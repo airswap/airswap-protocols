@@ -1,0 +1,196 @@
+# Market
+
+[AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens. This package contains a contract `Market` that represents a list of intents to trade a given token pair by traders on the AirSwap Network.
+
+## Features
+
+### Sorting
+
+Intents are sorted by their amount, currently the staking amount indicated by an Indexer that owns the Market.
+
+## Definitions
+
+| Term    | Definition                                                              |
+| :------ | :---------------------------------------------------------------------- |
+| Intent  | An interest in trading a specific token pair without price information. |
+| Market  | A list of intents to trade for a token pair.                            |
+| Locator | How a peer can be reached to communicate pricing.                       |
+
+## Intent Struct
+
+An "intent to trade" is represented by the following `Intent` struct.
+
+```
+struct Intent {
+  address staker;
+  uint256 amount;
+  uint256 expiry;
+  bytes32 locator;
+}
+```
+
+## Locators
+
+Locators are bytes32 values that indicate where a peer can be found to communicate pricing. The last byte is either a value of `1`, `2`, or `3` to indicate the kind of peer.
+
+| Value | Kind                                                                                                 |
+| :---- | :--------------------------------------------------------------------------------------------------- |
+| `1`   | Ethereum address, length 20 characters, representing a `Delegate` smart contract.                    |
+| `2`   | Ethereum address, length 20 characters, reachable on [AirSwap Instant](https://instant.airswap.io/). |
+| `3`   | Uniform resource locator (URL) max length 31 characters.                                             |
+
+## Constructor
+
+Create a new `Market` contract. Usually called within the context of an `Indexer` contract.
+
+```Solidity
+constructor (
+  address _makerToken,
+  address _takerToken
+) public
+```
+
+### Arguments
+
+| Name          | Type      | Optionality | Description                                              |
+| :------------ | :-------- | :---------- | :------------------------------------------------------- |
+| `_makerToken` | `address` | Required    | Address of the token that the Maker is intended to send. |
+| `_takerToken` | `address` | Required    | Address of the token that the Taker is intended to send. |
+
+## Set an Intent
+
+Set an intent to trade in the Market.
+
+```Solidity
+function set(
+  address staker,
+  uint256 amount,
+  uint256 expiry,
+  bytes32 locator
+) external
+```
+
+### Arguments
+
+| Name      | Type      | Optionality | Description                                            |
+| :-------- | :-------- | :---------- | :----------------------------------------------------- |
+| `staker`  | `address` | Required    | Address of the account that has staked for the intent. |
+| `amount`  | `uint256` | Required    | Amount of token that the account has staked.           |
+| `expiry`  | `uint256` | Required    | Expiry of the intent as a timestamp in seconds.        |
+| `locator` | `bytes32` | Required    | Locator for the peer.                                  |
+
+## Unset an Intent
+
+Set the minimum amount of tokens required to set an intent to trade.
+
+```Solidity
+function unset(
+  address staker
+) public returns (bool)
+```
+
+### Arguments
+
+| Name     | Type      | Optionality | Description                                          |
+| :------- | :-------- | :---------- | :--------------------------------------------------- |
+| `staker` | `address` | Required    | Address of the account that will unstake its intent. |
+
+## Get an Intent
+
+Gets the intent for a given staker address.
+
+```Solidity
+function get(
+  address staker
+) public view returns (Intent memory)
+```
+
+### Arguments
+
+| Name     | Type      | Optionality | Description                               |
+| :------- | :-------- | :---------- | :---------------------------------------- |
+| `staker` | `address` | Required    | Address of the account to fetch an intent |
+
+## Has an Intent
+
+Determines whether the Market has an intent for a staker address.
+
+```Solidity
+function has(
+  address staker
+) internal view returns (bool)
+```
+
+### Arguments
+
+| Name     | Type      | Optionality | Description                               |
+| :------- | :-------- | :---------- | :---------------------------------------- |
+| `staker` | `address` | Required    | Address of the account to check an intent |
+
+## Fetch Intents
+
+Fetch up to a number of intents from the list.
+
+```Solidity
+function fetch(
+  uint256 count
+) public view returns (bytes32[] memory result)
+```
+
+### Arguments
+
+| Name    | Type      | Optionality | Description                 |
+| :------ | :-------- | :---------- | :-------------------------- |
+| `count` | `uint256` | Required    | Number of intents to fetch. |
+
+## Find an Intent (By Value)
+
+Find an intent by value in the list.
+
+```Solidity
+function find(
+  uint256 amount
+) internal view returns (Intent memory)
+```
+
+### Arguments
+
+| Name    | Type      | Optionality | Description                 |
+| :------ | :-------- | :---------- | :-------------------------- |
+| `count` | `uint256` | Required    | Number of intents to fetch. |
+
+## Insert an Intent
+
+Insert an intent after an existing intent in the list.
+
+```Solidity
+function insert(
+  Intent memory intent,
+  Intent memory existing
+) internal returns (bool)
+```
+
+### Arguments
+
+| Name       | Type     | Optionality | Description                      |
+| :--------- | :------- | :---------- | :------------------------------- |
+| `intent`   | `Intent` | Required    | Intent to insert.                |
+| `existing` | `Intent` | Required    | Existing intent to insert after. |
+
+## Link Two Intents
+
+Link two intents in the list.
+
+```Solidity
+function link(
+  Intent memory left,
+  Intent memory right
+) internal
+```
+
+### Arguments
+
+| Name    | Type     | Optionality | Description                                    |
+| :------ | :------- | :---------- | :--------------------------------------------- |
+| `left`  | `Intent` | Required    | The intent to link to the left (Higher value). |
+| `right` | `Intent` | Required    | The intent to link to the right (Lower value). |

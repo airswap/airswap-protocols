@@ -1,0 +1,229 @@
+# Delegate
+
+[AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens. This package contains a basic `Delegate` contract that can be deployed with rules to trustlessly trade specific amounts of tokens at specific prices.
+
+## Features
+
+### Limit Orders
+
+Set rules to only take trades at specific prices.
+
+### Partial Fills
+
+Send up to a maximum amount of a token.
+
+## Definitions
+
+| Term              | Definition                                                      |
+| :---------------- | :-------------------------------------------------------------- |
+| Delegate          | An authorized third party to a trade.                           |
+| Consumer          | A party that gets quotes from and sends orders to the Delegate. |
+| Rule              | An amount of tokens to trade at a specific price.               |
+| Price Coefficient | The significant digits of the price.                            |
+| Price Exponent    | The location of the decimal on the price.                       |
+
+## Set a Rule
+
+Set a trading rule for the Delegate.
+
+```Solidity
+function setRule(
+  address delegateToken,
+  address consumerToken,
+  uint256 maxDelegateAmount,
+  uint256 priceCoef,
+  uint256 priceExp
+) external onlyOwner
+```
+
+### Arguments
+
+| Name             | Type      | Optionality | Description                                          |
+| :--------------- | :-------- | :---------- | :--------------------------------------------------- |
+| `delegateToken`  | `address` | Required    | The token that the delegate would send in a trade.   |
+| `consumerToken`  | `address` | Required    | The token that the consumer would send in a trade.   |
+| `maxTakerAmount` | `uint256` | Required    | The maximum amount of token the delegate would send. |
+| `priceCoef`      | `uint256` | Required    | The coefficient of the price.                        |
+| `priceExp`       | `uint256` | Required    | The exponent of the price.                           |
+
+### Example
+
+Set a Rule to sell up to 1000 WETH for DAI at 300 DAI/ETH.
+
+```Solidity
+setRule(<WETHAddress>, <DAIAddress>, 1000, 3, 2)
+```
+
+## Unset a Rule
+
+Unset a trading rule for the Delegate.
+
+```Solidity
+function unsetRule(
+  address delegateToken,
+  address consumerToken
+) external onlyOwner
+```
+
+### Arguments
+
+| Name            | Type      | Optionality | Description                                        |
+| :-------------- | :-------- | :---------- | :------------------------------------------------- |
+| `delegateToken` | `address` | Required    | The token that the Delegate would send in a trade. |
+| `consumerToken` | `address` | Required    | The token that the Consumer would send in a trade. |
+
+## Get a Buy Quote
+
+Get a quote to buy from the Delegate.
+
+```Solidity
+function getBuyQuote(
+  uint256 delegateAmount,
+  address delegateToken,
+  address consumerToken
+) public view returns (uint256)
+```
+
+### Arguments
+
+| Name             | Type      | Optionality | Description                             |
+| :--------------- | :-------- | :---------- | :-------------------------------------- |
+| `delegateAmount` | `uint256` | Optional    | The amount the Delegate would send.     |
+| `delegateToken`  | `address` | Required    | The token that the Delegate would send. |
+| `consumerToken`  | `address` | Required    | The token that the Consumer would send. |
+
+### Reverts
+
+| Reason                | Scenario                                         |
+| :-------------------- | :----------------------------------------------- |
+| `TOKEN_PAIR_INACTIVE` | There is no Rule set for this token pair.        |
+| `AMOUNT_EXCEEDS_MAX`  | The quote would exceed the maximum for the Rule. |
+
+## Get a Sell Quote
+
+Get a quote to buy from the Delegate.
+
+```Solidity
+function getBuyQuote(
+  uint256 delegateAmount,
+  address delegateToken,
+  address consumerToken
+) public view returns (uint256)
+```
+
+### Arguments
+
+| Name             | Type      | Optionality | Description                            |
+| :--------------- | :-------- | :---------- | :------------------------------------- |
+| `delegateAmount` | `uint256` | Optional    | The amount the Delegate would send.    |
+| `delegateToken`  | `address` | Required    | The token that the Delegate will send. |
+| `consumerToken`  | `address` | Required    | The token that the Consumer will send. |
+
+### Reverts
+
+| Reason                | Scenario                                         |
+| :-------------------- | :----------------------------------------------- |
+| `TOKEN_PAIR_INACTIVE` | There is no Rule set for this token pair.        |
+| `AMOUNT_EXCEEDS_MAX`  | The quote would exceed the maximum for the Rule. |
+
+## Get a Max Quote
+
+Get the maximum quote from the Delegate.
+
+```Solidity
+function getBuyQuote(
+  address delegateToken,
+  address consumerToken
+) public view returns (uint256)
+```
+
+### Arguments
+
+| Name             | Type      | Optionality | Description                            |
+| :--------------- | :-------- | :---------- | :------------------------------------- |
+| `delegateAmount` | `uint256` | Optional    | The amount the Delegate would send.    |
+| `delegateToken`  | `address` | Required    | The token that the Delegate will send. |
+| `consumerToken`  | `address` | Required    | The token that the Consumer will send. |
+
+### Reverts
+
+| Reason                | Scenario                                  |
+| :-------------------- | :---------------------------------------- |
+| `TOKEN_PAIR_INACTIVE` | There is no Rule set for this token pair. |
+
+## Provide an Order
+
+Provide an order to the Delegate for taking.
+
+```Solidity
+function provideOrder(
+  uint256 nonce,
+  uint256 expiry,
+  address consumerWallet,
+  uint256 consumerAmount,
+  address consumerToken,
+  address delegateWallet,
+  uint256 delegateAmount,
+  address delegateToken,
+  uint8 v,
+  bytes32 r,
+  bytes32 s
+) public payable
+```
+
+### Arguments
+
+| Name             | Type      | Optionality | Description                                            |
+| :--------------- | :-------- | :---------- | :----------------------------------------------------- |
+| `nonce`          | `uint256` | Required    | A single use identifier for the Order.                 |
+| `expiry`         | `uint256` | Required    | The expiry in seconds since unix epoch.                |
+| `consumerWallet` | `address` | Required    | The Maker of the Order who sets price.                 |
+| `consumerAmount` | `uint256` | Required    | The amount or identifier of the token the Maker sends. |
+| `consumerToken`  | `address` | Required    | The address of the token the Maker sends.              |
+| `delegateWallet` | `address` | Required    | The Taker of the Order who takes price.                |
+| `delegateAmount` | `uint256` | Required    | The amount or identifier of the token the Taker sends. |
+| `delegateToken`  | `address` | Required    | The address of the token the Taker sends.              |
+| `v`              | `uint8`   | Required    | The `v` value of an ECDSA signature.                   |
+| `r`              | `bytes32` | Required    | The `r` value of an ECDSA signature.                   |
+| `s`              | `bytes32` | Required    | The `s` value of an ECDSA signature.                   |
+
+### Reverts
+
+| Reason                | Scenario                                                       |
+| :-------------------- | :------------------------------------------------------------- |
+| `TOKEN_PAIR_INACTIVE` | There is no Rule set for this token pair.                      |
+| `AMOUNT_EXCEEDS_MAX`  | The amount of the trade would exceed the maximum for the Rule. |
+| `PRICE_INCORRECT`     | The order is priced incorrectly for the Rule.                  |
+
+## Provide an Unsigned Order
+
+Provide an unsigned order to the Delegate. Requires that the Consumer has authorized the Delegate on the Swap contract.
+
+```Solidity
+function provideUnsignedOrder(
+  uint256 nonce,
+  uint256 consumerAmount,
+  address consumerToken,
+  uint256 delegateAmount,
+  address delegateToken
+) public payable
+```
+
+### Arguments
+
+| Name             | Type      | Optionality | Description                                            |
+| :--------------- | :-------- | :---------- | :----------------------------------------------------- |
+| `nonce`          | `uint256` | Required    | A single use identifier for the Order.                 |
+| `expiry`         | `uint256` | Required    | The expiry in seconds since unix epoch.                |
+| `consumerAmount` | `uint256` | Required    | The amount or identifier of the token the Maker sends. |
+| `consumerToken`  | `address` | Required    | The address of the token the Maker sends.              |
+| `delegateAmount` | `uint256` | Required    | The amount or identifier of the token the Taker sends. |
+| `delegateToken`  | `address` | Required    | The address of the token the Taker sends.              |
+
+### Reverts
+
+| Reason                | Scenario                                                       |
+| :-------------------- | :------------------------------------------------------------- |
+| `TOKEN_PAIR_INACTIVE` | There is no Rule set for this token pair.                      |
+| `AMOUNT_EXCEEDS_MAX`  | The amount of the trade would exceed the maximum for the Rule. |
+| `PRICE_INCORRECT`     | The order is priced incorrectly for the Rule.                  |

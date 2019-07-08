@@ -1,0 +1,26 @@
+{
+  "name": "@airswap/market",
+  "version": "0.1.0",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/airswap/airswap-protocols"
+  },
+  "scripts": {
+    "clean": "rm -rf ./build",
+    "compile": "truffle compile",
+    "truffle": "node_modules/.bin/truffle --network development",
+    "test": "truffle test"
+  },
+  "devDependencies": {
+    "@airswap/indexer-utils": "0.1.0",
+    "@airswap/order-utils": "0.1.0",
+    "@airswap/test-utils": "0.1.0",
+    "@airswap/tokens": "0.1.0",
+    "truffle": "^5.0.24",
+    "bignumber.js": "^9.0.0"
+  },
+  "dependencies": {
+    "openzeppelin-solidity": "^v2.2"
+  }
+}
