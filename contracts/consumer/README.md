@@ -29,7 +29,7 @@ constructor(
 ) public
 ```
 
-### Arguments
+### Params
 
 | Name               | Type      | Optionality | Description                                         |
 | :----------------- | :-------- | :---------- | :-------------------------------------------------- |
@@ -49,7 +49,7 @@ function findBestBuy(
 ) public view returns (address, uint256)
 ```
 
-### Arguments
+### Params
 
 | Name                | Type      | Optionality | Description                    |
 | :------------------ | :-------- | :---------- | :----------------------------- |
@@ -71,7 +71,7 @@ function takeBestBuy(
 ) public
 ```
 
-### Arguments
+### Params
 
 | Name                | Type      | Optionality | Description                    |
 | :------------------ | :-------- | :---------- | :----------------------------- |

@@ -50,7 +50,7 @@ constructor (
 ) public
 ```
 
-### Arguments
+### Params
 
 | Name          | Type      | Optionality | Description                                              |
 | :------------ | :-------- | :---------- | :------------------------------------------------------- |
@@ -70,7 +70,7 @@ function set(
 ) external
 ```
 
-### Arguments
+### Params
 
 | Name      | Type      | Optionality | Description                                            |
 | :-------- | :-------- | :---------- | :----------------------------------------------------- |
@@ -89,7 +89,7 @@ function unset(
 ) public returns (bool)
 ```
 
-### Arguments
+### Params
 
 | Name     | Type      | Optionality | Description                                          |
 | :------- | :-------- | :---------- | :--------------------------------------------------- |
@@ -105,7 +105,7 @@ function get(
 ) public view returns (Intent memory)
 ```
 
-### Arguments
+### Params
 
 | Name     | Type      | Optionality | Description                               |
 | :------- | :-------- | :---------- | :---------------------------------------- |
@@ -121,7 +121,7 @@ function has(
 ) internal view returns (bool)
 ```
 
-### Arguments
+### Params
 
 | Name     | Type      | Optionality | Description                               |
 | :------- | :-------- | :---------- | :---------------------------------------- |
@@ -137,7 +137,7 @@ function fetch(
 ) public view returns (bytes32[] memory result)
 ```
 
-### Arguments
+### Params
 
 | Name    | Type      | Optionality | Description                 |
 | :------ | :-------- | :---------- | :-------------------------- |
@@ -153,7 +153,7 @@ function find(
 ) internal view returns (Intent memory)
 ```
 
-### Arguments
+### Params
 
 | Name    | Type      | Optionality | Description                 |
 | :------ | :-------- | :---------- | :-------------------------- |
@@ -170,7 +170,7 @@ function insert(
 ) internal returns (bool)
 ```
 
-### Arguments
+### Params
 
 | Name       | Type     | Optionality | Description                      |
 | :--------- | :------- | :---------- | :------------------------------- |
@@ -188,7 +188,7 @@ function link(
 ) internal
 ```
 
-### Arguments
+### Params
 
 | Name    | Type     | Optionality | Description                                    |
 | :------ | :------- | :---------- | :--------------------------------------------- |

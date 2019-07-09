@@ -61,7 +61,7 @@ function swap(
 ) external payable
 ```
 
-### Arguments
+### Params
 
 | Name        | Type        | Optionality | Description                          |
 | :---------- | :---------- | :---------- | :----------------------------------- |
@@ -136,7 +136,7 @@ function swapSimple(
 ) external
 ```
 
-### Arguments
+### Params
 
 | Name          | Type      | Optionality | Description                                            |
 | :------------ | :-------- | :---------- | :----------------------------------------------------- |

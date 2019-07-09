@@ -32,7 +32,7 @@ constructor(
 ) public
 ```
 
-### Arguments
+### Params
 
 | Name            | Type      | Optionality | Description                                         |
 | :-------------- | :-------- | :---------- | :-------------------------------------------------- |
@@ -52,7 +52,7 @@ function setRule(
 ) external onlyOwner
 ```
 
-### Arguments
+### Params
 
 | Name             | Type      | Optionality | Description                                          |
 | :--------------- | :-------- | :---------- | :--------------------------------------------------- |
@@ -81,7 +81,7 @@ function unsetRule(
 ) external onlyOwner
 ```
 
-### Arguments
+### Params
 
 | Name            | Type      | Optionality | Description                                        |
 | :-------------- | :-------- | :---------- | :------------------------------------------------- |
@@ -100,7 +100,7 @@ function getBuyQuote(
 ) public view returns (uint256)
 ```
 
-### Arguments
+### Params
 
 | Name             | Type      | Optionality | Description                             |
 | :--------------- | :-------- | :---------- | :-------------------------------------- |
@@ -127,7 +127,7 @@ function getSellQuote(
 ) public view returns (uint256)
 ```
 
-### Arguments
+### Params
 
 | Name             | Type      | Optionality | Description                            |
 | :--------------- | :-------- | :---------- | :------------------------------------- |
@@ -153,7 +153,7 @@ function getMaxQuote(
 ) external view returns (uint256, address, uint256, address)
 ```
 
-### Arguments
+### Params
 
 | Name            | Type      | Optionality | Description                            |
 | :-------------- | :-------- | :---------- | :------------------------------------- |
@@ -186,7 +186,7 @@ function provideOrder(
 ) public payable
 ```
 
-### Arguments
+### Params
 
 | Name             | Type      | Optionality | Description                                            |
 | :--------------- | :-------- | :---------- | :----------------------------------------------------- |
@@ -224,7 +224,7 @@ function provideUnsignedOrder(
 ) public payable
 ```
 
-### Arguments
+### Params
 
 | Name             | Type      | Optionality | Description                                            |
 | :--------------- | :-------- | :---------- | :----------------------------------------------------- |

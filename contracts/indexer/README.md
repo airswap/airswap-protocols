@@ -36,7 +36,7 @@ constructor(
 ) public
 ```
 
-### Arguments
+### Params
 
 | Name            | Type      | Optionality | Description                                |
 | :-------------- | :-------- | :---------- | :----------------------------------------- |
@@ -54,7 +54,7 @@ function createMarket(
 ) external
 ```
 
-### Arguments
+### Params
 
 | Name         | Type      | Optionality | Description                                |
 | :----------- | :-------- | :---------- | :----------------------------------------- |
@@ -77,7 +77,7 @@ function setStakeMinimum(
 ) external onlyOwner
 ```
 
-### Arguments
+### Params
 
 | Name            | Type      | Optionality | Description                                |
 | :-------------- | :-------- | :---------- | :----------------------------------------- |
@@ -93,7 +93,7 @@ function addToBlacklist(
 ) external onlyOwner
 ```
 
-### Arguments
+### Params
 
 | Name    | Type      | Optionality | Description                        |
 | :------ | :-------- | :---------- | :--------------------------------- |
@@ -109,7 +109,7 @@ function removeFromBlacklist(
 ) external onlyOwner
 ```
 
-### Arguments
+### Params
 
 | Name    | Type      | Optionality | Description                            |
 | :------ | :-------- | :---------- | :------------------------------------- |
@@ -129,7 +129,7 @@ function setIntent(
 ) external
 ```
 
-### Arguments
+### Params
 
 | Name         | Type      | Optionality | Description                                  |
 | :----------- | :-------- | :---------- | :------------------------------------------- |
@@ -159,7 +159,7 @@ function unsetIntent(
 ) external
 ```
 
-### Arguments
+### Params
 
 | Name         | Type      | Optionality | Description                                |
 | :----------- | :-------- | :---------- | :----------------------------------------- |
@@ -185,7 +185,7 @@ function getIntents(
 ) external view returns (bytes32[] memory)
 ```
 
-### Arguments
+### Params
 
 | Name         | Type      | Optionality | Description                                |
 | :----------- | :-------- | :---------- | :----------------------------------------- |
@@ -211,7 +211,7 @@ function sizeOf(
 ) external view returns (uint256)
 ```
 
-### Arguments
+### Params
 
 | Name         | Type      | Optionality | Description                                |
 | :----------- | :-------- | :---------- | :----------------------------------------- |
