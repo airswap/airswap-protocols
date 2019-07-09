@@ -36,6 +36,7 @@ contract Consumer {
     * @param userReceiveAmount uint256
     * @param userReceiveToken address
     * @param userSendToken address
+    * @param maxIntents uint256
     *
     * @return Best priced Delegate (address) and its quote amount (uint256)
     */
