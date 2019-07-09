@@ -1,7 +1,8 @@
 pragma solidity ^0.5.10;
 
+// TODO: Import interfaces IIndexer and IDelegate rather than full contracts.
+
 import "@airswap/indexer/contracts/Indexer.sol";
-import "@airswap/market/contracts/Market.sol";
 import "@airswap/delegate/contracts/Delegate.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 

@@ -1,6 +1,8 @@
 pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
+// TODO: Import interface ISwap rather than full contract.
+
 import "@airswap/swap/contracts/Swap.sol";
 import "@airswap/lib/contracts/Types.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
@@ -137,6 +139,8 @@ contract Delegate is Ownable {
 
     Rule memory rule = rules[delegateToken][consumerToken];
 
+    // TODO: Do not throw for onchain integrations.
+
     // Ensure that a rule exists.
     require(rule.maxDelegateAmount != 0,
       "TOKEN_PAIR_INACTIVE");
@@ -165,6 +169,8 @@ contract Delegate is Ownable {
   ) public view returns (uint256) {
 
     Rule memory rule = rules[delegateToken][consumerToken];
+
+    // TODO: Do not throw for onchain integrations.
 
     // Ensure that a rule exists.
     require(rule.maxDelegateAmount != 0,
@@ -195,6 +201,8 @@ contract Delegate is Ownable {
   ) external view returns (uint256, address, uint256, address) {
 
     Rule memory rule = rules[delegateToken][consumerToken];
+
+    // TODO: Do not throw for onchain integrations.
 
     // Ensure that a rule exists.
     require(rule.maxDelegateAmount != 0,
@@ -239,6 +247,8 @@ contract Delegate is Ownable {
     bytes32 r,
     bytes32 s
   ) public payable {
+
+    // TODO: Forward the message value (for ETH trades) and add tests.
 
     Rule memory rule = rules[delegateToken][consumerToken];
 
@@ -288,6 +298,8 @@ contract Delegate is Ownable {
     uint256 delegateAmount,
     address delegateToken
   ) public payable {
+
+    // TODO: Forward the message value (for ETH trades) and add tests.
 
     provideOrder(
       nonce,

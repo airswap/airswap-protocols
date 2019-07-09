@@ -2,6 +2,10 @@
 
 [AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens. This package contains a contract `Consumer` that represents an on-chain integration of an `Indexer`, `Delegate`, and `Swap` contract.
 
+#### :bulb: TODO
+
+- Consider ways to selectively trust Delegates rather than sending unsigned orders to untrusted Delegates.
+
 ## Features
 
 ### On-chain Liquidity

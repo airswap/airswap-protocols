@@ -2,6 +2,10 @@
 
 [AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens. This package contains the AirSwap `Indexer` that Traders use to manage their "intent to trade" on the AirSwap Network.
 
+#### :bulb: TODO
+
+- Consider adding a filter to `getIntents` to for example select only one kind of locator.
+
 ## Features
 
 ### Peer Discovery

@@ -55,6 +55,8 @@ contract(
       })
     })
 
+    // TODO: Add tests for unsetRule.
+
     describe('Get quotes from the Delegate', () => {
       it('Gets a quote to buy 1 WETH for DAI (Quote: 300 DAI)', async () => {
         const quote = await aliceDelegate.getBuyQuote(

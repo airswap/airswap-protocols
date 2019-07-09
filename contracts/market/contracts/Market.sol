@@ -1,6 +1,8 @@
 pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
+// TODO: Make this ownable to limit control to its Indexer.
+
 /**
   * @title Market: A List of Intents to Trade
   */
