@@ -22,6 +22,22 @@ Send up to a maximum amount of a token.
 | Price Coefficient | The significant digits of the price.                            |
 | Price Exponent    | The location of the decimal on the price.                       |
 
+## Constructor
+
+Create a new `Delegate` contract.
+
+```Solidity
+constructor(
+  address _swapContract
+) public
+```
+
+### Arguments
+
+| Name            | Type      | Optionality | Description                                         |
+| :-------------- | :-------- | :---------- | :-------------------------------------------------- |
+| `_swapContract` | `address` | Required    | Address of the Swap contract used to settle trades. |
+
 ## Set a Rule
 
 Set a trading rule for the Delegate.
@@ -48,7 +64,7 @@ function setRule(
 
 ### Example
 
-Set a Rule to sell up to 1000 WETH for DAI at 300 DAI/ETH.
+Set a Rule to sell up to 1000 WETH for DAI at 300 DAI/WETH.
 
 ```Solidity
 setRule(<WETHAddress>, <DAIAddress>, 1000, 3, 2)
@@ -88,7 +104,7 @@ function getBuyQuote(
 
 | Name             | Type      | Optionality | Description                             |
 | :--------------- | :-------- | :---------- | :-------------------------------------- |
-| `delegateAmount` | `uint256` | Optional    | The amount the Delegate would send.     |
+| `delegateAmount` | `uint256` | Required    | The amount the Delegate would send.     |
 | `delegateToken`  | `address` | Required    | The token that the Delegate would send. |
 | `consumerToken`  | `address` | Required    | The token that the Consumer would send. |
 
@@ -101,13 +117,13 @@ function getBuyQuote(
 
 ## Get a Sell Quote
 
-Get a quote to buy from the Delegate.
+Get a quote to sell from the Delegate.
 
 ```Solidity
-function getBuyQuote(
-  uint256 delegateAmount,
-  address delegateToken,
-  address consumerToken
+function getSellQuote(
+  uint256 consumerAmount,
+  address consumerToken,
+  address delegateToken
 ) public view returns (uint256)
 ```
 
@@ -115,9 +131,9 @@ function getBuyQuote(
 
 | Name             | Type      | Optionality | Description                            |
 | :--------------- | :-------- | :---------- | :------------------------------------- |
-| `delegateAmount` | `uint256` | Optional    | The amount the Delegate would send.    |
-| `delegateToken`  | `address` | Required    | The token that the Delegate will send. |
+| `consumerAmount` | `uint256` | Required    | The amount the Consumer would send.    |
 | `consumerToken`  | `address` | Required    | The token that the Consumer will send. |
+| `delegateToken`  | `address` | Required    | The token that the Delegate will send. |
 
 ### Reverts
 
@@ -131,19 +147,18 @@ function getBuyQuote(
 Get the maximum quote from the Delegate.
 
 ```Solidity
-function getBuyQuote(
+function getMaxQuote(
   address delegateToken,
   address consumerToken
-) public view returns (uint256)
+) external view returns (uint256, address, uint256, address)
 ```
 
 ### Arguments
 
-| Name             | Type      | Optionality | Description                            |
-| :--------------- | :-------- | :---------- | :------------------------------------- |
-| `delegateAmount` | `uint256` | Optional    | The amount the Delegate would send.    |
-| `delegateToken`  | `address` | Required    | The token that the Delegate will send. |
-| `consumerToken`  | `address` | Required    | The token that the Consumer will send. |
+| Name            | Type      | Optionality | Description                            |
+| :-------------- | :-------- | :---------- | :------------------------------------- |
+| `delegateToken` | `address` | Required    | The token that the Delegate will send. |
+| `consumerToken` | `address` | Required    | The token that the Consumer will send. |
 
 ### Reverts
 

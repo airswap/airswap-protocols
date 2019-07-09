@@ -54,7 +54,9 @@ contract Delegate is Ownable {
     * @notice Contract Constructor
     * @param _swapContract address
     */
-  constructor(address _swapContract) public {
+  constructor(
+    address _swapContract
+  ) public {
     swapContract = _swapContract;
   }
 
@@ -62,7 +64,9 @@ contract Delegate is Ownable {
     * @notice Set the Swap Contract
     * @param _swapContract address
     */
-  function setSwapContract(address _swapContract) external onlyOwner {
+  function setSwapContract(
+    address _swapContract
+  ) external onlyOwner {
     swapContract = _swapContract;
   }
 
@@ -251,7 +255,7 @@ contract Delegate is Ownable {
       .mul(10 ** rule.priceExp) == consumerAmount,
       "PRICE_INCORRECT");
 
-    // Overwrite thr ule with a decremented maxDelegateAmount.
+    // Overwrite the rule with a decremented maxDelegateAmount.
     rules[delegateToken][consumerToken] = Rule({
       maxDelegateAmount: rule.maxDelegateAmount - delegateAmount,
       priceCoef: rule.priceCoef,

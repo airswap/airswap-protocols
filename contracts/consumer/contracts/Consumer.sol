@@ -3,7 +3,7 @@ pragma solidity ^0.5.10;
 import "@airswap/indexer/contracts/Indexer.sol";
 import "@airswap/market/contracts/Market.sol";
 import "@airswap/delegate/contracts/Delegate.sol";
-import "@airswap/tokens/contracts/FungibleToken.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 
 /**
   * @title Consumer: An Onchain Liquidity Consumer for the Swap Protocol
@@ -36,6 +36,8 @@ contract Consumer {
     * @param userReceiveAmount uint256
     * @param userReceiveToken address
     * @param userSendToken address
+    *
+    * @return Best priced Delegate (address) and its quote amount (uint256)
     */
   function findBestBuy(
     uint256 userReceiveAmount,
@@ -77,6 +79,7 @@ contract Consumer {
     * @param userReceiveAmount uint256
     * @param userReceiveToken address
     * @param userSendToken address
+    * @param maxIntents uint256
     */
   function takeBestBuy(
     uint256 userReceiveAmount,
@@ -93,10 +96,10 @@ contract Consumer {
       findBestBuy(userReceiveAmount, userReceiveToken, userSendToken, maxIntents);
 
     // Consumer transfers User amount to itself.
-    FungibleToken(userSendToken).transferFrom(msg.sender, address(this), userSendAmount);
+    IERC20(userSendToken).transferFrom(msg.sender, address(this), userSendAmount);
 
     // Consumer approves Swap to move its new tokens.
-    FungibleToken(userSendToken).approve(address(swapContract), userSendAmount);
+    IERC20(userSendToken).approve(address(swapContract), userSendAmount);
 
     // Consumer authorizes the Delegate.
     swapContract.authorize(untrustedDelegateContract, block.timestamp);
@@ -114,7 +117,7 @@ contract Consumer {
     swapContract.revoke(untrustedDelegateContract);
 
     // Consumer transfers received amount to the User.
-    FungibleToken(userReceiveToken).transfer(msg.sender, userReceiveAmount);
+    IERC20(userReceiveToken).transfer(msg.sender, userReceiveAmount);
 
   }
 

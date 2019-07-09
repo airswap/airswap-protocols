@@ -10,12 +10,13 @@ One-time approval for each token and no off-chain signatures required.
 
 ## Definitions
 
-| Term     | Definition                                        |
-| :------- | :------------------------------------------------ |
-| Consumer | Smart contract that integrates onchain liquidity. |
-| Indexer  | List of intents to trade by token pair.           |
-| Delegate | Smart contract that trades based on rules.        |
-| User     | Account that invokes functions on the Consumer.   |
+| Term     | Definition                                                         |
+| :------- | :----------------------------------------------------------------- |
+| Consumer | Smart contract that integrates onchain liquidity.                  |
+| Indexer  | List of intents to trade by token pair.                            |
+| Delegate | Smart contract that trades based on rules.                         |
+| Swap     | Transaction of multiple transfers that succeeds entirely or fails. |
+| User     | Account that invokes functions on the Consumer.                    |
 
 ## Constructor
 
