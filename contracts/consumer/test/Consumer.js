@@ -19,6 +19,8 @@ function getExpiry() {
   return Math.round((new Date().getTime() + 60000) / 1000)
 }
 
+// TODO: Use token-unit for realistic token amounts.
+
 contract(
   'Consumer',
   ([ownerAddress, aliceAddress, bobAddress, carolAddress]) => {
@@ -120,13 +122,13 @@ contract(
     })
 
     describe('Alice adds some delegate rules', () => {
-      it('Adds a rule to send up to 1000 WETH for DAI at 300 DAI/WETH', async () => {
+      it('Adds a rule to send up to 100 WETH for DAI at 309.52 DAI/WETH', async () => {
         emitted(
           await aliceDelegate.setRule(
             tokenWETH.address,
             tokenDAI.address,
-            1000,
-            3,
+            150,
+            30952,
             2,
             { from: aliceAddress }
           ),
@@ -135,25 +137,25 @@ contract(
       })
 
       it('Checks the Delegate maximum', async () => {
-        const result = await aliceDelegate.getMaxQuote(
+        const quote = await aliceDelegate.getMaxQuote(
           tokenWETH.address,
           tokenDAI.address
         )
-        equal(result[0].toNumber(), 1000)
-        equal(result[2].toNumber(), 300000)
+        equal(quote[0], 150)
+        equal(quote[2], 46428)
       })
     })
 
     describe('Consumer', () => {
       it('Finds best price to buy 1 WETH for DAI', async () => {
-        const result = await consumer.findBestBuy(
-          1,
+        const quote = await consumer.findBestBuy(
+          100,
           tokenWETH.address,
           tokenDAI.address,
           50
         )
-        equal(result[0], aliceDelegate.address)
-        equal(result[1].toNumber(), 300)
+        equal(quote[0], aliceDelegate.address)
+        equal(quote[1], 30952)
       })
 
       it('Takes best price (Alice delegate)', async () => {
@@ -167,22 +169,30 @@ contract(
         )
 
         // Carol gets some DAI to use to buy some WETH
-        tokenDAI.mint(carolAddress, 300)
+        tokenDAI.mint(carolAddress, 50000)
 
         // Carol approves the Consumer to transfer her DAI
         emitted(
-          await tokenDAI.approve(consumerAddress, 300, { from: carolAddress }),
+          await tokenDAI.approve(consumerAddress, 50000, {
+            from: carolAddress,
+          }),
           'Approval'
         )
 
         // Carol takes the best price for 100 DAI
-        await consumer.takeBestBuy(1, tokenWETH.address, tokenDAI.address, 50, {
-          from: carolAddress,
-        })
+        await consumer.takeBestBuy(
+          100,
+          tokenWETH.address,
+          tokenDAI.address,
+          50,
+          {
+            from: carolAddress,
+          }
+        )
 
-        // Assert that Carol has taken 1 WETH from Alice
-        equal(await tokenWETH.balanceOf(aliceAddress), 99)
-        equal(await tokenWETH.balanceOf(carolAddress), 1)
+        // Assert that Carol has taken 100 WETH from Alice
+        equal(await tokenWETH.balanceOf(aliceAddress), 0)
+        equal(await tokenWETH.balanceOf(carolAddress), 100)
       })
 
       it('Checks the new Delegate maximum', async () => {
@@ -190,8 +200,8 @@ contract(
           tokenWETH.address,
           tokenDAI.address
         )
-        equal(result[0].toNumber(), 999)
-        equal(result[2].toNumber(), 299700)
+        equal(result[0], 50)
+        equal(result[2], 15476)
       })
     })
   }

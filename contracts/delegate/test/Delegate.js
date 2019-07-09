@@ -41,14 +41,14 @@ contract(
     })
 
     describe('Alice adds rules to the Delegate', () => {
-      it('Adds a rule to send up to 1000 WETH for DAI at 300 DAI/WETH', async () => {
+      it('Adds a rule to send up to 100,000 DAI for WETH at 0.0032 WETH/DAI', async () => {
         emitted(
           await aliceDelegate.setRule(
-            tokenWETH.address,
             tokenDAI.address,
-            1000,
-            3,
-            2
+            tokenWETH.address,
+            100000,
+            32,
+            4
           ),
           'SetRule'
         )
@@ -58,76 +58,83 @@ contract(
     // TODO: Add tests for unsetRule.
 
     describe('Get quotes from the Delegate', () => {
-      it('Gets a quote to buy 1 WETH for DAI (Quote: 300 DAI)', async () => {
+      it('Gets a quote to buy 20,000 DAI for WETH (Quote: 64 WETH)', async () => {
         const quote = await aliceDelegate.getBuyQuote(
+          20000,
+          tokenDAI.address,
+          tokenWETH.address
+        )
+        equal(quote, 64)
+      })
+
+      it('Gets a quote to sell 100,000 (Max) DAI for WETH (Quote: 320 WETH)', async () => {
+        const quote = await aliceDelegate.getBuyQuote(
+          100000,
+          tokenDAI.address,
+          tokenWETH.address
+        )
+        equal(quote, 320)
+      })
+
+      it('Gets a quote to sell 1 WETH for DAI (Quote: 300 DAI)', async () => {
+        const quote = await aliceDelegate.getSellQuote(
           1,
           tokenWETH.address,
           tokenDAI.address
         )
-        equal(quote, 300)
-      })
-
-      it('Gets a quote to buy 1000 WETH (Max) for DAI (Quote: 25 DAI)', async () => {
-        const quote = await aliceDelegate.getBuyQuote(
-          1000,
-          tokenWETH.address,
-          tokenDAI.address
-        )
-        equal(quote, 300000)
-      })
-
-      it('Gets a quote to sell 1000 DAI for WETH (Quote: 1 WETH)', async () => {
-        const quote = await aliceDelegate.getSellQuote(
-          3000,
-          tokenDAI.address,
-          tokenWETH.address
-        )
-        equal(quote, 10)
+        equal(quote, 312)
       })
 
       it('Gets a quote to sell 5 WETH for DAI (Fail: No rule)', async () => {
         await reverted(
-          aliceDelegate.getSellQuote(5, tokenWETH.address, tokenDAI.address),
+          aliceDelegate.getSellQuote(5, tokenDAI.address, tokenWETH.address),
           'TOKEN_PAIR_INACTIVE'
         )
       })
 
       it('Gets a max quote to buy WETH for DAI', async () => {
         const quote = await aliceDelegate.getMaxQuote(
-          tokenWETH.address,
-          tokenDAI.address
+          tokenDAI.address,
+          tokenWETH.address
         )
-        equal(quote[0], 1000)
-        equal(quote[2], 300000)
+        equal(quote[0], 100000)
+        equal(quote[2], 320)
       })
 
       it('Gets a quote to buy 1500 WETH for DAI (Exceeds Max)', async () => {
         await reverted(
-          aliceDelegate.getBuyQuote(1500, tokenWETH.address, tokenDAI.address),
+          aliceDelegate.getBuyQuote(
+            250000,
+            tokenDAI.address,
+            tokenWETH.address
+          ),
           'AMOUNT_EXCEEDS_MAX'
         )
       })
     })
 
     describe('Provide some orders to the Delegate', () => {
-      it('Gets a quote to buy 1 WETH and takes it', async () => {
-        const quote = await aliceDelegate.getBuyQuote(
+      let quote
+      before('Gets a quote for 1 WETH', async () => {
+        quote = await aliceDelegate.getSellQuote(
           1,
           tokenWETH.address,
           tokenDAI.address
         )
+      })
 
+      it('Gets a quote to sell 1 WETH and takes it', async () => {
         // Note: Consumer is the order maker, Delegate is the order taker.
         const { order, signature } = await orders.getOrder({
           maker: {
             wallet: bobAddress,
-            token: tokenDAI.address,
-            param: quote,
+            token: tokenWETH.address,
+            param: 1,
           },
           taker: {
             wallet: aliceAddress,
-            token: tokenWETH.address,
-            param: 1,
+            token: tokenDAI.address,
+            param: quote,
           },
         })
 

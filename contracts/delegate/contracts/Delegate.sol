@@ -149,7 +149,7 @@ contract Delegate is Ownable {
 
     return delegateAmount
       .mul(rule.priceCoef)
-      .mul(10 ** rule.priceExp);
+      .div(10 ** rule.priceExp);
 
   }
 
@@ -176,7 +176,7 @@ contract Delegate is Ownable {
 
     // Calculate the delegateAmount.
     uint256 delegateAmount = consumerAmount
-      .div(10 ** rule.priceExp).div(rule.priceCoef);
+      .mul(10 ** rule.priceExp).div(rule.priceCoef);
 
     // Ensure the delegateAmount does not exceed maximum for the rule.
     require(delegateAmount <= rule.maxDelegateAmount,
@@ -210,7 +210,7 @@ contract Delegate is Ownable {
     return (
       rule.maxDelegateAmount,
       delegateToken,
-      rule.maxDelegateAmount.mul(rule.priceCoef).mul(10 ** rule.priceExp),
+      rule.maxDelegateAmount.mul(rule.priceCoef).div(10 ** rule.priceExp),
       consumerToken
     );
 
@@ -259,8 +259,8 @@ contract Delegate is Ownable {
       "AMOUNT_EXCEEDS_MAX");
 
     // Ensure the order is priced according to the rule.
-    require(delegateAmount.mul(rule.priceCoef)
-      .mul(10 ** rule.priceExp) == consumerAmount,
+    require(delegateAmount == consumerAmount
+      .mul(10 ** rule.priceExp).div(rule.priceCoef),
       "PRICE_INCORRECT");
 
     // Overwrite the rule with a decremented maxDelegateAmount.

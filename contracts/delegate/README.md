@@ -58,20 +58,20 @@ function setRule(
 
 ### Params
 
-| Name             | Type      | Optionality | Description                                          |
-| :--------------- | :-------- | :---------- | :--------------------------------------------------- |
-| `delegateToken`  | `address` | Required    | The token that the delegate would send in a trade.   |
-| `consumerToken`  | `address` | Required    | The token that the consumer would send in a trade.   |
-| `maxTakerAmount` | `uint256` | Required    | The maximum amount of token the delegate would send. |
-| `priceCoef`      | `uint256` | Required    | The coefficient of the price.                        |
-| `priceExp`       | `uint256` | Required    | The exponent of the price.                           |
+| Name             | Type      | Optionality | Description                                                    |
+| :--------------- | :-------- | :---------- | :------------------------------------------------------------- |
+| `delegateToken`  | `address` | Required    | The token that the delegate would send in a trade.             |
+| `consumerToken`  | `address` | Required    | The token that the consumer would send in a trade.             |
+| `maxTakerAmount` | `uint256` | Required    | The maximum amount of token the delegate would send.           |
+| `priceCoef`      | `uint256` | Required    | The coefficient of the price to indicate the whole number.     |
+| `priceExp`       | `uint256` | Required    | The exponent of the price to indicate location of the decimal. |
 
 ### Example
 
-Set a Rule to sell up to 1000 WETH for DAI at 300 DAI/WETH.
+Set a rule to send up to 100,000 DAI for WETH at 0.0032 WETH/DAI
 
 ```Solidity
-setRule(<WETHAddress>, <DAIAddress>, 1000, 3, 2)
+setRule(<WETHAddress>, <DAIAddress>, 100000, 32, 4)
 ```
 
 ## Unset a Rule
