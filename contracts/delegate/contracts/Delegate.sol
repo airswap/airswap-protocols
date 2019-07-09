@@ -1,9 +1,7 @@
 pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
-// TODO: Import interface ISwap rather than full contract.
-
-import "@airswap/swap/contracts/Swap.sol";
+import "@airswap/swap/contracts/ISwap.sol";
 import "@airswap/lib/contracts/Types.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
@@ -16,7 +14,7 @@ contract Delegate is Ownable {
   using SafeMath for uint256;
 
   // Swap contract to be used to settle trades
-  address public swapContract;
+  ISwap public swapContract;
 
   // Mapping of delegateToken to consumerToken for rule lookup
   mapping (address => mapping (address => Rule)) public rules;
@@ -59,7 +57,7 @@ contract Delegate is Ownable {
   constructor(
     address _swapContract
   ) public {
-    swapContract = _swapContract;
+    swapContract = ISwap(_swapContract);
   }
 
   /** 
@@ -69,7 +67,7 @@ contract Delegate is Ownable {
   function setSwapContract(
     address _swapContract
   ) external onlyOwner {
-    swapContract = _swapContract;
+    swapContract = ISwap(_swapContract);
   }
 
   /** 
@@ -273,7 +271,7 @@ contract Delegate is Ownable {
     });
 
     // Perform the swap.
-    Swap(swapContract).swapSimple(nonce, expiry,
+    swapContract.swapSimple(nonce, expiry,
       consumerWallet, consumerAmount, consumerToken,
       delegateWallet, delegateAmount, delegateToken,
       v, r, s

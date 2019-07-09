@@ -206,6 +206,8 @@ contract Indexer is Ownable {
     uint256 count
   ) external view returns (bytes32[] memory) {
 
+    // TODO: Do not throw for onchain integrations.
+
     // Ensure both of the tokens are not blacklisted
     require(blacklist[makerToken] == 0 && blacklist[takerToken] == 0,
       "MARKET_IS_BLACKLISTED");
@@ -229,6 +231,8 @@ contract Indexer is Ownable {
     address makerToken,
     address takerToken
   ) external view returns (uint256) {
+
+    // TODO: Do not throw for onchain integrations.
 
     // Ensure the market exists.
     require(markets[makerToken][takerToken] != address(0),

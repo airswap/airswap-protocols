@@ -26,7 +26,7 @@ contract Swap {
   mapping (address => mapping (uint256 => byte)) public makerOrderStatus;
 
   // Mapping of peer address to delegate address and expiry.
-  mapping (address => mapping (address => uint256)) private approvals;
+  mapping (address => mapping (address => uint256)) public approvals;
 
   // Mapping of makers to an optionally set minimum valid nonce
   mapping (address => uint256) public makerMinimumNonce;

@@ -1,9 +1,8 @@
 pragma solidity ^0.5.10;
 
-// TODO: Import interfaces IIndexer and IDelegate rather than full contracts.
-
-import "@airswap/indexer/contracts/Indexer.sol";
-import "@airswap/delegate/contracts/Delegate.sol";
+import "@airswap/swap/contracts/ISwap.sol";
+import "@airswap/indexer/contracts/IIndexer.sol";
+import "@airswap/delegate/contracts/IDelegate.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 
 /**
@@ -12,10 +11,10 @@ import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 contract Consumer {
 
   // Indexer contract to be used to find intents to trade
-  Indexer public indexerContract;
+  IIndexer public indexerContract;
 
   // Swap contract to be used to settle trades
-  Swap public swapContract;
+  ISwap public swapContract;
 
   /** 
     * @notice Contract Constructor
@@ -27,8 +26,8 @@ contract Consumer {
     address _indexerContract,
     address _swapContract
   ) public {
-    indexerContract = Indexer(_indexerContract);
-    swapContract = Swap(_swapContract);
+    indexerContract = IIndexer(_indexerContract);
+    swapContract = ISwap(_swapContract);
   }
 
   /** 
@@ -62,7 +61,7 @@ contract Consumer {
       address delegateContract = address(bytes20(locators[i]));
 
       // Get a buy quote from the Delegate.
-      userSendAmount = Delegate(delegateContract).getBuyQuote(userReceiveAmount, userReceiveToken, userSendToken);
+      userSendAmount = IDelegate(delegateContract).getBuyQuote(userReceiveAmount, userReceiveToken, userSendToken);
 
       // Update the lowest cost.
       if (userSendAmount < lowestCost) {
@@ -107,7 +106,7 @@ contract Consumer {
     swapContract.authorize(untrustedDelegateContract, block.timestamp);
 
     // Consumer provides unsigned order to Delegate
-    Delegate(untrustedDelegateContract).provideUnsignedOrder(
+    IDelegate(untrustedDelegateContract).provideUnsignedOrder(
       1,
       userSendAmount,
       userSendToken,
