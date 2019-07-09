@@ -350,7 +350,9 @@ contract Swap {
     * @dev Canceled orders are marked CANCELED (0x02)
     * @param nonces uint256[]
     */
-  function cancel(uint256[] calldata nonces) external {
+  function cancel(
+    uint256[] calldata nonces
+  ) external {
     for (uint256 i = 0; i < nonces.length; i++) {
       if (makerOrderStatus[msg.sender][nonces[i]] == OPEN) {
         makerOrderStatus[msg.sender][nonces[i]] = CANCELED;
@@ -363,7 +365,9 @@ contract Swap {
     * @notice Invalidate All Orders Below a Nonce Value
     * @param minimumNonce uint256
     */
-  function invalidate(uint256 minimumNonce) external {
+  function invalidate(
+    uint256 minimumNonce
+  ) external {
     makerMinimumNonce[msg.sender] = minimumNonce;
     emit Invalidate(minimumNonce, msg.sender);
   }
@@ -374,7 +378,10 @@ contract Swap {
     * @param delegate address
     * @param expiry uint256
     */
-  function authorize(address delegate, uint256 expiry) public {
+  function authorize(
+    address delegate,
+    uint256 expiry
+  ) public {
     require(msg.sender != delegate, "INVALID_AUTH_DELEGATE");
     require(expiry >= block.timestamp, "INVALID_AUTH_EXPIRY");
     approvals[msg.sender][delegate] = expiry;
@@ -385,7 +392,9 @@ contract Swap {
     * @notice Revoke an Authorization
     * @param delegate address
     */
-  function revoke(address delegate) public {
+  function revoke(
+    address delegate
+  ) public {
     delete approvals[msg.sender][delegate];
     emit Revoke(msg.sender, delegate);
   }
@@ -396,7 +405,10 @@ contract Swap {
     * @param approver address
     * @param delegate address
     */
-  function isAuthorized(address approver, address delegate) public view returns (bool) {
+  function isAuthorized(
+    address approver,
+    address delegate
+  ) public view returns (bool) {
     if (approver == delegate) return true;
     return (approvals[approver][delegate] >= block.timestamp);
   }

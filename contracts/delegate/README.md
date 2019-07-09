@@ -1,6 +1,6 @@
 # Delegate
 
-[AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens. This package contains a basic `Delegate` contract that can be deployed with rules to trustlessly trade specific amounts of tokens at specific prices.
+[AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens. This package contains source code and tests for a basic `Delegate` contract that can be deployed with trading rules.
 
 #### :bulb: TODO
 

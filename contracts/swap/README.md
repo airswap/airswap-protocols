@@ -1,6 +1,6 @@
 # Swap
 
-The [Swap Protocol](https://swap.tech/whitepaper/) is a peer-to-peer protocol for trading Ethereum tokens. This repository contains source code and tests for the Atomic Swap used by the Swap Protocol.
+[AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens. This package contains source code and tests for the atomic `Swap` used to perform trustless token transfers between parties.
 
 ## Features
 

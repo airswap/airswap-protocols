@@ -1,6 +1,6 @@
 # Market
 
-[AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens. This package contains a contract `Market` that represents a list of intents to trade a given token pair by traders on the AirSwap Network.
+[AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens. This package contains source code and tests for a `Market` that represents a list of intents to trade.
 
 #### :bulb: TODO
 
