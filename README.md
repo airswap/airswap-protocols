@@ -1,6 +1,6 @@
 <center>
 <br />
-<img src="https://swap.tech/images/airswap-high-res.png" width="400"/>
+<img src="https://swap.tech/images/airswap-high-res.png" width="500"/>
 <br />
 </center>
 
