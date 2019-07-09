@@ -2,7 +2,9 @@ const Consumer = artifacts.require('Consumer')
 const Indexer = artifacts.require('@airswap/indexer/contracts/Indexer.sol')
 const Swap = artifacts.require('@airswap/indexer/contracts/Swap.sol')
 const Types = artifacts.require('@airswap/lib/contracts/Types.sol')
-const FungibleToken = artifacts.require('@airswap/tokens/contracts/FungibleToken.sol')
+const FungibleToken = artifacts.require(
+  '@airswap/tokens/contracts/FungibleToken.sol'
+)
 
 module.exports = deployer => {
   deployer.deploy(Types)
