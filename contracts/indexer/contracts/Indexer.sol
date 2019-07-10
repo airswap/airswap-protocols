@@ -1,6 +1,6 @@
 /*
   Copyright 2019 Swap Holdings Ltd.
-  
+
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
@@ -70,7 +70,7 @@ contract Indexer is Ownable {
     address token
   );
 
-  /** 
+  /**
     * @notice Contract Constructor
     *
     * @param _stakeToken address
@@ -220,20 +220,23 @@ contract Indexer is Ownable {
     address makerToken,
     address takerToken,
     uint256 count
-  ) external view returns (bytes32[] memory) {
+  ) external view returns (
+    bool available,
+    bytes32[] memory locators
+  ) {
 
-    // TODO: Do not throw for onchain integrations.
+    // Ensure neither token is blacklisted.
+    if (blacklist[makerToken] == 0 && blacklist[takerToken] == 0) {
 
-    // Ensure both of the tokens are not blacklisted
-    require(blacklist[makerToken] == 0 && blacklist[takerToken] == 0,
-      "MARKET_IS_BLACKLISTED");
+      // Ensure the market exists.
+      if (markets[makerToken][takerToken] != address(0)) {
 
-    // Ensure the market exists
-    require(markets[makerToken][takerToken] != address(0),
-      "MARKET_DOES_NOT_EXIST");
+        // Return an array of locators for the market.
+        return (true, Market(markets[makerToken][takerToken]).fetch(count));
 
-    // Return an array of locators for the market.
-    return Market(markets[makerToken][takerToken]).fetch(count);
+      }
+    }
+    return (false, new bytes32[](0));
   }
 
   /**
@@ -243,19 +246,21 @@ contract Indexer is Ownable {
     * @param makerToken address
     * @param takerToken address
     */
-  function sizeOf(
+  function lengthOf(
     address makerToken,
     address takerToken
-  ) external view returns (uint256) {
-
-    // TODO: Do not throw for onchain integrations.
+  ) external view returns (
+    bool available,
+    uint256 length
+  ) {
 
     // Ensure the market exists.
-    require(markets[makerToken][takerToken] != address(0),
-      "MARKET_DOES_NOT_EXIST");
+    if (markets[makerToken][takerToken] != address(0)) {
 
-    // Return the size of the market.
-    return Market(markets[makerToken][takerToken]).getLength();
+      // Return the size of the market.
+      return (true, Market(markets[makerToken][takerToken]).getLength());
+
+    }
+    return (false, 0);
   }
-
 }

@@ -1,6 +1,6 @@
 /*
   Copyright 2019 Swap Holdings Ltd.
-  
+
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
@@ -32,7 +32,7 @@ contract Consumer {
   // Swap contract to be used to settle trades
   ISwap public swapContract;
 
-  /** 
+  /**
     * @notice Contract Constructor
     *
     * @param _indexerContract address
@@ -46,7 +46,7 @@ contract Consumer {
     swapContract = ISwap(_swapContract);
   }
 
-  /** 
+  /**
     * @notice Find the Best Price for a Buy
     *
     * @param userReceiveAmount uint256
@@ -63,25 +63,29 @@ contract Consumer {
     uint256 maxIntents
   ) public view returns (address, uint256) {
 
-    // Fetch an array of Intent locators from the Indexer.
-    bytes32[] memory locators = indexerContract.getIntents(userReceiveToken, userSendToken, maxIntents);
-
     address location;
     uint256 lowestCost = 2**256 - 1;
+
+    bool gotResult;
+    bytes32[] memory locators;
     uint256 userSendAmount;
+
+    // Fetch an array of Intent locators from the Indexer.
+    (gotResult, locators) = indexerContract.getIntents(userReceiveToken, userSendToken, maxIntents);
 
     // Iterate through locators.
     for (uint256 i; i < locators.length; i ++) {
 
       // Assume the locator is a Delegate.
-      address delegateContract = address(bytes20(locators[i]));
+      address untrustedDelegateContract = address(bytes20(locators[i]));
 
       // Get a buy quote from the Delegate.
-      userSendAmount = IDelegate(delegateContract).getBuyQuote(userReceiveAmount, userReceiveToken, userSendToken);
+      (gotResult, userSendAmount) = IDelegate(untrustedDelegateContract)
+        .getBuyQuote(userReceiveAmount, userReceiveToken, userSendToken);
 
       // Update the lowest cost.
-      if (userSendAmount < lowestCost) {
-        location = delegateContract;
+      if (gotResult && userSendAmount < lowestCost) {
+        location = untrustedDelegateContract;
         lowestCost = userSendAmount;
       }
     }
@@ -90,7 +94,7 @@ contract Consumer {
     return (location, lowestCost);
   }
 
-  /** 
+  /**
     * @notice Take the Best Price for a Buy
     *
     * @param userReceiveAmount uint256
@@ -109,7 +113,7 @@ contract Consumer {
     uint256 userSendAmount;
 
     // Find the best buy among Indexed Delegates.
-    (untrustedDelegateContract, userSendAmount) = 
+    (untrustedDelegateContract, userSendAmount) =
       findBestBuy(userReceiveAmount, userReceiveToken, userSendToken, maxIntents);
 
     // Consumer transfers User amount to itself.

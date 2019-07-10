@@ -2,10 +2,6 @@
 
 [AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens. This package contains source code and tests for a basic `Delegate` contract that can be deployed with trading rules.
 
-#### :bulb: TODO
-
-- Further testing for price resolution including avoiding zero values.
-
 ## Features
 
 ### Limit Orders
@@ -101,7 +97,10 @@ function getBuyQuote(
   uint256 delegateAmount,
   address delegateToken,
   address consumerToken
-) public view returns (uint256)
+) external view returns (
+  bool available,
+  uint256 consumerAmount
+)
 ```
 
 ### Params
@@ -128,7 +127,10 @@ function getSellQuote(
   uint256 consumerAmount,
   address consumerToken,
   address delegateToken
-) public view returns (uint256)
+) external view returns (
+  bool available,
+  uint256 delegateAmount
+)
 ```
 
 ### Params
@@ -154,7 +156,11 @@ Get the maximum quote from the Delegate.
 function getMaxQuote(
   address delegateToken,
   address consumerToken
-) external view returns (uint256, address, uint256, address)
+) external view returns (
+  bool available,
+  uint256 delegateAmount,
+  uint256 consumerAmount
+)
 ```
 
 ### Params

@@ -64,7 +64,7 @@ contract(
           tokenDAI.address,
           tokenWETH.address
         )
-        equal(quote, 64)
+        equal(quote[1], 64)
       })
 
       it('Gets a quote to sell 100,000 (Max) DAI for WETH (Quote: 320 WETH)', async () => {
@@ -73,7 +73,7 @@ contract(
           tokenDAI.address,
           tokenWETH.address
         )
-        equal(quote, 320)
+        equal(quote[1], 320)
       })
 
       it('Gets a quote to sell 1 WETH for DAI (Quote: 300 DAI)', async () => {
@@ -82,14 +82,16 @@ contract(
           tokenWETH.address,
           tokenDAI.address
         )
-        equal(quote, 312)
+        equal(quote[1], 312)
       })
 
-      it('Gets a quote to sell 5 WETH for DAI (Fail: No rule)', async () => {
-        await reverted(
-          aliceDelegate.getSellQuote(5, tokenDAI.address, tokenWETH.address),
-          'TOKEN_PAIR_INACTIVE'
+      it('Gets a quote to sell 5 WETH for DAI (False: No rule)', async () => {
+        const quote = await aliceDelegate.getSellQuote(
+          5,
+          tokenDAI.address,
+          tokenWETH.address
         )
+        equal(quote[0], false)
       })
 
       it('Gets a max quote to buy WETH for DAI', async () => {
@@ -97,30 +99,28 @@ contract(
           tokenDAI.address,
           tokenWETH.address
         )
-        equal(quote[0], 100000)
+        equal(quote[1], 100000)
         equal(quote[2], 320)
       })
 
-      it('Gets a quote to buy 1500 WETH for DAI (Exceeds Max)', async () => {
-        await reverted(
-          aliceDelegate.getBuyQuote(
-            250000,
-            tokenDAI.address,
-            tokenWETH.address
-          ),
-          'AMOUNT_EXCEEDS_MAX'
+      it('Gets a quote to buy 1500 WETH for DAI (False: Exceeds Max)', async () => {
+        const quote = await aliceDelegate.getBuyQuote(
+          250000,
+          tokenDAI.address,
+          tokenWETH.address
         )
+        equal(quote[0], false)
       })
     })
 
     describe('Provide some orders to the Delegate', () => {
       let quote
       before('Gets a quote for 1 WETH', async () => {
-        quote = await aliceDelegate.getSellQuote(
+        quote = (await aliceDelegate.getSellQuote(
           1,
           tokenWETH.address,
           tokenDAI.address
-        )
+        ))[1]
       })
 
       it('Gets a quote to sell 1 WETH and takes it', async () => {

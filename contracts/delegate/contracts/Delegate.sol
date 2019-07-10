@@ -1,6 +1,6 @@
 /*
   Copyright 2019 Swap Holdings Ltd.
-  
+
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
@@ -37,7 +37,7 @@ contract Delegate is Ownable {
 
   /**
     * @notice Trading Rule
-    * 
+    *
     * @param maxDelegateAmount uint256
     * @param priceCoef uint256
     * @param priceExp uint256
@@ -66,7 +66,7 @@ contract Delegate is Ownable {
     address consumerToken
   );
 
-  /** 
+  /**
     * @notice Contract Constructor
     * @param _swapContract address
     */
@@ -76,7 +76,7 @@ contract Delegate is Ownable {
     swapContract = ISwap(_swapContract);
   }
 
-  /** 
+  /**
     * @notice Set the Swap Contract
     * @param _swapContract address
     */
@@ -86,7 +86,7 @@ contract Delegate is Ownable {
     swapContract = ISwap(_swapContract);
   }
 
-  /** 
+  /**
     * @notice Set a Trading Rule
     *
     * @param delegateToken address
@@ -118,7 +118,7 @@ contract Delegate is Ownable {
     );
   }
 
-  /** 
+  /**
     * @notice Unset a Trading Rule
     *
     * @param delegateToken address
@@ -149,24 +149,30 @@ contract Delegate is Ownable {
     uint256 delegateAmount,
     address delegateToken,
     address consumerToken
-  ) public view returns (uint256) {
+  ) external view returns (
+    bool available,
+    uint256 consumerAmount
+  ) {
 
     Rule memory rule = rules[delegateToken][consumerToken];
 
-    // TODO: Do not throw for onchain integrations.
-
     // Ensure that a rule exists.
-    require(rule.maxDelegateAmount != 0,
-      "TOKEN_PAIR_INACTIVE");
+    if(rule.maxDelegateAmount > 0) {
 
-    // Ensure the delegateAmount does not exceed maximum for the rule.
-    require(delegateAmount <= rule.maxDelegateAmount,
-      "AMOUNT_EXCEEDS_MAX");
+      // Ensure the delegateAmount does not exceed maximum for the rule.
+      if(delegateAmount <= rule.maxDelegateAmount) {
 
-    return delegateAmount
-      .mul(rule.priceCoef)
-      .div(10 ** rule.priceExp);
+        consumerAmount = delegateAmount
+            .mul(rule.priceCoef)
+            .div(10 ** rule.priceExp);
 
+        // Ensure that the quoted amount is greater than zero.
+        if (consumerAmount > 0) {
+          return (true, consumerAmount);
+        }
+      }
+    }
+    return (false, 0);
   }
 
   /**
@@ -180,26 +186,29 @@ contract Delegate is Ownable {
     uint256 consumerAmount,
     address consumerToken,
     address delegateToken
-  ) public view returns (uint256) {
+  ) external view returns (
+    bool available,
+    uint256 delegateAmount
+  ) {
 
     Rule memory rule = rules[delegateToken][consumerToken];
 
-    // TODO: Do not throw for onchain integrations.
-
     // Ensure that a rule exists.
-    require(rule.maxDelegateAmount != 0,
-      "TOKEN_PAIR_INACTIVE");
+    if(rule.maxDelegateAmount > 0) {
 
-    // Calculate the delegateAmount.
-    uint256 delegateAmount = consumerAmount
-      .mul(10 ** rule.priceExp).div(rule.priceCoef);
+      // Calculate the delegateAmount.
+      delegateAmount = consumerAmount
+        .mul(10 ** rule.priceExp).div(rule.priceCoef);
 
-    // Ensure the delegateAmount does not exceed maximum for the rule.
-    require(delegateAmount <= rule.maxDelegateAmount,
-      "AMOUNT_EXCEEDS_MAX");
-
-    return delegateAmount;
-
+      // Ensure the delegateAmount does not exceed maximum and is greater than zero.
+      if(delegateAmount <= rule.maxDelegateAmount && delegateAmount > 0) {
+        return (
+          true,
+          delegateAmount
+        );
+      }
+    }
+    return (false, 0);
   }
 
   /**
@@ -207,29 +216,30 @@ contract Delegate is Ownable {
     *
     * @param delegateToken address
     * @param consumerToken address
-    * @return (uint256, address, uint256, address)
+    * @return (bool, uint256, uint256)
     */
   function getMaxQuote(
     address delegateToken,
     address consumerToken
-  ) external view returns (uint256, address, uint256, address) {
+  ) external view returns (
+    bool available,
+    uint256 delegateAmount,
+    uint256 consumerAmount
+  ) {
 
     Rule memory rule = rules[delegateToken][consumerToken];
 
-    // TODO: Do not throw for onchain integrations.
-
     // Ensure that a rule exists.
-    require(rule.maxDelegateAmount != 0,
-      "TOKEN_PAIR_INACTIVE");
+    if(rule.maxDelegateAmount > 0) {
 
-    // Return the maxDelegateAmount and calculated consumerAmount.
-    return (
-      rule.maxDelegateAmount,
-      delegateToken,
-      rule.maxDelegateAmount.mul(rule.priceCoef).div(10 ** rule.priceExp),
-      consumerToken
-    );
-
+      // Return the maxDelegateAmount and calculated consumerAmount.
+      return (
+        true,
+        rule.maxDelegateAmount,
+        rule.maxDelegateAmount.mul(rule.priceCoef).div(10 ** rule.priceExp)
+      );
+    }
+    return (false, 0, 0);
   }
 
   /**

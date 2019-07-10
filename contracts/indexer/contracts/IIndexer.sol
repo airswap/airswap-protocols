@@ -1,6 +1,6 @@
 /*
   Copyright 2019 Swap Holdings Ltd.
-  
+
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
@@ -58,11 +58,11 @@ contract IIndexer {
     address makerToken,
     address takerToken,
     uint256 count
-  ) external view returns (bytes32[] memory) {}
+  ) external view returns (bool, bytes32[] memory) {}
 
-  function sizeOf(
+  function lengthOf(
     address makerToken,
     address takerToken
-  ) external view returns (uint256) {}
+  ) external view returns (bool, uint256) {}
 
 }

@@ -186,7 +186,10 @@ function getIntents(
   address makerToken,
   address takerToken,
   uint256 count
-) external view returns (bytes32[] memory)
+) external view returns (
+  bool available,
+  bytes32[] memory locators
+)
 ```
 
 ### Params
@@ -204,15 +207,18 @@ function getIntents(
 | `MARKET_IS_BLACKLISTED` | One or both of the tokens are blacklisted. |
 | `MARKET_DOES_NOT_EXIST` | There is no market for the token pair.     |
 
-## Get Size
+## Get Length
 
 Get the length of the list of intents for a token pair.
 
 ```Solidity
-function sizeOf(
+function lengthOf(
   address makerToken,
   address takerToken
-) external view returns (uint256)
+) external view returns (
+  bool available,
+  uint256 length
+)
 ```
 
 ### Params

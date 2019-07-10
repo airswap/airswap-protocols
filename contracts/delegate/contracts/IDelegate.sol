@@ -1,6 +1,6 @@
 /*
   Copyright 2019 Swap Holdings Ltd.
-  
+
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
@@ -51,18 +51,28 @@ contract IDelegate {
     uint256 delegateAmount,
     address delegateToken,
     address consumerToken
-  ) public view returns (uint256) {}
+  ) external view returns (
+    bool available,
+    uint256 consumerAmount
+  ) {}
 
   function getSellQuote(
     uint256 consumerAmount,
     address consumerToken,
     address delegateToken
-  ) public view returns (uint256) {}
+  ) external view returns (
+    bool available,
+    uint256 delegateAmount
+  ) {}
 
   function getMaxQuote(
     address delegateToken,
     address consumerToken
-  ) external view returns (uint256, address, uint256, address) {}
+  ) external view returns (
+    bool available,
+    uint256 delegateAmount,
+    uint256 consumerAmount
+  ) {}
 
   function provideOrder(
     uint256 nonce,
