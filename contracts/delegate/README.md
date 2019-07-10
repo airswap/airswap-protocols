@@ -70,6 +70,18 @@ Set a rule to send up to 100,000 DAI for WETH at 0.0032 WETH/DAI
 setRule(<WETHAddress>, <DAIAddress>, 100000, 32, 4)
 ```
 
+Set a rule to send up to 100,000 DAI for WETH at 312.50 WETH/DAI
+
+```Solidity
+setRule(<WETHAddress>, <DAIAddress>, 100000, 32150, 2)
+```
+
+Set a rule to send up to 100,000 DAI for WETH at 312 DAI/WETH
+
+```Solidity
+setRule(<WETHAddress>, <DAIAddress>, 100000, 312, 0)
+```
+
 ## Unset a Rule
 
 Unset a trading rule for the Delegate.

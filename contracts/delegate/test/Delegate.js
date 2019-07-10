@@ -40,25 +40,107 @@ contract(
       })
     })
 
-    describe('Alice adds rules to the Delegate', () => {
-      it('Adds a rule to send up to 100,000 DAI for WETH at 0.0032 WETH/DAI', async () => {
-        emitted(
-          await aliceDelegate.setRule(
-            tokenDAI.address,
+    describe('Checks set and unset rule', async () => {
+      it('Set and unset a rule for WETH/DAI', async () => {
+        await aliceDelegate.setRule(
+          tokenWETH.address,
+          tokenDAI.address,
+          100000,
+          300,
+          0
+        )
+        equal(
+          (await aliceDelegate.getBuyQuote(
+            1,
             tokenWETH.address,
-            100000,
-            32,
-            4
-          ),
-          'SetRule'
+            tokenDAI.address
+          ))[0],
+          true
+        )
+        await aliceDelegate.unsetRule(tokenWETH.address, tokenDAI.address)
+        equal(
+          (await aliceDelegate.getBuyQuote(
+            1,
+            tokenWETH.address,
+            tokenDAI.address
+          ))[0],
+          false
         )
       })
     })
 
-    // TODO: Add tests for unsetRule.
+    describe('Checks pricing logic from the Delegate', () => {
+      it('Send up to 100K WETH for DAI at 300 DAI/WETH', async () => {
+        await aliceDelegate.setRule(
+          tokenWETH.address,
+          tokenDAI.address,
+          100000,
+          300,
+          0
+        )
+        equal(
+          (await aliceDelegate.getBuyQuote(
+            1,
+            tokenWETH.address,
+            tokenDAI.address
+          ))[1],
+          300
+        )
+      })
+      it('Send up to 100K DAI for WETH at 0.0032 WETH/DAI', async () => {
+        await aliceDelegate.setRule(
+          tokenDAI.address,
+          tokenWETH.address,
+          100000,
+          32,
+          4
+        )
+        equal(
+          (await aliceDelegate.getBuyQuote(
+            100000,
+            tokenDAI.address,
+            tokenWETH.address
+          ))[1],
+          320
+        )
+      })
+      it('Send up to 100K WETH for DAI at 300.005 DAI/WETH', async () => {
+        await aliceDelegate.setRule(
+          tokenWETH.address,
+          tokenDAI.address,
+          100000,
+          300005,
+          3
+        )
+        equal(
+          (await aliceDelegate.getBuyQuote(
+            20000,
+            tokenWETH.address,
+            tokenDAI.address
+          ))[1],
+          6000100
+        )
+      })
+    })
 
-    describe('Get quotes from the Delegate', () => {
-      it('Gets a quote to buy 20,000 DAI for WETH (Quote: 64 WETH)', async () => {
+    describe('Checks quotes from the Delegate', () => {
+      before(
+        'Adds a rule to send up to 100K DAI for WETH at 0.0032 WETH/DAI',
+        async () => {
+          emitted(
+            await aliceDelegate.setRule(
+              tokenDAI.address,
+              tokenWETH.address,
+              100000,
+              32,
+              4
+            ),
+            'SetRule'
+          )
+        }
+      )
+
+      it('Gets a quote to buy 20K DAI for WETH (Quote: 64 WETH)', async () => {
         const quote = await aliceDelegate.getBuyQuote(
           20000,
           tokenDAI.address,
@@ -67,7 +149,7 @@ contract(
         equal(quote[1], 64)
       })
 
-      it('Gets a quote to sell 100,000 (Max) DAI for WETH (Quote: 320 WETH)', async () => {
+      it('Gets a quote to sell 100K (Max) DAI for WETH (Quote: 320 WETH)', async () => {
         const quote = await aliceDelegate.getBuyQuote(
           100000,
           tokenDAI.address,
