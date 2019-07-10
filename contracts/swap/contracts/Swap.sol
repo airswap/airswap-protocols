@@ -1,6 +1,6 @@
 /*
   Copyright 2019 Swap Holdings Ltd.
-  
+
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
@@ -87,7 +87,7 @@ contract Swap {
     address indexed delegateAddress
   );
 
-  /** 
+  /**
     * @notice Contract Constructor
     * @dev Sets domain for signature validation (EIP-712)
     */
@@ -136,7 +136,7 @@ contract Swap {
     address finalTakerWallet;
 
     if (order.taker.wallet == address(0)) {
-      /** 
+      /**
         * Taker is not specified. The sender of the transaction becomes
         * the taker of the order.
         */
@@ -193,7 +193,7 @@ contract Swap {
 
     } else {
       /**
-        * An ether value is not expected. Ensure the value sent is zero and 
+        * An ether value is not expected. Ensure the value sent is zero and
         * perform a token transfer to the taker wallet.
         */
       require(msg.value == 0,
@@ -361,7 +361,7 @@ contract Swap {
 
   }
 
-  /** 
+  /**
     * @notice Cancel One or More Orders by Nonce
     * @dev Canceled orders are marked CANCELED (0x02)
     * @param nonces uint256[]
@@ -377,7 +377,7 @@ contract Swap {
     }
   }
 
-  /** 
+  /**
     * @notice Invalidate All Orders Below a Nonce Value
     * @param minimumNonce uint256
     */
@@ -388,7 +388,7 @@ contract Swap {
     emit Invalidate(minimumNonce, msg.sender);
   }
 
-  /** 
+  /**
     * @notice Authorize a Delegate
     * @dev Expiry value is inclusive
     * @param delegate address
@@ -404,7 +404,7 @@ contract Swap {
     emit Authorize(msg.sender, delegate, expiry);
   }
 
-  /** 
+  /**
     * @notice Revoke an Authorization
     * @param delegate address
     */
@@ -415,7 +415,7 @@ contract Swap {
     emit Revoke(msg.sender, delegate);
   }
 
-  /** 
+  /**
     * @notice Determine Whether a Delegate is Authorized
     * @dev Expiry value is inclusive
     * @param approver address
