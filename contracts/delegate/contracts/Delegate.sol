@@ -17,16 +17,17 @@
 pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
-import "@airswap/swap/contracts/ISwap.sol";
+import "@airswap/delegate/interfaces/IDelegate.sol";
 import "@airswap/lib/contracts/Types.sol";
-import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "@airswap/swap/interfaces/ISwap.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 /**
   * @title Delegate: Deployable Trading Rules for the Swap Protocol
   * @notice Supports fungible tokens (ERC-20)
   */
-contract Delegate is Ownable {
+contract Delegate is IDelegate, Ownable {
   using SafeMath for uint256;
 
   // Swap contract to be used to settle trades
@@ -34,19 +35,6 @@ contract Delegate is Ownable {
 
   // Mapping of delegateToken to consumerToken for rule lookup
   mapping (address => mapping (address => Rule)) public rules;
-
-  /**
-    * @notice Trading Rule
-    *
-    * @param maxDelegateAmount uint256
-    * @param priceCoef uint256
-    * @param priceExp uint256
-    */
-  struct Rule {
-    uint256 maxDelegateAmount;
-    uint256 priceCoef;
-    uint256 priceExp;
-  }
 
   /**
     * @notice Contract Events

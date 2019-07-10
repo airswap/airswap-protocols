@@ -16,13 +16,7 @@
 
 pragma solidity 0.5.10;
 
-contract IIndexer {
-
-  address public stakeToken;
-  uint256 public stakeMinimum;
-
-  function markets(address, address) public returns (address);
-  function blacklist(address) public returns (uint256);
+interface IIndexer {
 
   function createMarket(
     address makerToken,

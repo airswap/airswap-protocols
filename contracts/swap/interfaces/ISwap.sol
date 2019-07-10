@@ -19,11 +19,7 @@ pragma experimental ABIEncoderV2;
 
 import "@airswap/lib/contracts/Types.sol";
 
-contract ISwap {
-
-  function makerOrderStatus(address, uint256) public returns (byte);
-  function approvals(address, address) public returns (uint256);
-  function makerMinimumNonce(address) public returns (uint256);
+interface ISwap {
 
   function swap(
     Types.Order calldata order,
@@ -60,10 +56,5 @@ contract ISwap {
   function revoke(
     address delegate
   ) external;
-
-  function isAuthorized(
-    address approver,
-    address delegate
-  ) public view returns (bool);
 
 }

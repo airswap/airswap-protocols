@@ -17,14 +17,14 @@
 pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
-import "@airswap/lib/contracts/Types.sol";
 import "@airswap/lib/contracts/Signatures.sol";
 import "@airswap/lib/contracts/Transfers.sol";
+import "@airswap/swap/interfaces/ISwap.sol";
 
 /**
   * @title Swap: The Atomic Swap used by the Swap Protocol
   */
-contract Swap {
+contract Swap is ISwap {
 
   // Domain and version for use in signatures (EIP-712)
   bytes constant internal DOMAIN_NAME = "SWAP";
@@ -397,7 +397,7 @@ contract Swap {
   function authorize(
     address delegate,
     uint256 expiry
-  ) public {
+  ) external {
     require(msg.sender != delegate, "INVALID_AUTH_DELEGATE");
     require(expiry >= block.timestamp, "INVALID_AUTH_EXPIRY");
     approvals[msg.sender][delegate] = expiry;
@@ -410,7 +410,7 @@ contract Swap {
     */
   function revoke(
     address delegate
-  ) public {
+  ) external {
     delete approvals[msg.sender][delegate];
     emit Revoke(msg.sender, delegate);
   }
@@ -424,7 +424,7 @@ contract Swap {
   function isAuthorized(
     address approver,
     address delegate
-  ) public view returns (bool) {
+  ) internal view returns (bool) {
     if (approver == delegate) return true;
     return (approvals[approver][delegate] >= block.timestamp);
   }

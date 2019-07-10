@@ -17,19 +17,20 @@
 pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
-import "@airswap/swap/contracts/ISwap.sol";
+interface IDelegate {
 
-contract IDelegate {
-
-  ISwap public swapContract;
-
+  /**
+    * @notice Trading Rule
+    *
+    * @param maxDelegateAmount uint256
+    * @param priceCoef uint256
+    * @param priceExp uint256
+    */
   struct Rule {
     uint256 maxDelegateAmount;
     uint256 priceCoef;
     uint256 priceExp;
   }
-
-  function rules(address, address) public returns (Rule memory);
 
   function setSwapContract(
     address _swapContract
@@ -87,7 +88,7 @@ contract IDelegate {
     uint8 v,
     bytes32 r,
     bytes32 s
-  ) public payable;
+  ) external payable;
 
   function provideUnsignedOrder(
     uint256 nonce,
@@ -95,7 +96,7 @@ contract IDelegate {
     address consumerToken,
     uint256 delegateAmount,
     address delegateToken
-  ) public payable;
+  ) external payable;
 
 
 }

@@ -17,14 +17,15 @@
 pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
+import "@airswap/indexer/interfaces/IIndexer.sol";
 import "@airswap/market/contracts/Market.sol";
-import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 /**
   * @title Indexer: An Index of Markets by Token Pair
   */
-contract Indexer is Ownable {
+contract Indexer is IIndexer, Ownable {
 
   // Token to be used for staking (ERC-20)
   address public stakeToken;
