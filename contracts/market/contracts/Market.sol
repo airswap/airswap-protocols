@@ -1,6 +1,6 @@
 /*
   Copyright 2019 Swap Holdings Ltd.
-  
+
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
@@ -17,12 +17,12 @@
 pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
-// TODO: Make this ownable to limit control to its Indexer.
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 /**
   * @title Market: A List of Intents to Trade
   */
-contract Market {
+contract Market is Ownable {
 
   // Token pair of the market
   address public makerToken;
@@ -43,7 +43,7 @@ contract Market {
 
   /**
     * @notice Intent to Trade
-    * 
+    *
     * @param staker address
     * @param amount uint256
     * @param expiry uint256
@@ -76,7 +76,7 @@ contract Market {
     address takerToken
   );
 
-  /** 
+  /**
     * @notice Contract Constructor
     *
     * @param _makerToken address
@@ -97,10 +97,10 @@ contract Market {
     list[HEAD][NEXT] = head;
   }
 
-  /** 
+  /**
     * @notice Set an Intent to Trade
     *
-    * @param staker The account 
+    * @param staker The account
     * @param amount uint256
     * @param expiry uint256
     * @param locator bytes32
@@ -108,9 +108,9 @@ contract Market {
   function set(
     address staker,
     uint256 amount,
-    uint256 expiry, 
+    uint256 expiry,
     bytes32 locator
-  ) external {
+  ) external onlyOwner {
 
     Intent memory newIntent = Intent(staker, amount, expiry, locator);
 
@@ -123,13 +123,13 @@ contract Market {
     emit Set(staker, amount, expiry, locator, makerToken, takerToken);
   }
 
-  /** 
+  /**
     * @notice Unset an Intent to Trade
     * @param staker address
     */
   function unset(
     address staker
-  ) public returns (bool) {
+  ) public onlyOwner returns (bool) {
 
     // Ensure the staker is in the list.
     if (!has(staker)) {
@@ -150,7 +150,7 @@ contract Market {
     return true;
   }
 
-  /** 
+  /**
     * @notice Get the Intent for a Staker
     * @param staker address
     */
@@ -166,7 +166,7 @@ contract Market {
     }
   }
 
-  /** 
+  /**
     * @notice Determine Whether a Staker is in the List
     * @param staker address
     */
@@ -187,14 +187,14 @@ contract Market {
     return false;
   }
 
-  /** 
+  /**
     * @notice Return the Length
     */
   function getLength() public view returns (uint256) {
     return length;
   }
 
-  /** 
+  /**
     * @notice Get Valid Intents
     * @param count uint256
     */
@@ -224,7 +224,7 @@ contract Market {
     return result;
   }
 
-  /** 
+  /**
     * @notice Find the Next Intent Below an Amount
     * @param amount uint256
     */
@@ -245,7 +245,7 @@ contract Market {
     return intent;
   }
 
-  /** 
+  /**
     * @notice Insert an Intent at a Location
     *
     * @param intent Intent
@@ -271,9 +271,9 @@ contract Market {
     return true;
   }
 
-  /** 
+  /**
     * @notice Link Two Intents
-    * 
+    *
     * @param left Intent
     * @param right Intent
     */

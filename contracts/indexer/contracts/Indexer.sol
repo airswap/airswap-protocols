@@ -18,8 +18,8 @@ pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
 import "@airswap/market/contracts/Market.sol";
-import "@airswap/tokens/contracts/FungibleToken.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 
 /**
   * @title Indexer: An Index of Markets by Token Pair
@@ -167,7 +167,7 @@ contract Indexer is Ownable {
       "MINIMUM_NOT_MET");
 
     // Transfer the amount for staking.
-    require(FungibleToken(stakeToken).transferFrom(msg.sender, address(this), amount),
+    require(IERC20(stakeToken).transferFrom(msg.sender, address(this), amount),
       "UNABLE_TO_STAKE");
 
     emit Stake(msg.sender, amount);
@@ -203,7 +203,7 @@ contract Indexer is Ownable {
     Market(markets[makerToken][takerToken]).unset(msg.sender);
 
     // Return the staked tokens.
-    FungibleToken(stakeToken).transfer(msg.sender, intent.amount);
+    IERC20(stakeToken).transfer(msg.sender, intent.amount);
     emit Unstake(msg.sender, intent.amount);
   }
 
