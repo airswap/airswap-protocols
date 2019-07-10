@@ -21,8 +21,8 @@ import "@airswap/lib/contracts/Types.sol";
 
 contract ISwap {
 
-  function makerOrderStatus(address) public returns (byte);
-  function approvals(address) public returns (uint256);
+  function makerOrderStatus(address, uint256) public returns (byte);
+  function approvals(address, address) public returns (uint256);
   function makerMinimumNonce(address) public returns (uint256);
 
   function swap(

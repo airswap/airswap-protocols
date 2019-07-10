@@ -29,7 +29,7 @@ contract IDelegate {
     uint256 priceExp;
   }
 
-  function rules(address) public returns (Rule memory);
+  function rules(address, address) public returns (Rule memory);
 
   function setSwapContract(
     address _swapContract

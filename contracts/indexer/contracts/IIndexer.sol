@@ -21,7 +21,7 @@ contract IIndexer {
   address public stakeToken;
   uint256 public stakeMinimum;
 
-  function markets(address) public returns (address);
+  function markets(address, address) public returns (address);
   function blacklist(address) public returns (uint256);
 
   function createMarket(
