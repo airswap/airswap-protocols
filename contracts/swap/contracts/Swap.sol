@@ -38,11 +38,11 @@ contract Swap is ISwap {
   byte constant private TAKEN = 0x01;
   byte constant private CANCELED = 0x02;
 
+  // Mapping of peer address to delegate address and expiry.
+  mapping (address => mapping (address => uint256)) public delegateApprovals;
+
   // Mapping of makers to orders by nonce as TAKEN (0x01) or CANCELED (0x02)
   mapping (address => mapping (uint256 => byte)) public makerOrderStatus;
-
-  // Mapping of peer address to delegate address and expiry.
-  mapping (address => mapping (address => uint256)) public approvals;
 
   // Mapping of makers to an optionally set minimum valid nonce
   mapping (address => uint256) public makerMinimumNonce;
@@ -400,7 +400,7 @@ contract Swap is ISwap {
   ) external {
     require(msg.sender != delegate, "INVALID_AUTH_DELEGATE");
     require(expiry >= block.timestamp, "INVALID_AUTH_EXPIRY");
-    approvals[msg.sender][delegate] = expiry;
+    delegateApprovals[msg.sender][delegate] = expiry;
     emit Authorize(msg.sender, delegate, expiry);
   }
 
@@ -411,7 +411,7 @@ contract Swap is ISwap {
   function revoke(
     address delegate
   ) external {
-    delete approvals[msg.sender][delegate];
+    delete delegateApprovals[msg.sender][delegate];
     emit Revoke(msg.sender, delegate);
   }
 
@@ -426,7 +426,7 @@ contract Swap is ISwap {
     address delegate
   ) internal view returns (bool) {
     if (approver == delegate) return true;
-    return (approvals[approver][delegate] >= block.timestamp);
+    return (delegateApprovals[approver][delegate] >= block.timestamp);
   }
 
 }

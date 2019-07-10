@@ -19,18 +19,13 @@ pragma experimental ABIEncoderV2;
 
 interface IDelegate {
 
-  /**
-    * @notice Trading Rule
-    *
-    * @param maxDelegateAmount uint256
-    * @param priceCoef uint256
-    * @param priceExp uint256
-    */
   struct Rule {
     uint256 maxDelegateAmount;
     uint256 priceCoef;
     uint256 priceExp;
   }
+
+  function rules(address, address) external returns (Rule memory);
 
   function setSwapContract(
     address _swapContract

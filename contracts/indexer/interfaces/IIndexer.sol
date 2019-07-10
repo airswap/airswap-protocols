@@ -18,6 +18,9 @@ pragma solidity 0.5.10;
 
 interface IIndexer {
 
+  function markets(address, address) external returns (address);
+  function blacklist(address) external returns (uint256);
+
   function createMarket(
     address makerToken,
     address takerToken

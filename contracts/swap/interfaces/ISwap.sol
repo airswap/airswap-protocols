@@ -21,6 +21,10 @@ import "@airswap/lib/contracts/Types.sol";
 
 interface ISwap {
 
+  function delegateApprovals(address, address) external returns (uint256);
+  function makerOrderStatus(address, uint256) external returns (byte);
+  function makerMinimumNonce(address) external returns (uint256);
+
   function swap(
     Types.Order calldata order,
     Types.Signature calldata signature
