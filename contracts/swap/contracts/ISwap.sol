@@ -21,14 +21,14 @@ import "@airswap/lib/contracts/Types.sol";
 
 contract ISwap {
 
-  mapping (address => mapping (uint256 => byte)) public makerOrderStatus;
-  mapping (address => mapping (address => uint256)) public approvals;
-  mapping (address => uint256) public makerMinimumNonce;
+  function makerOrderStatus(address) public returns (byte);
+  function approvals(address) public returns (uint256);
+  function makerMinimumNonce(address) public returns (uint256);
 
   function swap(
     Types.Order calldata order,
     Types.Signature calldata signature
-  ) external payable {}
+  ) external payable;
 
   function swapSimple(
     uint256 nonce,
@@ -42,28 +42,28 @@ contract ISwap {
     uint8 v,
     bytes32 r,
     bytes32 s
-  ) external payable {}
+  ) external payable;
 
   function cancel(
     uint256[] calldata nonces
-  ) external {}
+  ) external;
 
   function invalidate(
     uint256 minimumNonce
-  ) external {}
+  ) external;
 
   function authorize(
     address delegate,
     uint256 expiry
-  ) external {}
+  ) external;
 
   function revoke(
     address delegate
-  ) external {}
+  ) external;
 
   function isAuthorized(
     address approver,
     address delegate
-  ) public view returns (bool) {}
+  ) public view returns (bool);
 
 }

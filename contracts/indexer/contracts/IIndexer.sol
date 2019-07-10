@@ -15,31 +15,31 @@
 */
 
 pragma solidity 0.5.10;
-pragma experimental ABIEncoderV2;
 
 contract IIndexer {
 
   address public stakeToken;
   uint256 public stakeMinimum;
-  mapping (address => mapping (address => address)) public markets;
-  mapping (address => uint256) public blacklist;
+
+  function markets(address) public returns (address);
+  function blacklist(address) public returns (uint256);
 
   function createMarket(
     address makerToken,
     address takerToken
-  ) external {}
+  ) external;
 
   function setStakeMinimum(
     uint256 _stakeMinimum
-  ) external {}
+  ) external;
 
   function addToBlacklist(
     address token
-  ) external {}
+  ) external;
 
   function removeFromBlacklist(
     address token
-  ) external {}
+  ) external;
 
   function setIntent(
     address makerToken,
@@ -47,22 +47,22 @@ contract IIndexer {
     uint256 amount,
     uint256 expiry,
     bytes32 locator
-  ) external {}
+  ) external;
 
   function unsetIntent(
     address makerToken,
     address takerToken
-  ) external {}
+  ) external;
 
   function getIntents(
     address makerToken,
     address takerToken,
     uint256 count
-  ) external view returns (bool, bytes32[] memory) {}
+  ) external view returns (bool, bytes32[] memory);
 
   function lengthOf(
     address makerToken,
     address takerToken
-  ) external view returns (bool, uint256) {}
+  ) external view returns (bool, uint256);
 
 }

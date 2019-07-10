@@ -34,9 +34,9 @@ constructor(
 
 ### Params
 
-| Name            | Type      | Optionality | Description                                         |
-| :-------------- | :-------- | :---------- | :-------------------------------------------------- |
-| `_swapContract` | `address` | Required    | Address of the Swap contract used to settle trades. |
+| Name            | Type      | Description                                         |
+| :-------------- | :-------- | :-------------------------------------------------- |
+| `_swapContract` | `address` | Address of the Swap contract used to settle trades. |
 
 ## Set a Rule
 
@@ -54,13 +54,13 @@ function setRule(
 
 ### Params
 
-| Name             | Type      | Optionality | Description                                                    |
-| :--------------- | :-------- | :---------- | :------------------------------------------------------------- |
-| `delegateToken`  | `address` | Required    | The token that the delegate would send in a trade.             |
-| `consumerToken`  | `address` | Required    | The token that the consumer would send in a trade.             |
-| `maxTakerAmount` | `uint256` | Required    | The maximum amount of token the delegate would send.           |
-| `priceCoef`      | `uint256` | Required    | The coefficient of the price to indicate the whole number.     |
-| `priceExp`       | `uint256` | Required    | The exponent of the price to indicate location of the decimal. |
+| Name             | Type      | Description                                                    |
+| :--------------- | :-------- | :------------------------------------------------------------- |
+| `delegateToken`  | `address` | The token that the delegate would send in a trade.             |
+| `consumerToken`  | `address` | The token that the consumer would send in a trade.             |
+| `maxTakerAmount` | `uint256` | The maximum amount of token the delegate would send.           |
+| `priceCoef`      | `uint256` | The coefficient of the price to indicate the whole number.     |
+| `priceExp`       | `uint256` | The exponent of the price to indicate location of the decimal. |
 
 ### Example
 
@@ -83,10 +83,10 @@ function unsetRule(
 
 ### Params
 
-| Name            | Type      | Optionality | Description                                        |
-| :-------------- | :-------- | :---------- | :------------------------------------------------- |
-| `delegateToken` | `address` | Required    | The token that the Delegate would send in a trade. |
-| `consumerToken` | `address` | Required    | The token that the Consumer would send in a trade. |
+| Name            | Type      | Description                                        |
+| :-------------- | :-------- | :------------------------------------------------- |
+| `delegateToken` | `address` | The token that the Delegate would send in a trade. |
+| `consumerToken` | `address` | The token that the Consumer would send in a trade. |
 
 ## Get a Buy Quote
 
@@ -105,11 +105,11 @@ function getBuyQuote(
 
 ### Params
 
-| Name             | Type      | Optionality | Description                             |
-| :--------------- | :-------- | :---------- | :-------------------------------------- |
-| `delegateAmount` | `uint256` | Required    | The amount the Delegate would send.     |
-| `delegateToken`  | `address` | Required    | The token that the Delegate would send. |
-| `consumerToken`  | `address` | Required    | The token that the Consumer would send. |
+| Name             | Type      | Description                             |
+| :--------------- | :-------- | :-------------------------------------- |
+| `delegateAmount` | `uint256` | The amount the Delegate would send.     |
+| `delegateToken`  | `address` | The token that the Delegate would send. |
+| `consumerToken`  | `address` | The token that the Consumer would send. |
 
 ### Reverts
 
@@ -135,11 +135,11 @@ function getSellQuote(
 
 ### Params
 
-| Name             | Type      | Optionality | Description                            |
-| :--------------- | :-------- | :---------- | :------------------------------------- |
-| `consumerAmount` | `uint256` | Required    | The amount the Consumer would send.    |
-| `consumerToken`  | `address` | Required    | The token that the Consumer will send. |
-| `delegateToken`  | `address` | Required    | The token that the Delegate will send. |
+| Name             | Type      | Description                            |
+| :--------------- | :-------- | :------------------------------------- |
+| `consumerAmount` | `uint256` | The amount the Consumer would send.    |
+| `consumerToken`  | `address` | The token that the Consumer will send. |
+| `delegateToken`  | `address` | The token that the Delegate will send. |
 
 ### Reverts
 
@@ -165,10 +165,10 @@ function getMaxQuote(
 
 ### Params
 
-| Name            | Type      | Optionality | Description                            |
-| :-------------- | :-------- | :---------- | :------------------------------------- |
-| `delegateToken` | `address` | Required    | The token that the Delegate will send. |
-| `consumerToken` | `address` | Required    | The token that the Consumer will send. |
+| Name            | Type      | Description                            |
+| :-------------- | :-------- | :------------------------------------- |
+| `delegateToken` | `address` | The token that the Delegate will send. |
+| `consumerToken` | `address` | The token that the Consumer will send. |
 
 ### Reverts
 
@@ -198,19 +198,19 @@ function provideOrder(
 
 ### Params
 
-| Name             | Type      | Optionality | Description                                            |
-| :--------------- | :-------- | :---------- | :----------------------------------------------------- |
-| `nonce`          | `uint256` | Required    | A single use identifier for the Order.                 |
-| `expiry`         | `uint256` | Required    | The expiry in seconds since unix epoch.                |
-| `consumerWallet` | `address` | Required    | The Maker of the Order who sets price.                 |
-| `consumerAmount` | `uint256` | Required    | The amount or identifier of the token the Maker sends. |
-| `consumerToken`  | `address` | Required    | The address of the token the Maker sends.              |
-| `delegateWallet` | `address` | Required    | The Taker of the Order who takes price.                |
-| `delegateAmount` | `uint256` | Required    | The amount or identifier of the token the Taker sends. |
-| `delegateToken`  | `address` | Required    | The address of the token the Taker sends.              |
-| `v`              | `uint8`   | Required    | The `v` value of an ECDSA signature.                   |
-| `r`              | `bytes32` | Required    | The `r` value of an ECDSA signature.                   |
-| `s`              | `bytes32` | Required    | The `s` value of an ECDSA signature.                   |
+| Name             | Type      | Description                                            |
+| :--------------- | :-------- | :----------------------------------------------------- |
+| `nonce`          | `uint256` | A single use identifier for the Order.                 |
+| `expiry`         | `uint256` | The expiry in seconds since unix epoch.                |
+| `consumerWallet` | `address` | The Maker of the Order who sets price.                 |
+| `consumerAmount` | `uint256` | The amount or identifier of the token the Maker sends. |
+| `consumerToken`  | `address` | The address of the token the Maker sends.              |
+| `delegateWallet` | `address` | The Taker of the Order who takes price.                |
+| `delegateAmount` | `uint256` | The amount or identifier of the token the Taker sends. |
+| `delegateToken`  | `address` | The address of the token the Taker sends.              |
+| `v`              | `uint8`   | The `v` value of an ECDSA signature.                   |
+| `r`              | `bytes32` | The `r` value of an ECDSA signature.                   |
+| `s`              | `bytes32` | The `s` value of an ECDSA signature.                   |
 
 ### Reverts
 
@@ -236,14 +236,14 @@ function provideUnsignedOrder(
 
 ### Params
 
-| Name             | Type      | Optionality | Description                                            |
-| :--------------- | :-------- | :---------- | :----------------------------------------------------- |
-| `nonce`          | `uint256` | Required    | A single use identifier for the Order.                 |
-| `expiry`         | `uint256` | Required    | The expiry in seconds since unix epoch.                |
-| `consumerAmount` | `uint256` | Required    | The amount or identifier of the token the Maker sends. |
-| `consumerToken`  | `address` | Required    | The address of the token the Maker sends.              |
-| `delegateAmount` | `uint256` | Required    | The amount or identifier of the token the Taker sends. |
-| `delegateToken`  | `address` | Required    | The address of the token the Taker sends.              |
+| Name             | Type      | Description                                            |
+| :--------------- | :-------- | :----------------------------------------------------- |
+| `nonce`          | `uint256` | A single use identifier for the Order.                 |
+| `expiry`         | `uint256` | The expiry in seconds since unix epoch.                |
+| `consumerAmount` | `uint256` | The amount or identifier of the token the Maker sends. |
+| `consumerToken`  | `address` | The address of the token the Maker sends.              |
+| `delegateAmount` | `uint256` | The amount or identifier of the token the Taker sends. |
+| `delegateToken`  | `address` | The address of the token the Taker sends.              |
 
 ### Reverts
 

@@ -63,10 +63,10 @@ function swap(
 
 ### Params
 
-| Name        | Type        | Optionality | Description                          |
-| :---------- | :---------- | :---------- | :----------------------------------- |
-| `order`     | `Order`     | Required    | Order struct as specified below.     |
-| `signature` | `Signature` | Required    | Signature struct as specified below. |
+| Name        | Type        | Description                          |
+| :---------- | :---------- | :----------------------------------- |
+| `order`     | `Order`     | Order struct as specified below.     |
+| `signature` | `Signature` | Signature struct as specified below. |
 
 ```Solidity
 struct Order {
@@ -138,19 +138,19 @@ function swapSimple(
 
 ### Params
 
-| Name          | Type      | Optionality | Description                                            |
-| :------------ | :-------- | :---------- | :----------------------------------------------------- |
-| `nonce`       | `uint256` | Required    | A single use identifier for the Order.                 |
-| `expiry`      | `uint256` | Required    | The expiry in seconds since unix epoch.                |
-| `makerWallet` | `address` | Required    | The Maker of the Order who sets price.                 |
-| `makerParam`  | `uint256` | Required    | The amount or identifier of the token the Maker sends. |
-| `makerToken`  | `address` | Required    | The address of the token the Maker sends.              |
-| `takerWallet` | `address` | Required    | The Taker of the Order who takes price.                |
-| `takerParam`  | `uint256` | Required    | The amount or identifier of the token the Taker sends. |
-| `takerToken`  | `address` | Required    | The address of the token the Taker sends.              |
-| `v`           | `uint8`   | Required    | The `v` value of an ECDSA signature.                   |
-| `r`           | `bytes32` | Required    | The `r` value of an ECDSA signature.                   |
-| `s`           | `bytes32` | Required    | The `s` value of an ECDSA signature.                   |
+| Name          | Type      | Description                                            |
+| :------------ | :-------- | :----------------------------------------------------- |
+| `nonce`       | `uint256` | A single use identifier for the Order.                 |
+| `expiry`      | `uint256` | The expiry in seconds since unix epoch.                |
+| `makerWallet` | `address` | The Maker of the Order who sets price.                 |
+| `makerParam`  | `uint256` | The amount or identifier of the token the Maker sends. |
+| `makerToken`  | `address` | The address of the token the Maker sends.              |
+| `takerWallet` | `address` | The Taker of the Order who takes price.                |
+| `takerParam`  | `uint256` | The amount or identifier of the token the Taker sends. |
+| `takerToken`  | `address` | The address of the token the Taker sends.              |
+| `v`           | `uint8`   | The `v` value of an ECDSA signature.                   |
+| `r`           | `bytes32` | The `r` value of an ECDSA signature.                   |
+| `s`           | `bytes32` | The `s` value of an ECDSA signature.                   |
 
 ### Reverts
 

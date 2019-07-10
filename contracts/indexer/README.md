@@ -42,10 +42,10 @@ constructor(
 
 ### Params
 
-| Name            | Type      | Optionality | Description                                |
-| :-------------- | :-------- | :---------- | :----------------------------------------- |
-| `_stakeToken`   | `address` | Required    | Address of the token required for staking. |
-| `_stakeMinimum` | `uint256` | Required    | Minimum amount of token required to stake. |
+| Name            | Type      | Description                                |
+| :-------------- | :-------- | :----------------------------------------- |
+| `_stakeToken`   | `address` | Address of the token required for staking. |
+| `_stakeMinimum` | `uint256` | Minimum amount of token required to stake. |
 
 ## Create a Market
 
@@ -60,10 +60,10 @@ function createMarket(
 
 ### Params
 
-| Name         | Type      | Optionality | Description                                |
-| :----------- | :-------- | :---------- | :----------------------------------------- |
-| `makerToken` | `address` | Required    | Address of the token that the Maker sends. |
-| `takerToken` | `address` | Required    | Address of the token that the Taker sends. |
+| Name         | Type      | Description                                |
+| :----------- | :-------- | :----------------------------------------- |
+| `makerToken` | `address` | Address of the token that the Maker sends. |
+| `takerToken` | `address` | Address of the token that the Taker sends. |
 
 ### Reverts
 
@@ -83,9 +83,9 @@ function setStakeMinimum(
 
 ### Params
 
-| Name            | Type      | Optionality | Description                                |
-| :-------------- | :-------- | :---------- | :----------------------------------------- |
-| `_stakeMinimum` | `uint256` | Required    | Minimum amount of token required to stake. |
+| Name            | Type      | Description                                |
+| :-------------- | :-------- | :----------------------------------------- |
+| `_stakeMinimum` | `uint256` | Minimum amount of token required to stake. |
 
 ## Add a Token to Blacklist
 
@@ -99,9 +99,9 @@ function addToBlacklist(
 
 ### Params
 
-| Name    | Type      | Optionality | Description                        |
-| :------ | :-------- | :---------- | :--------------------------------- |
-| `token` | `address` | Required    | Address of the token to blacklist. |
+| Name    | Type      | Description                        |
+| :------ | :-------- | :--------------------------------- |
+| `token` | `address` | Address of the token to blacklist. |
 
 ## Remove a Token from Blacklist
 
@@ -115,9 +115,9 @@ function removeFromBlacklist(
 
 ### Params
 
-| Name    | Type      | Optionality | Description                            |
-| :------ | :-------- | :---------- | :------------------------------------- |
-| `token` | `address` | Required    | The address of the token to blacklist. |
+| Name    | Type      | Description                         |
+| :------ | :-------- | :---------------------------------- |
+| `token` | `address` | The address of the token to remove. |
 
 ## Set an Intent to Trade
 
@@ -135,13 +135,13 @@ function setIntent(
 
 ### Params
 
-| Name         | Type      | Optionality | Description                                  |
-| :----------- | :-------- | :---------- | :------------------------------------------- |
-| `makerToken` | `address` | Required    | Address of the token that the Maker sends.   |
-| `takerToken` | `address` | Required    | Address of the token that the Taker sends.   |
-| `amount`     | `uint256` | Required    | Amount of token to stake.                    |
-| `expiry`     | `uint256` | Required    | Timestamp after which the intent is invalid. |
-| `locator`    | `bytes32` | Required    | Locator for the peer.                        |
+| Name         | Type      | Description                                  |
+| :----------- | :-------- | :------------------------------------------- |
+| `makerToken` | `address` | Address of the token that the Maker sends.   |
+| `takerToken` | `address` | Address of the token that the Taker sends.   |
+| `amount`     | `uint256` | Amount of token to stake.                    |
+| `expiry`     | `uint256` | Timestamp after which the intent is invalid. |
+| `locator`    | `bytes32` | Locator for the peer.                        |
 
 ### Reverts
 
@@ -165,10 +165,10 @@ function unsetIntent(
 
 ### Params
 
-| Name         | Type      | Optionality | Description                                |
-| :----------- | :-------- | :---------- | :----------------------------------------- |
-| `makerToken` | `address` | Required    | Address of the token that the Maker sends. |
-| `takerToken` | `address` | Required    | Address of the token that the Taker sends. |
+| Name         | Type      | Description                                |
+| :----------- | :-------- | :----------------------------------------- |
+| `makerToken` | `address` | Address of the token that the Maker sends. |
+| `takerToken` | `address` | Address of the token that the Taker sends. |
 
 ### Reverts
 
@@ -194,11 +194,11 @@ function getIntents(
 
 ### Params
 
-| Name         | Type      | Optionality | Description                                |
-| :----------- | :-------- | :---------- | :----------------------------------------- |
-| `makerToken` | `address` | Required    | Address of the token that the Maker sends. |
-| `takerToken` | `address` | Required    | Address of the token that the Taker sends. |
-| `count`      | `uint256` | Required    | Maximum number of items to return.         |
+| Name         | Type      | Description                                |
+| :----------- | :-------- | :----------------------------------------- |
+| `makerToken` | `address` | Address of the token that the Maker sends. |
+| `takerToken` | `address` | Address of the token that the Taker sends. |
+| `count`      | `uint256` | Maximum number of items to return.         |
 
 ### Reverts
 
@@ -223,10 +223,10 @@ function lengthOf(
 
 ### Params
 
-| Name         | Type      | Optionality | Description                                |
-| :----------- | :-------- | :---------- | :----------------------------------------- |
-| `makerToken` | `address` | Required    | Address of the token that the Maker sends. |
-| `takerToken` | `address` | Required    | Address of the token that the Taker sends. |
+| Name         | Type      | Description                                |
+| :----------- | :-------- | :----------------------------------------- |
+| `makerToken` | `address` | Address of the token that the Maker sends. |
+| `takerToken` | `address` | Address of the token that the Taker sends. |
 
 ### Reverts
 
@@ -291,4 +291,4 @@ const locator = intents.serialize(
 // Looks like: 0x68747470733a2f2f7270632e6d616b65722d636c6f75642e696f00000000003
 ```
 
-She then sets his intent passing the `locator` value.
+She then sets her intent passing the `locator` value.

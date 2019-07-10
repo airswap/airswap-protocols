@@ -35,10 +35,10 @@ constructor(
 
 ### Params
 
-| Name               | Type      | Optionality | Description                                         |
-| :----------------- | :-------- | :---------- | :-------------------------------------------------- |
-| `_indexerContract` | `address` | Required    | Address of the Indexer to fetch intents from.       |
-| `_swapContract`    | `address` | Required    | Address of the Swap contract used to settle trades. |
+| Name               | Type      | Description                                         |
+| :----------------- | :-------- | :-------------------------------------------------- |
+| `_indexerContract` | `address` | Address of the Indexer to fetch intents from.       |
+| `_swapContract`    | `address` | Address of the Swap contract used to settle trades. |
 
 ## Find the Best Buy
 
@@ -55,12 +55,12 @@ function findBestBuy(
 
 ### Params
 
-| Name                | Type      | Optionality | Description                    |
-| :------------------ | :-------- | :---------- | :----------------------------- |
-| `userReceiveAmount` | `uint256` | Required    | Amount of token to buy.        |
-| `userReceiveToken`  | `address` | Required    | Address of token to buy.       |
-| `userSendToken`     | `address` | Required    | Address of token to spend.     |
-| `maxIntents`        | `uint256` | Required    | Max number of intents to scan. |
+| Name                | Type      | Description                    |
+| :------------------ | :-------- | :----------------------------- |
+| `userReceiveAmount` | `uint256` | Amount of token to buy.        |
+| `userReceiveToken`  | `address` | Address of token to buy.       |
+| `userSendToken`     | `address` | Address of token to spend.     |
+| `maxIntents`        | `uint256` | Max number of intents to scan. |
 
 ## Take the Best Buy
 
@@ -77,9 +77,9 @@ function takeBestBuy(
 
 ### Params
 
-| Name                | Type      | Optionality | Description                    |
-| :------------------ | :-------- | :---------- | :----------------------------- |
-| `userReceiveAmount` | `uint256` | Required    | Amount of token to buy.        |
-| `userReceiveToken`  | `address` | Required    | Address of token to buy.       |
-| `userSendToken`     | `address` | Required    | Address of token to spend.     |
-| `maxIntents`        | `uint256` | Required    | Max number of intents to scan. |
+| Name                | Type      | Description                    |
+| :------------------ | :-------- | :----------------------------- |
+| `userReceiveAmount` | `uint256` | Amount of token to buy.        |
+| `userReceiveToken`  | `address` | Address of token to buy.       |
+| `userSendToken`     | `address` | Address of token to spend.     |
+| `maxIntents`        | `uint256` | Max number of intents to scan. |

@@ -56,10 +56,10 @@ constructor (
 
 ### Params
 
-| Name          | Type      | Optionality | Description                                              |
-| :------------ | :-------- | :---------- | :------------------------------------------------------- |
-| `_makerToken` | `address` | Required    | Address of the token that the Maker is intended to send. |
-| `_takerToken` | `address` | Required    | Address of the token that the Taker is intended to send. |
+| Name          | Type      | Description                                              |
+| :------------ | :-------- | :------------------------------------------------------- |
+| `_makerToken` | `address` | Address of the token that the Maker is intended to send. |
+| `_takerToken` | `address` | Address of the token that the Taker is intended to send. |
 
 ## Set an Intent
 
@@ -76,12 +76,12 @@ function set(
 
 ### Params
 
-| Name      | Type      | Optionality | Description                                            |
-| :-------- | :-------- | :---------- | :----------------------------------------------------- |
-| `staker`  | `address` | Required    | Address of the account that has staked for the intent. |
-| `amount`  | `uint256` | Required    | Amount of token that the account has staked.           |
-| `expiry`  | `uint256` | Required    | Expiry of the intent as a timestamp in seconds.        |
-| `locator` | `bytes32` | Required    | Locator for the peer.                                  |
+| Name      | Type      | Description                                            |
+| :-------- | :-------- | :----------------------------------------------------- |
+| `staker`  | `address` | Address of the account that has staked for the intent. |
+| `amount`  | `uint256` | Amount of token that the account has staked.           |
+| `expiry`  | `uint256` | Expiry of the intent as a timestamp in seconds.        |
+| `locator` | `bytes32` | Locator for the peer.                                  |
 
 ## Unset an Intent
 
@@ -95,9 +95,9 @@ function unset(
 
 ### Params
 
-| Name     | Type      | Optionality | Description                                          |
-| :------- | :-------- | :---------- | :--------------------------------------------------- |
-| `staker` | `address` | Required    | Address of the account that will unstake its intent. |
+| Name     | Type      | Description                                          |
+| :------- | :-------- | :--------------------------------------------------- |
+| `staker` | `address` | Address of the account that will unstake its intent. |
 
 ## Get an Intent
 
@@ -111,9 +111,9 @@ function get(
 
 ### Params
 
-| Name     | Type      | Optionality | Description                               |
-| :------- | :-------- | :---------- | :---------------------------------------- |
-| `staker` | `address` | Required    | Address of the account to fetch an intent |
+| Name     | Type      | Description                               |
+| :------- | :-------- | :---------------------------------------- |
+| `staker` | `address` | Address of the account to fetch an intent |
 
 ## Has an Intent
 
@@ -127,9 +127,9 @@ function has(
 
 ### Params
 
-| Name     | Type      | Optionality | Description                               |
-| :------- | :-------- | :---------- | :---------------------------------------- |
-| `staker` | `address` | Required    | Address of the account to check an intent |
+| Name     | Type      | Description                               |
+| :------- | :-------- | :---------------------------------------- |
+| `staker` | `address` | Address of the account to check an intent |
 
 ## Fetch Intents
 
@@ -143,9 +143,9 @@ function fetch(
 
 ### Params
 
-| Name    | Type      | Optionality | Description                 |
-| :------ | :-------- | :---------- | :-------------------------- |
-| `count` | `uint256` | Required    | Number of intents to fetch. |
+| Name    | Type      | Description                 |
+| :------ | :-------- | :-------------------------- |
+| `count` | `uint256` | Number of intents to fetch. |
 
 ## Find an Intent (By Value)
 
@@ -159,9 +159,9 @@ function find(
 
 ### Params
 
-| Name    | Type      | Optionality | Description                 |
-| :------ | :-------- | :---------- | :-------------------------- |
-| `count` | `uint256` | Required    | Number of intents to fetch. |
+| Name    | Type      | Description                 |
+| :------ | :-------- | :-------------------------- |
+| `count` | `uint256` | Number of intents to fetch. |
 
 ## Insert an Intent
 
@@ -176,10 +176,10 @@ function insert(
 
 ### Params
 
-| Name       | Type     | Optionality | Description                      |
-| :--------- | :------- | :---------- | :------------------------------- |
-| `intent`   | `Intent` | Required    | Intent to insert.                |
-| `existing` | `Intent` | Required    | Existing intent to insert after. |
+| Name       | Type     | Description                      |
+| :--------- | :------- | :------------------------------- |
+| `intent`   | `Intent` | Intent to insert.                |
+| `existing` | `Intent` | Existing intent to insert after. |
 
 ## Link Two Intents
 
@@ -194,7 +194,7 @@ function link(
 
 ### Params
 
-| Name    | Type     | Optionality | Description                                    |
-| :------ | :------- | :---------- | :--------------------------------------------- |
-| `left`  | `Intent` | Required    | The intent to link to the left (Higher value). |
-| `right` | `Intent` | Required    | The intent to link to the right (Lower value). |
+| Name    | Type     | Description                                    |
+| :------ | :------- | :--------------------------------------------- |
+| `left`  | `Intent` | The intent to link to the left (Higher value). |
+| `right` | `Intent` | The intent to link to the right (Lower value). |

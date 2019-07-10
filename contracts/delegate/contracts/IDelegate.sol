@@ -22,7 +22,6 @@ import "@airswap/swap/contracts/ISwap.sol";
 contract IDelegate {
 
   ISwap public swapContract;
-  mapping (address => mapping (address => Rule)) public rules;
 
   struct Rule {
     uint256 maxDelegateAmount;
@@ -30,9 +29,11 @@ contract IDelegate {
     uint256 priceExp;
   }
 
+  function rules(address) public returns (Rule memory);
+
   function setSwapContract(
     address _swapContract
-  ) external {}
+  ) external;
 
   function setRule(
     address delegateToken,
@@ -40,12 +41,12 @@ contract IDelegate {
     uint256 maxDelegateAmount,
     uint256 priceCoef,
     uint256 priceExp
-  ) external {}
+  ) external;
 
   function unsetRule(
     address delegateToken,
     address consumerToken
-  ) external {}
+  ) external;
 
   function getBuyQuote(
     uint256 delegateAmount,
@@ -54,7 +55,7 @@ contract IDelegate {
   ) external view returns (
     bool available,
     uint256 consumerAmount
-  ) {}
+  );
 
   function getSellQuote(
     uint256 consumerAmount,
@@ -63,7 +64,7 @@ contract IDelegate {
   ) external view returns (
     bool available,
     uint256 delegateAmount
-  ) {}
+  );
 
   function getMaxQuote(
     address delegateToken,
@@ -72,7 +73,7 @@ contract IDelegate {
     bool available,
     uint256 delegateAmount,
     uint256 consumerAmount
-  ) {}
+  );
 
   function provideOrder(
     uint256 nonce,
@@ -86,7 +87,7 @@ contract IDelegate {
     uint8 v,
     bytes32 r,
     bytes32 s
-  ) public payable {}
+  ) public payable;
 
   function provideUnsignedOrder(
     uint256 nonce,
@@ -94,7 +95,7 @@ contract IDelegate {
     address consumerToken,
     uint256 delegateAmount,
     address delegateToken
-  ) public payable {}
+  ) public payable;
 
 
 }
