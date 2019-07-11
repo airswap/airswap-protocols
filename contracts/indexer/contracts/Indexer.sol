@@ -28,7 +28,7 @@ import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 contract Indexer is IIndexer, Ownable {
 
   // Token to be used for staking (ERC-20)
-  address public stakeToken;
+  IERC20 public stakeToken;
 
   // Minimum token amount required for staking
   uint256 public stakeMinimum;
@@ -46,7 +46,7 @@ contract Indexer is IIndexer, Ownable {
     * @param _stakeMinimum uint256
     */
   constructor(address _stakeToken, uint256 _stakeMinimum) public {
-    stakeToken = _stakeToken;
+    stakeToken = IERC20(_stakeToken);
     stakeMinimum = _stakeMinimum;
     emit SetStakeMinimum(stakeMinimum);
   }
@@ -142,7 +142,7 @@ contract Indexer is IIndexer, Ownable {
       "MINIMUM_NOT_MET");
 
     // Transfer the amount for staking.
-    require(IERC20(stakeToken).transferFrom(msg.sender, address(this), amount),
+    require(stakeToken.transferFrom(msg.sender, address(this), amount),
       "UNABLE_TO_STAKE");
 
     emit Stake(msg.sender, amount);
@@ -178,7 +178,7 @@ contract Indexer is IIndexer, Ownable {
     Market(markets[makerToken][takerToken]).unset(msg.sender);
 
     // Return the staked tokens.
-    IERC20(stakeToken).transfer(msg.sender, intent.amount);
+    stakeToken.transfer(msg.sender, intent.amount);
     emit Unstake(msg.sender, intent.amount);
   }
 
