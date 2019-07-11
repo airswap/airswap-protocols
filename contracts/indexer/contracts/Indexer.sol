@@ -36,7 +36,7 @@ contract Indexer is IIndexer, Ownable {
   // Mapping of token to token for market lookup
   mapping (address => mapping (address => address)) public markets;
 
-  // Mapping of address to timestamp for blacklisting
+  // Mapping of address to timestamp of blacklisting
   mapping (address => uint256) public blacklist;
 
   /**
@@ -92,8 +92,10 @@ contract Indexer is IIndexer, Ownable {
   function addToBlacklist(
     address token
   ) external onlyOwner {
-    blacklist[token] = block.timestamp;
-    emit AddToBlacklist(token);
+    if (blacklist[token] == 0) {
+      blacklist[token] = block.timestamp;
+      emit AddToBlacklist(token);
+    }
   }
 
   /**
@@ -103,8 +105,10 @@ contract Indexer is IIndexer, Ownable {
   function removeFromBlacklist(
     address token
   ) external onlyOwner {
-    blacklist[token] = 0;
-    emit RemoveFromBlacklist(token);
+    if (blacklist[token] != 0) {
+      blacklist[token] = 0;
+      emit RemoveFromBlacklist(token);
+    }
   }
 
   /**
