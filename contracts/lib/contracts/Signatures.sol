@@ -27,24 +27,35 @@ library Signatures {
   /**
     * @notice Validates signature using an EIP-712 typed data hash
     *
-    * @param order Order
-    * @param signature Signature
+    * @param _order Order
+    * @param _signature Signature
     */
   function isValid(
-    Types.Order memory order,
-    Types.Signature memory signature,
-    bytes32 domainSeparator
+    Types.Order memory _order,
+    Types.Signature memory _signature,
+    bytes32 _domainSeparator
   ) internal pure returns (bool) {
-    if (signature.version == byte(0x01)) {
-      return signature.signer == ecrecover(
-        Types.hashOrder(order, domainSeparator),
-        signature.v, signature.r, signature.s
+    if (_signature.version == byte(0x01)) {
+      return _signature.signer == ecrecover(
+        Types.hashOrder(
+          _order,
+          _domainSeparator),
+          _signature.v,
+          _signature.r,
+          _signature.s
       );
     }
-    if (signature.version == byte(0x45)) {
-      return signature.signer == ecrecover(
-        keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", Types.hashOrder(order, domainSeparator))),
-        signature.v, signature.r, signature.s
+    if (_signature.version == byte(0x45)) {
+      return _signature.signer == ecrecover(
+        keccak256(
+          abi.encodePacked(
+            "\x19Ethereum Signed Message:\n32",
+            Types.hashOrder(_order, _domainSeparator)
+          )
+        ),
+        _signature.v,
+        _signature.r,
+        _signature.s
       );
     }
     return false;
@@ -53,40 +64,49 @@ library Signatures {
   /**
     * @notice Validates signature using a simple hash and verifyingContract
     *
-    * @param nonce uint256
-    * @param expiry uint256
-    * @param makerWallet address
-    * @param makerParam uint256
-    * @param makerToken address
-    * @param takerWallet address
-    * @param takerParam uint256
-    * @param takerToken address
-    * @param v uint8
-    * @param r bytes32
-    * @param s bytes32
-    @ @param verifyingContract address
+    @ @param _verifyingContract address
+    * @param _nonce uint256
+    * @param _expiry uint256
+    * @param _makerWallet address
+    * @param _makerParam uint256
+    * @param _makerToken address
+    * @param _takerWallet address
+    * @param _takerParam uint256
+    * @param _takerToken address
+    * @param _v uint8
+    * @param _r bytes32
+    * @param _s bytes32
     */
-  function isValidSimple(uint256 nonce, uint256 expiry,
-    address makerWallet, uint256 makerParam, address makerToken,
-    address takerWallet, uint256 takerParam, address takerToken,
-    uint8 v, bytes32 r, bytes32 s, address verifyingContract
+  function isValidSimple(
+    address _verifyingContract,
+    uint256 _nonce,
+    uint256 _expiry,
+    address _makerWallet,
+    uint256 _makerParam,
+    address _makerToken,
+    address _takerWallet,
+    uint256 _takerParam,
+    address _takerToken,
+    uint8 _v,
+    bytes32 _r,
+    bytes32 _s
   ) internal pure returns (bool) {
-    return makerWallet == ecrecover(
+    return _makerWallet == ecrecover(
       keccak256(abi.encodePacked(
         "\x19Ethereum Signed Message:\n32",
         keccak256(abi.encodePacked(
           byte(0),
-          verifyingContract,
-          nonce,
-          expiry,
-          makerWallet,
-          makerParam,
-          makerToken,
-          takerWallet,
-          takerParam,
-          takerToken
+          _verifyingContract,
+          _nonce,
+          _expiry,
+          _makerWallet,
+          _makerParam,
+          _makerToken,
+          _takerWallet,
+          _takerParam,
+          _takerToken
         )))),
-      v, r, s);
+      _v, _r, _s);
   }
 
 }

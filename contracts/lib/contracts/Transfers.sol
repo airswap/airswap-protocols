@@ -29,47 +29,47 @@ library Transfers {
   bytes4 internal constant INTERFACE_ERC721 = 0x80ac58cd;
 
   function send(
-    address receiver,
-    uint256 value
+    address _receiver,
+    uint256 _value
   ) internal {
     // Cast the order maker as a payable address for ether transfer.
-    address payable wallet = address(uint160(receiver));
+    address payable wallet = address(uint160(_receiver));
 
     // Transfer the taker side of the trade (ether) to the makerWallet.
-    wallet.transfer(value);
+    wallet.transfer(_value);
   }
 
   function transferAny(
-      address token,
-      address from,
-      address to,
-      uint256 param
+      address _token,
+      address _from,
+      address _to,
+      uint256 _param
   ) internal {
-    if (token._supportsInterface(INTERFACE_ERC721)) {
-      IERC721(token)
-        .safeTransferFrom(from, to, param);
+    if (_token._supportsInterface(INTERFACE_ERC721)) {
+      IERC721(_token)
+        .safeTransferFrom(_from, _to, _param);
     } else {
-      require(IERC20(token)
-        .transferFrom(from, to, param));
+      require(IERC20(_token)
+        .transferFrom(_from, _to, _param));
     }
   }
 
   function safeTransferAny(
-      bytes memory side,
-      address from,
-      address to,
-      uint256 param,
-      address token
+      bytes memory _side,
+      address _from,
+      address _to,
+      uint256 _param,
+      address _token
   ) internal {
-    if (token._supportsInterface(INTERFACE_ERC721)) {
-      IERC721(token).safeTransferFrom(from, to, param);
+    if (_token._supportsInterface(INTERFACE_ERC721)) {
+      IERC721(_token).safeTransferFrom(_from, _to, _param);
     } else {
-      require(to != address(0), "INVALID_DESTINATION");
-      require(IERC20(token).balanceOf(from) >= param,
-          string(abi.encodePacked(side, "_INSUFFICIENT_BALANCE")));
-      require(IERC20(token).allowance(from, address(this)) >= param,
-          string(abi.encodePacked(side, "_INSUFFICIENT_ALLOWANCE")));
-      require(IERC20(token).transferFrom(from, to, param));
+      require(_to != address(0), "INVALID_DESTINATION");
+      require(IERC20(_token).balanceOf(_from) >= _param,
+          string(abi.encodePacked(_side, "_INSUFFICIENT_BALANCE")));
+      require(IERC20(_token).allowance(_from, address(this)) >= _param,
+          string(abi.encodePacked(_side, "_INSUFFICIENT_ALLOWANCE")));
+      require(IERC20(_token).transferFrom(_from, _to, _param));
     }
   }
 }

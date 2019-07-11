@@ -141,8 +141,8 @@ contract(
           tokenWETH.address,
           tokenDAI.address
         )
-        equal(quote[1], 150)
-        equal(quote[2], 46428)
+        equal(quote[0], 150)
+        equal(quote[1], 46428)
       })
     })
 
@@ -200,8 +200,8 @@ contract(
           tokenWETH.address,
           tokenDAI.address
         )
-        equal(result[1], 50)
-        equal(result[2], 15476)
+        equal(result[0], 50)
+        equal(result[1], 15476)
       })
     })
   }

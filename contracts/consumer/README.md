@@ -28,8 +28,8 @@ Create a new `Consumer` contract.
 
 ```Solidity
 constructor(
-  address _indexerContract,
-  address _swapContract
+  address _swapContract,
+  address _indexerContract
 ) public
 ```
 
@@ -37,8 +37,8 @@ constructor(
 
 | Name               | Type      | Description                                         |
 | :----------------- | :-------- | :-------------------------------------------------- |
-| `_indexerContract` | `address` | Address of the Indexer to fetch intents from.       |
 | `_swapContract`    | `address` | Address of the Swap contract used to settle trades. |
+| `_indexerContract` | `address` | Address of the Indexer to fetch intents from.       |
 
 ## Find the Best Buy
 
@@ -46,40 +46,40 @@ Find the best buy price among Delegates on the selected Indexer.
 
 ```Solidity
 function findBestBuy(
-  uint256 userReceiveAmount,
-  address userReceiveToken,
-  address userSendToken,
-  uint256 maxIntents
+  uint256 _userReceiveAmount,
+  address _userReceiveToken,
+  address _userSendToken,
+  uint256 _maxIntents
 ) public view returns (address, uint256)
 ```
 
 ### Params
 
-| Name                | Type      | Description                    |
-| :------------------ | :-------- | :----------------------------- |
-| `userReceiveAmount` | `uint256` | Amount of token to buy.        |
-| `userReceiveToken`  | `address` | Address of token to buy.       |
-| `userSendToken`     | `address` | Address of token to spend.     |
-| `maxIntents`        | `uint256` | Max number of intents to scan. |
+| Name                 | Type      | Description                    |
+| :------------------- | :-------- | :----------------------------- |
+| `_userReceiveAmount` | `uint256` | Amount of token to buy.        |
+| `_userReceiveToken`  | `address` | Address of token to buy.       |
+| `_userSendToken`     | `address` | Address of token to spend.     |
+| `_maxIntents`        | `uint256` | Max number of intents to scan. |
 
 ## Take the Best Buy
 
-Take the best buy price among Delegates on the selected Indexer. Requires that the User has approved the Consumer to transfer the `userSendToken` on his or her behalf.
+Take the best buy price among Delegates on the selected Indexer. Requires that the User has approved the Consumer to transfer the `_userSendToken` on his or her behalf.
 
 ```Solidity
 function takeBestBuy(
-  uint256 userReceiveAmount,
-  address userReceiveToken,
-  address userSendToken,
-  uint256 maxIntents
+  uint256 _userReceiveAmount,
+  address _userReceiveToken,
+  address _userSendToken,
+  uint256 _maxIntents
 ) public
 ```
 
 ### Params
 
-| Name                | Type      | Description                    |
-| :------------------ | :-------- | :----------------------------- |
-| `userReceiveAmount` | `uint256` | Amount of token to buy.        |
-| `userReceiveToken`  | `address` | Address of token to buy.       |
-| `userSendToken`     | `address` | Address of token to spend.     |
-| `maxIntents`        | `uint256` | Max number of intents to scan. |
+| Name                 | Type      | Description                    |
+| :------------------- | :-------- | :----------------------------- |
+| `_userReceiveAmount` | `uint256` | Amount of token to buy.        |
+| `_userReceiveToken`  | `address` | Address of token to buy.       |
+| `_userSendToken`     | `address` | Address of token to spend.     |
+| `_maxIntents`        | `uint256` | Max number of intents to scan. |

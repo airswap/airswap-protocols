@@ -45,66 +45,61 @@ interface IDelegate {
   ) external;
 
   function setRule(
-    address delegateToken,
-    address consumerToken,
-    uint256 maxDelegateAmount,
-    uint256 priceCoef,
-    uint256 priceExp
+    address _delegateToken,
+    address _consumerToken,
+    uint256 _maxDelegateAmount,
+    uint256 _priceCoef,
+    uint256 _priceExp
   ) external;
 
   function unsetRule(
-    address delegateToken,
-    address consumerToken
+    address _delegateToken,
+    address _consumerToken
   ) external;
 
   function getBuyQuote(
-    uint256 delegateAmount,
-    address delegateToken,
-    address consumerToken
+    uint256 _delegateAmount,
+    address _delegateToken,
+    address _consumerToken
   ) external view returns (
-    bool available,
     uint256 consumerAmount
   );
 
   function getSellQuote(
-    uint256 consumerAmount,
-    address consumerToken,
-    address delegateToken
+    uint256 _consumerAmount,
+    address _consumerToken,
+    address _delegateToken
   ) external view returns (
-    bool available,
     uint256 delegateAmount
   );
 
   function getMaxQuote(
-    address delegateToken,
-    address consumerToken
+    address _delegateToken,
+    address _consumerToken
   ) external view returns (
-    bool available,
     uint256 delegateAmount,
     uint256 consumerAmount
   );
 
   function provideOrder(
-    uint256 nonce,
-    uint256 expiry,
-    address consumerWallet,
-    uint256 consumerAmount,
-    address consumerToken,
-    address delegateWallet,
-    uint256 delegateAmount,
-    address delegateToken,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
+    uint256 _nonce,
+    uint256 _expiry,
+    address _consumerWallet,
+    uint256 _consumerAmount,
+    address _consumerToken,
+    address _delegateWallet,
+    uint256 _delegateAmount,
+    address _delegateToken,
+    uint8 _v,
+    bytes32 _r,
+    bytes32 _s
   ) external payable;
 
   function provideUnsignedOrder(
-    uint256 nonce,
-    uint256 consumerAmount,
-    address consumerToken,
-    uint256 delegateAmount,
-    address delegateToken
+    uint256 _nonce,
+    uint256 _consumerAmount,
+    address _consumerToken,
+    uint256 _delegateAmount,
+    address _delegateToken
   ) external payable;
-
-
 }

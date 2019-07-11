@@ -53,51 +53,51 @@ contract Wrapper {
   /**
     * @notice Send an Order (Simple)
     *
-    * @param nonce uint256
-    * @param expiry uint256
-    * @param makerWallet address
-    * @param makerParam uint256
-    * @param makerToken address
-    * @param takerWallet address
-    * @param takerParam uint256
-    * @param takerToken address
-    * @param v uint8
-    * @param r bytes32
-    * @param s bytes32
+    * @param _nonce uint256
+    * @param _expiry uint256
+    * @param _makerWallet address
+    * @param _makerParam uint256
+    * @param _makerToken address
+    * @param _takerWallet address
+    * @param _takerParam uint256
+    * @param _takerToken address
+    * @param _v uint8
+    * @param _r bytes32
+    * @param _s bytes32
     */
   function swapSimple(
-    uint256 nonce,
-    uint256 expiry,
-    address makerWallet,
-    uint256 makerParam,
-    address makerToken,
-    address takerWallet,
-    uint256 takerParam,
-    address takerToken,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
+    uint256 _nonce,
+    uint256 _expiry,
+    address _makerWallet,
+    uint256 _makerParam,
+    address _makerToken,
+    address _takerWallet,
+    uint256 _takerParam,
+    address _takerToken,
+    uint8 _v,
+    bytes32 _r,
+    bytes32 _s
   ) public payable {
 
     // The taker is sending ether.
-    if (takerToken == address(wethContract)) {
+    if (_takerToken == address(wethContract)) {
 
       // Ensure the takerWallet is unset.
-      require(takerWallet == address(0),
+      require(_takerWallet == address(0),
         "TAKER_ADDRESS_MUST_BE_UNSET");
 
-      // Ensure the takerToken is wrapped ether.
-      require(takerToken == address(wethContract),
+      // Ensure the _takerToken is wrapped ether.
+      require(_takerToken == address(wethContract),
         "TAKER_PARAM_MUST_BE_WETH");
 
-      // Ensure the takerParam matches the ether sent.
-      require(takerParam == msg.value,
+      // Ensure the _takerParam matches the ether sent.
+      require(_takerParam == msg.value,
         "VALUE_MUST_BE_SENT");
 
       // Wrap (deposit) the ether.
       wethContract.deposit.value(msg.value)();
 
-      // Approve the Swap contract to trade it.
+      // Approve Swap to trade it.
       wethContract.approve(address(swapContract), msg.value);
 
     } else {
@@ -109,23 +109,29 @@ contract Wrapper {
     }
 
     // Perform the swap.
-    swapContract.swapSimple(nonce, expiry,
-      makerWallet, makerParam, makerToken,
-      takerWallet, takerParam, takerToken,
-      v, r, s
+    swapContract.swapSimple(
+      _nonce,
+      _expiry,
+      _makerWallet,
+      _makerParam,
+      _makerToken,
+      _takerWallet,
+      _takerParam,
+      _takerToken,
+      _v, _r, _s
     );
 
     // The taker is receiving ether.
-    if (makerToken == address(wethContract)) {
+    if (_makerToken == address(wethContract)) {
 
       // Transfer from the taker to the wrapper.
-      wethContract.transferFrom(takerWallet, address(this), makerParam);
+      wethContract.transferFrom(_takerWallet, address(this), _makerParam);
 
       // Unwrap (withdraw) the ether.
-      wethContract.withdraw(makerParam);
+      wethContract.withdraw(_makerParam);
 
       // Transfer ether to the user.
-      msg.sender.transfer(makerParam);
+      msg.sender.transfer(_makerParam);
 
     }
 

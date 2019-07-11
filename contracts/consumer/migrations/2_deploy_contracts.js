@@ -14,5 +14,5 @@ module.exports = deployer => {
     .deploy(FungibleToken)
     .then(() => FungibleToken.deployed())
     .then(() => deployer.deploy(Indexer, FungibleToken.address, 250))
-    .then(() => deployer.deploy(Consumer, Indexer.address, Swap.address))
+    .then(() => deployer.deploy(Consumer, Swap.address, Indexer.address))
 }

@@ -67,21 +67,21 @@ Set an intent to trade in the Market.
 
 ```Solidity
 function set(
-  address staker,
-  uint256 amount,
-  uint256 expiry,
-  bytes32 locator
+  address _staker,
+  uint256 _amount,
+  uint256 _expiry,
+  bytes32 _locator
 ) external
 ```
 
 ### Params
 
-| Name      | Type      | Description                                            |
-| :-------- | :-------- | :----------------------------------------------------- |
-| `staker`  | `address` | Address of the account that has staked for the intent. |
-| `amount`  | `uint256` | Amount of token that the account has staked.           |
-| `expiry`  | `uint256` | Expiry of the intent as a timestamp in seconds.        |
-| `locator` | `bytes32` | Locator for the peer.                                  |
+| Name       | Type      | Description                                            |
+| :--------- | :-------- | :----------------------------------------------------- |
+| `_staker`  | `address` | Address of the account that has staked for the intent. |
+| `_amount`  | `uint256` | Amount of token that the account has staked.           |
+| `_expiry`  | `uint256` | Expiry of the intent as a timestamp in seconds.        |
+| `_locator` | `bytes32` | Locator for the peer.                                  |
 
 ## Unset an Intent
 
@@ -89,15 +89,15 @@ Set the minimum amount of tokens required to set an intent to trade.
 
 ```Solidity
 function unset(
-  address staker
+  address _staker
 ) public returns (bool)
 ```
 
 ### Params
 
-| Name     | Type      | Description                                          |
-| :------- | :-------- | :--------------------------------------------------- |
-| `staker` | `address` | Address of the account that will unstake its intent. |
+| Name      | Type      | Description                                          |
+| :-------- | :-------- | :--------------------------------------------------- |
+| `_staker` | `address` | Address of the account that will unstake its intent. |
 
 ## Get an Intent
 
@@ -105,15 +105,15 @@ Gets the intent for a given staker address.
 
 ```Solidity
 function get(
-  address staker
+  address _staker
 ) public view returns (Intent memory)
 ```
 
 ### Params
 
-| Name     | Type      | Description                               |
-| :------- | :-------- | :---------------------------------------- |
-| `staker` | `address` | Address of the account to fetch an intent |
+| Name      | Type      | Description                               |
+| :-------- | :-------- | :---------------------------------------- |
+| `_staker` | `address` | Address of the account to fetch an intent |
 
 ## Has an Intent
 
@@ -121,15 +121,15 @@ Determines whether the Market has an intent for a staker address.
 
 ```Solidity
 function has(
-  address staker
+  address _staker
 ) internal view returns (bool)
 ```
 
 ### Params
 
-| Name     | Type      | Description                               |
-| :------- | :-------- | :---------------------------------------- |
-| `staker` | `address` | Address of the account to check an intent |
+| Name      | Type      | Description                               |
+| :-------- | :-------- | :---------------------------------------- |
+| `_staker` | `address` | Address of the account to check an intent |
 
 ## Fetch Intents
 
@@ -137,15 +137,15 @@ Fetch up to a number of intents from the list.
 
 ```Solidity
 function fetch(
-  uint256 count
+  uint256 _count
 ) public view returns (bytes32[] memory result)
 ```
 
 ### Params
 
-| Name    | Type      | Description                 |
-| :------ | :-------- | :-------------------------- |
-| `count` | `uint256` | Number of intents to fetch. |
+| Name     | Type      | Description                 |
+| :------- | :-------- | :-------------------------- |
+| `_count` | `uint256` | Number of intents to fetch. |
 
 ## Find an Intent (By Value)
 
@@ -159,9 +159,9 @@ function find(
 
 ### Params
 
-| Name    | Type      | Description                 |
-| :------ | :-------- | :-------------------------- |
-| `count` | `uint256` | Number of intents to fetch. |
+| Name     | Type      | Description                 |
+| :------- | :-------- | :-------------------------- |
+| `_count` | `uint256` | Number of intents to fetch. |
 
 ## Insert an Intent
 
@@ -169,17 +169,17 @@ Insert an intent after an existing intent in the list.
 
 ```Solidity
 function insert(
-  Intent memory intent,
-  Intent memory existing
+  Intent memory _intent,
+  Intent memory _existing
 ) internal returns (bool)
 ```
 
 ### Params
 
-| Name       | Type     | Description                      |
-| :--------- | :------- | :------------------------------- |
-| `intent`   | `Intent` | Intent to insert.                |
-| `existing` | `Intent` | Existing intent to insert after. |
+| Name        | Type     | Description                      |
+| :---------- | :------- | :------------------------------- |
+| `_intent`   | `Intent` | Intent to insert.                |
+| `_existing` | `Intent` | Existing intent to insert after. |
 
 ## Link Two Intents
 
@@ -187,14 +187,14 @@ Link two intents in the list.
 
 ```Solidity
 function link(
-  Intent memory left,
-  Intent memory right
+  Intent memory _left,
+  Intent memory _right
 ) internal
 ```
 
 ### Params
 
-| Name    | Type     | Description                                    |
-| :------ | :------- | :--------------------------------------------- |
-| `left`  | `Intent` | The intent to link to the left (Higher value). |
-| `right` | `Intent` | The intent to link to the right (Lower value). |
+| Name     | Type     | Description                                    |
+| :------- | :------- | :--------------------------------------------- |
+| `_left`  | `Intent` | The intent to link to the left (Higher value). |
+| `_right` | `Intent` | The intent to link to the right (Lower value). |

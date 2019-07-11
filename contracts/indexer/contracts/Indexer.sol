@@ -23,7 +23,7 @@ import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 /**
-  * @title Indexer: An Index of Markets by Token Pair
+  * @title Indexer: An Collection of Markets by Token Pair
   */
 contract Indexer is IIndexer, Ownable {
 
@@ -34,7 +34,7 @@ contract Indexer is IIndexer, Ownable {
   uint256 public stakeMinimum;
 
   // Mapping of token to token for market lookup
-  mapping (address => mapping (address => address)) public markets;
+  mapping (address => mapping (address => Market)) public markets;
 
   // Mapping of address to timestamp of blacklisting
   mapping (address => uint256) public blacklist;
@@ -45,33 +45,36 @@ contract Indexer is IIndexer, Ownable {
     * @param _stakeToken address
     * @param _stakeMinimum uint256
     */
-  constructor(address _stakeToken, uint256 _stakeMinimum) public {
+  constructor(
+    address _stakeToken,
+    uint256 _stakeMinimum
+  ) public {
     stakeToken = IERC20(_stakeToken);
     stakeMinimum = _stakeMinimum;
-    emit SetStakeMinimum(stakeMinimum);
+    emit SetStakeMinimum(_stakeMinimum);
   }
 
   /**
     * @notice Create a Market (Collection of Intents to Trade)
     * @dev Deploys a new Market contract and tracks the address
     *
-    * @param makerToken address
-    * @param takerToken address
+    * @param _makerToken address
+    * @param _takerToken address
     */
   function createMarket(
-    address makerToken,
-    address takerToken
+    address _makerToken,
+    address _takerToken
   ) external returns (address) {
 
     // If the Market does not exist, create it.
-    if (markets[makerToken][takerToken] == address(0)) {
+    if (markets[_makerToken][_takerToken] == Market(0)) {
       // Create a new Market contract for the token pair.
-      markets[makerToken][takerToken] = address(new Market(makerToken, takerToken));
-      emit CreateMarket(makerToken, takerToken);
+      markets[_makerToken][_takerToken] = new Market(_makerToken, _takerToken);
+      emit CreateMarket(_makerToken, _takerToken);
     }
 
     // Return the address of the Market contract.
-    return address(markets[makerToken][takerToken]);
+    return address(markets[_makerToken][_takerToken]);
   }
 
   /**
@@ -82,32 +85,32 @@ contract Indexer is IIndexer, Ownable {
     uint256 _stakeMinimum
   ) external onlyOwner {
     stakeMinimum = _stakeMinimum;
-    emit SetStakeMinimum(stakeMinimum);
+    emit SetStakeMinimum(_stakeMinimum);
   }
 
   /**
     * @notice Add a Token to the Blacklist
-    * @param token address
+    * @param _token address
     */
   function addToBlacklist(
-    address token
+    address _token
   ) external onlyOwner {
-    if (blacklist[token] == 0) {
-      blacklist[token] = block.timestamp;
-      emit AddToBlacklist(token);
+    if (blacklist[_token] == 0) {
+      blacklist[_token] = block.timestamp;
+      emit AddToBlacklist(_token);
     }
   }
 
   /**
     * @notice Remove a Token from the Blacklist
-    * @param token address
+    * @param _token address
     */
   function removeFromBlacklist(
-    address token
+    address _token
   ) external onlyOwner {
-    if (blacklist[token] != 0) {
-      blacklist[token] = 0;
-      emit RemoveFromBlacklist(token);
+    if (blacklist[_token] != 0) {
+      blacklist[_token] = 0;
+      emit RemoveFromBlacklist(_token);
     }
   }
 
@@ -115,67 +118,67 @@ contract Indexer is IIndexer, Ownable {
     * @notice Set an Intent to Trade
     * @dev Requires approval to transfer staking token for sender
     *
-    * @param makerToken address
-    * @param takerToken address
-    * @param amount uint256
-    * @param expiry uint256
-    * @param locator bytes32
+    * @param _makerToken address
+    * @param _takerToken address
+    * @param _amount uint256
+    * @param _expiry uint256
+    * @param _locator bytes32
     */
   function setIntent(
-    address makerToken,
-    address takerToken,
-    uint256 amount,
-    uint256 expiry,
-    bytes32 locator
+    address _makerToken,
+    address _takerToken,
+    uint256 _amount,
+    uint256 _expiry,
+    bytes32 _locator
   ) external {
 
     // Ensure both of the tokens are not blacklisted.
-    require(blacklist[makerToken] == 0 && blacklist[takerToken] == 0,
+    require(blacklist[_makerToken] == 0 && blacklist[_takerToken] == 0,
       "MARKET_IS_BLACKLISTED");
 
     // Ensure the market exists.
-    require(markets[makerToken][takerToken] != address(0),
+    require(markets[_makerToken][_takerToken] != Market(0),
       "MARKET_DOES_NOT_EXIST");
 
-    // Ensure the amount meets the minimum.
-    require(amount >= stakeMinimum,
+    // Ensure the _amount meets the stakeMinimum.
+    require(_amount >= stakeMinimum,
       "MINIMUM_NOT_MET");
 
-    // Transfer the amount for staking.
-    require(stakeToken.transferFrom(msg.sender, address(this), amount),
+    // Transfer the _amount for staking.
+    require(stakeToken.transferFrom(msg.sender, address(this), _amount),
       "UNABLE_TO_STAKE");
 
-    emit Stake(msg.sender, amount);
+    emit Stake(msg.sender, _amount);
 
     // Set the intent on the market.
-    Market(markets[makerToken][takerToken]).set(msg.sender, amount, expiry, locator);
+    markets[_makerToken][_takerToken].set(msg.sender, _amount, _expiry, _locator);
   }
 
   /**
     * @notice Unset an Intent to Trade
     * @dev Users are allowed unstake from blacklisted markets
     *
-    * @param makerToken address
-    * @param takerToken address
+    * @param _makerToken address
+    * @param _takerToken address
     */
   function unsetIntent(
-    address makerToken,
-    address takerToken
+    address _makerToken,
+    address _takerToken
   ) external {
 
     // Ensure the market exists.
-    require(markets[makerToken][takerToken] != address(0),
+    require(markets[_makerToken][_takerToken] != Market(0),
       "MARKET_DOES_NOT_EXIST");
 
     // Get the intent for the sender.
-    Market.Intent memory intent = Market(markets[makerToken][takerToken]).get(msg.sender);
+    Market.Intent memory intent = markets[_makerToken][_takerToken].get(msg.sender);
 
     // Ensure the intent exists.
     require(intent.staker == msg.sender,
       "INTENT_DOES_NOT_EXIST");
 
     // Unset the intent on the market.
-    Market(markets[makerToken][takerToken]).unset(msg.sender);
+    markets[_makerToken][_takerToken].unset(msg.sender);
 
     // Return the staked tokens.
     stakeToken.transfer(msg.sender, intent.amount);
@@ -186,56 +189,54 @@ contract Indexer is IIndexer, Ownable {
     * @notice Get the Intents to Trade for a Market
     * @dev Users are allowed unstake from blacklisted markets
     *
-    * @param makerToken address
-    * @param takerToken address
-    * @param count uint256
+    * @param _makerToken address
+    * @param _takerToken address
+    * @param _count uint256
     * @return locators bytes32[]
     */
   function getIntents(
-    address makerToken,
-    address takerToken,
-    uint256 count
+    address _makerToken,
+    address _takerToken,
+    uint256 _count
   ) external view returns (
-    bool available,
     bytes32[] memory locators
   ) {
 
     // Ensure neither token is blacklisted.
-    if (blacklist[makerToken] == 0 && blacklist[takerToken] == 0) {
+    if (blacklist[_makerToken] == 0 && blacklist[_takerToken] == 0) {
 
       // Ensure the market exists.
-      if (markets[makerToken][takerToken] != address(0)) {
+      if (markets[_makerToken][_takerToken] != Market(0)) {
 
         // Return an array of locators for the market.
-        return (true, Market(markets[makerToken][takerToken]).fetch(count));
+        return markets[_makerToken][_takerToken].fetch(_count);
 
       }
     }
-    return (false, new bytes32[](0));
+    return new bytes32[](0);
   }
 
   /**
     * @notice Get the Size of a Market
     * @dev Returns the number of valid intents to trade
     *
-    * @param makerToken address
-    * @param takerToken address
+    * @param _makerToken address
+    * @param _takerToken address
     */
   function lengthOf(
-    address makerToken,
-    address takerToken
+    address _makerToken,
+    address _takerToken
   ) external view returns (
-    bool available,
     uint256 length
   ) {
 
     // Ensure the market exists.
-    if (markets[makerToken][takerToken] != address(0)) {
+    if (markets[_makerToken][_takerToken] != Market(0)) {
 
       // Return the size of the market.
-      return (true, Market(markets[makerToken][takerToken]).getLength());
+      return markets[_makerToken][_takerToken].getLength();
 
     }
-    return (false, 0);
+    return 0;
   }
 }

@@ -35,43 +35,39 @@ contract Consumer {
   /**
     * @notice Contract Constructor
     *
-    * @param _indexerContract address
     * @param _swapContract address
+    * @param _indexerContract address
     */
   constructor(
-    address _indexerContract,
-    address _swapContract
+    address _swapContract,
+    address _indexerContract
   ) public {
-    indexerContract = IIndexer(_indexerContract);
     swapContract = ISwap(_swapContract);
+    indexerContract = IIndexer(_indexerContract);
   }
 
   /**
     * @notice Find the Best Price for a Buy
     *
-    * @param userReceiveAmount uint256
-    * @param userReceiveToken address
-    * @param userSendToken address
-    * @param maxIntents uint256
+    * @param _userReceiveAmount uint256
+    * @param _userReceiveToken address
+    * @param _userSendToken address
+    * @param _maxIntents uint256
     *
     * @return Best priced Delegate (address) and its quote amount (uint256)
     */
   function findBestBuy(
-    uint256 userReceiveAmount,
-    address userReceiveToken,
-    address userSendToken,
-    uint256 maxIntents
+    uint256 _userReceiveAmount,
+    address _userReceiveToken,
+    address _userSendToken,
+    uint256 _maxIntents
   ) public view returns (address, uint256) {
 
-    address location;
+    address untrustedLowestCostDelegate;
     uint256 lowestCost = 2**256 - 1;
 
-    bool gotResult;
-    bytes32[] memory locators;
-    uint256 userSendAmount;
-
     // Fetch an array of Intent locators from the Indexer.
-    (gotResult, locators) = indexerContract.getIntents(userReceiveToken, userSendToken, maxIntents);
+    bytes32[] memory locators = indexerContract.getIntents(_userReceiveToken, _userSendToken, _maxIntents);
 
     // Iterate through locators.
     for (uint256 i; i < locators.length; i ++) {
@@ -80,33 +76,33 @@ contract Consumer {
       address untrustedDelegateContract = address(bytes20(locators[i]));
 
       // Get a buy quote from the Delegate.
-      (gotResult, userSendAmount) = IDelegate(untrustedDelegateContract)
-        .getBuyQuote(userReceiveAmount, userReceiveToken, userSendToken);
+      uint256 userSendAmount = IDelegate(untrustedDelegateContract)
+        .getBuyQuote(_userReceiveAmount, _userReceiveToken, _userSendToken);
 
       // Update the lowest cost.
-      if (gotResult && userSendAmount < lowestCost) {
-        location = untrustedDelegateContract;
+      if (userSendAmount > 0 && userSendAmount < lowestCost) {
+        untrustedLowestCostDelegate = untrustedDelegateContract;
         lowestCost = userSendAmount;
       }
     }
 
     // Return the Delegate address and amount.
-    return (location, lowestCost);
+    return (untrustedLowestCostDelegate, lowestCost);
   }
 
   /**
     * @notice Take the Best Price for a Buy
     *
-    * @param userReceiveAmount uint256
-    * @param userReceiveToken address
-    * @param userSendToken address
-    * @param maxIntents uint256
+    * @param _userReceiveAmount uint256
+    * @param _userReceiveToken address
+    * @param _userSendToken address
+    * @param _maxIntents uint256
     */
   function takeBestBuy(
-    uint256 userReceiveAmount,
-    address userReceiveToken,
-    address userSendToken,
-    uint256 maxIntents
+    uint256 _userReceiveAmount,
+    address _userReceiveToken,
+    address _userSendToken,
+    uint256 _maxIntents
   ) public {
 
     address untrustedDelegateContract;
@@ -114,13 +110,13 @@ contract Consumer {
 
     // Find the best buy among Indexed Delegates.
     (untrustedDelegateContract, userSendAmount) =
-      findBestBuy(userReceiveAmount, userReceiveToken, userSendToken, maxIntents);
+      findBestBuy(_userReceiveAmount, _userReceiveToken, _userSendToken, _maxIntents);
 
     // Consumer transfers User amount to itself.
-    IERC20(userSendToken).transferFrom(msg.sender, address(this), userSendAmount);
+    IERC20(_userSendToken).transferFrom(msg.sender, address(this), userSendAmount);
 
     // Consumer approves Swap to move its new tokens.
-    IERC20(userSendToken).approve(address(swapContract), userSendAmount);
+    IERC20(_userSendToken).approve(address(swapContract), userSendAmount);
 
     // Consumer authorizes the Delegate.
     swapContract.authorize(untrustedDelegateContract, block.timestamp);
@@ -129,16 +125,16 @@ contract Consumer {
     IDelegate(untrustedDelegateContract).provideUnsignedOrder(
       1,
       userSendAmount,
-      userSendToken,
-      userReceiveAmount,
-      userReceiveToken
+      _userSendToken,
+      _userReceiveAmount,
+      _userReceiveToken
     );
 
     // Consumer revokes the authorization of the Delegate.
     swapContract.revoke(untrustedDelegateContract);
 
     // Consumer transfers received amount to the User.
-    IERC20(userReceiveToken).transfer(msg.sender, userReceiveAmount);
+    IERC20(_userReceiveToken).transfer(msg.sender, _userReceiveAmount);
 
   }
 

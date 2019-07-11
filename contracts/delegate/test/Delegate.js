@@ -50,21 +50,21 @@ contract(
           0
         )
         equal(
-          (await aliceDelegate.getBuyQuote(
+          await aliceDelegate.getBuyQuote(
             1,
             tokenWETH.address,
             tokenDAI.address
-          ))[0],
-          true
+          ),
+          300
         )
         await aliceDelegate.unsetRule(tokenWETH.address, tokenDAI.address)
         equal(
-          (await aliceDelegate.getBuyQuote(
+          await aliceDelegate.getBuyQuote(
             1,
             tokenWETH.address,
             tokenDAI.address
-          ))[0],
-          false
+          ),
+          0
         )
       })
     })
@@ -79,11 +79,11 @@ contract(
           0
         )
         equal(
-          (await aliceDelegate.getBuyQuote(
+          await aliceDelegate.getBuyQuote(
             1,
             tokenWETH.address,
             tokenDAI.address
-          ))[1],
+          ),
           300
         )
       })
@@ -96,11 +96,11 @@ contract(
           4
         )
         equal(
-          (await aliceDelegate.getBuyQuote(
+          await aliceDelegate.getBuyQuote(
             100000,
             tokenDAI.address,
             tokenWETH.address
-          ))[1],
+          ),
           320
         )
       })
@@ -113,11 +113,11 @@ contract(
           3
         )
         equal(
-          (await aliceDelegate.getBuyQuote(
+          await aliceDelegate.getBuyQuote(
             20000,
             tokenWETH.address,
             tokenDAI.address
-          ))[1],
+          ),
           6000100
         )
       })
@@ -146,7 +146,7 @@ contract(
           tokenDAI.address,
           tokenWETH.address
         )
-        equal(quote[1], 64)
+        equal(quote, 64)
       })
 
       it('Gets a quote to sell 100K (Max) DAI for WETH (Quote: 320 WETH)', async () => {
@@ -155,7 +155,7 @@ contract(
           tokenDAI.address,
           tokenWETH.address
         )
-        equal(quote[1], 320)
+        equal(quote, 320)
       })
 
       it('Gets a quote to sell 1 WETH for DAI (Quote: 300 DAI)', async () => {
@@ -164,7 +164,7 @@ contract(
           tokenWETH.address,
           tokenDAI.address
         )
-        equal(quote[1], 312)
+        equal(quote, 312)
       })
 
       it('Gets a quote to sell 5 WETH for DAI (False: No rule)', async () => {
@@ -173,7 +173,7 @@ contract(
           tokenDAI.address,
           tokenWETH.address
         )
-        equal(quote[0], false)
+        equal(quote, false)
       })
 
       it('Gets a max quote to buy WETH for DAI', async () => {
@@ -181,8 +181,8 @@ contract(
           tokenDAI.address,
           tokenWETH.address
         )
-        equal(quote[1], 100000)
-        equal(quote[2], 320)
+        equal(quote[0], 100000)
+        equal(quote[1], 320)
       })
 
       it('Gets a quote to buy 1500 WETH for DAI (False: Exceeds Max)', async () => {
@@ -191,18 +191,18 @@ contract(
           tokenDAI.address,
           tokenWETH.address
         )
-        equal(quote[0], false)
+        equal(quote, 0)
       })
     })
 
     describe('Provide some orders to the Delegate', () => {
       let quote
       before('Gets a quote for 1 WETH', async () => {
-        quote = (await aliceDelegate.getSellQuote(
+        quote = await aliceDelegate.getSellQuote(
           1,
           tokenWETH.address,
           tokenDAI.address
-        ))[1]
+        )
       })
 
       it('Gets a quote to sell 1 WETH and takes it', async () => {

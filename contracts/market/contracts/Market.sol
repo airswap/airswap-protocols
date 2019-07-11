@@ -100,86 +100,92 @@ contract Market is Ownable {
   /**
     * @notice Set an Intent to Trade
     *
-    * @param staker The account
-    * @param amount uint256
-    * @param expiry uint256
-    * @param locator bytes32
+    * @param _staker The account
+    * @param _amount uint256
+    * @param _expiry uint256
+    * @param _locator bytes32
     */
   function set(
-    address staker,
-    uint256 amount,
-    uint256 expiry,
-    bytes32 locator
+    address _staker,
+    uint256 _amount,
+    uint256 _expiry,
+    bytes32 _locator
   ) external onlyOwner {
 
-    Intent memory newIntent = Intent(staker, amount, expiry, locator);
+    Intent memory newIntent = Intent(_staker, _amount, _expiry, _locator);
 
     // Insert after the next highest amount on the list.
-    insert(newIntent, find(amount));
+    insert(newIntent, find(_amount));
 
     // Increment the length of the list.
     length = length + 1;
 
-    emit Set(staker, amount, expiry, locator, makerToken, takerToken);
+    emit Set(_staker, _amount, _expiry, _locator, makerToken, takerToken);
   }
 
   /**
     * @notice Unset an Intent to Trade
-    * @param staker address
+    * @param _staker address
     */
   function unset(
-    address staker
-  ) public onlyOwner returns (bool) {
+    address _staker
+  ) public onlyOwner returns (
+    bool
+  ) {
 
-    // Ensure the staker is in the list.
-    if (!has(staker)) {
+    // Ensure the _staker is in the list.
+    if (!has(_staker)) {
       return false;
     }
 
     // Link its neighbors together.
-    link(list[staker][PREV], list[staker][NEXT]);
+    link(list[_staker][PREV], list[_staker][NEXT]);
 
     // Delete staker from the list.
-    delete list[staker][PREV];
-    delete list[staker][NEXT];
+    delete list[_staker][PREV];
+    delete list[_staker][NEXT];
 
     // Decrement the length of the list.
     length = length - 1;
 
-    emit Unset(staker, makerToken, takerToken);
+    emit Unset(_staker, makerToken, takerToken);
     return true;
   }
 
   /**
     * @notice Get the Intent for a Staker
-    * @param staker address
+    * @param _staker address
     */
   function get(
-    address staker
-  ) public view returns (Intent memory) {
+    address _staker
+  ) public view returns (
+    Intent memory
+  ) {
 
     // Ensure the staker has a neighbor in the list.
-    if (list[staker][PREV].staker != address(0)) {
+    if (list[_staker][PREV].staker != address(0)) {
 
       // Return the next intent from the previous neighbor.
-      return list[list[staker][PREV].staker][NEXT];
+      return list[list[_staker][PREV].staker][NEXT];
     }
   }
 
   /**
     * @notice Determine Whether a Staker is in the List
-    * @param staker address
+    * @param _staker address
     */
   function has(
-    address staker
-  ) internal view returns (bool) {
-    if (list[staker][PREV].staker == HEAD && list[staker][NEXT].staker == HEAD) {
-      if (list[HEAD][NEXT].staker == staker) {
+    address _staker
+  ) internal view returns (
+    bool
+  ) {
+    if (list[_staker][PREV].staker == HEAD && list[_staker][NEXT].staker == HEAD) {
+      if (list[HEAD][NEXT].staker == _staker) {
         return true;
       }
     } else {
-      if (list[staker][PREV].staker != address(0)) {
-        if (list[list[staker][PREV].staker][NEXT].staker == staker) {
+      if (list[_staker][PREV].staker != address(0)) {
+        if (list[list[_staker][PREV].staker][NEXT].staker == _staker) {
           return true;
         }
       }
@@ -196,16 +202,18 @@ contract Market is Ownable {
 
   /**
     * @notice Get Valid Intents
-    * @param count uint256
+    * @param _count uint256
     */
   function fetch(
-    uint256 count
-  ) public view returns (bytes32[] memory result) {
+    uint256 _count
+  ) public view returns (
+    bytes32[] memory result
+  ) {
 
-    // Limit results to list length or count.
+    // Limit results to list length or _count.
     uint256 limit = length;
-    if (count < length) {
-      limit = count;
+    if (_count < length) {
+      limit = _count;
     }
     result = new bytes32[](limit);
 
@@ -226,18 +234,20 @@ contract Market is Ownable {
 
   /**
     * @notice Find the Next Intent Below an Amount
-    * @param amount uint256
+    * @param _amount uint256
     */
   function find(
-    uint256 amount
-  ) internal view returns (Intent memory) {
+    uint256 _amount
+  ) internal view returns (
+    Intent memory
+  ) {
 
     // Get the first intent in the list.
     Intent storage intent = list[HEAD][NEXT];
 
     // Iterate through the list until a lower amount is found.
     while (intent.amount > 0) {
-      if (amount <= intent.amount) {
+      if (_amount <= intent.amount) {
         return intent;
       }
       intent = list[intent.staker][NEXT];
@@ -248,25 +258,27 @@ contract Market is Ownable {
   /**
     * @notice Insert an Intent at a Location
     *
-    * @param intent Intent
-    * @param existing Intent
+    * @param _intent Intent
+    * @param _existing Intent
     */
   function insert(
-    Intent memory intent,
-    Intent memory existing
-  ) internal returns (bool) {
+    Intent memory _intent,
+    Intent memory _existing
+  ) internal returns (
+    bool
+  ) {
 
-    // Ensure the existing intent is in the list.
-    if (!has(existing.staker)) {
+    // Ensure the _existing intent is in the list.
+    if (!has(_existing.staker)) {
       return false;
     }
 
-    // Get the intent following the existing intent.
-    Intent memory next = list[existing.staker][NEXT];
+    // Get the intent following the _existing intent.
+    Intent memory next = list[_existing.staker][NEXT];
 
-    // Link the new intent into place.
-    link(existing, intent);
-    link(intent, next);
+    // Link the new _intent into place.
+    link(_existing, _intent);
+    link(_intent, next);
 
     return true;
   }
@@ -274,15 +286,15 @@ contract Market is Ownable {
   /**
     * @notice Link Two Intents
     *
-    * @param left Intent
-    * @param right Intent
+    * @param _left Intent
+    * @param _right Intent
     */
   function link(
-    Intent memory left,
-    Intent memory right
+    Intent memory _left,
+    Intent memory _right
   ) internal {
-    list[left.staker][NEXT] = right;
-    list[right.staker][PREV] = left;
+    list[_left.staker][NEXT] = _right;
+    list[_right.staker][PREV] = _left;
   }
 
 }

@@ -49,44 +49,50 @@ interface IIndexer {
   function blacklist(address) external returns (uint256);
 
   function createMarket(
-    address makerToken,
-    address takerToken
-  ) external returns (address);
+    address _makerToken,
+    address _takerToken
+  ) external returns (
+    address
+  );
 
   function setStakeMinimum(
-    uint256 stakeMinimum
+    uint256 _stakeMinimum
   ) external;
 
   function addToBlacklist(
-    address token
+    address _token
   ) external;
 
   function removeFromBlacklist(
-    address token
+    address _token
   ) external;
 
   function setIntent(
-    address makerToken,
-    address takerToken,
-    uint256 amount,
-    uint256 expiry,
-    bytes32 locator
+    address _makerToken,
+    address _takerToken,
+    uint256 _amount,
+    uint256 _expiry,
+    bytes32 _locator
   ) external;
 
   function unsetIntent(
-    address makerToken,
-    address takerToken
+    address _makerToken,
+    address _takerToken
   ) external;
 
   function getIntents(
-    address makerToken,
-    address takerToken,
-    uint256 count
-  ) external view returns (bool, bytes32[] memory);
+    address _makerToken,
+    address _takerToken,
+    uint256 _count
+  ) external view returns (
+    bytes32[] memory
+  );
 
   function lengthOf(
-    address makerToken,
-    address takerToken
-  ) external view returns (bool, uint256);
+    address _makerToken,
+    address _takerToken
+  ) external view returns (
+    uint256
+  );
 
 }

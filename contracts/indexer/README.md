@@ -53,17 +53,17 @@ Deploy a new `Market` for the given token pair.
 
 ```Solidity
 function createMarket(
-  address makerToken,
-  address takerToken
+  address _makerToken,
+  address _takerToken
 ) external
 ```
 
 ### Params
 
-| Name         | Type      | Description                                |
-| :----------- | :-------- | :----------------------------------------- |
-| `makerToken` | `address` | Address of the token that the Maker sends. |
-| `takerToken` | `address` | Address of the token that the Taker sends. |
+| Name          | Type      | Description                                |
+| :------------ | :-------- | :----------------------------------------- |
+| `_makerToken` | `address` | Address of the token that the Maker sends. |
+| `_takerToken` | `address` | Address of the token that the Taker sends. |
 
 ### Reverts
 
@@ -93,15 +93,15 @@ Add a token to the blacklist. Markets that include the blacklisted token will be
 
 ```Solidity
 function addToBlacklist(
-  address token
+  address _token
 ) external onlyOwner
 ```
 
 ### Params
 
-| Name    | Type      | Description                        |
-| :------ | :-------- | :--------------------------------- |
-| `token` | `address` | Address of the token to blacklist. |
+| Name     | Type      | Description                        |
+| :------- | :-------- | :--------------------------------- |
+| `_token` | `address` | Address of the token to blacklist. |
 
 ## Remove a Token from Blacklist
 
@@ -109,15 +109,15 @@ Remove a token from the blacklist. Emits a `RemoveFromBlacklist` event.
 
 ```Solidity
 function removeFromBlacklist(
-  address token
+  address _token
 ) external onlyOwner
 ```
 
 ### Params
 
-| Name    | Type      | Description                         |
-| :------ | :-------- | :---------------------------------- |
-| `token` | `address` | The address of the token to remove. |
+| Name     | Type      | Description                         |
+| :------- | :-------- | :---------------------------------- |
+| `_token` | `address` | The address of the token to remove. |
 
 ## Set an Intent to Trade
 
@@ -125,23 +125,23 @@ Stake tokens to the Indexer and set an intent to trade.
 
 ```Solidity
 function setIntent(
-  address makerToken,
-  address takerToken,
-  uint256 amount,
-  uint256 expiry,
-  bytes32 locator
+  address _makerToken,
+  address _takerToken,
+  uint256 _amount,
+  uint256 _expiry,
+  bytes32 _locator
 ) external
 ```
 
 ### Params
 
-| Name         | Type      | Description                                  |
-| :----------- | :-------- | :------------------------------------------- |
-| `makerToken` | `address` | Address of the token that the Maker sends.   |
-| `takerToken` | `address` | Address of the token that the Taker sends.   |
-| `amount`     | `uint256` | Amount of token to stake.                    |
-| `expiry`     | `uint256` | Timestamp after which the intent is invalid. |
-| `locator`    | `bytes32` | Locator for the peer.                        |
+| Name          | Type      | Description                                  |
+| :------------ | :-------- | :------------------------------------------- |
+| `_makerToken` | `address` | Address of the token that the Maker sends.   |
+| `_takerToken` | `address` | Address of the token that the Taker sends.   |
+| `_amount`     | `uint256` | Amount of token to stake.                    |
+| `_expiry`     | `uint256` | Timestamp after which the intent is invalid. |
+| `_locator`    | `bytes32` | Locator for the peer.                        |
 
 ### Reverts
 
@@ -158,17 +158,17 @@ Unset an intent to trade and return staked tokens to the sender.
 
 ```Solidity
 function unsetIntent(
-  address makerToken,
-  address takerToken
+  address _makerToken,
+  address _takerToken
 ) external
 ```
 
 ### Params
 
-| Name         | Type      | Description                                |
-| :----------- | :-------- | :----------------------------------------- |
-| `makerToken` | `address` | Address of the token that the Maker sends. |
-| `takerToken` | `address` | Address of the token that the Taker sends. |
+| Name          | Type      | Description                                |
+| :------------ | :-------- | :----------------------------------------- |
+| `_makerToken` | `address` | Address of the token that the Maker sends. |
+| `_takerToken` | `address` | Address of the token that the Taker sends. |
 
 ### Reverts
 
@@ -183,8 +183,8 @@ Get a list of intents to trade.
 
 ```Solidity
 function getIntents(
-  address makerToken,
-  address takerToken,
+  address _makerToken,
+  address _takerToken,
   uint256 count
 ) external view returns (
   bool available,
@@ -194,11 +194,11 @@ function getIntents(
 
 ### Params
 
-| Name         | Type      | Description                                |
-| :----------- | :-------- | :----------------------------------------- |
-| `makerToken` | `address` | Address of the token that the Maker sends. |
-| `takerToken` | `address` | Address of the token that the Taker sends. |
-| `count`      | `uint256` | Maximum number of items to return.         |
+| Name          | Type      | Description                                |
+| :------------ | :-------- | :----------------------------------------- |
+| `_makerToken` | `address` | Address of the token that the Maker sends. |
+| `_takerToken` | `address` | Address of the token that the Taker sends. |
+| `_count`      | `uint256` | Maximum number of items to return.         |
 
 ### Reverts
 
@@ -213,8 +213,8 @@ Get the length of the list of intents for a token pair.
 
 ```Solidity
 function lengthOf(
-  address makerToken,
-  address takerToken
+  address _makerToken,
+  address _takerToken
 ) external view returns (
   bool available,
   uint256 length
@@ -223,10 +223,10 @@ function lengthOf(
 
 ### Params
 
-| Name         | Type      | Description                                |
-| :----------- | :-------- | :----------------------------------------- |
-| `makerToken` | `address` | Address of the token that the Maker sends. |
-| `takerToken` | `address` | Address of the token that the Taker sends. |
+| Name          | Type      | Description                                |
+| :------------ | :-------- | :----------------------------------------- |
+| `_makerToken` | `address` | Address of the token that the Maker sends. |
+| `_takerToken` | `address` | Address of the token that the Taker sends. |
 
 ### Reverts
 

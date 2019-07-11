@@ -77,40 +77,47 @@ library Types {
     ")"
   ));
 
-  function hashParty(Party memory party) internal pure returns (bytes32) {
+  function hashParty(
+    Party memory _party
+  ) internal pure returns (
+    bytes32
+  ) {
     return keccak256(abi.encode(
       PARTY_TYPEHASH,
-      party.wallet,
-      party.token,
-      party.param
+      _party.wallet,
+      _party.token,
+      _party.param
     ));
   }
 
-  function hashOrder(Order memory order, bytes32 domainSeparator) internal pure returns (bytes32) {
+  function hashOrder(
+    Order memory _order,
+    bytes32 _domainSeparator
+  ) internal pure returns (bytes32) {
     return keccak256(abi.encodePacked(
       EIP191_HEADER,
-      domainSeparator,
+      _domainSeparator,
       keccak256(abi.encode(
         ORDER_TYPEHASH,
-        order.nonce,
-        order.expiry,
-        hashParty(order.maker),
-        hashParty(order.taker),
-        hashParty(order.affiliate)
+        _order.nonce,
+        _order.expiry,
+        hashParty(_order.maker),
+        hashParty(_order.taker),
+        hashParty(_order.affiliate)
       ))
     ));
   }
 
   function hashDomain(
-    bytes memory name,
-    bytes memory version,
-    address verifyingContract
+    bytes memory _name,
+    bytes memory _version,
+    address _verifyingContract
   ) public pure returns (bytes32) {
     return keccak256(abi.encode(
       DOMAIN_TYPEHASH,
-      keccak256(name),
-      keccak256(version),
-      verifyingContract
+      keccak256(_name),
+      keccak256(_version),
+      _verifyingContract
     ));
   }
 

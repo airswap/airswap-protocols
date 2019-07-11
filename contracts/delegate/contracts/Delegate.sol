@@ -38,22 +38,22 @@ contract Delegate is IDelegate, Ownable {
 
   /**
     * @notice Contract Constructor
-    * @param _swapContract address
+    * @param initialSwapContract address
     */
   constructor(
-    address _swapContract
+    address initialSwapContract
   ) public {
-    swapContract = ISwap(_swapContract);
+    swapContract = ISwap(initialSwapContract);
   }
 
   /**
     * @notice Set the Swap Contract
-    * @param _swapContract address
+    * @param newSwapContract address
     */
   function setSwapContract(
-    address _swapContract
+    address newSwapContract
   ) external onlyOwner {
-    swapContract = ISwap(_swapContract);
+    swapContract = ISwap(newSwapContract);
   }
 
   /**
@@ -120,7 +120,6 @@ contract Delegate is IDelegate, Ownable {
     address delegateToken,
     address consumerToken
   ) external view returns (
-    bool available,
     uint256 consumerAmount
   ) {
 
@@ -138,11 +137,11 @@ contract Delegate is IDelegate, Ownable {
 
         // Ensure that the quoted amount is greater than zero.
         if (consumerAmount > 0) {
-          return (true, consumerAmount);
+          return consumerAmount;
         }
       }
     }
-    return (false, 0);
+    return 0;
   }
 
   /**
@@ -157,7 +156,6 @@ contract Delegate is IDelegate, Ownable {
     address consumerToken,
     address delegateToken
   ) external view returns (
-    bool available,
     uint256 delegateAmount
   ) {
 
@@ -172,13 +170,10 @@ contract Delegate is IDelegate, Ownable {
 
       // Ensure the delegateAmount does not exceed maximum and is greater than zero.
       if(delegateAmount <= rule.maxDelegateAmount && delegateAmount > 0) {
-        return (
-          true,
-          delegateAmount
-        );
+        return delegateAmount;
       }
     }
-    return (false, 0);
+    return 0;
   }
 
   /**
@@ -186,13 +181,12 @@ contract Delegate is IDelegate, Ownable {
     *
     * @param delegateToken address
     * @param consumerToken address
-    * @return (bool, uint256, uint256)
+    * @return (uint256, uint256)
     */
   function getMaxQuote(
     address delegateToken,
     address consumerToken
   ) external view returns (
-    bool available,
     uint256 delegateAmount,
     uint256 consumerAmount
   ) {
@@ -204,12 +198,11 @@ contract Delegate is IDelegate, Ownable {
 
       // Return the maxDelegateAmount and calculated consumerAmount.
       return (
-        true,
         rule.maxDelegateAmount,
         rule.maxDelegateAmount.mul(rule.priceCoef).div(10 ** rule.priceExp)
       );
     }
-    return (false, 0, 0);
+    return (0, 0);
   }
 
   /**
@@ -267,9 +260,15 @@ contract Delegate is IDelegate, Ownable {
     });
 
     // Perform the swap.
-    swapContract.swapSimple(nonce, expiry,
-      consumerWallet, consumerAmount, consumerToken,
-      delegateWallet, delegateAmount, delegateToken,
+    swapContract.swapSimple(
+      nonce,
+      expiry,
+      consumerWallet,
+      consumerAmount,
+      consumerToken,
+      delegateWallet,
+      delegateAmount,
+      delegateToken,
       v, r, s
     );
 
@@ -308,6 +307,4 @@ contract Delegate is IDelegate, Ownable {
     );
 
   }
-
-
 }

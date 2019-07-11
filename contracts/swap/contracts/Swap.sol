@@ -63,42 +63,42 @@ contract Swap is ISwap {
     * @notice Atomic Token Swap
     * @dev Determines type (ERC-20 or ERC-721) with ERC-165
     *
-    * @param order Types.Order
-    * @param signature Types.Signature
+    * @param _order Types.Order
+    * @param _signature Types.Signature
     */
   function swap(
-    Types.Order calldata order,
-    Types.Signature calldata signature
+    Types.Order calldata _order,
+    Types.Signature calldata _signature
   )
     external payable
   {
 
     // Ensure the order is not expired.
-    require(order.expiry >= block.timestamp,
+    require(_order.expiry >= block.timestamp,
       "ORDER_EXPIRED");
 
     // Ensure the order is not already taken.
-    require(makerOrderStatus[order.maker.wallet][order.nonce] != TAKEN,
+    require(makerOrderStatus[_order.maker.wallet][_order.nonce] != TAKEN,
       "ORDER_ALREADY_TAKEN");
 
     // Ensure the order is not already canceled.
-    require(makerOrderStatus[order.maker.wallet][order.nonce] != CANCELED,
+    require(makerOrderStatus[_order.maker.wallet][_order.nonce] != CANCELED,
       "ORDER_ALREADY_CANCELED");
 
     // Ensure the order nonce is above the minimum.
-    require(order.nonce >= makerMinimumNonce[order.maker.wallet],
+    require(_order.nonce >= makerMinimumNonce[_order.maker.wallet],
       "NONCE_TOO_LOW");
 
     // Mark the order TAKEN (0x01).
-    makerOrderStatus[order.maker.wallet][order.nonce] = TAKEN;
+    makerOrderStatus[_order.maker.wallet][_order.nonce] = TAKEN;
 
     // Validate the taker side of the trade.
     address finalTakerWallet;
 
-    if (order.taker.wallet == address(0)) {
+    if (_order.taker.wallet == address(0)) {
       /**
         * Taker is not specified. The sender of the transaction becomes
-        * the taker of the order.
+        * the taker of the _order.
         */
       finalTakerWallet = msg.sender;
 
@@ -107,22 +107,22 @@ contract Swap is ISwap {
         * Taker is specified. If the sender is not the specified taker,
         * determine whether the sender has been authorized by the taker.
         */
-      if (msg.sender != order.taker.wallet) {
-        require(isAuthorized(order.taker.wallet, msg.sender),
+      if (msg.sender != _order.taker.wallet) {
+        require(isAuthorized(_order.taker.wallet, msg.sender),
           "SENDER_UNAUTHORIZED");
       }
       // The specified taker is all clear.
-      finalTakerWallet = order.taker.wallet;
+      finalTakerWallet = _order.taker.wallet;
 
     }
 
     // Validate the maker side of the trade.
-    if (signature.v == 0) {
+    if (_signature.v == 0) {
       /**
         * Signature is not provided. The maker may have authorized the sender
-        * to swap on its behalf, which does not require a signature.
+        * to swap on its behalf, which does not require a _signature.
         */
-      require(isAuthorized(order.maker.wallet, msg.sender),
+      require(isAuthorized(_order.maker.wallet, msg.sender),
         "SIGNER_UNAUTHORIZED");
 
     } else {
@@ -130,26 +130,26 @@ contract Swap is ISwap {
         * The signature is provided. Determine whether the signer is
         * authorized by the maker and if so validate the signature itself.
         */
-      require(isAuthorized(order.maker.wallet, signature.signer),
+      require(isAuthorized(_order.maker.wallet, _signature.signer),
         "SIGNER_UNAUTHORIZED");
 
       // Ensure the signature is valid.
-      require(Signatures.isValid(order, signature, domainSeparator),
+      require(Signatures.isValid(_order, _signature, domainSeparator),
         "SIGNATURE_INVALID");
 
     }
 
     // Validate the message ether value.
-    if (order.taker.token == address(0)) {
+    if (_order.taker.token == address(0)) {
       /**
         * An ether value is expected. Ensure the ether sent matches the taker
         * param and send it to the maker wallet.
         */
-      require(msg.value == order.taker.param,
+      require(msg.value == _order.taker.param,
         "VALUE_MUST_BE_SENT");
 
       // Transfer ether from taker to maker
-      Transfers.send(order.maker.wallet, msg.value);
+      Transfers.send(_order.maker.wallet, msg.value);
 
     } else {
       /**
@@ -163,9 +163,9 @@ contract Swap is ISwap {
       Transfers.safeTransferAny(
         "TAKER",
         finalTakerWallet,
-        order.maker.wallet,
-        order.taker.param,
-        order.taker.token
+        _order.maker.wallet,
+        _order.taker.param,
+        _order.taker.token
       );
 
     }
@@ -173,27 +173,27 @@ contract Swap is ISwap {
     // Transfer token from maker to taker.
     Transfers.safeTransferAny(
       "MAKER",
-      order.maker.wallet,
+      _order.maker.wallet,
       finalTakerWallet,
-      order.maker.param,
-      order.maker.token
+      _order.maker.param,
+      _order.maker.token
     );
 
     // Transfer token from maker to affiliate if specified.
-    if (order.affiliate.wallet != address(0)) {
+    if (_order.affiliate.wallet != address(0)) {
       Transfers.safeTransferAny(
         "MAKER",
-        order.maker.wallet,
-        order.affiliate.wallet,
-        order.affiliate.param,
-        order.affiliate.token
+        _order.maker.wallet,
+        _order.affiliate.wallet,
+        _order.affiliate.param,
+        _order.affiliate.token
       );
     }
 
-    emit Swap(order.nonce, block.timestamp,
-      order.maker.wallet, order.maker.param, order.maker.token,
-      finalTakerWallet, order.taker.param, order.taker.token,
-      order.affiliate.wallet, order.affiliate.param, order.affiliate.token
+    emit Swap(_order.nonce, block.timestamp,
+      _order.maker.wallet, _order.maker.param, _order.maker.token,
+      finalTakerWallet, _order.taker.param, _order.taker.token,
+      _order.affiliate.wallet, _order.affiliate.param, _order.affiliate.token
     );
   }
 
@@ -201,49 +201,49 @@ contract Swap is ISwap {
     * @notice Atomic Token Swap (Simple)
     * @dev Determines type (ERC-20 or ERC-721) with ERC-165
     *
-    * @param nonce uint256
-    * @param expiry uint256
-    * @param makerWallet address
-    * @param makerParam uint256
-    * @param makerToken address
-    * @param takerWallet address
-    * @param takerParam uint256
-    * @param takerToken address
-    * @param v uint8
-    * @param r bytes32
-    * @param s bytes32
+    * @param _nonce uint256
+    * @param _expiry uint256
+    * @param _makerWallet address
+    * @param _makerParam uint256
+    * @param _makerToken address
+    * @param _takerWallet address
+    * @param _takerParam uint256
+    * @param _takerToken address
+    * @param _v uint8
+    * @param _r bytes32
+    * @param _s bytes32
     */
   function swapSimple(
-    uint256 nonce,
-    uint256 expiry,
-    address makerWallet,
-    uint256 makerParam,
-    address makerToken,
-    address takerWallet,
-    uint256 takerParam,
-    address takerToken,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
+    uint256 _nonce,
+    uint256 _expiry,
+    address _makerWallet,
+    uint256 _makerParam,
+    address _makerToken,
+    address _takerWallet,
+    uint256 _takerParam,
+    address _takerToken,
+    uint8 _v,
+    bytes32 _r,
+    bytes32 _s
   )
       external payable
   {
 
-    // Ensure the order is not expired.
-    require(expiry >= block.timestamp,
-      "ORDER_EXPIRED");
-
     // Ensure the order has not already been taken or canceled.
-    require(makerOrderStatus[makerWallet][nonce] == OPEN,
+    require(makerOrderStatus[_makerWallet][_nonce] == OPEN,
       "ORDER_UNAVAILABLE");
 
-    require(nonce >= makerMinimumNonce[makerWallet],
+    // Ensure the order is not expired.
+    require(_expiry >= block.timestamp,
+      "ORDER_EXPIRED");
+
+    require(_nonce >= makerMinimumNonce[_makerWallet],
       "NONCE_TOO_LOW");
 
     // Validate the taker side of the trade.
     address finalTakerWallet;
 
-    if (takerWallet == address(0)) {
+    if (_takerWallet == address(0)) {
 
       // Set a null taker to be the order sender.
       finalTakerWallet = msg.sender;
@@ -251,53 +251,53 @@ contract Swap is ISwap {
     } else {
 
       // Ensure the order sender is authorized.
-      if (msg.sender != takerWallet) {
-        require(isAuthorized(takerWallet, msg.sender),
+      if (msg.sender != _takerWallet) {
+        require(isAuthorized(_takerWallet, msg.sender),
           "SENDER_UNAUTHORIZED");
       }
 
-      finalTakerWallet = takerWallet;
+      finalTakerWallet = _takerWallet;
 
     }
 
     // Validate the maker side of the trade.
-    if (v == 0) {
+    if (_v == 0) {
       /**
         * Signature is not provided. The maker may have authorized the sender
         * to swap on its behalf, which does not require a signature.
         */
-      require(isAuthorized(makerWallet, msg.sender),
+      require(isAuthorized(_makerWallet, msg.sender),
         "SIGNER_UNAUTHORIZED");
 
     } else {
 
       // Signature is provided. Ensure that it is valid.
       require(Signatures.isValidSimple(
-        nonce,
-        expiry,
-        makerWallet,
-        makerParam,
-        makerToken,
-        takerWallet,
-        takerParam,
-        takerToken,
-        v, r, s,
-        address(this)
+        address(this),
+        _nonce,
+        _expiry,
+        _makerWallet,
+        _makerParam,
+        _makerToken,
+        _takerWallet,
+        _takerParam,
+        _takerToken,
+        _v, _r, _s
       ), "SIGNATURE_INVALID");
     }
 
     // Mark the order TAKEN (0x01).
-    makerOrderStatus[makerWallet][nonce] = TAKEN;
+    makerOrderStatus[_makerWallet][_nonce] = TAKEN;
 
     // A null taker token is an order for ether.
-    if (takerToken == address(0)) {
+    if (_takerToken == address(0)) {
 
       // Ensure the ether sent matches the taker param.
-      require(msg.value == takerParam,
+      require(msg.value == _takerParam,
         "VALUE_MUST_BE_SENT");
 
       // Transfer ether from taker to maker.
-      Transfers.send(makerWallet, msg.value);
+      Transfers.send(_makerWallet, msg.value);
 
     } else {
 
@@ -306,16 +306,16 @@ contract Swap is ISwap {
         "VALUE_MUST_BE_ZERO");
 
       // Transfer token from taker to maker.
-      Transfers.transferAny(takerToken, finalTakerWallet, makerWallet, takerParam);
+      Transfers.transferAny(_takerToken, finalTakerWallet, _makerWallet, _takerParam);
 
     }
 
     // Transfer token from maker to taker.
-    Transfers.transferAny(makerToken, makerWallet, finalTakerWallet, makerParam);
+    Transfers.transferAny(_makerToken, _makerWallet, finalTakerWallet, _makerParam);
 
-    emit Swap(nonce, block.timestamp,
-      makerWallet, makerParam, makerToken,
-      finalTakerWallet, takerParam, takerToken,
+    emit Swap(_nonce, block.timestamp,
+      _makerWallet, _makerParam, _makerToken,
+      finalTakerWallet, _takerParam, _takerToken,
       address(0), 0, address(0)
     );
 
@@ -324,69 +324,69 @@ contract Swap is ISwap {
   /**
     * @notice Cancel One or More Orders by Nonce
     * @dev Canceled orders are marked CANCELED (0x02)
-    * @param nonces uint256[]
+    * @param _nonces uint256[]
     */
   function cancel(
-    uint256[] calldata nonces
+    uint256[] calldata _nonces
   ) external {
-    for (uint256 i = 0; i < nonces.length; i++) {
-      if (makerOrderStatus[msg.sender][nonces[i]] == OPEN) {
-        makerOrderStatus[msg.sender][nonces[i]] = CANCELED;
-        emit Cancel(nonces[i], msg.sender);
+    for (uint256 i = 0; i < _nonces.length; i++) {
+      if (makerOrderStatus[msg.sender][_nonces[i]] == OPEN) {
+        makerOrderStatus[msg.sender][_nonces[i]] = CANCELED;
+        emit Cancel(_nonces[i], msg.sender);
       }
     }
   }
 
   /**
     * @notice Invalidate All Orders Below a Nonce Value
-    * @param minimumNonce uint256
+    * @param _minimumNonce uint256
     */
   function invalidate(
-    uint256 minimumNonce
+    uint256 _minimumNonce
   ) external {
-    makerMinimumNonce[msg.sender] = minimumNonce;
-    emit Invalidate(minimumNonce, msg.sender);
+    makerMinimumNonce[msg.sender] = _minimumNonce;
+    emit Invalidate(_minimumNonce, msg.sender);
   }
 
   /**
     * @notice Authorize a Delegate
     * @dev Expiry value is inclusive
-    * @param delegate address
-    * @param expiry uint256
+    * @param _delegate address
+    * @param _expiry uint256
     */
   function authorize(
-    address delegate,
-    uint256 expiry
+    address _delegate,
+    uint256 _expiry
   ) external {
-    require(msg.sender != delegate, "INVALID_AUTH_DELEGATE");
-    require(expiry >= block.timestamp, "INVALID_AUTH_EXPIRY");
-    delegateApprovals[msg.sender][delegate] = expiry;
-    emit Authorize(msg.sender, delegate, expiry);
+    require(msg.sender != _delegate, "INVALID_AUTH_DELEGATE");
+    require(_expiry >= block.timestamp, "INVALID_AUTH_EXPIRY");
+    delegateApprovals[msg.sender][_delegate] = _expiry;
+    emit Authorize(msg.sender, _delegate, _expiry);
   }
 
   /**
     * @notice Revoke an Authorization
-    * @param delegate address
+    * @param _delegate address
     */
   function revoke(
-    address delegate
+    address _delegate
   ) external {
-    delete delegateApprovals[msg.sender][delegate];
-    emit Revoke(msg.sender, delegate);
+    delete delegateApprovals[msg.sender][_delegate];
+    emit Revoke(msg.sender, _delegate);
   }
 
   /**
     * @notice Determine Whether a Delegate is Authorized
     * @dev Expiry value is inclusive
-    * @param approver address
-    * @param delegate address
+    * @param _approver address
+    * @param _delegate address
     */
   function isAuthorized(
-    address approver,
-    address delegate
+    address _approver,
+    address _delegate
   ) internal view returns (bool) {
-    if (approver == delegate) return true;
-    return (delegateApprovals[approver][delegate] >= block.timestamp);
+    if (_approver == _delegate) return true;
+    return (delegateApprovals[_approver][_delegate] >= block.timestamp);
   }
 
 }

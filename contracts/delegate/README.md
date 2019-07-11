@@ -28,15 +28,15 @@ Create a new `Delegate` contract.
 
 ```Solidity
 constructor(
-  address _swapContract
+  address initialSwapContract
 ) public
 ```
 
 ### Params
 
-| Name            | Type      | Description                                         |
-| :-------------- | :-------- | :-------------------------------------------------- |
-| `_swapContract` | `address` | Address of the Swap contract used to settle trades. |
+| Name                  | Type      | Description                                         |
+| :-------------------- | :-------- | :-------------------------------------------------- |
+| `initialSwapContract` | `address` | Address of the Swap contract used to settle trades. |
 
 ## Set a Rule
 
