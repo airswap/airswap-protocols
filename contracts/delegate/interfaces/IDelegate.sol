@@ -19,6 +19,19 @@ pragma experimental ABIEncoderV2;
 
 interface IDelegate {
 
+  event SetRule(
+    address delegateToken,
+    address consumerToken,
+    uint256 maxDelegateAmount,
+    uint256 priceCoef,
+    uint256 priceExp
+  );
+
+  event UnsetRule(
+    address delegateToken,
+    address consumerToken
+  );
+
   struct Rule {
     uint256 maxDelegateAmount;
     uint256 priceCoef;
@@ -28,7 +41,7 @@ interface IDelegate {
   function rules(address, address) external returns (Rule memory);
 
   function setSwapContract(
-    address _swapContract
+    address swapContract
   ) external;
 
   function setRule(

@@ -37,24 +37,6 @@ contract Delegate is IDelegate, Ownable {
   mapping (address => mapping (address => Rule)) public rules;
 
   /**
-    * @notice Contract Events
-    * @dev Emitted with successful state changes
-    */
-
-  event SetRule(
-    address delegateToken,
-    address consumerToken,
-    uint256 maxDelegateAmount,
-    uint256 priceCoef,
-    uint256 priceExp
-  );
-
-  event UnsetRule(
-    address delegateToken,
-    address consumerToken
-  );
-
-  /**
     * @notice Contract Constructor
     * @param _swapContract address
     */

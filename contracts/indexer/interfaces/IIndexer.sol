@@ -18,6 +18,33 @@ pragma solidity 0.5.10;
 
 interface IIndexer {
 
+  event CreateMarket(
+    address makerToken,
+    address takerToken
+  );
+
+  event Stake(
+    address wallet,
+    uint256 amount
+  );
+
+  event Unstake(
+    address wallet,
+    uint256 amount
+  );
+
+  event SetStakeMinimum(
+    uint256 amount
+  );
+
+  event AddToBlacklist(
+    address token
+  );
+
+  event RemoveFromBlacklist(
+    address token
+  );
+
   function markets(address, address) external returns (address);
   function blacklist(address) external returns (uint256);
 
@@ -27,7 +54,7 @@ interface IIndexer {
   ) external;
 
   function setStakeMinimum(
-    uint256 _stakeMinimum
+    uint256 stakeMinimum
   ) external;
 
   function addToBlacklist(

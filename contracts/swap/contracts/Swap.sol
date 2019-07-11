@@ -48,46 +48,6 @@ contract Swap is ISwap {
   mapping (address => uint256) public makerMinimumNonce;
 
   /**
-    * @notice Contract Events
-    * @dev Emitted with successful state changes
-    */
-
-  event Swap(
-    uint256 indexed nonce,
-    uint256 timestamp,
-    address indexed makerWallet,
-    uint256 makerParam,
-    address makerToken,
-    address indexed takerWallet,
-    uint256 takerParam,
-    address takerToken,
-    address affiliateWallet,
-    uint256 affiliateParam,
-    address affiliateToken
-  );
-
-  event Cancel(
-    uint256 indexed nonce,
-    address indexed makerWallet
-  );
-
-  event Invalidate(
-    uint256 indexed nonce,
-    address indexed makerWallet
-  );
-
-  event Authorize(
-    address indexed approverAddress,
-    address indexed delegateAddress,
-    uint256 expiry
-  );
-
-  event Revoke(
-    address indexed approverAddress,
-    address indexed delegateAddress
-  );
-
-  /**
     * @notice Contract Constructor
     * @dev Sets domain for signature validation (EIP-712)
     */

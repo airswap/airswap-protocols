@@ -40,38 +40,6 @@ contract Indexer is IIndexer, Ownable {
   mapping (address => uint256) public blacklist;
 
   /**
-    * @notice Contract Events
-    * @dev Emitted with successful state changes
-    */
-
-  event CreateMarket(
-    address makerToken,
-    address takerToken
-  );
-
-  event Stake(
-    address wallet,
-    uint256 amount
-  );
-
-  event Unstake(
-    address wallet,
-    uint256 amount
-  );
-
-  event SetStakeMinimum(
-    uint256 amount
-  );
-
-  event AddToBlacklist(
-    address token
-  );
-
-  event RemoveFromBlacklist(
-    address token
-  );
-
-  /**
     * @notice Contract Constructor
     *
     * @param _stakeToken address

@@ -21,6 +21,41 @@ import "@airswap/lib/contracts/Types.sol";
 
 interface ISwap {
 
+  event Swap(
+    uint256 indexed nonce,
+    uint256 timestamp,
+    address indexed makerWallet,
+    uint256 makerParam,
+    address makerToken,
+    address indexed takerWallet,
+    uint256 takerParam,
+    address takerToken,
+    address affiliateWallet,
+    uint256 affiliateParam,
+    address affiliateToken
+  );
+
+  event Cancel(
+    uint256 indexed nonce,
+    address indexed makerWallet
+  );
+
+  event Invalidate(
+    uint256 indexed nonce,
+    address indexed makerWallet
+  );
+
+  event Authorize(
+    address indexed approverAddress,
+    address indexed delegateAddress,
+    uint256 expiry
+  );
+
+  event Revoke(
+    address indexed approverAddress,
+    address indexed delegateAddress
+  );
+
   function delegateApprovals(address, address) external returns (uint256);
   function makerOrderStatus(address, uint256) external returns (byte);
   function makerMinimumNonce(address) external returns (uint256);
