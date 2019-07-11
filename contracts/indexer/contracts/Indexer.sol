@@ -61,15 +61,17 @@ contract Indexer is IIndexer, Ownable {
   function createMarket(
     address makerToken,
     address takerToken
-  ) external {
+  ) external returns (address) {
 
-    // Ensure the market does not exist.
-    require(markets[makerToken][takerToken] == address(0),
-      "MARKET_ALREADY_EXISTS");
+    // If the Market does not exist, create it.
+    if (markets[makerToken][takerToken] == address(0)) {
+      // Create a new Market contract for the token pair.
+      markets[makerToken][takerToken] = address(new Market(makerToken, takerToken));
+      emit CreateMarket(makerToken, takerToken);
+    }
 
-    // Create a new Market contract for the token pair.
-    markets[makerToken][takerToken] = address(new Market(makerToken, takerToken));
-    emit CreateMarket(makerToken, takerToken);
+    // Return the address of the Market contract.
+    return address(markets[makerToken][takerToken]);
   }
 
   /**

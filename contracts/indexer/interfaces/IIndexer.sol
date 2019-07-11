@@ -51,7 +51,7 @@ interface IIndexer {
   function createMarket(
     address makerToken,
     address takerToken
-  ) external;
+  ) external returns (address);
 
   function setStakeMinimum(
     uint256 stakeMinimum
