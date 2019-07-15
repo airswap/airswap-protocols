@@ -1,0 +1,24 @@
+{
+  "name": "@airswap/wrapper",
+  "version": "0.1.0",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/airswap/airswap-protocols"
+  },
+  "scripts": {
+    "clean": "rm -rf ./build",
+    "compile": "truffle compile",
+    "lint": "yarn eslint \"./test/**/*.js\"",
+    "truffle": "node_modules/.bin/truffle --network development",
+    "test": "truffle test"
+  },
+  "devDependencies": {
+    "@airswap/order-utils": "0.1.0",
+    "@airswap/test-utils": "0.1.0"
+  },
+  "dependences": {
+    "@airswap/swap": "0.1.0",
+    "@airswap/tokens": "0.1.0"
+  }
+}

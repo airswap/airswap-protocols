@@ -1,0 +1,37 @@
+{
+  "name": "airswap-protocols",
+  "version": "0.0.1",
+  "private": true,
+  "license": "Apache-2.0",
+  "workspaces": [
+    "packages/*",
+    "contracts/*"
+  ],
+  "scripts": {
+    "clean": "lerna run clean",
+    "compile": "lerna run compile",
+    "hint": "yarn solhint \"./contracts/**/*.sol\"",
+    "lint": "yarn eslint \"./**/test/**/*.js\" \"./packages/**/*.js\"",
+    "ganache": "ganache-cli -p 8545 --gasLimit 0xfffffffffff",
+    "publish": "lerna publish",
+    "test": "yarn clean && lerna run test"
+  },
+  "devDependencies": {
+    "babel-eslint": "^10.0.2",
+    "eslint": "^5.16.0",
+    "eslint-config-airbnb-base": "^13.2.0",
+    "eslint-plugin-import": "^2.18.0",
+    "eslint-plugin-prettier": "^3.1.0",
+    "ganache-cli": "^6.4.4",
+    "lerna": "^3.15.0",
+    "prettier": "^1.18.2",
+    "solhint": "^2.1.0",
+    "truffle": "^5.0.24"
+  },
+  "prettier": {
+    "trailingComma": "es5",
+    "tabWidth": 2,
+    "semi": false,
+    "singleQuote": true
+  }
+}

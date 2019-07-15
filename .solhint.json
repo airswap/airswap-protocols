@@ -1,0 +1,11 @@
+{
+  "extends": "solhint:default",
+  "rules": {
+    "not-rely-on-time": false,
+    "no-inline-assembly": false,
+    "no-empty-blocks": false,
+    "function-max-lines": false,
+    "no-simple-event-func-name": false,
+    "indent": ["error", 2]
+  }
+}
