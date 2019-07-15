@@ -70,7 +70,7 @@ contract Consumer {
     bytes32[] memory locators = indexerContract.getIntents(_userReceiveToken, _userSendToken, _maxIntents);
 
     // Iterate through locators.
-    for (uint256 i; i < locators.length; i ++) {
+    for (uint256 i; i < locators.length; i++) {
 
       // Assume the locator is a Delegate.
       address untrustedDelegateContract = address(bytes20(locators[i]));

@@ -3,16 +3,13 @@ const FungibleToken = artifacts.require('FungibleToken')
 
 const { emitted, reverted, equal, ok } = require('@airswap/test-utils').assert
 const { balances } = require('@airswap/test-utils').balances
+const { getExpiry } = require('@airswap/test-utils').time
 const { intents } = require('@airswap/indexer-utils')
 
 const ALICE_LOC = intents.serialize(
   intents.Locators.URL,
   'https://rpc.maker-cloud.io:1123'
 )
-
-function getExpiry() {
-  return Math.round((new Date().getTime() + 60000) / 1000)
-}
 
 contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
   let indexer

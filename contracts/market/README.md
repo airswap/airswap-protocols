@@ -85,7 +85,7 @@ function set(
 
 ## Unset an Intent
 
-Set the minimum amount of tokens required to set an intent to trade.
+Unset an intent to trade in the Market.
 
 ```Solidity
 function unset(
@@ -136,7 +136,7 @@ function has(
 Fetch up to a number of intents from the list.
 
 ```Solidity
-function fetch(
+function fetchIntents(
   uint256 _count
 ) public view returns (bytes32[] memory result)
 ```

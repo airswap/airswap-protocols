@@ -15,48 +15,34 @@ let indexerAddress
 let swapAddress
 let aliceDelegate
 
-function getExpiry() {
-  return Math.round((new Date().getTime() + 60000) / 1000)
-}
-
 // TODO: Use token-unit for realistic token amounts.
 
 contract(
   'Consumer',
   ([ownerAddress, aliceAddress, bobAddress, carolAddress]) => {
-    describe('Deployment', async () => {
-      it('Deployed staking token "AST"', async () => {
+    describe('Setup', async () => {
+      let location
+
+      before('Deploys all the things', async () => {
         tokenAST = await FungibleToken.deployed()
-      })
-
-      it('Deployed trading token "DAI"', async () => {
         tokenDAI = await FungibleToken.new()
-      })
-
-      it('Deployed trading token "WETH"', async () => {
         tokenWETH = await FungibleToken.new()
-      })
-
-      it('Deploys all the things', async () => {
         swapContract = await Swap.deployed()
         swapAddress = swapContract.address
         indexer = await Indexer.deployed({ from: ownerAddress })
         indexerAddress = indexer.address
         consumer = await Consumer.deployed({ from: ownerAddress })
         consumerAddress = consumer.address
-      })
-
-      it('Alice deployed a Swap Delegate', async () => {
         aliceDelegate = await Delegate.new(swapAddress, { from: aliceAddress })
-
         provideOrder =
-          aliceDelegate.methods[
-            'provideOrder((uint256,uint256,(address,address,uint256),(address,address,uint256),(address,address,uint256)),(address,bytes32,bytes32,uint8,bytes1))'
-          ]
-        provideOrderSimple =
           aliceDelegate.methods[
             'provideOrder(uint256,address,uint256,address,address,uint256,address,uint256,bytes32,bytes32,uint8)'
           ]
+
+        location = intents.serialize(
+          intents.Locators.CONTRACT,
+          aliceDelegate.address
+        )
       })
 
       it('Alice authorizes the new delegate', async () => {
@@ -65,17 +51,6 @@ contract(
             from: aliceAddress,
           }),
           'Authorize'
-        )
-      })
-    })
-
-    describe('Setup', async () => {
-      let location
-
-      before('Locationalize', () => {
-        location = intents.serialize(
-          intents.Locators.CONTRACT,
-          aliceDelegate.address
         )
       })
 
@@ -122,7 +97,7 @@ contract(
     })
 
     describe('Alice adds some delegate rules', () => {
-      it('Adds a rule to send up to 100 WETH for DAI at 309.52 DAI/WETH', async () => {
+      it('Adds a rule to send up to 150 WETH for DAI at 309.52 DAI/WETH', async () => {
         emitted(
           await aliceDelegate.setRule(
             tokenWETH.address,

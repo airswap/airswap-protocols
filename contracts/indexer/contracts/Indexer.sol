@@ -151,7 +151,7 @@ contract Indexer is IIndexer, Ownable {
     emit Stake(msg.sender, _amount);
 
     // Set the intent on the market.
-    markets[_makerToken][_takerToken].set(msg.sender, _amount, _expiry, _locator);
+    markets[_makerToken][_takerToken].setIntent(msg.sender, _amount, _expiry, _locator);
   }
 
   /**
@@ -171,14 +171,14 @@ contract Indexer is IIndexer, Ownable {
       "MARKET_DOES_NOT_EXIST");
 
     // Get the intent for the sender.
-    Market.Intent memory intent = markets[_makerToken][_takerToken].get(msg.sender);
+    Market.Intent memory intent = markets[_makerToken][_takerToken].getIntent(msg.sender);
 
     // Ensure the intent exists.
     require(intent.staker == msg.sender,
       "INTENT_DOES_NOT_EXIST");
 
     // Unset the intent on the market.
-    markets[_makerToken][_takerToken].unset(msg.sender);
+    markets[_makerToken][_takerToken].unsetIntent(msg.sender);
 
     // Return the staked tokens.
     stakeToken.transfer(msg.sender, intent.amount);
@@ -209,7 +209,7 @@ contract Indexer is IIndexer, Ownable {
       if (markets[_makerToken][_takerToken] != Market(0)) {
 
         // Return an array of locators for the market.
-        return markets[_makerToken][_takerToken].fetch(_count);
+        return markets[_makerToken][_takerToken].fetchIntents(_count);
 
       }
     }

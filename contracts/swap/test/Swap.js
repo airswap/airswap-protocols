@@ -10,7 +10,7 @@ const {
   ok,
 } = require('@airswap/test-utils').assert
 const { allowances, balances } = require('@airswap/test-utils').balances
-const { getLatestTimestamp } = require('@airswap/test-utils').evm
+const { getLatestTimestamp } = require('@airswap/test-utils').time
 const { orders, signatures } = require('@airswap/order-utils')
 
 const defaultAuthExpiry = orders.generateExpiry()

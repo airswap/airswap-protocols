@@ -61,7 +61,7 @@ contract Market is Ownable {
     * @dev Emitted with successful state changes
     */
 
-  event Set(
+  event SetIntent(
     address staker,
     uint256 amount,
     uint256 expiry,
@@ -70,7 +70,7 @@ contract Market is Ownable {
     address takerToken
   );
 
-  event Unset(
+  event UnsetIntent(
     address staker,
     address makerToken,
     address takerToken
@@ -87,7 +87,7 @@ contract Market is Ownable {
     address _takerToken
   ) public {
 
-    // Set the token pair fo the market.
+    // Set the token pair of the market.
     makerToken = _makerToken;
     takerToken = _takerToken;
 
@@ -105,7 +105,7 @@ contract Market is Ownable {
     * @param _expiry uint256
     * @param _locator bytes32
     */
-  function set(
+  function setIntent(
     address _staker,
     uint256 _amount,
     uint256 _expiry,
@@ -115,26 +115,26 @@ contract Market is Ownable {
     Intent memory newIntent = Intent(_staker, _amount, _expiry, _locator);
 
     // Insert after the next highest amount on the list.
-    insert(newIntent, find(_amount));
+    insertIntent(newIntent, findPosition(_amount));
 
     // Increment the length of the list.
     length = length + 1;
 
-    emit Set(_staker, _amount, _expiry, _locator, makerToken, takerToken);
+    emit SetIntent(_staker, _amount, _expiry, _locator, makerToken, takerToken);
   }
 
   /**
     * @notice Unset an Intent to Trade
     * @param _staker address
     */
-  function unset(
+  function unsetIntent(
     address _staker
   ) public onlyOwner returns (
     bool
   ) {
 
     // Ensure the _staker is in the list.
-    if (!has(_staker)) {
+    if (!hasIntent(_staker)) {
       return false;
     }
 
@@ -148,7 +148,7 @@ contract Market is Ownable {
     // Decrement the length of the list.
     length = length - 1;
 
-    emit Unset(_staker, makerToken, takerToken);
+    emit UnsetIntent(_staker, makerToken, takerToken);
     return true;
   }
 
@@ -156,7 +156,7 @@ contract Market is Ownable {
     * @notice Get the Intent for a Staker
     * @param _staker address
     */
-  function get(
+  function getIntent(
     address _staker
   ) public view returns (
     Intent memory
@@ -168,20 +168,21 @@ contract Market is Ownable {
       // Return the next intent from the previous neighbor.
       return list[list[_staker][PREV].staker][NEXT];
     }
+    return Intent(address(0), 0, 0, 0x0);
   }
 
   /**
     * @notice Determine Whether a Staker is in the List
     * @param _staker address
     */
-  function has(
+  function hasIntent(
     address _staker
   ) internal view returns (
     bool
   ) {
     if (list[_staker][PREV].staker == HEAD && list[_staker][NEXT].staker == HEAD) {
       if (list[HEAD][NEXT].staker == _staker) {
-        return true;
+         return true;
       }
     } else {
       if (list[_staker][PREV].staker != address(0)) {
@@ -204,7 +205,7 @@ contract Market is Ownable {
     * @notice Get Valid Intents
     * @param _count uint256
     */
-  function fetch(
+  function fetchIntents(
     uint256 _count
   ) public view returns (
     bytes32[] memory result
@@ -236,7 +237,7 @@ contract Market is Ownable {
     * @notice Find the Next Intent Below an Amount
     * @param _amount uint256
     */
-  function find(
+  function findPosition(
     uint256 _amount
   ) internal view returns (
     Intent memory
@@ -261,7 +262,7 @@ contract Market is Ownable {
     * @param _intent Intent
     * @param _existing Intent
     */
-  function insert(
+  function insertIntent(
     Intent memory _intent,
     Intent memory _existing
   ) internal returns (
@@ -269,7 +270,7 @@ contract Market is Ownable {
   ) {
 
     // Ensure the _existing intent is in the list.
-    if (!has(_existing.staker)) {
+    if (!hasIntent(_existing.staker)) {
       return false;
     }
 

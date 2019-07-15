@@ -89,6 +89,10 @@ getLatestTimestamp = async () => {
   return (await web3.eth.getBlock('latest')).timestamp
 }
 
+getExpiry = () => {
+  return Math.round((new Date().getTime() + 60000) / 1000)
+}
+
 module.exports = {
   advanceTime,
   advanceBlock,
@@ -96,4 +100,5 @@ module.exports = {
   takeSnapshot,
   revertToSnapShot,
   getLatestTimestamp,
+  getExpiry,
 }

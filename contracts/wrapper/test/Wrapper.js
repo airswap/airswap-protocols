@@ -3,8 +3,8 @@ const Wrapper = artifacts.require('Wrapper')
 const WETH9 = artifacts.require('WETH9')
 const FungibleToken = artifacts.require('FungibleToken')
 
-const { emitted, ok, getResult } = require('@airswap/test-utils').assert
-const { allowances, balances } = require('@airswap/test-utils').balances
+const { emitted, getResult } = require('@airswap/test-utils').assert
+const { getExpiry } = require('@airswap/test-utils').time
 const { orders, signatures } = require('@airswap/order-utils')
 
 let swapContract
@@ -15,10 +15,6 @@ let wrapperAddress
 
 let swap
 let swapSimple
-
-function getExpiry() {
-  return Math.round((new Date().getTime() + 60000) / 1000)
-}
 
 contract('Wrapper', ([aliceAddress, bobAddress, carolAddress]) => {
   orders.setKnownAccounts([aliceAddress, bobAddress, carolAddress])
