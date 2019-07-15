@@ -18,6 +18,7 @@
     "@airswap/test-utils": "0.1.0"
   },
   "dependences": {
+    "@airswap/common": "0.1.0",
     "@airswap/swap": "0.1.0",
     "@airswap/tokens": "0.1.0"
   }

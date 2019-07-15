@@ -14,6 +14,7 @@
     "test": "truffle test"
   },
   "dependencies": {
+    "@airswap/common": "0.1.0",
     "@airswap/delegate": "0.1.0",
     "@airswap/indexer": "0.1.0",
     "@airswap/order-utils": "0.1.0",

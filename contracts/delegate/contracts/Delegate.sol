@@ -18,7 +18,6 @@ pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
 import "@airswap/delegate/interfaces/IDelegate.sol";
-import "@airswap/lib/contracts/Types.sol";
 import "@airswap/swap/interfaces/ISwap.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";

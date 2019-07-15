@@ -17,8 +17,8 @@
 pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
-import "@airswap/lib/contracts/Signatures.sol";
-import "@airswap/lib/contracts/Transfers.sol";
+import "@airswap/common/libraries/Transfers.sol";
+import "@airswap/common/libraries/Types.sol";
 import "@airswap/swap/interfaces/ISwap.sol";
 
 /**
@@ -134,7 +134,7 @@ contract Swap is ISwap {
         "SIGNER_UNAUTHORIZED");
 
       // Ensure the signature is valid.
-      require(Signatures.isValid(_order, _signature, domainSeparator),
+      require(isValid(_order, _signature, domainSeparator),
         "SIGNATURE_INVALID");
 
     }
@@ -272,7 +272,7 @@ contract Swap is ISwap {
     } else {
 
       // Signature is provided. Ensure that it is valid.
-      require(Signatures.isValidSimple(
+      require(isValidSimple(
         address(this),
         _nonce,
         _expiry,
@@ -387,6 +387,91 @@ contract Swap is ISwap {
   ) internal view returns (bool) {
     if (_approver == _delegate) return true;
     return (delegateApprovals[_approver][_delegate] >= block.timestamp);
+  }
+
+  /**
+    * @notice Validates signature using an EIP-712 typed data hash
+    *
+    * @param _order Order
+    * @param _signature Signature
+    */
+  function isValid(
+    Types.Order memory _order,
+    Types.Signature memory _signature,
+    bytes32 _domainSeparator
+  ) internal pure returns (bool) {
+    if (_signature.version == byte(0x01)) {
+      return _signature.signer == ecrecover(
+        Types.hashOrder(
+          _order,
+          _domainSeparator),
+          _signature.v,
+          _signature.r,
+          _signature.s
+      );
+    }
+    if (_signature.version == byte(0x45)) {
+      return _signature.signer == ecrecover(
+        keccak256(
+          abi.encodePacked(
+            "\x19Ethereum Signed Message:\n32",
+            Types.hashOrder(_order, _domainSeparator)
+          )
+        ),
+        _signature.v,
+        _signature.r,
+        _signature.s
+      );
+    }
+    return false;
+  }
+
+  /**
+    * @notice Validates signature using a simple hash and verifyingContract
+    *
+    @ @param _verifyingContract address
+    * @param _nonce uint256
+    * @param _expiry uint256
+    * @param _makerWallet address
+    * @param _makerParam uint256
+    * @param _makerToken address
+    * @param _takerWallet address
+    * @param _takerParam uint256
+    * @param _takerToken address
+    * @param _v uint8
+    * @param _r bytes32
+    * @param _s bytes32
+    */
+  function isValidSimple(
+    address _verifyingContract,
+    uint256 _nonce,
+    uint256 _expiry,
+    address _makerWallet,
+    uint256 _makerParam,
+    address _makerToken,
+    address _takerWallet,
+    uint256 _takerParam,
+    address _takerToken,
+    uint8 _v,
+    bytes32 _r,
+    bytes32 _s
+  ) internal pure returns (bool) {
+    return _makerWallet == ecrecover(
+      keccak256(abi.encodePacked(
+        "\x19Ethereum Signed Message:\n32",
+        keccak256(abi.encodePacked(
+          byte(0),
+          _verifyingContract,
+          _nonce,
+          _expiry,
+          _makerWallet,
+          _makerParam,
+          _makerToken,
+          _takerWallet,
+          _takerParam,
+          _takerToken
+        )))),
+      _v, _r, _s);
   }
 
 }

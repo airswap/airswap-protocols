@@ -19,7 +19,7 @@
     "@airswap/tokens": "0.1.0"
   },
   "dependencies": {
-    "@airswap/lib": "0.1.0",
+    "@airswap/common": "0.1.0",
     "openzeppelin-solidity": "^v2.2"
   }
 }
