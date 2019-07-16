@@ -65,7 +65,7 @@ contract(
       it('Ensure ordering is correct', async () => {
         const intents = await market.fetchIntents(4)
         assert(intents[0] == ALICE_LOC, 'Alice is not first')
-        assert(intents[1] == CAROL_LOC, 'David should be second')
+        assert(intents[1] == CAROL_LOC, 'Carol should be second')
         assert(intents[2] == BOB_LOC, 'Bob should be third')
         assert(intents[3] == DAVID_LOC, 'David should be fourth')
       })
@@ -95,16 +95,16 @@ contract(
 
     describe('Unset', () => {
       it('Unsets intent for David', async () => {
-        market.unsetIntent(davidAddress)
-        equal((await market.getIntent(davidAddress)).locator, NULL_LOCATOR)
+        market.unsetIntent(bobAddress)
+        equal((await market.getIntent(bobAddress)).locator, NULL_LOCATOR)
         assert(BN(await market.length()).eq(3))
       })
 
       it('Ensure ordering is correct', async () => {
         const intents = await market.fetchIntents(10)
-        assert(intents[0] == CAROL_LOC, 'Carol is not first')
-        assert(intents[1] == BOB_LOC, 'Bob should be second')
-        assert(intents[2] == ALICE_LOC, 'Alice should be third')
+        assert(intents[0] == ALICE_LOC, 'Alice is not first')
+        assert(intents[1] == CAROL_LOC, 'Carol should be second')
+        assert(intents[2] == DAVID_LOC, 'David should be third')
       })
     })
   }

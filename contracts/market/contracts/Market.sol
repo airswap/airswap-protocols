@@ -234,7 +234,7 @@ contract Market is Ownable {
   }
 
   /**
-    * @notice Find the Next Intent Below an Amount
+    * @notice Returns the first intent smaller than _amount
     * @param _amount uint256
     */
   function findPosition(
@@ -247,39 +247,36 @@ contract Market is Ownable {
     Intent storage intent = list[HEAD][NEXT];
 
     // Iterate through the list until a lower amount is found.
-    while (intent.amount > 0) {
-      if (_amount <= intent.amount) {
-        return intent;
-      }
+    while (_amount <= intent.amount) {
       intent = list[intent.staker][NEXT];
     }
     return intent;
   }
 
   /**
-    * @notice Insert an Intent at a Location
+    * @notice Insert a new intent before an existing intent
     *
-    * @param _intent Intent
-    * @param _existing Intent
+    * @param _newIntent Intent to be inserted
+    * @param _existingIntent Intent
     */
   function insertIntent(
-    Intent memory _intent,
-    Intent memory _existing
+    Intent memory _newIntent,
+    Intent memory _existingIntent
   ) internal returns (
     bool
   ) {
 
     // Ensure the _existing intent is in the list.
-    if (!hasIntent(_existing.staker)) {
+    if (!hasIntent(_existingIntent.staker)) {
       return false;
     }
 
     // Get the intent following the _existing intent.
-    Intent memory next = list[_existing.staker][NEXT];
+    Intent memory precursor = list[_existingIntent.staker][PREV];
 
     // Link the new _intent into place.
-    link(_existing, _intent);
-    link(_intent, next);
+    link(precursor, _newIntent);
+    link(_newIntent, _existingIntent);
 
     return true;
   }
