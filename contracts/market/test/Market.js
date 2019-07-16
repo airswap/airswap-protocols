@@ -47,7 +47,7 @@ contract(
 
     describe('Set', () => {
       it('Sets an intent for Alice', async () => {
-        await market.setIntent(aliceAddress, 250, getExpiry(), ALICE_LOC)
+        await market.setIntent(aliceAddress, 2000, getExpiry(), ALICE_LOC)
       })
 
       it('Sets an intent for Bob', async () => {
@@ -55,19 +55,19 @@ contract(
       })
 
       it('Sets an intent for Carol', async () => {
-        await market.setIntent(carolAddress, 2000, getExpiry(), CAROL_LOC)
+        await market.setIntent(carolAddress, 1500, getExpiry(), CAROL_LOC)
       })
 
       it('Sets an intent for David', async () => {
-        await market.setIntent(davidAddress, 1000, getExpiry(), DAVID_LOC)
+        await market.setIntent(davidAddress, 100, getExpiry(), DAVID_LOC)
       })
 
       it('Ensure ordering is correct', async () => {
         const intents = await market.fetchIntents(4)
-        assert(intents[0] == CAROL_LOC, 'Carol is not first')
-        assert(intents[1] == DAVID_LOC, 'David should be second')
+        assert(intents[0] == ALICE_LOC, 'Alice is not first')
+        assert(intents[1] == CAROL_LOC, 'David should be second')
         assert(intents[2] == BOB_LOC, 'Bob should be third')
-        assert(intents[3] == ALICE_LOC, 'Alice should be fourth')
+        assert(intents[3] == DAVID_LOC, 'David should be fourth')
       })
     })
 
