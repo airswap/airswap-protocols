@@ -116,12 +116,12 @@ contract Market is Ownable {
     Intent memory newIntent = Intent(_staker, _amount, _expiry, _locator);
 
     // Insert after the next highest amount on the list.
-    insertIntent(newIntent, findPosition(_amount));
+    if (insertIntent(newIntent, findPosition(_amount))) {
+      // Increment the length of the list if successful.
+      length = length + 1;
 
-    // Increment the length of the list.
-    length = length + 1;
-
-    emit SetIntent(_staker, _amount, _expiry, _locator, makerToken, takerToken);
+      emit SetIntent(_staker, _amount, _expiry, _locator, makerToken, takerToken);
+    }
   }
 
   /**
@@ -181,16 +181,9 @@ contract Market is Ownable {
   ) internal view returns (
     bool
   ) {
-    if (list[_staker][PREV].staker == HEAD && list[_staker][NEXT].staker == HEAD) {
-      if (list[HEAD][NEXT].staker == _staker) {
-         return true;
-      }
-    } else {
-      if (list[_staker][PREV].staker != address(0)) {
-        if (list[list[_staker][PREV].staker][NEXT].staker == _staker) {
-          return true;
-        }
-      }
+    if (list[_staker][PREV].staker != address(0) &&
+      list[list[_staker][PREV].staker][NEXT].staker == _staker) {
+        return true;
     }
     return false;
   }
