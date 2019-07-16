@@ -92,7 +92,7 @@ contract Market is Ownable {
     takerToken = _takerToken;
 
     // Initialize the list.
-    Intent memory head = Intent(HEAD, 0, 0, "0x0");
+    Intent memory head = Intent(HEAD, 0, 0, byte(0));
     list[HEAD][PREV] = head;
     list[HEAD][NEXT] = head;
   }
@@ -169,7 +169,7 @@ contract Market is Ownable {
       // Return the next intent from the previous neighbor.
       return list[list[_staker][PREV].staker][NEXT];
     }
-    return Intent(address(0), 0, 0, 0x0);
+    return Intent(address(0), 0, 0, byte(0));
   }
 
   /**
