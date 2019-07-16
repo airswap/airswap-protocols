@@ -254,29 +254,29 @@ contract Market is Ownable {
   }
 
   /**
-    * @notice Insert a new intent before an existing intent
+    * @notice Insert a new intent in the list, before the specified _nextIntent
     *
     * @param _newIntent Intent to be inserted
-    * @param _existingIntent Intent
+    * @param _nextIntent Intent to follow _newIntent
     */
   function insertIntent(
     Intent memory _newIntent,
-    Intent memory _existingIntent
+    Intent memory _nextIntent
   ) internal returns (
     bool
   ) {
 
     // Ensure the _existing intent is in the list.
-    if (!hasIntent(_existingIntent.staker)) {
+    if (!hasIntent(_nextIntent.staker)) {
       return false;
     }
 
     // Get the intent following the _existing intent.
-    Intent memory precursor = list[_existingIntent.staker][PREV];
+    Intent memory previousIntent = list[_nextIntent.staker][PREV];
 
     // Link the new _intent into place.
-    link(precursor, _newIntent);
-    link(_newIntent, _existingIntent);
+    link(previousIntent, _newIntent);
+    link(_newIntent, _nextIntent);
 
     return true;
   }
