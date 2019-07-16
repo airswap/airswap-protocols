@@ -72,8 +72,6 @@ contract(
 
       it('Ensure ordering is correct', async () => {
         const intents = await market.fetchIntents(5)
-        console.log(intents)
-        console.log(EVE_LOC)
         assert(intents[0] == ALICE_LOC, 'Alice is not first')
         assert(intents[1] == CAROL_LOC, 'Carol should be second')
         assert(intents[2] == BOB_LOC, 'Bob should be third')
