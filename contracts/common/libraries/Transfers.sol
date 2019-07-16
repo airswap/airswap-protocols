@@ -15,6 +15,7 @@
 */
 
 pragma solidity 0.5.10;
+pragma experimental ABIEncoderV2;
 
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/token/ERC721/IERC721.sol";
@@ -31,7 +32,7 @@ library Transfers {
   function send(
     address _receiver,
     uint256 _value
-  ) internal {
+  ) external {
     // Cast the order maker as a payable address for ether transfer.
     address payable wallet = address(uint160(_receiver));
 
@@ -44,7 +45,7 @@ library Transfers {
       address _from,
       address _to,
       uint256 _param
-  ) internal {
+  ) external {
     if (_token._supportsInterface(INTERFACE_ERC721)) {
       IERC721(_token)
         .safeTransferFrom(_from, _to, _param);
@@ -55,12 +56,12 @@ library Transfers {
   }
 
   function safeTransferAny(
-      bytes memory _side,
+      bytes calldata _side,
       address _from,
       address _to,
       uint256 _param,
       address _token
-  ) internal {
+  ) external {
     if (_token._supportsInterface(INTERFACE_ERC721)) {
       IERC721(_token).safeTransferFrom(_from, _to, _param);
     } else {

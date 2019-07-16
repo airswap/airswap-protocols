@@ -1,10 +1,13 @@
 const Wrapper = artifacts.require('Wrapper')
 const Swap = artifacts.require('@airswap/swap/contracts/Swap.sol')
-const Types = artifacts.require('@airswap/lib/contracts/Types.sol')
+const Transfers = artifacts.require('@airswap/common/libraries/Transfers.sol')
+const Types = artifacts.require('@airswap/common/libraries/Types.sol')
 const WETH9 = artifacts.require('@airswap/tokens/contracts/WETH9.sol')
 
 module.exports = deployer => {
+  deployer.deploy(Transfers)
   deployer.deploy(Types)
+  deployer.link(Transfers, Swap)
   deployer.link(Types, Swap)
   deployer.deploy(WETH9)
   deployer

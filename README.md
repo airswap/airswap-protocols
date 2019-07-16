@@ -13,15 +13,15 @@
 
 ## Smart Contracts
 
-| Package                                    | Version                                                                                                     | Description                                |
-| :----------------------------------------- | :---------------------------------------------------------------------------------------------------------- | :----------------------------------------- |
-| [`@airswap/swap`](/contracts/swap)         | [![npm](https://img.shields.io/npm/v/airswap/swap.svg)](https://www.npmjs.com/package/airswap/swap)         | Atomic Swap                                |
-| [`@airswap/indexer`](/contracts/indexer)   | [![npm](https://img.shields.io/npm/v/airswap/indexer.svg)](https://www.npmjs.com/package/airswap/indexer)   | Indexer with Staking                       |
-| [`@airswap/delegate`](/contracts/delegate) | [![npm](https://img.shields.io/npm/v/airswap/delegate.svg)](https://www.npmjs.com/package/airswap/delegate) | Delegate with Rules                        |
-| [`@airswap/market`](/contracts/market)     | [![npm](https://img.shields.io/npm/v/airswap/market.svg)](https://www.npmjs.com/package/airswap/market)     | Intents for a Token Pair                   |
-| [`@airswap/consumer`](/contracts/consumer) | [![npm](https://img.shields.io/npm/v/airswap/consumer.svg)](https://www.npmjs.com/package/airswap/consumer) | Liquidity Consumer                         |
-| [`@airswap/lib`](/contracts/lib)           | [![npm](https://img.shields.io/npm/v/airswap/lib.svg)](https://www.npmjs.com/package/airswap/tokens)        | Libraries for Types, Signatures, Transfers |
-| [`@airswap/tokens`](/contracts/tokens)     | [![npm](https://img.shields.io/npm/v/airswap/tokens.svg)](https://www.npmjs.com/package/airswap/tokens)     | Standard Tokens                            |
+| Package                                    | Version                                                                                                     | Description              |
+| :----------------------------------------- | :---------------------------------------------------------------------------------------------------------- | :----------------------- |
+| [`@airswap/swap`](/contracts/swap)         | [![npm](https://img.shields.io/npm/v/airswap/swap.svg)](https://www.npmjs.com/package/airswap/swap)         | Atomic Swap              |
+| [`@airswap/indexer`](/contracts/indexer)   | [![npm](https://img.shields.io/npm/v/airswap/indexer.svg)](https://www.npmjs.com/package/airswap/indexer)   | Indexer with Staking     |
+| [`@airswap/delegate`](/contracts/delegate) | [![npm](https://img.shields.io/npm/v/airswap/delegate.svg)](https://www.npmjs.com/package/airswap/delegate) | Delegate with Rules      |
+| [`@airswap/market`](/contracts/market)     | [![npm](https://img.shields.io/npm/v/airswap/market.svg)](https://www.npmjs.com/package/airswap/market)     | Intents for a Token Pair |
+| [`@airswap/consumer`](/contracts/consumer) | [![npm](https://img.shields.io/npm/v/airswap/consumer.svg)](https://www.npmjs.com/package/airswap/consumer) | Liquidity Consumer       |
+| [`@airswap/common`](/contracts/common)     | [![npm](https://img.shields.io/npm/v/airswap/common.svg)](https://www.npmjs.com/package/airswap/common)     | Common Libraries         |
+| [`@airswap/tokens`](/contracts/tokens)     | [![npm](https://img.shields.io/npm/v/airswap/tokens.svg)](https://www.npmjs.com/package/airswap/tokens)     | Standard Tokens          |
 
 ## JavaScript
 

@@ -17,6 +17,10 @@
 pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
+import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
+import "openzeppelin-solidity/contracts/token/ERC721/IERC721.sol";
+import "openzeppelin-solidity/contracts/introspection/ERC165Checker.sol";
+
 /**
   * @title Types: Library of Swap Protocol Types and Hashes
   */
@@ -46,7 +50,7 @@ library Types {
     bytes1 version;
   }
 
-  bytes32 internal constant DOMAIN_TYPEHASH = keccak256(abi.encodePacked(
+  bytes32 constant DOMAIN_TYPEHASH = keccak256(abi.encodePacked(
     "EIP712Domain(",
     "string name,",
     "string version,",
@@ -54,7 +58,7 @@ library Types {
     ")"
   ));
 
-  bytes32 internal constant ORDER_TYPEHASH = keccak256(abi.encodePacked(
+  bytes32 constant ORDER_TYPEHASH = keccak256(abi.encodePacked(
     "Order(",
     "uint256 nonce,",
     "uint256 expiry,",
@@ -69,7 +73,7 @@ library Types {
     ")"
   ));
 
-  bytes32 internal constant PARTY_TYPEHASH = keccak256(abi.encodePacked(
+  bytes32 constant PARTY_TYPEHASH = keccak256(abi.encodePacked(
     "Party(",
     "address wallet,",
     "address token,",
@@ -78,8 +82,8 @@ library Types {
   ));
 
   function hashParty(
-    Party memory _party
-  ) internal pure returns (
+    Party calldata _party
+  ) external pure returns (
     bytes32
   ) {
     return keccak256(abi.encode(
@@ -91,9 +95,9 @@ library Types {
   }
 
   function hashOrder(
-    Order memory _order,
+    Order calldata _order,
     bytes32 _domainSeparator
-  ) internal pure returns (bytes32) {
+  ) external pure returns (bytes32) {
     return keccak256(abi.encodePacked(
       EIP191_HEADER,
       _domainSeparator,
@@ -101,18 +105,33 @@ library Types {
         ORDER_TYPEHASH,
         _order.nonce,
         _order.expiry,
-        hashParty(_order.maker),
-        hashParty(_order.taker),
-        hashParty(_order.affiliate)
+        keccak256(abi.encode(
+          PARTY_TYPEHASH,
+          _order.maker.wallet,
+          _order.maker.token,
+          _order.maker.param
+        )),
+        keccak256(abi.encode(
+          PARTY_TYPEHASH,
+          _order.taker.wallet,
+          _order.taker.token,
+          _order.taker.param
+        )),
+        keccak256(abi.encode(
+          PARTY_TYPEHASH,
+          _order.affiliate.wallet,
+          _order.affiliate.token,
+          _order.affiliate.param
+        ))
       ))
     ));
   }
 
   function hashDomain(
-    bytes memory _name,
-    bytes memory _version,
+    bytes calldata _name,
+    bytes calldata _version,
     address _verifyingContract
-  ) public pure returns (bytes32) {
+  ) external pure returns (bytes32) {
     return keccak256(abi.encode(
       DOMAIN_TYPEHASH,
       keccak256(_name),
