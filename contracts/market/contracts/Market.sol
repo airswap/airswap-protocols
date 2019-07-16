@@ -111,6 +111,7 @@ contract Market is Ownable {
     uint256 _expiry,
     bytes32 _locator
   ) external onlyOwner {
+    require(_amount > 0, "Amount must be >0");
 
     Intent memory newIntent = Intent(_staker, _amount, _expiry, _locator);
 
