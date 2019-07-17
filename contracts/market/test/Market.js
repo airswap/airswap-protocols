@@ -195,6 +195,15 @@ contract(
         // Market length still includes carol's intent
         assert(BN(await market.length()).eq(6), 'Market length is incorrect')
       })
+
+      it('If an intent has expired, the end of the returned list is 0x0', async () => {
+        const intents = await market.fetchIntents(7)
+        assert(BN(intents.length).eq(6), 'Returned intents wrong length')
+        assert(
+          intents[5] == NULL_LOCATOR,
+          'Final slot should be 0x0 - carol=expired'
+        )
+      })
     })
 
     describe('Unset', () => {
@@ -215,6 +224,11 @@ contract(
         assert(intents[0] == ALICE_LOC, 'Alice is not first')
         assert(intents[1] == EVE_LOC, 'Eve should be second')
         assert(intents[2] == DAVID_LOC, 'David should be third')
+        assert(
+          intents[3] == NULL_LOCATOR,
+          'Final slot should be 0x0 - carol=expired'
+        )
+
         assert(BN(await market.length()).eq(4), 'Market length is incorrect')
       })
     })
