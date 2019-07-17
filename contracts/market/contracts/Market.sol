@@ -202,8 +202,6 @@ contract Market is Ownable {
   ) public view returns (
     bytes32[] memory result
   ) {
-    bool endReached = false;
-
     // Limit results to list length or _count.
     uint256 limit = length;
     if (_count < length) {
@@ -216,13 +214,13 @@ contract Market is Ownable {
 
     // Iterate over the list until the end or limit.
     uint256 i = 0;
-    while (i < limit && !endReached) {
+    while (i < limit) {
       if (intent.expiry >= block.timestamp) {
         result[i] = intent.locator;
         i = i + 1;
       } else {
         if (intent.staker == HEAD) {
-          endReached = true;
+          break;
         }
       }
 
