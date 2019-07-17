@@ -112,10 +112,7 @@ function getBuyQuote(
   uint256 delegateAmount,
   address delegateToken,
   address consumerToken
-) external view returns (
-  bool available,
-  uint256 consumerAmount
-)
+) external view returns (uint256)
 ```
 
 ### Params
@@ -142,10 +139,7 @@ function getSellQuote(
   uint256 consumerAmount,
   address consumerToken,
   address delegateToken
-) external view returns (
-  bool available,
-  uint256 delegateAmount
-)
+) external view returns (uint256)
 ```
 
 ### Params
@@ -171,11 +165,7 @@ Get the maximum quote from the Delegate.
 function getMaxQuote(
   address delegateToken,
   address consumerToken
-) external view returns (
-  bool available,
-  uint256 delegateAmount,
-  uint256 consumerAmount
-)
+) external view returns (uint256, uint256)
 ```
 
 ### Params
