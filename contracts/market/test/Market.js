@@ -30,11 +30,24 @@ const EVE_LOC = intents.serialize(
   '0xd0a7a17ef9116668a299476f6230791ae0c5c8ba'
 )
 
+const ZARA_LOC = intents.serialize(
+  intents.Locators.CONTRACT,
+  '0xa916a5830d21bc05c4c56ce5452cc96d8edd8f8c'
+)
+
 let market
 
 contract(
   'Market',
-  ([aliceAddress, bobAddress, carolAddress, davidAddress, eveAddress, fredAddress]) => {
+  ([
+    aliceAddress,
+    bobAddress,
+    carolAddress,
+    davidAddress,
+    eveAddress,
+    fredAddress,
+    zaraAddress,
+  ]) => {
     describe('Deploying...', () => {
       it('Deployed trading token "AST"', async () => {
         tokenAST = await FungibleToken.new()
@@ -66,17 +79,23 @@ contract(
         await market.setIntent(davidAddress, 100, getExpiry(), DAVID_LOC)
       })
 
+      it('Sets an intent of 0 for zara', async () => {
+        await market.setIntent(zaraAddress, 0, getExpiry(), ZARA_LOC)
+        const intents = await market.fetchIntents(7)
+      })
+
       it("Sets an intent for Eve equal to Bob's intent", async () => {
         await market.setIntent(eveAddress, 500, getExpiry(), EVE_LOC)
       })
 
       it('Ensure ordering is correct', async () => {
-        const intents = await market.fetchIntents(5)
+        const intents = await market.fetchIntents(7)
         assert(intents[0] == ALICE_LOC, 'Alice is not first')
         assert(intents[1] == CAROL_LOC, 'Carol should be second')
         assert(intents[2] == BOB_LOC, 'Bob should be third')
         assert(intents[3] == EVE_LOC, 'Eve should be fourth')
-        assert(intents[4] == DAVID_LOC, 'David should be last')
+        assert(intents[4] == DAVID_LOC, 'David should be fifth')
+        assert(intents[5] == ZARA_LOC, 'Zara should be last')
       })
     })
 
@@ -101,6 +120,12 @@ contract(
         equal((await market.getIntent(eveAddress)).locator, EVE_LOC)
       })
 
+      it('Gets the intent for Zara', async () => {
+        let zaraIntent = await market.getIntent(zaraAddress)
+        equal(zaraIntent.locator, ZARA_LOC)
+        equal(zaraIntent.amount, 0)
+      })
+
       it('Gets a non existent intent', async () => {
         equal((await market.getIntent(fredAddress)).locator, NULL_LOCATOR)
       })
@@ -110,6 +135,12 @@ contract(
       it('Unsets intent for Bob', async () => {
         market.unsetIntent(bobAddress)
         equal((await market.getIntent(bobAddress)).locator, NULL_LOCATOR)
+        assert(BN(await market.length()).eq(5))
+      })
+
+      it('Unsets intent for Zara', async () => {
+        market.unsetIntent(zaraAddress)
+        equal((await market.getIntent(zaraAddress)).locator, NULL_LOCATOR)
         assert(BN(await market.length()).eq(4))
       })
 

@@ -111,8 +111,6 @@ contract Market is Ownable {
     uint256 _expiry,
     bytes32 _locator
   ) external onlyOwner {
-    require(_amount > 0, "Amount must be >0");
-
     Intent memory newIntent = Intent(_staker, _amount, _expiry, _locator);
 
     // Insert after the next highest amount on the list.
@@ -217,7 +215,7 @@ contract Market is Ownable {
 
     // Iterate over the list until the end or limit.
     uint256 i = 0;
-    while (intent.amount > 0 && i < limit) {
+    while (i < limit) {
       if (intent.expiry >= block.timestamp) {
         result[i] = intent.locator;
         i = i + 1;
@@ -236,9 +234,13 @@ contract Market is Ownable {
   ) internal view returns (
     Intent memory
   ) {
-
     // Get the first intent in the list.
     Intent storage intent = list[HEAD][NEXT];
+
+    if (_amount == 0) {
+      // return the head of the list
+      return list[intent.staker][PREV];
+    }
 
     // Iterate through the list until a lower amount is found.
     while (_amount <= intent.amount) {
@@ -265,10 +267,10 @@ contract Market is Ownable {
       return false;
     }
 
-    // Get the intent following the _existing intent.
+    // Get the intent before the _nextIntent.
     Intent memory previousIntent = list[_nextIntent.staker][PREV];
 
-    // Link the new _intent into place.
+    // Link the _newIntent into place.
     link(previousIntent, _newIntent);
     link(_newIntent, _nextIntent);
 
