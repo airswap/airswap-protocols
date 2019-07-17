@@ -3,7 +3,6 @@ const FungibleToken = artifacts.require('FungibleToken')
 
 const { emitted, reverted, equal, ok } = require('@airswap/test-utils').assert
 const { balances } = require('@airswap/test-utils').balances
-const { getExpiry } = require('@airswap/test-utils').time
 const { intents } = require('@airswap/indexer-utils')
 
 const ALICE_LOC = intents.serialize(
@@ -59,7 +58,7 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenDAI.address,
           tokenWETH.address,
           100,
-          getExpiry(),
+          1,
           ALICE_LOC,
           {
             from: aliceAddress,
@@ -75,7 +74,7 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenWETH.address,
           tokenDAI.address,
           100,
-          getExpiry(),
+          1,
           ALICE_LOC,
           {
             from: aliceAddress,
@@ -93,7 +92,7 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenWETH.address,
           tokenDAI.address,
           500,
-          getExpiry(),
+          1,
           ALICE_LOC,
           {
             from: aliceAddress,
@@ -113,7 +112,7 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenWETH.address,
           tokenDAI.address,
           500,
-          getExpiry(),
+          1,
           ALICE_LOC,
           {
             from: aliceAddress,
@@ -141,7 +140,7 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenWETH.address,
           tokenDAI.address,
           500,
-          getExpiry(),
+          1,
           ALICE_LOC,
           {
             from: aliceAddress,
@@ -206,7 +205,7 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenWETH.address,
           tokenDAI.address,
           1000,
-          getExpiry(),
+          1,
           ALICE_LOC,
           {
             from: aliceAddress,
@@ -241,7 +240,7 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenWETH.address,
           tokenDAI.address,
           1000,
-          getExpiry(),
+          1,
           ALICE_LOC,
           {
             from: aliceAddress,
@@ -284,7 +283,7 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenWETH.address,
           tokenDAI.address,
           1000,
-          getExpiry(),
+          1,
           ALICE_LOC,
           {
             from: aliceAddress,

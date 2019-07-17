@@ -25,7 +25,8 @@ interface IIndexer {
 
   event Stake(
     address wallet,
-    uint256 amount
+    uint256 amount,
+    uint256 periods
   );
 
   event Unstake(

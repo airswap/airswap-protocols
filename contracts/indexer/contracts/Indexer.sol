@@ -33,6 +33,12 @@ contract Indexer is IIndexer, Ownable {
   // Minimum token amount required for staking
   uint256 public stakeMinimum;
 
+  // Length of time in seconds of a staking period
+  uint256 public stakePeriodLength;
+
+  // Time at which the contract was created
+  uint256 public creationTime;
+
   // Mapping of token to token for market lookup
   mapping (address => mapping (address => Market)) public markets;
 
@@ -47,10 +53,12 @@ contract Indexer is IIndexer, Ownable {
     */
   constructor(
     address _stakeToken,
-    uint256 _stakeMinimum
+    uint256 _stakeMinimum,
+    uint256 _stakePeriodLength
   ) public {
     stakeToken = IERC20(_stakeToken);
     stakeMinimum = _stakeMinimum;
+    stakePeriodLength = _stakePeriodLength;
     emit SetStakeMinimum(_stakeMinimum);
   }
 
@@ -121,14 +129,14 @@ contract Indexer is IIndexer, Ownable {
     * @param _makerToken address
     * @param _takerToken address
     * @param _amount uint256
-    * @param _expiry uint256
+    * @param _periods uint256
     * @param _locator bytes32
     */
   function setIntent(
     address _makerToken,
     address _takerToken,
     uint256 _amount,
-    uint256 _expiry,
+    uint256 _periods,
     bytes32 _locator
   ) external {
 
@@ -148,10 +156,16 @@ contract Indexer is IIndexer, Ownable {
     require(stakeToken.transferFrom(msg.sender, address(this), _amount),
       "UNABLE_TO_STAKE");
 
-    emit Stake(msg.sender, _amount);
+    emit Stake(msg.sender, _amount, _periods);
+
+    // Calculate the score of the intent for ordering.
+    uint256 score = _amount / _periods;
+
+    // Calculate the expiry of the intent.
+    uint256 expiry = block.timestamp + (_periods * stakePeriodLength);
 
     // Set the intent on the market.
-    markets[_makerToken][_takerToken].setIntent(msg.sender, _amount, _expiry, _locator);
+    markets[_makerToken][_takerToken].setIntent(msg.sender, score, expiry, _locator);
   }
 
   /**
