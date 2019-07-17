@@ -52,7 +52,7 @@ constructor(
 
 ## Create a Market
 
-If none exists, deploy a new `Market` contract for the given token pair and return the address of the new or existing market. For example, an intent to trade ETH/DAI.
+If none exists, deploy a new `Market` contract for the given token pair and return the address of the new or existing market. For example, an intent to trade WETH/DAI.
 
 ```Solidity
 function createMarket(
@@ -70,10 +70,10 @@ function createMarket(
 
 ## Create a Two-Sided Market
 
-Call `createMarket` twice to for both sides of a market. For example, an intent to trade both ETH/DAI and DAI/ETH.
+Call `createMarket` twice to for both sides of a market. For example, an intent to trade both WETH/DAI and DAI/WETH.
 
 ```Solidity
-function createMarket(
+function createTwoSidedMarket(
   address _makerToken,
   address _takerToken
 ) public returns (address, address)
@@ -172,7 +172,7 @@ function setIntent(
 Call `setIntent` for both sides of a market.
 
 ```Solidity
-function setIntent(
+function setTwoSidedIntent(
   address _tokenOne,
   address _tokenTwo,
   uint256 _amount,
@@ -221,7 +221,7 @@ function unsetIntent(
 Call `unsetIntent` for both sides of a market.
 
 ```Solidity
-function setIntent(
+function setTwoSidedIntent(
   address _tokenOne,
   address _tokenTwo
 ) public
@@ -309,7 +309,7 @@ Alice has deployed a `Delegate` contract to address `0x8a56f218f7113f09bb4155ed8
 ```
 const { intents } = require('@airswap/indexer-utils')
 const locator = intents.serialize(
-  intents.Locators.ETH,
+  intents.Locators.CONTRACT,
   '0x8a56f218f7113f09bb4155ed8283bbca9d2ccb74'
 )
 // Looks like: 0x8a56f218f7113f09bb4155ed8283bbca9d2ccb74000000000000000000000001
