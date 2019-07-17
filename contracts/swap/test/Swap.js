@@ -13,8 +13,6 @@ const { allowances, balances } = require('@airswap/test-utils').balances
 const { getLatestTimestamp } = require('@airswap/test-utils').time
 const { orders, signatures } = require('@airswap/order-utils')
 
-const defaultAuthExpiry = orders.generateExpiry()
-
 contract('Swap', ([aliceAddress, bobAddress, carolAddress, davidAddress]) => {
   let swapContract
   let swapAddress
@@ -27,6 +25,8 @@ contract('Swap', ([aliceAddress, bobAddress, carolAddress, davidAddress]) => {
   let swapSimple
   let cancel
   let invalidate
+
+  let defaultAuthExpiry
 
   orders.setKnownAccounts([
     aliceAddress,
@@ -172,7 +172,7 @@ contract('Swap', ([aliceAddress, bobAddress, carolAddress, davidAddress]) => {
         taker: {
           wallet: bobAddress,
         },
-        expiry: 0,
+        expiry: (await getLatestTimestamp()) - 10,
       })
       await reverted(
         swap(order, signature, { from: bobAddress }),
@@ -265,6 +265,7 @@ contract('Swap', ([aliceAddress, bobAddress, carolAddress, davidAddress]) => {
     })
 
     it('Alice authorizes David to make orders on her behalf', async () => {
+      defaultAuthExpiry = await orders.generateExpiry(1)
       emitted(
         await swapContract.authorize(davidAddress, defaultAuthExpiry, {
           from: aliceAddress,
@@ -460,9 +461,6 @@ contract('Swap', ([aliceAddress, bobAddress, carolAddress, davidAddress]) => {
   })
 
   describe('Cancels', () => {
-    let _order
-    let _signature
-
     before('Alice creates orders with nonces 1, 2, 3', async () => {
       const {
         order: orderOne,

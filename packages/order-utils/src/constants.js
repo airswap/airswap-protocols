@@ -17,6 +17,7 @@
 module.exports = {
   DOMAIN_NAME: 'SWAP',
   DOMAIN_VERSION: '2',
+  SECONDS_IN_DAY: 86400,
   types: {
     EIP712Domain: [
       { name: 'name', type: 'string' },

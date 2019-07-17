@@ -5,7 +5,7 @@ const FungibleToken = artifacts.require('FungibleToken')
 
 const { equal } = require('@airswap/test-utils').assert
 const {
-  getLatestTimestamp,
+  getTimestampPlusDays,
   advanceTimeAndBlock,
 } = require('@airswap/test-utils').time
 const { intents } = require('@airswap/indexer-utils')
@@ -68,61 +68,55 @@ contract(
 
     describe('Set', () => {
       it('Sets an intent for Alice', async () => {
-        let currentTime = await getLatestTimestamp()
         await market.setIntent(
           aliceAddress,
           2000,
-          currentTime + SECONDS_IN_DAY * 3,
+          await getTimestampPlusDays(3),
           ALICE_LOC
         )
       })
 
       it('Sets an intent for Bob', async () => {
-        let currentTime = await getLatestTimestamp()
         await market.setIntent(
           bobAddress,
           500,
-          currentTime + SECONDS_IN_DAY * 2,
+          await getTimestampPlusDays(2),
           BOB_LOC
         )
       })
 
       it('Sets an intent for Carol', async () => {
-        let currentTime = await getLatestTimestamp()
         await market.setIntent(
           carolAddress,
           1500,
-          currentTime + SECONDS_IN_DAY * 1,
+          await getTimestampPlusDays(1),
           CAROL_LOC
         )
       })
 
       it('Sets an intent for David', async () => {
-        let currentTime = await getLatestTimestamp()
         await market.setIntent(
           davidAddress,
           100,
-          currentTime + SECONDS_IN_DAY * 3,
+          await getTimestampPlusDays(3),
           DAVID_LOC
         )
       })
 
       it('Sets an intent of 0 for zara', async () => {
-        let currentTime = await getLatestTimestamp()
         await market.setIntent(
           zaraAddress,
           0,
-          currentTime + SECONDS_IN_DAY * 4,
+          await getTimestampPlusDays(4),
           ZARA_LOC
         )
       })
 
       it("Sets an intent for Eve equal to Bob's intent", async () => {
-        let currentTime = await getLatestTimestamp()
         await market.setIntent(
           eveAddress,
           500,
-          currentTime + SECONDS_IN_DAY * 2,
+          await getTimestampPlusDays(2),
           EVE_LOC
         )
       })

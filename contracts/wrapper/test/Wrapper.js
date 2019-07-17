@@ -4,7 +4,7 @@ const WETH9 = artifacts.require('WETH9')
 const FungibleToken = artifacts.require('FungibleToken')
 
 const { emitted, getResult } = require('@airswap/test-utils').assert
-const { getExpiry } = require('@airswap/test-utils').time
+const { getTimestampPlusDays } = require('@airswap/test-utils').time
 const { orders, signatures } = require('@airswap/order-utils')
 
 let swapContract
@@ -105,9 +105,11 @@ contract('Wrapper', ([aliceAddress, bobAddress, carolAddress]) => {
 
     it('Alice authorizes the Wrapper to send orders on her behalf', async () => {
       emitted(
-        await swapContract.authorize(wrapperAddress, getExpiry(), {
-          from: aliceAddress,
-        }),
+        await swapContract.authorize(
+          wrapperAddress,
+          await getTimestampPlusDays(1),
+          { from: aliceAddress }
+        ),
         'Authorize'
       )
     })
