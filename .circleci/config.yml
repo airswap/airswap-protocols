@@ -21,16 +21,18 @@ references:
           - v1-dependencies-{{ checksum "package.json" }}
           - v1-dependencies-
       - run:
-          name: yarn install
+          name: yarn install and dependencies
           command: |
             yarn install
-      - run:
-          name: Run Tests
-          command: |
-            yarn test
+            sudo yarn global add ganache-cli
       - run:
           name: yarn lint
           command: yarn lint
+      - run:
+          name: Run Tests
+          command: |
+            ganache-cli -p 8545 &
+            yarn test
       - save_cache:
           paths:
             - node_modules
