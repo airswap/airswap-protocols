@@ -88,7 +88,7 @@ contract(
             tokenWETH.address,
             tokenDAI.address,
             500,
-            getTimestampPlusDays(1),
+            await getTimestampPlusDays(1),
             location,
             {
               from: aliceAddress,
