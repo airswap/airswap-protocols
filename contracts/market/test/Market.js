@@ -192,6 +192,8 @@ contract(
         assert(intents[2] == EVE_LOC, 'Eve should be third')
         assert(intents[3] == DAVID_LOC, 'David should be fourth')
         assert(intents[4] == ZARA_LOC, 'Zara should be fifth')
+        // The intents array only has 5 entries
+        assert(BN(await intents.length).eq(5), 'Intents length is incorrect')
         // Market length does not know that carol's intent has expired
         assert(BN(await market.length()).eq(6), 'Market length is incorrect')
       })
