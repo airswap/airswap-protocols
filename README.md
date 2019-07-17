@@ -6,7 +6,7 @@
 
 [AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens, initially built on the [Swap Protocol](https://swap.tech/whitepaper/). AirSwap is comprised of several user-facing products including [AirSwap Instant](https://instant.airswap.io/) and [AirSwap Spaces](https://spaces.airswap.io/). This repository contains smart contracts and JavaScript packages for use by developers and traders on the AirSwap network.
 
-[![Discord](https://img.shields.io/discord/590643190281928738.svg)](https://discord.gg/sDKbWUN)
+[![Discord](https://img.shields.io/discord/590643190281928738.svg)](https://discord.gg/ecQbV7H)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 # Packages
