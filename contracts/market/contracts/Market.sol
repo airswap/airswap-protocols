@@ -219,7 +219,9 @@ contract Market is Ownable {
       if (intent.expiry >= block.timestamp) {
         result[i] = intent.locator;
         i = i + 1;
-      }
+      } /** else {
+        limit = limit - 1;
+      } */
       intent = list[intent.staker][NEXT];
     }
     return result;

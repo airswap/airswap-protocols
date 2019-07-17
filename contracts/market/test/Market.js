@@ -4,10 +4,14 @@ const Market = artifacts.require('Market')
 const FungibleToken = artifacts.require('FungibleToken')
 
 const { equal } = require('@airswap/test-utils').assert
-const { getExpiry } = require('@airswap/test-utils').time
+const {
+  getLatestTimestamp,
+  advanceTimeAndBlock,
+} = require('@airswap/test-utils').time
 const { intents } = require('@airswap/indexer-utils')
 
 const NULL_LOCATOR = '0x'.padEnd(66, '0')
+const SECONDS_IN_DAY = 86400
 
 const ALICE_LOC = intents.serialize(
   intents.Locators.INSTANT,
@@ -64,28 +68,63 @@ contract(
 
     describe('Set', () => {
       it('Sets an intent for Alice', async () => {
-        await market.setIntent(aliceAddress, 2000, getExpiry(), ALICE_LOC)
+        let currentTime = await getLatestTimestamp()
+        await market.setIntent(
+          aliceAddress,
+          2000,
+          currentTime + SECONDS_IN_DAY * 3,
+          ALICE_LOC
+        )
       })
 
       it('Sets an intent for Bob', async () => {
-        await market.setIntent(bobAddress, 500, getExpiry(), BOB_LOC)
+        let currentTime = await getLatestTimestamp()
+        await market.setIntent(
+          bobAddress,
+          500,
+          currentTime + SECONDS_IN_DAY * 2,
+          BOB_LOC
+        )
       })
 
       it('Sets an intent for Carol', async () => {
-        await market.setIntent(carolAddress, 1500, getExpiry(), CAROL_LOC)
+        let currentTime = await getLatestTimestamp()
+        await market.setIntent(
+          carolAddress,
+          1500,
+          currentTime + SECONDS_IN_DAY * 1,
+          CAROL_LOC
+        )
       })
 
       it('Sets an intent for David', async () => {
-        await market.setIntent(davidAddress, 100, getExpiry(), DAVID_LOC)
+        let currentTime = await getLatestTimestamp()
+        await market.setIntent(
+          davidAddress,
+          100,
+          currentTime + SECONDS_IN_DAY * 3,
+          DAVID_LOC
+        )
       })
 
       it('Sets an intent of 0 for zara', async () => {
-        await market.setIntent(zaraAddress, 0, getExpiry(), ZARA_LOC)
-        const intents = await market.fetchIntents(7)
+        let currentTime = await getLatestTimestamp()
+        await market.setIntent(
+          zaraAddress,
+          0,
+          currentTime + SECONDS_IN_DAY * 4,
+          ZARA_LOC
+        )
       })
 
       it("Sets an intent for Eve equal to Bob's intent", async () => {
-        await market.setIntent(eveAddress, 500, getExpiry(), EVE_LOC)
+        let currentTime = await getLatestTimestamp()
+        await market.setIntent(
+          eveAddress,
+          500,
+          currentTime + SECONDS_IN_DAY * 2,
+          EVE_LOC
+        )
       })
 
       it('Ensure ordering is correct', async () => {
@@ -131,25 +170,51 @@ contract(
       })
     })
 
+    describe('Fetch', () => {
+      it('Fetches intents', async () => {
+        const intents = await market.fetchIntents(7)
+        assert(intents[0] == ALICE_LOC, 'Alice is not first')
+        assert(intents[1] == CAROL_LOC, 'Carol should be second')
+        assert(intents[2] == BOB_LOC, 'Bob should be third')
+        assert(intents[3] == EVE_LOC, 'Eve should be fourth')
+        assert(intents[4] == DAVID_LOC, 'David should be fifth')
+        assert(intents[5] == ZARA_LOC, 'Zara should be last')
+        assert(BN(await market.length()).eq(6), 'Market length is incorrect')
+      })
+
+      it("Doesn't fetch an expired intent", async () => {
+        // Advance time a day and a half.
+        // This advances past the expiry of Carol's intent
+        await advanceTimeAndBlock(SECONDS_IN_DAY * 1.5)
+        const intents = await market.fetchIntents(7)
+        assert(intents[0] == ALICE_LOC, 'Alice is not first')
+        assert(intents[1] == BOB_LOC, 'Bob should be second')
+        assert(intents[2] == EVE_LOC, 'Eve should be third')
+        assert(intents[3] == DAVID_LOC, 'David should be fourth')
+        assert(intents[4] == ZARA_LOC, 'Zara should be fifth')
+        assert(BN(await market.length()).eq(5), 'Market length is incorrect')
+      })
+    })
+
     describe('Unset', () => {
       it('Unsets intent for Bob', async () => {
         market.unsetIntent(bobAddress)
         equal((await market.getIntent(bobAddress)).locator, NULL_LOCATOR)
-        assert(BN(await market.length()).eq(5))
+        assert(BN(await market.length()).eq(4), 'Market length is incorrect')
       })
 
       it('Unsets intent for Zara', async () => {
         market.unsetIntent(zaraAddress)
         equal((await market.getIntent(zaraAddress)).locator, NULL_LOCATOR)
-        assert(BN(await market.length()).eq(4))
+        assert(BN(await market.length()).eq(3), 'Market length is incorrect')
       })
 
       it('Ensure ordering is correct', async () => {
         const intents = await market.fetchIntents(10)
         assert(intents[0] == ALICE_LOC, 'Alice is not first')
-        assert(intents[1] == CAROL_LOC, 'Carol should be second')
-        assert(intents[2] == EVE_LOC, 'Eve should be third')
-        assert(intents[3] == DAVID_LOC, 'David should be fourth')
+        assert(intents[1] == EVE_LOC, 'Eve should be second')
+        assert(intents[2] == DAVID_LOC, 'David should be third')
+        assert(BN(await market.length()).eq(3), 'Market length is incorrect')
       })
     })
   }
