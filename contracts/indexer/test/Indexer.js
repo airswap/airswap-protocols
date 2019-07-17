@@ -35,7 +35,7 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
     it('Deployed Indexer contract', async () => {
       indexer = await Indexer.deployed({ from: ownerAddress })
       indexerAddress = indexer.address
-      emitted(await indexer.setStakeMinimum(500), 'SetStakeMinimum')
+      emitted(await indexer.setStakeMinimum(250), 'SetStakeMinimum')
     })
   })
 
@@ -283,7 +283,36 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
         await indexer.setIntent(
           tokenWETH.address,
           tokenDAI.address,
-          1000,
+          500,
+          getExpiry(),
+          ALICE_LOC,
+          {
+            from: aliceAddress,
+          }
+        ),
+        'Stake'
+      )
+    })
+
+    it('Bob creates the other side of the market for WETH/DAI', async () => {
+      emitted(
+        await indexer.createTwoSidedMarket(
+          tokenDAI.address,
+          tokenWETH.address,
+          {
+            from: bobAddress,
+          }
+        ),
+        'CreateMarket'
+      )
+    })
+
+    it('Alice attempts to stake and set an intent and succeeds', async () => {
+      emitted(
+        await indexer.setTwoSidedIntent(
+          tokenWETH.address,
+          tokenDAI.address,
+          250,
           getExpiry(),
           ALICE_LOC,
           {
