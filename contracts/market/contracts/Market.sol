@@ -200,39 +200,34 @@ contract Market is Ownable {
   function fetchIntents(
     uint256 _count
   ) public view returns (
-    bytes32[] memory
+    bytes32[] memory result
   ) {
+    bool endReached = false;
 
     // Limit results to list length or _count.
     uint256 limit = length;
     if (_count < length) {
       limit = _count;
     }
-    bytes32[] memory tempResult = new bytes32[](limit);
+    result = new bytes32[](limit);
 
     // Get the first intent in the list.
     Intent storage intent = list[HEAD][NEXT];
 
     // Iterate over the list until the end or limit.
     uint256 i = 0;
-    while (i < limit) {
+    while (i < limit && !endReached) {
       if (intent.expiry >= block.timestamp) {
-        tempResult[i] = intent.locator;
+        result[i] = intent.locator;
         i = i + 1;
       } else {
-        limit = limit - 1;
+        if (intent.staker == HEAD) {
+          endReached = true;
+        }
       }
+
       intent = list[intent.staker][NEXT];
     }
-
-    if (limit < tempResult.length) {
-      bytes32[] memory result = new bytes32[](limit);
-      for (i = 0; i < limit; i++) {
-        result[i] = tempResult[i];
-      }
-      return result;
-    }
-    return tempResult;
   }
 
   /**
