@@ -69,7 +69,7 @@ jobs:
               echo "Working on $file"
               cd $file
               NPM_NAME=$(node -p "require('./package.json').name")
-              NPM_VERSION=$(npm view $NPM_NAME)
+              NPM_VERSION=$(npm view $NPM_NAME || :)
               LOCAL_VERSION=$(node -p "require('./package.json').version")
               echo $NPM_NAME
               echo $NPM_VERSION
