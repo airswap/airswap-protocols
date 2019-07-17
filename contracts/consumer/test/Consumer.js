@@ -85,7 +85,7 @@ contract(
             tokenWETH.address,
             tokenDAI.address,
             500,
-            getExpiry(),
+            1,
             location,
             {
               from: aliceAddress,

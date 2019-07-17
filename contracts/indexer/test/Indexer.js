@@ -1,8 +1,18 @@
 const Indexer = artifacts.require('Indexer')
+const Market = artifacts.require('Market')
 const FungibleToken = artifacts.require('FungibleToken')
 
-const { emitted, reverted, equal, ok } = require('@airswap/test-utils').assert
+const ONE_DAY = 60 * 60 * 24
+
+const {
+  emitted,
+  reverted,
+  equal,
+  ok,
+  getResult,
+} = require('@airswap/test-utils').assert
 const { balances } = require('@airswap/test-utils').balances
+const { getLatestTimestamp } = require('@airswap/test-utils').time
 const { intents } = require('@airswap/indexer-utils')
 
 const ALICE_LOC = intents.serialize(
@@ -17,6 +27,8 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
   let tokenAST
   let tokenDAI
   let tokenWETH
+
+  let marketContract
 
   describe('Deploying...', () => {
     it('Deployed staking token "AST"', async () => {
@@ -40,12 +52,14 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
 
   describe('Market setup', () => {
     it('Bob creates a market (collection of intents) for WETH/DAI', async () => {
+      let marketContractAddress
       emitted(
-        await indexer.createMarket(tokenWETH.address, tokenDAI.address, {
+        (tx = await indexer.createMarket(tokenWETH.address, tokenDAI.address, {
           from: bobAddress,
-        }),
+        })),
         'CreateMarket'
       )
+      marketContract = await Market.at(tx.logs[0].address)
     })
 
     it('Bob ensures no intents are on the Indexer', async () => {
@@ -268,7 +282,7 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
       )
     })
 
-    it('Owner attempts to blacklist a market and succeeds', async () => {
+    it('Owner attempts to remove from blacklist and succeeds', async () => {
       emitted(
         await indexer.removeFromBlacklist(tokenDAI.address, {
           from: ownerAddress,
@@ -277,20 +291,46 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
       )
     })
 
-    it('Alice attempts to stake and set an intent and succeeds', async () => {
-      emitted(
-        await indexer.setIntent(
-          tokenWETH.address,
-          tokenDAI.address,
-          1000,
-          1,
-          ALICE_LOC,
-          {
-            from: aliceAddress,
-          }
-        ),
-        'Stake'
+    it('Alice attempts to stake 500 for 1 period and results in score of 500', async () => {
+      const result = await indexer.setIntent(
+        tokenWETH.address,
+        tokenDAI.address,
+        500,
+        1,
+        ALICE_LOC,
+        {
+          from: aliceAddress,
+        }
       )
+
+      const timestamp = await getLatestTimestamp()
+      emitted(await getResult(marketContract, result.tx), 'SetIntent', ev => {
+        return (
+          ev.expiry.toNumber() - timestamp === ONE_DAY &&
+          ev.amount.toNumber() == 500
+        )
+      })
+    })
+
+    it('Alice attempts to stake 500 for 4 periods and results in score of 125', async () => {
+      let result = await indexer.setIntent(
+        tokenWETH.address,
+        tokenDAI.address,
+        500,
+        4,
+        ALICE_LOC,
+        {
+          from: aliceAddress,
+        }
+      )
+
+      const timestamp = await getLatestTimestamp()
+      emitted(await getResult(marketContract, result.tx), 'SetIntent', ev => {
+        return (
+          ev.expiry.toNumber() - timestamp === ONE_DAY * 4 &&
+          ev.amount.toNumber() == 125
+        )
+      })
     })
   })
 })

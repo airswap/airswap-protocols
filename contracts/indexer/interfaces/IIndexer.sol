@@ -35,15 +35,19 @@ interface IIndexer {
   );
 
   event SetStakeMinimum(
-    uint256 amount
+    uint256 _stakeMinimum
+  );
+
+  event SetStakePeriodLength(
+    uint256 _stakePeriodLength
   );
 
   event AddToBlacklist(
-    address token
+    address _token
   );
 
   event RemoveFromBlacklist(
-    address token
+    address _token
   );
 
   function markets(address, address) external returns (address);
@@ -52,9 +56,7 @@ interface IIndexer {
   function createMarket(
     address _makerToken,
     address _takerToken
-  ) external returns (
-    address
-  );
+  ) external returns (address);
 
   function setStakeMinimum(
     uint256 _stakeMinimum
@@ -85,15 +87,11 @@ interface IIndexer {
     address _makerToken,
     address _takerToken,
     uint256 _count
-  ) external view returns (
-    bytes32[] memory
-  );
+  ) external view returns (bytes32[] memory);
 
   function lengthOf(
     address _makerToken,
     address _takerToken
-  ) external view returns (
-    uint256
-  );
+  ) external view returns (uint256);
 
 }

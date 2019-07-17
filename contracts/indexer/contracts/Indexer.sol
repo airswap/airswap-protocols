@@ -36,9 +36,6 @@ contract Indexer is IIndexer, Ownable {
   // Length of time in seconds of a staking period
   uint256 public stakePeriodLength;
 
-  // Time at which the contract was created
-  uint256 public creationTime;
-
   // Mapping of token to token for market lookup
   mapping (address => mapping (address => Market)) public markets;
 
@@ -94,6 +91,20 @@ contract Indexer is IIndexer, Ownable {
   ) external onlyOwner {
     stakeMinimum = _stakeMinimum;
     emit SetStakeMinimum(_stakeMinimum);
+  }
+
+  /**
+    * @notice Set the Staking Period Length
+    * @param _stakePeriodLength uint256
+    */
+  function setStakePeriodLength(
+    uint256 _stakePeriodLength
+  ) external onlyOwner {
+    require(_stakePeriodLength > 0,
+      "PERIOD_LENGTH_TOO_LOW");
+
+    stakePeriodLength = _stakePeriodLength;
+    emit SetStakePeriodLength(_stakePeriodLength);
   }
 
   /**
