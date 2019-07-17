@@ -192,7 +192,8 @@ contract(
         assert(intents[2] == EVE_LOC, 'Eve should be third')
         assert(intents[3] == DAVID_LOC, 'David should be fourth')
         assert(intents[4] == ZARA_LOC, 'Zara should be fifth')
-        assert(BN(await market.length()).eq(5), 'Market length is incorrect')
+        // Market length does not know that carol's intent has expired
+        assert(BN(await market.length()).eq(6), 'Market length is incorrect')
       })
     })
 
@@ -200,13 +201,13 @@ contract(
       it('Unsets intent for Bob', async () => {
         market.unsetIntent(bobAddress)
         equal((await market.getIntent(bobAddress)).locator, NULL_LOCATOR)
-        assert(BN(await market.length()).eq(4), 'Market length is incorrect')
+        assert(BN(await market.length()).eq(5), 'Market length is incorrect')
       })
 
       it('Unsets intent for Zara', async () => {
         market.unsetIntent(zaraAddress)
         equal((await market.getIntent(zaraAddress)).locator, NULL_LOCATOR)
-        assert(BN(await market.length()).eq(3), 'Market length is incorrect')
+        assert(BN(await market.length()).eq(4), 'Market length is incorrect')
       })
 
       it('Ensure ordering is correct', async () => {
@@ -214,7 +215,7 @@ contract(
         assert(intents[0] == ALICE_LOC, 'Alice is not first')
         assert(intents[1] == EVE_LOC, 'Eve should be second')
         assert(intents[2] == DAVID_LOC, 'David should be third')
-        assert(BN(await market.length()).eq(3), 'Market length is incorrect')
+        assert(BN(await market.length()).eq(4), 'Market length is incorrect')
       })
     })
   }
