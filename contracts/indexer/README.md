@@ -52,13 +52,13 @@ constructor(
 
 ## Create a Market
 
-Deploy a new `Market` for the given token pair.
+If none exists, deploy a new `Market` contract for the given token pair and return the address of the new or existing market. For example, an intent to trade WETH/DAI.
 
 ```Solidity
 function createMarket(
   address _makerToken,
   address _takerToken
-) external
+) public returns (address)
 ```
 
 ### Params
@@ -68,11 +68,23 @@ function createMarket(
 | `_makerToken` | `address` | Address of the token that the Maker sends. |
 | `_takerToken` | `address` | Address of the token that the Taker sends. |
 
-### Reverts
+## Create a Two-Sided Market
 
-| Reason                  | Scenario                                      |
-| :---------------------- | :-------------------------------------------- |
-| `MARKET_ALREADY_EXISTS` | There is already a market for the token pair. |
+Call `createMarket` twice to for both sides of a market. For example, an intent to trade both WETH/DAI and DAI/WETH.
+
+```Solidity
+function createTwoSidedMarket(
+  address _tokenOne,
+  address _tokenTwo
+) public returns (address, address)
+```
+
+### Params
+
+| Name        | Type      | Description                                            |
+| :---------- | :-------- | :----------------------------------------------------- |
+| `_tokenOne` | `address` | Address of the token of the first side of the market.  |
+| `_tokenTwo` | `address` | Address of the token of the second side of the market. |
 
 ## Set the Stake Minimum
 
@@ -133,7 +145,7 @@ function setIntent(
   uint256 _amount,
   uint256 _expiry,
   bytes32 _locator
-) external
+) public
 ```
 
 ### Params
@@ -155,6 +167,30 @@ function setIntent(
 | `MINIMUM_NOT_MET`       | The staking amount is insufficient.        |
 | `UNABLE_TO_STAKE`       | The staking amount was not transferred.    |
 
+## Set a Two-Sided Intent to Trade
+
+Call `setIntent` for both sides of a market.
+
+```Solidity
+function setTwoSidedIntent(
+  address _tokenOne,
+  address _tokenTwo,
+  uint256 _amount,
+  uint256 _expiry,
+  bytes32 _locator
+) public
+```
+
+### Params
+
+| Name        | Type      | Description                                            |
+| :---------- | :-------- | :----------------------------------------------------- |
+| `_tokenOne` | `address` | Address of the token of the first side of the market.  |
+| `_tokenTwo` | `address` | Address of the token of the second side of the market. |
+| `_amount`   | `uint256` | Amount of token to stake for EACH market.              |
+| `_expiry`   | `uint256` | Timestamp after which the intent is invalid.           |
+| `_locator`  | `bytes32` | Locator for the peer.                                  |
+
 ## Unset an Intent to Trade
 
 Unset an intent to trade and return staked tokens to the sender.
@@ -163,7 +199,7 @@ Unset an intent to trade and return staked tokens to the sender.
 function unsetIntent(
   address _makerToken,
   address _takerToken
-) external
+) public
 ```
 
 ### Params
@@ -180,19 +216,37 @@ function unsetIntent(
 | `MARKET_IS_BLACKLISTED` | One or both of the tokens are blacklisted. |
 | `MARKET_DOES_NOT_EXIST` | There is no market for the token pair.     |
 
+## Unset a Two-Sided Intent to Trade
+
+Call `unsetIntent` for both sides of a market.
+
+```Solidity
+function setTwoSidedIntent(
+  address _tokenOne,
+  address _tokenTwo
+) public
+```
+
+### Params
+
+| Name        | Type      | Description                                            |
+| :---------- | :-------- | :----------------------------------------------------- |
+| `_tokenOne` | `address` | Address of the token of the first side of the market.  |
+| `_tokenTwo` | `address` | Address of the token of the second side of the market. |
+| `_amount`   | `uint256` | Amount of token to stake for each side.                |
+| `_expiry`   | `uint256` | Timestamp after which the intent is invalid.           |
+| `_locator`  | `bytes32` | Locator for the peer.                                  |
+
 ## Get Intents
 
-Get a list of intents to trade.
+Get a list of intents to trade as bytes32 locators.
 
 ```Solidity
 function getIntents(
   address _makerToken,
   address _takerToken,
   uint256 count
-) external view returns (
-  bool available,
-  bytes32[] memory locators
-)
+) external view returns (bytes32[] memory)
 ```
 
 ### Params
@@ -218,10 +272,7 @@ Get the length of the list of intents for a token pair.
 function lengthOf(
   address _makerToken,
   address _takerToken
-) external view returns (
-  bool available,
-  uint256 length
-)
+) external view returns (uint256)
 ```
 
 ### Params
@@ -258,7 +309,7 @@ Alice has deployed a `Delegate` contract to address `0x8a56f218f7113f09bb4155ed8
 ```
 const { intents } = require('@airswap/indexer-utils')
 const locator = intents.serialize(
-  intents.Locators.ETH,
+  intents.Locators.CONTRACT,
   '0x8a56f218f7113f09bb4155ed8283bbca9d2ccb74'
 )
 // Looks like: 0x8a56f218f7113f09bb4155ed8283bbca9d2ccb74000000000000000000000001
