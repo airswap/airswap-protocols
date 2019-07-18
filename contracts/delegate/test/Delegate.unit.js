@@ -43,5 +43,9 @@ contract.only('Delegate Unit Tests', async accounts => {
       notEqual(val, mockSwap.address, "the swap contract has not changed")
       equal(val, newSwap.address, "the swap contract has not changed to the right value")
     })
+
+    it('Test setRule', async () => {
+
+    })
   })
 })
