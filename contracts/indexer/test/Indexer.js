@@ -3,7 +3,7 @@ const FungibleToken = artifacts.require('FungibleToken')
 
 const { emitted, reverted, equal, ok } = require('@airswap/test-utils').assert
 const { balances } = require('@airswap/test-utils').balances
-const { getExpiry } = require('@airswap/test-utils').time
+const { getTimestampPlusDays } = require('@airswap/test-utils').time
 const { intents } = require('@airswap/indexer-utils')
 
 const ALICE_LOC = intents.serialize(
@@ -35,7 +35,7 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
     it('Deployed Indexer contract', async () => {
       indexer = await Indexer.deployed({ from: ownerAddress })
       indexerAddress = indexer.address
-      emitted(await indexer.setStakeMinimum(500), 'SetStakeMinimum')
+      emitted(await indexer.setStakeMinimum(250), 'SetStakeMinimum')
     })
   })
 
@@ -59,7 +59,7 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenDAI.address,
           tokenWETH.address,
           100,
-          getExpiry(),
+          await getTimestampPlusDays(1),
           ALICE_LOC,
           {
             from: aliceAddress,
@@ -75,7 +75,7 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenWETH.address,
           tokenDAI.address,
           100,
-          getExpiry(),
+          await getTimestampPlusDays(1),
           ALICE_LOC,
           {
             from: aliceAddress,
@@ -93,7 +93,7 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenWETH.address,
           tokenDAI.address,
           500,
-          getExpiry(),
+          await getTimestampPlusDays(1),
           ALICE_LOC,
           {
             from: aliceAddress,
@@ -113,7 +113,7 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenWETH.address,
           tokenDAI.address,
           500,
-          getExpiry(),
+          await getTimestampPlusDays(1),
           ALICE_LOC,
           {
             from: aliceAddress,
@@ -141,7 +141,7 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenWETH.address,
           tokenDAI.address,
           500,
-          getExpiry(),
+          await getTimestampPlusDays(1),
           ALICE_LOC,
           {
             from: aliceAddress,
@@ -206,7 +206,7 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenWETH.address,
           tokenDAI.address,
           1000,
-          getExpiry(),
+          await getTimestampPlusDays(1),
           ALICE_LOC,
           {
             from: aliceAddress,
@@ -241,7 +241,7 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenWETH.address,
           tokenDAI.address,
           1000,
-          getExpiry(),
+          await getTimestampPlusDays(1),
           ALICE_LOC,
           {
             from: aliceAddress,
@@ -283,8 +283,8 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
         await indexer.setIntent(
           tokenWETH.address,
           tokenDAI.address,
-          1000,
-          getExpiry(),
+          500,
+          await getTimestampPlusDays(1),
           ALICE_LOC,
           {
             from: aliceAddress,
@@ -292,6 +292,46 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
         ),
         'Stake'
       )
+    })
+
+    it('Bob creates the other side of the market for WETH/DAI', async () => {
+      emitted(
+        await indexer.createTwoSidedMarket(
+          tokenDAI.address,
+          tokenWETH.address,
+          {
+            from: bobAddress,
+          }
+        ),
+        'CreateMarket'
+      )
+    })
+
+    it('Alice attempts to stake and set a two-sided intent and succeeds', async () => {
+      let result = await indexer.setTwoSidedIntent(
+        tokenWETH.address,
+        tokenDAI.address,
+        250,
+        await getTimestampPlusDays(1),
+        ALICE_LOC,
+        {
+          from: aliceAddress,
+        }
+      )
+      emitted(result, 'Stake', ev => {
+        return (
+          ev.makerToken == tokenWETH.address &&
+          ev.takerToken == tokenDAI.address &&
+          ev.amount == 250
+        )
+      })
+      emitted(result, 'Stake', ev => {
+        return (
+          ev.makerToken == tokenDAI.address &&
+          ev.takerToken == tokenWETH.address &&
+          ev.amount == 250
+        )
+      })
     })
   })
 })

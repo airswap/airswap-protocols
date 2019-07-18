@@ -1,0 +1,119 @@
+version: 2.1
+
+orbs:
+  airswap: airswap/assume-role@volatile
+  aws-cli: airswap/aws-cli@volatile
+  slack: circleci/slack@0.1.1
+  datadog: airswap/datadog@volatile
+
+references:
+  container_config: &container_config
+    docker:
+      - image: circleci/node:10
+    working_directory: ~/repo
+
+  run_tests: &run_tests
+    <<: *container_config
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "package.json" }}
+          - v1-dependencies-
+      - run:
+          name: yarn install and dependencies
+          command: |
+            yarn install
+            sudo yarn global add ganache-cli
+      - run:
+          name: yarn lint
+          command: yarn lint
+      - run:
+          name: Run Tests
+          command: |
+            ganache-cli -p 8545 &
+            yarn test
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package.json" }}
+      - persist_to_workspace:
+          root: ~/repo
+          paths: .
+
+jobs:
+  run_tests:
+    <<: *run_tests
+
+  deploy:
+    <<: *container_config
+    steps:
+      - attach_workspace:
+          at: ~/repo
+      - run:
+          name: Install NPM non-interactive
+          command: sudo npm install -g npm-login-noninteractive
+      - run:
+          name: Set up the npm user
+          command: npm-login-noninteractive
+      - run:
+          name: NPM publish contracts
+          command: |
+            cd contracts
+            ### ADD FOLDERS HERE TO PROCESS ###
+            for file in common
+            do
+              echo "Working on $file"
+              cd $file
+              NPM_NAME=$(node -p "require('./package.json').name")
+              NPM_VERSION=$(npm view $NPM_NAME version || :)
+              LOCAL_VERSION=$(node -p "require('./package.json').version")
+              echo $NPM_NAME
+              echo $NPM_VERSION
+              echo $LOCAL_VERSION
+              if [[ $LOCAL_VERSION != $NPM_VERSION ]]; then
+                echo "Updating NPM..." # this is where we deploy the code to npm
+                npm publish
+                npm access restricted $NPM_NAME
+              fi
+              cd ..
+            done
+      - run:
+          name: NPM publish packages
+          command: |
+            cd packages
+            ### ADD FOLDERS HERE TO PROCESS ###
+            for file in indexer-utils order-utils test-utils
+            do
+              echo "Working on $file"
+              cd $file
+              NPM_NAME=$(node -p "require('./package.json').name")
+              NPM_VERSION=$(npm view $NPM_NAME version || :)
+              LOCAL_VERSION=$(node -p "require('./package.json').version")
+              echo $NPM_NAME
+              echo $NPM_VERSION
+              echo $LOCAL_VERSION
+              if [[ $LOCAL_VERSION != $NPM_VERSION ]]; then
+                echo "Updating NPM..." # this is where we deploy the code to npm
+                npm publish
+                npm access restricted $NPM_NAME
+              fi
+              cd ..
+            done
+      # Now we need to iterate over folders and deploy the folders that are listed
+      # but only if the version changed
+      - slack/status
+
+workflows:
+  smart_contract:
+    jobs:
+      - run_tests:
+          context: Development
+      - deploy:
+          context: NPM_Publish
+          requires:
+            - run_tests
+          filters:
+            branches:
+              only:
+                - master

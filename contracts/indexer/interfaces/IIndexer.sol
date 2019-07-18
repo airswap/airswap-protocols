@@ -25,11 +25,16 @@ interface IIndexer {
 
   event Stake(
     address wallet,
-    uint256 amount
+    address makerToken,
+    address takerToken,
+    uint256 amount,
+    uint256 expiry
   );
 
   event Unstake(
     address wallet,
+    address makerToken,
+    address takerToken,
     uint256 amount
   );
 
@@ -51,9 +56,12 @@ interface IIndexer {
   function createMarket(
     address _makerToken,
     address _takerToken
-  ) external returns (
-    address
-  );
+  ) external returns (address);
+
+  function createTwoSidedMarket(
+    address _makerToken,
+    address _takerToken
+  ) external returns (address, address);
 
   function setStakeMinimum(
     uint256 _stakeMinimum
@@ -75,24 +83,33 @@ interface IIndexer {
     bytes32 _locator
   ) external;
 
+  function setTwoSidedIntent(
+    address _tokenOne,
+    address _tokenTwo,
+    uint256 _amount,
+    uint256 _expiry,
+    bytes32 _locator
+  ) external;
+
   function unsetIntent(
     address _makerToken,
     address _takerToken
+  ) external;
+
+  function unsetTwoSidedIntent(
+    address _tokenOne,
+    address _tokenTwo
   ) external;
 
   function getIntents(
     address _makerToken,
     address _takerToken,
     uint256 _count
-  ) external view returns (
-    bytes32[] memory
-  );
+  ) external view returns (bytes32[] memory);
 
   function lengthOf(
     address _makerToken,
     address _takerToken
-  ) external view returns (
-    uint256
-  );
+  ) external view returns (uint256);
 
 }
