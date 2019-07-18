@@ -169,16 +169,19 @@ contract Indexer is IIndexer, Ownable {
     require(balances[_makerToken][_takerToken][msg.sender] == 0,
       "INTENT_ALREADY_EXISTS");
 
-    // Transfer the _amount for staking.
-    require(stakeToken.transferFrom(msg.sender, address(this), _amount),
+    // Calculate the score of the intent for ordering.
+    uint256 score = _amount / _periods;
+
+    // Calculate the effective stake amount that will round down to score.
+    uint256 effectiveStakeAmount = score * _periods;
+
+    // Transfer the effectiveStakeAmount for staking.
+    require(stakeToken.transferFrom(msg.sender, address(this), effectiveStakeAmount),
       "UNABLE_TO_STAKE");
 
     // Set the staked amount for the sender and emit.
-    balances[_makerToken][_takerToken][msg.sender] = _amount;
-    emit Stake(msg.sender, _amount, _periods);
-
-    // Calculate the score of the intent for ordering.
-    uint256 score = _amount / _periods;
+    balances[_makerToken][_takerToken][msg.sender] = effectiveStakeAmount;
+    emit Stake(msg.sender, effectiveStakeAmount, _periods);
 
     // Calculate the expiry of the intent.
     uint256 expiry = block.timestamp + (_periods * stakePeriodLength);
