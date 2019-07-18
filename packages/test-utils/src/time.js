@@ -3,6 +3,8 @@
  * Use of code from https://medium.com/edgefund/time-travelling-truffle-tests-f581c1964687
  * Utility functions to advance blocktime and mine blocks artificially for EVM
  */
+const SECONDS_IN_DAY = 86400
+
 advanceTime = time => {
   return new Promise((resolve, reject) => {
     web3.currentProvider.send(
@@ -89,8 +91,8 @@ getLatestTimestamp = async () => {
   return (await web3.eth.getBlock('latest')).timestamp
 }
 
-getExpiry = () => {
-  return Math.round((new Date().getTime() + 60000) / 1000)
+getTimestampPlusDays = async days => {
+  return (await getLatestTimestamp()) + SECONDS_IN_DAY * days
 }
 
 module.exports = {
@@ -100,5 +102,5 @@ module.exports = {
   takeSnapshot,
   revertToSnapShot,
   getLatestTimestamp,
-  getExpiry,
+  getTimestampPlusDays,
 }

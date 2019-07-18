@@ -6,6 +6,7 @@ const FungibleToken = artifacts.require('FungibleToken')
 
 const { emitted, equal, ok } = require('@airswap/test-utils').assert
 const { balances } = require('@airswap/test-utils').balances
+const { getTimestampPlusDays } = require('@airswap/test-utils').time
 const { intents } = require('@airswap/indexer-utils')
 
 let indexer
@@ -47,9 +48,11 @@ contract(
 
       it('Alice authorizes the new delegate', async () => {
         emitted(
-          await swapContract.authorize(aliceDelegate.address, getExpiry(), {
-            from: aliceAddress,
-          }),
+          await swapContract.authorize(
+            aliceDelegate.address,
+            await getTimestampPlusDays(1),
+            { from: aliceAddress }
+          ),
           'Authorize'
         )
       })

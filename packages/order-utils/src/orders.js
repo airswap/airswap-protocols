@@ -14,9 +14,15 @@
   limitations under the License.
 */
 
-const { defaults, NULL_ADDRESS } = require('./constants')
+const { SECONDS_IN_DAY, defaults, NULL_ADDRESS } = require('./constants')
 
 const signatures = require('./signatures')
+
+let nonce = 100
+
+getLatestTimestamp = async () => {
+  return (await web3.eth.getBlock('latest')).timestamp
+}
 
 module.exports = {
   _knownAccounts: [],
@@ -28,19 +34,23 @@ module.exports = {
     this._verifyingContract = verifyingContract
   },
   generateNonce() {
-    return new Date().getTime()
+    nonce = nonce + 1
+    return nonce
   },
-  generateExpiry() {
-    return Math.round((new Date().getTime() + 60000) / 1000)
+  async generateExpiry(days) {
+    return (await getLatestTimestamp()) + SECONDS_IN_DAY * days
   },
   async getOrder({
-    expiry = this.generateExpiry(),
+    expiry = 0,
     nonce = this.generateNonce(),
     signer = NULL_ADDRESS,
     maker = defaults.Party,
     taker = defaults.Party,
     affiliate = defaults.Party,
   }) {
+    if (expiry == 0) {
+      expiry = await this.generateExpiry(1)
+    }
     const order = {
       expiry,
       nonce,
