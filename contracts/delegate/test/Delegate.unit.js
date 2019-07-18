@@ -3,7 +3,7 @@ const Swap = artifacts.require('Swap')
 const FungibleToken = artifacts.require('FungibleToken')
 const MockContract = artifacts.require('MockContract')
 const abi = require('ethereumjs-abi')
-const { equal, passes } = require('@airswap/test-utils').assert
+const { equal, notEqual, passes } = require('@airswap/test-utils').assert
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 
 const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000'
@@ -35,4 +35,13 @@ contract.only('Delegate Unit Tests', async accounts => {
     })
   })
 
+  describe('Test setters', async () => {
+    it('Test setSwapContract', async () => {
+      let newSwap = await MockContract.new()
+      await delegate.setSwapContract(newSwap.address)
+      let val = await delegate.swapContract.call()
+      notEqual(val, mockSwap.address, "the swap contract has not changed")
+      equal(val, newSwap.address, "the swap contract has not changed to the right value")
+    })
+  })
 })
