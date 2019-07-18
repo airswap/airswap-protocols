@@ -52,7 +52,6 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
 
   describe('Market setup', () => {
     it('Bob creates a market (collection of intents) for WETH/DAI', async () => {
-      let marketContractAddress
       emitted(
         (tx = await indexer.createMarket(tokenWETH.address, tokenDAI.address, {
           from: bobAddress,
