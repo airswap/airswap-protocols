@@ -307,9 +307,18 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
       emitted(await getResult(marketContract, result.tx), 'SetIntent', ev => {
         return (
           ev.expiry.toNumber() - timestamp === ONE_DAY &&
-          ev.amount.toNumber() == 500
+          ev.score.toNumber() == 500
         )
       })
+    })
+
+    it('Alice attempts to unset an intent and succeeds', async () => {
+      emitted(
+        await indexer.unsetIntent(tokenWETH.address, tokenDAI.address, {
+          from: aliceAddress,
+        }),
+        'Unstake'
+      )
     })
 
     it('Alice attempts to stake 500 for 4 periods and results in score of 125', async () => {
@@ -328,7 +337,7 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
       emitted(await getResult(marketContract, result.tx), 'SetIntent', ev => {
         return (
           ev.expiry.toNumber() - timestamp === ONE_DAY * 4 &&
-          ev.amount.toNumber() == 125
+          ev.score.toNumber() == 125
         )
       })
     })

@@ -13,7 +13,11 @@
 
 ### Sorting
 
-Intents are sorted by their amount, currently the staking amount indicated by an Indexer that owns the Market.
+Intents are sorted by their score in descending order.
+
+### Expiration
+
+Intents that have expired are ignored when fetching.
 
 ## Definitions
 
@@ -29,8 +33,8 @@ An "intent to trade" is represented by the following `Intent` struct.
 
 ```
 struct Intent {
-  address staker;
-  uint256 amount;
+  address holder;
+  uint256 score;
   uint256 expiry;
   bytes32 locator;
 }
@@ -69,9 +73,9 @@ constructor (
 Set an intent to trade in the Market.
 
 ```Solidity
-function set(
-  address _staker,
-  uint256 _amount,
+function setIntent(
+  address _holder,
+  uint256 _score,
   uint256 _expiry,
   bytes32 _locator
 ) external
@@ -81,8 +85,8 @@ function set(
 
 | Name       | Type      | Description                                            |
 | :--------- | :-------- | :----------------------------------------------------- |
-| `_staker`  | `address` | Address of the account that has staked for the intent. |
-| `_amount`  | `uint256` | Amount of token that the account has staked.           |
+| `_holder`  | `address` | Address of the account that has staked for the intent. |
+| `_score`  | `uint256` | score of token that the account has staked.           |
 | `_expiry`  | `uint256` | Expiry of the intent as a timestamp in seconds.        |
 | `_locator` | `bytes32` | Locator for the peer.                                  |
 
@@ -91,8 +95,8 @@ function set(
 Unset an intent to trade in the Market.
 
 ```Solidity
-function unset(
-  address _staker
+function unsetIntent(
+  address _holder
 ) public returns (bool)
 ```
 
@@ -100,39 +104,39 @@ function unset(
 
 | Name      | Type      | Description                                          |
 | :-------- | :-------- | :--------------------------------------------------- |
-| `_staker` | `address` | Address of the account that will unstake its intent. |
+| `_holder` | `address` | Address of the account that will unstake its intent. |
 
 ## Get an Intent
 
-Gets the intent for a given staker address.
+Gets the intent for a given holder address.
 
 ```Solidity
-function get(
-  address _staker
+function getIntent(
+  address _holder
 ) public view returns (Intent memory)
 ```
 
 ### Params
 
-| Name      | Type      | Description                               |
-| :-------- | :-------- | :---------------------------------------- |
-| `_staker` | `address` | Address of the account to fetch an intent |
+| Name      | Type      | Description                                |
+| :-------- | :-------- | :----------------------------------------- |
+| `_holder` | `address` | Address of the account to fetch an intent. |
 
 ## Has an Intent
 
-Determines whether the Market has an intent for a staker address.
+Determines whether the Market has an intent for a holder address.
 
 ```Solidity
-function has(
-  address _staker
+function hasIntent(
+  address _holder
 ) internal view returns (bool)
 ```
 
 ### Params
 
-| Name      | Type      | Description                               |
-| :-------- | :-------- | :---------------------------------------- |
-| `_staker` | `address` | Address of the account to check an intent |
+| Name      | Type      | Description                                |
+| :-------- | :-------- | :----------------------------------------- |
+| `_holder` | `address` | Address of the account to check an intent. |
 
 ## Fetch Intents
 
@@ -155,8 +159,8 @@ function fetchIntents(
 Find an intent by value in the list.
 
 ```Solidity
-function find(
-  uint256 amount
+function findPosition(
+  uint256 score
 ) internal view returns (Intent memory)
 ```
 
@@ -168,21 +172,21 @@ function find(
 
 ## Insert an Intent
 
-Insert an intent after an existing intent in the list.
+Insert a new intent in the list, before the specified `_nextIntent`.
 
 ```Solidity
-function insert(
-  Intent memory _intent,
-  Intent memory _existing
+function insertIntent(
+  Intent memory _newIntent,
+  Intent memory _nextIntent
 ) internal returns (bool)
 ```
 
 ### Params
 
-| Name        | Type     | Description                      |
-| :---------- | :------- | :------------------------------- |
-| `_intent`   | `Intent` | Intent to insert.                |
-| `_existing` | `Intent` | Existing intent to insert after. |
+| Name        | Type     | Description                         |
+| :---------- | :------- | :---------------------------------- |
+| `_newIntent`   | `Intent` | Intent to insert.                |
+| `_nextIntent` | `Intent` | Existing intent to insert before. |
 
 ## Link Two Intents
 

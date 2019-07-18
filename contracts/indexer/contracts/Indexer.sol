@@ -39,6 +39,9 @@ contract Indexer is IIndexer, Ownable {
   // Mapping of token to token for market lookup
   mapping (address => mapping (address => Market)) public markets;
 
+  // Mapping of token to token to staker for amount lookup
+  mapping (address => mapping (address => mapping (address => uint256))) public balances;
+
   // Mapping of address to timestamp of blacklisting
   mapping (address => uint256) public blacklist;
 
@@ -162,10 +165,16 @@ contract Indexer is IIndexer, Ownable {
     require(_amount >= stakeMinimum,
       "MINIMUM_NOT_MET");
 
+    // Ensure the intent does not already exist.
+    require(balances[_makerToken][_takerToken][msg.sender] == 0,
+      "INTENT_ALREADY_EXISTS");
+
     // Transfer the _amount for staking.
     require(stakeToken.transferFrom(msg.sender, address(this), _amount),
       "UNABLE_TO_STAKE");
 
+    // Set the staked amount for the sender and emit.
+    balances[_makerToken][_takerToken][msg.sender] = _amount;
     emit Stake(msg.sender, _amount, _periods);
 
     // Calculate the score of the intent for ordering.
@@ -198,15 +207,19 @@ contract Indexer is IIndexer, Ownable {
     Market.Intent memory intent = markets[_makerToken][_takerToken].getIntent(msg.sender);
 
     // Ensure the intent exists.
-    require(intent.staker == msg.sender,
+    require(intent.holder == msg.sender,
       "INTENT_DOES_NOT_EXIST");
 
     // Unset the intent on the market.
     markets[_makerToken][_takerToken].unsetIntent(msg.sender);
 
+    // Read the stake amount for the sender.
+    uint256 stakeAmount = balances[_makerToken][_takerToken][msg.sender];
+
     // Return the staked tokens.
-    stakeToken.transfer(msg.sender, intent.amount);
-    emit Unstake(msg.sender, intent.amount);
+    stakeToken.transfer(msg.sender, stakeAmount);
+    balances[_makerToken][_takerToken][msg.sender] = 0;
+    emit Unstake(msg.sender, stakeAmount);
   }
 
   /**

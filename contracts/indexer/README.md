@@ -149,7 +149,7 @@ function setIntent(
   address _makerToken,
   address _takerToken,
   uint256 _amount,
-  uint256 _expiry,
+  uint256 _periods,
   bytes32 _locator
 ) external
 ```
@@ -161,7 +161,7 @@ function setIntent(
 | `_makerToken` | `address` | Address of the token that the Maker sends.   |
 | `_takerToken` | `address` | Address of the token that the Taker sends.   |
 | `_amount`     | `uint256` | Amount of token to stake.                    |
-| `_expiry`     | `uint256` | Timestamp after which the intent is invalid. |
+| `_periods`    | `uint256` | Number of periods to hold the Intent.        |
 | `_locator`    | `bytes32` | Locator for the peer.                        |
 
 ### Reverts

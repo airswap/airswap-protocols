@@ -156,7 +156,7 @@ contract(
       it('Gets the intent for Zara', async () => {
         let zaraIntent = await market.getIntent(zaraAddress)
         equal(zaraIntent.locator, ZARA_LOC)
-        equal(zaraIntent.amount, 0)
+        equal(zaraIntent.score, 0)
       })
 
       it('Gets a non existent intent', async () => {
