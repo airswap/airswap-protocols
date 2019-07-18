@@ -104,7 +104,7 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
     })
 
     it('Staking tokens are minted for Alice', async () => {
-      emitted(await tokenAST.mint(aliceAddress, 1000), 'Transfer')
+      emitted(await tokenAST.mint(aliceAddress, 2000), 'Transfer')
     })
 
     it('Fails due to no staking token allowance', async () => {
@@ -136,6 +136,7 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
     })
 
     it('Alice attempts to stake and set an intent succeeds', async () => {
+      console.log(ALICE_LOC)
       emitted(
         await indexer.setIntent(
           tokenWETH.address,
@@ -292,6 +293,46 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
         ),
         'Stake'
       )
+    })
+
+    it('Bob creates the other side of the market for WETH/DAI', async () => {
+      emitted(
+        await indexer.createTwoSidedMarket(
+          tokenDAI.address,
+          tokenWETH.address,
+          {
+            from: bobAddress,
+          }
+        ),
+        'CreateMarket'
+      )
+    })
+
+    it('Alice attempts to stake and set a two-sided intent and succeeds', async () => {
+      let result = await indexer.setTwoSidedIntent(
+        tokenWETH.address,
+        tokenDAI.address,
+        250,
+        await getTimestampPlusDays(1),
+        ALICE_LOC,
+        {
+          from: aliceAddress,
+        }
+      )
+      emitted(result, 'Stake', ev => {
+        return (
+          ev.makerToken == tokenWETH.address &&
+          ev.takerToken == tokenDAI.address &&
+          ev.amount == 250
+        )
+      })
+      emitted(result, 'Stake', ev => {
+        return (
+          ev.makerToken == tokenDAI.address &&
+          ev.takerToken == tokenWETH.address &&
+          ev.amount == 250
+        )
+      })
     })
   })
 })

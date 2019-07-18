@@ -81,19 +81,19 @@ contract Indexer is IIndexer, Ownable {
     * @notice Create a Two Sided Market
     * @dev Deploys two new Market contracts
     *
-    * @param _makerToken address
-    * @param _takerToken address
+    * @param _tokenOne address
+    * @param _tokenTwo address
     */
   function createTwoSidedMarket(
-    address _makerToken,
-    address _takerToken
+    address _tokenOne,
+    address _tokenTwo
   ) public returns (address, address) {
 
     // Create the makerToken / takerToken market.
-    address marketOne = createMarket(_makerToken, _takerToken);
+    address marketOne = createMarket(_tokenOne, _tokenTwo);
 
     // Create the takerToken / makerToken market.
-    address marketTwo = createMarket(_makerToken, _takerToken);
+    address marketTwo = createMarket(_tokenTwo, _tokenOne);
 
     // Return the addresses of both Market contracts.
     return (marketOne, marketTwo);
@@ -170,7 +170,7 @@ contract Indexer is IIndexer, Ownable {
     require(stakeToken.transferFrom(msg.sender, address(this), _amount),
       "UNABLE_TO_STAKE");
 
-    emit Stake(msg.sender, _amount);
+    emit Stake(msg.sender, _makerToken, _takerToken, _amount, _expiry);
 
     // Set the intent on the market.
     markets[_makerToken][_takerToken].setIntent(msg.sender, _amount, _expiry, _locator);
@@ -179,24 +179,24 @@ contract Indexer is IIndexer, Ownable {
   /**
     * @notice Set Two-Sided Intent to Trade
     *
-    * @param _makerToken address
-    * @param _takerToken address
+    * @param _tokenOne address
+    * @param _tokenTwo address
     * @param _amount uint256
     * @param _expiry uint256
     * @param _locator bytes32
     */
   function setTwoSidedIntent(
-    address _makerToken,
-    address _takerToken,
+    address _tokenOne,
+    address _tokenTwo,
     uint256 _amount,
     uint256 _expiry,
     bytes32 _locator
   ) public {
-    // Set the _makerToken / _takerToken side of the market.
-    setIntent(_makerToken, _takerToken, _amount, _expiry, _locator);
+    // Set the _makerToken / _tokenTwo side of the market.
+    setIntent(_tokenOne, _tokenTwo, _amount, _expiry, _locator);
 
-    // Set the _takerToken / _makerToken side of the market.
-    setIntent(_takerToken, _makerToken, _amount, _expiry, _locator);
+    // Set the _tokenTwo / _makerToken side of the market.
+    setIntent(_tokenTwo, _tokenOne, _amount, _expiry, _locator);
   }
 
   /**
@@ -227,25 +227,25 @@ contract Indexer is IIndexer, Ownable {
 
     // Return the staked tokens.
     stakeToken.transfer(msg.sender, intent.amount);
-    emit Unstake(msg.sender, intent.amount);
+    emit Unstake(msg.sender, _makerToken, _takerToken, intent.amount);
   }
 
   /**
     * @notice Unset an Intent to Trade
     * @dev Users are allowed unstake from blacklisted markets
     *
-    * @param _makerToken address
-    * @param _takerToken address
+    * @param _tokenOne address
+    * @param _tokenTwo address
     */
   function unsetTwoSidedIntent(
-    address _makerToken,
-    address _takerToken
+    address _tokenOne,
+    address _tokenTwo
   ) public {
-    // Unset the _makerToken / _takerToken side of the market.
-    unsetIntent(_makerToken, _takerToken);
+    // Unset the _tokenOne / _tokenTwo side of the market.
+    unsetIntent(_tokenOne, _tokenTwo);
 
-    // Unset the _takerToken / _makerToken side of the market.
-    unsetIntent(_takerToken, _makerToken);
+    // Unset the _tokenTwo / _tokenOne side of the market.
+    unsetIntent(_tokenTwo, _tokenOne);
   }
 
   /**

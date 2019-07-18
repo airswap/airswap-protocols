@@ -25,11 +25,16 @@ interface IIndexer {
 
   event Stake(
     address wallet,
-    uint256 amount
+    address makerToken,
+    address takerToken,
+    uint256 amount,
+    uint256 expiry
   );
 
   event Unstake(
     address wallet,
+    address makerToken,
+    address takerToken,
     uint256 amount
   );
 

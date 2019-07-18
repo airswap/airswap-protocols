@@ -74,17 +74,17 @@ Call `createMarket` twice to for both sides of a market. For example, an intent 
 
 ```Solidity
 function createTwoSidedMarket(
-  address _makerToken,
-  address _takerToken
+  address _tokenOne,
+  address _tokenTwo
 ) public returns (address, address)
 ```
 
 ### Params
 
-| Name          | Type      | Description                                |
-| :------------ | :-------- | :----------------------------------------- |
-| `_makerToken` | `address` | Address of the token that the Maker sends. |
-| `_takerToken` | `address` | Address of the token that the Taker sends. |
+| Name        | Type      | Description                                            |
+| :---------- | :-------- | :----------------------------------------------------- |
+| `_tokenOne` | `address` | Address of the token of the first side of the market.  |
+| `_tokenTwo` | `address` | Address of the token of the second side of the market. |
 
 ## Set the Stake Minimum
 
@@ -187,7 +187,7 @@ function setTwoSidedIntent(
 | :---------- | :-------- | :----------------------------------------------------- |
 | `_tokenOne` | `address` | Address of the token of the first side of the market.  |
 | `_tokenTwo` | `address` | Address of the token of the second side of the market. |
-| `_amount`   | `uint256` | Amount of token to stake.                              |
+| `_amount`   | `uint256` | Amount of token to stake for EACH market.              |
 | `_expiry`   | `uint256` | Timestamp after which the intent is invalid.           |
 | `_locator`  | `bytes32` | Locator for the peer.                                  |
 
