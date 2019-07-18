@@ -17,7 +17,7 @@ Find peers based on an intent to trade a specific token pair.
 
 ### Token Staking
 
-Stake variable amounts of token to position intent in a market.
+Stake variable amounts of token for variable lengths of time.
 
 ### Blacklisting
 
@@ -39,16 +39,18 @@ Create a new `Indexer` contract.
 ```Solidity
 constructor(
   address _stakeToken,
-  uint256 _stakeMinimum
+  uint256 _stakeMinimum,
+  uint256 _stakePeriodLength
 ) public
 ```
 
 ### Params
 
-| Name            | Type      | Description                                |
-| :-------------- | :-------- | :----------------------------------------- |
-| `_stakeToken`   | `address` | Address of the token required for staking. |
-| `_stakeMinimum` | `uint256` | Minimum amount of token required to stake. |
+| Name                 | Type      | Description                                |
+| :------------------- | :-------- | :----------------------------------------- |
+| `_stakeToken`        | `address` | Address of the token required for staking. |
+| `_stakeMinimum`      | `uint256` | Minimum amount of token required to stake. |
+| `_stakePeriodLength` | `uint256` | Length in seconds of a stake period.       |
 
 ## Create a Market
 
@@ -89,6 +91,22 @@ function setStakeMinimum(
 | Name            | Type      | Description                                |
 | :-------------- | :-------- | :----------------------------------------- |
 | `_stakeMinimum` | `uint256` | Minimum amount of token required to stake. |
+
+## Set the Stake Period
+
+Set the length of each stake period in seconds.
+
+```Solidity
+function setStakePeriodLength(
+  uint256 _stakePeriodLength
+) external onlyOwner
+```
+
+### Reverts
+
+| Reason                         | Scenario                  |
+| :----------------------------- | :------------------------ |
+| `PERIOD_LENGTH_CANNOT_BE_ZERO` | The value provided was 0. |
 
 ## Add a Token to Blacklist
 

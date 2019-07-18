@@ -19,8 +19,8 @@ pragma experimental ABIEncoderV2;
 
 import "@airswap/indexer/interfaces/IIndexer.sol";
 import "@airswap/market/contracts/Market.sol";
-import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 
 /**
   * @title Indexer: An Collection of Markets by Token Pair
@@ -47,6 +47,7 @@ contract Indexer is IIndexer, Ownable {
     *
     * @param _stakeToken address
     * @param _stakeMinimum uint256
+    * @param _stakePeriodLength uint256
     */
   constructor(
     address _stakeToken,
@@ -72,14 +73,12 @@ contract Indexer is IIndexer, Ownable {
   ) external returns (address) {
 
     // If the Market does not exist, create it.
-    if (markets[_makerToken][_takerToken] == Market(0)) {
-      // Create a new Market contract for the token pair.
-      markets[_makerToken][_takerToken] = new Market(_makerToken, _takerToken);
-      emit CreateMarket(_makerToken, _takerToken);
-    }
+    require (markets[_makerToken][_takerToken] == Market(0),
+      "MARKET_ALREADY_EXISTS");
 
-    // Return the address of the Market contract.
-    return address(markets[_makerToken][_takerToken]);
+    // Create a new Market contract for the token pair.
+    markets[_makerToken][_takerToken] = new Market(_makerToken, _takerToken);
+    emit CreateMarket(_makerToken, _takerToken);
   }
 
   /**
@@ -101,7 +100,7 @@ contract Indexer is IIndexer, Ownable {
     uint256 _stakePeriodLength
   ) external onlyOwner {
     require(_stakePeriodLength > 0,
-      "PERIOD_LENGTH_TOO_LOW");
+      "PERIOD_LENGTH_CANNOT_BE_ZERO");
 
     stakePeriodLength = _stakePeriodLength;
     emit SetStakePeriodLength(_stakePeriodLength);
