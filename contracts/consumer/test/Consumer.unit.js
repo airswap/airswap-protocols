@@ -39,6 +39,9 @@ contract.only('Consumer Unit Tests', async (accounts) => {
 
       consumer = await Consumer.new(mockSwap.address, mockIndexer.address)
 
+      let delegate_getBuyQuote = delegateTemplate.contract.methods.getBuyQuote(0, EMPTY_ADDRESS, EMPTY_ADDRESS).encodeABI()
+      mockDelegate.givenMethodReturnUint(delegate_getBuyQuote, 400)
+
       let indexer_getIntents = indexerTemplate.contract.methods.getIntents(EMPTY_ADDRESS, EMPTY_ADDRESS, 0).encodeABI()
       mockIndexer.givenMethodReturn(
         indexer_getIntents,
