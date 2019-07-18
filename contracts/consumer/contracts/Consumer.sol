@@ -135,7 +135,6 @@ contract Consumer {
 
     // Consumer transfers received amount to the User.
     IERC20(_userReceiveToken).transfer(msg.sender, _userReceiveAmount);
-
   }
 
 }
