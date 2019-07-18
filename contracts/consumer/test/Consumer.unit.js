@@ -11,7 +11,7 @@ const { intents } = require('@airswap/indexer-utils')
 
 const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
 
-contract('Consumer Unit Tests', async (accounts) => {
+contract.only('Consumer Unit Tests', async (accounts) => {
   
     let snapshotId
     let mockSwap
@@ -40,7 +40,10 @@ contract('Consumer Unit Tests', async (accounts) => {
       consumer = await Consumer.new(mockSwap.address, mockIndexer.address)
 
       let indexer_getIntents = indexerTemplate.contract.methods.getIntents(EMPTY_ADDRESS, EMPTY_ADDRESS, 0).encodeABI()
-      mockIndexer.givenMethodReturn(indexer_getIntents, abi.rawEncode(['bytes32[]'], [mockDelegate, mockDelegate]))
+      mockIndexer.givenMethodReturn(
+        indexer_getIntents,
+        abi.rawEncode(['bytes32[]'], [ [mockDelegate.address, mockDelegate.address] ])
+      )
     })
 
     describe("Test initial values", async () => {
