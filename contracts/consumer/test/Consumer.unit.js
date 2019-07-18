@@ -5,7 +5,6 @@ const Delegate = artifacts.require('Delegate')
 const MockContract = artifacts.require("MockContract")
 const abi = require('ethereumjs-abi')
 const { equal, passes } = require('@airswap/test-utils').assert
-const { balances } = require('@airswap/test-utils').balances
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 const { intents } = require('@airswap/indexer-utils')
 
