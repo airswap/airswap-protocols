@@ -92,7 +92,7 @@ contract Market is Ownable {
     takerToken = _takerToken;
 
     // Initialize the list.
-    Intent memory head = Intent(HEAD, 0, 0, "0x0");
+    Intent memory head = Intent(HEAD, 0, 0, byte(0));
     list[HEAD][PREV] = head;
     list[HEAD][NEXT] = head;
   }
@@ -111,16 +111,15 @@ contract Market is Ownable {
     uint256 _expiry,
     bytes32 _locator
   ) external onlyOwner {
-
     Intent memory newIntent = Intent(_staker, _amount, _expiry, _locator);
 
     // Insert after the next highest amount on the list.
-    insertIntent(newIntent, findPosition(_amount));
+    if (insertIntent(newIntent, findPosition(_amount))) {
+      // Increment the length of the list if successful.
+      length = length + 1;
 
-    // Increment the length of the list.
-    length = length + 1;
-
-    emit SetIntent(_staker, _amount, _expiry, _locator, makerToken, takerToken);
+      emit SetIntent(_staker, _amount, _expiry, _locator, makerToken, takerToken);
+    }
   }
 
   /**
@@ -168,7 +167,7 @@ contract Market is Ownable {
       // Return the next intent from the previous neighbor.
       return list[list[_staker][PREV].staker][NEXT];
     }
-    return Intent(address(0), 0, 0, 0x0);
+    return Intent(address(0), 0, 0, byte(0));
   }
 
   /**
@@ -180,16 +179,9 @@ contract Market is Ownable {
   ) internal view returns (
     bool
   ) {
-    if (list[_staker][PREV].staker == HEAD && list[_staker][NEXT].staker == HEAD) {
-      if (list[HEAD][NEXT].staker == _staker) {
-         return true;
-      }
-    } else {
-      if (list[_staker][PREV].staker != address(0)) {
-        if (list[list[_staker][PREV].staker][NEXT].staker == _staker) {
-          return true;
-        }
-      }
+    if (list[_staker][PREV].staker != address(0) &&
+      list[list[_staker][PREV].staker][NEXT].staker == _staker) {
+        return true;
     }
     return false;
   }
@@ -210,7 +202,6 @@ contract Market is Ownable {
   ) public view returns (
     bytes32[] memory result
   ) {
-
     // Limit results to list length or _count.
     uint256 limit = length;
     if (_count < length) {
@@ -223,18 +214,22 @@ contract Market is Ownable {
 
     // Iterate over the list until the end or limit.
     uint256 i = 0;
-    while (intent.amount > 0 && i < limit) {
+    while (i < limit) {
       if (intent.expiry >= block.timestamp) {
         result[i] = intent.locator;
         i = i + 1;
+      } else {
+        if (intent.staker == HEAD) {
+          break;
+        }
       }
+
       intent = list[intent.staker][NEXT];
     }
-    return result;
   }
 
   /**
-    * @notice Find the Next Intent Below an Amount
+    * @notice Returns the first intent smaller than _amount
     * @param _amount uint256
     */
   function findPosition(
@@ -242,44 +237,45 @@ contract Market is Ownable {
   ) internal view returns (
     Intent memory
   ) {
-
     // Get the first intent in the list.
     Intent storage intent = list[HEAD][NEXT];
 
+    if (_amount == 0) {
+      // return the head of the list
+      return list[intent.staker][PREV];
+    }
+
     // Iterate through the list until a lower amount is found.
-    while (intent.amount > 0) {
-      if (_amount <= intent.amount) {
-        return intent;
-      }
+    while (_amount <= intent.amount) {
       intent = list[intent.staker][NEXT];
     }
     return intent;
   }
 
   /**
-    * @notice Insert an Intent at a Location
+    * @notice Insert a new intent in the list, before the specified _nextIntent
     *
-    * @param _intent Intent
-    * @param _existing Intent
+    * @param _newIntent Intent to be inserted
+    * @param _nextIntent Intent to follow _newIntent
     */
   function insertIntent(
-    Intent memory _intent,
-    Intent memory _existing
+    Intent memory _newIntent,
+    Intent memory _nextIntent
   ) internal returns (
     bool
   ) {
 
     // Ensure the _existing intent is in the list.
-    if (!hasIntent(_existing.staker)) {
+    if (!hasIntent(_nextIntent.staker)) {
       return false;
     }
 
-    // Get the intent following the _existing intent.
-    Intent memory next = list[_existing.staker][NEXT];
+    // Get the intent before the _nextIntent.
+    Intent memory previousIntent = list[_nextIntent.staker][PREV];
 
-    // Link the new _intent into place.
-    link(_existing, _intent);
-    link(_intent, next);
+    // Link the _newIntent into place.
+    link(previousIntent, _newIntent);
+    link(_newIntent, _nextIntent);
 
     return true;
   }
