@@ -3,13 +3,13 @@ const Swap = artifacts.require('Swap')
 const Indexer = artifacts.require('Indexer')
 const Delegate = artifacts.require('Delegate')
 const MockContract = artifacts.require("MockContract")
-
+const abi = require('ethereumjs-abi')
 const { emitted, equal, ok } = require('@airswap/test-utils').assert
 const { balances } = require('@airswap/test-utils').balances
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 const { intents } = require('@airswap/indexer-utils')
 
-// TODO: Use token-unit for realistic token amounts.
+const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 contract('Consumer Unit Tests', async (accounts) => {
   
@@ -28,9 +28,19 @@ contract('Consumer Unit Tests', async (accounts) => {
     });
 
     before('deploy Consumer', async () => {
+      let swapTemplate = await Swap.new()
       mockSwap = await MockContract.new()
+
+      let indexerTemplate = await Indexer.new(EMPTY_ADDRESS, 0)
       mockIndexer = await MockContract.new()
+
+      let delegateTemplate = await Delegate.new(EMPTY_ADDRESS)
+      mockDelegate = await MockContract.new()
+
       consumer = await Consumer.new(mockSwap.address, mockIndexer.address)
+
+      let indexer_getIntents = indexerTemplate.contract.methods.getIntents(EMPTY_ADDRESS, EMPTY_ADDRESS, 0).encodeABI()
+      mockIndexer.givenMethodReturn(indexer_getIntents, abi.rawEncode(['bytes32[]'], [mockDelegate, mockDelegate]))
     })
 
     describe("Test initial values", async () => {
@@ -44,5 +54,8 @@ contract('Consumer Unit Tests', async (accounts) => {
         equal(val,  mockIndexer.address, "indexer address is incorrect");
       })
     })
+
+    describe("Test findBestBuy()", async () => {
+    });
   }
-)
+ )
