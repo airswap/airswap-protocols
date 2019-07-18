@@ -28,20 +28,7 @@ contract('Consumer Unit Tests', async (accounts) => {
       await revertToSnapShot(snapshotId)
     });
 
-    before('deploy Consumer', async () => {
-
-      mockUserSendToken = await MockContract.new()
-      await mockUserSendToken.givenAnyReturnBool(true);
-
-      mockUserReceiveToken = await MockContract.new()
-      await mockUserReceiveToken.givenAnyReturnBool(true);
-
-      mockSwap = await MockContract.new()
-      await mockSwap.givenAnyReturnBool(true)
-
-      let indexerTemplate = await Indexer.new(EMPTY_ADDRESS, 0)
-      mockIndexer = await MockContract.new()
-
+    async function setupMockDelgate() {
       let delegateTemplate = await Delegate.new(EMPTY_ADDRESS)
       mockDelegateHigh = await MockContract.new()
       mockDelegateLow = await MockContract.new()
@@ -56,6 +43,11 @@ contract('Consumer Unit Tests', async (accounts) => {
         = delegateTemplate.contract.methods.provideUnsignedOrder(0, 0, EMPTY_ADDRESS, 0, EMPTY_ADDRESS).encodeABI()
       await mockDelegateHigh.givenMethodReturnBool(delegate_provideUnsignedOrder, true);
       await mockDelegateLow.givenMethodReturnBool(delegate_provideUnsignedOrder, true);
+    }
+
+    async function setupMockIndexer() {
+      let indexerTemplate = await Indexer.new(EMPTY_ADDRESS, 0)
+      mockIndexer = await MockContract.new()
 
       //mock indexer getIntents()
       let indexer_getIntents = indexerTemplate.contract.methods.getIntents(EMPTY_ADDRESS, EMPTY_ADDRESS, 0).encodeABI()
@@ -63,7 +55,24 @@ contract('Consumer Unit Tests', async (accounts) => {
         indexer_getIntents,
         abi.rawEncode(['bytes32[]'], [ [mockDelegateHigh.address, mockDelegateLow.address] ])
       )
+    }
 
+    async function setupMocks() {
+      mockUserSendToken = await MockContract.new()
+      await mockUserSendToken.givenAnyReturnBool(true);
+
+      mockUserReceiveToken = await MockContract.new()
+      await mockUserReceiveToken.givenAnyReturnBool(true);
+
+      mockSwap = await MockContract.new()
+      await mockSwap.givenAnyReturnBool(true)
+
+      await setupMockDelgate()
+      await setupMockIndexer()
+    }
+
+    before('deploy Consumer', async () => {
+      await setupMocks()
       consumer = await Consumer.new(mockSwap.address, mockIndexer.address)
     })
 
