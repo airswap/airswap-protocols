@@ -6,7 +6,6 @@ const MockContract = artifacts.require("MockContract")
 const abi = require('ethereumjs-abi')
 const { equal, passes } = require('@airswap/test-utils').assert
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
-const { intents } = require('@airswap/indexer-utils')
 
 const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
 
