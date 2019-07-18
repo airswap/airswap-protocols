@@ -104,7 +104,7 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
     })
 
     it('Staking tokens are minted for Alice', async () => {
-      emitted(await tokenAST.mint(aliceAddress, 2000), 'Transfer')
+      emitted(await tokenAST.mint(aliceAddress, 1000), 'Transfer')
     })
 
     it('Fails due to no staking token allowance', async () => {
@@ -304,22 +304,6 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
           }
         ),
         'CreateMarket'
-      )
-    })
-
-    it('Alice attempts to stake and set an intent and succeeds', async () => {
-      emitted(
-        await indexer.setTwoSidedIntent(
-          tokenWETH.address,
-          tokenDAI.address,
-          250,
-          await getTimestampPlusDays(1),
-          ALICE_LOC,
-          {
-            from: aliceAddress,
-          }
-        ),
-        'Stake'
       )
     })
 
