@@ -1,5 +1,4 @@
 const Consumer = artifacts.require('Consumer')
-const Swap = artifacts.require('Swap')
 const Indexer = artifacts.require('Indexer')
 const Delegate = artifacts.require('Delegate')
 const MockContract = artifacts.require("MockContract")
