@@ -18,7 +18,6 @@
   },
   "devDependencies": {
     "@gnosis.pm/mock-contract": "^3.0.7",
-    "ganache-time-traveler": "^1.0.0",
     "babel-eslint": "^10.0.2",
     "eslint": "^5.16.0",
     "eslint-config-airbnb-base": "^13.2.0",
