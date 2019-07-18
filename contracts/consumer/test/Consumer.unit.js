@@ -34,10 +34,7 @@ contract.only('Consumer Unit Tests', async (accounts) => {
     before('deploy Consumer', async () => {
 
       mockUserSendToken = await MockContract.new()
-      await mockUserSendToken.givenAnyReturnBool(true)
-
       mockUserReceiveToken = await MockContract.new()
-      await mockUserReceiveToken.givenAnyReturnBool(true)
 
       mockSwap = await MockContract.new()
       await mockSwap.givenAnyReturnBool(true)
@@ -91,10 +88,8 @@ contract.only('Consumer Unit Tests', async (accounts) => {
       })
 
       it("test takeBestBuy()", async () => {
-        //this should always select the lowest cost delegate available
-        await consumer.takeBestBuy(180, EMPTY_ADDRESS, EMPTY_ADDRESS, 2)
-        //await consumer.takeBestBuy(180, mockUserSendToken, mockUserReceiveToken, 2)
-        //passes(trx)
+        let trx = await consumer.takeBestBuy(180, mockUserSendToken.address, mockUserReceiveToken.address, 2)
+        passes(trx)
       })
     });
   }
