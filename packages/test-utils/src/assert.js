@@ -7,4 +7,6 @@ module.exports = {
   getResult: truffleAssert.createTransactionResult,
   equal: assert.equal,
   ok: assert.ok,
+  passes: assert.passes,
+  fails: assert.fails
 }

@@ -4,7 +4,7 @@ const Indexer = artifacts.require('Indexer')
 const Delegate = artifacts.require('Delegate')
 const MockContract = artifacts.require("MockContract")
 const abi = require('ethereumjs-abi')
-const { emitted, equal, ok } = require('@airswap/test-utils').assert
+const { equal, passes } = require('@airswap/test-utils').assert
 const { balances } = require('@airswap/test-utils').balances
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 const { intents } = require('@airswap/indexer-utils')
@@ -19,6 +19,8 @@ contract.only('Consumer Unit Tests', async (accounts) => {
     let mockSwap
     let mockIndexer
     let consumer
+    let mockUserSendToken 
+    let mockUserReceiveToken 
 
     beforeEach(async() => {
       let snapShot = await takeSnapshot()
@@ -30,8 +32,15 @@ contract.only('Consumer Unit Tests', async (accounts) => {
     });
 
     before('deploy Consumer', async () => {
-      let swapTemplate = await Swap.new()
+
+      mockUserSendToken = await MockContract.new()
+      await mockUserSendToken.givenAnyReturnBool(true)
+
+      mockUserReceiveToken = await MockContract.new()
+      await mockUserReceiveToken.givenAnyReturnBool(true)
+
       mockSwap = await MockContract.new()
+      await mockSwap.givenAnyReturnBool(true)
 
       let indexerTemplate = await Indexer.new(EMPTY_ADDRESS, 0)
       mockIndexer = await MockContract.new()
@@ -42,12 +51,18 @@ contract.only('Consumer Unit Tests', async (accounts) => {
 
       //mock delegate getBuyQuote()
       let delegate_getBuyQuote = delegateTemplate.contract.methods.getBuyQuote(0, EMPTY_ADDRESS, EMPTY_ADDRESS).encodeABI()
-      mockDelegateHigh.givenMethodReturnUint(delegate_getBuyQuote, highVal)
-      mockDelegateLow.givenMethodReturnUint(delegate_getBuyQuote, lowVal)
+      await mockDelegateHigh.givenMethodReturnUint(delegate_getBuyQuote, highVal)
+      await mockDelegateLow.givenMethodReturnUint(delegate_getBuyQuote, lowVal)
+
+      //mock delegate provideUnsignedOrder()
+      let delegate_provideUnsignedOrder 
+        = delegateTemplate.contract.methods.provideUnsignedOrder(0, 0, EMPTY_ADDRESS, 0, EMPTY_ADDRESS).encodeABI()
+      await mockDelegateHigh.givenMethodReturnBool(delegate_provideUnsignedOrder, true);
+      await mockDelegateLow.givenMethodReturnBool(delegate_provideUnsignedOrder, true);
 
       //mock indexer getIntents()
       let indexer_getIntents = indexerTemplate.contract.methods.getIntents(EMPTY_ADDRESS, EMPTY_ADDRESS, 0).encodeABI()
-      mockIndexer.givenMethodReturn(
+      await mockIndexer.givenMethodReturn(
         indexer_getIntents,
         abi.rawEncode(['bytes32[]'], [ [mockDelegateHigh.address, mockDelegateLow.address] ])
       )
@@ -58,21 +73,28 @@ contract.only('Consumer Unit Tests', async (accounts) => {
     describe("Test initial values", async () => {
       it("Test initial Swap Contact", async () => {
         let val = await consumer.swapContract.call();
-        equal(val,  mockSwap.address, "swap address is incorrect");
+        equal(val, mockSwap.address, "swap address is incorrect");
       })
 
       it("Test initial Indexer Contact", async () => {
         let val = await consumer.indexerContract.call();
-        equal(val,  mockIndexer.address, "indexer address is incorrect");
+        equal(val, mockIndexer.address, "indexer address is incorrect");
       })
     })
 
     describe("Test buy methods", async () => {
-      it("test findBestBuy()", async() => {
+      it("test findBestBuy()", async () => {
         //this should always select the lowest cost delegate available
         let val = await consumer.findBestBuy.call(180, EMPTY_ADDRESS, EMPTY_ADDRESS, 2)
         equal(val[0], mockDelegateLow.address)
         equal(val[1].toNumber(), lowVal)
+      })
+
+      it("test takeBestBuy()", async () => {
+        //this should always select the lowest cost delegate available
+        await consumer.takeBestBuy(180, EMPTY_ADDRESS, EMPTY_ADDRESS, 2)
+        //await consumer.takeBestBuy(180, mockUserSendToken, mockUserReceiveToken, 2)
+        //passes(trx)
       })
     });
   }
