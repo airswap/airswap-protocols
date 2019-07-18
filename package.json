@@ -27,12 +27,15 @@
     "lerna": "^3.15.0",
     "prettier": "^1.18.2",
     "solhint": "^2.1.0",
-    "truffle": "^5.0.24"
+    "truffle": "^5.0.24",
+    "ethereumjs-abi": "^0.6.7"
   },
   "prettier": {
     "trailingComma": "es5",
     "tabWidth": 2,
     "semi": false,
     "singleQuote": true
+  },
+  "dependencies": {
   }
 }
