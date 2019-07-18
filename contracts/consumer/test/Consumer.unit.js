@@ -12,6 +12,8 @@ const { intents } = require('@airswap/indexer-utils')
 const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 contract.only('Consumer Unit Tests', async (accounts) => {
+    const highVal = 400
+    const lowVal = 200
   
     let snapshotId
     let mockSwap
@@ -35,18 +37,22 @@ contract.only('Consumer Unit Tests', async (accounts) => {
       mockIndexer = await MockContract.new()
 
       let delegateTemplate = await Delegate.new(EMPTY_ADDRESS)
-      mockDelegate = await MockContract.new()
+      mockDelegateHigh = await MockContract.new()
+      mockDelegateLow = await MockContract.new()
 
-      consumer = await Consumer.new(mockSwap.address, mockIndexer.address)
-
+      //mock delegate getBuyQuote()
       let delegate_getBuyQuote = delegateTemplate.contract.methods.getBuyQuote(0, EMPTY_ADDRESS, EMPTY_ADDRESS).encodeABI()
-      mockDelegate.givenMethodReturnUint(delegate_getBuyQuote, 400)
+      mockDelegateHigh.givenMethodReturnUint(delegate_getBuyQuote, highVal)
+      mockDelegateLow.givenMethodReturnUint(delegate_getBuyQuote, lowVal)
 
+      //mock indexer getIntents()
       let indexer_getIntents = indexerTemplate.contract.methods.getIntents(EMPTY_ADDRESS, EMPTY_ADDRESS, 0).encodeABI()
       mockIndexer.givenMethodReturn(
         indexer_getIntents,
-        abi.rawEncode(['bytes32[]'], [ [mockDelegate.address, mockDelegate.address] ])
+        abi.rawEncode(['bytes32[]'], [ [mockDelegateHigh.address, mockDelegateLow.address] ])
       )
+
+      consumer = await Consumer.new(mockSwap.address, mockIndexer.address)
     })
 
     describe("Test initial values", async () => {
@@ -61,7 +67,20 @@ contract.only('Consumer Unit Tests', async (accounts) => {
       })
     })
 
-    describe("Test findBestBuy()", async () => {
+    describe("Test buy methods", async () => {
+      it("test findBestBuy() with low recieve amount", async() => {
+        //this should select the lowest cost available
+        let val = await consumer.findBestBuy.call(180, EMPTY_ADDRESS, EMPTY_ADDRESS, 2)
+        equal(val[0], mockDelegateLow.address)
+        equal(val[1].toNumber(), lowVal)
+      })
+
+      it("test findBestBuy() with high receive amount", async() => {
+        //this should select the lowest cost availble
+        let val = await consumer.findBestBuy.call(600, EMPTY_ADDRESS, EMPTY_ADDRESS, 2)
+        equal(val[0], mockDelegateLow.address)
+        equal(val[1].toNumber(), lowVal)
+      })
     });
   }
  )
