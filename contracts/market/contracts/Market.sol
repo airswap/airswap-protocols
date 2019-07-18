@@ -252,8 +252,8 @@ contract Market is Ownable {
     * @param _nextIntent Intent to follow _newIntent
     */
   function insertIntent(
-    Intent memory _intent,
-    Intent memory _existing
+    Intent memory _newIntent,
+    Intent memory _nextIntent
   ) internal returns (bool) {
 
     // Ensure the _existing intent is in the list.
