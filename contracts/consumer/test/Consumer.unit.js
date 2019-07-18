@@ -34,7 +34,10 @@ contract.only('Consumer Unit Tests', async (accounts) => {
     before('deploy Consumer', async () => {
 
       mockUserSendToken = await MockContract.new()
+      await mockUserSendToken.givenAnyReturnBool(true);
+
       mockUserReceiveToken = await MockContract.new()
+      await mockUserReceiveToken.givenAnyReturnBool(true);
 
       mockSwap = await MockContract.new()
       await mockSwap.givenAnyReturnBool(true)
