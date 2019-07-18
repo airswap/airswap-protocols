@@ -135,15 +135,7 @@ contract Market is Ownable {
       return false;
     }
 
-    // Link its neighbors together.
-    link(list[_staker][PREV], list[_staker][NEXT]);
-
-    // Delete staker from the list.
-    delete list[_staker][PREV];
-    delete list[_staker][NEXT];
-
-    // Decrement the length of the list.
-    length = length - 1;
+    removeIntent(_staker);
 
     emit UnsetIntent(_staker, makerToken, takerToken);
     return true;
@@ -222,28 +214,26 @@ contract Market is Ownable {
     }
   }
 
-  function garbageCollection() external {
-    // Get the first intent in the list.
-    Intent storage intent = list[HEAD][NEXT];
+  function removeExpiredIntent(address _expiredStaker) external returns (bool) {
 
-    while(intent.staker != HEAD) {
-      if (intent.expiry <= now) {
-        address expiredStaker = intent.staker;
+      if (isIntentExpired(_expiredStaker)) {
+        // Link its neighbors together.
+        link(list[_expiredStaker][PREV], list[_expiredStaker][NEXT]);
 
-        // Keep track of the next intent to look at
-        intent = list[expiredStaker][NEXT];
+        // Delete staker from the list.
+        delete list[_expiredStaker][PREV];
+        delete list[_expiredStaker][NEXT];
 
-        // Remove the expired intent and link its neighbours together
-        link(list[expiredStaker][PREV], list[expiredStaker][NEXT]);
-        delete list[expiredStaker][PREV];
-        delete list[expiredStaker][NEXT];
-
+        // Decrement the length of the list.
         length = length - 1;
-      } else {
-        // Otherwise it hasnt expired - we move onto the next element
-        intent = list[intent.staker][NEXT];
+        return true;
       }
-    }
+
+      return false;
+  }
+
+  function isIntentExpired(address _staker) public returns (bool) {
+    return getIntent(_staker).expiry <= now;
   }
 
   /**
@@ -307,6 +297,20 @@ contract Market is Ownable {
   ) internal {
     list[_left.staker][NEXT] = _right;
     list[_right.staker][PREV] = _left;
+  }
+
+  function removeIntent(address _staker) internal returns (bool) {
+    // Link its neighbors together.
+    link(list[_staker][PREV], list[_staker][NEXT]);
+
+    // Delete staker from the list.
+    delete list[_staker][PREV];
+    delete list[_staker][NEXT];
+
+    // Decrement the length of the list.
+    length = length - 1;
+
+    return true;
   }
 
 }

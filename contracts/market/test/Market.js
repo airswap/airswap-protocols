@@ -200,30 +200,88 @@ contract(
       })
     })
 
+    describe('Garbage Collection', () => {
+      it("Doesn't remove Bob's intent as his hasnt expired", async () => {
+        let intents = await market.fetchIntents(7)
+        // Returns all 6 intents
+        assert(BN(intents.length).eq(6), 'Returned intents wrong length')
+
+        // Try to remove Bob's intent
+        await market.removeExpiredIntent(bobAddress)
+
+        intents = await market.fetchIntents(7)
+        assert(BN(intents.length).eq(6), 'Intents should be same length')
+
+        // Ensure that the ordering is the same
+        assert(intents[0] == ALICE_LOC, 'Alice is not first')
+        assert(intents[1] == BOB_LOC, 'Bob should be second')
+        assert(intents[2] == EVE_LOC, 'Eve should be third')
+        assert(intents[3] == DAVID_LOC, 'David should be fourth')
+        assert(intents[4] == ZARA_LOC, 'Zara should be fifth')
+        assert(intents[5] == NULL_LOCATOR, 'Null 6th location')
+      })
+
+      it("Should remove Carol's intent", async () => {
+        let intents = await market.fetchIntents(7)
+        // Returns all 6 intents
+        assert(BN(intents.length).eq(6), 'Returned intents wrong length')
+
+        // Try to remove Carol's intent
+        await market.removeExpiredIntent(carolAddress)
+
+        intents = await market.fetchIntents(7)
+        // Returns just 5 intents this time
+        assert(BN(intents.length).eq(5), 'Intents should be shorter')
+
+        // Ensure that the ordering is the same
+        assert(intents[0] == ALICE_LOC, 'Alice is not first')
+        assert(intents[1] == BOB_LOC, 'Bob should be second')
+        assert(intents[2] == EVE_LOC, 'Eve should be third')
+        assert(intents[3] == DAVID_LOC, 'David should be fourth')
+        assert(intents[4] == ZARA_LOC, 'Zara should be fifth')
+      })
+
+      it('Remove more intents after more time', async () => {
+        // Advance time another 0.6 days
+        // This advances past the expiry of Bob's and Eve's intents
+        await advanceTimeAndBlock(SECONDS_IN_DAY * 0.6)
+        let intents = await market.fetchIntents(7)
+        // Returns 5 intents as Bob and Eve have not been removed
+        assert(BN(intents.length).eq(5), 'Returned intents wrong length')
+
+        // Try to remove their intents
+        await market.removeExpiredIntent(bobAddress)
+        await market.removeExpiredIntent(eveAddress)
+
+        intents = await market.fetchIntents(7)
+        // Returns just 3 intents this time
+        assert(BN(intents.length).eq(3), 'Intents should be shorter')
+
+        // Ensure that the ordering is the same
+        assert(intents[0] == ALICE_LOC, 'Alice is not first')
+        assert(intents[1] == DAVID_LOC, 'David should be fourth')
+        assert(intents[2] == ZARA_LOC, 'Zara should be fifth')
+      })
+    })
+
     describe('Unset', () => {
       it('Unsets intent for Bob', async () => {
-        market.unsetIntent(bobAddress)
-        equal((await market.getIntent(bobAddress)).locator, NULL_LOCATOR)
-        assert(BN(await market.length()).eq(5), 'Market length is incorrect')
+        market.unsetIntent(davidAddress)
+        equal((await market.getIntent(davidAddress)).locator, NULL_LOCATOR)
+        assert(BN(await market.length()).eq(2), 'Market length is incorrect')
       })
 
       it('Unsets intent for Zara', async () => {
         market.unsetIntent(zaraAddress)
         equal((await market.getIntent(zaraAddress)).locator, NULL_LOCATOR)
-        assert(BN(await market.length()).eq(4), 'Market length is incorrect')
+        assert(BN(await market.length()).eq(1), 'Market length is incorrect')
       })
 
       it('Ensure ordering is correct', async () => {
         const intents = await market.fetchIntents(10)
         assert(intents[0] == ALICE_LOC, 'Alice is not first')
-        assert(intents[1] == EVE_LOC, 'Eve should be second')
-        assert(intents[2] == DAVID_LOC, 'David should be third')
-        assert(
-          intents[3] == NULL_LOCATOR,
-          'Final slot should be 0x0 - carol=expired'
-        )
 
-        assert(BN(await market.length()).eq(4), 'Market length is incorrect')
+        assert(BN(await market.length()).eq(1), 'Market length is incorrect')
       })
     })
   }
