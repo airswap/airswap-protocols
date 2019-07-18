@@ -222,6 +222,30 @@ contract Market is Ownable {
     }
   }
 
+  function garbageCollection() external {
+    // Get the first intent in the list.
+    Intent storage intent = list[HEAD][NEXT];
+
+    while(intent.staker != HEAD) {
+      if (intent.expiry <= now) {
+        address expiredStaker = intent.staker;
+
+        // Keep track of the next intent to look at
+        intent = list[expiredStaker][NEXT];
+
+        // Remove the expired intent and link its neighbours together
+        link(list[expiredStaker][PREV], list[expiredStaker][NEXT]);
+        delete list[expiredStaker][PREV];
+        delete list[expiredStaker][NEXT];
+
+        length = length - 1;
+      } else {
+        // Otherwise it hasnt expired - we move onto the next element
+        intent = list[intent.staker][NEXT];
+      }
+    }
+  }
+
   /**
     * @notice Returns the first intent smaller than _amount
     * @param _amount uint256
