@@ -68,16 +68,9 @@ contract.only('Consumer Unit Tests', async (accounts) => {
     })
 
     describe("Test buy methods", async () => {
-      it("test findBestBuy() with low recieve amount", async() => {
-        //this should select the lowest cost available
+      it("test findBestBuy()", async() => {
+        //this should always select the lowest cost delegate available
         let val = await consumer.findBestBuy.call(180, EMPTY_ADDRESS, EMPTY_ADDRESS, 2)
-        equal(val[0], mockDelegateLow.address)
-        equal(val[1].toNumber(), lowVal)
-      })
-
-      it("test findBestBuy() with high receive amount", async() => {
-        //this should select the lowest cost availble
-        let val = await consumer.findBestBuy.call(600, EMPTY_ADDRESS, EMPTY_ADDRESS, 2)
         equal(val[0], mockDelegateLow.address)
         equal(val[1].toNumber(), lowVal)
       })
