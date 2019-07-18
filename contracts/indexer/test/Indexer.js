@@ -3,7 +3,7 @@ const FungibleToken = artifacts.require('FungibleToken')
 
 const { emitted, reverted, equal, ok } = require('@airswap/test-utils').assert
 const { balances } = require('@airswap/test-utils').balances
-const { getExpiry } = require('@airswap/test-utils').time
+const { getTimestampPlusDays } = require('@airswap/test-utils').time
 const { intents } = require('@airswap/indexer-utils')
 
 const ALICE_LOC = intents.serialize(
@@ -59,7 +59,7 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenDAI.address,
           tokenWETH.address,
           100,
-          getExpiry(),
+          await getTimestampPlusDays(1),
           ALICE_LOC,
           {
             from: aliceAddress,
@@ -75,7 +75,7 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenWETH.address,
           tokenDAI.address,
           100,
-          getExpiry(),
+          await getTimestampPlusDays(1),
           ALICE_LOC,
           {
             from: aliceAddress,
@@ -93,7 +93,7 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenWETH.address,
           tokenDAI.address,
           500,
-          getExpiry(),
+          await getTimestampPlusDays(1),
           ALICE_LOC,
           {
             from: aliceAddress,
@@ -113,7 +113,7 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenWETH.address,
           tokenDAI.address,
           500,
-          getExpiry(),
+          await getTimestampPlusDays(1),
           ALICE_LOC,
           {
             from: aliceAddress,
@@ -141,7 +141,7 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenWETH.address,
           tokenDAI.address,
           500,
-          getExpiry(),
+          await getTimestampPlusDays(1),
           ALICE_LOC,
           {
             from: aliceAddress,
@@ -206,7 +206,7 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenWETH.address,
           tokenDAI.address,
           1000,
-          getExpiry(),
+          await getTimestampPlusDays(1),
           ALICE_LOC,
           {
             from: aliceAddress,
@@ -241,7 +241,7 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenWETH.address,
           tokenDAI.address,
           1000,
-          getExpiry(),
+          await getTimestampPlusDays(1),
           ALICE_LOC,
           {
             from: aliceAddress,
@@ -283,37 +283,8 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
         await indexer.setIntent(
           tokenWETH.address,
           tokenDAI.address,
-          500,
-          getExpiry(),
-          ALICE_LOC,
-          {
-            from: aliceAddress,
-          }
-        ),
-        'Stake'
-      )
-    })
-
-    it('Bob creates the other side of the market for WETH/DAI', async () => {
-      emitted(
-        await indexer.createTwoSidedMarket(
-          tokenDAI.address,
-          tokenWETH.address,
-          {
-            from: bobAddress,
-          }
-        ),
-        'CreateMarket'
-      )
-    })
-
-    it('Alice attempts to stake and set an intent and succeeds', async () => {
-      emitted(
-        await indexer.setTwoSidedIntent(
-          tokenWETH.address,
-          tokenDAI.address,
-          250,
-          getExpiry(),
+          1000,
+          await getTimestampPlusDays(1),
           ALICE_LOC,
           {
             from: aliceAddress,
