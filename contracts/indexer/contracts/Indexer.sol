@@ -231,7 +231,7 @@ contract Indexer is IIndexer, Ownable {
   }
 
   /**
-    * @notice Unset an Intent to Trade
+    * @notice Unset an Two-Sided Intent to Trade
     * @dev Users are allowed unstake from blacklisted markets
     *
     * @param _tokenOne address

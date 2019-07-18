@@ -136,7 +136,6 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
     })
 
     it('Alice attempts to stake and set an intent succeeds', async () => {
-      console.log(ALICE_LOC)
       emitted(
         await indexer.setIntent(
           tokenWETH.address,
@@ -284,7 +283,7 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
         await indexer.setIntent(
           tokenWETH.address,
           tokenDAI.address,
-          1000,
+          500,
           await getTimestampPlusDays(1),
           ALICE_LOC,
           {
@@ -305,6 +304,22 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
           }
         ),
         'CreateMarket'
+      )
+    })
+
+    it('Alice attempts to stake and set an intent and succeeds', async () => {
+      emitted(
+        await indexer.setTwoSidedIntent(
+          tokenWETH.address,
+          tokenDAI.address,
+          250,
+          await getTimestampPlusDays(1),
+          ALICE_LOC,
+          {
+            from: aliceAddress,
+          }
+        ),
+        'Stake'
       )
     })
 

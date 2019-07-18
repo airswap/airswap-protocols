@@ -172,9 +172,8 @@ contract Market is Ownable {
     */
   function hasIntent(
     address _staker
-  ) internal view returns (
-    bool
-  ) {
+  ) internal view returns (bool) {
+
     if (list[_staker][PREV].staker != address(0) &&
       list[list[_staker][PREV].staker][NEXT].staker == _staker) {
         return true;
@@ -195,9 +194,8 @@ contract Market is Ownable {
     */
   function fetchIntents(
     uint256 _count
-  ) public view returns (
-    bytes32[] memory result
-  ) {
+  ) public view returns (bytes32[] memory result) {
+
     // Limit results to list length or _count.
     uint256 limit = length;
     if (_count < length) {
@@ -230,9 +228,8 @@ contract Market is Ownable {
     */
   function findPosition(
     uint256 _amount
-  ) internal view returns (
-    Intent memory
-  ) {
+  ) internal view returns (Intent memory) {
+
     // Get the first intent in the list.
     Intent storage intent = list[HEAD][NEXT];
 
@@ -257,9 +254,7 @@ contract Market is Ownable {
   function insertIntent(
     Intent memory _newIntent,
     Intent memory _nextIntent
-  ) internal returns (
-    bool
-  ) {
+  ) internal returns (bool) {
 
     // Ensure the _existing intent is in the list.
     if (!hasIntent(_nextIntent.staker)) {
