@@ -214,24 +214,28 @@ contract Market is Ownable {
     }
   }
 
+  /**
+    * @notice Removes _expiredStaker from the market, if their intent has expired
+    *
+    * @param _expiredStaker the staker in question
+    * @return bool was the staker removed?
+    */
   function removeExpiredIntent(address _expiredStaker) external returns (bool) {
-
       if (isIntentExpired(_expiredStaker)) {
-        // Link its neighbors together.
-        link(list[_expiredStaker][PREV], list[_expiredStaker][NEXT]);
 
-        // Delete staker from the list.
-        delete list[_expiredStaker][PREV];
-        delete list[_expiredStaker][NEXT];
-
-        // Decrement the length of the list.
-        length = length - 1;
+        removeIntent(_expiredStaker);
         return true;
       }
 
       return false;
   }
 
+  /**
+    * @notice Concludes whether a staker's intent has expired
+    *
+    * @param _staker the staker in question
+    * @return bool has the staker's intent expired?
+    */
   function isIntentExpired(address _staker) public returns (bool) {
     return getIntent(_staker).expiry <= now;
   }
@@ -299,7 +303,12 @@ contract Market is Ownable {
     list[_right.staker][PREV] = _left;
   }
 
-  function removeIntent(address _staker) internal returns (bool) {
+  /**
+    * @notice Removes a specified staker from the linked list
+    *
+    * @param _staker the staker in question
+    */
+  function removeIntent(address _staker) internal {
     // Link its neighbors together.
     link(list[_staker][PREV], list[_staker][NEXT]);
 
@@ -309,8 +318,6 @@ contract Market is Ownable {
 
     // Decrement the length of the list.
     length = length - 1;
-
-    return true;
   }
 
 }
