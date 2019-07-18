@@ -9,7 +9,7 @@ const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 
 const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
 
-contract.only('Consumer Unit Tests', async (accounts) => {
+contract('Consumer Unit Tests', async (accounts) => {
     const highVal = 400
     const lowVal = 200
   
