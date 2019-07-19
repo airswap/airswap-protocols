@@ -202,4 +202,19 @@ contract('Delegate Unit Tests', async accounts => {
       )
     })
   })
+
+  describe('Test getSellQuote', async () => {
+    it('test when delegate does not exist', async () => {
+      const NON_EXISTENT_DELEGATE_TOKEN = accounts[7]
+      let val = await delegate.getSellQuote.call(
+      //assert 0
+    })
+
+    it('test when delegate amount is not within acceptable value bounds', async () => {
+      //assert 0
+    })
+
+    it('test a successful call', async() => {
+    })
+  })
 })
