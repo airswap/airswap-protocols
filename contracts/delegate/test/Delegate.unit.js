@@ -12,6 +12,11 @@ contract.only('Delegate Unit Tests', async accounts => {
 
   let delegate
   let mockSwap
+  const DELEGATE_TOKEN = accounts[9]
+  const CONSUMER_TOKEN = accounts[8]
+  const MAX_DELEGATE_AMOUNT = 12345
+  const PRICE_COEF = 4321
+  const EXP = 2
 
   beforeEach(async () => {
     let snapShot = await takeSnapshot()
@@ -45,27 +50,25 @@ contract.only('Delegate Unit Tests', async accounts => {
     })
 
     it('Test setRule', async () => {
-      let delegateToken = accounts[9]
-      let consumerToken = accounts[8]
-      let maxDelegateAmount = 12345
-      let priceCoef = 4321
-      let exp = 2
-      let trx = await delegate.setRule(delegateToken, consumerToken, maxDelegateAmount, priceCoef, exp)
+      let trx = await delegate.setRule(DELEGATE_TOKEN, CONSUMER_TOKEN, MAX_DELEGATE_AMOUNT, PRICE_COEF, EXP)
 
       //check if rule has been added
-      let rule = await delegate.rules.call(delegateToken, consumerToken)
-      equal(rule[0].toNumber(), maxDelegateAmount, "max delegate amount is incorrectly saved")
-      equal(rule[1].toNumber(), priceCoef, "price coef is incorrectly saved")
-      equal(rule[2].toNumber(), exp, "price exp is incorrectly saved")
+      let rule = await delegate.rules.call(DELEGATE_TOKEN, CONSUMER_TOKEN)
+      equal(rule[1].toNumber(), PRICE_COEF, "price coef is incorrectly saved")
+      equal(rule[2].toNumber(), EXP, "price exp is incorrectly saved")
       
       //check emitted event
       emitted(trx, 'SetRule', (e) => {
-        return e.delegateToken === delegateToken &&
-        e.consumerToken === consumerToken &&
-        e.maxDelegateAmount.toNumber() === maxDelegateAmount &&
-        e.priceCoef.toNumber() === priceCoef &&
-        e.priceExp.toNumber() === exp
+        return e.delegateToken === DELEGATE_TOKEN &&
+        e.consumerToken === CONSUMER_TOKEN &&
+        e.maxDelegateAmount.toNumber() === MAX_DELEGATE_AMOUNT &&
+        e.priceCoef.toNumber() === PRICE_COEF &&
+        e.priceExp.toNumber() === EXP
       })
+    })
+
+    it('Test unsetRule', async () => {
+
     })
   })
 })
