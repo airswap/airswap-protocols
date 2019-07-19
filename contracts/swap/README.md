@@ -59,8 +59,8 @@ Swap between tokens (ERC-20 or ERC-721) or ETH with all features using typed dat
 
 ```Solidity
 function swap(
-  Order calldata order,
-  Signature calldata signature
+  Types.Order calldata _order,
+  Types.Signature calldata _signature
 ) external payable
 ```
 
@@ -125,35 +125,35 @@ Lightweight swap between tokens (ERC-20 or ERC-721) using simple signatures.
 
 ```Solidity
 function swapSimple(
-  uint256 nonce,
-  address makerWallet,
-  uint256 makerParam,
-  address makerToken,
-  address takerWallet,
-  uint256 takerParam,
-  address takerToken,
-  uint256 expiry,
-  bytes32 r,
-  bytes32 s,
-  uint8 v
-) external
+  uint256 _nonce,
+  uint256 _expiry,
+  address _makerWallet,
+  uint256 _makerParam,
+  address _makerToken,
+  address _takerWallet,
+  uint256 _takerParam,
+  address _takerToken,
+  uint8 _v,
+  bytes32 _r,
+  bytes32 _s
+) external payable
 ```
 
 ### Params
 
-| Name          | Type      | Description                                            |
-| :------------ | :-------- | :----------------------------------------------------- |
-| `nonce`       | `uint256` | A single use identifier for the Order.                 |
-| `expiry`      | `uint256` | The expiry in seconds since unix epoch.                |
-| `makerWallet` | `address` | The Maker of the Order who sets price.                 |
-| `makerParam`  | `uint256` | The amount or identifier of the token the Maker sends. |
-| `makerToken`  | `address` | The address of the token the Maker sends.              |
-| `takerWallet` | `address` | The Taker of the Order who takes price.                |
-| `takerParam`  | `uint256` | The amount or identifier of the token the Taker sends. |
-| `takerToken`  | `address` | The address of the token the Taker sends.              |
-| `v`           | `uint8`   | The `v` value of an ECDSA signature.                   |
-| `r`           | `bytes32` | The `r` value of an ECDSA signature.                   |
-| `s`           | `bytes32` | The `s` value of an ECDSA signature.                   |
+| Name           | Type      | Description                                            |
+| :------------- | :-------- | :----------------------------------------------------- |
+| `_nonce`       | `uint256` | A single use identifier for the Order.                 |
+| `_expiry`      | `uint256` | The expiry in seconds since unix epoch.                |
+| `_makerWallet` | `address` | The Maker of the Order who sets price.                 |
+| `_makerParam`  | `uint256` | The amount or identifier of the token the Maker sends. |
+| `_makerToken`  | `address` | The address of the token the Maker sends.              |
+| `_takerWallet` | `address` | The Taker of the Order who takes price.                |
+| `_takerParam`  | `uint256` | The amount or identifier of the token the Taker sends. |
+| `_takerToken`  | `address` | The address of the token the Taker sends.              |
+| `_v`           | `uint8`   | The `v` value of an ECDSA signature.                   |
+| `_r`           | `bytes32` | The `r` value of an ECDSA signature.                   |
+| `_s`           | `bytes32` | The `s` value of an ECDSA signature.                   |
 
 ### Reverts
 
