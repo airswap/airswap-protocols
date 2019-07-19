@@ -3,6 +3,7 @@ const Indexer = artifacts.require('Indexer')
 const Delegate = artifacts.require('Delegate')
 const MockContract = artifacts.require('MockContract')
 const abi = require('ethereumjs-abi')
+const { intents } = require('@airswap/indexer-utils')
 const { equal, passes } = require('@airswap/test-utils').assert
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 
@@ -58,6 +59,16 @@ contract('Consumer Unit Tests', async accounts => {
     let indexerTemplate = await Indexer.new(EMPTY_ADDRESS, 0)
     mockIndexer = await MockContract.new()
 
+    const HIGH_LOCATOR = intents.serialize(
+      intents.Locators.CONTRACT,
+      mockDelegateHigh.address
+    )
+
+    const LOW_LOCATOR = intents.serialize(
+      intents.Locators.CONTRACT,
+      mockDelegateLow.address
+    )
+
     //mock indexer getIntents()
     let indexer_getIntents = indexerTemplate.contract.methods
       .getIntents(EMPTY_ADDRESS, EMPTY_ADDRESS, 0)
@@ -66,7 +77,7 @@ contract('Consumer Unit Tests', async accounts => {
       indexer_getIntents,
       abi.rawEncode(
         ['bytes32[]'],
-        [[mockDelegateHigh.address, mockDelegateLow.address]]
+        [[HIGH_LOCATOR, LOW_LOCATOR ]]
       )
     )
   }
