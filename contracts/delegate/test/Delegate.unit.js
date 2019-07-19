@@ -3,7 +3,7 @@ const Swap = artifacts.require('Swap')
 const FungibleToken = artifacts.require('FungibleToken')
 const MockContract = artifacts.require('MockContract')
 const abi = require('ethereumjs-abi')
-const { equal, notEqual, passes } = require('@airswap/test-utils').assert
+const { equal, notEqual, passes, emitted } = require('@airswap/test-utils').assert
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 
 const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000'
@@ -45,7 +45,27 @@ contract.only('Delegate Unit Tests', async accounts => {
     })
 
     it('Test setRule', async () => {
+      let delegateToken = accounts[9]
+      let consumerToken = accounts[8]
+      let maxDelegateAmount = 12345
+      let priceCoef = 4321
+      let exp = 2
+      let trx = await delegate.setRule(delegateToken, consumerToken, maxDelegateAmount, priceCoef, exp)
 
+      //check if rule has been added
+      let rule = await delegate.rules.call(delegateToken, consumerToken)
+      equal(rule[0].toNumber(), maxDelegateAmount, "max delegate amount is incorrectly saved")
+      equal(rule[1].toNumber(), priceCoef, "price coef is incorrectly saved")
+      equal(rule[2].toNumber(), exp, "price exp is incorrectly saved")
+      
+      //check emitted event
+      emitted(trx, 'SetRule', (e) => {
+        return e.delegateToken === delegateToken &&
+        e.consumerToken === consumerToken &&
+        e.maxDelegateAmount.toNumber() === maxDelegateAmount &&
+        e.priceCoef.toNumber() === priceCoef &&
+        e.priceExp.toNumber() === exp
+      })
     })
   })
 })
