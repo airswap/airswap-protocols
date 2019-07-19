@@ -75,10 +75,7 @@ contract('Consumer Unit Tests', async accounts => {
       .encodeABI()
     await mockIndexer.givenMethodReturn(
       indexer_getIntents,
-      abi.rawEncode(
-        ['bytes32[]'],
-        [[HIGH_LOCATOR, LOW_LOCATOR ]]
-      )
+      abi.rawEncode(['bytes32[]'], [[HIGH_LOCATOR, LOW_LOCATOR]])
     )
   }
 
