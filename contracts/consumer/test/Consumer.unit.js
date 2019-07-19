@@ -111,7 +111,7 @@ contract('Consumer Unit Tests', async () => {
   })
 
   describe('Test buy methods', async () => {
-    it('test findBestBuy()', async () => {
+    it('test findBestBuy() by ensuring that it returns the lowest cost delegate', async () => {
       //this should always select the lowest cost delegate available
       let val = await consumer.findBestBuy.call(
         180,
@@ -123,7 +123,7 @@ contract('Consumer Unit Tests', async () => {
       equal(val[1].toNumber(), lowVal)
     })
 
-    it('test takeBestBuy()', async () => {
+    it('test takeBestBuy() by ensuring all internal methods are called', async () => {
       let trx = await consumer.takeBestBuy(
         180,
         mockUserSendToken.address,
