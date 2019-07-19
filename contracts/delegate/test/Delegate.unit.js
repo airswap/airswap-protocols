@@ -95,4 +95,18 @@ contract.only('Delegate Unit Tests', async accounts => {
       })
     })
   })
+
+  describe('Test getBuyQuote', async () => {
+    it('test when delegate does not exist', async () => {
+    })
+
+    it('test when delegate amount is greater than max delegate amount', async () => {
+    })
+
+    it('test when consumer amount is not an invalid price', async () => {
+    })
+
+    it('test a successful call', async () => {
+    })
+  })
 })
