@@ -111,8 +111,7 @@ contract('Consumer Unit Tests', async () => {
   })
 
   describe('Test buy methods', async () => {
-
-    it('test findBestBuy() by ensuring that it returns default values when indexer returns no locators', async () => {
+    it('test findBestBuy() by ensuring that it returns default values with an empty indexer', async () => {
       //mock indexer getIntents() where there are no locators
       await mockIndexer.givenMethodReturn(
         indexer_getIntents,
@@ -131,7 +130,7 @@ contract('Consumer Unit Tests', async () => {
       equal(lowestCost, maxUint.toPrecision(5))
     })
 
-    it('test findBestBuy() by ensuring that it returns the lowest cost delegate (high to low)', async () => {
+    it('test findBestBuy() returns the lowest cost delegate with an indexer ordered high to low', async () => {
       //mock indexer getIntents() where locators are ordered high to low
       await mockIndexer.givenMethodReturn(
         indexer_getIntents,
@@ -150,7 +149,7 @@ contract('Consumer Unit Tests', async () => {
       equal(val[1].toNumber(), lowVal)
     })
 
-    it('test findBestBuy() by ensuring that it returns the lowest cost delegate (low to high)', async () => {
+    it('test findBestBuy() returns the lowest cost delegate with an indexer ordered low to high', async () => {
       //mock indexer getIntents() where locators are ordered low to high
       await mockIndexer.givenMethodReturn(
         indexer_getIntents,
