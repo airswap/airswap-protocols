@@ -98,15 +98,29 @@ contract.only('Delegate Unit Tests', async accounts => {
 
   describe('Test getBuyQuote', async () => {
     it('test when delegate does not exist', async () => {
+      const NON_EXISTENT_DELEGATE_TOKEN = accounts[7];
+      let val = await delegate.getBuyQuote.call(1234, NON_EXISTENT_DELEGATE_TOKEN, CONSUMER_TOKEN)
+      equal(val.toNumber(), 0, "no quote should be available if a delegate does not exist")
     })
 
     it('test when delegate amount is greater than max delegate amount', async () => {
+      await delegate.setRule(DELEGATE_TOKEN, CONSUMER_TOKEN, MAX_DELEGATE_AMOUNT, PRICE_COEF, EXP)
+      let val = await delegate.getBuyQuote.call(MAX_DELEGATE_AMOUNT + 1, DELEGATE_TOKEN, CONSUMER_TOKEN)
+      equal(val.toNumber(), 0, "no quote should be available if delegate amount is greater than delegate max amount")
     })
 
-    it('test when consumer amount is not an invalid price', async () => {
+    it('test when delegate amount is 0', async () => {
+      await delegate.setRule(DELEGATE_TOKEN, CONSUMER_TOKEN, MAX_DELEGATE_AMOUNT, PRICE_COEF, EXP)
+      let val = await delegate.getBuyQuote.call(0, DELEGATE_TOKEN, CONSUMER_TOKEN)
+      equal(val.toNumber(), 0, "no quote should be available if delegate amount is 0")
     })
 
     it('test a successful call', async () => {
+      await delegate.setRule(DELEGATE_TOKEN, CONSUMER_TOKEN, MAX_DELEGATE_AMOUNT, PRICE_COEF, EXP)
+      let val = await delegate.getBuyQuote.call(1234, DELEGATE_TOKEN, CONSUMER_TOKEN)
+      //TODO: @dmosites should the getBuyQuote() return with an exponent or a whole number?
+      //1234 * PRICE_COEF * 10^(-EXP)
+      equal(val.toNumber(), 5332114, "no quote should be available if delegate amount is 0")
     })
   })
 })
