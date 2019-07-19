@@ -99,19 +99,18 @@ event Filled(
 
 ```
 function swapSimple(
-  uint256 nonce,
-  uint256 expiry,
-  address makerWallet,
-  uint256 makerParam,
-  address makerToken,
-  address takerWallet,
-  uint256 takerParam,
-  address takerToken,
-  uint8 v,
-  bytes32 r,
-  bytes32 s
-)
-external payable
+  uint256 _nonce,
+  uint256 _expiry,
+  address _makerWallet,
+  uint256 _makerParam,
+  address _makerToken,
+  address _takerWallet,
+  uint256 _takerParam,
+  address _takerToken,
+  uint8 _v,
+  bytes32 _r,
+  bytes32 _s
+) external payable
 ```
 
 A successful `swapSimple` transaction will emit a `Swap` event.
