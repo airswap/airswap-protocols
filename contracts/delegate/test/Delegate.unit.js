@@ -13,7 +13,7 @@ const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 
 const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000'
 
-contract.only('Delegate Unit Tests', async accounts => {
+contract('Delegate Unit Tests', async accounts => {
   let delegate
   let mockSwap
   const DELEGATE_TOKEN = accounts[9]
