@@ -54,7 +54,8 @@ contract Consumer {
     * @param _userSendToken address the token the user is looking to send
     * @param _maxIntents uint256 the max number of intents to search through
     *
-    * @return address, uint256 The best priced Delegate (address) and its quote amount (uint256)
+    * @return address The best priced Delegate
+    * @return uint256 The best priced Delgate's quote amount
     */
   function findBestBuy(
     uint256 _userReceiveAmount,
@@ -93,7 +94,7 @@ contract Consumer {
   /**
     * @notice Take the Best Price for a Buy
     *
-    * @param _userReceiveAmount uint256 the amount of the token the the caller is looking to receive
+    * @param _userReceiveAmount uint256 the amount of the token the caller is looking to receive
     * @param _userReceiveToken address the token the user is looking to receive
     * @param _userSendToken address the token the user is looking to send
     * @param _maxIntents uint256 the max number of intents to search through
