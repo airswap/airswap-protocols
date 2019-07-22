@@ -40,16 +40,15 @@ contract('Wrapper', ([aliceAddress, bobAddress, carolAddress]) => {
         ]
     })
     it('Mints 1000 DAI for Alice', async () => {
-      emitted(await tokenDAI.mint(aliceAddress, 1000), 'Transfer')
+      let tx = await tokenDAI.mint(aliceAddress, 1000)
+      emitted(tx, 'Transfer')
     })
   })
 
   describe('Approving...', () => {
     it('Alice approves Swap to spend 9999 DAI', async () => {
-      emitted(
-        await tokenDAI.approve(swapAddress, 9999, { from: aliceAddress }),
-        'Approval'
-      )
+      let tx = await tokenDAI.approve(swapAddress, 9999, { from: aliceAddress })
+      emitted(tx, 'Approval')
     })
   })
 
@@ -87,40 +86,32 @@ contract('Wrapper', ([aliceAddress, bobAddress, carolAddress]) => {
         { from: bobAddress, value: order.taker.param }
       )
 
-      emitted(await getResult(swapContract, result.tx), 'Swap')
+      result = await getResult(swapContract, result.tx)
+      emitted(result, 'Swap')
     })
   })
 
   describe('Unwrap Sells', async () => {
     it('Carol gets some WETH and approves on the Swap contract', async () => {
-      emitted(
-        await tokenWETH.deposit({ from: carolAddress, value: 10000 }),
-        'Deposit'
-      )
-      emitted(
-        await tokenWETH.approve(swapAddress, 10000, { from: carolAddress }),
-        'Approval'
-      )
+      let tx = await tokenWETH.deposit({ from: carolAddress, value: 10000 })
+      emitted(tx, 'Deposit')
+      tx = await tokenWETH.approve(swapAddress, 10000, { from: carolAddress })
+      emitted(tx, 'Approval')
     })
 
     it('Alice authorizes the Wrapper to send orders on her behalf', async () => {
-      emitted(
-        await swapContract.authorize(
-          wrapperAddress,
-          await getTimestampPlusDays(1),
-          { from: aliceAddress }
-        ),
-        'Authorize'
-      )
+      let expiry = await getTimestampPlusDays(1)
+      let tx = await swapContract.authorize(wrapperAddress, expiry, {
+        from: aliceAddress,
+      })
+      emitted(tx, 'Authorize')
     })
 
     it('Alice authorizes the Swap contract to move her WETH', async () => {
-      emitted(
-        await tokenWETH.approve(wrapperAddress, 10000, {
-          from: aliceAddress,
-        }),
-        'Approval'
-      )
+      let tx = await tokenWETH.approve(wrapperAddress, 10000, {
+        from: aliceAddress,
+      })
+      emitted(tx, 'Approval')
     })
 
     it('Checks that Alice receives ETH for a WETH order from Carol', async () => {
@@ -142,7 +133,7 @@ contract('Wrapper', ([aliceAddress, bobAddress, carolAddress]) => {
         swapAddress
       )
 
-      const result = await swapSimple(
+      let result = await swapSimple(
         order.nonce,
         order.expiry,
         order.maker.wallet,
@@ -156,7 +147,8 @@ contract('Wrapper', ([aliceAddress, bobAddress, carolAddress]) => {
         signature.s,
         { from: aliceAddress }
       )
-      emitted(await getResult(swapContract, result.tx), 'Swap')
+      result = await getResult(swapContract, result.tx)
+      emitted(result, 'Swap')
     })
   })
 })
