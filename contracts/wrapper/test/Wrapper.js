@@ -3,7 +3,7 @@ const Wrapper = artifacts.require('Wrapper')
 const WETH9 = artifacts.require('WETH9')
 const FungibleToken = artifacts.require('FungibleToken')
 
-const { emitted, getResult } = require('@airswap/test-utils').assert
+const { emitted, getResult, passes } = require('@airswap/test-utils').assert
 const { getTimestampPlusDays } = require('@airswap/test-utils').time
 const { orders, signatures } = require('@airswap/order-utils')
 
@@ -42,6 +42,7 @@ contract('Wrapper', ([aliceAddress, bobAddress, carolAddress]) => {
     it('Mints 1000 DAI for Alice', async () => {
       let tx = await tokenDAI.mint(aliceAddress, 1000)
       emitted(tx, 'Transfer')
+      passes(tx)
     })
   })
 
@@ -49,6 +50,7 @@ contract('Wrapper', ([aliceAddress, bobAddress, carolAddress]) => {
     it('Alice approves Swap to spend 9999 DAI', async () => {
       let tx = await tokenDAI.approve(swapAddress, 9999, { from: aliceAddress })
       emitted(tx, 'Approval')
+      passes(tx)
     })
   })
 
@@ -85,7 +87,7 @@ contract('Wrapper', ([aliceAddress, bobAddress, carolAddress]) => {
         signature.s,
         { from: bobAddress, value: order.taker.param }
       )
-
+      passes(result)
       result = await getResult(swapContract, result.tx)
       emitted(result, 'Swap')
     })
@@ -94,8 +96,10 @@ contract('Wrapper', ([aliceAddress, bobAddress, carolAddress]) => {
   describe('Unwrap Sells', async () => {
     it('Carol gets some WETH and approves on the Swap contract', async () => {
       let tx = await tokenWETH.deposit({ from: carolAddress, value: 10000 })
+      passes(tx)
       emitted(tx, 'Deposit')
       tx = await tokenWETH.approve(swapAddress, 10000, { from: carolAddress })
+      passes(tx)
       emitted(tx, 'Approval')
     })
 
@@ -104,6 +108,7 @@ contract('Wrapper', ([aliceAddress, bobAddress, carolAddress]) => {
       let tx = await swapContract.authorize(wrapperAddress, expiry, {
         from: aliceAddress,
       })
+      passes(tx)
       emitted(tx, 'Authorize')
     })
 
@@ -111,6 +116,7 @@ contract('Wrapper', ([aliceAddress, bobAddress, carolAddress]) => {
       let tx = await tokenWETH.approve(wrapperAddress, 10000, {
         from: aliceAddress,
       })
+      passes(tx)
       emitted(tx, 'Approval')
     })
 
@@ -147,6 +153,7 @@ contract('Wrapper', ([aliceAddress, bobAddress, carolAddress]) => {
         signature.s,
         { from: aliceAddress }
       )
+      passes(result)
       result = await getResult(swapContract, result.tx)
       emitted(result, 'Swap')
     })
