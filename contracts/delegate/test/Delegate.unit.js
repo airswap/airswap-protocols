@@ -195,36 +195,50 @@ contract('Delegate Unit Tests', async accounts => {
       )
       //TODO: @dmosites should the getBuyQuote() return with an exponent or a whole number?
       //1234 * PRICE_COEF * 10^(-EXP)
-      equal(
-        val.toNumber(),
-        5332114,
-        'there should be a quote available'
-      )
+      equal(val.toNumber(), 5332114, 'there should be a quote available')
     })
   })
 
   describe('Test getSellQuote', async () => {
     it('test when delegate does not exist', async () => {
-      let val = await delegate.getSellQuote.call(4312, CONSUMER_TOKEN, DELEGATE_TOKEN)
-      equal(val.toNumber(), 0, 'no quote should be available if a delegate does not exist')
+      let val = await delegate.getSellQuote.call(
+        4312,
+        CONSUMER_TOKEN,
+        DELEGATE_TOKEN
+      )
+      equal(
+        val.toNumber(),
+        0,
+        'no quote should be available if a delegate does not exist'
+      )
     })
 
     it('test when delegate amount is not within acceptable value bounds', async () => {
-      await delegate.setRule(
-        DELEGATE_TOKEN,
+      await delegate.setRule(DELEGATE_TOKEN, CONSUMER_TOKEN, 100, 1, 0)
+      let val = await delegate.getSellQuote.call(
+        0,
         CONSUMER_TOKEN,
-        100,
-        1,
-        0
+        DELEGATE_TOKEN
       )
-      let val = await delegate.getSellQuote.call(0, CONSUMER_TOKEN, DELEGATE_TOKEN)
-      equal(val.toNumber(), 0, "no quote should be available if returned delegate amount is 0")
+      equal(
+        val.toNumber(),
+        0,
+        'no quote should be available if returned delegate amount is 0'
+      )
 
-      val = await delegate.getSellQuote.call(MAX_DELEGATE_AMOUNT + 1, CONSUMER_TOKEN, DELEGATE_TOKEN)
-      equal(val.toNumber(), 0, "no quote should be available if returned greater than max delegate amount")
+      val = await delegate.getSellQuote.call(
+        MAX_DELEGATE_AMOUNT + 1,
+        CONSUMER_TOKEN,
+        DELEGATE_TOKEN
+      )
+      equal(
+        val.toNumber(),
+        0,
+        'no quote should be available if returned greater than max delegate amount'
+      )
     })
 
-    it.skip('test a successful call', async() => {
+    it.skip('test a successful call', async () => {
       await delegate.setRule(
         DELEGATE_TOKEN,
         CONSUMER_TOKEN,
@@ -232,10 +246,53 @@ contract('Delegate Unit Tests', async accounts => {
         PRICE_COEF,
         EXP
       )
-      let val = await delegate.getSellQuote.call(500, CONSUMER_TOKEN, DELEGATE_TOKEN)
+      let val = await delegate.getSellQuote.call(
+        500,
+        CONSUMER_TOKEN,
+        DELEGATE_TOKEN
+      )
       //TODO: @dmosites should the getSellQuote() return with an exponent or a whole number?
       //500 * (10 ^ EXP) / PRICE_COEF
       equal(val.toNumber(), 1157, 'there should be a quote available')
+    })
+  })
+
+  describe('Test getMaxQuote', async () => {
+    it('test when delegate does not exist', async () => {
+      let val = await delegate.getMaxQuote(DELEGATE_TOKEN, CONSUMER_TOKEN)
+      equal(
+        val[0].toNumber(),
+        0,
+        'no quote should be available if a dleegate does not exist'
+      )
+      equal(
+        val[1].toNumber(),
+        0,
+        'no quote should be available if a dleegate does not exist'
+      )
+    })
+
+    it('test a successful call', async () => {
+      await delegate.setRule(
+        DELEGATE_TOKEN,
+        CONSUMER_TOKEN,
+        MAX_DELEGATE_AMOUNT,
+        PRICE_COEF,
+        EXP
+      )
+      let val = await delegate.getMaxQuote(DELEGATE_TOKEN, CONSUMER_TOKEN)
+      //TODO: @dmosites should the getMaxQuote() return with an exponent or a whole number?
+      //MAX_DELEGATE_AMOUNT * PRICE_COEF / (10 ^ EXP)
+      equal(
+        val[0].toNumber(),
+        MAX_DELEGATE_AMOUNT,
+        'no quote should be available if a dleegate does not exist'
+      )
+      equal(
+        val[1].toNumber(),
+        53342745,
+        'no quote should be available if a dleegate does not exist'
+      )
     })
   })
 })
