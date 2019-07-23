@@ -182,6 +182,7 @@ contract('Consumer Unit Tests', async () => {
         indexer_getIntents,
         abi.rawEncode(['bytes32[]'], [[low_locator, high_locator]])
       )
+    })
 
     it('test takeBestBuy()', async () => {
       let trx = await consumer.takeBestBuy(

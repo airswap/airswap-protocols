@@ -195,18 +195,18 @@ contract('Delegate Unit Tests', async accounts => {
       )
       //TODO: @dmosites should the getBuyQuote() return with an exponent or a whole number?
       //1234 * PRICE_COEF * 10^(-EXP)
-//      equal(
-//        val.toNumber(),
-//        5332114,
-//        'no quote should be available if delegate amount is 0'
-//      )
+      equal(
+        val.toNumber(),
+        5332114,
+        'no quote should be available if delegate amount is 0'
+      )
     })
   })
 
   describe('Test getSellQuote', async () => {
     it('test when delegate does not exist', async () => {
       const NON_EXISTENT_DELEGATE_TOKEN = accounts[7]
-      //let val = await delegate.getSellQuote.call()
+      let val = await delegate.getSellQuote.call()
       //assert 0
     })
 
