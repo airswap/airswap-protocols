@@ -8,6 +8,7 @@ const {
   notEqual,
   passes,
   emitted,
+  reverted,
 } = require('@airswap/test-utils').assert
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 
@@ -272,7 +273,7 @@ contract('Delegate Unit Tests', async accounts => {
       )
     })
 
-    it('test a successful call', async () => {
+    it.skip('test a successful call', async () => {
       await delegate.setRule(
         DELEGATE_TOKEN,
         CONSUMER_TOKEN,
@@ -286,13 +287,51 @@ contract('Delegate Unit Tests', async accounts => {
       equal(
         val[0].toNumber(),
         MAX_DELEGATE_AMOUNT,
-        'no quote should be available if a dleegate does not exist'
+        'no quote should be available if a delegate does not exist'
       )
       equal(
         val[1].toNumber(),
         53342745,
-        'no quote should be available if a dleegate does not exist'
+        'no quote should be available if a delegate does not exist'
       )
+    })
+  })
+
+  describe('Test provideOrder', async () => {
+    it('test if a rule does not exist', async () => {
+      await reverted(
+        delegate.provideOrder(
+          1,
+          2,
+          EMPTY_ADDRESS,
+          555,
+          CONSUMER_TOKEN,
+          EMPTY_ADDRESS,
+          999,
+          DELEGATE_TOKEN,
+          5,
+          web3.utils.asciiToHex('r'),
+          web3.utils.asciiToHex('s')
+        ),
+        'TOKEN_PAIR_INACTIVE'
+      )
+    })
+
+    it('test if an order exceeds maximum amount', async () => {
+      await delegate.setRule(
+        DELEGATE_TOKEN,
+        CONSUMER_TOKEN,
+        MAX_DELEGATE_AMOUNT,
+        PRICE_COEF,
+        EXP
+      )
+    })
+
+    it('test if order is priced according tot he role', async () => {})
+
+    it('test a successful calld', async () => {
+      //mock swapContract
+      //test rule decrement
     })
   })
 })
