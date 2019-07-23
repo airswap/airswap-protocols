@@ -325,13 +325,75 @@ contract('Delegate Unit Tests', async accounts => {
         PRICE_COEF,
         EXP
       )
+      await reverted(
+        delegate.provideOrder(
+          1,
+          2,
+          EMPTY_ADDRESS,
+          555,
+          CONSUMER_TOKEN,
+          EMPTY_ADDRESS,
+          MAX_DELEGATE_AMOUNT + 1,
+          DELEGATE_TOKEN,
+          5,
+          web3.utils.asciiToHex('r'),
+          web3.utils.asciiToHex('s')
+        ),
+        'AMOUNT_EXCEEDS_MAX'
+      )
     })
 
-    it('test if order is priced according tot he role', async () => {})
+    it('test if order is priced according to the role', async () => {
+      await delegate.setRule(
+        DELEGATE_TOKEN,
+        CONSUMER_TOKEN,
+        MAX_DELEGATE_AMOUNT,
+        PRICE_COEF,
+        EXP
+      )
+      await reverted(
+        delegate.provideOrder(
+          1,
+          2,
+          EMPTY_ADDRESS,
+          30,
+          CONSUMER_TOKEN,
+          EMPTY_ADDRESS,
+          MAX_DELEGATE_AMOUNT,
+          DELEGATE_TOKEN,
+          100,
+          web3.utils.asciiToHex('r'),
+          web3.utils.asciiToHex('s')
+        ),
+        'PRICE_INCORRECT'
+      )
+    })
 
-    it('test a successful calld', async () => {
-      //mock swapContract
-      //test rule decrement
+    it('test a successful called', async () => {
+      await delegate.setRule(
+        DELEGATE_TOKEN,
+        CONSUMER_TOKEN,
+        MAX_DELEGATE_AMOUNT,
+        4321,
+        EXP
+      )
+      await passes(
+        //mock swapContract
+        //test rule decrement
+        delegate.provideOrder(
+          1,                            //nonce
+          2,                            //expiry
+          EMPTY_ADDRESS,                //consumerWallet
+          100,                          //consumerAmount
+          CONSUMER_TOKEN,               //consumerToken
+          EMPTY_ADDRESS,                //delegateWallet
+          231,                          //delegateAmount
+          DELEGATE_TOKEN,               //delegateToken
+          8,                            //v
+          web3.utils.asciiToHex('r'),   //r
+          web3.utils.asciiToHex('s')    //s
+        )
+      )
     })
   })
 })
