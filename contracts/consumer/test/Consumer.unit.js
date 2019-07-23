@@ -3,14 +3,17 @@ const Indexer = artifacts.require('Indexer')
 const Delegate = artifacts.require('Delegate')
 const MockContract = artifacts.require('MockContract')
 const abi = require('ethereumjs-abi')
+const { intents } = require('@airswap/indexer-utils')
 const { equal, passes } = require('@airswap/test-utils').assert
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
+const BigNumber = require('bignumber.js')
 
 const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000'
 
-contract('Consumer Unit Tests', async accounts => {
+contract('Consumer Unit Tests', async () => {
   const highVal = 400
   const lowVal = 200
+  const maxUint = new BigNumber('1.1579209e+77')
 
   let snapshotId
   let mockSwap
@@ -18,6 +21,9 @@ contract('Consumer Unit Tests', async accounts => {
   let consumer
   let mockUserSendToken
   let mockUserReceiveToken
+  let indexer_getIntents
+  let low_locator
+  let high_locator
 
   beforeEach(async () => {
     let snapShot = await takeSnapshot()
@@ -58,8 +64,17 @@ contract('Consumer Unit Tests', async accounts => {
     let indexerTemplate = await Indexer.new(EMPTY_ADDRESS, 0)
     mockIndexer = await MockContract.new()
 
-    //mock indexer getIntents()
-    let indexer_getIntents = indexerTemplate.contract.methods
+    high_locator = intents.serialize(
+      intents.Locators.CONTRACT,
+      mockDelegateHigh.address
+    )
+
+    low_locator = intents.serialize(
+      intents.Locators.CONTRACT,
+      mockDelegateLow.address
+    )
+
+    indexer_getIntents = indexerTemplate.contract.methods
       .getIntents(EMPTY_ADDRESS, EMPTY_ADDRESS, 0)
       .encodeABI()
     await mockIndexer.givenMethodReturn(
@@ -102,8 +117,52 @@ contract('Consumer Unit Tests', async accounts => {
     })
   })
 
-  describe('Test buy methods', async () => {
-    it('test findBestBuy()', async () => {
+  describe('Test findBestBuy()', async () => {
+    it('test default values are returned with an empty indexer', async () => {
+      //mock indexer getIntents() where there are no locators
+      await mockIndexer.givenMethodReturn(
+        indexer_getIntents,
+        abi.rawEncode(['bytes32[]'], [[]])
+      )
+
+      let val = await consumer.findBestBuy.call(
+        180,
+        EMPTY_ADDRESS,
+        EMPTY_ADDRESS,
+        2
+      )
+
+      let lowestCost = new BigNumber(val[1]).toPrecision(5)
+      equal(val[0], EMPTY_ADDRESS)
+      equal(lowestCost, maxUint.toPrecision(5))
+    })
+
+    it('test that the lowest cost delegate is returned with an indexer ordered high to low', async () => {
+      //mock indexer getIntents() where locators are ordered high to low
+      await mockIndexer.givenMethodReturn(
+        indexer_getIntents,
+        abi.rawEncode(['bytes32[]'], [[high_locator, low_locator]])
+      )
+
+      //this should always select the lowest cost delegate available
+      let val = await consumer.findBestBuy.call(
+        180,
+        EMPTY_ADDRESS,
+        EMPTY_ADDRESS,
+        2
+      )
+
+      equal(val[0], mockDelegateLow.address)
+      equal(val[1].toNumber(), lowVal)
+    })
+
+    it('test that the lowest cost delegate is returned with an indexer ordered low to high', async () => {
+      //mock indexer getIntents() where locators are ordered low to high
+      await mockIndexer.givenMethodReturn(
+        indexer_getIntents,
+        abi.rawEncode(['bytes32[]'], [[low_locator, high_locator]])
+      )
+
       //this should always select the lowest cost delegate available
       let val = await consumer.findBestBuy.call(
         180,
@@ -114,6 +173,15 @@ contract('Consumer Unit Tests', async accounts => {
       equal(val[0], mockDelegateLow.address)
       equal(val[1].toNumber(), lowVal)
     })
+  })
+
+  describe('Test takeBestBuy()', async () => {
+    it('test by ensuring all internal methods are called', async () => {
+      //mock indexer getIntents() where locators are ordered low to high
+      await mockIndexer.givenMethodReturn(
+        indexer_getIntents,
+        abi.rawEncode(['bytes32[]'], [[low_locator, high_locator]])
+      )
 
     it('test takeBestBuy()', async () => {
       let trx = await consumer.takeBestBuy(
