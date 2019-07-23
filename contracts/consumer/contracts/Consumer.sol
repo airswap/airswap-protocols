@@ -35,8 +35,8 @@ contract Consumer {
   /**
     * @notice Contract Constructor
     *
-    * @param _swapContract address
-    * @param _indexerContract address
+    * @param _swapContract the address of the Swap Contract
+    * @param _indexerContract the address of the Indexer Contract
     */
   constructor(
     address _swapContract,
@@ -49,12 +49,13 @@ contract Consumer {
   /**
     * @notice Find the Best Price for a Buy
     *
-    * @param _userReceiveAmount uint256
-    * @param _userReceiveToken address
-    * @param _userSendToken address
-    * @param _maxIntents uint256
+    * @param _userReceiveAmount uint256 the amount of the token the caller is looking to receive
+    * @param _userReceiveToken address the token the user is looking to receive 
+    * @param _userSendToken address the token the user is looking to send
+    * @param _maxIntents uint256 the max number of intents to search through
     *
-    * @return Best priced Delegate (address) and its quote amount (uint256)
+    * @return address The best priced Delegate
+    * @return uint256 The best priced Delgate's quote amount
     */
   function findBestBuy(
     uint256 _userReceiveAmount,
@@ -93,10 +94,10 @@ contract Consumer {
   /**
     * @notice Take the Best Price for a Buy
     *
-    * @param _userReceiveAmount uint256
-    * @param _userReceiveToken address
-    * @param _userSendToken address
-    * @param _maxIntents uint256
+    * @param _userReceiveAmount uint256 the amount of the token the caller is looking to receive
+    * @param _userReceiveToken address the token the user is looking to receive
+    * @param _userSendToken address the token the user is looking to send
+    * @param _maxIntents uint256 the max number of intents to search through
     */
   function takeBestBuy(
     uint256 _userReceiveAmount,
@@ -135,7 +136,6 @@ contract Consumer {
 
     // Consumer transfers received amount to the User.
     IERC20(_userReceiveToken).transfer(msg.sender, _userReceiveAmount);
-
   }
 
 }

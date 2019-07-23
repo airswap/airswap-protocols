@@ -17,6 +17,7 @@
     "test": "yarn clean && lerna run test"
   },
   "devDependencies": {
+    "@gnosis.pm/mock-contract": "^3.0.7",
     "babel-eslint": "^10.0.2",
     "eslint": "^5.16.0",
     "eslint-config-airbnb-base": "^13.2.0",
@@ -26,7 +27,8 @@
     "lerna": "^3.15.0",
     "prettier": "^1.18.2",
     "solhint": "^2.1.0",
-    "truffle": "^5.0.24"
+    "truffle": "^5.0.24",
+    "ethereumjs-abi": "^0.6.7"
   },
   "prettier": {
     "trailingComma": "es5",
