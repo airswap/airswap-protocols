@@ -74,9 +74,7 @@ contract('Delegate Unit Tests', async accounts => {
       await reverted(
         delegate.setSwapContract(newSwap.address, { from: notOwner })
       )
-      await passes(
-        delegate.setSwapContract(newSwap.address, { from: owner })
-      )
+      await passes(delegate.setSwapContract(newSwap.address, { from: owner }))
     })
 
     it('Test setSwapContract', async () => {
@@ -110,10 +108,11 @@ contract('Delegate Unit Tests', async accounts => {
           MAX_DELEGATE_AMOUNT,
           PRICE_COEF,
           EXP,
-          { from: owner })
+          { from: owner }
+        )
       )
     })
-    
+
     it('Test setRule', async () => {
       let trx = await delegate.setRule(
         DELEGATE_TOKEN,
@@ -145,7 +144,7 @@ contract('Delegate Unit Tests', async accounts => {
       })
     })
 
-    it('Test unsetRule permissions', async() => {
+    it('Test unsetRule permissions', async () => {
       await reverted(
         delegate.unsetRule(DELEGATE_TOKEN, CONSUMER_TOKEN, { from: notOwner })
       )
