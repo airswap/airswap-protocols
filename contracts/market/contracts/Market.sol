@@ -159,21 +159,6 @@ contract Market is Ownable {
   }
 
   /**
-    * @notice Determine Whether a Staker is in the List
-    * @param _staker address
-    */
-  function hasIntent(
-    address _staker
-  ) internal view returns (bool) {
-
-    if (list[_staker][PREV].staker != address(0) &&
-      list[list[_staker][PREV].staker][NEXT].staker == _staker) {
-        return true;
-    }
-    return false;
-  }
-
-  /**
     * @notice Return the Length
     */
   function getLength() public view returns (uint256) {
@@ -215,20 +200,29 @@ contract Market is Ownable {
   }
 
   /**
-    * @notice Removes _expiredStaker from the market, if their intent has expired
+    * @notice Loops through _count stakers from _startingPoint and removes any expired intents
     *
-    * @param _expiredStaker the staker in question
-    * @return bool was the staker removed?
+    * @param _startingPoint the staker to start at
+    * @param _count the number of stakers to loop through
     */
-  function removeExpiredIntent(address _expiredStaker) external returns (bool) {
-      if (isIntentExpired(_expiredStaker)) {
+    function cleanExpiredIntents(address _startingPoint, uint256 _count) external {
+      uint256 limit = _count;
+      address staker = _startingPoint;
 
-        removeIntent(_expiredStaker);
-        return true;
+      if (limit > length) {
+        limit = length;
       }
 
-      return false;
-  }
+      uint256 i = 0;
+      while (i < limit) {
+        if (staker != HEAD) {
+          removeExpiredIntent(staker);
+          i++;
+        }
+
+        staker = list[staker][NEXT].staker;
+      }
+    }
 
   /**
     * @notice Concludes whether a staker's intent has expired
@@ -238,6 +232,21 @@ contract Market is Ownable {
     */
   function isIntentExpired(address _staker) public returns (bool) {
     return getIntent(_staker).expiry <= now;
+  }
+
+  /**
+    * @notice Determine Whether a Staker is in the List
+    * @param _staker address
+    */
+  function hasIntent(
+    address _staker
+  ) internal view returns (bool) {
+
+    if (list[_staker][PREV].staker != address(0) &&
+      list[list[_staker][PREV].staker][NEXT].staker == _staker) {
+        return true;
+    }
+    return false;
   }
 
   /**
@@ -301,6 +310,18 @@ contract Market is Ownable {
   ) internal {
     list[_left.staker][NEXT] = _right;
     list[_right.staker][PREV] = _left;
+  }
+
+  /**
+    * @notice Removes _expiredStaker from the market, if their intent has expired
+    *
+    * @param _expiredStaker the staker in question
+    * @return bool was the staker removed?
+    */
+  function removeExpiredIntent(address _expiredStaker) internal {
+      if (isIntentExpired(_expiredStaker)) {
+        removeIntent(_expiredStaker);
+      }
   }
 
   /**
