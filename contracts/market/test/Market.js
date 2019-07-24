@@ -273,7 +273,7 @@ contract(
     })
 
     describe('Unset', () => {
-      it('Unsets intent for Bob', async () => {
+      it('Unsets intent for David', async () => {
         market.unsetIntent(davidAddress)
         equal((await market.getIntent(davidAddress)).locator, NULL_LOCATOR)
         assert(BN(await market.length()).eq(2), 'Market length is incorrect')
