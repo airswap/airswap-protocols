@@ -123,7 +123,7 @@ contract(
 
       it('Ensure ordering is correct', async () => {
         const intents = await market.fetchIntents(7)
-        assert(intents[0] == ALICE_LOC, 'Alice is not first')
+        assert(intents[0] == ALICE_LOC, 'Alice should be first')
         assert(intents[1] == CAROL_LOC, 'Carol should be second')
         assert(intents[2] == BOB_LOC, 'Bob should be third')
         assert(intents[3] == EVE_LOC, 'Eve should be fourth')
@@ -167,7 +167,7 @@ contract(
     describe('Fetch', () => {
       it('Fetches intents', async () => {
         const intents = await market.fetchIntents(7)
-        assert(intents[0] == ALICE_LOC, 'Alice is not first')
+        assert(intents[0] == ALICE_LOC, 'Alice should be first')
         assert(intents[1] == CAROL_LOC, 'Carol should be second')
         assert(intents[2] == BOB_LOC, 'Bob should be third')
         assert(intents[3] == EVE_LOC, 'Eve should be fourth')
@@ -181,7 +181,7 @@ contract(
         // This advances past the expiry of Carol's intent
         await advanceTimeAndBlock(SECONDS_IN_DAY * 1.5)
         const intents = await market.fetchIntents(7)
-        assert(intents[0] == ALICE_LOC, 'Alice is not first')
+        assert(intents[0] == ALICE_LOC, 'Alice should be first')
         assert(intents[1] == BOB_LOC, 'Bob should be second')
         assert(intents[2] == EVE_LOC, 'Eve should be third')
         assert(intents[3] == DAVID_LOC, 'David should be fourth')
@@ -214,7 +214,7 @@ contract(
         assert(BN(intents.length).eq(6), 'Intents should be same length')
 
         // Ensure that the ordering is the same
-        assert(intents[0] == ALICE_LOC, 'Alice is not first')
+        assert(intents[0] == ALICE_LOC, 'Alice should be first')
         assert(intents[1] == BOB_LOC, 'Bob should be second')
         assert(intents[2] == EVE_LOC, 'Eve should be third')
         assert(intents[3] == DAVID_LOC, 'David should be fourth')
@@ -236,7 +236,7 @@ contract(
         assert(BN(intents.length).eq(5), 'Intents should be shorter')
 
         // Ensure that the ordering is the same, without a null 6th slot
-        assert(intents[0] == ALICE_LOC, 'Alice is not first')
+        assert(intents[0] == ALICE_LOC, 'Alice should be first')
         assert(intents[1] == BOB_LOC, 'Bob should be second')
         assert(intents[2] == EVE_LOC, 'Eve should be third')
         assert(intents[3] == DAVID_LOC, 'David should be fourth')
@@ -266,7 +266,7 @@ contract(
         assert(BN(intents.length).eq(3), 'Intents should be shorter')
 
         // Ensure that the ordering is the same
-        assert(intents[0] == ALICE_LOC, 'Alice is not first')
+        assert(intents[0] == ALICE_LOC, 'Alice should be first')
         assert(intents[1] == DAVID_LOC, 'David should be fourth')
         assert(intents[2] == ZARA_LOC, 'Zara should be fifth')
       })
@@ -287,7 +287,7 @@ contract(
 
       it('Ensure ordering is correct', async () => {
         const intents = await market.fetchIntents(10)
-        assert(intents[0] == ALICE_LOC, 'Alice is not first')
+        assert(intents[0] == ALICE_LOC, 'Alice should be first')
 
         assert(BN(await market.length()).eq(1), 'Market length is incorrect')
       })
