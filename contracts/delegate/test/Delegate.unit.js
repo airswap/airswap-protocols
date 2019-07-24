@@ -50,6 +50,7 @@ contract('Delegate Unit Tests', async accounts => {
         web3.utils.asciiToHex('s')
       )
       .encodeABI()
+
     mockSwap = await MockContract.new()
   }
 
@@ -148,7 +149,7 @@ contract('Delegate Unit Tests', async accounts => {
   })
 
   describe('Test getBuyQuote', async () => {
-    it('test when delegate does not exist', async () => {
+    it('test when rule does not exist', async () => {
       const NON_EXISTENT_DELEGATE_TOKEN = accounts[7]
       let val = await delegate.getBuyQuote.call(
         1234,
@@ -222,7 +223,7 @@ contract('Delegate Unit Tests', async accounts => {
   })
 
   describe('Test getSellQuote', async () => {
-    it('test when delegate does not exist', async () => {
+    it('test when rule does not exist', async () => {
       let val = await delegate.getSellQuote.call(
         4312,
         CONSUMER_TOKEN,
@@ -280,7 +281,7 @@ contract('Delegate Unit Tests', async accounts => {
   })
 
   describe('Test getMaxQuote', async () => {
-    it('test when delegate does not exist', async () => {
+    it('test when rule does not exist', async () => {
       let val = await delegate.getMaxQuote(DELEGATE_TOKEN, CONSUMER_TOKEN)
       equal(
         val[0].toNumber(),
@@ -390,7 +391,7 @@ contract('Delegate Unit Tests', async accounts => {
       )
     })
 
-    it('test a successful with integer values', async () => {
+    it('test a successful transaction with integer values', async () => {
       await delegate.setRule(
         DELEGATE_TOKEN,
         CONSUMER_TOKEN,
@@ -441,7 +442,7 @@ contract('Delegate Unit Tests', async accounts => {
       )
     })
 
-    it.skip('test a successful with decimal values', async () => {
+    it.skip('test a successful transaction with decimal values', async () => {
       await delegate.setRule(
         DELEGATE_TOKEN,
         CONSUMER_TOKEN,
