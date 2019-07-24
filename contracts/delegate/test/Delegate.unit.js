@@ -17,6 +17,7 @@ const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000'
 contract('Delegate Unit Tests', async accounts => {
   let delegate
   let mockSwap
+  let swap_swapSimple
   const DELEGATE_TOKEN = accounts[9]
   const CONSUMER_TOKEN = accounts[8]
   const MAX_DELEGATE_AMOUNT = 12345
@@ -32,8 +33,28 @@ contract('Delegate Unit Tests', async accounts => {
     await revertToSnapShot(snapshotId)
   })
 
-  before('deploy Delegate', async () => {
+  async function setupMockSwap() {
+    let swapTemplate = await Swap.new()
+    swap_swapSimple = swapTemplate.contract.methods
+      .swapSimple(
+        0,
+        0,
+        EMPTY_ADDRESS,
+        0,
+        EMPTY_ADDRESS,
+        EMPTY_ADDRESS,
+        0,
+        EMPTY_ADDRESS,
+        8,
+        web3.utils.asciiToHex('r'),
+        web3.utils.asciiToHex('s')
+      )
+      .encodeABI()
     mockSwap = await MockContract.new()
+  }
+
+  before('deploy Delegate', async () => {
+    await setupMockSwap()
     delegate = await Delegate.new(mockSwap.address)
   })
 
@@ -409,30 +430,14 @@ contract('Delegate Unit Tests', async accounts => {
         "rule's max delegate amount was not decremented"
       )
 
-      //check if swapSimple() was called
-      let swapTemplate = await Swap.new()
-      let swapSimple = swapTemplate.contract.methods
-        .swapSimple(
-          0,
-          0,
-          EMPTY_ADDRESS,
-          0,
-          EMPTY_ADDRESS,
-          EMPTY_ADDRESS,
-          0,
-          EMPTY_ADDRESS,
-          8,
-          web3.utils.asciiToHex('r'),
-          web3.utils.asciiToHex('s')
-        )
-        .encodeABI()
+      //check if swap_swapSimple() was called
       let invocationCount = await mockSwap.invocationCountForMethod.call(
-        swapSimple
+        swap_swapSimple
       )
       equal(
         invocationCount,
         1,
-        "swap contact's swapSimple method was not called the expected number of times"
+        "swap contact's swap_swapSimple method was not called the expected number of times"
       )
     })
 
@@ -507,28 +512,13 @@ contract('Delegate Unit Tests', async accounts => {
         )
       )
 
-      let swapTemplate = await Swap.new()
-      let swapSimple = swapTemplate.contract.methods
-        .swapSimple(
-          0,
-          0,
-          EMPTY_ADDRESS,
-          0,
-          EMPTY_ADDRESS,
-          EMPTY_ADDRESS,
-          0,
-          EMPTY_ADDRESS,
-          8,
-          web3.utils.asciiToHex('r'),
-          web3.utils.asciiToHex('s')
-        )
-        .encodeABI()
+      //check if swap_swapSimple() was called
       let invocationCount = await mockSwap.invocationCountForMethod.call(
-        swapSimple
+        swap_swapSimple
       )
       equal(
         invocationCount.toNumber(),
-        0,
+        1,
         'underlying method provideOrder was not called successfully'
       )
     })
