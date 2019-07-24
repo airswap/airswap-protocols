@@ -278,11 +278,11 @@ contract Delegate is IDelegate, Ownable {
     * @notice Provide an Unsigned Order (Simple)
     * @dev Requires that sender has authorized the delegate (Swap)
     *
-    * @param nonce uint256
-    * @param consumerAmount uint256
-    * @param consumerToken address
-    * @param delegateAmount uint256
-    * @param delegateToken address
+    * @param nonce uint256 a single use identifier for the order
+    * @param consumerAmount uint256 the amount or identifier of the token the Maker sends
+    * @param consumerToken address the address of the token the Maker sends
+    * @param delegateAmount uint256 the amount or identifier of the token the Taker sends
+    * @param delegateToken address the address of the token the Taker sends
     */
   function provideUnsignedOrder(
     uint256 nonce,
