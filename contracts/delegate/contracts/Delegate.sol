@@ -25,6 +25,7 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 /**
   * @title Delegate: Deployable Trading Rules for the Swap Protocol
   * @notice Supports fungible tokens (ERC-20)
+  * @dev inherits IDelegate, Ownable uses SafeMath library
   */
 contract Delegate is IDelegate, Ownable {
   using SafeMath for uint256;
@@ -46,7 +47,7 @@ contract Delegate is IDelegate, Ownable {
   }
 
   /**
-    * @notice Set the Swap Contract
+    * @notice Set the Swap Contract address
     * @dev only callable by the owner of the contract
     * @param newSwapContract address that will replace the old swap contract address
     */
@@ -58,7 +59,7 @@ contract Delegate is IDelegate, Ownable {
 
   /**
     * @notice Set a Trading Rule
-    *
+    * @dev can only be called by owner
     * @param delegateToken address
     * @param consumerToken address
     * @param maxDelegateAmount uint256 the maximum amount this rule will allow for trade
@@ -90,7 +91,7 @@ contract Delegate is IDelegate, Ownable {
 
   /**
     * @notice Unset a Trading Rule
-    *
+    * @dev can only be called by owner
     * @param delegateToken address
     * @param consumerToken address
     */
@@ -114,6 +115,7 @@ contract Delegate is IDelegate, Ownable {
     * @param delegateAmount uint256
     * @param delegateToken address
     * @param consumerToken address
+    * @return consumerAmount uint256
     */
   function getBuyQuote(
     uint256 delegateAmount,
@@ -146,10 +148,10 @@ contract Delegate is IDelegate, Ownable {
 
   /**
     * @notice Get a Sell Quote
-    *
     * @param consumerAmount uint256
     * @param consumerToken address
     * @param delegateToken address
+    * @return delegateAmount uint256
     */
   function getSellQuote(
     uint256 consumerAmount,
