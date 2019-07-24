@@ -58,9 +58,9 @@ contract Delegate is IDelegate, Ownable {
 
   /**
     * @notice Set a Trading Rule
-    *
-    * @param delegateToken address
-    * @param consumerToken address
+    * @dev only callable by the owner of the contract
+    * @param delegateToken address the address of the delegate token contract
+    * @param consumerToken address the address of the consumer token contract
     * @param maxDelegateAmount uint256 the maximum amount this rule will allow for trade
     * @param priceCoef uint256 the coefficient that will be multiplied by 10^-priceExp
     * @param priceExp uint256 the exponent represented as a negative number to help denote the decimal value of the priceCoef
@@ -90,7 +90,7 @@ contract Delegate is IDelegate, Ownable {
 
   /**
     * @notice Unset a Trading Rule
-    *
+    * @dev only callable by the owner of the contract
     * @param delegateToken address
     * @param consumerToken address
     */
