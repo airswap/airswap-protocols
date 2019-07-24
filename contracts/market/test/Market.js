@@ -3,7 +3,7 @@ const BN = require('bignumber.js')
 const Market = artifacts.require('Market')
 const FungibleToken = artifacts.require('FungibleToken')
 
-const { equal } = require('@airswap/test-utils').assert
+const { equal, passes } = require('@airswap/test-utils').assert
 const {
   getTimestampPlusDays,
   advanceTimeAndBlock,
@@ -201,13 +201,14 @@ contract(
     })
 
     describe('Garbage Collection', () => {
-      it("Doesn't remove Bob's intent as his hasnt expired", async () => {
+      it("Doesn't remove any intents that haven't expired", async () => {
         let intents = await market.fetchIntents(7)
         // Returns all 6 intents
         assert(BN(intents.length).eq(6), 'Returned intents wrong length')
 
-        // Try to remove Bob's intent
-        await market.removeExpiredIntent(bobAddress)
+        // Tries to remove intents, looping from Bob, count 5
+        // Bob -> Eve -> David -> Zara -> HEAD -> Alice (Carol is after Alice, before Bob)
+        await market.cleanExpiredIntents(bobAddress, 5)
 
         intents = await market.fetchIntents(7)
         assert(BN(intents.length).eq(6), 'Intents should be same length')
@@ -221,19 +222,20 @@ contract(
         assert(intents[5] == NULL_LOCATOR, 'Null 6th location')
       })
 
-      it("Should remove Carol's intent", async () => {
+      it("Should remove Carol's intent if she's included in the loop", async () => {
         let intents = await market.fetchIntents(7)
         // Returns all 6 intents
         assert(BN(intents.length).eq(6), 'Returned intents wrong length')
+ 
+        // Try to remove Carol's intent (Zara -> HEAD -> Alice -> Carol -> Bob)
+        let tx = await market.cleanExpiredIntents(zaraAddress, 4)
+        passes(tx)
 
-        // Try to remove Carol's intent
-        await market.removeExpiredIntent(carolAddress)
-
+        // Returns just 5 intents this time - carol has been removed
         intents = await market.fetchIntents(7)
-        // Returns just 5 intents this time
         assert(BN(intents.length).eq(5), 'Intents should be shorter')
 
-        // Ensure that the ordering is the same
+        // Ensure that the ordering is the same, without a null 6th slot
         assert(intents[0] == ALICE_LOC, 'Alice is not first')
         assert(intents[1] == BOB_LOC, 'Bob should be second')
         assert(intents[2] == EVE_LOC, 'Eve should be third')
@@ -249,9 +251,15 @@ contract(
         // Returns 5 intents as Bob and Eve have not been removed
         assert(BN(intents.length).eq(5), 'Returned intents wrong length')
 
-        // Try to remove their intents
-        await market.removeExpiredIntent(bobAddress)
-        await market.removeExpiredIntent(eveAddress)
+        // Loop through, not including Bob and Eve
+        await market.cleanExpiredIntents(davidAddress, 3)
+
+        // no intents have been removed
+        intents = await market.fetchIntents(7)
+        assert(BN(intents.length).eq(5), 'Intents should be same length')
+
+        // Now loop through, removing both in one go
+        await market.cleanExpiredIntents(bobAddress, 2)
 
         intents = await market.fetchIntents(7)
         // Returns just 3 intents this time

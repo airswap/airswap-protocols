@@ -216,7 +216,9 @@ contract Market is Ownable {
       uint256 i = 0;
       while (i < limit) {
         if (staker != HEAD) {
-          removeExpiredIntent(staker);
+          // the returned value is either the same if they weren't removed
+          // or the staker before the removed staker
+          staker = removeExpiredIntent(staker);
           i++;
         }
 
@@ -313,15 +315,20 @@ contract Market is Ownable {
   }
 
   /**
-    * @notice Removes _expiredStaker from the market, if their intent has expired
+    * @notice Removes _staker from the market, if their intent has expired
     *
-    * @param _expiredStaker the staker in question
-    * @return bool was the staker removed?
+    * @param _staker the staker in question
+    * @return address. _staker if not removed, or the previous staker
     */
-  function removeExpiredIntent(address _expiredStaker) internal {
-      if (isIntentExpired(_expiredStaker)) {
-        removeIntent(_expiredStaker);
-      }
+  function removeExpiredIntent(address _staker) internal returns (address) {
+    require(_staker != HEAD);
+
+    if (isIntentExpired(_staker)) {
+      address previousStaker = list[_staker][PREV].staker;
+      removeIntent(_staker);
+      return previousStaker;
+    }
+    return _staker;
   }
 
   /**
