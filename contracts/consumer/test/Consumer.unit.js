@@ -77,13 +77,6 @@ contract('Consumer Unit Tests', async () => {
     indexer_getIntents = indexerTemplate.contract.methods
       .getIntents(EMPTY_ADDRESS, EMPTY_ADDRESS, 0)
       .encodeABI()
-    await mockIndexer.givenMethodReturn(
-      indexer_getIntents,
-      abi.rawEncode(
-        ['bytes32[]'],
-        [[mockDelegateHigh.address, mockDelegateLow.address]]
-      )
-    )
   }
 
   async function setupMocks() {
@@ -182,9 +175,7 @@ contract('Consumer Unit Tests', async () => {
         indexer_getIntents,
         abi.rawEncode(['bytes32[]'], [[low_locator, high_locator]])
       )
-    })
 
-    it('test takeBestBuy()', async () => {
       let trx = await consumer.takeBestBuy(
         180,
         mockUserSendToken.address,
