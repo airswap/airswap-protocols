@@ -429,7 +429,11 @@ contract('Delegate Unit Tests', async accounts => {
       let invocationCount = await mockSwap.invocationCountForMethod.call(
         swapSimple
       )
-      equal(invocationCount, 1, "swap contact's swapSimple method was not called the expected number of times")
+      equal(
+        invocationCount,
+        1,
+        "swap contact's swapSimple method was not called the expected number of times"
+      )
     })
 
     it.skip('test a successful with decimal values', async () => {
