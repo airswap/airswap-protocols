@@ -369,7 +369,70 @@ contract('Delegate Unit Tests', async accounts => {
       )
     })
 
-    it('test a successful called', async () => {
+    it('test a successful with integer values', async () => {
+      await delegate.setRule(
+        DELEGATE_TOKEN,
+        CONSUMER_TOKEN,
+        MAX_DELEGATE_AMOUNT,
+        100,
+        EXP
+      )
+
+      let rule_before = await delegate.rules.call(
+        DELEGATE_TOKEN,
+        CONSUMER_TOKEN
+      )
+
+      consumer_amount = 100
+      await passes(
+        //mock swapContract
+        //test rule decrement
+        delegate.provideOrder(
+          1, //nonce
+          2, //expiry
+          EMPTY_ADDRESS, //consumerWallet
+          consumer_amount, //consumerAmount
+          CONSUMER_TOKEN, //consumerToken
+          EMPTY_ADDRESS, //delegateWallet
+          100, //delegateAmount
+          DELEGATE_TOKEN, //delegateToken
+          8, //v
+          web3.utils.asciiToHex('r'), //r
+          web3.utils.asciiToHex('s') //s
+        )
+      )
+
+      let rule_after = await delegate.rules.call(DELEGATE_TOKEN, CONSUMER_TOKEN)
+      equal(
+        rule_after[0].toNumber(),
+        rule_before[0].toNumber() - consumer_amount,
+        "rule's max delegate amount was not decremented"
+      )
+
+      //check if swapSimple() was called
+      let swapTemplate = await Swap.new()
+      let swapSimple = swapTemplate.contract.methods
+        .swapSimple(
+          0,
+          0,
+          EMPTY_ADDRESS,
+          0,
+          EMPTY_ADDRESS,
+          EMPTY_ADDRESS,
+          0,
+          EMPTY_ADDRESS,
+          8,
+          web3.utils.asciiToHex('r'),
+          web3.utils.asciiToHex('s')
+        )
+        .encodeABI()
+      let invocationCount = await mockSwap.invocationCountForMethod.call(
+        swapSimple
+      )
+      equal(invocationCount, 1, "swap contact's swapSimple method was not called the expected number of times")
+    })
+
+    it.skip('test a successful with decimal values', async () => {
       await delegate.setRule(
         DELEGATE_TOKEN,
         CONSUMER_TOKEN,
@@ -377,22 +440,36 @@ contract('Delegate Unit Tests', async accounts => {
         4321,
         EXP
       )
+
+      let rule_before = await delegate.rules.call(
+        DELEGATE_TOKEN,
+        CONSUMER_TOKEN
+      )
+
+      consumer_amount = 100
       await passes(
         //mock swapContract
         //test rule decrement
         delegate.provideOrder(
-          1,                            //nonce
-          2,                            //expiry
-          EMPTY_ADDRESS,                //consumerWallet
-          100,                          //consumerAmount
-          CONSUMER_TOKEN,               //consumerToken
-          EMPTY_ADDRESS,                //delegateWallet
-          231,                          //delegateAmount
-          DELEGATE_TOKEN,               //delegateToken
-          8,                            //v
-          web3.utils.asciiToHex('r'),   //r
-          web3.utils.asciiToHex('s')    //s
+          1, //nonce
+          2, //expiry
+          EMPTY_ADDRESS, //consumerWallet
+          consumer_amount, //consumerAmount
+          CONSUMER_TOKEN, //consumerToken
+          EMPTY_ADDRESS, //delegateWallet
+          231, //delegateAmount
+          DELEGATE_TOKEN, //delegateToken
+          8, //v
+          web3.utils.asciiToHex('r'), //r
+          web3.utils.asciiToHex('s') //s
         )
+      )
+
+      let rule_after = await delegate.rules.call(DELEGATE_TOKEN, CONSUMER_TOKEN)
+      equal(
+        rule_after[0].toNumber(),
+        rule_before[0].toNumber() - consumer_amount,
+        "rule's max delegate amount was not decremented"
       )
     })
   })
