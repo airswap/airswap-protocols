@@ -111,7 +111,6 @@ contract Delegate is IDelegate, Ownable {
 
   /**
     * @notice Get a Buy Quote from the Delegate
-    *
     * @param delegateAmount uint256 The amount the Delegate would send
     * @param delegateToken address The token that the Delegate would send
     * @param consumerToken address The token that the Consumer would send
@@ -180,7 +179,6 @@ contract Delegate is IDelegate, Ownable {
 
   /**
     * @notice Get a Maximum Quote from the Delegate
-    *
     * @param delegateToken address The token that the Delegate will send
     * @param consumerToken address The token that the Consumer will send
     * @return (uint256, uint256)
@@ -210,7 +208,6 @@ contract Delegate is IDelegate, Ownable {
   /**
     * @notice Provide an Order (Simple)
     * @dev Rules get reset with new maxDelegateAmount
-    *
     * @param nonce uint256  A single use identifier for the Order.
     * @param expiry uint256 The expiry in seconds since unix epoch.
     * @param consumerWallet address The Maker of the Order who sets price.
@@ -279,7 +276,6 @@ contract Delegate is IDelegate, Ownable {
   /**
     * @notice Provide an Unsigned Order (Simple)
     * @dev Requires that sender has authorized the delegate (Swap)
-    *
     * @param nonce uint256 a single use identifier for the order
     * @param consumerAmount uint256 the amount or identifier of the token the Maker sends
     * @param consumerToken address the address of the token the Maker sends
