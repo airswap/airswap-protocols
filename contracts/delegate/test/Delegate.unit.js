@@ -506,7 +506,7 @@ contract('Delegate Unit Tests', async accounts => {
           web3.utils.asciiToHex('s') //s
         )
       )
-      
+
       let swapTemplate = await Swap.new()
       let swapSimple = swapTemplate.contract.methods
         .swapSimple(
@@ -526,7 +526,11 @@ contract('Delegate Unit Tests', async accounts => {
       let invocationCount = await mockSwap.invocationCountForMethod.call(
         swapSimple
       )
-      equal(invocationCount.toNumber(), 0, "underlying method provideOrder was not called successfully")
+      equal(
+        invocationCount.toNumber(),
+        0,
+        'underlying method provideOrder was not called successfully'
+      )
     })
   })
 })
