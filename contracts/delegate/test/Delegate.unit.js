@@ -15,6 +15,8 @@ const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000'
 
 contract('Delegate Unit Tests', async accounts => {
+  const owner = accounts[0]
+  const notOwner = accounts[2]
   let delegate
   let mockSwap
   let swap_swapSimple
@@ -70,10 +72,10 @@ contract('Delegate Unit Tests', async accounts => {
     it('Test setSwapContract permissions', async () => {
       let newSwap = await MockContract.new()
       await reverted(
-        delegate.setSwapContract(newSwap.address, { from: accounts[1] })
+        delegate.setSwapContract(newSwap.address, { from: notOwner })
       )
       await passes(
-        delegate.setSwapContract(newSwap.address, { from: accounts[0] })
+        delegate.setSwapContract(newSwap.address, { from: owner })
       )
     })
 
@@ -89,6 +91,29 @@ contract('Delegate Unit Tests', async accounts => {
       )
     })
 
+    it('Test setRule permissions', async () => {
+      await reverted(
+        delegate.setRule(
+          DELEGATE_TOKEN,
+          CONSUMER_TOKEN,
+          MAX_DELEGATE_AMOUNT,
+          PRICE_COEF,
+          EXP,
+          { from: notOwner }
+        )
+      )
+
+      await passes(
+        delegate.setRule(
+          DELEGATE_TOKEN,
+          CONSUMER_TOKEN,
+          MAX_DELEGATE_AMOUNT,
+          PRICE_COEF,
+          EXP,
+          { from: owner })
+      )
+    })
+    
     it('Test setRule', async () => {
       let trx = await delegate.setRule(
         DELEGATE_TOKEN,
@@ -118,6 +143,15 @@ contract('Delegate Unit Tests', async accounts => {
           e.priceExp.toNumber() === EXP
         )
       })
+    })
+
+    it('Test unsetRule permissions', async() => {
+      await reverted(
+        delegate.unsetRule(DELEGATE_TOKEN, CONSUMER_TOKEN, { from: notOwner })
+      )
+      await passes(
+        delegate.unsetRule(DELEGATE_TOKEN, CONSUMER_TOKEN, { from: owner })
+      )
     })
 
     it('Test unsetRule', async () => {
