@@ -60,11 +60,11 @@ contract Delegate is IDelegate, Ownable {
   /**
     * @notice Set a Trading Rule
     * @dev only callable by the owner of the contract
-    * @param delegateToken address the address of the delegate token contract
-    * @param consumerToken address the address of the consumer token contract
-    * @param maxDelegateAmount uint256 the maximum amount this rule will allow for trade
-    * @param priceCoef uint256 the coefficient that will be multiplied by 10^-priceExp
-    * @param priceExp uint256 the exponent represented as a negative number to help denote the decimal value of the priceCoef
+    * @param delegateToken address The token address that the delegate would send in a trade
+    * @param consumerToken address The token address that the consumer would send in a trade
+    * @param maxDelegateAmount uint256 The maximum amount of token the delegate would send
+    * @param priceCoef uint256 The coefficient of the price to indicate the whole number that will be multiplied by 10^(-priceExp)
+    * @param priceExp uint256 The exponent of the price to indicate location of the decimal priceCoef * 10^(-priceExp)
     */
   function setRule(
     address delegateToken,
@@ -92,8 +92,8 @@ contract Delegate is IDelegate, Ownable {
   /**
     * @notice Unset a Trading Rule
     * @dev only callable by the owner of the contract, removes from a mapping
-    * @param delegateToken token address that the delegate would send in a trade
-    * @param consumerToken token address that the consumer would send in a trade
+    * @param delegateToken address The token address that the delegate would send in a trade
+    * @param consumerToken address The token address that the consumer would send in a trade
     */
   function unsetRule(
     address delegateToken,
@@ -114,7 +114,7 @@ contract Delegate is IDelegate, Ownable {
     * @param delegateAmount uint256 The amount the Delegate would send
     * @param delegateToken address The token that the Delegate would send
     * @param consumerToken address The token that the Consumer would send
-    * @return uint256 consumerAmount
+    * @return uint256 consumerAmount The amount the Consumer would send
     */
   function getBuyQuote(
     uint256 delegateAmount,
@@ -150,7 +150,7 @@ contract Delegate is IDelegate, Ownable {
     * @param consumerAmount uint256 The amount the Consumer would send
     * @param consumerToken address The token that the Consumer will send
     * @param delegateToken address The token that the Delegate will send
-    * @return uint256 delegateAmount
+    * @return uint256 delegateAmount The amount the Delegate would send
     */
   function getSellQuote(
     uint256 consumerAmount,
@@ -181,7 +181,8 @@ contract Delegate is IDelegate, Ownable {
     * @notice Get a Maximum Quote from the Delegate
     * @param delegateToken address The token that the Delegate will send
     * @param consumerToken address The token that the Consumer will send
-    * @return (uint256, uint256)
+    * @return uint 256 The amount the Delegate would send
+    * @return uint 256 The amount the Consumer would send
     */
   function getMaxQuote(
     address delegateToken,
@@ -276,11 +277,11 @@ contract Delegate is IDelegate, Ownable {
   /**
     * @notice Provide an Unsigned Order (Simple)
     * @dev Requires that sender has authorized the delegate (Swap)
-    * @param nonce uint256 a single use identifier for the order
-    * @param consumerAmount uint256 the amount or identifier of the token the Maker sends
-    * @param consumerToken address the address of the token the Maker sends
-    * @param delegateAmount uint256 the amount or identifier of the token the Taker sends
-    * @param delegateToken address the address of the token the Taker sends
+    * @param nonce uint256 A single use identifier for the order
+    * @param consumerAmount uint256 The amount or identifier of the token the Maker sends
+    * @param consumerToken address The address of the token the Maker sends
+    * @param delegateAmount uint256 The amount or identifier of the token the Taker sends
+    * @param delegateToken address The address of the token the Taker sends
     */
   function provideUnsignedOrder(
     uint256 nonce,
