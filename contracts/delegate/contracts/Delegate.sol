@@ -37,7 +37,7 @@ contract Delegate is IDelegate, Ownable {
 
   /**
     * @notice Contract Constructor
-    * @param initialSwapContract address
+    * @param initialSwapContract address of the swap contract the delegate will deploy with
     */
   constructor(
     address initialSwapContract
@@ -47,7 +47,8 @@ contract Delegate is IDelegate, Ownable {
 
   /**
     * @notice Set the Swap Contract
-    * @param newSwapContract address
+    * @dev only callable by the owner of the contract
+    * @param newSwapContract address that will replace the old swap contract address
     */
   function setSwapContract(
     address newSwapContract
@@ -60,9 +61,9 @@ contract Delegate is IDelegate, Ownable {
     *
     * @param delegateToken address
     * @param consumerToken address
-    * @param maxDelegateAmount uint256
-    * @param priceCoef uint256
-    * @param priceExp uint256
+    * @param maxDelegateAmount uint256 the maximum amount this rule will allow for trade
+    * @param priceCoef uint256 the coefficient that will be multiplied by 10^-priceExp
+    * @param priceExp uint256 the exponent represented as a negative number to help denote the decimal value of the priceCoef
     */
   function setRule(
     address delegateToken,
