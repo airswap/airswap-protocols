@@ -477,4 +477,56 @@ contract('Delegate Unit Tests', async accounts => {
       )
     })
   })
+
+  describe('Test provideUnsignedOrder', async () => {
+    it('test provideUnsignedOrder call', async () => {
+      await delegate.setRule(
+        DELEGATE_TOKEN,
+        CONSUMER_TOKEN,
+        MAX_DELEGATE_AMOUNT,
+        100,
+        EXP
+      )
+
+      consumer_amount = 100
+      await passes(
+        //mock swapContract
+        //test rule decrement
+        delegate.provideOrder(
+          1, //nonce
+          2, //expiry
+          EMPTY_ADDRESS, //consumerWallet
+          consumer_amount, //consumerAmount
+          CONSUMER_TOKEN, //consumerToken
+          EMPTY_ADDRESS, //delegateWallet
+          100, //delegateAmount
+          DELEGATE_TOKEN, //delegateToken
+          8, //v
+          web3.utils.asciiToHex('r'), //r
+          web3.utils.asciiToHex('s') //s
+        )
+      )
+      
+      let swapTemplate = await Swap.new()
+      let swapSimple = swapTemplate.contract.methods
+        .swapSimple(
+          0,
+          0,
+          EMPTY_ADDRESS,
+          0,
+          EMPTY_ADDRESS,
+          EMPTY_ADDRESS,
+          0,
+          EMPTY_ADDRESS,
+          8,
+          web3.utils.asciiToHex('r'),
+          web3.utils.asciiToHex('s')
+        )
+        .encodeABI()
+      let invocationCount = await mockSwap.invocationCountForMethod.call(
+        swapSimple
+      )
+      equal(invocationCount.toNumber(), 0, "underlying method provideOrder was not called successfully")
+    })
+  })
 })
