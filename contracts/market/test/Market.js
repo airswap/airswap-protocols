@@ -226,7 +226,7 @@ contract(
         let intents = await market.fetchIntents(7)
         // Returns all 6 intents
         assert(BN(intents.length).eq(6), 'Returned intents wrong length')
- 
+
         // Try to remove Carol's intent (Zara -> HEAD -> Alice -> Carol -> Bob)
         let tx = await market.cleanExpiredIntents(zaraAddress, 4)
         passes(tx)
