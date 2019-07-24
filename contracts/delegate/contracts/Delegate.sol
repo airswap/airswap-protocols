@@ -91,9 +91,9 @@ contract Delegate is IDelegate, Ownable {
 
   /**
     * @notice Unset a Trading Rule
-    * @dev only callable by the owner of the contract
-    * @param delegateToken address
-    * @param consumerToken address
+    * @dev only callable by the owner of the contract, removes from a mapping
+    * @param delegateToken token address that the delegate would send in a trade
+    * @param consumerToken token address that the consumer would send in a trade
     */
   function unsetRule(
     address delegateToken,
@@ -110,12 +110,12 @@ contract Delegate is IDelegate, Ownable {
   }
 
   /**
-    * @notice Get a Buy Quote
+    * @notice Get a Buy Quote from the Delegate
     *
-    * @param delegateAmount uint256
-    * @param delegateToken address
-    * @param consumerToken address
-    * @return consumerAmount uint256
+    * @param delegateAmount uint256 The amount the Delegate would send
+    * @param delegateToken address The token that the Delegate would send
+    * @param consumerToken address The token that the Consumer would send
+    * @return uint256 consumerAmount
     */
   function getBuyQuote(
     uint256 delegateAmount,
@@ -147,11 +147,11 @@ contract Delegate is IDelegate, Ownable {
   }
 
   /**
-    * @notice Get a Sell Quote
-    * @param consumerAmount uint256
-    * @param consumerToken address
-    * @param delegateToken address
-    * @return delegateAmount uint256
+    * @notice Get a Sell Quote from the Delegate
+    * @param consumerAmount uint256 The amount the Consumer would send
+    * @param consumerToken address The token that the Consumer will send
+    * @param delegateToken address The token that the Delegate will send
+    * @return uint256 delegateAmount
     */
   function getSellQuote(
     uint256 consumerAmount,
@@ -179,10 +179,10 @@ contract Delegate is IDelegate, Ownable {
   }
 
   /**
-    * @notice Get a Maximum Quote
+    * @notice Get a Maximum Quote from the Delegate
     *
-    * @param delegateToken address
-    * @param consumerToken address
+    * @param delegateToken address The token that the Delegate will send
+    * @param consumerToken address The token that the Consumer will send
     * @return (uint256, uint256)
     */
   function getMaxQuote(
@@ -211,17 +211,17 @@ contract Delegate is IDelegate, Ownable {
     * @notice Provide an Order (Simple)
     * @dev Rules get reset with new maxDelegateAmount
     *
-    * @param nonce uint256
-    * @param expiry uint256
-    * @param consumerWallet address
-    * @param consumerAmount uint256
-    * @param consumerToken address
-    * @param delegateWallet address
-    * @param delegateAmount uint256
-    * @param delegateToken address
-    * @param v uint8
-    * @param r bytes32
-    * @param s bytes32
+    * @param nonce uint256  A single use identifier for the Order.
+    * @param expiry uint256 The expiry in seconds since unix epoch.
+    * @param consumerWallet address The Maker of the Order who sets price.
+    * @param consumerAmount uint256 The amount or identifier of the token the Maker sends.
+    * @param consumerToken address The address of the token the Maker sends.
+    * @param delegateWallet address The Taker of the Order who takes price.
+    * @param delegateAmount uint256  The amount or identifier of the token the Taker sends.
+    * @param delegateToken address The address of the token the Taker sends.
+    * @param v uint8 The `v` value of an ECDSA signature.
+    * @param r bytes32 The `r` value of an ECDSA signature.
+    * @param s bytes32 The `s` value of an ECDSA signature.
     */
   function provideOrder(
     uint256 nonce,
