@@ -208,6 +208,7 @@ contract Market is Ownable {
     function cleanExpiredIntents(address _startingPoint, uint256 _count) external {
       uint256 limit = _count;
       address staker = _startingPoint;
+      address previousStaker;
 
       if (limit > length) {
         limit = length;
@@ -216,12 +217,16 @@ contract Market is Ownable {
       uint256 i = 0;
       while (i < limit) {
         if (staker != HEAD) {
-          // the returned value is either the same if they weren't removed
-          // or the staker before the removed staker
-          staker = removeExpiredIntent(staker);
+          if (isIntentExpired(staker)) {
+            // we must track the neighbouring intent for when `staker` is removed
+            previousStaker = list[staker][PREV].staker;
+            removeIntent(staker);
+            staker = previousStaker;
+          }
+          // only increase the count if it wasnt HEAD
           i++;
         }
-
+        // now look at the next element
         staker = list[staker][NEXT].staker;
       }
     }
@@ -312,23 +317,6 @@ contract Market is Ownable {
   ) internal {
     list[_left.staker][NEXT] = _right;
     list[_right.staker][PREV] = _left;
-  }
-
-  /**
-    * @notice Removes _staker from the market, if their intent has expired
-    *
-    * @param _staker the staker in question
-    * @return address. _staker if not removed, or the previous staker
-    */
-  function removeExpiredIntent(address _staker) internal returns (address) {
-    require(_staker != HEAD);
-
-    if (isIntentExpired(_staker)) {
-      address previousStaker = list[_staker][PREV].staker;
-      removeIntent(_staker);
-      return previousStaker;
-    }
-    return _staker;
   }
 
   /**
