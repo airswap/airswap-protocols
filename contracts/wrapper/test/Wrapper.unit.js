@@ -84,5 +84,26 @@ contract.only('Wrapper Unit Tests', async (accounts) => {
         "TAKER_ADDRESS_MUST_BE_UNSET"
       )
     })
+
+    it('Test when taker token == weth contract address, ensure the taker amount matches sent ether', async () => {
+      let mockMakerToken = accounts[9]
+      await reverted(
+        wrapper.swapSimple(
+          0, //nonce
+          0, //expiry
+          EMPTY_ADDRESS, //maker wallet
+          0, //maker amount
+          EMPTY_ADDRESS, //maker token
+          EMPTY_ADDRESS, //taker wallet
+          1, //taker amount
+          mockWeth.address, //taker token
+          8, //v
+          web3.utils.asciiToHex('r'), //r 
+          web3.utils.asciiToHex('s'), //s
+          { value: 2 }
+        ),
+        "VALUE_MUST_BE_SENT"
+      )
+    })
   })
 })
