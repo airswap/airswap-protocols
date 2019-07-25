@@ -126,7 +126,6 @@ contract Wrapper {
 
       // Transfer ether to the user.
       msg.sender.transfer(_makerAmount);
-
     }
 
     // Ensure no WETH balance remains.
