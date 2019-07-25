@@ -158,7 +158,7 @@ contract('Indexer', accounts => {
       )
 
       // check there is now 1 intent in getIntent
-      const intents = await indexer.getIntents(tokenWETH, tokenDAI, 10, {
+      let intents = await indexer.getIntents(tokenWETH, tokenDAI, 10, {
         from: bobAddress,
       })
       equal(intents.length, 1)
@@ -260,7 +260,7 @@ contract('Indexer', accounts => {
     })
 
     it("Bob ensures that Alice's intent is on the Indexer", async () => {
-      const intents = await indexer.getIntents(tokenWETH, tokenDAI, 10, {
+      let intents = await indexer.getIntents(tokenWETH, tokenDAI, 10, {
         from: bobAddress,
       })
       equal(intents[0], ALICE_LOC)
@@ -305,12 +305,36 @@ contract('Indexer', accounts => {
       equal(intents.length, 0)
     })
 
-    it('Alice attempts to set an intent and succeeds', async () => {
+    it('Alice can set an intent after removing her old one', async () => {
+      // The intent is removed
+      emitted(
+        await indexer.unsetIntent(tokenWETH, tokenDAI, {
+          from: aliceAddress,
+        }),
+        'Unstake'
+      )
+
+      // Now there are no intents
+      let intents = await indexer.getIntents(tokenWETH, tokenDAI, 10, {
+        from: bobAddress,
+      })
+      equal(intents.length, 0)
+      ok(balances(indexer.address, [[stakingToken, 0]]))
+
+      // Increase her approval as it will have decreased by 500
+      emitted(
+        await stakingToken.approve(indexer.address, 1000, {
+          from: aliceAddress,
+        }),
+        'Approval'
+      )
+
+      // She can now add a new one
       emitted(
         await indexer.setIntent(
           tokenWETH,
           tokenDAI,
-          500,
+          1000,
           await getTimestampPlusDays(1),
           ALICE_LOC,
           {
@@ -319,17 +343,18 @@ contract('Indexer', accounts => {
         ),
         'Stake'
       )
-      let intents = await indexer.getIntents(tokenWETH, tokenDAI, 10, {
-        from: bobAddress,
-      })
-
 
       ok(balances(aliceAddress, [[stakingToken, 0]]))
       ok(balances(indexer.address, [[stakingToken, 1000]]))
     })
   })
+
   describe('Blacklisting', () => {
-    it('Alice attempts to blacklist a market and fails because she is not owner', async () => {
+    beforeEach(async () => {
+      await indexer.createMarket(tokenWETH, tokenDAI, { from: bobAddress })
+    })
+
+    it('Alice attempts to blacklist a token and fails because she is not owner', async () => {
       await reverted(
         indexer.addToBlacklist(tokenDAI, {
           from: aliceAddress,
@@ -338,7 +363,7 @@ contract('Indexer', accounts => {
       )
     })
 
-    it('Owner attempts to blacklist a market and succeeds', async () => {
+    it('Owner attempts to blacklist a token and succeeds', async () => {
       emitted(
         await indexer.addToBlacklist(tokenDAI, {
           from: owner,
@@ -348,6 +373,13 @@ contract('Indexer', accounts => {
     })
 
     it('Alice attempts to stake and set an intent and fails due to blacklist', async () => {
+      emitted(
+        await indexer.addToBlacklist(tokenDAI, {
+          from: owner,
+        }),
+        'AddToBlacklist'
+      )
+
       await reverted(
         indexer.setIntent(
           tokenWETH,
@@ -363,7 +395,40 @@ contract('Indexer', accounts => {
       )
     })
 
-    it('Alice attempts to unset an intent and succeeds regardless of blacklist', async () => {
+    it('Alice can unset from a blacklisted market', async () => {
+      // mint alice tokens and approve the indexer to access them
+      emitted(await stakingToken.mint(aliceAddress, 1000), 'Transfer')
+      emitted(
+        await stakingToken.approve(indexer.address, 500, {
+          from: aliceAddress,
+        }),
+        'Approval'
+      )
+
+      // staking on market succeeds
+      emitted(
+        await indexer.setIntent(
+          tokenWETH,
+          tokenDAI,
+          500,
+          await getTimestampPlusDays(1),
+          ALICE_LOC,
+          {
+            from: aliceAddress,
+          }
+        ),
+        'Stake'
+      )
+
+      // Owner blacklists one of the tokens, and therefore the market
+      emitted(
+        await indexer.addToBlacklist(tokenDAI, {
+          from: owner,
+        }),
+        'AddToBlacklist'
+      )
+
+      // Alice is still able to unset
       emitted(
         await indexer.unsetIntent(tokenWETH, tokenDAI, {
           from: aliceAddress,
@@ -373,6 +438,15 @@ contract('Indexer', accounts => {
     })
 
     it('Alice attempts to remove from blacklist fails because she is not owner', async () => {
+      // Owner blacklists one of the tokens
+      emitted(
+        await indexer.addToBlacklist(tokenDAI, {
+          from: owner,
+        }),
+        'AddToBlacklist'
+      )
+
+      // Alice cannot remove this blacklist
       await reverted(
         indexer.removeFromBlacklist(tokenDAI, {
           from: aliceAddress,
