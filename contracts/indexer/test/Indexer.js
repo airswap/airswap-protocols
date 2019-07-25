@@ -86,6 +86,10 @@ contract('Indexer', accounts => {
   })
 
   describe('Staking', () => {
+    beforeEach(async () => {
+      await indexer.createMarket(tokenWETH, tokenDAI, { from: bobAddress })
+    })
+
     it('Fails due to no staking token balance', async () => {
       await reverted(
         indexer.setIntent(
@@ -102,11 +106,11 @@ contract('Indexer', accounts => {
       )
     })
 
-    it('Staking tokens are minted for Alice', async () => {
-      emitted(await stakingToken.mint(aliceAddress, 1000), 'Transfer')
-    })
-
     it('Fails due to no staking token allowance', async () => {
+      // mint alice tokens
+      emitted(await stakingToken.mint(aliceAddress, 1000), 'Transfer')
+
+      // try to set intent without approving the indexer
       await reverted(
         indexer.setIntent(
           tokenWETH,
@@ -122,19 +126,23 @@ contract('Indexer', accounts => {
       )
     })
 
-    it('Alice approves Indexer to spend staking tokens', async () => {
+    it('Succeeds when token allowance is given to the indexer', async () => {
+      // mint alice tokens
+      emitted(await stakingToken.mint(aliceAddress, 1000), 'Transfer')
+
+      // approve the indexer to use those tokens
       emitted(
-        await stakingToken.approve(indexer.address, 10000, { from: aliceAddress }),
+        await stakingToken.approve(indexer.address, 500, {
+          from: aliceAddress,
+        }),
         'Approval'
       )
-    })
 
-    it('Checks balances', async () => {
+      // check token balances before the staking
       ok(balances(aliceAddress, [[stakingToken, 1000]]))
       ok(balances(indexer.address, [[stakingToken, 0]]))
-    })
 
-    it('Alice attempts to stake and set an intent succeeds', async () => {
+      // staking succeeds
       emitted(
         await indexer.setIntent(
           tokenWETH,
@@ -148,9 +156,8 @@ contract('Indexer', accounts => {
         ),
         'Stake'
       )
-    })
 
-    it('Checks balances', async () => {
+      // check balances of staking token have changed
       ok(balances(aliceAddress, [[stakingToken, 500]]))
       ok(balances(indexer.address, [[stakingToken, 500]]))
     })
