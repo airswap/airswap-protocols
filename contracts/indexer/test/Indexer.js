@@ -164,19 +164,44 @@ contract('Indexer', accounts => {
   })
 
   describe('Intent integrity', () => {
+    beforeEach(async () => {
+      // we start with a market with 1 intent from alice
+      // create market
+      await indexer.createMarket(tokenWETH, tokenDAI, { from: bobAddress })
+
+      // mint alice staking tokens and approve the indexer to use them
+      emitted(await stakingToken.mint(aliceAddress, 1000), 'Transfer')
+      emitted(
+        await stakingToken.approve(indexer.address, 500, {
+          from: aliceAddress,
+        }),
+        'Approval'
+      )
+
+      // Set alice's intent
+      emitted(
+        await indexer.setIntent(
+          tokenWETH,
+          tokenDAI,
+          500,
+          await getTimestampPlusDays(1),
+          ALICE_LOC,
+          {
+            from: aliceAddress,
+          }
+        ),
+        'Stake'
+      )
+    })
+
     it('Bob ensures only one intent is on the Indexer', async () => {
       equal(await indexer.lengthOf(tokenWETH, tokenDAI), 1)
     })
 
     it('Bob ensures that Alice intent is on the Indexer', async () => {
-      const intents = await indexer.getIntents(
-        tokenWETH,
-        tokenDAI,
-        10,
-        {
-          from: bobAddress,
-        }
-      )
+      const intents = await indexer.getIntents(tokenWETH, tokenDAI, 10, {
+        from: bobAddress,
+      })
       equal(intents[0], ALICE_LOC)
     })
 
@@ -195,14 +220,9 @@ contract('Indexer', accounts => {
     })
 
     it('Bob ensures there are no more intents the Indexer', async () => {
-      const intents = await indexer.getIntents(
-        tokenWETH,
-        tokenDAI,
-        10,
-        {
-          from: bobAddress,
-        }
-      )
+      const intents = await indexer.getIntents(tokenWETH, tokenDAI, 10, {
+        from: bobAddress,
+      })
       equal(intents.length, 0)
     })
 
@@ -302,13 +322,9 @@ contract('Indexer', accounts => {
 
     it('Bob creates the other side of the market for WETH/DAI', async () => {
       emitted(
-        await indexer.createTwoSidedMarket(
-          tokenDAI,
-          tokenWETH,
-          {
-            from: bobAddress,
-          }
-        ),
+        await indexer.createTwoSidedMarket(tokenDAI, tokenWETH, {
+          from: bobAddress,
+        }),
         'CreateMarket'
       )
     })
