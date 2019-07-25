@@ -40,6 +40,19 @@ contract('Indexer', accounts => {
     await revertToSnapShot(snapshotId)
   })
 
+  async function mintAliceTokensAndApprove() {
+    // mint alice tokens
+    emitted(await stakingToken.mint(aliceAddress, 1000), 'Transfer')
+
+    // approve the indexer to use those tokens
+    emitted(
+      await stakingToken.approve(indexer.address, 1000, {
+        from: aliceAddress,
+      }),
+      'Approval'
+    )
+  }
+
   describe('Market setup', () => {
     it('Bob creates a market (collection of intents) for WETH/DAI', async () => {
       emitted(
@@ -127,16 +140,7 @@ contract('Indexer', accounts => {
     })
 
     it('Succeeds when token allowance is given to the indexer', async () => {
-      // mint alice tokens
-      emitted(await stakingToken.mint(aliceAddress, 1000), 'Transfer')
-
-      // approve the indexer to use those tokens
-      emitted(
-        await stakingToken.approve(indexer.address, 500, {
-          from: aliceAddress,
-        }),
-        'Approval'
-      )
+      await mintAliceTokensAndApprove()
 
       // check token balances before the staking
       ok(balances(aliceAddress, [[stakingToken, 1000]]))
@@ -169,14 +173,7 @@ contract('Indexer', accounts => {
     })
 
     it('Fails when Alice sets a second intent', async () => {
-      // mint alice tokens and approve indexer
-      emitted(await stakingToken.mint(aliceAddress, 1000), 'Transfer')
-      emitted(
-        await stakingToken.approve(indexer.address, 1000, {
-          from: aliceAddress,
-        }),
-        'Approval'
-      )
+      await mintAliceTokensAndApprove()
 
       // staking succeeds
       emitted(
@@ -230,14 +227,7 @@ contract('Indexer', accounts => {
       // create market
       await indexer.createMarket(tokenWETH, tokenDAI, { from: bobAddress })
 
-      // mint alice staking tokens and approve the indexer to use them
-      emitted(await stakingToken.mint(aliceAddress, 1000), 'Transfer')
-      emitted(
-        await stakingToken.approve(indexer.address, 1000, {
-          from: aliceAddress,
-        }),
-        'Approval'
-      )
+      await mintAliceTokensAndApprove()
 
       // Set alice's intent
       emitted(
@@ -396,14 +386,7 @@ contract('Indexer', accounts => {
     })
 
     it('Alice can unset from a blacklisted market', async () => {
-      // mint alice tokens and approve the indexer to access them
-      emitted(await stakingToken.mint(aliceAddress, 1000), 'Transfer')
-      emitted(
-        await stakingToken.approve(indexer.address, 500, {
-          from: aliceAddress,
-        }),
-        'Approval'
-      )
+      await mintAliceTokensAndApprove()
 
       // staking on market succeeds
       emitted(
@@ -437,7 +420,7 @@ contract('Indexer', accounts => {
       )
     })
 
-    it('Alice attempts to remove from blacklist fails because she is not owner', async () => {
+    it('Alice attempts to remove from blacklist and fails because she is not owner', async () => {
       // Owner blacklists one of the tokens
       emitted(
         await indexer.addToBlacklist(tokenDAI, {
@@ -455,7 +438,16 @@ contract('Indexer', accounts => {
       )
     })
 
-    it('Owner attempts to blacklist a market and succeeds', async () => {
+    it('Owner attempts to remove token from blacklist and succeeds', async () => {
+      // Owner blacklists one of the tokens
+      emitted(
+        await indexer.addToBlacklist(tokenDAI, {
+          from: owner,
+        }),
+        'AddToBlacklist'
+      )
+
+      // Owner removes it from the blacklist again
       emitted(
         await indexer.removeFromBlacklist(tokenDAI, {
           from: owner,
@@ -464,7 +456,24 @@ contract('Indexer', accounts => {
       )
     })
 
-    it('Alice attempts to stake and set an intent and succeeds', async () => {
+    it('Alice can stake after a token has been removed from the blacklist', async () => {
+      // Owner blacklists one of the tokens
+      emitted(
+        await indexer.addToBlacklist(tokenDAI, {
+          from: owner,
+        }),
+        'AddToBlacklist'
+      )
+
+      // Owner removes it from the blacklist again
+      emitted(
+        await indexer.removeFromBlacklist(tokenDAI, {
+          from: owner,
+        }),
+        'RemoveFromBlacklist'
+      )
+
+
       emitted(
         await indexer.setIntent(
           tokenWETH,
