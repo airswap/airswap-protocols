@@ -157,9 +157,70 @@ contract('Indexer', accounts => {
         'Stake'
       )
 
+      // check there is now 1 intent in getIntent
+      const intents = await indexer.getIntents(tokenWETH, tokenDAI, 10, {
+        from: bobAddress,
+      })
+      equal(intents.length, 1)
+
       // check balances of staking token have changed
       ok(balances(aliceAddress, [[stakingToken, 500]]))
       ok(balances(indexer.address, [[stakingToken, 500]]))
+    })
+
+    it('Fails when Alice sets a second intent', async () => {
+      // mint alice tokens and approve indexer
+      emitted(await stakingToken.mint(aliceAddress, 1000), 'Transfer')
+      emitted(
+        await stakingToken.approve(indexer.address, 1000, {
+          from: aliceAddress,
+        }),
+        'Approval'
+      )
+
+      // staking succeeds
+      emitted(
+        await indexer.setIntent(
+          tokenWETH,
+          tokenDAI,
+          500,
+          await getTimestampPlusDays(1),
+          ALICE_LOC,
+          {
+            from: aliceAddress,
+          }
+        ),
+        'Stake'
+      )
+
+      // check indexer balance and number of intents
+      ok(balances(indexer.address, [[stakingToken, 500]]))
+      let intents = await indexer.getIntents(tokenWETH, tokenDAI, 10, {
+        from: bobAddress,
+      })
+      equal(intents.length, 1)
+
+      // a second staking fails
+      await reverted(
+        indexer.setIntent(
+          tokenWETH,
+          tokenDAI,
+          500,
+          await getTimestampPlusDays(1),
+          ALICE_LOC,
+          {
+            from: aliceAddress,
+          }
+        ),
+        'USER_ALREADY_STAKED'
+      )
+
+      // Indexer balance has not increased and theres still just 1 intent
+      ok(balances(indexer.address, [[stakingToken, 500]]))
+      intents = await indexer.getIntents(tokenWETH, tokenDAI, 10, {
+        from: bobAddress,
+      })
+      equal(intents.length, 1)
     })
   })
 
@@ -172,7 +233,7 @@ contract('Indexer', accounts => {
       // mint alice staking tokens and approve the indexer to use them
       emitted(await stakingToken.mint(aliceAddress, 1000), 'Transfer')
       emitted(
-        await stakingToken.approve(indexer.address, 500, {
+        await stakingToken.approve(indexer.address, 1000, {
           from: aliceAddress,
         }),
         'Approval'
@@ -198,7 +259,7 @@ contract('Indexer', accounts => {
       equal(await indexer.lengthOf(tokenWETH, tokenDAI), 1)
     })
 
-    it('Bob ensures that Alice intent is on the Indexer', async () => {
+    it("Bob ensures that Alice's intent is on the Indexer", async () => {
       const intents = await indexer.getIntents(tokenWETH, tokenDAI, 10, {
         from: bobAddress,
       })
@@ -206,21 +267,39 @@ contract('Indexer', accounts => {
     })
 
     it('Alice attempts to unset an intent and succeeds', async () => {
+      // check before balances
+      ok(balances(aliceAddress, [[stakingToken, 500]]))
+      ok(balances(indexer.address, [[stakingToken, 500]]))
+
       emitted(
         await indexer.unsetIntent(tokenWETH, tokenDAI, {
           from: aliceAddress,
         }),
         'Unstake'
       )
-    })
 
-    it('Checks balances', async () => {
+      // this should update the balances - returning alices tokens
       ok(balances(aliceAddress, [[stakingToken, 1000]]))
       ok(balances(indexer.address, [[stakingToken, 0]]))
     })
 
-    it('Bob ensures there are no more intents the Indexer', async () => {
-      const intents = await indexer.getIntents(tokenWETH, tokenDAI, 10, {
+    it('Bob ensures removing intents decreases the length', async () => {
+      // There is 1 intent before removal
+      let intents = await indexer.getIntents(tokenWETH, tokenDAI, 10, {
+        from: bobAddress,
+      })
+      equal(intents.length, 1)
+
+      // The intent is removed
+      emitted(
+        await indexer.unsetIntent(tokenWETH, tokenDAI, {
+          from: aliceAddress,
+        }),
+        'Unstake'
+      )
+
+      // Now there are no intents
+      intents = await indexer.getIntents(tokenWETH, tokenDAI, 10, {
         from: bobAddress,
       })
       equal(intents.length, 0)
@@ -231,7 +310,7 @@ contract('Indexer', accounts => {
         await indexer.setIntent(
           tokenWETH,
           tokenDAI,
-          1000,
+          500,
           await getTimestampPlusDays(1),
           ALICE_LOC,
           {
@@ -240,6 +319,13 @@ contract('Indexer', accounts => {
         ),
         'Stake'
       )
+      let intents = await indexer.getIntents(tokenWETH, tokenDAI, 10, {
+        from: bobAddress,
+      })
+
+
+      ok(balances(aliceAddress, [[stakingToken, 0]]))
+      ok(balances(indexer.address, [[stakingToken, 1000]]))
     })
   })
   describe('Blacklisting', () => {
