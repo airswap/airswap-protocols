@@ -489,8 +489,10 @@ contract('Indexer', accounts => {
         'Stake'
       )
     })
+  })
 
-    it('Bob creates the other side of the market for WETH/DAI', async () => {
+  describe('Two Sided Markets', () => {
+    it('Bob can create a two sided market', async () => {
       emitted(
         await indexer.createTwoSidedMarket(tokenDAI, tokenWETH, {
           from: bobAddress,
@@ -500,6 +502,11 @@ contract('Indexer', accounts => {
     })
 
     it('Alice attempts to stake and set a two-sided intent and succeeds', async () => {
+      // Bob sets up the market
+      await indexer.createTwoSidedMarket(tokenDAI, tokenWETH, {
+        from: bobAddress,
+      })
+
       let result = await indexer.setTwoSidedIntent(
         tokenWETH,
         tokenDAI,
