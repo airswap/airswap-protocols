@@ -122,7 +122,7 @@ contract.only('Wrapper Unit Tests', async (accounts) => {
 
       //mock the weth.balance method
       let weth_balance = wethTemplate.contract.methods.balanceOf(EMPTY_ADDRESS).encodeABI();
-      mockWeth.givenMethodReturnUint(weth_balance, 1)
+      await mockWeth.givenMethodReturnUint(weth_balance, 1)
 
       await reverted(
         wrapper.swapSimple(
@@ -175,6 +175,31 @@ contract.only('Wrapper Unit Tests', async (accounts) => {
       //2. this unfortunately means there is also a security vulnerability: require(address(this).balance == 0, "ETH_BALANCE_REMAINING") if anybody sends
       //any amount to this contract outside of the swapSimple() method it will forever lock the contract.
       //Furthermore, it's also possible to lock the contract by sending WETH to the contract.
+    })
+
+    it('Test when taker token == weth contract address, maker token address == weth contract address', async () => {
+      let takerAmount = 2
+
+      //mock the weth.balance method
+      let weth_balance = wethTemplate.contract.methods.balanceOf(EMPTY_ADDRESS).encodeABI();
+      await mockWeth.givenMethodReturnUint(weth_balance, 0)
+
+      await passes(
+        wrapper.swapSimple(
+          0, //nonce
+          0, //expiry
+          EMPTY_ADDRESS, //maker wallet
+          0, //maker amount
+          mockWeth.address, //maker token
+          EMPTY_ADDRESS, //taker wallet
+          takerAmount, //taker amount
+          mockWeth.address, //taker token
+          8, //v
+          web3.utils.asciiToHex('r'), //r 
+          web3.utils.asciiToHex('s'), //s
+          { value: takerAmount }
+        )
+      )
     })
   })
 })
