@@ -507,6 +507,8 @@ contract('Indexer', accounts => {
         from: bobAddress,
       })
 
+      await mintAliceTokensAndApprove()
+
       let result = await indexer.setTwoSidedIntent(
         tokenWETH,
         tokenDAI,
