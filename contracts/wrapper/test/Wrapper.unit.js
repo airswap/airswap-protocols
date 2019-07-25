@@ -1,15 +1,19 @@
 const Swap = artifacts.require('Swap')
 const Wrapper = artifacts.require('Wrapper')
 const WETH9 = artifacts.require('WETH9')
+const MockContract = artifacts.require('MockContract')
 
-const { emitted, getResult, passes } = require('@airswap/test-utils').assert
+const { equal, reverted, emitted, passes } = require('@airswap/test-utils').assert
 const { takeSnapshot, revertToSnapShot, getTimestampPlusDays } = require('@airswap/test-utils').time
 const { orders, signatures } = require('@airswap/order-utils')
 
-contract('Wrapper Unit Tests', (accounts) => {
+const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000'
+
+contract.only('Wrapper Unit Tests', async (accounts) => {
 
   let mockSwap
   let mockWeth
+  let wrapper
 
   beforeEach(async () => {
     let snapShot = await takeSnapshot()
@@ -21,10 +25,42 @@ contract('Wrapper Unit Tests', (accounts) => {
   })
 
   before('deploy Wrapper', async () => {
-    await setupMocks()
-    consumer = await Consumer.new(mockSwap.address, mockIndexer.address)
+    mockSwap = await MockContract.new()
+    mockWeth = await MockContract.new()
+    wrapper = await Wrapper.new(mockSwap.address, mockWeth.address)
   })
 
   describe('Test initial values', async () => {
+    it('Test initial Swap Contract', async () => {
+      let val = await wrapper.swapContract.call()
+      equal(val, mockSwap.address, "swap address is incorrect")
+    })
+
+    it('Test initial Weth Contract', async () => {
+      let val = await wrapper.wethContract.call()
+      equal(val, mockWeth.address, "weth address is incorrect")
+    })
+  })
+
+  describe('Test swapSimple', async () => {
+    it('Test when taker token != weth contract address, ensure no unexpected ether sent', async () => {
+      await reverted(
+        wrapper.swapSimple(
+          0, //nonce
+          0, //expiry
+          EMPTY_ADDRESS, //maker wallet
+          0, //maker amount
+          EMPTY_ADDRESS, //maker token
+          EMPTY_ADDRESS, //taker wallet
+          0, //taker amount
+          EMPTY_ADDRESS, //taker token
+          8, //v
+          web3.utils.asciiToHex('r'), //r 
+          web3.utils.asciiToHex('s') //s
+        ,
+        { value: 2 }),
+        "VALUE_MUST_BE_ZERO"
+      )
+    })
   })
 })
