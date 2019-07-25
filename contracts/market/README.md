@@ -13,7 +13,7 @@
 
 ### Sorting
 
-Intents are sorted by their amount, currently the staking amount indicated by an Indexer that owns the Market.
+Intents are sorted by their amount, with the largest amount at the beginning of the list. Currently the staking amount is indicated by an Indexer that owns the Market.
 
 ## Definitions
 
@@ -69,12 +69,12 @@ constructor (
 Set an intent to trade in the Market.
 
 ```Solidity
-function set(
+function setIntent(
   address _staker,
   uint256 _amount,
   uint256 _expiry,
   bytes32 _locator
-) external
+) external onlyOwner
 ```
 
 ### Params
@@ -91,9 +91,9 @@ function set(
 Unset an intent to trade in the Market.
 
 ```Solidity
-function unset(
+function unsetIntent(
   address _staker
-) public returns (bool)
+) public onlyOwner returns (bool)
 ```
 
 ### Params
@@ -107,7 +107,7 @@ function unset(
 Gets the intent for a given staker address.
 
 ```Solidity
-function get(
+function getIntent(
   address _staker
 ) public view returns (Intent memory)
 ```
@@ -123,7 +123,7 @@ function get(
 Determines whether the Market has an intent for a staker address.
 
 ```Solidity
-function has(
+function hasIntent(
   address _staker
 ) internal view returns (bool)
 ```
@@ -155,7 +155,7 @@ function fetchIntents(
 Find an intent by value in the list.
 
 ```Solidity
-function find(
+function findPosition(
   uint256 amount
 ) internal view returns (Intent memory)
 ```
@@ -168,12 +168,12 @@ function find(
 
 ## Insert an Intent
 
-Insert an intent after an existing intent in the list.
+Insert an intent before an existing intent in the list.
 
 ```Solidity
-function insert(
-  Intent memory _intent,
-  Intent memory _existing
+function insertIntent(
+  Intent memory _newIntent,
+  Intent memory _nextIntent
 ) internal returns (bool)
 ```
 
@@ -181,8 +181,8 @@ function insert(
 
 | Name        | Type     | Description                      |
 | :---------- | :------- | :------------------------------- |
-| `_intent`   | `Intent` | Intent to insert.                |
-| `_existing` | `Intent` | Existing intent to insert after. |
+| `_newIntent`   | `Intent` | Intent to insert.                |
+| `_nextIntent` | `Intent` | Existing intent to insert before. |
 
 ## Link Two Intents
 
