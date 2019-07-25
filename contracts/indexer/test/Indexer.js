@@ -473,6 +473,7 @@ contract('Indexer', accounts => {
         'RemoveFromBlacklist'
       )
 
+      await mintAliceTokensAndApprove()
 
       emitted(
         await indexer.setIntent(
