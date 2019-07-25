@@ -44,6 +44,7 @@ contract.only('Wrapper Unit Tests', async (accounts) => {
 
   describe('Test swapSimple', async () => {
     it('Test when taker token != weth contract address, ensure no unexpected ether sent', async () => {
+      let nonTakerToken = accounts[9]
       await reverted(
         wrapper.swapSimple(
           0, //nonce
@@ -53,13 +54,34 @@ contract.only('Wrapper Unit Tests', async (accounts) => {
           EMPTY_ADDRESS, //maker token
           EMPTY_ADDRESS, //taker wallet
           0, //taker amount
-          EMPTY_ADDRESS, //taker token
+          nonTakerToken, //taker token
           8, //v
           web3.utils.asciiToHex('r'), //r 
-          web3.utils.asciiToHex('s') //s
-        ,
-        { value: 2 }),
+          web3.utils.asciiToHex('s'), //s
+          { value: 2 }
+        ),
         "VALUE_MUST_BE_ZERO"
+      )
+    })
+
+    it('Test when taker token == weth contract address, ensure the taker wallet is unset', async () => {
+      let mockMakerToken = accounts[9]
+      await reverted(
+        wrapper.swapSimple(
+          0, //nonce
+          0, //expiry
+          EMPTY_ADDRESS, //maker wallet
+          0, //maker amount
+          EMPTY_ADDRESS, //maker token
+          mockMakerToken, //taker wallet
+          0, //taker amount
+          mockWeth.address, //taker token
+          8, //v
+          web3.utils.asciiToHex('r'), //r 
+          web3.utils.asciiToHex('s'), //s
+          { value: 2 }
+        ),
+        "TAKER_ADDRESS_MUST_BE_UNSET"
       )
     })
   })
