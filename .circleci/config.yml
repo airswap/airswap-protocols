@@ -31,7 +31,7 @@ references:
       - run:
           name: Run Tests
           command: |
-            ganache-cli -p 8545 &
+            ganache-cli -p 8545 > /dev/null &
             yarn test
       - save_cache:
           paths:
