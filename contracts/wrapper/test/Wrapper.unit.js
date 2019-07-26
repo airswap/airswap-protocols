@@ -3,22 +3,12 @@ const Wrapper = artifacts.require('Wrapper')
 const WETH9 = artifacts.require('WETH9')
 const MockContract = artifacts.require('MockContract')
 
-const {
-  equal,
-  reverted,
-  emitted,
-  passes,
-} = require('@airswap/test-utils').assert
-const {
-  takeSnapshot,
-  revertToSnapShot,
-  getTimestampPlusDays,
-} = require('@airswap/test-utils').time
-const { orders, signatures } = require('@airswap/order-utils')
+const { equal, reverted, passes } = require('@airswap/test-utils').assert
+const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 
 const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000'
 
-contract.only('Wrapper Unit Tests', async accounts => {
+contract('Wrapper Unit Tests', async accounts => {
   let mockSwap
   let mockWeth
   let wrapper
