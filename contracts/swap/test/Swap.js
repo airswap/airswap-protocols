@@ -906,7 +906,7 @@ contract('Swap', ([aliceAddress, bobAddress, carolAddress, davidAddress]) => {
 
   describe('Minting...', () => {
     it('Mints a concert ticket (#12345) for Alice', async () => {
-      emitted(await tokenTicket.mint(aliceAddress, 12345), 'Transfer')
+      emitted(await tokenTicket.mint(aliceAddress, 12345), 'NFTTransfer')
       ok(
         balances(aliceAddress, [[tokenTicket, 1]]),
         'Alice balances are incorrect'
@@ -914,7 +914,7 @@ contract('Swap', ([aliceAddress, bobAddress, carolAddress, davidAddress]) => {
     })
 
     it('Mints a kitty collectible (#54321) for Bob', async () => {
-      emitted(await tokenKitty.mint(bobAddress, 54321), 'Transfer')
+      emitted(await tokenKitty.mint(bobAddress, 54321), 'NFTTransfer')
       ok(balances(bobAddress, [[tokenKitty, 1]]), 'Bob balances are incorrect')
     })
   })
@@ -923,7 +923,7 @@ contract('Swap', ([aliceAddress, bobAddress, carolAddress, davidAddress]) => {
     it('Alice approves Swap to transfer her concert ticket', async () => {
       emitted(
         await tokenTicket.approve(swapAddress, 12345, { from: aliceAddress }),
-        'Approval'
+        'NFTApproval'
       )
     })
 
@@ -946,7 +946,7 @@ contract('Swap', ([aliceAddress, bobAddress, carolAddress, davidAddress]) => {
     it('Bob approves Swap to transfer his kitty collectible', async () => {
       emitted(
         await tokenKitty.approve(swapAddress, 54321, { from: bobAddress }),
-        'Approval'
+        'NFTApproval'
       )
     })
 
@@ -969,7 +969,7 @@ contract('Swap', ([aliceAddress, bobAddress, carolAddress, davidAddress]) => {
     it('Alice approves Swap to transfer her kitty collectible', async () => {
       emitted(
         await tokenKitty.approve(swapAddress, 54321, { from: aliceAddress }),
-        'Approval'
+        'NFTApproval'
       )
     })
 
@@ -999,7 +999,7 @@ contract('Swap', ([aliceAddress, bobAddress, carolAddress, davidAddress]) => {
     it('Carol approves Swap to transfer her kitty collectible', async () => {
       emitted(
         await tokenKitty.approve(swapAddress, 54321, { from: carolAddress }),
-        'Approval'
+        'NFTApproval'
       )
     })
 
