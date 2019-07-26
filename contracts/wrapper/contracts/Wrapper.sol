@@ -117,13 +117,10 @@ contract Wrapper {
 
     // The taker is receiving ether.
     if (_makerToken == address(wethContract)) {
-
       // Transfer from the taker to the wrapper.
       wethContract.transferFrom(_takerWallet, address(this), _makerAmount);
-
       // Unwrap (withdraw) the ether.
       wethContract.withdraw(_makerAmount);
-
       // Transfer ether to the user.
       msg.sender.transfer(_makerAmount);
     }
