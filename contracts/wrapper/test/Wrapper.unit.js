@@ -3,14 +3,22 @@ const Wrapper = artifacts.require('Wrapper')
 const WETH9 = artifacts.require('WETH9')
 const MockContract = artifacts.require('MockContract')
 
-const { equal, reverted, emitted, passes } = require('@airswap/test-utils').assert
-const { takeSnapshot, revertToSnapShot, getTimestampPlusDays } = require('@airswap/test-utils').time
+const {
+  equal,
+  reverted,
+  emitted,
+  passes,
+} = require('@airswap/test-utils').assert
+const {
+  takeSnapshot,
+  revertToSnapShot,
+  getTimestampPlusDays,
+} = require('@airswap/test-utils').time
 const { orders, signatures } = require('@airswap/order-utils')
 
 const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000'
 
-contract.only('Wrapper Unit Tests', async (accounts) => {
-
+contract.only('Wrapper Unit Tests', async accounts => {
   let mockSwap
   let mockWeth
   let wrapper
@@ -29,19 +37,23 @@ contract.only('Wrapper Unit Tests', async (accounts) => {
   async function setupMockWeth() {
     mockWeth = await MockContract.new()
 
-    wethTemplate = await WETH9.new();
+    wethTemplate = await WETH9.new()
 
     //mock the weth.approve method
-    let weth_approve = wethTemplate.contract.methods.approve(EMPTY_ADDRESS, 0).encodeABI();
-    mockWeth.givenMethodReturnBool(weth_approve, true);
+    let weth_approve = wethTemplate.contract.methods
+      .approve(EMPTY_ADDRESS, 0)
+      .encodeABI()
+    mockWeth.givenMethodReturnBool(weth_approve, true)
 
     //mock the weth.transferFrom method
-    let weth_transferFrom = wethTemplate.contract.methods.transferFrom(EMPTY_ADDRESS, EMPTY_ADDRESS, 0).encodeABI();
-    mockWeth.givenMethodReturnBool(weth_transferFrom, true);
+    let weth_transferFrom = wethTemplate.contract.methods
+      .transferFrom(EMPTY_ADDRESS, EMPTY_ADDRESS, 0)
+      .encodeABI()
+    mockWeth.givenMethodReturnBool(weth_transferFrom, true)
   }
 
   async function setupMockSwap() {
-    swapTemplate = await Swap.new();
+    swapTemplate = await Swap.new()
     //mock the swap.swapSimple method
     swap_swapSimple = swapTemplate.contract.methods
       .swapSimple(
@@ -71,12 +83,12 @@ contract.only('Wrapper Unit Tests', async (accounts) => {
   describe('Test initial values', async () => {
     it('Test initial Swap Contract', async () => {
       let val = await wrapper.swapContract.call()
-      equal(val, mockSwap.address, "swap address is incorrect")
+      equal(val, mockSwap.address, 'swap address is incorrect')
     })
 
     it('Test initial Weth Contract', async () => {
       let val = await wrapper.wethContract.call()
-      equal(val, mockWeth.address, "weth address is incorrect")
+      equal(val, mockWeth.address, 'weth address is incorrect')
     })
   })
 
@@ -94,11 +106,11 @@ contract.only('Wrapper Unit Tests', async (accounts) => {
           0, //taker amount
           nonTakerToken, //taker token
           8, //v
-          web3.utils.asciiToHex('r'), //r 
+          web3.utils.asciiToHex('r'), //r
           web3.utils.asciiToHex('s'), //s
           { value: 2 }
         ),
-        "VALUE_MUST_BE_ZERO"
+        'VALUE_MUST_BE_ZERO'
       )
     })
 
@@ -115,11 +127,11 @@ contract.only('Wrapper Unit Tests', async (accounts) => {
           0, //taker amount
           mockWeth.address, //taker token
           8, //v
-          web3.utils.asciiToHex('r'), //r 
+          web3.utils.asciiToHex('r'), //r
           web3.utils.asciiToHex('s'), //s
           { value: 2 }
         ),
-        "TAKER_ADDRESS_MUST_BE_UNSET"
+        'TAKER_ADDRESS_MUST_BE_UNSET'
       )
     })
 
@@ -135,11 +147,11 @@ contract.only('Wrapper Unit Tests', async (accounts) => {
           1, //taker amount
           mockWeth.address, //taker token
           8, //v
-          web3.utils.asciiToHex('r'), //r 
+          web3.utils.asciiToHex('r'), //r
           web3.utils.asciiToHex('s'), //s
           { value: 2 }
         ),
-        "VALUE_MUST_BE_SENT"
+        'VALUE_MUST_BE_SENT'
       )
     })
 
@@ -148,7 +160,9 @@ contract.only('Wrapper Unit Tests', async (accounts) => {
       let takerAmount = 2
 
       //mock the weth.balance method
-      let weth_balance = wethTemplate.contract.methods.balanceOf(EMPTY_ADDRESS).encodeABI();
+      let weth_balance = wethTemplate.contract.methods
+        .balanceOf(EMPTY_ADDRESS)
+        .encodeABI()
       await mockWeth.givenMethodReturnUint(weth_balance, 1)
 
       await reverted(
@@ -162,11 +176,11 @@ contract.only('Wrapper Unit Tests', async (accounts) => {
           takerAmount, //taker amount
           mockWeth.address, //taker token
           8, //v
-          web3.utils.asciiToHex('r'), //r 
+          web3.utils.asciiToHex('r'), //r
           web3.utils.asciiToHex('s'), //s
           { value: takerAmount }
         ),
-        "WETH_BALANCE_REMAINING"
+        'WETH_BALANCE_REMAINING'
       )
     })
 
@@ -175,7 +189,9 @@ contract.only('Wrapper Unit Tests', async (accounts) => {
       let takerAmount = 2
 
       //mock the weth.balance method
-      let weth_balance = wethTemplate.contract.methods.balanceOf(EMPTY_ADDRESS).encodeABI();
+      let weth_balance = wethTemplate.contract.methods
+        .balanceOf(EMPTY_ADDRESS)
+        .encodeABI()
       mockWeth.givenMethodReturnUint(weth_balance, 0)
 
       await reverted(
@@ -189,18 +205,18 @@ contract.only('Wrapper Unit Tests', async (accounts) => {
           takerAmount, //taker amount
           mockWeth.address, //taker token
           8, //v
-          web3.utils.asciiToHex('r'), //r 
+          web3.utils.asciiToHex('r'), //r
           web3.utils.asciiToHex('s'), //s
           { value: takerAmount }
         ),
-        "ETH_BALANCE_REMAINING"
+        'ETH_BALANCE_REMAINING'
       )
 
       //TODO: @dmosites I can't actually test this.
       //there are two reasons for this.
       //1. the balance on the wrapper contact is not account specific. The entire contract has a balance that is tracked amongst all users.
       //2. this unfortunately means there is also a security vulnerability: require(address(this).balance == 0, "ETH_BALANCE_REMAINING") if anybody sends
-      //any amount of ETH or WETH to this contract outside of the swapSimple() method it will forever lock the contract. This is because the contract tries to keep 
+      //any amount of ETH or WETH to this contract outside of the swapSimple() method it will forever lock the contract. This is because the contract tries to keep
       //a balance of 0, but thats irrespective of what already exists within the contract.
     })
 
@@ -208,7 +224,9 @@ contract.only('Wrapper Unit Tests', async (accounts) => {
       let takerAmount = 2
 
       //mock the weth.balance method
-      let weth_balance = wethTemplate.contract.methods.balanceOf(EMPTY_ADDRESS).encodeABI();
+      let weth_balance = wethTemplate.contract.methods
+        .balanceOf(EMPTY_ADDRESS)
+        .encodeABI()
       await mockWeth.givenMethodReturnUint(weth_balance, 0)
 
       await passes(
@@ -222,7 +240,7 @@ contract.only('Wrapper Unit Tests', async (accounts) => {
           takerAmount, //taker amount
           mockWeth.address, //taker token
           8, //v
-          web3.utils.asciiToHex('r'), //r 
+          web3.utils.asciiToHex('r'), //r
           web3.utils.asciiToHex('s'), //s
           { value: takerAmount }
         )
@@ -232,14 +250,20 @@ contract.only('Wrapper Unit Tests', async (accounts) => {
       let invocationCount = await mockSwap.invocationCountForMethod.call(
         swap_swapSimple
       )
-      equal(invocationCount.toNumber(), 1, "swap contact's swap.swapSimple was not called the expected number of times")
+      equal(
+        invocationCount.toNumber(),
+        1,
+        "swap contact's swap.swapSimple was not called the expected number of times"
+      )
     })
 
     it('Test when taker token == weth contract address, maker token address != weth contract address, and transaction is passes', async () => {
       let takerAmount = 2
 
       //mock the weth.balance method
-      let weth_balance = wethTemplate.contract.methods.balanceOf(EMPTY_ADDRESS).encodeABI();
+      let weth_balance = wethTemplate.contract.methods
+        .balanceOf(EMPTY_ADDRESS)
+        .encodeABI()
       await mockWeth.givenMethodReturnUint(weth_balance, 0)
 
       let notWethContract = accounts[9]
@@ -254,7 +278,7 @@ contract.only('Wrapper Unit Tests', async (accounts) => {
           takerAmount, //taker amount
           mockWeth.address, //taker token
           8, //v
-          web3.utils.asciiToHex('r'), //r 
+          web3.utils.asciiToHex('r'), //r
           web3.utils.asciiToHex('s'), //s
           { value: takerAmount }
         )
@@ -264,7 +288,11 @@ contract.only('Wrapper Unit Tests', async (accounts) => {
       let invocationCount = await mockSwap.invocationCountForMethod.call(
         swap_swapSimple
       )
-      equal(invocationCount.toNumber(), 1, "swap contact's swap.swapSimple was not called the expected number of times")
+      equal(
+        invocationCount.toNumber(),
+        1,
+        "swap contact's swap.swapSimple was not called the expected number of times"
+      )
     })
   })
 })
