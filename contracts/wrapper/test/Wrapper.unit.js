@@ -173,8 +173,8 @@ contract.only('Wrapper Unit Tests', async (accounts) => {
       //there are two reasons for this.
       //1. the balance on the wrapper contact is not account specific. The entire contract has a balance that is tracked amongst all users.
       //2. this unfortunately means there is also a security vulnerability: require(address(this).balance == 0, "ETH_BALANCE_REMAINING") if anybody sends
-      //any amount to this contract outside of the swapSimple() method it will forever lock the contract.
-      //Furthermore, it's also possible to lock the contract by sending WETH to the contract.
+      //any amount of ETH or WETH to this contract outside of the swapSimple() method it will forever lock the contract. This is because the contract tries to keep 
+      //a balance of 0, but thats irrespective of what already exists within the contract.
     })
 
     it('Test when taker token == weth contract address, maker token address == weth contract address', async () => {
