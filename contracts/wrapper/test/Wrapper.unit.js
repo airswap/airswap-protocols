@@ -13,6 +13,7 @@ contract('Wrapper Unit Tests', async accounts => {
   let mockWeth
   let wrapper
   let wethTemplate
+  let weth_balance
   let swap_swapSimple
 
   beforeEach(async () => {
@@ -29,17 +30,21 @@ contract('Wrapper Unit Tests', async accounts => {
 
     wethTemplate = await WETH9.new()
 
+    weth_balance = wethTemplate.contract.methods
+      .balanceOf(EMPTY_ADDRESS)
+      .encodeABI()
+
     //mock the weth.approve method
     let weth_approve = wethTemplate.contract.methods
       .approve(EMPTY_ADDRESS, 0)
       .encodeABI()
-    mockWeth.givenMethodReturnBool(weth_approve, true)
+    await mockWeth.givenMethodReturnBool(weth_approve, true)
 
     //mock the weth.transferFrom method
     let weth_transferFrom = wethTemplate.contract.methods
       .transferFrom(EMPTY_ADDRESS, EMPTY_ADDRESS, 0)
       .encodeABI()
-    mockWeth.givenMethodReturnBool(weth_transferFrom, true)
+    await mockWeth.givenMethodReturnBool(weth_transferFrom, true)
   }
 
   async function setupMockSwap() {
@@ -150,9 +155,6 @@ contract('Wrapper Unit Tests', async accounts => {
       let takerAmount = 2
 
       //mock the weth.balance method
-      let weth_balance = wethTemplate.contract.methods
-        .balanceOf(EMPTY_ADDRESS)
-        .encodeABI()
       await mockWeth.givenMethodReturnUint(weth_balance, 1)
 
       await reverted(
@@ -179,10 +181,7 @@ contract('Wrapper Unit Tests', async accounts => {
       let takerAmount = 2
 
       //mock the weth.balance method
-      let weth_balance = wethTemplate.contract.methods
-        .balanceOf(EMPTY_ADDRESS)
-        .encodeABI()
-      mockWeth.givenMethodReturnUint(weth_balance, 0)
+      await mockWeth.givenMethodReturnUint(weth_balance, 0)
 
       await reverted(
         wrapper.swapSimple(
@@ -214,9 +213,6 @@ contract('Wrapper Unit Tests', async accounts => {
       let takerAmount = 2
 
       //mock the weth.balance method
-      let weth_balance = wethTemplate.contract.methods
-        .balanceOf(EMPTY_ADDRESS)
-        .encodeABI()
       await mockWeth.givenMethodReturnUint(weth_balance, 0)
 
       await passes(
@@ -251,9 +247,6 @@ contract('Wrapper Unit Tests', async accounts => {
       let takerAmount = 2
 
       //mock the weth.balance method
-      let weth_balance = wethTemplate.contract.methods
-        .balanceOf(EMPTY_ADDRESS)
-        .encodeABI()
       await mockWeth.givenMethodReturnUint(weth_balance, 0)
 
       let notWethContract = accounts[9]
