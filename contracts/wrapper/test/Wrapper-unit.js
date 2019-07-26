@@ -8,7 +8,7 @@ const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 
 const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000'
 
-contract('Wrapper Unit Tests', async (accounts) => {
+contract('Wrapper Unit Tests', async accounts => {
   let mockSwap
   let mockWeth
   let wrapper
