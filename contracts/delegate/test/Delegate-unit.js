@@ -567,7 +567,7 @@ contract('Delegate Unit Tests', async accounts => {
       equal(
         invocationCount.toNumber(),
         1,
-        'underlying method provideOrder was not called successfully'
+        "swap contact's swap.swapSimple was not called the expected number of times"
       )
     })
   })
