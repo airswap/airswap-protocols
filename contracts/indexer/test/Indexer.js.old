@@ -21,7 +21,7 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
 
   describe('Deploying...', () => {
     it('Deployed staking token "AST"', async () => {
-      tokenAST = await FungibleToken.deployed()
+      tokenAST = await FungibleToken.new()
     })
 
     it('Deployed trading token "DAI"', async () => {
@@ -33,7 +33,7 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
     })
 
     it('Deployed Indexer contract', async () => {
-      indexer = await Indexer.deployed({ from: ownerAddress })
+      indexer = await Indexer.new({ from: ownerAddress })
       indexerAddress = indexer.address
       emitted(await indexer.setStakeMinimum(250), 'SetStakeMinimum')
     })
