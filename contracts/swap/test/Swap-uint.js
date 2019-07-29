@@ -14,6 +14,9 @@ const { orders, signatures } = require('@airswap/order-utils')
 contract('Swap Unit Tests', async accounts => {
   const mockMaker = accounts[9]
   const sender = accounts[0]
+  const r = web3.utils.asciiToHex('r')
+  const s = web3.utils.asciiToHex('s')
+  const ver = web3.utils.asciiToHex('F0')
 
   let snapshotId
   let swap
@@ -31,10 +34,14 @@ contract('Swap Unit Tests', async accounts => {
     swap = await Swap.new()
   })
 
-  describe('Test initial values', async () => {})
-
   describe('Test swap', async () => {
-    it('test when order is expired', async () => {})
+    it('test when order is expired', async () => {
+      let party = [accounts[8], accounts[7], 121]
+      let order = [0, 0, party, party, party]
+      let signature = [accounts[8], 27, r, s, ver]
+
+      await reverted(swap.swap(order, signature), 'ORDER_EXPIRED')
+    })
 
     it('test when order is taken', async () => {})
 
