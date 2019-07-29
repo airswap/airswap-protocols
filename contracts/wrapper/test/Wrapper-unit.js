@@ -197,7 +197,7 @@ contract('Wrapper Unit Tests', async accounts => {
           takerAmount, //taker amount
           mockWeth.address, //taker token
           27, //v
-          r, 
+          r,
           s,
           { value: takerAmount }
         ),
@@ -229,7 +229,7 @@ contract('Wrapper Unit Tests', async accounts => {
           takerAmount, //taker amount
           mockWeth.address, //taker token
           27, //v
-          r, 
+          r,
           s,
           { value: takerAmount }
         )
