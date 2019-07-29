@@ -93,11 +93,7 @@ contract('Delegate', async accounts => {
         0
       )
       equal(
-        await aliceDelegate.getBuyQuote(
-          1,
-          tokenWETH.address,
-          tokenDAI.address
-        ),
+        await aliceDelegate.getBuyQuote(1, tokenWETH.address, tokenDAI.address),
         300
       )
     })
@@ -254,5 +250,4 @@ contract('Delegate', async accounts => {
       )
     })
   })
-  }
-)
+})
