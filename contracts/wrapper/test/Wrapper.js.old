@@ -66,7 +66,7 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
     await revertToSnapShot(snapshotId)
   })
 
-  describe('Setup', () => {
+  describe('Setup', async () => {
     it('Mints 1000 DAI for Alice', async () => {
       let tx = await tokenDAI.mint(aliceAddress, 1000)
       ok(await balances(aliceAddress, [[tokenDAI, 1000]]))
@@ -75,16 +75,17 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
     })
   })
 
-  describe('Approving...', () => {
+  describe('Approving...', async () => {
     it('Alice approves Swap to spend 9999 DAI', async () => {
       let result = await tokenDAI.approve(swapAddress, 1000, {
         from: aliceAddress,
       })
+      console.log(result)
       emitted(result, 'Approval')
     })
   })
 
-  describe('Wrap Buys', () => {
+  describe('Wrap Buys', async () => {
     it('Checks that Bob take a WETH order from Alice using ETH', async () => {
       const { order } = await orders.getOrder({
         maker: {
@@ -119,6 +120,7 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
       )
       passes(result)
       result = await getResult(swapContract, result.tx)
+      console.log(result)
       emitted(result, 'Swap')
     })
   })
@@ -130,6 +132,7 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
       emitted(tx, 'Deposit')
       tx = await tokenWETH.approve(swapAddress, 10000, { from: carolAddress })
       passes(tx)
+      console.log(tx)
       emitted(tx, 'Approval')
     })
 
@@ -147,6 +150,7 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
         from: aliceAddress,
       })
       passes(tx)
+      console.log(tx)
       emitted(tx, 'Approval')
     })
 
@@ -185,6 +189,7 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
       )
       passes(result)
       result = await getResult(swapContract, result.tx)
+      console.log(result)
       emitted(result, 'Swap')
     })
   })
