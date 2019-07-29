@@ -190,15 +190,9 @@ contract('Consumer', async accounts => {
       )
 
       // Carol takes the best price for 100 DAI
-      await consumer.takeBestBuy(
-        100,
-        tokenWETH.address,
-        tokenDAI.address,
-        50,
-        {
-          from: carolAddress,
-        }
-      )
+      await consumer.takeBestBuy(100, tokenWETH.address, tokenDAI.address, 50, {
+        from: carolAddress,
+      })
 
       // Assert that Carol has taken 100 WETH from Alice
       equal(await tokenWETH.balanceOf(aliceAddress), 0)

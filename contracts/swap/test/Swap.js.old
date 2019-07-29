@@ -130,7 +130,7 @@ contract('Swap', async accounts => {
     })
   })
 
-  describe('Swaps (Fungible)', () => {
+  describe('Swaps (Fungible)', async () => {
     let _order
     let _signature
 
