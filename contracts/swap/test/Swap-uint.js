@@ -118,12 +118,9 @@ contract('Swap Unit Tests', async accounts => {
 
       //ensure transaction was emitted
       await emitted(trx, 'Cancel', e => {
-        return(
-          e.nonce.toNumber() === 6  &&
-          e.makerWallet === mockMaker
-        )
+        return e.nonce.toNumber() === 6 && e.makerWallet === mockMaker
       })
-      
+
       //ensure the value was set
       let val
       val = await swap.makerOrderStatus.call(mockMaker, 6)
@@ -159,10 +156,7 @@ contract('Swap Unit Tests', async accounts => {
       equal(newNonceForMaker, 5, 'mock macker should have a min nonce of 5')
 
       emitted(trx, 'Invalidate', e => {
-        return (
-          e.nonce.toNumber() === 5 &&
-          e.makerWallet === mockMaker
-        )
+        return e.nonce.toNumber() === 5 && e.makerWallet === mockMaker
       })
     })
 
@@ -191,7 +185,7 @@ contract('Swap Unit Tests', async accounts => {
 
       //check delegateApproval was unset
       let val = await swap.delegateApprovals.call(sender, mockMaker)
-      equal(val, futureTime, "delegate approval was not properly set")
+      equal(val, futureTime, 'delegate approval was not properly set')
 
       //check that event was emitted
       emitted(trx, 'Authorize', e => {
@@ -210,14 +204,11 @@ contract('Swap Unit Tests', async accounts => {
 
       //check delegateApproval was unset
       let val = await swap.delegateApprovals.call(sender, mockMaker)
-      equal(val, 0, "delegate approval was not properly unset")
+      equal(val, 0, 'delegate approval was not properly unset')
 
       //check that the event was emitted
       emitted(trx, 'Revoke', e => {
-        return (
-          e.approverAddress === sender &&
-          e.delegateAddress === mockMaker
-        )
+        return e.approverAddress === sender && e.delegateAddress === mockMaker
       })
     })
   })
