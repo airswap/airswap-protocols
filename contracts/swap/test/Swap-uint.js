@@ -100,7 +100,22 @@ contract('Swap Unit Tests', async (accounts) => {
   })
 
   describe('Test cancel', async () => {
-    it('test an array of nonces, ensure the cancellation of only those orders', async () => {})
+    it('test an array of nonces, ensure the cancellation of only those orders', async () => {
+      await swap.cancel([1, 2, 4, 6], { from: mockMaker })
+      let val 
+      val = await swap.makerOrderStatus.call(mockMaker, 1)
+      equal(val, 0x02)
+      val = await swap.makerOrderStatus.call(mockMaker, 2)
+      equal(val, 0x02)
+      val = await swap.makerOrderStatus.call(mockMaker, 3)
+      equal(val, 0x00)
+      val = await swap.makerOrderStatus.call(mockMaker, 4)
+      equal(val, 0x02)
+      val = await swap.makerOrderStatus.call(mockMaker, 5)
+      equal(val, 0x00)
+      val = await swap.makerOrderStatus.call(mockMaker, 6)
+      equal(val, 0x02)
+    })
   })
 
   describe('Test invalidate', async () => {
