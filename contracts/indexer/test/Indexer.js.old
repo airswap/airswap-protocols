@@ -53,10 +53,14 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
 
     it('Deployed Indexer contract', async () => {
 <<<<<<< HEAD:contracts/indexer/test/Indexer.js.old
+<<<<<<< HEAD:contracts/indexer/test/Indexer.js.old
       indexer = await Indexer.new(tokenAST.address, 200, { from: ownerAddress })
 =======
       indexer = await Indexer.new({ from: ownerAddress })
 >>>>>>> snapshots and .new for all tests:contracts/indexer/test/Indexer.js
+=======
+      indexer = await Indexer.new(tokenAST.address, 200, { from: ownerAddress })
+>>>>>>> arguments for new deploymnts:contracts/indexer/test/Indexer.js
       indexerAddress = indexer.address
       emitted(await indexer.setStakeMinimum(250), 'SetStakeMinimum')
     })
