@@ -5,10 +5,10 @@ const MockContract = artifacts.require('MockContract')
 
 const { equal, reverted, passes } = require('@airswap/test-utils').assert
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
-
-const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000'
+const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 
 contract('Wrapper Unit Tests', async accounts => {
+  const takerAmount = 2
   const mockToken = accounts[9]
   const r = web3.utils.asciiToHex('r')
   const s = web3.utils.asciiToHex('s')
@@ -155,7 +155,6 @@ contract('Wrapper Unit Tests', async accounts => {
 
     it('Test when taker token == weth contract address, maker token address != weth contract address, and weth contact has a left over balance', async () => {
       let mockMakerToken = mockToken
-      let takerAmount = 2
 
       //mock the weth.balance method
       await mockWeth.givenMethodReturnUint(weth_balance, 1)
@@ -181,7 +180,6 @@ contract('Wrapper Unit Tests', async accounts => {
 
     it.skip('Test when taker token == weth contract address, maker token address != weth contract address, and wrapper address has a left over balance', async () => {
       let mockMakerToken = mockToken
-      let takerAmount = 2
 
       //mock the weth.balance method
       await mockWeth.givenMethodReturnUint(weth_balance, 0)
@@ -213,7 +211,6 @@ contract('Wrapper Unit Tests', async accounts => {
     })
 
     it('Test when taker token == weth contract address, maker token address == weth contract address, and transaction is passes', async () => {
-      let takerAmount = 2
 
       //mock the weth.balance method
       await mockWeth.givenMethodReturnUint(weth_balance, 0)
@@ -247,7 +244,6 @@ contract('Wrapper Unit Tests', async accounts => {
     })
 
     it('Test when taker token == weth contract address, maker token address != weth contract address, and transaction is passes', async () => {
-      let takerAmount = 2
 
       //mock the weth.balance method
       await mockWeth.givenMethodReturnUint(weth_balance, 0)
