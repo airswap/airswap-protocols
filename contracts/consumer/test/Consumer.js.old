@@ -16,6 +16,10 @@ let indexerAddress
 let swapAddress
 let aliceDelegate
 
+let tokenAST
+let tokenDAI
+let tokenWETH
+
 // TODO: Use token-unit for realistic token amounts.
 
 contract(
@@ -25,14 +29,14 @@ contract(
       let location
 
       before('Deploys all the things', async () => {
-        tokenAST = await FungibleToken.deployed()
+        tokenAST = await FungibleToken.new()
         tokenDAI = await FungibleToken.new()
         tokenWETH = await FungibleToken.new()
-        swapContract = await Swap.deployed()
+        swapContract = await Swap.new()
         swapAddress = swapContract.address
-        indexer = await Indexer.deployed({ from: ownerAddress })
+        indexer = await Indexer.new({ from: ownerAddress })
         indexerAddress = indexer.address
-        consumer = await Consumer.deployed({ from: ownerAddress })
+        consumer = await Consumer.new({ from: ownerAddress })
         consumerAddress = consumer.address
         aliceDelegate = await Delegate.new(swapAddress, { from: aliceAddress })
         provideOrder =
