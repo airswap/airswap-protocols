@@ -1,11 +1,16 @@
 const Swap = artifacts.require('Swap')
 const MockContract = artifacts.require('MockContract')
 
-const { passed, emitted, reverted, equal } = require('@airswap/test-utils').assert
+const {
+  passes,
+  emitted,
+  reverted,
+  equal,
+} = require('@airswap/test-utils').assert
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 const { orders, signatures } = require('@airswap/order-utils')
 
-contract('Swap Unit Tests', async (accounts) => {
+contract('Swap Unit Tests', async accounts => {
   let snapshotId
   let swap
   let mockMaker = accounts[9]
@@ -102,7 +107,7 @@ contract('Swap Unit Tests', async (accounts) => {
   describe('Test cancel', async () => {
     it('test an array of nonces, ensure the cancellation of only those orders', async () => {
       await swap.cancel([1, 2, 4, 6], { from: mockMaker })
-      let val 
+      let val
       val = await swap.makerOrderStatus.call(mockMaker, 1)
       equal(val, 0x02)
       val = await swap.makerOrderStatus.call(mockMaker, 2)
@@ -121,21 +126,33 @@ contract('Swap Unit Tests', async (accounts) => {
   describe('Test invalidate', async () => {
     it('test that given a minimum nonce for a maker is set', async () => {
       let minNonceForMaker = await swap.makerMinimumNonce.call(mockMaker)
-      equal(minNonceForMaker, 0, "mock maker should have min nonce of 0") 
+      equal(minNonceForMaker, 0, 'mock maker should have min nonce of 0')
       await swap.invalidate(5, { from: mockMaker })
       let newNonceForMaker = await swap.makerMinimumNonce.call(mockMaker)
-      equal(newNonceForMaker, 5, "mock macker should have a min nonce of 5")
+      equal(newNonceForMaker, 5, 'mock macker should have a min nonce of 5')
     })
 
     it('test that given a minimum nonce that all orders below a nonce value are invalidated', async () => {})
   })
 
   describe('Test authorize', async () => {
-    it('test when the message sender is the delegate', async () => {})
+    it('test when the message sender is the delegate', async () => {
+      let delegate = mockMaker
+      await reverted(
+        swap.authorize(delegate, 0, { from: mockMaker }),
+        'INVALID_AUTH_DELEGATE'
+      )
+    })
 
-    it('test when the expiration date has passed', async () => {})
+    it('test when the expiration date has passed', async () => {
+      await reverted(swap.authorize(mockMaker, 0), 'INVALID_AUTH_EXPIRY')
+    })
 
-    it('test when there is a valid delegate and the expiration has not expired', async () => {})
+    it('test when there is a valid delegate and the expiration has not expired', async () => {
+      const block = await web3.eth.getBlock('latest')
+      const time = block.timestamp
+      await passes(swap.authorize(mockMaker, time + 100))
+    })
   })
 
   describe('Test revoke', async () => {
