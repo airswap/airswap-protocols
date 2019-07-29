@@ -45,7 +45,13 @@ contract('Swap Unit Tests', async accounts => {
       await reverted(swap.swap(order, signature), 'ORDER_EXPIRED')
     })
 
-    it('test when order is taken', async () => {})
+    it('test when order is taken', async () => {
+      let party = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
+      let order = [0, 0, party, party, party]
+      let signature = [EMPTY_ADDRESS, v, r, s, ver]
+
+      await reverted(swap.swap(order, signature), 'ORDER_ALREADY_TAKEN')
+    })
 
     it('test when order is canceled', async () => {})
 
