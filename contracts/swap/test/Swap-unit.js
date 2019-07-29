@@ -12,7 +12,8 @@ const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 const { orders, signatures } = require('@airswap/order-utils')
 const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 
-contract('Swap Unit Tests', async accounts => {
+contract.only('Swap Unit Tests', async accounts => {
+  const Jun_06_2017T00_00_00_UTC = 1497052800 //a date later than than when ganache started
   const mockMaker = accounts[9]
   const sender = accounts[0]
   const v = 27
@@ -47,10 +48,10 @@ contract('Swap Unit Tests', async accounts => {
 
     it('test when order is taken', async () => {
       let party = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
-      let order = [0, 0, party, party, party]
+      let order = [0, Jun_06_2017T00_00_00_UTC, party, party, party]
       let signature = [EMPTY_ADDRESS, v, r, s, ver]
 
-      await reverted(swap.swap(order, signature), 'ORDER_ALREADY_TAKEN')
+      await reverted(await swap.swap(order, signature), 'ORDER_EXPIRED')
     })
 
     it('test when order is canceled', async () => {})
