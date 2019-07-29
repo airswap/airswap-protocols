@@ -79,22 +79,11 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
       // now deploy swap
       swapContract = await Swap.new()
 
-      console.log("swap new")
       swapAddress = swapContract.address
-      console.log("swap address")
-
       tokenWETH = await WETH9.new()
-      console.log("weth new")
-
       wrapperContract = await Wrapper.new(swapAddress, tokenWETH.address)
-      console.log("wrapper new")
-
       wrapperAddress = wrapperContract.address
-      console.log("wrapper address")
-
       tokenDAI = await FungibleToken.new()
-      console.log("dai new")
-
 
       orders.setVerifyingContract(swapAddress)
 
