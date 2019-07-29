@@ -67,6 +67,7 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
   })
 
 <<<<<<< HEAD:contracts/wrapper/test/Wrapper.js.old
+<<<<<<< HEAD:contracts/wrapper/test/Wrapper.js.old
   describe('Setup', async () => {
     before('Deploys all the things', async () => {
       // deploy both libs
@@ -100,6 +101,9 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
 =======
   describe('Setup', () => {
 >>>>>>> loads of missing awaits:contracts/wrapper/test/Wrapper.js
+=======
+  describe('Setup', async () => {
+>>>>>>> console logs and asyncs:contracts/wrapper/test/Wrapper.js
     it('Mints 1000 DAI for Alice', async () => {
       let tx = await tokenDAI.mint(aliceAddress, 1000)
       ok(await balances(aliceAddress, [[tokenDAI, 1000]]))
@@ -114,9 +118,13 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
         from: aliceAddress,
       })
 <<<<<<< HEAD:contracts/wrapper/test/Wrapper.js.old
+<<<<<<< HEAD:contracts/wrapper/test/Wrapper.js.old
       console.log(result)
 =======
 >>>>>>> loads of missing awaits:contracts/wrapper/test/Wrapper.js
+=======
+      console.log(result)
+>>>>>>> console logs and asyncs:contracts/wrapper/test/Wrapper.js
       emitted(result, 'Approval')
     })
   })
@@ -156,7 +164,11 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
       await passes(result)
       result = await getResult(swapContract, result.tx)
       console.log(result)
+<<<<<<< HEAD:contracts/wrapper/test/Wrapper.js.old
       await emitted(result, 'Swap')
+=======
+      emitted(result, 'Swap')
+>>>>>>> console logs and asyncs:contracts/wrapper/test/Wrapper.js
     })
   })
 
