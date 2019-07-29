@@ -138,15 +138,29 @@ contract('Swap Unit Tests', async () => {
     })
   })
 
-  descrive('Test cancel', async () => {
+  describe('Test cancel', async () => {
+    it('test an array of nonces, ensure the cancellation of only those orders', async () => {
+    })
   })
 
-  descrive('Test invalidate', async () => {
+  describe('Test invalidate', async () => {
+    it('test that given a minimum nonce that all orders below a nonce value are invalidated', async () => {
+    })
   })
 
-  descrive('Test authorize', async () => {
+  describe('Test authorize', async () => {
+    it('test when the message sender is the delegate', async () => {
+    })
+
+    it('test when the expiration date has passed', async () => {
+    })
+
+    it('test when there is a valid delegate and the expiration has not expired', async () => {
+    })
   })
 
-  descrive('Test revoke', async () => {
+  describe('Test revoke', async () => {
+    it('test that the approval is successfully removed', async () => {
+    })
   })
 })
