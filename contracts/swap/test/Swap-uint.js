@@ -10,6 +10,8 @@ const { getLatestTimestamp } = require('@airswap/test-utils').time
 const { orders, signatures } = require('@airswap/order-utils')
 
 contract('Swap Unit Tests', async () => {
+  let snapshotId
+  let swap
 
   beforeEach(async () => {
     let snapShot = await takeSnapshot()
@@ -21,8 +23,27 @@ contract('Swap Unit Tests', async () => {
   })
   
   before('deploy Swap', async () => {
+    swap = Swap.new()
   })
 
   describe('Test initial values', async () => {
+  })
+
+  describe('Test swap', async () => {
+  })
+
+  describe('Test swapSimple', async () => {
+  })
+
+  descrive('Test cancel', async () => {
+  })
+
+  descrive('Test invalidate', async () => {
+  })
+
+  descrive('Test authorize', async () => {
+  })
+
+  descrive('Test revoke', async () => {
   })
 })
