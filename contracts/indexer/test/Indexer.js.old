@@ -35,10 +35,14 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
   })
 
 <<<<<<< HEAD:contracts/indexer/test/Indexer.js.old
+<<<<<<< HEAD:contracts/indexer/test/Indexer.js.old
   describe('Deploying...', async () => {
 =======
   describe('Deploying...', () => {
 >>>>>>> snapshots and .new for all tests:contracts/indexer/test/Indexer.js
+=======
+  describe('Deploying...', async () => {
+>>>>>>> missing asyncs:contracts/indexer/test/Indexer.js
     it('Deployed staking token "AST"', async () => {
       tokenAST = await FungibleToken.new()
     })

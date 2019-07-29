@@ -55,7 +55,7 @@ contract('Delegate', async accounts => {
     await revertToSnapShot(snapshotId)
   })
 
-  describe('Deploying...', () => {
+  describe('Deploying...', async () => {
     it('Alice deployed a Swap Delegate', async () => {
       aliceDelegate = await Delegate.new(swapAddress)
       await aliceDelegate.setSwapContract(swapAddress)
@@ -83,7 +83,7 @@ contract('Delegate', async accounts => {
     })
   })
 
-  describe('Checks pricing logic from the Delegate', () => {
+  describe('Checks pricing logic from the Delegate', async () => {
     it('Send up to 100K WETH for DAI at 300 DAI/WETH', async () => {
       await aliceDelegate.setRule(
         tokenWETH.address,
@@ -133,7 +133,7 @@ contract('Delegate', async accounts => {
     })
   })
 
-  describe('Checks quotes from the Delegate', () => {
+  describe('Checks quotes from the Delegate', async () => {
     before(
       'Adds a rule to send up to 100K DAI for WETH at 0.0032 WETH/DAI',
       async () => {
@@ -205,7 +205,7 @@ contract('Delegate', async accounts => {
     })
   })
 
-  describe('Provide some orders to the Delegate', () => {
+  describe('Provide some orders to the Delegate', async () => {
     let quote
     before('Gets a quote for 1 WETH', async () => {
       quote = await aliceDelegate.getSellQuote(

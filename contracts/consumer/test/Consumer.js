@@ -131,7 +131,7 @@ contract('Consumer', async accounts => {
     })
   })
 
-  describe('Alice adds some delegate rules', () => {
+  describe('Alice adds some delegate rules', async () => {
     it('Adds a rule to send up to 150 WETH for DAI at 309.52 DAI/WETH', async () => {
       emitted(
         await aliceDelegate.setRule(
@@ -156,7 +156,7 @@ contract('Consumer', async accounts => {
     })
   })
 
-  describe('Consumer', () => {
+  describe('Consumer', async () => {
     it('Finds best price to buy 1 WETH for DAI', async () => {
       const quote = await consumer.findBestBuy(
         100,

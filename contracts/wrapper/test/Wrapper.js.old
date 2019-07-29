@@ -165,10 +165,14 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
       result = await getResult(swapContract, result.tx)
       console.log(result)
 <<<<<<< HEAD:contracts/wrapper/test/Wrapper.js.old
+<<<<<<< HEAD:contracts/wrapper/test/Wrapper.js.old
       await emitted(result, 'Swap')
 =======
       emitted(result, 'Swap')
 >>>>>>> console logs and asyncs:contracts/wrapper/test/Wrapper.js
+=======
+      await emitted(result, 'Swap')
+>>>>>>> missing asyncs:contracts/wrapper/test/Wrapper.js
     })
   })
 
