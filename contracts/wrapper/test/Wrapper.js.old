@@ -103,7 +103,6 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
         aliceAddress,
         swapAddress
       )
-
       let result = await swapSimple(
         order.nonce,
         order.expiry,
@@ -118,10 +117,10 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
         signature.s,
         { from: bobAddress, value: order.taker.param }
       )
-      passes(result)
+      await passes(result)
       result = await getResult(swapContract, result.tx)
       console.log(result)
-      emitted(result, 'Swap')
+      await emitted(result, 'Swap')
     })
   })
 

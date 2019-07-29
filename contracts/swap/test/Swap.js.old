@@ -54,7 +54,7 @@ contract('Swap', async accounts => {
     await revertToSnapShot(snapshotId)
   })
 
-  describe('Deploying...', () => {
+  describe('Deploying...', async () => {
     it('Deployed Swap contract', async () => {
       // deploy both libs
       const transfersLib = await Transfers.new()
@@ -89,7 +89,7 @@ contract('Swap', async accounts => {
     })
   })
 
-  describe('Minting...', () => {
+  describe('Minting...', async () => {
     it('Mints 1000 AST for Alice', async () => {
       emitted(await tokenAST.mint(aliceAddress, 1000), 'Transfer')
       ok(
@@ -107,7 +107,7 @@ contract('Swap', async accounts => {
     })
   })
 
-  describe('Approving...', () => {
+  describe('Approving...', async () => {
     it('Alice approves Swap to spend 200 AST', async () => {
       emitted(
         await tokenAST.approve(swapAddress, 200, { from: aliceAddress }),
@@ -259,7 +259,7 @@ contract('Swap', async accounts => {
     })
   })
 
-  describe('Signer Delegation (Maker-side)', () => {
+  describe('Signer Delegation (Maker-side)', async () => {
     let _order
     let _signature
 
@@ -343,7 +343,7 @@ contract('Swap', async accounts => {
     })
   })
 
-  describe('Sender Delegation (Taker-side)', () => {
+  describe('Sender Delegation (Taker-side)', async () => {
     let _order
     let _signature
 
@@ -407,7 +407,7 @@ contract('Swap', async accounts => {
     })
   })
 
-  describe('Signer and Sender Delegation (Three Way)', () => {
+  describe('Signer and Sender Delegation (Three Way)', async () => {
     it('Alice approves David to make orders on her behalf', async () => {
       emitted(
         await swapContract.authorize(davidAddress, defaultAuthExpiry, {
@@ -448,7 +448,7 @@ contract('Swap', async accounts => {
     })
   })
 
-  describe('Signer and Sender Delegation (Four Way)', () => {
+  describe('Signer and Sender Delegation (Four Way)', async () => {
     it('Alice approves David to make orders on her behalf', async () => {
       emitted(
         await swapContract.authorize(davidAddress, defaultAuthExpiry, {
@@ -494,7 +494,7 @@ contract('Swap', async accounts => {
     })
   })
 
-  describe('Cancels', () => {
+  describe('Cancels', async () => {
     before('Alice creates orders with nonces 1, 2, 3', async () => {
       const {
         order: orderOne,
@@ -577,7 +577,7 @@ contract('Swap', async accounts => {
     })
   })
 
-  describe('Swap with Ether', () => {
+  describe('Swap with Ether', async () => {
     const value = 1
 
     it('Checks allowance (Alice 200 AST)', async () => {
@@ -654,7 +654,7 @@ contract('Swap', async accounts => {
     })
   })
 
-  describe('Swaps with Fees', () => {
+  describe('Swaps with Fees', async () => {
     it('Checks that Carol gets paid 50 AST for facilitating a trade between Alice and Bob', async () => {
       const { order, signature } = await orders.getOrder({
         maker: {
@@ -692,7 +692,7 @@ contract('Swap', async accounts => {
     })
   })
 
-  describe('Swap (Simple)', () => {
+  describe('Swap (Simple)', async () => {
     let _order
     let _signature
 
@@ -797,7 +797,7 @@ contract('Swap', async accounts => {
     })
   })
 
-  describe('Maker Delegation for Swap (Simple)', () => {
+  describe('Maker Delegation for Swap (Simple)', async () => {
     it('Alice gives an unsigned order to David who takes it for Bob', async () => {
       const { order } = await orders.getOrder({
         maker: {
@@ -832,7 +832,7 @@ contract('Swap', async accounts => {
     })
   })
 
-  describe('Swap (Simple) for ETH', () => {
+  describe('Swap (Simple) for ETH', async () => {
     it('Checks that a Swap (Simple) for ETH succeeds', async () => {
       const { order } = await orders.getOrder({
         maker: {
@@ -873,7 +873,7 @@ contract('Swap', async accounts => {
     })
   })
 
-  describe('Swap with Public Orders (No Taker Set)', () => {
+  describe('Swap with Public Orders (No Taker Set)', async () => {
     it('Checks that a Swap succeeds without a taker wallet set', async () => {
       const { order, signature } = await orders.getOrder({
         maker: {
@@ -928,7 +928,7 @@ contract('Swap', async accounts => {
     })
   })
 
-  describe('Deploying...', () => {
+  describe('Deploying...', async () => {
     it('Deployed test contract "ConcertTicket"', async () => {
       tokenTicket = await NonFungibleToken.new()
     })
@@ -938,7 +938,7 @@ contract('Swap', async accounts => {
     })
   })
 
-  describe('Minting...', () => {
+  describe('Minting...', async () => {
     it('Mints a concert ticket (#12345) for Alice', async () => {
       emitted(await tokenTicket.mint(aliceAddress, 12345), 'NFTTransfer')
       ok(
@@ -956,7 +956,7 @@ contract('Swap', async accounts => {
     })
   })
 
-  describe('Swaps (Non-Fungible)', () => {
+  describe('Swaps (Non-Fungible)', async () => {
     it('Alice approves Swap to transfer her concert ticket', async () => {
       emitted(
         await tokenTicket.approve(swapAddress, 12345, { from: aliceAddress }),
@@ -1032,7 +1032,7 @@ contract('Swap', async accounts => {
     })
   })
 
-  describe('Swap (Simple) (Non-Fungible)', () => {
+  describe('Swap (Simple) (Non-Fungible)', async () => {
     it('Carol approves Swap to transfer her kitty collectible', async () => {
       emitted(
         await tokenKitty.approve(swapAddress, 54321, { from: carolAddress }),
@@ -1080,7 +1080,7 @@ contract('Swap', async accounts => {
     })
   })
 
-  describe('Signatures', () => {
+  describe('Signatures', async () => {
     const eveAddress = '0x9d2fB0BCC90C6F3Fa3a98D2C760623a4F6Ee59b4'
     const evePrivKey = Buffer.from(
       '4934d4ff925f39f91e3729fbce52ef12f25fdf93e014e291350f7d314c1a096b',

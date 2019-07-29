@@ -34,7 +34,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
     await revertToSnapShot(snapshotId)
   })
 
-  describe('Deploying...', () => {
+  describe('Deploying...', async () => {
     it('Deployed staking token "AST"', async () => {
       tokenAST = await FungibleToken.new()
     })
@@ -54,7 +54,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
     })
   })
 
-  describe('Market setup', () => {
+  describe('Market setup', async () => {
     it('Bob creates a market (collection of intents) for WETH/DAI', async () => {
       emitted(
         await indexer.createMarket(tokenWETH.address, tokenDAI.address, {
@@ -101,7 +101,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
     })
   })
 
-  describe('Staking', () => {
+  describe('Staking', async () => {
     it('Fails due to no staking token balance', async () => {
       await reverted(
         indexer.setIntent(
@@ -172,7 +172,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
     })
   })
 
-  describe('Intent integrity', () => {
+  describe('Intent integrity', async () => {
     it('Bob ensures only one intent is on the Indexer', async () => {
       equal(await indexer.lengthOf(tokenWETH.address, tokenDAI.address), 1)
     })
@@ -231,7 +231,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
       )
     })
   })
-  describe('Blacklisting', () => {
+  describe('Blacklisting', async () => {
     it('Alice attempts to blacklist a market and fails because she is not owner', async () => {
       await reverted(
         indexer.addToBlacklist(tokenDAI.address, {

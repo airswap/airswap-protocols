@@ -63,7 +63,7 @@ contract('Market', async accounts => {
     await revertToSnapShot(snapshotId)
   })
 
-  describe('Deploying...', () => {
+  describe('Deploying...', async () => {
     it('Deployed trading token "AST"', async () => {
       tokenAST = await FungibleToken.new()
     })
@@ -77,7 +77,7 @@ contract('Market', async accounts => {
     })
   })
 
-  describe('Set', () => {
+  describe('Set', async () => {
     it('Sets an intent for Alice', async () => {
       await market.setIntent(
         aliceAddress,
@@ -143,7 +143,7 @@ contract('Market', async accounts => {
     })
   })
 
-  describe('Get', () => {
+  describe('Get', async () => {
     it('Gets the intent for Alice', async () => {
       equal((await market.getIntent(aliceAddress)).locator, ALICE_LOC)
     })
@@ -175,7 +175,7 @@ contract('Market', async accounts => {
     })
   })
 
-  describe('Fetch', () => {
+  describe('Fetch', async () => {
     it('Fetches intents', async () => {
       const intents = await market.fetchIntents(7)
       assert(intents[0] == ALICE_LOC, 'Alice should be first')
@@ -211,7 +211,7 @@ contract('Market', async accounts => {
     })
   })
 
-  describe('Garbage Collection', () => {
+  describe('Garbage Collection', async () => {
     it("Doesn't remove any intents that haven't expired", async () => {
       let intents = await market.fetchIntents(7)
       // Returns all 6 intents
@@ -283,7 +283,7 @@ contract('Market', async accounts => {
     })
   })
 
-  describe('Unset', () => {
+  describe('Unset', async () => {
     it('Unsets intent for David', async () => {
       market.unsetIntent(davidAddress)
       equal((await market.getIntent(davidAddress)).locator, NULL_LOCATOR)
