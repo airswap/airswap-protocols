@@ -110,8 +110,8 @@ contract('Consumer', async accounts => {
     })
 
     it('Checks balances', async () => {
-      ok(balances(aliceAddress, [[tokenAST, 1000]]))
-      ok(balances(indexerAddress, [[tokenAST, 0]]))
+      ok(await balances(aliceAddress, [[tokenAST, 1000]]))
+      ok(await balances(indexerAddress, [[tokenAST, 0]]))
     })
 
     it('Alice attempts to stake and set an intent succeeds', async () => {

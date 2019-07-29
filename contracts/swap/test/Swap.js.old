@@ -93,7 +93,7 @@ contract('Swap', async accounts => {
     it('Mints 1000 AST for Alice', async () => {
       emitted(await tokenAST.mint(aliceAddress, 1000), 'Transfer')
       ok(
-        balances(aliceAddress, [[tokenAST, 1000], [tokenDAI, 0]]),
+        await balances(aliceAddress, [[tokenAST, 1000], [tokenDAI, 0]]),
         'Alice balances are incorrect'
       )
     })
@@ -101,7 +101,7 @@ contract('Swap', async accounts => {
     it('Mints 1000 DAI for Bob', async () => {
       emitted(await tokenDAI.mint(bobAddress, 1000), 'Transfer')
       ok(
-        balances(bobAddress, [[tokenAST, 0], [tokenDAI, 1000]]),
+        await balances(bobAddress, [[tokenAST, 0], [tokenDAI, 1000]]),
         'Bob balances are incorrect'
       )
     })
@@ -124,9 +124,17 @@ contract('Swap', async accounts => {
 
     it('Checks approvals (Alice 250 AST and 0 DAI, Bob 0 AST and 500 DAI)', async () => {
       ok(
-        allowances(aliceAddress, swapAddress, [[tokenAST, 200], [tokenDAI, 0]])
+        await allowances(aliceAddress, swapAddress, [
+          [tokenAST, 200],
+          [tokenDAI, 0],
+        ])
       )
-      ok(allowances(bobAddress, swapAddress, [[tokenAST, 0], [tokenDAI, 500]]))
+      ok(
+        await allowances(bobAddress, swapAddress, [
+          [tokenAST, 0],
+          [tokenDAI, 500],
+        ])
+      )
     })
   })
 
@@ -157,11 +165,11 @@ contract('Swap', async accounts => {
 
     it('Checks balances...', async () => {
       ok(
-        balances(aliceAddress, [[tokenAST, 800], [tokenDAI, 50]]),
+        await balances(aliceAddress, [[tokenAST, 800], [tokenDAI, 50]]),
         'Alice balances are incorrect'
       )
       ok(
-        balances(bobAddress, [[tokenAST, 200], [tokenDAI, 950]]),
+        await balances(bobAddress, [[tokenAST, 200], [tokenDAI, 950]]),
         'Bob balances are incorrect'
       )
     })
@@ -241,11 +249,11 @@ contract('Swap', async accounts => {
 
     it('Checks existing balances (Alice 800 AST and 50 DAI, Bob 200 AST and 950 DAI)', async () => {
       ok(
-        balances(aliceAddress, [[tokenAST, 800], [tokenDAI, 50]]),
+        await balances(aliceAddress, [[tokenAST, 800], [tokenDAI, 50]]),
         'Alice balances are incorrect'
       )
       ok(
-        balances(bobAddress, [[tokenAST, 200], [tokenDAI, 950]]),
+        await balances(bobAddress, [[tokenAST, 200], [tokenDAI, 950]]),
         'Bob balances are incorrect'
       )
     })
@@ -559,11 +567,11 @@ contract('Swap', async accounts => {
 
     it('Checks existing balances (Alice 800 AST and 50 DAI, Bob 200 AST and 950 DAI)', async () => {
       ok(
-        balances(aliceAddress, [[tokenAST, 700], [tokenDAI, 60]]),
+        await balances(aliceAddress, [[tokenAST, 700], [tokenDAI, 60]]),
         'Alice balances are incorrect'
       )
       ok(
-        balances(bobAddress, [[tokenAST, 250], [tokenDAI, 940]]),
+        await balances(bobAddress, [[tokenAST, 250], [tokenDAI, 940]]),
         'Bob balances are incorrect'
       )
     })
@@ -574,7 +582,7 @@ contract('Swap', async accounts => {
 
     it('Checks allowance (Alice 200 AST)', async () => {
       ok(
-        allowances(aliceAddress, swapAddress, [[tokenAST, 200]]),
+        await allowances(aliceAddress, swapAddress, [[tokenAST, 200]]),
         'Alice has not approved 200 AST'
       )
     })
@@ -934,14 +942,17 @@ contract('Swap', async accounts => {
     it('Mints a concert ticket (#12345) for Alice', async () => {
       emitted(await tokenTicket.mint(aliceAddress, 12345), 'NFTTransfer')
       ok(
-        balances(aliceAddress, [[tokenTicket, 1]]),
+        await balances(aliceAddress, [[tokenTicket, 1]]),
         'Alice balances are incorrect'
       )
     })
 
     it('Mints a kitty collectible (#54321) for Bob', async () => {
       emitted(await tokenKitty.mint(bobAddress, 54321), 'NFTTransfer')
-      ok(balances(bobAddress, [[tokenKitty, 1]]), 'Bob balances are incorrect')
+      ok(
+        await balances(bobAddress, [[tokenKitty, 1]]),
+        'Bob balances are incorrect'
+      )
     })
   })
 

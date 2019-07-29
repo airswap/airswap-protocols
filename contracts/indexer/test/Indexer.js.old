@@ -146,8 +146,8 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
     })
 
     it('Checks balances', async () => {
-      ok(balances(aliceAddress, [[tokenAST, 1000]]))
-      ok(balances(indexerAddress, [[tokenAST, 0]]))
+      ok(await balances(aliceAddress, [[tokenAST, 1000]]))
+      ok(await balances(indexerAddress, [[tokenAST, 0]]))
     })
 
     it('Alice attempts to stake and set an intent succeeds', async () => {
@@ -167,8 +167,8 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
     })
 
     it('Checks balances', async () => {
-      ok(balances(aliceAddress, [[tokenAST, 500]]))
-      ok(balances(indexerAddress, [[tokenAST, 500]]))
+      ok(await balances(aliceAddress, [[tokenAST, 500]]))
+      ok(await balances(indexerAddress, [[tokenAST, 500]]))
     })
   })
 
@@ -199,8 +199,8 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
     })
 
     it('Checks balances', async () => {
-      ok(balances(aliceAddress, [[tokenAST, 1000]]))
-      ok(balances(indexerAddress, [[tokenAST, 0]]))
+      ok(await balances(aliceAddress, [[tokenAST, 1000]]))
+      ok(await balances(indexerAddress, [[tokenAST, 0]]))
     })
 
     it('Bob ensures there are no more intents the Indexer', async () => {

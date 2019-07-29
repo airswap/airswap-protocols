@@ -5,7 +5,8 @@ const Wrapper = artifacts.require('Wrapper')
 const WETH9 = artifacts.require('WETH9')
 const FungibleToken = artifacts.require('FungibleToken')
 
-const { emitted, getResult, passes } = require('@airswap/test-utils').assert
+const { emitted, getResult, passes, ok } = require('@airswap/test-utils').assert
+const { balances } = require('@airswap/test-utils').balances
 const {
   getTimestampPlusDays,
   takeSnapshot,
@@ -32,6 +33,33 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
   before('Setup', async () => {
     let snapShot = await takeSnapshot()
     snapshotId = snapShot['result']
+    // deploy both libs
+    const transfersLib = await Transfers.new()
+    const typesLib = await Types.new()
+
+    // link both libs to swap
+    await Swap.link(Transfers, transfersLib.address)
+    await Swap.link(Types, typesLib.address)
+
+    // now deploy swap
+    swapContract = await Swap.new()
+
+    swapAddress = swapContract.address
+    tokenWETH = await WETH9.new()
+    wrapperContract = await Wrapper.new(swapAddress, tokenWETH.address)
+    wrapperAddress = wrapperContract.address
+    tokenDAI = await FungibleToken.new()
+
+    await orders.setVerifyingContract(swapAddress)
+
+    swap =
+      swapContract.methods[
+        'swap((uint256,uint256,(address,address,uint256),(address,address,uint256),(address,address,uint256)),(address,uint8,bytes32,bytes32,bytes1))'
+      ]
+    swapSimple =
+      wrapperContract.methods[
+        'swapSimple(uint256,uint256,address,uint256,address,address,uint256,address,uint8,bytes32,bytes32)'
+      ]
   })
 
   after(async () => {
@@ -39,37 +67,9 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
   })
 
   describe('Setup', () => {
-    before('Deploys all the things', async () => {
-      // deploy both libs
-      const transfersLib = await Transfers.new()
-      const typesLib = await Types.new()
-
-      // link both libs to swap
-      await Swap.link(Transfers, transfersLib.address)
-      await Swap.link(Types, typesLib.address)
-
-      // now deploy swap
-      swapContract = await Swap.new()
-
-      swapAddress = swapContract.address
-      tokenWETH = await WETH9.new()
-      wrapperContract = await Wrapper.new(swapAddress, tokenWETH.address)
-      wrapperAddress = wrapperContract.address
-      tokenDAI = await FungibleToken.new()
-
-      orders.setVerifyingContract(swapAddress)
-
-      swap =
-        swapContract.methods[
-          'swap((uint256,uint256,(address,address,uint256),(address,address,uint256),(address,address,uint256)),(address,uint8,bytes32,bytes32,bytes1))'
-        ]
-      swapSimple =
-        wrapperContract.methods[
-          'swapSimple(uint256,uint256,address,uint256,address,address,uint256,address,uint8,bytes32,bytes32)'
-        ]
-    })
     it('Mints 1000 DAI for Alice', async () => {
       let tx = await tokenDAI.mint(aliceAddress, 1000)
+      ok(await balances(aliceAddress, [[tokenDAI, 1000]]))
       emitted(tx, 'Transfer')
       passes(tx)
     })
@@ -77,9 +77,10 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
 
   describe('Approving...', () => {
     it('Alice approves Swap to spend 9999 DAI', async () => {
-      let tx = await tokenDAI.approve(swapAddress, 9999, { from: aliceAddress })
-      emitted(tx, 'Approval')
-      passes(tx)
+      let result = await tokenDAI.approve(swapAddress, 1000, {
+        from: aliceAddress,
+      })
+      emitted(result, 'Approval')
     })
   })
 
