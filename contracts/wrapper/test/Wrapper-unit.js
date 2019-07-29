@@ -211,7 +211,6 @@ contract('Wrapper Unit Tests', async accounts => {
     })
 
     it('Test when taker token == weth contract address, maker token address == weth contract address, and transaction is passes', async () => {
-
       //mock the weth.balance method
       await mockWeth.givenMethodReturnUint(weth_balance, 0)
 
@@ -244,7 +243,6 @@ contract('Wrapper Unit Tests', async accounts => {
     })
 
     it('Test when taker token == weth contract address, maker token address != weth contract address, and transaction is passes', async () => {
-
       //mock the weth.balance method
       await mockWeth.givenMethodReturnUint(weth_balance, 0)
 
