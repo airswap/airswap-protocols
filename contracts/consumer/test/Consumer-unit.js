@@ -6,9 +6,8 @@ const abi = require('ethereumjs-abi')
 const { intents } = require('@airswap/indexer-utils')
 const { equal, passes } = require('@airswap/test-utils').assert
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
+const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 const BigNumber = require('bignumber.js')
-
-const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000'
 
 contract('Consumer Unit Tests', async () => {
   const highVal = 400
