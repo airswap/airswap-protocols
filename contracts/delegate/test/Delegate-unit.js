@@ -11,8 +11,7 @@ const {
   reverted,
 } = require('@airswap/test-utils').assert
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
-
-const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000'
+const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 
 contract('Delegate Unit Tests', async accounts => {
   const owner = accounts[0]
