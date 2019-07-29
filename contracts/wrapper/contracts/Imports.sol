@@ -4,5 +4,9 @@ import "@airswap/tokens/contracts/FungibleToken.sol";
 import "@airswap/swap/contracts/Swap.sol";
 import "@airswap/common/libraries/Transfers.sol";
 import "@airswap/common/libraries/Types.sol";
+<<<<<<< HEAD
 import "@airswap/tokens/contracts/WETH9.sol";
 import "@gnosis.pm/mock-contract/contracts/MockContract.sol";
+=======
+import "@airswap/tokens/contracts/WETH9.sol";
+>>>>>>> snapshots and .new for all tests

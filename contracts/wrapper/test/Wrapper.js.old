@@ -67,6 +67,46 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
   })
 
   describe('Setup', async () => {
+    before('Deploys all the things', async () => {
+      // deploy both libs
+      const transfersLib = await Transfers.new()
+      const typesLib = await Types.new()
+
+      // link both libs to swap
+      await Swap.link(Transfers, transfersLib.address)
+      await Swap.link(Types, typesLib.address)
+
+      // now deploy swap
+      swapContract = await Swap.new()
+
+      console.log("swap new")
+      swapAddress = swapContract.address
+      console.log("swap address")
+
+      tokenWETH = await WETH9.new()
+      console.log("weth new")
+
+      wrapperContract = await Wrapper.new(swapAddress, tokenWETH.address)
+      console.log("wrapper new")
+
+      wrapperAddress = wrapperContract.address
+      console.log("wrapper address")
+
+      tokenDAI = await FungibleToken.new()
+      console.log("dai new")
+
+
+      orders.setVerifyingContract(swapAddress)
+
+      swap =
+        swapContract.methods[
+          'swap((uint256,uint256,(address,address,uint256),(address,address,uint256),(address,address,uint256)),(address,uint8,bytes32,bytes32,bytes1))'
+        ]
+      swapSimple =
+        wrapperContract.methods[
+          'swapSimple(uint256,uint256,address,uint256,address,address,uint256,address,uint8,bytes32,bytes32)'
+        ]
+    })
     it('Mints 1000 DAI for Alice', async () => {
       let tx = await tokenDAI.mint(aliceAddress, 1000)
       ok(await balances(aliceAddress, [[tokenDAI, 1000]]))
