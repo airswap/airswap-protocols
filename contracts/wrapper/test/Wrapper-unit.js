@@ -9,6 +9,9 @@ const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000'
 
 contract('Wrapper Unit Tests', async accounts => {
+  const mockToken = accounts[9]
+  const r = web3.utils.asciiToHex('r')
+  const s = web3.utils.asciiToHex('s')
   let mockSwap
   let mockWeth
   let wrapper
@@ -60,9 +63,9 @@ contract('Wrapper Unit Tests', async accounts => {
         EMPTY_ADDRESS,
         0,
         EMPTY_ADDRESS,
-        1,
-        web3.utils.asciiToHex('r'),
-        web3.utils.asciiToHex('s')
+        27,
+        r,
+        s
       )
       .encodeABI()
 
@@ -89,7 +92,7 @@ contract('Wrapper Unit Tests', async accounts => {
 
   describe('Test swapSimple', async () => {
     it('Test when taker token != weth contract address, ensure no unexpected ether sent', async () => {
-      let nonTakerToken = accounts[9]
+      let nonTakerToken = mockToken
       await reverted(
         wrapper.swapSimple(
           0, //nonce
@@ -100,9 +103,9 @@ contract('Wrapper Unit Tests', async accounts => {
           EMPTY_ADDRESS, //taker wallet
           0, //taker amount
           nonTakerToken, //taker token
-          8, //v
-          web3.utils.asciiToHex('r'), //r
-          web3.utils.asciiToHex('s'), //s
+          27, //v
+          r,
+          s,
           { value: 2 }
         ),
         'VALUE_MUST_BE_ZERO'
@@ -110,7 +113,7 @@ contract('Wrapper Unit Tests', async accounts => {
     })
 
     it('Test when taker token == weth contract address, ensure the taker wallet is unset', async () => {
-      let mockTakerToken = accounts[9]
+      let mockTakerToken = mockToken
       await reverted(
         wrapper.swapSimple(
           0, //nonce
@@ -121,9 +124,9 @@ contract('Wrapper Unit Tests', async accounts => {
           mockTakerToken, //taker wallet
           0, //taker amount
           mockWeth.address, //taker token
-          8, //v
-          web3.utils.asciiToHex('r'), //r
-          web3.utils.asciiToHex('s'), //s
+          27, //v
+          r,
+          s,
           { value: 2 }
         ),
         'TAKER_ADDRESS_MUST_BE_UNSET'
@@ -141,9 +144,9 @@ contract('Wrapper Unit Tests', async accounts => {
           EMPTY_ADDRESS, //taker wallet
           1, //taker amount
           mockWeth.address, //taker token
-          8, //v
-          web3.utils.asciiToHex('r'), //r
-          web3.utils.asciiToHex('s'), //s
+          27, //v
+          r,
+          s,
           { value: 2 }
         ),
         'VALUE_MUST_BE_SENT'
@@ -151,7 +154,7 @@ contract('Wrapper Unit Tests', async accounts => {
     })
 
     it('Test when taker token == weth contract address, maker token address != weth contract address, and weth contact has a left over balance', async () => {
-      let mockMakerToken = accounts[9]
+      let mockMakerToken = mockToken
       let takerAmount = 2
 
       //mock the weth.balance method
@@ -167,9 +170,9 @@ contract('Wrapper Unit Tests', async accounts => {
           EMPTY_ADDRESS, //taker wallet
           takerAmount, //taker amount
           mockWeth.address, //taker token
-          8, //v
-          web3.utils.asciiToHex('r'), //r
-          web3.utils.asciiToHex('s'), //s
+          27, //v
+          r,
+          s,
           { value: takerAmount }
         ),
         'WETH_BALANCE_REMAINING'
@@ -177,7 +180,7 @@ contract('Wrapper Unit Tests', async accounts => {
     })
 
     it.skip('Test when taker token == weth contract address, maker token address != weth contract address, and wrapper address has a left over balance', async () => {
-      let mockMakerToken = accounts[9]
+      let mockMakerToken = mockToken
       let takerAmount = 2
 
       //mock the weth.balance method
@@ -193,9 +196,9 @@ contract('Wrapper Unit Tests', async accounts => {
           EMPTY_ADDRESS, //taker wallet
           takerAmount, //taker amount
           mockWeth.address, //taker token
-          8, //v
-          web3.utils.asciiToHex('r'), //r
-          web3.utils.asciiToHex('s'), //s
+          27, //v
+          r, 
+          s,
           { value: takerAmount }
         ),
         'ETH_BALANCE_REMAINING'
@@ -225,9 +228,9 @@ contract('Wrapper Unit Tests', async accounts => {
           EMPTY_ADDRESS, //taker wallet
           takerAmount, //taker amount
           mockWeth.address, //taker token
-          8, //v
-          web3.utils.asciiToHex('r'), //r
-          web3.utils.asciiToHex('s'), //s
+          27, //v
+          r, 
+          s,
           { value: takerAmount }
         )
       )
@@ -249,7 +252,7 @@ contract('Wrapper Unit Tests', async accounts => {
       //mock the weth.balance method
       await mockWeth.givenMethodReturnUint(weth_balance, 0)
 
-      let notWethContract = accounts[9]
+      let notWethContract = mockToken
       await passes(
         wrapper.swapSimple(
           0, //nonce
@@ -260,9 +263,9 @@ contract('Wrapper Unit Tests', async accounts => {
           EMPTY_ADDRESS, //taker wallet
           takerAmount, //taker amount
           mockWeth.address, //taker token
-          8, //v
-          web3.utils.asciiToHex('r'), //r
-          web3.utils.asciiToHex('s'), //s
+          27, //v
+          r,
+          s,
           { value: takerAmount }
         )
       )
