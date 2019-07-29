@@ -8,7 +8,11 @@ const FungibleToken = artifacts.require('FungibleToken')
 
 const { emitted, equal, ok } = require('@airswap/test-utils').assert
 const { balances } = require('@airswap/test-utils').balances
-const { getTimestampPlusDays } = require('@airswap/test-utils').time
+const {
+  getTimestampPlusDays,
+  revertToSnapShot,
+  takeSnapshot,
+} = require('@airswap/test-utils').time
 const { intents } = require('@airswap/indexer-utils')
 
 let indexer
@@ -20,12 +24,13 @@ let consumerAddress
 let swapAddress
 let aliceDelegate
 
-let provideOrder
 let location
 
 let tokenAST
 let tokenDAI
 let tokenWETH
+
+let snapshotId
 
 // TODO: Use token-unit for realistic token amounts.
 
@@ -34,6 +39,15 @@ contract('Consumer', async accounts => {
   let aliceAddress = accounts[1]
   let bobAddress = accounts[2]
   let carolAddress = accounts[3]
+
+  before('Setup', async () => {
+    let snapShot = await takeSnapshot()
+    snapshotId = snapShot['result']
+  })
+
+  after(async () => {
+    await revertToSnapShot(snapshotId)
+  })
 
   describe('Setup', async () => {
     before('Deploys all the things', async () => {
@@ -57,10 +71,6 @@ contract('Consumer', async accounts => {
       })
       consumerAddress = consumer.address
       aliceDelegate = await Delegate.new(swapAddress, { from: aliceAddress })
-      provideOrder =
-        aliceDelegate.methods[
-          'provideOrder(uint256,address,uint256,address,address,uint256,address,uint256,bytes32,bytes32,uint8)'
-        ]
 
       location = intents.serialize(
         intents.Locators.CONTRACT,
