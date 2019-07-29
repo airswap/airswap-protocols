@@ -1,4 +1,6 @@
 const Swap = artifacts.require('Swap')
+const Transfers = artifacts.require('Transfers')
+const Types = artifacts.require('Types')
 const Consumer = artifacts.require('Consumer')
 const Indexer = artifacts.require('Indexer')
 const Delegate = artifacts.require('Delegate')
@@ -25,14 +27,22 @@ contract(
       let location
 
       before('Deploys all the things', async () => {
-        tokenAST = await FungibleToken.deployed()
+        tokenAST = await FungibleToken.new()
         tokenDAI = await FungibleToken.new()
         tokenWETH = await FungibleToken.new()
-        swapContract = await Swap.deployed()
+
+        // deploy both libs
+        const transfersLib = await Transfers.new()
+        const typesLib = await Types.new()
+
+        // link both libs to swap
+        await Swap.link(Transfers, transfersLib.address)
+        await Swap.link(Types, typesLib.address)
+        swapContract = await Swap.new()
         swapAddress = swapContract.address
-        indexer = await Indexer.deployed({ from: ownerAddress })
+        indexer = await Indexer.new({ from: ownerAddress })
         indexerAddress = indexer.address
-        consumer = await Consumer.deployed({ from: ownerAddress })
+        consumer = await Consumer.new({ from: ownerAddress })
         consumerAddress = consumer.address
         aliceDelegate = await Delegate.new(swapAddress, { from: aliceAddress })
         provideOrder =

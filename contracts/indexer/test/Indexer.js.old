@@ -3,7 +3,11 @@ const FungibleToken = artifacts.require('FungibleToken')
 
 const { emitted, reverted, equal, ok } = require('@airswap/test-utils').assert
 const { balances } = require('@airswap/test-utils').balances
-const { getTimestampPlusDays } = require('@airswap/test-utils').time
+const {
+  getTimestampPlusDays,
+  takeSnapshot,
+  revertToSnapShot,
+} = require('@airswap/test-utils').time
 const { intents } = require('@airswap/indexer-utils')
 
 const ALICE_LOC = intents.serialize(
@@ -11,7 +15,9 @@ const ALICE_LOC = intents.serialize(
   'https://rpc.maker-cloud.io:1123'
 )
 
-contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
+let snapshotId
+
+contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
   let indexer
   let indexerAddress
 
@@ -19,9 +25,18 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
   let tokenDAI
   let tokenWETH
 
+  before('Setup', async () => {
+    let snapShot = await takeSnapshot()
+    snapshotId = snapShot['result']
+  })
+
+  after(async () => {
+    await revertToSnapShot(snapshotId)
+  })
+
   describe('Deploying...', () => {
     it('Deployed staking token "AST"', async () => {
-      tokenAST = await FungibleToken.deployed()
+      tokenAST = await FungibleToken.new()
     })
 
     it('Deployed trading token "DAI"', async () => {
@@ -33,7 +48,7 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
     })
 
     it('Deployed Indexer contract', async () => {
-      indexer = await Indexer.deployed({ from: ownerAddress })
+      indexer = await Indexer.new({ from: ownerAddress })
       indexerAddress = indexer.address
       emitted(await indexer.setStakeMinimum(250), 'SetStakeMinimum')
     })

@@ -1,5 +1,7 @@
 const Delegate = artifacts.require('Delegate')
 const Swap = artifacts.require('Swap')
+const Transfers = artifacts.require('Transfers')
+const Types = artifacts.require('Types')
 const FungibleToken = artifacts.require('FungibleToken')
 const MockContract = artifacts.require('MockContract')
 const abi = require('ethereumjs-abi')
@@ -35,6 +37,13 @@ contract('Delegate Unit Tests', async accounts => {
   })
 
   async function setupMockSwap() {
+    // deploy both libs
+    const transfersLib = await Transfers.new()
+    const typesLib = await Types.new()
+
+    // link both libs to swap
+    await Swap.link(Transfers, transfersLib.address)
+    await Swap.link(Types, typesLib.address)
     let swapTemplate = await Swap.new()
     swap_swapSimple = swapTemplate.contract.methods
       .swapSimple(

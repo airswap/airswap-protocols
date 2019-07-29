@@ -1,6 +1,9 @@
 const Swap = artifacts.require('Swap')
+const Transfers = artifacts.require('Transfers')
+const Types = artifacts.require('Types')
 const FungibleToken = artifacts.require('FungibleToken')
 const NonFungibleToken = artifacts.require('NonFungibleToken')
+const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 
 const {
   emitted,
@@ -13,7 +16,14 @@ const { allowances, balances } = require('@airswap/test-utils').balances
 const { getLatestTimestamp } = require('@airswap/test-utils').time
 const { orders, signatures } = require('@airswap/order-utils')
 
-contract('Swap', ([aliceAddress, bobAddress, carolAddress, davidAddress]) => {
+let snapshotId
+
+contract('Swap', async accounts => {
+  let aliceAddress = accounts[0]
+  let bobAddress = accounts[1]
+  let carolAddress = accounts[2]
+  let davidAddress = accounts[3]
+
   let swapContract
   let swapAddress
   let tokenAST
@@ -28,6 +38,11 @@ contract('Swap', ([aliceAddress, bobAddress, carolAddress, davidAddress]) => {
 
   let defaultAuthExpiry
 
+  before('Setup', async () => {
+    let snapShot = await takeSnapshot()
+    snapshotId = snapShot['result']
+  })
+
   orders.setKnownAccounts([
     aliceAddress,
     bobAddress,
@@ -35,9 +50,20 @@ contract('Swap', ([aliceAddress, bobAddress, carolAddress, davidAddress]) => {
     davidAddress,
   ])
 
+  after(async () => {
+    await revertToSnapShot(snapshotId)
+  })
+
   describe('Deploying...', () => {
     it('Deployed Swap contract', async () => {
-      swapContract = await Swap.deployed()
+      // deploy both libs
+      const transfersLib = await Transfers.new()
+      const typesLib = await Types.new()
+
+      // link both libs to swap
+      await Swap.link(Transfers, transfersLib.address)
+      await Swap.link(Types, typesLib.address)
+      swapContract = await Swap.new()
       swapAddress = swapContract.address
 
       swap =
