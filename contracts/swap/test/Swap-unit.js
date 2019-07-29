@@ -10,6 +10,7 @@ const {
 } = require('@airswap/test-utils').assert
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 const { orders, signatures } = require('@airswap/order-utils')
+const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 
 contract('Swap Unit Tests', async accounts => {
   const mockMaker = accounts[9]
