@@ -4,6 +4,7 @@ const truffleAssert = require('truffle-assertions')
 module.exports = {
   notEmitted: truffleAssert.eventNotEmitted,
   emitted: truffleAssert.eventEmitted,
+  notEmitted: truffleAssert.eventNotEmitted,
   reverted: truffleAssert.reverts,
   getResult: truffleAssert.createTransactionResult,
   passes: truffleAssert.passes,
