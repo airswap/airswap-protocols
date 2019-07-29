@@ -1,13 +1,14 @@
 const Swap = artifacts.require('Swap')
 const MockContract = artifacts.require('MockContract')
 
-const { passed, emitted, reverted } = require('@airswap/test-utils').assert
+const { passed, emitted, reverted, equal } = require('@airswap/test-utils').assert
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 const { orders, signatures } = require('@airswap/order-utils')
 
-contract('Swap Unit Tests', async () => {
+contract('Swap Unit Tests', async (accounts) => {
   let snapshotId
   let swap
+  let mockMaker = accounts[9]
 
   beforeEach(async () => {
     let snapShot = await takeSnapshot()
@@ -19,7 +20,7 @@ contract('Swap Unit Tests', async () => {
   })
 
   before('deploy Swap', async () => {
-    swap = Swap.new()
+    swap = await Swap.new()
   })
 
   describe('Test initial values', async () => {})
@@ -102,8 +103,14 @@ contract('Swap Unit Tests', async () => {
     it('test an array of nonces, ensure the cancellation of only those orders', async () => {})
   })
 
-  describe('Test invalidate', async () => {
-    it('test that given a minimum nonce that all orders below a nonce value are invalidated', async () => {})
+  describe.only('Test invalidate', async () => {
+    it('test that given a minimum nonce that all orders below a nonce value are invalidated', async () => {
+      let minNonceForMaker = await swap.makerMinimumNonce.call(mockMaker)
+      equal(minNonceForMaker, 0, "mock maker should have min nonce of 0") 
+      await swap.invalidate(5, { from: mockMaker })
+      let newNonceForMaker = await swap.makerMinimumNonce.call(mockMaker)
+      equal(newNonceForMaker, 5, "mock macker should have a min nonce of 5")
+    })
   })
 
   describe('Test authorize', async () => {
