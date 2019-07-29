@@ -15,6 +15,7 @@ const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 contract('Swap Unit Tests', async accounts => {
   const mockMaker = accounts[9]
   const sender = accounts[0]
+  const v = 27
   const r = web3.utils.asciiToHex('r')
   const s = web3.utils.asciiToHex('s')
   const ver = web3.utils.asciiToHex('F0')
@@ -37,9 +38,9 @@ contract('Swap Unit Tests', async accounts => {
 
   describe('Test swap', async () => {
     it('test when order is expired', async () => {
-      let party = [accounts[8], accounts[7], 200]
+      let party = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
       let order = [0, 0, party, party, party]
-      let signature = [accounts[8], 27, r, s, ver]
+      let signature = [EMPTY_ADDRESS, v, r, s, ver]
 
       await reverted(swap.swap(order, signature), 'ORDER_EXPIRED')
     })
