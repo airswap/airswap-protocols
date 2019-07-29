@@ -36,7 +36,7 @@ contract('Swap Unit Tests', async accounts => {
 
   describe('Test swap', async () => {
     it('test when order is expired', async () => {
-      let party = [accounts[8], accounts[7], 121]
+      let party = [accounts[8], accounts[7], 200]
       let order = [0, 0, party, party, party]
       let signature = [accounts[8], 27, r, s, ver]
 
