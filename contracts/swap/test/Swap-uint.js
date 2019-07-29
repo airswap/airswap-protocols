@@ -103,14 +103,16 @@ contract('Swap Unit Tests', async (accounts) => {
     it('test an array of nonces, ensure the cancellation of only those orders', async () => {})
   })
 
-  describe.only('Test invalidate', async () => {
-    it('test that given a minimum nonce that all orders below a nonce value are invalidated', async () => {
+  describe('Test invalidate', async () => {
+    it('test that given a minimum nonce for a maker is set', async () => {
       let minNonceForMaker = await swap.makerMinimumNonce.call(mockMaker)
       equal(minNonceForMaker, 0, "mock maker should have min nonce of 0") 
       await swap.invalidate(5, { from: mockMaker })
       let newNonceForMaker = await swap.makerMinimumNonce.call(mockMaker)
       equal(newNonceForMaker, 5, "mock macker should have a min nonce of 5")
     })
+
+    it('test that given a minimum nonce that all orders below a nonce value are invalidated', async () => {})
   })
 
   describe('Test authorize', async () => {
