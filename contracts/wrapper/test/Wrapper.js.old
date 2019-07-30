@@ -25,7 +25,7 @@ contract('Wrapper', ([aliceAddress, bobAddress, carolAddress]) => {
       swapAddress = swapContract.address
       wrapperContract = await Wrapper.deployed()
       wrapperAddress = wrapperContract.address
-      tokenWETH = await WETH9.new()
+      tokenWETH = await WETH9.deployed()
       tokenDAI = await FungibleToken.new()
 
       orders.setVerifyingContract(swapAddress)
