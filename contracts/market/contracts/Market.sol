@@ -205,31 +205,31 @@ contract Market is Ownable {
     * @param _startingPoint the staker to start at
     * @param _count the number of stakers to loop through
     */
-    function cleanExpiredIntents(address _startingPoint, uint256 _count) external {
-      uint256 limit = _count;
-      address staker = _startingPoint;
-      address previousStaker;
+  function cleanExpiredIntents(address _startingPoint, uint256 _count) external {
+    uint256 limit = _count;
+    address staker = _startingPoint;
+    address previousStaker;
 
-      if (limit > length) {
-        limit = length;
-      }
-
-      uint256 i = 0;
-      while (i < limit) {
-        if (staker != HEAD) {
-          if (isIntentExpired(staker)) {
-            // we must track the neighbouring intent for when `staker` is removed
-            previousStaker = list[staker][PREV].staker;
-            removeIntent(staker);
-            staker = previousStaker;
-          }
-          // only increase the count if it wasnt HEAD
-          i++;
-        }
-        // now look at the next element
-        staker = list[staker][NEXT].staker;
-      }
+    if (limit > length) {
+      limit = length;
     }
+
+    uint256 i = 0;
+    while (i < limit) {
+      if (staker != HEAD) {
+        if (isIntentExpired(staker)) {
+          // we must track the neighbouring intent for when `staker` is removed
+          previousStaker = list[staker][PREV].staker;
+          removeIntent(staker);
+          staker = previousStaker;
+        }
+        // only increase the count if it wasnt HEAD
+        i++;
+      }
+      // now look at the next element
+      staker = list[staker][NEXT].staker;
+    }
+  }
 
   /**
     * @notice Concludes whether a staker's intent has expired
@@ -251,7 +251,7 @@ contract Market is Ownable {
 
     if (list[_staker][PREV].staker != address(0) &&
       list[list[_staker][PREV].staker][NEXT].staker == _staker) {
-        return true;
+      return true;
     }
     return false;
   }

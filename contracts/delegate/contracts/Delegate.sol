@@ -63,7 +63,7 @@ contract Delegate is IDelegate, Ownable {
     * @param delegateToken address The token address that the delegate would send in a trade
     * @param consumerToken address The token address that the consumer would send in a trade
     * @param maxDelegateAmount uint256 The maximum amount of token the delegate would send
-    * @param priceCoef uint256 The coefficient of the price to indicate the whole number that will be multiplied by 10^(-priceExp)
+    * @param priceCoef uint256 The whole number that will be multiplied by 10^(-priceExp) - the price coefficient
     * @param priceExp uint256 The exponent of the price to indicate location of the decimal priceCoef * 10^(-priceExp)
     */
   function setRule(
