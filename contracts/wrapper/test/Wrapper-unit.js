@@ -178,7 +178,7 @@ contract('Wrapper Unit Tests', async accounts => {
       )
     })
 
-    it.skip('Test when taker token == weth contract address, maker token address != weth contract address, and wrapper address has a left over balance', async () => {
+    it.skip('Test when taker token == weth, maker token != weth, and wrapper has a left over balance', async () => {
       let mockMakerToken = mockToken
 
       //mock the weth.balance method
@@ -210,7 +210,7 @@ contract('Wrapper Unit Tests', async accounts => {
       //a balance of 0, but thats irrespective of what already exists within the contract.
     })
 
-    it('Test when taker token == weth contract address, maker token address == weth contract address, and transaction is passes', async () => {
+    it('Test when taker token == weth, maker token == weth, and the transaction passes', async () => {
       //mock the weth.balance method
       await mockWeth.givenMethodReturnUint(weth_balance, 0)
 
@@ -242,7 +242,7 @@ contract('Wrapper Unit Tests', async accounts => {
       )
     })
 
-    it('Test when taker token == weth contract address, maker token address != weth contract address, and transaction is passes', async () => {
+    it('Test when taker token == weth, maker token != weth, and the transaction passes', async () => {
       //mock the weth.balance method
       await mockWeth.givenMethodReturnUint(weth_balance, 0)
 
