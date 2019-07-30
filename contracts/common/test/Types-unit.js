@@ -1,8 +1,6 @@
 const Types = artifacts.require('../libraries/Types')
 const MockTypes = artifacts.require('MockTypes')
-const {
-  equal
-} = require('@airswap/test-utils').assert
+const { equal } = require('@airswap/test-utils').assert
 const {
   defaults,
   EMPTY_ADDRESS,
@@ -48,11 +46,9 @@ contract('Types Unit Tests', async accounts => {
     it('Test hashOrder', async () => {
       const { order, signature } = await orders.getOrder({})
       let party = [EMPTY_ADDRESS, EMPTY_ADDRESS, 0]
-      console.log(order)
       orderCall = [order.expiry, order.nonce, party, party, party]
-      console.log(orderCall)
       let hashedDomain = '0x' + hashDomain(mockTypes.address).toString('hex')
-      let hashedOrder = await mockTypes.hashOrder.call(orderCall, hashedDomain)
+      let hashedOrder = await mockTypes.hashOrder(order, hashedDomain)
       equal(
         hashedOrder,
         '0x' + getOrderHash(order, mockTypes.address).toString('hex')

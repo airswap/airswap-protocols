@@ -8,7 +8,8 @@
   },
   "scripts": {
     "clean": "rm -rf ./build",
-    "compile": "truffle compile"
+    "compile": "truffle compile",
+    "test": "truffle test"
   },
   "dependencies": {
     "openzeppelin-solidity": "^v2.2"
