@@ -51,7 +51,7 @@ contract('Wrapper Unit Tests', async accounts => {
   }
 
   async function setupMockSwap() {
-    swapTemplate = await Swap.new()
+    let swapTemplate = await Swap.new()
     //mock the swap.swapSimple method
     swap_swapSimple = swapTemplate.contract.methods
       .swapSimple(
