@@ -1,7 +1,7 @@
 const Types = artifacts.require('../libraries/Types')
 const MockTypes = artifacts.require('MockTypes')
 const {
-  equal,
+  equal
 } = require('@airswap/test-utils').assert
 const {
   defaults,

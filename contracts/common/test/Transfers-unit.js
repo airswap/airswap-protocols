@@ -12,7 +12,7 @@ const {
 } = require('@airswap/test-utils').assert
 const {
   defaults,
-  EMPTY_ADDRESS,
+  EMPTY_ADDRESS
 } = require('@airswap/order-utils').constants
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 
