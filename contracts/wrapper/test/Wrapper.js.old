@@ -16,21 +16,16 @@ let wrapperAddress
 let swap
 let swapSimple
 
-let tokenDAI
-let tokenWETH
-
 contract('Wrapper', ([aliceAddress, bobAddress, carolAddress]) => {
   orders.setKnownAccounts([aliceAddress, bobAddress, carolAddress])
 
   describe('Setup', () => {
     before('Deploys all the things', async () => {
-      swapContract = await Swap.new()
+      swapContract = await Swap.deployed()
       swapAddress = swapContract.address
-      tokenWETH = await WETH9.new()
-
-      wrapperContract = await Wrapper.new(swapAddress, tokenWETH.address)
+      wrapperContract = await Wrapper.deployed()
       wrapperAddress = wrapperContract.address
-
+      tokenWETH = await WETH9.new()
       tokenDAI = await FungibleToken.new()
 
       orders.setVerifyingContract(swapAddress)
