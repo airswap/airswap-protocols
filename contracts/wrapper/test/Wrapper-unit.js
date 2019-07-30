@@ -91,7 +91,7 @@ contract('Wrapper Unit Tests', async accounts => {
   })
 
   describe('Test swapSimple', async () => {
-    it('Test when taker token != weth contract address, ensure no unexpected ether sent', async () => {
+    it('Test when taker token != weth, ensure no unexpected ether sent', async () => {
       let nonTakerToken = mockToken
       await reverted(
         wrapper.swapSimple(
@@ -112,7 +112,7 @@ contract('Wrapper Unit Tests', async accounts => {
       )
     })
 
-    it('Test when taker token == weth contract address, ensure the taker wallet is unset', async () => {
+    it('Test when taker token == weth, ensure the taker wallet is unset', async () => {
       let mockTakerToken = mockToken
       await reverted(
         wrapper.swapSimple(
@@ -133,7 +133,7 @@ contract('Wrapper Unit Tests', async accounts => {
       )
     })
 
-    it('Test when taker token == weth contract address, ensure the taker amount matches sent ether', async () => {
+    it('Test when taker token == weth, ensure the taker amount matches sent ether', async () => {
       await reverted(
         wrapper.swapSimple(
           0, //nonce
@@ -153,7 +153,7 @@ contract('Wrapper Unit Tests', async accounts => {
       )
     })
 
-    it('Test when taker token == weth contract address, maker token address != weth contract address, and weth contact has a left over balance', async () => {
+    it('Test when taker token == weth, maker token != weth, and weth has a left over balance', async () => {
       let mockMakerToken = mockToken
 
       //mock the weth.balance method
