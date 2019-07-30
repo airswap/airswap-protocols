@@ -37,7 +37,7 @@ contract('Swap', ([aliceAddress, bobAddress, carolAddress, davidAddress]) => {
 
   describe('Deploying...', () => {
     it('Deployed Swap contract', async () => {
-      swapContract = await Swap.new()
+      swapContract = await Swap.deployed()
       swapAddress = swapContract.address
 
       swap =
