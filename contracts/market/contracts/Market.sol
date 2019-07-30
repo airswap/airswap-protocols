@@ -210,7 +210,7 @@ contract Market is Ownable {
     address staker = _startingPoint;
     address previousStaker;
 
-    if (limit > length) {å
+    if (limit > length) {
       limit = length;
     }
 
