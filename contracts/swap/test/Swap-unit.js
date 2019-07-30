@@ -15,6 +15,11 @@ const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 contract.only('Swap Unit Tests', async accounts => {
   const Jun_06_2017T00_00_00_UTC = 1497052800 //a date later than than when ganache started
   const mockMaker = accounts[9]
+  const mockMakerToken = accounts[8]
+  const mockTaker = accounts[7]
+  const mockTakerToken = accounts[6]
+  const mockAffiliate = accounts[5]
+  const mockAffiliateToken = accounts[4]
   const sender = accounts[0]
   const v = 27
   const r = web3.utils.asciiToHex('r')
@@ -39,26 +44,86 @@ contract.only('Swap Unit Tests', async accounts => {
 
   describe('Test swap', async () => {
     it('test when order is expired', async () => {
-      let party = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
-      let order = [0, 0, party, party, party]
+      let maker = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
+      let taker = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
+      let affiliate = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
+      let order = [0, 0, maker, taker, affiliate]
       let signature = [EMPTY_ADDRESS, v, r, s, ver]
 
       await reverted(swap.swap(order, signature), 'ORDER_EXPIRED')
     })
 
     it('test when order is taken', async () => {
-      let party = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
-      let order = [0, Jun_06_2017T00_00_00_UTC, party, party, party]
+      let maker = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
+      let taker = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
+      let affiliate = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
+      let order = [0, Jun_06_2017T00_00_00_UTC, maker, taker, affiliate]
       let signature = [EMPTY_ADDRESS, v, r, s, ver]
 
-      await reverted(await swap.swap(order, signature), 'ORDER_EXPIRED')
+      //insert order
+      //take it
+      //try and take it again
+      //await reverted(await swap.swap(order, signature), 'ORDER_ALREADY_TAKEN')
     })
 
-    it('test when order is canceled', async () => {})
+    it('test when order is canceled', async () => {
+      let maker = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
+      let taker = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
+      let affiliate = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
+      let order = [0, Jun_06_2017T00_00_00_UTC, maker, taker, affiliate]
+      let signature = [EMPTY_ADDRESS, v, r, s, ver]
 
-    it('test when order nonce is too low', async () => {})
+      //insert order
+      //cancel it
+      //try and take it
+      //await reverted(await swap.swap(order, signature), 'ORDER_ALREADY_CANCELED')
+    })
 
-    it('test when taker is an empty address', async () => {})
+    it('test when order nonce is too low', async () => {
+      let maker = [mockMaker, EMPTY_ADDRESS, 200]
+      let taker = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
+      let affiliate = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
+      let order = [0, Jun_06_2017T00_00_00_UTC, maker, taker, affiliate]
+      let signature = [EMPTY_ADDRESS, v, r, s, ver]
+
+      await swap.invalidate(5, { from: mockMaker })
+      await reverted(swap.swap(order, signature), 'NONCE_TOO_LOW')
+    })
+
+    it('test when taker is an empty address', async () => {
+      let maker = [mockMaker, EMPTY_ADDRESS, 200]
+      let taker = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
+      let affiliate = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
+      let order = [0, Jun_06_2017T00_00_00_UTC, maker, taker, affiliate]
+      let signature = [EMPTY_ADDRESS, v, r, s, ver]
+     
+      //TODO
+      //await swap.swap(order, signature)
+    })
+
+    it('test when taker is not an empty address, and the sender is not authorized', async () => {
+      let maker = [mockMaker, EMPTY_ADDRESS, 200]
+      let taker = [mockTaker, EMPTY_ADDRESS, 200]
+      let affiliate = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
+      let order = [0, Jun_06_2017T00_00_00_UTC, maker, taker, affiliate]
+      let signature = [EMPTY_ADDRESS, v, r, s, ver]
+      
+      await reverted(swap.swap(order, signature), 'SENDER_UNAUTHORIZED')
+    })
+
+    it('test when taker is not an empty address, and the sender is authorized', async () => {
+      let maker = [mockMaker, EMPTY_ADDRESS, 200]
+      let taker = [mockTaker, EMPTY_ADDRESS, 200]
+      let affiliate = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
+      let order = [0, Jun_06_2017T00_00_00_UTC, maker, taker, affiliate]
+      let signature = [EMPTY_ADDRESS, v, r, s, ver]
+    
+      //mock maker authorizes mock taker
+      await swap.authorize(mockTaker, Jun_06_2017T00_00_00_UTC, { from: mockMaker })
+
+      //mock taker will take the order
+      await swap.swap(order, signature, { from: mockTaker })
+    })
 
     it('test when order is not specified', async () => {})
 
