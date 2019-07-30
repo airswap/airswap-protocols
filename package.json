@@ -28,7 +28,8 @@
     "prettier": "^1.18.2",
     "solhint": "^2.1.0",
     "truffle": "^5.0.24",
-    "ethereumjs-abi": "^0.6.7"
+    "ethereumjs-abi": "^0.6.7",
+    "eth-gas-reporter": "^0.2.9"
   },
   "prettier": {
     "trailingComma": "es5",
