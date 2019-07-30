@@ -10,6 +10,9 @@
     "clean": "rm -rf ./build",
     "compile": "truffle compile"
   },
+  "devDependencies": {
+    "@airswap/tokens": "0.1.0"
+  },
   "dependencies": {
     "openzeppelin-solidity": "^v2.2"
   }
