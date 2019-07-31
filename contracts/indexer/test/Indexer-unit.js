@@ -420,17 +420,30 @@ contract('Indexer Unit Tests', async accounts => {
       // approve the tokens to be staked
       await mockStakingSuccess()
 
+      let expiry = await getTimestampPlusDays(1)
+
       // now set an intent
-      await indexer.setIntent(
+      let result = await indexer.setIntent(
         tokenOne,
         tokenTwo,
         250,
-        await getTimestampPlusDays(1),
+        expiry,
         ALICE_LOC,
         {
           from: aliceAddress,
         }
       )
+      passes(result)
+
+      emitted(result, 'Stake', event => {
+        return (
+          event.wallet === aliceAddress &&
+          event.makerToken === tokenOne &&
+          event.takerToken == tokenTwo &&
+          event.amount.toNumber() === 250 &&
+          event.expiry.toNumber() === expiry
+        )
+      })
     })
 
     it('should not set an intent if the user has already staked', async () => {
@@ -460,7 +473,7 @@ contract('Indexer Unit Tests', async accounts => {
           tokenOne,
           tokenTwo,
           250,
-          await getTimestampPlusDays(1),
+          await getTimestampPlusDays(2),
           ALICE_LOC,
           {
             from: aliceAddress,
@@ -472,7 +485,88 @@ contract('Indexer Unit Tests', async accounts => {
   })
 
   describe('Test setTwoSidedIntent', async () => {
-    it('should not set either intent if 1 breaks a rule')
-    it('should set 2 valid intents and emit 2 events')
+    it('should not set either intent if 1 breaks a rule', async () => {
+      // make one market
+      await indexer.createMarket(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+
+      // approve the tokens to be staked
+      await mockStakingSuccess()
+
+      let expiry = await getTimestampPlusDays(1)
+
+      // try to set both intents, but one market doesnt exist
+      await reverted(
+        indexer.setTwoSidedIntent(tokenOne, tokenTwo, 250, expiry, ALICE_LOC, {
+          from: aliceAddress,
+        }),
+        'MARKET_DOES_NOT_EXIST'
+      )
+
+      // create the other market (both exist now)
+      await indexer.createMarket(tokenTwo, tokenOne, {
+        from: aliceAddress,
+      })
+
+      // alice stakes on one market
+      await indexer.setIntent(tokenOne, tokenTwo, 250, expiry, ALICE_LOC, {
+        from: aliceAddress,
+      })
+
+      // try to set both intents, but fails as alice has already staked on one
+      await reverted(
+        indexer.setTwoSidedIntent(tokenOne, tokenTwo, 250, expiry, ALICE_LOC, {
+          from: aliceAddress,
+        }),
+        'USER_ALREADY_STAKED'
+      )
+    })
+
+    it('should set 2 valid intents and emit 2 events', async () => {
+      // make both markets
+      await indexer.createTwoSidedMarket(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+
+      // approve the tokens to be staked
+      await mockStakingSuccess()
+
+      let expiry = await getTimestampPlusDays(1)
+
+      // set the intents
+      let result = await indexer.setTwoSidedIntent(
+        tokenOne,
+        tokenTwo,
+        250,
+        expiry,
+        ALICE_LOC,
+        {
+          from: aliceAddress,
+        }
+      )
+      passes(result)
+
+      // check both events were emitted
+      emitted(result, 'Stake', event => {
+        return (
+          event.wallet === aliceAddress &&
+          event.makerToken === tokenOne &&
+          event.takerToken == tokenTwo &&
+          event.amount.toNumber() === 250 &&
+          event.expiry.toNumber() === expiry
+        )
+      })
+
+      emitted(result, 'Stake', event => {
+        return (
+          event.wallet === aliceAddress &&
+          event.makerToken === tokenTwo &&
+          event.takerToken == tokenOne &&
+          event.amount.toNumber() === 250 &&
+          event.expiry.toNumber() === expiry
+        )
+      })
+    })
   })
 })
