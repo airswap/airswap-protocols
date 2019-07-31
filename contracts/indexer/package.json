@@ -1,6 +1,7 @@
 {
   "name": "@airswap/indexer",
   "version": "0.1.0",
+  "description": "Manages intents to trade for use in the Swap Protocol",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
