@@ -45,6 +45,27 @@ contract('Indexer Unit Tests', async accounts => {
     stakingTokenAddress = stakingTokenMock.address
   }
 
+  checkMarketAtAddress = async (marketAddress, makerToken, takerToken) => {
+    // find the market
+    let market = await Market.at(marketAddress)
+
+    // fetch its tokens
+    let marketMakerToken = await market.makerToken()
+    let marketTakerToken = await market.takerToken()
+
+    // check it has the correct tokens
+    equal(
+      marketMakerToken,
+      makerToken,
+      'Indexer has returned Market with incorrect maker token'
+    )
+    equal(
+      marketTakerToken,
+      takerToken,
+      'Indexer has returned Market with incorrect taker token'
+    )
+  }
+
   beforeEach(async () => {
     let snapShot = await takeSnapshot()
     snapshotId = snapShot['result']
@@ -122,20 +143,8 @@ contract('Indexer Unit Tests', async accounts => {
       let marketAddress = await indexer.createMarket.call(tokenOne, tokenTwo, {
         from: aliceAddress,
       })
-      let market = await Market.at(marketAddress)
-      let marketMakerToken = await market.makerToken()
-      let marketTakerToken = await market.takerToken()
 
-      equal(
-        marketMakerToken,
-        tokenOne,
-        'Indexer has created Market with incorrect maker token'
-      )
-      equal(
-        marketTakerToken,
-        tokenTwo,
-        'Indexer has created Market with incorrect taker token'
-      )
+      await checkMarketAtAddress(marketAddress, tokenOne, tokenTwo)
     })
 
     it('createMarket should just return an address if the market exists', async () => {
@@ -157,23 +166,57 @@ contract('Indexer Unit Tests', async accounts => {
       let marketAddress = await indexer.createMarket.call(tokenOne, tokenTwo, {
         from: aliceAddress,
       })
-      let market = await Market.at(marketAddress)
-      let marketMakerToken = await market.makerToken()
-      let marketTakerToken = await market.takerToken()
 
-      equal(
-        marketMakerToken,
-        tokenOne,
-        'Indexer has returned Market with incorrect maker token'
-      )
-      equal(
-        marketTakerToken,
-        tokenTwo,
-        'Indexer has returned Market with incorrect taker token'
-      )
+      await checkMarketAtAddress(marketAddress, tokenOne, tokenTwo)
     })
 
-    it('createTwoSidedMarket should create 2 new markets if they dont exist')
-    it('createTwoSidedMarket should just return 2 addresses if they exist')
+    it('createTwoSidedMarket should create 2 new markets if they dont exist', async () => {
+      let result = await indexer.createTwoSidedMarket(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+
+      // 2 events are emitted - one for each market
+      emitted(result, 'CreateMarket', event => {
+        return event.makerToken === tokenOne && event.takerToken === tokenTwo
+      })
+      emitted(result, 'CreateMarket', event => {
+        return event.makerToken === tokenTwo && event.takerToken === tokenOne
+      })
+
+      // and 2 markets with the correct tokens have been created
+      markets = await indexer.createTwoSidedMarket.call(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+
+      await checkMarketAtAddress(markets[0], tokenOne, tokenTwo)
+      await checkMarketAtAddress(markets[1], tokenTwo, tokenOne)
+    })
+
+    it('createTwoSidedMarket should just return 2 addresses if they exist', async () => {
+      // create the 2 markets so they already exist
+      await indexer.createTwoSidedMarket(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+
+      // now trying to create it again will not emit the event
+      let result = await indexer.createMarket(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+
+      notEmitted(result, 'CreateMarket', event => {
+        return event.makerToken === tokenOne && event.takerToken === tokenTwo
+      })
+      notEmitted(result, 'CreateMarket', event => {
+        return event.makerToken === tokenTwo && event.takerToken === tokenOne
+      })
+
+      // instead the markets' addresses are returned
+      markets = await indexer.createTwoSidedMarket.call(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+
+      await checkMarketAtAddress(markets[0], tokenOne, tokenTwo)
+      await checkMarketAtAddress(markets[1], tokenTwo, tokenOne)
+    })
   })
 })
