@@ -9,7 +9,7 @@ const {
   notEmitted,
   reverted,
   equal,
-  ok,
+  isTrue,
 } = require('@airswap/test-utils').assert
 const { balances } = require('@airswap/test-utils').balances
 const { getTimestampPlusDays } = require('@airswap/test-utils').time
@@ -230,7 +230,28 @@ contract('Indexer Unit Tests', async accounts => {
       )
     })
 
-    it('should allow the owner to blacklist a token')
+    it('should allow the owner to blacklist a token', async () => {
+      let result = await indexer.addToBlacklist(tokenOne, {
+        from: owner,
+      })
+
+      // check the event was emitted
+      emitted(result, 'AddToBlacklist', event => {
+        return event.token === tokenOne
+      })
+
+      // get the timestamp of the block that added the token to the blacklist
+      let txTimestamp = (await web3.eth.getBlock(result.receipt.blockHash))
+        .timestamp
+
+      // check the token is now on the blacklist
+      let isBlacklisted = await indexer.blacklist.call(tokenOne)
+      equal(
+        txTimestamp,
+        isBlacklisted,
+        'token was not blacklisted with correct timestamp'
+      )
+    })
 
     it('should not allow a non-owner to un-blacklist a token', async () => {
       await reverted(
