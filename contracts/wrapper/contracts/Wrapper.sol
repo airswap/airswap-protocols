@@ -56,10 +56,10 @@ contract Wrapper {
     * @param _nonce uint256
     * @param _expiry uint256
     * @param _makerWallet address
-    * @param _makerParam uint256
+    * @param _makerAmount uint256
     * @param _makerToken address
     * @param _takerWallet address
-    * @param _takerParam uint256
+    * @param _takerAmount uint256
     * @param _takerToken address
     * @param _v uint8
     * @param _r bytes32
@@ -69,10 +69,10 @@ contract Wrapper {
     uint256 _nonce,
     uint256 _expiry,
     address _makerWallet,
-    uint256 _makerParam,
+    uint256 _makerAmount,
     address _makerToken,
     address _takerWallet,
-    uint256 _takerParam,
+    uint256 _takerAmount,
     address _takerToken,
     uint8 _v,
     bytes32 _r,
@@ -86,12 +86,8 @@ contract Wrapper {
       require(_takerWallet == address(0),
         "TAKER_ADDRESS_MUST_BE_UNSET");
 
-      // Ensure the _takerToken is wrapped ether.
-      require(_takerToken == address(wethContract),
-        "TAKER_PARAM_MUST_BE_WETH");
-
-      // Ensure the _takerParam matches the ether sent.
-      require(_takerParam == msg.value,
+      // Ensure the _takerAmount matches the ether sent.
+      require(_takerAmount == msg.value,
         "VALUE_MUST_BE_SENT");
 
       // Wrap (deposit) the ether.
@@ -101,11 +97,9 @@ contract Wrapper {
       wethContract.approve(address(swapContract), msg.value);
 
     } else {
-
       // Ensure no unexpected ether sent.
       require(msg.value == 0,
         "VALUE_MUST_BE_ZERO");
-
     }
 
     // Perform the swap.
@@ -113,26 +107,22 @@ contract Wrapper {
       _nonce,
       _expiry,
       _makerWallet,
-      _makerParam,
+      _makerAmount,
       _makerToken,
       _takerWallet,
-      _takerParam,
+      _takerAmount,
       _takerToken,
       _v, _r, _s
     );
 
     // The taker is receiving ether.
     if (_makerToken == address(wethContract)) {
-
       // Transfer from the taker to the wrapper.
-      wethContract.transferFrom(_takerWallet, address(this), _makerParam);
-
+      wethContract.transferFrom(_takerWallet, address(this), _makerAmount);
       // Unwrap (withdraw) the ether.
-      wethContract.withdraw(_makerParam);
-
+      wethContract.withdraw(_makerAmount);
       // Transfer ether to the user.
-      msg.sender.transfer(_makerParam);
-
+      msg.sender.transfer(_makerAmount);
     }
 
     // Ensure no WETH balance remains.
