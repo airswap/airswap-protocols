@@ -9,6 +9,7 @@ const {
   notEmitted,
   reverted,
   equal,
+  passes,
   isTrue,
 } = require('@airswap/test-utils').assert
 const { balances } = require('@airswap/test-utils').balances
@@ -262,6 +263,27 @@ contract('Indexer Unit Tests', async accounts => {
       )
     })
 
-    it('should allow the owner to un-blacklist a token')
+    it('should allow the owner to un-blacklist a token', async () => {
+      // removing from blacklist before the token is blacklisted emits no events
+      let result = await indexer.removeFromBlacklist(tokenOne, {
+        from: owner,
+      })
+      notEmitted(result, 'RemoveFromBlacklist')
+      passes(result)
+
+      // Add the token to the blacklist
+      await indexer.addToBlacklist(tokenOne, {
+        from: owner,
+      })
+
+      // Now removing it succeeds and emits an event
+      result = await indexer.removeFromBlacklist(tokenOne, {
+        from: owner,
+      })
+      emitted(result, 'RemoveFromBlacklist', event => {
+        return event.token === tokenOne
+      })
+      passes(result)
+    })
   })
 })
