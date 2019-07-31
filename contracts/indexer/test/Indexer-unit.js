@@ -82,7 +82,7 @@ contract('Indexer Unit Tests', async accounts => {
       let result = await getResult(newIndexer, txHash)
 
       emitted(result, 'SetStakeMinimum', event => {
-        return (event.amount.toNumber() === MIN_STAKE_250)
+        return event.amount.toNumber() === MIN_STAKE_250
       })
     })
   })
@@ -100,7 +100,7 @@ contract('Indexer Unit Tests', async accounts => {
     it('should allow the owner to change the minimum', async () => {
       let result = await indexer.setStakeMinimum(MIN_STAKE_500, { from: owner })
       emitted(result, 'SetStakeMinimum', event => {
-        return (event.amount.toNumber() === MIN_STAKE_500)
+        return event.amount.toNumber() === MIN_STAKE_500
       })
     })
   })
