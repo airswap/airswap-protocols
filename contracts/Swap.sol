@@ -17,9 +17,9 @@
 pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
-import "@airswap/common/libraries/Transfers.sol";
-import "@airswap/common/libraries/Types.sol";
-import "@airswap/swap/interfaces/ISwap.sol";
+import "./Transfers.sol";
+import "./Types.sol";
+import "./ISwap.sol";
 
 /**
   * @title Swap: The Atomic Swap used by the Swap Protocol

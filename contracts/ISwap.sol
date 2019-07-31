@@ -17,7 +17,7 @@
 pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
-import "@airswap/common/libraries/Types.sol";
+import "./Types.sol";
 
 interface ISwap {
 

@@ -17,8 +17,8 @@
 pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
-import "@airswap/indexer/interfaces/IIndexer.sol";
-import "@airswap/market/contracts/Market.sol";
+import "./IIndexer.sol";
+import "./Market.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 

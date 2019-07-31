@@ -1,6 +1,0 @@
-{
-  "lerna": "3.15.0",
-  "packages": ["contracts/*", "packages/*"],
-  "version": "independent",
-  "npmClient": "yarn"
-}
