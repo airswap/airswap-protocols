@@ -8,7 +8,8 @@
   },
   "scripts": {
     "clean": "rm -rf ./build",
-    "compile": "truffle compile"
+    "compile": "truffle compile",
+    "test": "truffle test"
   },
   "devDependencies": {
     "@airswap/tokens": "0.1.0"

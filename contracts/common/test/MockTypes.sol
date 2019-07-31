@@ -8,17 +8,17 @@ import "../libraries/Types.sol";
   *
   */
 contract MockTypes {
-    function hashParty(Types.Party memory _party) public pure returns (bytes32) {
-        return Types.hashParty(_party);
-    }
+  function hashParty(Types.Party memory _party) public pure returns (bytes32) {
+    return Types.hashParty(_party);
+  }
 
-    function hashOrder(Types.Order memory _order, bytes32 _domainSeparator) public pure returns (bytes32) {
-        return Types.hashOrder(_order, _domainSeparator);
-    }
+  function hashOrder(Types.Order memory _order, bytes32 _domainSeparator) public pure returns (bytes32) {
+    return Types.hashOrder(_order, _domainSeparator);
+  }
 
-    function hashDomain(bytes memory _name,
-    bytes memory _version,
-    address _verifyingContract) public pure returns (bytes32) {
-        return Types.hashDomain(_name, _version, _verifyingContract);
-    }
+  function hashDomain(bytes memory _name,
+  bytes memory _version,
+  address _verifyingContract) public pure returns (bytes32) {
+    return Types.hashDomain(_name, _version, _verifyingContract);
+  }
 }
