@@ -108,21 +108,15 @@ contract('Swap', async accounts => {
   })
 
   describe('Approving...', async () => {
-    it('Alice approves Swap to spend 200 AST', async () => {
+    it('Checks approvals (Alice 250 AST and 0 DAI, Bob 0 AST and 500 DAI)', async () => {
       emitted(
         await tokenAST.approve(swapAddress, 200, { from: aliceAddress }),
         'Approval'
       )
-    })
-
-    it('Bob approves Swap to spend 9999 DAI', async () => {
       emitted(
-        await tokenDAI.approve(swapAddress, 9999, { from: bobAddress }),
+        await tokenDAI.approve(swapAddress, 1000, { from: bobAddress }),
         'Approval'
       )
-    })
-
-    it('Checks approvals (Alice 250 AST and 0 DAI, Bob 0 AST and 500 DAI)', async () => {
       ok(
         await allowances(aliceAddress, swapAddress, [
           [tokenAST, 200],
@@ -132,7 +126,7 @@ contract('Swap', async accounts => {
       ok(
         await allowances(bobAddress, swapAddress, [
           [tokenAST, 0],
-          [tokenDAI, 500],
+          [tokenDAI, 1000],
         ])
       )
     })
@@ -568,13 +562,13 @@ contract('Swap', async accounts => {
       )
     })
 
-    it('Checks existing balances (Alice 800 AST and 50 DAI, Bob 200 AST and 950 DAI)', async () => {
+    it('Checks existing balances (Alice 750 AST and 60 DAI, Bob 250 AST and 940 DAI)', async () => {
       ok(
-        await balances(aliceAddress, [[tokenAST, 700], [tokenDAI, 60]]),
+        await balances(aliceAddress, [[tokenAST, 750], [tokenDAI, 40]]),
         'Alice balances are incorrect'
       )
       ok(
-        await balances(bobAddress, [[tokenAST, 250], [tokenDAI, 940]]),
+        await balances(bobAddress, [[tokenAST, 250], [tokenDAI, 960]]),
         'Bob balances are incorrect'
       )
     })
@@ -584,6 +578,10 @@ contract('Swap', async accounts => {
     const value = 1
 
     it('Checks allowance (Alice 200 AST)', async () => {
+      emitted(
+        await tokenAST.approve(swapAddress, 200, { from: aliceAddress }),
+        'Approval'
+      )
       ok(
         await allowances(aliceAddress, swapAddress, [[tokenAST, 200]]),
         'Alice has not approved 200 AST'
