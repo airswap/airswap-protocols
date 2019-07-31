@@ -14,7 +14,7 @@
     "lint": "yarn eslint \"./**/test/**/*.js\" \"./packages/**/*.js\"",
     "ganache": "ganache-cli -p 8545 --gasLimit 0xfffffffffff --time '2017-05-10T00:00:00+00:00'",
     "publish": "lerna publish",
-    "test": "yarn clean && yarn test"
+    "test": "yarn clean && truffle test"
   },
   "devDependencies": {
     "@gnosis.pm/mock-contract": "^3.0.7",
