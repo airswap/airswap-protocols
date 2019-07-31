@@ -3,7 +3,7 @@
  * Use of code from https://medium.com/edgefund/time-travelling-truffle-tests-f581c1964687
  * Utility functions to advance blocktime and mine blocks artificially for EVM
  */
-const SECONDS_IN_DAY = 86400
+const { SECONDS_IN_DAY } = require('@airswap/order-utils').constants
 
 advanceTime = time => {
   return new Promise((resolve, reject) => {
