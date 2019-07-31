@@ -1,7 +1,6 @@
 const Indexer = artifacts.require('Indexer')
 const Market = artifacts.require('Market')
 const MockContract = artifacts.require('MockContract')
-const FungibleToken = artifacts.require('FungibleToken')
 
 const {
   getResult,
@@ -38,27 +37,14 @@ contract('Indexer Unit Tests', async accounts => {
   let tokenOne = accounts[8]
   let tokenTwo = accounts[9]
 
-  setupMockToken = async () => {
-    stakingTokenTemplate = await FungibleToken.new()
+  async function setupMockToken() {
     stakingTokenMock = await MockContract.new()
+    await stakingTokenMock.givenAnyReturnBool(true)
+
     stakingTokenAddress = stakingTokenMock.address
   }
 
-  mockStakingSuccess = async () => {
-    mockTransferFrom = stakingTokenTemplate.contract.methods
-      .transferFrom(EMPTY_ADDRESS, EMPTY_ADDRESS, 0)
-      .encodeABI()
-    await stakingTokenMock.givenMethodReturnBool(mockTransferFrom, true)
-  }
-
-  mockStakingFailure = async () => {
-    mockTransferFrom = stakingTokenTemplate.contract.methods
-      .transferFrom(EMPTY_ADDRESS, EMPTY_ADDRESS, 0)
-      .encodeABI()
-    await stakingTokenMock.givenMethodReturnBool(mockTransferFrom, false)
-  }
-
-  checkMarketAtAddress = async (marketAddress, makerToken, takerToken) => {
+  async function checkMarketAtAddress(marketAddress, makerToken, takerToken) {
     // find the market
     let market = await Market.at(marketAddress)
 
@@ -390,7 +376,7 @@ contract('Indexer Unit Tests', async accounts => {
       })
 
       // The transfer is not approved
-      await mockStakingFailure()
+      await stakingTokenMock.givenAnyReturnBool(false)
 
       // now try to set an intent
       await reverted(
@@ -413,9 +399,6 @@ contract('Indexer Unit Tests', async accounts => {
       await indexer.createMarket(tokenOne, tokenTwo, {
         from: aliceAddress,
       })
-
-      // approve the tokens to be staked
-      await mockStakingSuccess()
 
       let expiry = await getTimestampPlusDays(1)
 
@@ -448,9 +431,6 @@ contract('Indexer Unit Tests', async accounts => {
       await indexer.createMarket(tokenOne, tokenTwo, {
         from: aliceAddress,
       })
-
-      // approve the tokens to be staked
-      await mockStakingSuccess()
 
       // set one intent
       await indexer.setIntent(
@@ -488,9 +468,6 @@ contract('Indexer Unit Tests', async accounts => {
         from: aliceAddress,
       })
 
-      // approve the tokens to be staked
-      await mockStakingSuccess()
-
       let expiry = await getTimestampPlusDays(1)
 
       // try to set both intents, but one market doesnt exist
@@ -525,9 +502,6 @@ contract('Indexer Unit Tests', async accounts => {
       await indexer.createTwoSidedMarket(tokenOne, tokenTwo, {
         from: aliceAddress,
       })
-
-      // approve the tokens to be staked
-      await mockStakingSuccess()
 
       let expiry = await getTimestampPlusDays(1)
 
