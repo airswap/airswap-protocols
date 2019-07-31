@@ -113,7 +113,7 @@ contract('Wrapper Unit Tests', async accounts => {
     })
 
     it('Test when taker token == weth, ensure the taker wallet is unset', async () => {
-      let mockTakerToken = mockToken
+      let mockTaker = accounts[8]
       await reverted(
         wrapper.swapSimple(
           0, //nonce
@@ -121,7 +121,7 @@ contract('Wrapper Unit Tests', async accounts => {
           EMPTY_ADDRESS, //maker wallet
           0, //maker amount
           EMPTY_ADDRESS, //maker token
-          mockTakerToken, //taker wallet
+          mockTaker, //taker wallet
           0, //taker amount
           mockWeth.address, //taker token
           27, //v
