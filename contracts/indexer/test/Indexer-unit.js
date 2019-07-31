@@ -10,7 +10,6 @@ const {
   reverted,
   equal,
   passes,
-  isTrue,
 } = require('@airswap/test-utils').assert
 const { balances } = require('@airswap/test-utils').balances
 const { getTimestampPlusDays } = require('@airswap/test-utils').time
@@ -285,5 +284,18 @@ contract('Indexer Unit Tests', async accounts => {
       })
       passes(result)
     })
+  })
+
+  describe('Test setIntent', async () => {
+    it('should not set an intent if the market doesnt exist')
+    it('should not set an intent if the minimim stake isnt met')
+    it('should not set an intent if a token is blacklisted')
+    it('should not set an intent if the user has already staked')
+    it('should set a valid intent and emit an event')
+  })
+
+  describe('Test setTwoSidedIntent', async () => {
+    it('should not set either intent if 1 breaks a rule')
+    it('should set 2 valid intents and emit 2 events')
   })
 })
