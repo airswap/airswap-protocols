@@ -14,6 +14,7 @@ const {
 const { balances } = require('@airswap/test-utils').balances
 const { getTimestampPlusDays } = require('@airswap/test-utils').time
 const { intents } = require('@airswap/indexer-utils')
+const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 
 const ALICE_LOC = intents.serialize(
   intents.Locators.URL,
@@ -43,6 +44,20 @@ contract('Indexer Unit Tests', async accounts => {
     stakingTokenTemplate = await FungibleToken.new()
     stakingTokenMock = await MockContract.new()
     stakingTokenAddress = stakingTokenMock.address
+  }
+
+  mockStakingSuccess = async () => {
+    mockTransferFrom = stakingTokenTemplate.contract.methods
+      .transferFrom(EMPTY_ADDRESS, EMPTY_ADDRESS, 0)
+      .encodeABI()
+    await stakingTokenMock.givenMethodReturnBool(mockTransferFrom, true)
+  }
+
+  mockStakingFailure = async () => {
+    mockTransferFrom = stakingTokenTemplate.contract.methods
+      .transferFrom(EMPTY_ADDRESS, EMPTY_ADDRESS, 0)
+      .encodeABI()
+    await stakingTokenMock.givenMethodReturnBool(mockTransferFrom, false)
   }
 
   checkMarketAtAddress = async (marketAddress, makerToken, takerToken) => {
@@ -287,11 +302,173 @@ contract('Indexer Unit Tests', async accounts => {
   })
 
   describe('Test setIntent', async () => {
-    it('should not set an intent if the market doesnt exist')
-    it('should not set an intent if the minimim stake isnt met')
-    it('should not set an intent if a token is blacklisted')
-    it('should not set an intent if the user has already staked')
-    it('should set a valid intent and emit an event')
+    it('should not set an intent if the market doesnt exist', async () => {
+      await reverted(
+        indexer.setIntent(
+          tokenOne,
+          tokenTwo,
+          250,
+          await getTimestampPlusDays(1),
+          ALICE_LOC,
+          {
+            from: aliceAddress,
+          }
+        ),
+        'MARKET_DOES_NOT_EXIST'
+      )
+    })
+
+    it('should not set an intent if the minimim stake isnt met', async () => {
+      // make the market first
+      await indexer.createMarket(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+
+      // now try to stake with an amount less than 250
+      await reverted(
+        indexer.setIntent(
+          tokenOne,
+          tokenTwo,
+          249,
+          await getTimestampPlusDays(1),
+          ALICE_LOC,
+          {
+            from: aliceAddress,
+          }
+        ),
+        'MINIMUM_NOT_MET'
+      )
+    })
+
+    it('should not set an intent if a token is blacklisted', async () => {
+      // blacklist tokenOne
+      await indexer.addToBlacklist(tokenOne, {
+        from: owner,
+      })
+
+      // now try to stake with an amount less than 250
+      await reverted(
+        indexer.setIntent(
+          tokenOne,
+          tokenTwo,
+          250,
+          await getTimestampPlusDays(1),
+          ALICE_LOC,
+          {
+            from: aliceAddress,
+          }
+        ),
+        'MARKET_IS_BLACKLISTED'
+      )
+
+      await indexer.removeFromBlacklist(tokenOne, {
+        from: owner,
+      })
+
+      // blacklist tokenTwo
+      await indexer.addToBlacklist(tokenTwo, {
+        from: owner,
+      })
+
+      // now try to stake with an amount less than 250
+      await reverted(
+        indexer.setIntent(
+          tokenOne,
+          tokenTwo,
+          250,
+          await getTimestampPlusDays(1),
+          ALICE_LOC,
+          {
+            from: aliceAddress,
+          }
+        ),
+        'MARKET_IS_BLACKLISTED'
+      )
+    })
+
+    it('should not set an intent if the staking tokens arent approved', async () => {
+      // make the market first
+      await indexer.createMarket(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+
+      // The transfer is not approved
+      await mockStakingFailure()
+
+      // now try to set an intent
+      await reverted(
+        indexer.setIntent(
+          tokenOne,
+          tokenTwo,
+          250,
+          await getTimestampPlusDays(1),
+          ALICE_LOC,
+          {
+            from: aliceAddress,
+          }
+        ),
+        'UNABLE_TO_STAKE'
+      )
+    })
+
+    it('should set a valid intent and emit an event', async () => {
+      // make the market first
+      await indexer.createMarket(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+
+      // approve the tokens to be staked
+      await mockStakingSuccess()
+
+      // now set an intent
+      await indexer.setIntent(
+        tokenOne,
+        tokenTwo,
+        250,
+        await getTimestampPlusDays(1),
+        ALICE_LOC,
+        {
+          from: aliceAddress,
+        }
+      )
+    })
+
+    it('should not set an intent if the user has already staked', async () => {
+      // make the market first
+      await indexer.createMarket(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+
+      // approve the tokens to be staked
+      await mockStakingSuccess()
+
+      // set one intent
+      await indexer.setIntent(
+        tokenOne,
+        tokenTwo,
+        250,
+        await getTimestampPlusDays(1),
+        ALICE_LOC,
+        {
+          from: aliceAddress,
+        }
+      )
+
+      // now try to set another
+      await reverted(
+        indexer.setIntent(
+          tokenOne,
+          tokenTwo,
+          250,
+          await getTimestampPlusDays(1),
+          ALICE_LOC,
+          {
+            from: aliceAddress,
+          }
+        ),
+        'USER_ALREADY_STAKED'
+      )
+    })
   })
 
   describe('Test setTwoSidedIntent', async () => {
