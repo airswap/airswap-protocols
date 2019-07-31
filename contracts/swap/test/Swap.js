@@ -8,7 +8,7 @@ const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 const {
   emitted,
   reverted,
-  none,
+  notEmitted,
   equal,
   ok,
 } = require('@airswap/test-utils').assert
@@ -537,7 +537,10 @@ contract('Swap', async accounts => {
     })
 
     it('Checks that Alice is unable to cancel order with nonce 1 twice', async () => {
-      none(await cancel([_orderOne.nonce], { from: aliceAddress }), 'Cancel')
+      notEmitted(
+        await cancel([_orderOne.nonce], { from: aliceAddress }),
+        'Cancel'
+      )
     })
 
     it('Checks that Bob is unable to take an order with nonce 1', async () => {
