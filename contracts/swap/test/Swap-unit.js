@@ -24,7 +24,7 @@ contract.only('Swap Unit Tests', async accounts => {
   const v = 27
   const r = web3.utils.asciiToHex('r')
   const s = web3.utils.asciiToHex('s')
-  const ver = web3.utils.asciiToHex('F0')
+  const ver = web3.utils.asciiToHex('F0') //F is 70 in ASCII. 70 is "0x46" in Hex
 
   let snapshotId
   let swap
