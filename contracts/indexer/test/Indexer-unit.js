@@ -1,10 +1,12 @@
 const Indexer = artifacts.require('Indexer')
+const Market = artifacts.require('Market')
 const MockContract = artifacts.require('MockContract')
 const FungibleToken = artifacts.require('FungibleToken')
 
 const {
   getResult,
   emitted,
+  notEmitted,
   reverted,
   equal,
   ok,
@@ -21,8 +23,8 @@ const ALICE_LOC = intents.serialize(
 contract('Indexer Unit Tests', async accounts => {
   let owner = accounts[0]
   let nonOwner = accounts[1]
-  let alice = accounts[2]
-  let bob = accounts[3]
+  let aliceAddress = accounts[2]
+  let bobAddress = accounts[3]
 
   const MIN_STAKE_250 = 250
   const MIN_STAKE_500 = 500
@@ -34,8 +36,8 @@ contract('Indexer Unit Tests', async accounts => {
   let stakingTokenMock
   let stakingTokenAddress
 
-  let token1 = accounts[8]
-  let token2 = accounts[9]
+  let tokenOne = accounts[8]
+  let tokenTwo = accounts[9]
 
   setupMockToken = async () => {
     stakingTokenTemplate = await FungibleToken.new()
@@ -103,5 +105,75 @@ contract('Indexer Unit Tests', async accounts => {
         return event.amount.toNumber() === MIN_STAKE_500
       })
     })
+  })
+
+  describe('Test createMarket and createTwoSidedMarket', async () => {
+    it('createMarket should emit an event and create a new market', async () => {
+      let result = await indexer.createMarket(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+
+      // event is emitted
+      emitted(result, 'CreateMarket', event => {
+        return event.makerToken === tokenOne && event.takerToken === tokenTwo
+      })
+
+      // and a market with the correct tokens has been created
+      let marketAddress = await indexer.createMarket.call(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+      let market = await Market.at(marketAddress)
+      let marketMakerToken = await market.makerToken()
+      let marketTakerToken = await market.takerToken()
+
+      equal(
+        marketMakerToken,
+        tokenOne,
+        'Indexer has created Market with incorrect maker token'
+      )
+      equal(
+        marketTakerToken,
+        tokenTwo,
+        'Indexer has created Market with incorrect taker token'
+      )
+    })
+
+    it('createMarket should just return an address if the market exists', async () => {
+      // create the market - so that it already exists
+      await indexer.createMarket(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+
+      // now trying to create it again will not emit the event
+      let result = await indexer.createMarket(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+
+      notEmitted(result, 'CreateMarket', event => {
+        return event.makerToken === tokenOne && event.takerToken === tokenTwo
+      })
+
+      // instead the market's address is returned
+      let marketAddress = await indexer.createMarket.call(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+      let market = await Market.at(marketAddress)
+      let marketMakerToken = await market.makerToken()
+      let marketTakerToken = await market.takerToken()
+
+      equal(
+        marketMakerToken,
+        tokenOne,
+        'Indexer has returned Market with incorrect maker token'
+      )
+      equal(
+        marketTakerToken,
+        tokenTwo,
+        'Indexer has returned Market with incorrect taker token'
+      )
+    })
+
+    it('createTwoSidedMarket should create 2 new markets if they dont exist')
+    it('createTwoSidedMarket should just return 2 addresses if they exist')
   })
 })
