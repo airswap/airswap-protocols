@@ -219,4 +219,28 @@ contract('Indexer Unit Tests', async accounts => {
       await checkMarketAtAddress(markets[1], tokenTwo, tokenOne)
     })
   })
+
+  describe('Test addToBlacklist and removeFromBlacklist', async () => {
+    it('should not allow a non-owner to blacklist a token', async () => {
+      await reverted(
+        indexer.addToBlacklist(tokenOne, {
+          from: nonOwner,
+        }),
+        'Ownable: caller is not the owner'
+      )
+    })
+
+    it('should allow the owner to blacklist a token')
+
+    it('should not allow a non-owner to un-blacklist a token', async () => {
+      await reverted(
+        indexer.removeFromBlacklist(tokenOne, {
+          from: nonOwner,
+        }),
+        'Ownable: caller is not the owner'
+      )
+    })
+
+    it('should allow the owner to un-blacklist a token')
+  })
 })
