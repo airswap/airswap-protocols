@@ -54,15 +54,7 @@ contract('Swap', async accounts => {
     await revertToSnapShot(snapshotId)
   })
 
-<<<<<<< HEAD:contracts/swap/test/Swap.js.old
-<<<<<<< HEAD:contracts/swap/test/Swap.js.old
   describe('Deploying...', async () => {
-=======
-  describe('Deploying...', () => {
->>>>>>> snapshots and .new for all tests:contracts/swap/test/Swap.js
-=======
-  describe('Deploying...', async () => {
->>>>>>> missing asyncs:contracts/swap/test/Swap.js
     it('Deployed Swap contract', async () => {
       // deploy both libs
       const transfersLib = await Transfers.new()

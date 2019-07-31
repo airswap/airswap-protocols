@@ -34,15 +34,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
     await revertToSnapShot(snapshotId)
   })
 
-<<<<<<< HEAD:contracts/indexer/test/Indexer.js.old
-<<<<<<< HEAD:contracts/indexer/test/Indexer.js.old
   describe('Deploying...', async () => {
-=======
-  describe('Deploying...', () => {
->>>>>>> snapshots and .new for all tests:contracts/indexer/test/Indexer.js
-=======
-  describe('Deploying...', async () => {
->>>>>>> missing asyncs:contracts/indexer/test/Indexer.js
     it('Deployed staking token "AST"', async () => {
       tokenAST = await FungibleToken.new()
     })
@@ -56,15 +48,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
     })
 
     it('Deployed Indexer contract', async () => {
-<<<<<<< HEAD:contracts/indexer/test/Indexer.js.old
-<<<<<<< HEAD:contracts/indexer/test/Indexer.js.old
       indexer = await Indexer.new(tokenAST.address, 200, { from: ownerAddress })
-=======
-      indexer = await Indexer.new({ from: ownerAddress })
->>>>>>> snapshots and .new for all tests:contracts/indexer/test/Indexer.js
-=======
-      indexer = await Indexer.new(tokenAST.address, 200, { from: ownerAddress })
->>>>>>> arguments for new deploymnts:contracts/indexer/test/Indexer.js
       indexerAddress = indexer.address
       emitted(await indexer.setStakeMinimum(250), 'SetStakeMinimum')
     })

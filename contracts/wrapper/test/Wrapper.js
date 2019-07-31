@@ -66,44 +66,7 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
     await revertToSnapShot(snapshotId)
   })
 
-<<<<<<< HEAD:contracts/wrapper/test/Wrapper.js.old
-<<<<<<< HEAD:contracts/wrapper/test/Wrapper.js.old
   describe('Setup', async () => {
-    before('Deploys all the things', async () => {
-      // deploy both libs
-      const transfersLib = await Transfers.new()
-      const typesLib = await Types.new()
-
-      // link both libs to swap
-      await Swap.link(Transfers, transfersLib.address)
-      await Swap.link(Types, typesLib.address)
-
-      // now deploy swap
-      swapContract = await Swap.new()
-
-      swapAddress = swapContract.address
-      tokenWETH = await WETH9.new()
-      wrapperContract = await Wrapper.new(swapAddress, tokenWETH.address)
-      wrapperAddress = wrapperContract.address
-      tokenDAI = await FungibleToken.new()
-
-      orders.setVerifyingContract(swapAddress)
-
-      swap =
-        swapContract.methods[
-          'swap((uint256,uint256,(address,address,uint256),(address,address,uint256),(address,address,uint256)),(address,uint8,bytes32,bytes32,bytes1))'
-        ]
-      swapSimple =
-        wrapperContract.methods[
-          'swapSimple(uint256,uint256,address,uint256,address,address,uint256,address,uint8,bytes32,bytes32)'
-        ]
-    })
-=======
-  describe('Setup', () => {
->>>>>>> loads of missing awaits:contracts/wrapper/test/Wrapper.js
-=======
-  describe('Setup', async () => {
->>>>>>> console logs and asyncs:contracts/wrapper/test/Wrapper.js
     it('Mints 1000 DAI for Alice', async () => {
       let tx = await tokenDAI.mint(aliceAddress, 1000)
       ok(await balances(aliceAddress, [[tokenDAI, 1000]]))
@@ -117,14 +80,6 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
       let result = await tokenDAI.approve(swapAddress, 1000, {
         from: aliceAddress,
       })
-<<<<<<< HEAD:contracts/wrapper/test/Wrapper.js.old
-<<<<<<< HEAD:contracts/wrapper/test/Wrapper.js.old
-      console.log(result)
-=======
->>>>>>> loads of missing awaits:contracts/wrapper/test/Wrapper.js
-=======
-      console.log(result)
->>>>>>> console logs and asyncs:contracts/wrapper/test/Wrapper.js
       emitted(result, 'Approval')
     })
   })
@@ -163,16 +118,7 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
       )
       await passes(result)
       result = await getResult(swapContract, result.tx)
-      console.log(result)
-<<<<<<< HEAD:contracts/wrapper/test/Wrapper.js.old
-<<<<<<< HEAD:contracts/wrapper/test/Wrapper.js.old
-      await emitted(result, 'Swap')
-=======
       emitted(result, 'Swap')
->>>>>>> console logs and asyncs:contracts/wrapper/test/Wrapper.js
-=======
-      await emitted(result, 'Swap')
->>>>>>> missing asyncs:contracts/wrapper/test/Wrapper.js
     })
   })
 
