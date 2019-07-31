@@ -170,6 +170,9 @@ contract Indexer is IIndexer, Ownable {
     require(stakeToken.transferFrom(msg.sender, address(this), _amount),
       "UNABLE_TO_STAKE");
 
+    require(!markets[_makerToken][_takerToken].hasIntent(msg.sender),
+      "USER_ALREADY_STAKED");
+
     emit Stake(msg.sender, _makerToken, _takerToken, _amount, _expiry);
 
     // Set the intent on the market.
