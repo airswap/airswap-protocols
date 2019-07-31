@@ -129,7 +129,6 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
       emitted(tx, 'Deposit')
       tx = await tokenWETH.approve(swapAddress, 10000, { from: carolAddress })
       passes(tx)
-      console.log(tx)
       emitted(tx, 'Approval')
     })
 
@@ -147,7 +146,6 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
         from: aliceAddress,
       })
       passes(tx)
-      console.log(tx)
       emitted(tx, 'Approval')
     })
 
@@ -186,7 +184,6 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
       )
       passes(result)
       result = await getResult(swapContract, result.tx)
-      console.log(result)
       emitted(result, 'Swap')
     })
   })
