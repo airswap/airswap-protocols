@@ -25,13 +25,11 @@ contract('Indexer Unit Tests', async accounts => {
   let owner = accounts[0]
   let nonOwner = accounts[1]
   let aliceAddress = accounts[2]
-  let bobAddress = accounts[3]
 
   const MIN_STAKE_250 = 250
   const MIN_STAKE_500 = 500
 
   let indexer
-  let indexerAddress
 
   let stakingTokenTemplate
   let stakingTokenMock
@@ -93,7 +91,6 @@ contract('Indexer Unit Tests', async accounts => {
   before('Setup contracts', async () => {
     await setupMockToken()
     indexer = await Indexer.new(stakingTokenAddress, MIN_STAKE_250)
-    indexerAddress = indexer.address
   })
 
   describe('Check constructor', async () => {
