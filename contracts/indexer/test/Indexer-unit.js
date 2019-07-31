@@ -20,10 +20,12 @@ const ALICE_LOC = intents.serialize(
 
 contract('Indexer Unit Tests', async accounts => {
   let owner = accounts[0]
-  let alice = accounts[1]
-  let bob = accounts[2]
+  let nonOwner = accounts[1]
+  let alice = accounts[2]
+  let bob = accounts[3]
 
   const MIN_STAKE_250 = 250
+  const MIN_STAKE_500 = 500
 
   let indexer
   let indexerAddress
@@ -81,5 +83,18 @@ contract('Indexer Unit Tests', async accounts => {
 
       emitted(result, 'SetStakeMinimum')
     })
+  })
+
+  describe('Test setStakeMinimum', async () => {
+    it('should not allow a non-owner to change the minimum', async () => {
+      await reverted(
+        indexer.setStakeMinimum(MIN_STAKE_500, {
+          from: nonOwner,
+        }),
+        'Ownable: caller is not the owner'
+      )
+    })
+
+    it('should allow the owner to change the minimum')
   })
 })
