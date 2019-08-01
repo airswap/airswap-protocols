@@ -11,7 +11,11 @@ const {
   equal,
   passes,
 } = require('@airswap/test-utils').assert
-const { getTimestampPlusDays } = require('@airswap/test-utils').time
+const {
+  getTimestampPlusDays,
+  revertToSnapShot,
+  takeSnapshot,
+} = require('@airswap/test-utils').time
 const { intents } = require('@airswap/indexer-utils')
 
 const ALICE_LOC = intents.serialize(
@@ -29,7 +33,6 @@ contract('Indexer Unit Tests', async accounts => {
 
   let indexer
   let snapshotId
-  let stakingTokenTemplate
   let stakingTokenMock
   let stakingTokenAddress
 
@@ -181,9 +184,13 @@ contract('Indexer Unit Tests', async accounts => {
       })
 
       // and 2 markets with the correct tokens have been created
-      markets = await indexer.createTwoSidedMarket.call(tokenOne, tokenTwo, {
-        from: aliceAddress,
-      })
+      let markets = await indexer.createTwoSidedMarket.call(
+        tokenOne,
+        tokenTwo,
+        {
+          from: aliceAddress,
+        }
+      )
 
       await checkMarketAtAddress(markets[0], tokenOne, tokenTwo)
       await checkMarketAtAddress(markets[1], tokenTwo, tokenOne)
@@ -208,9 +215,13 @@ contract('Indexer Unit Tests', async accounts => {
       })
 
       // instead the markets' addresses are returned
-      markets = await indexer.createTwoSidedMarket.call(tokenOne, tokenTwo, {
-        from: aliceAddress,
-      })
+      let markets = await indexer.createTwoSidedMarket.call(
+        tokenOne,
+        tokenTwo,
+        {
+          from: aliceAddress,
+        }
+      )
 
       await checkMarketAtAddress(markets[0], tokenOne, tokenTwo)
       await checkMarketAtAddress(markets[1], tokenTwo, tokenOne)

@@ -16,6 +16,8 @@ contract('Consumer Unit Tests', async () => {
   const maxUint = new BigNumber('1.1579209e+77')
 
   let snapshotId
+  let mockDelegateHigh
+  let mockDelegateLow
   let mockSwap
   let mockIndexer
   let consumer
@@ -36,8 +38,8 @@ contract('Consumer Unit Tests', async () => {
 
   async function setupMockDelgate() {
     let delegateTemplate = await Delegate.new(EMPTY_ADDRESS)
-    let mockDelegateHigh = await MockContract.new()
-    let mockDelegateLow = await MockContract.new()
+    mockDelegateHigh = await MockContract.new()
+    mockDelegateLow = await MockContract.new()
 
     //mock delegate getBuyQuote()
     let delegate_getBuyQuote = delegateTemplate.contract.methods
