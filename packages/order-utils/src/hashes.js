@@ -88,4 +88,7 @@ module.exports = {
       ])
     )
   },
+  hashParty,
+  hashDomain,
+  hashOrder,
 }

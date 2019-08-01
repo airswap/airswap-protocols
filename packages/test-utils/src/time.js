@@ -32,7 +32,7 @@ let advanceBlock = () => {
         method: 'evm_mine',
         id: new Date().getTime(),
       },
-      (err, result) => {
+      err => {
         if (err) {
           return reject(err)
         }
