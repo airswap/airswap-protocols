@@ -28,7 +28,7 @@ contract Market is Ownable {
   address public makerToken;
   address public takerToken;
 
-  // Length of the list
+  // Length of the linked list
   uint256 public length;
 
   // Maximum address value to indicate the head
@@ -39,7 +39,7 @@ contract Market is Ownable {
   byte constant private NEXT = 0x01;
 
   // Mapping of staker address to its neighbors
-  mapping(address => mapping(byte => Intent)) list;
+  mapping(address => mapping(byte => Intent)) intentsLinkedList;
 
   /**
     * @notice Intent to Trade
@@ -91,10 +91,10 @@ contract Market is Ownable {
     makerToken = _makerToken;
     takerToken = _takerToken;
 
-    // Initialize the list.
+    // Initialize the linked list.
     Intent memory head = Intent(HEAD, 0, 0, byte(0));
-    list[HEAD][PREV] = head;
-    list[HEAD][NEXT] = head;
+    intentsLinkedList[HEAD][PREV] = head;
+    intentsLinkedList[HEAD][NEXT] = head;
   }
 
   /**
@@ -113,9 +113,9 @@ contract Market is Ownable {
   ) external onlyOwner {
     Intent memory newIntent = Intent(_staker, _amount, _expiry, _locator);
 
-    // Insert after the next highest amount on the list.
+    // Insert after the next highest amount on the linked list.
     if (insertIntent(newIntent, findPosition(_amount))) {
-      // Increment the length of the list if successful.
+      // Increment the length of the linked list if successful.
       length = length + 1;
 
       emit SetIntent(_staker, _amount, _expiry, _locator, makerToken, takerToken);
@@ -130,7 +130,7 @@ contract Market is Ownable {
     address _staker
   ) public onlyOwner returns (bool) {
 
-    // Ensure the _staker is in the list.
+    // Ensure the _staker is in the linked list.
     if (!hasIntent(_staker)) {
       return false;
     }
@@ -149,11 +149,11 @@ contract Market is Ownable {
     address _staker
   ) public view returns (Intent memory) {
 
-    // Ensure the staker has a neighbor in the list.
-    if (list[_staker][PREV].staker != address(0)) {
+    // Ensure the staker has a neighbor in the linked list.
+    if (intentsLinkedList[_staker][PREV].staker != address(0)) {
 
       // Return the next intent from the previous neighbor.
-      return list[list[_staker][PREV].staker][NEXT];
+      return intentsLinkedList[intentsLinkedList[_staker][PREV].staker][NEXT];
     }
     return Intent(address(0), 0, 0, byte(0));
   }
@@ -180,8 +180,8 @@ contract Market is Ownable {
     }
     result = new bytes32[](limit);
 
-    // Get the first intent in the list.
-    Intent storage intent = list[HEAD][NEXT];
+    // Get the first intent in the linked list.
+    Intent storage intent = intentsLinkedList[HEAD][NEXT];
 
     // Iterate over the list until the end or limit.
     uint256 i = 0;
@@ -195,7 +195,7 @@ contract Market is Ownable {
         }
       }
 
-      intent = list[intent.staker][NEXT];
+      intent = intentsLinkedList[intent.staker][NEXT];
     }
   }
 
@@ -219,7 +219,7 @@ contract Market is Ownable {
       if (staker != HEAD) {
         if (isIntentExpired(staker)) {
           // we must track the neighbouring intent for when `staker` is removed
-          previousStaker = list[staker][PREV].staker;
+          previousStaker = intentsLinkedList[staker][PREV].staker;
           removeIntent(staker);
           staker = previousStaker;
         }
@@ -227,7 +227,7 @@ contract Market is Ownable {
         i++;
       }
       // now look at the next element
-      staker = list[staker][NEXT].staker;
+      staker = intentsLinkedList[staker][NEXT].staker;
     }
   }
 
@@ -242,15 +242,15 @@ contract Market is Ownable {
   }
 
   /**
-    * @notice Determine Whether a Staker is in the List
+    * @notice Determine Whether a Staker is in the Linked List
     * @param _staker address
     */
   function hasIntent(
     address _staker
   ) public view returns (bool) {
 
-    if (list[_staker][PREV].staker != address(0) &&
-      list[list[_staker][PREV].staker][NEXT].staker == _staker) {
+    if (intentsLinkedList[_staker][PREV].staker != address(0) &&
+      intentsLinkedList[intentsLinkedList[_staker][PREV].staker][NEXT].staker == _staker) {
       return true;
     }
     return false;
@@ -264,23 +264,23 @@ contract Market is Ownable {
     uint256 _amount
   ) internal view returns (Intent memory) {
 
-    // Get the first intent in the list.
-    Intent storage intent = list[HEAD][NEXT];
+    // Get the first intent in the linked list.
+    Intent storage intent = intentsLinkedList[HEAD][NEXT];
 
     if (_amount == 0) {
-      // return the head of the list
-      return list[intent.staker][PREV];
+      // return the head of the linked list
+      return intentsLinkedList[intent.staker][PREV];
     }
 
     // Iterate through the list until a lower amount is found.
     while (_amount <= intent.amount) {
-      intent = list[intent.staker][NEXT];
+      intent = intentsLinkedList[intent.staker][NEXT];
     }
     return intent;
   }
 
   /**
-    * @notice Insert a new intent in the list, before the specified _nextIntent
+    * @notice Insert a new intent in the linked list, before the specified _nextIntent
     *
     * @param _newIntent Intent to be inserted
     * @param _nextIntent Intent to follow _newIntent
@@ -290,13 +290,13 @@ contract Market is Ownable {
     Intent memory _nextIntent
   ) internal returns (bool) {
 
-    // Ensure the _existing intent is in the list.
+    // Ensure the _existing intent is in the linked list.
     if (!hasIntent(_nextIntent.staker)) {
       return false;
     }
 
     // Get the intent before the _nextIntent.
-    Intent memory previousIntent = list[_nextIntent.staker][PREV];
+    Intent memory previousIntent = intentsLinkedList[_nextIntent.staker][PREV];
 
     // Link the _newIntent into place.
     link(previousIntent, _newIntent);
@@ -315,8 +315,8 @@ contract Market is Ownable {
     Intent memory _left,
     Intent memory _right
   ) internal {
-    list[_left.staker][NEXT] = _right;
-    list[_right.staker][PREV] = _left;
+    intentsLinkedList[_left.staker][NEXT] = _right;
+    intentsLinkedList[_right.staker][PREV] = _left;
   }
 
   /**
@@ -326,13 +326,13 @@ contract Market is Ownable {
     */
   function removeIntent(address _staker) internal {
     // Link its neighbors together.
-    link(list[_staker][PREV], list[_staker][NEXT]);
+    link(intentsLinkedList[_staker][PREV], intentsLinkedList[_staker][NEXT]);
 
     // Delete staker from the list.
-    delete list[_staker][PREV];
-    delete list[_staker][NEXT];
+    delete intentsLinkedList[_staker][PREV];
+    delete intentsLinkedList[_staker][NEXT];
 
-    // Decrement the length of the list.
+    // Decrement the length of the linked list.
     length = length - 1;
   }
 
