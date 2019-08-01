@@ -2,6 +2,13 @@
 # yarn lockfile v1
 
 
+"@airswap/common@0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@airswap/common/-/common-0.1.0.tgz#0a218827de7c52241fee34d149fac87d718aabcb"
+  integrity sha512-LClzWzvHr6a8gR8ARpmGLeJvUeQaHcP+aawTiawUY16in3imvC5W/+3ivzOdHOf6bPw+4laAi7jJvgP0OBfnQQ==
+  dependencies:
+    openzeppelin-solidity "^v2.2"
+
 "@babel/code-frame@^7.0.0":
   version "7.0.0"
   resolved "https://registry.yarnpkg.com/@babel/code-frame/-/code-frame-7.0.0.tgz#06e2ab19bdb535385559aabb5ba59729482800f8"
