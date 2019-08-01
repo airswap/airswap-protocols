@@ -119,12 +119,18 @@ contract.only('Swap Unit Tests', async accounts => {
       let signature = [EMPTY_ADDRESS, v, r, s, ver]
 
       //mock maker authorizes mock taker
-      await swap.authorize(mockTaker, Jun_06_2017T00_00_00_UTC, {
-        from: mockMaker,
-      })
+      emitted(
+        await swap.authorize(mockTaker, Jun_06_2017T00_00_00_UTC, {
+          from: mockMaker,
+        }),
+        'Authorize'
+      )
 
       //mock taker will take the order
-      await swap.swap(order, signature, { from: mockTaker })
+      await reverted(
+        swap.swap(order, signature, { from: mockTaker }),
+        'SIGNER_UNAUTHORIZED.'
+      )
     })
 
     it('test when order is not specified', async () => {})
