@@ -6,7 +6,7 @@ const NonFungibleToken = artifacts.require('NonFungibleToken') // ERC721 Token
 const MockContract = artifacts.require('MockContract')
 const BigNumber = require('bignumber.js')
 const { equal, passes, reverted } = require('@airswap/test-utils').assert
-const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
+const { EMPTY_ADDRESS, ONE_ETH } = require('@airswap/order-utils').constants
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 
 contract('Transfers Unit Tests', async accounts => {
@@ -18,7 +18,6 @@ contract('Transfers Unit Tests', async accounts => {
   let fungibleTokenTemplate
   let nonFungibleTokenTemplate
   let mockNonFungibleToken
-  const etherAmount = web3.utils.toWei('1', 'ether')
   let snapshotId
 
   beforeEach(async () => {
@@ -47,15 +46,15 @@ contract('Transfers Unit Tests', async accounts => {
     it('Test sending 1 ether from sender to receiver', async () => {
       let receiverBalance = await web3.eth.getBalance(receiver)
       await passes(
-        mockTransfers.send(receiver, etherAmount, {
+        mockTransfers.send(receiver, ONE_ETH, {
           from: sender,
-          value: etherAmount,
+          value: ONE_ETH,
         })
       )
       let newReceiverBalance = await web3.eth.getBalance(receiver)
       equal(
         newReceiverBalance,
-        BigNumber(receiverBalance).plus(etherAmount),
+        BigNumber(receiverBalance).plus(ONE_ETH),
         'Ether in the transfer is missing.'
       )
     })
