@@ -16,7 +16,7 @@ const { allowances, balances } = require('@airswap/test-utils').balances
 const { getLatestTimestamp } = require('@airswap/test-utils').time
 const { orders, signatures } = require('@airswap/order-utils')
 
-const ONE_ETH = 1
+const ONE_ETH = web3.utils.toWei('1', 'ether')
 
 let snapshotId
 
@@ -510,15 +510,6 @@ contract('Swap', async accounts => {
       )
     })
 
-    it('Bob revokes the authorization to David', async () => {
-      emitted(
-        await swapContract.revoke(davidAddress, {
-          from: bobAddress,
-        }),
-        'Revoke'
-      )
-    })
-
     it('Checks remaining balances and approvals', async () => {
       // Alice and Bob swapped 25 AST for 5 DAI. Previous balances were:
       // Alice 700 AST 70 DAI, Bob 300 AST 930 DAI
@@ -743,10 +734,14 @@ contract('Swap', async accounts => {
           param: ONE_ETH,
         },
       })
+      // check alice's balance increases by 1 ETH
+      const balanceBefore = parseInt(await web3.eth.getBalance(aliceAddress))
       emitted(
         await swap(order, signature, { from: bobAddress, value: ONE_ETH }),
         'Swap'
       )
+      const expectedBalance = balanceBefore + parseInt(ONE_ETH)
+      equal(expectedBalance, parseInt(await web3.eth.getBalance(aliceAddress)), "Alice's balance did not increase by 1")
     })
 
     it('Ensures that Swap has not kept any of the ether', async () => {
