@@ -741,7 +741,11 @@ contract('Swap', async accounts => {
         'Swap'
       )
       const expectedBalance = balanceBefore + parseInt(ONE_ETH)
-      equal(expectedBalance, parseInt(await web3.eth.getBalance(aliceAddress)), "Alice's balance did not increase by 1")
+      equal(
+        expectedBalance,
+        parseInt(await web3.eth.getBalance(aliceAddress)),
+        "Alice's balance did not increase by 1"
+      )
     })
 
     it('Ensures that Swap has not kept any of the ether', async () => {
