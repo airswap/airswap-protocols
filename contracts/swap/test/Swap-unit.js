@@ -96,7 +96,7 @@ contract.only('Swap Unit Tests', async accounts => {
       let affiliate = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
       let order = [0, Jun_06_2017T00_00_00_UTC, maker, taker, affiliate]
       let signature = [EMPTY_ADDRESS, v, r, s, ver]
-     
+
       //TODO
       //await swap.swap(order, signature)
     })
@@ -107,7 +107,7 @@ contract.only('Swap Unit Tests', async accounts => {
       let affiliate = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
       let order = [0, Jun_06_2017T00_00_00_UTC, maker, taker, affiliate]
       let signature = [EMPTY_ADDRESS, v, r, s, ver]
-      
+
       await reverted(swap.swap(order, signature), 'SENDER_UNAUTHORIZED')
     })
 
@@ -117,9 +117,11 @@ contract.only('Swap Unit Tests', async accounts => {
       let affiliate = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
       let order = [0, Jun_06_2017T00_00_00_UTC, maker, taker, affiliate]
       let signature = [EMPTY_ADDRESS, v, r, s, ver]
-    
+
       //mock maker authorizes mock taker
-      await swap.authorize(mockTaker, Jun_06_2017T00_00_00_UTC, { from: mockMaker })
+      await swap.authorize(mockTaker, Jun_06_2017T00_00_00_UTC, {
+        from: mockMaker,
+      })
 
       //mock taker will take the order
       await swap.swap(order, signature, { from: mockTaker })
