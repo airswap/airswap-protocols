@@ -1,7 +1,9 @@
 const Delegate = artifacts.require('Delegate')
 const Swap = artifacts.require('@airswap/swap/contracts/Swap.sol')
-const Transfers = artifacts.require('@airswap/common/libraries/Transfers.sol')
-const Types = artifacts.require('@airswap/common/libraries/Types.sol')
+const Transfers = artifacts.require(
+  '@airswap/libraries/contracts/Transfers.sol'
+)
+const Types = artifacts.require('@airswap/libraries/contracts/Types.sol')
 
 module.exports = deployer => {
   deployer.deploy(Transfers)
