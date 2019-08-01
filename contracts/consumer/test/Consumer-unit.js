@@ -1,3 +1,4 @@
+/* global artifacts, contract */
 const Consumer = artifacts.require('Consumer')
 const Indexer = artifacts.require('Indexer')
 const Delegate = artifacts.require('Delegate')
@@ -35,8 +36,8 @@ contract('Consumer Unit Tests', async () => {
 
   async function setupMockDelgate() {
     let delegateTemplate = await Delegate.new(EMPTY_ADDRESS)
-    mockDelegateHigh = await MockContract.new()
-    mockDelegateLow = await MockContract.new()
+    let mockDelegateHigh = await MockContract.new()
+    let mockDelegateLow = await MockContract.new()
 
     //mock delegate getBuyQuote()
     let delegate_getBuyQuote = delegateTemplate.contract.methods

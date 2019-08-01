@@ -1,3 +1,4 @@
+/* global artifacts, contract, web3 */
 const Indexer = artifacts.require('Indexer')
 const Market = artifacts.require('Market')
 const MockContract = artifacts.require('MockContract')
@@ -10,10 +11,8 @@ const {
   equal,
   passes,
 } = require('@airswap/test-utils').assert
-const { balances } = require('@airswap/test-utils').balances
 const { getTimestampPlusDays } = require('@airswap/test-utils').time
 const { intents } = require('@airswap/indexer-utils')
-const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 
 const ALICE_LOC = intents.serialize(
   intents.Locators.URL,
@@ -29,7 +28,7 @@ contract('Indexer Unit Tests', async accounts => {
   const MIN_STAKE_500 = 500
 
   let indexer
-
+  let snapshotId
   let stakingTokenTemplate
   let stakingTokenMock
   let stakingTokenAddress
