@@ -1,9 +1,14 @@
+/* global artifacts, contract */
 const Indexer = artifacts.require('Indexer')
 const FungibleToken = artifacts.require('FungibleToken')
 
 const { emitted, reverted, equal, ok } = require('@airswap/test-utils').assert
 const { balances } = require('@airswap/test-utils').balances
-const { getTimestampPlusDays } = require('@airswap/test-utils').time
+const {
+  getTimestampPlusDays,
+  takeSnapshot,
+  revertToSnapShot,
+} = require('@airswap/test-utils').time
 const { intents } = require('@airswap/indexer-utils')
 
 const ALICE_LOC = intents.serialize(
@@ -11,7 +16,9 @@ const ALICE_LOC = intents.serialize(
   'https://rpc.maker-cloud.io:1123'
 )
 
-contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
+let snapshotId
+
+contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
   let indexer
   let indexerAddress
 
@@ -19,9 +26,18 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
   let tokenDAI
   let tokenWETH
 
-  describe('Deploying...', () => {
+  before('Setup', async () => {
+    let snapShot = await takeSnapshot()
+    snapshotId = snapShot['result']
+  })
+
+  after(async () => {
+    await revertToSnapShot(snapshotId)
+  })
+
+  describe('Deploying...', async () => {
     it('Deployed staking token "AST"', async () => {
-      tokenAST = await FungibleToken.deployed()
+      tokenAST = await FungibleToken.new()
     })
 
     it('Deployed trading token "DAI"', async () => {
@@ -33,13 +49,13 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
     })
 
     it('Deployed Indexer contract', async () => {
-      indexer = await Indexer.deployed({ from: ownerAddress })
+      indexer = await Indexer.new(tokenAST.address, 200, { from: ownerAddress })
       indexerAddress = indexer.address
       emitted(await indexer.setStakeMinimum(250), 'SetStakeMinimum')
     })
   })
 
-  describe('Market setup', () => {
+  describe('Market setup', async () => {
     it('Bob creates a market (collection of intents) for WETH/DAI', async () => {
       emitted(
         await indexer.createMarket(tokenWETH.address, tokenDAI.address, {
@@ -86,7 +102,7 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
     })
   })
 
-  describe('Staking', () => {
+  describe('Staking', async () => {
     it('Fails due to no staking token balance', async () => {
       await reverted(
         indexer.setIntent(
@@ -131,8 +147,8 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
     })
 
     it('Checks balances', async () => {
-      ok(balances(aliceAddress, [[tokenAST, 1000]]))
-      ok(balances(indexerAddress, [[tokenAST, 0]]))
+      ok(await balances(aliceAddress, [[tokenAST, 1000]]))
+      ok(await balances(indexerAddress, [[tokenAST, 0]]))
     })
 
     it('Alice attempts to stake and set an intent succeeds', async () => {
@@ -152,12 +168,12 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
     })
 
     it('Checks balances', async () => {
-      ok(balances(aliceAddress, [[tokenAST, 500]]))
-      ok(balances(indexerAddress, [[tokenAST, 500]]))
+      ok(await balances(aliceAddress, [[tokenAST, 500]]))
+      ok(await balances(indexerAddress, [[tokenAST, 500]]))
     })
   })
 
-  describe('Intent integrity', () => {
+  describe('Intent integrity', async () => {
     it('Bob ensures only one intent is on the Indexer', async () => {
       equal(await indexer.lengthOf(tokenWETH.address, tokenDAI.address), 1)
     })
@@ -184,8 +200,8 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
     })
 
     it('Checks balances', async () => {
-      ok(balances(aliceAddress, [[tokenAST, 1000]]))
-      ok(balances(indexerAddress, [[tokenAST, 0]]))
+      ok(await balances(aliceAddress, [[tokenAST, 1000]]))
+      ok(await balances(indexerAddress, [[tokenAST, 0]]))
     })
 
     it('Bob ensures there are no more intents the Indexer', async () => {
@@ -216,7 +232,7 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
       )
     })
   })
-  describe('Blacklisting', () => {
+  describe('Blacklisting', async () => {
     it('Alice attempts to blacklist a market and fails because she is not owner', async () => {
       await reverted(
         indexer.addToBlacklist(tokenDAI.address, {
@@ -308,6 +324,10 @@ contract('Indexer', ([ownerAddress, aliceAddress, bobAddress]) => {
     })
 
     it('Alice attempts to stake and set a two-sided intent and succeeds', async () => {
+      await indexer.unsetIntent(tokenWETH.address, tokenDAI.address, {
+        from: aliceAddress,
+      })
+
       let result = await indexer.setTwoSidedIntent(
         tokenWETH.address,
         tokenDAI.address,

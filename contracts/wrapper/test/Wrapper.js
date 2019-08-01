@@ -1,10 +1,18 @@
+/* global artifacts, contract */
 const Swap = artifacts.require('Swap')
+const Transfers = artifacts.require('Transfers')
+const Types = artifacts.require('Types')
 const Wrapper = artifacts.require('Wrapper')
 const WETH9 = artifacts.require('WETH9')
 const FungibleToken = artifacts.require('FungibleToken')
 
-const { emitted, getResult, passes } = require('@airswap/test-utils').assert
-const { getTimestampPlusDays } = require('@airswap/test-utils').time
+const { emitted, getResult, passes, ok } = require('@airswap/test-utils').assert
+const { balances } = require('@airswap/test-utils').balances
+const {
+  getTimestampPlusDays,
+  takeSnapshot,
+  revertToSnapShot,
+} = require('@airswap/test-utils').time
 const { orders, signatures } = require('@airswap/order-utils')
 
 let swapContract
@@ -13,48 +21,66 @@ let wrapperContract
 let swapAddress
 let wrapperAddress
 
-let swap
 let swapSimple
 
-contract('Wrapper', ([aliceAddress, bobAddress, carolAddress]) => {
+let tokenDAI
+let tokenWETH
+let snapshotId
+
+contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
   orders.setKnownAccounts([aliceAddress, bobAddress, carolAddress])
 
-  describe('Setup', () => {
-    before('Deploys all the things', async () => {
-      swapContract = await Swap.deployed()
-      swapAddress = swapContract.address
-      wrapperContract = await Wrapper.deployed()
-      wrapperAddress = wrapperContract.address
-      tokenWETH = await WETH9.deployed()
-      tokenDAI = await FungibleToken.new()
+  before('Setup', async () => {
+    let snapShot = await takeSnapshot()
+    snapshotId = snapShot['result']
+    // deploy both libs
+    const transfersLib = await Transfers.new()
+    const typesLib = await Types.new()
 
-      orders.setVerifyingContract(swapAddress)
+    // link both libs to swap
+    await Swap.link(Transfers, transfersLib.address)
+    await Swap.link(Types, typesLib.address)
 
-      swap =
-        swapContract.methods[
-          'swap((uint256,uint256,(address,address,uint256),(address,address,uint256),(address,address,uint256)),(address,uint8,bytes32,bytes32,bytes1))'
-        ]
-      swapSimple =
-        wrapperContract.methods[
-          'swapSimple(uint256,uint256,address,uint256,address,address,uint256,address,uint8,bytes32,bytes32)'
-        ]
-    })
+    // now deploy swap
+    swapContract = await Swap.new()
+
+    swapAddress = swapContract.address
+    tokenWETH = await WETH9.new()
+    wrapperContract = await Wrapper.new(swapAddress, tokenWETH.address)
+    wrapperAddress = wrapperContract.address
+    tokenDAI = await FungibleToken.new()
+
+    await orders.setVerifyingContract(swapAddress)
+
+    swapSimple =
+      wrapperContract.methods[
+        'swapSimple(uint256,uint256,address,uint256,address,address,uint256,address,uint8,bytes32,bytes32)'
+      ]
+  })
+
+  after(async () => {
+    await revertToSnapShot(snapshotId)
+  })
+
+  describe('Setup', async () => {
     it('Mints 1000 DAI for Alice', async () => {
       let tx = await tokenDAI.mint(aliceAddress, 1000)
+      ok(await balances(aliceAddress, [[tokenDAI, 1000]]))
       emitted(tx, 'Transfer')
       passes(tx)
     })
   })
 
-  describe('Approving...', () => {
+  describe('Approving...', async () => {
     it('Alice approves Swap to spend 9999 DAI', async () => {
-      let tx = await tokenDAI.approve(swapAddress, 9999, { from: aliceAddress })
-      emitted(tx, 'Approval')
-      passes(tx)
+      let result = await tokenDAI.approve(swapAddress, 1000, {
+        from: aliceAddress,
+      })
+      emitted(result, 'Approval')
     })
   })
 
-  describe('Wrap Buys', () => {
+  describe('Wrap Buys', async () => {
     it('Checks that Bob take a WETH order from Alice using ETH', async () => {
       const { order } = await orders.getOrder({
         maker: {
@@ -72,7 +98,6 @@ contract('Wrapper', ([aliceAddress, bobAddress, carolAddress]) => {
         aliceAddress,
         swapAddress
       )
-
       let result = await swapSimple(
         order.nonce,
         order.expiry,
@@ -87,7 +112,7 @@ contract('Wrapper', ([aliceAddress, bobAddress, carolAddress]) => {
         signature.s,
         { from: bobAddress, value: order.taker.param }
       )
-      passes(result)
+      await passes(result)
       result = await getResult(swapContract, result.tx)
       emitted(result, 'Swap')
     })
