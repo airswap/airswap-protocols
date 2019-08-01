@@ -18,8 +18,8 @@ references:
       - checkout
       - restore_cache:
           keys:
-          - v1-dependencies-{{ checksum "package.json" }}
-          - v1-dependencies-
+            - v1-dependencies-{{ checksum "package.json" }}
+            - v1-dependencies-
       - run:
           name: yarn install and dependencies
           command: |
@@ -56,28 +56,6 @@ jobs:
       - run:
           name: Set up the npm user
           command: npm-login-noninteractive
-      - run:
-          name: NPM publish contracts
-          command: |
-            cd contracts
-            ### ADD FOLDERS HERE TO PROCESS ###
-            for file in common
-            do
-              echo "Working on $file"
-              cd $file
-              NPM_NAME=$(node -p "require('./package.json').name")
-              NPM_VERSION=$(npm view $NPM_NAME version || :)
-              LOCAL_VERSION=$(node -p "require('./package.json').version")
-              echo $NPM_NAME
-              echo $NPM_VERSION
-              echo $LOCAL_VERSION
-              if [[ $LOCAL_VERSION != $NPM_VERSION ]]; then
-                echo "Updating NPM..." # this is where we deploy the code to npm
-                npm publish
-                npm access restricted $NPM_NAME
-              fi
-              cd ..
-            done
       - run:
           name: NPM publish packages
           command: |

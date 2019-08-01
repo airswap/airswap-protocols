@@ -19,7 +19,6 @@
     "@airswap/test-utils": "0.1.0"
   },
   "dependencies": {
-    "@airswap/common": "0.1.0",
     "@airswap/swap": "0.1.0",
     "openzeppelin-solidity": "^v2.2"
   }
