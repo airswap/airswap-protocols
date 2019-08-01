@@ -4,10 +4,14 @@
     "ecmaVersion": 2017
   },
   "env": {
-    "es6": true
+    "es6": true,
+    "node": true,
+    "mocha": true
   },
   "plugins": ["prettier"],
   "rules": {
-    "prettier/prettier": "error"
+    "prettier/prettier": "error",
+    "no-undef": "warn",
+    "no-unused-vars": "warn"
   }
 }

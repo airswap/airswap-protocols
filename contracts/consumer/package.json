@@ -1,6 +1,7 @@
 {
   "name": "@airswap/consumer",
   "version": "0.1.0",
+  "description": "Example integration of Swap, Indexer, and Delegate contracts",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",

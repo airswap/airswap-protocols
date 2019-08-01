@@ -1,3 +1,4 @@
+/* global artifacts, contract */
 const Consumer = artifacts.require('Consumer')
 const Indexer = artifacts.require('Indexer')
 const Delegate = artifacts.require('Delegate')
@@ -15,6 +16,8 @@ contract('Consumer Unit Tests', async () => {
   const maxUint = new BigNumber('1.1579209e+77')
 
   let snapshotId
+  let mockDelegateHigh
+  let mockDelegateLow
   let mockSwap
   let mockIndexer
   let consumer

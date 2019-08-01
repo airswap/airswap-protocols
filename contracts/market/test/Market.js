@@ -1,3 +1,5 @@
+/* global artifacts, contract */
+const assert = require('assert')
 const BN = require('bignumber.js')
 
 const Market = artifacts.require('Market')
@@ -64,16 +66,10 @@ contract('Market', async accounts => {
   })
 
   describe('Deploying...', async () => {
-    it('Deployed trading token "AST"', async () => {
-      tokenAST = await FungibleToken.new()
-    })
-
-    it('Deployed trading token "DAI"', async () => {
-      tokenDAI = await FungibleToken.new()
-    })
-
-    it('Deployed market for AST/DAI', async () => {
-      market = await Market.new(tokenAST.address, tokenDAI.address)
+    it('Deployed trading token "AST" and "DAI" and market for AST/DAI', async () => {
+        let tokenAST = await FungibleToken.new()
+        let tokenDAI = await FungibleToken.new()
+        market = await Market.new(tokenAST.address, tokenDAI.address)
     })
   })
 

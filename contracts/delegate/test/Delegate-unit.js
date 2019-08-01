@@ -1,10 +1,10 @@
+/* global artifacts, contract, web3*/
 const Delegate = artifacts.require('Delegate')
 const Swap = artifacts.require('Swap')
 const Transfers = artifacts.require('Transfers')
 const Types = artifacts.require('Types')
 const FungibleToken = artifacts.require('FungibleToken')
 const MockContract = artifacts.require('MockContract')
-const abi = require('ethereumjs-abi')
 const {
   equal,
   notEqual,
@@ -20,6 +20,7 @@ contract('Delegate Unit Tests', async accounts => {
   const notOwner = accounts[2]
   let delegate
   let mockSwap
+  let snapshotId
   let swap_swapSimple
   const DELEGATE_TOKEN = accounts[9]
   const CONSUMER_TOKEN = accounts[8]
@@ -460,7 +461,7 @@ contract('Delegate Unit Tests', async accounts => {
         CONSUMER_TOKEN
       )
 
-      consumer_amount = 100
+      let consumer_amount = 100
       await passes(
         //mock swapContract
         //test rule decrement
@@ -511,7 +512,7 @@ contract('Delegate Unit Tests', async accounts => {
         CONSUMER_TOKEN
       )
 
-      consumer_amount = 100
+      let consumer_amount = 100
       await passes(
         //mock swapContract
         //test rule decrement
@@ -549,7 +550,7 @@ contract('Delegate Unit Tests', async accounts => {
         EXP
       )
 
-      consumer_amount = 100
+      let consumer_amount = 100
       await passes(
         //mock swapContract
         //test rule decrement

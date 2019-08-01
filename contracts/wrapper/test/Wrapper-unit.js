@@ -1,3 +1,4 @@
+/* global artifacts, contract, web3 */
 const Swap = artifacts.require('Swap')
 const Wrapper = artifacts.require('Wrapper')
 const WETH9 = artifacts.require('WETH9')
@@ -18,6 +19,7 @@ contract('Wrapper Unit Tests', async accounts => {
   let wethTemplate
   let weth_balance
   let swap_swapSimple
+  let snapshotId
 
   beforeEach(async () => {
     let snapShot = await takeSnapshot()
