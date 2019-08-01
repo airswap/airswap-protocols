@@ -33,7 +33,7 @@ contract Indexer is IIndexer, Ownable {
   // Minimum token amount required for staking
   uint256 public stakeMinimum;
 
-  // Mapping of token to token for market lookup
+  // Mapping of maker token to taker token to market
   mapping (address => mapping (address => Market)) public markets;
 
   // Mapping of address to timestamp of blacklisting

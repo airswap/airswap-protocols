@@ -1,6 +1,7 @@
+/* global web3 */
 /*
   Copyright 2019 Swap Holdings Ltd.
-  
+
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
@@ -16,7 +17,12 @@
 
 const ethUtil = require('ethereumjs-util')
 const sigUtil = require('eth-sig-util')
-const { DOMAIN_NAME, DOMAIN_VERSION, types } = require('./constants')
+const {
+  DOMAIN_NAME,
+  DOMAIN_VERSION,
+  EMPTY_ADDRESS,
+  types,
+} = require('./constants')
 const hashes = require('./hashes')
 
 module.exports = {
@@ -87,7 +93,7 @@ module.exports = {
   getEmptySignature() {
     return {
       version: '0x0',
-      signer: '0x0000000000000000000000000000000000000000',
+      signer: EMPTY_ADDRESS,
       v: '0',
       r: '0x0',
       s: '0x0',

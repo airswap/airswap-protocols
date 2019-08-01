@@ -25,25 +25,25 @@ library Types {
   bytes constant internal EIP191_HEADER = "\x19\x01";
 
   struct Party {
-    address wallet;
-    address token;
-    uint256 param;
+    address wallet;   // Wallet address of the party
+    address token;    // Contract address of the token
+    uint256 param;    // Value (ERC-20) or ID (ERC-721)
   }
 
   struct Order {
-    uint256 nonce;
-    uint256 expiry;
-    Party maker;
-    Party taker;
-    Party affiliate;
+    uint256 nonce;    // Unique per order and should be sequential
+    uint256 expiry;   // Expiry in seconds since 1 January 1970
+    Party maker;      // Party to the trade that sets terms
+    Party taker;      // Party to the trade that accepts terms
+    Party affiliate;  // Party compensated for facilitating (optional)
   }
 
   struct Signature {
-    address signer;
-    uint8 v;
-    bytes32 r;
-    bytes32 s;
-    bytes1 version;
+    address signer;   // Address of the wallet used to sign
+    uint8 v;          // `v` value of an ECDSA signature
+    bytes32 r;        // `r` value of an ECDSA signature
+    bytes32 s;        // `s` value of an ECDSA signature
+    bytes1 version;   // EIP-191 signature version
   }
 
   bytes32 constant DOMAIN_TYPEHASH = keccak256(abi.encodePacked(
