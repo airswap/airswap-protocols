@@ -894,6 +894,26 @@ contract('Swap', async accounts => {
       )
     })
 
+    it('Checks that a Swap (Simple) fails because order is no longer available', async () => {
+      await reverted(
+        swapSimple(
+          _order.nonce,
+          _order.expiry,
+          _order.maker.wallet,
+          _order.maker.param,
+          _order.maker.token,
+          _order.taker.wallet,
+          _order.taker.param,
+          _order.taker.token,
+          _signature.v,
+          _signature.r,
+          _signature.s,
+          { from: bobAddress }
+        ),
+        'ORDER_UNAVAILABLE'
+      )
+    })
+
     it('Checks that an invalid simple signature will fail', async () => {
       const { order } = await orders.getOrder({
         maker: {
