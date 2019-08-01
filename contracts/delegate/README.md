@@ -41,6 +41,10 @@ constructor(
 | :-------------------- | :-------- | :-------------------------------------------------- |
 | `initialSwapContract` | `address` | Address of the Swap contract used to settle trades. |
 
+## Price Calculations
+
+All amounts are in the smallest unit (e.g. wei), so all calculations based on price result in a whole number. For calculations that would result in a decimal, the amount is automatically floored by dropping the decimal. For example, a price of `5.25` and `delegateAmount` of `2` results in `consumerAmount` of `10` rather than `10.5`. Tokens have many decimal places so these differences are very small.
+
 ## Set a Rule
 
 Set a trading rule for the Delegate.
@@ -79,7 +83,7 @@ Set a rule to send up to 100,000 DAI for WETH at 312.50 WETH/DAI
 setRule(<WETHAddress>, <DAIAddress>, 100000, 32150, 2)
 ```
 
-Set a rule to send up to 100,000 DAI for WETH at 312 DAI/WETH
+Set a rule to send up to 100,000 DAI for WETH at 312 WETH/DAI
 
 ```Solidity
 setRule(<WETHAddress>, <DAIAddress>, 100000, 312, 0)
