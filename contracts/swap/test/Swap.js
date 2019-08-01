@@ -16,6 +16,8 @@ const { allowances, balances } = require('@airswap/test-utils').balances
 const { getLatestTimestamp } = require('@airswap/test-utils').time
 const { orders, signatures } = require('@airswap/order-utils')
 
+const ONE_ETH = 1
+
 let snapshotId
 
 contract('Swap', async accounts => {
@@ -220,7 +222,7 @@ contract('Swap', async accounts => {
         },
       })
       await reverted(
-        swap(order, signature, { from: bobAddress, value: 1 }),
+        swap(order, signature, { from: bobAddress, value: ONE_ETH }),
         'VALUE_MUST_BE_ZERO'
       )
     })
@@ -706,16 +708,10 @@ contract('Swap', async accounts => {
   })
 
   describe('Swap with Ether', async () => {
-    const value = 1
-
-    it('Checks allowance (Alice 200 AST)', async () => {
-      emitted(
-        await tokenAST.approve(swapAddress, 200, { from: aliceAddress }),
-        'Approval'
-      )
+    it('Checks allowance (Alice 650 AST remaining)', async () => {
       ok(
-        await allowances(aliceAddress, swapAddress, [[tokenAST, 200]]),
-        'Alice has not approved 200 AST'
+        await allowances(aliceAddress, swapAddress, [[tokenAST, 650]]),
+        'Alice has not approved 650 AST'
       )
     })
 
@@ -726,7 +722,7 @@ contract('Swap', async accounts => {
         },
         taker: {
           wallet: bobAddress,
-          param: value,
+          param: ONE_ETH,
         },
       })
       await reverted(
@@ -744,10 +740,10 @@ contract('Swap', async accounts => {
         },
         taker: {
           wallet: bobAddress,
-          param: value,
+          param: ONE_ETH,
         },
       })
-      emitted(await swap(order, signature, { from: bobAddress, value }), 'Swap')
+      emitted(await swap(order, signature, { from: bobAddress, value: ONE_ETH }), 'Swap')
     })
 
     it('Ensures that Swap has not kept any of the ether', async () => {
@@ -769,7 +765,7 @@ contract('Swap', async accounts => {
         },
       })
       await reverted(
-        swap(order, signature, { from: bobAddress, value }),
+        swap(order, signature, { from: bobAddress, value: ONE_ETH }),
         'VALUE_MUST_BE_ZERO'
       )
     })
