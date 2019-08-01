@@ -67,9 +67,9 @@ contract('Market', async accounts => {
 
   describe('Deploying...', async () => {
     it('Deployed trading token "AST" and "DAI" and market for AST/DAI', async () => {
-        let tokenAST = await FungibleToken.new()
-        let tokenDAI = await FungibleToken.new()
-        market = await Market.new(tokenAST.address, tokenDAI.address)
+      let tokenAST = await FungibleToken.new()
+      let tokenDAI = await FungibleToken.new()
+      market = await Market.new(tokenAST.address, tokenDAI.address)
     })
   })
 

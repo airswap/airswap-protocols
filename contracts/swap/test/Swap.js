@@ -1,3 +1,4 @@
+/* global artifacts, contract, web3 */
 const Swap = artifacts.require('Swap')
 const Transfers = artifacts.require('Transfers')
 const Types = artifacts.require('Types')
@@ -600,6 +601,13 @@ contract('Swap', async accounts => {
   })
 
   describe('Cancels', async () => {
+    let _orderOne
+    let _signatureOne
+    let _orderTwo
+    let _signatureTwo
+    let _orderThree
+    let _signatureThree
+
     before('Alice creates orders with nonces 1, 2, 3', async () => {
       const {
         order: orderOne,

@@ -1,3 +1,4 @@
+/* global artifacts, contract */
 const Delegate = artifacts.require('Delegate')
 const Swap = artifacts.require('Swap')
 const Transfers = artifacts.require('Transfers')

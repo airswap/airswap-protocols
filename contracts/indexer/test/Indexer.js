@@ -1,3 +1,4 @@
+/* global artifacts, contract */
 const Indexer = artifacts.require('Indexer')
 const FungibleToken = artifacts.require('FungibleToken')
 

@@ -1,3 +1,4 @@
+/* global artifacts, contract */
 const Swap = artifacts.require('Swap')
 const Transfers = artifacts.require('Transfers')
 const Types = artifacts.require('Types')
@@ -20,7 +21,6 @@ let wrapperContract
 let swapAddress
 let wrapperAddress
 
-let swap
 let swapSimple
 
 let tokenDAI
@@ -52,10 +52,6 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
 
     await orders.setVerifyingContract(swapAddress)
 
-    swap =
-      swapContract.methods[
-        'swap((uint256,uint256,(address,address,uint256),(address,address,uint256),(address,address,uint256)),(address,uint8,bytes32,bytes32,bytes1))'
-      ]
     swapSimple =
       wrapperContract.methods[
         'swapSimple(uint256,uint256,address,uint256,address,address,uint256,address,uint8,bytes32,bytes32)'

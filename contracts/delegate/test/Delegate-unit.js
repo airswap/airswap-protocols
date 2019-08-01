@@ -3,7 +3,6 @@ const Delegate = artifacts.require('Delegate')
 const Swap = artifacts.require('Swap')
 const Transfers = artifacts.require('Transfers')
 const Types = artifacts.require('Types')
-const FungibleToken = artifacts.require('FungibleToken')
 const MockContract = artifacts.require('MockContract')
 const {
   equal,
