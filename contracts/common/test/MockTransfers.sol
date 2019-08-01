@@ -10,8 +10,10 @@ import "../libraries/Transfers.sol";
   */
 contract MockTransfers {
 
-  function send(address _receiver,
-  uint256 _value) public payable {
+  function send(
+    address _receiver,
+    uint256 _value
+  ) public payable {
     Transfers.send(_receiver, _value);
   }
 
@@ -26,7 +28,8 @@ contract MockTransfers {
     address _from,
     address _to,
     uint256 _param,
-    address _token) public {
+    address _token
+  ) public {
     Transfers.safeTransferAny(_side,
     _from,
     _to,

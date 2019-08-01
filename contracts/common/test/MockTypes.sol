@@ -16,9 +16,11 @@ contract MockTypes {
     return Types.hashOrder(_order, _domainSeparator);
   }
 
-  function hashDomain(bytes memory _name,
-  bytes memory _version,
-  address _verifyingContract) public pure returns (bytes32) {
+  function hashDomain(
+    bytes memory _name,
+    bytes memory _version,
+    address _verifyingContract
+  ) public pure returns (bytes32) {
     return Types.hashDomain(_name, _version, _verifyingContract);
   }
 }

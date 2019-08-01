@@ -1,3 +1,4 @@
+/* global artifacts, contract, web3*/
 const Types = artifacts.require('../libraries/Types')
 const MockTypes = artifacts.require('MockTypes')
 const { equal } = require('@airswap/test-utils').assert
@@ -15,8 +16,9 @@ const {
 const { orders } = require('@airswap/order-utils')
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 
-contract('Types Unit Tests', async accounts => {
+contract('Types Unit Tests', async () => {
   let mockTypes
+  let snapshotId
 
   beforeEach(async () => {
     let snapShot = await takeSnapshot()
@@ -40,18 +42,21 @@ contract('Types Unit Tests', async accounts => {
         EMPTY_ADDRESS,
         0,
       ])
-      equal(result, '0x' + hashParty(defaults.Party).toString('hex'))
+      equal(
+        result,
+        '0x' + hashParty(defaults.Party).toString('hex'),
+        'Part hash hashed incorrectly.'
+      )
     })
 
     it('Test hashOrder', async () => {
-      const { order, signature } = await orders.getOrder({})
-      let party = [EMPTY_ADDRESS, EMPTY_ADDRESS, 0]
-      orderCall = [order.expiry, order.nonce, party, party, party]
+      const { order } = await orders.getOrder({})
       let hashedDomain = '0x' + hashDomain(mockTypes.address).toString('hex')
       let hashedOrder = await mockTypes.hashOrder(order, hashedDomain)
       equal(
         hashedOrder,
-        '0x' + getOrderHash(order, mockTypes.address).toString('hex')
+        '0x' + getOrderHash(order, mockTypes.address).toString('hex'),
+        'Order hash hashed incorrectly.'
       )
     })
 
@@ -61,7 +66,11 @@ contract('Types Unit Tests', async accounts => {
         web3.utils.fromAscii(DOMAIN_VERSION),
         mockTypes.address
       )
-      equal(hashedDomain, '0x' + hashDomain(mockTypes.address).toString('hex'))
+      equal(
+        hashedDomain,
+        '0x' + hashDomain(mockTypes.address).toString('hex'),
+        'Domain hash hashed incorrectly.'
+      )
     })
   })
 })
