@@ -16,8 +16,7 @@ const {
 const { allowances, balances } = require('@airswap/test-utils').balances
 const { getLatestTimestamp } = require('@airswap/test-utils').time
 const { orders, signatures } = require('@airswap/order-utils')
-
-const ONE_ETH = web3.utils.toWei('1', 'ether')
+const { EMPTY_ADDRESS, ONE_ETH } = require('@airswap/order-utils').constants
 
 let snapshotId
 
@@ -980,7 +979,7 @@ contract('Swap', async accounts => {
         },
         taker: {
           wallet: bobAddress,
-          token: '0x0000000000000000000000000000000000000000',
+          token: EMPTY_ADDRESS,
           param: 10,
         },
       })

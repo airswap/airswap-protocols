@@ -1,6 +1,7 @@
+/* global web3 */
 /*
   Copyright 2019 Swap Holdings Ltd.
-  
+
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
@@ -19,6 +20,7 @@ module.exports = {
   DOMAIN_VERSION: '2',
   SECONDS_IN_DAY: 86400,
   EMPTY_ADDRESS: '0x0000000000000000000000000000000000000000',
+  ONE_ETH: web3.utils.toWei('1', 'ether'),
   types: {
     EIP712Domain: [
       { name: 'name', type: 'string' },
