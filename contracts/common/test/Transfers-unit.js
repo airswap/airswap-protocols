@@ -53,7 +53,7 @@ contract('Transfers Unit Tests', async accounts => {
         })
       )
       let newReceiverBalance = await web3.eth.getBalance(receiver)
-      equal(newReceiverBalance, BigNumber(receiverBalance).plus(etherAmount))
+      equal(newReceiverBalance, BigNumber(receiverBalance).plus(etherAmount), 'Ether in the transfer is missing.')
     })
   })
 
@@ -80,7 +80,7 @@ contract('Transfers Unit Tests', async accounts => {
       let invocationCount = await mockFungibleToken.invocationCountForMethod.call(
         fungibleToken_transferFrom
       )
-      equal(invocationCount, 1, 'FungibleToken.transferFrom was called once')
+      equal(invocationCount, 1, 'FungibleToken.transferFrom was not called.')
     })
 
     it('Test transferAny ERC721', async () => {
@@ -116,7 +116,7 @@ contract('Transfers Unit Tests', async accounts => {
       equal(
         invocationCount,
         1,
-        'NonFungibleToken.safetransferFrom was called once'
+        'NonFungibleToken.safetransferFrom was not called.'
       )
     })
   })
@@ -209,7 +209,7 @@ contract('Transfers Unit Tests', async accounts => {
       equal(
         invocationCount,
         1,
-        'NonFungibleToken.safetransferFrom was called once'
+        'NonFungibleToken.safetransferFrom was not called.'
       )
     })
   })
