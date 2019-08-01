@@ -1,6 +1,7 @@
 {
   "name": "@airswap/test-utils",
   "version": "0.1.0",
+  "description": "JavaScript utilities for use in Truffle tests",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
