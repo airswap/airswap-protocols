@@ -1,6 +1,6 @@
 const Indexer = artifacts.require('Indexer')
 const FungibleToken = artifacts.require(
-  '@airswap/common/tokens/FungibleToken.sol'
+  '@airswap/tokens/contracts/FungibleToken.sol'
 )
 
 module.exports = deployer => {
