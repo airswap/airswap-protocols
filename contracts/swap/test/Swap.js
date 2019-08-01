@@ -1,11 +1,15 @@
+/* global artifacts, contract, web3 */
 const Swap = artifacts.require('Swap')
+const Transfers = artifacts.require('Transfers')
+const Types = artifacts.require('Types')
 const FungibleToken = artifacts.require('FungibleToken')
 const NonFungibleToken = artifacts.require('NonFungibleToken')
+const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 
 const {
   emitted,
   reverted,
-  none,
+  notEmitted,
   equal,
   ok,
 } = require('@airswap/test-utils').assert
@@ -13,7 +17,16 @@ const { allowances, balances } = require('@airswap/test-utils').balances
 const { getLatestTimestamp } = require('@airswap/test-utils').time
 const { orders, signatures } = require('@airswap/order-utils')
 
-contract('Swap', ([aliceAddress, bobAddress, carolAddress, davidAddress]) => {
+const ONE_ETH = web3.utils.toWei('1', 'ether')
+
+let snapshotId
+
+contract('Swap', async accounts => {
+  let aliceAddress = accounts[0]
+  let bobAddress = accounts[1]
+  let carolAddress = accounts[2]
+  let davidAddress = accounts[3]
+
   let swapContract
   let swapAddress
   let tokenAST
@@ -28,6 +41,12 @@ contract('Swap', ([aliceAddress, bobAddress, carolAddress, davidAddress]) => {
 
   let defaultAuthExpiry
 
+  // One big snapshot - not snapshotting every test
+  before('Setup', async () => {
+    let snapShot = await takeSnapshot()
+    snapshotId = snapShot['result']
+  })
+
   orders.setKnownAccounts([
     aliceAddress,
     bobAddress,
@@ -35,9 +54,20 @@ contract('Swap', ([aliceAddress, bobAddress, carolAddress, davidAddress]) => {
     davidAddress,
   ])
 
-  describe('Deploying...', () => {
+  after(async () => {
+    await revertToSnapShot(snapshotId)
+  })
+
+  describe('Deploying...', async () => {
     it('Deployed Swap contract', async () => {
-      swapContract = await Swap.deployed()
+      // deploy both libs
+      const transfersLib = await Transfers.new()
+      const typesLib = await Types.new()
+
+      // link both libs to swap
+      await Swap.link(Transfers, transfersLib.address)
+      await Swap.link(Types, typesLib.address)
+      swapContract = await Swap.new()
       swapAddress = swapContract.address
 
       swap =
@@ -63,11 +93,11 @@ contract('Swap', ([aliceAddress, bobAddress, carolAddress, davidAddress]) => {
     })
   })
 
-  describe('Minting...', () => {
+  describe('Minting...', async () => {
     it('Mints 1000 AST for Alice', async () => {
       emitted(await tokenAST.mint(aliceAddress, 1000), 'Transfer')
       ok(
-        balances(aliceAddress, [[tokenAST, 1000], [tokenDAI, 0]]),
+        await balances(aliceAddress, [[tokenAST, 1000], [tokenDAI, 0]]),
         'Alice balances are incorrect'
       )
     })
@@ -75,36 +105,38 @@ contract('Swap', ([aliceAddress, bobAddress, carolAddress, davidAddress]) => {
     it('Mints 1000 DAI for Bob', async () => {
       emitted(await tokenDAI.mint(bobAddress, 1000), 'Transfer')
       ok(
-        balances(bobAddress, [[tokenAST, 0], [tokenDAI, 1000]]),
+        await balances(bobAddress, [[tokenAST, 0], [tokenDAI, 1000]]),
         'Bob balances are incorrect'
       )
     })
   })
 
-  describe('Approving...', () => {
-    it('Alice approves Swap to spend 200 AST', async () => {
+  describe('Approving...', async () => {
+    it('Checks approvals (Alice 250 AST and 0 DAI, Bob 0 AST and 500 DAI)', async () => {
       emitted(
         await tokenAST.approve(swapAddress, 200, { from: aliceAddress }),
         'Approval'
       )
-    })
-
-    it('Bob approves Swap to spend 9999 DAI', async () => {
       emitted(
-        await tokenDAI.approve(swapAddress, 9999, { from: bobAddress }),
+        await tokenDAI.approve(swapAddress, 1000, { from: bobAddress }),
         'Approval'
       )
-    })
-
-    it('Checks approvals (Alice 250 AST and 0 DAI, Bob 0 AST and 500 DAI)', async () => {
       ok(
-        allowances(aliceAddress, swapAddress, [[tokenAST, 200], [tokenDAI, 0]])
+        await allowances(aliceAddress, swapAddress, [
+          [tokenAST, 200],
+          [tokenDAI, 0],
+        ])
       )
-      ok(allowances(bobAddress, swapAddress, [[tokenAST, 0], [tokenDAI, 500]]))
+      ok(
+        await allowances(bobAddress, swapAddress, [
+          [tokenAST, 0],
+          [tokenDAI, 1000],
+        ])
+      )
     })
   })
 
-  describe('Swaps (Fungible)', () => {
+  describe('Swaps (Fungible)', async () => {
     let _order
     let _signature
 
@@ -131,11 +163,11 @@ contract('Swap', ([aliceAddress, bobAddress, carolAddress, davidAddress]) => {
 
     it('Checks balances...', async () => {
       ok(
-        balances(aliceAddress, [[tokenAST, 800], [tokenDAI, 50]]),
+        await balances(aliceAddress, [[tokenAST, 800], [tokenDAI, 50]]),
         'Alice balances are incorrect'
       )
       ok(
-        balances(bobAddress, [[tokenAST, 200], [tokenDAI, 950]]),
+        await balances(bobAddress, [[tokenAST, 200], [tokenDAI, 950]]),
         'Bob balances are incorrect'
       )
     })
@@ -191,7 +223,7 @@ contract('Swap', ([aliceAddress, bobAddress, carolAddress, davidAddress]) => {
         },
       })
       await reverted(
-        swap(order, signature, { from: bobAddress, value: 1 }),
+        swap(order, signature, { from: bobAddress, value: ONE_ETH }),
         'VALUE_MUST_BE_ZERO'
       )
     })
@@ -213,19 +245,34 @@ contract('Swap', ([aliceAddress, bobAddress, carolAddress, davidAddress]) => {
       )
     })
 
-    it('Checks existing balances (Alice 800 AST and 50 DAI, Bob 200 AST and 950 DAI)', async () => {
+    it('Checks remaining balances and approvals', async () => {
       ok(
-        balances(aliceAddress, [[tokenAST, 800], [tokenDAI, 50]]),
+        await balances(aliceAddress, [[tokenAST, 800], [tokenDAI, 50]]),
         'Alice balances are incorrect'
       )
       ok(
-        balances(bobAddress, [[tokenAST, 200], [tokenDAI, 950]]),
+        await balances(bobAddress, [[tokenAST, 200], [tokenDAI, 950]]),
         'Bob balances are incorrect'
+      )
+      // Alice and Bob swapped 200 AST for 50 DAI above, thereforeL
+      // Alice's 200 AST approval is now all gone
+      // Bob's 1000 DAI approval has decreased by 50
+      ok(
+        await allowances(aliceAddress, swapAddress, [
+          [tokenAST, 0],
+          [tokenDAI, 0],
+        ])
+      )
+      ok(
+        await allowances(bobAddress, swapAddress, [
+          [tokenAST, 0],
+          [tokenDAI, 950],
+        ])
       )
     })
   })
 
-  describe('Signer Delegation (Maker-side)', () => {
+  describe('Signer Delegation (Maker-side)', async () => {
     let _order
     let _signature
 
@@ -307,13 +354,39 @@ contract('Swap', ([aliceAddress, bobAddress, carolAddress, davidAddress]) => {
         'SIGNER_UNAUTHORIZED'
       )
     })
+
+    it('Checks remaining balances and approvals', async () => {
+      // Alice and Bob swapped 50 AST for 10 DAI. Previous balances were:
+      // Alice 800 AST 50 DAI, Bob 200 AST 950 DAI
+      ok(
+        await balances(aliceAddress, [[tokenAST, 750], [tokenDAI, 60]]),
+        'Alice balances are incorrect'
+      )
+      ok(
+        await balances(bobAddress, [[tokenAST, 250], [tokenDAI, 940]]),
+        'Bob balances are incorrect'
+      )
+      // Alice approved all her AST
+      ok(
+        await allowances(aliceAddress, swapAddress, [
+          [tokenAST, 750],
+          [tokenDAI, 0],
+        ])
+      )
+      ok(
+        await allowances(bobAddress, swapAddress, [
+          [tokenAST, 0],
+          [tokenDAI, 940],
+        ])
+      )
+    })
   })
 
-  describe('Sender Delegation (Taker-side)', () => {
+  describe('Sender Delegation (Taker-side)', async () => {
     let _order
     let _signature
 
-    before('Alice creates an order for Bob (200 AST for 50 DAI)', async () => {
+    before('Alice creates an order for Bob (50 AST for 10 DAI)', async () => {
       const { order, signature } = await orders.getOrder({
         maker: {
           wallet: aliceAddress,
@@ -371,9 +444,34 @@ contract('Swap', ([aliceAddress, bobAddress, carolAddress, davidAddress]) => {
         'SENDER_UNAUTHORIZED'
       )
     })
+
+    it('Checks remaining balances and approvals', async () => {
+      // Alice and Bob swapped 50 AST for 10 DAI again. Previous balances were:
+      // Alice 750 AST 60 DAI, Bob 250 AST 940 DAI
+      ok(
+        await balances(aliceAddress, [[tokenAST, 700], [tokenDAI, 70]]),
+        'Alice balances are incorrect'
+      )
+      ok(
+        await balances(bobAddress, [[tokenAST, 300], [tokenDAI, 930]]),
+        'Bob balances are incorrect'
+      )
+      ok(
+        await allowances(aliceAddress, swapAddress, [
+          [tokenAST, 700],
+          [tokenDAI, 0],
+        ])
+      )
+      ok(
+        await allowances(bobAddress, swapAddress, [
+          [tokenAST, 0],
+          [tokenDAI, 930],
+        ])
+      )
+    })
   })
 
-  describe('Signer and Sender Delegation (Three Way)', () => {
+  describe('Signer and Sender Delegation (Three Way)', async () => {
     it('Alice approves David to make orders on her behalf', async () => {
       emitted(
         await swapContract.authorize(davidAddress, defaultAuthExpiry, {
@@ -412,18 +510,34 @@ contract('Swap', ([aliceAddress, bobAddress, carolAddress, davidAddress]) => {
         'Swap'
       )
     })
-  })
 
-  describe('Signer and Sender Delegation (Four Way)', () => {
-    it('Alice approves David to make orders on her behalf', async () => {
-      emitted(
-        await swapContract.authorize(davidAddress, defaultAuthExpiry, {
-          from: aliceAddress,
-        }),
-        'Authorize'
+    it('Checks remaining balances and approvals', async () => {
+      // Alice and Bob swapped 25 AST for 5 DAI. Previous balances were:
+      // Alice 700 AST 70 DAI, Bob 300 AST 930 DAI
+      ok(
+        await balances(aliceAddress, [[tokenAST, 675], [tokenDAI, 75]]),
+        'Alice balances are incorrect'
+      )
+      ok(
+        await balances(bobAddress, [[tokenAST, 325], [tokenDAI, 925]]),
+        'Bob balances are incorrect'
+      )
+      ok(
+        await allowances(aliceAddress, swapAddress, [
+          [tokenAST, 675],
+          [tokenDAI, 0],
+        ])
+      )
+      ok(
+        await allowances(bobAddress, swapAddress, [
+          [tokenAST, 0],
+          [tokenDAI, 925],
+        ])
       )
     })
+  })
 
+  describe('Signer and Sender Delegation (Four Way)', async () => {
     it('Bob approves Carol to take orders on his behalf', async () => {
       emitted(
         await swapContract.authorize(carolAddress, defaultAuthExpiry, {
@@ -434,6 +548,7 @@ contract('Swap', ([aliceAddress, bobAddress, carolAddress, davidAddress]) => {
     })
 
     it('David makes an order for Alice, Carol takes the order for Bob', async () => {
+      // Alice has already approved David in the previous section
       const { order, signature } = await orders.getOrder({
         signer: davidAddress,
         maker: {
@@ -458,9 +573,41 @@ contract('Swap', ([aliceAddress, bobAddress, carolAddress, davidAddress]) => {
         'Revoke'
       )
     })
+
+    it('Checks remaining balances and approvals', async () => {
+      // Alice and Bob swapped 25 AST for 5 DAI. Previous balances were:
+      // Alice 675 AST 75 DAI, Bob 325 AST 925 DAI
+      ok(
+        await balances(aliceAddress, [[tokenAST, 650], [tokenDAI, 80]]),
+        'Alice balances are incorrect'
+      )
+      ok(
+        await balances(bobAddress, [[tokenAST, 350], [tokenDAI, 920]]),
+        'Bob balances are incorrect'
+      )
+      ok(
+        await allowances(aliceAddress, swapAddress, [
+          [tokenAST, 650],
+          [tokenDAI, 0],
+        ])
+      )
+      ok(
+        await allowances(bobAddress, swapAddress, [
+          [tokenAST, 0],
+          [tokenDAI, 920],
+        ])
+      )
+    })
   })
 
-  describe('Cancels', () => {
+  describe('Cancels', async () => {
+    let _orderOne
+    let _signatureOne
+    let _orderTwo
+    let _signatureTwo
+    let _orderThree
+    let _signatureThree
+
     before('Alice creates orders with nonces 1, 2, 3', async () => {
       const {
         order: orderOne,
@@ -503,7 +650,10 @@ contract('Swap', ([aliceAddress, bobAddress, carolAddress, davidAddress]) => {
     })
 
     it('Checks that Alice is unable to cancel order with nonce 1 twice', async () => {
-      none(await cancel([_orderOne.nonce], { from: aliceAddress }), 'Cancel')
+      notEmitted(
+        await cancel([_orderOne.nonce], { from: aliceAddress }),
+        'Cancel'
+      )
     })
 
     it('Checks that Bob is unable to take an order with nonce 1', async () => {
@@ -531,25 +681,36 @@ contract('Swap', ([aliceAddress, bobAddress, carolAddress, davidAddress]) => {
       )
     })
 
-    it('Checks existing balances (Alice 800 AST and 50 DAI, Bob 200 AST and 950 DAI)', async () => {
+    it('Checks existing balances (Alice 650 AST and 80 DAI, Bob 750 AST and 920 DAI)', async () => {
+      // No swaps happened in this section
       ok(
-        balances(aliceAddress, [[tokenAST, 700], [tokenDAI, 60]]),
+        await balances(aliceAddress, [[tokenAST, 650], [tokenDAI, 80]]),
         'Alice balances are incorrect'
       )
       ok(
-        balances(bobAddress, [[tokenAST, 250], [tokenDAI, 940]]),
+        await balances(bobAddress, [[tokenAST, 350], [tokenDAI, 920]]),
         'Bob balances are incorrect'
+      )
+      ok(
+        await allowances(aliceAddress, swapAddress, [
+          [tokenAST, 650],
+          [tokenDAI, 0],
+        ])
+      )
+      ok(
+        await allowances(bobAddress, swapAddress, [
+          [tokenAST, 0],
+          [tokenDAI, 920],
+        ])
       )
     })
   })
 
-  describe('Swap with Ether', () => {
-    const value = 1
-
-    it('Checks allowance (Alice 200 AST)', async () => {
+  describe('Swap with Ether', async () => {
+    it('Checks allowance (Alice 650 AST remaining)', async () => {
       ok(
-        allowances(aliceAddress, swapAddress, [[tokenAST, 200]]),
-        'Alice has not approved 200 AST'
+        await allowances(aliceAddress, swapAddress, [[tokenAST, 650]]),
+        'Alice has not approved 650 AST'
       )
     })
 
@@ -560,7 +721,7 @@ contract('Swap', ([aliceAddress, bobAddress, carolAddress, davidAddress]) => {
         },
         taker: {
           wallet: bobAddress,
-          param: value,
+          param: ONE_ETH,
         },
       })
       await reverted(
@@ -578,10 +739,21 @@ contract('Swap', ([aliceAddress, bobAddress, carolAddress, davidAddress]) => {
         },
         taker: {
           wallet: bobAddress,
-          param: value,
+          param: ONE_ETH,
         },
       })
-      emitted(await swap(order, signature, { from: bobAddress, value }), 'Swap')
+      // check alice's balance increases by 1 ETH
+      const balanceBefore = parseInt(await web3.eth.getBalance(aliceAddress))
+      emitted(
+        await swap(order, signature, { from: bobAddress, value: ONE_ETH }),
+        'Swap'
+      )
+      const expectedBalance = balanceBefore + parseInt(ONE_ETH)
+      equal(
+        expectedBalance,
+        parseInt(await web3.eth.getBalance(aliceAddress)),
+        "Alice's balance did not increase by 1"
+      )
     })
 
     it('Ensures that Swap has not kept any of the ether', async () => {
@@ -603,7 +775,7 @@ contract('Swap', ([aliceAddress, bobAddress, carolAddress, davidAddress]) => {
         },
       })
       await reverted(
-        swap(order, signature, { from: bobAddress, value }),
+        swap(order, signature, { from: bobAddress, value: ONE_ETH }),
         'VALUE_MUST_BE_ZERO'
       )
     })
@@ -620,7 +792,7 @@ contract('Swap', ([aliceAddress, bobAddress, carolAddress, davidAddress]) => {
     })
   })
 
-  describe('Swaps with Fees', () => {
+  describe('Swaps with Fees', async () => {
     it('Checks that Carol gets paid 50 AST for facilitating a trade between Alice and Bob', async () => {
       const { order, signature } = await orders.getOrder({
         maker: {
@@ -658,7 +830,7 @@ contract('Swap', ([aliceAddress, bobAddress, carolAddress, davidAddress]) => {
     })
   })
 
-  describe('Swap (Simple)', () => {
+  describe('Swap (Simple)', async () => {
     let _order
     let _signature
 
@@ -763,7 +935,7 @@ contract('Swap', ([aliceAddress, bobAddress, carolAddress, davidAddress]) => {
     })
   })
 
-  describe('Maker Delegation for Swap (Simple)', () => {
+  describe('Maker Delegation for Swap (Simple)', async () => {
     it('Alice gives an unsigned order to David who takes it for Bob', async () => {
       const { order } = await orders.getOrder({
         maker: {
@@ -798,7 +970,7 @@ contract('Swap', ([aliceAddress, bobAddress, carolAddress, davidAddress]) => {
     })
   })
 
-  describe('Swap (Simple) for ETH', () => {
+  describe('Swap (Simple) for ETH', async () => {
     it('Checks that a Swap (Simple) for ETH succeeds', async () => {
       const { order } = await orders.getOrder({
         maker: {
@@ -839,7 +1011,7 @@ contract('Swap', ([aliceAddress, bobAddress, carolAddress, davidAddress]) => {
     })
   })
 
-  describe('Swap with Public Orders (No Taker Set)', () => {
+  describe('Swap with Public Orders (No Taker Set)', async () => {
     it('Checks that a Swap succeeds without a taker wallet set', async () => {
       const { order, signature } = await orders.getOrder({
         maker: {
@@ -894,7 +1066,7 @@ contract('Swap', ([aliceAddress, bobAddress, carolAddress, davidAddress]) => {
     })
   })
 
-  describe('Deploying...', () => {
+  describe('Deploying...', async () => {
     it('Deployed test contract "ConcertTicket"', async () => {
       tokenTicket = await NonFungibleToken.new()
     })
@@ -904,22 +1076,25 @@ contract('Swap', ([aliceAddress, bobAddress, carolAddress, davidAddress]) => {
     })
   })
 
-  describe('Minting...', () => {
+  describe('Minting...', async () => {
     it('Mints a concert ticket (#12345) for Alice', async () => {
       emitted(await tokenTicket.mint(aliceAddress, 12345), 'NFTTransfer')
       ok(
-        balances(aliceAddress, [[tokenTicket, 1]]),
+        await balances(aliceAddress, [[tokenTicket, 1]]),
         'Alice balances are incorrect'
       )
     })
 
     it('Mints a kitty collectible (#54321) for Bob', async () => {
       emitted(await tokenKitty.mint(bobAddress, 54321), 'NFTTransfer')
-      ok(balances(bobAddress, [[tokenKitty, 1]]), 'Bob balances are incorrect')
+      ok(
+        await balances(bobAddress, [[tokenKitty, 1]]),
+        'Bob balances are incorrect'
+      )
     })
   })
 
-  describe('Swaps (Non-Fungible)', () => {
+  describe('Swaps (Non-Fungible)', async () => {
     it('Alice approves Swap to transfer her concert ticket', async () => {
       emitted(
         await tokenTicket.approve(swapAddress, 12345, { from: aliceAddress }),
@@ -995,7 +1170,7 @@ contract('Swap', ([aliceAddress, bobAddress, carolAddress, davidAddress]) => {
     })
   })
 
-  describe('Swap (Simple) (Non-Fungible)', () => {
+  describe('Swap (Simple) (Non-Fungible)', async () => {
     it('Carol approves Swap to transfer her kitty collectible', async () => {
       emitted(
         await tokenKitty.approve(swapAddress, 54321, { from: carolAddress }),
@@ -1043,7 +1218,7 @@ contract('Swap', ([aliceAddress, bobAddress, carolAddress, davidAddress]) => {
     })
   })
 
-  describe('Signatures', () => {
+  describe('Signatures', async () => {
     const eveAddress = '0x9d2fB0BCC90C6F3Fa3a98D2C760623a4F6Ee59b4'
     const evePrivKey = Buffer.from(
       '4934d4ff925f39f91e3729fbce52ef12f25fdf93e014e291350f7d314c1a096b',
