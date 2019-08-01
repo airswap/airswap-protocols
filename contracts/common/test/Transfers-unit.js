@@ -53,7 +53,11 @@ contract('Transfers Unit Tests', async accounts => {
         })
       )
       let newReceiverBalance = await web3.eth.getBalance(receiver)
-      equal(newReceiverBalance, BigNumber(receiverBalance).plus(etherAmount), 'Ether in the transfer is missing.')
+      equal(
+        newReceiverBalance,
+        BigNumber(receiverBalance).plus(etherAmount),
+        'Ether in the transfer is missing.'
+      )
     })
   })
 
