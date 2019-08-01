@@ -22,7 +22,6 @@
 | [`@airswap/market`](/contracts/market)     | [![npm](https://img.shields.io/npm/v/airswap/market.svg)](https://www.npmjs.com/package/airswap/market)     | Intents for a Token Pair |
 | [`@airswap/consumer`](/contracts/consumer) | [![npm](https://img.shields.io/npm/v/airswap/consumer.svg)](https://www.npmjs.com/package/airswap/consumer) | Liquidity Consumer       |
 | [`@airswap/common`](/contracts/common)     | [![npm](https://img.shields.io/npm/v/airswap/common.svg)](https://www.npmjs.com/package/airswap/common)     | Common Libraries         |
-| [`@airswap/tokens`](/contracts/tokens)     | [![npm](https://img.shields.io/npm/v/airswap/tokens.svg)](https://www.npmjs.com/package/airswap/tokens)     | Standard Tokens          |
 
 ## JavaScript
 
