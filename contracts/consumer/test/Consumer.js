@@ -1,10 +1,10 @@
 const Swap = artifacts.require('Swap')
-const Transfers = artifacts.require('Transfers')
-const Types = artifacts.require('Types')
 const Consumer = artifacts.require('Consumer')
 const Indexer = artifacts.require('Indexer')
 const Delegate = artifacts.require('Delegate')
 const FungibleToken = artifacts.require('FungibleToken')
+const Transfers = artifacts.require('Transfers')
+const Types = artifacts.require('Types')
 
 const { emitted, equal, ok } = require('@airswap/test-utils').assert
 const { balances } = require('@airswap/test-utils').balances
