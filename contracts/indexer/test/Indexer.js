@@ -323,13 +323,9 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
     })
 
     it('Alice attempts to stake and set a two-sided intent and succeeds', async () => {
-      await indexer.unsetIntent(
-        tokenWETH.address,
-        tokenDAI.address,
-        {
-          from: aliceAddress,
-        }
-      )
+      await indexer.unsetIntent(tokenWETH.address, tokenDAI.address, {
+        from: aliceAddress,
+      })
 
       let result = await indexer.setTwoSidedIntent(
         tokenWETH.address,

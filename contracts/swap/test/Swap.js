@@ -743,7 +743,10 @@ contract('Swap', async accounts => {
           param: ONE_ETH,
         },
       })
-      emitted(await swap(order, signature, { from: bobAddress, value: ONE_ETH }), 'Swap')
+      emitted(
+        await swap(order, signature, { from: bobAddress, value: ONE_ETH }),
+        'Swap'
+      )
     })
 
     it('Ensures that Swap has not kept any of the ether', async () => {
