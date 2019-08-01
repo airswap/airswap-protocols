@@ -1,7 +1,7 @@
 {
   "name": "@airswap/tokens",
   "version": "0.1.0",
-  "description": "Wrappers for OpenZeppelin tokens for use in Swap Protocol tests",
+  "description": "Ethereum tokens for use in Swap Protocol tests",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",

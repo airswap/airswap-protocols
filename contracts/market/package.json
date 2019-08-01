@@ -1,7 +1,7 @@
 {
   "name": "@airswap/market",
   "version": "0.1.0",
-  "description": "Represents a list of intents to trade for use in the Swap Protocol",
+  "description": "Manages a list of intents to trade a specific token pair in the Swap Protocol",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",

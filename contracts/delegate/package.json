@@ -1,7 +1,7 @@
 {
   "name": "@airswap/delegate",
   "version": "0.1.0",
-  "description": "Manages trading rules for use in the Swap Protocol",
+  "description": "Manages delegated trading rules for use in the Swap Protocol",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
