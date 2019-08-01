@@ -3,6 +3,7 @@ const BN = require('bignumber.js')
 const Market = artifacts.require('Market')
 const FungibleToken = artifacts.require('FungibleToken')
 
+const { SECONDS_IN_DAY } = require('@airswap/order-utils').constants
 const { equal, passes } = require('@airswap/test-utils').assert
 const {
   getTimestampPlusDays,
@@ -11,7 +12,6 @@ const {
 const { intents } = require('@airswap/indexer-utils')
 
 const NULL_LOCATOR = '0x'.padEnd(66, '0')
-const SECONDS_IN_DAY = 86400
 
 const ALICE_LOC = intents.serialize(
   intents.Locators.INSTANT,
