@@ -1,3 +1,4 @@
+const assert = require('assert')
 const truffleAssert = require('truffle-assertions')
 
 module.exports = {

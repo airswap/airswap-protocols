@@ -1,11 +1,11 @@
-/* global web3,  */ // ignore those keywords when linting
+/* global web3  */ // ignore those keywords when linting
 /*
  * Use of code from https://medium.com/edgefund/time-travelling-truffle-tests-f581c1964687
  * Utility functions to advance blocktime and mine blocks artificially for EVM
  */
 const { SECONDS_IN_DAY } = require('@airswap/order-utils').constants
 
-advanceTime = time => {
+let advanceTime = time => {
   return new Promise((resolve, reject) => {
     web3.currentProvider.send(
       {
@@ -24,7 +24,7 @@ advanceTime = time => {
   })
 }
 
-advanceBlock = () => {
+let advanceBlock = () => {
   return new Promise((resolve, reject) => {
     web3.currentProvider.send(
       {
@@ -44,7 +44,7 @@ advanceBlock = () => {
   })
 }
 
-takeSnapshot = () => {
+let takeSnapshot = () => {
   return new Promise((resolve, reject) => {
     web3.currentProvider.send(
       {
@@ -62,7 +62,7 @@ takeSnapshot = () => {
   })
 }
 
-revertToSnapShot = id => {
+let revertToSnapShot = id => {
   return new Promise((resolve, reject) => {
     web3.currentProvider.send(
       {
@@ -81,17 +81,17 @@ revertToSnapShot = id => {
   })
 }
 
-advanceTimeAndBlock = async time => {
+let advanceTimeAndBlock = async time => {
   await advanceTime(time)
   await advanceBlock()
   return Promise.resolve(web3.eth.getBlock('latest'))
 }
 
-getLatestTimestamp = async () => {
+let getLatestTimestamp = async () => {
   return (await web3.eth.getBlock('latest')).timestamp
 }
 
-getTimestampPlusDays = async days => {
+let getTimestampPlusDays = async days => {
   return (await getLatestTimestamp()) + SECONDS_IN_DAY * days
 }
 

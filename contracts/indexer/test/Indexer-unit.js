@@ -1,3 +1,4 @@
+/* global artifacts, contract, web3 */
 const Indexer = artifacts.require('Indexer')
 const Market = artifacts.require('Market')
 const MockContract = artifacts.require('MockContract')
@@ -10,10 +11,12 @@ const {
   equal,
   passes,
 } = require('@airswap/test-utils').assert
-const { balances } = require('@airswap/test-utils').balances
-const { getTimestampPlusDays } = require('@airswap/test-utils').time
+const {
+  getTimestampPlusDays,
+  revertToSnapShot,
+  takeSnapshot,
+} = require('@airswap/test-utils').time
 const { intents } = require('@airswap/indexer-utils')
-const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 
 const ALICE_LOC = intents.serialize(
   intents.Locators.URL,
@@ -29,8 +32,7 @@ contract('Indexer Unit Tests', async accounts => {
   const MIN_STAKE_500 = 500
 
   let indexer
-
-  let stakingTokenTemplate
+  let snapshotId
   let stakingTokenMock
   let stakingTokenAddress
 
@@ -182,9 +184,13 @@ contract('Indexer Unit Tests', async accounts => {
       })
 
       // and 2 markets with the correct tokens have been created
-      markets = await indexer.createTwoSidedMarket.call(tokenOne, tokenTwo, {
-        from: aliceAddress,
-      })
+      let markets = await indexer.createTwoSidedMarket.call(
+        tokenOne,
+        tokenTwo,
+        {
+          from: aliceAddress,
+        }
+      )
 
       await checkMarketAtAddress(markets[0], tokenOne, tokenTwo)
       await checkMarketAtAddress(markets[1], tokenTwo, tokenOne)
@@ -209,9 +215,13 @@ contract('Indexer Unit Tests', async accounts => {
       })
 
       // instead the markets' addresses are returned
-      markets = await indexer.createTwoSidedMarket.call(tokenOne, tokenTwo, {
-        from: aliceAddress,
-      })
+      let markets = await indexer.createTwoSidedMarket.call(
+        tokenOne,
+        tokenTwo,
+        {
+          from: aliceAddress,
+        }
+      )
 
       await checkMarketAtAddress(markets[0], tokenOne, tokenTwo)
       await checkMarketAtAddress(markets[1], tokenTwo, tokenOne)
