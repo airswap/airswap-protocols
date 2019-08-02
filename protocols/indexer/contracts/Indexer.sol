@@ -293,14 +293,14 @@ contract Indexer is IIndexer, Ownable {
     address _makerToken,
     address _takerToken
   ) external view returns (
-    uint256 length
+    uint256
   ) {
 
     // Ensure the market exists.
     if (markets[_makerToken][_takerToken] != Market(0)) {
 
       // Return the size of the market.
-      return markets[_makerToken][_takerToken].getLength();
+      return markets[_makerToken][_takerToken].length();
 
     }
     return 0;
