@@ -1,6 +1,6 @@
 module.exports = {
     port: 8545,
-    norpc: true,
+    norpc: falss,
     compileCommand: 'yarn compile',
     testCommand: 'yarn test --network coverage',
     copyPackages: ['openzeppelin-solidity'],
