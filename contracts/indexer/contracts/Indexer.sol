@@ -264,7 +264,7 @@ contract Indexer is IIndexer, Ownable {
     address _makerToken,
     address _takerToken,
     uint256 _count
-  ) external view returns (
+  ) external returns (
     bytes32[] memory locators
   ) {
 
@@ -292,7 +292,7 @@ contract Indexer is IIndexer, Ownable {
   function lengthOf(
     address _makerToken,
     address _takerToken
-  ) external view returns (
+  ) external returns (
     uint256 length
   ) {
 
