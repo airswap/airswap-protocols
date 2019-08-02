@@ -209,7 +209,7 @@ contract('Market', async accounts => {
 
   describe('Garbage Collection', async () => {
     it("Doesn't remove any intents that haven't expired", async () => {
-      let intents = await market.fetchIntents(7)
+      let intents = await market.fetchIntents.call(7)
       // Returns all 6 intents
       assert(BN(intents.length).eq(6), 'Returned intents wrong length')
 
@@ -217,7 +217,7 @@ contract('Market', async accounts => {
       // Bob -> Eve -> David -> Zara -> HEAD -> Alice (Carol is after Alice, before Bob)
       await market.cleanExpiredIntents(bobAddress, 5)
 
-      intents = await market.fetchIntents(7)
+      intents = await market.fetchIntents.call(7)
       assert(BN(intents.length).eq(6), 'Intents should be same length')
 
       // Ensure that the ordering is the same
@@ -230,7 +230,7 @@ contract('Market', async accounts => {
     })
 
     it("Should remove Carol's intent if she's included in the loop", async () => {
-      let intents = await market.fetchIntents(7)
+      let intents = await market.fetchIntents.call(7)
       // Returns all 6 intents
       assert(BN(intents.length).eq(6), 'Returned intents wrong length')
 
@@ -239,7 +239,7 @@ contract('Market', async accounts => {
       passes(tx)
 
       // Returns just 5 intents this time - carol has been removed
-      intents = await market.fetchIntents(7)
+      intents = await market.fetchIntents.call(7)
       assert(BN(intents.length).eq(5), 'Intents should be shorter')
 
       // Ensure that the ordering is the same, without a null 6th slot
@@ -254,7 +254,7 @@ contract('Market', async accounts => {
       // Advance time another 0.6 days
       // This advances past the expiry of Bob's and Eve's intents
       await advanceTimeAndBlock(SECONDS_IN_DAY * 0.6)
-      let intents = await market.fetchIntents(7)
+      let intents = await market.fetchIntents.call(7)
       // Returns 5 intents as Bob and Eve have not been removed
       assert(BN(intents.length).eq(5), 'Returned intents wrong length')
 
@@ -262,13 +262,13 @@ contract('Market', async accounts => {
       await market.cleanExpiredIntents(davidAddress, 3)
 
       // no intents have been removed
-      intents = await market.fetchIntents(7)
+      intents = await market.fetchIntents.call(7)
       assert(BN(intents.length).eq(5), 'Intents should be same length')
 
       // Now loop through, removing both in one go
       await market.cleanExpiredIntents(bobAddress, 2)
 
-      intents = await market.fetchIntents(7)
+      intents = await market.fetchIntents.call(7)
       // Returns just 3 intents this time
       assert(BN(intents.length).eq(3), 'Intents should be shorter')
 
@@ -293,7 +293,7 @@ contract('Market', async accounts => {
     })
 
     it('Ensure ordering is correct', async () => {
-      const intents = await market.fetchIntents(10)
+      const intents = await market.fetchIntents.call(10)
       assert(intents[0] == ALICE_LOC, 'Alice should be first')
 
       assert(BN(await market.length()).eq(1), 'Market length is incorrect')
