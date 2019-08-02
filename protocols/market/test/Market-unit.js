@@ -502,8 +502,21 @@ contract('Market Unit Tests', async accounts => {
       equal(intents[0], ALICE_LOC, 'Alice should be first')
       equal(intents[1], BOB_LOC, 'Bob should be second')
       equal(intents[2], NULL_LOCATOR, 'Null should be third')
+    })
 
-      // noq reach carols intent
+    it('should make remove an expired intent if count does reach it', async () => {
+      let intents = await market.fetchIntents(7)
+      equal(intents[0], ALICE_LOC, 'before: Alice should be first')
+      equal(intents[1], CAROL_LOC, 'before: Carol should be second')
+      equal(intents[2], BOB_LOC, 'before: Bob should be third')
+
+      let listLength = await market.length()
+      equal(listLength, 3, 'Link list length should be 3')
+
+      // progress so that carol has expired
+      await advanceTimeAndBlock(SECONDS_IN_DAY * 1.1)
+
+      // now reach carols intent
       await market.cleanExpiredIntents(bobAddress, 3)
 
       // length is changed
