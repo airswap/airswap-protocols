@@ -1,0 +1,488 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for contracts/Consumer.sol</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../prettify.css" />
+    <link rel="stylesheet" href="../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../index.html">all files</a> / <a href="index.html">contracts/</a> Consumer.sol
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>0/21</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>0/2</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>0/3</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>0/21</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line low'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">/*
+  Copyright 2019 Swap Holdings Ltd.
+&nbsp;
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+&nbsp;
+    http://www.apache.org/licenses/LICENSE-2.0
+&nbsp;
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/
+&nbsp;
+pragma solidity ^0.5.10;
+&nbsp;
+import "@airswap/swap/interfaces/ISwap.sol";
+import "@airswap/indexer/interfaces/IIndexer.sol";
+import "@airswap/delegate/interfaces/IDelegate.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
+&nbsp;
+/**
+  * @title Consumer: Onchain Liquidity Consumer for the Swap Protocol
+  */
+contract Consumer {
+&nbsp;
+  // Indexer contract to be used to find intents to trade
+  IIndexer public indexerContract;
+&nbsp;
+  // Swap contract to be used to settle trades
+  ISwap public swapContract;
+&nbsp;
+  /**
+    * @notice Contract Constructor
+    *
+    * @param _swapContract the address of the Swap Contract
+    * @param _indexerContract the address of the Indexer Contract
+    */
+<span class="fstat-no" title="function not covered" >  constructor(</span>
+    address _swapContract,
+    address _indexerContract
+  ) public {
+<span class="cstat-no" title="statement not covered" >    swapContract = ISwap(_swapContract)</span>;
+<span class="cstat-no" title="statement not covered" >    indexerContract = IIndexer(_indexerContract)</span>;
+  }
+&nbsp;
+  /**
+    * @notice Find the Best Price for a Buy
+    *
+    * @param _userReceiveAmount uint256 the amount of the token the caller is looking to receive
+    * @param _userReceiveToken address the token the user is looking to receive 
+    * @param _userSendToken address the token the user is looking to send
+    * @param _maxIntents uint256 the max number of intents to search through
+    *
+    * @return address The best priced Delegate
+    * @return uint256 The best priced Delgate's quote amount
+    */
+<span class="fstat-no" title="function not covered" >  function findBestBuy(</span>
+    uint256 _userReceiveAmount,
+    address _userReceiveToken,
+    address _userSendToken,
+    uint256 _maxIntents
+  ) public view returns (address, uint256) {
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    address untrustedLowestCostDelegate;</span>
+<span class="cstat-no" title="statement not covered" >    uint256 lowestCost = 2**256 - 1;</span>
+&nbsp;
+    // Fetch an array of Intent locators from the Indexer.
+<span class="cstat-no" title="statement not covered" >    bytes32[] memory locators = indexerContract.getIntents(_userReceiveToken, _userSendToken, _maxIntents);</span>
+&nbsp;
+    // Iterate through locators.
+<span class="cstat-no" title="statement not covered" >    for (uint256 i; i &lt; locators.length; i++) {</span>
+&nbsp;
+      // Assume the locator is a Delegate.
+<span class="cstat-no" title="statement not covered" >      address untrustedDelegateContract = address(bytes20(locators[i]));</span>
+&nbsp;
+      // Get a buy quote from the Delegate.
+<span class="cstat-no" title="statement not covered" >      uint256 userSendAmount = IDelegate(untrustedDelegateContract)</span>
+        .getBuyQuote(_userReceiveAmount, _userReceiveToken, _userSendToken);
+&nbsp;
+      // Update the lowest cost.
+<span class="cstat-no" title="statement not covered" >      if (userSendAmount &gt; 0 &amp;&amp; userSendAmount &lt; lowestCost) {</span>
+<span class="cstat-no" title="statement not covered" >        untrustedLowestCostDelegate = untrustedDelegateContract</span>;
+<span class="cstat-no" title="statement not covered" >        lowestCost = userSendAmount</span>;
+      }
+    }
+&nbsp;
+    // Return the Delegate address and amount.
+<span class="cstat-no" title="statement not covered" >    return (untrustedLowestCostDelegate, lowestCost);</span>
+  }
+&nbsp;
+  /**
+    * @notice Take the Best Price for a Buy
+    *
+    * @param _userReceiveAmount uint256 the amount of the token the caller is looking to receive
+    * @param _userReceiveToken address the token the user is looking to receive
+    * @param _userSendToken address the token the user is looking to send
+    * @param _maxIntents uint256 the max number of intents to search through
+    */
+<span class="fstat-no" title="function not covered" >  function takeBestBuy(</span>
+    uint256 _userReceiveAmount,
+    address _userReceiveToken,
+    address _userSendToken,
+    uint256 _maxIntents
+  ) public {
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    address untrustedDelegateContract;</span>
+<span class="cstat-no" title="statement not covered" >    uint256 userSendAmount;</span>
+&nbsp;
+    // Find the best buy among Indexed Delegates.
+<span class="cstat-no" title="statement not covered" >    (untrustedDelegateContract, userSendAmount) =</span>
+      findBestBuy(_userReceiveAmount, _userReceiveToken, _userSendToken, _maxIntents);
+&nbsp;
+    // Consumer transfers User amount to itself.
+<span class="cstat-no" title="statement not covered" >    IERC20(_userSendToken).transferFrom(msg.sender, address(this), userSendAmount)</span>;
+&nbsp;
+    // Consumer approves Swap to move its new tokens.
+<span class="cstat-no" title="statement not covered" >    IERC20(_userSendToken).approve(address(swapContract), userSendAmount)</span>;
+&nbsp;
+    // Consumer authorizes the Delegate.
+<span class="cstat-no" title="statement not covered" >    swapContract.authorize(untrustedDelegateContract, block.timestamp)</span>;
+&nbsp;
+    // Consumer provides unsigned order to Delegate.
+<span class="cstat-no" title="statement not covered" >    IDelegate(untrustedDelegateContract).provideUnsignedOrder(</span>
+      1,
+      userSendAmount,
+      _userSendToken,
+      _userReceiveAmount,
+      _userReceiveToken
+    );
+&nbsp;
+    // Consumer revokes the authorization of the Delegate.
+<span class="cstat-no" title="statement not covered" >    swapContract.revoke(untrustedDelegateContract)</span>;
+&nbsp;
+    // Consumer transfers received amount to the User.
+<span class="cstat-no" title="statement not covered" >    IERC20(_userReceiveToken).transfer(msg.sender, _userReceiveAmount)</span>;
+  }
+&nbsp;
+}
+&nbsp;</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Fri Aug 02 2019 04:12:19 GMT-0400 (EDT)
+</div>
+</div>
+<script src="../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../sorter.js"></script>
+</body>
+</html>
