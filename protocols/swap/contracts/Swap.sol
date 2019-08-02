@@ -70,7 +70,7 @@ contract Swap is ISwap {
     Types.Order calldata _order,
     Types.Signature calldata _signature
   )
-    external payable
+    external
   {
 
     // Ensure the order is not expired.
@@ -138,37 +138,14 @@ contract Swap is ISwap {
         "SIGNATURE_INVALID");
 
     }
-
-    // Validate the message ether value.
-    if (_order.taker.token == address(0)) {
-      /**
-        * An ether value is expected. Ensure the ether sent matches the taker
-        * param and send it to the maker wallet.
-        */
-      require(msg.value == _order.taker.param,
-        "VALUE_MUST_BE_SENT");
-
-      // Transfer ether from taker to maker
-      Transfers.send(_order.maker.wallet, msg.value);
-
-    } else {
-      /**
-        * An ether value is not expected. Ensure the value sent is zero and
-        * perform a token transfer to the taker wallet.
-        */
-      require(msg.value == 0,
-        "VALUE_MUST_BE_ZERO");
-
-      // Transfer token from taker to maker.
-      Transfers.safeTransferAny(
-        "TAKER",
-        finalTakerWallet,
-        _order.maker.wallet,
-        _order.taker.param,
-        _order.taker.token
-      );
-
-    }
+    // Transfer token from taker to maker.
+    Transfers.safeTransferAny(
+      "TAKER",
+      finalTakerWallet,
+      _order.maker.wallet,
+      _order.taker.param,
+      _order.taker.token
+    );
 
     // Transfer token from maker to taker.
     Transfers.safeTransferAny(
@@ -226,7 +203,7 @@ contract Swap is ISwap {
     bytes32 _r,
     bytes32 _s
   )
-      external payable
+      external
   {
 
     // Ensure the order has not already been taken or canceled.
@@ -289,26 +266,8 @@ contract Swap is ISwap {
     // Mark the order TAKEN (0x01).
     makerOrderStatus[_makerWallet][_nonce] = TAKEN;
 
-    // A null taker token is an order for ether.
-    if (_takerToken == address(0)) {
-
-      // Ensure the ether sent matches the taker param.
-      require(msg.value == _takerParam,
-        "VALUE_MUST_BE_SENT");
-
-      // Transfer ether from taker to maker.
-      Transfers.send(_makerWallet, msg.value);
-
-    } else {
-
-      // Ensure the value sent is zero.
-      require(msg.value == 0,
-        "VALUE_MUST_BE_ZERO");
-
-      // Transfer token from taker to maker.
-      Transfers.transferAny(_takerToken, finalTakerWallet, _makerWallet, _takerParam);
-
-    }
+    // Transfer token from taker to maker.
+    Transfers.transferAny(_takerToken, finalTakerWallet, _makerWallet, _takerParam);
 
     // Transfer token from maker to taker.
     Transfers.transferAny(_makerToken, _makerWallet, finalTakerWallet, _makerParam);

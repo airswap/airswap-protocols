@@ -63,7 +63,7 @@ interface ISwap {
   function swap(
     Types.Order calldata order,
     Types.Signature calldata signature
-  ) external payable;
+  ) external;
 
   function swapSimple(
     uint256 _nonce,
@@ -77,7 +77,7 @@ interface ISwap {
     uint8 _v,
     bytes32 _r,
     bytes32 _s
-  ) external payable;
+  ) external;
 
   function cancel(
     uint256[] calldata _nonces
