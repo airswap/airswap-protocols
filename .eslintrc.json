@@ -8,6 +8,9 @@
     "node": true,
     "mocha": true
   },
+  "globals": {
+    "artifacts": true
+  },
   "plugins": ["prettier"],
   "rules": {
     "prettier/prettier": "error",

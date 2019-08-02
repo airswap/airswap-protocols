@@ -1,6 +1,7 @@
 {
   "lerna": "3.15.0",
-  "packages": ["contracts/*", "packages/*"],
+  "packages": ["examples/*", "helpers/*", "packages/*", "protocols/*"],
   "version": "independent",
-  "npmClient": "yarn"
+  "npmClient": "yarn",
+  "useWorkspaces": true
 }

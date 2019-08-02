@@ -1,0 +1,21 @@
+{
+  "name": "@airswap/libraries",
+  "version": "0.1.0",
+  "description": "Solidity contracts and libraries used in the Swap Protocol",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/airswap/airswap-protocols"
+  },
+  "scripts": {
+    "clean": "rm -rf ./build",
+    "compile": "truffle compile",
+    "test": "truffle test"
+  },
+  "devDependencies": {
+    "@airswap/tokens": "0.1.0"
+  },
+  "dependencies": {
+    "openzeppelin-solidity": "^v2.2"
+  }
+}

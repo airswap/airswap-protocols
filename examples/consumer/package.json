@@ -1,0 +1,25 @@
+{
+  "name": "@airswap/consumer",
+  "version": "0.1.0",
+  "description": "Example integration of Swap, Indexer, and Delegate contracts",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/airswap/airswap-protocols"
+  },
+  "scripts": {
+    "clean": "rm -rf ./build",
+    "compile": "truffle compile",
+    "lint": "yarn eslint \"./test/**/*.js\"",
+    "truffle": "node_modules/.bin/truffle --network development",
+    "test": "truffle test"
+  },
+  "dependencies": {
+    "@airswap/tokens": "0.1.0",
+    "@airswap/delegate": "0.1.0",
+    "@airswap/indexer": "0.1.0",
+    "@airswap/order-utils": "0.1.0",
+    "@airswap/test-utils": "0.1.0",
+    "truffle": "^5.0.24"
+  }
+}
