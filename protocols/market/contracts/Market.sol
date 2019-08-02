@@ -39,7 +39,7 @@ contract Market is Ownable {
   byte constant private NEXT = 0x01;
 
   // Mapping of staker address to its neighbors
-  mapping(address => mapping(byte => Intent)) intentsLinkedList;
+  mapping(address => mapping(byte => Intent)) public intentsLinkedList;
 
   /**
     * @notice Intent to Trade
@@ -156,13 +156,6 @@ contract Market is Ownable {
       return intentsLinkedList[intentsLinkedList[_staker][PREV].staker][NEXT];
     }
     return Intent(address(0), 0, 0, byte(0));
-  }
-
-  /**
-    * @notice Return the Length
-    */
-  function getLength() public view returns (uint256) {
-    return length;
   }
 
   /**
