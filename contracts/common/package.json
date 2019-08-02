@@ -10,7 +10,8 @@
   "scripts": {
     "clean": "rm -rf ./build",
     "compile": "truffle compile",
-    "test": "truffle test"
+    "test": "truffle test",
+    "coverage": "node_modules/.bin/solidity-coverage"
   },
   "devDependencies": {
     "@airswap/tokens": "0.1.0"

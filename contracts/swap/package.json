@@ -10,9 +10,11 @@
   "scripts": {
     "clean": "rm -rf ./build",
     "compile": "truffle compile",
-    "truffle": "node_modules/.bin/truffle --network development",
+    "truffle": "node_modules/.bin/truffle",
     "lint": "yarn eslint \"./test/**/*.js\"",
-    "test": "truffle test"
+    "test": "truffle test",
+    "coverage": "node_modules/.bin/solidity-coverage"
+
   },
   "devDependencies": {
     "@airswap/order-utils": "0.1.0",
@@ -21,6 +23,7 @@
   },
   "dependencies": {
     "@airswap/common": "0.1.0",
-    "openzeppelin-solidity": "^v2.2"
+    "openzeppelin-solidity": "^v2.2",
+    "solidity-coverage": "^0.6.3"
   }
 }

@@ -14,7 +14,8 @@
     "lint": "yarn eslint \"./**/test/**/*.js\" \"./packages/**/*.js\"",
     "ganache": "ganache-cli -p 8545 --gasLimit 0xfffffffffff --time '2017-05-10T00:00:00+00:00'",
     "publish": "lerna publish",
-    "test": "yarn clean && lerna run test --concurrency=1"
+    "test": "yarn clean && lerna run test --concurrency=1",
+    "coverage": "yarn clean && lerna run coverage --concurrency=1"
   },
   "devDependencies": {
     "@gnosis.pm/mock-contract": "^3.0.7",
@@ -23,17 +24,21 @@
     "eslint-config-airbnb-base": "^13.2.0",
     "eslint-plugin-import": "^2.18.0",
     "eslint-plugin-prettier": "^3.1.0",
+    "ethereumjs-abi": "^0.6.7",
     "ganache-cli": "^6.4.4",
     "lerna": "^3.15.0",
     "prettier": "^1.18.2",
     "solhint": "^2.1.0",
-    "truffle": "^5.0.24",
-    "ethereumjs-abi": "^0.6.7"
+    "truffle": "^5.0.24"
   },
   "prettier": {
     "trailingComma": "es5",
     "tabWidth": 2,
     "semi": false,
     "singleQuote": true
+  },
+  "dependencies": {
+    "@0x/sol-coverage": "^3.0.8",
+    "solidity-coverage": "git://github.com/leapdao/solidity-coverage#master"
   }
 }

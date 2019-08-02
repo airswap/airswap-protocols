@@ -12,15 +12,17 @@
     "compile": "truffle compile",
     "lint": "yarn eslint \"./test/**/*.js\"",
     "truffle": "node_modules/.bin/truffle --network development",
-    "test": "truffle test"
+    "test": "truffle test",
+    "coverage": "node_modules/.bin/solidity-coverage"
   },
   "devDependencies": {
     "@airswap/order-utils": "0.1.0",
     "@airswap/test-utils": "0.1.0"
   },
-  "dependences": {
+  "dependencies": {
     "@airswap/common": "0.1.0",
     "@airswap/swap": "0.1.0",
-    "@airswap/tokens": "0.1.0"
+    "@airswap/tokens": "0.1.0",
+    "solidity-coverage": "^0.6.3"
   }
 }

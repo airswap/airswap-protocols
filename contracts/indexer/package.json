@@ -11,7 +11,8 @@
     "clean": "rm -rf ./build",
     "compile": "truffle compile",
     "truffle": "node_modules/.bin/truffle --network development",
-    "test": "truffle test"
+    "test": "truffle test",
+    "coverage": "node_modules/.bin/solidity-coverage"
   },
   "devDependencies": {
     "@airswap/market": "0.1.0",
@@ -21,6 +22,7 @@
     "truffle": "^5.0.24"
   },
   "dependencies": {
-    "openzeppelin-solidity": "^v2.2"
+    "openzeppelin-solidity": "^v2.2",
+    "solidity-coverage": "^0.6.3"
   }
 }
