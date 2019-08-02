@@ -6,3 +6,7 @@ import "@airswap/common/libraries/Transfers.sol";
 import "@airswap/common/libraries/Types.sol";
 import "@airswap/tokens/contracts/WETH9.sol";
 import "@gnosis.pm/mock-contract/contracts/MockContract.sol";
+
+contract Imports {
+
+}

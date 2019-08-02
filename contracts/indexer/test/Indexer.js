@@ -66,7 +66,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
     })
 
     it('Bob ensures no intents are on the Indexer', async () => {
-      equal(await indexer.lengthOf(tokenWETH.address, tokenDAI.address), 0)
+      equal(await indexer.lengthOf.call(tokenWETH.address, tokenDAI.address), 0)
     })
 
     it('Alice attempts to stake and set an intent but fails due to no market', async () => {
@@ -175,18 +175,17 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
 
   describe('Intent integrity', async () => {
     it('Bob ensures only one intent is on the Indexer', async () => {
-      equal(await indexer.lengthOf(tokenWETH.address, tokenDAI.address), 1)
+      equal(await indexer.lengthOf.call(tokenWETH.address, tokenDAI.address), 1)
     })
 
     it('Bob ensures that Alice intent is on the Indexer', async () => {
-      const intents = await indexer.getIntents(
-        tokenWETH.address,
+      const intents = await indexer.getIntents.call(tokenWETH.address,
         tokenDAI.address,
         10,
         {
           from: bobAddress,
         }
-      )
+        )
       equal(intents[0], ALICE_LOC)
     })
 
@@ -205,7 +204,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
     })
 
     it('Bob ensures there are no more intents the Indexer', async () => {
-      const intents = await indexer.getIntents(
+      const intents = await indexer.getIntents.call(
         tokenWETH.address,
         tokenDAI.address,
         10,
