@@ -288,31 +288,63 @@ contract('Market Unit Tests', async accounts => {
 
     it('should return empty intent for a non-staker', async () => {
       let davidIntent = await market.getIntent(davidAddress)
-      equal(davidIntent[STAKER], EMPTY_ADDRESS, 'David: Intent address not correct')
+      equal(
+        davidIntent[STAKER],
+        EMPTY_ADDRESS,
+        'David: Intent address not correct'
+      )
       equal(davidIntent[AMOUNT], 0, 'David: Intent amount not correct')
       equal(davidIntent[EXPIRY], 0, 'David: Intent expiry not correct')
-      equal(davidIntent[LOCATOR], NULL_LOCATOR, 'David: Intent locator not correct')
+      equal(
+        davidIntent[LOCATOR],
+        NULL_LOCATOR,
+        'David: Intent locator not correct'
+      )
 
       // now for a recently unset intent
       await market.unsetIntent(carolAddress, { from: owner })
       let carolIntent = await market.getIntent(carolAddress)
-      equal(carolIntent[STAKER], EMPTY_ADDRESS, 'Carol: Intent address not correct')
+      equal(
+        carolIntent[STAKER],
+        EMPTY_ADDRESS,
+        'Carol: Intent address not correct'
+      )
       equal(carolIntent[AMOUNT], 0, 'Carol: Intent amount not correct')
       equal(carolIntent[EXPIRY], 0, 'Carol: Intent expiry not correct')
-      equal(carolIntent[LOCATOR], NULL_LOCATOR, 'Carol: Intent locator not correct')
+      equal(
+        carolIntent[LOCATOR],
+        NULL_LOCATOR,
+        'Carol: Intent locator not correct'
+      )
     })
 
     it('should return the correct intent for a valid staker', async () => {
       let aliceIntent = await market.getIntent(aliceAddress)
-      equal(aliceIntent[STAKER], aliceAddress, 'Alice: Intent address not correct')
+      equal(
+        aliceIntent[STAKER],
+        aliceAddress,
+        'Alice: Intent address not correct'
+      )
       equal(aliceIntent[AMOUNT], 2000, 'Alice: Intent amount not correct')
-      equal(aliceIntent[EXPIRY], EXPIRY_THREE_DAYS, 'Alice: Intent expiry not correct')
-      equal(aliceIntent[LOCATOR], ALICE_LOC, 'Alice: Intent locator not correct')
+      equal(
+        aliceIntent[EXPIRY],
+        EXPIRY_THREE_DAYS,
+        'Alice: Intent expiry not correct'
+      )
+      equal(
+        aliceIntent[LOCATOR],
+        ALICE_LOC,
+        'Alice: Intent locator not correct'
+      )
 
       let bobIntent = await market.getIntent(bobAddress)
       equal(bobIntent[STAKER], bobAddress, 'Bob: intent address not correct')
       equal(bobIntent[AMOUNT], 500, 'Bob: Intent amount not correct')
-      equal(bobIntent[EXPIRY], EXPIRY_TWO_DAYS, 'Bob: Intent expiry not correct')
+      equal(
+        bobIntent[EXPIRY],
+        EXPIRY_TWO_DAYS,
+        'Bob: Intent expiry not correct'
+      )
       equal(bobIntent[LOCATOR], BOB_LOC, 'Bob: Intent locator not correct')
     })
   })
