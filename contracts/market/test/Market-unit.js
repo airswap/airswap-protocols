@@ -230,7 +230,6 @@ contract('Market', async accounts => {
       let returnValue = await market.unsetIntent.call(davidAddress, {
         from: owner,
       })
-
       equal(returnValue, false, 'unsetIntent should have returned false')
 
       await market.unsetIntent(davidAddress, { from: owner })
@@ -244,6 +243,33 @@ contract('Market', async accounts => {
       equal(intents[2], BOB_LOC, 'Bob should be third')
     })
 
-    it('should unset the intent for a valid staker')
+    it('should unset the intent for a valid staker', async () => {
+      // check it returns true
+      let returnValue = await market.unsetIntent.call(bobAddress, {
+        from: owner,
+      })
+      equal(returnValue, true, 'unsetIntent should have returned true')
+
+      // check it emits an event correctly
+      let result = await market.unsetIntent(bobAddress, { from: owner })
+      emitted(result, 'UnsetIntent', event => {
+        return (
+          event.staker === bobAddress &&
+          event.makerToken === mockTokenOne &&
+          event.takerToken === mockTokenTwo
+        )
+      })
+
+      // check the linked list of intents is updated correspondingly
+      await checkLinking(LIST_HEAD, aliceAddress, carolAddress)
+      await checkLinking(aliceAddress, carolAddress, LIST_HEAD)
+
+      let listLength = await market.length()
+      equal(listLength, 2, 'Link list length should be 2')
+
+      const intents = await market.fetchIntents(7)
+      equal(intents[0], ALICE_LOC, 'Alice should be first')
+      equal(intents[1], CAROL_LOC, 'Carol should be second')
+    })
   })
 })
