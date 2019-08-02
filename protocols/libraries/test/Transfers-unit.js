@@ -149,35 +149,6 @@ contract('Transfers Unit Tests', async accounts => {
       )
     })
 
-    it('Test safeTransferAny ERC20 - Fails Insufficient Balance', async () => {
-      let fungibleToken_balanceOf = fungibleTokenTemplate.contract.methods
-        .balanceOf(sender)
-        .encodeABI()
-      await mockFungibleToken.givenMethodReturnUint(
-        fungibleToken_balanceOf,
-        10000
-      )
-
-      let fungibleToken_allowance = fungibleTokenTemplate.contract.methods
-        .allowance(sender, sender)
-        .encodeABI()
-      await mockFungibleToken.givenMethodReturnUint(fungibleToken_allowance, 0)
-
-      await reverted(
-        mockTransfers.safeTransferAny(
-          TAKER,
-          sender,
-          receiver,
-          10000,
-          mockFungibleToken.address,
-          {
-            from: sender,
-          }
-        ),
-        'TAKER_INSUFFICIENT_ALLOWANCE.'
-      )
-    })
-
     it('Test safeTransferAny ERC721 to EMPTY_ADDRESS succeeds', async () => {
       let nft_support165 = nonFungibleTokenTemplate.contract.methods
         .supportsInterface('0x01ffc9a7')
