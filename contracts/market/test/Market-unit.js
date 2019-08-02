@@ -349,7 +349,67 @@ contract('Market Unit Tests', async accounts => {
     })
   })
 
-  describe('Test fetchIntents')
-  describe('Test isIntentExpired and cleanExpiredIntents')
-  describe('Test hashIntent')
+  describe('Test fetchIntents', async () => {
+    it('returns an empty array with no intents', async () => {
+      const intents = await market.fetchIntents(7)
+      equal(intents.length, 0, 'there should be no intents')
+    })
+
+    it('returns specified number of elements if < length', async () => {
+      // add 3 intents
+      await market.setIntent(aliceAddress, 2000, EXPIRY_THREE_DAYS, ALICE_LOC, {
+        from: owner,
+      })
+      await market.setIntent(bobAddress, 500, EXPIRY_TWO_DAYS, BOB_LOC, {
+        from: owner,
+      })
+      await market.setIntent(carolAddress, 1500, EXPIRY_ONE_DAY, CAROL_LOC, {
+        from: owner,
+      })
+
+      const intents = await market.fetchIntents(2)
+      equal(intents.length, 2, 'there should only be 2 intents returned')
+
+      equal(intents[0], ALICE_LOC, 'Alice should be first')
+      equal(intents[1], CAROL_LOC, 'Carol should be second')
+    })
+
+    it('returns only length if requested number if larger', async () => {
+      // add 3 intents
+      await market.setIntent(aliceAddress, 2000, EXPIRY_THREE_DAYS, ALICE_LOC, {
+        from: owner,
+      })
+      await market.setIntent(bobAddress, 500, EXPIRY_TWO_DAYS, BOB_LOC, {
+        from: owner,
+      })
+      await market.setIntent(carolAddress, 1500, EXPIRY_ONE_DAY, CAROL_LOC, {
+        from: owner,
+      })
+
+      const intents = await market.fetchIntents(10)
+      equal(intents.length, 3, 'there should only be 3 intents returned')
+
+      equal(intents[0], ALICE_LOC, 'Alice should be first')
+      equal(intents[1], CAROL_LOC, 'Carol should be second')
+      equal(intents[2], BOB_LOC, 'Bob should be third')
+    })
+  })
+
+  describe('Test hasIntent', async () => {
+    it('should return false if the address has no intent', async () => {
+      let hasIntent = await market.hasIntent(aliceAddress)
+      equal(hasIntent, false, 'hasIntent should have returned false')
+    })
+
+    it('should return false if the address has no intent', async () => {
+      // give alice an intent
+      await market.setIntent(aliceAddress, 2000, EXPIRY_THREE_DAYS, ALICE_LOC, {
+        from: owner,
+      })
+      // now test again
+      let hasIntent = await market.hasIntent(aliceAddress)
+      equal(hasIntent, true, 'hasIntent should have returned true')
+    })
+  })
+  // describe('Test isIntentExpired and cleanExpiredIntents')
 })
