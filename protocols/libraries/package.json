@@ -10,10 +10,12 @@
   "scripts": {
     "clean": "rm -rf ./build",
     "compile": "truffle compile",
+    "coverage": "node_modules/.bin/solidity-coverage",
     "test": "truffle test"
   },
   "devDependencies": {
-    "@airswap/tokens": "0.1.0"
+    "@airswap/tokens": "0.1.0",
+    "solidity-coverage": "^0.6.3"
   },
   "dependencies": {
     "openzeppelin-solidity": "^v2.2"

@@ -50,7 +50,7 @@ contract Consumer {
     * @notice Find the Best Price for a Buy
     *
     * @param _userReceiveAmount uint256 the amount of the token the caller is looking to receive
-    * @param _userReceiveToken address the token the user is looking to receive 
+    * @param _userReceiveToken address the token the user is looking to receive
     * @param _userSendToken address the token the user is looking to send
     * @param _maxIntents uint256 the max number of intents to search through
     *
@@ -62,7 +62,7 @@ contract Consumer {
     address _userReceiveToken,
     address _userSendToken,
     uint256 _maxIntents
-  ) public view returns (address, uint256) {
+  ) public returns (address, uint256) {
 
     address untrustedLowestCostDelegate;
     uint256 lowestCost = 2**256 - 1;

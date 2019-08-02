@@ -52,7 +52,7 @@ contract('Types Unit Tests', async () => {
     it('Test hashOrder', async () => {
       const { order } = await orders.getOrder({})
       let hashedDomain = '0x' + hashDomain(mockTypes.address).toString('hex')
-      let hashedOrder = await mockTypes.hashOrder(order, hashedDomain)
+      let hashedOrder = await mockTypes.hashOrder.call(order, hashedDomain)
       equal(
         hashedOrder,
         '0x' + getOrderHash(order, mockTypes.address).toString('hex'),

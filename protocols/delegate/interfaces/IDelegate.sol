@@ -61,7 +61,7 @@ interface IDelegate {
     uint256 _delegateAmount,
     address _delegateToken,
     address _consumerToken
-  ) external view returns (
+  ) external returns (
     uint256 consumerAmount
   );
 
@@ -69,14 +69,14 @@ interface IDelegate {
     uint256 _consumerAmount,
     address _consumerToken,
     address _delegateToken
-  ) external view returns (
+  ) external returns (
     uint256 delegateAmount
   );
 
   function getMaxQuote(
     address _delegateToken,
     address _consumerToken
-  ) external view returns (
+  ) external returns (
     uint256 delegateAmount,
     uint256 consumerAmount
   );

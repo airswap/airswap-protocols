@@ -328,7 +328,7 @@ contract('Delegate Unit Tests', async accounts => {
 
   describe('Test getMaxQuote', async () => {
     it('test when rule does not exist', async () => {
-      let val = await delegate.getMaxQuote(DELEGATE_TOKEN, CONSUMER_TOKEN)
+      let val = await delegate.getMaxQuote.call(DELEGATE_TOKEN, CONSUMER_TOKEN)
       equal(
         val[0].toNumber(),
         0,
@@ -349,7 +349,7 @@ contract('Delegate Unit Tests', async accounts => {
         PRICE_COEF,
         EXP
       )
-      let val = await delegate.getMaxQuote(DELEGATE_TOKEN, CONSUMER_TOKEN)
+      let val = await delegate.getMaxQuote.call(DELEGATE_TOKEN, CONSUMER_TOKEN)
       //TODO: @dmosites should the getMaxQuote() return with an exponent or a whole number?
       //MAX_DELEGATE_AMOUNT * PRICE_COEF / (10 ^ EXP)
       equal(
