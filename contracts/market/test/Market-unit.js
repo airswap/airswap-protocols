@@ -348,4 +348,8 @@ contract('Market Unit Tests', async accounts => {
       equal(bobIntent[LOCATOR], BOB_LOC, 'Bob: Intent locator not correct')
     })
   })
+
+  describe('Test fetchIntents')
+  describe('Test isIntentExpired and cleanExpiredIntents')
+  describe('Test hashIntent')
 })
