@@ -5,15 +5,9 @@ const BN = require('bignumber.js')
 const Market = artifacts.require('Market')
 
 const { SECONDS_IN_DAY } = require('@airswap/order-utils').constants
-const {
-  equal,
-  reverted,
-  emitted,
-  passes,
-} = require('@airswap/test-utils').assert
+const { equal, reverted, emitted } = require('@airswap/test-utils').assert
 const {
   getTimestampPlusDays,
-  advanceTimeAndBlock,
   takeSnapshot,
   revertToSnapShot,
 } = require('@airswap/test-utils').time
@@ -58,6 +52,11 @@ contract('Market', async accounts => {
   const EXPIRY = 'expiry'
   const LOCATOR = 'locator'
 
+  // expiries
+  let EXPIRY_ONE_DAY
+  let EXPIRY_TWO_DAYS
+  let EXPIRY_THREE_DAYS
+
   beforeEach(async () => {
     let snapShot = await takeSnapshot()
     snapshotId = snapShot['result']
@@ -69,19 +68,20 @@ contract('Market', async accounts => {
 
   before('Setup', async () => {
     market = await Market.new(mockTokenOne, mockTokenTwo, { from: owner })
+    EXPIRY_ONE_DAY = await getTimestampPlusDays(1)
+    EXPIRY_TWO_DAYS = await getTimestampPlusDays(2)
+    EXPIRY_THREE_DAYS = await getTimestampPlusDays(3)
   })
 
-  async function checkLinking(staker, nextStaker, prevStaker) {
-    let actualNextStaker = (await market.intentsLinkedList(
-      staker,
-      LIST_NEXT
-    ))[STAKER]
-      let actualPrevStaker = (await market.intentsLinkedList(
-        staker,
-        LIST_PREV
-      ))[STAKER]
-      equal(actualNextStaker, nextStaker, "Next staker not set correctly")
-      equal(actualPrevStaker, prevStaker, "Prev staker not set correctly")
+  async function checkLinking(prevStaker, staker, nextStaker) {
+    let actualNextStaker = (await market.intentsLinkedList(staker, LIST_NEXT))[
+      STAKER
+    ]
+    let actualPrevStaker = (await market.intentsLinkedList(staker, LIST_PREV))[
+      STAKER
+    ]
+    equal(actualNextStaker, nextStaker, 'Next staker not set correctly')
+    equal(actualPrevStaker, prevStaker, 'Prev staker not set correctly')
   }
 
   describe('Test constructor', async () => {
@@ -118,12 +118,11 @@ contract('Market', async accounts => {
     })
 
     it('should allow an intent to be inserted by the owner', async () => {
-      let intentExpiry = await getTimestampPlusDays(3)
       // set an intent from the owner
       let result = await market.setIntent(
         aliceAddress,
         2000,
-        intentExpiry,
+        EXPIRY_THREE_DAYS,
         ALICE_LOC,
         { from: owner }
       )
@@ -133,7 +132,7 @@ contract('Market', async accounts => {
         return (
           event.staker === aliceAddress &&
           event.amount.toNumber() === 2000 &&
-          event.expiry.toNumber() === intentExpiry &&
+          event.expiry.toNumber() === EXPIRY_THREE_DAYS &&
           event.locator === ALICE_LOC &&
           event.makerToken === mockTokenOne &&
           event.takerToken === mockTokenTwo
@@ -143,15 +142,19 @@ contract('Market', async accounts => {
       // check it has been inserted into the linked list correctly
 
       // check its been linked to the head correctly
-      await checkLinking(LIST_HEAD, aliceAddress, aliceAddress)
-      await checkLinking(aliceAddress, LIST_HEAD, LIST_HEAD)
+      await checkLinking(aliceAddress, LIST_HEAD, aliceAddress)
+      await checkLinking(LIST_HEAD, aliceAddress, LIST_HEAD)
 
       // check the values have been stored correctly
       let headNextIntent = await market.intentsLinkedList(LIST_HEAD, LIST_NEXT)
 
       equal(headNextIntent[STAKER], aliceAddress, 'Intent address not correct')
       equal(headNextIntent[AMOUNT], 2000, 'Intent amount not correct')
-      equal(headNextIntent[EXPIRY], intentExpiry, 'Intent expiry not correct')
+      equal(
+        headNextIntent[EXPIRY],
+        EXPIRY_THREE_DAYS,
+        'Intent expiry not correct'
+      )
       equal(headNextIntent[LOCATOR], ALICE_LOC, 'Intent locator not correct')
 
       // check the length has increased
@@ -160,12 +163,16 @@ contract('Market', async accounts => {
     })
 
     it('should insert subsequent intents in the correct order', async () => {
-      let intentExpiry = await getTimestampPlusDays(2)
-      // set an intent from the owner
+      // insert alice
+      await market.setIntent(aliceAddress, 2000, EXPIRY_THREE_DAYS, ALICE_LOC, {
+        from: owner,
+      })
+
+      // now add more
       let result = await market.setIntent(
         bobAddress,
         500,
-        intentExpiry,
+        EXPIRY_TWO_DAYS,
         BOB_LOC,
         { from: owner }
       )
@@ -175,12 +182,34 @@ contract('Market', async accounts => {
         return (
           event.staker === bobAddress &&
           event.amount.toNumber() === 500 &&
-          event.expiry.toNumber() === intentExpiry &&
+          event.expiry.toNumber() === EXPIRY_TWO_DAYS &&
           event.locator === BOB_LOC &&
           event.makerToken === mockTokenOne &&
           event.takerToken === mockTokenTwo
         )
       })
+
+      await market.setIntent(carolAddress, 1500, EXPIRY_ONE_DAY, CAROL_LOC, {
+        from: owner,
+      })
+
+      await checkLinking(LIST_HEAD, aliceAddress, carolAddress)
+      await checkLinking(aliceAddress, carolAddress, bobAddress)
+      await checkLinking(carolAddress, bobAddress, LIST_HEAD)
     })
   })
+
+  // describe('Test unsetIntent', async () => {
+  //   before('Setup intents', async () => {
+  //     await market.setIntent(aliceAddress, 2000, EXPIRY_THREE_DAYS, ALICE_LOC, {
+  //       from: owner,
+  //     })
+  //     await market.setIntent(bobAddress, 500, EXPIRY_TWO_DAYS, BOB_LOC, {
+  //       from: owner,
+  //     })
+  //     await market.setIntent(carolAddress, 1500, EXPIRY_ONE_DAY, CAROL_LOC, {
+  //       from: owner,
+  //     })
+  //   })
+  // })
 })
