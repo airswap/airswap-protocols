@@ -9,7 +9,10 @@ const {
   revertToSnapShot,
 } = require('@airswap/test-utils').time
 const { intents } = require('@airswap/indexer-utils')
-const { EMPTY_ADDRESS, SECONDS_IN_DAY } = require('@airswap/order-utils').constants
+const {
+  EMPTY_ADDRESS,
+  SECONDS_IN_DAY,
+} = require('@airswap/order-utils').constants
 
 const ALICE_LOC = intents.serialize(
   intents.Locators.INSTANT,
@@ -421,7 +424,11 @@ contract('Market Unit Tests', async accounts => {
       })
 
       let isIntentExpired = await market.isIntentExpired.call(aliceAddress)
-      equal(isIntentExpired, false, 'isIntentExpired should have returned false')
+      equal(
+        isIntentExpired,
+        false,
+        'isIntentExpired should have returned false'
+      )
     })
 
     it('should return true if an intent has expired', async () => {
