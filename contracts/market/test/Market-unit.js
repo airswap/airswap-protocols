@@ -141,25 +141,28 @@ contract('Market', async accounts => {
 
       // check its been linked to the head correctly
       let headNextStaker = headNextIntent[STAKER]
-      let headPrevStaker = (await market.intentsLinkedList(LIST_HEAD, LIST_PREV))[
-        STAKER
-      ]
+      let headPrevStaker = (await market.intentsLinkedList(
+        LIST_HEAD,
+        LIST_PREV
+      ))[STAKER]
       equal(headNextStaker, aliceAddress, "Head 'next' not updated to alice")
       equal(headPrevStaker, aliceAddress, "Head 'prev' not updated to alice")
-      let aliceNextStaker = (await market.intentsLinkedList(aliceAddress, LIST_NEXT))[
-        STAKER
-      ]
-      let alicePrevStaker = (await market.intentsLinkedList(aliceAddress, LIST_PREV))[
-        STAKER
-      ]
+      let aliceNextStaker = (await market.intentsLinkedList(
+        aliceAddress,
+        LIST_NEXT
+      ))[STAKER]
+      let alicePrevStaker = (await market.intentsLinkedList(
+        aliceAddress,
+        LIST_PREV
+      ))[STAKER]
       equal(aliceNextStaker, LIST_HEAD, "Alice 'next' not head")
       equal(alicePrevStaker, LIST_HEAD, "Alice 'prev' not head")
 
       // check the values have been stored correctly
-      equal(headNextIntent[STAKER], aliceAddress, "Intent address not correct")
-      equal(headNextIntent[AMOUNT], 2000, "Intent amount not correct")
-      equal(headNextIntent[EXPIRY], intentExpiry, "Intent expiry not correct")
-      equal(headNextIntent[LOCATOR], ALICE_LOC, "Intent locator not correct")
+      equal(headNextIntent[STAKER], aliceAddress, 'Intent address not correct')
+      equal(headNextIntent[AMOUNT], 2000, 'Intent amount not correct')
+      equal(headNextIntent[EXPIRY], intentExpiry, 'Intent expiry not correct')
+      equal(headNextIntent[LOCATOR], ALICE_LOC, 'Intent locator not correct')
 
       // check the length has increased
       let listLength = await market.length()
