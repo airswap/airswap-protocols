@@ -71,6 +71,19 @@ contract('Market', async accounts => {
     market = await Market.new(mockTokenOne, mockTokenTwo, { from: owner })
   })
 
+  async function checkLinking(staker, nextStaker, prevStaker) {
+    let actualNextStaker = (await market.intentsLinkedList(
+      staker,
+      LIST_NEXT
+    ))[STAKER]
+      let actualPrevStaker = (await market.intentsLinkedList(
+        staker,
+        LIST_PREV
+      ))[STAKER]
+      equal(actualNextStaker, nextStaker, "Next staker not set correctly")
+      equal(actualPrevStaker, prevStaker, "Prev staker not set correctly")
+  }
+
   describe('Test constructor', async () => {
     it('should set maker token', async () => {
       const actualMakerToken = await market.makerToken()
@@ -83,14 +96,7 @@ contract('Market', async accounts => {
     })
 
     it('should setup the linked list as just a head, length 0', async () => {
-      let nextStaker = (await market.intentsLinkedList(LIST_HEAD, LIST_NEXT))[
-        STAKER
-      ]
-      let prevStaker = (await market.intentsLinkedList(LIST_HEAD, LIST_PREV))[
-        STAKER
-      ]
-      equal(nextStaker, LIST_HEAD, "Linked list 'next' set up incorrectly")
-      equal(prevStaker, LIST_HEAD, "Linked list 'prev' set up incorrectly")
+      await checkLinking(LIST_HEAD, LIST_HEAD, LIST_HEAD)
 
       let listLength = await market.length()
       equal(listLength, 0, 'Link list length should be 0')
@@ -136,29 +142,13 @@ contract('Market', async accounts => {
 
       // check it has been inserted into the linked list correctly
 
-      // get intent
-      let headNextIntent = await market.intentsLinkedList(LIST_HEAD, LIST_NEXT)
-
       // check its been linked to the head correctly
-      let headNextStaker = headNextIntent[STAKER]
-      let headPrevStaker = (await market.intentsLinkedList(
-        LIST_HEAD,
-        LIST_PREV
-      ))[STAKER]
-      equal(headNextStaker, aliceAddress, "Head 'next' not updated to alice")
-      equal(headPrevStaker, aliceAddress, "Head 'prev' not updated to alice")
-      let aliceNextStaker = (await market.intentsLinkedList(
-        aliceAddress,
-        LIST_NEXT
-      ))[STAKER]
-      let alicePrevStaker = (await market.intentsLinkedList(
-        aliceAddress,
-        LIST_PREV
-      ))[STAKER]
-      equal(aliceNextStaker, LIST_HEAD, "Alice 'next' not head")
-      equal(alicePrevStaker, LIST_HEAD, "Alice 'prev' not head")
+      await checkLinking(LIST_HEAD, aliceAddress, aliceAddress)
+      await checkLinking(aliceAddress, LIST_HEAD, LIST_HEAD)
 
       // check the values have been stored correctly
+      let headNextIntent = await market.intentsLinkedList(LIST_HEAD, LIST_NEXT)
+
       equal(headNextIntent[STAKER], aliceAddress, 'Intent address not correct')
       equal(headNextIntent[AMOUNT], 2000, 'Intent amount not correct')
       equal(headNextIntent[EXPIRY], intentExpiry, 'Intent expiry not correct')
@@ -169,6 +159,28 @@ contract('Market', async accounts => {
       equal(listLength, 1, 'Link list length should be 1')
     })
 
-    it('should insert subsequent intents in the correct order')
+    it('should insert subsequent intents in the correct order', async () => {
+      let intentExpiry = await getTimestampPlusDays(2)
+      // set an intent from the owner
+      let result = await market.setIntent(
+        bobAddress,
+        500,
+        intentExpiry,
+        BOB_LOC,
+        { from: owner }
+      )
+
+      // check the SetIntent event was emitted
+      emitted(result, 'SetIntent', event => {
+        return (
+          event.staker === bobAddress &&
+          event.amount.toNumber() === 500 &&
+          event.expiry.toNumber() === intentExpiry &&
+          event.locator === BOB_LOC &&
+          event.makerToken === mockTokenOne &&
+          event.takerToken === mockTokenTwo
+        )
+      })
+    })
   })
 })
