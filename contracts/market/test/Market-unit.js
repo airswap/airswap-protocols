@@ -49,10 +49,14 @@ contract('Market', async accounts => {
   let snapshotId
   let market
 
+  // linked list helpers
   const LIST_HEAD = '0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF'
   const LIST_PREV = '0x00'
   const LIST_NEXT = '0x01'
   const STAKER = 'staker'
+  const AMOUNT = 'amount'
+  const EXPIRY = 'expiry'
+  const LOCATOR = 'locator'
 
   beforeEach(async () => {
     let snapShot = await takeSnapshot()
@@ -129,6 +133,37 @@ contract('Market', async accounts => {
           event.takerToken === mockTokenTwo
         )
       })
+
+      // check it has been inserted into the linked list correctly
+
+      // get intent
+      let headNextIntent = await market.intentsLinkedList(LIST_HEAD, LIST_NEXT)
+
+      // check its been linked to the head correctly
+      let headNextStaker = headNextIntent[STAKER]
+      let headPrevStaker = (await market.intentsLinkedList(LIST_HEAD, LIST_PREV))[
+        STAKER
+      ]
+      equal(headNextStaker, aliceAddress, "Head 'next' not updated to alice")
+      equal(headPrevStaker, aliceAddress, "Head 'prev' not updated to alice")
+      let aliceNextStaker = (await market.intentsLinkedList(aliceAddress, LIST_NEXT))[
+        STAKER
+      ]
+      let alicePrevStaker = (await market.intentsLinkedList(aliceAddress, LIST_PREV))[
+        STAKER
+      ]
+      equal(aliceNextStaker, LIST_HEAD, "Alice 'next' not head")
+      equal(alicePrevStaker, LIST_HEAD, "Alice 'prev' not head")
+
+      // check the values have been stored correctly
+      equal(headNextIntent[STAKER], aliceAddress, "Intent address not correct")
+      equal(headNextIntent[AMOUNT], 2000, "Intent amount not correct")
+      equal(headNextIntent[EXPIRY], intentExpiry, "Intent expiry not correct")
+      equal(headNextIntent[LOCATOR], ALICE_LOC, "Intent locator not correct")
+
+      // check the length has increased
+      let listLength = await market.length()
+      equal(listLength, 1, 'Link list length should be 1')
     })
 
     it('should insert subsequent intents in the correct order')
