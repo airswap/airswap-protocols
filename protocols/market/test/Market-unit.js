@@ -444,4 +444,63 @@ contract('Market Unit Tests', async accounts => {
       equal(isIntentExpired, true, 'isIntentExpired should have returned true')
     })
   })
+
+  describe('Test cleanExpiredIntents', async () => {
+    beforeEach('Setup intents again', async () => {
+      await market.setIntent(aliceAddress, 2000, EXPIRY_THREE_DAYS, ALICE_LOC, {
+        from: owner,
+      })
+      await market.setIntent(bobAddress, 500, EXPIRY_TWO_DAYS, BOB_LOC, {
+        from: owner,
+      })
+      await market.setIntent(carolAddress, 1500, EXPIRY_ONE_DAY, CAROL_LOC, {
+        from: owner,
+      })
+    })
+
+    it('should make no changes if none have expired', async () => {
+      let intents = await market.fetchIntents(7)
+      equal(intents[0], ALICE_LOC, 'Alice should be first')
+      equal(intents[1], CAROL_LOC, 'Carol should be second')
+      equal(intents[2], BOB_LOC, 'Bob should be third')
+
+      let listLength = await market.length()
+      equal(listLength, 3, 'Link list length should be 3')
+
+      await market.cleanExpiredIntents(LIST_HEAD, 6)
+
+      intents = await market.fetchIntents(7)
+      equal(intents[0], ALICE_LOC, 'Alice should be first')
+      equal(intents[1], CAROL_LOC, 'Carol should be second')
+      equal(intents[2], BOB_LOC, 'Bob should be third')
+
+      listLength = await market.length()
+      equal(listLength, 3, 'Link list length should be 3')
+    })
+
+    it('should make not remove an expired intent if count doesnt reach it', async () => {
+      let intents = await market.fetchIntents(7)
+      equal(intents[0], ALICE_LOC, 'before: Alice should be first')
+      equal(intents[1], CAROL_LOC, 'before: Carol should be second')
+      equal(intents[2], BOB_LOC, 'before: Bob should be third')
+
+      let listLength = await market.length()
+      equal(listLength, 3, 'Link list length should be 3')
+
+      // progress so that carol has expired
+      await advanceTimeAndBlock(SECONDS_IN_DAY * 1.1)
+
+      // do not reach carols intent
+      await market.cleanExpiredIntents(bobAddress, 1)
+
+      // left unchanged
+      intents = await market.fetchIntents(7)
+      equal(intents[0], ALICE_LOC, 'Alice should be first')
+      equal(intents[1], CAROL_LOC, 'Carol should be second')
+      equal(intents[2], BOB_LOC, 'Bob should be third')
+
+      listLength = await market.length()
+      equal(listLength, 3, 'Link list length should be 3')
+    })
+  })
 })
