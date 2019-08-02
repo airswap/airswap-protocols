@@ -270,6 +270,13 @@ contract('Market', async accounts => {
       const intents = await market.fetchIntents(7)
       equal(intents[0], ALICE_LOC, 'Alice should be first')
       equal(intents[1], CAROL_LOC, 'Carol should be second')
+
+      await market.unsetIntent(aliceAddress, { from: owner })
+      await market.unsetIntent(carolAddress, { from: owner })
+
+      await checkLinking(LIST_HEAD, LIST_HEAD, LIST_HEAD)
+      listLength = await market.length()
+      equal(listLength, 0, 'Link list length should be 2')
     })
   })
 })
