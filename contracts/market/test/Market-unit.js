@@ -1,17 +1,14 @@
 /* global artifacts, contract */
 const Market = artifacts.require('Market')
 
-const {
-  equal,
-  reverted,
-  emitted,
-} = require('@airswap/test-utils').assert
+const { equal, reverted, emitted } = require('@airswap/test-utils').assert
 const {
   getTimestampPlusDays,
   takeSnapshot,
   revertToSnapShot,
 } = require('@airswap/test-utils').time
 const { intents } = require('@airswap/indexer-utils')
+const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 
 const ALICE_LOC = intents.serialize(
   intents.Locators.INSTANT,
@@ -26,9 +23,9 @@ const CAROL_LOC = intents.serialize(
   'https://rpc.maker-cloud.io:80'
 )
 
-// const NULL_LOCATOR = '0x'.padEnd(66, '0')
+const NULL_LOCATOR = '0x'.padEnd(66, '0')
 
-contract('Market', async accounts => {
+contract('Market Unit Tests', async accounts => {
   let owner = accounts[0]
   let nonOwner = accounts[1]
   let aliceAddress = accounts[1]
@@ -145,16 +142,12 @@ contract('Market', async accounts => {
       await checkLinking(LIST_HEAD, aliceAddress, LIST_HEAD)
 
       // check the values have been stored correctly
-      let headNextIntent = await market.intentsLinkedList(LIST_HEAD, LIST_NEXT)
+      let headNext = await market.intentsLinkedList(LIST_HEAD, LIST_NEXT)
 
-      equal(headNextIntent[STAKER], aliceAddress, 'Intent address not correct')
-      equal(headNextIntent[AMOUNT], 2000, 'Intent amount not correct')
-      equal(
-        headNextIntent[EXPIRY],
-        EXPIRY_THREE_DAYS,
-        'Intent expiry not correct'
-      )
-      equal(headNextIntent[LOCATOR], ALICE_LOC, 'Intent locator not correct')
+      equal(headNext[STAKER], aliceAddress, 'Intent address not correct')
+      equal(headNext[AMOUNT], 2000, 'Intent amount not correct')
+      equal(headNext[EXPIRY], EXPIRY_THREE_DAYS, 'Intent expiry not correct')
+      equal(headNext[LOCATOR], ALICE_LOC, 'Intent locator not correct')
 
       // check the length has increased
       let listLength = await market.length()
@@ -207,7 +200,7 @@ contract('Market', async accounts => {
   })
 
   describe('Test unsetIntent', async () => {
-    before('Setup intents', async () => {
+    beforeEach('Setup intents', async () => {
       await market.setIntent(aliceAddress, 2000, EXPIRY_THREE_DAYS, ALICE_LOC, {
         from: owner,
       })
@@ -276,7 +269,51 @@ contract('Market', async accounts => {
 
       await checkLinking(LIST_HEAD, LIST_HEAD, LIST_HEAD)
       listLength = await market.length()
-      equal(listLength, 0, 'Link list length should be 2')
+      equal(listLength, 0, 'Link list length should be 0')
+    })
+  })
+
+  describe('Test getIntent', async () => {
+    beforeEach('Setup intents again', async () => {
+      await market.setIntent(aliceAddress, 2000, EXPIRY_THREE_DAYS, ALICE_LOC, {
+        from: owner,
+      })
+      await market.setIntent(bobAddress, 500, EXPIRY_TWO_DAYS, BOB_LOC, {
+        from: owner,
+      })
+      await market.setIntent(carolAddress, 1500, EXPIRY_ONE_DAY, CAROL_LOC, {
+        from: owner,
+      })
+    })
+
+    it('should return empty intent for a non-staker', async () => {
+      let davidIntent = await market.getIntent(davidAddress)
+      equal(davidIntent[STAKER], EMPTY_ADDRESS, 'David: Intent address not correct')
+      equal(davidIntent[AMOUNT], 0, 'David: Intent amount not correct')
+      equal(davidIntent[EXPIRY], 0, 'David: Intent expiry not correct')
+      equal(davidIntent[LOCATOR], NULL_LOCATOR, 'David: Intent locator not correct')
+
+      // now for a recently unset intent
+      await market.unsetIntent(carolAddress, { from: owner })
+      let carolIntent = await market.getIntent(carolAddress)
+      equal(carolIntent[STAKER], EMPTY_ADDRESS, 'Carol: Intent address not correct')
+      equal(carolIntent[AMOUNT], 0, 'Carol: Intent amount not correct')
+      equal(carolIntent[EXPIRY], 0, 'Carol: Intent expiry not correct')
+      equal(carolIntent[LOCATOR], NULL_LOCATOR, 'Carol: Intent locator not correct')
+    })
+
+    it('should return the correct intent for a valid staker', async () => {
+      let aliceIntent = await market.getIntent(aliceAddress)
+      equal(aliceIntent[STAKER], aliceAddress, 'Alice: Intent address not correct')
+      equal(aliceIntent[AMOUNT], 2000, 'Alice: Intent amount not correct')
+      equal(aliceIntent[EXPIRY], EXPIRY_THREE_DAYS, 'Alice: Intent expiry not correct')
+      equal(aliceIntent[LOCATOR], ALICE_LOC, 'Alice: Intent locator not correct')
+
+      let bobIntent = await market.getIntent(bobAddress)
+      equal(bobIntent[STAKER], bobAddress, 'Bob: intent address not correct')
+      equal(bobIntent[AMOUNT], 500, 'Bob: Intent amount not correct')
+      equal(bobIntent[EXPIRY], EXPIRY_TWO_DAYS, 'Bob: Intent expiry not correct')
+      equal(bobIntent[LOCATOR], BOB_LOC, 'Bob: Intent locator not correct')
     })
   })
 })
