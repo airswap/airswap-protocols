@@ -66,10 +66,6 @@ library Transfers {
       IERC721(_token).safeTransferFrom(_from, _to, _param);
     } else {
       require(_to != address(0), "INVALID_DESTINATION");
-      require(IERC20(_token).balanceOf(_from) >= _param,
-          string(abi.encodePacked(_side, "_INSUFFICIENT_BALANCE")));
-      require(IERC20(_token).allowance(_from, address(this)) >= _param,
-          string(abi.encodePacked(_side, "_INSUFFICIENT_ALLOWANCE")));
       require(IERC20(_token).transferFrom(_from, _to, _param));
     }
   }

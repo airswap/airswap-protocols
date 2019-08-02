@@ -186,10 +186,7 @@ contract('Swap', async accounts => {
           param: 100,
         },
       })
-      await reverted(
-        swap(order, signature, { from: bobAddress }),
-        'INSUFFICIENT_ALLOWANCE'
-      )
+      await reverted(swap(order, signature, { from: bobAddress }))
     })
 
     it('Checks that Bob cannot take an expired order', async () => {
@@ -219,10 +216,7 @@ contract('Swap', async accounts => {
           wallet: aliceAddress,
         },
       })
-      await reverted(
-        swap(order, signature, { from: aliceAddress }),
-        'INSUFFICIENT_BALANCE'
-      )
+      await reverted(swap(order, signature, { from: aliceAddress }))
     })
 
     it('Checks remaining balances and approvals', async () => {
@@ -710,11 +704,11 @@ contract('Swap', async accounts => {
 
     it('Checks balances...', async () => {
       ok(
-        await balances(aliceAddress, [[tokenAST, 300], [tokenDAI, 130]]),
+        await balances(aliceAddress, [[tokenAST, 500], [tokenDAI, 130]]),
         'Alice balances are incorrect'
       )
       ok(
-        await balances(bobAddress, [[tokenAST, 650], [tokenDAI, 870]]),
+        await balances(bobAddress, [[tokenAST, 450], [tokenDAI, 870]]),
         'Bob balances are incorrect'
       )
       ok(
