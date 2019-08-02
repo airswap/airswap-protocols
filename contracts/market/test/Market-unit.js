@@ -1,11 +1,11 @@
 /* global artifacts, contract */
-const assert = require('assert')
-const BN = require('bignumber.js')
-
 const Market = artifacts.require('Market')
 
-const { SECONDS_IN_DAY } = require('@airswap/order-utils').constants
-const { equal, reverted, emitted } = require('@airswap/test-utils').assert
+const {
+  equal,
+  reverted,
+  emitted,
+} = require('@airswap/test-utils').assert
 const {
   getTimestampPlusDays,
   takeSnapshot,
@@ -26,7 +26,7 @@ const CAROL_LOC = intents.serialize(
   'https://rpc.maker-cloud.io:80'
 )
 
-const NULL_LOCATOR = '0x'.padEnd(66, '0')
+// const NULL_LOCATOR = '0x'.padEnd(66, '0')
 
 contract('Market', async accounts => {
   let owner = accounts[0]
@@ -35,7 +35,6 @@ contract('Market', async accounts => {
   let bobAddress = accounts[2]
   let carolAddress = accounts[3]
   let davidAddress = accounts[4]
-  let eveAddress = accounts[4]
 
   let mockTokenOne = accounts[8]
   let mockTokenTwo = accounts[8]
@@ -196,20 +195,55 @@ contract('Market', async accounts => {
       await checkLinking(LIST_HEAD, aliceAddress, carolAddress)
       await checkLinking(aliceAddress, carolAddress, bobAddress)
       await checkLinking(carolAddress, bobAddress, LIST_HEAD)
+
+      let listLength = await market.length()
+      equal(listLength, 3, 'Link list length should be 3')
+
+      const intents = await market.fetchIntents(7)
+      equal(intents[0], ALICE_LOC, 'Alice should be first')
+      equal(intents[1], CAROL_LOC, 'Carol should be second')
+      equal(intents[2], BOB_LOC, 'Bob should be third')
     })
   })
 
-  // describe('Test unsetIntent', async () => {
-  //   before('Setup intents', async () => {
-  //     await market.setIntent(aliceAddress, 2000, EXPIRY_THREE_DAYS, ALICE_LOC, {
-  //       from: owner,
-  //     })
-  //     await market.setIntent(bobAddress, 500, EXPIRY_TWO_DAYS, BOB_LOC, {
-  //       from: owner,
-  //     })
-  //     await market.setIntent(carolAddress, 1500, EXPIRY_ONE_DAY, CAROL_LOC, {
-  //       from: owner,
-  //     })
-  //   })
-  // })
+  describe('Test unsetIntent', async () => {
+    before('Setup intents', async () => {
+      await market.setIntent(aliceAddress, 2000, EXPIRY_THREE_DAYS, ALICE_LOC, {
+        from: owner,
+      })
+      await market.setIntent(bobAddress, 500, EXPIRY_TWO_DAYS, BOB_LOC, {
+        from: owner,
+      })
+      await market.setIntent(carolAddress, 1500, EXPIRY_ONE_DAY, CAROL_LOC, {
+        from: owner,
+      })
+    })
+
+    it('should not allow a non owner to call unsetIntent', async () => {
+      await reverted(
+        market.unsetIntent(aliceAddress, { from: nonOwner }),
+        'Ownable: caller is not the owner'
+      )
+    })
+
+    it('should leave state unchanged for someone who hasnt staked', async () => {
+      let returnValue = await market.unsetIntent.call(davidAddress, {
+        from: owner,
+      })
+
+      equal(returnValue, false, 'unsetIntent should have returned false')
+
+      await market.unsetIntent(davidAddress, { from: owner })
+
+      let listLength = await market.length()
+      equal(listLength, 3, 'Link list length should be 3')
+
+      const intents = await market.fetchIntents(7)
+      equal(intents[0], ALICE_LOC, 'Alice should be first')
+      equal(intents[1], CAROL_LOC, 'Carol should be second')
+      equal(intents[2], BOB_LOC, 'Bob should be third')
+    })
+
+    it('should unset the intent for a valid staker')
+  })
 })
