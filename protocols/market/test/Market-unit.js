@@ -480,6 +480,7 @@ contract('Market Unit Tests', async accounts => {
 
     it('should make not remove an expired intent if count doesnt reach it', async () => {
       let intents = await market.fetchIntents(7)
+      console.log(intents)
       equal(intents[0], ALICE_LOC, 'before: Alice should be first')
       equal(intents[1], CAROL_LOC, 'before: Carol should be second')
       equal(intents[2], BOB_LOC, 'before: Bob should be third')
@@ -492,9 +493,11 @@ contract('Market Unit Tests', async accounts => {
 
       // do not reach carols intent
       await market.cleanExpiredIntents(bobAddress, 1)
-
+      listLength = await market.length()
+      console.log(listLength)
       // left unchanged
       intents = await market.fetchIntents(7)
+      console.log(intents)
       equal(intents[0], ALICE_LOC, 'Alice should be first')
       equal(intents[1], CAROL_LOC, 'Carol should be second')
       equal(intents[2], BOB_LOC, 'Bob should be third')
