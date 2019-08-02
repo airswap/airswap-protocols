@@ -4,11 +4,12 @@ const Market = artifacts.require('Market')
 const { equal, reverted, emitted } = require('@airswap/test-utils').assert
 const {
   getTimestampPlusDays,
+  advanceTimeAndBlock,
   takeSnapshot,
   revertToSnapShot,
 } = require('@airswap/test-utils').time
 const { intents } = require('@airswap/indexer-utils')
-const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
+const { EMPTY_ADDRESS, SECONDS_IN_DAY } = require('@airswap/order-utils').constants
 
 const ALICE_LOC = intents.serialize(
   intents.Locators.INSTANT,
@@ -411,5 +412,29 @@ contract('Market Unit Tests', async accounts => {
       equal(hasIntent, true, 'hasIntent should have returned true')
     })
   })
-  // describe('Test isIntentExpired and cleanExpiredIntents')
+
+  describe('Test isIntentExpired', async () => {
+    it('should return false if an intent has not expired', async () => {
+      // give alice an intent expiring in 1 day
+      await market.setIntent(aliceAddress, 2000, EXPIRY_ONE_DAY, ALICE_LOC, {
+        from: owner,
+      })
+
+      let isIntentExpired = await market.isIntentExpired.call(aliceAddress)
+      equal(isIntentExpired, false, 'isIntentExpired should have returned false')
+    })
+
+    it('should return true if an intent has expired', async () => {
+      // give alice an intent expiring in 1 day
+      await market.setIntent(aliceAddress, 2000, EXPIRY_ONE_DAY, ALICE_LOC, {
+        from: owner,
+      })
+
+      // advance past this time
+      await advanceTimeAndBlock(SECONDS_IN_DAY * 1.1)
+
+      let isIntentExpired = await market.isIntentExpired.call(aliceAddress)
+      equal(isIntentExpired, true, 'isIntentExpired should have returned true')
+    })
+  })
 })
