@@ -183,7 +183,7 @@ contract('Swap', async accounts => {
         maker: {
           wallet: aliceAddress,
           token: tokenAST.address,
-          param: 100,
+          param: 200,
         },
       })
       await reverted(swap(order, signature, { from: bobAddress }))
