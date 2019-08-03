@@ -112,10 +112,6 @@ struct Signature {
 | `SENDER_UNAUTHORIZED`          | Order has been sent by an account that has not been authorized to send it.   |
 | `VALUE_MUST_BE_SENT`           | Order indicates an ether Swap but insufficient ether was sent.               |
 | `VALUE_MUST_BE_ZERO`           | Order indicates a token Swap but ether was sent.                             |
-| `MAKER_INSUFFICIENT_ALLOWANCE` | Maker has not approved the Swap contract to transfer the balance.            |
-| `MAKER_INSUFFICIENT_BALANCE`   | Maker has an insufficient balance.                                           |
-| `TAKER_INSUFFICIENT_ALLOWANCE` | Taker has not approved the Swap contract to transfer the balance.            |
-| `TAKER_INSUFFICIENT_BALANCE`   | Taker has an insufficient balance.                                           |
 | `INVALID_AUTH_DELEGATE`        | Delegate address is the same as the sender address.                          |
 | `INVALID_AUTH_EXPIRY`          | Authorization expiry time is in the past.                                    |
 

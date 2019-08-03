@@ -185,14 +185,8 @@ contract('Swap', async accounts => {
           token: tokenAST.address,
           param: 200,
         },
-        taker: {
-          wallet: bobAddress,
-        },
       })
-      await reverted(
-        swap(order, signature, { from: bobAddress }),
-        'INSUFFICIENT_ALLOWANCE'
-      )
+      await reverted(swap(order, signature, { from: bobAddress }))
     })
 
     it('Checks that Bob cannot take an expired order', async () => {
@@ -211,22 +205,6 @@ contract('Swap', async accounts => {
       )
     })
 
-    it('Checks that sending ether with a token trade will revert', async () => {
-      const { order, signature } = await orders.getOrder({
-        maker: {
-          wallet: aliceAddress,
-        },
-        taker: {
-          wallet: bobAddress,
-          token: tokenAST.address,
-        },
-      })
-      await reverted(
-        swap(order, signature, { from: bobAddress, value: ONE_ETH }),
-        'VALUE_MUST_BE_ZERO'
-      )
-    })
-
     it('Checks that Bob can not trade more than he holds', async () => {
       const { order, signature } = await orders.getOrder({
         maker: {
@@ -238,10 +216,7 @@ contract('Swap', async accounts => {
           wallet: aliceAddress,
         },
       })
-      await reverted(
-        swap(order, signature, { from: aliceAddress }),
-        'INSUFFICIENT_BALANCE'
-      )
+      await reverted(swap(order, signature, { from: aliceAddress }))
     })
 
     it('Checks remaining balances and approvals', async () => {
@@ -705,92 +680,6 @@ contract('Swap', async accounts => {
     })
   })
 
-  describe('Swap with Ether', async () => {
-    it('Checks allowance (Alice 650 AST remaining)', async () => {
-      ok(
-        await allowances(aliceAddress, swapAddress, [[tokenAST, 650]]),
-        'Alice has not approved 650 AST'
-      )
-    })
-
-    it('Checks that Bob cannot take an order for ETH without sending ether', async () => {
-      const { order, signature } = await orders.getOrder({
-        maker: {
-          wallet: aliceAddress,
-        },
-        taker: {
-          wallet: bobAddress,
-          param: ONE_ETH,
-        },
-      })
-      await reverted(
-        swap(order, signature, { from: bobAddress }),
-        'VALUE_MUST_BE_SENT'
-      )
-    })
-
-    it('Checks that Bob can swap raw ETH with Alice (200 AST for 1 ETH)', async () => {
-      const { order, signature } = await orders.getOrder({
-        maker: {
-          wallet: aliceAddress,
-          token: tokenAST.address,
-          param: 200,
-        },
-        taker: {
-          wallet: bobAddress,
-          param: ONE_ETH,
-        },
-      })
-      // check alice's balance increases by 1 ETH
-      const balanceBefore = parseInt(await web3.eth.getBalance(aliceAddress))
-      emitted(
-        await swap(order, signature, { from: bobAddress, value: ONE_ETH }),
-        'Swap'
-      )
-      const expectedBalance = balanceBefore + parseInt(ONE_ETH)
-      equal(
-        expectedBalance,
-        parseInt(await web3.eth.getBalance(aliceAddress)),
-        "Alice's balance did not increase by 1"
-      )
-    })
-
-    it('Ensures that Swap has not kept any of the ether', async () => {
-      equal(
-        await web3.eth.getBalance(swapAddress),
-        0,
-        'Swap contract took ether from the trade'
-      )
-    })
-
-    it('Checks that Bob can not accidentally send ETH', async () => {
-      const { order, signature } = await orders.getOrder({
-        maker: {
-          wallet: aliceAddress,
-        },
-        taker: {
-          wallet: bobAddress,
-          token: tokenAST.address,
-        },
-      })
-      await reverted(
-        swap(order, signature, { from: bobAddress, value: ONE_ETH }),
-        'VALUE_MUST_BE_ZERO'
-      )
-    })
-
-    it('Checks balances...', async () => {
-      ok(
-        await balances(aliceAddress, [[tokenAST, 450], [tokenDAI, 80]]),
-        'Alice balances are incorrect'
-      )
-      ok(
-        await balances(bobAddress, [[tokenAST, 550], [tokenDAI, 920]]),
-        'Bob balances are incorrect'
-      )
-    })
-  })
-
   describe('Swaps with Fees', async () => {
     it('Checks that Carol gets paid 50 AST for facilitating a trade between Alice and Bob', async () => {
       const { order, signature } = await orders.getOrder({
@@ -815,11 +704,11 @@ contract('Swap', async accounts => {
 
     it('Checks balances...', async () => {
       ok(
-        await balances(aliceAddress, [[tokenAST, 300], [tokenDAI, 130]]),
+        await balances(aliceAddress, [[tokenAST, 500], [tokenDAI, 130]]),
         'Alice balances are incorrect'
       )
       ok(
-        await balances(bobAddress, [[tokenAST, 650], [tokenDAI, 870]]),
+        await balances(bobAddress, [[tokenAST, 450], [tokenDAI, 870]]),
         'Bob balances are incorrect'
       )
       ok(
@@ -983,47 +872,6 @@ contract('Swap', async accounts => {
           signature.r,
           signature.s,
           { from: davidAddress }
-        ),
-        'Swap'
-      )
-    })
-  })
-
-  describe('Swap (Simple) for ETH', async () => {
-    it('Checks that a Swap (Simple) for ETH succeeds', async () => {
-      const { order } = await orders.getOrder({
-        maker: {
-          wallet: aliceAddress,
-          token: tokenAST.address,
-          param: 50,
-        },
-        taker: {
-          wallet: bobAddress,
-          token: EMPTY_ADDRESS,
-          param: 10,
-        },
-      })
-
-      const signature = await signatures.getSimpleSignature(
-        order,
-        aliceAddress,
-        swapAddress
-      )
-
-      emitted(
-        await swapSimple(
-          order.nonce,
-          order.expiry,
-          order.maker.wallet,
-          order.maker.param,
-          order.maker.token,
-          order.taker.wallet,
-          order.taker.param,
-          order.taker.token,
-          signature.v,
-          signature.r,
-          signature.s,
-          { from: bobAddress, value: order.taker.param }
         ),
         'Swap'
       )
