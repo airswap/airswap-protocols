@@ -19,15 +19,13 @@ pragma experimental ABIEncoderV2;
 
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/token/ERC721/IERC721.sol";
-import "openzeppelin-solidity/contracts/introspection/ERC165Checker.sol";
 
 /**
   * @title Transfers: Tools for Transferring Ether and Tokens Between Accounts
   */
 library Transfers {
-  using ERC165Checker for address;
 
-  bytes4 internal constant INTERFACE_ERC721 = 0x80ac58cd;
+  bytes4 constant INTERFACE_ERC721 = 0x80ac58cd;
 
   function send(
     address _receiver,
@@ -40,32 +38,28 @@ library Transfers {
     wallet.transfer(_value);
   }
 
-  function transferAny(
-      address _token,
-      address _from,
-      address _to,
-      uint256 _param
+  function transferFungible(
+    address _from,
+    address _to,
+    uint256 _param,
+    address _token
   ) external {
-    if (_token._supportsInterface(INTERFACE_ERC721)) {
-      IERC721(_token)
-        .safeTransferFrom(_from, _to, _param);
-    } else {
-      require(IERC20(_token)
-        .transferFrom(_from, _to, _param));
-    }
+    // Attempt to transfer an ERC-20 token.
+    require(IERC20(_token).transferFrom(_from, _to, _param));
   }
 
-  function safeTransferAny(
-      bytes calldata _side,
+  function transferAny(
       address _from,
       address _to,
       uint256 _param,
-      address _token
+      address _token,
+      bytes4 _kind
   ) external {
-    if (_token._supportsInterface(INTERFACE_ERC721)) {
+    if (_kind == INTERFACE_ERC721) {
+      // Attempt to transfer an ERC-721 token.
       IERC721(_token).safeTransferFrom(_from, _to, _param);
     } else {
-      require(_to != address(0), "INVALID_DESTINATION");
+      // Attempt to transfer an ERC-20 token.
       require(IERC20(_token).transferFrom(_from, _to, _param));
     }
   }

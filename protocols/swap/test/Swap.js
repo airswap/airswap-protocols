@@ -1,4 +1,3 @@
-/* global artifacts, contract, web3 */
 const Swap = artifacts.require('Swap')
 const Transfers = artifacts.require('Transfers')
 const Types = artifacts.require('Types')
@@ -10,13 +9,12 @@ const {
   emitted,
   reverted,
   notEmitted,
-  equal,
   ok,
 } = require('@airswap/test-utils').assert
 const { allowances, balances } = require('@airswap/test-utils').balances
 const { getLatestTimestamp } = require('@airswap/test-utils').time
 const { orders, signatures } = require('@airswap/order-utils')
-const { EMPTY_ADDRESS, ONE_ETH } = require('@airswap/order-utils').constants
+const { INTERFACE_ERC721 } = require('@airswap/order-utils').constants
 
 let snapshotId
 
@@ -71,7 +69,7 @@ contract('Swap', async accounts => {
 
       swap =
         swapContract.methods[
-          'swap((uint256,uint256,(address,address,uint256),(address,address,uint256),(address,address,uint256)),(address,uint8,bytes32,bytes32,bytes1))'
+          'swap((uint256,uint256,(address,address,uint256,bytes4),(address,address,uint256,bytes4),(address,address,uint256,bytes4)),(address,uint8,bytes32,bytes32,bytes1))'
         ]
       swapSimple =
         swapContract.methods[
@@ -975,6 +973,7 @@ contract('Swap', async accounts => {
           wallet: aliceAddress,
           token: tokenTicket.address,
           param: 12345,
+          kind: INTERFACE_ERC721,
         },
         taker: {
           wallet: bobAddress,
@@ -1003,6 +1002,7 @@ contract('Swap', async accounts => {
           wallet: bobAddress,
           token: tokenKitty.address,
           param: 54321,
+          kind: INTERFACE_ERC721,
         },
       })
       emitted(await swap(order, signature, { from: bobAddress }), 'Swap')
@@ -1031,57 +1031,10 @@ contract('Swap', async accounts => {
           wallet: carolAddress,
           token: tokenKitty.address,
           param: 54321,
+          kind: INTERFACE_ERC721,
         },
       })
       emitted(await swap(order, signature, { from: bobAddress }), 'Swap')
-    })
-  })
-
-  describe('Swap (Simple) (Non-Fungible)', async () => {
-    it('Carol approves Swap to transfer her kitty collectible', async () => {
-      emitted(
-        await tokenKitty.approve(swapAddress, 54321, { from: carolAddress }),
-        'NFTApproval'
-      )
-    })
-
-    it('Checks that a Swap (Simple) (Non-Fungible) succeeds', async () => {
-      const { order } = await orders.getOrder({
-        maker: {
-          wallet: aliceAddress,
-          token: tokenAST.address,
-          param: 50,
-        },
-        taker: {
-          wallet: carolAddress,
-          token: tokenKitty.address,
-          param: 54321,
-        },
-      })
-
-      const signature = await signatures.getSimpleSignature(
-        order,
-        aliceAddress,
-        swapAddress
-      )
-
-      emitted(
-        await swapSimple(
-          order.nonce,
-          order.expiry,
-          order.maker.wallet,
-          order.maker.param,
-          order.maker.token,
-          order.taker.wallet,
-          order.taker.param,
-          order.taker.token,
-          signature.v,
-          signature.r,
-          signature.s,
-          { from: carolAddress }
-        ),
-        'Swap'
-      )
     })
   })
 

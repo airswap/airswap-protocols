@@ -1,18 +1,20 @@
-/* global artifacts, contract, web3 */
 const Transfers = artifacts.require('../contracts/Transfers')
 const MockTransfers = artifacts.require('MockTransfers')
 const FungibleToken = artifacts.require('FungibleToken') // ERC20 Token
 const NonFungibleToken = artifacts.require('NonFungibleToken') // ERC721 Token
 const MockContract = artifacts.require('MockContract')
 const BigNumber = require('bignumber.js')
-const { equal, passes, reverted } = require('@airswap/test-utils').assert
-const { EMPTY_ADDRESS, ONE_ETH } = require('@airswap/order-utils').constants
+const { equal, passes } = require('@airswap/test-utils').assert
+const {
+  ONE_ETH,
+  INTERFACE_ERC721,
+  INTERFACE_DEFAULT,
+} = require('@airswap/order-utils').constants
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 
 contract('Transfers Unit Tests', async accounts => {
   const sender = accounts[1]
   const receiver = accounts[2]
-  const TAKER = web3.utils.fromAscii('TAKER')
   let mockTransfers
   let mockFungibleToken
   let fungibleTokenTemplate
@@ -71,10 +73,11 @@ contract('Transfers Unit Tests', async accounts => {
       )
 
       await mockTransfers.transferAny(
-        mockFungibleToken.address,
         sender,
         receiver,
         10000,
+        mockFungibleToken.address,
+        INTERFACE_DEFAULT,
         {
           from: sender,
         }
@@ -87,29 +90,17 @@ contract('Transfers Unit Tests', async accounts => {
     })
 
     it('Test transferAny ERC721', async () => {
-      let nft_support165 = nonFungibleTokenTemplate.contract.methods
-        .supportsInterface('0x01ffc9a7')
-        .encodeABI()
-      await mockNonFungibleToken.givenCalldataReturnBool(nft_support165, true)
-      let nft_support721 = nonFungibleTokenTemplate.contract.methods
-        .supportsInterface('0x80ac58cd')
-        .encodeABI()
-      await mockNonFungibleToken.givenCalldataReturnBool(nft_support721, true)
-      let nft_supportfff = nonFungibleTokenTemplate.contract.methods
-        .supportsInterface('0xffffffff')
-        .encodeABI()
-      await mockNonFungibleToken.givenCalldataReturnBool(nft_supportfff, false)
-
       let nft_safeTransferFrom = nonFungibleTokenTemplate.contract.methods
         .safeTransferFrom(sender, receiver, 1000)
         .encodeABI()
 
       await passes(
         mockTransfers.transferAny(
-          mockNonFungibleToken.address,
           sender,
           receiver,
-          1000
+          1000,
+          mockNonFungibleToken.address,
+          INTERFACE_ERC721
         )
       )
 
@@ -124,8 +115,8 @@ contract('Transfers Unit Tests', async accounts => {
     })
   })
 
-  describe('Test safeTransferAny', async () => {
-    it('Test safeTransferAny ERC20 - Fails Invalid Destination', async () => {
+  describe('Test transferFungible', async () => {
+    it('Test transferFungible ', async () => {
       let fungibleToken_transferFrom = fungibleTokenTemplate.contract.methods
         .transferFrom(sender, receiver, 1000)
         .encodeABI()
@@ -134,57 +125,20 @@ contract('Transfers Unit Tests', async accounts => {
         true
       )
 
-      await reverted(
-        mockTransfers.safeTransferAny(
-          TAKER,
-          sender,
-          EMPTY_ADDRESS,
-          10000,
-          mockFungibleToken.address,
-          {
-            from: sender,
-          }
-        ),
-        'INVALID_DESTINATION'
-      )
-    })
-
-    it('Test safeTransferAny ERC721 to EMPTY_ADDRESS succeeds', async () => {
-      let nft_support165 = nonFungibleTokenTemplate.contract.methods
-        .supportsInterface('0x01ffc9a7')
-        .encodeABI()
-      await mockNonFungibleToken.givenCalldataReturnBool(nft_support165, true)
-      let nft_support721 = nonFungibleTokenTemplate.contract.methods
-        .supportsInterface('0x80ac58cd')
-        .encodeABI()
-      await mockNonFungibleToken.givenCalldataReturnBool(nft_support721, true)
-      let nft_supportfff = nonFungibleTokenTemplate.contract.methods
-        .supportsInterface('0xffffffff')
-        .encodeABI()
-      await mockNonFungibleToken.givenCalldataReturnBool(nft_supportfff, false)
-
-      let nft_safeTransferFrom = nonFungibleTokenTemplate.contract.methods
-        .safeTransferFrom(sender, receiver, 1000)
-        .encodeABI()
-
-      await passes(
-        mockTransfers.safeTransferAny(
-          TAKER,
-          sender,
-          EMPTY_ADDRESS,
-          1000,
-          mockNonFungibleToken.address
-        )
+      await mockTransfers.transferFungible(
+        sender,
+        receiver,
+        10000,
+        mockFungibleToken.address,
+        {
+          from: sender,
+        }
       )
 
-      let invocationCount = await mockNonFungibleToken.invocationCountForMethod.call(
-        nft_safeTransferFrom
+      let invocationCount = await mockFungibleToken.invocationCountForMethod.call(
+        fungibleToken_transferFrom
       )
-      equal(
-        invocationCount,
-        1,
-        'NonFungibleToken.safetransferFrom was not called.'
-      )
+      equal(invocationCount, 1, 'FungibleToken.transferFrom was not called.')
     })
   })
 })

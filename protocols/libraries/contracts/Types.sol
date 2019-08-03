@@ -28,6 +28,7 @@ library Types {
     address wallet;   // Wallet address of the party
     address token;    // Contract address of the token
     uint256 param;    // Value (ERC-20) or ID (ERC-721)
+    bytes4 kind;      // Interface ID of the token
   }
 
   struct Order {
@@ -65,7 +66,8 @@ library Types {
     "Party(",
     "address wallet,",
     "address token,",
-    "uint256 param",
+    "uint256 param,",
+    "bytes4 kind",
     ")"
   ));
 
@@ -73,22 +75,10 @@ library Types {
     "Party(",
     "address wallet,",
     "address token,",
-    "uint256 param",
+    "uint256 param,",
+    "bytes4 kind",
     ")"
   ));
-
-  function hashParty(
-    Party calldata _party
-  ) external pure returns (
-    bytes32
-  ) {
-    return keccak256(abi.encode(
-      PARTY_TYPEHASH,
-      _party.wallet,
-      _party.token,
-      _party.param
-    ));
-  }
 
   function hashOrder(
     Order calldata _order,
@@ -105,19 +95,22 @@ library Types {
           PARTY_TYPEHASH,
           _order.maker.wallet,
           _order.maker.token,
-          _order.maker.param
+          _order.maker.param,
+          _order.maker.kind
         )),
         keccak256(abi.encode(
           PARTY_TYPEHASH,
           _order.taker.wallet,
           _order.taker.token,
-          _order.taker.param
+          _order.taker.param,
+          _order.taker.kind
         )),
         keccak256(abi.encode(
           PARTY_TYPEHASH,
           _order.affiliate.wallet,
           _order.affiliate.token,
-          _order.affiliate.param
+          _order.affiliate.param,
+          _order.affiliate.kind
         ))
       ))
     ));

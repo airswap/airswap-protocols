@@ -61,7 +61,6 @@ contract Swap is ISwap {
 
   /**
     * @notice Atomic Token Swap
-    * @dev Determines type (ERC-20 or ERC-721) with ERC-165
     *
     * @param _order Types.Order
     * @param _signature Types.Signature
@@ -139,31 +138,31 @@ contract Swap is ISwap {
 
     }
     // Transfer token from taker to maker.
-    Transfers.safeTransferAny(
-      "TAKER",
+    Transfers.transferAny(
       finalTakerWallet,
       _order.maker.wallet,
       _order.taker.param,
-      _order.taker.token
+      _order.taker.token,
+      _order.taker.kind
     );
 
     // Transfer token from maker to taker.
-    Transfers.safeTransferAny(
-      "MAKER",
+    Transfers.transferAny(
       _order.maker.wallet,
       finalTakerWallet,
       _order.maker.param,
-      _order.maker.token
+      _order.maker.token,
+      _order.maker.kind
     );
 
     // Transfer token from maker to affiliate if specified.
     if (_order.affiliate.wallet != address(0)) {
-      Transfers.safeTransferAny(
-        "MAKER",
+      Transfers.transferAny(
         _order.maker.wallet,
         _order.affiliate.wallet,
         _order.affiliate.param,
-        _order.affiliate.token
+        _order.affiliate.token,
+        _order.affiliate.kind
       );
     }
 
@@ -176,7 +175,6 @@ contract Swap is ISwap {
 
   /**
     * @notice Atomic Token Swap (Simple)
-    * @dev Determines type (ERC-20 or ERC-721) with ERC-165
     *
     * @param _nonce uint256
     * @param _expiry uint256
@@ -267,10 +265,10 @@ contract Swap is ISwap {
     makerOrderStatus[_makerWallet][_nonce] = TAKEN;
 
     // Transfer token from taker to maker.
-    Transfers.transferAny(_takerToken, finalTakerWallet, _makerWallet, _takerParam);
+    Transfers.transferFungible(finalTakerWallet, _makerWallet, _takerParam, _takerToken);
 
     // Transfer token from maker to taker.
-    Transfers.transferAny(_makerToken, _makerWallet, finalTakerWallet, _makerParam);
+    Transfers.transferFungible(_makerWallet, finalTakerWallet, _makerParam, _makerToken);
 
     emit Swap(_nonce, block.timestamp,
       _makerWallet, _makerParam, _makerToken,

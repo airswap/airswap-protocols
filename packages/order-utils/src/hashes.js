@@ -42,8 +42,8 @@ const PARTY_TYPEHASH = web3.utils.soliditySha3(stringify('Party'))
 function hashParty(party) {
   return ethUtil.keccak256(
     abi.rawEncode(
-      ['bytes32', 'address', 'address', 'uint256'],
-      [PARTY_TYPEHASH, party.wallet, party.token, party.param]
+      ['bytes32', 'address', 'address', 'uint256', 'bytes4'],
+      [PARTY_TYPEHASH, party.wallet, party.token, party.param, party.kind]
     )
   )
 }

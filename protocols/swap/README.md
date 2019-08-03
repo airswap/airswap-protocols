@@ -86,6 +86,7 @@ struct Party {
   address wallet;  // The Ethereum account of the party
   address token;   // The address of the token the party sends or receives
   uint256 param;   // The amount of ERC-20 or the identifier of an ERC-721
+  bytes4 kind;     // The interface ID of the token. E.g. ERC-721 is 0x80ac58cd
 }
 ```
 

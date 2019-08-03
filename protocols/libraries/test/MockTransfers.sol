@@ -17,23 +17,22 @@ contract MockTransfers {
     Transfers.send(_receiver, _value);
   }
 
-  function transferAny( address _token,
-    address _from,
-    address _to,
-    uint256 _param) public {
-    Transfers.transferAny(_token, _from, _to, _param);
-  }
-
-  function safeTransferAny( bytes memory _side,
+  function transferFungible(
     address _from,
     address _to,
     uint256 _param,
     address _token
   ) public {
-    Transfers.safeTransferAny(_side,
-    _from,
-    _to,
-    _param,
-    _token);
+    Transfers.transferFungible(_from, _to, _param, _token);
+  }
+
+  function transferAny(
+    address _from,
+    address _to,
+    uint256 _param,
+    address _token,
+    bytes4 _kind
+  ) public {
+    Transfers.transferAny(_from, _to, _param, _token, _kind);
   }
 }

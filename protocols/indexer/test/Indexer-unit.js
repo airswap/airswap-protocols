@@ -1,4 +1,3 @@
-/* global artifacts, contract, web3 */
 const Indexer = artifacts.require('Indexer')
 const Market = artifacts.require('Market')
 const MockContract = artifacts.require('MockContract')

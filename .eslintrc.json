@@ -9,7 +9,9 @@
     "mocha": true
   },
   "globals": {
-    "artifacts": true
+    "artifacts": true,
+    "contract": true,
+    "web3": true
   },
   "plugins": ["prettier"],
   "rules": {

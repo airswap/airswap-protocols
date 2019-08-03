@@ -1,4 +1,3 @@
-/* global artifacts, contract, web3 */
 const Swap = artifacts.require('Swap')
 const Wrapper = artifacts.require('Wrapper')
 const WETH9 = artifacts.require('WETH9')
