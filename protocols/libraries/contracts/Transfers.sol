@@ -25,7 +25,7 @@ import "openzeppelin-solidity/contracts/token/ERC721/IERC721.sol";
   */
 library Transfers {
 
-  bytes4 constant INTERFACE_ERC721 = 0x80ac58cd;
+  bytes4 internal constant INTERFACE_ERC721 = 0x80ac58cd;
 
   function send(
     address _receiver,
