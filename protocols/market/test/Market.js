@@ -278,25 +278,4 @@ contract('Market', async accounts => {
       assert(intents[2] == ZARA_LOC, 'Zara should be fifth')
     })
   })
-
-  describe('Unset', async () => {
-    it('Unsets intent for David', async () => {
-      market.unsetIntent(davidAddress)
-      equal((await market.getIntent(davidAddress)).locator, NULL_LOCATOR)
-      assert(BN(await market.length()).eq(2), 'Market length is incorrect')
-    })
-
-    it('Unsets intent for Zara', async () => {
-      market.unsetIntent(zaraAddress)
-      equal((await market.getIntent(zaraAddress)).locator, NULL_LOCATOR)
-      assert(BN(await market.length()).eq(1), 'Market length is incorrect')
-    })
-
-    it('Ensure ordering is correct', async () => {
-      const intents = await market.fetchIntents(10)
-      assert(intents[0] == ALICE_LOC, 'Alice should be first')
-
-      assert(BN(await market.length()).eq(1), 'Market length is incorrect')
-    })
-  })
 })

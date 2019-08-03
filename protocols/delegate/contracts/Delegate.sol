@@ -120,7 +120,7 @@ contract Delegate is IDelegate, Ownable {
     uint256 delegateAmount,
     address delegateToken,
     address consumerToken
-  ) external view returns (
+  ) external returns (
     uint256 consumerAmount
   ) {
 
@@ -156,7 +156,7 @@ contract Delegate is IDelegate, Ownable {
     uint256 consumerAmount,
     address consumerToken,
     address delegateToken
-  ) external view returns (
+  ) external returns (
     uint256 delegateAmount
   ) {
 
@@ -187,7 +187,7 @@ contract Delegate is IDelegate, Ownable {
   function getMaxQuote(
     address delegateToken,
     address consumerToken
-  ) external view returns (
+  ) external returns (
     uint256 delegateAmount,
     uint256 consumerAmount
   ) {

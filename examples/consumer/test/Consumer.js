@@ -148,7 +148,7 @@ contract('Consumer', async accounts => {
     })
 
     it('Checks the Delegate maximum', async () => {
-      const quote = await aliceDelegate.getMaxQuote(
+      const quote = await aliceDelegate.getMaxQuote.call(
         tokenWETH.address,
         tokenDAI.address
       )
@@ -159,7 +159,7 @@ contract('Consumer', async accounts => {
 
   describe('Consumer', async () => {
     it('Finds best price to buy 1 WETH for DAI', async () => {
-      const quote = await consumer.findBestBuy(
+      const quote = await consumer.findBestBuy.call(
         100,
         tokenWETH.address,
         tokenDAI.address,
@@ -201,7 +201,7 @@ contract('Consumer', async accounts => {
     })
 
     it('Checks the new Delegate maximum', async () => {
-      const result = await aliceDelegate.getMaxQuote(
+      const result = await aliceDelegate.getMaxQuote.call(
         tokenWETH.address,
         tokenDAI.address
       )

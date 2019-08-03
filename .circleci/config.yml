@@ -24,14 +24,13 @@ references:
           name: yarn install and dependencies
           command: |
             yarn install
-            sudo yarn global add ganache-cli
       - run:
           name: yarn lint
           command: yarn lint
       - run:
           name: Run Tests
           command: |
-            ganache-cli -p 8545 > /dev/null &
+            yarn ganache > /dev/null &
             yarn test
       - save_cache:
           paths:

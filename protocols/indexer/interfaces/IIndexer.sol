@@ -105,11 +105,11 @@ interface IIndexer {
     address _makerToken,
     address _takerToken,
     uint256 _count
-  ) external view returns (bytes32[] memory);
+  ) external returns (bytes32[] memory);
 
   function lengthOf(
     address _makerToken,
     address _takerToken
-  ) external view returns (uint256);
+  ) external returns (uint256);
 
 }

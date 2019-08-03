@@ -10,6 +10,7 @@
   "scripts": {
     "clean": "rm -rf ./build",
     "compile": "truffle compile",
+    "coverage": "node_modules/.bin/solidity-coverage",
     "truffle": "node_modules/.bin/truffle --network development",
     "test": "truffle test"
   },
@@ -22,6 +23,7 @@
     "bignumber.js": "^9.0.0"
   },
   "dependencies": {
-    "openzeppelin-solidity": "^v2.2"
+    "openzeppelin-solidity": "^v2.2",
+    "solidity-coverage": "^0.6.3"
   }
 }

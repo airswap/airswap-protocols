@@ -10,14 +10,18 @@
   "scripts": {
     "clean": "rm -rf ./build",
     "compile": "truffle compile",
+    "coverage": "node_modules/.bin/solidity-coverage",
     "lint": "yarn eslint \"./test/**/*.js\"",
     "truffle": "node_modules/.bin/truffle --network development",
     "test": "truffle test"
   },
-  "dependencies": {
+  "devDependencies": {
     "@airswap/tokens": "0.1.0",
     "@airswap/delegate": "0.1.0",
     "@airswap/indexer": "0.1.0",
+    "solidity-coverage": "^0.6.3"
+  },
+  "dependencies": {
     "@airswap/order-utils": "0.1.0",
     "@airswap/test-utils": "0.1.0",
     "truffle": "^5.0.24"

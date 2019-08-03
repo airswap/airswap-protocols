@@ -10,6 +10,7 @@
   "scripts": {
     "clean": "rm -rf ./build",
     "compile": "truffle compile",
+    "coverage": "node_modules/.bin/solidity-coverage",
     "truffle": "node_modules/.bin/truffle --network development",
     "lint": "yarn eslint \"./test/**/*.js\"",
     "test": "truffle test"
@@ -21,6 +22,7 @@
   },
   "dependencies": {
     "@airswap/libraries": "0.1.0",
-    "openzeppelin-solidity": "^v2.2"
+    "openzeppelin-solidity": "^v2.2",
+    "solidity-coverage": "^0.6.3"
   }
 }

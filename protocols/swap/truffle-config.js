@@ -7,6 +7,13 @@ module.exports = {
       gasPrice: 10000000000,
       gas: 6700000,
     },
+    coverage: {
+      host: 'localhost',
+      network_id: '*',
+      port: 8545,
+      gas: 0xfffffffffff,
+      gasPrice: 0x01,
+    },
   },
   compilers: {
     solc: {
