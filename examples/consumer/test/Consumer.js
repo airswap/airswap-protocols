@@ -4,7 +4,6 @@ const Consumer = artifacts.require('Consumer')
 const Indexer = artifacts.require('Indexer')
 const Delegate = artifacts.require('Delegate')
 const FungibleToken = artifacts.require('FungibleToken')
-const Transfers = artifacts.require('Transfers')
 const Types = artifacts.require('Types')
 
 const { emitted, equal, ok } = require('@airswap/test-utils').assert
@@ -55,14 +54,9 @@ contract('Consumer', async accounts => {
       tokenAST = await FungibleToken.new()
       tokenDAI = await FungibleToken.new()
       tokenWETH = await FungibleToken.new()
-
-      // deploy both libs
-      const transfersLib = await Transfers.new()
-      const typesLib = await Types.new()
-
-      // link both libs to swap
-      await Swap.link(Transfers, transfersLib.address)
-      await Swap.link(Types, typesLib.address)
+      // link types to swap
+      await Swap.link(Types, (await Types.new()).address)
+      // now deploy swap
       swapContract = await Swap.new()
       swapAddress = swapContract.address
       indexer = await Indexer.new(tokenAST.address, 250, { from: ownerAddress })

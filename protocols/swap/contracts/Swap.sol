@@ -17,9 +17,10 @@
 pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
-import "@airswap/libraries/contracts/Transfers.sol";
-import "@airswap/libraries/contracts/Types.sol";
+import "@airswap/types/contracts/Types.sol";
 import "@airswap/swap/interfaces/ISwap.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
+import "openzeppelin-solidity/contracts/token/ERC721/IERC721.sol";
 
 /**
   * @title Swap: The Atomic Swap used by the Swap Protocol
@@ -138,7 +139,7 @@ contract Swap is ISwap {
 
     }
     // Transfer token from taker to maker.
-    Transfers.transferAny(
+    transferToken(
       finalTakerWallet,
       _order.maker.wallet,
       _order.taker.param,
@@ -147,7 +148,7 @@ contract Swap is ISwap {
     );
 
     // Transfer token from maker to taker.
-    Transfers.transferAny(
+    transferToken(
       _order.maker.wallet,
       finalTakerWallet,
       _order.maker.param,
@@ -157,7 +158,7 @@ contract Swap is ISwap {
 
     // Transfer token from maker to affiliate if specified.
     if (_order.affiliate.wallet != address(0)) {
-      Transfers.transferAny(
+      transferToken(
         _order.maker.wallet,
         _order.affiliate.wallet,
         _order.affiliate.param,
@@ -175,6 +176,7 @@ contract Swap is ISwap {
 
   /**
     * @notice Atomic Token Swap (Simple)
+    * @dev Supports fungible token transfers (ERC-20)
     *
     * @param _nonce uint256
     * @param _expiry uint256
@@ -265,10 +267,22 @@ contract Swap is ISwap {
     makerOrderStatus[_makerWallet][_nonce] = TAKEN;
 
     // Transfer token from taker to maker.
-    Transfers.transferFungible(finalTakerWallet, _makerWallet, _takerParam, _takerToken);
+    transferToken(
+      finalTakerWallet,
+      _makerWallet,
+      _takerParam,
+      _takerToken,
+      ERC20_INTERFACE_ID
+    );
 
     // Transfer token from maker to taker.
-    Transfers.transferFungible(_makerWallet, finalTakerWallet, _makerParam, _makerToken);
+    transferToken(
+      _makerWallet,
+      finalTakerWallet,
+      _makerParam,
+      _makerToken,
+      ERC20_INTERFACE_ID
+    );
 
     emit Swap(_nonce, block.timestamp,
       _makerWallet, _makerParam, _makerToken,
@@ -430,5 +444,50 @@ contract Swap is ISwap {
         )))),
       _v, _r, _s);
   }
+
+  /**
+    * @notice Performs an ERC20 or ERC721 token transfer
+    *
+    * @param _from address
+    * @param _to address
+    * @param _param uint256
+    * @param _token address
+    * @param _kind bytes4
+    */
+  function transferToken(
+      address _from,
+      address _to,
+      uint256 _param,
+      address _token,
+      bytes4 _kind
+  ) internal {
+    if (_kind == ERC721_INTERFACE_ID) {
+      // Attempt to transfer an ERC-721 token.
+      IERC721(_token).safeTransferFrom(_from, _to, _param);
+    } else {
+      // Attempt to transfer an ERC-20 token.
+      require(IERC20(_token).transferFrom(_from, _to, _param));
+    }
+  }
+
+  /*
+    bytes4(keccak256('transfer(address,uint256)')) ^
+    bytes4(keccak256('transferFrom(address,address,uint256)')) ^
+    bytes4(keccak256('balanceOf(address)')) ^
+    bytes4(keccak256('allowance(address,address)'));
+  */
+  bytes4 constant internal ERC20_INTERFACE_ID = 0x277f8169;
+  /*
+    bytes4(keccak256('balanceOf(address)')) ^
+    bytes4(keccak256('ownerOf(uint256)')) ^
+    bytes4(keccak256('approve(address,uint256)')) ^
+    bytes4(keccak256('getApproved(uint256)')) ^
+    bytes4(keccak256('setApprovalForAll(address,bool)')) ^
+    bytes4(keccak256('isApprovedForAll(address,address)')) ^
+    bytes4(keccak256('transferFrom(address,address,uint256)')) ^
+    bytes4(keccak256('safeTransferFrom(address,address,uint256)')) ^
+    bytes4(keccak256('safeTransferFrom(address,address,uint256,bytes)'));
+  */
+  bytes4 constant internal ERC721_INTERFACE_ID = 0x80ac58cd;
 
 }

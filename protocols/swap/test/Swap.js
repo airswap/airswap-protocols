@@ -1,5 +1,4 @@
 const Swap = artifacts.require('Swap')
-const Transfers = artifacts.require('Transfers')
 const Types = artifacts.require('Types')
 const FungibleToken = artifacts.require('FungibleToken')
 const NonFungibleToken = artifacts.require('NonFungibleToken')
@@ -57,12 +56,7 @@ contract('Swap', async accounts => {
 
   describe('Deploying...', async () => {
     it('Deployed Swap contract', async () => {
-      // deploy both libs
-      const transfersLib = await Transfers.new()
       const typesLib = await Types.new()
-
-      // link both libs to swap
-      await Swap.link(Transfers, transfersLib.address)
       await Swap.link(Types, typesLib.address)
       swapContract = await Swap.new()
       swapAddress = swapContract.address

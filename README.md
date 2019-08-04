@@ -20,7 +20,7 @@
 | [`@airswap/indexer`](/protocols/indexer)     | [![npm](https://img.shields.io/npm/v/airswap/indexer.svg)](https://www.npmjs.com/package/airswap/indexer)     | Indexer with Staking      |
 | [`@airswap/market`](/protocols/market)       | [![npm](https://img.shields.io/npm/v/airswap/market.svg)](https://www.npmjs.com/package/airswap/market)       | Intents for a Token Pair  |
 | [`@airswap/delegate`](/protocols/delegate)   | [![npm](https://img.shields.io/npm/v/airswap/delegate.svg)](https://www.npmjs.com/package/airswap/delegate)   | Delegate with Rules       |
-| [`@airswap/libraries`](/protocols/libraries) | [![npm](https://img.shields.io/npm/v/airswap/libraries.svg)](https://www.npmjs.com/package/airswap/libraries) | Common Libraries          |
+| [`@airswap/types`](/protocols/libraries) | [![npm](https://img.shields.io/npm/v/airswap/libraries.svg)](https://www.npmjs.com/package/airswap/libraries) | Common Libraries          |
 | [`@airswap/wrapper`](/helpers/wrapper)       | [![npm](https://img.shields.io/npm/v/airswap/wrapper.svg)](https://www.npmjs.com/package/airswap/wrapper)     | Use ether for WETH trades |
 | [`@airswap/tokens`](/helpers/tokens)         | [![npm](https://img.shields.io/npm/v/airswap/tokens.svg)](https://www.npmjs.com/package/airswap/tokens)       | Ethereum Tokens           |
 | [`@airswap/consumer`](/examples/consumer)    | [![npm](https://img.shields.io/npm/v/airswap/consumer.svg)](https://www.npmjs.com/package/airswap/consumer)   | Liquidity Consumer        |
