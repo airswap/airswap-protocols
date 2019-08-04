@@ -42,10 +42,10 @@ library Transfers {
     address _from,
     address _to,
     uint256 _param,
-    address _token
+    address _amount
   ) external {
     // Attempt to transfer an ERC-20 token.
-    require(IERC20(_token).transferFrom(_from, _to, _param));
+    require(IERC20(_token).transferFrom(_from, _to, _amount));
   }
 
   function transferAny(
