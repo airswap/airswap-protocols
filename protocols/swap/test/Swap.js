@@ -13,7 +13,7 @@ const {
 const { allowances, balances } = require('@airswap/test-utils').balances
 const { getLatestTimestamp } = require('@airswap/test-utils').time
 const { orders, signatures } = require('@airswap/order-utils')
-const { INTERFACE_ERC721 } = require('@airswap/order-utils').constants
+const { ERC721_INTERFACE_ID } = require('@airswap/order-utils').constants
 
 let snapshotId
 
@@ -967,7 +967,7 @@ contract('Swap', async accounts => {
           wallet: aliceAddress,
           token: tokenTicket.address,
           param: 12345,
-          kind: INTERFACE_ERC721,
+          kind: ERC721_INTERFACE_ID,
         },
         taker: {
           wallet: bobAddress,
@@ -996,7 +996,7 @@ contract('Swap', async accounts => {
           wallet: bobAddress,
           token: tokenKitty.address,
           param: 54321,
-          kind: INTERFACE_ERC721,
+          kind: ERC721_INTERFACE_ID,
         },
       })
       emitted(await swap(order, signature, { from: bobAddress }), 'Swap')
@@ -1025,7 +1025,7 @@ contract('Swap', async accounts => {
           wallet: carolAddress,
           token: tokenKitty.address,
           param: 54321,
-          kind: INTERFACE_ERC721,
+          kind: ERC721_INTERFACE_ID,
         },
       })
       emitted(await swap(order, signature, { from: bobAddress }), 'Swap')

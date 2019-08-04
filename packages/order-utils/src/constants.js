@@ -21,8 +21,8 @@ module.exports = {
   SECONDS_IN_DAY: 86400,
   EMPTY_ADDRESS: '0x0000000000000000000000000000000000000000',
   ONE_ETH: web3.utils.toWei('1', 'ether'),
-  INTERFACE_ERC721: '0x80ac58cd',
-  INTERFACE_DEFAULT: '0xffffffff',
+  ERC721_INTERFACE_ID: '0x80ac58cd',
+  ERC20_INTERFACE_ID: '0x277f8169',
   types: {
     EIP712Domain: [
       { name: 'name', type: 'string' },
@@ -48,7 +48,7 @@ module.exports = {
       wallet: '0x0000000000000000000000000000000000000000',
       token: '0x0000000000000000000000000000000000000000',
       param: 0,
-      kind: '0xffffffff',
+      kind: '0x277f8169',
     },
   },
 }
