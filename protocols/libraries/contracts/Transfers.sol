@@ -41,8 +41,8 @@ library Transfers {
   function transferFungible(
     address _from,
     address _to,
-    uint256 _param,
-    address _amount
+    uint256 _amount,
+    address _token
   ) external {
     // Attempt to transfer an ERC-20 token.
     require(IERC20(_token).transferFrom(_from, _to, _amount));
