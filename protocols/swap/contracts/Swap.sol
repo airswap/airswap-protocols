@@ -249,18 +249,22 @@ contract Swap is ISwap {
     } else {
 
       // Signature is provided. Ensure that it is valid.
-      require(isValidSimple(
-        address(this),
-        _nonce,
-        _expiry,
-        _makerWallet,
-        _makerParam,
-        _makerToken,
-        _takerWallet,
-        _takerParam,
-        _takerToken,
-        _v, _r, _s
-      ), "SIGNATURE_INVALID");
+      require(_makerWallet == ecrecover(
+        keccak256(abi.encodePacked(
+          "\x19Ethereum Signed Message:\n32",
+          keccak256(abi.encodePacked(
+            byte(0),
+            address(this),
+            _nonce,
+            _expiry,
+            _makerWallet,
+            _makerParam,
+            _makerToken,
+            _takerWallet,
+            _takerParam,
+            _takerToken
+          ))
+        )), _v, _r, _s), "SIGNATURE_INVALID");
     }
 
     // Mark the order TAKEN (0x01).
@@ -395,54 +399,6 @@ contract Swap is ISwap {
       );
     }
     return false;
-  }
-
-  /**
-    * @notice Validates signature using a simple hash and verifyingContract
-    *
-    @ @param _verifyingContract address
-    * @param _nonce uint256
-    * @param _expiry uint256
-    * @param _makerWallet address
-    * @param _makerParam uint256
-    * @param _makerToken address
-    * @param _takerWallet address
-    * @param _takerParam uint256
-    * @param _takerToken address
-    * @param _v uint8
-    * @param _r bytes32
-    * @param _s bytes32
-    */
-  function isValidSimple(
-    address _verifyingContract,
-    uint256 _nonce,
-    uint256 _expiry,
-    address _makerWallet,
-    uint256 _makerParam,
-    address _makerToken,
-    address _takerWallet,
-    uint256 _takerParam,
-    address _takerToken,
-    uint8 _v,
-    bytes32 _r,
-    bytes32 _s
-  ) internal pure returns (bool) {
-    return _makerWallet == ecrecover(
-      keccak256(abi.encodePacked(
-        "\x19Ethereum Signed Message:\n32",
-        keccak256(abi.encodePacked(
-          byte(0),
-          _verifyingContract,
-          _nonce,
-          _expiry,
-          _makerWallet,
-          _makerParam,
-          _makerToken,
-          _takerWallet,
-          _takerParam,
-          _takerToken
-        )))),
-      _v, _r, _s);
   }
 
   /**
