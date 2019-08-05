@@ -9,11 +9,12 @@ const {
   reverted,
   notEmitted,
   ok,
+  equal,
 } = require('@airswap/test-utils').assert
 const { allowances, balances } = require('@airswap/test-utils').balances
-const { getLatestTimestamp } = require('@airswap/test-utils').time
+const { getLatestTimestamp, getTimestampPlusDays, advanceTime } = require('@airswap/test-utils').time
 const { orders, signatures } = require('@airswap/order-utils')
-const { ERC721_INTERFACE_ID } = require('@airswap/order-utils').constants
+const { ERC721_INTERFACE_ID, SECONDS_IN_DAY } = require('@airswap/order-utils').constants
 
 let snapshotId
 
@@ -195,6 +196,25 @@ contract('Swap', async accounts => {
         swap(order, signature, { from: bobAddress }),
         'ORDER_EXPIRED'
       )
+    })
+
+    it('Checks that an order is expired when expiry == block.timestamp', async () => {
+      const ONE_DAY = SECONDS_IN_DAY * 1
+      const { order, signature } = await orders.getOrder({
+        maker: {
+          wallet: aliceAddress,
+        },
+        taker: {
+          wallet: bobAddress,
+        },
+        expiry: await getTimestampPlusDays(1),
+      })
+      await advanceTime(ONE_DAY)
+      await reverted(
+        swap(order, signature, { from: bobAddress }),
+        'ORDER_EXPIRED'
+      )
+      equal(order.expiry, await getLatestTimestamp())
     })
 
     it('Checks that Bob can not trade more than he holds', async () => {
