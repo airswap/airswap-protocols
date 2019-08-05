@@ -544,18 +544,12 @@ contract('Delegate Unit Tests', async accounts => {
       await passes(
         //mock swapContract
         //test rule decrement
-        delegate.provideOrder(
+        delegate.provideUnsignedOrder(
           1, //nonce
-          2, //expiry
-          EMPTY_ADDRESS, //consumerWallet
           consumer_amount, //consumerAmount
           CONSUMER_TOKEN, //consumerToken
-          EMPTY_ADDRESS, //delegateWallet
           100, //delegateAmount
-          DELEGATE_TOKEN, //delegateToken
-          8, //v
-          web3.utils.asciiToHex('r'), //r
-          web3.utils.asciiToHex('s') //s
+          DELEGATE_TOKEN //delegateToken
         )
       )
 
