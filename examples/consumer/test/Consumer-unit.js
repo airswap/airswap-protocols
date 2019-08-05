@@ -1,4 +1,3 @@
-/* global artifacts, contract */
 const Consumer = artifacts.require('Consumer')
 const Indexer = artifacts.require('Indexer')
 const Delegate = artifacts.require('Delegate')

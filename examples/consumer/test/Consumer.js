@@ -1,4 +1,3 @@
-/* global artifacts, contract */
 const Swap = artifacts.require('Swap')
 const Consumer = artifacts.require('Consumer')
 const Indexer = artifacts.require('Indexer')

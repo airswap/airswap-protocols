@@ -1,5 +1,3 @@
-/* global module */
-
 module.exports = {
   async allowances(account, withdrawer, allowances) {
     let index = allowances.length

@@ -1,4 +1,3 @@
-/* global artifacts, contract, web3*/
 const Types = artifacts.require('../contracts/Types')
 const MockTypes = artifacts.require('MockTypes')
 const { equal } = require('@airswap/test-utils').assert
