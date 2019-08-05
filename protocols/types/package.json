@@ -1,7 +1,7 @@
 {
-  "name": "@airswap/libraries",
+  "name": "@airswap/types",
   "version": "0.1.0",
-  "description": "Solidity contracts and libraries used in the Swap Protocol",
+  "description": "Solidity structs and hashing used in the Swap Protocol",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",

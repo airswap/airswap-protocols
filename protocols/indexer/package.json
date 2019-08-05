@@ -17,7 +17,7 @@
   "devDependencies": {
     "@airswap/market": "0.1.0",
     "@airswap/test-utils": "0.1.0",
-    "@airswap/libraries": "0.1.0",
+    "@airswap/types": "0.1.0",
     "bignumber.js": "^9.0.0",
     "truffle": "^5.0.24"
   },

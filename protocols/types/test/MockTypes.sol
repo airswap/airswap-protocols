@@ -8,10 +8,6 @@ import "../contracts/Types.sol";
   *
   */
 contract MockTypes {
-  function hashParty(Types.Party memory _party) public pure returns (bytes32) {
-    return Types.hashParty(_party);
-  }
-
   function hashOrder(Types.Order memory _order, bytes32 _domainSeparator) public pure returns (bytes32) {
     return Types.hashOrder(_order, _domainSeparator);
   }

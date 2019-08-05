@@ -1,6 +1,5 @@
 /* global artifacts, contract */
 const Swap = artifacts.require('Swap')
-const Transfers = artifacts.require('Transfers')
 const Types = artifacts.require('Types')
 const Wrapper = artifacts.require('Wrapper')
 const WETH9 = artifacts.require('WETH9')
@@ -33,14 +32,8 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
   before('Setup', async () => {
     let snapShot = await takeSnapshot()
     snapshotId = snapShot['result']
-    // deploy both libs
-    const transfersLib = await Transfers.new()
-    const typesLib = await Types.new()
-
-    // link both libs to swap
-    await Swap.link(Transfers, transfersLib.address)
-    await Swap.link(Types, typesLib.address)
-
+    // link types to swap
+    await Swap.link(Types, (await Types.new()).address)
     // now deploy swap
     swapContract = await Swap.new()
 

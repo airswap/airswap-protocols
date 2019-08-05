@@ -3,16 +3,10 @@ const Types = artifacts.require('../contracts/Types')
 const MockTypes = artifacts.require('MockTypes')
 const { equal } = require('@airswap/test-utils').assert
 const {
-  defaults,
-  EMPTY_ADDRESS,
   DOMAIN_NAME,
   DOMAIN_VERSION,
 } = require('@airswap/order-utils').constants
-const {
-  hashParty,
-  hashDomain,
-  getOrderHash,
-} = require('@airswap/order-utils').hashes
+const { hashDomain, getOrderHash } = require('@airswap/order-utils').hashes
 const { orders } = require('@airswap/order-utils')
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 
@@ -36,19 +30,6 @@ contract('Types Unit Tests', async () => {
   })
 
   describe('Test hashing functions within the library', async () => {
-    it('Test hashParty', async () => {
-      let result = await mockTypes.hashParty.call([
-        EMPTY_ADDRESS,
-        EMPTY_ADDRESS,
-        0,
-      ])
-      equal(
-        result,
-        '0x' + hashParty(defaults.Party).toString('hex'),
-        'Part hash hashed incorrectly.'
-      )
-    })
-
     it('Test hashOrder', async () => {
       const { order } = await orders.getOrder({})
       let hashedDomain = '0x' + hashDomain(mockTypes.address).toString('hex')

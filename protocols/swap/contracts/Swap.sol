@@ -17,9 +17,10 @@
 pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
-import "@airswap/libraries/contracts/Transfers.sol";
-import "@airswap/libraries/contracts/Types.sol";
+import "@airswap/types/contracts/Types.sol";
 import "@airswap/swap/interfaces/ISwap.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
+import "openzeppelin-solidity/contracts/token/ERC721/IERC721.sol";
 
 /**
   * @title Swap: The Atomic Swap used by the Swap Protocol
@@ -37,6 +38,29 @@ contract Swap is ISwap {
   byte constant private OPEN = 0x00;
   byte constant private TAKEN = 0x01;
   byte constant private CANCELED = 0x02;
+
+  // ERC-20 (fungible token) interface identifier (ERC-165)
+  bytes4 constant internal ERC20_INTERFACE_ID = 0x277f8169;
+  /*
+    bytes4(keccak256('transfer(address,uint256)')) ^
+    bytes4(keccak256('transferFrom(address,address,uint256)')) ^
+    bytes4(keccak256('balanceOf(address)')) ^
+    bytes4(keccak256('allowance(address,address)'));
+  */
+
+  // ERC-721 (non-fungible token) interface identifier (ERC-165)
+  bytes4 constant internal ERC721_INTERFACE_ID = 0x80ac58cd;
+  /*
+    bytes4(keccak256('balanceOf(address)')) ^
+    bytes4(keccak256('ownerOf(uint256)')) ^
+    bytes4(keccak256('approve(address,uint256)')) ^
+    bytes4(keccak256('getApproved(uint256)')) ^
+    bytes4(keccak256('setApprovalForAll(address,bool)')) ^
+    bytes4(keccak256('isApprovedForAll(address,address)')) ^
+    bytes4(keccak256('transferFrom(address,address,uint256)')) ^
+    bytes4(keccak256('safeTransferFrom(address,address,uint256)')) ^
+    bytes4(keccak256('safeTransferFrom(address,address,uint256,bytes)'));
+  */
 
   // Mapping of peer address to delegate address and expiry.
   mapping (address => mapping (address => uint256)) public delegateApprovals;
@@ -61,7 +85,6 @@ contract Swap is ISwap {
 
   /**
     * @notice Atomic Token Swap
-    * @dev Determines type (ERC-20 or ERC-721) with ERC-165
     *
     * @param _order Types.Order
     * @param _signature Types.Signature
@@ -139,31 +162,31 @@ contract Swap is ISwap {
 
     }
     // Transfer token from taker to maker.
-    Transfers.safeTransferAny(
-      "TAKER",
+    transferToken(
       finalTakerWallet,
       _order.maker.wallet,
       _order.taker.param,
-      _order.taker.token
+      _order.taker.token,
+      _order.taker.kind
     );
 
     // Transfer token from maker to taker.
-    Transfers.safeTransferAny(
-      "MAKER",
+    transferToken(
       _order.maker.wallet,
       finalTakerWallet,
       _order.maker.param,
-      _order.maker.token
+      _order.maker.token,
+      _order.maker.kind
     );
 
     // Transfer token from maker to affiliate if specified.
     if (_order.affiliate.wallet != address(0)) {
-      Transfers.safeTransferAny(
-        "MAKER",
+      transferToken(
         _order.maker.wallet,
         _order.affiliate.wallet,
         _order.affiliate.param,
-        _order.affiliate.token
+        _order.affiliate.token,
+        _order.affiliate.kind
       );
     }
 
@@ -176,7 +199,7 @@ contract Swap is ISwap {
 
   /**
     * @notice Atomic Token Swap (Simple)
-    * @dev Determines type (ERC-20 or ERC-721) with ERC-165
+    * @dev Supports fungible token transfers (ERC-20)
     *
     * @param _nonce uint256
     * @param _expiry uint256
@@ -249,28 +272,44 @@ contract Swap is ISwap {
     } else {
 
       // Signature is provided. Ensure that it is valid.
-      require(isValidSimple(
-        address(this),
-        _nonce,
-        _expiry,
-        _makerWallet,
-        _makerParam,
-        _makerToken,
-        _takerWallet,
-        _takerParam,
-        _takerToken,
-        _v, _r, _s
-      ), "SIGNATURE_INVALID");
+      require(_makerWallet == ecrecover(
+        keccak256(abi.encodePacked(
+          "\x19Ethereum Signed Message:\n32",
+          keccak256(abi.encodePacked(
+            byte(0),
+            address(this),
+            _nonce,
+            _expiry,
+            _makerWallet,
+            _makerParam,
+            _makerToken,
+            _takerWallet,
+            _takerParam,
+            _takerToken
+          ))
+        )), _v, _r, _s), "SIGNATURE_INVALID");
     }
 
     // Mark the order TAKEN (0x01).
     makerOrderStatus[_makerWallet][_nonce] = TAKEN;
 
     // Transfer token from taker to maker.
-    Transfers.transferAny(_takerToken, finalTakerWallet, _makerWallet, _takerParam);
+    transferToken(
+      finalTakerWallet,
+      _makerWallet,
+      _takerParam,
+      _takerToken,
+      ERC20_INTERFACE_ID
+    );
 
     // Transfer token from maker to taker.
-    Transfers.transferAny(_makerToken, _makerWallet, finalTakerWallet, _makerParam);
+    transferToken(
+      _makerWallet,
+      finalTakerWallet,
+      _makerParam,
+      _makerToken,
+      ERC20_INTERFACE_ID
+    );
 
     emit Swap(_nonce, block.timestamp,
       _makerWallet, _makerParam, _makerToken,
@@ -386,51 +425,27 @@ contract Swap is ISwap {
   }
 
   /**
-    * @notice Validates signature using a simple hash and verifyingContract
+    * @notice Performs an ERC20 or ERC721 token transfer
     *
-    @ @param _verifyingContract address
-    * @param _nonce uint256
-    * @param _expiry uint256
-    * @param _makerWallet address
-    * @param _makerParam uint256
-    * @param _makerToken address
-    * @param _takerWallet address
-    * @param _takerParam uint256
-    * @param _takerToken address
-    * @param _v uint8
-    * @param _r bytes32
-    * @param _s bytes32
+    * @param _from address
+    * @param _to address
+    * @param _param uint256
+    * @param _token address
+    * @param _kind bytes4
     */
-  function isValidSimple(
-    address _verifyingContract,
-    uint256 _nonce,
-    uint256 _expiry,
-    address _makerWallet,
-    uint256 _makerParam,
-    address _makerToken,
-    address _takerWallet,
-    uint256 _takerParam,
-    address _takerToken,
-    uint8 _v,
-    bytes32 _r,
-    bytes32 _s
-  ) internal pure returns (bool) {
-    return _makerWallet == ecrecover(
-      keccak256(abi.encodePacked(
-        "\x19Ethereum Signed Message:\n32",
-        keccak256(abi.encodePacked(
-          byte(0),
-          _verifyingContract,
-          _nonce,
-          _expiry,
-          _makerWallet,
-          _makerParam,
-          _makerToken,
-          _takerWallet,
-          _takerParam,
-          _takerToken
-        )))),
-      _v, _r, _s);
+  function transferToken(
+      address _from,
+      address _to,
+      uint256 _param,
+      address _token,
+      bytes4 _kind
+  ) internal {
+    if (_kind == ERC721_INTERFACE_ID) {
+      // Attempt to transfer an ERC-721 token.
+      IERC721(_token).safeTransferFrom(_from, _to, _param);
+    } else {
+      // Attempt to transfer an ERC-20 token.
+      require(IERC20(_token).transferFrom(_from, _to, _param));
+    }
   }
-
 }
