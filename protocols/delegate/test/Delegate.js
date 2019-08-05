@@ -1,4 +1,3 @@
-/* global artifacts, contract */
 const Delegate = artifacts.require('Delegate')
 const Swap = artifacts.require('Swap')
 const Types = artifacts.require('Types')
