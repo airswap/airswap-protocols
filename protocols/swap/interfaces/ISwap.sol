@@ -99,7 +99,7 @@ interface ISwap {
   ) external;
 
   /**
-    * @notice Cancel One or More Orders by Nonce
+    * @notice Cancel one or more open orders by nonce
     * @param _nonces uint256[]
     */
   function cancel(
@@ -107,7 +107,7 @@ interface ISwap {
   ) external;
 
   /**
-    * @notice Invalidate All Orders Below a Nonce Value
+    * @notice Invalidate all orders below a nonce value
     * @param _minimumNonce uint256
     */
   function invalidate(

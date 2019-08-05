@@ -80,6 +80,13 @@ library Types {
     ")"
   ));
 
+  /**
+    * @notice Hashes a Types.Order into bytes32
+    * @dev EIP-191 Header and domain separator is included
+    * @param _order Order
+    * @param _domainSeparator bytes32
+    * @return bytes32 returns a keccak256 abi.encodePacked value
+    */
   function hashOrder(
     Order calldata _order,
     bytes32 _domainSeparator
@@ -116,6 +123,14 @@ library Types {
     ));
   }
 
+  /**
+    * @notice Hashes Domain parameters into bytes32
+    * @dev Uses domain for signature validation (EIP-712)
+    * @param _name bytes
+    * @param _version bytes
+    * @param _verifyingContract address
+    * @return bytes32 returns a keccak256 abi.encodePacked value
+    */
   function hashDomain(
     bytes calldata _name,
     bytes calldata _version,

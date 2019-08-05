@@ -318,7 +318,7 @@ contract Swap is ISwap {
   }
 
   /**
-    * @notice Cancel One or More Orders by Nonce
+    * @notice Cancel one or more open orders by nonce
     * @dev Canceled orders are marked CANCELED (0x02)
     * and a Cancel event is emitted
     * @param _nonces uint256[]
@@ -335,7 +335,7 @@ contract Swap is ISwap {
   }
 
   /**
-    * @notice Invalidate All Orders Below a Nonce Value
+    * @notice Invalidate all orders below a nonce value
     * @param _minimumNonce uint256
     */
   function invalidate(
@@ -346,7 +346,7 @@ contract Swap is ISwap {
   }
 
   /**
-    * @notice Authorize a Delegate
+    * @notice Authorize a delegate
     * @dev Expiry value is inclusive
     * @param _delegate address
     * @param _expiry uint256
@@ -362,8 +362,8 @@ contract Swap is ISwap {
   }
 
   /**
-    * @notice Revoke an Authorization
-    * @dev emits a Revoke event
+    * @notice Revoke an authorization
+    * @dev Emits a Revoke event
     * @param _delegate address
     */
   function revoke(
@@ -374,7 +374,7 @@ contract Swap is ISwap {
   }
 
   /**
-    * @notice Determine Whether a Delegate is Authorized
+    * @notice Determine whether a delegate is authorized
     * @dev Expiry value is inclusive
     * @param _approver address
     * @param _delegate address
@@ -427,12 +427,13 @@ contract Swap is ISwap {
 
   /**
     * @notice Performs an ERC20 or ERC721 token transfer
-    * @dev transfer type specified by the bytes4 _kind param
+    * @dev Transfer type specified by the bytes4 _kind param
     * @param _from address
     * @param _to address
-    * @param _param uint256
-    * @param _token address
-    * @param _kind bytes4
+    * @param _param uint256 either the amount of tokens for
+    * ERC20 or tokenId for ERC721
+    * @param _token address contract address of token
+    * @param _kind bytes4 specifies whether the transfer is ERC20 or ERC721
     */
   function transferToken(
       address _from,
