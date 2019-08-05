@@ -261,6 +261,22 @@ contract('Indexer Unit Tests', async accounts => {
       )
     })
 
+    it('should not emit an event if token is already blacklisted', async () => {
+      // add to blacklist
+      await indexer.addToBlacklist(tokenOne, {
+        from: owner,
+      })
+
+      // now try to add it again
+      let tx = await indexer.addToBlacklist(tokenOne, {
+        from: owner,
+      })
+
+      // passes but doesnt emit an event
+      passes(tx)
+      notEmitted(tx, 'AddToBlacklist')
+    })
+
     it('should not allow a non-owner to un-blacklist a token', async () => {
       await reverted(
         indexer.removeFromBlacklist(tokenOne, {
@@ -468,6 +484,67 @@ contract('Indexer Unit Tests', async accounts => {
         ),
         'USER_ALREADY_STAKED'
       )
+    })
+  })
+
+  describe('Test unsetIntent', async () => {
+    it('should not unset an intent if the market doesnt exist', async () => {
+      await reverted(
+        indexer.unsetIntent(tokenOne, tokenTwo, {
+          from: aliceAddress,
+        }),
+        'MARKET_DOES_NOT_EXIST'
+      )
+    })
+
+    it('should not unset an intent if the intent doesnt exist', async () => {
+      // create the market
+      await indexer.createMarket(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+
+      // now try to unset a non-existent intent
+      await reverted(
+        indexer.unsetIntent(tokenOne, tokenTwo, {
+          from: aliceAddress,
+        }),
+        'INTENT_DOES_NOT_EXIST'
+      )
+    })
+
+    it('should successfully unset an intent', async () => {
+      // create the market
+      await indexer.createMarket(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+
+      // create the intent
+      await indexer.setIntent(
+        tokenOne,
+        tokenTwo,
+        250,
+        await getTimestampPlusDays(3),
+        ALICE_LOC,
+        {
+          from: aliceAddress,
+        }
+      )
+
+      // now try to unset the intent
+      let tx = await indexer.unsetIntent(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+
+      // passes and emits and event
+      passes(tx)
+      emitted(tx, 'Unstake', event => {
+        return (
+          event.wallet === aliceAddress &&
+          event.makerToken === tokenOne &&
+          event.takerToken == tokenTwo &&
+          event.amount.toNumber() === 250
+        )
+      })
     })
   })
 
