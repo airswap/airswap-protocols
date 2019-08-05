@@ -12,9 +12,16 @@ const {
   equal,
 } = require('@airswap/test-utils').assert
 const { allowances, balances } = require('@airswap/test-utils').balances
-const { getLatestTimestamp, getTimestampPlusDays, advanceTime } = require('@airswap/test-utils').time
+const {
+  getLatestTimestamp,
+  getTimestampPlusDays,
+  advanceTime,
+} = require('@airswap/test-utils').time
 const { orders, signatures } = require('@airswap/order-utils')
-const { ERC721_INTERFACE_ID, SECONDS_IN_DAY } = require('@airswap/order-utils').constants
+const {
+  ERC721_INTERFACE_ID,
+  SECONDS_IN_DAY,
+} = require('@airswap/order-utils').constants
 
 let snapshotId
 
