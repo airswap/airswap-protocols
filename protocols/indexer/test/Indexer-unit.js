@@ -22,10 +22,16 @@ const ALICE_LOC = intents.serialize(
   'https://rpc.maker-cloud.io:1123'
 )
 
+const BOB_LOC = intents.serialize(
+  intents.Locators.CONTRACT,
+  '0xbb58285762f0b56b6a206d6032fc6939eb26f4e8'
+)
+
 contract('Indexer Unit Tests', async accounts => {
   let owner = accounts[0]
   let nonOwner = accounts[1]
   let aliceAddress = accounts[2]
+  let bobAddress = accounts[3]
 
   const MIN_STAKE_250 = 250
   const MIN_STAKE_500 = 500
@@ -260,6 +266,22 @@ contract('Indexer Unit Tests', async accounts => {
       )
     })
 
+    it('should not emit an event if token is already blacklisted', async () => {
+      // add to blacklist
+      await indexer.addToBlacklist(tokenOne, {
+        from: owner,
+      })
+
+      // now try to add it again
+      let tx = await indexer.addToBlacklist(tokenOne, {
+        from: owner,
+      })
+
+      // passes but doesnt emit an event
+      passes(tx)
+      notEmitted(tx, 'AddToBlacklist')
+    })
+
     it('should not allow a non-owner to un-blacklist a token', async () => {
       await reverted(
         indexer.removeFromBlacklist(tokenOne, {
@@ -470,6 +492,67 @@ contract('Indexer Unit Tests', async accounts => {
     })
   })
 
+  describe('Test unsetIntent', async () => {
+    it('should not unset an intent if the market doesnt exist', async () => {
+      await reverted(
+        indexer.unsetIntent(tokenOne, tokenTwo, {
+          from: aliceAddress,
+        }),
+        'MARKET_DOES_NOT_EXIST'
+      )
+    })
+
+    it('should not unset an intent if the intent doesnt exist', async () => {
+      // create the market
+      await indexer.createMarket(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+
+      // now try to unset a non-existent intent
+      await reverted(
+        indexer.unsetIntent(tokenOne, tokenTwo, {
+          from: aliceAddress,
+        }),
+        'INTENT_DOES_NOT_EXIST'
+      )
+    })
+
+    it('should successfully unset an intent', async () => {
+      // create the market
+      await indexer.createMarket(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+
+      // create the intent
+      await indexer.setIntent(
+        tokenOne,
+        tokenTwo,
+        250,
+        await getTimestampPlusDays(3),
+        ALICE_LOC,
+        {
+          from: aliceAddress,
+        }
+      )
+
+      // now try to unset the intent
+      let tx = await indexer.unsetIntent(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+
+      // passes and emits and event
+      passes(tx)
+      emitted(tx, 'Unstake', event => {
+        return (
+          event.wallet === aliceAddress &&
+          event.makerToken === tokenOne &&
+          event.takerToken == tokenTwo &&
+          event.amount.toNumber() === 250
+        )
+      })
+    })
+  })
+
   describe('Test setTwoSidedIntent', async () => {
     it('should not set either intent if 1 breaks a rule', async () => {
       // make one market
@@ -547,6 +630,207 @@ contract('Indexer Unit Tests', async accounts => {
           event.expiry.toNumber() === expiry
         )
       })
+    })
+  })
+
+  describe('Test unsetTwoSidedIntent', async () => {
+    it('should not unset either intent if 1 breaks a rule', async () => {
+      // make one market and one intent
+      await indexer.createMarket(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+      let expiry = await getTimestampPlusDays(1)
+      await indexer.setIntent(tokenOne, tokenTwo, 250, expiry, ALICE_LOC, {
+        from: aliceAddress,
+      })
+
+      // try to unset both intents, but the second market doesnt exist
+      await reverted(
+        indexer.unsetTwoSidedIntent(tokenOne, tokenTwo, {
+          from: aliceAddress,
+        }),
+        'MARKET_DOES_NOT_EXIST'
+      )
+
+      // create the other market (both exist now), and stake on it
+      await indexer.createMarket(tokenTwo, tokenOne, {
+        from: aliceAddress,
+      })
+      await indexer.setIntent(tokenTwo, tokenOne, 250, expiry, ALICE_LOC, {
+        from: aliceAddress,
+      })
+
+      // unset intent from first market
+      await indexer.unsetIntent(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+
+      // try to unset both intents, but fails as alice has only staked on one
+      await reverted(
+        indexer.unsetTwoSidedIntent(tokenOne, tokenTwo, {
+          from: aliceAddress,
+        }),
+        'INTENT_DOES_NOT_EXIST'
+      )
+    })
+
+    it('should unset 2 valid intents and emit 2 events', async () => {
+      // make both markets
+      await indexer.createTwoSidedMarket(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+
+      let expiry = await getTimestampPlusDays(1)
+
+      // set both intents
+      await indexer.setTwoSidedIntent(
+        tokenOne,
+        tokenTwo,
+        250,
+        expiry,
+        ALICE_LOC,
+        {
+          from: aliceAddress,
+        }
+      )
+
+      // now unset 2 intents
+      let result = await indexer.unsetTwoSidedIntent(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+      passes(result)
+
+      // check both events were emitted
+      emitted(result, 'Unstake', event => {
+        return (
+          event.wallet === aliceAddress &&
+          event.makerToken === tokenOne &&
+          event.takerToken == tokenTwo &&
+          event.amount.toNumber() === 250
+        )
+      })
+
+      emitted(result, 'Unstake', event => {
+        return (
+          event.wallet === aliceAddress &&
+          event.makerToken === tokenTwo &&
+          event.takerToken == tokenOne &&
+          event.amount.toNumber() === 250
+        )
+      })
+    })
+  })
+
+  describe('Test getIntents', async () => {
+    it('should return an empty array if the market doesnt exist', async () => {
+      let intents = await indexer.getIntents.call(tokenOne, tokenTwo, 4)
+      equal(intents.length, 0, 'intents array should be empty')
+    })
+
+    it('should return an empty array if a token is blacklisted', async () => {
+      // create market
+      await indexer.createMarket(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+
+      // set an intent
+      await indexer.setIntent(
+        tokenOne,
+        tokenTwo,
+        250,
+        await getTimestampPlusDays(1),
+        ALICE_LOC,
+        {
+          from: aliceAddress,
+        }
+      )
+
+      // blacklist tokenOne
+      await indexer.addToBlacklist(tokenOne, {
+        from: owner,
+      })
+
+      // now try to get the intents
+      let intents = await indexer.getIntents.call(tokenOne, tokenTwo, 4)
+      equal(intents.length, 0, 'intents array should be empty')
+    })
+
+    it('should otherwise return the intents', async () => {
+      // create market
+      await indexer.createMarket(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+
+      // set two intents
+      await indexer.setIntent(
+        tokenOne,
+        tokenTwo,
+        250,
+        await getTimestampPlusDays(1),
+        ALICE_LOC,
+        {
+          from: aliceAddress,
+        }
+      )
+      await indexer.setIntent(
+        tokenOne,
+        tokenTwo,
+        250,
+        await getTimestampPlusDays(1),
+        BOB_LOC,
+        {
+          from: bobAddress,
+        }
+      )
+
+      // now try to get the intents
+      let intents = await indexer.getIntents.call(tokenOne, tokenTwo, 4)
+      equal(intents.length, 2, 'intents array should be size 2')
+
+      // should only get the number specified
+      intents = await indexer.getIntents.call(tokenOne, tokenTwo, 1)
+      equal(intents.length, 1, 'intents array should be size 1')
+    })
+  })
+
+  describe('Test lengthOf', async () => {
+    it("should return 0 if the market doesn't exist", async () => {
+      // call length of without creating the market
+      let result = await indexer.lengthOf.call(tokenOne, tokenTwo)
+      equal(result, 0, 'result should be 0')
+    })
+
+    it('should return the length of the market', async () => {
+      // create market
+      await indexer.createMarket(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+
+      // set two intents
+      await indexer.setIntent(
+        tokenOne,
+        tokenTwo,
+        250,
+        await getTimestampPlusDays(1),
+        ALICE_LOC,
+        {
+          from: aliceAddress,
+        }
+      )
+      await indexer.setIntent(
+        tokenOne,
+        tokenTwo,
+        250,
+        await getTimestampPlusDays(1),
+        BOB_LOC,
+        {
+          from: bobAddress,
+        }
+      )
+
+      // now call length of
+      let result = await indexer.lengthOf.call(tokenOne, tokenTwo)
+      equal(result, 2, 'result should be 2')
     })
   })
 })
