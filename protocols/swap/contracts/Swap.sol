@@ -97,7 +97,7 @@ contract Swap is ISwap {
   {
 
     // Ensure the order is not expired.
-    require(_order.expiry >= block.timestamp,
+    require(_order.expiry > block.timestamp,
       "ORDER_EXPIRED");
 
     // Ensure the order is not already taken.
@@ -234,7 +234,7 @@ contract Swap is ISwap {
       "ORDER_UNAVAILABLE");
 
     // Ensure the order is not expired.
-    require(_expiry >= block.timestamp,
+    require(_expiry > block.timestamp,
       "ORDER_EXPIRED");
 
     require(_nonce >= makerMinimumNonce[_makerWallet],
@@ -357,7 +357,7 @@ contract Swap is ISwap {
     uint256 _expiry
   ) external {
     require(msg.sender != _delegate, "INVALID_AUTH_DELEGATE");
-    require(_expiry >= block.timestamp, "INVALID_AUTH_EXPIRY");
+    require(_expiry > block.timestamp, "INVALID_AUTH_EXPIRY");
     delegateApprovals[msg.sender][_delegate] = _expiry;
     emit Authorize(msg.sender, _delegate, _expiry);
   }
@@ -384,7 +384,7 @@ contract Swap is ISwap {
     address _delegate
   ) internal view returns (bool) {
     if (_approver == _delegate) return true;
-    return (delegateApprovals[_approver][_delegate] >= block.timestamp);
+    return (delegateApprovals[_approver][_delegate] > block.timestamp);
   }
 
   /**

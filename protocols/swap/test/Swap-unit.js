@@ -7,7 +7,14 @@ const {
   reverted,
   equal,
 } = require('@airswap/test-utils').assert
-const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
+const {
+  takeSnapshot,
+  revertToSnapShot,
+  advanceTime,
+  getLatestTimestamp,
+  getTimestampPlusDays,
+} = require('@airswap/test-utils').time
+const { SECONDS_IN_DAY } = require('@airswap/order-utils').constants
 
 contract('Swap Unit Tests', async accounts => {
   const mockMaker = accounts[9]
@@ -96,6 +103,27 @@ contract('Swap Unit Tests', async accounts => {
 
     it('test when the expiration date has passed', async () => {
       await reverted(swap.authorize(mockMaker, 0), 'INVALID_AUTH_EXPIRY')
+    })
+
+    it('test when the expiration == block.timestamp', async () => {
+      // with this method, sometimes ONE_DAY_EXPIRY is 1 second before block.timestamp
+      // however ~50% of the time they are equal. This is due to the fact that in the
+      // time it takes to perform the below commands, some number of milliseconds pass.
+      // Sometimes that pushes the current time into the next second, and sometimes it doesnt.
+      // Therefore sometimes the current time is the same time as the expiry, and sometimes
+      // the current time is one second after the expiry.
+
+      const ONE_DAY = SECONDS_IN_DAY * 1
+      const ONE_DAY_EXPIRY = await getTimestampPlusDays(1)
+
+      // advance the time one day
+      await advanceTime(ONE_DAY)
+
+      // set the expiry as the same time as the current time - revert
+      await reverted(
+        swap.authorize(mockMaker, ONE_DAY_EXPIRY),
+        'INVALID_AUTH_EXPIRY'
+      )
     })
 
     it('test when there is a valid delegate and the expiration has not expired', async () => {
