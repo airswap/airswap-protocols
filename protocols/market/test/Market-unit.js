@@ -1,4 +1,3 @@
-/* global artifacts, contract */
 const Market = artifacts.require('Market')
 
 const { equal, reverted, emitted } = require('@airswap/test-utils').assert

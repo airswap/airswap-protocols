@@ -1,4 +1,3 @@
-/* global web3 */
 /*
   Copyright 2019 Swap Holdings Ltd.
 

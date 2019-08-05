@@ -1,4 +1,3 @@
-/* global artifacts, contract, web3*/
 const Delegate = artifacts.require('Delegate')
 const Swap = artifacts.require('Swap')
 const MockContract = artifacts.require('MockContract')

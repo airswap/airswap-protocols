@@ -1,4 +1,3 @@
-/* global artifacts, contract */
 const Swap = artifacts.require('Swap')
 const Types = artifacts.require('Types')
 const Wrapper = artifacts.require('Wrapper')

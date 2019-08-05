@@ -1,4 +1,3 @@
-/* global artifacts, contract */
 const assert = require('assert')
 const BN = require('bignumber.js')
 
