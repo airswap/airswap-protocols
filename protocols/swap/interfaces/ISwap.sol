@@ -60,11 +60,30 @@ interface ISwap {
   function makerOrderStatus(address, uint256) external returns (byte);
   function makerMinimumNonce(address) external returns (uint256);
 
+  /**
+    * @notice Atomic Token Swap
+    * @param order Types.Order
+    * @param signature Types.Signature
+    */
   function swap(
     Types.Order calldata order,
     Types.Signature calldata signature
   ) external;
 
+  /**
+    * @notice Atomic Token Swap (Simple)
+    * @param _nonce uint256
+    * @param _expiry uint256
+    * @param _makerWallet address
+    * @param _makerParam uint256
+    * @param _makerToken address
+    * @param _takerWallet address
+    * @param _takerParam uint256
+    * @param _takerToken address
+    * @param _v uint8
+    * @param _r bytes32
+    * @param _s bytes32
+    */
   function swapSimple(
     uint256 _nonce,
     uint256 _expiry,
@@ -79,19 +98,36 @@ interface ISwap {
     bytes32 _s
   ) external;
 
+  /**
+    * @notice Cancel one or more open orders by nonce
+    * @param _nonces uint256[]
+    */
   function cancel(
     uint256[] calldata _nonces
   ) external;
 
+  /**
+    * @notice Invalidate all orders below a nonce value
+    * @param _minimumNonce uint256
+    */
   function invalidate(
     uint256 _minimumNonce
   ) external;
 
+  /**
+    * @notice Authorize a delegate
+    * @param _delegate address
+    * @param _expiry uint256
+    */
   function authorize(
     address _delegate,
     uint256 _expiry
   ) external;
 
+  /**
+    * @notice Revoke an authorization
+    * @param _delegate address
+    */
   function revoke(
     address _delegate
   ) external;

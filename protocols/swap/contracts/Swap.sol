@@ -85,7 +85,6 @@ contract Swap is ISwap {
 
   /**
     * @notice Atomic Token Swap
-    *
     * @param _order Types.Order
     * @param _signature Types.Signature
     */
@@ -200,7 +199,6 @@ contract Swap is ISwap {
   /**
     * @notice Atomic Token Swap (Simple)
     * @dev Supports fungible token transfers (ERC-20)
-    *
     * @param _nonce uint256
     * @param _expiry uint256
     * @param _makerWallet address
@@ -320,8 +318,9 @@ contract Swap is ISwap {
   }
 
   /**
-    * @notice Cancel One or More Orders by Nonce
+    * @notice Cancel one or more open orders by nonce
     * @dev Canceled orders are marked CANCELED (0x02)
+    * @dev Emits a Cancel event
     * @param _nonces uint256[]
     */
   function cancel(
@@ -336,7 +335,8 @@ contract Swap is ISwap {
   }
 
   /**
-    * @notice Invalidate All Orders Below a Nonce Value
+    * @notice Invalidate all orders below a nonce value
+    * @dev Emits an Invalidate event
     * @param _minimumNonce uint256
     */
   function invalidate(
@@ -347,8 +347,8 @@ contract Swap is ISwap {
   }
 
   /**
-    * @notice Authorize a Delegate
-    * @dev Expiry value is inclusive
+    * @notice Authorize a delegate
+    * @dev Emits an Authorize event
     * @param _delegate address
     * @param _expiry uint256
     */
@@ -363,7 +363,8 @@ contract Swap is ISwap {
   }
 
   /**
-    * @notice Revoke an Authorization
+    * @notice Revoke an authorization
+    * @dev Emits a Revoke event
     * @param _delegate address
     */
   function revoke(
@@ -374,10 +375,10 @@ contract Swap is ISwap {
   }
 
   /**
-    * @notice Determine Whether a Delegate is Authorized
-    * @dev Expiry value is inclusive
+    * @notice Determine whether a delegate is authorized
     * @param _approver address
     * @param _delegate address
+    * @return bool returns whether a delegate is authorized
     */
   function isAuthorized(
     address _approver,
@@ -388,10 +389,10 @@ contract Swap is ISwap {
   }
 
   /**
-    * @notice Validates signature using an EIP-712 typed data hash
-    *
+    * @notice Validate signature using an EIP-712 typed data hash
     * @param _order Order
     * @param _signature Signature
+    * @return bool returns whether the signature + order is valid
     */
   function isValid(
     Types.Order memory _order,
@@ -425,13 +426,13 @@ contract Swap is ISwap {
   }
 
   /**
-    * @notice Performs an ERC20 or ERC721 token transfer
-    *
-    * @param _from address
-    * @param _to address
-    * @param _param uint256
-    * @param _token address
-    * @param _kind bytes4
+    * @notice Perform an ERC-20 or ERC-721 token transfer
+    * @dev Transfer type specified by the bytes4 _kind param
+    * @param _from address wallet address to send from
+    * @param _to address wallet address to send to
+    * @param _param uint256 amount for ERC-20 or token ID for ERC-721
+    * @param _token address contract address of token
+    * @param _kind bytes4 EIP-165 interface ID of the token
     */
   function transferToken(
       address _from,
