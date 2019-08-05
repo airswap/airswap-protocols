@@ -206,6 +206,9 @@ contract('Swap', async accounts => {
     })
 
     it('Checks that an order is expired when expiry == block.timestamp', async () => {
+      // with this method, sometimes order.expiry is 1 second after block.timestamp
+      // however ~50% of the time they are equal
+
       const ONE_DAY = SECONDS_IN_DAY * 1
       const { order, signature } = await orders.getOrder({
         maker: {
