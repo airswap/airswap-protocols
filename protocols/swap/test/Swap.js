@@ -221,7 +221,6 @@ contract('Swap', async accounts => {
         swap(order, signature, { from: bobAddress }),
         'ORDER_EXPIRED'
       )
-      equal(order.expiry, await getLatestTimestamp())
     })
 
     it('Checks that Bob can not trade more than he holds', async () => {
