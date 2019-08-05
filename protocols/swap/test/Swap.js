@@ -9,11 +9,19 @@ const {
   reverted,
   notEmitted,
   ok,
+  equal,
 } = require('@airswap/test-utils').assert
 const { allowances, balances } = require('@airswap/test-utils').balances
-const { getLatestTimestamp } = require('@airswap/test-utils').time
+const {
+  getLatestTimestamp,
+  getTimestampPlusDays,
+  advanceTime,
+} = require('@airswap/test-utils').time
 const { orders, signatures } = require('@airswap/order-utils')
-const { ERC721_INTERFACE_ID } = require('@airswap/order-utils').constants
+const {
+  ERC721_INTERFACE_ID,
+  SECONDS_IN_DAY,
+} = require('@airswap/order-utils').constants
 
 let snapshotId
 
@@ -191,6 +199,31 @@ contract('Swap', async accounts => {
         },
         expiry: (await getLatestTimestamp()) - 10,
       })
+      await reverted(
+        swap(order, signature, { from: bobAddress }),
+        'ORDER_EXPIRED'
+      )
+    })
+
+    it('Checks that an order is expired when expiry == block.timestamp', async () => {
+      // with this method, sometimes order.expiry is 1 second before block.timestamp
+      // however ~50% of the time they are equal. This is due to the fact that in the
+      // time it takes to create an order, some number of milliseconds pass. Sometimes
+      // that pushes the current time into the next second, and sometimes it doesnt.
+      // Therefore sometimes the current time is the same time as the expiry, and sometimes
+      // the current time is one second after the expiry
+
+      const ONE_DAY = SECONDS_IN_DAY * 1
+      const { order, signature } = await orders.getOrder({
+        maker: {
+          wallet: aliceAddress,
+        },
+        taker: {
+          wallet: bobAddress,
+        },
+        expiry: await getTimestampPlusDays(1),
+      })
+      await advanceTime(ONE_DAY)
       await reverted(
         swap(order, signature, { from: bobAddress }),
         'ORDER_EXPIRED'

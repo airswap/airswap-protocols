@@ -295,7 +295,7 @@ contract Delegate is IDelegate, Ownable {
 
     provideOrder(
       nonce,
-      block.timestamp,
+      block.timestamp + 1,
       msg.sender,
       consumerAmount,
       consumerToken,

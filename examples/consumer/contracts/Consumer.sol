@@ -120,7 +120,7 @@ contract Consumer {
     IERC20(_userSendToken).approve(address(swapContract), userSendAmount);
 
     // Consumer authorizes the Delegate.
-    swapContract.authorize(untrustedDelegateContract, block.timestamp);
+    swapContract.authorize(untrustedDelegateContract, block.timestamp + 1);
 
     // Consumer provides unsigned order to Delegate.
     IDelegate(untrustedDelegateContract).provideUnsignedOrder(
