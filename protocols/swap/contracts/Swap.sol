@@ -320,7 +320,7 @@ contract Swap is ISwap {
   /**
     * @notice Cancel one or more open orders by nonce
     * @dev Canceled orders are marked CANCELED (0x02)
-    * and a Cancel event is emitted
+    * @dev Emits a Cancel event
     * @param _nonces uint256[]
     */
   function cancel(
@@ -347,7 +347,6 @@ contract Swap is ISwap {
 
   /**
     * @notice Authorize a delegate
-    * @dev Expiry value is inclusive
     * @param _delegate address
     * @param _expiry uint256
     */
@@ -375,7 +374,6 @@ contract Swap is ISwap {
 
   /**
     * @notice Determine whether a delegate is authorized
-    * @dev Expiry value is inclusive
     * @param _approver address
     * @param _delegate address
     * @return bool returns whether a delegate is authorized

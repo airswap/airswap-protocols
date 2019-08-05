@@ -116,7 +116,6 @@ interface ISwap {
 
   /**
     * @notice Authorize a Delegate
-    * @dev Expiry value is inclusive
     * @param _delegate address
     * @param _expiry uint256
     */
