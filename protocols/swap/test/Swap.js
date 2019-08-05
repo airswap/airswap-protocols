@@ -207,7 +207,11 @@ contract('Swap', async accounts => {
 
     it('Checks that an order is expired when expiry == block.timestamp', async () => {
       // with this method, sometimes order.expiry is 1 second before block.timestamp
-      // however ~50% of the time they are equal
+      // however ~50% of the time they are equal. This is due to the fact that in the
+      // time it takes to create an order, some number of milliseconds pass. Sometimes
+      // that pushes the current time into the next second, and sometimes it doesnt.
+      // Therefore sometimes the current time is the same time as the expiry, and sometimes
+      // the current time is one second after the expiry
 
       const ONE_DAY = SECONDS_IN_DAY * 1
       const { order, signature } = await orders.getOrder({
