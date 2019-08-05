@@ -106,7 +106,7 @@ contract('Swap Unit Tests', async accounts => {
     })
 
     it('test when the expiration == block.timestamp', async () => {
-      // with this method, sometimes ONE_DAY_EXPIRY is 1 second after block.timestamp
+      // with this method, sometimes ONE_DAY_EXPIRY is 1 second before block.timestamp
       // however ~50% of the time they are equal
 
       const ONE_DAY = SECONDS_IN_DAY * 1
