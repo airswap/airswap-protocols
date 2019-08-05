@@ -85,7 +85,6 @@ contract Swap is ISwap {
 
   /**
     * @notice Atomic Token Swap
-    *
     * @param _order Types.Order
     * @param _signature Types.Signature
     */
@@ -200,7 +199,6 @@ contract Swap is ISwap {
   /**
     * @notice Atomic Token Swap (Simple)
     * @dev Supports fungible token transfers (ERC-20)
-    *
     * @param _nonce uint256
     * @param _expiry uint256
     * @param _makerWallet address
@@ -322,6 +320,7 @@ contract Swap is ISwap {
   /**
     * @notice Cancel One or More Orders by Nonce
     * @dev Canceled orders are marked CANCELED (0x02)
+    * and a Cancel event is emitted
     * @param _nonces uint256[]
     */
   function cancel(
@@ -364,6 +363,7 @@ contract Swap is ISwap {
 
   /**
     * @notice Revoke an Authorization
+    * @dev emits a Revoke event
     * @param _delegate address
     */
   function revoke(
@@ -378,6 +378,7 @@ contract Swap is ISwap {
     * @dev Expiry value is inclusive
     * @param _approver address
     * @param _delegate address
+    * @return bool returns whether a delegate is authorized
     */
   function isAuthorized(
     address _approver,
@@ -389,9 +390,9 @@ contract Swap is ISwap {
 
   /**
     * @notice Validates signature using an EIP-712 typed data hash
-    *
     * @param _order Order
     * @param _signature Signature
+    * @return bool returns whether the signature + order is valid
     */
   function isValid(
     Types.Order memory _order,
@@ -426,7 +427,7 @@ contract Swap is ISwap {
 
   /**
     * @notice Performs an ERC20 or ERC721 token transfer
-    *
+    * @dev transfer type specified by the bytes4 _kind param
     * @param _from address
     * @param _to address
     * @param _param uint256
