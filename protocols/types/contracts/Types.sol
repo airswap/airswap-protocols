@@ -81,8 +81,8 @@ library Types {
   ));
 
   /**
-    * @notice Hashes a Types.Order into bytes32
-    * @dev EIP-191 Header and domain separator is included
+    * @notice Hash an order into bytes32
+    * @dev EIP-191 header and domain separator included
     * @param _order Order
     * @param _domainSeparator bytes32
     * @return bytes32 returns a keccak256 abi.encodePacked value
@@ -124,8 +124,8 @@ library Types {
   }
 
   /**
-    * @notice Hashes Domain parameters into bytes32
-    * @dev Uses domain for signature validation (EIP-712)
+    * @notice Hash domain parameters into bytes32
+    * @dev Used for signature validation (EIP-712)
     * @param _name bytes
     * @param _version bytes
     * @param _verifyingContract address
