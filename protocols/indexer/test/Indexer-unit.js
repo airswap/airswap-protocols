@@ -23,10 +23,16 @@ const ALICE_LOC = intents.serialize(
   'https://rpc.maker-cloud.io:1123'
 )
 
+const BOB_LOC = intents.serialize(
+  intents.Locators.CONTRACT,
+  '0xbb58285762f0b56b6a206d6032fc6939eb26f4e8'
+)
+
 contract('Indexer Unit Tests', async accounts => {
   let owner = accounts[0]
   let nonOwner = accounts[1]
   let aliceAddress = accounts[2]
+  let bobAddress = accounts[3]
 
   const MIN_STAKE_250 = 250
   const MIN_STAKE_500 = 500
@@ -713,6 +719,78 @@ contract('Indexer Unit Tests', async accounts => {
           event.amount.toNumber() === 250
         )
       })
+    })
+  })
+
+  describe('Test getIntents', async () => {
+    it('should return an empty array if the market doesnt exist', async () => {
+      let intents = await indexer.getIntents.call(tokenOne, tokenTwo, 4)
+      equal(intents.length, 0, 'intents array should be empty')
+    })
+
+    it('should return an empty array if a token is blacklisted', async () => {
+      // create market
+      await indexer.createMarket(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+
+      // set an intent
+      await indexer.setIntent(
+        tokenOne,
+        tokenTwo,
+        250,
+        await getTimestampPlusDays(1),
+        ALICE_LOC,
+        {
+          from: aliceAddress,
+        }
+      )
+
+      // blacklist tokenOne
+      await indexer.addToBlacklist(tokenOne, {
+        from: owner,
+      })
+
+      // now try to get the intents
+      let intents = await indexer.getIntents.call(tokenOne, tokenTwo, 4)
+      equal(intents.length, 0, 'intents array should be empty')
+    })
+
+    it('should otherwise return the intents', async () => {
+      // create market
+      await indexer.createMarket(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+
+      // set two intents
+      await indexer.setIntent(
+        tokenOne,
+        tokenTwo,
+        250,
+        await getTimestampPlusDays(1),
+        ALICE_LOC,
+        {
+          from: aliceAddress,
+        }
+      )
+      await indexer.setIntent(
+        tokenOne,
+        tokenTwo,
+        250,
+        await getTimestampPlusDays(1),
+        BOB_LOC,
+        {
+          from: bobAddress,
+        }
+      )
+
+      // now try to get the intents
+      let intents = await indexer.getIntents.call(tokenOne, tokenTwo, 4)
+      equal(intents.length, 2, 'intents array should be size 2')
+
+      // should only get the number specified
+      intents = await indexer.getIntents.call(tokenOne, tokenTwo, 1)
+      equal(intents.length, 1, 'intents array should be size 1')
     })
   })
 })
