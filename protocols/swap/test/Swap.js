@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-/* global artifacts, contract */
->>>>>>> eslint ignore and linting fixes
 const Swap = artifacts.require('Swap')
 const Types = artifacts.require('Types')
 const FungibleToken = artifacts.require('FungibleToken')
@@ -17,10 +13,7 @@ const {
 const { allowances, balances } = require('@airswap/test-utils').balances
 const { getLatestTimestamp } = require('@airswap/test-utils').time
 const { orders, signatures } = require('@airswap/order-utils')
-<<<<<<< HEAD
 const { ERC721_INTERFACE_ID } = require('@airswap/order-utils').constants
-=======
->>>>>>> eslint ignore and linting fixes
 
 let snapshotId
 
