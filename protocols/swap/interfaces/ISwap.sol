@@ -115,7 +115,7 @@ interface ISwap {
   ) external;
 
   /**
-    * @notice Authorize a Delegate
+    * @notice Authorize a delegate
     * @param _delegate address
     * @param _expiry uint256
     */
@@ -125,7 +125,7 @@ interface ISwap {
   ) external;
 
   /**
-    * @notice Revoke an Authorization
+    * @notice Revoke an authorization
     * @param _delegate address
     */
   function revoke(
