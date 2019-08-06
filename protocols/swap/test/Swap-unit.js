@@ -15,7 +15,10 @@ const {
   getLatestTimestamp,
   getTimestampPlusDays,
 } = require('@airswap/test-utils').time
-const { SECONDS_IN_DAY, EMPTY_ADDRESS } = require('@airswap/order-utils').constants
+const {
+  SECONDS_IN_DAY,
+  EMPTY_ADDRESS,
+} = require('@airswap/order-utils').constants
 const { orders, signatures } = require('@airswap/order-utils')
 
 contract('Swap Unit Tests', async accounts => {
@@ -57,7 +60,7 @@ contract('Swap Unit Tests', async accounts => {
       let order = [0, 0, maker, taker, affiliate]
       let signature = [EMPTY_ADDRESS, v, r, s, ver]
 
-       await reverted(swap.swap(order, signature), 'ORDER_EXPIRED')
+      await reverted(swap.swap(order, signature), 'ORDER_EXPIRED')
     })
 
     it('test when order is taken', async () => {
@@ -67,20 +70,20 @@ contract('Swap Unit Tests', async accounts => {
       let order = [0, Jun_06_2017T00_00_00_UTC, maker, taker, affiliate]
       let signature = [EMPTY_ADDRESS, v, r, s, ver]
 
-       //insert order
+      //insert order
       //take it
       //try and take it again
       //await reverted(await swap.swap(order, signature), 'ORDER_ALREADY_TAKEN')
     })
 
-   it('test when order is canceled', async () => {
+    it('test when order is canceled', async () => {
       let maker = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
       let taker = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
       let affiliate = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
       let order = [0, Jun_06_2017T00_00_00_UTC, maker, taker, affiliate]
       let signature = [EMPTY_ADDRESS, v, r, s, ver]
 
-       //insert order
+      //insert order
       //cancel it
       //try and take it
       //await reverted(await swap.swap(order, signature), 'ORDER_ALREADY_CANCELED')
@@ -93,7 +96,7 @@ contract('Swap Unit Tests', async accounts => {
       let order = [0, Jun_06_2017T00_00_00_UTC, maker, taker, affiliate]
       let signature = [EMPTY_ADDRESS, v, r, s, ver]
 
-       await swap.invalidate(5, { from: mockMaker })
+      await swap.invalidate(5, { from: mockMaker })
       await reverted(swap.swap(order, signature), 'NONCE_TOO_LOW')
     })
 
@@ -104,7 +107,7 @@ contract('Swap Unit Tests', async accounts => {
       let order = [0, Jun_06_2017T00_00_00_UTC, maker, taker, affiliate]
       let signature = [EMPTY_ADDRESS, v, r, s, ver]
 
-       //TODO
+      //TODO
       //await swap.swap(order, signature)
     })
 
@@ -115,7 +118,7 @@ contract('Swap Unit Tests', async accounts => {
       let order = [0, Jun_06_2017T00_00_00_UTC, maker, taker, affiliate]
       let signature = [EMPTY_ADDRESS, v, r, s, ver]
 
-       await reverted(swap.swap(order, signature), 'SENDER_UNAUTHORIZED')
+      await reverted(swap.swap(order, signature), 'SENDER_UNAUTHORIZED')
     })
 
     it('test when taker is not an empty address, and the sender is authorized', async () => {
@@ -127,7 +130,7 @@ contract('Swap Unit Tests', async accounts => {
 
       emitted(
         await swap.authorize(mockTaker, Jun_06_2017T00_00_00_UTC, {
-          from: mockMaker, 
+          from: mockMaker,
         }),
         'Authorize'
       )
@@ -141,19 +144,75 @@ contract('Swap Unit Tests', async accounts => {
       let affiliate = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
       let order = [0, Jun_06_2017T00_00_00_UTC, maker, taker, affiliate]
       let signature = [EMPTY_ADDRESS, 0, r, s, ver]
-      
+
       //taker authorizes maker
       emitted(
         await swap.authorize(mockMaker, Jun_06_2017T00_00_00_UTC, {
-          from: mockTaker
+          from: mockTaker,
         }),
         'Authorize'
       )
 
-       //mock taker will take the order
+      //mock taker will take the order
       await reverted(
         swap.swap(order, signature, { from: mockTaker }),
         'SIGNER_UNAUTHORIZED.'
+      )
+    })
+  })
+
+  describe('Test swap simple', async () => {
+    it('test when order is expired', async () => {
+      let maker = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
+      let taker = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
+      let affiliate = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
+      let order = [0, 0, maker, taker, affiliate]
+      let signature = [EMPTY_ADDRESS, v, r, s, ver]
+
+      await reverted(
+        swap.swapSimple(
+            0,
+          500,
+          mockMaker,
+          100,
+          mockMakerToken, 
+          mockTaker, 
+          100, 
+          mockTakerToken, 
+          v, 
+          r, 
+          s
+        ),
+        'ORDER_EXPIRED'
+      )
+    })
+
+    it('test when the order nonce is too low', async () => {
+      let maker = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
+      let taker = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
+      let affiliate = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
+      let order = [0, 0, maker, taker, affiliate]
+      let signature = [EMPTY_ADDRESS, v, r, s, ver]
+
+      //invalidate all nonces below 2
+      await swap.invalidate(2, { from: mockMaker })
+
+      await reverted(
+        swap.swapSimple(
+            0,
+          Jun_06_2017T00_00_00_UTC,
+          mockMaker,
+          100,
+          mockMakerToken, 
+          mockTaker, 
+          100, 
+          mockTakerToken, 
+          v, 
+          r, 
+          s,
+          { from: mockMaker }
+        ),
+        'NONCE_TOO_LOW'
       )
     })
   })
