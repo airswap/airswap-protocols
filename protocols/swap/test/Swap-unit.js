@@ -100,7 +100,7 @@ contract('Swap Unit Tests', async accounts => {
       await reverted(swap.swap(order, signature), 'NONCE_TOO_LOW')
     })
 
-    it('test when taker is an empty address', async () => {
+    it('test when taker is unprovided', async () => {
       let maker = [mockMaker, EMPTY_ADDRESS, 200, kind]
       let taker = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
       let affiliate = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
@@ -111,7 +111,7 @@ contract('Swap Unit Tests', async accounts => {
       //await swap.swap(order, signature)
     })
 
-    it('test when taker is not an empty address, and the sender is unauthorized', async () => {
+    it('test when taker is provided, and the sender is unauthorized', async () => {
       let maker = [mockMaker, EMPTY_ADDRESS, 200, kind]
       let taker = [mockTaker, EMPTY_ADDRESS, 200, kind]
       let affiliate = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
@@ -121,7 +121,7 @@ contract('Swap Unit Tests', async accounts => {
       await reverted(swap.swap(order, signature), 'SENDER_UNAUTHORIZED')
     })
 
-    it('test when taker is not an empty address, and the sender is authorized', async () => {
+    it('test when taker is provided, and the sender is authorized', async () => {
       let maker = [mockMaker, EMPTY_ADDRESS, 200, kind]
       let taker = [mockTaker, EMPTY_ADDRESS, 200, kind]
       let affiliate = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
@@ -138,7 +138,7 @@ contract('Swap Unit Tests', async accounts => {
       //TODO
     })
 
-    it('test when taker is not an empty address, the sender is authorized, the signature.v is 0, and the maker wallet is unauthorized', async () => {
+    it('test when taker is provided, the sender is authorized, the signature.v is 0, and the maker wallet is unauthorized', async () => {
       let maker = [mockMaker, EMPTY_ADDRESS, 200, kind]
       let taker = [mockTaker, EMPTY_ADDRESS, 200, kind]
       let affiliate = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
@@ -210,7 +210,7 @@ contract('Swap Unit Tests', async accounts => {
       )
     })
 
-    it('test when taker is an empty address, the signature.v is 0, and the maker wallet is unauthorized', async () => {
+    it('test when taker is unprovided, the signature.v is 0, and the maker wallet is unauthorized', async () => {
       await reverted(
         swap.swapSimple(
             0,
@@ -218,7 +218,7 @@ contract('Swap Unit Tests', async accounts => {
           mockMaker,
           100,
           mockMakerToken, 
-          EMPTY_ADDRESS, 
+          EMPTY_ADDRESS, //unprovided taker
           100, 
           mockTakerToken, 
           0, 
