@@ -18,7 +18,7 @@ const {
 const { SECONDS_IN_DAY, EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 const { orders, signatures } = require('@airswap/order-utils')
 
-contract('Swap Unit Tests', async accounts => {
+contract.only('Swap Unit Tests', async accounts => {
   const Jun_06_2017T00_00_00_UTC = 1497052800 //a date later than than when ganache started
   const mockMaker = accounts[9]
   const mockMakerToken = accounts[8]
@@ -60,7 +60,7 @@ contract('Swap Unit Tests', async accounts => {
        await reverted(swap.swap(order, signature), 'ORDER_EXPIRED')
     })
 
-     it('test when order is taken', async () => {
+    it('test when order is taken', async () => {
       let maker = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
       let taker = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
       let affiliate = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
@@ -73,7 +73,7 @@ contract('Swap Unit Tests', async accounts => {
       //await reverted(await swap.swap(order, signature), 'ORDER_ALREADY_TAKEN')
     })
 
-     it('test when order is canceled', async () => {
+   it('test when order is canceled', async () => {
       let maker = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
       let taker = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
       let affiliate = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
@@ -86,7 +86,7 @@ contract('Swap Unit Tests', async accounts => {
       //await reverted(await swap.swap(order, signature), 'ORDER_ALREADY_CANCELED')
     })
 
-     it('test when order nonce is too low', async () => {
+    it('test when order nonce is too low', async () => {
       let maker = [mockMaker, EMPTY_ADDRESS, 200, kind]
       let taker = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
       let affiliate = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
@@ -97,7 +97,7 @@ contract('Swap Unit Tests', async accounts => {
       await reverted(swap.swap(order, signature), 'NONCE_TOO_LOW')
     })
 
-     it('test when taker is an empty address', async () => {
+    it('test when taker is an empty address', async () => {
       let maker = [mockMaker, EMPTY_ADDRESS, 200, kind]
       let taker = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
       let affiliate = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
@@ -108,7 +108,7 @@ contract('Swap Unit Tests', async accounts => {
       //await swap.swap(order, signature)
     })
 
-     it('test when taker is not an empty address, and the sender is not authorized', async () => {
+    it('test when taker is not an empty address, and the sender is unauthorized', async () => {
       let maker = [mockMaker, EMPTY_ADDRESS, 200, kind]
       let taker = [mockTaker, EMPTY_ADDRESS, 200, kind]
       let affiliate = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
@@ -118,17 +118,34 @@ contract('Swap Unit Tests', async accounts => {
        await reverted(swap.swap(order, signature), 'SENDER_UNAUTHORIZED')
     })
 
-     it('test when taker is not an empty address, and the sender is authorized', async () => {
+    it('test when taker is not an empty address, and the sender is authorized', async () => {
       let maker = [mockMaker, EMPTY_ADDRESS, 200, kind]
       let taker = [mockTaker, EMPTY_ADDRESS, 200, kind]
       let affiliate = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
       let order = [0, Jun_06_2017T00_00_00_UTC, maker, taker, affiliate]
       let signature = [EMPTY_ADDRESS, v, r, s, ver]
 
-       //mock maker authorizes mock taker
       emitted(
         await swap.authorize(mockTaker, Jun_06_2017T00_00_00_UTC, {
-          from: mockMaker,
+          from: mockMaker, 
+        }),
+        'Authorize'
+      )
+
+      //TODO
+    })
+
+    it('test when taker is not an empty address, the sender is authorized, the signature.v is 0, and the maker wallet is unauthorized', async () => {
+      let maker = [mockMaker, EMPTY_ADDRESS, 200, kind]
+      let taker = [mockTaker, EMPTY_ADDRESS, 200, kind]
+      let affiliate = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
+      let order = [0, Jun_06_2017T00_00_00_UTC, maker, taker, affiliate]
+      let signature = [EMPTY_ADDRESS, 0, r, s, ver]
+      
+      //taker authorizes maker
+      emitted(
+        await swap.authorize(mockMaker, Jun_06_2017T00_00_00_UTC, {
+          from: mockTaker
         }),
         'Authorize'
       )
