@@ -14,6 +14,7 @@
 | wallet | `address` | Wallet address of the party    |
 | token  | `address` | Contract address of the token  |
 | param  | `uint256` | Value (ERC-20) or ID (ERC-721) |
+| kind   | `bytes4`  | Interface ID of the token      |
 
 ### Order Struct
 
