@@ -1,5 +1,4 @@
 const Swap = artifacts.require('Swap')
-const MockContract = artifacts.require('MockContract')
 
 const {
   passes,
@@ -12,14 +11,12 @@ const {
   takeSnapshot,
   revertToSnapShot,
   advanceTime,
-  getLatestTimestamp,
   getTimestampPlusDays,
 } = require('@airswap/test-utils').time
 const {
   SECONDS_IN_DAY,
   EMPTY_ADDRESS,
 } = require('@airswap/order-utils').constants
-const { orders, signatures } = require('@airswap/order-utils')
 
 contract('Swap Unit Tests', async accounts => {
   const Jun_06_2017T00_00_00_UTC = 1497052800 //a date later than than when ganache started
@@ -27,8 +24,6 @@ contract('Swap Unit Tests', async accounts => {
   const mockMakerToken = accounts[8]
   const mockTaker = accounts[7]
   const mockTakerToken = accounts[6]
-  const mockAffiliate = accounts[5]
-  const mockAffiliateToken = accounts[4]
   const sender = accounts[0]
   const kind = web3.utils.asciiToHex('FFFF') // hex representation is "0x46464646" this is 4 bytes
   const v = 27
@@ -63,32 +58,6 @@ contract('Swap Unit Tests', async accounts => {
       await reverted(swap.swap(order, signature), 'ORDER_EXPIRED')
     })
 
-    it('test when order is taken', async () => {
-      let maker = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
-      let taker = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
-      let affiliate = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
-      let order = [0, Jun_06_2017T00_00_00_UTC, maker, taker, affiliate]
-      let signature = [EMPTY_ADDRESS, v, r, s, ver]
-
-      //insert order
-      //take it
-      //try and take it again
-      //await reverted(await swap.swap(order, signature), 'ORDER_ALREADY_TAKEN')
-    })
-
-    it('test when order is canceled', async () => {
-      let maker = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
-      let taker = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
-      let affiliate = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
-      let order = [0, Jun_06_2017T00_00_00_UTC, maker, taker, affiliate]
-      let signature = [EMPTY_ADDRESS, v, r, s, ver]
-
-      //insert order
-      //cancel it
-      //try and take it
-      //await reverted(await swap.swap(order, signature), 'ORDER_ALREADY_CANCELED')
-    })
-
     it('test when order nonce is too low', async () => {
       let maker = [mockMaker, EMPTY_ADDRESS, 200, kind]
       let taker = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
@@ -100,17 +69,6 @@ contract('Swap Unit Tests', async accounts => {
       await reverted(swap.swap(order, signature), 'NONCE_TOO_LOW')
     })
 
-    it('test when taker is unprovided', async () => {
-      let maker = [mockMaker, EMPTY_ADDRESS, 200, kind]
-      let taker = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
-      let affiliate = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
-      let order = [0, Jun_06_2017T00_00_00_UTC, maker, taker, affiliate]
-      let signature = [EMPTY_ADDRESS, v, r, s, ver]
-
-      //TODO
-      //await swap.swap(order, signature)
-    })
-
     it('test when taker is provided, and the sender is unauthorized', async () => {
       let maker = [mockMaker, EMPTY_ADDRESS, 200, kind]
       let taker = [mockTaker, EMPTY_ADDRESS, 200, kind]
@@ -119,23 +77,6 @@ contract('Swap Unit Tests', async accounts => {
       let signature = [EMPTY_ADDRESS, v, r, s, ver]
 
       await reverted(swap.swap(order, signature), 'SENDER_UNAUTHORIZED')
-    })
-
-    it('test when taker is provided, and the sender is authorized', async () => {
-      let maker = [mockMaker, EMPTY_ADDRESS, 200, kind]
-      let taker = [mockTaker, EMPTY_ADDRESS, 200, kind]
-      let affiliate = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
-      let order = [0, Jun_06_2017T00_00_00_UTC, maker, taker, affiliate]
-      let signature = [EMPTY_ADDRESS, v, r, s, ver]
-
-      emitted(
-        await swap.authorize(mockTaker, Jun_06_2017T00_00_00_UTC, {
-          from: mockMaker,
-        }),
-        'Authorize'
-      )
-
-      //TODO
     })
 
     it('test when taker is provided, the sender is authorized, the signature.v is 0, and the maker wallet is unauthorized', async () => {
@@ -163,24 +104,18 @@ contract('Swap Unit Tests', async accounts => {
 
   describe('Test swap simple', async () => {
     it('test when order is expired', async () => {
-      let maker = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
-      let taker = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
-      let affiliate = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
-      let order = [0, 0, maker, taker, affiliate]
-      let signature = [EMPTY_ADDRESS, v, r, s, ver]
-
       await reverted(
         swap.swapSimple(
-            0,
+          0,
           500,
           mockMaker,
           100,
-          mockMakerToken, 
-          mockTaker, 
-          100, 
-          mockTakerToken, 
-          v, 
-          r, 
+          mockMakerToken,
+          mockTaker,
+          100,
+          mockTakerToken,
+          v,
+          r,
           s
         ),
         'ORDER_EXPIRED'
@@ -193,16 +128,16 @@ contract('Swap Unit Tests', async accounts => {
 
       await reverted(
         swap.swapSimple(
-            0,
+          0,
           Jun_06_2017T00_00_00_UTC,
           mockMaker,
           100,
-          mockMakerToken, 
-          mockTaker, 
-          100, 
-          mockTakerToken, 
-          v, 
-          r, 
+          mockMakerToken,
+          mockTaker,
+          100,
+          mockTakerToken,
+          v,
+          r,
           s,
           { from: mockMaker }
         ),
@@ -213,16 +148,16 @@ contract('Swap Unit Tests', async accounts => {
     it('test when taker is unprovided, the signature.v is 0, and the maker wallet is unauthorized', async () => {
       await reverted(
         swap.swapSimple(
-            0,
+          0,
           Jun_06_2017T00_00_00_UTC,
           mockMaker,
           100,
-          mockMakerToken, 
+          mockMakerToken,
           EMPTY_ADDRESS, //unprovided taker
-          100, 
-          mockTakerToken, 
-          0, 
-          r, 
+          100,
+          mockTakerToken,
+          0,
+          r,
           s,
           { from: mockTaker }
         ),

@@ -9,7 +9,6 @@ const {
   reverted,
   notEmitted,
   ok,
-  equal,
 } = require('@airswap/test-utils').assert
 const { allowances, balances } = require('@airswap/test-utils').balances
 const {
