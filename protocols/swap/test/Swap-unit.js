@@ -18,7 +18,7 @@ const {
 const { SECONDS_IN_DAY, EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 const { orders, signatures } = require('@airswap/order-utils')
 
-contract.only('Swap Unit Tests', async accounts => {
+contract('Swap Unit Tests', async accounts => {
   const Jun_06_2017T00_00_00_UTC = 1497052800 //a date later than than when ganache started
   const mockMaker = accounts[9]
   const mockMakerToken = accounts[8]
