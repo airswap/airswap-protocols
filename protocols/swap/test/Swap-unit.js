@@ -188,12 +188,6 @@ contract('Swap Unit Tests', async accounts => {
     })
 
     it('test when the order nonce is too low', async () => {
-      let maker = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
-      let taker = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
-      let affiliate = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
-      let order = [0, 0, maker, taker, affiliate]
-      let signature = [EMPTY_ADDRESS, v, r, s, ver]
-
       //invalidate all nonces below 2
       await swap.invalidate(2, { from: mockMaker })
 
@@ -213,6 +207,26 @@ contract('Swap Unit Tests', async accounts => {
           { from: mockMaker }
         ),
         'NONCE_TOO_LOW'
+      )
+    })
+
+    it('test when taker is an empty address, the signature.v is 0, and the maker wallet is unauthorized', async () => {
+      await reverted(
+        swap.swapSimple(
+            0,
+          Jun_06_2017T00_00_00_UTC,
+          mockMaker,
+          100,
+          mockMakerToken, 
+          EMPTY_ADDRESS, 
+          100, 
+          mockTakerToken, 
+          0, 
+          r, 
+          s,
+          { from: mockTaker }
+        ),
+        'SIGNER_UNAUTHORIZED'
       )
     })
   })
