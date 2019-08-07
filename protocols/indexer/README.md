@@ -239,7 +239,7 @@ function setTwoSidedIntent(
 
 ## Get Intents
 
-Get a list of intents to trade as address locators.
+Get a list of addresses that have an intent to trade a token pair.
 
 ```Solidity
 function getIntents(
