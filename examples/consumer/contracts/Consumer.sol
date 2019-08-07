@@ -68,18 +68,18 @@ contract Consumer {
     uint256 lowestCost = 2**256 - 1;
 
     // Fetch an array of Intent locators from the Indexer.
-    address[] memory untrustedDelegates = indexerContract.getIntents(_userReceiveToken, _userSendToken, _maxIntents);
+    address[] memory untrustedProbablyDelegates = indexerContract.getIntents(_userReceiveToken, _userSendToken, _maxIntents);
 
     // Iterate through locators.
-    for (uint256 i; i < untrustedDelegates.length; i++) {
+    for (uint256 i; i < untrustedProbablyDelegates.length; i++) {
 
       // Get a buy quote from the Delegate.
-      uint256 userSendAmount = IDelegate(untrustedDelegates[i])
+      uint256 userSendAmount = IDelegate(untrustedProbablyDelegates[i])
         .getBuyQuote(_userReceiveAmount, _userReceiveToken, _userSendToken);
 
       // Update the lowest cost.
       if (userSendAmount > 0 && userSendAmount < lowestCost) {
-        untrustedLowestCostDelegate = untrustedDelegates[i];
+        untrustedLowestCostDelegate = untrustedProbablyDelegates[i];
         lowestCost = userSendAmount;
       }
     }
