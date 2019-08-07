@@ -47,13 +47,13 @@ contract Market is Ownable {
     * @param staker address
     * @param amount uint256
     * @param expiry uint256
-    * @param locator bytes32
+    * @param locator address
     */
   struct Intent {
     address staker;
     uint256 amount;
     uint256 expiry;
-    bytes32 locator;
+    address locator;
   }
 
   /**
@@ -65,7 +65,7 @@ contract Market is Ownable {
     address staker,
     uint256 amount,
     uint256 expiry,
-    bytes32 locator,
+    address locator,
     address makerToken,
     address takerToken
   );
@@ -92,7 +92,7 @@ contract Market is Ownable {
     takerToken = _takerToken;
 
     // Initialize the linked list.
-    Intent memory head = Intent(HEAD, 0, 0, byte(0));
+    Intent memory head = Intent(HEAD, 0, 0, address(0));
     intentsLinkedList[HEAD][PREV] = head;
     intentsLinkedList[HEAD][NEXT] = head;
   }
@@ -103,13 +103,13 @@ contract Market is Ownable {
     * @param _staker The account
     * @param _amount uint256
     * @param _expiry uint256
-    * @param _locator bytes32
+    * @param _locator address
     */
   function setIntent(
     address _staker,
     uint256 _amount,
     uint256 _expiry,
-    bytes32 _locator
+    address _locator
   ) external onlyOwner {
     Intent memory newIntent = Intent(_staker, _amount, _expiry, _locator);
 
@@ -154,7 +154,7 @@ contract Market is Ownable {
       // Return the next intent from the previous neighbor.
       return intentsLinkedList[intentsLinkedList[_staker][PREV].staker][NEXT];
     }
-    return Intent(address(0), 0, 0, byte(0));
+    return Intent(address(0), 0, 0, address(0));
   }
 
   /**
@@ -163,14 +163,14 @@ contract Market is Ownable {
     */
   function fetchIntents(
     uint256 _count
-  ) public view returns (bytes32[] memory result) {
+  ) public view returns (address[] memory result) {
 
     // Limit results to list length or _count.
     uint256 limit = length;
     if (_count < length) {
       limit = _count;
     }
-    result = new bytes32[](limit);
+    result = new address[](limit);
 
     // Get the first intent in the linked list.
     Intent storage intent = intentsLinkedList[HEAD][NEXT];

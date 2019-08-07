@@ -15,17 +15,6 @@ const {
   revertToSnapShot,
   takeSnapshot,
 } = require('@airswap/test-utils').time
-const { intents } = require('@airswap/indexer-utils')
-
-const ALICE_LOC = intents.serialize(
-  intents.Locators.URL,
-  'https://rpc.maker-cloud.io:1123'
-)
-
-const BOB_LOC = intents.serialize(
-  intents.Locators.CONTRACT,
-  '0xbb58285762f0b56b6a206d6032fc6939eb26f4e8'
-)
 
 contract('Indexer Unit Tests', async accounts => {
   let owner = accounts[0]
@@ -323,7 +312,7 @@ contract('Indexer Unit Tests', async accounts => {
           tokenTwo,
           250,
           await getTimestampPlusDays(1),
-          ALICE_LOC,
+          aliceAddress,
           {
             from: aliceAddress,
           }
@@ -345,7 +334,7 @@ contract('Indexer Unit Tests', async accounts => {
           tokenTwo,
           249,
           await getTimestampPlusDays(1),
-          ALICE_LOC,
+          aliceAddress,
           {
             from: aliceAddress,
           }
@@ -367,7 +356,7 @@ contract('Indexer Unit Tests', async accounts => {
           tokenTwo,
           250,
           await getTimestampPlusDays(1),
-          ALICE_LOC,
+          aliceAddress,
           {
             from: aliceAddress,
           }
@@ -391,7 +380,7 @@ contract('Indexer Unit Tests', async accounts => {
           tokenTwo,
           250,
           await getTimestampPlusDays(1),
-          ALICE_LOC,
+          aliceAddress,
           {
             from: aliceAddress,
           }
@@ -416,7 +405,7 @@ contract('Indexer Unit Tests', async accounts => {
           tokenTwo,
           250,
           await getTimestampPlusDays(1),
-          ALICE_LOC,
+          aliceAddress,
           {
             from: aliceAddress,
           }
@@ -439,7 +428,7 @@ contract('Indexer Unit Tests', async accounts => {
         tokenTwo,
         250,
         expiry,
-        ALICE_LOC,
+        aliceAddress,
         {
           from: aliceAddress,
         }
@@ -469,7 +458,7 @@ contract('Indexer Unit Tests', async accounts => {
         tokenTwo,
         250,
         await getTimestampPlusDays(1),
-        ALICE_LOC,
+        aliceAddress,
         {
           from: aliceAddress,
         }
@@ -482,7 +471,7 @@ contract('Indexer Unit Tests', async accounts => {
           tokenTwo,
           250,
           await getTimestampPlusDays(2),
-          ALICE_LOC,
+          aliceAddress,
           {
             from: aliceAddress,
           }
@@ -529,7 +518,7 @@ contract('Indexer Unit Tests', async accounts => {
         tokenTwo,
         250,
         await getTimestampPlusDays(3),
-        ALICE_LOC,
+        aliceAddress,
         {
           from: aliceAddress,
         }
@@ -564,9 +553,16 @@ contract('Indexer Unit Tests', async accounts => {
 
       // try to set both intents, but one market doesnt exist
       await reverted(
-        indexer.setTwoSidedIntent(tokenOne, tokenTwo, 250, expiry, ALICE_LOC, {
-          from: aliceAddress,
-        }),
+        indexer.setTwoSidedIntent(
+          tokenOne,
+          tokenTwo,
+          250,
+          expiry,
+          aliceAddress,
+          {
+            from: aliceAddress,
+          }
+        ),
         'MARKET_DOES_NOT_EXIST'
       )
 
@@ -576,15 +572,22 @@ contract('Indexer Unit Tests', async accounts => {
       })
 
       // alice stakes on one market
-      await indexer.setIntent(tokenOne, tokenTwo, 250, expiry, ALICE_LOC, {
+      await indexer.setIntent(tokenOne, tokenTwo, 250, expiry, aliceAddress, {
         from: aliceAddress,
       })
 
       // try to set both intents, but fails as alice has already staked on one
       await reverted(
-        indexer.setTwoSidedIntent(tokenOne, tokenTwo, 250, expiry, ALICE_LOC, {
-          from: aliceAddress,
-        }),
+        indexer.setTwoSidedIntent(
+          tokenOne,
+          tokenTwo,
+          250,
+          expiry,
+          aliceAddress,
+          {
+            from: aliceAddress,
+          }
+        ),
         'USER_ALREADY_STAKED'
       )
     })
@@ -603,7 +606,7 @@ contract('Indexer Unit Tests', async accounts => {
         tokenTwo,
         250,
         expiry,
-        ALICE_LOC,
+        aliceAddress,
         {
           from: aliceAddress,
         }
@@ -640,7 +643,7 @@ contract('Indexer Unit Tests', async accounts => {
         from: aliceAddress,
       })
       let expiry = await getTimestampPlusDays(1)
-      await indexer.setIntent(tokenOne, tokenTwo, 250, expiry, ALICE_LOC, {
+      await indexer.setIntent(tokenOne, tokenTwo, 250, expiry, aliceAddress, {
         from: aliceAddress,
       })
 
@@ -656,7 +659,7 @@ contract('Indexer Unit Tests', async accounts => {
       await indexer.createMarket(tokenTwo, tokenOne, {
         from: aliceAddress,
       })
-      await indexer.setIntent(tokenTwo, tokenOne, 250, expiry, ALICE_LOC, {
+      await indexer.setIntent(tokenTwo, tokenOne, 250, expiry, aliceAddress, {
         from: aliceAddress,
       })
 
@@ -688,7 +691,7 @@ contract('Indexer Unit Tests', async accounts => {
         tokenTwo,
         250,
         expiry,
-        ALICE_LOC,
+        aliceAddress,
         {
           from: aliceAddress,
         }
@@ -739,7 +742,7 @@ contract('Indexer Unit Tests', async accounts => {
         tokenTwo,
         250,
         await getTimestampPlusDays(1),
-        ALICE_LOC,
+        aliceAddress,
         {
           from: aliceAddress,
         }
@@ -767,7 +770,7 @@ contract('Indexer Unit Tests', async accounts => {
         tokenTwo,
         250,
         await getTimestampPlusDays(1),
-        ALICE_LOC,
+        aliceAddress,
         {
           from: aliceAddress,
         }
@@ -777,7 +780,7 @@ contract('Indexer Unit Tests', async accounts => {
         tokenTwo,
         250,
         await getTimestampPlusDays(1),
-        BOB_LOC,
+        bobAddress,
         {
           from: bobAddress,
         }
@@ -812,7 +815,7 @@ contract('Indexer Unit Tests', async accounts => {
         tokenTwo,
         250,
         await getTimestampPlusDays(1),
-        ALICE_LOC,
+        aliceAddress,
         {
           from: aliceAddress,
         }
@@ -822,7 +825,7 @@ contract('Indexer Unit Tests', async accounts => {
         tokenTwo,
         250,
         await getTimestampPlusDays(1),
-        BOB_LOC,
+        bobAddress,
         {
           from: bobAddress,
         }

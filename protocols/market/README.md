@@ -32,19 +32,9 @@ struct Intent {
   address staker;
   uint256 amount;
   uint256 expiry;
-  bytes32 locator;
+  address locator;
 }
 ```
-
-## Locators
-
-Locators are bytes32 values that indicate where a peer can be found to communicate pricing. The last byte is either a value of `1`, `2`, or `3` to indicate the kind of peer.
-
-| Value | Kind                                                                                                 |
-| :---- | :--------------------------------------------------------------------------------------------------- |
-| `1`   | Ethereum address, length 20 characters, representing a `Delegate` smart contract.                    |
-| `2`   | Ethereum address, length 20 characters, reachable on [AirSwap Instant](https://instant.airswap.io/). |
-| `3`   | Uniform resource locator (URL) max length 31 characters.                                             |
 
 ## Constructor
 
@@ -73,7 +63,7 @@ function setIntent(
   address _staker,
   uint256 _amount,
   uint256 _expiry,
-  bytes32 _locator
+  address _locator
 ) external onlyOwner
 ```
 
@@ -84,7 +74,7 @@ function setIntent(
 | `_staker`  | `address` | Address of the account that has staked for the intent. |
 | `_amount`  | `uint256` | Amount of token that the account has staked.           |
 | `_expiry`  | `uint256` | Expiry of the intent as a timestamp in seconds.        |
-| `_locator` | `bytes32` | Locator for the peer.                                  |
+| `_locator` | `address` | Locator for the peer.                                  |
 
 ## Unset an Intent
 
@@ -141,7 +131,7 @@ Fetch up to a number of intents from the list.
 ```Solidity
 function fetchIntents(
   uint256 _count
-) public view returns (bytes32[] memory result)
+) public view returns (address[] memory result)
 ```
 
 ### Params
@@ -179,9 +169,9 @@ function insertIntent(
 
 ### Params
 
-| Name        | Type     | Description                      |
-| :---------- | :------- | :------------------------------- |
-| `_newIntent`   | `Intent` | Intent to insert.                |
+| Name          | Type     | Description                       |
+| :------------ | :------- | :-------------------------------- |
+| `_newIntent`  | `Intent` | Intent to insert.                 |
 | `_nextIntent` | `Intent` | Existing intent to insert before. |
 
 ## Link Two Intents

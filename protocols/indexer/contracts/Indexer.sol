@@ -144,14 +144,14 @@ contract Indexer is IIndexer, Ownable {
     * @param _takerToken address
     * @param _amount uint256
     * @param _expiry uint256
-    * @param _locator bytes32
+    * @param _locator address
     */
   function setIntent(
     address _makerToken,
     address _takerToken,
     uint256 _amount,
     uint256 _expiry,
-    bytes32 _locator
+    address _locator
   ) public {
 
     // Ensure both of the tokens are not blacklisted.
@@ -186,14 +186,14 @@ contract Indexer is IIndexer, Ownable {
     * @param _tokenTwo address
     * @param _amount uint256
     * @param _expiry uint256
-    * @param _locator bytes32
+    * @param _locator address
     */
   function setTwoSidedIntent(
     address _tokenOne,
     address _tokenTwo,
     uint256 _amount,
     uint256 _expiry,
-    bytes32 _locator
+    address _locator
   ) public {
     // Set the _makerToken / _tokenTwo side of the market.
     setIntent(_tokenOne, _tokenTwo, _amount, _expiry, _locator);
@@ -258,14 +258,14 @@ contract Indexer is IIndexer, Ownable {
     * @param _makerToken address
     * @param _takerToken address
     * @param _count uint256
-    * @return locators bytes32[]
+    * @return locators address[]
     */
   function getIntents(
     address _makerToken,
     address _takerToken,
     uint256 _count
   ) external returns (
-    bytes32[] memory locators
+    address[] memory locators
   ) {
 
     // Ensure neither token is blacklisted.
@@ -279,7 +279,7 @@ contract Indexer is IIndexer, Ownable {
 
       }
     }
-    return new bytes32[](0);
+    return new address[](0);
   }
 
   /**
