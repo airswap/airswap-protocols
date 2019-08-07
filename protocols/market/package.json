@@ -15,7 +15,6 @@
     "test": "truffle test"
   },
   "devDependencies": {
-    "@airswap/indexer-utils": "0.1.0",
     "@airswap/order-utils": "0.1.0",
     "@airswap/test-utils": "0.1.0",
     "@airswap/tokens": "0.1.0",

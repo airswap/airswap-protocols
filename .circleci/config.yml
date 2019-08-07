@@ -60,7 +60,7 @@ jobs:
           command: |
             cd packages
             ### ADD FOLDERS HERE TO PROCESS ###
-            for file in indexer-utils order-utils test-utils
+            for file in order-utils test-utils
             do
               echo "Working on $file"
               cd $file
