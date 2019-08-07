@@ -68,6 +68,7 @@ contract Consumer {
     uint256 lowestCost = 2**256 - 1;
 
     // Fetch an array of Intent locators from the Indexer.
+    // Warning: In this example, the addresses returned are not trusted and may not actually implement IDelegate.
     address[] memory untrustedProbablyDelegates = indexerContract.getIntents(_userReceiveToken, _userSendToken, _maxIntents);
 
     // Iterate through locators.
