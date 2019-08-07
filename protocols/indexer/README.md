@@ -144,7 +144,7 @@ function setIntent(
   address _takerToken,
   uint256 _amount,
   uint256 _expiry,
-  bytes32 _locator
+  address _locator
 ) public
 ```
 
@@ -156,7 +156,7 @@ function setIntent(
 | `_takerToken` | `address` | Address of the token that the Taker sends.   |
 | `_amount`     | `uint256` | Amount of token to stake.                    |
 | `_expiry`     | `uint256` | Timestamp after which the intent is invalid. |
-| `_locator`    | `bytes32` | Locator for the peer.                        |
+| `_locator`    | `address` | Locator for the peer.                        |
 
 ### Reverts
 
@@ -177,7 +177,7 @@ function setTwoSidedIntent(
   address _tokenTwo,
   uint256 _amount,
   uint256 _expiry,
-  bytes32 _locator
+  address _locator
 ) public
 ```
 
@@ -189,7 +189,7 @@ function setTwoSidedIntent(
 | `_tokenTwo` | `address` | Address of the token of the second side of the market. |
 | `_amount`   | `uint256` | Amount of token to stake for EACH market.              |
 | `_expiry`   | `uint256` | Timestamp after which the intent is invalid.           |
-| `_locator`  | `bytes32` | Locator for the peer.                                  |
+| `_locator`  | `address` | Locator for the peer.                                  |
 
 ## Unset an Intent to Trade
 
@@ -235,18 +235,18 @@ function setTwoSidedIntent(
 | `_tokenTwo` | `address` | Address of the token of the second side of the market. |
 | `_amount`   | `uint256` | Amount of token to stake for each side.                |
 | `_expiry`   | `uint256` | Timestamp after which the intent is invalid.           |
-| `_locator`  | `bytes32` | Locator for the peer.                                  |
+| `_locator`  | `address` | Locator for the peer.                                  |
 
 ## Get Intents
 
-Get a list of intents to trade as bytes32 locators.
+Get a list of intents to trade as address locators.
 
 ```Solidity
 function getIntents(
   address _makerToken,
   address _takerToken,
   uint256 count
-) external view returns (bytes32[] memory)
+) external view returns (address[] memory)
 ```
 
 ### Params
@@ -287,62 +287,3 @@ function lengthOf(
 | Reason                  | Scenario                               |
 | :---------------------- | :------------------------------------- |
 | `MARKET_DOES_NOT_EXIST` | There is no market for the token pair. |
-
-## Locators
-
-An intent to trade includes a `Locator` stored as byte32. The last byte is the kind of the Locator.
-
-### Kinds
-
-| Value | Kind     | Description                                                                       |
-| :---- | :------- | :-------------------------------------------------------------------------------- |
-| `1`   | CONTRACT | Ethereum address, length 20 characters, representing a `Delegate` smart contract. |
-| `2`   | INSTANT  | Ethereum address, length 20 characters, reachable on AirSwap Instant.             |
-| `3`   | URL      | Uniform resource locator (URL) max length 31 characters.                          |
-
-## Examples
-
-### Delegate Contract
-
-Alice has deployed a `Delegate` contract to address `0x8a56f218f7113f09bb4155ed8283bbca9d2ccb74`. She serializes her intent to trade at that address using the `indexer-utils` package.
-
-```
-const { intents } = require('@airswap/indexer-utils')
-const locator = intents.serialize(
-  intents.Locators.CONTRACT,
-  '0x8a56f218f7113f09bb4155ed8283bbca9d2ccb74'
-)
-// Looks like: 0x8a56f218f7113f09bb4155ed8283bbca9d2ccb74000000000000000000000001
-```
-
-She then sets her intent passing the `locator` value.
-
-### Instant Maker
-
-Bob runs a maker connected to AirSwap Instant with address `0x06eb4aa8a6fa0b1d893581d30cf653d1835fb2b9`. He serializes his intent to trade at that address using the `indexer-utils` package.
-
-```
-const { intents } = require('@airswap/indexer-utils')
-const locator = intents.serialize(
-  intents.Locators.INSTANT,
-  '0x06eb4aa8a6fa0b1d893581d30cf653d1835fb2b9'
-)
-// Looks like: 0x06eb4aa8a6fa0b1d893581d30cf653d1835fb2b9000000000000000000000002
-```
-
-He then sets his intent passing the `locator` value.
-
-### Arbitrary
-
-Carol runs a Maker on an HTTP-RPC endpoint on the public internet at `https://rpc.maker-cloud.io`. She serializes her intent to trade at that address using the `indexer-utils` package.
-
-```
-const { intents } = require('@airswap/indexer-utils')
-const locator = intents.serialize(
-  intents.Locators.URL,
-  'https://rpc.maker-cloud.io'
-)
-// Looks like: 0x68747470733a2f2f7270632e6d616b65722d636c6f75642e696f00000000003
-```
-
-She then sets her intent passing the `locator` value.
