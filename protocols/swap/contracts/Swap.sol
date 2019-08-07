@@ -17,7 +17,6 @@
 pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
-import "@airswap/types/contracts/Types.sol";
 import "@airswap/swap/interfaces/ISwap.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/token/ERC721/IERC721.sol";
@@ -227,16 +226,19 @@ contract Swap is ISwap {
       external
   {
 
-    // Ensure the order has not already been taken or canceled.
-    require(makerOrderStatus[_makerWallet][_nonce] == OPEN,
-      "ORDER_UNAVAILABLE");
-
     // Ensure the order is not expired.
     require(_expiry > block.timestamp,
       "ORDER_EXPIRED");
 
+    // Ensure the order has not already been taken or canceled.
+    require(makerOrderStatus[_makerWallet][_nonce] == OPEN,
+      "ORDER_UNAVAILABLE");
+
     require(_nonce >= makerMinimumNonce[_makerWallet],
       "NONCE_TOO_LOW");
+
+    // Mark the order TAKEN (0x01).
+    makerOrderStatus[_makerWallet][_nonce] = TAKEN;
 
     // Validate the taker side of the trade.
     address finalTakerWallet;
@@ -287,9 +289,6 @@ contract Swap is ISwap {
           ))
         )), _v, _r, _s), "SIGNATURE_INVALID");
     }
-
-    // Mark the order TAKEN (0x01).
-    makerOrderStatus[_makerWallet][_nonce] = TAKEN;
 
     // Transfer token from taker to maker.
     transferToken(
