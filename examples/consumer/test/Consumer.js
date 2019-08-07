@@ -12,7 +12,6 @@ const {
   revertToSnapShot,
   takeSnapshot,
 } = require('@airswap/test-utils').time
-const { intents } = require('@airswap/indexer-utils')
 
 let indexer
 let consumer
@@ -22,8 +21,6 @@ let indexerAddress
 let consumerAddress
 let swapAddress
 let aliceDelegate
-
-let location
 
 let tokenAST
 let tokenDAI
@@ -65,11 +62,6 @@ contract('Consumer', async accounts => {
       })
       consumerAddress = consumer.address
       aliceDelegate = await Delegate.new(swapAddress, { from: aliceAddress })
-
-      location = intents.serialize(
-        intents.Locators.CONTRACT,
-        aliceDelegate.address
-      )
     })
 
     it('Alice authorizes the new delegate', async () => {
@@ -115,7 +107,7 @@ contract('Consumer', async accounts => {
           tokenDAI.address,
           500,
           await getTimestampPlusDays(1),
-          location,
+          aliceDelegate.address,
           {
             from: aliceAddress,
           }

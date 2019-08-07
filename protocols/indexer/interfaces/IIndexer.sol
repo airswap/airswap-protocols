@@ -80,7 +80,7 @@ interface IIndexer {
     address _takerToken,
     uint256 _amount,
     uint256 _expiry,
-    bytes32 _locator
+    address _locator
   ) external;
 
   function setTwoSidedIntent(
@@ -88,7 +88,7 @@ interface IIndexer {
     address _tokenTwo,
     uint256 _amount,
     uint256 _expiry,
-    bytes32 _locator
+    address _locator
   ) external;
 
   function unsetIntent(
@@ -105,7 +105,7 @@ interface IIndexer {
     address _makerToken,
     address _takerToken,
     uint256 _count
-  ) external returns (bytes32[] memory);
+  ) external returns (address[] memory);
 
   function lengthOf(
     address _makerToken,

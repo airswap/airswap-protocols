@@ -135,7 +135,10 @@ contract('Consumer Unit Tests', async () => {
       //mock indexer getIntents() where locators are ordered high to low
       await mockIndexer.givenMethodReturn(
         indexer_getIntents,
-        abi.rawEncode(['bytes32[]'], [[high_locator, low_locator]])
+        abi.rawEncode(
+          ['address[]'],
+          [[mockDelegateHigh.address, mockDelegateLow.address]]
+        )
       )
 
       //this should always select the lowest cost delegate available
@@ -154,7 +157,10 @@ contract('Consumer Unit Tests', async () => {
       //mock indexer getIntents() where locators are ordered low to high
       await mockIndexer.givenMethodReturn(
         indexer_getIntents,
-        abi.rawEncode(['bytes32[]'], [[low_locator, high_locator]])
+        abi.rawEncode(
+          ['address[]'],
+          [[mockDelegateLow.address, mockDelegateHigh.address]]
+        )
       )
 
       //this should always select the lowest cost delegate available
@@ -174,7 +180,10 @@ contract('Consumer Unit Tests', async () => {
       //mock indexer getIntents() where locators are ordered low to high
       await mockIndexer.givenMethodReturn(
         indexer_getIntents,
-        abi.rawEncode(['bytes32[]'], [[low_locator, high_locator]])
+        abi.rawEncode(
+          ['address[]'],
+          [[mockDelegateLow.address, mockDelegateHigh.address]]
+        )
       )
 
       let trx = await consumer.takeBestBuy(
