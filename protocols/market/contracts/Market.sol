@@ -114,12 +114,11 @@ contract Market is Ownable {
     Intent memory newIntent = Intent(_staker, _amount, _expiry, _locator);
 
     // Insert after the next highest amount on the linked list.
-    if (insertIntent(newIntent, findPosition(_amount))) {
+    insertIntent(newIntent, findPosition(_amount));
       // Increment the length of the linked list if successful.
-      length = length + 1;
+    length = length + 1;
 
-      emit SetIntent(_staker, _amount, _expiry, _locator, makerToken, takerToken);
-    }
+    emit SetIntent(_staker, _amount, _expiry, _locator, makerToken, takerToken);
   }
 
   /**
@@ -281,12 +280,7 @@ contract Market is Ownable {
   function insertIntent(
     Intent memory _newIntent,
     Intent memory _nextIntent
-  ) internal returns (bool) {
-
-    // Ensure the _existing intent is in the linked list.
-    if (!hasIntent(_nextIntent.staker)) {
-      return false;
-    }
+  ) internal {
 
     // Get the intent before the _nextIntent.
     Intent memory previousIntent = intentsLinkedList[_nextIntent.staker][PREV];
@@ -294,8 +288,6 @@ contract Market is Ownable {
     // Link the _newIntent into place.
     link(previousIntent, _newIntent);
     link(_newIntent, _nextIntent);
-
-    return true;
   }
 
   /**
