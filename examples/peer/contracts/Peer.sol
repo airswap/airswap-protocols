@@ -110,9 +110,9 @@ contract Peer is IPeer, Ownable {
   }
 
   /**
-    * @notice Get a Buy Quote from the Delegate
-    * @param peerAmount uint256 The amount the Delegate would send
-    * @param peerToken address The token that the Delegate would send
+    * @notice Get a Buy Quote from the Peer
+    * @param peerAmount uint256 The amount the Peer would send
+    * @param peerToken address The token that the Peer would send
     * @param consumerToken address The token that the Consumer would send
     * @return uint256 consumerAmount The amount the Consumer would send
     */
@@ -146,11 +146,11 @@ contract Peer is IPeer, Ownable {
   }
 
   /**
-    * @notice Get a Sell Quote from the Delegate
+    * @notice Get a Sell Quote from the Peer
     * @param consumerAmount uint256 The amount the Consumer would send
     * @param consumerToken address The token that the Consumer will send
-    * @param peerToken address The token that the Delegate will send
-    * @return uint256 peerAmount The amount the Delegate would send
+    * @param peerToken address The token that the Peer will send
+    * @return uint256 peerAmount The amount the Peer would send
     */
   function getSellQuote(
     uint256 consumerAmount,
@@ -178,10 +178,10 @@ contract Peer is IPeer, Ownable {
   }
 
   /**
-    * @notice Get a Maximum Quote from the Delegate
-    * @param peerToken address The token that the Delegate will send
+    * @notice Get a Maximum Quote from the Peer
+    * @param peerToken address The token that the Peer will send
     * @param consumerToken address The token that the Consumer will send
-    * @return uint 256 The amount the Delegate would send
+    * @return uint 256 The amount the Peer would send
     * @return uint 256 The amount the Consumer would send
     */
   function getMaxQuote(
