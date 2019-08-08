@@ -87,7 +87,7 @@ interface IPeer {
     address _consumerWallet,
     uint256 _consumerAmount,
     address _consumerToken,
-    address _delegateWallet,
+    address _peerWallet,
     uint256 _peerAmount,
     address _peerToken,
     uint8 _v,

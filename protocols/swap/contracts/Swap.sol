@@ -355,7 +355,7 @@ contract Swap is ISwap {
     address _delegate,
     uint256 _expiry
   ) external {
-    require(msg.sender != _delegate, "INVALID_AUTH_PEER");
+    require(msg.sender != _delegate, "INVALID_AUTH_DELEGATE");
     require(_expiry > block.timestamp, "INVALID_AUTH_EXPIRY");
     delegateApprovals[msg.sender][_delegate] = _expiry;
     emit Authorize(msg.sender, _delegate, _expiry);

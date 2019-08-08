@@ -201,7 +201,7 @@ function provideOrder(
   address consumerWallet,
   uint256 consumerAmount,
   address consumerToken,
-  address delegateWallet,
+  address peerWallet,
   uint256 peerAmount,
   address peerToken,
   uint8 v,
@@ -219,7 +219,7 @@ function provideOrder(
 | `consumerWallet` | `address` | The Maker of the Order who sets price.                 |
 | `consumerAmount` | `uint256` | The amount or identifier of the token the Maker sends. |
 | `consumerToken`  | `address` | The address of the token the Maker sends.              |
-| `delegateWallet` | `address` | The Taker of the Order who takes price.                |
+| `peerWallet` | `address` | The Taker of the Order who takes price.                |
 | `peerAmount` | `uint256` | The amount or identifier of the token the Taker sends. |
 | `peerToken`  | `address` | The address of the token the Taker sends.              |
 | `v`              | `uint8`   | The `v` value of an ECDSA signature.                   |

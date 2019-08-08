@@ -214,7 +214,7 @@ contract Peer is IPeer, Ownable {
     * @param consumerWallet address The Maker of the Order who sets price.
     * @param consumerAmount uint256 The amount or identifier of the token the Maker sends.
     * @param consumerToken address The address of the token the Maker sends.
-    * @param delegateWallet address The Taker of the Order who takes price.
+    * @param peerWallet address The Taker of the Order who takes price.
     * @param peerAmount uint256  The amount or identifier of the token the Taker sends.
     * @param peerToken address The address of the token the Taker sends.
     * @param v uint8 The `v` value of an ECDSA signature.
@@ -227,7 +227,7 @@ contract Peer is IPeer, Ownable {
     address consumerWallet,
     uint256 consumerAmount,
     address consumerToken,
-    address delegateWallet,
+    address peerWallet,
     uint256 peerAmount,
     address peerToken,
     uint8 v,
@@ -266,7 +266,7 @@ contract Peer is IPeer, Ownable {
       consumerWallet,
       consumerAmount,
       consumerToken,
-      delegateWallet,
+      peerWallet,
       peerAmount,
       peerToken,
       v, r, s
