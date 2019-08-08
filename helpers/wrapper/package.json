@@ -21,7 +21,7 @@
     "solidity-coverage": "^0.6.3"
   },
   "dependences": {
-    "@airswap/tokens": "0.1.0",
-    "@airswap/swap": "0.1.0"
+    "@airswap/swap": "2.0.0",
+    "@airswap/tokens": "0.1.0"
   }
 }
