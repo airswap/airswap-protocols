@@ -22,7 +22,7 @@ interface IPeer {
   event SetRule(
     address peerToken,
     address consumerToken,
-    uint256 maxpeerAmount,
+    uint256 maxPeerAmount,
     uint256 priceCoef,
     uint256 priceExp
   );
@@ -33,7 +33,7 @@ interface IPeer {
   );
 
   struct Rule {
-    uint256 maxpeerAmount;
+    uint256 maxPeerAmount;
     uint256 priceCoef;
     uint256 priceExp;
   }
@@ -47,7 +47,7 @@ interface IPeer {
   function setRule(
     address _peerToken,
     address _consumerToken,
-    uint256 _maxpeerAmount,
+    uint256 _maxPeerAmount,
     uint256 _priceCoef,
     uint256 _priceExp
   ) external;

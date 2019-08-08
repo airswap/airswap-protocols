@@ -62,20 +62,20 @@ contract Peer is IPeer, Ownable {
     * @dev only callable by the owner of the contract
     * @param peerToken address The token address that the delegate would send in a trade
     * @param consumerToken address The token address that the consumer would send in a trade
-    * @param maxpeerAmount uint256 The maximum amount of token the delegate would send
+    * @param maxPeerAmount uint256 The maximum amount of token the delegate would send
     * @param priceCoef uint256 The whole number that will be multiplied by 10^(-priceExp) - the price coefficient
     * @param priceExp uint256 The exponent of the price to indicate location of the decimal priceCoef * 10^(-priceExp)
     */
   function setRule(
     address peerToken,
     address consumerToken,
-    uint256 maxpeerAmount,
+    uint256 maxPeerAmount,
     uint256 priceCoef,
     uint256 priceExp
   ) external onlyOwner {
 
     rules[peerToken][consumerToken] = Rule({
-      maxpeerAmount: maxpeerAmount,
+      maxPeerAmount: maxPeerAmount,
       priceCoef: priceCoef,
       priceExp: priceExp
     });
@@ -83,7 +83,7 @@ contract Peer is IPeer, Ownable {
     emit SetRule(
       peerToken,
       consumerToken,
-      maxpeerAmount,
+      maxPeerAmount,
       priceCoef,
       priceExp
     );
@@ -127,10 +127,10 @@ contract Peer is IPeer, Ownable {
     Rule memory rule = rules[peerToken][consumerToken];
 
     // Ensure that a rule exists.
-    if(rule.maxpeerAmount > 0) {
+    if(rule.maxPeerAmount > 0) {
 
       // Ensure the peerAmount does not exceed maximum for the rule.
-      if(peerAmount <= rule.maxpeerAmount) {
+      if(peerAmount <= rule.maxPeerAmount) {
 
         consumerAmount = peerAmount
             .mul(rule.priceCoef)
@@ -163,14 +163,14 @@ contract Peer is IPeer, Ownable {
     Rule memory rule = rules[peerToken][consumerToken];
 
     // Ensure that a rule exists.
-    if(rule.maxpeerAmount > 0) {
+    if(rule.maxPeerAmount > 0) {
 
       // Calculate the peerAmount.
       peerAmount = consumerAmount
         .mul(10 ** rule.priceExp).div(rule.priceCoef);
 
       // Ensure the peerAmount does not exceed maximum and is greater than zero.
-      if(peerAmount <= rule.maxpeerAmount && peerAmount > 0) {
+      if(peerAmount <= rule.maxPeerAmount && peerAmount > 0) {
         return peerAmount;
       }
     }
@@ -195,12 +195,12 @@ contract Peer is IPeer, Ownable {
     Rule memory rule = rules[peerToken][consumerToken];
 
     // Ensure that a rule exists.
-    if(rule.maxpeerAmount > 0) {
+    if(rule.maxPeerAmount > 0) {
 
-      // Return the maxpeerAmount and calculated consumerAmount.
+      // Return the maxPeerAmount and calculated consumerAmount.
       return (
-        rule.maxpeerAmount,
-        rule.maxpeerAmount.mul(rule.priceCoef).div(10 ** rule.priceExp)
+        rule.maxPeerAmount,
+        rule.maxPeerAmount.mul(rule.priceCoef).div(10 ** rule.priceExp)
       );
     }
     return (0, 0);
@@ -208,7 +208,7 @@ contract Peer is IPeer, Ownable {
 
   /**
     * @notice Provide an Order (Simple)
-    * @dev Rules get reset with new maxpeerAmount
+    * @dev Rules get reset with new maxPeerAmount
     * @param nonce uint256  A single use identifier for the Order.
     * @param expiry uint256 The expiry in seconds since unix epoch.
     * @param consumerWallet address The Maker of the Order who sets price.
@@ -240,11 +240,11 @@ contract Peer is IPeer, Ownable {
     Rule memory rule = rules[peerToken][consumerToken];
 
     // Ensure that a rule exists.
-    require(rule.maxpeerAmount != 0,
+    require(rule.maxPeerAmount != 0,
       "TOKEN_PAIR_INACTIVE");
 
     // Ensure the order does not exceed the maximum amount.
-    require(peerAmount <= rule.maxpeerAmount,
+    require(peerAmount <= rule.maxPeerAmount,
       "AMOUNT_EXCEEDS_MAX");
 
     // Ensure the order is priced according to the rule.
@@ -252,9 +252,9 @@ contract Peer is IPeer, Ownable {
       .mul(10 ** rule.priceExp).div(rule.priceCoef),
       "PRICE_INCORRECT");
 
-    // Overwrite the rule with a decremented maxpeerAmount.
+    // Overwrite the rule with a decremented maxPeerAmount.
     rules[peerToken][consumerToken] = Rule({
-      maxpeerAmount: rule.maxpeerAmount - peerAmount,
+      maxPeerAmount: rule.maxPeerAmount - peerAmount,
       priceCoef: rule.priceCoef,
       priceExp: rule.priceExp
     });

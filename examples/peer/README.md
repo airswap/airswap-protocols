@@ -20,7 +20,7 @@ Send up to a maximum amount of a token.
 | Term              | Definition                                                      |
 | :---------------- | :-------------------------------------------------------------- |
 | Peer              | An authorized third party to a trade.                           |
-| Consumer          | A party that gets quotes from and sends orders to the Delegate. |
+| Consumer          | A party that gets quotes from and sends orders to the Peer. |
 | Rule              | An amount of tokens to trade at a specific price.               |
 | Price Coefficient | The significant digits of the price.                            |
 | Price Exponent    | The location of the decimal on the price.                       |
@@ -47,13 +47,13 @@ All amounts are in the smallest unit (e.g. wei), so all calculations based on pr
 
 ## Set a Rule
 
-Set a trading rule for the Delegate.
+Set a trading rule for the Peer.
 
 ```Solidity
 function setRule(
   address peerToken,
   address consumerToken,
-  uint256 maxpeerAmount,
+  uint256 maxPeerAmount,
   uint256 priceCoef,
   uint256 priceExp
 ) external onlyOwner
@@ -63,9 +63,9 @@ function setRule(
 
 | Name             | Type      | Description                                                    |
 | :--------------- | :-------- | :------------------------------------------------------------- |
-| `peerToken`  | `address` | The token that the delegate would send in a trade.             |
+| `peerToken`      | `address` | The token that the peer would send in a trade.                 |
 | `consumerToken`  | `address` | The token that the consumer would send in a trade.             |
-| `maxTakerAmount` | `uint256` | The maximum amount of token the delegate would send.           |
+| `maxPeerAmount ` | `uint256` | The maximum amount of token the peer would send.               |
 | `priceCoef`      | `uint256` | The coefficient of the price to indicate the whole number.     |
 | `priceExp`       | `uint256` | The exponent of the price to indicate location of the decimal. |
 
@@ -91,7 +91,7 @@ setRule(<WETHAddress>, <DAIAddress>, 100000, 312, 0)
 
 ## Unset a Rule
 
-Unset a trading rule for the Delegate.
+Unset a trading rule for the Peer.
 
 ```Solidity
 function unsetRule(
@@ -104,12 +104,12 @@ function unsetRule(
 
 | Name            | Type      | Description                                        |
 | :-------------- | :-------- | :------------------------------------------------- |
-| `peerToken` | `address` | The token that the Delegate would send in a trade. |
+| `peerToken` | `address` | The token that the Peer would send in a trade. |
 | `consumerToken` | `address` | The token that the Consumer would send in a trade. |
 
 ## Get a Buy Quote
 
-Get a quote to buy from the Delegate.
+Get a quote to buy from the Peer.
 
 ```Solidity
 function getBuyQuote(
@@ -125,8 +125,8 @@ function getBuyQuote(
 
 | Name             | Type      | Description                             |
 | :--------------- | :-------- | :-------------------------------------- |
-| `peerAmount` | `uint256` | The amount the Delegate would send.     |
-| `peerToken`  | `address` | The token that the Delegate would send. |
+| `peerAmount` | `uint256` | The amount the Peer would send.     |
+| `peerToken`  | `address` | The token that the Peer would send. |
 | `consumerToken`  | `address` | The token that the Consumer would send. |
 
 ### Reverts
@@ -138,7 +138,7 @@ function getBuyQuote(
 
 ## Get a Sell Quote
 
-Get a quote to sell from the Delegate.
+Get a quote to sell from the Peer.
 
 ```Solidity
 function getSellQuote(
@@ -154,7 +154,7 @@ function getSellQuote(
 | :--------------- | :-------- | :------------------------------------- |
 | `consumerAmount` | `uint256` | The amount the Consumer would send.    |
 | `consumerToken`  | `address` | The token that the Consumer will send. |
-| `peerToken`  | `address` | The token that the Delegate will send. |
+| `peerToken`  | `address` | The token that the Peer will send. |
 
 ### Reverts
 
@@ -165,7 +165,7 @@ function getSellQuote(
 
 ## Get a Max Quote
 
-Get the maximum quote from the Delegate.
+Get the maximum quote from the Peer.
 
 ```Solidity
 function getMaxQuote(
@@ -181,7 +181,7 @@ function getMaxQuote(
 
 | Name            | Type      | Description                            |
 | :-------------- | :-------- | :------------------------------------- |
-| `peerToken` | `address` | The token that the Delegate will send. |
+| `peerToken` | `address` | The token that the Peer will send. |
 | `consumerToken` | `address` | The token that the Consumer will send. |
 
 ### Reverts
@@ -192,7 +192,7 @@ function getMaxQuote(
 
 ## Provide an Order
 
-Provide an order to the Delegate for taking.
+Provide an order to the Peer for taking.
 
 ```Solidity
 function provideOrder(
@@ -219,9 +219,9 @@ function provideOrder(
 | `consumerWallet` | `address` | The Maker of the Order who sets price.                 |
 | `consumerAmount` | `uint256` | The amount or identifier of the token the Maker sends. |
 | `consumerToken`  | `address` | The address of the token the Maker sends.              |
-| `peerWallet` | `address` | The Taker of the Order who takes price.                |
-| `peerAmount` | `uint256` | The amount or identifier of the token the Taker sends. |
-| `peerToken`  | `address` | The address of the token the Taker sends.              |
+| `peerWallet`     | `address` | The Taker of the Order who takes price.                |
+| `peerAmount`     | `uint256` | The amount or identifier of the token the Taker sends. |
+| `peerToken`      | `address` | The address of the token the Taker sends.              |
 | `v`              | `uint8`   | The `v` value of an ECDSA signature.                   |
 | `r`              | `bytes32` | The `r` value of an ECDSA signature.                   |
 | `s`              | `bytes32` | The `s` value of an ECDSA signature.                   |
@@ -236,7 +236,7 @@ function provideOrder(
 
 ## Provide an Unsigned Order
 
-Provide an unsigned order to the Delegate. Requires that the Consumer has authorized the Delegate on the Swap contract.
+Provide an unsigned order to the Peer. Requires that the Consumer has authorized the Peer on the Swap contract.
 
 ```Solidity
 function provideUnsignedOrder(
@@ -256,8 +256,8 @@ function provideUnsignedOrder(
 | `expiry`         | `uint256` | The expiry in seconds since unix epoch.                |
 | `consumerAmount` | `uint256` | The amount or identifier of the token the Maker sends. |
 | `consumerToken`  | `address` | The address of the token the Maker sends.              |
-| `peerAmount` | `uint256` | The amount or identifier of the token the Taker sends. |
-| `peerToken`  | `address` | The address of the token the Taker sends.              |
+| `peerAmount`     | `uint256` | The amount or identifier of the token the Taker sends. |
+| `peerToken`      | `address` | The address of the token the Taker sends.              |
 
 ### Reverts
 
