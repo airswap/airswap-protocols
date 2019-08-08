@@ -1,7 +1,7 @@
 # Security Report: Swap
 
-Smart Contract Security Audit by Team Fluidity (team[at]fluidity[dot]io) and Phil Daian (feedback[at]stableset[dot]com)
-Hash of master used for audit: [6e6c314f1d082dbb98e8ca2fd671dddfd36e37fa](https://github.com/airswap/airswap-protocols/commit/209c69e10d70e7750a46235c89ff449d5fa6145e)
+Smart Contract Security Report by Team Fluidity (team[at]fluidity[dot]io) and Phil Daian (feedback[at]stableset[dot]com)
+Hash of master used for report: [6e6c314f1d082dbb98e8ca2fd671dddfd36e37fa](https://github.com/airswap/airswap-protocols/commit/209c69e10d70e7750a46235c89ff449d5fa6145e)
 Swap [Source Code](https://github.com/airswap/airswap-protocols/tree/master/protocols/swap) and [README](../README.md)
 
 ## Introduction
@@ -190,7 +190,6 @@ https://etherscan.io/address/0xc65ff60eb8e4038a2415bb569d1fa6dca47d692e
 - Because of two issues found with ABIEncoderV2, we ensured that the newest version of the Solidity compiler was used where those issues were resolved. More information can be found at the [Ethereum Foundation blog](https://blog.ethereum.org/2019/03/26/solidity-optimizer-and-abiencoderv2-bug/).
 - There may be issues where if someone tries to use the cancel function and submit a large array of order nonces, out of gas issues.
 - We note a potential loss vector for Swap contract users; the affiliate fee could exceed the token fee. If the user-facing libraries or interfaces are not appropriately checking affiliate fee size, this could lead to makers being tricked into spending all or most of their money as an affiliate fee. We recommend clearly communicating this to users and including a check in any high-level code released for distribution. Another mitigation is to switch to limited, amount-based approvals (as in ERC-20), or to require that the affiliate fee cannot exceed the trade size.
-- We recommend minor code cleanup tasks of upgrading Solidity to the latest pragma at audit time (completed by AirSwap team), and of renaming the "makerNonces" variable to "makerOrderStatus", which is more descriptive of the data structure’s use to map makers and their nonces to status constants (completed by AirSwap team).
 - We assume the ERC-20 super-contract is good; recommend noting its audit trail / history as well as the audit trail / history for the version of Zeppelin being used. Recommend fixing this dependency version formally. This is done, and a version of Zeppelin audited by "Level K" is used; we recommend carefully considering the scope/impact of their audit. (noted above by AirSwap)
 - Constants are ABI decoded at deployment time rather than hardcoded; this is fine assuming the ABI encoder works (which is required to decode orders from memory regardless).
 - Smart contracts are a nascent space, and no perfect security audit procedure has thus far been perfected for their deployment. We welcome any suggestions or comments on this report, its contents, our methodology, or potential gaps in coverage.
