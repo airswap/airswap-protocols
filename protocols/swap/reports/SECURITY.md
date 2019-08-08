@@ -1,7 +1,7 @@
 # Security Report: Swap
 
 Smart Contract Security Report by Team Fluidity (team[at]fluidity[dot]io) and Phil Daian (feedback[at]stableset[dot]com)
-Hash of master used for report: [6e6c314f1d082dbb98e8ca2fd671dddfd36e37fa](https://github.com/airswap/airswap-protocols/commit/209c69e10d70e7750a46235c89ff449d5fa6145e)
+Hash of master used for report: [6e6c314f1d082dbb98e8ca2fd671dddfd36e37fa](https://github.com/airswap/airswap-protocols/commit/6e6c314f1d082dbb98e8ca2fd671dddfd36e37fa)
 Swap [Source Code](https://github.com/airswap/airswap-protocols/tree/master/protocols/swap) and [README](../README.md)
 
 ## Introduction
@@ -15,9 +15,9 @@ A mono-repo structure contains all the airswap-protocols contracts. Lerna is use
 
 The Swap contract is comprised a contract, an interface, and a library.
 
-[@airswap/swap/contracts/Swap.sol](../contracts/Swap.sol) @ [6e6c314f1d082dbb98e8ca2fd671dddfd36e37fa](https://github.com/airswap/airswap-protocols/commit/209c69e10d70e7750a46235c89ff449d5fa6145e)
-[@airswap/swap/interfaces/ISwap.sol](../interfaces/ISwap.sol) @ [6e6c314f1d082dbb98e8ca2fd671dddfd36e37fa](https://github.com/airswap/airswap-protocols/commit/209c69e10d70e7750a46235c89ff449d5fa6145e)
-[@airswap/types/contracts/ISwap.sol](../../types/contracts/Types.sol) @ [6e6c314f1d082dbb98e8ca2fd671dddfd36e37fa](https://github.com/airswap/airswap-protocols/commit/209c69e10d70e7750a46235c89ff449d5fa6145e)
+[@airswap/swap/contracts/Swap.sol](../contracts/Swap.sol) @ [6e6c314f1d082dbb98e8ca2fd671dddfd36e37fa](https://github.com/airswap/airswap-protocols/commit/6e6c314f1d082dbb98e8ca2fd671dddfd36e37fa)
+[@airswap/swap/interfaces/ISwap.sol](../interfaces/ISwap.sol) @ [6e6c314f1d082dbb98e8ca2fd671dddfd36e37fa](https://github.com/airswap/airswap-protocols/commit/6e6c314f1d082dbb98e8ca2fd671dddfd36e37fa)
+[@airswap/types/contracts/Types.sol](../../types/contracts/Types.sol) @ [6e6c314f1d082dbb98e8ca2fd671dddfd36e37fa](https://github.com/airswap/airswap-protocols/commit/6e6c314f1d082dbb98e8ca2fd671dddfd36e37fa)
 
 ## Dependencies
 
@@ -178,7 +178,7 @@ End-to-end tests for the ERC-20 flow were performed on Rinkeby prior to deploy o
 
 ## Migrations
 
-Hash of master used for deploy: [6e6c314f1d082dbb98e8ca2fd671dddfd36e37fa](https://github.com/airswap/airswap-protocols/commit/209c69e10d70e7750a46235c89ff449d5fa6145e)
+Hash of master used for deploy: [6e6c314f1d082dbb98e8ca2fd671dddfd36e37fa](https://github.com/airswap/airswap-protocols/commit/6e6c314f1d082dbb98e8ca2fd671dddfd36e37fa)
 Rinkeby Etherscan (Swap): https://rinkeby.etherscan.io/address/0x78db49d0459a67158bdca6e161be3d90342c7247
 Rinkeby Etherscan (Types); https://rinkeby.etherscan.io/address/0xaaf6cb19298e7d0abc410eb2a0d5b8fef747573d#code
 Mainnet Etherscan (verified Swap): https://etherscan.io/address/0x54d2690e97e477a4b33f40d6e4afdd4832c07c57
