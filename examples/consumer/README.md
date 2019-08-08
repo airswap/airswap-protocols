@@ -11,9 +11,9 @@
 
 ## Features
 
-### On-chain Liquidity
+### Onchain Liquidity
 
-One-time approval for each token and no off-chain signatures required.
+One-time approval for each token and no offchain signatures required.
 
 ## Definitions
 
@@ -21,7 +21,7 @@ One-time approval for each token and no off-chain signatures required.
 | :------- | :----------------------------------------------------------------- |
 | Consumer | Smart contract that integrates onchain liquidity.                  |
 | Indexer  | List of intents to trade by token pair.                            |
-| Peer | Smart contract that trades based on rules.                         |
+| Peer     | Smart contract that trades based on rules.                         |
 | Swap     | Transaction of multiple transfers that succeeds entirely or fails. |
 | User     | Account that invokes functions on the Consumer.                    |
 

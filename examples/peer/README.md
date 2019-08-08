@@ -17,13 +17,13 @@ Send up to a maximum amount of a token.
 
 ## Definitions
 
-| Term              | Definition                                                      |
-| :---------------- | :-------------------------------------------------------------- |
-| Peer              | An authorized third party to a trade.                           |
+| Term              | Definition                                                  |
+| :---------------- | :---------------------------------------------------------- |
+| Peer              | Smart contract that trades based on rules.                  |
 | Consumer          | A party that gets quotes from and sends orders to the Peer. |
-| Rule              | An amount of tokens to trade at a specific price.               |
-| Price Coefficient | The significant digits of the price.                            |
-| Price Exponent    | The location of the decimal on the price.                       |
+| Rule              | An amount of tokens to trade at a specific price.           |
+| Price Coefficient | The significant digits of the price.                        |
+| Price Exponent    | The location of the decimal on the price.                   |
 
 ## Constructor
 
@@ -61,13 +61,13 @@ function setRule(
 
 ### Params
 
-| Name             | Type      | Description                                                    |
-| :--------------- | :-------- | :------------------------------------------------------------- |
-| `peerToken`      | `address` | The token that the peer would send in a trade.                 |
-| `consumerToken`  | `address` | The token that the consumer would send in a trade.             |
-| `maxPeerAmount ` | `uint256` | The maximum amount of token the peer would send.               |
-| `priceCoef`      | `uint256` | The coefficient of the price to indicate the whole number.     |
-| `priceExp`       | `uint256` | The exponent of the price to indicate location of the decimal. |
+| Name            | Type      | Description                                                    |
+| :-------------- | :-------- | :------------------------------------------------------------- |
+| `peerToken`     | `address` | The token that the peer would send in a trade.                 |
+| `consumerToken` | `address` | The token that the consumer would send in a trade.             |
+| `maxPeerAmount` | `uint256` | The maximum amount of token the peer would send.               |
+| `priceCoef`     | `uint256` | The coefficient of the price to indicate the whole number.     |
+| `priceExp`      | `uint256` | The exponent of the price to indicate location of the decimal. |
 
 ### Example
 
@@ -104,7 +104,7 @@ function unsetRule(
 
 | Name            | Type      | Description                                        |
 | :-------------- | :-------- | :------------------------------------------------- |
-| `peerToken` | `address` | The token that the Peer would send in a trade. |
+| `peerToken`     | `address` | The token that the Peer would send in a trade.     |
 | `consumerToken` | `address` | The token that the Consumer would send in a trade. |
 
 ## Get a Buy Quote
@@ -123,11 +123,11 @@ function getBuyQuote(
 
 ### Params
 
-| Name             | Type      | Description                             |
-| :--------------- | :-------- | :-------------------------------------- |
-| `peerAmount` | `uint256` | The amount the Peer would send.     |
-| `peerToken`  | `address` | The token that the Peer would send. |
-| `consumerToken`  | `address` | The token that the Consumer would send. |
+| Name            | Type      | Description                             |
+| :-------------- | :-------- | :-------------------------------------- |
+| `peerAmount`    | `uint256` | The amount the Peer would send.         |
+| `peerToken`     | `address` | The token that the Peer would send.     |
+| `consumerToken` | `address` | The token that the Consumer would send. |
 
 ### Reverts
 
@@ -154,7 +154,7 @@ function getSellQuote(
 | :--------------- | :-------- | :------------------------------------- |
 | `consumerAmount` | `uint256` | The amount the Consumer would send.    |
 | `consumerToken`  | `address` | The token that the Consumer will send. |
-| `peerToken`  | `address` | The token that the Peer will send. |
+| `peerToken`      | `address` | The token that the Peer will send.     |
 
 ### Reverts
 
@@ -181,7 +181,7 @@ function getMaxQuote(
 
 | Name            | Type      | Description                            |
 | :-------------- | :-------- | :------------------------------------- |
-| `peerToken` | `address` | The token that the Peer will send. |
+| `peerToken`     | `address` | The token that the Peer will send.     |
 | `consumerToken` | `address` | The token that the Consumer will send. |
 
 ### Reverts
