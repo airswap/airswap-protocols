@@ -1,19 +1,19 @@
 # Consumer
 
-[AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens. This package contains source code and tests for a basic `Consumer` that represents an on-chain integration of `Indexer`, `Delegate`, and `Swap` contracts.
+[AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens. This package contains source code and tests for a basic `Consumer` that represents an on-chain integration of `Indexer`, `Peer`, and `Swap` contracts.
 
 [![Discord](https://img.shields.io/discord/590643190281928738.svg)](https://discord.gg/ecQbV7H)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 #### :bulb: TODO
 
-- Consider ways to selectively trust Delegates rather than sending unsigned orders to untrusted Delegates.
+- Consider ways to selectively trust Peers rather than sending unsigned orders to untrusted Peers.
 
 ## Features
 
-### On-chain Liquidity
+### Onchain Liquidity
 
-One-time approval for each token and no off-chain signatures required.
+One-time approval for each token and no offchain signatures required.
 
 ## Definitions
 
@@ -21,7 +21,7 @@ One-time approval for each token and no off-chain signatures required.
 | :------- | :----------------------------------------------------------------- |
 | Consumer | Smart contract that integrates onchain liquidity.                  |
 | Indexer  | List of intents to trade by token pair.                            |
-| Delegate | Smart contract that trades based on rules.                         |
+| Peer     | Smart contract that trades based on rules.                         |
 | Swap     | Transaction of multiple transfers that succeeds entirely or fails. |
 | User     | Account that invokes functions on the Consumer.                    |
 
@@ -45,7 +45,7 @@ constructor(
 
 ## Find the Best Buy
 
-Find the best buy price among Delegates on the selected Indexer.
+Find the best buy price among Peers on the selected Indexer.
 
 ```Solidity
 function findBestBuy(
@@ -67,7 +67,7 @@ function findBestBuy(
 
 ## Take the Best Buy
 
-Take the best buy price among Delegates on the selected Indexer. Requires that the User has approved the Consumer to transfer the `_userSendToken` on his or her behalf.
+Take the best buy price among Peers on the selected Indexer. Requires that the User has approved the Consumer to transfer the `_userSendToken` on his or her behalf.
 
 ```Solidity
 function takeBestBuy(
