@@ -48,14 +48,8 @@ contract('Consumer Unit Tests', async () => {
     let peer_provideUnsignedOrder = peerTemplate.contract.methods
       .provideUnsignedOrder(0, 0, EMPTY_ADDRESS, 0, EMPTY_ADDRESS)
       .encodeABI()
-    await mockPeerHigh.givenMethodReturnBool(
-      peer_provideUnsignedOrder,
-      true
-    )
-    await mockPeerLow.givenMethodReturnBool(
-      peer_provideUnsignedOrder,
-      true
-    )
+    await mockPeerHigh.givenMethodReturnBool(peer_provideUnsignedOrder, true)
+    await mockPeerLow.givenMethodReturnBool(peer_provideUnsignedOrder, true)
   }
 
   async function setupMockIndexer() {
