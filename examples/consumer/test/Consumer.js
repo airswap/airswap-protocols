@@ -1,7 +1,7 @@
 const Swap = artifacts.require('Swap')
 const Consumer = artifacts.require('Consumer')
 const Indexer = artifacts.require('Indexer')
-const Delegate = artifacts.require('Delegate')
+const Peer = artifacts.require('Peer')
 const FungibleToken = artifacts.require('FungibleToken')
 const Types = artifacts.require('Types')
 
@@ -20,7 +20,7 @@ let swapContract
 let indexerAddress
 let consumerAddress
 let swapAddress
-let aliceDelegate
+let alicePeer
 
 let tokenAST
 let tokenDAI
@@ -61,13 +61,13 @@ contract('Consumer', async accounts => {
         from: ownerAddress,
       })
       consumerAddress = consumer.address
-      aliceDelegate = await Delegate.new(swapAddress, { from: aliceAddress })
+      alicePeer = await Peer.new(swapAddress, { from: aliceAddress })
     })
 
-    it('Alice authorizes the new delegate', async () => {
+    it('Alice authorizes the new peer', async () => {
       emitted(
         await swapContract.authorize(
-          aliceDelegate.address,
+          alicePeer.address,
           await getTimestampPlusDays(1),
           { from: aliceAddress }
         ),
@@ -107,7 +107,7 @@ contract('Consumer', async accounts => {
           tokenDAI.address,
           500,
           await getTimestampPlusDays(1),
-          aliceDelegate.address,
+          alicePeer.address,
           {
             from: aliceAddress,
           }
@@ -117,10 +117,10 @@ contract('Consumer', async accounts => {
     })
   })
 
-  describe('Alice adds some delegate rules', async () => {
+  describe('Alice adds some peer rules', async () => {
     it('Adds a rule to send up to 150 WETH for DAI at 309.52 DAI/WETH', async () => {
       emitted(
-        await aliceDelegate.setRule(
+        await alicePeer.setRule(
           tokenWETH.address,
           tokenDAI.address,
           150,
@@ -132,8 +132,8 @@ contract('Consumer', async accounts => {
       )
     })
 
-    it('Checks the Delegate maximum', async () => {
-      const quote = await aliceDelegate.getMaxQuote.call(
+    it('Checks the Peer maximum', async () => {
+      const quote = await alicePeer.getMaxQuote.call(
         tokenWETH.address,
         tokenDAI.address
       )
@@ -150,12 +150,12 @@ contract('Consumer', async accounts => {
         tokenDAI.address,
         50
       )
-      equal(quote[0], aliceDelegate.address)
+      equal(quote[0], alicePeer.address)
       equal(quote[1], 30952)
     })
 
-    it('Takes best price (Alice delegate)', async () => {
-      // Alice delegate gets some WETH to trade throug her Delegate
+    it('Takes best price (Alice peer)', async () => {
+      // Alice peer gets some WETH to trade throug her Peer
       tokenWETH.mint(aliceAddress, 100)
 
       // Alice approves Swap contract to transfer her WETH
@@ -185,8 +185,8 @@ contract('Consumer', async accounts => {
       equal(await tokenWETH.balanceOf(carolAddress), 100)
     })
 
-    it('Checks the new Delegate maximum', async () => {
-      const result = await aliceDelegate.getMaxQuote.call(
+    it('Checks the new Peer maximum', async () => {
+      const result = await alicePeer.getMaxQuote.call(
         tokenWETH.address,
         tokenDAI.address
       )

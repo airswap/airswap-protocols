@@ -18,7 +18,7 @@ pragma solidity ^0.5.10;
 
 import "@airswap/swap/interfaces/ISwap.sol";
 import "@airswap/indexer/interfaces/IIndexer.sol";
-import "@airswap/delegate/interfaces/IDelegate.sol";
+import "@airswap/peer/interfaces/IPeer.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 
 /**
@@ -54,7 +54,7 @@ contract Consumer {
     * @param _userSendToken address the token the user is looking to send
     * @param _maxIntents uint256 the max number of intents to search through
     *
-    * @return address The best priced Delegate
+    * @return address The best priced Peer
     * @return uint256 The best priced Delgate's quote amount
     */
   function findBestBuy(
@@ -64,29 +64,29 @@ contract Consumer {
     uint256 _maxIntents
   ) public returns (address, uint256) {
 
-    address untrustedLowestCostDelegate;
+    address untrustedLowestCostPeer;
     uint256 lowestCost = 2**256 - 1;
 
     // Fetch an array of Intent locators from the Indexer.
-    // Warning: In this example, the addresses returned are not trusted and may not actually implement IDelegate.
-    address[] memory untrustedProbablyDelegates = indexerContract.getIntents(_userReceiveToken, _userSendToken, _maxIntents);
+    // Warning: In this example, the addresses returned are not trusted and may not actually implement IPeer.
+    address[] memory untrustedProbablyPeers = indexerContract.getIntents(_userReceiveToken, _userSendToken, _maxIntents);
 
     // Iterate through locators.
-    for (uint256 i; i < untrustedProbablyDelegates.length; i++) {
+    for (uint256 i; i < untrustedProbablyPeers.length; i++) {
 
-      // Get a buy quote from the Delegate.
-      uint256 userSendAmount = IDelegate(untrustedProbablyDelegates[i])
+      // Get a buy quote from the Peer.
+      uint256 userSendAmount = IPeer(untrustedProbablyPeers[i])
         .getBuyQuote(_userReceiveAmount, _userReceiveToken, _userSendToken);
 
       // Update the lowest cost.
       if (userSendAmount > 0 && userSendAmount < lowestCost) {
-        untrustedLowestCostDelegate = untrustedProbablyDelegates[i];
+        untrustedLowestCostPeer = untrustedProbablyPeers[i];
         lowestCost = userSendAmount;
       }
     }
 
-    // Return the Delegate address and amount.
-    return (untrustedLowestCostDelegate, lowestCost);
+    // Return the Peer address and amount.
+    return (untrustedLowestCostPeer, lowestCost);
   }
 
   /**
@@ -104,11 +104,11 @@ contract Consumer {
     uint256 _maxIntents
   ) public {
 
-    address untrustedDelegateContract;
+    address untrustedPeerContract;
     uint256 userSendAmount;
 
-    // Find the best buy among Indexed Delegates.
-    (untrustedDelegateContract, userSendAmount) =
+    // Find the best buy among Indexed Peers.
+    (untrustedPeerContract, userSendAmount) =
       findBestBuy(_userReceiveAmount, _userReceiveToken, _userSendToken, _maxIntents);
 
     // Consumer transfers User amount to itself.
@@ -117,11 +117,11 @@ contract Consumer {
     // Consumer approves Swap to move its new tokens.
     IERC20(_userSendToken).approve(address(swapContract), userSendAmount);
 
-    // Consumer authorizes the Delegate.
-    swapContract.authorize(untrustedDelegateContract, block.timestamp + 1);
+    // Consumer authorizes the Peer.
+    swapContract.authorize(untrustedPeerContract, block.timestamp + 1);
 
-    // Consumer provides unsigned order to Delegate.
-    IDelegate(untrustedDelegateContract).provideUnsignedOrder(
+    // Consumer provides unsigned order to Peer.
+    IPeer(untrustedPeerContract).provideUnsignedOrder(
       1,
       userSendAmount,
       _userSendToken,
@@ -129,8 +129,8 @@ contract Consumer {
       _userReceiveToken
     );
 
-    // Consumer revokes the authorization of the Delegate.
-    swapContract.revoke(untrustedDelegateContract);
+    // Consumer revokes the authorization of the Peer.
+    swapContract.revoke(untrustedPeerContract);
 
     // Consumer transfers received amount to the User.
     IERC20(_userReceiveToken).transfer(msg.sender, _userReceiveAmount);

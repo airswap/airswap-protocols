@@ -1,6 +1,6 @@
-# Delegate
+# Peer
 
-[AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens. This package contains source code and tests for a basic `Delegate` contract that can be deployed with trading rules.
+[AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens. This package contains source code and tests for a basic `Peer` contract that can be deployed with trading rules.
 
 [![Discord](https://img.shields.io/discord/590643190281928738.svg)](https://discord.gg/ecQbV7H)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
@@ -17,17 +17,17 @@ Send up to a maximum amount of a token.
 
 ## Definitions
 
-| Term              | Definition                                                      |
-| :---------------- | :-------------------------------------------------------------- |
-| Delegate          | An authorized third party to a trade.                           |
-| Consumer          | A party that gets quotes from and sends orders to the Delegate. |
-| Rule              | An amount of tokens to trade at a specific price.               |
-| Price Coefficient | The significant digits of the price.                            |
-| Price Exponent    | The location of the decimal on the price.                       |
+| Term              | Definition                                                  |
+| :---------------- | :---------------------------------------------------------- |
+| Peer              | Smart contract that trades based on rules.                  |
+| Consumer          | A party that gets quotes from and sends orders to the Peer. |
+| Rule              | An amount of tokens to trade at a specific price.           |
+| Price Coefficient | The significant digits of the price.                        |
+| Price Exponent    | The location of the decimal on the price.                   |
 
 ## Constructor
 
-Create a new `Delegate` contract.
+Create a new `Peer` contract.
 
 ```Solidity
 constructor(
@@ -43,17 +43,17 @@ constructor(
 
 ## Price Calculations
 
-All amounts are in the smallest unit (e.g. wei), so all calculations based on price result in a whole number. For calculations that would result in a decimal, the amount is automatically floored by dropping the decimal. For example, a price of `5.25` and `delegateAmount` of `2` results in `consumerAmount` of `10` rather than `10.5`. Tokens have many decimal places so these differences are very small.
+All amounts are in the smallest unit (e.g. wei), so all calculations based on price result in a whole number. For calculations that would result in a decimal, the amount is automatically floored by dropping the decimal. For example, a price of `5.25` and `peerAmount` of `2` results in `consumerAmount` of `10` rather than `10.5`. Tokens have many decimal places so these differences are very small.
 
 ## Set a Rule
 
-Set a trading rule for the Delegate.
+Set a trading rule for the Peer.
 
 ```Solidity
 function setRule(
-  address delegateToken,
+  address peerToken,
   address consumerToken,
-  uint256 maxDelegateAmount,
+  uint256 maxPeerAmount,
   uint256 priceCoef,
   uint256 priceExp
 ) external onlyOwner
@@ -61,13 +61,13 @@ function setRule(
 
 ### Params
 
-| Name             | Type      | Description                                                    |
-| :--------------- | :-------- | :------------------------------------------------------------- |
-| `delegateToken`  | `address` | The token that the delegate would send in a trade.             |
-| `consumerToken`  | `address` | The token that the consumer would send in a trade.             |
-| `maxTakerAmount` | `uint256` | The maximum amount of token the delegate would send.           |
-| `priceCoef`      | `uint256` | The coefficient of the price to indicate the whole number.     |
-| `priceExp`       | `uint256` | The exponent of the price to indicate location of the decimal. |
+| Name            | Type      | Description                                                    |
+| :-------------- | :-------- | :------------------------------------------------------------- |
+| `peerToken`     | `address` | The token that the peer would send in a trade.                 |
+| `consumerToken` | `address` | The token that the consumer would send in a trade.             |
+| `maxPeerAmount` | `uint256` | The maximum amount of token the peer would send.               |
+| `priceCoef`     | `uint256` | The coefficient of the price to indicate the whole number.     |
+| `priceExp`      | `uint256` | The exponent of the price to indicate location of the decimal. |
 
 ### Example
 
@@ -91,11 +91,11 @@ setRule(<WETHAddress>, <DAIAddress>, 100000, 312, 0)
 
 ## Unset a Rule
 
-Unset a trading rule for the Delegate.
+Unset a trading rule for the Peer.
 
 ```Solidity
 function unsetRule(
-  address delegateToken,
+  address peerToken,
   address consumerToken
 ) external onlyOwner
 ```
@@ -104,17 +104,17 @@ function unsetRule(
 
 | Name            | Type      | Description                                        |
 | :-------------- | :-------- | :------------------------------------------------- |
-| `delegateToken` | `address` | The token that the Delegate would send in a trade. |
+| `peerToken`     | `address` | The token that the Peer would send in a trade.     |
 | `consumerToken` | `address` | The token that the Consumer would send in a trade. |
 
 ## Get a Buy Quote
 
-Get a quote to buy from the Delegate.
+Get a quote to buy from the Peer.
 
 ```Solidity
 function getBuyQuote(
-  uint256 delegateAmount,
-  address delegateToken,
+  uint256 peerAmount,
+  address peerToken,
   address consumerToken
 ) external view returns (
   uint256 consumerAmount
@@ -123,11 +123,11 @@ function getBuyQuote(
 
 ### Params
 
-| Name             | Type      | Description                             |
-| :--------------- | :-------- | :-------------------------------------- |
-| `delegateAmount` | `uint256` | The amount the Delegate would send.     |
-| `delegateToken`  | `address` | The token that the Delegate would send. |
-| `consumerToken`  | `address` | The token that the Consumer would send. |
+| Name            | Type      | Description                             |
+| :-------------- | :-------- | :-------------------------------------- |
+| `peerAmount`    | `uint256` | The amount the Peer would send.         |
+| `peerToken`     | `address` | The token that the Peer would send.     |
+| `consumerToken` | `address` | The token that the Consumer would send. |
 
 ### Reverts
 
@@ -138,13 +138,13 @@ function getBuyQuote(
 
 ## Get a Sell Quote
 
-Get a quote to sell from the Delegate.
+Get a quote to sell from the Peer.
 
 ```Solidity
 function getSellQuote(
   uint256 consumerAmount,
   address consumerToken,
-  address delegateToken
+  address peerToken
 ) external view returns (uint256)
 ```
 
@@ -154,7 +154,7 @@ function getSellQuote(
 | :--------------- | :-------- | :------------------------------------- |
 | `consumerAmount` | `uint256` | The amount the Consumer would send.    |
 | `consumerToken`  | `address` | The token that the Consumer will send. |
-| `delegateToken`  | `address` | The token that the Delegate will send. |
+| `peerToken`      | `address` | The token that the Peer will send.     |
 
 ### Reverts
 
@@ -165,14 +165,14 @@ function getSellQuote(
 
 ## Get a Max Quote
 
-Get the maximum quote from the Delegate.
+Get the maximum quote from the Peer.
 
 ```Solidity
 function getMaxQuote(
-  address delegateToken,
+  address peerToken,
   address consumerToken
 ) external view returns (
-  uint256 delegateAmount,
+  uint256 peerAmount,
   uint256 consumerAmount
 )
 ```
@@ -181,7 +181,7 @@ function getMaxQuote(
 
 | Name            | Type      | Description                            |
 | :-------------- | :-------- | :------------------------------------- |
-| `delegateToken` | `address` | The token that the Delegate will send. |
+| `peerToken`     | `address` | The token that the Peer will send.     |
 | `consumerToken` | `address` | The token that the Consumer will send. |
 
 ### Reverts
@@ -192,7 +192,7 @@ function getMaxQuote(
 
 ## Provide an Order
 
-Provide an order to the Delegate for taking.
+Provide an order to the Peer for taking.
 
 ```Solidity
 function provideOrder(
@@ -201,9 +201,9 @@ function provideOrder(
   address consumerWallet,
   uint256 consumerAmount,
   address consumerToken,
-  address delegateWallet,
-  uint256 delegateAmount,
-  address delegateToken,
+  address peerWallet,
+  uint256 peerAmount,
+  address peerToken,
   uint8 v,
   bytes32 r,
   bytes32 s
@@ -219,9 +219,9 @@ function provideOrder(
 | `consumerWallet` | `address` | The Maker of the Order who sets price.                 |
 | `consumerAmount` | `uint256` | The amount or identifier of the token the Maker sends. |
 | `consumerToken`  | `address` | The address of the token the Maker sends.              |
-| `delegateWallet` | `address` | The Taker of the Order who takes price.                |
-| `delegateAmount` | `uint256` | The amount or identifier of the token the Taker sends. |
-| `delegateToken`  | `address` | The address of the token the Taker sends.              |
+| `peerWallet`     | `address` | The Taker of the Order who takes price.                |
+| `peerAmount`     | `uint256` | The amount or identifier of the token the Taker sends. |
+| `peerToken`      | `address` | The address of the token the Taker sends.              |
 | `v`              | `uint8`   | The `v` value of an ECDSA signature.                   |
 | `r`              | `bytes32` | The `r` value of an ECDSA signature.                   |
 | `s`              | `bytes32` | The `s` value of an ECDSA signature.                   |
@@ -236,15 +236,15 @@ function provideOrder(
 
 ## Provide an Unsigned Order
 
-Provide an unsigned order to the Delegate. Requires that the Consumer has authorized the Delegate on the Swap contract.
+Provide an unsigned order to the Peer. Requires that the Consumer has authorized the Peer on the Swap contract.
 
 ```Solidity
 function provideUnsignedOrder(
   uint256 nonce,
   uint256 consumerAmount,
   address consumerToken,
-  uint256 delegateAmount,
-  address delegateToken
+  uint256 peerAmount,
+  address peerToken
 ) public payable
 ```
 
@@ -256,8 +256,8 @@ function provideUnsignedOrder(
 | `expiry`         | `uint256` | The expiry in seconds since unix epoch.                |
 | `consumerAmount` | `uint256` | The amount or identifier of the token the Maker sends. |
 | `consumerToken`  | `address` | The address of the token the Maker sends.              |
-| `delegateAmount` | `uint256` | The amount or identifier of the token the Taker sends. |
-| `delegateToken`  | `address` | The address of the token the Taker sends.              |
+| `peerAmount`     | `uint256` | The amount or identifier of the token the Taker sends. |
+| `peerToken`      | `address` | The address of the token the Taker sends.              |
 
 ### Reverts
 

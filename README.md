@@ -14,16 +14,16 @@
 
 ## Smart Contracts
 
-| Package                                   | Version                                                                                                     | Description               |
-| :---------------------------------------- | :---------------------------------------------------------------------------------------------------------- | :------------------------ |
-| [`@airswap/swap`](/protocols/swap)        | [![npm](https://img.shields.io/npm/v/airswap/swap.svg)](https://www.npmjs.com/package/airswap/swap)         | Atomic Swap               |
-| [`@airswap/indexer`](/protocols/indexer)  | [![npm](https://img.shields.io/npm/v/airswap/indexer.svg)](https://www.npmjs.com/package/airswap/indexer)   | Indexer with Staking      |
-| [`@airswap/market`](/protocols/market)    | [![npm](https://img.shields.io/npm/v/airswap/market.svg)](https://www.npmjs.com/package/airswap/market)     | Intents for a Token Pair  |
-| [`@airswap/types`](/protocols/types)      | [![npm](https://img.shields.io/npm/v/airswap/types.svg)](https://www.npmjs.com/package/airswap/libraries)   | Types and Hashes          |
-| [`@airswap/delegate`](/examples/delegate) | [![npm](https://img.shields.io/npm/v/airswap/delegate.svg)](https://www.npmjs.com/package/airswap/delegate) | Delegate with Rules       |
-| [`@airswap/consumer`](/examples/consumer) | [![npm](https://img.shields.io/npm/v/airswap/consumer.svg)](https://www.npmjs.com/package/airswap/consumer) | Liquidity Consumer        |
-| [`@airswap/wrapper`](/helpers/wrapper)    | [![npm](https://img.shields.io/npm/v/airswap/wrapper.svg)](https://www.npmjs.com/package/airswap/wrapper)   | Use ether for WETH trades |
-| [`@airswap/tokens`](/helpers/tokens)      | [![npm](https://img.shields.io/npm/v/airswap/tokens.svg)](https://www.npmjs.com/package/airswap/tokens)     | Ethereum Tokens           |
+| Package                                   | Version                                                                                                     | Description                  |
+| :---------------------------------------- | :---------------------------------------------------------------------------------------------------------- | :--------------------------- |
+| [`@airswap/swap`](/protocols/swap)        | [![npm](https://img.shields.io/npm/v/airswap/swap.svg)](https://www.npmjs.com/package/airswap/swap)         | Atomic Swap                  |
+| [`@airswap/indexer`](/protocols/indexer)  | [![npm](https://img.shields.io/npm/v/airswap/indexer.svg)](https://www.npmjs.com/package/airswap/indexer)   | Onchain Indexer with Staking |
+| [`@airswap/market`](/protocols/market)    | [![npm](https://img.shields.io/npm/v/airswap/market.svg)](https://www.npmjs.com/package/airswap/market)     | Intents for a Token Pair     |
+| [`@airswap/types`](/protocols/types)      | [![npm](https://img.shields.io/npm/v/airswap/types.svg)](https://www.npmjs.com/package/airswap/libraries)   | Types and Hashes             |
+| [`@airswap/peer`](/examples/peer)         | [![npm](https://img.shields.io/npm/v/airswap/peer.svg)](https://www.npmjs.com/package/airswap/peer)         | Onchain Peer with Rules      |
+| [`@airswap/consumer`](/examples/consumer) | [![npm](https://img.shields.io/npm/v/airswap/consumer.svg)](https://www.npmjs.com/package/airswap/consumer) | Onchain Liquidity Consumer   |
+| [`@airswap/wrapper`](/helpers/wrapper)    | [![npm](https://img.shields.io/npm/v/airswap/wrapper.svg)](https://www.npmjs.com/package/airswap/wrapper)   | Use ether for WETH trades    |
+| [`@airswap/tokens`](/helpers/tokens)      | [![npm](https://img.shields.io/npm/v/airswap/tokens.svg)](https://www.npmjs.com/package/airswap/tokens)     | Ethereum Tokens              |
 
 ## JavaScript
 

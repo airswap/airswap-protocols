@@ -17,23 +17,23 @@
 pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
-import "@airswap/delegate/interfaces/IDelegate.sol";
+import "@airswap/peer/interfaces/IPeer.sol";
 import "@airswap/swap/interfaces/ISwap.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 /**
-  * @title Delegate: Deployable Trading Rules for the Swap Protocol
+  * @title Peer: Deployable Trading Rules for the Swap Protocol
   * @notice Supports fungible tokens (ERC-20)
-  * @dev inherits IDelegate, Ownable uses SafeMath library
+  * @dev inherits IPeer, Ownable uses SafeMath library
   */
-contract Delegate is IDelegate, Ownable {
+contract Peer is IPeer, Ownable {
   using SafeMath for uint256;
 
   // Swap contract to be used to settle trades
   ISwap public swapContract;
 
-  // Mapping of delegateToken to consumerToken for rule lookup
+  // Mapping of peerToken to consumerToken for rule lookup
   mapping (address => mapping (address => Rule)) public rules;
 
   /**
@@ -60,30 +60,30 @@ contract Delegate is IDelegate, Ownable {
   /**
     * @notice Set a Trading Rule
     * @dev only callable by the owner of the contract
-    * @param delegateToken address The token address that the delegate would send in a trade
+    * @param peerToken address The token address that the delegate would send in a trade
     * @param consumerToken address The token address that the consumer would send in a trade
-    * @param maxDelegateAmount uint256 The maximum amount of token the delegate would send
+    * @param maxPeerAmount uint256 The maximum amount of token the delegate would send
     * @param priceCoef uint256 The whole number that will be multiplied by 10^(-priceExp) - the price coefficient
     * @param priceExp uint256 The exponent of the price to indicate location of the decimal priceCoef * 10^(-priceExp)
     */
   function setRule(
-    address delegateToken,
+    address peerToken,
     address consumerToken,
-    uint256 maxDelegateAmount,
+    uint256 maxPeerAmount,
     uint256 priceCoef,
     uint256 priceExp
   ) external onlyOwner {
 
-    rules[delegateToken][consumerToken] = Rule({
-      maxDelegateAmount: maxDelegateAmount,
+    rules[peerToken][consumerToken] = Rule({
+      maxPeerAmount: maxPeerAmount,
       priceCoef: priceCoef,
       priceExp: priceExp
     });
 
     emit SetRule(
-      delegateToken,
+      peerToken,
       consumerToken,
-      maxDelegateAmount,
+      maxPeerAmount,
       priceCoef,
       priceExp
     );
@@ -92,47 +92,47 @@ contract Delegate is IDelegate, Ownable {
   /**
     * @notice Unset a Trading Rule
     * @dev only callable by the owner of the contract, removes from a mapping
-    * @param delegateToken address The token address that the delegate would send in a trade
+    * @param peerToken address The token address that the delegate would send in a trade
     * @param consumerToken address The token address that the consumer would send in a trade
     */
   function unsetRule(
-    address delegateToken,
+    address peerToken,
     address consumerToken
   ) external onlyOwner {
 
     // Delete the rule.
-    delete rules[delegateToken][consumerToken];
+    delete rules[peerToken][consumerToken];
 
     emit UnsetRule(
-      delegateToken,
+      peerToken,
       consumerToken
     );
   }
 
   /**
-    * @notice Get a Buy Quote from the Delegate
-    * @param delegateAmount uint256 The amount the Delegate would send
-    * @param delegateToken address The token that the Delegate would send
+    * @notice Get a Buy Quote from the Peer
+    * @param peerAmount uint256 The amount the Peer would send
+    * @param peerToken address The token that the Peer would send
     * @param consumerToken address The token that the Consumer would send
     * @return uint256 consumerAmount The amount the Consumer would send
     */
   function getBuyQuote(
-    uint256 delegateAmount,
-    address delegateToken,
+    uint256 peerAmount,
+    address peerToken,
     address consumerToken
   ) external returns (
     uint256 consumerAmount
   ) {
 
-    Rule memory rule = rules[delegateToken][consumerToken];
+    Rule memory rule = rules[peerToken][consumerToken];
 
     // Ensure that a rule exists.
-    if(rule.maxDelegateAmount > 0) {
+    if(rule.maxPeerAmount > 0) {
 
-      // Ensure the delegateAmount does not exceed maximum for the rule.
-      if(delegateAmount <= rule.maxDelegateAmount) {
+      // Ensure the peerAmount does not exceed maximum for the rule.
+      if(peerAmount <= rule.maxPeerAmount) {
 
-        consumerAmount = delegateAmount
+        consumerAmount = peerAmount
             .mul(rule.priceCoef)
             .div(10 ** rule.priceExp);
 
@@ -146,61 +146,61 @@ contract Delegate is IDelegate, Ownable {
   }
 
   /**
-    * @notice Get a Sell Quote from the Delegate
+    * @notice Get a Sell Quote from the Peer
     * @param consumerAmount uint256 The amount the Consumer would send
     * @param consumerToken address The token that the Consumer will send
-    * @param delegateToken address The token that the Delegate will send
-    * @return uint256 delegateAmount The amount the Delegate would send
+    * @param peerToken address The token that the Peer will send
+    * @return uint256 peerAmount The amount the Peer would send
     */
   function getSellQuote(
     uint256 consumerAmount,
     address consumerToken,
-    address delegateToken
+    address peerToken
   ) external returns (
-    uint256 delegateAmount
+    uint256 peerAmount
   ) {
 
-    Rule memory rule = rules[delegateToken][consumerToken];
+    Rule memory rule = rules[peerToken][consumerToken];
 
     // Ensure that a rule exists.
-    if(rule.maxDelegateAmount > 0) {
+    if(rule.maxPeerAmount > 0) {
 
-      // Calculate the delegateAmount.
-      delegateAmount = consumerAmount
+      // Calculate the peerAmount.
+      peerAmount = consumerAmount
         .mul(10 ** rule.priceExp).div(rule.priceCoef);
 
-      // Ensure the delegateAmount does not exceed maximum and is greater than zero.
-      if(delegateAmount <= rule.maxDelegateAmount && delegateAmount > 0) {
-        return delegateAmount;
+      // Ensure the peerAmount does not exceed maximum and is greater than zero.
+      if(peerAmount <= rule.maxPeerAmount && peerAmount > 0) {
+        return peerAmount;
       }
     }
     return 0;
   }
 
   /**
-    * @notice Get a Maximum Quote from the Delegate
-    * @param delegateToken address The token that the Delegate will send
+    * @notice Get a Maximum Quote from the Peer
+    * @param peerToken address The token that the Peer will send
     * @param consumerToken address The token that the Consumer will send
-    * @return uint 256 The amount the Delegate would send
+    * @return uint 256 The amount the Peer would send
     * @return uint 256 The amount the Consumer would send
     */
   function getMaxQuote(
-    address delegateToken,
+    address peerToken,
     address consumerToken
   ) external returns (
-    uint256 delegateAmount,
+    uint256 peerAmount,
     uint256 consumerAmount
   ) {
 
-    Rule memory rule = rules[delegateToken][consumerToken];
+    Rule memory rule = rules[peerToken][consumerToken];
 
     // Ensure that a rule exists.
-    if(rule.maxDelegateAmount > 0) {
+    if(rule.maxPeerAmount > 0) {
 
-      // Return the maxDelegateAmount and calculated consumerAmount.
+      // Return the maxPeerAmount and calculated consumerAmount.
       return (
-        rule.maxDelegateAmount,
-        rule.maxDelegateAmount.mul(rule.priceCoef).div(10 ** rule.priceExp)
+        rule.maxPeerAmount,
+        rule.maxPeerAmount.mul(rule.priceCoef).div(10 ** rule.priceExp)
       );
     }
     return (0, 0);
@@ -208,15 +208,15 @@ contract Delegate is IDelegate, Ownable {
 
   /**
     * @notice Provide an Order (Simple)
-    * @dev Rules get reset with new maxDelegateAmount
+    * @dev Rules get reset with new maxPeerAmount
     * @param nonce uint256  A single use identifier for the Order.
     * @param expiry uint256 The expiry in seconds since unix epoch.
     * @param consumerWallet address The Maker of the Order who sets price.
     * @param consumerAmount uint256 The amount or identifier of the token the Maker sends.
     * @param consumerToken address The address of the token the Maker sends.
-    * @param delegateWallet address The Taker of the Order who takes price.
-    * @param delegateAmount uint256  The amount or identifier of the token the Taker sends.
-    * @param delegateToken address The address of the token the Taker sends.
+    * @param peerWallet address The Taker of the Order who takes price.
+    * @param peerAmount uint256  The amount or identifier of the token the Taker sends.
+    * @param peerToken address The address of the token the Taker sends.
     * @param v uint8 The `v` value of an ECDSA signature.
     * @param r bytes32 The `r` value of an ECDSA signature.
     * @param s bytes32 The `s` value of an ECDSA signature.
@@ -227,9 +227,9 @@ contract Delegate is IDelegate, Ownable {
     address consumerWallet,
     uint256 consumerAmount,
     address consumerToken,
-    address delegateWallet,
-    uint256 delegateAmount,
-    address delegateToken,
+    address peerWallet,
+    uint256 peerAmount,
+    address peerToken,
     uint8 v,
     bytes32 r,
     bytes32 s
@@ -237,24 +237,24 @@ contract Delegate is IDelegate, Ownable {
 
     // TODO: Forward the message value (for ETH trades) and add tests.
 
-    Rule memory rule = rules[delegateToken][consumerToken];
+    Rule memory rule = rules[peerToken][consumerToken];
 
     // Ensure that a rule exists.
-    require(rule.maxDelegateAmount != 0,
+    require(rule.maxPeerAmount != 0,
       "TOKEN_PAIR_INACTIVE");
 
     // Ensure the order does not exceed the maximum amount.
-    require(delegateAmount <= rule.maxDelegateAmount,
+    require(peerAmount <= rule.maxPeerAmount,
       "AMOUNT_EXCEEDS_MAX");
 
     // Ensure the order is priced according to the rule.
-    require(delegateAmount == consumerAmount
+    require(peerAmount == consumerAmount
       .mul(10 ** rule.priceExp).div(rule.priceCoef),
       "PRICE_INCORRECT");
 
-    // Overwrite the rule with a decremented maxDelegateAmount.
-    rules[delegateToken][consumerToken] = Rule({
-      maxDelegateAmount: rule.maxDelegateAmount - delegateAmount,
+    // Overwrite the rule with a decremented maxPeerAmount.
+    rules[peerToken][consumerToken] = Rule({
+      maxPeerAmount: rule.maxPeerAmount - peerAmount,
       priceCoef: rule.priceCoef,
       priceExp: rule.priceExp
     });
@@ -266,9 +266,9 @@ contract Delegate is IDelegate, Ownable {
       consumerWallet,
       consumerAmount,
       consumerToken,
-      delegateWallet,
-      delegateAmount,
-      delegateToken,
+      peerWallet,
+      peerAmount,
+      peerToken,
       v, r, s
     );
 
@@ -280,15 +280,15 @@ contract Delegate is IDelegate, Ownable {
     * @param nonce uint256 A single use identifier for the order
     * @param consumerAmount uint256 The amount or identifier of the token the Maker sends
     * @param consumerToken address The address of the token the Maker sends
-    * @param delegateAmount uint256 The amount or identifier of the token the Taker sends
-    * @param delegateToken address The address of the token the Taker sends
+    * @param peerAmount uint256 The amount or identifier of the token the Taker sends
+    * @param peerToken address The address of the token the Taker sends
     */
   function provideUnsignedOrder(
     uint256 nonce,
     uint256 consumerAmount,
     address consumerToken,
-    uint256 delegateAmount,
-    address delegateToken
+    uint256 peerAmount,
+    address peerToken
   ) public payable {
 
     // TODO: Forward the message value (for ETH trades) and add tests.
@@ -300,8 +300,8 @@ contract Delegate is IDelegate, Ownable {
       consumerAmount,
       consumerToken,
       owner(),
-      delegateAmount,
-      delegateToken,
+      peerAmount,
+      peerToken,
       0, 0, 0
     );
 
