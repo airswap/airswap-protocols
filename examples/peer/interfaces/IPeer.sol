@@ -17,23 +17,23 @@
 pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
-interface IDelegate {
+interface IPeer {
 
   event SetRule(
-    address delegateToken,
+    address peerToken,
     address consumerToken,
-    uint256 maxDelegateAmount,
+    uint256 maxpeerAmount,
     uint256 priceCoef,
     uint256 priceExp
   );
 
   event UnsetRule(
-    address delegateToken,
+    address peerToken,
     address consumerToken
   );
 
   struct Rule {
-    uint256 maxDelegateAmount;
+    uint256 maxpeerAmount;
     uint256 priceCoef;
     uint256 priceExp;
   }
@@ -45,21 +45,21 @@ interface IDelegate {
   ) external;
 
   function setRule(
-    address _delegateToken,
+    address _peerToken,
     address _consumerToken,
-    uint256 _maxDelegateAmount,
+    uint256 _maxpeerAmount,
     uint256 _priceCoef,
     uint256 _priceExp
   ) external;
 
   function unsetRule(
-    address _delegateToken,
+    address _peerToken,
     address _consumerToken
   ) external;
 
   function getBuyQuote(
-    uint256 _delegateAmount,
-    address _delegateToken,
+    uint256 _peerAmount,
+    address _peerToken,
     address _consumerToken
   ) external returns (
     uint256 consumerAmount
@@ -68,16 +68,16 @@ interface IDelegate {
   function getSellQuote(
     uint256 _consumerAmount,
     address _consumerToken,
-    address _delegateToken
+    address _peerToken
   ) external returns (
-    uint256 delegateAmount
+    uint256 peerAmount
   );
 
   function getMaxQuote(
-    address _delegateToken,
+    address _peerToken,
     address _consumerToken
   ) external returns (
-    uint256 delegateAmount,
+    uint256 peerAmount,
     uint256 consumerAmount
   );
 
@@ -88,8 +88,8 @@ interface IDelegate {
     uint256 _consumerAmount,
     address _consumerToken,
     address _delegateWallet,
-    uint256 _delegateAmount,
-    address _delegateToken,
+    uint256 _peerAmount,
+    address _peerToken,
     uint8 _v,
     bytes32 _r,
     bytes32 _s
@@ -99,7 +99,7 @@ interface IDelegate {
     uint256 _nonce,
     uint256 _consumerAmount,
     address _consumerToken,
-    uint256 _delegateAmount,
-    address _delegateToken
+    uint256 _peerAmount,
+    address _peerToken
   ) external payable;
 }

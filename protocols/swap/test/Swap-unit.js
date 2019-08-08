@@ -227,7 +227,7 @@ contract('Swap Unit Tests', async accounts => {
       let delegate = mockMaker
       await reverted(
         swap.authorize(delegate, 0, { from: mockMaker }),
-        'INVALID_AUTH_DELEGATE'
+        'INVALID_AUTH_PEER'
       )
     })
 

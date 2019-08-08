@@ -1,5 +1,5 @@
 {
-  "name": "@airswap/delegate",
+  "name": "@airswap/peer",
   "version": "0.1.0",
   "description": "Manages delegated trading rules for use in the Swap Protocol",
   "license": "Apache-2.0",

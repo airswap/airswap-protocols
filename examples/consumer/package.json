@@ -1,7 +1,7 @@
 {
   "name": "@airswap/consumer",
   "version": "0.1.0",
-  "description": "Example integration of Swap, Indexer, and Delegate contracts",
+  "description": "Example integration of Swap, Indexer, and Peer contracts",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -17,7 +17,7 @@
   },
   "devDependencies": {
     "@airswap/tokens": "0.1.0",
-    "@airswap/delegate": "0.1.0",
+    "@airswap/peer": "0.1.0",
     "@airswap/indexer": "0.1.0",
     "solidity-coverage": "^0.6.3"
   },

@@ -1,6 +1,6 @@
 const Consumer = artifacts.require('Consumer')
 const Indexer = artifacts.require('Indexer')
-const Delegate = artifacts.require('Delegate')
+const Peer = artifacts.require('Peer')
 const MockContract = artifacts.require('MockContract')
 const abi = require('ethereumjs-abi')
 const { equal, passes } = require('@airswap/test-utils').assert
@@ -14,8 +14,8 @@ contract('Consumer Unit Tests', async () => {
   const maxUint = new BigNumber('1.1579209e+77')
 
   let snapshotId
-  let mockDelegateHigh
-  let mockDelegateLow
+  let mockPeerHigh
+  let mockPeerLow
   let mockSwap
   let mockIndexer
   let consumer
@@ -33,27 +33,27 @@ contract('Consumer Unit Tests', async () => {
   })
 
   async function setupMockDelgate() {
-    let delegateTemplate = await Delegate.new(EMPTY_ADDRESS)
-    mockDelegateHigh = await MockContract.new()
-    mockDelegateLow = await MockContract.new()
+    let peerTemplate = await Peer.new(EMPTY_ADDRESS)
+    mockPeerHigh = await MockContract.new()
+    mockPeerLow = await MockContract.new()
 
-    //mock delegate getBuyQuote()
-    let delegate_getBuyQuote = delegateTemplate.contract.methods
+    //mock peer getBuyQuote()
+    let peer_getBuyQuote = peerTemplate.contract.methods
       .getBuyQuote(0, EMPTY_ADDRESS, EMPTY_ADDRESS)
       .encodeABI()
-    await mockDelegateHigh.givenMethodReturnUint(delegate_getBuyQuote, highVal)
-    await mockDelegateLow.givenMethodReturnUint(delegate_getBuyQuote, lowVal)
+    await mockPeerHigh.givenMethodReturnUint(peer_getBuyQuote, highVal)
+    await mockPeerLow.givenMethodReturnUint(peer_getBuyQuote, lowVal)
 
-    //mock delegate provideUnsignedOrder()
-    let delegate_provideUnsignedOrder = delegateTemplate.contract.methods
+    //mock peer provideUnsignedOrder()
+    let peer_provideUnsignedOrder = peerTemplate.contract.methods
       .provideUnsignedOrder(0, 0, EMPTY_ADDRESS, 0, EMPTY_ADDRESS)
       .encodeABI()
-    await mockDelegateHigh.givenMethodReturnBool(
-      delegate_provideUnsignedOrder,
+    await mockPeerHigh.givenMethodReturnBool(
+      peer_provideUnsignedOrder,
       true
     )
-    await mockDelegateLow.givenMethodReturnBool(
-      delegate_provideUnsignedOrder,
+    await mockPeerLow.givenMethodReturnBool(
+      peer_provideUnsignedOrder,
       true
     )
   }
@@ -118,17 +118,17 @@ contract('Consumer Unit Tests', async () => {
       equal(lowestCost, maxUint.toPrecision(5))
     })
 
-    it('test that the lowest cost delegate is returned with an indexer ordered high to low', async () => {
+    it('test that the lowest cost peer is returned with an indexer ordered high to low', async () => {
       //mock indexer getIntents() where locators are ordered high to low
       await mockIndexer.givenMethodReturn(
         indexer_getIntents,
         abi.rawEncode(
           ['address[]'],
-          [[mockDelegateHigh.address, mockDelegateLow.address]]
+          [[mockPeerHigh.address, mockPeerLow.address]]
         )
       )
 
-      //this should always select the lowest cost delegate available
+      //this should always select the lowest cost peer available
       let val = await consumer.findBestBuy.call(
         180,
         EMPTY_ADDRESS,
@@ -136,28 +136,28 @@ contract('Consumer Unit Tests', async () => {
         2
       )
 
-      equal(val[0], mockDelegateLow.address)
+      equal(val[0], mockPeerLow.address)
       equal(val[1].toNumber(), lowVal)
     })
 
-    it('test that the lowest cost delegate is returned with an indexer ordered low to high', async () => {
+    it('test that the lowest cost peer is returned with an indexer ordered low to high', async () => {
       //mock indexer getIntents() where locators are ordered low to high
       await mockIndexer.givenMethodReturn(
         indexer_getIntents,
         abi.rawEncode(
           ['address[]'],
-          [[mockDelegateLow.address, mockDelegateHigh.address]]
+          [[mockPeerLow.address, mockPeerHigh.address]]
         )
       )
 
-      //this should always select the lowest cost delegate available
+      //this should always select the lowest cost peer available
       let val = await consumer.findBestBuy.call(
         180,
         EMPTY_ADDRESS,
         EMPTY_ADDRESS,
         2
       )
-      equal(val[0], mockDelegateLow.address)
+      equal(val[0], mockPeerLow.address)
       equal(val[1].toNumber(), lowVal)
     })
   })
@@ -169,7 +169,7 @@ contract('Consumer Unit Tests', async () => {
         indexer_getIntents,
         abi.rawEncode(
           ['address[]'],
-          [[mockDelegateLow.address, mockDelegateHigh.address]]
+          [[mockPeerLow.address, mockPeerHigh.address]]
         )
       )
 
