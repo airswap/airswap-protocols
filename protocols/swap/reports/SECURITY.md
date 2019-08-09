@@ -81,6 +81,7 @@ the exploit surface to incorrect arguments to swap, swapSimple, authorize, cance
 - **This invariant currently holds as-is.**
 
 #### 3. All flows are identical (no calls to underlying token contract) until the internal transferToken call.
+
 - In the ERC-20 case, reverts will occur on the underlying transferFrom implemented methods. Applications using this contract may want to do pre-checks on known tokens to do better user experience.
 - **This invariant currently holds as-is.**
 
@@ -174,7 +175,7 @@ Hash of master used for deploy: [6e6c314f1d082dbb98e8ca2fd671dddfd36e37fa](https
 
 Rinkeby Etherscan (Swap): https://rinkeby.etherscan.io/address/0x78db49d0459a67158bdca6e161be3d90342c7247
 
-Rinkeby Etherscan (Types); https://rinkeby.etherscan.io/address/0xaaf6cb19298e7d0abc410eb2a0d5b8fef747573d#code
+Rinkeby Etherscan (Types); https://rinkeby.etherscan.io/address/0xaaf6cb19298e7d0abc410eb2a0d5b8fef747573d
 
 Mainnet Etherscan (verified Swap): https://etherscan.io/address/0x54d2690e97e477a4b33f40d6e4afdd4832c07c57
 
