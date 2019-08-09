@@ -62,18 +62,50 @@ jobs:
             ### ADD FOLDERS HERE TO PROCESS ###
             for file in order-utils test-utils
             do
-              echo "Working on $file"
               cd $file
               NPM_NAME=$(node -p "require('./package.json').name")
               NPM_VERSION=$(npm view $NPM_NAME version || :)
               LOCAL_VERSION=$(node -p "require('./package.json').version")
-              echo $NPM_NAME
-              echo $NPM_VERSION
-              echo $LOCAL_VERSION
               if [[ $LOCAL_VERSION != $NPM_VERSION ]]; then
                 echo "Updating NPM..." # this is where we deploy the code to npm
                 npm publish
-                npm access restricted $NPM_NAME
+                npm access public $NPM_NAME
+              fi
+              cd ..
+            done
+      - run:
+          name: NPM publish helpers
+          command: |
+            cd helpers
+            ### ADD FOLDERS HERE TO PROCESS ###
+            for file in tokens wrapper
+            do
+              cd $file
+              NPM_NAME=$(node -p "require('./package.json').name")
+              NPM_VERSION=$(npm view $NPM_NAME version || :)
+              LOCAL_VERSION=$(node -p "require('./package.json').version")
+              if [[ $LOCAL_VERSION != $NPM_VERSION ]]; then
+                echo "Updating NPM..." # this is where we deploy the code to npm
+                npm publish
+                npm access public $NPM_NAME
+              fi
+              cd ..
+            done
+      - run:
+          name: NPM publish protocols
+          command: |
+            cd protocols
+            ### ADD FOLDERS HERE TO PROCESS ###
+            for file in indexer market swap types
+            do
+              cd $file
+              NPM_NAME=$(node -p "require('./package.json').name")
+              NPM_VERSION=$(npm view $NPM_NAME version || :)
+              LOCAL_VERSION=$(node -p "require('./package.json').version")
+              if [[ $LOCAL_VERSION != $NPM_VERSION ]]; then
+                echo "Updating NPM..." # this is where we deploy the code to npm
+                npm publish
+                npm access public $NPM_NAME
               fi
               cd ..
             done
