@@ -30,6 +30,15 @@
 | [`@airswap/order-utils`](/packages/order-utils) | [![npm](https://img.shields.io/npm/v/@airswap/order-utils)](https://www.npmjs.com/package/@airswap/order-utils) | Create and Sign Orders |
 | [`@airswap/test-utils`](/packages/test-utils)   | [![npm](https://img.shields.io/npm/v/@airswap/test-utils)](https://www.npmjs.com/package/@airswap/test-utils)   | Test Utilities         |
 
+# Deployed
+
+| Contract | Package                              | Version | Network | Address                                                                                                                         |
+| :------- | :----------------------------------- | :------ | :------ | :------------------------------------------------------------------------------------------------------------------------------ |
+| Swap     | [`@airswap/swap`](/protocols/swap)   | `2.0.0` | Mainnet | [`0x54d2690e97e477a4b33f40d6e4afdd4832c07c57`](https://etherscan.io/address/0x54d2690e97e477a4b33f40d6e4afdd4832c07c57)         |
+| Types    | [`@airswap/types`](/protocols/types) | `0.1.0` | Mainnet | [`0xc65ff60eb8e4038a2415bb569d1fa6dca47d692e`](https://etherscan.io/address/0xc65ff60eb8e4038a2415bb569d1fa6dca47d692e)         |
+| Swap     | [`@airswap/swap`](/protocols/swap)   | `2.0.0` | Rinkeby | [`0x78db49d0459a67158bdca6e161be3d90342c7247`](https://rinkeby.etherscan.io/address/0x78db49d0459a67158bdca6e161be3d90342c7247) |
+| Types    | [`@airswap/types`](/protocols/types) | `0.1.0` | Rinkeby | [`0xaaf6cb19298e7d0abc410eb2a0d5b8fef747573d`](https://rinkeby.etherscan.io/address/0xaaf6cb19298e7d0abc410eb2a0d5b8fef747573d) |
+
 # Examples
 
 ## Onchain Peer with Rules
