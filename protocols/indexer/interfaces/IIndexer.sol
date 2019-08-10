@@ -54,11 +54,6 @@ interface IIndexer {
     address _takerToken
   ) external returns (address);
 
-  function createTwoSidedMarket(
-    address _makerToken,
-    address _takerToken
-  ) external returns (address, address);
-
   function addToBlacklist(
     address _token
   ) external;
@@ -75,22 +70,9 @@ interface IIndexer {
     address _locator
   ) external;
 
-  function setTwoSidedIntent(
-    address _tokenOne,
-    address _tokenTwo,
-    uint256 _amount,
-    uint256 _expiry,
-    address _locator
-  ) external;
-
   function unsetIntent(
     address _makerToken,
     address _takerToken
-  ) external;
-
-  function unsetTwoSidedIntent(
-    address _tokenOne,
-    address _tokenTwo
   ) external;
 
   function getIntents(

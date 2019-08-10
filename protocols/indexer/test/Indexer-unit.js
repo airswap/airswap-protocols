@@ -3,7 +3,6 @@ const Market = artifacts.require('Market')
 const MockContract = artifacts.require('MockContract')
 
 const {
-  getResult,
   emitted,
   notEmitted,
   reverted,
@@ -83,7 +82,7 @@ contract('Indexer Unit Tests', async accounts => {
     })
   })
 
-  describe('Test createMarket and createTwoSidedMarket', async () => {
+  describe('Test createMarket', async () => {
     it('createMarket should emit an event and create a new market', async () => {
       let result = await indexer.createMarket(tokenOne, tokenTwo, {
         from: aliceAddress,
@@ -123,63 +122,6 @@ contract('Indexer Unit Tests', async accounts => {
       })
 
       await checkMarketAtAddress(marketAddress, tokenOne, tokenTwo)
-    })
-
-    it('createTwoSidedMarket should create 2 new markets if they dont exist', async () => {
-      let result = await indexer.createTwoSidedMarket(tokenOne, tokenTwo, {
-        from: aliceAddress,
-      })
-
-      // 2 events are emitted - one for each market
-      emitted(result, 'CreateMarket', event => {
-        return event.makerToken === tokenOne && event.takerToken === tokenTwo
-      })
-      emitted(result, 'CreateMarket', event => {
-        return event.makerToken === tokenTwo && event.takerToken === tokenOne
-      })
-
-      // and 2 markets with the correct tokens have been created
-      let markets = await indexer.createTwoSidedMarket.call(
-        tokenOne,
-        tokenTwo,
-        {
-          from: aliceAddress,
-        }
-      )
-
-      await checkMarketAtAddress(markets[0], tokenOne, tokenTwo)
-      await checkMarketAtAddress(markets[1], tokenTwo, tokenOne)
-    })
-
-    it('createTwoSidedMarket should just return 2 addresses if they exist', async () => {
-      // create the 2 markets so they already exist
-      await indexer.createTwoSidedMarket(tokenOne, tokenTwo, {
-        from: aliceAddress,
-      })
-
-      // now trying to create it again will not emit the event
-      let result = await indexer.createMarket(tokenOne, tokenTwo, {
-        from: aliceAddress,
-      })
-
-      notEmitted(result, 'CreateMarket', event => {
-        return event.makerToken === tokenOne && event.takerToken === tokenTwo
-      })
-      notEmitted(result, 'CreateMarket', event => {
-        return event.makerToken === tokenTwo && event.takerToken === tokenOne
-      })
-
-      // instead the markets' addresses are returned
-      let markets = await indexer.createTwoSidedMarket.call(
-        tokenOne,
-        tokenTwo,
-        {
-          from: aliceAddress,
-        }
-      )
-
-      await checkMarketAtAddress(markets[0], tokenOne, tokenTwo)
-      await checkMarketAtAddress(markets[1], tokenTwo, tokenOne)
     })
   })
 
@@ -475,188 +417,6 @@ contract('Indexer Unit Tests', async accounts => {
           event.wallet === aliceAddress &&
           event.makerToken === tokenOne &&
           event.takerToken == tokenTwo &&
-          event.amount.toNumber() === 250
-        )
-      })
-    })
-  })
-
-  describe('Test setTwoSidedIntent', async () => {
-    it('should not set either intent if 1 breaks a rule', async () => {
-      // make one market
-      await indexer.createMarket(tokenOne, tokenTwo, {
-        from: aliceAddress,
-      })
-
-      let expiry = await getTimestampPlusDays(1)
-
-      // try to set both intents, but one market doesnt exist
-      await reverted(
-        indexer.setTwoSidedIntent(
-          tokenOne,
-          tokenTwo,
-          250,
-          expiry,
-          aliceAddress,
-          {
-            from: aliceAddress,
-          }
-        ),
-        'MARKET_DOES_NOT_EXIST'
-      )
-
-      // create the other market (both exist now)
-      await indexer.createMarket(tokenTwo, tokenOne, {
-        from: aliceAddress,
-      })
-
-      // alice stakes on one market
-      await indexer.setIntent(tokenOne, tokenTwo, 250, expiry, aliceAddress, {
-        from: aliceAddress,
-      })
-
-      // try to set both intents, but fails as alice has already staked on one
-      await reverted(
-        indexer.setTwoSidedIntent(
-          tokenOne,
-          tokenTwo,
-          250,
-          expiry,
-          aliceAddress,
-          {
-            from: aliceAddress,
-          }
-        ),
-        'USER_ALREADY_STAKED'
-      )
-    })
-
-    it('should set 2 valid intents and emit 2 events', async () => {
-      // make both markets
-      await indexer.createTwoSidedMarket(tokenOne, tokenTwo, {
-        from: aliceAddress,
-      })
-
-      let expiry = await getTimestampPlusDays(1)
-
-      // set the intents
-      let result = await indexer.setTwoSidedIntent(
-        tokenOne,
-        tokenTwo,
-        250,
-        expiry,
-        aliceAddress,
-        {
-          from: aliceAddress,
-        }
-      )
-      passes(result)
-
-      // check both events were emitted
-      emitted(result, 'Stake', event => {
-        return (
-          event.wallet === aliceAddress &&
-          event.makerToken === tokenOne &&
-          event.takerToken == tokenTwo &&
-          event.amount.toNumber() === 250 &&
-          event.expiry.toNumber() === expiry
-        )
-      })
-
-      emitted(result, 'Stake', event => {
-        return (
-          event.wallet === aliceAddress &&
-          event.makerToken === tokenTwo &&
-          event.takerToken == tokenOne &&
-          event.amount.toNumber() === 250 &&
-          event.expiry.toNumber() === expiry
-        )
-      })
-    })
-  })
-
-  describe('Test unsetTwoSidedIntent', async () => {
-    it('should not unset either intent if 1 breaks a rule', async () => {
-      // make one market and one intent
-      await indexer.createMarket(tokenOne, tokenTwo, {
-        from: aliceAddress,
-      })
-      let expiry = await getTimestampPlusDays(1)
-      await indexer.setIntent(tokenOne, tokenTwo, 250, expiry, aliceAddress, {
-        from: aliceAddress,
-      })
-
-      // try to unset both intents, but the second market doesnt exist
-      await reverted(
-        indexer.unsetTwoSidedIntent(tokenOne, tokenTwo, {
-          from: aliceAddress,
-        }),
-        'MARKET_DOES_NOT_EXIST'
-      )
-
-      // create the other market (both exist now), and stake on it
-      await indexer.createMarket(tokenTwo, tokenOne, {
-        from: aliceAddress,
-      })
-      await indexer.setIntent(tokenTwo, tokenOne, 250, expiry, aliceAddress, {
-        from: aliceAddress,
-      })
-
-      // unset intent from first market
-      await indexer.unsetIntent(tokenOne, tokenTwo, {
-        from: aliceAddress,
-      })
-
-      // try to unset both intents, but fails as alice has only staked on one
-      await reverted(
-        indexer.unsetTwoSidedIntent(tokenOne, tokenTwo, {
-          from: aliceAddress,
-        }),
-        'INTENT_DOES_NOT_EXIST'
-      )
-    })
-
-    it('should unset 2 valid intents and emit 2 events', async () => {
-      // make both markets
-      await indexer.createTwoSidedMarket(tokenOne, tokenTwo, {
-        from: aliceAddress,
-      })
-
-      let expiry = await getTimestampPlusDays(1)
-
-      // set both intents
-      await indexer.setTwoSidedIntent(
-        tokenOne,
-        tokenTwo,
-        250,
-        expiry,
-        aliceAddress,
-        {
-          from: aliceAddress,
-        }
-      )
-
-      // now unset 2 intents
-      let result = await indexer.unsetTwoSidedIntent(tokenOne, tokenTwo, {
-        from: aliceAddress,
-      })
-      passes(result)
-
-      // check both events were emitted
-      emitted(result, 'Unstake', event => {
-        return (
-          event.wallet === aliceAddress &&
-          event.makerToken === tokenOne &&
-          event.takerToken == tokenTwo &&
-          event.amount.toNumber() === 250
-        )
-      })
-
-      emitted(result, 'Unstake', event => {
-        return (
-          event.wallet === aliceAddress &&
-          event.makerToken === tokenTwo &&
-          event.takerToken == tokenOne &&
           event.amount.toNumber() === 250
         )
       })

@@ -71,28 +71,6 @@ contract Indexer is IIndexer, Ownable {
   }
 
   /**
-    * @notice Create a Two Sided Market
-    * @dev Deploys two new Market contracts
-    *
-    * @param _tokenOne address
-    * @param _tokenTwo address
-    */
-  function createTwoSidedMarket(
-    address _tokenOne,
-    address _tokenTwo
-  ) public returns (address, address) {
-
-    // Create the makerToken / takerToken market.
-    address marketOne = createMarket(_tokenOne, _tokenTwo);
-
-    // Create the takerToken / makerToken market.
-    address marketTwo = createMarket(_tokenTwo, _tokenOne);
-
-    // Return the addresses of both Market contracts.
-    return (marketOne, marketTwo);
-  }
-
-  /**
     * @notice Add a Token to the Blacklist
     * @param _token address
     */
@@ -163,29 +141,6 @@ contract Indexer is IIndexer, Ownable {
   }
 
   /**
-    * @notice Set Two-Sided Intent to Trade
-    *
-    * @param _tokenOne address
-    * @param _tokenTwo address
-    * @param _amount uint256
-    * @param _expiry uint256
-    * @param _locator address
-    */
-  function setTwoSidedIntent(
-    address _tokenOne,
-    address _tokenTwo,
-    uint256 _amount,
-    uint256 _expiry,
-    address _locator
-  ) public {
-    // Set the _makerToken / _tokenTwo side of the market.
-    setIntent(_tokenOne, _tokenTwo, _amount, _expiry, _locator);
-
-    // Set the _tokenTwo / _makerToken side of the market.
-    setIntent(_tokenTwo, _tokenOne, _amount, _expiry, _locator);
-  }
-
-  /**
     * @notice Unset an Intent to Trade
     * @dev Users are allowed unstake from blacklisted markets
     *
@@ -214,24 +169,6 @@ contract Indexer is IIndexer, Ownable {
     // Return the staked tokens.
     stakeToken.transfer(msg.sender, intent.amount);
     emit Unstake(msg.sender, _makerToken, _takerToken, intent.amount);
-  }
-
-  /**
-    * @notice Unset an Two-Sided Intent to Trade
-    * @dev Users are allowed unstake from blacklisted markets
-    *
-    * @param _tokenOne address
-    * @param _tokenTwo address
-    */
-  function unsetTwoSidedIntent(
-    address _tokenOne,
-    address _tokenTwo
-  ) public {
-    // Unset the _tokenOne / _tokenTwo side of the market.
-    unsetIntent(_tokenOne, _tokenTwo);
-
-    // Unset the _tokenTwo / _tokenOne side of the market.
-    unsetIntent(_tokenTwo, _tokenOne);
   }
 
   /**
