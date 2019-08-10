@@ -47,7 +47,7 @@ interface IIndexer {
   );
 
   function markets(address, address) external returns (address);
-  function blacklist(address) external returns (uint256);
+  function blacklist(address) external returns (bool);
 
   function createMarket(
     address _makerToken,
@@ -55,11 +55,11 @@ interface IIndexer {
   ) external returns (address);
 
   function addToBlacklist(
-    address _token
+    address[] calldata _tokens
   ) external;
 
   function removeFromBlacklist(
-    address _token
+    address[] calldata _tokens
   ) external;
 
   function setIntent(

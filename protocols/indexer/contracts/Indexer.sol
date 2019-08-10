@@ -34,7 +34,7 @@ contract Indexer is IIndexer, Ownable {
   mapping (address => mapping (address => Market)) public markets;
 
   // Mapping of address to timestamp of blacklisting
-  mapping (address => uint256) public blacklist;
+  mapping (address => bool) public blacklist;
 
   /**
     * @notice Contract Constructor
@@ -72,27 +72,31 @@ contract Indexer is IIndexer, Ownable {
 
   /**
     * @notice Add a Token to the Blacklist
-    * @param _token address
+    * @param _tokens address[]
     */
   function addToBlacklist(
-    address _token
+    address[] calldata _tokens
   ) external onlyOwner {
-    if (blacklist[_token] == 0) {
-      blacklist[_token] = block.timestamp;
-      emit AddToBlacklist(_token);
+    for (uint256 i = 0; i < _tokens.length; i++) {
+      if (blacklist[_tokens[i]] == false) {
+        blacklist[_tokens[i]] = true;
+        emit AddToBlacklist(_tokens[i]);
+      }
     }
   }
 
   /**
     * @notice Remove a Token from the Blacklist
-    * @param _token address
+    * @param _tokens address[]
     */
   function removeFromBlacklist(
-    address _token
+    address[] calldata _tokens
   ) external onlyOwner {
-    if (blacklist[_token] != 0) {
-      blacklist[_token] = 0;
-      emit RemoveFromBlacklist(_token);
+    for (uint256 i = 0; i < _tokens.length; i++) {
+      if (blacklist[_tokens[i]] == true) {
+        blacklist[_tokens[i]] = false;
+        emit RemoveFromBlacklist(_tokens[i]);
+      }
     }
   }
 
@@ -115,7 +119,7 @@ contract Indexer is IIndexer, Ownable {
   ) public {
 
     // Ensure both of the tokens are not blacklisted.
-    require(blacklist[_makerToken] == 0 && blacklist[_takerToken] == 0,
+    require(!blacklist[_makerToken] && !blacklist[_takerToken],
       "MARKET_IS_BLACKLISTED");
 
     // Ensure the market exists.
@@ -189,7 +193,7 @@ contract Indexer is IIndexer, Ownable {
   ) {
 
     // Ensure neither token is blacklisted.
-    if (blacklist[_makerToken] == 0 && blacklist[_takerToken] == 0) {
+    if (!blacklist[_makerToken] && !blacklist[_takerToken]) {
 
       // Ensure the market exists.
       if (markets[_makerToken][_takerToken] != Market(0)) {
