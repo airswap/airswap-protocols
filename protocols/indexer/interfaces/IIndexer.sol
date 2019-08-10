@@ -81,9 +81,4 @@ interface IIndexer {
     uint256 _count
   ) external returns (address[] memory);
 
-  function lengthOf(
-    address _makerToken,
-    address _takerToken
-  ) external returns (uint256);
-
 }

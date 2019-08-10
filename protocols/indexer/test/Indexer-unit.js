@@ -494,45 +494,4 @@ contract('Indexer Unit Tests', async accounts => {
       equal(intents.length, 1, 'intents array should be size 1')
     })
   })
-
-  describe('Test lengthOf', async () => {
-    it("should return 0 if the market doesn't exist", async () => {
-      // call length of without creating the market
-      let result = await indexer.lengthOf.call(tokenOne, tokenTwo)
-      equal(result, 0, 'result should be 0')
-    })
-
-    it('should return the length of the market', async () => {
-      // create market
-      await indexer.createMarket(tokenOne, tokenTwo, {
-        from: aliceAddress,
-      })
-
-      // set two intents
-      await indexer.setIntent(
-        tokenOne,
-        tokenTwo,
-        250,
-        await getTimestampPlusDays(1),
-        aliceAddress,
-        {
-          from: aliceAddress,
-        }
-      )
-      await indexer.setIntent(
-        tokenOne,
-        tokenTwo,
-        250,
-        await getTimestampPlusDays(1),
-        bobAddress,
-        {
-          from: bobAddress,
-        }
-      )
-
-      // now call length of
-      let result = await indexer.lengthOf.call(tokenOne, tokenTwo)
-      equal(result, 2, 'result should be 2')
-    })
-  })
 })

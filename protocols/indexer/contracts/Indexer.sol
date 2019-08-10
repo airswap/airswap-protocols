@@ -202,27 +202,4 @@ contract Indexer is IIndexer, Ownable {
     return new address[](0);
   }
 
-  /**
-    * @notice Get the Size of a Market
-    * @dev Returns the number of valid intents to trade
-    *
-    * @param _makerToken address
-    * @param _takerToken address
-    */
-  function lengthOf(
-    address _makerToken,
-    address _takerToken
-  ) external returns (
-    uint256
-  ) {
-
-    // Ensure the market exists.
-    if (markets[_makerToken][_takerToken] != Market(0)) {
-
-      // Return the size of the market.
-      return markets[_makerToken][_takerToken].length();
-
-    }
-    return 0;
-  }
 }
