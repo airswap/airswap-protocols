@@ -22,9 +22,6 @@ contract('Indexer Unit Tests', async accounts => {
   let aliceAddress = accounts[2]
   let bobAddress = accounts[3]
 
-  const MIN_STAKE_250 = 250
-  const MIN_STAKE_500 = 500
-
   let indexer
   let snapshotId
   let stakingTokenMock
@@ -72,7 +69,7 @@ contract('Indexer Unit Tests', async accounts => {
 
   before('Setup contracts', async () => {
     await setupMockToken()
-    indexer = await Indexer.new(stakingTokenAddress, MIN_STAKE_250)
+    indexer = await Indexer.new(stakingTokenAddress)
   })
 
   describe('Check constructor', async () => {
@@ -83,42 +80,6 @@ contract('Indexer Unit Tests', async accounts => {
         stakingTokenAddress,
         'Staking token was set incorrectly'
       )
-    })
-
-    it('should set the staking minimum correctly', async () => {
-      const actualMinimum = await indexer.stakeMinimum()
-      equal(actualMinimum, MIN_STAKE_250, 'Staking minimum was set incorrectly')
-    })
-
-    it('should emit an event in the constructor', async () => {
-      // create a new indexer
-      const newIndexer = await Indexer.new(stakingTokenAddress, MIN_STAKE_250)
-
-      // get the tx hash and get the transaction result from it
-      let txHash = newIndexer.transactionHash
-      let result = await getResult(newIndexer, txHash)
-
-      emitted(result, 'SetStakeMinimum', event => {
-        return event.amount.toNumber() === MIN_STAKE_250
-      })
-    })
-  })
-
-  describe('Test setStakeMinimum', async () => {
-    it('should not allow a non-owner to change the minimum', async () => {
-      await reverted(
-        indexer.setStakeMinimum(MIN_STAKE_500, {
-          from: nonOwner,
-        }),
-        'Ownable: caller is not the owner'
-      )
-    })
-
-    it('should allow the owner to change the minimum', async () => {
-      let result = await indexer.setStakeMinimum(MIN_STAKE_500, { from: owner })
-      emitted(result, 'SetStakeMinimum', event => {
-        return event.amount.toNumber() === MIN_STAKE_500
-      })
     })
   })
 
@@ -318,28 +279,6 @@ contract('Indexer Unit Tests', async accounts => {
           }
         ),
         'MARKET_DOES_NOT_EXIST'
-      )
-    })
-
-    it('should not set an intent if the minimim stake isnt met', async () => {
-      // make the market first
-      await indexer.createMarket(tokenOne, tokenTwo, {
-        from: aliceAddress,
-      })
-
-      // now try to stake with an amount less than 250
-      await reverted(
-        indexer.setIntent(
-          tokenOne,
-          tokenTwo,
-          249,
-          await getTimestampPlusDays(1),
-          aliceAddress,
-          {
-            from: aliceAddress,
-          }
-        ),
-        'MINIMUM_NOT_MET'
       )
     })
 

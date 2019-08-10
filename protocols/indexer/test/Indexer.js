@@ -42,9 +42,8 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
     })
 
     it('Deployed Indexer contract', async () => {
-      indexer = await Indexer.new(tokenAST.address, 200, { from: ownerAddress })
+      indexer = await Indexer.new(tokenAST.address, { from: ownerAddress })
       indexerAddress = indexer.address
-      emitted(await indexer.setStakeMinimum(250), 'SetStakeMinimum')
     })
   })
 
@@ -75,22 +74,6 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
           }
         ),
         'MARKET_DOES_NOT_EXIST'
-      )
-    })
-
-    it('Alice attempts to stake and set an intent but fails due to minimum', async () => {
-      await reverted(
-        indexer.setIntent(
-          tokenWETH.address,
-          tokenDAI.address,
-          100,
-          await getTimestampPlusDays(1),
-          aliceAddress,
-          {
-            from: aliceAddress,
-          }
-        ),
-        'MINIMUM_NOT_MET'
       )
     })
   })

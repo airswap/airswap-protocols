@@ -30,9 +30,6 @@ contract Indexer is IIndexer, Ownable {
   // Token to be used for staking (ERC-20)
   IERC20 public stakeToken;
 
-  // Minimum token amount required for staking
-  uint256 public stakeMinimum;
-
   // Mapping of maker token to taker token to market
   mapping (address => mapping (address => Market)) public markets;
 
@@ -43,15 +40,11 @@ contract Indexer is IIndexer, Ownable {
     * @notice Contract Constructor
     *
     * @param _stakeToken address
-    * @param _stakeMinimum uint256
     */
   constructor(
-    address _stakeToken,
-    uint256 _stakeMinimum
+    address _stakeToken
   ) public {
     stakeToken = IERC20(_stakeToken);
-    stakeMinimum = _stakeMinimum;
-    emit SetStakeMinimum(_stakeMinimum);
   }
 
   /**
@@ -97,17 +90,6 @@ contract Indexer is IIndexer, Ownable {
 
     // Return the addresses of both Market contracts.
     return (marketOne, marketTwo);
-  }
-
-  /**
-    * @notice Set the Minimum Staking Amount
-    * @param _stakeMinimum uint256
-    */
-  function setStakeMinimum(
-    uint256 _stakeMinimum
-  ) external onlyOwner {
-    stakeMinimum = _stakeMinimum;
-    emit SetStakeMinimum(_stakeMinimum);
   }
 
   /**
@@ -162,13 +144,14 @@ contract Indexer is IIndexer, Ownable {
     require(markets[_makerToken][_takerToken] != Market(0),
       "MARKET_DOES_NOT_EXIST");
 
-    // Ensure the _amount meets the stakeMinimum.
-    require(_amount >= stakeMinimum,
-      "MINIMUM_NOT_MET");
+    // Only transfer for staking if is amount is set.
+    if (_amount > 0) {
 
-    // Transfer the _amount for staking.
-    require(stakeToken.transferFrom(msg.sender, address(this), _amount),
-      "UNABLE_TO_STAKE");
+      // Transfer the _amount for staking.
+      require(stakeToken.transferFrom(msg.sender, address(this), _amount),
+        "UNABLE_TO_STAKE");
+
+    }
 
     require(!markets[_makerToken][_takerToken].hasIntent(msg.sender),
       "USER_ALREADY_STAKED");

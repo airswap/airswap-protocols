@@ -38,10 +38,6 @@ interface IIndexer {
     uint256 amount
   );
 
-  event SetStakeMinimum(
-    uint256 amount
-  );
-
   event AddToBlacklist(
     address token
   );
@@ -62,10 +58,6 @@ interface IIndexer {
     address _makerToken,
     address _takerToken
   ) external returns (address, address);
-
-  function setStakeMinimum(
-    uint256 _stakeMinimum
-  ) external;
 
   function addToBlacklist(
     address _token
