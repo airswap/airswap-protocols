@@ -45,7 +45,9 @@ contract Peer is IPeer, Ownable {
     address peerOwner
   ) public {
     swapContract = ISwap(initialSwapContract);
-    transferOwnership(peerOwner);
+    if (peerOwner != address(0)) {
+      transferOwnership(peerOwner);
+    }
   }
 
   /**
