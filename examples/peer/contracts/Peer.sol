@@ -41,9 +41,11 @@ contract Peer is IPeer, Ownable {
     * @param initialSwapContract address of the swap contract the delegate will deploy with
     */
   constructor(
-    address initialSwapContract
+    address initialSwapContract,
+    address peerOwner
   ) public {
     swapContract = ISwap(initialSwapContract);
+    transferOwnership(peerOwner);
   }
 
   /**
