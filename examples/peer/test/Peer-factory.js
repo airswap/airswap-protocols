@@ -92,7 +92,7 @@ contract('Peer Factory Tests', async accounts => {
       equal(isTrustedPeer, true)
 
       // get the swap and owner values of the peer
-      let peer = Peer.at(peerAddress)
+      let peer = await Peer.at(peerAddress)
       let actualSwap = await peer.swapContract.call()
       let actualOwner = await peer.owner.call()
 
