@@ -61,7 +61,7 @@ contract('Consumer', async accounts => {
         from: ownerAddress,
       })
       consumerAddress = consumer.address
-      alicePeer = await Peer.new(swapAddress, { from: aliceAddress })
+      alicePeer = await Peer.new(swapAddress, aliceAddress, { from: aliceAddress })
     })
 
     it('Alice authorizes the new peer', async () => {

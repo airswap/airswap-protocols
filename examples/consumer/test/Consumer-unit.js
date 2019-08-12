@@ -33,7 +33,7 @@ contract('Consumer Unit Tests', async () => {
   })
 
   async function setupMockDelgate() {
-    let peerTemplate = await Peer.new(EMPTY_ADDRESS)
+    let peerTemplate = await Peer.new(EMPTY_ADDRESS, EMPTY_ADDRESS)
     mockPeerHigh = await MockContract.new()
     mockPeerLow = await MockContract.new()
 
