@@ -29,8 +29,8 @@ contract PeerFactory {
     * @param initialSwapContract address of the swap contract the peer will deploy with
     * @param peerOwner address that should be the owner of the peer
     */
-  function deployTrustedPeer(address initialSwapContract, address owner) public returns (address) {
-    address newPeer = address(new Peer(initialSwapContract, owner));
+  function deployTrustedPeer(address initialSwapContract, address peerOwner) public returns (address) {
+    address newPeer = address(new Peer(initialSwapContract, peerOwner));
     trustedPeers[newPeer] = true;
     return newPeer;
   }
