@@ -30,6 +30,9 @@ contract PeerFactory {
     * @param peerOwner address that should be the owner of the peer
     */
   function deployTrustedPeer(address initialSwapContract, address peerOwner) public returns (address) {
+    require(peerOwner != address(0), 'Provide a peer owner');
+    require(initialSwapContract != address(0), 'Provide a swap address');
+
     address newPeer = address(new Peer(initialSwapContract, peerOwner));
     trustedPeers[newPeer] = true;
     return newPeer;
