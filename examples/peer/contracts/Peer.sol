@@ -39,6 +39,7 @@ contract Peer is IPeer, Ownable {
   /**
     * @notice Contract Constructor
     * @param initialSwapContract address of the swap contract the delegate will deploy with
+    * @param peerOwner address that should be the owner of the peer
     */
   constructor(
     address initialSwapContract,
