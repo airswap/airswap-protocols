@@ -22,6 +22,8 @@ import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 contract PeerFactory {
 
+  event NewTrustedPeer(address peer, address swap, address owner);
+
   mapping(address => bool) public trustedPeers;
 
   /**
@@ -35,6 +37,9 @@ contract PeerFactory {
 
     address newPeer = address(new Peer(initialSwapContract, peerOwner));
     trustedPeers[newPeer] = true;
+
+    emit NewTrustedPeer(newPeer, initialSwapContract, peerOwner);
+
     return newPeer;
   }
 
