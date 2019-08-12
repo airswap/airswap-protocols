@@ -54,7 +54,6 @@ contract('Peer', async accounts => {
       alicePeer = await Peer.new(swapAddress, aliceAddress, {
         from: aliceAddress,
       })
-      await alicePeer.setSwapContract(swapAddress)
     })
   })
 
