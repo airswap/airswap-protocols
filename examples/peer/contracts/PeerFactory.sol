@@ -24,9 +24,15 @@ contract PeerFactory {
 
   mapping(address => bool) public trustedPeers;
 
+  /**
+    * @notice Deploy a trusted peer contract
+    * @param initialSwapContract address of the swap contract the peer will deploy with
+    * @param peerOwner address that should be the owner of the peer
+    */
   function deployTrustedPeer(address initialSwapContract, address owner) public returns (address) {
     address newPeer = address(new Peer(initialSwapContract, owner));
     trustedPeers[newPeer] = true;
     return newPeer;
   }
+
 }
