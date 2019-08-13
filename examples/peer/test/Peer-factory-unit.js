@@ -55,7 +55,7 @@ contract('Peer Factory Tests', async accounts => {
       )
 
       // before calling the function, the mapping is false
-      let isTrustedPeer = await peerFactory.trustedPeers.call(peerAddress)
+      let isTrustedPeer = await peerFactory.isWhitelisted.call(peerAddress)
       equal(isTrustedPeer, false)
 
       // successful tx
@@ -75,7 +75,7 @@ contract('Peer Factory Tests', async accounts => {
       })
 
       // mapping has been updated
-      isTrustedPeer = await peerFactory.trustedPeers.call(peerAddress)
+      isTrustedPeer = await peerFactory.isWhitelisted.call(peerAddress)
       equal(isTrustedPeer, true)
     })
 
@@ -88,7 +88,7 @@ contract('Peer Factory Tests', async accounts => {
 
       // deploy peer
       await peerFactory.deployTrustedPeer(swapContractTwo, peerOwnerTwo)
-      let isTrustedPeer = await peerFactory.trustedPeers.call(peerAddress)
+      let isTrustedPeer = await peerFactory.isWhitelisted.call(peerAddress)
       equal(isTrustedPeer, true)
 
       // get the swap and owner values of the peer

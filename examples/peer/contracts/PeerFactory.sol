@@ -20,11 +20,11 @@ pragma experimental ABIEncoderV2;
 import "@airswap/peer/contracts/Peer.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
-contract PeerFactory {
+contract PeerFactory is IWhitelisted {
 
   event NewTrustedPeer(address peer, address swap, address owner);
 
-  mapping(address => bool) public trustedPeers;
+  mapping(address => bool) public isWhitelisted;
 
   /**
     * @notice Deploy a trusted peer contract
@@ -36,7 +36,7 @@ contract PeerFactory {
     require(initialSwapContract != address(0), 'Provide a swap address');
 
     address newPeer = address(new Peer(initialSwapContract, peerOwner));
-    trustedPeers[newPeer] = true;
+    isWhitelisted[newPeer] = true;
 
     emit NewTrustedPeer(newPeer, initialSwapContract, peerOwner);
 
