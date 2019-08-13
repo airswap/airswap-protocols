@@ -40,6 +40,7 @@ contract Indexer is IIndexer, Ownable {
   // Mapping of address to timestamp of blacklisting
   mapping (address => uint256) public blacklist;
 
+  // The whitelist contract for checking whether a peer is whitelisted
   IWhitelist whitelist;
   bool hasWhitelist;
 
@@ -48,6 +49,7 @@ contract Indexer is IIndexer, Ownable {
     *
     * @param _stakeToken address
     * @param _stakeMinimum uint256
+    * @param _whitelist address
     */
   constructor(
     address _stakeToken,
@@ -154,15 +156,21 @@ contract Indexer is IIndexer, Ownable {
     * @param _takerToken address
     * @param _amount uint256
     * @param _expiry uint256
-    * @param _locator address
+    * @param _locator bytes32
     */
   function setIntent(
     address _makerToken,
     address _takerToken,
     uint256 _amount,
     uint256 _expiry,
-    address _locator
+    bytes32 _locator
   ) public {
+
+    // Ensure the locator is whitelisted, if relevant
+    if (hasWhitelist) {
+      require(whitelist.isWhitelisted(_locator),
+      "LOCATOR_NOT_WHITELISTED");
+    }
 
     // Ensure both of the tokens are not blacklisted.
     require(blacklist[_makerToken] == 0 && blacklist[_takerToken] == 0,
@@ -196,14 +204,14 @@ contract Indexer is IIndexer, Ownable {
     * @param _tokenTwo address
     * @param _amount uint256
     * @param _expiry uint256
-    * @param _locator address
+    * @param _locator bytes32
     */
   function setTwoSidedIntent(
     address _tokenOne,
     address _tokenTwo,
     uint256 _amount,
     uint256 _expiry,
-    address _locator
+    bytes32 _locator
   ) public {
     // Set the _makerToken / _tokenTwo side of the market.
     setIntent(_tokenOne, _tokenTwo, _amount, _expiry, _locator);
@@ -275,7 +283,7 @@ contract Indexer is IIndexer, Ownable {
     address _takerToken,
     uint256 _count
   ) external returns (
-    address[] memory locators
+    bytes32[] memory locators
   ) {
 
     // Ensure neither token is blacklisted.
