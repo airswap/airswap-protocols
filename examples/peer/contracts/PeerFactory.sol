@@ -24,23 +24,32 @@ contract PeerFactory is IWhitelisted {
 
   event NewTrustedPeer(address peer, address swap, address owner);
 
-  mapping(address => bool) public isWhitelisted;
+  mapping(address => bool) internal factoryPeers;
 
   /**
     * @notice Deploy a trusted peer contract
-    * @param initialSwapContract address of the swap contract the peer will deploy with
-    * @param peerOwner address that should be the owner of the peer
+    * @param _initialSwapContract address of the swap contract the peer will deploy with
+    * @param _peerOwner address that should be the owner of the peer
     */
-  function deployTrustedPeer(address initialSwapContract, address peerOwner) public returns (address) {
-    require(peerOwner != address(0), 'Provide a peer owner');
-    require(initialSwapContract != address(0), 'Provide a swap address');
+  function deployTrustedPeer(address _initialSwapContract, address _peerOwner) public returns (address) {
+    require(_peerOwner != address(0), 'Provide a peer owner');
+    require(_initialSwapContract != address(0), 'Provide a swap address');
 
-    address newPeer = address(new Peer(initialSwapContract, peerOwner));
-    isWhitelisted[newPeer] = true;
+    address newPeer = address(new Peer(_initialSwapContract, _peerOwner));
+    factoryPeers[newPeer] = true;
 
-    emit NewTrustedPeer(newPeer, initialSwapContract, peerOwner);
+    emit NewTrustedPeer(newPeer, _initialSwapContract, _peerOwner);
 
     return newPeer;
+  }
+
+  /**
+    * @notice To check whether a locator is whitelisted
+    * @param _locator locator of the peer in question
+    * @return bool - true if the locator is whitelisted
+    */
+  function isWhitelisted(bytes32 _locator) external returns (bool) {
+    return factoryPeers(address(bytes20(_locator)));
   }
 
 }
