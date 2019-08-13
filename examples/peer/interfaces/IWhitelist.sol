@@ -16,7 +16,7 @@
 
 pragma solidity 0.5.10;
 
-interface IWhitelisted {
+interface IWhitelist {
 
   function isWhitelisted(
     bytes32 _locator

@@ -19,6 +19,7 @@ pragma experimental ABIEncoderV2;
 
 import "@airswap/indexer/interfaces/IIndexer.sol";
 import "@airswap/market/contracts/Market.sol";
+import "@airswap/peer/interfaces/IWhitelist.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
@@ -39,6 +40,9 @@ contract Indexer is IIndexer, Ownable {
   // Mapping of address to timestamp of blacklisting
   mapping (address => uint256) public blacklist;
 
+  IWhitelist whitelist;
+  bool hasWhitelist;
+
   /**
     * @notice Contract Constructor
     *
@@ -47,11 +51,17 @@ contract Indexer is IIndexer, Ownable {
     */
   constructor(
     address _stakeToken,
-    uint256 _stakeMinimum
+    uint256 _stakeMinimum,
+    address _whitelist
   ) public {
     stakeToken = IERC20(_stakeToken);
     stakeMinimum = _stakeMinimum;
     emit SetStakeMinimum(_stakeMinimum);
+
+    if (_whitelist != address(0)) {
+      hasWhitelist = true;
+      whitelist = IWhitelist(_whitelist);
+    }
   }
 
   /**
