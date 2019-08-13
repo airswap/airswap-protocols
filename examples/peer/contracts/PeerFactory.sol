@@ -18,6 +18,7 @@ pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
 import "@airswap/peer/contracts/Peer.sol";
+import "@airswap/peer/interfaces/IWhitelisted.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 contract PeerFactory is IWhitelisted {
@@ -49,7 +50,7 @@ contract PeerFactory is IWhitelisted {
     * @return bool - true if the locator is whitelisted
     */
   function isWhitelisted(bytes32 _locator) external returns (bool) {
-    return factoryPeers(address(bytes20(_locator)));
+    return factoryPeers[address(bytes20(_locator))];
   }
 
 }
