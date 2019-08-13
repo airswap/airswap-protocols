@@ -30,8 +30,7 @@
     "prettier": "^1.18.2",
     "solhint": "^2.1.0",
     "truffle": "^5.0.24",
-    "ethereumjs-abi": "^0.6.7",
-    "truffle-flattener": "^1.4.0"
+    "ethereumjs-abi": "^0.6.7"
   },
   "prettier": {
     "trailingComma": "es5",
