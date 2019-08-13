@@ -297,7 +297,7 @@ contract Indexer is IIndexer, Ownable {
 
       }
     }
-    return new address[](0);
+    return new bytes32[](0);
   }
 
   /**
