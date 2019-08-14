@@ -1,5 +1,7 @@
 # Indexer
 
+**:warning: This package is under active development. Do not use in production.**
+
 [AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens. This package contains source code and tests for an `Indexer` used to manage intents to trade.
 
 [![Discord](https://img.shields.io/discord/590643190281928738.svg)](https://discord.gg/ecQbV7H)
@@ -19,9 +21,13 @@ Find peers based on an intent to trade a specific token pair.
 
 Stake variable amounts of token to position intent in a market.
 
-### Blacklisting
+### Token Blacklisting
 
 Duplicate or malicious tokens may be blacklisted.
+
+### Locator Whitelisting
+
+Limit locators to those whitelisted by another contract.
 
 ## Definitions
 
@@ -39,14 +45,16 @@ Create a new `Indexer` contract.
 ```Solidity
 constructor(
   address _stakeToken
+  address _locatorWhitelist
 ) public
 ```
 
 ### Params
 
-| Name          | Type      | Description                                |
-| :------------ | :-------- | :----------------------------------------- |
-| `_stakeToken` | `address` | Address of the token required for staking. |
+| Name                | Type      | Description                                        |
+| :------------------ | :-------- | :------------------------------------------------- |
+| `_stakeToken`       | `address` | Address of the token required for staking.         |
+| `_locatorWhitelist` | `address` | Address of an optional locator whitelist contract. |
 
 ## Create a Market
 

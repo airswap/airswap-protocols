@@ -18,6 +18,7 @@ pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
 import "@airswap/indexer/interfaces/IIndexer.sol";
+import "@airswap/indexer/interfaces/ILocatorWhitelist.sol";
 import "@airswap/market/contracts/Market.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
@@ -36,15 +37,21 @@ contract Indexer is IIndexer, Ownable {
   // Mapping of token address to boolean
   mapping (address => bool) public blacklist;
 
+  // The whitelist contract for checking whether a peer is whitelisted
+  address public locatorWhitelist;
+
   /**
     * @notice Contract Constructor
     *
     * @param _stakeToken address
+    * @param _locatorWhitelist address
     */
   constructor(
-    address _stakeToken
+    address _stakeToken,
+    address _locatorWhitelist
   ) public {
     stakeToken = IERC20(_stakeToken);
+    locatorWhitelist = _locatorWhitelist;
   }
 
   /**
@@ -108,15 +115,21 @@ contract Indexer is IIndexer, Ownable {
     * @param _takerToken address
     * @param _amount uint256
     * @param _expiry uint256
-    * @param _locator address
+    * @param _locator bytes32
     */
   function setIntent(
     address _makerToken,
     address _takerToken,
     uint256 _amount,
     uint256 _expiry,
-    address _locator
+    bytes32 _locator
   ) public {
+
+    // Ensure the locator is whitelisted, if relevant
+    if (locatorWhitelist != address(0)) {
+      require(ILocatorWhitelist(locatorWhitelist).has(_locator),
+      "LOCATOR_NOT_WHITELISTED");
+    }
 
     // Ensure both of the tokens are not blacklisted.
     require(!blacklist[_makerToken] && !blacklist[_takerToken],
@@ -189,7 +202,7 @@ contract Indexer is IIndexer, Ownable {
     address _takerToken,
     uint256 _count
   ) external returns (
-    address[] memory locators
+    bytes32[] memory locators
   ) {
 
     // Ensure neither token is blacklisted.
@@ -203,7 +216,7 @@ contract Indexer is IIndexer, Ownable {
 
       }
     }
-    return new address[](0);
+    return new bytes32[](0);
   }
 
 }

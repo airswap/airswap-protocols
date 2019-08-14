@@ -19,6 +19,7 @@
 | [`@airswap/swap`](/protocols/swap)       | [![npm](https://img.shields.io/npm/v/@airswap/swap)](https://www.npmjs.com/package/@airswap/swap)       | Atomic Swap                  |
 | [`@airswap/indexer`](/protocols/indexer) | [![npm](https://img.shields.io/npm/v/@airswap/indexer)](https://www.npmjs.com/package/@airswap/indexer) | Onchain Indexer with Staking |
 | [`@airswap/market`](/protocols/market)   | [![npm](https://img.shields.io/npm/v/@airswap/market)](https://www.npmjs.com/package/@airswap/market)   | Intents for a Token Pair     |
+| [`@airswap/peer`](/protocols/peer)       | [![npm](https://img.shields.io/npm/v/@airswap/peer)](https://www.npmjs.com/package/@airswap/peer)       | Onchain Peer with Rules      |
 | [`@airswap/types`](/protocols/types)     | [![npm](https://img.shields.io/npm/v/@airswap/types)](https://www.npmjs.com/package/@airswap/types)     | Types and Hashes             |
 | [`@airswap/wrapper`](/helpers/wrapper)   | [![npm](https://img.shields.io/npm/v/@airswap/wrapper)](https://www.npmjs.com/package/@airswap/wrapper) | Use ether for WETH trades    |
 | [`@airswap/tokens`](/helpers/tokens)     | [![npm](https://img.shields.io/npm/v/@airswap/tokens)](https://www.npmjs.com/package/@airswap/tokens)   | Ethereum Tokens              |
@@ -45,7 +46,7 @@
 
 The [authorization feature](/protocols/swap/README.md#authorizations) enables traders to deploy smart contracts that trade on their behalf. These contracts can include arbitrary logic and connect to other liquidity sources.
 
-See the [`@airswap/peer`](/examples/peer) example. **Demonstration only.**
+See [`@airswap/peer`](/protocols/peer) for an implementation based on trading rules.
 
 ## Onchain Liquidity Consumer
 

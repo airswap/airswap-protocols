@@ -14,6 +14,8 @@ const {
   revertToSnapShot,
   takeSnapshot,
 } = require('@airswap/test-utils').time
+const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
+const { padAddressToLocator } = require('@airswap/test-utils').padding
 
 contract('Indexer Unit Tests', async accounts => {
   let owner = accounts[0]
@@ -21,19 +23,32 @@ contract('Indexer Unit Tests', async accounts => {
   let aliceAddress = accounts[2]
   let bobAddress = accounts[3]
 
+  let aliceLocator = padAddressToLocator(aliceAddress)
+  let bobLocator = padAddressToLocator(bobAddress)
+
   let indexer
   let snapshotId
   let stakingTokenMock
   let stakingTokenAddress
 
+  let whitelistMock
+  let whitelistAddress
+  let whitelistedIndexer
+
   let tokenOne = accounts[8]
   let tokenTwo = accounts[9]
 
-  async function setupMockToken() {
+  async function setupMockContracts() {
     stakingTokenMock = await MockContract.new()
     await stakingTokenMock.givenAnyReturnBool(true)
 
     stakingTokenAddress = stakingTokenMock.address
+
+    whitelistMock = await MockContract.new()
+    // address is not whitelisted
+    await whitelistMock.givenAnyReturnBool(false)
+
+    whitelistAddress = whitelistMock.address
   }
 
   async function checkMarketAtAddress(marketAddress, makerToken, takerToken) {
@@ -67,8 +82,12 @@ contract('Indexer Unit Tests', async accounts => {
   })
 
   before('Setup contracts', async () => {
-    await setupMockToken()
-    indexer = await Indexer.new(stakingTokenAddress)
+    await setupMockContracts()
+    indexer = await Indexer.new(stakingTokenAddress, EMPTY_ADDRESS)
+    whitelistedIndexer = await Indexer.new(
+      stakingTokenAddress,
+      whitelistAddress
+    )
   })
 
   describe('Check constructor', async () => {
@@ -207,12 +226,28 @@ contract('Indexer Unit Tests', async accounts => {
           tokenTwo,
           250,
           await getTimestampPlusDays(1),
-          aliceAddress,
+          aliceLocator,
           {
             from: aliceAddress,
           }
         ),
         'MARKET_DOES_NOT_EXIST'
+      )
+    })
+
+    it('should not set an intent if the locator is not whitelisted', async () => {
+      await reverted(
+        whitelistedIndexer.setIntent(
+          tokenOne,
+          tokenTwo,
+          250,
+          await getTimestampPlusDays(1),
+          aliceLocator,
+          {
+            from: aliceAddress,
+          }
+        ),
+        'LOCATOR_NOT_WHITELISTED'
       )
     })
 
@@ -229,7 +264,7 @@ contract('Indexer Unit Tests', async accounts => {
           tokenTwo,
           250,
           await getTimestampPlusDays(1),
-          aliceAddress,
+          aliceLocator,
           {
             from: aliceAddress,
           }
@@ -253,7 +288,7 @@ contract('Indexer Unit Tests', async accounts => {
           tokenTwo,
           250,
           await getTimestampPlusDays(1),
-          aliceAddress,
+          aliceLocator,
           {
             from: aliceAddress,
           }
@@ -278,7 +313,7 @@ contract('Indexer Unit Tests', async accounts => {
           tokenTwo,
           250,
           await getTimestampPlusDays(1),
-          aliceAddress,
+          aliceLocator,
           {
             from: aliceAddress,
           }
@@ -287,7 +322,7 @@ contract('Indexer Unit Tests', async accounts => {
       )
     })
 
-    it('should set a valid intent and emit an event', async () => {
+    it('should set a valid intent on a non-whitelisted indexer', async () => {
       // make the market first
       await indexer.createMarket(tokenOne, tokenTwo, {
         from: aliceAddress,
@@ -301,7 +336,7 @@ contract('Indexer Unit Tests', async accounts => {
         tokenTwo,
         250,
         expiry,
-        aliceAddress,
+        aliceLocator,
         {
           from: aliceAddress,
         }
@@ -311,6 +346,41 @@ contract('Indexer Unit Tests', async accounts => {
       emitted(result, 'Stake', event => {
         return (
           event.wallet === aliceAddress &&
+          event.makerToken === tokenOne &&
+          event.takerToken == tokenTwo &&
+          event.amount.toNumber() === 250 &&
+          event.expiry.toNumber() === expiry
+        )
+      })
+    })
+
+    it('should set a valid intent on a whitelisted indexer', async () => {
+      // make the market first
+      await whitelistedIndexer.createMarket(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+
+      // whitelist the locator
+      await whitelistMock.givenAnyReturnBool(true)
+
+      let expiry = await getTimestampPlusDays(1)
+
+      // now set an intent
+      let result = await whitelistedIndexer.setIntent(
+        tokenOne,
+        tokenTwo,
+        250,
+        expiry,
+        bobLocator,
+        {
+          from: bobAddress,
+        }
+      )
+      passes(result)
+
+      emitted(result, 'Stake', event => {
+        return (
+          event.wallet === bobAddress &&
           event.makerToken === tokenOne &&
           event.takerToken == tokenTwo &&
           event.amount.toNumber() === 250 &&
@@ -331,7 +401,7 @@ contract('Indexer Unit Tests', async accounts => {
         tokenTwo,
         250,
         await getTimestampPlusDays(1),
-        aliceAddress,
+        aliceLocator,
         {
           from: aliceAddress,
         }
@@ -344,7 +414,7 @@ contract('Indexer Unit Tests', async accounts => {
           tokenTwo,
           250,
           await getTimestampPlusDays(2),
-          aliceAddress,
+          aliceLocator,
           {
             from: aliceAddress,
           }
@@ -391,7 +461,7 @@ contract('Indexer Unit Tests', async accounts => {
         tokenTwo,
         250,
         await getTimestampPlusDays(3),
-        aliceAddress,
+        aliceLocator,
         {
           from: aliceAddress,
         }
@@ -427,13 +497,13 @@ contract('Indexer Unit Tests', async accounts => {
         from: aliceAddress,
       })
 
-      // set an intent
+      // set an intent staking 0
       await indexer.setIntent(
         tokenOne,
         tokenTwo,
-        250,
+        0,
         await getTimestampPlusDays(1),
-        aliceAddress,
+        aliceLocator,
         {
           from: aliceAddress,
         }
@@ -459,9 +529,9 @@ contract('Indexer Unit Tests', async accounts => {
       await indexer.setIntent(
         tokenOne,
         tokenTwo,
-        250,
+        50,
         await getTimestampPlusDays(1),
-        aliceAddress,
+        aliceLocator,
         {
           from: aliceAddress,
         }
@@ -469,9 +539,9 @@ contract('Indexer Unit Tests', async accounts => {
       await indexer.setIntent(
         tokenOne,
         tokenTwo,
-        250,
+        100,
         await getTimestampPlusDays(1),
-        bobAddress,
+        bobLocator,
         {
           from: bobAddress,
         }

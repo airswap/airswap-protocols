@@ -15,6 +15,7 @@ const {
   takeSnapshot,
   revertToSnapShot,
 } = require('@airswap/test-utils').time
+const { padAddressToLocator } = require('@airswap/test-utils').padding
 
 let market
 
@@ -28,6 +29,14 @@ contract('Market', async accounts => {
   let eveAddress = accounts[4]
   let fredAddress = accounts[5]
   let zaraAddress = accounts[6]
+
+  let aliceLocator = padAddressToLocator(aliceAddress)
+  let bobLocator = padAddressToLocator(bobAddress)
+  let carolLocator = padAddressToLocator(carolAddress)
+  let davidLocator = padAddressToLocator(davidAddress)
+  let eveLocator = padAddressToLocator(eveAddress)
+  let zaraLocator = padAddressToLocator(zaraAddress)
+  let emptyLocator = padAddressToLocator(EMPTY_ADDRESS)
 
   before('Setup', async () => {
     let snapShot = await takeSnapshot()
@@ -103,56 +112,57 @@ contract('Market', async accounts => {
 
     it('Ensure ordering is correct', async () => {
       const intents = await market.fetchIntents(7)
-      assert(intents[0] == aliceAddress, 'Alice should be first')
-      assert(intents[1] == carolAddress, 'Carol should be second')
-      assert(intents[2] == bobAddress, 'Bob should be third')
-      assert(intents[3] == eveAddress, 'Eve should be fourth')
-      assert(intents[4] == davidAddress, 'David should be fifth')
-      assert(intents[5] == zaraAddress, 'Zara should be last')
+      assert(intents[0] == aliceLocator, 'Alice should be first')
+      assert(intents[1] == carolLocator, 'Carol should be second')
+      assert(intents[2] == bobLocator, 'Bob should be third')
+      assert(intents[3] == eveLocator, 'Eve should be fourth')
+      assert(intents[4] == davidLocator, 'David should be fifth')
+      assert(intents[5] == zaraLocator, 'Zara should be last')
     })
   })
 
   describe('Get', async () => {
     it('Gets the intent for Alice', async () => {
-      equal((await market.getIntent(aliceAddress)).locator, aliceAddress)
+      equal((await market.getIntent(aliceAddress)).locator, aliceLocator)
     })
 
     it('Gets the intent for Bob', async () => {
-      equal((await market.getIntent(bobAddress)).locator, bobAddress)
+      equal((await market.getIntent(bobAddress)).locator, bobLocator)
     })
 
     it('Gets the intent for Carol', async () => {
-      equal((await market.getIntent(carolAddress)).locator, carolAddress)
+      equal((await market.getIntent(carolAddress)).locator, carolLocator)
     })
 
     it('Gets the intent for David', async () => {
-      equal((await market.getIntent(davidAddress)).locator, davidAddress)
+      equal((await market.getIntent(davidAddress)).locator, davidLocator)
     })
 
     it('Gets the intent for Eve', async () => {
-      equal((await market.getIntent(eveAddress)).locator, eveAddress)
+      equal((await market.getIntent(eveAddress)).locator, eveLocator)
     })
 
     it('Gets the intent for Zara', async () => {
       let zaraIntent = await market.getIntent(zaraAddress)
-      equal(zaraIntent.locator, zaraAddress)
+      equal(zaraIntent.locator, zaraLocator)
       equal(zaraIntent.amount, 0)
     })
 
     it('Gets a non existent intent', async () => {
-      equal((await market.getIntent(fredAddress)).locator, EMPTY_ADDRESS)
+      let fredIntent = await market.getIntent(fredAddress)
+      equal(fredIntent.locator, emptyLocator)
     })
   })
 
   describe('Fetch', async () => {
     it('Fetches intents', async () => {
       const intents = await market.fetchIntents(7)
-      assert(intents[0] == aliceAddress, 'Alice should be first')
-      assert(intents[1] == carolAddress, 'Carol should be second')
-      assert(intents[2] == bobAddress, 'Bob should be third')
-      assert(intents[3] == eveAddress, 'Eve should be fourth')
-      assert(intents[4] == davidAddress, 'David should be fifth')
-      assert(intents[5] == zaraAddress, 'Zara should be last')
+      assert(intents[0] == aliceLocator, 'Alice should be first')
+      assert(intents[1] == carolLocator, 'Carol should be second')
+      assert(intents[2] == bobLocator, 'Bob should be third')
+      assert(intents[3] == eveLocator, 'Eve should be fourth')
+      assert(intents[4] == davidLocator, 'David should be fifth')
+      assert(intents[5] == zaraLocator, 'Zara should be last')
       assert(BN(await market.length()).eq(6), 'Market length is incorrect')
     })
 
@@ -161,11 +171,11 @@ contract('Market', async accounts => {
       // This advances past the expiry of Carol's intent
       await advanceTimeAndBlock(SECONDS_IN_DAY * 1.5)
       const intents = await market.fetchIntents(7)
-      assert(intents[0] == aliceAddress, 'Alice should be first')
-      assert(intents[1] == bobAddress, 'Bob should be second')
-      assert(intents[2] == eveAddress, 'Eve should be third')
-      assert(intents[3] == davidAddress, 'David should be fourth')
-      assert(intents[4] == zaraAddress, 'Zara should be fifth')
+      assert(intents[0] == aliceLocator, 'Alice should be first')
+      assert(intents[1] == bobLocator, 'Bob should be second')
+      assert(intents[2] == eveLocator, 'Eve should be third')
+      assert(intents[3] == davidLocator, 'David should be fourth')
+      assert(intents[4] == zaraLocator, 'Zara should be fifth')
       // Market length still includes carol's intent
       assert(BN(await market.length()).eq(6), 'Market length is incorrect')
     })
@@ -174,7 +184,7 @@ contract('Market', async accounts => {
       const intents = await market.fetchIntents(7)
       assert(BN(intents.length).eq(6), 'Returned intents wrong length')
       assert(
-        intents[5] == EMPTY_ADDRESS,
+        intents[5] == emptyLocator,
         'Final slot should be 0x0 - carol=expired'
       )
     })
@@ -194,12 +204,12 @@ contract('Market', async accounts => {
       assert(BN(intents.length).eq(6), 'Intents should be same length')
 
       // Ensure that the ordering is the same
-      assert(intents[0] == aliceAddress, 'Alice should be first')
-      assert(intents[1] == bobAddress, 'Bob should be second')
-      assert(intents[2] == eveAddress, 'Eve should be third')
-      assert(intents[3] == davidAddress, 'David should be fourth')
-      assert(intents[4] == zaraAddress, 'Zara should be fifth')
-      assert(intents[5] == EMPTY_ADDRESS, 'Null 6th location')
+      assert(intents[0] == aliceLocator, 'Alice should be first')
+      assert(intents[1] == bobLocator, 'Bob should be second')
+      assert(intents[2] == eveLocator, 'Eve should be third')
+      assert(intents[3] == davidLocator, 'David should be fourth')
+      assert(intents[4] == zaraLocator, 'Zara should be fifth')
+      assert(intents[5] == emptyLocator, 'Null 6th location')
     })
 
     it("Should remove Carol's intent if she's included in the loop", async () => {
@@ -216,11 +226,11 @@ contract('Market', async accounts => {
       assert(BN(intents.length).eq(5), 'Intents should be shorter')
 
       // Ensure that the ordering is the same, without a null 6th slot
-      assert(intents[0] == aliceAddress, 'Alice should be first')
-      assert(intents[1] == bobAddress, 'Bob should be second')
-      assert(intents[2] == eveAddress, 'Eve should be third')
-      assert(intents[3] == davidAddress, 'David should be fourth')
-      assert(intents[4] == zaraAddress, 'Zara should be fifth')
+      assert(intents[0] == aliceLocator, 'Alice should be first')
+      assert(intents[1] == bobLocator, 'Bob should be second')
+      assert(intents[2] == eveLocator, 'Eve should be third')
+      assert(intents[3] == davidLocator, 'David should be fourth')
+      assert(intents[4] == zaraLocator, 'Zara should be fifth')
     })
 
     it('Remove more intents after more time', async () => {
@@ -246,9 +256,9 @@ contract('Market', async accounts => {
       assert(BN(intents.length).eq(3), 'Intents should be shorter')
 
       // Ensure that the ordering is the same
-      assert(intents[0] == aliceAddress, 'Alice should be first')
-      assert(intents[1] == davidAddress, 'David should be fourth')
-      assert(intents[2] == zaraAddress, 'Zara should be fifth')
+      assert(intents[0] == aliceLocator, 'Alice should be first')
+      assert(intents[1] == davidLocator, 'David should be fourth')
+      assert(intents[2] == zaraLocator, 'Zara should be fifth')
     })
   })
 })

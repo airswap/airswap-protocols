@@ -8,6 +8,8 @@ const {
   takeSnapshot,
   revertToSnapShot,
 } = require('@airswap/test-utils').time
+const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
+const { padAddressToLocator } = require('@airswap/test-utils').padding
 
 let snapshotId
 
@@ -18,6 +20,8 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
   let tokenAST
   let tokenDAI
   let tokenWETH
+
+  let aliceLocator = padAddressToLocator(aliceAddress)
 
   before('Setup', async () => {
     let snapShot = await takeSnapshot()
@@ -42,7 +46,9 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
     })
 
     it('Deployed Indexer contract', async () => {
-      indexer = await Indexer.new(tokenAST.address, { from: ownerAddress })
+      indexer = await Indexer.new(tokenAST.address, EMPTY_ADDRESS, {
+        from: ownerAddress,
+      })
       indexerAddress = indexer.address
     })
   })
@@ -114,7 +120,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenDAI.address,
           500,
           await getTimestampPlusDays(1),
-          aliceAddress,
+          aliceLocator,
           {
             from: aliceAddress,
           }
@@ -142,7 +148,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenDAI.address,
           500,
           await getTimestampPlusDays(1),
-          aliceAddress,
+          aliceLocator,
           {
             from: aliceAddress,
           }
@@ -181,7 +187,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
           from: bobAddress,
         }
       )
-      equal(intents[0], aliceAddress)
+      equal(intents[0], aliceLocator)
     })
 
     it('Alice attempts to unset an intent and succeeds', async () => {
@@ -217,7 +223,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenDAI.address,
           1000,
           await getTimestampPlusDays(1),
-          aliceAddress,
+          aliceLocator,
           {
             from: aliceAddress,
           }
@@ -252,7 +258,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenDAI.address,
           1000,
           await getTimestampPlusDays(1),
-          aliceAddress,
+          aliceLocator,
           {
             from: aliceAddress,
           }
@@ -295,7 +301,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenDAI.address,
           500,
           await getTimestampPlusDays(1),
-          aliceAddress,
+          aliceLocator,
           {
             from: aliceAddress,
           }

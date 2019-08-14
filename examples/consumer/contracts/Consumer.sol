@@ -62,20 +62,20 @@ contract Consumer {
     address _userReceiveToken,
     address _userSendToken,
     uint256 _maxIntents
-  ) public returns (address, uint256) {
+  ) public returns (bytes32, uint256) {
 
-    address untrustedLowestCostPeer;
+    bytes32 untrustedLowestCostPeer;
     uint256 lowestCost = 2**256 - 1;
 
     // Fetch an array of Intent locators from the Indexer.
     // Warning: In this example, the addresses returned are not trusted and may not actually implement IPeer.
-    address[] memory untrustedProbablyPeers = indexerContract.getIntents(_userReceiveToken, _userSendToken, _maxIntents);
+    bytes32[] memory untrustedProbablyPeers = indexerContract.getIntents(_userReceiveToken, _userSendToken, _maxIntents);
 
     // Iterate through locators.
     for (uint256 i; i < untrustedProbablyPeers.length; i++) {
 
       // Get a buy quote from the Peer.
-      uint256 userSendAmount = IPeer(untrustedProbablyPeers[i])
+      uint256 userSendAmount = IPeer(address(bytes20(untrustedProbablyPeers[i])))
         .getBuyQuote(_userReceiveAmount, _userReceiveToken, _userSendToken);
 
       // Update the lowest cost.
@@ -104,12 +104,14 @@ contract Consumer {
     uint256 _maxIntents
   ) public {
 
+    bytes32 untrustedPeerLocator;
     address untrustedPeerContract;
     uint256 userSendAmount;
 
     // Find the best buy among Indexed Peers.
-    (untrustedPeerContract, userSendAmount) =
+    (untrustedPeerLocator, userSendAmount) =
       findBestBuy(_userReceiveAmount, _userReceiveToken, _userSendToken, _maxIntents);
+    untrustedPeerContract = address(bytes20(untrustedPeerLocator));
 
     // Consumer transfers User amount to itself.
     IERC20(_userSendToken).transferFrom(msg.sender, address(this), userSendAmount);

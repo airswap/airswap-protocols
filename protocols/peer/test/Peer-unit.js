@@ -3,7 +3,6 @@ const Swap = artifacts.require('Swap')
 const MockContract = artifacts.require('MockContract')
 const {
   equal,
-  notEqual,
   passes,
   emitted,
   reverted,
@@ -56,7 +55,7 @@ contract('Peer Unit Tests', async accounts => {
 
   before('deploy Peer', async () => {
     await setupMockSwap()
-    peer = await Peer.new(mockSwap.address)
+    peer = await Peer.new(mockSwap.address, EMPTY_ADDRESS, { from: owner })
   })
 
   describe('Test initial values', async () => {
@@ -64,27 +63,23 @@ contract('Peer Unit Tests', async accounts => {
       let val = await peer.swapContract.call()
       equal(val, mockSwap.address, 'swap address is incorrect')
     })
+
+    it('Test owner is set correctly if provided the empty address', async () => {
+      // being provided an empty address, it should leave the owner unchanged
+      let val = await peer.owner.call()
+      equal(val, owner, 'owner is incorrect - should be owner')
+    })
+
+    it('Test owner is set correctly if provided an address', async () => {
+      let newPeer = await Peer.new(mockSwap.address, notOwner, { from: owner })
+
+      // being provided an empty address, it should leave the owner unchanged
+      let val = await newPeer.owner.call()
+      equal(val, notOwner, 'owner is incorrect - should be notOwner')
+    })
   })
 
   describe('Test setters', async () => {
-    it('Test setSwapContract permissions', async () => {
-      let newSwap = await MockContract.new()
-      await reverted(peer.setSwapContract(newSwap.address, { from: notOwner }))
-      await passes(peer.setSwapContract(newSwap.address, { from: owner }))
-    })
-
-    it('Test setSwapContract', async () => {
-      let newSwap = await MockContract.new()
-      await peer.setSwapContract(newSwap.address)
-      let val = await peer.swapContract.call()
-      notEqual(val, mockSwap.address, 'the swap contract has not changed')
-      equal(
-        val,
-        newSwap.address,
-        'the swap contract has not changed to the right value'
-      )
-    })
-
     it('Test setRule permissions', async () => {
       await reverted(
         peer.setRule(

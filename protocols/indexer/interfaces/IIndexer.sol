@@ -67,7 +67,7 @@ interface IIndexer {
     address _takerToken,
     uint256 _amount,
     uint256 _expiry,
-    address _locator
+    bytes32 _locator
   ) external;
 
   function unsetIntent(
@@ -79,6 +79,6 @@ interface IIndexer {
     address _makerToken,
     address _takerToken,
     uint256 _count
-  ) external returns (address[] memory);
+  ) external returns (bytes32[] memory);
 
 }
