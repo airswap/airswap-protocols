@@ -41,25 +41,25 @@ contract Indexer is IIndexer, Ownable {
   mapping (address => uint256) public blacklist;
 
   // The whitelist contract for checking whether a peer is whitelisted
-  address public whitelist;
+  address public locatorWhitelist;
 
   /**
     * @notice Contract Constructor
     *
     * @param _stakeToken address
     * @param _stakeMinimum uint256
-    * @param _whitelist address
+    * @param _locatorWhitelist address
     */
   constructor(
     address _stakeToken,
     uint256 _stakeMinimum,
-    address _whitelist
+    address _locatorWhitelist
   ) public {
     stakeToken = IERC20(_stakeToken);
     stakeMinimum = _stakeMinimum;
     emit SetStakeMinimum(_stakeMinimum);
 
-    whitelist = _whitelist;
+    locatorWhitelist = _locatorWhitelist;
   }
 
   /**
@@ -163,8 +163,8 @@ contract Indexer is IIndexer, Ownable {
   ) public {
 
     // Ensure the locator is whitelisted, if relevant
-    if (whitelist != address(0)) {
-      require(IWhitelist(whitelist).isWhitelisted(_locator),
+    if (locatorWhitelist != address(0)) {
+      require(IWhitelist(locatorWhitelist).isWhitelisted(_locator),
       "LOCATOR_NOT_WHITELISTED");
     }
 
