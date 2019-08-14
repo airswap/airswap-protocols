@@ -44,6 +44,18 @@ contract('Wrapper Unit Tests', async accounts => {
       .encodeABI()
     await mockWeth.givenMethodReturnBool(weth_approve, true)
 
+    // mock the weth.allowance method
+    let weth_allowance = wethTemplate.contract.methods
+      .allowance(EMPTY_ADDRESS, EMPTY_ADDRESS)
+      .encodeABI()
+    await mockWeth.givenMethodReturnUint(weth_allowance, 100000)
+
+    // mock the weth.balanceOf method
+    let weth_wrapper_balance = wethTemplate.contract.methods
+      .balanceOf(EMPTY_ADDRESS)
+      .encodeABI()
+    await mockWeth.givenMethodReturnUint(weth_wrapper_balance, 100000)
+
     //mock the weth.transferFrom method
     let weth_transferFrom = wethTemplate.contract.methods
       .transferFrom(EMPTY_ADDRESS, EMPTY_ADDRESS, 0)
