@@ -46,11 +46,10 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
     })
 
     it('Deployed Indexer contract', async () => {
-      indexer = await Indexer.new(tokenAST.address, 200, EMPTY_ADDRESS, {
+      indexer = await Indexer.new(tokenAST.address, EMPTY_ADDRESS, {
         from: ownerAddress,
       })
       indexerAddress = indexer.address
-      emitted(await indexer.setStakeMinimum(250), 'SetStakeMinimum')
     })
   })
 
@@ -65,7 +64,15 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
     })
 
     it('Bob ensures no intents are on the Indexer', async () => {
-      equal(await indexer.lengthOf.call(tokenWETH.address, tokenDAI.address), 0)
+      const intents = await indexer.getIntents.call(
+        tokenWETH.address,
+        tokenDAI.address,
+        10,
+        {
+          from: bobAddress,
+        }
+      )
+      equal(intents.length, 0)
     })
 
     it('Alice attempts to stake and set an intent but fails due to no market', async () => {
@@ -81,22 +88,6 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
           }
         ),
         'MARKET_DOES_NOT_EXIST'
-      )
-    })
-
-    it('Alice attempts to stake and set an intent but fails due to minimum', async () => {
-      await reverted(
-        indexer.setIntent(
-          tokenWETH.address,
-          tokenDAI.address,
-          100,
-          await getTimestampPlusDays(1),
-          aliceLocator,
-          {
-            from: aliceAddress,
-          }
-        ),
-        'MINIMUM_NOT_MET'
       )
     })
   })
@@ -174,7 +165,17 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
 
   describe('Intent integrity', async () => {
     it('Bob ensures only one intent is on the Indexer', async () => {
-      equal(await indexer.lengthOf.call(tokenWETH.address, tokenDAI.address), 1)
+      it('Bob ensures no intents are on the Indexer', async () => {
+        const intents = await indexer.getIntents.call(
+          tokenWETH.address,
+          tokenDAI.address,
+          10,
+          {
+            from: bobAddress,
+          }
+        )
+        equal(intents.length, 1)
+      })
     })
 
     it('Bob ensures that Alice intent is on the Indexer', async () => {
@@ -234,7 +235,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
   describe('Blacklisting', async () => {
     it('Alice attempts to blacklist a market and fails because she is not owner', async () => {
       await reverted(
-        indexer.addToBlacklist(tokenDAI.address, {
+        indexer.addToBlacklist([tokenDAI.address], {
           from: aliceAddress,
         }),
         'Ownable: caller is not the owner'
@@ -243,7 +244,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
 
     it('Owner attempts to blacklist a market and succeeds', async () => {
       emitted(
-        await indexer.addToBlacklist(tokenDAI.address, {
+        await indexer.addToBlacklist([tokenDAI.address], {
           from: ownerAddress,
         }),
         'AddToBlacklist'
@@ -277,7 +278,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
 
     it('Alice attempts to remove from blacklist fails because she is not owner', async () => {
       await reverted(
-        indexer.removeFromBlacklist(tokenDAI.address, {
+        indexer.removeFromBlacklist([tokenDAI.address], {
           from: aliceAddress,
         }),
         'Ownable: caller is not the owner'
@@ -286,7 +287,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
 
     it('Owner attempts to blacklist a market and succeeds', async () => {
       emitted(
-        await indexer.removeFromBlacklist(tokenDAI.address, {
+        await indexer.removeFromBlacklist([tokenDAI.address], {
           from: ownerAddress,
         }),
         'RemoveFromBlacklist'
@@ -307,50 +308,6 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
         ),
         'Stake'
       )
-    })
-
-    it('Bob creates the other side of the market for WETH/DAI', async () => {
-      emitted(
-        await indexer.createTwoSidedMarket(
-          tokenDAI.address,
-          tokenWETH.address,
-          {
-            from: bobAddress,
-          }
-        ),
-        'CreateMarket'
-      )
-    })
-
-    it('Alice attempts to stake and set a two-sided intent and succeeds', async () => {
-      await indexer.unsetIntent(tokenWETH.address, tokenDAI.address, {
-        from: aliceAddress,
-      })
-
-      let result = await indexer.setTwoSidedIntent(
-        tokenWETH.address,
-        tokenDAI.address,
-        250,
-        await getTimestampPlusDays(1),
-        aliceAddress,
-        {
-          from: aliceAddress,
-        }
-      )
-      emitted(result, 'Stake', ev => {
-        return (
-          ev.makerToken == tokenWETH.address &&
-          ev.takerToken == tokenDAI.address &&
-          ev.amount == 250
-        )
-      })
-      emitted(result, 'Stake', ev => {
-        return (
-          ev.makerToken == tokenDAI.address &&
-          ev.takerToken == tokenWETH.address &&
-          ev.amount == 250
-        )
-      })
     })
   })
 })
