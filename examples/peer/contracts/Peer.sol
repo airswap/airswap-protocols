@@ -52,17 +52,6 @@ contract Peer is IPeer, Ownable {
   }
 
   /**
-    * @notice Set the Swap Contract address
-    * @dev only callable by the owner of the contract
-    * @param newSwapContract address that will replace the old swap contract address
-    */
-  function setSwapContract(
-    address newSwapContract
-  ) external onlyOwner {
-    swapContract = ISwap(newSwapContract);
-  }
-
-  /**
     * @notice Set a Trading Rule
     * @dev only callable by the owner of the contract
     * @param peerToken address The token address that the peer would send in a trade

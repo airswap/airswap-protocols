@@ -81,24 +81,6 @@ contract('Peer Unit Tests', async accounts => {
   })
 
   describe('Test setters', async () => {
-    it('Test setSwapContract permissions', async () => {
-      let newSwap = await MockContract.new()
-      await reverted(peer.setSwapContract(newSwap.address, { from: notOwner }))
-      await passes(peer.setSwapContract(newSwap.address, { from: owner }))
-    })
-
-    it('Test setSwapContract', async () => {
-      let newSwap = await MockContract.new()
-      await peer.setSwapContract(newSwap.address)
-      let val = await peer.swapContract.call()
-      notEqual(val, mockSwap.address, 'the swap contract has not changed')
-      equal(
-        val,
-        newSwap.address,
-        'the swap contract has not changed to the right value'
-      )
-    })
-
     it('Test setRule permissions', async () => {
       await reverted(
         peer.setRule(
