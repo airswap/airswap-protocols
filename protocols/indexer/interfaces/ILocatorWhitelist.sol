@@ -16,9 +16,9 @@
 
 pragma solidity 0.5.10;
 
-interface IWhitelist {
+interface ILocatorWhitelist {
 
-  function isWhitelisted(
+  function has(
     bytes32 _locator
   ) external returns (bool);
 

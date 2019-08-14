@@ -1,6 +1,6 @@
 {
   "name": "@airswap/peer",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Manages delegated trading rules for use in the Swap Protocol",
   "license": "Apache-2.0",
   "repository": {

@@ -37,14 +37,14 @@ contract('Peer Factory Tests', async accounts => {
     it('should not deploy a peer with owner address 0x0', async () => {
       await reverted(
         peerFactory.createPeer(swapContractOne, EMPTY_ADDRESS),
-        'Provide a peer owner'
+        'PEER_CONTRACT_OWNER_REQUIRED'
       )
     })
 
     it('should not deploy a peer with swap address 0x0', async () => {
       await reverted(
         peerFactory.createPeer(EMPTY_ADDRESS, peerOwnerOne),
-        'Provide a swap address'
+        'SWAP_CONTRACT_REQUIRED'
       )
     })
 
@@ -56,17 +56,18 @@ contract('Peer Factory Tests', async accounts => {
       let peerAddress
 
       // emitted event
-      emitted(tx, 'PeerCreated', event => {
-        peerAddress = event.peer
-        return event.swap === swapContractOne && event.owner === peerOwnerOne
+      emitted(tx, 'CreatePeer', event => {
+        peerAddress = event.peerContract
+        return (
+          event.swapContract === swapContractOne &&
+          event.peerContractOwner === peerOwnerOne
+        )
       })
 
       let paddedPeerAddress = padAddressToLocator(peerAddress)
 
       // mapping has been updated
-      let isTrustedPeer = await peerFactory.isWhitelisted.call(
-        paddedPeerAddress
-      )
+      let isTrustedPeer = await peerFactory.has.call(paddedPeerAddress)
       equal(isTrustedPeer, true)
     })
 
@@ -76,15 +77,16 @@ contract('Peer Factory Tests', async accounts => {
 
       // get peer address and pad
       let peerAddress
-      emitted(tx, 'PeerCreated', event => {
-        peerAddress = event.peer
-        return event.swap === swapContractTwo && event.owner === peerOwnerTwo
+      emitted(tx, 'CreatePeer', event => {
+        peerAddress = event.peerContract
+        return (
+          event.swapContract === swapContractTwo &&
+          event.peerContractOwner === peerOwnerTwo
+        )
       })
       let paddedPeerAddress = padAddressToLocator(peerAddress)
 
-      let isTrustedPeer = await peerFactory.isWhitelisted.call(
-        paddedPeerAddress
-      )
+      let isTrustedPeer = await peerFactory.has.call(paddedPeerAddress)
       equal(isTrustedPeer, true)
 
       // get the swap and owner values of the peer

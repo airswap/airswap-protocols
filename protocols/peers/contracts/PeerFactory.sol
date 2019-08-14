@@ -17,10 +17,10 @@
 pragma solidity 0.5.10;
 
 import "@airswap/peer/contracts/Peer.sol";
-import "@airswap/indexer/interfaces/IWhitelist.sol";
+import "@airswap/indexer/interfaces/ILocatorWhitelist.sol";
 import "@airswap/peer/interfaces/IPeerFactory.sol";
 
-contract PeerFactory is IPeerFactory, IWhitelist {
+contract PeerFactory is IPeerFactory, ILocatorWhitelist {
 
   mapping(address => bool) internal deployedAddresses;
 
@@ -47,10 +47,11 @@ contract PeerFactory is IPeerFactory, IWhitelist {
 
   /**
     * @notice To check whether a locator is whitelisted
+    * @dev Implements ILocatorWhitelist.has
     * @param _locator locator of the peer in question
     * @return bool - true if the locator is whitelisted
     */
-  function isWhitelisted(bytes32 _locator) external returns (bool) {
+  function has(bytes32 _locator) external returns (bool) {
     return deployedAddresses[address(bytes20(_locator))];
   }
 
