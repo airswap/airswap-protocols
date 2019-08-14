@@ -15,6 +15,7 @@ const {
   takeSnapshot,
   revertToSnapShot,
 } = require('@airswap/test-utils').time
+const { padAddressToLocator } = require('@airswap/test-utils').padding
 
 let market
 
@@ -28,6 +29,14 @@ contract('Market', async accounts => {
   let eveAddress = accounts[4]
   let fredAddress = accounts[5]
   let zaraAddress = accounts[6]
+
+  let aliceLocator = padAddressToLocator(aliceAddress)
+  let bobLocator = padAddressToLocator(bobAddress)
+  let carolLocator = padAddressToLocator(carolAddress)
+  let davidLocator = padAddressToLocator(davidAddress)
+  let eveLocator = padAddressToLocator(eveAddress)
+  let zaraLocator = padAddressToLocator(zaraAddress)
+  let emptyLocator = padAddressToLocator(EMPTY_ADDRESS)
 
   before('Setup', async () => {
     let snapShot = await takeSnapshot()
@@ -114,33 +123,33 @@ contract('Market', async accounts => {
 
   describe('Get', async () => {
     it('Gets the intent for Alice', async () => {
-      equal((await market.getIntent(aliceAddress)).locator, aliceAddress)
+      equal((await market.getIntent(aliceAddress)).locator, aliceLocator)
     })
 
     it('Gets the intent for Bob', async () => {
-      equal((await market.getIntent(bobAddress)).locator, bobAddress)
+      equal((await market.getIntent(bobAddress)).locator, bobLocator)
     })
 
     it('Gets the intent for Carol', async () => {
-      equal((await market.getIntent(carolAddress)).locator, carolAddress)
+      equal((await market.getIntent(carolAddress)).locator, carolLocator)
     })
 
     it('Gets the intent for David', async () => {
-      equal((await market.getIntent(davidAddress)).locator, davidAddress)
+      equal((await market.getIntent(davidAddress)).locator, davidLocator)
     })
 
     it('Gets the intent for Eve', async () => {
-      equal((await market.getIntent(eveAddress)).locator, eveAddress)
+      equal((await market.getIntent(eveAddress)).locator, eveLocator)
     })
 
     it('Gets the intent for Zara', async () => {
       let zaraIntent = await market.getIntent(zaraAddress)
-      equal(zaraIntent.locator, zaraAddress)
+      equal(zaraIntent.locator, zaraLocator)
       equal(zaraIntent.amount, 0)
     })
 
     it('Gets a non existent intent', async () => {
-      equal((await market.getIntent(fredAddress)).locator, EMPTY_ADDRESS)
+      equal((await market.getIntent(fredAddress)).locator, emptyLocator)
     })
   })
 
