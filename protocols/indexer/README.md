@@ -38,17 +38,15 @@ Create a new `Indexer` contract.
 
 ```Solidity
 constructor(
-  address _stakeToken,
-  uint256 _stakeMinimum
+  address _stakeToken
 ) public
 ```
 
 ### Params
 
-| Name            | Type      | Description                                |
-| :-------------- | :-------- | :----------------------------------------- |
-| `_stakeToken`   | `address` | Address of the token required for staking. |
-| `_stakeMinimum` | `uint256` | Minimum amount of token required to stake. |
+| Name          | Type      | Description                                |
+| :------------ | :-------- | :----------------------------------------- |
+| `_stakeToken` | `address` | Address of the token required for staking. |
 
 ## Create a Market
 
@@ -85,22 +83,6 @@ function createTwoSidedMarket(
 | :---------- | :-------- | :----------------------------------------------------- |
 | `_tokenOne` | `address` | Address of the token of the first side of the market.  |
 | `_tokenTwo` | `address` | Address of the token of the second side of the market. |
-
-## Set the Stake Minimum
-
-Set the minimum amount of tokens required to set an intent to trade.
-
-```Solidity
-function setStakeMinimum(
-  uint256 _stakeMinimum
-) external onlyOwner
-```
-
-### Params
-
-| Name            | Type      | Description                                |
-| :-------------- | :-------- | :----------------------------------------- |
-| `_stakeMinimum` | `uint256` | Minimum amount of token required to stake. |
 
 ## Add a Token to Blacklist
 

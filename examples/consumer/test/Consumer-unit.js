@@ -53,7 +53,7 @@ contract('Consumer Unit Tests', async () => {
   }
 
   async function setupMockIndexer() {
-    let indexerTemplate = await Indexer.new(EMPTY_ADDRESS, 0)
+    let indexerTemplate = await Indexer.new(EMPTY_ADDRESS)
     mockIndexer = await MockContract.new()
 
     indexer_getIntents = indexerTemplate.contract.methods

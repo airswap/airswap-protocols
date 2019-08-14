@@ -30,28 +30,21 @@ contract Indexer is IIndexer, Ownable {
   // Token to be used for staking (ERC-20)
   IERC20 public stakeToken;
 
-  // Minimum token amount required for staking
-  uint256 public stakeMinimum;
-
   // Mapping of maker token to taker token to market
   mapping (address => mapping (address => Market)) public markets;
 
-  // Mapping of address to timestamp of blacklisting
-  mapping (address => uint256) public blacklist;
+  // Mapping of token address to boolean
+  mapping (address => bool) public blacklist;
 
   /**
     * @notice Contract Constructor
     *
     * @param _stakeToken address
-    * @param _stakeMinimum uint256
     */
   constructor(
-    address _stakeToken,
-    uint256 _stakeMinimum
+    address _stakeToken
   ) public {
     stakeToken = IERC20(_stakeToken);
-    stakeMinimum = _stakeMinimum;
-    emit SetStakeMinimum(_stakeMinimum);
   }
 
   /**
@@ -78,61 +71,32 @@ contract Indexer is IIndexer, Ownable {
   }
 
   /**
-    * @notice Create a Two Sided Market
-    * @dev Deploys two new Market contracts
-    *
-    * @param _tokenOne address
-    * @param _tokenTwo address
-    */
-  function createTwoSidedMarket(
-    address _tokenOne,
-    address _tokenTwo
-  ) public returns (address, address) {
-
-    // Create the makerToken / takerToken market.
-    address marketOne = createMarket(_tokenOne, _tokenTwo);
-
-    // Create the takerToken / makerToken market.
-    address marketTwo = createMarket(_tokenTwo, _tokenOne);
-
-    // Return the addresses of both Market contracts.
-    return (marketOne, marketTwo);
-  }
-
-  /**
-    * @notice Set the Minimum Staking Amount
-    * @param _stakeMinimum uint256
-    */
-  function setStakeMinimum(
-    uint256 _stakeMinimum
-  ) external onlyOwner {
-    stakeMinimum = _stakeMinimum;
-    emit SetStakeMinimum(_stakeMinimum);
-  }
-
-  /**
     * @notice Add a Token to the Blacklist
-    * @param _token address
+    * @param _tokens address[]
     */
   function addToBlacklist(
-    address _token
+    address[] calldata _tokens
   ) external onlyOwner {
-    if (blacklist[_token] == 0) {
-      blacklist[_token] = block.timestamp;
-      emit AddToBlacklist(_token);
+    for (uint256 i = 0; i < _tokens.length; i++) {
+      if (blacklist[_tokens[i]] == false) {
+        blacklist[_tokens[i]] = true;
+        emit AddToBlacklist(_tokens[i]);
+      }
     }
   }
 
   /**
     * @notice Remove a Token from the Blacklist
-    * @param _token address
+    * @param _tokens address[]
     */
   function removeFromBlacklist(
-    address _token
+    address[] calldata _tokens
   ) external onlyOwner {
-    if (blacklist[_token] != 0) {
-      blacklist[_token] = 0;
-      emit RemoveFromBlacklist(_token);
+    for (uint256 i = 0; i < _tokens.length; i++) {
+      if (blacklist[_tokens[i]] == true) {
+        blacklist[_tokens[i]] = false;
+        emit RemoveFromBlacklist(_tokens[i]);
+      }
     }
   }
 
@@ -155,20 +119,21 @@ contract Indexer is IIndexer, Ownable {
   ) public {
 
     // Ensure both of the tokens are not blacklisted.
-    require(blacklist[_makerToken] == 0 && blacklist[_takerToken] == 0,
+    require(!blacklist[_makerToken] && !blacklist[_takerToken],
       "MARKET_IS_BLACKLISTED");
 
     // Ensure the market exists.
     require(markets[_makerToken][_takerToken] != Market(0),
       "MARKET_DOES_NOT_EXIST");
 
-    // Ensure the _amount meets the stakeMinimum.
-    require(_amount >= stakeMinimum,
-      "MINIMUM_NOT_MET");
+    // Only transfer for staking if amount is set.
+    if (_amount > 0) {
 
-    // Transfer the _amount for staking.
-    require(stakeToken.transferFrom(msg.sender, address(this), _amount),
-      "UNABLE_TO_STAKE");
+      // Transfer the _amount for staking.
+      require(stakeToken.transferFrom(msg.sender, address(this), _amount),
+        "UNABLE_TO_STAKE");
+
+    }
 
     require(!markets[_makerToken][_takerToken].hasIntent(msg.sender),
       "USER_ALREADY_STAKED");
@@ -177,29 +142,6 @@ contract Indexer is IIndexer, Ownable {
 
     // Set the intent on the market.
     markets[_makerToken][_takerToken].setIntent(msg.sender, _amount, _expiry, _locator);
-  }
-
-  /**
-    * @notice Set Two-Sided Intent to Trade
-    *
-    * @param _tokenOne address
-    * @param _tokenTwo address
-    * @param _amount uint256
-    * @param _expiry uint256
-    * @param _locator address
-    */
-  function setTwoSidedIntent(
-    address _tokenOne,
-    address _tokenTwo,
-    uint256 _amount,
-    uint256 _expiry,
-    address _locator
-  ) public {
-    // Set the _makerToken / _tokenTwo side of the market.
-    setIntent(_tokenOne, _tokenTwo, _amount, _expiry, _locator);
-
-    // Set the _tokenTwo / _makerToken side of the market.
-    setIntent(_tokenTwo, _tokenOne, _amount, _expiry, _locator);
   }
 
   /**
@@ -234,24 +176,6 @@ contract Indexer is IIndexer, Ownable {
   }
 
   /**
-    * @notice Unset an Two-Sided Intent to Trade
-    * @dev Users are allowed unstake from blacklisted markets
-    *
-    * @param _tokenOne address
-    * @param _tokenTwo address
-    */
-  function unsetTwoSidedIntent(
-    address _tokenOne,
-    address _tokenTwo
-  ) public {
-    // Unset the _tokenOne / _tokenTwo side of the market.
-    unsetIntent(_tokenOne, _tokenTwo);
-
-    // Unset the _tokenTwo / _tokenOne side of the market.
-    unsetIntent(_tokenTwo, _tokenOne);
-  }
-
-  /**
     * @notice Get the Intents to Trade for a Market
     * @dev Users are allowed unstake from blacklisted markets
     *
@@ -269,7 +193,7 @@ contract Indexer is IIndexer, Ownable {
   ) {
 
     // Ensure neither token is blacklisted.
-    if (blacklist[_makerToken] == 0 && blacklist[_takerToken] == 0) {
+    if (!blacklist[_makerToken] && !blacklist[_takerToken]) {
 
       // Ensure the market exists.
       if (markets[_makerToken][_takerToken] != Market(0)) {
@@ -282,27 +206,4 @@ contract Indexer is IIndexer, Ownable {
     return new address[](0);
   }
 
-  /**
-    * @notice Get the Size of a Market
-    * @dev Returns the number of valid intents to trade
-    *
-    * @param _makerToken address
-    * @param _takerToken address
-    */
-  function lengthOf(
-    address _makerToken,
-    address _takerToken
-  ) external returns (
-    uint256
-  ) {
-
-    // Ensure the market exists.
-    if (markets[_makerToken][_takerToken] != Market(0)) {
-
-      // Return the size of the market.
-      return markets[_makerToken][_takerToken].length();
-
-    }
-    return 0;
-  }
 }
