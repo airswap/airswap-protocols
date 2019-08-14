@@ -66,7 +66,7 @@ contract('Peer Factory Tests', async accounts => {
       passes(tx)
 
       // emitted event
-      emitted(tx, 'NewTrustedPeer', event => {
+      emitted(tx, 'NewFactoryPeer', event => {
         return (
           event.peer === peerAddress &&
           event.swap === swapContractOne &&
