@@ -23,25 +23,23 @@ import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 contract PeerFactory is IWhitelist {
 
-  event NewFactoryPeer(address indexed peer, address swap, address indexed owner);
+  event PeerCreated(address indexed peer, address swap, address indexed owner);
 
   mapping(address => bool) internal factoryPeers;
 
   /**
     * @notice Deploy a trusted peer contract
-    * @param _initialSwapContract address of the swap contract the peer will deploy with
+    * @param _swapContract address of the swap contract the peer will deploy with
     * @param _peerOwner address that should be the owner of the peer
     */
-  function deployTrustedPeer(address _initialSwapContract, address _peerOwner) public returns (address) {
+  function createPeer(address _swapContract, address _peerOwner) public {
     require(_peerOwner != address(0), 'Provide a peer owner');
-    require(_initialSwapContract != address(0), 'Provide a swap address');
+    require(_swapContract != address(0), 'Provide a swap address');
 
-    address newPeer = address(new Peer(_initialSwapContract, _peerOwner));
+    address newPeer = address(new Peer(_swapContract, _peerOwner));
     factoryPeers[newPeer] = true;
 
-    emit NewFactoryPeer(newPeer, _initialSwapContract, _peerOwner);
-
-    return newPeer;
+    emit PeerCreated(newPeer, _swapContract, _peerOwner);
   }
 
   /**

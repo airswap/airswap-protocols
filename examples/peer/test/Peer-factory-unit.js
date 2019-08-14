@@ -36,63 +36,52 @@ contract('Peer Factory Tests', async accounts => {
   describe('Test deploying peers', async () => {
     it('should not deploy a peer with owner address 0x0', async () => {
       await reverted(
-        peerFactory.deployTrustedPeer(swapContractOne, EMPTY_ADDRESS),
+        peerFactory.createPeer(swapContractOne, EMPTY_ADDRESS),
         'Provide a peer owner'
       )
     })
 
     it('should not deploy a peer with swap address 0x0', async () => {
       await reverted(
-        peerFactory.deployTrustedPeer(EMPTY_ADDRESS, peerOwnerOne),
+        peerFactory.createPeer(EMPTY_ADDRESS, peerOwnerOne),
         'Provide a swap address'
       )
     })
 
-    it('should return address, emit event and update the mapping', async () => {
-      // return the address
-      let peerAddress = await peerFactory.deployTrustedPeer.call(
-        swapContractOne,
-        peerOwnerOne
-      )
+    it('should emit event and update the mapping', async () => {
+      // successful tx
+      let tx = await peerFactory.createPeer(swapContractOne, peerOwnerOne)
+      passes(tx)
+
+      let peerAddress
+
+      // emitted event
+      emitted(tx, 'PeerCreated', event => {
+        peerAddress = event.peer
+        return event.swap === swapContractOne && event.owner === peerOwnerOne
+      })
+
       let paddedPeerAddress = padAddressToLocator(peerAddress)
 
-      // before calling the function, the mapping is false
+      // mapping has been updated
       let isTrustedPeer = await peerFactory.isWhitelisted.call(
         paddedPeerAddress
       )
-      equal(isTrustedPeer, false)
-
-      // successful tx
-      let tx = await peerFactory.deployTrustedPeer(
-        swapContractOne,
-        peerOwnerOne
-      )
-      passes(tx)
-
-      // emitted event
-      emitted(tx, 'NewFactoryPeer', event => {
-        return (
-          event.peer === peerAddress &&
-          event.swap === swapContractOne &&
-          event.owner === peerOwnerOne
-        )
-      })
-
-      // mapping has been updated
-      isTrustedPeer = await peerFactory.isWhitelisted.call(paddedPeerAddress)
       equal(isTrustedPeer, true)
     })
 
     it('should create delegate with the correct values', async () => {
-      // return the address
-      let peerAddress = await peerFactory.deployTrustedPeer.call(
-        swapContractTwo,
-        peerOwnerTwo
-      )
+      // deploy peer
+      let tx = await peerFactory.createPeer(swapContractTwo, peerOwnerTwo)
+
+      // get peer address and pad
+      let peerAddress
+      emitted(tx, 'PeerCreated', event => {
+        peerAddress = event.peer
+        return event.swap === swapContractTwo && event.owner === peerOwnerTwo
+      })
       let paddedPeerAddress = padAddressToLocator(peerAddress)
 
-      // deploy peer
-      await peerFactory.deployTrustedPeer(swapContractTwo, peerOwnerTwo)
       let isTrustedPeer = await peerFactory.isWhitelisted.call(
         paddedPeerAddress
       )
