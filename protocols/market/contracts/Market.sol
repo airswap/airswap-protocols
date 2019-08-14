@@ -154,7 +154,7 @@ contract Market is Ownable {
       // Return the next intent from the previous neighbor.
       return intentsLinkedList[intentsLinkedList[_staker][PREV].staker][NEXT];
     }
-    return Intent(address(0), 0, 0, "0x0");
+    return Intent(address(0), 0, 0, bytes32(0));
   }
 
   /**

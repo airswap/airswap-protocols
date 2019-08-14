@@ -149,7 +149,8 @@ contract('Market', async accounts => {
     })
 
     it('Gets a non existent intent', async () => {
-      equal((await market.getIntent(fredAddress)).locator, emptyLocator)
+      let fredIntent = await market.getIntent(fredAddress)
+      equal(fredIntent.locator, emptyLocator)
     })
   })
 
