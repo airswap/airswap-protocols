@@ -118,8 +118,6 @@ contract('Market Unit Tests', async accounts => {
 
       // check the SetIntent event was emitted
       emitted(result, 'SetIntent', event => {
-        console.log('from contract:' + event.locator)
-        console.log('from test:' + aliceLocator)
         return (
           event.staker === aliceAddress &&
           event.amount.toNumber() === 2000 &&
@@ -139,7 +137,7 @@ contract('Market Unit Tests', async accounts => {
       // check the values have been stored correctly
       let headNext = await market.intentsLinkedList(LIST_HEAD, LIST_NEXT)
 
-      equal(headNext[STAKER], aliceLocator, 'Intent address not correct')
+      equal(headNext[STAKER], aliceAddress, 'Intent address not correct')
       equal(headNext[AMOUNT], 2000, 'Intent amount not correct')
       equal(headNext[EXPIRY], EXPIRY_THREE_DAYS, 'Intent expiry not correct')
       equal(headNext[LOCATOR], aliceLocator, 'Intent locator not correct')
@@ -310,7 +308,7 @@ contract('Market Unit Tests', async accounts => {
       equal(davidIntent[EXPIRY], 0, 'David: Intent expiry not correct')
       equal(
         davidIntent[LOCATOR],
-        EMPTY_ADDRESS,
+        emptyLocator,
         'David: Intent locator not correct'
       )
 
@@ -326,7 +324,7 @@ contract('Market Unit Tests', async accounts => {
       equal(carolIntent[EXPIRY], 0, 'Carol: Intent expiry not correct')
       equal(
         carolIntent[LOCATOR],
-        EMPTY_ADDRESS,
+        emptyLocator,
         'Carol: Intent locator not correct'
       )
     })
@@ -346,12 +344,12 @@ contract('Market Unit Tests', async accounts => {
       )
       equal(
         aliceIntent[LOCATOR],
-        aliceAddress,
+        aliceLocator,
         'Alice: Intent locator not correct'
       )
 
       let bobIntent = await market.getIntent(bobAddress)
-      equal(bobIntent[STAKER], bobLocator, 'Bob: intent address not correct')
+      equal(bobIntent[STAKER], bobAddress, 'Bob: intent address not correct')
       equal(bobIntent[AMOUNT], 500, 'Bob: Intent amount not correct')
       equal(
         bobIntent[EXPIRY],
