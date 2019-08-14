@@ -46,7 +46,7 @@
 
 The [authorization feature](/protocols/swap/README.md#authorizations) enables traders to deploy smart contracts that trade on their behalf. These contracts can include arbitrary logic and connect to other liquidity sources.
 
-See [`@airswap/peer`](/protocols/peer).
+See [`@airswap/peer`](/protocols/peer) for an implementation based on trading rules.
 
 ## Onchain Liquidity Consumer
 
