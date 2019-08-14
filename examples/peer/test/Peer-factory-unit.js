@@ -8,6 +8,7 @@ const {
   equal,
   emitted,
 } = require('@airswap/test-utils').assert
+const { padAddressToLocator } = require('@airswap/test-utils').padding
 
 contract('Peer Factory Tests', async accounts => {
   const swapContractOne = accounts[0]
@@ -53,9 +54,10 @@ contract('Peer Factory Tests', async accounts => {
         swapContractOne,
         peerOwnerOne
       )
+      let paddedPeerAddress = padAddressToLocator(peerAddress)
 
       // before calling the function, the mapping is false
-      let isTrustedPeer = await peerFactory.isWhitelisted.call(peerAddress)
+      let isTrustedPeer = await peerFactory.isWhitelisted.call(paddedPeerAddress)
       equal(isTrustedPeer, false)
 
       // successful tx
@@ -75,7 +77,7 @@ contract('Peer Factory Tests', async accounts => {
       })
 
       // mapping has been updated
-      isTrustedPeer = await peerFactory.isWhitelisted.call(peerAddress)
+      isTrustedPeer = await peerFactory.isWhitelisted.call(paddedPeerAddress)
       equal(isTrustedPeer, true)
     })
 
@@ -85,10 +87,11 @@ contract('Peer Factory Tests', async accounts => {
         swapContractTwo,
         peerOwnerTwo
       )
+      let paddedPeerAddress = padAddressToLocator(peerAddress)
 
       // deploy peer
       await peerFactory.deployTrustedPeer(swapContractTwo, peerOwnerTwo)
-      let isTrustedPeer = await peerFactory.isWhitelisted.call(peerAddress)
+      let isTrustedPeer = await peerFactory.isWhitelisted.call(paddedPeerAddress)
       equal(isTrustedPeer, true)
 
       // get the swap and owner values of the peer

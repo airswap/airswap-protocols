@@ -7,7 +7,7 @@ const {
   takeSnapshot,
   revertToSnapShot,
 } = require('@airswap/test-utils').time
-const { padAddressToLocator } = require('@airswap/test-utils').time
+const { padAddressToLocator } = require('@airswap/test-utils').padding
 const {
   EMPTY_ADDRESS,
   SECONDS_IN_DAY,
@@ -28,9 +28,9 @@ contract('Market Unit Tests', async accounts => {
   let market
 
   let aliceLocator = padAddressToLocator(aliceAddress)
-  let bobLocator =  padAddressToLocator(bobAddress)
-  let carolLocator =  padAddressToLocator(carolAddress)
-  let davidLocator =  padAddressToLocator(davidAddress)
+  let bobLocator = padAddressToLocator(bobAddress)
+  let carolLocator = padAddressToLocator(carolAddress)
+  let davidLocator = padAddressToLocator(davidAddress)
 
   // linked list helpers
   const LIST_HEAD = '0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF'
