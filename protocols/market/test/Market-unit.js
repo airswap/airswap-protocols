@@ -7,6 +7,7 @@ const {
   takeSnapshot,
   revertToSnapShot,
 } = require('@airswap/test-utils').time
+const { padAddressToLocator } = require('@airswap/test-utils').time
 const {
   EMPTY_ADDRESS,
   SECONDS_IN_DAY,
@@ -25,6 +26,11 @@ contract('Market Unit Tests', async accounts => {
 
   let snapshotId
   let market
+
+  let aliceLocator = padAddressToLocator(aliceAddress)
+  let bobLocator =  padAddressToLocator(bobAddress)
+  let carolLocator =  padAddressToLocator(carolAddress)
+  let davidLocator =  padAddressToLocator(davidAddress)
 
   // linked list helpers
   const LIST_HEAD = '0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF'
@@ -106,7 +112,7 @@ contract('Market Unit Tests', async accounts => {
         aliceAddress,
         2000,
         EXPIRY_THREE_DAYS,
-        aliceAddress,
+        aliceLocator,
         { from: owner }
       )
 
@@ -116,7 +122,7 @@ contract('Market Unit Tests', async accounts => {
           event.staker === aliceAddress &&
           event.amount.toNumber() === 2000 &&
           event.expiry.toNumber() === EXPIRY_THREE_DAYS &&
-          event.locator === aliceAddress &&
+          event.locator === aliceLocator &&
           event.makerToken === mockTokenOne &&
           event.takerToken === mockTokenTwo
         )
@@ -147,7 +153,7 @@ contract('Market Unit Tests', async accounts => {
         aliceAddress,
         2000,
         EXPIRY_THREE_DAYS,
-        aliceAddress,
+        aliceLocator,
         {
           from: owner,
         }
@@ -158,7 +164,7 @@ contract('Market Unit Tests', async accounts => {
         bobAddress,
         500,
         EXPIRY_TWO_DAYS,
-        bobAddress,
+        bobLocator,
         { from: owner }
       )
 
@@ -168,13 +174,13 @@ contract('Market Unit Tests', async accounts => {
           event.staker === bobAddress &&
           event.amount.toNumber() === 500 &&
           event.expiry.toNumber() === EXPIRY_TWO_DAYS &&
-          event.locator === bobAddress &&
+          event.locator === bobLocator &&
           event.makerToken === mockTokenOne &&
           event.takerToken === mockTokenTwo
         )
       })
 
-      await market.setIntent(carolAddress, 1500, EXPIRY_ONE_DAY, carolAddress, {
+      await market.setIntent(carolAddress, 1500, EXPIRY_ONE_DAY, carolLocator, {
         from: owner,
       })
 
@@ -198,15 +204,15 @@ contract('Market Unit Tests', async accounts => {
         aliceAddress,
         2000,
         EXPIRY_THREE_DAYS,
-        aliceAddress,
+        aliceLocator,
         {
           from: owner,
         }
       )
-      await market.setIntent(bobAddress, 500, EXPIRY_TWO_DAYS, bobAddress, {
+      await market.setIntent(bobAddress, 500, EXPIRY_TWO_DAYS, bobLocator, {
         from: owner,
       })
-      await market.setIntent(carolAddress, 1500, EXPIRY_ONE_DAY, carolAddress, {
+      await market.setIntent(carolAddress, 1500, EXPIRY_ONE_DAY, carolLocator, {
         from: owner,
       })
     })
@@ -278,15 +284,15 @@ contract('Market Unit Tests', async accounts => {
         aliceAddress,
         2000,
         EXPIRY_THREE_DAYS,
-        aliceAddress,
+        aliceLocator,
         {
           from: owner,
         }
       )
-      await market.setIntent(bobAddress, 500, EXPIRY_TWO_DAYS, bobAddress, {
+      await market.setIntent(bobAddress, 500, EXPIRY_TWO_DAYS, bobLocator, {
         from: owner,
       })
-      await market.setIntent(carolAddress, 1500, EXPIRY_ONE_DAY, carolAddress, {
+      await market.setIntent(carolAddress, 1500, EXPIRY_ONE_DAY, carolLocator, {
         from: owner,
       })
     })
@@ -366,15 +372,15 @@ contract('Market Unit Tests', async accounts => {
         aliceAddress,
         2000,
         EXPIRY_THREE_DAYS,
-        aliceAddress,
+        aliceLocator,
         {
           from: owner,
         }
       )
-      await market.setIntent(bobAddress, 500, EXPIRY_TWO_DAYS, bobAddress, {
+      await market.setIntent(bobAddress, 500, EXPIRY_TWO_DAYS, bobLocator, {
         from: owner,
       })
-      await market.setIntent(carolAddress, 1500, EXPIRY_ONE_DAY, carolAddress, {
+      await market.setIntent(carolAddress, 1500, EXPIRY_ONE_DAY, carolLocator, {
         from: owner,
       })
 
@@ -391,15 +397,15 @@ contract('Market Unit Tests', async accounts => {
         aliceAddress,
         2000,
         EXPIRY_THREE_DAYS,
-        aliceAddress,
+        aliceLocator,
         {
           from: owner,
         }
       )
-      await market.setIntent(bobAddress, 500, EXPIRY_TWO_DAYS, bobAddress, {
+      await market.setIntent(bobAddress, 500, EXPIRY_TWO_DAYS, bobLocator, {
         from: owner,
       })
-      await market.setIntent(carolAddress, 1500, EXPIRY_ONE_DAY, carolAddress, {
+      await market.setIntent(carolAddress, 1500, EXPIRY_ONE_DAY, carolLocator, {
         from: owner,
       })
 
@@ -424,7 +430,7 @@ contract('Market Unit Tests', async accounts => {
         aliceAddress,
         2000,
         EXPIRY_THREE_DAYS,
-        aliceAddress,
+        aliceLocator,
         {
           from: owner,
         }
@@ -438,7 +444,7 @@ contract('Market Unit Tests', async accounts => {
   describe('Test isIntentExpired', async () => {
     it('should return false if an intent has not expired', async () => {
       // give alice an intent expiring in 1 day
-      await market.setIntent(aliceAddress, 2000, EXPIRY_ONE_DAY, aliceAddress, {
+      await market.setIntent(aliceAddress, 2000, EXPIRY_ONE_DAY, aliceLocator, {
         from: owner,
       })
 
@@ -452,7 +458,7 @@ contract('Market Unit Tests', async accounts => {
 
     it('should return true if an intent has expired', async () => {
       // give alice an intent expiring in 1 day
-      await market.setIntent(aliceAddress, 2000, EXPIRY_ONE_DAY, aliceAddress, {
+      await market.setIntent(aliceAddress, 2000, EXPIRY_ONE_DAY, aliceLocator, {
         from: owner,
       })
 
@@ -470,15 +476,15 @@ contract('Market Unit Tests', async accounts => {
         aliceAddress,
         2000,
         EXPIRY_THREE_DAYS,
-        aliceAddress,
+        aliceLocator,
         {
           from: owner,
         }
       )
-      await market.setIntent(bobAddress, 500, EXPIRY_TWO_DAYS, bobAddress, {
+      await market.setIntent(bobAddress, 500, EXPIRY_TWO_DAYS, bobLocator, {
         from: owner,
       })
-      await market.setIntent(carolAddress, 1500, EXPIRY_ONE_DAY, carolAddress, {
+      await market.setIntent(carolAddress, 1500, EXPIRY_ONE_DAY, carolLocator, {
         from: owner,
       })
     })
