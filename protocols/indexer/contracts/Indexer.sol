@@ -18,8 +18,8 @@ pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
 import "@airswap/indexer/interfaces/IIndexer.sol";
+import "@airswap/indexer/interfaces/ILocatorWhitelist.sol";
 import "@airswap/market/contracts/Market.sol";
-import "@airswap/indexer/interfaces/IWhitelist.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
@@ -164,7 +164,7 @@ contract Indexer is IIndexer, Ownable {
 
     // Ensure the locator is whitelisted, if relevant
     if (locatorWhitelist != address(0)) {
-      require(IWhitelist(locatorWhitelist).isWhitelisted(_locator),
+      require(ILocatorWhitelist(locatorWhitelist).has(_locator),
       "LOCATOR_NOT_WHITELISTED");
     }
 

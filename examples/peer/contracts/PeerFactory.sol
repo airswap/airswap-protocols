@@ -22,21 +22,27 @@ import "@airswap/peer/interfaces/IPeerFactory.sol";
 
 contract PeerFactory is IPeerFactory, IWhitelist {
 
-  mapping(address => bool) internal factoryPeers;
+  mapping(address => bool) internal deployedAddresses;
 
   /**
     * @notice Deploy a trusted peer contract
     * @param _swapContract address of the swap contract the peer will deploy with
-    * @param _peerOwner address that should be the owner of the peer
+    * @param _peerContractOwner address that should be the owner of the peer
     */
-  function createPeer(address _swapContract, address _peerOwner) external {
-    require(_peerOwner != address(0), 'Provide a peer owner');
-    require(_swapContract != address(0), 'Provide a swap address');
+  function createPeer(address _swapContract, address _peerContractOwner) external {
 
-    address newPeer = address(new Peer(_swapContract, _peerOwner));
-    factoryPeers[newPeer] = true;
+    // Ensure an owner for the peer contract is provided.
+    require(_peerContractOwner != address(0),
+      'PEER_CONTRACT_OWNER_REQUIRED');
 
-    emit PeerCreated(newPeer, _swapContract, _peerOwner);
+    // Ensure a swap contract is provided.
+    require(_swapContract != address(0),
+      'SWAP_CONTRACT_REQUIRED');
+
+    address newPeerContract = address(new Peer(_swapContract, _peerContractOwner));
+    deployedAddresses[newPeerContract] = true;
+
+    emit CreatePeer(newPeerContract, _swapContract, _peerContractOwner);
   }
 
   /**
@@ -45,7 +51,7 @@ contract PeerFactory is IPeerFactory, IWhitelist {
     * @return bool - true if the locator is whitelisted
     */
   function isWhitelisted(bytes32 _locator) external returns (bool) {
-    return factoryPeers[address(bytes20(_locator))];
+    return deployedAddresses[address(bytes20(_locator))];
   }
 
 }

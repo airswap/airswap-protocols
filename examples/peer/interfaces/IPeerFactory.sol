@@ -18,13 +18,13 @@ pragma solidity 0.5.10;
 
 interface IPeerFactory {
 
-  event PeerCreated(address indexed peer, address swap, address indexed owner);
+  event CreatePeer(address indexed peerContract, address swapContract, address indexed peerContractOwner);
 
   /**
     * @notice Deploy a trusted peer contract
     * @param _swapContract address of the swap contract the peer will deploy with
-    * @param _peerOwner address that should be the owner of the peer
+    * @param _peerContractOwner address that should be the owner of the peer
     */
-  function createPeer(address _swapContract, address _peerOwner) external;
+  function createPeer(address _swapContract, address _peerContractOwner) external;
 
 }
