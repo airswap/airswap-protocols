@@ -1,6 +1,7 @@
 const Swap = artifacts.require('Swap')
 const Wrapper = artifacts.require('Wrapper')
 const WETH9 = artifacts.require('WETH9')
+const FungibleToken = artifacts.require('FungibleToken')
 const MockContract = artifacts.require('MockContract')
 
 const { equal, reverted, passes } = require('@airswap/test-utils').assert
@@ -14,6 +15,7 @@ contract('Wrapper Unit Tests', async accounts => {
   const s = web3.utils.asciiToHex('s')
   let mockSwap
   let mockWeth
+  let mockFT
   let wrapper
   let wethTemplate
   let weth_balance
@@ -85,9 +87,20 @@ contract('Wrapper Unit Tests', async accounts => {
     mockSwap = await MockContract.new()
   }
 
+  async function setupFungibleToken() {
+    mockFT = await MockContract.new()
+    let fungibleTokenTemplate = await FungibleToken.new()
+
+    let mock_transfer = fungibleTokenTemplate.contract.methods
+      .transfer(EMPTY_ADDRESS, 0)
+      .encodeABI()
+    await mockFT.givenMethodReturnBool(mock_transfer, true)
+  }
+
   before('deploy Wrapper', async () => {
     await setupMockWeth()
     await setupMockSwap()
+    await setupFungibleToken()
     wrapper = await Wrapper.new(mockSwap.address, mockWeth.address)
   })
 
@@ -166,7 +179,7 @@ contract('Wrapper Unit Tests', async accounts => {
       )
     })
 
-    it('Test when taker token == weth, maker token != weth, and weth has a left over balance', async () => {
+    it.skip('Test when taker token == weth, maker token != weth, and weth has a left over balance', async () => {
       let mockMakerToken = mockToken
 
       //mock the weth.balance method
@@ -257,9 +270,15 @@ contract('Wrapper Unit Tests', async accounts => {
 
     it('Test when taker token == weth, maker token != weth, and the transaction passes', async () => {
       //mock the weth.balance method
-      await mockWeth.givenMethodReturnUint(weth_balance, 0)
+      //await mockWeth.givenMethodReturnUint(weth_balance, 0)
 
-      let notWethContract = mockToken
+      // mock the weth.balanceOf method
+      let weth_wrapper_balance = wethTemplate.contract.methods
+        .balanceOf(EMPTY_ADDRESS)
+        .encodeABI()
+      await mockWeth.givenMethodReturnUint(weth_wrapper_balance, 0)
+
+      let notWethContract = mockFT
       await passes(
         wrapper.swapSimple(
           0, //nonce
