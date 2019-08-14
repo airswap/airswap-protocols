@@ -23,7 +23,7 @@ import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 contract PeerFactory is IWhitelist {
 
-  event NewFactoryPeer(address indexed peer, address swap, address indexedowner);
+  event NewFactoryPeer(address indexed peer, address swap, address indexed owner);
 
   mapping(address => bool) internal factoryPeers;
 
