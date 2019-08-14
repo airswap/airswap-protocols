@@ -41,7 +41,7 @@ contract Indexer is IIndexer, Ownable {
   mapping (address => uint256) public blacklist;
 
   // The whitelist contract for checking whether a peer is whitelisted
-  address whitelist;
+  address public whitelist;
 
   /**
     * @notice Contract Constructor
