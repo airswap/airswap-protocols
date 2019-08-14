@@ -57,7 +57,9 @@ contract('Peer Factory Tests', async accounts => {
       let paddedPeerAddress = padAddressToLocator(peerAddress)
 
       // before calling the function, the mapping is false
-      let isTrustedPeer = await peerFactory.isWhitelisted.call(paddedPeerAddress)
+      let isTrustedPeer = await peerFactory.isWhitelisted.call(
+        paddedPeerAddress
+      )
       equal(isTrustedPeer, false)
 
       // successful tx
@@ -91,7 +93,9 @@ contract('Peer Factory Tests', async accounts => {
 
       // deploy peer
       await peerFactory.deployTrustedPeer(swapContractTwo, peerOwnerTwo)
-      let isTrustedPeer = await peerFactory.isWhitelisted.call(paddedPeerAddress)
+      let isTrustedPeer = await peerFactory.isWhitelisted.call(
+        paddedPeerAddress
+      )
       equal(isTrustedPeer, true)
 
       // get the swap and owner values of the peer

@@ -15,6 +15,7 @@ const {
   revertToSnapShot,
   takeSnapshot,
 } = require('@airswap/test-utils').time
+const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 
 contract('Indexer Unit Tests', async accounts => {
   let owner = accounts[0]
@@ -72,7 +73,11 @@ contract('Indexer Unit Tests', async accounts => {
 
   before('Setup contracts', async () => {
     await setupMockToken()
-    indexer = await Indexer.new(stakingTokenAddress, MIN_STAKE_250)
+    indexer = await Indexer.new(
+      stakingTokenAddress,
+      MIN_STAKE_250,
+      EMPTY_ADDRESS
+    )
   })
 
   describe('Check constructor', async () => {
@@ -92,7 +97,11 @@ contract('Indexer Unit Tests', async accounts => {
 
     it('should emit an event in the constructor', async () => {
       // create a new indexer
-      const newIndexer = await Indexer.new(stakingTokenAddress, MIN_STAKE_250)
+      const newIndexer = await Indexer.new(
+        stakingTokenAddress,
+        MIN_STAKE_250,
+        EMPTY_ADDRESS
+      )
 
       // get the tx hash and get the transaction result from it
       let txHash = newIndexer.transactionHash

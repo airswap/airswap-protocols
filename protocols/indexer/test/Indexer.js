@@ -8,6 +8,8 @@ const {
   takeSnapshot,
   revertToSnapShot,
 } = require('@airswap/test-utils').time
+const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
+const { padAddressToLocator } = require('@airswap/test-utils').padding
 
 let snapshotId
 
@@ -18,6 +20,8 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
   let tokenAST
   let tokenDAI
   let tokenWETH
+
+  let aliceLocator = padAddressToLocator(aliceAddress)
 
   before('Setup', async () => {
     let snapShot = await takeSnapshot()
@@ -42,7 +46,9 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
     })
 
     it('Deployed Indexer contract', async () => {
-      indexer = await Indexer.new(tokenAST.address, 200, { from: ownerAddress })
+      indexer = await Indexer.new(tokenAST.address, 200, EMPTY_ADDRESS, {
+        from: ownerAddress,
+      })
       indexerAddress = indexer.address
       emitted(await indexer.setStakeMinimum(250), 'SetStakeMinimum')
     })
@@ -180,7 +186,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
           from: bobAddress,
         }
       )
-      equal(intents[0], aliceAddress)
+      equal(intents[0], aliceLocator)
     })
 
     it('Alice attempts to unset an intent and succeeds', async () => {
