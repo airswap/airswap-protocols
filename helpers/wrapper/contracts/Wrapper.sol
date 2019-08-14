@@ -46,7 +46,7 @@ contract Wrapper {
   }
 
   /**
-    * @notice Required to recieve ether from IWETH
+    * @notice Required to receive ether from IWETH
     */
   function() external payable { }
 
@@ -79,6 +79,9 @@ contract Wrapper {
     bytes32 _s
   ) public payable {
 
+    uint256 startingWETH = wethContract.balanceOf(address(this));
+    uint256 startingETH = address(this).balance;
+
     // The taker is sending ether.
     if (_takerToken == address(wethContract)) {
 
@@ -93,8 +96,10 @@ contract Wrapper {
       // Wrap (deposit) the ether.
       wethContract.deposit.value(msg.value)();
 
-      // Approve Swap to trade it.
-      wethContract.approve(address(swapContract), msg.value);
+      // Approve Swap to trade it, only if not already already allowed.
+      if (wethContract.allowance(address(this), address(swapContract)) < msg.value) {
+        wethContract.approve(address(swapContract), msg.value);
+      }
 
     } else {
       // Ensure no unexpected ether sent.
@@ -123,14 +128,16 @@ contract Wrapper {
       wethContract.withdraw(_makerAmount);
       // Transfer ether to the user.
       msg.sender.transfer(_makerAmount);
+    } else if (_makerToken != address(0)){
+      IERC20(_makerToken).transfer(msg.sender, _makerAmount);
     }
 
     // Ensure no WETH balance remains.
-    require(wethContract.balanceOf(address(this)) == 0,
+    require(wethContract.balanceOf(address(this)) == startingWETH,
       "WETH_BALANCE_REMAINING");
 
     // Ensure no ether balance remains.
-    require(address(this).balance == 0,
+    require(address(this).balance <= startingETH,
       "ETH_BALANCE_REMAINING");
   }
 }

@@ -4,7 +4,13 @@ const Wrapper = artifacts.require('Wrapper')
 const WETH9 = artifacts.require('WETH9')
 const FungibleToken = artifacts.require('FungibleToken')
 
-const { emitted, getResult, passes, ok } = require('@airswap/test-utils').assert
+const {
+  emitted,
+  equal,
+  getResult,
+  passes,
+  ok,
+} = require('@airswap/test-utils').assert
 const { balances } = require('@airswap/test-utils').balances
 const {
   getTimestampPlusDays,
@@ -107,6 +113,8 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
       await passes(result)
       result = await getResult(swapContract, result.tx)
       emitted(result, 'Swap')
+
+      ok(await balances(wrapperAddress, [[tokenDAI, 0], [tokenWETH, 0]]))
     })
   })
 
@@ -129,7 +137,7 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
       emitted(tx, 'Authorize')
     })
 
-    it('Alice authorizes the Swap contract to move her WETH', async () => {
+    it('Alice approves the Swap contract to move her WETH', async () => {
       let tx = await tokenWETH.approve(wrapperAddress, 10000, {
         from: aliceAddress,
       })
@@ -173,6 +181,75 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
       passes(result)
       result = await getResult(swapContract, result.tx)
       emitted(result, 'Swap')
+
+      ok(await balances(wrapperAddress, [[tokenDAI, 0], [tokenWETH, 0]]))
+    })
+  })
+
+  describe('Sending Ether and WETH to the WrapperContract without swapSimple issues', async () => {
+    it('Sending Ether to the Wrapper Contract', async () => {
+      await web3.eth.sendTransaction({
+        to: wrapperAddress,
+        from: aliceAddress,
+        value: 100000,
+        data: '0x0',
+      })
+
+      equal(await web3.eth.getBalance(wrapperAddress), 100000)
+    })
+    it('Sending WETH to the Wrapper Contract', async () => {
+      const startingBalance = await tokenWETH.balanceOf(wrapperAddress)
+      await tokenWETH.transfer(wrapperAddress, 5, { from: aliceAddress })
+      ok(
+        await balances(wrapperAddress, [
+          [tokenWETH, startingBalance.toNumber() + 5],
+        ])
+      )
+    })
+
+    it('Alice approves Swap to spend 1000 DAI', async () => {
+      let result = await tokenDAI.approve(swapAddress, 1000, {
+        from: aliceAddress,
+      })
+      emitted(result, 'Approval')
+    })
+
+    it('Send order where Bob sends Eth to Alice for DAI', async () => {
+      const { order } = await orders.getOrder({
+        maker: {
+          wallet: aliceAddress,
+          token: tokenDAI.address,
+          param: 50,
+        },
+        taker: {
+          token: tokenWETH.address,
+          param: 10,
+        },
+      })
+      const signature = await signatures.getSimpleSignature(
+        order,
+        aliceAddress,
+        swapAddress
+      )
+      let result = await swapSimple(
+        order.nonce,
+        order.expiry,
+        order.maker.wallet,
+        order.maker.param,
+        order.maker.token,
+        order.taker.wallet,
+        order.taker.param,
+        order.taker.token,
+        signature.v,
+        signature.r,
+        signature.s,
+        { from: bobAddress, value: order.taker.param }
+      )
+      await passes(result)
+      result = await getResult(swapContract, result.tx)
+      emitted(result, 'Swap')
+      equal(await web3.eth.getBalance(wrapperAddress), 100000)
+      ok(await balances(wrapperAddress, [[tokenDAI, 0], [tokenWETH, 5]]))
     })
   })
 })
