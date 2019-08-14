@@ -91,7 +91,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenDAI.address,
           100,
           await getTimestampPlusDays(1),
-          aliceAddress,
+          aliceLocator,
           {
             from: aliceAddress,
           }
@@ -129,7 +129,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenDAI.address,
           500,
           await getTimestampPlusDays(1),
-          aliceAddress,
+          aliceLocator,
           {
             from: aliceAddress,
           }
@@ -157,7 +157,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenDAI.address,
           500,
           await getTimestampPlusDays(1),
-          aliceAddress,
+          aliceLocator,
           {
             from: aliceAddress,
           }
@@ -222,7 +222,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenDAI.address,
           1000,
           await getTimestampPlusDays(1),
-          aliceAddress,
+          aliceLocator,
           {
             from: aliceAddress,
           }
@@ -257,7 +257,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenDAI.address,
           1000,
           await getTimestampPlusDays(1),
-          aliceAddress,
+          aliceLocator,
           {
             from: aliceAddress,
           }
@@ -300,7 +300,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenDAI.address,
           500,
           await getTimestampPlusDays(1),
-          aliceAddress,
+          aliceLocator,
           {
             from: aliceAddress,
           }
