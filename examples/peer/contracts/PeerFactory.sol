@@ -15,15 +15,13 @@
 */
 
 pragma solidity 0.5.10;
-pragma experimental ABIEncoderV2;
 
 import "@airswap/peer/contracts/Peer.sol";
 import "@airswap/peer/interfaces/IWhitelist.sol";
+import "@airswap/peer/interfaces/IPeerFactory.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
-contract PeerFactory is IWhitelist {
-
-  event PeerCreated(address indexed peer, address swap, address indexed owner);
+contract PeerFactory is IPeerFactory, IWhitelist {
 
   mapping(address => bool) internal factoryPeers;
 
@@ -32,7 +30,7 @@ contract PeerFactory is IWhitelist {
     * @param _swapContract address of the swap contract the peer will deploy with
     * @param _peerOwner address that should be the owner of the peer
     */
-  function createPeer(address _swapContract, address _peerOwner) public {
+  function createPeer(address _swapContract, address _peerOwner) external {
     require(_peerOwner != address(0), 'Provide a peer owner');
     require(_swapContract != address(0), 'Provide a swap address');
 
