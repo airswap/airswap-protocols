@@ -17,7 +17,7 @@
 pragma solidity 0.5.10;
 
 import "@airswap/peer/contracts/Peer.sol";
-import "@airswap/peer/interfaces/IWhitelist.sol";
+import "@airswap/indexer/interfaces/IWhitelist.sol";
 import "@airswap/peer/interfaces/IPeerFactory.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
