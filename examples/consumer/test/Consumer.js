@@ -13,6 +13,7 @@ const {
   takeSnapshot,
 } = require('@airswap/test-utils').time
 const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
+const { padAddressToLocator } = require('@airswap/test-utils').padding
 
 let indexer
 let consumer
@@ -155,7 +156,7 @@ contract('Consumer', async accounts => {
         tokenDAI.address,
         50
       )
-      equal(quote[0], alicePeer.address)
+      equal(quote[0], padAddressToLocator(alicePeer.address))
       equal(quote[1], 30952)
     })
 

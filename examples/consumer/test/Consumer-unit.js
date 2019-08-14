@@ -7,6 +7,7 @@ const { equal, passes } = require('@airswap/test-utils').assert
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 const BigNumber = require('bignumber.js')
+const { padAddressToLocator } = require('@airswap/test-utils').padding
 
 contract('Consumer Unit Tests', async () => {
   const highVal = 400
@@ -15,13 +16,17 @@ contract('Consumer Unit Tests', async () => {
 
   let snapshotId
   let mockPeerHigh
+  let mockPeerHighLocator
   let mockPeerLow
+  let mockPeerLowLocator
   let mockSwap
   let mockIndexer
   let consumer
   let mockUserSendToken
   let mockUserReceiveToken
   let indexer_getIntents
+
+  let emptyLocator = padAddressToLocator(EMPTY_ADDRESS)
 
   beforeEach(async () => {
     let snapShot = await takeSnapshot()
@@ -35,7 +40,9 @@ contract('Consumer Unit Tests', async () => {
   async function setupMockDelgate() {
     let peerTemplate = await Peer.new(EMPTY_ADDRESS, EMPTY_ADDRESS)
     mockPeerHigh = await MockContract.new()
+    mockPeerHighLocator = padAddressToLocator(mockPeerHigh.address)
     mockPeerLow = await MockContract.new()
+    mockPeerLowLocator = padAddressToLocator(mockPeerLow.address)
 
     //mock peer getBuyQuote()
     let peer_getBuyQuote = peerTemplate.contract.methods
@@ -108,7 +115,7 @@ contract('Consumer Unit Tests', async () => {
       )
 
       let lowestCost = new BigNumber(val[1]).toPrecision(5)
-      equal(val[0], EMPTY_ADDRESS)
+      equal(val[0], emptyLocator)
       equal(lowestCost, maxUint.toPrecision(5))
     })
 
@@ -117,8 +124,8 @@ contract('Consumer Unit Tests', async () => {
       await mockIndexer.givenMethodReturn(
         indexer_getIntents,
         abi.rawEncode(
-          ['address[]'],
-          [[mockPeerHigh.address, mockPeerLow.address]]
+          ['bytes32[]'],
+          [[mockPeerHighLocator, mockPeerLowLocator]]
         )
       )
 
@@ -130,7 +137,7 @@ contract('Consumer Unit Tests', async () => {
         2
       )
 
-      equal(val[0], mockPeerLow.address)
+      equal(val[0], mockPeerLowLocator)
       equal(val[1].toNumber(), lowVal)
     })
 
@@ -139,8 +146,8 @@ contract('Consumer Unit Tests', async () => {
       await mockIndexer.givenMethodReturn(
         indexer_getIntents,
         abi.rawEncode(
-          ['address[]'],
-          [[mockPeerLow.address, mockPeerHigh.address]]
+          ['bytes32[]'],
+          [[mockPeerLowLocator, mockPeerHighLocator]]
         )
       )
 
@@ -151,7 +158,7 @@ contract('Consumer Unit Tests', async () => {
         EMPTY_ADDRESS,
         2
       )
-      equal(val[0], mockPeerLow.address)
+      equal(val[0], mockPeerLowLocator)
       equal(val[1].toNumber(), lowVal)
     })
   })
@@ -162,8 +169,8 @@ contract('Consumer Unit Tests', async () => {
       await mockIndexer.givenMethodReturn(
         indexer_getIntents,
         abi.rawEncode(
-          ['address[]'],
-          [[mockPeerLow.address, mockPeerHigh.address]]
+          ['bytes32[]'],
+          [[mockPeerLowLocator, mockPeerHighLocator]]
         )
       )
 
