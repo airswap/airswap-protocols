@@ -497,11 +497,11 @@ contract('Indexer Unit Tests', async accounts => {
         from: aliceAddress,
       })
 
-      // set an intent
+      // set an intent staking 0
       await indexer.setIntent(
         tokenOne,
         tokenTwo,
-        250,
+        0,
         await getTimestampPlusDays(1),
         aliceLocator,
         {
@@ -529,7 +529,7 @@ contract('Indexer Unit Tests', async accounts => {
       await indexer.setIntent(
         tokenOne,
         tokenTwo,
-        250,
+        50,
         await getTimestampPlusDays(1),
         aliceLocator,
         {
@@ -539,7 +539,7 @@ contract('Indexer Unit Tests', async accounts => {
       await indexer.setIntent(
         tokenOne,
         tokenTwo,
-        250,
+        100,
         await getTimestampPlusDays(1),
         bobLocator,
         {
