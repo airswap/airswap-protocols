@@ -43,7 +43,7 @@ struct Intent {
 Create a new `Market` contract. Usually called within the context of an `Indexer` contract.
 
 ```Solidity
-constructor (
+constructor(
   address _makerToken,
   address _takerToken
 ) public

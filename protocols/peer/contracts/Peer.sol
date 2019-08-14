@@ -38,16 +38,16 @@ contract Peer is IPeer, Ownable {
 
   /**
     * @notice Contract Constructor
-    * @param initialSwapContract address of the swap contract the peer will deploy with
-    * @param peerOwner address that should be the owner of the peer
+    * @param _swapContract address of the swap contract the peer will deploy with
+    * @param _peerContractOwner address that should be the owner of the peer
     */
   constructor(
-    address initialSwapContract,
-    address peerOwner
+    address _swapContract,
+    address _peerContractOwner
   ) public {
-    swapContract = ISwap(initialSwapContract);
-    if (peerOwner != address(0)) {
-      transferOwnership(peerOwner);
+    swapContract = ISwap(_swapContract);
+    if (_peerContractOwner != address(0)) {
+      transferOwnership(_peerContractOwner);
     }
   }
 

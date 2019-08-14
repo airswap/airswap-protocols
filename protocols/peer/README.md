@@ -33,15 +33,17 @@ Create a new `Peer` contract.
 
 ```Solidity
 constructor(
-  address initialSwapContract
+  address _swapContract,
+  address _peerContractOwner
 ) public
 ```
 
 ### Params
 
-| Name                  | Type      | Description                                         |
-| :-------------------- | :-------- | :-------------------------------------------------- |
-| `initialSwapContract` | `address` | Address of the Swap contract used to settle trades. |
+| Name                 | Type      | Description                                           |
+| :------------------- | :-------- | :---------------------------------------------------- |
+| `_swapContract`      | `address` | Address of the Swap contract used to settle trades.   |
+| `_peerContractOwner` | `address` | Address of the owner of the peer for rule management. |
 
 ## Price Calculations
 

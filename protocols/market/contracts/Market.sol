@@ -82,7 +82,7 @@ contract Market is Ownable {
     * @param _makerToken address
     * @param _takerToken address
     */
-  constructor (
+  constructor(
     address _makerToken,
     address _takerToken
   ) public {
