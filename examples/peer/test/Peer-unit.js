@@ -3,7 +3,6 @@ const Swap = artifacts.require('Swap')
 const MockContract = artifacts.require('MockContract')
 const {
   equal,
-  notEqual,
   passes,
   emitted,
   reverted,

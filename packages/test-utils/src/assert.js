@@ -10,6 +10,5 @@ module.exports = {
   fails: truffleAssert.fails,
   equal: assert.equal,
   isTrue: assert.isTrue,
-  notEqual: assert.notEqual,
   ok: assert.ok,
 }
