@@ -33,7 +33,7 @@ contract Indexer is IIndexer, Ownable {
   // Mapping of maker token to taker token to market
   mapping (address => mapping (address => Market)) public markets;
 
-  // Mapping of address to timestamp of blacklisting
+  // Mapping of token address to boolean
   mapping (address => bool) public blacklist;
 
   /**
@@ -126,7 +126,7 @@ contract Indexer is IIndexer, Ownable {
     require(markets[_makerToken][_takerToken] != Market(0),
       "MARKET_DOES_NOT_EXIST");
 
-    // Only transfer for staking if is amount is set.
+    // Only transfer for staking if amount is set.
     if (_amount > 0) {
 
       // Transfer the _amount for staking.
