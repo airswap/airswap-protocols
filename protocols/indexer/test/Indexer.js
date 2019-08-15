@@ -4,7 +4,6 @@ const FungibleToken = artifacts.require('FungibleToken')
 const { emitted, reverted, equal, ok } = require('@airswap/test-utils').assert
 const { balances } = require('@airswap/test-utils').balances
 const {
-  getTimestampPlusDays,
   takeSnapshot,
   revertToSnapShot,
 } = require('@airswap/test-utils').time
@@ -81,7 +80,6 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenDAI.address,
           tokenWETH.address,
           100,
-          await getTimestampPlusDays(1),
           aliceAddress,
           {
             from: aliceAddress,
@@ -99,7 +97,6 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenWETH.address,
           tokenDAI.address,
           500,
-          await getTimestampPlusDays(1),
           aliceAddress,
           {
             from: aliceAddress,
@@ -119,7 +116,6 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenWETH.address,
           tokenDAI.address,
           500,
-          await getTimestampPlusDays(1),
           aliceLocator,
           {
             from: aliceAddress,
@@ -147,7 +143,6 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenWETH.address,
           tokenDAI.address,
           500,
-          await getTimestampPlusDays(1),
           aliceLocator,
           {
             from: aliceAddress,
@@ -222,7 +217,6 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenWETH.address,
           tokenDAI.address,
           1000,
-          await getTimestampPlusDays(1),
           aliceLocator,
           {
             from: aliceAddress,
@@ -257,7 +251,6 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenWETH.address,
           tokenDAI.address,
           1000,
-          await getTimestampPlusDays(1),
           aliceLocator,
           {
             from: aliceAddress,
@@ -300,7 +293,6 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenWETH.address,
           tokenDAI.address,
           500,
-          await getTimestampPlusDays(1),
           aliceLocator,
           {
             from: aliceAddress,
