@@ -89,11 +89,8 @@ contract Wrapper {
       // Wrap (deposit) the ether.
       wethContract.deposit.value(msg.value)();
 
-      // Check if Swap has allowance, if not approve Swap to trade it.
-      if (wethContract.allowance(address(this), address(swapContract)) < msg.value) {
-        wethContract.approve(address(swapContract), msg.value);
-      }
-
+      // Approve Swap to trade it.
+      wethContract.approve(address(swapContract), msg.value);
     } else {
 
       // Ensure no unexpected ether sent during WETH transaction.
@@ -132,7 +129,7 @@ contract Wrapper {
        */
     } else if ((_makerToken != address(0)) && (_takerWallet == address(0))) {
 
-      // Fowrading the _makerAmount of type _makerToken to the msg.sender.
+      // Forwarding the _makerAmount of type _makerToken to the msg.sender.
       require(IERC20(_makerToken).transfer(msg.sender, _makerAmount));
     }
     // Falls here if it was a non-WETH ERC20 - non-WETH ERC20 trade and the
