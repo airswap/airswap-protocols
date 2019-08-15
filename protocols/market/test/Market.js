@@ -5,13 +5,10 @@ const Market = artifacts.require('Market')
 const FungibleToken = artifacts.require('FungibleToken')
 
 const {
-  SECONDS_IN_DAY,
   EMPTY_ADDRESS,
 } = require('@airswap/order-utils').constants
 const { equal } = require('@airswap/test-utils').assert
 const {
-  getTimestampPlusDays,
-  advanceTimeAndBlock,
   takeSnapshot,
   revertToSnapShot,
 } = require('@airswap/test-utils').time
@@ -60,7 +57,6 @@ contract('Market', async accounts => {
       await market.setIntent(
         aliceAddress,
         2000,
-        await getTimestampPlusDays(3),
         aliceAddress
       )
     })
@@ -69,7 +65,6 @@ contract('Market', async accounts => {
       await market.setIntent(
         bobAddress,
         500,
-        await getTimestampPlusDays(2),
         bobAddress
       )
     })
@@ -78,7 +73,6 @@ contract('Market', async accounts => {
       await market.setIntent(
         carolAddress,
         1500,
-        await getTimestampPlusDays(1),
         carolAddress
       )
     })
@@ -87,7 +81,6 @@ contract('Market', async accounts => {
       await market.setIntent(
         davidAddress,
         100,
-        await getTimestampPlusDays(3),
         davidAddress
       )
     })
@@ -96,7 +89,6 @@ contract('Market', async accounts => {
       await market.setIntent(
         zaraAddress,
         0,
-        await getTimestampPlusDays(4),
         zaraAddress
       )
     })
@@ -105,7 +97,6 @@ contract('Market', async accounts => {
       await market.setIntent(
         eveAddress,
         500,
-        await getTimestampPlusDays(2),
         eveAddress
       )
     })
@@ -164,79 +155,6 @@ contract('Market', async accounts => {
       assert(intents[4] == davidLocator, 'David should be fifth')
       assert(intents[5] == zaraLocator, 'Zara should be last')
       assert(BN(await market.length()).eq(6), 'Market length is incorrect')
-    })
-
-    it("Doesn't fetch an expired intent", async () => {
-      // Advance time a day and a half.
-      // This advances past the expiry of Carol's intent
-      await advanceTimeAndBlock(SECONDS_IN_DAY * 1.5)
-      const intents = await market.fetchIntents(7)
-      assert(intents[0] == aliceLocator, 'Alice should be first')
-      assert(intents[1] == bobLocator, 'Bob should be second')
-      assert(intents[2] == eveLocator, 'Eve should be third')
-      assert(intents[3] == davidLocator, 'David should be fourth')
-      assert(intents[4] == zaraLocator, 'Zara should be fifth')
-      // Market length still includes carol's intent
-      assert(BN(await market.length()).eq(6), 'Market length is incorrect')
-    })
-
-    it('If an intent has expired, the end of the returned list is 0x0', async () => {
-      const intents = await market.fetchIntents(7)
-      assert(BN(intents.length).eq(6), 'Returned intents wrong length')
-      assert(
-        intents[5] == emptyLocator,
-        'Final slot should be 0x0 - carol=expired'
-      )
-    })
-  })
-
-  describe('Garbage Collection', async () => {
-    it("Doesn't return any intents that haven't expired", async () => {
-      let intents = await market.fetchIntents(7)
-      // Returns all 6 intents
-      assert(BN(intents.length).eq(6), 'Returned intents wrong length')
-
-      // Tries to remove intents, looping from Bob, count 5
-      // Bob -> Eve -> David -> Zara -> HEAD -> Alice (Carol is after Alice, before Bob)
-      let expiredIntents = await market.findExpiredIntents.call(bobAddress, 5)
-
-      assert(BN(expiredIntents.length).eq(5), 'Array length should be 5')
-
-      assert(expiredIntents[0] == EMPTY_ADDRESS, 'This element should be empty')
-      assert(expiredIntents[1] == EMPTY_ADDRESS, 'This element should be empty')
-      assert(expiredIntents[2] == EMPTY_ADDRESS, 'This element should be empty')
-      assert(expiredIntents[3] == EMPTY_ADDRESS, 'This element should be empty')
-      assert(expiredIntents[4] == EMPTY_ADDRESS, 'This element should be empty')
-    })
-
-    it("Should return Carol's intent if she's included in the loop", async () => {
-      let intents = await market.fetchIntents(7)
-      // Returns all 6 intents
-      assert(BN(intents.length).eq(6), 'Returned intents wrong length')
-
-      // Try to remove Carol's intent (Zara -> HEAD -> Alice -> Carol -> Bob)
-      let expiredIntents = await market.findExpiredIntents.call(zaraAddress, 4)
-
-      assert(BN(expiredIntents.length).eq(4), 'Array length should be 4')
-
-      assert(expiredIntents[0] == carolAddress, 'Carol should be listed')
-      assert(expiredIntents[1] == EMPTY_ADDRESS, 'This element should be empty')
-      assert(expiredIntents[2] == EMPTY_ADDRESS, 'This element should be empty')
-      assert(expiredIntents[3] == EMPTY_ADDRESS, 'This element should be empty')
-    })
-
-    it('Remove more intents after more time', async () => {
-      // Advance time another 0.6 days
-      // This advances past the expiry of Bob's and Eve's intents
-      await advanceTimeAndBlock(SECONDS_IN_DAY * 0.6)
-
-      // Now loop through, both Bob and Eve should be returned
-      let expiredIntents = await market.findExpiredIntents.call(bobAddress, 2)
-
-      assert(BN(expiredIntents.length).eq(2), 'Array length should be 2')
-
-      assert(expiredIntents[0] == bobAddress, 'Bob should be listed')
-      assert(expiredIntents[1] == eveAddress, 'Eve should be listed')
     })
   })
 })
