@@ -18,6 +18,7 @@ contract('Wrapper Unit Tests', async accounts => {
   let mockFT
   let wrapper
   let wethTemplate
+  let fungibleTokenTemplate
   let weth_balance
   let swap_swapSimple
   let snapshotId
@@ -89,7 +90,7 @@ contract('Wrapper Unit Tests', async accounts => {
 
   async function setupFungibleToken() {
     mockFT = await MockContract.new()
-    let fungibleTokenTemplate = await FungibleToken.new()
+    fungibleTokenTemplate = await FungibleToken.new()
 
     let mock_transfer = fungibleTokenTemplate.contract.methods
       .transfer(EMPTY_ADDRESS, 0)
@@ -179,63 +180,6 @@ contract('Wrapper Unit Tests', async accounts => {
       )
     })
 
-    it.skip('Test when taker token == weth, maker token != weth, and weth has a left over balance', async () => {
-      let mockMakerToken = mockToken
-
-      //mock the weth.balance method
-      await mockWeth.givenMethodReturnUint(weth_balance, 1)
-
-      await reverted(
-        wrapper.swapSimple(
-          0, //nonce
-          0, //expiry
-          EMPTY_ADDRESS, //maker wallet
-          0, //maker amount
-          mockMakerToken, //maker token
-          EMPTY_ADDRESS, //taker wallet
-          takerAmount, //taker amount
-          mockWeth.address, //taker token
-          27, //v
-          r,
-          s,
-          { value: takerAmount }
-        ),
-        'WETH_BALANCE_REMAINING'
-      )
-    })
-
-    it.skip('Test when taker token == weth, maker token != weth, and wrapper has a left over balance', async () => {
-      let mockMakerToken = mockToken
-
-      //mock the weth.balance method
-      await mockWeth.givenMethodReturnUint(weth_balance, 0)
-
-      await reverted(
-        wrapper.swapSimple(
-          0, //nonce
-          0, //expiry
-          EMPTY_ADDRESS, //maker wallet
-          0, //maker amount
-          mockMakerToken, //maker token
-          EMPTY_ADDRESS, //taker wallet
-          takerAmount, //taker amount
-          mockWeth.address, //taker token
-          27, //v
-          r,
-          s,
-          { value: takerAmount }
-        ),
-        'ETH_BALANCE_REMAINING'
-      )
-
-      //TODO: @dmosites I can't actually test this.
-      //there are two reasons for this.
-      //1. the balance on the wrapper contact is not account specific. The entire contract has a balance that is tracked amongst all users.
-      //2. this unfortunately means there is also a security vulnerability: require(address(this).balance == 0, "ETH_BALANCE_REMAINING") if anybody sends
-      //any amount of ETH or WETH to this contract outside of the swapSimple() method it will forever lock the contract. This is because the contract tries to keep
-      //a balance of 0, but thats irrespective of what already exists within the contract.
-    })
-
     it('Test when taker token == weth, maker token == weth, and the transaction passes', async () => {
       //mock the weth.balance method
       await mockWeth.givenMethodReturnUint(weth_balance, 0)
@@ -269,16 +213,7 @@ contract('Wrapper Unit Tests', async accounts => {
     })
 
     it('Test when taker token == weth, maker token != weth, and the transaction passes', async () => {
-      //mock the weth.balance method
-      //await mockWeth.givenMethodReturnUint(weth_balance, 0)
-
-      // mock the weth.balanceOf method
-      let weth_wrapper_balance = wethTemplate.contract.methods
-        .balanceOf(EMPTY_ADDRESS)
-        .encodeABI()
-      await mockWeth.givenMethodReturnUint(weth_wrapper_balance, 0)
-
-      let notWethContract = mockFT
+      let notWethContract = mockFT.address
       await passes(
         wrapper.swapSimple(
           0, //nonce

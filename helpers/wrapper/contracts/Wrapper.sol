@@ -33,7 +33,6 @@ contract Wrapper {
 
   /**
     * @notice Contract Constructor
-    *
     * @param _swapContract address
     * @param _wethContract address
     */
@@ -85,29 +84,27 @@ contract Wrapper {
     // The taker is sending ether.
     if (_takerToken == address(wethContract)) {
 
-      // Ensure the takerWallet is unset.
       require(_takerWallet == address(0),
         "TAKER_ADDRESS_MUST_BE_UNSET");
 
-      // Ensure the _takerAmount matches the ether sent.
       require(_takerAmount == msg.value,
         "VALUE_MUST_BE_SENT");
 
       // Wrap (deposit) the ether.
       wethContract.deposit.value(msg.value)();
 
-      // Approve Swap to trade it, only if not already already allowed.
+      // Check if Swap has allowance, if not approve Swap to trade it.
       if (wethContract.allowance(address(this), address(swapContract)) < msg.value) {
         wethContract.approve(address(swapContract), msg.value);
       }
 
     } else {
-      // Ensure no unexpected ether sent.
+      // Ensure no unexpected ether sent during WETH transaction.
       require(msg.value == 0,
         "VALUE_MUST_BE_ZERO");
     }
 
-    // Perform the swap.
+    // Perform the simple swap.
     swapContract.swapSimple(
       _nonce,
       _expiry,
@@ -132,11 +129,9 @@ contract Wrapper {
       IERC20(_makerToken).transfer(msg.sender, _makerAmount);
     }
 
-    // Ensure no WETH balance remains.
     require(wethContract.balanceOf(address(this)) == startingWETH,
       "WETH_BALANCE_REMAINING");
 
-    // Ensure no ether balance remains.
     require(address(this).balance <= startingETH,
       "ETH_BALANCE_REMAINING");
   }
