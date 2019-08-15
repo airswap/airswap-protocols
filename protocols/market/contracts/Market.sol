@@ -192,10 +192,11 @@ contract Market is Ownable {
   }
 
   /**
-    * @notice Loops through _count stakers from _startingPoint and removes any expired intents
+    * @notice Loops through _count stakers from _startingPoint and returns expired stakers
     *
     * @param _startingPoint the staker to start at
     * @param _count the number of stakers to loop through
+    * @return address[] the expired stakers
     */
   function findExpiredIntents(address _startingPoint, uint256 _count) external view returns (address[] memory expiredIntents) {
     uint256 limit = _count;

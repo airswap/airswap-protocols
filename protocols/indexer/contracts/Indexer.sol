@@ -179,6 +179,14 @@ contract Indexer is IIndexer, Ownable {
     removeIntents(_makerToken, _takerToken, staker);
   }
 
+  /**
+    * @notice Loops through _count stakers from _startingPoint on a market and removes any expired intents
+    *
+    * @param _makerToken address
+    * @param _takerToken address
+    * @param _startingPoint the staker to start at
+    * @param _count the number of stakers to loop through
+    */
   function cleanExpiredIntents(
     address _makerToken,
     address _takerToken,
@@ -225,6 +233,13 @@ contract Indexer is IIndexer, Ownable {
     return new bytes32[](0);
   }
 
+/**
+    * @notice Removes stakers' intents from a market
+    *
+    * @param _makerToken address
+    * @param _takerToken address
+    * @param _stakers address[]
+    */
   function removeIntents(
     address _makerToken,
     address _takerToken,
