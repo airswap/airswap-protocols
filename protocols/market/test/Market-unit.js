@@ -99,12 +99,9 @@ contract('Market Unit Tests', async accounts => {
 
     it('should allow an intent to be inserted by the owner', async () => {
       // set an intent from the owner
-      let result = await market.setIntent(
-        aliceAddress,
-        2000,
-        aliceLocator,
-        { from: owner }
-      )
+      let result = await market.setIntent(aliceAddress, 2000, aliceLocator, {
+        from: owner,
+      })
 
       // check the SetIntent event was emitted
       emitted(result, 'SetIntent', event => {
@@ -137,22 +134,14 @@ contract('Market Unit Tests', async accounts => {
 
     it('should insert subsequent intents in the correct order', async () => {
       // insert alice
-      await market.setIntent(
-        aliceAddress,
-        2000,
-        aliceLocator,
-        {
-          from: owner,
-        }
-      )
+      await market.setIntent(aliceAddress, 2000, aliceLocator, {
+        from: owner,
+      })
 
       // now add more
-      let result = await market.setIntent(
-        bobAddress,
-        500,
-        bobLocator,
-        { from: owner }
-      )
+      let result = await market.setIntent(bobAddress, 500, bobLocator, {
+        from: owner,
+      })
 
       // check the SetIntent event was emitted
       emitted(result, 'SetIntent', event => {
@@ -185,14 +174,9 @@ contract('Market Unit Tests', async accounts => {
 
   describe('Test unsetIntent', async () => {
     beforeEach('Setup intents', async () => {
-      await market.setIntent(
-        aliceAddress,
-        2000,
-        aliceLocator,
-        {
-          from: owner,
-        }
-      )
+      await market.setIntent(aliceAddress, 2000, aliceLocator, {
+        from: owner,
+      })
       await market.setIntent(bobAddress, 500, bobLocator, {
         from: owner,
       })
@@ -264,14 +248,9 @@ contract('Market Unit Tests', async accounts => {
 
   describe('Test getIntent', async () => {
     beforeEach('Setup intents again', async () => {
-      await market.setIntent(
-        aliceAddress,
-        2000,
-        aliceLocator,
-        {
-          from: owner,
-        }
-      )
+      await market.setIntent(aliceAddress, 2000, aliceLocator, {
+        from: owner,
+      })
       await market.setIntent(bobAddress, 500, bobLocator, {
         from: owner,
       })
@@ -339,14 +318,9 @@ contract('Market Unit Tests', async accounts => {
 
     it('returns specified number of elements if < length', async () => {
       // add 3 intents
-      await market.setIntent(
-        aliceAddress,
-        2000,
-        aliceLocator,
-        {
-          from: owner,
-        }
-      )
+      await market.setIntent(aliceAddress, 2000, aliceLocator, {
+        from: owner,
+      })
       await market.setIntent(bobAddress, 500, bobLocator, {
         from: owner,
       })
@@ -363,14 +337,9 @@ contract('Market Unit Tests', async accounts => {
 
     it('returns only length if requested number if larger', async () => {
       // add 3 intents
-      await market.setIntent(
-        aliceAddress,
-        2000,
-        aliceLocator,
-        {
-          from: owner,
-        }
-      )
+      await market.setIntent(aliceAddress, 2000, aliceLocator, {
+        from: owner,
+      })
       await market.setIntent(bobAddress, 500, bobLocator, {
         from: owner,
       })
@@ -395,14 +364,9 @@ contract('Market Unit Tests', async accounts => {
 
     it('should return false if the address has no intent', async () => {
       // give alice an intent
-      await market.setIntent(
-        aliceAddress,
-        2000,
-        aliceLocator,
-        {
-          from: owner,
-        }
-      )
+      await market.setIntent(aliceAddress, 2000, aliceLocator, {
+        from: owner,
+      })
       // now test again
       let hasIntent = await market.hasIntent(aliceAddress)
       equal(hasIntent, true, 'hasIntent should have returned true')
