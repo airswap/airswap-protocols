@@ -114,14 +114,12 @@ contract Indexer is IIndexer, Ownable {
     * @param _makerToken address
     * @param _takerToken address
     * @param _amount uint256
-    * @param _expiry uint256
     * @param _locator bytes32
     */
   function setIntent(
     address _makerToken,
     address _takerToken,
     uint256 _amount,
-    uint256 _expiry,
     bytes32 _locator
   ) public {
 
@@ -151,10 +149,10 @@ contract Indexer is IIndexer, Ownable {
     require(!markets[_makerToken][_takerToken].hasIntent(msg.sender),
       "USER_ALREADY_STAKED");
 
-    emit Stake(msg.sender, _makerToken, _takerToken, _amount, _expiry);
+    emit Stake(msg.sender, _makerToken, _takerToken, _amount);
 
     // Set the intent on the market.
-    markets[_makerToken][_takerToken].setIntent(msg.sender, _amount, _expiry, _locator);
+    markets[_makerToken][_takerToken].setIntent(msg.sender, _amount, _locator);
   }
 
   /**
@@ -173,33 +171,7 @@ contract Indexer is IIndexer, Ownable {
     require(markets[_makerToken][_takerToken] != Market(0),
       "MARKET_DOES_NOT_EXIST");
 
-    // this initialisation is needed due to ethereum/solidity/issues/5462
-    address[] memory staker = new address[](1);
-    staker[0] = msg.sender;
-    removeIntents(_makerToken, _takerToken, staker);
-  }
-
-  /**
-    * @notice Loops through _count stakers from _startingPoint on a market and removes any expired intents
-    *
-    * @param _makerToken address
-    * @param _takerToken address
-    * @param _startingPoint the staker to start at
-    * @param _count the number of stakers to loop through
-    */
-  function cleanExpiredIntents(
-    address _makerToken,
-    address _takerToken,
-    address _startingPoint,
-    uint256 _count
-  ) external {
-    // Ensure the market exists.
-    require(markets[_makerToken][_takerToken] != Market(0),
-      "MARKET_DOES_NOT_EXIST");
-
-    address[] memory expiredStakers = markets[_makerToken][_takerToken].findExpiredIntents(_startingPoint, _count);
-
-    removeIntents(_makerToken, _takerToken, expiredStakers);
+    removeIntent(_makerToken, _takerToken, msg.sender);
   }
 
   /**
@@ -233,35 +205,31 @@ contract Indexer is IIndexer, Ownable {
     return new bytes32[](0);
   }
 
-/**
+  /**
     * @notice Removes stakers' intents from a market
     *
     * @param _makerToken address
     * @param _takerToken address
-    * @param _stakers address[]
+    * @param _staker address
     */
-  function removeIntents(
+  function removeIntent(
     address _makerToken,
     address _takerToken,
-    address[] memory _stakers
+    address _staker
   ) internal {
-    for (uint256 i; i < _stakers.length; i++) {
-      if (_stakers[i] != address(0)) {
-        // Get the intent for the sender.
-        Market.Intent memory intent = markets[_makerToken][_takerToken].getIntent(_stakers[i]);
+    // Get the intent for the sender.
+    Market.Intent memory intent = markets[_makerToken][_takerToken].getIntent(_staker);
 
-        // Ensure the intent exists.
-        require(intent.staker == _stakers[i],
-          "INTENT_DOES_NOT_EXIST");
+    // Ensure the intent exists.
+    require(intent.staker == _staker,
+      "INTENT_DOES_NOT_EXIST");
 
-        // Unset the intent on the market.
-        markets[_makerToken][_takerToken].unsetIntent(_stakers[i]);
+    // Unset the intent on the market.
+    markets[_makerToken][_takerToken].unsetIntent(_staker);
 
-        // Return the staked tokens.
-        stakeToken.transfer(_stakers[i], intent.amount);
-        emit Unstake(_stakers[i], _makerToken, _takerToken, intent.amount);
-      }
-    }
+    // Return the staked tokens.
+    stakeToken.transfer(_staker, intent.amount);
+    emit Unstake(_staker, _makerToken, _takerToken, intent.amount);
   }
 
 }

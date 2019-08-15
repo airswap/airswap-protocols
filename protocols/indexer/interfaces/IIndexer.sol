@@ -27,8 +27,7 @@ interface IIndexer {
     address wallet,
     address makerToken,
     address takerToken,
-    uint256 amount,
-    uint256 expiry
+    uint256 amount
   );
 
   event Unstake(
@@ -66,7 +65,6 @@ interface IIndexer {
     address _makerToken,
     address _takerToken,
     uint256 _amount,
-    uint256 _expiry,
     bytes32 _locator
   ) external;
 
