@@ -10,7 +10,6 @@ const {
   passes,
 } = require('@airswap/test-utils').assert
 const {
-  getTimestampPlusDays,
   revertToSnapShot,
   takeSnapshot,
   advanceTimeAndBlock,
@@ -225,32 +224,18 @@ contract('Indexer Unit Tests', async accounts => {
   describe('Test setIntent', async () => {
     it('should not set an intent if the market doesnt exist', async () => {
       await reverted(
-        indexer.setIntent(
-          tokenOne,
-          tokenTwo,
-          250,
-          await getTimestampPlusDays(1),
-          aliceLocator,
-          {
-            from: aliceAddress,
-          }
-        ),
+        indexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
+          from: aliceAddress,
+        }),
         'MARKET_DOES_NOT_EXIST'
       )
     })
 
     it('should not set an intent if the locator is not whitelisted', async () => {
       await reverted(
-        whitelistedIndexer.setIntent(
-          tokenOne,
-          tokenTwo,
-          250,
-          await getTimestampPlusDays(1),
-          aliceLocator,
-          {
-            from: aliceAddress,
-          }
-        ),
+        whitelistedIndexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
+          from: aliceAddress,
+        }),
         'LOCATOR_NOT_WHITELISTED'
       )
     })
@@ -263,16 +248,9 @@ contract('Indexer Unit Tests', async accounts => {
 
       // now try to stake with an amount less than 250
       await reverted(
-        indexer.setIntent(
-          tokenOne,
-          tokenTwo,
-          250,
-          await getTimestampPlusDays(1),
-          aliceLocator,
-          {
-            from: aliceAddress,
-          }
-        ),
+        indexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
+          from: aliceAddress,
+        }),
         'MARKET_IS_BLACKLISTED'
       )
 
@@ -287,16 +265,9 @@ contract('Indexer Unit Tests', async accounts => {
 
       // now try to stake with an amount less than 250
       await reverted(
-        indexer.setIntent(
-          tokenOne,
-          tokenTwo,
-          250,
-          await getTimestampPlusDays(1),
-          aliceLocator,
-          {
-            from: aliceAddress,
-          }
-        ),
+        indexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
+          from: aliceAddress,
+        }),
         'MARKET_IS_BLACKLISTED'
       )
     })
@@ -312,16 +283,9 @@ contract('Indexer Unit Tests', async accounts => {
 
       // now try to set an intent
       await reverted(
-        indexer.setIntent(
-          tokenOne,
-          tokenTwo,
-          250,
-          await getTimestampPlusDays(1),
-          aliceLocator,
-          {
-            from: aliceAddress,
-          }
-        ),
+        indexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
+          from: aliceAddress,
+        }),
         'UNABLE_TO_STAKE'
       )
     })
@@ -332,14 +296,11 @@ contract('Indexer Unit Tests', async accounts => {
         from: aliceAddress,
       })
 
-      let expiry = await getTimestampPlusDays(1)
-
       // now set an intent
       let result = await indexer.setIntent(
         tokenOne,
         tokenTwo,
         250,
-        expiry,
         aliceLocator,
         {
           from: aliceAddress,
@@ -352,8 +313,7 @@ contract('Indexer Unit Tests', async accounts => {
           event.wallet === aliceAddress &&
           event.makerToken === tokenOne &&
           event.takerToken == tokenTwo &&
-          event.amount.toNumber() === 250 &&
-          event.expiry.toNumber() === expiry
+          event.amount.toNumber() === 250
         )
       })
     })
@@ -367,14 +327,11 @@ contract('Indexer Unit Tests', async accounts => {
       // whitelist the locator
       await whitelistMock.givenAnyReturnBool(true)
 
-      let expiry = await getTimestampPlusDays(1)
-
       // now set an intent
       let result = await whitelistedIndexer.setIntent(
         tokenOne,
         tokenTwo,
         250,
-        expiry,
         bobLocator,
         {
           from: bobAddress,
@@ -387,8 +344,7 @@ contract('Indexer Unit Tests', async accounts => {
           event.wallet === bobAddress &&
           event.makerToken === tokenOne &&
           event.takerToken == tokenTwo &&
-          event.amount.toNumber() === 250 &&
-          event.expiry.toNumber() === expiry
+          event.amount.toNumber() === 250
         )
       })
     })
@@ -400,29 +356,15 @@ contract('Indexer Unit Tests', async accounts => {
       })
 
       // set one intent
-      await indexer.setIntent(
-        tokenOne,
-        tokenTwo,
-        250,
-        await getTimestampPlusDays(1),
-        aliceLocator,
-        {
-          from: aliceAddress,
-        }
-      )
+      await indexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
+        from: aliceAddress,
+      })
 
       // now try to set another
       await reverted(
-        indexer.setIntent(
-          tokenOne,
-          tokenTwo,
-          250,
-          await getTimestampPlusDays(2),
-          aliceLocator,
-          {
-            from: aliceAddress,
-          }
-        ),
+        indexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
+          from: aliceAddress,
+        }),
         'USER_ALREADY_STAKED'
       )
     })
@@ -460,16 +402,9 @@ contract('Indexer Unit Tests', async accounts => {
       })
 
       // create the intent
-      await indexer.setIntent(
-        tokenOne,
-        tokenTwo,
-        250,
-        await getTimestampPlusDays(3),
-        aliceLocator,
-        {
-          from: aliceAddress,
-        }
-      )
+      await indexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
+        from: aliceAddress,
+      })
 
       // now try to unset the intent
       let tx = await indexer.unsetIntent(tokenOne, tokenTwo, {
@@ -502,16 +437,9 @@ contract('Indexer Unit Tests', async accounts => {
       })
 
       // set an intent staking 0
-      await indexer.setIntent(
-        tokenOne,
-        tokenTwo,
-        0,
-        await getTimestampPlusDays(1),
-        aliceLocator,
-        {
-          from: aliceAddress,
-        }
-      )
+      await indexer.setIntent(tokenOne, tokenTwo, 0, aliceLocator, {
+        from: aliceAddress,
+      })
 
       // blacklist tokenOne
       await indexer.addToBlacklist([tokenOne], {
@@ -530,26 +458,12 @@ contract('Indexer Unit Tests', async accounts => {
       })
 
       // set two intents
-      await indexer.setIntent(
-        tokenOne,
-        tokenTwo,
-        50,
-        await getTimestampPlusDays(1),
-        aliceLocator,
-        {
-          from: aliceAddress,
-        }
-      )
-      await indexer.setIntent(
-        tokenOne,
-        tokenTwo,
-        100,
-        await getTimestampPlusDays(1),
-        bobLocator,
-        {
-          from: bobAddress,
-        }
-      )
+      await indexer.setIntent(tokenOne, tokenTwo, 50, aliceLocator, {
+        from: aliceAddress,
+      })
+      await indexer.setIntent(tokenOne, tokenTwo, 100, bobLocator, {
+        from: bobAddress,
+      })
 
       // now try to get the intents
       let intents = await indexer.getIntents.call(tokenOne, tokenTwo, 4)
@@ -576,26 +490,12 @@ contract('Indexer Unit Tests', async accounts => {
       })
 
       // set two intents
-      await indexer.setIntent(
-        tokenOne,
-        tokenTwo,
-        50,
-        await getTimestampPlusDays(1),
-        aliceLocator,
-        {
-          from: aliceAddress,
-        }
-      )
-      await indexer.setIntent(
-        tokenOne,
-        tokenTwo,
-        100,
-        await getTimestampPlusDays(2),
-        bobLocator,
-        {
-          from: bobAddress,
-        }
-      )
+      await indexer.setIntent(tokenOne, tokenTwo, 50, aliceLocator, {
+        from: aliceAddress,
+      })
+      await indexer.setIntent(tokenOne, tokenTwo, 100, bobLocator, {
+        from: bobAddress,
+      })
 
       // get size of market
       let marketBefore = await indexer.getIntents.call(tokenOne, tokenTwo, 100)
@@ -622,26 +522,12 @@ contract('Indexer Unit Tests', async accounts => {
       })
 
       // set two intents
-      await indexer.setIntent(
-        tokenOne,
-        tokenTwo,
-        50,
-        await getTimestampPlusDays(1),
-        aliceLocator,
-        {
-          from: aliceAddress,
-        }
-      )
-      await indexer.setIntent(
-        tokenOne,
-        tokenTwo,
-        100,
-        await getTimestampPlusDays(2),
-        bobLocator,
-        {
-          from: bobAddress,
-        }
-      )
+      await indexer.setIntent(tokenOne, tokenTwo, 50, aliceLocator, {
+        from: aliceAddress,
+      })
+      await indexer.setIntent(tokenOne, tokenTwo, 100, bobLocator, {
+        from: bobAddress,
+      })
 
       // increase time so Alice's intent has expired
       await advanceTimeAndBlock(SECONDS_IN_DAY * 1.1)
@@ -671,26 +557,12 @@ contract('Indexer Unit Tests', async accounts => {
       })
 
       // set two intents
-      await indexer.setIntent(
-        tokenOne,
-        tokenTwo,
-        50,
-        await getTimestampPlusDays(1),
-        aliceLocator,
-        {
-          from: aliceAddress,
-        }
-      )
-      await indexer.setIntent(
-        tokenOne,
-        tokenTwo,
-        100,
-        await getTimestampPlusDays(2),
-        bobLocator,
-        {
-          from: bobAddress,
-        }
-      )
+      await indexer.setIntent(tokenOne, tokenTwo, 50, aliceLocator, {
+        from: aliceAddress,
+      })
+      await indexer.setIntent(tokenOne, tokenTwo, 100, bobLocator, {
+        from: bobAddress,
+      })
 
       // increase time so Alice's intent has expired
       await advanceTimeAndBlock(SECONDS_IN_DAY * 1.1)
