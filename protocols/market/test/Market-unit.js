@@ -470,7 +470,7 @@ contract('Market Unit Tests', async accounts => {
     })
   })
 
-  describe('Test cleanExpiredIntents', async () => {
+  describe('Test findExpiredIntents', async () => {
     beforeEach('Setup intents again', async () => {
       await market.setIntent(
         aliceAddress,
@@ -489,7 +489,7 @@ contract('Market Unit Tests', async accounts => {
       })
     })
 
-    it('should make no changes if none have expired', async () => {
+    it('should return empty array if none have expired', async () => {
       let intents = await market.fetchIntents(7)
       equal(intents[0], aliceLocator, 'Alice should be first')
       equal(intents[1], carolLocator, 'Carol should be second')
@@ -498,18 +498,17 @@ contract('Market Unit Tests', async accounts => {
       let listLength = await market.length()
       equal(listLength, 3, 'Link list length should be 3')
 
-      await market.cleanExpiredIntents(LIST_HEAD, 6)
+      let expiredIntents = await market.findExpiredIntents.call(LIST_HEAD, 6, {
+        from: owner,
+      })
 
-      intents = await market.fetchIntents(7)
-      equal(intents[0], aliceLocator, 'Alice should be first')
-      equal(intents[1], carolLocator, 'Carol should be second')
-      equal(intents[2], bobLocator, 'Bob should be third')
-
-      listLength = await market.length()
-      equal(listLength, 3, 'Link list length should be 3')
+      equal(expiredIntents.length, 3, 'Array length should be 3')
+      equal(expiredIntents[0], EMPTY_ADDRESS, 'This element should be empty')
+      equal(expiredIntents[1], EMPTY_ADDRESS, 'This element should be empty')
+      equal(expiredIntents[2], EMPTY_ADDRESS, 'This element should be empty')
     })
 
-    it('should make not remove an expired intent if count doesnt reach it', async () => {
+    it('should make not return an expired intent if count doesnt reach it', async () => {
       let intents = await market.fetchIntents(7)
       equal(intents[0], aliceLocator, 'before: Alice should be first')
       equal(intents[1], carolLocator, 'before: Carol should be second')
@@ -522,20 +521,15 @@ contract('Market Unit Tests', async accounts => {
       await advanceTimeAndBlock(SECONDS_IN_DAY * 1.1)
 
       // do not reach carols intent
-      await market.cleanExpiredIntents(bobAddress, 1)
+      let expiredIntents = await market.findExpiredIntents.call(bobAddress, 1, {
+        from: owner,
+      })
 
-      // length is unchanged
-      listLength = await market.length()
-      equal(listLength, 3, 'Link list length should be 3')
-
-      // fetch intents does not return carol as she is expired
-      intents = await market.fetchIntents(7)
-      equal(intents[0], aliceLocator, 'Alice should be first')
-      equal(intents[1], bobLocator, 'Bob should be second')
-      equal(intents[2], emptyLocator, 'Null should be third')
+      equal(expiredIntents.length, 1, 'Array length should be 1')
+      equal(expiredIntents[0], EMPTY_ADDRESS, 'This element should be empty')
     })
 
-    it('should make remove an expired intent if count does reach it', async () => {
+    it('should make return an expired intent if count does reach it', async () => {
       let intents = await market.fetchIntents(7)
       equal(intents[0], aliceLocator, 'before: Alice should be first')
       equal(intents[1], carolLocator, 'before: Carol should be second')
@@ -548,14 +542,14 @@ contract('Market Unit Tests', async accounts => {
       await advanceTimeAndBlock(SECONDS_IN_DAY * 1.1)
 
       // now reach carols intent
-      await market.cleanExpiredIntents(bobAddress, 3)
+      let expiredIntents = await market.findExpiredIntents.call(bobAddress, 3, {
+        from: owner,
+      })
 
-      // length is changed
-      listLength = await market.length()
-      equal(listLength, 2, 'Link list length should be 2')
-      intents = await market.fetchIntents(7)
-      equal(intents[0], aliceLocator, 'Alice should be first')
-      equal(intents[1], bobLocator, 'Bob should be second')
+      equal(expiredIntents.length, 3, 'Array length should be 3')
+      equal(expiredIntents[0], carolAddress, 'Carol should be listed')
+      equal(expiredIntents[1], EMPTY_ADDRESS, 'This element should be empty')
+      equal(expiredIntents[2], EMPTY_ADDRESS, 'This element should be empty')
     })
   })
 })

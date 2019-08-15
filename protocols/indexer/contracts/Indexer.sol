@@ -173,19 +173,33 @@ contract Indexer is IIndexer, Ownable {
     require(markets[_makerToken][_takerToken] != Market(0),
       "MARKET_DOES_NOT_EXIST");
 
-    // Get the intent for the sender.
-    Market.Intent memory intent = markets[_makerToken][_takerToken].getIntent(msg.sender);
+    // this initialisation is needed due to ethereum/solidity/issues/5462
+    address[] memory staker = new address[](1);
+    staker[0] = msg.sender;
+    removeIntents(_makerToken, _takerToken, staker);
+  }
 
-    // Ensure the intent exists.
-    require(intent.staker == msg.sender,
-      "INTENT_DOES_NOT_EXIST");
+  /**
+    * @notice Loops through _count stakers from _startingPoint on a market and removes any expired intents
+    *
+    * @param _makerToken address
+    * @param _takerToken address
+    * @param _startingPoint the staker to start at
+    * @param _count the number of stakers to loop through
+    */
+  function cleanExpiredIntents(
+    address _makerToken,
+    address _takerToken,
+    address _startingPoint,
+    uint256 _count
+  ) external {
+    // Ensure the market exists.
+    require(markets[_makerToken][_takerToken] != Market(0),
+      "MARKET_DOES_NOT_EXIST");
 
-    // Unset the intent on the market.
-    markets[_makerToken][_takerToken].unsetIntent(msg.sender);
+    address[] memory expiredStakers = markets[_makerToken][_takerToken].findExpiredIntents(_startingPoint, _count);
 
-    // Return the staked tokens.
-    stakeToken.transfer(msg.sender, intent.amount);
-    emit Unstake(msg.sender, _makerToken, _takerToken, intent.amount);
+    removeIntents(_makerToken, _takerToken, expiredStakers);
   }
 
   /**
@@ -217,6 +231,37 @@ contract Indexer is IIndexer, Ownable {
       }
     }
     return new bytes32[](0);
+  }
+
+/**
+    * @notice Removes stakers' intents from a market
+    *
+    * @param _makerToken address
+    * @param _takerToken address
+    * @param _stakers address[]
+    */
+  function removeIntents(
+    address _makerToken,
+    address _takerToken,
+    address[] memory _stakers
+  ) internal {
+    for (uint256 i; i < _stakers.length; i++) {
+      if (_stakers[i] != address(0)) {
+        // Get the intent for the sender.
+        Market.Intent memory intent = markets[_makerToken][_takerToken].getIntent(_stakers[i]);
+
+        // Ensure the intent exists.
+        require(intent.staker == _stakers[i],
+          "INTENT_DOES_NOT_EXIST");
+
+        // Unset the intent on the market.
+        markets[_makerToken][_takerToken].unsetIntent(_stakers[i]);
+
+        // Return the staked tokens.
+        stakeToken.transfer(_stakers[i], intent.amount);
+        emit Unstake(_stakers[i], _makerToken, _takerToken, intent.amount);
+      }
+    }
   }
 
 }

@@ -13,8 +13,12 @@ const {
   getTimestampPlusDays,
   revertToSnapShot,
   takeSnapshot,
+  advanceTimeAndBlock,
 } = require('@airswap/test-utils').time
-const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
+const {
+  EMPTY_ADDRESS,
+  SECONDS_IN_DAY,
+} = require('@airswap/order-utils').constants
 const { padAddressToLocator } = require('@airswap/test-utils').padding
 
 contract('Indexer Unit Tests', async accounts => {
@@ -554,6 +558,166 @@ contract('Indexer Unit Tests', async accounts => {
       // should only get the number specified
       intents = await indexer.getIntents.call(tokenOne, tokenTwo, 1)
       equal(intents.length, 1, 'intents array should be size 1')
+    })
+  })
+
+  describe('Test cleanExpiredIntents', async () => {
+    it("should revert if the market doesn't exist", async () => {
+      await reverted(
+        indexer.cleanExpiredIntents(tokenOne, tokenTwo, aliceAddress, 3),
+        'MARKET_DOES_NOT_EXIST'
+      )
+    })
+
+    it("shouldn't remove intents if they not have expired", async () => {
+      // create market
+      await indexer.createMarket(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+
+      // set two intents
+      await indexer.setIntent(
+        tokenOne,
+        tokenTwo,
+        50,
+        await getTimestampPlusDays(1),
+        aliceLocator,
+        {
+          from: aliceAddress,
+        }
+      )
+      await indexer.setIntent(
+        tokenOne,
+        tokenTwo,
+        100,
+        await getTimestampPlusDays(2),
+        bobLocator,
+        {
+          from: bobAddress,
+        }
+      )
+
+      // get size of market
+      let marketBefore = await indexer.getIntents.call(tokenOne, tokenTwo, 100)
+      equal(marketBefore.length, 2, 'intents array should be size 2')
+
+      // try to remove intents
+      let tx = await indexer.cleanExpiredIntents(
+        tokenOne,
+        tokenTwo,
+        aliceAddress,
+        3
+      )
+
+      // check no intents were unstaked
+      let marketAfter = await indexer.getIntents.call(tokenOne, tokenTwo, 100)
+      equal(marketAfter.length, 2, 'intents array should be size 2')
+      notEmitted(tx, 'Unstake')
+    })
+
+    it("shouldn't remove intents if expired intents aren't in count", async () => {
+      // create market
+      await indexer.createMarket(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+
+      // set two intents
+      await indexer.setIntent(
+        tokenOne,
+        tokenTwo,
+        50,
+        await getTimestampPlusDays(1),
+        aliceLocator,
+        {
+          from: aliceAddress,
+        }
+      )
+      await indexer.setIntent(
+        tokenOne,
+        tokenTwo,
+        100,
+        await getTimestampPlusDays(2),
+        bobLocator,
+        {
+          from: bobAddress,
+        }
+      )
+
+      // increase time so Alice's intent has expired
+      await advanceTimeAndBlock(SECONDS_IN_DAY * 1.1)
+
+      // get size of market
+      let marketBefore = await indexer.getIntents.call(tokenOne, tokenTwo, 100)
+      equal(marketBefore.length, 2, 'intents array should be size 2')
+
+      // try to remove intents but only consider Bob's
+      let tx = await indexer.cleanExpiredIntents(
+        tokenOne,
+        tokenTwo,
+        bobAddress,
+        1
+      )
+
+      // check no intents were unstaked
+      let marketAfter = await indexer.getIntents.call(tokenOne, tokenTwo, 100)
+      equal(marketAfter.length, 2, 'intents array should be size 2')
+      notEmitted(tx, 'Unstake')
+    })
+
+    it('should remove expired intents in count', async () => {
+      // create market
+      await indexer.createMarket(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+
+      // set two intents
+      await indexer.setIntent(
+        tokenOne,
+        tokenTwo,
+        50,
+        await getTimestampPlusDays(1),
+        aliceLocator,
+        {
+          from: aliceAddress,
+        }
+      )
+      await indexer.setIntent(
+        tokenOne,
+        tokenTwo,
+        100,
+        await getTimestampPlusDays(2),
+        bobLocator,
+        {
+          from: bobAddress,
+        }
+      )
+
+      // increase time so Alice's intent has expired
+      await advanceTimeAndBlock(SECONDS_IN_DAY * 1.1)
+
+      // get size of market
+      let marketBefore = await indexer.getIntents.call(tokenOne, tokenTwo, 100)
+      equal(marketBefore.length, 2, 'intents array should be size 2')
+
+      // try to remove intents and consider both
+      let tx = await indexer.cleanExpiredIntents(
+        tokenOne,
+        tokenTwo,
+        bobAddress,
+        2
+      )
+
+      // check alice's intent was unstaked
+      let marketAfter = await indexer.getIntents.call(tokenOne, tokenTwo, 100)
+      equal(marketAfter.length, 1, 'intents array should be size 1')
+      emitted(tx, 'Unstake', event => {
+        return (
+          event.wallet === aliceAddress &&
+          event.makerToken === tokenOne &&
+          event.takerToken == tokenTwo &&
+          event.amount.toNumber() === 50
+        )
+      })
     })
   })
 })

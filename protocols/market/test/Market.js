@@ -8,7 +8,7 @@ const {
   SECONDS_IN_DAY,
   EMPTY_ADDRESS,
 } = require('@airswap/order-utils').constants
-const { equal, passes } = require('@airswap/test-utils').assert
+const { equal } = require('@airswap/test-utils').assert
 const {
   getTimestampPlusDays,
   advanceTimeAndBlock,
@@ -191,74 +191,52 @@ contract('Market', async accounts => {
   })
 
   describe('Garbage Collection', async () => {
-    it("Doesn't remove any intents that haven't expired", async () => {
+    it("Doesn't return any intents that haven't expired", async () => {
       let intents = await market.fetchIntents(7)
       // Returns all 6 intents
       assert(BN(intents.length).eq(6), 'Returned intents wrong length')
 
       // Tries to remove intents, looping from Bob, count 5
       // Bob -> Eve -> David -> Zara -> HEAD -> Alice (Carol is after Alice, before Bob)
-      await market.cleanExpiredIntents(bobAddress, 5)
+      let expiredIntents = await market.findExpiredIntents.call(bobAddress, 5)
 
-      intents = await market.fetchIntents(7)
-      assert(BN(intents.length).eq(6), 'Intents should be same length')
+      assert(BN(expiredIntents.length).eq(5), 'Array length should be 5')
 
-      // Ensure that the ordering is the same
-      assert(intents[0] == aliceLocator, 'Alice should be first')
-      assert(intents[1] == bobLocator, 'Bob should be second')
-      assert(intents[2] == eveLocator, 'Eve should be third')
-      assert(intents[3] == davidLocator, 'David should be fourth')
-      assert(intents[4] == zaraLocator, 'Zara should be fifth')
-      assert(intents[5] == emptyLocator, 'Null 6th location')
+      assert(expiredIntents[0] == EMPTY_ADDRESS, 'This element should be empty')
+      assert(expiredIntents[1] == EMPTY_ADDRESS, 'This element should be empty')
+      assert(expiredIntents[2] == EMPTY_ADDRESS, 'This element should be empty')
+      assert(expiredIntents[3] == EMPTY_ADDRESS, 'This element should be empty')
+      assert(expiredIntents[4] == EMPTY_ADDRESS, 'This element should be empty')
     })
 
-    it("Should remove Carol's intent if she's included in the loop", async () => {
+    it("Should return Carol's intent if she's included in the loop", async () => {
       let intents = await market.fetchIntents(7)
       // Returns all 6 intents
       assert(BN(intents.length).eq(6), 'Returned intents wrong length')
 
       // Try to remove Carol's intent (Zara -> HEAD -> Alice -> Carol -> Bob)
-      let tx = await market.cleanExpiredIntents(zaraAddress, 4)
-      passes(tx)
+      let expiredIntents = await market.findExpiredIntents.call(zaraAddress, 4)
 
-      // Returns just 5 intents this time - carol has been removed
-      intents = await market.fetchIntents(7)
-      assert(BN(intents.length).eq(5), 'Intents should be shorter')
+      assert(BN(expiredIntents.length).eq(4), 'Array length should be 4')
 
-      // Ensure that the ordering is the same, without a null 6th slot
-      assert(intents[0] == aliceLocator, 'Alice should be first')
-      assert(intents[1] == bobLocator, 'Bob should be second')
-      assert(intents[2] == eveLocator, 'Eve should be third')
-      assert(intents[3] == davidLocator, 'David should be fourth')
-      assert(intents[4] == zaraLocator, 'Zara should be fifth')
+      assert(expiredIntents[0] == carolAddress, 'Carol should be listed')
+      assert(expiredIntents[1] == EMPTY_ADDRESS, 'This element should be empty')
+      assert(expiredIntents[2] == EMPTY_ADDRESS, 'This element should be empty')
+      assert(expiredIntents[3] == EMPTY_ADDRESS, 'This element should be empty')
     })
 
     it('Remove more intents after more time', async () => {
       // Advance time another 0.6 days
       // This advances past the expiry of Bob's and Eve's intents
       await advanceTimeAndBlock(SECONDS_IN_DAY * 0.6)
-      let intents = await market.fetchIntents(7)
-      // Returns 5 intents as Bob and Eve have not been removed
-      assert(BN(intents.length).eq(5), 'Returned intents wrong length')
 
-      // Loop through, not including Bob and Eve
-      await market.cleanExpiredIntents(davidAddress, 3)
+      // Now loop through, both Bob and Eve should be returned
+      let expiredIntents = await market.findExpiredIntents.call(bobAddress, 2)
 
-      // no intents have been removed
-      intents = await market.fetchIntents(7)
-      assert(BN(intents.length).eq(5), 'Intents should be same length')
+      assert(BN(expiredIntents.length).eq(2), 'Array length should be 2')
 
-      // Now loop through, removing both in one go
-      await market.cleanExpiredIntents(bobAddress, 2)
-
-      intents = await market.fetchIntents(7)
-      // Returns just 3 intents this time
-      assert(BN(intents.length).eq(3), 'Intents should be shorter')
-
-      // Ensure that the ordering is the same
-      assert(intents[0] == aliceLocator, 'Alice should be first')
-      assert(intents[1] == davidLocator, 'David should be fourth')
-      assert(intents[2] == zaraLocator, 'Zara should be fifth')
+      assert(expiredIntents[0] == bobAddress, 'Bob should be listed')
+      assert(expiredIntents[1] == eveAddress, 'Eve should be listed')
     })
   })
 })

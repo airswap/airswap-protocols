@@ -192,28 +192,29 @@ contract Market is Ownable {
   }
 
   /**
-    * @notice Loops through _count stakers from _startingPoint and removes any expired intents
+    * @notice Loops through _count stakers from _startingPoint and returns expired stakers
     *
     * @param _startingPoint the staker to start at
     * @param _count the number of stakers to loop through
+    * @return address[] the expired stakers
     */
-  function cleanExpiredIntents(address _startingPoint, uint256 _count) external {
+  function findExpiredIntents(address _startingPoint, uint256 _count) external view returns (address[] memory expiredIntents) {
     uint256 limit = _count;
     address staker = _startingPoint;
-    address previousStaker;
 
     if (limit > length) {
       limit = length;
     }
 
+    expiredIntents = new address[](limit);
+    uint256 intentsIndex = 0;
+
     uint256 i = 0;
     while (i < limit) {
       if (staker != HEAD) {
         if (isIntentExpired(staker)) {
-          // we must track the neighbouring intent for when `staker` is removed
-          previousStaker = intentsLinkedList[staker][PREV].staker;
-          removeIntent(staker);
-          staker = previousStaker;
+          expiredIntents[intentsIndex] = staker;
+          intentsIndex++;
         }
         // only increase the count if it wasnt HEAD
         i++;
@@ -229,7 +230,7 @@ contract Market is Ownable {
     * @param _staker the staker in question
     * @return bool has the staker's intent expired?
     */
-  function isIntentExpired(address _staker) public returns (bool) {
+  function isIntentExpired(address _staker) public view returns (bool) {
     return getIntent(_staker).expiry <= now;
   }
 
