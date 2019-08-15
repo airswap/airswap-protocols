@@ -20,6 +20,7 @@ contract('Wrapper Unit Tests', async accounts => {
   let wethTemplate
   let fungibleTokenTemplate
   let weth_balance
+  let mock_transfer
   let swap_swapSimple
   let snapshotId
 
@@ -88,11 +89,11 @@ contract('Wrapper Unit Tests', async accounts => {
     mockSwap = await MockContract.new()
   }
 
-  async function setupFungibleToken() {
+  async function setupMockFungibleToken() {
     mockFT = await MockContract.new()
     fungibleTokenTemplate = await FungibleToken.new()
 
-    let mock_transfer = fungibleTokenTemplate.contract.methods
+    mock_transfer = fungibleTokenTemplate.contract.methods
       .transfer(EMPTY_ADDRESS, 0)
       .encodeABI()
     await mockFT.givenMethodReturnBool(mock_transfer, true)
@@ -101,7 +102,7 @@ contract('Wrapper Unit Tests', async accounts => {
   before('deploy Wrapper', async () => {
     await setupMockWeth()
     await setupMockSwap()
-    await setupFungibleToken()
+    await setupMockFungibleToken()
     wrapper = await Wrapper.new(mockSwap.address, mockWeth.address)
   })
 
@@ -228,6 +229,69 @@ contract('Wrapper Unit Tests', async accounts => {
           r,
           s,
           { value: takerAmount }
+        )
+      )
+
+      //check if swap_swapSimple() was called
+      let invocationCount = await mockSwap.invocationCountForMethod.call(
+        swap_swapSimple
+      )
+      equal(
+        invocationCount.toNumber(),
+        1,
+        "swap contact's swap.swapSimple was not called the expected number of times"
+      )
+    })
+
+    it('Test when taker token == weth, maker token != weth, and the wrapper token transfer fails', async () => {
+      await mockFT.givenMethodReturnBool(mock_transfer, false)
+      let notWethContract = mockFT.address
+      await reverted(
+        wrapper.swapSimple(
+          0, //nonce
+          0, //expiry
+          EMPTY_ADDRESS, //maker wallet
+          0, //maker amount
+          notWethContract, //maker token
+          EMPTY_ADDRESS, //taker wallet
+          takerAmount, //taker amount
+          mockWeth.address, //taker token
+          27, //v
+          r,
+          s,
+          { value: takerAmount }
+        )
+      )
+
+      //check if swap_swapSimple() was called
+      let invocationCount = await mockSwap.invocationCountForMethod.call(
+        swap_swapSimple
+      )
+      equal(
+        invocationCount.toNumber(),
+        0,
+        "swap contact's swap.swapSimple was not called the expected number of times"
+      )
+    })
+  })
+
+  describe('Test sending two ERC20s', async () => {
+    it('Test when taker token == non weth erc20, maker token == non weth erc20, and the transaction passes', async () => {
+      let notWethContract = mockFT.address
+      await passes(
+        wrapper.swapSimple(
+          0, //nonce
+          0, //expiry
+          EMPTY_ADDRESS, //maker wallet
+          0, //maker amount
+          notWethContract, //maker token
+          EMPTY_ADDRESS, //taker wallet
+          takerAmount, //taker amount
+          notWethContract, //taker token
+          27, //v
+          r,
+          s,
+          { value: 0 }
         )
       )
 

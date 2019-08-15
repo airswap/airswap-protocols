@@ -3,7 +3,7 @@
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
+  You may obtain a copy of the License atd
 
     http://www.apache.org/licenses/LICENSE-2.0
 
@@ -78,9 +78,6 @@ contract Wrapper {
     bytes32 _s
   ) public payable {
 
-    uint256 startingWETH = wethContract.balanceOf(address(this));
-    uint256 startingETH = address(this).balance;
-
     // The taker is sending ether.
     if (_takerToken == address(wethContract)) {
 
@@ -125,14 +122,8 @@ contract Wrapper {
       wethContract.withdraw(_makerAmount);
       // Transfer ether to the user.
       msg.sender.transfer(_makerAmount);
-    } else if (_makerToken != address(0)){
-      IERC20(_makerToken).transfer(msg.sender, _makerAmount);
-    }
-
-    require(wethContract.balanceOf(address(this)) == startingWETH,
-      "WETH_BALANCE_REMAINING");
-
-    require(address(this).balance <= startingETH,
-      "ETH_BALANCE_REMAINING");
+    } else if ((_makerToken != address(0)) && (_takerToken == address(wethContract))) {
+      require(IERC20(_makerToken).transfer(msg.sender, _makerAmount));
+    } // fall here if it was a non-WETH trade and didn't require any wrapper functionality.
   }
 }

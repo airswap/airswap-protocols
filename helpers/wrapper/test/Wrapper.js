@@ -26,7 +26,7 @@ let swapAddress
 let wrapperAddress
 
 let swapSimple
-
+let tokenAST
 let tokenDAI
 let tokenWETH
 let snapshotId
@@ -47,6 +47,7 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
     wrapperContract = await Wrapper.new(swapAddress, tokenWETH.address)
     wrapperAddress = wrapperContract.address
     tokenDAI = await FungibleToken.new()
+    tokenAST = await FungibleToken.new()
 
     await orders.setVerifyingContract(swapAddress)
 
@@ -67,12 +68,26 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
       emitted(tx, 'Transfer')
       passes(tx)
     })
+
+    it('Mints 1000 AST for Bob', async () => {
+      let tx = await tokenAST.mint(bobAddress, 1000)
+      ok(await balances(bobAddress, [[tokenAST, 1000]]))
+      emitted(tx, 'Transfer')
+      passes(tx)
+    })
   })
 
   describe('Approving...', async () => {
-    it('Alice approves Swap to spend 9999 DAI', async () => {
+    it('Alice approves Swap to spend 1000 DAI', async () => {
       let result = await tokenDAI.approve(swapAddress, 1000, {
         from: aliceAddress,
+      })
+      emitted(result, 'Approval')
+    })
+
+    it('Bob approves Swap to spend 1000 AST', async () => {
+      let result = await tokenAST.approve(swapAddress, 1000, {
+        from: bobAddress,
       })
       emitted(result, 'Approval')
     })
@@ -113,7 +128,6 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
       await passes(result)
       result = await getResult(swapContract, result.tx)
       emitted(result, 'Swap')
-
       ok(await balances(wrapperAddress, [[tokenDAI, 0], [tokenWETH, 0]]))
     })
   })
@@ -181,7 +195,6 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
       passes(result)
       result = await getResult(swapContract, result.tx)
       emitted(result, 'Swap')
-
       ok(await balances(wrapperAddress, [[tokenDAI, 0], [tokenWETH, 0]]))
     })
   })
@@ -250,6 +263,75 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
       emitted(result, 'Swap')
       equal(await web3.eth.getBalance(wrapperAddress), 100000)
       ok(await balances(wrapperAddress, [[tokenDAI, 0], [tokenWETH, 5]]))
+    })
+  })
+  describe('Sending nonWETH ERC20', async () => {
+    it('Alice approves Swap to spend 1000 DAI', async () => {
+      let result = await tokenDAI.approve(swapAddress, 1000, {
+        from: aliceAddress,
+      })
+      emitted(result, 'Approval')
+    })
+
+    it('Bob approves Swap to spend 1000 AST', async () => {
+      let result = await tokenAST.approve(swapAddress, 1000, {
+        from: bobAddress,
+      })
+      emitted(result, 'Approval')
+    })
+
+    it('Bob authorizes the Wrapper to send orders on her behalf', async () => {
+      let expiry = await getTimestampPlusDays(1)
+      let tx = await swapContract.authorize(wrapperAddress, expiry, {
+        from: bobAddress,
+      })
+      passes(tx)
+      emitted(tx, 'Authorize')
+    })
+
+    it('Send order where Bob sends AST to Alice for DAI', async () => {
+      const { order } = await orders.getOrder({
+        maker: {
+          wallet: aliceAddress,
+          token: tokenDAI.address,
+          param: 1,
+        },
+        taker: {
+          wallet: bobAddress,
+          token: tokenAST.address,
+          param: 100,
+        },
+      })
+      const signature = await signatures.getSimpleSignature(
+        order,
+        aliceAddress,
+        swapAddress
+      )
+      let result = await swapSimple(
+        order.nonce,
+        order.expiry,
+        order.maker.wallet,
+        order.maker.param,
+        order.maker.token,
+        order.taker.wallet,
+        order.taker.param,
+        order.taker.token,
+        signature.v,
+        signature.r,
+        signature.s,
+        { from: bobAddress, value: 0 }
+      )
+      await passes(result)
+      result = await getResult(swapContract, result.tx)
+      emitted(result, 'Swap')
+      equal(await web3.eth.getBalance(wrapperAddress), 100000)
+      ok(
+        await balances(wrapperAddress, [
+          [tokenAST, 0],
+          [tokenDAI, 0],
+          [tokenWETH, 5],
+        ])
+      )
     })
   })
 })
