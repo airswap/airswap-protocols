@@ -110,7 +110,7 @@ function swapSimple(
   uint8 _v,
   bytes32 _r,
   bytes32 _s
-) external payable
+) external
 ```
 
 A successful `swapSimple` transaction will emit a `Swap` event.

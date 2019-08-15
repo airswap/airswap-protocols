@@ -211,7 +211,7 @@ function provideOrder(
   uint8 v,
   bytes32 r,
   bytes32 s
-) public payable
+) public
 ```
 
 ### Params
@@ -249,7 +249,7 @@ function provideUnsignedOrder(
   address consumerToken,
   uint256 peerAmount,
   address peerToken
-) public payable
+) public
 ```
 
 ### Params

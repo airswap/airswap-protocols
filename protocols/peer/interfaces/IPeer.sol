@@ -89,7 +89,7 @@ interface IPeer {
     uint8 _v,
     bytes32 _r,
     bytes32 _s
-  ) external payable;
+  ) external;
 
   function provideUnsignedOrder(
     uint256 _nonce,
@@ -97,5 +97,5 @@ interface IPeer {
     address _consumerToken,
     uint256 _peerAmount,
     address _peerToken
-  ) external payable;
+  ) external;
 }
