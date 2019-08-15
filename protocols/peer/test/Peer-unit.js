@@ -238,8 +238,6 @@ contract('Peer Unit Tests', async accounts => {
         EXP
       )
       let val = await peer.getBuyQuote.call(1234, PEER_TOKEN, CONSUMER_TOKEN)
-      //TODO: @dmosites should the getBuyQuote() return with an exponent or a whole number?
-      //1234 * PRICE_COEF * 10^(-EXP)
       equal(val.toNumber(), 5332114, 'there should be a quote available')
     })
   })
@@ -284,8 +282,6 @@ contract('Peer Unit Tests', async accounts => {
         EXP
       )
       let val = await peer.getSellQuote.call(500, CONSUMER_TOKEN, PEER_TOKEN)
-      //TODO: @dmosites should the getSellQuote() return with an exponent or a whole number?
-      //500 * (10 ^ EXP) / PRICE_COEF
       equal(val.toNumber(), 1157, 'there should be a quote available')
     })
   })
@@ -314,8 +310,6 @@ contract('Peer Unit Tests', async accounts => {
         EXP
       )
       let val = await peer.getMaxQuote.call(PEER_TOKEN, CONSUMER_TOKEN)
-      //TODO: @dmosites should the getMaxQuote() return with an exponent or a whole number?
-      //MAX_PEER_AMOUNT * PRICE_COEF / (10 ^ EXP)
       equal(
         val[0].toNumber(),
         MAX_PEER_AMOUNT,
