@@ -3,15 +3,11 @@ const Market = artifacts.require('Market')
 const { equal, reverted, emitted } = require('@airswap/test-utils').assert
 const {
   getTimestampPlusDays,
-  advanceTimeAndBlock,
   takeSnapshot,
   revertToSnapShot,
 } = require('@airswap/test-utils').time
 const { padAddressToLocator } = require('@airswap/test-utils').padding
-const {
-  EMPTY_ADDRESS,
-  SECONDS_IN_DAY,
-} = require('@airswap/order-utils').constants
+const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 
 contract('Market Unit Tests', async accounts => {
   let owner = accounts[0]

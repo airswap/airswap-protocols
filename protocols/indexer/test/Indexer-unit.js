@@ -9,15 +9,8 @@ const {
   equal,
   passes,
 } = require('@airswap/test-utils').assert
-const {
-  revertToSnapShot,
-  takeSnapshot,
-  advanceTimeAndBlock,
-} = require('@airswap/test-utils').time
-const {
-  EMPTY_ADDRESS,
-  SECONDS_IN_DAY,
-} = require('@airswap/order-utils').constants
+const { revertToSnapShot, takeSnapshot } = require('@airswap/test-utils').time
+const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 const { padAddressToLocator } = require('@airswap/test-utils').padding
 
 contract('Indexer Unit Tests', async accounts => {
