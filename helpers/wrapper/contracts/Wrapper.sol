@@ -51,7 +51,6 @@ contract Wrapper {
 
   /**
     * @notice Send an Order (Simple)
-    *
     * @param _nonce uint256
     * @param _expiry uint256
     * @param _makerWallet address
@@ -96,6 +95,7 @@ contract Wrapper {
       }
 
     } else {
+
       // Ensure no unexpected ether sent during WETH transaction.
       require(msg.value == 0,
         "VALUE_MUST_BE_ZERO");
@@ -116,14 +116,26 @@ contract Wrapper {
 
     // The taker is receiving ether.
     if (_makerToken == address(wethContract)) {
+
       // Transfer from the taker to the wrapper.
       wethContract.transferFrom(_takerWallet, address(this), _makerAmount);
+
       // Unwrap (withdraw) the ether.
       wethContract.withdraw(_makerAmount);
+
       // Transfer ether to the user.
       msg.sender.transfer(_makerAmount);
-    } else if ((_makerToken != address(0)) && (_takerToken == address(wethContract))) {
+
+      /* The taker wallet was not defined and thus the swapped
+       * makerTokens were distributed to the wrapper contract
+       * and now the wrapper contract forwards them to msg.sender.
+       */
+    } else if ((_makerToken != address(0)) && (_takerWallet == address(0))) {
+
+      // Fowrading the _makerAmount of type _makerToken to the msg.sender.
       require(IERC20(_makerToken).transfer(msg.sender, _makerAmount));
-    } // fall here if it was a non-WETH trade and didn't require any wrapper functionality.
+    }
+    // Falls here if it was a non-WETH ERC20 - non-WETH ERC20 trade and the
+    // transaction did not require any wrapper functionality.
   }
 }

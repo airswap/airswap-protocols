@@ -243,6 +243,13 @@ contract('Wrapper Unit Tests', async accounts => {
       )
     })
 
+    /**
+     * Scenario for failure: The taker sends in WETH which means that when the trade succeeds the taker wallet
+     * is the wrapper contract and the swap is between the maker token and the wrapper contract. The token needs
+     * to be returned to the taker. Certain ERC20 contract return a boolean instead of reverting on failure and
+     * thus if the final transfer from wrapper contract to maker fails the overall transaction should revert to
+     * ensure no tokens are left in the wrapper contract.
+     */
     it('Test when taker token == weth, maker token != weth, and the wrapper token transfer fails', async () => {
       await mockFT.givenMethodReturnBool(mock_transfer, false)
       let notWethContract = mockFT.address
