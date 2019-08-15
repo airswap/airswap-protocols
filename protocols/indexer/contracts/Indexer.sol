@@ -173,27 +173,25 @@ contract Indexer is IIndexer, Ownable {
     require(markets[_makerToken][_takerToken] != Market(0),
       "MARKET_DOES_NOT_EXIST");
 
-    removeIntent(_makerToken, _takerToken, msg.sender);
+    // this initialisation is needed due to ethereum/solidity/issues/5462
+    address[] memory staker = new address[](1);
+    staker[0] = msg.sender;
+    removeIntents(_makerToken, _takerToken, staker);
   }
 
-  function removeIntent(
+  function cleanExpiredIntents(
     address _makerToken,
     address _takerToken,
-    address _staker
-  ) internal {
-    // Get the intent for the sender.
-    Market.Intent memory intent = markets[_makerToken][_takerToken].getIntent(_staker);
+    address _startingPoint,
+    uint256 _count
+  ) external {
+    // Ensure the market exists.
+    require(markets[_makerToken][_takerToken] != Market(0),
+      "MARKET_DOES_NOT_EXIST");
 
-    // Ensure the intent exists.
-    require(intent.staker == _staker,
-      "INTENT_DOES_NOT_EXIST");
+    address[] memory expiredStakers = markets[_makerToken][_takerToken].findExpiredIntents(_startingPoint, _count);
 
-    // Unset the intent on the market.
-    markets[_makerToken][_takerToken].unsetIntent(_staker);
-
-    // Return the staked tokens.
-    stakeToken.transfer(_staker, intent.amount);
-    emit Unstake(_staker, _makerToken, _takerToken, intent.amount);
+    removeIntents(_makerToken, _takerToken, expiredStakers);
   }
 
   /**
@@ -225,6 +223,29 @@ contract Indexer is IIndexer, Ownable {
       }
     }
     return new bytes32[](0);
+  }
+  
+  function removeIntents(
+    address _makerToken,
+    address _takerToken,
+    address[] memory _stakers
+  ) internal {
+
+    for (uint256 i; i < _stakers.length; i++) {
+      // Get the intent for the sender.
+      Market.Intent memory intent = markets[_makerToken][_takerToken].getIntent(_stakers[i]);
+
+      // Ensure the intent exists.
+      require(intent.staker == _stakers[i],
+        "INTENT_DOES_NOT_EXIST");
+
+      // Unset the intent on the market.
+      markets[_makerToken][_takerToken].unsetIntent(_stakers[i]);
+
+      // Return the staked tokens.
+      stakeToken.transfer(_stakers[i], intent.amount);
+      emit Unstake(_stakers[i], _makerToken, _takerToken, intent.amount);
+    }
   }
 
 }
