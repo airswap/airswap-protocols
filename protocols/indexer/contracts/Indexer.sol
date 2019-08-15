@@ -224,13 +224,12 @@ contract Indexer is IIndexer, Ownable {
     }
     return new bytes32[](0);
   }
-  
+
   function removeIntents(
     address _makerToken,
     address _takerToken,
     address[] memory _stakers
   ) internal {
-
     for (uint256 i; i < _stakers.length; i++) {
       if (_stakers[i] != address(0)) {
         // Get the intent for the sender.

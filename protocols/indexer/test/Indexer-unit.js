@@ -556,4 +556,19 @@ contract('Indexer Unit Tests', async accounts => {
       equal(intents.length, 1, 'intents array should be size 1')
     })
   })
+
+  describe('Test cleanExpiredIntents', async () => {
+    it("should revert if the market doesn't exist", async () => {
+      await reverted(
+        indexer.cleanExpiredIntents(tokenOne, tokenTwo, aliceAddress, 3),
+        'MARKET_DOES_NOT_EXIST'
+      )
+    })
+
+    it("shouldn't remove intents if they not have expired")
+
+    it("shouldn't remove intents if expired intents aren't in count")
+
+    it('should remove expired intents in count')
+  })
 })

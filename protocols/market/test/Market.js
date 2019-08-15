@@ -8,7 +8,7 @@ const {
   SECONDS_IN_DAY,
   EMPTY_ADDRESS,
 } = require('@airswap/order-utils').constants
-const { equal, passes } = require('@airswap/test-utils').assert
+const { equal } = require('@airswap/test-utils').assert
 const {
   getTimestampPlusDays,
   advanceTimeAndBlock,
