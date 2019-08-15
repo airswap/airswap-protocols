@@ -57,7 +57,7 @@ interface IPeer {
     uint256 _peerAmount,
     address _peerToken,
     address _consumerToken
-  ) external returns (
+  ) external view returns (
     uint256 consumerAmount
   );
 
@@ -65,14 +65,14 @@ interface IPeer {
     uint256 _consumerAmount,
     address _consumerToken,
     address _peerToken
-  ) external returns (
+  ) external view returns (
     uint256 peerAmount
   );
 
   function getMaxQuote(
     address _peerToken,
     address _consumerToken
-  ) external returns (
+  ) external view returns (
     uint256 peerAmount,
     uint256 consumerAmount
   );

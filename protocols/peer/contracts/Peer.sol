@@ -114,7 +114,7 @@ contract Peer is IPeer, Ownable {
     uint256 peerAmount,
     address peerToken,
     address consumerToken
-  ) external returns (
+  ) external view returns (
     uint256 consumerAmount
   ) {
 
@@ -150,7 +150,7 @@ contract Peer is IPeer, Ownable {
     uint256 consumerAmount,
     address consumerToken,
     address peerToken
-  ) external returns (
+  ) external view returns (
     uint256 peerAmount
   ) {
 
@@ -181,7 +181,7 @@ contract Peer is IPeer, Ownable {
   function getMaxQuote(
     address peerToken,
     address consumerToken
-  ) external returns (
+  ) external view returns (
     uint256 peerAmount,
     uint256 consumerAmount
   ) {
@@ -246,7 +246,7 @@ contract Peer is IPeer, Ownable {
 
     // Overwrite the rule with a decremented maxPeerAmount.
     rules[peerToken][consumerToken] = Rule({
-      maxPeerAmount: rule.maxPeerAmount - peerAmount,
+      maxPeerAmount: (rule.maxPeerAmount).sub(peerAmount),
       priceCoef: rule.priceCoef,
       priceExp: rule.priceExp
     });
