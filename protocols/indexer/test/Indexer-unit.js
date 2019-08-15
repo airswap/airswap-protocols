@@ -565,7 +565,46 @@ contract('Indexer Unit Tests', async accounts => {
       )
     })
 
-    it("shouldn't remove intents if they not have expired")
+    it("shouldn't remove intents if they not have expired", async () => {
+      // create market
+      await indexer.createMarket(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+
+      // set two intents
+      await indexer.setIntent(
+        tokenOne,
+        tokenTwo,
+        50,
+        await getTimestampPlusDays(1),
+        aliceLocator,
+        {
+          from: aliceAddress,
+        }
+      )
+      await indexer.setIntent(
+        tokenOne,
+        tokenTwo,
+        100,
+        await getTimestampPlusDays(2),
+        bobLocator,
+        {
+          from: bobAddress,
+        }
+      )
+
+      // get size of market
+      let marketBefore = await indexer.getIntents.call(tokenOne, tokenTwo, 100)
+      equal(marketBefore.length, 2, 'intents array should be size 2')
+
+      // try to remove intents
+      let tx = await indexer.cleanExpiredIntents(tokenOne, tokenTwo, aliceAddress, 3)
+
+      // check no intents were unstaked
+      let marketAfter = await indexer.getIntents.call(tokenOne, tokenTwo, 100)
+      equal(marketAfter.length, 2, 'intents array should be size 2')
+      notEmitted(tx, 'Unstake')
+    })
 
     it("shouldn't remove intents if expired intents aren't in count")
 
