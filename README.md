@@ -66,4 +66,4 @@ See the [`@airswap/consumer`](/examples/consumer) example. **Demonstration only.
 
 # Protocol Migration (V1 to V2)
 
-To migrate to the new Swap Protocol please see [MIGRATION.md](/contracts/swap/MIGRATION.md)
+To migrate to the new Swap Protocol please see [MIGRATION.md](/protocols/swap/MIGRATION.md)
