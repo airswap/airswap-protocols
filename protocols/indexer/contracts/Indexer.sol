@@ -171,10 +171,7 @@ contract Indexer is IIndexer, Ownable {
     require(markets[_makerToken][_takerToken] != Market(0),
       "MARKET_DOES_NOT_EXIST");
 
-    // this initialisation is needed due to ethereum/solidity/issues/5462
-    address[] memory staker = new address[](1);
-    staker[0] = msg.sender;
-    removeIntents(_makerToken, _takerToken, staker);
+    removeIntent(_makerToken, _takerToken, msg.sender);
   }
 
   /**
