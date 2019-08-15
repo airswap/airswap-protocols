@@ -4,14 +4,9 @@ const BN = require('bignumber.js')
 const Market = artifacts.require('Market')
 const FungibleToken = artifacts.require('FungibleToken')
 
-const {
-  EMPTY_ADDRESS,
-} = require('@airswap/order-utils').constants
+const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 const { equal } = require('@airswap/test-utils').assert
-const {
-  takeSnapshot,
-  revertToSnapShot,
-} = require('@airswap/test-utils').time
+const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 const { padAddressToLocator } = require('@airswap/test-utils').padding
 
 let market
@@ -54,51 +49,27 @@ contract('Market', async accounts => {
 
   describe('Set', async () => {
     it('Sets an intent for Alice', async () => {
-      await market.setIntent(
-        aliceAddress,
-        2000,
-        aliceAddress
-      )
+      await market.setIntent(aliceAddress, 2000, aliceAddress)
     })
 
     it('Sets an intent for Bob', async () => {
-      await market.setIntent(
-        bobAddress,
-        500,
-        bobAddress
-      )
+      await market.setIntent(bobAddress, 500, bobAddress)
     })
 
     it('Sets an intent for Carol', async () => {
-      await market.setIntent(
-        carolAddress,
-        1500,
-        carolAddress
-      )
+      await market.setIntent(carolAddress, 1500, carolAddress)
     })
 
     it('Sets an intent for David', async () => {
-      await market.setIntent(
-        davidAddress,
-        100,
-        davidAddress
-      )
+      await market.setIntent(davidAddress, 100, davidAddress)
     })
 
     it('Sets an intent of 0 for zara', async () => {
-      await market.setIntent(
-        zaraAddress,
-        0,
-        zaraAddress
-      )
+      await market.setIntent(zaraAddress, 0, zaraAddress)
     })
 
     it("Sets an intent for Eve equal to Bob's intent", async () => {
-      await market.setIntent(
-        eveAddress,
-        500,
-        eveAddress
-      )
+      await market.setIntent(eveAddress, 500, eveAddress)
     })
 
     it('Ensure ordering is correct', async () => {
