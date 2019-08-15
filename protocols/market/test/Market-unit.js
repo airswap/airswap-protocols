@@ -38,13 +38,7 @@ contract('Market Unit Tests', async accounts => {
   const LIST_NEXT = '0x01'
   const STAKER = 'staker'
   const AMOUNT = 'amount'
-  const EXPIRY = 'expiry'
   const LOCATOR = 'locator'
-
-  // expiries
-  let EXPIRY_ONE_DAY
-  let EXPIRY_TWO_DAYS
-  let EXPIRY_THREE_DAYS
 
   beforeEach(async () => {
     let snapShot = await takeSnapshot()
@@ -57,9 +51,6 @@ contract('Market Unit Tests', async accounts => {
 
   before('Setup', async () => {
     market = await Market.new(mockTokenOne, mockTokenTwo, { from: owner })
-    EXPIRY_ONE_DAY = await getTimestampPlusDays(1)
-    EXPIRY_TWO_DAYS = await getTimestampPlusDays(2)
-    EXPIRY_THREE_DAYS = await getTimestampPlusDays(3)
   })
 
   async function checkLinking(prevStaker, staker, nextStaker) {
@@ -111,7 +102,6 @@ contract('Market Unit Tests', async accounts => {
       let result = await market.setIntent(
         aliceAddress,
         2000,
-        EXPIRY_THREE_DAYS,
         aliceLocator,
         { from: owner }
       )
@@ -121,7 +111,6 @@ contract('Market Unit Tests', async accounts => {
         return (
           event.staker === aliceAddress &&
           event.amount.toNumber() === 2000 &&
-          event.expiry.toNumber() === EXPIRY_THREE_DAYS &&
           event.locator === aliceLocator &&
           event.makerToken === mockTokenOne &&
           event.takerToken === mockTokenTwo
@@ -139,7 +128,6 @@ contract('Market Unit Tests', async accounts => {
 
       equal(headNext[STAKER], aliceAddress, 'Intent address not correct')
       equal(headNext[AMOUNT], 2000, 'Intent amount not correct')
-      equal(headNext[EXPIRY], EXPIRY_THREE_DAYS, 'Intent expiry not correct')
       equal(headNext[LOCATOR], aliceLocator, 'Intent locator not correct')
 
       // check the length has increased
@@ -152,7 +140,6 @@ contract('Market Unit Tests', async accounts => {
       await market.setIntent(
         aliceAddress,
         2000,
-        EXPIRY_THREE_DAYS,
         aliceLocator,
         {
           from: owner,
@@ -163,7 +150,6 @@ contract('Market Unit Tests', async accounts => {
       let result = await market.setIntent(
         bobAddress,
         500,
-        EXPIRY_TWO_DAYS,
         bobLocator,
         { from: owner }
       )
@@ -173,14 +159,13 @@ contract('Market Unit Tests', async accounts => {
         return (
           event.staker === bobAddress &&
           event.amount.toNumber() === 500 &&
-          event.expiry.toNumber() === EXPIRY_TWO_DAYS &&
           event.locator === bobLocator &&
           event.makerToken === mockTokenOne &&
           event.takerToken === mockTokenTwo
         )
       })
 
-      await market.setIntent(carolAddress, 1500, EXPIRY_ONE_DAY, carolLocator, {
+      await market.setIntent(carolAddress, 1500, carolLocator, {
         from: owner,
       })
 
@@ -203,16 +188,15 @@ contract('Market Unit Tests', async accounts => {
       await market.setIntent(
         aliceAddress,
         2000,
-        EXPIRY_THREE_DAYS,
         aliceLocator,
         {
           from: owner,
         }
       )
-      await market.setIntent(bobAddress, 500, EXPIRY_TWO_DAYS, bobLocator, {
+      await market.setIntent(bobAddress, 500, bobLocator, {
         from: owner,
       })
-      await market.setIntent(carolAddress, 1500, EXPIRY_ONE_DAY, carolLocator, {
+      await market.setIntent(carolAddress, 1500, carolLocator, {
         from: owner,
       })
     })
@@ -283,16 +267,15 @@ contract('Market Unit Tests', async accounts => {
       await market.setIntent(
         aliceAddress,
         2000,
-        EXPIRY_THREE_DAYS,
         aliceLocator,
         {
           from: owner,
         }
       )
-      await market.setIntent(bobAddress, 500, EXPIRY_TWO_DAYS, bobLocator, {
+      await market.setIntent(bobAddress, 500, bobLocator, {
         from: owner,
       })
-      await market.setIntent(carolAddress, 1500, EXPIRY_ONE_DAY, carolLocator, {
+      await market.setIntent(carolAddress, 1500, carolLocator, {
         from: owner,
       })
     })
@@ -305,7 +288,6 @@ contract('Market Unit Tests', async accounts => {
         'David: Intent address not correct'
       )
       equal(davidIntent[AMOUNT], 0, 'David: Intent amount not correct')
-      equal(davidIntent[EXPIRY], 0, 'David: Intent expiry not correct')
       equal(
         davidIntent[LOCATOR],
         emptyLocator,
@@ -321,7 +303,6 @@ contract('Market Unit Tests', async accounts => {
         'Carol: Intent address not correct'
       )
       equal(carolIntent[AMOUNT], 0, 'Carol: Intent amount not correct')
-      equal(carolIntent[EXPIRY], 0, 'Carol: Intent expiry not correct')
       equal(
         carolIntent[LOCATOR],
         emptyLocator,
@@ -338,11 +319,6 @@ contract('Market Unit Tests', async accounts => {
       )
       equal(aliceIntent[AMOUNT], 2000, 'Alice: Intent amount not correct')
       equal(
-        aliceIntent[EXPIRY],
-        EXPIRY_THREE_DAYS,
-        'Alice: Intent expiry not correct'
-      )
-      equal(
         aliceIntent[LOCATOR],
         aliceLocator,
         'Alice: Intent locator not correct'
@@ -351,11 +327,6 @@ contract('Market Unit Tests', async accounts => {
       let bobIntent = await market.getIntent(bobAddress)
       equal(bobIntent[STAKER], bobAddress, 'Bob: intent address not correct')
       equal(bobIntent[AMOUNT], 500, 'Bob: Intent amount not correct')
-      equal(
-        bobIntent[EXPIRY],
-        EXPIRY_TWO_DAYS,
-        'Bob: Intent expiry not correct'
-      )
       equal(bobIntent[LOCATOR], bobLocator, 'Bob: Intent locator not correct')
     })
   })
@@ -371,16 +342,15 @@ contract('Market Unit Tests', async accounts => {
       await market.setIntent(
         aliceAddress,
         2000,
-        EXPIRY_THREE_DAYS,
         aliceLocator,
         {
           from: owner,
         }
       )
-      await market.setIntent(bobAddress, 500, EXPIRY_TWO_DAYS, bobLocator, {
+      await market.setIntent(bobAddress, 500, bobLocator, {
         from: owner,
       })
-      await market.setIntent(carolAddress, 1500, EXPIRY_ONE_DAY, carolLocator, {
+      await market.setIntent(carolAddress, 1500, carolLocator, {
         from: owner,
       })
 
@@ -396,16 +366,15 @@ contract('Market Unit Tests', async accounts => {
       await market.setIntent(
         aliceAddress,
         2000,
-        EXPIRY_THREE_DAYS,
         aliceLocator,
         {
           from: owner,
         }
       )
-      await market.setIntent(bobAddress, 500, EXPIRY_TWO_DAYS, bobLocator, {
+      await market.setIntent(bobAddress, 500, bobLocator, {
         from: owner,
       })
-      await market.setIntent(carolAddress, 1500, EXPIRY_ONE_DAY, carolLocator, {
+      await market.setIntent(carolAddress, 1500, carolLocator, {
         from: owner,
       })
 
@@ -429,7 +398,6 @@ contract('Market Unit Tests', async accounts => {
       await market.setIntent(
         aliceAddress,
         2000,
-        EXPIRY_THREE_DAYS,
         aliceLocator,
         {
           from: owner,
@@ -438,118 +406,6 @@ contract('Market Unit Tests', async accounts => {
       // now test again
       let hasIntent = await market.hasIntent(aliceAddress)
       equal(hasIntent, true, 'hasIntent should have returned true')
-    })
-  })
-
-  describe('Test isIntentExpired', async () => {
-    it('should return false if an intent has not expired', async () => {
-      // give alice an intent expiring in 1 day
-      await market.setIntent(aliceAddress, 2000, EXPIRY_ONE_DAY, aliceLocator, {
-        from: owner,
-      })
-
-      let isIntentExpired = await market.isIntentExpired.call(aliceAddress)
-      equal(
-        isIntentExpired,
-        false,
-        'isIntentExpired should have returned false'
-      )
-    })
-
-    it('should return true if an intent has expired', async () => {
-      // give alice an intent expiring in 1 day
-      await market.setIntent(aliceAddress, 2000, EXPIRY_ONE_DAY, aliceLocator, {
-        from: owner,
-      })
-
-      // advance past this time
-      await advanceTimeAndBlock(SECONDS_IN_DAY * 1.1)
-
-      let isIntentExpired = await market.isIntentExpired.call(aliceAddress)
-      equal(isIntentExpired, true, 'isIntentExpired should have returned true')
-    })
-  })
-
-  describe('Test findExpiredIntents', async () => {
-    beforeEach('Setup intents again', async () => {
-      await market.setIntent(
-        aliceAddress,
-        2000,
-        EXPIRY_THREE_DAYS,
-        aliceLocator,
-        {
-          from: owner,
-        }
-      )
-      await market.setIntent(bobAddress, 500, EXPIRY_TWO_DAYS, bobLocator, {
-        from: owner,
-      })
-      await market.setIntent(carolAddress, 1500, EXPIRY_ONE_DAY, carolLocator, {
-        from: owner,
-      })
-    })
-
-    it('should return empty array if none have expired', async () => {
-      let intents = await market.fetchIntents(7)
-      equal(intents[0], aliceLocator, 'Alice should be first')
-      equal(intents[1], carolLocator, 'Carol should be second')
-      equal(intents[2], bobLocator, 'Bob should be third')
-
-      let listLength = await market.length()
-      equal(listLength, 3, 'Link list length should be 3')
-
-      let expiredIntents = await market.findExpiredIntents.call(LIST_HEAD, 6, {
-        from: owner,
-      })
-
-      equal(expiredIntents.length, 3, 'Array length should be 3')
-      equal(expiredIntents[0], EMPTY_ADDRESS, 'This element should be empty')
-      equal(expiredIntents[1], EMPTY_ADDRESS, 'This element should be empty')
-      equal(expiredIntents[2], EMPTY_ADDRESS, 'This element should be empty')
-    })
-
-    it('should make not return an expired intent if count doesnt reach it', async () => {
-      let intents = await market.fetchIntents(7)
-      equal(intents[0], aliceLocator, 'before: Alice should be first')
-      equal(intents[1], carolLocator, 'before: Carol should be second')
-      equal(intents[2], bobLocator, 'before: Bob should be third')
-
-      let listLength = await market.length()
-      equal(listLength, 3, 'Link list length should be 3')
-
-      // progress so that carol has expired
-      await advanceTimeAndBlock(SECONDS_IN_DAY * 1.1)
-
-      // do not reach carols intent
-      let expiredIntents = await market.findExpiredIntents.call(bobAddress, 1, {
-        from: owner,
-      })
-
-      equal(expiredIntents.length, 1, 'Array length should be 1')
-      equal(expiredIntents[0], EMPTY_ADDRESS, 'This element should be empty')
-    })
-
-    it('should make return an expired intent if count does reach it', async () => {
-      let intents = await market.fetchIntents(7)
-      equal(intents[0], aliceLocator, 'before: Alice should be first')
-      equal(intents[1], carolLocator, 'before: Carol should be second')
-      equal(intents[2], bobLocator, 'before: Bob should be third')
-
-      let listLength = await market.length()
-      equal(listLength, 3, 'Link list length should be 3')
-
-      // progress so that carol has expired
-      await advanceTimeAndBlock(SECONDS_IN_DAY * 1.1)
-
-      // now reach carols intent
-      let expiredIntents = await market.findExpiredIntents.call(bobAddress, 3, {
-        from: owner,
-      })
-
-      equal(expiredIntents.length, 3, 'Array length should be 3')
-      equal(expiredIntents[0], carolAddress, 'Carol should be listed')
-      equal(expiredIntents[1], EMPTY_ADDRESS, 'This element should be empty')
-      equal(expiredIntents[2], EMPTY_ADDRESS, 'This element should be empty')
     })
   })
 })
