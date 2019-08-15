@@ -1,11 +1,7 @@
 const Market = artifacts.require('Market')
 
 const { equal, reverted, emitted } = require('@airswap/test-utils').assert
-const {
-  getTimestampPlusDays,
-  takeSnapshot,
-  revertToSnapShot,
-} = require('@airswap/test-utils').time
+const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 const { padAddressToLocator } = require('@airswap/test-utils').padding
 const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 
@@ -82,13 +78,7 @@ contract('Market Unit Tests', async accounts => {
   describe('Test setIntent', async () => {
     it('should not allow a non owner to call setIntent', async () => {
       await reverted(
-        market.setIntent(
-          aliceAddress,
-          2000,
-          await getTimestampPlusDays(3),
-          aliceAddress,
-          { from: nonOwner }
-        ),
+        market.setIntent(aliceAddress, 2000, aliceAddress, { from: nonOwner }),
         'Ownable: caller is not the owner'
       )
     })
