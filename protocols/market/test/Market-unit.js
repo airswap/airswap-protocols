@@ -498,7 +498,9 @@ contract('Market Unit Tests', async accounts => {
       let listLength = await market.length()
       equal(listLength, 3, 'Link list length should be 3')
 
-      let expiredIntents = await market.findExpiredIntents.call(LIST_HEAD, 6, { from: owner })
+      let expiredIntents = await market.findExpiredIntents.call(LIST_HEAD, 6, {
+        from: owner,
+      })
 
       equal(expiredIntents.length, 3, 'Array length should be 3')
       equal(expiredIntents[0], EMPTY_ADDRESS, 'This element should be empty')
@@ -519,7 +521,9 @@ contract('Market Unit Tests', async accounts => {
       await advanceTimeAndBlock(SECONDS_IN_DAY * 1.1)
 
       // do not reach carols intent
-      let expiredIntents = await market.findExpiredIntents.call(bobAddress, 1, { from: owner })
+      let expiredIntents = await market.findExpiredIntents.call(bobAddress, 1, {
+        from: owner,
+      })
 
       equal(expiredIntents.length, 1, 'Array length should be 1')
       equal(expiredIntents[0], EMPTY_ADDRESS, 'This element should be empty')
@@ -538,7 +542,9 @@ contract('Market Unit Tests', async accounts => {
       await advanceTimeAndBlock(SECONDS_IN_DAY * 1.1)
 
       // now reach carols intent
-      let expiredIntents = await market.findExpiredIntents.call(bobAddress, 3, { from: owner })
+      let expiredIntents = await market.findExpiredIntents.call(bobAddress, 3, {
+        from: owner,
+      })
 
       equal(expiredIntents.length, 3, 'Array length should be 3')
       equal(expiredIntents[0], carolAddress, 'Carol should be listed')
