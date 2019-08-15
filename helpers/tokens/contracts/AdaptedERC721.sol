@@ -52,7 +52,7 @@ contract AdaptedERC721 is ERC165 {
     */
   bytes4 private constant _INTERFACE_ID_ERC721 = 0x80ac58cd;
 
-  constructor () public {
+  constructor() public {
     // register the supported interfaces to conform to ERC721 via ERC165
     _registerInterface(_INTERFACE_ID_ERC721);
   }

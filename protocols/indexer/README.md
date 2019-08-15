@@ -1,5 +1,7 @@
 # Indexer
 
+**:warning: This package is under active development. Do not use in production.**
+
 [AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens. This package contains source code and tests for an `Indexer` used to manage intents to trade.
 
 [![Discord](https://img.shields.io/discord/590643190281928738.svg)](https://discord.gg/ecQbV7H)
@@ -19,9 +21,13 @@ Find peers based on an intent to trade a specific token pair.
 
 Stake variable amounts of token to position intent in a market.
 
-### Blacklisting
+### Token Blacklisting
 
 Duplicate or malicious tokens may be blacklisted.
+
+### Locator Whitelisting
+
+Limit locators to those whitelisted by another contract.
 
 ## Definitions
 
@@ -38,17 +44,17 @@ Create a new `Indexer` contract.
 
 ```Solidity
 constructor(
-  address _stakeToken,
-  uint256 _stakeMinimum
+  address _stakeToken
+  address _locatorWhitelist
 ) public
 ```
 
 ### Params
 
-| Name            | Type      | Description                                |
-| :-------------- | :-------- | :----------------------------------------- |
-| `_stakeToken`   | `address` | Address of the token required for staking. |
-| `_stakeMinimum` | `uint256` | Minimum amount of token required to stake. |
+| Name                | Type      | Description                                        |
+| :------------------ | :-------- | :------------------------------------------------- |
+| `_stakeToken`       | `address` | Address of the token required for staking.         |
+| `_locatorWhitelist` | `address` | Address of an optional locator whitelist contract. |
 
 ## Create a Market
 
@@ -85,22 +91,6 @@ function createTwoSidedMarket(
 | :---------- | :-------- | :----------------------------------------------------- |
 | `_tokenOne` | `address` | Address of the token of the first side of the market.  |
 | `_tokenTwo` | `address` | Address of the token of the second side of the market. |
-
-## Set the Stake Minimum
-
-Set the minimum amount of tokens required to set an intent to trade.
-
-```Solidity
-function setStakeMinimum(
-  uint256 _stakeMinimum
-) external onlyOwner
-```
-
-### Params
-
-| Name            | Type      | Description                                |
-| :-------------- | :-------- | :----------------------------------------- |
-| `_stakeMinimum` | `uint256` | Minimum amount of token required to stake. |
 
 ## Add a Token to Blacklist
 

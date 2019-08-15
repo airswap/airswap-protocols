@@ -38,31 +38,25 @@ contract Peer is IPeer, Ownable {
 
   /**
     * @notice Contract Constructor
-    * @param initialSwapContract address of the swap contract the delegate will deploy with
+    * @param _swapContract address of the swap contract the peer will deploy with
+    * @param _peerContractOwner address that should be the owner of the peer
     */
   constructor(
-    address initialSwapContract
+    address _swapContract,
+    address _peerContractOwner
   ) public {
-    swapContract = ISwap(initialSwapContract);
-  }
-
-  /**
-    * @notice Set the Swap Contract address
-    * @dev only callable by the owner of the contract
-    * @param newSwapContract address that will replace the old swap contract address
-    */
-  function setSwapContract(
-    address newSwapContract
-  ) external onlyOwner {
-    swapContract = ISwap(newSwapContract);
+    swapContract = ISwap(_swapContract);
+    if (_peerContractOwner != address(0)) {
+      transferOwnership(_peerContractOwner);
+    }
   }
 
   /**
     * @notice Set a Trading Rule
     * @dev only callable by the owner of the contract
-    * @param peerToken address The token address that the delegate would send in a trade
+    * @param peerToken address The token address that the peer would send in a trade
     * @param consumerToken address The token address that the consumer would send in a trade
-    * @param maxPeerAmount uint256 The maximum amount of token the delegate would send
+    * @param maxPeerAmount uint256 The maximum amount of token the peer would send
     * @param priceCoef uint256 The whole number that will be multiplied by 10^(-priceExp) - the price coefficient
     * @param priceExp uint256 The exponent of the price to indicate location of the decimal priceCoef * 10^(-priceExp)
     */
@@ -92,7 +86,7 @@ contract Peer is IPeer, Ownable {
   /**
     * @notice Unset a Trading Rule
     * @dev only callable by the owner of the contract, removes from a mapping
-    * @param peerToken address The token address that the delegate would send in a trade
+    * @param peerToken address The token address that the peer would send in a trade
     * @param consumerToken address The token address that the consumer would send in a trade
     */
   function unsetRule(
@@ -276,7 +270,7 @@ contract Peer is IPeer, Ownable {
 
   /**
     * @notice Provide an Unsigned Order (Simple)
-    * @dev Requires that sender has authorized the delegate (Swap)
+    * @dev Requires that sender has authorized the peer (Swap)
     * @param nonce uint256 A single use identifier for the order
     * @param consumerAmount uint256 The amount or identifier of the token the Maker sends
     * @param consumerToken address The address of the token the Maker sends

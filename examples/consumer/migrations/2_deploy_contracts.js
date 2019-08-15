@@ -5,6 +5,7 @@ const FungibleToken = artifacts.require(
 )
 const Swap = artifacts.require('@airswap/indexer/contracts/Swap.sol')
 const Types = artifacts.require('@airswap/types/contracts/Types.sol')
+const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000'
 
 module.exports = deployer => {
   deployer.deploy(Types)
@@ -13,6 +14,6 @@ module.exports = deployer => {
   deployer
     .deploy(FungibleToken)
     .then(() => FungibleToken.deployed())
-    .then(() => deployer.deploy(Indexer, FungibleToken.address, 250))
+    .then(() => deployer.deploy(Indexer, FungibleToken.address, EMPTY_ADDRESS))
     .then(() => deployer.deploy(Consumer, Swap.address, Indexer.address))
 }

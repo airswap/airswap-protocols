@@ -51,8 +51,9 @@ contract('Peer', async accounts => {
 
   describe('Deploying...', async () => {
     it('Alice deployed a Swap Peer', async () => {
-      alicePeer = await Peer.new(swapAddress)
-      await alicePeer.setSwapContract(swapAddress)
+      alicePeer = await Peer.new(swapAddress, aliceAddress, {
+        from: aliceAddress,
+      })
     })
   })
 

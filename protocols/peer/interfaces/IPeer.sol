@@ -40,10 +40,6 @@ interface IPeer {
 
   function rules(address, address) external returns (Rule memory);
 
-  function setSwapContract(
-    address swapContract
-  ) external;
-
   function setRule(
     address _peerToken,
     address _consumerToken,

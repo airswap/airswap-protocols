@@ -12,6 +12,8 @@ const {
   revertToSnapShot,
   takeSnapshot,
 } = require('@airswap/test-utils').time
+const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
+const { padAddressToLocator } = require('@airswap/test-utils').padding
 
 let indexer
 let consumer
@@ -55,13 +57,19 @@ contract('Consumer', async accounts => {
       // now deploy swap
       swapContract = await Swap.new()
       swapAddress = swapContract.address
-      indexer = await Indexer.new(tokenAST.address, 250, { from: ownerAddress })
+
+      indexer = await Indexer.new(tokenAST.address, EMPTY_ADDRESS, {
+        from: ownerAddress,
+      })
+
       indexerAddress = indexer.address
       consumer = await Consumer.new(swapAddress, indexerAddress, {
         from: ownerAddress,
       })
       consumerAddress = consumer.address
-      alicePeer = await Peer.new(swapAddress, { from: aliceAddress })
+      alicePeer = await Peer.new(swapAddress, aliceAddress, {
+        from: aliceAddress,
+      })
     })
 
     it('Alice authorizes the new peer', async () => {
@@ -150,7 +158,7 @@ contract('Consumer', async accounts => {
         tokenDAI.address,
         50
       )
-      equal(quote[0], alicePeer.address)
+      equal(quote[0], padAddressToLocator(alicePeer.address))
       equal(quote[1], 30952)
     })
 
