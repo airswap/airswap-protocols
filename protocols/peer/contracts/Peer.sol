@@ -227,9 +227,7 @@ contract Peer is IPeer, Ownable {
     uint8 v,
     bytes32 r,
     bytes32 s
-  ) public payable {
-
-    // TODO: Forward the message value (for ETH trades) and add tests.
+  ) public {
 
     Rule memory rule = rules[peerToken][consumerToken];
 
@@ -283,9 +281,7 @@ contract Peer is IPeer, Ownable {
     address consumerToken,
     uint256 peerAmount,
     address peerToken
-  ) public payable {
-
-    // TODO: Forward the message value (for ETH trades) and add tests.
+  ) public {
 
     provideOrder(
       nonce,
