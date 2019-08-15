@@ -9,7 +9,7 @@
 
 #### :bulb: TODO
 
-- Consider ways to selectively trust Peers rather than sending unsigned orders to untrusted Peers.
+- Integrate this with an Indexer bound to a PeerFactory.
 
 ## Features
 
