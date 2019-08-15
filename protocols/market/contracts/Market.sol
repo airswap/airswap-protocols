@@ -197,7 +197,7 @@ contract Market is Ownable {
     * @param _startingPoint the staker to start at
     * @param _count the number of stakers to loop through
     */
-  function cleanExpiredIntents(address _startingPoint, uint256 _count) external {
+  function cleanExpiredIntents(address _startingPoint, uint256 _count) external onlyOwner {
     uint256 limit = _count;
     address staker = _startingPoint;
     address previousStaker;

@@ -489,6 +489,13 @@ contract('Market Unit Tests', async accounts => {
       })
     })
 
+    it('should not allow a non owner to call cleanExpiredIntents', async () => {
+      await reverted(
+        market.cleanExpiredIntents(LIST_HEAD, 3, { from: nonOwner }),
+        'Ownable: caller is not the owner'
+      )
+    })
+
     it('should make no changes if none have expired', async () => {
       let intents = await market.fetchIntents(7)
       equal(intents[0], aliceLocator, 'Alice should be first')
@@ -498,7 +505,7 @@ contract('Market Unit Tests', async accounts => {
       let listLength = await market.length()
       equal(listLength, 3, 'Link list length should be 3')
 
-      await market.cleanExpiredIntents(LIST_HEAD, 6)
+      await market.cleanExpiredIntents(LIST_HEAD, 6, { from: owner })
 
       intents = await market.fetchIntents(7)
       equal(intents[0], aliceLocator, 'Alice should be first')
@@ -522,7 +529,7 @@ contract('Market Unit Tests', async accounts => {
       await advanceTimeAndBlock(SECONDS_IN_DAY * 1.1)
 
       // do not reach carols intent
-      await market.cleanExpiredIntents(bobAddress, 1)
+      await market.cleanExpiredIntents(bobAddress, 1, { from: owner })
 
       // length is unchanged
       listLength = await market.length()
@@ -548,7 +555,7 @@ contract('Market Unit Tests', async accounts => {
       await advanceTimeAndBlock(SECONDS_IN_DAY * 1.1)
 
       // now reach carols intent
-      await market.cleanExpiredIntents(bobAddress, 3)
+      await market.cleanExpiredIntents(bobAddress, 3, { from: owner })
 
       // length is changed
       listLength = await market.length()
