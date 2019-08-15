@@ -232,19 +232,21 @@ contract Indexer is IIndexer, Ownable {
   ) internal {
 
     for (uint256 i; i < _stakers.length; i++) {
-      // Get the intent for the sender.
-      Market.Intent memory intent = markets[_makerToken][_takerToken].getIntent(_stakers[i]);
+      if (_stakers[i] != address(0)) {
+        // Get the intent for the sender.
+        Market.Intent memory intent = markets[_makerToken][_takerToken].getIntent(_stakers[i]);
 
-      // Ensure the intent exists.
-      require(intent.staker == _stakers[i],
-        "INTENT_DOES_NOT_EXIST");
+        // Ensure the intent exists.
+        require(intent.staker == _stakers[i],
+          "INTENT_DOES_NOT_EXIST");
 
-      // Unset the intent on the market.
-      markets[_makerToken][_takerToken].unsetIntent(_stakers[i]);
+        // Unset the intent on the market.
+        markets[_makerToken][_takerToken].unsetIntent(_stakers[i]);
 
-      // Return the staked tokens.
-      stakeToken.transfer(_stakers[i], intent.amount);
-      emit Unstake(_stakers[i], _makerToken, _takerToken, intent.amount);
+        // Return the staked tokens.
+        stakeToken.transfer(_stakers[i], intent.amount);
+        emit Unstake(_stakers[i], _makerToken, _takerToken, intent.amount);
+      }
     }
   }
 
