@@ -664,6 +664,60 @@ contract('Indexer Unit Tests', async accounts => {
       notEmitted(tx, 'Unstake')
     })
 
-    it('should remove expired intents in count')
+    it('should remove expired intents in count', async () => {
+      // create market
+      await indexer.createMarket(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+
+      // set two intents
+      await indexer.setIntent(
+        tokenOne,
+        tokenTwo,
+        50,
+        await getTimestampPlusDays(1),
+        aliceLocator,
+        {
+          from: aliceAddress,
+        }
+      )
+      await indexer.setIntent(
+        tokenOne,
+        tokenTwo,
+        100,
+        await getTimestampPlusDays(2),
+        bobLocator,
+        {
+          from: bobAddress,
+        }
+      )
+
+      // increase time so Alice's intent has expired
+      await advanceTimeAndBlock(SECONDS_IN_DAY * 1.1)
+
+      // get size of market
+      let marketBefore = await indexer.getIntents.call(tokenOne, tokenTwo, 100)
+      equal(marketBefore.length, 2, 'intents array should be size 2')
+
+      // try to remove intents and consider both
+      let tx = await indexer.cleanExpiredIntents(
+        tokenOne,
+        tokenTwo,
+        bobAddress,
+        2
+      )
+
+      // check alice's intent was unstaked
+      let marketAfter = await indexer.getIntents.call(tokenOne, tokenTwo, 100)
+      equal(marketAfter.length, 1, 'intents array should be size 1')
+      emitted(tx, 'Unstake', event => {
+        return (
+          event.wallet === aliceAddress &&
+          event.makerToken === tokenOne &&
+          event.takerToken == tokenTwo &&
+          event.amount.toNumber() === 50
+        )
+      })
+    })
   })
 })
