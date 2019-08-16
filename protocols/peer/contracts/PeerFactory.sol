@@ -31,6 +31,10 @@ contract PeerFactory is IPeerFactory, ILocatorWhitelist {
     */
   function createPeer(address _swapContract, address _peerContractOwner) external {
 
+    // Ensure an owner for the peer contract is provided.
+    require(_peerContractOwner != address(0),
+      'PEER_CONTRACT_OWNER_REQUIRED');
+
     // Ensure a swap contract is provided.
     require(_swapContract != address(0),
       'SWAP_CONTRACT_REQUIRED');
