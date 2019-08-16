@@ -229,7 +229,7 @@ contract('Peer Unit Tests', async accounts => {
       )
     })
 
-    it('test a successful call', async () => {
+    it('test a successful call - getBuyQuote', async () => {
       await peer.setRule(
         PEER_TOKEN,
         CONSUMER_TOKEN,
@@ -275,7 +275,7 @@ contract('Peer Unit Tests', async accounts => {
       )
     })
 
-    it('test a successful call', async () => {
+    it('test a successful call - getSellQuote', async () => {
       await peer.setRule(
         PEER_TOKEN,
         CONSUMER_TOKEN,
@@ -305,7 +305,7 @@ contract('Peer Unit Tests', async accounts => {
       )
     })
 
-    it('test a successful call', async () => {
+    it('test a successful call - getMaxQuote', async () => {
       await peer.setRule(
         PEER_TOKEN,
         CONSUMER_TOKEN,
