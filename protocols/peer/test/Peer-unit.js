@@ -445,7 +445,13 @@ contract('Peer Unit Tests', async accounts => {
     })
 
     it('test a successful transaction with decimal values', async () => {
-      await peer.setRule(PEER_TOKEN, CONSUMER_TOKEN, MAX_PEER_AMOUNT, PRICE_COEF, EXP)
+      await peer.setRule(
+        PEER_TOKEN,
+        CONSUMER_TOKEN,
+        MAX_PEER_AMOUNT,
+        PRICE_COEF,
+        EXP
+      )
 
       let rule_before = await peer.rules.call(PEER_TOKEN, CONSUMER_TOKEN)
 
