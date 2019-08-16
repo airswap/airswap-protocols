@@ -229,7 +229,7 @@ contract('Peer Unit Tests', async accounts => {
       )
     })
 
-    it.skip('test a successful call', async () => {
+    it('test a successful call', async () => {
       await peer.setRule(
         PEER_TOKEN,
         CONSUMER_TOKEN,
@@ -237,8 +237,10 @@ contract('Peer Unit Tests', async accounts => {
         PRICE_COEF,
         EXP
       )
+
       let val = await peer.getBuyQuote.call(1234, PEER_TOKEN, CONSUMER_TOKEN)
-      equal(val.toNumber(), 5332114, 'there should be a quote available')
+      let expectedValue = Math.floor((1234 * PRICE_COEF) / 10 ** EXP)
+      equal(val.toNumber(), expectedValue, 'there should be a quote available')
     })
   })
 
@@ -273,7 +275,7 @@ contract('Peer Unit Tests', async accounts => {
       )
     })
 
-    it.skip('test a successful call', async () => {
+    it('test a successful call', async () => {
       await peer.setRule(
         PEER_TOKEN,
         CONSUMER_TOKEN,
@@ -281,8 +283,10 @@ contract('Peer Unit Tests', async accounts => {
         PRICE_COEF,
         EXP
       )
+
       let val = await peer.getSellQuote.call(500, CONSUMER_TOKEN, PEER_TOKEN)
-      equal(val.toNumber(), 1157, 'there should be a quote available')
+      let expectedValue = Math.floor((500 * 10 ** EXP) / PRICE_COEF)
+      equal(val.toNumber(), expectedValue, 'there should be a quote available')
     })
   })
 
@@ -301,7 +305,7 @@ contract('Peer Unit Tests', async accounts => {
       )
     })
 
-    it.skip('test a successful call', async () => {
+    it('test a successful call', async () => {
       await peer.setRule(
         PEER_TOKEN,
         CONSUMER_TOKEN,
@@ -310,14 +314,17 @@ contract('Peer Unit Tests', async accounts => {
         EXP
       )
       let val = await peer.getMaxQuote.call(PEER_TOKEN, CONSUMER_TOKEN)
+
       equal(
         val[0].toNumber(),
         MAX_PEER_AMOUNT,
         'no quote should be available if a peer does not exist'
       )
+
+      let expectedValue = Math.floor((MAX_PEER_AMOUNT * PRICE_COEF) / 10 ** EXP)
       equal(
         val[1].toNumber(),
-        53342745,
+        expectedValue,
         'no quote should be available if a peer does not exist'
       )
     })
