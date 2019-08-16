@@ -444,12 +444,14 @@ contract('Peer Unit Tests', async accounts => {
       )
     })
 
-    it.skip('test a successful transaction with decimal values', async () => {
-      await peer.setRule(PEER_TOKEN, CONSUMER_TOKEN, MAX_PEER_AMOUNT, 4321, EXP)
+    it('test a successful transaction with decimal values', async () => {
+      await peer.setRule(PEER_TOKEN, CONSUMER_TOKEN, MAX_PEER_AMOUNT, PRICE_COEF, EXP)
 
       let rule_before = await peer.rules.call(PEER_TOKEN, CONSUMER_TOKEN)
 
       let consumer_amount = 100
+      let peer_amount = Math.floor((consumer_amount * 10 ** EXP) / PRICE_COEF)
+
       await passes(
         //mock swapContract
         //test rule decrement
@@ -460,7 +462,7 @@ contract('Peer Unit Tests', async accounts => {
           consumer_amount, //consumerAmount
           CONSUMER_TOKEN, //consumerToken
           EMPTY_ADDRESS, //peerWallet
-          231, //peerAmount
+          peer_amount, //peerAmount
           PEER_TOKEN, //peerToken
           8, //v
           web3.utils.asciiToHex('r'), //r
@@ -471,7 +473,7 @@ contract('Peer Unit Tests', async accounts => {
       let rule_after = await peer.rules.call(PEER_TOKEN, CONSUMER_TOKEN)
       equal(
         rule_after[0].toNumber(),
-        rule_before[0].toNumber() - consumer_amount,
+        rule_before[0].toNumber() - peer_amount,
         "rule's max peer amount was not decremented"
       )
     })
