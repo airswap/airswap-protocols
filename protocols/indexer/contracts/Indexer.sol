@@ -178,10 +178,12 @@ contract Indexer is IIndexer, Ownable {
     require(intent.staker == msg.sender,
       "INTENT_DOES_NOT_EXIST");
 
-    // Unset the intent on the market.
-    require(markets[_makerToken][_takerToken].unsetIntent(msg.sender));
+    // Unset the intent on the market. 
+    //No need to require() because a check is done above that reverts if there are no intents
+    markets[_makerToken][_takerToken].unsetIntent(msg.sender);
 
-    // Return the staked tokens.
+    // Return the staked tokens. IERC20 returns boolean this contract may not be ours.
+    // Need to revert when false is returned
     require(stakeToken.transfer(msg.sender, intent.amount));
     emit Unstake(msg.sender, _makerToken, _takerToken, intent.amount);
   }
