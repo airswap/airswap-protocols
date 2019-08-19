@@ -44,6 +44,7 @@ contract Wrapper {
     swapContract = ISwap(_swapContract);
     wethContract = IWETH(_wethContract);
 
+    // Sets unlimited allowance for the Wrapper contract.
     wethContract.approve(_swapContract, MAX_INT);
   }
 
