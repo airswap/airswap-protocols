@@ -122,7 +122,7 @@ contract Market is Ownable {
     */
   function unsetIntent(
     address _staker
-  ) public onlyOwner returns (bool) {
+  ) external onlyOwner returns (bool) {
 
     // Ensure the _staker is in the linked list.
     if (!hasIntent(_staker)) {
@@ -141,7 +141,7 @@ contract Market is Ownable {
     */
   function getIntent(
     address _staker
-  ) public view returns (Intent memory) {
+  ) external view returns (Intent memory) {
 
     // Ensure the staker has a neighbor in the linked list.
     if (intentsLinkedList[_staker][PREV].staker != address(0)) {
@@ -158,7 +158,7 @@ contract Market is Ownable {
     */
   function fetchIntents(
     uint256 _count
-  ) public view returns (bytes32[] memory result) {
+  ) external view returns (bytes32[] memory result) {
 
     // Limit results to list length or _count.
     uint256 limit = length;
