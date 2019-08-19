@@ -31,6 +31,7 @@ contract Wrapper {
   // WETH contract to wrap ether
   IWETH public wethContract;
 
+  uint256 constant MAX_INT = 2**256 - 1;
   /**
     * @notice Contract Constructor
     * @param _swapContract address
@@ -42,6 +43,9 @@ contract Wrapper {
   ) public {
     swapContract = ISwap(_swapContract);
     wethContract = IWETH(_wethContract);
+
+    // Sets unlimited allowance for the Wrapper contract.
+    wethContract.approve(_swapContract, MAX_INT);
   }
 
   /**
@@ -89,8 +93,6 @@ contract Wrapper {
       // Wrap (deposit) the ether.
       wethContract.deposit.value(msg.value)();
 
-      // Approve Swap to trade it.
-      wethContract.approve(address(swapContract), msg.value);
     } else {
 
       // Ensure no unexpected ether sent during WETH transaction.
