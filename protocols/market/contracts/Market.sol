@@ -106,6 +106,9 @@ contract Market is Ownable {
     uint256 _amount,
     bytes32 _locator
   ) external onlyOwner {
+
+    require(!hasIntent(_staker), "USER_ALREADY_STAKED");
+
     Intent memory newIntent = Intent(_staker, _amount, _locator);
 
     // Insert after the next highest amount on the linked list.
@@ -188,7 +191,7 @@ contract Market is Ownable {
     */
   function hasIntent(
     address _staker
-  ) public view returns (bool) {
+  ) internal view returns (bool) {
 
     if (intentsLinkedList[_staker][PREV].staker != address(0) &&
       intentsLinkedList[intentsLinkedList[_staker][PREV].staker][NEXT].staker == _staker) {
