@@ -364,7 +364,7 @@ contract('Market Unit Tests', async accounts => {
     })
   })
 
-  describe('Test multiple setting of intents from same addres', async () => {
+  describe('Test multiple setting of intents from same address', async () => {
     it('should not increase the total number of intents', async () => {
       let trx = market.setIntent(aliceAddress, 2000, aliceLocator, {
         from: owner,
