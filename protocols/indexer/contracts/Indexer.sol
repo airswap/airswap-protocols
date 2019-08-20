@@ -64,7 +64,7 @@ contract Indexer is IIndexer, Ownable {
   function createMarket(
     address _makerToken,
     address _takerToken
-  ) public returns (address) {
+  ) external returns (address) {
 
     // If the Market does not exist, create it.
     if (markets[_makerToken][_takerToken] == Market(0)) {
@@ -114,16 +114,14 @@ contract Indexer is IIndexer, Ownable {
     * @param _makerToken address
     * @param _takerToken address
     * @param _amount uint256
-    * @param _expiry uint256
     * @param _locator bytes32
     */
   function setIntent(
     address _makerToken,
     address _takerToken,
     uint256 _amount,
-    uint256 _expiry,
     bytes32 _locator
-  ) public {
+  ) external {
 
     // Ensure the locator is whitelisted, if relevant
     if (locatorWhitelist != address(0)) {
@@ -145,16 +143,12 @@ contract Indexer is IIndexer, Ownable {
       // Transfer the _amount for staking.
       require(stakeToken.transferFrom(msg.sender, address(this), _amount),
         "UNABLE_TO_STAKE");
-
     }
 
-    require(!markets[_makerToken][_takerToken].hasIntent(msg.sender),
-      "USER_ALREADY_STAKED");
-
-    emit Stake(msg.sender, _makerToken, _takerToken, _amount, _expiry);
+    emit Stake(msg.sender, _makerToken, _takerToken, _amount);
 
     // Set the intent on the market.
-    markets[_makerToken][_takerToken].setIntent(msg.sender, _amount, _expiry, _locator);
+    markets[_makerToken][_takerToken].setIntent(msg.sender, _amount, _locator);
   }
 
   /**
@@ -167,7 +161,7 @@ contract Indexer is IIndexer, Ownable {
   function unsetIntent(
     address _makerToken,
     address _takerToken
-  ) public {
+  ) external {
 
     // Ensure the market exists.
     require(markets[_makerToken][_takerToken] != Market(0),
@@ -180,11 +174,13 @@ contract Indexer is IIndexer, Ownable {
     require(intent.staker == msg.sender,
       "INTENT_DOES_NOT_EXIST");
 
-    // Unset the intent on the market.
+    // Unset the intent on the market. 
+    //No need to require() because a check is done above that reverts if there are no intents
     markets[_makerToken][_takerToken].unsetIntent(msg.sender);
 
-    // Return the staked tokens.
-    stakeToken.transfer(msg.sender, intent.amount);
+    // Return the staked tokens. IERC20 returns boolean this contract may not be ours.
+    // Need to revert when false is returned
+    require(stakeToken.transfer(msg.sender, intent.amount));
     emit Unstake(msg.sender, _makerToken, _takerToken, intent.amount);
   }
 
@@ -218,5 +214,4 @@ contract Indexer is IIndexer, Ownable {
     }
     return new bytes32[](0);
   }
-
 }

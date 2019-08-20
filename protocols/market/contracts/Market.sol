@@ -46,13 +46,11 @@ contract Market is Ownable {
     *
     * @param staker address
     * @param amount uint256
-    * @param expiry uint256
     * @param locator bytes32
     */
   struct Intent {
     address staker;
     uint256 amount;
-    uint256 expiry;
     bytes32 locator;
   }
 
@@ -64,7 +62,6 @@ contract Market is Ownable {
   event SetIntent(
     address staker,
     uint256 amount,
-    uint256 expiry,
     bytes32 locator,
     address makerToken,
     address takerToken
@@ -92,7 +89,7 @@ contract Market is Ownable {
     takerToken = _takerToken;
 
     // Initialize the linked list.
-    Intent memory head = Intent(HEAD, 0, 0, "0x0");
+    Intent memory head = Intent(HEAD, 0, bytes32(0));
     intentsLinkedList[HEAD][PREV] = head;
     intentsLinkedList[HEAD][NEXT] = head;
   }
@@ -102,23 +99,24 @@ contract Market is Ownable {
     *
     * @param _staker The account
     * @param _amount uint256
-    * @param _expiry uint256
     * @param _locator bytes32
     */
   function setIntent(
     address _staker,
     uint256 _amount,
-    uint256 _expiry,
     bytes32 _locator
   ) external onlyOwner {
-    Intent memory newIntent = Intent(_staker, _amount, _expiry, _locator);
+
+    require(!hasIntent(_staker), "USER_HAS_INTENT");
+
+    Intent memory newIntent = Intent(_staker, _amount, _locator);
 
     // Insert after the next highest amount on the linked list.
     insertIntent(newIntent, findPosition(_amount));
       // Increment the length of the linked list if successful.
     length = length + 1;
 
-    emit SetIntent(_staker, _amount, _expiry, _locator, makerToken, takerToken);
+    emit SetIntent(_staker, _amount, _locator, makerToken, takerToken);
   }
 
   /**
@@ -127,7 +125,7 @@ contract Market is Ownable {
     */
   function unsetIntent(
     address _staker
-  ) public onlyOwner returns (bool) {
+  ) external onlyOwner returns (bool) {
 
     // Ensure the _staker is in the linked list.
     if (!hasIntent(_staker)) {
@@ -146,7 +144,7 @@ contract Market is Ownable {
     */
   function getIntent(
     address _staker
-  ) public view returns (Intent memory) {
+  ) external view returns (Intent memory) {
 
     // Ensure the staker has a neighbor in the linked list.
     if (intentsLinkedList[_staker][PREV].staker != address(0)) {
@@ -154,7 +152,7 @@ contract Market is Ownable {
       // Return the next intent from the previous neighbor.
       return intentsLinkedList[intentsLinkedList[_staker][PREV].staker][NEXT];
     }
-    return Intent(address(0), 0, 0, bytes32(0));
+    return Intent(address(0), 0, bytes32(0));
   }
 
   /**
@@ -163,7 +161,7 @@ contract Market is Ownable {
     */
   function fetchIntents(
     uint256 _count
-  ) public view returns (bytes32[] memory result) {
+  ) external view returns (bytes32[] memory result) {
 
     // Limit results to list length or _count.
     uint256 limit = length;
@@ -172,65 +170,16 @@ contract Market is Ownable {
     }
     result = new bytes32[](limit);
 
-    // Get the first intent in the linked list.
+    // Get the first intent in the linked list after the HEAD
     Intent storage intent = intentsLinkedList[HEAD][NEXT];
 
     // Iterate over the list until the end or limit.
     uint256 i = 0;
     while (i < limit) {
-      if (intent.expiry >= block.timestamp) {
-        result[i] = intent.locator;
-        i = i + 1;
-      } else {
-        if (intent.staker == HEAD) {
-          break;
-        }
-      }
-
+      result[i] = intent.locator;
+      i = i + 1;
       intent = intentsLinkedList[intent.staker][NEXT];
     }
-  }
-
-  /**
-    * @notice Loops through _count stakers from _startingPoint and removes any expired intents
-    *
-    * @param _startingPoint the staker to start at
-    * @param _count the number of stakers to loop through
-    */
-  function cleanExpiredIntents(address _startingPoint, uint256 _count) external {
-    uint256 limit = _count;
-    address staker = _startingPoint;
-    address previousStaker;
-
-    if (limit > length) {
-      limit = length;
-    }
-
-    uint256 i = 0;
-    while (i < limit) {
-      if (staker != HEAD) {
-        if (isIntentExpired(staker)) {
-          // we must track the neighbouring intent for when `staker` is removed
-          previousStaker = intentsLinkedList[staker][PREV].staker;
-          removeIntent(staker);
-          staker = previousStaker;
-        }
-        // only increase the count if it wasnt HEAD
-        i++;
-      }
-      // now look at the next element
-      staker = intentsLinkedList[staker][NEXT].staker;
-    }
-  }
-
-  /**
-    * @notice Concludes whether a staker's intent has expired
-    *
-    * @param _staker the staker in question
-    * @return bool has the staker's intent expired?
-    */
-  function isIntentExpired(address _staker) public returns (bool) {
-    return getIntent(_staker).expiry <= now;
   }
 
   /**

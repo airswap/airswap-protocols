@@ -61,7 +61,7 @@ Swap between tokens (ERC-20 or ERC-721) or ETH with all features using typed dat
 function swap(
   Types.Order calldata _order,
   Types.Signature calldata _signature
-) external payable
+) external
 ```
 
 ### Params
@@ -102,19 +102,19 @@ struct Signature {
 
 ### Reverts
 
-| Reason                         | Scenario                                                                     |
-| :----------------------------- | :--------------------------------------------------------------------------- |
-| `SIGNER_UNAUTHORIZED`          | Order has been signed by an account that has not been authorized to sign it. |
-| `SIGNATURE_INVALID`            | Signature provided does not match the Order provided.                        |
-| `ORDER_ALREADY_TAKEN`          | Order has already been taken by its `nonce` value.                           |
-| `ORDER_ALREADY_CANCELED`       | Order has already been canceled by its `nonce` value.                        |
-| `ORDER_EXPIRED`                | Order has an `expiry` lower than the current block time.                     |
-| `NONCE_TOO_LOW`                | Nonce provided is below the minimum value set.                               |
-| `SENDER_UNAUTHORIZED`          | Order has been sent by an account that has not been authorized to send it.   |
-| `VALUE_MUST_BE_SENT`           | Order indicates an ether Swap but insufficient ether was sent.               |
-| `VALUE_MUST_BE_ZERO`           | Order indicates a token Swap but ether was sent.                             |
-| `INVALID_AUTH_DELEGATE`        | Delegate address is the same as the sender address.                          |
-| `INVALID_AUTH_EXPIRY`          | Authorization expiry time is in the past.                                    |
+| Reason                   | Scenario                                                                     |
+| :----------------------- | :--------------------------------------------------------------------------- |
+| `SIGNER_UNAUTHORIZED`    | Order has been signed by an account that has not been authorized to sign it. |
+| `SIGNATURE_INVALID`      | Signature provided does not match the Order provided.                        |
+| `ORDER_ALREADY_TAKEN`    | Order has already been taken by its `nonce` value.                           |
+| `ORDER_ALREADY_CANCELED` | Order has already been canceled by its `nonce` value.                        |
+| `ORDER_EXPIRED`          | Order has an `expiry` lower than the current block time.                     |
+| `NONCE_TOO_LOW`          | Nonce provided is below the minimum value set.                               |
+| `SENDER_UNAUTHORIZED`    | Order has been sent by an account that has not been authorized to send it.   |
+| `VALUE_MUST_BE_SENT`     | Order indicates an ether Swap but insufficient ether was sent.               |
+| `VALUE_MUST_BE_ZERO`     | Order indicates a token Swap but ether was sent.                             |
+| `INVALID_AUTH_DELEGATE`  | Delegate address is the same as the sender address.                          |
+| `INVALID_AUTH_EXPIRY`    | Authorization expiry time is in the past.                                    |
 
 ## Swap (Simple)
 
@@ -133,7 +133,7 @@ function swapSimple(
   uint8 _v,
   bytes32 _r,
   bytes32 _s
-) external payable
+) external
 ```
 
 ### Params

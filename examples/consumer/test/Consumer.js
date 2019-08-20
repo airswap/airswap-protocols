@@ -114,7 +114,6 @@ contract('Consumer', async accounts => {
           tokenWETH.address,
           tokenDAI.address,
           500,
-          await getTimestampPlusDays(1),
           alicePeer.address,
           {
             from: aliceAddress,

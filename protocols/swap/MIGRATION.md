@@ -2,61 +2,48 @@
 
 This document is intended for those migrating from Swap V1 to V2 and does not include all of the features of Swap V2. [Read more about Swap V2](README.md).
 
+:bulb: **Note**: A key feature of V2 is that every order must have a `nonce` value that is unique to its makerWallet.
+
 ## Signing an Order
 
-Using `eth_signTypedData` not available for `swapSimple`. [Read more about Signatures](README.md#signatures).
+Both V1 and V2 signatures can use the `eth_sign` function. [Read more about Signatures](README.md#signatures).
 
 **V1** hashes arguments in the following order.
 
 ```
-const hashedOrder = utils.solidityKeccak256([
-  'address',
-  'uint256',
-  'address',
-  'address',
-  'uint256',
-  'address',
-  'uint256',
-  'uint256',
-], [
-  makerAddress,
-  makerAmount,
-  makerToken,
-  takerAddress,
-  takerAmount,
-  takerToken,
-  expiration,
-  nonce,
-])
-```
-
-**V2** hashes arguments in the following order.
-
-```
-const hashedOrder = utils.solidityKeccak256([
-  'bytes1',
-  'address',
-  'uint256',
-  'uint256',
-  'address',
-  'uint256',
-  'address',
-  'address',
-  'uint256',
-  'address',
-  'uint256',
-], [
-  '0x0',
-  verifyingContract,
-  nonce,
-  expiry,
-  makerAddress,
-  makerAmount,
-  makerToken,
-  takerAddress,
-  takerAmount,
-  takerToken,
+const ethUtil = require('ethereumjs-util')
+const msg = web3.utils.soliditySha3(
+  { type: 'address', value: makerAddress },
+  { type: 'uint256', value: makerAmount },
+  { type: 'address', value: makerToken },
+  { type: 'address', value: takerAddress },
+  { type: 'uint256', value: takerAmount },
+  { type: 'address', value: takerToken },
+  { type: 'uint256', value: expiration },
+  { type: 'uint256', value: nonce }
 )
+const sig = await web3.eth.sign(ethUtil.bufferToHex(msg), signer)
+return ethUtil.fromRpcSig(sig)
+```
+
+**V2** hashes arguments in the following order with the addition of `0x0` and the address of the `swapContract` to be used.
+
+```
+const ethUtil = require('ethereumjs-util')
+const msg = web3.utils.soliditySha3(
+  { type: 'bytes1', value: '0x0' },
+  { type: 'address', value: swapContract },
+  { type: 'uint256', value: nonce },
+  { type: 'uint256', value: expiry },
+  { type: 'address', value: makerWallet },
+  { type: 'uint256', value: makerParam },
+  { type: 'address', value: makerToken },
+  { type: 'address', value: takerWallet },
+  { type: 'uint256', value: takerParam },
+  { type: 'address', value: takerToken }
+)
+const sig = await web3.eth.sign(ethUtil.bufferToHex(msg), signer)
+return ethUtil.fromRpcSig(sig)
 ```
 
 ## Performing a Swap
@@ -95,7 +82,7 @@ event Filled(
 );
 ```
 
-**V2** has a `swapSimple` function. A key change is that every order is expected to have a `nonce` that is **unique to its makerWallet**.
+**V2** has a `swapSimple` function.
 
 ```
 function swapSimple(
@@ -110,7 +97,7 @@ function swapSimple(
   uint8 _v,
   bytes32 _r,
   bytes32 _s
-) external payable
+) external
 ```
 
 A successful `swapSimple` transaction will emit a `Swap` event.
@@ -130,6 +117,8 @@ event Swap(
   address affiliateToken
 );
 ```
+
+:bulb: **Note**: The V2 swap functions are not `payable` and cannot accept ether for trades.
 
 ## Canceling an Order
 
