@@ -96,6 +96,10 @@ contract Wrapper {
       // Ensure no unexpected ether sent during WETH transaction.
       require(msg.value == 0,
         "VALUE_MUST_BE_ZERO");
+
+      // Ensure msg sender matches the takerWallet.
+      require(msg.sender == _takerWallet,
+          "SENDER_NOT_TAKERWALLET");
     }
 
     // Perform the simple swap.
