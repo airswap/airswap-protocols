@@ -191,7 +191,7 @@ contract Market is Ownable {
     */
   function hasIntent(
     address _staker
-  ) internal view returns (bool) {
+  ) public view returns (bool) {
 
     if (intentsLinkedList[_staker][PREV].staker != address(0) &&
       intentsLinkedList[intentsLinkedList[_staker][PREV].staker][NEXT].staker == _staker) {
