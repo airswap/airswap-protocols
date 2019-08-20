@@ -358,4 +358,18 @@ contract('Market Unit Tests', async accounts => {
       equal(hasIntent, true, 'hasIntent should have returned true')
     })
   })
+
+  describe('Test multiple setting of intents from same addres', async () => {
+      it('should not increase the total number of intents', async () => {
+        await market.setIntent(aliceAddress, 2000, aliceLocator, {
+          from: owner,
+        })
+        await market.setIntent(aliceAddress, 5000, aliceLocator, {
+          from: owner,
+        })
+
+        let length = await market.length.call()
+        equal(length.toNumber(), 1, "length increased, but total stakers has not")
+      })
+  })
 })
