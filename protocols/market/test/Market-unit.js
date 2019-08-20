@@ -161,6 +161,20 @@ contract('Market Unit Tests', async accounts => {
       equal(intents[1], carolLocator, 'Carol should be second')
       equal(intents[2], bobLocator, 'Bob should be third')
     })
+
+    it('user should not be able to set a second intent if one already exists', async () => {
+      let trx = market.setIntent(aliceAddress, 2000, aliceLocator, {
+        from: owner,
+      })
+      await passes(trx)
+      trx = market.setIntent(aliceAddress, 5000, aliceLocator, {
+        from: owner,
+      })
+      await reverted(trx, 'USER_ALREADY_HAS_INTENT')
+
+      let length = await market.length.call()
+      equal(length.toNumber(), 1, 'length increased, but total stakers has not')
+    })
   })
 
   describe('Test unsetIntent', async () => {
@@ -361,22 +375,6 @@ contract('Market Unit Tests', async accounts => {
       // now test again
       let hasIntent = await market.hasIntent(aliceAddress)
       equal(hasIntent, true, 'hasIntent should have returned true')
-    })
-  })
-
-  describe('Test multiple setting of intents from same address', async () => {
-    it('should not increase the total number of intents', async () => {
-      let trx = market.setIntent(aliceAddress, 2000, aliceLocator, {
-        from: owner,
-      })
-      await passes(trx)
-      trx = market.setIntent(aliceAddress, 5000, aliceLocator, {
-        from: owner,
-      })
-      await reverted(trx, 'USER_ALREADY_HAS_INTENT')
-
-      let length = await market.length.call()
-      equal(length.toNumber(), 1, 'length increased, but total stakers has not')
     })
   })
 })
