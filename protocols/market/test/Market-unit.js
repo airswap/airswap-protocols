@@ -373,7 +373,7 @@ contract('Market Unit Tests', async accounts => {
       trx = market.setIntent(aliceAddress, 5000, aliceLocator, {
         from: owner,
       })
-      await reverted(trx, 'USER_ALREADY_STAKED')
+      await reverted(trx, 'USER_ALREADY_HAS_INTENT')
 
       let length = await market.length.call()
       equal(length.toNumber(), 1, 'length increased, but total stakers has not')

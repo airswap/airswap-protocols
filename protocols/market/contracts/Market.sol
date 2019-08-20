@@ -107,7 +107,7 @@ contract Market is Ownable {
     bytes32 _locator
   ) external onlyOwner {
 
-    require(!hasIntent(_staker), "USER_ALREADY_STAKED");
+    require(!hasIntent(_staker), "USER_HAS_INTENT");
 
     Intent memory newIntent = Intent(_staker, _amount, _locator);
 
