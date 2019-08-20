@@ -301,7 +301,7 @@ contract('Wrapper Unit Tests', async accounts => {
           s,
           { value: 0, from: mockTaker }
         ),
-        'SENDER_NOT_TAKERWALLET'
+        'SENDER_MUST_BE_TAKER'
       )
     })
 
