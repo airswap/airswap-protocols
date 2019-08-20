@@ -176,9 +176,6 @@ contract Market is Ownable {
     // Iterate over the list until the end or limit.
     uint256 i = 0;
     while (i < limit) {
-      if (intent.staker == HEAD) {
-        break;
-      }
       result[i] = intent.locator;
       i = i + 1;
       intent = intentsLinkedList[intent.staker][NEXT];
