@@ -1,6 +1,11 @@
 const Market = artifacts.require('Market')
 
-const { passes, equal, reverted, emitted } = require('@airswap/test-utils').assert
+const {
+  passes,
+  equal,
+  reverted,
+  emitted,
+} = require('@airswap/test-utils').assert
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 const { padAddressToLocator } = require('@airswap/test-utils').padding
 const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
@@ -360,18 +365,18 @@ contract('Market Unit Tests', async accounts => {
   })
 
   describe('Test multiple setting of intents from same addres', async () => {
-      it('should not increase the total number of intents', async () => {
-        let trx = market.setIntent(aliceAddress, 2000, aliceLocator, {
-          from: owner,
-        })
-        await passes(trx)
-        trx = market.setIntent(aliceAddress, 5000, aliceLocator, {
-          from: owner,
-        })
-        await reverted(trx, "USER_ALREADY_STAKED")
-
-        let length = await market.length.call()
-        equal(length.toNumber(), 1, "length increased, but total stakers has not")
+    it('should not increase the total number of intents', async () => {
+      let trx = market.setIntent(aliceAddress, 2000, aliceLocator, {
+        from: owner,
       })
+      await passes(trx)
+      trx = market.setIntent(aliceAddress, 5000, aliceLocator, {
+        from: owner,
+      })
+      await reverted(trx, 'USER_ALREADY_STAKED')
+
+      let length = await market.length.call()
+      equal(length.toNumber(), 1, 'length increased, but total stakers has not')
+    })
   })
 })
