@@ -162,7 +162,7 @@ contract('Market Unit Tests', async accounts => {
       equal(intents[2], bobLocator, 'Bob should be third')
     })
 
-    it('user should not be able to set a second intent if one already exists', async () => {
+    it('should not be able to set a second intent if one already exists for an address', async () => {
       let trx = market.setIntent(aliceAddress, 2000, aliceLocator, {
         from: owner,
       })
