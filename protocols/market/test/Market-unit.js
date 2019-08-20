@@ -254,10 +254,10 @@ contract('Market Unit Tests', async accounts => {
       let trx = market.unsetIntent(bobAddress, { from: owner })
       await passes(trx)
       let size = await market.length.call()
-      equal(size, 2, "Intent was improperly removed")
+      equal(size, 2, 'Intent was improperly removed')
       trx = market.unsetIntent(bobAddress, { from: owner })
       await passes(trx)
-      equal(size, 2, "Intent was improperly removed")
+      equal(size, 2, 'Intent was improperly removed')
 
       let intents = await market.fetchIntents(7)
       equal(intents[0], aliceLocator, 'Alice should be first')
