@@ -157,7 +157,7 @@ contract('Wrapper Unit Tests', async accounts => {
           s,
           { value: 2, from: mockTaker }
         ),
-        'TAKER_ADDRESS_MUST_BE_UNSET'
+        'TAKER_WALLET_MUST_BE_UNSET'
       )
     })
 

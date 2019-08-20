@@ -81,7 +81,7 @@ contract Wrapper {
     if (_takerToken == address(wethContract)) {
 
       require(_takerWallet == address(0),
-        "TAKER_ADDRESS_MUST_BE_UNSET");
+        "TAKER_WALLET_MUST_BE_UNSET");
 
       require(_takerAmount == msg.value,
         "VALUE_MUST_BE_SENT");
@@ -99,7 +99,7 @@ contract Wrapper {
 
       // Ensure msg sender matches the takerWallet.
       require(msg.sender == _takerWallet,
-          "SENDER_NOT_TAKERWALLET");
+        "SENDER_MUST_BE_TAKER");
     }
 
     // Perform the simple swap.
