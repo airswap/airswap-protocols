@@ -170,7 +170,7 @@ contract('Market Unit Tests', async accounts => {
       trx = market.setIntent(aliceAddress, 5000, aliceLocator, {
         from: owner,
       })
-      await reverted(trx, 'USER_ALREADY_HAS_INTENT')
+      await reverted(trx, 'USER_HAS_INTENT')
 
       let length = await market.length.call()
       equal(length.toNumber(), 1, 'length increased, but total stakers has not')
@@ -248,6 +248,20 @@ contract('Market Unit Tests', async accounts => {
       await checkLinking(LIST_HEAD, LIST_HEAD, LIST_HEAD)
       listLength = await market.length()
       equal(listLength, 0, 'Link list length should be 0')
+    })
+
+    it('unsetting intent twice in a row for an address has no effect', async () => {
+      let trx = market.unsetIntent(bobAddress, { from: owner })
+      await passes(trx)
+      let size = await market.length.call()
+      equal(size, 2, "Intent was improperly removed")
+      trx = market.unsetIntent(bobAddress, { from: owner })
+      await passes(trx)
+      equal(size, 2, "Intent was improperly removed")
+
+      let intents = await market.fetchIntents(7)
+      equal(intents[0], aliceLocator, 'Alice should be first')
+      equal(intents[1], carolLocator, 'Carol should be second')
     })
   })
 
@@ -367,7 +381,7 @@ contract('Market Unit Tests', async accounts => {
       equal(hasIntent, false, 'hasIntent should have returned false')
     })
 
-    it('should return false if the address has no intent', async () => {
+    it('should return true if the address has an intent', async () => {
       // give alice an intent
       await market.setIntent(aliceAddress, 2000, aliceLocator, {
         from: owner,
