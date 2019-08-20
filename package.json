@@ -29,7 +29,7 @@
     "lerna": "^3.15.0",
     "prettier": "^1.18.2",
     "solhint": "^2.1.0",
-    "truffle": "^5.0.24",
+    "truffle": "^5.0.32",
     "ethereumjs-abi": "^0.6.7"
   },
   "prettier": {
