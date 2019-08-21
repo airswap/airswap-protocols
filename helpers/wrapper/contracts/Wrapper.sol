@@ -60,8 +60,8 @@ contract Wrapper {
     * @param _signature Types.Signature
     */
   function swap(
-    Types.Order memory _order,
-    Types.Signature memory _signature
+    Types.Order calldata _order,
+    Types.Signature calldata _signature
   ) external payable {
 
     // The taker is sending ether.
