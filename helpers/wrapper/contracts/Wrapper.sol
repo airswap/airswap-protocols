@@ -79,7 +79,7 @@ contract Wrapper {
     uint8 _v,
     bytes32 _r,
     bytes32 _s
-  ) public payable {
+  ) external payable {
 
     // The taker is sending ether.
     if (_takerToken == address(wethContract)) {
