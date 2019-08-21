@@ -1,3 +1,4 @@
 **/migrations/*.js
 **/coverage/*.js
 **/lcov-report/*.js
+**/node_modules/*
