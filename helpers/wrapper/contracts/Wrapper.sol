@@ -62,7 +62,7 @@ contract Wrapper {
   function swap(
     Types.Order memory _order,
     Types.Signature memory _signature
-  ) public payable {
+  ) external payable {
 
     // The taker is sending ether.
     if (_order.taker.token == address(wethContract)) {
