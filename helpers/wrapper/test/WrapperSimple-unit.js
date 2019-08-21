@@ -1,5 +1,5 @@
 const Swap = artifacts.require('Swap')
-const WrapperSimple = artifacts.require('Wrapper')
+const WrapperSimple = artifacts.require('WrapperSimple')
 const WETH9 = artifacts.require('WETH9')
 const FungibleToken = artifacts.require('FungibleToken')
 const MockContract = artifacts.require('MockContract')
