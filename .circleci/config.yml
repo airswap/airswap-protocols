@@ -25,6 +25,9 @@ references:
           command: |
             yarn install
       - run:
+          name: yarn lint
+          command: yarn lint
+      - run:
           name: Run Tests
           command: |
             yarn ganache > /dev/null &
