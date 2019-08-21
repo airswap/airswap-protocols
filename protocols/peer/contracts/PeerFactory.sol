@@ -17,8 +17,8 @@
 pragma solidity 0.5.10;
 
 import "@airswap/peer/contracts/Peer.sol";
-import "@airswap/indexer/interfaces/ILocatorWhitelist.sol";
-import "@airswap/peer/interfaces/IPeerFactory.sol";
+import "@airswap/indexer/contracts/interfaces/ILocatorWhitelist.sol";
+import "@airswap/peer/contracts/interfaces/IPeerFactory.sol";
 
 contract PeerFactory is IPeerFactory, ILocatorWhitelist {
 
