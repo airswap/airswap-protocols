@@ -7,10 +7,6 @@
 [![Discord](https://img.shields.io/discord/590643190281928738.svg)](https://discord.gg/ecQbV7H)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-#### :bulb: TODO
-
-- Consider adding a filter to `getIntents` to for example select only one kind of locator.
-
 ## Features
 
 ### Peer Discovery

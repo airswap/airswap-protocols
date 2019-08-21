@@ -64,7 +64,7 @@ contract Indexer is IIndexer, Ownable {
   function createMarket(
     address _makerToken,
     address _takerToken
-  ) public returns (address) {
+  ) external returns (address) {
 
     // If the Market does not exist, create it.
     if (markets[_makerToken][_takerToken] == Market(0)) {
@@ -121,7 +121,7 @@ contract Indexer is IIndexer, Ownable {
     address _takerToken,
     uint256 _amount,
     bytes32 _locator
-  ) public {
+  ) external {
 
     // Ensure the locator is whitelisted, if relevant
     if (locatorWhitelist != address(0)) {
@@ -143,11 +143,7 @@ contract Indexer is IIndexer, Ownable {
       // Transfer the _amount for staking.
       require(stakeToken.transferFrom(msg.sender, address(this), _amount),
         "UNABLE_TO_STAKE");
-
     }
-
-    require(!markets[_makerToken][_takerToken].hasIntent(msg.sender),
-      "USER_ALREADY_STAKED");
 
     emit Stake(msg.sender, _makerToken, _takerToken, _amount);
 
@@ -165,13 +161,27 @@ contract Indexer is IIndexer, Ownable {
   function unsetIntent(
     address _makerToken,
     address _takerToken
-  ) public {
+  ) external {
 
     // Ensure the market exists.
     require(markets[_makerToken][_takerToken] != Market(0),
       "MARKET_DOES_NOT_EXIST");
 
-    removeIntent(_makerToken, _takerToken, msg.sender);
+    // Get the intent for the sender.
+    Market.Intent memory intent = markets[_makerToken][_takerToken].getIntent(msg.sender);
+
+    // Ensure the intent exists.
+    require(intent.staker == msg.sender,
+      "INTENT_DOES_NOT_EXIST");
+
+    // Unset the intent on the market. 
+    //No need to require() because a check is done above that reverts if there are no intents
+    markets[_makerToken][_takerToken].unsetIntent(msg.sender);
+
+    // Return the staked tokens. IERC20 returns boolean this contract may not be ours.
+    // Need to revert when false is returned
+    require(stakeToken.transfer(msg.sender, intent.amount));
+    emit Unstake(msg.sender, _makerToken, _takerToken, intent.amount);
   }
 
   /**
@@ -204,32 +214,4 @@ contract Indexer is IIndexer, Ownable {
     }
     return new bytes32[](0);
   }
-
-  /**
-    * @notice Removes stakers' intents from a market
-    *
-    * @param _makerToken address
-    * @param _takerToken address
-    * @param _staker address
-    */
-  function removeIntent(
-    address _makerToken,
-    address _takerToken,
-    address _staker
-  ) internal {
-    // Get the intent for the sender.
-    Market.Intent memory intent = markets[_makerToken][_takerToken].getIntent(_staker);
-
-    // Ensure the intent exists.
-    require(intent.staker == _staker,
-      "INTENT_DOES_NOT_EXIST");
-
-    // Unset the intent on the market.
-    markets[_makerToken][_takerToken].unsetIntent(_staker);
-
-    // Return the staked tokens.
-    stakeToken.transfer(_staker, intent.amount);
-    emit Unstake(_staker, _makerToken, _takerToken, intent.amount);
-  }
-
 }

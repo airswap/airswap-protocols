@@ -31,6 +31,7 @@ contract Wrapper {
   // WETH contract to wrap ether
   IWETH public wethContract;
 
+  uint256 constant MAX_INT = 2**256 - 1;
   /**
     * @notice Contract Constructor
     * @param _swapContract address
@@ -42,6 +43,9 @@ contract Wrapper {
   ) public {
     swapContract = ISwap(_swapContract);
     wethContract = IWETH(_wethContract);
+
+    // Sets unlimited allowance for the Wrapper contract.
+    wethContract.approve(_swapContract, MAX_INT);
   }
 
   /**
@@ -75,13 +79,13 @@ contract Wrapper {
     uint8 _v,
     bytes32 _r,
     bytes32 _s
-  ) public payable {
+  ) external payable {
 
     // The taker is sending ether.
     if (_takerToken == address(wethContract)) {
 
       require(_takerWallet == address(0),
-        "TAKER_ADDRESS_MUST_BE_UNSET");
+        "TAKER_WALLET_MUST_BE_UNSET");
 
       require(_takerAmount == msg.value,
         "VALUE_MUST_BE_SENT");
@@ -89,13 +93,15 @@ contract Wrapper {
       // Wrap (deposit) the ether.
       wethContract.deposit.value(msg.value)();
 
-      // Approve Swap to trade it.
-      wethContract.approve(address(swapContract), msg.value);
     } else {
 
       // Ensure no unexpected ether sent during WETH transaction.
       require(msg.value == 0,
         "VALUE_MUST_BE_ZERO");
+
+      // Ensure msg sender matches the takerWallet.
+      require(msg.sender == _takerWallet,
+        "SENDER_MUST_BE_TAKER");
     }
 
     // Perform the simple swap.

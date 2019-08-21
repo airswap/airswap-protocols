@@ -1,6 +1,11 @@
 const Market = artifacts.require('Market')
 
-const { equal, reverted, emitted } = require('@airswap/test-utils').assert
+const {
+  passes,
+  equal,
+  reverted,
+  emitted,
+} = require('@airswap/test-utils').assert
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 const { padAddressToLocator } = require('@airswap/test-utils').padding
 const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
@@ -156,6 +161,20 @@ contract('Market Unit Tests', async accounts => {
       equal(intents[1], carolLocator, 'Carol should be second')
       equal(intents[2], bobLocator, 'Bob should be third')
     })
+
+    it('should not be able to set a second intent if one already exists for an address', async () => {
+      let trx = market.setIntent(aliceAddress, 2000, aliceLocator, {
+        from: owner,
+      })
+      await passes(trx)
+      trx = market.setIntent(aliceAddress, 5000, aliceLocator, {
+        from: owner,
+      })
+      await reverted(trx, 'USER_HAS_INTENT')
+
+      let length = await market.length.call()
+      equal(length.toNumber(), 1, 'length increased, but total stakers has not')
+    })
   })
 
   describe('Test unsetIntent', async () => {
@@ -229,6 +248,20 @@ contract('Market Unit Tests', async accounts => {
       await checkLinking(LIST_HEAD, LIST_HEAD, LIST_HEAD)
       listLength = await market.length()
       equal(listLength, 0, 'Link list length should be 0')
+    })
+
+    it('unsetting intent twice in a row for an address has no effect', async () => {
+      let trx = market.unsetIntent(bobAddress, { from: owner })
+      await passes(trx)
+      let size = await market.length.call()
+      equal(size, 2, 'Intent was improperly removed')
+      trx = market.unsetIntent(bobAddress, { from: owner })
+      await passes(trx)
+      equal(size, 2, 'Intent was improperly removed')
+
+      let intents = await market.fetchIntents(7)
+      equal(intents[0], aliceLocator, 'Alice should be first')
+      equal(intents[1], carolLocator, 'Carol should be second')
     })
   })
 
@@ -348,7 +381,7 @@ contract('Market Unit Tests', async accounts => {
       equal(hasIntent, false, 'hasIntent should have returned false')
     })
 
-    it('should return false if the address has no intent', async () => {
+    it('should return true if the address has an intent', async () => {
       // give alice an intent
       await market.setIntent(aliceAddress, 2000, aliceLocator, {
         from: owner,

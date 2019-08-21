@@ -11,6 +11,7 @@ const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 contract('Wrapper Unit Tests', async accounts => {
   const takerAmount = 2
   const mockToken = accounts[9]
+  const mockTaker = accounts[8]
   const r = web3.utils.asciiToHex('r')
   const s = web3.utils.asciiToHex('s')
   let mockSwap
@@ -141,7 +142,6 @@ contract('Wrapper Unit Tests', async accounts => {
     })
 
     it('Test when taker token == weth, ensure the taker wallet is unset', async () => {
-      let mockTaker = accounts[8]
       await reverted(
         wrapper.swapSimple(
           0, //nonce
@@ -155,9 +155,9 @@ contract('Wrapper Unit Tests', async accounts => {
           27, //v
           r,
           s,
-          { value: 2 }
+          { value: 2, from: mockTaker }
         ),
-        'TAKER_ADDRESS_MUST_BE_UNSET'
+        'TAKER_WALLET_MUST_BE_UNSET'
       )
     })
 
@@ -175,7 +175,7 @@ contract('Wrapper Unit Tests', async accounts => {
           27, //v
           r,
           s,
-          { value: 2 }
+          { value: 2, from: mockTaker }
         ),
         'VALUE_MUST_BE_SENT'
       )
@@ -198,7 +198,7 @@ contract('Wrapper Unit Tests', async accounts => {
           27, //v
           r,
           s,
-          { value: takerAmount }
+          { value: takerAmount, from: mockTaker }
         )
       )
 
@@ -283,6 +283,28 @@ contract('Wrapper Unit Tests', async accounts => {
   })
 
   describe('Test sending two ERC20s', async () => {
+    it('Test when taker token == non weth erc20, maker token == non weth erc20 but msg.sender is not takerwallet', async () => {
+      let nonMockTaker = accounts[7]
+      let notWethContract = mockFT.address
+      await reverted(
+        wrapper.swapSimple(
+          0, //nonce
+          0, //expiry
+          EMPTY_ADDRESS, //maker wallet
+          0, //maker amount
+          EMPTY_ADDRESS, //maker token
+          nonMockTaker, //taker wallet
+          1, //taker amount
+          notWethContract, //taker token
+          27, //v
+          r,
+          s,
+          { value: 0, from: mockTaker }
+        ),
+        'SENDER_MUST_BE_TAKER'
+      )
+    })
+
     it('Test when taker token == non weth erc20, maker token == non weth erc20, and the transaction passes', async () => {
       let notWethContract = mockFT.address
       await passes(
@@ -292,13 +314,13 @@ contract('Wrapper Unit Tests', async accounts => {
           EMPTY_ADDRESS, //maker wallet
           0, //maker amount
           notWethContract, //maker token
-          EMPTY_ADDRESS, //taker wallet
+          mockTaker, //taker wallet
           takerAmount, //taker amount
           notWethContract, //taker token
           27, //v
           r,
           s,
-          { value: 0 }
+          { value: 0, from: mockTaker }
         )
       )
 
