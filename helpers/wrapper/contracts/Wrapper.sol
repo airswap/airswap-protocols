@@ -87,7 +87,7 @@ contract Wrapper {
         "SENDER_MUST_BE_TAKER");
     }
 
-    // Perform the simple swap.
+    // Perform the swap.
     swapContract.swap(
       _order,
       _signature
