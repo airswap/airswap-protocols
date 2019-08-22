@@ -10,7 +10,7 @@ Both V1 and V2 signatures can use the `eth_sign` function. [Read more about Sign
 
 **V1** hashes arguments in the following order.
 
-```
+```JavaScript
 const ethUtil = require('ethereumjs-util')
 const msg = web3.utils.soliditySha3(
   { type: 'address', value: makerAddress },
@@ -26,29 +26,35 @@ const sig = await web3.eth.sign(ethUtil.bufferToHex(msg), signer)
 return ethUtil.fromRpcSig(sig)
 ```
 
-**V2** hashes arguments in the following order with the addition of `0x0` and the address of the `swapContract` to be used.
+**V2** hashes arguments according to an [EIP712](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-712.md) structure. See [`@airswap/order-utils`](../../packages/order-utils) for the JavaScript source and [`@airswap/types`](../types) for the Solidity source.
 
+```JavaScript
+const { hashes } = require('@airswap/order-utils')
+const orderHash = hashes.getOrderHash(order, swapContractAddress)
+const orderHashHex = ethUtil.bufferToHex(orderHash)
+const sig = await web3.eth.sign(orderHashHex, signer)
+const { r, s, v } = ethUtil.fromRpcSig(sig)
+return {
+  version: '0x45', // EIP-191: Version 0x45 (personal_sign)
+  signer,
+  r,
+  s,
+  v,
+}
 ```
-const ethUtil = require('ethereumjs-util')
-const msg = web3.utils.soliditySha3(
-  { type: 'bytes1', value: '0x0' },
-  { type: 'address', value: swapContract },
-  { type: 'uint256', value: nonce },
-  { type: 'uint256', value: expiry },
-  { type: 'address', value: makerWallet },
-  { type: 'uint256', value: makerParam },
-  { type: 'address', value: makerToken },
-  { type: 'address', value: takerWallet },
-  { type: 'uint256', value: takerParam },
-  { type: 'address', value: takerToken }
-)
-const sig = await web3.eth.sign(ethUtil.bufferToHex(msg), signer)
-return ethUtil.fromRpcSig(sig)
+
+Alternatively you can use `signatures` from the `order-utils` package.
+
+```JavaScript
+const { signatures } = require('@airswap/order-utils')
+return await signatures.getWeb3Signature(order, signer, swapContractAddress)
 ```
+
+Where `order` is specified by example below.
 
 ## Performing a Swap
 
-**V1** has `fill` function.
+The **V1** contract has `fill` function.
 
 ```
 function fill(
@@ -67,7 +73,7 @@ function fill(
 payable
 ```
 
-A successful `fill` transaction will emit a `Filled` event.
+A successful `fill` transaction emits a `Filled` event.
 
 ```
 event Filled(
@@ -82,25 +88,53 @@ event Filled(
 );
 ```
 
-**V2** has a `swapSimple` function.
+The **V2** contract has a `swap` function.
 
 ```
-function swapSimple(
-  uint256 _nonce,
-  uint256 _expiry,
-  address _makerWallet,
-  uint256 _makerParam,
-  address _makerToken,
-  address _takerWallet,
-  uint256 _takerParam,
-  address _takerToken,
-  uint8 _v,
-  bytes32 _r,
-  bytes32 _s
+function swap(
+  Types.Order calldata _order,
+  Types.Signature calldata _signature
 ) external
 ```
 
-A successful `swapSimple` transaction will emit a `Swap` event.
+Where the `_order` argument is an `Order` struct.
+
+```
+struct Order {
+  uint256 nonce;    // Unique per order and should be sequential
+  uint256 expiry;   // Expiry in seconds since 1 January 1970
+  Party maker;      // Party to the trade that sets terms
+  Party taker;      // Party to the trade that accepts terms
+  Party affiliate;  // Party compensated for facilitating (optional)
+}
+```
+
+The `_order` argument has multiple `Party` structs.
+
+```
+struct Party {
+  address wallet;   // Wallet address of the party
+  address token;    // Contract address of the token
+  uint256 param;    // Value (ERC-20) or ID (ERC-721)
+  bytes4 kind;      // Interface ID of the token
+}
+```
+
+And the `_signature` argument is a `Signature` struct.
+
+```
+struct Signature {
+  address signer;   // Address of the wallet used to sign
+  uint8 v;          // `v` value of an ECDSA signature
+  bytes32 r;        // `r` value of an ECDSA signature
+  bytes32 s;        // `s` value of an ECDSA signature
+  bytes1 version;   // EIP-191 signature version
+}
+```
+
+The above are defined in the [`@airswap/types`](../types) library.
+
+A successful `swap` transaction emits a `Swap` event.
 
 ```
 event Swap(
@@ -118,7 +152,7 @@ event Swap(
 );
 ```
 
-:bulb: **Note**: The V2 swap functions are not `payable` and cannot accept ether for trades.
+:bulb: **Note**: The V2 swap function is not `payable` and cannot accept ether for trades.
 
 ## Canceling an Order
 

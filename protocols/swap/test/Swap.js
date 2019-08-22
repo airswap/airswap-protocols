@@ -38,7 +38,6 @@ contract('Swap', async accounts => {
   let tokenKitty
 
   let swap
-  let swapSimple
   let cancel
   let invalidate
 
@@ -71,10 +70,6 @@ contract('Swap', async accounts => {
       swap =
         swapContract.methods[
           'swap((uint256,uint256,(address,address,uint256,bytes4),(address,address,uint256,bytes4),(address,address,uint256,bytes4)),(address,uint8,bytes32,bytes32,bytes1))'
-        ]
-      swapSimple =
-        swapContract.methods[
-          'swapSimple(uint256,uint256,address,uint256,address,address,uint256,address,uint8,bytes32,bytes32)'
         ]
       cancel = swapContract.methods['cancel(uint256[])']
       invalidate = swapContract.methods['invalidate(uint256)']
@@ -742,166 +737,6 @@ contract('Swap', async accounts => {
     })
   })
 
-  describe('Swap (Simple)', async () => {
-    let _order
-    let _signature
-
-    before('Alice creates an order for id "12345"', async () => {
-      const { order } = await orders.getOrder({
-        maker: {
-          wallet: aliceAddress,
-          token: tokenAST.address,
-          param: 50,
-        },
-        taker: {
-          wallet: bobAddress,
-          token: tokenDAI.address,
-          param: 10,
-        },
-      })
-      _order = order
-      _signature = await signatures.getSimpleSignature(
-        order,
-        aliceAddress,
-        swapAddress
-      )
-    })
-
-    it('Checks that Carol cannot take a (Simple) order on behalf of Bob', async () => {
-      await reverted(
-        swapSimple(
-          _order.nonce,
-          _order.expiry,
-          _order.maker.wallet,
-          _order.maker.param,
-          _order.maker.token,
-          _order.taker.wallet,
-          _order.taker.param,
-          _order.taker.token,
-          _signature.v,
-          _signature.r,
-          _signature.s,
-          { from: carolAddress }
-        ),
-        'SENDER_UNAUTHORIZED'
-      )
-    })
-
-    it('Checks that a Swap (Simple) succeeds', async () => {
-      emitted(
-        await swapSimple(
-          _order.nonce,
-          _order.expiry,
-          _order.maker.wallet,
-          _order.maker.param,
-          _order.maker.token,
-          _order.taker.wallet,
-          _order.taker.param,
-          _order.taker.token,
-          _signature.v,
-          _signature.r,
-          _signature.s,
-          { from: bobAddress }
-        ),
-        'Swap'
-      )
-    })
-
-    it('Checks that a Swap (Simple) fails because order is no longer available', async () => {
-      await reverted(
-        swapSimple(
-          _order.nonce,
-          _order.expiry,
-          _order.maker.wallet,
-          _order.maker.param,
-          _order.maker.token,
-          _order.taker.wallet,
-          _order.taker.param,
-          _order.taker.token,
-          _signature.v,
-          _signature.r,
-          _signature.s,
-          { from: bobAddress }
-        ),
-        'ORDER_UNAVAILABLE'
-      )
-    })
-
-    it('Checks that an invalid simple signature will fail', async () => {
-      const { order } = await orders.getOrder({
-        maker: {
-          wallet: aliceAddress,
-          token: tokenAST.address,
-          param: 100,
-        },
-        taker: {
-          wallet: bobAddress,
-          token: tokenDAI.address,
-          param: 50,
-        },
-      })
-
-      // Signs with bobAddress rather than alice Address.
-      const signature = await signatures.getSimpleSignature(
-        order,
-        bobAddress,
-        swapAddress
-      )
-      await reverted(
-        swapSimple(
-          order.nonce,
-          order.expiry,
-          order.maker.wallet,
-          order.maker.param,
-          order.maker.token,
-          order.taker.wallet,
-          order.taker.param,
-          order.taker.token,
-          signature.v,
-          signature.r,
-          signature.s,
-          { from: bobAddress }
-        ),
-        'INVALID'
-      )
-    })
-  })
-
-  describe('Maker Delegation for Swap (Simple)', async () => {
-    it('Alice gives an unsigned order to David who takes it for Bob', async () => {
-      const { order } = await orders.getOrder({
-        maker: {
-          wallet: aliceAddress,
-          token: tokenAST.address,
-          param: 20,
-        },
-        taker: {
-          wallet: bobAddress,
-          token: tokenDAI.address,
-          param: 5,
-        },
-      })
-      const signature = signatures.getEmptySignature()
-      emitted(
-        await swapSimple(
-          order.nonce,
-          order.expiry,
-          order.maker.wallet,
-          order.maker.param,
-          order.maker.token,
-          order.taker.wallet,
-          order.taker.param,
-          order.taker.token,
-          signature.v,
-          signature.r,
-          signature.s,
-          { from: davidAddress }
-        ),
-        'Swap'
-      )
-    })
-  })
-
   describe('Swap with Public Orders (No Taker Set)', async () => {
     it('Checks that a Swap succeeds without a taker wallet set', async () => {
       const { order, signature } = await orders.getOrder({
@@ -916,44 +751,6 @@ contract('Swap', async accounts => {
         },
       })
       emitted(await swap(order, signature, { from: bobAddress }), 'Swap') //, { takerAddress: bobAddress })
-    })
-
-    it('Checks that a Swap (Simple) succeeds without a taker wallet set', async () => {
-      const { order } = await orders.getOrder({
-        maker: {
-          wallet: aliceAddress,
-          token: tokenAST.address,
-          param: 25,
-        },
-        taker: {
-          token: tokenDAI.address,
-          param: 5,
-        },
-      })
-
-      const signature = await signatures.getSimpleSignature(
-        order,
-        aliceAddress,
-        swapAddress
-      )
-
-      emitted(
-        await swapSimple(
-          order.nonce,
-          order.expiry,
-          order.maker.wallet,
-          order.maker.param,
-          order.maker.token,
-          order.taker.wallet,
-          order.taker.param,
-          order.taker.token,
-          signature.v,
-          signature.r,
-          signature.s,
-          { from: bobAddress }
-        ),
-        'Swap'
-      ) //, { takerAddress: bobAddress })
     })
   })
 
