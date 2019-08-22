@@ -152,7 +152,7 @@ event Swap(
 );
 ```
 
-:bulb: **Note**: The V2 swap functions are not `payable` and cannot accept ether for trades.
+:bulb: **Note**: The V2 swap function is not `payable` and cannot accept ether for trades.
 
 ## Canceling an Order
 
