@@ -72,23 +72,6 @@ module.exports = {
       v,
     }
   },
-  async getSimpleSignature(order, signer, verifyingContract) {
-    const msg = web3.utils.soliditySha3(
-      // Version 0x00: Data with intended validator (verifyingContract)
-      { type: 'bytes1', value: '0x0' },
-      { type: 'address', value: verifyingContract },
-      { type: 'uint256', value: order.nonce },
-      { type: 'uint256', value: order.expiry },
-      { type: 'address', value: order.maker.wallet },
-      { type: 'uint256', value: order.maker.param },
-      { type: 'address', value: order.maker.token },
-      { type: 'address', value: order.taker.wallet },
-      { type: 'uint256', value: order.taker.param },
-      { type: 'address', value: order.taker.token }
-    )
-    const sig = await web3.eth.sign(ethUtil.bufferToHex(msg), signer)
-    return ethUtil.fromRpcSig(sig)
-  },
   getEmptySignature() {
     return {
       version: '0x0',

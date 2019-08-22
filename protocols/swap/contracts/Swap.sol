@@ -90,9 +90,7 @@ contract Swap is ISwap {
   function swap(
     Types.Order calldata _order,
     Types.Signature calldata _signature
-  )
-    external
-  {
+  ) external {
 
     // Ensure the order is not expired.
     require(_order.expiry > block.timestamp,
