@@ -116,51 +116,6 @@ struct Signature {
 | `INVALID_AUTH_DELEGATE`  | Delegate address is the same as the sender address.                          |
 | `INVALID_AUTH_EXPIRY`    | Authorization expiry time is in the past.                                    |
 
-## Swap (Simple)
-
-Lightweight swap between tokens (ERC-20 or ERC-721) using simple signatures.
-
-```Solidity
-function swapSimple(
-  uint256 _nonce,
-  uint256 _expiry,
-  address _makerWallet,
-  uint256 _makerParam,
-  address _makerToken,
-  address _takerWallet,
-  uint256 _takerParam,
-  address _takerToken,
-  uint8 _v,
-  bytes32 _r,
-  bytes32 _s
-) external
-```
-
-### Params
-
-| Name           | Type      | Description                                            |
-| :------------- | :-------- | :----------------------------------------------------- |
-| `_nonce`       | `uint256` | A single use identifier for the Order.                 |
-| `_expiry`      | `uint256` | The expiry in seconds since unix epoch.                |
-| `_makerWallet` | `address` | The Maker of the Order who sets price.                 |
-| `_makerParam`  | `uint256` | The amount or identifier of the token the Maker sends. |
-| `_makerToken`  | `address` | The address of the token the Maker sends.              |
-| `_takerWallet` | `address` | The Taker of the Order who takes price.                |
-| `_takerParam`  | `uint256` | The amount or identifier of the token the Taker sends. |
-| `_takerToken`  | `address` | The address of the token the Taker sends.              |
-| `_v`           | `uint8`   | The `v` value of an ECDSA signature.                   |
-| `_r`           | `bytes32` | The `r` value of an ECDSA signature.                   |
-| `_s`           | `bytes32` | The `s` value of an ECDSA signature.                   |
-
-### Reverts
-
-| Reason              | Scenario                                                 |
-| :------------------ | :------------------------------------------------------- |
-| `ORDER_EXPIRED`     | Order has an `expiry` lower than the current block time. |
-| `ORDER_UNAVAILABLE` | Order has already been taken or canceled.                |
-| `NONCE_TOO_LOW`     | Nonce provided is below the minimum value set.           |
-| `SIGNATURE_INVALID` | Signature provided does not match the Order provided.    |
-
 ## Cancel
 
 Provide an array of `nonces`, unique by Maker address, to mark one or more Orders as canceled.
@@ -183,7 +138,7 @@ Peers may authorize other peers to make (sign) or take (send) Orders on their be
 
 ### Authorize
 
-Authorize a delegate account or contract to make (sign) or take (send) Orders on the sender's behalf. `swapSimple` only supports sender authorization, for example delegation to another smart contract to take orders.
+Authorize a delegate account or contract to make (sign) or take (send) Orders on the sender's behalf.
 
 ```Solidity
 function authorize(address delegate, uint256 expiry) external returns (bool)
@@ -294,28 +249,4 @@ return {
   version: '0x01', // Version 0x01: signTypedData
   r, s, v
 }
-```
-
-### Simple
-
-For use in the `swapSimple` function. Signature parameters are passed in directly.
-
-```JavaScript
-const ethUtil = require('ethereumjs-util')
-const msg = web3.utils.soliditySha3(
-  // Version 0x00: Data with intended validator (verifyingContract)
-  { type: 'bytes1', value: '0x0' },
-  { type: 'address', value: verifyingContract },
-  { type: 'uint256', value: nonce },
-  { type: 'uint256', value: expiry },
-  { type: 'address', value: makerWallet },
-  { type: 'uint256', value: makerParam },
-  { type: 'address', value: makerToken },
-  { type: 'address', value: takerWallet },
-  { type: 'uint256', value: takerParam },
-  { type: 'address', value: takerToken },
-);
-const orderHashHex = ethUtil.bufferToHex(msg);
-const sig = await web3.eth.sign(orderHashHex, signer);
-const { r, s, v } = ethUtil.fromRpcSig(sig);
 ```

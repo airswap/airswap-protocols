@@ -71,34 +71,6 @@ interface ISwap {
   ) external;
 
   /**
-    * @notice Atomic Token Swap (Simple)
-    * @param _nonce uint256
-    * @param _expiry uint256
-    * @param _makerWallet address
-    * @param _makerParam uint256
-    * @param _makerToken address
-    * @param _takerWallet address
-    * @param _takerParam uint256
-    * @param _takerToken address
-    * @param _v uint8
-    * @param _r bytes32
-    * @param _s bytes32
-    */
-  function swapSimple(
-    uint256 _nonce,
-    uint256 _expiry,
-    address _makerWallet,
-    uint256 _makerParam,
-    address _makerToken,
-    address _takerWallet,
-    uint256 _takerParam,
-    address _takerToken,
-    uint8 _v,
-    bytes32 _r,
-    bytes32 _s
-  ) external;
-
-  /**
     * @notice Cancel one or more open orders by nonce
     * @param _nonces uint256[]
     */
