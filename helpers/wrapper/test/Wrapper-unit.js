@@ -112,7 +112,7 @@ contract('Wrapper Unit Tests', async accounts => {
       let nonTakerToken = mockToken
       const { order } = await orders.getOrder({
         taker: {
-          takerToken: nonTakerToken,
+          token: nonTakerToken,
         },
       })
       await reverted(
