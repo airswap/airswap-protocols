@@ -13,8 +13,6 @@ contract('Wrapper Unit Tests', async accounts => {
   const takerAmount = 2
   const mockToken = accounts[9]
   const mockTaker = accounts[8]
-  const r = web3.utils.asciiToHex('r')
-  const s = web3.utils.asciiToHex('s')
   let mockSwap
   let mockWeth
   let mockFT

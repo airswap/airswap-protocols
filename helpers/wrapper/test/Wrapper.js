@@ -17,7 +17,7 @@ const {
   takeSnapshot,
   revertToSnapShot,
 } = require('@airswap/test-utils').time
-const { orders, signatures } = require('@airswap/order-utils')
+const { orders } = require('@airswap/order-utils')
 
 let swapContract
 let wrapperContract
