@@ -17,23 +17,25 @@
 pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
+import "@airswap/types/contracts/Types.sol";
+
 interface IPeer {
 
   event SetRule(
-    address peerToken,
-    address consumerToken,
-    uint256 maxPeerAmount,
+    address takerToken,
+    address makerToken,
+    uint256 maxTakerAmount,
     uint256 priceCoef,
     uint256 priceExp
   );
 
   event UnsetRule(
-    address peerToken,
-    address consumerToken
+    address takerToken,
+    address makerToken
   );
 
   struct Rule {
-    uint256 maxPeerAmount;
+    uint256 maxTakerAmount;
     uint256 priceCoef;
     uint256 priceExp;
   }
@@ -41,61 +43,47 @@ interface IPeer {
   function rules(address, address) external returns (Rule memory);
 
   function setRule(
-    address _peerToken,
-    address _consumerToken,
-    uint256 _maxPeerAmount,
+    address _takerToken,
+    address _makerToken,
+    uint256 _maxTakerAmount,
     uint256 _priceCoef,
     uint256 _priceExp
   ) external;
 
   function unsetRule(
-    address _peerToken,
-    address _consumerToken
+    address _takerToken,
+    address _makerToken
   ) external;
 
   function getBuyQuote(
-    uint256 _peerAmount,
-    address _peerToken,
-    address _consumerToken
+    uint256 _takerAmount,
+    address _takerToken,
+    address _makerToken
   ) external returns (
-    uint256 consumerAmount
+    uint256 makerAmount
   );
 
   function getSellQuote(
-    uint256 _consumerAmount,
-    address _consumerToken,
-    address _peerToken
+    uint256 _makerAmount,
+    address _makerToken,
+    address _takerToken
   ) external returns (
-    uint256 peerAmount
+    uint256 takerAmount
   );
 
   function getMaxQuote(
-    address _peerToken,
-    address _consumerToken
+    address _takerToken,
+    address _makerToken
   ) external returns (
-    uint256 peerAmount,
-    uint256 consumerAmount
+    uint256 takerAmount,
+    uint256 makerAmount
   );
 
   function provideOrder(
-    uint256 _nonce,
-    uint256 _expiry,
-    address _consumerWallet,
-    uint256 _consumerAmount,
-    address _consumerToken,
-    address _peerWallet,
-    uint256 _peerAmount,
-    address _peerToken,
-    uint8 _v,
-    bytes32 _r,
-    bytes32 _s
+    Types.Order calldata order,
+    Types.Signature calldata signature
   ) external;
 
-  function provideUnsignedOrder(
-    uint256 _nonce,
-    uint256 _consumerAmount,
-    address _consumerToken,
-    uint256 _peerAmount,
-    address _peerToken
-  ) external;
+  function owner()
+    external view returns (address);
 }

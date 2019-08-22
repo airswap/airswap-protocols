@@ -8,6 +8,7 @@ const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 const BigNumber = require('bignumber.js')
 const { padAddressToLocator } = require('@airswap/test-utils').padding
+const { orders, signatures } = require('@airswap/order-utils')
 
 contract('Consumer Unit Tests', async () => {
   const highVal = 400
@@ -51,9 +52,16 @@ contract('Consumer Unit Tests', async () => {
     await mockPeerHigh.givenMethodReturnUint(peer_getBuyQuote, highVal)
     await mockPeerLow.givenMethodReturnUint(peer_getBuyQuote, lowVal)
 
+    // mock peer has owner()
+    let peer_owner = peerTemplate.contract.methods.owner().encodeABI()
+    await mockPeerHigh.givenMethodReturnAddress(peer_owner, EMPTY_ADDRESS)
+    await mockPeerLow.givenMethodReturnAddress(peer_owner, EMPTY_ADDRESS)
+
     //mock peer provideUnsignedOrder()
+    const { order } = await orders.getOrder({})
+
     let peer_provideUnsignedOrder = peerTemplate.contract.methods
-      .provideUnsignedOrder(0, 0, EMPTY_ADDRESS, 0, EMPTY_ADDRESS)
+      .provideOrder(order, signatures.getEmptySignature())
       .encodeABI()
     await mockPeerHigh.givenMethodReturnBool(peer_provideUnsignedOrder, true)
     await mockPeerLow.givenMethodReturnBool(peer_provideUnsignedOrder, true)
@@ -173,6 +181,8 @@ contract('Consumer Unit Tests', async () => {
           [[mockPeerLowLocator, mockPeerHighLocator]]
         )
       )
+
+      // relies on consumer.takeBestBuy requires
 
       let trx = await consumer.takeBestBuy(
         180,
