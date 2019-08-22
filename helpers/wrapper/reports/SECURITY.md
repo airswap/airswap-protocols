@@ -52,7 +52,7 @@ _\*\* OpenZeppelin contract_
 
 | Function   | Source   | Visibility | Params                                                                                                                                                                                                                  | Payable |
 | :--------- | :------- | :--------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------ |
-| swapSimple | Wrapper.sol | external   | `uint256 _nonce`, `uint256 _expiry`, `address _makerWallet`, `uint256 _makerParam`, `address _makerToken`, `address _takerWallet`, `uint256 _takerParam`, `address _takerToken`, `uint8 _v`, `bytes32 _r`, `bytes32 _s` | yes      |
+| swap | Wrapper.sol | external   | `Types.Order calldata _order, Types.Signature calldata _signature` | yes      |
 | fallback     | Wrapper.sol | external   | none   | yes      |
 
 ## Invariants
@@ -81,11 +81,11 @@ Wrapper does not perform any arithmetic computation, or calling this.balance. It
 #### 6. Protected from re-entrancy attacks such that multiple parties could use Wrapper and receive more balances.
 
 #### 7. Sending the same parameters twice will have the same guarantees as the Swap contract.
-Calls to swapSimple() are idempotent. When called many times. The wrapper’s beginning and final state are the same due to having either swapped WETH or transferring ETH out of the contract.
+Calls to swap() are idempotent. When called many times. The wrapper’s beginning and final state are the same due to having either swapped WETH or transferring ETH out of the contract.
 - **This invariant currently holds as-is.**
 
-#### 8. non-WETH ERC20 swaps with non-null taker address should occur similar to Swap.swapSimple.
-- In this scenario, none of the conditional statements for swapSimple() in Wrapper are hit and thus just swapContract.swapSimple() method was called.
+#### 8. non-WETH ERC20 swaps with non-null taker address should occur similar to Swap.swap.
+- In this scenario, none of the conditional statements for swap() in Wrapper are hit and thus just swapContract.swap() method was called.
 - **This invariant currently holds as-is.**
 
 ## Analysis
@@ -101,7 +101,7 @@ Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unused-
 External call is being made to a known contract implementation of WETH9.sol. WETH9.sol either returns True of revert, there are no instances
 where it returns False during approve or transferFrom.
 
-Full slither output located in ../analysis/slither.txt
+Full slither output located in ../reports/analysis/slither.txt
 
 ## Testing
 
