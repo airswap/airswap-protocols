@@ -1,6 +1,6 @@
 const Swap = artifacts.require('Swap')
 const Types = artifacts.require('Types')
-const WrapperSimple = artifacts.require('WrapperSimple')
+const Wrapper = artifacts.require('Wrapper')
 const WETH9 = artifacts.require('WETH9')
 const FungibleToken = artifacts.require('FungibleToken')
 
@@ -25,13 +25,13 @@ let wrapperContract
 let swapAddress
 let wrapperAddress
 
-let swapSimple
+let swap
 let tokenAST
 let tokenDAI
 let tokenWETH
 let snapshotId
 
-contract('WrapperSimple', async ([aliceAddress, bobAddress, carolAddress]) => {
+contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
   orders.setKnownAccounts([aliceAddress, bobAddress, carolAddress])
 
   before('Setup', async () => {
@@ -44,17 +44,14 @@ contract('WrapperSimple', async ([aliceAddress, bobAddress, carolAddress]) => {
 
     swapAddress = swapContract.address
     tokenWETH = await WETH9.new()
-    wrapperContract = await WrapperSimple.new(swapAddress, tokenWETH.address)
+    wrapperContract = await Wrapper.new(swapAddress, tokenWETH.address)
     wrapperAddress = wrapperContract.address
     tokenDAI = await FungibleToken.new()
     tokenAST = await FungibleToken.new()
 
     await orders.setVerifyingContract(swapAddress)
 
-    swapSimple =
-      wrapperContract.methods[
-        'swapSimple(uint256,uint256,address,uint256,address,address,uint256,address,uint8,bytes32,bytes32)'
-      ]
+    swap = wrapperContract.swap
   })
 
   after(async () => {
@@ -95,7 +92,7 @@ contract('WrapperSimple', async ([aliceAddress, bobAddress, carolAddress]) => {
 
   describe('Wrap Buys', async () => {
     it('Checks that Bob take a WETH order from Alice using ETH', async () => {
-      const { order } = await orders.getOrder({
+      const { order, signature } = await orders.getOrder({
         maker: {
           wallet: aliceAddress,
           token: tokenDAI.address,
@@ -106,25 +103,10 @@ contract('WrapperSimple', async ([aliceAddress, bobAddress, carolAddress]) => {
           param: 10,
         },
       })
-      const signature = await signatures.getSimpleSignature(
-        order,
-        aliceAddress,
-        swapAddress
-      )
-      let result = await swapSimple(
-        order.nonce,
-        order.expiry,
-        order.maker.wallet,
-        order.maker.param,
-        order.maker.token,
-        order.taker.wallet,
-        order.taker.param,
-        order.taker.token,
-        signature.v,
-        signature.r,
-        signature.s,
-        { from: bobAddress, value: order.taker.param }
-      )
+      let result = await swap(order, signature, {
+        from: bobAddress,
+        value: order.taker.param,
+      })
       await passes(result)
       result = await getResult(swapContract, result.tx)
       emitted(result, 'Swap')
@@ -160,7 +142,7 @@ contract('WrapperSimple', async ([aliceAddress, bobAddress, carolAddress]) => {
     })
 
     it('Checks that Alice receives ETH for a WETH order from Carol', async () => {
-      const { order } = await orders.getOrder({
+      const { order, signature } = await orders.getOrder({
         maker: {
           wallet: carolAddress,
           token: tokenWETH.address,
@@ -172,26 +154,8 @@ contract('WrapperSimple', async ([aliceAddress, bobAddress, carolAddress]) => {
           param: 100,
         },
       })
-      const signature = await signatures.getSimpleSignature(
-        order,
-        carolAddress,
-        swapAddress
-      )
 
-      let result = await swapSimple(
-        order.nonce,
-        order.expiry,
-        order.maker.wallet,
-        order.maker.param,
-        order.maker.token,
-        order.taker.wallet,
-        order.taker.param,
-        order.taker.token,
-        signature.v,
-        signature.r,
-        signature.s,
-        { from: aliceAddress }
-      )
+      let result = await swap(order, signature, { from: aliceAddress })
       passes(result)
       result = await getResult(swapContract, result.tx)
       emitted(result, 'Swap')
@@ -199,7 +163,7 @@ contract('WrapperSimple', async ([aliceAddress, bobAddress, carolAddress]) => {
     })
   })
 
-  describe('Sending Ether and WETH to the WrapperContract without swapSimple issues', async () => {
+  describe('Sending Ether and WETH to the WrapperContract without swap issues', async () => {
     it('Sending Ether to the Wrapper Contract', async () => {
       await web3.eth.sendTransaction({
         to: wrapperAddress,
@@ -228,7 +192,7 @@ contract('WrapperSimple', async ([aliceAddress, bobAddress, carolAddress]) => {
     })
 
     it('Send order where Bob sends Eth to Alice for DAI', async () => {
-      const { order } = await orders.getOrder({
+      const { order, signature } = await orders.getOrder({
         maker: {
           wallet: aliceAddress,
           token: tokenDAI.address,
@@ -239,25 +203,10 @@ contract('WrapperSimple', async ([aliceAddress, bobAddress, carolAddress]) => {
           param: 10,
         },
       })
-      const signature = await signatures.getSimpleSignature(
-        order,
-        aliceAddress,
-        swapAddress
-      )
-      let result = await swapSimple(
-        order.nonce,
-        order.expiry,
-        order.maker.wallet,
-        order.maker.param,
-        order.maker.token,
-        order.taker.wallet,
-        order.taker.param,
-        order.taker.token,
-        signature.v,
-        signature.r,
-        signature.s,
-        { from: bobAddress, value: order.taker.param }
-      )
+      let result = await swap(order, signature, {
+        from: bobAddress,
+        value: order.taker.param,
+      })
       await passes(result)
       result = await getResult(swapContract, result.tx)
       emitted(result, 'Swap')
@@ -290,7 +239,7 @@ contract('WrapperSimple', async ([aliceAddress, bobAddress, carolAddress]) => {
     })
 
     it('Send order where Bob sends AST to Alice for DAI', async () => {
-      const { order } = await orders.getOrder({
+      const { order, signature } = await orders.getOrder({
         maker: {
           wallet: aliceAddress,
           token: tokenDAI.address,
@@ -302,25 +251,7 @@ contract('WrapperSimple', async ([aliceAddress, bobAddress, carolAddress]) => {
           param: 100,
         },
       })
-      const signature = await signatures.getSimpleSignature(
-        order,
-        aliceAddress,
-        swapAddress
-      )
-      let result = await swapSimple(
-        order.nonce,
-        order.expiry,
-        order.maker.wallet,
-        order.maker.param,
-        order.maker.token,
-        order.taker.wallet,
-        order.taker.param,
-        order.taker.token,
-        signature.v,
-        signature.r,
-        signature.s,
-        { from: bobAddress, value: 0 }
-      )
+      let result = await swap(order, signature, { from: bobAddress, value: 0 })
       await passes(result)
       result = await getResult(swapContract, result.tx)
       emitted(result, 'Swap')

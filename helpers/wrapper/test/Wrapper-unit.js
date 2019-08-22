@@ -1,5 +1,5 @@
 const Swap = artifacts.require('Swap')
-const WrapperSimple = artifacts.require('WrapperSimple')
+const Wrapper = artifacts.require('Wrapper')
 const WETH9 = artifacts.require('WETH9')
 const FungibleToken = artifacts.require('FungibleToken')
 const MockContract = artifacts.require('MockContract')
@@ -7,8 +7,9 @@ const MockContract = artifacts.require('MockContract')
 const { equal, reverted, passes } = require('@airswap/test-utils').assert
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
+const { orders, signatures } = require('@airswap/order-utils')
 
-contract('WrapperSimple Unit Tests', async accounts => {
+contract('Wrapper Unit Tests', async accounts => {
   const takerAmount = 2
   const mockToken = accounts[9]
   const mockTaker = accounts[8]
@@ -22,7 +23,7 @@ contract('WrapperSimple Unit Tests', async accounts => {
   let fungibleTokenTemplate
   let weth_balance
   let mock_transfer
-  let swap_swapSimple
+  let swap
   let snapshotId
 
   beforeEach(async () => {
@@ -70,21 +71,10 @@ contract('WrapperSimple Unit Tests', async accounts => {
 
   async function setupMockSwap() {
     let swapTemplate = await Swap.new()
-    //mock the swap.swapSimple method
-    swap_swapSimple = swapTemplate.contract.methods
-      .swapSimple(
-        0,
-        0,
-        EMPTY_ADDRESS,
-        0,
-        EMPTY_ADDRESS,
-        EMPTY_ADDRESS,
-        0,
-        EMPTY_ADDRESS,
-        27,
-        r,
-        s
-      )
+    //mock the swap.swap method
+    const { order } = await orders.getOrder({})
+    swap = swapTemplate.contract.methods
+      .swap(order, signatures.getEmptySignature())
       .encodeABI()
 
     mockSwap = await MockContract.new()
@@ -100,11 +90,11 @@ contract('WrapperSimple Unit Tests', async accounts => {
     await mockFT.givenMethodReturnBool(mock_transfer, true)
   }
 
-  before('deploy WrapperSimple', async () => {
+  before('deploy Wrapper', async () => {
     await setupMockWeth()
     await setupMockSwap()
     await setupMockFungibleToken()
-    wrapper = await WrapperSimple.new(mockSwap.address, mockWeth.address)
+    wrapper = await Wrapper.new(mockSwap.address, mockWeth.address)
   })
 
   describe('Test initial values', async () => {
@@ -119,64 +109,48 @@ contract('WrapperSimple Unit Tests', async accounts => {
     })
   })
 
-  describe('Test swapSimple', async () => {
+  describe('Test swap', async () => {
     it('Test when taker token != weth, ensure no unexpected ether sent', async () => {
       let nonTakerToken = mockToken
+      const { order } = await orders.getOrder({
+        taker: {
+          takerToken: nonTakerToken,
+        },
+      })
       await reverted(
-        wrapper.swapSimple(
-          0, //nonce
-          0, //expiry
-          EMPTY_ADDRESS, //maker wallet
-          0, //maker amount
-          EMPTY_ADDRESS, //maker token
-          EMPTY_ADDRESS, //taker wallet
-          0, //taker amount
-          nonTakerToken, //taker token
-          27, //v
-          r,
-          s,
-          { value: 2 }
-        ),
+        wrapper.swap(order, signatures.getEmptySignature(), { value: 2 }),
         'VALUE_MUST_BE_ZERO'
       )
     })
 
     it('Test when taker token == weth, ensure the taker wallet is unset', async () => {
+      const { order } = await orders.getOrder({
+        taker: {
+          wallet: mockTaker,
+          token: mockWeth.address,
+        },
+      })
       await reverted(
-        wrapper.swapSimple(
-          0, //nonce
-          0, //expiry
-          EMPTY_ADDRESS, //maker wallet
-          0, //maker amount
-          EMPTY_ADDRESS, //maker token
-          mockTaker, //taker wallet
-          0, //taker amount
-          mockWeth.address, //taker token
-          27, //v
-          r,
-          s,
-          { value: 2, from: mockTaker }
-        ),
+        wrapper.swap(order, signatures.getEmptySignature(), {
+          value: 2,
+          from: mockTaker,
+        }),
         'TAKER_WALLET_MUST_BE_UNSET'
       )
     })
 
     it('Test when taker token == weth, ensure the taker amount matches sent ether', async () => {
+      const { order } = await orders.getOrder({
+        taker: {
+          param: 1,
+          token: mockWeth.address,
+        },
+      })
       await reverted(
-        wrapper.swapSimple(
-          0, //nonce
-          0, //expiry
-          EMPTY_ADDRESS, //maker wallet
-          0, //maker amount
-          EMPTY_ADDRESS, //maker token
-          EMPTY_ADDRESS, //taker wallet
-          1, //taker amount
-          mockWeth.address, //taker token
-          27, //v
-          r,
-          s,
-          { value: 2, from: mockTaker }
-        ),
+        wrapper.swap(order, signatures.getEmptySignature(), {
+          value: 2,
+          from: mockTaker,
+        }),
         'VALUE_MUST_BE_SENT'
       )
     })
@@ -185,61 +159,57 @@ contract('WrapperSimple Unit Tests', async accounts => {
       //mock the weth.balance method
       await mockWeth.givenMethodReturnUint(weth_balance, 0)
 
+      const { order } = await orders.getOrder({
+        maker: {
+          token: mockWeth.address,
+        },
+        taker: {
+          param: takerAmount,
+          token: mockWeth.address,
+        },
+      })
+
       await passes(
-        wrapper.swapSimple(
-          0, //nonce
-          0, //expiry
-          EMPTY_ADDRESS, //maker wallet
-          0, //maker amount
-          mockWeth.address, //maker token
-          EMPTY_ADDRESS, //taker wallet
-          takerAmount, //taker amount
-          mockWeth.address, //taker token
-          27, //v
-          r,
-          s,
-          { value: takerAmount, from: mockTaker }
-        )
+        wrapper.swap(order, signatures.getEmptySignature(), {
+          value: takerAmount,
+          from: mockTaker,
+        })
       )
 
-      //check if swap_swapSimple() was called
-      let invocationCount = await mockSwap.invocationCountForMethod.call(
-        swap_swapSimple
-      )
+      //check if swap() was called
+      let invocationCount = await mockSwap.invocationCountForMethod.call(swap)
       equal(
         invocationCount.toNumber(),
         1,
-        "swap contact's swap.swapSimple was not called the expected number of times"
+        'swap function was not called the expected number of times'
       )
     })
 
     it('Test when taker token == weth, maker token != weth, and the transaction passes', async () => {
       let notWethContract = mockFT.address
+
+      const { order } = await orders.getOrder({
+        maker: {
+          token: notWethContract,
+        },
+        taker: {
+          param: takerAmount,
+          token: mockWeth.address,
+        },
+      })
+
       await passes(
-        wrapper.swapSimple(
-          0, //nonce
-          0, //expiry
-          EMPTY_ADDRESS, //maker wallet
-          0, //maker amount
-          notWethContract, //maker token
-          EMPTY_ADDRESS, //taker wallet
-          takerAmount, //taker amount
-          mockWeth.address, //taker token
-          27, //v
-          r,
-          s,
-          { value: takerAmount }
-        )
+        wrapper.swap(order, signatures.getEmptySignature(), {
+          value: takerAmount,
+        })
       )
 
-      //check if swap_swapSimple() was called
-      let invocationCount = await mockSwap.invocationCountForMethod.call(
-        swap_swapSimple
-      )
+      //check if swap() was called
+      let invocationCount = await mockSwap.invocationCountForMethod.call(swap)
       equal(
         invocationCount.toNumber(),
         1,
-        "swap contact's swap.swapSimple was not called the expected number of times"
+        'swap function was not called the expected number of times'
       )
     })
 
@@ -253,31 +223,29 @@ contract('WrapperSimple Unit Tests', async accounts => {
     it('Test when taker token == weth, maker token != weth, and the wrapper token transfer fails', async () => {
       await mockFT.givenMethodReturnBool(mock_transfer, false)
       let notWethContract = mockFT.address
+
+      const { order } = await orders.getOrder({
+        maker: {
+          token: notWethContract,
+        },
+        taker: {
+          param: takerAmount,
+          token: mockWeth.address,
+        },
+      })
+
       await reverted(
-        wrapper.swapSimple(
-          0, //nonce
-          0, //expiry
-          EMPTY_ADDRESS, //maker wallet
-          0, //maker amount
-          notWethContract, //maker token
-          EMPTY_ADDRESS, //taker wallet
-          takerAmount, //taker amount
-          mockWeth.address, //taker token
-          27, //v
-          r,
-          s,
-          { value: takerAmount }
-        )
+        wrapper.swap(order, signatures.getEmptySignature(), {
+          value: takerAmount,
+        })
       )
 
-      //check if swap_swapSimple() was called
-      let invocationCount = await mockSwap.invocationCountForMethod.call(
-        swap_swapSimple
-      )
+      //check if swap() was called
+      let invocationCount = await mockSwap.invocationCountForMethod.call(swap)
       equal(
         invocationCount.toNumber(),
         0,
-        "swap contact's swap.swapSimple was not called the expected number of times"
+        'swap function was not called the expected number of times'
       )
     })
   })
@@ -286,52 +254,51 @@ contract('WrapperSimple Unit Tests', async accounts => {
     it('Test when taker token == non weth erc20, maker token == non weth erc20 but msg.sender is not takerwallet', async () => {
       let nonMockTaker = accounts[7]
       let notWethContract = mockFT.address
+
+      const { order } = await orders.getOrder({
+        taker: {
+          wallet: nonMockTaker,
+          param: 1,
+          token: notWethContract,
+        },
+      })
+
       await reverted(
-        wrapper.swapSimple(
-          0, //nonce
-          0, //expiry
-          EMPTY_ADDRESS, //maker wallet
-          0, //maker amount
-          EMPTY_ADDRESS, //maker token
-          nonMockTaker, //taker wallet
-          1, //taker amount
-          notWethContract, //taker token
-          27, //v
-          r,
-          s,
-          { value: 0, from: mockTaker }
-        ),
+        wrapper.swap(order, signatures.getEmptySignature(), {
+          value: 0,
+          from: mockTaker,
+        }),
         'SENDER_MUST_BE_TAKER'
       )
     })
 
     it('Test when taker token == non weth erc20, maker token == non weth erc20, and the transaction passes', async () => {
       let notWethContract = mockFT.address
+
+      const { order } = await orders.getOrder({
+        maker: {
+          token: notWethContract,
+        },
+        taker: {
+          wallet: mockTaker,
+          param: takerAmount,
+          token: notWethContract,
+        },
+      })
+
       await passes(
-        wrapper.swapSimple(
-          0, //nonce
-          0, //expiry
-          EMPTY_ADDRESS, //maker wallet
-          0, //maker amount
-          notWethContract, //maker token
-          mockTaker, //taker wallet
-          takerAmount, //taker amount
-          notWethContract, //taker token
-          27, //v
-          r,
-          s,
-          { value: 0, from: mockTaker }
-        )
+        wrapper.swap(order, signatures.getEmptySignature(), {
+          value: 0,
+          from: mockTaker,
+        })
       )
 
-      //check if swap_swapSimple() was called
-      let invocationCount = await mockSwap.invocationCountForMethod.call(
-        swap_swapSimple
-      )
+      //check if swap() was called
+      let invocationCount = await mockSwap.invocationCountForMethod.call(swap)
       equal(
         invocationCount.toNumber(),
         1,
-        "swap contact's swap.swapSimple was not called the expected number of times"
+        'swap function was not called the expected number of times'
       )
     })
   })
