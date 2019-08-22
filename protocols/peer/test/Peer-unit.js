@@ -19,8 +19,8 @@ contract('Peer Unit Tests', async accounts => {
   let mockSwap
   let snapshotId
   let swapFunction
-  const PEER_TOKEN = accounts[9]
-  const CONSUMER_TOKEN = accounts[8]
+  const TAKER_TOKEN = accounts[9]
+  const MAKER_TOKEN = accounts[8]
   const MAX_PEER_AMOUNT = 12345
   const PRICE_COEF = 4321
   const EXP = 2
@@ -74,8 +74,8 @@ contract('Peer Unit Tests', async accounts => {
     it('Test setRule permissions', async () => {
       await reverted(
         peer.setRule(
-          PEER_TOKEN,
-          CONSUMER_TOKEN,
+          TAKER_TOKEN,
+          MAKER_TOKEN,
           MAX_PEER_AMOUNT,
           PRICE_COEF,
           EXP,
@@ -85,8 +85,8 @@ contract('Peer Unit Tests', async accounts => {
 
       await passes(
         peer.setRule(
-          PEER_TOKEN,
-          CONSUMER_TOKEN,
+          TAKER_TOKEN,
+          MAKER_TOKEN,
           MAX_PEER_AMOUNT,
           PRICE_COEF,
           EXP,
@@ -97,15 +97,15 @@ contract('Peer Unit Tests', async accounts => {
 
     it('Test setRule', async () => {
       let trx = await peer.setRule(
-        PEER_TOKEN,
-        CONSUMER_TOKEN,
+        TAKER_TOKEN,
+        MAKER_TOKEN,
         MAX_PEER_AMOUNT,
         PRICE_COEF,
         EXP
       )
 
       //check if rule has been added
-      let rule = await peer.rules.call(PEER_TOKEN, CONSUMER_TOKEN)
+      let rule = await peer.rules.call(TAKER_TOKEN, MAKER_TOKEN)
       equal(
         rule[0].toNumber(),
         MAX_PEER_AMOUNT,
@@ -117,8 +117,8 @@ contract('Peer Unit Tests', async accounts => {
       //check emitted event
       emitted(trx, 'SetRule', e => {
         return (
-          e.takerToken === PEER_TOKEN &&
-          e.makerToken === CONSUMER_TOKEN &&
+          e.takerToken === TAKER_TOKEN &&
+          e.makerToken === MAKER_TOKEN &&
           e.maxTakerAmount.toNumber() === MAX_PEER_AMOUNT &&
           e.priceCoef.toNumber() === PRICE_COEF &&
           e.priceExp.toNumber() === EXP
@@ -128,32 +128,32 @@ contract('Peer Unit Tests', async accounts => {
 
     it('Test unsetRule permissions', async () => {
       await reverted(
-        peer.unsetRule(PEER_TOKEN, CONSUMER_TOKEN, { from: notOwner })
+        peer.unsetRule(TAKER_TOKEN, MAKER_TOKEN, { from: notOwner })
       )
-      await passes(peer.unsetRule(PEER_TOKEN, CONSUMER_TOKEN, { from: owner }))
+      await passes(peer.unsetRule(TAKER_TOKEN, MAKER_TOKEN, { from: owner }))
     })
 
     it('Test unsetRule', async () => {
       let trx = await peer.setRule(
-        PEER_TOKEN,
-        CONSUMER_TOKEN,
+        TAKER_TOKEN,
+        MAKER_TOKEN,
         MAX_PEER_AMOUNT,
         PRICE_COEF,
         EXP
       )
 
       //ensure rule has been added
-      let ruleBefore = await peer.rules.call(PEER_TOKEN, CONSUMER_TOKEN)
+      let ruleBefore = await peer.rules.call(TAKER_TOKEN, MAKER_TOKEN)
       equal(
         ruleBefore[0].toNumber(),
         MAX_PEER_AMOUNT,
         'max peer amount is incorrectly saved'
       )
 
-      trx = await peer.unsetRule(PEER_TOKEN, CONSUMER_TOKEN)
+      trx = await peer.unsetRule(TAKER_TOKEN, MAKER_TOKEN)
 
       //check that the rule has been removed
-      let ruleAfter = await peer.rules.call(PEER_TOKEN, CONSUMER_TOKEN)
+      let ruleAfter = await peer.rules.call(TAKER_TOKEN, MAKER_TOKEN)
       equal(
         ruleAfter[0].toNumber(),
         0,
@@ -164,18 +164,18 @@ contract('Peer Unit Tests', async accounts => {
 
       //check emitted event
       emitted(trx, 'UnsetRule', e => {
-        return e.takerToken === PEER_TOKEN && e.makerToken === CONSUMER_TOKEN
+        return e.takerToken === TAKER_TOKEN && e.makerToken === MAKER_TOKEN
       })
     })
   })
 
   describe('Test getBuyQuote', async () => {
     it('test when rule does not exist', async () => {
-      const NON_EXISTENT_PEER_TOKEN = accounts[7]
+      const NON_EXISTENT_TAKER_TOKEN = accounts[7]
       let val = await peer.getBuyQuote.call(
         1234,
-        NON_EXISTENT_PEER_TOKEN,
-        CONSUMER_TOKEN
+        NON_EXISTENT_TAKER_TOKEN,
+        MAKER_TOKEN
       )
       equal(
         val.toNumber(),
@@ -186,16 +186,16 @@ contract('Peer Unit Tests', async accounts => {
 
     it('test when peer amount is greater than max peer amount', async () => {
       await peer.setRule(
-        PEER_TOKEN,
-        CONSUMER_TOKEN,
+        TAKER_TOKEN,
+        MAKER_TOKEN,
         MAX_PEER_AMOUNT,
         PRICE_COEF,
         EXP
       )
       let val = await peer.getBuyQuote.call(
         MAX_PEER_AMOUNT + 1,
-        PEER_TOKEN,
-        CONSUMER_TOKEN
+        TAKER_TOKEN,
+        MAKER_TOKEN
       )
       equal(
         val.toNumber(),
@@ -206,13 +206,13 @@ contract('Peer Unit Tests', async accounts => {
 
     it('test when peer amount is 0', async () => {
       await peer.setRule(
-        PEER_TOKEN,
-        CONSUMER_TOKEN,
+        TAKER_TOKEN,
+        MAKER_TOKEN,
         MAX_PEER_AMOUNT,
         PRICE_COEF,
         EXP
       )
-      let val = await peer.getBuyQuote.call(0, PEER_TOKEN, CONSUMER_TOKEN)
+      let val = await peer.getBuyQuote.call(0, TAKER_TOKEN, MAKER_TOKEN)
       equal(
         val.toNumber(),
         0,
@@ -222,14 +222,14 @@ contract('Peer Unit Tests', async accounts => {
 
     it('test a successful call - getBuyQuote', async () => {
       await peer.setRule(
-        PEER_TOKEN,
-        CONSUMER_TOKEN,
+        TAKER_TOKEN,
+        MAKER_TOKEN,
         MAX_PEER_AMOUNT,
         PRICE_COEF,
         EXP
       )
 
-      let val = await peer.getBuyQuote.call(1234, PEER_TOKEN, CONSUMER_TOKEN)
+      let val = await peer.getBuyQuote.call(1234, TAKER_TOKEN, MAKER_TOKEN)
       let expectedValue = Math.floor((1234 * PRICE_COEF) / 10 ** EXP)
       equal(val.toNumber(), expectedValue, 'there should be a quote available')
     })
@@ -237,7 +237,7 @@ contract('Peer Unit Tests', async accounts => {
 
   describe('Test getSellQuote', async () => {
     it('test when rule does not exist', async () => {
-      let val = await peer.getSellQuote.call(4312, CONSUMER_TOKEN, PEER_TOKEN)
+      let val = await peer.getSellQuote.call(4312, MAKER_TOKEN, TAKER_TOKEN)
       equal(
         val.toNumber(),
         0,
@@ -246,8 +246,8 @@ contract('Peer Unit Tests', async accounts => {
     })
 
     it('test when peer amount is not within acceptable value bounds', async () => {
-      await peer.setRule(PEER_TOKEN, CONSUMER_TOKEN, 100, 1, 0)
-      let val = await peer.getSellQuote.call(0, CONSUMER_TOKEN, PEER_TOKEN)
+      await peer.setRule(TAKER_TOKEN, MAKER_TOKEN, 100, 1, 0)
+      let val = await peer.getSellQuote.call(0, MAKER_TOKEN, TAKER_TOKEN)
       equal(
         val.toNumber(),
         0,
@@ -256,8 +256,8 @@ contract('Peer Unit Tests', async accounts => {
 
       val = await peer.getSellQuote.call(
         MAX_PEER_AMOUNT + 1,
-        CONSUMER_TOKEN,
-        PEER_TOKEN
+        MAKER_TOKEN,
+        TAKER_TOKEN
       )
       equal(
         val.toNumber(),
@@ -268,14 +268,14 @@ contract('Peer Unit Tests', async accounts => {
 
     it('test a successful call - getSellQuote', async () => {
       await peer.setRule(
-        PEER_TOKEN,
-        CONSUMER_TOKEN,
+        TAKER_TOKEN,
+        MAKER_TOKEN,
         MAX_PEER_AMOUNT,
         PRICE_COEF,
         EXP
       )
 
-      let val = await peer.getSellQuote.call(500, CONSUMER_TOKEN, PEER_TOKEN)
+      let val = await peer.getSellQuote.call(500, MAKER_TOKEN, TAKER_TOKEN)
       let expectedValue = Math.floor((500 * 10 ** EXP) / PRICE_COEF)
       equal(val.toNumber(), expectedValue, 'there should be a quote available')
     })
@@ -283,7 +283,7 @@ contract('Peer Unit Tests', async accounts => {
 
   describe('Test getMaxQuote', async () => {
     it('test when rule does not exist', async () => {
-      let val = await peer.getMaxQuote.call(PEER_TOKEN, CONSUMER_TOKEN)
+      let val = await peer.getMaxQuote.call(TAKER_TOKEN, MAKER_TOKEN)
       equal(
         val[0].toNumber(),
         0,
@@ -298,13 +298,13 @@ contract('Peer Unit Tests', async accounts => {
 
     it('test a successful call - getMaxQuote', async () => {
       await peer.setRule(
-        PEER_TOKEN,
-        CONSUMER_TOKEN,
+        TAKER_TOKEN,
+        MAKER_TOKEN,
         MAX_PEER_AMOUNT,
         PRICE_COEF,
         EXP
       )
-      let val = await peer.getMaxQuote.call(PEER_TOKEN, CONSUMER_TOKEN)
+      let val = await peer.getMaxQuote.call(TAKER_TOKEN, MAKER_TOKEN)
 
       equal(
         val[0].toNumber(),
@@ -326,11 +326,11 @@ contract('Peer Unit Tests', async accounts => {
       const { order } = await orders.getOrder({
         maker: {
           param: 555,
-          token: CONSUMER_TOKEN,
+          token: MAKER_TOKEN,
         },
         taker: {
           param: 999,
-          token: PEER_TOKEN,
+          token: TAKER_TOKEN,
         },
       })
       await reverted(
@@ -341,8 +341,8 @@ contract('Peer Unit Tests', async accounts => {
 
     it('test if an order exceeds maximum amount', async () => {
       await peer.setRule(
-        PEER_TOKEN,
-        CONSUMER_TOKEN,
+        TAKER_TOKEN,
+        MAKER_TOKEN,
         MAX_PEER_AMOUNT,
         PRICE_COEF,
         EXP
@@ -351,11 +351,11 @@ contract('Peer Unit Tests', async accounts => {
       const { order } = await orders.getOrder({
         maker: {
           param: 555,
-          token: CONSUMER_TOKEN,
+          token: MAKER_TOKEN,
         },
         taker: {
           param: MAX_PEER_AMOUNT + 1,
-          token: PEER_TOKEN,
+          token: TAKER_TOKEN,
         },
       })
 
@@ -367,8 +367,8 @@ contract('Peer Unit Tests', async accounts => {
 
     it('test if order is priced according to the rule', async () => {
       await peer.setRule(
-        PEER_TOKEN,
-        CONSUMER_TOKEN,
+        TAKER_TOKEN,
+        MAKER_TOKEN,
         MAX_PEER_AMOUNT,
         PRICE_COEF,
         EXP
@@ -377,11 +377,11 @@ contract('Peer Unit Tests', async accounts => {
       const { order } = await orders.getOrder({
         maker: {
           param: 30,
-          token: CONSUMER_TOKEN,
+          token: MAKER_TOKEN,
         },
         taker: {
           param: MAX_PEER_AMOUNT,
-          token: PEER_TOKEN,
+          token: TAKER_TOKEN,
         },
       })
 
@@ -389,20 +389,20 @@ contract('Peer Unit Tests', async accounts => {
     })
 
     it('test a successful transaction with integer values', async () => {
-      await peer.setRule(PEER_TOKEN, CONSUMER_TOKEN, MAX_PEER_AMOUNT, 100, EXP)
+      await peer.setRule(TAKER_TOKEN, MAKER_TOKEN, MAX_PEER_AMOUNT, 100, EXP)
 
-      let ruleBefore = await peer.rules.call(PEER_TOKEN, CONSUMER_TOKEN)
+      let ruleBefore = await peer.rules.call(TAKER_TOKEN, MAKER_TOKEN)
 
-      let consumerAmount = 100
+      let makerAmount = 100
 
       const { order } = await orders.getOrder({
         maker: {
-          param: consumerAmount,
-          token: CONSUMER_TOKEN,
+          param: makerAmount,
+          token: MAKER_TOKEN,
         },
         taker: {
           param: 100,
-          token: PEER_TOKEN,
+          token: TAKER_TOKEN,
         },
       })
 
@@ -412,10 +412,10 @@ contract('Peer Unit Tests', async accounts => {
         peer.provideOrder(order, signatures.getEmptySignature())
       )
 
-      let ruleAfter = await peer.rules.call(PEER_TOKEN, CONSUMER_TOKEN)
+      let ruleAfter = await peer.rules.call(TAKER_TOKEN, MAKER_TOKEN)
       equal(
         ruleAfter[0].toNumber(),
-        ruleBefore[0].toNumber() - consumerAmount,
+        ruleBefore[0].toNumber() - makerAmount,
         "rule's max peer amount was not decremented"
       )
 
@@ -432,26 +432,26 @@ contract('Peer Unit Tests', async accounts => {
 
     it('test a successful transaction with decimal values', async () => {
       await peer.setRule(
-        PEER_TOKEN,
-        CONSUMER_TOKEN,
+        TAKER_TOKEN,
+        MAKER_TOKEN,
         MAX_PEER_AMOUNT,
         PRICE_COEF,
         EXP
       )
 
-      let ruleBefore = await peer.rules.call(PEER_TOKEN, CONSUMER_TOKEN)
+      let ruleBefore = await peer.rules.call(TAKER_TOKEN, MAKER_TOKEN)
 
-      let consumerAmount = 100
-      let peerAmount = Math.floor((consumerAmount * 10 ** EXP) / PRICE_COEF)
+      let makerAmount = 100
+      let takerAmount = Math.floor((makerAmount * 10 ** EXP) / PRICE_COEF)
 
       const { order } = await orders.getOrder({
         maker: {
-          param: consumerAmount,
-          token: CONSUMER_TOKEN,
+          param: makerAmount,
+          token: MAKER_TOKEN,
         },
         taker: {
-          param: peerAmount,
-          token: PEER_TOKEN,
+          param: takerAmount,
+          token: TAKER_TOKEN,
         },
       })
 
@@ -461,10 +461,10 @@ contract('Peer Unit Tests', async accounts => {
         peer.provideOrder(order, signatures.getEmptySignature())
       )
 
-      let ruleAfter = await peer.rules.call(PEER_TOKEN, CONSUMER_TOKEN)
+      let ruleAfter = await peer.rules.call(TAKER_TOKEN, MAKER_TOKEN)
       equal(
         ruleAfter[0].toNumber(),
-        ruleBefore[0].toNumber() - peerAmount,
+        ruleBefore[0].toNumber() - takerAmount,
         "rule's max peer amount was not decremented"
       )
     })
@@ -472,18 +472,18 @@ contract('Peer Unit Tests', async accounts => {
 
   describe('Test provideUnsignedOrder', async () => {
     it('test provideUnsignedOrder call', async () => {
-      await peer.setRule(PEER_TOKEN, CONSUMER_TOKEN, MAX_PEER_AMOUNT, 100, EXP)
+      await peer.setRule(TAKER_TOKEN, MAKER_TOKEN, MAX_PEER_AMOUNT, 100, EXP)
 
-      let consumerAmount = 100
+      let makerAmount = 100
       await passes(
         //mock swapContract
         //test rule decrement
         peer.provideUnsignedOrder(
           1, //nonce
-          consumerAmount, //consumerAmount
-          CONSUMER_TOKEN, //makerToken
-          100, //peerAmount
-          PEER_TOKEN //takerToken
+          makerAmount, //makerAmount
+          MAKER_TOKEN, //makerToken
+          100, //takerAmount
+          TAKER_TOKEN //takerToken
         )
       )
 
