@@ -42,6 +42,8 @@ contract('Peer Unit Tests', async accounts => {
       .encodeABI()
 
     mockSwap = await MockContract.new()
+
+    orders.setVerifyingContract(mockSwap.address)
   }
 
   before('deploy Peer', async () => {
@@ -325,7 +327,7 @@ contract('Peer Unit Tests', async accounts => {
 
   describe('Test provideOrder', async () => {
     it('test if a rule does not exist', async () => {
-      const { order } = await orders.getOrder({
+      const { order, signature } = await orders.getOrder({
         maker: {
           wallet: notOwner,
           param: 555,
@@ -338,7 +340,7 @@ contract('Peer Unit Tests', async accounts => {
       })
 
       await reverted(
-        peer.provideOrder(order, signatures.getEmptySignature(), {
+        peer.provideOrder(order, signature, {
           from: notOwner,
         }),
         'TOKEN_PAIR_INACTIVE'
