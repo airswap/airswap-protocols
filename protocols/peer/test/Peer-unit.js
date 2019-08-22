@@ -339,7 +339,7 @@ contract('Peer Unit Tests', async accounts => {
 
       await reverted(
         peer.provideOrder(order, signatures.getEmptySignature(), {
-          from: notOwner
+          from: notOwner,
         }),
         'TOKEN_PAIR_INACTIVE'
       )
@@ -358,7 +358,7 @@ contract('Peer Unit Tests', async accounts => {
         maker: {
           wallet: notOwner,
           param: 555,
-          token: MAKER_TOKEN
+          token: MAKER_TOKEN,
         },
         taker: {
           param: MAX_TAKER_AMOUNT + 1,
@@ -424,7 +424,7 @@ contract('Peer Unit Tests', async accounts => {
         //mock swapContract
         //test rule decrement
         peer.provideOrder(order, signatures.getEmptySignature(), {
-          from: notOwner
+          from: notOwner,
         })
       )
 
