@@ -327,6 +327,7 @@ contract('Peer Unit Tests', async accounts => {
     it('test if a rule does not exist', async () => {
       const { order } = await orders.getOrder({
         maker: {
+          wallet: notOwner,
           param: 555,
           token: MAKER_TOKEN,
         },
@@ -335,8 +336,11 @@ contract('Peer Unit Tests', async accounts => {
           token: TAKER_TOKEN,
         },
       })
+
       await reverted(
-        peer.provideOrder(order, signatures.getEmptySignature()),
+        peer.provideOrder(order, signatures.getEmptySignature(), {
+          from: notOwner
+        }),
         'TOKEN_PAIR_INACTIVE'
       )
     })
@@ -352,8 +356,9 @@ contract('Peer Unit Tests', async accounts => {
 
       const { order } = await orders.getOrder({
         maker: {
+          wallet: notOwner,
           param: 555,
-          token: MAKER_TOKEN,
+          token: MAKER_TOKEN
         },
         taker: {
           param: MAX_TAKER_AMOUNT + 1,
@@ -362,7 +367,9 @@ contract('Peer Unit Tests', async accounts => {
       })
 
       await reverted(
-        peer.provideOrder(order, signatures.getEmptySignature()),
+        peer.provideOrder(order, signatures.getEmptySignature(), {
+          from: notOwner,
+        }),
         'AMOUNT_EXCEEDS_MAX'
       )
     })
@@ -387,7 +394,11 @@ contract('Peer Unit Tests', async accounts => {
         },
       })
 
-      await reverted(peer.provideOrder(order, signatures.getEmptySignature()))
+      await reverted(
+        peer.provideOrder(order, signatures.getEmptySignature(), {
+          from: notOwner,
+        })
+      )
     })
 
     it('test a successful transaction with integer values', async () => {
@@ -399,6 +410,7 @@ contract('Peer Unit Tests', async accounts => {
 
       const { order } = await orders.getOrder({
         maker: {
+          wallet: notOwner,
           param: makerAmount,
           token: MAKER_TOKEN,
         },
@@ -411,7 +423,9 @@ contract('Peer Unit Tests', async accounts => {
       await passes(
         //mock swapContract
         //test rule decrement
-        peer.provideOrder(order, signatures.getEmptySignature())
+        peer.provideOrder(order, signatures.getEmptySignature(), {
+          from: notOwner
+        })
       )
 
       let ruleAfter = await peer.rules.call(TAKER_TOKEN, MAKER_TOKEN)
@@ -448,6 +462,7 @@ contract('Peer Unit Tests', async accounts => {
 
       const { order } = await orders.getOrder({
         maker: {
+          wallet: notOwner,
           param: makerAmount,
           token: MAKER_TOKEN,
         },
@@ -460,7 +475,9 @@ contract('Peer Unit Tests', async accounts => {
       await passes(
         //mock swapContract
         //test rule decrement
-        peer.provideOrder(order, signatures.getEmptySignature())
+        peer.provideOrder(order, signatures.getEmptySignature(), {
+          from: notOwner,
+        })
       )
 
       let ruleAfter = await peer.rules.call(TAKER_TOKEN, MAKER_TOKEN)

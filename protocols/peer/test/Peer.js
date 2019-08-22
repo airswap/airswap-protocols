@@ -239,7 +239,7 @@ contract('Peer', async accounts => {
 
       // Succeeds on the Peer, fails on the Swap.
       await reverted(
-        alicePeer.provideOrder(order, signature),
+        alicePeer.provideOrder(order, signature, { from: bobAddress }),
         'SENDER_UNAUTHORIZED'
       )
     })

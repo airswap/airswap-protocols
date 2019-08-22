@@ -36,6 +36,9 @@ contract Peer is IPeer, Ownable {
   // Mapping of takerToken to makerToken for rule lookup
   mapping (address => mapping (address => Rule)) public rules;
 
+  // ERC-20 (fungible token) interface identifier (ERC-165)
+  bytes4 constant internal ERC20_INTERFACE_ID = 0x277f8169;
+
   /**
     * @notice Contract Constructor
     * @param _swapContract address of the swap contract the peer will deploy with
@@ -205,11 +208,20 @@ contract Peer is IPeer, Ownable {
     * @param _signature Types.Signature
     */
   function provideOrder(
-    Types.Order memory _order,
-    Types.Signature memory _signature
-  ) public {
+    Types.Order calldata _order,
+    Types.Signature calldata _signature
+  ) external {
 
     Rule memory rule = rules[_order.taker.token][_order.maker.token];
+
+    require(_order.maker.wallet == msg.sender,
+      "MAKER_MUST_BE_SENDER");
+
+    require(_order.maker.kind == ERC20_INTERFACE_ID,
+      "MAKER_MUST_BE_ERC20");
+
+    require(_order.taker.kind == ERC20_INTERFACE_ID,
+      "TAKER_MUST_BE_ERC20");
 
     // Ensure that a rule exists.
     require(rule.maxTakerAmount != 0,
