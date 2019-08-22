@@ -15,9 +15,10 @@
 */
 
 pragma solidity ^0.5.10;
+pragma experimental ABIEncoderV2;
 
-import "@airswap/swap/interfaces/ISwap.sol";
-import "@airswap/tokens/interfaces/IWETH.sol";
+import "@airswap/swap/contracts/interfaces/ISwap.sol";
+import "@airswap/tokens/contracts/interfaces/IWETH.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 
 /**
@@ -54,40 +55,22 @@ contract Wrapper {
   function() external payable { }
 
   /**
-    * @notice Send an Order (Simple)
-    * @param _nonce uint256
-    * @param _expiry uint256
-    * @param _makerWallet address
-    * @param _makerAmount uint256
-    * @param _makerToken address
-    * @param _takerWallet address
-    * @param _takerAmount uint256
-    * @param _takerToken address
-    * @param _v uint8
-    * @param _r bytes32
-    * @param _s bytes32
+    * @notice Send an Order
+    * @param _order Types.Order
+    * @param _signature Types.Signature
     */
-  function swapSimple(
-    uint256 _nonce,
-    uint256 _expiry,
-    address _makerWallet,
-    uint256 _makerAmount,
-    address _makerToken,
-    address _takerWallet,
-    uint256 _takerAmount,
-    address _takerToken,
-    uint8 _v,
-    bytes32 _r,
-    bytes32 _s
+  function swap(
+    Types.Order calldata _order,
+    Types.Signature calldata _signature
   ) external payable {
 
     // The taker is sending ether.
-    if (_takerToken == address(wethContract)) {
+    if (_order.taker.token == address(wethContract)) {
 
-      require(_takerWallet == address(0),
+      require(_order.taker.wallet == address(0),
         "TAKER_WALLET_MUST_BE_UNSET");
 
-      require(_takerAmount == msg.value,
+      require(_order.taker.param == msg.value,
         "VALUE_MUST_BE_SENT");
 
       // Wrap (deposit) the ether.
@@ -100,43 +83,36 @@ contract Wrapper {
         "VALUE_MUST_BE_ZERO");
 
       // Ensure msg sender matches the takerWallet.
-      require(msg.sender == _takerWallet,
+      require(msg.sender == _order.taker.wallet,
         "SENDER_MUST_BE_TAKER");
     }
 
     // Perform the simple swap.
-    swapContract.swapSimple(
-      _nonce,
-      _expiry,
-      _makerWallet,
-      _makerAmount,
-      _makerToken,
-      _takerWallet,
-      _takerAmount,
-      _takerToken,
-      _v, _r, _s
+    swapContract.swap(
+      _order,
+      _signature
     );
 
     // The taker is receiving ether.
-    if (_makerToken == address(wethContract)) {
+    if (_order.maker.token == address(wethContract)) {
 
       // Transfer from the taker to the wrapper.
-      wethContract.transferFrom(_takerWallet, address(this), _makerAmount);
+      wethContract.transferFrom(_order.taker.wallet, address(this), _order.maker.param);
 
       // Unwrap (withdraw) the ether.
-      wethContract.withdraw(_makerAmount);
+      wethContract.withdraw(_order.maker.param);
 
       // Transfer ether to the user.
-      msg.sender.transfer(_makerAmount);
+      msg.sender.transfer(_order.maker.param);
 
       /* The taker wallet was not defined and thus the swapped
        * makerTokens were distributed to the wrapper contract
        * and now the wrapper contract forwards them to msg.sender.
        */
-    } else if ((_makerToken != address(0)) && (_takerWallet == address(0))) {
+    } else if ((_order.maker.token != address(0)) && (_order.taker.wallet == address(0))) {
 
       // Forwarding the _makerAmount of type _makerToken to the msg.sender.
-      require(IERC20(_makerToken).transfer(msg.sender, _makerAmount));
+      require(IERC20(_order.maker.token).transfer(msg.sender, _order.maker.param));
     }
     // Falls here if it was a non-WETH ERC20 - non-WETH ERC20 trade and the
     // transaction did not require any wrapper functionality.

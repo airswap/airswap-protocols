@@ -18,7 +18,9 @@
   "devDependencies": {
     "@airswap/tokens": "0.1.0",
     "@airswap/order-utils": "0.1.0",
-    "@airswap/test-utils": "0.1.0"
+    "@airswap/test-utils": "0.1.0",
+    "truffle": "^5.0.32",
+    "@gnosis.pm/mock-contract": "^3.0.7"
   },
   "dependencies": {
     "@airswap/types": "0.1.0",
