@@ -17,8 +17,8 @@
 pragma solidity ^0.5.10;
 pragma experimental ABIEncoderV2;
 
-import "@airswap/swap/interfaces/ISwap.sol";
-import "@airswap/tokens/interfaces/IWETH.sol";
+import "@airswap/swap/contracts/interfaces/ISwap.sol";
+import "@airswap/tokens/contracts/interfaces/IWETH.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 
 /**

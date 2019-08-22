@@ -17,8 +17,8 @@
 pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
-import "@airswap/indexer/interfaces/IIndexer.sol";
-import "@airswap/indexer/interfaces/ILocatorWhitelist.sol";
+import "@airswap/indexer/contracts/interfaces/IIndexer.sol";
+import "@airswap/indexer/contracts/interfaces/ILocatorWhitelist.sol";
 import "@airswap/market/contracts/Market.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
@@ -174,7 +174,7 @@ contract Indexer is IIndexer, Ownable {
     require(intent.staker == msg.sender,
       "INTENT_DOES_NOT_EXIST");
 
-    // Unset the intent on the market. 
+    // Unset the intent on the market.
     //No need to require() because a check is done above that reverts if there are no intents
     markets[_makerToken][_takerToken].unsetIntent(msg.sender);
 
