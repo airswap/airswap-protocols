@@ -33,7 +33,7 @@ contract Peer is IPeer, Ownable {
   // Swap contract to be used to settle trades
   ISwap public swapContract;
 
-  // Mapping of peerToken to consumerToken for rule lookup
+  // Mapping of takerToken to makerToken for rule lookup
   mapping (address => mapping (address => Rule)) public rules;
 
   /**
@@ -54,86 +54,84 @@ contract Peer is IPeer, Ownable {
   /**
     * @notice Set a Trading Rule
     * @dev only callable by the owner of the contract
-    * @param peerToken address The token address that the peer would send in a trade
-    * @param consumerToken address The token address that the consumer would send in a trade
-    * @param maxPeerAmount uint256 The maximum amount of token the peer would send
-    * @param priceCoef uint256 The whole number that will be multiplied by 10^(-priceExp) - the price coefficient
-    * @param priceExp uint256 The exponent of the price to indicate location of the decimal priceCoef * 10^(-priceExp)
+    * @param _takerToken address The token address that the Peer would send in a trade
+    * @param _makerToken address The token address that the Consumer would send in a trade
+    * @param _maxTakerAmount uint256 The maximum amount of token the Peer would send
+    * @param _priceCoef uint256 The whole number that will be multiplied by 10^(-priceExp) - the price coefficient
+    * @param _priceExp uint256 The exponent of the price to indicate location of the decimal priceCoef * 10^(-priceExp)
     */
   function setRule(
-    address peerToken,
-    address consumerToken,
-    uint256 maxPeerAmount,
-    uint256 priceCoef,
-    uint256 priceExp
+    address _takerToken,
+    address _makerToken,
+    uint256 _maxTakerAmount,
+    uint256 _priceCoef,
+    uint256 _priceExp
   ) external onlyOwner {
 
-    rules[peerToken][consumerToken] = Rule({
-      maxPeerAmount: maxPeerAmount,
-      priceCoef: priceCoef,
-      priceExp: priceExp
+    rules[_takerToken][_makerToken] = Rule({
+      maxTakerAmount: _maxTakerAmount,
+      priceCoef: _priceCoef,
+      priceExp: _priceExp
     });
 
     emit SetRule(
-      peerToken,
-      consumerToken,
-      maxPeerAmount,
-      priceCoef,
-      priceExp
+      _takerToken,
+      _makerToken,
+      _maxTakerAmount,
+      _priceCoef,
+      _priceExp
     );
   }
 
   /**
     * @notice Unset a Trading Rule
     * @dev only callable by the owner of the contract, removes from a mapping
-    * @param peerToken address The token address that the peer would send in a trade
-    * @param consumerToken address The token address that the consumer would send in a trade
+    * @param _takerToken address The token address that the peer would send in a trade
+    * @param _makerToken address The token address that the consumer would send in a trade
     */
   function unsetRule(
-    address peerToken,
-    address consumerToken
+    address _takerToken,
+    address _makerToken
   ) external onlyOwner {
 
     // Delete the rule.
-    delete rules[peerToken][consumerToken];
+    delete rules[_takerToken][_makerToken];
 
     emit UnsetRule(
-      peerToken,
-      consumerToken
+      _takerToken,
+      _makerToken
     );
   }
 
   /**
     * @notice Get a Buy Quote from the Peer
-    * @param peerAmount uint256 The amount the Peer would send
-    * @param peerToken address The token that the Peer would send
-    * @param consumerToken address The token that the Consumer would send
-    * @return uint256 consumerAmount The amount the Consumer would send
+    * @param _takerAmount uint256 The amount the Peer would send
+    * @param _takerToken address The token that the Peer would send
+    * @param _makerToken address The token that the Consumer would send
+    * @return uint256 _makerAmount The amount the Consumer would send
     */
   function getBuyQuote(
-    uint256 peerAmount,
-    address peerToken,
-    address consumerToken
+    uint256 _takerAmount,
+    address _takerToken,
+    address _makerToken
   ) external returns (
-    uint256 consumerAmount
+    uint256 _makerAmount
   ) {
 
-    Rule memory rule = rules[peerToken][consumerToken];
+    Rule memory rule = rules[_takerToken][_makerToken];
 
     // Ensure that a rule exists.
-    if(rule.maxPeerAmount > 0) {
+    if(rule.maxTakerAmount > 0) {
 
-      // Ensure the peerAmount does not exceed maximum for the rule.
-      if(peerAmount <= rule.maxPeerAmount) {
+      // Ensure the _takerAmount does not exceed maximum for the rule.
+      if(_takerAmount <= rule.maxTakerAmount) {
 
-        consumerAmount = peerAmount
+        _makerAmount = _takerAmount
             .mul(rule.priceCoef)
             .div(10 ** rule.priceExp);
 
-        // Ensure that the quoted amount is greater than zero.
-        if (consumerAmount > 0) {
-          return consumerAmount;
-        }
+        // Return the quote.
+        return _makerAmount;
       }
     }
     return 0;
@@ -141,31 +139,31 @@ contract Peer is IPeer, Ownable {
 
   /**
     * @notice Get a Sell Quote from the Peer
-    * @param consumerAmount uint256 The amount the Consumer would send
-    * @param consumerToken address The token that the Consumer will send
-    * @param peerToken address The token that the Peer will send
-    * @return uint256 peerAmount The amount the Peer would send
+    * @param _makerAmount uint256 The amount the Consumer would send
+    * @param _makerToken address The token that the Consumer will send
+    * @param _takerToken address The token that the Peer will send
+    * @return uint256 _takerAmount The amount the Peer would send
     */
   function getSellQuote(
-    uint256 consumerAmount,
-    address consumerToken,
-    address peerToken
+    uint256 _makerAmount,
+    address _makerToken,
+    address _takerToken
   ) external returns (
-    uint256 peerAmount
+    uint256 _takerAmount
   ) {
 
-    Rule memory rule = rules[peerToken][consumerToken];
+    Rule memory rule = rules[_takerToken][_makerToken];
 
     // Ensure that a rule exists.
-    if(rule.maxPeerAmount > 0) {
+    if(rule.maxTakerAmount > 0) {
 
-      // Calculate the peerAmount.
-      peerAmount = consumerAmount
+      // Calculate the _takerAmount.
+      _takerAmount = _makerAmount
         .mul(10 ** rule.priceExp).div(rule.priceCoef);
 
-      // Ensure the peerAmount does not exceed maximum and is greater than zero.
-      if(peerAmount <= rule.maxPeerAmount && peerAmount > 0) {
-        return peerAmount;
+      // Ensure the _takerAmount does not exceed maximum and is greater than zero.
+      if(_takerAmount <= rule.maxTakerAmount && _takerAmount > 0) {
+        return _takerAmount;
       }
     }
     return 0;
@@ -173,127 +171,105 @@ contract Peer is IPeer, Ownable {
 
   /**
     * @notice Get a Maximum Quote from the Peer
-    * @param peerToken address The token that the Peer will send
-    * @param consumerToken address The token that the Consumer will send
+    * @param _takerToken address The token that the Peer will send
+    * @param _makerToken address The token that the Consumer will send
     * @return uint 256 The amount the Peer would send
     * @return uint 256 The amount the Consumer would send
     */
   function getMaxQuote(
-    address peerToken,
-    address consumerToken
+    address _takerToken,
+    address _makerToken
   ) external returns (
-    uint256 peerAmount,
-    uint256 consumerAmount
+    uint256 _takerAmount,
+    uint256 _makerAmount
   ) {
 
-    Rule memory rule = rules[peerToken][consumerToken];
+    Rule memory rule = rules[_takerToken][_makerToken];
 
     // Ensure that a rule exists.
-    if(rule.maxPeerAmount > 0) {
+    if(rule.maxTakerAmount > 0) {
 
-      // Return the maxPeerAmount and calculated consumerAmount.
+      // Return the maxTakerAmount and calculated _makerAmount.
       return (
-        rule.maxPeerAmount,
-        rule.maxPeerAmount.mul(rule.priceCoef).div(10 ** rule.priceExp)
+        rule.maxTakerAmount,
+        rule.maxTakerAmount.mul(rule.priceCoef).div(10 ** rule.priceExp)
       );
     }
     return (0, 0);
   }
 
   /**
-    * @notice Provide an Order (Simple)
-    * @dev Rules get reset with new maxPeerAmount
-    * @param nonce uint256  A single use identifier for the Order.
-    * @param expiry uint256 The expiry in seconds since unix epoch.
-    * @param consumerWallet address The Maker of the Order who sets price.
-    * @param consumerAmount uint256 The amount or identifier of the token the Maker sends.
-    * @param consumerToken address The address of the token the Maker sends.
-    * @param peerWallet address The Taker of the Order who takes price.
-    * @param peerAmount uint256  The amount or identifier of the token the Taker sends.
-    * @param peerToken address The address of the token the Taker sends.
-    * @param v uint8 The `v` value of an ECDSA signature.
-    * @param r bytes32 The `r` value of an ECDSA signature.
-    * @param s bytes32 The `s` value of an ECDSA signature.
+    * @notice Provide an Order
+    * @dev Rules get reset with new maxTakerAmount
+    * @param _order Types.Order
+    * @param _signature Types.Signature
     */
   function provideOrder(
-    uint256 nonce,
-    uint256 expiry,
-    address consumerWallet,
-    uint256 consumerAmount,
-    address consumerToken,
-    address peerWallet,
-    uint256 peerAmount,
-    address peerToken,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
+    Types.Order memory _order,
+    Types.Signature memory _signature
   ) public {
 
-    Rule memory rule = rules[peerToken][consumerToken];
+    Rule memory rule = rules[_order.taker.token][_order.maker.token];
 
     // Ensure that a rule exists.
-    require(rule.maxPeerAmount != 0,
+    require(rule.maxTakerAmount != 0,
       "TOKEN_PAIR_INACTIVE");
 
     // Ensure the order does not exceed the maximum amount.
-    require(peerAmount <= rule.maxPeerAmount,
+    require(_order.taker.param <= rule.maxTakerAmount,
       "AMOUNT_EXCEEDS_MAX");
 
     // Ensure the order is priced according to the rule.
-    require(peerAmount == consumerAmount
+    require(_order.taker.param == _order.maker.param
       .mul(10 ** rule.priceExp).div(rule.priceCoef),
       "PRICE_INCORRECT");
 
-    // Overwrite the rule with a decremented maxPeerAmount.
-    rules[peerToken][consumerToken] = Rule({
-      maxPeerAmount: rule.maxPeerAmount - peerAmount,
+    // Overwrite the rule with a decremented maxTakerAmount.
+    rules[_order.taker.token][_order.maker.token] = Rule({
+      maxTakerAmount: rule.maxTakerAmount - _order.taker.param,
       priceCoef: rule.priceCoef,
       priceExp: rule.priceExp
     });
 
     // Perform the swap.
-    swapContract.swapSimple(
-      nonce,
-      expiry,
-      consumerWallet,
-      consumerAmount,
-      consumerToken,
-      peerWallet,
-      peerAmount,
-      peerToken,
-      v, r, s
-    );
+    swapContract.swap(_order, _signature);
 
   }
 
   /**
-    * @notice Provide an Unsigned Order (Simple)
+    * @notice Provide an Unsigned Order
     * @dev Requires that sender has authorized the peer (Swap)
-    * @param nonce uint256 A single use identifier for the order
-    * @param consumerAmount uint256 The amount or identifier of the token the Maker sends
-    * @param consumerToken address The address of the token the Maker sends
-    * @param peerAmount uint256 The amount or identifier of the token the Taker sends
-    * @param peerToken address The address of the token the Taker sends
+    * @param _nonce uint256 A single use identifier for the order
+    * @param _makerAmount uint256 The amount or identifier of the token the Maker sends
+    * @param _makerToken address The address of the token the Maker sends
+    * @param _takerAmount uint256 The amount or identifier of the token the Taker sends
+    * @param _takerToken address The address of the token the Taker sends
     */
   function provideUnsignedOrder(
-    uint256 nonce,
-    uint256 consumerAmount,
-    address consumerToken,
-    uint256 peerAmount,
-    address peerToken
+    uint256 _nonce,
+    uint256 _makerAmount,
+    address _makerToken,
+    uint256 _takerAmount,
+    address _takerToken
   ) public {
 
-    provideOrder(
-      nonce,
+    provideOrder(Types.Order(
+      _nonce,
       block.timestamp + 1,
-      msg.sender,
-      consumerAmount,
-      consumerToken,
-      owner(),
-      peerAmount,
-      peerToken,
-      0, 0, 0
-    );
+      Types.Party(
+        msg.sender,
+        _makerToken,
+        _makerAmount,
+        0x277f8169
+      ),
+      Types.Party(
+        owner(),
+        _takerToken,
+        _takerAmount,
+        0x277f8169
+      ),
+      Types.Party(address(0), address(0), 0, bytes4(0))
+    ), Types.Signature(address(0), 0, 0, 0, 0));
 
   }
 }

@@ -10,13 +10,15 @@ const {
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 
+const { orders, signatures } = require('@airswap/order-utils')
+
 contract('Peer Unit Tests', async accounts => {
   const owner = accounts[0]
   const notOwner = accounts[2]
   let peer
   let mockSwap
   let snapshotId
-  let swap_swapSimple
+  let swapFunction
   const PEER_TOKEN = accounts[9]
   const CONSUMER_TOKEN = accounts[8]
   const MAX_PEER_AMOUNT = 12345
@@ -34,20 +36,9 @@ contract('Peer Unit Tests', async accounts => {
 
   async function setupMockSwap() {
     let swapTemplate = await Swap.new()
-    swap_swapSimple = swapTemplate.contract.methods
-      .swapSimple(
-        0,
-        0,
-        EMPTY_ADDRESS,
-        0,
-        EMPTY_ADDRESS,
-        EMPTY_ADDRESS,
-        0,
-        EMPTY_ADDRESS,
-        8,
-        web3.utils.asciiToHex('r'),
-        web3.utils.asciiToHex('s')
-      )
+    const { order } = await orders.getOrder({})
+    swapFunction = swapTemplate.contract.methods
+      .swap(order, signatures.getEmptySignature())
       .encodeABI()
 
     mockSwap = await MockContract.new()
@@ -126,9 +117,9 @@ contract('Peer Unit Tests', async accounts => {
       //check emitted event
       emitted(trx, 'SetRule', e => {
         return (
-          e.peerToken === PEER_TOKEN &&
-          e.consumerToken === CONSUMER_TOKEN &&
-          e.maxPeerAmount.toNumber() === MAX_PEER_AMOUNT &&
+          e.takerToken === PEER_TOKEN &&
+          e.makerToken === CONSUMER_TOKEN &&
+          e.maxTakerAmount.toNumber() === MAX_PEER_AMOUNT &&
           e.priceCoef.toNumber() === PRICE_COEF &&
           e.priceExp.toNumber() === EXP
         )
@@ -173,7 +164,7 @@ contract('Peer Unit Tests', async accounts => {
 
       //check emitted event
       emitted(trx, 'UnsetRule', e => {
-        return e.peerToken === PEER_TOKEN && e.consumerToken === CONSUMER_TOKEN
+        return e.takerToken === PEER_TOKEN && e.makerToken === CONSUMER_TOKEN
       })
     })
   })
@@ -332,20 +323,18 @@ contract('Peer Unit Tests', async accounts => {
 
   describe('Test provideOrder', async () => {
     it('test if a rule does not exist', async () => {
+      const { order } = await orders.getOrder({
+        maker: {
+          param: 555,
+          token: CONSUMER_TOKEN,
+        },
+        taker: {
+          param: 999,
+          token: PEER_TOKEN,
+        },
+      })
       await reverted(
-        peer.provideOrder(
-          1,
-          2,
-          EMPTY_ADDRESS,
-          555,
-          CONSUMER_TOKEN,
-          EMPTY_ADDRESS,
-          999,
-          PEER_TOKEN,
-          5,
-          web3.utils.asciiToHex('r'),
-          web3.utils.asciiToHex('s')
-        ),
+        peer.provideOrder(order, signatures.getEmptySignature()),
         'TOKEN_PAIR_INACTIVE'
       )
     })
@@ -358,20 +347,20 @@ contract('Peer Unit Tests', async accounts => {
         PRICE_COEF,
         EXP
       )
+
+      const { order } = await orders.getOrder({
+        maker: {
+          param: 555,
+          token: CONSUMER_TOKEN,
+        },
+        taker: {
+          param: MAX_PEER_AMOUNT + 1,
+          token: PEER_TOKEN,
+        },
+      })
+
       await reverted(
-        peer.provideOrder(
-          1,
-          2,
-          EMPTY_ADDRESS,
-          555,
-          CONSUMER_TOKEN,
-          EMPTY_ADDRESS,
-          MAX_PEER_AMOUNT + 1,
-          PEER_TOKEN,
-          5,
-          web3.utils.asciiToHex('r'),
-          web3.utils.asciiToHex('s')
-        ),
+        peer.provideOrder(order, signatures.getEmptySignature()),
         'AMOUNT_EXCEEDS_MAX'
       )
     })
@@ -384,22 +373,19 @@ contract('Peer Unit Tests', async accounts => {
         PRICE_COEF,
         EXP
       )
-      await reverted(
-        peer.provideOrder(
-          1,
-          2,
-          EMPTY_ADDRESS,
-          30,
-          CONSUMER_TOKEN,
-          EMPTY_ADDRESS,
-          MAX_PEER_AMOUNT,
-          PEER_TOKEN,
-          100,
-          web3.utils.asciiToHex('r'),
-          web3.utils.asciiToHex('s')
-        ),
-        'PRICE_INCORRECT'
-      )
+
+      const { order } = await orders.getOrder({
+        maker: {
+          param: 30,
+          token: CONSUMER_TOKEN,
+        },
+        taker: {
+          param: MAX_PEER_AMOUNT,
+          token: PEER_TOKEN,
+        },
+      })
+
+      await reverted(peer.provideOrder(order, signatures.getEmptySignature()))
     })
 
     it('test a successful transaction with integer values', async () => {
@@ -408,22 +394,22 @@ contract('Peer Unit Tests', async accounts => {
       let ruleBefore = await peer.rules.call(PEER_TOKEN, CONSUMER_TOKEN)
 
       let consumerAmount = 100
+
+      const { order } = await orders.getOrder({
+        maker: {
+          param: consumerAmount,
+          token: CONSUMER_TOKEN,
+        },
+        taker: {
+          param: 100,
+          token: PEER_TOKEN,
+        },
+      })
+
       await passes(
         //mock swapContract
         //test rule decrement
-        peer.provideOrder(
-          1, //nonce
-          2, //expiry
-          EMPTY_ADDRESS, //consumerWallet
-          consumerAmount, //consumerAmount
-          CONSUMER_TOKEN, //consumerToken
-          EMPTY_ADDRESS, //peerWallet
-          100, //peerAmount
-          PEER_TOKEN, //peerToken
-          8, //v
-          web3.utils.asciiToHex('r'), //r
-          web3.utils.asciiToHex('s') //s
-        )
+        peer.provideOrder(order, signatures.getEmptySignature())
       )
 
       let ruleAfter = await peer.rules.call(PEER_TOKEN, CONSUMER_TOKEN)
@@ -433,14 +419,14 @@ contract('Peer Unit Tests', async accounts => {
         "rule's max peer amount was not decremented"
       )
 
-      //check if swap_swapSimple() was called
+      //check if swap() was called
       let invocationCount = await mockSwap.invocationCountForMethod.call(
-        swap_swapSimple
+        swapFunction
       )
       equal(
         invocationCount,
         1,
-        "swap contact's swap.swapSimple was not called the expected number of times"
+        'swap function was not called the expected number of times'
       )
     })
 
@@ -458,22 +444,21 @@ contract('Peer Unit Tests', async accounts => {
       let consumerAmount = 100
       let peerAmount = Math.floor((consumerAmount * 10 ** EXP) / PRICE_COEF)
 
+      const { order } = await orders.getOrder({
+        maker: {
+          param: consumerAmount,
+          token: CONSUMER_TOKEN,
+        },
+        taker: {
+          param: peerAmount,
+          token: PEER_TOKEN,
+        },
+      })
+
       await passes(
         //mock swapContract
         //test rule decrement
-        peer.provideOrder(
-          1, //nonce
-          2, //expiry
-          EMPTY_ADDRESS, //consumerWallet
-          consumerAmount, //consumerAmount
-          CONSUMER_TOKEN, //consumerToken
-          EMPTY_ADDRESS, //peerWallet
-          peerAmount, //peerAmount
-          PEER_TOKEN, //peerToken
-          8, //v
-          web3.utils.asciiToHex('r'), //r
-          web3.utils.asciiToHex('s') //s
-        )
+        peer.provideOrder(order, signatures.getEmptySignature())
       )
 
       let ruleAfter = await peer.rules.call(PEER_TOKEN, CONSUMER_TOKEN)
@@ -496,20 +481,20 @@ contract('Peer Unit Tests', async accounts => {
         peer.provideUnsignedOrder(
           1, //nonce
           consumerAmount, //consumerAmount
-          CONSUMER_TOKEN, //consumerToken
+          CONSUMER_TOKEN, //makerToken
           100, //peerAmount
-          PEER_TOKEN //peerToken
+          PEER_TOKEN //takerToken
         )
       )
 
-      //check if swap_swapSimple() was called
+      //check if swap() was called
       let invocationCount = await mockSwap.invocationCountForMethod.call(
-        swap_swapSimple
+        swapFunction
       )
       equal(
         invocationCount.toNumber(),
         1,
-        "swap contact's swap.swapSimple was not called the expected number of times"
+        'swap function was not called the expected number of times'
       )
     })
   })

@@ -233,26 +233,13 @@ contract('Peer', async accounts => {
         taker: {
           wallet: aliceAddress,
           token: tokenDAI.address,
-          param: quote,
+          param: quote.toNumber(),
         },
       })
 
       // Succeeds on the Peer, fails on the Swap.
       await reverted(
-        alicePeer.provideOrder(
-          order.nonce,
-          order.expiry,
-          order.maker.wallet,
-          order.maker.param,
-          order.maker.token,
-          order.taker.wallet,
-          order.taker.param,
-          order.taker.token,
-          signature.v,
-          signature.r,
-          signature.s,
-          { from: bobAddress }
-        ),
+        alicePeer.provideOrder(order, signature),
         'SENDER_UNAUTHORIZED'
       )
     })
