@@ -84,11 +84,6 @@ interface IPeer {
     Types.Signature calldata signature
   ) external;
 
-  function provideUnsignedOrder(
-    uint256 _nonce,
-    uint256 _makerAmount,
-    address _makerToken,
-    uint256 _takerAmount,
-    address _takerToken
-  ) external;
+  function owner()
+    external view returns (address);
 }

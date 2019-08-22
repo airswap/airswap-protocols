@@ -223,26 +223,21 @@ function provideOrder(
 ## Provide an Unsigned Order
 
 Provide an unsigned order to the Peer. Requires that the Consumer has authorized the Peer on the Swap contract.
+The Signature should be an empty Signature struct to support the unsigned order.
 
 ```Solidity
-function provideUnsignedOrder(
-  uint256 _nonce,
-  uint256 _makerAmount,
-  address _makerToken,
-  uint256 _takerAmount,
-  address _takerToken
+function provideOrder(
+  Types.Order memory _order,
+  Types.Signature memory _signature
 ) public
 ```
 
 ### Params
 
-| Name           | Type      | Description                                            |
-| :------------- | :-------- | :----------------------------------------------------- |
-| `_nonce`       | `uint256` | A single use identifier for the Order.                 |
-| `_makerAmount` | `uint256` | The amount or identifier of the token the Maker sends. |
-| `_makerToken`  | `address` | The address of the token the Maker sends.              |
-| `_takerAmount` | `uint256` | The amount or identifier of the token the Taker sends. |
-| `_takerToken`  | `address` | The address of the token the Taker sends.              |
+| Name        | Type        | Description                                                    |
+| :---------- | :---------- | :------------------------------------------------------------- |
+| `order`     | `Order`     | Order struct as specified in the `@airswap/types` package.     |
+| `signature` | `Signature` | Signature struct as specified in the `@airswap/types` package. |
 
 ### Reverts
 

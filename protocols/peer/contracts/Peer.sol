@@ -235,41 +235,4 @@ contract Peer is IPeer, Ownable {
     swapContract.swap(_order, _signature);
 
   }
-
-  /**
-    * @notice Provide an Unsigned Order
-    * @dev Requires that sender has authorized the peer (Swap)
-    * @param _nonce uint256 A single use identifier for the order
-    * @param _makerAmount uint256 The amount or identifier of the token the Maker sends
-    * @param _makerToken address The address of the token the Maker sends
-    * @param _takerAmount uint256 The amount or identifier of the token the Taker sends
-    * @param _takerToken address The address of the token the Taker sends
-    */
-  function provideUnsignedOrder(
-    uint256 _nonce,
-    uint256 _makerAmount,
-    address _makerToken,
-    uint256 _takerAmount,
-    address _takerToken
-  ) public {
-
-    provideOrder(Types.Order(
-      _nonce,
-      block.timestamp + 1,
-      Types.Party(
-        msg.sender,
-        _makerToken,
-        _makerAmount,
-        0x277f8169
-      ),
-      Types.Party(
-        owner(),
-        _takerToken,
-        _takerAmount,
-        0x277f8169
-      ),
-      Types.Party(address(0), address(0), 0, bytes4(0))
-    ), Types.Signature(address(0), 0, 0, 0, 0));
-
-  }
 }

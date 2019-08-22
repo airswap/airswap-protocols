@@ -471,33 +471,4 @@ contract('Peer Unit Tests', async accounts => {
       )
     })
   })
-
-  describe('Test provideUnsignedOrder', async () => {
-    it('test provideUnsignedOrder call', async () => {
-      await peer.setRule(TAKER_TOKEN, MAKER_TOKEN, MAX_TAKER_AMOUNT, 100, EXP)
-
-      let makerAmount = 100
-      await passes(
-        //mock swapContract
-        //test rule decrement
-        peer.provideUnsignedOrder(
-          1, //nonce
-          makerAmount, //makerAmount
-          MAKER_TOKEN, //makerToken
-          100, //takerAmount
-          TAKER_TOKEN //takerToken
-        )
-      )
-
-      //check if swap() was called
-      let invocationCount = await mockSwap.invocationCountForMethod.call(
-        swapFunction
-      )
-      equal(
-        invocationCount.toNumber(),
-        1,
-        'swap function was not called the expected number of times'
-      )
-    })
-  })
 })
