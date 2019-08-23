@@ -7,11 +7,11 @@ Wrapper [Source Code](https://github.com/airswap/airswap-protocols/tree/master/h
 
 ## Introduction
 
-The Wrapper contract acts as an intermediary contract to facilitate using Ether with the AirSwap contract. When performing a swap using the Airswap protocol, if given ether instead of WETH, it will convert ether to WETH and then perform the swap. Additionally, if receiving WETH, it will perform the swap, and convert the WETH into Ether. The contracts are compiled with v0.5.10.a6ea5b19 (0.5.10 stable release).
+The Wrapper contract facilitates using ether for wrapped ether (WETH) trades on the Swap contract. If a swap is performed through the Wrapper with a message value (ether) it will deposit the ether to WETH and then perform the swap. Additionally, if receiving WETH in the swap, it will withdraw the ether and transfer it to the message sender. The contracts are compiled with v0.5.10.a6ea5b19 (0.5.10 stable release).
 
 ## Structure
 
-The Swap contract is comprised a contract.
+Wrapper is comprised of a single contract.
 
 [@airswap/wrapper/contracts/Wrapper.sol](../contracts/Wrapper.sol) @ [4af8d83e8d5d52c183cacf0544a55a352b7bfc60](https://github.com/airswap/airswap-protocols/commit/4af8d83e8d5d52c183cacf0544a55a352b7bfc60)
 
@@ -30,12 +30,13 @@ _Externally Audited files from OpenZeppelin library used solely for tests_
 ```
 ERC20Mintable.sol
 ```
+
 [WETH9 Audit](https://github.com/bokkypoobah/MakerDAOSaiContractAudit/blob/master/audit/code-review/makerdao/weth9-b353893.md)
-_Externally Audited files from WETH used solely for tests
+\_Externally Audited files from WETH used solely for tests
+
 ```
 WETH9.sol
 ```
-
 
 ## Contracts
 
@@ -50,42 +51,49 @@ _\*\* OpenZeppelin contract_
 
 #### Public and external functions (non-getter functions)
 
-| Function   | Source   | Visibility | Params                                                                                                                                                                                                                  | Payable |
-| :--------- | :------- | :--------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------ |
-| swap | Wrapper.sol | external   | `Types.Order calldata _order, Types.Signature calldata _signature` | yes      |
-| fallback     | Wrapper.sol | external   | none   | yes      |
+| Function | Source      | Visibility | Params                                                             | Payable |
+| :------- | :---------- | :--------- | :----------------------------------------------------------------- | :------ |
+| swap     | Wrapper.sol | external   | `Types.Order calldata _order, Types.Signature calldata _signature` | yes     |
+| fallback | Wrapper.sol | external   | none                                                               | yes     |
 
 ## Invariants
 
-#### 1. No ether or tokens should be held by the contract address due to an incorrect swap.
-WETH and Swap functions REVERTS on any failure cases within Wrapper. Similarly, Wrapper will REVERT in case any movements of tokens or ether fails within Wrapper.swapSimple().
+#### 1. No ether or tokens should be held by the contract address due to a failed swap.
+
+- WETH and Swap functions REVERT on failure cases within Wrapper. Similarly, Wrapper will REVERT in case any movements of tokens or ether fails within Wrapper.swap.
 
 #### 2. Contract Ether and Token balances should remain unchanged after each swap.
-Wrapper does not perform any arithmetic computation, or calling this.balance. It passses the full token or ether amounts received along or REVERTS the transaction.
+
+- Wrapper does not perform any arithmetic computation, or call this.balance. It passses the full token or ether amounts received along or REVERTS the transaction.
 - **This invariant currently holds as-is.**
 
-#### 3. If Ether is sent with a swap, it should be deposited to WETH and then traded..
-- When ETH is sent to the contract by the taker, the wrapper contract will forward the amount sent to the WETH contract and perform the swap. This prevents the contract from holding any Ether and subsequently any WETH.
+#### 3. If Ether is sent to Wrapper.swap, it should be deposited to WETH and then traded.
+
+- When ETH is sent to the contract by the taker, the wrapper contract will deposit to the WETH contract and perform the swap. This prevents the contract from holding any Ether and subsequently any WETH.
 
 - **This invariant currently holds as-is.**
 
 #### 4. If WETH is received with a swap, it should be withdrawn and sent to the sender.
+
 - When WETH is sent to the contract by the taker, the wrapper contract will perform the swap and obtain WETH, the WETH is then withdrawn and transferred to the maker. If there are any failed transactions, the overall transaction will REVERT.
 
 - **This invariant currently holds as-is.**
 
 #### 5. ISwap and IWeth contracts are immutable, any updates will require new deploy of Wrapper.
-- There are no methods within the Wrapper that allow the Swap contract or the WETH contract to be set; the Swap and WETH values provided on deployment are permanent. There is no functionality whatsoever that allows changing the addresses.
+
+- There are no methods within the Wrapper that allow the Swap contract or the WETH contract to be set; the Swap and WETH contracts provided on deployment are permanent. There is no functionality whatsoever that allows changing the addresses.
 - **This invariant currently holds as-is.**
 
 #### 6. Protected from re-entrancy attacks such that multiple parties could use Wrapper and receive more balances.
 
 #### 7. Sending the same parameters twice will have the same guarantees as the Swap contract.
-Calls to swap() are idempotent. When called many times. The wrapper’s beginning and final state are the same due to having either swapped WETH or transferring ETH out of the contract.
+
+- Calls to Wrapper.swap are idempotent. When called many times, the beginning and final state are the same due to having either swapped WETH or transferring ether out of the contract.
 - **This invariant currently holds as-is.**
 
-#### 8. non-WETH ERC20 swaps with non-null taker address should occur similar to Swap.swap.
-- In this scenario, none of the conditional statements for swap() in Wrapper are hit and thus just swapContract.swap() method was called.
+#### 8. Non-WETH ERC20 swaps with non-null taker address should occur similar to Swap.swap.
+
+- In this scenario, none of the conditional statements for Wrapper.swap are hit and thus just swapContract.swap method was called.
 - **This invariant currently holds as-is.**
 
 ## Analysis
@@ -93,15 +101,14 @@ Calls to swap() are idempotent. When called many times. The wrapper’s beginnin
 #### Slither (static analyzer)
 
 Medium Severity Detected:
-Wrapper.constructor (Wrapper.sol#42-51) ignores return value by external calls "wethContract.approve(_swapContract,MAX_INT)" (Wrapper.sol#50)
+Wrapper.constructor (Wrapper.sol#42-51) ignores return value by external calls "wethContract.approve(\_swapContract,MAX_INT)" (Wrapper.sol#50)
 
-Wrapper.swapSimple (Wrapper.sol#72-141) ignores return value by external calls "wethContract.transferFrom(_takerWallet,address(this),_makerAmount)" (Wrapper.sol#122)
+Wrapper.swapSimple (Wrapper.sol#72-141) ignores return value by external calls "wethContract.transferFrom(\_takerWallet,address(this),\_makerAmount)" (Wrapper.sol#122)
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unused-return
 
-External call is being made to a known contract implementation of WETH9.sol. WETH9.sol either returns True of revert, there are no instances
-where it returns False during approve or transferFrom.
+External call is being made to a known contract implementation of WETH9.sol. WETH9.sol either returns True of revert, there are no instances where it returns False during approve or transferFrom.
 
-Full slither output located in ../reports/analysis/slither.txt
+Full slither output located in [./analysis/slither.txt](./analysis/slither.txt)
 
 ## Testing
 
@@ -125,13 +132,10 @@ helpers/wrapper/test/Wrapper.js
 
 Hash of master used for deploy: [08e523bcc0a992ec3568655d43fe3669398c8e4e](https://github.com/airswap/airswap-protocols/commit/08e523bcc0a992ec3568655d43fe3669398c8e4e)
 
-Rinkeby 0x83A6c08Ffa087d1741f4c3e9c1004DAa3dB42e65
+Rinkeby Etherscan (Wrapper): [0x83A6c08Ffa087d1741f4c3e9c1004DAa3dB42e65](https://rinkeby.etherscan.io/address/0x83A6c08Ffa087d1741f4c3e9c1004DAa3dB42e65)
 
-Contract was deployed using
-Swap.address = 0x78Db49D0459a67158BdCA6e161BE3D90342C7247
-WETH address = 0xc778417E063141139Fce010982780140Aa0cD5Ab
-(https://rinkeby.etherscan.io/address/0xc778417E063141139Fce010982780140Aa0cD5Ab)
-
+- \_swapContract = [0x78Db49D0459a67158BdCA6e161BE3D90342C7247](https://rinkeby.etherscan.io/address/0x78Db49D0459a67158BdCA6e161BE3D90342C7247)
+- \_wethContract = [0xc778417E063141139Fce010982780140Aa0cD5Ab](https://rinkeby.etherscan.io/address/0xc778417E063141139Fce010982780140Aa0cD5Ab)
 
 ## Notes
 
