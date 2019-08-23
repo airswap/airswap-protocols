@@ -105,16 +105,11 @@ contract Wrapper {
       // Transfer ether to the user.
       msg.sender.transfer(_order.maker.param);
 
-      /* The taker wallet was not defined and thus the swapped
-       * makerTokens were distributed to the wrapper contract
-       * and now the wrapper contract forwards them to msg.sender.
-       */
-    } else if ((_order.maker.token != address(0)) && (_order.taker.wallet == address(0))) {
+    // This contract assumed the role of taker and received tokens.
+    } else if (_order.taker.wallet == address(0)) {
 
-      // Forwarding the _makerAmount of type _makerToken to the msg.sender.
+      // Transfer tokens received by this contract to the sender.
       require(IERC20(_order.maker.token).transfer(msg.sender, _order.maker.param));
     }
-    // Falls here if it was a non-WETH ERC20 - non-WETH ERC20 trade and the
-    // transaction did not require any wrapper functionality.
   }
 }

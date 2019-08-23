@@ -15,6 +15,7 @@
 */
 
 pragma solidity ^0.5.10;
+pragma experimental ABIEncoderV2;
 
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "@airswap/indexer/contracts/interfaces/IIndexer.sol";
@@ -69,7 +70,11 @@ contract Consumer {
 
     // Fetch an array of Intent locators from the Indexer.
     // Warning: In this example, the addresses returned are not trusted and may not actually implement IPeer.
-    bytes32[] memory untrustedProbablyPeers = indexerContract.getIntents(_userReceiveToken, _userSendToken, _maxIntents);
+    bytes32[] memory untrustedProbablyPeers = indexerContract.getIntents(
+      _userReceiveToken,
+      _userSendToken,
+      _maxIntents
+      );
 
     // Iterate through locators.
     for (uint256 i; i < untrustedProbablyPeers.length; i++) {
@@ -123,13 +128,23 @@ contract Consumer {
     swapContract.authorize(untrustedPeerContract, block.timestamp + 1);
 
     // Consumer provides unsigned order to Peer.
-    IPeer(untrustedPeerContract).provideUnsignedOrder(
+    IPeer(untrustedPeerContract).provideOrder(Types.Order(
       1,
-      userSendAmount,
-      _userSendToken,
-      _userReceiveAmount,
-      _userReceiveToken
-    );
+      block.timestamp + 1,
+      Types.Party(
+        address(this), // consumer is acting as the maker in this case
+        _userSendToken,
+        userSendAmount,
+        0x277f8169
+      ),
+      Types.Party(
+        IPeer(untrustedPeerContract).owner(),
+        _userReceiveToken,
+        _userReceiveAmount,
+        0x277f8169
+      ),
+      Types.Party(address(0), address(0), 0, bytes4(0))
+    ), Types.Signature(address(0), 0, 0, 0, 0));
 
     // Consumer revokes the authorization of the Peer.
     swapContract.revoke(untrustedPeerContract);
