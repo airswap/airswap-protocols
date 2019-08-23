@@ -1,7 +1,7 @@
 # Security Report: Wrapper
 
 Smart Contract Security Report by Team Fluidity (team[at]fluidity[dot]io) and Phil Daian (feedback[at]stableset[dot]com)
-Hash of master used for report: [4af8d83e8d5d52c183cacf0544a55a352b7bfc60](https://github.com/airswap/airswap-protocols/commit/4af8d83e8d5d52c183cacf0544a55a352b7bfc60)
+Hash of master used for report: [aec813337e7f2320162d9314932a553c0a52c9dc](https://github.com/airswap/airswap-protocols/commit/aec813337e7f2320162d9314932a553c0a52c9dc)
 
 Wrapper [Source Code](https://github.com/airswap/airswap-protocols/tree/master/helpers/wrapper) and [README](../README.md)
 
@@ -13,7 +13,7 @@ The Wrapper contract facilitates using ether for wrapped ether (WETH) trades on 
 
 Wrapper is comprised of a single contract.
 
-[@airswap/wrapper/contracts/Wrapper.sol](../contracts/Wrapper.sol) @ [4af8d83e8d5d52c183cacf0544a55a352b7bfc60](https://github.com/airswap/airswap-protocols/commit/4af8d83e8d5d52c183cacf0544a55a352b7bfc60)
+[@airswap/wrapper/contracts/Wrapper.sol](../contracts/Wrapper.sol) @ [aec813337e7f2320162d9314932a553c0a52c9dc](https://github.com/airswap/airswap-protocols/commit/aec813337e7f2320162d9314932a553c0a52c9dc)
 
 ## Dependencies
 
@@ -130,9 +130,9 @@ helpers/wrapper/test/Wrapper.js
 
 ## Migrations
 
-Hash of master used for deploy: [08e523bcc0a992ec3568655d43fe3669398c8e4e](https://github.com/airswap/airswap-protocols/commit/08e523bcc0a992ec3568655d43fe3669398c8e4e)
+Hash of master used for deploy: [aec813337e7f2320162d9314932a553c0a52c9dc](https://github.com/airswap/airswap-protocols/commit/aec813337e7f2320162d9314932a553c0a52c9dc)
 
-Rinkeby Etherscan (Wrapper): [0x83A6c08Ffa087d1741f4c3e9c1004DAa3dB42e65](https://rinkeby.etherscan.io/address/0x83A6c08Ffa087d1741f4c3e9c1004DAa3dB42e65)
+Rinkeby Etherscan (Wrapper): [0xE6dbe98486B25f0D1bd247c2052dbb9E1F0Fe023](https://rinkeby.etherscan.io/address/0xE6dbe98486B25f0D1bd247c2052dbb9E1F0Fe023)
 
 - \_swapContract = [0x78Db49D0459a67158BdCA6e161BE3D90342C7247](https://rinkeby.etherscan.io/address/0x78Db49D0459a67158BdCA6e161BE3D90342C7247)
 - \_wethContract = [0xc778417E063141139Fce010982780140Aa0cD5Ab](https://rinkeby.etherscan.io/address/0xc778417E063141139Fce010982780140Aa0cD5Ab)
