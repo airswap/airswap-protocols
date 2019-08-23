@@ -22,7 +22,7 @@
     "solidity-coverage": "^0.6.3"
   },
   "dependencies": {
-    "@airswap/order-utils": "0.1.0",
+    "@airswap/order-utils": "0.2.0",
     "@airswap/test-utils": "0.1.0",
     "truffle": "^5.0.24"
   }

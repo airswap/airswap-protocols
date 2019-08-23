@@ -1,11 +1,18 @@
 {
   "name": "@airswap/order-utils",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "JavaScript utilities for orders, hashes, and signatures in the Swap Protocol",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/airswap/airswap-protocols"
+  },
+  "scripts": {
+    "test": "mocha test"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^6.2.0"
   },
   "dependencies": {
     "eth-sig-util": "^2.2.0",

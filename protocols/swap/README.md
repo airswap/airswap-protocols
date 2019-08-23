@@ -200,15 +200,15 @@ event Invalidate(
 
 ## Signatures
 
-When producing [ECDSA](https://hackernoon.com/a-closer-look-at-ethereum-signatures-5784c14abecc) signatures, Ethereum wallets prefix signed data with byte `\x19` to stay out of range of valid RLP so that a signature cannot be executed as a transaction. [EIP-191](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-191.md) standardizes this prefixing to include existing `personal_sign` behavior and [EIP-712](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-712.md) implements it for structured data, which makes the data more transparent for the signer. Signatures are comprised of parameters `v`, `r`, and `s`. Read more about [Ethereum Signatures]().
+When producing [ECDSA](https://hackernoon.com/a-closer-look-at-ethereum-signatures-5784c14abecc) signatures, Ethereum wallets prefix signed data with byte `\x19` to stay out of range of valid RLP so that a signature cannot be executed as a transaction. [EIP-191](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-191.md) standardizes this prefixing to include existing `personalSign` behavior and [EIP-712](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-712.md) implements it for structured data, which makes the data more transparent for the signer. Signatures are comprised of parameters `v`, `r`, and `s`. Read more about [Ethereum Signatures]().
 
 ### Typed Data
 
-For use in the `swap` function. The `Signature` struct is passed to the function including a byte `version` to indicate `personal_sign` (`0x45`) or `signTypedData` (`0x01`) so that hashes can be recreated correctly in contract code.
+For use in the `swap` function. The `Signature` struct is passed to the function including a byte `version` to indicate `personalSign` (`0x45`) or `signTypedData` (`0x01`) so that hashes can be recreated correctly in contract code.
 
 #### Personal Sign
 
-You can use `personal_sign` with `swap` by using an EIP-712 hashing function.
+You can use `personalSign` with `swap` by using an EIP-712 hashing function.
 
 ```JavaScript
 const ethUtil = require('ethereumjs-util')
@@ -217,7 +217,7 @@ const orderHashHex = hashes.getOrderHash(order); // See: @airswap/order-utils/sr
 const sig = await web3.eth.sign(orderHashHex, signer);
 const { r, s, v } = ethUtil.fromRpcSig(sig);
 return {
-  version: '0x45', // Version 0x45: personal_sign
+  version: '0x45', // Version 0x45: personalSign
   r, s, v
 }
 ```

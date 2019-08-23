@@ -31,7 +31,7 @@ module.exports = {
     const sig = await web3.eth.sign(orderHashHex, signer)
     const { r, s, v } = ethUtil.fromRpcSig(sig)
     return {
-      version: '0x45', // Version 0x45: personal_sign
+      version: '0x45', // Version 0x45: personalSign
       signer,
       r,
       s,
@@ -45,6 +45,20 @@ module.exports = {
     return {
       version: '0x01', // Version 0x01: signTypedData
       signer: ethUtil.privateToAddress(privateKey).toString('hex'),
+      r,
+      s,
+      v,
+    }
+  },
+  getPersonalSignature(order, privateKey, verifyingContract) {
+    const orderHash = hashes.getOrderHash(order, verifyingContract)
+    const sig = sigUtil.personalSign(privateKey, {
+      data: orderHash,
+    })
+    const { r, s, v } = ethUtil.fromRpcSig(sig)
+    return {
+      version: '0x45', // Version 0x45: personalSign
+      signer: `0x${ethUtil.privateToAddress(privateKey).toString('hex')}`,
       r,
       s,
       v,
@@ -66,7 +80,7 @@ module.exports = {
     const { r, s, v } = ethUtil.fromRpcSig(sig)
     return {
       version: '0x01', // Version 0x01: signTypedData
-      signer: ethUtil.privateToAddress(privateKey).toString('hex'),
+      signer: `0x${ethUtil.privateToAddress(privateKey).toString('hex')}`,
       r,
       s,
       v,
