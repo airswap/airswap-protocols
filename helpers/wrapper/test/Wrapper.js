@@ -25,7 +25,7 @@ let wrapperContract
 let swapAddress
 let wrapperAddress
 
-let swap
+let wrappedSwap
 let tokenAST
 let tokenDAI
 let tokenWETH
@@ -51,7 +51,7 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
 
     await orders.setVerifyingContract(swapAddress)
 
-    swap = wrapperContract.swap
+    wrappedSwap = wrapperContract.swap
   })
 
   after(async () => {
@@ -103,14 +103,17 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
           param: 10,
         },
       })
-      let result = await swap(order, signature, {
+      let result = await wrappedSwap(order, signature, {
         from: bobAddress,
         value: order.taker.param,
       })
       await passes(result)
       result = await getResult(swapContract, result.tx)
       emitted(result, 'Swap')
+
       ok(await balances(wrapperAddress, [[tokenDAI, 0], [tokenWETH, 0]]))
+      ok(await balances(aliceAddress, [[tokenWETH, 10]]))
+      ok(await balances(bobAddress, [[tokenDAI, 50]]))
     })
   })
 
@@ -133,7 +136,7 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
       emitted(tx, 'Authorize')
     })
 
-    it('Alice approves the Swap contract to move her WETH', async () => {
+    it('Alice approves the Wrapper contract to move her WETH', async () => {
       let tx = await tokenWETH.approve(wrapperAddress, 10000, {
         from: aliceAddress,
       })
@@ -155,16 +158,18 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
         },
       })
 
-      let result = await swap(order, signature, { from: aliceAddress })
+      let result = await wrappedSwap(order, signature, { from: aliceAddress })
       passes(result)
       result = await getResult(swapContract, result.tx)
       emitted(result, 'Swap')
+
       ok(await balances(wrapperAddress, [[tokenDAI, 0], [tokenWETH, 0]]))
+      ok(await balances(aliceAddress, [[tokenDAI, 850]]))
     })
   })
 
-  describe('Sending Ether and WETH to the WrapperContract without swap issues', async () => {
-    it('Sending Ether to the Wrapper Contract', async () => {
+  describe('Sending ether and WETH to the WrapperContract without swap issues', async () => {
+    it('Sending ether to the Wrapper Contract', async () => {
       await web3.eth.sendTransaction({
         to: wrapperAddress,
         from: aliceAddress,
@@ -203,7 +208,7 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
           param: 10,
         },
       })
-      let result = await swap(order, signature, {
+      let result = await wrappedSwap(order, signature, {
         from: bobAddress,
         value: order.taker.param,
       })
@@ -251,7 +256,10 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
           param: 100,
         },
       })
-      let result = await swap(order, signature, { from: bobAddress, value: 0 })
+      let result = await wrappedSwap(order, signature, {
+        from: bobAddress,
+        value: 0,
+      })
       await passes(result)
       result = await getResult(swapContract, result.tx)
       emitted(result, 'Swap')

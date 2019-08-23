@@ -1,0 +1,46 @@
+## Run with version aec813337e7f2320162d9314932a553c0a52c9dc
+
+INFO:Detectors:
+Wrapper.constructor (Wrapper.sol#44-53) ignores return value by external calls "wethContract.approve(_swapContract,MAX_INT)" (Wrapper.sol#52)
+Wrapper.swap (Wrapper.sol#65-122) ignores return value by external calls "wethContract.transferFrom(_order.taker.wallet,address(this),_order.maker.param)" (Wrapper.sol#103)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unused-return
+INFO:Detectors:
+Different versions of Solidity is used in :
+    - Version used: ['0.5.10', '>=0.4.21<0.6.0', 'ABIEncoderV2', '^0.5.0', '^0.5.10']
+    - Migrations.sol#1 declares pragma solidity>=0.4.21<0.6.0
+    - ../../protocols/types/contracts/Types.sol#17 declares pragma solidity0.5.10
+    - ../../protocols/types/contracts/Types.sol#18 declares pragma experimentalABIEncoderV2
+    - ../tokens/contracts/interfaces/IWETH.sol#1 declares pragma solidity^0.5.10
+    - Wrapper.sol#17 declares pragma solidity^0.5.10
+    - Wrapper.sol#18 declares pragma experimentalABIEncoderV2
+    - ../../node_modules/openzeppelin-solidity/contracts/token/ERC20/IERC20.sol#1 declares pragma solidity^0.5.0
+    - Imports.sol#1 declares pragma solidity0.5.10
+    - ../../protocols/swap/contracts/interfaces/ISwap.sol#17 declares pragma solidity0.5.10
+    - ../../protocols/swap/contracts/interfaces/ISwap.sol#18 declares pragma experimentalABIEncoderV2
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#different-pragma-directives-are-used
+INFO:Detectors:
+Pragma version ">=0.4.21<0.6.0" allows old versions (Migrations.sol#1)
+Pragma version "0.5.10" necessitates versions too recent to be trusted. Consider deploying with 0.5.3 (../../protocols/types/contracts/Types.sol#17)
+Pragma version "^0.5.10" necessitates versions too recent to be trusted. Consider deploying with 0.5.3 (../tokens/contracts/interfaces/IWETH.sol#1)
+Pragma version "^0.5.10" necessitates versions too recent to be trusted. Consider deploying with 0.5.3 (Wrapper.sol#17)
+Pragma version "^0.5.0" allows old versions (../../node_modules/openzeppelin-solidity/contracts/token/ERC20/IERC20.sol#1)
+Pragma version "0.5.10" necessitates versions too recent to be trusted. Consider deploying with 0.5.3 (Imports.sol#1)
+Pragma version "0.5.10" necessitates versions too recent to be trusted. Consider deploying with 0.5.3 (../../protocols/swap/contracts/interfaces/ISwap.sol#17)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#incorrect-versions-of-solidity
+INFO:Detectors:
+Parameter '_order' of Types.hashOrder (../../protocols/types/contracts/Types.sol#91) is not in mixedCase
+Parameter '_domainSeparator' of Types.hashOrder (../../protocols/types/contracts/Types.sol#92) is not in mixedCase
+Parameter '_name' of Types.hashDomain (../../protocols/types/contracts/Types.sol#135) is not in mixedCase
+Parameter '_version' of Types.hashDomain (../../protocols/types/contracts/Types.sol#136) is not in mixedCase
+Parameter '_verifyingContract' of Types.hashDomain (../../protocols/types/contracts/Types.sol#137) is not in mixedCase
+Parameter '' of IWETH.withdraw (../tokens/contracts/interfaces/IWETH.sol#6) is not in mixedCase
+Parameter '_swapContract' of Wrapper. (Wrapper.sol#45) is not in mixedCase
+Parameter '_wethContract' of Wrapper. (Wrapper.sol#46) is not in mixedCase
+Parameter '_order' of Wrapper.swap (Wrapper.sol#66) is not in mixedCase
+Parameter '_signature' of Wrapper.swap (Wrapper.sol#67) is not in mixedCase
+Parameter '' of ISwap.delegateApprovals (../../protocols/swap/contracts/interfaces/ISwap.sol#60) is not in mixedCase
+Parameter '_scope_0' of ISwap.delegateApprovals (../../protocols/swap/contracts/interfaces/ISwap.sol#60) is not in mixedCase
+Parameter '' of ISwap.makerOrderStatus (../../protocols/swap/contracts/interfaces/ISwap.sol#61) is not in mixedCase
+Parameter '_scope_0' of ISwap.makerOrderStatus (../../protocols/swap/contracts/interfaces/ISwap.sol#61) is not in mixedCase
+Parameter '' of ISwap.makerMinimumNonce (../../protocols/swap/contracts/interfaces/ISwap.sol#62) is not in mixedCase
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#conformance-to-solidity-naming-conventions

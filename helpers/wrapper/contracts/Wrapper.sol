@@ -56,6 +56,9 @@ contract Wrapper {
 
   /**
     * @notice Send an Order
+    * @dev To send ether to this contract, taker wallet must be unset
+    * @dev For orders with taker wallet set, taker must authorize this contract on the swapContract
+    * @dev To receive ether from this contract, taker must approve it on the wethContract
     * @param _order Types.Order
     * @param _signature Types.Signature
     */
@@ -78,7 +81,7 @@ contract Wrapper {
 
     } else {
 
-      // Ensure no unexpected ether sent during WETH transaction.
+      // Ensure no unexpected ether is sent.
       require(msg.value == 0,
         "VALUE_MUST_BE_ZERO");
 
