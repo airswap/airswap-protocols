@@ -59,7 +59,7 @@ interface IPeer {
     uint256 _takerAmount,
     address _takerToken,
     address _makerToken
-  ) external returns (
+  ) external view returns (
     uint256 makerAmount
   );
 
@@ -67,14 +67,14 @@ interface IPeer {
     uint256 _makerAmount,
     address _makerToken,
     address _takerToken
-  ) external returns (
+  ) external view returns (
     uint256 takerAmount
   );
 
   function getMaxQuote(
     address _takerToken,
     address _makerToken
-  ) external returns (
+  ) external view returns (
     uint256 takerAmount,
     uint256 makerAmount
   );
