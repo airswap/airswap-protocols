@@ -35,7 +35,7 @@ const orderHashHex = ethUtil.bufferToHex(orderHash)
 const sig = await web3.eth.sign(orderHashHex, signer)
 const { r, s, v } = ethUtil.fromRpcSig(sig)
 return {
-  version: '0x45', // EIP-191: Version 0x45 (personal_sign)
+  version: '0x45', // EIP-191: Version 0x45 (personalSign)
   signer,
   r,
   s,
