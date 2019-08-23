@@ -30,13 +30,13 @@ function stringify(type) {
   return `${str})`
 }
 
-const EIP712_DOMAIN_TYPEHASH = web3.utils.soliditySha3(
-  stringify('EIP712Domain')
-)
-const ORDER_TYPEHASH = web3.utils.soliditySha3(
+const EIP712_DOMAIN_TYPEHASH = ethUtil.keccak256(stringify('EIP712Domain'))
+
+const ORDER_TYPEHASH = ethUtil.keccak256(
   stringify('Order') + stringify('Party')
 )
-const PARTY_TYPEHASH = web3.utils.soliditySha3(stringify('Party'))
+
+const PARTY_TYPEHASH = ethUtil.keccak256(stringify('Party'))
 
 function hashParty(party) {
   return ethUtil.keccak256(
@@ -50,7 +50,7 @@ function hashParty(party) {
 function hashOrder(order) {
   return ethUtil.keccak256(
     abi.rawEncode(
-      ['uint256', 'uint256', 'uint256', 'bytes32', 'bytes32', 'bytes32'],
+      ['bytes32', 'uint256', 'uint256', 'bytes32', 'bytes32', 'bytes32'],
       [
         ORDER_TYPEHASH,
         order.nonce,

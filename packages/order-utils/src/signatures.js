@@ -50,6 +50,20 @@ module.exports = {
       v,
     }
   },
+  getPersonalSignature(order, privateKey, verifyingContract) {
+    const orderHash = hashes.getOrderHash(order, verifyingContract)
+    const sig = sigUtil.personalSign(privateKey, {
+      data: orderHash,
+    })
+    const { r, s, v } = ethUtil.fromRpcSig(sig)
+    return {
+      version: '0x45', // Version 0x01: personal_sign
+      signer: `0x${ethUtil.privateToAddress(privateKey).toString('hex')}`,
+      r,
+      s,
+      v,
+    }
+  },
   getTypedDataSignature(order, privateKey, verifyingContract) {
     const sig = sigUtil.signTypedData(privateKey, {
       data: {
@@ -66,7 +80,7 @@ module.exports = {
     const { r, s, v } = ethUtil.fromRpcSig(sig)
     return {
       version: '0x01', // Version 0x01: signTypedData
-      signer: ethUtil.privateToAddress(privateKey).toString('hex'),
+      signer: `0x${ethUtil.privateToAddress(privateKey).toString('hex')}`,
       r,
       s,
       v,
