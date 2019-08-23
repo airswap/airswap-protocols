@@ -7,13 +7,15 @@ Wrapper [Source Code](https://github.com/airswap/airswap-protocols/tree/master/h
 
 ## Introduction
 
-The Wrapper contract facilitates using ether for wrapped ether (WETH) trades on the Swap contract. If a swap is performed through the Wrapper with a message value (ether) it will deposit the ether to WETH and then perform the swap. Additionally, if receiving WETH in the swap, it will withdraw the ether and transfer it to the message sender. The contracts are compiled with v0.5.10.a6ea5b19 (0.5.10 stable release).
+The Swap Protocol is a peer-to-peer protocol for trading Ethereum tokens that allows two parties to exchange tokens in an atomic transaction. The Wrapper contract facilitates using ether for wrapped ether (WETH) trades on the Swap contract. If the Wrapper is invoked with a message value (ether) it will deposit the ether to WETH and then perform the swap with itself as the counterparty, then transfer received tokens to the message sender. Additionally, if receiving WETH in the swap, it will withdraw the ether and transfer it to the message sender. The contracts are compiled with v0.5.10.a6ea5b19 (0.5.10 stable release).
 
 ## Structure
 
 Wrapper is comprised of a single contract.
 
 [@airswap/wrapper/contracts/Wrapper.sol](../contracts/Wrapper.sol) @ [aec813337e7f2320162d9314932a553c0a52c9dc](https://github.com/airswap/airswap-protocols/commit/aec813337e7f2320162d9314932a553c0a52c9dc)
+
+Deployment of Wrapper.sol was performed in the `@airswap/wrapper` package in the `airswap-protocols` monorepo.
 
 ## Dependencies
 
@@ -62,14 +64,14 @@ _\*\* OpenZeppelin contract_
 
 - WETH and Swap functions REVERT on failure cases within Wrapper. Similarly, Wrapper will REVERT in case any movements of tokens or ether fails within Wrapper.swap.
 
-#### 2. Contract Ether and Token balances should remain unchanged after each swap.
+#### 2. Contract ether and Token balances should remain unchanged after each swap.
 
 - Wrapper does not perform any arithmetic computation, or call this.balance. It passses the full token or ether amounts received along or REVERTS the transaction.
 - **This invariant currently holds as-is.**
 
-#### 3. If Ether is sent to Wrapper.swap, it should be deposited to WETH and then traded.
+#### 3. If ether is sent to Wrapper.swap, it should be deposited to WETH and then traded.
 
-- When ETH is sent to the contract by the taker, the wrapper contract will deposit to the WETH contract and perform the swap. This prevents the contract from holding any Ether and subsequently any WETH.
+- When ETH is sent to the contract by the taker, the wrapper contract will deposit to the WETH contract and perform the swap. This prevents the contract from holding any ether and subsequently any WETH.
 
 - **This invariant currently holds as-is.**
 
