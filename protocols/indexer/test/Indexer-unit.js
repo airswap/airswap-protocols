@@ -358,7 +358,7 @@ contract('Indexer Unit Tests', async accounts => {
         indexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
           from: aliceAddress,
         }),
-        'USER_ALREADY_STAKED'
+        'USER_HAS_INTENT'
       )
     })
   })

@@ -17,7 +17,7 @@
 pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
-import "@airswap/swap/interfaces/ISwap.sol";
+import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/token/ERC721/IERC721.sol";
 
@@ -90,9 +90,7 @@ contract Swap is ISwap {
   function swap(
     Types.Order calldata _order,
     Types.Signature calldata _signature
-  )
-    external
-  {
+  ) external {
 
     // Ensure the order is not expired.
     require(_order.expiry > block.timestamp,
@@ -193,127 +191,6 @@ contract Swap is ISwap {
       finalTakerWallet, _order.taker.param, _order.taker.token,
       _order.affiliate.wallet, _order.affiliate.param, _order.affiliate.token
     );
-  }
-
-  /**
-    * @notice Atomic Token Swap (Simple)
-    * @dev Supports fungible token transfers (ERC-20)
-    * @param _nonce uint256
-    * @param _expiry uint256
-    * @param _makerWallet address
-    * @param _makerParam uint256
-    * @param _makerToken address
-    * @param _takerWallet address
-    * @param _takerParam uint256
-    * @param _takerToken address
-    * @param _v uint8
-    * @param _r bytes32
-    * @param _s bytes32
-    */
-  function swapSimple(
-    uint256 _nonce,
-    uint256 _expiry,
-    address _makerWallet,
-    uint256 _makerParam,
-    address _makerToken,
-    address _takerWallet,
-    uint256 _takerParam,
-    address _takerToken,
-    uint8 _v,
-    bytes32 _r,
-    bytes32 _s
-  )
-      external
-  {
-
-    // Ensure the order is not expired.
-    require(_expiry > block.timestamp,
-      "ORDER_EXPIRED");
-
-    // Ensure the order has not already been taken or canceled.
-    require(makerOrderStatus[_makerWallet][_nonce] == OPEN,
-      "ORDER_UNAVAILABLE");
-
-    require(_nonce >= makerMinimumNonce[_makerWallet],
-      "NONCE_TOO_LOW");
-
-    // Mark the order TAKEN (0x01).
-    makerOrderStatus[_makerWallet][_nonce] = TAKEN;
-
-    // Validate the taker side of the trade.
-    address finalTakerWallet;
-
-    if (_takerWallet == address(0)) {
-
-      // Set a null taker to be the order sender.
-      finalTakerWallet = msg.sender;
-
-    } else {
-
-      // Ensure the order sender is authorized.
-      if (msg.sender != _takerWallet) {
-        require(isAuthorized(_takerWallet, msg.sender),
-          "SENDER_UNAUTHORIZED");
-      }
-
-      finalTakerWallet = _takerWallet;
-
-    }
-
-    // Validate the maker side of the trade.
-    if (_v == 0) {
-      /**
-        * Signature is not provided. The maker may have authorized the sender
-        * to swap on its behalf, which does not require a signature.
-        */
-      require(isAuthorized(_makerWallet, msg.sender),
-        "SIGNER_UNAUTHORIZED");
-
-    } else {
-
-      // Signature is provided. Ensure that it is valid.
-      require(_makerWallet == ecrecover(
-        keccak256(abi.encodePacked(
-          "\x19Ethereum Signed Message:\n32",
-          keccak256(abi.encodePacked(
-            byte(0),
-            address(this),
-            _nonce,
-            _expiry,
-            _makerWallet,
-            _makerParam,
-            _makerToken,
-            _takerWallet,
-            _takerParam,
-            _takerToken
-          ))
-        )), _v, _r, _s), "SIGNATURE_INVALID");
-    }
-
-    // Transfer token from taker to maker.
-    transferToken(
-      finalTakerWallet,
-      _makerWallet,
-      _takerParam,
-      _takerToken,
-      ERC20_INTERFACE_ID
-    );
-
-    // Transfer token from maker to taker.
-    transferToken(
-      _makerWallet,
-      finalTakerWallet,
-      _makerParam,
-      _makerToken,
-      ERC20_INTERFACE_ID
-    );
-
-    emit Swap(_nonce, block.timestamp,
-      _makerWallet, _makerParam, _makerToken,
-      finalTakerWallet, _takerParam, _takerToken,
-      address(0), 0, address(0)
-    );
-
   }
 
   /**

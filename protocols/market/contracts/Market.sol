@@ -106,6 +106,9 @@ contract Market is Ownable {
     uint256 _amount,
     bytes32 _locator
   ) external onlyOwner {
+
+    require(!hasIntent(_staker), "USER_HAS_INTENT");
+
     Intent memory newIntent = Intent(_staker, _amount, _locator);
 
     // Insert after the next highest amount on the linked list.
@@ -122,7 +125,7 @@ contract Market is Ownable {
     */
   function unsetIntent(
     address _staker
-  ) public onlyOwner returns (bool) {
+  ) external onlyOwner returns (bool) {
 
     // Ensure the _staker is in the linked list.
     if (!hasIntent(_staker)) {
@@ -141,7 +144,7 @@ contract Market is Ownable {
     */
   function getIntent(
     address _staker
-  ) public view returns (Intent memory) {
+  ) external view returns (Intent memory) {
 
     // Ensure the staker has a neighbor in the linked list.
     if (intentsLinkedList[_staker][PREV].staker != address(0)) {
@@ -158,7 +161,7 @@ contract Market is Ownable {
     */
   function fetchIntents(
     uint256 _count
-  ) public view returns (bytes32[] memory result) {
+  ) external view returns (bytes32[] memory result) {
 
     // Limit results to list length or _count.
     uint256 limit = length;
@@ -173,9 +176,6 @@ contract Market is Ownable {
     // Iterate over the list until the end or limit.
     uint256 i = 0;
     while (i < limit) {
-      if (intent.staker == HEAD) {
-        break;
-      }
       result[i] = intent.locator;
       i = i + 1;
       intent = intentsLinkedList[intent.staker][NEXT];
