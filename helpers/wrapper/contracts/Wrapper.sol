@@ -50,10 +50,10 @@ contract Wrapper {
   }
 
   /**
-    * @notice Required to receive ether from IWETH
+    * @notice Required when withdrawing from WETH
     */
   function() external payable {
-    // Ensure the message sender is the
+    // Ensure the message sender is the WETH contract.
     require(msg.sender == address(wethContract),
       "CONTRACT_NOT_PAYABLE");
   }
