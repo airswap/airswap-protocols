@@ -81,7 +81,7 @@ contract Consumer {
 
       // Get a buy quote from the Peer.
       uint256 userSendAmount = IPeer(address(bytes20(untrustedProbablyPeers[i])))
-        .getBuyQuote(_userReceiveAmount, _userReceiveToken, _userSendToken);
+        .getMakerSideQuote(_userReceiveAmount, _userReceiveToken, _userSendToken);
 
       // Update the lowest cost.
       if (userSendAmount > 0 && userSendAmount < lowestCost) {
