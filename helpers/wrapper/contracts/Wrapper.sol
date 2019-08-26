@@ -55,7 +55,7 @@ contract Wrapper {
   function() external payable {
     // Ensure the message sender is the WETH contract.
     require(msg.sender == address(wethContract),
-      "CONTRACT_NOT_PAYABLE");
+      "DO_NOT_SEND_ETHER");
   }
 
   /**
@@ -71,7 +71,7 @@ contract Wrapper {
   ) external payable {
 
     // Ensure message sender is taker wallet.
-    require(msg.sender == _order.taker.wallet,
+    require(_order.taker.wallet == msg.sender,
       "SENDER_MUST_BE_TAKER");
 
     // The taker is sending ether.

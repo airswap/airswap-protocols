@@ -121,7 +121,7 @@ contract('Wrapper Unit Tests', async accounts => {
           to: wrapper.address,
           value: 1,
         }),
-        'CONTRACT_NOT_PAYABLE'
+        'DO_NOT_SEND_ETHER'
       )
     })
 
