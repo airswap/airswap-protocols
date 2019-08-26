@@ -113,12 +113,12 @@ function unsetRule(
 | `_takerToken` | `address` | The token that the Peer would send in a trade.     |
 | `_makerToken` | `address` | The token that the Consumer would send in a trade. |
 
-## Get a Buy Quote
+## Get a Maker-Side Quote
 
-Get a quote to buy from the Peer.
+Get a quote for the maker side. Often used to get a buy price for \_makerToken.
 
 ```Solidity
-function getBuyQuote(
+function getMakerSideQuote(
   uint256 _takerAmount,
   address _takerToken,
   address _makerToken
@@ -142,16 +142,18 @@ function getBuyQuote(
 | `TOKEN_PAIR_INACTIVE` | There is no Rule set for this token pair.        |
 | `AMOUNT_EXCEEDS_MAX`  | The quote would exceed the maximum for the Rule. |
 
-## Get a Sell Quote
+## Get a Taker-Side Quote
 
-Get a quote to sell from the Peer.
+Get a quote for the taker side. Often used to get a sell price for \_takerToken.
 
 ```Solidity
-function getSellQuote(
+function getTakerSideQuote(
   uint256 _makerAmount,
   address _makerToken,
   address _takerToken
-) external view returns (uint256)
+) external view returns (
+  uint256 _takerAmount
+)
 ```
 
 ### Params
