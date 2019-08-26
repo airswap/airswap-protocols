@@ -60,6 +60,12 @@ contract('Wrapper Unit Tests', async accounts => {
       .encodeABI()
     await mockWeth.givenMethodReturnUint(weth_wrapper_balance, 100000)
 
+    //mock the weth.transfer method
+    let weth_transfer = wethTemplate.contract.methods
+      .transfer(EMPTY_ADDRESS, 0)
+      .encodeABI()
+    await mockWeth.givenMethodReturnBool(weth_transfer, true)
+
     //mock the weth.transferFrom method
     let weth_transferFrom = wethTemplate.contract.methods
       .transferFrom(EMPTY_ADDRESS, EMPTY_ADDRESS, 0)
@@ -107,39 +113,39 @@ contract('Wrapper Unit Tests', async accounts => {
     })
   })
 
-  describe('Test swap', async () => {
+  describe('Test wrapped swap', async () => {
+    it('Test fallback function revert', async () => {
+      await reverted(
+        web3.eth.sendTransaction({
+          from: mockTaker,
+          to: wrapper.address,
+          value: 1,
+        }),
+        'DO_NOT_SEND_ETHER'
+      )
+    })
+
     it('Test when taker token != weth, ensure no unexpected ether sent', async () => {
       let nonTakerToken = mockToken
       const { order } = await orders.getOrder({
         taker: {
+          wallet: mockTaker,
           token: nonTakerToken,
         },
       })
       await reverted(
-        wrapper.swap(order, signatures.getEmptySignature(), { value: 2 }),
-        'VALUE_MUST_BE_ZERO'
-      )
-    })
-
-    it('Test when taker token == weth, ensure the taker wallet is unset', async () => {
-      const { order } = await orders.getOrder({
-        taker: {
-          wallet: mockTaker,
-          token: mockWeth.address,
-        },
-      })
-      await reverted(
         wrapper.swap(order, signatures.getEmptySignature(), {
-          value: 2,
           from: mockTaker,
+          value: 2,
         }),
-        'TAKER_WALLET_MUST_BE_UNSET'
+        'VALUE_MUST_BE_ZERO'
       )
     })
 
     it('Test when taker token == weth, ensure the taker amount matches sent ether', async () => {
       const { order } = await orders.getOrder({
         taker: {
+          wallet: mockTaker,
           param: 1,
           token: mockWeth.address,
         },
@@ -162,6 +168,7 @@ contract('Wrapper Unit Tests', async accounts => {
           token: mockWeth.address,
         },
         taker: {
+          wallet: mockTaker,
           param: takerAmount,
           token: mockWeth.address,
         },
@@ -191,6 +198,7 @@ contract('Wrapper Unit Tests', async accounts => {
           token: notWethContract,
         },
         taker: {
+          wallet: mockTaker,
           param: takerAmount,
           token: mockWeth.address,
         },
@@ -199,6 +207,7 @@ contract('Wrapper Unit Tests', async accounts => {
       await passes(
         wrapper.swap(order, signatures.getEmptySignature(), {
           value: takerAmount,
+          from: mockTaker,
         })
       )
 

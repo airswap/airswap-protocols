@@ -50,15 +50,20 @@ contract Wrapper {
   }
 
   /**
-    * @notice Required to receive ether from IWETH
+    * @notice Required when withdrawing from WETH
+    * @dev During unwraps, WETH.withdraw transfers ether to msg.sender (this contract)
     */
-  function() external payable { }
+  function() external payable {
+    // Ensure the message sender is the WETH contract.
+    if(msg.sender != address(wethContract)) {
+      revert("DO_NOT_SEND_ETHER");
+    }
+  }
 
   /**
     * @notice Send an Order
-    * @dev To send ether to this contract, taker wallet must be unset
-    * @dev For orders with taker wallet set, taker must authorize this contract on the swapContract
-    * @dev To receive ether from this contract, taker must approve it on the wethContract
+    * @dev Taker must authorize this contract on the swapContract
+    * @dev Taker must approve this contract on the wethContract
     * @param _order Types.Order
     * @param _signature Types.Signature
     */
@@ -67,17 +72,22 @@ contract Wrapper {
     Types.Signature calldata _signature
   ) external payable {
 
-    // The taker is sending ether.
+    // Ensure message sender is taker wallet.
+    require(_order.taker.wallet == msg.sender,
+      "SENDER_MUST_BE_TAKER");
+
+    // The taker is sending ether that must be wrapped.
     if (_order.taker.token == address(wethContract)) {
 
-      require(_order.taker.wallet == address(0),
-        "TAKER_WALLET_MUST_BE_UNSET");
-
+      // Ensure  message value is taker param.
       require(_order.taker.param == msg.value,
         "VALUE_MUST_BE_SENT");
 
       // Wrap (deposit) the ether.
       wethContract.deposit.value(msg.value)();
+
+      // Transfer from wrapper to taker.
+      wethContract.transfer(_order.taker.wallet, _order.taker.param);
 
     } else {
 
@@ -85,9 +95,6 @@ contract Wrapper {
       require(msg.value == 0,
         "VALUE_MUST_BE_ZERO");
 
-      // Ensure msg sender matches the takerWallet.
-      require(msg.sender == _order.taker.wallet,
-        "SENDER_MUST_BE_TAKER");
     }
 
     // Perform the simple swap.
@@ -96,7 +103,7 @@ contract Wrapper {
       _signature
     );
 
-    // The taker is receiving ether.
+    // The taker is receiving ether that must be unwrapped.
     if (_order.maker.token == address(wethContract)) {
 
       // Transfer from the taker to the wrapper.
@@ -108,11 +115,6 @@ contract Wrapper {
       // Transfer ether to the user.
       msg.sender.transfer(_order.maker.param);
 
-    // This contract assumed the role of taker and received tokens.
-    } else if (_order.taker.wallet == address(0)) {
-
-      // Transfer tokens received by this contract to the sender.
-      require(IERC20(_order.maker.token).transfer(msg.sender, _order.maker.param));
     }
   }
 }
