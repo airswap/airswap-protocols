@@ -70,24 +70,6 @@ function createMarket(
 | `_makerToken` | `address` | Address of the token that the Maker sends. |
 | `_takerToken` | `address` | Address of the token that the Taker sends. |
 
-## Create a Two-Sided Market
-
-Call `createMarket` twice to for both sides of a market. For example, an intent to trade both WETH/DAI and DAI/WETH.
-
-```Solidity
-function createTwoSidedMarket(
-  address _tokenOne,
-  address _tokenTwo
-) public returns (address, address)
-```
-
-### Params
-
-| Name        | Type      | Description                                            |
-| :---------- | :-------- | :----------------------------------------------------- |
-| `_tokenOne` | `address` | Address of the token of the first side of the market.  |
-| `_tokenTwo` | `address` | Address of the token of the second side of the market. |
-
 ## Add a Token to Blacklist
 
 Add a token to the blacklist. Markets that include the blacklisted token will be ignored. Emits an `AddToBlacklist` event.
@@ -153,30 +135,6 @@ function setIntent(
 | `MINIMUM_NOT_MET`       | The staking amount is insufficient.        |
 | `UNABLE_TO_STAKE`       | The staking amount was not transferred.    |
 
-## Set a Two-Sided Intent to Trade
-
-Call `setIntent` for both sides of a market.
-
-```Solidity
-function setTwoSidedIntent(
-  address _tokenOne,
-  address _tokenTwo,
-  uint256 _amount,
-  uint256 _expiry,
-  address _locator
-) public
-```
-
-### Params
-
-| Name        | Type      | Description                                            |
-| :---------- | :-------- | :----------------------------------------------------- |
-| `_tokenOne` | `address` | Address of the token of the first side of the market.  |
-| `_tokenTwo` | `address` | Address of the token of the second side of the market. |
-| `_amount`   | `uint256` | Amount of token to stake for EACH market.              |
-| `_expiry`   | `uint256` | Timestamp after which the intent is invalid.           |
-| `_locator`  | `address` | Locator for the peer.                                  |
-
 ## Unset an Intent to Trade
 
 Unset an intent to trade and return staked tokens to the sender.
@@ -201,27 +159,6 @@ function unsetIntent(
 | :---------------------- | :----------------------------------------- |
 | `MARKET_IS_BLACKLISTED` | One or both of the tokens are blacklisted. |
 | `MARKET_DOES_NOT_EXIST` | There is no market for the token pair.     |
-
-## Unset a Two-Sided Intent to Trade
-
-Call `unsetIntent` for both sides of a market.
-
-```Solidity
-function setTwoSidedIntent(
-  address _tokenOne,
-  address _tokenTwo
-) public
-```
-
-### Params
-
-| Name        | Type      | Description                                            |
-| :---------- | :-------- | :----------------------------------------------------- |
-| `_tokenOne` | `address` | Address of the token of the first side of the market.  |
-| `_tokenTwo` | `address` | Address of the token of the second side of the market. |
-| `_amount`   | `uint256` | Amount of token to stake for each side.                |
-| `_expiry`   | `uint256` | Timestamp after which the intent is invalid.           |
-| `_locator`  | `address` | Locator for the peer.                                  |
 
 ## Get Intents
 
@@ -249,27 +186,3 @@ function getIntents(
 | :---------------------- | :----------------------------------------- |
 | `MARKET_IS_BLACKLISTED` | One or both of the tokens are blacklisted. |
 | `MARKET_DOES_NOT_EXIST` | There is no market for the token pair.     |
-
-## Get Length
-
-Get the length of the list of intents for a token pair.
-
-```Solidity
-function lengthOf(
-  address _makerToken,
-  address _takerToken
-) external view returns (uint256)
-```
-
-### Params
-
-| Name          | Type      | Description                                |
-| :------------ | :-------- | :----------------------------------------- |
-| `_makerToken` | `address` | Address of the token that the Maker sends. |
-| `_takerToken` | `address` | Address of the token that the Taker sends. |
-
-### Reverts
-
-| Reason                  | Scenario                               |
-| :---------------------- | :------------------------------------- |
-| `MARKET_DOES_NOT_EXIST` | There is no market for the token pair. |
