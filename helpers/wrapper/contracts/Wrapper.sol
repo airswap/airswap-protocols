@@ -51,6 +51,7 @@ contract Wrapper {
 
   /**
     * @notice Required when withdrawing from WETH
+    * @dev During unwraps, WETH.withdraw transfers ether to msg.sender (this contract)
     */
   function() external payable {
     // Ensure the message sender is the WETH contract.
@@ -74,7 +75,7 @@ contract Wrapper {
     require(_order.taker.wallet == msg.sender,
       "SENDER_MUST_BE_TAKER");
 
-    // The taker is sending ether.
+    // The taker is sending ether that must be wrapped.
     if (_order.taker.token == address(wethContract)) {
 
       // Ensure  message value is taker param.
@@ -101,7 +102,7 @@ contract Wrapper {
       _signature
     );
 
-    // The taker is receiving ether.
+    // The taker is receiving ether that must be unwrapped.
     if (_order.maker.token == address(wethContract)) {
 
       // Transfer from the taker to the wrapper.
