@@ -1,13 +1,13 @@
 # Security Report: Wrapper
 
 Smart Contract Security Report by Team Fluidity (team[at]fluidity[dot]io) and Phil Daian (feedback[at]stableset[dot]com)
-Hash of master used for report: [aec813337e7f2320162d9314932a553c0a52c9dc](https://github.com/airswap/airswap-protocols/commit/aec813337e7f2320162d9314932a553c0a52c9dc)
+Hash of master used for report: [ef5cff0613532d27ecedb332e222ae0a75079841](https://github.com/airswap/airswap-protocols/commit/ef5cff0613532d27ecedb332e222ae0a75079841)
 
 Wrapper [Source Code](https://github.com/airswap/airswap-protocols/tree/master/helpers/wrapper) and [README](../README.md)
 
 ## Introduction
 
-The Swap Protocol is a peer-to-peer protocol for trading Ethereum tokens that allows two parties to exchange tokens in an atomic transaction. The Wrapper contract facilitates using ether for wrapped ether (WETH) trades on the Swap contract. If the Wrapper is invoked with a message value (ether) it will deposit the ether to WETH and then perform the swap with itself as the counterparty, then transfer received tokens to the message sender. Additionally, if receiving WETH in the swap, it will withdraw the ether and transfer it to the message sender. The contracts are compiled with v0.5.10.a6ea5b19 (0.5.10 stable release).
+The Swap Protocol is a peer-to-peer protocol for trading Ethereum tokens that allows two parties to exchange tokens in an atomic transaction. The Wrapper contract facilitates using ether for wrapped ether (WETH) trades on the Swap contract. If the Wrapper is invoked with a message value (ether) it will deposit the ether to WETH and then perform the swap with itself as the counterparty, then transfer received tokens to the message sender. Additionally, if receiving WETH in the swap, it will withdraw the ether and transfer it to the message sender. The Wrapper contract is designed to work primarily with AirSwap Instant application. The contracts are compiled with v0.5.10.a6ea5b19 (0.5.10 stable release).
 
 ## Structure
 
@@ -66,7 +66,7 @@ _\*\* OpenZeppelin contract_
 
 #### 2. Contract ether and Token balances should remain unchanged after each swap.
 
-- Wrapper does not perform any arithmetic computation, or call this.balance. It passses the full token or ether amounts received along or REVERTS the transaction.
+- Wrapper does not perform any arithmetic computation, or call this.balance. It passes the full token or ether amounts received along or REVERTS the transaction.
 - **This invariant currently holds as-is.**
 
 #### 3. If ether is sent to Wrapper.swap, it should be deposited to WETH and then traded.
@@ -132,9 +132,9 @@ helpers/wrapper/test/Wrapper.js
 
 ## Migrations
 
-Hash of master used for deploy: [aec813337e7f2320162d9314932a553c0a52c9dc](https://github.com/airswap/airswap-protocols/commit/aec813337e7f2320162d9314932a553c0a52c9dc)
+Hash of master used for deploy: [ef5cff0613532d27ecedb332e222ae0a75079841](https://github.com/airswap/airswap-protocols/commit/ef5cff0613532d27ecedb332e222ae0a75079841)
 
-Rinkeby Etherscan (Wrapper): [0xE6dbe98486B25f0D1bd247c2052dbb9E1F0Fe023](https://rinkeby.etherscan.io/address/0xE6dbe98486B25f0D1bd247c2052dbb9E1F0Fe023)
+Rinkeby Etherscan (Wrapper): TBD: [0xE6dbe98486B25f0D1bd247c2052dbb9E1F0Fe023](https://rinkeby.etherscan.io/address/0xE6dbe98486B25f0D1bd247c2052dbb9E1F0Fe023)
 
 - \_swapContract = [0x78Db49D0459a67158BdCA6e161BE3D90342C7247](https://rinkeby.etherscan.io/address/0x78Db49D0459a67158BdCA6e161BE3D90342C7247)
 - \_wethContract = [0xc778417E063141139Fce010982780140Aa0cD5Ab](https://rinkeby.etherscan.io/address/0xc778417E063141139Fce010982780140Aa0cD5Ab)
