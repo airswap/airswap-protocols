@@ -55,8 +55,9 @@ contract Wrapper {
     */
   function() external payable {
     // Ensure the message sender is the WETH contract.
-    require(msg.sender == address(wethContract),
-      "DO_NOT_SEND_ETHER");
+    if(msg.sender != address(wethContract)) {
+      revert("DO_NOT_SEND_ETHER");
+    }
   }
 
   /**
