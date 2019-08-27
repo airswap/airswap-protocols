@@ -19,7 +19,7 @@ const {
 } = require('@airswap/order-utils').constants
 
 contract('Swap Unit Tests', async accounts => {
-  const Jun_06_2017T00_00_00_UTC = 1497052800 //a date later than than when ganache started
+  const Jun_06_2017T00_00_00_UTC = 1497052800 //a date later than when ganache started
   const mockMaker = accounts[9]
   const mockTaker = accounts[7]
   const sender = accounts[0]
