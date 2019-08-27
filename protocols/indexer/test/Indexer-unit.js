@@ -415,6 +415,28 @@ contract('Indexer Unit Tests', async accounts => {
         )
       })
     })
+
+    it('should revert if unset an intent failed in token transfer', async () => {
+      // create the market
+      await indexer.createMarket(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+
+      // create the intent
+      await indexer.setIntent(tokenOne, tokenTwo, 10, aliceLocator, {
+        from: aliceAddress,
+      })
+
+      // The token transfer should revert
+      await stakingTokenMock.givenAnyRevert()
+
+      // reverts if transfer failed
+      await reverted(
+        indexer.unsetIntent(tokenOne, tokenTwo, {
+          from: aliceAddress,
+        })
+      )
+    })
   })
 
   describe('Test getIntents', async () => {

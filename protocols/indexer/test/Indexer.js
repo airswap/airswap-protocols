@@ -1,7 +1,12 @@
 const Indexer = artifacts.require('Indexer')
 const FungibleToken = artifacts.require('FungibleToken')
-
-const { emitted, reverted, equal, ok } = require('@airswap/test-utils').assert
+const {
+  emitted,
+  notEmitted,
+  reverted,
+  equal,
+  ok,
+} = require('@airswap/test-utils').assert
 const { balances } = require('@airswap/test-utils').balances
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
@@ -59,10 +64,31 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
       )
     })
 
-    it('Bob ensures no intents are on the Indexer', async () => {
+    it('Bob tries to create a duplicate market (collection of intents) for WETH/DAI', async () => {
+      notEmitted(
+        await indexer.createMarket(tokenWETH.address, tokenDAI.address, {
+          from: bobAddress,
+        }),
+        'CreateMarket'
+      )
+    })
+
+    it('Bob ensures no intents are on the Indexer for existing market', async () => {
       const intents = await indexer.getIntents.call(
         tokenWETH.address,
         tokenDAI.address,
+        10,
+        {
+          from: bobAddress,
+        }
+      )
+      equal(intents.length, 0)
+    })
+
+    it('Bob ensures no intents are on the Indexer for non-existing market', async () => {
+      const intents = await indexer.getIntents.call(
+        tokenDAI.address,
+        tokenWETH.address,
         10,
         {
           from: bobAddress,
@@ -88,6 +114,30 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
   })
 
   describe('Staking', async () => {
+    it('Alice attempts to stake with 0 and set an intent succeeds', async () => {
+      emitted(
+        await indexer.setIntent(
+          tokenWETH.address,
+          tokenDAI.address,
+          0,
+          aliceLocator,
+          {
+            from: aliceAddress,
+          }
+        ),
+        'Stake'
+      )
+    })
+
+    it('Alice attempts to unset an intent and succeeds', async () => {
+      emitted(
+        await indexer.unsetIntent(tokenWETH.address, tokenDAI.address, {
+          from: aliceAddress,
+        }),
+        'Unstake'
+      )
+    })
+
     it('Fails due to no staking token balance', async () => {
       await reverted(
         indexer.setIntent(
@@ -157,17 +207,15 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
 
   describe('Intent integrity', async () => {
     it('Bob ensures only one intent is on the Indexer', async () => {
-      it('Bob ensures no intents are on the Indexer', async () => {
-        const intents = await indexer.getIntents.call(
-          tokenWETH.address,
-          tokenDAI.address,
-          10,
-          {
-            from: bobAddress,
-          }
-        )
-        equal(intents.length, 1)
-      })
+      const intents = await indexer.getIntents.call(
+        tokenWETH.address,
+        tokenDAI.address,
+        10,
+        {
+          from: bobAddress,
+        }
+      )
+      equal(intents.length, 1)
     })
 
     it('Bob ensures that Alice intent is on the Indexer', async () => {
@@ -182,12 +230,30 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
       equal(intents[0], aliceLocator)
     })
 
+    it('Alice attempts to unset non-existent market and reverts', async () => {
+      await reverted(
+        indexer.unsetIntent(tokenDAI.address, tokenWETH.address, {
+          from: aliceAddress,
+        }),
+        'MARKET_DOES_NOT_EXIST'
+      )
+    })
+
     it('Alice attempts to unset an intent and succeeds', async () => {
       emitted(
         await indexer.unsetIntent(tokenWETH.address, tokenDAI.address, {
           from: aliceAddress,
         }),
         'Unstake'
+      )
+    })
+
+    it('Alice attempts to unset an non-existent intent and reverts', async () => {
+      await reverted(
+        indexer.unsetIntent(tokenWETH.address, tokenDAI.address, {
+          from: aliceAddress,
+        }),
+        'INTENT_DOES_NOT_EXIST'
       )
     })
 
@@ -242,6 +308,27 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
       )
     })
 
+    it('Bob tries to fetch intent on blacklisted token which returns 0', async () => {
+      const intents = await indexer.getIntents.call(
+        tokenWETH.address,
+        tokenDAI.address,
+        10,
+        {
+          from: bobAddress,
+        }
+      )
+      equal(intents.length, 0)
+    })
+
+    it('Owner attempts to blacklist same asset which does not emit a new event', async () => {
+      notEmitted(
+        await indexer.addToBlacklist([tokenDAI.address], {
+          from: ownerAddress,
+        }),
+        'AddToBlacklist'
+      )
+    })
+
     it('Alice attempts to stake and set an intent and fails due to blacklist', async () => {
       await reverted(
         indexer.setIntent(
@@ -275,7 +362,16 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
       )
     })
 
-    it('Owner attempts to blacklist a market and succeeds', async () => {
+    it('Owner attempts to remove non-existent token from blacklist with no event emitted', async () => {
+      notEmitted(
+        await indexer.removeFromBlacklist([tokenAST.address], {
+          from: ownerAddress,
+        }),
+        'RemoveFromBlacklist'
+      )
+    })
+
+    it('Owner attempts to remove token from blacklist and succeeds', async () => {
       emitted(
         await indexer.removeFromBlacklist([tokenDAI.address], {
           from: ownerAddress,

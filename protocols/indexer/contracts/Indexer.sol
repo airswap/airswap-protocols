@@ -85,7 +85,7 @@ contract Indexer is IIndexer, Ownable {
     address[] calldata _tokens
   ) external onlyOwner {
     for (uint256 i = 0; i < _tokens.length; i++) {
-      if (blacklist[_tokens[i]] == false) {
+      if (!blacklist[_tokens[i]]) {
         blacklist[_tokens[i]] = true;
         emit AddToBlacklist(_tokens[i]);
       }
@@ -100,7 +100,7 @@ contract Indexer is IIndexer, Ownable {
     address[] calldata _tokens
   ) external onlyOwner {
     for (uint256 i = 0; i < _tokens.length; i++) {
-      if (blacklist[_tokens[i]] == true) {
+      if (blacklist[_tokens[i]]) {
         blacklist[_tokens[i]] = false;
         emit RemoveFromBlacklist(_tokens[i]);
       }
@@ -178,9 +178,12 @@ contract Indexer is IIndexer, Ownable {
     //No need to require() because a check is done above that reverts if there are no intents
     markets[_makerToken][_takerToken].unsetIntent(msg.sender);
 
-    // Return the staked tokens. IERC20 returns boolean this contract may not be ours.
-    // Need to revert when false is returned
-    require(stakeToken.transfer(msg.sender, intent.amount));
+    if (intent.amount > 0) {
+      // Return the staked tokens. IERC20 returns boolean this contract may not be ours.
+      // Need to revert when false is returned
+      require(stakeToken.transfer(msg.sender, intent.amount));
+    }
+
     emit Unstake(msg.sender, _makerToken, _takerToken, intent.amount);
   }
 
