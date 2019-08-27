@@ -59,7 +59,7 @@ Set a trading rule on the peer.
 function setRule(
   address _takerToken,
   address _makerToken,
-  uint256 _maxTakerParam,
+  uint256 _maxTakerAmount,
   uint256 _priceCoef,
   uint256 _priceExp
 ) external onlyOwner
@@ -67,13 +67,13 @@ function setRule(
 
 ### Params
 
-| Name             | Type      | Description                                                    |
-| :--------------- | :-------- | :------------------------------------------------------------- |
-| `_takerToken`    | `address` | The token the peer would send.                                 |
-| `_makerToken`    | `address` | The token the consumer would send.                             |
-| `_maxTakerParam` | `uint256` | The maximum amount of token the peer would send.               |
-| `_priceCoef`     | `uint256` | The coefficient of the price to indicate the whole number.     |
-| `_priceExp`      | `uint256` | The exponent of the price to indicate location of the decimal. |
+| Name              | Type      | Description                                                    |
+| :---------------- | :-------- | :------------------------------------------------------------- |
+| `_takerToken`     | `address` | The token the peer would send.                                 |
+| `_makerToken`     | `address` | The token the consumer would send.                             |
+| `_maxTakerAmount` | `uint256` | The maximum amount of token the peer would send.               |
+| `_priceCoef`      | `uint256` | The coefficient of the price to indicate the whole number.     |
+| `_priceExp`       | `uint256` | The exponent of the price to indicate location of the decimal. |
 
 ### Example
 
