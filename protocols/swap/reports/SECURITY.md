@@ -1,7 +1,7 @@
 # Security Report: Swap
 
 Smart Contract Security Report by Team Fluidity (team[at]fluidity[dot]io) and Phil Daian (feedback[at]stableset[dot]com)
-Hash of master used for report: [6e6c314f1d082dbb98e8ca2fd671dddfd36e37fa](https://github.com/airswap/airswap-protocols/commit/6e6c314f1d082dbb98e8ca2fd671dddfd36e37fa)
+Hash of master used for report: [ef5cff0613532d27ecedb332e222ae0a75079841](https://github.com/airswap/airswap-protocols/commit/ef5cff0613532d27ecedb332e222ae0a75079841)
 
 Swap [Source Code](https://github.com/airswap/airswap-protocols/tree/master/protocols/swap) and [README](../README.md)
 
@@ -13,9 +13,9 @@ The Swap Protocol is a peer-to-peer protocol for trading Ethereum tokens that al
 
 The Swap contract is comprised a contract, an interface, and a library.
 
-[@airswap/swap/contracts/Swap.sol](../contracts/Swap.sol) @ [6e6c314f1d082dbb98e8ca2fd671dddfd36e37fa](https://github.com/airswap/airswap-protocols/commit/6e6c314f1d082dbb98e8ca2fd671dddfd36e37fa)
+[@airswap/swap/contracts/Swap.sol](../contracts/Swap.sol) @ [ef5cff0613532d27ecedb332e222ae0a75079841](https://github.com/airswap/airswap-protocols/commit/ef5cff0613532d27ecedb332e222ae0a75079841)
 
-[@airswap/swap/interfaces/ISwap.sol](../interfaces/ISwap.sol) @ [6e6c314f1d082dbb98e8ca2fd671dddfd36e37fa](https://github.com/airswap/airswap-protocols/commit/6e6c314f1d082dbb98e8ca2fd671dddfd36e37fa)
+[@airswap/swap/interfaces/ISwap.sol](../interfaces/ISwap.sol) @ [ef5cff0613532d27ecedb332e222ae0a75079841](https://github.com/airswap/airswap-protocols/commit/ef5cff0613532d27ecedb332e222ae0a75079841)
 
 [@airswap/types/contracts/Types.sol](../../types/contracts/Types.sol) @ [6e6c314f1d082dbb98e8ca2fd671dddfd36e37fa](https://github.com/airswap/airswap-protocols/commit/6e6c314f1d082dbb98e8ca2fd671dddfd36e37fa)
 
@@ -55,7 +55,7 @@ _\*\* OpenZeppelin contract_
 
 | Function   | Source   | Visibility | Params                                                                                                                                                                                                                  | Payable |
 | :--------- | :------- | :--------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------ |
-| swapSimple | Swap.sol | external   | `uint256 _nonce`, `uint256 _expiry`, `address _makerWallet`, `uint256 _makerParam`, `address _makerToken`, `address _takerWallet`, `uint256 _takerParam`, `address _takerToken`, `uint8 _v`, `bytes32 _r`, `bytes32 _s` | no      |
+| swap | Swap.sol | external   | `Types.Order _order, Types.Signature _signature` | no      |
 | cancel     | Swap.sol | external   | `uint256[] calldata _nonces`                                                                                                                                                                                            | no      |
 | invalidate | Swap.sol | external   | `uint256 _minimumNonce`                                                                                                                                                                                                 | no      |
 | authorize  | Swap.sol | external   | `address _delegate`, `uint256 _expiry`                                                                                                                                                                                  | no      |
@@ -86,7 +86,7 @@ the exploit surface to incorrect arguments to swap, swapSimple, authorize, cance
 
 #### 4. Signatures cannot be forged or duplicated.
 
-- Both in the simpleSimple and full swap flow, validation is required on all of the order parameters to the swap function. Every item in the order is included in a hash along with an identifier tag (nonce), uniquely identifying each Order object and preventing hash/signature reuse between different items. All items that are hashed are fixed size and stored in memory, making it impossible to exploit padding or offset vulnerabilities.
+- In the swap flow, validation is required on all of the order parameters to the swap function. Every item in the order is included in a hash along with an identifier tag (nonce), uniquely identifying each Order object and preventing hash/signature reuse between different items. All items that are hashed are fixed size and stored in memory, making it impossible to exploit padding or offset vulnerabilities.
 - In both cases, ecrecover is performed, and checked against the relevant maker (or signer, checked separately for authorization).
 - The output of a correct ecrecover cannot be forged without knowledge of the signing private key.
 - **This invariant currently holds as-is.**
@@ -170,16 +170,18 @@ End-to-end tests for the ERC-20 flow were performed on Rinkeby prior to deploy o
 
 ## Migrations
 
-Hash of master used for deploy: [6e6c314f1d082dbb98e8ca2fd671dddfd36e37fa](https://github.com/airswap/airswap-protocols/commit/6e6c314f1d082dbb98e8ca2fd671dddfd36e37fa)
+Hash of master used for deploy of Swap: [ef5cff0613532d27ecedb332e222ae0a75079841](https://github.com/airswap/airswap-protocols/commit/ef5cff0613532d27ecedb332e222ae0a75079841)
 
-Rinkeby Etherscan (Swap): https://rinkeby.etherscan.io/address/0x78db49d0459a67158bdca6e161be3d90342c7247
+Rinkeby Etherscan (Swap): https://rinkeby.etherscan.io/address/0x6c629eAFFbEf9935F4FA390AC32f27EEC9462a8E
+
+Hash of master used for deploy of below contracts: [6e6c314f1d082dbb98e8ca2fd671dddfd36e37fa](https://github.com/airswap/airswap-protocols/commit/6e6c314f1d082dbb98e8ca2fd671dddfd36e37fa)
 
 Rinkeby Etherscan (Types); https://rinkeby.etherscan.io/address/0xaaf6cb19298e7d0abc410eb2a0d5b8fef747573d
 
-Mainnet Etherscan (verified Swap): https://etherscan.io/address/0x54d2690e97e477a4b33f40d6e4afdd4832c07c57
-
 Mainnet Etherscan (verified lib Types):
 https://etherscan.io/address/0xc65ff60eb8e4038a2415bb569d1fa6dca47d692e
+
+Mainnet Etherscan (verified Swap): https://etherscan.io/address/0x54d2690e97e477a4b33f40d6e4afdd4832c07c57
 
 ## Notes
 

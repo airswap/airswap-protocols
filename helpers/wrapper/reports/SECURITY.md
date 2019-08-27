@@ -13,7 +13,7 @@ The Swap Protocol is a peer-to-peer protocol for trading Ethereum tokens that al
 
 Wrapper is comprised of a single contract.
 
-[@airswap/wrapper/contracts/Wrapper.sol](../contracts/Wrapper.sol) @ [aec813337e7f2320162d9314932a553c0a52c9dc](https://github.com/airswap/airswap-protocols/commit/aec813337e7f2320162d9314932a553c0a52c9dc)
+[@airswap/wrapper/contracts/Wrapper.sol](../contracts/Wrapper.sol) @ [ef5cff0613532d27ecedb332e222ae0a75079841](https://github.com/airswap/airswap-protocols/commit/ef5cff0613532d27ecedb332e222ae0a75079841)
 
 Deployment of Wrapper.sol was performed in the `@airswap/wrapper` package in the `airswap-protocols` monorepo.
 
@@ -105,7 +105,7 @@ _\*\* OpenZeppelin contract_
 Medium Severity Detected:
 Wrapper.constructor (Wrapper.sol#42-51) ignores return value by external calls "wethContract.approve(\_swapContract,MAX_INT)" (Wrapper.sol#50)
 
-Wrapper.swapSimple (Wrapper.sol#72-141) ignores return value by external calls "wethContract.transferFrom(\_takerWallet,address(this),\_makerAmount)" (Wrapper.sol#122)
+Wrapper.swap (Wrapper.sol#72-141) ignores return value by external calls "wethContract.transferFrom(\_takerWallet,address(this),\_makerAmount)" (Wrapper.sol#122)
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unused-return
 
 External call is being made to a known contract implementation of WETH9.sol. WETH9.sol either returns True of revert, there are no instances where it returns False during approve or transferFrom.
@@ -134,9 +134,9 @@ helpers/wrapper/test/Wrapper.js
 
 Hash of master used for deploy: [ef5cff0613532d27ecedb332e222ae0a75079841](https://github.com/airswap/airswap-protocols/commit/ef5cff0613532d27ecedb332e222ae0a75079841)
 
-Rinkeby Etherscan (Wrapper): TBD: [0xE6dbe98486B25f0D1bd247c2052dbb9E1F0Fe023](https://rinkeby.etherscan.io/address/0xE6dbe98486B25f0D1bd247c2052dbb9E1F0Fe023)
+Rinkeby Etherscan (Wrapper): [0x769c9D31613F28790540395bdAF2F68e1D3FF243](https://rinkeby.etherscan.io/address/0x769c9D31613F28790540395bdAF2F68e1D3FF243)
 
-- \_swapContract = [0x78Db49D0459a67158BdCA6e161BE3D90342C7247](https://rinkeby.etherscan.io/address/0x78Db49D0459a67158BdCA6e161BE3D90342C7247)
+- \_swapContract = [0x6c629eAFFbEf9935F4FA390AC32f27EEC9462a8E](https://rinkeby.etherscan.io/address/0x6c629eAFFbEf9935F4FA390AC32f27EEC9462a8E)
 - \_wethContract = [0xc778417E063141139Fce010982780140Aa0cD5Ab](https://rinkeby.etherscan.io/address/0xc778417E063141139Fce010982780140Aa0cD5Ab)
 
 ## Notes

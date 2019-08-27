@@ -1,4 +1,4 @@
-Commit Hash 86a5df112429cbddacd9d99d08f12dbc35bf1642
+Commit Hash ef5cff0613532d27ecedb332e222ae0a75079841
 
 Compiling your contracts...
 ===========================
@@ -42,9 +42,6 @@ INFO:Detectors:
 Swap.swap (Swap.sol#73-202) uses timestamp for comparisons
     Dangerous comparisons:
     - require(bool,string)(_order.expiry >= block.timestamp,ORDER_EXPIRED) (Swap.sol#81-82)
-Swap.swapSimple (Swap.sol#220-326) uses timestamp for comparisons
-    Dangerous comparisons:
-    - require(bool,string)(_expiry >= block.timestamp,ORDER_EXPIRED) (Swap.sol#241-242)
 Swap.authorize (Swap.sol#361-369) uses timestamp for comparisons
     Dangerous comparisons:
     - require(bool,string)(_expiry >= block.timestamp,INVALID_AUTH_EXPIRY) (Swap.sol#366)
@@ -153,17 +150,6 @@ Function 'ERC165Checker._supportsERC165Interface' (../../node_modules/openzeppel
 Function 'ERC165Checker._callERC165SupportsInterface' (../../node_modules/openzeppelin-solidity/contracts/introspection/ERC165Checker.sol#94-120) is not in mixedCase
 Parameter '_order' of Swap.swap (Swap.sol#74) is not in mixedCase
 Parameter '_signature' of Swap.swap (Swap.sol#75) is not in mixedCase
-Parameter '_nonce' of Swap.swapSimple (Swap.sol#221) is not in mixedCase
-Parameter '_expiry' of Swap.swapSimple (Swap.sol#222) is not in mixedCase
-Parameter '_makerWallet' of Swap.swapSimple (Swap.sol#223) is not in mixedCase
-Parameter '_makerParam' of Swap.swapSimple (Swap.sol#224) is not in mixedCase
-Parameter '_makerToken' of Swap.swapSimple (Swap.sol#225) is not in mixedCase
-Parameter '_takerWallet' of Swap.swapSimple (Swap.sol#226) is not in mixedCase
-Parameter '_takerParam' of Swap.swapSimple (Swap.sol#227) is not in mixedCase
-Parameter '_takerToken' of Swap.swapSimple (Swap.sol#228) is not in mixedCase
-Parameter '_v' of Swap.swapSimple (Swap.sol#229) is not in mixedCase
-Parameter '_r' of Swap.swapSimple (Swap.sol#230) is not in mixedCase
-Parameter '_s' of Swap.swapSimple (Swap.sol#231) is not in mixedCase
 Parameter '_nonces' of Swap.cancel (Swap.sol#334) is not in mixedCase
 Parameter '_minimumNonce' of Swap.invalidate (Swap.sol#349) is not in mixedCase
 Parameter '_delegate' of Swap.authorize (Swap.sol#362) is not in mixedCase
