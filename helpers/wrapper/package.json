@@ -20,7 +20,7 @@
     "@airswap/test-utils": "0.1.0",
     "solidity-coverage": "^0.6.3"
   },
-  "dependences": {
+  "dependencies": {
     "@airswap/swap": "2.0.0",
     "@airswap/tokens": "0.1.0"
   }
