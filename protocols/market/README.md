@@ -29,7 +29,6 @@ An "intent to trade" is represented by the following `Intent` struct.
 struct Intent {
   address staker;
   uint256 amount;
-  uint256 expiry;
   address locator;
 }
 ```
@@ -60,7 +59,6 @@ Set an intent to trade in the Market.
 function setIntent(
   address _staker,
   uint256 _amount,
-  uint256 _expiry,
   address _locator
 ) external onlyOwner
 ```
@@ -71,7 +69,6 @@ function setIntent(
 | :--------- | :-------- | :----------------------------------------------------- |
 | `_staker`  | `address` | Address of the account that has staked for the intent. |
 | `_amount`  | `uint256` | Amount of token that the account has staked.           |
-| `_expiry`  | `uint256` | Expiry of the intent as a timestamp in seconds.        |
 | `_locator` | `address` | Locator for the peer.                                  |
 
 ## Unset an Intent
