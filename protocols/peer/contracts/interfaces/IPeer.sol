@@ -56,27 +56,27 @@ interface IPeer {
   ) external;
 
   function getMakerSideQuote(
-    uint256 _takerAmount,
+    uint256 _takerParam,
     address _takerToken,
     address _makerToken
   ) external view returns (
-    uint256 makerAmount
+    uint256 makerParam
   );
 
   function getTakerSideQuote(
-    uint256 _makerAmount,
+    uint256 _makerParam,
     address _makerToken,
     address _takerToken
   ) external view returns (
-    uint256 takerAmount
+    uint256 takerParam
   );
 
   function getMaxQuote(
     address _takerToken,
     address _makerToken
   ) external view returns (
-    uint256 takerAmount,
-    uint256 makerAmount
+    uint256 takerParam,
+    uint256 makerParam
   );
 
   function provideOrder(

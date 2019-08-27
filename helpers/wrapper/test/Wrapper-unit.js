@@ -10,7 +10,7 @@ const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 const { orders, signatures } = require('@airswap/order-utils')
 
 contract('Wrapper Unit Tests', async accounts => {
-  const takerAmount = 2
+  const takerParam = 2
   const mockToken = accounts[9]
   const mockTaker = accounts[8]
   let mockSwap
@@ -169,14 +169,14 @@ contract('Wrapper Unit Tests', async accounts => {
         },
         taker: {
           wallet: mockTaker,
-          param: takerAmount,
+          param: takerParam,
           token: mockWeth.address,
         },
       })
 
       await passes(
         wrapper.swap(order, signatures.getEmptySignature(), {
-          value: takerAmount,
+          value: takerParam,
           from: mockTaker,
         })
       )
@@ -199,14 +199,14 @@ contract('Wrapper Unit Tests', async accounts => {
         },
         taker: {
           wallet: mockTaker,
-          param: takerAmount,
+          param: takerParam,
           token: mockWeth.address,
         },
       })
 
       await passes(
         wrapper.swap(order, signatures.getEmptySignature(), {
-          value: takerAmount,
+          value: takerParam,
           from: mockTaker,
         })
       )
@@ -236,14 +236,14 @@ contract('Wrapper Unit Tests', async accounts => {
           token: notWethContract,
         },
         taker: {
-          param: takerAmount,
+          param: takerParam,
           token: mockWeth.address,
         },
       })
 
       await reverted(
         wrapper.swap(order, signatures.getEmptySignature(), {
-          value: takerAmount,
+          value: takerParam,
         })
       )
 
@@ -288,7 +288,7 @@ contract('Wrapper Unit Tests', async accounts => {
         },
         taker: {
           wallet: mockTaker,
-          param: takerAmount,
+          param: takerParam,
           token: notWethContract,
         },
       })
