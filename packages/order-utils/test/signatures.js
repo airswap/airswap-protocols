@@ -15,7 +15,7 @@ describe('Signatures', async () => {
   const ASTAddress = '0xcc1cbd4f67cceb7c001bd4adf98451237a193ff8'
   const WETHAddress = '0xc778417e063141139fce010982780140aa0cd5ab'
 
-  it('Checks that a Version 0x45: personal_sign signature is valid', async () => {
+  it('Checks that a Version 0x45: personalSign signature is valid', async () => {
     const { order } = await orders.getOrder({
       expiry: 1494460800,
       nonce: 101,

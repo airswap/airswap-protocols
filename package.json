@@ -25,17 +25,20 @@
     "eslint-config-airbnb-base": "^13.2.0",
     "eslint-plugin-import": "^2.18.0",
     "eslint-plugin-prettier": "^3.1.0",
+    "ethereumjs-abi": "^0.6.7",
     "ganache-cli": "^6.4.4",
     "lerna": "^3.15.0",
     "prettier": "^1.18.2",
     "solhint": "^2.1.0",
-    "truffle": "^5.0.32",
-    "ethereumjs-abi": "^0.6.7"
+    "truffle": "^5.0.32"
   },
   "prettier": {
     "trailingComma": "es5",
     "tabWidth": 2,
     "semi": false,
     "singleQuote": true
+  },
+  "dependencies": {
+    "eslint-utils": "^1.4.2"
   }
 }

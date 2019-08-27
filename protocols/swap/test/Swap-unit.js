@@ -19,11 +19,9 @@ const {
 } = require('@airswap/order-utils').constants
 
 contract('Swap Unit Tests', async accounts => {
-  const Jun_06_2017T00_00_00_UTC = 1497052800 //a date later than than when ganache started
+  const Jun_06_2017T00_00_00_UTC = 1497052800 //a date later than when ganache started
   const mockMaker = accounts[9]
-  const mockMakerToken = accounts[8]
   const mockTaker = accounts[7]
-  const mockTakerToken = accounts[6]
   const sender = accounts[0]
   const kind = web3.utils.asciiToHex('FFFF') // hex representation is "0x46464646" this is 4 bytes
   const v = 27
