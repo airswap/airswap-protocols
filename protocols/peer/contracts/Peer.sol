@@ -107,13 +107,13 @@ contract Peer is IPeer, Ownable {
   }
 
   /**
-    * @notice Get a Buy Quote from the Peer
+    * @notice Get a Maker Side Quote from the Peer
     * @param _takerAmount uint256 The amount the Peer would send
     * @param _takerToken address The token that the Peer would send
     * @param _makerToken address The token that the Consumer would send
     * @return uint256 _makerAmount The amount the Consumer would send
     */
-  function getBuyQuote(
+  function getMakerSideQuote(
     uint256 _takerAmount,
     address _takerToken,
     address _makerToken
@@ -141,13 +141,13 @@ contract Peer is IPeer, Ownable {
   }
 
   /**
-    * @notice Get a Sell Quote from the Peer
+    * @notice Get a Taker Side Quote from the Peer
     * @param _makerAmount uint256 The amount the Consumer would send
     * @param _makerToken address The token that the Consumer will send
     * @param _takerToken address The token that the Peer will send
     * @return uint256 _takerAmount The amount the Peer would send
     */
-  function getSellQuote(
+  function getTakerSideQuote(
     uint256 _makerAmount,
     address _makerToken,
     address _takerToken

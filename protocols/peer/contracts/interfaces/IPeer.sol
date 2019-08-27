@@ -55,7 +55,7 @@ interface IPeer {
     address _makerToken
   ) external;
 
-  function getBuyQuote(
+  function getMakerSideQuote(
     uint256 _takerAmount,
     address _takerToken,
     address _makerToken
@@ -63,7 +63,7 @@ interface IPeer {
     uint256 makerAmount
   );
 
-  function getSellQuote(
+  function getTakerSideQuote(
     uint256 _makerAmount,
     address _makerToken,
     address _takerToken

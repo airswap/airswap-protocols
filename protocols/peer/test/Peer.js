@@ -67,7 +67,7 @@ contract('Peer', async accounts => {
         0
       )
       equal(
-        await alicePeer.getBuyQuote.call(
+        await alicePeer.getMakerSideQuote.call(
           1,
           tokenWETH.address,
           tokenDAI.address
@@ -76,7 +76,7 @@ contract('Peer', async accounts => {
       )
       await alicePeer.unsetRule(tokenWETH.address, tokenDAI.address)
       equal(
-        await alicePeer.getBuyQuote.call(
+        await alicePeer.getMakerSideQuote.call(
           1,
           tokenWETH.address,
           tokenDAI.address
@@ -96,7 +96,7 @@ contract('Peer', async accounts => {
         0
       )
       equal(
-        await alicePeer.getBuyQuote.call(
+        await alicePeer.getMakerSideQuote.call(
           1,
           tokenWETH.address,
           tokenDAI.address
@@ -113,7 +113,7 @@ contract('Peer', async accounts => {
         4
       )
       equal(
-        await alicePeer.getBuyQuote.call(
+        await alicePeer.getMakerSideQuote.call(
           100000,
           tokenDAI.address,
           tokenWETH.address
@@ -130,7 +130,7 @@ contract('Peer', async accounts => {
         3
       )
       equal(
-        await alicePeer.getBuyQuote.call(
+        await alicePeer.getMakerSideQuote.call(
           20000,
           tokenWETH.address,
           tokenDAI.address
@@ -158,7 +158,7 @@ contract('Peer', async accounts => {
     )
 
     it('Gets a quote to buy 20K DAI for WETH (Quote: 64 WETH)', async () => {
-      const quote = await alicePeer.getBuyQuote.call(
+      const quote = await alicePeer.getMakerSideQuote.call(
         20000,
         tokenDAI.address,
         tokenWETH.address
@@ -167,7 +167,7 @@ contract('Peer', async accounts => {
     })
 
     it('Gets a quote to sell 100K (Max) DAI for WETH (Quote: 320 WETH)', async () => {
-      const quote = await alicePeer.getBuyQuote.call(
+      const quote = await alicePeer.getMakerSideQuote.call(
         100000,
         tokenDAI.address,
         tokenWETH.address
@@ -176,7 +176,7 @@ contract('Peer', async accounts => {
     })
 
     it('Gets a quote to sell 1 WETH for DAI (Quote: 300 DAI)', async () => {
-      const quote = await alicePeer.getSellQuote.call(
+      const quote = await alicePeer.getTakerSideQuote.call(
         1,
         tokenWETH.address,
         tokenDAI.address
@@ -185,7 +185,7 @@ contract('Peer', async accounts => {
     })
 
     it('Gets a quote to sell 5 WETH for DAI (False: No rule)', async () => {
-      const quote = await alicePeer.getSellQuote.call(
+      const quote = await alicePeer.getTakerSideQuote.call(
         5,
         tokenDAI.address,
         tokenWETH.address
@@ -203,7 +203,7 @@ contract('Peer', async accounts => {
     })
 
     it('Gets a quote to buy 1500 WETH for DAI (False: Exceeds Max)', async () => {
-      const quote = await alicePeer.getBuyQuote.call(
+      const quote = await alicePeer.getMakerSideQuote.call(
         250000,
         tokenDAI.address,
         tokenWETH.address
@@ -215,7 +215,7 @@ contract('Peer', async accounts => {
   describe('Provide some orders to the Peer', async () => {
     let quote
     before('Gets a quote for 1 WETH', async () => {
-      quote = await alicePeer.getSellQuote.call(
+      quote = await alicePeer.getTakerSideQuote.call(
         1,
         tokenWETH.address,
         tokenDAI.address
