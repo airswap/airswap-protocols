@@ -1,6 +1,7 @@
 const Indexer = artifacts.require('Indexer')
 const Market = artifacts.require('Market')
 const MockContract = artifacts.require('MockContract')
+const FungibleToken = artifacts.require('FungibleToken')
 
 const {
   emitted,
@@ -30,6 +31,7 @@ contract('Indexer Unit Tests', async accounts => {
   let whitelistMock
   let whitelistAddress
   let whitelistedIndexer
+  let fungibleTokenTemplate
 
   let tokenOne = accounts[8]
   let tokenTwo = accounts[9]
@@ -45,6 +47,8 @@ contract('Indexer Unit Tests', async accounts => {
     await whitelistMock.givenAnyReturnBool(false)
 
     whitelistAddress = whitelistMock.address
+
+    fungibleTokenTemplate = await FungibleToken.new()
   }
 
   async function checkMarketAtAddress(marketAddress, makerToken, takerToken) {
@@ -427,8 +431,13 @@ contract('Indexer Unit Tests', async accounts => {
         from: aliceAddress,
       })
 
+      // mock the token transfer method to fail
+      let token_transfer = fungibleTokenTemplate.contract.methods
+        .transfer(EMPTY_ADDRESS, 0)
+        .encodeABI()
+
       // The token transfer should revert
-      await stakingTokenMock.givenAnyRevert()
+      await stakingTokenMock.givenMethodRevert(token_transfer)
 
       // reverts if transfer failed
       await reverted(
