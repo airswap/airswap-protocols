@@ -57,9 +57,9 @@ contract Peer is IPeer, Ownable {
   /**
     * @notice Set a Trading Rule
     * @dev only callable by the owner of the contract
-    * @param _takerToken address The token address that the Peer would send in a trade
-    * @param _makerToken address The token address that the Consumer would send in a trade
-    * @param _maxTakerAmount uint256 The maximum amount of token the Peer would send
+    * @param _takerToken address The address of an ERC-20 token the peer would send
+    * @param _makerToken address The address of an ERC-20 token the consumer would send
+    * @param _maxTakerAmount uint256 The maximum amount of ERC-20 token the peer would send
     * @param _priceCoef uint256 The whole number that will be multiplied by 10^(-priceExp) - the price coefficient
     * @param _priceExp uint256 The exponent of the price to indicate location of the decimal priceCoef * 10^(-priceExp)
     */
@@ -89,8 +89,8 @@ contract Peer is IPeer, Ownable {
   /**
     * @notice Unset a Trading Rule
     * @dev only callable by the owner of the contract, removes from a mapping
-    * @param _takerToken address The token address that the peer would send in a trade
-    * @param _makerToken address The token address that the consumer would send in a trade
+    * @param _takerToken address The address of an ERC-20 token the peer would send
+    * @param _makerToken address The address of an ERC-20 token the consumer would send
     */
   function unsetRule(
     address _takerToken,
@@ -107,18 +107,18 @@ contract Peer is IPeer, Ownable {
   }
 
   /**
-    * @notice Get a Maker Side Quote from the Peer
-    * @param _takerAmount uint256 The amount the Peer would send
-    * @param _takerToken address The token that the Peer would send
-    * @param _makerToken address The token that the Consumer would send
-    * @return uint256 _makerAmount The amount the Consumer would send
+    * @notice Get a Maker-Side Quote from the Peer
+    * @param _takerParam uint256 The amount of ERC-20 token the peer would send
+    * @param _takerToken address The address of an ERC-20 token the peer would send
+    * @param _makerToken address The address of an ERC-20 token the consumer would send
+    * @return uint256 _makerParam The amount of ERC-20 token the consumer would send
     */
   function getMakerSideQuote(
-    uint256 _takerAmount,
+    uint256 _takerParam,
     address _takerToken,
     address _makerToken
   ) external view returns (
-    uint256 _makerAmount
+    uint256 _makerParam
   ) {
 
     Rule memory rule = rules[_takerToken][_makerToken];
@@ -126,33 +126,33 @@ contract Peer is IPeer, Ownable {
     // Ensure that a rule exists.
     if(rule.maxTakerAmount > 0) {
 
-      // Ensure the _takerAmount does not exceed maximum for the rule.
-      if(_takerAmount <= rule.maxTakerAmount) {
+      // Ensure the _takerParam does not exceed maximum for the rule.
+      if(_takerParam <= rule.maxTakerAmount) {
 
-        _makerAmount = _takerAmount
+        _makerParam = _takerParam
             .mul(rule.priceCoef)
             .div(10 ** rule.priceExp);
 
         // Return the quote.
-        return _makerAmount;
+        return _makerParam;
       }
     }
     return 0;
   }
 
   /**
-    * @notice Get a Taker Side Quote from the Peer
-    * @param _makerAmount uint256 The amount the Consumer would send
-    * @param _makerToken address The token that the Consumer will send
-    * @param _takerToken address The token that the Peer will send
-    * @return uint256 _takerAmount The amount the Peer would send
+    * @notice Get a Taker-Side Quote from the Peer
+    * @param _makerParam uint256 The amount of ERC-20 token the consumer would send
+    * @param _makerToken address The address of an ERC-20 token the consumer would send
+    * @param _takerToken address The address of an ERC-20 token the peer would send
+    * @return uint256 _takerParam The amount of ERC-20 token the peer would send
     */
   function getTakerSideQuote(
-    uint256 _makerAmount,
+    uint256 _makerParam,
     address _makerToken,
     address _takerToken
   ) external view returns (
-    uint256 _takerAmount
+    uint256 _takerParam
   ) {
 
     Rule memory rule = rules[_takerToken][_makerToken];
@@ -160,13 +160,13 @@ contract Peer is IPeer, Ownable {
     // Ensure that a rule exists.
     if(rule.maxTakerAmount > 0) {
 
-      // Calculate the _takerAmount.
-      _takerAmount = _makerAmount
+      // Calculate the _takerParam.
+      _takerParam = _makerParam
         .mul(10 ** rule.priceExp).div(rule.priceCoef);
 
-      // Ensure the _takerAmount does not exceed maximum and is greater than zero.
-      if(_takerAmount <= rule.maxTakerAmount && _takerAmount > 0) {
-        return _takerAmount;
+      // Ensure the _takerParam does not exceed maximum and is greater than zero.
+      if(_takerParam <= rule.maxTakerAmount && _takerParam > 0) {
+        return _takerParam;
       }
     }
     return 0;
@@ -174,8 +174,8 @@ contract Peer is IPeer, Ownable {
 
   /**
     * @notice Get a Maximum Quote from the Peer
-    * @param _takerToken address The token that the Peer will send
-    * @param _makerToken address The token that the Consumer will send
+    * @param _takerToken address The address of an ERC-20 token the peer would send
+    * @param _makerToken address The address of an ERC-20 token the consumer would send
     * @return uint256 The amount the Peer would send
     * @return uint256 The amount the Consumer would send
     */
@@ -183,8 +183,8 @@ contract Peer is IPeer, Ownable {
     address _takerToken,
     address _makerToken
   ) external view returns (
-    uint256 _takerAmount,
-    uint256 _makerAmount
+    uint256 _takerParam,
+    uint256 _makerParam
   ) {
 
     Rule memory rule = rules[_takerToken][_makerToken];
@@ -192,7 +192,7 @@ contract Peer is IPeer, Ownable {
     // Ensure that a rule exists.
     if(rule.maxTakerAmount > 0) {
 
-      // Return the maxTakerAmount and calculated _makerAmount.
+      // Return the maxTakerAmount and calculated _makerParam.
       return (
         rule.maxTakerAmount,
         rule.maxTakerAmount.mul(rule.priceCoef).div(10 ** rule.priceExp)
