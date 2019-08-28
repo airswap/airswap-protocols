@@ -50,39 +50,60 @@ contract('Swap Unit Tests', async accounts => {
       let maker = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
       let taker = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
       let affiliate = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
-      let order = [0, 0, maker, taker, affiliate]
       let signature = [EMPTY_ADDRESS, v, r, s, ver]
+      let order = [0, 0, maker, taker, affiliate, signature]
 
-      await reverted(swap.swap(order, signature), 'ORDER_EXPIRED')
+      await reverted(swap.swap(order), 'ORDER_EXPIRED')
     })
 
     it('test when order nonce is too low', async () => {
       let maker = [mockMaker, EMPTY_ADDRESS, 200, kind]
       let taker = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
       let affiliate = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
-      let order = [0, Jun_06_2017T00_00_00_UTC, maker, taker, affiliate]
       let signature = [EMPTY_ADDRESS, v, r, s, ver]
+      let order = [
+        0,
+        Jun_06_2017T00_00_00_UTC,
+        maker,
+        taker,
+        affiliate,
+        signature,
+      ]
 
       await swap.invalidate(5, { from: mockMaker })
-      await reverted(swap.swap(order, signature), 'NONCE_TOO_LOW')
+      await reverted(swap.swap(order), 'NONCE_TOO_LOW')
     })
 
     it('test when taker is provided, and the sender is unauthorized', async () => {
       let maker = [mockMaker, EMPTY_ADDRESS, 200, kind]
       let taker = [mockTaker, EMPTY_ADDRESS, 200, kind]
       let affiliate = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
-      let order = [0, Jun_06_2017T00_00_00_UTC, maker, taker, affiliate]
       let signature = [EMPTY_ADDRESS, v, r, s, ver]
+      let order = [
+        0,
+        Jun_06_2017T00_00_00_UTC,
+        maker,
+        taker,
+        affiliate,
+        signature,
+      ]
 
-      await reverted(swap.swap(order, signature), 'SENDER_UNAUTHORIZED')
+      await reverted(swap.swap(order), 'SENDER_UNAUTHORIZED')
     })
 
     it('test when taker is provided, the sender is authorized, the signature.v is 0, and the maker wallet is unauthorized', async () => {
       let maker = [mockMaker, EMPTY_ADDRESS, 200, kind]
       let taker = [mockTaker, EMPTY_ADDRESS, 200, kind]
       let affiliate = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
-      let order = [0, Jun_06_2017T00_00_00_UTC, maker, taker, affiliate]
       let signature = [EMPTY_ADDRESS, 0, r, s, ver]
+      let order = [
+        0,
+        Jun_06_2017T00_00_00_UTC,
+        maker,
+        taker,
+        affiliate,
+        signature,
+      ]
 
       //taker authorizes maker
       emitted(
@@ -94,7 +115,7 @@ contract('Swap Unit Tests', async accounts => {
 
       //mock taker will take the order
       await reverted(
-        swap.swap(order, signature, { from: mockTaker }),
+        swap.swap(order, { from: mockTaker }),
         'SIGNER_UNAUTHORIZED.'
       )
     })

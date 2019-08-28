@@ -63,11 +63,9 @@ interface ISwap {
   /**
     * @notice Atomic Token Swap
     * @param order Types.Order
-    * @param signature Types.Signature
     */
   function swap(
-    Types.Order calldata order,
-    Types.Signature calldata signature
+    Types.Order calldata order
   ) external;
 
   /**
