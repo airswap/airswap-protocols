@@ -200,7 +200,7 @@ contract Indexer is IIndexer, Ownable {
     address _makerToken,
     address _takerToken,
     uint256 _count
-  ) external returns (
+  ) external view returns (
     bytes32[] memory locators
   ) {
 

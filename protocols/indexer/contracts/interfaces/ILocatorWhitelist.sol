@@ -20,6 +20,6 @@ interface ILocatorWhitelist {
 
   function has(
     bytes32 _locator
-  ) external returns (bool);
+  ) external view returns (bool);
 
 }
