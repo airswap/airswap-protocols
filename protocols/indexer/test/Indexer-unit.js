@@ -1,6 +1,7 @@
 const Indexer = artifacts.require('Indexer')
 const Market = artifacts.require('Market')
 const MockContract = artifacts.require('MockContract')
+const FungibleToken = artifacts.require('FungibleToken')
 
 const {
   emitted,
@@ -30,6 +31,7 @@ contract('Indexer Unit Tests', async accounts => {
   let whitelistMock
   let whitelistAddress
   let whitelistedIndexer
+  let fungibleTokenTemplate
 
   let tokenOne = accounts[8]
   let tokenTwo = accounts[9]
@@ -45,6 +47,8 @@ contract('Indexer Unit Tests', async accounts => {
     await whitelistMock.givenAnyReturnBool(false)
 
     whitelistAddress = whitelistMock.address
+
+    fungibleTokenTemplate = await FungibleToken.new()
   }
 
   async function checkMarketAtAddress(marketAddress, makerToken, takerToken) {
@@ -414,6 +418,33 @@ contract('Indexer Unit Tests', async accounts => {
           event.amount.toNumber() === 250
         )
       })
+    })
+
+    it('should revert if unset an intent failed in token transfer', async () => {
+      // create the market
+      await indexer.createMarket(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+
+      // create the intent
+      await indexer.setIntent(tokenOne, tokenTwo, 10, aliceLocator, {
+        from: aliceAddress,
+      })
+
+      // mock the token transfer method to fail
+      let token_transfer = fungibleTokenTemplate.contract.methods
+        .transfer(EMPTY_ADDRESS, 0)
+        .encodeABI()
+
+      // The token transfer should revert
+      await stakingTokenMock.givenMethodRevert(token_transfer)
+
+      // reverts if transfer failed
+      await reverted(
+        indexer.unsetIntent(tokenOne, tokenTwo, {
+          from: aliceAddress,
+        })
+      )
     })
   })
 
