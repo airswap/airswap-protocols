@@ -4,7 +4,7 @@
 
 [AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens. This package contains source code and tests for a basic `Peer` contract that can be deployed with trading rules.
 
-:bulb: **Note**: `solidity-coverage` does not cooperate with `view` functions. To run test coverage, remove the `view` keywords from functions in `Peer.sol` and `IPeer.sol`.
+:bulb: **Note**: `solidity-coverage` does not cooperate with `view` functions. To run test coverage, remove the `view` keywords from functions in `Peer.sol`, `IPeer.sol`, and `PeerFactory.sol`.
 
 [![Discord](https://img.shields.io/discord/590643190281928738.svg)](https://discord.gg/ecQbV7H)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
@@ -129,8 +129,8 @@ function getMakerSideQuote(
 
 ### Params
 
-| Name          | Type      | Description                                             |
-| :------------ | :-------- | :------------------------------------------------------ |
+| Name               | Type      | Description                                             |
+| :----------------- | :-------- | :------------------------------------------------------ |
 | `_quoteTakerParam` | `uint256` | The amount of ERC-20 token the peer would send.         |
 | `_quoteTakerToken` | `address` | The address of an ERC-20 token the peer would send.     |
 | `_quoteMakerToken` | `address` | The address of an ERC-20 token the consumer would send. |
@@ -158,8 +158,8 @@ function getTakerSideQuote(
 
 ### Params
 
-| Name          | Type      | Description                                             |
-| :------------ | :-------- | :------------------------------------------------------ |
+| Name               | Type      | Description                                             |
+| :----------------- | :-------- | :------------------------------------------------------ |
 | `_quoteMakerParam` | `uint256` | The amount of ERC-20 token the consumer would send.     |
 | `_quoteMakerToken` | `address` | The address of an ERC-20 token the consumer would send. |
 | `_quoteTakerToken` | `address` | The address of an ERC-20 token the peer would send.     |
@@ -187,8 +187,8 @@ function getMaxQuote(
 
 ### Params
 
-| Name          | Type      | Description                                             |
-| :------------ | :-------- | :------------------------------------------------------ |
+| Name               | Type      | Description                                             |
+| :----------------- | :-------- | :------------------------------------------------------ |
 | `_quoteTakerToken` | `address` | The address of an ERC-20 token the peer would send.     |
 | `_quoteMakerToken` | `address` | The address of an ERC-20 token the consumer would send. |
 

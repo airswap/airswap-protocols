@@ -77,6 +77,6 @@ interface IIndexer {
     address _makerToken,
     address _takerToken,
     uint256 _count
-  ) external returns (bytes32[] memory);
+  ) external view returns (bytes32[] memory);
 
 }

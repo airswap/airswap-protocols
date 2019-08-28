@@ -51,7 +51,7 @@ contract PeerFactory is IPeerFactory, ILocatorWhitelist {
     * @param _locator locator of the peer in question
     * @return bool - true if the locator is whitelisted
     */
-  function has(bytes32 _locator) external returns (bool) {
+  function has(bytes32 _locator) external view returns (bool) {
     return deployedAddresses[address(bytes20(_locator))];
   }
 
