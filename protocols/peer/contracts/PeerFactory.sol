@@ -28,8 +28,9 @@ contract PeerFactory is IPeerFactory, ILocatorWhitelist {
     * @notice Deploy a trusted peer contract
     * @param _swapContract address of the swap contract the peer will deploy with
     * @param _peerContractOwner address that should be the owner of the peer
+    * @return peerContractAddress address address of the peer contract created
     */
-  function createPeer(address _swapContract, address _peerContractOwner) external {
+  function createPeer(address _swapContract, address _peerContractOwner) external returns (address peerContractAddress) {
 
     // Ensure an owner for the peer contract is provided.
     require(_peerContractOwner != address(0),
@@ -43,13 +44,15 @@ contract PeerFactory is IPeerFactory, ILocatorWhitelist {
     deployedAddresses[newPeerContract] = true;
 
     emit CreatePeer(newPeerContract, _swapContract, _peerContractOwner);
+
+    return newPeerContract;
   }
 
   /**
-    * @notice To check whether a locator is whitelisted
+    * @notice To check whether a locator was deployed
     * @dev Implements ILocatorWhitelist.has
     * @param _locator locator of the peer in question
-    * @return bool - true if the locator is whitelisted
+    * @return bool true if the peer was deployed by this contract
     */
   function has(bytes32 _locator) external returns (bool) {
     return deployedAddresses[address(bytes20(_locator))];
