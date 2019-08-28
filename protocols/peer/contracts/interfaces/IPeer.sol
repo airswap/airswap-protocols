@@ -60,7 +60,7 @@ interface IPeer {
     address _quoteTakerToken,
     address _quoteMakerToken
   ) external view returns (
-    uint256 _quoteMakerParam
+    uint256 quoteMakerParam
   );
 
   function getTakerSideQuote(
@@ -68,15 +68,15 @@ interface IPeer {
     address _quoteMakerToken,
     address _quoteTakerToken
   ) external view returns (
-    uint256 _quoteTakerParam
+    uint256 quoteTakerParam
   );
 
   function getMaxQuote(
     address _quoteTakerToken,
     address _quoteMakerToken
   ) external view returns (
-    uint256 _quoteTakerParam,
-    uint256 _quoteMakerParam
+    uint256 quoteTakerParam,
+    uint256 quoteMakerParam
   );
 
   function provideOrder(

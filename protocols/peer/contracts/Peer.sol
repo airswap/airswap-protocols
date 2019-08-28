@@ -111,14 +111,14 @@ contract Peer is IPeer, Ownable {
     * @param _quoteTakerParam uint256 The amount of ERC-20 token the peer would send
     * @param _quoteTakerToken address The address of an ERC-20 token the peer would send
     * @param _quoteMakerToken address The address of an ERC-20 token the consumer would send
-    * @return uint256 _quoteMakerParam The amount of ERC-20 token the consumer would send
+    * @return uint256 quoteMakerParam The amount of ERC-20 token the consumer would send
     */
   function getMakerSideQuote(
     uint256 _quoteTakerParam,
     address _quoteTakerToken,
     address _quoteMakerToken
   ) external view returns (
-    uint256 _quoteMakerParam
+    uint256 quoteMakerParam
   ) {
 
     Rule memory rule = rules[_quoteTakerToken][_quoteMakerToken];
@@ -129,12 +129,12 @@ contract Peer is IPeer, Ownable {
       // Ensure the _takerParam does not exceed maximum for the rule.
       if(_quoteTakerParam <= rule.maxTakerAmount) {
 
-        _quoteMakerParam = _quoteTakerParam
+        quoteMakerParam = _quoteTakerParam
             .mul(rule.priceCoef)
             .div(10 ** rule.priceExp);
 
         // Return the quote.
-        return _quoteMakerParam;
+        return quoteMakerParam;
       }
     }
     return 0;
@@ -145,14 +145,14 @@ contract Peer is IPeer, Ownable {
     * @param _quoteMakerParam uint256 The amount of ERC-20 token the consumer would send
     * @param _quoteMakerToken address The address of an ERC-20 token the consumer would send
     * @param _quoteTakerToken address The address of an ERC-20 token the peer would send
-    * @return uint256 _quoteTakerParam The amount of ERC-20 token the peer would send
+    * @return uint256 quoteTakerParam The amount of ERC-20 token the peer would send
     */
   function getTakerSideQuote(
     uint256 _quoteMakerParam,
     address _quoteMakerToken,
     address _quoteTakerToken
   ) external view returns (
-    uint256 _quoteTakerParam
+    uint256 quoteTakerParam
   ) {
 
     Rule memory rule = rules[_quoteTakerToken][_quoteMakerToken];
@@ -161,12 +161,12 @@ contract Peer is IPeer, Ownable {
     if(rule.maxTakerAmount > 0) {
 
       // Calculate the _takerParam.
-      _quoteTakerParam = _quoteMakerParam
+      quoteTakerParam = _quoteMakerParam
         .mul(10 ** rule.priceExp).div(rule.priceCoef);
 
-      // Ensure the _takerParam does not exceed maximum and is greater than zero.
-      if(_quoteTakerParam <= rule.maxTakerAmount && _quoteTakerParam > 0) {
-        return _quoteTakerParam;
+      // Ensure the quoteTakerParam does not exceed maximum and is greater than zero.
+      if(quoteTakerParam <= rule.maxTakerAmount && quoteTakerParam > 0) {
+        return quoteTakerParam;
       }
     }
     return 0;
@@ -183,8 +183,8 @@ contract Peer is IPeer, Ownable {
     address _quoteTakerToken,
     address _quoteMakerToken
   ) external view returns (
-    uint256 _quoteTakerParam,
-    uint256 _quoteMakerParam
+    uint256 quoteTakerParam,
+    uint256 quoteMakerParam
   ) {
 
     Rule memory rule = rules[_quoteTakerToken][_quoteMakerToken];
