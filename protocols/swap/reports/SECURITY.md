@@ -62,7 +62,7 @@ _\*\* OpenZeppelin contract_
 | revoke     | Swap.sol | external   | `address _delegate`                                                                                                                                                                                                     | no      |
 
 Note that state-modifying public entry points are minimized in this contract, reducing
-the exploit surface to incorrect arguments to swap, swapSimple, authorize, cancel, invalidate, and revoke.
+the exploit surface to incorrect arguments to swap, authorize, cancel, invalidate, and revoke.
 
 ## Invariants
 
@@ -99,29 +99,13 @@ the exploit surface to incorrect arguments to swap, swapSimple, authorize, cance
 - Block timestamp can technically be manipulated by miners, who may attempt to prolong authorizations that are about to expire. The gain, however, seems marginal, and the cost of this attack relative to Swap trading volume make it unlikely to be of concern.
 - **This invariant currently holds as-is.**
 
-#### 6. Legacy flow (swapSimple) and previous swap contract flow are identical in behavior related to ERC-20 token transfers
-
-- Legacy flow first checks if maker and taker are the same; otherwise fails. This has been removed from the new Swap contract.
-- Both contracts check whether order is taken or cancelled; new one does this first, as order ID is available
-- Both contracts check whether order is expired, otherwise fail.
-- Eth transactions are disallowed in new legacy flow, with no function being payable.
-- One important flow difference occurs in the use of the return-false-then-refund pattern as opposed to the newer require pattern with reason messages; we reason that these are equivalent through the invariants explored in the original Swap audit.
-- **This invariant currently holds as-is.**
-
-#### 7. Full flow (swap) and legacy flow (swapSimple) are identical
-
-- Full Flow: Order expiry checked -> order not taken -> order not cancelled -> valid nonce -> order marked taken -> sender is authorized -> signer is authorized -> signature is valid -> transfer to maker -> transfer to taker -> transfer to affiliate -> emit Swap event
-- Simple Flow: Order expiry checked -> Order not taken or cancelled -> valid nonce -> order marked taken -> sender is authorized -> signature is valid (sender must be signer) -> transfer to maker -> transfer to taker -> emit Swap event
-- They are consistent by inspection save for affiliate fees and slightly different signature. There are differences in order or checks though.
-- **This invariant currently holds as-is.**
-
-#### 8. Orders can never move states once they are CANCELED or TAKEN.
+#### 6. Orders can never move states once they are CANCELED or TAKEN.
 
 - The first function check ensures an order is not already taken or cancelled or reverts, making further successful swaps impossible. Ensuring that an order status cannot move from CANCELED to something else.
 - Cancels also can only be performed on OPEN order and checks are done to ensure the order was not TAKEN.
 - **This invariant currently holds as-is.**
 
-#### 9. Orders can only be successfully taken once.
+#### 7. Orders can only be successfully taken once.
 
 - By (8), orders either revert or complete successfully. The TAKEN flag is set before any functions that have side effects or external calls are used, preventing its modification through e.g. re-entrancy, and it is not reset in the function, indicating the TAKEN flag will remain set unless a revert occurs.
 - If a revert occurs, the trade is not taken, so this is correct. If no revert occurs, the trade was (and will stay) taken, so this is correct.
@@ -129,9 +113,9 @@ the exploit surface to incorrect arguments to swap, swapSimple, authorize, cance
 - Orders could potentially be replayed on a different Swap contract, if e.g. old au- throizations exist on another contract. The legacy signature is modified to require an additional "0" byte to prevent such replay attacks; all future Swap contracts should increment this bid to maintain replay protection against old authorizations.
 - **This invariant currently holds as-is.**
 
-#### 10. Swap and SwapSimple functions either successfully execute swap or revert
+#### 10. Swap function either successfully execute swap or revert
 
-- By manual inspection of all branches of swap, swapSimple and transferFrom, no functions can fail silently without causing a REVERT. In the case no REVERT branch is hit, both sides of the swap must have been successfully executed. Note that require is used in the ERC-20 case to handle tokens where a bad transfer may fail silently without reversions. This is the only external call other than safeTransferFrom, which has no return value and therefore cannot fail silently.
+- By manual inspection of all branches of swap and transferFrom, no functions can fail silently without causing a REVERT. In the case no REVERT branch is hit, both sides of the swap must have been successfully executed. Note that require is used in the ERC-20 case to handle tokens where a bad transfer may fail silently without reversions. This is the only external call other than safeTransferFrom, which has no return value and therefore cannot fail silently.
 - **This invariant currently holds as-is.**
 
 ## Analysis
@@ -174,14 +158,14 @@ Hash of master used for deploy of Swap: [ef5cff0613532d27ecedb332e222ae0a7507984
 
 Rinkeby Etherscan (Swap): https://rinkeby.etherscan.io/address/0x6c629eAFFbEf9935F4FA390AC32f27EEC9462a8E
 
+Mainnet Etherscan (verified Swap): https://etherscan.io/address/0x6738668f16b28589b7b9d50e79095bdecc88d13b
+
 Hash of master used for deploy of below contracts: [6e6c314f1d082dbb98e8ca2fd671dddfd36e37fa](https://github.com/airswap/airswap-protocols/commit/6e6c314f1d082dbb98e8ca2fd671dddfd36e37fa)
 
 Rinkeby Etherscan (Types); https://rinkeby.etherscan.io/address/0xaaf6cb19298e7d0abc410eb2a0d5b8fef747573d
 
 Mainnet Etherscan (verified lib Types):
 https://etherscan.io/address/0xc65ff60eb8e4038a2415bb569d1fa6dca47d692e
-
-Mainnet Etherscan (verified Swap): https://etherscan.io/address/0x54d2690e97e477a4b33f40d6e4afdd4832c07c57
 
 ## Notes
 

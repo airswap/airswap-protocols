@@ -35,7 +35,7 @@
 
 | Contract | Package                              | Version | Network | Address                                                                                                                         |
 | :------- | :----------------------------------- | :------ | :------ | :------------------------------------------------------------------------------------------------------------------------------ |
-| Swap     | [`@airswap/swap`](/protocols/swap)   | `2.0.0` | Mainnet | [`0x54d2690e97e477a4b33f40d6e4afdd4832c07c57`](https://etherscan.io/address/0x54d2690e97e477a4b33f40d6e4afdd4832c07c57)         |
+| Swap     | [`@airswap/swap`](/protocols/swap)   | `2.0.0` | Mainnet | [`0x6738668f16b28589B7B9d50E79095bdeCC88d13B`](https://etherscan.io/address/0x54d2690e97e477a4b33f40d6e4afdd4832c07c57)         |
 | Types    | [`@airswap/types`](/protocols/types) | `0.1.0` | Mainnet | [`0xc65ff60eb8e4038a2415bb569d1fa6dca47d692e`](https://etherscan.io/address/0xc65ff60eb8e4038a2415bb569d1fa6dca47d692e)         |
 | Swap     | [`@airswap/swap`](/protocols/swap)   | `2.0.0` | Rinkeby | [`0x6c629eAFFbEf9935F4FA390AC32f27EEC9462a8E`](https://rinkeby.etherscan.io/address/0x78db49d0459a67158bdca6e161be3d90342c7247) |
 | Types    | [`@airswap/types`](/protocols/types) | `0.1.0` | Rinkeby | [`0xAaf6cB19298e7d0abc410Eb2A0D5B8fEf747573D`](https://rinkeby.etherscan.io/address/0xaaf6cb19298e7d0abc410eb2a0d5b8fef747573d) |
