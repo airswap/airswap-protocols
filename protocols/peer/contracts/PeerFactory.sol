@@ -40,12 +40,12 @@ contract PeerFactory is IPeerFactory, ILocatorWhitelist {
     require(_swapContract != address(0),
       'SWAP_CONTRACT_REQUIRED');
 
-    address newPeerContract = address(new Peer(_swapContract, _peerContractOwner));
-    deployedAddresses[newPeerContract] = true;
+    peerContractAddress = address(new Peer(_swapContract, _peerContractOwner));
+    deployedAddresses[peerContractAddress] = true;
 
-    emit CreatePeer(newPeerContract, _swapContract, _peerContractOwner);
+    emit CreatePeer(peerContractAddress, _swapContract, _peerContractOwner);
 
-    return newPeerContract;
+    return peerContractAddress;
   }
 
   /**
