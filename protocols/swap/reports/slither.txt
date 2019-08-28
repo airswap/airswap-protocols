@@ -1,90 +1,34 @@
-Commit Hash ef5cff0613532d27ecedb332e222ae0a75079841
-
-Compiling your contracts...
-===========================
-> Compiling ./contracts/Imports.sol
-> Compiling ./contracts/Migrations.sol
-> Compiling ./contracts/Signatures.sol
-> Compiling ./contracts/Swap.sol
-> Compiling ./contracts/Transfers.sol
-> Compiling ./contracts/Types.sol
-> Compiling ./contracts/WETH9.sol
-> Compiling ./interfaces/ISwap.sol
-> Compiling ./../../node_modules/openzeppelin-solidity/contracts/introspection/ERC165Checker.sol
-> Compiling ./../../node_modules/openzeppelin-solidity/contracts/introspection/IERC165.sol
-> Compiling ./../../node_modules/openzeppelin-solidity/contracts/token/ERC20/IERC20.sol
-> Compiling ./../../node_modules/openzeppelin-solidity/contracts/token/ERC721/IERC721.sol
-
-    > compilation warnings encountered:
-
-/home/poiresel/Documents/Git/AirSwapProtocol/justswap/contracts/swap/contracts/Types.sol:18:1: Warning: Experimental features are turned on. Do not use experimental features on live deployments.
-pragma experimental ABIEncoderV2;
-^-------------------------------^
-,/home/poiresel/Documents/Git/AirSwapProtocol/justswap/contracts/swap/contracts/Signatures.sol:18:1: Warning: Experimental features are turned on. Do not use experimental features on live deployments.
-pragma experimental ABIEncoderV2;
-^-------------------------------^
-,/home/poiresel/Documents/Git/AirSwapProtocol/justswap/contracts/swap/interfaces/ISwap.sol:18:1: Warning: Experimental features are turned on. Do not use experimental features on live deployments.
-pragma experimental ABIEncoderV2;
-^-------------------------------^
-,/home/poiresel/Documents/Git/AirSwapProtocol/justswap/contracts/swap/contracts/Swap.sol:18:1: Warning: Experimental features are turned on. Do not use experimental features on live deployments.
-pragma experimental ABIEncoderV2;
-^-------------------------------^
-
-> Artifacts written to /home/poiresel/Documents/Git/AirSwapProtocol/justswap/contracts/swap/build/contracts
-> Compiled successfully using:
-   - solc: 0.5.10+commit.5a6ea5b1.Emscripten.clang
-
+Hash run on: ef5cff0613532d27ecedb332e222ae0a75079841
 
 INFO:Detectors:
-ERC165Checker._callERC165SupportsInterface (../../node_modules/openzeppelin-solidity/contracts/introspection/ERC165Checker.sol#94-120) is declared view but contains assembly code
-Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#constant-functions-changing-the-state
-INFO:Detectors:
-Swap.swap (Swap.sol#73-202) uses timestamp for comparisons
+Swap.swap (Swap.sol#92-198) uses timestamp for comparisons
     Dangerous comparisons:
-    - require(bool,string)(_order.expiry >= block.timestamp,ORDER_EXPIRED) (Swap.sol#81-82)
-Swap.authorize (Swap.sol#361-369) uses timestamp for comparisons
+    - require(bool,string)(_order.expiry > block.timestamp,ORDER_EXPIRED) (Swap.sol#100-101)
+Swap.authorize (Swap.sol#356-364) uses timestamp for comparisons
     Dangerous comparisons:
-    - require(bool,string)(_expiry >= block.timestamp,INVALID_AUTH_EXPIRY) (Swap.sol#366)
-Swap.isAuthorized (Swap.sol#388-394) uses timestamp for comparisons
+    - require(bool,string)(_expiry > block.timestamp,INVALID_AUTH_EXPIRY) (Swap.sol#361)
+Swap.isAuthorized (Swap.sol#384-390) uses timestamp for comparisons
     Dangerous comparisons:
-    - (delegateApprovals[_approver][_delegate] >= block.timestamp) (Swap.sol#393)
+    - (delegateApprovals[_approver][_delegate] > block.timestamp) (Swap.sol#389)
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#block-timestamp
 INFO:Detectors:
-ERC165Checker._callERC165SupportsInterface uses assembly (../../node_modules/openzeppelin-solidity/contracts/introspection/ERC165Checker.sol#94-120)
-    - ../../node_modules/openzeppelin-solidity/contracts/introspection/ERC165Checker.sol#102-119
-Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#assembly-usage
-INFO:Detectors:
-WETH9.decimals should be constant (WETH9.sol#23)
-WETH9.name should be constant (WETH9.sol#21)
-WETH9.symbol should be constant (WETH9.sol#22)
-Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#state-variables-that-could-be-declared-constant
-INFO:Detectors:
 Different versions of Solidity is used in :
-    - Version used: ['0.5.10', '>=0.4.21<0.6.0', 'ABIEncoderV2', '^0.5.0']
-    - Signatures.sol#17 declares pragma solidity0.5.10
-    - Signatures.sol#18 declares pragma experimentalABIEncoderV2
-    - WETH9.sol#17 declares pragma solidity0.5.10
-    - Migrations.sol#1 declares pragma solidity>=0.4.21<0.6.0
-    - Types.sol#17 declares pragma solidity0.5.10
-    - Types.sol#18 declares pragma experimentalABIEncoderV2
-    - Transfers.sol#17 declares pragma solidity0.5.10
-    - ../../node_modules/openzeppelin-solidity/contracts/introspection/ERC165Checker.sol#1 declares pragma solidity^0.5.0
+    - Version used: ['0.5.10', 'ABIEncoderV2', '^0.5.0']
+    - Migrations.sol#1 declares pragma solidity0.5.10
+    - ../types/contracts/Types.sol#17 declares pragma solidity0.5.10
+    - ../types/contracts/Types.sol#18 declares pragma experimentalABIEncoderV2
     - ../../node_modules/openzeppelin-solidity/contracts/token/ERC721/IERC721.sol#1 declares pragma solidity^0.5.0
     - ../../node_modules/openzeppelin-solidity/contracts/token/ERC20/IERC20.sol#1 declares pragma solidity^0.5.0
     - ../../node_modules/openzeppelin-solidity/contracts/introspection/IERC165.sol#1 declares pragma solidity^0.5.0
+    - Imports.sol#1 declares pragma solidity0.5.10
     - Swap.sol#17 declares pragma solidity0.5.10
     - Swap.sol#18 declares pragma experimentalABIEncoderV2
     - interfaces/ISwap.sol#17 declares pragma solidity0.5.10
     - interfaces/ISwap.sol#18 declares pragma experimentalABIEncoderV2
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#different-pragma-directives-are-used
 INFO:Detectors:
-WETH9.withdraw (WETH9.sol#40-45) should be declared external
-WETH9.totalSupply (WETH9.sol#47-49) should be declared external
-WETH9.approve (WETH9.sol#51-55) should be declared external
-WETH9.transfer (WETH9.sol#57-59) should be declared external
 Migrations.setCompleted (Migrations.sol#15-17) should be declared external
 Migrations.upgrade (Migrations.sol#19-22) should be declared external
-Types.hashDomain (Types.sol#111-122) should be declared external
 IERC721.balanceOf (../../node_modules/openzeppelin-solidity/contracts/token/ERC721/IERC721.sol#16) should be declared external
 IERC721.ownerOf (../../node_modules/openzeppelin-solidity/contracts/token/ERC721/IERC721.sol#21) should be declared external
 IERC721.safeTransferFrom (../../node_modules/openzeppelin-solidity/contracts/token/ERC721/IERC721.sol#35) should be declared external
@@ -96,67 +40,38 @@ IERC721.isApprovedForAll (../../node_modules/openzeppelin-solidity/contracts/tok
 IERC721.safeTransferFrom (../../node_modules/openzeppelin-solidity/contracts/token/ERC721/IERC721.sol#52) should be declared external
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#public-function-that-could-be-declared-as-external
 INFO:Detectors:
-Pragma version "0.5.10" necessitates versions too recent to be trusted. Consider deploying with 0.5.3 (Signatures.sol#17)
-Pragma version "0.5.10" necessitates versions too recent to be trusted. Consider deploying with 0.5.3 (WETH9.sol#17)
-Pragma version ">=0.4.21<0.6.0" allows old versions (Migrations.sol#1)
-Pragma version "0.5.10" necessitates versions too recent to be trusted. Consider deploying with 0.5.3 (Types.sol#17)
-Pragma version "0.5.10" necessitates versions too recent to be trusted. Consider deploying with 0.5.3 (Transfers.sol#17)
-Pragma version "^0.5.0" allows old versions (../../node_modules/openzeppelin-solidity/contracts/introspection/ERC165Checker.sol#1)
+Pragma version "0.5.10" necessitates versions too recent to be trusted. Consider deploying with 0.5.3 (Migrations.sol#1)
+Pragma version "0.5.10" necessitates versions too recent to be trusted. Consider deploying with 0.5.3 (../types/contracts/Types.sol#17)
 Pragma version "^0.5.0" allows old versions (../../node_modules/openzeppelin-solidity/contracts/token/ERC721/IERC721.sol#1)
 Pragma version "^0.5.0" allows old versions (../../node_modules/openzeppelin-solidity/contracts/token/ERC20/IERC20.sol#1)
 Pragma version "^0.5.0" allows old versions (../../node_modules/openzeppelin-solidity/contracts/introspection/IERC165.sol#1)
+Pragma version "0.5.10" necessitates versions too recent to be trusted. Consider deploying with 0.5.3 (Imports.sol#1)
 Pragma version "0.5.10" necessitates versions too recent to be trusted. Consider deploying with 0.5.3 (Swap.sol#17)
 Pragma version "0.5.10" necessitates versions too recent to be trusted. Consider deploying with 0.5.3 (interfaces/ISwap.sol#17)
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#incorrect-versions-of-solidity
 INFO:Detectors:
-Parameter '_order' of Signatures.isValid (Signatures.sol#34) is not in mixedCase
-Parameter '_signature' of Signatures.isValid (Signatures.sol#35) is not in mixedCase
-Parameter '_domainSeparator' of Signatures.isValid (Signatures.sol#36) is not in mixedCase
-Parameter '_verifyingContract' of Signatures.isValidSimple (Signatures.sol#81) is not in mixedCase
-Parameter '_nonce' of Signatures.isValidSimple (Signatures.sol#82) is not in mixedCase
-Parameter '_expiry' of Signatures.isValidSimple (Signatures.sol#83) is not in mixedCase
-Parameter '_makerWallet' of Signatures.isValidSimple (Signatures.sol#84) is not in mixedCase
-Parameter '_makerParam' of Signatures.isValidSimple (Signatures.sol#85) is not in mixedCase
-Parameter '_makerToken' of Signatures.isValidSimple (Signatures.sol#86) is not in mixedCase
-Parameter '_takerWallet' of Signatures.isValidSimple (Signatures.sol#87) is not in mixedCase
-Parameter '_takerParam' of Signatures.isValidSimple (Signatures.sol#88) is not in mixedCase
-Parameter '_takerToken' of Signatures.isValidSimple (Signatures.sol#89) is not in mixedCase
-Parameter '_v' of Signatures.isValidSimple (Signatures.sol#90) is not in mixedCase
-Parameter '_r' of Signatures.isValidSimple (Signatures.sol#91) is not in mixedCase
-Parameter '_s' of Signatures.isValidSimple (Signatures.sol#92) is not in mixedCase
-Parameter 'new_address' of Migrations.upgrade (Migrations.sol#19) is not in mixedCase
-Variable 'Migrations.last_completed_migration' (Migrations.sol#5) is not in mixedCase
-Parameter '_party' of Types.hashParty (Types.sol#81) is not in mixedCase
-Parameter '_order' of Types.hashOrder (Types.sol#94) is not in mixedCase
-Parameter '_domainSeparator' of Types.hashOrder (Types.sol#95) is not in mixedCase
-Parameter '_name' of Types.hashDomain (Types.sol#112) is not in mixedCase
-Parameter '_version' of Types.hashDomain (Types.sol#113) is not in mixedCase
-Parameter '_verifyingContract' of Types.hashDomain (Types.sol#114) is not in mixedCase
-Parameter '_receiver' of Transfers.send (Transfers.sol#32) is not in mixedCase
-Parameter '_value' of Transfers.send (Transfers.sol#33) is not in mixedCase
-Parameter '_token' of Transfers.transferAny (Transfers.sol#43) is not in mixedCase
-Parameter '_from' of Transfers.transferAny (Transfers.sol#44) is not in mixedCase
-Parameter '_to' of Transfers.transferAny (Transfers.sol#45) is not in mixedCase
-Parameter '_param' of Transfers.transferAny (Transfers.sol#46) is not in mixedCase
-Parameter '_side' of Transfers.safeTransferAny (Transfers.sol#58) is not in mixedCase
-Parameter '_from' of Transfers.safeTransferAny (Transfers.sol#59) is not in mixedCase
-Parameter '_to' of Transfers.safeTransferAny (Transfers.sol#60) is not in mixedCase
-Parameter '_param' of Transfers.safeTransferAny (Transfers.sol#61) is not in mixedCase
-Parameter '_token' of Transfers.safeTransferAny (Transfers.sol#62) is not in mixedCase
-Function 'ERC165Checker._supportsERC165' (../../node_modules/openzeppelin-solidity/contracts/introspection/ERC165Checker.sol#22-27) is not in mixedCase
-Function 'ERC165Checker._supportsInterface' (../../node_modules/openzeppelin-solidity/contracts/introspection/ERC165Checker.sol#35-39) is not in mixedCase
-Function 'ERC165Checker._supportsAllInterfaces' (../../node_modules/openzeppelin-solidity/contracts/introspection/ERC165Checker.sol#50-65) is not in mixedCase
-Function 'ERC165Checker._supportsERC165Interface' (../../node_modules/openzeppelin-solidity/contracts/introspection/ERC165Checker.sol#78-84) is not in mixedCase
-Function 'ERC165Checker._callERC165SupportsInterface' (../../node_modules/openzeppelin-solidity/contracts/introspection/ERC165Checker.sol#94-120) is not in mixedCase
-Parameter '_order' of Swap.swap (Swap.sol#74) is not in mixedCase
-Parameter '_signature' of Swap.swap (Swap.sol#75) is not in mixedCase
-Parameter '_nonces' of Swap.cancel (Swap.sol#334) is not in mixedCase
-Parameter '_minimumNonce' of Swap.invalidate (Swap.sol#349) is not in mixedCase
-Parameter '_delegate' of Swap.authorize (Swap.sol#362) is not in mixedCase
-Parameter '_expiry' of Swap.authorize (Swap.sol#363) is not in mixedCase
-Parameter '_delegate' of Swap.revoke (Swap.sol#376) is not in mixedCase
-Parameter '_approver' of Swap.isAuthorized (Swap.sol#389) is not in mixedCase
-Parameter '_delegate' of Swap.isAuthorized (Swap.sol#390) is not in mixedCase
+Parameter '_order' of Types.hashOrder (../types/contracts/Types.sol#91) is not in mixedCase
+Parameter '_domainSeparator' of Types.hashOrder (../types/contracts/Types.sol#92) is not in mixedCase
+Parameter '_name' of Types.hashDomain (../types/contracts/Types.sol#135) is not in mixedCase
+Parameter '_version' of Types.hashDomain (../types/contracts/Types.sol#136) is not in mixedCase
+Parameter '_verifyingContract' of Types.hashDomain (../types/contracts/Types.sol#137) is not in mixedCase
+Parameter '_order' of Swap.swap (Swap.sol#93) is not in mixedCase
+Parameter '_signature' of Swap.swap (Swap.sol#94) is not in mixedCase
+Parameter '_nonces' of Swap.cancel (Swap.sol#328) is not in mixedCase
+Parameter '_minimumNonce' of Swap.invalidate (Swap.sol#344) is not in mixedCase
+Parameter '_delegate' of Swap.authorize (Swap.sol#357) is not in mixedCase
+Parameter '_expiry' of Swap.authorize (Swap.sol#358) is not in mixedCase
+Parameter '_delegate' of Swap.revoke (Swap.sol#372) is not in mixedCase
+Parameter '_approver' of Swap.isAuthorized (Swap.sol#385) is not in mixedCase
+Parameter '_delegate' of Swap.isAuthorized (Swap.sol#386) is not in mixedCase
+Parameter '_order' of Swap.isValid (Swap.sol#399) is not in mixedCase
+Parameter '_signature' of Swap.isValid (Swap.sol#400) is not in mixedCase
+Parameter '_domainSeparator' of Swap.isValid (Swap.sol#401) is not in mixedCase
+Parameter '_from' of Swap.transferToken (Swap.sol#439) is not in mixedCase
+Parameter '_to' of Swap.transferToken (Swap.sol#440) is not in mixedCase
+Parameter '_param' of Swap.transferToken (Swap.sol#441) is not in mixedCase
+Parameter '_token' of Swap.transferToken (Swap.sol#442) is not in mixedCase
+Parameter '_kind' of Swap.transferToken (Swap.sol#443) is not in mixedCase
 Parameter '' of ISwap.delegateApprovals (interfaces/ISwap.sol#60) is not in mixedCase
 Parameter '_scope_0' of ISwap.delegateApprovals (interfaces/ISwap.sol#60) is not in mixedCase
 Parameter '' of ISwap.makerOrderStatus (interfaces/ISwap.sol#61) is not in mixedCase
