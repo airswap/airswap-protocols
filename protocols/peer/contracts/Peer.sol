@@ -108,33 +108,33 @@ contract Peer is IPeer, Ownable {
 
   /**
     * @notice Get a Maker-Side Quote from the Peer
-    * @param _takerParam uint256 The amount of ERC-20 token the peer would send
-    * @param _takerToken address The address of an ERC-20 token the peer would send
-    * @param _makerToken address The address of an ERC-20 token the consumer would send
-    * @return uint256 _makerParam The amount of ERC-20 token the consumer would send
+    * @param _quoteTakerParam uint256 The amount of ERC-20 token the peer would send
+    * @param _quoteTakerToken address The address of an ERC-20 token the peer would send
+    * @param _quoteMakerToken address The address of an ERC-20 token the consumer would send
+    * @return uint256 quoteMakerParam The amount of ERC-20 token the consumer would send
     */
   function getMakerSideQuote(
-    uint256 _takerParam,
-    address _takerToken,
-    address _makerToken
+    uint256 _quoteTakerParam,
+    address _quoteTakerToken,
+    address _quoteMakerToken
   ) external view returns (
-    uint256 _makerParam
+    uint256 quoteMakerParam
   ) {
 
-    Rule memory rule = rules[_takerToken][_makerToken];
+    Rule memory rule = rules[_quoteTakerToken][_quoteMakerToken];
 
     // Ensure that a rule exists.
     if(rule.maxTakerAmount > 0) {
 
       // Ensure the _takerParam does not exceed maximum for the rule.
-      if(_takerParam <= rule.maxTakerAmount) {
+      if(_quoteTakerParam <= rule.maxTakerAmount) {
 
-        _makerParam = _takerParam
+        quoteMakerParam = _quoteTakerParam
             .mul(rule.priceCoef)
             .div(10 ** rule.priceExp);
 
         // Return the quote.
-        return _makerParam;
+        return quoteMakerParam;
       }
     }
     return 0;
@@ -142,31 +142,31 @@ contract Peer is IPeer, Ownable {
 
   /**
     * @notice Get a Taker-Side Quote from the Peer
-    * @param _makerParam uint256 The amount of ERC-20 token the consumer would send
-    * @param _makerToken address The address of an ERC-20 token the consumer would send
-    * @param _takerToken address The address of an ERC-20 token the peer would send
-    * @return uint256 _takerParam The amount of ERC-20 token the peer would send
+    * @param _quoteMakerParam uint256 The amount of ERC-20 token the consumer would send
+    * @param _quoteMakerToken address The address of an ERC-20 token the consumer would send
+    * @param _quoteTakerToken address The address of an ERC-20 token the peer would send
+    * @return uint256 quoteTakerParam The amount of ERC-20 token the peer would send
     */
   function getTakerSideQuote(
-    uint256 _makerParam,
-    address _makerToken,
-    address _takerToken
+    uint256 _quoteMakerParam,
+    address _quoteMakerToken,
+    address _quoteTakerToken
   ) external view returns (
-    uint256 _takerParam
+    uint256 quoteTakerParam
   ) {
 
-    Rule memory rule = rules[_takerToken][_makerToken];
+    Rule memory rule = rules[_quoteTakerToken][_quoteMakerToken];
 
     // Ensure that a rule exists.
     if(rule.maxTakerAmount > 0) {
 
       // Calculate the _takerParam.
-      _takerParam = _makerParam
+      quoteTakerParam = _quoteMakerParam
         .mul(10 ** rule.priceExp).div(rule.priceCoef);
 
-      // Ensure the _takerParam does not exceed maximum and is greater than zero.
-      if(_takerParam <= rule.maxTakerAmount && _takerParam > 0) {
-        return _takerParam;
+      // Ensure the quoteTakerParam does not exceed maximum and is greater than zero.
+      if(quoteTakerParam <= rule.maxTakerAmount && quoteTakerParam > 0) {
+        return quoteTakerParam;
       }
     }
     return 0;
@@ -174,20 +174,20 @@ contract Peer is IPeer, Ownable {
 
   /**
     * @notice Get a Maximum Quote from the Peer
-    * @param _takerToken address The address of an ERC-20 token the peer would send
-    * @param _makerToken address The address of an ERC-20 token the consumer would send
-    * @return uint256 The amount the Peer would send
-    * @return uint256 The amount the Consumer would send
+    * @param _quoteTakerToken address The address of an ERC-20 token the peer would send
+    * @param _quoteMakerToken address The address of an ERC-20 token the consumer would send
+    * @return uint256 quoteTakerParam The amount the peer would send
+    * @return uint256 quoteMakerParam The amount the consumer would send
     */
   function getMaxQuote(
-    address _takerToken,
-    address _makerToken
+    address _quoteTakerToken,
+    address _quoteMakerToken
   ) external view returns (
-    uint256 _takerParam,
-    uint256 _makerParam
+    uint256 quoteTakerParam,
+    uint256 quoteMakerParam
   ) {
 
-    Rule memory rule = rules[_takerToken][_makerToken];
+    Rule memory rule = rules[_quoteTakerToken][_quoteMakerToken];
 
     // Ensure that a rule exists.
     if(rule.maxTakerAmount > 0) {
