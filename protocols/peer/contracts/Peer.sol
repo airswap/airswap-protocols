@@ -176,8 +176,8 @@ contract Peer is IPeer, Ownable {
     * @notice Get a Maximum Quote from the Peer
     * @param _quoteTakerToken address The address of an ERC-20 token the peer would send
     * @param _quoteMakerToken address The address of an ERC-20 token the consumer would send
-    * @return uint256 The amount the Peer would send
-    * @return uint256 The amount the Consumer would send
+    * @return uint256 quoteTakerParam The amount the peer would send
+    * @return uint256 quoteMakerParam The amount the consumer would send
     */
   function getMaxQuote(
     address _quoteTakerToken,
