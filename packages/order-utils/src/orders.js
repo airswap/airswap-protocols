@@ -40,14 +40,17 @@ module.exports = {
   async generateExpiry(days) {
     return (await getLatestTimestamp()) + SECONDS_IN_DAY * days
   },
-  async getOrder({
-    expiry = 0,
-    nonce = this.generateNonce(),
-    signer = NULL_ADDRESS,
-    maker = defaults.Party,
-    taker = defaults.Party,
-    affiliate = defaults.Party,
-  }) {
+  async getOrder(
+    {
+      expiry = 0,
+      nonce = this.generateNonce(),
+      signer = NULL_ADDRESS,
+      maker = defaults.Party,
+      taker = defaults.Party,
+      affiliate = defaults.Party,
+    },
+    noSignature
+  ) {
     if (expiry == 0) {
       expiry = await this.generateExpiry(1)
     }
@@ -59,16 +62,13 @@ module.exports = {
       affiliate: { ...defaults.Party, ...affiliate },
     }
     const wallet = signer !== NULL_ADDRESS ? signer : order.maker.wallet
-    if (this._knownAccounts.indexOf(wallet) !== -1) {
-      return {
+    if (!noSignature && this._knownAccounts.indexOf(wallet) !== -1) {
+      order.signature = await signatures.getWeb3Signature(
         order,
-        signature: await signatures.getWeb3Signature(
-          order,
-          wallet,
-          this._verifyingContract
-        ),
-      }
+        wallet,
+        this._verifyingContract
+      )
     }
-    return { order }
+    return order
   },
 }
