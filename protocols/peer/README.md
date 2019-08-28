@@ -129,18 +129,18 @@ function getMakerSideQuote(
 
 ### Params
 
-| Name          | Type      | Description                        |
-| :------------ | :-------- | :--------------------------------- |
-| `_takerParam` | `uint256` | The amount the peer would send.    |
-| `_takerToken` | `address` | The token the peer would send.     |
-| `_makerToken` | `address` | The token the consumer would send. |
+| Name          | Type      | Description                                             |
+| :------------ | :-------- | :------------------------------------------------------ |
+| `_takerParam` | `uint256` | The amount of ERC-20 token the peer would send.         |
+| `_takerToken` | `address` | The address of an ERC-20 token the peer would send.     |
+| `_makerToken` | `address` | The address of an ERC-20 token the consumer would send. |
 
 ### Reverts
 
 | Reason                | Scenario                                         |
 | :-------------------- | :----------------------------------------------- |
-| `TOKEN_PAIR_INACTIVE` | There is no Rule set for this token pair.        |
-| `AMOUNT_EXCEEDS_MAX`  | The quote would exceed the maximum for the Rule. |
+| `TOKEN_PAIR_INACTIVE` | There is no rule set for this token pair.        |
+| `AMOUNT_EXCEEDS_MAX`  | The quote would exceed the maximum for the rule. |
 
 ## Get a Taker-Side Quote
 
@@ -158,18 +158,18 @@ function getTakerSideQuote(
 
 ### Params
 
-| Name          | Type      | Description                         |
-| :------------ | :-------- | :---------------------------------- |
-| `_makerParam` | `uint256` | The amount the consumer would send. |
-| `_makerToken` | `address` | The token the consumer will send.   |
-| `_takerToken` | `address` | The token the peer will send.       |
+| Name          | Type      | Description                                             |
+| :------------ | :-------- | :------------------------------------------------------ |
+| `_makerParam` | `uint256` | The amount of ERC-20 token the consumer would send.     |
+| `_makerToken` | `address` | The address of an ERC-20 token the consumer would send. |
+| `_takerToken` | `address` | The address of an ERC-20 token the peer would send.     |
 
 ### Reverts
 
 | Reason                | Scenario                                         |
 | :-------------------- | :----------------------------------------------- |
-| `TOKEN_PAIR_INACTIVE` | There is no Rule set for this token pair.        |
-| `AMOUNT_EXCEEDS_MAX`  | The quote would exceed the maximum for the Rule. |
+| `TOKEN_PAIR_INACTIVE` | There is no rule set for this token pair.        |
+| `AMOUNT_EXCEEDS_MAX`  | The quote would exceed the maximum for the rule. |
 
 ## Get a Max Quote
 
@@ -187,16 +187,16 @@ function getMaxQuote(
 
 ### Params
 
-| Name          | Type      | Description                       |
-| :------------ | :-------- | :-------------------------------- |
-| `_takerToken` | `address` | The token the peer will send.     |
-| `_makerToken` | `address` | The token the consumer will send. |
+| Name          | Type      | Description                                             |
+| :------------ | :-------- | :------------------------------------------------------ |
+| `_takerToken` | `address` | The address of an ERC-20 token the peer would send.     |
+| `_makerToken` | `address` | The address of an ERC-20 token the consumer would send. |
 
 ### Reverts
 
 | Reason                | Scenario                                  |
 | :-------------------- | :---------------------------------------- |
-| `TOKEN_PAIR_INACTIVE` | There is no Rule set for this token pair. |
+| `TOKEN_PAIR_INACTIVE` | There is no rule set for this token pair. |
 
 ## Provide an Order
 
@@ -220,6 +220,6 @@ function provideOrder(
 
 | Reason                | Scenario                                                       |
 | :-------------------- | :------------------------------------------------------------- |
-| `TOKEN_PAIR_INACTIVE` | There is no Rule set for this token pair.                      |
-| `AMOUNT_EXCEEDS_MAX`  | The amount of the trade would exceed the maximum for the Rule. |
-| `PRICE_INCORRECT`     | The order is priced incorrectly for the Rule.                  |
+| `TOKEN_PAIR_INACTIVE` | There is no rule set for this token pair.                      |
+| `AMOUNT_EXCEEDS_MAX`  | The amount of the trade would exceed the maximum for the rule. |
+| `PRICE_INCORRECT`     | The order is priced incorrectly for the rule.                  |
