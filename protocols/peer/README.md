@@ -115,15 +115,15 @@ function unsetRule(
 
 ## Get a Maker-Side Quote
 
-Get a quote for the maker (consumer) side. Often used to get a buy price for \_takerToken.
+Get a quote for the maker (consumer) side. Often used to get a buy price for \_quoteTakerToken.
 
 ```Solidity
 function getMakerSideQuote(
-  uint256 _takerParam,
-  address _takerToken,
-  address _makerToken
+  uint256 _quoteTakerParam,
+  address _quoteTakerToken,
+  address _quoteMakerToken
 ) external view returns (
-  uint256 _makerParam
+  uint256 _quoteMakerParam
 )
 ```
 
@@ -131,9 +131,9 @@ function getMakerSideQuote(
 
 | Name          | Type      | Description                                             |
 | :------------ | :-------- | :------------------------------------------------------ |
-| `_takerParam` | `uint256` | The amount of ERC-20 token the peer would send.         |
-| `_takerToken` | `address` | The address of an ERC-20 token the peer would send.     |
-| `_makerToken` | `address` | The address of an ERC-20 token the consumer would send. |
+| `_quoteTakerParam` | `uint256` | The amount of ERC-20 token the peer would send.         |
+| `_quoteTakerToken` | `address` | The address of an ERC-20 token the peer would send.     |
+| `_quoteMakerToken` | `address` | The address of an ERC-20 token the consumer would send. |
 
 ### Reverts
 
@@ -144,15 +144,15 @@ function getMakerSideQuote(
 
 ## Get a Taker-Side Quote
 
-Get a quote for the taker (peer) side. Often used to get a sell price for \_makerToken.
+Get a quote for the taker (peer) side. Often used to get a sell price for \_quoteMakerToken.
 
 ```Solidity
 function getTakerSideQuote(
-  uint256 _makerParam,
-  address _makerToken,
-  address _takerToken
+  uint256 _quoteMakerParam,
+  address _quoteMakerToken,
+  address _quoteTakerToken
 ) external view returns (
-  uint256 _takerParam
+  uint256 _quoteTakerParam
 )
 ```
 
@@ -160,9 +160,9 @@ function getTakerSideQuote(
 
 | Name          | Type      | Description                                             |
 | :------------ | :-------- | :------------------------------------------------------ |
-| `_makerParam` | `uint256` | The amount of ERC-20 token the consumer would send.     |
-| `_makerToken` | `address` | The address of an ERC-20 token the consumer would send. |
-| `_takerToken` | `address` | The address of an ERC-20 token the peer would send.     |
+| `_quoteMakerParam` | `uint256` | The amount of ERC-20 token the consumer would send.     |
+| `_quoteMakerToken` | `address` | The address of an ERC-20 token the consumer would send. |
+| `_quoteTakerToken` | `address` | The address of an ERC-20 token the peer would send.     |
 
 ### Reverts
 
@@ -177,11 +177,11 @@ Get the maximum quote from the peer.
 
 ```Solidity
 function getMaxQuote(
-  address _takerToken,
-  address _makerToken
+  address _quoteTakerToken,
+  address _quoteMakerToken
 ) external view returns (
-  uint256 _takerParam,
-  uint256 _makerParam
+  uint256 _quoteTakerParam,
+  uint256 _quoteMakerParam
 )
 ```
 
@@ -189,8 +189,8 @@ function getMaxQuote(
 
 | Name          | Type      | Description                                             |
 | :------------ | :-------- | :------------------------------------------------------ |
-| `_takerToken` | `address` | The address of an ERC-20 token the peer would send.     |
-| `_makerToken` | `address` | The address of an ERC-20 token the consumer would send. |
+| `_quoteTakerToken` | `address` | The address of an ERC-20 token the peer would send.     |
+| `_quoteMakerToken` | `address` | The address of an ERC-20 token the consumer would send. |
 
 ### Reverts
 
