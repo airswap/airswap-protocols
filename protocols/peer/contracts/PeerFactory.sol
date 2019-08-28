@@ -25,7 +25,7 @@ contract PeerFactory is IPeerFactory, ILocatorWhitelist {
   mapping(address => bool) internal deployedAddresses;
 
   /**
-    * @notice Deploy a trusted peer contract
+    * @notice Create a new Peer contract
     * @param _swapContract address of the swap contract the peer will deploy with
     * @param _peerContractOwner address that should be the owner of the peer
     * @return peerContractAddress address address of the peer contract created
