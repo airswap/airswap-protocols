@@ -25,11 +25,12 @@ contract PeerFactory is IPeerFactory, ILocatorWhitelist {
   mapping(address => bool) internal deployedAddresses;
 
   /**
-    * @notice Deploy a trusted peer contract
+    * @notice Create a new Peer contract
     * @param _swapContract address of the swap contract the peer will deploy with
     * @param _peerContractOwner address that should be the owner of the peer
+    * @return peerContractAddress address address of the peer contract created
     */
-  function createPeer(address _swapContract, address _peerContractOwner) external {
+  function createPeer(address _swapContract, address _peerContractOwner) external returns (address peerContractAddress) {
 
     // Ensure an owner for the peer contract is provided.
     require(_peerContractOwner != address(0),
@@ -39,17 +40,19 @@ contract PeerFactory is IPeerFactory, ILocatorWhitelist {
     require(_swapContract != address(0),
       'SWAP_CONTRACT_REQUIRED');
 
-    address newPeerContract = address(new Peer(_swapContract, _peerContractOwner));
-    deployedAddresses[newPeerContract] = true;
+    peerContractAddress = address(new Peer(_swapContract, _peerContractOwner));
+    deployedAddresses[peerContractAddress] = true;
 
-    emit CreatePeer(newPeerContract, _swapContract, _peerContractOwner);
+    emit CreatePeer(peerContractAddress, _swapContract, _peerContractOwner);
+
+    return peerContractAddress;
   }
 
   /**
-    * @notice To check whether a locator is whitelisted
+    * @notice To check whether a locator was deployed
     * @dev Implements ILocatorWhitelist.has
     * @param _locator locator of the peer in question
-    * @return bool - true if the locator is whitelisted
+    * @return bool true if the peer was deployed by this contract
     */
   function has(bytes32 _locator) external view returns (bool) {
     return deployedAddresses[address(bytes20(_locator))];

@@ -222,6 +222,96 @@ contract('Peer', async accounts => {
       )
     })
 
+    it('Use quote with non-extent rule', async () => {
+      // Note: Consumer is the order maker, Peer is the order taker.
+      const { order, signature } = await orders.getOrder({
+        maker: {
+          wallet: bobAddress,
+          token: tokenDAI.address,
+          param: 1,
+        },
+        taker: {
+          wallet: aliceAddress,
+          token: tokenDAI.address,
+          param: 1,
+        },
+      })
+
+      // Succeeds on the Peer, fails on the Swap.
+      await reverted(
+        alicePeer.provideOrder(order, signature, { from: bobAddress }),
+        'TOKEN_PAIR_INACTIVE'
+      )
+    })
+
+    it('Use quote with incorrect maker wallet', async () => {
+      // Note: Consumer is the order maker, Peer is the order taker.
+      const { order, signature } = await orders.getOrder({
+        maker: {
+          wallet: bobAddress,
+          token: tokenWETH.address,
+          param: 1,
+        },
+        taker: {
+          wallet: aliceAddress,
+          token: tokenDAI.address,
+          param: quote.toNumber(),
+        },
+      })
+
+      // Succeeds on the Peer, fails on the Swap.
+      await reverted(
+        alicePeer.provideOrder(order, signature, { from: carolAddress }),
+        'MAKER_MUST_BE_SENDER'
+      )
+    })
+
+    it('Use quote with incorrect maker token kind', async () => {
+      // Note: Consumer is the order maker, Peer is the order taker.
+      const { order, signature } = await orders.getOrder({
+        maker: {
+          wallet: bobAddress,
+          token: tokenWETH.address,
+          param: 1,
+          kind: '0x80ac58cd',
+        },
+        taker: {
+          wallet: aliceAddress,
+          token: tokenDAI.address,
+          param: quote.toNumber(),
+        },
+      })
+
+      // Succeeds on the Peer, fails on the Swap.
+      await reverted(
+        alicePeer.provideOrder(order, signature, { from: bobAddress }),
+        'MAKER_MUST_BE_ERC20'
+      )
+    })
+
+    it('Use quote with incorrect taker token kind', async () => {
+      // Note: Consumer is the order maker, Peer is the order taker.
+      const { order, signature } = await orders.getOrder({
+        maker: {
+          wallet: bobAddress,
+          token: tokenWETH.address,
+          param: 1,
+        },
+        taker: {
+          wallet: aliceAddress,
+          token: tokenDAI.address,
+          param: quote.toNumber(),
+          kind: '0x80ac58cd',
+        },
+      })
+
+      // Succeeds on the Peer, fails on the Swap.
+      await reverted(
+        alicePeer.provideOrder(order, signature, { from: bobAddress }),
+        'TAKER_MUST_BE_ERC20'
+      )
+    })
+
     it('Gets a quote to sell 1 WETH and takes it', async () => {
       // Note: Consumer is the order maker, Peer is the order taker.
       const { order, signature } = await orders.getOrder({

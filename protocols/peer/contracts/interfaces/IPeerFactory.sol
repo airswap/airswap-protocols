@@ -24,7 +24,8 @@ interface IPeerFactory {
     * @notice Deploy a trusted peer contract
     * @param _swapContract address of the swap contract the peer will deploy with
     * @param _peerContractOwner address that should be the owner of the peer
+    * @return peerContractAddress address of the peer contract created
     */
-  function createPeer(address _swapContract, address _peerContractOwner) external;
+  function createPeer(address _swapContract, address _peerContractOwner) external returns (address peerContractAddress);
 
 }
