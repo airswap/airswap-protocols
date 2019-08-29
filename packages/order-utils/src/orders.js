@@ -62,14 +62,16 @@ module.exports = {
       affiliate: { ...defaults.Party, ...affiliate },
     }
     const wallet = signer !== NULL_ADDRESS ? signer : order.maker.wallet
-    if (!noSignature && this._knownAccounts.indexOf(wallet) !== -1) {
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        wallet,
-        this._verifyingContract
-      )
-    } else {
-      order.signature = signatures.getEmptySignature()
+    if (!noSignature) {
+      if (this._knownAccounts.indexOf(wallet) !== -1) {
+        order.signature = await signatures.getWeb3Signature(
+          order,
+          wallet,
+          this._verifyingContract
+        )
+      } else {
+        order.signature = signatures.getEmptySignature()
+      }
     }
     return order
   },
