@@ -68,6 +68,8 @@ module.exports = {
         wallet,
         this._verifyingContract
       )
+    } else {
+      order.signature = signatures.getEmptySignature()
     }
     return order
   },
