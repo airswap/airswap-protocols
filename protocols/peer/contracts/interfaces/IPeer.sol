@@ -56,31 +56,31 @@ interface IPeer {
   ) external;
 
   function getMakerSideQuote(
-    uint256 _quoteTakerParam,
-    address _quoteTakerToken,
-    address _quoteMakerToken
+    uint256 _takerParam,
+    address _takerToken,
+    address _makerToken
   ) external view returns (
-    uint256 quoteMakerParam
+    uint256 makerParam
   );
 
   function getTakerSideQuote(
-    uint256 _quoteMakerParam,
-    address _quoteMakerToken,
-    address _quoteTakerToken
+    uint256 _makerParam,
+    address _makerToken,
+    address _takerToken
   ) external view returns (
-    uint256 quoteTakerParam
+    uint256 takerParam
   );
 
   function getMaxQuote(
-    address _quoteTakerToken,
-    address _quoteMakerToken
+    address _takerToken,
+    address _makerToken
   ) external view returns (
-    uint256 quoteTakerParam,
-    uint256 quoteMakerParam
+    uint256 takerParam,
+    uint256 makerParam
   );
 
   function provideOrder(
-    Types.Order calldata order
+    Types.Order calldata _order
   ) external;
 
   function owner()
