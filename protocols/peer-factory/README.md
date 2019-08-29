@@ -8,61 +8,33 @@
 
 [![Discord](https://img.shields.io/discord/590643190281928738.svg)](https://discord.gg/ecQbV7H)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![CircleCI](https://circleci.com/gh/airswap/airswap-protocols.svg?style=svg&circle-token=73bd6668f836ce4306dbf6ca32109ddbb5b7e1fe)](https://circleci.com/gh/airswap/airswap-protocols)
+![Twitter Follow](https://img.shields.io/twitter/follow/airswap?style=social)
 
-### Features
+## Resources
 
-#### Deploys Peer Contracts
+- Docs → https://airswap.gitbook.io/
+- Website → https://www.airswap.io/
+- Blog → https://medium.com/fluidity
+- Support → https://support.airswap.io/
 
-Creates peers with a trusted interface
+## Commands
 
-#### Has lookup to find peer contracts it has deployed
+| Command         | Description                                   |
+| :-------------- | :-------------------------------------------- |
+| `yarn`          | Install dependencies                          |
+| `yarn clean`    | Delete the contract `build` folder            |
+| `yarn compile`  | Compile all contracts to `build` folder       |
+| `yarn coverage` | Run solidity-coverage to report test coverage |
+| `yarn ganache`  | Run an instance of `ganache-cli` for tests    |
+| `yarn hint`     | Run a syntax linter for all Solidity code     |
+| `yarn lint`     | Run a syntax linter for all JavaScript code   |
+| `yarn test`     | Run all contract tests in `test` folder       |
 
-### Definitions
+## Running Tests
 
-| Term | Definition                                                |
-| :--- | :-------------------------------------------------------- |
-| Peer | Smart contract that trades based on rules. Acts as taker. |
+Run an instance of `ganache-cli` before running tests.
 
-### Constructor
-
-Create a new `Peer` contract.
-
-```Solidity
-constructor(
-  address _swapContract,
-  address _peerContractOwner
-) public
 ```
-
-### Create a new `Peer` contract.
-
-```Solidity
-createPeer(
-  address _swapContract,
-  address _peerContractOwner
-) external returns
-  (address peerContractAddress)
+yarn ganache
 ```
-
-#### Params
-
-| Name                 | Type      | Description                                           |
-| :------------------- | :-------- | :---------------------------------------------------- |
-| `_swapContract`      | `address` | Address of the swap contract used to settle trades.   |
-| `_peerContractOwner` | `address` | Address of the owner of the peer for rule management. |
-
-### Lookup for deployed peers
-
-To check whether a locator was deployed
-
-```Solidity
-function has(
-  bytes32 _locator
-) external returns (bool)
-```
-
-#### Params
-
-| Name       | Type      | Description                                      |
-| :--------- | :-------- | :----------------------------------------------- |
-| `_locator` | `bytes32` | locator of the peer in question, ex an `address` |
