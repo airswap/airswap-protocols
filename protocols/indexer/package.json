@@ -1,6 +1,6 @@
 {
   "name": "@airswap/indexer",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Manages markets that store intents to trade in the Swap Protocol",
   "license": "Apache-2.0",
   "repository": {
@@ -15,9 +15,9 @@
     "test": "truffle test"
   },
   "devDependencies": {
-    "@airswap/market": "0.1.0",
+    "@airswap/market": "0.2.0",
     "@airswap/test-utils": "0.1.0",
-    "@airswap/types": "0.1.0",
+    "@airswap/types": "0.2.0",
     "bignumber.js": "^9.0.0",
     "truffle": "^5.0.24"
   },
