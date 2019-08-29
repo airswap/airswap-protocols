@@ -113,7 +113,15 @@ contract Market is Ownable {
       return false;
     }
 
-    removeIntent(_user);
+    // Link its neighbors together.
+    link(intentsLinkedList[_user][PREV], intentsLinkedList[_user][NEXT]);
+
+    // Delete user from the list.
+    delete intentsLinkedList[_user][PREV];
+    delete intentsLinkedList[_user][NEXT];
+
+    // Decrement the length of the linked list.
+    length = length - 1;
 
     emit UnsetIntent(_user);
     return true;
@@ -233,22 +241,4 @@ contract Market is Ownable {
     intentsLinkedList[_left.user][NEXT] = _right;
     intentsLinkedList[_right.user][PREV] = _left;
   }
-
-  /**
-    * @notice Removes a specified user from the linked list
-    *
-    * @param _user the user in question
-    */
-  function removeIntent(address _user) internal {
-    // Link its neighbors together.
-    link(intentsLinkedList[_user][PREV], intentsLinkedList[_user][NEXT]);
-
-    // Delete user from the list.
-    delete intentsLinkedList[_user][PREV];
-    delete intentsLinkedList[_user][NEXT];
-
-    // Decrement the length of the linked list.
-    length = length - 1;
-  }
-
 }
