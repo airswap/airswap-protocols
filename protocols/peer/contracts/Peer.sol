@@ -205,11 +205,9 @@ contract Peer is IPeer, Ownable {
     * @notice Provide an Order
     * @dev Rules get reset with new maxTakerAmount
     * @param _order Types.Order
-    * @param _signature Types.Signature
     */
   function provideOrder(
-    Types.Order calldata _order,
-    Types.Signature calldata _signature
+    Types.Order calldata _order
   ) external {
 
     Rule memory rule = rules[_order.taker.token][_order.maker.token];
@@ -244,7 +242,7 @@ contract Peer is IPeer, Ownable {
     });
 
     // Perform the swap.
-    swapContract.swap(_order, _signature);
+    swapContract.swap(_order);
 
   }
 }
