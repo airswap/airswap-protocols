@@ -149,7 +149,7 @@ contract('Index Unit Tests', async accounts => {
       trx = index.setEntry(aliceAddress, 5000, aliceLocator, {
         from: owner,
       })
-      await reverted(trx, 'USER_HAS_INTENT')
+      await reverted(trx, 'USER_HAS_ENTRY')
 
       let length = await index.length.call()
       equal(length.toNumber(), 1, 'length increased, but total users has not')
