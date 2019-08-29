@@ -182,10 +182,10 @@ contract('Indexer Unit Tests', async accounts => {
     })
   })
 
-  describe('Test setEntry', async () => {
+  describe('Test setIntent', async () => {
     it('should not set an entry if the index doesnt exist', async () => {
       await reverted(
-        indexer.setEntry(tokenOne, tokenTwo, 250, aliceLocator, {
+        indexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
           from: aliceAddress,
         }),
         'INDEX_DOES_NOT_EXIST'
@@ -194,7 +194,7 @@ contract('Indexer Unit Tests', async accounts => {
 
     it('should not set an entry if the locator is not whitelisted', async () => {
       await reverted(
-        whitelistedIndexer.setEntry(tokenOne, tokenTwo, 250, aliceLocator, {
+        whitelistedIndexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
           from: aliceAddress,
         }),
         'LOCATOR_NOT_WHITELISTED'
@@ -209,7 +209,7 @@ contract('Indexer Unit Tests', async accounts => {
 
       // now try to stake with an amount less than 250
       await reverted(
-        indexer.setEntry(tokenOne, tokenTwo, 250, aliceLocator, {
+        indexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
           from: aliceAddress,
         }),
         'INDEX_IS_BLACKLISTED'
@@ -226,7 +226,7 @@ contract('Indexer Unit Tests', async accounts => {
 
       // now try to stake with an amount less than 250
       await reverted(
-        indexer.setEntry(tokenOne, tokenTwo, 250, aliceLocator, {
+        indexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
           from: aliceAddress,
         }),
         'INDEX_IS_BLACKLISTED'
@@ -244,7 +244,7 @@ contract('Indexer Unit Tests', async accounts => {
 
       // now try to set an entry
       await reverted(
-        indexer.setEntry(tokenOne, tokenTwo, 250, aliceLocator, {
+        indexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
           from: aliceAddress,
         }),
         'UNABLE_TO_STAKE'
@@ -258,7 +258,7 @@ contract('Indexer Unit Tests', async accounts => {
       })
 
       // now set an entry
-      let result = await indexer.setEntry(
+      let result = await indexer.setIntent(
         tokenOne,
         tokenTwo,
         250,
@@ -289,7 +289,7 @@ contract('Indexer Unit Tests', async accounts => {
       await whitelistMock.givenAnyReturnBool(true)
 
       // now set an entry
-      let result = await whitelistedIndexer.setEntry(
+      let result = await whitelistedIndexer.setIntent(
         tokenOne,
         tokenTwo,
         250,
@@ -317,13 +317,13 @@ contract('Indexer Unit Tests', async accounts => {
       })
 
       // set one entry
-      await indexer.setEntry(tokenOne, tokenTwo, 250, aliceLocator, {
+      await indexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
         from: aliceAddress,
       })
 
       // now try to set another
       await reverted(
-        indexer.setEntry(tokenOne, tokenTwo, 250, aliceLocator, {
+        indexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
           from: aliceAddress,
         }),
         'USER_HAS_ENTRY'
@@ -331,10 +331,10 @@ contract('Indexer Unit Tests', async accounts => {
     })
   })
 
-  describe('Test unsetEntry', async () => {
+  describe('Test unsetIntent', async () => {
     it('should not unset an entry if the index doesnt exist', async () => {
       await reverted(
-        indexer.unsetEntry(tokenOne, tokenTwo, {
+        indexer.unsetIntent(tokenOne, tokenTwo, {
           from: aliceAddress,
         }),
         'INDEX_DOES_NOT_EXIST'
@@ -349,7 +349,7 @@ contract('Indexer Unit Tests', async accounts => {
 
       // now try to unset a non-existent entry
       await reverted(
-        indexer.unsetEntry(tokenOne, tokenTwo, {
+        indexer.unsetIntent(tokenOne, tokenTwo, {
           from: aliceAddress,
         }),
         'ENTRY_DOES_NOT_EXIST'
@@ -363,12 +363,12 @@ contract('Indexer Unit Tests', async accounts => {
       })
 
       // create the entry
-      await indexer.setEntry(tokenOne, tokenTwo, 250, aliceLocator, {
+      await indexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
         from: aliceAddress,
       })
 
       // now try to unset the entry
-      let tx = await indexer.unsetEntry(tokenOne, tokenTwo, {
+      let tx = await indexer.unsetIntent(tokenOne, tokenTwo, {
         from: aliceAddress,
       })
 
@@ -391,7 +391,7 @@ contract('Indexer Unit Tests', async accounts => {
       })
 
       // create the entry
-      await indexer.setEntry(tokenOne, tokenTwo, 10, aliceLocator, {
+      await indexer.setIntent(tokenOne, tokenTwo, 10, aliceLocator, {
         from: aliceAddress,
       })
 
@@ -405,16 +405,16 @@ contract('Indexer Unit Tests', async accounts => {
 
       // reverts if transfer failed
       await reverted(
-        indexer.unsetEntry(tokenOne, tokenTwo, {
+        indexer.unsetIntent(tokenOne, tokenTwo, {
           from: aliceAddress,
         })
       )
     })
   })
 
-  describe('Test getEntries', async () => {
+  describe('Test getIntents', async () => {
     it('should return an empty array if the index doesnt exist', async () => {
-      let entries = await indexer.getEntries.call(tokenOne, tokenTwo, 4)
+      let entries = await indexer.getIntents.call(tokenOne, tokenTwo, 4)
       equal(entries.length, 0, 'entries array should be empty')
     })
 
@@ -425,7 +425,7 @@ contract('Indexer Unit Tests', async accounts => {
       })
 
       // set an entry staking 0
-      await indexer.setEntry(tokenOne, tokenTwo, 0, aliceLocator, {
+      await indexer.setIntent(tokenOne, tokenTwo, 0, aliceLocator, {
         from: aliceAddress,
       })
 
@@ -435,7 +435,7 @@ contract('Indexer Unit Tests', async accounts => {
       })
 
       // now try to get the entries
-      let entries = await indexer.getEntries.call(tokenOne, tokenTwo, 4)
+      let entries = await indexer.getIntents.call(tokenOne, tokenTwo, 4)
       equal(entries.length, 0, 'entries array should be empty')
     })
 
@@ -446,19 +446,19 @@ contract('Indexer Unit Tests', async accounts => {
       })
 
       // set two entries
-      await indexer.setEntry(tokenOne, tokenTwo, 50, aliceLocator, {
+      await indexer.setIntent(tokenOne, tokenTwo, 50, aliceLocator, {
         from: aliceAddress,
       })
-      await indexer.setEntry(tokenOne, tokenTwo, 100, bobLocator, {
+      await indexer.setIntent(tokenOne, tokenTwo, 100, bobLocator, {
         from: bobAddress,
       })
 
       // now try to get the entries
-      let entries = await indexer.getEntries.call(tokenOne, tokenTwo, 4)
+      let entries = await indexer.getIntents.call(tokenOne, tokenTwo, 4)
       equal(entries.length, 2, 'entries array should be size 2')
 
       // should only get the number specified
-      entries = await indexer.getEntries.call(tokenOne, tokenTwo, 1)
+      entries = await indexer.getIntents.call(tokenOne, tokenTwo, 1)
       equal(entries.length, 1, 'entries array should be size 1')
     })
   })

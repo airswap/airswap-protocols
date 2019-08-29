@@ -61,19 +61,19 @@ interface IIndexer {
     address[] calldata _tokens
   ) external;
 
-  function setEntry(
+  function setIntent(
     address _makerToken,
     address _takerToken,
     uint256 _amount,
     bytes32 _locator
   ) external;
 
-  function unsetEntry(
+  function unsetIntent(
     address _makerToken,
     address _takerToken
   ) external;
 
-  function getEntries(
+  function getIntents(
     address _makerToken,
     address _takerToken,
     uint256 _count

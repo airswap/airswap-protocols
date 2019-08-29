@@ -55,7 +55,7 @@ contract Indexer is IIndexer, Ownable {
   }
 
   /**
-    * @notice Create a Index (Collection of Entries to Trade)
+    * @notice Create a Index (Collection of Intents to Trade)
     * @dev Deploys a new Index contract and tracks the address
     *
     * @param _makerToken address
@@ -108,7 +108,7 @@ contract Indexer is IIndexer, Ownable {
   }
 
   /**
-    * @notice Set an Entry to Trade
+    * @notice Set an Intent to Trade
     * @dev Requires approval to transfer staking token for sender
     *
     * @param _makerToken address
@@ -116,7 +116,7 @@ contract Indexer is IIndexer, Ownable {
     * @param _amount uint256
     * @param _locator bytes32
     */
-  function setEntry(
+  function setIntent(
     address _makerToken,
     address _takerToken,
     uint256 _amount,
@@ -152,13 +152,13 @@ contract Indexer is IIndexer, Ownable {
   }
 
   /**
-    * @notice Unset an Entry to Trade
+    * @notice Unset an Intent to Trade
     * @dev Users are allowed unstake from blacklisted indexes
     *
     * @param _makerToken address
     * @param _takerToken address
     */
-  function unsetEntry(
+  function unsetIntent(
     address _makerToken,
     address _takerToken
   ) external {
@@ -188,7 +188,7 @@ contract Indexer is IIndexer, Ownable {
   }
 
   /**
-    * @notice Get the Entries to Trade for a Index
+    * @notice Get the Intents to Trade for a Index
     * @dev Users are allowed unstake from blacklisted indexes
     *
     * @param _makerToken address
@@ -196,7 +196,7 @@ contract Indexer is IIndexer, Ownable {
     * @param _count uint256
     * @return locators address[]
     */
-  function getEntries(
+  function getIntents(
     address _makerToken,
     address _takerToken,
     uint256 _count
