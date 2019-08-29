@@ -18,6 +18,12 @@
 - Blog → https://medium.com/fluidity
 - Support → https://support.airswap.io/
 
+## Deployments
+
+| Contract    | Version | Network | Address                                                                                                                         |
+| :---------- | :------ | :------ | :------------------------------------------------------------------------------------------------------------------------------ |
+| PeerFactory | `0.1.0` | Rinkeby | [`0x264fD6933aa77aD558330a78f931a5f227d14B05`](https://rinkeby.etherscan.io/address/0x264fD6933aa77aD558330a78f931a5f227d14B05) |
+
 ## Commands
 
 | Command         | Description                                   |
