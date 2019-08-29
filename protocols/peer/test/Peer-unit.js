@@ -10,7 +10,7 @@ const {
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 
-const { orders, signatures } = require('@airswap/order-utils')
+const { orders } = require('@airswap/order-utils')
 
 contract('Peer Unit Tests', async accounts => {
   const owner = accounts[0]
@@ -36,10 +36,8 @@ contract('Peer Unit Tests', async accounts => {
 
   async function setupMockSwap() {
     let swapTemplate = await Swap.new()
-    const { order } = await orders.getOrder({})
-    swapFunction = swapTemplate.contract.methods
-      .swap(order, signatures.getEmptySignature())
-      .encodeABI()
+    const order = await orders.getOrder({})
+    swapFunction = swapTemplate.contract.methods.swap(order).encodeABI()
 
     mockSwap = await MockContract.new()
 
@@ -335,7 +333,7 @@ contract('Peer Unit Tests', async accounts => {
 
   describe('Test provideOrder', async () => {
     it('test if a rule does not exist', async () => {
-      const { order, signature } = await orders.getOrder({
+      const order = await orders.getOrder({
         maker: {
           wallet: notOwner,
           param: 555,
@@ -348,7 +346,7 @@ contract('Peer Unit Tests', async accounts => {
       })
 
       await reverted(
-        peer.provideOrder(order, signature, {
+        peer.provideOrder(order, {
           from: notOwner,
         }),
         'TOKEN_PAIR_INACTIVE'
@@ -364,7 +362,7 @@ contract('Peer Unit Tests', async accounts => {
         EXP
       )
 
-      const { order } = await orders.getOrder({
+      const order = await orders.getOrder({
         maker: {
           wallet: notOwner,
           param: 555,
@@ -377,7 +375,7 @@ contract('Peer Unit Tests', async accounts => {
       })
 
       await reverted(
-        peer.provideOrder(order, signatures.getEmptySignature(), {
+        peer.provideOrder(order, {
           from: notOwner,
         }),
         'AMOUNT_EXCEEDS_MAX'
@@ -393,7 +391,7 @@ contract('Peer Unit Tests', async accounts => {
         EXP
       )
 
-      const { order } = await orders.getOrder({
+      const order = await orders.getOrder({
         maker: {
           param: 30,
           token: MAKER_TOKEN,
@@ -405,7 +403,7 @@ contract('Peer Unit Tests', async accounts => {
       })
 
       await reverted(
-        peer.provideOrder(order, signatures.getEmptySignature(), {
+        peer.provideOrder(order, {
           from: notOwner,
         })
       )
@@ -418,7 +416,7 @@ contract('Peer Unit Tests', async accounts => {
 
       let makerAmount = 100
 
-      const { order } = await orders.getOrder({
+      const order = await orders.getOrder({
         maker: {
           wallet: notOwner,
           param: makerAmount,
@@ -433,7 +431,7 @@ contract('Peer Unit Tests', async accounts => {
       await passes(
         //mock swapContract
         //test rule decrement
-        peer.provideOrder(order, signatures.getEmptySignature(), {
+        peer.provideOrder(order, {
           from: notOwner,
         })
       )
@@ -470,7 +468,7 @@ contract('Peer Unit Tests', async accounts => {
       let makerAmount = 100
       let takerAmount = Math.floor((makerAmount * 10 ** EXP) / PRICE_COEF)
 
-      const { order } = await orders.getOrder({
+      const order = await orders.getOrder({
         maker: {
           wallet: notOwner,
           param: makerAmount,
@@ -485,7 +483,7 @@ contract('Peer Unit Tests', async accounts => {
       await passes(
         //mock swapContract
         //test rule decrement
-        peer.provideOrder(order, signatures.getEmptySignature(), {
+        peer.provideOrder(order, {
           from: notOwner,
         })
       )

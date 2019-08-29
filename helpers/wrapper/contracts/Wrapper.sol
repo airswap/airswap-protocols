@@ -65,11 +65,9 @@ contract Wrapper {
     * @dev Taker must authorize this contract on the swapContract
     * @dev Taker must approve this contract on the wethContract
     * @param _order Types.Order
-    * @param _signature Types.Signature
     */
   function swap(
-    Types.Order calldata _order,
-    Types.Signature calldata _signature
+    Types.Order calldata _order
   ) external payable {
 
     // Ensure message sender is taker wallet.
@@ -97,11 +95,8 @@ contract Wrapper {
 
     }
 
-    // Perform the simple swap.
-    swapContract.swap(
-      _order,
-      _signature
-    );
+    // Perform the swap.
+    swapContract.swap(_order);
 
     // The taker is receiving ether that must be unwrapped.
     if (_order.maker.token == address(wethContract)) {

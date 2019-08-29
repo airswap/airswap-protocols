@@ -9,9 +9,12 @@ const { hashDomain, getOrderHash } = require('@airswap/order-utils').hashes
 const { orders } = require('@airswap/order-utils')
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 
-contract('Types Unit Tests', async () => {
+contract('Types Unit Tests', async ([defaultAccount]) => {
   let mockTypes
   let snapshotId
+
+  orders.setKnownAccounts([defaultAccount])
+  orders.setVerifyingContract(defaultAccount)
 
   beforeEach(async () => {
     let snapShot = await takeSnapshot()
@@ -30,7 +33,11 @@ contract('Types Unit Tests', async () => {
 
   describe('Test hashing functions within the library', async () => {
     it('Test hashOrder', async () => {
-      const { order } = await orders.getOrder({})
+      const order = await orders.getOrder({
+        maker: {
+          wallet: defaultAccount,
+        },
+      })
       let hashedDomain = '0x' + hashDomain(mockTypes.address).toString('hex')
       let hashedOrder = await mockTypes.hashOrder.call(order, hashedDomain)
       equal(

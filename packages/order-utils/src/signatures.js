@@ -20,6 +20,7 @@ const {
   DOMAIN_NAME,
   DOMAIN_VERSION,
   EMPTY_ADDRESS,
+  signatures,
   types,
 } = require('./constants')
 const hashes = require('./hashes')
@@ -31,7 +32,7 @@ module.exports = {
     const sig = await web3.eth.sign(orderHashHex, signer)
     const { r, s, v } = ethUtil.fromRpcSig(sig)
     return {
-      version: '0x45', // Version 0x45: personalSign
+      version: signatures.PERSONAL_SIGN,
       signer,
       r,
       s,
@@ -43,7 +44,7 @@ module.exports = {
     const orderHashBuff = ethUtil.toBuffer(orderHash)
     const { r, s, v } = ethUtil.ecsign(orderHashBuff, privateKey)
     return {
-      version: '0x01', // Version 0x01: signTypedData
+      version: signatures.SIGN_TYPED_DATA,
       signer: ethUtil.privateToAddress(privateKey).toString('hex'),
       r,
       s,
@@ -57,7 +58,7 @@ module.exports = {
     })
     const { r, s, v } = ethUtil.fromRpcSig(sig)
     return {
-      version: '0x45', // Version 0x45: personalSign
+      version: signatures.PERSONAL_SIGN,
       signer: `0x${ethUtil.privateToAddress(privateKey).toString('hex')}`,
       r,
       s,
@@ -79,7 +80,7 @@ module.exports = {
     })
     const { r, s, v } = ethUtil.fromRpcSig(sig)
     return {
-      version: '0x01', // Version 0x01: signTypedData
+      version: signatures.SIGN_TYPED_DATA,
       signer: `0x${ethUtil.privateToAddress(privateKey).toString('hex')}`,
       r,
       s,
@@ -88,7 +89,7 @@ module.exports = {
   },
   getEmptySignature() {
     return {
-      version: '0x0',
+      version: signatures.INTENDED_VALIDATOR,
       signer: EMPTY_ADDRESS,
       v: '0',
       r: '0x0',

@@ -22,6 +22,11 @@ module.exports = {
   ONE_ETH: 1000000000000000000,
   ERC721_INTERFACE_ID: '0x80ac58cd',
   ERC20_INTERFACE_ID: '0x277f8169',
+  signatures: {
+    INTENDED_VALIDATOR: '0x00',
+    SIGN_TYPED_DATA: '0x01',
+    PERSONAL_SIGN: '0x45',
+  },
   types: {
     EIP712Domain: [
       { name: 'name', type: 'string' },
@@ -46,7 +51,7 @@ module.exports = {
     Party: {
       wallet: '0x0000000000000000000000000000000000000000',
       token: '0x0000000000000000000000000000000000000000',
-      param: 0,
+      param: '0',
       kind: '0x277f8169',
     },
   },

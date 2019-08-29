@@ -92,8 +92,7 @@ The **V2** contract has a `swap` function.
 
 ```
 function swap(
-  Types.Order calldata _order,
-  Types.Signature calldata _signature
+  Types.Order calldata _order
 ) external
 ```
 
@@ -101,11 +100,12 @@ Where the `_order` argument is an `Order` struct.
 
 ```
 struct Order {
-  uint256 nonce;    // Unique per order and should be sequential
-  uint256 expiry;   // Expiry in seconds since 1 January 1970
-  Party maker;      // Party to the trade that sets terms
-  Party taker;      // Party to the trade that accepts terms
-  Party affiliate;  // Party compensated for facilitating (optional)
+  uint256 nonce;        // Unique per order and should be sequential
+  uint256 expiry;       // Expiry in seconds since 1 January 1970
+  Party maker;          // Party to the trade that sets terms
+  Party taker;          // Party to the trade that accepts terms
+  Party affiliate;      // Party compensated for facilitating (optional)
+  Signature signature;  // Signature of the order
 }
 ```
 
@@ -113,22 +113,22 @@ The `_order` argument has multiple `Party` structs.
 
 ```
 struct Party {
-  address wallet;   // Wallet address of the party
-  address token;    // Contract address of the token
-  uint256 param;    // Value (ERC-20) or ID (ERC-721)
-  bytes4 kind;      // Interface ID of the token
+  address wallet;       // Wallet address of the party
+  address token;        // Contract address of the token
+  uint256 param;        // Value (ERC-20) or ID (ERC-721)
+  bytes4 kind;          // Interface ID of the token
 }
 ```
 
-And the `_signature` argument is a `Signature` struct.
+And the `_order` argument has a `signature` struct.
 
 ```
 struct Signature {
-  address signer;   // Address of the wallet used to sign
-  uint8 v;          // `v` value of an ECDSA signature
-  bytes32 r;        // `r` value of an ECDSA signature
-  bytes32 s;        // `s` value of an ECDSA signature
-  bytes1 version;   // EIP-191 signature version
+  address signer;       // Address of the wallet used to sign
+  uint8 v;              // `v` value of an ECDSA signature
+  bytes32 r;            // `r` value of an ECDSA signature
+  bytes32 s;            // `s` value of an ECDSA signature
+  bytes1 version;       // EIP-191 signature version
 }
 ```
 

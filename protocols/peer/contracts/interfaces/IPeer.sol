@@ -80,8 +80,7 @@ interface IPeer {
   );
 
   function provideOrder(
-    Types.Order calldata order,
-    Types.Signature calldata signature
+    Types.Order calldata order
   ) external;
 
   function owner()

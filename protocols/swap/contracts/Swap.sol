@@ -85,11 +85,9 @@ contract Swap is ISwap {
   /**
     * @notice Atomic Token Swap
     * @param _order Types.Order
-    * @param _signature Types.Signature
     */
   function swap(
-    Types.Order calldata _order,
-    Types.Signature calldata _signature
+    Types.Order calldata _order
   ) external {
 
     // Ensure the order is not expired.
@@ -136,10 +134,10 @@ contract Swap is ISwap {
     }
 
     // Validate the maker side of the trade.
-    if (_signature.v == 0) {
+    if (_order.signature.v == 0) {
       /**
         * Signature is not provided. The maker may have authorized the sender
-        * to swap on its behalf, which does not require a _signature.
+        * to swap on its behalf, which does not require a signature.
         */
       require(isAuthorized(_order.maker.wallet, msg.sender),
         "SIGNER_UNAUTHORIZED");
@@ -149,11 +147,11 @@ contract Swap is ISwap {
         * The signature is provided. Determine whether the signer is
         * authorized by the maker and if so validate the signature itself.
         */
-      require(isAuthorized(_order.maker.wallet, _signature.signer),
+      require(isAuthorized(_order.maker.wallet, _order.signature.signer),
         "SIGNER_UNAUTHORIZED");
 
       // Ensure the signature is valid.
-      require(isValid(_order, _signature, domainSeparator),
+      require(isValid(_order, domainSeparator),
         "SIGNATURE_INVALID");
 
     }
@@ -267,35 +265,33 @@ contract Swap is ISwap {
   /**
     * @notice Validate signature using an EIP-712 typed data hash
     * @param _order Order
-    * @param _signature Signature
     * @return bool returns whether the signature + order is valid
     */
   function isValid(
     Types.Order memory _order,
-    Types.Signature memory _signature,
     bytes32 _domainSeparator
   ) internal pure returns (bool) {
-    if (_signature.version == byte(0x01)) {
-      return _signature.signer == ecrecover(
+    if (_order.signature.version == byte(0x01)) {
+      return _order.signature.signer == ecrecover(
         Types.hashOrder(
           _order,
           _domainSeparator),
-          _signature.v,
-          _signature.r,
-          _signature.s
+          _order.signature.v,
+          _order.signature.r,
+          _order.signature.s
       );
     }
-    if (_signature.version == byte(0x45)) {
-      return _signature.signer == ecrecover(
+    if (_order.signature.version == byte(0x45)) {
+      return _order.signature.signer == ecrecover(
         keccak256(
           abi.encodePacked(
             "\x19Ethereum Signed Message:\n32",
             Types.hashOrder(_order, _domainSeparator)
           )
         ),
-        _signature.v,
-        _signature.r,
-        _signature.s
+        _order.signature.v,
+        _order.signature.r,
+        _order.signature.s
       );
     }
     return false;

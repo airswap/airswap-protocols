@@ -143,8 +143,9 @@ contract Consumer {
         _userReceiveAmount,
         0x277f8169
       ),
-      Types.Party(address(0), address(0), 0, bytes4(0))
-    ), Types.Signature(address(0), 0, 0, 0, 0));
+      Types.Party(address(0), address(0), 0, bytes4(0)),
+      Types.Signature(address(0), 0, 0, 0, 0)
+    ));
 
     // Consumer revokes the authorization of the Peer.
     swapContract.revoke(untrustedPeerContract);
