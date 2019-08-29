@@ -35,7 +35,7 @@ contract Market is Ownable {
   byte constant private NEXT = 0x01;
 
   // Mapping of user address to its neighbors
-  mapping(address => mapping(byte => Intent)) public list;
+  mapping(address => mapping(byte => Intent)) public intentsLinkedList;
 
   /**
     * @notice Intent to Trade
@@ -71,8 +71,8 @@ contract Market is Ownable {
   constructor() public {
     // Initialize the linked list.
     Intent memory head = Intent(HEAD, 0, bytes32(0));
-    list[HEAD][PREV] = head;
-    list[HEAD][NEXT] = head;
+    intentsLinkedList[HEAD][PREV] = head;
+    intentsLinkedList[HEAD][NEXT] = head;
   }
 
   /**
@@ -128,10 +128,10 @@ contract Market is Ownable {
   ) external view returns (Intent memory) {
 
     // Ensure the user has a neighbor in the linked list.
-    if (list[_user][PREV].user != address(0)) {
+    if (intentsLinkedList[_user][PREV].user != address(0)) {
 
       // Return the next intent from the previous neighbor.
-      return list[list[_user][PREV].user][NEXT];
+      return intentsLinkedList[intentsLinkedList[_user][PREV].user][NEXT];
     }
     return Intent(address(0), 0, bytes32(0));
   }
@@ -152,14 +152,14 @@ contract Market is Ownable {
     result = new bytes32[](limit);
 
     // Get the first intent in the linked list after the HEAD
-    Intent storage intent = list[HEAD][NEXT];
+    Intent storage intent = intentsLinkedList[HEAD][NEXT];
 
     // Iterate over the list until the end or limit.
     uint256 i = 0;
     while (i < limit) {
       result[i] = intent.locator;
       i = i + 1;
-      intent = list[intent.user][NEXT];
+      intent = intentsLinkedList[intent.user][NEXT];
     }
   }
 
@@ -171,8 +171,8 @@ contract Market is Ownable {
     address _user
   ) public view returns (bool) {
 
-    if (list[_user][PREV].user != address(0) &&
-      list[list[_user][PREV].user][NEXT].user == _user) {
+    if (intentsLinkedList[_user][PREV].user != address(0) &&
+      intentsLinkedList[intentsLinkedList[_user][PREV].user][NEXT].user == _user) {
       return true;
     }
     return false;
@@ -187,16 +187,16 @@ contract Market is Ownable {
   ) internal view returns (Intent memory) {
 
     // Get the first intent in the linked list.
-    Intent storage intent = list[HEAD][NEXT];
+    Intent storage intent = intentsLinkedList[HEAD][NEXT];
 
     if (_score == 0) {
       // return the head of the linked list
-      return list[intent.user][PREV];
+      return intentsLinkedList[intent.user][PREV];
     }
 
     // Iterate through the list until a lower score is found.
     while (_score <= intent.score) {
-      intent = list[intent.user][NEXT];
+      intent = intentsLinkedList[intent.user][NEXT];
     }
     return intent;
   }
@@ -213,7 +213,7 @@ contract Market is Ownable {
   ) internal {
 
     // Get the intent before the _nextIntent.
-    Intent memory previousIntent = list[_nextIntent.user][PREV];
+    Intent memory previousIntent = intentsLinkedList[_nextIntent.user][PREV];
 
     // Link the _newIntent into place.
     link(previousIntent, _newIntent);
@@ -230,8 +230,8 @@ contract Market is Ownable {
     Intent memory _left,
     Intent memory _right
   ) internal {
-    list[_left.user][NEXT] = _right;
-    list[_right.user][PREV] = _left;
+    intentsLinkedList[_left.user][NEXT] = _right;
+    intentsLinkedList[_right.user][PREV] = _left;
   }
 
   /**
@@ -241,11 +241,11 @@ contract Market is Ownable {
     */
   function removeIntent(address _user) internal {
     // Link its neighbors together.
-    link(list[_user][PREV], list[_user][NEXT]);
+    link(intentsLinkedList[_user][PREV], intentsLinkedList[_user][NEXT]);
 
     // Delete user from the list.
-    delete list[_user][PREV];
-    delete list[_user][NEXT];
+    delete intentsLinkedList[_user][PREV];
+    delete intentsLinkedList[_user][NEXT];
 
     // Decrement the length of the linked list.
     length = length - 1;

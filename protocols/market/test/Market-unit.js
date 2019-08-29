@@ -48,8 +48,12 @@ contract('Market Unit Tests', async accounts => {
   })
 
   async function checkLinking(prevUser, user, nextUser) {
-    let actualNextUser = (await market.list(user, LIST_NEXT))[STAKER]
-    let actualPrevUser = (await market.list(user, LIST_PREV))[STAKER]
+    let actualNextUser = (await market.intentsLinkedList(user, LIST_NEXT))[
+      STAKER
+    ]
+    let actualPrevUser = (await market.intentsLinkedList(user, LIST_PREV))[
+      STAKER
+    ]
     equal(actualNextUser, nextUser, 'Next user not set correctly')
     equal(actualPrevUser, prevUser, 'Prev user not set correctly')
   }
@@ -93,7 +97,7 @@ contract('Market Unit Tests', async accounts => {
       await checkLinking(LIST_HEAD, aliceAddress, LIST_HEAD)
 
       // check the values have been stored correctly
-      let headNext = await market.list(LIST_HEAD, LIST_NEXT)
+      let headNext = await market.intentsLinkedList(LIST_HEAD, LIST_NEXT)
 
       equal(headNext[STAKER], aliceAddress, 'Intent address not correct')
       equal(headNext[AMOUNT], 2000, 'Intent score not correct')
