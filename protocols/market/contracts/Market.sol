@@ -93,7 +93,7 @@ contract Market is Ownable {
     Intent memory newIntent = Intent(_user, _score, _locator);
 
     // Insert after the next highest score on the linked list.
-    Intent memory nextIntent = findPosition(_score));
+    Intent memory nextIntent = findPosition(_score);
 
     // Link the newIntent into place.
     link(intentsLinkedList[nextIntent.user][PREV], newIntent);
