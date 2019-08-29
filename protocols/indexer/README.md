@@ -8,19 +8,34 @@
 
 [![Discord](https://img.shields.io/discord/590643190281928738.svg)](https://discord.gg/ecQbV7H)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![CircleCI](https://circleci.com/gh/airswap/airswap-protocols.svg?style=svg&circle-token=73bd6668f836ce4306dbf6ca32109ddbb5b7e1fe)](https://circleci.com/gh/airswap/airswap-protocols)
+![Twitter Follow](https://img.shields.io/twitter/follow/airswap?style=social)
 
-## Features
+## Resources
 
-### Peer Discovery
+- Docs → https://airswap.gitbook.io/
+- Website → https://www.airswap.io/
+- Blog → https://medium.com/fluidity
+- Support → https://support.airswap.io/
 
-Find peers based on an intent to trade a specific token pair.
+## Commands
 
-### Token Staking
+| Command         | Description                                   |
+| :-------------- | :-------------------------------------------- |
+| `yarn`          | Install dependencies                          |
+| `yarn clean`    | Delete the contract `build` folder            |
+| `yarn compile`  | Compile all contracts to `build` folder       |
+| `yarn coverage` | Run solidity-coverage to report test coverage |
+| `yarn ganache`  | Run an instance of `ganache-cli` for tests    |
+| `yarn hint`     | Run a syntax linter for all Solidity code     |
+| `yarn lint`     | Run a syntax linter for all JavaScript code   |
+| `yarn test`     | Run all contract tests in `test` folder       |
 
-Stake variable amounts of token to position intent in a market.
+## Running Tests
 
-### Token Blacklisting
+Run an instance of `ganache-cli` before running tests.
 
+<<<<<<< HEAD
 Duplicate or malicious tokens may be blacklisted.
 
 ### Locator Whitelisting
@@ -31,7 +46,7 @@ Limit locators to those whitelisted by another contract.
 
 | Term    | Definition                                                              |
 | :------ | :---------------------------------------------------------------------- |
-| Intent  | An interest in trading a specific token pair without price information. |
+| Entry  | An interest in trading a specific token pair without price information. |
 | Indexer | A data store of intents to trade on the AirSwap Network.                |
 | Index  | A list of intents to trade for a token pair.                            |
 | Locator | How a peer can be reached to communicate pricing.                       |
@@ -56,7 +71,7 @@ constructor(
 
 ## Create a Index
 
-If none exists, deploy a new `Index` contract for the given token pair and return the address of the new or existing market. For example, an intent to trade WETH/DAI.
+If none exists, deploy a new `Index` contract for the given token pair and return the address of the new or existing index contract. For example, an entry to trade WETH/DAI.
 
 ```Solidity
 function createIndex(
@@ -96,95 +111,8 @@ Remove a token from the blacklist. Emits a `RemoveFromBlacklist` event.
 function removeFromBlacklist(
   address _token
 ) external onlyOwner
+=======
+>>>>>>> 4bca549250eca8420e990a3ff0bcb14425fafb53
 ```
-
-### Params
-
-| Name     | Type      | Description                         |
-| :------- | :-------- | :---------------------------------- |
-| `_token` | `address` | The address of the token to remove. |
-
-## Set an Intent to Trade
-
-Stake tokens to the Indexer and set an intent to trade.
-
-```Solidity
-function setIntent(
-  address _makerToken,
-  address _takerToken,
-  uint256 _amount,
-  uint256 _expiry,
-  address _locator
-) public
+yarn ganache
 ```
-
-### Params
-
-| Name          | Type      | Description                                  |
-| :------------ | :-------- | :------------------------------------------- |
-| `_makerToken` | `address` | Address of the token that the Maker sends.   |
-| `_takerToken` | `address` | Address of the token that the Taker sends.   |
-| `_amount`     | `uint256` | Amount of token to stake.                    |
-| `_expiry`     | `uint256` | Timestamp after which the intent is invalid. |
-| `_locator`    | `address` | Locator for the peer.                        |
-
-### Reverts
-
-| Reason                  | Scenario                                   |
-| :---------------------- | :----------------------------------------- |
-| `MARKET_IS_BLACKLISTED` | One or both of the tokens are blacklisted. |
-| `MARKET_DOES_NOT_EXIST` | There is no market for the token pair.     |
-| `MINIMUM_NOT_MET`       | The staking amount is insufficient.        |
-| `UNABLE_TO_STAKE`       | The staking amount was not transferred.    |
-
-## Unset an Intent to Trade
-
-Unset an intent to trade and return staked tokens to the sender.
-
-```Solidity
-function unsetIntent(
-  address _makerToken,
-  address _takerToken
-) public
-```
-
-### Params
-
-| Name          | Type      | Description                                |
-| :------------ | :-------- | :----------------------------------------- |
-| `_makerToken` | `address` | Address of the token that the Maker sends. |
-| `_takerToken` | `address` | Address of the token that the Taker sends. |
-
-### Reverts
-
-| Reason                  | Scenario                                   |
-| :---------------------- | :----------------------------------------- |
-| `MARKET_IS_BLACKLISTED` | One or both of the tokens are blacklisted. |
-| `MARKET_DOES_NOT_EXIST` | There is no market for the token pair.     |
-
-## Get Intents
-
-Get a list of addresses that have an intent to trade a token pair.
-
-```Solidity
-function getIntents(
-  address _makerToken,
-  address _takerToken,
-  uint256 count
-) external view returns (address[] memory)
-```
-
-### Params
-
-| Name          | Type      | Description                                |
-| :------------ | :-------- | :----------------------------------------- |
-| `_makerToken` | `address` | Address of the token that the Maker sends. |
-| `_takerToken` | `address` | Address of the token that the Taker sends. |
-| `_count`      | `uint256` | Maximum number of items to return.         |
-
-### Reverts
-
-| Reason                  | Scenario                                   |
-| :---------------------- | :----------------------------------------- |
-| `MARKET_IS_BLACKLISTED` | One or both of the tokens are blacklisted. |
-| `MARKET_DOES_NOT_EXIST` | There is no market for the token pair.     |
