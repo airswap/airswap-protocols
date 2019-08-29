@@ -1,6 +1,6 @@
 {
   "name": "@airswap/wrapper",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Wraps and unwraps ether for WETH trades in the Swap Protocol",
   "license": "Apache-2.0",
   "repository": {
@@ -16,12 +16,12 @@
     "test": "truffle test"
   },
   "devDependencies": {
-    "@airswap/order-utils": "0.2.0",
+    "@airswap/order-utils": "0.3.0",
     "@airswap/test-utils": "0.1.0",
     "solidity-coverage": "^0.6.3"
   },
   "dependencies": {
-    "@airswap/swap": "2.0.0",
+    "@airswap/swap": "2.1.0",
     "@airswap/tokens": "0.1.0"
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@airswap/peer",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Manages delegated trading rules for use in the Swap Protocol",
   "license": "Apache-2.0",
   "repository": {
@@ -16,11 +16,11 @@
     "test": "truffle test"
   },
   "devDependencies": {
-    "@airswap/order-utils": "0.2.0",
+    "@airswap/order-utils": "0.3.0",
     "@airswap/test-utils": "0.1.0"
   },
   "dependencies": {
-    "@airswap/swap": "2.0.0",
+    "@airswap/swap": "2.1.0",
     "openzeppelin-solidity": "^v2.2",
     "solidity-coverage": "^0.6.3"
   }

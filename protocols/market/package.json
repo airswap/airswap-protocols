@@ -1,6 +1,6 @@
 {
   "name": "@airswap/market",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Manages a list of intents to trade a specific token pair in the Swap Protocol",
   "license": "Apache-2.0",
   "repository": {
@@ -15,7 +15,7 @@
     "test": "truffle test"
   },
   "devDependencies": {
-    "@airswap/order-utils": "0.2.0",
+    "@airswap/order-utils": "0.3.0",
     "@airswap/test-utils": "0.1.0",
     "@airswap/tokens": "0.1.0",
     "truffle": "^5.0.24",
