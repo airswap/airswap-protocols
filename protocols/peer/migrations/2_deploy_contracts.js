@@ -1,5 +1,4 @@
 const Peer = artifacts.require('Peer')
-const PeerFactory = artifacts.require('PeerFactory')
 const Swap = artifacts.require('@airswap/swap/contracts/Swap.sol')
 const Types = artifacts.require('@airswap/types/contracts/Types.sol')
 
@@ -12,5 +11,4 @@ module.exports = deployer => {
     .deploy(Swap)
     .then(() => Swap.deployed())
     .then(() => deployer.deploy(Peer, Swap.address, EMPTY_ADDRESS))
-  deployer.deploy(PeerFactory)
 }

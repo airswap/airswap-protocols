@@ -16,10 +16,10 @@
 
 ## Deployments
 
-| Contract | Package                              | Version | Network | Address                                                                                                                         |
-| :------- | :----------------------------------- | :------ | :------ | :------------------------------------------------------------------------------------------------------------------------------ |
-| Types    | [`@airswap/types`](/protocols/types) | `0.1.0` | Mainnet | [`0xc65ff60eb8e4038a2415bb569d1fa6dca47d692e`](https://etherscan.io/address/0xc65ff60eb8e4038a2415bb569d1fa6dca47d692e)         |
-| Types    | [`@airswap/types`](/protocols/types) | `0.1.0` | Rinkeby | [`0xAaf6cB19298e7d0abc410Eb2A0D5B8fEf747573D`](https://rinkeby.etherscan.io/address/0xaaf6cb19298e7d0abc410eb2a0d5b8fef747573d) |
+| Contract | Version | Network | Address                                                                                                                         |
+| :------- | :------ | :------ | :------------------------------------------------------------------------------------------------------------------------------ |
+| Types    | `0.2.0` | Mainnet | [`0x2fA5d35f9c99E11a75F2D3cD9F6E6d904a1241C5`](https://etherscan.io/address/0x2fA5d35f9c99E11a75F2D3cD9F6E6d904a1241C5)         |
+| Types    | `0.2.0` | Rinkeby | [`0x4A041FA0a727c828616C83C090585913221641ba`](https://rinkeby.etherscan.io/address/0x4A041FA0a727c828616C83C090585913221641ba) |
 
 ## Commands
 
