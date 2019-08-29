@@ -255,11 +255,7 @@ contract('Index Unit Tests', async accounts => {
 
     it('should return empty entry for a non-user', async () => {
       let davidEntry = await index.getEntry(davidAddress)
-      equal(
-        davidEntry[USER],
-        EMPTY_ADDRESS,
-        'David: Entry address not correct'
-      )
+      equal(davidEntry[USER], EMPTY_ADDRESS, 'David: Entry address not correct')
       equal(davidEntry[SCORE], 0, 'David: Entry score not correct')
       equal(
         davidEntry[LOCATOR],
@@ -270,11 +266,7 @@ contract('Index Unit Tests', async accounts => {
       // now for a recently unset entry
       await index.unsetEntry(carolAddress, { from: owner })
       let carolEntry = await index.getEntry(carolAddress)
-      equal(
-        carolEntry[USER],
-        EMPTY_ADDRESS,
-        'Carol: Entry address not correct'
-      )
+      equal(carolEntry[USER], EMPTY_ADDRESS, 'Carol: Entry address not correct')
       equal(carolEntry[SCORE], 0, 'Carol: Entry score not correct')
       equal(
         carolEntry[LOCATOR],
@@ -285,11 +277,7 @@ contract('Index Unit Tests', async accounts => {
 
     it('should return the correct entry for a valid user', async () => {
       let aliceEntry = await index.getEntry(aliceAddress)
-      equal(
-        aliceEntry[USER],
-        aliceAddress,
-        'Alice: Entry address not correct'
-      )
+      equal(aliceEntry[USER], aliceAddress, 'Alice: Entry address not correct')
       equal(aliceEntry[SCORE], 2000, 'Alice: Entry score not correct')
       equal(
         aliceEntry[LOCATOR],
