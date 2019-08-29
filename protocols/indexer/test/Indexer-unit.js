@@ -1,5 +1,4 @@
 const Indexer = artifacts.require('Indexer')
-const Market = artifacts.require('Market')
 const MockContract = artifacts.require('MockContract')
 const FungibleToken = artifacts.require('FungibleToken')
 

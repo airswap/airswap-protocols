@@ -7,7 +7,7 @@ const MockContract = artifacts.require('MockContract')
 const { equal, reverted, passes } = require('@airswap/test-utils').assert
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
-const { orders, signatures } = require('@airswap/order-utils')
+const { orders } = require('@airswap/order-utils')
 
 contract('Wrapper Unit Tests', async accounts => {
   const takerParam = 2
