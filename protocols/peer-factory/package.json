@@ -1,0 +1,27 @@
+{
+  "name": "@airswap/peer-factory",
+  "version": "0.1.0",
+  "description": "Deploys Peer contracts for use in the Swap Protocol",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/airswap/airswap-protocols"
+  },
+  "scripts": {
+    "clean": "rm -rf ./build",
+    "compile": "truffle compile",
+    "coverage": "node_modules/.bin/solidity-coverage",
+    "lint": "yarn eslint \"./test/**/*.js\"",
+    "truffle": "node_modules/.bin/truffle --network development",
+    "test": "truffle test"
+  },
+  "devDependencies": {
+    "@airswap/order-utils": "0.3.0",
+    "@airswap/test-utils": "0.1.0"
+  },
+  "dependencies": {
+    "@airswap/peer": "0.3.0",
+    "openzeppelin-solidity": "^v2.2",
+    "solidity-coverage": "^0.6.3"
+  }
+}
