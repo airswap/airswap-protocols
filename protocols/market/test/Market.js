@@ -2,7 +2,6 @@ const assert = require('assert')
 const BN = require('bignumber.js')
 
 const Market = artifacts.require('Market')
-const FungibleToken = artifacts.require('FungibleToken')
 
 const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 const { equal } = require('@airswap/test-utils').assert
@@ -40,10 +39,8 @@ contract('Market', async accounts => {
   })
 
   describe('Deploying...', async () => {
-    it('Deployed trading token "AST" and "DAI" and market for AST/DAI', async () => {
-      let tokenAST = await FungibleToken.new()
-      let tokenDAI = await FungibleToken.new()
-      market = await Market.new(tokenAST.address, tokenDAI.address)
+    it('Deployed new Market', async () => {
+      market = await Market.new()
     })
   })
 
@@ -107,7 +104,7 @@ contract('Market', async accounts => {
     it('Gets the intent for Zara', async () => {
       let zaraIntent = await market.getIntent(zaraAddress)
       equal(zaraIntent.locator, zaraLocator)
-      equal(zaraIntent.amount, 0)
+      equal(zaraIntent.score, 0)
     })
 
     it('Gets a non existent intent', async () => {

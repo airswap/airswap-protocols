@@ -51,27 +51,6 @@ contract('Indexer Unit Tests', async accounts => {
     fungibleTokenTemplate = await FungibleToken.new()
   }
 
-  async function checkMarketAtAddress(marketAddress, makerToken, takerToken) {
-    // find the market
-    let market = await Market.at(marketAddress)
-
-    // fetch its tokens
-    let marketMakerToken = await market.makerToken()
-    let marketTakerToken = await market.takerToken()
-
-    // check it has the correct tokens
-    equal(
-      marketMakerToken,
-      makerToken,
-      'Indexer has returned Market with incorrect maker token'
-    )
-    equal(
-      marketTakerToken,
-      takerToken,
-      'Indexer has returned Market with incorrect taker token'
-    )
-  }
-
   beforeEach(async () => {
     let snapShot = await takeSnapshot()
     snapshotId = snapShot['result']
@@ -111,13 +90,6 @@ contract('Indexer Unit Tests', async accounts => {
       emitted(result, 'CreateMarket', event => {
         return event.makerToken === tokenOne && event.takerToken === tokenTwo
       })
-
-      // and a market with the correct tokens has been created
-      let marketAddress = await indexer.createMarket.call(tokenOne, tokenTwo, {
-        from: aliceAddress,
-      })
-
-      await checkMarketAtAddress(marketAddress, tokenOne, tokenTwo)
     })
 
     it('createMarket should just return an address if the market exists', async () => {
@@ -134,13 +106,6 @@ contract('Indexer Unit Tests', async accounts => {
       notEmitted(result, 'CreateMarket', event => {
         return event.makerToken === tokenOne && event.takerToken === tokenTwo
       })
-
-      // instead the market's address is returned
-      let marketAddress = await indexer.createMarket.call(tokenOne, tokenTwo, {
-        from: aliceAddress,
-      })
-
-      await checkMarketAtAddress(marketAddress, tokenOne, tokenTwo)
     })
   })
 

@@ -69,7 +69,7 @@ contract Indexer is IIndexer, Ownable {
     // If the Market does not exist, create it.
     if (markets[_makerToken][_takerToken] == Market(0)) {
       // Create a new Market contract for the token pair.
-      markets[_makerToken][_takerToken] = new Market(_makerToken, _takerToken);
+      markets[_makerToken][_takerToken] = new Market();
       emit CreateMarket(_makerToken, _takerToken);
     }
 
@@ -171,20 +171,20 @@ contract Indexer is IIndexer, Ownable {
     Market.Intent memory intent = markets[_makerToken][_takerToken].getIntent(msg.sender);
 
     // Ensure the intent exists.
-    require(intent.staker == msg.sender,
+    require(intent.user == msg.sender,
       "INTENT_DOES_NOT_EXIST");
 
     // Unset the intent on the market.
     //No need to require() because a check is done above that reverts if there are no intents
     markets[_makerToken][_takerToken].unsetIntent(msg.sender);
 
-    if (intent.amount > 0) {
+    if (intent.score > 0) {
       // Return the staked tokens. IERC20 returns boolean this contract may not be ours.
       // Need to revert when false is returned
-      require(stakeToken.transfer(msg.sender, intent.amount));
+      require(stakeToken.transfer(msg.sender, intent.score));
     }
 
-    emit Unstake(msg.sender, _makerToken, _takerToken, intent.amount);
+    emit Unstake(msg.sender, _makerToken, _takerToken, intent.score);
   }
 
   /**
