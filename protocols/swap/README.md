@@ -4,248 +4,44 @@
 
 [![Discord](https://img.shields.io/discord/590643190281928738.svg)](https://discord.gg/ecQbV7H)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![CircleCI](https://circleci.com/gh/airswap/airswap-protocols.svg?style=svg&circle-token=73bd6668f836ce4306dbf6ca32109ddbb5b7e1fe)](https://circleci.com/gh/airswap/airswap-protocols)
+![Twitter Follow](https://img.shields.io/twitter/follow/airswap?style=social)
 
-## Features
+## Resources
 
-### Atomic Swap
+- Docs → https://airswap.gitbook.io/
+- Website → https://www.airswap.io/
+- Blog → https://medium.com/fluidity
+- Support → https://support.airswap.io/
 
-Transact directly peer-to-peer on Ethereum.
+## For V1 Users
 
-### Fungible and Non-Fungible
+To migrate from the V1 to V2 protocol please see [MIGRATION.md](MIGRATION.md).
 
-Swap between any two ERC-20 or ERC-721 assets.
+## Deployments
 
-### Typed Data Signatures
+| Contract | Package                            | Version | Network | Address                                                                                                                         |
+| :------- | :--------------------------------- | :------ | :------ | :------------------------------------------------------------------------------------------------------------------------------ |
+| Swap     | [`@airswap/swap`](/protocols/swap) | `2.0.0` | Mainnet | [`0x6738668f16b28589B7B9d50E79095bdeCC88d13B`](https://etherscan.io/address/0x54d2690e97e477a4b33f40d6e4afdd4832c07c57)         |
+| Swap     | [`@airswap/swap`](/protocols/swap) | `2.0.0` | Rinkeby | [`0x6c629eAFFbEf9935F4FA390AC32f27EEC9462a8E`](https://rinkeby.etherscan.io/address/0x78db49d0459a67158bdca6e161be3d90342c7247) |
 
-Sign informative messages for improved transparency.
+## Commands
 
-### Delegate Authorization
+| Command         | Description                                   |
+| :-------------- | :-------------------------------------------- |
+| `yarn`          | Install dependencies                          |
+| `yarn clean`    | Delete the contract `build` folder            |
+| `yarn compile`  | Compile all contracts to `build` folder       |
+| `yarn coverage` | Run solidity-coverage to report test coverage |
+| `yarn ganache`  | Run an instance of `ganache-cli` for tests    |
+| `yarn hint`     | Run a syntax linter for all Solidity code     |
+| `yarn lint`     | Run a syntax linter for all JavaScript code   |
+| `yarn test`     | Run all contract tests in `test` folder       |
 
-Authorize peers to act on behalf of others.
+## Running Tests
 
-### Affiliate Fees
+Run an instance of `ganache-cli` before running tests.
 
-Compensate those who facilitate trades.
-
-### Trade with Anyone or Someone
-
-Let anyone take an order or set a specific taker.
-
-### Batch Cancels
-
-Cancel multiple orders in a single transaction.
-
-### Minimum Nonce
-
-Invalidate all order nonces below a value.
-
-## Definitions
-
-| Term      | Definition                                                                        |
-| :-------- | :-------------------------------------------------------------------------------- |
-| Swap      | A transaction of multiple Token transfers that succeeds for all parties or fails. |
-| Token     | A fungible (ERC-20) or non-fungible (ERC-721) Ethereum asset to be transferred.   |
-| Maker     | A party that sets and signs the parameters and price of an Order.                 |
-| Taker     | A party that accepts the parameters of an Order and settles it on Ethereum.       |
-| Affiliate | An _optional_ party compensated by the Maker for facilitating a Swap.             |
-| Delegate  | An _optional_ party authorized to make or take Orders on behalf of another party. |
-| Order     | A specification of the tokens, amounts, and parties to a Swap.                    |
-| Signature | An asymmetric cryptographic signature of an Order.                                |
-| Nonce     | A numeric parameter of every Order that is unique to its Maker.                   |
-
-## Swap
-
-Swap between tokens (ERC-20 or ERC-721) or ETH with all features using typed data signatures.
-
-```Solidity
-function swap(
-  Types.Order calldata _order
-) external
 ```
-
-### Params
-
-| Name    | Type    | Description                      |
-| :------ | :------ | :------------------------------- |
-| `order` | `Order` | Order struct as specified below. |
-
-```Solidity
-struct Order {
-  uint256 nonce;        // Unique per order and should be sequential
-  uint256 expiry;       // Expiry in seconds since 1 January 1970
-  Party maker;          // Party to the trade that sets terms
-  Party taker;          // Party to the trade that accepts terms
-  Party affiliate;      // Party compensated for facilitating (optional)
-  Signature signature;  // Signature of the order
-}
-```
-
-```Solidity
-struct Party {
-  address wallet;       // Wallet address of the party
-  address token;        // Contract address of the token
-  uint256 param;        // Value (ERC-20) or ID (ERC-721)
-  bytes4 kind;          // Interface ID of the token
-}
-```
-
-```Solidity
-struct Signature {
-  address signer;       // Address of the wallet used to sign
-  uint8 v;              // `v` value of an ECDSA signature
-  bytes32 r;            // `r` value of an ECDSA signature
-  bytes32 s;            // `s` value of an ECDSA signature
-  bytes1 version;       // EIP-191 signature version
-}
-```
-
-### Reverts
-
-| Reason                   | Scenario                                                                     |
-| :----------------------- | :--------------------------------------------------------------------------- |
-| `SIGNER_UNAUTHORIZED`    | Order has been signed by an account that has not been authorized to sign it. |
-| `SIGNATURE_INVALID`      | Signature provided does not match the Order provided.                        |
-| `ORDER_ALREADY_TAKEN`    | Order has already been taken by its `nonce` value.                           |
-| `ORDER_ALREADY_CANCELED` | Order has already been canceled by its `nonce` value.                        |
-| `ORDER_EXPIRED`          | Order has an `expiry` lower than the current block time.                     |
-| `NONCE_TOO_LOW`          | Nonce provided is below the minimum value set.                               |
-| `SENDER_UNAUTHORIZED`    | Order has been sent by an account that has not been authorized to send it.   |
-| `VALUE_MUST_BE_SENT`     | Order indicates an ether Swap but insufficient ether was sent.               |
-| `VALUE_MUST_BE_ZERO`     | Order indicates a token Swap but ether was sent.                             |
-| `INVALID_AUTH_DELEGATE`  | Delegate address is the same as the sender address.                          |
-| `INVALID_AUTH_EXPIRY`    | Authorization expiry time is in the past.                                    |
-
-## Cancel
-
-Provide an array of `nonces`, unique by Maker address, to mark one or more Orders as canceled.
-
-```Solidity
-function cancel(uint256[] memory nonces) external
-```
-
-## Set a Minimum Nonce
-
-Provide a minimum value to invalidate all nonces below the value.
-
-```Solidity
-invalidate(uint256 minimumNonce) external
-```
-
-## Authorizations
-
-Peers may authorize other peers to make (sign) or take (send) Orders on their behalf. This is useful for delegating authorization to a trusted third party, whether a user account or smart contract. An authorization works for both sides of a Swap, regardless of whether the delegate signing or sending on ones behalf.
-
-### Authorize
-
-Authorize a delegate account or contract to make (sign) or take (send) Orders on the sender's behalf.
-
-```Solidity
-function authorize(address delegate, uint256 expiry) external returns (bool)
-```
-
-### Revoke
-
-Revoke the authorization of a delegate account or contract.
-
-```Solidity
-function revoke(address delegate) external returns (bool)
-```
-
-## Events
-
-Ethereum transactions often emit events to indicate state changes or other provide useful information. The `indexed` keyword indicates that a filter may be set on the property. Learn more about events and filters in the [official documentation](https://solidity.readthedocs.io/en/v0.5.8/contracts.html#events).
-
-### Swap
-
-Emitted with a successful Swap.
-
-```Solidity
-event Swap(
-  uint256 indexed nonce,
-  uint256 timestamp,
-  address indexed makerWallet,
-  uint256 makerParam,
-  address makerToken,
-  address indexed takerWallet,
-  uint256 takerParam,
-  address takerToken,
-  address affiliateWallet,
-  uint256 affiliateParam,
-  address affiliateToken
-);
-```
-
-### Cancel
-
-Emitted with a successful Cancel.
-
-```Solidity
-event Cancel(
-  uint256 indexed nonce,
-  address indexed makerAddress
-);
-```
-
-### Invalidate
-
-Emitted with a successful Invalidate.
-
-```Solidity
-event Invalidate(
-  uint256 indexed nonce,
-  address indexed makerAddress
-);
-```
-
-## Signatures
-
-When producing [ECDSA](https://hackernoon.com/a-closer-look-at-ethereum-signatures-5784c14abecc) signatures, Ethereum wallets prefix signed data with byte `\x19` to stay out of range of valid RLP so that a signature cannot be executed as a transaction. [EIP-191](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-191.md) standardizes this prefixing to include existing `personalSign` behavior and [EIP-712](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-712.md) implements it for structured data, which makes the data more transparent for the signer. Signatures are comprised of parameters `v`, `r`, and `s`. Read more about [Ethereum Signatures](https://hackernoon.com/a-closer-look-at-ethereum-signatures-5784c14abecc).
-
-### Typed Data
-
-The `Signature` struct includes a byte `version` to indicate `personalSign` (`0x45`) or `signTypedData` (`0x01`) so that hashes can be recreated correctly in contract code.
-
-#### Personal Sign
-
-You can use `personalSign` with `swap` by using an EIP-712 hashing function.
-
-```JavaScript
-const ethUtil = require('ethereumjs-util')
-const { hashes } = require('@airswap/order-utils')
-const orderHashHex = hashes.getOrderHash(order); // See: @airswap/order-utils/src/hashes.js:60
-const sig = await web3.eth.sign(orderHashHex, signer);
-const { r, s, v } = ethUtil.fromRpcSig(sig);
-return {
-  version: '0x45', // Version 0x45: personalSign
-  r, s, v
-}
-```
-
-#### Sign Typed Data
-
-You can use `signTypedData` with `swap` by calling it directly. Read more about [EIP-712](https://medium.com/metamask/eip712-is-coming-what-to-expect-and-how-to-use-it-bb92fd1a7a26).
-
-```JavaScript
-const ethUtil = require('ethereumjs-util')
-const sigUtil = require('eth-sig-util')
-const DOMAIN_NAME = 'SWAP'
-const DOMAIN_VERSION = '2'
-const verifyingContract = '0x0...' // Address of the Swap Contract
-const sig = sigUtil.signTypedData(privateKey, {
-  data: {
-    types, // See: @airswap/order-utils/src/constants.js:4
-    domain: {
-      name: DOMAIN_NAME,
-      version: DOMAIN_VERSION,
-      verifyingContract,
-    },
-    primaryType: 'Order',
-    message: order, // See: @airswap/order-utils/src/orders.js:28
-  },
-});
-const { r, s, v } = ethUtil.fromRpcSig(sig)
-return {
-  version: '0x01', // Version 0x01: signTypedData
-  r, s, v
-}
+yarn ganache
 ```

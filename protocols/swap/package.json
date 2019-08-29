@@ -11,7 +11,8 @@
     "clean": "rm -rf ./build",
     "compile": "truffle compile",
     "coverage": "node_modules/.bin/solidity-coverage",
-    "truffle": "node_modules/.bin/truffle --network development",
+    "ganache": "ganache-cli -p 8545 --gasLimit 0xfffffffffff --time '2017-05-10T00:00:00+00:00'",
+    "hint": "yarn solhint \"./contracts/**/*.sol\"",
     "lint": "yarn eslint \"./test/**/*.js\"",
     "test": "truffle test"
   },
