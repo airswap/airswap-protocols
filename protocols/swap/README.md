@@ -59,44 +59,43 @@ Swap between tokens (ERC-20 or ERC-721) or ETH with all features using typed dat
 
 ```Solidity
 function swap(
-  Types.Order calldata _order,
-  Types.Signature calldata _signature
+  Types.Order calldata _order
 ) external
 ```
 
 ### Params
 
-| Name        | Type        | Description                          |
-| :---------- | :---------- | :----------------------------------- |
-| `order`     | `Order`     | Order struct as specified below.     |
-| `signature` | `Signature` | Signature struct as specified below. |
+| Name    | Type    | Description                      |
+| :------ | :------ | :------------------------------- |
+| `order` | `Order` | Order struct as specified below. |
 
 ```Solidity
 struct Order {
-  uint256 nonce;   // A single use identifier for the Order
-  uint256 expiry;  // The expiry in seconds since unix epoch
-  Party maker;     // The Maker of the Order who sets price
-  Party taker;     // The Taker of the Order who accepts price
-  Party affiliate; // Optional affiliate to be paid by the Maker
+  uint256 nonce;        // Unique per order and should be sequential
+  uint256 expiry;       // Expiry in seconds since 1 January 1970
+  Party maker;          // Party to the trade that sets terms
+  Party taker;          // Party to the trade that accepts terms
+  Party affiliate;      // Party compensated for facilitating (optional)
+  Signature signature;  // Signature of the order
 }
 ```
 
 ```Solidity
 struct Party {
-  address wallet;  // The Ethereum account of the party
-  address token;   // The address of the token the party sends or receives
-  uint256 param;   // The amount of ERC-20 or the identifier of an ERC-721
-  bytes4 kind;     // The interface ID of the token. E.g. ERC-721 is 0x80ac58cd
+  address wallet;       // Wallet address of the party
+  address token;        // Contract address of the token
+  uint256 param;        // Value (ERC-20) or ID (ERC-721)
+  bytes4 kind;          // Interface ID of the token
 }
 ```
 
 ```Solidity
 struct Signature {
-  address signer;  // The address of the signer Ethereum account
-  bytes32 r;       // The `r` value of an ECDSA signature
-  bytes32 s;       // The `s` value of an ECDSA signature
-  uint8 v;         // The `v` value of an ECDSA signature
-  bytes1 version;  // Indicates the signing method used
+  address signer;       // Address of the wallet used to sign
+  uint8 v;              // `v` value of an ECDSA signature
+  bytes32 r;            // `r` value of an ECDSA signature
+  bytes32 s;            // `s` value of an ECDSA signature
+  bytes1 version;       // EIP-191 signature version
 }
 ```
 
@@ -204,7 +203,7 @@ When producing [ECDSA](https://hackernoon.com/a-closer-look-at-ethereum-signatur
 
 ### Typed Data
 
-For use in the `swap` function. The `Signature` struct is passed to the function including a byte `version` to indicate `personalSign` (`0x45`) or `signTypedData` (`0x01`) so that hashes can be recreated correctly in contract code.
+The `Signature` struct includes a byte `version` to indicate `personalSign` (`0x45`) or `signTypedData` (`0x01`) so that hashes can be recreated correctly in contract code.
 
 #### Personal Sign
 

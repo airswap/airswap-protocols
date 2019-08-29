@@ -137,7 +137,7 @@ contract Swap is ISwap {
     if (_order.signature.v == 0) {
       /**
         * Signature is not provided. The maker may have authorized the sender
-        * to swap on its behalf, which does not require a _signature.
+        * to swap on its behalf, which does not require a signature.
         */
       require(isAuthorized(_order.maker.wallet, msg.sender),
         "SIGNER_UNAUTHORIZED");

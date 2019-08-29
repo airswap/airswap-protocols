@@ -206,17 +206,15 @@ Provide an order to the peer for taking.
 
 ```Solidity
 function provideOrder(
-  Types.Order memory _order,
-  Types.Signature memory _signature
+  Types.Order memory _order
 ) public
 ```
 
 #### Params
 
-| Name        | Type        | Description                                                    |
-| :---------- | :---------- | :------------------------------------------------------------- |
-| `order`     | `Order`     | Order struct as specified in the `@airswap/types` package.     |
-| `signature` | `Signature` | Signature struct as specified in the `@airswap/types` package. |
+| Name    | Type    | Description                                                |
+| :------ | :------ | :--------------------------------------------------------- |
+| `order` | `Order` | Order struct as specified in the `@airswap/types` package. |
 
 #### Reverts
 
@@ -236,12 +234,11 @@ Creates peers with a trusted interface
 
 #### Has lookup to find peer contracts it has deployed
 
-
 ### Definitions
 
-| Term              | Definition                                                                 |
-| :---------------- | :------------------------------------------------------------------------- |
-| Peer              | Smart contract that trades based on rules. Acts as taker.                  |
+| Term | Definition                                                |
+| :--- | :-------------------------------------------------------- |
+| Peer | Smart contract that trades based on rules. Acts as taker. |
 
 ### Constructor
 
@@ -255,7 +252,6 @@ constructor(
 ```
 
 ### Create a new `Peer` contract.
-
 
 ```Solidity
 createPeer(
@@ -272,7 +268,6 @@ createPeer(
 | `_swapContract`      | `address` | Address of the swap contract used to settle trades.   |
 | `_peerContractOwner` | `address` | Address of the owner of the peer for rule management. |
 
-
 ### Lookup for deployed peers
 
 To check whether a locator was deployed
@@ -285,6 +280,6 @@ function has(
 
 #### Params
 
-| Name        | Type        | Description                                                    |
-| :---------- | :---------- | :------------------------------------------------------------- |
-| `_locator`  | `bytes32`   | locator of the peer in question, ex an `address`               |
+| Name       | Type      | Description                                      |
+| :--------- | :-------- | :----------------------------------------------- |
+| `_locator` | `bytes32` | locator of the peer in question, ex an `address` |
