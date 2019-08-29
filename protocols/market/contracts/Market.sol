@@ -97,7 +97,7 @@ contract Market is Ownable {
       // Increment the length of the linked list if successful.
     length = length + 1;
 
-    emit SetIntent(_user, _score, _locator);
+    emit SetIntent(_score, _user, _locator);
   }
 
   /**
