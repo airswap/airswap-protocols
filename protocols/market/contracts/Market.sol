@@ -93,8 +93,13 @@ contract Market is Ownable {
     Intent memory newIntent = Intent(_user, _score, _locator);
 
     // Insert after the next highest score on the linked list.
-    insertIntent(newIntent, findPosition(_score));
-      // Increment the length of the linked list if successful.
+    Intent memory nextIntent = findPosition(_score);
+
+    // Link the newIntent into place.
+    link(intentsLinkedList[nextIntent.user][PREV], newIntent);
+    link(newIntent, nextIntent);
+
+    // Increment the length of the linked list if successful.
     length = length + 1;
 
     emit SetIntent(_score, _user, _locator);
@@ -207,25 +212,6 @@ contract Market is Ownable {
       intent = intentsLinkedList[intent.user][NEXT];
     }
     return intent;
-  }
-
-  /**
-    * @notice Insert a new intent in the linked list, before the specified _nextIntent
-    *
-    * @param _newIntent Intent to be inserted
-    * @param _nextIntent Intent to follow _newIntent
-    */
-  function insertIntent(
-    Intent memory _newIntent,
-    Intent memory _nextIntent
-  ) internal {
-
-    // Get the intent before the _nextIntent.
-    Intent memory previousIntent = intentsLinkedList[_nextIntent.user][PREV];
-
-    // Link the _newIntent into place.
-    link(previousIntent, _newIntent);
-    link(_newIntent, _nextIntent);
   }
 
   /**
