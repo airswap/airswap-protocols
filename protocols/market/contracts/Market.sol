@@ -56,13 +56,13 @@ contract Market is Ownable {
     */
 
   event SetIntent(
-    address user,
     uint256 score,
-    bytes32 locator
+    address indexed user,
+    bytes32 indexed locator
   );
 
   event UnsetIntent(
-    address user
+    address indexed user
   );
 
   /**

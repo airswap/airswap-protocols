@@ -30,8 +30,8 @@ contract('Market Unit Tests', async accounts => {
   const LIST_HEAD = '0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF'
   const LIST_PREV = '0x00'
   const LIST_NEXT = '0x01'
-  const STAKER = 'user'
-  const AMOUNT = 'score'
+  const USER = 'user'
+  const SCORE = 'score'
   const LOCATOR = 'locator'
 
   beforeEach(async () => {
@@ -48,12 +48,8 @@ contract('Market Unit Tests', async accounts => {
   })
 
   async function checkLinking(prevUser, user, nextUser) {
-    let actualNextUser = (await market.intentsLinkedList(user, LIST_NEXT))[
-      STAKER
-    ]
-    let actualPrevUser = (await market.intentsLinkedList(user, LIST_PREV))[
-      STAKER
-    ]
+    let actualNextUser = (await market.intentsLinkedList(user, LIST_NEXT))[USER]
+    let actualPrevUser = (await market.intentsLinkedList(user, LIST_PREV))[USER]
     equal(actualNextUser, nextUser, 'Next user not set correctly')
     equal(actualPrevUser, prevUser, 'Prev user not set correctly')
   }
@@ -99,8 +95,8 @@ contract('Market Unit Tests', async accounts => {
       // check the values have been stored correctly
       let headNext = await market.intentsLinkedList(LIST_HEAD, LIST_NEXT)
 
-      equal(headNext[STAKER], aliceAddress, 'Intent address not correct')
-      equal(headNext[AMOUNT], 2000, 'Intent score not correct')
+      equal(headNext[USER], aliceAddress, 'Intent address not correct')
+      equal(headNext[SCORE], 2000, 'Intent score not correct')
       equal(headNext[LOCATOR], aliceLocator, 'Intent locator not correct')
 
       // check the length has increased
@@ -260,11 +256,11 @@ contract('Market Unit Tests', async accounts => {
     it('should return empty intent for a non-user', async () => {
       let davidIntent = await market.getIntent(davidAddress)
       equal(
-        davidIntent[STAKER],
+        davidIntent[USER],
         EMPTY_ADDRESS,
         'David: Intent address not correct'
       )
-      equal(davidIntent[AMOUNT], 0, 'David: Intent score not correct')
+      equal(davidIntent[SCORE], 0, 'David: Intent score not correct')
       equal(
         davidIntent[LOCATOR],
         emptyLocator,
@@ -275,11 +271,11 @@ contract('Market Unit Tests', async accounts => {
       await market.unsetIntent(carolAddress, { from: owner })
       let carolIntent = await market.getIntent(carolAddress)
       equal(
-        carolIntent[STAKER],
+        carolIntent[USER],
         EMPTY_ADDRESS,
         'Carol: Intent address not correct'
       )
-      equal(carolIntent[AMOUNT], 0, 'Carol: Intent score not correct')
+      equal(carolIntent[SCORE], 0, 'Carol: Intent score not correct')
       equal(
         carolIntent[LOCATOR],
         emptyLocator,
@@ -290,11 +286,11 @@ contract('Market Unit Tests', async accounts => {
     it('should return the correct intent for a valid user', async () => {
       let aliceIntent = await market.getIntent(aliceAddress)
       equal(
-        aliceIntent[STAKER],
+        aliceIntent[USER],
         aliceAddress,
         'Alice: Intent address not correct'
       )
-      equal(aliceIntent[AMOUNT], 2000, 'Alice: Intent score not correct')
+      equal(aliceIntent[SCORE], 2000, 'Alice: Intent score not correct')
       equal(
         aliceIntent[LOCATOR],
         aliceLocator,
@@ -302,8 +298,8 @@ contract('Market Unit Tests', async accounts => {
       )
 
       let bobIntent = await market.getIntent(bobAddress)
-      equal(bobIntent[STAKER], bobAddress, 'Bob: intent address not correct')
-      equal(bobIntent[AMOUNT], 500, 'Bob: Intent score not correct')
+      equal(bobIntent[USER], bobAddress, 'Bob: intent address not correct')
+      equal(bobIntent[SCORE], 500, 'Bob: Intent score not correct')
       equal(bobIntent[LOCATOR], bobLocator, 'Bob: Intent locator not correct')
     })
   })
