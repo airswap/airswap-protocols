@@ -6,183 +6,44 @@
 
 [![Discord](https://img.shields.io/discord/590643190281928738.svg)](https://discord.gg/ecQbV7H)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![CircleCI](https://circleci.com/gh/airswap/airswap-protocols.svg?style=svg&circle-token=73bd6668f836ce4306dbf6ca32109ddbb5b7e1fe)](https://circleci.com/gh/airswap/airswap-protocols)
+![Twitter Follow](https://img.shields.io/twitter/follow/airswap?style=social)
 
-## Features
+## Resources
 
-### Sorting
+- Docs → https://airswap.gitbook.io/
+- Website → https://www.airswap.io/
+- Blog → https://medium.com/fluidity
+- Support → https://support.airswap.io/
 
-Intents are sorted by their amount, with the largest amount at the beginning of the list. Currently the staking amount is indicated by an Indexer that owns the Market.
+## For V1 Users
 
-## Definitions
+To migrate from the V1 to V2 protocol please see [MIGRATION.md](MIGRATION.md).
 
-| Term    | Definition                                                              |
-| :------ | :---------------------------------------------------------------------- |
-| Intent  | An interest in trading a specific token pair without price information. |
-| Market  | A list of intents to trade for a token pair.                            |
-| Locator | How a peer can be reached to communicate pricing.                       |
+## Deployments
 
-## Intent Struct
+| Contract | Package                            | Version | Network | Address                                                                                                                         |
+| :------- | :--------------------------------- | :------ | :------ | :------------------------------------------------------------------------------------------------------------------------------ |
+| Swap     | [`@airswap/swap`](/protocols/swap) | `2.0.0` | Mainnet | [`0x6738668f16b28589B7B9d50E79095bdeCC88d13B`](https://etherscan.io/address/0x54d2690e97e477a4b33f40d6e4afdd4832c07c57)         |
+| Swap     | [`@airswap/swap`](/protocols/swap) | `2.0.0` | Rinkeby | [`0x6c629eAFFbEf9935F4FA390AC32f27EEC9462a8E`](https://rinkeby.etherscan.io/address/0x78db49d0459a67158bdca6e161be3d90342c7247) |
 
-An "intent to trade" is represented by the following `Intent` struct.
+## Commands
+
+| Command         | Description                                   |
+| :-------------- | :-------------------------------------------- |
+| `yarn`          | Install dependencies                          |
+| `yarn clean`    | Delete the contract `build` folder            |
+| `yarn compile`  | Compile all contracts to `build` folder       |
+| `yarn coverage` | Run solidity-coverage to report test coverage |
+| `yarn ganache`  | Run an instance of `ganache-cli` for tests    |
+| `yarn hint`     | Run a syntax linter for all Solidity code     |
+| `yarn lint`     | Run a syntax linter for all JavaScript code   |
+| `yarn test`     | Run all contract tests in `test` folder       |
+
+## Running Tests
+
+Run an instance of `ganache-cli` before running tests.
 
 ```
-struct Intent {
-  address staker;
-  uint256 amount;
-  address locator;
-}
+yarn ganache
 ```
-
-## Constructor
-
-Create a new `Market` contract. Usually called within the context of an `Indexer` contract.
-
-```Solidity
-constructor(
-  address _makerToken,
-  address _takerToken
-) public
-```
-
-### Params
-
-| Name          | Type      | Description                                              |
-| :------------ | :-------- | :------------------------------------------------------- |
-| `_makerToken` | `address` | Address of the token that the Maker is intended to send. |
-| `_takerToken` | `address` | Address of the token that the Taker is intended to send. |
-
-## Set an Intent
-
-Set an intent to trade in the Market.
-
-```Solidity
-function setIntent(
-  address _staker,
-  uint256 _amount,
-  address _locator
-) external onlyOwner
-```
-
-### Params
-
-| Name       | Type      | Description                                            |
-| :--------- | :-------- | :----------------------------------------------------- |
-| `_staker`  | `address` | Address of the account that has staked for the intent. |
-| `_amount`  | `uint256` | Amount of token that the account has staked.           |
-| `_locator` | `address` | Locator for the peer.                                  |
-
-## Unset an Intent
-
-Unset an intent to trade in the Market.
-
-```Solidity
-function unsetIntent(
-  address _staker
-) public onlyOwner returns (bool)
-```
-
-### Params
-
-| Name      | Type      | Description                                          |
-| :-------- | :-------- | :--------------------------------------------------- |
-| `_staker` | `address` | Address of the account that will unstake its intent. |
-
-## Get an Intent
-
-Gets the intent for a given staker address.
-
-```Solidity
-function getIntent(
-  address _staker
-) public view returns (Intent memory)
-```
-
-### Params
-
-| Name      | Type      | Description                               |
-| :-------- | :-------- | :---------------------------------------- |
-| `_staker` | `address` | Address of the account to fetch an intent |
-
-## Has an Intent
-
-Determines whether the Market has an intent for a staker address.
-
-```Solidity
-function hasIntent(
-  address _staker
-) internal view returns (bool)
-```
-
-### Params
-
-| Name      | Type      | Description                               |
-| :-------- | :-------- | :---------------------------------------- |
-| `_staker` | `address` | Address of the account to check an intent |
-
-## Fetch Intents
-
-Fetch up to a number of intents from the list.
-
-```Solidity
-function fetchIntents(
-  uint256 _count
-) public view returns (address[] memory result)
-```
-
-### Params
-
-| Name     | Type      | Description                 |
-| :------- | :-------- | :-------------------------- |
-| `_count` | `uint256` | Number of intents to fetch. |
-
-## Find an Intent (By Value)
-
-Find an intent by value in the list.
-
-```Solidity
-function findPosition(
-  uint256 amount
-) internal view returns (Intent memory)
-```
-
-### Params
-
-| Name     | Type      | Description                 |
-| :------- | :-------- | :-------------------------- |
-| `_count` | `uint256` | Number of intents to fetch. |
-
-## Insert an Intent
-
-Insert an intent before an existing intent in the list.
-
-```Solidity
-function insertIntent(
-  Intent memory _newIntent,
-  Intent memory _nextIntent
-) internal returns (bool)
-```
-
-### Params
-
-| Name          | Type     | Description                       |
-| :------------ | :------- | :-------------------------------- |
-| `_newIntent`  | `Intent` | Intent to insert.                 |
-| `_nextIntent` | `Intent` | Existing intent to insert before. |
-
-## Link Two Intents
-
-Link two intents in the list.
-
-```Solidity
-function link(
-  Intent memory _left,
-  Intent memory _right
-) internal
-```
-
-### Params
-
-| Name     | Type     | Description                                    |
-| :------- | :------- | :--------------------------------------------- |
-| `_left`  | `Intent` | The intent to link to the left (Higher value). |
-| `_right` | `Intent` | The intent to link to the right (Lower value). |
