@@ -18,9 +18,6 @@ contract('Market Unit Tests', async accounts => {
   let carolAddress = accounts[3]
   let davidAddress = accounts[4]
 
-  let mockTokenOne = accounts[8]
-  let mockTokenTwo = accounts[8]
-
   let snapshotId
   let market
 
@@ -33,8 +30,8 @@ contract('Market Unit Tests', async accounts => {
   const LIST_HEAD = '0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF'
   const LIST_PREV = '0x00'
   const LIST_NEXT = '0x01'
-  const STAKER = 'staker'
-  const AMOUNT = 'amount'
+  const STAKER = 'user'
+  const AMOUNT = 'score'
   const LOCATOR = 'locator'
 
   beforeEach(async () => {
@@ -47,31 +44,17 @@ contract('Market Unit Tests', async accounts => {
   })
 
   before('Setup', async () => {
-    market = await Market.new(mockTokenOne, mockTokenTwo, { from: owner })
+    market = await Market.new({ from: owner })
   })
 
-  async function checkLinking(prevStaker, staker, nextStaker) {
-    let actualNextStaker = (await market.intentsLinkedList(staker, LIST_NEXT))[
-      STAKER
-    ]
-    let actualPrevStaker = (await market.intentsLinkedList(staker, LIST_PREV))[
-      STAKER
-    ]
-    equal(actualNextStaker, nextStaker, 'Next staker not set correctly')
-    equal(actualPrevStaker, prevStaker, 'Prev staker not set correctly')
+  async function checkLinking(prevUser, user, nextUser) {
+    let actualNextUser = (await market.list(user, LIST_NEXT))[STAKER]
+    let actualPrevUser = (await market.list(user, LIST_PREV))[STAKER]
+    equal(actualNextUser, nextUser, 'Next user not set correctly')
+    equal(actualPrevUser, prevUser, 'Prev user not set correctly')
   }
 
   describe('Test constructor', async () => {
-    it('should set maker token', async () => {
-      const actualMakerToken = await market.makerToken()
-      equal(actualMakerToken, mockTokenOne, 'Maker token set incorrectly')
-    })
-
-    it('should set taker token', async () => {
-      const actualTakerToken = await market.takerToken()
-      equal(actualTakerToken, mockTokenTwo, 'Taker token set incorrectly')
-    })
-
     it('should setup the linked list as just a head, length 0', async () => {
       await checkLinking(LIST_HEAD, LIST_HEAD, LIST_HEAD)
 
@@ -97,11 +80,9 @@ contract('Market Unit Tests', async accounts => {
       // check the SetIntent event was emitted
       emitted(result, 'SetIntent', event => {
         return (
-          event.staker === aliceAddress &&
-          event.amount.toNumber() === 2000 &&
-          event.locator === aliceLocator &&
-          event.makerToken === mockTokenOne &&
-          event.takerToken === mockTokenTwo
+          event.user === aliceAddress &&
+          event.score.toNumber() === 2000 &&
+          event.locator === aliceLocator
         )
       })
 
@@ -112,10 +93,10 @@ contract('Market Unit Tests', async accounts => {
       await checkLinking(LIST_HEAD, aliceAddress, LIST_HEAD)
 
       // check the values have been stored correctly
-      let headNext = await market.intentsLinkedList(LIST_HEAD, LIST_NEXT)
+      let headNext = await market.list(LIST_HEAD, LIST_NEXT)
 
       equal(headNext[STAKER], aliceAddress, 'Intent address not correct')
-      equal(headNext[AMOUNT], 2000, 'Intent amount not correct')
+      equal(headNext[AMOUNT], 2000, 'Intent score not correct')
       equal(headNext[LOCATOR], aliceLocator, 'Intent locator not correct')
 
       // check the length has increased
@@ -137,11 +118,9 @@ contract('Market Unit Tests', async accounts => {
       // check the SetIntent event was emitted
       emitted(result, 'SetIntent', event => {
         return (
-          event.staker === bobAddress &&
-          event.amount.toNumber() === 500 &&
-          event.locator === bobLocator &&
-          event.makerToken === mockTokenOne &&
-          event.takerToken === mockTokenTwo
+          event.user === bobAddress &&
+          event.score.toNumber() === 500 &&
+          event.locator === bobLocator
         )
       })
 
@@ -173,7 +152,7 @@ contract('Market Unit Tests', async accounts => {
       await reverted(trx, 'USER_HAS_INTENT')
 
       let length = await market.length.call()
-      equal(length.toNumber(), 1, 'length increased, but total stakers has not')
+      equal(length.toNumber(), 1, 'length increased, but total users has not')
     })
   })
 
@@ -214,7 +193,7 @@ contract('Market Unit Tests', async accounts => {
       equal(intents[2], bobLocator, 'Bob should be third')
     })
 
-    it('should unset the intent for a valid staker', async () => {
+    it('should unset the intent for a valid user', async () => {
       // check it returns true
       let returnValue = await market.unsetIntent.call(bobAddress, {
         from: owner,
@@ -224,11 +203,7 @@ contract('Market Unit Tests', async accounts => {
       // check it emits an event correctly
       let result = await market.unsetIntent(bobAddress, { from: owner })
       emitted(result, 'UnsetIntent', event => {
-        return (
-          event.staker === bobAddress &&
-          event.makerToken === mockTokenOne &&
-          event.takerToken === mockTokenTwo
-        )
+        return event.user === bobAddress
       })
 
       // check the linked list of intents is updated correspondingly
@@ -278,14 +253,14 @@ contract('Market Unit Tests', async accounts => {
       })
     })
 
-    it('should return empty intent for a non-staker', async () => {
+    it('should return empty intent for a non-user', async () => {
       let davidIntent = await market.getIntent(davidAddress)
       equal(
         davidIntent[STAKER],
         EMPTY_ADDRESS,
         'David: Intent address not correct'
       )
-      equal(davidIntent[AMOUNT], 0, 'David: Intent amount not correct')
+      equal(davidIntent[AMOUNT], 0, 'David: Intent score not correct')
       equal(
         davidIntent[LOCATOR],
         emptyLocator,
@@ -300,7 +275,7 @@ contract('Market Unit Tests', async accounts => {
         EMPTY_ADDRESS,
         'Carol: Intent address not correct'
       )
-      equal(carolIntent[AMOUNT], 0, 'Carol: Intent amount not correct')
+      equal(carolIntent[AMOUNT], 0, 'Carol: Intent score not correct')
       equal(
         carolIntent[LOCATOR],
         emptyLocator,
@@ -308,14 +283,14 @@ contract('Market Unit Tests', async accounts => {
       )
     })
 
-    it('should return the correct intent for a valid staker', async () => {
+    it('should return the correct intent for a valid user', async () => {
       let aliceIntent = await market.getIntent(aliceAddress)
       equal(
         aliceIntent[STAKER],
         aliceAddress,
         'Alice: Intent address not correct'
       )
-      equal(aliceIntent[AMOUNT], 2000, 'Alice: Intent amount not correct')
+      equal(aliceIntent[AMOUNT], 2000, 'Alice: Intent score not correct')
       equal(
         aliceIntent[LOCATOR],
         aliceLocator,
@@ -324,7 +299,7 @@ contract('Market Unit Tests', async accounts => {
 
       let bobIntent = await market.getIntent(bobAddress)
       equal(bobIntent[STAKER], bobAddress, 'Bob: intent address not correct')
-      equal(bobIntent[AMOUNT], 500, 'Bob: Intent amount not correct')
+      equal(bobIntent[AMOUNT], 500, 'Bob: Intent score not correct')
       equal(bobIntent[LOCATOR], bobLocator, 'Bob: Intent locator not correct')
     })
   })

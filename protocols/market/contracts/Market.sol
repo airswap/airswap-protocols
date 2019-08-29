@@ -24,10 +24,6 @@ import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
   */
 contract Market is Ownable {
 
-  // Token pair of the market
-  address public makerToken;
-  address public takerToken;
-
   // Length of the linked list
   uint256 public length;
 
@@ -38,19 +34,19 @@ contract Market is Ownable {
   byte constant private PREV = 0x00;
   byte constant private NEXT = 0x01;
 
-  // Mapping of staker address to its neighbors
-  mapping(address => mapping(byte => Intent)) public intentsLinkedList;
+  // Mapping of user address to its neighbors
+  mapping(address => mapping(byte => Intent)) public list;
 
   /**
     * @notice Intent to Trade
     *
-    * @param staker address
-    * @param amount uint256
+    * @param user address
+    * @param score uint256
     * @param locator bytes32
     */
   struct Intent {
-    address staker;
-    uint256 amount;
+    address user;
+    uint256 score;
     bytes32 locator;
   }
 
@@ -60,97 +56,82 @@ contract Market is Ownable {
     */
 
   event SetIntent(
-    address staker,
-    uint256 amount,
-    bytes32 locator,
-    address makerToken,
-    address takerToken
+    address user,
+    uint256 score,
+    bytes32 locator
   );
 
   event UnsetIntent(
-    address staker,
-    address makerToken,
-    address takerToken
+    address user
   );
 
   /**
     * @notice Contract Constructor
-    *
-    * @param _makerToken address
-    * @param _takerToken address
     */
-  constructor(
-    address _makerToken,
-    address _takerToken
-  ) public {
-
-    // Set the token pair of the market.
-    makerToken = _makerToken;
-    takerToken = _takerToken;
-
+  constructor() public {
     // Initialize the linked list.
     Intent memory head = Intent(HEAD, 0, bytes32(0));
-    intentsLinkedList[HEAD][PREV] = head;
-    intentsLinkedList[HEAD][NEXT] = head;
+    list[HEAD][PREV] = head;
+    list[HEAD][NEXT] = head;
   }
 
   /**
     * @notice Set an Intent to Trade
     *
-    * @param _staker The account
-    * @param _amount uint256
+    * @param _user The account
+    * @param _score uint256
     * @param _locator bytes32
     */
   function setIntent(
-    address _staker,
-    uint256 _amount,
+    address _user,
+    uint256 _score,
     bytes32 _locator
   ) external onlyOwner {
 
-    require(!hasIntent(_staker), "USER_HAS_INTENT");
+    require(!hasIntent(_user), "USER_HAS_INTENT");
 
-    Intent memory newIntent = Intent(_staker, _amount, _locator);
+    Intent memory newIntent = Intent(_user, _score, _locator);
 
-    // Insert after the next highest amount on the linked list.
-    insertIntent(newIntent, findPosition(_amount));
+    // Insert after the next highest score on the linked list.
+    insertIntent(newIntent, findPosition(_score));
       // Increment the length of the linked list if successful.
     length = length + 1;
 
-    emit SetIntent(_staker, _amount, _locator, makerToken, takerToken);
+    emit SetIntent(_user, _score, _locator);
   }
 
   /**
     * @notice Unset an Intent to Trade
-    * @param _staker address
+    * @param _user address
     */
   function unsetIntent(
-    address _staker
+    address _user
   ) external onlyOwner returns (bool) {
 
-    // Ensure the _staker is in the linked list.
-    if (!hasIntent(_staker)) {
+    // Ensure the _user is in the linked list.
+    if (!hasIntent(_user)) {
       return false;
     }
 
-    removeIntent(_staker);
+    removeIntent(_user);
 
-    emit UnsetIntent(_staker, makerToken, takerToken);
+    emit UnsetIntent(_user);
     return true;
   }
 
   /**
-    * @notice Get the Intent for a Staker
-    * @param _staker address
+    * @notice Get the Intent for a user
+    * @param _user address
     */
   function getIntent(
-    address _staker
+    address _user
   ) external view returns (Intent memory) {
 
-    // Ensure the staker has a neighbor in the linked list.
-    if (intentsLinkedList[_staker][PREV].staker != address(0)) {
+    // Ensure the user has a neighbor in the linked list.
+    if (list[_user][PREV].user != address(0)) {
 
       // Return the next intent from the previous neighbor.
-      return intentsLinkedList[intentsLinkedList[_staker][PREV].staker][NEXT];
+      return list[list[_user][PREV].user][NEXT];
     }
     return Intent(address(0), 0, bytes32(0));
   }
@@ -171,51 +152,51 @@ contract Market is Ownable {
     result = new bytes32[](limit);
 
     // Get the first intent in the linked list after the HEAD
-    Intent storage intent = intentsLinkedList[HEAD][NEXT];
+    Intent storage intent = list[HEAD][NEXT];
 
     // Iterate over the list until the end or limit.
     uint256 i = 0;
     while (i < limit) {
       result[i] = intent.locator;
       i = i + 1;
-      intent = intentsLinkedList[intent.staker][NEXT];
+      intent = list[intent.user][NEXT];
     }
   }
 
   /**
-    * @notice Determine Whether a Staker is in the Linked List
-    * @param _staker address
+    * @notice Determine Whether a user is in the Linked List
+    * @param _user address
     */
   function hasIntent(
-    address _staker
+    address _user
   ) public view returns (bool) {
 
-    if (intentsLinkedList[_staker][PREV].staker != address(0) &&
-      intentsLinkedList[intentsLinkedList[_staker][PREV].staker][NEXT].staker == _staker) {
+    if (list[_user][PREV].user != address(0) &&
+      list[list[_user][PREV].user][NEXT].user == _user) {
       return true;
     }
     return false;
   }
 
   /**
-    * @notice Returns the first intent smaller than _amount
-    * @param _amount uint256
+    * @notice Returns the first intent smaller than _score
+    * @param _score uint256
     */
   function findPosition(
-    uint256 _amount
+    uint256 _score
   ) internal view returns (Intent memory) {
 
     // Get the first intent in the linked list.
-    Intent storage intent = intentsLinkedList[HEAD][NEXT];
+    Intent storage intent = list[HEAD][NEXT];
 
-    if (_amount == 0) {
+    if (_score == 0) {
       // return the head of the linked list
-      return intentsLinkedList[intent.staker][PREV];
+      return list[intent.user][PREV];
     }
 
-    // Iterate through the list until a lower amount is found.
-    while (_amount <= intent.amount) {
-      intent = intentsLinkedList[intent.staker][NEXT];
+    // Iterate through the list until a lower score is found.
+    while (_score <= intent.score) {
+      intent = list[intent.user][NEXT];
     }
     return intent;
   }
@@ -232,7 +213,7 @@ contract Market is Ownable {
   ) internal {
 
     // Get the intent before the _nextIntent.
-    Intent memory previousIntent = intentsLinkedList[_nextIntent.staker][PREV];
+    Intent memory previousIntent = list[_nextIntent.user][PREV];
 
     // Link the _newIntent into place.
     link(previousIntent, _newIntent);
@@ -249,22 +230,22 @@ contract Market is Ownable {
     Intent memory _left,
     Intent memory _right
   ) internal {
-    intentsLinkedList[_left.staker][NEXT] = _right;
-    intentsLinkedList[_right.staker][PREV] = _left;
+    list[_left.user][NEXT] = _right;
+    list[_right.user][PREV] = _left;
   }
 
   /**
-    * @notice Removes a specified staker from the linked list
+    * @notice Removes a specified user from the linked list
     *
-    * @param _staker the staker in question
+    * @param _user the user in question
     */
-  function removeIntent(address _staker) internal {
+  function removeIntent(address _user) internal {
     // Link its neighbors together.
-    link(intentsLinkedList[_staker][PREV], intentsLinkedList[_staker][NEXT]);
+    link(list[_user][PREV], list[_user][NEXT]);
 
-    // Delete staker from the list.
-    delete intentsLinkedList[_staker][PREV];
-    delete intentsLinkedList[_staker][NEXT];
+    // Delete user from the list.
+    delete list[_user][PREV];
+    delete list[_user][NEXT];
 
     // Decrement the length of the linked list.
     length = length - 1;
