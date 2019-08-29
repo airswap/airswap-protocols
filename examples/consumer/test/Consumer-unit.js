@@ -8,7 +8,7 @@ const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 const BigNumber = require('bignumber.js')
 const { padAddressToLocator } = require('@airswap/test-utils').padding
-const { orders, signatures } = require('@airswap/order-utils')
+const { orders } = require('@airswap/order-utils')
 
 contract('Consumer Unit Tests', async () => {
   const highVal = 400
