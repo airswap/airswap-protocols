@@ -35,14 +35,14 @@ module.exports = {
   },
   generateNonce() {
     nonce = nonce + 1
-    return nonce
+    return nonce.toString()
   },
   async generateExpiry(days) {
     return (await getLatestTimestamp()) + SECONDS_IN_DAY * days
   },
   async getOrder(
     {
-      expiry = 0,
+      expiry = '0',
       nonce = this.generateNonce(),
       signer = NULL_ADDRESS,
       maker = defaults.Party,

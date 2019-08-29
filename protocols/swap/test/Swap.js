@@ -700,7 +700,7 @@ contract('Swap', async accounts => {
         },
         taker: {
           token: tokenDAI.address,
-          param: 0,
+          param: '0',
         },
       })
       emitted(await swap(order, { from: bobAddress }), 'Swap') //, { takerAddress: bobAddress })
@@ -856,12 +856,12 @@ contract('Swap', async accounts => {
         maker: {
           wallet: aliceAddress,
           token: tokenAST.address,
-          param: 0,
+          param: '0',
         },
         taker: {
           wallet: bobAddress,
           token: tokenDAI.address,
-          param: 0,
+          param: '0',
         },
       })
       const orderTwo = await orders.getOrder({
@@ -906,12 +906,12 @@ contract('Swap', async accounts => {
           maker: {
             wallet: eveAddress,
             token: tokenAST.address,
-            param: 0,
+            param: '0',
           },
           taker: {
             wallet: aliceAddress,
             token: tokenDAI.address,
-            param: 0,
+            param: '0',
           },
         },
         true
@@ -928,12 +928,12 @@ contract('Swap', async accounts => {
         maker: {
           wallet: eveAddress,
           token: tokenAST.address,
-          param: 0,
+          param: '0',
         },
         taker: {
           wallet: aliceAddress,
           token: tokenDAI.address,
-          param: 0,
+          param: '0',
         },
       })
       order.signature = signatures.getTypedDataSignature(

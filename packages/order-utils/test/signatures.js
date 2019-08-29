@@ -23,12 +23,12 @@ describe('Signatures', async () => {
         maker: {
           wallet: makerWallet,
           token: ASTAddress,
-          param: 0,
+          param: '0',
         },
         taker: {
           wallet: takerWallet,
           token: WETHAddress,
-          param: 0,
+          param: '0',
         },
       },
       true
@@ -63,12 +63,12 @@ describe('Signatures', async () => {
         maker: {
           wallet: makerWallet,
           token: ASTAddress,
-          param: 0,
+          param: '0',
         },
         taker: {
           wallet: takerWallet,
           token: WETHAddress,
-          param: 0,
+          param: '0',
         },
       },
       true
