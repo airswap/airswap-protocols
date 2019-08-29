@@ -22,7 +22,7 @@
 | :------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------- | :--------------------------- |
 | [`@airswap/swap`](/protocols/swap)                 | [![npm](https://img.shields.io/npm/v/@airswap/swap)](https://www.npmjs.com/package/@airswap/swap)                 | Atomic Swap                  |
 | [`@airswap/indexer`](/protocols/indexer)           | [![npm](https://img.shields.io/npm/v/@airswap/indexer)](https://www.npmjs.com/package/@airswap/indexer)           | Onchain Indexer with Staking |
-| [`@airswap/market`](/protocols/market)             | [![npm](https://img.shields.io/npm/v/@airswap/market)](https://www.npmjs.com/package/@airswap/market)             | Intents for a Token Pair     |
+| [`@airswap/index`](/protocols/index)             | [![npm](https://img.shields.io/npm/v/@airswap/index)](https://www.npmjs.com/package/@airswap/index)             | Intents for a Token Pair     |
 | [`@airswap/peer`](/protocols/peer)                 | [![npm](https://img.shields.io/npm/v/@airswap/peer)](https://www.npmjs.com/package/@airswap/peer)                 | Onchain Peer with Rules      |
 | [`@airswap/peer-factory`](/protocols/peer-factory) | [![npm](https://img.shields.io/npm/v/@airswap/peer-factory)](https://www.npmjs.com/package/@airswap/peer-factory) | Deploys Peer Contracts       |
 | [`@airswap/types`](/protocols/types)               | [![npm](https://img.shields.io/npm/v/@airswap/types)](https://www.npmjs.com/package/@airswap/types)               | Types and Hashes             |

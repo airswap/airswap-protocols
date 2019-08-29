@@ -20,9 +20,9 @@ pragma experimental ABIEncoderV2;
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 /**
-  * @title Market: A List of Intents to Trade
+  * @title Index: A List of Entries to Trade
   */
-contract Market is Ownable {
+contract Index is Ownable {
 
   // Length of the linked list
   uint256 public length;
@@ -35,16 +35,16 @@ contract Market is Ownable {
   byte constant private NEXT = 0x01;
 
   // Mapping of user address to its neighbors
-  mapping(address => mapping(byte => Intent)) public intentsLinkedList;
+  mapping(address => mapping(byte => Entry)) public entriesLinkedList;
 
   /**
-    * @notice Intent to Trade
+    * @notice Entry to Trade
     *
     * @param user address
     * @param score uint256
     * @param locator bytes32
     */
-  struct Intent {
+  struct Entry {
     address user;
     uint256 score;
     bytes32 locator;
@@ -55,13 +55,13 @@ contract Market is Ownable {
     * @dev Emitted with successful state changes
     */
 
-  event SetIntent(
+  event SetEntry(
     uint256 score,
     address indexed user,
     bytes32 indexed locator
   );
 
-  event UnsetIntent(
+  event UnsetEntry(
     address indexed user
   );
 
@@ -70,90 +70,90 @@ contract Market is Ownable {
     */
   constructor() public {
     // Initialize the linked list.
-    Intent memory head = Intent(HEAD, 0, bytes32(0));
-    intentsLinkedList[HEAD][PREV] = head;
-    intentsLinkedList[HEAD][NEXT] = head;
+    Entry memory head = Entry(HEAD, 0, bytes32(0));
+    entriesLinkedList[HEAD][PREV] = head;
+    entriesLinkedList[HEAD][NEXT] = head;
   }
 
   /**
-    * @notice Set an Intent to Trade
+    * @notice Set an Entry to Trade
     *
     * @param _user The account
     * @param _score uint256
     * @param _locator bytes32
     */
-  function setIntent(
+  function setEntry(
     address _user,
     uint256 _score,
     bytes32 _locator
   ) external onlyOwner {
 
-    require(!hasIntent(_user), "USER_HAS_INTENT");
+    require(!hasEntry(_user), "USER_HAS_ENTRY");
 
-    Intent memory newIntent = Intent(_user, _score, _locator);
+    Entry memory newEntry = Entry(_user, _score, _locator);
 
     // Insert after the next highest score on the linked list.
-    Intent memory nextIntent = findPosition(_score);
+    Entry memory nextEntry = findPosition(_score);
 
-    // Link the newIntent into place.
-    link(intentsLinkedList[nextIntent.user][PREV], newIntent);
-    link(newIntent, nextIntent);
+    // Link the newEntry into place.
+    link(entriesLinkedList[nextEntry.user][PREV], newEntry);
+    link(newEntry, nextEntry);
 
     // Increment the length of the linked list if successful.
     length = length + 1;
 
-    emit SetIntent(_score, _user, _locator);
+    emit SetEntry(_score, _user, _locator);
   }
 
   /**
-    * @notice Unset an Intent to Trade
+    * @notice Unset an Entry to Trade
     * @param _user address
     */
-  function unsetIntent(
+  function unsetEntry(
     address _user
   ) external onlyOwner returns (bool) {
 
     // Ensure the _user is in the linked list.
-    if (!hasIntent(_user)) {
+    if (!hasEntry(_user)) {
       return false;
     }
 
     // Link its neighbors together.
-    link(intentsLinkedList[_user][PREV], intentsLinkedList[_user][NEXT]);
+    link(entriesLinkedList[_user][PREV], entriesLinkedList[_user][NEXT]);
 
     // Delete user from the list.
-    delete intentsLinkedList[_user][PREV];
-    delete intentsLinkedList[_user][NEXT];
+    delete entriesLinkedList[_user][PREV];
+    delete entriesLinkedList[_user][NEXT];
 
     // Decrement the length of the linked list.
     length = length - 1;
 
-    emit UnsetIntent(_user);
+    emit UnsetEntry(_user);
     return true;
   }
 
   /**
-    * @notice Get the Intent for a user
+    * @notice Get the Entry for a user
     * @param _user address
     */
-  function getIntent(
+  function getEntry(
     address _user
-  ) external view returns (Intent memory) {
+  ) external view returns (Entry memory) {
 
     // Ensure the user has a neighbor in the linked list.
-    if (intentsLinkedList[_user][PREV].user != address(0)) {
+    if (entriesLinkedList[_user][PREV].user != address(0)) {
 
       // Return the next intent from the previous neighbor.
-      return intentsLinkedList[intentsLinkedList[_user][PREV].user][NEXT];
+      return entriesLinkedList[entriesLinkedList[_user][PREV].user][NEXT];
     }
-    return Intent(address(0), 0, bytes32(0));
+    return Entry(address(0), 0, bytes32(0));
   }
 
   /**
-    * @notice Get Valid Intents
+    * @notice Get Valid Entries
     * @param _count uint256
     */
-  function fetchIntents(
+  function fetchEntries(
     uint256 _count
   ) external view returns (bytes32[] memory result) {
 
@@ -165,14 +165,14 @@ contract Market is Ownable {
     result = new bytes32[](limit);
 
     // Get the first intent in the linked list after the HEAD
-    Intent storage intent = intentsLinkedList[HEAD][NEXT];
+    Entry storage intent = entriesLinkedList[HEAD][NEXT];
 
     // Iterate over the list until the end or limit.
     uint256 i = 0;
     while (i < limit) {
       result[i] = intent.locator;
       i = i + 1;
-      intent = intentsLinkedList[intent.user][NEXT];
+      intent = entriesLinkedList[intent.user][NEXT];
     }
   }
 
@@ -180,12 +180,12 @@ contract Market is Ownable {
     * @notice Determine Whether a user is in the Linked List
     * @param _user address
     */
-  function hasIntent(
+  function hasEntry(
     address _user
   ) public view returns (bool) {
 
-    if (intentsLinkedList[_user][PREV].user != address(0) &&
-      intentsLinkedList[intentsLinkedList[_user][PREV].user][NEXT].user == _user) {
+    if (entriesLinkedList[_user][PREV].user != address(0) &&
+      entriesLinkedList[entriesLinkedList[_user][PREV].user][NEXT].user == _user) {
       return true;
     }
     return false;
@@ -197,34 +197,34 @@ contract Market is Ownable {
     */
   function findPosition(
     uint256 _score
-  ) internal view returns (Intent memory) {
+  ) internal view returns (Entry memory) {
 
     // Get the first intent in the linked list.
-    Intent storage intent = intentsLinkedList[HEAD][NEXT];
+    Entry storage intent = entriesLinkedList[HEAD][NEXT];
 
     if (_score == 0) {
       // return the head of the linked list
-      return intentsLinkedList[intent.user][PREV];
+      return entriesLinkedList[intent.user][PREV];
     }
 
     // Iterate through the list until a lower score is found.
     while (_score <= intent.score) {
-      intent = intentsLinkedList[intent.user][NEXT];
+      intent = entriesLinkedList[intent.user][NEXT];
     }
     return intent;
   }
 
   /**
-    * @notice Link Two Intents
+    * @notice Link Two Entries
     *
-    * @param _left Intent
-    * @param _right Intent
+    * @param _left Entry
+    * @param _right Entry
     */
   function link(
-    Intent memory _left,
-    Intent memory _right
+    Entry memory _left,
+    Entry memory _right
   ) internal {
-    intentsLinkedList[_left.user][NEXT] = _right;
-    intentsLinkedList[_right.user][PREV] = _left;
+    entriesLinkedList[_left.user][NEXT] = _right;
+    entriesLinkedList[_right.user][PREV] = _left;
   }
 }

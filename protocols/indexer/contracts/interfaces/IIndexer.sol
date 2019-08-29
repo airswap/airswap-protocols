@@ -18,7 +18,7 @@ pragma solidity 0.5.10;
 
 interface IIndexer {
 
-  event CreateMarket(
+  event CreateIndex(
     address makerToken,
     address takerToken
   );
@@ -45,10 +45,10 @@ interface IIndexer {
     address token
   );
 
-  function markets(address, address) external returns (address);
+  function indexes(address, address) external returns (address);
   function blacklist(address) external returns (bool);
 
-  function createMarket(
+  function createIndex(
     address _makerToken,
     address _takerToken
   ) external returns (address);
@@ -61,19 +61,19 @@ interface IIndexer {
     address[] calldata _tokens
   ) external;
 
-  function setIntent(
+  function setEntry(
     address _makerToken,
     address _takerToken,
     uint256 _amount,
     bytes32 _locator
   ) external;
 
-  function unsetIntent(
+  function unsetEntry(
     address _makerToken,
     address _takerToken
   ) external;
 
-  function getIntents(
+  function getEntries(
     address _makerToken,
     address _takerToken,
     uint256 _count

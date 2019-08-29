@@ -19,20 +19,20 @@ pragma experimental ABIEncoderV2;
 
 import "@airswap/indexer/contracts/interfaces/IIndexer.sol";
 import "@airswap/indexer/contracts/interfaces/ILocatorWhitelist.sol";
-import "@airswap/market/contracts/Market.sol";
+import "@airswap/index/contracts/Index.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 /**
-  * @title Indexer: A Collection of Markets by Token Pair
+  * @title Indexer: A Collection of Index contracts by Token Pair
   */
 contract Indexer is IIndexer, Ownable {
 
   // Token to be used for staking (ERC-20)
   IERC20 public stakeToken;
 
-  // Mapping of maker token to taker token to market
-  mapping (address => mapping (address => Market)) public markets;
+  // Mapping of maker token to taker token to index
+  mapping (address => mapping (address => Index)) public indexes;
 
   // Mapping of token address to boolean
   mapping (address => bool) public blacklist;
@@ -55,26 +55,26 @@ contract Indexer is IIndexer, Ownable {
   }
 
   /**
-    * @notice Create a Market (Collection of Intents to Trade)
-    * @dev Deploys a new Market contract and tracks the address
+    * @notice Create a Index (Collection of Entries to Trade)
+    * @dev Deploys a new Index contract and tracks the address
     *
     * @param _makerToken address
     * @param _takerToken address
     */
-  function createMarket(
+  function createIndex(
     address _makerToken,
     address _takerToken
   ) external returns (address) {
 
-    // If the Market does not exist, create it.
-    if (markets[_makerToken][_takerToken] == Market(0)) {
-      // Create a new Market contract for the token pair.
-      markets[_makerToken][_takerToken] = new Market();
-      emit CreateMarket(_makerToken, _takerToken);
+    // If the Index does not exist, create it.
+    if (indexes[_makerToken][_takerToken] == Index(0)) {
+      // Create a new Index contract for the token pair.
+      indexes[_makerToken][_takerToken] = new Index();
+      emit CreateIndex(_makerToken, _takerToken);
     }
 
-    // Return the address of the Market contract.
-    return address(markets[_makerToken][_takerToken]);
+    // Return the address of the Index contract.
+    return address(indexes[_makerToken][_takerToken]);
   }
 
   /**
@@ -108,7 +108,7 @@ contract Indexer is IIndexer, Ownable {
   }
 
   /**
-    * @notice Set an Intent to Trade
+    * @notice Set an Entry to Trade
     * @dev Requires approval to transfer staking token for sender
     *
     * @param _makerToken address
@@ -116,7 +116,7 @@ contract Indexer is IIndexer, Ownable {
     * @param _amount uint256
     * @param _locator bytes32
     */
-  function setIntent(
+  function setEntry(
     address _makerToken,
     address _takerToken,
     uint256 _amount,
@@ -131,11 +131,11 @@ contract Indexer is IIndexer, Ownable {
 
     // Ensure both of the tokens are not blacklisted.
     require(!blacklist[_makerToken] && !blacklist[_takerToken],
-      "MARKET_IS_BLACKLISTED");
+      "INDEX_IS_BLACKLISTED");
 
     // Ensure the market exists.
-    require(markets[_makerToken][_takerToken] != Market(0),
-      "MARKET_DOES_NOT_EXIST");
+    require(indexes[_makerToken][_takerToken] != Index(0),
+      "INDEX_DOES_NOT_EXIST");
 
     // Only transfer for staking if amount is set.
     if (_amount > 0) {
@@ -147,56 +147,56 @@ contract Indexer is IIndexer, Ownable {
 
     emit Stake(msg.sender, _makerToken, _takerToken, _amount);
 
-    // Set the intent on the market.
-    markets[_makerToken][_takerToken].setIntent(msg.sender, _amount, _locator);
+    // Set the entry on the market.
+    indexes[_makerToken][_takerToken].setEntry(msg.sender, _amount, _locator);
   }
 
   /**
-    * @notice Unset an Intent to Trade
-    * @dev Users are allowed unstake from blacklisted markets
+    * @notice Unset an Entry to Trade
+    * @dev Users are allowed unstake from blacklisted indexes
     *
     * @param _makerToken address
     * @param _takerToken address
     */
-  function unsetIntent(
+  function unsetEntry(
     address _makerToken,
     address _takerToken
   ) external {
 
     // Ensure the market exists.
-    require(markets[_makerToken][_takerToken] != Market(0),
-      "MARKET_DOES_NOT_EXIST");
+    require(indexes[_makerToken][_takerToken] != Index(0),
+      "INDEX_DOES_NOT_EXIST");
 
-    // Get the intent for the sender.
-    Market.Intent memory intent = markets[_makerToken][_takerToken].getIntent(msg.sender);
+    // Get the entry for the sender.
+    Index.Entry memory entry = indexes[_makerToken][_takerToken].getEntry(msg.sender);
 
-    // Ensure the intent exists.
-    require(intent.user == msg.sender,
-      "INTENT_DOES_NOT_EXIST");
+    // Ensure the entry exists.
+    require(entry.user == msg.sender,
+      "ENTRY_DOES_NOT_EXIST");
 
-    // Unset the intent on the market.
-    //No need to require() because a check is done above that reverts if there are no intents
-    markets[_makerToken][_takerToken].unsetIntent(msg.sender);
+    // Unset the entry on the market.
+    //No need to require() because a check is done above that reverts if there are no entries
+    indexes[_makerToken][_takerToken].unsetEntry(msg.sender);
 
-    if (intent.score > 0) {
+    if (entry.score > 0) {
       // Return the staked tokens. IERC20 returns boolean this contract may not be ours.
       // Need to revert when false is returned
-      require(stakeToken.transfer(msg.sender, intent.score));
+      require(stakeToken.transfer(msg.sender, entry.score));
     }
 
-    emit Unstake(msg.sender, _makerToken, _takerToken, intent.score);
+    emit Unstake(msg.sender, _makerToken, _takerToken, entry.score);
   }
 
   /**
-    * @notice Get the Intents to Trade for a Market
-    * @dev Users are allowed unstake from blacklisted markets
+    * @notice Get the Entries to Trade for a Index
+    * @dev Users are allowed unstake from blacklisted indexes
     *
     * @param _makerToken address
     * @param _takerToken address
     * @param _count uint256
     * @return locators address[]
     */
-  function getIntents(
+  function getEntries(
     address _makerToken,
     address _takerToken,
     uint256 _count
@@ -208,10 +208,10 @@ contract Indexer is IIndexer, Ownable {
     if (!blacklist[_makerToken] && !blacklist[_takerToken]) {
 
       // Ensure the market exists.
-      if (markets[_makerToken][_takerToken] != Market(0)) {
+      if (indexes[_makerToken][_takerToken] != Index(0)) {
 
         // Return an array of locators for the market.
-        return markets[_makerToken][_takerToken].fetchIntents(_count);
+        return indexes[_makerToken][_takerToken].fetchEntries(_count);
 
       }
     }

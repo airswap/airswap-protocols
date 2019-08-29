@@ -1,8 +1,8 @@
-# Market
+# Index
 
 **:warning: This package is under active development. Do not use in production.**
 
-[AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens. This package contains source code and tests for a `Market` that represents a list of intents to trade.
+[AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens. This package contains source code and tests for a `Index` that represents a list of intents to trade.
 
 [![Discord](https://img.shields.io/discord/590643190281928738.svg)](https://discord.gg/ecQbV7H)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
@@ -11,14 +11,14 @@
 
 ### Sorting
 
-Intents are sorted by their amount, with the largest amount at the beginning of the list. Currently the staking amount is indicated by an Indexer that owns the Market.
+Intents are sorted by their amount, with the largest amount at the beginning of the list. Currently the staking amount is indicated by an Indexer that owns the Index.
 
 ## Definitions
 
 | Term    | Definition                                                              |
 | :------ | :---------------------------------------------------------------------- |
 | Intent  | An interest in trading a specific token pair without price information. |
-| Market  | A list of intents to trade for a token pair.                            |
+| Index  | A list of intents to trade for a token pair.                            |
 | Locator | How a peer can be reached to communicate pricing.                       |
 
 ## Intent Struct
@@ -35,7 +35,7 @@ struct Intent {
 
 ## Constructor
 
-Create a new `Market` contract. Usually called within the context of an `Indexer` contract.
+Create a new `Index` contract. Usually called within the context of an `Indexer` contract.
 
 ```Solidity
 constructor(
@@ -53,7 +53,7 @@ constructor(
 
 ## Set an Intent
 
-Set an intent to trade in the Market.
+Set an intent to trade in the Index.
 
 ```Solidity
 function setIntent(
@@ -73,7 +73,7 @@ function setIntent(
 
 ## Unset an Intent
 
-Unset an intent to trade in the Market.
+Unset an intent to trade in the Index.
 
 ```Solidity
 function unsetIntent(
@@ -105,7 +105,7 @@ function getIntent(
 
 ## Has an Intent
 
-Determines whether the Market has an intent for a staker address.
+Determines whether the Index has an intent for a staker address.
 
 ```Solidity
 function hasIntent(

@@ -33,7 +33,7 @@ Limit locators to those whitelisted by another contract.
 | :------ | :---------------------------------------------------------------------- |
 | Intent  | An interest in trading a specific token pair without price information. |
 | Indexer | A data store of intents to trade on the AirSwap Network.                |
-| Market  | A list of intents to trade for a token pair.                            |
+| Index  | A list of intents to trade for a token pair.                            |
 | Locator | How a peer can be reached to communicate pricing.                       |
 
 ## Constructor
@@ -54,12 +54,12 @@ constructor(
 | `_stakeToken`       | `address` | Address of the token required for staking.         |
 | `_locatorWhitelist` | `address` | Address of an optional locator whitelist contract. |
 
-## Create a Market
+## Create a Index
 
-If none exists, deploy a new `Market` contract for the given token pair and return the address of the new or existing market. For example, an intent to trade WETH/DAI.
+If none exists, deploy a new `Index` contract for the given token pair and return the address of the new or existing market. For example, an intent to trade WETH/DAI.
 
 ```Solidity
-function createMarket(
+function createIndex(
   address _makerToken,
   address _takerToken
 ) public returns (address)
@@ -74,7 +74,7 @@ function createMarket(
 
 ## Add a Token to Blacklist
 
-Add a token to the blacklist. Markets that include the blacklisted token will be ignored. Emits an `AddToBlacklist` event.
+Add a token to the blacklist. Index contracts that include the blacklisted token will be ignored. Emits an `AddToBlacklist` event.
 
 ```Solidity
 function addToBlacklist(
