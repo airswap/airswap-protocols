@@ -26,10 +26,7 @@ contract('Index Unit Tests', async accounts => {
   let carolLocator = padAddressToLocator(carolAddress)
   let emptyLocator = padAddressToLocator(EMPTY_ADDRESS)
 
-  // linked list helpers
-  const LIST_HEAD = '0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF'
-  const LIST_PREV = '0x00'
-  const LIST_NEXT = '0x01'
+  // helpers
   const USER = 'user'
   const SCORE = 'score'
   const LOCATOR = 'locator'
@@ -47,19 +44,13 @@ contract('Index Unit Tests', async accounts => {
     index = await Index.new({ from: owner })
   })
 
-  async function checkLinking(prevUser, user, nextUser) {
-    let actualNextUser = (await index.signalsLinkedList(user, LIST_NEXT))[USER]
-    let actualPrevUser = (await index.signalsLinkedList(user, LIST_PREV))[USER]
-    equal(actualNextUser, nextUser, 'Next user not set correctly')
-    equal(actualPrevUser, prevUser, 'Prev user not set correctly')
-  }
-
   describe('Test constructor', async () => {
     it('should setup the linked list as just a head, length 0', async () => {
-      await checkLinking(LIST_HEAD, LIST_HEAD, LIST_HEAD)
-
       let listLength = await index.length()
       equal(listLength, 0, 'Link list length should be 0')
+
+      let signals = await index.fetchSignals(10)
+      equal(signals.length, 0, 'list should have 0 signals')
     })
   })
 
@@ -87,17 +78,9 @@ contract('Index Unit Tests', async accounts => {
       })
 
       // check it has been inserted into the linked list correctly
-
-      // check its been linked to the head correctly
-      await checkLinking(aliceAddress, LIST_HEAD, aliceAddress)
-      await checkLinking(LIST_HEAD, aliceAddress, LIST_HEAD)
-
-      // check the values have been stored correctly
-      let headNext = await index.signalsLinkedList(LIST_HEAD, LIST_NEXT)
-
-      equal(headNext[USER], aliceAddress, 'Signal address not correct')
-      equal(headNext[SCORE], 2000, 'Signal score not correct')
-      equal(headNext[LOCATOR], aliceLocator, 'Signal locator not correct')
+      let signals = await index.fetchSignals(10)
+      equal(signals.length, 1, 'list should have 1 signal')
+      equal(signals[0], aliceLocator, 'Alice should be in list')
 
       // check the length has increased
       let listLength = await index.length()
@@ -127,10 +110,6 @@ contract('Index Unit Tests', async accounts => {
       await index.setSignal(carolAddress, 1500, carolLocator, {
         from: owner,
       })
-
-      await checkLinking(LIST_HEAD, aliceAddress, carolAddress)
-      await checkLinking(aliceAddress, carolAddress, bobAddress)
-      await checkLinking(carolAddress, bobAddress, LIST_HEAD)
 
       let listLength = await index.length()
       equal(listLength, 3, 'Link list length should be 3')
@@ -206,23 +185,21 @@ contract('Index Unit Tests', async accounts => {
         return event.user === bobAddress
       })
 
-      // check the linked list of signals is updated correspondingly
-      await checkLinking(LIST_HEAD, aliceAddress, carolAddress)
-      await checkLinking(aliceAddress, carolAddress, LIST_HEAD)
-
       let listLength = await index.length()
       equal(listLength, 2, 'Link list length should be 2')
 
-      const signals = await index.fetchSignals(7)
+      let signals = await index.fetchSignals(7)
       equal(signals[0], aliceLocator, 'Alice should be first')
       equal(signals[1], carolLocator, 'Carol should be second')
 
       await index.unsetSignal(aliceAddress, { from: owner })
       await index.unsetSignal(carolAddress, { from: owner })
 
-      await checkLinking(LIST_HEAD, LIST_HEAD, LIST_HEAD)
       listLength = await index.length()
       equal(listLength, 0, 'Link list length should be 0')
+
+      signals = await index.fetchSignals(10)
+      equal(signals.length, 0, 'list should have 0 signals')
     })
 
     it('unsetting signal twice in a row for an address has no effect', async () => {
