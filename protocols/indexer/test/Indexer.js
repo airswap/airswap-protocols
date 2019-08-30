@@ -340,7 +340,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
             from: aliceAddress,
           }
         ),
-        'INDEX_IS_BLACKLISTED'
+        'TOKEN_IS_BLACKLISTED'
       )
     })
 

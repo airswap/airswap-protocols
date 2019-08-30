@@ -326,21 +326,4 @@ contract('Index Unit Tests', async accounts => {
       equal(signals[2], bobLocator, 'Bob should be third')
     })
   })
-
-  describe('Test hasSignal', async () => {
-    it('should return false if the address has no signal', async () => {
-      let hasSignal = await index.hasSignal(aliceAddress)
-      equal(hasSignal, false, 'hasSignal should have returned false')
-    })
-
-    it('should return true if the address has a signal', async () => {
-      // give alice a signal
-      await index.setSignal(aliceAddress, 2000, aliceLocator, {
-        from: owner,
-      })
-      // now test again
-      let hasSignal = await index.hasSignal(aliceAddress)
-      equal(hasSignal, true, 'hasSignal should have returned true')
-    })
-  })
 })

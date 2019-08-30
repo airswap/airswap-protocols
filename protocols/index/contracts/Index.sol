@@ -182,7 +182,7 @@ contract Index is Ownable {
     */
   function hasSignal(
     address _user
-  ) public view returns (bool) {
+  ) internal view returns (bool) {
 
     if (signalsLinkedList[_user][PREV].user != address(0) &&
       signalsLinkedList[signalsLinkedList[_user][PREV].user][NEXT].user == _user) {

@@ -83,7 +83,7 @@ contract('Consumer', async accounts => {
       )
     })
 
-    it('Bob creates a market (collection of intents) for WETH/DAI', async () => {
+    it('Bob creates an index for WETH/DAI', async () => {
       emitted(
         await indexer.createIndex(tokenWETH.address, tokenDAI.address, {
           from: bobAddress,
