@@ -35,7 +35,7 @@ contract Index is Ownable {
   byte constant private NEXT = 0x01;
 
   // Mapping of user address to its neighbors
-  mapping(address => mapping(byte => Signal)) public signalsLinkedList;
+  mapping(address => mapping(byte => Signal)) private signalsLinkedList;
 
   /**
     * @notice Signal to Trade
