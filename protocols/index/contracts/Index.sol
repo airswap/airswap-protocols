@@ -88,7 +88,7 @@ contract Index is Ownable {
     bytes32 _locator
   ) external onlyOwner {
 
-    require(!hasSignal(_user), "USER_HAS_ENTRY");
+    require(!hasSignal(_user), "SIGNAL_ALREADY_SET");
 
     Signal memory newSignal = Signal(_user, _score, _locator);
 
@@ -143,7 +143,7 @@ contract Index is Ownable {
     // Ensure the user has a neighbor in the linked list.
     if (signalsLinkedList[_user][PREV].user != address(0)) {
 
-      // Return the next intent from the previous neighbor.
+      // Return the next signal from the previous neighbor.
       return signalsLinkedList[signalsLinkedList[_user][PREV].user][NEXT];
     }
     return Signal(address(0), 0, bytes32(0));
@@ -164,15 +164,15 @@ contract Index is Ownable {
     }
     result = new bytes32[](limit);
 
-    // Get the first intent in the linked list after the HEAD
-    Signal storage intent = signalsLinkedList[HEAD][NEXT];
+    // Get the first signal in the linked list after the HEAD
+    Signal storage signal = signalsLinkedList[HEAD][NEXT];
 
     // Iterate over the list until the end or limit.
     uint256 i = 0;
     while (i < limit) {
-      result[i] = intent.locator;
+      result[i] = signal.locator;
       i = i + 1;
-      intent = signalsLinkedList[intent.user][NEXT];
+      signal = signalsLinkedList[signal.user][NEXT];
     }
   }
 
@@ -192,26 +192,26 @@ contract Index is Ownable {
   }
 
   /**
-    * @notice Returns the first intent smaller than _score
+    * @notice Returns the first signal smaller than _score
     * @param _score uint256
     */
   function findPosition(
     uint256 _score
   ) internal view returns (Signal memory) {
 
-    // Get the first intent in the linked list.
-    Signal storage intent = signalsLinkedList[HEAD][NEXT];
+    // Get the first signal in the linked list.
+    Signal storage signal = signalsLinkedList[HEAD][NEXT];
 
     if (_score == 0) {
       // return the head of the linked list
-      return signalsLinkedList[intent.user][PREV];
+      return signalsLinkedList[signal.user][PREV];
     }
 
     // Iterate through the list until a lower score is found.
-    while (_score <= intent.score) {
-      intent = signalsLinkedList[intent.user][NEXT];
+    while (_score <= signal.score) {
+      signal = signalsLinkedList[signal.user][NEXT];
     }
-    return intent;
+    return signal;
   }
 
   /**

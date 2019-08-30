@@ -128,7 +128,7 @@ contract('Index Unit Tests', async accounts => {
       trx = index.setSignal(aliceAddress, 5000, aliceLocator, {
         from: owner,
       })
-      await reverted(trx, 'USER_HAS_ENTRY')
+      await reverted(trx, 'SIGNAL_ALREADY_SET')
 
       let length = await index.length.call()
       equal(length.toNumber(), 1, 'length increased, but total users has not')
