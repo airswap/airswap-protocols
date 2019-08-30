@@ -35,7 +35,7 @@ contract Market is Ownable {
   byte constant private NEXT = 0x01;
 
   // Mapping of user address to its neighbors
-  mapping(address => mapping(byte => Intent)) public intentsLinkedList;
+  mapping(address => mapping(byte => Intent)) private intentsLinkedList;
 
   /**
     * @notice Intent to Trade
