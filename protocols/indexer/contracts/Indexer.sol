@@ -55,8 +55,8 @@ contract Indexer is IIndexer, Ownable {
   }
 
   /**
-    * @notice Create a Index (Collection of Intents to Trade)
-    * @dev Deploys a new Index contract and tracks the address
+    * @notice Create an Index (List of Signals for a Token Pair)
+    * @dev Deploys a new Index contract and stores the address
     *
     * @param _makerToken address
     * @param _takerToken address
@@ -188,7 +188,7 @@ contract Indexer is IIndexer, Ownable {
   }
 
   /**
-    * @notice Get the Intents to Trade for a Index
+    * @notice Get the locators of those trading a token pair
     * @dev Users are allowed unstake from blacklisted indexes
     *
     * @param _makerToken address
