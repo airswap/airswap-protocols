@@ -212,7 +212,7 @@ contract('Indexer Unit Tests', async accounts => {
         indexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
           from: aliceAddress,
         }),
-        'INDEX_IS_BLACKLISTED'
+        'TOKEN_IS_BLACKLISTED'
       )
 
       await indexer.removeFromBlacklist([tokenOne], {
@@ -229,7 +229,7 @@ contract('Indexer Unit Tests', async accounts => {
         indexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
           from: aliceAddress,
         }),
-        'INDEX_IS_BLACKLISTED'
+        'TOKEN_IS_BLACKLISTED'
       )
     })
 
@@ -326,7 +326,7 @@ contract('Indexer Unit Tests', async accounts => {
         indexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
           from: aliceAddress,
         }),
-        'SIGNAL_ALREADY_SET'
+        'LOCATOR_ALREADY_SET'
       )
     })
   })

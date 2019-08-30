@@ -55,7 +55,7 @@ contract Indexer is IIndexer, Ownable {
   }
 
   /**
-    * @notice Create an Index (List of Signals for a Token Pair)
+    * @notice Create an Index (List of Locators for a Token Pair)
     * @dev Deploys a new Index contract and stores the address
     *
     * @param _makerToken address
@@ -147,8 +147,8 @@ contract Indexer is IIndexer, Ownable {
 
     emit Stake(msg.sender, _makerToken, _takerToken, _amount);
 
-    // Set the signal on the index.
-    indexes[_makerToken][_takerToken].setSignal(msg.sender, _amount, _locator);
+    // Set the locator on the index.
+    indexes[_makerToken][_takerToken].setLocator(msg.sender, _amount, _locator);
   }
 
   /**
@@ -167,24 +167,24 @@ contract Indexer is IIndexer, Ownable {
     require(indexes[_makerToken][_takerToken] != Index(0),
       "INDEX_DOES_NOT_EXIST");
 
-    // Get the signal for the sender.
-    Index.Signal memory signal = indexes[_makerToken][_takerToken].getSignal(msg.sender);
+    // Get the locator for the sender.
+    Index.Locator memory locator = indexes[_makerToken][_takerToken].getLocator(msg.sender);
 
-    // Ensure the signal exists.
-    require(signal.user == msg.sender,
+    // Ensure the locator exists.
+    require(locator.user == msg.sender,
       "SIGNAL_DOES_NOT_EXIST");
 
-    // Unset the signal on the index.
-    //No need to require() because a check is done above that reverts if there are no signals
-    indexes[_makerToken][_takerToken].unsetSignal(msg.sender);
+    // Unset the locator on the index.
+    //No need to require() because a check is done above that reverts if there are no locators
+    indexes[_makerToken][_takerToken].unsetLocator(msg.sender);
 
-    if (signal.score > 0) {
+    if (locator.score > 0) {
       // Return the staked tokens. IERC20 returns boolean this contract may not be ours.
       // Need to revert when false is returned
-      require(stakeToken.transfer(msg.sender, signal.score));
+      require(stakeToken.transfer(msg.sender, locator.score));
     }
 
-    emit Unstake(msg.sender, _makerToken, _takerToken, signal.score);
+    emit Unstake(msg.sender, _makerToken, _takerToken, locator.score);
   }
 
   /**
@@ -211,7 +211,7 @@ contract Indexer is IIndexer, Ownable {
       if (indexes[_makerToken][_takerToken] != Index(0)) {
 
         // Return an array of locators for the index.
-        return indexes[_makerToken][_takerToken].fetchSignals(_count);
+        return indexes[_makerToken][_takerToken].fetchLocators(_count);
 
       }
     }
