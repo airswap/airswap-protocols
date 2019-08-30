@@ -20,9 +20,9 @@ pragma experimental ABIEncoderV2;
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 /**
-  * @title Market: A List of Intents to Trade
+  * @title Index: A List of Signals to Trade
   */
-contract Market is Ownable {
+contract Index is Ownable {
 
   // Length of the linked list
   uint256 public length;
@@ -35,16 +35,16 @@ contract Market is Ownable {
   byte constant private NEXT = 0x01;
 
   // Mapping of user address to its neighbors
-  mapping(address => mapping(byte => Intent)) public intentsLinkedList;
+  mapping(address => mapping(byte => Signal)) public signalsLinkedList;
 
   /**
-    * @notice Intent to Trade
+    * @notice Signal to Trade
     *
     * @param user address
     * @param score uint256
     * @param locator bytes32
     */
-  struct Intent {
+  struct Signal {
     address user;
     uint256 score;
     bytes32 locator;
@@ -55,13 +55,13 @@ contract Market is Ownable {
     * @dev Emitted with successful state changes
     */
 
-  event SetIntent(
+  event SetSignal(
     uint256 score,
     address indexed user,
     bytes32 indexed locator
   );
 
-  event UnsetIntent(
+  event UnsetSignal(
     address indexed user
   );
 
@@ -70,90 +70,90 @@ contract Market is Ownable {
     */
   constructor() public {
     // Initialize the linked list.
-    Intent memory head = Intent(HEAD, 0, bytes32(0));
-    intentsLinkedList[HEAD][PREV] = head;
-    intentsLinkedList[HEAD][NEXT] = head;
+    Signal memory head = Signal(HEAD, 0, bytes32(0));
+    signalsLinkedList[HEAD][PREV] = head;
+    signalsLinkedList[HEAD][NEXT] = head;
   }
 
   /**
-    * @notice Set an Intent to Trade
+    * @notice Set an Signal to Trade
     *
     * @param _user The account
     * @param _score uint256
     * @param _locator bytes32
     */
-  function setIntent(
+  function setSignal(
     address _user,
     uint256 _score,
     bytes32 _locator
   ) external onlyOwner {
 
-    require(!hasIntent(_user), "USER_HAS_INTENT");
+    require(!hasSignal(_user), "USER_HAS_ENTRY");
 
-    Intent memory newIntent = Intent(_user, _score, _locator);
+    Signal memory newSignal = Signal(_user, _score, _locator);
 
     // Insert after the next highest score on the linked list.
-    Intent memory nextIntent = findPosition(_score);
+    Signal memory nextSignal = findPosition(_score);
 
-    // Link the newIntent into place.
-    link(intentsLinkedList[nextIntent.user][PREV], newIntent);
-    link(newIntent, nextIntent);
+    // Link the newSignal into place.
+    link(signalsLinkedList[nextSignal.user][PREV], newSignal);
+    link(newSignal, nextSignal);
 
     // Increment the length of the linked list if successful.
     length = length + 1;
 
-    emit SetIntent(_score, _user, _locator);
+    emit SetSignal(_score, _user, _locator);
   }
 
   /**
-    * @notice Unset an Intent to Trade
+    * @notice Unset an Signal to Trade
     * @param _user address
     */
-  function unsetIntent(
+  function unsetSignal(
     address _user
   ) external onlyOwner returns (bool) {
 
     // Ensure the _user is in the linked list.
-    if (!hasIntent(_user)) {
+    if (!hasSignal(_user)) {
       return false;
     }
 
     // Link its neighbors together.
-    link(intentsLinkedList[_user][PREV], intentsLinkedList[_user][NEXT]);
+    link(signalsLinkedList[_user][PREV], signalsLinkedList[_user][NEXT]);
 
     // Delete user from the list.
-    delete intentsLinkedList[_user][PREV];
-    delete intentsLinkedList[_user][NEXT];
+    delete signalsLinkedList[_user][PREV];
+    delete signalsLinkedList[_user][NEXT];
 
     // Decrement the length of the linked list.
     length = length - 1;
 
-    emit UnsetIntent(_user);
+    emit UnsetSignal(_user);
     return true;
   }
 
   /**
-    * @notice Get the Intent for a user
+    * @notice Get the Signal for a user
     * @param _user address
     */
-  function getIntent(
+  function getSignal(
     address _user
-  ) external view returns (Intent memory) {
+  ) external view returns (Signal memory) {
 
     // Ensure the user has a neighbor in the linked list.
-    if (intentsLinkedList[_user][PREV].user != address(0)) {
+    if (signalsLinkedList[_user][PREV].user != address(0)) {
 
       // Return the next intent from the previous neighbor.
-      return intentsLinkedList[intentsLinkedList[_user][PREV].user][NEXT];
+      return signalsLinkedList[signalsLinkedList[_user][PREV].user][NEXT];
     }
-    return Intent(address(0), 0, bytes32(0));
+    return Signal(address(0), 0, bytes32(0));
   }
 
   /**
-    * @notice Get Valid Intents
+    * @notice Get Valid Signals
     * @param _count uint256
     */
-  function fetchIntents(
+  function fetchSignals(
     uint256 _count
   ) external view returns (bytes32[] memory result) {
 
@@ -165,14 +165,14 @@ contract Market is Ownable {
     result = new bytes32[](limit);
 
     // Get the first intent in the linked list after the HEAD
-    Intent storage intent = intentsLinkedList[HEAD][NEXT];
+    Signal storage intent = signalsLinkedList[HEAD][NEXT];
 
     // Iterate over the list until the end or limit.
     uint256 i = 0;
     while (i < limit) {
       result[i] = intent.locator;
       i = i + 1;
-      intent = intentsLinkedList[intent.user][NEXT];
+      intent = signalsLinkedList[intent.user][NEXT];
     }
   }
 
@@ -180,12 +180,12 @@ contract Market is Ownable {
     * @notice Determine Whether a user is in the Linked List
     * @param _user address
     */
-  function hasIntent(
+  function hasSignal(
     address _user
   ) public view returns (bool) {
 
-    if (intentsLinkedList[_user][PREV].user != address(0) &&
-      intentsLinkedList[intentsLinkedList[_user][PREV].user][NEXT].user == _user) {
+    if (signalsLinkedList[_user][PREV].user != address(0) &&
+      signalsLinkedList[signalsLinkedList[_user][PREV].user][NEXT].user == _user) {
       return true;
     }
     return false;
@@ -197,34 +197,34 @@ contract Market is Ownable {
     */
   function findPosition(
     uint256 _score
-  ) internal view returns (Intent memory) {
+  ) internal view returns (Signal memory) {
 
     // Get the first intent in the linked list.
-    Intent storage intent = intentsLinkedList[HEAD][NEXT];
+    Signal storage intent = signalsLinkedList[HEAD][NEXT];
 
     if (_score == 0) {
       // return the head of the linked list
-      return intentsLinkedList[intent.user][PREV];
+      return signalsLinkedList[intent.user][PREV];
     }
 
     // Iterate through the list until a lower score is found.
     while (_score <= intent.score) {
-      intent = intentsLinkedList[intent.user][NEXT];
+      intent = signalsLinkedList[intent.user][NEXT];
     }
     return intent;
   }
 
   /**
-    * @notice Link Two Intents
+    * @notice Link Two Signals
     *
-    * @param _left Intent
-    * @param _right Intent
+    * @param _left Signal
+    * @param _right Signal
     */
   function link(
-    Intent memory _left,
-    Intent memory _right
+    Signal memory _left,
+    Signal memory _right
   ) internal {
-    intentsLinkedList[_left.user][NEXT] = _right;
-    intentsLinkedList[_right.user][PREV] = _left;
+    signalsLinkedList[_left.user][NEXT] = _right;
+    signalsLinkedList[_right.user][PREV] = _left;
   }
 }
