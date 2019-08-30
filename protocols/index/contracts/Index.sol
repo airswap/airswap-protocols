@@ -35,7 +35,7 @@ contract Index is Ownable {
   byte constant private NEXT = 0x01;
 
   // Mapping of user address to its neighbors
-  mapping(address => mapping(byte => Locator)) private LocatorsLinkedList;
+  mapping(address => mapping(byte => Locator)) private locatorsLinkedList;
 
   /**
     * @notice Locator for a Peer
@@ -72,8 +72,8 @@ contract Index is Ownable {
   constructor() public {
     // Initialize the linked list.
     Locator memory head = Locator(HEAD, 0, bytes32(0));
-    LocatorsLinkedList[HEAD][PREV] = head;
-    LocatorsLinkedList[HEAD][NEXT] = head;
+    locatorsLinkedList[HEAD][PREV] = head;
+    locatorsLinkedList[HEAD][NEXT] = head;
   }
 
   /**
@@ -97,7 +97,7 @@ contract Index is Ownable {
     Locator memory nextLocator = findPosition(_score);
 
     // Link the newLocator into place.
-    link(LocatorsLinkedList[nextLocator.user][PREV], newLocator);
+    link(locatorsLinkedList[nextLocator.user][PREV], newLocator);
     link(newLocator, nextLocator);
 
     // Increment the length of the linked list if successful.
@@ -120,11 +120,11 @@ contract Index is Ownable {
     }
 
     // Link its neighbors together.
-    link(LocatorsLinkedList[_user][PREV], LocatorsLinkedList[_user][NEXT]);
+    link(locatorsLinkedList[_user][PREV], locatorsLinkedList[_user][NEXT]);
 
     // Delete user from the list.
-    delete LocatorsLinkedList[_user][PREV];
-    delete LocatorsLinkedList[_user][NEXT];
+    delete locatorsLinkedList[_user][PREV];
+    delete locatorsLinkedList[_user][NEXT];
 
     // Decrement the length of the linked list.
     length = length - 1;
@@ -142,10 +142,10 @@ contract Index is Ownable {
   ) external view returns (Locator memory) {
 
     // Ensure the user has a neighbor in the linked list.
-    if (LocatorsLinkedList[_user][PREV].user != address(0)) {
+    if (locatorsLinkedList[_user][PREV].user != address(0)) {
 
       // Return the next Locator from the previous neighbor.
-      return LocatorsLinkedList[LocatorsLinkedList[_user][PREV].user][NEXT];
+      return locatorsLinkedList[locatorsLinkedList[_user][PREV].user][NEXT];
     }
     return Locator(address(0), 0, bytes32(0));
   }
@@ -166,14 +166,14 @@ contract Index is Ownable {
     result = new bytes32[](limit);
 
     // Get the first Locator in the linked list after the HEAD
-    Locator storage Locator = LocatorsLinkedList[HEAD][NEXT];
+    Locator storage Locator = locatorsLinkedList[HEAD][NEXT];
 
     // Iterate over the list until the end or limit.
     uint256 i = 0;
     while (i < limit) {
       result[i] = Locator.data;
       i = i + 1;
-      Locator = LocatorsLinkedList[Locator.user][NEXT];
+      Locator = locatorsLinkedList[Locator.user][NEXT];
     }
   }
 
@@ -185,8 +185,8 @@ contract Index is Ownable {
     address _user
   ) internal view returns (bool) {
 
-    if (LocatorsLinkedList[_user][PREV].user != address(0) &&
-      LocatorsLinkedList[LocatorsLinkedList[_user][PREV].user][NEXT].user == _user) {
+    if (locatorsLinkedList[_user][PREV].user != address(0) &&
+      locatorsLinkedList[locatorsLinkedList[_user][PREV].user][NEXT].user == _user) {
       return true;
     }
     return false;
@@ -201,16 +201,16 @@ contract Index is Ownable {
   ) internal view returns (Locator memory) {
 
     // Get the first Locator in the linked list.
-    Locator storage Locator = LocatorsLinkedList[HEAD][NEXT];
+    Locator storage Locator = locatorsLinkedList[HEAD][NEXT];
 
     if (_score == 0) {
       // return the head of the linked list
-      return LocatorsLinkedList[Locator.user][PREV];
+      return locatorsLinkedList[Locator.user][PREV];
     }
 
     // Iterate through the list until a lower score is found.
     while (_score <= Locator.score) {
-      Locator = LocatorsLinkedList[Locator.user][NEXT];
+      Locator = locatorsLinkedList[Locator.user][NEXT];
     }
     return Locator;
   }
@@ -225,7 +225,7 @@ contract Index is Ownable {
     Locator memory _left,
     Locator memory _right
   ) internal {
-    LocatorsLinkedList[_left.user][NEXT] = _right;
-    LocatorsLinkedList[_right.user][PREV] = _left;
+    locatorsLinkedList[_left.user][NEXT] = _right;
+    locatorsLinkedList[_right.user][PREV] = _left;
   }
 }
