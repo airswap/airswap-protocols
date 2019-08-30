@@ -147,8 +147,8 @@ contract Indexer is IIndexer, Ownable {
 
     emit Stake(msg.sender, _makerToken, _takerToken, _amount);
 
-    // Set the entry on the market.
-    indexes[_makerToken][_takerToken].setEntry(msg.sender, _amount, _locator);
+    // Set the signal on the market.
+    indexes[_makerToken][_takerToken].setSignal(msg.sender, _amount, _locator);
   }
 
   /**
@@ -167,24 +167,24 @@ contract Indexer is IIndexer, Ownable {
     require(indexes[_makerToken][_takerToken] != Index(0),
       "INDEX_DOES_NOT_EXIST");
 
-    // Get the entry for the sender.
-    Index.Entry memory entry = indexes[_makerToken][_takerToken].getEntry(msg.sender);
+    // Get the signal for the sender.
+    Index.Signal memory signal = indexes[_makerToken][_takerToken].getSignal(msg.sender);
 
-    // Ensure the entry exists.
-    require(entry.user == msg.sender,
+    // Ensure the signal exists.
+    require(signal.user == msg.sender,
       "ENTRY_DOES_NOT_EXIST");
 
-    // Unset the entry on the market.
-    //No need to require() because a check is done above that reverts if there are no entries
-    indexes[_makerToken][_takerToken].unsetEntry(msg.sender);
+    // Unset the signal on the market.
+    //No need to require() because a check is done above that reverts if there are no signals
+    indexes[_makerToken][_takerToken].unsetSignal(msg.sender);
 
-    if (entry.score > 0) {
+    if (signal.score > 0) {
       // Return the staked tokens. IERC20 returns boolean this contract may not be ours.
       // Need to revert when false is returned
-      require(stakeToken.transfer(msg.sender, entry.score));
+      require(stakeToken.transfer(msg.sender, signal.score));
     }
 
-    emit Unstake(msg.sender, _makerToken, _takerToken, entry.score);
+    emit Unstake(msg.sender, _makerToken, _takerToken, signal.score);
   }
 
   /**
@@ -211,7 +211,7 @@ contract Indexer is IIndexer, Ownable {
       if (indexes[_makerToken][_takerToken] != Index(0)) {
 
         // Return an array of locators for the market.
-        return indexes[_makerToken][_takerToken].fetchEntries(_count);
+        return indexes[_makerToken][_takerToken].fetchSignals(_count);
 
       }
     }

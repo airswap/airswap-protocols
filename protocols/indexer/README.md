@@ -46,7 +46,7 @@ Limit locators to those whitelisted by another contract.
 
 | Term    | Definition                                                              |
 | :------ | :---------------------------------------------------------------------- |
-| Entry  | An interest in trading a specific token pair without price information. |
+| Signal  | An interest in trading a specific token pair without price information. |
 | Indexer | A data store of intents to trade on the AirSwap Network.                |
 | Index  | A list of intents to trade for a token pair.                            |
 | Locator | How a peer can be reached to communicate pricing.                       |
@@ -71,7 +71,7 @@ constructor(
 
 ## Create a Index
 
-If none exists, deploy a new `Index` contract for the given token pair and return the address of the new or existing index contract. For example, an entry to trade WETH/DAI.
+If none exists, deploy a new `Index` contract for the given token pair and return the address of the new or existing index contract. For example, a signal to trade WETH/DAI.
 
 ```Solidity
 function createIndex(

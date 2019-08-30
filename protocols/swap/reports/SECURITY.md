@@ -61,7 +61,7 @@ _\*\* OpenZeppelin contract_
 | authorize  | Swap.sol | external   | `address _delegate`, `uint256 _expiry`                                                                                                                                                                                  | no      |
 | revoke     | Swap.sol | external   | `address _delegate`                                                                                                                                                                                                     | no      |
 
-Note that state-modifying public entry points are minimized in this contract, reducing
+Note that state-modifying public signal points are minimized in this contract, reducing
 the exploit surface to incorrect arguments to swap, authorize, cancel, invalidate, and revoke.
 
 ## Invariants
@@ -95,7 +95,7 @@ the exploit surface to incorrect arguments to swap, authorize, cancel, invalidat
 
 - Only two methods can be used to authorize delegated signing in the contract: authorize and revoke. No other methods modify the approval state.
 - Both allow setting of an expiry parameter, and the authorization check used in Swap.sol checks that the block timestamp is less than this parameter or throws.
-- Revoke deletes the mapping entry, which will default the value to 0 if queried.
+- Revoke deletes the mapping signal, which will default the value to 0 if queried.
 - Block timestamp can technically be manipulated by miners, who may attempt to prolong authorizations that are about to expire. The gain, however, seems marginal, and the cost of this attack relative to Swap trading volume make it unlikely to be of concern.
 - **This invariant currently holds as-is.**
 

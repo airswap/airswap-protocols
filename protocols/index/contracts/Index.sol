@@ -20,7 +20,7 @@ pragma experimental ABIEncoderV2;
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 /**
-  * @title Index: A List of Entries to Trade
+  * @title Index: A List of Signals to Trade
   */
 contract Index is Ownable {
 
@@ -35,16 +35,16 @@ contract Index is Ownable {
   byte constant private NEXT = 0x01;
 
   // Mapping of user address to its neighbors
-  mapping(address => mapping(byte => Entry)) public entriesLinkedList;
+  mapping(address => mapping(byte => Signal)) public signalsLinkedList;
 
   /**
-    * @notice Entry to Trade
+    * @notice Signal to Trade
     *
     * @param user address
     * @param score uint256
     * @param locator bytes32
     */
-  struct Entry {
+  struct Signal {
     address user;
     uint256 score;
     bytes32 locator;
@@ -55,13 +55,13 @@ contract Index is Ownable {
     * @dev Emitted with successful state changes
     */
 
-  event SetEntry(
+  event SetSignal(
     uint256 score,
     address indexed user,
     bytes32 indexed locator
   );
 
-  event UnsetEntry(
+  event UnsetSignal(
     address indexed user
   );
 
@@ -70,90 +70,90 @@ contract Index is Ownable {
     */
   constructor() public {
     // Initialize the linked list.
-    Entry memory head = Entry(HEAD, 0, bytes32(0));
-    entriesLinkedList[HEAD][PREV] = head;
-    entriesLinkedList[HEAD][NEXT] = head;
+    Signal memory head = Signal(HEAD, 0, bytes32(0));
+    signalsLinkedList[HEAD][PREV] = head;
+    signalsLinkedList[HEAD][NEXT] = head;
   }
 
   /**
-    * @notice Set an Entry to Trade
+    * @notice Set an Signal to Trade
     *
     * @param _user The account
     * @param _score uint256
     * @param _locator bytes32
     */
-  function setEntry(
+  function setSignal(
     address _user,
     uint256 _score,
     bytes32 _locator
   ) external onlyOwner {
 
-    require(!hasEntry(_user), "USER_HAS_ENTRY");
+    require(!hasSignal(_user), "USER_HAS_ENTRY");
 
-    Entry memory newEntry = Entry(_user, _score, _locator);
+    Signal memory newSignal = Signal(_user, _score, _locator);
 
     // Insert after the next highest score on the linked list.
-    Entry memory nextEntry = findPosition(_score);
+    Signal memory nextSignal = findPosition(_score);
 
-    // Link the newEntry into place.
-    link(entriesLinkedList[nextEntry.user][PREV], newEntry);
-    link(newEntry, nextEntry);
+    // Link the newSignal into place.
+    link(signalsLinkedList[nextSignal.user][PREV], newSignal);
+    link(newSignal, nextSignal);
 
     // Increment the length of the linked list if successful.
     length = length + 1;
 
-    emit SetEntry(_score, _user, _locator);
+    emit SetSignal(_score, _user, _locator);
   }
 
   /**
-    * @notice Unset an Entry to Trade
+    * @notice Unset an Signal to Trade
     * @param _user address
     */
-  function unsetEntry(
+  function unsetSignal(
     address _user
   ) external onlyOwner returns (bool) {
 
     // Ensure the _user is in the linked list.
-    if (!hasEntry(_user)) {
+    if (!hasSignal(_user)) {
       return false;
     }
 
     // Link its neighbors together.
-    link(entriesLinkedList[_user][PREV], entriesLinkedList[_user][NEXT]);
+    link(signalsLinkedList[_user][PREV], signalsLinkedList[_user][NEXT]);
 
     // Delete user from the list.
-    delete entriesLinkedList[_user][PREV];
-    delete entriesLinkedList[_user][NEXT];
+    delete signalsLinkedList[_user][PREV];
+    delete signalsLinkedList[_user][NEXT];
 
     // Decrement the length of the linked list.
     length = length - 1;
 
-    emit UnsetEntry(_user);
+    emit UnsetSignal(_user);
     return true;
   }
 
   /**
-    * @notice Get the Entry for a user
+    * @notice Get the Signal for a user
     * @param _user address
     */
-  function getEntry(
+  function getSignal(
     address _user
-  ) external view returns (Entry memory) {
+  ) external view returns (Signal memory) {
 
     // Ensure the user has a neighbor in the linked list.
-    if (entriesLinkedList[_user][PREV].user != address(0)) {
+    if (signalsLinkedList[_user][PREV].user != address(0)) {
 
       // Return the next intent from the previous neighbor.
-      return entriesLinkedList[entriesLinkedList[_user][PREV].user][NEXT];
+      return signalsLinkedList[signalsLinkedList[_user][PREV].user][NEXT];
     }
-    return Entry(address(0), 0, bytes32(0));
+    return Signal(address(0), 0, bytes32(0));
   }
 
   /**
-    * @notice Get Valid Entries
+    * @notice Get Valid Signals
     * @param _count uint256
     */
-  function fetchEntries(
+  function fetchSignals(
     uint256 _count
   ) external view returns (bytes32[] memory result) {
 
@@ -165,14 +165,14 @@ contract Index is Ownable {
     result = new bytes32[](limit);
 
     // Get the first intent in the linked list after the HEAD
-    Entry storage intent = entriesLinkedList[HEAD][NEXT];
+    Signal storage intent = signalsLinkedList[HEAD][NEXT];
 
     // Iterate over the list until the end or limit.
     uint256 i = 0;
     while (i < limit) {
       result[i] = intent.locator;
       i = i + 1;
-      intent = entriesLinkedList[intent.user][NEXT];
+      intent = signalsLinkedList[intent.user][NEXT];
     }
   }
 
@@ -180,12 +180,12 @@ contract Index is Ownable {
     * @notice Determine Whether a user is in the Linked List
     * @param _user address
     */
-  function hasEntry(
+  function hasSignal(
     address _user
   ) public view returns (bool) {
 
-    if (entriesLinkedList[_user][PREV].user != address(0) &&
-      entriesLinkedList[entriesLinkedList[_user][PREV].user][NEXT].user == _user) {
+    if (signalsLinkedList[_user][PREV].user != address(0) &&
+      signalsLinkedList[signalsLinkedList[_user][PREV].user][NEXT].user == _user) {
       return true;
     }
     return false;
@@ -197,34 +197,34 @@ contract Index is Ownable {
     */
   function findPosition(
     uint256 _score
-  ) internal view returns (Entry memory) {
+  ) internal view returns (Signal memory) {
 
     // Get the first intent in the linked list.
-    Entry storage intent = entriesLinkedList[HEAD][NEXT];
+    Signal storage intent = signalsLinkedList[HEAD][NEXT];
 
     if (_score == 0) {
       // return the head of the linked list
-      return entriesLinkedList[intent.user][PREV];
+      return signalsLinkedList[intent.user][PREV];
     }
 
     // Iterate through the list until a lower score is found.
     while (_score <= intent.score) {
-      intent = entriesLinkedList[intent.user][NEXT];
+      intent = signalsLinkedList[intent.user][NEXT];
     }
     return intent;
   }
 
   /**
-    * @notice Link Two Entries
+    * @notice Link Two Signals
     *
-    * @param _left Entry
-    * @param _right Entry
+    * @param _left Signal
+    * @param _right Signal
     */
   function link(
-    Entry memory _left,
-    Entry memory _right
+    Signal memory _left,
+    Signal memory _right
   ) internal {
-    entriesLinkedList[_left.user][NEXT] = _right;
-    entriesLinkedList[_right.user][PREV] = _left;
+    signalsLinkedList[_left.user][NEXT] = _right;
+    signalsLinkedList[_right.user][PREV] = _left;
   }
 }

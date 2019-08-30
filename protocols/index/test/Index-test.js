@@ -45,83 +45,83 @@ contract('Index', async accounts => {
   })
 
   describe('Set', async () => {
-    it('Sets an entry for Alice', async () => {
-      await index.setEntry(aliceAddress, 2000, aliceAddress)
+    it('Sets a signal for Alice', async () => {
+      await index.setSignal(aliceAddress, 2000, aliceAddress)
     })
 
-    it('Sets an entry for Bob', async () => {
-      await index.setEntry(bobAddress, 500, bobAddress)
+    it('Sets a signal for Bob', async () => {
+      await index.setSignal(bobAddress, 500, bobAddress)
     })
 
-    it('Sets an entry for Carol', async () => {
-      await index.setEntry(carolAddress, 1500, carolAddress)
+    it('Sets a signal for Carol', async () => {
+      await index.setSignal(carolAddress, 1500, carolAddress)
     })
 
-    it('Sets an entry for David', async () => {
-      await index.setEntry(davidAddress, 100, davidAddress)
+    it('Sets a signal for David', async () => {
+      await index.setSignal(davidAddress, 100, davidAddress)
     })
 
-    it('Sets an entry of 0 for zara', async () => {
-      await index.setEntry(zaraAddress, 0, zaraAddress)
+    it('Sets a signal of 0 for zara', async () => {
+      await index.setSignal(zaraAddress, 0, zaraAddress)
     })
 
-    it("Sets an entry for Eve equal to Bob's entry", async () => {
-      await index.setEntry(eveAddress, 500, eveAddress)
+    it("Sets a signal for Eve equal to Bob's signal", async () => {
+      await index.setSignal(eveAddress, 500, eveAddress)
     })
 
     it('Ensure ordering is correct', async () => {
-      const entries = await index.fetchEntries(7)
-      assert(entries[0] == aliceLocator, 'Alice should be first')
-      assert(entries[1] == carolLocator, 'Carol should be second')
-      assert(entries[2] == bobLocator, 'Bob should be third')
-      assert(entries[3] == eveLocator, 'Eve should be fourth')
-      assert(entries[4] == davidLocator, 'David should be fifth')
-      assert(entries[5] == zaraLocator, 'Zara should be last')
+      const signals = await index.fetchSignals(7)
+      assert(signals[0] == aliceLocator, 'Alice should be first')
+      assert(signals[1] == carolLocator, 'Carol should be second')
+      assert(signals[2] == bobLocator, 'Bob should be third')
+      assert(signals[3] == eveLocator, 'Eve should be fourth')
+      assert(signals[4] == davidLocator, 'David should be fifth')
+      assert(signals[5] == zaraLocator, 'Zara should be last')
     })
   })
 
   describe('Get', async () => {
-    it('Gets the entry for Alice', async () => {
-      equal((await index.getEntry(aliceAddress)).locator, aliceLocator)
+    it('Gets the signal for Alice', async () => {
+      equal((await index.getSignal(aliceAddress)).locator, aliceLocator)
     })
 
-    it('Gets the entry for Bob', async () => {
-      equal((await index.getEntry(bobAddress)).locator, bobLocator)
+    it('Gets the signal for Bob', async () => {
+      equal((await index.getSignal(bobAddress)).locator, bobLocator)
     })
 
-    it('Gets the entry for Carol', async () => {
-      equal((await index.getEntry(carolAddress)).locator, carolLocator)
+    it('Gets the signal for Carol', async () => {
+      equal((await index.getSignal(carolAddress)).locator, carolLocator)
     })
 
-    it('Gets the entry for David', async () => {
-      equal((await index.getEntry(davidAddress)).locator, davidLocator)
+    it('Gets the signal for David', async () => {
+      equal((await index.getSignal(davidAddress)).locator, davidLocator)
     })
 
-    it('Gets the entry for Eve', async () => {
-      equal((await index.getEntry(eveAddress)).locator, eveLocator)
+    it('Gets the signal for Eve', async () => {
+      equal((await index.getSignal(eveAddress)).locator, eveLocator)
     })
 
-    it('Gets the entry for Zara', async () => {
-      let zaraEntry = await index.getEntry(zaraAddress)
-      equal(zaraEntry.locator, zaraLocator)
-      equal(zaraEntry.score, 0)
+    it('Gets the signal for Zara', async () => {
+      let zaraSignal = await index.getSignal(zaraAddress)
+      equal(zaraSignal.locator, zaraLocator)
+      equal(zaraSignal.score, 0)
     })
 
-    it('Gets a non existent entry', async () => {
-      let fredEntry = await index.getEntry(fredAddress)
-      equal(fredEntry.locator, emptyLocator)
+    it('Gets a non existent signal', async () => {
+      let fredSignal = await index.getSignal(fredAddress)
+      equal(fredSignal.locator, emptyLocator)
     })
   })
 
   describe('Fetch', async () => {
-    it('Fetches entries', async () => {
-      const entries = await index.fetchEntries(7)
-      assert(entries[0] == aliceLocator, 'Alice should be first')
-      assert(entries[1] == carolLocator, 'Carol should be second')
-      assert(entries[2] == bobLocator, 'Bob should be third')
-      assert(entries[3] == eveLocator, 'Eve should be fourth')
-      assert(entries[4] == davidLocator, 'David should be fifth')
-      assert(entries[5] == zaraLocator, 'Zara should be last')
+    it('Fetches signals', async () => {
+      const signals = await index.fetchSignals(7)
+      assert(signals[0] == aliceLocator, 'Alice should be first')
+      assert(signals[1] == carolLocator, 'Carol should be second')
+      assert(signals[2] == bobLocator, 'Bob should be third')
+      assert(signals[3] == eveLocator, 'Eve should be fourth')
+      assert(signals[4] == davidLocator, 'David should be fifth')
+      assert(signals[5] == zaraLocator, 'Zara should be last')
       assert(BN(await index.length()).eq(6), 'Index length is incorrect')
     })
   })

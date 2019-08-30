@@ -3421,7 +3421,7 @@ eslint-config-airbnb-base@^13.2.0:
   dependencies:
     confusing-browser-globals "^1.0.5"
     object.assign "^4.1.0"
-    object.entries "^1.1.0"
+    object.signals "^1.1.0"
 
 eslint-import-resolver-node@^0.3.2:
   version "0.3.2"
@@ -3515,7 +3515,7 @@ eslint@^5.16.0, eslint@^5.6.0:
     espree "^5.0.1"
     esquery "^1.0.1"
     esutils "^2.0.2"
-    file-entry-cache "^5.0.1"
+    file-signal-cache "^5.0.1"
     functional-red-black-tree "^1.0.1"
     glob "^7.1.2"
     globals "^11.7.0"
@@ -4150,9 +4150,9 @@ figures@^2.0.0:
   dependencies:
     escape-string-regexp "^1.0.5"
 
-file-entry-cache@^5.0.1:
+file-signal-cache@^5.0.1:
   version "5.0.1"
-  resolved "https://registry.yarnpkg.com/file-entry-cache/-/file-entry-cache-5.0.1.tgz#ca0f6efa6dd3d561333fb14515065c2fafdf439c"
+  resolved "https://registry.yarnpkg.com/file-signal-cache/-/file-signal-cache-5.0.1.tgz#ca0f6efa6dd3d561333fb14515065c2fafdf439c"
   integrity sha512-bCg29ictuBaKUwwArK4ouCaqDgLZcysCFLmM/Yn/FDoqndh/9vNuQfXRDvTuXKLxfD/JtZQGKFT8MGcJBK644g==
   dependencies:
     flat-cache "^2.0.1"
@@ -6755,9 +6755,9 @@ object.assign@4.1.0, object.assign@^4.1.0:
     has-symbols "^1.0.0"
     object-keys "^1.0.11"
 
-object.entries@^1.1.0:
+object.signals@^1.1.0:
   version "1.1.0"
-  resolved "https://registry.yarnpkg.com/object.entries/-/object.entries-1.1.0.tgz#2024fc6d6ba246aee38bdb0ffd5cfbcf371b7519"
+  resolved "https://registry.yarnpkg.com/object.signals/-/object.signals-1.1.0.tgz#2024fc6d6ba246aee38bdb0ffd5cfbcf371b7519"
   integrity sha512-l+H6EQ8qzGRxbkHOd5I/aHRhHDKoQXQ8g0BYt4uSweQU1/J6dZUOyWh9a2Vky35YCKjzmgxOzta2hH6kf9HuXA==
   dependencies:
     define-properties "^1.1.3"
