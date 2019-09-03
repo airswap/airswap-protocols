@@ -21,15 +21,15 @@ contract('Index Unit Tests', async accounts => {
   let snapshotId
   let index
 
-  let aliceLocator = padAddressToLocator(aliceAddress)
-  let bobLocator = padAddressToLocator(bobAddress)
-  let carolLocator = padAddressToLocator(carolAddress)
-  let emptyLocator = padAddressToLocator(EMPTY_ADDRESS)
+  let aliceLocatorData = padAddressToLocator(aliceAddress)
+  let bobLocatorData = padAddressToLocator(bobAddress)
+  let carolLocatorData = padAddressToLocator(carolAddress)
+  let emptyLocatorData = padAddressToLocator(EMPTY_ADDRESS)
 
   // helpers
   const USER = 'user'
   const SCORE = 'score'
-  const LOCATOR = 'locator'
+  const DATA = 'data'
 
   beforeEach(async () => {
     let snapShot = await takeSnapshot()
@@ -49,298 +49,286 @@ contract('Index Unit Tests', async accounts => {
       let listLength = await index.length()
       equal(listLength, 0, 'Link list length should be 0')
 
-      let signals = await index.fetchSignals(10)
-      equal(signals.length, 0, 'list should have 0 signals')
+      let locators = await index.fetchLocators(10)
+      equal(locators.length, 0, 'list should have 0 locators')
     })
   })
 
-  describe('Test setSignal', async () => {
-    it('should not allow a non owner to call setSignal', async () => {
+  describe('Test setLocator', async () => {
+    it('should not allow a non owner to call setLocator', async () => {
       await reverted(
-        index.setSignal(aliceAddress, 2000, aliceAddress, { from: nonOwner }),
+        index.setLocator(aliceAddress, 2000, aliceAddress, { from: nonOwner }),
         'Ownable: caller is not the owner'
       )
     })
 
-    it('should allow a signal to be inserted by the owner', async () => {
-      // set a signal from the owner
-      let result = await index.setSignal(aliceAddress, 2000, aliceLocator, {
-        from: owner,
-      })
+    it('should allow a locator to be inserted by the owner', async () => {
+      // set a locator from the owner
+      let result = await index.setLocator(
+        aliceAddress,
+        2000,
+        aliceLocatorData,
+        {
+          from: owner,
+        }
+      )
 
-      // check the SetSignal event was emitted
-      emitted(result, 'SetSignal', event => {
+      // check the SetLocator event was emitted
+      emitted(result, 'SetLocator', event => {
         return (
           event.user === aliceAddress &&
           event.score.toNumber() === 2000 &&
-          event.locator === aliceLocator
+          event.data === aliceLocatorData
         )
       })
 
       // check it has been inserted into the linked list correctly
-      let signals = await index.fetchSignals(10)
-      equal(signals.length, 1, 'list should have 1 signal')
-      equal(signals[0], aliceLocator, 'Alice should be in list')
+      let locators = await index.fetchLocators(10)
+      equal(locators.length, 1, 'list should have 1 locator')
+      equal(locators[0], aliceLocatorData, 'Alice should be in list')
 
       // check the length has increased
       let listLength = await index.length()
       equal(listLength, 1, 'Link list length should be 1')
     })
 
-    it('should insert subsequent signals in the correct order', async () => {
+    it('should insert subsequent locators in the correct order', async () => {
       // insert alice
-      await index.setSignal(aliceAddress, 2000, aliceLocator, {
+      await index.setLocator(aliceAddress, 2000, aliceLocatorData, {
         from: owner,
       })
 
       // now add more
-      let result = await index.setSignal(bobAddress, 500, bobLocator, {
+      let result = await index.setLocator(bobAddress, 500, bobLocatorData, {
         from: owner,
       })
 
-      // check the SetSignal event was emitted
-      emitted(result, 'SetSignal', event => {
+      // check the SetLocator event was emitted
+      emitted(result, 'SetLocator', event => {
         return (
           event.user === bobAddress &&
           event.score.toNumber() === 500 &&
-          event.locator === bobLocator
+          event.data === bobLocatorData
         )
       })
 
-      await index.setSignal(carolAddress, 1500, carolLocator, {
+      await index.setLocator(carolAddress, 1500, carolLocatorData, {
         from: owner,
       })
 
       let listLength = await index.length()
       equal(listLength, 3, 'Link list length should be 3')
 
-      const signals = await index.fetchSignals(7)
-      equal(signals[0], aliceLocator, 'Alice should be first')
-      equal(signals[1], carolLocator, 'Carol should be second')
-      equal(signals[2], bobLocator, 'Bob should be third')
+      const locators = await index.fetchLocators(7)
+      equal(locators[0], aliceLocatorData, 'Alice should be first')
+      equal(locators[1], carolLocatorData, 'Carol should be second')
+      equal(locators[2], bobLocatorData, 'Bob should be third')
     })
 
-    it('should not be able to set a second signal if one already exists for an address', async () => {
-      let trx = index.setSignal(aliceAddress, 2000, aliceLocator, {
+    it('should not be able to set a second locator if one already exists for an address', async () => {
+      let trx = index.setLocator(aliceAddress, 2000, aliceLocatorData, {
         from: owner,
       })
       await passes(trx)
-      trx = index.setSignal(aliceAddress, 5000, aliceLocator, {
+      trx = index.setLocator(aliceAddress, 5000, aliceLocatorData, {
         from: owner,
       })
-      await reverted(trx, 'USER_HAS_ENTRY')
+      await reverted(trx, 'LOCATOR_ALREADY_SET')
 
       let length = await index.length.call()
       equal(length.toNumber(), 1, 'length increased, but total users has not')
     })
   })
 
-  describe('Test unsetSignal', async () => {
-    beforeEach('Setup signals', async () => {
-      await index.setSignal(aliceAddress, 2000, aliceLocator, {
+  describe('Test unsetLocator', async () => {
+    beforeEach('Setup locators', async () => {
+      await index.setLocator(aliceAddress, 2000, aliceLocatorData, {
         from: owner,
       })
-      await index.setSignal(bobAddress, 500, bobLocator, {
+      await index.setLocator(bobAddress, 500, bobLocatorData, {
         from: owner,
       })
-      await index.setSignal(carolAddress, 1500, carolLocator, {
+      await index.setLocator(carolAddress, 1500, carolLocatorData, {
         from: owner,
       })
     })
 
-    it('should not allow a non owner to call unsetSignal', async () => {
+    it('should not allow a non owner to call unsetLocator', async () => {
       await reverted(
-        index.unsetSignal(aliceAddress, { from: nonOwner }),
+        index.unsetLocator(aliceAddress, { from: nonOwner }),
         'Ownable: caller is not the owner'
       )
     })
 
     it('should leave state unchanged for someone who hasnt staked', async () => {
-      let returnValue = await index.unsetSignal.call(davidAddress, {
+      let returnValue = await index.unsetLocator.call(davidAddress, {
         from: owner,
       })
-      equal(returnValue, false, 'unsetSignal should have returned false')
+      equal(returnValue, false, 'unsetLocator should have returned false')
 
-      await index.unsetSignal(davidAddress, { from: owner })
+      await index.unsetLocator(davidAddress, { from: owner })
 
       let listLength = await index.length()
       equal(listLength, 3, 'Link list length should be 3')
 
-      const signals = await index.fetchSignals(7)
-      equal(signals[0], aliceLocator, 'Alice should be first')
-      equal(signals[1], carolLocator, 'Carol should be second')
-      equal(signals[2], bobLocator, 'Bob should be third')
+      const locators = await index.fetchLocators(7)
+      equal(locators[0], aliceLocatorData, 'Alice should be first')
+      equal(locators[1], carolLocatorData, 'Carol should be second')
+      equal(locators[2], bobLocatorData, 'Bob should be third')
     })
 
-    it('should unset the signal for a valid user', async () => {
+    it('should unset the locator for a valid user', async () => {
       // check it returns true
-      let returnValue = await index.unsetSignal.call(bobAddress, {
+      let returnValue = await index.unsetLocator.call(bobAddress, {
         from: owner,
       })
-      equal(returnValue, true, 'unsetSignal should have returned true')
+      equal(returnValue, true, 'unsetLocator should have returned true')
 
       // check it emits an event correctly
-      let result = await index.unsetSignal(bobAddress, { from: owner })
-      emitted(result, 'UnsetSignal', event => {
+      let result = await index.unsetLocator(bobAddress, { from: owner })
+      emitted(result, 'UnsetLocator', event => {
         return event.user === bobAddress
       })
 
       let listLength = await index.length()
       equal(listLength, 2, 'Link list length should be 2')
 
-      let signals = await index.fetchSignals(7)
-      equal(signals[0], aliceLocator, 'Alice should be first')
-      equal(signals[1], carolLocator, 'Carol should be second')
+      let locators = await index.fetchLocators(7)
+      equal(locators[0], aliceLocatorData, 'Alice should be first')
+      equal(locators[1], carolLocatorData, 'Carol should be second')
 
-      await index.unsetSignal(aliceAddress, { from: owner })
-      await index.unsetSignal(carolAddress, { from: owner })
+      await index.unsetLocator(aliceAddress, { from: owner })
+      await index.unsetLocator(carolAddress, { from: owner })
 
       listLength = await index.length()
       equal(listLength, 0, 'Link list length should be 0')
 
-      signals = await index.fetchSignals(10)
-      equal(signals.length, 0, 'list should have 0 signals')
+      locators = await index.fetchLocators(10)
+      equal(locators.length, 0, 'list should have 0 locators')
     })
 
-    it('unsetting signal twice in a row for an address has no effect', async () => {
-      let trx = index.unsetSignal(bobAddress, { from: owner })
+    it('unsetting locator twice in a row for an address has no effect', async () => {
+      let trx = index.unsetLocator(bobAddress, { from: owner })
       await passes(trx)
       let size = await index.length.call()
-      equal(size, 2, 'Signal was improperly removed')
-      trx = index.unsetSignal(bobAddress, { from: owner })
+      equal(size, 2, 'Locator was improperly removed')
+      trx = index.unsetLocator(bobAddress, { from: owner })
       await passes(trx)
-      equal(size, 2, 'Signal was improperly removed')
+      equal(size, 2, 'Locator was improperly removed')
 
-      let signals = await index.fetchSignals(7)
-      equal(signals[0], aliceLocator, 'Alice should be first')
-      equal(signals[1], carolLocator, 'Carol should be second')
+      let locators = await index.fetchLocators(7)
+      equal(locators[0], aliceLocatorData, 'Alice should be first')
+      equal(locators[1], carolLocatorData, 'Carol should be second')
     })
   })
 
-  describe('Test getSignal', async () => {
-    beforeEach('Setup signals again', async () => {
-      await index.setSignal(aliceAddress, 2000, aliceLocator, {
+  describe('Test getLocator', async () => {
+    beforeEach('Setup locators again', async () => {
+      await index.setLocator(aliceAddress, 2000, aliceLocatorData, {
         from: owner,
       })
-      await index.setSignal(bobAddress, 500, bobLocator, {
+      await index.setLocator(bobAddress, 500, bobLocatorData, {
         from: owner,
       })
-      await index.setSignal(carolAddress, 1500, carolLocator, {
+      await index.setLocator(carolAddress, 1500, carolLocatorData, {
         from: owner,
       })
     })
 
-    it('should return empty signal for a non-user', async () => {
-      let davidSignal = await index.getSignal(davidAddress)
+    it('should return empty locator for a non-user', async () => {
+      let davidLocator = await index.getLocator(davidAddress)
       equal(
-        davidSignal[USER],
+        davidLocator[USER],
         EMPTY_ADDRESS,
-        'David: Signal address not correct'
+        'David: Locator address not correct'
       )
-      equal(davidSignal[SCORE], 0, 'David: Signal score not correct')
-      equal(
-        davidSignal[LOCATOR],
-        emptyLocator,
-        'David: Signal locator not correct'
-      )
+      equal(davidLocator[SCORE], 0, 'David: Locator score not correct')
+      equal(davidLocator[DATA], emptyLocatorData, 'David: Locator not correct')
 
-      // now for a recently unset signal
-      await index.unsetSignal(carolAddress, { from: owner })
-      let carolSignal = await index.getSignal(carolAddress)
+      // now for a recently unset locator
+      await index.unsetLocator(carolAddress, { from: owner })
+      let testLocator = await index.getLocator(carolAddress)
       equal(
-        carolSignal[USER],
+        testLocator[USER],
         EMPTY_ADDRESS,
-        'Carol: Signal address not correct'
+        'Carol: Locator address not correct'
       )
-      equal(carolSignal[SCORE], 0, 'Carol: Signal score not correct')
+      equal(testLocator[SCORE], 0, 'Carol: Locator score not correct')
       equal(
-        carolSignal[LOCATOR],
-        emptyLocator,
-        'Carol: Signal locator not correct'
+        testLocator[DATA],
+        emptyLocatorData,
+        'Carol: Locator data not correct'
       )
     })
 
-    it('should return the correct signal for a valid user', async () => {
-      let aliceSignal = await index.getSignal(aliceAddress)
+    it('should return the correct locator for a valid user', async () => {
+      let aliceLocator = await index.getLocator(aliceAddress)
       equal(
-        aliceSignal[USER],
+        aliceLocator[USER],
         aliceAddress,
-        'Alice: Signal address not correct'
+        'Alice: Locator address not correct'
       )
-      equal(aliceSignal[SCORE], 2000, 'Alice: Signal score not correct')
+      equal(aliceLocator[SCORE], 2000, 'Alice: Locator score not correct')
       equal(
-        aliceSignal[LOCATOR],
-        aliceLocator,
-        'Alice: Signal locator not correct'
+        aliceLocator[DATA],
+        aliceLocatorData,
+        'Alice: Locator data not correct'
       )
 
-      let bobSignal = await index.getSignal(bobAddress)
-      equal(bobSignal[USER], bobAddress, 'Bob: signal address not correct')
-      equal(bobSignal[SCORE], 500, 'Bob: Signal score not correct')
-      equal(bobSignal[LOCATOR], bobLocator, 'Bob: Signal locator not correct')
+      let bobLocator = await index.getLocator(bobAddress)
+      equal(bobLocator[USER], bobAddress, 'Bob: locator address not correct')
+      equal(bobLocator[SCORE], 500, 'Bob: Locator score not correct')
+      equal(
+        bobLocator[DATA],
+        bobLocatorData,
+        'Bob: Locator locator data not correct'
+      )
     })
   })
 
-  describe('Test fetchSignals', async () => {
-    it('returns an empty array with no signals', async () => {
-      const signals = await index.fetchSignals(7)
-      equal(signals.length, 0, 'there should be no signals')
+  describe('Test fetchLocators', async () => {
+    it('returns an empty array with no locators', async () => {
+      const locators = await index.fetchLocators(7)
+      equal(locators.length, 0, 'there should be no locators')
     })
 
     it('returns specified number of elements if < length', async () => {
-      // add 3 signals
-      await index.setSignal(aliceAddress, 2000, aliceLocator, {
+      // add 3 locators
+      await index.setLocator(aliceAddress, 2000, aliceLocatorData, {
         from: owner,
       })
-      await index.setSignal(bobAddress, 500, bobLocator, {
+      await index.setLocator(bobAddress, 500, bobLocatorData, {
         from: owner,
       })
-      await index.setSignal(carolAddress, 1500, carolLocator, {
+      await index.setLocator(carolAddress, 1500, carolLocatorData, {
         from: owner,
       })
 
-      const signals = await index.fetchSignals(2)
-      equal(signals.length, 2, 'there should only be 2 signals returned')
+      const locators = await index.fetchLocators(2)
+      equal(locators.length, 2, 'there should only be 2 locators returned')
 
-      equal(signals[0], aliceLocator, 'Alice should be first')
-      equal(signals[1], carolLocator, 'Carol should be second')
+      equal(locators[0], aliceLocatorData, 'Alice should be first')
+      equal(locators[1], carolLocatorData, 'Carol should be second')
     })
 
     it('returns only length if requested number if larger', async () => {
-      // add 3 signals
-      await index.setSignal(aliceAddress, 2000, aliceLocator, {
+      // add 3 locators
+      await index.setLocator(aliceAddress, 2000, aliceLocatorData, {
         from: owner,
       })
-      await index.setSignal(bobAddress, 500, bobLocator, {
+      await index.setLocator(bobAddress, 500, bobLocatorData, {
         from: owner,
       })
-      await index.setSignal(carolAddress, 1500, carolLocator, {
+      await index.setLocator(carolAddress, 1500, carolLocatorData, {
         from: owner,
       })
 
-      const signals = await index.fetchSignals(10)
-      equal(signals.length, 3, 'there should only be 3 signals returned')
+      const locators = await index.fetchLocators(10)
+      equal(locators.length, 3, 'there should only be 3 locators returned')
 
-      equal(signals[0], aliceLocator, 'Alice should be first')
-      equal(signals[1], carolLocator, 'Carol should be second')
-      equal(signals[2], bobLocator, 'Bob should be third')
-    })
-  })
-
-  describe('Test hasSignal', async () => {
-    it('should return false if the address has no signal', async () => {
-      let hasSignal = await index.hasSignal(aliceAddress)
-      equal(hasSignal, false, 'hasSignal should have returned false')
-    })
-
-    it('should return true if the address has a signal', async () => {
-      // give alice a signal
-      await index.setSignal(aliceAddress, 2000, aliceLocator, {
-        from: owner,
-      })
-      // now test again
-      let hasSignal = await index.hasSignal(aliceAddress)
-      equal(hasSignal, true, 'hasSignal should have returned true')
+      equal(locators[0], aliceLocatorData, 'Alice should be first')
+      equal(locators[1], carolLocatorData, 'Carol should be second')
+      equal(locators[2], bobLocatorData, 'Bob should be third')
     })
   })
 })

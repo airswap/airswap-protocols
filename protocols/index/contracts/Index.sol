@@ -20,7 +20,7 @@ pragma experimental ABIEncoderV2;
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 /**
-  * @title Index: A List of Signals to Trade
+  * @title Index: A List of Locators
   */
 contract Index is Ownable {
 
@@ -35,19 +35,20 @@ contract Index is Ownable {
   byte constant private NEXT = 0x01;
 
   // Mapping of user address to its neighbors
-  mapping(address => mapping(byte => Signal)) private signalsLinkedList;
+  mapping(address => mapping(byte => Locator)) private locatorsLinkedList;
 
   /**
-    * @notice Signal to Trade
+    * @notice Locator for a Peer
+    * @dev data is arbitrary e.g. may include an address
     *
     * @param user address
     * @param score uint256
-    * @param locator bytes32
+    * @param data bytes32
     */
-  struct Signal {
+  struct Locator {
     address user;
     uint256 score;
-    bytes32 locator;
+    bytes32 data;
   }
 
   /**
@@ -55,13 +56,13 @@ contract Index is Ownable {
     * @dev Emitted with successful state changes
     */
 
-  event SetSignal(
+  event SetLocator(
     uint256 score,
     address indexed user,
-    bytes32 indexed locator
+    bytes32 indexed data
   );
 
-  event UnsetSignal(
+  event UnsetLocator(
     address indexed user
   );
 
@@ -70,90 +71,93 @@ contract Index is Ownable {
     */
   constructor() public {
     // Initialize the linked list.
-    Signal memory head = Signal(HEAD, 0, bytes32(0));
-    signalsLinkedList[HEAD][PREV] = head;
-    signalsLinkedList[HEAD][NEXT] = head;
+    Locator memory head = Locator(HEAD, 0, bytes32(0));
+    locatorsLinkedList[HEAD][PREV] = head;
+    locatorsLinkedList[HEAD][NEXT] = head;
   }
 
   /**
-    * @notice Set an Signal to Trade
+    * @notice Set an Locator to Trade
     *
     * @param _user The account
     * @param _score uint256
-    * @param _locator bytes32
+    * @param _data bytes32
     */
-  function setSignal(
+  function setLocator(
     address _user,
     uint256 _score,
-    bytes32 _locator
+    bytes32 _data
   ) external onlyOwner {
 
-    require(!hasSignal(_user), "USER_HAS_ENTRY");
+    require(!hasLocator(_user), "LOCATOR_ALREADY_SET");
 
-    Signal memory newSignal = Signal(_user, _score, _locator);
+    Locator memory newLocator = Locator(_user, _score, _data);
 
     // Insert after the next highest score on the linked list.
-    Signal memory nextSignal = findPosition(_score);
+    Locator memory nextLocator = findPosition(_score);
 
-    // Link the newSignal into place.
-    link(signalsLinkedList[nextSignal.user][PREV], newSignal);
-    link(newSignal, nextSignal);
+    // Link the newLocator into place.
+    link(locatorsLinkedList[nextLocator.user][PREV], newLocator);
+    link(newLocator, nextLocator);
 
     // Increment the length of the linked list if successful.
     length = length + 1;
 
-    emit SetSignal(_score, _user, _locator);
+    emit SetLocator(_score, _user, _data);
   }
 
   /**
-    * @notice Unset an Signal to Trade
+    * @notice Unset an Locator to Trade
     * @param _user address
+    * @return bool return true on success
     */
-  function unsetSignal(
+  function unsetLocator(
     address _user
   ) external onlyOwner returns (bool) {
 
     // Ensure the _user is in the linked list.
-    if (!hasSignal(_user)) {
+    if (!hasLocator(_user)) {
       return false;
     }
 
     // Link its neighbors together.
-    link(signalsLinkedList[_user][PREV], signalsLinkedList[_user][NEXT]);
+    link(locatorsLinkedList[_user][PREV], locatorsLinkedList[_user][NEXT]);
 
     // Delete user from the list.
-    delete signalsLinkedList[_user][PREV];
-    delete signalsLinkedList[_user][NEXT];
+    delete locatorsLinkedList[_user][PREV];
+    delete locatorsLinkedList[_user][NEXT];
 
     // Decrement the length of the linked list.
     length = length - 1;
 
-    emit UnsetSignal(_user);
+    emit UnsetLocator(_user);
     return true;
   }
 
   /**
-    * @notice Get the Signal for a user
+    * @notice Get the Locator for a user
     * @param _user address
+    * @return Locator
     */
-  function getSignal(
+  function getLocator(
     address _user
-  ) external view returns (Signal memory) {
+  ) external view returns (Locator memory) {
 
     // Ensure the user has a neighbor in the linked list.
-    if (signalsLinkedList[_user][PREV].user != address(0)) {
+    if (locatorsLinkedList[_user][PREV].user != address(0)) {
 
-      // Return the next intent from the previous neighbor.
-      return signalsLinkedList[signalsLinkedList[_user][PREV].user][NEXT];
+      // Return the next Locator from the previous neighbor.
+      return locatorsLinkedList[locatorsLinkedList[_user][PREV].user][NEXT];
     }
-    return Signal(address(0), 0, bytes32(0));
+    return Locator(address(0), 0, bytes32(0));
   }
 
   /**
-    * @notice Get Valid Signals
+    * @notice Get Valid Locators
     * @param _count uint256
+    * @return result bytes32[]
     */
-  function fetchSignals(
+  function fetchLocators(
     uint256 _count
   ) external view returns (bytes32[] memory result) {
 
@@ -164,67 +168,69 @@ contract Index is Ownable {
     }
     result = new bytes32[](limit);
 
-    // Get the first intent in the linked list after the HEAD
-    Signal storage intent = signalsLinkedList[HEAD][NEXT];
+    // Get the first Locator in the linked list after the HEAD
+    Locator storage Locator = locatorsLinkedList[HEAD][NEXT];
 
     // Iterate over the list until the end or limit.
     uint256 i = 0;
     while (i < limit) {
-      result[i] = intent.locator;
+      result[i] = Locator.data;
       i = i + 1;
-      intent = signalsLinkedList[intent.user][NEXT];
+      Locator = locatorsLinkedList[Locator.user][NEXT];
     }
   }
 
   /**
     * @notice Determine Whether a user is in the Linked List
     * @param _user address
+    * @return bool return true when user exists
     */
-  function hasSignal(
+  function hasLocator(
     address _user
-  ) public view returns (bool) {
+  ) internal view returns (bool) {
 
-    if (signalsLinkedList[_user][PREV].user != address(0) &&
-      signalsLinkedList[signalsLinkedList[_user][PREV].user][NEXT].user == _user) {
+    if (locatorsLinkedList[_user][PREV].user != address(0) &&
+      locatorsLinkedList[locatorsLinkedList[_user][PREV].user][NEXT].user == _user) {
       return true;
     }
     return false;
   }
 
   /**
-    * @notice Returns the first intent smaller than _score
+    * @notice Returns the first Locator smaller than _score
     * @param _score uint256
+    * @return Locator
     */
   function findPosition(
     uint256 _score
-  ) internal view returns (Signal memory) {
+  ) internal view returns (Locator memory) {
 
-    // Get the first intent in the linked list.
-    Signal storage intent = signalsLinkedList[HEAD][NEXT];
+    // Get the first Locator in the linked list.
+    Locator storage Locator = locatorsLinkedList[HEAD][NEXT];
 
     if (_score == 0) {
       // return the head of the linked list
-      return signalsLinkedList[intent.user][PREV];
+      return locatorsLinkedList[Locator.user][PREV];
     }
 
     // Iterate through the list until a lower score is found.
-    while (_score <= intent.score) {
-      intent = signalsLinkedList[intent.user][NEXT];
+    while (_score <= Locator.score) {
+      Locator = locatorsLinkedList[Locator.user][NEXT];
     }
-    return intent;
+    return Locator;
   }
 
   /**
-    * @notice Link Two Signals
-    *
-    * @param _left Signal
-    * @param _right Signal
+    * @notice Link Two Locators
+    * @dev helper function for linked list
+    * @param _left Locator
+    * @param _right Locator
     */
   function link(
-    Signal memory _left,
-    Signal memory _right
+    Locator memory _left,
+    Locator memory _right
   ) internal {
-    signalsLinkedList[_left.user][NEXT] = _right;
-    signalsLinkedList[_right.user][PREV] = _left;
+    locatorsLinkedList[_left.user][NEXT] = _right;
+    locatorsLinkedList[_right.user][PREV] = _left;
   }
 }
