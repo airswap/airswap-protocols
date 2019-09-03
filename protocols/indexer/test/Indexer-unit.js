@@ -183,7 +183,7 @@ contract('Indexer Unit Tests', async accounts => {
   })
 
   describe('Test setIntent', async () => {
-    it('should not set a signal if the index doesnt exist', async () => {
+    it('should not set an intent if the index doesnt exist', async () => {
       await reverted(
         indexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
           from: aliceAddress,
@@ -192,7 +192,7 @@ contract('Indexer Unit Tests', async accounts => {
       )
     })
 
-    it('should not set a signal if the locator is not whitelisted', async () => {
+    it('should not set an intent if the locator is not whitelisted', async () => {
       await reverted(
         whitelistedIndexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
           from: aliceAddress,
@@ -201,18 +201,18 @@ contract('Indexer Unit Tests', async accounts => {
       )
     })
 
-    it('should not set a signal if a token is blacklisted', async () => {
+    it('should not set an intent if a token is blacklisted', async () => {
       // blacklist tokenOne
       await indexer.addToBlacklist([tokenOne], {
         from: owner,
       })
 
-      // now try to stake with an amount less than 250
+      // now try to stake with a blacklisted tokenOne
       await reverted(
         indexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
           from: aliceAddress,
         }),
-        'TOKEN_IS_BLACKLISTED'
+        'PAIR_IS_BLACKLISTED'
       )
 
       await indexer.removeFromBlacklist([tokenOne], {
@@ -224,16 +224,16 @@ contract('Indexer Unit Tests', async accounts => {
         from: owner,
       })
 
-      // now try to stake with an amount less than 250
+      // now try to stake with a blacklisted tokenTwo
       await reverted(
         indexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
           from: aliceAddress,
         }),
-        'TOKEN_IS_BLACKLISTED'
+        'PAIR_IS_BLACKLISTED'
       )
     })
 
-    it('should not set a signal if the staking tokens arent approved', async () => {
+    it('should not set an intent if the staking tokens arent approved', async () => {
       // make the index first
       await indexer.createIndex(tokenOne, tokenTwo, {
         from: aliceAddress,
@@ -242,7 +242,7 @@ contract('Indexer Unit Tests', async accounts => {
       // The transfer is not approved
       await stakingTokenMock.givenAnyReturnBool(false)
 
-      // now try to set a signal
+      // now try to set an intent
       await reverted(
         indexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
           from: aliceAddress,
@@ -251,13 +251,13 @@ contract('Indexer Unit Tests', async accounts => {
       )
     })
 
-    it('should set a valid signal on a non-whitelisted indexer', async () => {
+    it('should set a valid intent on a non-whitelisted indexer', async () => {
       // make the index first
       await indexer.createIndex(tokenOne, tokenTwo, {
         from: aliceAddress,
       })
 
-      // now set a signal
+      // now set an intent
       let result = await indexer.setIntent(
         tokenOne,
         tokenTwo,
@@ -279,7 +279,7 @@ contract('Indexer Unit Tests', async accounts => {
       })
     })
 
-    it('should set a valid signal on a whitelisted indexer', async () => {
+    it('should set a valid intent on a whitelisted indexer', async () => {
       // make the index first
       await whitelistedIndexer.createIndex(tokenOne, tokenTwo, {
         from: aliceAddress,
@@ -288,7 +288,7 @@ contract('Indexer Unit Tests', async accounts => {
       // whitelist the locator
       await whitelistMock.givenAnyReturnBool(true)
 
-      // now set a signal
+      // now set an intent
       let result = await whitelistedIndexer.setIntent(
         tokenOne,
         tokenTwo,
@@ -310,13 +310,13 @@ contract('Indexer Unit Tests', async accounts => {
       })
     })
 
-    it('should not set a signal if the user has already staked', async () => {
+    it('should not set an intent if the user has already staked', async () => {
       // make the index first
       await indexer.createIndex(tokenOne, tokenTwo, {
         from: aliceAddress,
       })
 
-      // set one signal
+      // set one intent
       await indexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
         from: aliceAddress,
       })
@@ -332,7 +332,7 @@ contract('Indexer Unit Tests', async accounts => {
   })
 
   describe('Test unsetIntent', async () => {
-    it('should not unset a signal if the index doesnt exist', async () => {
+    it('should not unset an intent if the index doesnt exist', async () => {
       await reverted(
         indexer.unsetIntent(tokenOne, tokenTwo, {
           from: aliceAddress,
@@ -341,33 +341,33 @@ contract('Indexer Unit Tests', async accounts => {
       )
     })
 
-    it('should not unset a signal if the signal doesnt exist', async () => {
+    it('should not unset an intent if the intent does not exist', async () => {
       // create the index
       await indexer.createIndex(tokenOne, tokenTwo, {
         from: aliceAddress,
       })
 
-      // now try to unset a non-existent signal
+      // now try to unset a non-existent intent
       await reverted(
         indexer.unsetIntent(tokenOne, tokenTwo, {
           from: aliceAddress,
         }),
-        'SIGNAL_DOES_NOT_EXIST'
+        'LOCATOR_DOES_NOT_EXIST'
       )
     })
 
-    it('should successfully unset a signal', async () => {
+    it('should successfully unset an intent', async () => {
       // create the index
       await indexer.createIndex(tokenOne, tokenTwo, {
         from: aliceAddress,
       })
 
-      // create the signal
+      // create the intent
       await indexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
         from: aliceAddress,
       })
 
-      // now try to unset the signal
+      // now try to unset the intent
       let tx = await indexer.unsetIntent(tokenOne, tokenTwo, {
         from: aliceAddress,
       })
@@ -384,13 +384,13 @@ contract('Indexer Unit Tests', async accounts => {
       })
     })
 
-    it('should revert if unset a signal failed in token transfer', async () => {
+    it('should revert if unset an intent failed in token transfer', async () => {
       // create the index
       await indexer.createIndex(tokenOne, tokenTwo, {
         from: aliceAddress,
       })
 
-      // create the signal
+      // create the intent
       await indexer.setIntent(tokenOne, tokenTwo, 10, aliceLocator, {
         from: aliceAddress,
       })
@@ -414,8 +414,8 @@ contract('Indexer Unit Tests', async accounts => {
 
   describe('Test getIntents', async () => {
     it('should return an empty array if the index doesnt exist', async () => {
-      let signals = await indexer.getIntents.call(tokenOne, tokenTwo, 4)
-      equal(signals.length, 0, 'signals array should be empty')
+      let intents = await indexer.getIntents.call(tokenOne, tokenTwo, 4)
+      equal(intents.length, 0, 'intents array should be empty')
     })
 
     it('should return an empty array if a token is blacklisted', async () => {
@@ -424,7 +424,7 @@ contract('Indexer Unit Tests', async accounts => {
         from: aliceAddress,
       })
 
-      // set a signal staking 0
+      // set an intent staking 0
       await indexer.setIntent(tokenOne, tokenTwo, 0, aliceLocator, {
         from: aliceAddress,
       })
@@ -434,18 +434,18 @@ contract('Indexer Unit Tests', async accounts => {
         from: owner,
       })
 
-      // now try to get the signals
-      let signals = await indexer.getIntents.call(tokenOne, tokenTwo, 4)
-      equal(signals.length, 0, 'signals array should be empty')
+      // now try to get the intents
+      let intents = await indexer.getIntents.call(tokenOne, tokenTwo, 4)
+      equal(intents.length, 0, 'intents array should be empty')
     })
 
-    it('should otherwise return the signals', async () => {
+    it('should otherwise return the intents', async () => {
       // create index
       await indexer.createIndex(tokenOne, tokenTwo, {
         from: aliceAddress,
       })
 
-      // set two signals
+      // set two intents
       await indexer.setIntent(tokenOne, tokenTwo, 50, aliceLocator, {
         from: aliceAddress,
       })
@@ -453,13 +453,13 @@ contract('Indexer Unit Tests', async accounts => {
         from: bobAddress,
       })
 
-      // now try to get the signals
-      let signals = await indexer.getIntents.call(tokenOne, tokenTwo, 4)
-      equal(signals.length, 2, 'signals array should be size 2')
+      // now try to get the intents
+      let intents = await indexer.getIntents.call(tokenOne, tokenTwo, 4)
+      equal(intents.length, 2, 'intents array should be size 2')
 
       // should only get the number specified
-      signals = await indexer.getIntents.call(tokenOne, tokenTwo, 1)
-      equal(signals.length, 1, 'signals array should be size 1')
+      intents = await indexer.getIntents.call(tokenOne, tokenTwo, 1)
+      equal(intents.length, 1, 'intents array should be size 1')
     })
   })
 })

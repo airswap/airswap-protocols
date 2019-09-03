@@ -109,6 +109,7 @@ contract Index is Ownable {
   /**
     * @notice Unset an Locator to Trade
     * @param _user address
+    * @return bool return true on success
     */
   function unsetLocator(
     address _user
@@ -136,6 +137,7 @@ contract Index is Ownable {
   /**
     * @notice Get the Locator for a user
     * @param _user address
+    * @return Locator
     */
   function getLocator(
     address _user
@@ -153,6 +155,7 @@ contract Index is Ownable {
   /**
     * @notice Get Valid Locators
     * @param _count uint256
+    * @return result bytes32[]
     */
   function fetchLocators(
     uint256 _count
@@ -180,6 +183,7 @@ contract Index is Ownable {
   /**
     * @notice Determine Whether a user is in the Linked List
     * @param _user address
+    * @return bool return true when user exists
     */
   function hasLocator(
     address _user
@@ -195,6 +199,7 @@ contract Index is Ownable {
   /**
     * @notice Returns the first Locator smaller than _score
     * @param _score uint256
+    * @return Locator
     */
   function findPosition(
     uint256 _score
@@ -217,7 +222,7 @@ contract Index is Ownable {
 
   /**
     * @notice Link Two Locators
-    *
+    * @dev helper function for linked list
     * @param _left Locator
     * @param _right Locator
     */
