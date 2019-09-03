@@ -153,6 +153,7 @@ contract Index is Ownable {
   /**
     * @notice Get Valid Locators
     * @param _count uint256
+    * @return result bytes32[]
     */
   function fetchLocators(
     uint256 _count
@@ -217,7 +218,7 @@ contract Index is Ownable {
 
   /**
     * @notice Link Two Locators
-    *
+    * @dev helper function for linkedlist
     * @param _left Locator
     * @param _right Locator
     */
