@@ -169,14 +169,14 @@ contract Index is Ownable {
     result = new bytes32[](limit);
 
     // Get the first Locator in the linked list after the HEAD
-    Locator storage Locator = locatorsLinkedList[HEAD][NEXT];
+    Locator storage locator = locatorsLinkedList[HEAD][NEXT];
 
     // Iterate over the list until the end or limit.
     uint256 i = 0;
     while (i < limit) {
-      result[i] = Locator.data;
+      result[i] = locator.data;
       i = i + 1;
-      Locator = locatorsLinkedList[Locator.user][NEXT];
+      locator = locatorsLinkedList[locator.user][NEXT];
     }
   }
 
@@ -206,18 +206,18 @@ contract Index is Ownable {
   ) internal view returns (Locator memory) {
 
     // Get the first Locator in the linked list.
-    Locator storage Locator = locatorsLinkedList[HEAD][NEXT];
+    Locator storage locator = locatorsLinkedList[HEAD][NEXT];
 
     if (_score == 0) {
       // return the head of the linked list
-      return locatorsLinkedList[Locator.user][PREV];
+      return locatorsLinkedList[locator.user][PREV];
     }
 
     // Iterate through the list until a lower score is found.
-    while (_score <= Locator.score) {
-      Locator = locatorsLinkedList[Locator.user][NEXT];
+    while (_score <= locator.score) {
+      locator = locatorsLinkedList[locator.user][NEXT];
     }
-    return Locator;
+    return locator;
   }
 
   /**
