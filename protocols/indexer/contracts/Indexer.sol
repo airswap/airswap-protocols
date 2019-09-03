@@ -172,7 +172,7 @@ contract Indexer is IIndexer, Ownable {
 
     // Ensure the locator exists.
     require(locator.user == msg.sender,
-      "SIGNAL_DOES_NOT_EXIST");
+      "LOCATOR_DOES_NOT_EXIST");
 
     // Unset the locator on the index.
     //No need to require() because a check is done above that reverts if there are no locators
