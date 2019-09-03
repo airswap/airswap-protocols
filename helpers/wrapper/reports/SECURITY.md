@@ -134,10 +134,15 @@ helpers/wrapper/test/Wrapper.js
 
 Hash of master used for deploy: [ef5cff0613532d27ecedb332e222ae0a75079841](https://github.com/airswap/airswap-protocols/commit/ef5cff0613532d27ecedb332e222ae0a75079841)
 
-Rinkeby Etherscan (Wrapper): [0x769c9D31613F28790540395bdAF2F68e1D3FF243](https://rinkeby.etherscan.io/address/0x769c9D31613F28790540395bdAF2F68e1D3FF243)
+Rinkeby Etherscan (Wrapper): [0x15FC598E31B98D73a7d56e10f079b827cb97Af82](https://rinkeby.etherscan.io/address/0x15FC598E31B98D73a7d56e10f079b827cb97Af82)
 
-- \_swapContract = [0x6c629eAFFbEf9935F4FA390AC32f27EEC9462a8E](https://rinkeby.etherscan.io/address/0x6c629eAFFbEf9935F4FA390AC32f27EEC9462a8E)
+- \_swapContract = [0x6f337bA064b0a92538a4AfdCF0e60F50eEAe0D5B](https://rinkeby.etherscan.io/address/0x6f337bA064b0a92538a4AfdCF0e60F50eEAe0D5B)
 - \_wethContract = [0xc778417E063141139Fce010982780140Aa0cD5Ab](https://rinkeby.etherscan.io/address/0xc778417E063141139Fce010982780140Aa0cD5Ab)
+
+Mainnet Etherscan (Wrapper): [0x7d32b51258bBd675E47F55082Ad3BB1133C5cc60](https://etherscan.io/address/0x7d32b51258bBd675E47F55082Ad3BB1133C5cc60)
+
+- \_swapContract = [0x251F752B85a9F7e1B3C42D802715B5D7A8Da3165](https://etherscan.io/address/0x251F752B85a9F7e1B3C42D802715B5D7A8Da3165)
+- \_wethContract = [0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2](https://etherscan.io/address/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2)
 
 ## Notes
 
