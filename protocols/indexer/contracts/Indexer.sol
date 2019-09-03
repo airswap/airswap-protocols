@@ -131,7 +131,7 @@ contract Indexer is IIndexer, Ownable {
 
     // Ensure both of the tokens are not blacklisted.
     require(!blacklist[_makerToken] && !blacklist[_takerToken],
-      "TOKEN_IS_BLACKLISTED");
+      "PAIR_IS_BLACKLISTED");
 
     // Ensure the index exists.
     require(indexes[_makerToken][_takerToken] != Index(0),

@@ -207,12 +207,12 @@ contract('Indexer Unit Tests', async accounts => {
         from: owner,
       })
 
-      // now try to stake with an amount less than 250
+      // now try to stake with a blacklisted tokenOne
       await reverted(
         indexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
           from: aliceAddress,
         }),
-        'TOKEN_IS_BLACKLISTED'
+        'PAIR_IS_BLACKLISTED'
       )
 
       await indexer.removeFromBlacklist([tokenOne], {
@@ -224,12 +224,12 @@ contract('Indexer Unit Tests', async accounts => {
         from: owner,
       })
 
-      // now try to stake with an amount less than 250
+      // now try to stake with a blacklisted tokenTwo
       await reverted(
         indexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
           from: aliceAddress,
         }),
-        'TOKEN_IS_BLACKLISTED'
+        'PAIR_IS_BLACKLISTED'
       )
     })
 
