@@ -84,7 +84,7 @@ By induction:
         - If its score is 0, the location for the new locator is the end of the list
         - Otherwise findPosition looks at the list of locators in decreasing score value, and returns the first score that is lower than the new score.
         - If there is an equal score, the new Locator is placed after the previous same-scored Locator.
-    - This is guaranteed to happen, as we know the new locator has a score of more than 0, and HEAD has a score of 0, meaning if the new locator is the new tail of the list the HEAD will be returned.
+    - This is guaranteed to happen, as all locators are in a fixed ordering, and HEAD has a score of 0, meaning if the new locator is the new tail of the list the HEAD will be returned.
     - The Locator is then inserted in its rightful position, and the list is still in descending order of score.
 - **This invariant currently holds as-is.**
 b. Removing locators preserves the ordering of the list
