@@ -103,9 +103,9 @@ unsetIntent first links together the element before and after x in the list so t
 
 #### 5. Calling unsetLocator() twice does not disrupt ordering of the locator linked list.
 
-- At the beginning of unsetLocator, the function checks whether the specified address actually has an address. If they do not, the function returns false and stopped executing
+- At the beginning of unsetLocator, the function checks whether the specified address actually has an address. If they do not, the function returns false and stops executing
+"At the beginning of unsetLocator, the function checks whether the specified address actually has an address. If they do not, the function returns false and stops executing
 - unsetLocator therefore only executes for addresses that have a Locator at that moment in time
-- Calling unsetLocator twice would (1) remove the Locator and then (2) return false and stop executing
 
 - **This invariant currently holds as-is.**
 
