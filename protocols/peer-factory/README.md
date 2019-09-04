@@ -22,7 +22,7 @@
 
 | Contract    | Version | Network | Address                                                                                                                         |
 | :---------- | :------ | :------ | :------------------------------------------------------------------------------------------------------------------------------ |
-| PeerFactory | `0.1.0` | Rinkeby | [`0x264fD6933aa77aD558330a78f931a5f227d14B05`](https://rinkeby.etherscan.io/address/0x264fD6933aa77aD558330a78f931a5f227d14B05) |
+| PeerFactory | `0.1.0` | Rinkeby | [`0x53d47a69A506Ceb97D5cafD93bab76bfFBA0B055`](https://rinkeby.etherscan.io/address/0x53d47a69A506Ceb97D5cafD93bab76bfFBA0B055) |
 
 ## Commands
 
