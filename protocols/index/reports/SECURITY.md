@@ -44,10 +44,11 @@ _\*\* OpenZeppelin contract_
 
 #### Public and external functions (non-getter functions)
 
-| Function    | Source      | Visibility | Params                                                             | Payable |
-| :-------    | :---------- | :--------- | :----------------------------------------------------------------- | :------ |
-| setLocator  | Index.sol   | external   | `address _user, uint256 _score, bytes32 _locator`                  | no      |
-| unsetLocator| Index.sol   | external   | `address _user`                                                    | no      |
+| Function     | Source      | Visibility   | Params                                                             | Payable |
+| :-------     | :---------- | :----------- | :----------------------------------------------------------------- | :------ |
+| setLocator   | Index.sol   | external     | `address _user, uint256 _score, bytes32 _data`                     | no      |
+| unsetLocator | Index.sol   | external     | `address _user`                                                    | no      |
+| fetchLocators| Index.sol   | external view| `uint256 _count`                                                   | no      |
 
 ## Invariants
 
