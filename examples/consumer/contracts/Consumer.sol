@@ -14,7 +14,7 @@
   limitations under the License.
 */
 
-pragma solidity ^0.5.10;
+pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
