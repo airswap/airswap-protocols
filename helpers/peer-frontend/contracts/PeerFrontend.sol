@@ -29,8 +29,8 @@ contract PeerFrontend {
 
   uint256 constant public MAX_INT =  2**256 - 1;
 
-  IIndexer indexer;
-  ISwap swapContract;
+  IIndexer public indexer;
+  ISwap public swapContract;
 
   constructor(IIndexer _indexer, ISwap _swap) public {
     indexer = _indexer;
