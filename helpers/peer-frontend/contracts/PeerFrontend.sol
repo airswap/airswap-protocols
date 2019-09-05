@@ -15,24 +15,26 @@
 */
 
 pragma solidity 0.5.10;
+pragma experimental ABIEncoderV2;
 
+import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "@airswap/indexer/contracts/interfaces/IIndexer.sol";
-import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "@airswap/peer/contracts/interfaces/IPeer.sol";
+import "@airswap/swap/contracts/interfaces/ISwap.sol";
 
 /**
-  * @title PeerFrontEnd: Onchain Liquidity provider for the Swap Protocol
+  * @title PeerFrontend: Onchain Liquidity provider for the Swap Protocol
   */
-contract PeerFrontEnd {
+contract PeerFrontend {
 
   uint256 constant public MAX_INT =  2**256 - 1;
 
   IIndexer indexer;
-  ISwap swap;
+  ISwap swapContract;
 
   constructor(IIndexer _indexer, ISwap _swap) public {
     indexer = _indexer;
-    swap = _swap;
+    swapContract = _swap;
   }
 
   function getBestTakerSideQuote(
@@ -40,7 +42,7 @@ contract PeerFrontEnd {
     address _takerToken,
     address _makerToken,
     uint256 _maxIntents
-  ) external view returns (bytes32 peerAddress, uint256 lowestCost) {
+  ) public view returns (bytes32 peerAddress, uint256 lowestCost) {
 
     // use the indexer to query peers
     lowestCost = MAX_INT;
@@ -76,7 +78,7 @@ contract PeerFrontEnd {
     address _makerToken,
     address _takerToken,
     uint256 _maxIntents
-  ) external view returns (bytes32 peerAddress, uint256 lowestCost) {
+  ) public view returns (bytes32 peerLocator, uint256 lowestCost) {
 
     // use the indexer to query peers
     lowestCost = MAX_INT;
@@ -97,13 +99,13 @@ contract PeerFrontEnd {
 
       // Update the lowest cost.
       if (makerAmount > 0 && makerAmount < lowestCost) {
-        peerAddress = locators[i];
+        peerLocator = locators[i];
         lowestCost = makerAmount;
       }
     }
 
     // Return the Peer address and amount.
-    return (peerAddress, lowestCost);
+    return (peerLocator, lowestCost);
 
   }
 
@@ -114,6 +116,48 @@ contract PeerFrontEnd {
     uint256 _maxIntents
   ) external {
 
+    // Find the best buy among Indexed Peers.
+    (bytes32 peerLocator, uint256 makerAmount) = getBestTakerSideQuote(_takerAmount, _takerToken, _makerToken, _maxIntents);
+
+    // check if peerLocator exists
+    require(peerLocator != bytes32(0), "NO_LOCATOR, BAILING");
+
+    address peerContract = address(bytes20(peerLocator));
+
+    // User transfers amount to the contract.
+    IERC20(_makerToken).transferFrom(msg.sender, address(this), makerAmount);
+
+    // PeerFrontend approves Swap to move its new tokens.
+    IERC20(_makerToken).approve(address(swapContract), makerAmount);
+
+    // PeerFrontend authorizes the Peer.
+    swapContract.authorize(peerContract, block.timestamp + 1);
+
+    // Consumer provides unsigned order to Peer.
+    IPeer(peerContract).provideOrder(Types.Order(
+      1,
+      block.timestamp + 1,
+      Types.Party(
+        address(this), // consumer is acting as the maker in this case
+        _makerToken,
+        makerAmount,
+        0x277f8169
+      ),
+      Types.Party(
+        IPeer(peerContract).owner(),
+        _takerToken,
+        _takerAmount,
+        0x277f8169
+      ),
+      Types.Party(address(0), address(0), 0, bytes4(0)),
+      Types.Signature(address(0), 0, 0, 0, 0)
+    ));
+
+    // PeerFrontend revokes the authorization of the Peer.
+    swapContract.revoke(peerContract);
+
+    // PeerFrontend transfers received amount to the User.
+    IERC20(_takerToken).transfer(msg.sender, _takerAmount);
   }
 
   function fillBestMakerSideOrder(
@@ -123,5 +167,47 @@ contract PeerFrontEnd {
     uint256 _maxIntents
   ) external {
 
+    // Find the best buy among Indexed Peers.
+    (bytes32 peerLocator, uint256 takerAmount) = getBestMakerSideQuote(_makerAmount, _makerToken, _takerToken, _maxIntents);
+
+    // check if peerLocator exists
+    require(peerLocator != bytes32(0), "NO_LOCATOR, BAILING");
+
+    address peerContract = address(bytes20(peerLocator));
+
+    // User transfers amount to the contract.
+    IERC20(_makerToken).transferFrom(msg.sender, address(this), _makerAmount);
+
+    // PeerFrontend approves Swap to move its new tokens.
+    IERC20(_makerToken).approve(address(swapContract), _makerAmount);
+
+    // PeerFrontend authorizes the Peer.
+    swapContract.authorize(peerContract, block.timestamp + 1);
+
+    // Consumer provides unsigned order to Peer.
+    IPeer(peerContract).provideOrder(Types.Order(
+      1,
+      block.timestamp + 1,
+      Types.Party(
+        address(this), // consumer is acting as the maker in this case
+        _makerToken,
+        _makerAmount,
+        0x277f8169
+      ),
+      Types.Party(
+        IPeer(peerContract).owner(),
+        _takerToken,
+        takerAmount,
+        0x277f8169
+      ),
+      Types.Party(address(0), address(0), 0, bytes4(0)),
+      Types.Signature(address(0), 0, 0, 0, 0)
+    ));
+
+    // PeerFrontend revokes the authorization of the Peer.
+    swapContract.revoke(peerContract);
+
+    // PeerFrontend transfers received amount to the User.
+    IERC20(_takerToken).transfer(msg.sender, takerAmount);
   }
 }
