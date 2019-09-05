@@ -156,16 +156,14 @@ End-to-end tests for the ERC-20 flow were performed on Rinkeby prior to deploy o
 
 Hash of master used for deploy of Swap: [ef5cff0613532d27ecedb332e222ae0a75079841](https://github.com/airswap/airswap-protocols/commit/ef5cff0613532d27ecedb332e222ae0a75079841)
 
-Rinkeby Etherscan (Swap): https://rinkeby.etherscan.io/address/0x6c629eAFFbEf9935F4FA390AC32f27EEC9462a8E
+Rinkeby Etherscan (Swap): https://rinkeby.etherscan.io/address/0x6f337bA064b0a92538a4AfdCF0e60F50eEAe0D5B
 
-Mainnet Etherscan (verified Swap): https://etherscan.io/address/0x6738668f16b28589b7b9d50e79095bdecc88d13b
+Mainnet Etherscan (verified Swap): https://etherscan.io/address/0x251F752B85a9F7e1B3C42D802715B5D7A8Da3165
 
-Hash of master used for deploy of below contracts: [6e6c314f1d082dbb98e8ca2fd671dddfd36e37fa](https://github.com/airswap/airswap-protocols/commit/6e6c314f1d082dbb98e8ca2fd671dddfd36e37fa)
-
-Rinkeby Etherscan (Types); https://rinkeby.etherscan.io/address/0xaaf6cb19298e7d0abc410eb2a0d5b8fef747573d
+Rinkeby Etherscan (Types); https://rinkeby.etherscan.io/address/0x4A041FA0a727c828616C83C090585913221641ba
 
 Mainnet Etherscan (verified lib Types):
-https://etherscan.io/address/0xc65ff60eb8e4038a2415bb569d1fa6dca47d692e
+https://etherscan.io/address/0x2fA5d35f9c99E11a75F2D3cD9F6E6d904a1241C5
 
 ## Notes
 

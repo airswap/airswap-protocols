@@ -1,0 +1,32 @@
+Compilation warnings/errors on contracts/Index.sol: commit 2518c58bec77b8b7d7791d225de9f22716294e77
+pragma experimental ABIEncoderV2;
+^-------------------------------^
+
+INFO:Detectors:
+Different versions of Solidity is used in :
+  - Version used: ['0.5.10', 'ABIEncoderV2', '^0.5.0']
+  - ../../node_modules/openzeppelin-solidity/contracts/ownership/Ownable.sol#1 declares pragma solidity^0.5.0
+  - contracts/Index.sol#17 declares pragma solidity0.5.10
+  - contracts/Index.sol#18 declares pragma experimentalABIEncoderV2
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#different-pragma-directives-are-used
+INFO:Detectors:
+Pragma version "^0.5.0" allows old versions (../../node_modules/openzeppelin-solidity/contracts/ownership/Ownable.sol#1)
+Pragma version "0.5.10" necessitates versions too recent to be trusted. Consider deploying with 0.5.3 (contracts/Index.sol#17)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#incorrect-versions-of-solidity
+INFO:Detectors:
+Parameter '_user' of _user (contracts/Index.sol#87) is not in mixedCase
+Parameter '_score' of _score (contracts/Index.sol#88) is not in mixedCase
+Parameter '_data' of _data (contracts/Index.sol#89) is not in mixedCase
+Parameter '_user' of _user (contracts/Index.sol#115) is not in mixedCase
+Parameter '_user' of _user (contracts/Index.sol#143) is not in mixedCase
+Parameter '_count' of _count (contracts/Index.sol#161) is not in mixedCase
+Parameter '_user' of _user (contracts/Index.sol#189) is not in mixedCase
+Parameter '_score' of _score (contracts/Index.sol#205) is not in mixedCase
+Parameter '_left' of _left (contracts/Index.sol#230) is not in mixedCase
+Parameter '_right' of _right (contracts/Index.sol#231) is not in mixedCase
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#conformance-to-solidity-naming-conventions
+INFO:Detectors:
+Ownable.owner() (../../node_modules/openzeppelin-solidity/contracts/ownership/Ownable.sol#28-30) should be declared external
+Ownable.renounceOwnership() (../../node_modules/openzeppelin-solidity/contracts/ownership/Ownable.sol#54-57) should be declared external
+Ownable.transferOwnership(address) (../../node_modules/openzeppelin-solidity/contracts/ownership/Ownable.sol#63-65) should be declared external
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#public-function-that-could-be-declared-as-external
