@@ -18,33 +18,110 @@ pragma solidity 0.5.10;
 
 import "@airswap/indexer/contracts/interfaces/IIndexer.sol";
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
+import "@airswap/peer/contracts/interfaces/IPeer.sol";
 
 /**
   * @title PeerFrontEnd: Onchain Liquidity provider for the Swap Protocol
   */
 contract PeerFrontEnd {
 
-    IIndexer indexer;
-    ISwap swap;
+  uint256 constant public MAX_INT =  2**256 - 1;
 
-	constructor(IIndexer _indexer, ISwap _swap) public {
-        indexer = _indexer;
-        swap = _swap;
-	}
+  IIndexer indexer;
+  ISwap swap;
 
-    function findBestBuy(uint256 _receiveAmount, address _receiveToken, address _sendToken, uint256 _maxIntents) external view returns (bytes32, uint256) {
-        return (0, 0);
+  constructor(IIndexer _indexer, ISwap _swap) public {
+    indexer = _indexer;
+    swap = _swap;
+  }
+
+  function getBestTakerSideQuote(
+    uint256 _takerAmount,
+    address _takerToken,
+    address _makerToken,
+    uint256 _maxIntents
+  ) external view returns (bytes32 peerAddress, uint256 lowestCost) {
+
+    // use the indexer to query peers
+    lowestCost = MAX_INT;
+
+    // Fetch an array of locators from the Indexer.
+    bytes32[] memory locators = indexer.getIntents(
+      _takerToken,
+      _makerToken,
+      _maxIntents
+      );
+
+    // Iterate through locators.
+    for (uint256 i; i < locators.length; i++) {
+
+      // Get a buy quote from the Peer.
+      uint256 makerAmount = IPeer(address(bytes20(locators[i])))
+        .getMakerSideQuote(_takerAmount, _takerToken, _makerToken);
+
+      // Update the lowest cost.
+      if (makerAmount > 0 && makerAmount < lowestCost) {
+        peerAddress = locators[i];
+        lowestCost = makerAmount;
+      }
     }
 
-    function findBestSell(uint256 _sendAmount, address _sendToken, address _receiveToken, uint256 _maxIntents) external view returns (bytes32, uint256) {
-        return (0, 0);
+    // Return the Peer address and amount.
+    return (peerAddress, lowestCost);
+
+  }
+
+  function getBestMakerSideQuote(
+    uint256 _makerAmount,
+    address _makerToken,
+    address _takerToken,
+    uint256 _maxIntents
+  ) external view returns (bytes32 peerAddress, uint256 lowestCost) {
+
+    // use the indexer to query peers
+    lowestCost = MAX_INT;
+
+    // Fetch an array of locators from the Indexer.
+    bytes32[] memory locators = indexer.getIntents(
+      _takerToken,
+      _makerToken,
+      _maxIntents
+      );
+
+    // Iterate through locators.
+    for (uint256 i; i < locators.length; i++) {
+
+      // Get a buy quote from the Peer.
+      uint256 makerAmount = IPeer(address(bytes20(locators[i])))
+        .getTakerSideQuote(_makerAmount, _makerToken, _takerToken);
+
+      // Update the lowest cost.
+      if (makerAmount > 0 && makerAmount < lowestCost) {
+        peerAddress = locators[i];
+        lowestCost = makerAmount;
+      }
     }
 
-    function takeBestBuy(uint256 _receiveAmount, address _receiveToken, address _sendToken, uint256 _maxIntents) external {
+    // Return the Peer address and amount.
+    return (peerAddress, lowestCost);
 
-    }
+  }
 
-    function takeBestSell(uint256 _sendAmount, address _sendToken, address _receiveToken, uint256 _maxIntents) external {
+  function fillBestTakerSideOrder(
+    uint256 _takerAmount,
+    address _takerToken,
+    address _makerToken,
+    uint256 _maxIntents
+  ) external {
 
-    }
+  }
+
+  function fillBestMakerSideOrder(
+    uint256 _makerAmount,
+    address _makerToken,
+    address _takerToken,
+    uint256 _maxIntents
+  ) external {
+
+  }
 }
