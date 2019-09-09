@@ -4,8 +4,8 @@ const Indexer = artifacts.require('Indexer')
 const Peer = artifacts.require('Peer')
 const FungibleToken = artifacts.require('FungibleToken')
 const Types = artifacts.require('Types')
-
-const { emitted, equal, ok } = require('@airswap/test-utils').assert
+var BigNumber = require('bignumber.js')
+const { emitted, equal, ok, reverted } = require('@airswap/test-utils').assert
 const { balances } = require('@airswap/test-utils').balances
 const {
   getTimestampPlusDays,
@@ -124,6 +124,32 @@ contract('PeerFrontend', async accounts => {
     })
   })
 
+  describe('PeerFrontend - fills for non-existent quotes', async () => {
+    it('Finds best price to buy 100 AST for DAI - reverts ', async () => {
+      await reverted(
+        peerfrontend.fillBestMakerSideOrder.call(
+          100,
+          tokenAST.address,
+          tokenDAI.address,
+          5
+        ),
+        'NO_LOCATOR, BAILING'
+      )
+    })
+
+    it('Finds best price to sell 100 AST for DAI - reverts', async () => {
+      await reverted(
+        peerfrontend.fillBestTakerSideOrder.call(
+          100,
+          tokenAST.address,
+          tokenDAI.address,
+          5
+        ),
+        'NO_LOCATOR, BAILING'
+      )
+    })
+  })
+
   describe('Alice adds some peer rules', async () => {
     it('Adds a rule to send up to 150 WETH for DAI at 309.52 DAI/WETH', async () => {
       emitted(
@@ -168,6 +194,20 @@ contract('PeerFrontend', async accounts => {
       )
       equal(quote[0], padAddressToLocator(alicePeer.address))
       equal(quote[1].toNumber(), 30952)
+    })
+
+    it('Finds best price to very large WETH amount for DAI', async () => {
+      const quote = await peerfrontend.getBestTakerSideQuote.call(
+        10000000,
+        tokenWETH.address,
+        tokenDAI.address,
+        5
+      )
+      equal(quote[0], padAddressToLocator(EMPTY_ADDRESS))
+      equal(
+        new BigNumber(quote[1]).toString(16),
+        'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
+      )
     })
 
     it('Takes best price (Alice peer)', async () => {
