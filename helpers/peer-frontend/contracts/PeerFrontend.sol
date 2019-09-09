@@ -32,17 +32,27 @@ contract PeerFrontend {
   IIndexer public indexer;
   ISwap public swapContract;
 
-  constructor(IIndexer _indexer, ISwap _swap) public {
-    indexer = _indexer;
-    swapContract = _swap;
+  constructor(address _indexer, address _swap) public {
+    indexer = IIndexer(_indexer);
+    swapContract = ISwap(_swap);
   }
 
+  /**
+    * @notice Get a Taker-Side Quote from the Onchain Liquidity provider
+    * @param _takerAmount uint256 The amount of ERC-20 token the peer would send
+    * @param _takerToken address The address of an ERC-20 token the peer would send
+    * @param _makerToken address The address of an ERC-20 token the consumer would send
+    * @param _maxIntents uint256 The maximum number of Peers to query
+    * @return peerAddress bytes32
+    * @return lowestCost uint256
+    */
   function getBestTakerSideQuote(
     uint256 _takerAmount,
     address _takerToken,
     address _makerToken,
     uint256 _maxIntents
   ) public view returns (bytes32 peerAddress, uint256 lowestCost) {
+
 
     // use the indexer to query peers
     lowestCost = MAX_INT;
@@ -73,6 +83,15 @@ contract PeerFrontend {
 
   }
 
+  /**
+    * @notice Get a Maker-Side Quote from the Onchain Liquidity provider
+    * @param _makerAmount uint256 The amount of ERC-20 token the peer would send
+    * @param _makerToken address The address of an ERC-20 token the peer would send
+    * @param _takerToken address The address of an ERC-20 token the consumer would send
+    * @param _maxIntents uint256 The maximum number of Peers to query
+    * @return peerLocator bytes32  The amount of ERC-20 token the consumer would send
+    * @return lowestCost uint256 The amount of ERC-20 token the consumer would send
+    */
   function getBestMakerSideQuote(
     uint256 _makerAmount,
     address _makerToken,
@@ -117,7 +136,12 @@ contract PeerFrontend {
   ) external {
 
     // Find the best buy among Indexed Peers.
-    (bytes32 peerLocator, uint256 makerAmount) = getBestTakerSideQuote(_takerAmount, _takerToken, _makerToken, _maxIntents);
+    (bytes32 peerLocator, uint256 makerAmount) = getBestTakerSideQuote(
+      _takerAmount,
+      _takerToken,
+      _makerToken,
+      _maxIntents
+    );
 
     // check if peerLocator exists
     require(peerLocator != bytes32(0), "NO_LOCATOR, BAILING");
@@ -168,7 +192,12 @@ contract PeerFrontend {
   ) external {
 
     // Find the best buy among Indexed Peers.
-    (bytes32 peerLocator, uint256 takerAmount) = getBestMakerSideQuote(_makerAmount, _makerToken, _takerToken, _maxIntents);
+    (bytes32 peerLocator, uint256 takerAmount) = getBestMakerSideQuote(
+      _makerAmount,
+      _makerToken,
+      _takerToken,
+      _maxIntents
+    );
 
     // check if peerLocator exists
     require(peerLocator != bytes32(0), "NO_LOCATOR, BAILING");
