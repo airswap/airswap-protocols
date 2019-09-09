@@ -47,7 +47,7 @@ contract('PeerFrontend', async accounts => {
     await revertToSnapShot(snapshotId)
   })
 
-  describe('Setup', async () => {
+  describe('Setup peer for Alice', async () => {
     before('Deploys all the things', async () => {
       tokenAST = await FungibleToken.new()
       tokenDAI = await FungibleToken.new()
@@ -83,9 +83,9 @@ contract('PeerFrontend', async accounts => {
       )
     })
 
-    it('Bob creates an index for WETH/DAI', async () => {
+    it('Bob creates an index for DAI (maker)/WETH (taker)', async () => {
       emitted(
-        await indexer.createIndex(tokenWETH.address, tokenDAI.address, {
+        await indexer.createIndex(tokenDAI.address, tokenWETH.address, {
           from: bobAddress,
         }),
         'CreateIndex'
@@ -111,8 +111,8 @@ contract('PeerFrontend', async accounts => {
     it('Alice attempts to stake and set an intent succeeds', async () => {
       emitted(
         await indexer.setIntent(
-          tokenWETH.address,
           tokenDAI.address,
+          tokenWETH.address,
           500,
           alicePeer.address,
           {
@@ -152,8 +152,8 @@ contract('PeerFrontend', async accounts => {
   describe('PeerFrontend - TakerSide', async () => {
     it('Get the intent', async () => {
       const result = await indexer.getIntents.call(
-        tokenWETH.address,
         tokenDAI.address,
+        tokenWETH.address,
         5
       )
       equal(result, padAddressToLocator(alicePeer.address))
@@ -172,7 +172,7 @@ contract('PeerFrontend', async accounts => {
 
     it('Takes best price (Alice peer)', async () => {
       // Alice peer gets some WETH to trade throug her Peer
-      tokenWETH.mint(aliceAddress, 100)
+      await tokenWETH.mint(aliceAddress, 200)
 
       // Alice approves Swap contract to transfer her WETH
       emitted(
@@ -203,8 +203,8 @@ contract('PeerFrontend', async accounts => {
       )
 
       // Assert that Carol has taken 100 WETH from Alice
-      equal(await tokenWETH.balanceOf(aliceAddress), 0)
-      equal(await tokenWETH.balanceOf(carolAddress), 100)
+      ok(await balances(aliceAddress, [[tokenWETH, 100], [tokenDAI, 30952]]))
+      ok(await balances(carolAddress, [[tokenWETH, 100], [tokenDAI, 19048]]))
     })
 
     it('Checks the new Peer maximum', async () => {
@@ -218,52 +218,28 @@ contract('PeerFrontend', async accounts => {
   })
 
   describe('PeerFrontend - MakerSide', async () => {
-    it('Get the intent', async () => {
-      const result = await indexer.getIntents.call(
-        tokenWETH.address,
-        tokenDAI.address,
-        5
-      )
-      equal(result, padAddressToLocator(alicePeer.address))
-    })
-
     it('Finds best price to buy 309 DAI for WETH', async () => {
       const quote = await peerfrontend.getBestMakerSideQuote.call(
-        100,
+        15476,
         tokenDAI.address,
         tokenWETH.address,
         5
       )
+
       equal(quote[0], padAddressToLocator(alicePeer.address))
-      equal(quote[1].toNumber(), 30952)
+      equal(quote[1].toNumber(), 50)
+
+      // Assert that Carol has taken 100 WETH from Alice
+      ok(await balances(aliceAddress, [[tokenWETH, 100]]))
+      ok(await balances(carolAddress, [[tokenWETH, 100]]))
     })
 
-    it('Takes best price (Alice peer)', async () => {
-      // Alice peer gets some WETH to trade throug her Peer
-      tokenWETH.mint(aliceAddress, 100)
-
-      // Alice approves Swap contract to transfer her WETH
-      emitted(
-        await tokenWETH.approve(swapAddress, 10000, { from: aliceAddress }),
-        'Approval'
-      )
-
-      // Carol gets some DAI to use to buy some WETH
-      await tokenDAI.mint(carolAddress, 50000)
-
-      // Carol approves the PeerFrontend to transfer her DAI
-      emitted(
-        await tokenDAI.approve(peerfrontendAddress, 50000, {
-          from: carolAddress,
-        }),
-        'Approval'
-      )
-
+    it('Takes best price (Alice peer) - MakerSide', async () => {
       // Carol takes the best price for 100 DAI
-      await peerfrontend.fillBestTakerSideOrder(
-        100,
-        tokenWETH.address,
+      await peerfrontend.fillBestMakerSideOrder(
+        15476,
         tokenDAI.address,
+        tokenWETH.address,
         50,
         {
           from: carolAddress,
@@ -271,8 +247,8 @@ contract('PeerFrontend', async accounts => {
       )
 
       // Assert that Carol has taken 100 WETH from Alice
-      equal(await tokenWETH.balanceOf(aliceAddress), 0)
-      equal(await tokenWETH.balanceOf(carolAddress), 100)
+      ok(await balances(aliceAddress, [[tokenWETH, 50]]))
+      ok(await balances(carolAddress, [[tokenWETH, 150]]))
     })
 
     it('Checks the new Peer maximum', async () => {
@@ -280,8 +256,8 @@ contract('PeerFrontend', async accounts => {
         tokenWETH.address,
         tokenDAI.address
       )
-      equal(result[0], 50)
-      equal(result[1], 15476)
+      equal(result[0], 0)
+      equal(result[1], 0)
     })
   })
 })

@@ -47,9 +47,9 @@ contract PeerFrontend {
     * @return lowestCost uint256
     */
   function getBestTakerSideQuote(
-    uint256 _takerAmount,
-    address _takerToken,
-    address _makerToken,
+    uint256 _takerAmount, //peer
+    address _takerToken, //peers
+    address _makerToken, // thiscontract
     uint256 _maxIntents
   ) public view returns (bytes32 peerAddress, uint256 lowestCost) {
 
@@ -59,8 +59,8 @@ contract PeerFrontend {
 
     // Fetch an array of locators from the Indexer.
     bytes32[] memory locators = indexer.getIntents(
-      _takerToken,
       _makerToken,
+      _takerToken,
       _maxIntents
       );
 
@@ -104,8 +104,8 @@ contract PeerFrontend {
 
     // Fetch an array of locators from the Indexer.
     bytes32[] memory locators = indexer.getIntents(
-      _takerToken,
       _makerToken,
+      _takerToken,
       _maxIntents
       );
 
@@ -159,7 +159,7 @@ contract PeerFrontend {
 
     // Consumer provides unsigned order to Peer.
     IPeer(peerContract).provideOrder(Types.Order(
-      1,
+      uint256(keccak256(abi.encodePacked(block.timestamp, IPeer(peerContract).owner()))),
       block.timestamp + 1,
       Types.Party(
         address(this), // consumer is acting as the maker in this case
@@ -215,7 +215,7 @@ contract PeerFrontend {
 
     // Consumer provides unsigned order to Peer.
     IPeer(peerContract).provideOrder(Types.Order(
-      1,
+      uint256(keccak256(abi.encodePacked(block.timestamp, IPeer(peerContract).owner()))),
       block.timestamp + 1,
       Types.Party(
         address(this), // consumer is acting as the maker in this case
