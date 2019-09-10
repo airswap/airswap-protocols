@@ -90,10 +90,10 @@ _\*\* OpenZeppelin contract_
 - Because the taker has authorized the wrapper on the swap contract, the wrapper requires that the sender of the transaction be the same as the takerAddress.
 - **This invariant holds as-is.**
 
-#### 7. Protected from re-entrancy attacks such that multiple parties could use Wrapper and receive more balances.
+#### 6. The contract is safeguarded against re-entrancy attacks that can make unauthorized or unexpected ether or token transfers.
 
-- Requires inspection.
-- **This invariant is not known to hold.**
+- Confirmed through manual inspection walking through several attack scenarios. Prior to Swap.swap being called, the transfers use a well-known WETH contract that does not unexpectedly hold balances. It will always REVERT on failures (see WETH audit for notes). After the first conditional in Wrapper.swap, the Swap.swap re-entrancy guards prevent duplicate orders from being submitted and filled. In addition, the fallback function locks ether transfers to only the WETH smart contract.
+- **This invariant currently holds as-is.**
 
 #### 8. Sending the same parameters twice will have the same guarantees as the Swap contract.
 
