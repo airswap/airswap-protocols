@@ -159,7 +159,7 @@ contract PeerFrontend {
 
     // Consumer provides unsigned order to Peer.
     IPeer(peerContract).provideOrder(Types.Order(
-      uint256(keccak256(abi.encodePacked(block.timestamp, IPeer(peerContract).owner()))),
+      uint256(keccak256(abi.encodePacked(block.timestamp, address(this), _makerToken, IPeer(peerContract).owner(), _takerToken))),
       block.timestamp + 1,
       Types.Party(
         address(this), // consumer is acting as the maker in this case
@@ -215,7 +215,7 @@ contract PeerFrontend {
 
     // Consumer provides unsigned order to Peer.
     IPeer(peerContract).provideOrder(Types.Order(
-      uint256(keccak256(abi.encodePacked(block.timestamp, IPeer(peerContract).owner()))),
+      uint256(keccak256(abi.encodePacked(block.timestamp, address(this), _makerToken, IPeer(peerContract).owner(), _takerToken))),
       block.timestamp + 1,
       Types.Party(
         address(this), // consumer is acting as the maker in this case
