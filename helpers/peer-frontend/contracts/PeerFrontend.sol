@@ -113,13 +113,13 @@ contract PeerFrontend {
     for (uint256 i; i < locators.length; i++) {
 
       // Get a buy quote from the Peer.
-      uint256 makerAmount = IPeer(address(bytes20(locators[i])))
+      uint256 takerAmount = IPeer(address(bytes20(locators[i])))
         .getTakerSideQuote(_makerAmount, _makerToken, _takerToken);
 
       // Update the lowest cost.
-      if (makerAmount > 0 && makerAmount < lowestCost) {
+      if (takerAmount > 0 && takerAmount < lowestCost) {
         peerLocator = locators[i];
-        lowestCost = makerAmount;
+        lowestCost = takerAmount;
       }
     }
 

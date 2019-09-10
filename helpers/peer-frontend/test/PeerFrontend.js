@@ -4,10 +4,11 @@ const Indexer = artifacts.require('Indexer')
 const Peer = artifacts.require('Peer')
 const FungibleToken = artifacts.require('FungibleToken')
 const Types = artifacts.require('Types')
-var BigNumber = require('bignumber.js')
+var BigNumber = require('bn.js')
 const { emitted, equal, ok, reverted } = require('@airswap/test-utils').assert
 const { balances } = require('@airswap/test-utils').balances
 const {
+  advanceTimeAndBlock,
   getTimestampPlusDays,
   revertToSnapShot,
   takeSnapshot,
@@ -210,7 +211,7 @@ contract('PeerFrontend', async accounts => {
       )
     })
 
-    it('Takes best price (Alice peer)', async () => {
+    it('Takes best price (Alice peer) - TakerSide', async () => {
       // Alice peer gets some WETH to trade throug her Peer
       await tokenWETH.mint(aliceAddress, 200)
 
@@ -275,6 +276,7 @@ contract('PeerFrontend', async accounts => {
     })
 
     it('Takes best price (Alice peer) - MakerSide', async () => {
+      await advanceTimeAndBlock(10)
       // Carol takes the best price for 100 DAI
       await peerfrontend.fillBestMakerSideOrder(
         15476,
