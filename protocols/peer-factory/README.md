@@ -13,9 +13,9 @@
 
 ## Resources
 
-- Docs → https://airswap.gitbook.io/
+- Docs → https://docs.airswap.io/
 - Website → https://www.airswap.io/
-- Blog → https://medium.com/fluidity
+- Blog → https://blog.airswap.io/
 - Support → https://support.airswap.io/
 
 ## Deployments
