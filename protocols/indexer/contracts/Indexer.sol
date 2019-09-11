@@ -179,7 +179,7 @@ contract Indexer is IIndexer, Ownable {
     indexes[_makerToken][_takerToken].unsetLocator(msg.sender);
 
     if (locator.score > 0) {
-      // Return the staked tokens. IERC20 returns boolean this contract may not be ours.
+      // Return the staked tokens.
       // Need to revert when false is returned
       require(stakeToken.transfer(msg.sender, locator.score));
     }

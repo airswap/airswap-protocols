@@ -3,7 +3,7 @@ const Indexer = artifacts.require('Indexer')
 const Peer = artifacts.require('Peer')
 const MockContract = artifacts.require('MockContract')
 const abi = require('ethereumjs-abi')
-const { equal } = require('@airswap/test-utils').assert
+const { equal, passes } = require('@airswap/test-utils').assert
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 const BigNumber = require('bignumber.js')
@@ -244,7 +244,7 @@ contract('PeerFrontend Unit Tests', async () => {
   })
 
   describe('Test fillBestTakerSideOrder()', async () => {
-    /*        it('test by ensuring all internal methods are called', async () => {
+    it('test by ensuring all internal methods are called', async () => {
       //mock indexer getIntents() where locators are ordered low to high
       await mockIndexer.givenMethodReturn(
         indexer_getIntents,
@@ -254,8 +254,6 @@ contract('PeerFrontend Unit Tests', async () => {
         )
       )
 
-      // relies on peerFrontend.takeBestBuy requires
-
       let trx = await peerFrontend.fillBestTakerSideOrder(
         180,
         mockUserSendToken.address,
@@ -263,7 +261,7 @@ contract('PeerFrontend Unit Tests', async () => {
         2
       )
       passes(trx)
-    })*/
+    })
   })
 
   describe('Test fillBestMakerSideOrder()', async () => {})
