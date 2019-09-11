@@ -9,16 +9,16 @@
 
 ## Resources
 
-- Docs → https://airswap.gitbook.io/
+- Docs → https://docs.airswap.io/
 - Website → https://www.airswap.io/
-- Blog → https://medium.com/fluidity
+- Blog → https://blog.airswap.io/
 - Support → https://support.airswap.io/
 
 ## For V1 Users
 
 To migrate from the V1 to V2 protocol please see [MIGRATION.md](MIGRATION.md).
 
-## Deployments
+## Last Deploy
 
 | Contract | Version | Network | Address                                                                                                                         |
 | :------- | :------ | :------ | :------------------------------------------------------------------------------------------------------------------------------ |

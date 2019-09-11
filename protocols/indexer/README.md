@@ -13,9 +13,9 @@
 
 ## Resources
 
-- Docs → https://airswap.gitbook.io/
+- Docs → https://docs.airswap.io/
 - Website → https://www.airswap.io/
-- Blog → https://medium.com/fluidity
+- Blog → https://blog.airswap.io/
 - Support → https://support.airswap.io/
 
 ## Commands
@@ -35,84 +35,6 @@
 
 Run an instance of `ganache-cli` before running tests.
 
-<<<<<<< HEAD
-Duplicate or malicious tokens may be blacklisted.
-
-### Locator Whitelisting
-
-Limit locators to those whitelisted by another contract.
-
-## Definitions
-
-| Term    | Definition                                                              |
-| :------ | :---------------------------------------------------------------------- |
-| Signal  | An interest in trading a specific token pair without price information. |
-| Indexer | A data store of intents to trade on the AirSwap Network.                |
-| Index  | A list of intents to trade for a token pair.                            |
-| Locator | How a peer can be reached to communicate pricing.                       |
-
-## Constructor
-
-Create a new `Indexer` contract.
-
-```Solidity
-constructor(
-  address _stakeToken
-  address _locatorWhitelist
-) public
-```
-
-### Params
-
-| Name                | Type      | Description                                        |
-| :------------------ | :-------- | :------------------------------------------------- |
-| `_stakeToken`       | `address` | Address of the token required for staking.         |
-| `_locatorWhitelist` | `address` | Address of an optional locator whitelist contract. |
-
-## Create a Index
-
-If none exists, deploy a new `Index` contract for the given token pair and return the address of the new or existing index contract. For example, a signal to trade WETH/DAI.
-
-```Solidity
-function createIndex(
-  address _makerToken,
-  address _takerToken
-) public returns (address)
-```
-
-### Params
-
-| Name          | Type      | Description                                |
-| :------------ | :-------- | :----------------------------------------- |
-| `_makerToken` | `address` | Address of the token that the Maker sends. |
-| `_takerToken` | `address` | Address of the token that the Taker sends. |
-
-## Add a Token to Blacklist
-
-Add a token to the blacklist. Index contracts that include the blacklisted token will be ignored. Emits an `AddToBlacklist` event.
-
-```Solidity
-function addToBlacklist(
-  address _token
-) external onlyOwner
-```
-
-### Params
-
-| Name     | Type      | Description                        |
-| :------- | :-------- | :--------------------------------- |
-| `_token` | `address` | Address of the token to blacklist. |
-
-## Remove a Token from Blacklist
-
-Remove a token from the blacklist. Emits a `RemoveFromBlacklist` event.
-
-```Solidity
-function removeFromBlacklist(
-  address _token
-) external onlyOwner
-=======
->>>>>>> 4bca549250eca8420e990a3ff0bcb14425fafb53
 ```
 yarn ganache
 ```
