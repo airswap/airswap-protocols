@@ -31,8 +31,6 @@ let tokenWETH
 
 let snapshotId
 
-// TODO: Use token-unit for realistic token amounts.
-
 contract('PeerFrontend', async accounts => {
   let ownerAddress = accounts[0]
   let aliceAddress = accounts[1]
@@ -212,7 +210,7 @@ contract('PeerFrontend', async accounts => {
     })
 
     it('Takes best price (Alice peer) - TakerSide', async () => {
-      // Alice peer gets some WETH to trade throug her Peer
+      // Alice peer gets some WETH to trade through the Peer
       await tokenWETH.mint(aliceAddress, 200)
 
       // Alice approves Swap contract to transfer her WETH
@@ -269,10 +267,6 @@ contract('PeerFrontend', async accounts => {
 
       equal(quote[0], padAddressToLocator(alicePeer.address))
       equal(quote[1].toNumber(), 50)
-
-      // Assert that Carol has taken 100 WETH from Alice
-      ok(await balances(aliceAddress, [[tokenWETH, 100]]))
-      ok(await balances(carolAddress, [[tokenWETH, 100]]))
     })
 
     it('Takes best price (Alice peer) - MakerSide', async () => {
@@ -288,7 +282,7 @@ contract('PeerFrontend', async accounts => {
         }
       )
 
-      // Assert that Carol has taken 100 WETH from Alice
+      // Assert that Carol has taken 50 WETH from Alice
       ok(await balances(aliceAddress, [[tokenWETH, 50]]))
       ok(await balances(carolAddress, [[tokenWETH, 150]]))
     })

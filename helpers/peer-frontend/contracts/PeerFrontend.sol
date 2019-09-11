@@ -39,6 +39,8 @@ contract PeerFrontend {
 
   /**
     * @notice Get a Taker-Side Quote from the Onchain Liquidity provider
+    * @dev want to fetch the lowest _makerAmount for requested _takerAmount
+    * @dev if no suitable Peer found, defaults to 0x0 peerLocator
     * @param _takerAmount uint256 The amount of ERC-20 token the peer would send
     * @param _takerToken address The address of an ERC-20 token the peer would send
     * @param _makerToken address The address of an ERC-20 token the consumer would send
@@ -47,15 +49,15 @@ contract PeerFrontend {
     * @return lowestCost uint256
     */
   function getBestTakerQuote(
-    uint256 _takerAmount, //peer
-    address _takerToken, //peers
-    address _makerToken, // thiscontract
+    uint256 _takerAmount,
+    address _takerToken,
+    address _makerToken,
     uint256 _maxIntents
-  ) public view returns (bytes32 peerAddress, uint256 lowestCost) {
+  ) public view returns (bytes32 peerAddress, uint256 lowestAmount) {
 
 
     // use the indexer to query peers
-    lowestCost = MAX_INT;
+    lowestAmount = MAX_INT;
 
     // Fetch an array of locators from the Indexer.
     bytes32[] memory locators = indexer.getIntents(
@@ -72,19 +74,21 @@ contract PeerFrontend {
         .getMakerQuote(_takerAmount, _takerToken, _makerToken);
 
       // Update the lowest cost.
-      if (makerAmount > 0 && makerAmount < lowestCost) {
+      if (makerAmount > 0 && makerAmount < lowestAmount) {
         peerAddress = locators[i];
-        lowestCost = makerAmount;
+        lowestAmount = makerAmount;
       }
     }
 
     // Return the Peer address and amount.
-    return (peerAddress, lowestCost);
+    return (peerAddress, lowestAmount);
 
   }
 
   /**
     * @notice Get a Maker-Side Quote from the Onchain Liquidity provider
+    * @dev want to fetch the highest _takerAmount for requested _makerAmount
+    * @dev if no suitable Peer found, peerLocator will be 0x0
     * @param _makerAmount uint256 The amount of ERC-20 token the peer would send
     * @param _makerToken address The address of an ERC-20 token the peer would send
     * @param _takerToken address The address of an ERC-20 token the consumer would send
@@ -97,10 +101,10 @@ contract PeerFrontend {
     address _makerToken,
     address _takerToken,
     uint256 _maxIntents
-  ) public view returns (bytes32 peerLocator, uint256 lowestCost) {
+  ) public view returns (bytes32 peerLocator, uint256 highAmount) {
 
     // use the indexer to query peers
-    lowestCost = MAX_INT;
+    highAmount = 0;
 
     // Fetch an array of locators from the Indexer.
     bytes32[] memory locators = indexer.getIntents(
@@ -116,18 +120,28 @@ contract PeerFrontend {
       uint256 takerAmount = IPeer(address(bytes20(locators[i])))
         .getTakerQuote(_makerAmount, _makerToken, _takerToken);
 
-      // Update the lowest cost.
-      if (takerAmount > 0 && takerAmount < lowestCost) {
+      // Update the highest amount.
+      if (takerAmount > 0 && takerAmount > highAmount) {
         peerLocator = locators[i];
-        lowestCost = takerAmount;
+        highAmount = takerAmount;
       }
     }
 
     // Return the Peer address and amount.
-    return (peerLocator, lowestCost);
-
+    return (peerLocator, highAmount);
   }
 
+  /**
+    * @notice Get and fill Taker-Side Quote from the Onchain Liquidity provider
+    * @dev want to fetch the lowest _makerAmount for requested _takerAmount
+    * @dev if no suitable Peer found, will revert by checking peerLocator is 0x0
+    * @param _takerAmount uint256 The amount of ERC-20 token the peer would send
+    * @param _takerToken address The address of an ERC-20 token the peer would send
+    * @param _makerToken address The address of an ERC-20 token the consumer would send
+    * @param _maxIntents uint256 The maximum number of Peers to query
+    * @return peerAddress bytes32
+    * @return lowestCost uint256
+    */
   function fillBestTakerOrder(
     uint256 _takerAmount,
     address _takerToken,
@@ -159,7 +173,12 @@ contract PeerFrontend {
 
     // Consumer provides unsigned order to Peer.
     IPeer(peerContract).provideOrder(Types.Order(
-      uint256(keccak256(abi.encodePacked(block.timestamp, address(this), _makerToken, IPeer(peerContract).owner(), _takerToken))),
+      uint256(keccak256(abi.encodePacked(
+        block.timestamp,
+        address(this),
+        _makerToken,
+        IPeer(peerContract).owner(),
+        _takerToken))),
       block.timestamp + 1,
       Types.Party(
         address(this), // consumer is acting as the maker in this case
@@ -215,7 +234,13 @@ contract PeerFrontend {
 
     // Consumer provides unsigned order to Peer.
     IPeer(peerContract).provideOrder(Types.Order(
-      uint256(keccak256(abi.encodePacked(block.timestamp, address(this), _makerToken, IPeer(peerContract).owner(), _takerToken))),
+      uint256(keccak256(abi.encodePacked(
+        block.timestamp,
+        address(this),
+        _makerToken,
+        IPeer(peerContract).owner(),
+        _takerToken
+      ))),
       block.timestamp + 1,
       Types.Party(
         address(this), // consumer is acting as the maker in this case

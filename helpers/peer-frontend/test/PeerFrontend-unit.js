@@ -14,6 +14,7 @@ contract('PeerFrontend Unit Tests', async () => {
   const highVal = 400
   const lowVal = 200
   const maxUint = new BigNumber('1.1579209e+77')
+  const minUint = new BigNumber('0.0000000')
 
   let snapshotId
   let mockPeerHigh
@@ -195,7 +196,7 @@ contract('PeerFrontend Unit Tests', async () => {
 
       let lowestCost = new BigNumber(val[1]).toPrecision(5)
       equal(val[0], emptyLocator)
-      equal(lowestCost, maxUint.toPrecision(5))
+      equal(lowestCost, minUint.toPrecision(5))
     })
 
     it('test that the lowest cost peer is returned with an indexer ordered high to low', async () => {
@@ -216,8 +217,8 @@ contract('PeerFrontend Unit Tests', async () => {
         2
       )
 
-      equal(val[0], mockPeerLowLocator)
-      equal(val[1].toNumber(), lowVal)
+      equal(val[0], mockPeerHighLocator)
+      equal(val[1].toNumber(), highVal)
     })
 
     it('test that the lowest cost peer is returned with an indexer ordered low to high', async () => {
@@ -237,8 +238,8 @@ contract('PeerFrontend Unit Tests', async () => {
         EMPTY_ADDRESS,
         2
       )
-      equal(val[0], mockPeerLowLocator)
-      equal(val[1].toNumber(), lowVal)
+      equal(val[0], mockPeerHighLocator)
+      equal(val[1].toNumber(), highVal)
     })
   })
 
