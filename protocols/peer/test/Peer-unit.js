@@ -169,10 +169,10 @@ contract('Peer Unit Tests', async accounts => {
     })
   })
 
-  describe('Test getMakerSideQuote', async () => {
+  describe('Test getMakerQuote', async () => {
     it('test when rule does not exist', async () => {
       const NON_EXISTENT_TAKER_TOKEN = accounts[7]
-      let val = await peer.getMakerSideQuote.call(
+      let val = await peer.getMakerQuote.call(
         1234,
         NON_EXISTENT_TAKER_TOKEN,
         MAKER_TOKEN
@@ -192,7 +192,7 @@ contract('Peer Unit Tests', async accounts => {
         PRICE_COEF,
         EXP
       )
-      let val = await peer.getMakerSideQuote.call(
+      let val = await peer.getMakerQuote.call(
         MAX_TAKER_AMOUNT + 1,
         TAKER_TOKEN,
         MAKER_TOKEN
@@ -212,7 +212,7 @@ contract('Peer Unit Tests', async accounts => {
         PRICE_COEF,
         EXP
       )
-      let val = await peer.getMakerSideQuote.call(0, TAKER_TOKEN, MAKER_TOKEN)
+      let val = await peer.getMakerQuote.call(0, TAKER_TOKEN, MAKER_TOKEN)
       equal(
         val.toNumber(),
         0,
@@ -220,7 +220,7 @@ contract('Peer Unit Tests', async accounts => {
       )
     })
 
-    it('test a successful call - getMakerSideQuote', async () => {
+    it('test a successful call - getMakerQuote', async () => {
       await peer.setRule(
         TAKER_TOKEN,
         MAKER_TOKEN,
@@ -229,7 +229,7 @@ contract('Peer Unit Tests', async accounts => {
         EXP
       )
 
-      let val = await peer.getMakerSideQuote.call(
+      let val = await peer.getMakerQuote.call(
         1234,
         TAKER_TOKEN,
         MAKER_TOKEN
@@ -239,9 +239,9 @@ contract('Peer Unit Tests', async accounts => {
     })
   })
 
-  describe('Test getTakerSideQuote', async () => {
+  describe('Test getTakerQuote', async () => {
     it('test when rule does not exist', async () => {
-      let val = await peer.getTakerSideQuote.call(
+      let val = await peer.getTakerQuote.call(
         4312,
         MAKER_TOKEN,
         TAKER_TOKEN
@@ -255,14 +255,14 @@ contract('Peer Unit Tests', async accounts => {
 
     it('test when peer amount is not within acceptable value bounds', async () => {
       await peer.setRule(TAKER_TOKEN, MAKER_TOKEN, 100, 1, 0)
-      let val = await peer.getTakerSideQuote.call(0, MAKER_TOKEN, TAKER_TOKEN)
+      let val = await peer.getTakerQuote.call(0, MAKER_TOKEN, TAKER_TOKEN)
       equal(
         val.toNumber(),
         0,
         'no quote should be available if returned peer amount is 0'
       )
 
-      val = await peer.getTakerSideQuote.call(
+      val = await peer.getTakerQuote.call(
         MAX_TAKER_AMOUNT + 1,
         MAKER_TOKEN,
         TAKER_TOKEN
@@ -274,7 +274,7 @@ contract('Peer Unit Tests', async accounts => {
       )
     })
 
-    it('test a successful call - getTakerSideQuote', async () => {
+    it('test a successful call - getTakerQuote', async () => {
       await peer.setRule(
         TAKER_TOKEN,
         MAKER_TOKEN,
@@ -283,7 +283,7 @@ contract('Peer Unit Tests', async accounts => {
         EXP
       )
 
-      let val = await peer.getTakerSideQuote.call(500, MAKER_TOKEN, TAKER_TOKEN)
+      let val = await peer.getTakerQuote.call(500, MAKER_TOKEN, TAKER_TOKEN)
       let expectedValue = Math.floor((500 * 10 ** EXP) / PRICE_COEF)
       equal(val.toNumber(), expectedValue, 'there should be a quote available')
     })

@@ -113,7 +113,7 @@ contract Peer is IPeer, Ownable {
     * @param _makerToken address The address of an ERC-20 token the consumer would send
     * @return uint256 makerParam The amount of ERC-20 token the consumer would send
     */
-  function getMakerSideQuote(
+  function getMakerQuote(
     uint256 _takerParam,
     address _takerToken,
     address _makerToken
@@ -147,7 +147,7 @@ contract Peer is IPeer, Ownable {
     * @param _takerToken address The address of an ERC-20 token the peer would send
     * @return uint256 takerParam The amount of ERC-20 token the peer would send
     */
-  function getTakerSideQuote(
+  function getTakerQuote(
     uint256 _makerParam,
     address _makerToken,
     address _takerToken

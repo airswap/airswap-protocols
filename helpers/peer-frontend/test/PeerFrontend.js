@@ -128,7 +128,7 @@ contract('PeerFrontend', async accounts => {
   describe('PeerFrontend - fills for non-existent quotes', async () => {
     it('Finds best price to buy 100 AST for DAI - reverts ', async () => {
       await reverted(
-        peerfrontend.fillBestMakerSideOrder.call(
+        peerfrontend.fillBestMakerOrder.call(
           100,
           tokenAST.address,
           tokenDAI.address,
@@ -140,7 +140,7 @@ contract('PeerFrontend', async accounts => {
 
     it('Finds best price to sell 100 AST for DAI - reverts', async () => {
       await reverted(
-        peerfrontend.fillBestTakerSideOrder.call(
+        peerfrontend.fillBestTakerOrder.call(
           100,
           tokenAST.address,
           tokenDAI.address,
@@ -187,7 +187,7 @@ contract('PeerFrontend', async accounts => {
     })
 
     it('Finds best price to buy 1 WETH for DAI', async () => {
-      const quote = await peerfrontend.getBestTakerSideQuote.call(
+      const quote = await peerfrontend.getBestTakerQuote.call(
         100,
         tokenWETH.address,
         tokenDAI.address,
@@ -198,7 +198,7 @@ contract('PeerFrontend', async accounts => {
     })
 
     it('Finds best price to very large WETH amount for DAI', async () => {
-      const quote = await peerfrontend.getBestTakerSideQuote.call(
+      const quote = await peerfrontend.getBestTakerQuote.call(
         10000000,
         tokenWETH.address,
         tokenDAI.address,
@@ -233,7 +233,7 @@ contract('PeerFrontend', async accounts => {
       )
 
       // Carol takes the best price for 100 DAI
-      await peerfrontend.fillBestTakerSideOrder(
+      await peerfrontend.fillBestTakerOrder(
         100,
         tokenWETH.address,
         tokenDAI.address,
@@ -260,7 +260,7 @@ contract('PeerFrontend', async accounts => {
 
   describe('PeerFrontend - MakerSide', async () => {
     it('Finds best price to buy 309 DAI for WETH', async () => {
-      const quote = await peerfrontend.getBestMakerSideQuote.call(
+      const quote = await peerfrontend.getBestMakerQuote.call(
         15476,
         tokenDAI.address,
         tokenWETH.address,
@@ -278,7 +278,7 @@ contract('PeerFrontend', async accounts => {
     it('Takes best price (Alice peer) - MakerSide', async () => {
       await advanceTimeAndBlock(10)
       // Carol takes the best price for 100 DAI
-      await peerfrontend.fillBestMakerSideOrder(
+      await peerfrontend.fillBestMakerOrder(
         15476,
         tokenDAI.address,
         tokenWETH.address,

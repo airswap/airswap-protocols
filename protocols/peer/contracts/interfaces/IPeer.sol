@@ -55,7 +55,7 @@ interface IPeer {
     address _makerToken
   ) external;
 
-  function getMakerSideQuote(
+  function getMakerQuote(
     uint256 _takerParam,
     address _takerToken,
     address _makerToken
@@ -63,7 +63,7 @@ interface IPeer {
     uint256 makerParam
   );
 
-  function getTakerSideQuote(
+  function getTakerQuote(
     uint256 _makerParam,
     address _makerToken,
     address _takerToken

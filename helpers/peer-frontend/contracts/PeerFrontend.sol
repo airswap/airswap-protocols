@@ -46,7 +46,7 @@ contract PeerFrontend {
     * @return peerAddress bytes32
     * @return lowestCost uint256
     */
-  function getBestTakerSideQuote(
+  function getBestTakerQuote(
     uint256 _takerAmount, //peer
     address _takerToken, //peers
     address _makerToken, // thiscontract
@@ -69,7 +69,7 @@ contract PeerFrontend {
 
       // Get a buy quote from the Peer.
       uint256 makerAmount = IPeer(address(bytes20(locators[i])))
-        .getMakerSideQuote(_takerAmount, _takerToken, _makerToken);
+        .getMakerQuote(_takerAmount, _takerToken, _makerToken);
 
       // Update the lowest cost.
       if (makerAmount > 0 && makerAmount < lowestCost) {
@@ -92,7 +92,7 @@ contract PeerFrontend {
     * @return peerLocator bytes32  The amount of ERC-20 token the consumer would send
     * @return lowestCost uint256 The amount of ERC-20 token the consumer would send
     */
-  function getBestMakerSideQuote(
+  function getBestMakerQuote(
     uint256 _makerAmount,
     address _makerToken,
     address _takerToken,
@@ -114,7 +114,7 @@ contract PeerFrontend {
 
       // Get a buy quote from the Peer.
       uint256 takerAmount = IPeer(address(bytes20(locators[i])))
-        .getTakerSideQuote(_makerAmount, _makerToken, _takerToken);
+        .getTakerQuote(_makerAmount, _makerToken, _takerToken);
 
       // Update the lowest cost.
       if (takerAmount > 0 && takerAmount < lowestCost) {
@@ -128,7 +128,7 @@ contract PeerFrontend {
 
   }
 
-  function fillBestTakerSideOrder(
+  function fillBestTakerOrder(
     uint256 _takerAmount,
     address _takerToken,
     address _makerToken,
@@ -136,7 +136,7 @@ contract PeerFrontend {
   ) external {
 
     // Find the best buy among Indexed Peers.
-    (bytes32 peerLocator, uint256 makerAmount) = getBestTakerSideQuote(
+    (bytes32 peerLocator, uint256 makerAmount) = getBestTakerQuote(
       _takerAmount,
       _takerToken,
       _makerToken,
@@ -184,7 +184,7 @@ contract PeerFrontend {
     IERC20(_takerToken).transfer(msg.sender, _takerAmount);
   }
 
-  function fillBestMakerSideOrder(
+  function fillBestMakerOrder(
     uint256 _makerAmount,
     address _makerToken,
     address _takerToken,
@@ -192,7 +192,7 @@ contract PeerFrontend {
   ) external {
 
     // Find the best buy among Indexed Peers.
-    (bytes32 peerLocator, uint256 takerAmount) = getBestMakerSideQuote(
+    (bytes32 peerLocator, uint256 takerAmount) = getBestMakerQuote(
       _makerAmount,
       _makerToken,
       _takerToken,
