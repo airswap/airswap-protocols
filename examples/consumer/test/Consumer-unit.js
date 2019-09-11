@@ -45,12 +45,12 @@ contract('Consumer Unit Tests', async () => {
     mockPeerLow = await MockContract.new()
     mockPeerLowLocator = padAddressToLocator(mockPeerLow.address)
 
-    //mock peer getMakerSideQuote()
-    let peer_getMakerSideQuote = peerTemplate.contract.methods
-      .getMakerSideQuote(0, EMPTY_ADDRESS, EMPTY_ADDRESS)
+    //mock peer getMakerQuote()
+    let peer_getMakerQuote = peerTemplate.contract.methods
+      .getMakerQuote(0, EMPTY_ADDRESS, EMPTY_ADDRESS)
       .encodeABI()
-    await mockPeerHigh.givenMethodReturnUint(peer_getMakerSideQuote, highVal)
-    await mockPeerLow.givenMethodReturnUint(peer_getMakerSideQuote, lowVal)
+    await mockPeerHigh.givenMethodReturnUint(peer_getMakerQuote, highVal)
+    await mockPeerLow.givenMethodReturnUint(peer_getMakerQuote, lowVal)
 
     // mock peer has owner()
     let peer_owner = peerTemplate.contract.methods.owner().encodeABI()
