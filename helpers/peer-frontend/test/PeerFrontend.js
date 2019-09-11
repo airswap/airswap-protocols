@@ -181,7 +181,7 @@ contract('PeerFrontend', async accounts => {
         tokenWETH.address,
         5
       )
-      equal(result, padAddressToLocator(alicePeer.address))
+      equal(result[0], padAddressToLocator(alicePeer.address))
     })
 
     it('Finds best price to buy 1 WETH for DAI', async () => {
