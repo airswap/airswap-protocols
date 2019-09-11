@@ -243,7 +243,7 @@ contract('PeerFrontend Unit Tests', async () => {
     })
   })
 
-  describe('Test fillBestTakerSideOrder()', async () => {
+  describe('Test fillBestTakerOrder()', async () => {
     it('test by ensuring all internal methods are called', async () => {
       //mock indexer getIntents() where locators are ordered low to high
       await mockIndexer.givenMethodReturn(
@@ -254,7 +254,7 @@ contract('PeerFrontend Unit Tests', async () => {
         )
       )
 
-      let trx = await peerFrontend.fillBestTakerSideOrder(
+      let trx = await peerFrontend.fillBestTakerOrder(
         180,
         mockUserSendToken.address,
         mockUserReceiveToken.address,
