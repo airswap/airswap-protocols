@@ -22,6 +22,7 @@ import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "@airswap/maker-delegate-factory/contracts/interfaces/IMakerDelegateFactory.sol";
 import "@airswap/maker-delegate/contracts/interfaces/IMakerDelegate.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import "@airswap/types/contracts/Types.sol";
 
 contract MakerDelegateManager is Ownable {
 

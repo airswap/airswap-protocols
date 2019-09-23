@@ -48,6 +48,21 @@ library Types {
     bytes1 version;       // EIP-191 signature version
   }
 
+  struct Rule {
+    address takerToken;   // Address of the taker token
+    address makerToken;   // Address of the maker token
+    uint256 maxTakerAmount; // Max amount of ERC20 token the maker-delegate would send
+    uint256 priceCoef;    // Whole number that will be multiplied by 10^(-priceExp)
+    uint256 priceExp;     // Exponent of the price to indicate the location of the decimal place
+  }
+
+  struct Intent {
+    address makerToken;
+    address takerToken;
+    uint256 amount;
+    bytes32 locator;
+  }
+
   bytes32 constant DOMAIN_TYPEHASH = keccak256(abi.encodePacked(
     "EIP712Domain(",
     "string name,",

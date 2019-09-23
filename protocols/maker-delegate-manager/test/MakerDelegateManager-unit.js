@@ -22,7 +22,6 @@ contract('MakerDelegate Unit Tests', async accounts => {
   const TAKER_TOKEN = accounts[9]
   const MAKER_TOKEN = accounts[8]
 
-
   beforeEach(async () => {
     let snapShot = await takeSnapshot()
     snapshotId = snapShot['result']
@@ -32,21 +31,15 @@ contract('MakerDelegate Unit Tests', async accounts => {
     await revertToSnapShot(snapshotId)
   })
 
-  describe('Test initial values', async () => {
-  })
+  describe('Test initial values', async () => {})
 
-  describe('Test setters', async () => {
-  })
+  describe('Test setters', async () => {})
 
-  describe('Test getMakerSideQuote', async () => {
-  })
+  describe('Test getMakerSideQuote', async () => {})
 
-  describe('Test getTakerSideQuote', async () => {
-  })
+  describe('Test getTakerSideQuote', async () => {})
 
-  describe('Test getMaxQuote', async () => {
-  })
+  describe('Test getMaxQuote', async () => {})
 
-  describe('Test provideOrder', async () => {
-  })
+  describe('Test provideOrder', async () => {})
 })

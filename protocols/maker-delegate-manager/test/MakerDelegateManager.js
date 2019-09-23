@@ -39,18 +39,13 @@ contract('MakerDelegate', async accounts => {
     await revertToSnapShot(snapshotId)
   })
 
-  describe('Deploying...', async () => {
-  })
+  describe('Deploying...', async () => {})
 
-  describe('Checks set and unset rule', async () => {
-  })
+  describe('Checks set and unset rule', async () => {})
 
-  describe('Checks pricing logic from the MakerDelegate', async () => {
-  })
+  describe('Checks pricing logic from the MakerDelegate', async () => {})
 
-  describe('Checks quotes from the MakerDelegate', async () => {
-  })
+  describe('Checks quotes from the MakerDelegate', async () => {})
 
-  describe('Provide some orders to the MakerDelegate', async () => {
-  })
+  describe('Provide some orders to the MakerDelegate', async () => {})
 })
