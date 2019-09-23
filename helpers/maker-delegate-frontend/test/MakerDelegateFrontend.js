@@ -62,9 +62,13 @@ contract('MakerDelegateFrontend', async accounts => {
       })
 
       indexerAddress = indexer.address
-      makerDelegateFrontend = await MakerDelegateFrontend.new(indexerAddress, swapAddress, {
-        from: ownerAddress,
-      })
+      makerDelegateFrontend = await MakerDelegateFrontend.new(
+        indexerAddress,
+        swapAddress,
+        {
+          from: ownerAddress,
+        }
+      )
       makerDelegateFrontendAddress = makerDelegateFrontend.address
       aliceMakerDelegate = await MakerDelegate.new(swapAddress, aliceAddress, {
         from: aliceAddress,

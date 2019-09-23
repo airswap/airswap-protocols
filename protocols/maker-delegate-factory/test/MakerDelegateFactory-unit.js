@@ -36,21 +36,30 @@ contract('MakerDelegate Factory Tests', async accounts => {
   describe('Test deploying makerDelegates', async () => {
     it('should not deploy a makerDelegate with owner address 0x0', async () => {
       await reverted(
-        makerDelegateFactory.createMakerDelegate(swapContractOne, EMPTY_ADDRESS),
+        makerDelegateFactory.createMakerDelegate(
+          swapContractOne,
+          EMPTY_ADDRESS
+        ),
         'PEER_CONTRACT_OWNER_REQUIRED'
       )
     })
 
     it('should not deploy a makerDelegate with swap address 0x0', async () => {
       await reverted(
-        makerDelegateFactory.createMakerDelegate(EMPTY_ADDRESS, makerDelegateOwnerOne),
+        makerDelegateFactory.createMakerDelegate(
+          EMPTY_ADDRESS,
+          makerDelegateOwnerOne
+        ),
         'SWAP_CONTRACT_REQUIRED'
       )
     })
 
     it('should emit event and update the mapping', async () => {
       // successful tx
-      let tx = await makerDelegateFactory.createMakerDelegate(swapContractOne, makerDelegateOwnerOne)
+      let tx = await makerDelegateFactory.createMakerDelegate(
+        swapContractOne,
+        makerDelegateOwnerOne
+      )
       passes(tx)
 
       let makerDelegateAddress
@@ -67,13 +76,18 @@ contract('MakerDelegate Factory Tests', async accounts => {
       let paddedMakerDelegateAddress = padAddressToLocator(makerDelegateAddress)
 
       // mapping has been updated
-      let isTrustedMakerDelegate = await makerDelegateFactory.has.call(paddedMakerDelegateAddress)
+      let isTrustedMakerDelegate = await makerDelegateFactory.has.call(
+        paddedMakerDelegateAddress
+      )
       equal(isTrustedMakerDelegate, true)
     })
 
     it('should create delegate with the correct values', async () => {
       // deploy makerDelegate
-      let tx = await makerDelegateFactory.createMakerDelegate(swapContractTwo, makerDelegateOwnerTwo)
+      let tx = await makerDelegateFactory.createMakerDelegate(
+        swapContractTwo,
+        makerDelegateOwnerTwo
+      )
 
       // get makerDelegate address and pad
       let makerDelegateAddress
@@ -86,7 +100,9 @@ contract('MakerDelegate Factory Tests', async accounts => {
       })
       let paddedMakerDelegateAddress = padAddressToLocator(makerDelegateAddress)
 
-      let isTrustedMakerDelegate = await makerDelegateFactory.has.call(paddedMakerDelegateAddress)
+      let isTrustedMakerDelegate = await makerDelegateFactory.has.call(
+        paddedMakerDelegateAddress
+      )
       equal(isTrustedMakerDelegate, true)
 
       // get the swap and owner values of the makerDelegate
@@ -95,8 +111,16 @@ contract('MakerDelegate Factory Tests', async accounts => {
       let actualOwner = await makerDelegate.owner.call()
 
       // check they are correct
-      equal(swapContractTwo, actualSwap, 'MakerDelegate has incorrect swap address')
-      equal(makerDelegateOwnerTwo, actualOwner, 'MakerDelegate has incorrect owner address')
+      equal(
+        swapContractTwo,
+        actualSwap,
+        'MakerDelegate has incorrect swap address'
+      )
+      equal(
+        makerDelegateOwnerTwo,
+        actualOwner,
+        'MakerDelegate has incorrect owner address'
+      )
     })
   })
 })

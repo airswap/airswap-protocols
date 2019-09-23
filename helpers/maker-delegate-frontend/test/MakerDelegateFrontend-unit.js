@@ -40,30 +40,57 @@ contract('MakerDelegateFrontend Unit Tests', async () => {
   })
 
   async function setupMockMakerDelegateFrontend() {
-    let makerDelegateTemplate = await MakerDelegate.new(EMPTY_ADDRESS, EMPTY_ADDRESS)
+    let makerDelegateTemplate = await MakerDelegate.new(
+      EMPTY_ADDRESS,
+      EMPTY_ADDRESS
+    )
     mockMakerDelegateHigh = await MockContract.new()
-    mockMakerDelegateHighLocator = padAddressToLocator(mockMakerDelegateHigh.address)
+    mockMakerDelegateHighLocator = padAddressToLocator(
+      mockMakerDelegateHigh.address
+    )
     mockMakerDelegateLow = await MockContract.new()
-    mockMakerDelegateLowLocator = padAddressToLocator(mockMakerDelegateLow.address)
+    mockMakerDelegateLowLocator = padAddressToLocator(
+      mockMakerDelegateLow.address
+    )
 
     //mock makerDelegate getMakerSideQuote()
     let makerDelegate_getMakerSideQuote = makerDelegateTemplate.contract.methods
       .getMakerSideQuote(0, EMPTY_ADDRESS, EMPTY_ADDRESS)
       .encodeABI()
-    await mockMakerDelegateHigh.givenMethodReturnUint(makerDelegate_getMakerSideQuote, highVal)
-    await mockMakerDelegateLow.givenMethodReturnUint(makerDelegate_getMakerSideQuote, lowVal)
+    await mockMakerDelegateHigh.givenMethodReturnUint(
+      makerDelegate_getMakerSideQuote,
+      highVal
+    )
+    await mockMakerDelegateLow.givenMethodReturnUint(
+      makerDelegate_getMakerSideQuote,
+      lowVal
+    )
 
     //mock makerDelegate getMakerSideQuote()
     let makerDelegate_getTakerSideQuote = makerDelegateTemplate.contract.methods
       .getTakerSideQuote(0, EMPTY_ADDRESS, EMPTY_ADDRESS)
       .encodeABI()
-    await mockMakerDelegateHigh.givenMethodReturnUint(makerDelegate_getTakerSideQuote, highVal)
-    await mockMakerDelegateLow.givenMethodReturnUint(makerDelegate_getTakerSideQuote, lowVal)
+    await mockMakerDelegateHigh.givenMethodReturnUint(
+      makerDelegate_getTakerSideQuote,
+      highVal
+    )
+    await mockMakerDelegateLow.givenMethodReturnUint(
+      makerDelegate_getTakerSideQuote,
+      lowVal
+    )
 
     // mock makerDelegate has owner()
-    let makerDelegate_owner = makerDelegateTemplate.contract.methods.owner().encodeABI()
-    await mockMakerDelegateHigh.givenMethodReturnAddress(makerDelegate_owner, EMPTY_ADDRESS)
-    await mockMakerDelegateLow.givenMethodReturnAddress(makerDelegate_owner, EMPTY_ADDRESS)
+    let makerDelegate_owner = makerDelegateTemplate.contract.methods
+      .owner()
+      .encodeABI()
+    await mockMakerDelegateHigh.givenMethodReturnAddress(
+      makerDelegate_owner,
+      EMPTY_ADDRESS
+    )
+    await mockMakerDelegateLow.givenMethodReturnAddress(
+      makerDelegate_owner,
+      EMPTY_ADDRESS
+    )
 
     //mock makerDelegate provideUnsignedOrder()
     const order = await orders.getOrder({})
@@ -71,8 +98,14 @@ contract('MakerDelegateFrontend Unit Tests', async () => {
     let makerDelegate_provideUnsignedOrder = makerDelegateTemplate.contract.methods
       .provideOrder(order)
       .encodeABI()
-    await mockMakerDelegateHigh.givenMethodReturnBool(makerDelegate_provideUnsignedOrder, true)
-    await mockMakerDelegateLow.givenMethodReturnBool(makerDelegate_provideUnsignedOrder, true)
+    await mockMakerDelegateHigh.givenMethodReturnBool(
+      makerDelegate_provideUnsignedOrder,
+      true
+    )
+    await mockMakerDelegateLow.givenMethodReturnBool(
+      makerDelegate_provideUnsignedOrder,
+      true
+    )
   }
 
   async function setupMockIndexer() {
@@ -100,7 +133,10 @@ contract('MakerDelegateFrontend Unit Tests', async () => {
 
   before('deploy MakerDelegateFrontend', async () => {
     await setupMocks()
-    makerDelegateFrontend = await MakerDelegateFrontend.new(mockIndexer.address, mockSwap.address)
+    makerDelegateFrontend = await MakerDelegateFrontend.new(
+      mockIndexer.address,
+      mockSwap.address
+    )
   })
 
   describe('Test initial values', async () => {

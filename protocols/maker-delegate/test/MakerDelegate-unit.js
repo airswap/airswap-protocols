@@ -46,7 +46,9 @@ contract('MakerDelegate Unit Tests', async accounts => {
 
   before('deploy MakerDelegate', async () => {
     await setupMockSwap()
-    makerDelegate = await MakerDelegate.new(mockSwap.address, EMPTY_ADDRESS, { from: owner })
+    makerDelegate = await MakerDelegate.new(mockSwap.address, EMPTY_ADDRESS, {
+      from: owner,
+    })
   })
 
   describe('Test initial values', async () => {
@@ -62,7 +64,11 @@ contract('MakerDelegate Unit Tests', async accounts => {
     })
 
     it('Test owner is set correctly if provided an address', async () => {
-      let newMakerDelegate = await MakerDelegate.new(mockSwap.address, notOwner, { from: owner })
+      let newMakerDelegate = await MakerDelegate.new(
+        mockSwap.address,
+        notOwner,
+        { from: owner }
+      )
 
       // being provided an empty address, it should leave the owner unchanged
       let val = await newMakerDelegate.owner.call()
@@ -130,7 +136,9 @@ contract('MakerDelegate Unit Tests', async accounts => {
       await reverted(
         makerDelegate.unsetRule(TAKER_TOKEN, MAKER_TOKEN, { from: notOwner })
       )
-      await passes(makerDelegate.unsetRule(TAKER_TOKEN, MAKER_TOKEN, { from: owner }))
+      await passes(
+        makerDelegate.unsetRule(TAKER_TOKEN, MAKER_TOKEN, { from: owner })
+      )
     })
 
     it('Test unsetRule', async () => {
@@ -212,7 +220,11 @@ contract('MakerDelegate Unit Tests', async accounts => {
         PRICE_COEF,
         EXP
       )
-      let val = await makerDelegate.getMakerSideQuote.call(0, TAKER_TOKEN, MAKER_TOKEN)
+      let val = await makerDelegate.getMakerSideQuote.call(
+        0,
+        TAKER_TOKEN,
+        MAKER_TOKEN
+      )
       equal(
         val.toNumber(),
         0,
@@ -255,7 +267,11 @@ contract('MakerDelegate Unit Tests', async accounts => {
 
     it('test when makerDelegate amount is not within acceptable value bounds', async () => {
       await makerDelegate.setRule(TAKER_TOKEN, MAKER_TOKEN, 100, 1, 0)
-      let val = await makerDelegate.getTakerSideQuote.call(0, MAKER_TOKEN, TAKER_TOKEN)
+      let val = await makerDelegate.getTakerSideQuote.call(
+        0,
+        MAKER_TOKEN,
+        TAKER_TOKEN
+      )
       equal(
         val.toNumber(),
         0,
@@ -283,7 +299,11 @@ contract('MakerDelegate Unit Tests', async accounts => {
         EXP
       )
 
-      let val = await makerDelegate.getTakerSideQuote.call(500, MAKER_TOKEN, TAKER_TOKEN)
+      let val = await makerDelegate.getTakerSideQuote.call(
+        500,
+        MAKER_TOKEN,
+        TAKER_TOKEN
+      )
       let expectedValue = Math.floor((500 * 10 ** EXP) / PRICE_COEF)
       equal(val.toNumber(), expectedValue, 'there should be a quote available')
     })
@@ -410,7 +430,13 @@ contract('MakerDelegate Unit Tests', async accounts => {
     })
 
     it('test a successful transaction with integer values', async () => {
-      await makerDelegate.setRule(TAKER_TOKEN, MAKER_TOKEN, MAX_TAKER_AMOUNT, 100, EXP)
+      await makerDelegate.setRule(
+        TAKER_TOKEN,
+        MAKER_TOKEN,
+        MAX_TAKER_AMOUNT,
+        100,
+        EXP
+      )
 
       let ruleBefore = await makerDelegate.rules.call(TAKER_TOKEN, MAKER_TOKEN)
 
