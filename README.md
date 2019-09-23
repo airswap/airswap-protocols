@@ -2,7 +2,7 @@
 <img src="https://swap.tech/images/airswap-high-res.png" width="500"/>
 <br />
 
-[AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens, initially built on the [Swap Protocol](https://swap.tech/whitepaper/). The AirSwap product family includes [DexIndex](https://dexindex.io/), [AirSwap Instant](https://instant.airswap.io/), [AirSwap Trader](https://trader.airswap.io/), and [AirSwap Spaces](https://spaces.airswap.io/). This repository contains smart contracts and JavaScript packages for use by developers and traders on the AirSwap network.
+[AirSwap](https://www.airswap.io/) is a maker-delegate-to-maker-delegate trading network for Ethereum tokens, initially built on the [Swap Protocol](https://swap.tech/whitepaper/). The AirSwap product family includes [DexIndex](https://dexindex.io/), [AirSwap Instant](https://instant.airswap.io/), [AirSwap Trader](https://trader.airswap.io/), and [AirSwap Spaces](https://spaces.airswap.io/). This repository contains smart contracts and JavaScript packages for use by developers and traders on the AirSwap network.
 
 [![Discord](https://img.shields.io/discord/590643190281928738.svg)](https://chat.airswap.io)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
@@ -21,10 +21,10 @@
 | Package                                            | Version                                                                                                           | Description                         |
 | :------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------- | :---------------------------------- |
 | [`@airswap/swap`](/protocols/swap)                 | [![npm](https://img.shields.io/npm/v/@airswap/swap)](https://www.npmjs.com/package/@airswap/swap)                 | Atomic Swap                         |
-| [`@airswap/indexer`](/protocols/indexer)           | [![npm](https://img.shields.io/npm/v/@airswap/indexer)](https://www.npmjs.com/package/@airswap/indexer)           | Onchain Peer Discovery with Staking |
-| [`@airswap/index`](/protocols/index)               | [![npm](https://img.shields.io/npm/v/@airswap/index)](https://www.npmjs.com/package/@airswap/index)               | Ordered List of Peer Signals        |
-| [`@airswap/peer`](/protocols/peer)                 | [![npm](https://img.shields.io/npm/v/@airswap/peer)](https://www.npmjs.com/package/@airswap/peer)                 | Onchain Peer with Rules             |
-| [`@airswap/peer-factory`](/protocols/peer-factory) | [![npm](https://img.shields.io/npm/v/@airswap/peer-factory)](https://www.npmjs.com/package/@airswap/peer-factory) | Deploys Peer Contracts              |
+| [`@airswap/indexer`](/protocols/indexer)           | [![npm](https://img.shields.io/npm/v/@airswap/indexer)](https://www.npmjs.com/package/@airswap/indexer)           | Onchain MakerDelegate Discovery with Staking |
+| [`@airswap/index`](/protocols/index)               | [![npm](https://img.shields.io/npm/v/@airswap/index)](https://www.npmjs.com/package/@airswap/index)               | Ordered List of MakerDelegate Signals        |
+| [`@airswap/maker-delegate`](/protocols/maker-delegate)                 | [![npm](https://img.shields.io/npm/v/@airswap/maker-delegate)](https://www.npmjs.com/package/@airswap/maker-delegate)                 | Onchain MakerDelegate with Rules             |
+| [`@airswap/maker-delegate-factory`](/protocols/maker-delegate-factory) | [![npm](https://img.shields.io/npm/v/@airswap/maker-delegate-factory)](https://www.npmjs.com/package/@airswap/maker-delegate-factory) | Deploys MakerDelegate Contracts              |
 | [`@airswap/types`](/protocols/types)               | [![npm](https://img.shields.io/npm/v/@airswap/types)](https://www.npmjs.com/package/@airswap/types)               | Types and Hashes                    |
 | [`@airswap/wrapper`](/helpers/wrapper)             | [![npm](https://img.shields.io/npm/v/@airswap/wrapper)](https://www.npmjs.com/package/@airswap/wrapper)           | Use ether for WETH trades           |
 | [`@airswap/tokens`](/helpers/tokens)               | [![npm](https://img.shields.io/npm/v/@airswap/tokens)](https://www.npmjs.com/package/@airswap/tokens)             | Ethereum Tokens                     |

@@ -61,7 +61,7 @@ contract Swap is ISwap {
     bytes4(keccak256('safeTransferFrom(address,address,uint256,bytes)'));
   */
 
-  // Mapping of peer address to delegate address and expiry.
+  // Mapping of maker address to delegate address and expiry.
   mapping (address => mapping (address => uint256)) public delegateApprovals;
 
   // Mapping of makers to orders by nonce as TAKEN (0x01) or CANCELED (0x02)

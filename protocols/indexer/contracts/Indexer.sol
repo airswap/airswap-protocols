@@ -37,7 +37,7 @@ contract Indexer is IIndexer, Ownable {
   // Mapping of token address to boolean
   mapping (address => bool) public blacklist;
 
-  // The whitelist contract for checking whether a peer is whitelisted
+  // The whitelist contract for checking whether a maker-delegate is whitelisted
   address public locatorWhitelist;
 
   /**
