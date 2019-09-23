@@ -1,4 +1,4 @@
-# MakerDelegate
+# MakerDelegateManager
 
 **:warning: This package is under active development. Do not use in production.**
 
