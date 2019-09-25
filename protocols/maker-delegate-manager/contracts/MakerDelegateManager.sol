@@ -29,7 +29,7 @@ contract MakerDelegateManager is Ownable {
     event MakerDelegateCreated(address owner, address delegate);
 
     //keeps track of all the delegates created by a maker
-    mapping(address => address[]) public makerAddressToDelegate;
+    mapping(address => address[]) private makerAddressToDelegates;
     IMakerDelegateFactory public factory;
 
     constructor(IMakerDelegateFactory _factory) public {
@@ -39,10 +39,19 @@ contract MakerDelegateManager is Ownable {
     function createMakerDelegate(ISwap _swapContract) external returns (IMakerDelegate) {
         require(address(_swapContract) != address(0), "SWAP_ADDRESS_REQUIRED");
         IMakerDelegate makerDelegate = IMakerDelegate(factory.createMakerDelegate(address(_swapContract), msg.sender));
-        makerAddressToDelegate[msg.sender].push(address(makerDelegate));
+        makerAddressToDelegates[msg.sender].push(address(makerDelegate));
         emit MakerDelegateCreated(msg.sender, address(makerDelegate));
         return makerDelegate;
     }
+
+    function getMakerAddressToDelegates(address _maker) external returns (address[] memory) {
+      uint256 length = makerAddressToDelegates[_maker].length;
+      address[] memory delegates = new address[](length);
+      for(uint i = 0; i < length; i++) {
+        delegates[i] = makerAddressToDelegates[_maker][i];
+      } 
+      return delegates;
+    } 
 
     function setRuleAndIntent(IMakerDelegate _makerDelegate) external {
     }

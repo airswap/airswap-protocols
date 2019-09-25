@@ -13,6 +13,8 @@ const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 const { orders } = require('@airswap/order-utils')
 
 contract('MakerDelegateManager Unit Tests', async (accounts) => {
+  let owner = accounts[0];
+  let generatedDelegate = accounts[1];
   let makerDelegateManager;
   let mockFactory;
   let mockSwap; 
@@ -33,7 +35,7 @@ contract('MakerDelegateManager Unit Tests', async (accounts) => {
     // mock createMakerDelegate()
     let mockFactory_createMakerDelegate =
       mockFactoryTemplate.contract.methods.createMakerDelegate(EMPTY_ADDRESS, EMPTY_ADDRESS).encodeABI();
-    await mockFactory.givenMethodReturnAddress(mockFactory_createMakerDelegate, accounts[1])
+    await mockFactory.givenMethodReturnAddress(mockFactory_createMakerDelegate, generatedDelegate)
   }
 
   before(async () => {
@@ -57,12 +59,19 @@ contract('MakerDelegateManager Unit Tests', async (accounts) => {
 
     it("Test when a delegate is returned", async() => {
       let val = await makerDelegateManager.createMakerDelegate.call(mockSwap.address);
-      equal(val, accounts[1], "no maker delegate was created")
+      equal(val, generatedDelegate, "no maker delegate was created")
     })
 
     it("Test when a delegate is added to owner to delegate list mapping", async() => {
-      let trx = await makerDelegateManager.createMakerDelegate.call();
-      // get makerAddressToDelegate value
+      //add generate two delegates
+      await makerDelegateManager.createMakerDelegate(mockSwap.address);
+      await makerDelegateManager.createMakerDelegate(mockSwap.address);
+
+      //retrieve the list
+      let val = await makerDelegateManager.getMakerAddressToDelegates.call(owner);
+      equal(val.length, 2, "there are too many items in the returned list");
+      equal(val[0], generatedDelegate, "there was an issue creating the delegate");
+      equal(val[1], generatedDelegate, "there was an issue creating the delegate");
     })
 
     it("Test when a create delegate event is emitted", async() => {
