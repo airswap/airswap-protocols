@@ -26,8 +26,10 @@ import "@airswap/types/contracts/Types.sol";
 
 contract MakerDelegateManager is Ownable {
 
+    event MakerDelegateCreated(address owner, address delegate);
+
     //keeps track of all the delegates created by a maker
-    mapping(address => address[]) makerAddressToDelegate;
+    mapping(address => address[]) public makerAddressToDelegate;
     IMakerDelegateFactory public factory;
 
     constructor(IMakerDelegateFactory _factory) public {
@@ -35,9 +37,10 @@ contract MakerDelegateManager is Ownable {
     }
 
     function createMakerDelegate(ISwap _swapContract) external returns (IMakerDelegate) {
-        require(_swapContract != address(0), "SWAP_ADDRESS_REQUIRED");
-        IMakerDelegate makerDelegate = IMakerDelegate(factory.createMakerDelegate(_swapContract, msg.sender));
-        makerAddressToDelegate[msg.sender].push(makerDelegate.address);
+        require(address(_swapContract) != address(0), "SWAP_ADDRESS_REQUIRED");
+        IMakerDelegate makerDelegate = IMakerDelegate(factory.createMakerDelegate(address(_swapContract), msg.sender));
+        makerAddressToDelegate[msg.sender].push(address(makerDelegate));
+        emit MakerDelegateCreated(msg.sender, address(makerDelegate));
         return makerDelegate;
     }
 
