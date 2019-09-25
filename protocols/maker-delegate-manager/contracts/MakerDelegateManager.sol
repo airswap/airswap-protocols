@@ -37,11 +37,11 @@ contract MakerDelegateManager is Ownable {
     }
 
     function createMakerDelegate(ISwap _swapContract) external returns (IMakerDelegate) {
-        require(address(_swapContract) != address(0), "SWAP_ADDRESS_REQUIRED");
-        IMakerDelegate makerDelegate = IMakerDelegate(factory.createMakerDelegate(address(_swapContract), msg.sender));
-        makerAddressToDelegates[msg.sender].push(address(makerDelegate));
-        emit MakerDelegateCreated(msg.sender, address(makerDelegate));
-        return makerDelegate;
+      require(address(_swapContract) != address(0), "SWAP_ADDRESS_REQUIRED");
+      IMakerDelegate makerDelegate = IMakerDelegate(factory.createMakerDelegate(address(_swapContract), msg.sender));
+      makerAddressToDelegates[msg.sender].push(address(makerDelegate));
+      emit MakerDelegateCreated(msg.sender, address(makerDelegate));
+      return makerDelegate;
     }
 
     function getMakerAddressToDelegates(address _maker) external returns (address[] memory) {
