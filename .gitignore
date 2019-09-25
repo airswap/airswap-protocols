@@ -3,6 +3,7 @@ yarn-error.log
 build
 lerna-debug.log
 .DS_Store
+*.swp
 
 coverage.json
 coverage
