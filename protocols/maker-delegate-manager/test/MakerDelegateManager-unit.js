@@ -75,8 +75,10 @@ contract('MakerDelegateManager Unit Tests', async (accounts) => {
     })
 
     it("Test when a create delegate event is emitted", async() => {
-      await makerDelegateManager.createMakerDelegate.call();
-      // check for event MakerDelegateCreated
+      let trx = await makerDelegateManager.createMakerDelegate(mockSwap.address);
+      emitted(trx, "MakerDelegateCreated", (e) => {
+        return e.owner === owner && e.delegate == generatedDelegate;
+      });
     })
   })
 
