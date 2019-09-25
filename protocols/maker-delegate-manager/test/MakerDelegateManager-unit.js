@@ -82,11 +82,7 @@ contract('MakerDelegateManager Unit Tests', async (accounts) => {
     })
   })
 
-  describe('Test getMakerSideQuote', async () => {})
+  describe('Test setRuleAndIntent()', async () => {})
 
-  describe('Test getTakerSideQuote', async () => {})
-
-  describe('Test getMaxQuote', async () => {})
-
-  describe('Test provideOrder', async () => {})
+  describe('Test unsetRuleAndIntent()', async () => {})
 })
