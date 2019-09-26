@@ -6,6 +6,7 @@ const {
   passes,
   emitted,
   reverted,
+  fails
 } = require('@airswap/test-utils').assert
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
@@ -71,8 +72,9 @@ contract('Peer Unit Tests', async accounts => {
   })
 
   describe('Test setters', async () => {
-    it('Test setRule permissions', async () => {
-      await reverted(
+    it('Test setRule permissions as not owner', async () => {
+      //not owner is not apart of whitelist and should fail
+      await fails(
         peer.setRule(
           TAKER_TOKEN,
           MAKER_TOKEN,
@@ -82,7 +84,26 @@ contract('Peer Unit Tests', async accounts => {
           { from: notOwner }
         )
       )
+    })
 
+    it('Test setRule permissions after not owner is whitelisted', async () => {
+      //test again after adding not owner to whitelist
+      await peer.addToWhitelist(notOwner)
+      await passes(
+        peer.setRule(
+          TAKER_TOKEN,
+          MAKER_TOKEN,
+          MAX_TAKER_AMOUNT,
+          PRICE_COEF,
+          EXP,
+          { from: notOwner }
+        )
+      )
+    })
+
+    it('Test setRule permissions as owner', async () => {
+      let val = await peer.owner.call();
+      let isWhitelisted = await peer.isWhitelisted.call(owner)
       await passes(
         peer.setRule(
           TAKER_TOKEN,
@@ -126,10 +147,22 @@ contract('Peer Unit Tests', async accounts => {
       })
     })
 
-    it('Test unsetRule permissions', async () => {
-      await reverted(
+    it('Test unsetRule permissions as not owner', async () => {
+      //not owner is not apart of whitelist and should fail
+      await fails(
+        peer.unsetRule(TAKER_TOKEN, MAKER_TOKEN, { from: notOwner }, "CALLER_NOT_WHITELISTED")
+      )
+    })
+
+    it('Test unsetRule permissions after not owner is whitelisted', async () => {
+      //test again after adding not owner to whitelist
+      await peer.addToWhitelist(notOwner);
+      await passes(
         peer.unsetRule(TAKER_TOKEN, MAKER_TOKEN, { from: notOwner })
       )
+    })
+      
+    it('Test unsetRule permissions', async () => {
       await passes(peer.unsetRule(TAKER_TOKEN, MAKER_TOKEN, { from: owner }))
     })
 
@@ -166,6 +199,25 @@ contract('Peer Unit Tests', async accounts => {
       emitted(trx, 'UnsetRule', e => {
         return e.takerToken === TAKER_TOKEN && e.makerToken === MAKER_TOKEN
       })
+    })
+  })
+
+  describe('Test whitelist', async() => {
+    it('Test adding to whitelist as owner', async() => {
+      await passes(peer.addToWhitelist(notOwner))
+    })
+
+    it('Test adding to whitelist as not owner', async() => {
+      await fails(peer.addToWhitelist(notOwner, { from: notOwner }))
+    })
+
+    it('Test removal from whitelist', async() => {
+      await peer.addToWhitelist(notOwner)
+      await passes(peer.removeFromWhitelist(notOwner))
+    })
+
+    it('Test removal from whitelist as not owner', async() => {
+      await fails(peer.removeFromWhitelist(notOwner, { from: notOwner }))
     })
   })
 

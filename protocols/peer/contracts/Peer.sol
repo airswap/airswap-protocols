@@ -54,7 +54,7 @@ contract Peer is IPeer, Ownable {
     swapContract = ISwap(_swapContract);
     if (_peerContractOwner != address(0)) {
       whitelist[_peerContractOwner] = true;
-      transferOwnership(_peerContractOwner);
+      super.transferOwnership(_peerContractOwner);
     }
   }
 
@@ -72,14 +72,32 @@ contract Peer is IPeer, Ownable {
     * @param addressToAdd the address to add to the whitelist
     */
   function addToWhitelist(address addressToAdd) external onlyOwner {
+    //TODO: emit
     whitelist[addressToAdd] = true;
+  }
+
+  /**
+    * @notice removes from the list of whitelisted accounts that can interact with this peer
+    * @dev only callable by the owner of the contract
+    * @param addressToRemove the address to add to the whitelist
+    */
+  function removeFromWhitelist(address addressToRemove) external onlyOwner {
+    //TODO: emit
+    require(addressToRemove != owner(), "OWNER_MUST_BE_WHITELISTED");
+    whitelist[addressToRemove] = false;
+  }
+
+  function transferOwnership(address newOwner) public onlyOwner {
+    whitelist[newOwner] = true;
+    whitelist[owner()] = false;
+    super.transferOwnership(newOwner);
   }
 
   /**
     * @dev only whitelisted ensures that only whitelisted parties can call the method it modifies
     */
   modifier onlyWhitelisted() {
-    require(whitelist[msg.sender] == true, "caller not whitelisted");
+    require(whitelist[msg.sender] == true, "CALLER_NOT_WHITELISTED");
     _;
   }
 
