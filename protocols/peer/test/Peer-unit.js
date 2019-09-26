@@ -216,6 +216,10 @@ contract('Peer Unit Tests', async accounts => {
       await passes(peer.removeFromWhitelist(notOwner))
     })
 
+    it('Test removal of owner from whitelist', async() => {
+      await fails(peer.removeFromWhitelist(owner), "OWNER_MUST_BE_WHITELISTED");
+    })
+
     it('Test removal from whitelist as not owner', async() => {
       await fails(peer.removeFromWhitelist(notOwner, { from: notOwner }))
     })
