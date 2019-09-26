@@ -30,6 +30,9 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 contract Peer is IPeer, Ownable {
   using SafeMath for uint256;
 
+  event WhitelistAdded(address indexed account);
+  event WhitelistRemoved(address indexed account);
+
   // Swap contract to be used to settle trades
   ISwap public swapContract;
 
@@ -72,8 +75,8 @@ contract Peer is IPeer, Ownable {
     * @param addressToAdd the address to add to the whitelist
     */
   function addToWhitelist(address addressToAdd) external onlyOwner {
-    //TODO: emit
     whitelist[addressToAdd] = true;
+    emit WhitelistAdded(addressToAdd);
   }
 
   /**
@@ -82,9 +85,9 @@ contract Peer is IPeer, Ownable {
     * @param addressToRemove the address to add to the whitelist
     */
   function removeFromWhitelist(address addressToRemove) external onlyOwner {
-    //TODO: emit
     require(addressToRemove != owner(), "OWNER_MUST_BE_WHITELISTED");
     whitelist[addressToRemove] = false;
+    emit WhitelistRemoved(addressToRemove);
   }
 
   /**

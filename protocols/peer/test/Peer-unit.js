@@ -226,6 +226,20 @@ contract('Peer Unit Tests', async accounts => {
     it('Test removal from whitelist as not owner', async () => {
       await fails(peer.removeFromWhitelist(notOwner, { from: notOwner }))
     })
+
+    it('Test adding to whitelist event emitted', async () => {
+      let trx = await peer.addToWhitelist(notOwner)
+      await emitted(trx, "WhitelistAdded", (e) => {
+        return e.account == notOwner
+      })
+    })
+
+    it('Test removing from whitelist event emitted', async () => {
+      let trx = await peer.removeFromWhitelist(notOwner)
+      await emitted(trx, "WhitelistRemoved", (e) => {
+        return e.account == notOwner
+      })
+    })
   })
 
   describe('Test transfer of ownership', async () => {
