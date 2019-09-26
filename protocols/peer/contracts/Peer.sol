@@ -87,6 +87,11 @@ contract Peer is IPeer, Ownable {
     whitelist[addressToRemove] = false;
   }
 
+  /**
+    * @notice transfers ownership to the new owner and ensures that whitelist is updated
+    * @dev only callable by the owner of the contract
+    * @param newOwner the address of the new owner of the contract
+    */
   function transferOwnership(address newOwner) public onlyOwner {
     whitelist[newOwner] = true;
     whitelist[owner()] = false;
