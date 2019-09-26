@@ -36,6 +36,9 @@ contract MakerDelegate is IMakerDelegate, Ownable {
   // Mapping of takerToken to makerToken for rule lookup
   mapping (address => mapping (address => Rule)) public rules;
 
+  // Mapping of whitelisted addresses that can call on behalf of the owner, owner controls access
+  mapping (address => bool) private whitelist;
+
   // ERC-20 (fungible token) interface identifier (ERC-165)
   bytes4 constant internal ERC20_INTERFACE_ID = 0x277f8169;
 
@@ -50,8 +53,22 @@ contract MakerDelegate is IMakerDelegate, Ownable {
   ) public {
     swapContract = ISwap(_swapContract);
     if (_makerDelegateContractOwner != address(0)) {
+      whitelist[_makerDelegateContractOwner] = true;
       transferOwnership(_makerDelegateContractOwner);
     }
+  }
+
+  function isWhitelisted(address addressToCheck) external returns(bool){
+    return whitelist[addressToCheck];
+  }
+
+  function addToWhitelist(address addressToAdd) external onlyOwner {
+    whitelist[addressToAdd] = true;
+  }
+
+  modifier onlyWhitelist() {
+    require(whitelist[msg.sender] == true, "caller not whitelisted");
+    _;
   }
 
   /**
@@ -69,7 +86,7 @@ contract MakerDelegate is IMakerDelegate, Ownable {
     uint256 _maxTakerAmount,
     uint256 _priceCoef,
     uint256 _priceExp
-  ) external onlyOwner {
+  ) external onlyWhitelist {
 
     rules[_takerToken][_makerToken] = Rule({
       maxTakerAmount: _maxTakerAmount,
@@ -95,7 +112,7 @@ contract MakerDelegate is IMakerDelegate, Ownable {
   function unsetRule(
     address _takerToken,
     address _makerToken
-  ) external onlyOwner {
+  ) external onlyWhitelist {
 
     // Delete the rule.
     delete rules[_takerToken][_makerToken];

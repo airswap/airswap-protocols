@@ -39,6 +39,7 @@ contract MakerDelegateManager is Ownable {
     function createMakerDelegate(ISwap _swapContract) external returns (IMakerDelegate) {
       require(address(_swapContract) != address(0), "SWAP_ADDRESS_REQUIRED");
       IMakerDelegate makerDelegate = IMakerDelegate(factory.createMakerDelegate(address(_swapContract), msg.sender));
+      //NOTE: MakerDelegateManager does not have access to the created MakerDelegate by default
       makerAddressToDelegates[msg.sender].push(address(makerDelegate));
       emit MakerDelegateCreated(msg.sender, address(makerDelegate));
       return makerDelegate;
@@ -54,6 +55,14 @@ contract MakerDelegateManager is Ownable {
     } 
 
     function setRuleAndIntent(IMakerDelegate _makerDelegate) external {
+      //IMakerDelegate makerDelegate = IMakerDelegate(address(_makerDelegate));
+      //makerDelegate.setRule();
+      //indexer.setIntent();
+
+      // created delegate needs owner for the manager to act on it's behalf.
+      // owner needs to call addToWhiteList and privide manager's address
+      // takes any delegate, delegate will check the whitelist
+      // sets the rule on the delegate and then set the intent on the indexer
     }
 
     function unsetRuleAndIntent(IMakerDelegate _makerDelegate) external {

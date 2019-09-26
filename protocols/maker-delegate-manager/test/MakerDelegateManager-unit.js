@@ -78,8 +78,9 @@ contract('MakerDelegateManager Unit Tests', async (accounts) => {
       let trx = await makerDelegateManager.createMakerDelegate(mockSwap.address);
       emitted(trx, "MakerDelegateCreated", (e) => {
         return e.owner === owner && e.delegate == generatedDelegate;
-      });
+      })
     })
+
   })
 
   describe('Test setRuleAndIntent()', async () => {})
