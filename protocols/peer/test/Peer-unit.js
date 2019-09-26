@@ -6,7 +6,7 @@ const {
   passes,
   emitted,
   reverted,
-  fails
+  fails,
 } = require('@airswap/test-utils').assert
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
@@ -102,7 +102,7 @@ contract('Peer Unit Tests', async accounts => {
     })
 
     it('Test setRule permissions as owner', async () => {
-      let val = await peer.owner.call();
+      let val = await peer.owner.call()
       let isWhitelisted = await peer.isWhitelisted.call(owner)
       await passes(
         peer.setRule(
@@ -150,18 +150,21 @@ contract('Peer Unit Tests', async accounts => {
     it('Test unsetRule permissions as not owner', async () => {
       //not owner is not apart of whitelist and should fail
       await fails(
-        peer.unsetRule(TAKER_TOKEN, MAKER_TOKEN, { from: notOwner }, "CALLER_NOT_WHITELISTED")
+        peer.unsetRule(
+          TAKER_TOKEN,
+          MAKER_TOKEN,
+          { from: notOwner },
+          'CALLER_NOT_WHITELISTED'
+        )
       )
     })
 
     it('Test unsetRule permissions after not owner is whitelisted', async () => {
       //test again after adding not owner to whitelist
-      await peer.addToWhitelist(notOwner);
-      await passes(
-        peer.unsetRule(TAKER_TOKEN, MAKER_TOKEN, { from: notOwner })
-      )
+      await peer.addToWhitelist(notOwner)
+      await passes(peer.unsetRule(TAKER_TOKEN, MAKER_TOKEN, { from: notOwner }))
     })
-      
+
     it('Test unsetRule permissions', async () => {
       await passes(peer.unsetRule(TAKER_TOKEN, MAKER_TOKEN, { from: owner }))
     })
@@ -202,37 +205,37 @@ contract('Peer Unit Tests', async accounts => {
     })
   })
 
-  describe('Test whitelist', async() => {
-    it('Test adding to whitelist as owner', async() => {
+  describe('Test whitelist', async () => {
+    it('Test adding to whitelist as owner', async () => {
       await passes(peer.addToWhitelist(notOwner))
     })
 
-    it('Test adding to whitelist as not owner', async() => {
+    it('Test adding to whitelist as not owner', async () => {
       await fails(peer.addToWhitelist(notOwner, { from: notOwner }))
     })
 
-    it('Test removal from whitelist', async() => {
+    it('Test removal from whitelist', async () => {
       await peer.addToWhitelist(notOwner)
       await passes(peer.removeFromWhitelist(notOwner))
     })
 
-    it('Test removal of owner from whitelist', async() => {
-      await fails(peer.removeFromWhitelist(owner), "OWNER_MUST_BE_WHITELISTED");
+    it('Test removal of owner from whitelist', async () => {
+      await fails(peer.removeFromWhitelist(owner), 'OWNER_MUST_BE_WHITELISTED')
     })
 
-    it('Test removal from whitelist as not owner', async() => {
+    it('Test removal from whitelist as not owner', async () => {
       await fails(peer.removeFromWhitelist(notOwner, { from: notOwner }))
     })
   })
 
-  describe('Test transfer of ownership', async() => {
-    it('Test ownership after transfer', async() => {
+  describe('Test transfer of ownership', async () => {
+    it('Test ownership after transfer', async () => {
       await peer.transferOwnership(notOwner)
       let val = await peer.owner.call()
-      equal(val, notOwner, "owner was not passed properly")
+      equal(val, notOwner, 'owner was not passed properly')
 
-      val = await peer.isWhitelisted.call(owner);
-      equal(val, false, "owner should no longer be whitelisted")
+      val = await peer.isWhitelisted.call(owner)
+      equal(val, false, 'owner should no longer be whitelisted')
     })
   })
 
