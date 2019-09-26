@@ -221,6 +221,17 @@ contract('Peer Unit Tests', async accounts => {
     })
   })
 
+  describe('Test transfer of ownership', async() => {
+    it('Test ownership after transfer', async() => {
+      await peer.transferOwnership(notOwner)
+      let val = await peer.owner.call()
+      equal(val, notOwner, "owner was not passed properly")
+
+      val = await peer.isWhitelisted.call(owner);
+      equal(val, false, "owner should no longer be whitelisted")
+    })
+  })
+
   describe('Test getMakerSideQuote', async () => {
     it('test when rule does not exist', async () => {
       const NON_EXISTENT_TAKER_TOKEN = accounts[7]
