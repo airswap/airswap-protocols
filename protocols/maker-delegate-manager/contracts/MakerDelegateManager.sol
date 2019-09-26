@@ -17,8 +17,7 @@
 pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
-import "@airswap/indexer/contracts/interfaces/IIndexer.sol";
-import "@airswap/swap/contracts/interfaces/ISwap.sol";
+import "@airswap/indexer/contracts/interfaces/IIndexer.sol"; import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "@airswap/maker-delegate-factory/contracts/interfaces/IMakerDelegateFactory.sol";
 import "@airswap/maker-delegate/contracts/interfaces/IMakerDelegate.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
@@ -59,13 +58,17 @@ contract MakerDelegateManager is Ownable {
       //makerDelegate.setRule();
       //indexer.setIntent();
 
-      // created delegate needs owner for the manager to act on it's behalf.
-      // owner needs to call addToWhiteList and privide manager's address
-      // takes any delegate, delegate will check the whitelist
-      // sets the rule on the delegate and then set the intent on the indexer
+      // created delegate needs the manager to be whitelisted in order to act with it.
+      // owner first needs to call addToWhiteList and provide manager's address before interacting with this method
     }
 
     function unsetRuleAndIntent(IMakerDelegate _makerDelegate) external {
+      //IMakerDelegate makerDelegate = IMakerDelegate(address(_makerDelegate));
+      //makerDelegate.unsetRule();
+      //indexer.unsetIntent();
+
+      // created delegate needs the manager to be whitelisted in order to act with it.
+      // owner first needs to call addToWhiteList and provide manager's address before interacting with this method
     }
 
 }
