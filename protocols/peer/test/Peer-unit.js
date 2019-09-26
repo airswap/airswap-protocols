@@ -46,7 +46,7 @@ contract('Peer Unit Tests', async accounts => {
 
   before('deploy Peer', async () => {
     await setupMockSwap()
-    peer = await Peer.new(mockSwap.address, EMPTY_ADDRESS, { from: owner })
+    peer = await Peer.new(mockSwap.address, owner)
   })
 
   describe('Test initial values', async () => {

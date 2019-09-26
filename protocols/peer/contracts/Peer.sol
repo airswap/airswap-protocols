@@ -36,6 +36,9 @@ contract Peer is IPeer, Ownable {
   // Mapping of takerToken to makerToken for rule lookup
   mapping (address => mapping (address => Rule)) public rules;
 
+  // Mapping of whitelisted addresses that can call on behalf of owner
+  mapping (address => bool) private whitelist;
+
   // ERC-20 (fungible token) interface identifier (ERC-165)
   bytes4 constant internal ERC20_INTERFACE_ID = 0x277f8169;
 
@@ -50,8 +53,34 @@ contract Peer is IPeer, Ownable {
   ) public {
     swapContract = ISwap(_swapContract);
     if (_peerContractOwner != address(0)) {
+      whitelist[_peerContractOwner] = true;
       transferOwnership(_peerContractOwner);
     }
+  }
+
+  /**
+    * @notice determines if an address to interact with this peer
+    * @param addressToCheck the address to check if whitelisted or not 
+    */
+  function isWhitelisted(address addressToCheck) external returns(bool) {
+    return whitelist[addressToCheck];
+  }
+
+  /**
+    * @notice adds to the list of whitelisted accounts that can interact with this peer
+    * @dev only callable by the owner of the contract
+    * @param addressToAdd the address to add to the whitelist
+    */
+  function addToWhitelist(address addressToAdd) external onlyOwner {
+    whitelist[addressToAdd] = true;
+  }
+
+  /**
+    * @dev only whitelisted ensures that only whitelisted parties can call the method it modifies
+    */
+  modifier onlyWhitelisted() {
+    require(whitelist[msg.sender] == true, "caller not whitelisted");
+    _;
   }
 
   /**
@@ -69,7 +98,7 @@ contract Peer is IPeer, Ownable {
     uint256 _maxTakerAmount,
     uint256 _priceCoef,
     uint256 _priceExp
-  ) external onlyOwner {
+  ) external onlyWhitelisted {
 
     rules[_takerToken][_makerToken] = Rule({
       maxTakerAmount: _maxTakerAmount,
@@ -95,7 +124,7 @@ contract Peer is IPeer, Ownable {
   function unsetRule(
     address _takerToken,
     address _makerToken
-  ) external onlyOwner {
+  ) external onlyWhitelisted {
 
     // Delete the rule.
     delete rules[_takerToken][_makerToken];
