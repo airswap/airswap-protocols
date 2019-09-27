@@ -192,12 +192,11 @@ contract('Peer Unit Tests', async accounts => {
   })
 
   describe('Test setTakerWallet', async () => {
-    // it('Test unsetRule permissions', async () => {
-    //   await reverted(
-    //     peer.unsetRule(TAKER_TOKEN, MAKER_TOKEN, { from: notOwner })
-    //   )
-    //   await passes(peer.unsetRule(TAKER_TOKEN, MAKER_TOKEN, { from: owner }))
-    // })
+    it('Test setTakerWallet permissions', async () => {
+      await reverted(peer.setTakerWallet(notOwner, { from: notOwner }))
+
+      await passes(peer.setTakerWallet(notOwner, { from: owner }))
+    })
   })
 
   describe('Test getMakerSideQuote', async () => {
