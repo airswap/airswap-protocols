@@ -16,6 +16,7 @@ contract('Peer Unit Tests', async accounts => {
   const owner = accounts[0]
   const tradeWallet = accounts[1]
   const notOwner = accounts[2]
+  const notTradeWallet = accounts[3]
   let peer
   let mockSwap
   let snapshotId
@@ -431,7 +432,7 @@ contract('Peer Unit Tests', async accounts => {
           token: MAKER_TOKEN,
         },
         taker: {
-          wallet: owner,
+          wallet: notTradeWallet,
           param: takerAmount,
           token: TAKER_TOKEN,
         },
