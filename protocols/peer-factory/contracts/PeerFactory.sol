@@ -28,9 +28,14 @@ contract PeerFactory is IPeerFactory, ILocatorWhitelist {
     * @notice Create a new Peer contract
     * @param _swapContract address of the swap contract the peer will deploy with
     * @param _peerContractOwner address that should be the owner of the peer
+    * @param _peerTradeWallet the wallet the peer will trade from
     * @return peerContractAddress address address of the peer contract created
     */
-  function createPeer(address _swapContract, address _peerContractOwner) external returns (address peerContractAddress) {
+  function createPeer(
+    address _swapContract,
+    address _peerContractOwner,
+    address _peerTradeWallet
+  ) external returns (address peerContractAddress) {
 
     // Ensure an owner for the peer contract is provided.
     require(_peerContractOwner != address(0),
@@ -40,10 +45,10 @@ contract PeerFactory is IPeerFactory, ILocatorWhitelist {
     require(_swapContract != address(0),
       'SWAP_CONTRACT_REQUIRED');
 
-    peerContractAddress = address(new Peer(_swapContract, _peerContractOwner));
+    peerContractAddress = address(new Peer(_swapContract, _peerContractOwner, _peerTradeWallet));
     deployedAddresses[peerContractAddress] = true;
 
-    emit CreatePeer(peerContractAddress, _swapContract, _peerContractOwner);
+    emit CreatePeer(peerContractAddress, _swapContract, _peerContractOwner, _peerTradeWallet);
 
     return peerContractAddress;
   }
