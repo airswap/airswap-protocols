@@ -412,6 +412,39 @@ contract('Peer Unit Tests', async accounts => {
       )
     })
 
+    it('test if the taker is not empty and not the trade wallet', async () => {
+      await peer.setRule(
+        TAKER_TOKEN,
+        MAKER_TOKEN,
+        MAX_TAKER_AMOUNT,
+        PRICE_COEF,
+        EXP
+      )
+
+      let makerAmount = 100
+      let takerAmount = Math.floor((makerAmount * 10 ** EXP) / PRICE_COEF)
+
+      const order = await orders.getOrder({
+        maker: {
+          wallet: notOwner,
+          param: makerAmount,
+          token: MAKER_TOKEN,
+        },
+        taker: {
+          wallet: owner,
+          param: takerAmount,
+          token: TAKER_TOKEN,
+        },
+      })
+
+      await reverted(
+        peer.provideOrder(order, {
+          from: notOwner,
+        }),
+        'INVALID_TAKER_WALLET'
+      )
+    })
+
     it('test if order is not priced according to the rule', async () => {
       await peer.setRule(
         TAKER_TOKEN,
