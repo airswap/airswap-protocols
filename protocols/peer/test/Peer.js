@@ -13,7 +13,6 @@ contract('Peer', async accounts => {
   let aliceAddress = accounts[1]
   let bobAddress = accounts[2]
   let carolAddress = accounts[3]
-  let davidAddress = accounts[4]
   let aliceTradeWallet = accounts[5]
 
   let alicePeer
@@ -28,7 +27,6 @@ contract('Peer', async accounts => {
     aliceAddress,
     bobAddress,
     carolAddress,
-    davidAddress,
   ])
 
   before('Setup', async () => {
@@ -273,6 +271,28 @@ contract('Peer', async accounts => {
       await reverted(
         alicePeer.provideOrder(order, { from: carolAddress }),
         'MAKER_MUST_BE_SENDER'
+      )
+    })
+
+    it('Use quote with incorrect taker wallet', async () => {
+      // Note: Consumer is the order maker, Peer is the order taker.
+      const order = await orders.getOrder({
+        maker: {
+          wallet: bobAddress,
+          token: tokenWETH.address,
+          param: 1,
+        },
+        taker: {
+          wallet: carolAddress,
+          token: tokenDAI.address,
+          param: quote.toNumber(),
+        },
+      })
+
+      // Succeeds on the Peer, fails on the Swap.
+      await reverted(
+        alicePeer.provideOrder(order, { from: bobAddress }),
+        'INVALID_TAKER_WALLET'
       )
     })
 
