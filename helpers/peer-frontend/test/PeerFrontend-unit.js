@@ -40,7 +40,11 @@ contract('PeerFrontend Unit Tests', async () => {
   })
 
   async function setupMockPeerFrontend() {
-    let peerTemplate = await Peer.new(EMPTY_ADDRESS, EMPTY_ADDRESS, EMPTY_ADDRESS)
+    let peerTemplate = await Peer.new(
+      EMPTY_ADDRESS,
+      EMPTY_ADDRESS,
+      EMPTY_ADDRESS
+    )
     mockPeerHigh = await MockContract.new()
     mockPeerHighLocator = padAddressToLocator(mockPeerHigh.address)
     mockPeerLow = await MockContract.new()
