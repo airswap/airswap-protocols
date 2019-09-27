@@ -254,6 +254,11 @@ contract Peer is IPeer, Ownable {
 
     // Perform the swap.
     swapContract.swap(_order);
-
   }
+
+  function setTradeWallet(address _newTradeWallet) external onlyOwner {
+    require(_newTradeWallet != address(0), 'TRADE_WALLET_REQUIRED');
+    tradeWallet = _newTradeWallet;
+  }
+
 }
