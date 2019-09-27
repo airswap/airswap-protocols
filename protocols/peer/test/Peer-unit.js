@@ -375,8 +375,6 @@ contract('Peer Unit Tests', async accounts => {
         },
       })
 
-      console.log(order.taker.wallet)
-
       await reverted(
         peer.provideOrder(order, {
           from: notOwner,
@@ -414,7 +412,7 @@ contract('Peer Unit Tests', async accounts => {
       )
     })
 
-    it('test if order is priced according to the rule', async () => {
+    it('test if order is not priced according to the rule', async () => {
       await peer.setRule(
         TAKER_TOKEN,
         MAKER_TOKEN,
@@ -455,6 +453,52 @@ contract('Peer Unit Tests', async accounts => {
           token: MAKER_TOKEN,
         },
         taker: {
+          param: 100,
+          token: TAKER_TOKEN,
+        },
+      })
+
+      await passes(
+        //mock swapContract
+        //test rule decrement
+        peer.provideOrder(order, {
+          from: notOwner,
+        })
+      )
+
+      let ruleAfter = await peer.rules.call(TAKER_TOKEN, MAKER_TOKEN)
+      equal(
+        ruleAfter[0].toNumber(),
+        ruleBefore[0].toNumber() - makerAmount,
+        "rule's max peer amount was not decremented"
+      )
+
+      //check if swap() was called
+      let invocationCount = await mockSwap.invocationCountForMethod.call(
+        swapFunction
+      )
+      equal(
+        invocationCount,
+        1,
+        'swap function was not called the expected number of times'
+      )
+    })
+
+    it('test a successful transaction with trade wallet as taker', async () => {
+      await peer.setRule(TAKER_TOKEN, MAKER_TOKEN, MAX_TAKER_AMOUNT, 100, EXP)
+
+      let ruleBefore = await peer.rules.call(TAKER_TOKEN, MAKER_TOKEN)
+
+      let makerAmount = 100
+
+      const order = await orders.getOrder({
+        maker: {
+          wallet: notOwner,
+          param: makerAmount,
+          token: MAKER_TOKEN,
+        },
+        taker: {
+          wallet: tradeWallet,
           param: 100,
           token: TAKER_TOKEN,
         },
