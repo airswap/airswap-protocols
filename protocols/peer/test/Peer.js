@@ -23,11 +23,7 @@ contract('Peer', async accounts => {
   let tokenDAI
   let tokenWETH
 
-  orders.setKnownAccounts([
-    aliceAddress,
-    bobAddress,
-    carolAddress,
-  ])
+  orders.setKnownAccounts([aliceAddress, bobAddress, carolAddress])
 
   before('Setup', async () => {
     let snapShot = await takeSnapshot()

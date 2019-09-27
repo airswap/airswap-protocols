@@ -11,10 +11,12 @@ const {
 const { padAddressToLocator } = require('@airswap/test-utils').padding
 
 contract('Peer Factory Tests', async accounts => {
-  const swapContractOne = accounts[0]
-  const swapContractTwo = accounts[1]
-  const peerOwnerOne = accounts[2]
-  const peerOwnerTwo = accounts[2]
+  const swapContractOne = accounts[1]
+  const swapContractTwo = accounts[2]
+  const peerOwnerOne = accounts[3]
+  const peerOwnerTwo = accounts[4]
+  const tradeWalletOne = accounts[5]
+  const tradeWalletTwo = accounts[6]
 
   let snapshotId
 
@@ -36,21 +38,25 @@ contract('Peer Factory Tests', async accounts => {
   describe('Test deploying peers', async () => {
     it('should not deploy a peer with owner address 0x0', async () => {
       await reverted(
-        peerFactory.createPeer(swapContractOne, EMPTY_ADDRESS),
+        peerFactory.createPeer(swapContractOne, EMPTY_ADDRESS, tradeWalletOne),
         'PEER_CONTRACT_OWNER_REQUIRED'
       )
     })
 
     it('should not deploy a peer with swap address 0x0', async () => {
       await reverted(
-        peerFactory.createPeer(EMPTY_ADDRESS, peerOwnerOne),
+        peerFactory.createPeer(EMPTY_ADDRESS, peerOwnerOne, tradeWalletOne),
         'SWAP_CONTRACT_REQUIRED'
       )
     })
 
     it('should emit event and update the mapping', async () => {
       // successful tx
-      let tx = await peerFactory.createPeer(swapContractOne, peerOwnerOne)
+      let tx = await peerFactory.createPeer(
+        swapContractOne,
+        peerOwnerOne,
+        tradeWalletOne
+      )
       passes(tx)
 
       let peerAddress
@@ -60,7 +66,8 @@ contract('Peer Factory Tests', async accounts => {
         peerAddress = event.peerContract
         return (
           event.swapContract === swapContractOne &&
-          event.peerContractOwner === peerOwnerOne
+          event.peerContractOwner === peerOwnerOne &&
+          event.peerTradeWallet === tradeWalletOne
         )
       })
 
@@ -73,7 +80,11 @@ contract('Peer Factory Tests', async accounts => {
 
     it('should create delegate with the correct values', async () => {
       // deploy peer
-      let tx = await peerFactory.createPeer(swapContractTwo, peerOwnerTwo)
+      let tx = await peerFactory.createPeer(
+        swapContractTwo,
+        peerOwnerTwo,
+        tradeWalletTwo
+      )
 
       // get peer address and pad
       let peerAddress
@@ -81,7 +92,8 @@ contract('Peer Factory Tests', async accounts => {
         peerAddress = event.peerContract
         return (
           event.swapContract === swapContractTwo &&
-          event.peerContractOwner === peerOwnerTwo
+          event.peerContractOwner === peerOwnerTwo &&
+          event.peerTradeWallet === tradeWalletTwo
         )
       })
       let paddedPeerAddress = padAddressToLocator(peerAddress)
@@ -93,10 +105,16 @@ contract('Peer Factory Tests', async accounts => {
       let peer = await Peer.at(peerAddress)
       let actualSwap = await peer.swapContract.call()
       let actualOwner = await peer.owner.call()
+      let actualTradeWallet = await peer.tradeWallet.call()
 
       // check they are correct
       equal(swapContractTwo, actualSwap, 'Peer has incorrect swap address')
       equal(peerOwnerTwo, actualOwner, 'Peer has incorrect owner address')
+      equal(
+        tradeWalletTwo,
+        actualTradeWallet,
+        'Peer has incorrect trade wallet address'
+      )
     })
   })
 })

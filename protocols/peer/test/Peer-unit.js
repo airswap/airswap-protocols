@@ -85,7 +85,9 @@ contract('Peer Unit Tests', async accounts => {
     })
 
     it('Test owner is set correctly if provided an address', async () => {
-      let newPeer = await Peer.new(mockSwap.address, notOwner, tradeWallet, { from: owner })
+      let newPeer = await Peer.new(mockSwap.address, notOwner, tradeWallet, {
+        from: owner,
+      })
 
       // being provided an empty address, it should leave the owner unchanged
       let val = await newPeer.owner.call()
