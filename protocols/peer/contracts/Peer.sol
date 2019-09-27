@@ -256,6 +256,10 @@ contract Peer is IPeer, Ownable {
     swapContract.swap(_order);
   }
 
+  /**
+    * @notice Set a new trade wallet
+    * @param _newTradeWallet address The address of the new trade wallet
+    */
   function setTradeWallet(address _newTradeWallet) external onlyOwner {
     require(_newTradeWallet != address(0), 'TRADE_WALLET_REQUIRED');
     tradeWallet = _newTradeWallet;
