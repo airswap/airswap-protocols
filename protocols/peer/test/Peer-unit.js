@@ -84,7 +84,7 @@ contract('Peer Unit Tests', async accounts => {
     })
 
     it('Test owner is set correctly if provided an address', async () => {
-      let newPeer = await Peer.new(mockSwap.address, notOwner, { from: owner })
+      let newPeer = await Peer.new(mockSwap.address, notOwner, tradeWallet, { from: owner })
 
       // being provided an empty address, it should leave the owner unchanged
       let val = await newPeer.owner.call()
@@ -193,9 +193,9 @@ contract('Peer Unit Tests', async accounts => {
 
   describe('Test setTakerWallet', async () => {
     it('Test setTakerWallet permissions', async () => {
-      await reverted(peer.setTakerWallet(notOwner, { from: notOwner }))
+      await reverted(peer.setTradeWallet(notOwner, { from: notOwner }))
 
-      await passes(peer.setTakerWallet(notOwner, { from: owner }))
+      await passes(peer.setTradeWallet(notOwner, { from: owner }))
     })
   })
 
@@ -374,6 +374,8 @@ contract('Peer Unit Tests', async accounts => {
           token: TAKER_TOKEN,
         },
       })
+
+      console.log(order.taker.wallet)
 
       await reverted(
         peer.provideOrder(order, {
