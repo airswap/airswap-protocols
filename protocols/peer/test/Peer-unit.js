@@ -63,13 +63,18 @@ contract('Peer Unit Tests', async accounts => {
       equal(val, tradeWallet, 'trade wallet is incorrect')
     })
 
-    it('Test constructor reverts with trade wallet of 0', async () => {
-      await reverted(
-        Peer.new(mockSwap.address, EMPTY_ADDRESS, EMPTY_ADDRESS, {
+    it('Test constructor sets the owner as the trade wallet on empty address', async () => {
+      let newPeer = await Peer.new(
+        mockSwap.address,
+        EMPTY_ADDRESS,
+        EMPTY_ADDRESS,
+        {
           from: owner,
-        }),
-        'TRADE_WALLET_REQUIRED'
+        }
       )
+
+      let val = await newPeer.tradeWallet.call()
+      equal(val, owner, 'trade wallet is incorrect')
     })
 
     it('Test owner is set correctly if provided the empty address', async () => {
@@ -184,6 +189,15 @@ contract('Peer Unit Tests', async accounts => {
         return e.takerToken === TAKER_TOKEN && e.makerToken === MAKER_TOKEN
       })
     })
+  })
+
+  describe('Test setTakerWallet', async () => {
+    // it('Test unsetRule permissions', async () => {
+    //   await reverted(
+    //     peer.unsetRule(TAKER_TOKEN, MAKER_TOKEN, { from: notOwner })
+    //   )
+    //   await passes(peer.unsetRule(TAKER_TOKEN, MAKER_TOKEN, { from: owner }))
+    // })
   })
 
   describe('Test getMakerSideQuote', async () => {
