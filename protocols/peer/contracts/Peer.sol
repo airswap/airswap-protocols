@@ -53,12 +53,18 @@ contract Peer is IPeer, Ownable {
     address _peerContractOwner,
     address _tradeWallet
   ) public {
-    require(_tradeWallet != address(0), 'TRADE_WALLET_REQUIRED');
- 
     swapContract = ISwap(_swapContract);
-    tradeWallet = _tradeWallet;
+
+    // if no peer owner is provided, the deploying address is the owner
     if (_peerContractOwner != address(0)) {
       transferOwnership(_peerContractOwner);
+    }
+
+    // if no trade wallet is provided, the owner's wallet is the trade wallet
+    if (_tradeWallet != address(0)) {
+      tradeWallet = _tradeWallet;
+    } else {
+      tradeWallet = owner();
     }
   }
 

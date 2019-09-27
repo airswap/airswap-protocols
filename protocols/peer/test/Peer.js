@@ -10,10 +10,11 @@ const { orders } = require('@airswap/order-utils')
 let snapshotId
 
 contract('Peer', async accounts => {
-  let aliceAddress = accounts[0]
-  let bobAddress = accounts[1]
-  let carolAddress = accounts[2]
-  let davidAddress = accounts[3]
+  let aliceAddress = accounts[1]
+  let bobAddress = accounts[2]
+  let carolAddress = accounts[3]
+  let davidAddress = accounts[4]
+  let aliceTradeWallet = accounts[5]
 
   let alicePeer
 
@@ -51,7 +52,7 @@ contract('Peer', async accounts => {
 
   describe('Deploying...', async () => {
     it('Alice deployed a Swap Peer', async () => {
-      alicePeer = await Peer.new(swapAddress, aliceAddress, {
+      alicePeer = await Peer.new(swapAddress, aliceAddress, aliceTradeWallet, {
         from: aliceAddress,
       })
     })
@@ -64,7 +65,8 @@ contract('Peer', async accounts => {
         tokenDAI.address,
         100000,
         300,
-        0
+        0,
+        { from: aliceAddress }
       )
       equal(
         await alicePeer.getMakerSideQuote.call(
@@ -74,7 +76,9 @@ contract('Peer', async accounts => {
         ),
         300
       )
-      await alicePeer.unsetRule(tokenWETH.address, tokenDAI.address)
+      await alicePeer.unsetRule(tokenWETH.address, tokenDAI.address, {
+        from: aliceAddress,
+      })
       equal(
         await alicePeer.getMakerSideQuote.call(
           1,
@@ -93,7 +97,8 @@ contract('Peer', async accounts => {
         tokenDAI.address,
         100000,
         300,
-        0
+        0,
+        { from: aliceAddress }
       )
       equal(
         await alicePeer.getMakerSideQuote.call(
@@ -104,13 +109,15 @@ contract('Peer', async accounts => {
         300
       )
     })
+
     it('Send up to 100K DAI for WETH at 0.0032 WETH/DAI', async () => {
       await alicePeer.setRule(
         tokenDAI.address,
         tokenWETH.address,
         100000,
         32,
-        4
+        4,
+        { from: aliceAddress }
       )
       equal(
         await alicePeer.getMakerSideQuote.call(
@@ -121,13 +128,15 @@ contract('Peer', async accounts => {
         320
       )
     })
+
     it('Send up to 100K WETH for DAI at 300.005 DAI/WETH', async () => {
       await alicePeer.setRule(
         tokenWETH.address,
         tokenDAI.address,
         100000,
         300005,
-        3
+        3,
+        { from: aliceAddress }
       )
       equal(
         await alicePeer.getMakerSideQuote.call(
@@ -150,7 +159,8 @@ contract('Peer', async accounts => {
             tokenWETH.address,
             100000,
             32,
-            4
+            4,
+            { from: aliceAddress }
           ),
           'SetRule'
         )
@@ -231,7 +241,7 @@ contract('Peer', async accounts => {
           param: 1,
         },
         taker: {
-          wallet: aliceAddress,
+          wallet: aliceTradeWallet,
           token: tokenDAI.address,
           param: 1,
         },
@@ -253,7 +263,7 @@ contract('Peer', async accounts => {
           param: 1,
         },
         taker: {
-          wallet: aliceAddress,
+          wallet: aliceTradeWallet,
           token: tokenDAI.address,
           param: quote.toNumber(),
         },
@@ -276,7 +286,7 @@ contract('Peer', async accounts => {
           kind: '0x80ac58cd',
         },
         taker: {
-          wallet: aliceAddress,
+          wallet: aliceTradeWallet,
           token: tokenDAI.address,
           param: quote.toNumber(),
         },
@@ -298,7 +308,7 @@ contract('Peer', async accounts => {
           param: 1,
         },
         taker: {
-          wallet: aliceAddress,
+          wallet: aliceTradeWallet,
           token: tokenDAI.address,
           param: quote.toNumber(),
           kind: '0x80ac58cd',
@@ -321,7 +331,7 @@ contract('Peer', async accounts => {
           param: 1,
         },
         taker: {
-          wallet: aliceAddress,
+          wallet: aliceTradeWallet,
           token: tokenDAI.address,
           param: quote.toNumber(),
         },

@@ -14,6 +14,7 @@ const { orders } = require('@airswap/order-utils')
 
 contract('Peer Unit Tests', async accounts => {
   const owner = accounts[0]
+  const tradeWallet = accounts[1]
   const notOwner = accounts[2]
   let peer
   let mockSwap
@@ -46,13 +47,29 @@ contract('Peer Unit Tests', async accounts => {
 
   before('deploy Peer', async () => {
     await setupMockSwap()
-    peer = await Peer.new(mockSwap.address, EMPTY_ADDRESS, { from: owner })
+    peer = await Peer.new(mockSwap.address, EMPTY_ADDRESS, tradeWallet, {
+      from: owner,
+    })
   })
 
-  describe('Test initial values', async () => {
+  describe('Test constructor', async () => {
     it('Test initial Swap Contract', async () => {
       let val = await peer.swapContract.call()
       equal(val, mockSwap.address, 'swap address is incorrect')
+    })
+
+    it('Test initial trade wallet value', async () => {
+      let val = await peer.tradeWallet.call()
+      equal(val, tradeWallet, 'trade wallet is incorrect')
+    })
+
+    it('Test constructor reverts with trade wallet of 0', async () => {
+      await reverted(
+        Peer.new(mockSwap.address, EMPTY_ADDRESS, EMPTY_ADDRESS, {
+          from: owner,
+        }),
+        'TRADE_WALLET_REQUIRED'
+      )
     })
 
     it('Test owner is set correctly if provided the empty address', async () => {
