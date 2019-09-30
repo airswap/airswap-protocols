@@ -180,7 +180,7 @@ contract Peer is IPeer, Ownable {
         .mul(10 ** rule.priceExp).div(rule.priceCoef);
 
       // Ensure the takerParam does not exceed maximum and is greater than zero.
-      if(takerParam <= rule.maxTakerAmount && takerParam > 0) {
+      if(takerParam <= rule.maxTakerAmount) {
         return takerParam;
       }
     }
