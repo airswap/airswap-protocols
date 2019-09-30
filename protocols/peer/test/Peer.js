@@ -173,6 +173,9 @@ contract('Peer', async accounts => {
         ),
         6000100
       )
+      await alicePeer.unsetRule(tokenWETH.address, tokenDAI.address, {
+        from: aliceAddress,
+      })
     })
   })
 
@@ -221,9 +224,9 @@ contract('Peer', async accounts => {
       equal(quote, 312)
     })
 
-    it('Gets a quote to sell 5 WETH for DAI (False: No rule)', async () => {
+    it('Gets a quote to sell 500 DAI for WETH (False: No rule)', async () => {
       const quote = await alicePeer.getTakerSideQuote.call(
-        5,
+        500,
         tokenDAI.address,
         tokenWETH.address
       )
@@ -237,6 +240,15 @@ contract('Peer', async accounts => {
       )
       equal(quote[0], 100000)
       equal(quote[1], 320)
+    })
+
+    it('Gets a max quote for a non-existent rule', async () => {
+      const quote = await alicePeer.getMaxQuote.call(
+        tokenWETH.address,
+        tokenDAI.address
+      )
+      equal(quote[0], 0)
+      equal(quote[1], 0)
     })
 
     it('Gets a quote to buy 1500 WETH for DAI (False: Exceeds Max)', async () => {
