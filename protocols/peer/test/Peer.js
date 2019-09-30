@@ -12,7 +12,10 @@ const {
   advanceTime,
 } = require('@airswap/test-utils').time
 const { orders } = require('@airswap/order-utils')
-const { SECONDS_IN_DAY } = require('@airswap/order-utils').constants
+const {
+  EMPTY_ADDRESS,
+  SECONDS_IN_DAY,
+} = require('@airswap/order-utils').constants
 
 let snapshotId
 
@@ -53,6 +56,33 @@ contract('Peer', async accounts => {
 
   after(async () => {
     await revertToSnapShot(snapshotId)
+  })
+
+  describe('Checks setTradeWallet', async () => {
+    it('Does not set a 0x0 trade wallet', async () => {
+      await reverted(
+        alicePeer.setTradeWallet(EMPTY_ADDRESS, { from: aliceAddress }),
+        'TRADE_WALLET_REQUIRED'
+      )
+    })
+
+    it('Does set a new valid trade wallet address', async () => {
+      // set trade address to carol
+      await alicePeer.setTradeWallet(carolAddress, { from: aliceAddress })
+
+      // check it set
+      let val = await alicePeer.tradeWallet.call()
+      equal(val, carolAddress, 'trade wallet is incorrect')
+
+      //change it back
+      await alicePeer.setTradeWallet(aliceTradeWallet, { from: aliceAddress })
+    })
+
+    it('Non-owner cannot set a new address', async () => {
+      await reverted(
+        alicePeer.setTradeWallet(carolAddress, { from: carolAddress })
+      )
+    })
   })
 
   describe('Checks set and unset rule', async () => {
