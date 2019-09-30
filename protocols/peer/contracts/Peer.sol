@@ -229,7 +229,7 @@ contract Peer is IPeer, Ownable {
     require(_order.maker.wallet == msg.sender,
       "MAKER_MUST_BE_SENDER");
 
-    require(_order.taker.wallet == tradeWallet || _order.taker.wallet == address(0),
+    require(_order.taker.wallet == tradeWallet,
       "INVALID_TAKER_WALLET");
 
     require(_order.maker.kind == ERC20_INTERFACE_ID,
