@@ -43,18 +43,14 @@ contract('Peer', async accounts => {
 
     tokenWETH = await FungibleToken.new()
     tokenDAI = await FungibleToken.new()
+
+    alicePeer = await Peer.new(swapAddress, aliceAddress, aliceTradeWallet, {
+      from: aliceAddress,
+    })
   })
 
   after(async () => {
     await revertToSnapShot(snapshotId)
-  })
-
-  describe('Deploying...', async () => {
-    it('Alice deployed a Swap Peer', async () => {
-      alicePeer = await Peer.new(swapAddress, aliceAddress, aliceTradeWallet, {
-        from: aliceAddress,
-      })
-    })
   })
 
   describe('Checks set and unset rule', async () => {
@@ -223,7 +219,17 @@ contract('Peer', async accounts => {
 
   describe('Test tradeWallet logic', async () => {
     let quote
-    before('Gets a quote for 1 WETH', async () => {
+    before('sets up rule and quote', async () => {
+      // Peer will trade up to 100,000 DAI for WETH, at 200 DAI/WETH
+      await alicePeer.setRule(
+        tokenDAI.address,     // Peer's token
+        tokenWETH.address,    // Maker's token
+        100000,
+        5,
+        3,
+        { from: aliceAddress }
+      )
+      // Maker wants to trade 1 WETH for x DAI
       quote = await alicePeer.getTakerSideQuote.call(
         1,
         tokenWETH.address,
@@ -328,11 +334,23 @@ contract('Peer', async accounts => {
       })
       emitted(tx, 'Authorize')
 
-      // Now the swap succeeds
-      await reverted(
-        alicePeer.provideOrder(order, { from: bobAddress }),
-        'SENDER_UNAUTHORIZED'
+      // both approve Swap to transfer tokens
+      emitted(
+        await tokenDAI.approve(swapAddress, 200, { from: aliceTradeWallet }),
+        'Approval'
       )
+      emitted(
+        await tokenWETH.approve(swapAddress, 1, { from: bobAddress }),
+        'Approval'
+      )
+
+      // Now the swap succeeds
+      await alicePeer.provideOrder(order, { from: bobAddress })
+
+      // remove authorization
+      await swapContract.revoke(alicePeer.address, {
+        from: aliceTradeWallet,
+      })
     })
   })
 

@@ -76,6 +76,7 @@ contract Peer is IPeer, Ownable {
     * @param _maxTakerAmount uint256 The maximum amount of ERC-20 token the peer would send
     * @param _priceCoef uint256 The whole number that will be multiplied by 10^(-priceExp) - the price coefficient
     * @param _priceExp uint256 The exponent of the price to indicate location of the decimal priceCoef * 10^(-priceExp)
+    * @dev 1 takerToken = priceCoef * 10^(-priceExp) makerToken
     */
   function setRule(
     address _takerToken,
