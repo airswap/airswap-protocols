@@ -251,11 +251,20 @@ contract('Peer', async accounts => {
       equal(quote[1], 0)
     })
 
-    it('Gets a quote to buy 1500 WETH for DAI (False: Exceeds Max)', async () => {
+    it('Gets a quote to buy WETH for 250000 DAI (False: Exceeds Max)', async () => {
       const quote = await alicePeer.getMakerSideQuote.call(
         250000,
         tokenDAI.address,
         tokenWETH.address
+      )
+      equal(quote, 0)
+    })
+
+    it('Gets a quote to buy 500 WETH for DAI (False: Exceeds Max)', async () => {
+      const quote = await alicePeer.getTakerSideQuote.call(
+        500,
+        tokenWETH.address,
+        tokenDAI.address
       )
       equal(quote, 0)
     })
