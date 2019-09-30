@@ -3,8 +3,13 @@ const Swap = artifacts.require('Swap')
 const Types = artifacts.require('Types')
 const FungibleToken = artifacts.require('FungibleToken')
 
-const { emitted, reverted, equal } = require('@airswap/test-utils').assert
-const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
+const { emitted, reverted, equal, ok } = require('@airswap/test-utils').assert
+const { balances } = require('@airswap/test-utils').balances
+const {
+  takeSnapshot,
+  revertToSnapShot,
+  getTimestampPlusDays,
+} = require('@airswap/test-utils').time
 const { orders } = require('@airswap/order-utils')
 
 let snapshotId
@@ -217,13 +222,16 @@ contract('Peer', async accounts => {
   })
 
   describe('Test tradeWallet logic', async () => {
-    it('should not trade for a different wallet', async () => {
-      let quote = await alicePeer.getTakerSideQuote.call(
+    let quote
+    before('Gets a quote for 1 WETH', async () => {
+      quote = await alicePeer.getTakerSideQuote.call(
         1,
         tokenWETH.address,
         tokenDAI.address
       )
+    })
 
+    it('should not trade for a different wallet', async () => {
       const order = await orders.getOrder({
         maker: {
           wallet: bobAddress,
@@ -244,12 +252,6 @@ contract('Peer', async accounts => {
     })
 
     it('should not accept open trades', async () => {
-      let quote = await alicePeer.getTakerSideQuote.call(
-        1,
-        tokenWETH.address,
-        tokenDAI.address
-      )
-
       const order = await orders.getOrder({
         maker: {
           wallet: bobAddress,
@@ -270,12 +272,6 @@ contract('Peer', async accounts => {
     })
 
     it("should not trade if the tradeWallet hasn't authorized the peer", async () => {
-      let quote = await alicePeer.getTakerSideQuote.call(
-        1,
-        tokenWETH.address,
-        tokenDAI.address
-      )
-
       const order = await orders.getOrder({
         maker: {
           wallet: bobAddress,
@@ -298,12 +294,6 @@ contract('Peer', async accounts => {
     })
 
     it('should trade if the tradeWallet has authorized the peer', async () => {
-      let quote = await alicePeer.getTakerSideQuote.call(
-        1,
-        tokenWETH.address,
-        tokenDAI.address
-      )
-
       const order = await orders.getOrder({
         maker: {
           wallet: bobAddress,
@@ -317,9 +307,26 @@ contract('Peer', async accounts => {
         },
       })
 
-      // tradeWallet needs tokens to trade
+      // tradeWallet needs DAI to trade
+      emitted(await tokenDAI.mint(aliceTradeWallet, 300), 'Transfer')
+      ok(
+        await balances(aliceTradeWallet, [[tokenDAI, 300], [tokenWETH, 0]]),
+        'Trade Wallet balances are incorrect'
+      )
+
+      // bob needs WETH to trade
+      emitted(await tokenWETH.mint(bobAddress, 2), 'Transfer')
+      ok(
+        await balances(bobAddress, [[tokenDAI, 0], [tokenWETH, 2]]),
+        'Bob balances are incorrect'
+      )
 
       // aliceTradeWallet must authorize the Peer contract to swap
+      let expiry = await getTimestampPlusDays(1)
+      let tx = await swapContract.authorize(alicePeer.address, expiry, {
+        from: aliceTradeWallet,
+      })
+      emitted(tx, 'Authorize')
 
       // Now the swap succeeds
       await reverted(
