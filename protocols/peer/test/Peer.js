@@ -9,8 +9,10 @@ const {
   takeSnapshot,
   revertToSnapShot,
   getTimestampPlusDays,
+  advanceTime,
 } = require('@airswap/test-utils').time
 const { orders } = require('@airswap/order-utils')
+const { SECONDS_IN_DAY } = require('@airswap/order-utils').constants
 
 let snapshotId
 
@@ -222,8 +224,8 @@ contract('Peer', async accounts => {
     before('sets up rule and quote', async () => {
       // Peer will trade up to 100,000 DAI for WETH, at 200 DAI/WETH
       await alicePeer.setRule(
-        tokenDAI.address,     // Peer's token
-        tokenWETH.address,    // Maker's token
+        tokenDAI.address, // Peer's token
+        tokenWETH.address, // Maker's token
         100000,
         5,
         3,
@@ -299,6 +301,38 @@ contract('Peer', async accounts => {
       )
     })
 
+    it("should not trade if the tradeWallet's authorization has expired", async () => {
+      const order = await orders.getOrder({
+        maker: {
+          wallet: bobAddress,
+          token: tokenWETH.address,
+          param: 1,
+        },
+        taker: {
+          wallet: aliceTradeWallet, //correct trade wallet provided
+          token: tokenDAI.address,
+          param: quote.toNumber(),
+        },
+      })
+
+      // authorize the peer
+      let expiry = await getTimestampPlusDays(0.5)
+      let tx = await swapContract.authorize(alicePeer.address, expiry, {
+        from: aliceTradeWallet,
+      })
+      emitted(tx, 'Authorize')
+
+      // increase time past expiry
+      await advanceTime(SECONDS_IN_DAY * 0.6)
+
+      // Succeeds on the Peer, fails on the Swap.
+      // aliceTradeWallet approval has expired
+      await reverted(
+        alicePeer.provideOrder(order, { from: bobAddress }),
+        'SENDER_UNAUTHORIZED'
+      )
+    })
+
     it('should trade if the tradeWallet has authorized the peer', async () => {
       const order = await orders.getOrder({
         maker: {
@@ -328,7 +362,7 @@ contract('Peer', async accounts => {
       )
 
       // aliceTradeWallet must authorize the Peer contract to swap
-      let expiry = await getTimestampPlusDays(1)
+      let expiry = await getTimestampPlusDays(0.5)
       let tx = await swapContract.authorize(alicePeer.address, expiry, {
         from: aliceTradeWallet,
       })
