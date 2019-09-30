@@ -17,6 +17,8 @@
 pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
+import "@airswap/token-registry/contracts/interfaces/IAsset.sol";
+import "@airswap/token-registry/contracts/TokenRegistry.sol";
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/token/ERC721/IERC721.sol";
@@ -313,12 +315,6 @@ contract Swap is ISwap {
       address _token,
       bytes4 _kind
   ) internal {
-    if (_kind == ERC721_INTERFACE_ID) {
-      // Attempt to transfer an ERC-721 token.
-      IERC721(_token).safeTransferFrom(_from, _to, _param);
-    } else {
-      // Attempt to transfer an ERC-20 token.
-      require(IERC20(_token).transferFrom(_from, _to, _param));
-    }
+    require(IAsset(TokenRegistry.assetMapping[_kind]).transferTokens(_from, _to, _param, _toklen));
   }
 }
