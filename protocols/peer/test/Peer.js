@@ -442,6 +442,56 @@ contract('Peer', async accounts => {
       )
     })
 
+    it('Use quote larger than peer rule', async () => {
+      // Peer trades WETH for 100 DAI. Max trade is 2 WETH.
+      await alicePeer.setRule(
+        tokenWETH.address, // Peer's token
+        tokenDAI.address, // Maker's token
+        2,
+        100,
+        0,
+        { from: aliceAddress }
+      )
+      const order = await orders.getOrder({
+        maker: {
+          wallet: bobAddress,
+          token: tokenDAI.address,
+          param: 300,
+        },
+        taker: {
+          wallet: aliceTradeWallet,
+          token: tokenWETH.address,
+          param: quote.toNumber(),
+        },
+      })
+
+      // 300 DAI is 3 WETH, which is more than the max
+      await reverted(
+        alicePeer.provideOrder(order, { from: bobAddress }),
+        'AMOUNT_EXCEEDS_MAX'
+      )
+    })
+
+    it('Use incorrect price on peer', async () => {
+      const order = await orders.getOrder({
+        maker: {
+          wallet: bobAddress,
+          token: tokenWETH.address,
+          param: 1,
+        },
+        taker: {
+          wallet: aliceTradeWallet,
+          token: tokenDAI.address,
+          param: 500, //this is more than the peer rule would pay out
+        },
+      })
+
+      await reverted(
+        alicePeer.provideOrder(order, { from: bobAddress }),
+        'PRICE_INCORRECT'
+      )
+    })
+
     it('Use quote with incorrect maker token kind', async () => {
       // Note: Consumer is the order maker, Peer is the order taker.
       const order = await orders.getOrder({
