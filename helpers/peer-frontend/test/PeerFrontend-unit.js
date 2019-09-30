@@ -69,6 +69,13 @@ contract('PeerFrontend Unit Tests', async () => {
     await mockPeerHigh.givenMethodReturnAddress(peer_owner, EMPTY_ADDRESS)
     await mockPeerLow.givenMethodReturnAddress(peer_owner, EMPTY_ADDRESS)
 
+    // mock peer trade wallet
+    let peer_tradeWallet = peerTemplate.contract.methods
+      .tradeWallet()
+      .encodeABI()
+    await mockPeerHigh.givenMethodReturnAddress(peer_tradeWallet, EMPTY_ADDRESS)
+    await mockPeerLow.givenMethodReturnAddress(peer_tradeWallet, EMPTY_ADDRESS)
+
     //mock peer provideUnsignedOrder()
     const order = await orders.getOrder({})
 
