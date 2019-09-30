@@ -78,7 +78,7 @@ contract('Peer Factory Tests', async accounts => {
       equal(isTrustedPeer, true)
     })
 
-    it('should create delegate with the correct values', async () => {
+    it('should create peer with the correct values', async () => {
       // deploy peer
       let tx = await peerFactory.createPeer(
         swapContractTwo,
@@ -107,7 +107,7 @@ contract('Peer Factory Tests', async accounts => {
       let actualOwner = await peer.owner.call()
       let actualTradeWallet = await peer.tradeWallet.call()
 
-      // check they are correct
+      // check that the addresses are equal
       equal(swapContractTwo, actualSwap, 'Peer has incorrect swap address')
       equal(peerOwnerTwo, actualOwner, 'Peer has incorrect owner address')
       equal(

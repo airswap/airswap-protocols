@@ -23,7 +23,7 @@ contract('Peer', async accounts => {
   let aliceAddress = accounts[1]
   let bobAddress = accounts[2]
   let carolAddress = accounts[3]
-  let aliceTradeWallet = accounts[5]
+  let aliceTradeWallet = accounts[4]
 
   let alicePeer
 
