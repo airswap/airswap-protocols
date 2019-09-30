@@ -85,4 +85,8 @@ interface IPeer {
 
   function owner()
     external view returns (address);
+
+  function tradeWallet()
+    external view returns (address);
+
 }

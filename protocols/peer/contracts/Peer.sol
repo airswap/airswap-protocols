@@ -34,7 +34,7 @@ contract Peer is IPeer, Ownable {
   ISwap public swapContract;
 
   // The address holding tokens that will be trading through this peer
-  address public tradeWallet;
+  address private tradeWalletAddress;
 
   // Mapping of takerToken to makerToken for rule lookup
   mapping (address => mapping (address => Rule)) public rules;
@@ -62,21 +62,21 @@ contract Peer is IPeer, Ownable {
 
     // if no trade wallet is provided, the owner's wallet is the trade wallet
     if (_tradeWallet != address(0)) {
-      tradeWallet = _tradeWallet;
+      tradeWalletAddress = _tradeWallet;
     } else {
-      tradeWallet = owner();
+      tradeWalletAddress = owner();
     }
   }
 
   /**
     * @notice Set a Trading Rule
     * @dev only callable by the owner of the contract
+    * @dev 1 takerToken = priceCoef * 10^(-priceExp) * makerToken
     * @param _takerToken address The address of an ERC-20 token the peer would send
     * @param _makerToken address The address of an ERC-20 token the consumer would send
     * @param _maxTakerAmount uint256 The maximum amount of ERC-20 token the peer would send
     * @param _priceCoef uint256 The whole number that will be multiplied by 10^(-priceExp) - the price coefficient
     * @param _priceExp uint256 The exponent of the price to indicate location of the decimal priceCoef * 10^(-priceExp)
-    * @dev 1 takerToken = priceCoef * 10^(-priceExp) makerToken
     */
   function setRule(
     address _takerToken,
@@ -230,7 +230,7 @@ contract Peer is IPeer, Ownable {
     require(_order.maker.wallet == msg.sender,
       "MAKER_MUST_BE_SENDER");
 
-    require(_order.taker.wallet == tradeWallet,
+    require(_order.taker.wallet == tradeWalletAddress,
       "INVALID_TAKER_WALLET");
 
     require(_order.maker.kind == ERC20_INTERFACE_ID,
@@ -269,7 +269,11 @@ contract Peer is IPeer, Ownable {
     */
   function setTradeWallet(address _newTradeWallet) external onlyOwner {
     require(_newTradeWallet != address(0), 'TRADE_WALLET_REQUIRED');
-    tradeWallet = _newTradeWallet;
+    tradeWalletAddress = _newTradeWallet;
+  }
+
+  function tradeWallet() external view returns (address) {
+    return tradeWalletAddress;
   }
 
 }
