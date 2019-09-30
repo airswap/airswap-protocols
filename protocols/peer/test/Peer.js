@@ -227,7 +227,7 @@ contract('Peer', async accounts => {
         tokenDAI.address,
         tokenWETH.address
       )
-      equal(quote, false)
+      equal(quote, 0)
     })
 
     it('Gets a max quote to buy WETH for DAI', async () => {
