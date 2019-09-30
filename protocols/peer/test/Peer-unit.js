@@ -373,6 +373,7 @@ contract('Peer Unit Tests', async accounts => {
           token: MAKER_TOKEN,
         },
         taker: {
+          wallet: tradeWallet,
           param: 999,
           token: TAKER_TOKEN,
         },
@@ -402,6 +403,7 @@ contract('Peer Unit Tests', async accounts => {
           token: MAKER_TOKEN,
         },
         taker: {
+          wallet: tradeWallet,
           param: MAX_TAKER_AMOUNT + 1,
           token: TAKER_TOKEN,
         },
@@ -463,6 +465,7 @@ contract('Peer Unit Tests', async accounts => {
           token: MAKER_TOKEN,
         },
         taker: {
+          wallet: tradeWallet,
           param: MAX_TAKER_AMOUNT,
           token: TAKER_TOKEN,
         },
@@ -489,6 +492,7 @@ contract('Peer Unit Tests', async accounts => {
           token: MAKER_TOKEN,
         },
         taker: {
+          wallet: tradeWallet,
           param: 100,
           token: TAKER_TOKEN,
         },
@@ -587,6 +591,7 @@ contract('Peer Unit Tests', async accounts => {
           token: MAKER_TOKEN,
         },
         taker: {
+          wallet: tradeWallet,
           param: takerAmount,
           token: TAKER_TOKEN,
         },
