@@ -46,12 +46,12 @@ contract Peer is IPeer, Ownable {
     * @notice Contract Constructor
     * @param _swapContract address of the swap contract the peer will deploy with
     * @param _peerContractOwner address that should be the owner of the peer
-    * @param _tradeWallet the wallet the peer will trade from
+    * @param _peerTradeWallet the wallet the peer will trade from
     */
   constructor(
     address _swapContract,
     address _peerContractOwner,
-    address _tradeWallet
+    address _peerTradeWallet
   ) public {
     swapContract = ISwap(_swapContract);
 
@@ -61,8 +61,8 @@ contract Peer is IPeer, Ownable {
     }
 
     // if no trade wallet is provided, the owner's wallet is the trade wallet
-    if (_tradeWallet != address(0)) {
-      _tradeWallet = _tradeWallet;
+    if (_peerTradeWallet != address(0)) {
+      _tradeWallet = _peerTradeWallet;
     } else {
       _tradeWallet = owner();
     }
