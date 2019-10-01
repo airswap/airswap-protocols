@@ -34,7 +34,7 @@ contract Peer is IPeer, Ownable {
   ISwap public swapContract;
 
   // The address holding tokens that will be trading through this peer
-  address private tradeWalletAddress;
+  address private _tradeWallet;
 
   // Mapping of takerToken to makerToken for rule lookup
   mapping (address => mapping (address => Rule)) public rules;
@@ -62,9 +62,9 @@ contract Peer is IPeer, Ownable {
 
     // if no trade wallet is provided, the owner's wallet is the trade wallet
     if (_tradeWallet != address(0)) {
-      tradeWalletAddress = _tradeWallet;
+      _tradeWallet = _tradeWallet;
     } else {
-      tradeWalletAddress = owner();
+      _tradeWallet = owner();
     }
   }
 
@@ -230,7 +230,7 @@ contract Peer is IPeer, Ownable {
     require(_order.maker.wallet == msg.sender,
       "MAKER_MUST_BE_SENDER");
 
-    require(_order.taker.wallet == tradeWalletAddress,
+    require(_order.taker.wallet == _tradeWallet,
       "INVALID_TAKER_WALLET");
 
     require(_order.maker.kind == ERC20_INTERFACE_ID,
@@ -269,11 +269,14 @@ contract Peer is IPeer, Ownable {
     */
   function setTradeWallet(address _newTradeWallet) external onlyOwner {
     require(_newTradeWallet != address(0), 'TRADE_WALLET_REQUIRED');
-    tradeWalletAddress = _newTradeWallet;
+    _tradeWallet = _newTradeWallet;
   }
 
+  /**
+    * @notice Get the trade wallet address
+    */
   function tradeWallet() external view returns (address) {
-    return tradeWalletAddress;
+    return _tradeWallet;
   }
 
 }
