@@ -177,7 +177,7 @@ contract PeerFrontend {
         block.timestamp,
         address(this),
         _makerToken,
-        IPeer(peerContract).owner(),
+        IPeer(peerContract).tradeWallet(),
         _takerToken))),
       block.timestamp + 1,
       Types.Party(
@@ -187,7 +187,7 @@ contract PeerFrontend {
         0x277f8169
       ),
       Types.Party(
-        IPeer(peerContract).owner(),
+        IPeer(peerContract).tradeWallet(),
         _takerToken,
         _takerAmount,
         0x277f8169
@@ -238,7 +238,7 @@ contract PeerFrontend {
         block.timestamp,
         address(this),
         _makerToken,
-        IPeer(peerContract).owner(),
+        IPeer(peerContract).tradeWallet(),
         _takerToken
       ))),
       block.timestamp + 1,
@@ -249,7 +249,7 @@ contract PeerFrontend {
         0x277f8169
       ),
       Types.Party(
-        IPeer(peerContract).owner(),
+        IPeer(peerContract).tradeWallet(),
         _takerToken,
         takerAmount,
         0x277f8169

@@ -3,17 +3,27 @@ const Swap = artifacts.require('Swap')
 const Types = artifacts.require('Types')
 const FungibleToken = artifacts.require('FungibleToken')
 
-const { emitted, reverted, equal } = require('@airswap/test-utils').assert
-const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
+const { emitted, reverted, equal, ok } = require('@airswap/test-utils').assert
+const { balances } = require('@airswap/test-utils').balances
+const {
+  takeSnapshot,
+  revertToSnapShot,
+  getTimestampPlusDays,
+  advanceTime,
+} = require('@airswap/test-utils').time
 const { orders } = require('@airswap/order-utils')
+const {
+  EMPTY_ADDRESS,
+  SECONDS_IN_DAY,
+} = require('@airswap/order-utils').constants
 
 let snapshotId
 
 contract('Peer', async accounts => {
-  let aliceAddress = accounts[0]
-  let bobAddress = accounts[1]
-  let carolAddress = accounts[2]
-  let davidAddress = accounts[3]
+  let aliceAddress = accounts[1]
+  let bobAddress = accounts[2]
+  let carolAddress = accounts[3]
+  let aliceTradeWallet = accounts[4]
 
   let alicePeer
 
@@ -23,12 +33,7 @@ contract('Peer', async accounts => {
   let tokenDAI
   let tokenWETH
 
-  orders.setKnownAccounts([
-    aliceAddress,
-    bobAddress,
-    carolAddress,
-    davidAddress,
-  ])
+  orders.setKnownAccounts([aliceAddress, bobAddress, carolAddress])
 
   before('Setup', async () => {
     let snapShot = await takeSnapshot()
@@ -43,17 +48,40 @@ contract('Peer', async accounts => {
 
     tokenWETH = await FungibleToken.new()
     tokenDAI = await FungibleToken.new()
+
+    alicePeer = await Peer.new(swapAddress, aliceAddress, aliceTradeWallet, {
+      from: aliceAddress,
+    })
   })
 
   after(async () => {
     await revertToSnapShot(snapshotId)
   })
 
-  describe('Deploying...', async () => {
-    it('Alice deployed a Swap Peer', async () => {
-      alicePeer = await Peer.new(swapAddress, aliceAddress, {
-        from: aliceAddress,
-      })
+  describe('Checks setTradeWallet', async () => {
+    it('Does not set a 0x0 trade wallet', async () => {
+      await reverted(
+        alicePeer.setTradeWallet(EMPTY_ADDRESS, { from: aliceAddress }),
+        'TRADE_WALLET_REQUIRED'
+      )
+    })
+
+    it('Does set a new valid trade wallet address', async () => {
+      // set trade address to carol
+      await alicePeer.setTradeWallet(carolAddress, { from: aliceAddress })
+
+      // check it set
+      let val = await alicePeer.tradeWallet.call()
+      equal(val, carolAddress, 'trade wallet is incorrect')
+
+      //change it back
+      await alicePeer.setTradeWallet(aliceTradeWallet, { from: aliceAddress })
+    })
+
+    it('Non-owner cannot set a new address', async () => {
+      await reverted(
+        alicePeer.setTradeWallet(carolAddress, { from: carolAddress })
+      )
     })
   })
 
@@ -64,7 +92,8 @@ contract('Peer', async accounts => {
         tokenDAI.address,
         100000,
         300,
-        0
+        0,
+        { from: aliceAddress }
       )
       equal(
         await alicePeer.getMakerSideQuote.call(
@@ -74,7 +103,9 @@ contract('Peer', async accounts => {
         ),
         300
       )
-      await alicePeer.unsetRule(tokenWETH.address, tokenDAI.address)
+      await alicePeer.unsetRule(tokenWETH.address, tokenDAI.address, {
+        from: aliceAddress,
+      })
       equal(
         await alicePeer.getMakerSideQuote.call(
           1,
@@ -93,7 +124,8 @@ contract('Peer', async accounts => {
         tokenDAI.address,
         100000,
         300,
-        0
+        0,
+        { from: aliceAddress }
       )
       equal(
         await alicePeer.getMakerSideQuote.call(
@@ -104,13 +136,15 @@ contract('Peer', async accounts => {
         300
       )
     })
+
     it('Send up to 100K DAI for WETH at 0.0032 WETH/DAI', async () => {
       await alicePeer.setRule(
         tokenDAI.address,
         tokenWETH.address,
         100000,
         32,
-        4
+        4,
+        { from: aliceAddress }
       )
       equal(
         await alicePeer.getMakerSideQuote.call(
@@ -121,13 +155,15 @@ contract('Peer', async accounts => {
         320
       )
     })
+
     it('Send up to 100K WETH for DAI at 300.005 DAI/WETH', async () => {
       await alicePeer.setRule(
         tokenWETH.address,
         tokenDAI.address,
         100000,
         300005,
-        3
+        3,
+        { from: aliceAddress }
       )
       equal(
         await alicePeer.getMakerSideQuote.call(
@@ -137,6 +173,9 @@ contract('Peer', async accounts => {
         ),
         6000100
       )
+      await alicePeer.unsetRule(tokenWETH.address, tokenDAI.address, {
+        from: aliceAddress,
+      })
     })
   })
 
@@ -150,7 +189,8 @@ contract('Peer', async accounts => {
             tokenWETH.address,
             100000,
             32,
-            4
+            4,
+            { from: aliceAddress }
           ),
           'SetRule'
         )
@@ -184,13 +224,13 @@ contract('Peer', async accounts => {
       equal(quote, 312)
     })
 
-    it('Gets a quote to sell 5 WETH for DAI (False: No rule)', async () => {
+    it('Gets a quote to sell 500 DAI for WETH (False: No rule)', async () => {
       const quote = await alicePeer.getTakerSideQuote.call(
-        5,
+        500,
         tokenDAI.address,
         tokenWETH.address
       )
-      equal(quote, false)
+      equal(quote, 0)
     })
 
     it('Gets a max quote to buy WETH for DAI', async () => {
@@ -202,13 +242,200 @@ contract('Peer', async accounts => {
       equal(quote[1], 320)
     })
 
-    it('Gets a quote to buy 1500 WETH for DAI (False: Exceeds Max)', async () => {
+    it('Gets a max quote for a non-existent rule', async () => {
+      const quote = await alicePeer.getMaxQuote.call(
+        tokenWETH.address,
+        tokenDAI.address
+      )
+      equal(quote[0], 0)
+      equal(quote[1], 0)
+    })
+
+    it('Gets a quote to buy WETH for 250000 DAI (False: Exceeds Max)', async () => {
       const quote = await alicePeer.getMakerSideQuote.call(
         250000,
         tokenDAI.address,
         tokenWETH.address
       )
       equal(quote, 0)
+    })
+
+    it('Gets a quote to buy 500 WETH for DAI (False: Exceeds Max)', async () => {
+      const quote = await alicePeer.getTakerSideQuote.call(
+        500,
+        tokenWETH.address,
+        tokenDAI.address
+      )
+      equal(quote, 0)
+    })
+  })
+
+  describe('Test tradeWallet logic', async () => {
+    let quote
+    before('sets up rule and quote', async () => {
+      // Peer will trade up to 100,000 DAI for WETH, at 200 DAI/WETH
+      await alicePeer.setRule(
+        tokenDAI.address, // Peer's token
+        tokenWETH.address, // Maker's token
+        100000,
+        5,
+        3,
+        { from: aliceAddress }
+      )
+      // Maker wants to trade 1 WETH for x DAI
+      quote = await alicePeer.getTakerSideQuote.call(
+        1,
+        tokenWETH.address,
+        tokenDAI.address
+      )
+    })
+
+    it('should not trade for a different wallet', async () => {
+      const order = await orders.getOrder({
+        maker: {
+          wallet: bobAddress,
+          token: tokenWETH.address,
+          param: 1,
+        },
+        taker: {
+          wallet: carolAddress,
+          token: tokenDAI.address,
+          param: quote.toNumber(),
+        },
+      })
+
+      await reverted(
+        alicePeer.provideOrder(order, { from: bobAddress }),
+        'INVALID_TAKER_WALLET'
+      )
+    })
+
+    it('should not accept open trades', async () => {
+      const order = await orders.getOrder({
+        maker: {
+          wallet: bobAddress,
+          token: tokenWETH.address,
+          param: 1,
+        },
+        taker: {
+          // no wallet provided means wallet = address(0)
+          token: tokenDAI.address,
+          param: quote.toNumber(),
+        },
+      })
+
+      await reverted(
+        alicePeer.provideOrder(order, { from: bobAddress }),
+        'INVALID_TAKER_WALLET'
+      )
+    })
+
+    it("should not trade if the tradeWallet hasn't authorized the peer", async () => {
+      const order = await orders.getOrder({
+        maker: {
+          wallet: bobAddress,
+          token: tokenWETH.address,
+          param: 1,
+        },
+        taker: {
+          wallet: aliceTradeWallet, //correct trade wallet provided
+          token: tokenDAI.address,
+          param: quote.toNumber(),
+        },
+      })
+
+      // Succeeds on the Peer, fails on the Swap.
+      // aliceTradeWallet hasn't authorized Peer to swap
+      await reverted(
+        alicePeer.provideOrder(order, { from: bobAddress }),
+        'SENDER_UNAUTHORIZED'
+      )
+    })
+
+    it("should not trade if the tradeWallet's authorization has expired", async () => {
+      const order = await orders.getOrder({
+        maker: {
+          wallet: bobAddress,
+          token: tokenWETH.address,
+          param: 1,
+        },
+        taker: {
+          wallet: aliceTradeWallet, //correct trade wallet provided
+          token: tokenDAI.address,
+          param: quote.toNumber(),
+        },
+      })
+
+      // authorize the peer
+      let expiry = await getTimestampPlusDays(0.5)
+      let tx = await swapContract.authorize(alicePeer.address, expiry, {
+        from: aliceTradeWallet,
+      })
+      emitted(tx, 'Authorize')
+
+      // increase time past expiry
+      await advanceTime(SECONDS_IN_DAY * 0.6)
+
+      // Succeeds on the Peer, fails on the Swap.
+      // aliceTradeWallet approval has expired
+      await reverted(
+        alicePeer.provideOrder(order, { from: bobAddress }),
+        'SENDER_UNAUTHORIZED'
+      )
+    })
+
+    it('should trade if the tradeWallet has authorized the peer', async () => {
+      const order = await orders.getOrder({
+        maker: {
+          wallet: bobAddress,
+          token: tokenWETH.address,
+          param: 1,
+        },
+        taker: {
+          wallet: aliceTradeWallet, //correct trade wallet provided
+          token: tokenDAI.address,
+          param: quote.toNumber(),
+        },
+      })
+
+      // tradeWallet needs DAI to trade
+      emitted(await tokenDAI.mint(aliceTradeWallet, 300), 'Transfer')
+      ok(
+        await balances(aliceTradeWallet, [[tokenDAI, 300], [tokenWETH, 0]]),
+        'Trade Wallet balances are incorrect'
+      )
+
+      // bob needs WETH to trade
+      emitted(await tokenWETH.mint(bobAddress, 2), 'Transfer')
+      ok(
+        await balances(bobAddress, [[tokenDAI, 0], [tokenWETH, 2]]),
+        'Bob balances are incorrect'
+      )
+
+      // aliceTradeWallet must authorize the Peer contract to swap
+      let expiry = await getTimestampPlusDays(0.5)
+      let tx = await swapContract.authorize(alicePeer.address, expiry, {
+        from: aliceTradeWallet,
+      })
+      emitted(tx, 'Authorize')
+
+      // both approve Swap to transfer tokens
+      emitted(
+        await tokenDAI.approve(swapAddress, 200, { from: aliceTradeWallet }),
+        'Approval'
+      )
+      emitted(
+        await tokenWETH.approve(swapAddress, 1, { from: bobAddress }),
+        'Approval'
+      )
+
+      // Now the swap succeeds
+      await alicePeer.provideOrder(order, { from: bobAddress })
+
+      // remove authorization
+      await swapContract.revoke(alicePeer.address, {
+        from: aliceTradeWallet,
+      })
     })
   })
 
@@ -231,7 +458,7 @@ contract('Peer', async accounts => {
           param: 1,
         },
         taker: {
-          wallet: aliceAddress,
+          wallet: aliceTradeWallet,
           token: tokenDAI.address,
           param: 1,
         },
@@ -253,7 +480,7 @@ contract('Peer', async accounts => {
           param: 1,
         },
         taker: {
-          wallet: aliceAddress,
+          wallet: aliceTradeWallet,
           token: tokenDAI.address,
           param: quote.toNumber(),
         },
@@ -263,6 +490,56 @@ contract('Peer', async accounts => {
       await reverted(
         alicePeer.provideOrder(order, { from: carolAddress }),
         'MAKER_MUST_BE_SENDER'
+      )
+    })
+
+    it('Use quote larger than peer rule', async () => {
+      // Peer trades WETH for 100 DAI. Max trade is 2 WETH.
+      await alicePeer.setRule(
+        tokenWETH.address, // Peer's token
+        tokenDAI.address, // Maker's token
+        2,
+        100,
+        0,
+        { from: aliceAddress }
+      )
+      const order = await orders.getOrder({
+        maker: {
+          wallet: bobAddress,
+          token: tokenDAI.address,
+          param: 300,
+        },
+        taker: {
+          wallet: aliceTradeWallet,
+          token: tokenWETH.address,
+          param: quote.toNumber(),
+        },
+      })
+
+      // 300 DAI is 3 WETH, which is more than the max
+      await reverted(
+        alicePeer.provideOrder(order, { from: bobAddress }),
+        'AMOUNT_EXCEEDS_MAX'
+      )
+    })
+
+    it('Use incorrect price on peer', async () => {
+      const order = await orders.getOrder({
+        maker: {
+          wallet: bobAddress,
+          token: tokenWETH.address,
+          param: 1,
+        },
+        taker: {
+          wallet: aliceTradeWallet,
+          token: tokenDAI.address,
+          param: 500, //this is more than the peer rule would pay out
+        },
+      })
+
+      await reverted(
+        alicePeer.provideOrder(order, { from: bobAddress }),
+        'PRICE_INCORRECT'
       )
     })
 
@@ -276,7 +553,7 @@ contract('Peer', async accounts => {
           kind: '0x80ac58cd',
         },
         taker: {
-          wallet: aliceAddress,
+          wallet: aliceTradeWallet,
           token: tokenDAI.address,
           param: quote.toNumber(),
         },
@@ -298,7 +575,7 @@ contract('Peer', async accounts => {
           param: 1,
         },
         taker: {
-          wallet: aliceAddress,
+          wallet: aliceTradeWallet,
           token: tokenDAI.address,
           param: quote.toNumber(),
           kind: '0x80ac58cd',
@@ -321,7 +598,7 @@ contract('Peer', async accounts => {
           param: 1,
         },
         taker: {
-          wallet: aliceAddress,
+          wallet: aliceTradeWallet,
           token: tokenDAI.address,
           param: quote.toNumber(),
         },

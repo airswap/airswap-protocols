@@ -77,7 +77,7 @@ contract Wrapper {
     // The taker is sending ether that must be wrapped.
     if (_order.taker.token == address(wethContract)) {
 
-      // Ensure  message value is taker param.
+      // Ensure message value is taker param.
       require(_order.taker.param == msg.value,
         "VALUE_MUST_BE_SENT");
 
