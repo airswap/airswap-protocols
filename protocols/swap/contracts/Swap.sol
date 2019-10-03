@@ -38,8 +38,6 @@ contract Swap is ISwap {
   byte constant private TAKEN = 0x01;
   byte constant private CANCELED = 0x02;
 
-  // ERC-20 (fungible token) interface identifier (ERC-165)
-  bytes4 constant internal ERC20_INTERFACE_ID = 0x277f8169;
   /*
     bytes4(keccak256('transfer(address,uint256)')) ^
     bytes4(keccak256('transferFrom(address,address,uint256)')) ^
@@ -64,11 +62,11 @@ contract Swap is ISwap {
   // Mapping of peer address to delegate address and expiry.
   mapping (address => mapping (address => uint256)) public delegateApprovals;
 
-  // Mapping of makers to orders by nonce as TAKEN (0x01) or CANCELED (0x02)
-  mapping (address => mapping (uint256 => byte)) public makerOrderStatus;
+  // Mapping of signers to orders by nonce as TAKEN (0x01) or CANCELED (0x02)
+  mapping (address => mapping (uint256 => byte)) public signerOrderStatus;
 
-  // Mapping of makers to an optionally set minimum valid nonce
-  mapping (address => uint256) public makerMinimumNonce;
+  // Mapping of signer addresses to an optionally set minimum valid nonce
+  mapping (address => uint256) public signerMinimumNonce;
 
   /**
     * @notice Contract Constructor
@@ -95,59 +93,59 @@ contract Swap is ISwap {
       "ORDER_EXPIRED");
 
     // Ensure the order is not already taken.
-    require(makerOrderStatus[_order.maker.wallet][_order.nonce] != TAKEN,
+    require(signerOrderStatus[_order.signer.wallet][_order.nonce] != TAKEN,
       "ORDER_ALREADY_TAKEN");
 
     // Ensure the order is not already canceled.
-    require(makerOrderStatus[_order.maker.wallet][_order.nonce] != CANCELED,
+    require(signerOrderStatus[_order.signer.wallet][_order.nonce] != CANCELED,
       "ORDER_ALREADY_CANCELED");
 
     // Ensure the order nonce is above the minimum.
-    require(_order.nonce >= makerMinimumNonce[_order.maker.wallet],
+    require(_order.nonce >= signerMinimumNonce[_order.signer.wallet],
       "NONCE_TOO_LOW");
 
     // Mark the order TAKEN (0x01).
-    makerOrderStatus[_order.maker.wallet][_order.nonce] = TAKEN;
+    signerOrderStatus[_order.signer.wallet][_order.nonce] = TAKEN;
 
-    // Validate the taker side of the trade.
-    address finalTakerWallet;
+    // Validate the sender side of the trade.
+    address finalSenderWallet;
 
-    if (_order.taker.wallet == address(0)) {
+    if (_order.sender.wallet == address(0)) {
       /**
-        * Taker is not specified. The sender of the transaction becomes
-        * the taker of the _order.
+        * Sender is not specified. The msg.sender of the transaction becomes
+        * the sender of the _order.
         */
-      finalTakerWallet = msg.sender;
+      finalSenderWallet = msg.sender;
 
     } else {
       /**
-        * Taker is specified. If the sender is not the specified taker,
-        * determine whether the sender has been authorized by the taker.
+        * Sender is specified. If the msg.sender is not the specified sender,
+        * thus determines whether the msg.sender is an authorized sender.
         */
-      if (msg.sender != _order.taker.wallet) {
-        require(isAuthorized(_order.taker.wallet, msg.sender),
+      if (msg.sender != _order.sender.wallet) {
+        require(isAuthorized(_order.sender.wallet, msg.sender),
           "SENDER_UNAUTHORIZED");
       }
-      // The specified taker is all clear.
-      finalTakerWallet = _order.taker.wallet;
+      // The specified sender is all clear.
+      finalSenderWallet = _order.sender.wallet;
 
     }
 
-    // Validate the maker side of the trade.
+    // Validate the signer side of the trade.
     if (_order.signature.v == 0) {
       /**
-        * Signature is not provided. The maker may have authorized the sender
-        * to swap on its behalf, which does not require a signature.
+        * Signature is not provided. The signer may have authorized the
+        * msg.sender to swap on its behalf, which does not require a signature.
         */
-      require(isAuthorized(_order.maker.wallet, msg.sender),
+      require(isAuthorized(_order.signer.wallet, msg.sender),
         "SIGNER_UNAUTHORIZED");
 
     } else {
       /**
         * The signature is provided. Determine whether the signer is
-        * authorized by the maker and if so validate the signature itself.
+        * authorized and if so validate the signature itself.
         */
-      require(isAuthorized(_order.maker.wallet, _order.signature.signer),
+      require(isAuthorized(_order.signer.wallet, _order.signature.signatory),
         "SIGNER_UNAUTHORIZED");
 
       // Ensure the signature is valid.
@@ -155,28 +153,28 @@ contract Swap is ISwap {
         "SIGNATURE_INVALID");
 
     }
-    // Transfer token from taker to maker.
+    // Transfer token from sender to signer.
     transferToken(
-      finalTakerWallet,
-      _order.maker.wallet,
-      _order.taker.param,
-      _order.taker.token,
-      _order.taker.kind
+      finalSenderWallet,
+      _order.signer.wallet,
+      _order.sender.param,
+      _order.sender.token,
+      _order.sender.kind
     );
 
-    // Transfer token from maker to taker.
+    // Transfer token from signer to sender.
     transferToken(
-      _order.maker.wallet,
-      finalTakerWallet,
-      _order.maker.param,
-      _order.maker.token,
-      _order.maker.kind
+      _order.signer.wallet,
+      finalSenderWallet,
+      _order.signer.param,
+      _order.signer.token,
+      _order.signer.kind
     );
 
-    // Transfer token from maker to affiliate if specified.
+    // Transfer token from signer to affiliate if specified.
     if (_order.affiliate.wallet != address(0)) {
       transferToken(
-        _order.maker.wallet,
+        _order.signer.wallet,
         _order.affiliate.wallet,
         _order.affiliate.param,
         _order.affiliate.token,
@@ -185,8 +183,8 @@ contract Swap is ISwap {
     }
 
     emit Swap(_order.nonce, block.timestamp,
-      _order.maker.wallet, _order.maker.param, _order.maker.token,
-      finalTakerWallet, _order.taker.param, _order.taker.token,
+      _order.signer.wallet, _order.signer.param, _order.signer.token,
+      finalSenderWallet, _order.sender.param, _order.sender.token,
       _order.affiliate.wallet, _order.affiliate.param, _order.affiliate.token
     );
   }
@@ -201,8 +199,8 @@ contract Swap is ISwap {
     uint256[] calldata _nonces
   ) external {
     for (uint256 i = 0; i < _nonces.length; i++) {
-      if (makerOrderStatus[msg.sender][_nonces[i]] == OPEN) {
-        makerOrderStatus[msg.sender][_nonces[i]] = CANCELED;
+      if (signerOrderStatus[msg.sender][_nonces[i]] == OPEN) {
+        signerOrderStatus[msg.sender][_nonces[i]] = CANCELED;
         emit Cancel(_nonces[i], msg.sender);
       }
     }
@@ -216,7 +214,7 @@ contract Swap is ISwap {
   function invalidate(
     uint256 _minimumNonce
   ) external {
-    makerMinimumNonce[msg.sender] = _minimumNonce;
+    signerMinimumNonce[msg.sender] = _minimumNonce;
     emit Invalidate(_minimumNonce, msg.sender);
   }
 
@@ -272,7 +270,7 @@ contract Swap is ISwap {
     bytes32 _domainSeparator
   ) internal pure returns (bool) {
     if (_order.signature.version == byte(0x01)) {
-      return _order.signature.signer == ecrecover(
+      return _order.signature.signatory == ecrecover(
         Types.hashOrder(
           _order,
           _domainSeparator),
@@ -282,7 +280,7 @@ contract Swap is ISwap {
       );
     }
     if (_order.signature.version == byte(0x45)) {
-      return _order.signature.signer == ecrecover(
+      return _order.signature.signatory == ecrecover(
         keccak256(
           abi.encodePacked(
             "\x19Ethereum Signed Message:\n32",

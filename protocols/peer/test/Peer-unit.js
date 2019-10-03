@@ -367,12 +367,12 @@ contract('Peer Unit Tests', async accounts => {
   describe('Test provideOrder', async () => {
     it('test if a rule does not exist', async () => {
       const order = await orders.getOrder({
-        maker: {
+        signer: {
           wallet: notOwner,
           param: 555,
           token: MAKER_TOKEN,
         },
-        taker: {
+        sender: {
           wallet: tradeWallet,
           param: 999,
           token: TAKER_TOKEN,
@@ -397,12 +397,12 @@ contract('Peer Unit Tests', async accounts => {
       )
 
       const order = await orders.getOrder({
-        maker: {
+        signer: {
           wallet: notOwner,
           param: 555,
           token: MAKER_TOKEN,
         },
-        taker: {
+        sender: {
           wallet: tradeWallet,
           param: MAX_TAKER_AMOUNT + 1,
           token: TAKER_TOKEN,
@@ -426,18 +426,18 @@ contract('Peer Unit Tests', async accounts => {
         EXP
       )
 
-      let makerAmount = 100
-      let takerAmount = Math.floor((makerAmount * 10 ** EXP) / PRICE_COEF)
+      let signerAmount = 100
+      let senderAmount = Math.floor((signerAmount * 10 ** EXP) / PRICE_COEF)
 
       const order = await orders.getOrder({
-        maker: {
+        signer: {
           wallet: notOwner,
-          param: makerAmount,
+          param: signerAmount,
           token: MAKER_TOKEN,
         },
-        taker: {
+        sender: {
           wallet: notTradeWallet,
-          param: takerAmount,
+          param: senderAmount,
           token: TAKER_TOKEN,
         },
       })
@@ -446,7 +446,7 @@ contract('Peer Unit Tests', async accounts => {
         peer.provideOrder(order, {
           from: notOwner,
         }),
-        'INVALID_TAKER_WALLET'
+        'INVALID_SENDER_WALLET'
       )
     })
 
@@ -460,11 +460,11 @@ contract('Peer Unit Tests', async accounts => {
       )
 
       const order = await orders.getOrder({
-        maker: {
+        signer: {
           param: 30,
           token: MAKER_TOKEN,
         },
-        taker: {
+        sender: {
           wallet: tradeWallet,
           param: MAX_TAKER_AMOUNT,
           token: TAKER_TOKEN,
@@ -483,15 +483,15 @@ contract('Peer Unit Tests', async accounts => {
 
       let ruleBefore = await peer.rules.call(TAKER_TOKEN, MAKER_TOKEN)
 
-      let makerAmount = 100
+      let signerAmount = 100
 
       const order = await orders.getOrder({
-        maker: {
+        signer: {
           wallet: notOwner,
-          param: makerAmount,
+          param: signerAmount,
           token: MAKER_TOKEN,
         },
-        taker: {
+        sender: {
           wallet: tradeWallet,
           param: 100,
           token: TAKER_TOKEN,
@@ -509,7 +509,7 @@ contract('Peer Unit Tests', async accounts => {
       let ruleAfter = await peer.rules.call(TAKER_TOKEN, MAKER_TOKEN)
       equal(
         ruleAfter[0].toNumber(),
-        ruleBefore[0].toNumber() - makerAmount,
+        ruleBefore[0].toNumber() - signerAmount,
         "rule's max peer amount was not decremented"
       )
 
@@ -529,15 +529,15 @@ contract('Peer Unit Tests', async accounts => {
 
       let ruleBefore = await peer.rules.call(TAKER_TOKEN, MAKER_TOKEN)
 
-      let makerAmount = 100
+      let signerAmount = 100
 
       const order = await orders.getOrder({
-        maker: {
+        signer: {
           wallet: notOwner,
-          param: makerAmount,
+          param: signerAmount,
           token: MAKER_TOKEN,
         },
-        taker: {
+        sender: {
           wallet: tradeWallet,
           param: 100,
           token: TAKER_TOKEN,
@@ -555,7 +555,7 @@ contract('Peer Unit Tests', async accounts => {
       let ruleAfter = await peer.rules.call(TAKER_TOKEN, MAKER_TOKEN)
       equal(
         ruleAfter[0].toNumber(),
-        ruleBefore[0].toNumber() - makerAmount,
+        ruleBefore[0].toNumber() - signerAmount,
         "rule's max peer amount was not decremented"
       )
 
@@ -581,18 +581,18 @@ contract('Peer Unit Tests', async accounts => {
 
       let ruleBefore = await peer.rules.call(TAKER_TOKEN, MAKER_TOKEN)
 
-      let makerAmount = 100
-      let takerAmount = Math.floor((makerAmount * 10 ** EXP) / PRICE_COEF)
+      let signerAmount = 100
+      let senderAmount = Math.floor((signerAmount * 10 ** EXP) / PRICE_COEF)
 
       const order = await orders.getOrder({
-        maker: {
+        signer: {
           wallet: notOwner,
-          param: makerAmount,
+          param: signerAmount,
           token: MAKER_TOKEN,
         },
-        taker: {
+        sender: {
           wallet: tradeWallet,
-          param: takerAmount,
+          param: senderAmount,
           token: TAKER_TOKEN,
         },
       })
@@ -608,7 +608,7 @@ contract('Peer Unit Tests', async accounts => {
       let ruleAfter = await peer.rules.call(TAKER_TOKEN, MAKER_TOKEN)
       equal(
         ruleAfter[0].toNumber(),
-        ruleBefore[0].toNumber() - takerAmount,
+        ruleBefore[0].toNumber() - senderAmount,
         "rule's max peer amount was not decremented"
       )
     })

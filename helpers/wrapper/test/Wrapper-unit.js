@@ -10,7 +10,7 @@ const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 const { orders } = require('@airswap/order-utils')
 
 contract('Wrapper Unit Tests', async accounts => {
-  const takerParam = 2
+  const senderParam = 2
   const mockToken = accounts[9]
   const mockTaker = accounts[8]
   let mockSwap
@@ -124,10 +124,10 @@ contract('Wrapper Unit Tests', async accounts => {
       )
     })
 
-    it('Test when taker token != weth, ensure no unexpected ether sent', async () => {
+    it('Test when sender token != weth, ensure no unexpected ether sent', async () => {
       let nonTakerToken = mockToken
       const order = await orders.getOrder({
-        taker: {
+        sender: {
           wallet: mockTaker,
           token: nonTakerToken,
         },
@@ -142,9 +142,9 @@ contract('Wrapper Unit Tests', async accounts => {
       )
     })
 
-    it('Test when taker token == weth, ensure the taker amount matches sent ether', async () => {
+    it('Test when sender token == weth, ensure the sender amount matches sent ether', async () => {
       const order = await orders.getOrder({
-        taker: {
+        sender: {
           wallet: mockTaker,
           param: 1,
           token: mockWeth.address,
@@ -160,24 +160,24 @@ contract('Wrapper Unit Tests', async accounts => {
       )
     })
 
-    it('Test when taker token == weth, maker token == weth, and the transaction passes', async () => {
+    it('Test when sender token == weth, signer token == weth, and the transaction passes', async () => {
       //mock the weth.balance method
       await mockWeth.givenMethodReturnUint(weth_balance, 0)
 
       const order = await orders.getOrder({
-        maker: {
+        signer: {
           token: mockWeth.address,
         },
-        taker: {
+        sender: {
           wallet: mockTaker,
-          param: takerParam,
+          param: senderParam,
           token: mockWeth.address,
         },
       })
 
       await passes(
         wrapper.swap(order, {
-          value: takerParam,
+          value: senderParam,
           from: mockTaker,
         })
       )
@@ -191,23 +191,23 @@ contract('Wrapper Unit Tests', async accounts => {
       )
     })
 
-    it('Test when taker token == weth, maker token != weth, and the transaction passes', async () => {
+    it('Test when sender token == weth, signer token != weth, and the transaction passes', async () => {
       let notWethContract = mockFT.address
 
       const order = await orders.getOrder({
-        maker: {
+        signer: {
           token: notWethContract,
         },
-        taker: {
+        sender: {
           wallet: mockTaker,
-          param: takerParam,
+          param: senderParam,
           token: mockWeth.address,
         },
       })
 
       await passes(
         wrapper.swap(order, {
-          value: takerParam,
+          value: senderParam,
           from: mockTaker,
         })
       )
@@ -222,29 +222,29 @@ contract('Wrapper Unit Tests', async accounts => {
     })
 
     /**
-     * Scenario for failure: The taker sends in WETH which means that when the trade succeeds the taker wallet
-     * is the wrapper contract and the swap is between the maker token and the wrapper contract. The token needs
-     * to be returned to the taker. Certain ERC20 contract return a boolean instead of reverting on failure and
-     * thus if the final transfer from wrapper contract to maker fails the overall transaction should revert to
+     * Scenario for failure: The sender sends in WETH which means that when the trade succeeds the sender wallet
+     * is the wrapper contract and the swap is between the signer token and the wrapper contract. The token needs
+     * to be returned to the sender. Certain ERC20 contract return a boolean instead of reverting on failure and
+     * thus if the final transfer from wrapper contract to signer fails the overall transaction should revert to
      * ensure no tokens are left in the wrapper contract.
      */
-    it('Test when taker token == weth, maker token != weth, and the wrapper token transfer fails', async () => {
+    it('Test when sender token == weth, signer token != weth, and the wrapper token transfer fails', async () => {
       await mockFT.givenMethodReturnBool(mock_transfer, false)
       let notWethContract = mockFT.address
 
       const order = await orders.getOrder({
-        maker: {
+        signer: {
           token: notWethContract,
         },
-        taker: {
-          param: takerParam,
+        sender: {
+          param: senderParam,
           token: mockWeth.address,
         },
       })
 
       await reverted(
         wrapper.swap(order, {
-          value: takerParam,
+          value: senderParam,
         })
       )
 
@@ -259,12 +259,12 @@ contract('Wrapper Unit Tests', async accounts => {
   })
 
   describe('Test sending two ERC20s', async () => {
-    it('Test when taker token == non weth erc20, maker token == non weth erc20 but msg.sender is not takerwallet', async () => {
+    it('Test when sender token == non weth erc20, signer token == non weth erc20 but msg.sender is not senderwallet', async () => {
       let nonMockTaker = accounts[7]
       let notWethContract = mockFT.address
 
       const order = await orders.getOrder({
-        taker: {
+        sender: {
           wallet: nonMockTaker,
           param: 1,
           token: notWethContract,
@@ -280,16 +280,16 @@ contract('Wrapper Unit Tests', async accounts => {
       )
     })
 
-    it('Test when taker token == non weth erc20, maker token == non weth erc20, and the transaction passes', async () => {
+    it('Test when sender token == non weth erc20, signer token == non weth erc20, and the transaction passes', async () => {
       let notWethContract = mockFT.address
 
       const order = await orders.getOrder({
-        maker: {
+        signer: {
           token: notWethContract,
         },
-        taker: {
+        sender: {
           wallet: mockTaker,
-          param: takerParam,
+          param: senderParam,
           token: notWethContract,
         },
       })

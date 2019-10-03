@@ -36,8 +36,8 @@ module.exports = {
     Order: [
       { name: 'nonce', type: 'uint256' },
       { name: 'expiry', type: 'uint256' },
-      { name: 'maker', type: 'Party' },
-      { name: 'taker', type: 'Party' },
+      { name: 'signer', type: 'Party' },
+      { name: 'sender', type: 'Party' },
       { name: 'affiliate', type: 'Party' },
     ],
     Party: [

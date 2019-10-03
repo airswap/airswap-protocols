@@ -225,36 +225,36 @@ contract Peer is IPeer, Ownable {
     Types.Order calldata _order
   ) external {
 
-    Rule memory rule = rules[_order.taker.token][_order.maker.token];
+    Rule memory rule = rules[_order.sender.token][_order.signer.token];
 
-    require(_order.maker.wallet == msg.sender,
-      "MAKER_MUST_BE_SENDER");
+    require(_order.signer.wallet == msg.sender,
+      "SIGNER_MUST_BE_SENDER");
 
-    require(_order.taker.wallet == _tradeWallet,
-      "INVALID_TAKER_WALLET");
+    require(_order.sender.wallet == _tradeWallet,
+      "INVALID_SENDER_WALLET");
 
-    require(_order.maker.kind == ERC20_INTERFACE_ID,
-      "MAKER_MUST_BE_ERC20");
+    require(_order.signer.kind == ERC20_INTERFACE_ID,
+      "SIGNER_MUST_BE_ERC20");
 
-    require(_order.taker.kind == ERC20_INTERFACE_ID,
-      "TAKER_MUST_BE_ERC20");
+    require(_order.sender.kind == ERC20_INTERFACE_ID,
+      "SENDER_MUST_BE_ERC20");
 
     // Ensure that a rule exists.
     require(rule.maxTakerAmount != 0,
       "TOKEN_PAIR_INACTIVE");
 
     // Ensure the order does not exceed the maximum amount.
-    require(_order.taker.param <= rule.maxTakerAmount,
+    require(_order.sender.param <= rule.maxTakerAmount,
       "AMOUNT_EXCEEDS_MAX");
 
     // Ensure the order is priced according to the rule.
-    require(_order.taker.param == _order.maker.param
+    require(_order.sender.param == _order.signer.param
       .mul(10 ** rule.priceExp).div(rule.priceCoef),
       "PRICE_INCORRECT");
 
     // Overwrite the rule with a decremented maxTakerAmount.
-    rules[_order.taker.token][_order.maker.token] = Rule({
-      maxTakerAmount: (rule.maxTakerAmount).sub(_order.taker.param),
+    rules[_order.sender.token][_order.signer.token] = Rule({
+      maxTakerAmount: (rule.maxTakerAmount).sub(_order.sender.param),
       priceCoef: rule.priceCoef,
       priceExp: rule.priceExp
     });
