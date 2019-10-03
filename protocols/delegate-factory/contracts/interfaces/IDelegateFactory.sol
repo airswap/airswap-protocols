@@ -18,19 +18,19 @@ pragma solidity 0.5.10;
 
 interface IDelegateFactory {
 
-  event CreateDelegate(address indexed peerContract, address swapContract, address indexed peerContractOwner, address peerTradeWallet);
+  event CreateDelegate(address indexed delegateContract, address swapContract, address indexed delegateContractOwner, address delegateTradeWallet);
 
   /**
     * @notice Deploy a trusted peer contract
     * @param _swapContract address of the swap contract the peer will deploy with
-    * @param _peerContractOwner address that should be the owner of the peer
-    * @param _peerTradeWallet the wallet the peer will trade from
-    * @return peerContractAddress address of the peer contract created
+    * @param _delegateContractOwner address that should be the owner of the peer
+    * @param _delegateTradeWallet the wallet the peer will trade from
+    * @return delegateContractAddress address of the peer contract created
     */
   function createDelegate(
     address _swapContract,
-    address _peerContractOwner,
-    address _peerTradeWallet
-  ) external returns (address peerContractAddress);
+    address _delegateContractOwner,
+    address _delegalteTradeWallet
+  ) external returns (address delegateContractAddress);
 
 }

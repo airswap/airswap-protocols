@@ -27,30 +27,30 @@ contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
   /**
     * @notice Create a new Delegate contract
     * @param _swapContract address of the swap contract the peer will deploy with
-    * @param _peerContractOwner address that should be the owner of the peer
-    * @param _peerTradeWallet the wallet the peer will trade from
-    * @return peerContractAddress address address of the peer contract created
+    * @param _delegateContractOwner address that should be the owner of the peer
+    * @param _delegateTradeWallet the wallet the peer will trade from
+    * @return delegateContractAddress address address of the peer contract created
     */
   function createDelegate(
     address _swapContract,
-    address _peerContractOwner,
-    address _peerTradeWallet
-  ) external returns (address peerContractAddress) {
+    address _delegateContractOwner,
+    address _delegateTradeWallet
+  ) external returns (address delegateContractAddress) {
 
     // Ensure an owner for the peer contract is provided.
-    require(_peerContractOwner != address(0),
+    require(_delegateContractOwner != address(0),
       'PEER_CONTRACT_OWNER_REQUIRED');
 
     // Ensure a swap contract is provided.
     require(_swapContract != address(0),
       'SWAP_CONTRACT_REQUIRED');
 
-    peerContractAddress = address(new Delegate(_swapContract, _peerContractOwner, _peerTradeWallet));
-    deployedAddresses[peerContractAddress] = true;
+    delegateContractAddress = address(new Delegate(_swapContract, _delegateContractOwner, _delegateTradeWallet));
+    deployedAddresses[delegateContractAddress] = true;
 
-    emit CreateDelegate(peerContractAddress, _swapContract, _peerContractOwner, _peerTradeWallet);
+    emit CreateDelegate(delegateContractAddress, _swapContract, _delegateContractOwner, _delegateTradeWallet);
 
-    return peerContractAddress;
+    return delegateContractAddress;
   }
 
   /**
