@@ -30,7 +30,7 @@ interface IDelegateFactory {
   function createDelegate(
     address _swapContract,
     address _delegateContractOwner,
-    address _delegalteTradeWallet
+    address _delegateTradeWallet
   ) external returns (address delegateContractAddress);
 
 }
