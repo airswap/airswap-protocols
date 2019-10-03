@@ -278,5 +278,4 @@ contract Delegate is IDelegate, Ownable {
   function tradeWallet() external view returns (address) {
     return _tradeWallet;
   }
-
 }
