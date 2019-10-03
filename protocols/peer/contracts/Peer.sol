@@ -51,8 +51,8 @@ contract Peer is IPeer, Ownable {
   /**
     * @dev only admin ensures that only admin parties can call the method it modifies
     */
-  modifier onlyAdmins() {
-    require(admins[msg.sender], "CALLER_NOT_ADMIN");
+  modifier onlyAdmin() {
+    require(admins[msg.sender], "CALLER_MUST_BE_ADMIN");
     _;
   }
 
@@ -99,7 +99,7 @@ contract Peer is IPeer, Ownable {
     * @dev only callable by the owner of the contract
     * @param _addressToAdd the address to add to the admins
     */
-  function addToAdmins(address _addressToAdd) external onlyOwner {
+  function addAdmin(address _addressToAdd) external onlyOwner {
     admins[_addressToAdd] = true;
     emit AdminAdded(_addressToAdd);
   }
@@ -109,7 +109,7 @@ contract Peer is IPeer, Ownable {
     * @dev only callable by the owner of the contract
     * @param _addressToRemove the address to add to the admins
     */
-  function removeFromAdmins(address _addressToRemove) external onlyOwner {
+  function removeAdmin(address _addressToRemove) external onlyOwner {
     require(_addressToRemove != owner(), "OWNER_MUST_BE_ADMIN");
     delete admins[_addressToRemove];
     emit AdminRemoved(_addressToRemove);
@@ -143,7 +143,7 @@ contract Peer is IPeer, Ownable {
     uint256 _maxTakerAmount,
     uint256 _priceCoef,
     uint256 _priceExp
-  ) external onlyAdmins {
+  ) external onlyAdmin {
 
     rules[_takerToken][_makerToken] = Rule({
       maxTakerAmount: _maxTakerAmount,
@@ -169,7 +169,7 @@ contract Peer is IPeer, Ownable {
   function unsetRule(
     address _takerToken,
     address _makerToken
-  ) external onlyAdmins {
+  ) external onlyAdmin {
 
     // Delete the rule.
     delete rules[_takerToken][_makerToken];

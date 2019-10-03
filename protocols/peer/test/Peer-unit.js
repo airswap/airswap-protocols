@@ -106,13 +106,13 @@ contract('Peer Unit Tests', async accounts => {
           EXP,
           { from: notOwner }
         ),
-        'CALLER_NOT_ADMIN'
+        'CALLER_MUST_BE_ADMIN'
       )
     })
 
     it('Test setRule permissions after not owner is admin', async () => {
       //test again after adding not owner to admin
-      await peer.addToAdmins(notOwner)
+      await peer.addAdmin(notOwner)
       await passes(
         peer.setRule(
           TAKER_TOKEN,
@@ -173,13 +173,13 @@ contract('Peer Unit Tests', async accounts => {
       //not owner is not apart of admin and should fail
       await reverted(
         peer.unsetRule(TAKER_TOKEN, MAKER_TOKEN, { from: notOwner }),
-        'CALLER_NOT_ADMIN'
+        'CALLER_MUST_BE_ADMIN'
       )
     })
 
     it('Test unsetRule permissions after not owner is admin', async () => {
       //test again after adding not owner to admin
-      await peer.addToAdmins(notOwner)
+      await peer.addAdmin(notOwner)
       await passes(peer.unsetRule(TAKER_TOKEN, MAKER_TOKEN, { from: notOwner }))
     })
 
@@ -235,35 +235,35 @@ contract('Peer Unit Tests', async accounts => {
 
   describe('Test admin', async () => {
     it('Test adding to admin as owner', async () => {
-      await passes(peer.addToAdmins(notOwner))
+      await passes(peer.addAdmin(notOwner))
     })
 
     it('Test adding to admin as not owner', async () => {
-      await reverted(peer.addToAdmins(notOwner, { from: notOwner }))
+      await reverted(peer.addAdmin(notOwner, { from: notOwner }))
     })
 
     it('Test removal from admin', async () => {
-      await peer.addToAdmins(notOwner)
-      await passes(peer.removeFromAdmins(notOwner))
+      await peer.addAdmin(notOwner)
+      await passes(peer.removeAdmin(notOwner))
     })
 
     it('Test removal of owner from admin', async () => {
-      await reverted(peer.removeFromAdmins(owner), 'OWNER_MUST_BE_ADMIN')
+      await reverted(peer.removeAdmin(owner), 'OWNER_MUST_BE_ADMIN')
     })
 
     it('Test removal from admin as not owner', async () => {
-      await reverted(peer.removeFromAdmins(notOwner, { from: notOwner }))
+      await reverted(peer.removeAdmin(notOwner, { from: notOwner }))
     })
 
     it('Test adding to admin event emitted', async () => {
-      let trx = await peer.addToAdmins(notOwner)
+      let trx = await peer.addAdmin(notOwner)
       await emitted(trx, 'AdminAdded', e => {
         return e.account == notOwner
       })
     })
 
     it('Test removing from admin event emitted', async () => {
-      let trx = await peer.removeFromAdmins(notOwner)
+      let trx = await peer.removeAdmin(notOwner)
       await emitted(trx, 'AdminRemoved', e => {
         return e.account == notOwner
       })
