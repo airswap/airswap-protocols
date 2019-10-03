@@ -16,9 +16,9 @@
 
 pragma solidity 0.5.10;
 
-import "@airswap/peer/contracts/Delegate.sol";
+import "@airswap/delegate/contracts/Delegate.sol";
 import "@airswap/indexer/contracts/interfaces/ILocatorWhitelist.sol";
-import "@airswap/peer-factory/contracts/interfaces/IDelegateFactory.sol";
+import "@airswap/delegate-factory/contracts/interfaces/IDelegateFactory.sol";
 
 contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
 
