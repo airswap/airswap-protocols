@@ -88,7 +88,7 @@ contract('Peer Unit Tests', async accounts => {
 
     it('Test setRule permissions after not owner is whitelisted', async () => {
       //test again after adding not owner to whitelist
-      await peer.addToWhitelist(notOwner)
+      await peer.addToAdmins(notOwner)
       await passes(
         peer.setRule(
           TAKER_TOKEN,
@@ -103,7 +103,7 @@ contract('Peer Unit Tests', async accounts => {
 
     it('Test setRule permissions as owner', async () => {
       let val = await peer.owner.call()
-      let isWhitelisted = await peer.isWhitelisted.call(owner)
+      let isAdmin = await peer.isAdmin.call(owner)
       await passes(
         peer.setRule(
           TAKER_TOKEN,
@@ -161,7 +161,7 @@ contract('Peer Unit Tests', async accounts => {
 
     it('Test unsetRule permissions after not owner is whitelisted', async () => {
       //test again after adding not owner to whitelist
-      await peer.addToWhitelist(notOwner)
+      await peer.addToAdmins(notOwner)
       await passes(peer.unsetRule(TAKER_TOKEN, MAKER_TOKEN, { from: notOwner }))
     })
 
@@ -207,36 +207,36 @@ contract('Peer Unit Tests', async accounts => {
 
   describe('Test whitelist', async () => {
     it('Test adding to whitelist as owner', async () => {
-      await passes(peer.addToWhitelist(notOwner))
+      await passes(peer.addToAdmins(notOwner))
     })
 
     it('Test adding to whitelist as not owner', async () => {
-      await fails(peer.addToWhitelist(notOwner, { from: notOwner }))
+      await fails(peer.addToAdmins(notOwner, { from: notOwner }))
     })
 
     it('Test removal from whitelist', async () => {
-      await peer.addToWhitelist(notOwner)
-      await passes(peer.removeFromWhitelist(notOwner))
+      await peer.addToAdmins(notOwner)
+      await passes(peer.removeFromAdmins(notOwner))
     })
 
     it('Test removal of owner from whitelist', async () => {
-      await fails(peer.removeFromWhitelist(owner), 'OWNER_MUST_BE_WHITELISTED')
+      await fails(peer.removeFromAdmins(owner), 'OWNER_MUST_BE_WHITELISTED')
     })
 
     it('Test removal from whitelist as not owner', async () => {
-      await fails(peer.removeFromWhitelist(notOwner, { from: notOwner }))
+      await fails(peer.removeFromAdmins(notOwner, { from: notOwner }))
     })
 
     it('Test adding to whitelist event emitted', async () => {
-      let trx = await peer.addToWhitelist(notOwner)
-      await emitted(trx, 'WhitelistAdded', e => {
+      let trx = await peer.addToAdmins(notOwner)
+      await emitted(trx, 'AdminAdded', e => {
         return e.account == notOwner
       })
     })
 
     it('Test removing from whitelist event emitted', async () => {
-      let trx = await peer.removeFromWhitelist(notOwner)
-      await emitted(trx, 'WhitelistRemoved', e => {
+      let trx = await peer.removeFromAdmins(notOwner)
+      await emitted(trx, 'AdminRemoved', e => {
         return e.account == notOwner
       })
     })
@@ -248,7 +248,7 @@ contract('Peer Unit Tests', async accounts => {
       let val = await peer.owner.call()
       equal(val, notOwner, 'owner was not passed properly')
 
-      val = await peer.isWhitelisted.call(owner)
+      val = await peer.isAdmin.call(owner)
       equal(val, false, 'owner should no longer be whitelisted')
     })
 

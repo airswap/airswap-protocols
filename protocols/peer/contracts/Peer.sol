@@ -30,8 +30,8 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 contract Peer is IPeer, Ownable {
   using SafeMath for uint256;
 
-  event WhitelistAdded(address indexed account);
-  event WhitelistRemoved(address indexed account);
+  event AdminAdded(address indexed account);
+  event AdminRemoved(address indexed account);
 
   // Swap contract to be used to settle trades
   ISwap public swapContract;
@@ -39,17 +39,17 @@ contract Peer is IPeer, Ownable {
   // Mapping of takerToken to makerToken for rule lookup
   mapping (address => mapping (address => Rule)) public rules;
 
-  // Mapping of whitelisted addresses that can call on behalf of owner
-  mapping (address => bool) private whitelist;
+  // Mapping of admin addresses that can call on behalf of owner
+  mapping (address => bool) private admins;
 
   // ERC-20 (fungible token) interface identifier (ERC-165)
   bytes4 constant internal ERC20_INTERFACE_ID = 0x277f8169;
 
   /**
-    * @dev only whitelisted ensures that only whitelisted parties can call the method it modifies
+    * @dev only admin ensures that only admin parties can call the method it modifies
     */
   modifier onlyWhitelisted() {
-    require(whitelist[msg.sender], "CALLER_NOT_WHITELISTED");
+    require(admins[msg.sender], "CALLER_NOT_WHITELISTED");
     _;
   }
 
@@ -64,49 +64,49 @@ contract Peer is IPeer, Ownable {
   ) public {
     swapContract = ISwap(_swapContract);
     if (_peerContractOwner != address(0)) {
-      whitelist[_peerContractOwner] = true;
+      admins[_peerContractOwner] = true;
       super.transferOwnership(_peerContractOwner);
     }
   }
 
   /**
     * @notice determines if an address to interact with this peer
-    * @param addressToCheck the address to check if whitelisted or not 
+    * @param _addressToCheck the address to check if admin or not 
     */
-  function isWhitelisted(address _addressToCheck) external returns (bool) {
-    return whitelist[_addressToCheck];
+  function isAdmin(address _addressToCheck) external returns (bool) {
+    return admins[_addressToCheck];
   }
 
   /**
-    * @notice adds to the list of whitelisted accounts that can interact with this peer
+    * @notice adds to the list of admin accounts that can interact with this peer
     * @dev only callable by the owner of the contract
-    * @param addressToAdd the address to add to the whitelist
+    * @param _addressToAdd the address to add to the admins
     */
-  function addToWhitelist(address _addressToAdd) external onlyOwner {
-    whitelist[_addressToAdd] = true;
-    emit WhitelistAdded(_addressToAdd);
+  function addToAdmins(address _addressToAdd) external onlyOwner {
+    admins[_addressToAdd] = true;
+    emit AdminAdded(_addressToAdd);
   }
 
   /**
-    * @notice removes from the list of whitelisted accounts that can interact with this peer
+    * @notice removes from the list of admin accounts that can interact with this peer
     * @dev only callable by the owner of the contract
-    * @param addressToRemove the address to add to the whitelist
+    * @param _addressToRemove the address to add to the admins
     */
-  function removeFromWhitelist(address _addressToRemove) external onlyOwner {
+  function removeFromAdmins(address _addressToRemove) external onlyOwner {
     require(_addressToRemove != owner(), "OWNER_MUST_BE_WHITELISTED");
-    delete whitelist[_addressToRemove];
-    emit WhitelistRemoved(_addressToRemove);
+    delete admins[_addressToRemove];
+    emit AdminRemoved(_addressToRemove);
   }
 
   /**
-    * @notice transfers ownership to the new owner and ensures that whitelist is updated
+    * @notice transfers ownership to the new owner and ensures that admins is updated
     * @dev only callable by the owner of the contract
-    * @param newOwner the address of the new owner of the contract
+    * @param _newOwner the address of the new owner of the contract
     */
   function transferOwnership(address _newOwner) public onlyOwner {
     require(_newOwner != address(0), 'PEER_CONTRACT_OWNER_REQUIRED');
-    whitelist[_newOwner] = true;
-    whitelist[owner()] = false;
+    admins[_newOwner] = true;
+    admins[owner()] = false;
     super.transferOwnership(_newOwner);
   }
 
