@@ -23,7 +23,7 @@ contract('DelegateFrontend Unit Tests', async () => {
   let mockDelegateLowLocator
   let mockSwap
   let mockIndexer
-  let peerFrontend
+  let delegateFrontend
   let mockUserSendToken
   let mockUserReceiveToken
   let indexer_getIntents
@@ -40,7 +40,7 @@ contract('DelegateFrontend Unit Tests', async () => {
   })
 
   async function setupMockDelegateFrontend() {
-    let peerTemplate = await Delegate.new(
+    let delegateTemplate = await Delegate.new(
       EMPTY_ADDRESS,
       EMPTY_ADDRESS,
       EMPTY_ADDRESS
@@ -50,55 +50,55 @@ contract('DelegateFrontend Unit Tests', async () => {
     mockDelegateLow = await MockContract.new()
     mockDelegateLowLocator = padAddressToLocator(mockDelegateLow.address)
 
-    //mock peer getMakerSideQuote()
-    let peer_getMakerSideQuote = peerTemplate.contract.methods
+    //mock delegate getMakerSideQuote()
+    let delegate_getMakerSideQuote = delegateTemplate.contract.methods
       .getMakerSideQuote(0, EMPTY_ADDRESS, EMPTY_ADDRESS)
       .encodeABI()
     await mockDelegateHigh.givenMethodReturnUint(
-      peer_getMakerSideQuote,
+      delegate_getMakerSideQuote,
       highVal
     )
-    await mockDelegateLow.givenMethodReturnUint(peer_getMakerSideQuote, lowVal)
+    await mockDelegateLow.givenMethodReturnUint(delegate_getMakerSideQuote, lowVal)
 
-    //mock peer getMakerSideQuote()
-    let peer_getTakerSideQuote = peerTemplate.contract.methods
+    //mock delegate getMakerSideQuote()
+    let delegate_getTakerSideQuote = delegateTemplate.contract.methods
       .getTakerSideQuote(0, EMPTY_ADDRESS, EMPTY_ADDRESS)
       .encodeABI()
     await mockDelegateHigh.givenMethodReturnUint(
-      peer_getTakerSideQuote,
+      delegate_getTakerSideQuote,
       highVal
     )
-    await mockDelegateLow.givenMethodReturnUint(peer_getTakerSideQuote, lowVal)
+    await mockDelegateLow.givenMethodReturnUint(delegate_getTakerSideQuote, lowVal)
 
-    // mock peer has owner()
-    let peer_owner = peerTemplate.contract.methods.owner().encodeABI()
-    await mockDelegateHigh.givenMethodReturnAddress(peer_owner, EMPTY_ADDRESS)
-    await mockDelegateLow.givenMethodReturnAddress(peer_owner, EMPTY_ADDRESS)
+    // mock delegate has owner()
+    let delegate_owner = delegateTemplate.contract.methods.owner().encodeABI()
+    await mockDelegateHigh.givenMethodReturnAddress(delegate_owner, EMPTY_ADDRESS)
+    await mockDelegateLow.givenMethodReturnAddress(delegate_owner, EMPTY_ADDRESS)
 
-    // mock peer trade wallet
-    let peer_tradeWallet = peerTemplate.contract.methods
+    // mock delegate trade wallet
+    let delegate_tradeWallet = delegateTemplate.contract.methods
       .tradeWallet()
       .encodeABI()
     await mockDelegateHigh.givenMethodReturnAddress(
-      peer_tradeWallet,
+      delegate_tradeWallet,
       EMPTY_ADDRESS
     )
     await mockDelegateLow.givenMethodReturnAddress(
-      peer_tradeWallet,
+      delegate_tradeWallet,
       EMPTY_ADDRESS
     )
 
-    //mock peer provideUnsignedOrder()
+    //mock delegate provideUnsignedOrder()
     const order = await orders.getOrder({})
 
-    let peer_provideUnsignedOrder = peerTemplate.contract.methods
+    let delegate_provideUnsignedOrder = delegateTemplate.contract.methods
       .provideOrder(order)
       .encodeABI()
     await mockDelegateHigh.givenMethodReturnBool(
-      peer_provideUnsignedOrder,
+      delegate_provideUnsignedOrder,
       true
     )
-    await mockDelegateLow.givenMethodReturnBool(peer_provideUnsignedOrder, true)
+    await mockDelegateLow.givenMethodReturnBool(delegate_provideUnsignedOrder, true)
   }
 
   async function setupMockIndexer() {
@@ -126,7 +126,7 @@ contract('DelegateFrontend Unit Tests', async () => {
 
   before('deploy DelegateFrontend', async () => {
     await setupMocks()
-    peerFrontend = await DelegateFrontend.new(
+    delegateFrontend = await DelegateFrontend.new(
       mockIndexer.address,
       mockSwap.address
     )
@@ -134,12 +134,12 @@ contract('DelegateFrontend Unit Tests', async () => {
 
   describe('Test initial values', async () => {
     it('Test initial Swap Contact', async () => {
-      let val = await peerFrontend.swapContract.call()
+      let val = await delegateFrontend.swapContract.call()
       equal(val, mockSwap.address, 'swap address is incorrect')
     })
 
     it('Test initial Indexer Contact', async () => {
-      let val = await peerFrontend.indexer.call()
+      let val = await delegateFrontend.indexer.call()
       equal(val, mockIndexer.address, 'indexer address is incorrect')
     })
   })
@@ -152,7 +152,7 @@ contract('DelegateFrontend Unit Tests', async () => {
         abi.rawEncode(['bytes32[]'], [[]])
       )
 
-      let val = await peerFrontend.getBestTakerSideQuote.call(
+      let val = await delegateFrontend.getBestTakerSideQuote.call(
         180,
         EMPTY_ADDRESS,
         EMPTY_ADDRESS,
@@ -164,7 +164,7 @@ contract('DelegateFrontend Unit Tests', async () => {
       equal(lowestCost, maxUint.toPrecision(5))
     })
 
-    it('test that the lowest cost peer is returned with an indexer ordered high to low', async () => {
+    it('test that the lowest cost delegate is returned with an indexer ordered high to low', async () => {
       //mock indexer getIntents() where locators are ordered high to low
       await mockIndexer.givenMethodReturn(
         indexer_getIntents,
@@ -174,8 +174,8 @@ contract('DelegateFrontend Unit Tests', async () => {
         )
       )
 
-      //this should always select the lowest cost peer available
-      let val = await peerFrontend.getBestTakerSideQuote.call(
+      //this should always select the lowest cost delegate available
+      let val = await delegateFrontend.getBestTakerSideQuote.call(
         180,
         EMPTY_ADDRESS,
         EMPTY_ADDRESS,
@@ -186,7 +186,7 @@ contract('DelegateFrontend Unit Tests', async () => {
       equal(val[1].toNumber(), lowVal)
     })
 
-    it('test that the lowest cost peer is returned with an indexer ordered low to high', async () => {
+    it('test that the lowest cost delegate is returned with an indexer ordered low to high', async () => {
       //mock indexer getIntents() where locators are ordered low to high
       await mockIndexer.givenMethodReturn(
         indexer_getIntents,
@@ -196,8 +196,8 @@ contract('DelegateFrontend Unit Tests', async () => {
         )
       )
 
-      //this should always select the lowest cost peer available
-      let val = await peerFrontend.getBestTakerSideQuote.call(
+      //this should always select the lowest cost delegate available
+      let val = await delegateFrontend.getBestTakerSideQuote.call(
         180,
         EMPTY_ADDRESS,
         EMPTY_ADDRESS,
@@ -216,7 +216,7 @@ contract('DelegateFrontend Unit Tests', async () => {
         abi.rawEncode(['bytes32[]'], [[]])
       )
 
-      let val = await peerFrontend.getBestMakerSideQuote.call(
+      let val = await delegateFrontend.getBestMakerSideQuote.call(
         180,
         EMPTY_ADDRESS,
         EMPTY_ADDRESS,
@@ -228,7 +228,7 @@ contract('DelegateFrontend Unit Tests', async () => {
       equal(lowestCost, minUint.toPrecision(5))
     })
 
-    it('test that the lowest cost peer is returned with an indexer ordered high to low', async () => {
+    it('test that the lowest cost delegate is returned with an indexer ordered high to low', async () => {
       //mock indexer getIntents() where locators are ordered high to low
       await mockIndexer.givenMethodReturn(
         indexer_getIntents,
@@ -238,8 +238,8 @@ contract('DelegateFrontend Unit Tests', async () => {
         )
       )
 
-      //this should always select the lowest cost peer available
-      let val = await peerFrontend.getBestMakerSideQuote.call(
+      //this should always select the lowest cost delegate available
+      let val = await delegateFrontend.getBestMakerSideQuote.call(
         180,
         EMPTY_ADDRESS,
         EMPTY_ADDRESS,
@@ -250,7 +250,7 @@ contract('DelegateFrontend Unit Tests', async () => {
       equal(val[1].toNumber(), highVal)
     })
 
-    it('test that the lowest cost peer is returned with an indexer ordered low to high', async () => {
+    it('test that the lowest cost delegate is returned with an indexer ordered low to high', async () => {
       //mock indexer getIntents() where locators are ordered low to high
       await mockIndexer.givenMethodReturn(
         indexer_getIntents,
@@ -260,8 +260,8 @@ contract('DelegateFrontend Unit Tests', async () => {
         )
       )
 
-      //this should always select the lowest cost peer available
-      let val = await peerFrontend.getBestMakerSideQuote.call(
+      //this should always select the lowest cost delegate available
+      let val = await delegateFrontend.getBestMakerSideQuote.call(
         180,
         EMPTY_ADDRESS,
         EMPTY_ADDRESS,
@@ -283,7 +283,7 @@ contract('DelegateFrontend Unit Tests', async () => {
         )
       )
 
-      let trx = await peerFrontend.fillBestTakerSideOrder(
+      let trx = await delegateFrontend.fillBestTakerSideOrder(
         180,
         mockUserSendToken.address,
         mockUserReceiveToken.address,

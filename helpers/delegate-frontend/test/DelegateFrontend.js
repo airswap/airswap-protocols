@@ -17,11 +17,11 @@ const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 const { padAddressToLocator } = require('@airswap/test-utils').padding
 
 let indexer
-let peerfrontend
+let delegatefrontend
 let swapContract
 
 let indexerAddress
-let peerfrontendAddress
+let delegatefrontendAddress
 let swapAddress
 let aliceDelegate
 
@@ -46,7 +46,7 @@ contract('DelegateFrontend', async accounts => {
     await revertToSnapShot(snapshotId)
   })
 
-  describe('Setup peer for Alice', async () => {
+  describe('Setup delegate for Alice', async () => {
     before('Deploys all the things', async () => {
       tokenAST = await FungibleToken.new()
       tokenDAI = await FungibleToken.new()
@@ -62,10 +62,10 @@ contract('DelegateFrontend', async accounts => {
       })
 
       indexerAddress = indexer.address
-      peerfrontend = await DelegateFrontend.new(indexerAddress, swapAddress, {
+      delegatefrontend = await DelegateFrontend.new(indexerAddress, swapAddress, {
         from: ownerAddress,
       })
-      peerfrontendAddress = peerfrontend.address
+      delegatefrontendAddress = delegatefrontend.address
       aliceDelegate = await Delegate.new(
         swapAddress,
         EMPTY_ADDRESS,
@@ -76,7 +76,7 @@ contract('DelegateFrontend', async accounts => {
       )
     })
 
-    it('Alice authorizes the new peer', async () => {
+    it('Alice authorizes the new delegate', async () => {
       emitted(
         await swapContract.authorize(
           aliceDelegate.address,
@@ -131,7 +131,7 @@ contract('DelegateFrontend', async accounts => {
   describe('DelegateFrontend - fills for non-existent quotes', async () => {
     it('Finds best price to buy 100 AST for DAI - reverts ', async () => {
       await reverted(
-        peerfrontend.fillBestMakerSideOrder.call(
+        delegatefrontend.fillBestMakerSideOrder.call(
           100,
           tokenAST.address,
           tokenDAI.address,
@@ -143,7 +143,7 @@ contract('DelegateFrontend', async accounts => {
 
     it('Finds best price to sell 100 AST for DAI - reverts', async () => {
       await reverted(
-        peerfrontend.fillBestTakerSideOrder.call(
+        delegatefrontend.fillBestTakerSideOrder.call(
           100,
           tokenAST.address,
           tokenDAI.address,
@@ -154,7 +154,7 @@ contract('DelegateFrontend', async accounts => {
     })
   })
 
-  describe('Alice adds some peer rules', async () => {
+  describe('Alice adds some delegate rules', async () => {
     it('Adds a rule to send up to 150 WETH for DAI at 309.52 DAI/WETH', async () => {
       emitted(
         await aliceDelegate.setRule(
@@ -190,7 +190,7 @@ contract('DelegateFrontend', async accounts => {
     })
 
     it('Finds best price to buy 1 WETH for DAI', async () => {
-      const quote = await peerfrontend.getBestTakerSideQuote.call(
+      const quote = await delegatefrontend.getBestTakerSideQuote.call(
         100,
         tokenWETH.address,
         tokenDAI.address,
@@ -201,7 +201,7 @@ contract('DelegateFrontend', async accounts => {
     })
 
     it('Finds best price to very large WETH amount for DAI', async () => {
-      const quote = await peerfrontend.getBestTakerSideQuote.call(
+      const quote = await delegatefrontend.getBestTakerSideQuote.call(
         10000000,
         tokenWETH.address,
         tokenDAI.address,
@@ -214,8 +214,8 @@ contract('DelegateFrontend', async accounts => {
       )
     })
 
-    it('Takes best price (Alice peer) - TakerSide', async () => {
-      // Alice peer gets some WETH to trade through the Delegate
+    it('Takes best price (Alice delegate) - TakerSide', async () => {
+      // Alice delegate gets some WETH to trade through the Delegate
       await tokenWETH.mint(aliceAddress, 200)
 
       // Alice approves Swap contract to transfer her WETH
@@ -229,14 +229,14 @@ contract('DelegateFrontend', async accounts => {
 
       // Carol approves the DelegateFrontend to transfer her DAI
       emitted(
-        await tokenDAI.approve(peerfrontendAddress, 50000, {
+        await tokenDAI.approve(delegatefrontendAddress, 50000, {
           from: carolAddress,
         }),
         'Approval'
       )
 
       // Carol takes the best price for 100 DAI
-      await peerfrontend.fillBestTakerSideOrder(
+      await delegatefrontend.fillBestTakerSideOrder(
         100,
         tokenWETH.address,
         tokenDAI.address,
@@ -263,7 +263,7 @@ contract('DelegateFrontend', async accounts => {
 
   describe('DelegateFrontend - MakerSide', async () => {
     it('Finds best price to buy 309 DAI for WETH', async () => {
-      const quote = await peerfrontend.getBestMakerSideQuote.call(
+      const quote = await delegatefrontend.getBestMakerSideQuote.call(
         15476,
         tokenDAI.address,
         tokenWETH.address,
@@ -274,10 +274,10 @@ contract('DelegateFrontend', async accounts => {
       equal(quote[1].toNumber(), 50)
     })
 
-    it('Takes best price (Alice peer) - MakerSide', async () => {
+    it('Takes best price (Alice delegate) - MakerSide', async () => {
       await advanceTimeAndBlock(10)
       // Carol takes the best price for 100 DAI
-      await peerfrontend.fillBestMakerSideOrder(
+      await delegatefrontend.fillBestMakerSideOrder(
         15476,
         tokenDAI.address,
         tokenWETH.address,

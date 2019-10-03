@@ -17,7 +17,7 @@ contract('Delegate Unit Tests', async accounts => {
   const tradeWallet = accounts[1]
   const notOwner = accounts[2]
   const notTradeWallet = accounts[3]
-  let peer
+  let delegate
   let mockSwap
   let snapshotId
   let swapFunction
@@ -48,19 +48,19 @@ contract('Delegate Unit Tests', async accounts => {
 
   before('deploy Delegate', async () => {
     await setupMockSwap()
-    peer = await Delegate.new(mockSwap.address, EMPTY_ADDRESS, tradeWallet, {
+    delegate = await Delegate.new(mockSwap.address, EMPTY_ADDRESS, tradeWallet, {
       from: owner,
     })
   })
 
   describe('Test constructor', async () => {
     it('Test initial Swap Contract', async () => {
-      let val = await peer.swapContract.call()
+      let val = await delegate.swapContract.call()
       equal(val, mockSwap.address, 'swap address is incorrect')
     })
 
     it('Test initial trade wallet value', async () => {
-      let val = await peer.tradeWallet.call()
+      let val = await delegate.tradeWallet.call()
       equal(val, tradeWallet, 'trade wallet is incorrect')
     })
 
@@ -80,7 +80,7 @@ contract('Delegate Unit Tests', async accounts => {
 
     it('Test owner is set correctly if provided the empty address', async () => {
       // being provided an empty address, it should leave the owner unchanged
-      let val = await peer.owner.call()
+      let val = await delegate.owner.call()
       equal(val, owner, 'owner is incorrect - should be owner')
     })
 
@@ -103,7 +103,7 @@ contract('Delegate Unit Tests', async accounts => {
   describe('Test setters', async () => {
     it('Test setRule permissions', async () => {
       await reverted(
-        peer.setRule(
+        delegate.setRule(
           TAKER_TOKEN,
           MAKER_TOKEN,
           MAX_TAKER_AMOUNT,
@@ -114,7 +114,7 @@ contract('Delegate Unit Tests', async accounts => {
       )
 
       await passes(
-        peer.setRule(
+        delegate.setRule(
           TAKER_TOKEN,
           MAKER_TOKEN,
           MAX_TAKER_AMOUNT,
@@ -126,7 +126,7 @@ contract('Delegate Unit Tests', async accounts => {
     })
 
     it('Test setRule', async () => {
-      let trx = await peer.setRule(
+      let trx = await delegate.setRule(
         TAKER_TOKEN,
         MAKER_TOKEN,
         MAX_TAKER_AMOUNT,
@@ -135,11 +135,11 @@ contract('Delegate Unit Tests', async accounts => {
       )
 
       //check if rule has been added
-      let rule = await peer.rules.call(TAKER_TOKEN, MAKER_TOKEN)
+      let rule = await delegate.rules.call(TAKER_TOKEN, MAKER_TOKEN)
       equal(
         rule[0].toNumber(),
         MAX_TAKER_AMOUNT,
-        'max peer amount is incorrectly saved'
+        'max delegate amount is incorrectly saved'
       )
       equal(rule[1].toNumber(), PRICE_COEF, 'price coef is incorrectly saved')
       equal(rule[2].toNumber(), EXP, 'price exp is incorrectly saved')
@@ -158,13 +158,13 @@ contract('Delegate Unit Tests', async accounts => {
 
     it('Test unsetRule permissions', async () => {
       await reverted(
-        peer.unsetRule(TAKER_TOKEN, MAKER_TOKEN, { from: notOwner })
+        delegate.unsetRule(TAKER_TOKEN, MAKER_TOKEN, { from: notOwner })
       )
-      await passes(peer.unsetRule(TAKER_TOKEN, MAKER_TOKEN, { from: owner }))
+      await passes(delegate.unsetRule(TAKER_TOKEN, MAKER_TOKEN, { from: owner }))
     })
 
     it('Test unsetRule', async () => {
-      let trx = await peer.setRule(
+      let trx = await delegate.setRule(
         TAKER_TOKEN,
         MAKER_TOKEN,
         MAX_TAKER_AMOUNT,
@@ -173,17 +173,17 @@ contract('Delegate Unit Tests', async accounts => {
       )
 
       //ensure rule has been added
-      let ruleBefore = await peer.rules.call(TAKER_TOKEN, MAKER_TOKEN)
+      let ruleBefore = await delegate.rules.call(TAKER_TOKEN, MAKER_TOKEN)
       equal(
         ruleBefore[0].toNumber(),
         MAX_TAKER_AMOUNT,
-        'max peer amount is incorrectly saved'
+        'max delegate amount is incorrectly saved'
       )
 
-      trx = await peer.unsetRule(TAKER_TOKEN, MAKER_TOKEN)
+      trx = await delegate.unsetRule(TAKER_TOKEN, MAKER_TOKEN)
 
       //check that the rule has been removed
-      let ruleAfter = await peer.rules.call(TAKER_TOKEN, MAKER_TOKEN)
+      let ruleAfter = await delegate.rules.call(TAKER_TOKEN, MAKER_TOKEN)
       equal(
         ruleAfter[0].toNumber(),
         0,
@@ -201,16 +201,16 @@ contract('Delegate Unit Tests', async accounts => {
 
   describe('Test setTakerWallet', async () => {
     it('Test setTakerWallet permissions', async () => {
-      await reverted(peer.setTradeWallet(notOwner, { from: notOwner }))
+      await reverted(delegate.setTradeWallet(notOwner, { from: notOwner }))
 
-      await passes(peer.setTradeWallet(notOwner, { from: owner }))
+      await passes(delegate.setTradeWallet(notOwner, { from: owner }))
     })
   })
 
   describe('Test getMakerSideQuote', async () => {
     it('test when rule does not exist', async () => {
       const NON_EXISTENT_TAKER_TOKEN = accounts[7]
-      let val = await peer.getMakerSideQuote.call(
+      let val = await delegate.getMakerSideQuote.call(
         1234,
         NON_EXISTENT_TAKER_TOKEN,
         MAKER_TOKEN
@@ -218,19 +218,19 @@ contract('Delegate Unit Tests', async accounts => {
       equal(
         val.toNumber(),
         0,
-        'no quote should be available if a peer does not exist'
+        'no quote should be available if a delegate does not exist'
       )
     })
 
-    it('test when peer amount is greater than max peer amount', async () => {
-      await peer.setRule(
+    it('test when delegate amount is greater than max delegate amount', async () => {
+      await delegate.setRule(
         TAKER_TOKEN,
         MAKER_TOKEN,
         MAX_TAKER_AMOUNT,
         PRICE_COEF,
         EXP
       )
-      let val = await peer.getMakerSideQuote.call(
+      let val = await delegate.getMakerSideQuote.call(
         MAX_TAKER_AMOUNT + 1,
         TAKER_TOKEN,
         MAKER_TOKEN
@@ -238,28 +238,28 @@ contract('Delegate Unit Tests', async accounts => {
       equal(
         val.toNumber(),
         0,
-        'no quote should be available if peer amount is greater than peer max amount'
+        'no quote should be available if delegate amount is greater than delegate max amount'
       )
     })
 
-    it('test when peer amount is 0', async () => {
-      await peer.setRule(
+    it('test when delegate amount is 0', async () => {
+      await delegate.setRule(
         TAKER_TOKEN,
         MAKER_TOKEN,
         MAX_TAKER_AMOUNT,
         PRICE_COEF,
         EXP
       )
-      let val = await peer.getMakerSideQuote.call(0, TAKER_TOKEN, MAKER_TOKEN)
+      let val = await delegate.getMakerSideQuote.call(0, TAKER_TOKEN, MAKER_TOKEN)
       equal(
         val.toNumber(),
         0,
-        'no quote should be available if peer amount is 0'
+        'no quote should be available if delegate amount is 0'
       )
     })
 
     it('test a successful call - getMakerSideQuote', async () => {
-      await peer.setRule(
+      await delegate.setRule(
         TAKER_TOKEN,
         MAKER_TOKEN,
         MAX_TAKER_AMOUNT,
@@ -267,7 +267,7 @@ contract('Delegate Unit Tests', async accounts => {
         EXP
       )
 
-      let val = await peer.getMakerSideQuote.call(
+      let val = await delegate.getMakerSideQuote.call(
         1234,
         TAKER_TOKEN,
         MAKER_TOKEN
@@ -279,7 +279,7 @@ contract('Delegate Unit Tests', async accounts => {
 
   describe('Test getTakerSideQuote', async () => {
     it('test when rule does not exist', async () => {
-      let val = await peer.getTakerSideQuote.call(
+      let val = await delegate.getTakerSideQuote.call(
         4312,
         MAKER_TOKEN,
         TAKER_TOKEN
@@ -287,20 +287,20 @@ contract('Delegate Unit Tests', async accounts => {
       equal(
         val.toNumber(),
         0,
-        'no quote should be available if a peer does not exist'
+        'no quote should be available if a delegate does not exist'
       )
     })
 
-    it('test when peer amount is not within acceptable value bounds', async () => {
-      await peer.setRule(TAKER_TOKEN, MAKER_TOKEN, 100, 1, 0)
-      let val = await peer.getTakerSideQuote.call(0, MAKER_TOKEN, TAKER_TOKEN)
+    it('test when delegate amount is not within acceptable value bounds', async () => {
+      await delegate.setRule(TAKER_TOKEN, MAKER_TOKEN, 100, 1, 0)
+      let val = await delegate.getTakerSideQuote.call(0, MAKER_TOKEN, TAKER_TOKEN)
       equal(
         val.toNumber(),
         0,
-        'no quote should be available if returned peer amount is 0'
+        'no quote should be available if returned delegate amount is 0'
       )
 
-      val = await peer.getTakerSideQuote.call(
+      val = await delegate.getTakerSideQuote.call(
         MAX_TAKER_AMOUNT + 1,
         MAKER_TOKEN,
         TAKER_TOKEN
@@ -308,12 +308,12 @@ contract('Delegate Unit Tests', async accounts => {
       equal(
         val.toNumber(),
         0,
-        'no quote should be available if returned greater than max peer amount'
+        'no quote should be available if returned greater than max delegate amount'
       )
     })
 
     it('test a successful call - getTakerSideQuote', async () => {
-      await peer.setRule(
+      await delegate.setRule(
         TAKER_TOKEN,
         MAKER_TOKEN,
         MAX_TAKER_AMOUNT,
@@ -321,7 +321,7 @@ contract('Delegate Unit Tests', async accounts => {
         EXP
       )
 
-      let val = await peer.getTakerSideQuote.call(500, MAKER_TOKEN, TAKER_TOKEN)
+      let val = await delegate.getTakerSideQuote.call(500, MAKER_TOKEN, TAKER_TOKEN)
       let expectedValue = Math.floor((500 * 10 ** EXP) / PRICE_COEF)
       equal(val.toNumber(), expectedValue, 'there should be a quote available')
     })
@@ -329,33 +329,33 @@ contract('Delegate Unit Tests', async accounts => {
 
   describe('Test getMaxQuote', async () => {
     it('test when rule does not exist', async () => {
-      let val = await peer.getMaxQuote.call(TAKER_TOKEN, MAKER_TOKEN)
+      let val = await delegate.getMaxQuote.call(TAKER_TOKEN, MAKER_TOKEN)
       equal(
         val[0].toNumber(),
         0,
-        'no quote should be available if a peer does not exist'
+        'no quote should be available if a delegate does not exist'
       )
       equal(
         val[1].toNumber(),
         0,
-        'no quote should be available if a peer does not exist'
+        'no quote should be available if a delegate does not exist'
       )
     })
 
     it('test a successful call - getMaxQuote', async () => {
-      await peer.setRule(
+      await delegate.setRule(
         TAKER_TOKEN,
         MAKER_TOKEN,
         MAX_TAKER_AMOUNT,
         PRICE_COEF,
         EXP
       )
-      let val = await peer.getMaxQuote.call(TAKER_TOKEN, MAKER_TOKEN)
+      let val = await delegate.getMaxQuote.call(TAKER_TOKEN, MAKER_TOKEN)
 
       equal(
         val[0].toNumber(),
         MAX_TAKER_AMOUNT,
-        'no quote should be available if a peer does not exist'
+        'no quote should be available if a delegate does not exist'
       )
 
       let expectedValue = Math.floor(
@@ -364,7 +364,7 @@ contract('Delegate Unit Tests', async accounts => {
       equal(
         val[1].toNumber(),
         expectedValue,
-        'no quote should be available if a peer does not exist'
+        'no quote should be available if a delegate does not exist'
       )
     })
   })
@@ -385,7 +385,7 @@ contract('Delegate Unit Tests', async accounts => {
       })
 
       await reverted(
-        peer.provideOrder(order, {
+        delegate.provideOrder(order, {
           from: notOwner,
         }),
         'TOKEN_PAIR_INACTIVE'
@@ -393,7 +393,7 @@ contract('Delegate Unit Tests', async accounts => {
     })
 
     it('test if an order exceeds maximum amount', async () => {
-      await peer.setRule(
+      await delegate.setRule(
         TAKER_TOKEN,
         MAKER_TOKEN,
         MAX_TAKER_AMOUNT,
@@ -415,7 +415,7 @@ contract('Delegate Unit Tests', async accounts => {
       })
 
       await reverted(
-        peer.provideOrder(order, {
+        delegate.provideOrder(order, {
           from: notOwner,
         }),
         'AMOUNT_EXCEEDS_MAX'
@@ -423,7 +423,7 @@ contract('Delegate Unit Tests', async accounts => {
     })
 
     it('test if the taker is not empty and not the trade wallet', async () => {
-      await peer.setRule(
+      await delegate.setRule(
         TAKER_TOKEN,
         MAKER_TOKEN,
         MAX_TAKER_AMOUNT,
@@ -448,7 +448,7 @@ contract('Delegate Unit Tests', async accounts => {
       })
 
       await reverted(
-        peer.provideOrder(order, {
+        delegate.provideOrder(order, {
           from: notOwner,
         }),
         'INVALID_TAKER_WALLET'
@@ -456,7 +456,7 @@ contract('Delegate Unit Tests', async accounts => {
     })
 
     it('test if order is not priced according to the rule', async () => {
-      await peer.setRule(
+      await delegate.setRule(
         TAKER_TOKEN,
         MAKER_TOKEN,
         MAX_TAKER_AMOUNT,
@@ -477,16 +477,16 @@ contract('Delegate Unit Tests', async accounts => {
       })
 
       await reverted(
-        peer.provideOrder(order, {
+        delegate.provideOrder(order, {
           from: notOwner,
         })
       )
     })
 
     it('test a successful transaction with integer values', async () => {
-      await peer.setRule(TAKER_TOKEN, MAKER_TOKEN, MAX_TAKER_AMOUNT, 100, EXP)
+      await delegate.setRule(TAKER_TOKEN, MAKER_TOKEN, MAX_TAKER_AMOUNT, 100, EXP)
 
-      let ruleBefore = await peer.rules.call(TAKER_TOKEN, MAKER_TOKEN)
+      let ruleBefore = await delegate.rules.call(TAKER_TOKEN, MAKER_TOKEN)
 
       let makerAmount = 100
 
@@ -506,16 +506,16 @@ contract('Delegate Unit Tests', async accounts => {
       await passes(
         //mock swapContract
         //test rule decrement
-        peer.provideOrder(order, {
+        delegate.provideOrder(order, {
           from: notOwner,
         })
       )
 
-      let ruleAfter = await peer.rules.call(TAKER_TOKEN, MAKER_TOKEN)
+      let ruleAfter = await delegate.rules.call(TAKER_TOKEN, MAKER_TOKEN)
       equal(
         ruleAfter[0].toNumber(),
         ruleBefore[0].toNumber() - makerAmount,
-        "rule's max peer amount was not decremented"
+        "rule's max delegate amount was not decremented"
       )
 
       //check if swap() was called
@@ -530,9 +530,9 @@ contract('Delegate Unit Tests', async accounts => {
     })
 
     it('test a successful transaction with trade wallet as taker', async () => {
-      await peer.setRule(TAKER_TOKEN, MAKER_TOKEN, MAX_TAKER_AMOUNT, 100, EXP)
+      await delegate.setRule(TAKER_TOKEN, MAKER_TOKEN, MAX_TAKER_AMOUNT, 100, EXP)
 
-      let ruleBefore = await peer.rules.call(TAKER_TOKEN, MAKER_TOKEN)
+      let ruleBefore = await delegate.rules.call(TAKER_TOKEN, MAKER_TOKEN)
 
       let makerAmount = 100
 
@@ -552,16 +552,16 @@ contract('Delegate Unit Tests', async accounts => {
       await passes(
         //mock swapContract
         //test rule decrement
-        peer.provideOrder(order, {
+        delegate.provideOrder(order, {
           from: notOwner,
         })
       )
 
-      let ruleAfter = await peer.rules.call(TAKER_TOKEN, MAKER_TOKEN)
+      let ruleAfter = await delegate.rules.call(TAKER_TOKEN, MAKER_TOKEN)
       equal(
         ruleAfter[0].toNumber(),
         ruleBefore[0].toNumber() - makerAmount,
-        "rule's max peer amount was not decremented"
+        "rule's max delegate amount was not decremented"
       )
 
       //check if swap() was called
@@ -576,7 +576,7 @@ contract('Delegate Unit Tests', async accounts => {
     })
 
     it('test a successful transaction with decimal values', async () => {
-      await peer.setRule(
+      await delegate.setRule(
         TAKER_TOKEN,
         MAKER_TOKEN,
         MAX_TAKER_AMOUNT,
@@ -584,7 +584,7 @@ contract('Delegate Unit Tests', async accounts => {
         EXP
       )
 
-      let ruleBefore = await peer.rules.call(TAKER_TOKEN, MAKER_TOKEN)
+      let ruleBefore = await delegate.rules.call(TAKER_TOKEN, MAKER_TOKEN)
 
       let makerAmount = 100
       let takerAmount = Math.floor((makerAmount * 10 ** EXP) / PRICE_COEF)
@@ -605,16 +605,16 @@ contract('Delegate Unit Tests', async accounts => {
       await passes(
         //mock swapContract
         //test rule decrement
-        peer.provideOrder(order, {
+        delegate.provideOrder(order, {
           from: notOwner,
         })
       )
 
-      let ruleAfter = await peer.rules.call(TAKER_TOKEN, MAKER_TOKEN)
+      let ruleAfter = await delegate.rules.call(TAKER_TOKEN, MAKER_TOKEN)
       equal(
         ruleAfter[0].toNumber(),
         ruleBefore[0].toNumber() - takerAmount,
-        "rule's max peer amount was not decremented"
+        "rule's max delegate amount was not decremented"
       )
     })
   })

@@ -337,7 +337,7 @@ contract('Delegate', async accounts => {
       )
     })
 
-    it("should not trade if the tradeWallet hasn't authorized the peer", async () => {
+    it("should not trade if the tradeWallet hasn't authorized the delegate", async () => {
       const order = await orders.getOrder({
         maker: {
           wallet: bobAddress,
@@ -373,7 +373,7 @@ contract('Delegate', async accounts => {
         },
       })
 
-      // authorize the peer
+      // authorize the delegate
       let expiry = await getTimestampPlusDays(0.5)
       let tx = await swapContract.authorize(aliceDelegate.address, expiry, {
         from: aliceTradeWallet,
@@ -391,7 +391,7 @@ contract('Delegate', async accounts => {
       )
     })
 
-    it('should trade if the tradeWallet has authorized the peer', async () => {
+    it('should trade if the tradeWallet has authorized the delegate', async () => {
       const order = await orders.getOrder({
         maker: {
           wallet: bobAddress,
@@ -500,7 +500,7 @@ contract('Delegate', async accounts => {
       )
     })
 
-    it('Use quote larger than peer rule', async () => {
+    it('Use quote larger than delegate rule', async () => {
       // Delegate trades WETH for 100 DAI. Max trade is 2 WETH.
       await aliceDelegate.setRule(
         tokenWETH.address, // Delegate's token
@@ -530,7 +530,7 @@ contract('Delegate', async accounts => {
       )
     })
 
-    it('Use incorrect price on peer', async () => {
+    it('Use incorrect price on delegate', async () => {
       const order = await orders.getOrder({
         maker: {
           wallet: bobAddress,
@@ -540,7 +540,7 @@ contract('Delegate', async accounts => {
         taker: {
           wallet: aliceTradeWallet,
           token: tokenDAI.address,
-          param: 500, //this is more than the peer rule would pay out
+          param: 500, //this is more than the delegate rule would pay out
         },
       })
 

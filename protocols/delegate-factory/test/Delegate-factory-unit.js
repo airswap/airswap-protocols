@@ -13,14 +13,14 @@ const { padAddressToLocator } = require('@airswap/test-utils').padding
 contract('Delegate Factory Tests', async accounts => {
   const swapContractOne = accounts[1]
   const swapContractTwo = accounts[2]
-  const peerOwnerOne = accounts[3]
-  const peerOwnerTwo = accounts[4]
+  const delegateOwnerOne = accounts[3]
+  const delegateOwnerTwo = accounts[4]
   const tradeWalletOne = accounts[5]
   const tradeWalletTwo = accounts[6]
 
   let snapshotId
 
-  let peerFactory
+  let delegateFactory
 
   beforeEach(async () => {
     let snapShot = await takeSnapshot()
@@ -32,13 +32,13 @@ contract('Delegate Factory Tests', async accounts => {
   })
 
   before('Deploy Delegate Factory', async () => {
-    peerFactory = await DelegateFactory.new()
+    delegateFactory = await DelegateFactory.new()
   })
 
-  describe('Test deploying peers', async () => {
-    it('should not deploy a peer with owner address 0x0', async () => {
+  describe('Test deploying delegates', async () => {
+    it('should not deploy a delegate with owner address 0x0', async () => {
       await reverted(
-        peerFactory.createDelegate(
+        delegateFactory.createDelegate(
           swapContractOne,
           EMPTY_ADDRESS,
           tradeWalletOne
@@ -47,73 +47,73 @@ contract('Delegate Factory Tests', async accounts => {
       )
     })
 
-    it('should not deploy a peer with swap address 0x0', async () => {
+    it('should not deploy a delegate with swap address 0x0', async () => {
       await reverted(
-        peerFactory.createDelegate(EMPTY_ADDRESS, peerOwnerOne, tradeWalletOne),
+        delegateFactory.createDelegate(EMPTY_ADDRESS, delegateOwnerOne, tradeWalletOne),
         'SWAP_CONTRACT_REQUIRED'
       )
     })
 
     it('should emit event and update the mapping', async () => {
       // successful tx
-      let tx = await peerFactory.createDelegate(
+      let tx = await delegateFactory.createDelegate(
         swapContractOne,
-        peerOwnerOne,
+        delegateOwnerOne,
         tradeWalletOne
       )
       passes(tx)
 
-      let peerAddress
+      let delegateAddress
 
       // emitted event
       emitted(tx, 'CreateDelegate', event => {
-        peerAddress = event.peerContract
+        delegateAddress = event.delegateContract
         return (
           event.swapContract === swapContractOne &&
-          event.peerContractOwner === peerOwnerOne &&
-          event.peerTradeWallet === tradeWalletOne
+          event.delegateContractOwner === delegateOwnerOne &&
+          event.delegateTradeWallet === tradeWalletOne
         )
       })
 
-      let paddedDelegateAddress = padAddressToLocator(peerAddress)
+      let paddedDelegateAddress = padAddressToLocator(delegateAddress)
 
       // mapping has been updated
-      let isTrustedDelegate = await peerFactory.has.call(paddedDelegateAddress)
+      let isTrustedDelegate = await delegateFactory.has.call(paddedDelegateAddress)
       equal(isTrustedDelegate, true)
     })
 
-    it('should create peer with the correct values', async () => {
-      // deploy peer
-      let tx = await peerFactory.createDelegate(
+    it('should create delegate with the correct values', async () => {
+      // deploy delegate
+      let tx = await delegateFactory.createDelegate(
         swapContractTwo,
-        peerOwnerTwo,
+        delegateOwnerTwo,
         tradeWalletTwo
       )
 
-      // get peer address and pad
-      let peerAddress
+      // get delegate address and pad
+      let delegateAddress
       emitted(tx, 'CreateDelegate', event => {
-        peerAddress = event.peerContract
+        delegateAddress = event.delegateContract
         return (
           event.swapContract === swapContractTwo &&
-          event.peerContractOwner === peerOwnerTwo &&
-          event.peerTradeWallet === tradeWalletTwo
+          event.delegateContractOwner === delegateOwnerTwo &&
+          event.delegateTradeWallet === tradeWalletTwo
         )
       })
-      let paddedDelegateAddress = padAddressToLocator(peerAddress)
+      let paddedDelegateAddress = padAddressToLocator(delegateAddress)
 
-      let isTrustedDelegate = await peerFactory.has.call(paddedDelegateAddress)
+      let isTrustedDelegate = await delegateFactory.has.call(paddedDelegateAddress)
       equal(isTrustedDelegate, true)
 
-      // get the swap and owner values of the peer
-      let peer = await Delegate.at(peerAddress)
-      let actualSwap = await peer.swapContract.call()
-      let actualOwner = await peer.owner.call()
-      let actualTradeWallet = await peer.tradeWallet.call()
+      // get the swap and owner values of the delegate
+      let delegate = await Delegate.at(delegateAddress)
+      let actualSwap = await delegate.swapContract.call()
+      let actualOwner = await delegate.owner.call()
+      let actualTradeWallet = await delegate.tradeWallet.call()
 
       // check that the addresses are equal
       equal(swapContractTwo, actualSwap, 'Delegate has incorrect swap address')
-      equal(peerOwnerTwo, actualOwner, 'Delegate has incorrect owner address')
+      equal(delegateOwnerTwo, actualOwner, 'Delegate has incorrect owner address')
       equal(
         tradeWalletTwo,
         actualTradeWallet,
