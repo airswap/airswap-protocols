@@ -49,7 +49,11 @@ contract('Delegate Factory Tests', async accounts => {
 
     it('should not deploy a delegate with swap address 0x0', async () => {
       await reverted(
-        delegateFactory.createDelegate(EMPTY_ADDRESS, delegateOwnerOne, tradeWalletOne),
+        delegateFactory.createDelegate(
+          EMPTY_ADDRESS,
+          delegateOwnerOne,
+          tradeWalletOne
+        ),
         'SWAP_CONTRACT_REQUIRED'
       )
     })
@@ -78,7 +82,9 @@ contract('Delegate Factory Tests', async accounts => {
       let paddedDelegateAddress = padAddressToLocator(delegateAddress)
 
       // mapping has been updated
-      let isTrustedDelegate = await delegateFactory.has.call(paddedDelegateAddress)
+      let isTrustedDelegate = await delegateFactory.has.call(
+        paddedDelegateAddress
+      )
       equal(isTrustedDelegate, true)
     })
 
@@ -102,7 +108,9 @@ contract('Delegate Factory Tests', async accounts => {
       })
       let paddedDelegateAddress = padAddressToLocator(delegateAddress)
 
-      let isTrustedDelegate = await delegateFactory.has.call(paddedDelegateAddress)
+      let isTrustedDelegate = await delegateFactory.has.call(
+        paddedDelegateAddress
+      )
       equal(isTrustedDelegate, true)
 
       // get the swap and owner values of the delegate
@@ -113,7 +121,11 @@ contract('Delegate Factory Tests', async accounts => {
 
       // check that the addresses are equal
       equal(swapContractTwo, actualSwap, 'Delegate has incorrect swap address')
-      equal(delegateOwnerTwo, actualOwner, 'Delegate has incorrect owner address')
+      equal(
+        delegateOwnerTwo,
+        actualOwner,
+        'Delegate has incorrect owner address'
+      )
       equal(
         tradeWalletTwo,
         actualTradeWallet,

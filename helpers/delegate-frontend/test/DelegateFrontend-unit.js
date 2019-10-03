@@ -58,7 +58,10 @@ contract('DelegateFrontend Unit Tests', async () => {
       delegate_getMakerSideQuote,
       highVal
     )
-    await mockDelegateLow.givenMethodReturnUint(delegate_getMakerSideQuote, lowVal)
+    await mockDelegateLow.givenMethodReturnUint(
+      delegate_getMakerSideQuote,
+      lowVal
+    )
 
     //mock delegate getMakerSideQuote()
     let delegate_getTakerSideQuote = delegateTemplate.contract.methods
@@ -68,12 +71,21 @@ contract('DelegateFrontend Unit Tests', async () => {
       delegate_getTakerSideQuote,
       highVal
     )
-    await mockDelegateLow.givenMethodReturnUint(delegate_getTakerSideQuote, lowVal)
+    await mockDelegateLow.givenMethodReturnUint(
+      delegate_getTakerSideQuote,
+      lowVal
+    )
 
     // mock delegate has owner()
     let delegate_owner = delegateTemplate.contract.methods.owner().encodeABI()
-    await mockDelegateHigh.givenMethodReturnAddress(delegate_owner, EMPTY_ADDRESS)
-    await mockDelegateLow.givenMethodReturnAddress(delegate_owner, EMPTY_ADDRESS)
+    await mockDelegateHigh.givenMethodReturnAddress(
+      delegate_owner,
+      EMPTY_ADDRESS
+    )
+    await mockDelegateLow.givenMethodReturnAddress(
+      delegate_owner,
+      EMPTY_ADDRESS
+    )
 
     // mock delegate trade wallet
     let delegate_tradeWallet = delegateTemplate.contract.methods
@@ -98,7 +110,10 @@ contract('DelegateFrontend Unit Tests', async () => {
       delegate_provideUnsignedOrder,
       true
     )
-    await mockDelegateLow.givenMethodReturnBool(delegate_provideUnsignedOrder, true)
+    await mockDelegateLow.givenMethodReturnBool(
+      delegate_provideUnsignedOrder,
+      true
+    )
   }
 
   async function setupMockIndexer() {

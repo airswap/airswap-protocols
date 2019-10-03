@@ -48,9 +48,14 @@ contract('Delegate Unit Tests', async accounts => {
 
   before('deploy Delegate', async () => {
     await setupMockSwap()
-    delegate = await Delegate.new(mockSwap.address, EMPTY_ADDRESS, tradeWallet, {
-      from: owner,
-    })
+    delegate = await Delegate.new(
+      mockSwap.address,
+      EMPTY_ADDRESS,
+      tradeWallet,
+      {
+        from: owner,
+      }
+    )
   })
 
   describe('Test constructor', async () => {
@@ -160,7 +165,9 @@ contract('Delegate Unit Tests', async accounts => {
       await reverted(
         delegate.unsetRule(TAKER_TOKEN, MAKER_TOKEN, { from: notOwner })
       )
-      await passes(delegate.unsetRule(TAKER_TOKEN, MAKER_TOKEN, { from: owner }))
+      await passes(
+        delegate.unsetRule(TAKER_TOKEN, MAKER_TOKEN, { from: owner })
+      )
     })
 
     it('Test unsetRule', async () => {
@@ -250,7 +257,11 @@ contract('Delegate Unit Tests', async accounts => {
         PRICE_COEF,
         EXP
       )
-      let val = await delegate.getMakerSideQuote.call(0, TAKER_TOKEN, MAKER_TOKEN)
+      let val = await delegate.getMakerSideQuote.call(
+        0,
+        TAKER_TOKEN,
+        MAKER_TOKEN
+      )
       equal(
         val.toNumber(),
         0,
@@ -293,7 +304,11 @@ contract('Delegate Unit Tests', async accounts => {
 
     it('test when delegate amount is not within acceptable value bounds', async () => {
       await delegate.setRule(TAKER_TOKEN, MAKER_TOKEN, 100, 1, 0)
-      let val = await delegate.getTakerSideQuote.call(0, MAKER_TOKEN, TAKER_TOKEN)
+      let val = await delegate.getTakerSideQuote.call(
+        0,
+        MAKER_TOKEN,
+        TAKER_TOKEN
+      )
       equal(
         val.toNumber(),
         0,
@@ -321,7 +336,11 @@ contract('Delegate Unit Tests', async accounts => {
         EXP
       )
 
-      let val = await delegate.getTakerSideQuote.call(500, MAKER_TOKEN, TAKER_TOKEN)
+      let val = await delegate.getTakerSideQuote.call(
+        500,
+        MAKER_TOKEN,
+        TAKER_TOKEN
+      )
       let expectedValue = Math.floor((500 * 10 ** EXP) / PRICE_COEF)
       equal(val.toNumber(), expectedValue, 'there should be a quote available')
     })
@@ -484,7 +503,13 @@ contract('Delegate Unit Tests', async accounts => {
     })
 
     it('test a successful transaction with integer values', async () => {
-      await delegate.setRule(TAKER_TOKEN, MAKER_TOKEN, MAX_TAKER_AMOUNT, 100, EXP)
+      await delegate.setRule(
+        TAKER_TOKEN,
+        MAKER_TOKEN,
+        MAX_TAKER_AMOUNT,
+        100,
+        EXP
+      )
 
       let ruleBefore = await delegate.rules.call(TAKER_TOKEN, MAKER_TOKEN)
 
@@ -530,7 +555,13 @@ contract('Delegate Unit Tests', async accounts => {
     })
 
     it('test a successful transaction with trade wallet as taker', async () => {
-      await delegate.setRule(TAKER_TOKEN, MAKER_TOKEN, MAX_TAKER_AMOUNT, 100, EXP)
+      await delegate.setRule(
+        TAKER_TOKEN,
+        MAKER_TOKEN,
+        MAX_TAKER_AMOUNT,
+        100,
+        EXP
+      )
 
       let ruleBefore = await delegate.rules.call(TAKER_TOKEN, MAKER_TOKEN)
 

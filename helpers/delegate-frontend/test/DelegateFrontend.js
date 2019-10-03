@@ -62,9 +62,13 @@ contract('DelegateFrontend', async accounts => {
       })
 
       indexerAddress = indexer.address
-      delegatefrontend = await DelegateFrontend.new(indexerAddress, swapAddress, {
-        from: ownerAddress,
-      })
+      delegatefrontend = await DelegateFrontend.new(
+        indexerAddress,
+        swapAddress,
+        {
+          from: ownerAddress,
+        }
+      )
       delegatefrontendAddress = delegatefrontend.address
       aliceDelegate = await Delegate.new(
         swapAddress,
