@@ -251,6 +251,10 @@ contract('Peer Unit Tests', async accounts => {
       val = await peer.isWhitelisted.call(owner)
       equal(val, false, 'owner should no longer be whitelisted')
     })
+
+    it('Test ownership after transfer', async () => {
+      await reverted(peer.transferOwnership(EMPTY_ADDRESS), 'PEER_CONTRACT_OWNER_REQUIRED')
+    })
   })
 
   describe('Test getMakerSideQuote', async () => {

@@ -46,6 +46,14 @@ contract Peer is IPeer, Ownable {
   bytes4 constant internal ERC20_INTERFACE_ID = 0x277f8169;
 
   /**
+    * @dev only whitelisted ensures that only whitelisted parties can call the method it modifies
+    */
+  modifier onlyWhitelisted() {
+    require(whitelist[msg.sender], "CALLER_NOT_WHITELISTED");
+    _;
+  }
+
+  /**
     * @notice Contract Constructor
     * @param _swapContract address of the swap contract the peer will deploy with
     * @param _peerContractOwner address that should be the owner of the peer
@@ -86,7 +94,7 @@ contract Peer is IPeer, Ownable {
     */
   function removeFromWhitelist(address addressToRemove) external onlyOwner {
     require(addressToRemove != owner(), "OWNER_MUST_BE_WHITELISTED");
-    whitelist[addressToRemove] = false;
+    delete whitelist[addressToRemove];
     emit WhitelistRemoved(addressToRemove);
   }
 
@@ -96,17 +104,10 @@ contract Peer is IPeer, Ownable {
     * @param newOwner the address of the new owner of the contract
     */
   function transferOwnership(address newOwner) public onlyOwner {
+    require(newOwner != address(0), 'PEER_CONTRACT_OWNER_REQUIRED');
     whitelist[newOwner] = true;
     whitelist[owner()] = false;
     super.transferOwnership(newOwner);
-  }
-
-  /**
-    * @dev only whitelisted ensures that only whitelisted parties can call the method it modifies
-    */
-  modifier onlyWhitelisted() {
-    require(whitelist[msg.sender] == true, "CALLER_NOT_WHITELISTED");
-    _;
   }
 
   /**
