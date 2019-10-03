@@ -21,11 +21,11 @@ interface IDelegateFactory {
   event CreateDelegate(address indexed delegateContract, address swapContract, address indexed delegateContractOwner, address delegateTradeWallet);
 
   /**
-    * @notice Deploy a trusted peer contract
-    * @param _swapContract address of the swap contract the peer will deploy with
-    * @param _delegateContractOwner address that should be the owner of the peer
-    * @param _delegateTradeWallet the wallet the peer will trade from
-    * @return delegateContractAddress address of the peer contract created
+    * @notice Deploy a trusted delegate contract
+    * @param _swapContract address of the swap contract the delegate will deploy with
+    * @param _delegateContractOwner address that should be the owner of the delegate
+    * @param _delegateTradeWallet the wallet the delegate will trade from
+    * @return delegateContractAddress address of the delegate contract created
     */
   function createDelegate(
     address _swapContract,

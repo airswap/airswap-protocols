@@ -43,7 +43,7 @@ contract('Delegate Factory Tests', async accounts => {
           EMPTY_ADDRESS,
           tradeWalletOne
         ),
-        'PEER_CONTRACT_OWNER_REQUIRED'
+        'DELEGATE_CONTRACT_OWNER_REQUIRED'
       )
     })
 

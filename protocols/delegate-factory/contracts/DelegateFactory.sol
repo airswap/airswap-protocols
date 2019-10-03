@@ -26,10 +26,10 @@ contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
 
   /**
     * @notice Create a new Delegate contract
-    * @param _swapContract address of the swap contract the peer will deploy with
-    * @param _delegateContractOwner address that should be the owner of the peer
-    * @param _delegateTradeWallet the wallet the peer will trade from
-    * @return delegateContractAddress address address of the peer contract created
+    * @param _swapContract address of the swap contract the delegate will deploy with
+    * @param _delegateContractOwner address that should be the owner of the delegate
+    * @param _delegateTradeWallet the wallet the delegate will trade from
+    * @return delegateContractAddress address address of the delegate contract created
     */
   function createDelegate(
     address _swapContract,
@@ -37,9 +37,9 @@ contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
     address _delegateTradeWallet
   ) external returns (address delegateContractAddress) {
 
-    // Ensure an owner for the peer contract is provided.
+    // Ensure an owner for the delegate contract is provided.
     require(_delegateContractOwner != address(0),
-      'PEER_CONTRACT_OWNER_REQUIRED');
+      'DELEGATE_CONTRACT_OWNER_REQUIRED');
 
     // Ensure a swap contract is provided.
     require(_swapContract != address(0),
@@ -56,7 +56,7 @@ contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
   /**
     * @notice To check whether a locator was deployed
     * @dev Implements ILocatorWhitelist.has
-    * @param _locator locator of the peer in question
+    * @param _locator locator of the delegate in question
     * @return bool true if the peer was deployed by this contract
     */
   function has(bytes32 _locator) external view returns (bool) {

@@ -40,12 +40,12 @@ contract DelegateFrontend {
   /**
     * @notice Get a Taker-Side Quote from the Onchain Liquidity provider
     * @dev want to fetch the lowest _makerAmount for requested _takerAmount
-    * @dev if no suitable Delegate found, defaults to 0x0 peerLocator
-    * @param _takerAmount uint256 The amount of ERC-20 token the peer would send
-    * @param _takerToken address The address of an ERC-20 token the peer would send
+    * @dev if no suitable Delegate found, defaults to 0x0 delegateLocator
+    * @param _takerAmount uint256 The amount of ERC-20 token the delegate would send
+    * @param _takerToken address The address of an ERC-20 token the delegate would send
     * @param _makerToken address The address of an ERC-20 token the consumer would send
     * @param _maxIntents uint256 The maximum number of Delegates to query
-    * @return peerAddress bytes32
+    * @return delegateAddress bytes32
     * @return lowestCost uint256
     */
   function getBestTakerSideQuote(
@@ -53,7 +53,7 @@ contract DelegateFrontend {
     address _takerToken,
     address _makerToken,
     uint256 _maxIntents
-  ) public view returns (bytes32 peerAddress, uint256 lowestAmount) {
+  ) public view returns (bytes32 delegateAddress, uint256 lowestAmount) {
 
 
     // use the indexer to query peers
@@ -75,25 +75,25 @@ contract DelegateFrontend {
 
       // Update the lowest cost.
       if (makerAmount > 0 && makerAmount < lowestAmount) {
-        peerAddress = locators[i];
+        delegateAddress = locators[i];
         lowestAmount = makerAmount;
       }
     }
 
     // Return the Delegate address and amount.
-    return (peerAddress, lowestAmount);
+    return (delegateAddress, lowestAmount);
 
   }
 
   /**
     * @notice Get a Maker-Side Quote from the Onchain Liquidity provider
     * @dev want to fetch the highest _takerAmount for requested _makerAmount
-    * @dev if no suitable Delegate found, peerLocator will be 0x0
-    * @param _makerAmount uint256 The amount of ERC-20 token the peer would send
-    * @param _makerToken address The address of an ERC-20 token the peer would send
+    * @dev if no suitable Delegate found, delegateLocator will be 0x0
+    * @param _makerAmount uint256 The amount of ERC-20 token the delegate would send
+    * @param _makerToken address The address of an ERC-20 token the delegate would send
     * @param _takerToken address The address of an ERC-20 token the consumer would send
     * @param _maxIntents uint256 The maximum number of Delegates to query
-    * @return peerLocator bytes32  The amount of ERC-20 token the consumer would send
+    * @return delegateLocator bytes32  The amount of ERC-20 token the consumer would send
     * @return lowestCost uint256 The amount of ERC-20 token the consumer would send
     */
   function getBestMakerSideQuote(
@@ -101,7 +101,7 @@ contract DelegateFrontend {
     address _makerToken,
     address _takerToken,
     uint256 _maxIntents
-  ) public view returns (bytes32 peerLocator, uint256 highAmount) {
+  ) public view returns (bytes32 delegateLocator, uint256 highAmount) {
 
     // use the indexer to query peers
     highAmount = 0;
@@ -122,24 +122,24 @@ contract DelegateFrontend {
 
       // Update the highest amount.
       if (takerAmount > 0 && takerAmount > highAmount) {
-        peerLocator = locators[i];
+        delegateLocator = locators[i];
         highAmount = takerAmount;
       }
     }
 
     // Return the Delegate address and amount.
-    return (peerLocator, highAmount);
+    return (delegateLocator, highAmount);
   }
 
   /**
     * @notice Get and fill Taker-Side Quote from the Onchain Liquidity provider
     * @dev want to fetch the lowest _makerAmount for requested _takerAmount
-    * @dev if no suitable Delegate found, will revert by checking peerLocator is 0x0
-    * @param _takerAmount uint256 The amount of ERC-20 token the peer would send
-    * @param _takerToken address The address of an ERC-20 token the peer would send
+    * @dev if no suitable Delegate found, will revert by checking delegateLocator is 0x0
+    * @param _takerAmount uint256 The amount of ERC-20 token the delegate would send
+    * @param _takerToken address The address of an ERC-20 token the delegate would send
     * @param _makerToken address The address of an ERC-20 token the consumer would send
     * @param _maxIntents uint256 The maximum number of Delegates to query
-    * @return peerAddress bytes32
+    * @return delegateAddress bytes32
     * @return lowestCost uint256
     */
   function fillBestTakerSideOrder(
@@ -150,17 +150,17 @@ contract DelegateFrontend {
   ) external {
 
     // Find the best buy among Indexed Delegates.
-    (bytes32 peerLocator, uint256 makerAmount) = getBestTakerSideQuote(
+    (bytes32 delegateLocator, uint256 makerAmount) = getBestTakerSideQuote(
       _takerAmount,
       _takerToken,
       _makerToken,
       _maxIntents
     );
 
-    // check if peerLocator exists
-    require(peerLocator != bytes32(0), "NO_LOCATOR, BAILING");
+    // check if delegateLocator exists
+    require(delegateLocator != bytes32(0), "NO_LOCATOR, BAILING");
 
-    address peerContract = address(bytes20(peerLocator));
+    address delegateContract = address(bytes20(delegateLocator));
 
     // User transfers amount to the contract.
     IERC20(_makerToken).transferFrom(msg.sender, address(this), makerAmount);
@@ -169,15 +169,15 @@ contract DelegateFrontend {
     IERC20(_makerToken).approve(address(swapContract), makerAmount);
 
     // DelegateFrontend authorizes the Delegate.
-    swapContract.authorize(peerContract, block.timestamp + 1);
+    swapContract.authorize(delegateContract, block.timestamp + 1);
 
     // Consumer provides unsigned order to Delegate.
-    IDelegate(peerContract).provideOrder(Types.Order(
+    IDelegate(delegateContract).provideOrder(Types.Order(
       uint256(keccak256(abi.encodePacked(
         block.timestamp,
         address(this),
         _makerToken,
-        IDelegate(peerContract).tradeWallet(),
+        IDelegate(delegateContract).tradeWallet(),
         _takerToken))),
       block.timestamp + 1,
       Types.Party(
@@ -187,7 +187,7 @@ contract DelegateFrontend {
         0x277f8169
       ),
       Types.Party(
-        IDelegate(peerContract).tradeWallet(),
+        IDelegate(delegateContract).tradeWallet(),
         _takerToken,
         _takerAmount,
         0x277f8169
@@ -197,7 +197,7 @@ contract DelegateFrontend {
     ));
 
     // DelegateFrontend revokes the authorization of the Delegate.
-    swapContract.revoke(peerContract);
+    swapContract.revoke(delegateContract);
 
     // DelegateFrontend transfers received amount to the User.
     IERC20(_takerToken).transfer(msg.sender, _takerAmount);
@@ -211,17 +211,17 @@ contract DelegateFrontend {
   ) external {
 
     // Find the best buy among Indexed Delegates.
-    (bytes32 peerLocator, uint256 takerAmount) = getBestMakerSideQuote(
+    (bytes32 delegateLocator, uint256 takerAmount) = getBestMakerSideQuote(
       _makerAmount,
       _makerToken,
       _takerToken,
       _maxIntents
     );
 
-    // check if peerLocator exists
-    require(peerLocator != bytes32(0), "NO_LOCATOR, BAILING");
+    // check if delegateLocator exists
+    require(delegateLocator != bytes32(0), "NO_LOCATOR, BAILING");
 
-    address peerContract = address(bytes20(peerLocator));
+    address delegateContract = address(bytes20(delegateLocator));
 
     // User transfers amount to the contract.
     IERC20(_makerToken).transferFrom(msg.sender, address(this), _makerAmount);
@@ -230,15 +230,15 @@ contract DelegateFrontend {
     IERC20(_makerToken).approve(address(swapContract), _makerAmount);
 
     // DelegateFrontend authorizes the Delegate.
-    swapContract.authorize(peerContract, block.timestamp + 1);
+    swapContract.authorize(delegateContract, block.timestamp + 1);
 
     // Consumer provides unsigned order to Delegate.
-    IDelegate(peerContract).provideOrder(Types.Order(
+    IDelegate(delegateContract).provideOrder(Types.Order(
       uint256(keccak256(abi.encodePacked(
         block.timestamp,
         address(this),
         _makerToken,
-        IDelegate(peerContract).tradeWallet(),
+        IDelegate(delegateContract).tradeWallet(),
         _takerToken
       ))),
       block.timestamp + 1,
@@ -249,7 +249,7 @@ contract DelegateFrontend {
         0x277f8169
       ),
       Types.Party(
-        IDelegate(peerContract).tradeWallet(),
+        IDelegate(delegateContract).tradeWallet(),
         _takerToken,
         takerAmount,
         0x277f8169
@@ -259,7 +259,7 @@ contract DelegateFrontend {
     ));
 
     // DelegateFrontend revokes the authorization of the Delegate.
-    swapContract.revoke(peerContract);
+    swapContract.revoke(delegateContract);
 
     // DelegateFrontend transfers received amount to the User.
     IERC20(_takerToken).transfer(msg.sender, takerAmount);

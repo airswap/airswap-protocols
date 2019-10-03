@@ -44,20 +44,20 @@ contract Delegate is IDelegate, Ownable {
 
   /**
     * @notice Contract Constructor
-    * @param _swapContract address of the swap contract the peer will deploy with
-    * @param _peerContractOwner address that should be the owner of the peer
-    * @param _peerTradeWallet the wallet the peer will trade from
+    * @param _swapContract address of the swap contract the delegate will deploy with
+    * @param _delegateContractOwner address that should be the owner of the delegate
+    * @param _peerTradeWallet the wallet the delegate will trade from
     */
   constructor(
     address _swapContract,
-    address _peerContractOwner,
+    address _delegateContractOwner,
     address _peerTradeWallet
   ) public {
     swapContract = ISwap(_swapContract);
 
     // if no peer owner is provided, the deploying address is the owner
-    if (_peerContractOwner != address(0)) {
-      transferOwnership(_peerContractOwner);
+    if (_delegateContractOwner != address(0)) {
+      transferOwnership(_delegateContractOwner);
     }
 
     // if no trade wallet is provided, the owner's wallet is the trade wallet
@@ -72,9 +72,9 @@ contract Delegate is IDelegate, Ownable {
     * @notice Set a Trading Rule
     * @dev only callable by the owner of the contract
     * @dev 1 takerToken = priceCoef * 10^(-priceExp) * makerToken
-    * @param _takerToken address The address of an ERC-20 token the peer would send
+    * @param _takerToken address The address of an ERC-20 token the delegate would send
     * @param _makerToken address The address of an ERC-20 token the consumer would send
-    * @param _maxTakerAmount uint256 The maximum amount of ERC-20 token the peer would send
+    * @param _maxTakerAmount uint256 The maximum amount of ERC-20 token the delegate would send
     * @param _priceCoef uint256 The whole number that will be multiplied by 10^(-priceExp) - the price coefficient
     * @param _priceExp uint256 The exponent of the price to indicate location of the decimal priceCoef * 10^(-priceExp)
     */
@@ -104,7 +104,7 @@ contract Delegate is IDelegate, Ownable {
   /**
     * @notice Unset a Trading Rule
     * @dev only callable by the owner of the contract, removes from a mapping
-    * @param _takerToken address The address of an ERC-20 token the peer would send
+    * @param _takerToken address The address of an ERC-20 token the delegate would send
     * @param _makerToken address The address of an ERC-20 token the consumer would send
     */
   function unsetRule(
@@ -123,8 +123,8 @@ contract Delegate is IDelegate, Ownable {
 
   /**
     * @notice Get a Maker-Side Quote from the Delegate
-    * @param _takerParam uint256 The amount of ERC-20 token the peer would send
-    * @param _takerToken address The address of an ERC-20 token the peer would send
+    * @param _takerParam uint256 The amount of ERC-20 token the delegate would send
+    * @param _takerToken address The address of an ERC-20 token the delegate would send
     * @param _makerToken address The address of an ERC-20 token the consumer would send
     * @return uint256 makerParam The amount of ERC-20 token the consumer would send
     */
@@ -159,8 +159,8 @@ contract Delegate is IDelegate, Ownable {
     * @notice Get a Taker-Side Quote from the Delegate
     * @param _makerParam uint256 The amount of ERC-20 token the consumer would send
     * @param _makerToken address The address of an ERC-20 token the consumer would send
-    * @param _takerToken address The address of an ERC-20 token the peer would send
-    * @return uint256 takerParam The amount of ERC-20 token the peer would send
+    * @param _takerToken address The address of an ERC-20 token the delegate would send
+    * @return uint256 takerParam The amount of ERC-20 token the delegate would send
     */
   function getTakerSideQuote(
     uint256 _makerParam,
@@ -189,9 +189,9 @@ contract Delegate is IDelegate, Ownable {
 
   /**
     * @notice Get a Maximum Quote from the Delegate
-    * @param _takerToken address The address of an ERC-20 token the peer would send
+    * @param _takerToken address The address of an ERC-20 token the delegate would send
     * @param _makerToken address The address of an ERC-20 token the consumer would send
-    * @return uint256 takerParam The amount the peer would send
+    * @return uint256 takerParam The amount the delegate would send
     * @return uint256 makerParam The amount the consumer would send
     */
   function getMaxQuote(
