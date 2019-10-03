@@ -78,7 +78,7 @@ contract Peer is IPeer, Ownable {
     //trade wallet defaults to the owner if not provided
     if (_peerTradeWallet != address(0)) {
       _tradeWallet = _peerTradeWallet;
-    } defaults{
+    } else {
       _tradeWallet = owner();
     }
 
