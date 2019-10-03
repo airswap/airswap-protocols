@@ -1,10 +1,10 @@
-# MakerDelegateManager
+# DelegateManager
 
 **:warning: This package is under active development. Do not use in production.**
 
-[AirSwap](https://www.airswap.io/) is a maker-delegate-to-maker-delegate trading network for Ethereum tokens. This package contains source code and tests for a basic `MakerDelegate` contract that can be deployed with trading rules.
+[AirSwap](https://www.airswap.io/) is a delegate-to-delegate trading network for Ethereum tokens. This package contains source code and tests for a basic `Delegate` contract that can be deployed with trading rules.
 
-:bulb: **Note**: `solidity-coverage` does not cooperate with `view` functions. To run test coverage, remove the `view` keywords from functions in `MakerDelegate.sol` and `IMakerDelegate.sol`.
+:bulb: **Note**: `solidity-coverage` does not cooperate with `view` functions. To run test coverage, remove the `view` keywords from functions in `Delegate.sol` and `IDelegate.sol`.
 
 [![Discord](https://img.shields.io/discord/590643190281928738.svg)](https://discord.gg/ecQbV7H)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)

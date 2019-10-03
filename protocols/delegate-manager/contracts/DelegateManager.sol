@@ -19,53 +19,53 @@ pragma experimental ABIEncoderV2;
 
 import "@airswap/indexer/contracts/interfaces/IIndexer.sol";
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
-import "@airswap/maker-delegate-factory/contracts/interfaces/IMakerDelegateFactory.sol";
-import "@airswap/maker-delegate/contracts/interfaces/IMakerDelegate.sol";
+import "@airswap/delegate-factory/contracts/interfaces/IDelegateFactory.sol";
+import "@airswap/delegate/contracts/interfaces/IDelegate.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "@airswap/types/contracts/Types.sol";
 
-contract MakerDelegateManager is Ownable {
+contract DelegateManager is Ownable {
 
-    event MakerDelegateCreated(address owner, address delegate);
+    event DelegateCreated(address owner, address delegate);
 
-    //keeps track of all the delegates created by a maker
-    mapping(address => address[]) private makerAddressToDelegates;
-    IMakerDelegateFactory public factory;
+    //keeps track of all the delegates created by owner address
+    mapping(address => address[]) private ownerToDelegates;
+    IDelegateFactory public factory;
 
-    constructor(IMakerDelegateFactory _factory) public {
+    constructor(IDelegateFactory _factory) public {
         factory = _factory;
     }
 
-    function createMakerDelegate(ISwap _swapContract) external returns (IMakerDelegate) {
+    function createDelegate(ISwap _swapContract) external returns (IDelegate) {
       require(address(_swapContract) != address(0), "SWAP_ADDRESS_REQUIRED");
-      IMakerDelegate makerDelegate = IMakerDelegate(factory.createMakerDelegate(address(_swapContract), msg.sender));
-      //NOTE: MakerDelegateManager does not have access to the created MakerDelegate by default
-      makerAddressToDelegates[msg.sender].push(address(makerDelegate));
-      emit MakerDelegateCreated(msg.sender, address(makerDelegate));
-      return makerDelegate;
+      IDelegate delegate = IDelegate(factory.createDelegate(address(_swapContract), msg.sender, address(0)));
+      //NOTE: DelegateManager does not have access to the created Delegate by default
+      ownerToDelegates[msg.sender].push(address(delegate));
+      emit DelegateCreated(msg.sender, address(delegate));
+      return delegate;
     }
 
-    function getMakerAddressToDelegates(address _maker) external returns (address[] memory) {
-      uint256 length = makerAddressToDelegates[_maker].length;
+    function getOwnerAddressToDelegates(address _owner) external returns (address[] memory) {
+      uint256 length = ownerToDelegates[_owner].length;
       address[] memory delegates = new address[](length);
       for(uint i = 0; i < length; i++) {
-        delegates[i] = makerAddressToDelegates[_maker][i];
-      } 
+        delegates[i] = ownerToDelegates[_owner][i];
+      }
       return delegates;
-    } 
+    }
 
-    function setRuleAndIntent(IMakerDelegate _makerDelegate) external {
-      //IMakerDelegate makerDelegate = IMakerDelegate(address(_makerDelegate));
-      //makerDelegate.setRule();
+    function setRuleAndIntent(IDelegate _delegate) external {
+      //IDelegate delegate = IDelegate(address(_delegate));
+      //delegate.setRule();
       //indexer.setIntent();
 
       // created delegate needs the manager to be whitelisted in order to act with it.
       // owner first needs to call addToWhiteList and provide manager's address before interacting with this method
     }
 
-    function unsetRuleAndIntent(IMakerDelegate _makerDelegate) external {
-      //IMakerDelegate makerDelegate = IMakerDelegate(address(_makerDelegate));
-      //makerDelegate.unsetRule();
+    function unsetRuleAndIntent(IDelegate _delegate) external {
+      //IDelegate delegate = IDelegate(address(_delegate));
+      //delegate.unsetRule();
       //indexer.unsetIntent();
 
       // created delegate needs the manager to be whitelisted in order to act with it.

@@ -1,5 +1,5 @@
-const MakerDelegateManager = artifacts.require('MakerDelegateManager')
-const MakerDelegateFactory = artifacts.require('MakerDelegateFactory')
+const DelegateManager = artifacts.require('DelegateManager')
+const DelegateFactory = artifacts.require('DelegateFactory')
 const MockContract = artifacts.require('MockContract')
 const {
   equal,
@@ -12,12 +12,12 @@ const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 const { orders } = require('@airswap/order-utils')
 
-contract('MakerDelegateManager Unit Tests', async (accounts) => {
+contract('DelegateManager Unit Tests', async (accounts) => {
   let owner = accounts[0];
   let generatedDelegate = accounts[1];
-  let makerDelegateManager;
+  let delegateManager;
   let mockFactory;
-  let mockSwap; 
+  let mockSwap;
 
   beforeEach(async () => {
     let snapShot = await takeSnapshot()
@@ -30,53 +30,53 @@ contract('MakerDelegateManager Unit Tests', async (accounts) => {
 
   async function setupMockFactory() {
     mockFactory = await MockContract.new()
-    mockFactoryTemplate = await MakerDelegateFactory.new()
+    mockFactoryTemplate = await DelegateFactory.new()
 
-    // mock createMakerDelegate()
-    let mockFactory_createMakerDelegate =
-      mockFactoryTemplate.contract.methods.createMakerDelegate(EMPTY_ADDRESS, EMPTY_ADDRESS).encodeABI();
-    await mockFactory.givenMethodReturnAddress(mockFactory_createMakerDelegate, generatedDelegate)
+    // mock createDelegate()
+    let mockFactory_createDelegate =
+      mockFactoryTemplate.contract.methods.createDelegate(EMPTY_ADDRESS, EMPTY_ADDRESS).encodeABI();
+    await mockFactory.givenMethodReturnAddress(mockFactory_createDelegate, generatedDelegate)
   }
 
   before(async () => {
     await setupMockFactory();
 
-    makerDelegateManager = await MakerDelegateManager.new(mockFactory.address)
+    delegateManager = await DelegateManager.new(mockFactory.address)
     mockSwap = await MockContract.new()
   })
 
   describe('Test initial values', async () => {
     it('Test mockFactory', async () => {
-      let val = await makerDelegateManager.factory.call()
+      let val = await delegateManager.factory.call()
       equal(val, mockFactory.address, "mockFactory was not properly set")
     })
   })
 
-  describe('Test createMakerDelegate', async () => {
+  describe('Test createDelegate', async () => {
     it("Test when empty address is given", async() => {
-      await reverted(makerDelegateManager.createMakerDelegate.call(EMPTY_ADDRESS), "SWAP_ADDRESS_REQUIRED");
+      await reverted(delegateManager.createDelegate.call(EMPTY_ADDRESS), "SWAP_ADDRESS_REQUIRED");
     })
 
     it("Test when a delegate is returned", async() => {
-      let val = await makerDelegateManager.createMakerDelegate.call(mockSwap.address);
-      equal(val, generatedDelegate, "no maker delegate was created")
+      let val = await delegateManager.createDelegate.call(mockSwap.address);
+      equal(val, generatedDelegate, "no delegate was created")
     })
 
     it("Test when a delegate is added to owner to delegate list mapping", async() => {
       //add generate two delegates
-      await makerDelegateManager.createMakerDelegate(mockSwap.address);
-      await makerDelegateManager.createMakerDelegate(mockSwap.address);
+      await delegateManager.createDelegate(mockSwap.address);
+      await delegateManager.createDelegate(mockSwap.address);
 
       //retrieve the list
-      let val = await makerDelegateManager.getMakerAddressToDelegates.call(owner);
+      let val = await delegateManager.getOwnerAddressToDelegates.call(owner);
       equal(val.length, 2, "there are too many items in the returned list");
       equal(val[0], generatedDelegate, "there was an issue creating the delegate");
       equal(val[1], generatedDelegate, "there was an issue creating the delegate");
     })
 
     it("Test when a create delegate event is emitted", async() => {
-      let trx = await makerDelegateManager.createMakerDelegate(mockSwap.address);
-      emitted(trx, "MakerDelegateCreated", (e) => {
+      let trx = await delegateManager.createDelegate(mockSwap.address);
+      emitted(trx, "DelegateCreated", (e) => {
         return e.owner === owner && e.delegate == generatedDelegate;
       })
     })

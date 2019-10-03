@@ -1,5 +1,5 @@
 {
-  "name": "@airswap/maker-delegate-manager",
+  "name": "@airswap/delegate-manager",
   "version": "0.3.0",
   "description": "Manages delegated trading rules for use in the Swap Protocol",
   "license": "Apache-2.0",
