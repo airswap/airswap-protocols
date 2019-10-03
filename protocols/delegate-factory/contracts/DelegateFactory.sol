@@ -23,16 +23,27 @@ import "@airswap/delegate-factory/contracts/interfaces/IDelegateFactory.sol";
 contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
 
   mapping(address => bool) internal deployedAddresses;
+  address public swapContract;
+
+  /**
+    * @dev swapContract is unable to be changed after the factory sets it
+    * @param _swapContract address of the swap contract the delegate will deploy with
+    */
+  constructor(address _swapContract) public {
+    // Ensure a swap contract is provided.
+    require(_swapContract != address(0),
+      'SWAP_CONTRACT_REQUIRED');
+
+    swapContract = _swapContract;
+  }
 
   /**
     * @notice Create a new Delegate contract
-    * @param _swapContract address of the swap contract the delegate will deploy with
     * @param _delegateContractOwner address that should be the owner of the delegate
     * @param _delegateTradeWallet the wallet the delegate will trade from
     * @return delegateContractAddress address address of the delegate contract created
     */
   function createDelegate(
-    address _swapContract,
     address _delegateContractOwner,
     address _delegateTradeWallet
   ) external returns (address delegateContractAddress) {
@@ -41,14 +52,10 @@ contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
     require(_delegateContractOwner != address(0),
       'DELEGATE_CONTRACT_OWNER_REQUIRED');
 
-    // Ensure a swap contract is provided.
-    require(_swapContract != address(0),
-      'SWAP_CONTRACT_REQUIRED');
-
-    delegateContractAddress = address(new Delegate(_swapContract, _delegateContractOwner, _delegateTradeWallet));
+    delegateContractAddress = address(new Delegate(swapContract, _delegateContractOwner, _delegateTradeWallet));
     deployedAddresses[delegateContractAddress] = true;
 
-    emit CreateDelegate(delegateContractAddress, _swapContract, _delegateContractOwner, _delegateTradeWallet);
+    emit CreateDelegate(delegateContractAddress, swapContract, _delegateContractOwner, _delegateTradeWallet);
 
     return delegateContractAddress;
   }

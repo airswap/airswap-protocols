@@ -11,8 +11,7 @@ const {
 const { padAddressToLocator } = require('@airswap/test-utils').padding
 
 contract('Delegate Factory Tests', async accounts => {
-  const swapContractOne = accounts[1]
-  const swapContractTwo = accounts[2]
+  const swapContract = accounts[1]
   const delegateOwnerOne = accounts[3]
   const delegateOwnerTwo = accounts[4]
   const tradeWalletOne = accounts[5]
@@ -32,14 +31,24 @@ contract('Delegate Factory Tests', async accounts => {
   })
 
   before('Deploy Delegate Factory', async () => {
-    delegateFactory = await DelegateFactory.new()
+    delegateFactory = await DelegateFactory.new(swapContract)
+  })
+
+  describe('Test deploying factory', async () => {
+    it('should have set swapContract', async () => {
+      let val = await delegateFactory.swapContract.call();
+      equal(val, swapContract, "swap contract was not successfully set on deployment")
+    })
+
+    it('should not deploy a factory with swap address 0x0', async () => {
+      await reverted(DelegateFactory.new(EMPTY_ADDRESS), 'SWAP_CONTRACT_REQUIRED')
+    })
   })
 
   describe('Test deploying delegates', async () => {
     it('should not deploy a delegate with owner address 0x0', async () => {
       await reverted(
         delegateFactory.createDelegate(
-          swapContractOne,
           EMPTY_ADDRESS,
           tradeWalletOne
         ),
@@ -47,21 +56,9 @@ contract('Delegate Factory Tests', async accounts => {
       )
     })
 
-    it('should not deploy a delegate with swap address 0x0', async () => {
-      await reverted(
-        delegateFactory.createDelegate(
-          EMPTY_ADDRESS,
-          delegateOwnerOne,
-          tradeWalletOne
-        ),
-        'SWAP_CONTRACT_REQUIRED'
-      )
-    })
-
     it('should emit event and update the mapping', async () => {
       // successful tx
       let tx = await delegateFactory.createDelegate(
-        swapContractOne,
         delegateOwnerOne,
         tradeWalletOne
       )
@@ -73,7 +70,7 @@ contract('Delegate Factory Tests', async accounts => {
       emitted(tx, 'CreateDelegate', event => {
         delegateAddress = event.delegateContract
         return (
-          event.swapContract === swapContractOne &&
+          event.swapContract === swapContract &&
           event.delegateContractOwner === delegateOwnerOne &&
           event.delegateTradeWallet === tradeWalletOne
         )
@@ -91,7 +88,6 @@ contract('Delegate Factory Tests', async accounts => {
     it('should create delegate with the correct values', async () => {
       // deploy delegate
       let tx = await delegateFactory.createDelegate(
-        swapContractTwo,
         delegateOwnerTwo,
         tradeWalletTwo
       )
@@ -101,7 +97,7 @@ contract('Delegate Factory Tests', async accounts => {
       emitted(tx, 'CreateDelegate', event => {
         delegateAddress = event.delegateContract
         return (
-          event.swapContract === swapContractTwo &&
+          event.swapContract === swapContract &&
           event.delegateContractOwner === delegateOwnerTwo &&
           event.delegateTradeWallet === tradeWalletTwo
         )
@@ -120,7 +116,7 @@ contract('Delegate Factory Tests', async accounts => {
       let actualTradeWallet = await delegate.tradeWallet.call()
 
       // check that the addresses are equal
-      equal(swapContractTwo, actualSwap, 'Delegate has incorrect swap address')
+      equal(swapContract, actualSwap, 'Delegate has incorrect swap address')
       equal(
         delegateOwnerTwo,
         actualOwner,
