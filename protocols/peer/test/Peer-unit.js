@@ -47,7 +47,7 @@ contract('Peer Unit Tests', async accounts => {
 
   before('deploy Peer', async () => {
     await setupMockSwap()
-    peer = await Peer.new(mockSwap.address, owner)
+    peer = await Peer.new(mockSwap.address, EMPTY_ADDRESS, { from: owner })
   })
 
   describe('Test initial values', async () => {
@@ -56,16 +56,8 @@ contract('Peer Unit Tests', async accounts => {
       equal(val, mockSwap.address, 'swap address is incorrect')
     })
 
-    it('Test owner is set correctly', async () => {
+    it('Test owner is set correctly having been provided an empty address', async () => {
       let val = await peer.owner.call()
-      equal(val, owner, 'owner is incorrect - should be owner')
-    })
-
-    it('Test owner if provided the empty address', async () => {
-      let newPeer = await Peer.new(mockSwap.address, EMPTY_ADDRESS, {
-        from: owner,
-      })
-      let val = await newPeer.owner.call()
       equal(val, owner, 'owner is incorrect - should be owner')
     })
 
