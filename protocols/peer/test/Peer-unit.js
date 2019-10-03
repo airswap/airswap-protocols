@@ -145,11 +145,7 @@ contract('Peer Unit Tests', async accounts => {
     it('Test unsetRule permissions as not owner', async () => {
       //not owner is not apart of admin and should fail
       await reverted(
-        peer.unsetRule(
-          TAKER_TOKEN,
-          MAKER_TOKEN,
-          { from: notOwner },
-        ),
+        peer.unsetRule(TAKER_TOKEN, MAKER_TOKEN, { from: notOwner }),
         'CALLER_NOT_ADMIN'
       )
     })
