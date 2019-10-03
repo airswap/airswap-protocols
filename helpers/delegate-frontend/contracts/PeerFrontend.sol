@@ -19,7 +19,7 @@ pragma experimental ABIEncoderV2;
 
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "@airswap/indexer/contracts/interfaces/IIndexer.sol";
-import "@airswap/peer/contracts/interfaces/IDelegate.sol";
+import "@airswap/delegate/contracts/interfaces/IDelegate.sol";
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
 
 /**

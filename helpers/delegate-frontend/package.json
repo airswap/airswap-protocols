@@ -1,5 +1,5 @@
 {
-  "name": "@airswap/peer-frontend",
+  "name": "@airswap/delegate-frontend",
   "version": "0.1.0",
   "description": "Example integration of Swap, Indexer, and Delegate contracts",
   "license": "Apache-2.0",
