@@ -70,19 +70,13 @@ contract Peer is IPeer, Ownable {
   ) public {
     swapContract = ISwap(_swapContract);
 
-    //owner defaults to msg.sender if not provided
+<<<<<<< HEAD
+    //owner defaults to msg.sender if _peerContractOwner is not provided
     if (_peerContractOwner != address(0)){
       super.transferOwnership(_peerContractOwner);
     }
 
-    //trade wallet defaults to the owner if not provided
-    if (_peerTradeWallet != address(0)) {
-      _tradeWallet = _peerTradeWallet;
-    } defaults{
-      _tradeWallet = owner();
-    }
-
-    //owner must always be added to the whitelist
+    //owner, whether provided or not must always be added to the whitelist
     admins[owner()] = true;
   }
 
@@ -125,6 +119,19 @@ contract Peer is IPeer, Ownable {
     admins[_newOwner] = true;
     admins[owner()] = false;
     super.transferOwnership(_newOwner);
+=======
+    // if no peer owner is provided, the deploying address is the owner
+    if (_peerContractOwner != address(0)) {
+      transferOwnership(_peerContractOwner);
+    }
+
+    // if no trade wallet is provided, the owner's wallet is the trade wallet
+    if (_peerTradeWallet != address(0)) {
+      _tradeWallet = _peerTradeWallet;
+    } else {
+      _tradeWallet = owner();
+    }
+>>>>>>> master
   }
 
   /**
