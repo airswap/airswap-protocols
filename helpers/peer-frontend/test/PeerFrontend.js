@@ -1,7 +1,7 @@
 const Swap = artifacts.require('Swap')
-const PeerFrontend = artifacts.require('PeerFrontend')
+const DelegateFrontend = artifacts.require('DelegateFrontend')
 const Indexer = artifacts.require('Indexer')
-const Peer = artifacts.require('Peer')
+const Delegate = artifacts.require('Delegate')
 const FungibleToken = artifacts.require('FungibleToken')
 const Types = artifacts.require('Types')
 var BigNumber = require('bn.js')
@@ -23,7 +23,7 @@ let swapContract
 let indexerAddress
 let peerfrontendAddress
 let swapAddress
-let alicePeer
+let aliceDelegate
 
 let tokenAST
 let tokenDAI
@@ -31,7 +31,7 @@ let tokenWETH
 
 let snapshotId
 
-contract('PeerFrontend', async accounts => {
+contract('DelegateFrontend', async accounts => {
   let ownerAddress = accounts[0]
   let aliceAddress = accounts[1]
   let bobAddress = accounts[2]
@@ -62,11 +62,11 @@ contract('PeerFrontend', async accounts => {
       })
 
       indexerAddress = indexer.address
-      peerfrontend = await PeerFrontend.new(indexerAddress, swapAddress, {
+      peerfrontend = await DelegateFrontend.new(indexerAddress, swapAddress, {
         from: ownerAddress,
       })
       peerfrontendAddress = peerfrontend.address
-      alicePeer = await Peer.new(swapAddress, EMPTY_ADDRESS, EMPTY_ADDRESS, {
+      aliceDelegate = await Delegate.new(swapAddress, EMPTY_ADDRESS, EMPTY_ADDRESS, {
         from: aliceAddress,
       })
     })
@@ -74,7 +74,7 @@ contract('PeerFrontend', async accounts => {
     it('Alice authorizes the new peer', async () => {
       emitted(
         await swapContract.authorize(
-          alicePeer.address,
+          aliceDelegate.address,
           await getTimestampPlusDays(1),
           { from: aliceAddress }
         ),
@@ -113,7 +113,7 @@ contract('PeerFrontend', async accounts => {
           tokenDAI.address,
           tokenWETH.address,
           500,
-          alicePeer.address,
+          aliceDelegate.address,
           {
             from: aliceAddress,
           }
@@ -123,7 +123,7 @@ contract('PeerFrontend', async accounts => {
     })
   })
 
-  describe('PeerFrontend - fills for non-existent quotes', async () => {
+  describe('DelegateFrontend - fills for non-existent quotes', async () => {
     it('Finds best price to buy 100 AST for DAI - reverts ', async () => {
       await reverted(
         peerfrontend.fillBestMakerSideOrder.call(
@@ -152,7 +152,7 @@ contract('PeerFrontend', async accounts => {
   describe('Alice adds some peer rules', async () => {
     it('Adds a rule to send up to 150 WETH for DAI at 309.52 DAI/WETH', async () => {
       emitted(
-        await alicePeer.setRule(
+        await aliceDelegate.setRule(
           tokenWETH.address,
           tokenDAI.address,
           150,
@@ -164,8 +164,8 @@ contract('PeerFrontend', async accounts => {
       )
     })
 
-    it('Checks the Peer maximum', async () => {
-      const quote = await alicePeer.getMaxQuote.call(
+    it('Checks the Delegate maximum', async () => {
+      const quote = await aliceDelegate.getMaxQuote.call(
         tokenWETH.address,
         tokenDAI.address
       )
@@ -174,14 +174,14 @@ contract('PeerFrontend', async accounts => {
     })
   })
 
-  describe('PeerFrontend - TakerSide', async () => {
+  describe('DelegateFrontend - TakerSide', async () => {
     it('Get the intent', async () => {
       const result = await indexer.getIntents.call(
         tokenDAI.address,
         tokenWETH.address,
         5
       )
-      equal(result[0], padAddressToLocator(alicePeer.address))
+      equal(result[0], padAddressToLocator(aliceDelegate.address))
     })
 
     it('Finds best price to buy 1 WETH for DAI', async () => {
@@ -191,7 +191,7 @@ contract('PeerFrontend', async accounts => {
         tokenDAI.address,
         5
       )
-      equal(quote[0], padAddressToLocator(alicePeer.address))
+      equal(quote[0], padAddressToLocator(aliceDelegate.address))
       equal(quote[1].toNumber(), 30952)
     })
 
@@ -210,7 +210,7 @@ contract('PeerFrontend', async accounts => {
     })
 
     it('Takes best price (Alice peer) - TakerSide', async () => {
-      // Alice peer gets some WETH to trade through the Peer
+      // Alice peer gets some WETH to trade through the Delegate
       await tokenWETH.mint(aliceAddress, 200)
 
       // Alice approves Swap contract to transfer her WETH
@@ -222,7 +222,7 @@ contract('PeerFrontend', async accounts => {
       // Carol gets some DAI to use to buy some WETH
       await tokenDAI.mint(carolAddress, 50000)
 
-      // Carol approves the PeerFrontend to transfer her DAI
+      // Carol approves the DelegateFrontend to transfer her DAI
       emitted(
         await tokenDAI.approve(peerfrontendAddress, 50000, {
           from: carolAddress,
@@ -246,8 +246,8 @@ contract('PeerFrontend', async accounts => {
       ok(await balances(carolAddress, [[tokenWETH, 100], [tokenDAI, 19048]]))
     })
 
-    it('Checks the new Peer maximum', async () => {
-      const result = await alicePeer.getMaxQuote.call(
+    it('Checks the new Delegate maximum', async () => {
+      const result = await aliceDelegate.getMaxQuote.call(
         tokenWETH.address,
         tokenDAI.address
       )
@@ -256,7 +256,7 @@ contract('PeerFrontend', async accounts => {
     })
   })
 
-  describe('PeerFrontend - MakerSide', async () => {
+  describe('DelegateFrontend - MakerSide', async () => {
     it('Finds best price to buy 309 DAI for WETH', async () => {
       const quote = await peerfrontend.getBestMakerSideQuote.call(
         15476,
@@ -265,7 +265,7 @@ contract('PeerFrontend', async accounts => {
         5
       )
 
-      equal(quote[0], padAddressToLocator(alicePeer.address))
+      equal(quote[0], padAddressToLocator(aliceDelegate.address))
       equal(quote[1].toNumber(), 50)
     })
 
@@ -287,8 +287,8 @@ contract('PeerFrontend', async accounts => {
       ok(await balances(carolAddress, [[tokenWETH, 150]]))
     })
 
-    it('Checks the new Peer maximum', async () => {
-      const result = await alicePeer.getMaxQuote.call(
+    it('Checks the new Delegate maximum', async () => {
+      const result = await aliceDelegate.getMaxQuote.call(
         tokenWETH.address,
         tokenDAI.address
       )

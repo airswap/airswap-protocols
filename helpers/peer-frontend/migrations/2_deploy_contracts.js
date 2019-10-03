@@ -1,4 +1,4 @@
-const PeerFrontend = artifacts.require('PeerFrontend')
+const DelegateFrontend = artifacts.require('DelegateFrontend')
 const Indexer = artifacts.require('@airswap/indexer/contracts/Indexer.sol')
 const FungibleToken = artifacts.require(
   '@airswap/tokens/contracts/FungibleToken.sol'
@@ -15,5 +15,5 @@ module.exports = deployer => {
     .deploy(FungibleToken)
     .then(() => FungibleToken.deployed())
     .then(() => deployer.deploy(Indexer, FungibleToken.address, EMPTY_ADDRESS))
-    .then(() => deployer.deploy(PeerFrontend, Swap.address, Indexer.address))
+    .then(() => deployer.deploy(DelegateFrontend, Swap.address, Indexer.address))
 }

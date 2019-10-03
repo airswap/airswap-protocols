@@ -21,10 +21,10 @@
 | Package                                            | Version                                                                                                           | Description                         |
 | :------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------- | :---------------------------------- |
 | [`@airswap/swap`](/protocols/swap)                 | [![npm](https://img.shields.io/npm/v/@airswap/swap)](https://www.npmjs.com/package/@airswap/swap)                 | Atomic Swap                         |
-| [`@airswap/indexer`](/protocols/indexer)           | [![npm](https://img.shields.io/npm/v/@airswap/indexer)](https://www.npmjs.com/package/@airswap/indexer)           | Onchain Peer Discovery with Staking |
-| [`@airswap/index`](/protocols/index)               | [![npm](https://img.shields.io/npm/v/@airswap/index)](https://www.npmjs.com/package/@airswap/index)               | Ordered List of Peer Signals        |
-| [`@airswap/peer`](/protocols/peer)                 | [![npm](https://img.shields.io/npm/v/@airswap/peer)](https://www.npmjs.com/package/@airswap/peer)                 | Onchain Peer with Rules             |
-| [`@airswap/peer-factory`](/protocols/peer-factory) | [![npm](https://img.shields.io/npm/v/@airswap/peer-factory)](https://www.npmjs.com/package/@airswap/peer-factory) | Deploys Peer Contracts              |
+| [`@airswap/indexer`](/protocols/indexer)           | [![npm](https://img.shields.io/npm/v/@airswap/indexer)](https://www.npmjs.com/package/@airswap/indexer)           | Onchain Delegate Discovery with Staking |
+| [`@airswap/index`](/protocols/index)               | [![npm](https://img.shields.io/npm/v/@airswap/index)](https://www.npmjs.com/package/@airswap/index)               | Ordered List of Delegate Signals        |
+| [`@airswap/peer`](/protocols/peer)                 | [![npm](https://img.shields.io/npm/v/@airswap/peer)](https://www.npmjs.com/package/@airswap/peer)                 | Onchain Delegate with Rules             |
+| [`@airswap/peer-factory`](/protocols/peer-factory) | [![npm](https://img.shields.io/npm/v/@airswap/peer-factory)](https://www.npmjs.com/package/@airswap/peer-factory) | Deploys Delegate Contracts              |
 | [`@airswap/types`](/protocols/types)               | [![npm](https://img.shields.io/npm/v/@airswap/types)](https://www.npmjs.com/package/@airswap/types)               | Types and Hashes                    |
 | [`@airswap/wrapper`](/helpers/wrapper)             | [![npm](https://img.shields.io/npm/v/@airswap/wrapper)](https://www.npmjs.com/package/@airswap/wrapper)           | Use ether for WETH trades           |
 | [`@airswap/tokens`](/helpers/tokens)               | [![npm](https://img.shields.io/npm/v/@airswap/tokens)](https://www.npmjs.com/package/@airswap/tokens)             | Ethereum Tokens                     |

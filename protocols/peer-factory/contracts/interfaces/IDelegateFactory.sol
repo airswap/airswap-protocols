@@ -16,9 +16,9 @@
 
 pragma solidity 0.5.10;
 
-interface IPeerFactory {
+interface IDelegateFactory {
 
-  event CreatePeer(address indexed peerContract, address swapContract, address indexed peerContractOwner, address peerTradeWallet);
+  event CreateDelegate(address indexed peerContract, address swapContract, address indexed peerContractOwner, address peerTradeWallet);
 
   /**
     * @notice Deploy a trusted peer contract
@@ -27,7 +27,7 @@ interface IPeerFactory {
     * @param _peerTradeWallet the wallet the peer will trade from
     * @return peerContractAddress address of the peer contract created
     */
-  function createPeer(
+  function createDelegate(
     address _swapContract,
     address _peerContractOwner,
     address _peerTradeWallet

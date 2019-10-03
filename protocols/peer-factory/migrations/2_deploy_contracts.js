@@ -1,5 +1,5 @@
-const PeerFactory = artifacts.require('PeerFactory')
+const DelegateFactory = artifacts.require('DelegateFactory')
 
 module.exports = deployer => {
-  deployer.deploy(PeerFactory)
+  deployer.deploy(DelegateFactory)
 }

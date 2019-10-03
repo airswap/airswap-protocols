@@ -38,7 +38,7 @@ contract Index is Ownable {
   mapping(address => mapping(byte => Locator)) private locatorsLinkedList;
 
   /**
-    * @notice Locator for a Peer
+    * @notice Locator for a Delegate
     * @dev data is arbitrary e.g. may include an address
     *
     * @param user address

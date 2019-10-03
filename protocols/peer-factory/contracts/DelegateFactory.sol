@@ -16,22 +16,22 @@
 
 pragma solidity 0.5.10;
 
-import "@airswap/peer/contracts/Peer.sol";
+import "@airswap/peer/contracts/Delegate.sol";
 import "@airswap/indexer/contracts/interfaces/ILocatorWhitelist.sol";
-import "@airswap/peer-factory/contracts/interfaces/IPeerFactory.sol";
+import "@airswap/peer-factory/contracts/interfaces/IDelegateFactory.sol";
 
-contract PeerFactory is IPeerFactory, ILocatorWhitelist {
+contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
 
   mapping(address => bool) internal deployedAddresses;
 
   /**
-    * @notice Create a new Peer contract
+    * @notice Create a new Delegate contract
     * @param _swapContract address of the swap contract the peer will deploy with
     * @param _peerContractOwner address that should be the owner of the peer
     * @param _peerTradeWallet the wallet the peer will trade from
     * @return peerContractAddress address address of the peer contract created
     */
-  function createPeer(
+  function createDelegate(
     address _swapContract,
     address _peerContractOwner,
     address _peerTradeWallet
@@ -45,10 +45,10 @@ contract PeerFactory is IPeerFactory, ILocatorWhitelist {
     require(_swapContract != address(0),
       'SWAP_CONTRACT_REQUIRED');
 
-    peerContractAddress = address(new Peer(_swapContract, _peerContractOwner, _peerTradeWallet));
+    peerContractAddress = address(new Delegate(_swapContract, _peerContractOwner, _peerTradeWallet));
     deployedAddresses[peerContractAddress] = true;
 
-    emit CreatePeer(peerContractAddress, _swapContract, _peerContractOwner, _peerTradeWallet);
+    emit CreateDelegate(peerContractAddress, _swapContract, _peerContractOwner, _peerTradeWallet);
 
     return peerContractAddress;
   }

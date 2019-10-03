@@ -1,10 +1,10 @@
-# PeerFactory
+# DelegateFactory
 
 **:warning: This package is under active development. Do not use in production.**
 
-[AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens. This package contains source code and tests for a basic `PeerFactory` contract that deploys `Peer` contracts.
+[AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens. This package contains source code and tests for a basic `DelegateFactory` contract that deploys `Delegate` contracts.
 
-:bulb: **Note**: `solidity-coverage` does not cooperate with `view` functions. To run test coverage, remove the `view` keywords from functions in `PeerFactory.sol`.
+:bulb: **Note**: `solidity-coverage` does not cooperate with `view` functions. To run test coverage, remove the `view` keywords from functions in `DelegateFactory.sol`.
 
 [![Discord](https://img.shields.io/discord/590643190281928738.svg)](https://discord.gg/ecQbV7H)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
@@ -22,7 +22,7 @@
 
 | Contract    | Version | Network | Address                                                                                                                         |
 | :---------- | :------ | :------ | :------------------------------------------------------------------------------------------------------------------------------ |
-| PeerFactory | `0.1.0` | Rinkeby | [`0x53d47a69A506Ceb97D5cafD93bab76bfFBA0B055`](https://rinkeby.etherscan.io/address/0x53d47a69A506Ceb97D5cafD93bab76bfFBA0B055) |
+| DelegateFactory | `0.1.0` | Rinkeby | [`0x53d47a69A506Ceb97D5cafD93bab76bfFBA0B055`](https://rinkeby.etherscan.io/address/0x53d47a69A506Ceb97D5cafD93bab76bfFBA0B055) |
 
 ## Commands
 

@@ -17,17 +17,17 @@
 pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
-import "@airswap/peer/contracts/interfaces/IPeer.sol";
+import "@airswap/peer/contracts/interfaces/IDelegate.sol";
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 /**
-  * @title Peer: Deployable Trading Rules for the Swap Protocol
+  * @title Delegate: Deployable Trading Rules for the Swap Protocol
   * @notice Supports fungible tokens (ERC-20)
-  * @dev inherits IPeer, Ownable uses SafeMath library
+  * @dev inherits IDelegate, Ownable uses SafeMath library
   */
-contract Peer is IPeer, Ownable {
+contract Delegate is IDelegate, Ownable {
   using SafeMath for uint256;
 
   // Swap contract to be used to settle trades
@@ -122,7 +122,7 @@ contract Peer is IPeer, Ownable {
   }
 
   /**
-    * @notice Get a Maker-Side Quote from the Peer
+    * @notice Get a Maker-Side Quote from the Delegate
     * @param _takerParam uint256 The amount of ERC-20 token the peer would send
     * @param _takerToken address The address of an ERC-20 token the peer would send
     * @param _makerToken address The address of an ERC-20 token the consumer would send
@@ -156,7 +156,7 @@ contract Peer is IPeer, Ownable {
   }
 
   /**
-    * @notice Get a Taker-Side Quote from the Peer
+    * @notice Get a Taker-Side Quote from the Delegate
     * @param _makerParam uint256 The amount of ERC-20 token the consumer would send
     * @param _makerToken address The address of an ERC-20 token the consumer would send
     * @param _takerToken address The address of an ERC-20 token the peer would send
@@ -188,7 +188,7 @@ contract Peer is IPeer, Ownable {
   }
 
   /**
-    * @notice Get a Maximum Quote from the Peer
+    * @notice Get a Maximum Quote from the Delegate
     * @param _takerToken address The address of an ERC-20 token the peer would send
     * @param _makerToken address The address of an ERC-20 token the consumer would send
     * @return uint256 takerParam The amount the peer would send

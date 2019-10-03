@@ -1,6 +1,6 @@
-const PeerFrontend = artifacts.require('PeerFrontend')
+const DelegateFrontend = artifacts.require('DelegateFrontend')
 const Indexer = artifacts.require('Indexer')
-const Peer = artifacts.require('Peer')
+const Delegate = artifacts.require('Delegate')
 const MockContract = artifacts.require('MockContract')
 const abi = require('ethereumjs-abi')
 const { equal, passes } = require('@airswap/test-utils').assert
@@ -10,17 +10,17 @@ const BigNumber = require('bignumber.js')
 const { padAddressToLocator } = require('@airswap/test-utils').padding
 const { orders } = require('@airswap/order-utils')
 
-contract('PeerFrontend Unit Tests', async () => {
+contract('DelegateFrontend Unit Tests', async () => {
   const highVal = 400
   const lowVal = 200
   const maxUint = new BigNumber('1.1579209e+77')
   const minUint = new BigNumber('0.0000000')
 
   let snapshotId
-  let mockPeerHigh
-  let mockPeerHighLocator
-  let mockPeerLow
-  let mockPeerLowLocator
+  let mockDelegateHigh
+  let mockDelegateHighLocator
+  let mockDelegateLow
+  let mockDelegateLowLocator
   let mockSwap
   let mockIndexer
   let peerFrontend
@@ -39,42 +39,42 @@ contract('PeerFrontend Unit Tests', async () => {
     await revertToSnapShot(snapshotId)
   })
 
-  async function setupMockPeerFrontend() {
-    let peerTemplate = await Peer.new(
+  async function setupMockDelegateFrontend() {
+    let peerTemplate = await Delegate.new(
       EMPTY_ADDRESS,
       EMPTY_ADDRESS,
       EMPTY_ADDRESS
     )
-    mockPeerHigh = await MockContract.new()
-    mockPeerHighLocator = padAddressToLocator(mockPeerHigh.address)
-    mockPeerLow = await MockContract.new()
-    mockPeerLowLocator = padAddressToLocator(mockPeerLow.address)
+    mockDelegateHigh = await MockContract.new()
+    mockDelegateHighLocator = padAddressToLocator(mockDelegateHigh.address)
+    mockDelegateLow = await MockContract.new()
+    mockDelegateLowLocator = padAddressToLocator(mockDelegateLow.address)
 
     //mock peer getMakerSideQuote()
     let peer_getMakerSideQuote = peerTemplate.contract.methods
       .getMakerSideQuote(0, EMPTY_ADDRESS, EMPTY_ADDRESS)
       .encodeABI()
-    await mockPeerHigh.givenMethodReturnUint(peer_getMakerSideQuote, highVal)
-    await mockPeerLow.givenMethodReturnUint(peer_getMakerSideQuote, lowVal)
+    await mockDelegateHigh.givenMethodReturnUint(peer_getMakerSideQuote, highVal)
+    await mockDelegateLow.givenMethodReturnUint(peer_getMakerSideQuote, lowVal)
 
     //mock peer getMakerSideQuote()
     let peer_getTakerSideQuote = peerTemplate.contract.methods
       .getTakerSideQuote(0, EMPTY_ADDRESS, EMPTY_ADDRESS)
       .encodeABI()
-    await mockPeerHigh.givenMethodReturnUint(peer_getTakerSideQuote, highVal)
-    await mockPeerLow.givenMethodReturnUint(peer_getTakerSideQuote, lowVal)
+    await mockDelegateHigh.givenMethodReturnUint(peer_getTakerSideQuote, highVal)
+    await mockDelegateLow.givenMethodReturnUint(peer_getTakerSideQuote, lowVal)
 
     // mock peer has owner()
     let peer_owner = peerTemplate.contract.methods.owner().encodeABI()
-    await mockPeerHigh.givenMethodReturnAddress(peer_owner, EMPTY_ADDRESS)
-    await mockPeerLow.givenMethodReturnAddress(peer_owner, EMPTY_ADDRESS)
+    await mockDelegateHigh.givenMethodReturnAddress(peer_owner, EMPTY_ADDRESS)
+    await mockDelegateLow.givenMethodReturnAddress(peer_owner, EMPTY_ADDRESS)
 
     // mock peer trade wallet
     let peer_tradeWallet = peerTemplate.contract.methods
       .tradeWallet()
       .encodeABI()
-    await mockPeerHigh.givenMethodReturnAddress(peer_tradeWallet, EMPTY_ADDRESS)
-    await mockPeerLow.givenMethodReturnAddress(peer_tradeWallet, EMPTY_ADDRESS)
+    await mockDelegateHigh.givenMethodReturnAddress(peer_tradeWallet, EMPTY_ADDRESS)
+    await mockDelegateLow.givenMethodReturnAddress(peer_tradeWallet, EMPTY_ADDRESS)
 
     //mock peer provideUnsignedOrder()
     const order = await orders.getOrder({})
@@ -82,8 +82,8 @@ contract('PeerFrontend Unit Tests', async () => {
     let peer_provideUnsignedOrder = peerTemplate.contract.methods
       .provideOrder(order)
       .encodeABI()
-    await mockPeerHigh.givenMethodReturnBool(peer_provideUnsignedOrder, true)
-    await mockPeerLow.givenMethodReturnBool(peer_provideUnsignedOrder, true)
+    await mockDelegateHigh.givenMethodReturnBool(peer_provideUnsignedOrder, true)
+    await mockDelegateLow.givenMethodReturnBool(peer_provideUnsignedOrder, true)
   }
 
   async function setupMockIndexer() {
@@ -105,13 +105,13 @@ contract('PeerFrontend Unit Tests', async () => {
     mockSwap = await MockContract.new()
     await mockSwap.givenAnyReturnBool(true)
 
-    await setupMockPeerFrontend()
+    await setupMockDelegateFrontend()
     await setupMockIndexer()
   }
 
-  before('deploy PeerFrontend', async () => {
+  before('deploy DelegateFrontend', async () => {
     await setupMocks()
-    peerFrontend = await PeerFrontend.new(mockIndexer.address, mockSwap.address)
+    peerFrontend = await DelegateFrontend.new(mockIndexer.address, mockSwap.address)
   })
 
   describe('Test initial values', async () => {
@@ -152,7 +152,7 @@ contract('PeerFrontend Unit Tests', async () => {
         indexer_getIntents,
         abi.rawEncode(
           ['bytes32[]'],
-          [[mockPeerHighLocator, mockPeerLowLocator]]
+          [[mockDelegateHighLocator, mockDelegateLowLocator]]
         )
       )
 
@@ -164,7 +164,7 @@ contract('PeerFrontend Unit Tests', async () => {
         2
       )
 
-      equal(val[0], mockPeerLowLocator)
+      equal(val[0], mockDelegateLowLocator)
       equal(val[1].toNumber(), lowVal)
     })
 
@@ -174,7 +174,7 @@ contract('PeerFrontend Unit Tests', async () => {
         indexer_getIntents,
         abi.rawEncode(
           ['bytes32[]'],
-          [[mockPeerLowLocator, mockPeerHighLocator]]
+          [[mockDelegateLowLocator, mockDelegateHighLocator]]
         )
       )
 
@@ -185,7 +185,7 @@ contract('PeerFrontend Unit Tests', async () => {
         EMPTY_ADDRESS,
         2
       )
-      equal(val[0], mockPeerLowLocator)
+      equal(val[0], mockDelegateLowLocator)
       equal(val[1].toNumber(), lowVal)
     })
   })
@@ -216,7 +216,7 @@ contract('PeerFrontend Unit Tests', async () => {
         indexer_getIntents,
         abi.rawEncode(
           ['bytes32[]'],
-          [[mockPeerHighLocator, mockPeerLowLocator]]
+          [[mockDelegateHighLocator, mockDelegateLowLocator]]
         )
       )
 
@@ -228,7 +228,7 @@ contract('PeerFrontend Unit Tests', async () => {
         2
       )
 
-      equal(val[0], mockPeerHighLocator)
+      equal(val[0], mockDelegateHighLocator)
       equal(val[1].toNumber(), highVal)
     })
 
@@ -238,7 +238,7 @@ contract('PeerFrontend Unit Tests', async () => {
         indexer_getIntents,
         abi.rawEncode(
           ['bytes32[]'],
-          [[mockPeerLowLocator, mockPeerHighLocator]]
+          [[mockDelegateLowLocator, mockDelegateHighLocator]]
         )
       )
 
@@ -249,7 +249,7 @@ contract('PeerFrontend Unit Tests', async () => {
         EMPTY_ADDRESS,
         2
       )
-      equal(val[0], mockPeerHighLocator)
+      equal(val[0], mockDelegateHighLocator)
       equal(val[1].toNumber(), highVal)
     })
   })
@@ -261,7 +261,7 @@ contract('PeerFrontend Unit Tests', async () => {
         indexer_getIntents,
         abi.rawEncode(
           ['bytes32[]'],
-          [[mockPeerLowLocator, mockPeerHighLocator]]
+          [[mockDelegateLowLocator, mockDelegateHighLocator]]
         )
       )
 

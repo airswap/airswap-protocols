@@ -19,7 +19,7 @@ pragma experimental ABIEncoderV2;
 
 import "@airswap/types/contracts/Types.sol";
 
-interface IPeer {
+interface IDelegate {
 
   event SetRule(
     address takerToken,

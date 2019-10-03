@@ -1,7 +1,7 @@
 {
   "name": "@airswap/peer-factory",
   "version": "0.1.0",
-  "description": "Deploys Peer contracts for use in the Swap Protocol",
+  "description": "Deploys Delegate contracts for use in the Swap Protocol",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",

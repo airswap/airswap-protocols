@@ -1,4 +1,4 @@
-const Peer = artifacts.require('Peer')
+const Delegate = artifacts.require('Delegate')
 const Swap = artifacts.require('Swap')
 const MockContract = artifacts.require('MockContract')
 const {
@@ -12,7 +12,7 @@ const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 
 const { orders } = require('@airswap/order-utils')
 
-contract('Peer Unit Tests', async accounts => {
+contract('Delegate Unit Tests', async accounts => {
   const owner = accounts[0]
   const tradeWallet = accounts[1]
   const notOwner = accounts[2]
@@ -46,9 +46,9 @@ contract('Peer Unit Tests', async accounts => {
     orders.setVerifyingContract(mockSwap.address)
   }
 
-  before('deploy Peer', async () => {
+  before('deploy Delegate', async () => {
     await setupMockSwap()
-    peer = await Peer.new(mockSwap.address, EMPTY_ADDRESS, tradeWallet, {
+    peer = await Delegate.new(mockSwap.address, EMPTY_ADDRESS, tradeWallet, {
       from: owner,
     })
   })
@@ -65,7 +65,7 @@ contract('Peer Unit Tests', async accounts => {
     })
 
     it('Test constructor sets the owner as the trade wallet on empty address', async () => {
-      let newPeer = await Peer.new(
+      let newDelegate = await Delegate.new(
         mockSwap.address,
         EMPTY_ADDRESS,
         EMPTY_ADDRESS,
@@ -74,7 +74,7 @@ contract('Peer Unit Tests', async accounts => {
         }
       )
 
-      let val = await newPeer.tradeWallet.call()
+      let val = await newDelegate.tradeWallet.call()
       equal(val, owner, 'trade wallet is incorrect')
     })
 
@@ -85,12 +85,12 @@ contract('Peer Unit Tests', async accounts => {
     })
 
     it('Test owner is set correctly if provided an address', async () => {
-      let newPeer = await Peer.new(mockSwap.address, notOwner, tradeWallet, {
+      let newDelegate = await Delegate.new(mockSwap.address, notOwner, tradeWallet, {
         from: owner,
       })
 
       // being provided an empty address, it should leave the owner unchanged
-      let val = await newPeer.owner.call()
+      let val = await newDelegate.owner.call()
       equal(val, notOwner, 'owner is incorrect - should be notOwner')
     })
   })
