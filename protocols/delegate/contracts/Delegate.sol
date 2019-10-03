@@ -36,7 +36,7 @@ contract Delegate is IDelegate, Ownable {
   // Swap contract to be used to settle trades
   ISwap public swapContract;
 
-  // The address holding tokens that will be trading through this peer
+  // The address holding tokens that will be trading through this delegate
   address private _tradeWallet;
 
   // Mapping of takerToken to makerToken for rule lookup
@@ -58,7 +58,7 @@ contract Delegate is IDelegate, Ownable {
 
   /**
     * @notice Contract Constructor
-    * @dev owner defaults to msg.sender if _peerContractOwner is not provided
+    * @dev owner defaults to msg.sender if _delegateContractOwner is not provided
     * @param _swapContract address of the swap contract the delegate will deploy with
     * @param _delegateContractOwner address that should be the owner of the delegate
     * @param _delegateTradeWallet the wallet the delegate will trade from
@@ -87,7 +87,7 @@ contract Delegate is IDelegate, Ownable {
   }
 
   /**
-    * @notice determines if an address to interact with this peer
+    * @notice determines if an address to interact with this delegate
     * @param _addressToCheck the address to check if admin or not 
     */
   function isAdmin(address _addressToCheck) view external returns (bool) {
@@ -95,7 +95,7 @@ contract Delegate is IDelegate, Ownable {
   }
 
   /**
-    * @notice adds to the list of admin accounts that can interact with this peer
+    * @notice adds to the list of admin accounts that can interact with this delegate
     * @dev only callable by the owner of the contract
     * @param _addressToAdd the address to add to the admins
     */
@@ -105,7 +105,7 @@ contract Delegate is IDelegate, Ownable {
   }
 
   /**
-    * @notice removes from the list of admin accounts that can interact with this peer
+    * @notice removes from the list of admin accounts that can interact with this delegate
     * @dev only callable by the owner of the contract
     * @param _addressToRemove the address to add to the admins
     */
