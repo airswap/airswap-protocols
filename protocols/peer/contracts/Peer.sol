@@ -36,7 +36,7 @@ contract Peer is IPeer, Ownable {
   // The address holding tokens that will be trading through this peer
   address private _tradeWallet;
 
-  // Mapping of takerToken to makerToken for rule lookup
+  // Mapping of senderToken to signerToken for rule lookup
   mapping (address => mapping (address => Rule)) public rules;
 
   // ERC-20 (fungible token) interface identifier (ERC-165)
@@ -71,31 +71,31 @@ contract Peer is IPeer, Ownable {
   /**
     * @notice Set a Trading Rule
     * @dev only callable by the owner of the contract
-    * @dev 1 takerToken = priceCoef * 10^(-priceExp) * makerToken
-    * @param _takerToken address The address of an ERC-20 token the peer would send
-    * @param _makerToken address The address of an ERC-20 token the consumer would send
-    * @param _maxTakerAmount uint256 The maximum amount of ERC-20 token the peer would send
+    * @dev 1 senderToken = priceCoef * 10^(-priceExp) * signerToken
+    * @param _senderToken address The address of an ERC-20 token the peer would send
+    * @param _signerToken address The address of an ERC-20 token the consumer would send
+    * @param _maxSenderAmount uint256 The maximum amount of ERC-20 token the peer would send
     * @param _priceCoef uint256 The whole number that will be multiplied by 10^(-priceExp) - the price coefficient
     * @param _priceExp uint256 The exponent of the price to indicate location of the decimal priceCoef * 10^(-priceExp)
     */
   function setRule(
-    address _takerToken,
-    address _makerToken,
-    uint256 _maxTakerAmount,
+    address _senderToken,
+    address _signerToken,
+    uint256 _maxSenderAmount,
     uint256 _priceCoef,
     uint256 _priceExp
   ) external onlyOwner {
 
-    rules[_takerToken][_makerToken] = Rule({
-      maxTakerAmount: _maxTakerAmount,
+    rules[_senderToken][_signerToken] = Rule({
+      maxSenderAmount: _maxSenderAmount,
       priceCoef: _priceCoef,
       priceExp: _priceExp
     });
 
     emit SetRule(
-      _takerToken,
-      _makerToken,
-      _maxTakerAmount,
+      _senderToken,
+      _signerToken,
+      _maxSenderAmount,
       _priceCoef,
       _priceExp
     );
@@ -104,84 +104,84 @@ contract Peer is IPeer, Ownable {
   /**
     * @notice Unset a Trading Rule
     * @dev only callable by the owner of the contract, removes from a mapping
-    * @param _takerToken address The address of an ERC-20 token the peer would send
-    * @param _makerToken address The address of an ERC-20 token the consumer would send
+    * @param _senderToken address The address of an ERC-20 token the peer would send
+    * @param _signerToken address The address of an ERC-20 token the consumer would send
     */
   function unsetRule(
-    address _takerToken,
-    address _makerToken
+    address _senderToken,
+    address _signerToken
   ) external onlyOwner {
 
     // Delete the rule.
-    delete rules[_takerToken][_makerToken];
+    delete rules[_senderToken][_signerToken];
 
     emit UnsetRule(
-      _takerToken,
-      _makerToken
+      _senderToken,
+      _signerToken
     );
   }
 
   /**
-    * @notice Get a Maker-Side Quote from the Peer
-    * @param _takerParam uint256 The amount of ERC-20 token the peer would send
-    * @param _takerToken address The address of an ERC-20 token the peer would send
-    * @param _makerToken address The address of an ERC-20 token the consumer would send
-    * @return uint256 makerParam The amount of ERC-20 token the consumer would send
+    * @notice Get a Signer-Side Quote from the Peer
+    * @param _senderParam uint256 The amount of ERC-20 token the peer would send
+    * @param _senderToken address The address of an ERC-20 token the peer would send
+    * @param _signerToken address The address of an ERC-20 token the consumer would send
+    * @return uint256 signerParam The amount of ERC-20 token the consumer would send
     */
-  function getMakerSideQuote(
-    uint256 _takerParam,
-    address _takerToken,
-    address _makerToken
+  function getSignerSideQuote(
+    uint256 _senderParam,
+    address _senderToken,
+    address _signerToken
   ) external view returns (
-    uint256 makerParam
+    uint256 signerParam
   ) {
 
-    Rule memory rule = rules[_takerToken][_makerToken];
+    Rule memory rule = rules[_senderToken][_signerToken];
 
     // Ensure that a rule exists.
-    if(rule.maxTakerAmount > 0) {
+    if(rule.maxSenderAmount > 0) {
 
-      // Ensure the _takerParam does not exceed maximum for the rule.
-      if(_takerParam <= rule.maxTakerAmount) {
+      // Ensure the _senderParam does not exceed maximum for the rule.
+      if(_senderParam <= rule.maxSenderAmount) {
 
-        makerParam = _takerParam
+        signerParam = _senderParam
             .mul(rule.priceCoef)
             .div(10 ** rule.priceExp);
 
         // Return the quote.
-        return makerParam;
+        return signerParam;
       }
     }
     return 0;
   }
 
   /**
-    * @notice Get a Taker-Side Quote from the Peer
-    * @param _makerParam uint256 The amount of ERC-20 token the consumer would send
-    * @param _makerToken address The address of an ERC-20 token the consumer would send
-    * @param _takerToken address The address of an ERC-20 token the peer would send
-    * @return uint256 takerParam The amount of ERC-20 token the peer would send
+    * @notice Get a Sender-Side Quote from the Peer
+    * @param _signerParam uint256 The amount of ERC-20 token the consumer would send
+    * @param _signerToken address The address of an ERC-20 token the consumer would send
+    * @param _senderToken address The address of an ERC-20 token the peer would send
+    * @return uint256 senderParam The amount of ERC-20 token the peer would send
     */
-  function getTakerSideQuote(
-    uint256 _makerParam,
-    address _makerToken,
-    address _takerToken
+  function getSenderSideQuote(
+    uint256 _signerParam,
+    address _signerToken,
+    address _senderToken
   ) external view returns (
-    uint256 takerParam
+    uint256 senderParam
   ) {
 
-    Rule memory rule = rules[_takerToken][_makerToken];
+    Rule memory rule = rules[_senderToken][_signerToken];
 
     // Ensure that a rule exists.
-    if(rule.maxTakerAmount > 0) {
+    if(rule.maxSenderAmount > 0) {
 
-      // Calculate the _takerParam.
-      takerParam = _makerParam
+      // Calculate the _senderParam.
+      senderParam = _signerParam
         .mul(10 ** rule.priceExp).div(rule.priceCoef);
 
-      // Ensure the takerParam does not exceed maximum and is greater than zero.
-      if(takerParam <= rule.maxTakerAmount) {
-        return takerParam;
+      // Ensure the senderParam does not exceed maximum and is greater than zero.
+      if(senderParam <= rule.maxSenderAmount) {
+        return senderParam;
       }
     }
     return 0;
@@ -189,28 +189,28 @@ contract Peer is IPeer, Ownable {
 
   /**
     * @notice Get a Maximum Quote from the Peer
-    * @param _takerToken address The address of an ERC-20 token the peer would send
-    * @param _makerToken address The address of an ERC-20 token the consumer would send
-    * @return uint256 takerParam The amount the peer would send
-    * @return uint256 makerParam The amount the consumer would send
+    * @param _senderToken address The address of an ERC-20 token the peer would send
+    * @param _signerToken address The address of an ERC-20 token the consumer would send
+    * @return uint256 senderParam The amount the peer would send
+    * @return uint256 signerParam The amount the consumer would send
     */
   function getMaxQuote(
-    address _takerToken,
-    address _makerToken
+    address _senderToken,
+    address _signerToken
   ) external view returns (
-    uint256 takerParam,
-    uint256 makerParam
+    uint256 senderParam,
+    uint256 signerParam
   ) {
 
-    Rule memory rule = rules[_takerToken][_makerToken];
+    Rule memory rule = rules[_senderToken][_signerToken];
 
     // Ensure that a rule exists.
-    if(rule.maxTakerAmount > 0) {
+    if(rule.maxSenderAmount > 0) {
 
-      // Return the maxTakerAmount and calculated _makerParam.
+      // Return the maxSenderAmount and calculated _signerParam.
       return (
-        rule.maxTakerAmount,
-        rule.maxTakerAmount.mul(rule.priceCoef).div(10 ** rule.priceExp)
+        rule.maxSenderAmount,
+        rule.maxSenderAmount.mul(rule.priceCoef).div(10 ** rule.priceExp)
       );
     }
     return (0, 0);
@@ -218,7 +218,7 @@ contract Peer is IPeer, Ownable {
 
   /**
     * @notice Provide an Order
-    * @dev Rules get reset with new maxTakerAmount
+    * @dev Rules get reset with new maxSenderAmount
     * @param _order Types.Order
     */
   function provideOrder(
@@ -234,17 +234,17 @@ contract Peer is IPeer, Ownable {
       "INVALID_SENDER_WALLET");
 
     require(_order.signer.kind == ERC20_INTERFACE_ID,
-      "SIGNER_MUST_BE_ERC20");
+      "SIGNER_KIND_MUST_BE_ERC20");
 
     require(_order.sender.kind == ERC20_INTERFACE_ID,
-      "SENDER_MUST_BE_ERC20");
+      "SENDER_KIND_MUST_BE_ERC20");
 
     // Ensure that a rule exists.
-    require(rule.maxTakerAmount != 0,
+    require(rule.maxSenderAmount != 0,
       "TOKEN_PAIR_INACTIVE");
 
     // Ensure the order does not exceed the maximum amount.
-    require(_order.sender.param <= rule.maxTakerAmount,
+    require(_order.sender.param <= rule.maxSenderAmount,
       "AMOUNT_EXCEEDS_MAX");
 
     // Ensure the order is priced according to the rule.
@@ -252,9 +252,9 @@ contract Peer is IPeer, Ownable {
       .mul(10 ** rule.priceExp).div(rule.priceCoef),
       "PRICE_INCORRECT");
 
-    // Overwrite the rule with a decremented maxTakerAmount.
+    // Overwrite the rule with a decremented maxSenderAmount.
     rules[_order.sender.token][_order.signer.token] = Rule({
-      maxTakerAmount: (rule.maxTakerAmount).sub(_order.sender.param),
+      maxSenderAmount: (rule.maxSenderAmount).sub(_order.sender.param),
       priceCoef: rule.priceCoef,
       priceExp: rule.priceExp
     });

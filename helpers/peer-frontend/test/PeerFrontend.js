@@ -82,7 +82,7 @@ contract('PeerFrontend', async accounts => {
       )
     })
 
-    it('Bob creates an index for DAI (maker)/WETH (taker)', async () => {
+    it('Bob creates an index for DAI (signer)/WETH (sender)', async () => {
       emitted(
         await indexer.createIndex(tokenDAI.address, tokenWETH.address, {
           from: bobAddress,
@@ -126,7 +126,7 @@ contract('PeerFrontend', async accounts => {
   describe('PeerFrontend - fills for non-existent quotes', async () => {
     it('Finds best price to buy 100 AST for DAI - reverts ', async () => {
       await reverted(
-        peerfrontend.fillBestMakerSideOrder.call(
+        peerfrontend.fillBestSignerSideOrder.call(
           100,
           tokenAST.address,
           tokenDAI.address,
@@ -138,7 +138,7 @@ contract('PeerFrontend', async accounts => {
 
     it('Finds best price to sell 100 AST for DAI - reverts', async () => {
       await reverted(
-        peerfrontend.fillBestTakerSideOrder.call(
+        peerfrontend.fillBestSenderSideOrder.call(
           100,
           tokenAST.address,
           tokenDAI.address,
@@ -174,7 +174,7 @@ contract('PeerFrontend', async accounts => {
     })
   })
 
-  describe('PeerFrontend - TakerSide', async () => {
+  describe('PeerFrontend - SenderSide', async () => {
     it('Get the intent', async () => {
       const result = await indexer.getIntents.call(
         tokenDAI.address,
@@ -185,7 +185,7 @@ contract('PeerFrontend', async accounts => {
     })
 
     it('Finds best price to buy 1 WETH for DAI', async () => {
-      const quote = await peerfrontend.getBestTakerSideQuote.call(
+      const quote = await peerfrontend.getBestSenderSideQuote.call(
         100,
         tokenWETH.address,
         tokenDAI.address,
@@ -196,7 +196,7 @@ contract('PeerFrontend', async accounts => {
     })
 
     it('Finds best price to very large WETH amount for DAI', async () => {
-      const quote = await peerfrontend.getBestTakerSideQuote.call(
+      const quote = await peerfrontend.getBestSenderSideQuote.call(
         10000000,
         tokenWETH.address,
         tokenDAI.address,
@@ -209,7 +209,7 @@ contract('PeerFrontend', async accounts => {
       )
     })
 
-    it('Takes best price (Alice peer) - TakerSide', async () => {
+    it('Takes best price (Alice peer) - SenderSide', async () => {
       // Alice peer gets some WETH to trade through the Peer
       await tokenWETH.mint(aliceAddress, 200)
 
@@ -231,7 +231,7 @@ contract('PeerFrontend', async accounts => {
       )
 
       // Carol takes the best price for 100 DAI
-      await peerfrontend.fillBestTakerSideOrder(
+      await peerfrontend.fillBestSenderSideOrder(
         100,
         tokenWETH.address,
         tokenDAI.address,
@@ -256,9 +256,9 @@ contract('PeerFrontend', async accounts => {
     })
   })
 
-  describe('PeerFrontend - MakerSide', async () => {
+  describe('PeerFrontend - SignerSide', async () => {
     it('Finds best price to buy 309 DAI for WETH', async () => {
-      const quote = await peerfrontend.getBestMakerSideQuote.call(
+      const quote = await peerfrontend.getBestSignerSideQuote.call(
         15476,
         tokenDAI.address,
         tokenWETH.address,
@@ -269,10 +269,10 @@ contract('PeerFrontend', async accounts => {
       equal(quote[1].toNumber(), 50)
     })
 
-    it('Takes best price (Alice peer) - MakerSide', async () => {
+    it('Takes best price (Alice peer) - SignerSide', async () => {
       await advanceTimeAndBlock(10)
       // Carol takes the best price for 100 DAI
-      await peerfrontend.fillBestMakerSideOrder(
+      await peerfrontend.fillBestSignerSideOrder(
         15476,
         tokenDAI.address,
         tokenWETH.address,

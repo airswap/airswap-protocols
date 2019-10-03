@@ -15,10 +15,10 @@ const ethUtil = require('ethereumjs-util')
 const msg = web3.utils.soliditySha3(
   { type: 'address', value: makerAddress },
   { type: 'uint256', value: makerAmount },
-  { type: 'address', value: makerToken },
+  { type: 'address', value: signerToken },
   { type: 'address', value: takerAddress },
   { type: 'uint256', value: takerAmount },
-  { type: 'address', value: takerToken },
+  { type: 'address', value: senderToken },
   { type: 'uint256', value: expiration },
   { type: 'uint256', value: nonce }
 )
@@ -60,10 +60,10 @@ The **V1** contract has `fill` function.
 function fill(
   address makerAddress,
   uint makerAmount,
-  address makerToken,
+  address signerToken,
   address takerAddress,
   uint takerAmount,
-  address takerToken,
+  address senderToken,
   uint256 expiration,
   uint256 nonce,
   uint8 v,
@@ -79,10 +79,10 @@ A successful `fill` transaction emits a `Filled` event.
 event Filled(
   address indexed makerAddress,
   uint makerAmount,
-  address indexed makerToken,
+  address indexed signerToken,
   address takerAddress,
   uint takerAmount,
-  address indexed takerToken,
+  address indexed senderToken,
   uint256 expiration,
   uint256 nonce
 );
@@ -142,10 +142,10 @@ event Swap(
   uint256 timestamp,
   address indexed makerWallet,
   uint256 makerParam,
-  address makerToken,
+  address signerToken,
   address indexed takerWallet,
   uint256 takerParam,
-  address takerToken,
+  address senderToken,
   address affiliateWallet,
   uint256 affiliateParam,
   address affiliateToken
@@ -162,10 +162,10 @@ event Swap(
 function cancel(
   address makerAddress,
   uint makerAmount,
-  address makerToken,
+  address signerToken,
   address takerAddress,
   uint takerAmount,
-  address takerToken,
+  address senderToken,
   uint256 expiration,
   uint256 nonce,
   uint8 v,
@@ -180,10 +180,10 @@ A successful `cancel` transaction will emit a `Canceled` event.
 event Canceled(
   address indexed makerAddress,
   uint makerAmount,
-  address indexed makerToken,
+  address indexed signerToken,
   address takerAddress,
   uint takerAmount,
-  address indexed takerToken,
+  address indexed senderToken,
   uint256 expiration,
   uint256 nonce
 );

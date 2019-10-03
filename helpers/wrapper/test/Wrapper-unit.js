@@ -12,7 +12,7 @@ const { orders } = require('@airswap/order-utils')
 contract('Wrapper Unit Tests', async accounts => {
   const senderParam = 2
   const mockToken = accounts[9]
-  const mockTaker = accounts[8]
+  const mockSender = accounts[8]
   let mockSwap
   let mockWeth
   let mockFT
@@ -116,7 +116,7 @@ contract('Wrapper Unit Tests', async accounts => {
     it('Test fallback function revert', async () => {
       await reverted(
         web3.eth.sendTransaction({
-          from: mockTaker,
+          from: mockSender,
           to: wrapper.address,
           value: 1,
         }),
@@ -125,17 +125,17 @@ contract('Wrapper Unit Tests', async accounts => {
     })
 
     it('Test when sender token != weth, ensure no unexpected ether sent', async () => {
-      let nonTakerToken = mockToken
+      let nonSenderToken = mockToken
       const order = await orders.getOrder({
         sender: {
-          wallet: mockTaker,
-          token: nonTakerToken,
+          wallet: mockSender,
+          token: nonSenderToken,
         },
       })
 
       await reverted(
         wrapper.swap(order, {
-          from: mockTaker,
+          from: mockSender,
           value: 2,
         }),
         'VALUE_MUST_BE_ZERO'
@@ -145,7 +145,7 @@ contract('Wrapper Unit Tests', async accounts => {
     it('Test when sender token == weth, ensure the sender amount matches sent ether', async () => {
       const order = await orders.getOrder({
         sender: {
-          wallet: mockTaker,
+          wallet: mockSender,
           param: 1,
           token: mockWeth.address,
         },
@@ -154,7 +154,7 @@ contract('Wrapper Unit Tests', async accounts => {
       await reverted(
         wrapper.swap(order, {
           value: 2,
-          from: mockTaker,
+          from: mockSender,
         }),
         'VALUE_MUST_BE_SENT'
       )
@@ -169,7 +169,7 @@ contract('Wrapper Unit Tests', async accounts => {
           token: mockWeth.address,
         },
         sender: {
-          wallet: mockTaker,
+          wallet: mockSender,
           param: senderParam,
           token: mockWeth.address,
         },
@@ -178,7 +178,7 @@ contract('Wrapper Unit Tests', async accounts => {
       await passes(
         wrapper.swap(order, {
           value: senderParam,
-          from: mockTaker,
+          from: mockSender,
         })
       )
 
@@ -199,7 +199,7 @@ contract('Wrapper Unit Tests', async accounts => {
           token: notWethContract,
         },
         sender: {
-          wallet: mockTaker,
+          wallet: mockSender,
           param: senderParam,
           token: mockWeth.address,
         },
@@ -208,7 +208,7 @@ contract('Wrapper Unit Tests', async accounts => {
       await passes(
         wrapper.swap(order, {
           value: senderParam,
-          from: mockTaker,
+          from: mockSender,
         })
       )
 
@@ -260,12 +260,12 @@ contract('Wrapper Unit Tests', async accounts => {
 
   describe('Test sending two ERC20s', async () => {
     it('Test when sender token == non weth erc20, signer token == non weth erc20 but msg.sender is not senderwallet', async () => {
-      let nonMockTaker = accounts[7]
+      let nonMockSender = accounts[7]
       let notWethContract = mockFT.address
 
       const order = await orders.getOrder({
         sender: {
-          wallet: nonMockTaker,
+          wallet: nonMockSender,
           param: 1,
           token: notWethContract,
         },
@@ -274,9 +274,9 @@ contract('Wrapper Unit Tests', async accounts => {
       await reverted(
         wrapper.swap(order, {
           value: 0,
-          from: mockTaker,
+          from: mockSender,
         }),
-        'SENDER_MUST_BE_TAKER'
+        'MSG_SENDER_MUST_BE_ORDER_SENDER'
       )
     })
 
@@ -288,7 +288,7 @@ contract('Wrapper Unit Tests', async accounts => {
           token: notWethContract,
         },
         sender: {
-          wallet: mockTaker,
+          wallet: mockSender,
           param: senderParam,
           token: notWethContract,
         },
@@ -297,7 +297,7 @@ contract('Wrapper Unit Tests', async accounts => {
       await passes(
         wrapper.swap(order, {
           value: 0,
-          from: mockTaker,
+          from: mockSender,
         })
       )
 

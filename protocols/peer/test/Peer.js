@@ -96,7 +96,7 @@ contract('Peer', async accounts => {
         { from: aliceAddress }
       )
       equal(
-        await alicePeer.getMakerSideQuote.call(
+        await alicePeer.getSignerSideQuote.call(
           1,
           tokenWETH.address,
           tokenDAI.address
@@ -107,7 +107,7 @@ contract('Peer', async accounts => {
         from: aliceAddress,
       })
       equal(
-        await alicePeer.getMakerSideQuote.call(
+        await alicePeer.getSignerSideQuote.call(
           1,
           tokenWETH.address,
           tokenDAI.address
@@ -128,7 +128,7 @@ contract('Peer', async accounts => {
         { from: aliceAddress }
       )
       equal(
-        await alicePeer.getMakerSideQuote.call(
+        await alicePeer.getSignerSideQuote.call(
           1,
           tokenWETH.address,
           tokenDAI.address
@@ -147,7 +147,7 @@ contract('Peer', async accounts => {
         { from: aliceAddress }
       )
       equal(
-        await alicePeer.getMakerSideQuote.call(
+        await alicePeer.getSignerSideQuote.call(
           100000,
           tokenDAI.address,
           tokenWETH.address
@@ -166,7 +166,7 @@ contract('Peer', async accounts => {
         { from: aliceAddress }
       )
       equal(
-        await alicePeer.getMakerSideQuote.call(
+        await alicePeer.getSignerSideQuote.call(
           20000,
           tokenWETH.address,
           tokenDAI.address
@@ -198,7 +198,7 @@ contract('Peer', async accounts => {
     )
 
     it('Gets a quote to buy 20K DAI for WETH (Quote: 64 WETH)', async () => {
-      const quote = await alicePeer.getMakerSideQuote.call(
+      const quote = await alicePeer.getSignerSideQuote.call(
         20000,
         tokenDAI.address,
         tokenWETH.address
@@ -207,7 +207,7 @@ contract('Peer', async accounts => {
     })
 
     it('Gets a quote to sell 100K (Max) DAI for WETH (Quote: 320 WETH)', async () => {
-      const quote = await alicePeer.getMakerSideQuote.call(
+      const quote = await alicePeer.getSignerSideQuote.call(
         100000,
         tokenDAI.address,
         tokenWETH.address
@@ -216,7 +216,7 @@ contract('Peer', async accounts => {
     })
 
     it('Gets a quote to sell 1 WETH for DAI (Quote: 300 DAI)', async () => {
-      const quote = await alicePeer.getTakerSideQuote.call(
+      const quote = await alicePeer.getSenderSideQuote.call(
         1,
         tokenWETH.address,
         tokenDAI.address
@@ -225,7 +225,7 @@ contract('Peer', async accounts => {
     })
 
     it('Gets a quote to sell 500 DAI for WETH (False: No rule)', async () => {
-      const quote = await alicePeer.getTakerSideQuote.call(
+      const quote = await alicePeer.getSenderSideQuote.call(
         500,
         tokenDAI.address,
         tokenWETH.address
@@ -252,7 +252,7 @@ contract('Peer', async accounts => {
     })
 
     it('Gets a quote to buy WETH for 250000 DAI (False: Exceeds Max)', async () => {
-      const quote = await alicePeer.getMakerSideQuote.call(
+      const quote = await alicePeer.getSignerSideQuote.call(
         250000,
         tokenDAI.address,
         tokenWETH.address
@@ -261,7 +261,7 @@ contract('Peer', async accounts => {
     })
 
     it('Gets a quote to buy 500 WETH for DAI (False: Exceeds Max)', async () => {
-      const quote = await alicePeer.getTakerSideQuote.call(
+      const quote = await alicePeer.getSenderSideQuote.call(
         500,
         tokenWETH.address,
         tokenDAI.address
@@ -276,14 +276,14 @@ contract('Peer', async accounts => {
       // Peer will trade up to 100,000 DAI for WETH, at 200 DAI/WETH
       await alicePeer.setRule(
         tokenDAI.address, // Peer's token
-        tokenWETH.address, // Maker's token
+        tokenWETH.address, // Signer's token
         100000,
         5,
         3,
         { from: aliceAddress }
       )
-      // Maker wants to trade 1 WETH for x DAI
-      quote = await alicePeer.getTakerSideQuote.call(
+      // Signer wants to trade 1 WETH for x DAI
+      quote = await alicePeer.getSenderSideQuote.call(
         1,
         tokenWETH.address,
         tokenDAI.address
@@ -442,7 +442,7 @@ contract('Peer', async accounts => {
   describe('Provide some orders to the Peer', async () => {
     let quote
     before('Gets a quote for 1 WETH', async () => {
-      quote = await alicePeer.getTakerSideQuote.call(
+      quote = await alicePeer.getSenderSideQuote.call(
         1,
         tokenWETH.address,
         tokenDAI.address
@@ -450,7 +450,7 @@ contract('Peer', async accounts => {
     })
 
     it('Use quote with non-extent rule', async () => {
-      // Note: Consumer is the order maker, Peer is the order taker.
+      // Note: Consumer is the order signer, Peer is the order sender.
       const order = await orders.getOrder({
         signer: {
           wallet: bobAddress,
@@ -471,8 +471,8 @@ contract('Peer', async accounts => {
       )
     })
 
-    it('Use quote with incorrect maker wallet', async () => {
-      // Note: Consumer is the order maker, Peer is the order taker.
+    it('Use quote with incorrect signer wallet', async () => {
+      // Note: Consumer is the order signer, Peer is the order sender.
       const order = await orders.getOrder({
         signer: {
           wallet: bobAddress,
@@ -497,7 +497,7 @@ contract('Peer', async accounts => {
       // Peer trades WETH for 100 DAI. Max trade is 2 WETH.
       await alicePeer.setRule(
         tokenWETH.address, // Peer's token
-        tokenDAI.address, // Maker's token
+        tokenDAI.address, // Signer's token
         2,
         100,
         0,
@@ -543,8 +543,8 @@ contract('Peer', async accounts => {
       )
     })
 
-    it('Use quote with incorrect maker token kind', async () => {
-      // Note: Consumer is the order maker, Peer is the order taker.
+    it('Use quote with incorrect signer token kind', async () => {
+      // Note: Consumer is the order signer, Peer is the order sender.
       const order = await orders.getOrder({
         signer: {
           wallet: bobAddress,
@@ -562,12 +562,12 @@ contract('Peer', async accounts => {
       // Succeeds on the Peer, fails on the Swap.
       await reverted(
         alicePeer.provideOrder(order, { from: bobAddress }),
-        'SIGNER_MUST_BE_ERC20'
+        'SIGNER_KIND_MUST_BE_ERC20'
       )
     })
 
-    it('Use quote with incorrect taker token kind', async () => {
-      // Note: Consumer is the order maker, Peer is the order taker.
+    it('Use quote with incorrect sender token kind', async () => {
+      // Note: Consumer is the order signer, Peer is the order sender.
       const order = await orders.getOrder({
         signer: {
           wallet: bobAddress,
@@ -585,12 +585,12 @@ contract('Peer', async accounts => {
       // Succeeds on the Peer, fails on the Swap.
       await reverted(
         alicePeer.provideOrder(order, { from: bobAddress }),
-        'SENDER_MUST_BE_ERC20'
+        'SENDER_KIND_MUST_BE_ERC20'
       )
     })
 
     it('Gets a quote to sell 1 WETH and takes it', async () => {
-      // Note: Consumer is the order maker, Peer is the order taker.
+      // Note: Consumer is the order signer, Peer is the order sender.
       const order = await orders.getOrder({
         signer: {
           wallet: bobAddress,

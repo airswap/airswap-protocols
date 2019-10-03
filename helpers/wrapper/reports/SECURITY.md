@@ -72,12 +72,12 @@ _\*\* OpenZeppelin contract_
 
 #### 3. If ether is sent to Wrapper.swap, it should be deposited to WETH for the swap.
 
-- When WETH is specified as the takerToken, the contract requires that the equivalent message value (ether) was sent with the transaction. The contract then deposits this value to WETH and transfers it to the message sender so that their side of the trade will succeed.
+- When WETH is specified as the senderToken, the contract requires that the equivalent message value (ether) was sent with the transaction. The contract then deposits this value to WETH and transfers it to the message sender so that their side of the trade will succeed.
 - **This invariant currently holds as-is.**
 
 #### 4. If WETH is received after a swap, it should be withdrawn and sent to the sender.
 
-- When WETH is specified as the makerToken, the contract transfers the WETH to itself on behalf of the taker. The contract then withdraws the ether and transfers the amount to the message sender. Both the `transferFrom` and `withdraw` functions on the WETH contract will REVERT if they fail.
+- When WETH is specified as the signerToken, the contract transfers the WETH to itself on behalf of the taker. The contract then withdraws the ether and transfers the amount to the message sender. Both the `transferFrom` and `withdraw` functions on the WETH contract will REVERT if they fail.
 - **This invariant currently holds as-is.**
 
 #### 5. ISwap and IWeth contract addresses are immutable, any updates will require new deploy of Wrapper.
