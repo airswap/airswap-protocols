@@ -55,17 +55,23 @@ contract Peer is IPeer, Ownable {
 
   /**
     * @notice Contract Constructor
+    * @dev owner defaults to msg.sender if _peerContractOwner is not provided
     * @param _swapContract address of the swap contract the peer will deploy with
-    * @param _owner address that should be the owner of the peer
+    * @param _peerContractOwner address that should be the owner of the peer
     */
   constructor(
     address _swapContract,
-    address _owner
+    address _peerContractOwner
   ) public {
     swapContract = ISwap(_swapContract);
-    require(_owner != address(0), 'PEER_CONTRACT_OWNER_REQUIRED');
-    admins[_owner] = true;
-    super.transferOwnership(_owner);
+
+    //owner defaults to msg.sender if _peerContractOwner is not provided
+    if (_peerContractOwner != address(0)){
+      super.transferOwnership(_peerContractOwner);
+    }
+
+    //owner, whether provided or not must always be added to the whitelist
+    admins[owner()] = true;
   }
 
   /**

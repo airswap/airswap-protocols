@@ -62,7 +62,9 @@ contract('Peer Unit Tests', async accounts => {
     })
 
     it('Test owner if provided the empty address', async () => {
-      await reverted(Peer.new(mockSwap.address, EMPTY_ADDRESS, { from: owner }),'PEER_CONTRACT_OWNER_REQUIRED')
+      let newPeer = await Peer.new(mockSwap.address, EMPTY_ADDRESS, { from: owner })
+      let val = await newPeer.owner.call()
+      equal(val, owner, 'owner is incorrect - should be owner')
     })
 
     it('Test owner is set correctly if provided an address', async () => {
