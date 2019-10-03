@@ -46,23 +46,23 @@ contract Delegate is IDelegate, Ownable {
     * @notice Contract Constructor
     * @param _swapContract address of the swap contract the delegate will deploy with
     * @param _delegateContractOwner address that should be the owner of the delegate
-    * @param _peerTradeWallet the wallet the delegate will trade from
+    * @param _delegateTradeWallet the wallet the delegate will trade from
     */
   constructor(
     address _swapContract,
     address _delegateContractOwner,
-    address _peerTradeWallet
+    address _delegateTradeWallet
   ) public {
     swapContract = ISwap(_swapContract);
 
-    // if no peer owner is provided, the deploying address is the owner
+    // if no delegate owner is provided, the deploying address is the owner
     if (_delegateContractOwner != address(0)) {
       transferOwnership(_delegateContractOwner);
     }
 
     // if no trade wallet is provided, the owner's wallet is the trade wallet
-    if (_peerTradeWallet != address(0)) {
-      _tradeWallet = _peerTradeWallet;
+    if (_delegateTradeWallet != address(0)) {
+      _tradeWallet = _delegateTradeWallet;
     } else {
       _tradeWallet = owner();
     }

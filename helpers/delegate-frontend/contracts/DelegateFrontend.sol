@@ -56,7 +56,7 @@ contract DelegateFrontend {
   ) public view returns (bytes32 delegateAddress, uint256 lowestAmount) {
 
 
-    // use the indexer to query peers
+    // use the indexer to query delegates
     lowestAmount = MAX_INT;
 
     // Fetch an array of locators from the Indexer.
@@ -103,7 +103,7 @@ contract DelegateFrontend {
     uint256 _maxIntents
   ) public view returns (bytes32 delegateLocator, uint256 highAmount) {
 
-    // use the indexer to query peers
+    // use the indexer to query delegates
     highAmount = 0;
 
     // Fetch an array of locators from the Indexer.

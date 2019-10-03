@@ -11,9 +11,9 @@
     ethereumjs-util "^6.1.0"
     web3 "^1.0.0-beta.55"
 
-"@airswap/peer@0.3.0":
+"@airswap/delegate@0.3.0":
   version "0.3.0"
-  resolved "https://registry.yarnpkg.com/@airswap/peer/-/peer-0.3.0.tgz#8c2c02365b89c02aae061a3a3230f2b5a91b38d0"
+  resolved "https://registry.yarnpkg.com/@airswap/delegate/-/delegate-0.3.0.tgz#8c2c02365b89c02aae061a3a3230f2b5a91b38d0"
   integrity sha512-LWPhrkOCtAAqq53oTrfQRRoeLAjZe4F5RogHqJyJt8F3QZOz31ZYluX3zGjqiuogZJ32J3sMDhlnkxKXz6Hikg==
   dependencies:
     "@airswap/swap" "2.1.0"

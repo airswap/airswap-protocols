@@ -57,7 +57,7 @@ contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
     * @notice To check whether a locator was deployed
     * @dev Implements ILocatorWhitelist.has
     * @param _locator locator of the delegate in question
-    * @return bool true if the peer was deployed by this contract
+    * @return bool true if the delegate was deployed by this contract
     */
   function has(bytes32 _locator) external view returns (bool) {
     return deployedAddresses[address(bytes20(_locator))];
