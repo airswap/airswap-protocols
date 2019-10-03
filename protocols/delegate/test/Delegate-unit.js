@@ -83,8 +83,7 @@ contract('Delegate Unit Tests', async accounts => {
       equal(val, owner, 'trade wallet is incorrect')
     })
 
-    it('Test owner is set correctly if provided the empty address', async () => {
-      // being provided an empty address, it should leave the owner unchanged
+    it('Test owner is set correctly having been provided an empty address', async () => {
       let val = await delegate.owner.call()
       equal(val, owner, 'owner is incorrect - should be owner')
     })
@@ -106,8 +105,25 @@ contract('Delegate Unit Tests', async accounts => {
   })
 
   describe('Test setters', async () => {
-    it('Test setRule permissions', async () => {
+    it('Test setRule permissions as not owner', async () => {
+      //not owner is not apart of admin and should fail
       await reverted(
+        delegate.setRule(
+          TAKER_TOKEN,
+          MAKER_TOKEN,
+          MAX_TAKER_AMOUNT,
+          PRICE_COEF,
+          EXP,
+          { from: notOwner }
+        ),
+        'CALLER_MUST_BE_ADMIN'
+      )
+    })
+
+    it('Test setRule permissions after not owner is admin', async () => {
+      //test again after adding not owner to admin
+      await delegate.addAdmin(notOwner)
+      await passes(
         delegate.setRule(
           TAKER_TOKEN,
           MAKER_TOKEN,
@@ -117,7 +133,9 @@ contract('Delegate Unit Tests', async accounts => {
           { from: notOwner }
         )
       )
+    })
 
+    it('Test setRule permissions as owner', async () => {
       await passes(
         delegate.setRule(
           TAKER_TOKEN,
@@ -161,10 +179,23 @@ contract('Delegate Unit Tests', async accounts => {
       })
     })
 
-    it('Test unsetRule permissions', async () => {
+    it('Test unsetRule permissions as not owner', async () => {
+      //not owner is not apart of admin and should fail
       await reverted(
+        delegate.unsetRule(TAKER_TOKEN, MAKER_TOKEN, { from: notOwner }),
+        'CALLER_MUST_BE_ADMIN'
+      )
+    })
+
+    it('Test unsetRule permissions after not owner is admin', async () => {
+      //test again after adding not owner to admin
+      await delegate.addAdmin(notOwner)
+      await passes(
         delegate.unsetRule(TAKER_TOKEN, MAKER_TOKEN, { from: notOwner })
       )
+    })
+
+    it('Test unsetRule permissions', async () => {
       await passes(
         delegate.unsetRule(TAKER_TOKEN, MAKER_TOKEN, { from: owner })
       )
@@ -206,11 +237,71 @@ contract('Delegate Unit Tests', async accounts => {
     })
   })
 
+  describe('Test setTradeWallet', async () => {
+    it('Test setTradeWallet when not owner', async () => {
+      await reverted(delegate.setTradeWallet(notOwner, { from: notOwner }))
+    })
+
+    it('Test setTakerWallet when owner', async () => {
+      await passes(delegate.setTradeWallet(notOwner, { from: owner }))
+    })
+  })
+
+  describe('Test admin', async () => {
+    it('Test adding to admin as owner', async () => {
+      await passes(delegate.addAdmin(notOwner))
+    })
+
+    it('Test adding to admin as not owner', async () => {
+      await reverted(delegate.addAdmin(notOwner, { from: notOwner }))
+    })
+
+    it('Test removal from admin', async () => {
+      await delegate.addAdmin(notOwner)
+      await passes(delegate.removeAdmin(notOwner))
+    })
+
+    it('Test removal of owner from admin', async () => {
+      await reverted(delegate.removeAdmin(owner), 'OWNER_MUST_BE_ADMIN')
+    })
+
+    it('Test removal from admin as not owner', async () => {
+      await reverted(delegate.removeAdmin(notOwner, { from: notOwner }))
+    })
+
+    it('Test adding to admin event emitted', async () => {
+      let trx = await delegate.addAdmin(notOwner)
+      await emitted(trx, 'AdminAdded', e => {
+        return e.account == notOwner
+      })
+    })
+
+    it('Test removing from admin event emitted', async () => {
+      let trx = await delegate.removeAdmin(notOwner)
+      await emitted(trx, 'AdminRemoved', e => {
+        return e.account == notOwner
+      })
+    })
+  })
+
+  describe('Test transfer of ownership', async () => {
+    it('Test ownership after transfer', async () => {
+      await delegate.transferOwnership(notOwner)
+      let val = await delegate.owner.call()
+      equal(val, notOwner, 'owner was not passed properly')
+    })
+  })
+
   describe('Test setTakerWallet', async () => {
     it('Test setTakerWallet permissions', async () => {
       await reverted(delegate.setTradeWallet(notOwner, { from: notOwner }))
+    })
 
-      await passes(delegate.setTradeWallet(notOwner, { from: owner }))
+    it('Test ownership after transfer', async () => {
+      await reverted(
+        delegate.transferOwnership(EMPTY_ADDRESS),
+        'PEER_CONTRACT_OWNER_REQUIRED'
+      )
     })
   })
 

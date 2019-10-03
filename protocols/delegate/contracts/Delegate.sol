@@ -30,6 +30,9 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 contract Delegate is IDelegate, Ownable {
   using SafeMath for uint256;
 
+  event AdminAdded(address indexed account);
+  event AdminRemoved(address indexed account);
+
   // Swap contract to be used to settle trades
   ISwap public swapContract;
 
@@ -39,11 +42,23 @@ contract Delegate is IDelegate, Ownable {
   // Mapping of takerToken to makerToken for rule lookup
   mapping (address => mapping (address => Rule)) public rules;
 
+  // Mapping of admin addresses that can call on behalf of owner
+  mapping (address => bool) private admins;
+
   // ERC-20 (fungible token) interface identifier (ERC-165)
   bytes4 constant internal ERC20_INTERFACE_ID = 0x277f8169;
 
   /**
+    * @dev only admin ensures that only admin parties can call the method it modifies
+    */
+  modifier onlyAdmin() {
+    require(admins[msg.sender], "CALLER_MUST_BE_ADMIN");
+    _;
+  }
+
+  /**
     * @notice Contract Constructor
+    * @dev owner defaults to msg.sender if _peerContractOwner is not provided
     * @param _swapContract address of the swap contract the delegate will deploy with
     * @param _delegateContractOwner address that should be the owner of the delegate
     * @param _delegateTradeWallet the wallet the delegate will trade from
@@ -66,6 +81,50 @@ contract Delegate is IDelegate, Ownable {
     } else {
       _tradeWallet = owner();
     }
+
+    //owner must always be added to the whitelist
+    admins[owner()] = true;
+  }
+
+  /**
+    * @notice determines if an address to interact with this peer
+    * @param _addressToCheck the address to check if admin or not 
+    */
+  function isAdmin(address _addressToCheck) view external returns (bool) {
+    return admins[_addressToCheck];
+  }
+
+  /**
+    * @notice adds to the list of admin accounts that can interact with this peer
+    * @dev only callable by the owner of the contract
+    * @param _addressToAdd the address to add to the admins
+    */
+  function addAdmin(address _addressToAdd) external onlyOwner {
+    admins[_addressToAdd] = true;
+    emit AdminAdded(_addressToAdd);
+  }
+
+  /**
+    * @notice removes from the list of admin accounts that can interact with this peer
+    * @dev only callable by the owner of the contract
+    * @param _addressToRemove the address to add to the admins
+    */
+  function removeAdmin(address _addressToRemove) external onlyOwner {
+    require(_addressToRemove != owner(), "OWNER_MUST_BE_ADMIN");
+    delete admins[_addressToRemove];
+    emit AdminRemoved(_addressToRemove);
+  }
+
+  /**
+    * @notice transfers ownership to the new owner and ensures that admins is updated
+    * @dev only callable by the owner of the contract
+    * @param _newOwner the address of the new owner of the contract
+    */
+  function transferOwnership(address _newOwner) public onlyOwner {
+    require(_newOwner != address(0), 'PEER_CONTRACT_OWNER_REQUIRED');
+    admins[_newOwner] = true;
+    admins[owner()] = false;
+    super.transferOwnership(_newOwner);
   }
 
   /**
@@ -84,7 +143,7 @@ contract Delegate is IDelegate, Ownable {
     uint256 _maxTakerAmount,
     uint256 _priceCoef,
     uint256 _priceExp
-  ) external onlyOwner {
+  ) external onlyAdmin {
 
     rules[_takerToken][_makerToken] = Rule({
       maxTakerAmount: _maxTakerAmount,
@@ -110,7 +169,7 @@ contract Delegate is IDelegate, Ownable {
   function unsetRule(
     address _takerToken,
     address _makerToken
-  ) external onlyOwner {
+  ) external onlyAdmin {
 
     // Delete the rule.
     delete rules[_takerToken][_makerToken];
