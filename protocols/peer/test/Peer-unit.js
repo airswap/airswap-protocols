@@ -14,7 +14,9 @@ const { orders } = require('@airswap/order-utils')
 
 contract('Peer Unit Tests', async accounts => {
   const owner = accounts[0]
+  const tradeWallet = accounts[1]
   const notOwner = accounts[2]
+  const notTradeWallet = accounts[3]
   let peer
   let mockSwap
   let snapshotId
@@ -46,13 +48,34 @@ contract('Peer Unit Tests', async accounts => {
 
   before('deploy Peer', async () => {
     await setupMockSwap()
-    peer = await Peer.new(mockSwap.address, EMPTY_ADDRESS, { from: owner })
+    peer = await Peer.new(mockSwap.address, EMPTY_ADDRESS, tradeWallet, {
+      from: owner,
+    })
   })
 
-  describe('Test initial values', async () => {
+  describe('Test constructor', async () => {
     it('Test initial Swap Contract', async () => {
       let val = await peer.swapContract.call()
       equal(val, mockSwap.address, 'swap address is incorrect')
+    })
+
+    it('Test initial trade wallet value', async () => {
+      let val = await peer.tradeWallet.call()
+      equal(val, tradeWallet, 'trade wallet is incorrect')
+    })
+
+    it('Test constructor sets the owner as the trade wallet on empty address', async () => {
+      let newPeer = await Peer.new(
+        mockSwap.address,
+        EMPTY_ADDRESS,
+        EMPTY_ADDRESS,
+        {
+          from: owner,
+        }
+      )
+
+      let val = await newPeer.tradeWallet.call()
+      equal(val, owner, 'trade wallet is incorrect')
     })
 
     it('Test owner is set correctly if provided the empty address', async () => {
@@ -62,7 +85,9 @@ contract('Peer Unit Tests', async accounts => {
     })
 
     it('Test owner is set correctly if provided an address', async () => {
-      let newPeer = await Peer.new(mockSwap.address, notOwner, { from: owner })
+      let newPeer = await Peer.new(mockSwap.address, notOwner, tradeWallet, {
+        from: owner,
+      })
 
       // being provided an empty address, it should leave the owner unchanged
       let val = await newPeer.owner.call()
@@ -166,6 +191,14 @@ contract('Peer Unit Tests', async accounts => {
       emitted(trx, 'UnsetRule', e => {
         return e.takerToken === TAKER_TOKEN && e.makerToken === MAKER_TOKEN
       })
+    })
+  })
+
+  describe('Test setTakerWallet', async () => {
+    it('Test setTakerWallet permissions', async () => {
+      await reverted(peer.setTradeWallet(notOwner, { from: notOwner }))
+
+      await passes(peer.setTradeWallet(notOwner, { from: owner }))
     })
   })
 
@@ -340,6 +373,7 @@ contract('Peer Unit Tests', async accounts => {
           token: MAKER_TOKEN,
         },
         taker: {
+          wallet: tradeWallet,
           param: 999,
           token: TAKER_TOKEN,
         },
@@ -369,6 +403,7 @@ contract('Peer Unit Tests', async accounts => {
           token: MAKER_TOKEN,
         },
         taker: {
+          wallet: tradeWallet,
           param: MAX_TAKER_AMOUNT + 1,
           token: TAKER_TOKEN,
         },
@@ -382,7 +417,40 @@ contract('Peer Unit Tests', async accounts => {
       )
     })
 
-    it('test if order is priced according to the rule', async () => {
+    it('test if the taker is not empty and not the trade wallet', async () => {
+      await peer.setRule(
+        TAKER_TOKEN,
+        MAKER_TOKEN,
+        MAX_TAKER_AMOUNT,
+        PRICE_COEF,
+        EXP
+      )
+
+      let makerAmount = 100
+      let takerAmount = Math.floor((makerAmount * 10 ** EXP) / PRICE_COEF)
+
+      const order = await orders.getOrder({
+        maker: {
+          wallet: notOwner,
+          param: makerAmount,
+          token: MAKER_TOKEN,
+        },
+        taker: {
+          wallet: notTradeWallet,
+          param: takerAmount,
+          token: TAKER_TOKEN,
+        },
+      })
+
+      await reverted(
+        peer.provideOrder(order, {
+          from: notOwner,
+        }),
+        'INVALID_TAKER_WALLET'
+      )
+    })
+
+    it('test if order is not priced according to the rule', async () => {
       await peer.setRule(
         TAKER_TOKEN,
         MAKER_TOKEN,
@@ -397,6 +465,7 @@ contract('Peer Unit Tests', async accounts => {
           token: MAKER_TOKEN,
         },
         taker: {
+          wallet: tradeWallet,
           param: MAX_TAKER_AMOUNT,
           token: TAKER_TOKEN,
         },
@@ -423,6 +492,53 @@ contract('Peer Unit Tests', async accounts => {
           token: MAKER_TOKEN,
         },
         taker: {
+          wallet: tradeWallet,
+          param: 100,
+          token: TAKER_TOKEN,
+        },
+      })
+
+      await passes(
+        //mock swapContract
+        //test rule decrement
+        peer.provideOrder(order, {
+          from: notOwner,
+        })
+      )
+
+      let ruleAfter = await peer.rules.call(TAKER_TOKEN, MAKER_TOKEN)
+      equal(
+        ruleAfter[0].toNumber(),
+        ruleBefore[0].toNumber() - makerAmount,
+        "rule's max peer amount was not decremented"
+      )
+
+      //check if swap() was called
+      let invocationCount = await mockSwap.invocationCountForMethod.call(
+        swapFunction
+      )
+      equal(
+        invocationCount,
+        1,
+        'swap function was not called the expected number of times'
+      )
+    })
+
+    it('test a successful transaction with trade wallet as taker', async () => {
+      await peer.setRule(TAKER_TOKEN, MAKER_TOKEN, MAX_TAKER_AMOUNT, 100, EXP)
+
+      let ruleBefore = await peer.rules.call(TAKER_TOKEN, MAKER_TOKEN)
+
+      let makerAmount = 100
+
+      const order = await orders.getOrder({
+        maker: {
+          wallet: notOwner,
+          param: makerAmount,
+          token: MAKER_TOKEN,
+        },
+        taker: {
+          wallet: tradeWallet,
           param: 100,
           token: TAKER_TOKEN,
         },
@@ -475,6 +591,7 @@ contract('Peer Unit Tests', async accounts => {
           token: MAKER_TOKEN,
         },
         taker: {
+          wallet: tradeWallet,
           param: takerAmount,
           token: TAKER_TOKEN,
         },

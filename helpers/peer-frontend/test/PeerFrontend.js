@@ -66,7 +66,7 @@ contract('PeerFrontend', async accounts => {
         from: ownerAddress,
       })
       peerfrontendAddress = peerfrontend.address
-      alicePeer = await Peer.new(swapAddress, aliceAddress, {
+      alicePeer = await Peer.new(swapAddress, EMPTY_ADDRESS, EMPTY_ADDRESS, {
         from: aliceAddress,
       })
     })

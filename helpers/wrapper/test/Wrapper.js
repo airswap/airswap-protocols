@@ -241,6 +241,7 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
       ok(await balances(wrapperAddress, [[tokenDAI, 0], [tokenWETH, 5]]))
     })
   })
+
   describe('Sending nonWETH ERC20', async () => {
     it('Alice approves Swap to spend 1000 DAI', async () => {
       let result = await tokenDAI.approve(swapAddress, 1000, {
