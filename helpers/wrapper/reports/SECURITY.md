@@ -77,7 +77,7 @@ _\*\* OpenZeppelin contract_
 
 #### 4. If WETH is received after a swap, it should be withdrawn and sent to the sender.
 
-- When WETH is specified as the signerToken, the contract transfers the WETH to itself on behalf of the taker. The contract then withdraws the ether and transfers the amount to the message sender. Both the `transferFrom` and `withdraw` functions on the WETH contract will REVERT if they fail.
+- When WETH is specified as the signerToken, the contract transfers the WETH to itself on behalf of the order sender. The contract then withdraws the ether and transfers the amount to the message sender. Both the `transferFrom` and `withdraw` functions on the WETH contract will REVERT if they fail.
 - **This invariant currently holds as-is.**
 
 #### 5. ISwap and IWeth contract addresses are immutable, any updates will require new deploy of Wrapper.
@@ -85,9 +85,9 @@ _\*\* OpenZeppelin contract_
 - There are no methods within the Wrapper that allow the Swap contract or the WETH contract to be changed; the Swap and WETH contracts provided on deployment are permanent. There is no functionality whatsoever that allows changing the addresses.
 - **This invariant currently holds as-is.**
 
-#### 6. Only the taker specified on an order may execute Wrapper.swap.
+#### 6. Only the sender specified on an order may execute Wrapper.swap.
 
-- Because the taker has authorized the wrapper on the swap contract, the wrapper requires that the sender of the transaction be the same as the takerAddress.
+- Because the sender has authorized the wrapper on the swap contract, the wrapper requires that the sender of the transaction be the same as the order sender.
 - **This invariant holds as-is.**
 
 #### 6. The contract is safeguarded against re-entrancy attacks that can make unauthorized or unexpected ether or token transfers.
@@ -122,7 +122,7 @@ _\*\* OpenZeppelin contract_
 Medium Severity Detected:
 Wrapper.constructor (Wrapper.sol#42-51) ignores return value by external calls "wethContract.approve(\_swapContract,MAX_INT)" (Wrapper.sol#50)
 
-Wrapper.swap (Wrapper.sol#72-141) ignores return value by external calls "wethContract.transferFrom(\_takerWallet,address(this),\_makerAmount)" (Wrapper.sol#122)
+Wrapper.swap (Wrapper.sol#72-141) ignores return value by external calls "wethContract.transferFrom(\_senderWallet,address(this),\_signerAmount)" (Wrapper.sol#122)
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unused-return
 
 External call is being made to a known contract implementation of WETH9.sol. WETH9.sol either returns True of revert, there are no instances where it returns False during approve or transferFrom.
