@@ -6,7 +6,6 @@ const {
   passes,
   emitted,
   reverted,
-  fails,
 } = require('@airswap/test-utils').assert
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
@@ -70,8 +69,8 @@ contract('Peer Unit Tests', async accounts => {
 
   describe('Test setters', async () => {
     it('Test setRule permissions as not owner', async () => {
-      //not owner is not apart of whitelist and should fail
-      await fails(
+      //not owner is not apart of admin and should fail
+      await reverted(
         peer.setRule(
           TAKER_TOKEN,
           MAKER_TOKEN,
@@ -79,12 +78,13 @@ contract('Peer Unit Tests', async accounts => {
           PRICE_COEF,
           EXP,
           { from: notOwner }
-        )
+        ),
+        'CALLER_NOT_ADMIN'
       )
     })
 
-    it('Test setRule permissions after not owner is whitelisted', async () => {
-      //test again after adding not owner to whitelist
+    it('Test setRule permissions after not owner is admin', async () => {
+      //test again after adding not owner to admin
       await peer.addToAdmins(notOwner)
       await passes(
         peer.setRule(
@@ -143,19 +143,19 @@ contract('Peer Unit Tests', async accounts => {
     })
 
     it('Test unsetRule permissions as not owner', async () => {
-      //not owner is not apart of whitelist and should fail
-      await fails(
+      //not owner is not apart of admin and should fail
+      await reverted(
         peer.unsetRule(
           TAKER_TOKEN,
           MAKER_TOKEN,
           { from: notOwner },
-          'CALLER_NOT_WHITELISTED'
-        )
+        ),
+        'CALLER_NOT_ADMIN'
       )
     })
 
-    it('Test unsetRule permissions after not owner is whitelisted', async () => {
-      //test again after adding not owner to whitelist
+    it('Test unsetRule permissions after not owner is admin', async () => {
+      //test again after adding not owner to admin
       await peer.addToAdmins(notOwner)
       await passes(peer.unsetRule(TAKER_TOKEN, MAKER_TOKEN, { from: notOwner }))
     })
@@ -200,36 +200,36 @@ contract('Peer Unit Tests', async accounts => {
     })
   })
 
-  describe('Test whitelist', async () => {
-    it('Test adding to whitelist as owner', async () => {
+  describe('Test admin', async () => {
+    it('Test adding to admin as owner', async () => {
       await passes(peer.addToAdmins(notOwner))
     })
 
-    it('Test adding to whitelist as not owner', async () => {
-      await fails(peer.addToAdmins(notOwner, { from: notOwner }))
+    it('Test adding to admin as not owner', async () => {
+      await reverted(peer.addToAdmins(notOwner, { from: notOwner }))
     })
 
-    it('Test removal from whitelist', async () => {
+    it('Test removal from admin', async () => {
       await peer.addToAdmins(notOwner)
       await passes(peer.removeFromAdmins(notOwner))
     })
 
-    it('Test removal of owner from whitelist', async () => {
-      await fails(peer.removeFromAdmins(owner), 'OWNER_MUST_BE_ADMIN')
+    it('Test removal of owner from admin', async () => {
+      await reverted(peer.removeFromAdmins(owner), 'OWNER_MUST_BE_ADMIN')
     })
 
-    it('Test removal from whitelist as not owner', async () => {
-      await fails(peer.removeFromAdmins(notOwner, { from: notOwner }))
+    it('Test removal from admin as not owner', async () => {
+      await reverted(peer.removeFromAdmins(notOwner, { from: notOwner }))
     })
 
-    it('Test adding to whitelist event emitted', async () => {
+    it('Test adding to admin event emitted', async () => {
       let trx = await peer.addToAdmins(notOwner)
       await emitted(trx, 'AdminAdded', e => {
         return e.account == notOwner
       })
     })
 
-    it('Test removing from whitelist event emitted', async () => {
+    it('Test removing from admin event emitted', async () => {
       let trx = await peer.removeFromAdmins(notOwner)
       await emitted(trx, 'AdminRemoved', e => {
         return e.account == notOwner
@@ -244,7 +244,7 @@ contract('Peer Unit Tests', async accounts => {
       equal(val, notOwner, 'owner was not passed properly')
 
       val = await peer.isAdmin.call(owner)
-      equal(val, false, 'owner should no longer be whitelisted')
+      equal(val, false, 'owner should no longer be admin')
     })
 
     it('Test ownership after transfer', async () => {
