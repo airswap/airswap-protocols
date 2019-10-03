@@ -85,9 +85,14 @@ contract('Delegate Unit Tests', async accounts => {
     })
 
     it('Test owner is set correctly if provided an address', async () => {
-      let newDelegate = await Delegate.new(mockSwap.address, notOwner, tradeWallet, {
-        from: owner,
-      })
+      let newDelegate = await Delegate.new(
+        mockSwap.address,
+        notOwner,
+        tradeWallet,
+        {
+          from: owner,
+        }
+      )
 
       // being provided an empty address, it should leave the owner unchanged
       let val = await newDelegate.owner.call()

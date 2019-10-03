@@ -49,9 +49,14 @@ contract('Delegate', async accounts => {
     tokenWETH = await FungibleToken.new()
     tokenDAI = await FungibleToken.new()
 
-    aliceDelegate = await Delegate.new(swapAddress, aliceAddress, aliceTradeWallet, {
-      from: aliceAddress,
-    })
+    aliceDelegate = await Delegate.new(
+      swapAddress,
+      aliceAddress,
+      aliceTradeWallet,
+      {
+        from: aliceAddress,
+      }
+    )
   })
 
   after(async () => {
@@ -75,7 +80,9 @@ contract('Delegate', async accounts => {
       equal(val, carolAddress, 'trade wallet is incorrect')
 
       //change it back
-      await aliceDelegate.setTradeWallet(aliceTradeWallet, { from: aliceAddress })
+      await aliceDelegate.setTradeWallet(aliceTradeWallet, {
+        from: aliceAddress,
+      })
     })
 
     it('Non-owner cannot set a new address', async () => {

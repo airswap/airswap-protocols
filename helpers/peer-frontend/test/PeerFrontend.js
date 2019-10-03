@@ -66,9 +66,14 @@ contract('DelegateFrontend', async accounts => {
         from: ownerAddress,
       })
       peerfrontendAddress = peerfrontend.address
-      aliceDelegate = await Delegate.new(swapAddress, EMPTY_ADDRESS, EMPTY_ADDRESS, {
-        from: aliceAddress,
-      })
+      aliceDelegate = await Delegate.new(
+        swapAddress,
+        EMPTY_ADDRESS,
+        EMPTY_ADDRESS,
+        {
+          from: aliceAddress,
+        }
+      )
     })
 
     it('Alice authorizes the new peer', async () => {

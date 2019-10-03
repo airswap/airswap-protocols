@@ -38,7 +38,11 @@ contract('Delegate Factory Tests', async accounts => {
   describe('Test deploying peers', async () => {
     it('should not deploy a peer with owner address 0x0', async () => {
       await reverted(
-        peerFactory.createDelegate(swapContractOne, EMPTY_ADDRESS, tradeWalletOne),
+        peerFactory.createDelegate(
+          swapContractOne,
+          EMPTY_ADDRESS,
+          tradeWalletOne
+        ),
         'PEER_CONTRACT_OWNER_REQUIRED'
       )
     })

@@ -54,14 +54,20 @@ contract('DelegateFrontend Unit Tests', async () => {
     let peer_getMakerSideQuote = peerTemplate.contract.methods
       .getMakerSideQuote(0, EMPTY_ADDRESS, EMPTY_ADDRESS)
       .encodeABI()
-    await mockDelegateHigh.givenMethodReturnUint(peer_getMakerSideQuote, highVal)
+    await mockDelegateHigh.givenMethodReturnUint(
+      peer_getMakerSideQuote,
+      highVal
+    )
     await mockDelegateLow.givenMethodReturnUint(peer_getMakerSideQuote, lowVal)
 
     //mock peer getMakerSideQuote()
     let peer_getTakerSideQuote = peerTemplate.contract.methods
       .getTakerSideQuote(0, EMPTY_ADDRESS, EMPTY_ADDRESS)
       .encodeABI()
-    await mockDelegateHigh.givenMethodReturnUint(peer_getTakerSideQuote, highVal)
+    await mockDelegateHigh.givenMethodReturnUint(
+      peer_getTakerSideQuote,
+      highVal
+    )
     await mockDelegateLow.givenMethodReturnUint(peer_getTakerSideQuote, lowVal)
 
     // mock peer has owner()
@@ -73,8 +79,14 @@ contract('DelegateFrontend Unit Tests', async () => {
     let peer_tradeWallet = peerTemplate.contract.methods
       .tradeWallet()
       .encodeABI()
-    await mockDelegateHigh.givenMethodReturnAddress(peer_tradeWallet, EMPTY_ADDRESS)
-    await mockDelegateLow.givenMethodReturnAddress(peer_tradeWallet, EMPTY_ADDRESS)
+    await mockDelegateHigh.givenMethodReturnAddress(
+      peer_tradeWallet,
+      EMPTY_ADDRESS
+    )
+    await mockDelegateLow.givenMethodReturnAddress(
+      peer_tradeWallet,
+      EMPTY_ADDRESS
+    )
 
     //mock peer provideUnsignedOrder()
     const order = await orders.getOrder({})
@@ -82,7 +94,10 @@ contract('DelegateFrontend Unit Tests', async () => {
     let peer_provideUnsignedOrder = peerTemplate.contract.methods
       .provideOrder(order)
       .encodeABI()
-    await mockDelegateHigh.givenMethodReturnBool(peer_provideUnsignedOrder, true)
+    await mockDelegateHigh.givenMethodReturnBool(
+      peer_provideUnsignedOrder,
+      true
+    )
     await mockDelegateLow.givenMethodReturnBool(peer_provideUnsignedOrder, true)
   }
 
@@ -111,7 +126,10 @@ contract('DelegateFrontend Unit Tests', async () => {
 
   before('deploy DelegateFrontend', async () => {
     await setupMocks()
-    peerFrontend = await DelegateFrontend.new(mockIndexer.address, mockSwap.address)
+    peerFrontend = await DelegateFrontend.new(
+      mockIndexer.address,
+      mockSwap.address
+    )
   })
 
   describe('Test initial values', async () => {
