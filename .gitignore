@@ -4,5 +4,6 @@ build
 lerna-debug.log
 .DS_Store
 *.swp
+*.orig
 coverage.json
 coverage
