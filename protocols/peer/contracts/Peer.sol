@@ -73,8 +73,8 @@ contract Peer is IPeer, Ownable {
     * @notice determines if an address to interact with this peer
     * @param addressToCheck the address to check if whitelisted or not 
     */
-  function isWhitelisted(address addressToCheck) external returns(bool) {
-    return whitelist[addressToCheck];
+  function isWhitelisted(address _addressToCheck) external returns (bool) {
+    return whitelist[_addressToCheck];
   }
 
   /**
@@ -82,9 +82,9 @@ contract Peer is IPeer, Ownable {
     * @dev only callable by the owner of the contract
     * @param addressToAdd the address to add to the whitelist
     */
-  function addToWhitelist(address addressToAdd) external onlyOwner {
-    whitelist[addressToAdd] = true;
-    emit WhitelistAdded(addressToAdd);
+  function addToWhitelist(address _addressToAdd) external onlyOwner {
+    whitelist[_addressToAdd] = true;
+    emit WhitelistAdded(_addressToAdd);
   }
 
   /**
@@ -92,10 +92,10 @@ contract Peer is IPeer, Ownable {
     * @dev only callable by the owner of the contract
     * @param addressToRemove the address to add to the whitelist
     */
-  function removeFromWhitelist(address addressToRemove) external onlyOwner {
-    require(addressToRemove != owner(), "OWNER_MUST_BE_WHITELISTED");
-    delete whitelist[addressToRemove];
-    emit WhitelistRemoved(addressToRemove);
+  function removeFromWhitelist(address _addressToRemove) external onlyOwner {
+    require(_addressToRemove != owner(), "OWNER_MUST_BE_WHITELISTED");
+    delete whitelist[_addressToRemove];
+    emit WhitelistRemoved(_addressToRemove);
   }
 
   /**
@@ -103,11 +103,11 @@ contract Peer is IPeer, Ownable {
     * @dev only callable by the owner of the contract
     * @param newOwner the address of the new owner of the contract
     */
-  function transferOwnership(address newOwner) public onlyOwner {
-    require(newOwner != address(0), 'PEER_CONTRACT_OWNER_REQUIRED');
-    whitelist[newOwner] = true;
+  function transferOwnership(address _newOwner) public onlyOwner {
+    require(_newOwner != address(0), 'PEER_CONTRACT_OWNER_REQUIRED');
+    whitelist[_newOwner] = true;
     whitelist[owner()] = false;
-    super.transferOwnership(newOwner);
+    super.transferOwnership(_newOwner);
   }
 
   /**
