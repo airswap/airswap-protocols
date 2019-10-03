@@ -48,32 +48,31 @@ contract Peer is IPeer, Ownable {
   /**
     * @dev only admin ensures that only admin parties can call the method it modifies
     */
-  modifier onlyWhitelisted() {
-    require(admins[msg.sender], "CALLER_NOT_WHITELISTED");
+  modifier onlyAdmins() {
+    require(admins[msg.sender], "CALLER_NOT_ADMIN");
     _;
   }
 
   /**
     * @notice Contract Constructor
     * @param _swapContract address of the swap contract the peer will deploy with
-    * @param _peerContractOwner address that should be the owner of the peer
+    * @param _owner address that should be the owner of the peer
     */
   constructor(
     address _swapContract,
-    address _peerContractOwner
+    address _owner
   ) public {
     swapContract = ISwap(_swapContract);
-    if (_peerContractOwner != address(0)) {
-      admins[_peerContractOwner] = true;
-      super.transferOwnership(_peerContractOwner);
-    }
+    require(_owner != address(0), 'PEER_CONTRACT_OWNER_REQUIRED');
+    admins[_owner] = true;
+    super.transferOwnership(_owner);
   }
 
   /**
     * @notice determines if an address to interact with this peer
     * @param _addressToCheck the address to check if admin or not 
     */
-  function isAdmin(address _addressToCheck) external returns (bool) {
+  function isAdmin(address _addressToCheck) view external returns (bool) {
     return admins[_addressToCheck];
   }
 
@@ -93,7 +92,7 @@ contract Peer is IPeer, Ownable {
     * @param _addressToRemove the address to add to the admins
     */
   function removeFromAdmins(address _addressToRemove) external onlyOwner {
-    require(_addressToRemove != owner(), "OWNER_MUST_BE_WHITELISTED");
+    require(_addressToRemove != owner(), "OWNER_MUST_BE_ADMIN");
     delete admins[_addressToRemove];
     emit AdminRemoved(_addressToRemove);
   }
@@ -125,7 +124,7 @@ contract Peer is IPeer, Ownable {
     uint256 _maxTakerAmount,
     uint256 _priceCoef,
     uint256 _priceExp
-  ) external onlyWhitelisted {
+  ) external onlyAdmins {
 
     rules[_takerToken][_makerToken] = Rule({
       maxTakerAmount: _maxTakerAmount,
@@ -151,7 +150,7 @@ contract Peer is IPeer, Ownable {
   function unsetRule(
     address _takerToken,
     address _makerToken
-  ) external onlyWhitelisted {
+  ) external onlyAdmins {
 
     // Delete the rule.
     delete rules[_takerToken][_makerToken];

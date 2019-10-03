@@ -10,5 +10,5 @@ module.exports = deployer => {
   deployer
     .deploy(Swap)
     .then(() => Swap.deployed())
-    .then(() => deployer.deploy(Peer, Swap.address, EMPTY_ADDRESS))
+//    .then(() => deployer.deploy(Peer, Swap.address, EMPTY_ADDRESS))
 }

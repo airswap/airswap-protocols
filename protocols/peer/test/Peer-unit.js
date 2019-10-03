@@ -56,16 +56,17 @@ contract('Peer Unit Tests', async accounts => {
       equal(val, mockSwap.address, 'swap address is incorrect')
     })
 
-    it('Test owner is set correctly if provided the empty address', async () => {
-      // being provided an empty address, it should leave the owner unchanged
+    it('Test owner is set correctly', async () => {
       let val = await peer.owner.call()
       equal(val, owner, 'owner is incorrect - should be owner')
     })
 
+    it('Test owner if provided the empty address', async () => {
+      await reverted(Peer.new(mockSwap.address, EMPTY_ADDRESS, { from: owner }),'PEER_CONTRACT_OWNER_REQUIRED')
+    })
+
     it('Test owner is set correctly if provided an address', async () => {
       let newPeer = await Peer.new(mockSwap.address, notOwner, { from: owner })
-
-      // being provided an empty address, it should leave the owner unchanged
       let val = await newPeer.owner.call()
       equal(val, notOwner, 'owner is incorrect - should be notOwner')
     })
@@ -220,7 +221,7 @@ contract('Peer Unit Tests', async accounts => {
     })
 
     it('Test removal of owner from whitelist', async () => {
-      await fails(peer.removeFromAdmins(owner), 'OWNER_MUST_BE_WHITELISTED')
+      await fails(peer.removeFromAdmins(owner), 'OWNER_MUST_BE_ADMIN')
     })
 
     it('Test removal from whitelist as not owner', async () => {
