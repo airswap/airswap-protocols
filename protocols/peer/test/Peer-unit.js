@@ -62,7 +62,9 @@ contract('Peer Unit Tests', async accounts => {
     })
 
     it('Test owner if provided the empty address', async () => {
-      let newPeer = await Peer.new(mockSwap.address, EMPTY_ADDRESS, { from: owner })
+      let newPeer = await Peer.new(mockSwap.address, EMPTY_ADDRESS, {
+        from: owner,
+      })
       let val = await newPeer.owner.call()
       equal(val, owner, 'owner is incorrect - should be owner')
     })
@@ -105,8 +107,6 @@ contract('Peer Unit Tests', async accounts => {
     })
 
     it('Test setRule permissions as owner', async () => {
-      let val = await peer.owner.call()
-      let isAdmin = await peer.isAdmin.call(owner)
       await passes(
         peer.setRule(
           TAKER_TOKEN,
@@ -256,7 +256,10 @@ contract('Peer Unit Tests', async accounts => {
     })
 
     it('Test ownership after transfer', async () => {
-      await reverted(peer.transferOwnership(EMPTY_ADDRESS), 'PEER_CONTRACT_OWNER_REQUIRED')
+      await reverted(
+        peer.transferOwnership(EMPTY_ADDRESS),
+        'PEER_CONTRACT_OWNER_REQUIRED'
+      )
     })
   })
 
