@@ -40,7 +40,6 @@ contract Index is Ownable {
   /**
     * @notice Locator for a Delegate
     * @dev data is arbitrary e.g. may include an address
-    *
     * @param user address
     * @param score uint256
     * @param data bytes32
