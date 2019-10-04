@@ -50,19 +50,19 @@ contract('PeerFrontend Unit Tests', async () => {
     mockPeerLow = await MockContract.new()
     mockPeerLowLocator = padAddressToLocator(mockPeerLow.address)
 
-    //mock peer getMakerSideQuote()
-    let peer_getMakerSideQuote = peerTemplate.contract.methods
-      .getMakerSideQuote(0, EMPTY_ADDRESS, EMPTY_ADDRESS)
+    //mock peer getSignerSideQuote()
+    let peer_getSignerSideQuote = peerTemplate.contract.methods
+      .getSignerSideQuote(0, EMPTY_ADDRESS, EMPTY_ADDRESS)
       .encodeABI()
-    await mockPeerHigh.givenMethodReturnUint(peer_getMakerSideQuote, highVal)
-    await mockPeerLow.givenMethodReturnUint(peer_getMakerSideQuote, lowVal)
+    await mockPeerHigh.givenMethodReturnUint(peer_getSignerSideQuote, highVal)
+    await mockPeerLow.givenMethodReturnUint(peer_getSignerSideQuote, lowVal)
 
-    //mock peer getMakerSideQuote()
-    let peer_getTakerSideQuote = peerTemplate.contract.methods
-      .getTakerSideQuote(0, EMPTY_ADDRESS, EMPTY_ADDRESS)
+    //mock peer getSignerSideQuote()
+    let peer_getSenderSideQuote = peerTemplate.contract.methods
+      .getSenderSideQuote(0, EMPTY_ADDRESS, EMPTY_ADDRESS)
       .encodeABI()
-    await mockPeerHigh.givenMethodReturnUint(peer_getTakerSideQuote, highVal)
-    await mockPeerLow.givenMethodReturnUint(peer_getTakerSideQuote, lowVal)
+    await mockPeerHigh.givenMethodReturnUint(peer_getSenderSideQuote, highVal)
+    await mockPeerLow.givenMethodReturnUint(peer_getSenderSideQuote, lowVal)
 
     // mock peer has owner()
     let peer_owner = peerTemplate.contract.methods.owner().encodeABI()
@@ -126,7 +126,7 @@ contract('PeerFrontend Unit Tests', async () => {
     })
   })
 
-  describe('Test getBestTakerSideQuote()', async () => {
+  describe('Test getBestSenderSideQuote()', async () => {
     it('test default values are returned with an empty indexer', async () => {
       //mock indexer getIntents() where there are no locators
       await mockIndexer.givenMethodReturn(
@@ -134,7 +134,7 @@ contract('PeerFrontend Unit Tests', async () => {
         abi.rawEncode(['bytes32[]'], [[]])
       )
 
-      let val = await peerFrontend.getBestTakerSideQuote.call(
+      let val = await peerFrontend.getBestSenderSideQuote.call(
         180,
         EMPTY_ADDRESS,
         EMPTY_ADDRESS,
@@ -157,7 +157,7 @@ contract('PeerFrontend Unit Tests', async () => {
       )
 
       //this should always select the lowest cost peer available
-      let val = await peerFrontend.getBestTakerSideQuote.call(
+      let val = await peerFrontend.getBestSenderSideQuote.call(
         180,
         EMPTY_ADDRESS,
         EMPTY_ADDRESS,
@@ -179,7 +179,7 @@ contract('PeerFrontend Unit Tests', async () => {
       )
 
       //this should always select the lowest cost peer available
-      let val = await peerFrontend.getBestTakerSideQuote.call(
+      let val = await peerFrontend.getBestSenderSideQuote.call(
         180,
         EMPTY_ADDRESS,
         EMPTY_ADDRESS,
@@ -190,7 +190,7 @@ contract('PeerFrontend Unit Tests', async () => {
     })
   })
 
-  describe('Test getBestMakerSideQuote()', async () => {
+  describe('Test getBestSignerSideQuote()', async () => {
     it('test default values are returned with an empty indexer', async () => {
       //mock indexer getIntents() where there are no locators
       await mockIndexer.givenMethodReturn(
@@ -198,7 +198,7 @@ contract('PeerFrontend Unit Tests', async () => {
         abi.rawEncode(['bytes32[]'], [[]])
       )
 
-      let val = await peerFrontend.getBestMakerSideQuote.call(
+      let val = await peerFrontend.getBestSignerSideQuote.call(
         180,
         EMPTY_ADDRESS,
         EMPTY_ADDRESS,
@@ -221,7 +221,7 @@ contract('PeerFrontend Unit Tests', async () => {
       )
 
       //this should always select the lowest cost peer available
-      let val = await peerFrontend.getBestMakerSideQuote.call(
+      let val = await peerFrontend.getBestSignerSideQuote.call(
         180,
         EMPTY_ADDRESS,
         EMPTY_ADDRESS,
@@ -243,7 +243,7 @@ contract('PeerFrontend Unit Tests', async () => {
       )
 
       //this should always select the lowest cost peer available
-      let val = await peerFrontend.getBestMakerSideQuote.call(
+      let val = await peerFrontend.getBestSignerSideQuote.call(
         180,
         EMPTY_ADDRESS,
         EMPTY_ADDRESS,
@@ -254,7 +254,7 @@ contract('PeerFrontend Unit Tests', async () => {
     })
   })
 
-  describe('Test fillBestTakerSideOrder()', async () => {
+  describe('Test fillBestSenderSideOrder()', async () => {
     it('test by ensuring all internal methods are called', async () => {
       //mock indexer getIntents() where locators are ordered low to high
       await mockIndexer.givenMethodReturn(
@@ -265,7 +265,7 @@ contract('PeerFrontend Unit Tests', async () => {
         )
       )
 
-      let trx = await peerFrontend.fillBestTakerSideOrder(
+      let trx = await peerFrontend.fillBestSenderSideOrder(
         180,
         mockUserSendToken.address,
         mockUserReceiveToken.address,
@@ -275,5 +275,5 @@ contract('PeerFrontend Unit Tests', async () => {
     })
   })
 
-  describe('Test fillBestMakerSideOrder()', async () => {})
+  describe('Test fillBestSignerSideOrder()', async () => {})
 })

@@ -72,7 +72,7 @@ contract Wrapper {
 
     // Ensure msg.sender is sender wallet.
     require(_order.sender.wallet == msg.sender,
-      "SENDER_MUST_BE_TAKER");
+      "MSG_SENDER_MUST_BE_ORDER_SENDER");
 
     // The sender is sending ether that must be wrapped.
     if (_order.sender.token == address(wethContract)) {
