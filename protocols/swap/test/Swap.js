@@ -703,7 +703,7 @@ contract('Swap', async accounts => {
           param: '0',
         },
       })
-      emitted(await swap(order, { from: bobAddress }), 'Swap') //, { senderAddress: bobAddress })
+      emitted(await swap(order, { from: bobAddress }), 'Swap')
     })
   })
 
