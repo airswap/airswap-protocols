@@ -29,8 +29,9 @@ contract('DelegateManager Unit Tests', async (accounts) => {
   })
 
   async function setupMockFactory() {
+    mockSwap = await MockContract.new()
     mockFactory = await MockContract.new()
-    mockFactoryTemplate = await DelegateFactory.new()
+    mockFactoryTemplate = await DelegateFactory.new(mockSwap.address)
 
     // mock createDelegate()
     let mockFactory_createDelegate =
@@ -40,9 +41,7 @@ contract('DelegateManager Unit Tests', async (accounts) => {
 
   before(async () => {
     await setupMockFactory();
-
     delegateManager = await DelegateManager.new(mockFactory.address)
-    mockSwap = await MockContract.new()
   })
 
   describe('Test initial values', async () => {
@@ -53,19 +52,15 @@ contract('DelegateManager Unit Tests', async (accounts) => {
   })
 
   describe('Test createDelegate', async () => {
-    it("Test when empty address is given", async() => {
-      await reverted(delegateManager.createDelegate.call(EMPTY_ADDRESS), "SWAP_ADDRESS_REQUIRED");
-    })
-
     it("Test when a delegate is returned", async() => {
-      let val = await delegateManager.createDelegate.call(mockSwap.address);
+      let val = await delegateManager.createDelegate.call();
       equal(val, generatedDelegate, "no delegate was created")
     })
 
     it("Test when a delegate is added to owner to delegate list mapping", async() => {
-      //add generate two delegates
-      await delegateManager.createDelegate(mockSwap.address);
-      await delegateManager.createDelegate(mockSwap.address);
+      //generate two delegates against the caller
+      await delegateManager.createDelegate();
+      await delegateManager.createDelegate();
 
       //retrieve the list
       let val = await delegateManager.getOwnerAddressToDelegates.call(owner);
@@ -75,7 +70,7 @@ contract('DelegateManager Unit Tests', async (accounts) => {
     })
 
     it("Test when a create delegate event is emitted", async() => {
-      let trx = await delegateManager.createDelegate(mockSwap.address);
+      let trx = await delegateManager.createDelegate();
       emitted(trx, "DelegateCreated", (e) => {
         return e.owner === owner && e.delegate == generatedDelegate;
       })
