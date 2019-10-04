@@ -40,7 +40,6 @@ contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
   }
 
   /**
-    * @notice Create a new Delegate contract
     * @param _delegateContractOwner address that will become the delegate owner
     * @param _delegateTradeWallet the wallet the delegate will trade from
     * @return delegateContractAddress address of the delegate contract created
