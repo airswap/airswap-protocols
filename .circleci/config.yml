@@ -96,7 +96,7 @@ jobs:
           command: |
             cd protocols
             ### ADD FOLDERS HERE TO PROCESS ###
-            for file in indexer index peer peer-factory swap types
+            for file in indexer index delegate delegate-factory swap types
             do
               cd $file
               NPM_NAME=$(node -p "require('./package.json').name")

@@ -27,8 +27,8 @@ library Types {
   struct Order {
     uint256 nonce;        // Unique per order and should be sequential
     uint256 expiry;       // Expiry in seconds since 1 January 1970
-    Party maker;          // Party to the trade that sets terms
-    Party taker;          // Party to the trade that accepts terms
+    Party signer;          // Party to the trade that sets terms
+    Party sender;          // Party to the trade that accepts terms
     Party affiliate;      // Party compensated for facilitating (optional)
     Signature signature;  // Signature of the order
   }
@@ -41,7 +41,7 @@ library Types {
   }
 
   struct Signature {
-    address signer;       // Address of the wallet used to sign
+    address signatory;    // Address of the wallet used to sign
     uint8 v;              // `v` value of an ECDSA signature
     bytes32 r;            // `r` value of an ECDSA signature
     bytes32 s;            // `s` value of an ECDSA signature
@@ -60,8 +60,8 @@ library Types {
     "Order(",
     "uint256 nonce,",
     "uint256 expiry,",
-    "Party maker,",
-    "Party taker,",
+    "Party signer,",
+    "Party sender,",
     "Party affiliate",
     ")",
     "Party(",
@@ -101,17 +101,17 @@ library Types {
         _order.expiry,
         keccak256(abi.encode(
           PARTY_TYPEHASH,
-          _order.maker.wallet,
-          _order.maker.token,
-          _order.maker.param,
-          _order.maker.kind
+          _order.signer.wallet,
+          _order.signer.token,
+          _order.signer.param,
+          _order.signer.kind
         )),
         keccak256(abi.encode(
           PARTY_TYPEHASH,
-          _order.taker.wallet,
-          _order.taker.token,
-          _order.taker.param,
-          _order.taker.kind
+          _order.sender.wallet,
+          _order.sender.token,
+          _order.sender.param,
+          _order.sender.kind
         )),
         keccak256(abi.encode(
           PARTY_TYPEHASH,

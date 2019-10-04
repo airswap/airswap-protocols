@@ -19,21 +19,21 @@ pragma solidity 0.5.10;
 interface IIndexer {
 
   event CreateIndex(
-    address makerToken,
-    address takerToken
+    address signerToken,
+    address senderToken
   );
 
   event Stake(
     address wallet,
-    address makerToken,
-    address takerToken,
+    address signerToken,
+    address senderToken,
     uint256 amount
   );
 
   event Unstake(
     address wallet,
-    address makerToken,
-    address takerToken,
+    address signerToken,
+    address senderToken,
     uint256 amount
   );
 
@@ -49,8 +49,8 @@ interface IIndexer {
   function blacklist(address) external returns (bool);
 
   function createIndex(
-    address _makerToken,
-    address _takerToken
+    address _signerToken,
+    address _senderToken
   ) external returns (address);
 
   function addToBlacklist(
@@ -62,20 +62,20 @@ interface IIndexer {
   ) external;
 
   function setIntent(
-    address _makerToken,
-    address _takerToken,
+    address _signerToken,
+    address _senderToken,
     uint256 _amount,
     bytes32 _locator
   ) external;
 
   function unsetIntent(
-    address _makerToken,
-    address _takerToken
+    address _signerToken,
+    address _senderToken
   ) external;
 
   function getIntents(
-    address _makerToken,
-    address _takerToken,
+    address _signerToken,
+    address _senderToken,
     uint256 _count
   ) external view returns (bytes32[] memory);
 

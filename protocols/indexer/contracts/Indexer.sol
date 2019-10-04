@@ -31,7 +31,7 @@ contract Indexer is IIndexer, Ownable {
   // Token to be used for staking (ERC-20)
   IERC20 public stakeToken;
 
-  // Mapping of maker token to taker token to index
+  // Mapping of signer token to sender token to index
   mapping (address => mapping (address => Index)) public indexes;
 
   // Mapping of token address to boolean
@@ -58,23 +58,23 @@ contract Indexer is IIndexer, Ownable {
     * @notice Create an Index (List of Locators for a Token Pair)
     * @dev Deploys a new Index contract and stores the address
     *
-    * @param _makerToken address
-    * @param _takerToken address
+    * @param _signerToken address
+    * @param _senderToken address
     */
   function createIndex(
-    address _makerToken,
-    address _takerToken
+    address _signerToken,
+    address _senderToken
   ) external returns (address) {
 
     // If the Index does not exist, create it.
-    if (indexes[_makerToken][_takerToken] == Index(0)) {
+    if (indexes[_signerToken][_senderToken] == Index(0)) {
       // Create a new Index contract for the token pair.
-      indexes[_makerToken][_takerToken] = new Index();
-      emit CreateIndex(_makerToken, _takerToken);
+      indexes[_signerToken][_senderToken] = new Index();
+      emit CreateIndex(_signerToken, _senderToken);
     }
 
     // Return the address of the Index contract.
-    return address(indexes[_makerToken][_takerToken]);
+    return address(indexes[_signerToken][_senderToken]);
   }
 
   /**
@@ -111,14 +111,14 @@ contract Indexer is IIndexer, Ownable {
     * @notice Set an Intent to Trade
     * @dev Requires approval to transfer staking token for sender
     *
-    * @param _makerToken address
-    * @param _takerToken address
+    * @param _signerToken address
+    * @param _senderToken address
     * @param _amount uint256
     * @param _locator bytes32
     */
   function setIntent(
-    address _makerToken,
-    address _takerToken,
+    address _signerToken,
+    address _senderToken,
     uint256 _amount,
     bytes32 _locator
   ) external {
@@ -130,11 +130,11 @@ contract Indexer is IIndexer, Ownable {
     }
 
     // Ensure both of the tokens are not blacklisted.
-    require(!blacklist[_makerToken] && !blacklist[_takerToken],
+    require(!blacklist[_signerToken] && !blacklist[_senderToken],
       "PAIR_IS_BLACKLISTED");
 
     // Ensure the index exists.
-    require(indexes[_makerToken][_takerToken] != Index(0),
+    require(indexes[_signerToken][_senderToken] != Index(0),
       "INDEX_DOES_NOT_EXIST");
 
     // Only transfer for staking if amount is set.
@@ -145,30 +145,30 @@ contract Indexer is IIndexer, Ownable {
         "UNABLE_TO_STAKE");
     }
 
-    emit Stake(msg.sender, _makerToken, _takerToken, _amount);
+    emit Stake(msg.sender, _signerToken, _senderToken, _amount);
 
     // Set the locator on the index.
-    indexes[_makerToken][_takerToken].setLocator(msg.sender, _amount, _locator);
+    indexes[_signerToken][_senderToken].setLocator(msg.sender, _amount, _locator);
   }
 
   /**
     * @notice Unset an Intent to Trade
     * @dev Users are allowed unstake from blacklisted indexes
     *
-    * @param _makerToken address
-    * @param _takerToken address
+    * @param _signerToken address
+    * @param _senderToken address
     */
   function unsetIntent(
-    address _makerToken,
-    address _takerToken
+    address _signerToken,
+    address _senderToken
   ) external {
 
     // Ensure the index exists.
-    require(indexes[_makerToken][_takerToken] != Index(0),
+    require(indexes[_signerToken][_senderToken] != Index(0),
       "INDEX_DOES_NOT_EXIST");
 
     // Get the locator for the sender.
-    Index.Locator memory locator = indexes[_makerToken][_takerToken].getLocator(msg.sender);
+    Index.Locator memory locator = indexes[_signerToken][_senderToken].getLocator(msg.sender);
 
     // Ensure the locator exists.
     require(locator.user == msg.sender,
@@ -176,7 +176,7 @@ contract Indexer is IIndexer, Ownable {
 
     // Unset the locator on the index.
     //No need to require() because a check is done above that reverts if there are no locators
-    indexes[_makerToken][_takerToken].unsetLocator(msg.sender);
+    indexes[_signerToken][_senderToken].unsetLocator(msg.sender);
 
     if (locator.score > 0) {
       // Return the staked tokens.
@@ -184,34 +184,34 @@ contract Indexer is IIndexer, Ownable {
       require(stakeToken.transfer(msg.sender, locator.score));
     }
 
-    emit Unstake(msg.sender, _makerToken, _takerToken, locator.score);
+    emit Unstake(msg.sender, _signerToken, _senderToken, locator.score);
   }
 
   /**
     * @notice Get the locators of those trading a token pair
     * @dev Users are allowed unstake from blacklisted indexes
     *
-    * @param _makerToken address
-    * @param _takerToken address
+    * @param _signerToken address
+    * @param _senderToken address
     * @param _count uint256
     * @return locators address[]
     */
   function getIntents(
-    address _makerToken,
-    address _takerToken,
+    address _signerToken,
+    address _senderToken,
     uint256 _count
   ) external view returns (
     bytes32[] memory locators
   ) {
 
     // Ensure neither token is blacklisted.
-    if (!blacklist[_makerToken] && !blacklist[_takerToken]) {
+    if (!blacklist[_signerToken] && !blacklist[_senderToken]) {
 
       // Ensure the index exists.
-      if (indexes[_makerToken][_takerToken] != Index(0)) {
+      if (indexes[_signerToken][_senderToken] != Index(0)) {
 
         // Return an array of locators for the index.
-        return indexes[_makerToken][_takerToken].fetchLocators(_count);
+        return indexes[_signerToken][_senderToken].fetchLocators(_count);
 
       }
     }

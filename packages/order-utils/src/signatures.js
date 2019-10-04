@@ -26,14 +26,14 @@ const {
 const hashes = require('./hashes')
 
 module.exports = {
-  async getWeb3Signature(order, signer, verifyingContract) {
+  async getWeb3Signature(order, signatory, verifyingContract) {
     const orderHash = hashes.getOrderHash(order, verifyingContract)
     const orderHashHex = ethUtil.bufferToHex(orderHash)
-    const sig = await web3.eth.sign(orderHashHex, signer)
+    const sig = await web3.eth.sign(orderHashHex, signatory)
     const { r, s, v } = ethUtil.fromRpcSig(sig)
     return {
       version: signatures.PERSONAL_SIGN,
-      signer,
+      signatory: signatory,
       r,
       s,
       v,
@@ -45,7 +45,7 @@ module.exports = {
     const { r, s, v } = ethUtil.ecsign(orderHashBuff, privateKey)
     return {
       version: signatures.SIGN_TYPED_DATA,
-      signer: ethUtil.privateToAddress(privateKey).toString('hex'),
+      signatory: ethUtil.privateToAddress(privateKey).toString('hex'),
       r,
       s,
       v,
@@ -59,7 +59,7 @@ module.exports = {
     const { r, s, v } = ethUtil.fromRpcSig(sig)
     return {
       version: signatures.PERSONAL_SIGN,
-      signer: `0x${ethUtil.privateToAddress(privateKey).toString('hex')}`,
+      signatory: `0x${ethUtil.privateToAddress(privateKey).toString('hex')}`,
       r,
       s,
       v,
@@ -81,7 +81,7 @@ module.exports = {
     const { r, s, v } = ethUtil.fromRpcSig(sig)
     return {
       version: signatures.SIGN_TYPED_DATA,
-      signer: `0x${ethUtil.privateToAddress(privateKey).toString('hex')}`,
+      signatory: `0x${ethUtil.privateToAddress(privateKey).toString('hex')}`,
       r,
       s,
       v,
@@ -90,7 +90,7 @@ module.exports = {
   getEmptySignature() {
     return {
       version: signatures.INTENDED_VALIDATOR,
-      signer: EMPTY_ADDRESS,
+      signatory: EMPTY_ADDRESS,
       v: '0',
       r: '0x0',
       s: '0x0',
