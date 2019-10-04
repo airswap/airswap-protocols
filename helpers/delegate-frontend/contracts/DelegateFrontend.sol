@@ -38,20 +38,20 @@ contract DelegateFrontend {
   }
 
   /**
-    * @notice Get a Taker-Side Quote from the Onchain Liquidity provider
-    * @dev want to fetch the lowest _makerAmount for requested _takerAmount
+    * @notice Get a Sender-Side Quote from the Onchain Liquidity provider
+    * @dev want to fetch the lowest _signerAmount for requested _senderAmount
     * @dev if no suitable Delegate found, defaults to 0x0 delegateLocator
-    * @param _takerAmount uint256 The amount of ERC-20 token the delegate would send
-    * @param _takerToken address The address of an ERC-20 token the delegate would send
-    * @param _makerToken address The address of an ERC-20 token the consumer would send
-    * @param _maxIntents uint256 The maximum number of Delegates to query
-    * @return delegateAddress bytes32
-    * @return lowestCost uint256
+    * @param _senderAmount uint256 The amount of ERC-20 token the delegate would send
+    * @param _senderToken address The address of an ERC-20 token the delegate would send
+    * @param _signerToken address The address of an ERC-20 token the signer would send
+    * @param _maxIntents uint256 The maximum number of Peers to query
+    * @return delegateAddress bytes32 The locator to connect to the peer
+    * @return lowestCost uint256 The amount of ERC-20 tokens the signer would send
     */
-  function getBestTakerSideQuote(
-    uint256 _takerAmount,
-    address _takerToken,
-    address _makerToken,
+  function getBestSenderSideQuote(
+    uint256 _senderAmount,
+    address _senderToken,
+    address _signerToken,
     uint256 _maxIntents
   ) public view returns (bytes32 delegateAddress, uint256 lowestAmount) {
 
@@ -61,8 +61,8 @@ contract DelegateFrontend {
 
     // Fetch an array of locators from the Indexer.
     bytes32[] memory locators = indexer.getIntents(
-      _makerToken,
-      _takerToken,
+      _signerToken,
+      _senderToken,
       _maxIntents
       );
 
@@ -70,13 +70,13 @@ contract DelegateFrontend {
     for (uint256 i; i < locators.length; i++) {
 
       // Get a buy quote from the Delegate.
-      uint256 makerAmount = IDelegate(address(bytes20(locators[i])))
-        .getMakerSideQuote(_takerAmount, _takerToken, _makerToken);
+      uint256 signerAmount = IDelegate(address(bytes20(locators[i])))
+        .getSignerSideQuote(_senderAmount, _senderToken, _signerToken);
 
       // Update the lowest cost.
-      if (makerAmount > 0 && makerAmount < lowestAmount) {
+      if (signerAmount > 0 && signerAmount < lowestAmount) {
         delegateAddress = locators[i];
-        lowestAmount = makerAmount;
+        lowestAmount = signerAmount;
       }
     }
 
@@ -86,20 +86,20 @@ contract DelegateFrontend {
   }
 
   /**
-    * @notice Get a Maker-Side Quote from the Onchain Liquidity provider
-    * @dev want to fetch the highest _takerAmount for requested _makerAmount
+    * @notice Get a Signer-Side Quote from the Onchain Liquidity provider
+    * @dev want to fetch the highest _senderAmount for requested _signerAmount
     * @dev if no suitable Delegate found, delegateLocator will be 0x0
-    * @param _makerAmount uint256 The amount of ERC-20 token the delegate would send
-    * @param _makerToken address The address of an ERC-20 token the delegate would send
-    * @param _takerToken address The address of an ERC-20 token the consumer would send
+    * @param _signerAmount uint256 The amount of ERC-20 token the signer would send
+    * @param _signerToken address The address of an ERC-20 token the signer would send
+    * @param _senderToken address The address of an ERC-20 token the peer would send
     * @param _maxIntents uint256 The maximum number of Delegates to query
-    * @return delegateLocator bytes32  The amount of ERC-20 token the consumer would send
-    * @return lowestCost uint256 The amount of ERC-20 token the consumer would send
+    * @return delegateLocator bytes32  The locator to connect to the delegate
+    * @return highAmount uint256 The amount of ERC-20 tokens the delegate would send
     */
-  function getBestMakerSideQuote(
-    uint256 _makerAmount,
-    address _makerToken,
-    address _takerToken,
+  function getBestSignerSideQuote(
+    uint256 _signerAmount,
+    address _signerToken,
+    address _senderToken,
     uint256 _maxIntents
   ) public view returns (bytes32 delegateLocator, uint256 highAmount) {
 
@@ -107,8 +107,8 @@ contract DelegateFrontend {
 
     // Fetch an array of locators from the Indexer.
     bytes32[] memory locators = indexer.getIntents(
-      _makerToken,
-      _takerToken,
+      _signerToken,
+      _senderToken,
       _maxIntents
       );
 
@@ -116,13 +116,13 @@ contract DelegateFrontend {
     for (uint256 i; i < locators.length; i++) {
 
       // Get a buy quote from the Delegate.
-      uint256 takerAmount = IDelegate(address(bytes20(locators[i])))
-        .getTakerSideQuote(_makerAmount, _makerToken, _takerToken);
+      uint256 senderAmount = IDelegate(address(bytes20(locators[i])))
+        .getSenderSideQuote(_signerAmount, _signerToken, _senderToken);
 
       // Update the highest amount.
-      if (takerAmount > 0 && takerAmount > highAmount) {
+      if (senderAmount > 0 && senderAmount > highAmount) {
         delegateLocator = locators[i];
-        highAmount = takerAmount;
+        highAmount = senderAmount;
       }
     }
 
@@ -131,28 +131,26 @@ contract DelegateFrontend {
   }
 
   /**
-    * @notice Get and fill Taker-Side Quote from the Onchain Liquidity provider
-    * @dev want to fetch the lowest _makerAmount for requested _takerAmount
-    * @dev if no suitable Delegate found, will revert by checking delegateLocator is 0x0
-    * @param _takerAmount uint256 The amount of ERC-20 token the delegate would send
-    * @param _takerToken address The address of an ERC-20 token the delegate would send
-    * @param _makerToken address The address of an ERC-20 token the consumer would send
+    * @notice Get and fill Sender-Side Quote from the Onchain Liquidity provider
+    * @dev want to fetch the lowest _signerAmount for requested _senderAmount
+    * @dev if no suitable Delegate found, will revert by checking peerLocator is 0x0
+    * @param _senderAmount uint256 The amount of ERC-20 token the delegate would send
+    * @param _senderToken address The address of an ERC-20 token the delegate would send
+    * @param _signerToken address The address of an ERC-20 token the signer would send
     * @param _maxIntents uint256 The maximum number of Delegates to query
-    * @return delegateAddress bytes32
-    * @return lowestCost uint256
     */
-  function fillBestTakerSideOrder(
-    uint256 _takerAmount,
-    address _takerToken,
-    address _makerToken,
+  function fillBestSenderSideOrder(
+    uint256 _senderAmount,
+    address _senderToken,
+    address _signerToken,
     uint256 _maxIntents
   ) external {
 
-    // Find the best buy among Indexed Delegates.
-    (bytes32 delegateLocator, uint256 makerAmount) = getBestTakerSideQuote(
-      _takerAmount,
-      _takerToken,
-      _makerToken,
+    // Find the best locator and amount on Indexed Delegates.
+    (bytes32 delegateLocator, uint256 signerAmount) = getBestSenderSideQuote(
+      _senderAmount,
+      _senderToken,
+      _signerToken,
       _maxIntents
     );
 
@@ -162,33 +160,33 @@ contract DelegateFrontend {
     address delegateContract = address(bytes20(delegateLocator));
 
     // User transfers amount to the contract.
-    IERC20(_makerToken).transferFrom(msg.sender, address(this), makerAmount);
+    IERC20(_signerToken).transferFrom(msg.sender, address(this), signerAmount);
 
     // DelegateFrontend approves Swap to move its new tokens.
-    IERC20(_makerToken).approve(address(swapContract), makerAmount);
+    IERC20(_signerToken).approve(address(swapContract), signerAmount);
 
     // DelegateFrontend authorizes the Delegate.
     swapContract.authorize(delegateContract, block.timestamp + 1);
 
-    // Consumer provides unsigned order to Delegate.
+    // DelegateFrontend provides unsigned order to Delegate.
     IDelegate(delegateContract).provideOrder(Types.Order(
       uint256(keccak256(abi.encodePacked(
         block.timestamp,
         address(this),
-        _makerToken,
+        _signerToken,
         IDelegate(delegateContract).tradeWallet(),
-        _takerToken))),
+        _senderToken))),
       block.timestamp + 1,
       Types.Party(
-        address(this), // consumer is acting as the maker in this case
-        _makerToken,
-        makerAmount,
+        address(this),
+        _signerToken,
+        signerAmount,
         0x277f8169
       ),
       Types.Party(
         IDelegate(delegateContract).tradeWallet(),
-        _takerToken,
-        _takerAmount,
+        _senderToken,
+        _senderAmount,
         0x277f8169
       ),
       Types.Party(address(0), address(0), 0, bytes4(0)),
@@ -199,21 +197,30 @@ contract DelegateFrontend {
     swapContract.revoke(delegateContract);
 
     // DelegateFrontend transfers received amount to the User.
-    IERC20(_takerToken).transfer(msg.sender, _takerAmount);
+    IERC20(_senderToken).transfer(msg.sender, _senderAmount);
   }
 
-  function fillBestMakerSideOrder(
-    uint256 _makerAmount,
-    address _makerToken,
-    address _takerToken,
+  /**
+    * @notice Get and fill Signer-Side Quote from the Onchain Liquidity provider
+    * @dev want to fetch the highest _signerAmount for requested _senderAmount
+    * @dev if no suitable Peer found, will revert by checking peerLocator is 0x0
+    * @param _signerAmount uint256 The amount of ERC-20 token the signer would send
+    * @param _signerToken address The address of an ERC-20 token the signer would send
+    * @param _senderToken address The address of an ERC-20 token the peer would send
+    * @param _maxIntents uint256 The maximum number of Peers to query
+    */
+  function fillBestSignerSideOrder(
+    uint256 _signerAmount,
+    address _signerToken,
+    address _senderToken,
     uint256 _maxIntents
   ) external {
 
-    // Find the best buy among Indexed Delegates.
-    (bytes32 delegateLocator, uint256 takerAmount) = getBestMakerSideQuote(
-      _makerAmount,
-      _makerToken,
-      _takerToken,
+    // Find the best locator and amount on Indexed Delegate.
+    (bytes32 delegateLocator, uint256 senderAmount) = getBestSignerSideQuote(
+      _signerAmount,
+      _signerToken,
+      _senderToken,
       _maxIntents
     );
 
@@ -223,34 +230,34 @@ contract DelegateFrontend {
     address delegateContract = address(bytes20(delegateLocator));
 
     // User transfers amount to the contract.
-    IERC20(_makerToken).transferFrom(msg.sender, address(this), _makerAmount);
+    IERC20(_signerToken).transferFrom(msg.sender, address(this), _signerAmount);
 
     // DelegateFrontend approves Swap to move its new tokens.
-    IERC20(_makerToken).approve(address(swapContract), _makerAmount);
+    IERC20(_signerToken).approve(address(swapContract), _signerAmount);
 
     // DelegateFrontend authorizes the Delegate.
     swapContract.authorize(delegateContract, block.timestamp + 1);
 
-    // Consumer provides unsigned order to Delegate.
+    // DelegateFrontend provides unsigned order to Delegate.
     IDelegate(delegateContract).provideOrder(Types.Order(
       uint256(keccak256(abi.encodePacked(
         block.timestamp,
         address(this),
-        _makerToken,
+        _signerToken,
         IDelegate(delegateContract).tradeWallet(),
-        _takerToken
+        _senderToken
       ))),
       block.timestamp + 1,
       Types.Party(
-        address(this), // consumer is acting as the maker in this case
-        _makerToken,
-        _makerAmount,
+        address(this),
+        _signerToken,
+        _signerAmount,
         0x277f8169
       ),
       Types.Party(
         IDelegate(delegateContract).tradeWallet(),
-        _takerToken,
-        takerAmount,
+        _senderToken,
+        senderAmount,
         0x277f8169
       ),
       Types.Party(address(0), address(0), 0, bytes4(0)),
@@ -261,6 +268,6 @@ contract DelegateFrontend {
     swapContract.revoke(delegateContract);
 
     // DelegateFrontend transfers received amount to the User.
-    IERC20(_takerToken).transfer(msg.sender, takerAmount);
+    IERC20(_senderToken).transfer(msg.sender, senderAmount);
   }
 }

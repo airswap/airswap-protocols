@@ -21,9 +21,9 @@ contract('Delegate Unit Tests', async accounts => {
   let mockSwap
   let snapshotId
   let swapFunction
-  const TAKER_TOKEN = accounts[9]
-  const MAKER_TOKEN = accounts[8]
-  const MAX_TAKER_AMOUNT = 12345
+  const SIGNER_TOKEN = accounts[9]
+  const SENDER_TOKEN = accounts[8]
+  const MAX_SENDER_AMOUNT = 12345
   const PRICE_COEF = 4321
   const EXP = 2
 
@@ -109,9 +109,9 @@ contract('Delegate Unit Tests', async accounts => {
       //not owner is not apart of admin and should fail
       await reverted(
         delegate.setRule(
-          TAKER_TOKEN,
-          MAKER_TOKEN,
-          MAX_TAKER_AMOUNT,
+          SENDER_TOKEN,
+          SIGNER_TOKEN,
+          MAX_SENDER_AMOUNT,
           PRICE_COEF,
           EXP,
           { from: notOwner }
@@ -125,9 +125,9 @@ contract('Delegate Unit Tests', async accounts => {
       await delegate.addAdmin(notOwner)
       await passes(
         delegate.setRule(
-          TAKER_TOKEN,
-          MAKER_TOKEN,
-          MAX_TAKER_AMOUNT,
+          SENDER_TOKEN,
+          SIGNER_TOKEN,
+          MAX_SENDER_AMOUNT,
           PRICE_COEF,
           EXP,
           { from: notOwner }
@@ -138,9 +138,9 @@ contract('Delegate Unit Tests', async accounts => {
     it('Test setRule permissions as owner', async () => {
       await passes(
         delegate.setRule(
-          TAKER_TOKEN,
-          MAKER_TOKEN,
-          MAX_TAKER_AMOUNT,
+          SENDER_TOKEN,
+          SIGNER_TOKEN,
+          MAX_SENDER_AMOUNT,
           PRICE_COEF,
           EXP,
           { from: owner }
@@ -150,18 +150,18 @@ contract('Delegate Unit Tests', async accounts => {
 
     it('Test setRule', async () => {
       let trx = await delegate.setRule(
-        TAKER_TOKEN,
-        MAKER_TOKEN,
-        MAX_TAKER_AMOUNT,
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
         PRICE_COEF,
         EXP
       )
 
       //check if rule has been added
-      let rule = await delegate.rules.call(TAKER_TOKEN, MAKER_TOKEN)
+      let rule = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
       equal(
         rule[0].toNumber(),
-        MAX_TAKER_AMOUNT,
+        MAX_SENDER_AMOUNT,
         'max delegate amount is incorrectly saved'
       )
       equal(rule[1].toNumber(), PRICE_COEF, 'price coef is incorrectly saved')
@@ -170,9 +170,9 @@ contract('Delegate Unit Tests', async accounts => {
       //check emitted event
       emitted(trx, 'SetRule', e => {
         return (
-          e.takerToken === TAKER_TOKEN &&
-          e.makerToken === MAKER_TOKEN &&
-          e.maxTakerAmount.toNumber() === MAX_TAKER_AMOUNT &&
+          e.signerToken === SIGNER_TOKEN &&
+          e.senderToken === SENDER_TOKEN &&
+          e.maxSenderAmount.toNumber() === MAX_SENDER_AMOUNT &&
           e.priceCoef.toNumber() === PRICE_COEF &&
           e.priceExp.toNumber() === EXP
         )
@@ -182,7 +182,7 @@ contract('Delegate Unit Tests', async accounts => {
     it('Test unsetRule permissions as not owner', async () => {
       //not owner is not apart of admin and should fail
       await reverted(
-        delegate.unsetRule(TAKER_TOKEN, MAKER_TOKEN, { from: notOwner }),
+        delegate.unsetRule(SENDER_TOKEN, SIGNER_TOKEN, { from: notOwner }),
         'CALLER_MUST_BE_ADMIN'
       )
     })
@@ -191,37 +191,37 @@ contract('Delegate Unit Tests', async accounts => {
       //test again after adding not owner to admin
       await delegate.addAdmin(notOwner)
       await passes(
-        delegate.unsetRule(TAKER_TOKEN, MAKER_TOKEN, { from: notOwner })
+        delegate.unsetRule(SENDER_TOKEN, SIGNER_TOKEN, { from: notOwner })
       )
     })
 
     it('Test unsetRule permissions', async () => {
       await passes(
-        delegate.unsetRule(TAKER_TOKEN, MAKER_TOKEN, { from: owner })
+        delegate.unsetRule(SENDER_TOKEN, SIGNER_TOKEN, { from: owner })
       )
     })
 
     it('Test unsetRule', async () => {
       let trx = await delegate.setRule(
-        TAKER_TOKEN,
-        MAKER_TOKEN,
-        MAX_TAKER_AMOUNT,
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
         PRICE_COEF,
         EXP
       )
 
       //ensure rule has been added
-      let ruleBefore = await delegate.rules.call(TAKER_TOKEN, MAKER_TOKEN)
+      let ruleBefore = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
       equal(
         ruleBefore[0].toNumber(),
-        MAX_TAKER_AMOUNT,
+        MAX_SENDER_AMOUNT,
         'max delegate amount is incorrectly saved'
       )
 
-      trx = await delegate.unsetRule(TAKER_TOKEN, MAKER_TOKEN)
+      trx = await delegate.unsetRule(SENDER_TOKEN, SIGNER_TOKEN)
 
       //check that the rule has been removed
-      let ruleAfter = await delegate.rules.call(TAKER_TOKEN, MAKER_TOKEN)
+      let ruleAfter = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
       equal(
         ruleAfter[0].toNumber(),
         0,
@@ -232,7 +232,7 @@ contract('Delegate Unit Tests', async accounts => {
 
       //check emitted event
       emitted(trx, 'UnsetRule', e => {
-        return e.takerToken === TAKER_TOKEN && e.makerToken === MAKER_TOKEN
+        return e.senderToken === SENDER_TOKEN && e.signerToken === SIGNER_TOKEN
       })
     })
   })
@@ -305,13 +305,13 @@ contract('Delegate Unit Tests', async accounts => {
     })
   })
 
-  describe('Test getMakerSideQuote', async () => {
+  describe('Test getSignerSideQuote', async () => {
     it('test when rule does not exist', async () => {
-      const NON_EXISTENT_TAKER_TOKEN = accounts[7]
-      let val = await delegate.getMakerSideQuote.call(
+      const NON_EXISTENT_SIGNER_TOKEN = accounts[7]
+      let val = await delegate.getSignerSideQuote.call(
         1234,
-        NON_EXISTENT_TAKER_TOKEN,
-        MAKER_TOKEN
+        SENDER_TOKEN,
+        NON_EXISTENT_SIGNER_TOKEN
       )
       equal(
         val.toNumber(),
@@ -322,16 +322,16 @@ contract('Delegate Unit Tests', async accounts => {
 
     it('test when delegate amount is greater than max delegate amount', async () => {
       await delegate.setRule(
-        TAKER_TOKEN,
-        MAKER_TOKEN,
-        MAX_TAKER_AMOUNT,
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
         PRICE_COEF,
         EXP
       )
-      let val = await delegate.getMakerSideQuote.call(
-        MAX_TAKER_AMOUNT + 1,
-        TAKER_TOKEN,
-        MAKER_TOKEN
+      let val = await delegate.getSignerSideQuote.call(
+        MAX_SENDER_AMOUNT + 1,
+        SENDER_TOKEN,
+        SIGNER_TOKEN
       )
       equal(
         val.toNumber(),
@@ -342,16 +342,16 @@ contract('Delegate Unit Tests', async accounts => {
 
     it('test when delegate amount is 0', async () => {
       await delegate.setRule(
-        TAKER_TOKEN,
-        MAKER_TOKEN,
-        MAX_TAKER_AMOUNT,
+        SIGNER_TOKEN,
+        SENDER_TOKEN,
+        MAX_SENDER_AMOUNT,
         PRICE_COEF,
         EXP
       )
-      let val = await delegate.getMakerSideQuote.call(
+      let val = await delegate.getSignerSideQuote.call(
         0,
-        TAKER_TOKEN,
-        MAKER_TOKEN
+        SENDER_TOKEN,
+        SIGNER_TOKEN
       )
       equal(
         val.toNumber(),
@@ -360,31 +360,31 @@ contract('Delegate Unit Tests', async accounts => {
       )
     })
 
-    it('test a successful call - getMakerSideQuote', async () => {
+    it('test a successful call - getSignerSideQuote', async () => {
       await delegate.setRule(
-        TAKER_TOKEN,
-        MAKER_TOKEN,
-        MAX_TAKER_AMOUNT,
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
         PRICE_COEF,
         EXP
       )
 
-      let val = await delegate.getMakerSideQuote.call(
+      let val = await delegate.getSignerSideQuote.call(
         1234,
-        TAKER_TOKEN,
-        MAKER_TOKEN
+        SENDER_TOKEN,
+        SIGNER_TOKEN
       )
       let expectedValue = Math.floor((1234 * PRICE_COEF) / 10 ** EXP)
       equal(val.toNumber(), expectedValue, 'there should be a quote available')
     })
   })
 
-  describe('Test getTakerSideQuote', async () => {
+  describe('Test getSenderSideQuote', async () => {
     it('test when rule does not exist', async () => {
-      let val = await delegate.getTakerSideQuote.call(
+      let val = await delegate.getSenderSideQuote.call(
         4312,
-        MAKER_TOKEN,
-        TAKER_TOKEN
+        SENDER_TOKEN,
+        SIGNER_TOKEN
       )
       equal(
         val.toNumber(),
@@ -394,11 +394,11 @@ contract('Delegate Unit Tests', async accounts => {
     })
 
     it('test when delegate amount is not within acceptable value bounds', async () => {
-      await delegate.setRule(TAKER_TOKEN, MAKER_TOKEN, 100, 1, 0)
-      let val = await delegate.getTakerSideQuote.call(
+      await delegate.setRule(SENDER_TOKEN, SIGNER_TOKEN, 100, 1, 0)
+      let val = await delegate.getSenderSideQuote.call(
         0,
-        MAKER_TOKEN,
-        TAKER_TOKEN
+        SENDER_TOKEN,
+        SIGNER_TOKEN
       )
       equal(
         val.toNumber(),
@@ -406,10 +406,10 @@ contract('Delegate Unit Tests', async accounts => {
         'no quote should be available if returned delegate amount is 0'
       )
 
-      val = await delegate.getTakerSideQuote.call(
-        MAX_TAKER_AMOUNT + 1,
-        MAKER_TOKEN,
-        TAKER_TOKEN
+      val = await delegate.getSenderSideQuote.call(
+        MAX_SENDER_AMOUNT + 1,
+        SENDER_TOKEN,
+        SIGNER_TOKEN
       )
       equal(
         val.toNumber(),
@@ -418,19 +418,19 @@ contract('Delegate Unit Tests', async accounts => {
       )
     })
 
-    it('test a successful call - getTakerSideQuote', async () => {
+    it('test a successful call - getSenderSideQuote', async () => {
       await delegate.setRule(
-        TAKER_TOKEN,
-        MAKER_TOKEN,
-        MAX_TAKER_AMOUNT,
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
         PRICE_COEF,
         EXP
       )
 
-      let val = await delegate.getTakerSideQuote.call(
+      let val = await delegate.getSenderSideQuote.call(
         500,
-        MAKER_TOKEN,
-        TAKER_TOKEN
+        SIGNER_TOKEN,
+        SENDER_TOKEN
       )
       let expectedValue = Math.floor((500 * 10 ** EXP) / PRICE_COEF)
       equal(val.toNumber(), expectedValue, 'there should be a quote available')
@@ -439,7 +439,7 @@ contract('Delegate Unit Tests', async accounts => {
 
   describe('Test getMaxQuote', async () => {
     it('test when rule does not exist', async () => {
-      let val = await delegate.getMaxQuote.call(TAKER_TOKEN, MAKER_TOKEN)
+      let val = await delegate.getMaxQuote.call(SENDER_TOKEN, SIGNER_TOKEN)
       equal(
         val[0].toNumber(),
         0,
@@ -454,22 +454,22 @@ contract('Delegate Unit Tests', async accounts => {
 
     it('test a successful call - getMaxQuote', async () => {
       await delegate.setRule(
-        TAKER_TOKEN,
-        MAKER_TOKEN,
-        MAX_TAKER_AMOUNT,
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
         PRICE_COEF,
         EXP
       )
-      let val = await delegate.getMaxQuote.call(TAKER_TOKEN, MAKER_TOKEN)
+      let val = await delegate.getMaxQuote.call(SENDER_TOKEN, SIGNER_TOKEN)
 
       equal(
         val[0].toNumber(),
-        MAX_TAKER_AMOUNT,
-        'no quote should be available if a delegate does not exist'
+        MAX_SENDER_AMOUNT,
+        'no quote should be available if a peer does not exist'
       )
 
       let expectedValue = Math.floor(
-        (MAX_TAKER_AMOUNT * PRICE_COEF) / 10 ** EXP
+        (MAX_SENDER_AMOUNT * PRICE_COEF) / 10 ** EXP
       )
       equal(
         val[1].toNumber(),
@@ -482,15 +482,15 @@ contract('Delegate Unit Tests', async accounts => {
   describe('Test provideOrder', async () => {
     it('test if a rule does not exist', async () => {
       const order = await orders.getOrder({
-        maker: {
+        signer: {
           wallet: notOwner,
           param: 555,
-          token: MAKER_TOKEN,
+          token: SENDER_TOKEN,
         },
-        taker: {
+        sender: {
           wallet: tradeWallet,
           param: 999,
-          token: TAKER_TOKEN,
+          token: SIGNER_TOKEN,
         },
       })
 
@@ -504,23 +504,23 @@ contract('Delegate Unit Tests', async accounts => {
 
     it('test if an order exceeds maximum amount', async () => {
       await delegate.setRule(
-        TAKER_TOKEN,
-        MAKER_TOKEN,
-        MAX_TAKER_AMOUNT,
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
         PRICE_COEF,
         EXP
       )
 
       const order = await orders.getOrder({
-        maker: {
+        signer: {
           wallet: notOwner,
           param: 555,
-          token: MAKER_TOKEN,
+          token: SIGNER_TOKEN,
         },
-        taker: {
+        sender: {
           wallet: tradeWallet,
-          param: MAX_TAKER_AMOUNT + 1,
-          token: TAKER_TOKEN,
+          param: MAX_SENDER_AMOUNT + 1,
+          token: SENDER_TOKEN,
         },
       })
 
@@ -532,28 +532,28 @@ contract('Delegate Unit Tests', async accounts => {
       )
     })
 
-    it('test if the taker is not empty and not the trade wallet', async () => {
+    it('test if the sender is not empty and not the trade wallet', async () => {
       await delegate.setRule(
-        TAKER_TOKEN,
-        MAKER_TOKEN,
-        MAX_TAKER_AMOUNT,
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
         PRICE_COEF,
         EXP
       )
 
-      let makerAmount = 100
-      let takerAmount = Math.floor((makerAmount * 10 ** EXP) / PRICE_COEF)
+      let signerAmount = 100
+      let senderAmount = Math.floor((signerAmount * 10 ** EXP) / PRICE_COEF)
 
       const order = await orders.getOrder({
-        maker: {
+        signer: {
           wallet: notOwner,
-          param: makerAmount,
-          token: MAKER_TOKEN,
+          param: signerAmount,
+          token: SIGNER_TOKEN,
         },
-        taker: {
+        sender: {
           wallet: notTradeWallet,
-          param: takerAmount,
-          token: TAKER_TOKEN,
+          param: senderAmount,
+          token: SENDER_TOKEN,
         },
       })
 
@@ -561,28 +561,28 @@ contract('Delegate Unit Tests', async accounts => {
         delegate.provideOrder(order, {
           from: notOwner,
         }),
-        'INVALID_TAKER_WALLET'
+        'INVALID_SENDER_WALLET'
       )
     })
 
     it('test if order is not priced according to the rule', async () => {
       await delegate.setRule(
-        TAKER_TOKEN,
-        MAKER_TOKEN,
-        MAX_TAKER_AMOUNT,
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
         PRICE_COEF,
         EXP
       )
 
       const order = await orders.getOrder({
-        maker: {
+        signer: {
           param: 30,
-          token: MAKER_TOKEN,
+          token: SIGNER_TOKEN,
         },
-        taker: {
+        sender: {
           wallet: tradeWallet,
-          param: MAX_TAKER_AMOUNT,
-          token: TAKER_TOKEN,
+          param: MAX_SENDER_AMOUNT,
+          token: SENDER_TOKEN,
         },
       })
 
@@ -595,27 +595,27 @@ contract('Delegate Unit Tests', async accounts => {
 
     it('test a successful transaction with integer values', async () => {
       await delegate.setRule(
-        TAKER_TOKEN,
-        MAKER_TOKEN,
-        MAX_TAKER_AMOUNT,
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
         100,
         EXP
       )
 
-      let ruleBefore = await delegate.rules.call(TAKER_TOKEN, MAKER_TOKEN)
+      let ruleBefore = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
 
-      let makerAmount = 100
+      let signerAmount = 100
 
       const order = await orders.getOrder({
-        maker: {
+        signer: {
           wallet: notOwner,
-          param: makerAmount,
-          token: MAKER_TOKEN,
+          param: signerAmount,
+          token: SIGNER_TOKEN,
         },
-        taker: {
+        sender: {
           wallet: tradeWallet,
           param: 100,
-          token: TAKER_TOKEN,
+          token: SENDER_TOKEN,
         },
       })
 
@@ -627,11 +627,11 @@ contract('Delegate Unit Tests', async accounts => {
         })
       )
 
-      let ruleAfter = await delegate.rules.call(TAKER_TOKEN, MAKER_TOKEN)
+      let ruleAfter = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
       equal(
         ruleAfter[0].toNumber(),
-        ruleBefore[0].toNumber() - makerAmount,
-        "rule's max delegate amount was not decremented"
+        ruleBefore[0].toNumber() - signerAmount,
+        "rule's max peer amount was not decremented"
       )
 
       //check if swap() was called
@@ -645,29 +645,29 @@ contract('Delegate Unit Tests', async accounts => {
       )
     })
 
-    it('test a successful transaction with trade wallet as taker', async () => {
+    it('test a successful transaction with trade wallet as sender', async () => {
       await delegate.setRule(
-        TAKER_TOKEN,
-        MAKER_TOKEN,
-        MAX_TAKER_AMOUNT,
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
         100,
         EXP
       )
 
-      let ruleBefore = await delegate.rules.call(TAKER_TOKEN, MAKER_TOKEN)
+      let ruleBefore = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
 
-      let makerAmount = 100
+      let signerAmount = 100
 
       const order = await orders.getOrder({
-        maker: {
+        signer: {
           wallet: notOwner,
-          param: makerAmount,
-          token: MAKER_TOKEN,
+          param: signerAmount,
+          token: SIGNER_TOKEN,
         },
-        taker: {
+        sender: {
           wallet: tradeWallet,
           param: 100,
-          token: TAKER_TOKEN,
+          token: SENDER_TOKEN,
         },
       })
 
@@ -679,10 +679,10 @@ contract('Delegate Unit Tests', async accounts => {
         })
       )
 
-      let ruleAfter = await delegate.rules.call(TAKER_TOKEN, MAKER_TOKEN)
+      let ruleAfter = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
       equal(
         ruleAfter[0].toNumber(),
-        ruleBefore[0].toNumber() - makerAmount,
+        ruleBefore[0].toNumber() - signerAmount,
         "rule's max delegate amount was not decremented"
       )
 
@@ -699,28 +699,28 @@ contract('Delegate Unit Tests', async accounts => {
 
     it('test a successful transaction with decimal values', async () => {
       await delegate.setRule(
-        TAKER_TOKEN,
-        MAKER_TOKEN,
-        MAX_TAKER_AMOUNT,
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
         PRICE_COEF,
         EXP
       )
 
-      let ruleBefore = await delegate.rules.call(TAKER_TOKEN, MAKER_TOKEN)
+      let ruleBefore = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
 
-      let makerAmount = 100
-      let takerAmount = Math.floor((makerAmount * 10 ** EXP) / PRICE_COEF)
+      let signerAmount = 100
+      let senderAmount = Math.floor((signerAmount * 10 ** EXP) / PRICE_COEF)
 
       const order = await orders.getOrder({
-        maker: {
+        signer: {
           wallet: notOwner,
-          param: makerAmount,
-          token: MAKER_TOKEN,
+          param: signerAmount,
+          token: SIGNER_TOKEN,
         },
-        taker: {
+        sender: {
           wallet: tradeWallet,
-          param: takerAmount,
-          token: TAKER_TOKEN,
+          param: senderAmount,
+          token: SENDER_TOKEN,
         },
       })
 
@@ -732,10 +732,10 @@ contract('Delegate Unit Tests', async accounts => {
         })
       )
 
-      let ruleAfter = await delegate.rules.call(TAKER_TOKEN, MAKER_TOKEN)
+      let ruleAfter = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
       equal(
         ruleAfter[0].toNumber(),
-        ruleBefore[0].toNumber() - takerAmount,
+        ruleBefore[0].toNumber() - senderAmount,
         "rule's max delegate amount was not decremented"
       )
     })

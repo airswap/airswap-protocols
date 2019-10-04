@@ -103,7 +103,7 @@ contract('Delegate', async accounts => {
         { from: aliceAddress }
       )
       equal(
-        await aliceDelegate.getMakerSideQuote.call(
+        await aliceDelegate.getSignerSideQuote.call(
           1,
           tokenWETH.address,
           tokenDAI.address
@@ -114,7 +114,7 @@ contract('Delegate', async accounts => {
         from: aliceAddress,
       })
       equal(
-        await aliceDelegate.getMakerSideQuote.call(
+        await aliceDelegate.getSignerSideQuote.call(
           1,
           tokenWETH.address,
           tokenDAI.address
@@ -135,7 +135,7 @@ contract('Delegate', async accounts => {
         { from: aliceAddress }
       )
       equal(
-        await aliceDelegate.getMakerSideQuote.call(
+        await aliceDelegate.getSignerSideQuote.call(
           1,
           tokenWETH.address,
           tokenDAI.address
@@ -154,7 +154,7 @@ contract('Delegate', async accounts => {
         { from: aliceAddress }
       )
       equal(
-        await aliceDelegate.getMakerSideQuote.call(
+        await aliceDelegate.getSignerSideQuote.call(
           100000,
           tokenDAI.address,
           tokenWETH.address
@@ -173,7 +173,7 @@ contract('Delegate', async accounts => {
         { from: aliceAddress }
       )
       equal(
-        await aliceDelegate.getMakerSideQuote.call(
+        await aliceDelegate.getSignerSideQuote.call(
           20000,
           tokenWETH.address,
           tokenDAI.address
@@ -205,7 +205,7 @@ contract('Delegate', async accounts => {
     )
 
     it('Gets a quote to buy 20K DAI for WETH (Quote: 64 WETH)', async () => {
-      const quote = await aliceDelegate.getMakerSideQuote.call(
+      const quote = await aliceDelegate.getSignerSideQuote.call(
         20000,
         tokenDAI.address,
         tokenWETH.address
@@ -214,7 +214,7 @@ contract('Delegate', async accounts => {
     })
 
     it('Gets a quote to sell 100K (Max) DAI for WETH (Quote: 320 WETH)', async () => {
-      const quote = await aliceDelegate.getMakerSideQuote.call(
+      const quote = await aliceDelegate.getSignerSideQuote.call(
         100000,
         tokenDAI.address,
         tokenWETH.address
@@ -223,7 +223,7 @@ contract('Delegate', async accounts => {
     })
 
     it('Gets a quote to sell 1 WETH for DAI (Quote: 300 DAI)', async () => {
-      const quote = await aliceDelegate.getTakerSideQuote.call(
+      const quote = await aliceDelegate.getSenderSideQuote.call(
         1,
         tokenWETH.address,
         tokenDAI.address
@@ -232,7 +232,7 @@ contract('Delegate', async accounts => {
     })
 
     it('Gets a quote to sell 500 DAI for WETH (False: No rule)', async () => {
-      const quote = await aliceDelegate.getTakerSideQuote.call(
+      const quote = await aliceDelegate.getSenderSideQuote.call(
         500,
         tokenDAI.address,
         tokenWETH.address
@@ -259,7 +259,7 @@ contract('Delegate', async accounts => {
     })
 
     it('Gets a quote to buy WETH for 250000 DAI (False: Exceeds Max)', async () => {
-      const quote = await aliceDelegate.getMakerSideQuote.call(
+      const quote = await aliceDelegate.getSignerSideQuote.call(
         250000,
         tokenDAI.address,
         tokenWETH.address
@@ -268,7 +268,7 @@ contract('Delegate', async accounts => {
     })
 
     it('Gets a quote to buy 500 WETH for DAI (False: Exceeds Max)', async () => {
-      const quote = await aliceDelegate.getTakerSideQuote.call(
+      const quote = await aliceDelegate.getSenderSideQuote.call(
         500,
         tokenWETH.address,
         tokenDAI.address
@@ -283,14 +283,14 @@ contract('Delegate', async accounts => {
       // Delegate will trade up to 100,000 DAI for WETH, at 200 DAI/WETH
       await aliceDelegate.setRule(
         tokenDAI.address, // Delegate's token
-        tokenWETH.address, // Maker's token
+        tokenWETH.address, // Signer's token
         100000,
         5,
         3,
         { from: aliceAddress }
       )
-      // Maker wants to trade 1 WETH for x DAI
-      quote = await aliceDelegate.getTakerSideQuote.call(
+      // Signer wants to trade 1 WETH for x DAI
+      quote = await aliceDelegate.getSenderSideQuote.call(
         1,
         tokenWETH.address,
         tokenDAI.address
@@ -299,12 +299,12 @@ contract('Delegate', async accounts => {
 
     it('should not trade for a different wallet', async () => {
       const order = await orders.getOrder({
-        maker: {
+        signer: {
           wallet: bobAddress,
           token: tokenWETH.address,
           param: 1,
         },
-        taker: {
+        sender: {
           wallet: carolAddress,
           token: tokenDAI.address,
           param: quote.toNumber(),
@@ -313,18 +313,18 @@ contract('Delegate', async accounts => {
 
       await reverted(
         aliceDelegate.provideOrder(order, { from: bobAddress }),
-        'INVALID_TAKER_WALLET'
+        'INVALID_SENDER_WALLET'
       )
     })
 
     it('should not accept open trades', async () => {
       const order = await orders.getOrder({
-        maker: {
+        signer: {
           wallet: bobAddress,
           token: tokenWETH.address,
           param: 1,
         },
-        taker: {
+        sender: {
           // no wallet provided means wallet = address(0)
           token: tokenDAI.address,
           param: quote.toNumber(),
@@ -333,18 +333,18 @@ contract('Delegate', async accounts => {
 
       await reverted(
         aliceDelegate.provideOrder(order, { from: bobAddress }),
-        'INVALID_TAKER_WALLET'
+        'INVALID_SENDER_WALLET'
       )
     })
 
     it("should not trade if the tradeWallet hasn't authorized the delegate", async () => {
       const order = await orders.getOrder({
-        maker: {
+        signer: {
           wallet: bobAddress,
           token: tokenWETH.address,
           param: 1,
         },
-        taker: {
+        sender: {
           wallet: aliceTradeWallet, //correct trade wallet provided
           token: tokenDAI.address,
           param: quote.toNumber(),
@@ -361,12 +361,12 @@ contract('Delegate', async accounts => {
 
     it("should not trade if the tradeWallet's authorization has expired", async () => {
       const order = await orders.getOrder({
-        maker: {
+        signer: {
           wallet: bobAddress,
           token: tokenWETH.address,
           param: 1,
         },
-        taker: {
+        sender: {
           wallet: aliceTradeWallet, //correct trade wallet provided
           token: tokenDAI.address,
           param: quote.toNumber(),
@@ -393,12 +393,12 @@ contract('Delegate', async accounts => {
 
     it('should trade if the tradeWallet has authorized the delegate', async () => {
       const order = await orders.getOrder({
-        maker: {
+        signer: {
           wallet: bobAddress,
           token: tokenWETH.address,
           param: 1,
         },
-        taker: {
+        sender: {
           wallet: aliceTradeWallet, //correct trade wallet provided
           token: tokenDAI.address,
           param: quote.toNumber(),
@@ -449,7 +449,7 @@ contract('Delegate', async accounts => {
   describe('Provide some orders to the Delegate', async () => {
     let quote
     before('Gets a quote for 1 WETH', async () => {
-      quote = await aliceDelegate.getTakerSideQuote.call(
+      quote = await aliceDelegate.getSenderSideQuote.call(
         1,
         tokenWETH.address,
         tokenDAI.address
@@ -457,14 +457,14 @@ contract('Delegate', async accounts => {
     })
 
     it('Use quote with non-extent rule', async () => {
-      // Note: Consumer is the order maker, Delegate is the order taker.
+      // Note: Consumer is the order signer, Delegate is the order sender.
       const order = await orders.getOrder({
-        maker: {
+        signer: {
           wallet: bobAddress,
           token: tokenDAI.address,
           param: 1,
         },
-        taker: {
+        sender: {
           wallet: aliceTradeWallet,
           token: tokenDAI.address,
           param: 1,
@@ -478,15 +478,15 @@ contract('Delegate', async accounts => {
       )
     })
 
-    it('Use quote with incorrect maker wallet', async () => {
-      // Note: Consumer is the order maker, Delegate is the order taker.
+    it('Use quote with incorrect signer wallet', async () => {
+      // Note: Consumer is the order signer, Delegate is the order sender.
       const order = await orders.getOrder({
-        maker: {
+        signer: {
           wallet: bobAddress,
           token: tokenWETH.address,
           param: 1,
         },
-        taker: {
+        sender: {
           wallet: aliceTradeWallet,
           token: tokenDAI.address,
           param: quote.toNumber(),
@@ -496,7 +496,7 @@ contract('Delegate', async accounts => {
       // Succeeds on the Delegate, fails on the Swap.
       await reverted(
         aliceDelegate.provideOrder(order, { from: carolAddress }),
-        'MAKER_MUST_BE_SENDER'
+        'SIGNER_MUST_BE_SENDER'
       )
     })
 
@@ -504,19 +504,19 @@ contract('Delegate', async accounts => {
       // Delegate trades WETH for 100 DAI. Max trade is 2 WETH.
       await aliceDelegate.setRule(
         tokenWETH.address, // Delegate's token
-        tokenDAI.address, // Maker's token
+        tokenDAI.address, // Signer's token
         2,
         100,
         0,
         { from: aliceAddress }
       )
       const order = await orders.getOrder({
-        maker: {
+        signer: {
           wallet: bobAddress,
           token: tokenDAI.address,
           param: 300,
         },
-        taker: {
+        sender: {
           wallet: aliceTradeWallet,
           token: tokenWETH.address,
           param: quote.toNumber(),
@@ -532,12 +532,12 @@ contract('Delegate', async accounts => {
 
     it('Use incorrect price on delegate', async () => {
       const order = await orders.getOrder({
-        maker: {
+        signer: {
           wallet: bobAddress,
           token: tokenWETH.address,
           param: 1,
         },
-        taker: {
+        sender: {
           wallet: aliceTradeWallet,
           token: tokenDAI.address,
           param: 500, //this is more than the delegate rule would pay out
@@ -550,16 +550,16 @@ contract('Delegate', async accounts => {
       )
     })
 
-    it('Use quote with incorrect maker token kind', async () => {
-      // Note: Consumer is the order maker, Delegate is the order taker.
+    it('Use quote with incorrect signer token kind', async () => {
+      // Note: Consumer is the order signer, Delegate is the order sender.
       const order = await orders.getOrder({
-        maker: {
+        signer: {
           wallet: bobAddress,
           token: tokenWETH.address,
           param: 1,
           kind: '0x80ac58cd',
         },
-        taker: {
+        sender: {
           wallet: aliceTradeWallet,
           token: tokenDAI.address,
           param: quote.toNumber(),
@@ -569,19 +569,19 @@ contract('Delegate', async accounts => {
       // Succeeds on the Delegate, fails on the Swap.
       await reverted(
         aliceDelegate.provideOrder(order, { from: bobAddress }),
-        'MAKER_MUST_BE_ERC20'
+        'SIGNER_KIND_MUST_BE_ERC20'
       )
     })
 
-    it('Use quote with incorrect taker token kind', async () => {
-      // Note: Consumer is the order maker, Delegate is the order taker.
+    it('Use quote with incorrect sender token kind', async () => {
+      // Note: Consumer is the order signer, Delegate is the order sender.
       const order = await orders.getOrder({
-        maker: {
+        signer: {
           wallet: bobAddress,
           token: tokenWETH.address,
           param: 1,
         },
-        taker: {
+        sender: {
           wallet: aliceTradeWallet,
           token: tokenDAI.address,
           param: quote.toNumber(),
@@ -592,19 +592,19 @@ contract('Delegate', async accounts => {
       // Succeeds on the Delegate, fails on the Swap.
       await reverted(
         aliceDelegate.provideOrder(order, { from: bobAddress }),
-        'TAKER_MUST_BE_ERC20'
+        'SENDER_KIND_MUST_BE_ERC20'
       )
     })
 
     it('Gets a quote to sell 1 WETH and takes it', async () => {
-      // Note: Consumer is the order maker, Delegate is the order taker.
+      // Note: Consumer is the order signer, Delegate is the order sender.
       const order = await orders.getOrder({
-        maker: {
+        signer: {
           wallet: bobAddress,
           token: tokenWETH.address,
           param: 1,
         },
-        taker: {
+        sender: {
           wallet: aliceTradeWallet,
           token: tokenDAI.address,
           param: quote.toNumber(),

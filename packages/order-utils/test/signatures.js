@@ -5,9 +5,9 @@ const { orders, signatures } = require('@airswap/order-utils')
 describe('Signatures', async () => {
   const swapAddress = '0x78db49d0459a67158bdca6e161be3d90342c7247'
 
-  const takerWallet = '0xbabe31056c0fe1b704d811b2405f6e9f5ae5e59d'
-  const makerWallet = '0x9d2fb0bcc90c6f3fa3a98d2c760623a4f6ee59b4'
-  const makerPrivKey = Buffer.from(
+  const senderWallet = '0xbabe31056c0fe1b704d811b2405f6e9f5ae5e59d'
+  const signerWallet = '0x9d2fb0bcc90c6f3fa3a98d2c760623a4f6ee59b4'
+  const signerPrivKey = Buffer.from(
     '4934d4ff925f39f91e3729fbce52ef12f25fdf93e014e291350f7d314c1a096b',
     'hex'
   )
@@ -20,13 +20,13 @@ describe('Signatures', async () => {
       {
         expiry: 1494460800,
         nonce: 101,
-        maker: {
-          wallet: makerWallet,
+        signer: {
+          wallet: signerWallet,
           token: ASTAddress,
           param: '0',
         },
-        taker: {
-          wallet: takerWallet,
+        sender: {
+          wallet: senderWallet,
           token: WETHAddress,
           param: '0',
         },
@@ -36,19 +36,18 @@ describe('Signatures', async () => {
 
     const signature = signatures.getPersonalSignature(
       order,
-      makerPrivKey,
+      signerPrivKey,
       swapAddress
     )
-
     expect(signature).to.deep.include({
       version: '0x45',
-      signer: makerWallet,
+      signatory: signerWallet,
       r: Buffer.from(
-        'b8bb81c7a0e5e88d74af3a3883d7d6e4a9b2a1f6fdf166a446a5bdc3dc495c89',
+        '539d93cf04378950229dffac7887fffb2b6a91072273c3b14d8942d109251998',
         'hex'
       ),
       s: Buffer.from(
-        '54110f864a69ce8e65e49efa1f93e5f5433e99a68a394e24a5b95760d0a19c63',
+        '55ee011f45450a444c83fa9c42f179efa3c130e254c175a8bd89560a15c8775e',
         'hex'
       ),
       v: 28,
@@ -60,13 +59,13 @@ describe('Signatures', async () => {
       {
         expiry: 1494460800,
         nonce: 101,
-        maker: {
-          wallet: makerWallet,
+        signer: {
+          wallet: signerWallet,
           token: ASTAddress,
           param: '0',
         },
-        taker: {
-          wallet: takerWallet,
+        sender: {
+          wallet: senderWallet,
           token: WETHAddress,
           param: '0',
         },
@@ -76,22 +75,21 @@ describe('Signatures', async () => {
 
     const signature = signatures.getTypedDataSignature(
       order,
-      makerPrivKey,
+      signerPrivKey,
       swapAddress
     )
-
     expect(signature).to.deep.include({
       version: '0x01',
-      signer: makerWallet,
+      signatory: signerWallet,
       r: Buffer.from(
-        '9c74ae08b167c61f0ad5ef1dd7937c196548ef98e718401d9515e441f3bd36bb',
+        'c78d7d33e620fdbec03176353f44d684178c079bb5a23c2d3cf72b6d40f32ce9',
         'hex'
       ),
       s: Buffer.from(
-        '18a8b95277a6b7c9d5d54bc5825a70be1bd28d1a09edecb7c8ab7012fb4ad67a',
+        '49dfeaee6792ee5a88e6747d1b49bd836af552db8ad8c6f45ed3d3e8f18248c1',
         'hex'
       ),
-      v: 28,
+      v: 27,
     })
   })
 })
