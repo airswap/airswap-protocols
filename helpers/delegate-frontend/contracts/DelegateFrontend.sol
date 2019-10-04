@@ -103,7 +103,6 @@ contract DelegateFrontend {
     uint256 _maxIntents
   ) public view returns (bytes32 delegateLocator, uint256 highAmount) {
 
-    // use the indexer to query delegates
     highAmount = 0;
 
     // Fetch an array of locators from the Indexer.
