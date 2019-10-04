@@ -74,6 +74,11 @@ contract Wrapper {
     require(_order.taker.wallet == msg.sender,
       "SENDER_MUST_BE_TAKER");
 
+    // Ensure that signature is present and
+    // will be explicitly checked in swap.
+    require(_order.signature.v != 0,
+      "SIGNATURE_MUST_BE_SENT");
+
     // The taker is sending ether that must be wrapped.
     if (_order.taker.token == address(wethContract)) {
 

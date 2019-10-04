@@ -18,7 +18,7 @@ const {
   takeSnapshot,
   revertToSnapShot,
 } = require('@airswap/test-utils').time
-const { orders } = require('@airswap/order-utils')
+const { orders, signatures } = require('@airswap/order-utils')
 
 let swapContract
 let wrapperContract
@@ -33,8 +33,6 @@ let tokenWETH
 let snapshotId
 
 contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
-  orders.setKnownAccounts([aliceAddress, bobAddress, carolAddress])
-
   before('Setup', async () => {
     let snapShot = await takeSnapshot()
     snapshotId = snapShot['result']
@@ -50,12 +48,12 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
     tokenDAI = await FungibleToken.new()
     tokenAST = await FungibleToken.new()
 
-    await orders.setVerifyingContract(swapAddress)
-
+    orders.setVerifyingContract(swapAddress)
+    orders.setKnownAccounts([aliceAddress, bobAddress, carolAddress])
     wrappedSwap = wrapperContract.swap
   })
 
-  after(async () => {
+  after('Cleanup', async () => {
     await revertToSnapShot(snapshotId)
   })
 
@@ -121,6 +119,7 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
           param: 10,
         },
       })
+
       let result = await wrappedSwap(order, {
         from: bobAddress,
         value: order.taker.param,
@@ -294,6 +293,31 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
           [tokenWETH, 5],
         ])
       )
-    })
+    }),
+      it('Send order where Bob sends AST to Alice for DAI w/ authorization but without signature', async () => {
+        const order = await orders.getOrder(
+          {
+            maker: {
+              wallet: aliceAddress,
+              token: tokenDAI.address,
+              param: 1,
+            },
+            taker: {
+              wallet: bobAddress,
+              token: tokenAST.address,
+              param: 100,
+            },
+          },
+          true
+        )
+
+        order.signature = signatures.getEmptySignature()
+
+        let result = wrappedSwap(order, {
+          from: bobAddress,
+          value: 0,
+        })
+        await reverted(result, 'SIGNATURE_MUST_BE_SENT.')
+      })
   })
 })
