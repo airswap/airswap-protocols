@@ -22,20 +22,20 @@ import "@airswap/types/contracts/Types.sol";
 interface IDelegate {
 
   event SetRule(
-    address takerToken,
-    address makerToken,
-    uint256 maxTakerAmount,
+    address senderToken,
+    address signerToken,
+    uint256 maxSenderAmount,
     uint256 priceCoef,
     uint256 priceExp
   );
 
   event UnsetRule(
-    address takerToken,
-    address makerToken
+    address senderToken,
+    address signerToken
   );
 
   struct Rule {
-    uint256 maxTakerAmount;
+    uint256 maxSenderAmount;
     uint256 priceCoef;
     uint256 priceExp;
   }
@@ -43,40 +43,40 @@ interface IDelegate {
   function rules(address, address) external returns (Rule memory);
 
   function setRule(
-    address _takerToken,
-    address _makerToken,
-    uint256 _maxTakerAmount,
+    address _senderToken,
+    address _signerToken,
+    uint256 _maxSenderAmount,
     uint256 _priceCoef,
     uint256 _priceExp
   ) external;
 
   function unsetRule(
-    address _takerToken,
-    address _makerToken
+    address _senderToken,
+    address _signerToken
   ) external;
 
-  function getMakerSideQuote(
-    uint256 _takerParam,
-    address _takerToken,
-    address _makerToken
+  function getSignerSideQuote(
+    uint256 _senderParam,
+    address _senderToken,
+    address _signerToken
   ) external view returns (
-    uint256 makerParam
+    uint256 signerParam
   );
 
-  function getTakerSideQuote(
-    uint256 _makerParam,
-    address _makerToken,
-    address _takerToken
+  function getSenderSideQuote(
+    uint256 _signerParam,
+    address _signerToken,
+    address _senderToken
   ) external view returns (
-    uint256 takerParam
+    uint256 senderParam
   );
 
   function getMaxQuote(
-    address _takerToken,
-    address _makerToken
+    address _senderToken,
+    address _signerToken
   ) external view returns (
-    uint256 takerParam,
-    uint256 makerParam
+    uint256 senderParam,
+    uint256 signerParam
   );
 
   function provideOrder(

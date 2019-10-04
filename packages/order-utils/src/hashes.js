@@ -55,8 +55,8 @@ function hashOrder(order) {
         ORDER_TYPEHASH,
         order.nonce,
         order.expiry,
-        hashParty(order.maker),
-        hashParty(order.taker),
+        hashParty(order.signer),
+        hashParty(order.sender),
         hashParty(order.affiliate),
       ]
     )

@@ -110,12 +110,12 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
   describe('Wrap Buys', async () => {
     it('Checks that Bob take a WETH order from Alice using ETH', async () => {
       const order = await orders.getOrder({
-        maker: {
+        signer: {
           wallet: aliceAddress,
           token: tokenDAI.address,
           param: 50,
         },
-        taker: {
+        sender: {
           wallet: bobAddress,
           token: tokenWETH.address,
           param: 10,
@@ -123,7 +123,7 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
       })
       let result = await wrappedSwap(order, {
         from: bobAddress,
-        value: order.taker.param,
+        value: order.sender.param,
       })
       await passes(result)
       result = await getResult(swapContract, result.tx)
@@ -164,12 +164,12 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
 
     it('Checks that Alice receives ETH for a WETH order from Carol', async () => {
       const order = await orders.getOrder({
-        maker: {
+        signer: {
           wallet: carolAddress,
           token: tokenWETH.address,
           param: 10000,
         },
-        taker: {
+        sender: {
           wallet: aliceAddress,
           token: tokenDAI.address,
           param: 100,
@@ -219,12 +219,12 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
 
     it('Send order where Bob sends Eth to Alice for DAI', async () => {
       const order = await orders.getOrder({
-        maker: {
+        signer: {
           wallet: aliceAddress,
           token: tokenDAI.address,
           param: 50,
         },
-        taker: {
+        sender: {
           wallet: bobAddress,
           token: tokenWETH.address,
           param: 10,
@@ -232,7 +232,7 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
       })
       let result = await wrappedSwap(order, {
         from: bobAddress,
-        value: order.taker.param,
+        value: order.sender.param,
       })
       await passes(result)
       result = await getResult(swapContract, result.tx)
@@ -268,12 +268,12 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
 
     it('Send order where Bob sends AST to Alice for DAI', async () => {
       const order = await orders.getOrder({
-        maker: {
+        signer: {
           wallet: aliceAddress,
           token: tokenDAI.address,
           param: 1,
         },
-        taker: {
+        sender: {
           wallet: bobAddress,
           token: tokenAST.address,
           param: 100,

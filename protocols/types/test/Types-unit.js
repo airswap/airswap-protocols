@@ -34,7 +34,7 @@ contract('Types Unit Tests', async ([defaultAccount]) => {
   describe('Test hashing functions within the library', async () => {
     it('Test hashOrder', async () => {
       const order = await orders.getOrder({
-        maker: {
+        signer: {
           wallet: defaultAccount,
         },
       })
