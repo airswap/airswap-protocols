@@ -216,6 +216,28 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
       emitted(result, 'Approval')
     })
 
+    it('Send order where the sender does not send the correct amount of ETH', async () => {
+      const order = await orders.getOrder({
+        maker: {
+          wallet: aliceAddress,
+          token: tokenDAI.address,
+          param: 1,
+        },
+        taker: {
+          wallet: bobAddress,
+          token: tokenWETH.address,
+          param: 100,
+        },
+      })
+      await reverted(
+        wrappedSwap(order, {
+          from: bobAddress,
+          value: 200,
+        }),
+        'VALUE_MUST_BE_SENT'
+      )
+    })
+
     it('Send order where Bob sends Eth to Alice for DAI', async () => {
       const order = await orders.getOrder({
         maker: {
