@@ -113,7 +113,8 @@ contract Wrapper {
       wethContract.withdraw(_order.maker.param);
 
       // Transfer ether to the user.
-      msg.sender.transfer(_order.maker.param);
+      // solium-disable-next-line security/no-call-value
+      msg.sender.call.value(_order.maker.param)("");
 
     }
   }
