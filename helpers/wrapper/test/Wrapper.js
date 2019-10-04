@@ -339,7 +339,6 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
       )
     })
 
-
     it('Send order without WETH where ETH is incorrectly supplied', async () => {
       const order = await orders.getOrder({
         maker: {
