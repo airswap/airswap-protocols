@@ -36,22 +36,26 @@ contract('Delegate Factory Tests', async accounts => {
 
   describe('Test deploying factory', async () => {
     it('should have set swapContract', async () => {
-      let val = await delegateFactory.swapContract.call();
-      equal(val, swapContract, "swap contract was not successfully set on deployment")
+      let val = await delegateFactory.swapContract.call()
+      equal(
+        val,
+        swapContract,
+        'swap contract was not successfully set on deployment'
+      )
     })
 
     it('should not deploy a factory with swap address 0x0', async () => {
-      await reverted(DelegateFactory.new(EMPTY_ADDRESS), 'SWAP_CONTRACT_REQUIRED')
+      await reverted(
+        DelegateFactory.new(EMPTY_ADDRESS),
+        'SWAP_CONTRACT_REQUIRED'
+      )
     })
   })
 
   describe('Test deploying delegates', async () => {
     it('should not deploy a delegate with owner address 0x0', async () => {
       await reverted(
-        delegateFactory.createDelegate(
-          EMPTY_ADDRESS,
-          tradeWalletOne
-        ),
+        delegateFactory.createDelegate(EMPTY_ADDRESS, tradeWalletOne),
         'DELEGATE_CONTRACT_OWNER_REQUIRED'
       )
     })
