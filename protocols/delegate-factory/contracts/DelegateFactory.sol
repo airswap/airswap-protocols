@@ -27,6 +27,7 @@ contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
   ISwap public swapContract;
 
   /**
+    * @notice Create a new Delegate contract
     * @dev swapContract is unable to be changed after the factory sets it
     * @param _swapContract address of the swap contract the delegate will deploy with
     */
@@ -40,9 +41,9 @@ contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
 
   /**
     * @notice Create a new Delegate contract
-    * @param _delegateContractOwner address that should be the owner of the delegate
+    * @param _delegateContractOwner address that will become the delegate owner
     * @param _delegateTradeWallet the wallet the delegate will trade from
-    * @return delegateContractAddress address address of the delegate contract created
+    * @return delegateContractAddress address of the delegate contract created
     */
   function createDelegate(
     address _delegateContractOwner,
