@@ -16,9 +16,7 @@ contract('Delegate Factory Tests', async accounts => {
   const delegateOwnerTwo = accounts[4]
   const tradeWalletOne = accounts[5]
   const tradeWalletTwo = accounts[6]
-
   let snapshotId
-
   let delegateFactory
 
   beforeEach(async () => {
@@ -35,19 +33,19 @@ contract('Delegate Factory Tests', async accounts => {
   })
 
   describe('Test deploying factory', async () => {
+    it('should not deploy a factory with swap address 0x0', async () => {
+      await reverted(
+        DelegateFactory.new(EMPTY_ADDRESS),
+        'SWAP_CONTRACT_REQUIRED'
+      )
+    })
+
     it('should have set swapContract', async () => {
       let val = await delegateFactory.swapContract.call()
       equal(
         val,
         swapContract,
         'swap contract was not successfully set on deployment'
-      )
-    })
-
-    it('should not deploy a factory with swap address 0x0', async () => {
-      await reverted(
-        DelegateFactory.new(EMPTY_ADDRESS),
-        'SWAP_CONTRACT_REQUIRED'
       )
     })
   })

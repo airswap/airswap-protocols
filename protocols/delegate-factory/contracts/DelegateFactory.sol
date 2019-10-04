@@ -17,21 +17,22 @@
 pragma solidity 0.5.10;
 
 import "@airswap/delegate/contracts/Delegate.sol";
+import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "@airswap/indexer/contracts/interfaces/ILocatorWhitelist.sol";
 import "@airswap/delegate-factory/contracts/interfaces/IDelegateFactory.sol";
 
 contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
 
   mapping(address => bool) internal deployedAddresses;
-  address public swapContract;
+  ISwap public swapContract;
 
   /**
     * @dev swapContract is unable to be changed after the factory sets it
     * @param _swapContract address of the swap contract the delegate will deploy with
     */
-  constructor(address _swapContract) public {
+  constructor(ISwap _swapContract) public {
     // Ensure a swap contract is provided.
-    require(_swapContract != address(0),
+    require(address(_swapContract) != address(0),
       'SWAP_CONTRACT_REQUIRED');
 
     swapContract = _swapContract;
@@ -55,7 +56,7 @@ contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
     delegateContractAddress = address(new Delegate(swapContract, _delegateContractOwner, _delegateTradeWallet));
     deployedAddresses[delegateContractAddress] = true;
 
-    emit CreateDelegate(delegateContractAddress, swapContract, _delegateContractOwner, _delegateTradeWallet);
+    emit CreateDelegate(delegateContractAddress, address(swapContract), _delegateContractOwner, _delegateTradeWallet);
 
     return delegateContractAddress;
   }
