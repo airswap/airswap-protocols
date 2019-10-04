@@ -300,7 +300,7 @@ contract('Delegate Unit Tests', async accounts => {
     it('Test ownership after transfer', async () => {
       await reverted(
         delegate.transferOwnership(EMPTY_ADDRESS),
-        'PEER_CONTRACT_OWNER_REQUIRED'
+        'DELEGATE_CONTRACT_OWNER_REQUIRED'
       )
     })
   })

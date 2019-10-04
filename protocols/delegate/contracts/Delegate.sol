@@ -88,7 +88,7 @@ contract Delegate is IDelegate, Ownable {
 
   /**
     * @notice determines if an address to interact with this delegate
-    * @param _addressToCheck the address to check if admin or not 
+    * @param _addressToCheck the address to check if admin or not
     */
   function isAdmin(address _addressToCheck) view external returns (bool) {
     return admins[_addressToCheck];
@@ -121,7 +121,7 @@ contract Delegate is IDelegate, Ownable {
     * @param _newOwner the address of the new owner of the contract
     */
   function transferOwnership(address _newOwner) public onlyOwner {
-    require(_newOwner != address(0), 'PEER_CONTRACT_OWNER_REQUIRED');
+    require(_newOwner != address(0), 'DELEGATE_CONTRACT_OWNER_REQUIRED');
     admins[_newOwner] = true;
     admins[owner()] = false;
     super.transferOwnership(_newOwner);
