@@ -39,9 +39,9 @@ contract PeerFrontend {
 
   /**
     * @notice Get a Sender-Side Quote from the Onchain Liquidity provider
-    * @dev want to fetch the lowest _signerAmount for requested _signerAmount
+    * @dev want to fetch the lowest _signerAmount for requested _senderAmount
     * @dev if no suitable Peer found, defaults to 0x0 peerLocator
-    * @param _signerAmount uint256 The amount of ERC-20 token the peer would send
+    * @param _senderAmount uint256 The amount of ERC-20 token the peer would send
     * @param _senderToken address The address of an ERC-20 token the peer would send
     * @param _signerToken address The address of an ERC-20 token the consumer would send
     * @param _maxIntents uint256 The maximum number of Peers to query
@@ -49,7 +49,7 @@ contract PeerFrontend {
     * @return lowestCost uint256
     */
   function getBestSenderSideQuote(
-    uint256 _signerAmount,
+    uint256 _senderAmount,
     address _senderToken,
     address _signerToken,
     uint256 _maxIntents
@@ -71,7 +71,7 @@ contract PeerFrontend {
 
       // Get a buy quote from the Peer.
       uint256 signerAmount = IPeer(address(bytes20(locators[i])))
-        .getSignerSideQuote(_signerAmount, _senderToken, _signerToken);
+        .getSignerSideQuote(_senderAmount, _senderToken, _signerToken);
 
       // Update the lowest cost.
       if (signerAmount > 0 && signerAmount < lowestAmount) {
@@ -87,7 +87,7 @@ contract PeerFrontend {
 
   /**
     * @notice Get a Signer-Side Quote from the Onchain Liquidity provider
-    * @dev want to fetch the highest _signerAmount for requested _signerAmount
+    * @dev want to fetch the highest _senderAmount for requested _signerAmount
     * @dev if no suitable Peer found, peerLocator will be 0x0
     * @param _signerAmount uint256 The amount of ERC-20 token the peer would send
     * @param _signerToken address The address of an ERC-20 token the peer would send
@@ -117,13 +117,13 @@ contract PeerFrontend {
     for (uint256 i; i < locators.length; i++) {
 
       // Get a buy quote from the Peer.
-      uint256 signerAmount = IPeer(address(bytes20(locators[i])))
+      uint256 senderAmount = IPeer(address(bytes20(locators[i])))
         .getSenderSideQuote(_signerAmount, _signerToken, _senderToken);
 
       // Update the highest amount.
-      if (signerAmount > 0 && signerAmount > highAmount) {
+      if (senderAmount > 0 && senderAmount > highAmount) {
         peerLocator = locators[i];
-        highAmount = signerAmount;
+        highAmount = senderAmount;
       }
     }
 
@@ -133,9 +133,9 @@ contract PeerFrontend {
 
   /**
     * @notice Get and fill Sender-Side Quote from the Onchain Liquidity provider
-    * @dev want to fetch the lowest _signerAmount for requested _signerAmount
+    * @dev want to fetch the lowest _signerAmount for requested _senderAmount
     * @dev if no suitable Peer found, will revert by checking peerLocator is 0x0
-    * @param _signerAmount uint256 The amount of ERC-20 token the peer would send
+    * @param _senderAmount uint256 The amount of ERC-20 token the peer would send
     * @param _senderToken address The address of an ERC-20 token the peer would send
     * @param _signerToken address The address of an ERC-20 token the consumer would send
     * @param _maxIntents uint256 The maximum number of Peers to query
@@ -143,7 +143,7 @@ contract PeerFrontend {
     * @return lowestCost uint256
     */
   function fillBestSenderSideOrder(
-    uint256 _signerAmount,
+    uint256 _senderAmount,
     address _senderToken,
     address _signerToken,
     uint256 _maxIntents
@@ -151,7 +151,7 @@ contract PeerFrontend {
 
     // Find the best buy among Indexed Peers.
     (bytes32 peerLocator, uint256 signerAmount) = getBestSenderSideQuote(
-      _signerAmount,
+      _senderAmount,
       _senderToken,
       _signerToken,
       _maxIntents
@@ -189,7 +189,7 @@ contract PeerFrontend {
       Types.Party(
         IPeer(peerContract).tradeWallet(),
         _senderToken,
-        _signerAmount,
+        _senderAmount,
         0x277f8169
       ),
       Types.Party(address(0), address(0), 0, bytes4(0)),
@@ -200,7 +200,7 @@ contract PeerFrontend {
     swapContract.revoke(peerContract);
 
     // PeerFrontend transfers received amount to the User.
-    IERC20(_senderToken).transfer(msg.sender, _signerAmount);
+    IERC20(_senderToken).transfer(msg.sender, _senderAmount);
   }
 
   function fillBestSignerSideOrder(
@@ -211,7 +211,7 @@ contract PeerFrontend {
   ) external {
 
     // Find the best buy among Indexed Peers.
-    (bytes32 peerLocator, uint256 signerAmount) = getBestSignerSideQuote(
+    (bytes32 peerLocator, uint256 senderAmount) = getBestSignerSideQuote(
       _signerAmount,
       _signerToken,
       _senderToken,
@@ -251,7 +251,7 @@ contract PeerFrontend {
       Types.Party(
         IPeer(peerContract).tradeWallet(),
         _senderToken,
-        signerAmount,
+        senderAmount,
         0x277f8169
       ),
       Types.Party(address(0), address(0), 0, bytes4(0)),
@@ -262,6 +262,6 @@ contract PeerFrontend {
     swapContract.revoke(peerContract);
 
     // PeerFrontend transfers received amount to the User.
-    IERC20(_senderToken).transfer(msg.sender, signerAmount);
+    IERC20(_senderToken).transfer(msg.sender, senderAmount);
   }
 }

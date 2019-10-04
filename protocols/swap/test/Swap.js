@@ -517,7 +517,7 @@ contract('Swap', async accounts => {
     it('David makes an order for Alice, Carol takes the order for Bob', async () => {
       // Alice has already approved David in the previous section
       const order = await orders.getOrder({
-        signer: davidAddress,
+        signatory: davidAddress,
         signer: {
           wallet: aliceAddress,
           token: tokenAST.address,

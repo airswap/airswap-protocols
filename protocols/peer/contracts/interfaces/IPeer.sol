@@ -22,16 +22,16 @@ import "@airswap/types/contracts/Types.sol";
 interface IPeer {
 
   event SetRule(
-    address signerToken,
     address senderToken,
+    address signerToken,
     uint256 maxSenderAmount,
     uint256 priceCoef,
     uint256 priceExp
   );
 
   event UnsetRule(
-    address signerToken,
-    address senderToken
+    address senderToken,
+    address signerToken
   );
 
   struct Rule {
@@ -43,37 +43,37 @@ interface IPeer {
   function rules(address, address) external returns (Rule memory);
 
   function setRule(
-    address _signerToken,
     address _senderToken,
+    address _signerToken,
     uint256 _maxSenderAmount,
     uint256 _priceCoef,
     uint256 _priceExp
   ) external;
 
   function unsetRule(
-    address _signerToken,
-    address _senderToken
+    address _senderToken,
+    address _signerToken
   ) external;
 
   function getSignerSideQuote(
     uint256 _senderParam,
-    address _signerToken,
-    address _senderToken
+    address _senderToken,
+    address _signerToken
   ) external view returns (
     uint256 signerParam
   );
 
   function getSenderSideQuote(
     uint256 _signerParam,
-    address _senderToken,
-    address _signerToken
+    address _signerToken,
+    address _senderToken
   ) external view returns (
     uint256 senderParam
   );
 
   function getMaxQuote(
-    address _signerToken,
-    address _senderToken
+    address _senderToken,
+    address _signerToken
   ) external view returns (
     uint256 senderParam,
     uint256 signerParam

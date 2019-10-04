@@ -99,8 +99,8 @@ contract('Peer Unit Tests', async accounts => {
     it('Test setRule permissions', async () => {
       await reverted(
         peer.setRule(
-          SIGNER_TOKEN,
           SENDER_TOKEN,
+          SIGNER_TOKEN,
           MAX_SENDER_AMOUNT,
           PRICE_COEF,
           EXP,
@@ -110,8 +110,8 @@ contract('Peer Unit Tests', async accounts => {
 
       await passes(
         peer.setRule(
-          SIGNER_TOKEN,
           SENDER_TOKEN,
+          SIGNER_TOKEN,
           MAX_SENDER_AMOUNT,
           PRICE_COEF,
           EXP,
@@ -122,15 +122,15 @@ contract('Peer Unit Tests', async accounts => {
 
     it('Test setRule', async () => {
       let trx = await peer.setRule(
-        SIGNER_TOKEN,
         SENDER_TOKEN,
+        SIGNER_TOKEN,
         MAX_SENDER_AMOUNT,
         PRICE_COEF,
         EXP
       )
 
       //check if rule has been added
-      let rule = await peer.rules.call(SIGNER_TOKEN, SENDER_TOKEN)
+      let rule = await peer.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
       equal(
         rule[0].toNumber(),
         MAX_SENDER_AMOUNT,
@@ -153,32 +153,32 @@ contract('Peer Unit Tests', async accounts => {
 
     it('Test unsetRule permissions', async () => {
       await reverted(
-        peer.unsetRule(SIGNER_TOKEN, SENDER_TOKEN, { from: notOwner })
+        peer.unsetRule(SENDER_TOKEN, SIGNER_TOKEN, { from: notOwner })
       )
-      await passes(peer.unsetRule(SIGNER_TOKEN, SENDER_TOKEN, { from: owner }))
+      await passes(peer.unsetRule(SENDER_TOKEN, SIGNER_TOKEN, { from: owner }))
     })
 
     it('Test unsetRule', async () => {
       let trx = await peer.setRule(
-        SIGNER_TOKEN,
         SENDER_TOKEN,
+        SIGNER_TOKEN,
         MAX_SENDER_AMOUNT,
         PRICE_COEF,
         EXP
       )
 
       //ensure rule has been added
-      let ruleBefore = await peer.rules.call(SIGNER_TOKEN, SENDER_TOKEN)
+      let ruleBefore = await peer.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
       equal(
         ruleBefore[0].toNumber(),
         MAX_SENDER_AMOUNT,
         'max peer amount is incorrectly saved'
       )
 
-      trx = await peer.unsetRule(SIGNER_TOKEN, SENDER_TOKEN)
+      trx = await peer.unsetRule(SENDER_TOKEN, SIGNER_TOKEN)
 
       //check that the rule has been removed
-      let ruleAfter = await peer.rules.call(SIGNER_TOKEN, SENDER_TOKEN)
+      let ruleAfter = await peer.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
       equal(
         ruleAfter[0].toNumber(),
         0,
@@ -445,12 +445,12 @@ contract('Peer Unit Tests', async accounts => {
         signer: {
           wallet: notOwner,
           param: signerAmount,
-          token: SENDER_TOKEN,
+          token: SIGNER_TOKEN,
         },
         sender: {
           wallet: notTradeWallet,
           param: senderAmount,
-          token: SIGNER_TOKEN,
+          token: SENDER_TOKEN,
         },
       })
 
@@ -464,8 +464,8 @@ contract('Peer Unit Tests', async accounts => {
 
     it('test if order is not priced according to the rule', async () => {
       await peer.setRule(
-        SIGNER_TOKEN,
         SENDER_TOKEN,
+        SIGNER_TOKEN,
         MAX_SENDER_AMOUNT,
         PRICE_COEF,
         EXP
@@ -474,12 +474,12 @@ contract('Peer Unit Tests', async accounts => {
       const order = await orders.getOrder({
         signer: {
           param: 30,
-          token: SENDER_TOKEN,
+          token: SIGNER_TOKEN,
         },
         sender: {
           wallet: tradeWallet,
           param: MAX_SENDER_AMOUNT,
-          token: SIGNER_TOKEN,
+          token: SENDER_TOKEN,
         },
       })
 
@@ -492,14 +492,14 @@ contract('Peer Unit Tests', async accounts => {
 
     it('test a successful transaction with integer values', async () => {
       await peer.setRule(
-        SIGNER_TOKEN,
         SENDER_TOKEN,
+        SIGNER_TOKEN,
         MAX_SENDER_AMOUNT,
         100,
         EXP
       )
 
-      let ruleBefore = await peer.rules.call(SIGNER_TOKEN, SENDER_TOKEN)
+      let ruleBefore = await peer.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
 
       let signerAmount = 100
 
@@ -507,12 +507,12 @@ contract('Peer Unit Tests', async accounts => {
         signer: {
           wallet: notOwner,
           param: signerAmount,
-          token: SENDER_TOKEN,
+          token: SIGNER_TOKEN,
         },
         sender: {
           wallet: tradeWallet,
           param: 100,
-          token: SIGNER_TOKEN,
+          token: SENDER_TOKEN,
         },
       })
 
@@ -524,7 +524,7 @@ contract('Peer Unit Tests', async accounts => {
         })
       )
 
-      let ruleAfter = await peer.rules.call(SIGNER_TOKEN, SENDER_TOKEN)
+      let ruleAfter = await peer.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
       equal(
         ruleAfter[0].toNumber(),
         ruleBefore[0].toNumber() - signerAmount,
@@ -544,14 +544,14 @@ contract('Peer Unit Tests', async accounts => {
 
     it('test a successful transaction with trade wallet as sender', async () => {
       await peer.setRule(
-        SIGNER_TOKEN,
         SENDER_TOKEN,
+        SIGNER_TOKEN,
         MAX_SENDER_AMOUNT,
         100,
         EXP
       )
 
-      let ruleBefore = await peer.rules.call(SIGNER_TOKEN, SENDER_TOKEN)
+      let ruleBefore = await peer.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
 
       let signerAmount = 100
 
@@ -559,12 +559,12 @@ contract('Peer Unit Tests', async accounts => {
         signer: {
           wallet: notOwner,
           param: signerAmount,
-          token: SENDER_TOKEN,
+          token: SIGNER_TOKEN,
         },
         sender: {
           wallet: tradeWallet,
           param: 100,
-          token: SIGNER_TOKEN,
+          token: SENDER_TOKEN,
         },
       })
 
@@ -576,7 +576,7 @@ contract('Peer Unit Tests', async accounts => {
         })
       )
 
-      let ruleAfter = await peer.rules.call(SIGNER_TOKEN, SENDER_TOKEN)
+      let ruleAfter = await peer.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
       equal(
         ruleAfter[0].toNumber(),
         ruleBefore[0].toNumber() - signerAmount,
@@ -596,14 +596,14 @@ contract('Peer Unit Tests', async accounts => {
 
     it('test a successful transaction with decimal values', async () => {
       await peer.setRule(
-        SIGNER_TOKEN,
         SENDER_TOKEN,
+        SIGNER_TOKEN,
         MAX_SENDER_AMOUNT,
         PRICE_COEF,
         EXP
       )
 
-      let ruleBefore = await peer.rules.call(SIGNER_TOKEN, SENDER_TOKEN)
+      let ruleBefore = await peer.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
 
       let signerAmount = 100
       let senderAmount = Math.floor((signerAmount * 10 ** EXP) / PRICE_COEF)
@@ -612,12 +612,12 @@ contract('Peer Unit Tests', async accounts => {
         signer: {
           wallet: notOwner,
           param: signerAmount,
-          token: SENDER_TOKEN,
+          token: SIGNER_TOKEN,
         },
         sender: {
           wallet: tradeWallet,
           param: senderAmount,
-          token: SIGNER_TOKEN,
+          token: SENDER_TOKEN,
         },
       })
 
@@ -629,7 +629,7 @@ contract('Peer Unit Tests', async accounts => {
         })
       )
 
-      let ruleAfter = await peer.rules.call(SIGNER_TOKEN, SENDER_TOKEN)
+      let ruleAfter = await peer.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
       equal(
         ruleAfter[0].toNumber(),
         ruleBefore[0].toNumber() - senderAmount,
