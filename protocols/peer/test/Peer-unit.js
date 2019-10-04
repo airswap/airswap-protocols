@@ -78,8 +78,7 @@ contract('Peer Unit Tests', async accounts => {
       equal(val, owner, 'trade wallet is incorrect')
     })
 
-    it('Test owner is set correctly if provided the empty address', async () => {
-      // being provided an empty address, it should leave the owner unchanged
+    it('Test owner is set correctly having been provided an empty address', async () => {
       let val = await peer.owner.call()
       equal(val, owner, 'owner is incorrect - should be owner')
     })
@@ -96,8 +95,25 @@ contract('Peer Unit Tests', async accounts => {
   })
 
   describe('Test setters', async () => {
-    it('Test setRule permissions', async () => {
+    it('Test setRule permissions as not owner', async () => {
+      //not owner is not apart of admin and should fail
       await reverted(
+        peer.setRule(
+          SENDER_TOKEN,
+          SIGNER_TOKEN,
+          MAX_SENDER_AMOUNT,
+          PRICE_COEF,
+          EXP,
+          { from: notOwner }
+        ),
+        'CALLER_MUST_BE_ADMIN'
+      )
+    })
+
+    it('Test setRule permissions after not owner is admin', async () => {
+      //test again after adding not owner to admin
+      await peer.addAdmin(notOwner)
+      await passes(
         peer.setRule(
           SENDER_TOKEN,
           SIGNER_TOKEN,
@@ -107,7 +123,9 @@ contract('Peer Unit Tests', async accounts => {
           { from: notOwner }
         )
       )
+    })
 
+    it('Test setRule permissions as owner', async () => {
       await passes(
         peer.setRule(
           SENDER_TOKEN,
@@ -151,10 +169,23 @@ contract('Peer Unit Tests', async accounts => {
       })
     })
 
-    it('Test unsetRule permissions', async () => {
+    it('Test unsetRule permissions as not owner', async () => {
+      //not owner is not apart of admin and should fail
       await reverted(
+        peer.unsetRule(SENDER_TOKEN, SIGNER_TOKEN, { from: notOwner }),
+        'CALLER_MUST_BE_ADMIN'
+      )
+    })
+
+    it('Test unsetRule permissions after not owner is admin', async () => {
+      //test again after adding not owner to admin
+      await peer.addAdmin(notOwner)
+      await passes(
         peer.unsetRule(SENDER_TOKEN, SIGNER_TOKEN, { from: notOwner })
       )
+    })
+
+    it('Test unsetRule permissions', async () => {
       await passes(peer.unsetRule(SENDER_TOKEN, SIGNER_TOKEN, { from: owner }))
     })
 
@@ -194,11 +225,68 @@ contract('Peer Unit Tests', async accounts => {
     })
   })
 
-  describe('Test setSenderWallet', async () => {
-    it('Test setSenderWallet permissions', async () => {
+  describe('Test setTradeWallet', async () => {
+    it('Test setTradeWallet when not owner', async () => {
       await reverted(peer.setTradeWallet(notOwner, { from: notOwner }))
+    })
 
+    it('Test setTakerWallet when owner', async () => {
       await passes(peer.setTradeWallet(notOwner, { from: owner }))
+    })
+  })
+
+  describe('Test admin', async () => {
+    it('Test adding to admin as owner', async () => {
+      await passes(peer.addAdmin(notOwner))
+    })
+
+    it('Test adding to admin as not owner', async () => {
+      await reverted(peer.addAdmin(notOwner, { from: notOwner }))
+    })
+
+    it('Test removal from admin', async () => {
+      await peer.addAdmin(notOwner)
+      await passes(peer.removeAdmin(notOwner))
+    })
+
+    it('Test removal of owner from admin', async () => {
+      await reverted(peer.removeAdmin(owner), 'OWNER_MUST_BE_ADMIN')
+    })
+
+    it('Test removal from admin as not owner', async () => {
+      await reverted(peer.removeAdmin(notOwner, { from: notOwner }))
+    })
+
+    it('Test adding to admin event emitted', async () => {
+      let trx = await peer.addAdmin(notOwner)
+      await emitted(trx, 'AdminAdded', e => {
+        return e.account == notOwner
+      })
+    })
+
+    it('Test removing from admin event emitted', async () => {
+      let trx = await peer.removeAdmin(notOwner)
+      await emitted(trx, 'AdminRemoved', e => {
+        return e.account == notOwner
+      })
+    })
+  })
+
+  describe('Test transfer of ownership', async () => {
+    it('Test ownership after transfer', async () => {
+      await peer.transferOwnership(notOwner)
+      let val = await peer.owner.call()
+      equal(val, notOwner, 'owner was not passed properly')
+
+      val = await peer.isAdmin.call(owner)
+      equal(val, false, 'owner should no longer be admin')
+    })
+
+    it('Test ownership after transfer', async () => {
+      await reverted(
+        peer.transferOwnership(EMPTY_ADDRESS),
+        'PEER_CONTRACT_OWNER_REQUIRED'
+      )
     })
   })
 
@@ -207,8 +295,8 @@ contract('Peer Unit Tests', async accounts => {
       const NON_EXISTENT_SIGNER_TOKEN = accounts[7]
       let val = await peer.getSignerSideQuote.call(
         1234,
-        NON_EXISTENT_SIGNER_TOKEN,
-        SENDER_TOKEN
+        SENDER_TOKEN,
+        NON_EXISTENT_SIGNER_TOKEN
       )
       equal(
         val.toNumber(),
@@ -219,16 +307,16 @@ contract('Peer Unit Tests', async accounts => {
 
     it('test when peer amount is greater than max peer amount', async () => {
       await peer.setRule(
-        SIGNER_TOKEN,
         SENDER_TOKEN,
+        SIGNER_TOKEN,
         MAX_SENDER_AMOUNT,
         PRICE_COEF,
         EXP
       )
       let val = await peer.getSignerSideQuote.call(
         MAX_SENDER_AMOUNT + 1,
-        SIGNER_TOKEN,
-        SENDER_TOKEN
+        SENDER_TOKEN,
+        SIGNER_TOKEN
       )
       equal(
         val.toNumber(),
@@ -247,8 +335,8 @@ contract('Peer Unit Tests', async accounts => {
       )
       let val = await peer.getSignerSideQuote.call(
         0,
-        SIGNER_TOKEN,
-        SENDER_TOKEN
+        SENDER_TOKEN,
+        SIGNER_TOKEN
       )
       equal(
         val.toNumber(),
@@ -259,8 +347,8 @@ contract('Peer Unit Tests', async accounts => {
 
     it('test a successful call - getSignerSideQuote', async () => {
       await peer.setRule(
-        SIGNER_TOKEN,
         SENDER_TOKEN,
+        SIGNER_TOKEN,
         MAX_SENDER_AMOUNT,
         PRICE_COEF,
         EXP
@@ -268,8 +356,8 @@ contract('Peer Unit Tests', async accounts => {
 
       let val = await peer.getSignerSideQuote.call(
         1234,
-        SIGNER_TOKEN,
-        SENDER_TOKEN
+        SENDER_TOKEN,
+        SIGNER_TOKEN
       )
       let expectedValue = Math.floor((1234 * PRICE_COEF) / 10 ** EXP)
       equal(val.toNumber(), expectedValue, 'there should be a quote available')
@@ -291,7 +379,7 @@ contract('Peer Unit Tests', async accounts => {
     })
 
     it('test when peer amount is not within acceptable value bounds', async () => {
-      await peer.setRule(SIGNER_TOKEN, SENDER_TOKEN, 100, 1, 0)
+      await peer.setRule(SENDER_TOKEN, SIGNER_TOKEN, 100, 1, 0)
       let val = await peer.getSenderSideQuote.call(
         0,
         SENDER_TOKEN,
@@ -317,8 +405,8 @@ contract('Peer Unit Tests', async accounts => {
 
     it('test a successful call - getSenderSideQuote', async () => {
       await peer.setRule(
-        SIGNER_TOKEN,
         SENDER_TOKEN,
+        SIGNER_TOKEN,
         MAX_SENDER_AMOUNT,
         PRICE_COEF,
         EXP
@@ -326,8 +414,8 @@ contract('Peer Unit Tests', async accounts => {
 
       let val = await peer.getSenderSideQuote.call(
         500,
-        SENDER_TOKEN,
-        SIGNER_TOKEN
+        SIGNER_TOKEN,
+        SENDER_TOKEN
       )
       let expectedValue = Math.floor((500 * 10 ** EXP) / PRICE_COEF)
       equal(val.toNumber(), expectedValue, 'there should be a quote available')
@@ -336,7 +424,7 @@ contract('Peer Unit Tests', async accounts => {
 
   describe('Test getMaxQuote', async () => {
     it('test when rule does not exist', async () => {
-      let val = await peer.getMaxQuote.call(SIGNER_TOKEN, SENDER_TOKEN)
+      let val = await peer.getMaxQuote.call(SENDER_TOKEN, SIGNER_TOKEN)
       equal(
         val[0].toNumber(),
         0,
@@ -351,13 +439,13 @@ contract('Peer Unit Tests', async accounts => {
 
     it('test a successful call - getMaxQuote', async () => {
       await peer.setRule(
-        SIGNER_TOKEN,
         SENDER_TOKEN,
+        SIGNER_TOKEN,
         MAX_SENDER_AMOUNT,
         PRICE_COEF,
         EXP
       )
-      let val = await peer.getMaxQuote.call(SIGNER_TOKEN, SENDER_TOKEN)
+      let val = await peer.getMaxQuote.call(SENDER_TOKEN, SIGNER_TOKEN)
 
       equal(
         val[0].toNumber(),
@@ -401,8 +489,8 @@ contract('Peer Unit Tests', async accounts => {
 
     it('test if an order exceeds maximum amount', async () => {
       await peer.setRule(
-        SIGNER_TOKEN,
         SENDER_TOKEN,
+        SIGNER_TOKEN,
         MAX_SENDER_AMOUNT,
         PRICE_COEF,
         EXP
@@ -412,12 +500,12 @@ contract('Peer Unit Tests', async accounts => {
         signer: {
           wallet: notOwner,
           param: 555,
-          token: SENDER_TOKEN,
+          token: SIGNER_TOKEN,
         },
         sender: {
           wallet: tradeWallet,
           param: MAX_SENDER_AMOUNT + 1,
-          token: SIGNER_TOKEN,
+          token: SENDER_TOKEN,
         },
       })
 
@@ -431,8 +519,8 @@ contract('Peer Unit Tests', async accounts => {
 
     it('test if the sender is not empty and not the trade wallet', async () => {
       await peer.setRule(
-        SIGNER_TOKEN,
         SENDER_TOKEN,
+        SIGNER_TOKEN,
         MAX_SENDER_AMOUNT,
         PRICE_COEF,
         EXP
