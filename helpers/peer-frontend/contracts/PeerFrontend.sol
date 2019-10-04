@@ -43,10 +43,10 @@ contract PeerFrontend {
     * @dev if no suitable Peer found, defaults to 0x0 peerLocator
     * @param _senderAmount uint256 The amount of ERC-20 token the peer would send
     * @param _senderToken address The address of an ERC-20 token the peer would send
-    * @param _signerToken address The address of an ERC-20 token the consumer would send
+    * @param _signerToken address The address of an ERC-20 token the signer would send
     * @param _maxIntents uint256 The maximum number of Peers to query
-    * @return peerAddress bytes32
-    * @return lowestCost uint256
+    * @return peerAddress bytes32 The locator to connect to the peer
+    * @return lowestCost uint256 The amount of ERC-20 tokens the signer would send
     */
   function getBestSenderSideQuote(
     uint256 _senderAmount,
@@ -89,12 +89,12 @@ contract PeerFrontend {
     * @notice Get a Signer-Side Quote from the Onchain Liquidity provider
     * @dev want to fetch the highest _senderAmount for requested _signerAmount
     * @dev if no suitable Peer found, peerLocator will be 0x0
-    * @param _signerAmount uint256 The amount of ERC-20 token the peer would send
-    * @param _signerToken address The address of an ERC-20 token the peer would send
-    * @param _senderToken address The address of an ERC-20 token the consumer would send
+    * @param _signerAmount uint256 The amount of ERC-20 token the signer would send
+    * @param _signerToken address The address of an ERC-20 token the signer would send
+    * @param _senderToken address The address of an ERC-20 token the peer would send
     * @param _maxIntents uint256 The maximum number of Peers to query
-    * @return peerLocator bytes32  The amount of ERC-20 token the consumer would send
-    * @return lowestCost uint256 The amount of ERC-20 token the consumer would send
+    * @return peerLocator bytes32  The locator to connect to the peer
+    * @return highAmount uint256 The amount of ERC-20 tokens the peer would send
     */
   function getBestSignerSideQuote(
     uint256 _signerAmount,
@@ -137,10 +137,8 @@ contract PeerFrontend {
     * @dev if no suitable Peer found, will revert by checking peerLocator is 0x0
     * @param _senderAmount uint256 The amount of ERC-20 token the peer would send
     * @param _senderToken address The address of an ERC-20 token the peer would send
-    * @param _signerToken address The address of an ERC-20 token the consumer would send
+    * @param _signerToken address The address of an ERC-20 token the signer would send
     * @param _maxIntents uint256 The maximum number of Peers to query
-    * @return peerAddress bytes32
-    * @return lowestCost uint256
     */
   function fillBestSenderSideOrder(
     uint256 _senderAmount,
@@ -149,7 +147,7 @@ contract PeerFrontend {
     uint256 _maxIntents
   ) external {
 
-    // Find the best buy among Indexed Peers.
+    // Find the best locator and amount on Indexed Peers.
     (bytes32 peerLocator, uint256 signerAmount) = getBestSenderSideQuote(
       _senderAmount,
       _senderToken,
@@ -181,7 +179,7 @@ contract PeerFrontend {
         _senderToken))),
       block.timestamp + 1,
       Types.Party(
-        address(this), // consumer is acting as the signer in this case
+        address(this),
         _signerToken,
         signerAmount,
         0x277f8169
@@ -203,6 +201,15 @@ contract PeerFrontend {
     IERC20(_senderToken).transfer(msg.sender, _senderAmount);
   }
 
+  /**
+    * @notice Get and fill Signer-Side Quote from the Onchain Liquidity provider
+    * @dev want to fetch the highest _signerAmount for requested _senderAmount
+    * @dev if no suitable Peer found, will revert by checking peerLocator is 0x0
+    * @param _signerAmount uint256 The amount of ERC-20 token the signer would send
+    * @param _signerToken address The address of an ERC-20 token the signer would send
+    * @param _senderToken address The address of an ERC-20 token the peer would send
+    * @param _maxIntents uint256 The maximum number of Peers to query
+    */
   function fillBestSignerSideOrder(
     uint256 _signerAmount,
     address _signerToken,
@@ -210,7 +217,7 @@ contract PeerFrontend {
     uint256 _maxIntents
   ) external {
 
-    // Find the best buy among Indexed Peers.
+    // Find the best locator and amount on Indexed Peers.
     (bytes32 peerLocator, uint256 senderAmount) = getBestSignerSideQuote(
       _signerAmount,
       _signerToken,
@@ -243,7 +250,7 @@ contract PeerFrontend {
       ))),
       block.timestamp + 1,
       Types.Party(
-        address(this), // consumer is acting as the signer in this case
+        address(this),
         _signerToken,
         _signerAmount,
         0x277f8169
