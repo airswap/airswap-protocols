@@ -339,6 +339,29 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
       )
     })
 
+
+    it('Send order without WETH where ETH is incorrectly supplied', async () => {
+      const order = await orders.getOrder({
+        maker: {
+          wallet: aliceAddress,
+          token: tokenDAI.address,
+          param: 1,
+        },
+        taker: {
+          wallet: bobAddress,
+          token: tokenAST.address,
+          param: 100,
+        },
+      })
+      await reverted(
+        wrappedSwap(order, {
+          from: bobAddress,
+          value: 10,
+        }),
+        'VALUE_MUST_BE_ZERO'
+      )
+    })
+
     it('Send order where Bob sends AST to Alice for DAI w/ authorization but without signature', async () => {
       const order = await orders.getOrder(
         {
