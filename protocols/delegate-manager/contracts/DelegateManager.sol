@@ -38,14 +38,14 @@ contract DelegateManager is Ownable {
 
     function createDelegate(ISwap _swapContract) external returns (IDelegate) {
       require(address(_swapContract) != address(0), "SWAP_ADDRESS_REQUIRED");
-      IDelegate delegate = IDelegate(factory.createDelegate(address(_swapContract), msg.sender, address(0)));
+      IDelegate delegate = IDelegate(factory.createDelegate(_swapContract, msg.sender, address(0)));
       //NOTE: DelegateManager does not have access to the created Delegate by default
       ownerToDelegates[msg.sender].push(address(delegate));
       emit DelegateCreated(msg.sender, address(delegate));
       return delegate;
     }
 
-    function getOwnerAddressToDelegates(address _owner) external returns (address[] memory) {
+    function getOwnerAddressToDelegates(address _owner) view external returns (address[] memory) {
       uint256 length = ownerToDelegates[_owner].length;
       address[] memory delegates = new address[](length);
       for(uint i = 0; i < length; i++) {
