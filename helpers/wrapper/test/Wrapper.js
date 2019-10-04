@@ -293,31 +293,54 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
           [tokenWETH, 5],
         ])
       )
-    }),
-      it('Send order where Bob sends AST to Alice for DAI w/ authorization but without signature', async () => {
-        const order = await orders.getOrder(
-          {
-            maker: {
-              wallet: aliceAddress,
-              token: tokenDAI.address,
-              param: 1,
-            },
-            taker: {
-              wallet: bobAddress,
-              token: tokenAST.address,
-              param: 100,
-            },
-          },
-          true
-        )
+    })
 
-        order.signature = signatures.getEmptySignature()
-
-        let result = wrappedSwap(order, {
-          from: bobAddress,
-          value: 0,
-        })
-        await reverted(result, 'SIGNATURE_MUST_BE_SENT.')
+    it('Send order where the sender is not the taker of the order', async () => {
+      const order = await orders.getOrder({
+        maker: {
+          wallet: aliceAddress,
+          token: tokenDAI.address,
+          param: 1,
+        },
+        taker: {
+          wallet: bobAddress,
+          token: tokenAST.address,
+          param: 100,
+        },
       })
+      await reverted(
+        wrappedSwap(order, {
+          from: carolAddress,
+          value: 0,
+        }),
+        'SENDER_MUST_BE_TAKER'
+      )
+    })
+
+    it('Send order where Bob sends AST to Alice for DAI w/ authorization but without signature', async () => {
+      const order = await orders.getOrder(
+        {
+          maker: {
+            wallet: aliceAddress,
+            token: tokenDAI.address,
+            param: 1,
+          },
+          taker: {
+            wallet: bobAddress,
+            token: tokenAST.address,
+            param: 100,
+          },
+        },
+        true
+      )
+
+      order.signature = signatures.getEmptySignature()
+
+      let result = wrappedSwap(order, {
+        from: bobAddress,
+        value: 0,
+      })
+      await reverted(result, 'SIGNATURE_MUST_BE_SENT.')
+    })
   })
 })
