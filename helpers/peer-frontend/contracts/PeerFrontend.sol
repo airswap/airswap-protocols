@@ -239,7 +239,7 @@ contract PeerFrontend {
     // PeerFrontend authorizes the Peer.
     swapContract.authorize(peerContract, block.timestamp + 1);
 
-    // Consumer provides unsigned order to Peer.
+    // PeerFrontend provides unsigned order to Peer.
     IPeer(peerContract).provideOrder(Types.Order(
       uint256(keccak256(abi.encodePacked(
         block.timestamp,
