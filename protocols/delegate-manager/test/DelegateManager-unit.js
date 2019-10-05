@@ -1,3 +1,4 @@
+const Delegate = artifacts.require('Delegate')
 const DelegateManager = artifacts.require('DelegateManager')
 const DelegateFactory = artifacts.require('DelegateFactory')
 const MockContract = artifacts.require('MockContract')
@@ -16,7 +17,7 @@ contract('DelegateManager Unit Tests', async accounts => {
   let owner = accounts[0]
   let tradeWallet_1 = accounts[1]
   let tradeWallet_2 = accounts[1]
-  let generatedDelegate = accounts[2]
+  let mockDelegate
   let delegateManager
   let mockFactory
   let mockSwap
@@ -30,8 +31,22 @@ contract('DelegateManager Unit Tests', async accounts => {
     await revertToSnapShot(snapshotId)
   })
 
-  async function setupMockFactory() {
+  async function setupMockSwap() {
     mockSwap = await MockContract.new()
+  }
+
+  async function setupMockDelegate() {
+    mockDelegate = await MockContract.new()
+    let mockDelegateTemplate = await Delegate.new(mockSwap.address, owner, tradeWallet_1)
+
+    //mock setRule()
+    let mockDelegate_setRule = mockDelegateTemplate.contract.methods
+      .setRule(EMPTY_ADDRESS, EMPTY_ADDRESS, 0, 0, 0)
+      .encodeABI()
+    await mockDelegate.givenMethodReturnBool(mockDelegate_setRule, true)
+  }
+
+  async function setupMockFactory() {
     mockFactory = await MockContract.new()
     mockFactoryTemplate = await DelegateFactory.new(mockSwap.address)
 
@@ -41,12 +56,18 @@ contract('DelegateManager Unit Tests', async accounts => {
       .encodeABI()
     await mockFactory.givenMethodReturnAddress(
       mockFactory_createDelegate,
-      generatedDelegate
+      mockDelegate.address
     )
   }
 
+  async function setupMockIndexer() {
+  }
+
   before(async () => {
+    await setupMockSwap()
+    await setupMockDelegate()
     await setupMockFactory()
+
     delegateManager = await DelegateManager.new(mockFactory.address)
   })
 
@@ -60,12 +81,12 @@ contract('DelegateManager Unit Tests', async accounts => {
   describe('Test createDelegate', async () => {
     it('Test creating a delegate with 0x0 trade wallet', async () => {
       let val = await delegateManager.createDelegate.call(EMPTY_ADDRESS)
-      equal(val, generatedDelegate, 'no delegate was created')
+      equal(val, mockDelegate.address, 'no delegate was created')
     })
 
     it('Test creating a delegate with non 0x0 trade wallet', async () => {
       let val = await delegateManager.createDelegate.call(tradeWallet_1)
-      equal(val, generatedDelegate, 'no delegate was created')
+      equal(val, mockDelegate.address, 'no delegate was created')
     })
 
     it('Test when a delegate is added to owner to delegate list mapping', async () => {
@@ -78,12 +99,12 @@ contract('DelegateManager Unit Tests', async accounts => {
       equal(val.length, 2, 'there are too many items in the returned list')
       equal(
         val[0],
-        generatedDelegate,
+        mockDelegate.address,
         'there was an issue creating the delegate'
       )
       equal(
         val[1],
-        generatedDelegate,
+        mockDelegate.address,
         'there was an issue creating the delegate'
       )
     })
@@ -91,7 +112,7 @@ contract('DelegateManager Unit Tests', async accounts => {
     it('Test when a create delegate event is emitted', async () => {
       let trx = await delegateManager.createDelegate(tradeWallet_1)
       emitted(trx, 'DelegateCreated', e => {
-        return e.owner === owner && e.delegate == generatedDelegate
+        return e.owner === owner && e.delegate == mockDelegate.address
       })
     })
   })
@@ -100,8 +121,8 @@ contract('DelegateManager Unit Tests', async accounts => {
     // construct delegate with no trade wallet
     let trx = await delegateManager.createDelegate(EMPTY_ADDRESS)
 
-    // get generated delegate. I've mocked to always return generatedDelegate
-    let delegateAddress = generatedDelegate
+    // get generated delegate. I've mocked to always return mockDelegate.address
+    let delegateAddress = mockDelegate.address
 
     let intent = [
       tokenWETH.address,
