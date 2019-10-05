@@ -21,6 +21,8 @@ contract('DelegateManager Unit Tests', async accounts => {
   let delegateManager
   let mockFactory
   let mockSwap
+  let mockWETH
+  let mockDAI
 
   beforeEach(async () => {
     let snapShot = await takeSnapshot()
@@ -30,6 +32,11 @@ contract('DelegateManager Unit Tests', async accounts => {
   afterEach(async () => {
     await revertToSnapShot(snapshotId)
   })
+
+  async function setupMockTokens() {
+    mockWETH = await MockContract.new()
+    mockDAI = await MockContract.new()
+  }
 
   async function setupMockSwap() {
     mockSwap = await MockContract.new()
@@ -64,6 +71,7 @@ contract('DelegateManager Unit Tests', async accounts => {
   }
 
   before(async () => {
+    await setupMockTokens()
     await setupMockSwap()
     await setupMockDelegate()
     await setupMockFactory()
@@ -125,15 +133,15 @@ contract('DelegateManager Unit Tests', async accounts => {
     let delegateAddress = mockDelegate.address
 
     let intent = [
-      tokenWETH.address,
-      tokenDAI.address,
+      mockWETH.address,
+      mockDAI.address,
       250,
       padAddressToLocator(delegateAddress)
     ];
 
     let rule = [
-      tokenWETH.address,
-      tokenDAI.address,
+      mockWETH.address,
+      mockDAI.address,
       100000,
       300,
       0
