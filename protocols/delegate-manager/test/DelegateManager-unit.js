@@ -1,4 +1,5 @@
 const Delegate = artifacts.require('Delegate')
+const Indexer = artifacts.require('Indexer')
 const DelegateManager = artifacts.require('DelegateManager')
 const DelegateFactory = artifacts.require('DelegateFactory')
 const MockContract = artifacts.require('MockContract')
@@ -75,7 +76,7 @@ contract('DelegateManager Unit Tests', async accounts => {
 
     //mock setIntent()
     let mockIndexer_setIntent = mockIndexerTemplate.contract.methods
-      .setIntent(EMPTY_ADDRESS, EMPTY_ADDRESS, 0, "")
+      .setIntent(EMPTY_ADDRESS, EMPTY_ADDRESS, 0, web3.utils.fromAscii(""))
       .encodeABI()
     await mockIndexer.givenMethodReturnBool(mockIndexer_setIntent, true)
   }
@@ -160,7 +161,6 @@ contract('DelegateManager Unit Tests', async accounts => {
     ];
 
     // TODO: 
-    // mock the indexer and indexer.setIntent()
     // create the Type in types or use from .sol files
     // possibly migrate the delegate and indexer to the new types
     //await delegateManager.setRuleAndIntent(delegateAddress, rule, intent, indexerAddress)
