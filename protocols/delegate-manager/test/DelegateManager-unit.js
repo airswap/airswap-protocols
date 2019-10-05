@@ -58,6 +58,12 @@ contract('DelegateManager Unit Tests', async accounts => {
       .setRule(EMPTY_ADDRESS, EMPTY_ADDRESS, 0, 0, 0)
       .encodeABI()
     await mockDelegate.givenMethodReturnBool(mockDelegate_setRule, true)
+
+    //mock unsetRule()
+    let mockDelegate_unsetRule = mockDelegateTemplate.contract.methods
+      .unsetRule(EMPTY_ADDRESS, EMPTY_ADDRESS)
+      .encodeABI()
+    await mockDelegate.givenMethodReturnBool(mockDelegate_unsetRule, true)
   }
 
   async function setupMockFactory() {
@@ -83,6 +89,12 @@ contract('DelegateManager Unit Tests', async accounts => {
       .setIntent(EMPTY_ADDRESS, EMPTY_ADDRESS, 0, web3.utils.fromAscii(''))
       .encodeABI()
     await mockIndexer.givenMethodReturnBool(mockIndexer_setIntent, true)
+
+    //mock unsetIntent()
+    let mockIndexer_unsetIntent = mockIndexerTemplate.contract.methods
+      .unsetIntent(EMPTY_ADDRESS, EMPTY_ADDRESS)
+      .encodeABI()
+    await mockIndexer.givenMethodReturnBool(mockIndexer_unsetIntent, true)
   }
 
   before(async () => {
@@ -141,27 +153,44 @@ contract('DelegateManager Unit Tests', async accounts => {
     })
   })
 
-  it('Test setRuleAndIntent()', async () => {
-    // construct delegate with no trade wallet
-    let trx = await delegateManager.createDelegate(EMPTY_ADDRESS)
+  describe('Test setRuleAndIntent()', async () => {
+    it('Test successfully calling setRuleAndIntent', async () => {
+      // construct delegate with no trade wallet
+      let trx = await delegateManager.createDelegate(EMPTY_ADDRESS)
 
-    // get generated delegate. I've mocked to always return mockDelegate.address
-    let delegateAddress = mockDelegate.address
-    let indexerAddress = mockIndexer.address
+      //NOTE: I don't need to capture emitted delegate
+      //I've mocked to always return mockDelegate.address
+      let delegateAddress = mockDelegate.address
+      let indexerAddress = mockIndexer.address
 
-    let rule = [mockWETH.address, mockDAI.address, 100000, 300, 0]
+      let rule = [mockWETH.address, mockDAI.address, 100000, 300, 0]
 
-    let intent = [
-      mockWETH.address,
-      mockDAI.address,
-      250,
-      padAddressToLocator(delegateAddress),
-    ]
+      let intent = [
+        mockWETH.address,
+        mockDAI.address,
+        250,
+        padAddressToLocator(delegateAddress),
+      ]
 
-    // TODO:
-    // possibly migrate the delegate and indexer to the new types
-    await delegateManager.setRuleAndIntent(delegateAddress, rule, intent, indexerAddress)
+      //NOTE: owner would call delegate.addAdmin(delegateManager)
+      //this doesn't need to be done here because delegate is a mock
+
+      // TODO:
+      // possibly migrate the delegate and indexer to the new types
+      await passes(delegateManager.setRuleAndIntent(delegateAddress, rule, intent, indexerAddress))
+    })
   })
 
-  it('Test unsetRuleAndIntent()', async () => {})
+  describe('Test unsetRuleAndIntent()', async () => {
+    it('Test successfully calling unsetRuleAndIntent()', async () => {
+      let delegateAddress = mockDelegate.address
+      let indexerAddress = mockIndexer.address
+      await passes(delegateManager.unsetRuleAndIntent(
+        delegateAddress, 
+        mockWETH.address,
+        mockDAI.address, 
+        indexerAddress
+      ))
+    })
+  })
 })

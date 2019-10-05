@@ -25,18 +25,18 @@ library Types {
   bytes constant internal EIP191_HEADER = "\x19\x01";
 
   struct Rule {
-    address _takerToken;
-    address _makerToken;
-    uint256 _maxTakerAmount;
-    uint256 _priceCoef;
-    uint256 _priceExp;
+    address takerToken;
+    address makerToken;
+    uint256 maxTakerAmount;
+    uint256 priceCoef;
+    uint256 priceExp;
   }
 
   struct Intent {
-    address _makerToken;
-    address _takerToken;
-    uint256 _amount;
-    bytes32 _locator;
+    address makerToken;
+    address takerToken;
+    uint256 amount;
+    bytes32 locator;
   }
 
   struct Order {

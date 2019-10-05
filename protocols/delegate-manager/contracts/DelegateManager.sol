@@ -53,27 +53,39 @@ contract DelegateManager is Ownable {
       return delegates;
     }
 
+    // NOTE: created delegate needs the manager to be and admin in order to act with it.
     function setRuleAndIntent(
       IDelegate _delegate,
-      Types.Rule calldata rule,
-      Types.Intent calldata intent,
+      Types.Rule calldata _rule,
+      Types.Intent calldata _intent,
       IIndexer _indexer
     ) external {
-      IDelegate delegate = IDelegate(address(_delegate));
-      //delegate.setRule();
-      //indexer.setIntent();
 
-      // created delegate needs the manager to be whitelisted in order to act with it.
-      // owner first needs to call addToWhiteList and provide manager's address before interacting with this method
+      _delegate.setRule(
+        _rule.takerToken,
+        _rule.makerToken,
+        _rule.maxTakerAmount, 
+        _rule.priceCoef,
+        _rule.priceExp
+      );
+
+      _indexer.setIntent(
+        _intent.makerToken,
+        _intent.takerToken,
+        _intent.amount,
+        _intent.locator
+      );
     }
 
-    function unsetRuleAndIntent(IDelegate _delegate, IIndexer _indexer) external {
-      //IDelegate delegate = IDelegate(address(_delegate));
-      //delegate.unsetRule();
-      //indexer.unsetIntent();
-
-      // created delegate needs the manager to be whitelisted in order to act with it.
-      // owner first needs to call addToWhiteList and provide manager's address before interacting with this method
+    // NOTE: created delegate needs the manager to be and admin in order to act with it.
+    function unsetRuleAndIntent(
+      IDelegate _delegate,
+      address _makerToken, 
+      address _takerToken, 
+      IIndexer _indexer
+    ) external {
+      _delegate.unsetRule(_takerToken, _makerToken);
+      _indexer.unsetIntent(_makerToken, _takerToken);
     }
 
 }
