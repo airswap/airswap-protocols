@@ -12,12 +12,14 @@ const {
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 const { orders } = require('@airswap/order-utils')
+const { padAddressToLocator } = require('@airswap/test-utils').padding
 
 contract('DelegateManager Unit Tests', async accounts => {
   let owner = accounts[0]
   let tradeWallet_1 = accounts[1]
   let tradeWallet_2 = accounts[1]
   let mockDelegate
+  let mockIndexer
   let delegateManager
   let mockFactory
   let mockSwap
@@ -68,11 +70,20 @@ contract('DelegateManager Unit Tests', async accounts => {
   }
 
   async function setupMockIndexer() {
+    mockIndexer = await MockContract.new()
+    mockIndexerTemplate = await Indexer.new(EMPTY_ADDRESS, EMPTY_ADDRESS)
+
+    //mock setIntent()
+    let mockIndexer_setIntent = mockIndexerTemplate.contract.methods
+      .setIntent(EMPTY_ADDRESS, EMPTY_ADDRESS, 0, "")
+      .encodeABI()
+    await mockIndexer.givenMethodReturnBool(mockIndexer_setIntent, true)
   }
 
   before(async () => {
     await setupMockTokens()
     await setupMockSwap()
+    await setupMockIndexer()
     await setupMockDelegate()
     await setupMockFactory()
 
@@ -131,6 +142,7 @@ contract('DelegateManager Unit Tests', async accounts => {
 
     // get generated delegate. I've mocked to always return mockDelegate.address
     let delegateAddress = mockDelegate.address
+    let indexerAddress = mockIndexer.address
 
     let intent = [
       mockWETH.address,
@@ -148,11 +160,10 @@ contract('DelegateManager Unit Tests', async accounts => {
     ];
 
     // TODO: 
-    // mock the delegate and delegate.setRule()
     // mock the indexer and indexer.setIntent()
     // create the Type in types or use from .sol files
     // possibly migrate the delegate and indexer to the new types
-    await delegateManager.setRuleAndIntent(delegateAddress, rule, intent, )
+    //await delegateManager.setRuleAndIntent(delegateAddress, rule, intent, indexerAddress)
   })
 
   it('Test unsetRuleAndIntent()', async () => {})
