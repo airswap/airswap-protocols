@@ -159,9 +159,8 @@ contract('DelegateManager Unit Tests', async accounts => {
     ]
 
     // TODO:
-    // create the Type in types or use from .sol files
     // possibly migrate the delegate and indexer to the new types
-    //await delegateManager.setRuleAndIntent(delegateAddress, rule, intent, indexerAddress)
+    await delegateManager.setRuleAndIntent(delegateAddress, rule, intent, indexerAddress)
   })
 
   it('Test unsetRuleAndIntent()', async () => {})
