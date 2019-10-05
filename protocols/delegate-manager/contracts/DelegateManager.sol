@@ -36,8 +36,8 @@ contract DelegateManager is Ownable {
         factory = _factory;
     }
 
-    function createDelegate() external returns (IDelegate) {
-      IDelegate delegate = IDelegate(factory.createDelegate(msg.sender, address(0)));
+    function createDelegate(address _tradeWallet) external returns (IDelegate) {
+      IDelegate delegate = IDelegate(factory.createDelegate(msg.sender, _tradeWallet));
       //NOTE: DelegateManager does not have access to the created Delegate by default
       ownerToDelegates[msg.sender].push(address(delegate));
       emit DelegateCreated(msg.sender, address(delegate));

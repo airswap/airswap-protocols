@@ -14,7 +14,9 @@ const { orders } = require('@airswap/order-utils')
 
 contract('DelegateManager Unit Tests', async accounts => {
   let owner = accounts[0]
-  let generatedDelegate = accounts[1]
+  let tradeWallet_1 = accounts[1]
+  let tradeWallet_2 = accounts[1]
+  let generatedDelegate = accounts[2]
   let delegateManager
   let mockFactory
   let mockSwap
@@ -49,22 +51,27 @@ contract('DelegateManager Unit Tests', async accounts => {
   })
 
   describe('Test initial values', async () => {
-    it('Test mockFactory', async () => {
+    it('Test factory address', async () => {
       let val = await delegateManager.factory.call()
       equal(val, mockFactory.address, 'mockFactory was not properly set')
     })
   })
 
   describe('Test createDelegate', async () => {
-    it('Test when a delegate is returned', async () => {
-      let val = await delegateManager.createDelegate.call()
+    it('Test creating a delegate with 0x0 trade wallet', async () => {
+      let val = await delegateManager.createDelegate.call(EMPTY_ADDRESS)
+      equal(val, generatedDelegate, 'no delegate was created')
+    })
+
+    it('Test creating a delegate with non 0x0 trade wallet', async () => {
+      let val = await delegateManager.createDelegate.call(tradeWallet_1)
       equal(val, generatedDelegate, 'no delegate was created')
     })
 
     it('Test when a delegate is added to owner to delegate list mapping', async () => {
       //generate two delegates against the caller
-      await delegateManager.createDelegate()
-      await delegateManager.createDelegate()
+      await delegateManager.createDelegate(tradeWallet_1)
+      await delegateManager.createDelegate(tradeWallet_2)
 
       //retrieve the list
       let val = await delegateManager.getOwnerAddressToDelegates.call(owner)
@@ -82,7 +89,7 @@ contract('DelegateManager Unit Tests', async accounts => {
     })
 
     it('Test when a create delegate event is emitted', async () => {
-      let trx = await delegateManager.createDelegate()
+      let trx = await delegateManager.createDelegate(tradeWallet_1)
       emitted(trx, 'DelegateCreated', e => {
         return e.owner === owner && e.delegate == generatedDelegate
       })
