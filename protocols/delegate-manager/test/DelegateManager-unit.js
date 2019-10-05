@@ -47,7 +47,11 @@ contract('DelegateManager Unit Tests', async accounts => {
 
   async function setupMockDelegate() {
     mockDelegate = await MockContract.new()
-    let mockDelegateTemplate = await Delegate.new(mockSwap.address, owner, tradeWallet_1)
+    let mockDelegateTemplate = await Delegate.new(
+      mockSwap.address,
+      owner,
+      tradeWallet_1
+    )
 
     //mock setRule()
     let mockDelegate_setRule = mockDelegateTemplate.contract.methods
@@ -76,7 +80,7 @@ contract('DelegateManager Unit Tests', async accounts => {
 
     //mock setIntent()
     let mockIndexer_setIntent = mockIndexerTemplate.contract.methods
-      .setIntent(EMPTY_ADDRESS, EMPTY_ADDRESS, 0, web3.utils.fromAscii(""))
+      .setIntent(EMPTY_ADDRESS, EMPTY_ADDRESS, 0, web3.utils.fromAscii(''))
       .encodeABI()
     await mockIndexer.givenMethodReturnBool(mockIndexer_setIntent, true)
   }
@@ -145,22 +149,16 @@ contract('DelegateManager Unit Tests', async accounts => {
     let delegateAddress = mockDelegate.address
     let indexerAddress = mockIndexer.address
 
+    let rule = [mockWETH.address, mockDAI.address, 100000, 300, 0]
+
     let intent = [
       mockWETH.address,
       mockDAI.address,
       250,
-      padAddressToLocator(delegateAddress)
-    ];
+      padAddressToLocator(delegateAddress),
+    ]
 
-    let rule = [
-      mockWETH.address,
-      mockDAI.address,
-      100000,
-      300,
-      0
-    ];
-
-    // TODO: 
+    // TODO:
     // create the Type in types or use from .sol files
     // possibly migrate the delegate and indexer to the new types
     //await delegateManager.setRuleAndIntent(delegateAddress, rule, intent, indexerAddress)

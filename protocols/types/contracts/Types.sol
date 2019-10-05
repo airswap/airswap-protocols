@@ -24,6 +24,21 @@ library Types {
 
   bytes constant internal EIP191_HEADER = "\x19\x01";
 
+  struct Rule {
+    address _takerToken;
+    address _makerToken;
+    uint256 _maxTakerAmount;
+    uint256 _priceCoef;
+    uint256 _priceExp;
+  }
+
+  struct Intent {
+    address _makerToken;
+    address _takerToken;
+    uint256 _amount;
+    bytes32 _locator;
+  }
+
   struct Order {
     uint256 nonce;        // Unique per order and should be sequential
     uint256 expiry;       // Expiry in seconds since 1 January 1970

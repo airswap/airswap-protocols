@@ -53,7 +53,7 @@ contract DelegateManager is Ownable {
       return delegates;
     }
 
-    function setRuleAndIntent(IDelegate _delegate, IIndexer _indexer) external {
+    function setRuleAndIntent(IDelegate _delegate, Types.Rule calldata rule, Types.Intent calldata intent, IIndexer _indexer) external {
       //IDelegate delegate = IDelegate(address(_delegate));
       //delegate.setRule();
       //indexer.setIntent();
