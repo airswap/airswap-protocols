@@ -64,11 +64,11 @@ contract Delegate is IDelegate, Ownable {
     * @param _delegateTradeWallet the wallet the delegate will trade from
     */
   constructor(
-    address _swapContract,
+    ISwap _swapContract,
     address _delegateContractOwner,
     address _delegateTradeWallet
   ) public {
-    swapContract = ISwap(_swapContract);
+    swapContract = _swapContract;
 
     // if no delegate owner is provided, the deploying address is the owner
     if (_delegateContractOwner != address(0)) {
