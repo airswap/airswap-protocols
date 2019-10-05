@@ -96,7 +96,35 @@ contract('DelegateManager Unit Tests', async accounts => {
     })
   })
 
-  describe('Test setRuleAndIntent()', async () => {})
+  it('Test setRuleAndIntent()', async () => {
+    // construct delegate with no trade wallet
+    let trx = await delegateManager.createDelegate(EMPTY_ADDRESS)
 
-  describe('Test unsetRuleAndIntent()', async () => {})
+    // get generated delegate. I've mocked to always return generatedDelegate
+    let delegateAddress = generatedDelegate
+
+    let intent = [
+      tokenWETH.address,
+      tokenDAI.address,
+      250,
+      padAddressToLocator(delegateAddress)
+    ];
+
+    let rule = [
+      tokenWETH.address,
+      tokenDAI.address,
+      100000,
+      300,
+      0
+    ];
+
+    // TODO: 
+    // mock the delegate and delegate.setRule()
+    // mock the indexer and indexer.setIntent()
+    // create the Type in types or use from .sol files
+    // possibly migrate the delegate and indexer to the new types
+    await delegateManager.setRuleAndIntent(delegateAddress, rule, intent, )
+  })
+
+  it('Test unsetRuleAndIntent()', async () => {})
 })

@@ -53,7 +53,7 @@ contract DelegateManager is Ownable {
       return delegates;
     }
 
-    function setRuleAndIntent(IDelegate _delegate) external {
+    function setRuleAndIntent(IDelegate _delegate, IIndexer _indexer) external {
       //IDelegate delegate = IDelegate(address(_delegate));
       //delegate.setRule();
       //indexer.setIntent();
@@ -62,7 +62,7 @@ contract DelegateManager is Ownable {
       // owner first needs to call addToWhiteList and provide manager's address before interacting with this method
     }
 
-    function unsetRuleAndIntent(IDelegate _delegate) external {
+    function unsetRuleAndIntent(IDelegate _delegate, IIndexer _indexer) external {
       //IDelegate delegate = IDelegate(address(_delegate));
       //delegate.unsetRule();
       //indexer.unsetIntent();
