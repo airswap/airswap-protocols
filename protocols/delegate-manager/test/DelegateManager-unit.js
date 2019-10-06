@@ -177,7 +177,14 @@ contract('DelegateManager Unit Tests', async accounts => {
 
       // TODO:
       // possibly migrate the delegate and indexer to the new types
-      await passes(delegateManager.setRuleAndIntent(delegateAddress, rule, intent, indexerAddress))
+      await passes(
+        delegateManager.setRuleAndIntent(
+          delegateAddress,
+          rule,
+          intent,
+          indexerAddress
+        )
+      )
     })
   })
 
@@ -185,12 +192,14 @@ contract('DelegateManager Unit Tests', async accounts => {
     it('Test successfully calling unsetRuleAndIntent()', async () => {
       let delegateAddress = mockDelegate.address
       let indexerAddress = mockIndexer.address
-      await passes(delegateManager.unsetRuleAndIntent(
-        delegateAddress, 
-        mockWETH.address,
-        mockDAI.address, 
-        indexerAddress
-      ))
+      await passes(
+        delegateManager.unsetRuleAndIntent(
+          delegateAddress,
+          mockWETH.address,
+          mockDAI.address,
+          indexerAddress
+        )
+      )
     })
   })
 })
