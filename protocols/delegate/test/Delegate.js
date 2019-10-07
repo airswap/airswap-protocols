@@ -337,7 +337,7 @@ contract('Delegate', async accounts => {
       )
     })
 
-    it("should not trade if the tradeWallet hasn't authorized the delegate", async () => {
+    it("should not trade if the tradeWallet hasn't authorized the delegate to send", async () => {
       const order = await orders.getOrder({
         signer: {
           wallet: bobAddress,
@@ -373,12 +373,16 @@ contract('Delegate', async accounts => {
         },
       })
 
-      // authorize the delegate
+      // authorize the delegate to be sender
       let expiry = await getTimestampPlusDays(0.5)
-      let tx = await swapContract.authorize(aliceDelegate.address, expiry, {
-        from: aliceTradeWallet,
-      })
-      emitted(tx, 'Authorize')
+      let tx = await swapContract.authorizeSender(
+        aliceDelegate.address,
+        expiry,
+        {
+          from: aliceTradeWallet,
+        }
+      )
+      emitted(tx, 'AuthorizeSender')
 
       // increase time past expiry
       await advanceTime(SECONDS_IN_DAY * 0.6)
@@ -391,7 +395,7 @@ contract('Delegate', async accounts => {
       )
     })
 
-    it('should trade if the tradeWallet has authorized the delegate', async () => {
+    it('should trade if the tradeWallet has authorized the delegate to send', async () => {
       const order = await orders.getOrder({
         signer: {
           wallet: bobAddress,
@@ -421,10 +425,14 @@ contract('Delegate', async accounts => {
 
       // aliceTradeWallet must authorize the Delegate contract to swap
       let expiry = await getTimestampPlusDays(0.5)
-      let tx = await swapContract.authorize(aliceDelegate.address, expiry, {
-        from: aliceTradeWallet,
-      })
-      emitted(tx, 'Authorize')
+      let tx = await swapContract.authorizeSender(
+        aliceDelegate.address,
+        expiry,
+        {
+          from: aliceTradeWallet,
+        }
+      )
+      emitted(tx, 'AuthorizeSender')
 
       // both approve Swap to transfer tokens
       emitted(
@@ -440,7 +448,7 @@ contract('Delegate', async accounts => {
       await aliceDelegate.provideOrder(order, { from: bobAddress })
 
       // remove authorization
-      await swapContract.revoke(aliceDelegate.address, {
+      await swapContract.revokeSender(aliceDelegate.address, {
         from: aliceTradeWallet,
       })
     })

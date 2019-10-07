@@ -98,13 +98,13 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
     })
   })
 
-  it('Bob authorizes the Wrapper to send orders on his behalf', async () => {
+  it('Bob authorizesSender the Wrapper to send orders on his behalf', async () => {
     let expiry = await getTimestampPlusDays(1)
-    let tx = await swapContract.authorize(wrapperAddress, expiry, {
+    let tx = await swapContract.authorizeSender(wrapperAddress, expiry, {
       from: bobAddress,
     })
     passes(tx)
-    emitted(tx, 'Authorize')
+    emitted(tx, 'AuthorizeSender')
   })
 
   describe('Wrap Buys', async () => {
@@ -147,11 +147,11 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
 
     it('Alice authorizes the Wrapper to send orders on her behalf', async () => {
       let expiry = await getTimestampPlusDays(1)
-      let tx = await swapContract.authorize(wrapperAddress, expiry, {
+      let tx = await swapContract.authorizeSender(wrapperAddress, expiry, {
         from: aliceAddress,
       })
       passes(tx)
-      emitted(tx, 'Authorize')
+      emitted(tx, 'AuthorizeSender')
     })
 
     it('Alice approves the Wrapper contract to move her WETH', async () => {
@@ -259,11 +259,11 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
 
     it('Bob authorizes the Wrapper to send orders on her behalf', async () => {
       let expiry = await getTimestampPlusDays(1)
-      let tx = await swapContract.authorize(wrapperAddress, expiry, {
+      let tx = await swapContract.authorizeSender(wrapperAddress, expiry, {
         from: bobAddress,
       })
       passes(tx)
-      emitted(tx, 'Authorize')
+      emitted(tx, 'AuthorizeSender')
     })
 
     it('Send order where Bob sends AST to Alice for DAI', async () => {
