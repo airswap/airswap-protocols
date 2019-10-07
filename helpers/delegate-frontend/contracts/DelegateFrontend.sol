@@ -166,7 +166,7 @@ contract DelegateFrontend {
     IERC20(_signerToken).approve(address(swapContract), signerAmount);
 
     // DelegateFrontend authorizes the Delegate.
-    swapContract.authorize(delegateContract, block.timestamp + 1);
+    swapContract.authorizeSigner(delegateContract, block.timestamp + 1);
 
     // DelegateFrontend provides unsigned order to Delegate.
     IDelegate(delegateContract).provideOrder(Types.Order(
@@ -194,7 +194,7 @@ contract DelegateFrontend {
     ));
 
     // DelegateFrontend revokes the authorization of the Delegate.
-    swapContract.revoke(delegateContract);
+    swapContract.revokeSigner(delegateContract);
 
     // DelegateFrontend transfers received amount to the User.
     IERC20(_senderToken).transfer(msg.sender, _senderAmount);
@@ -236,7 +236,7 @@ contract DelegateFrontend {
     IERC20(_signerToken).approve(address(swapContract), _signerAmount);
 
     // DelegateFrontend authorizes the Delegate.
-    swapContract.authorize(delegateContract, block.timestamp + 1);
+    swapContract.authorizeSigner(delegateContract, block.timestamp + 1);
 
     // DelegateFrontend provides unsigned order to Delegate.
     IDelegate(delegateContract).provideOrder(Types.Order(
@@ -265,7 +265,7 @@ contract DelegateFrontend {
     ));
 
     // DelegateFrontend revokes the authorization of the Delegate.
-    swapContract.revoke(delegateContract);
+    swapContract.revokeSigner(delegateContract);
 
     // DelegateFrontend transfers received amount to the User.
     IERC20(_senderToken).transfer(msg.sender, senderAmount);
