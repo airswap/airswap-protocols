@@ -24,12 +24,12 @@ interface ISwap {
   event Swap(
     uint256 indexed nonce,
     uint256 timestamp,
-    address indexed makerWallet,
-    uint256 makerParam,
-    address makerToken,
-    address indexed takerWallet,
-    uint256 takerParam,
-    address takerToken,
+    address indexed signerWallet,
+    uint256 signerParam,
+    address signerToken,
+    address indexed senderWallet,
+    uint256 senderParam,
+    address senderToken,
     address affiliateWallet,
     uint256 affiliateParam,
     address affiliateToken
@@ -37,12 +37,12 @@ interface ISwap {
 
   event Cancel(
     uint256 indexed nonce,
-    address indexed makerWallet
+    address indexed signerWallet
   );
 
   event Invalidate(
     uint256 indexed nonce,
-    address indexed makerWallet
+    address indexed signerWallet
   );
 
   event Authorize(
@@ -57,8 +57,8 @@ interface ISwap {
   );
 
   function delegateApprovals(address, address) external returns (uint256);
-  function makerOrderStatus(address, uint256) external returns (byte);
-  function makerMinimumNonce(address) external returns (uint256);
+  function signerOrderStatus(address, uint256) external returns (byte);
+  function signerMinimumNonce(address) external returns (uint256);
 
   /**
     * @notice Atomic Token Swap

@@ -20,8 +20,8 @@ const {
 
 contract('Swap Unit Tests', async accounts => {
   const Jun_06_2017T00_00_00_UTC = 1497052800 //a date later than when ganache started
-  const mockMaker = accounts[9]
-  const mockTaker = accounts[7]
+  const mockSigner = accounts[9]
+  const mockSender = accounts[7]
   const sender = accounts[0]
   const kind = web3.utils.asciiToHex('FFFF') // hex representation is "0x46464646" this is 4 bytes
   const v = 27
@@ -47,43 +47,43 @@ contract('Swap Unit Tests', async accounts => {
 
   describe('Test swap', async () => {
     it('test when order is expired', async () => {
-      let maker = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
-      let taker = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
+      let signer = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
+      let sender = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
       let affiliate = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
       let signature = [EMPTY_ADDRESS, v, r, s, ver]
-      let order = [0, 0, maker, taker, affiliate, signature]
+      let order = [0, 0, signer, sender, affiliate, signature]
 
       await reverted(swap.swap(order), 'ORDER_EXPIRED')
     })
 
     it('test when order nonce is too low', async () => {
-      let maker = [mockMaker, EMPTY_ADDRESS, 200, kind]
-      let taker = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
+      let signer = [mockSigner, EMPTY_ADDRESS, 200, kind]
+      let sender = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
       let affiliate = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
       let signature = [EMPTY_ADDRESS, v, r, s, ver]
       let order = [
         0,
         Jun_06_2017T00_00_00_UTC,
-        maker,
-        taker,
+        signer,
+        sender,
         affiliate,
         signature,
       ]
 
-      await swap.invalidate(5, { from: mockMaker })
+      await swap.invalidate(5, { from: mockSigner })
       await reverted(swap.swap(order), 'NONCE_TOO_LOW')
     })
 
-    it('test when taker is provided, and the sender is unauthorized', async () => {
-      let maker = [mockMaker, EMPTY_ADDRESS, 200, kind]
-      let taker = [mockTaker, EMPTY_ADDRESS, 200, kind]
+    it('test when sender is provided, and the sender is unauthorized', async () => {
+      let signer = [mockSigner, EMPTY_ADDRESS, 200, kind]
+      let sender = [mockSender, EMPTY_ADDRESS, 200, kind]
       let affiliate = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
       let signature = [EMPTY_ADDRESS, v, r, s, ver]
       let order = [
         0,
         Jun_06_2017T00_00_00_UTC,
-        maker,
-        taker,
+        signer,
+        sender,
         affiliate,
         signature,
       ]
@@ -91,31 +91,31 @@ contract('Swap Unit Tests', async accounts => {
       await reverted(swap.swap(order), 'SENDER_UNAUTHORIZED')
     })
 
-    it('test when taker is provided, the sender is authorized, the signature.v is 0, and the maker wallet is unauthorized', async () => {
-      let maker = [mockMaker, EMPTY_ADDRESS, 200, kind]
-      let taker = [mockTaker, EMPTY_ADDRESS, 200, kind]
+    it('test when sender is provided, the sender is authorized, the signature.v is 0, and the signer wallet is unauthorized', async () => {
+      let signer = [mockSigner, EMPTY_ADDRESS, 200, kind]
+      let sender = [mockSender, EMPTY_ADDRESS, 200, kind]
       let affiliate = [EMPTY_ADDRESS, EMPTY_ADDRESS, 200, kind]
       let signature = [EMPTY_ADDRESS, 0, r, s, ver]
       let order = [
         0,
         Jun_06_2017T00_00_00_UTC,
-        maker,
-        taker,
+        signer,
+        sender,
         affiliate,
         signature,
       ]
 
-      //taker authorizes maker
+      //sender authorizes signer
       emitted(
-        await swap.authorize(mockMaker, Jun_06_2017T00_00_00_UTC, {
-          from: mockTaker,
+        await swap.authorize(mockSigner, Jun_06_2017T00_00_00_UTC, {
+          from: mockSender,
         }),
         'Authorize'
       )
 
-      //mock taker will take the order
+      //mock sender will take the order
       await reverted(
-        swap.swap(order, { from: mockTaker }),
+        swap.swap(order, { from: mockSender }),
         'SIGNER_UNAUTHORIZED.'
       )
     })
@@ -123,54 +123,54 @@ contract('Swap Unit Tests', async accounts => {
 
   describe('Test cancel', async () => {
     it('test cancellation with no items', async () => {
-      let trx = await swap.cancel([], { from: mockMaker })
+      let trx = await swap.cancel([], { from: mockSigner })
       await notEmitted(trx, 'Cancel')
     })
 
     it('test cancellation with one item', async () => {
-      let trx = await swap.cancel([6], { from: mockMaker })
+      let trx = await swap.cancel([6], { from: mockSigner })
 
       //ensure transaction was emitted
       await emitted(trx, 'Cancel', e => {
-        return e.nonce.toNumber() === 6 && e.makerWallet === mockMaker
+        return e.nonce.toNumber() === 6 && e.signerWallet === mockSigner
       })
 
       //ensure the value was set
       let val
-      val = await swap.makerOrderStatus.call(mockMaker, 6)
+      val = await swap.signerOrderStatus.call(mockSigner, 6)
       equal(val, 0x02)
     })
 
     it('test an array of nonces, ensure the cancellation of only those orders', async () => {
-      await swap.cancel([1, 2, 4, 6], { from: mockMaker })
+      await swap.cancel([1, 2, 4, 6], { from: mockSigner })
       let val
-      val = await swap.makerOrderStatus.call(mockMaker, 1)
+      val = await swap.signerOrderStatus.call(mockSigner, 1)
       equal(val, 0x02)
-      val = await swap.makerOrderStatus.call(mockMaker, 2)
+      val = await swap.signerOrderStatus.call(mockSigner, 2)
       equal(val, 0x02)
-      val = await swap.makerOrderStatus.call(mockMaker, 3)
+      val = await swap.signerOrderStatus.call(mockSigner, 3)
       equal(val, 0x00)
-      val = await swap.makerOrderStatus.call(mockMaker, 4)
+      val = await swap.signerOrderStatus.call(mockSigner, 4)
       equal(val, 0x02)
-      val = await swap.makerOrderStatus.call(mockMaker, 5)
+      val = await swap.signerOrderStatus.call(mockSigner, 5)
       equal(val, 0x00)
-      val = await swap.makerOrderStatus.call(mockMaker, 6)
+      val = await swap.signerOrderStatus.call(mockSigner, 6)
       equal(val, 0x02)
     })
   })
 
   describe('Test invalidate', async () => {
-    it('test that given a minimum nonce for a maker is set', async () => {
-      let minNonceForMaker = await swap.makerMinimumNonce.call(mockMaker)
-      equal(minNonceForMaker, 0, 'mock maker should have min nonce of 0')
+    it('test that given a minimum nonce for a signer is set', async () => {
+      let minNonceForSigner = await swap.signerMinimumNonce.call(mockSigner)
+      equal(minNonceForSigner, 0, 'mock signer should have min nonce of 0')
 
-      let trx = await swap.invalidate(5, { from: mockMaker })
+      let trx = await swap.invalidate(5, { from: mockSigner })
 
-      let newNonceForMaker = await swap.makerMinimumNonce.call(mockMaker)
-      equal(newNonceForMaker, 5, 'mock macker should have a min nonce of 5')
+      let newNonceForSigner = await swap.signerMinimumNonce.call(mockSigner)
+      equal(newNonceForSigner, 5, 'mock signer should have a min nonce of 5')
 
       emitted(trx, 'Invalidate', e => {
-        return e.nonce.toNumber() === 5 && e.makerWallet === mockMaker
+        return e.nonce.toNumber() === 5 && e.signerWallet === mockSigner
       })
     })
 
@@ -179,15 +179,15 @@ contract('Swap Unit Tests', async accounts => {
 
   describe('Test authorize', async () => {
     it('test when the message sender is the delegate', async () => {
-      let delegate = mockMaker
+      let delegate = mockSigner
       await reverted(
-        swap.authorize(delegate, 0, { from: mockMaker }),
+        swap.authorize(delegate, 0, { from: mockSigner }),
         'INVALID_AUTH_DELEGATE'
       )
     })
 
     it('test when the expiration date has passed', async () => {
-      await reverted(swap.authorize(mockMaker, 0), 'INVALID_AUTH_EXPIRY')
+      await reverted(swap.authorize(mockSigner, 0), 'INVALID_AUTH_EXPIRY')
     })
 
     it('test when the expiration == block.timestamp', async () => {
@@ -206,7 +206,7 @@ contract('Swap Unit Tests', async accounts => {
 
       // set the expiry as the same time as the current time - revert
       await reverted(
-        swap.authorize(mockMaker, ONE_DAY_EXPIRY),
+        swap.authorize(mockSigner, ONE_DAY_EXPIRY),
         'INVALID_AUTH_EXPIRY'
       )
     })
@@ -215,18 +215,18 @@ contract('Swap Unit Tests', async accounts => {
       const block = await web3.eth.getBlock('latest')
       const time = block.timestamp
       const futureTime = time + 100
-      let trx = await swap.authorize(mockMaker, futureTime)
+      let trx = await swap.authorize(mockSigner, futureTime)
       await passes(trx)
 
       //check delegateApproval was unset
-      let val = await swap.delegateApprovals.call(sender, mockMaker)
+      let val = await swap.delegateApprovals.call(sender, mockSigner)
       equal(val, futureTime, 'delegate approval was not properly set')
 
       //check that event was emitted
       emitted(trx, 'Authorize', e => {
         return (
           e.approverAddress === sender &&
-          e.delegateAddress === mockMaker &&
+          e.delegateAddress === mockSigner &&
           e.expiry.toNumber() === futureTime
         )
       })
@@ -235,15 +235,15 @@ contract('Swap Unit Tests', async accounts => {
 
   describe('Test revoke', async () => {
     it('test that the approval is successfully removed', async () => {
-      let trx = await swap.revoke(mockMaker)
+      let trx = await swap.revoke(mockSigner)
 
       //check delegateApproval was unset
-      let val = await swap.delegateApprovals.call(sender, mockMaker)
+      let val = await swap.delegateApprovals.call(sender, mockSigner)
       equal(val, 0, 'delegate approval was not properly unset')
 
       //check that the event was emitted
       emitted(trx, 'Revoke', e => {
-        return e.approverAddress === sender && e.delegateAddress === mockMaker
+        return e.approverAddress === sender && e.delegateAddress === mockSigner
       })
     })
   })
