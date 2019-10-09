@@ -40,27 +40,6 @@ contract Swap is ISwap {
   byte constant private TAKEN = 0x01;
   byte constant private CANCELED = 0x02;
 
-  /*
-    bytes4(keccak256('transfer(address,uint256)')) ^
-    bytes4(keccak256('transferFrom(address,address,uint256)')) ^
-    bytes4(keccak256('balanceOf(address)')) ^
-    bytes4(keccak256('allowance(address,address)'));
-  */
-
-  // ERC-721 (non-fungible token) interface identifier (ERC-165)
-  bytes4 constant internal ERC721_INTERFACE_ID = 0x80ac58cd;
-  /*
-    bytes4(keccak256('balanceOf(address)')) ^
-    bytes4(keccak256('ownerOf(uint256)')) ^
-    bytes4(keccak256('approve(address,uint256)')) ^
-    bytes4(keccak256('getApproved(uint256)')) ^
-    bytes4(keccak256('setApprovalForAll(address,bool)')) ^
-    bytes4(keccak256('isApprovedForAll(address,address)')) ^
-    bytes4(keccak256('transferFrom(address,address,uint256)')) ^
-    bytes4(keccak256('safeTransferFrom(address,address,uint256)')) ^
-    bytes4(keccak256('safeTransferFrom(address,address,uint256,bytes)'));
-  */
-
   // Mapping of peer address to delegate address and expiry.
   mapping (address => mapping (address => uint256)) public delegateApprovals;
 
@@ -70,16 +49,21 @@ contract Swap is ISwap {
   // Mapping of signer addresses to an optionally set minimum valid nonce
   mapping (address => uint256) public signerMinimumNonce;
 
+  // contains registry of kind to asset types
+  TokenRegistry registry;
+
   /**
     * @notice Contract Constructor
     * @dev Sets domain for signature validation (EIP-712)
+    * @param _registry TokenRegistry contract
     */
-  constructor() public {
+  constructor(TokenRegistry _registry) public {
     domainSeparator = Types.hashDomain(
       DOMAIN_NAME,
       DOMAIN_VERSION,
       address(this)
     );
+    registry = _registry;
   }
 
   /**
@@ -313,6 +297,7 @@ contract Swap is ISwap {
       address _token,
       bytes4 _kind
   ) internal {
-    require(IAsset(TokenRegistry.assetMapping[_kind]).transferTokens(_from, _to, _param, _toklen));
+    IAsset asset = registry.getAsset(_kind);
+    require(asset.transferTokens(_from, _to, _param, _token));
   }
 }

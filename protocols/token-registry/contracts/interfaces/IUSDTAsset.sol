@@ -1,4 +1,4 @@
-pragram solidity 0.5.10;
+pragma solidity 0.5.10;
 
 /**
  * @title IUSDTAsset
@@ -6,5 +6,5 @@ pragram solidity 0.5.10;
  * @dev see https://github.com/ethereum/EIPs/issues/20
  */
 contract IUSDTAsset {
-    function transferFrom(address from, address to, uint value) external;
+  function transferFrom(address from, address to, uint value) external;
 }
