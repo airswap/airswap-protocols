@@ -2,6 +2,11 @@ const Swap = artifacts.require('Swap')
 const Types = artifacts.require('Types')
 const FungibleToken = artifacts.require('FungibleToken')
 const NonFungibleToken = artifacts.require('NonFungibleToken')
+const TokenRegistry = artifacts.require('TokenRegistry')
+const PartialKittyCoreAsset = artifacts.require('PartialKittyCoreAsset')
+const ERC20Asset = artifacts.require('ERC20Asset')
+const ERC721Asset = artifacts.require('ERC721Asset')
+const USDTAsset = artifacts.require('USDTAsset')
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 
 const {
@@ -37,6 +42,8 @@ contract('Swap', async accounts => {
   let tokenTicket
   let tokenKitty
 
+  let tokenRegistry
+
   let swap
   let cancel
   let invalidate
@@ -62,9 +69,10 @@ contract('Swap', async accounts => {
 
   describe('Deploying...', async () => {
     it('Deployed Swap contract', async () => {
+      tokenRegistry = await TokenRegistry.new()
       const typesLib = await Types.new()
       await Swap.link(Types, typesLib.address)
-      swapContract = await Swap.new()
+      swapContract = await Swap.new(tokenRegistry.address)
       swapAddress = swapContract.address
 
       swap = swapContract.swap
@@ -81,9 +89,22 @@ contract('Swap', async accounts => {
     it('Deployed test contract "DAI"', async () => {
       tokenDAI = await FungibleToken.new()
     })
+
+    it('Set up TokenRegistry', async () => {
+      const kittyCore = await PartialKittyCoreAsset.new()
+      const erc20Asset = await ERC20Asset.new()
+      const erc721Asset = await ERC721Asset.new()
+      const usdtaAsset = await USDTAsset.new()
+
+      // add all 4 of these contracts into the TokenRegistry
+      tokenRegistry.addToRegistry('0x9a20483d', kittyCore.address)
+      tokenRegistry.addToRegistry('0x277f8169', erc20Asset.address)
+      tokenRegistry.addToRegistry('0x80ac58cd', erc721Asset.address)
+      tokenRegistry.addToRegistry('0xffffffff', usdtaAsset.address)
+    })
   })
 
-  describe('Minting...', async () => {
+  describe('Minting ERC20 tokens (AST, DAI, and OMG)...', async () => {
     it('Mints 1000 AST for Alice', async () => {
       emitted(await tokenAST.mint(aliceAddress, 1000), 'Transfer')
       ok(
@@ -101,7 +122,7 @@ contract('Swap', async accounts => {
     })
   })
 
-  describe('Approving...', async () => {
+  describe('Approving ERC20 tokens (AST and DAI)...', async () => {
     it('Checks approvals (Alice 250 AST and 0 DAI, Bob 0 AST and 500 DAI)', async () => {
       emitted(
         await tokenAST.approve(swapAddress, 200, { from: aliceAddress }),

@@ -1,5 +1,5 @@
 const Swap = artifacts.require('Swap')
-
+const MockContract = artifacts.require('MockContract')
 const {
   passes,
   emitted,
@@ -32,6 +32,8 @@ contract('Swap Unit Tests', async accounts => {
   let snapshotId
   let swap
 
+  let mockTokenRegistry
+
   beforeEach(async () => {
     let snapShot = await takeSnapshot()
     snapshotId = snapShot['result']
@@ -41,8 +43,13 @@ contract('Swap Unit Tests', async accounts => {
     await revertToSnapShot(snapshotId)
   })
 
+  async function setupMockTokenRegistry() {
+    mockTokenRegistry = await MockContract.new()
+  }
+
   before('deploy Swap', async () => {
-    swap = await Swap.new()
+    await setupMockTokenRegistry()
+    swap = await Swap.new(mockTokenRegistry.address)
   })
 
   describe('Test swap', async () => {
