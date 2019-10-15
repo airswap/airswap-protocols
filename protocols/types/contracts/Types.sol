@@ -5,7 +5,7 @@
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+    http:        //www.apache.org/licenses/LICENSE-2.0
 
   Unless required by applicable law or agreed to in writing, software
   distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,42 +25,42 @@ library Types {
   bytes constant internal EIP191_HEADER = "\x19\x01";
 
   struct Rule {
-    address senderToken;
-    address signerToken;
-    uint256 maxSenderAmount;
-    uint256 priceCoef;
-    uint256 priceExp;
+    address senderToken;          // The address of the ERC-20 token the 'sender' is sending
+    address signerToken;          // The address of the ERC-20 token the 'signer' is sending
+    uint256 maxSenderAmount;      // The maximum amount of ERC-20 token the delegate would send
+    uint256 priceCoef;            // The whole number that will be multiplied by the 10^(-priceExp) - the price coefficient
+    uint256 priceExp;             // The exponent of the price to indicate location of the decimal priceCoef * 10^(-priceExp)
   }
 
   struct Intent {
-    address signerToken;
-    address senderToken;
-    uint256 amount;
-    bytes32 locator;
+    address signerToken;          // The address of the ERC-20 token to signify the token a 'signer' would send
+    address senderToken;          // The address of the ERC-20 token to signify the token a 'sender' would send
+    uint256 amount;               // The amount to take
+    bytes32 locator;              // Locator data
   }
 
   struct Order {
-    uint256 nonce;        // Unique per order and should be sequential
-    uint256 expiry;       // Expiry in seconds since 1 January 1970
-    Party signer;          // Party to the trade that sets terms
-    Party sender;          // Party to the trade that accepts terms
-    Party affiliate;      // Party compensated for facilitating (optional)
-    Signature signature;  // Signature of the order
+    uint256 nonce;                // Unique per order and should be sequential
+    uint256 expiry;               // Expiry in seconds since 1 January 1970
+    Party signer;                 // Party to the trade that sets terms
+    Party sender;                 // Party to the trade that accepts terms
+    Party affiliate;              // Party compensated for facilitating (optional)
+    Signature signature;          // Signature of the order
   }
 
   struct Party {
-    address wallet;       // Wallet address of the party
-    address token;        // Contract address of the token
-    uint256 param;        // Value (ERC-20) or ID (ERC-721)
-    bytes4 kind;          // Interface ID of the token
+    address wallet;               // Wallet address of the party
+    address token;                // Contract address of the token
+    uint256 param;                // Value (ERC-20) or ID (ERC-721)
+    bytes4 kind;                  // Interface ID of the token
   }
 
   struct Signature {
-    address signatory;    // Address of the wallet used to sign
-    uint8 v;              // `v` value of an ECDSA signature
-    bytes32 r;            // `r` value of an ECDSA signature
-    bytes32 s;            // `s` value of an ECDSA signature
-    bytes1 version;       // EIP-191 signature version
+    address signatory;            // Address of the wallet used to sign
+    uint8 v;                      // `v` value of an ECDSA signature
+    bytes32 r;                    // `r` value of an ECDSA signature
+    bytes32 s;                    // `s` value of an ECDSA signature
+    bytes1 version;               // EIP-191 signature version
   }
 
   bytes32 constant DOMAIN_TYPEHASH = keccak256(abi.encodePacked(
