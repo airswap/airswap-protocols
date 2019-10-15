@@ -32,10 +32,20 @@ contract DelegateManager is Ownable {
     mapping(address => address[]) private ownerToDelegates;
     IDelegateFactory public factory;
 
+    /**
+      * @dev factory is unable to be changed after the DelegateManager is constructed
+      * @param _factory address of the factory contract that will create the delegates
+      */
     constructor(IDelegateFactory _factory) public {
         factory = _factory;
     }
 
+    /**
+      * @notice Creates a new Delegate contract using the Factory contract, 
+      * saves deployed address to msg.sender list of deployed addresses
+      * @param _tradeWallet the wallet that the delegate will be trading on behalf of
+      * @return IDelegate the Delegate created by the factory
+      */
     function createDelegate(address _tradeWallet) external returns (IDelegate) {
       IDelegate delegate = IDelegate(factory.createDelegate(msg.sender, _tradeWallet));
       //NOTE: DelegateManager does not have access to the created Delegate by default
@@ -44,6 +54,11 @@ contract DelegateManager is Ownable {
       return delegate;
     }
 
+    /**
+      * @notice gets all the delegates for an owner
+      * @param _owner the owner to look up addresses for
+      * @returns address[] memory the list of the delegates for an owner
+      */ 
     function getOwnerAddressToDelegates(address _owner) view external returns (address[] memory) {
       uint256 length = ownerToDelegates[_owner].length;
       address[] memory delegates = new address[](length);
@@ -53,7 +68,14 @@ contract DelegateManager is Ownable {
       return delegates;
     }
 
-    // NOTE: created delegate needs the manager to be an admin in order to act with it.
+    /**
+      * @notice sets a rule on the delegate and an intent on the indexer
+      * @dev delegate needs the manager to be an admin in order to act with it.
+      * @param _delegate the delegate that a rule will be set on
+      * @param _rule the rule to set on a delegate
+      * @param _intent the intent to set on an the indexer
+      * @param _indexer the indexer the intent will be set on
+      */
     function setRuleAndIntent(
       IDelegate _delegate,
       Types.Rule calldata _rule,
@@ -77,7 +99,14 @@ contract DelegateManager is Ownable {
       );
     }
 
-    // NOTE: created delegate needs the manager to be an admin in order to act with it.
+    /**
+      * @notice unsets a rule on the delegate and removes an intent on the indexer
+      * @dev delegate needs the manager to be an admin in order to act with it.
+      * @param _delegate the delegate that a rule will be unset on
+      * @param _makerToken the maker token in the token pair for rules and intents
+      * @param _takerToken the taker token  in the token pair for rules and intents
+      * @param _intent the intent to remove from the indexer
+      */
     function unsetRuleAndIntent(
       IDelegate _delegate,
       address _makerToken, 
