@@ -57,7 +57,7 @@ contract DelegateManager is Ownable {
     /**
       * @notice gets all the delegates for an owner
       * @param _owner the owner to look up addresses for
-      * @returns address[] memory the list of the delegates for an owner
+      * @return address[] memory the list of the delegates for an owner
       */ 
     function getOwnerAddressToDelegates(address _owner) view external returns (address[] memory) {
       uint256 length = ownerToDelegates[_owner].length;
@@ -84,16 +84,16 @@ contract DelegateManager is Ownable {
     ) external {
 
       _delegate.setRule(
-        _rule.takerToken,
-        _rule.makerToken,
-        _rule.maxTakerAmount, 
+        _rule.senderToken,
+        _rule.signerToken,
+        _rule.maxSenderAmount, 
         _rule.priceCoef,
         _rule.priceExp
       );
 
       _indexer.setIntent(
-        _intent.makerToken,
-        _intent.takerToken,
+        _intent.signerToken,
+        _intent.senderToken,
         _intent.amount,
         _intent.locator
       );
@@ -103,18 +103,18 @@ contract DelegateManager is Ownable {
       * @notice unsets a rule on the delegate and removes an intent on the indexer
       * @dev delegate needs the manager to be an admin in order to act with it.
       * @param _delegate the delegate that a rule will be unset on
-      * @param _makerToken the maker token in the token pair for rules and intents
-      * @param _takerToken the taker token  in the token pair for rules and intents
-      * @param _intent the intent to remove from the indexer
+      * @param _senderToken the maker token in the token pair for rules and intents
+      * @param _signerToken the taker token  in the token pair for rules and intents
+      * @param _indexer the indexer to remove the intent from
       */
     function unsetRuleAndIntent(
       IDelegate _delegate,
-      address _makerToken, 
-      address _takerToken, 
+      address _senderToken, 
+      address _signerToken, 
       IIndexer _indexer
     ) external {
-      _delegate.unsetRule(_takerToken, _makerToken);
-      _indexer.unsetIntent(_makerToken, _takerToken);
+      _delegate.unsetRule(_signerToken, _senderToken);
+      _indexer.unsetIntent(_senderToken, _signerToken);
     }
 
 }
