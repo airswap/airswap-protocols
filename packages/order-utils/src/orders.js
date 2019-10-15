@@ -44,9 +44,9 @@ module.exports = {
     {
       expiry = '0',
       nonce = this.generateNonce(),
-      signer = NULL_ADDRESS,
-      maker = defaults.Party,
-      taker = defaults.Party,
+      signatory = NULL_ADDRESS,
+      signer = defaults.Party,
+      sender = defaults.Party,
       affiliate = defaults.Party,
     },
     noSignature
@@ -57,11 +57,11 @@ module.exports = {
     const order = {
       expiry,
       nonce,
-      maker: { ...defaults.Party, ...maker },
-      taker: { ...defaults.Party, ...taker },
+      signer: { ...defaults.Party, ...signer },
+      sender: { ...defaults.Party, ...sender },
       affiliate: { ...defaults.Party, ...affiliate },
     }
-    const wallet = signer !== NULL_ADDRESS ? signer : order.maker.wallet
+    const wallet = signatory !== NULL_ADDRESS ? signatory : order.signer.wallet
     if (!noSignature) {
       if (this._knownAccounts.indexOf(wallet) !== -1) {
         order.signature = await signatures.getWeb3Signature(

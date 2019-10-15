@@ -50,29 +50,29 @@ contract('DelegateFrontend Unit Tests', async () => {
     mockDelegateLow = await MockContract.new()
     mockDelegateLowLocator = padAddressToLocator(mockDelegateLow.address)
 
-    //mock delegate getMakerSideQuote()
-    let delegate_getMakerSideQuote = delegateTemplate.contract.methods
-      .getMakerSideQuote(0, EMPTY_ADDRESS, EMPTY_ADDRESS)
+    //mock delegate getSignerSideQuote()
+    let delegate_getSignerSideQuote = delegateTemplate.contract.methods
+      .getSignerSideQuote(0, EMPTY_ADDRESS, EMPTY_ADDRESS)
       .encodeABI()
     await mockDelegateHigh.givenMethodReturnUint(
-      delegate_getMakerSideQuote,
+      delegate_getSignerSideQuote,
       highVal
     )
     await mockDelegateLow.givenMethodReturnUint(
-      delegate_getMakerSideQuote,
+      delegate_getSignerSideQuote,
       lowVal
     )
 
-    //mock delegate getMakerSideQuote()
-    let delegate_getTakerSideQuote = delegateTemplate.contract.methods
-      .getTakerSideQuote(0, EMPTY_ADDRESS, EMPTY_ADDRESS)
+    //mock delegate getSignerSideQuote()
+    let delegate_getSenderSideQuote = delegateTemplate.contract.methods
+      .getSenderSideQuote(0, EMPTY_ADDRESS, EMPTY_ADDRESS)
       .encodeABI()
     await mockDelegateHigh.givenMethodReturnUint(
-      delegate_getTakerSideQuote,
+      delegate_getSenderSideQuote,
       highVal
     )
     await mockDelegateLow.givenMethodReturnUint(
-      delegate_getTakerSideQuote,
+      delegate_getSenderSideQuote,
       lowVal
     )
 
@@ -159,7 +159,7 @@ contract('DelegateFrontend Unit Tests', async () => {
     })
   })
 
-  describe('Test getBestTakerSideQuote()', async () => {
+  describe('Test getBestSenderSideQuote()', async () => {
     it('test default values are returned with an empty indexer', async () => {
       //mock indexer getIntents() where there are no locators
       await mockIndexer.givenMethodReturn(
@@ -167,7 +167,7 @@ contract('DelegateFrontend Unit Tests', async () => {
         abi.rawEncode(['bytes32[]'], [[]])
       )
 
-      let val = await delegateFrontend.getBestTakerSideQuote.call(
+      let val = await delegateFrontend.getBestSenderSideQuote.call(
         180,
         EMPTY_ADDRESS,
         EMPTY_ADDRESS,
@@ -190,7 +190,7 @@ contract('DelegateFrontend Unit Tests', async () => {
       )
 
       //this should always select the lowest cost delegate available
-      let val = await delegateFrontend.getBestTakerSideQuote.call(
+      let val = await delegateFrontend.getBestSenderSideQuote.call(
         180,
         EMPTY_ADDRESS,
         EMPTY_ADDRESS,
@@ -212,7 +212,7 @@ contract('DelegateFrontend Unit Tests', async () => {
       )
 
       //this should always select the lowest cost delegate available
-      let val = await delegateFrontend.getBestTakerSideQuote.call(
+      let val = await delegateFrontend.getBestSenderSideQuote.call(
         180,
         EMPTY_ADDRESS,
         EMPTY_ADDRESS,
@@ -223,7 +223,7 @@ contract('DelegateFrontend Unit Tests', async () => {
     })
   })
 
-  describe('Test getBestMakerSideQuote()', async () => {
+  describe('Test getBestSignerSideQuote()', async () => {
     it('test default values are returned with an empty indexer', async () => {
       //mock indexer getIntents() where there are no locators
       await mockIndexer.givenMethodReturn(
@@ -231,7 +231,7 @@ contract('DelegateFrontend Unit Tests', async () => {
         abi.rawEncode(['bytes32[]'], [[]])
       )
 
-      let val = await delegateFrontend.getBestMakerSideQuote.call(
+      let val = await delegateFrontend.getBestSignerSideQuote.call(
         180,
         EMPTY_ADDRESS,
         EMPTY_ADDRESS,
@@ -254,7 +254,7 @@ contract('DelegateFrontend Unit Tests', async () => {
       )
 
       //this should always select the lowest cost delegate available
-      let val = await delegateFrontend.getBestMakerSideQuote.call(
+      let val = await delegateFrontend.getBestSignerSideQuote.call(
         180,
         EMPTY_ADDRESS,
         EMPTY_ADDRESS,
@@ -276,7 +276,7 @@ contract('DelegateFrontend Unit Tests', async () => {
       )
 
       //this should always select the lowest cost delegate available
-      let val = await delegateFrontend.getBestMakerSideQuote.call(
+      let val = await delegateFrontend.getBestSignerSideQuote.call(
         180,
         EMPTY_ADDRESS,
         EMPTY_ADDRESS,
@@ -287,7 +287,7 @@ contract('DelegateFrontend Unit Tests', async () => {
     })
   })
 
-  describe('Test fillBestTakerSideOrder()', async () => {
+  describe('Test fillBestSenderSideOrder()', async () => {
     it('test by ensuring all internal methods are called', async () => {
       //mock indexer getIntents() where locators are ordered low to high
       await mockIndexer.givenMethodReturn(
@@ -298,7 +298,7 @@ contract('DelegateFrontend Unit Tests', async () => {
         )
       )
 
-      let trx = await delegateFrontend.fillBestTakerSideOrder(
+      let trx = await delegateFrontend.fillBestSenderSideOrder(
         180,
         mockUserSendToken.address,
         mockUserReceiveToken.address,
@@ -308,5 +308,5 @@ contract('DelegateFrontend Unit Tests', async () => {
     })
   })
 
-  describe('Test fillBestMakerSideOrder()', async () => {})
+  describe('Test fillBestSignerSideOrder()', async () => {})
 })

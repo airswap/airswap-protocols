@@ -1,5 +1,5 @@
 INFO:Detectors:
-Indexer.unsetIntent(address,address) (contracts/Indexer.sol#168-195) ignores return value by external calls "indexes[_makerToken][_takerToken].unsetLocator(msg.sender)" (contracts/Indexer.sol#186)
+Indexer.unsetIntent(address,address) (contracts/Indexer.sol#168-195) ignores return value by external calls "indexes[_signerToken][_senderToken].unsetLocator(msg.sender)" (contracts/Indexer.sol#186)
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unused-return
 INFO:Detectors:
 Different versions of Solidity is used in :

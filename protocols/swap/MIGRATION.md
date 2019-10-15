@@ -2,7 +2,7 @@
 
 This document is intended for those migrating from Swap V1 to V2 and does not include all of the features of Swap V2. [Read more about Swap V2](README.md).
 
-:bulb: **Note**: A key feature of V2 is that every order must have a `nonce` value that is unique to its makerWallet.
+:bulb: **Note**: A key feature of V2 is that every order must have a `nonce` value that is unique to its signerWallet.
 
 ## Signing an Order
 
@@ -32,11 +32,11 @@ return ethUtil.fromRpcSig(sig)
 const { hashes } = require('@airswap/order-utils')
 const orderHash = hashes.getOrderHash(order, swapContractAddress)
 const orderHashHex = ethUtil.bufferToHex(orderHash)
-const sig = await web3.eth.sign(orderHashHex, signer)
+const sig = await web3.eth.sign(orderHashHex, signatory)
 const { r, s, v } = ethUtil.fromRpcSig(sig)
 return {
   version: '0x45', // EIP-191: Version 0x45 (personalSign)
-  signer,
+  signatory,
   r,
   s,
   v,
@@ -47,7 +47,7 @@ Alternatively you can use `signatures` from the `order-utils` package.
 
 ```JavaScript
 const { signatures } = require('@airswap/order-utils')
-return await signatures.getWeb3Signature(order, signer, swapContractAddress)
+return await signatures.getWeb3Signature(order, signatory, swapContractAddress)
 ```
 
 Where `order` is specified by example below.
@@ -102,8 +102,8 @@ Where the `_order` argument is an `Order` struct.
 struct Order {
   uint256 nonce;        // Unique per order and should be sequential
   uint256 expiry;       // Expiry in seconds since 1 January 1970
-  Party maker;          // Party to the trade that sets terms
-  Party taker;          // Party to the trade that accepts terms
+  Party signer;         // Party to the trade that sets terms
+  Party sender;         // Party to the trade that accepts terms
   Party affiliate;      // Party compensated for facilitating (optional)
   Signature signature;  // Signature of the order
 }
@@ -124,7 +124,7 @@ And the `_order` argument has a `signature` struct.
 
 ```
 struct Signature {
-  address signer;       // Address of the wallet used to sign
+  address signatory;    // Address of the wallet used to sign
   uint8 v;              // `v` value of an ECDSA signature
   bytes32 r;            // `r` value of an ECDSA signature
   bytes32 s;            // `s` value of an ECDSA signature
@@ -140,12 +140,12 @@ A successful `swap` transaction emits a `Swap` event.
 event Swap(
   uint256 indexed nonce,
   uint256 timestamp,
-  address indexed makerWallet,
-  uint256 makerParam,
-  address makerToken,
-  address indexed takerWallet,
-  uint256 takerParam,
-  address takerToken,
+  address indexed signerWallet,
+  uint256 signerParam,
+  address signerToken,
+  address indexed senderWallet,
+  uint256 senderParam,
+  address senderToken,
   address affiliateWallet,
   uint256 affiliateParam,
   address affiliateToken
@@ -202,7 +202,7 @@ A successful `cancel` transaction will emit one or more `Cancel` events.
 ```
 event Cancel(
   uint256 indexed nonce,
-  address indexed makerWallet
+  address indexed signerWallet
 );
 ```
 

@@ -91,7 +91,7 @@ contract('DelegateFrontend', async accounts => {
       )
     })
 
-    it('Bob creates an index for DAI (maker)/WETH (taker)', async () => {
+    it('Bob creates an index for DAI (signer)/WETH (sender)', async () => {
       emitted(
         await indexer.createIndex(tokenDAI.address, tokenWETH.address, {
           from: bobAddress,
@@ -135,7 +135,7 @@ contract('DelegateFrontend', async accounts => {
   describe('DelegateFrontend - fills for non-existent quotes', async () => {
     it('Finds best price to buy 100 AST for DAI - reverts ', async () => {
       await reverted(
-        delegatefrontend.fillBestMakerSideOrder.call(
+        delegatefrontend.fillBestSignerSideOrder.call(
           100,
           tokenAST.address,
           tokenDAI.address,
@@ -147,7 +147,7 @@ contract('DelegateFrontend', async accounts => {
 
     it('Finds best price to sell 100 AST for DAI - reverts', async () => {
       await reverted(
-        delegatefrontend.fillBestTakerSideOrder.call(
+        delegatefrontend.fillBestSenderSideOrder.call(
           100,
           tokenAST.address,
           tokenDAI.address,
@@ -183,7 +183,7 @@ contract('DelegateFrontend', async accounts => {
     })
   })
 
-  describe('DelegateFrontend - TakerSide', async () => {
+  describe('DelegateFrontend - SenderSide', async () => {
     it('Get the intent', async () => {
       const result = await indexer.getIntents.call(
         tokenDAI.address,
@@ -194,7 +194,7 @@ contract('DelegateFrontend', async accounts => {
     })
 
     it('Finds best price to buy 1 WETH for DAI', async () => {
-      const quote = await delegatefrontend.getBestTakerSideQuote.call(
+      const quote = await delegatefrontend.getBestSenderSideQuote.call(
         100,
         tokenWETH.address,
         tokenDAI.address,
@@ -205,7 +205,7 @@ contract('DelegateFrontend', async accounts => {
     })
 
     it('Finds best price to very large WETH amount for DAI', async () => {
-      const quote = await delegatefrontend.getBestTakerSideQuote.call(
+      const quote = await delegatefrontend.getBestSenderSideQuote.call(
         10000000,
         tokenWETH.address,
         tokenDAI.address,
@@ -218,7 +218,7 @@ contract('DelegateFrontend', async accounts => {
       )
     })
 
-    it('Takes best price (Alice delegate) - TakerSide', async () => {
+    it('Takes best price (Alice delegate) - SenderSide', async () => {
       // Alice delegate gets some WETH to trade through the Delegate
       await tokenWETH.mint(aliceAddress, 200)
 
@@ -240,7 +240,7 @@ contract('DelegateFrontend', async accounts => {
       )
 
       // Carol takes the best price for 100 DAI
-      await delegatefrontend.fillBestTakerSideOrder(
+      await delegatefrontend.fillBestSenderSideOrder(
         100,
         tokenWETH.address,
         tokenDAI.address,
@@ -265,9 +265,9 @@ contract('DelegateFrontend', async accounts => {
     })
   })
 
-  describe('DelegateFrontend - MakerSide', async () => {
+  describe('DelegateFrontend - SignerSide', async () => {
     it('Finds best price to buy 309 DAI for WETH', async () => {
-      const quote = await delegatefrontend.getBestMakerSideQuote.call(
+      const quote = await delegatefrontend.getBestSignerSideQuote.call(
         15476,
         tokenDAI.address,
         tokenWETH.address,
@@ -278,10 +278,10 @@ contract('DelegateFrontend', async accounts => {
       equal(quote[1].toNumber(), 50)
     })
 
-    it('Takes best price (Alice delegate) - MakerSide', async () => {
+    it('Takes best price (Alice delegate) - SignerSide', async () => {
       await advanceTimeAndBlock(10)
       // Carol takes the best price for 100 DAI
-      await delegatefrontend.fillBestMakerSideOrder(
+      await delegatefrontend.fillBestSignerSideOrder(
         15476,
         tokenDAI.address,
         tokenWETH.address,
