@@ -40,9 +40,6 @@ describe('Signatures', async () => {
       swapAddress
     )
 
-    console.log(signature.r.toString('hex'))
-    console.log(signature.s.toString('hex'))
-
     expect(signature).to.deep.include({
       version: '0x45',
       signatory: signerWallet,
@@ -83,8 +80,6 @@ describe('Signatures', async () => {
       swapAddress
     )
 
-    console.log(signature.r.toString('hex'))
-    console.log(signature.s.toString('hex'))
     expect(signature).to.deep.include({
       version: '0x01',
       signatory: signerWallet,
