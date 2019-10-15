@@ -74,6 +74,11 @@ contract Wrapper {
     require(_order.sender.wallet == msg.sender,
       "MSG_SENDER_MUST_BE_ORDER_SENDER");
 
+    // Ensure that signature is present and
+    // will be explicitly checked in swap.
+    require(_order.signature.v != 0,
+      "SIGNATURE_MUST_BE_SENT");
+
     // The sender is sending ether that must be wrapped.
     if (_order.sender.token == address(wethContract)) {
 
@@ -108,8 +113,8 @@ contract Wrapper {
       wethContract.withdraw(_order.signer.param);
 
       // Transfer ether to the user.
-      msg.sender.transfer(_order.signer.param);
-
+      // solium-disable-next-line security/no-call-value
+      msg.sender.call.value(_order.signer.param)("");
     }
   }
 }

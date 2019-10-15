@@ -18,7 +18,7 @@ const {
   takeSnapshot,
   revertToSnapShot,
 } = require('@airswap/test-utils').time
-const { orders } = require('@airswap/order-utils')
+const { orders, signatures } = require('@airswap/order-utils')
 
 let swapContract
 let wrapperContract
@@ -33,8 +33,6 @@ let tokenWETH
 let snapshotId
 
 contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
-  orders.setKnownAccounts([aliceAddress, bobAddress, carolAddress])
-
   before('Setup', async () => {
     let snapShot = await takeSnapshot()
     snapshotId = snapShot['result']
@@ -50,12 +48,12 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
     tokenDAI = await FungibleToken.new()
     tokenAST = await FungibleToken.new()
 
-    await orders.setVerifyingContract(swapAddress)
-
+    orders.setVerifyingContract(swapAddress)
+    orders.setKnownAccounts([aliceAddress, bobAddress, carolAddress])
     wrappedSwap = wrapperContract.swap
   })
 
-  after(async () => {
+  after('Cleanup', async () => {
     await revertToSnapShot(snapshotId)
   })
 
@@ -121,6 +119,7 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
           param: 10,
         },
       })
+
       let result = await wrappedSwap(order, {
         from: bobAddress,
         value: order.sender.param,
@@ -217,6 +216,28 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
       emitted(result, 'Approval')
     })
 
+    it('Send order where the sender does not send the correct amount of ETH', async () => {
+      const order = await orders.getOrder({
+        signer: {
+          wallet: aliceAddress,
+          token: tokenDAI.address,
+          param: 1,
+        },
+        sender: {
+          wallet: bobAddress,
+          token: tokenWETH.address,
+          param: 100,
+        },
+      })
+      await reverted(
+        wrappedSwap(order, {
+          from: bobAddress,
+          value: 200,
+        }),
+        'VALUE_MUST_BE_SENT'
+      )
+    })
+
     it('Send order where Bob sends Eth to Alice for DAI', async () => {
       const order = await orders.getOrder({
         signer: {
@@ -294,6 +315,76 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
           [tokenWETH, 5],
         ])
       )
+    })
+
+    it('Send order where the sender is not the sender of the order', async () => {
+      const order = await orders.getOrder({
+        signer: {
+          wallet: aliceAddress,
+          token: tokenDAI.address,
+          param: 1,
+        },
+        sender: {
+          wallet: bobAddress,
+          token: tokenAST.address,
+          param: 100,
+        },
+      })
+      await reverted(
+        wrappedSwap(order, {
+          from: carolAddress,
+          value: 0,
+        }),
+        'MSG_SENDER_MUST_BE_ORDER_SENDER'
+      )
+    })
+
+    it('Send order without WETH where ETH is incorrectly supplied', async () => {
+      const order = await orders.getOrder({
+        signer: {
+          wallet: aliceAddress,
+          token: tokenDAI.address,
+          param: 1,
+        },
+        sender: {
+          wallet: bobAddress,
+          token: tokenAST.address,
+          param: 100,
+        },
+      })
+      await reverted(
+        wrappedSwap(order, {
+          from: bobAddress,
+          value: 10,
+        }),
+        'VALUE_MUST_BE_ZERO'
+      )
+    })
+
+    it('Send order where Bob sends AST to Alice for DAI w/ authorization but without signature', async () => {
+      const order = await orders.getOrder(
+        {
+          signer: {
+            wallet: aliceAddress,
+            token: tokenDAI.address,
+            param: 1,
+          },
+          sender: {
+            wallet: bobAddress,
+            token: tokenAST.address,
+            param: 100,
+          },
+        },
+        true
+      )
+
+      order.signature = signatures.getEmptySignature()
+
+      let result = wrappedSwap(order, {
+        from: bobAddress,
+        value: 0,
+      })
+      await reverted(result, 'SIGNATURE_MUST_BE_SENT.')
     })
   })
 })
