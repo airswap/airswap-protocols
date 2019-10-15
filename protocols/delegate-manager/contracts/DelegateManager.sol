@@ -53,7 +53,7 @@ contract DelegateManager is Ownable {
       return delegates;
     }
 
-    // NOTE: created delegate needs the manager to be and admin in order to act with it.
+    // NOTE: created delegate needs the manager to be an admin in order to act with it.
     function setRuleAndIntent(
       IDelegate _delegate,
       Types.Rule calldata _rule,
@@ -77,7 +77,7 @@ contract DelegateManager is Ownable {
       );
     }
 
-    // NOTE: created delegate needs the manager to be and admin in order to act with it.
+    // NOTE: created delegate needs the manager to be an admin in order to act with it.
     function unsetRuleAndIntent(
       IDelegate _delegate,
       address _makerToken, 
