@@ -43,12 +43,12 @@ contract DelegateManager is Ownable {
     /**
       * @notice Creates a new Delegate contract using the Factory contract, 
       * saves deployed address to msg.sender list of deployed addresses
+      * @dev DelegateManager does not have access to the created Delegate by default
       * @param _tradeWallet the wallet that the delegate will be trading on behalf of
       * @return IDelegate the Delegate created by the factory
       */
     function createDelegate(address _tradeWallet) external returns (IDelegate) {
       IDelegate delegate = IDelegate(factory.createDelegate(msg.sender, _tradeWallet));
-      //NOTE: DelegateManager does not have access to the created Delegate by default
       ownerToDelegates[msg.sender].push(address(delegate));
       emit DelegateCreated(msg.sender, address(delegate));
       return delegate;
