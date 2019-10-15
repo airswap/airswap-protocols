@@ -74,7 +74,8 @@ contract('Wrapper Unit Tests', async accounts => {
   }
 
   async function setupMockSwap() {
-    let swapTemplate = await Swap.new()
+    let mockTokenRegistry = await MockContract.new()
+    let swapTemplate = await Swap.new(mockTokenRegistry.address)
     //mock the swap.swap method
     const order = await orders.getOrder({})
 

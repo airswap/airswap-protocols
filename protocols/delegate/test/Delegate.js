@@ -1,7 +1,9 @@
 const Delegate = artifacts.require('Delegate')
+const TokenRegistry = artifacts.require('TokenRegistry')
 const Swap = artifacts.require('Swap')
 const Types = artifacts.require('Types')
 const FungibleToken = artifacts.require('FungibleToken')
+const ERC20Asset = artifacts.require('ERC20Asset')
 
 const { emitted, reverted, equal, ok } = require('@airswap/test-utils').assert
 const { balances } = require('@airswap/test-utils').balances
@@ -41,7 +43,11 @@ contract('Delegate', async accounts => {
     // link types to swap
     await Swap.link(Types, (await Types.new()).address)
     // now deploy swap
-    swapContract = await Swap.new()
+
+    const erc20asset = await ERC20Asset.new()
+    const tokenRegistry = await TokenRegistry.new()
+    tokenRegistry.addToRegistry('0x277f8169', erc20asset.address)
+    swapContract = await Swap.new(tokenRegistry.address)
     swapAddress = swapContract.address
 
     orders.setVerifyingContract(swapAddress)

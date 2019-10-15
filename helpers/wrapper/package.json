@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "@airswap/swap": "2.1.0",
-    "@airswap/tokens": "0.1.0"
+    "@airswap/tokens": "0.1.0",
+    "@airswap/token-registry": "0.1.0"
   }
 }

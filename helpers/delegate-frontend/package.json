@@ -19,6 +19,7 @@
   "devDependencies": {
     "@airswap/swap": "2.1.0",
     "@airswap/tokens": "0.1.0",
+    "@airswap/token-registry": "0.1.0",
     "@airswap/delegate": "0.3.0",
     "@airswap/indexer": "0.2.0",
     "solidity-coverage": "^0.6.4"

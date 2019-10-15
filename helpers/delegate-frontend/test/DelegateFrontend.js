@@ -3,6 +3,8 @@ const DelegateFrontend = artifacts.require('DelegateFrontend')
 const Indexer = artifacts.require('Indexer')
 const Delegate = artifacts.require('Delegate')
 const FungibleToken = artifacts.require('FungibleToken')
+const TokenRegistry = artifacts.require('TokenRegistry')
+const ERC20Asset = artifacts.require('ERC20Asset')
 const Types = artifacts.require('Types')
 var BigNumber = require('bn.js')
 const { emitted, equal, ok, reverted } = require('@airswap/test-utils').assert
@@ -54,7 +56,11 @@ contract('DelegateFrontend', async accounts => {
       // link types to swap
       await Swap.link(Types, (await Types.new()).address)
       // now deploy swap
-      swapContract = await Swap.new()
+
+      const erc20asset = await ERC20Asset.new()
+      const tokenRegistry = await TokenRegistry.new()
+      tokenRegistry.addToRegistry('0x277f8169', erc20asset.address)
+      swapContract = await Swap.new(tokenRegistry.address)
       swapAddress = swapContract.address
 
       indexer = await Indexer.new(tokenAST.address, EMPTY_ADDRESS, {

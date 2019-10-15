@@ -37,7 +37,8 @@ contract('Delegate Unit Tests', async accounts => {
   })
 
   async function setupMockSwap() {
-    let swapTemplate = await Swap.new()
+    let mockTokenRegistry = await MockContract.new()
+    let swapTemplate = await Swap.new(mockTokenRegistry.address)
     const order = await orders.getOrder({})
     swapFunction = swapTemplate.contract.methods.swap(order).encodeABI()
 

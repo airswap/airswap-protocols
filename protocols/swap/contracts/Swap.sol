@@ -299,6 +299,6 @@ contract Swap is ISwap {
   ) internal {
     IAsset asset = registry.getAsset(_kind);
     (bool success, bytes memory data) = address(asset).delegatecall(abi.encodeWithSignature("transferTokens(address,address,uint256,address)", _from, _to, _param, _token));
-    require(success);
+    require(success && abi.decode(data, (bool)));
   }
 }
