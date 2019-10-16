@@ -178,18 +178,18 @@ contract DelegateFrontend {
         _senderToken))),
       block.timestamp + 1,
       Types.Party(
+        0x277f8169,
         address(this),
         _signerToken,
-        signerAmount,
-        0x277f8169
+        signerAmount
       ),
       Types.Party(
+        0x277f8169,
         IDelegate(delegateContract).tradeWallet(),
         _senderToken,
-        _senderAmount,
-        0x277f8169
+        _senderAmount
       ),
-      Types.Party(address(0), address(0), 0, bytes4(0)),
+      Types.Party(bytes4(0), address(0), address(0), 0),
       Types.Signature(address(0), 0, 0, 0, 0)
     ));
 
@@ -249,18 +249,18 @@ contract DelegateFrontend {
       ))),
       block.timestamp + 1,
       Types.Party(
+        0x277f8169,
         address(this),
         _signerToken,
-        _signerAmount,
-        0x277f8169
+        _signerAmount
       ),
       Types.Party(
+        0x277f8169,
         IDelegate(delegateContract).tradeWallet(),
         _senderToken,
-        senderAmount,
-        0x277f8169
+        senderAmount
       ),
-      Types.Party(address(0), address(0), 0, bytes4(0)),
+      Types.Party(bytes4(0), address(0), address(0), 0),
       Types.Signature(address(0), 0, 0, 0, 0)
     ));
 
