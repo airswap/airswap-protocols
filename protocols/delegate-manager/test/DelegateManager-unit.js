@@ -17,6 +17,7 @@ const { padAddressToLocator } = require('@airswap/test-utils').padding
 
 contract('DelegateManager Unit Tests', async accounts => {
   let owner = accounts[0]
+  let notOwner = accounts[2]
   let tradeWallet_1 = accounts[1]
   let tradeWallet_2 = accounts[1]
   let mockDelegate
@@ -64,6 +65,12 @@ contract('DelegateManager Unit Tests', async accounts => {
       .unsetRule(EMPTY_ADDRESS, EMPTY_ADDRESS)
       .encodeABI()
     await mockDelegate.givenMethodReturnBool(mockDelegate_unsetRule, true)
+
+    //mock owner()
+    let mockDelegate_owner = mockDelegateTemplate.contract.methods
+      .owner()
+      .encodeABI()
+    await mockDelegate.givenMethodReturnAddress(mockDelegate_owner, owner)
   }
 
   async function setupMockFactory() {
@@ -154,6 +161,39 @@ contract('DelegateManager Unit Tests', async accounts => {
   })
 
   describe('Test setRuleAndIntent()', async () => {
+    it('Test calling setRuleAndIntent on unowned delegate', async () => {
+      // construct delegate with no trade wallet
+      let trx = await delegateManager.createDelegate(EMPTY_ADDRESS)
+
+      //NOTE: I don't need to capture emitted delegate
+      //I've mocked to always return mockDelegate.address
+      let delegateAddress = mockDelegate.address
+      let indexerAddress = mockIndexer.address
+
+      let rule = [mockWETH.address, mockDAI.address, 100000, 300, 0]
+
+      let intent = [
+        mockWETH.address,
+        mockDAI.address,
+        250,
+        padAddressToLocator(delegateAddress),
+      ]
+
+      //NOTE: owner would call delegate.addAdmin(delegateManager)
+      //this doesn't need to be done here because delegate is a mock
+
+      await reverted(
+        delegateManager.setRuleAndIntent(
+          delegateAddress,
+          rule,
+          intent,
+          indexerAddress, 
+          { from: notOwner }
+        ),
+        "DELEGATE_NOT_OWNED"
+      )
+    });
+
     it('Test successfully calling setRuleAndIntent', async () => {
       // construct delegate with no trade wallet
       let trx = await delegateManager.createDelegate(EMPTY_ADDRESS)
@@ -189,6 +229,21 @@ contract('DelegateManager Unit Tests', async accounts => {
   })
 
   describe('Test unsetRuleAndIntent()', async () => {
+    it('Test calling unsetRuleAndIntent on unowned delegate', async () => {
+      let delegateAddress = mockDelegate.address
+      let indexerAddress = mockIndexer.address
+      await reverted(
+        delegateManager.unsetRuleAndIntent(
+          delegateAddress,
+          mockWETH.address,
+          mockDAI.address,
+          indexerAddress,
+          { from: notOwner }
+        ),
+        "DELEGATE_NOT_OWNED"
+      )
+    });
+
     it('Test successfully calling unsetRuleAndIntent()', async () => {
       let delegateAddress = mockDelegate.address
       let indexerAddress = mockIndexer.address

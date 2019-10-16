@@ -29,10 +29,11 @@ contract DelegateManager is Ownable {
     event DelegateCreated(address owner, address delegate);
 
     //keeps track of all the delegates created by owner address
-    mapping(address => address[]) private ownerToDelegates;
+    mapping(address => address[]) private _ownerToDelegates;
     IDelegateFactory public factory;
 
     /**
+      * @notice Constructor to create the Delegate Manager
       * @dev factory is unable to be changed after the DelegateManager is constructed
       * @param _factory address of the factory contract that will create the delegates
       */
@@ -49,7 +50,7 @@ contract DelegateManager is Ownable {
       */
     function createDelegate(address _tradeWallet) external returns (IDelegate) {
       IDelegate delegate = IDelegate(factory.createDelegate(msg.sender, _tradeWallet));
-      ownerToDelegates[msg.sender].push(address(delegate));
+      _ownerToDelegates[msg.sender].push(address(delegate));
       emit DelegateCreated(msg.sender, address(delegate));
       return delegate;
     }
@@ -60,10 +61,10 @@ contract DelegateManager is Ownable {
       * @return address[] memory the list of the delegates for an owner
       */ 
     function getOwnerAddressToDelegates(address _owner) view external returns (address[] memory) {
-      uint256 length = ownerToDelegates[_owner].length;
+      uint256 length = _ownerToDelegates[_owner].length;
       address[] memory delegates = new address[](length);
       for(uint i = 0; i < length; i++) {
-        delegates[i] = ownerToDelegates[_owner][i];
+        delegates[i] = _ownerToDelegates[_owner][i];
       }
       return delegates;
     }
@@ -82,6 +83,8 @@ contract DelegateManager is Ownable {
       Types.Intent calldata _intent,
       IIndexer _indexer
     ) external {
+
+      require(msg.sender == _delegate.owner(), "DELEGATE_NOT_OWNED");
 
       _delegate.setRule(
         _rule.senderToken,
@@ -113,6 +116,9 @@ contract DelegateManager is Ownable {
       address _signerToken, 
       IIndexer _indexer
     ) external {
+
+      require(msg.sender == _delegate.owner(), "DELEGATE_NOT_OWNED");
+
       _delegate.unsetRule(_signerToken, _senderToken);
       _indexer.unsetIntent(_senderToken, _signerToken);
     }
