@@ -1,3 +1,4 @@
+
 /*
   Copyright 2019 Swap Holdings Ltd.
 
@@ -34,18 +35,18 @@ library Types {
   }
 
   struct Party {
+    bytes4 kind;          // Interface ID of the token
     address wallet;       // Wallet address of the party
     address token;        // Contract address of the token
     uint256 param;        // Value (ERC-20) or ID (ERC-721)
-    bytes4 kind;          // Interface ID of the token
   }
 
   struct Signature {
     address signatory;    // Address of the wallet used to sign
+    bytes1 version;       // EIP-191 signature version
     uint8 v;              // `v` value of an ECDSA signature
     bytes32 r;            // `r` value of an ECDSA signature
     bytes32 s;            // `s` value of an ECDSA signature
-    bytes1 version;       // EIP-191 signature version
   }
 
   bytes32 constant DOMAIN_TYPEHASH = keccak256(abi.encodePacked(
@@ -65,19 +66,20 @@ library Types {
     "Party affiliate",
     ")",
     "Party(",
+    "bytes4 kind,",
     "address wallet,",
     "address token,",
-    "uint256 param,",
-    "bytes4 kind",
+    "uint256 param",
     ")"
   ));
 
   bytes32 constant PARTY_TYPEHASH = keccak256(abi.encodePacked(
     "Party(",
+    "bytes4 kind,",
     "address wallet,",
     "address token,",
-    "uint256 param,",
-    "bytes4 kind",
+    "uint256 param",
+
     ")"
   ));
 
@@ -101,24 +103,24 @@ library Types {
         _order.expiry,
         keccak256(abi.encode(
           PARTY_TYPEHASH,
+          _order.signer.kind,
           _order.signer.wallet,
           _order.signer.token,
-          _order.signer.param,
-          _order.signer.kind
+          _order.signer.param
         )),
         keccak256(abi.encode(
           PARTY_TYPEHASH,
+          _order.sender.kind,
           _order.sender.wallet,
           _order.sender.token,
-          _order.sender.param,
-          _order.sender.kind
+          _order.sender.param
         )),
         keccak256(abi.encode(
           PARTY_TYPEHASH,
+          _order.affiliate.kind,
           _order.affiliate.wallet,
           _order.affiliate.token,
-          _order.affiliate.param,
-          _order.affiliate.kind
+          _order.affiliate.param
         ))
       ))
     ));

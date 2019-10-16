@@ -39,15 +39,16 @@ describe('Signatures', async () => {
       signerPrivKey,
       swapAddress
     )
+
     expect(signature).to.deep.include({
       version: '0x45',
       signatory: signerWallet,
       r: Buffer.from(
-        '539d93cf04378950229dffac7887fffb2b6a91072273c3b14d8942d109251998',
+        '6ce2f4c1d5f21f9b101a8043ae1e9fecf93972720399a65237abd70e43cc05d8',
         'hex'
       ),
       s: Buffer.from(
-        '55ee011f45450a444c83fa9c42f179efa3c130e254c175a8bd89560a15c8775e',
+        '39c1efa6505ef3e87c09e9105f63e449d9c29d11c50dc968f0070a5a860bfd49',
         'hex'
       ),
       v: 28,
@@ -78,15 +79,16 @@ describe('Signatures', async () => {
       signerPrivKey,
       swapAddress
     )
+
     expect(signature).to.deep.include({
       version: '0x01',
       signatory: signerWallet,
       r: Buffer.from(
-        'c78d7d33e620fdbec03176353f44d684178c079bb5a23c2d3cf72b6d40f32ce9',
+        '3d884c1025eb35ec6f6d4305bebe65416ee7e8acb48ceefece3a585f74e44030',
         'hex'
       ),
       s: Buffer.from(
-        '49dfeaee6792ee5a88e6747d1b49bd836af552db8ad8c6f45ed3d3e8f18248c1',
+        '31f3161d9a3451841ff3fe6bd16738e17a284ea2f8c235ea769d04bf6aa12855',
         'hex'
       ),
       v: 27,

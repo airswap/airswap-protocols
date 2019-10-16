@@ -41,18 +41,18 @@ module.exports = {
       { name: 'affiliate', type: 'Party' },
     ],
     Party: [
+      { name: 'kind', type: 'bytes4' },
       { name: 'wallet', type: 'address' },
       { name: 'token', type: 'address' },
       { name: 'param', type: 'uint256' },
-      { name: 'kind', type: 'bytes4' },
     ],
   },
   defaults: {
     Party: {
+      kind: '0x277f8169',
       wallet: '0x0000000000000000000000000000000000000000',
       token: '0x0000000000000000000000000000000000000000',
       param: '0',
-      kind: '0x277f8169',
     },
   },
 }
