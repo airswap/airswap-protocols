@@ -3,6 +3,7 @@ const Indexer = artifacts.require('Indexer')
 const DelegateManager = artifacts.require('DelegateManager')
 const DelegateFactory = artifacts.require('DelegateFactory')
 const MockContract = artifacts.require('MockContract')
+const ERC20 = artifacts.require('ERC20')
 const {
   equal,
   passes,
@@ -25,6 +26,9 @@ contract('DelegateManager Unit Tests', async accounts => {
   let mockSwap
   let mockWETH
   let mockDAI
+  let mockStakeToken
+  let mockStakeToken_allowance
+  let mockStakeToken_transferFrom
   let snapshotId
 
   beforeEach(async () => {
@@ -39,6 +43,17 @@ contract('DelegateManager Unit Tests', async accounts => {
   async function setupMockTokens() {
     mockWETH = await MockContract.new()
     mockDAI = await MockContract.new()
+
+    mockStakeToken = await MockContract.new()
+    let mockERC20Template = await ERC20.new()
+
+    mockStakeToken_allowance = await mockERC20Template.contract.methods
+      .allowance(EMPTY_ADDRESS, EMPTY_ADDRESS)
+      .encodeABI()
+
+    mockStakeToken_transferFrom = await mockERC20Template.contract.methods
+      .transferFrom(EMPTY_ADDRESS, EMPTY_ADDRESS, 0)
+      .encodeABI()
   }
 
   async function setupMockSwap() {
@@ -101,6 +116,12 @@ contract('DelegateManager Unit Tests', async accounts => {
       .unsetIntent(EMPTY_ADDRESS, EMPTY_ADDRESS)
       .encodeABI()
     await mockIndexer.givenMethodReturnBool(mockIndexer_unsetIntent, true)
+
+    //mock stakeToken()
+    let mockIndexer_stakeToken = mockIndexerTemplate.contract.methods
+      .stakeToken()
+      .encodeABI()
+    await mockIndexer.givenMethodReturnAddress(mockIndexer_stakeToken, mockStakeToken.address)
   }
 
   before(async () => {
@@ -193,6 +214,79 @@ contract('DelegateManager Unit Tests', async accounts => {
       )
     })
 
+    it('Test calling setRuleAndIntent with allowance error', async () => {
+      // construct delegate with no trade wallet
+      await delegateManager.createDelegate(EMPTY_ADDRESS)
+
+      //NOTE: I don't need to capture emitted delegate
+      //I've mocked to always return mockDelegate.address
+      let delegateAddress = mockDelegate.address
+      let indexerAddress = mockIndexer.address
+
+      let rule = [mockWETH.address, mockDAI.address, 100000, 300, 0]
+
+      let intentAmount = 250
+      let intent = [
+        mockWETH.address,
+        mockDAI.address,
+        intentAmount,
+        padAddressToLocator(delegateAddress),
+      ]
+
+      //NOTE: owner would call delegate.addAdmin(delegateManager)
+      //this doesn't need to be done here because delegate is a mock
+
+      //mock improper allowance
+      await mockStakeToken.givenMethodReturnUint(mockStakeToken_allowance, intentAmount - 1)
+
+      await reverted(
+        delegateManager.setRuleAndIntent(
+          delegateAddress,
+          rule,
+          intent,
+          indexerAddress
+        ),
+        "ALLOWANCE_FUNDS_ERROR"
+      )
+    })
+    
+    it('Test calling setRuleAndIntent with transfer error', async () => {
+      // construct delegate with no trade wallet
+      await delegateManager.createDelegate(EMPTY_ADDRESS)
+
+      //NOTE: I don't need to capture emitted delegate
+      //I've mocked to always return mockDelegate.address
+      let delegateAddress = mockDelegate.address
+      let indexerAddress = mockIndexer.address
+
+      let rule = [mockWETH.address, mockDAI.address, 100000, 300, 0]
+
+      let intentAmount = 250
+      let intent = [
+        mockWETH.address,
+        mockDAI.address,
+        intentAmount,
+        padAddressToLocator(delegateAddress),
+      ]
+
+      //NOTE: owner would call delegate.addAdmin(delegateManager)
+      //this doesn't need to be done here because delegate is a mock
+
+      await mockStakeToken.givenMethodReturnUint(mockStakeToken_allowance, intentAmount)
+      //mock unsuccessful transfer
+      await mockStakeToken.givenMethodReturnBool(mockStakeToken_transferFrom, false)
+
+      await reverted(
+        delegateManager.setRuleAndIntent(
+          delegateAddress,
+          rule,
+          intent,
+          indexerAddress
+        ),
+        "TRANSFER_FUNDS_ERROR"
+      )
+    })
+
     it('Test successfully calling setRuleAndIntent', async () => {
       // construct delegate with no trade wallet
       await delegateManager.createDelegate(EMPTY_ADDRESS)
@@ -204,18 +298,20 @@ contract('DelegateManager Unit Tests', async accounts => {
 
       let rule = [mockWETH.address, mockDAI.address, 100000, 300, 0]
 
+      let intentAmount = 250
       let intent = [
         mockWETH.address,
         mockDAI.address,
-        250,
+        intentAmount,
         padAddressToLocator(delegateAddress),
       ]
 
       //NOTE: owner would call delegate.addAdmin(delegateManager)
       //this doesn't need to be done here because delegate is a mock
 
-      // TODO:
-      // possibly migrate the delegate and indexer to the new types
+      await mockStakeToken.givenMethodReturnUint(mockStakeToken_allowance, intentAmount)
+      await mockStakeToken.givenMethodReturnBool(mockStakeToken_transferFrom, true)
+
       await passes(
         delegateManager.setRuleAndIntent(
           delegateAddress,

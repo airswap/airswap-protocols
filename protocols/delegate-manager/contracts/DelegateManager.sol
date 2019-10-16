@@ -21,8 +21,9 @@ import "@airswap/indexer/contracts/interfaces/IIndexer.sol";
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "@airswap/delegate-factory/contracts/interfaces/IDelegateFactory.sol";
 import "@airswap/delegate/contracts/interfaces/IDelegate.sol";
-import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "@airswap/types/contracts/Types.sol";
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 
 contract DelegateManager is Ownable {
 
@@ -72,6 +73,8 @@ contract DelegateManager is Ownable {
     /**
       * @notice sets a rule on the delegate and an intent on the indexer
       * @dev delegate needs the manager to be an admin in order to act with it.
+      * @dev manager needs to be given approval from msg.sender for the _intent.amount
+      * @dev delegate swap needs to be given permission to move funds from the manager
       * @param _delegate the delegate that a rule will be set on
       * @param _rule the rule to set on a delegate
       * @param _intent the intent to set on an the indexer
@@ -92,6 +95,15 @@ contract DelegateManager is Ownable {
         _rule.maxSenderAmount, 
         _rule.priceCoef,
         _rule.priceExp
+      );
+
+      require(
+        IERC20(_indexer.stakeToken())
+        .allowance(msg.sender, address(this)) >= _intent.amount, "ALLOWANCE_FUNDS_ERROR"
+      );
+      require(
+        IERC20(_indexer.stakeToken())
+        .transferFrom(msg.sender, address(this), _intent.amount), "TRANSFER_FUNDS_ERROR"
       );
 
       _indexer.setIntent(

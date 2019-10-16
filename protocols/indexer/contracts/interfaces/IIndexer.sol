@@ -45,6 +45,7 @@ interface IIndexer {
     address token
   );
 
+  function stakeToken() external returns (address);
   function indexes(address, address) external returns (address);
   function blacklist(address) external returns (bool);
 
