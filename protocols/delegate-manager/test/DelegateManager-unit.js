@@ -5,14 +5,12 @@ const DelegateFactory = artifacts.require('DelegateFactory')
 const MockContract = artifacts.require('MockContract')
 const {
   equal,
-  notEqual,
   passes,
   emitted,
   reverted,
 } = require('@airswap/test-utils').assert
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
-const { orders } = require('@airswap/order-utils')
 const { padAddressToLocator } = require('@airswap/test-utils').padding
 
 contract('DelegateManager Unit Tests', async accounts => {
@@ -27,6 +25,7 @@ contract('DelegateManager Unit Tests', async accounts => {
   let mockSwap
   let mockWETH
   let mockDAI
+  let snapshotId
 
   beforeEach(async () => {
     let snapShot = await takeSnapshot()
@@ -75,7 +74,7 @@ contract('DelegateManager Unit Tests', async accounts => {
 
   async function setupMockFactory() {
     mockFactory = await MockContract.new()
-    mockFactoryTemplate = await DelegateFactory.new(mockSwap.address)
+    let mockFactoryTemplate = await DelegateFactory.new(mockSwap.address)
 
     // mock createDelegate()
     let mockFactory_createDelegate = mockFactoryTemplate.contract.methods
@@ -89,7 +88,7 @@ contract('DelegateManager Unit Tests', async accounts => {
 
   async function setupMockIndexer() {
     mockIndexer = await MockContract.new()
-    mockIndexerTemplate = await Indexer.new(EMPTY_ADDRESS, EMPTY_ADDRESS)
+    let mockIndexerTemplate = await Indexer.new(EMPTY_ADDRESS, EMPTY_ADDRESS)
 
     //mock setIntent()
     let mockIndexer_setIntent = mockIndexerTemplate.contract.methods
@@ -163,7 +162,7 @@ contract('DelegateManager Unit Tests', async accounts => {
   describe('Test setRuleAndIntent()', async () => {
     it('Test calling setRuleAndIntent on unowned delegate', async () => {
       // construct delegate with no trade wallet
-      let trx = await delegateManager.createDelegate(EMPTY_ADDRESS)
+      await delegateManager.createDelegate(EMPTY_ADDRESS)
 
       //NOTE: I don't need to capture emitted delegate
       //I've mocked to always return mockDelegate.address
@@ -187,16 +186,16 @@ contract('DelegateManager Unit Tests', async accounts => {
           delegateAddress,
           rule,
           intent,
-          indexerAddress, 
+          indexerAddress,
           { from: notOwner }
         ),
-        "DELEGATE_NOT_OWNED"
+        'DELEGATE_NOT_OWNED'
       )
-    });
+    })
 
     it('Test successfully calling setRuleAndIntent', async () => {
       // construct delegate with no trade wallet
-      let trx = await delegateManager.createDelegate(EMPTY_ADDRESS)
+      await delegateManager.createDelegate(EMPTY_ADDRESS)
 
       //NOTE: I don't need to capture emitted delegate
       //I've mocked to always return mockDelegate.address
@@ -240,9 +239,9 @@ contract('DelegateManager Unit Tests', async accounts => {
           indexerAddress,
           { from: notOwner }
         ),
-        "DELEGATE_NOT_OWNED"
+        'DELEGATE_NOT_OWNED'
       )
-    });
+    })
 
     it('Test successfully calling unsetRuleAndIntent()', async () => {
       let delegateAddress = mockDelegate.address
