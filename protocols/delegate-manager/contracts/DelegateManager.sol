@@ -73,7 +73,7 @@ contract DelegateManager is Ownable {
     /**
       * @notice sets a rule on the delegate and an intent on the indexer
       * @dev delegate needs the manager to be an admin in order to act with it.
-      * @dev manager needs to be given approval from msg.sender for the _intent.amount
+      * @dev manager needs to be given allowance from msg.sender for the _intent.amount
       * @dev delegate swap needs to be given permission to move funds from the manager
       * @param _delegate the delegate that a rule will be set on
       * @param _rule the rule to set on a delegate
@@ -133,6 +133,10 @@ contract DelegateManager is Ownable {
 
       _delegate.unsetRule(_signerToken, _senderToken);
       _indexer.unsetIntent(_senderToken, _signerToken);
+
+      //retrieve the staking amount so that we know how much to push back to the msg.sender
+      //upon unstaking the manager will be given the staking amount
+      //the manager will then push the staking amount to the msg.sender
     }
 
 }

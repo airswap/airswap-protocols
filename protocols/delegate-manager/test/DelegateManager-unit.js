@@ -121,7 +121,10 @@ contract('DelegateManager Unit Tests', async accounts => {
     let mockIndexer_stakeToken = mockIndexerTemplate.contract.methods
       .stakeToken()
       .encodeABI()
-    await mockIndexer.givenMethodReturnAddress(mockIndexer_stakeToken, mockStakeToken.address)
+    await mockIndexer.givenMethodReturnAddress(
+      mockIndexer_stakeToken,
+      mockStakeToken.address
+    )
   }
 
   before(async () => {
@@ -237,7 +240,10 @@ contract('DelegateManager Unit Tests', async accounts => {
       //this doesn't need to be done here because delegate is a mock
 
       //mock improper allowance
-      await mockStakeToken.givenMethodReturnUint(mockStakeToken_allowance, intentAmount - 1)
+      await mockStakeToken.givenMethodReturnUint(
+        mockStakeToken_allowance,
+        intentAmount - 1
+      )
 
       await reverted(
         delegateManager.setRuleAndIntent(
@@ -246,10 +252,10 @@ contract('DelegateManager Unit Tests', async accounts => {
           intent,
           indexerAddress
         ),
-        "ALLOWANCE_FUNDS_ERROR"
+        'ALLOWANCE_FUNDS_ERROR'
       )
     })
-    
+
     it('Test calling setRuleAndIntent with transfer error', async () => {
       // construct delegate with no trade wallet
       await delegateManager.createDelegate(EMPTY_ADDRESS)
@@ -272,9 +278,15 @@ contract('DelegateManager Unit Tests', async accounts => {
       //NOTE: owner would call delegate.addAdmin(delegateManager)
       //this doesn't need to be done here because delegate is a mock
 
-      await mockStakeToken.givenMethodReturnUint(mockStakeToken_allowance, intentAmount)
+      await mockStakeToken.givenMethodReturnUint(
+        mockStakeToken_allowance,
+        intentAmount
+      )
       //mock unsuccessful transfer
-      await mockStakeToken.givenMethodReturnBool(mockStakeToken_transferFrom, false)
+      await mockStakeToken.givenMethodReturnBool(
+        mockStakeToken_transferFrom,
+        false
+      )
 
       await reverted(
         delegateManager.setRuleAndIntent(
@@ -283,7 +295,7 @@ contract('DelegateManager Unit Tests', async accounts => {
           intent,
           indexerAddress
         ),
-        "TRANSFER_FUNDS_ERROR"
+        'TRANSFER_FUNDS_ERROR'
       )
     })
 
@@ -309,8 +321,14 @@ contract('DelegateManager Unit Tests', async accounts => {
       //NOTE: owner would call delegate.addAdmin(delegateManager)
       //this doesn't need to be done here because delegate is a mock
 
-      await mockStakeToken.givenMethodReturnUint(mockStakeToken_allowance, intentAmount)
-      await mockStakeToken.givenMethodReturnBool(mockStakeToken_transferFrom, true)
+      await mockStakeToken.givenMethodReturnUint(
+        mockStakeToken_allowance,
+        intentAmount
+      )
+      await mockStakeToken.givenMethodReturnBool(
+        mockStakeToken_transferFrom,
+        true
+      )
 
       await passes(
         delegateManager.setRuleAndIntent(
