@@ -338,6 +338,9 @@ contract('DelegateManager Unit Tests', async accounts => {
           indexerAddress
         )
       )
+
+      let val = await delegateManager.stakedAmounts.call(mockDAI.address, mockWETH.address, owner)
+      equal(val, intentAmount, "intent amount not properly saved")
     })
   })
 
