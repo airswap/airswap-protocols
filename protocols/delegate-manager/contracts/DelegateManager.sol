@@ -31,6 +31,17 @@ contract DelegateManager is Ownable {
 
     //keeps track of all the delegates created by owner address
     mapping(address => address[]) private _ownerToDelegates;
+
+    //keeps track of the staked amounts per msg.sender
+    //signer => sender => msg.sender => staked amount
+    mapping(
+      address => mapping(
+        address => mapping(
+          address => uint256
+        )
+      )
+    ) public stakedAmounts;
+
     IDelegateFactory public factory;
 
     /**
@@ -106,6 +117,9 @@ contract DelegateManager is Ownable {
         .transferFrom(msg.sender, address(this), _intent.amount), "TRANSFER_FUNDS_ERROR"
       );
 
+      //save the amount being staked for a particular token pair for a given sender
+      stakedAmounts[_rule.signerToken][_rule.senderToken][msg.sender] = _intent.amount;
+
       _indexer.setIntent(
         _intent.signerToken,
         _intent.senderToken,
@@ -131,12 +145,20 @@ contract DelegateManager is Ownable {
 
       require(msg.sender == _delegate.owner(), "DELEGATE_NOT_OWNED");
 
+      //get the amount that was staked for a particular token pair for a given sender
+      uint256 stakedAmount = stakedAmounts[_signerToken][_senderToken][msg.sender];
+      delete stakedAmounts[_signerToken][_senderToken][msg.sender];
+
       _delegate.unsetRule(_signerToken, _senderToken);
       _indexer.unsetIntent(_senderToken, _signerToken);
 
-      //retrieve the staking amount so that we know how much to push back to the msg.sender
       //upon unstaking the manager will be given the staking amount
-      //the manager will then push the staking amount to the msg.sender
+      //push the staking amount to the msg.sender
+
+      require(
+        IERC20(_indexer.stakeToken())
+          .transfer(msg.sender, stakedAmount),"TRANSFER_FUNDS_ERROR"
+      );
     }
 
 }
