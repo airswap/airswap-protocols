@@ -96,7 +96,7 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
     })
   })
 
-  it('Bob authorizesSender the Wrapper to send orders on his behalf', async () => {
+  it('Bob authorizes the Wrapper to send orders on his behalf', async () => {
     let expiry = await getTimestampPlusDays(1)
     let tx = await swapContract.authorizeSender(wrapperAddress, expiry, {
       from: bobAddress,
