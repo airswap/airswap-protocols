@@ -5,7 +5,7 @@ const { reverted, equal, emitted } = require('@airswap/test-utils').assert
 contract('TokenRegistry Unit Tests', async accounts => {
   const owner = accounts[0]
   const nonOwner = accounts[1]
-  const erc20asset = accounts[4]
+  const erc20Asset = accounts[2]
   let snapshotId
   let tokenregistry
 
@@ -18,30 +18,30 @@ contract('TokenRegistry Unit Tests', async accounts => {
     await revertToSnapShot(snapshotId)
   })
 
-  before('Deploy TokenRegistry Factory', async () => {
+  before('Deploy TokenRegistry', async () => {
     tokenregistry = await TokenRegistry.new({ from: owner })
   })
 
   describe('Test adding to registry', async () => {
     it('test adding when not the owner, should revert', async () => {
       await reverted(
-        tokenregistry.addToRegistry('0x80ac58cd', erc20asset, {
+        tokenregistry.addToRegistry('0x80ac58cd', erc20Asset, {
           from: nonOwner,
         }),
-        'NOT OWNER'
+        'Ownable: caller is not the owner'
       )
     })
 
     it('test adding when the owner, should pass', async () => {
       await emitted(
-        await tokenregistry.addToRegistry('0x80ac58cd', erc20asset, {
+        await tokenregistry.addToRegistry('0x80ac58cd', erc20Asset, {
           from: owner,
         }),
         'AddToRegistry'
       )
 
       equal(
-        erc20asset,
+        erc20Asset,
         await tokenregistry.getAsset.call('0x80ac58cd'),
         'Unable to find match'
       )
@@ -52,13 +52,13 @@ contract('TokenRegistry Unit Tests', async accounts => {
     it('test removing when not the owner, should revert', async () => {
       await reverted(
         tokenregistry.removeFromRegistry('0x80ac58cd', { from: nonOwner }),
-        'NOT OWNER'
+        'Ownable: caller is not the owner'
       )
     })
 
-    it('test adding when the owner, should pass', async () => {
+    it('test adding and then removing when the owner, should pass', async () => {
       await emitted(
-        await tokenregistry.addToRegistry('0x80ac58cd', erc20asset, {
+        await tokenregistry.addToRegistry('0x80ac58cd', erc20Asset, {
           from: owner,
         }),
         'AddToRegistry'

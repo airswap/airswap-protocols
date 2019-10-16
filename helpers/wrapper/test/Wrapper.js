@@ -42,9 +42,9 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
     await Swap.link(Types, (await Types.new()).address)
     // now deploy swap
 
-    const erc20asset = await ERC20Asset.new()
+    const erc20Asset = await ERC20Asset.new()
     const tokenRegistry = await TokenRegistry.new()
-    tokenRegistry.addToRegistry('0x277f8169', erc20asset.address)
+    tokenRegistry.addToRegistry('0x277f8169', erc20Asset.address)
     swapContract = await Swap.new(tokenRegistry.address)
 
     swapAddress = swapContract.address
