@@ -22,9 +22,10 @@ import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "@airswap/delegate-factory/contracts/interfaces/IDelegateFactory.sol";
 import "@airswap/delegate/contracts/interfaces/IDelegate.sol";
 import "@airswap/types/contracts/Types.sol";
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 
-contract DelegateManager {
+contract DelegateManager is Ownable {
 
     event DelegateCreated(address owner, address delegate);
 
