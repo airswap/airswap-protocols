@@ -161,5 +161,4 @@ library Types {
       _verifyingContract
     ));
   }
-
 }
