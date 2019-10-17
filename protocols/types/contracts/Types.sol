@@ -50,18 +50,18 @@ library Types {
   }
 
   struct Party {
-    bytes4 kind;       ````````   // Interface ID of the token
-    address wallet;    ````````   // Wallet address of the party
-    address token;        ````````// Contract address of the token
-    uint256 param;        ````````// Value (ERC-20) or ID (ERC-721)
+    bytes4 kind;                  // Interface ID of the token
+    address wallet;               // Wallet address of the party
+    address token;                // Contract address of the token
+    uint256 param;                // Value (ERC-20) or ID (ERC-721)
   }
 
   struct Signature {
-    address signatory;    ````````// Address of the wallet used to sign
-    bytes1 version;       ````````// EIP-191 signature version
-    uint8 v;              ````````// `v` value of an ECDSA signature
-    bytes32 r;           ```````` // `r` value of an ECDSA signature
-    bytes32 s;          ````````  // `s` value of an ECDSA signature
+    address signatory;            // Address of the wallet used to sign
+    bytes1 version;               // EIP-191 signature version
+    uint8 v;                      // `v` value of an ECDSA signature
+    bytes32 r;                    // `r` value of an ECDSA signature
+    bytes32 s;                    // `s` value of an ECDSA signature
   }
 
   bytes32 constant DOMAIN_TYPEHASH = keccak256(abi.encodePacked(
