@@ -11,7 +11,7 @@
   "scripts": {
     "clean": "lerna run clean",
     "compile": "lerna run compile",
-    "hint": "yarn solhint \"./contracts/**/*.sol\"",
+    "hint": "yarn solhint \"./protocols/**/*.sol\" \"./helpers/**/*.sol\"",
     "lint": "yarn eslint \"./**/*.js\"",
     "ganache": "ganache-cli -p 8545 --gasLimit 0xfffffffffff --time '2017-05-10T00:00:00+00:00'",
     "publish": "lerna publish",

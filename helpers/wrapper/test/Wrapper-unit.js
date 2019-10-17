@@ -13,6 +13,7 @@ contract('Wrapper Unit Tests', async accounts => {
   const senderParam = 2
   const mockToken = accounts[9]
   const mockSender = accounts[8]
+  const mockSigner = accounts[7]
   let mockSwap
   let mockWeth
   let mockFT
@@ -23,6 +24,8 @@ contract('Wrapper Unit Tests', async accounts => {
   let mock_transfer
   let swap
   let snapshotId
+
+  orders.setKnownAccounts([mockSender, mockSigner])
 
   beforeEach(async () => {
     let snapShot = await takeSnapshot()
@@ -81,6 +84,8 @@ contract('Wrapper Unit Tests', async accounts => {
     swap = swapTemplate.contract.methods.swap(order).encodeABI()
 
     mockSwap = await MockContract.new()
+
+    await orders.setVerifyingContract(mockSwap.address)
   }
 
   async function setupMockFungibleToken() {
@@ -126,10 +131,16 @@ contract('Wrapper Unit Tests', async accounts => {
 
     it('Test when sender token != weth, ensure no unexpected ether sent', async () => {
       let nonSenderToken = mockToken
+      let senderToken = mockToken
+
       const order = await orders.getOrder({
         sender: {
           wallet: mockSender,
           token: nonSenderToken,
+        },
+        signer: {
+          wallet: mockSigner,
+          token: senderToken,
         },
       })
 
@@ -149,8 +160,10 @@ contract('Wrapper Unit Tests', async accounts => {
           param: 1,
           token: mockWeth.address,
         },
+        signer: {
+          wallet: mockSigner,
+        },
       })
-
       await reverted(
         wrapper.swap(order, {
           value: 2,
@@ -163,9 +176,9 @@ contract('Wrapper Unit Tests', async accounts => {
     it('Test when sender token == weth, signer token == weth, and the transaction passes', async () => {
       //mock the weth.balance method
       await mockWeth.givenMethodReturnUint(weth_balance, 0)
-
       const order = await orders.getOrder({
         signer: {
+          wallet: mockSigner,
           token: mockWeth.address,
         },
         sender: {
@@ -196,6 +209,7 @@ contract('Wrapper Unit Tests', async accounts => {
 
       const order = await orders.getOrder({
         signer: {
+          wallet: mockSigner,
           token: notWethContract,
         },
         sender: {
@@ -234,6 +248,7 @@ contract('Wrapper Unit Tests', async accounts => {
 
       const order = await orders.getOrder({
         signer: {
+          wallet: mockSigner,
           token: notWethContract,
         },
         sender: {
@@ -269,6 +284,9 @@ contract('Wrapper Unit Tests', async accounts => {
           param: 1,
           token: notWethContract,
         },
+        signer: {
+          wallet: mockSigner,
+        },
       })
 
       await reverted(
@@ -286,6 +304,7 @@ contract('Wrapper Unit Tests', async accounts => {
       const order = await orders.getOrder({
         signer: {
           token: notWethContract,
+          wallet: mockSigner,
         },
         sender: {
           wallet: mockSender,
