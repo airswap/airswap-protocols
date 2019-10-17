@@ -54,6 +54,10 @@ contract('DelegateManager Unit Tests', async accounts => {
     mockStakeToken_transferFrom = await mockERC20Template.contract.methods
       .transferFrom(EMPTY_ADDRESS, EMPTY_ADDRESS, 0)
       .encodeABI()
+    
+    mockStakeToken_transfer = await mockERC20Template.contract.methods
+      .transfer(EMPTY_ADDRESS, 0)
+      .encodeABI()
   }
 
   async function setupMockSwap() {
@@ -360,9 +364,37 @@ contract('DelegateManager Unit Tests', async accounts => {
       )
     })
 
+    it('Test calling unsetRuleAndIntent() with transfer error', async () => {
+      let delegateAddress = mockDelegate.address
+      let indexerAddress = mockIndexer.address
+
+      //mock a failed transfer
+      await mockStakeToken.givenMethodReturnBool(
+        mockStakeToken_transfer,
+        false
+      )
+
+      await reverted(
+        delegateManager.unsetRuleAndIntent(
+          delegateAddress,
+          mockWETH.address,
+          mockDAI.address,
+          indexerAddress
+        ),
+        "TRANSFER_FUNDS_ERROR"
+      )
+    })
+
     it('Test successfully calling unsetRuleAndIntent()', async () => {
       let delegateAddress = mockDelegate.address
       let indexerAddress = mockIndexer.address
+
+      //mock a successful transfer
+      await mockStakeToken.givenMethodReturnBool(
+        mockStakeToken_transfer,
+        true
+      )
+
       await passes(
         delegateManager.unsetRuleAndIntent(
           delegateAddress,
@@ -371,6 +403,73 @@ contract('DelegateManager Unit Tests', async accounts => {
           indexerAddress
         )
       )
+    })
+  })
+
+  describe('Test end to end mock flow', async() => {
+    it('Test stakedAmount values', async() => {
+      // construct delegate with no trade wallet
+      await delegateManager.createDelegate(EMPTY_ADDRESS)
+
+      //NOTE: I don't need to capture emitted delegate
+      //I've mocked to always return mockDelegate.address
+      let delegateAddress = mockDelegate.address
+      let indexerAddress = mockIndexer.address
+
+      let rule = [mockWETH.address, mockDAI.address, 100000, 300, 0]
+
+      let intentAmount = 250
+      let intent = [
+        mockWETH.address,
+        mockDAI.address,
+        intentAmount,
+        padAddressToLocator(delegateAddress),
+      ]
+
+      //NOTE: owner would call delegate.addAdmin(delegateManager)
+      //this doesn't need to be done here because delegate is a mock
+
+      await mockStakeToken.givenMethodReturnUint(
+        mockStakeToken_allowance,
+        intentAmount
+      )
+      await mockStakeToken.givenMethodReturnBool(
+        mockStakeToken_transferFrom,
+        true
+      )
+
+      let stakedAmountInitial = await delegateManager.stakedAmounts.call(mockDAI.address, mockWETH.address, owner)
+      equal(stakedAmountInitial.toNumber(), 0, "improper initial staked amount")
+
+      await passes(
+        delegateManager.setRuleAndIntent(
+          delegateAddress,
+          rule,
+          intent,
+          indexerAddress
+        )
+      )
+
+      let stakedAmountSet = await delegateManager.stakedAmounts.call(mockDAI.address, mockWETH.address, owner)
+      equal(stakedAmountSet.toNumber(), intentAmount, "improper staked amount after set")
+
+      //mock a successful transfer
+      await mockStakeToken.givenMethodReturnBool(
+        mockStakeToken_transfer,
+        true
+      )
+
+      await passes(
+        delegateManager.unsetRuleAndIntent(
+          delegateAddress,
+          mockWETH.address,
+          mockDAI.address,
+          indexerAddress
+        )
+      )
+
+      let stakedAmountUnset = await delegateManager.stakedAmounts.call(mockDAI.address, mockWETH.address, owner)
+      equal(stakedAmountUnset.toNumber(), stakedAmountInitial.toNumber(), "improper staked amount after unset")
     })
   })
 })
