@@ -105,16 +105,6 @@ contract('Swap Unit Tests', async accounts => {
         signature,
       ]
 
-      //mockSender authorizes mockSigner using authorizeSender
-      //mocks that case where one can send unsigned orders if authorized
-      // the roles of this authorization need to be reversed for the swap to succeed
-      /*      emitted(
-        await swap.authorizeSender(mockSigner, Jun_06_2017T00_00_00_UTC, {
-          from: mockSender,
-        }),
-        'AuthorizeSender'
-      )*/
-
       //mock sender will take the order
       await reverted(
         swap.swap(order, { from: mockSender }),
