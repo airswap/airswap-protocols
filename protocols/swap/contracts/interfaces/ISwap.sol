@@ -67,8 +67,8 @@ interface ISwap {
     address indexed revokedSigner
   );
 
-  function senderApprovals(address, address) external returns (uint256);
-  function signerApprovals(address, address) external returns (uint256);
+  function senderAuthorizations(address, address) external returns (uint256);
+  function signerAuthorizations(address, address) external returns (uint256);
 
   function signerOrderStatus(address, uint256) external returns (byte);
   function signerMinimumNonce(address) external returns (uint256);

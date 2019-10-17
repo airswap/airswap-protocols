@@ -53,10 +53,10 @@ contract Swap is ISwap {
   */
 
   // Mapping of sender address to a delegated sender address and expiry.
-  mapping (address => mapping (address => uint256)) public senderApprovals;
+  mapping (address => mapping (address => uint256)) public senderAuthorizations;
 
   // Mapping of signer address to a delegated signer and expiry.
-  mapping (address => mapping (address => uint256)) public signerApprovals;
+  mapping (address => mapping (address => uint256)) public signerAuthorizations;
 
   // Mapping of signers to orders by nonce as TAKEN (0x01) or CANCELED (0x02)
   mapping (address => mapping (uint256 => byte)) public signerOrderStatus;
@@ -118,10 +118,8 @@ contract Swap is ISwap {
         * Sender is specified. If the msg.sender is not the specified sender,
         * thus determines whether the msg.sender is an authorized sender.
         */
-      if (msg.sender != _order.sender.wallet) {
-        require(isSenderAuthorized(_order.sender.wallet, msg.sender),
+      require(isSenderAuthorized(_order.sender.wallet, msg.sender),
           "SENDER_UNAUTHORIZED");
-      }
       // The specified sender is all clear.
       finalSenderWallet = _order.sender.wallet;
 
@@ -226,7 +224,7 @@ contract Swap is ISwap {
   ) external {
     require(msg.sender != _authorizedSender, "INVALID_AUTH_SENDER");
     require(_expiry > block.timestamp, "INVALID_AUTH_EXPIRY");
-    senderApprovals[msg.sender][_authorizedSender] = _expiry;
+    senderAuthorizations[msg.sender][_authorizedSender] = _expiry;
     emit AuthorizeSender(msg.sender, _authorizedSender, _expiry);
   }
 
@@ -242,7 +240,7 @@ contract Swap is ISwap {
   ) external {
     require(msg.sender != _authorizedSigner, "INVALID_AUTH_SIGNER");
     require(_expiry > block.timestamp, "INVALID_AUTH_EXPIRY");
-    signerApprovals[msg.sender][_authorizedSigner] = _expiry;
+    signerAuthorizations[msg.sender][_authorizedSigner] = _expiry;
     emit AuthorizeSigner(msg.sender, _authorizedSigner, _expiry);
   }
 
@@ -254,7 +252,7 @@ contract Swap is ISwap {
   function revokeSender(
     address _authorizedSender
   ) external {
-    delete senderApprovals[msg.sender][_authorizedSender];
+    delete senderAuthorizations[msg.sender][_authorizedSender];
     emit RevokeSender(msg.sender, _authorizedSender);
   }
 
@@ -266,7 +264,7 @@ contract Swap is ISwap {
   function revokeSigner(
     address _authorizedSigner
   ) external {
-    delete signerApprovals[msg.sender][_authorizedSigner];
+    delete signerAuthorizations[msg.sender][_authorizedSigner];
     emit RevokeSigner(msg.sender, _authorizedSigner);
   }
 
@@ -280,7 +278,8 @@ contract Swap is ISwap {
     address _approver,
     address _delegate
   ) internal view returns (bool) {
-    return (senderApprovals[_approver][_delegate] > block.timestamp);
+    if (_approver == _delegate) return true;
+    return (senderAuthorizations[_approver][_delegate] > block.timestamp);
   }
 
   /**
@@ -294,7 +293,7 @@ contract Swap is ISwap {
     address _delegate
   ) internal view returns (bool) {
     if (_approver == _delegate) return true;
-    return (signerApprovals[_approver][_delegate] > block.timestamp);
+    return (signerAuthorizations[_approver][_delegate] > block.timestamp);
   }
 
   /**

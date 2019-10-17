@@ -105,13 +105,15 @@ contract('Swap Unit Tests', async accounts => {
         signature,
       ]
 
-      //sender authorizes signer using authorizeSender
-      emitted(
+      //mockSender authorizes mockSigner using authorizeSender
+      //mocks that case where one can send unsigned orders if authorized
+      // the roles of this authorization need to be reversed for the swap to succeed
+      /*      emitted(
         await swap.authorizeSender(mockSigner, Jun_06_2017T00_00_00_UTC, {
           from: mockSender,
         }),
         'AuthorizeSender'
-      )
+      )*/
 
       //mock sender will take the order
       await reverted(
@@ -224,7 +226,7 @@ contract('Swap Unit Tests', async accounts => {
       await passes(trx)
 
       //check delegateApproval was unset
-      let val = await swap.signerApprovals.call(sender, mockSigner)
+      let val = await swap.signerAuthorizations.call(sender, mockSigner)
       equal(val, futureTime, 'signer approval was not properly set')
 
       //check that event was emitted
@@ -242,8 +244,8 @@ contract('Swap Unit Tests', async accounts => {
     it('test that the revokeSigner is successfully removed', async () => {
       let trx = await swap.revokeSigner(mockSigner, { from: sender })
 
-      //check signerApprovals was unset
-      let val = await swap.signerApprovals.call(sender, mockSigner)
+      //check signerAuthorizations was unset
+      let val = await swap.signerAuthorizations.call(sender, mockSigner)
       equal(val, 0, 'signer approval was not properly unset')
 
       //check that the event was emitted
@@ -255,8 +257,8 @@ contract('Swap Unit Tests', async accounts => {
     it('test that the revokeSender is successfully removed', async () => {
       let trx = await swap.revokeSender(mockSender)
 
-      //check senderApprovals was unset
-      let val = await swap.senderApprovals.call(sender, mockSender)
+      //check senderAuthorizations was unset
+      let val = await swap.senderAuthorizations.call(sender, mockSender)
       equal(val, 0, 'sender approval was not properly unset')
 
       //check that the event was emitted
