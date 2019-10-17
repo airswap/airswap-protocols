@@ -105,14 +105,6 @@ contract('Swap Unit Tests', async accounts => {
         signature,
       ]
 
-      //sender authorizes signer
-      emitted(
-        await swap.authorize(mockSigner, Jun_06_2017T00_00_00_UTC, {
-          from: mockSender,
-        }),
-        'Authorize'
-      )
-
       //mock sender will take the order
       await reverted(
         swap.swap(order, { from: mockSender }),
@@ -177,17 +169,20 @@ contract('Swap Unit Tests', async accounts => {
     it('test that given a minimum nonce that all orders below a nonce value are invalidated', async () => {})
   })
 
-  describe('Test authorize', async () => {
-    it('test when the message sender is the delegate', async () => {
+  describe('Test authorize signer', async () => {
+    it('test when the message sender is the authorized signer', async () => {
       let delegate = mockSigner
       await reverted(
-        swap.authorize(delegate, 0, { from: mockSigner }),
-        'INVALID_AUTH_DELEGATE'
+        swap.authorizeSigner(delegate, 0, { from: mockSigner }),
+        'INVALID_AUTH_SIGNER'
       )
     })
 
     it('test when the expiration date has passed', async () => {
-      await reverted(swap.authorize(mockSigner, 0), 'INVALID_AUTH_EXPIRY')
+      await reverted(
+        swap.authorizeSigner(mockSigner, 0, { from: sender }),
+        'INVALID_AUTH_EXPIRY'
+      )
     })
 
     it('test when the expiration == block.timestamp', async () => {
@@ -206,7 +201,7 @@ contract('Swap Unit Tests', async accounts => {
 
       // set the expiry as the same time as the current time - revert
       await reverted(
-        swap.authorize(mockSigner, ONE_DAY_EXPIRY),
+        swap.authorizeSigner(mockSigner, ONE_DAY_EXPIRY, { from: sender }),
         'INVALID_AUTH_EXPIRY'
       )
     })
@@ -215,18 +210,20 @@ contract('Swap Unit Tests', async accounts => {
       const block = await web3.eth.getBlock('latest')
       const time = block.timestamp
       const futureTime = time + 100
-      let trx = await swap.authorize(mockSigner, futureTime)
+      let trx = await swap.authorizeSigner(mockSigner, futureTime, {
+        from: sender,
+      })
       await passes(trx)
 
       //check delegateApproval was unset
-      let val = await swap.delegateApprovals.call(sender, mockSigner)
-      equal(val, futureTime, 'delegate approval was not properly set')
+      let val = await swap.signerAuthorizations.call(sender, mockSigner)
+      equal(val, futureTime, 'signer approval was not properly set')
 
       //check that event was emitted
-      emitted(trx, 'Authorize', e => {
+      emitted(trx, 'AuthorizeSigner', e => {
         return (
           e.approverAddress === sender &&
-          e.delegateAddress === mockSigner &&
+          e.authorizedSigner === mockSigner &&
           e.expiry.toNumber() === futureTime
         )
       })
@@ -234,16 +231,29 @@ contract('Swap Unit Tests', async accounts => {
   })
 
   describe('Test revoke', async () => {
-    it('test that the approval is successfully removed', async () => {
-      let trx = await swap.revoke(mockSigner)
+    it('test that the revokeSigner is successfully removed', async () => {
+      let trx = await swap.revokeSigner(mockSigner, { from: sender })
 
-      //check delegateApproval was unset
-      let val = await swap.delegateApprovals.call(sender, mockSigner)
-      equal(val, 0, 'delegate approval was not properly unset')
+      //check signerAuthorizations was unset
+      let val = await swap.signerAuthorizations.call(sender, mockSigner)
+      equal(val, 0, 'signer approval was not properly unset')
 
       //check that the event was emitted
-      emitted(trx, 'Revoke', e => {
-        return e.approverAddress === sender && e.delegateAddress === mockSigner
+      emitted(trx, 'RevokeSigner', e => {
+        return e.approverAddress === sender && e.revokedSigner === mockSigner
+      })
+    })
+
+    it('test that the revokeSender is successfully removed', async () => {
+      let trx = await swap.revokeSender(mockSender)
+
+      //check senderAuthorizations was unset
+      let val = await swap.senderAuthorizations.call(sender, mockSender)
+      equal(val, 0, 'sender approval was not properly unset')
+
+      //check that the event was emitted
+      emitted(trx, 'RevokeSender', e => {
+        return e.approverAddress === sender && e.revokedSender === mockSender
       })
     })
   })

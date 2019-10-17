@@ -80,14 +80,14 @@ contract('DelegateFrontend', async accounts => {
       )
     })
 
-    it('Alice authorizes the new delegate', async () => {
+    it('Alice authorizes the new delegate to be an AuthorizedSender', async () => {
       emitted(
-        await swapContract.authorize(
+        await swapContract.authorizeSender(
           aliceDelegate.address,
           await getTimestampPlusDays(1),
           { from: aliceAddress }
         ),
-        'Authorize'
+        'AuthorizeSender'
       )
     })
 
