@@ -214,7 +214,7 @@ contract Swap is ISwap {
 
   /**
     * @notice Authorize a delegated sender
-    * @dev Emits an Authorize event
+    * @dev Emits an AuthorizeSender event
     * @param _authorizedSender address to authorize
     * @param _expiry uint256
     */
@@ -230,7 +230,7 @@ contract Swap is ISwap {
 
   /**
     * @notice Authorize a delegated signer
-    * @dev Emits an Authorize event
+    * @dev Emits an AuthorizeSigner event
     * @param _authorizedSigner address to authorize
     * @param _expiry uint256
     */
@@ -246,7 +246,7 @@ contract Swap is ISwap {
 
   /**
     * @notice Revoke an authorized sender
-    * @dev Emits a Revoke event
+    * @dev Emits a RevokeSender event
     * @param _authorizedSender address
     */
   function revokeSender(
@@ -258,7 +258,7 @@ contract Swap is ISwap {
 
   /**
     * @notice Revoke an authorized signer
-    * @dev Emits a Revoke event
+    * @dev Emits a RevokeSigner event
     * @param _authorizedSigner address
     */
   function revokeSigner(
@@ -278,8 +278,8 @@ contract Swap is ISwap {
     address _approver,
     address _delegate
   ) internal view returns (bool) {
-    if (_approver == _delegate) return true;
-    return (senderAuthorizations[_approver][_delegate] > block.timestamp);
+    return ((_approver == _delegate) ||
+      senderAuthorizations[_approver][_delegate] > block.timestamp);
   }
 
   /**
@@ -292,8 +292,8 @@ contract Swap is ISwap {
     address _approver,
     address _delegate
   ) internal view returns (bool) {
-    if (_approver == _delegate) return true;
-    return (signerAuthorizations[_approver][_delegate] > block.timestamp);
+    return ((_approver == _delegate) ||
+      (signerAuthorizations[_approver][_delegate] > block.timestamp));
   }
 
   /**
