@@ -29,6 +29,7 @@ contract('DelegateManager Unit Tests', async accounts => {
   let mockStakeToken
   let mockStakeToken_allowance
   let mockStakeToken_transferFrom
+  let mockStakeToken_transfer
   let snapshotId
 
   beforeEach(async () => {
@@ -54,7 +55,7 @@ contract('DelegateManager Unit Tests', async accounts => {
     mockStakeToken_transferFrom = await mockERC20Template.contract.methods
       .transferFrom(EMPTY_ADDRESS, EMPTY_ADDRESS, 0)
       .encodeABI()
-    
+
     mockStakeToken_transfer = await mockERC20Template.contract.methods
       .transfer(EMPTY_ADDRESS, 0)
       .encodeABI()
@@ -343,8 +344,12 @@ contract('DelegateManager Unit Tests', async accounts => {
         )
       )
 
-      let val = await delegateManager.stakedAmounts.call(mockDAI.address, mockWETH.address, owner)
-      equal(val, intentAmount, "intent amount not properly saved")
+      let val = await delegateManager.stakedAmounts.call(
+        mockDAI.address,
+        mockWETH.address,
+        owner
+      )
+      equal(val, intentAmount, 'intent amount not properly saved')
     })
   })
 
@@ -369,10 +374,7 @@ contract('DelegateManager Unit Tests', async accounts => {
       let indexerAddress = mockIndexer.address
 
       //mock a failed transfer
-      await mockStakeToken.givenMethodReturnBool(
-        mockStakeToken_transfer,
-        false
-      )
+      await mockStakeToken.givenMethodReturnBool(mockStakeToken_transfer, false)
 
       await reverted(
         delegateManager.unsetRuleAndIntent(
@@ -381,7 +383,7 @@ contract('DelegateManager Unit Tests', async accounts => {
           mockDAI.address,
           indexerAddress
         ),
-        "TRANSFER_FUNDS_ERROR"
+        'TRANSFER_FUNDS_ERROR'
       )
     })
 
@@ -390,10 +392,7 @@ contract('DelegateManager Unit Tests', async accounts => {
       let indexerAddress = mockIndexer.address
 
       //mock a successful transfer
-      await mockStakeToken.givenMethodReturnBool(
-        mockStakeToken_transfer,
-        true
-      )
+      await mockStakeToken.givenMethodReturnBool(mockStakeToken_transfer, true)
 
       await passes(
         delegateManager.unsetRuleAndIntent(
@@ -406,8 +405,8 @@ contract('DelegateManager Unit Tests', async accounts => {
     })
   })
 
-  describe('Test end to end mock flow', async() => {
-    it('Test stakedAmount values', async() => {
+  describe('Test end to end mock flow', async () => {
+    it('Test stakedAmount values', async () => {
       // construct delegate with no trade wallet
       await delegateManager.createDelegate(EMPTY_ADDRESS)
 
@@ -438,8 +437,12 @@ contract('DelegateManager Unit Tests', async accounts => {
         true
       )
 
-      let stakedAmountInitial = await delegateManager.stakedAmounts.call(mockDAI.address, mockWETH.address, owner)
-      equal(stakedAmountInitial.toNumber(), 0, "improper initial staked amount")
+      let stakedAmountInitial = await delegateManager.stakedAmounts.call(
+        mockDAI.address,
+        mockWETH.address,
+        owner
+      )
+      equal(stakedAmountInitial.toNumber(), 0, 'improper initial staked amount')
 
       await passes(
         delegateManager.setRuleAndIntent(
@@ -450,14 +453,19 @@ contract('DelegateManager Unit Tests', async accounts => {
         )
       )
 
-      let stakedAmountSet = await delegateManager.stakedAmounts.call(mockDAI.address, mockWETH.address, owner)
-      equal(stakedAmountSet.toNumber(), intentAmount, "improper staked amount after set")
+      let stakedAmountSet = await delegateManager.stakedAmounts.call(
+        mockDAI.address,
+        mockWETH.address,
+        owner
+      )
+      equal(
+        stakedAmountSet.toNumber(),
+        intentAmount,
+        'improper staked amount after set'
+      )
 
       //mock a successful transfer
-      await mockStakeToken.givenMethodReturnBool(
-        mockStakeToken_transfer,
-        true
-      )
+      await mockStakeToken.givenMethodReturnBool(mockStakeToken_transfer, true)
 
       await passes(
         delegateManager.unsetRuleAndIntent(
@@ -468,8 +476,16 @@ contract('DelegateManager Unit Tests', async accounts => {
         )
       )
 
-      let stakedAmountUnset = await delegateManager.stakedAmounts.call(mockDAI.address, mockWETH.address, owner)
-      equal(stakedAmountUnset.toNumber(), stakedAmountInitial.toNumber(), "improper staked amount after unset")
+      let stakedAmountUnset = await delegateManager.stakedAmounts.call(
+        mockDAI.address,
+        mockWETH.address,
+        owner
+      )
+      equal(
+        stakedAmountUnset.toNumber(),
+        stakedAmountInitial.toNumber(),
+        'improper staked amount after unset'
+      )
     })
   })
 })
