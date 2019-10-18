@@ -462,4 +462,22 @@ contract('Indexer Unit Tests', async accounts => {
       equal(intents.length, 1, 'intents array should be size 1')
     })
   })
+
+  describe('Test getScore', async () => {
+    it('should retrieve the score on a token pair for a user', async() => {
+      // create index
+      await indexer.createIndex(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+
+      let stakeAmount = 1000
+      // set an intent staking 0
+      await indexer.setIntent(tokenOne, tokenTwo, 1000, aliceLocator, {
+        from: aliceAddress,
+      })
+
+      let val = await indexer.getScore(tokenOne, tokenTwo, aliceAddress)
+      equal(val.toNumber(), stakeAmount, "stake was improperly saved")
+    })
+  })
 })

@@ -188,6 +188,17 @@ contract Indexer is IIndexer, Ownable {
   }
 
   /**
+    * @notice Gets the locator score for a token pair
+    * @param _signerToken the address of the signer token
+    * @param _senderToken the address of the sender token
+    * @return uint256 the locator score
+    */
+  function getScore(address _signerToken, address _senderToken, address _user) external view returns (uint256) {
+    Index.Locator memory locator = indexes[_signerToken][_senderToken].getLocator(_user); 
+    return locator.score;
+  }
+
+  /**
     * @notice Get the locators of those trading a token pair
     * @dev Users are allowed unstake from blacklisted indexes
     *
