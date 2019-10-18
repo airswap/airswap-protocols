@@ -4,25 +4,19 @@ const Indexer = artifacts.require('Indexer')
 const Delegate = artifacts.require('Delegate')
 const DelegateFactory = artifacts.require('DelegateFactory')
 const DelegateManager = artifacts.require('DelegateManager')
-const {
-  equal,
-  passes,
-  emitted,
-  reverted,
-} = require('@airswap/test-utils').assert
-const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
-const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
+const { equal, passes, emitted } = require('@airswap/test-utils').assert
 const { padAddressToLocator } = require('@airswap/test-utils').padding
 
 contract('DelegateManager Integration Tests', async accounts => {
   let startingBalance = 700
+  let intentAmount = 250
   let owner = accounts[0]
   let notOwner = accounts[2]
   let tradeWallet_1 = accounts[1]
   let tradeWallet_2 = accounts[1]
   let DAI_TOKEN
   let WETH_TOKEN
-  let stake_TOKEN
+  let stakeToken
   let swap
   let indexer
   let delegateFactory
@@ -100,7 +94,6 @@ contract('DelegateManager Integration Tests', async accounts => {
     it('Test successfully calling setRuleAndIntent', async () => {
       let rule = [WETH_TOKEN.address, DAI_TOKEN.address, 100000, 300, 0]
 
-      let intentAmount = 250
       let intent = [
         WETH_TOKEN.address,
         DAI_TOKEN.address,
@@ -115,7 +108,13 @@ contract('DelegateManager Integration Tests', async accounts => {
       //give allowance to the delegateManager to pull staking amount
       await stakeToken.approve(delegateManager.address, intentAmount)
 
-      //manager needs to give approval to the Indexer?
+      //check the score of the manager before
+      let scoreBefore = await indexer.getScore(
+        WETH_TOKEN.address,
+        DAI_TOKEN.address,
+        delegateManager.address
+      )
+      equal(scoreBefore.toNumber(), 0, 'intent score is incorrect')
 
       await passes(
         delegateManager.setRuleAndIntent(
@@ -125,142 +124,43 @@ contract('DelegateManager Integration Tests', async accounts => {
           indexer.address
         )
       )
+
+      //check the score of the manager after
+      let scoreAfter = await indexer.getScore(
+        WETH_TOKEN.address,
+        DAI_TOKEN.address,
+        delegateManager.address
+      )
+      equal(scoreAfter.toNumber(), intentAmount, 'intent score is incorrect')
     })
   })
 
   describe('Test unsetRuleAndIntent()', async () => {
-    it('Test calling unsetRuleAndIntent on unowned delegate', async () => {
-      let delegateAddress = mockDelegate.address
-      let indexerAddress = mockIndexer.address
-      await reverted(
-        delegateManager.unsetRuleAndIntent(
-          delegateAddress,
-          mockWETH.address,
-          mockDAI.address,
-          indexerAddress,
-          { from: notOwner }
-        ),
-        'DELEGATE_NOT_OWNED'
-      )
-    })
-
-    it('Test calling unsetRuleAndIntent() with transfer error', async () => {
-      let delegateAddress = mockDelegate.address
-      let indexerAddress = mockIndexer.address
-
-      //mock a failed transfer
-      await mockStakeToken.givenMethodReturnBool(mockStakeToken_transfer, false)
-
-      await reverted(
-        delegateManager.unsetRuleAndIntent(
-          delegateAddress,
-          mockWETH.address,
-          mockDAI.address,
-          indexerAddress
-        ),
-        'TRANSFER_FUNDS_ERROR'
-      )
-    })
-
     it('Test successfully calling unsetRuleAndIntent()', async () => {
-      let delegateAddress = mockDelegate.address
-      let indexerAddress = mockIndexer.address
-
-      //mock a successful transfer
-      await mockStakeToken.givenMethodReturnBool(mockStakeToken_transfer, true)
+      //check the score of the manager before
+      let scoreBefore = await indexer.getScore(
+        WETH_TOKEN.address,
+        DAI_TOKEN.address,
+        delegateManager.address
+      )
+      equal(scoreBefore.toNumber(), intentAmount, 'intent score is incorrect')
 
       await passes(
         delegateManager.unsetRuleAndIntent(
-          delegateAddress,
-          mockWETH.address,
-          mockDAI.address,
-          indexerAddress
-        )
-      )
-    })
-  })
-
-  describe('Test end to end mock flow', async () => {
-    it('Test stakedAmount values', async () => {
-      // construct delegate with no trade wallet
-      await delegateManager.createDelegate(EMPTY_ADDRESS)
-
-      //NOTE: I don't need to capture emitted delegate
-      //I've mocked to always return mockDelegate.address
-      let delegateAddress = mockDelegate.address
-      let indexerAddress = mockIndexer.address
-
-      let rule = [mockWETH.address, mockDAI.address, 100000, 300, 0]
-
-      let intentAmount = 250
-      let intent = [
-        mockWETH.address,
-        mockDAI.address,
-        intentAmount,
-        padAddressToLocator(delegateAddress),
-      ]
-
-      //NOTE: owner would call delegate.addAdmin(delegateManager)
-      //this doesn't need to be done here because delegate is a mock
-
-      await mockStakeToken.givenMethodReturnUint(
-        mockStakeToken_allowance,
-        intentAmount
-      )
-      await mockStakeToken.givenMethodReturnBool(
-        mockStakeToken_transferFrom,
-        true
-      )
-
-      let stakedAmountInitial = await delegateManager.stakedAmounts.call(
-        mockDAI.address,
-        mockWETH.address,
-        owner
-      )
-      equal(stakedAmountInitial.toNumber(), 0, 'improper initial staked amount')
-
-      await passes(
-        delegateManager.setRuleAndIntent(
-          delegateAddress,
-          rule,
-          intent,
-          indexerAddress
+          delegateAddress1,
+          WETH_TOKEN.address,
+          DAI_TOKEN.address,
+          indexer.address
         )
       )
 
-      let stakedAmountSet = await delegateManager.stakedAmounts.call(
-        mockDAI.address,
-        mockWETH.address,
-        owner
+      //check the score of the manager after
+      let scoreAfter = await indexer.getScore(
+        WETH_TOKEN.address,
+        DAI_TOKEN.address,
+        delegateManager.address
       )
-      equal(
-        stakedAmountSet.toNumber(),
-        intentAmount,
-        'improper staked amount after set'
-      )
-
-      //mock a successful transfer
-      await mockStakeToken.givenMethodReturnBool(mockStakeToken_transfer, true)
-
-      await passes(
-        delegateManager.unsetRuleAndIntent(
-          delegateAddress,
-          mockWETH.address,
-          mockDAI.address,
-          indexerAddress
-        )
-      )
-
-      let stakedAmountUnset = await delegateManager.stakedAmounts.call(
-        mockDAI.address,
-        mockWETH.address,
-        owner
-      )
-      equal(
-        stakedAmountUnset.toNumber(),
-        stakedAmountInitial.toNumber(),
-        'improper staked amount after unset'
-      )
+      equal(scoreAfter.toNumber(), 0, 'intent score is incorrect')
     })
   })
 })

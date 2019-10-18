@@ -131,8 +131,8 @@ contract DelegateManager is Ownable {
       */
     function unsetRuleAndIntent(
       IDelegate _delegate,
-      address _senderToken, 
       address _signerToken, 
+      address _senderToken, 
       IIndexer _indexer
     ) external onlyOwner {
 
@@ -142,7 +142,7 @@ contract DelegateManager is Ownable {
 
       //query against indexer for amount staked
       uint256 stakedAmount = _indexer.getScore(_signerToken, _senderToken, msg.sender);
-      _indexer.unsetIntent(_senderToken, _signerToken);
+      _indexer.unsetIntent(_signerToken, _senderToken);
 
       //upon unstaking the manager will be given the staking amount
       //push the staking amount to the msg.sender
