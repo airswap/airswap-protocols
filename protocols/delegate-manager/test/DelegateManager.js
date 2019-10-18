@@ -1,4 +1,4 @@
-const ERC20 = artifacts.require('ERC20Mintable')
+const ERC20 = artifacts.require('FungibleToken')
 const Swap = artifacts.require('Swap')
 const Indexer = artifacts.require('Indexer')
 const Delegate = artifacts.require('Delegate')
@@ -8,8 +8,8 @@ const { equal, passes, emitted } = require('@airswap/test-utils').assert
 const { padAddressToLocator } = require('@airswap/test-utils').padding
 
 contract('DelegateManager Integration Tests', async accounts => {
-  let startingBalance = 700
-  let intentAmount = 250
+  let STARTING_BALANCE = 700
+  let INTENT_AMOUNT = 250
   let owner = accounts[0]
   let notOwner = accounts[2]
   let tradeWallet_1 = accounts[1]
@@ -25,13 +25,13 @@ contract('DelegateManager Integration Tests', async accounts => {
   let delegateAddress2
 
   async function setupTokenAmounts() {
-    await stakeToken.mint(owner, startingBalance)
-    await DAI_TOKEN.mint(owner, startingBalance)
-    await WETH_TOKEN.mint(owner, startingBalance)
+    await stakeToken.mint(owner, STARTING_BALANCE)
+    await DAI_TOKEN.mint(owner, STARTING_BALANCE)
+    await WETH_TOKEN.mint(owner, STARTING_BALANCE)
 
-    await stakeToken.mint(notOwner, startingBalance)
-    await DAI_TOKEN.mint(notOwner, startingBalance)
-    await WETH_TOKEN.mint(notOwner, startingBalance)
+    await stakeToken.mint(notOwner, STARTING_BALANCE)
+    await DAI_TOKEN.mint(notOwner, STARTING_BALANCE)
+    await WETH_TOKEN.mint(notOwner, STARTING_BALANCE)
   }
 
   before(async () => {
@@ -97,7 +97,7 @@ contract('DelegateManager Integration Tests', async accounts => {
       let intent = [
         WETH_TOKEN.address,
         DAI_TOKEN.address,
-        intentAmount,
+        INTENT_AMOUNT,
         padAddressToLocator(delegateAddress1),
       ]
 
@@ -106,7 +106,7 @@ contract('DelegateManager Integration Tests', async accounts => {
       await delegate.addAdmin(delegateManager.address)
 
       //give allowance to the delegateManager to pull staking amount
-      await stakeToken.approve(delegateManager.address, intentAmount)
+      await stakeToken.approve(delegateManager.address, INTENT_AMOUNT)
 
       //check the score of the manager before
       let scoreBefore = await indexer.getScore(
@@ -131,11 +131,11 @@ contract('DelegateManager Integration Tests', async accounts => {
         DAI_TOKEN.address,
         delegateManager.address
       )
-      equal(scoreAfter.toNumber(), intentAmount, 'intent score is incorrect')
+      equal(scoreAfter.toNumber(), INTENT_AMOUNT, 'intent score is incorrect')
 
       //check owner stake balance has been reduced
       let stakeTokenBal = await stakeToken.balanceOf(owner)
-      equal(stakeTokenBal.toNumber(), startingBalance - intentAmount)
+      equal(stakeTokenBal.toNumber(), STARTING_BALANCE - INTENT_AMOUNT)
     })
   })
 
@@ -147,7 +147,16 @@ contract('DelegateManager Integration Tests', async accounts => {
         DAI_TOKEN.address,
         delegateManager.address
       )
-      equal(scoreBefore.toNumber(), intentAmount, 'intent score is incorrect')
+      equal(scoreBefore.toNumber(), INTENT_AMOUNT, 'intent score is incorrect')
+
+      let stakeTokenBal_Manager = await stakeToken.balanceOf(delegateManager.address)
+      console.log("manager balance before:")
+      console.log(stakeTokenBal_Manager.toNumber())
+
+      //check owner stake balance has been increased
+      let stakeTokenBal = await stakeToken.balanceOf(owner)
+      console.log("owner balance before:")
+      console.log(stakeTokenBal.toNumber())
 
       await passes(delegateManager.unsetRuleAndIntent(
         delegateAddress1,
@@ -167,17 +176,17 @@ contract('DelegateManager Integration Tests', async accounts => {
       //confirmed all events are emitted properly and the balances should update
 
       //ISSUE HERE!! balances in transfer do not update...
-      
-      let stakeTokenBal_Manager = await stakeToken.balanceOf(delegateManager.address)
+
+      stakeTokenBal_Manager = await stakeToken.balanceOf(delegateManager.address)
       console.log("manager balance:")
       console.log(stakeTokenBal_Manager.toNumber())
 
       //check owner stake balance has been increased
-      let stakeTokenBal = await stakeToken.balanceOf(owner)
+      stakeTokenBal = await stakeToken.balanceOf(owner)
       console.log("owner balance:")
       console.log(stakeTokenBal.toNumber())
 
-      equal(stakeTokenBal.toNumber(), startingBalance)
+      equal(stakeTokenBal.toNumber(), STARTING_BALANCE)
     })
   })
 })

@@ -138,10 +138,10 @@ contract DelegateManager is Ownable {
 
       require(msg.sender == _delegate.owner(), "DELEGATE_NOT_OWNED");
 
-      _delegate.unsetRule(_signerToken, _senderToken);
+      _delegate.unsetRule(_senderToken, _signerToken);
 
       //query against indexer for amount staked
-      uint256 stakedAmount = _indexer.getScore(_signerToken, _senderToken, msg.sender);
+      uint256 stakedAmount = _indexer.getScore(_signerToken, _senderToken, address(this));
       _indexer.unsetIntent(_signerToken, _senderToken);
 
       //upon unstaking the manager will be given the staking amount
