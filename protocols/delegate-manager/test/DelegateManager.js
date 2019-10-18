@@ -8,8 +8,8 @@ const { equal, passes, emitted } = require('@airswap/test-utils').assert
 const { padAddressToLocator } = require('@airswap/test-utils').padding
 
 contract('DelegateManager Integration Tests', async accounts => {
-  let STARTING_BALANCE = 700
-  let INTENT_AMOUNT = 250
+  const STARTING_BALANCE = 700
+  const INTENT_AMOUNT = 250
   let owner = accounts[0]
   let notOwner = accounts[2]
   let tradeWallet_1 = accounts[1]
@@ -149,15 +149,6 @@ contract('DelegateManager Integration Tests', async accounts => {
       )
       equal(scoreBefore.toNumber(), INTENT_AMOUNT, 'intent score is incorrect')
 
-      let stakeTokenBal_Manager = await stakeToken.balanceOf(delegateManager.address)
-      console.log("manager balance before:")
-      console.log(stakeTokenBal_Manager.toNumber())
-
-      //check owner stake balance has been increased
-      let stakeTokenBal = await stakeToken.balanceOf(owner)
-      console.log("owner balance before:")
-      console.log(stakeTokenBal.toNumber())
-
       await passes(delegateManager.unsetRuleAndIntent(
         delegateAddress1,
         WETH_TOKEN.address,
@@ -173,18 +164,8 @@ contract('DelegateManager Integration Tests', async accounts => {
       )
       equal(scoreAfter.toNumber(), 0, 'intent score is incorrect')
 
-      //confirmed all events are emitted properly and the balances should update
-
-      //ISSUE HERE!! balances in transfer do not update...
-
-      stakeTokenBal_Manager = await stakeToken.balanceOf(delegateManager.address)
-      console.log("manager balance:")
-      console.log(stakeTokenBal_Manager.toNumber())
-
       //check owner stake balance has been increased
       stakeTokenBal = await stakeToken.balanceOf(owner)
-      console.log("owner balance:")
-      console.log(stakeTokenBal.toNumber())
 
       equal(stakeTokenBal.toNumber(), STARTING_BALANCE)
     })
