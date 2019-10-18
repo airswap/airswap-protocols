@@ -464,7 +464,7 @@ contract('Indexer Unit Tests', async accounts => {
   })
 
   describe('Test getScore', async () => {
-    it('should retrieve the score on a token pair for a user', async() => {
+    it('should retrieve the score on a token pair for a user', async () => {
       // create index
       await indexer.createIndex(tokenOne, tokenTwo, {
         from: aliceAddress,
@@ -477,7 +477,7 @@ contract('Indexer Unit Tests', async accounts => {
       })
 
       let val = await indexer.getScore(tokenOne, tokenTwo, aliceAddress)
-      equal(val.toNumber(), stakeAmount, "stake was improperly saved")
+      equal(val.toNumber(), stakeAmount, 'stake was improperly saved')
     })
   })
 })

@@ -28,7 +28,7 @@ contract('DelegateManager Unit Tests', async accounts => {
   let mockStakeToken
   let mockStakeToken_allowance
   let mockStakeToken_transferFrom
-  let mockStakeToken_transfer 
+  let mockStakeToken_transfer
   let mockIndexer_getScore
   let snapshotId
 
