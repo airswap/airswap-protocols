@@ -4,12 +4,7 @@ const DelegateManager = artifacts.require('DelegateManager')
 const DelegateFactory = artifacts.require('DelegateFactory')
 const MockContract = artifacts.require('MockContract')
 const ERC20 = artifacts.require('ERC20')
-const {
-  equal,
-  passes,
-  emitted,
-  reverted,
-} = require('@airswap/test-utils').assert
+const { equal, passes, reverted } = require('@airswap/test-utils').assert
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 const { padAddressToLocator } = require('@airswap/test-utils').padding
@@ -148,7 +143,10 @@ contract('DelegateManager Unit Tests', async accounts => {
     await setupMockDelegate()
     await setupMockFactory()
 
-    delegateManager = await DelegateManager.new(mockFactory.address, tradeWallet)
+    delegateManager = await DelegateManager.new(
+      mockFactory.address,
+      tradeWallet
+    )
   })
 
   describe('Test initial values', async () => {
@@ -188,11 +186,7 @@ contract('DelegateManager Unit Tests', async accounts => {
       )
 
       await reverted(
-        delegateManager.setRuleAndIntent(
-          rule,
-          intent,
-          indexerAddress
-        ),
+        delegateManager.setRuleAndIntent(rule, intent, indexerAddress),
         'ALLOWANCE_FUNDS_ERROR'
       )
     })
@@ -225,11 +219,7 @@ contract('DelegateManager Unit Tests', async accounts => {
       )
 
       await reverted(
-        delegateManager.setRuleAndIntent(
-          rule,
-          intent,
-          indexerAddress
-        ),
+        delegateManager.setRuleAndIntent(rule, intent, indexerAddress),
         'TRANSFER_FUNDS_ERROR'
       )
     })
@@ -259,17 +249,10 @@ contract('DelegateManager Unit Tests', async accounts => {
         mockStakeToken_transferFrom,
         true
       )
-      await mockStakeToken.givenMethodReturnBool(
-        mockStakeToken_approve,
-        false
-      )
+      await mockStakeToken.givenMethodReturnBool(mockStakeToken_approve, false)
 
       await reverted(
-        delegateManager.setRuleAndIntent(
-          rule,
-          intent,
-          indexerAddress
-        ),
+        delegateManager.setRuleAndIntent(rule, intent, indexerAddress),
         'APPROVAL_ERROR'
       )
     })
@@ -299,17 +282,10 @@ contract('DelegateManager Unit Tests', async accounts => {
         mockStakeToken_transferFrom,
         true
       )
-      await mockStakeToken.givenMethodReturnBool(
-        mockStakeToken_approve,
-        true
-      )
+      await mockStakeToken.givenMethodReturnBool(mockStakeToken_approve, true)
 
       await passes(
-        delegateManager.setRuleAndIntent(
-          rule,
-          intent,
-          indexerAddress
-        )
+        delegateManager.setRuleAndIntent(rule, intent, indexerAddress)
       )
     })
   })
@@ -317,7 +293,6 @@ contract('DelegateManager Unit Tests', async accounts => {
   describe('Test unsetRuleAndIntent()', async () => {
     it('Test calling unsetRuleAndIntent() with transfer error', async () => {
       let mockScore = 1000
-      let delegateAddress = mockDelegate.address
       let indexerAddress = mockIndexer.address
 
       //mock the score/staked amount to be transferred
@@ -338,7 +313,6 @@ contract('DelegateManager Unit Tests', async accounts => {
 
     it('Test successfully calling unsetRuleAndIntent()', async () => {
       let mockScore = 1000
-      let delegateAddress = mockDelegate.address
       let indexerAddress = mockIndexer.address
 
       //mock the score/staked amount to be transferred

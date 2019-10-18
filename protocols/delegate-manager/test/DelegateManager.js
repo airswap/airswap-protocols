@@ -4,7 +4,7 @@ const Indexer = artifacts.require('Indexer')
 const Delegate = artifacts.require('Delegate')
 const DelegateFactory = artifacts.require('DelegateFactory')
 const DelegateManager = artifacts.require('DelegateManager')
-const { equal, passes, emitted } = require('@airswap/test-utils').assert
+const { equal, passes } = require('@airswap/test-utils').assert
 const { padAddressToLocator } = require('@airswap/test-utils').padding
 
 contract('DelegateManager Integration Tests', async accounts => {
@@ -12,8 +12,7 @@ contract('DelegateManager Integration Tests', async accounts => {
   const INTENT_AMOUNT = 250
   let owner = accounts[0]
   let notOwner = accounts[2]
-  let tradeWallet_1 = accounts[1]
-  let tradeWallet_2 = accounts[1]
+  let tradeWallet = accounts[1]
   let DAI_TOKEN
   let WETH_TOKEN
   let stakeToken
@@ -42,7 +41,10 @@ contract('DelegateManager Integration Tests', async accounts => {
     swap = await Swap.new()
 
     delegateFactory = await DelegateFactory.new(swap.address)
-    delegateManager = await DelegateManager.new(delegateFactory.address, tradeWallet_1)
+    delegateManager = await DelegateManager.new(
+      delegateFactory.address,
+      tradeWallet
+    )
 
     indexer = await Indexer.new(stakeToken.address, delegateFactory.address)
     await indexer.createIndex(WETH_TOKEN.address, DAI_TOKEN.address)
@@ -86,11 +88,7 @@ contract('DelegateManager Integration Tests', async accounts => {
       equal(scoreBefore.toNumber(), 0, 'intent score is incorrect')
 
       await passes(
-        delegateManager.setRuleAndIntent(
-          rule,
-          intent,
-          indexer.address
-        )
+        delegateManager.setRuleAndIntent(rule, intent, indexer.address)
       )
 
       //check the score of the manager after
@@ -117,11 +115,13 @@ contract('DelegateManager Integration Tests', async accounts => {
       )
       equal(scoreBefore.toNumber(), INTENT_AMOUNT, 'intent score is incorrect')
 
-      await passes(delegateManager.unsetRuleAndIntent(
-        WETH_TOKEN.address,
-        DAI_TOKEN.address,
-        indexer.address
-      ))
+      await passes(
+        delegateManager.unsetRuleAndIntent(
+          WETH_TOKEN.address,
+          DAI_TOKEN.address,
+          indexer.address
+        )
+      )
 
       //check the score of the manager after
       let scoreAfter = await indexer.getScore(
@@ -132,7 +132,7 @@ contract('DelegateManager Integration Tests', async accounts => {
       equal(scoreAfter.toNumber(), 0, 'intent score is incorrect')
 
       //check owner stake balance has been increased
-      stakeTokenBal = await stakeToken.balanceOf(owner)
+      let stakeTokenBal = await stakeToken.balanceOf(owner)
 
       equal(stakeTokenBal.toNumber(), STARTING_BALANCE)
     })
