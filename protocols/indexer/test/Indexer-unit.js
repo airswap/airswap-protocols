@@ -464,6 +464,15 @@ contract('Indexer Unit Tests', async accounts => {
   })
 
   describe('Test getScore', async () => {
+    it('should fail if the index does not exist', async () => {
+      await reverted(
+        indexer.setIntent(tokenOne, tokenTwo, 1000, aliceLocator, {
+          from: aliceAddress,
+        }),
+        'INDEX_DOES_NOT_EXIST'
+      )
+    })
+
     it('should retrieve the score on a token pair for a user', async () => {
       // create index
       await indexer.createIndex(tokenOne, tokenTwo, {

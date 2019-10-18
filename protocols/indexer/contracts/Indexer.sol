@@ -194,6 +194,10 @@ contract Indexer is IIndexer, Ownable {
     * @return uint256 the locator score
     */
   function getScore(address _signerToken, address _senderToken, address _user) external view returns (uint256) {
+    // Ensure the index exists.
+    require(indexes[_signerToken][_senderToken] != Index(0),
+      "INDEX_DOES_NOT_EXIST");
+
     Index.Locator memory locator = indexes[_signerToken][_senderToken].getLocator(_user); 
     return locator.score;
   }
