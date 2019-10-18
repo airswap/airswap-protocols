@@ -29,6 +29,7 @@ contract('DelegateManager Unit Tests', async accounts => {
   let mockStakeToken_allowance
   let mockStakeToken_transferFrom
   let mockStakeToken_transfer
+  let mockStakeToken_approve
   let mockIndexer_getScore
   let snapshotId
 
@@ -58,6 +59,10 @@ contract('DelegateManager Unit Tests', async accounts => {
 
     mockStakeToken_transfer = await mockERC20Template.contract.methods
       .transfer(EMPTY_ADDRESS, 0)
+      .encodeABI()
+
+    mockStakeToken_approve = await mockERC20Template.contract.methods
+      .approve(EMPTY_ADDRESS, 0)
       .encodeABI()
   }
 
@@ -276,6 +281,52 @@ contract('DelegateManager Unit Tests', async accounts => {
       )
     })
 
+    it('Test calling setRuleAndIntent with approval error', async () => {
+      // construct delegate with no trade wallet
+      await delegateManager.createDelegate(EMPTY_ADDRESS)
+
+      //NOTE: I don't need to capture emitted delegate
+      //I've mocked to always return mockDelegate.address
+      let delegateAddress = mockDelegate.address
+      let indexerAddress = mockIndexer.address
+
+      let rule = [mockWETH.address, mockDAI.address, 100000, 300, 0]
+
+      let intentAmount = 250
+      let intent = [
+        mockWETH.address,
+        mockDAI.address,
+        intentAmount,
+        padAddressToLocator(delegateAddress),
+      ]
+
+      //NOTE: owner would call delegate.addAdmin(delegateManager)
+      //this doesn't need to be done here because delegate is a mock
+
+      await mockStakeToken.givenMethodReturnUint(
+        mockStakeToken_allowance,
+        intentAmount
+      )
+      await mockStakeToken.givenMethodReturnBool(
+        mockStakeToken_transferFrom,
+        true
+      )
+      await mockStakeToken.givenMethodReturnBool(
+        mockStakeToken_approve,
+        false
+      )
+
+      await reverted(
+        delegateManager.setRuleAndIntent(
+          delegateAddress,
+          rule,
+          intent,
+          indexerAddress
+        ),
+        'APPROVAL_ERROR'
+      )
+    })
+
     it('Test successfully calling setRuleAndIntent', async () => {
       // construct delegate with no trade wallet
       await delegateManager.createDelegate(EMPTY_ADDRESS)
@@ -304,6 +355,10 @@ contract('DelegateManager Unit Tests', async accounts => {
       )
       await mockStakeToken.givenMethodReturnBool(
         mockStakeToken_transferFrom,
+        true
+      )
+      await mockStakeToken.givenMethodReturnBool(
+        mockStakeToken_approve,
         true
       )
 
