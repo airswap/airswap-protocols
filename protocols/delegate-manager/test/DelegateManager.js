@@ -132,6 +132,10 @@ contract('DelegateManager Integration Tests', async accounts => {
         delegateManager.address
       )
       equal(scoreAfter.toNumber(), intentAmount, 'intent score is incorrect')
+
+      //check owner stake balance has been reduced
+      let stakeTokenBal = await stakeToken.balanceOf(owner)
+      equal(stakeTokenBal.toNumber(), startingBalance - intentAmount)
     })
   })
 
@@ -161,6 +165,14 @@ contract('DelegateManager Integration Tests', async accounts => {
         delegateManager.address
       )
       equal(scoreAfter.toNumber(), 0, 'intent score is incorrect')
+
+      let stakeTokenBal_Manager = await stakeToken.balanceOf(delegateManager.address)
+      console.log("manager balance: " + stakeTokenBal_Manager.toNumber())
+
+      //check owner stake balance has been increased
+      let stakeTokenBal = await stakeToken.balanceOf(owner)
+      console.log("owner balance: " + stakeTokenBal.toNumber())
+      equal(stakeTokenBal.toNumber(), startingBalance)
     })
   })
 })

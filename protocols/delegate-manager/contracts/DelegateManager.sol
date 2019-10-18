@@ -152,5 +152,4 @@ contract DelegateManager is Ownable {
           .transfer(msg.sender, stakedAmount),"TRANSFER_FUNDS_ERROR"
       );
     }
-
 }
