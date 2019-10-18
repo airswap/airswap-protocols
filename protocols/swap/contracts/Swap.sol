@@ -325,7 +325,7 @@ contract Swap is ISwap {
   }
 
   /**
-    * @notice Perform an ERC-20 or ERC-721 token transfer
+    * @notice Perform token transfer for tokens in registry
     * @dev Transfer type specified by the bytes4 _kind param
     * @param _from address wallet address to send from
     * @param _to address wallet address to send to
