@@ -32,16 +32,6 @@ contract DelegateManager is Ownable {
     //keeps track of all the delegates created by owner address
     mapping(address => address[]) private _ownerToDelegates;
 
-    //keeps track of the staked amounts per msg.sender
-    //signer => sender => msg.sender => staked amount
-    mapping(
-      address => mapping(
-        address => mapping(
-          address => uint256
-        )
-      )
-    ) public stakedAmounts;
-
     IDelegateFactory public factory;
 
     /**
@@ -60,7 +50,7 @@ contract DelegateManager is Ownable {
       * @param _tradeWallet the wallet that the delegate will be trading on behalf of
       * @return IDelegate the Delegate created by the factory
       */
-    function createDelegate(address _tradeWallet) external returns (IDelegate) {
+    function createDelegate(address _tradeWallet) external onlyOwner returns (IDelegate) {
       IDelegate delegate = IDelegate(factory.createDelegate(msg.sender, _tradeWallet));
       _ownerToDelegates[msg.sender].push(address(delegate));
       emit DelegateCreated(msg.sender, address(delegate));
@@ -72,7 +62,7 @@ contract DelegateManager is Ownable {
       * @param _owner the owner to look up addresses for
       * @return address[] memory the list of the delegates for an owner
       */ 
-    function getOwnerAddressToDelegates(address _owner) view external returns (address[] memory) {
+    function getOwnerAddressToDelegates(address _owner) view external onlyOwner returns (address[] memory) {
       uint256 length = _ownerToDelegates[_owner].length;
       address[] memory delegates = new address[](length);
       for(uint i = 0; i < length; i++) {
@@ -96,7 +86,7 @@ contract DelegateManager is Ownable {
       Types.Rule calldata _rule,
       Types.Intent calldata _intent,
       IIndexer _indexer
-    ) external {
+    ) external onlyOwner {
 
       require(msg.sender == _delegate.owner(), "DELEGATE_NOT_OWNED");
 
@@ -116,9 +106,6 @@ contract DelegateManager is Ownable {
         IERC20(_indexer.stakeToken())
         .transferFrom(msg.sender, address(this), _intent.amount), "TRANSFER_FUNDS_ERROR"
       );
-
-      //save the amount being staked for a particular token pair for a given sender
-      stakedAmounts[_rule.signerToken][_rule.senderToken][msg.sender] = _intent.amount;
 
       _indexer.setIntent(
         _intent.signerToken,
@@ -141,15 +128,14 @@ contract DelegateManager is Ownable {
       address _senderToken, 
       address _signerToken, 
       IIndexer _indexer
-    ) external {
+    ) external onlyOwner {
 
       require(msg.sender == _delegate.owner(), "DELEGATE_NOT_OWNED");
 
-      //get the amount that was staked for a particular token pair for a given sender
-      uint256 stakedAmount = stakedAmounts[_signerToken][_senderToken][msg.sender];
-      delete stakedAmounts[_signerToken][_senderToken][msg.sender];
-
       _delegate.unsetRule(_signerToken, _senderToken);
+
+      //query against indexer for amount staked
+      uint256 stakedAmount = _indexer.getScore(_signerToken, _senderToken, msg.sender);
       _indexer.unsetIntent(_senderToken, _signerToken);
 
       //upon unstaking the manager will be given the staking amount
