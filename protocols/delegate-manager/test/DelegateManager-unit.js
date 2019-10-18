@@ -16,8 +16,7 @@ const { padAddressToLocator } = require('@airswap/test-utils').padding
 
 contract('DelegateManager Unit Tests', async accounts => {
   let owner = accounts[0]
-  let tradeWallet_1 = accounts[1]
-  let tradeWallet_2 = accounts[1]
+  let tradeWallet = accounts[1]
   let mockDelegate
   let mockIndexer
   let delegateManager
@@ -75,7 +74,7 @@ contract('DelegateManager Unit Tests', async accounts => {
     let mockDelegateTemplate = await Delegate.new(
       mockSwap.address,
       owner,
-      tradeWallet_1
+      tradeWallet
     )
 
     //mock setRule()
@@ -149,7 +148,7 @@ contract('DelegateManager Unit Tests', async accounts => {
     await setupMockDelegate()
     await setupMockFactory()
 
-    delegateManager = await DelegateManager.new(mockFactory.address, tradeWallet_1)
+    delegateManager = await DelegateManager.new(mockFactory.address, tradeWallet)
   })
 
   describe('Test initial values', async () => {
