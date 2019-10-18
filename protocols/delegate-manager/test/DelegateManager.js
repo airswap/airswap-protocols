@@ -21,8 +21,7 @@ contract('DelegateManager Integration Tests', async accounts => {
   let indexer
   let delegateFactory
   let delegateManager
-  let delegateAddress1
-  let delegateAddress2
+  let delegateAddress
 
   async function setupTokenAmounts() {
     await stakeToken.mint(owner, STARTING_BALANCE)
@@ -43,7 +42,7 @@ contract('DelegateManager Integration Tests', async accounts => {
     swap = await Swap.new()
 
     delegateFactory = await DelegateFactory.new(swap.address)
-    delegateManager = await DelegateManager.new(delegateFactory.address)
+    delegateManager = await DelegateManager.new(delegateFactory.address, tradeWallet_1)
 
     indexer = await Indexer.new(stakeToken.address, delegateFactory.address)
     await indexer.createIndex(WETH_TOKEN.address, DAI_TOKEN.address)
@@ -54,39 +53,9 @@ contract('DelegateManager Integration Tests', async accounts => {
       let val = await delegateManager.factory.call()
       equal(val, delegateFactory.address, 'factory was not properly set')
     })
-  })
-
-  describe('Test createDelegate', async () => {
-    it('Test creating delegates', async () => {
-      let trx = await delegateManager.createDelegate(tradeWallet_1)
-      emitted(trx, 'DelegateCreated', e => {
-        delegateAddress1 = e.delegate
-        return e.owner === owner
-      })
-    })
-
-    it('Test creating another delegate', async () => {
-      let trx = await delegateManager.createDelegate(tradeWallet_2)
-      emitted(trx, 'DelegateCreated', e => {
-        delegateAddress2 = e.delegate
-        return e.owner === owner
-      })
-    })
-
-    it('Test retrieval of delegates', async () => {
-      //retrieve the list
-      let val = await delegateManager.getOwnerAddressToDelegates.call(owner)
-      equal(val.length, 2, 'there are too many items in the returned list')
-      equal(
-        val[0],
-        delegateAddress1,
-        'there was an issue creating the delegate'
-      )
-      equal(
-        val[1],
-        delegateAddress2,
-        'there was an issue creating the delegate'
-      )
+    it('Test delegate address', async () => {
+      delegateAddress = await delegateManager.delegate.call()
+      //TODO: ensure it's not empty
     })
   })
 
@@ -98,11 +67,11 @@ contract('DelegateManager Integration Tests', async accounts => {
         WETH_TOKEN.address,
         DAI_TOKEN.address,
         INTENT_AMOUNT,
-        padAddressToLocator(delegateAddress1),
+        padAddressToLocator(delegateAddress),
       ]
 
       //give manager admin access
-      let delegate = await Delegate.at(delegateAddress1)
+      let delegate = await Delegate.at(delegateAddress)
       await delegate.addAdmin(delegateManager.address)
 
       //give allowance to the delegateManager to pull staking amount
@@ -118,7 +87,6 @@ contract('DelegateManager Integration Tests', async accounts => {
 
       await passes(
         delegateManager.setRuleAndIntent(
-          delegateAddress1,
           rule,
           intent,
           indexer.address
@@ -150,7 +118,6 @@ contract('DelegateManager Integration Tests', async accounts => {
       equal(scoreBefore.toNumber(), INTENT_AMOUNT, 'intent score is incorrect')
 
       await passes(delegateManager.unsetRuleAndIntent(
-        delegateAddress1,
         WETH_TOKEN.address,
         DAI_TOKEN.address,
         indexer.address
