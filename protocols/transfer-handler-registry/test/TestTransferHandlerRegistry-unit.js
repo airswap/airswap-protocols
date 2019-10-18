@@ -1,6 +1,7 @@
 const TransferHandlerRegistry = artifacts.require('TransferHandlerRegistry')
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 const { reverted, equal, emitted } = require('@airswap/test-utils').assert
+const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 
 contract('TransferHandlerRegistry Unit Tests', async accounts => {
   const owner = accounts[0]
@@ -20,6 +21,16 @@ contract('TransferHandlerRegistry Unit Tests', async accounts => {
 
   before('Deploy TransferHandlerRegistry', async () => {
     transferhandlerregistry = await TransferHandlerRegistry.new({ from: owner })
+  })
+
+  describe('Test fetching non-existent handler', async () => {
+    it('test fetching non-existent handler, returns null address', async () => {
+      equal(
+        EMPTY_ADDRESS,
+        await transferhandlerregistry.getTransferHandler.call('0x80ac58cd'),
+        'Returns actual non-zero address'
+      )
+    })
   })
 
   describe('Test adding to handler', async () => {

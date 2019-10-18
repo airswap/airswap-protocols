@@ -40,8 +40,11 @@ contract Swap is ISwap {
   byte constant private TAKEN = 0x01;
   byte constant private CANCELED = 0x02;
 
-  // Mapping of peer address to delegate address and expiry.
-  mapping (address => mapping (address => uint256)) public delegateApprovals;
+  // Mapping of sender address to a delegated sender address and expiry.
+  mapping (address => mapping (address => uint256)) public senderAuthorizations;
+
+  // Mapping of signer address to a delegated signer and expiry.
+  mapping (address => mapping (address => uint256)) public signerAuthorizations;
 
   // Mapping of signers to orders by nonce as TAKEN (0x01) or CANCELED (0x02)
   mapping (address => mapping (uint256 => byte)) public signerOrderStatus;
@@ -108,10 +111,8 @@ contract Swap is ISwap {
         * Sender is specified. If the msg.sender is not the specified sender,
         * thus determines whether the msg.sender is an authorized sender.
         */
-      if (msg.sender != _order.sender.wallet) {
-        require(isAuthorized(_order.sender.wallet, msg.sender),
+      require(isSenderAuthorized(_order.sender.wallet, msg.sender),
           "SENDER_UNAUTHORIZED");
-      }
       // The specified sender is all clear.
       finalSenderWallet = _order.sender.wallet;
 
@@ -123,7 +124,7 @@ contract Swap is ISwap {
         * Signature is not provided. The signer may have authorized the
         * msg.sender to swap on its behalf, which does not require a signature.
         */
-      require(isAuthorized(_order.signer.wallet, msg.sender),
+      require(isSignerAuthorized(_order.signer.wallet, msg.sender),
         "SIGNER_UNAUTHORIZED");
 
     } else {
@@ -131,7 +132,7 @@ contract Swap is ISwap {
         * The signature is provided. Determine whether the signer is
         * authorized and if so validate the signature itself.
         */
-      require(isAuthorized(_order.signer.wallet, _order.signature.signatory),
+      require(isSignerAuthorized(_order.signer.wallet, _order.signature.signatory),
         "SIGNER_UNAUTHORIZED");
 
       // Ensure the signature is valid.
@@ -205,45 +206,87 @@ contract Swap is ISwap {
   }
 
   /**
-    * @notice Authorize a delegate
-    * @dev Emits an Authorize event
-    * @param _delegate address
+    * @notice Authorize a delegated sender
+    * @dev Emits an AuthorizeSender event
+    * @param _authorizedSender address to authorize
     * @param _expiry uint256
     */
-  function authorize(
-    address _delegate,
+  function authorizeSender(
+    address _authorizedSender,
     uint256 _expiry
   ) external {
-    require(msg.sender != _delegate, "INVALID_AUTH_DELEGATE");
+    require(msg.sender != _authorizedSender, "INVALID_AUTH_SENDER");
     require(_expiry > block.timestamp, "INVALID_AUTH_EXPIRY");
-    delegateApprovals[msg.sender][_delegate] = _expiry;
-    emit Authorize(msg.sender, _delegate, _expiry);
+    senderAuthorizations[msg.sender][_authorizedSender] = _expiry;
+    emit AuthorizeSender(msg.sender, _authorizedSender, _expiry);
   }
 
   /**
-    * @notice Revoke an authorization
-    * @dev Emits a Revoke event
-    * @param _delegate address
+    * @notice Authorize a delegated signer
+    * @dev Emits an AuthorizeSigner event
+    * @param _authorizedSigner address to authorize
+    * @param _expiry uint256
     */
-  function revoke(
-    address _delegate
+  function authorizeSigner(
+    address _authorizedSigner,
+    uint256 _expiry
   ) external {
-    delete delegateApprovals[msg.sender][_delegate];
-    emit Revoke(msg.sender, _delegate);
+    require(msg.sender != _authorizedSigner, "INVALID_AUTH_SIGNER");
+    require(_expiry > block.timestamp, "INVALID_AUTH_EXPIRY");
+    signerAuthorizations[msg.sender][_authorizedSigner] = _expiry;
+    emit AuthorizeSigner(msg.sender, _authorizedSigner, _expiry);
   }
 
   /**
-    * @notice Determine whether a delegate is authorized
+    * @notice Revoke an authorized sender
+    * @dev Emits a RevokeSender event
+    * @param _authorizedSender address
+    */
+  function revokeSender(
+    address _authorizedSender
+  ) external {
+    delete senderAuthorizations[msg.sender][_authorizedSender];
+    emit RevokeSender(msg.sender, _authorizedSender);
+  }
+
+  /**
+    * @notice Revoke an authorized signer
+    * @dev Emits a RevokeSigner event
+    * @param _authorizedSigner address
+    */
+  function revokeSigner(
+    address _authorizedSigner
+  ) external {
+    delete signerAuthorizations[msg.sender][_authorizedSigner];
+    emit RevokeSigner(msg.sender, _authorizedSigner);
+  }
+
+  /**
+    * @notice Determine whether a sender delegate is authorized
     * @param _approver address
     * @param _delegate address
-    * @return bool returns whether a delegate is authorized
+    * @return bool returns whether a delegate is sender authorized
     */
-  function isAuthorized(
+  function isSenderAuthorized(
     address _approver,
     address _delegate
   ) internal view returns (bool) {
-    if (_approver == _delegate) return true;
-    return (delegateApprovals[_approver][_delegate] > block.timestamp);
+    return ((_approver == _delegate) ||
+      senderAuthorizations[_approver][_delegate] > block.timestamp);
+  }
+
+  /**
+    * @notice Determine whether a signer delegate is authorized
+    * @param _approver address
+    * @param _delegate address
+    * @return bool returns whether a delegate is signer authorized
+    */
+  function isSignerAuthorized(
+    address _approver,
+    address _delegate
+  ) internal view returns (bool) {
+    return ((_approver == _delegate) ||
+      (signerAuthorizations[_approver][_delegate] > block.timestamp));
   }
 
   /**

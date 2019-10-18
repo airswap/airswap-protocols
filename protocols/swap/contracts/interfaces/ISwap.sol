@@ -45,18 +45,31 @@ interface ISwap {
     address indexed signerWallet
   );
 
-  event Authorize(
+  event AuthorizeSender(
     address indexed approverAddress,
-    address indexed delegateAddress,
+    address indexed authorizedSender,
     uint256 expiry
   );
 
-  event Revoke(
+  event AuthorizeSigner(
     address indexed approverAddress,
-    address indexed delegateAddress
+    address indexed authorizedSigner,
+    uint256 expiry
   );
 
-  function delegateApprovals(address, address) external returns (uint256);
+  event RevokeSender(
+    address indexed approverAddress,
+    address indexed revokedSender
+  );
+
+  event RevokeSigner(
+    address indexed approverAddress,
+    address indexed revokedSigner
+  );
+
+  function senderAuthorizations(address, address) external returns (uint256);
+  function signerAuthorizations(address, address) external returns (uint256);
+
   function signerOrderStatus(address, uint256) external returns (byte);
   function signerMinimumNonce(address) external returns (uint256);
 
@@ -85,21 +98,40 @@ interface ISwap {
   ) external;
 
   /**
-    * @notice Authorize a delegate
-    * @param _delegate address
+    * @notice Authorize a delegated sender
+    * @param _authorizedSender address
     * @param _expiry uint256
     */
-  function authorize(
-    address _delegate,
+  function authorizeSender(
+    address _authorizedSender,
     uint256 _expiry
   ) external;
 
   /**
-    * @notice Revoke an authorization
-    * @param _delegate address
+    * @notice Authorize a delegated signer
+    * @param _authorizedSigner address
+    * @param _expiry uint256
     */
-  function revoke(
-    address _delegate
+  function authorizeSigner(
+    address _authorizedSigner,
+    uint256 _expiry
+  ) external;
+
+
+  /**
+    * @notice Revoke an authorization
+    * @param _authorizedSender address
+    */
+  function revokeSender(
+    address _authorizedSender
+  ) external;
+
+  /**
+    * @notice Revoke an authorization
+    * @param _authorizedSigner address
+    */
+  function revokeSigner(
+    address _authorizedSigner
   ) external;
 
 }
