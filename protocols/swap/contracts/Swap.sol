@@ -341,9 +341,10 @@ contract Swap is ISwap {
       bytes4 _kind
   ) internal {
     ITransferHandler transferHandler = registry.getTransferHandler(_kind);
+    require(address(transferHandler) != address(0x0), "UNKNOWN_TRANSFER_HANDLER");
     (bool success, bytes memory data) = address(transferHandler).
-      delegatecall(abi.encodeWithSignature(
-        "transferTokens(address,address,uint256,address)",
+      delegatecall(abi.encodeWithSelector(
+        transferHandler.transferTokens.selector,
         _from,
         _to,
         _param,

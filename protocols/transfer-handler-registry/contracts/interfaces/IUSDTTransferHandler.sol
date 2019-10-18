@@ -6,5 +6,5 @@ pragma solidity 0.5.10;
  * @dev see https://github.com/ethereum/EIPs/issues/20
  */
 contract IUSDTTransferHandler {
-  function transferFrom(address from, address to, uint value) external;
+  function transferFrom(address _from, address _to, uint _value) external;
 }

@@ -827,6 +827,35 @@ contract('Swap', async accounts => {
     })
   })
 
+  describe('Swaps (Non-Fungible) with unknown kind', async () => {
+    it('Alice approves Swap to transfer her concert ticket', async () => {
+      emitted(
+        await tokenTicket.approve(swapAddress, 12345, { from: aliceAddress }),
+        'NFTApproval'
+      )
+    })
+
+    it('Alice sends Bob with an unknown kind for 1 DAI', async () => {
+      const order = await orders.getOrder({
+        signer: {
+          wallet: aliceAddress,
+          token: tokenTicket.address,
+          param: 12345,
+          kind: '0x1111111',
+        },
+        sender: {
+          wallet: bobAddress,
+          token: tokenDAI.address,
+          param: 100,
+        },
+      })
+      await reverted(
+        swap(order, { from: bobAddress }),
+        'UNKNOWN_TRANSFER_HANDLER'
+      )
+    })
+  })
+
   describe('Swaps (Non-Fungible)', async () => {
     it('Alice approves Swap to transfer her concert ticket', async () => {
       emitted(

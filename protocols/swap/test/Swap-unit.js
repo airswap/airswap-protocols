@@ -1,5 +1,4 @@
 const Swap = artifacts.require('Swap')
-const MockContract = artifacts.require('MockContract')
 const {
   passes,
   emitted,
@@ -21,7 +20,8 @@ const {
 contract('Swap Unit Tests', async accounts => {
   const Jun_06_2017T00_00_00_UTC = 1497052800 //a date later than when ganache started
   const mockSigner = accounts[9]
-  const mockSender = accounts[7]
+  const mockSender = accounts[8]
+  const mockRegistry = accounts[7]
   const sender = accounts[0]
   const kind = web3.utils.asciiToHex('FFFF') // hex representation is "0x46464646" this is 4 bytes
   const v = 27
@@ -32,8 +32,6 @@ contract('Swap Unit Tests', async accounts => {
   let snapshotId
   let swap
 
-  let mockTokenRegistry
-
   beforeEach(async () => {
     let snapShot = await takeSnapshot()
     snapshotId = snapShot['result']
@@ -43,13 +41,8 @@ contract('Swap Unit Tests', async accounts => {
     await revertToSnapShot(snapshotId)
   })
 
-  async function setupMockTokenRegistry() {
-    mockTokenRegistry = await MockContract.new()
-  }
-
   before('deploy Swap', async () => {
-    await setupMockTokenRegistry()
-    swap = await Swap.new(mockTokenRegistry.address)
+    swap = await Swap.new(mockRegistry)
   })
 
   describe('Test swap', async () => {
