@@ -1,13 +1,13 @@
-const TokenRegistry = artifacts.require('TokenRegistry')
+const TransferHandlerRegistry = artifacts.require('TransferHandlerRegistry')
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 const { reverted, equal, emitted } = require('@airswap/test-utils').assert
 
-contract('TokenRegistry Unit Tests', async accounts => {
+contract('TransferHandlerRegistry Unit Tests', async accounts => {
   const owner = accounts[0]
   const nonOwner = accounts[1]
   const erc20Asset = accounts[2]
   let snapshotId
-  let tokenregistry
+  let transferhandlerregistry
 
   beforeEach(async () => {
     let snapShot = await takeSnapshot()
@@ -18,14 +18,14 @@ contract('TokenRegistry Unit Tests', async accounts => {
     await revertToSnapShot(snapshotId)
   })
 
-  before('Deploy TokenRegistry', async () => {
-    tokenregistry = await TokenRegistry.new({ from: owner })
+  before('Deploy TransferHandlerRegistry', async () => {
+    transferhandlerregistry = await TransferHandlerRegistry.new({ from: owner })
   })
 
-  describe('Test adding to registry', async () => {
+  describe('Test adding to handler', async () => {
     it('test adding when not the owner, should revert', async () => {
       await reverted(
-        tokenregistry.addToRegistry('0x80ac58cd', erc20Asset, {
+        transferhandlerregistry.addHandler('0x80ac58cd', erc20Asset, {
           from: nonOwner,
         }),
         'Ownable: caller is not the owner'
@@ -34,39 +34,41 @@ contract('TokenRegistry Unit Tests', async accounts => {
 
     it('test adding when the owner, should pass', async () => {
       await emitted(
-        await tokenregistry.addToRegistry('0x80ac58cd', erc20Asset, {
+        await transferhandlerregistry.addHandler('0x80ac58cd', erc20Asset, {
           from: owner,
         }),
-        'AddToRegistry'
+        'AddHandler'
       )
 
       equal(
         erc20Asset,
-        await tokenregistry.getAsset.call('0x80ac58cd'),
+        await transferhandlerregistry.getTransferHandler.call('0x80ac58cd'),
         'Unable to find match'
       )
     })
   })
 
-  describe('Test removing to registry', async () => {
+  describe('Test removing from handler', async () => {
     it('test removing when not the owner, should revert', async () => {
       await reverted(
-        tokenregistry.removeFromRegistry('0x80ac58cd', { from: nonOwner }),
+        transferhandlerregistry.removeHandler('0x80ac58cd', { from: nonOwner }),
         'Ownable: caller is not the owner'
       )
     })
 
     it('test adding and then removing when the owner, should pass', async () => {
       await emitted(
-        await tokenregistry.addToRegistry('0x80ac58cd', erc20Asset, {
+        await transferhandlerregistry.addHandler('0x80ac58cd', erc20Asset, {
           from: owner,
         }),
-        'AddToRegistry'
+        'AddHandler'
       )
 
       await emitted(
-        await tokenregistry.removeFromRegistry('0x80ac58cd', { from: owner }),
-        'RemoveFromRegistry'
+        await transferhandlerregistry.removeHandler('0x80ac58cd', {
+          from: owner,
+        }),
+        'RemoveHandler'
       )
     })
   })

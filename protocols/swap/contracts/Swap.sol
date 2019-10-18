@@ -17,8 +17,8 @@
 pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
-import "@airswap/token-registry/contracts/interfaces/IAsset.sol";
-import "@airswap/token-registry/contracts/TokenRegistry.sol";
+import "@airswap/transfer-handler-registry/contracts/interfaces/ITransferHandler.sol";
+import "@airswap/transfer-handler-registry/contracts/TransferHandlerRegistry.sol";
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/token/ERC721/IERC721.sol";
@@ -50,14 +50,14 @@ contract Swap is ISwap {
   mapping (address => uint256) public signerMinimumNonce;
 
   // contains registry of kind to asset types
-  TokenRegistry registry;
+  TransferHandlerRegistry public registry;
 
   /**
     * @notice Contract Constructor
     * @dev Sets domain for signature validation (EIP-712)
     * @param _registry TokenRegistry contract
     */
-  constructor(TokenRegistry _registry) public {
+  constructor(TransferHandlerRegistry _registry) public {
     domainSeparator = Types.hashDomain(
       DOMAIN_NAME,
       DOMAIN_VERSION,
@@ -297,8 +297,15 @@ contract Swap is ISwap {
       address _token,
       bytes4 _kind
   ) internal {
-    IAsset asset = registry.getAsset(_kind);
-    (bool success, bytes memory data) = address(asset).delegatecall(abi.encodeWithSignature("transferTokens(address,address,uint256,address)", _from, _to, _param, _token));
+    ITransferHandler transferHandler = registry.getTransferHandler(_kind);
+    (bool success, bytes memory data) = address(transferHandler).
+      delegatecall(abi.encodeWithSignature(
+        "transferTokens(address,address,uint256,address)",
+        _from,
+        _to,
+        _param,
+        _token
+    ));
     require(success && abi.decode(data, (bool)));
   }
 }

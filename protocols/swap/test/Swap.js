@@ -2,11 +2,13 @@ const Swap = artifacts.require('Swap')
 const Types = artifacts.require('Types')
 const FungibleToken = artifacts.require('FungibleToken')
 const NonFungibleToken = artifacts.require('NonFungibleToken')
-const TokenRegistry = artifacts.require('TokenRegistry')
-const PartialKittyCoreAsset = artifacts.require('PartialKittyCoreAsset')
-const ERC20Asset = artifacts.require('ERC20Asset')
-const ERC721Asset = artifacts.require('ERC721Asset')
-const USDTAsset = artifacts.require('USDTAsset')
+const TransferHandlerRegistry = artifacts.require('TransferHandlerRegistry')
+const PartialKittyCoreTransferHandler = artifacts.require(
+  'PartialKittyCoreTransferHandler'
+)
+const ERC20TransferHandler = artifacts.require('ERC20TransferHandler')
+const ERC721TransferHandler = artifacts.require('ERC721TransferHandler')
+const USDTTransferHandler = artifacts.require('USDTTransferHandler')
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 
 const {
@@ -14,6 +16,7 @@ const {
   reverted,
   notEmitted,
   ok,
+  equal,
 } = require('@airswap/test-utils').assert
 const { allowances, balances } = require('@airswap/test-utils').balances
 const {
@@ -42,7 +45,7 @@ contract('Swap', async accounts => {
   let tokenTicket
   let tokenKitty
 
-  let tokenRegistry
+  let transferHandlerRegistry
 
   let swap
   let cancel
@@ -69,10 +72,10 @@ contract('Swap', async accounts => {
 
   describe('Deploying...', async () => {
     it('Deployed Swap contract', async () => {
-      tokenRegistry = await TokenRegistry.new()
+      transferHandlerRegistry = await TransferHandlerRegistry.new()
       const typesLib = await Types.new()
       await Swap.link(Types, typesLib.address)
-      swapContract = await Swap.new(tokenRegistry.address)
+      swapContract = await Swap.new(transferHandlerRegistry.address)
       swapAddress = swapContract.address
 
       swap = swapContract.swap
@@ -90,17 +93,30 @@ contract('Swap', async accounts => {
       tokenDAI = await FungibleToken.new()
     })
 
+    it('Check that TransferHandlerRegistry correctly set', async () => {
+      equal(await swapContract.registry.call(), transferHandlerRegistry.address)
+    })
+
     it('Set up TokenRegistry', async () => {
-      const kittyCore = await PartialKittyCoreAsset.new()
-      const erc20Asset = await ERC20Asset.new()
-      const erc721Asset = await ERC721Asset.new()
-      const usdtaAsset = await USDTAsset.new()
+      const kittyCore = await PartialKittyCoreTransferHandler.new()
+      const erc20TransferHandler = await ERC20TransferHandler.new()
+      const erc721TransferHandler = await ERC721TransferHandler.new()
+      const usdtaTransferHandler = await USDTTransferHandler.new()
 
       // add all 4 of these contracts into the TokenRegistry
-      tokenRegistry.addToRegistry('0x9a20483d', kittyCore.address)
-      tokenRegistry.addToRegistry('0x277f8169', erc20Asset.address)
-      tokenRegistry.addToRegistry('0x80ac58cd', erc721Asset.address)
-      tokenRegistry.addToRegistry('0xffffffff', usdtaAsset.address)
+      transferHandlerRegistry.addHandler('0x9a20483d', kittyCore.address)
+      transferHandlerRegistry.addHandler(
+        '0x277f8169',
+        erc20TransferHandler.address
+      )
+      transferHandlerRegistry.addHandler(
+        '0x80ac58cd',
+        erc721TransferHandler.address
+      )
+      transferHandlerRegistry.addHandler(
+        '0xffffffff',
+        usdtaTransferHandler.address
+      )
     })
   })
 

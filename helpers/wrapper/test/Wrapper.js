@@ -3,8 +3,8 @@ const Types = artifacts.require('Types')
 const Wrapper = artifacts.require('Wrapper')
 const WETH9 = artifacts.require('WETH9')
 const FungibleToken = artifacts.require('FungibleToken')
-const TokenRegistry = artifacts.require('TokenRegistry')
-const ERC20Asset = artifacts.require('ERC20Asset')
+const TransferHandlerRegistry = artifacts.require('TransferHandlerRegistry')
+const ERC20TransferHandler = artifacts.require('ERC20TransferHandler')
 
 const {
   emitted,
@@ -42,10 +42,13 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
     await Swap.link(Types, (await Types.new()).address)
     // now deploy swap
 
-    const erc20Asset = await ERC20Asset.new()
-    const tokenRegistry = await TokenRegistry.new()
-    tokenRegistry.addToRegistry('0x277f8169', erc20Asset.address)
-    swapContract = await Swap.new(tokenRegistry.address)
+    const erc20TransferHandler = await ERC20TransferHandler.new()
+    const transferHandlerRegistry = await TransferHandlerRegistry.new()
+    transferHandlerRegistry.addHandler(
+      '0x277f8169',
+      erc20TransferHandler.address
+    )
+    swapContract = await Swap.new(transferHandlerRegistry.address)
 
     swapAddress = swapContract.address
     tokenWETH = await WETH9.new()

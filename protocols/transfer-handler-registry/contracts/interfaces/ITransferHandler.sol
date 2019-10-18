@@ -1,6 +1,6 @@
 pragma solidity 0.5.10;
 
-interface IAsset {
+interface ITransferHandler {
 
   function transferTokens(
     address _from,

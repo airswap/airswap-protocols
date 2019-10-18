@@ -3,8 +3,8 @@ const DelegateFrontend = artifacts.require('DelegateFrontend')
 const Indexer = artifacts.require('Indexer')
 const Delegate = artifacts.require('Delegate')
 const FungibleToken = artifacts.require('FungibleToken')
-const TokenRegistry = artifacts.require('TokenRegistry')
-const ERC20Asset = artifacts.require('ERC20Asset')
+const TransferHandlerRegistry = artifacts.require('TransferHandlerRegistry')
+const ERC20TransferHandler = artifacts.require('ERC20TransferHandler')
 const Types = artifacts.require('Types')
 var BigNumber = require('bn.js')
 const { emitted, equal, ok, reverted } = require('@airswap/test-utils').assert
@@ -57,10 +57,13 @@ contract('DelegateFrontend', async accounts => {
       await Swap.link(Types, (await Types.new()).address)
       // now deploy swap
 
-      const erc20asset = await ERC20Asset.new()
-      const tokenRegistry = await TokenRegistry.new()
-      tokenRegistry.addToRegistry('0x277f8169', erc20asset.address)
-      swapContract = await Swap.new(tokenRegistry.address)
+      const erc20TransferHandler = await ERC20TransferHandler.new()
+      const transferHandlerRegistry = await TransferHandlerRegistry.new()
+      transferHandlerRegistry.addHandler(
+        '0x277f8169',
+        erc20TransferHandler.address
+      )
+      swapContract = await Swap.new(transferHandlerRegistry.address)
       swapAddress = swapContract.address
 
       indexer = await Indexer.new(tokenAST.address, EMPTY_ADDRESS, {

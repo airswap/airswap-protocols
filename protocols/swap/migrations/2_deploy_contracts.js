@@ -1,15 +1,15 @@
 const Swap = artifacts.require('Swap')
 const Types = artifacts.require('Types')
-const TokenRegistry = artifacts.require('TokenRegistry')
+const TransferHandlerRegistry = artifacts.require('TransferHandlerRegistry')
 
 module.exports = deployer => {
 
   deployer.deploy(Types)
   deployer.link(Types, Swap)
   deployer
-    .deploy(TokenRegistry)
-    .then(() => TokenRegistry.deployed())
-    .then(() => deployer.deploy(Swap, TokenRegistry.address))
+    .deploy(TransferHandlerRegistry)
+    .then(() => TransferHandlerRegistry.deployed())
+    .then(() => deployer.deploy(Swap, TransferHandlerRegistry.address))
 }
 
 

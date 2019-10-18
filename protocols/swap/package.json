@@ -22,7 +22,7 @@
     "@airswap/test-utils": "0.1.0",
     "truffle": "^5.0.32",
     "@gnosis.pm/mock-contract": "^3.0.7",
-    "@airswap/token-registry": "0.1.0"
+    "@airswap/transfer-handler-registry": "0.1.0"
   },
   "dependencies": {
     "@airswap/types": "0.2.0",

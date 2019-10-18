@@ -1,7 +1,7 @@
 {
-  "name": "@airswap/token-registry",
+  "name": "@airswap/transfer-handler-registry",
   "version": "0.1.0",
-  "description": "Manages an authorized token-registry for swap",
+  "description": "Manages an authorized transfer-handler-registry for swap",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -21,7 +21,6 @@
     "@airswap/test-utils": "0.1.0"
   },
   "dependencies": {
-    "@airswap/swap": "2.1.0",
     "openzeppelin-solidity": "^v2.2",
     "solidity-coverage": "^0.6.3"
   }
