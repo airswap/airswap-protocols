@@ -149,14 +149,12 @@ contract('DelegateManager Integration Tests', async accounts => {
       )
       equal(scoreBefore.toNumber(), intentAmount, 'intent score is incorrect')
 
-      await passes(
-        delegateManager.unsetRuleAndIntent(
-          delegateAddress1,
-          WETH_TOKEN.address,
-          DAI_TOKEN.address,
-          indexer.address
-        )
-      )
+      await passes(delegateManager.unsetRuleAndIntent(
+        delegateAddress1,
+        WETH_TOKEN.address,
+        DAI_TOKEN.address,
+        indexer.address
+      ))
 
       //check the score of the manager after
       let scoreAfter = await indexer.getScore(
@@ -166,12 +164,19 @@ contract('DelegateManager Integration Tests', async accounts => {
       )
       equal(scoreAfter.toNumber(), 0, 'intent score is incorrect')
 
+      //confirmed all events are emitted properly and the balances should update
+
+      //ISSUE HERE!! balances in transfer do not update...
+      
       let stakeTokenBal_Manager = await stakeToken.balanceOf(delegateManager.address)
-      console.log("manager balance: " + stakeTokenBal_Manager.toNumber())
+      console.log("manager balance:")
+      console.log(stakeTokenBal_Manager.toNumber())
 
       //check owner stake balance has been increased
       let stakeTokenBal = await stakeToken.balanceOf(owner)
-      console.log("owner balance: " + stakeTokenBal.toNumber())
+      console.log("owner balance:")
+      console.log(stakeTokenBal.toNumber())
+
       equal(stakeTokenBal.toNumber(), startingBalance)
     })
   })
