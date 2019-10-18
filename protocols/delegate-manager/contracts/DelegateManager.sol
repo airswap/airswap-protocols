@@ -107,6 +107,12 @@ contract DelegateManager is Ownable {
         .transferFrom(msg.sender, address(this), _intent.amount), "TRANSFER_FUNDS_ERROR"
       );
 
+      //ensure that the indexer can pull funds from manager's account
+      require(
+        IERC20(_indexer.stakeToken())
+        .approve(address(_indexer), _intent.amount), "APPROVAL_ERROR"
+      );
+
       _indexer.setIntent(
         _intent.signerToken,
         _intent.senderToken,

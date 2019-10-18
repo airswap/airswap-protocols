@@ -49,7 +49,7 @@ contract('DelegateManager Integration Tests', async accounts => {
     swap = await Swap.new()
 
     delegateFactory = await DelegateFactory.new(swap.address)
-    delegateManager = await DelegateManager.new(delegateFactory.address);
+    delegateManager = await DelegateManager.new(delegateFactory.address)
 
     indexer = await Indexer.new(stakeToken.address, delegateFactory.address)
     await indexer.createIndex(WETH_TOKEN.address, DAI_TOKEN.address)
@@ -71,7 +71,7 @@ contract('DelegateManager Integration Tests', async accounts => {
       })
     })
 
-    it('Test creating another delegate', async() => {
+    it('Test creating another delegate', async () => {
       let trx = await delegateManager.createDelegate(tradeWallet_2)
       emitted(trx, 'DelegateCreated', e => {
         delegateAddress2 = e.delegate
@@ -79,7 +79,7 @@ contract('DelegateManager Integration Tests', async accounts => {
       })
     })
 
-    it ('Test retrieval of delegates', async() => {
+    it('Test retrieval of delegates', async () => {
       //retrieve the list
       let val = await delegateManager.getOwnerAddressToDelegates.call(owner)
       equal(val.length, 2, 'there are too many items in the returned list')
@@ -115,6 +115,8 @@ contract('DelegateManager Integration Tests', async accounts => {
       //give allowance to the delegateManager to pull staking amount
       await stakeToken.approve(delegateManager.address, intentAmount)
 
+      //manager needs to give approval to the Indexer?
+
       await passes(
         delegateManager.setRuleAndIntent(
           delegateAddress1,
@@ -123,13 +125,6 @@ contract('DelegateManager Integration Tests', async accounts => {
           indexer.address
         )
       )
-
-      let val = await delegateManager.stakedAmounts.call(
-        DAI_TOKEN.address,
-        WETH_TOKEN.address,
-        owner
-      )
-      equal(val, intentAmount, 'intent amount not properly saved')
     })
   })
 
