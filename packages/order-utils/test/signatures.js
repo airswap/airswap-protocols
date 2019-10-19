@@ -18,8 +18,8 @@ describe('Signatures', async () => {
   it('Checks that a Version 0x45: personalSign signature is valid', async () => {
     const order = await orders.getOrder(
       {
-        expiry: 1494460800,
-        nonce: 101,
+        expiry: '1494460800',
+        nonce: '101',
         signer: {
           wallet: signerWallet,
           token: ASTAddress,
@@ -58,8 +58,8 @@ describe('Signatures', async () => {
   it('Checks that a Version 0x01: signTypedData signature is valid', async () => {
     const order = await orders.getOrder(
       {
-        expiry: 1494460800,
-        nonce: 101,
+        expiry: '1494460800',
+        nonce: '101',
         signer: {
           wallet: signerWallet,
           token: ASTAddress,
