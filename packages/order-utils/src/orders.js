@@ -75,4 +75,38 @@ module.exports = {
     }
     return order
   },
+  isValidQuote(quote) {
+    return (
+      'signer' in quote &&
+      'sender' in quote &&
+      'token' in quote['signer'] &&
+      'token' in quote['sender'] &&
+      'param' in quote['signer'] &&
+      'param' in quote['sender'] &&
+      !('signature' in quote)
+    )
+  },
+  isValidOrder(order) {
+    return (
+      'nonce' in order &&
+      'expiry' in order &&
+      'signer' in order &&
+      'sender' in order &&
+      'affiliate' in order &&
+      'signature' in order &&
+      'wallet' in order['signer'] &&
+      'wallet' in order['sender'] &&
+      'wallet' in order['affiliate'] &&
+      'token' in order['signer'] &&
+      'token' in order['sender'] &&
+      'token' in order['affiliate'] &&
+      'param' in order['signer'] &&
+      'param' in order['sender'] &&
+      'param' in order['affiliate'] &&
+      'signatory' in order['signature'] &&
+      'r' in order['signature'] &&
+      's' in order['signature'] &&
+      'v' in order['signature']
+    )
+  },
 }
