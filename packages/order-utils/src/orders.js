@@ -51,7 +51,7 @@ module.exports = {
     },
     noSignature
   ) {
-    if (expiry == 0) {
+    if (expiry === '0') {
       expiry = await this.generateExpiry(1)
     }
     const order = {
