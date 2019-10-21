@@ -45,9 +45,7 @@ interface IDelegate {
   function setRule(
     address _senderToken,
     address _signerToken,
-    uint256 _maxSenderAmount,
-    uint256 _priceCoef,
-    uint256 _priceExp
+    Rule calldata _rule
   ) external;
 
   function unsetRule(
