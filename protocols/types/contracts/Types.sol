@@ -25,6 +25,12 @@ library Types {
 
   bytes constant internal EIP191_HEADER = "\x19\x01";
 
+  struct Rule {
+    uint256 maxSenderAmount;
+    uint256 priceCoef;
+    uint256 priceExp;
+  }
+
   struct Order {
     uint256 nonce;        // Unique per order and should be sequential
     uint256 expiry;       // Expiry in seconds since 1 January 1970

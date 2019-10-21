@@ -34,18 +34,12 @@ interface IDelegate {
     address signerToken
   );
 
-  struct Rule {
-    uint256 maxSenderAmount;
-    uint256 priceCoef;
-    uint256 priceExp;
-  }
-
-  function rules(address, address) external returns (Rule memory);
+  function rules(address, address) external returns (Types.Rule memory);
 
   function setRule(
     address _senderToken,
     address _signerToken,
-    Rule calldata _rule
+    Types.Rule calldata _rule
   ) external;
 
   function unsetRule(

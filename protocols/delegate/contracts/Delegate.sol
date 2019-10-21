@@ -40,7 +40,7 @@ contract Delegate is IDelegate, Ownable {
   address private _tradeWallet;
 
   // Mapping of senderToken to signerToken for rule lookup
-  mapping (address => mapping (address => Rule)) public rules;
+  mapping (address => mapping (address => Types.Rule)) public rules;
 
   // Mapping of admin addresses that can call on behalf of owner
   mapping (address => bool) private admins;
@@ -141,7 +141,7 @@ contract Delegate is IDelegate, Ownable {
   function setRule(
     address _senderToken,
     address _signerToken,
-    Rule calldata _rule
+    Types.Rule calldata _rule
   ) external onlyAdmin {
 
     rules[_senderToken][_signerToken] = _rule;
@@ -190,7 +190,7 @@ contract Delegate is IDelegate, Ownable {
     uint256 signerParam
   ) {
 
-    Rule memory rule = rules[_senderToken][_signerToken];
+    Types.Rule memory rule = rules[_senderToken][_signerToken];
 
     // Ensure that a rule exists.
     if(rule.maxSenderAmount > 0) {
@@ -224,7 +224,7 @@ contract Delegate is IDelegate, Ownable {
     uint256 senderParam
   ) {
 
-    Rule memory rule = rules[_senderToken][_signerToken];
+    Types.Rule memory rule = rules[_senderToken][_signerToken];
 
     // Ensure that a rule exists.
     if(rule.maxSenderAmount > 0) {
@@ -256,7 +256,7 @@ contract Delegate is IDelegate, Ownable {
     uint256 signerParam
   ) {
 
-    Rule memory rule = rules[_senderToken][_signerToken];
+    Types.Rule memory rule = rules[_senderToken][_signerToken];
 
     // Ensure that a rule exists.
     if(rule.maxSenderAmount > 0) {
@@ -279,7 +279,7 @@ contract Delegate is IDelegate, Ownable {
     Types.Order calldata _order
   ) external {
 
-    Rule memory rule = rules[_order.sender.token][_order.signer.token];
+    Types.Rule memory rule = rules[_order.sender.token][_order.signer.token];
 
     require(_order.signer.wallet == msg.sender,
       "SIGNER_MUST_BE_SENDER");
@@ -307,7 +307,7 @@ contract Delegate is IDelegate, Ownable {
       "PRICE_INCORRECT");
 
     // Overwrite the rule with a decremented maxSenderAmount.
-    rules[_order.sender.token][_order.signer.token] = Rule({
+    rules[_order.sender.token][_order.signer.token] = Types.Rule({
       maxSenderAmount: (rule.maxSenderAmount).sub(_order.sender.param),
       priceCoef: rule.priceCoef,
       priceExp: rule.priceExp
