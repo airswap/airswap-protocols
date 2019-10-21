@@ -133,9 +133,10 @@ contract Delegate is IDelegate, Ownable {
     * @dev 1 senderToken = priceCoef * 10^(-priceExp) * signerToken
     * @param _senderToken address The address of an ERC-20 token the delegate would send
     * @param _signerToken address The address of an ERC-20 token the consumer would send
-    * @param _maxSenderAmount uint256 The maximum amount of ERC-20 token the delegate would send
-    * @param _priceCoef uint256 The whole number that will be multiplied by 10^(-priceExp) - the price coefficient
-    * @param _priceExp uint256 The exponent of the price to indicate location of the decimal priceCoef * 10^(-priceExp)
+    * @param _rule Rule The rule explaining the trade wanting to be set. Constructed of:
+    * @dev maxSenderAmount: uint256 The maximum amount of ERC-20 token the delegate would send
+    * @dev priceCoef: uint256 The whole number that will be multiplied by 10^(-priceExp) - the price coefficient
+    * @dev priceExp: uint256 The exponent of the price to indicate location of the decimal priceCoef * 10^(-priceExp)
     */
   function setRule(
     address _senderToken,
