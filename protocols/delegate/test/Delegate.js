@@ -94,14 +94,12 @@ contract('Delegate', async accounts => {
 
   describe('Checks set and unset rule', async () => {
     it('Set and unset a rule for WETH/DAI', async () => {
-      await aliceDelegate.setRule(
-        tokenWETH.address,
-        tokenDAI.address,
-        100000,
-        300,
-        0,
-        { from: aliceAddress }
-      )
+      let rule = [100000, 300, 0]
+
+      await aliceDelegate.setRule(tokenWETH.address, tokenDAI.address, rule, {
+        from: aliceAddress,
+      })
+
       equal(
         await aliceDelegate.getSignerSideQuote.call(
           1,
@@ -110,9 +108,11 @@ contract('Delegate', async accounts => {
         ),
         300
       )
+
       await aliceDelegate.unsetRule(tokenWETH.address, tokenDAI.address, {
         from: aliceAddress,
       })
+
       equal(
         await aliceDelegate.getSignerSideQuote.call(
           1,
@@ -126,14 +126,12 @@ contract('Delegate', async accounts => {
 
   describe('Checks pricing logic from the Delegate', async () => {
     it('Send up to 100K WETH for DAI at 300 DAI/WETH', async () => {
-      await aliceDelegate.setRule(
-        tokenWETH.address,
-        tokenDAI.address,
-        100000,
-        300,
-        0,
-        { from: aliceAddress }
-      )
+      let rule = [100000, 300, 0]
+
+      await aliceDelegate.setRule(tokenWETH.address, tokenDAI.address, rule, {
+        from: aliceAddress,
+      })
+
       equal(
         await aliceDelegate.getSignerSideQuote.call(
           1,
@@ -145,14 +143,12 @@ contract('Delegate', async accounts => {
     })
 
     it('Send up to 100K DAI for WETH at 0.0032 WETH/DAI', async () => {
-      await aliceDelegate.setRule(
-        tokenDAI.address,
-        tokenWETH.address,
-        100000,
-        32,
-        4,
-        { from: aliceAddress }
-      )
+      let rule = [100000, 32, 4]
+
+      await aliceDelegate.setRule(tokenDAI.address, tokenWETH.address, rule, {
+        from: aliceAddress,
+      })
+
       equal(
         await aliceDelegate.getSignerSideQuote.call(
           100000,
@@ -164,14 +160,12 @@ contract('Delegate', async accounts => {
     })
 
     it('Send up to 100K WETH for DAI at 300.005 DAI/WETH', async () => {
-      await aliceDelegate.setRule(
-        tokenWETH.address,
-        tokenDAI.address,
-        100000,
-        300005,
-        3,
-        { from: aliceAddress }
-      )
+      let rule = [100000, 300005, 3]
+
+      await aliceDelegate.setRule(tokenWETH.address, tokenDAI.address, rule, {
+        from: aliceAddress,
+      })
+
       equal(
         await aliceDelegate.getSignerSideQuote.call(
           20000,
@@ -180,6 +174,7 @@ contract('Delegate', async accounts => {
         ),
         6000100
       )
+
       await aliceDelegate.unsetRule(tokenWETH.address, tokenDAI.address, {
         from: aliceAddress,
       })
@@ -190,13 +185,13 @@ contract('Delegate', async accounts => {
     before(
       'Adds a rule to send up to 100K DAI for WETH at 0.0032 WETH/DAI',
       async () => {
+        let rule = [100000, 32, 4]
+
         emitted(
           await aliceDelegate.setRule(
             tokenDAI.address,
             tokenWETH.address,
-            100000,
-            32,
-            4,
+            rule,
             { from: aliceAddress }
           ),
           'SetRule'
@@ -280,13 +275,13 @@ contract('Delegate', async accounts => {
   describe('Test tradeWallet logic', async () => {
     let quote
     before('sets up rule and quote', async () => {
+      let rule = [100000, 5, 3]
+
       // Delegate will trade up to 100,000 DAI for WETH, at 200 DAI/WETH
       await aliceDelegate.setRule(
         tokenDAI.address, // Delegate's token
         tokenWETH.address, // Signer's token
-        100000,
-        5,
-        3,
+        rule,
         { from: aliceAddress }
       )
       // Signer wants to trade 1 WETH for x DAI
@@ -509,15 +504,15 @@ contract('Delegate', async accounts => {
     })
 
     it('Use quote larger than delegate rule', async () => {
+      let rule = [2, 100, 0]
       // Delegate trades WETH for 100 DAI. Max trade is 2 WETH.
       await aliceDelegate.setRule(
         tokenWETH.address, // Delegate's token
         tokenDAI.address, // Signer's token
-        2,
-        100,
-        0,
+        rule,
         { from: aliceAddress }
       )
+
       const order = await orders.getOrder({
         signer: {
           wallet: bobAddress,
