@@ -90,7 +90,7 @@ contract Delegate is IDelegate, Ownable {
     * @notice determines if an address to interact with this delegate
     * @param _addressToCheck the address to check if admin or not
     */
-  function isAdmin(address _addressToCheck) view external returns (bool) {
+  function isAdmin(address _addressToCheck) external view returns (bool) {
     return admins[_addressToCheck];
   }
 
