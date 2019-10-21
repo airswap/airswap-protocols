@@ -140,23 +140,17 @@ contract Delegate is IDelegate, Ownable {
   function setRule(
     address _senderToken,
     address _signerToken,
-    uint256 _maxSenderAmount,
-    uint256 _priceCoef,
-    uint256 _priceExp
+    Rule _rule
   ) external onlyAdmin {
 
-    rules[_senderToken][_signerToken] = Rule({
-      maxSenderAmount: _maxSenderAmount,
-      priceCoef: _priceCoef,
-      priceExp: _priceExp
-    });
+    rules[_senderToken][_signerToken] = _rule;
 
     emit SetRule(
       _senderToken,
       _signerToken,
-      _maxSenderAmount,
-      _priceCoef,
-      _priceExp
+      _rule.maxSenderAmount,
+      _rule.priceCoef,
+      _rule.priceExp
     );
   }
 
