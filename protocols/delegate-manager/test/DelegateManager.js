@@ -63,13 +63,7 @@ contract('DelegateManager Integration Tests', async accounts => {
 
   describe('Test setRuleAndIntent()', async () => {
     it('Test successfully calling setRuleAndIntent', async () => {
-      let rule = [
-        WETH_TOKEN.address, 
-        DAI_TOKEN.address, 
-        100000, 
-        300, 
-        0
-      ]
+      let rule = [WETH_TOKEN.address, DAI_TOKEN.address, 100000, 300, 0]
 
       let intent = [
         DAI_TOKEN.address,
