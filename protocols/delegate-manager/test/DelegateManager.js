@@ -47,7 +47,7 @@ contract('DelegateManager Integration Tests', async accounts => {
     )
 
     indexer = await Indexer.new(stakeToken.address, delegateFactory.address)
-    await indexer.createIndex(WETH_TOKEN.address, DAI_TOKEN.address)
+    await indexer.createIndex(DAI_TOKEN.address, WETH_TOKEN.address)
   })
 
   describe('Test initial values', async () => {
@@ -63,11 +63,17 @@ contract('DelegateManager Integration Tests', async accounts => {
 
   describe('Test setRuleAndIntent()', async () => {
     it('Test successfully calling setRuleAndIntent', async () => {
-      let rule = [WETH_TOKEN.address, DAI_TOKEN.address, 100000, 300, 0]
+      let rule = [
+        WETH_TOKEN.address, 
+        DAI_TOKEN.address, 
+        100000, 
+        300, 
+        0
+      ]
 
       let intent = [
-        WETH_TOKEN.address,
         DAI_TOKEN.address,
+        WETH_TOKEN.address,
         INTENT_AMOUNT,
         padAddressToLocator(delegateAddress),
       ]
@@ -81,8 +87,8 @@ contract('DelegateManager Integration Tests', async accounts => {
 
       //check the score of the manager before
       let scoreBefore = await indexer.getScore(
-        WETH_TOKEN.address,
         DAI_TOKEN.address,
+        WETH_TOKEN.address,
         delegateManager.address
       )
       equal(scoreBefore.toNumber(), 0, 'intent score is incorrect')
@@ -93,8 +99,8 @@ contract('DelegateManager Integration Tests', async accounts => {
 
       //check the score of the manager after
       let scoreAfter = await indexer.getScore(
-        WETH_TOKEN.address,
         DAI_TOKEN.address,
+        WETH_TOKEN.address,
         delegateManager.address
       )
       equal(scoreAfter.toNumber(), INTENT_AMOUNT, 'intent score is incorrect')
@@ -109,24 +115,24 @@ contract('DelegateManager Integration Tests', async accounts => {
     it('Test successfully calling unsetRuleAndIntent()', async () => {
       //check the score of the manager before
       let scoreBefore = await indexer.getScore(
-        WETH_TOKEN.address,
         DAI_TOKEN.address,
+        WETH_TOKEN.address,
         delegateManager.address
       )
       equal(scoreBefore.toNumber(), INTENT_AMOUNT, 'intent score is incorrect')
 
       await passes(
         delegateManager.unsetRuleAndIntent(
-          WETH_TOKEN.address,
           DAI_TOKEN.address,
+          WETH_TOKEN.address,
           indexer.address
         )
       )
 
       //check the score of the manager after
       let scoreAfter = await indexer.getScore(
-        WETH_TOKEN.address,
         DAI_TOKEN.address,
+        WETH_TOKEN.address,
         delegateManager.address
       )
       equal(scoreAfter.toNumber(), 0, 'intent score is incorrect')
