@@ -17,8 +17,8 @@ contract('DelegateManager Unit Tests', async accounts => {
   let delegateManager
   let mockFactory
   let mockSwap
-  let mockWETH
-  let mockDAI
+  let mockWETH = accounts[2]
+  let mockDAI = accounts[3]
   let mockStakeToken
   let mockStakeToken_allowance
   let mockStakeToken_transferFrom
@@ -37,9 +37,6 @@ contract('DelegateManager Unit Tests', async accounts => {
   })
 
   async function setupMockTokens() {
-    mockWETH = await MockContract.new()
-    mockDAI = await MockContract.new()
-
     mockStakeToken = await MockContract.new()
     let mockERC20Template = await ERC20.new()
 
@@ -83,12 +80,6 @@ contract('DelegateManager Unit Tests', async accounts => {
       .unsetRule(EMPTY_ADDRESS, EMPTY_ADDRESS)
       .encodeABI()
     await mockDelegate.givenMethodReturnBool(mockDelegate_unsetRule, true)
-
-    //mock owner()
-    let mockDelegate_owner = mockDelegateTemplate.contract.methods
-      .owner()
-      .encodeABI()
-    await mockDelegate.givenMethodReturnAddress(mockDelegate_owner, owner)
   }
 
   async function setupMockFactory() {
@@ -166,12 +157,12 @@ contract('DelegateManager Unit Tests', async accounts => {
       let delegateAddress = await delegateManager.delegate.call()
       let indexerAddress = mockIndexer.address
 
-      let rule = [mockWETH.address, mockWETH.address, 100000, 300, 0]
+      let rule = [mockWETH, mockWETH, 100000, 300, 0]
 
       let intentAmount = 250
       let intent = [
-        mockWETH.address,
-        mockDAI.address,
+        mockWETH,
+        mockDAI,
         intentAmount,
         padAddressToLocator(delegateAddress),
       ]
@@ -195,12 +186,12 @@ contract('DelegateManager Unit Tests', async accounts => {
       let delegateAddress = await delegateManager.delegate.call()
       let indexerAddress = mockIndexer.address
 
-      let rule = [mockWETH.address, mockDAI.address, 100000, 300, 0]
+      let rule = [mockWETH, mockDAI, 100000, 300, 0]
 
       let intentAmount = 250
       let intent = [
-        mockWETH.address,
-        mockWETH.address,
+        mockWETH,
+        mockWETH,
         intentAmount,
         padAddressToLocator(delegateAddress),
       ]
@@ -224,12 +215,12 @@ contract('DelegateManager Unit Tests', async accounts => {
       let delegateAddress = await delegateManager.delegate.call()
       let indexerAddress = mockIndexer.address
 
-      let rule = [mockWETH.address, mockDAI.address, 100000, 300, 0]
+      let rule = [mockWETH, mockDAI, 100000, 300, 0]
 
       let intentAmount = 250
       let intent = [
-        mockDAI.address,
-        mockWETH.address,
+        mockDAI,
+        mockWETH,
         intentAmount,
         padAddressToLocator(delegateAddress),
       ]
@@ -253,12 +244,12 @@ contract('DelegateManager Unit Tests', async accounts => {
       let delegateAddress = mockDelegate.address
       let indexerAddress = mockIndexer.address
 
-      let rule = [mockWETH.address, mockDAI.address, 100000, 300, 0]
+      let rule = [mockWETH, mockDAI, 100000, 300, 0]
 
       let intentAmount = 250
       let intent = [
-        mockDAI.address,
-        mockWETH.address,
+        mockDAI,
+        mockWETH,
         intentAmount,
         padAddressToLocator(delegateAddress),
       ]
@@ -286,12 +277,12 @@ contract('DelegateManager Unit Tests', async accounts => {
       let delegateAddress = mockDelegate.address
       let indexerAddress = mockIndexer.address
 
-      let rule = [mockWETH.address, mockDAI.address, 100000, 300, 0]
+      let rule = [mockWETH, mockDAI, 100000, 300, 0]
 
       let intentAmount = 250
       let intent = [
-        mockDAI.address,
-        mockWETH.address,
+        mockDAI,
+        mockWETH,
         intentAmount,
         padAddressToLocator(delegateAddress),
       ]
@@ -319,12 +310,12 @@ contract('DelegateManager Unit Tests', async accounts => {
       let delegateAddress = mockDelegate.address
       let indexerAddress = mockIndexer.address
 
-      let rule = [mockWETH.address, mockDAI.address, 100000, 300, 0]
+      let rule = [mockWETH, mockDAI, 100000, 300, 0]
 
       let intentAmount = 250
       let intent = [
-        mockDAI.address,
-        mockWETH.address,
+        mockDAI,
+        mockWETH,
         intentAmount,
         padAddressToLocator(delegateAddress),
       ]
@@ -361,8 +352,8 @@ contract('DelegateManager Unit Tests', async accounts => {
 
       await reverted(
         delegateManager.unsetRuleAndIntent(
-          mockWETH.address,
-          mockDAI.address,
+          mockWETH,
+          mockDAI,
           indexerAddress
         ),
         'TRANSFER_FUNDS_ERROR'
@@ -381,8 +372,8 @@ contract('DelegateManager Unit Tests', async accounts => {
 
       await passes(
         delegateManager.unsetRuleAndIntent(
-          mockWETH.address,
-          mockDAI.address,
+          mockWETH,
+          mockDAI,
           indexerAddress
         )
       )
