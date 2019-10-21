@@ -55,6 +55,7 @@ contract('DelegateManager Integration Tests', async accounts => {
       let val = await delegateManager.factory.call()
       equal(val, delegateFactory.address, 'factory was not properly set')
     })
+
     it('Test delegate address', async () => {
       delegateAddress = await delegateManager.delegate.call()
       //TODO: ensure it's not empty
