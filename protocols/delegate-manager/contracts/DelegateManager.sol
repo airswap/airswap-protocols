@@ -21,7 +21,7 @@ import "@airswap/indexer/contracts/interfaces/IIndexer.sol";
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "@airswap/delegate-factory/contracts/interfaces/IDelegateFactory.sol";
 import "@airswap/delegate/contracts/interfaces/IDelegate.sol";
-import "@airswap/types/contracts/Types.sol";
+import "@airswap/structs/contracts/Structs.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 
@@ -51,8 +51,8 @@ contract DelegateManager is Ownable {
       * @param _indexer the indexer the intent will be set on
       */
     function setRuleAndIntent(
-      Types.Rule calldata _rule,
-      Types.Intent calldata _intent,
+      Structs.Rule calldata _rule,
+      Structs.Intent calldata _intent,
       IIndexer _indexer
     ) external onlyOwner {
       
