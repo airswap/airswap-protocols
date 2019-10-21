@@ -55,6 +55,10 @@ contract DelegateManager is Ownable {
       Types.Intent calldata _intent,
       IIndexer _indexer
     ) external onlyOwner {
+      
+      //verify the rule and intent
+      require(_rule.senderToken == _intent.senderToken, "SENDER_TOKEN_MISMATCH");
+      require(_rule.signerToken == _intent.signerToken, "SIGNER_TOKEN_MISMATCH");
 
       delegate.setRule(
         _rule.senderToken,
@@ -99,7 +103,6 @@ contract DelegateManager is Ownable {
       address _senderToken, 
       IIndexer _indexer
     ) external onlyOwner {
-
 
       delegate.unsetRule(_senderToken, _signerToken);
 
