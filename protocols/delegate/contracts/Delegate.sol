@@ -140,7 +140,7 @@ contract Delegate is IDelegate, Ownable {
   function setRule(
     address _senderToken,
     address _signerToken,
-    Rule _rule
+    Rule calldata _rule
   ) external onlyAdmin {
 
     rules[_senderToken][_signerToken] = _rule;
