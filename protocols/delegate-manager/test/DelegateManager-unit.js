@@ -191,7 +191,7 @@ contract('DelegateManager Unit Tests', async accounts => {
       )
     })
 
-    it('Test calling setRuleAndIntent with sender token mismatch', async() => {
+    it('Test calling setRuleAndIntent with signer token mismatch', async() => {
       let delegateAddress = await delegateManager.delegate.call()
       let indexerAddress = mockIndexer.address
 
