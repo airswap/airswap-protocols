@@ -111,8 +111,8 @@ contract Indexer is IIndexer, Ownable {
     * @notice Set an Intent to Trade
     * @dev Requires approval to transfer staking token for sender
     *
-    * @param _signerToken the address of the ERC-20 token a Consumer would send
-    * @param _senderToken the address of the ERC-20 token a Consumer would receive
+    * @param _signerToken address
+    * @param _senderToken address
     * @param _amount uint256
     * @param _locator bytes32
     */
@@ -155,8 +155,8 @@ contract Indexer is IIndexer, Ownable {
     * @notice Unset an Intent to Trade
     * @dev Users are allowed unstake from blacklisted indexes
     *
-    * @param _signerToken the address of the ERC-20 token a Consumer would send
-    * @param _senderToken the address of the ERC-20 token a Consumer would receive
+    * @param _signerToken address
+    * @param _senderToken address
     */
   function unsetIntent(
     address _signerToken,
@@ -189,8 +189,8 @@ contract Indexer is IIndexer, Ownable {
 
   /**
     * @notice Gets the locator score for a token pair
-    * @param _signerToken the address of the ERC-20 token a Consumer would send
-    * @param _senderToken the address of the ERC-20 token a Consumer would receive
+    * @param _signerToken address
+    * @param _senderToken address
     * @return uint256 the locator score
     */
   function getScore(address _signerToken, address _senderToken, address _user) external view returns (uint256) {
@@ -206,8 +206,8 @@ contract Indexer is IIndexer, Ownable {
     * @notice Get the locators of those trading a token pair
     * @dev Users are allowed unstake from blacklisted indexes
     *
-    * @param _signerToken the address of the ERC-20 token a Consumer would send
-    * @param _senderToken the address of the ERC-20 token a Consumer would receive
+    * @param _signerToken address
+    * @param _senderToken address
     * @param _count uint256
     * @return locators address[]
     */
