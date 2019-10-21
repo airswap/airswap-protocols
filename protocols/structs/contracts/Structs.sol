@@ -36,3 +36,4 @@ library Structs {
     uint256 amount;               // The amount to take
     bytes32 locator;              // Locator data
   }
+}
