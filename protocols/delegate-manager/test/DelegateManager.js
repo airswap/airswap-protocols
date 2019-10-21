@@ -4,18 +4,19 @@ const Indexer = artifacts.require('Indexer')
 const Delegate = artifacts.require('Delegate')
 const DelegateFactory = artifacts.require('DelegateFactory')
 const DelegateManager = artifacts.require('DelegateManager')
-const { equal, passes } = require('@airswap/test-utils').assert
+const { equal, notEqual, passes } = require('@airswap/test-utils').assert
+const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 const { padAddressToLocator } = require('@airswap/test-utils').padding
 
 contract('DelegateManager Integration Tests', async accounts => {
   const STARTING_BALANCE = 700
   const INTENT_AMOUNT = 250
   let owner = accounts[0]
-  let notOwner = accounts[2]
-  let tradeWallet = accounts[1]
+  let notOwner = accounts[1]
+  let tradeWallet = accounts[2]
   let DAI_TOKEN
   let WETH_TOKEN
-  let stakeToken
+  let STAKE_TOKEN
   let swap
   let indexer
   let delegateFactory
@@ -23,11 +24,11 @@ contract('DelegateManager Integration Tests', async accounts => {
   let delegateAddress
 
   async function setupTokenAmounts() {
-    await stakeToken.mint(owner, STARTING_BALANCE)
+    await STAKE_TOKEN.mint(owner, STARTING_BALANCE)
     await DAI_TOKEN.mint(owner, STARTING_BALANCE)
     await WETH_TOKEN.mint(owner, STARTING_BALANCE)
 
-    await stakeToken.mint(notOwner, STARTING_BALANCE)
+    await STAKE_TOKEN.mint(notOwner, STARTING_BALANCE)
     await DAI_TOKEN.mint(notOwner, STARTING_BALANCE)
     await WETH_TOKEN.mint(notOwner, STARTING_BALANCE)
   }
@@ -35,7 +36,7 @@ contract('DelegateManager Integration Tests', async accounts => {
   before(async () => {
     DAI_TOKEN = await ERC20.new()
     WETH_TOKEN = await ERC20.new()
-    stakeToken = await ERC20.new()
+    STAKE_TOKEN = await ERC20.new()
     await setupTokenAmounts()
 
     swap = await Swap.new()
@@ -46,7 +47,7 @@ contract('DelegateManager Integration Tests', async accounts => {
       tradeWallet
     )
 
-    indexer = await Indexer.new(stakeToken.address, delegateFactory.address)
+    indexer = await Indexer.new(STAKE_TOKEN.address, delegateFactory.address)
     await indexer.createIndex(DAI_TOKEN.address, WETH_TOKEN.address)
   })
 
@@ -58,7 +59,7 @@ contract('DelegateManager Integration Tests', async accounts => {
 
     it('Test delegate address', async () => {
       delegateAddress = await delegateManager.delegate.call()
-      //TODO: ensure it's not empty
+      notEqual(delegateAddress, EMPTY_ADDRESS)
     })
   })
 
@@ -78,7 +79,7 @@ contract('DelegateManager Integration Tests', async accounts => {
       await delegate.addAdmin(delegateManager.address)
 
       //give allowance to the delegateManager to pull staking amount
-      await stakeToken.approve(delegateManager.address, INTENT_AMOUNT)
+      await STAKE_TOKEN.approve(delegateManager.address, INTENT_AMOUNT)
 
       //check the score of the manager before
       let scoreBefore = await indexer.getScore(
@@ -101,7 +102,7 @@ contract('DelegateManager Integration Tests', async accounts => {
       equal(scoreAfter.toNumber(), INTENT_AMOUNT, 'intent score is incorrect')
 
       //check owner stake balance has been reduced
-      let stakeTokenBal = await stakeToken.balanceOf(owner)
+      let stakeTokenBal = await STAKE_TOKEN.balanceOf(owner)
       equal(stakeTokenBal.toNumber(), STARTING_BALANCE - INTENT_AMOUNT)
     })
   })
@@ -133,7 +134,7 @@ contract('DelegateManager Integration Tests', async accounts => {
       equal(scoreAfter.toNumber(), 0, 'intent score is incorrect')
 
       //check owner stake balance has been increased
-      let stakeTokenBal = await stakeToken.balanceOf(owner)
+      let stakeTokenBal = await STAKE_TOKEN.balanceOf(owner)
 
       equal(stakeTokenBal.toNumber(), STARTING_BALANCE)
     })
