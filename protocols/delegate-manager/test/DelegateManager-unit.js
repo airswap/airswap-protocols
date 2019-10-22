@@ -153,7 +153,7 @@ contract('DelegateManager Unit Tests', async accounts => {
   })
 
   describe('Test setRuleAndIntent()', async () => {
-    it('Test calling setRuleAndIntent with sender token mismatch', async() => {
+    it('Test calling setRuleAndIntent with sender token mismatch', async () => {
       let delegateAddress = await delegateManager.delegate.call()
       let indexerAddress = mockIndexer.address
 
@@ -182,7 +182,7 @@ contract('DelegateManager Unit Tests', async accounts => {
       )
     })
 
-    it('Test calling setRuleAndIntent with signer token mismatch', async() => {
+    it('Test calling setRuleAndIntent with signer token mismatch', async () => {
       let delegateAddress = await delegateManager.delegate.call()
       let indexerAddress = mockIndexer.address
 
@@ -351,11 +351,7 @@ contract('DelegateManager Unit Tests', async accounts => {
       await mockStakeToken.givenMethodReturnBool(mockStakeToken_transfer, false)
 
       await reverted(
-        delegateManager.unsetRuleAndIntent(
-          mockWETH,
-          mockDAI,
-          indexerAddress
-        ),
+        delegateManager.unsetRuleAndIntent(mockWETH, mockDAI, indexerAddress),
         'TRANSFER_FUNDS_ERROR'
       )
     })
@@ -371,11 +367,7 @@ contract('DelegateManager Unit Tests', async accounts => {
       await mockStakeToken.givenMethodReturnBool(mockStakeToken_transfer, true)
 
       await passes(
-        delegateManager.unsetRuleAndIntent(
-          mockWETH,
-          mockDAI,
-          indexerAddress
-        )
+        delegateManager.unsetRuleAndIntent(mockWETH, mockDAI, indexerAddress)
       )
     })
   })
