@@ -18,7 +18,7 @@
     "test": "truffle test"
   },
   "devDependencies": {
-    "@airswap/order-utils": "0.3.1",
+    "@airswap/order-utils": "0.3.3",
     "@airswap/test-utils": "0.1.0",
     "solidity-coverage": "^0.6.3"
   },
