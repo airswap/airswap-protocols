@@ -23,6 +23,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
   let tokenWETH
 
   let aliceLocator = padAddressToLocator(aliceAddress)
+  let emptyLocator = padAddressToLocator(EMPTY_ADDRESS)
 
   before('Setup', async () => {
     let snapShot = await takeSnapshot()
@@ -83,7 +84,9 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
           from: bobAddress,
         }
       )
-      equal(intents.length, 0)
+      equal(intents.length, 10)
+      equal(intents[0], emptyLocator)
+      equal(intents[1], emptyLocator)
     })
 
     it('Bob ensures no intents are on the Indexer for non-existing index', async () => {
@@ -213,25 +216,14 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
         tokenWETH.address,
         tokenDAI.address,
         EMPTY_ADDRESS,
-        10,
+        5,
         {
           from: bobAddress,
         }
       )
-      equal(intents.length, 1)
-    })
-
-    it('Bob ensures that Alice intent is on the Indexer', async () => {
-      const intents = await indexer.getIntents.call(
-        tokenWETH.address,
-        tokenDAI.address,
-        EMPTY_ADDRESS,
-        10,
-        {
-          from: bobAddress,
-        }
-      )
+      equal(intents.length, 5)
       equal(intents[0], aliceLocator)
+      equal(intents[1], emptyLocator)
     })
 
     it('Alice attempts to unset non-existent index and reverts', async () => {
@@ -276,7 +268,9 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
           from: bobAddress,
         }
       )
-      equal(intents.length, 0)
+      equal(intents.length, 10)
+      equal(intents[0], emptyLocator)
+      equal(intents[1], emptyLocator)
     })
 
     it('Alice attempts to set an intent and succeeds', async () => {
