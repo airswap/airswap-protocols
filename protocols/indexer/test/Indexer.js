@@ -77,6 +77,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
       const intents = await indexer.getIntents.call(
         tokenWETH.address,
         tokenDAI.address,
+        EMPTY_ADDRESS,
         10,
         {
           from: bobAddress,
@@ -89,6 +90,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
       const intents = await indexer.getIntents.call(
         tokenDAI.address,
         tokenWETH.address,
+        EMPTY_ADDRESS,
         10,
         {
           from: bobAddress,
@@ -210,6 +212,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
       const intents = await indexer.getIntents.call(
         tokenWETH.address,
         tokenDAI.address,
+        EMPTY_ADDRESS,
         10,
         {
           from: bobAddress,
@@ -222,6 +225,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
       const intents = await indexer.getIntents.call(
         tokenWETH.address,
         tokenDAI.address,
+        EMPTY_ADDRESS,
         10,
         {
           from: bobAddress,
@@ -266,6 +270,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
       const intents = await indexer.getIntents.call(
         tokenWETH.address,
         tokenDAI.address,
+        EMPTY_ADDRESS,
         10,
         {
           from: bobAddress,
@@ -312,6 +317,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
       const intents = await indexer.getIntents.call(
         tokenWETH.address,
         tokenDAI.address,
+        EMPTY_ADDRESS,
         10,
         {
           from: bobAddress,

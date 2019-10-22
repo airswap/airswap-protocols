@@ -414,7 +414,7 @@ contract('Indexer Unit Tests', async accounts => {
 
   describe('Test getIntents', async () => {
     it('should return an empty array if the index doesnt exist', async () => {
-      let intents = await indexer.getIntents.call(tokenOne, tokenTwo, 4)
+      let intents = await indexer.getIntents.call(tokenOne, tokenTwo, EMPTY_ADDRESS, 4)
       equal(intents.length, 0, 'intents array should be empty')
     })
 
@@ -435,7 +435,7 @@ contract('Indexer Unit Tests', async accounts => {
       })
 
       // now try to get the intents
-      let intents = await indexer.getIntents.call(tokenOne, tokenTwo, 4)
+      let intents = await indexer.getIntents.call(tokenOne, tokenTwo, EMPTY_ADDRESS, 4)
       equal(intents.length, 0, 'intents array should be empty')
     })
 
@@ -454,11 +454,11 @@ contract('Indexer Unit Tests', async accounts => {
       })
 
       // now try to get the intents
-      let intents = await indexer.getIntents.call(tokenOne, tokenTwo, 4)
+      let intents = await indexer.getIntents.call(tokenOne, tokenTwo, EMPTY_ADDRESS, 4)
       equal(intents.length, 2, 'intents array should be size 2')
 
       // should only get the number specified
-      intents = await indexer.getIntents.call(tokenOne, tokenTwo, 1)
+      intents = await indexer.getIntents.call(tokenOne, tokenTwo, EMPTY_ADDRESS, 1)
       equal(intents.length, 1, 'intents array should be size 1')
     })
   })
