@@ -206,17 +206,11 @@ contract Indexer is IIndexer, Ownable {
     bytes32[] memory locators
   ) {
     // Ensure neither token is blacklisted.
-    if (!blacklist[_signerToken] && !blacklist[_senderToken]) {
-
-      // Ensure the index exists.
-      if (indexes[_signerToken][_senderToken] != Index(0)) {
-
-        // Return an array of locators for the index.
-        return indexes[_signerToken][_senderToken].fetchLocators(_startAddress, _count);
-
-      }
-
+    if (!blacklist[_signerToken] && !blacklist[_senderToken] && indexes[_signerToken][_senderToken] != Index(0)) {
+      // Return an array of locators for the index.
+      return indexes[_signerToken][_senderToken].fetchLocators(_startAddress, _count);
     }
     return new bytes32[](0);
   }
+
 }
