@@ -49,14 +49,14 @@ contract DelegateManager is Ownable {
       * @param _senderToken the token the delgeate will send
       * @param _senderToken the token the delegate will receive 
       * @param _rule the rule to set on a delegate
-      * @param _amount the amount to set an intent for
+      * @param _amountToStake the amount to stake for an intent
       * @param _indexer the indexer the intent will be set on
       */
     function setRuleAndIntent(
       address _senderToken,
       address _signerToken,
       Types.Rule calldata _rule,
-      uint256 _amount,
+      uint256 _amountToStake,
       IIndexer _indexer
     ) external onlyOwner {
       
@@ -70,23 +70,23 @@ contract DelegateManager is Ownable {
 
       require(
         IERC20(_indexer.stakeToken())
-        .allowance(msg.sender, address(this)) >= _amount, "ALLOWANCE_FUNDS_ERROR"
+        .allowance(msg.sender, address(this)) >= _amountToStake, "ALLOWANCE_FUNDS_ERROR"
       );
       require(
         IERC20(_indexer.stakeToken())
-        .transferFrom(msg.sender, address(this), _amount), "TRANSFER_FUNDS_ERROR"
+        .transferFrom(msg.sender, address(this), _amountToStake), "TRANSFER_FUNDS_ERROR"
       );
 
       //ensure that the indexer can pull funds from manager's account
       require(
         IERC20(_indexer.stakeToken())
-        .approve(address(_indexer), _amount), "APPROVAL_ERROR"
+        .approve(address(_indexer), _amountToStake), "APPROVAL_ERROR"
       );
 
       _indexer.setIntent(
         _signerToken,
         _senderToken,
-        _amount,
+        _amountToStake,
        bytes32(uint256(address(delegate)) << 96) //NOTE: this will pad 0's to the right
       );
     }
