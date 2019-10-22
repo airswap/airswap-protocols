@@ -65,7 +65,7 @@ contract DelegateFrontend {
       _senderToken,
       address(0),
       _maxIntents
-      );
+    );
 
     // Iterate through locators.
     for (uint256 i; i < locators.length; i++) {
@@ -112,7 +112,7 @@ contract DelegateFrontend {
       _senderToken,
       address(0),
       _maxIntents
-      );
+    );
 
     // Iterate through locators.
     for (uint256 i; i < locators.length; i++) {
