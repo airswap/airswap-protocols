@@ -134,6 +134,32 @@ contract('Index Unit Tests', async accounts => {
       equal(locators[2], bobLocatorData, 'Bob should be third')
     })
 
+    it('should insert an identical stake after the pre-existing one', async () => {
+      // two at 2000 and two at 0
+      await index.setLocator(aliceAddress, 2000, aliceLocatorData, {
+        from: owner,
+      })
+      await index.setLocator(bobAddress, 0, bobLocatorData, {
+        from: owner,
+      })
+
+      await index.setLocator(carolAddress, 2000, carolLocatorData, {
+        from: owner,
+      })
+      await index.setLocator(davidAddress, 0, davidLocatorData, {
+        from: owner,
+      })
+
+      let listLength = await index.length()
+      equal(listLength, 4, 'Link list length should be 4')
+
+      const locators = await index.fetchLocators(EMPTY_ADDRESS, 7)
+      equal(locators[0], aliceLocatorData, 'Alice should be first')
+      equal(locators[1], carolLocatorData, 'Carol should be second')
+      equal(locators[2], bobLocatorData, 'Bob should be third')
+      equal(locators[3], davidLocatorData, 'David should be fourth')
+    })
+
     it('should not be able to set a second locator if one already exists for an address', async () => {
       let trx = index.setLocator(aliceAddress, 2000, aliceLocatorData, {
         from: owner,
