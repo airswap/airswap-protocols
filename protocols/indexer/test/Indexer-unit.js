@@ -417,7 +417,12 @@ contract('Indexer Unit Tests', async accounts => {
 
   describe('Test getIntents', async () => {
     it('should return an empty array if the index doesnt exist', async () => {
-      let intents = await indexer.getIntents.call(tokenOne, tokenTwo, EMPTY_ADDRESS, 3)
+      let intents = await indexer.getIntents.call(
+        tokenOne,
+        tokenTwo,
+        EMPTY_ADDRESS,
+        3
+      )
       equal(intents.length, 0, 'intents array should be size 0')
     })
 
@@ -438,7 +443,12 @@ contract('Indexer Unit Tests', async accounts => {
       })
 
       // now try to get the intents
-      let intents = await indexer.getIntents.call(tokenOne, tokenTwo, EMPTY_ADDRESS, 4)
+      let intents = await indexer.getIntents.call(
+        tokenOne,
+        tokenTwo,
+        EMPTY_ADDRESS,
+        4
+      )
       equal(intents.length, 0, 'intents array should be size 0')
     })
 
@@ -460,7 +470,12 @@ contract('Indexer Unit Tests', async accounts => {
       })
 
       // now try to get the intents
-      let intents = await indexer.getIntents.call(tokenOne, tokenTwo, EMPTY_ADDRESS, 4)
+      let intents = await indexer.getIntents.call(
+        tokenOne,
+        tokenTwo,
+        EMPTY_ADDRESS,
+        4
+      )
       equal(intents.length, 4, 'intents array should be size 4')
       equal(intents[0], bobLocator, 'intent should be bob')
       equal(intents[1], carolLocator, 'intent should be carol')
@@ -468,12 +483,22 @@ contract('Indexer Unit Tests', async accounts => {
       equal(intents[3], emptyLocatorData, 'intent should be empty')
 
       // should only get the number specified
-      intents = await indexer.getIntents.call(tokenOne, tokenTwo, EMPTY_ADDRESS, 1)
+      intents = await indexer.getIntents.call(
+        tokenOne,
+        tokenTwo,
+        EMPTY_ADDRESS,
+        1
+      )
       equal(intents.length, 1, 'intents array should be size 1')
       equal(intents[0], bobLocator, 'intent should be bob')
 
       // should start in the specified location
-      intents = await indexer.getIntents.call(tokenOne, tokenTwo, carolAddress, 5)
+      intents = await indexer.getIntents.call(
+        tokenOne,
+        tokenTwo,
+        carolAddress,
+        5
+      )
       equal(intents.length, 5, 'intents array should be size 5')
       equal(intents[0], carolLocator, 'intent should be carol')
       equal(intents[1], aliceLocator, 'intent should be alice')
