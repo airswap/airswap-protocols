@@ -1,4 +1,4 @@
-pragma solidity 0.5.10;
+pragma solidity 0.5.12;
 
 import "@airswap/swap/contracts/Swap.sol";
 import "@airswap/indexer/contracts/Indexer.sol";
