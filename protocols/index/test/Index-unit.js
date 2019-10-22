@@ -49,8 +49,9 @@ contract('Index Unit Tests', async accounts => {
       let listLength = await index.length()
       equal(listLength, 0, 'Link list length should be 0')
 
-      let locators = await index.fetchLocators(10)
-      equal(locators.length, 0, 'list should have 0 locators')
+      let locators = await index.fetchLocators(EMPTY_ADDRESS, 10)
+      equal(locators.length, 10, 'list should have 10 slots')
+      equal(locators[0], emptyLocatorData, 'The locator should be empty')
     })
   })
 
@@ -83,9 +84,10 @@ contract('Index Unit Tests', async accounts => {
       })
 
       // check it has been inserted into the linked list correctly
-      let locators = await index.fetchLocators(10)
-      equal(locators.length, 1, 'list should have 1 locator')
+      let locators = await index.fetchLocators(EMPTY_ADDRESS, 10)
+      equal(locators.length, 10, 'list should be of size 10')
       equal(locators[0], aliceLocatorData, 'Alice should be in list')
+      equal(locators[1], emptyLocatorData, 'The second locator should be empty')
 
       // check the length has increased
       let listLength = await index.length()
@@ -119,7 +121,7 @@ contract('Index Unit Tests', async accounts => {
       let listLength = await index.length()
       equal(listLength, 3, 'Link list length should be 3')
 
-      const locators = await index.fetchLocators(7)
+      const locators = await index.fetchLocators(EMPTY_ADDRESS, 7)
       equal(locators[0], aliceLocatorData, 'Alice should be first')
       equal(locators[1], carolLocatorData, 'Carol should be second')
       equal(locators[2], bobLocatorData, 'Bob should be third')
@@ -171,7 +173,7 @@ contract('Index Unit Tests', async accounts => {
       let listLength = await index.length()
       equal(listLength, 3, 'Link list length should be 3')
 
-      const locators = await index.fetchLocators(7)
+      const locators = await index.fetchLocators(EMPTY_ADDRESS, 7)
       equal(locators[0], aliceLocatorData, 'Alice should be first')
       equal(locators[1], carolLocatorData, 'Carol should be second')
       equal(locators[2], bobLocatorData, 'Bob should be third')
@@ -193,7 +195,7 @@ contract('Index Unit Tests', async accounts => {
       let listLength = await index.length()
       equal(listLength, 2, 'Link list length should be 2')
 
-      let locators = await index.fetchLocators(7)
+      let locators = await index.fetchLocators(EMPTY_ADDRESS, 7)
       equal(locators[0], aliceLocatorData, 'Alice should be first')
       equal(locators[1], carolLocatorData, 'Carol should be second')
 
@@ -203,8 +205,12 @@ contract('Index Unit Tests', async accounts => {
       listLength = await index.length()
       equal(listLength, 0, 'Link list length should be 0')
 
-      locators = await index.fetchLocators(10)
-      equal(locators.length, 0, 'list should have 0 locators')
+      locators = await index.fetchLocators(EMPTY_ADDRESS, 4)
+      equal(locators.length, 4, 'list should have 4 locators')
+      equal(locators[0], emptyLocatorData, 'The first locator should be empty')
+      equal(locators[1], emptyLocatorData, 'The second locator should be empty')
+      equal(locators[2], emptyLocatorData, 'The third locator should be empty')
+      equal(locators[3], emptyLocatorData, 'The fouth locator should be empty')
     })
 
     it('unsetting locator twice in a row for an address has no effect', async () => {
@@ -216,7 +222,7 @@ contract('Index Unit Tests', async accounts => {
       await passes(trx)
       equal(size, 2, 'Locator was improperly removed')
 
-      let locators = await index.fetchLocators(7)
+      let locators = await index.fetchLocators(EMPTY_ADDRESS, 7)
       equal(locators[0], aliceLocatorData, 'Alice should be first')
       equal(locators[1], carolLocatorData, 'Carol should be second')
     })
@@ -288,8 +294,9 @@ contract('Index Unit Tests', async accounts => {
 
   describe('Test fetchLocators', async () => {
     it('returns an empty array with no locators', async () => {
-      const locators = await index.fetchLocators(7)
-      equal(locators.length, 0, 'there should be no locators')
+      const locators = await index.fetchLocators(EMPTY_ADDRESS, 7)
+      equal(locators.length, 7, 'there should be 7 locators')
+      equal(locators[0], emptyLocatorData, 'The first locator should be empty')
     })
 
     it('returns specified number of elements if < length', async () => {
@@ -304,7 +311,7 @@ contract('Index Unit Tests', async accounts => {
         from: owner,
       })
 
-      const locators = await index.fetchLocators(2)
+      const locators = await index.fetchLocators(EMPTY_ADDRESS, 2)
       equal(locators.length, 2, 'there should only be 2 locators returned')
 
       equal(locators[0], aliceLocatorData, 'Alice should be first')
@@ -323,12 +330,13 @@ contract('Index Unit Tests', async accounts => {
         from: owner,
       })
 
-      const locators = await index.fetchLocators(10)
-      equal(locators.length, 3, 'there should only be 3 locators returned')
+      const locators = await index.fetchLocators(EMPTY_ADDRESS, 10)
+      equal(locators.length, 10, 'there should be 10 locators returned')
 
       equal(locators[0], aliceLocatorData, 'Alice should be first')
       equal(locators[1], carolLocatorData, 'Carol should be second')
       equal(locators[2], bobLocatorData, 'Bob should be third')
+      equal(locators[3], emptyLocatorData, 'Fourth slot should be empty')
     })
   })
 })

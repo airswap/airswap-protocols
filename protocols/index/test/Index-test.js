@@ -70,7 +70,7 @@ contract('Index', async accounts => {
     })
 
     it('Ensure ordering is correct', async () => {
-      const locators = await index.fetchLocators(7)
+      const locators = await index.fetchLocators(EMPTY_ADDRESS, 7)
       assert(locators[0] == aliceLocator, 'Alice should be first')
       assert(locators[1] == carolLocator, 'Carol should be second')
       assert(locators[2] == bobLocator, 'Bob should be third')
@@ -115,7 +115,7 @@ contract('Index', async accounts => {
 
   describe('Fetch', async () => {
     it('Fetches locators', async () => {
-      const locators = await index.fetchLocators(7)
+      const locators = await index.fetchLocators(EMPTY_ADDRESS, 7)
       assert(locators[0] == aliceLocator, 'Alice should be first')
       assert(locators[1] == carolLocator, 'Carol should be second')
       assert(locators[2] == bobLocator, 'Bob should be third')
