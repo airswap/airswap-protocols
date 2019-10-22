@@ -67,11 +67,11 @@ contract DelegateFrontend {
       _maxIntents
     );
 
-    // Iterate through locators.
+    // Iterate through locators
     for (uint256 i; i < locators.length; i++) {
 
       // the end of the locators has been reached
-      if (address(bytes20(locators[i])) == address(0)) {
+      if (locators[i] == bytes32(0)) {
         break;
       }
 
@@ -123,7 +123,7 @@ contract DelegateFrontend {
     for (uint256 i; i < locators.length; i++) {
 
       // the end of the locators has been reached
-      if (address(bytes20(locators[i])) == address(0)) {
+      if (locators[i] == bytes32(0)) {
         break;
       }
 

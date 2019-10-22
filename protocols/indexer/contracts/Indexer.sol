@@ -205,7 +205,6 @@ contract Indexer is IIndexer, Ownable {
   ) external view returns (
     bytes32[] memory locators
   ) {
-
     // Ensure neither token is blacklisted.
     if (!blacklist[_signerToken] && !blacklist[_senderToken]) {
 
@@ -216,6 +215,7 @@ contract Indexer is IIndexer, Ownable {
         return indexes[_signerToken][_senderToken].fetchLocators(_startAddress, _count);
 
       }
+
     }
     return new bytes32[](0);
   }
