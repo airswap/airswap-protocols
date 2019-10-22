@@ -63,7 +63,7 @@ contract DelegateFrontend {
     bytes32[] memory locators = indexer.getIntents(
       _signerToken,
       _senderToken,
-      address(0),
+      address(0), // This is to start at the head of the list of intents
       _maxIntents
     );
 
@@ -115,7 +115,7 @@ contract DelegateFrontend {
     bytes32[] memory locators = indexer.getIntents(
       _signerToken,
       _senderToken,
-      address(0),
+      address(0), // This is to start at the head of the list of intents
       _maxIntents
     );
 
