@@ -151,7 +151,7 @@ contract('Indexer Unit Tests', async accounts => {
 
     it('should not allow a non-owner to un-blacklist a token', async () => {
       await reverted(
-        indexer.removeFromBlacklist([tokenOne], {
+        indexer.removeFromBlacklist(tokenOne, {
           from: nonOwner,
         }),
         'Ownable: caller is not the owner'
@@ -160,7 +160,7 @@ contract('Indexer Unit Tests', async accounts => {
 
     it('should allow the owner to un-blacklist a token', async () => {
       // removing from blacklist before the token is blacklisted emits no events
-      let result = await indexer.removeFromBlacklist([tokenOne], {
+      let result = await indexer.removeFromBlacklist(tokenOne, {
         from: owner,
       })
       notEmitted(result, 'RemoveFromBlacklist')
@@ -172,7 +172,7 @@ contract('Indexer Unit Tests', async accounts => {
       })
 
       // Now removing it succeeds and emits an event
-      result = await indexer.removeFromBlacklist([tokenOne], {
+      result = await indexer.removeFromBlacklist(tokenOne, {
         from: owner,
       })
       emitted(result, 'RemoveFromBlacklist', event => {
@@ -215,7 +215,7 @@ contract('Indexer Unit Tests', async accounts => {
         'PAIR_IS_BLACKLISTED'
       )
 
-      await indexer.removeFromBlacklist([tokenOne], {
+      await indexer.removeFromBlacklist(tokenOne, {
         from: owner,
       })
 

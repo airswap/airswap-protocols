@@ -355,7 +355,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
 
     it('Alice attempts to remove from blacklist fails because she is not owner', async () => {
       await reverted(
-        indexer.removeFromBlacklist([tokenDAI.address], {
+        indexer.removeFromBlacklist(tokenDAI.address, {
           from: aliceAddress,
         }),
         'Ownable: caller is not the owner'
@@ -364,7 +364,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
 
     it('Owner attempts to remove non-existent token from blacklist with no event emitted', async () => {
       notEmitted(
-        await indexer.removeFromBlacklist([tokenAST.address], {
+        await indexer.removeFromBlacklist(tokenAST.address, {
           from: ownerAddress,
         }),
         'RemoveFromBlacklist'
@@ -373,7 +373,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
 
     it('Owner attempts to remove token from blacklist and succeeds', async () => {
       emitted(
-        await indexer.removeFromBlacklist([tokenDAI.address], {
+        await indexer.removeFromBlacklist(tokenDAI.address, {
           from: ownerAddress,
         }),
         'RemoveFromBlacklist'
