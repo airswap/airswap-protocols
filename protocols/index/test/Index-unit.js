@@ -8,7 +8,7 @@ const {
 } = require('@airswap/test-utils').assert
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 const { padAddressToLocator } = require('@airswap/test-utils').padding
-const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
+const { EMPTY_ADDRESS, HEAD } = require('@airswap/order-utils').constants
 
 contract('Index Unit Tests', async accounts => {
   let owner = accounts[0]
@@ -19,8 +19,6 @@ contract('Index Unit Tests', async accounts => {
   let davidAddress = accounts[4]
   let emilyAddress = accounts[5]
   let fredAddress = accounts[6]
-
-  const HEAD = '0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF'
 
   let snapshotId
   let index
