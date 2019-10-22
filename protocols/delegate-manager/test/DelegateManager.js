@@ -60,14 +60,7 @@ contract('DelegateManager Integration Tests', async accounts => {
 
   describe('Test setRuleAndIntent()', async () => {
     it('Test successfully calling setRuleAndIntent', async () => {
-      let rule = [WETH_TOKEN.address, DAI_TOKEN.address, 100000, 300, 0]
-
-      let intent = [
-        DAI_TOKEN.address,
-        WETH_TOKEN.address,
-        INTENT_AMOUNT,
-        padAddressToLocator(delegateAddress),
-      ]
+      let rule = [100000, 300, 0]
 
       //give manager admin access
       let delegate = await Delegate.at(delegateAddress)
@@ -85,7 +78,12 @@ contract('DelegateManager Integration Tests', async accounts => {
       equal(scoreBefore.toNumber(), 0, 'intent score is incorrect')
 
       await passes(
-        delegateManager.setRuleAndIntent(rule, intent, indexer.address)
+        delegateManager.setRuleAndIntent(
+          WETH_TOKEN.address,
+          DAI_TOKEN.address,
+          rule,
+          INTENT_AMOUNT,
+          indexer.address)
       )
 
       //check the score of the manager after

@@ -153,77 +153,12 @@ contract('DelegateManager Unit Tests', async accounts => {
   })
 
   describe('Test setRuleAndIntent()', async () => {
-    it('Test calling setRuleAndIntent with sender token mismatch', async () => {
-      let delegateAddress = await delegateManager.delegate.call()
-      let indexerAddress = mockIndexer.address
-
-      let rule = [mockWETH, mockWETH, 100000, 300, 0]
-
-      let intentAmount = 250
-      let intent = [
-        mockWETH,
-        mockDAI,
-        intentAmount,
-        padAddressToLocator(delegateAddress),
-      ]
-
-      //NOTE: owner would call delegate.addAdmin(delegateManager)
-      //this doesn't need to be done here because delegate is a mock
-
-      //mock improper allowance
-      await mockStakeToken.givenMethodReturnUint(
-        mockStakeToken_allowance,
-        intentAmount
-      )
-
-      await reverted(
-        delegateManager.setRuleAndIntent(rule, intent, indexerAddress),
-        'SENDER_TOKEN_MISMATCH'
-      )
-    })
-
-    it('Test calling setRuleAndIntent with signer token mismatch', async () => {
-      let delegateAddress = await delegateManager.delegate.call()
-      let indexerAddress = mockIndexer.address
-
-      let rule = [mockWETH, mockDAI, 100000, 300, 0]
-
-      let intentAmount = 250
-      let intent = [
-        mockWETH,
-        mockWETH,
-        intentAmount,
-        padAddressToLocator(delegateAddress),
-      ]
-
-      //NOTE: owner would call delegate.addAdmin(delegateManager)
-      //this doesn't need to be done here because delegate is a mock
-
-      //mock improper allowance
-      await mockStakeToken.givenMethodReturnUint(
-        mockStakeToken_allowance,
-        intentAmount
-      )
-
-      await reverted(
-        delegateManager.setRuleAndIntent(rule, intent, indexerAddress),
-        'SIGNER_TOKEN_MISMATCH'
-      )
-    })
-
     it('Test calling setRuleAndIntent with allowance error', async () => {
       let delegateAddress = await delegateManager.delegate.call()
       let indexerAddress = mockIndexer.address
-
-      let rule = [mockWETH, mockDAI, 100000, 300, 0]
-
       let intentAmount = 250
-      let intent = [
-        mockDAI,
-        mockWETH,
-        intentAmount,
-        padAddressToLocator(delegateAddress),
-      ]
+
+      let rule = [100000, 300, 0]
 
       //NOTE: owner would call delegate.addAdmin(delegateManager)
       //this doesn't need to be done here because delegate is a mock
@@ -235,7 +170,13 @@ contract('DelegateManager Unit Tests', async accounts => {
       )
 
       await reverted(
-        delegateManager.setRuleAndIntent(rule, intent, indexerAddress),
+        delegateManager.setRuleAndIntent(
+          mockWETH,
+          mockDAI,
+          rule,
+          intentAmount,
+          indexerAddress
+        ),
         'ALLOWANCE_FUNDS_ERROR'
       )
     })
@@ -243,16 +184,9 @@ contract('DelegateManager Unit Tests', async accounts => {
     it('Test calling setRuleAndIntent with transfer error', async () => {
       let delegateAddress = mockDelegate.address
       let indexerAddress = mockIndexer.address
-
-      let rule = [mockWETH, mockDAI, 100000, 300, 0]
-
       let intentAmount = 250
-      let intent = [
-        mockDAI,
-        mockWETH,
-        intentAmount,
-        padAddressToLocator(delegateAddress),
-      ]
+
+      let rule = [100000, 300, 0]
 
       //NOTE: owner would call delegate.addAdmin(delegateManager)
       //this doesn't need to be done here because delegate is a mock
@@ -268,7 +202,13 @@ contract('DelegateManager Unit Tests', async accounts => {
       )
 
       await reverted(
-        delegateManager.setRuleAndIntent(rule, intent, indexerAddress),
+        delegateManager.setRuleAndIntent(
+          mockWETH,
+          mockDAI, 
+          rule,
+          intentAmount,
+          indexerAddress
+        ),
         'TRANSFER_FUNDS_ERROR'
       )
     })
@@ -276,16 +216,9 @@ contract('DelegateManager Unit Tests', async accounts => {
     it('Test calling setRuleAndIntent with approval error', async () => {
       let delegateAddress = mockDelegate.address
       let indexerAddress = mockIndexer.address
-
-      let rule = [mockWETH, mockDAI, 100000, 300, 0]
-
       let intentAmount = 250
-      let intent = [
-        mockDAI,
-        mockWETH,
-        intentAmount,
-        padAddressToLocator(delegateAddress),
-      ]
+
+      let rule = [100000, 300, 0]
 
       //NOTE: owner would call delegate.addAdmin(delegateManager)
       //this doesn't need to be done here because delegate is a mock
@@ -301,7 +234,13 @@ contract('DelegateManager Unit Tests', async accounts => {
       await mockStakeToken.givenMethodReturnBool(mockStakeToken_approve, false)
 
       await reverted(
-        delegateManager.setRuleAndIntent(rule, intent, indexerAddress),
+        delegateManager.setRuleAndIntent(
+          mockWETH,
+          mockDAI, 
+          rule, 
+          intentAmount,
+          indexerAddress
+        ),
         'APPROVAL_ERROR'
       )
     })
@@ -309,16 +248,9 @@ contract('DelegateManager Unit Tests', async accounts => {
     it('Test successfully calling setRuleAndIntent', async () => {
       let delegateAddress = mockDelegate.address
       let indexerAddress = mockIndexer.address
-
-      let rule = [mockWETH, mockDAI, 100000, 300, 0]
-
       let intentAmount = 250
-      let intent = [
-        mockDAI,
-        mockWETH,
-        intentAmount,
-        padAddressToLocator(delegateAddress),
-      ]
+
+      let rule = [100000, 300, 0]
 
       //NOTE: owner would call delegate.addAdmin(delegateManager)
       //this doesn't need to be done here because delegate is a mock
@@ -334,7 +266,13 @@ contract('DelegateManager Unit Tests', async accounts => {
       await mockStakeToken.givenMethodReturnBool(mockStakeToken_approve, true)
 
       await passes(
-        delegateManager.setRuleAndIntent(rule, intent, indexerAddress)
+        delegateManager.setRuleAndIntent(
+          mockWETH,
+          mockDAI,
+          rule,
+          intentAmount,
+          indexerAddress
+        )
       )
     })
   })
