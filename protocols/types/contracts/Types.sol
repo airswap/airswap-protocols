@@ -25,6 +25,12 @@ library Types {
 
   bytes constant internal EIP191_HEADER = "\x19\x01";
 
+  struct Rule {
+    uint256 maxSenderAmount;      // The maximum amount of ERC-20 token the delegate would send
+    uint256 priceCoef;            // The whole number that will be multiplied by the 10^(-priceExp) - the price coefficient
+    uint256 priceExp;             // The exponent of the price to indicate location of the decimal priceCoef * 10^(-priceExp)
+  }
+
   struct Order {
     uint256 nonce;                // Unique per order and should be sequential
     uint256 expiry;               // Expiry in seconds since 1 January 1970
