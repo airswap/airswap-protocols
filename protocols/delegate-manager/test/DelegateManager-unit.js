@@ -204,7 +204,7 @@ contract('DelegateManager Unit Tests', async accounts => {
       await reverted(
         delegateManager.setRuleAndIntent(
           mockWETH,
-          mockDAI, 
+          mockDAI,
           rule,
           intentAmount,
           indexerAddress
@@ -236,8 +236,8 @@ contract('DelegateManager Unit Tests', async accounts => {
       await reverted(
         delegateManager.setRuleAndIntent(
           mockWETH,
-          mockDAI, 
-          rule, 
+          mockDAI,
+          rule,
           intentAmount,
           indexerAddress
         ),

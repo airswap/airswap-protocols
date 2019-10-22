@@ -83,7 +83,8 @@ contract('DelegateManager Integration Tests', async accounts => {
           DAI_TOKEN.address,
           rule,
           INTENT_AMOUNT,
-          indexer.address)
+          indexer.address
+        )
       )
 
       //check the score of the manager after
