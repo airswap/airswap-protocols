@@ -21,7 +21,7 @@ import "@airswap/indexer/contracts/interfaces/IIndexer.sol";
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "@airswap/delegate-factory/contracts/interfaces/IDelegateFactory.sol";
 import "@airswap/delegate/contracts/interfaces/IDelegate.sol";
-import "@airswap/structs/contracts/Structs.sol";
+import "@airswap/types/contracts/Types.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 
@@ -46,23 +46,23 @@ contract DelegateManager is Ownable {
       * @dev delegate needs the manager to be an admin in order to act with it.
       * @dev manager needs to be given allowance from msg.sender for the _intent.amount
       * @dev delegate swap needs to be given permission to move funds from the manager
+      * @param _senderToken the token the delgeate will send
+      * @param _senderToken the token the delegate will receive 
       * @param _rule the rule to set on a delegate
-      * @param _intent the intent to set on an the indexer
+      * @param _amount the amount to set an intent for
       * @param _indexer the indexer the intent will be set on
       */
     function setRuleAndIntent(
-      Structs.Rule calldata _rule,
-      Structs.Intent calldata _intent,
+      address _senderToken,
+      address _signerToken,
+      Types.Rule calldata _rule,
+      uint256 _amount,
       IIndexer _indexer
     ) external onlyOwner {
       
-      //verify the rule and intent
-      require(_rule.senderToken == _intent.senderToken, "SENDER_TOKEN_MISMATCH");
-      require(_rule.signerToken == _intent.signerToken, "SIGNER_TOKEN_MISMATCH");
-
       delegate.setRule(
-        _rule.senderToken,
-        _rule.signerToken,
+        _senderToken,
+        _signerToken,
         _rule.maxSenderAmount, 
         _rule.priceCoef,
         _rule.priceExp
@@ -70,24 +70,24 @@ contract DelegateManager is Ownable {
 
       require(
         IERC20(_indexer.stakeToken())
-        .allowance(msg.sender, address(this)) >= _intent.amount, "ALLOWANCE_FUNDS_ERROR"
+        .allowance(msg.sender, address(this)) >= _amount, "ALLOWANCE_FUNDS_ERROR"
       );
       require(
         IERC20(_indexer.stakeToken())
-        .transferFrom(msg.sender, address(this), _intent.amount), "TRANSFER_FUNDS_ERROR"
+        .transferFrom(msg.sender, address(this), _amount), "TRANSFER_FUNDS_ERROR"
       );
 
       //ensure that the indexer can pull funds from manager's account
       require(
         IERC20(_indexer.stakeToken())
-        .approve(address(_indexer), _intent.amount), "APPROVAL_ERROR"
+        .approve(address(_indexer), _amount), "APPROVAL_ERROR"
       );
 
       _indexer.setIntent(
-        _intent.signerToken,
-        _intent.senderToken,
-        _intent.amount,
-        _intent.locator
+        _signerToken,
+        _senderToken,
+        _amount,
+        abi.encodePacked(address(delegate))
       );
     }
 
