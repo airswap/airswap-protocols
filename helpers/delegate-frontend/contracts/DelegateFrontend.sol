@@ -70,6 +70,11 @@ contract DelegateFrontend {
     // Iterate through locators.
     for (uint256 i; i < locators.length; i++) {
 
+      // the end of the locators has been reached
+      if (address(bytes20(locators[i])) == address(0)) {
+        break;
+      }
+
       // Get a buy quote from the Delegate.
       uint256 signerAmount = IDelegate(address(bytes20(locators[i])))
         .getSignerSideQuote(_senderAmount, _senderToken, _signerToken);
@@ -116,6 +121,11 @@ contract DelegateFrontend {
 
     // Iterate through locators.
     for (uint256 i; i < locators.length; i++) {
+
+      // the end of the locators has been reached
+      if (address(bytes20(locators[i])) == address(0)) {
+        break;
+      }
 
       // Get a buy quote from the Delegate.
       uint256 senderAmount = IDelegate(address(bytes20(locators[i])))
