@@ -12,7 +12,6 @@ contract('DelegateManager Integration Tests', async accounts => {
   const STARTING_BALANCE = 700
   const INTENT_AMOUNT = 250
   let owner = accounts[0]
-  let notOwner = accounts[1]
   let tradeWallet = accounts[2]
   let DAI_TOKEN
   let WETH_TOKEN
@@ -27,10 +26,6 @@ contract('DelegateManager Integration Tests', async accounts => {
     await STAKE_TOKEN.mint(owner, STARTING_BALANCE)
     await DAI_TOKEN.mint(owner, STARTING_BALANCE)
     await WETH_TOKEN.mint(owner, STARTING_BALANCE)
-
-    await STAKE_TOKEN.mint(notOwner, STARTING_BALANCE)
-    await DAI_TOKEN.mint(notOwner, STARTING_BALANCE)
-    await WETH_TOKEN.mint(notOwner, STARTING_BALANCE)
   }
 
   before(async () => {
