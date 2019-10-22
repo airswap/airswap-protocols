@@ -129,25 +129,25 @@ contract('Swap Unit Tests', async accounts => {
 
       //ensure the value was set
       let val
-      val = await swap.signerOrderStatus.call(mockSigner, 6)
-      equal(val, 0x02)
+      val = await swap.signerNonceStatus.call(mockSigner, 6)
+      equal(val, 0x01)
     })
 
     it('test an array of nonces, ensure the cancellation of only those orders', async () => {
       await swap.cancel([1, 2, 4, 6], { from: mockSigner })
       let val
-      val = await swap.signerOrderStatus.call(mockSigner, 1)
-      equal(val, 0x02)
-      val = await swap.signerOrderStatus.call(mockSigner, 2)
-      equal(val, 0x02)
-      val = await swap.signerOrderStatus.call(mockSigner, 3)
+      val = await swap.signerNonceStatus.call(mockSigner, 1)
+      equal(val, 0x01)
+      val = await swap.signerNonceStatus.call(mockSigner, 2)
+      equal(val, 0x01)
+      val = await swap.signerNonceStatus.call(mockSigner, 3)
       equal(val, 0x00)
-      val = await swap.signerOrderStatus.call(mockSigner, 4)
-      equal(val, 0x02)
-      val = await swap.signerOrderStatus.call(mockSigner, 5)
+      val = await swap.signerNonceStatus.call(mockSigner, 4)
+      equal(val, 0x01)
+      val = await swap.signerNonceStatus.call(mockSigner, 5)
       equal(val, 0x00)
-      val = await swap.signerOrderStatus.call(mockSigner, 6)
-      equal(val, 0x02)
+      val = await swap.signerNonceStatus.call(mockSigner, 6)
+      equal(val, 0x01)
     })
   })
 

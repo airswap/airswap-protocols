@@ -33,10 +33,9 @@ contract Swap is ISwap {
   // Unique domain identifier for use in signatures (EIP-712)
   bytes32 private domainSeparator;
 
-  // Possible order statuses
-  byte constant private OPEN = 0x00;
-  byte constant private TAKEN = 0x01;
-  byte constant private CANCELED = 0x02;
+  // Possible nonce statuses
+  byte constant private AVAILABLE = 0x00;
+  byte constant private UNAVAILABLE = 0x01;
 
   // ERC-721 (non-fungible token) interface identifier (ERC-165)
   bytes4 constant internal ERC721_INTERFACE_ID = 0x80ac58cd;
@@ -52,14 +51,14 @@ contract Swap is ISwap {
     bytes4(keccak256('safeTransferFrom(address,address,uint256,bytes)'));
   */
 
-  // Mapping of sender address to a delegated sender address and expiry.
+  // Mapping of sender address to a delegated sender address and expiry
   mapping (address => mapping (address => uint256)) public senderAuthorizations;
 
-  // Mapping of signer address to a delegated signer and expiry.
+  // Mapping of signer address to a delegated signer and expiry
   mapping (address => mapping (address => uint256)) public signerAuthorizations;
 
-  // Mapping of signers to orders by nonce as TAKEN (0x01) or CANCELED (0x02)
-  mapping (address => mapping (uint256 => byte)) public signerOrderStatus;
+  // Mapping of signers to nonces with value AVAILABLE (0x00) or UNAVAILABLE (0x01)
+  mapping (address => mapping (uint256 => byte)) public signerNonceStatus;
 
   // Mapping of signer addresses to an optionally set minimum valid nonce
   mapping (address => uint256) public signerMinimumNonce;
@@ -88,20 +87,16 @@ contract Swap is ISwap {
     require(_order.expiry > block.timestamp,
       "ORDER_EXPIRED");
 
-    // Ensure the order is not already taken.
-    require(signerOrderStatus[_order.signer.wallet][_order.nonce] != TAKEN,
-      "ORDER_ALREADY_TAKEN");
-
-    // Ensure the order is not already canceled.
-    require(signerOrderStatus[_order.signer.wallet][_order.nonce] != CANCELED,
-      "ORDER_ALREADY_CANCELED");
+    // Ensure the nonce is AVAILABLE (0x00).
+    require(signerNonceStatus[_order.signer.wallet][_order.nonce] == AVAILABLE,
+      "ALREADY_TAKEN_OR_CANCELLED");
 
     // Ensure the order nonce is above the minimum.
     require(_order.nonce >= signerMinimumNonce[_order.signer.wallet],
       "NONCE_TOO_LOW");
 
-    // Mark the order TAKEN (0x01).
-    signerOrderStatus[_order.signer.wallet][_order.nonce] = TAKEN;
+    // Mark the nonce UNAVAILABLE (0x01).
+    signerNonceStatus[_order.signer.wallet][_order.nonce] = UNAVAILABLE;
 
     // Validate the sender side of the trade.
     address finalSenderWallet;
@@ -185,7 +180,7 @@ contract Swap is ISwap {
 
   /**
     * @notice Cancel one or more open orders by nonce
-    * @dev Canceled orders are marked CANCELED (0x02)
+    * @dev Cancelled nonces are marked UNAVAILABLE (0x01)
     * @dev Emits a Cancel event
     * @param _nonces uint256[]
     */
@@ -193,8 +188,8 @@ contract Swap is ISwap {
     uint256[] calldata _nonces
   ) external {
     for (uint256 i = 0; i < _nonces.length; i++) {
-      if (signerOrderStatus[msg.sender][_nonces[i]] == OPEN) {
-        signerOrderStatus[msg.sender][_nonces[i]] = CANCELED;
+      if (signerNonceStatus[msg.sender][_nonces[i]] == AVAILABLE) {
+        signerNonceStatus[msg.sender][_nonces[i]] = UNAVAILABLE;
         emit Cancel(_nonces[i], msg.sender);
       }
     }
