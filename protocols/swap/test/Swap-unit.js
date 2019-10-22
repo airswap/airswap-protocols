@@ -18,6 +18,9 @@ const {
   EMPTY_ADDRESS,
 } = require('@airswap/order-utils').constants
 
+const NONCE_AVAILABLE = 0x00
+const NONCE_UNAVAILABLE = 0x01
+
 contract('Swap Unit Tests', async accounts => {
   const Jun_06_2017T00_00_00_UTC = 1497052800 //a date later than when ganache started
   const mockSigner = accounts[9]
@@ -129,25 +132,25 @@ contract('Swap Unit Tests', async accounts => {
 
       //ensure the value was set
       let val
-      val = await swap.signerOrderStatus.call(mockSigner, 6)
-      equal(val, 0x02)
+      val = await swap.signerNonceStatus.call(mockSigner, 6)
+      equal(val, NONCE_UNAVAILABLE)
     })
 
     it('test an array of nonces, ensure the cancellation of only those orders', async () => {
       await swap.cancel([1, 2, 4, 6], { from: mockSigner })
       let val
-      val = await swap.signerOrderStatus.call(mockSigner, 1)
-      equal(val, 0x02)
-      val = await swap.signerOrderStatus.call(mockSigner, 2)
-      equal(val, 0x02)
-      val = await swap.signerOrderStatus.call(mockSigner, 3)
-      equal(val, 0x00)
-      val = await swap.signerOrderStatus.call(mockSigner, 4)
-      equal(val, 0x02)
-      val = await swap.signerOrderStatus.call(mockSigner, 5)
-      equal(val, 0x00)
-      val = await swap.signerOrderStatus.call(mockSigner, 6)
-      equal(val, 0x02)
+      val = await swap.signerNonceStatus.call(mockSigner, 1)
+      equal(val, NONCE_UNAVAILABLE)
+      val = await swap.signerNonceStatus.call(mockSigner, 2)
+      equal(val, NONCE_UNAVAILABLE)
+      val = await swap.signerNonceStatus.call(mockSigner, 3)
+      equal(val, NONCE_AVAILABLE)
+      val = await swap.signerNonceStatus.call(mockSigner, 4)
+      equal(val, NONCE_UNAVAILABLE)
+      val = await swap.signerNonceStatus.call(mockSigner, 5)
+      equal(val, NONCE_AVAILABLE)
+      val = await swap.signerNonceStatus.call(mockSigner, 6)
+      equal(val, NONCE_UNAVAILABLE)
     })
   })
 
