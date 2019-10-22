@@ -89,7 +89,7 @@ contract Swap is ISwap {
 
     // Ensure the nonce is AVAILABLE (0x00).
     require(signerNonceStatus[_order.signer.wallet][_order.nonce] == AVAILABLE,
-      "ALREADY_TAKEN_OR_CANCELLED");
+      "ORDER_TAKEN_OR_CANCELLED");
 
     // Ensure the order nonce is above the minimum.
     require(_order.nonce >= signerMinimumNonce[_order.signer.wallet],

@@ -163,7 +163,7 @@ contract('Swap', async accounts => {
     it('Checks that Bob cannot take the same order again (200 AST for 50 DAI)', async () => {
       await reverted(
         swap(_order, { from: bobAddress }),
-        'ALREADY_TAKEN_OR_CANCELLED'
+        'ORDER_TAKEN_OR_CANCELLED'
       )
     })
 
@@ -669,7 +669,7 @@ contract('Swap', async accounts => {
     it('Checks that Bob is unable to take an order with nonce 1', async () => {
       await reverted(
         swap(_orderOne, { from: bobAddress }),
-        'ALREADY_TAKEN_OR_CANCELLED'
+        'ORDER_TAKEN_OR_CANCELLED'
       )
     })
 
