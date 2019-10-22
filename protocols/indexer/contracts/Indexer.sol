@@ -193,12 +193,14 @@ contract Indexer is IIndexer, Ownable {
     *
     * @param _signerToken address
     * @param _senderToken address
-    * @param _count uint256
+    * @param _startAddress address The address to start from in the list of intents
+    * @param _count uint256 The total number of intents to return
     * @return locators address[]
     */
   function getIntents(
     address _signerToken,
     address _senderToken,
+    address _startAddress,
     uint256 _count
   ) external view returns (
     bytes32[] memory locators
@@ -211,7 +213,7 @@ contract Indexer is IIndexer, Ownable {
       if (indexes[_signerToken][_senderToken] != Index(0)) {
 
         // Return an array of locators for the index.
-        return indexes[_signerToken][_senderToken].fetchLocators(_count);
+        return indexes[_signerToken][_senderToken].fetchLocators(_startAddress, _count);
 
       }
     }
