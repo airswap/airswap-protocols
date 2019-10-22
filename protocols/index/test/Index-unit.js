@@ -18,6 +18,8 @@ contract('Index Unit Tests', async accounts => {
   let carolAddress = accounts[3]
   let davidAddress = accounts[4]
 
+  const HEAD = '0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF'
+
   let snapshotId
   let index
 
@@ -293,10 +295,11 @@ contract('Index Unit Tests', async accounts => {
   })
 
   describe('Test fetchLocators', async () => {
-    it('returns an empty array with no locators', async () => {
+    it('returns an array of empty locators', async () => {
       const locators = await index.fetchLocators(EMPTY_ADDRESS, 7)
       equal(locators.length, 7, 'there should be 7 locators')
       equal(locators[0], emptyLocatorData, 'The first locator should be empty')
+      equal(locators[1], emptyLocatorData, 'The second locator should be empty')
     })
 
     it('returns specified number of elements if < length', async () => {
@@ -311,14 +314,21 @@ contract('Index Unit Tests', async accounts => {
         from: owner,
       })
 
-      const locators = await index.fetchLocators(EMPTY_ADDRESS, 2)
+      let locators = await index.fetchLocators(EMPTY_ADDRESS, 2)
+      equal(locators.length, 2, 'there should only be 2 locators returned')
+
+      equal(locators[0], aliceLocatorData, 'Alice should be first')
+      equal(locators[1], carolLocatorData, 'Carol should be second')
+
+      // the same should happen passing HEAD
+      locators = await index.fetchLocators(HEAD, 2)
       equal(locators.length, 2, 'there should only be 2 locators returned')
 
       equal(locators[0], aliceLocatorData, 'Alice should be first')
       equal(locators[1], carolLocatorData, 'Carol should be second')
     })
 
-    it('returns only length if requested number if larger', async () => {
+    it('returns trailing empty slots if requested number is larger', async () => {
       // add 3 locators
       await index.setLocator(aliceAddress, 2000, aliceLocatorData, {
         from: owner,
@@ -337,6 +347,42 @@ contract('Index Unit Tests', async accounts => {
       equal(locators[1], carolLocatorData, 'Carol should be second')
       equal(locators[2], bobLocatorData, 'Bob should be third')
       equal(locators[3], emptyLocatorData, 'Fourth slot should be empty')
+      equal(locators[4], emptyLocatorData, 'Fifth slot should be empty')
+    })
+
+    it('starts the array at the specified starting user', async () => {
+      // add 3 locators
+      await index.setLocator(aliceAddress, 2000, aliceLocatorData, {
+        from: owner,
+      })
+      await index.setLocator(bobAddress, 500, bobLocatorData, {
+        from: owner,
+      })
+      await index.setLocator(carolAddress, 1500, carolLocatorData, {
+        from: owner,
+      })
+
+      const locators = await index.fetchLocators(bobAddress, 10)
+      equal(locators.length, 10, 'there should be 10 locators returned')
+
+      equal(locators[0], bobLocatorData, 'Bob should be first')
+      equal(locators[1], emptyLocatorData, 'Second slot should be empty')
+      equal(locators[2], emptyLocatorData, 'Third slot should be empty')
+    })
+
+    it('throws an error for an unstaked user', async () => {
+      // add 3 locators
+      await index.setLocator(aliceAddress, 2000, aliceLocatorData, {
+        from: owner,
+      })
+      await index.setLocator(bobAddress, 500, bobLocatorData, {
+        from: owner,
+      })
+      await index.setLocator(carolAddress, 1500, carolLocatorData, {
+        from: owner,
+      })
+
+      await reverted(index.fetchLocators(davidAddress, 10), 'USER_HAS_NO_LOCATOR')
     })
   })
 })
