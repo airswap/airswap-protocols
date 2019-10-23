@@ -473,6 +473,58 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
         }),
         'CONTRACT_IS_PAUSED'
       )
+
+      // create market
+      await reverted(
+        indexer.createIndex(tokenWETH.address, tokenDAI.address, {
+          from: aliceAddress,
+        }),
+        'CONTRACT_IS_PAUSED'
+      )
+    })
+
+    it('The owner can un-pause the indexer', async () => {
+      let val = await indexer.paused.call()
+      equal(val, true)
+
+      // unpause the indexer
+      await indexer.setPausedStatus(false, { from: ownerAddress })
+
+      // now its not paused
+      val = await indexer.paused.call()
+      equal(val, false)
+    })
+
+    it('Now functions can be called again', async () => {
+      // unset intent
+      emitted(
+        await indexer.unsetIntent(tokenWETH.address, tokenDAI.address, {
+          from: aliceAddress,
+        }),
+        'Unstake'
+      )
+
+      // set intent
+      emitted(
+        await indexer.setIntent(
+          tokenWETH.address,
+          tokenDAI.address,
+          500,
+          aliceLocator,
+          {
+            from: aliceAddress,
+          }
+        ),
+        'Stake'
+      )
+
+      // create market
+      emitted(
+        await indexer.createIndex(tokenDAI.address, bobAddress, {
+          from: aliceAddress,
+        }),
+        'CreateIndex'
+      )
     })
   })
 })
