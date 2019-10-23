@@ -31,7 +31,7 @@ contract Index is Ownable {
   address private constant HEAD = address(uint160(2**160-1));
 
   // Mapping of user address to its neighbors
-  mapping(address => ListElement) private linkedList;
+  mapping(address => Node) private listEntry;
 
   /**
     * @notice Locator for a Delegate
@@ -40,9 +40,9 @@ contract Index is Ownable {
     * @param score uint256
     * @param data bytes32
     */
-  struct ListElement {
-    address next;
+  struct Node {
     address prev;
+    address next;
     uint256 score;
     bytes32 data;
   }
@@ -67,7 +67,7 @@ contract Index is Ownable {
     */
   constructor() public {
     // Initialize the linked list.
-    linkedList[HEAD] = ListElement(HEAD, HEAD, 0, bytes32(0));
+    listEntry[HEAD] = Node(HEAD, HEAD, 0, bytes32(0));
   }
 
   /**
@@ -88,12 +88,12 @@ contract Index is Ownable {
     // Find the first user who has a lower stake, and insert before them
     address nextUser = findPosition(_score);
 
-    // Link the newLocator into place.
-    address prevUser = linkedList[nextUser].prev;
-    
-    linkedList[prevUser].next = _user;
-    linkedList[nextUser].prev = _user;
-    linkedList[_user] = ListElement(nextUser, prevUser, _score, _data);
+    // Link the newUser into place.
+    address prevUser = listEntry[nextUser].prev;
+
+    listEntry[prevUser].next = _user;
+    listEntry[nextUser].prev = _user;
+    listEntry[_user] = Node(prevUser, nextUser, _score, _data);
 
     // Increment the length of the linked list if successful.
     length = length + 1;
@@ -116,14 +116,14 @@ contract Index is Ownable {
     }
 
     // Link its neighbors together.
-    address prevUser = linkedList[_user].prev;
-    address nextUser = linkedList[_user].next;
+    address prevUser = listEntry[_user].prev;
+    address nextUser = listEntry[_user].next;
 
-    linkedList[prevUser].next = nextUser;
-    linkedList[nextUser].prev = prevUser;
+    listEntry[prevUser].next = nextUser;
+    listEntry[nextUser].prev = prevUser;
 
     // Delete user from the list.
-    delete linkedList[_user];
+    delete listEntry[_user];
 
     // Decrement the length of the linked list.
     length = length - 1;
@@ -133,14 +133,14 @@ contract Index is Ownable {
   }
 
   /**
-    * @notice Get the Locator for a user
+    * @notice Get the Locator information for a user
     * @param _user address
-    * @return Locator
+    * @return (uint256, bytes32) locator score and locator data
     */
   function getLocator(
     address _user
-  ) external view returns (ListElement memory) {
-    return linkedList[_user];
+  ) external view returns (uint256, bytes32) {
+    return (listEntry[_user].score, listEntry[_user].data);
   }
 
   /**
@@ -167,31 +167,15 @@ contract Index is Ownable {
       require(locator.user == _startUser, 'USER_HAS_NO_LOCATOR');
     }
 
-<<<<<<< HEAD
-    result = new bytes32[](_count);
-
-    // Iterate over the list until the end or limit.
-    uint256 i = 0;
-
-    // if the HEAD is reached (the end of the list) before count, break
-    while (i < _count && locator.user != HEAD) {
-      // add the locator to the returned data
-      result[i] = locator.data;
-      i = i + 1;
-
-      // move along to the next locator
-      locator = locatorsLinkedList[locator.user][NEXT];
-=======
     // Get the first user in the linked list after the HEAD
-    address user = linkedList[HEAD].next;
+    address user = listEntry[HEAD].next;
 
     // Iterate over the list until the end or limit.
     uint256 i = 0;
     while (i < limit) {
-      result[i] = linkedList[user].data;
+      result[i] = listEntry[user].data;
       i = i + 1;
-      user = linkedList[user].next;
->>>>>>> draft of linked list new structure
+      user = listEntry[user].next;
     }
   }
 
@@ -203,23 +187,23 @@ contract Index is Ownable {
   function hasLocator(
     address _user
   ) internal view returns (bool) {
-    if (linkedList[_user].data != bytes32(0)) {
+    if (listEntry[_user].data != bytes32(0)) {
       return true;
     }
     return false;
   }
 
   /**
-    * @notice Returns the first Locator smaller than _score
+    * @notice Returns the first user who staked less than _score
     * @param _score uint256
-    * @return Locator
+    * @return address of the user
     */
   function findPosition(
     uint256 _score
   ) internal view returns (address) {
 
     // Get the first user in the linked list.
-    address user = linkedList[HEAD].next;
+    address user = listEntry[HEAD].next;
 
     if (_score == 0) {
       // return the head of the linked list
@@ -227,8 +211,8 @@ contract Index is Ownable {
     }
 
     // Iterate through the list until a lower score is found.
-    while (_score <= linkedList[user].score) {
-      user = linkedList[user].next;
+    while (_score <= listEntry[user].score) {
+      user = listEntry[user].next;
     }
     return user;
   }
