@@ -162,7 +162,6 @@ contract Indexer is IIndexer, Ownable {
     address _signerToken,
     address _senderToken
   ) external {
-
     // Ensure the index exists.
     require(indexes[_signerToken][_senderToken] != Index(0),
       "INDEX_DOES_NOT_EXIST");
