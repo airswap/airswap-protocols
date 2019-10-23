@@ -87,7 +87,7 @@ contract DelegateManager is Ownable {
         _signerToken,
         _senderToken,
         _amountToStake,
-       bytes32(uint256(address(delegate)) << 96) //NOTE: this will pad 0's to the right
+        bytes32(uint256(address(delegate)) << 96) //NOTE: this will pad 0's to the right
       );
     }
 
