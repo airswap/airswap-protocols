@@ -18,9 +18,12 @@ pragma solidity 0.5.12;
 pragma experimental ABIEncoderV2;
 
 import "@airswap/delegate/contracts/interfaces/IDelegate.sol";
+import "@airswap/indexer/contracts/interfaces/IIndexer.sol";
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
+
 
 /**
   * @title Delegate: Deployable Trading Rules for the Swap Protocol
@@ -29,9 +32,6 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
   */
 contract Delegate is IDelegate, Ownable {
   using SafeMath for uint256;
-
-  event AdminAdded(address indexed account);
-  event AdminRemoved(address indexed account);
 
   // Swap contract to be used to settle trades
   ISwap public swapContract;
@@ -42,19 +42,8 @@ contract Delegate is IDelegate, Ownable {
   // Mapping of senderToken to signerToken for rule lookup
   mapping (address => mapping (address => Types.Rule)) public rules;
 
-  // Mapping of admin addresses that can call on behalf of owner
-  mapping (address => bool) private admins;
-
   // ERC-20 (fungible token) interface identifier (ERC-165)
   bytes4 constant internal ERC20_INTERFACE_ID = 0x277f8169;
-
-  /**
-    * @dev only admin ensures that only admin parties can call the method it modifies
-    */
-  modifier onlyAdmin() {
-    require(admins[msg.sender], "CALLER_MUST_BE_ADMIN");
-    _;
-  }
 
   /**
     * @notice Contract Constructor
@@ -81,50 +70,6 @@ contract Delegate is IDelegate, Ownable {
     } else {
       _tradeWallet = owner();
     }
-
-    //owner must always be added to the whitelist
-    admins[owner()] = true;
-  }
-
-  /**
-    * @notice determines if an address to interact with this delegate
-    * @param _addressToCheck the address to check if admin or not
-    */
-  function isAdmin(address _addressToCheck) view external returns (bool) {
-    return admins[_addressToCheck];
-  }
-
-  /**
-    * @notice adds to the list of admin accounts that can interact with this delegate
-    * @dev only callable by the owner of the contract
-    * @param _addressToAdd the address to add to the admins
-    */
-  function addAdmin(address _addressToAdd) external onlyOwner {
-    admins[_addressToAdd] = true;
-    emit AdminAdded(_addressToAdd);
-  }
-
-  /**
-    * @notice removes from the list of admin accounts that can interact with this delegate
-    * @dev only callable by the owner of the contract
-    * @param _addressToRemove the address to add to the admins
-    */
-  function removeAdmin(address _addressToRemove) external onlyOwner {
-    require(_addressToRemove != owner(), "OWNER_MUST_BE_ADMIN");
-    delete admins[_addressToRemove];
-    emit AdminRemoved(_addressToRemove);
-  }
-
-  /**
-    * @notice transfers ownership to the new owner and ensures that admins is updated
-    * @dev only callable by the owner of the contract
-    * @param _newOwner the address of the new owner of the contract
-    */
-  function transferOwnership(address _newOwner) public onlyOwner {
-    require(_newOwner != address(0), 'DELEGATE_CONTRACT_OWNER_REQUIRED');
-    admins[_newOwner] = true;
-    admins[owner()] = false;
-    super.transferOwnership(_newOwner);
   }
 
   /**
@@ -143,7 +88,7 @@ contract Delegate is IDelegate, Ownable {
     uint256 _maxSenderAmount,
     uint256 _priceCoef,
     uint256 _priceExp
-  ) external onlyAdmin {
+  ) public onlyOwner {
 
     rules[_senderToken][_signerToken] = Types.Rule({
       maxSenderAmount: _maxSenderAmount,
@@ -169,7 +114,7 @@ contract Delegate is IDelegate, Ownable {
   function unsetRule(
     address _senderToken,
     address _signerToken
-  ) external onlyAdmin {
+  ) public onlyOwner {
 
     // Delete the rule.
     delete rules[_senderToken][_signerToken];
@@ -180,6 +125,84 @@ contract Delegate is IDelegate, Ownable {
     );
   }
 
+  /**
+    * @notice sets a rule on the delegate and an intent on the indexer
+    * @dev only callable by owner
+    * @dev delegate needs to be given allowance from msg.sender for the _amountToStake
+    * @dev swap needs to be given permission to move funds from the delegate
+    * @param _senderToken the token the delgeate will send
+    * @param _senderToken the token the delegate will receive 
+    * @param _rule the rule to set on a delegate
+    * @param _amountToStake the amount to stake for an intent
+    * @param _indexer the indexer the intent will be set on
+    */
+  function setRuleAndIntent(
+    address _senderToken,
+    address _signerToken,
+    Types.Rule calldata _rule,
+    uint256 _amountToStake,
+    IIndexer _indexer
+  ) external onlyOwner {
+    
+    setRule(
+      _senderToken,
+      _signerToken,
+      _rule.maxSenderAmount, 
+      _rule.priceCoef,
+      _rule.priceExp
+    );
+
+    require(
+      IERC20(_indexer.stakeToken())
+      .allowance(msg.sender, address(this)) >= _amountToStake, "ALLOWANCE_FUNDS_ERROR"
+    );
+    require(
+      IERC20(_indexer.stakeToken())
+      .transferFrom(msg.sender, address(this), _amountToStake), "TRANSFER_FUNDS_ERROR"
+    );
+
+    //ensure that the indexer can pull funds from delegate account
+    require(
+      IERC20(_indexer.stakeToken())
+      .approve(address(_indexer), _amountToStake), "APPROVAL_ERROR"
+    );
+
+    _indexer.setIntent(
+      _signerToken,
+      _senderToken,
+      _amountToStake,
+      bytes32(uint256(address(this)) << 96) //NOTE: this will pad 0's to the right
+    );
+ 
+  }
+  
+  /**
+    * @notice unsets a rule on the delegate and removes an intent on the indexer
+    * @dev only callable by owner
+    * @param _senderToken the maker token in the token pair for rules and intents
+    * @param _signerToken the taker token  in the token pair for rules and intents
+    * @param _indexer the indexer to remove the intent from
+    */
+  function unsetRuleAndIntent(
+    address _signerToken, 
+    address _senderToken, 
+    IIndexer _indexer
+  ) external onlyOwner {
+
+    unsetRule(_senderToken, _signerToken);
+
+    //query against indexer for amount staked
+    uint256 stakedAmount = _indexer.getScore(_signerToken, _senderToken, address(this));
+    _indexer.unsetIntent(_signerToken, _senderToken);
+
+    //upon unstaking the manager will be given the staking amount
+    //push the staking amount to the msg.sender
+
+    require(
+      IERC20(_indexer.stakeToken())
+        .transfer(msg.sender, stakedAmount),"TRANSFER_FUNDS_ERROR"
+    );
+  }
   /**
     * @notice Get a Signer-Side Quote from the Delegate
     * @param _senderParam uint256 The amount of ERC-20 token the delegate would send
@@ -337,4 +360,5 @@ contract Delegate is IDelegate, Ownable {
   function tradeWallet() external view returns (address) {
     return _tradeWallet;
   }
+
 }
