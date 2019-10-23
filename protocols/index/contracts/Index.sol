@@ -31,7 +31,7 @@ contract Index is Ownable {
   address private constant HEAD = address(uint160(2**160-1));
 
   // Mapping of user address to its neighbors
-  mapping(address => Entry) private listEntry;
+  mapping(address => Entry) private _listEntries;
 
   /**
     * @notice Entry for a locator
@@ -67,7 +67,7 @@ contract Index is Ownable {
     */
   constructor() public {
     // Initialize the linked list.
-    listEntry[HEAD] = Entry(HEAD, HEAD, 0, bytes32(0));
+    _listEntries[HEAD] = Entry(HEAD, HEAD, 0, bytes32(0));
   }
 
   /**
@@ -89,11 +89,11 @@ contract Index is Ownable {
     address nextUser = findPosition(_score);
 
     // Link the newUser into place.
-    address prevUser = listEntry[nextUser].prev;
+    address prevUser = _listEntries[nextUser].prev;
 
-    listEntry[prevUser].next = _user;
-    listEntry[nextUser].prev = _user;
-    listEntry[_user] = Entry(prevUser, nextUser, _score, _locator);
+    _listEntries[prevUser].next = _user;
+    _listEntries[nextUser].prev = _user;
+    _listEntries[_user] = Entry(prevUser, nextUser, _score, _locator);
 
     // Increment the length of the linked list if successful.
     length = length + 1;
@@ -116,14 +116,14 @@ contract Index is Ownable {
     }
 
     // Link its neighbors together.
-    address prevUser = listEntry[_user].prev;
-    address nextUser = listEntry[_user].next;
+    address prevUser = _listEntries[_user].prev;
+    address nextUser = _listEntries[_user].next;
 
-    listEntry[prevUser].next = nextUser;
-    listEntry[nextUser].prev = prevUser;
+    _listEntries[prevUser].next = nextUser;
+    _listEntries[nextUser].prev = prevUser;
 
     // Delete user from the list.
-    delete listEntry[_user];
+    delete _listEntries[_user];
 
     // Decrement the length of the linked list.
     length = length - 1;
@@ -140,7 +140,7 @@ contract Index is Ownable {
   function getEntry(
     address _user
   ) external view returns (uint256, bytes32) {
-    return (listEntry[_user].score, listEntry[_user].locator);
+    return (_listEntries[_user].score, _listEntries[_user].locator);
   }
 
   /**
@@ -168,14 +168,14 @@ contract Index is Ownable {
     }
 
     // Get the first user in the linked list after the HEAD
-    address user = listEntry[HEAD].next;
+    address user = _listEntries[HEAD].next;
 
     // Iterate over the list until the end or limit.
     uint256 i = 0;
     while (i < limit) {
-      result[i] = listEntry[user].locator;
+      result[i] = _listEntries[user].locator;
       i = i + 1;
-      user = listEntry[user].next;
+      user = _listEntries[user].next;
     }
   }
 
@@ -187,7 +187,7 @@ contract Index is Ownable {
   function hasEntry(
     address _user
   ) internal view returns (bool) {
-    if (listEntry[_user].locator != bytes32(0)) {
+    if (_listEntries[_user].locator != bytes32(0)) {
       return true;
     }
     return false;
@@ -203,7 +203,7 @@ contract Index is Ownable {
   ) internal view returns (address) {
 
     // Get the first user in the linked list.
-    address user = listEntry[HEAD].next;
+    address user = _listEntries[HEAD].next;
 
     if (_score == 0) {
       // return the head of the linked list
@@ -211,8 +211,8 @@ contract Index is Ownable {
     }
 
     // Iterate through the list until a lower score is found.
-    while (_score <= listEntry[user].score) {
-      user = listEntry[user].next;
+    while (_score <= _listEntries[user].score) {
+      user = _listEntries[user].next;
     }
     return user;
   }
