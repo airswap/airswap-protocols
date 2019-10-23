@@ -183,21 +183,7 @@ contract Indexer is IIndexer, Ownable {
     require(indexes[_signerToken][_senderToken] != Index(0),
       "INDEX_DOES_NOT_EXIST");
 
-    // Get the score for the sender.
-    uint256 score;
-    bytes32 data;
-    (score, data) = indexes[_signerToken][_senderToken].getEntry(msg.sender);
-
-    // Unset the locator on the index.
-    require(indexes[_signerToken][_senderToken].unsetEntry(msg.sender), 'ENTRY_DOES_NOT_EXIST');
-
-    if (score > 0) {
-      // Return the staked tokens.
-      // Need to revert when false is returned
-      require(stakeToken.transfer(msg.sender, score));
-    }
-
-    emit Unstake(msg.sender, _signerToken, _senderToken, score);
+    unsetUserIntent(msg.sender, _signerToken, _senderToken);
   }
 
   /**
@@ -237,6 +223,32 @@ contract Indexer is IIndexer, Ownable {
     */
   function setPausedStatus(bool _newStatus) external onlyOwner {
     paused = _newStatus;
+  }
+
+  /**
+    * @notice Allows the owner to unset intent and return tokens
+    */
+  function unsetIntentForUser(address _user, address _signerToken, address _senderToken) external onlyOwner {
+    unsetUserIntent(_user, _signerToken, _senderToken);
+  }
+
+  function unsetUserIntent(address _user, address _signerToken, address _senderToken) internal {
+     // Get the score for the sender.
+    uint256 score;
+    bytes32 data;
+    (score, data) = indexes[_signerToken][_senderToken].getEntry(msg.sender);
+
+    // Unset the locator on the index.
+    require(indexes[_signerToken][_senderToken].unsetEntry(msg.sender), 'ENTRY_DOES_NOT_EXIST');
+
+    if (score > 0) {
+      // Return the staked tokens.
+      // Need to revert when false is returned
+      require(stakeToken.transfer(msg.sender, score));
+    }
+
+    emit Unstake(msg.sender, _signerToken, _senderToken, score);
+
   }
 
 }
