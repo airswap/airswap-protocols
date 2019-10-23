@@ -1,6 +1,8 @@
 const Delegate = artifacts.require('Delegate')
 const Swap = artifacts.require('Swap')
+const Indexer = artifacts.require('Indexer')
 const MockContract = artifacts.require('MockContract')
+const FungibleToken = artifacts.require('FungibleToken')
 const {
   equal,
   passes,
@@ -26,6 +28,8 @@ contract('Delegate Unit Tests', async accounts => {
   const MAX_SENDER_AMOUNT = 12345
   const PRICE_COEF = 4321
   const EXP = 2
+  const MOCK_WETH = accounts[2]
+  const MOCK_DAI = accounts[3]
 
   beforeEach(async () => {
     let snapShot = await takeSnapshot()
@@ -35,6 +39,27 @@ contract('Delegate Unit Tests', async accounts => {
   afterEach(async () => {
     await revertToSnapShot(snapshotId)
   })
+
+  async function setupMockTokens() {
+    mockStakeToken = await MockContract.new()
+    let mockFungibleTokenTemplate = await FungibleToken.new()
+
+    mockStakeToken_allowance = await mockFungibleTokenTemplate.contract.methods
+      .allowance(EMPTY_ADDRESS, EMPTY_ADDRESS)
+      .encodeABI()
+
+    mockStakeToken_transferFrom = await mockFungibleTokenTemplate.contract.methods
+      .transferFrom(EMPTY_ADDRESS, EMPTY_ADDRESS, 0)
+      .encodeABI()
+
+    mockStakeToken_transfer = await mockFungibleTokenTemplate.contract.methods
+      .transfer(EMPTY_ADDRESS, 0)
+      .encodeABI()
+
+    mockStakeToken_approve = await mockFungibleTokenTemplate.contract.methods
+      .approve(EMPTY_ADDRESS, 0)
+      .encodeABI()
+  }
 
   async function setupMockSwap() {
     let swapTemplate = await Swap.new()
@@ -46,8 +71,42 @@ contract('Delegate Unit Tests', async accounts => {
     orders.setVerifyingContract(mockSwap.address)
   }
 
+  async function setupMockIndexer() {
+    mockIndexer = await MockContract.new()
+    let mockIndexerTemplate = await Indexer.new(EMPTY_ADDRESS, EMPTY_ADDRESS)
+
+    //mock setIntent()
+    let mockIndexer_setIntent = mockIndexerTemplate.contract.methods
+      .setIntent(EMPTY_ADDRESS, EMPTY_ADDRESS, 0, web3.utils.fromAscii(''))
+      .encodeABI()
+    await mockIndexer.givenMethodReturnBool(mockIndexer_setIntent, true)
+
+    //mock unsetIntent()
+    let mockIndexer_unsetIntent = mockIndexerTemplate.contract.methods
+      .unsetIntent(EMPTY_ADDRESS, EMPTY_ADDRESS)
+      .encodeABI()
+    await mockIndexer.givenMethodReturnBool(mockIndexer_unsetIntent, true)
+
+    //mock stakeToken()
+    let mockIndexer_stakeToken = mockIndexerTemplate.contract.methods
+      .stakeToken()
+      .encodeABI()
+    await mockIndexer.givenMethodReturnAddress(
+      mockIndexer_stakeToken,
+      mockStakeToken.address
+    )
+
+    //mock getScore()
+    mockIndexer_getScore = mockIndexerTemplate.contract.methods
+      .getScore(EMPTY_ADDRESS, EMPTY_ADDRESS, EMPTY_ADDRESS)
+      .encodeABI()
+  }
+
   before('deploy Delegate', async () => {
+    await setupMockTokens()
     await setupMockSwap()
+    await setupMockIndexer()
+
     delegate = await Delegate.new(
       mockSwap.address,
       EMPTY_ADDRESS,
@@ -104,7 +163,7 @@ contract('Delegate Unit Tests', async accounts => {
     })
   })
 
-  describe('Test setters', async () => {
+  describe('Test setRule', async () => {
     it('Test setRule permissions as not owner', async () => {
       await reverted(
         delegate.setRule(
@@ -161,7 +220,9 @@ contract('Delegate Unit Tests', async accounts => {
         )
       })
     })
+  })
 
+  describe('Test unsetRule', async () => {
     it('Test unsetRule permissions as not owner', async () => {
       await reverted(
         delegate.unsetRule(SENDER_TOKEN, SIGNER_TOKEN, { from: notOwner }),
@@ -210,6 +271,160 @@ contract('Delegate Unit Tests', async accounts => {
     })
   })
 
+  describe('Test setRuleAndIntent()', async () => {
+    it('Test calling setRuleAndIntent with allowance error', async () => {
+      let indexerAddress = mockIndexer.address
+      let intentAmount = 250
+
+      let rule = [100000, 300, 0]
+
+      //NOTE: owner would call delegate.addAdmin(delegate)
+      //this doesn't need to be done here because delegate is a mock
+
+      //mock improper allowance
+      await mockStakeToken.givenMethodReturnUint(
+        mockStakeToken_allowance,
+        intentAmount - 1
+      )
+
+      await reverted(
+        delegate.setRuleAndIntent(
+          MOCK_WETH,
+          MOCK_DAI,
+          rule,
+          intentAmount,
+          indexerAddress
+        ),
+        'ALLOWANCE_FUNDS_ERROR'
+      )
+    })
+
+    it('Test calling setRuleAndIntent with transfer error', async () => {
+      let indexerAddress = mockIndexer.address
+      let intentAmount = 250
+
+      let rule = [100000, 300, 0]
+
+      //NOTE: owner would call delegate.addAdmin(delegate)
+      //this doesn't need to be done here because delegate is a mock
+
+      await mockStakeToken.givenMethodReturnUint(
+        mockStakeToken_allowance,
+        intentAmount
+      )
+      //mock unsuccessful transfer
+      await mockStakeToken.givenMethodReturnBool(
+        mockStakeToken_transferFrom,
+        false
+      )
+
+      await reverted(
+        delegate.setRuleAndIntent(
+          MOCK_WETH,
+          MOCK_DAI,
+          rule,
+          intentAmount,
+          indexerAddress
+        ),
+        'TRANSFER_FUNDS_ERROR'
+      )
+    })
+
+    it('Test calling setRuleAndIntent with approval error', async () => {
+      let indexerAddress = mockIndexer.address
+      let intentAmount = 250
+
+      let rule = [100000, 300, 0]
+
+      //NOTE: owner would call delegate.addAdmin(delegate)
+      //this doesn't need to be done here because delegate is a mock
+
+      await mockStakeToken.givenMethodReturnUint(
+        mockStakeToken_allowance,
+        intentAmount
+      )
+      await mockStakeToken.givenMethodReturnBool(
+        mockStakeToken_transferFrom,
+        true
+      )
+      await mockStakeToken.givenMethodReturnBool(mockStakeToken_approve, false)
+
+      await reverted(
+        delegate.setRuleAndIntent(
+          MOCK_WETH,
+          MOCK_DAI,
+          rule,
+          intentAmount,
+          indexerAddress
+        ),
+        'APPROVAL_ERROR'
+      )
+    })
+    
+    it('Test successfully calling setRuleAndIntent', async () => {
+      let indexerAddress = mockIndexer.address
+      let intentAmount = 250
+
+      let rule = [100000, 300, 0]
+
+      //NOTE: owner would call delegate.addAdmin(delegate)
+      //this doesn't need to be done here because delegate is a mock
+
+      await mockStakeToken.givenMethodReturnUint(
+        mockStakeToken_allowance,
+        intentAmount
+      )
+      await mockStakeToken.givenMethodReturnBool(
+        mockStakeToken_transferFrom,
+        true
+      )
+      await mockStakeToken.givenMethodReturnBool(mockStakeToken_approve, true)
+
+      await passes(
+        delegate.setRuleAndIntent(
+          MOCK_WETH,
+          MOCK_DAI,
+          rule,
+          intentAmount,
+          indexerAddress
+        )
+      )
+    })
+  })
+
+  describe('Test unsetRuleAndIntent()', async () => {
+    it('Test calling unsetRuleAndIntent() with transfer error', async () => {
+      let mockScore = 1000
+      let indexerAddress = mockIndexer.address
+
+      //mock the score/staked amount to be transferred
+      await mockIndexer.givenMethodReturnUint(mockIndexer_getScore, mockScore)
+
+      //mock a failed transfer
+      await mockStakeToken.givenMethodReturnBool(mockStakeToken_transfer, false)
+
+      await reverted(
+        delegate.unsetRuleAndIntent(MOCK_WETH, MOCK_DAI, indexerAddress),
+        'TRANSFER_FUNDS_ERROR'
+      )
+    })
+
+    it('Test successfully calling unsetRuleAndIntent()', async () => {
+      let mockScore = 1000
+      let indexerAddress = mockIndexer.address
+
+      //mock the score/staked amount to be transferred
+      await mockIndexer.givenMethodReturnUint(mockIndexer_getScore, mockScore)
+
+      //mock a successful transfer
+      await mockStakeToken.givenMethodReturnBool(mockStakeToken_transfer, true)
+
+      await passes(
+        delegate.unsetRuleAndIntent(MOCK_WETH, MOCK_DAI, indexerAddress)
+      )
+    })
+  })
+  
   describe('Test setTradeWallet', async () => {
     it('Test setTradeWallet when not owner', async () => {
       await reverted(delegate.setTradeWallet(notOwner, { from: notOwner }))
@@ -663,4 +878,5 @@ contract('Delegate Unit Tests', async accounts => {
       )
     })
   })
+
 })

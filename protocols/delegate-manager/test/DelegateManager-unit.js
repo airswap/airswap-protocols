@@ -61,41 +61,6 @@ contract('DelegateManager Unit Tests', async accounts => {
     mockSwap = await MockContract.new()
   }
 
-  async function setupMockDelegate() {
-    mockDelegate = await MockContract.new()
-    let mockDelegateTemplate = await Delegate.new(
-      mockSwap.address,
-      owner,
-      tradeWallet
-    )
-
-    //mock setRule()
-    let mockDelegate_setRule = mockDelegateTemplate.contract.methods
-      .setRule(EMPTY_ADDRESS, EMPTY_ADDRESS, 0, 0, 0)
-      .encodeABI()
-    await mockDelegate.givenMethodReturnBool(mockDelegate_setRule, true)
-
-    //mock unsetRule()
-    let mockDelegate_unsetRule = mockDelegateTemplate.contract.methods
-      .unsetRule(EMPTY_ADDRESS, EMPTY_ADDRESS)
-      .encodeABI()
-    await mockDelegate.givenMethodReturnBool(mockDelegate_unsetRule, true)
-  }
-
-  async function setupMockFactory() {
-    mockFactory = await MockContract.new()
-    let mockFactoryTemplate = await DelegateFactory.new(mockSwap.address)
-
-    // mock createDelegate()
-    let mockFactory_createDelegate = mockFactoryTemplate.contract.methods
-      .createDelegate(EMPTY_ADDRESS, EMPTY_ADDRESS)
-      .encodeABI()
-    await mockFactory.givenMethodReturnAddress(
-      mockFactory_createDelegate,
-      mockDelegate.address
-    )
-  }
-
   async function setupMockIndexer() {
     mockIndexer = await MockContract.new()
     let mockIndexerTemplate = await Indexer.new(EMPTY_ADDRESS, EMPTY_ADDRESS)
