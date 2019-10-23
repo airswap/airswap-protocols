@@ -181,7 +181,8 @@ contract('Delegate Unit Tests', async accounts => {
           PRICE_COEF,
           EXP,
           { from: notOwner }
-        )
+        ),
+        "Ownable: caller is not the owner"
       )
     })
 
