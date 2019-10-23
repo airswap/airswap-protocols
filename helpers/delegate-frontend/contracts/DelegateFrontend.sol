@@ -63,11 +63,17 @@ contract DelegateFrontend {
     bytes32[] memory locators = indexer.getIntents(
       _signerToken,
       _senderToken,
+      address(0), // This is to start at the head of the list of intents
       _maxIntents
-      );
+    );
 
-    // Iterate through locators.
+    // Iterate through locators
     for (uint256 i; i < locators.length; i++) {
+
+      // the end of the locators has been reached
+      if (locators[i] == bytes32(0)) {
+        break;
+      }
 
       // Get a buy quote from the Delegate.
       uint256 signerAmount = IDelegate(address(bytes20(locators[i])))
@@ -109,11 +115,17 @@ contract DelegateFrontend {
     bytes32[] memory locators = indexer.getIntents(
       _signerToken,
       _senderToken,
+      address(0), // This is to start at the head of the list of intents
       _maxIntents
-      );
+    );
 
     // Iterate through locators.
     for (uint256 i; i < locators.length; i++) {
+
+      // the end of the locators has been reached
+      if (locators[i] == bytes32(0)) {
+        break;
+      }
 
       // Get a buy quote from the Delegate.
       uint256 senderAmount = IDelegate(address(bytes20(locators[i])))

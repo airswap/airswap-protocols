@@ -76,6 +76,7 @@ interface IIndexer {
   function getIntents(
     address _signerToken,
     address _senderToken,
+    address _startAddress,
     uint256 _count
   ) external view returns (bytes32[] memory);
 

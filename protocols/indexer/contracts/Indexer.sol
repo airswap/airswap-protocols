@@ -158,7 +158,6 @@ contract Indexer is IIndexer, Ownable {
     address _signerToken,
     address _senderToken
   ) external {
-
     // Ensure the index exists.
     require(indexes[_signerToken][_senderToken] != Index(0),
       "INDEX_DOES_NOT_EXIST");
@@ -189,28 +188,29 @@ contract Indexer is IIndexer, Ownable {
     *
     * @param _signerToken address
     * @param _senderToken address
-    * @param _count uint256
+    * @param _startAddress address The address to start from in the list of intents
+    * @param _count uint256 The total number of intents to return
     * @return locators address[]
     */
   function getIntents(
     address _signerToken,
     address _senderToken,
+    address _startAddress,
     uint256 _count
   ) external view returns (
     bytes32[] memory locators
   ) {
-
     // Ensure neither token is blacklisted.
-    if (!blacklist[_signerToken] && !blacklist[_senderToken]) {
-
-      // Ensure the index exists.
-      if (indexes[_signerToken][_senderToken] != Index(0)) {
-
-        // Return an array of locators for the index.
-        return indexes[_signerToken][_senderToken].fetchLocators(_count);
-
-      }
+    if (blacklist[_signerToken] || blacklist[_senderToken]) {
+      return new bytes32[](0);
     }
-    return new bytes32[](0);
+
+    // Ensure the index exists.
+    if (indexes[_signerToken][_senderToken] == Index(0)) {
+      return new bytes32[](0);
+    }
+
+    // Return an array of locators for the index.
+    return indexes[_signerToken][_senderToken].fetchLocators(_startAddress, _count);
   }
 }

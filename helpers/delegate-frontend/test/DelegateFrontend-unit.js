@@ -121,7 +121,7 @@ contract('DelegateFrontend Unit Tests', async () => {
     mockIndexer = await MockContract.new()
 
     indexer_getIntents = indexerTemplate.contract.methods
-      .getIntents(EMPTY_ADDRESS, EMPTY_ADDRESS, 0)
+      .getIntents(EMPTY_ADDRESS, EMPTY_ADDRESS, EMPTY_ADDRESS, 0)
       .encodeABI()
   }
 

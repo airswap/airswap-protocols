@@ -18,9 +18,12 @@ contract('Indexer Unit Tests', async accounts => {
   let nonOwner = accounts[1]
   let aliceAddress = accounts[2]
   let bobAddress = accounts[3]
+  let carolAddress = accounts[4]
 
   let aliceLocator = padAddressToLocator(aliceAddress)
   let bobLocator = padAddressToLocator(bobAddress)
+  let carolLocator = padAddressToLocator(carolAddress)
+  let emptyLocatorData = padAddressToLocator(EMPTY_ADDRESS)
 
   let indexer
   let snapshotId
@@ -414,8 +417,13 @@ contract('Indexer Unit Tests', async accounts => {
 
   describe('Test getIntents', async () => {
     it('should return an empty array if the index doesnt exist', async () => {
-      let intents = await indexer.getIntents.call(tokenOne, tokenTwo, 4)
-      equal(intents.length, 0, 'intents array should be empty')
+      let intents = await indexer.getIntents.call(
+        tokenOne,
+        tokenTwo,
+        EMPTY_ADDRESS,
+        3
+      )
+      equal(intents.length, 0, 'intents array should be size 0')
     })
 
     it('should return an empty array if a token is blacklisted', async () => {
@@ -435,8 +443,13 @@ contract('Indexer Unit Tests', async accounts => {
       })
 
       // now try to get the intents
-      let intents = await indexer.getIntents.call(tokenOne, tokenTwo, 4)
-      equal(intents.length, 0, 'intents array should be empty')
+      let intents = await indexer.getIntents.call(
+        tokenOne,
+        tokenTwo,
+        EMPTY_ADDRESS,
+        4
+      )
+      equal(intents.length, 0, 'intents array should be size 0')
     })
 
     it('should otherwise return the intents', async () => {
@@ -452,14 +465,45 @@ contract('Indexer Unit Tests', async accounts => {
       await indexer.setIntent(tokenOne, tokenTwo, 100, bobLocator, {
         from: bobAddress,
       })
+      await indexer.setIntent(tokenOne, tokenTwo, 75, carolLocator, {
+        from: carolAddress,
+      })
 
       // now try to get the intents
-      let intents = await indexer.getIntents.call(tokenOne, tokenTwo, 4)
-      equal(intents.length, 2, 'intents array should be size 2')
+      let intents = await indexer.getIntents.call(
+        tokenOne,
+        tokenTwo,
+        EMPTY_ADDRESS,
+        4
+      )
+      equal(intents.length, 4, 'intents array should be size 4')
+      equal(intents[0], bobLocator, 'intent should be bob')
+      equal(intents[1], carolLocator, 'intent should be carol')
+      equal(intents[2], aliceLocator, 'intent should be alice')
+      equal(intents[3], emptyLocatorData, 'intent should be empty')
 
       // should only get the number specified
-      intents = await indexer.getIntents.call(tokenOne, tokenTwo, 1)
+      intents = await indexer.getIntents.call(
+        tokenOne,
+        tokenTwo,
+        EMPTY_ADDRESS,
+        1
+      )
       equal(intents.length, 1, 'intents array should be size 1')
+      equal(intents[0], bobLocator, 'intent should be bob')
+
+      // should start in the specified location
+      intents = await indexer.getIntents.call(
+        tokenOne,
+        tokenTwo,
+        carolAddress,
+        5
+      )
+      equal(intents.length, 5, 'intents array should be size 5')
+      equal(intents[0], carolLocator, 'intent should be carol')
+      equal(intents[1], aliceLocator, 'intent should be alice')
+      equal(intents[2], emptyLocatorData, 'intent should be empty')
+      equal(intents[3], emptyLocatorData, 'intent should be empty')
     })
   })
 })

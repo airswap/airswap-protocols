@@ -23,6 +23,8 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
   let tokenWETH
 
   let aliceLocator = padAddressToLocator(aliceAddress)
+  let bobLocator = padAddressToLocator(bobAddress)
+  let emptyLocator = padAddressToLocator(EMPTY_ADDRESS)
 
   before('Setup', async () => {
     let snapShot = await takeSnapshot()
@@ -77,18 +79,22 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
       const intents = await indexer.getIntents.call(
         tokenWETH.address,
         tokenDAI.address,
+        EMPTY_ADDRESS,
         10,
         {
           from: bobAddress,
         }
       )
-      equal(intents.length, 0)
+      equal(intents.length, 10)
+      equal(intents[0], emptyLocator)
+      equal(intents[1], emptyLocator)
     })
 
     it('Bob ensures no intents are on the Indexer for non-existing index', async () => {
       const intents = await indexer.getIntents.call(
         tokenDAI.address,
         tokenWETH.address,
+        EMPTY_ADDRESS,
         10,
         {
           from: bobAddress,
@@ -153,8 +159,9 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
       )
     })
 
-    it('Staking tokens are minted for Alice', async () => {
+    it('Staking tokens are minted for Alice and Bob', async () => {
       emitted(await tokenAST.mint(aliceAddress, 1000), 'Transfer')
+      emitted(await tokenAST.mint(bobAddress, 1000), 'Transfer')
     })
 
     it('Fails due to no staking token allowance', async () => {
@@ -172,9 +179,13 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
       )
     })
 
-    it('Alice approves Indexer to spend staking tokens', async () => {
+    it('Alice and Bob approve Indexer to spend staking tokens', async () => {
       emitted(
         await tokenAST.approve(indexerAddress, 10000, { from: aliceAddress }),
+        'Approval'
+      )
+      emitted(
+        await tokenAST.approve(indexerAddress, 10000, { from: bobAddress }),
         'Approval'
       )
     })
@@ -210,24 +221,15 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
       const intents = await indexer.getIntents.call(
         tokenWETH.address,
         tokenDAI.address,
-        10,
+        EMPTY_ADDRESS,
+        5,
         {
           from: bobAddress,
         }
       )
-      equal(intents.length, 1)
-    })
-
-    it('Bob ensures that Alice intent is on the Indexer', async () => {
-      const intents = await indexer.getIntents.call(
-        tokenWETH.address,
-        tokenDAI.address,
-        10,
-        {
-          from: bobAddress,
-        }
-      )
+      equal(intents.length, 5)
       equal(intents[0], aliceLocator)
+      equal(intents[1], emptyLocator)
     })
 
     it('Alice attempts to unset non-existent index and reverts', async () => {
@@ -266,12 +268,15 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
       const intents = await indexer.getIntents.call(
         tokenWETH.address,
         tokenDAI.address,
+        EMPTY_ADDRESS,
         10,
         {
           from: bobAddress,
         }
       )
-      equal(intents.length, 0)
+      equal(intents.length, 10)
+      equal(intents[0], emptyLocator)
+      equal(intents[1], emptyLocator)
     })
 
     it('Alice attempts to set an intent and succeeds', async () => {
@@ -312,6 +317,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
       const intents = await indexer.getIntents.call(
         tokenWETH.address,
         tokenDAI.address,
+        EMPTY_ADDRESS,
         10,
         {
           from: bobAddress,
@@ -380,7 +386,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
       )
     })
 
-    it('Alice attempts to stake and set an intent and succeeds', async () => {
+    it('Alice and Bob attempt to stake and set an intent and succeed', async () => {
       emitted(
         await indexer.setIntent(
           tokenWETH.address,
@@ -393,6 +399,34 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
         ),
         'Stake'
       )
+      emitted(
+        await indexer.setIntent(
+          tokenWETH.address,
+          tokenDAI.address,
+          50,
+          bobLocator,
+          {
+            from: bobAddress,
+          }
+        ),
+        'Stake'
+      )
+    })
+
+    it('Bob fetches intents starting at bobAddress', async () => {
+      const intents = await indexer.getIntents.call(
+        tokenWETH.address,
+        tokenDAI.address,
+        bobAddress,
+        3,
+        {
+          from: bobAddress,
+        }
+      )
+      equal(intents.length, 3)
+      equal(intents[0], bobLocator)
+      equal(intents[1], emptyLocator)
+      equal(intents[2], emptyLocator)
     })
   })
 })

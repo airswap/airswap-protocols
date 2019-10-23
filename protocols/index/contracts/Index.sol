@@ -153,28 +153,40 @@ contract Index is Ownable {
 
   /**
     * @notice Get Valid Locators
-    * @param _count uint256
+    * @dev if _startUser is provided as 0x0, the function starts from the head of the list
+    * @param _startUser address The user to start from
+    * @param _count uint256 The number of locators to return
     * @return result bytes32[]
     */
   function fetchLocators(
+    address _startUser,
     uint256 _count
   ) external view returns (bytes32[] memory result) {
 
-    // Limit results to list length or _count.
-    uint256 limit = length;
-    if (_count < length) {
-      limit = _count;
-    }
-    result = new bytes32[](limit);
-
-    // Get the first Locator in the linked list after the HEAD
+    // locator starts holding the first locator to consider
     Locator storage locator = locatorsLinkedList[HEAD][NEXT];
+
+    // if there's a valid start user, start there instead of the head
+    if (_startUser != address(0) && _startUser != HEAD) {
+      // the locator of the start user
+      locator = locatorsLinkedList[locatorsLinkedList[_startUser][PREV].user][NEXT];
+
+      // check the start user actually features in the linked list
+      require(locator.user == _startUser, 'USER_HAS_NO_LOCATOR');
+    }
+
+    result = new bytes32[](_count);
 
     // Iterate over the list until the end or limit.
     uint256 i = 0;
-    while (i < limit) {
+
+    // if the HEAD is reached (the end of the list) before count, break
+    while (i < _count && locator.user != HEAD) {
+      // add the locator to the returned data
       result[i] = locator.data;
       i = i + 1;
+
+      // move along to the next locator
       locator = locatorsLinkedList[locator.user][NEXT];
     }
   }
