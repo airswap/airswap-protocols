@@ -4,11 +4,15 @@ const Types = artifacts.require('Types')
 const Indexer = artifacts.require('Indexer')
 const DelegateFactory = artifacts.require('DelegateFactory')
 const FungibleToken = artifacts.require('FungibleToken')
-const { emitted, reverted, equal, ok, passes } = require('@airswap/test-utils').assert
+const {
+  emitted,
+  reverted,
+  equal,
+  ok,
+  passes,
+} = require('@airswap/test-utils').assert
 const { balances } = require('@airswap/test-utils').balances
 const {
-  takeSnapshot,
-  revertToSnapShot,
   getTimestampPlusDays,
   advanceTime,
 } = require('@airswap/test-utils').time
@@ -69,14 +73,17 @@ contract('Delegate Integration Tests', async accounts => {
     await setupFactory()
     await setupIndexer()
 
-    let trx = await delegateFactory.createDelegate(aliceAddress, aliceTradeWallet)
+    let trx = await delegateFactory.createDelegate(
+      aliceAddress,
+      aliceTradeWallet
+    )
     let aliceDelegateAddress
-    emitted(trx, "CreateDelegate", (e) => {
+    emitted(trx, 'CreateDelegate', e => {
       //capture the delegate address
       aliceDelegateAddress = e.delegateContract
       return e.delegateContractOwner === aliceAddress
     })
-    aliceDelegate = await Delegate.at(aliceDelegateAddress);
+    aliceDelegate = await Delegate.at(aliceDelegateAddress)
   })
 
   describe('Checks setTradeWallet', async () => {
@@ -145,13 +152,9 @@ contract('Delegate Integration Tests', async accounts => {
       let rule = [100000, 300, 0]
 
       //give allowance to the delegate to pull staking amount
-      await STAKE_TOKEN.approve(
-        aliceDelegate.address,
-        INTENT_AMOUNT,
-        {
-          from: aliceAddress
-        }
-      )
+      await STAKE_TOKEN.approve(aliceDelegate.address, INTENT_AMOUNT, {
+        from: aliceAddress,
+      })
 
       //check the score of the delegate before
       let scoreBefore = await indexer.getScore(
@@ -168,8 +171,8 @@ contract('Delegate Integration Tests', async accounts => {
           rule,
           INTENT_AMOUNT,
           indexer.address,
-          { 
-            from: aliceAddress
+          {
+            from: aliceAddress,
           }
         )
       )
@@ -203,8 +206,8 @@ contract('Delegate Integration Tests', async accounts => {
           DAI_TOKEN.address,
           WETH_TOKEN.address,
           indexer.address,
-          { 
-            from: aliceAddress
+          {
+            from: aliceAddress,
           }
         )
       )
@@ -223,7 +226,7 @@ contract('Delegate Integration Tests', async accounts => {
       equal(stakeTokenBal.toNumber(), STARTING_BALANCE)
     })
   })
-  
+
   describe('Checks pricing logic from the Delegate', async () => {
     it('Send up to 100K WETH for DAI at 300 DAI/WETH', async () => {
       await aliceDelegate.setRule(
@@ -726,5 +729,4 @@ contract('Delegate Integration Tests', async accounts => {
       )
     })
   })
-
 })
