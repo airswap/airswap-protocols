@@ -32,8 +32,8 @@ contract('Index Unit Tests', async accounts => {
   let emptyLocatorData = padAddressToLocator(EMPTY_ADDRESS)
 
   // helpers
-  const SCORE = 'score'
-  const DATA = 'data'
+  const SCORE = 0
+  const DATA = 1
 
   beforeEach(async () => {
     let snapShot = await takeSnapshot()
