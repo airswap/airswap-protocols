@@ -79,31 +79,27 @@ contract Indexer is IIndexer, Ownable {
 
   /**
     * @notice Add a Token to the Blacklist
-    * @param _tokens address[]
+    * @param _token address
     */
   function addToBlacklist(
-    address[] calldata _tokens
+    address _token
   ) external onlyOwner {
-    for (uint256 i = 0; i < _tokens.length; i++) {
-      if (!blacklist[_tokens[i]]) {
-        blacklist[_tokens[i]] = true;
-        emit AddToBlacklist(_tokens[i]);
-      }
+    if (!blacklist[_token]) {
+      blacklist[_token] = true;
+      emit AddToBlacklist(_token);
     }
   }
 
   /**
     * @notice Remove a Token from the Blacklist
-    * @param _tokens address[]
+    * @param _token address
     */
   function removeFromBlacklist(
-    address[] calldata _tokens
+    address _token
   ) external onlyOwner {
-    for (uint256 i = 0; i < _tokens.length; i++) {
-      if (blacklist[_tokens[i]]) {
-        blacklist[_tokens[i]] = false;
-        emit RemoveFromBlacklist(_tokens[i]);
-      }
+    if (blacklist[_token]) {
+      blacklist[_token] = false;
+      emit RemoveFromBlacklist(_token);
     }
   }
 

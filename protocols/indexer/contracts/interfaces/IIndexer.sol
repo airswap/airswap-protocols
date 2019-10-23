@@ -55,11 +55,11 @@ interface IIndexer {
   ) external returns (address);
 
   function addToBlacklist(
-    address[] calldata _tokens
+    address _token
   ) external;
 
   function removeFromBlacklist(
-    address[] calldata _tokens
+    address _token
   ) external;
 
   function setIntent(
