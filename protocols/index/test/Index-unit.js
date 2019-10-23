@@ -32,7 +32,6 @@ contract('Index Unit Tests', async accounts => {
   let emptyLocatorData = padAddressToLocator(EMPTY_ADDRESS)
 
   // helpers
-  const USER = 'user'
   const SCORE = 'score'
   const DATA = 'data'
 
@@ -274,22 +273,12 @@ contract('Index Unit Tests', async accounts => {
 
     it('should return empty locator for a non-user', async () => {
       let davidLocator = await index.getLocator(davidAddress)
-      equal(
-        davidLocator[USER],
-        EMPTY_ADDRESS,
-        'David: Locator address not correct'
-      )
       equal(davidLocator[SCORE], 0, 'David: Locator score not correct')
       equal(davidLocator[DATA], emptyLocatorData, 'David: Locator not correct')
 
       // now for a recently unset locator
       await index.unsetLocator(carolAddress, { from: owner })
       let testLocator = await index.getLocator(carolAddress)
-      equal(
-        testLocator[USER],
-        EMPTY_ADDRESS,
-        'Carol: Locator address not correct'
-      )
       equal(testLocator[SCORE], 0, 'Carol: Locator score not correct')
       equal(
         testLocator[DATA],
@@ -300,11 +289,6 @@ contract('Index Unit Tests', async accounts => {
 
     it('should return the correct locator for a valid user', async () => {
       let aliceLocator = await index.getLocator(aliceAddress)
-      equal(
-        aliceLocator[USER],
-        aliceAddress,
-        'Alice: Locator address not correct'
-      )
       equal(aliceLocator[SCORE], 2000, 'Alice: Locator score not correct')
       equal(
         aliceLocator[DATA],
@@ -313,7 +297,6 @@ contract('Index Unit Tests', async accounts => {
       )
 
       let bobLocator = await index.getLocator(bobAddress)
-      equal(bobLocator[USER], bobAddress, 'Bob: locator address not correct')
       equal(bobLocator[SCORE], 500, 'Bob: Locator score not correct')
       equal(
         bobLocator[DATA],

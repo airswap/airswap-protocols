@@ -30,12 +30,8 @@ contract Index is Ownable {
   // Maximum address value to indicate the head
   address private constant HEAD = address(uint160(2**160-1));
 
-  // Byte values to map to the previous and next
-  byte constant private PREV = 0x00;
-  byte constant private NEXT = 0x01;
-
   // Mapping of user address to its neighbors
-  mapping(address => mapping(byte => Locator)) private locatorsLinkedList;
+  mapping(address => ListElement) private linkedList;
 
   /**
     * @notice Locator for a Delegate
@@ -44,8 +40,9 @@ contract Index is Ownable {
     * @param score uint256
     * @param data bytes32
     */
-  struct Locator {
-    address user;
+  struct ListElement {
+    address next;
+    address prev;
     uint256 score;
     bytes32 data;
   }
@@ -70,13 +67,11 @@ contract Index is Ownable {
     */
   constructor() public {
     // Initialize the linked list.
-    Locator memory head = Locator(HEAD, 0, bytes32(0));
-    locatorsLinkedList[HEAD][PREV] = head;
-    locatorsLinkedList[HEAD][NEXT] = head;
+    linkedList[HEAD] = ListElement(HEAD, HEAD, 0, bytes32(0));
   }
 
   /**
-    * @notice Set an Locator to Trade
+    * @notice Set a Locator to Trade
     *
     * @param _user The account
     * @param _score uint256
@@ -90,14 +85,15 @@ contract Index is Ownable {
 
     require(!hasLocator(_user), "LOCATOR_ALREADY_SET");
 
-    Locator memory newLocator = Locator(_user, _score, _data);
-
-    // Insert after the next highest score on the linked list.
-    Locator memory nextLocator = findPosition(_score);
+    // Find the first user who has a lower stake, and insert before them
+    address nextUser = findPosition(_score);
 
     // Link the newLocator into place.
-    link(locatorsLinkedList[nextLocator.user][PREV], newLocator);
-    link(newLocator, nextLocator);
+    address prevUser = linkedList[nextUser].prev;
+    
+    linkedList[prevUser].next = _user;
+    linkedList[nextUser].prev = _user;
+    linkedList[_user] = ListElement(nextUser, prevUser, _score, _data);
 
     // Increment the length of the linked list if successful.
     length = length + 1;
@@ -120,11 +116,14 @@ contract Index is Ownable {
     }
 
     // Link its neighbors together.
-    link(locatorsLinkedList[_user][PREV], locatorsLinkedList[_user][NEXT]);
+    address prevUser = linkedList[_user].prev;
+    address nextUser = linkedList[_user].next;
+
+    linkedList[prevUser].next = nextUser;
+    linkedList[nextUser].prev = prevUser;
 
     // Delete user from the list.
-    delete locatorsLinkedList[_user][PREV];
-    delete locatorsLinkedList[_user][NEXT];
+    delete linkedList[_user];
 
     // Decrement the length of the linked list.
     length = length - 1;
@@ -140,15 +139,8 @@ contract Index is Ownable {
     */
   function getLocator(
     address _user
-  ) external view returns (Locator memory) {
-
-    // Ensure the user has a neighbor in the linked list.
-    if (locatorsLinkedList[_user][PREV].user != address(0)) {
-
-      // Return the next Locator from the previous neighbor.
-      return locatorsLinkedList[locatorsLinkedList[_user][PREV].user][NEXT];
-    }
-    return Locator(address(0), 0, bytes32(0));
+  ) external view returns (ListElement memory) {
+    return linkedList[_user];
   }
 
   /**
@@ -175,6 +167,7 @@ contract Index is Ownable {
       require(locator.user == _startUser, 'USER_HAS_NO_LOCATOR');
     }
 
+<<<<<<< HEAD
     result = new bytes32[](_count);
 
     // Iterate over the list until the end or limit.
@@ -188,6 +181,17 @@ contract Index is Ownable {
 
       // move along to the next locator
       locator = locatorsLinkedList[locator.user][NEXT];
+=======
+    // Get the first user in the linked list after the HEAD
+    address user = linkedList[HEAD].next;
+
+    // Iterate over the list until the end or limit.
+    uint256 i = 0;
+    while (i < limit) {
+      result[i] = linkedList[user].data;
+      i = i + 1;
+      user = linkedList[user].next;
+>>>>>>> draft of linked list new structure
     }
   }
 
@@ -199,9 +203,7 @@ contract Index is Ownable {
   function hasLocator(
     address _user
   ) internal view returns (bool) {
-
-    if (locatorsLinkedList[_user][PREV].user != address(0) &&
-      locatorsLinkedList[locatorsLinkedList[_user][PREV].user][NEXT].user == _user) {
+    if (linkedList[_user].data != bytes32(0)) {
       return true;
     }
     return false;
@@ -214,34 +216,21 @@ contract Index is Ownable {
     */
   function findPosition(
     uint256 _score
-  ) internal view returns (Locator memory) {
+  ) internal view returns (address) {
 
-    // Get the first Locator in the linked list.
-    Locator storage locator = locatorsLinkedList[HEAD][NEXT];
+    // Get the first user in the linked list.
+    address user = linkedList[HEAD].next;
 
     if (_score == 0) {
       // return the head of the linked list
-      return locatorsLinkedList[locator.user][PREV];
+      return HEAD;
     }
 
     // Iterate through the list until a lower score is found.
-    while (_score <= locator.score) {
-      locator = locatorsLinkedList[locator.user][NEXT];
+    while (_score <= linkedList[user].score) {
+      user = linkedList[user].next;
     }
-    return locator;
+    return user;
   }
 
-  /**
-    * @notice Link Two Locators
-    * @dev helper function for linked list
-    * @param _left Locator
-    * @param _right Locator
-    */
-  function link(
-    Locator memory _left,
-    Locator memory _right
-  ) internal {
-    locatorsLinkedList[_left.user][NEXT] = _right;
-    locatorsLinkedList[_right.user][PREV] = _left;
-  }
 }
