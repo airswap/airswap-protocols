@@ -19,13 +19,13 @@ contract('Delegate Unit Tests', async accounts => {
   const tradeWallet = accounts[1]
   const notOwner = accounts[2]
   const notTradeWallet = accounts[3]
-  const SIGNER_TOKEN = accounts[9]
-  const SENDER_TOKEN = accounts[8]
+  const SIGNER_TOKEN = accounts[4]
+  const SENDER_TOKEN = accounts[5]
+  const MOCK_WETH = accounts[6]
+  const MOCK_DAI = accounts[7]
   const MAX_SENDER_AMOUNT = 12345
   const PRICE_COEF = 4321
   const EXP = 2
-  const MOCK_WETH = accounts[2]
-  const MOCK_DAI = accounts[3]
 
   let delegate
   let mockSwap
@@ -286,9 +286,6 @@ contract('Delegate Unit Tests', async accounts => {
 
       let rule = [100000, 300, 0]
 
-      //NOTE: owner would call delegate.addAdmin(delegate)
-      //this doesn't need to be done here because delegate is a mock
-
       //mock improper allowance
       await mockStakeToken.givenMethodReturnUint(
         mockStakeToken_allowance,
@@ -312,9 +309,6 @@ contract('Delegate Unit Tests', async accounts => {
       let intentAmount = 250
 
       let rule = [100000, 300, 0]
-
-      //NOTE: owner would call delegate.addAdmin(delegate)
-      //this doesn't need to be done here because delegate is a mock
 
       await mockStakeToken.givenMethodReturnUint(
         mockStakeToken_allowance,
@@ -344,9 +338,6 @@ contract('Delegate Unit Tests', async accounts => {
 
       let rule = [100000, 300, 0]
 
-      //NOTE: owner would call delegate.addAdmin(delegate)
-      //this doesn't need to be done here because delegate is a mock
-
       await mockStakeToken.givenMethodReturnUint(
         mockStakeToken_allowance,
         intentAmount
@@ -374,9 +365,6 @@ contract('Delegate Unit Tests', async accounts => {
       let intentAmount = 250
 
       let rule = [100000, 300, 0]
-
-      //NOTE: owner would call delegate.addAdmin(delegate)
-      //this doesn't need to be done here because delegate is a mock
 
       await mockStakeToken.givenMethodReturnUint(
         mockStakeToken_allowance,
