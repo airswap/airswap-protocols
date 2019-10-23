@@ -20,7 +20,7 @@ pragma experimental ABIEncoderV2;
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 /**
-  * @title Index: A List of Locators
+  * @title Index: A List of Entries
   */
 contract Index is Ownable {
 
@@ -31,20 +31,20 @@ contract Index is Ownable {
   address private constant HEAD = address(uint160(2**160-1));
 
   // Mapping of user address to its neighbors
-  mapping(address => Node) private listEntry;
+  mapping(address => Entry) private listEntry;
 
   /**
-    * @notice Locator for a Delegate
-    * @dev data is arbitrary e.g. may include an address
+    * @notice Entry for a locator
+    * @dev locator is arbitrary e.g. may include an address
     * @param user address
     * @param score uint256
-    * @param data bytes32
+    * @param locator bytes32
     */
-  struct Node {
+  struct Entry {
     address prev;
     address next;
     uint256 score;
-    bytes32 data;
+    bytes32 locator;
   }
 
   /**
@@ -52,13 +52,13 @@ contract Index is Ownable {
     * @dev Emitted with successful state changes
     */
 
-  event SetLocator(
+  event SetEntry(
     uint256 score,
     address indexed user,
-    bytes32 indexed data
+    bytes32 indexed locator
   );
 
-  event UnsetLocator(
+  event UnsetEntry(
     address indexed user
   );
 
@@ -67,23 +67,23 @@ contract Index is Ownable {
     */
   constructor() public {
     // Initialize the linked list.
-    listEntry[HEAD] = Node(HEAD, HEAD, 0, bytes32(0));
+    listEntry[HEAD] = Entry(HEAD, HEAD, 0, bytes32(0));
   }
 
   /**
-    * @notice Set a Locator to Trade
+    * @notice Set a Entry to Trade
     *
     * @param _user The account
     * @param _score uint256
-    * @param _data bytes32
+    * @param _locator bytes32
     */
-  function setLocator(
+  function setEntry(
     address _user,
     uint256 _score,
-    bytes32 _data
+    bytes32 _locator
   ) external onlyOwner {
 
-    require(!hasLocator(_user), "LOCATOR_ALREADY_SET");
+    require(!hasEntry(_user), "ENTRY_ALREADY_EXISTS");
 
     // Find the first user who has a lower stake, and insert before them
     address nextUser = findPosition(_score);
@@ -93,25 +93,25 @@ contract Index is Ownable {
 
     listEntry[prevUser].next = _user;
     listEntry[nextUser].prev = _user;
-    listEntry[_user] = Node(prevUser, nextUser, _score, _data);
+    listEntry[_user] = Entry(prevUser, nextUser, _score, _locator);
 
     // Increment the length of the linked list if successful.
     length = length + 1;
 
-    emit SetLocator(_score, _user, _data);
+    emit SetEntry(_score, _user, _locator);
   }
 
   /**
-    * @notice Unset an Locator to Trade
+    * @notice Unset an Entry to Trade
     * @param _user address
     * @return bool return true on success
     */
-  function unsetLocator(
+  function unsetEntry(
     address _user
   ) external onlyOwner returns (bool) {
 
     // Ensure the _user is in the linked list.
-    if (!hasLocator(_user)) {
+    if (!hasEntry(_user)) {
       return false;
     }
 
@@ -128,19 +128,19 @@ contract Index is Ownable {
     // Decrement the length of the linked list.
     length = length - 1;
 
-    emit UnsetLocator(_user);
+    emit UnsetEntry(_user);
     return true;
   }
 
   /**
-    * @notice Get the Locator information for a user
+    * @notice Get the Entry information for a user
     * @param _user address
-    * @return (uint256, bytes32) locator score and locator data
+    * @return (uint256, bytes32) score and locator
     */
-  function getLocator(
+  function getEntry(
     address _user
   ) external view returns (uint256, bytes32) {
-    return (listEntry[_user].score, listEntry[_user].data);
+    return (listEntry[_user].score, listEntry[_user].locator);
   }
 
   /**
@@ -150,7 +150,7 @@ contract Index is Ownable {
     * @param _count uint256 The number of locators to return
     * @return result bytes32[]
     */
-  function fetchLocators(
+  function fetchEntries(
     address _startUser,
     uint256 _count
   ) external view returns (bytes32[] memory result) {
@@ -173,7 +173,7 @@ contract Index is Ownable {
     // Iterate over the list until the end or limit.
     uint256 i = 0;
     while (i < limit) {
-      result[i] = listEntry[user].data;
+      result[i] = listEntry[user].locator;
       i = i + 1;
       user = listEntry[user].next;
     }
@@ -184,10 +184,10 @@ contract Index is Ownable {
     * @param _user address
     * @return bool return true when user exists
     */
-  function hasLocator(
+  function hasEntry(
     address _user
   ) internal view returns (bool) {
-    if (listEntry[_user].data != bytes32(0)) {
+    if (listEntry[_user].locator != bytes32(0)) {
       return true;
     }
     return false;

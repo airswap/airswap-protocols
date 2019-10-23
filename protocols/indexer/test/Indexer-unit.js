@@ -329,7 +329,7 @@ contract('Indexer Unit Tests', async accounts => {
         indexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
           from: aliceAddress,
         }),
-        'LOCATOR_ALREADY_SET'
+        'ENTRY_ALREADY_EXISTS'
       )
     })
   })
@@ -355,7 +355,7 @@ contract('Indexer Unit Tests', async accounts => {
         indexer.unsetIntent(tokenOne, tokenTwo, {
           from: aliceAddress,
         }),
-        'LOCATOR_DOES_NOT_EXIST'
+        'ENTRY_DOES_NOT_EXIST'
       )
     })
 

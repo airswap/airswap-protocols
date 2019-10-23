@@ -144,7 +144,7 @@ contract Indexer is IIndexer, Ownable {
     emit Stake(msg.sender, _signerToken, _senderToken, _amount);
 
     // Set the locator on the index.
-    indexes[_signerToken][_senderToken].setLocator(msg.sender, _amount, _locator);
+    indexes[_signerToken][_senderToken].setEntry(msg.sender, _amount, _locator);
   }
 
   /**
@@ -165,10 +165,10 @@ contract Indexer is IIndexer, Ownable {
     // Get the score for the sender.
     uint256 score;
     bytes32 data;
-    (score, data) = indexes[_signerToken][_senderToken].getLocator(msg.sender);
+    (score, data) = indexes[_signerToken][_senderToken].getEntry(msg.sender);
 
     // Unset the locator on the index.
-    require(indexes[_signerToken][_senderToken].unsetLocator(msg.sender), 'LOCATOR_DOES_NOT_EXIST');
+    require(indexes[_signerToken][_senderToken].unsetEntry(msg.sender), 'ENTRY_DOES_NOT_EXIST');
 
     if (score > 0) {
       // Return the staked tokens.
@@ -208,6 +208,6 @@ contract Indexer is IIndexer, Ownable {
     }
 
     // Return an array of locators for the index.
-    return indexes[_signerToken][_senderToken].fetchLocators(_startAddress, _count);
+    return indexes[_signerToken][_senderToken].fetchEntries(_startAddress, _count);
   }
 }
