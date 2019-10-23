@@ -34,7 +34,6 @@ contract('Delegate Integration Tests', async accounts => {
   let swapAddress
   let indexer
   let delegateFactory
-  let delegate
 
   orders.setKnownAccounts([aliceAddress, bobAddress, carolAddress])
 
@@ -141,6 +140,90 @@ contract('Delegate Integration Tests', async accounts => {
     })
   })
 
+  describe('Test setRuleAndIntent()', async () => {
+    it('Test successfully calling setRuleAndIntent', async () => {
+      let rule = [100000, 300, 0]
+
+      //give allowance to the delegate to pull staking amount
+      await STAKE_TOKEN.approve(
+        aliceDelegate.address,
+        INTENT_AMOUNT,
+        {
+          from: aliceAddress
+        }
+      )
+
+      //check the score of the delegate before
+      let scoreBefore = await indexer.getScore(
+        DAI_TOKEN.address,
+        WETH_TOKEN.address,
+        aliceDelegate.address
+      )
+      equal(scoreBefore.toNumber(), 0, 'intent score is incorrect')
+
+      await passes(
+        aliceDelegate.setRuleAndIntent(
+          WETH_TOKEN.address,
+          DAI_TOKEN.address,
+          rule,
+          INTENT_AMOUNT,
+          indexer.address,
+          { 
+            from: aliceAddress
+          }
+        )
+      )
+
+      //check the score of the manager after
+      let scoreAfter = await indexer.getScore(
+        DAI_TOKEN.address,
+        WETH_TOKEN.address,
+        aliceDelegate.address
+      )
+      equal(scoreAfter.toNumber(), INTENT_AMOUNT, 'intent score is incorrect')
+
+      //check owner stake balance has been reduced
+      let stakeTokenBal = await STAKE_TOKEN.balanceOf(aliceAddress)
+      equal(stakeTokenBal.toNumber(), STARTING_BALANCE - INTENT_AMOUNT)
+    })
+  })
+
+  describe('Test unsetRuleAndIntent()', async () => {
+    it('Test successfully calling unsetRuleAndIntent()', async () => {
+      //check the score of the manager before
+      let scoreBefore = await indexer.getScore(
+        DAI_TOKEN.address,
+        WETH_TOKEN.address,
+        aliceDelegate.address
+      )
+      equal(scoreBefore.toNumber(), INTENT_AMOUNT, 'intent score is incorrect')
+
+      await passes(
+        aliceDelegate.unsetRuleAndIntent(
+          DAI_TOKEN.address,
+          WETH_TOKEN.address,
+          indexer.address,
+          { 
+            from: aliceAddress
+          }
+        )
+      )
+
+      //check the score of the manager after
+      let scoreAfter = await indexer.getScore(
+        DAI_TOKEN.address,
+        WETH_TOKEN.address,
+        aliceDelegate.address
+      )
+      equal(scoreAfter.toNumber(), 0, 'intent score is incorrect')
+
+      //check owner stake balance has been increased
+      let stakeTokenBal = await STAKE_TOKEN.balanceOf(aliceAddress)
+
+      equal(stakeTokenBal.toNumber(), STARTING_BALANCE)
+    })
+  })
+  
   describe('Checks pricing logic from the Delegate', async () => {
     it('Send up to 100K WETH for DAI at 300 DAI/WETH', async () => {
       await aliceDelegate.setRule(
@@ -644,51 +727,4 @@ contract('Delegate Integration Tests', async accounts => {
     })
   })
 
-  describe('Test setRuleAndIntent()', async () => {
-    it('Test successfully calling setRuleAndIntent', async () => {
-      let rule = [100000, 300, 0]
-
-      //give allowance to the delegate to pull staking amount
-      await STAKE_TOKEN.approve(
-        aliceDelegate.address,
-        INTENT_AMOUNT,
-        {
-          from: aliceAddress
-        }
-      )
-
-      //check the score of the delegate before
-      let scoreBefore = await indexer.getScore(
-        DAI_TOKEN.address,
-        WETH_TOKEN.address,
-        aliceDelegate.address
-      )
-      equal(scoreBefore.toNumber(), 0, 'intent score is incorrect')
-
-      await passes(
-        aliceDelegate.setRuleAndIntent(
-          WETH_TOKEN.address,
-          DAI_TOKEN.address,
-          rule,
-          INTENT_AMOUNT,
-          indexer.address,
-          { 
-            from: aliceAddress
-          }
-        )
-      )
-
-      //check the score of the manager after
-      let scoreAfter = await indexer.getScore(
-        DAI_TOKEN.address,
-        WETH_TOKEN.address,
-        aliceDelegate.address
-      )
-      equal(scoreAfter.toNumber(), INTENT_AMOUNT, 'intent score is incorrect')
-
-      //check owner stake balance has been reduced
-      let stakeTokenBal = await STAKE_TOKEN.balanceOf(aliceAddress)
-      equal(stakeTokenBal.toNumber(), STARTING_BALANCE - INTENT_AMOUNT)
-    })
-  })
 })
