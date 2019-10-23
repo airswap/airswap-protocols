@@ -84,7 +84,7 @@ contract Indexer is IIndexer, Ownable {
   function createIndex(
     address _signerToken,
     address _senderToken
-  ) external returns (address) {
+  ) external isNotPaused returns (address) {
 
     // If the Index does not exist, create it.
     if (indexes[_signerToken][_senderToken] == Index(0)) {
@@ -103,7 +103,7 @@ contract Indexer is IIndexer, Ownable {
     */
   function addToBlacklist(
     address _token
-  ) external onlyOwner {
+  ) external onlyOwner isNotPaused {
     if (!blacklist[_token]) {
       blacklist[_token] = true;
       emit AddToBlacklist(_token);
@@ -116,7 +116,7 @@ contract Indexer is IIndexer, Ownable {
     */
   function removeFromBlacklist(
     address _token
-  ) external onlyOwner {
+  ) external onlyOwner isNotPaused {
     if (blacklist[_token]) {
       blacklist[_token] = false;
       emit RemoveFromBlacklist(_token);
@@ -137,7 +137,7 @@ contract Indexer is IIndexer, Ownable {
     address _senderToken,
     uint256 _amount,
     bytes32 _locator
-  ) external {
+  ) external isNotPaused {
 
     // Ensure the locator is whitelisted, if relevant
     if (locatorWhitelist != address(0)) {
@@ -177,7 +177,8 @@ contract Indexer is IIndexer, Ownable {
   function unsetIntent(
     address _signerToken,
     address _senderToken
-  ) external {
+  ) external isNotPaused {
+
     // Ensure the index exists.
     require(indexes[_signerToken][_senderToken] != Index(0),
       "INDEX_DOES_NOT_EXIST");
@@ -214,7 +215,7 @@ contract Indexer is IIndexer, Ownable {
     address _senderToken,
     address _startAddress,
     uint256 _count
-  ) external view returns (
+  ) external view isNotPaused returns (
     bytes32[] memory locators
   ) {
     // Ensure neither token is blacklisted.
