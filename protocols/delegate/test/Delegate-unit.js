@@ -19,10 +19,6 @@ contract('Delegate Unit Tests', async accounts => {
   const tradeWallet = accounts[1]
   const notOwner = accounts[2]
   const notTradeWallet = accounts[3]
-  let delegate
-  let mockSwap
-  let snapshotId
-  let swapFunction
   const SIGNER_TOKEN = accounts[9]
   const SENDER_TOKEN = accounts[8]
   const MAX_SENDER_AMOUNT = 12345
@@ -30,6 +26,18 @@ contract('Delegate Unit Tests', async accounts => {
   const EXP = 2
   const MOCK_WETH = accounts[2]
   const MOCK_DAI = accounts[3]
+
+  let delegate
+  let mockSwap
+  let snapshotId
+  let swapFunction
+  let mockStakeToken
+  let mockStakeToken_allowance
+  let mockStakeToken_transferFrom
+  let mockStakeToken_transfer
+  let mockStakeToken_approve
+  let mockIndexer
+  let mockIndexer_getScore
 
   beforeEach(async () => {
     let snapShot = await takeSnapshot()
@@ -225,7 +233,7 @@ contract('Delegate Unit Tests', async accounts => {
   describe('Test unsetRule', async () => {
     it('Test unsetRule permissions as not owner', async () => {
       await reverted(
-        delegate.unsetRule(SENDER_TOKEN, SIGNER_TOKEN, { from: notOwner }),
+        delegate.unsetRule(SENDER_TOKEN, SIGNER_TOKEN, { from: notOwner })
       )
     })
 
@@ -360,7 +368,7 @@ contract('Delegate Unit Tests', async accounts => {
         'APPROVAL_ERROR'
       )
     })
-    
+
     it('Test successfully calling setRuleAndIntent', async () => {
       let indexerAddress = mockIndexer.address
       let intentAmount = 250
@@ -424,7 +432,7 @@ contract('Delegate Unit Tests', async accounts => {
       )
     })
   })
-  
+
   describe('Test setTradeWallet', async () => {
     it('Test setTradeWallet when not owner', async () => {
       await reverted(delegate.setTradeWallet(notOwner, { from: notOwner }))
@@ -878,5 +886,4 @@ contract('Delegate Unit Tests', async accounts => {
       )
     })
   })
-
 })
