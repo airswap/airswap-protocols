@@ -57,15 +57,6 @@ contract Indexer is IIndexer, Ownable {
   }
 
   /**
-    * @notice Modifier to prevent function call unless the contract is paused
-    *
-    */
-  modifier whenPaused() {
-    require(paused, 'CONTRACT_NOT_PAUSED');
-    _;
-  }
-
-  /**
     * @notice Modifier to prevent function call unless the contract is not paused
     *
     */
