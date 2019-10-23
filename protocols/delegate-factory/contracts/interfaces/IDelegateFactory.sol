@@ -35,5 +35,4 @@ interface IDelegateFactory {
     address _delegateContractOwner,
     address _delegateTradeWallet
   ) external returns (address delegateContractAddress);
-
 }
