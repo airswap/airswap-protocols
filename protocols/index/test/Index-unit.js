@@ -267,25 +267,25 @@ contract('Index Unit Tests', async accounts => {
     })
 
     it('should return empty entry for a non-user', async () => {
-      let davidLocator = await index.getEntry(davidAddress)
-      equal(davidLocator[SCORE], 0, 'David: Locator score not correct')
-      equal(davidLocator[LOCATOR], emptyLocator, 'David: Locator not correct')
+      let davidEntry = await index.getEntry(davidAddress)
+      equal(davidEntry[SCORE], 0, 'David: Locator score not correct')
+      equal(davidEntry[LOCATOR], emptyLocator, 'David: Locator not correct')
 
       // now for a recently unset entry
       await index.unsetEntry(carolAddress, { from: owner })
-      let testLocator = await index.getEntry(carolAddress)
-      equal(testLocator[SCORE], 0, 'Carol: Locator score not correct')
-      equal(testLocator[LOCATOR], emptyLocator, 'Carol: Locator not correct')
+      let testEntry = await index.getEntry(carolAddress)
+      equal(testEntry[SCORE], 0, 'Carol: Locator score not correct')
+      equal(testEntry[LOCATOR], emptyLocator, 'Carol: Locator not correct')
     })
 
     it('should return the correct entry for a valid user', async () => {
-      let aliceLocator = await index.getEntry(aliceAddress)
-      equal(aliceLocator[SCORE], 2000, 'Alice: Locator score not correct')
-      equal(aliceLocator[LOCATOR], aliceLocator, 'Alice: Locator not correct')
+      let aliceEntry = await index.getEntry(aliceAddress)
+      equal(aliceEntry[SCORE], 2000, 'Alice: Locator score not correct')
+      equal(aliceEntry[LOCATOR], aliceLocator, 'Alice: Locator not correct')
 
-      let bobLocator = await index.getEntry(bobAddress)
-      equal(bobLocator[SCORE], 500, 'Bob: Locator score not correct')
-      equal(bobLocator[LOCATOR], bobLocator, 'Bob: Locator not correct')
+      let bobEntry = await index.getEntry(bobAddress)
+      equal(bobEntry[SCORE], 500, 'Bob: Locator score not correct')
+      equal(bobEntry[LOCATOR], bobLocator, 'Bob: Locator not correct')
     })
   })
 
