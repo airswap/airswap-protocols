@@ -294,6 +294,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
       )
     })
   })
+
   describe('Blacklisting', async () => {
     it('Alice attempts to blacklist a index and fails because she is not owner', async () => {
       await reverted(
@@ -427,6 +428,51 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
       equal(intents[0], bobLocator)
       equal(intents[1], emptyLocator)
       equal(intents[2], emptyLocator)
+    })
+  })
+
+  describe('Pausing', async () => {
+    it('A non-owner cannot pause the indexer', async () => {
+      await reverted(
+        indexer.setPausedStatus(true, { from: aliceAddress }),
+        'Ownable: caller is not the owner'
+      )
+    })
+
+    it('The owner can pause the indexer', async () => {
+      let val = await indexer.paused.call()
+      equal(val, false)
+
+      // pause the indexer
+      await indexer.setPausedStatus(true, { from: ownerAddress })
+
+      // now its paused
+      val = await indexer.paused.call()
+      equal(val, true)
+    })
+
+    it('Functions cannot be called when the indexer is paused', async () => {
+      // set intent
+      await reverted(
+        indexer.setIntent(
+          tokenWETH.address,
+          tokenDAI.address,
+          1000,
+          aliceLocator,
+          {
+            from: aliceAddress,
+          }
+        ),
+        'CONTRACT_IS_PAUSED'
+      )
+
+      // unset intent
+      await reverted(
+        indexer.unsetIntent(tokenWETH.address, tokenDAI.address, {
+          from: aliceAddress,
+        }),
+        'CONTRACT_IS_PAUSED'
+      )
     })
   })
 })
