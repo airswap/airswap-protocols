@@ -163,7 +163,9 @@ contract Indexer is IIndexer, Ownable {
       "INDEX_DOES_NOT_EXIST");
 
     // Get the score for the sender.
-    uint256 score = indexes[_signerToken][_senderToken].getLocator(msg.sender).score;
+    uint256 score;
+    bytes32 data;
+    (score, data) = indexes[_signerToken][_senderToken].getLocator(msg.sender);
 
     // Unset the locator on the index.
     require(indexes[_signerToken][_senderToken].unsetLocator(msg.sender), 'LOCATOR_DOES_NOT_EXIST');
