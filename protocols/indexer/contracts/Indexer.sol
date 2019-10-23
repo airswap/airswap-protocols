@@ -232,6 +232,9 @@ contract Indexer is IIndexer, Ownable {
     unsetUserIntent(_user, _signerToken, _senderToken);
   }
 
+  /**
+    * @notice Internal function that unsets a user's intent and returns tokens
+    */
   function unsetUserIntent(address _user, address _signerToken, address _senderToken) internal {
      // Get the score for the sender.
     uint256 score;

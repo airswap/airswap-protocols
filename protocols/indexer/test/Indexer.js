@@ -214,6 +214,37 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
       ok(await balances(aliceAddress, [[tokenAST, 500]]))
       ok(await balances(indexerAddress, [[tokenAST, 500]]))
     })
+
+    it("The owner can unset alice's intent", async () => {
+      emitted(
+        await indexer.unsetIntentForUser(
+          aliceAddress,
+          tokenWETH.address,
+          tokenDAI.address,
+          {
+            from: ownerAddress,
+          }
+        ),
+        'Unstake'
+      )
+      ok(await balances(aliceAddress, [[tokenAST, 1000]]))
+      ok(await balances(indexerAddress, [[tokenAST, 0]]))
+    })
+
+    it('Restake for future tests', async () => {
+      emitted(
+        await indexer.setIntent(
+          tokenWETH.address,
+          tokenDAI.address,
+          500,
+          aliceLocator,
+          {
+            from: aliceAddress,
+          }
+        ),
+        'Stake'
+      )
+    })
   })
 
   describe('Intent integrity', async () => {
