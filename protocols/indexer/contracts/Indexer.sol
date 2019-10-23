@@ -40,6 +40,8 @@ contract Indexer is IIndexer, Ownable {
   // The whitelist contract for checking whether a peer is whitelisted
   address public locatorWhitelist;
 
+  bool paused = false;
+
   /**
     * @notice Contract Constructor
     *
@@ -52,6 +54,24 @@ contract Indexer is IIndexer, Ownable {
   ) public {
     stakeToken = IERC20(_stakeToken);
     locatorWhitelist = _locatorWhitelist;
+  }
+
+  /**
+    * @notice Modifier to prevent function call unless the contract is paused
+    *
+    */
+  modifier isPaused() {
+    require(paused, 'CONTRACT_NOT_PAUSED');
+    _;
+  }
+
+  /**
+    * @notice Modifier to prevent function call unless the contract is not paused
+    *
+    */
+  modifier isNotPaused() {
+    require(!paused, 'CONTRACT_IS_PAUSED');
+    _;
   }
 
   /**
