@@ -255,7 +255,7 @@ contract Delegate is IDelegate, Ownable {
     uint256 _senderParam,
     address _senderToken,
     address _signerToken
-  ) external view returns (
+  ) external returns (
     uint256 signerParam
   ) {
 
@@ -289,7 +289,7 @@ contract Delegate is IDelegate, Ownable {
     uint256 _signerParam,
     address _signerToken,
     address _senderToken
-  ) external view returns (
+  ) external returns (
     uint256 senderParam
   ) {
 
@@ -320,7 +320,7 @@ contract Delegate is IDelegate, Ownable {
   function getMaxQuote(
     address _senderToken,
     address _signerToken
-  ) external view returns (
+  ) external returns (
     uint256 senderParam,
     uint256 signerParam
   ) {
@@ -398,7 +398,7 @@ contract Delegate is IDelegate, Ownable {
   /**
     * @notice Get the trade wallet address
     */
-  function tradeWallet() external view returns (address) {
+  function tradeWallet() external returns (address) {
     return _tradeWallet;
   }
 

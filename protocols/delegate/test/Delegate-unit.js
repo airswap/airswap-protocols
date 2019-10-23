@@ -430,6 +430,10 @@ contract('Delegate Unit Tests', async accounts => {
     it('Test setTradeWallet when owner', async () => {
       await passes(delegate.setTradeWallet(notOwner, { from: owner }))
     })
+
+    it('Test setTradeWallet with empty address', async () => {
+      await reverted(delegate.setTradeWallet(EMPTY_ADDRESS, { from: owner }), "TRADE_WALLET_REQUIRED")
+    })
   })
 
   describe('Test transfer of ownership', async () => {
@@ -532,8 +536,8 @@ contract('Delegate Unit Tests', async accounts => {
       await delegate.setRule(SENDER_TOKEN, SIGNER_TOKEN, 100, 1, 0)
       let val = await delegate.getSenderSideQuote.call(
         0,
-        SENDER_TOKEN,
-        SIGNER_TOKEN
+        SIGNER_TOKEN,
+        SENDER_TOKEN
       )
       equal(
         val.toNumber(),
@@ -542,9 +546,9 @@ contract('Delegate Unit Tests', async accounts => {
       )
 
       val = await delegate.getSenderSideQuote.call(
-        MAX_SENDER_AMOUNT + 1,
-        SENDER_TOKEN,
-        SIGNER_TOKEN
+        MAX_SENDER_AMOUNT,
+        SIGNER_TOKEN,
+        SENDER_TOKEN
       )
       equal(
         val.toNumber(),
@@ -725,6 +729,50 @@ contract('Delegate Unit Tests', async accounts => {
         delegate.provideOrder(order, {
           from: notOwner,
         })
+      )
+    })
+
+    it('test if order sender and signer param are not matching', async () => {
+      await delegate.setRule(
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
+        PRICE_COEF,
+        EXP
+      )
+
+      let ruleBefore = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
+
+      let signerAmount = 100
+      let senderAmount = Math.floor((signerAmount * 10 ** EXP) / PRICE_COEF)
+
+      const order = await orders.getOrder({
+        signer: {
+          wallet: notOwner,
+          param: signerAmount - 100,
+          token: SIGNER_TOKEN,
+        },
+        sender: {
+          wallet: tradeWallet,
+          param: senderAmount,
+          token: SENDER_TOKEN,
+        },
+      })
+
+      await reverted(
+        //mock swapContract
+        //test rule decrement
+        delegate.provideOrder(order, {
+          from: notOwner,
+        }),
+        'PRICE_INCORRECT'
+      )
+
+      let ruleAfter = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
+      equal(
+        ruleAfter[0].toNumber(),
+        ruleBefore[0].toNumber() - senderAmount,
+        "rule's max delegate amount was not decremented"
       )
     })
 
