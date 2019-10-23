@@ -231,4 +231,12 @@ contract Indexer is IIndexer, Ownable {
     // Return an array of locators for the index.
     return indexes[_signerToken][_senderToken].fetchLocators(_startAddress, _count);
   }
+
+  /**
+    * @notice Allows the owner to pause and unpause the contract
+    */
+  function setPausedStatus(bool _newStatus) external onlyOwner {
+    paused = _newStatus;
+  }
+
 }
