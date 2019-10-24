@@ -432,7 +432,10 @@ contract('Delegate Unit Tests', async accounts => {
     })
 
     it('Test setTradeWallet with empty address', async () => {
-      await reverted(delegate.setTradeWallet(EMPTY_ADDRESS, { from: owner }), "TRADE_WALLET_REQUIRED")
+      await reverted(
+        delegate.setTradeWallet(EMPTY_ADDRESS, { from: owner }),
+        'TRADE_WALLET_REQUIRED'
+      )
     })
   })
 
@@ -741,8 +744,6 @@ contract('Delegate Unit Tests', async accounts => {
         EXP
       )
 
-      let ruleBefore = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
-
       let signerAmount = 100
       let senderAmount = Math.floor((signerAmount * 10 ** EXP) / PRICE_COEF)
 
@@ -768,7 +769,7 @@ contract('Delegate Unit Tests', async accounts => {
         'PRICE_INCORRECT'
       )
     })
-    
+
     it('test if order signer kind is not an ERC20 interface id', async () => {
       await delegate.setRule(
         SENDER_TOKEN,
@@ -778,8 +779,6 @@ contract('Delegate Unit Tests', async accounts => {
         EXP
       )
 
-      let ruleBefore = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
-
       let signerAmount = 100
       let senderAmount = Math.floor((signerAmount * 10 ** EXP) / PRICE_COEF)
 
@@ -788,7 +787,7 @@ contract('Delegate Unit Tests', async accounts => {
           wallet: notOwner,
           param: signerAmount,
           token: SIGNER_TOKEN,
-          kind: '0x80ac58cd'
+          kind: '0x80ac58cd',
         },
         sender: {
           wallet: tradeWallet,
@@ -816,8 +815,6 @@ contract('Delegate Unit Tests', async accounts => {
         EXP
       )
 
-      let ruleBefore = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
-
       let signerAmount = 100
       let senderAmount = Math.floor((signerAmount * 10 ** EXP) / PRICE_COEF)
 
@@ -831,7 +828,7 @@ contract('Delegate Unit Tests', async accounts => {
           wallet: tradeWallet,
           param: senderAmount,
           token: SENDER_TOKEN,
-          kind: '0x80ac58cd'
+          kind: '0x80ac58cd',
         },
       })
 
