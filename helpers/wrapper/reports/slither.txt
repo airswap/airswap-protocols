@@ -1,0 +1,37 @@
+INFO:Detectors:
+Wrapper.swap(Types.Order) (Full.sol#456-506) ignores return value by low-level calls "msg.sender.call.value(_order.signer.param)()" (Full.sol#504)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unchecked-low-level-calls
+INFO:Detectors:
+Wrapper.swap(Types.Order) (Full.sol#456-506) ignores return value by external calls "wethContract.transfer(_order.sender.wallet,_order.sender.param)" (Full.sol#480)
+Wrapper.swap(Types.Order) (Full.sol#456-506) ignores return value by external calls "wethContract.transferFrom(_order.sender.wallet,address(this),_order.signer.param)" (Full.sol#497)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unused-return
+INFO:Detectors:
+Different versions of Solidity is used in :
+	- Version used: ['0.5.12', 'ABIEncoderV2', '^0.5.0']
+	- Full.sol#20 declares pragma solidity0.5.12
+	- Full.sol#21 declares pragma experimentalABIEncoderV2
+	- Full.sol#172 declares pragma solidity0.5.12
+	- Full.sol#295 declares pragma solidity0.5.12
+	- Full.sol#314 declares pragma solidity^0.5.0
+	- Full.sol#409 declares pragma solidity0.5.12
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#different-pragma-directives-are-used
+INFO:Detectors:
+Pragma version "0.5.12" allows old versions (Full.sol#20)
+Pragma version "0.5.12" allows old versions (Full.sol#172)
+Pragma version "0.5.12" allows old versions (Full.sol#295)
+Pragma version "^0.5.0" allows old versions (Full.sol#314)
+Pragma version "0.5.12" allows old versions (Full.sol#409)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#incorrect-versions-of-solidity
+INFO:Detectors:
+Low level call in Wrapper.swap(Types.Order) (Full.sol#456-506):
+	-msg.sender.call.value(_order.signer.param)() Full.sol#504
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#low-level-calls
+INFO:Detectors:
+Parameter '_order' of _order (Full.sol#96) is not in mixedCase
+Parameter '_domainSeparator' of _domainSeparator (Full.sol#97) is not in mixedCase
+Parameter '_name' of _name (Full.sol#140) is not in mixedCase
+Parameter '_version' of _version (Full.sol#141) is not in mixedCase
+Parameter '_verifyingContract' of _verifyingContract (Full.sol#142) is not in mixedCase
+Parameter '_order' of _order (Full.sol#457) is not in mixedCase
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#conformance-to-solidity-naming-conventions
+INFO:Slither:Full.sol analyzed (5 contracts with 38 detectors), 16 result(s) found
