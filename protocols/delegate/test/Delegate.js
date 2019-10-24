@@ -30,7 +30,7 @@ contract('Delegate Integration Tests', async accounts => {
   const carolAddress = accounts[3]
   const aliceTradeWallet = accounts[4]
 
-  let STAKE_TOKEN
+  let stakeToken
   let tokenDAI
   let tokenWETH
   let aliceDelegate
@@ -44,11 +44,11 @@ contract('Delegate Integration Tests', async accounts => {
   async function setupTokens() {
     tokenWETH = await FungibleToken.new()
     tokenDAI = await FungibleToken.new()
-    STAKE_TOKEN = await FungibleToken.new()
+    stakeToken = await FungibleToken.new()
 
     await tokenWETH.mint(aliceAddress, STARTING_BALANCE)
     await tokenDAI.mint(aliceAddress, STARTING_BALANCE)
-    await STAKE_TOKEN.mint(aliceAddress, STARTING_BALANCE)
+    await stakeToken.mint(aliceAddress, STARTING_BALANCE)
   }
 
   async function setupFactory() {
@@ -56,7 +56,7 @@ contract('Delegate Integration Tests', async accounts => {
   }
 
   async function setupIndexer() {
-    indexer = await Indexer.new(STAKE_TOKEN.address, delegateFactory.address)
+    indexer = await Indexer.new(stakeToken.address, delegateFactory.address)
     await indexer.createIndex(tokenDAI.address, tokenWETH.address)
   }
 
@@ -152,7 +152,7 @@ contract('Delegate Integration Tests', async accounts => {
       let rule = [100000, 300, 0]
 
       //give allowance to the delegate to pull staking amount
-      await STAKE_TOKEN.approve(aliceDelegate.address, INTENT_AMOUNT, {
+      await stakeToken.approve(aliceDelegate.address, INTENT_AMOUNT, {
         from: aliceAddress,
       })
 
@@ -186,7 +186,7 @@ contract('Delegate Integration Tests', async accounts => {
       equal(scoreAfter.toNumber(), INTENT_AMOUNT, 'intent score is incorrect')
 
       //check owner stake balance has been reduced
-      let stakeTokenBal = await STAKE_TOKEN.balanceOf(aliceAddress)
+      let stakeTokenBal = await stakeToken.balanceOf(aliceAddress)
       equal(stakeTokenBal.toNumber(), STARTING_BALANCE - INTENT_AMOUNT)
     })
   })
@@ -221,7 +221,7 @@ contract('Delegate Integration Tests', async accounts => {
       equal(scoreAfter.toNumber(), 0, 'intent score is incorrect')
 
       //check owner stake balance has been increased
-      let stakeTokenBal = await STAKE_TOKEN.balanceOf(aliceAddress)
+      let stakeTokenBal = await stakeToken.balanceOf(aliceAddress)
 
       equal(stakeTokenBal.toNumber(), STARTING_BALANCE)
     })
