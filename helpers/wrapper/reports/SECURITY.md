@@ -18,12 +18,14 @@ Wrapper includes one contract and its dependencies.
 
 ```
 contracts/Wrapper.sol
-@airswap/swap/contracts/interfaces/ISwap.sol
-@airswap/tokens/contracts/interfaces/IWETH.sol
-** openzeppelin-solidity/contracts/token/ERC20/IERC20.sol
+* @airswap/swap/contracts/interfaces/ISwap.sol
+† @airswap/tokens/contracts/interfaces/IWETH.sol
+‡ openzeppelin-solidity/contracts/token/ERC20/IERC20.sol
 ```
 
-\*\* [Open Zeppelin v2.0 Security Audit](https://drive.google.com/file/d/1gWUV0qz3n52VEUwoT-VlYmscPxxo9xhc/view)
+`*` [@airswap/swap](https://github.com/airswap/airswap-protocols/tree/master/protocols/swap)
+`†` [@airswap/tokens](https://github.com/airswap/airswap-protocols/tree/master/helpers/tokens)
+`‡` [Open Zeppelin v2.0 Security Audit](https://drive.google.com/file/d/1gWUV0qz3n52VEUwoT-VlYmscPxxo9xhc/view)
 
 #### Public and external functions
 
