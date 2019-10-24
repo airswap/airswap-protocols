@@ -240,18 +240,18 @@ contract Indexer is IIndexer, Ownable {
      // Get the score for the sender.
     uint256 score;
     bytes32 data;
-    (score, data) = indexes[_signerToken][_senderToken].getEntry(msg.sender);
+    (score, data) = indexes[_signerToken][_senderToken].getEntry(_user);
 
     // Unset the locator on the index.
-    require(indexes[_signerToken][_senderToken].unsetEntry(msg.sender), 'ENTRY_DOES_NOT_EXIST');
+    require(indexes[_signerToken][_senderToken].unsetEntry(_user), 'ENTRY_DOES_NOT_EXIST');
 
     if (score > 0) {
       // Return the staked tokens.
       // Need to revert when false is returned
-      require(stakeToken.transfer(msg.sender, score));
+      require(stakeToken.transfer(_user, score));
     }
 
-    emit Unstake(msg.sender, _signerToken, _senderToken, score);
+    emit Unstake(_user, _signerToken, _senderToken, score);
 
   }
 
