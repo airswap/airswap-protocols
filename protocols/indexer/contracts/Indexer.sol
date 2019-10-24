@@ -40,8 +40,8 @@ contract Indexer is IIndexer, Ownable {
   // The whitelist contract for checking whether a peer is whitelisted
   address public locatorWhitelist;
 
-  // boolean marks when contract is paused - users cannot call function when paused = true
-  bool public paused = false;
+  // boolean marks when contract is contractPaused - users cannot call function when contractPaused = true
+  bool public contractPaused = false;
 
   /**
     * @notice Contract Constructor
@@ -58,20 +58,20 @@ contract Indexer is IIndexer, Ownable {
   }
 
   /**
-    * @notice Modifier to prevent function call unless the contract is not paused
+    * @notice Modifier to prevent function call unless the contract is not contractPaused
     *
     */
-  modifier whenNotPaused() {
-    require(!paused, 'CONTRACT_IS_PAUSED');
+  modifier notPaused() {
+    require(!contractPaused, 'CONTRACT_IS_PAUSED');
     _;
   }
 
   /**
-    * @notice Modifier to prevent function call unless the contract is paused
+    * @notice Modifier to prevent function call unless the contract is contractPaused
     *
     */
-  modifier whenPaused() {
-    require(paused, 'CONTRACT_NOT_PAUSED');
+  modifier paused() {
+    require(contractPaused, 'CONTRACT_NOT_PAUSED');
     _;
   }
 
@@ -85,7 +85,7 @@ contract Indexer is IIndexer, Ownable {
   function createIndex(
     address _signerToken,
     address _senderToken
-  ) external whenNotPaused returns (address) {
+  ) external notPaused returns (address) {
 
     // If the Index does not exist, create it.
     if (indexes[_signerToken][_senderToken] == Index(0)) {
@@ -138,7 +138,7 @@ contract Indexer is IIndexer, Ownable {
     address _senderToken,
     uint256 _amount,
     bytes32 _locator
-  ) external whenNotPaused {
+  ) external notPaused {
     // Ensure the locator is whitelisted, if relevant
     if (locatorWhitelist != address(0)) {
       require(ILocatorWhitelist(locatorWhitelist).has(_locator),
@@ -177,7 +177,7 @@ contract Indexer is IIndexer, Ownable {
   function unsetIntent(
     address _signerToken,
     address _senderToken
-  ) external whenNotPaused {
+  ) external notPaused {
     unsetUserIntent(msg.sender, _signerToken, _senderToken);
   }
 
@@ -196,7 +196,7 @@ contract Indexer is IIndexer, Ownable {
     address _senderToken,
     address _startAddress,
     uint256 _count
-  ) external view whenNotPaused returns (
+  ) external view notPaused returns (
     bytes32[] memory locators
   ) {
     // Ensure neither token is blacklisted.
@@ -220,7 +220,7 @@ contract Indexer is IIndexer, Ownable {
     * @param _newStatus bool
     */
   function setPausedStatus(bool _newStatus) external onlyOwner {
-    paused = _newStatus;
+    contractPaused = _newStatus;
   }
 
   /**
@@ -236,11 +236,11 @@ contract Indexer is IIndexer, Ownable {
   }
 
   /**
-    * @notice Allows the owner to destroy the contract when it is paused
-    * @dev only callable by owner and when paused
+    * @notice Allows the owner to destroy the contract when it is contractPaused
+    * @dev only callable by owner and when contractPaused
     *
     */
-  function killContract(address payable _recipient) external onlyOwner whenPaused {
+  function killContract(address payable _recipient) external onlyOwner paused {
     selfdestruct(_recipient);
   }
 

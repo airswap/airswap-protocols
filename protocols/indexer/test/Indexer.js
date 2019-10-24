@@ -471,14 +471,14 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
     })
 
     it('The owner can pause the indexer', async () => {
-      let val = await indexer.paused.call()
+      let val = await indexer.contractPaused.call()
       equal(val, false)
 
       // pause the indexer
       await indexer.setPausedStatus(true, { from: ownerAddress })
 
       // now its paused
-      val = await indexer.paused.call()
+      val = await indexer.contractPaused.call()
       equal(val, true)
     })
 
@@ -515,14 +515,14 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
     })
 
     it('The owner can un-pause the indexer', async () => {
-      let val = await indexer.paused.call()
+      let val = await indexer.contractPaused.call()
       equal(val, true)
 
       // unpause the indexer
       await indexer.setPausedStatus(false, { from: ownerAddress })
 
       // now its not paused
-      val = await indexer.paused.call()
+      val = await indexer.contractPaused.call()
       equal(val, false)
     })
 
