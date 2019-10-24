@@ -168,11 +168,6 @@ contract Indexer is IIndexer, Ownable {
     address _signerToken,
     address _senderToken
   ) external whenNotPaused {
-
-    // Ensure the index exists.
-    require(indexes[_signerToken][_senderToken] != Index(0),
-      "INDEX_DOES_NOT_EXIST");
-
     unsetUserIntent(msg.sender, _signerToken, _senderToken);
   }
 
@@ -237,6 +232,10 @@ contract Indexer is IIndexer, Ownable {
     * @param _senderToken address
     */
   function unsetUserIntent(address _user, address _signerToken, address _senderToken) internal {
+    // Ensure the index exists.
+    require(indexes[_signerToken][_senderToken] != Index(0),
+      "INDEX_DOES_NOT_EXIST");
+
      // Get the score for the sender.
     uint256 score;
     bytes32 data;

@@ -415,6 +415,65 @@ contract('Indexer Unit Tests', async accounts => {
     })
   })
 
+  describe('Test unsetIntentForUser', async () => {
+    it('should not unset an intent if the index doesnt exist', async () => {
+      await reverted(
+        indexer.unsetIntentForUser(aliceAddress, tokenOne, tokenTwo, {
+          from: owner,
+        }),
+        'INDEX_DOES_NOT_EXIST'
+      )
+    })
+
+    it('should not unset an intent if the intent does not exist', async () => {
+      // create the index
+      await indexer.createIndex(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+
+      // now try to unset a non-existent intent
+      await reverted(
+        indexer.unsetIntentForUser(aliceAddress, tokenOne, tokenTwo, {
+          from: owner,
+        }),
+        'ENTRY_DOES_NOT_EXIST'
+      )
+    })
+
+    it('should successfully unset an intent', async () => {
+      // create the index
+      await indexer.createIndex(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+
+      // create the intent
+      await indexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
+        from: aliceAddress,
+      })
+
+      // now try to unset the intent
+      let tx = await indexer.unsetIntentForUser(
+        aliceAddress,
+        tokenOne,
+        tokenTwo,
+        {
+          from: owner,
+        }
+      )
+
+      // passes and emits and event
+      passes(tx)
+      emitted(tx, 'Unstake', event => {
+        return (
+          event.wallet === aliceAddress &&
+          event.signerToken === tokenOne &&
+          event.senderToken == tokenTwo &&
+          event.amount.toNumber() === 250
+        )
+      })
+    })
+  })
+
   describe('Test getIntents', async () => {
     it('should return an empty array if the index doesnt exist', async () => {
       let intents = await indexer.getIntents.call(
