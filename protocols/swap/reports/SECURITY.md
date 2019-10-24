@@ -10,25 +10,24 @@ Swap is a non-custodial exchange settlement contract. It is used in the Swap Pro
 
 ## Structure
 
-Swap includes one contract, its interface, and a library.
+Swap includes one contract, its interface, and their dependencies.
 
 [@airswap/swap/contracts/Swap.sol](../contracts/Swap.sol) @ [2a83c1ff2e46e6befa45889aa556fdd31e5c71fb](https://github.com/airswap/airswap-protocols/commit/2a83c1ff2e46e6befa45889aa556fdd31e5c71fb)
 
 [@airswap/swap/interfaces/ISwap.sol](../interfaces/ISwap.sol) @ [2a83c1ff2e46e6befa45889aa556fdd31e5c71fb](https://github.com/airswap/airswap-protocols/commit/2a83c1ff2e46e6befa45889aa556fdd31e5c71fb)
-
-[@airswap/types/contracts/Types.sol](../../types/contracts/Types.sol) @ [2a83c1ff2e46e6befa45889aa556fdd31e5c71fb](https://github.com/airswap/airswap-protocols/commit/2a83c1ff2e46e6befa45889aa556fdd31e5c71fb)
 
 ## Contracts
 
 ```
 contracts/Swap.sol
 contracts/interfaces/ISwap.sol
-@airswap/types/contracts/Types.sol
-** openzeppelin-solidity/contracts/token/ERC20/IERC20.sol
-** openzeppelin-solidity/contracts/token/ERC721/IERC721.sol
+* @airswap/types/contracts/Types.sol
+† openzeppelin-solidity/contracts/token/ERC20/IERC20.sol
+† openzeppelin-solidity/contracts/token/ERC721/IERC721.sol
 ```
 
-\*\* [Open Zeppelin v2.0 Security Audit](https://drive.google.com/file/d/1gWUV0qz3n52VEUwoT-VlYmscPxxo9xhc/view)
+`*` [@airswap/types](https://github.com/airswap/airswap-protocols/tree/master/protocols/types)
+`†` [Open Zeppelin v2.0 Security Audit](https://drive.google.com/file/d/1gWUV0qz3n52VEUwoT-VlYmscPxxo9xhc/view)
 
 #### Public and external functions (non-getter functions)
 
