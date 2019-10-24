@@ -281,30 +281,6 @@ contract('Delegate Unit Tests', async accounts => {
   })
 
   describe('Test setRuleAndIntent()', async () => {
-    it('Test calling setRuleAndIntent with allowance error', async () => {
-      let indexerAddress = mockIndexer.address
-      let intentAmount = 250
-
-      let rule = [100000, 300, 0]
-
-      //mock improper allowance
-      await mockStakeToken.givenMethodReturnUint(
-        mockStakeToken_allowance,
-        intentAmount - 1
-      )
-
-      await reverted(
-        delegate.setRuleAndIntent(
-          MOCK_WETH,
-          MOCK_DAI,
-          rule,
-          intentAmount,
-          indexerAddress
-        ),
-        'ALLOWANCE_FUNDS_ERROR'
-      )
-    })
-
     it('Test calling setRuleAndIntent with transfer error', async () => {
       let indexerAddress = mockIndexer.address
       let intentAmount = 250

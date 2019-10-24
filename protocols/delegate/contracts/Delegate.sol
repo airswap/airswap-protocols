@@ -89,7 +89,7 @@ contract Delegate is IDelegate, Ownable {
     uint256 _priceCoef,
     uint256 _priceExp
   ) external onlyOwner {
-    _setRuleInternal(
+    setRuleInternal(
        _senderToken,
        _signerToken,
        _maxSenderAmount,
@@ -108,7 +108,7 @@ contract Delegate is IDelegate, Ownable {
     address _senderToken,
     address _signerToken
   ) external onlyOwner {
-    _unsetRuleInternal(
+    unsetRuleInternal(
       _senderToken,
       _signerToken
     );
@@ -132,17 +132,12 @@ contract Delegate is IDelegate, Ownable {
     uint256 _amountToStake,
     IIndexer _indexer
   ) external onlyOwner {
-    _setRuleInternal(
+    setRuleInternal(
       _senderToken,
       _signerToken,
       _rule.maxSenderAmount,
       _rule.priceCoef,
       _rule.priceExp
-    );
-
-    require(
-      IERC20(_indexer.stakeToken())
-      .allowance(msg.sender, address(this)) >= _amountToStake, "ALLOWANCE_FUNDS_ERROR"
     );
 
     require(
@@ -178,7 +173,7 @@ contract Delegate is IDelegate, Ownable {
     IIndexer _indexer
   ) external onlyOwner {
 
-    _unsetRuleInternal(_senderToken, _signerToken);
+    unsetRuleInternal(_senderToken, _signerToken);
 
     //query against indexer for amount staked
     uint256 stakedAmount = _indexer.getScore(_signerToken, _senderToken, address(this));
@@ -359,7 +354,7 @@ contract Delegate is IDelegate, Ownable {
     * @param _priceCoef uint256 The whole number that will be multiplied by 10^(-priceExp) - the price coefficient
     * @param _priceExp uint256 The exponent of the price to indicate location of the decimal priceCoef * 10^(-priceExp)
     */
-  function _setRuleInternal(
+  function setRuleInternal(
     address _senderToken,
     address _signerToken,
     uint256 _maxSenderAmount,
@@ -387,7 +382,7 @@ contract Delegate is IDelegate, Ownable {
     * @param _senderToken address The address of an ERC-20 token the delegate would send
     * @param _signerToken address The address of an ERC-20 token the consumer would send
     */
-  function _unsetRuleInternal(
+  function unsetRuleInternal(
     address _senderToken,
     address _signerToken
   ) internal {
