@@ -749,7 +749,7 @@ contract('Delegate Unit Tests', async accounts => {
       const order = await orders.getOrder({
         signer: {
           wallet: notOwner,
-          param: signerAmount - 100,
+          param: signerAmount - 100, //Fudge the price
           token: SIGNER_TOKEN,
         },
         sender: {
@@ -771,8 +771,8 @@ contract('Delegate Unit Tests', async accounts => {
       let ruleAfter = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
       equal(
         ruleAfter[0].toNumber(),
-        ruleBefore[0].toNumber() - senderAmount,
-        "rule's max delegate amount was not decremented"
+        ruleBefore[0].toNumber(),
+        "rule's max delegate amount was decremented incorrectly"
       )
     })
 
