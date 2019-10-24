@@ -21,6 +21,7 @@ interface IDelegateFactory {
   event CreateDelegate(
     address indexed delegateContract,
     address swapContract,
+    address indexerContract,
     address indexed delegateContractOwner,
     address delegateTradeWallet
   );

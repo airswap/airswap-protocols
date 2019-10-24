@@ -57,14 +57,14 @@ contract('DelegateFrontend', async accounts => {
       swapContract = await Swap.new()
       swapAddress = swapContract.address
 
-      indexer = await Indexer.new(tokenAST.address, EMPTY_ADDRESS, {
+      indexer = await Indexer.new(tokenAST.address, {
         from: ownerAddress,
       })
 
       indexerAddress = indexer.address
       delegatefrontend = await DelegateFrontend.new(
-        indexerAddress,
         swapAddress,
+        indexerAddress,
         {
           from: ownerAddress,
         }
@@ -72,6 +72,7 @@ contract('DelegateFrontend', async accounts => {
       delegatefrontendAddress = delegatefrontend.address
       aliceDelegate = await Delegate.new(
         swapAddress,
+        indexerAddress,
         EMPTY_ADDRESS,
         EMPTY_ADDRESS,
         {

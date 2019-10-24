@@ -64,11 +64,9 @@ contract('Indexer Unit Tests', async accounts => {
 
   before('Setup contracts', async () => {
     await setupMockContracts()
-    indexer = await Indexer.new(stakingTokenAddress, EMPTY_ADDRESS)
-    whitelistedIndexer = await Indexer.new(
-      stakingTokenAddress,
-      whitelistAddress
-    )
+    indexer = await Indexer.new(stakingTokenAddress)
+    whitelistedIndexer = await Indexer.new(stakingTokenAddress)
+    await whitelistedIndexer.setLocatorWhitelist(whitelistAddress)
   })
 
   describe('Check constructor', async () => {

@@ -2,6 +2,7 @@ const DelegateFrontend = artifacts.require('DelegateFrontend')
 const Indexer = artifacts.require('Indexer')
 const Delegate = artifacts.require('Delegate')
 const MockContract = artifacts.require('MockContract')
+const FungibleToken = artifacts.require('FungibleToken')
 const abi = require('ethereumjs-abi')
 const { equal, passes } = require('@airswap/test-utils').assert
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
@@ -27,6 +28,8 @@ contract('DelegateFrontend Unit Tests', async () => {
   let mockUserSendToken
   let mockUserReceiveToken
   let indexer_getIntents
+  let mockStakeToken
+  let mockStakeToken_approve
 
   let emptyLocator = padAddressToLocator(EMPTY_ADDRESS)
 
@@ -39,9 +42,10 @@ contract('DelegateFrontend Unit Tests', async () => {
     await revertToSnapShot(snapshotId)
   })
 
-  async function setupMockDelegateFrontend() {
+  async function setupMockDelegate() {
     let delegateTemplate = await Delegate.new(
       EMPTY_ADDRESS,
+      mockIndexer.address,
       EMPTY_ADDRESS,
       EMPTY_ADDRESS
     )
@@ -116,13 +120,32 @@ contract('DelegateFrontend Unit Tests', async () => {
     )
   }
 
+  async function setupMockTokens() {
+    mockStakeToken = await MockContract.new()
+    let mockFungibleTokenTemplate = await FungibleToken.new()
+
+    mockStakeToken_approve = await mockFungibleTokenTemplate.contract.methods
+      .approve(EMPTY_ADDRESS, 0)
+      .encodeABI()
+
+    await mockStakeToken.givenMethodReturnBool(mockStakeToken_approve, true)
+  }
+
   async function setupMockIndexer() {
-    let indexerTemplate = await Indexer.new(EMPTY_ADDRESS, EMPTY_ADDRESS)
+    let indexerTemplate = await Indexer.new(EMPTY_ADDRESS)
     mockIndexer = await MockContract.new()
 
     indexer_getIntents = indexerTemplate.contract.methods
       .getIntents(EMPTY_ADDRESS, EMPTY_ADDRESS, EMPTY_ADDRESS, 0)
       .encodeABI()
+
+    let mockIndexer_stakeToken = indexerTemplate.contract.methods
+      .stakeToken()
+      .encodeABI()
+    await mockIndexer.givenMethodReturnAddress(
+      mockIndexer_stakeToken,
+      mockStakeToken.address
+    )
   }
 
   async function setupMocks() {
@@ -135,15 +158,16 @@ contract('DelegateFrontend Unit Tests', async () => {
     mockSwap = await MockContract.new()
     await mockSwap.givenAnyReturnBool(true)
 
-    await setupMockDelegateFrontend()
+    await setupMockTokens()
     await setupMockIndexer()
+    await setupMockDelegate()
   }
 
   before('deploy DelegateFrontend', async () => {
     await setupMocks()
     delegateFrontend = await DelegateFrontend.new(
-      mockIndexer.address,
-      mockSwap.address
+      mockSwap.address,
+      mockIndexer.address
     )
   })
 

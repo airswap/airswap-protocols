@@ -36,6 +36,12 @@ contract Delegate is IDelegate, Ownable {
   // Swap contract to be used to settle trades
   ISwap public swapContract;
 
+  // Indexer to stake intent to trade on
+  IIndexer public indexer;
+
+  // Maximum integer for token transfer approval
+  uint256 constant public MAX_INT =  2**256 - 1;
+
   // The address holding tokens that will be trading through this delegate
   address private _tradeWallet;
 
@@ -48,16 +54,19 @@ contract Delegate is IDelegate, Ownable {
   /**
     * @notice Contract Constructor
     * @dev owner defaults to msg.sender if _delegateContractOwner is not provided
-    * @param _swapContract address of the swap contract the delegate will deploy with
+    * @param _delegateSwap address of the swap contract the delegate will deploy with
+    * @param _delegateIndexer address of the indexer contract the delegate will deploy with
     * @param _delegateContractOwner address that should be the owner of the delegate
     * @param _delegateTradeWallet the wallet the delegate will trade from
     */
   constructor(
-    ISwap _swapContract,
+    ISwap _delegateSwap,
+    IIndexer _delegateIndexer,
     address _delegateContractOwner,
     address _delegateTradeWallet
   ) public {
-    swapContract = _swapContract;
+    swapContract = _delegateSwap;
+    indexer = _delegateIndexer;
 
     // if no delegate owner is provided, the deploying address is the owner
     if (_delegateContractOwner != address(0)) {
@@ -70,6 +79,12 @@ contract Delegate is IDelegate, Ownable {
     } else {
       _tradeWallet = owner();
     }
+
+    //ensure that the indexer can pull funds from delegate account
+    require(
+      IERC20(indexer.stakeToken())
+      .approve(address(indexer), MAX_INT), "APPROVAL_ERROR"
+    );
   }
 
   /**
@@ -123,14 +138,12 @@ contract Delegate is IDelegate, Ownable {
     * @param _senderToken the token the delegate will receive
     * @param _rule the rule to set on a delegate
     * @param _amountToStake the amount to stake for an intent
-    * @param _indexer the indexer the intent will be set on
     */
   function setRuleAndIntent(
     address _senderToken,
     address _signerToken,
     Types.Rule calldata _rule,
-    uint256 _amountToStake,
-    IIndexer _indexer
+    uint256 _amountToStake
   ) external onlyOwner {
     setRuleInternal(
       _senderToken,
@@ -141,17 +154,11 @@ contract Delegate is IDelegate, Ownable {
     );
 
     require(
-      IERC20(_indexer.stakeToken())
-      .transferFrom(msg.sender, address(this), _amountToStake), "TRANSFER_FUNDS_ERROR"
+      IERC20(indexer.stakeToken())
+      .transferFrom(msg.sender, address(this), _amountToStake), "STAKING_TRANSFER_FAILED"
     );
 
-    //ensure that the indexer can pull funds from delegate account
-    require(
-      IERC20(_indexer.stakeToken())
-      .approve(address(_indexer), _amountToStake), "APPROVAL_ERROR"
-    );
-
-    _indexer.setIntent(
+    indexer.setIntent(
       _signerToken,
       _senderToken,
       _amountToStake,
@@ -165,26 +172,24 @@ contract Delegate is IDelegate, Ownable {
     * @dev only callable by owner
     * @param _senderToken the maker token in the token pair for rules and intents
     * @param _signerToken the taker token  in the token pair for rules and intents
-    * @param _indexer the indexer to remove the intent from
     */
   function unsetRuleAndIntent(
     address _signerToken,
-    address _senderToken,
-    IIndexer _indexer
+    address _senderToken
   ) external onlyOwner {
 
     unsetRuleInternal(_senderToken, _signerToken);
 
     //query against indexer for amount staked
-    uint256 stakedAmount = _indexer.getScore(_signerToken, _senderToken, address(this));
-    _indexer.unsetIntent(_signerToken, _senderToken);
+    uint256 stakedAmount = indexer.getScore(_signerToken, _senderToken, address(this));
+    indexer.unsetIntent(_signerToken, _senderToken);
 
     //upon unstaking the manager will be given the staking amount
     //push the staking amount to the msg.sender
 
     require(
-      IERC20(_indexer.stakeToken())
-        .transfer(msg.sender, stakedAmount),"TRANSFER_FUNDS_ERROR"
+      IERC20(indexer.stakeToken())
+        .transfer(msg.sender, stakedAmount),"STAKING_TRANSFER_FAILED"
     );
   }
   /**

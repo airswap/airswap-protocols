@@ -1,4 +1,7 @@
 const DelegateFactory = artifacts.require('DelegateFactory')
+const MockContract = artifacts.require('MockContract')
+const Indexer = artifacts.require('Indexer')
+const FungibleToken = artifacts.require('FungibleToken')
 const Delegate = artifacts.require('Delegate')
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
@@ -12,10 +15,15 @@ const { padAddressToLocator } = require('@airswap/test-utils').padding
 
 contract('Delegate Factory Tests', async accounts => {
   const swapContract = accounts[1]
-  const delegateOwnerOne = accounts[3]
-  const delegateOwnerTwo = accounts[4]
-  const tradeWalletOne = accounts[5]
-  const tradeWalletTwo = accounts[6]
+  const delegateOwnerOne = accounts[2]
+  const delegateOwnerTwo = accounts[3]
+  const tradeWalletOne = accounts[4]
+  const tradeWalletTwo = accounts[5]
+
+  let mockIndexer
+  let mockStakeToken
+  let mockStakeToken_approve
+
   let snapshotId
   let delegateFactory
 
@@ -29,13 +37,43 @@ contract('Delegate Factory Tests', async accounts => {
   })
 
   before('Deploy Delegate Factory', async () => {
-    delegateFactory = await DelegateFactory.new(swapContract)
+    await setupMockToken()
+    await setupMockIndexer()
+    delegateFactory = await DelegateFactory.new(
+      swapContract,
+      mockIndexer.address
+    )
   })
+
+  async function setupMockToken() {
+    mockStakeToken = await MockContract.new()
+    let mockFungibleTokenTemplate = await FungibleToken.new()
+
+    mockStakeToken_approve = await mockFungibleTokenTemplate.contract.methods
+      .approve(EMPTY_ADDRESS, 0)
+      .encodeABI()
+
+    await mockStakeToken.givenMethodReturnBool(mockStakeToken_approve, true)
+  }
+
+  async function setupMockIndexer() {
+    mockIndexer = await MockContract.new()
+    let mockIndexerTemplate = await Indexer.new(EMPTY_ADDRESS)
+
+    //mock stakeToken()
+    let mockIndexer_stakeToken = mockIndexerTemplate.contract.methods
+      .stakeToken()
+      .encodeABI()
+    await mockIndexer.givenMethodReturnAddress(
+      mockIndexer_stakeToken,
+      mockStakeToken.address
+    )
+  }
 
   describe('Test deploying factory', async () => {
     it('should not deploy a factory with swap address 0x0', async () => {
       await reverted(
-        DelegateFactory.new(EMPTY_ADDRESS),
+        DelegateFactory.new(EMPTY_ADDRESS, mockIndexer.address),
         'SWAP_CONTRACT_REQUIRED'
       )
     })
