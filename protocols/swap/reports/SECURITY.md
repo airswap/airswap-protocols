@@ -1,175 +1,164 @@
-# Security Report: Swap
+# Swap: Security Report
 
-Smart Contract Security Report by Team Fluidity (team[at]fluidity[dot]io) and Phil Daian (feedback[at]stableset[dot]com)
-Hash of master used for report: [ef5cff0613532d27ecedb332e222ae0a75079841](https://github.com/airswap/airswap-protocols/commit/ef5cff0613532d27ecedb332e222ae0a75079841)
+Security report by Team Fluidity (team[at]fluidity[dot]io). Smart contracts are a nascent space, and no security audit procedure has been perfected. We welcome any suggestions and comments on this report, its contents, our methodology, or potential gaps in coverage.
 
-Swap [Source Code](https://github.com/airswap/airswap-protocols/tree/master/protocols/swap) and [README](../README.md)
+Swap [Source Code](https://github.com/airswap/airswap-protocols/tree/master/protocols/swap) and [README](../README.md) are available in this repository. Commit used for report: [2a83c1ff2e46e6befa45889aa556fdd31e5c71fb](https://github.com/airswap/airswap-protocols/commit/2a83c1ff2e46e6befa45889aa556fdd31e5c71fb)
 
 ## Introduction
 
-The Swap Protocol is a peer-to-peer protocol for trading Ethereum tokens that allows two parties to exchange tokens in an atomic transaction. It is a non-custodial exchange settlement contract. The new additions to the contract allow for trading of ERC-721 tokens, delegation for token trades to pre-authorized parties, and optionally distributing affiliate fees in tokens to a party who facilitates peers meeting. In addition, previous behavior of the AirSwap protocol is maintained in terms of swapping ERC-20 tokens. One significant change related to security is that the Swap protocol now does not deal with ether at all. The contracts are compiled with v0.5.10.a6ea5b19 (0.5.10 stable release).
+Swap is a non-custodial exchange settlement contract. It is used in the Swap Protocol, a peer-to-peer trading protocol for Ethereum tokens. The implementation supports trading ERC-20 and ERC-721 tokens. Additional features include the ability to authorize another party to sign or send orders on one's behalf, and the ability to optionally set an affiliate that is compensated for bringing together trading parties. This contract only transfers tokens, no raw ether (ETH). The following contracts are compiled with solidity 0.5.12.
 
 ## Structure
 
-The Swap contract is comprised a contract, an interface, and a library.
+Swap includes one contract, its interface, and a library.
 
-[@airswap/swap/contracts/Swap.sol](../contracts/Swap.sol) @ [ef5cff0613532d27ecedb332e222ae0a75079841](https://github.com/airswap/airswap-protocols/commit/ef5cff0613532d27ecedb332e222ae0a75079841)
+[@airswap/swap/contracts/Swap.sol](../contracts/Swap.sol) @ [2a83c1ff2e46e6befa45889aa556fdd31e5c71fb](https://github.com/airswap/airswap-protocols/commit/2a83c1ff2e46e6befa45889aa556fdd31e5c71fb)
 
-[@airswap/swap/interfaces/ISwap.sol](../interfaces/ISwap.sol) @ [ef5cff0613532d27ecedb332e222ae0a75079841](https://github.com/airswap/airswap-protocols/commit/ef5cff0613532d27ecedb332e222ae0a75079841)
+[@airswap/swap/interfaces/ISwap.sol](../interfaces/ISwap.sol) @ [2a83c1ff2e46e6befa45889aa556fdd31e5c71fb](https://github.com/airswap/airswap-protocols/commit/2a83c1ff2e46e6befa45889aa556fdd31e5c71fb)
 
-[@airswap/types/contracts/Types.sol](../../types/contracts/Types.sol) @ [6e6c314f1d082dbb98e8ca2fd671dddfd36e37fa](https://github.com/airswap/airswap-protocols/commit/6e6c314f1d082dbb98e8ca2fd671dddfd36e37fa)
-
-Deployment of the Swap.sol and Types.sol was performed in the `@airswap/swap` package, which pulled in the `@airswap/types` library, all in the `airswap-protocols` monorepo.
-
-## Dependencies
-
-[Open Zeppelin v2.0 Security Audit](https://drive.google.com/file/d/1gWUV0qz3n52VEUwoT-VlYmscPxxo9xhc/view)
-
-_Externally Audited Files from the OpenZeppelin library (v2.2)_
-
-```
-IERC20.sol
-IERC721.sol
-```
-
-_Externally Audited files from OpenZeppelin library used solely for tests_
-
-```
-ERC20Mintable.sol
-ERC721Mintable.sol
-```
+[@airswap/types/contracts/Types.sol](../../types/contracts/Types.sol) @ [2a83c1ff2e46e6befa45889aa556fdd31e5c71fb](https://github.com/airswap/airswap-protocols/commit/2a83c1ff2e46e6befa45889aa556fdd31e5c71fb)
 
 ## Contracts
 
 ```
-Swap.sol
-ISwap.sol
-Types.sol
-** IERC20.sol
-** IERC721.sol
+contracts/Swap.sol
+contracts/interfaces/ISwap.sol
+@airswap/types/contracts/Types.sol
+** openzeppelin-solidity/contracts/token/ERC20/IERC20.sol
+** openzeppelin-solidity/contracts/token/ERC721/IERC721.sol
 ```
 
-_\*\* OpenZeppelin contract_
+\*\* [Open Zeppelin v2.0 Security Audit](https://drive.google.com/file/d/1gWUV0qz3n52VEUwoT-VlYmscPxxo9xhc/view)
 
 #### Public and external functions (non-getter functions)
 
-| Function   | Source   | Visibility | Params                                                                                                                                                                                                                  | Payable |
-| :--------- | :------- | :--------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------ |
-| swap | Swap.sol | external   | `Types.Order _order, Types.Signature _signature` | no      |
-| cancel     | Swap.sol | external   | `uint256[] calldata _nonces`                                                                                                                                                                                            | no      |
-| invalidate | Swap.sol | external   | `uint256 _minimumNonce`                                                                                                                                                                                                 | no      |
-| authorize  | Swap.sol | external   | `address _delegate`, `uint256 _expiry`                                                                                                                                                                                  | no      |
-| revoke     | Swap.sol | external   | `address _delegate`                                                                                                                                                                                                     | no      |
-
-Note that state-modifying public signal points are minimized in this contract, reducing
-the exploit surface to incorrect arguments to swap, authorize, cancel, invalidate, and revoke.
+| Function        | Source   | Visibility | Params                                         | Payable |
+| :-------------- | :------- | :--------- | :--------------------------------------------- | :------ |
+| swap            | Swap.sol | external   | `Types.Order _order`                           | no      |
+| cancel          | Swap.sol | external   | `uint256[] calldata _nonces`                   | no      |
+| invalidate      | Swap.sol | external   | `uint256 _minimumNonce`                        | no      |
+| authorizeSender | Swap.sol | external   | `address _authorizedSender`, `uint256 _expiry` | no      |
+| authorizeSigner | Swap.sol | external   | `address _authorizedSigner`, `uint256 _expiry` | no      |
+| revokeSender    | Swap.sol | external   | `address _authorizedSender`                    | no      |
+| revokeSigner    | Swap.sol | external   | `address _authorizedSender`                    | no      |
 
 ## Invariants
 
-#### 1. No ether or tokens should be held by the contract address.
+### No ether (ETH) or tokens should be held by the contract address.
 
+- No functions are payable and therefore ether (ETH) cannot be stuck by calling any functions.
+- By inspection, all branches of the function `swap` either succeed or throw. At no point can these functions return false or fail silently without throwing.
+- All transfers in the execution function are between the signer and sender or a signer and affiliate; at no point is a token transfer performed to or from the Swap contract address.
+- Tokens can however be sent to the contract by accident, and will remain stuck as there is no withdrawal mechanism for any of the supported token standards. Looking at the Swap V1 contract ([0x8fd3121013a07c57f0d69646e86e7a4880b467b7](https://etherscan.io/address/0x8fd3121013a07c57f0d69646e86e7a4880b467b7)), there is 0 ether and < \$.10 stored, so we are comfortable without implementing a recovery backdoor.
 - Although `selfdestruct` can forcefully send money to any non-payable contract; this is out of scope of review, and because this.balance is not used in the code, cannot lead to security issues.
-  No functions are payable and thus stuck ether due to improper function calls is not possible.
-  By inspection, in all branches of this function, swap, and safeTransferAny/transferAny, either the trade succeeds or an exception is generated by a ‘require’. At no point can these functions return false or fail silently without throwing.
-- All transfers in the execution function are between the maker and taker or a maker and affiliate; at no point is a token transfer performed using the Swap contract’s address. Tokens can however be sent to the contract by accident, and will remain stuck as there is no withdrawal mechanism for any of the supported token standards. Per V1 Exchange contract (0x8fd3121013a07c57f0d69646e86e7a4880b467b7), there is 0 ether and < \$.10 stored. While we recommend considering a withdrawal backdoor, it introduces complexity that may be undesirable from a business perspective.
-- **This invariant currently holds as-is.**
+- **This invariant holds as-is.**
 
-#### 2. Affiliate trades supply appropriate fees
+### The `swap` function will only either successfully settle an order or revert.
 
-- safeTransferFrom is used for ERC-721 and transferFrom is called with affiliate.param as amount, transfer works by manual verification of transfer flow and testing; see also the original Swap audit report. A require is not required for safeTransferFrom as the contract signature guarantees there is no return parameter.
-- **This invariant currently holds as-is.**
+- By manual inspection and testing, after checks for expiry (line 87), nonce validity (lines 91, 95), sender validity (lines 102:121), and signer and signature validity (lines 124:144), the swap completes, barring issues on the underlying token contracts. Each of these checks will revert with a reason in a failure case.
+- A `require` is used in the ERC-20 case to handle tokens where a bad transfer may fail silently without reversions. This is the only external call other than safeTransferFrom, for the ERC-721 case, which has no return value and therefore cannot fail silently.
+- **This invariant holds as-is.**
 
-#### 3. All flows are identical (no calls to underlying token contract) until the internal transferToken call.
+### An order cannot be settled at any time beyond the `expiry` specified on the order.
 
-- In the ERC-20 case, reverts will occur on the underlying transferFrom implemented methods. Applications using this contract may want to do pre-checks on known tokens to do better user experience.
-- **This invariant currently holds as-is.**
+- The `expiry` of each order is checked in the first line of the `swap` function, comparing the `expiry` to `block.timestamp` and throwing if at or beyond it.
+- **This invariant holds as-is.**
 
-#### 4. Signatures cannot be forged or duplicated.
+### Signatures cannot be forged or duplicated.
 
-- In the swap flow, validation is required on all of the order parameters to the swap function. Every item in the order is included in a hash along with an identifier tag (nonce), uniquely identifying each Order object and preventing hash/signature reuse between different items. All items that are hashed are fixed size and stored in memory, making it impossible to exploit padding or offset vulnerabilities.
-- In both cases, ecrecover is performed, and checked against the relevant maker (or signer, checked separately for authorization).
-- The output of a correct ecrecover cannot be forged without knowledge of the signing private key.
-- **This invariant currently holds as-is.**
+- Each order includes a `nonce` to uniquely identify it and prevent any re-use of the order parameters.
+- All parameters that are hashed are fixed size and stored in memory, making it impossible to exploit padding or offset vulnerabilities.
+- During hashing, a "verifying contract" is provided in accordance with [EIP-712](https://eips.ethereum.org/EIPS/eip-712) to ensure that a given order was intended to be settled by a given Swap contract instance.
+- The `isValid` function ensures that the provided signature is indeed a signature of the provided order.
+- There are two signining methods supported by `isValid` both of which use `ecrecover` to recover the public address of the key that signed it. The only difference is that one method prefixes the hash with "\x19Ethereum Signed Message:\n32" for signatures generated by `personal_sign`.
+- The output of a correct `ecrecover` cannot be forged without knowledge of the signing private key.
+- **This invariant holds as-is.**
 
-#### 5. Trades performed cannot exceed authorized timestamp.
+### Parties authorized to **send** on behalf of others may not **sign** on their behalf.
 
-- Only two methods can be used to authorize delegated signing in the contract: authorize and revoke. No other methods modify the approval state.
-- Both allow setting of an expiry parameter, and the authorization check used in Swap.sol checks that the block timestamp is less than this parameter or throws.
-- Revoke deletes the mapping signal, which will default the value to 0 if queried.
-- Block timestamp can technically be manipulated by miners, who may attempt to prolong authorizations that are about to expire. The gain, however, seems marginal, and the cost of this attack relative to Swap trading volume make it unlikely to be of concern.
-- **This invariant currently holds as-is.**
+- - By inspection and testing, in the **sender** checking logic, only `isSenderAuthorized` is called on line 116. This function checks the `senderAuthorizations` mapping which is only modified by `authorizeSender` and `revokeSender`.
+- **This invariant holds as-is.**
 
-#### 6. Orders can never move states once they are CANCELED or TAKEN.
+### Parties authorized to **sign** on behalf of others may not **send** on their behalf.
 
-- The first function check ensures an order is not already taken or cancelled or reverts, making further successful swaps impossible. Ensuring that an order status cannot move from CANCELED to something else.
-- Cancels also can only be performed on OPEN order and checks are done to ensure the order was not TAKEN.
-- **This invariant currently holds as-is.**
+- By inspection and testing, in the **signature** checking logic between lines 124 and 144, only `isSignerAuthorized` is called on lines 129 and 137. This function checks the `signerAuthorizations` mapping which is only modified by `authorizeSigner` and `revokeSigner`.
+- **This invariant holds as-is.**
 
-#### 7. Orders can only be successfully taken once.
+### An authorized party may not settle trades after the expiry specified in the authorization.
 
-- By (8), orders either revert or complete successfully. The TAKEN flag is set before any functions that have side effects or external calls are used, preventing its modification through e.g. re-entrancy, and it is not reset in the function, indicating the TAKEN flag will remain set unless a revert occurs.
-- If a revert occurs, the trade is not taken, so this is correct. If no revert occurs, the trade was (and will stay) taken, so this is correct.
-- The first function check ensures an order is not already taken or cancelled or reverts, making further successful swaps impossible.
-- Orders could potentially be replayed on a different Swap contract, if e.g. old au- throizations exist on another contract. The legacy signature is modified to require an additional "0" byte to prevent such replay attacks; all future Swap contracts should increment this bid to maintain replay protection against old authorizations.
-- **This invariant currently holds as-is.**
+- By inspection and testing, `authorizeSender` on line 222 sets the new expiry and `isSenderAuthorized` on line 276 ensures that the authorization expiry is above the block timestamp. In `authorizeSigner` line 238 sets the expiry, and in `isSignerAuthorized` line 290 ensures that the authorization expiry is above the block timestamp.
+- **This invariant holds as-is.**
 
-#### 10. Swap function either successfully execute swap or revert
+### Affiliate trades supply correct fees from signer to sender.
 
-- By manual inspection of all branches of swap and transferFrom, no functions can fail silently without causing a REVERT. In the case no REVERT branch is hit, both sides of the swap must have been successfully executed. Note that require is used in the ERC-20 case to handle tokens where a bad transfer may fail silently without reversions. This is the only external call other than safeTransferFrom, which has no return value and therefore cannot fail silently.
-- **This invariant currently holds as-is.**
+- By inspection and testing, the transfer from signer to affiliate will complete, barring issues on the underlying token contract, on line 165. In the transferToken function, when calling safeTransferFrom, a `require` is not required for safeTransferFrom as the contract signature guarantees there is no return parameter.
+- **This invariant holds as-is.**
 
-## Analysis
+### A nonce status can never change once marked UNAVAILABLE.
 
-#### Slither (static analyzer)
+- The `signerNonceStatus` of a provided `nonce` is checked in the second line of the `swap` function, ensuring that it is `AVAILABLE` (`0x00`) or throwing othewise.
+- By inspection, `signerNonceStatus` for the provided `nonce` is only set to UNAVAILABLE two lines later in the `swap` function and also within the loop inside of the `cancel` function. It is not set to any value other than `UNAVAILABLE` or set in any other cases.
+- **This invariant holds as-is.**
 
-- No medium or severe issues were found.
-- Choosing Solidity compiler 0.5.10 over the recommended 0.5.3 because of issues fixed in ABIEncoderV2.
-- Timestamps were used for comparisons though an attack seems unlikely to be of concern.
-- Different Solidity versions are used not with AirSwap specific code, only with Migrations (used from Truffle boilerplate) and Open-Zeppelin library.
-- Cases of \_name notation versus mixedCase were ignored.
+### Orders can only be successfully taken once.
+
+- In a successful transaction, on line 99, the nonce status is set to UNAVAILABLE, which makes it impossible, given the require statement on line 91, to complete the same swap twice.
+- Given the "verifying contract" provided for the hash in the signing process, and given the respective check on the Swap contract, a signature is invalid if not intended for the Swap contract instance doing the verification.
+- **This invariant holds as-is.**
+
+### No calls are made to the underlying token contracts until the internal transferToken call.
+
+- Holds by inspection, as the only calls made to underlying token contracts are in the `transferToken` function. Applications using this contract may opt to do pre-swap checks to ensure a good user experience in the case that token balances are too low or have not yet been approved on the Swap contract.
+- **This invariant holds as-is.**
 
 ## Testing
 
 #### Unit and Integration Tests
 
+See the [Unit](test/Swap-unit.js) and [Integration](test/Swap.js) tests.
+
 ```
-protocols/swap/tests/Swap-unit.js
-protocols/swap/test/Swap.js
+yarn test
 ```
 
-#### Test Coverage
+```
+--------------|----------|----------|----------|----------|----------------|
+File          |  % Stmts | % Branch |  % Funcs |  % Lines |Uncovered Lines |
+--------------|----------|----------|----------|----------|----------------|
+ contracts/   |      100 |      100 |      100 |      100 |                |
+  Imports.sol |      100 |      100 |      100 |      100 |                |
+  Swap.sol    |      100 |      100 |      100 |      100 |                |
+--------------|----------|----------|----------|----------|----------------|
+All files     |      100 |      100 |      100 |      100 |                |
+--------------|----------|----------|----------|----------|----------------|
+```
 
-100% coverage between unit and integration tests.
+## Analysis
 
-| File        | % Stmts | % Branch | % Funcs | % Lines | Uncovered Lines |
-| :---------- | :------ | :------- | :------ | :------ | :-------------- |
-| contracts/  | 100     | 100      | 100     | 100     |                 |
-| Imports.sol | 100     | 100      | 100     | 100     |                 |
-| Swap.sol    | 100     | 100      | 100     | 100     |                 |
-| All files   | 100     | 100      | 100     | 100     |                 |
+### Slither (static analyzer)
 
-#### Regression Tests
+Slither generates warnings against using `block.timestamp`, which is necessary in the current design for order and authorization expiry.
 
-End-to-end tests for the ERC-20 flow were performed on Rinkeby prior to deploy on Mainnet to confirm behavior was consistent with prior Swap contract.
-
-## Migrations
-
-Hash of master used for deploy of Swap: [ef5cff0613532d27ecedb332e222ae0a75079841](https://github.com/airswap/airswap-protocols/commit/ef5cff0613532d27ecedb332e222ae0a75079841)
-
-Rinkeby Etherscan (Swap): https://rinkeby.etherscan.io/address/0x6f337bA064b0a92538a4AfdCF0e60F50eEAe0D5B
-
-Mainnet Etherscan (verified Swap): https://etherscan.io/address/0x251F752B85a9F7e1B3C42D802715B5D7A8Da3165
-
-Rinkeby Etherscan (Types); https://rinkeby.etherscan.io/address/0x4A041FA0a727c828616C83C090585913221641ba
-
-Mainnet Etherscan (verified lib Types):
-https://etherscan.io/address/0x2fA5d35f9c99E11a75F2D3cD9F6E6d904a1241C5
+```
+Swap.swap(Types.Order) (Full.sol#521-618) uses timestamp for comparisons
+	Dangerous comparisons:
+	- require(bool,string)(order.expiry > block.timestamp,ORDER_EXPIRED) (Full.sol#526-527)
+Swap.authorizeSender(address,uint256) (Full.sol#655-663) uses timestamp for comparisons
+	Dangerous comparisons:
+	- require(bool,string)(expiry > block.timestamp,INVALID_AUTH_EXPIRY) (Full.sol#660)
+Swap.authorizeSigner(address,uint256) (Full.sol#671-679) uses timestamp for comparisons
+	Dangerous comparisons:
+	- require(bool,string)(expiry > block.timestamp,INVALID_AUTH_EXPIRY) (Full.sol#676)
+Swap.isSenderAuthorized(address,address) (Full.sol#711-717) uses timestamp for comparisons
+	Dangerous comparisons:
+	- ((approver == delegate) || senderAuthorizations[approver][delegate] > block.timestamp) (Full.sol#715-716)
+Swap.isSignerAuthorized(address,address) (Full.sol#725-731) uses timestamp for comparisons
+	Dangerous comparisons:
+	- ((approver == delegate) || signerAuthorizations[approver][delegate] > block.timestamp) (Full.sol#729-730)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#block-timestamp
+```
 
 ## Notes
 
-- Because of two issues found with ABIEncoderV2, we ensured that the newest version of the Solidity compiler was used where those issues were resolved. More information can be found at the [Ethereum Foundation blog](https://blog.ethereum.org/2019/03/26/solidity-optimizer-and-abiencoderv2-bug/).
-- There may be issues where if someone tries to use the cancel function and submit a large array of order nonces, out of gas issues.
-- We note a potential loss vector for Swap contract users; the affiliate fee could exceed the token fee. If the user-facing libraries or interfaces are not appropriately checking affiliate fee size, this could lead to makers being tricked into spending all or most of their money as an affiliate fee. We recommend clearly communicating this to users and including a check in any high-level code released for distribution. Another mitigation is to switch to limited, amount-based approvals (as in ERC-20), or to require that the affiliate fee cannot exceed the trade size.
-- We assume the ERC-20 super-contract is good; recommend noting its audit trail / history as well as the audit trail / history for the version of Zeppelin being used. Recommend fixing this dependency version formally. This is done, and a version of Zeppelin audited by "Level K" is used; we recommend carefully considering the scope/impact of their audit. (noted above by AirSwap)
-- Constants are ABI decoded at deployment time rather than hardcoded; this is fine assuming the ABI encoder works (which is required to decode orders from memory regardless).
-- Smart contracts are a nascent space, and no perfect security audit procedure has thus far been perfected for their deployment. We welcome any suggestions or comments on this report, its contents, our methodology, or potential gaps in coverage.
+- When using the `cancel` function, because there is no limit on the number of nonces that may be provided, an out of gas error may be thrown if the number is too high.
+- An affiliate fee can be any token and any size, so both signers and senders must be vigilant when requesting and setting affiliate fees, so as to not be tricked into transferring unexpected amounts to an affiliate.
