@@ -507,4 +507,98 @@ contract('Indexer Unit Tests', async accounts => {
       equal(intents[3], emptyLocatorData, 'intent should be empty')
     })
   })
+
+  describe('Test pausing', async () => {
+    it('A non-owner cannot pause the indexer', async () => {
+      await reverted(
+        indexer.setPausedStatus(true, { from: aliceAddress }),
+        'Ownable: caller is not the owner'
+      )
+    })
+
+    it('The owner can pause the indexer', async () => {
+      let val = await indexer.paused.call()
+      equal(val, false)
+
+      // pause the indexer
+      await indexer.setPausedStatus(true, { from: owner })
+
+      // now its paused
+      val = await indexer.paused.call()
+      equal(val, true)
+    })
+
+    it('The owner can un-pause the indexer', async () => {
+      // pause the indexer
+      await indexer.setPausedStatus(true, { from: owner })
+
+      let val = await indexer.paused.call()
+      equal(val, true)
+
+      // unpause the indexer
+      await indexer.setPausedStatus(false, { from: owner })
+
+      // now its not paused
+      val = await indexer.paused.call()
+      equal(val, false)
+    })
+
+    it('Functions cannot be called when the indexer is paused', async () => {
+      // pause the indexer
+      await indexer.setPausedStatus(true, { from: owner })
+
+      // set intent
+      await reverted(
+        indexer.setIntent(tokenOne, tokenTwo, 1000, aliceLocator, {
+          from: aliceAddress,
+        }),
+        'CONTRACT_IS_PAUSED'
+      )
+
+      // unset intent
+      await reverted(
+        indexer.unsetIntent(tokenOne, tokenTwo, {
+          from: aliceAddress,
+        }),
+        'CONTRACT_IS_PAUSED'
+      )
+
+      // create market
+      await reverted(
+        indexer.createIndex(tokenOne, tokenTwo, {
+          from: aliceAddress,
+        }),
+        'CONTRACT_IS_PAUSED'
+      )
+    })
+
+    it('After unpausing functions can be called again', async () => {
+      await indexer.setPausedStatus(true, { from: owner })
+      await indexer.setPausedStatus(false, { from: owner })
+
+      // create market
+      emitted(
+        await indexer.createIndex(tokenTwo, bobAddress, {
+          from: aliceAddress,
+        }),
+        'CreateIndex'
+      )
+
+      // set intent
+      emitted(
+        await indexer.setIntent(tokenTwo, bobAddress, 500, aliceLocator, {
+          from: aliceAddress,
+        }),
+        'Stake'
+      )
+
+      // unset intent
+      emitted(
+        await indexer.unsetIntent(tokenTwo, bobAddress, {
+          from: aliceAddress,
+        }),
+        'Unstake'
+      )
+    })
+  })
 })
