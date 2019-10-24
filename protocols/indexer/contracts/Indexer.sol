@@ -66,6 +66,15 @@ contract Indexer is IIndexer, Ownable {
   }
 
   /**
+    * @notice Modifier to prevent function call unless the contract is paused
+    *
+    */
+  modifier whenPaused() {
+    require(paused, 'CONTRACT_NOT_PAUSED');
+    _;
+  }
+
+  /**
     * @notice Create an Index (List of Locators for a Token Pair)
     * @dev Deploys a new Index contract and stores the address
     *
@@ -226,6 +235,16 @@ contract Indexer is IIndexer, Ownable {
   }
 
   /**
+    * @notice Allows the owner to destroy the contract when it is paused
+    * @dev only callable by owner and when paused
+    * @dev any ETH at address(this) is sent to the owner, which should be none
+    *
+    */
+  function killContract() external whenPaused onlyOwner {
+    selfdestruct(owner());
+  }
+
+  /**
     * @notice Internal function that unsets a user's intent and returns tokens
     * @param _user address
     * @param _signerToken address
@@ -249,7 +268,6 @@ contract Indexer is IIndexer, Ownable {
       // Need to revert when false is returned
       require(stakeToken.transfer(_user, score));
     }
-
     emit Unstake(_user, _signerToken, _senderToken, score);
 
   }
