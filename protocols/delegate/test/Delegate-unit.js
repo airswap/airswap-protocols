@@ -1,6 +1,8 @@
 const Delegate = artifacts.require('Delegate')
 const Swap = artifacts.require('Swap')
+const Indexer = artifacts.require('Indexer')
 const MockContract = artifacts.require('MockContract')
+const FungibleToken = artifacts.require('FungibleToken')
 const {
   equal,
   passes,
@@ -17,15 +19,25 @@ contract('Delegate Unit Tests', async accounts => {
   const tradeWallet = accounts[1]
   const notOwner = accounts[2]
   const notTradeWallet = accounts[3]
+  const SIGNER_TOKEN = accounts[4]
+  const SENDER_TOKEN = accounts[5]
+  const MOCK_WETH = accounts[6]
+  const MOCK_DAI = accounts[7]
+  const MAX_SENDER_AMOUNT = 12345
+  const PRICE_COEF = 4321
+  const EXP = 2
+
   let delegate
   let mockSwap
   let snapshotId
   let swapFunction
-  const SIGNER_TOKEN = accounts[9]
-  const SENDER_TOKEN = accounts[8]
-  const MAX_SENDER_AMOUNT = 12345
-  const PRICE_COEF = 4321
-  const EXP = 2
+  let mockStakeToken
+  let mockStakeToken_allowance
+  let mockStakeToken_transferFrom
+  let mockStakeToken_transfer
+  let mockStakeToken_approve
+  let mockIndexer
+  let mockIndexer_getScore
 
   beforeEach(async () => {
     let snapShot = await takeSnapshot()
@@ -35,6 +47,27 @@ contract('Delegate Unit Tests', async accounts => {
   afterEach(async () => {
     await revertToSnapShot(snapshotId)
   })
+
+  async function setupMockTokens() {
+    mockStakeToken = await MockContract.new()
+    let mockFungibleTokenTemplate = await FungibleToken.new()
+
+    mockStakeToken_allowance = await mockFungibleTokenTemplate.contract.methods
+      .allowance(EMPTY_ADDRESS, EMPTY_ADDRESS)
+      .encodeABI()
+
+    mockStakeToken_transferFrom = await mockFungibleTokenTemplate.contract.methods
+      .transferFrom(EMPTY_ADDRESS, EMPTY_ADDRESS, 0)
+      .encodeABI()
+
+    mockStakeToken_transfer = await mockFungibleTokenTemplate.contract.methods
+      .transfer(EMPTY_ADDRESS, 0)
+      .encodeABI()
+
+    mockStakeToken_approve = await mockFungibleTokenTemplate.contract.methods
+      .approve(EMPTY_ADDRESS, 0)
+      .encodeABI()
+  }
 
   async function setupMockSwap() {
     let swapTemplate = await Swap.new()
@@ -46,10 +79,47 @@ contract('Delegate Unit Tests', async accounts => {
     orders.setVerifyingContract(mockSwap.address)
   }
 
+  async function setupMockIndexer() {
+    mockIndexer = await MockContract.new()
+    let mockIndexerTemplate = await Indexer.new(EMPTY_ADDRESS)
+
+    //mock setIntent()
+    let mockIndexer_setIntent = mockIndexerTemplate.contract.methods
+      .setIntent(EMPTY_ADDRESS, EMPTY_ADDRESS, 0, web3.utils.fromAscii(''))
+      .encodeABI()
+    await mockIndexer.givenMethodReturnBool(mockIndexer_setIntent, true)
+
+    //mock unsetIntent()
+    let mockIndexer_unsetIntent = mockIndexerTemplate.contract.methods
+      .unsetIntent(EMPTY_ADDRESS, EMPTY_ADDRESS)
+      .encodeABI()
+    await mockIndexer.givenMethodReturnBool(mockIndexer_unsetIntent, true)
+
+    //mock stakeToken()
+    let mockIndexer_stakeToken = mockIndexerTemplate.contract.methods
+      .stakeToken()
+      .encodeABI()
+    await mockIndexer.givenMethodReturnAddress(
+      mockIndexer_stakeToken,
+      mockStakeToken.address
+    )
+
+    //mock getScore()
+    mockIndexer_getScore = mockIndexerTemplate.contract.methods
+      .getScore(EMPTY_ADDRESS, EMPTY_ADDRESS, EMPTY_ADDRESS)
+      .encodeABI()
+  }
+
   before('deploy Delegate', async () => {
+    await setupMockTokens()
     await setupMockSwap()
+    await setupMockIndexer()
+
+    await mockStakeToken.givenMethodReturnBool(mockStakeToken_approve, true)
+
     delegate = await Delegate.new(
       mockSwap.address,
+      mockIndexer.address,
       EMPTY_ADDRESS,
       tradeWallet,
       {
@@ -70,8 +140,11 @@ contract('Delegate Unit Tests', async accounts => {
     })
 
     it('Test constructor sets the owner as the trade wallet on empty address', async () => {
+      await mockStakeToken.givenMethodReturnBool(mockStakeToken_approve, true)
+
       let newDelegate = await Delegate.new(
         mockSwap.address,
+        mockIndexer.address,
         EMPTY_ADDRESS,
         EMPTY_ADDRESS,
         {
@@ -89,8 +162,11 @@ contract('Delegate Unit Tests', async accounts => {
     })
 
     it('Test owner is set correctly if provided an address', async () => {
+      await mockStakeToken.givenMethodReturnBool(mockStakeToken_approve, true)
+
       let newDelegate = await Delegate.new(
         mockSwap.address,
+        mockIndexer.address,
         notOwner,
         tradeWallet,
         {
@@ -104,9 +180,8 @@ contract('Delegate Unit Tests', async accounts => {
     })
   })
 
-  describe('Test setters', async () => {
+  describe('Test setRule', async () => {
     it('Test setRule permissions as not owner', async () => {
-      //not owner is not apart of admin and should fail
       await reverted(
         delegate.setRule(
           SENDER_TOKEN,
@@ -116,22 +191,7 @@ contract('Delegate Unit Tests', async accounts => {
           EXP,
           { from: notOwner }
         ),
-        'CALLER_MUST_BE_ADMIN'
-      )
-    })
-
-    it('Test setRule permissions after not owner is admin', async () => {
-      //test again after adding not owner to admin
-      await delegate.addAdmin(notOwner)
-      await passes(
-        delegate.setRule(
-          SENDER_TOKEN,
-          SIGNER_TOKEN,
-          MAX_SENDER_AMOUNT,
-          PRICE_COEF,
-          EXP,
-          { from: notOwner }
-        )
+        'Ownable: caller is not the owner'
       )
     })
 
@@ -178,19 +238,11 @@ contract('Delegate Unit Tests', async accounts => {
         )
       })
     })
+  })
 
+  describe('Test unsetRule', async () => {
     it('Test unsetRule permissions as not owner', async () => {
-      //not owner is not apart of admin and should fail
       await reverted(
-        delegate.unsetRule(SENDER_TOKEN, SIGNER_TOKEN, { from: notOwner }),
-        'CALLER_MUST_BE_ADMIN'
-      )
-    })
-
-    it('Test unsetRule permissions after not owner is admin', async () => {
-      //test again after adding not owner to admin
-      await delegate.addAdmin(notOwner)
-      await passes(
         delegate.unsetRule(SENDER_TOKEN, SIGNER_TOKEN, { from: notOwner })
       )
     })
@@ -237,50 +289,92 @@ contract('Delegate Unit Tests', async accounts => {
     })
   })
 
+  describe('Test setRuleAndIntent()', async () => {
+    it('Test calling setRuleAndIntent with transfer error', async () => {
+      let intentAmount = 250
+
+      let rule = [100000, 300, 0]
+
+      await mockStakeToken.givenMethodReturnUint(
+        mockStakeToken_allowance,
+        intentAmount
+      )
+      //mock unsuccessful transfer
+      await mockStakeToken.givenMethodReturnBool(
+        mockStakeToken_transferFrom,
+        false
+      )
+
+      await reverted(
+        delegate.setRuleAndIntent(MOCK_WETH, MOCK_DAI, rule, intentAmount),
+        'STAKING_TRANSFER_FAILED'
+      )
+    })
+
+    it('Test successfully calling setRuleAndIntent', async () => {
+      let intentAmount = 250
+
+      let rule = [100000, 300, 0]
+
+      await mockStakeToken.givenMethodReturnUint(
+        mockStakeToken_allowance,
+        intentAmount
+      )
+      await mockStakeToken.givenMethodReturnBool(
+        mockStakeToken_transferFrom,
+        true
+      )
+      await mockStakeToken.givenMethodReturnBool(mockStakeToken_approve, true)
+
+      await passes(
+        delegate.setRuleAndIntent(MOCK_WETH, MOCK_DAI, rule, intentAmount)
+      )
+    })
+  })
+
+  describe('Test unsetRuleAndIntent()', async () => {
+    it('Test calling unsetRuleAndIntent() with transfer error', async () => {
+      let mockScore = 1000
+
+      //mock the score/staked amount to be transferred
+      await mockIndexer.givenMethodReturnUint(mockIndexer_getScore, mockScore)
+
+      //mock a failed transfer
+      await mockStakeToken.givenMethodReturnBool(mockStakeToken_transfer, false)
+
+      await reverted(
+        delegate.unsetRuleAndIntent(MOCK_WETH, MOCK_DAI),
+        'STAKING_TRANSFER_FAILED'
+      )
+    })
+
+    it('Test successfully calling unsetRuleAndIntent()', async () => {
+      let mockScore = 1000
+
+      //mock the score/staked amount to be transferred
+      await mockIndexer.givenMethodReturnUint(mockIndexer_getScore, mockScore)
+
+      //mock a successful transfer
+      await mockStakeToken.givenMethodReturnBool(mockStakeToken_transfer, true)
+
+      await passes(delegate.unsetRuleAndIntent(MOCK_WETH, MOCK_DAI))
+    })
+  })
+
   describe('Test setTradeWallet', async () => {
     it('Test setTradeWallet when not owner', async () => {
       await reverted(delegate.setTradeWallet(notOwner, { from: notOwner }))
     })
 
-    it('Test setTakerWallet when owner', async () => {
+    it('Test setTradeWallet when owner', async () => {
       await passes(delegate.setTradeWallet(notOwner, { from: owner }))
     })
-  })
 
-  describe('Test admin', async () => {
-    it('Test adding to admin as owner', async () => {
-      await passes(delegate.addAdmin(notOwner))
-    })
-
-    it('Test adding to admin as not owner', async () => {
-      await reverted(delegate.addAdmin(notOwner, { from: notOwner }))
-    })
-
-    it('Test removal from admin', async () => {
-      await delegate.addAdmin(notOwner)
-      await passes(delegate.removeAdmin(notOwner))
-    })
-
-    it('Test removal of owner from admin', async () => {
-      await reverted(delegate.removeAdmin(owner), 'OWNER_MUST_BE_ADMIN')
-    })
-
-    it('Test removal from admin as not owner', async () => {
-      await reverted(delegate.removeAdmin(notOwner, { from: notOwner }))
-    })
-
-    it('Test adding to admin event emitted', async () => {
-      let trx = await delegate.addAdmin(notOwner)
-      await emitted(trx, 'AdminAdded', e => {
-        return e.account == notOwner
-      })
-    })
-
-    it('Test removing from admin event emitted', async () => {
-      let trx = await delegate.removeAdmin(notOwner)
-      await emitted(trx, 'AdminRemoved', e => {
-        return e.account == notOwner
-      })
+    it('Test setTradeWallet with empty address', async () => {
+      await reverted(
+        delegate.setTradeWallet(EMPTY_ADDRESS, { from: owner }),
+        'TRADE_WALLET_REQUIRED'
+      )
     })
   })
 
@@ -289,19 +383,6 @@ contract('Delegate Unit Tests', async accounts => {
       await delegate.transferOwnership(notOwner)
       let val = await delegate.owner.call()
       equal(val, notOwner, 'owner was not passed properly')
-    })
-  })
-
-  describe('Test setTakerWallet', async () => {
-    it('Test setTakerWallet permissions', async () => {
-      await reverted(delegate.setTradeWallet(notOwner, { from: notOwner }))
-    })
-
-    it('Test ownership after transfer', async () => {
-      await reverted(
-        delegate.transferOwnership(EMPTY_ADDRESS),
-        'DELEGATE_CONTRACT_OWNER_REQUIRED'
-      )
     })
   })
 
@@ -397,8 +478,8 @@ contract('Delegate Unit Tests', async accounts => {
       await delegate.setRule(SENDER_TOKEN, SIGNER_TOKEN, 100, 1, 0)
       let val = await delegate.getSenderSideQuote.call(
         0,
-        SENDER_TOKEN,
-        SIGNER_TOKEN
+        SIGNER_TOKEN,
+        SENDER_TOKEN
       )
       equal(
         val.toNumber(),
@@ -407,9 +488,9 @@ contract('Delegate Unit Tests', async accounts => {
       )
 
       val = await delegate.getSenderSideQuote.call(
-        MAX_SENDER_AMOUNT + 1,
-        SENDER_TOKEN,
-        SIGNER_TOKEN
+        MAX_SENDER_AMOUNT,
+        SIGNER_TOKEN,
+        SENDER_TOKEN
       )
       equal(
         val.toNumber(),
@@ -590,6 +671,113 @@ contract('Delegate Unit Tests', async accounts => {
         delegate.provideOrder(order, {
           from: notOwner,
         })
+      )
+    })
+
+    it('test if order sender and signer param are not matching', async () => {
+      await delegate.setRule(
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
+        PRICE_COEF,
+        EXP
+      )
+
+      let signerAmount = 100
+      let senderAmount = Math.floor((signerAmount * 10 ** EXP) / PRICE_COEF)
+
+      const order = await orders.getOrder({
+        signer: {
+          wallet: notOwner,
+          param: signerAmount - 100, //Fudge the price
+          token: SIGNER_TOKEN,
+        },
+        sender: {
+          wallet: tradeWallet,
+          param: senderAmount,
+          token: SENDER_TOKEN,
+        },
+      })
+
+      await reverted(
+        //mock swapContract
+        //test rule decrement
+        delegate.provideOrder(order, {
+          from: notOwner,
+        }),
+        'PRICE_INCORRECT'
+      )
+    })
+
+    it('test if order signer kind is not an ERC20 interface id', async () => {
+      await delegate.setRule(
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
+        PRICE_COEF,
+        EXP
+      )
+
+      let signerAmount = 100
+      let senderAmount = Math.floor((signerAmount * 10 ** EXP) / PRICE_COEF)
+
+      const order = await orders.getOrder({
+        signer: {
+          wallet: notOwner,
+          param: signerAmount,
+          token: SIGNER_TOKEN,
+          kind: '0x80ac58cd',
+        },
+        sender: {
+          wallet: tradeWallet,
+          param: senderAmount,
+          token: SENDER_TOKEN,
+        },
+      })
+
+      await reverted(
+        //mock swapContract
+        //test rule decrement
+        delegate.provideOrder(order, {
+          from: notOwner,
+        }),
+        'SIGNER_KIND_MUST_BE_ERC20'
+      )
+    })
+
+    it('test if order sender kind is not an ERC20 interface id', async () => {
+      await delegate.setRule(
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
+        PRICE_COEF,
+        EXP
+      )
+
+      let signerAmount = 100
+      let senderAmount = Math.floor((signerAmount * 10 ** EXP) / PRICE_COEF)
+
+      const order = await orders.getOrder({
+        signer: {
+          wallet: notOwner,
+          param: signerAmount,
+          token: SIGNER_TOKEN,
+        },
+        sender: {
+          wallet: tradeWallet,
+          param: senderAmount,
+          token: SENDER_TOKEN,
+          kind: '0x80ac58cd',
+        },
+      })
+
+      await reverted(
+        //mock swapContract
+        //test rule decrement
+        delegate.provideOrder(order, {
+          from: notOwner,
+        }),
+        'SENDER_KIND_MUST_BE_ERC20'
       )
     })
 

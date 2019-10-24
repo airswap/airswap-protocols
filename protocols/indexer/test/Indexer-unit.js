@@ -64,11 +64,9 @@ contract('Indexer Unit Tests', async accounts => {
 
   before('Setup contracts', async () => {
     await setupMockContracts()
-    indexer = await Indexer.new(stakingTokenAddress, EMPTY_ADDRESS)
-    whitelistedIndexer = await Indexer.new(
-      stakingTokenAddress,
-      whitelistAddress
-    )
+    indexer = await Indexer.new(stakingTokenAddress)
+    whitelistedIndexer = await Indexer.new(stakingTokenAddress)
+    await whitelistedIndexer.setLocatorWhitelist(whitelistAddress)
   })
 
   describe('Check constructor', async () => {
@@ -684,6 +682,32 @@ contract('Indexer Unit Tests', async accounts => {
 
       let contractCode = await web3.eth.getCode(indexer.address)
       equal(contractCode, '0x', 'contract did not self destruct')
+    })
+  })
+
+  describe('Test getScore', async () => {
+    it('should fail if the index does not exist', async () => {
+      await reverted(
+        indexer.setIntent(tokenOne, tokenTwo, 1000, aliceLocator, {
+          from: aliceAddress,
+        }),
+        'INDEX_DOES_NOT_EXIST'
+      )
+    })
+
+    it('should retrieve the score on a token pair for a user', async () => {
+      // create index
+      await indexer.createIndex(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+
+      let stakeAmount = 1000
+      await indexer.setIntent(tokenOne, tokenTwo, stakeAmount, aliceLocator, {
+        from: aliceAddress,
+      })
+
+      let val = await indexer.getScore(tokenOne, tokenTwo, aliceAddress)
+      equal(val.toNumber(), stakeAmount, 'stake was improperly saved')
     })
   })
 })

@@ -49,7 +49,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
     })
 
     it('Deployed Indexer contract', async () => {
-      indexer = await Indexer.new(tokenAST.address, EMPTY_ADDRESS, {
+      indexer = await Indexer.new(tokenAST.address, {
         from: ownerAddress,
       })
       indexerAddress = indexer.address

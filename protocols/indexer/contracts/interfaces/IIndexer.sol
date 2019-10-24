@@ -45,6 +45,7 @@ interface IIndexer {
     address token
   );
 
+  function stakeToken() external returns (address);
   function indexes(address, address) external returns (address);
   function blacklist(address) external returns (bool);
 
@@ -72,6 +73,12 @@ interface IIndexer {
     address _signerToken,
     address _senderToken
   ) external;
+
+  function getScore(
+    address _signerToken,
+    address _senderToken,
+    address _user
+  ) external view returns (uint256);
 
   function getIntents(
     address _signerToken,

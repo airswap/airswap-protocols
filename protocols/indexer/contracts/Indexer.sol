@@ -47,14 +47,11 @@ contract Indexer is IIndexer, Ownable {
     * @notice Contract Constructor
     *
     * @param _stakeToken address
-    * @param _locatorWhitelist address
     */
   constructor(
-    address _stakeToken,
-    address _locatorWhitelist
+    address _stakeToken
   ) public {
     stakeToken = IERC20(_stakeToken);
-    locatorWhitelist = _locatorWhitelist;
   }
 
   /**
@@ -125,6 +122,14 @@ contract Indexer is IIndexer, Ownable {
   }
 
   /**
+    * set the locator whitelist address
+    * @param _locatorWhitelist address
+    */
+  function setLocatorWhitelist(address _locatorWhitelist) external onlyOwner {
+    locatorWhitelist = _locatorWhitelist;
+  }
+
+  /**
     * @notice Set an Intent to Trade
     * @dev Requires approval to transfer staking token for sender
     *
@@ -179,6 +184,24 @@ contract Indexer is IIndexer, Ownable {
     address _senderToken
   ) external notPaused {
     unsetUserIntent(msg.sender, _signerToken, _senderToken);
+  }
+
+  /**
+    * @notice Gets the locator score for a token pair
+    * @param _signerToken address
+    * @param _senderToken address
+    * @return uint256 the locator score
+    */
+  function getScore(address _signerToken, address _senderToken, address _user) external view returns (uint256) {
+    // Ensure the index exists.
+    require(indexes[_signerToken][_senderToken] != Index(0),
+      "INDEX_DOES_NOT_EXIST");
+
+    uint256 score;
+    bytes32 locator;
+
+    (score, locator) = indexes[_signerToken][_senderToken].getEntry(_user);
+    return score;
   }
 
   /**
@@ -268,8 +291,8 @@ contract Indexer is IIndexer, Ownable {
       // Need to revert when false is returned
       require(stakeToken.transfer(_user, score));
     }
-    emit Unstake(_user, _signerToken, _senderToken, score);
 
+    emit Unstake(_user, _signerToken, _senderToken, score);
   }
 
 }

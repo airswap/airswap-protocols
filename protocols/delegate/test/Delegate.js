@@ -1,13 +1,18 @@
 const Delegate = artifacts.require('Delegate')
 const Swap = artifacts.require('Swap')
 const Types = artifacts.require('Types')
+const Indexer = artifacts.require('Indexer')
+const DelegateFactory = artifacts.require('DelegateFactory')
 const FungibleToken = artifacts.require('FungibleToken')
-
-const { emitted, reverted, equal, ok } = require('@airswap/test-utils').assert
+const {
+  emitted,
+  reverted,
+  equal,
+  ok,
+  passes,
+} = require('@airswap/test-utils').assert
 const { balances } = require('@airswap/test-utils').balances
 const {
-  takeSnapshot,
-  revertToSnapShot,
   getTimestampPlusDays,
   advanceTime,
 } = require('@airswap/test-utils').time
@@ -17,27 +22,48 @@ const {
   SECONDS_IN_DAY,
 } = require('@airswap/order-utils').constants
 
-let snapshotId
+contract('Delegate Integration Tests', async accounts => {
+  const STARTING_BALANCE = 700
+  const INTENT_AMOUNT = 250
+  const aliceAddress = accounts[1]
+  const bobAddress = accounts[2]
+  const carolAddress = accounts[3]
+  const aliceTradeWallet = accounts[4]
 
-contract('Delegate', async accounts => {
-  let aliceAddress = accounts[1]
-  let bobAddress = accounts[2]
-  let carolAddress = accounts[3]
-  let aliceTradeWallet = accounts[4]
-
-  let aliceDelegate
-
-  let swapContract
-  let swapAddress
-
+  let stakeToken
   let tokenDAI
   let tokenWETH
+  let aliceDelegate
+  let swapContract
+  let swapAddress
+  let indexer
+  let delegateFactory
 
   orders.setKnownAccounts([aliceAddress, bobAddress, carolAddress])
 
+  async function setupTokens() {
+    tokenWETH = await FungibleToken.new()
+    tokenDAI = await FungibleToken.new()
+    stakeToken = await FungibleToken.new()
+
+    await tokenWETH.mint(aliceAddress, STARTING_BALANCE)
+    await tokenDAI.mint(aliceAddress, STARTING_BALANCE)
+    await stakeToken.mint(aliceAddress, STARTING_BALANCE)
+  }
+
+  async function setupFactory() {
+    delegateFactory = await DelegateFactory.new(
+      swapContract.address,
+      indexer.address
+    )
+  }
+
+  async function setupIndexer() {
+    indexer = await Indexer.new(stakeToken.address)
+    await indexer.createIndex(tokenDAI.address, tokenWETH.address)
+  }
+
   before('Setup', async () => {
-    let snapShot = await takeSnapshot()
-    snapshotId = snapShot['result']
     // link types to swap
     await Swap.link(Types, (await Types.new()).address)
     // now deploy swap
@@ -46,21 +72,21 @@ contract('Delegate', async accounts => {
 
     orders.setVerifyingContract(swapAddress)
 
-    tokenWETH = await FungibleToken.new()
-    tokenDAI = await FungibleToken.new()
+    await setupTokens()
+    await setupIndexer()
+    await setupFactory()
 
-    aliceDelegate = await Delegate.new(
-      swapAddress,
+    let trx = await delegateFactory.createDelegate(
       aliceAddress,
-      aliceTradeWallet,
-      {
-        from: aliceAddress,
-      }
+      aliceTradeWallet
     )
-  })
-
-  after(async () => {
-    await revertToSnapShot(snapshotId)
+    let aliceDelegateAddress
+    emitted(trx, 'CreateDelegate', e => {
+      //capture the delegate address
+      aliceDelegateAddress = e.delegateContract
+      return e.delegateContractOwner === aliceAddress
+    })
+    aliceDelegate = await Delegate.at(aliceDelegateAddress)
   })
 
   describe('Checks setTradeWallet', async () => {
@@ -121,6 +147,80 @@ contract('Delegate', async accounts => {
         ),
         0
       )
+    })
+  })
+
+  describe('Test setRuleAndIntent()', async () => {
+    it('Test successfully calling setRuleAndIntent', async () => {
+      let rule = [100000, 300, 0]
+
+      //give allowance to the delegate to pull staking amount
+      await stakeToken.approve(aliceDelegate.address, INTENT_AMOUNT, {
+        from: aliceAddress,
+      })
+
+      //check the score of the delegate before
+      let scoreBefore = await indexer.getScore(
+        tokenDAI.address,
+        tokenWETH.address,
+        aliceDelegate.address
+      )
+      equal(scoreBefore.toNumber(), 0, 'intent score is incorrect')
+
+      await passes(
+        aliceDelegate.setRuleAndIntent(
+          tokenWETH.address,
+          tokenDAI.address,
+          rule,
+          INTENT_AMOUNT,
+          {
+            from: aliceAddress,
+          }
+        )
+      )
+
+      //check the score of the manager after
+      let scoreAfter = await indexer.getScore(
+        tokenDAI.address,
+        tokenWETH.address,
+        aliceDelegate.address
+      )
+      equal(scoreAfter.toNumber(), INTENT_AMOUNT, 'intent score is incorrect')
+
+      //check owner stake balance has been reduced
+      let stakeTokenBal = await stakeToken.balanceOf(aliceAddress)
+      equal(stakeTokenBal.toNumber(), STARTING_BALANCE - INTENT_AMOUNT)
+    })
+  })
+
+  describe('Test unsetRuleAndIntent()', async () => {
+    it('Test successfully calling unsetRuleAndIntent()', async () => {
+      //check the score of the manager before
+      let scoreBefore = await indexer.getScore(
+        tokenDAI.address,
+        tokenWETH.address,
+        aliceDelegate.address
+      )
+      equal(scoreBefore.toNumber(), INTENT_AMOUNT, 'intent score is incorrect')
+
+      await passes(
+        aliceDelegate.unsetRuleAndIntent(tokenDAI.address, tokenWETH.address, {
+          from: aliceAddress,
+        })
+      )
+
+      //check the score of the manager after
+      let scoreAfter = await indexer.getScore(
+        tokenDAI.address,
+        tokenWETH.address,
+        aliceDelegate.address
+      )
+      equal(scoreAfter.toNumber(), 0, 'intent score is incorrect')
+
+      //check owner stake balance has been increased
+      let stakeTokenBal = await stakeToken.balanceOf(aliceAddress)
+
+      equal(stakeTokenBal.toNumber(), STARTING_BALANCE)
     })
   })
 

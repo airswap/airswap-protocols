@@ -9,6 +9,7 @@ module.exports = {
   passes: truffleAssert.passes,
   fails: truffleAssert.fails,
   equal: assert.equal,
+  notEqual: assert.notEqual,
   isTrue: assert.isTrue,
   ok: assert.ok,
 }

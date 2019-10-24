@@ -21,6 +21,7 @@ interface IDelegateFactory {
   event CreateDelegate(
     address indexed delegateContract,
     address swapContract,
+    address indexerContract,
     address indexed delegateContractOwner,
     address delegateTradeWallet
   );
@@ -35,5 +36,4 @@ interface IDelegateFactory {
     address _delegateContractOwner,
     address _delegateTradeWallet
   ) external returns (address delegateContractAddress);
-
 }

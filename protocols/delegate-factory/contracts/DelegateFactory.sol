@@ -20,23 +20,30 @@ import "@airswap/delegate/contracts/Delegate.sol";
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "@airswap/indexer/contracts/interfaces/ILocatorWhitelist.sol";
 import "@airswap/delegate-factory/contracts/interfaces/IDelegateFactory.sol";
+import "@airswap/indexer/contracts/interfaces/IIndexer.sol";
 
 contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
 
   mapping(address => bool) internal deployedAddresses;
   ISwap public swapContract;
+  IIndexer public indexerContract;
 
   /**
     * @notice Create a new Delegate contract
     * @dev swapContract is unable to be changed after the factory sets it
     * @param _swapContract address of the swap contract the delegate will deploy with
+    * @param _indexerContract address of the indexer contract the delegate will deploy with
     */
-  constructor(ISwap _swapContract) public {
+  constructor(ISwap _swapContract, IIndexer _indexerContract) public {
     // Ensure a swap contract is provided.
     require(address(_swapContract) != address(0),
       'SWAP_CONTRACT_REQUIRED');
 
+    require(address(_indexerContract) != address(0),
+      'INDEXER_CONTRACT_REQUIRED');
+
     swapContract = _swapContract;
+    indexerContract = _indexerContract;
   }
 
   /**
@@ -53,10 +60,10 @@ contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
     require(_delegateContractOwner != address(0),
       'DELEGATE_CONTRACT_OWNER_REQUIRED');
 
-    delegateContractAddress = address(new Delegate(swapContract, _delegateContractOwner, _delegateTradeWallet));
+    delegateContractAddress = address(new Delegate(swapContract, indexerContract, _delegateContractOwner, _delegateTradeWallet));
     deployedAddresses[delegateContractAddress] = true;
 
-    emit CreateDelegate(delegateContractAddress, address(swapContract), _delegateContractOwner, _delegateTradeWallet);
+    emit CreateDelegate(delegateContractAddress, address(swapContract), address(indexerContract), _delegateContractOwner, _delegateTradeWallet);
 
     return delegateContractAddress;
   }
