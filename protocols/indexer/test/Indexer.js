@@ -579,6 +579,9 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
       await indexer.setPausedStatus(true, { from: ownerAddress })
       // KILL
       await indexer.killContract(ownerAddress, { from: ownerAddress })
+
+      let contractCode = await web3.eth.getCode(indexerAddress)
+      equal(contractCode, '0x', 'contract did not self destruct')
     })
   })
 })

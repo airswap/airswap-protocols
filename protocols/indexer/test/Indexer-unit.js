@@ -660,4 +660,30 @@ contract('Indexer Unit Tests', async accounts => {
       )
     })
   })
+
+  describe('Test killContract', async () => {
+    it('A non-owner cannot call the function', async () => {
+      await reverted(
+        indexer.killContract(aliceAddress, { from: aliceAddress }),
+        'Ownable: caller is not the owner'
+      )
+    })
+
+    it('The owner cannot call the function when not paused', async () => {
+      await reverted(
+        indexer.killContract(owner, { from: owner }),
+        'CONTRACT_NOT_PAUSED'
+      )
+    })
+
+    it('The owner can call the function when the indexer is paused', async () => {
+      // pause the indexer
+      await indexer.setPausedStatus(true, { from: owner })
+      // KILL
+      await indexer.killContract(owner, { from: owner })
+
+      let contractCode = await web3.eth.getCode(indexer.address)
+      equal(contractCode, '0x', 'contract did not self destruct')
+    })
+  })
 })
