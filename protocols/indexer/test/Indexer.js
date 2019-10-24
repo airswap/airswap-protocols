@@ -23,6 +23,8 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
   let tokenWETH
 
   let aliceLocator = padAddressToLocator(aliceAddress)
+  let bobLocator = padAddressToLocator(bobAddress)
+  let emptyLocator = padAddressToLocator(EMPTY_ADDRESS)
 
   before('Setup', async () => {
     let snapShot = await takeSnapshot()
@@ -77,18 +79,22 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
       const intents = await indexer.getIntents.call(
         tokenWETH.address,
         tokenDAI.address,
+        EMPTY_ADDRESS,
         10,
         {
           from: bobAddress,
         }
       )
-      equal(intents.length, 0)
+      equal(intents.length, 10)
+      equal(intents[0], emptyLocator)
+      equal(intents[1], emptyLocator)
     })
 
     it('Bob ensures no intents are on the Indexer for non-existing index', async () => {
       const intents = await indexer.getIntents.call(
         tokenDAI.address,
         tokenWETH.address,
+        EMPTY_ADDRESS,
         10,
         {
           from: bobAddress,
@@ -153,8 +159,9 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
       )
     })
 
-    it('Staking tokens are minted for Alice', async () => {
+    it('Staking tokens are minted for Alice and Bob', async () => {
       emitted(await tokenAST.mint(aliceAddress, 1000), 'Transfer')
+      emitted(await tokenAST.mint(bobAddress, 1000), 'Transfer')
     })
 
     it('Fails due to no staking token allowance', async () => {
@@ -172,9 +179,13 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
       )
     })
 
-    it('Alice approves Indexer to spend staking tokens', async () => {
+    it('Alice and Bob approve Indexer to spend staking tokens', async () => {
       emitted(
         await tokenAST.approve(indexerAddress, 10000, { from: aliceAddress }),
+        'Approval'
+      )
+      emitted(
+        await tokenAST.approve(indexerAddress, 10000, { from: bobAddress }),
         'Approval'
       )
     })
@@ -203,6 +214,37 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
       ok(await balances(aliceAddress, [[tokenAST, 500]]))
       ok(await balances(indexerAddress, [[tokenAST, 500]]))
     })
+
+    it("The owner can unset alice's intent", async () => {
+      emitted(
+        await indexer.unsetIntentForUser(
+          aliceAddress,
+          tokenWETH.address,
+          tokenDAI.address,
+          {
+            from: ownerAddress,
+          }
+        ),
+        'Unstake'
+      )
+      ok(await balances(aliceAddress, [[tokenAST, 1000]]))
+      ok(await balances(indexerAddress, [[tokenAST, 0]]))
+    })
+
+    it('Restake for future tests', async () => {
+      emitted(
+        await indexer.setIntent(
+          tokenWETH.address,
+          tokenDAI.address,
+          500,
+          aliceLocator,
+          {
+            from: aliceAddress,
+          }
+        ),
+        'Stake'
+      )
+    })
   })
 
   describe('Intent integrity', async () => {
@@ -210,24 +252,15 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
       const intents = await indexer.getIntents.call(
         tokenWETH.address,
         tokenDAI.address,
-        10,
+        EMPTY_ADDRESS,
+        5,
         {
           from: bobAddress,
         }
       )
-      equal(intents.length, 1)
-    })
-
-    it('Bob ensures that Alice intent is on the Indexer', async () => {
-      const intents = await indexer.getIntents.call(
-        tokenWETH.address,
-        tokenDAI.address,
-        10,
-        {
-          from: bobAddress,
-        }
-      )
+      equal(intents.length, 5)
       equal(intents[0], aliceLocator)
+      equal(intents[1], emptyLocator)
     })
 
     it('Alice attempts to unset non-existent index and reverts', async () => {
@@ -253,7 +286,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
         indexer.unsetIntent(tokenWETH.address, tokenDAI.address, {
           from: aliceAddress,
         }),
-        'LOCATOR_DOES_NOT_EXIST'
+        'ENTRY_DOES_NOT_EXIST'
       )
     })
 
@@ -266,12 +299,15 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
       const intents = await indexer.getIntents.call(
         tokenWETH.address,
         tokenDAI.address,
+        EMPTY_ADDRESS,
         10,
         {
           from: bobAddress,
         }
       )
-      equal(intents.length, 0)
+      equal(intents.length, 10)
+      equal(intents[0], emptyLocator)
+      equal(intents[1], emptyLocator)
     })
 
     it('Alice attempts to set an intent and succeeds', async () => {
@@ -289,6 +325,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
       )
     })
   })
+
   describe('Blacklisting', async () => {
     it('Alice attempts to blacklist a index and fails because she is not owner', async () => {
       await reverted(
@@ -312,6 +349,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
       const intents = await indexer.getIntents.call(
         tokenWETH.address,
         tokenDAI.address,
+        EMPTY_ADDRESS,
         10,
         {
           from: bobAddress,
@@ -380,7 +418,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
       )
     })
 
-    it('Alice attempts to stake and set an intent and succeeds', async () => {
+    it('Alice and Bob attempt to stake and set an intent and succeed', async () => {
       emitted(
         await indexer.setIntent(
           tokenWETH.address,
@@ -393,6 +431,157 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
         ),
         'Stake'
       )
+      emitted(
+        await indexer.setIntent(
+          tokenWETH.address,
+          tokenDAI.address,
+          50,
+          bobLocator,
+          {
+            from: bobAddress,
+          }
+        ),
+        'Stake'
+      )
+    })
+
+    it('Bob fetches intents starting at bobAddress', async () => {
+      const intents = await indexer.getIntents.call(
+        tokenWETH.address,
+        tokenDAI.address,
+        bobAddress,
+        3,
+        {
+          from: bobAddress,
+        }
+      )
+      equal(intents.length, 3)
+      equal(intents[0], bobLocator)
+      equal(intents[1], emptyLocator)
+      equal(intents[2], emptyLocator)
+    })
+  })
+
+  describe('Pausing', async () => {
+    it('A non-owner cannot pause the indexer', async () => {
+      await reverted(
+        indexer.setPausedStatus(true, { from: aliceAddress }),
+        'Ownable: caller is not the owner'
+      )
+    })
+
+    it('The owner can pause the indexer', async () => {
+      let val = await indexer.contractPaused.call()
+      equal(val, false)
+
+      // pause the indexer
+      await indexer.setPausedStatus(true, { from: ownerAddress })
+
+      // now its paused
+      val = await indexer.contractPaused.call()
+      equal(val, true)
+    })
+
+    it('Functions cannot be called when the indexer is paused', async () => {
+      // set intent
+      await reverted(
+        indexer.setIntent(
+          tokenWETH.address,
+          tokenDAI.address,
+          1000,
+          aliceLocator,
+          {
+            from: aliceAddress,
+          }
+        ),
+        'CONTRACT_IS_PAUSED'
+      )
+
+      // unset intent
+      await reverted(
+        indexer.unsetIntent(tokenWETH.address, tokenDAI.address, {
+          from: aliceAddress,
+        }),
+        'CONTRACT_IS_PAUSED'
+      )
+
+      // create market
+      await reverted(
+        indexer.createIndex(tokenWETH.address, tokenDAI.address, {
+          from: aliceAddress,
+        }),
+        'CONTRACT_IS_PAUSED'
+      )
+    })
+
+    it('The owner can un-pause the indexer', async () => {
+      let val = await indexer.contractPaused.call()
+      equal(val, true)
+
+      // unpause the indexer
+      await indexer.setPausedStatus(false, { from: ownerAddress })
+
+      // now its not paused
+      val = await indexer.contractPaused.call()
+      equal(val, false)
+    })
+
+    it('Now functions can be called again', async () => {
+      // unset intent
+      emitted(
+        await indexer.unsetIntent(tokenWETH.address, tokenDAI.address, {
+          from: aliceAddress,
+        }),
+        'Unstake'
+      )
+
+      // set intent
+      emitted(
+        await indexer.setIntent(
+          tokenWETH.address,
+          tokenDAI.address,
+          500,
+          aliceLocator,
+          {
+            from: aliceAddress,
+          }
+        ),
+        'Stake'
+      )
+
+      // create market
+      emitted(
+        await indexer.createIndex(tokenDAI.address, bobAddress, {
+          from: aliceAddress,
+        }),
+        'CreateIndex'
+      )
+    })
+  })
+
+  describe('Test killContract', async () => {
+    it('A non-owner cannot call the function', async () => {
+      await reverted(
+        indexer.killContract(aliceAddress, { from: aliceAddress }),
+        'Ownable: caller is not the owner'
+      )
+    })
+
+    it('The owner cannot call the function when not paused', async () => {
+      await reverted(
+        indexer.killContract(ownerAddress, { from: ownerAddress }),
+        'CONTRACT_NOT_PAUSED'
+      )
+    })
+
+    it('The owner can call the function when the indexer is paused', async () => {
+      // pause the indexer
+      await indexer.setPausedStatus(true, { from: ownerAddress })
+      // KILL
+      await indexer.killContract(ownerAddress, { from: ownerAddress })
+
+      let contractCode = await web3.eth.getCode(indexerAddress)
+      equal(contractCode, '0x', 'contract did not self destruct')
     })
   })
 })

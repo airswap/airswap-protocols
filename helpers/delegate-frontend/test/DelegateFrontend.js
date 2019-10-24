@@ -188,6 +188,7 @@ contract('DelegateFrontend', async accounts => {
       const result = await indexer.getIntents.call(
         tokenDAI.address,
         tokenWETH.address,
+        EMPTY_ADDRESS,
         5
       )
       equal(result[0], padAddressToLocator(aliceDelegate.address))

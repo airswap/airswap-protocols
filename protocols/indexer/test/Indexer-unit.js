@@ -18,9 +18,12 @@ contract('Indexer Unit Tests', async accounts => {
   let nonOwner = accounts[1]
   let aliceAddress = accounts[2]
   let bobAddress = accounts[3]
+  let carolAddress = accounts[4]
 
   let aliceLocator = padAddressToLocator(aliceAddress)
   let bobLocator = padAddressToLocator(bobAddress)
+  let carolLocator = padAddressToLocator(carolAddress)
+  let emptyLocatorData = padAddressToLocator(EMPTY_ADDRESS)
 
   let indexer
   let snapshotId
@@ -326,7 +329,7 @@ contract('Indexer Unit Tests', async accounts => {
         indexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
           from: aliceAddress,
         }),
-        'LOCATOR_ALREADY_SET'
+        'ENTRY_ALREADY_EXISTS'
       )
     })
   })
@@ -352,7 +355,7 @@ contract('Indexer Unit Tests', async accounts => {
         indexer.unsetIntent(tokenOne, tokenTwo, {
           from: aliceAddress,
         }),
-        'LOCATOR_DOES_NOT_EXIST'
+        'ENTRY_DOES_NOT_EXIST'
       )
     })
 
@@ -412,10 +415,74 @@ contract('Indexer Unit Tests', async accounts => {
     })
   })
 
+  describe('Test unsetIntentForUser', async () => {
+    it('should not unset an intent if the index doesnt exist', async () => {
+      await reverted(
+        indexer.unsetIntentForUser(aliceAddress, tokenOne, tokenTwo, {
+          from: owner,
+        }),
+        'INDEX_DOES_NOT_EXIST'
+      )
+    })
+
+    it('should not unset an intent if the intent does not exist', async () => {
+      // create the index
+      await indexer.createIndex(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+
+      // now try to unset a non-existent intent
+      await reverted(
+        indexer.unsetIntentForUser(aliceAddress, tokenOne, tokenTwo, {
+          from: owner,
+        }),
+        'ENTRY_DOES_NOT_EXIST'
+      )
+    })
+
+    it('should successfully unset an intent', async () => {
+      // create the index
+      await indexer.createIndex(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+
+      // create the intent
+      await indexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
+        from: aliceAddress,
+      })
+
+      // now try to unset the intent
+      let tx = await indexer.unsetIntentForUser(
+        aliceAddress,
+        tokenOne,
+        tokenTwo,
+        {
+          from: owner,
+        }
+      )
+
+      // passes and emits and event
+      passes(tx)
+      emitted(tx, 'Unstake', event => {
+        return (
+          event.wallet === aliceAddress &&
+          event.signerToken === tokenOne &&
+          event.senderToken == tokenTwo &&
+          event.amount.toNumber() === 250
+        )
+      })
+    })
+  })
+
   describe('Test getIntents', async () => {
     it('should return an empty array if the index doesnt exist', async () => {
-      let intents = await indexer.getIntents.call(tokenOne, tokenTwo, 4)
-      equal(intents.length, 0, 'intents array should be empty')
+      let intents = await indexer.getIntents.call(
+        tokenOne,
+        tokenTwo,
+        EMPTY_ADDRESS,
+        3
+      )
+      equal(intents.length, 0, 'intents array should be size 0')
     })
 
     it('should return an empty array if a token is blacklisted', async () => {
@@ -435,8 +502,13 @@ contract('Indexer Unit Tests', async accounts => {
       })
 
       // now try to get the intents
-      let intents = await indexer.getIntents.call(tokenOne, tokenTwo, 4)
-      equal(intents.length, 0, 'intents array should be empty')
+      let intents = await indexer.getIntents.call(
+        tokenOne,
+        tokenTwo,
+        EMPTY_ADDRESS,
+        4
+      )
+      equal(intents.length, 0, 'intents array should be size 0')
     })
 
     it('should otherwise return the intents', async () => {
@@ -452,14 +524,166 @@ contract('Indexer Unit Tests', async accounts => {
       await indexer.setIntent(tokenOne, tokenTwo, 100, bobLocator, {
         from: bobAddress,
       })
+      await indexer.setIntent(tokenOne, tokenTwo, 75, carolLocator, {
+        from: carolAddress,
+      })
 
       // now try to get the intents
-      let intents = await indexer.getIntents.call(tokenOne, tokenTwo, 4)
-      equal(intents.length, 2, 'intents array should be size 2')
+      let intents = await indexer.getIntents.call(
+        tokenOne,
+        tokenTwo,
+        EMPTY_ADDRESS,
+        4
+      )
+      equal(intents.length, 4, 'intents array should be size 4')
+      equal(intents[0], bobLocator, 'intent should be bob')
+      equal(intents[1], carolLocator, 'intent should be carol')
+      equal(intents[2], aliceLocator, 'intent should be alice')
+      equal(intents[3], emptyLocatorData, 'intent should be empty')
 
       // should only get the number specified
-      intents = await indexer.getIntents.call(tokenOne, tokenTwo, 1)
+      intents = await indexer.getIntents.call(
+        tokenOne,
+        tokenTwo,
+        EMPTY_ADDRESS,
+        1
+      )
       equal(intents.length, 1, 'intents array should be size 1')
+      equal(intents[0], bobLocator, 'intent should be bob')
+
+      // should start in the specified location
+      intents = await indexer.getIntents.call(
+        tokenOne,
+        tokenTwo,
+        carolAddress,
+        5
+      )
+
+      equal(intents.length, 5, 'intents array should be size 5')
+      equal(intents[0], carolLocator, 'intent should be carol')
+      equal(intents[1], aliceLocator, 'intent should be alice')
+      equal(intents[2], emptyLocatorData, 'intent should be empty')
+      equal(intents[3], emptyLocatorData, 'intent should be empty')
+    })
+  })
+
+  describe('Test pausing', async () => {
+    it('A non-owner cannot pause the indexer', async () => {
+      await reverted(
+        indexer.setPausedStatus(true, { from: aliceAddress }),
+        'Ownable: caller is not the owner'
+      )
+    })
+
+    it('The owner can pause the indexer', async () => {
+      let val = await indexer.contractPaused.call()
+      equal(val, false)
+
+      // pause the indexer
+      await indexer.setPausedStatus(true, { from: owner })
+
+      // now its paused
+      val = await indexer.contractPaused.call()
+      equal(val, true)
+    })
+
+    it('The owner can un-pause the indexer', async () => {
+      // pause the indexer
+      await indexer.setPausedStatus(true, { from: owner })
+
+      let val = await indexer.contractPaused.call()
+      equal(val, true)
+
+      // unpause the indexer
+      await indexer.setPausedStatus(false, { from: owner })
+
+      // now its not paused
+      val = await indexer.contractPaused.call()
+      equal(val, false)
+    })
+
+    it('Functions cannot be called when the indexer is paused', async () => {
+      // pause the indexer
+      await indexer.setPausedStatus(true, { from: owner })
+
+      // set intent
+      await reverted(
+        indexer.setIntent(tokenOne, tokenTwo, 1000, aliceLocator, {
+          from: aliceAddress,
+        }),
+        'CONTRACT_IS_PAUSED'
+      )
+
+      // unset intent
+      await reverted(
+        indexer.unsetIntent(tokenOne, tokenTwo, {
+          from: aliceAddress,
+        }),
+        'CONTRACT_IS_PAUSED'
+      )
+
+      // create market
+      await reverted(
+        indexer.createIndex(tokenOne, tokenTwo, {
+          from: aliceAddress,
+        }),
+        'CONTRACT_IS_PAUSED'
+      )
+    })
+
+    it('After unpausing functions can be called again', async () => {
+      await indexer.setPausedStatus(true, { from: owner })
+      await indexer.setPausedStatus(false, { from: owner })
+
+      // create market
+      emitted(
+        await indexer.createIndex(tokenTwo, bobAddress, {
+          from: aliceAddress,
+        }),
+        'CreateIndex'
+      )
+
+      // set intent
+      emitted(
+        await indexer.setIntent(tokenTwo, bobAddress, 500, aliceLocator, {
+          from: aliceAddress,
+        }),
+        'Stake'
+      )
+
+      // unset intent
+      emitted(
+        await indexer.unsetIntent(tokenTwo, bobAddress, {
+          from: aliceAddress,
+        }),
+        'Unstake'
+      )
+    })
+  })
+
+  describe('Test killContract', async () => {
+    it('A non-owner cannot call the function', async () => {
+      await reverted(
+        indexer.killContract(aliceAddress, { from: aliceAddress }),
+        'Ownable: caller is not the owner'
+      )
+    })
+
+    it('The owner cannot call the function when not paused', async () => {
+      await reverted(
+        indexer.killContract(owner, { from: owner }),
+        'CONTRACT_NOT_PAUSED'
+      )
+    })
+
+    it('The owner can call the function when the indexer is paused', async () => {
+      // pause the indexer
+      await indexer.setPausedStatus(true, { from: owner })
+      // KILL
+      await indexer.killContract(owner, { from: owner })
+
+      let contractCode = await web3.eth.getCode(indexer.address)
+      equal(contractCode, '0x', 'contract did not self destruct')
     })
   })
 
