@@ -558,4 +558,27 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
       )
     })
   })
+
+  describe('Test killContract', async () => {
+    it('A non-owner cannot call the function', async () => {
+      await reverted(
+        indexer.killContract(aliceAddress, { from: aliceAddress }),
+        'Ownable: caller is not the owner'
+      )
+    })
+
+    it('The owner cannot call the function when not paused', async () => {
+      await reverted(
+        indexer.killContract(ownerAddress, { from: ownerAddress }),
+        'CONTRACT_NOT_PAUSED'
+      )
+    })
+
+    it('The owner can call the function when the indexer is paused', async () => {
+      // pause the indexer
+      await indexer.setPausedStatus(true, { from: ownerAddress })
+      // KILL
+      await indexer.killContract(ownerAddress, { from: ownerAddress })
+    })
+  })
 })

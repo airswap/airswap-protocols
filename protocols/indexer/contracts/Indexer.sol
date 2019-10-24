@@ -237,11 +237,10 @@ contract Indexer is IIndexer, Ownable {
   /**
     * @notice Allows the owner to destroy the contract when it is paused
     * @dev only callable by owner and when paused
-    * @dev any ETH at address(this) is sent to the owner, which should be none
     *
     */
-  function killContract() external whenPaused onlyOwner {
-    selfdestruct(owner());
+  function killContract(address payable _recipient) external onlyOwner whenPaused {
+    selfdestruct(_recipient);
   }
 
   /**
