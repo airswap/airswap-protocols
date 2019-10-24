@@ -210,6 +210,9 @@ contract Indexer is IIndexer, Ownable {
 
   /**
     * @notice Allows the owner to pause and unpause the contract
+    * @dev only callable by owner
+    *
+    * @param _newStatus bool
     */
   function setPausedStatus(bool _newStatus) external onlyOwner {
     paused = _newStatus;
@@ -217,6 +220,11 @@ contract Indexer is IIndexer, Ownable {
 
   /**
     * @notice Allows the owner to unset intent and return tokens
+    * @dev only callable by owner
+    *
+    * @param _user address
+    * @param _signerToken address
+    * @param _senderToken address
     */
   function unsetIntentForUser(address _user, address _signerToken, address _senderToken) external onlyOwner {
     unsetUserIntent(_user, _signerToken, _senderToken);
@@ -224,6 +232,9 @@ contract Indexer is IIndexer, Ownable {
 
   /**
     * @notice Internal function that unsets a user's intent and returns tokens
+    * @param _user address
+    * @param _signerToken address
+    * @param _senderToken address
     */
   function unsetUserIntent(address _user, address _signerToken, address _senderToken) internal {
      // Get the score for the sender.
