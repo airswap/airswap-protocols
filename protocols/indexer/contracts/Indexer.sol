@@ -194,7 +194,7 @@ contract Indexer is IIndexer, Ownable {
     require(indexes[_signerToken][_senderToken] != Index(0),
       "INDEX_DOES_NOT_EXIST");
 
-    Index.Locator memory locator = indexes[_signerToken][_senderToken].getLocator(_user); 
+    Index.Locator memory locator = indexes[_signerToken][_senderToken].getLocator(_user);
     return locator.score;
   }
 
@@ -227,5 +227,6 @@ contract Indexer is IIndexer, Ownable {
       }
     }
     return new bytes32[](0);
+
   }
 }

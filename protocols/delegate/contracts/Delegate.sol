@@ -120,7 +120,7 @@ contract Delegate is IDelegate, Ownable {
     * @dev delegate needs to be given allowance from msg.sender for the _amountToStake
     * @dev swap needs to be given permission to move funds from the delegate
     * @param _senderToken the token the delgeate will send
-    * @param _senderToken the token the delegate will receive 
+    * @param _senderToken the token the delegate will receive
     * @param _rule the rule to set on a delegate
     * @param _amountToStake the amount to stake for an intent
     * @param _indexer the indexer the intent will be set on
@@ -132,11 +132,10 @@ contract Delegate is IDelegate, Ownable {
     uint256 _amountToStake,
     IIndexer _indexer
   ) external onlyOwner {
-    
     _setRuleInternal(
       _senderToken,
       _signerToken,
-      _rule.maxSenderAmount, 
+      _rule.maxSenderAmount,
       _rule.priceCoef,
       _rule.priceExp
     );
@@ -145,6 +144,7 @@ contract Delegate is IDelegate, Ownable {
       IERC20(_indexer.stakeToken())
       .allowance(msg.sender, address(this)) >= _amountToStake, "ALLOWANCE_FUNDS_ERROR"
     );
+
     require(
       IERC20(_indexer.stakeToken())
       .transferFrom(msg.sender, address(this), _amountToStake), "TRANSFER_FUNDS_ERROR"
@@ -162,9 +162,9 @@ contract Delegate is IDelegate, Ownable {
       _amountToStake,
       bytes32(uint256(address(this)) << 96) //NOTE: this will pad 0's to the right
     );
- 
+
   }
-  
+
   /**
     * @notice unsets a rule on the delegate and removes an intent on the indexer
     * @dev only callable by owner
@@ -173,8 +173,8 @@ contract Delegate is IDelegate, Ownable {
     * @param _indexer the indexer to remove the intent from
     */
   function unsetRuleAndIntent(
-    address _signerToken, 
-    address _senderToken, 
+    address _signerToken,
+    address _senderToken,
     IIndexer _indexer
   ) external onlyOwner {
 
@@ -206,7 +206,6 @@ contract Delegate is IDelegate, Ownable {
   ) external view returns (
     uint256 signerParam
   ) {
-
     Types.Rule memory rule = rules[_senderToken][_signerToken];
 
     // Ensure that a rule exists.
