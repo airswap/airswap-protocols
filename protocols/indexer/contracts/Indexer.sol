@@ -47,14 +47,11 @@ contract Indexer is IIndexer, Ownable {
     * @notice Contract Constructor
     *
     * @param _stakeToken address
-    * @param _locatorWhitelist address
     */
   constructor(
-    address _stakeToken,
-    address _locatorWhitelist
+    address _stakeToken
   ) public {
     stakeToken = IERC20(_stakeToken);
-    locatorWhitelist = _locatorWhitelist;
   }
 
   /**
@@ -122,6 +119,14 @@ contract Indexer is IIndexer, Ownable {
       blacklist[_token] = false;
       emit RemoveFromBlacklist(_token);
     }
+  }
+
+  /**
+    * set the locator whitelist address
+    * @param _locatorWhitelist address
+    */
+  function setLocatorWhitelist(address _locatorWhitelist) external onlyOwner {
+    locatorWhitelist = _locatorWhitelist;
   }
 
   /**

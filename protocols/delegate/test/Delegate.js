@@ -52,11 +52,14 @@ contract('Delegate Integration Tests', async accounts => {
   }
 
   async function setupFactory() {
-    delegateFactory = await DelegateFactory.new(swapContract.address)
+    delegateFactory = await DelegateFactory.new(
+      swapContract.address,
+      indexer.address
+    )
   }
 
   async function setupIndexer() {
-    indexer = await Indexer.new(stakeToken.address, delegateFactory.address)
+    indexer = await Indexer.new(stakeToken.address)
     await indexer.createIndex(tokenDAI.address, tokenWETH.address)
   }
 
@@ -70,8 +73,8 @@ contract('Delegate Integration Tests', async accounts => {
     orders.setVerifyingContract(swapAddress)
 
     await setupTokens()
-    await setupFactory()
     await setupIndexer()
+    await setupFactory()
 
     let trx = await delegateFactory.createDelegate(
       aliceAddress,
@@ -170,7 +173,6 @@ contract('Delegate Integration Tests', async accounts => {
           tokenDAI.address,
           rule,
           INTENT_AMOUNT,
-          indexer.address,
           {
             from: aliceAddress,
           }
@@ -202,14 +204,9 @@ contract('Delegate Integration Tests', async accounts => {
       equal(scoreBefore.toNumber(), INTENT_AMOUNT, 'intent score is incorrect')
 
       await passes(
-        aliceDelegate.unsetRuleAndIntent(
-          tokenDAI.address,
-          tokenWETH.address,
-          indexer.address,
-          {
-            from: aliceAddress,
-          }
-        )
+        aliceDelegate.unsetRuleAndIntent(tokenDAI.address, tokenWETH.address, {
+          from: aliceAddress,
+        })
       )
 
       //check the score of the manager after

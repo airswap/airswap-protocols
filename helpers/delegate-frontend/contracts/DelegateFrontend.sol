@@ -32,7 +32,7 @@ contract DelegateFrontend {
   IIndexer public indexer;
   ISwap public swapContract;
 
-  constructor(address _indexer, address _swap) public {
+  constructor(address _swap, address _indexer) public {
     indexer = IIndexer(_indexer);
     swapContract = ISwap(_swap);
   }
