@@ -103,7 +103,7 @@ contract Indexer is IIndexer, Ownable {
     */
   function addToBlacklist(
     address _token
-  ) external onlyOwner whenNotPaused {
+  ) external onlyOwner {
     if (!blacklist[_token]) {
       blacklist[_token] = true;
       emit AddToBlacklist(_token);
@@ -116,7 +116,7 @@ contract Indexer is IIndexer, Ownable {
     */
   function removeFromBlacklist(
     address _token
-  ) external onlyOwner whenNotPaused {
+  ) external onlyOwner {
     if (blacklist[_token]) {
       blacklist[_token] = false;
       emit RemoveFromBlacklist(_token);
