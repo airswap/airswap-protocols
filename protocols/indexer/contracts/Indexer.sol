@@ -144,7 +144,7 @@ contract Indexer is IIndexer, Ownable {
     emit Stake(msg.sender, _signerToken, _senderToken, _amount);
 
     // Set the locator on the index.
-    indexes[_signerToken][_senderToken].setLocator(msg.sender, _amount, _locator);
+    indexes[_signerToken][_senderToken].setEntry(msg.sender, _amount, _locator);
   }
 
   /**
@@ -162,24 +162,21 @@ contract Indexer is IIndexer, Ownable {
     require(indexes[_signerToken][_senderToken] != Index(0),
       "INDEX_DOES_NOT_EXIST");
 
-    // Get the locator for the sender.
-    Index.Locator memory locator = indexes[_signerToken][_senderToken].getLocator(msg.sender);
-
-    // Ensure the locator exists.
-    require(locator.user == msg.sender,
-      "LOCATOR_DOES_NOT_EXIST");
+    // Get the score for the sender.
+    uint256 score;
+    bytes32 data;
+    (score, data) = indexes[_signerToken][_senderToken].getEntry(msg.sender);
 
     // Unset the locator on the index.
-    //No need to require() because a check is done above that reverts if there are no locators
-    indexes[_signerToken][_senderToken].unsetLocator(msg.sender);
+    require(indexes[_signerToken][_senderToken].unsetEntry(msg.sender), 'ENTRY_DOES_NOT_EXIST');
 
-    if (locator.score > 0) {
+    if (score > 0) {
       // Return the staked tokens.
       // Need to revert when false is returned
-      require(stakeToken.transfer(msg.sender, locator.score));
+      require(stakeToken.transfer(msg.sender, score));
     }
 
-    emit Unstake(msg.sender, _signerToken, _senderToken, locator.score);
+    emit Unstake(msg.sender, _signerToken, _senderToken, score);
   }
 
   /**

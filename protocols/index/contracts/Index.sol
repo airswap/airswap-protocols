@@ -20,7 +20,7 @@ pragma experimental ABIEncoderV2;
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 /**
-  * @title Index: A List of Locators
+  * @title Index: A List of Entries
   */
 contract Index is Ownable {
 
@@ -30,24 +30,21 @@ contract Index is Ownable {
   // Maximum address value to indicate the head
   address private constant HEAD = address(uint160(2**160-1));
 
-  // Byte values to map to the previous and next
-  byte constant private PREV = 0x00;
-  byte constant private NEXT = 0x01;
-
   // Mapping of user address to its neighbors
-  mapping(address => mapping(byte => Locator)) private locatorsLinkedList;
+  mapping(address => Entry) private _listEntries;
 
   /**
-    * @notice Locator for a Delegate
-    * @dev data is arbitrary e.g. may include an address
+    * @notice Entry for a locator
+    * @dev locator is arbitrary e.g. may include an address
     * @param user address
     * @param score uint256
-    * @param data bytes32
+    * @param locator bytes32
     */
-  struct Locator {
-    address user;
+  struct Entry {
+    address prev;
+    address next;
     uint256 score;
-    bytes32 data;
+    bytes32 locator;
   }
 
   /**
@@ -55,13 +52,13 @@ contract Index is Ownable {
     * @dev Emitted with successful state changes
     */
 
-  event SetLocator(
+  event SetEntry(
     uint256 score,
     address indexed user,
-    bytes32 indexed data
+    bytes32 indexed locator
   );
 
-  event UnsetLocator(
+  event UnsetEntry(
     address indexed user
   );
 
@@ -70,85 +67,80 @@ contract Index is Ownable {
     */
   constructor() public {
     // Initialize the linked list.
-    Locator memory head = Locator(HEAD, 0, bytes32(0));
-    locatorsLinkedList[HEAD][PREV] = head;
-    locatorsLinkedList[HEAD][NEXT] = head;
+    _listEntries[HEAD] = Entry(HEAD, HEAD, 0, bytes32(0));
   }
 
   /**
-    * @notice Set an Locator to Trade
+    * @notice Set an Entry
     *
     * @param _user The account
     * @param _score uint256
-    * @param _data bytes32
+    * @param _locator bytes32
     */
-  function setLocator(
+  function setEntry(
     address _user,
     uint256 _score,
-    bytes32 _data
+    bytes32 _locator
   ) external onlyOwner {
 
-    require(!hasLocator(_user), "LOCATOR_ALREADY_SET");
+    require(!hasEntry(_user), "ENTRY_ALREADY_EXISTS");
 
-    Locator memory newLocator = Locator(_user, _score, _data);
+    // Find the first user who has a lower stake, and insert before them
+    address nextUser = findPosition(_score);
 
-    // Insert after the next highest score on the linked list.
-    Locator memory nextLocator = findPosition(_score);
+    // Link the newUser into place.
+    address prevUser = _listEntries[nextUser].prev;
 
-    // Link the newLocator into place.
-    link(locatorsLinkedList[nextLocator.user][PREV], newLocator);
-    link(newLocator, nextLocator);
+    _listEntries[prevUser].next = _user;
+    _listEntries[nextUser].prev = _user;
+    _listEntries[_user] = Entry(prevUser, nextUser, _score, _locator);
 
     // Increment the length of the linked list if successful.
     length = length + 1;
 
-    emit SetLocator(_score, _user, _data);
+    emit SetEntry(_score, _user, _locator);
   }
 
   /**
-    * @notice Unset an Locator to Trade
+    * @notice Unset an Entry
     * @param _user address
     * @return bool return true on success
     */
-  function unsetLocator(
+  function unsetEntry(
     address _user
   ) external onlyOwner returns (bool) {
 
     // Ensure the _user is in the linked list.
-    if (!hasLocator(_user)) {
+    if (!hasEntry(_user)) {
       return false;
     }
 
     // Link its neighbors together.
-    link(locatorsLinkedList[_user][PREV], locatorsLinkedList[_user][NEXT]);
+    address prevUser = _listEntries[_user].prev;
+    address nextUser = _listEntries[_user].next;
+
+    _listEntries[prevUser].next = nextUser;
+    _listEntries[nextUser].prev = prevUser;
 
     // Delete user from the list.
-    delete locatorsLinkedList[_user][PREV];
-    delete locatorsLinkedList[_user][NEXT];
+    delete _listEntries[_user];
 
     // Decrement the length of the linked list.
     length = length - 1;
 
-    emit UnsetLocator(_user);
+    emit UnsetEntry(_user);
     return true;
   }
 
   /**
-    * @notice Get the Locator for a user
+    * @notice Get the Entry information for a user
     * @param _user address
-    * @return Locator
+    * @return (uint256, bytes32) score and locator
     */
-  function getLocator(
+  function getEntry(
     address _user
-  ) external view returns (Locator memory) {
-
-    // Ensure the user has a neighbor in the linked list.
-    if (locatorsLinkedList[_user][PREV].user != address(0)) {
-
-      // Return the next Locator from the previous neighbor.
-      return locatorsLinkedList[locatorsLinkedList[_user][PREV].user][NEXT];
-    }
-    return Locator(address(0), 0, bytes32(0));
+  ) external view returns (uint256, bytes32) {
+    return (_listEntries[_user].score, _listEntries[_user].locator);
   }
 
   /**
@@ -163,31 +155,26 @@ contract Index is Ownable {
     uint256 _count
   ) external view returns (bytes32[] memory result) {
 
-    // locator starts holding the first locator to consider
-    Locator storage locator = locatorsLinkedList[HEAD][NEXT];
+    // start by holding the first user to consider
+    address user = _listEntries[HEAD].next;
 
     // if there's a valid start user, start there instead of the head
     if (_startUser != address(0) && _startUser != HEAD) {
-      // the locator of the start user
-      locator = locatorsLinkedList[locatorsLinkedList[_startUser][PREV].user][NEXT];
+      // check they exist
+      require(hasEntry(_startUser), 'USER_HAS_NO_ENTRY');
 
-      // check the start user actually features in the linked list
-      require(locator.user == _startUser, 'USER_HAS_NO_LOCATOR');
+      // the locator of the start user
+      user = _startUser;
     }
 
     result = new bytes32[](_count);
 
-    // Iterate over the list until the end or limit.
-    uint256 i = 0;
-
-    // if the HEAD is reached (the end of the list) before count, break
-    while (i < _count && locator.user != HEAD) {
-      // add the locator to the returned data
-      result[i] = locator.data;
+    // Iterate over the list until the end or count.
+    uint8 i = 0;
+    while (i < _count && user != HEAD) {
+      result[i] = _listEntries[user].locator;
       i = i + 1;
-
-      // move along to the next locator
-      locator = locatorsLinkedList[locator.user][NEXT];
+      user = _listEntries[user].next;
     }
   }
 
@@ -196,52 +183,37 @@ contract Index is Ownable {
     * @param _user address
     * @return bool return true when user exists
     */
-  function hasLocator(
+  function hasEntry(
     address _user
   ) internal view returns (bool) {
-
-    if (locatorsLinkedList[_user][PREV].user != address(0) &&
-      locatorsLinkedList[locatorsLinkedList[_user][PREV].user][NEXT].user == _user) {
+    if (_listEntries[_user].locator != bytes32(0)) {
       return true;
     }
     return false;
   }
 
   /**
-    * @notice Returns the first Locator smaller than _score
+    * @notice Returns the first user who staked less than _score
     * @param _score uint256
-    * @return Locator
+    * @return address of the user
     */
   function findPosition(
     uint256 _score
-  ) internal view returns (Locator memory) {
+  ) internal view returns (address) {
 
-    // Get the first Locator in the linked list.
-    Locator storage locator = locatorsLinkedList[HEAD][NEXT];
+    // Get the first user in the linked list.
+    address user = _listEntries[HEAD].next;
 
     if (_score == 0) {
       // return the head of the linked list
-      return locatorsLinkedList[locator.user][PREV];
+      return HEAD;
     }
 
     // Iterate through the list until a lower score is found.
-    while (_score <= locator.score) {
-      locator = locatorsLinkedList[locator.user][NEXT];
+    while (_score <= _listEntries[user].score) {
+      user = _listEntries[user].next;
     }
-    return locator;
+    return user;
   }
 
-  /**
-    * @notice Link Two Locators
-    * @dev helper function for linked list
-    * @param _left Locator
-    * @param _right Locator
-    */
-  function link(
-    Locator memory _left,
-    Locator memory _right
-  ) internal {
-    locatorsLinkedList[_left.user][NEXT] = _right;
-    locatorsLinkedList[_right.user][PREV] = _left;
-  }
 }

@@ -255,7 +255,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
         indexer.unsetIntent(tokenWETH.address, tokenDAI.address, {
           from: aliceAddress,
         }),
-        'LOCATOR_DOES_NOT_EXIST'
+        'ENTRY_DOES_NOT_EXIST'
       )
     })
 
