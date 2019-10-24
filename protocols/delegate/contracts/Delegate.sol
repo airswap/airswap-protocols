@@ -83,7 +83,7 @@ contract Delegate is IDelegate, Ownable {
     //ensure that the indexer can pull funds from delegate account
     require(
       IERC20(indexer.stakeToken())
-      .approve(address(indexer), MAX_INT), "APPROVAL_ERROR"
+      .approve(address(indexer), MAX_INT), "STAKING_APPROVAL_FAILED"
     );
   }
 
