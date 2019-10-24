@@ -99,38 +99,6 @@ contract Delegate is IDelegate, Ownable {
   }
 
   /**
-    * @notice Set a Trading Rule
-    * @dev only callable by the owner of the contract
-    * @dev 1 senderToken = priceCoef * 10^(-priceExp) * signerToken
-    * @param _senderToken address The address of an ERC-20 token the delegate would send
-    * @param _signerToken address The address of an ERC-20 token the consumer would send
-    * @param _maxSenderAmount uint256 The maximum amount of ERC-20 token the delegate would send
-    * @param _priceCoef uint256 The whole number that will be multiplied by 10^(-priceExp) - the price coefficient
-    * @param _priceExp uint256 The exponent of the price to indicate location of the decimal priceCoef * 10^(-priceExp)
-    */
-  function _setRuleInternal(
-    address _senderToken,
-    address _signerToken,
-    uint256 _maxSenderAmount,
-    uint256 _priceCoef,
-    uint256 _priceExp
-  ) internal {
-    rules[_senderToken][_signerToken] = Types.Rule({
-      maxSenderAmount: _maxSenderAmount,
-      priceCoef: _priceCoef,
-      priceExp: _priceExp
-    });
-
-    emit SetRule(
-      _senderToken,
-      _signerToken,
-      _maxSenderAmount,
-      _priceCoef,
-      _priceExp
-    );
-  }
-
-  /**
     * @notice Unset a Trading Rule
     * @dev only callable by the owner of the contract, removes from a mapping
     * @param _senderToken address The address of an ERC-20 token the delegate would send
@@ -141,26 +109,6 @@ contract Delegate is IDelegate, Ownable {
     address _signerToken
   ) external onlyOwner {
     _unsetRuleInternal(
-      _senderToken,
-      _signerToken
-    );
-  }
-
-  /**
-    * @notice Unset a Trading Rule
-    * @dev only callable by the owner of the contract, removes from a mapping
-    * @param _senderToken address The address of an ERC-20 token the delegate would send
-    * @param _signerToken address The address of an ERC-20 token the consumer would send
-    */
-  function _unsetRuleInternal(
-    address _senderToken,
-    address _signerToken
-  ) internal {
-
-    // Delete the rule.
-    delete rules[_senderToken][_signerToken];
-
-    emit UnsetRule(
       _senderToken,
       _signerToken
     );
@@ -402,4 +350,55 @@ contract Delegate is IDelegate, Ownable {
     return _tradeWallet;
   }
 
+  /**
+    * @notice Set a Trading Rule
+    * @dev only callable by the owner of the contract
+    * @dev 1 senderToken = priceCoef * 10^(-priceExp) * signerToken
+    * @param _senderToken address The address of an ERC-20 token the delegate would send
+    * @param _signerToken address The address of an ERC-20 token the consumer would send
+    * @param _maxSenderAmount uint256 The maximum amount of ERC-20 token the delegate would send
+    * @param _priceCoef uint256 The whole number that will be multiplied by 10^(-priceExp) - the price coefficient
+    * @param _priceExp uint256 The exponent of the price to indicate location of the decimal priceCoef * 10^(-priceExp)
+    */
+  function _setRuleInternal(
+    address _senderToken,
+    address _signerToken,
+    uint256 _maxSenderAmount,
+    uint256 _priceCoef,
+    uint256 _priceExp
+  ) internal {
+    rules[_senderToken][_signerToken] = Types.Rule({
+      maxSenderAmount: _maxSenderAmount,
+      priceCoef: _priceCoef,
+      priceExp: _priceExp
+    });
+
+    emit SetRule(
+      _senderToken,
+      _signerToken,
+      _maxSenderAmount,
+      _priceCoef,
+      _priceExp
+    );
+  }
+
+  /**
+    * @notice Unset a Trading Rule
+    * @dev only callable by the owner of the contract, removes from a mapping
+    * @param _senderToken address The address of an ERC-20 token the delegate would send
+    * @param _signerToken address The address of an ERC-20 token the consumer would send
+    */
+  function _unsetRuleInternal(
+    address _senderToken,
+    address _signerToken
+  ) internal {
+
+    // Delete the rule.
+    delete rules[_senderToken][_signerToken];
+
+    emit UnsetRule(
+      _senderToken,
+      _signerToken
+    );
+  }
 }
