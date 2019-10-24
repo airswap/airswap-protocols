@@ -129,7 +129,6 @@ contract Indexer is IIndexer, Ownable {
     uint256 _amount,
     bytes32 _locator
   ) external whenNotPaused {
-
     // Ensure the locator is whitelisted, if relevant
     if (locatorWhitelist != address(0)) {
       require(ILocatorWhitelist(locatorWhitelist).has(_locator),
