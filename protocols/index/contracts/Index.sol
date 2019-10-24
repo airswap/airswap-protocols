@@ -71,7 +71,7 @@ contract Index is Ownable {
   }
 
   /**
-    * @notice Set a Entry to Trade
+    * @notice Set an Entry
     *
     * @param _user The account
     * @param _score uint256
@@ -102,7 +102,7 @@ contract Index is Ownable {
   }
 
   /**
-    * @notice Unset an Entry to Trade
+    * @notice Unset an Entry
     * @param _user address
     * @return bool return true on success
     */
