@@ -53,7 +53,7 @@ interface IDelegate {
     uint256 _senderParam,
     address _senderToken,
     address _signerToken
-  ) external returns (
+  ) external view returns (
     uint256 signerParam
   );
 
@@ -61,14 +61,14 @@ interface IDelegate {
     uint256 _signerParam,
     address _signerToken,
     address _senderToken
-  ) external returns (
+  ) external view returns (
     uint256 senderParam
   );
 
   function getMaxQuote(
     address _senderToken,
     address _signerToken
-  ) external returns (
+  ) external view returns (
     uint256 senderParam,
     uint256 signerParam
   );
@@ -81,6 +81,6 @@ interface IDelegate {
     external view returns (address);
 
   function tradeWallet()
-    external returns (address);
+    external view returns (address);
 
 }
