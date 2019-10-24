@@ -767,12 +767,81 @@ contract('Delegate Unit Tests', async accounts => {
         }),
         'PRICE_INCORRECT'
       )
+    })
+    
+    it('test if order signer kind is not an ERC20 interface id', async () => {
+      await delegate.setRule(
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
+        PRICE_COEF,
+        EXP
+      )
 
-      let ruleAfter = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
-      equal(
-        ruleAfter[0].toNumber(),
-        ruleBefore[0].toNumber(),
-        "rule's max delegate amount was decremented incorrectly"
+      let ruleBefore = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
+
+      let signerAmount = 100
+      let senderAmount = Math.floor((signerAmount * 10 ** EXP) / PRICE_COEF)
+
+      const order = await orders.getOrder({
+        signer: {
+          wallet: notOwner,
+          param: signerAmount,
+          token: SIGNER_TOKEN,
+          kind: '0x80ac58cd'
+        },
+        sender: {
+          wallet: tradeWallet,
+          param: senderAmount,
+          token: SENDER_TOKEN,
+        },
+      })
+
+      await reverted(
+        //mock swapContract
+        //test rule decrement
+        delegate.provideOrder(order, {
+          from: notOwner,
+        }),
+        'SIGNER_KIND_MUST_BE_ERC20'
+      )
+    })
+
+    it('test if order sender kind is not an ERC20 interface id', async () => {
+      await delegate.setRule(
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
+        PRICE_COEF,
+        EXP
+      )
+
+      let ruleBefore = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
+
+      let signerAmount = 100
+      let senderAmount = Math.floor((signerAmount * 10 ** EXP) / PRICE_COEF)
+
+      const order = await orders.getOrder({
+        signer: {
+          wallet: notOwner,
+          param: signerAmount,
+          token: SIGNER_TOKEN,
+        },
+        sender: {
+          wallet: tradeWallet,
+          param: senderAmount,
+          token: SENDER_TOKEN,
+          kind: '0x80ac58cd'
+        },
+      })
+
+      await reverted(
+        //mock swapContract
+        //test rule decrement
+        delegate.provideOrder(order, {
+          from: notOwner,
+        }),
+        'SENDER_KIND_MUST_BE_ERC20'
       )
     })
 
