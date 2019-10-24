@@ -499,6 +499,7 @@ contract('Indexer Unit Tests', async accounts => {
         carolAddress,
         5
       )
+
       equal(intents.length, 5, 'intents array should be size 5')
       equal(intents[0], carolLocator, 'intent should be carol')
       equal(intents[1], aliceLocator, 'intent should be alice')
