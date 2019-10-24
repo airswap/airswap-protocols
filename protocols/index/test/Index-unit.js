@@ -416,10 +416,7 @@ contract('Index Unit Tests', async accounts => {
         from: owner,
       })
 
-      await reverted(
-        index.fetchLocators(davidAddress, 10),
-        'USER_HAS_NO_LOCATOR'
-      )
+      await reverted(index.fetchLocators(davidAddress, 10), 'USER_HAS_NO_ENTRY')
     })
   })
 })

@@ -208,6 +208,6 @@ contract Indexer is IIndexer, Ownable {
     }
 
     // Return an array of locators for the index.
-    return indexes[_signerToken][_senderToken].fetchEntries(_startAddress, _count);
+    return indexes[_signerToken][_senderToken].fetchLocators(_startAddress, _count);
   }
 }
