@@ -40,6 +40,7 @@ contract Indexer is IIndexer, Ownable {
   // The whitelist contract for checking whether a peer is whitelisted
   address public locatorWhitelist;
 
+  // boolean marks when contract is paused - users cannot call function when paused = true
   bool public paused = false;
 
   /**
