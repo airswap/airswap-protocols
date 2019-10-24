@@ -94,10 +94,20 @@ contracts/interfaces/ISwap.sol
 - By inspection and testing, the transfer from signer to affiliate will complete, barring issues on the underlying token contract, on line 165. In the transferToken function, when calling safeTransferFrom, a `require` is not required for safeTransferFrom as the contract signature guarantees there is no return parameter.
 - **This invariant holds as-is.**
 
-### A nonce status can never change once marked UNAVAILABLE.
+### The `cancel` function will set all provided nonces to UNAVAILABLE.
+
+- By manual inspection and testing, the `cancel` function iterates through the array of provided nonce values, setting each to UNAVAILABLE if the present status is AVAILABLE.
+- **This invariant holds as-is.**
+
+### A nonce status can never change once set to UNAVAILABLE.
 
 - The `signerNonceStatus` of a provided `nonce` is checked in the second line of the `swap` function, ensuring that it is `AVAILABLE` (`0x00`) or throwing othewise.
 - By inspection, `signerNonceStatus` for the provided `nonce` is only set to UNAVAILABLE two lines later in the `swap` function and also within the loop inside of the `cancel` function. It is not set to any value other than `UNAVAILABLE` or set in any other cases.
+- **This invariant holds as-is.**
+
+### Setting a minimum nonce makes it impossible to settle an order with a lower nonce.
+
+- By manual inspection and testing, the `invalidate` function takes a miniumum nonce, which is set for the transaction sender. In the `swap` function on line 95, the provided nonce must be **greater than or equal to** the minimum nonce for the order signer.
 - **This invariant holds as-is.**
 
 ### Orders can only be successfully taken once.
