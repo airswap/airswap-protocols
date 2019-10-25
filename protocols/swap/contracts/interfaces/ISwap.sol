@@ -83,55 +83,55 @@ interface ISwap {
 
   /**
     * @notice Cancel one or more open orders by nonce
-    * @param _nonces uint256[]
+    * @param nonces uint256[]
     */
   function cancel(
-    uint256[] calldata _nonces
+    uint256[] calldata nonces
   ) external;
 
   /**
     * @notice Invalidate all orders below a nonce value
-    * @param _minimumNonce uint256
+    * @param minimumNonce uint256
     */
   function invalidate(
-    uint256 _minimumNonce
+    uint256 minimumNonce
   ) external;
 
   /**
     * @notice Authorize a delegated sender
-    * @param _authorizedSender address
-    * @param _expiry uint256
+    * @param authorizedSender address
+    * @param expiry uint256
     */
   function authorizeSender(
-    address _authorizedSender,
-    uint256 _expiry
+    address authorizedSender,
+    uint256 expiry
   ) external;
 
   /**
     * @notice Authorize a delegated signer
-    * @param _authorizedSigner address
-    * @param _expiry uint256
+    * @param authorizedSigner address
+    * @param expiry uint256
     */
   function authorizeSigner(
-    address _authorizedSigner,
-    uint256 _expiry
+    address authorizedSigner,
+    uint256 expiry
   ) external;
 
 
   /**
     * @notice Revoke an authorization
-    * @param _authorizedSender address
+    * @param authorizedSender address
     */
   function revokeSender(
-    address _authorizedSender
+    address authorizedSender
   ) external;
 
   /**
     * @notice Revoke an authorization
-    * @param _authorizedSigner address
+    * @param authorizedSigner address
     */
   function revokeSigner(
-    address _authorizedSigner
+    address authorizedSigner
   ) external;
 
 }
