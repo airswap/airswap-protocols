@@ -78,6 +78,12 @@ interface IIndexer {
     address _senderToken
   ) external;
 
+  function unsetIntentForUser(
+    address _user,
+    address _signerToken,
+    address _senderToken
+  ) external;
+
   function getStakedAmount(
     address _user,
     address _signerToken,
@@ -90,11 +96,5 @@ interface IIndexer {
     address _startAddress,
     uint256 _count
   ) external view returns (bytes32[] memory);
-
-  function unsetIntentForUser(
-    address _user,
-    address _signerToken,
-    address _senderToken
-  ) external;
 
 }
