@@ -37,19 +37,8 @@ contract Swap is ISwap {
   byte constant internal AVAILABLE = 0x00;
   byte constant internal UNAVAILABLE = 0x01;
 
-  // ERC-721 (non-fungible token) interface identifier (ERC-165)
+  // ERC-721 (non-fungible token) interface identifier (EIP-165)
   bytes4 constant internal ERC721_INTERFACE_ID = 0x80ac58cd;
-  /*
-    bytes4(keccak256('balanceOf(address)')) ^
-    bytes4(keccak256('ownerOf(uint256)')) ^
-    bytes4(keccak256('approve(address,uint256)')) ^
-    bytes4(keccak256('getApproved(uint256)')) ^
-    bytes4(keccak256('setApprovalForAll(address,bool)')) ^
-    bytes4(keccak256('isApprovedForAll(address,address)')) ^
-    bytes4(keccak256('transferFrom(address,address,uint256)')) ^
-    bytes4(keccak256('safeTransferFrom(address,address,uint256)')) ^
-    bytes4(keccak256('safeTransferFrom(address,address,uint256,bytes)'));
-  */
 
   // Mapping of sender address to a delegated sender address and expiry
   mapping (address => mapping (address => uint256)) public senderAuthorizations;
