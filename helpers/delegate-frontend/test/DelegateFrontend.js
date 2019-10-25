@@ -186,7 +186,7 @@ contract('DelegateFrontend', async accounts => {
 
   describe('DelegateFrontend - SenderSide', async () => {
     it('Get the intent', async () => {
-      const result = await indexer.getIntents.call(
+      const result = await indexer.getLocators.call(
         tokenDAI.address,
         tokenWETH.address,
         EMPTY_ADDRESS,

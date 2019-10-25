@@ -30,7 +30,7 @@ contract('Delegate Integration Tests', async accounts => {
   const carolAddress = accounts[3]
   const aliceTradeWallet = accounts[4]
 
-  let stakeToken
+  let stakingToken
   let tokenDAI
   let tokenWETH
   let aliceDelegate
@@ -44,11 +44,11 @@ contract('Delegate Integration Tests', async accounts => {
   async function setupTokens() {
     tokenWETH = await FungibleToken.new()
     tokenDAI = await FungibleToken.new()
-    stakeToken = await FungibleToken.new()
+    stakingToken = await FungibleToken.new()
 
     await tokenWETH.mint(aliceAddress, STARTING_BALANCE)
     await tokenDAI.mint(aliceAddress, STARTING_BALANCE)
-    await stakeToken.mint(aliceAddress, STARTING_BALANCE)
+    await stakingToken.mint(aliceAddress, STARTING_BALANCE)
   }
 
   async function setupFactory() {
@@ -59,7 +59,7 @@ contract('Delegate Integration Tests', async accounts => {
   }
 
   async function setupIndexer() {
-    indexer = await Indexer.new(stakeToken.address)
+    indexer = await Indexer.new(stakingToken.address)
     await indexer.createIndex(tokenDAI.address, tokenWETH.address)
   }
 
@@ -155,15 +155,15 @@ contract('Delegate Integration Tests', async accounts => {
       let rule = [100000, 300, 0]
 
       //give allowance to the delegate to pull staking amount
-      await stakeToken.approve(aliceDelegate.address, INTENT_AMOUNT, {
+      await stakingToken.approve(aliceDelegate.address, INTENT_AMOUNT, {
         from: aliceAddress,
       })
 
       //check the score of the delegate before
-      let scoreBefore = await indexer.getScore(
+      let scoreBefore = await indexer.getStakedAmount(
+        aliceDelegate.address,
         tokenDAI.address,
-        tokenWETH.address,
-        aliceDelegate.address
+        tokenWETH.address
       )
       equal(scoreBefore.toNumber(), 0, 'intent score is incorrect')
 
@@ -180,26 +180,26 @@ contract('Delegate Integration Tests', async accounts => {
       )
 
       //check the score of the manager after
-      let scoreAfter = await indexer.getScore(
+      let scoreAfter = await indexer.getStakedAmount(
+        aliceDelegate.address,
         tokenDAI.address,
-        tokenWETH.address,
-        aliceDelegate.address
+        tokenWETH.address
       )
       equal(scoreAfter.toNumber(), INTENT_AMOUNT, 'intent score is incorrect')
 
       //check owner stake balance has been reduced
-      let stakeTokenBal = await stakeToken.balanceOf(aliceAddress)
-      equal(stakeTokenBal.toNumber(), STARTING_BALANCE - INTENT_AMOUNT)
+      let stakingTokenBal = await stakingToken.balanceOf(aliceAddress)
+      equal(stakingTokenBal.toNumber(), STARTING_BALANCE - INTENT_AMOUNT)
     })
   })
 
   describe('Test unsetRuleAndIntent()', async () => {
     it('Test successfully calling unsetRuleAndIntent()', async () => {
       //check the score of the manager before
-      let scoreBefore = await indexer.getScore(
+      let scoreBefore = await indexer.getStakedAmount(
+        aliceDelegate.address,
         tokenDAI.address,
-        tokenWETH.address,
-        aliceDelegate.address
+        tokenWETH.address
       )
       equal(scoreBefore.toNumber(), INTENT_AMOUNT, 'intent score is incorrect')
 
@@ -210,17 +210,17 @@ contract('Delegate Integration Tests', async accounts => {
       )
 
       //check the score of the manager after
-      let scoreAfter = await indexer.getScore(
+      let scoreAfter = await indexer.getStakedAmount(
+        aliceDelegate.address,
         tokenDAI.address,
-        tokenWETH.address,
-        aliceDelegate.address
+        tokenWETH.address
       )
       equal(scoreAfter.toNumber(), 0, 'intent score is incorrect')
 
       //check owner stake balance has been increased
-      let stakeTokenBal = await stakeToken.balanceOf(aliceAddress)
+      let stakingTokenBal = await stakingToken.balanceOf(aliceAddress)
 
-      equal(stakeTokenBal.toNumber(), STARTING_BALANCE)
+      equal(stakingTokenBal.toNumber(), STARTING_BALANCE)
     })
   })
 

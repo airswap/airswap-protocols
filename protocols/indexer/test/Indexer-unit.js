@@ -71,7 +71,7 @@ contract('Indexer Unit Tests', async accounts => {
 
   describe('Check constructor', async () => {
     it('should set the staking token address correctly', async () => {
-      const actualAddress = await indexer.stakeToken()
+      const actualAddress = await indexer.stakingToken()
       equal(
         actualAddress,
         stakingTokenAddress,
@@ -472,9 +472,9 @@ contract('Indexer Unit Tests', async accounts => {
     })
   })
 
-  describe('Test getIntents', async () => {
+  describe('Test getLocators', async () => {
     it('should return an empty array if the index doesnt exist', async () => {
-      let intents = await indexer.getIntents.call(
+      let intents = await indexer.getLocators.call(
         tokenOne,
         tokenTwo,
         EMPTY_ADDRESS,
@@ -500,7 +500,7 @@ contract('Indexer Unit Tests', async accounts => {
       })
 
       // now try to get the intents
-      let intents = await indexer.getIntents.call(
+      let intents = await indexer.getLocators.call(
         tokenOne,
         tokenTwo,
         EMPTY_ADDRESS,
@@ -527,7 +527,7 @@ contract('Indexer Unit Tests', async accounts => {
       })
 
       // now try to get the intents
-      let intents = await indexer.getIntents.call(
+      let intents = await indexer.getLocators.call(
         tokenOne,
         tokenTwo,
         EMPTY_ADDRESS,
@@ -540,7 +540,7 @@ contract('Indexer Unit Tests', async accounts => {
       equal(intents[3], emptyLocatorData, 'intent should be empty')
 
       // should only get the number specified
-      intents = await indexer.getIntents.call(
+      intents = await indexer.getLocators.call(
         tokenOne,
         tokenTwo,
         EMPTY_ADDRESS,
@@ -550,7 +550,7 @@ contract('Indexer Unit Tests', async accounts => {
       equal(intents[0], bobLocator, 'intent should be bob')
 
       // should start in the specified location
-      intents = await indexer.getIntents.call(
+      intents = await indexer.getLocators.call(
         tokenOne,
         tokenTwo,
         carolAddress,
@@ -685,7 +685,7 @@ contract('Indexer Unit Tests', async accounts => {
     })
   })
 
-  describe('Test getScore', async () => {
+  describe('Test getStakedAmount', async () => {
     it('should fail if the index does not exist', async () => {
       await reverted(
         indexer.setIntent(tokenOne, tokenTwo, 1000, aliceLocator, {
@@ -706,7 +706,7 @@ contract('Indexer Unit Tests', async accounts => {
         from: aliceAddress,
       })
 
-      let val = await indexer.getScore(tokenOne, tokenTwo, aliceAddress)
+      let val = await indexer.getStakedAmount(aliceAddress, tokenOne, tokenTwo)
       equal(val.toNumber(), stakeAmount, 'stake was improperly saved')
     })
   })

@@ -82,7 +82,7 @@ contract Delegate is IDelegate, Ownable {
 
     //ensure that the indexer can pull funds from delegate account
     require(
-      IERC20(indexer.stakeToken())
+      IERC20(indexer.stakingToken())
       .approve(address(indexer), MAX_INT), "STAKING_APPROVAL_FAILED"
     );
   }
@@ -105,11 +105,11 @@ contract Delegate is IDelegate, Ownable {
     uint256 _priceExp
   ) external onlyOwner {
     setRuleInternal(
-       _senderToken,
-       _signerToken,
-       _maxSenderAmount,
-       _priceCoef,
-       _priceExp
+      _senderToken,
+      _signerToken,
+      _maxSenderAmount,
+      _priceCoef,
+      _priceExp
     );
   }
 
@@ -154,7 +154,7 @@ contract Delegate is IDelegate, Ownable {
     );
 
     require(
-      IERC20(indexer.stakeToken())
+      IERC20(indexer.stakingToken())
       .transferFrom(msg.sender, address(this), _amountToStake), "STAKING_TRANSFER_FAILED"
     );
 
@@ -181,14 +181,14 @@ contract Delegate is IDelegate, Ownable {
     unsetRuleInternal(_senderToken, _signerToken);
 
     //query against indexer for amount staked
-    uint256 stakedAmount = indexer.getScore(_signerToken, _senderToken, address(this));
+    uint256 stakedAmount = indexer.getStakedAmount(address(this), _signerToken, _senderToken);
     indexer.unsetIntent(_signerToken, _senderToken);
 
     //upon unstaking the manager will be given the staking amount
     //push the staking amount to the msg.sender
 
     require(
-      IERC20(indexer.stakeToken())
+      IERC20(indexer.stakingToken())
         .transfer(msg.sender, stakedAmount),"STAKING_TRANSFER_FAILED"
     );
   }

@@ -45,9 +45,13 @@ interface IIndexer {
     address token
   );
 
-  function stakeToken() external returns (address);
+  function stakingToken() external returns (address);
   function indexes(address, address) external returns (address);
   function blacklist(address) external returns (bool);
+
+  function setLocatorWhitelist(
+    address _locatorWhitelist
+  ) external;
 
   function createIndex(
     address _signerToken,
@@ -74,17 +78,23 @@ interface IIndexer {
     address _senderToken
   ) external;
 
-  function getScore(
+  function getStakedAmount(
+    address _user,
     address _signerToken,
-    address _senderToken,
-    address _user
+    address _senderToken
   ) external view returns (uint256);
 
-  function getIntents(
+  function getLocators(
     address _signerToken,
     address _senderToken,
     address _startAddress,
     uint256 _count
   ) external view returns (bytes32[] memory);
+
+  function unsetIntentForUser(
+    address _user,
+    address _signerToken,
+    address _senderToken
+  ) external;
 
 }

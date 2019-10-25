@@ -76,7 +76,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
     })
 
     it('Bob ensures no intents are on the Indexer for existing index', async () => {
-      const intents = await indexer.getIntents.call(
+      const intents = await indexer.getLocators.call(
         tokenWETH.address,
         tokenDAI.address,
         EMPTY_ADDRESS,
@@ -91,7 +91,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
     })
 
     it('Bob ensures no intents are on the Indexer for non-existing index', async () => {
-      const intents = await indexer.getIntents.call(
+      const intents = await indexer.getLocators.call(
         tokenDAI.address,
         tokenWETH.address,
         EMPTY_ADDRESS,
@@ -249,7 +249,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
 
   describe('Intent integrity', async () => {
     it('Bob ensures only one intent is on the Indexer', async () => {
-      const intents = await indexer.getIntents.call(
+      const intents = await indexer.getLocators.call(
         tokenWETH.address,
         tokenDAI.address,
         EMPTY_ADDRESS,
@@ -296,7 +296,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
     })
 
     it('Bob ensures there are no more intents the Indexer', async () => {
-      const intents = await indexer.getIntents.call(
+      const intents = await indexer.getLocators.call(
         tokenWETH.address,
         tokenDAI.address,
         EMPTY_ADDRESS,
@@ -346,7 +346,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
     })
 
     it('Bob tries to fetch intent on blacklisted token which returns 0', async () => {
-      const intents = await indexer.getIntents.call(
+      const intents = await indexer.getLocators.call(
         tokenWETH.address,
         tokenDAI.address,
         EMPTY_ADDRESS,
@@ -446,7 +446,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
     })
 
     it('Bob fetches intents starting at bobAddress', async () => {
-      const intents = await indexer.getIntents.call(
+      const intents = await indexer.getLocators.call(
         tokenWETH.address,
         tokenDAI.address,
         bobAddress,

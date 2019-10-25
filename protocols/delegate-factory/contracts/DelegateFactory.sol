@@ -60,10 +60,17 @@ contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
     require(_delegateContractOwner != address(0),
       'DELEGATE_CONTRACT_OWNER_REQUIRED');
 
-    delegateContractAddress = address(new Delegate(swapContract, indexerContract, _delegateContractOwner, _delegateTradeWallet));
+    delegateContractAddress = address(
+      new Delegate(swapContract, indexerContract, _delegateContractOwner, _delegateTradeWallet));
     deployedAddresses[delegateContractAddress] = true;
 
-    emit CreateDelegate(delegateContractAddress, address(swapContract), address(indexerContract), _delegateContractOwner, _delegateTradeWallet);
+    emit CreateDelegate(
+      delegateContractAddress,
+      address(swapContract),
+      address(indexerContract),
+      _delegateContractOwner,
+      _delegateTradeWallet
+    );
 
     return delegateContractAddress;
   }

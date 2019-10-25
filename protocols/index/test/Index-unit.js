@@ -31,10 +31,6 @@ contract('Index Unit Tests', async accounts => {
   let fredLocator = padAddressToLocator(fredAddress)
   let emptyLocator = padAddressToLocator(EMPTY_ADDRESS)
 
-  // helpers
-  const SCORE = 0
-  const LOCATOR = 1
-
   beforeEach(async () => {
     let snapShot = await takeSnapshot()
     snapshotId = snapShot['result']
@@ -53,37 +49,37 @@ contract('Index Unit Tests', async accounts => {
       let listLength = await index.length()
       equal(listLength, 0, 'list length should be 0')
 
-      let locators = await index.fetchLocators(EMPTY_ADDRESS, 10)
+      let locators = await index.getLocators(EMPTY_ADDRESS, 10)
       equal(locators.length, 10, 'list should have 10 slots')
       equal(locators[0], emptyLocator, 'The locator should be empty')
     })
   })
 
-  describe('Test setEntry', async () => {
-    it('should not allow a non owner to call setEntry', async () => {
+  describe('Test setLocator', async () => {
+    it('should not allow a non owner to call setLocator', async () => {
       await reverted(
-        index.setEntry(aliceAddress, 2000, aliceAddress, { from: nonOwner }),
+        index.setLocator(aliceAddress, 2000, aliceAddress, { from: nonOwner }),
         'Ownable: caller is not the owner'
       )
     })
 
     it('should allow an entry to be inserted by the owner', async () => {
       // set an entry from the owner
-      let result = await index.setEntry(aliceAddress, 2000, aliceLocator, {
+      let result = await index.setLocator(aliceAddress, 2000, aliceLocator, {
         from: owner,
       })
 
-      // check the SetEntry event was emitted
-      emitted(result, 'SetEntry', event => {
+      // check the SetLocator event was emitted
+      emitted(result, 'SetLocator', event => {
         return (
-          event.user === aliceAddress &&
+          event.identifier === aliceAddress &&
           event.score.toNumber() === 2000 &&
           event.locator === aliceLocator
         )
       })
 
       // check it has been inserted into the linked list correctly
-      let locators = await index.fetchLocators(EMPTY_ADDRESS, 10)
+      let locators = await index.getLocators(EMPTY_ADDRESS, 10)
       equal(locators.length, 10, 'list should be of size 10')
       equal(locators[0], aliceLocator, 'Alice should be in list')
       equal(locators[1], emptyLocator, 'The second locator should be empty')
@@ -95,32 +91,32 @@ contract('Index Unit Tests', async accounts => {
 
     it('should insert subsequent entries in the correct order', async () => {
       // insert alice
-      await index.setEntry(aliceAddress, 2000, aliceLocator, {
+      await index.setLocator(aliceAddress, 2000, aliceLocator, {
         from: owner,
       })
 
       // now add more
-      let result = await index.setEntry(bobAddress, 500, bobLocator, {
+      let result = await index.setLocator(bobAddress, 500, bobLocator, {
         from: owner,
       })
 
-      // check the SetEntry event was emitted
-      emitted(result, 'SetEntry', event => {
+      // check the SetLocator event was emitted
+      emitted(result, 'SetLocator', event => {
         return (
-          event.user === bobAddress &&
+          event.identifier === bobAddress &&
           event.score.toNumber() === 500 &&
           event.locator === bobLocator
         )
       })
 
-      await index.setEntry(carolAddress, 1500, carolLocator, {
+      await index.setLocator(carolAddress, 1500, carolLocator, {
         from: owner,
       })
 
       let listLength = await index.length()
       equal(listLength, 3, 'list length should be 3')
 
-      const locators = await index.fetchLocators(EMPTY_ADDRESS, 7)
+      const locators = await index.getLocators(EMPTY_ADDRESS, 7)
       equal(locators[0], aliceLocator, 'Alice should be first')
       equal(locators[1], carolLocator, 'Carol should be second')
       equal(locators[2], bobLocator, 'Bob should be third')
@@ -128,24 +124,24 @@ contract('Index Unit Tests', async accounts => {
 
     it('should insert an identical stake after the pre-existing one', async () => {
       // two at 2000 and two at 0
-      await index.setEntry(aliceAddress, 2000, aliceLocator, {
+      await index.setLocator(aliceAddress, 2000, aliceLocator, {
         from: owner,
       })
-      await index.setEntry(bobAddress, 0, bobLocator, {
+      await index.setLocator(bobAddress, 0, bobLocator, {
         from: owner,
       })
 
-      await index.setEntry(carolAddress, 2000, carolLocator, {
+      await index.setLocator(carolAddress, 2000, carolLocator, {
         from: owner,
       })
-      await index.setEntry(davidAddress, 0, davidLocator, {
+      await index.setLocator(davidAddress, 0, davidLocator, {
         from: owner,
       })
 
       let listLength = await index.length()
       equal(listLength, 4, 'Link list length should be 4')
 
-      const locators = await index.fetchLocators(EMPTY_ADDRESS, 7)
+      const locators = await index.getLocators(EMPTY_ADDRESS, 7)
       equal(locators[0], aliceLocator, 'Alice should be first')
       equal(locators[1], carolLocator, 'Carol should be second')
       equal(locators[2], bobLocator, 'Bob should be third')
@@ -153,11 +149,11 @@ contract('Index Unit Tests', async accounts => {
     })
 
     it('should not be able to set a second locator if one already exists for an address', async () => {
-      let trx = index.setEntry(aliceAddress, 2000, aliceLocator, {
+      let trx = index.setLocator(aliceAddress, 2000, aliceLocator, {
         from: owner,
       })
       await passes(trx)
-      trx = index.setEntry(aliceAddress, 5000, aliceLocator, {
+      trx = index.setLocator(aliceAddress, 5000, aliceLocator, {
         from: owner,
       })
       await reverted(trx, 'ENTRY_ALREADY_EXISTS')
@@ -167,131 +163,105 @@ contract('Index Unit Tests', async accounts => {
     })
   })
 
-  describe('Test unsetEntry', async () => {
+  describe('Test unsetLocator', async () => {
     beforeEach('Setup entries', async () => {
-      await index.setEntry(aliceAddress, 2000, aliceLocator, {
+      await index.setLocator(aliceAddress, 2000, aliceLocator, {
         from: owner,
       })
-      await index.setEntry(bobAddress, 500, bobLocator, {
+      await index.setLocator(bobAddress, 500, bobLocator, {
         from: owner,
       })
-      await index.setEntry(carolAddress, 1500, carolLocator, {
+      await index.setLocator(carolAddress, 1500, carolLocator, {
         from: owner,
       })
     })
 
-    it('should not allow a non owner to call unsetEntry', async () => {
+    it('should not allow a non owner to call unsetLocator', async () => {
       await reverted(
-        index.unsetEntry(aliceAddress, { from: nonOwner }),
+        index.unsetLocator(aliceAddress, { from: nonOwner }),
         'Ownable: caller is not the owner'
       )
     })
 
     it('should leave state unchanged for someone who hasnt staked', async () => {
-      let returnValue = await index.unsetEntry.call(davidAddress, {
+      let trx = index.unsetLocator(davidAddress, {
         from: owner,
       })
-      equal(returnValue, false, 'unsetEntry should have returned false')
-
-      await index.unsetEntry(davidAddress, { from: owner })
+      await reverted(trx, 'ENTRY_DOES_NOT_EXIST')
 
       let listLength = await index.length()
       equal(listLength, 3, 'list length should be 3')
 
-      const locators = await index.fetchLocators(EMPTY_ADDRESS, 7)
+      const locators = await index.getLocators(EMPTY_ADDRESS, 7)
       equal(locators[0], aliceLocator, 'Alice should be first')
       equal(locators[1], carolLocator, 'Carol should be second')
       equal(locators[2], bobLocator, 'Bob should be third')
     })
 
     it('should unset the entry for a valid user', async () => {
-      // check it returns true
-      let returnValue = await index.unsetEntry.call(bobAddress, {
-        from: owner,
-      })
-      equal(returnValue, true, 'unsetEntry should have returned true')
-
       // check it emits an event correctly
-      let result = await index.unsetEntry(bobAddress, { from: owner })
-      emitted(result, 'UnsetEntry', event => {
-        return event.user === bobAddress
+      let result = await index.unsetLocator(bobAddress, { from: owner })
+      emitted(result, 'UnsetLocator', event => {
+        return event.identifier === bobAddress
       })
 
       let listLength = await index.length()
       equal(listLength, 2, 'list length should be 2')
 
-      let locators = await index.fetchLocators(EMPTY_ADDRESS, 7)
+      let locators = await index.getLocators(EMPTY_ADDRESS, 7)
       equal(locators[0], aliceLocator, 'Alice should be first')
       equal(locators[1], carolLocator, 'Carol should be second')
 
-      await index.unsetEntry(aliceAddress, { from: owner })
-      await index.unsetEntry(carolAddress, { from: owner })
+      await index.unsetLocator(aliceAddress, { from: owner })
+      await index.unsetLocator(carolAddress, { from: owner })
 
       listLength = await index.length()
       equal(listLength, 0, 'list length should be 0')
 
-      locators = await index.fetchLocators(EMPTY_ADDRESS, 4)
+      locators = await index.getLocators(EMPTY_ADDRESS, 4)
       equal(locators.length, 4, 'list should have 4 locators')
       equal(locators[0], emptyLocator, 'The first locator should be empty')
       equal(locators[1], emptyLocator, 'The second locator should be empty')
       equal(locators[2], emptyLocator, 'The third locator should be empty')
       equal(locators[3], emptyLocator, 'The fouth locator should be empty')
     })
-
-    it('unsetting entry twice in a row for an address has no effect', async () => {
-      let trx = index.unsetEntry(bobAddress, { from: owner })
-      await passes(trx)
-      let size = await index.length.call()
-      equal(size, 2, 'Locator was improperly removed')
-      trx = index.unsetEntry(bobAddress, { from: owner })
-      await passes(trx)
-      equal(size, 2, 'Locator was improperly removed')
-
-      let locators = await index.fetchLocators(EMPTY_ADDRESS, 7)
-      equal(locators[0], aliceLocator, 'Alice should be first')
-      equal(locators[1], carolLocator, 'Carol should be second')
-    })
   })
 
   describe('Test getLocator', async () => {
     beforeEach('Setup entries again', async () => {
-      await index.setEntry(aliceAddress, 2000, aliceLocator, {
+      await index.setLocator(aliceAddress, 2000, aliceLocator, {
         from: owner,
       })
-      await index.setEntry(bobAddress, 500, bobLocator, {
+      await index.setLocator(bobAddress, 500, bobLocator, {
         from: owner,
       })
-      await index.setEntry(carolAddress, 1500, carolLocator, {
+      await index.setLocator(carolAddress, 1500, carolLocator, {
         from: owner,
       })
     })
 
     it('should return empty entry for a non-user', async () => {
-      let davidEntry = await index.getEntry(davidAddress)
-      equal(davidEntry[SCORE], 0, 'David: Locator score not correct')
-      equal(davidEntry[LOCATOR], emptyLocator, 'David: Locator not correct')
+      let davidScore = await index.getScore(davidAddress)
+      equal(davidScore, 0, 'David: Locator score not correct')
 
       // now for a recently unset entry
-      await index.unsetEntry(carolAddress, { from: owner })
-      let testEntry = await index.getEntry(carolAddress)
-      equal(testEntry[SCORE], 0, 'Carol: Locator score not correct')
-      equal(testEntry[LOCATOR], emptyLocator, 'Carol: Locator not correct')
+      await index.unsetLocator(carolAddress, { from: owner })
+      let testScore = await index.getScore(carolAddress)
+      equal(testScore, 0, 'Carol: Locator score not correct')
     })
 
     it('should return the correct entry for a valid user', async () => {
-      let aliceEntry = await index.getEntry(aliceAddress)
-      equal(aliceEntry[SCORE], 2000, 'Alice: Locator score not correct')
-      equal(aliceEntry[LOCATOR], aliceLocator, 'Alice: Locator not correct')
+      let aliceScore = await index.getScore(aliceAddress)
+      equal(aliceScore, 2000, 'Alice: Locator score not correct')
 
-      let bobEntry = await index.getEntry(bobAddress)
-      equal(bobEntry[SCORE], 500, 'Bob: Locator score not correct')
-      equal(bobEntry[LOCATOR], bobLocator, 'Bob: Locator not correct')
+      let bobScore = await index.getScore(bobAddress)
+      equal(bobScore, 500, 'Bob: Locator score not correct')
     })
   })
 
-  describe('Test fetchLocators', async () => {
+  describe('Test getLocators', async () => {
     it('returns an array of empty locators', async () => {
-      const locators = await index.fetchLocators(EMPTY_ADDRESS, 7)
+      const locators = await index.getLocators(EMPTY_ADDRESS, 7)
       equal(locators.length, 7, 'there should be 7 locators')
       equal(locators[0], emptyLocator, 'The first locator should be empty')
       equal(locators[1], emptyLocator, 'The second locator should be empty')
@@ -299,24 +269,24 @@ contract('Index Unit Tests', async accounts => {
 
     it('returns specified number of elements if < length', async () => {
       // add 3 locators
-      await index.setEntry(aliceAddress, 2000, aliceLocator, {
+      await index.setLocator(aliceAddress, 2000, aliceLocator, {
         from: owner,
       })
-      await index.setEntry(bobAddress, 500, bobLocator, {
+      await index.setLocator(bobAddress, 500, bobLocator, {
         from: owner,
       })
-      await index.setEntry(carolAddress, 1500, carolLocator, {
+      await index.setLocator(carolAddress, 1500, carolLocator, {
         from: owner,
       })
 
-      let locators = await index.fetchLocators(EMPTY_ADDRESS, 2)
+      let locators = await index.getLocators(EMPTY_ADDRESS, 2)
       equal(locators.length, 2, 'there should only be 2 locators returned')
 
       equal(locators[0], aliceLocator, 'Alice should be first')
       equal(locators[1], carolLocator, 'Carol should be second')
 
       // the same should happen passing HEAD
-      locators = await index.fetchLocators(HEAD, 2)
+      locators = await index.getLocators(HEAD, 2)
       equal(locators.length, 2, 'there should only be 2 locators returned')
 
       equal(locators[0], aliceLocator, 'Alice should be first')
@@ -325,17 +295,17 @@ contract('Index Unit Tests', async accounts => {
 
     it('returns only length if requested number if larger', async () => {
       // add 3 entries
-      await index.setEntry(aliceAddress, 2000, aliceLocator, {
+      await index.setLocator(aliceAddress, 2000, aliceLocator, {
         from: owner,
       })
-      await index.setEntry(bobAddress, 500, bobLocator, {
+      await index.setLocator(bobAddress, 500, bobLocator, {
         from: owner,
       })
-      await index.setEntry(carolAddress, 1500, carolLocator, {
+      await index.setLocator(carolAddress, 1500, carolLocator, {
         from: owner,
       })
 
-      const locators = await index.fetchLocators(EMPTY_ADDRESS, 10)
+      const locators = await index.getLocators(EMPTY_ADDRESS, 10)
       equal(locators.length, 10, 'there should be 10 locators returned')
 
       equal(locators[0], aliceLocator, 'Alice should be first')
@@ -347,17 +317,17 @@ contract('Index Unit Tests', async accounts => {
 
     it('starts the array at the specified starting user', async () => {
       // add 3 locators
-      await index.setEntry(aliceAddress, 2000, aliceLocator, {
+      await index.setLocator(aliceAddress, 2000, aliceLocator, {
         from: owner,
       })
-      await index.setEntry(bobAddress, 500, bobLocator, {
+      await index.setLocator(bobAddress, 500, bobLocator, {
         from: owner,
       })
-      await index.setEntry(carolAddress, 1500, carolLocator, {
+      await index.setLocator(carolAddress, 1500, carolLocator, {
         from: owner,
       })
 
-      const locators = await index.fetchLocators(bobAddress, 10)
+      const locators = await index.getLocators(bobAddress, 10)
       equal(locators.length, 10, 'there should be 10 locators returned')
 
       equal(locators[0], bobLocator, 'Bob should be first')
@@ -367,27 +337,27 @@ contract('Index Unit Tests', async accounts => {
 
     it('starts the array at the specified starting user - longer list', async () => {
       // add 3 locators
-      await index.setEntry(aliceAddress, 2000, aliceLocator, {
+      await index.setLocator(aliceAddress, 2000, aliceLocator, {
         from: owner,
       })
-      await index.setEntry(bobAddress, 500, bobLocator, {
+      await index.setLocator(bobAddress, 500, bobLocator, {
         from: owner,
       })
-      await index.setEntry(carolAddress, 1500, carolLocator, {
+      await index.setLocator(carolAddress, 1500, carolLocator, {
         from: owner,
       })
-      await index.setEntry(davidAddress, 700, davidLocator, {
+      await index.setLocator(davidAddress, 700, davidLocator, {
         from: owner,
       })
-      await index.setEntry(emilyAddress, 1, emilyLocator, {
+      await index.setLocator(emilyAddress, 1, emilyLocator, {
         from: owner,
       })
-      await index.setEntry(fredAddress, 4000, fredLocator, {
+      await index.setLocator(fredAddress, 4000, fredLocator, {
         from: owner,
       })
 
       // fetch 4 from first element
-      let locators = await index.fetchLocators(fredAddress, 4)
+      let locators = await index.getLocators(fredAddress, 4)
       equal(locators.length, 4, 'there should be 4 locators returned')
 
       equal(locators[0], fredLocator, 'Fred should be first')
@@ -396,7 +366,7 @@ contract('Index Unit Tests', async accounts => {
       equal(locators[3], davidLocator, 'David should be fourth')
 
       // now fetch the next 4
-      locators = await index.fetchLocators(bobAddress, 4)
+      locators = await index.getLocators(bobAddress, 4)
       equal(locators.length, 4, 'there should be 4 locators returned')
       equal(locators[0], bobLocator, 'Bob should be first')
       equal(locators[1], emilyLocator, 'Emily should be second')
@@ -406,17 +376,20 @@ contract('Index Unit Tests', async accounts => {
 
     it('throws an error for an unstaked user', async () => {
       // add 3 locators
-      await index.setEntry(aliceAddress, 2000, aliceLocator, {
+      await index.setLocator(aliceAddress, 2000, aliceLocator, {
         from: owner,
       })
-      await index.setEntry(bobAddress, 500, bobLocator, {
+      await index.setLocator(bobAddress, 500, bobLocator, {
         from: owner,
       })
-      await index.setEntry(carolAddress, 1500, carolLocator, {
+      await index.setLocator(carolAddress, 1500, carolLocator, {
         from: owner,
       })
 
-      await reverted(index.fetchLocators(davidAddress, 10), 'USER_HAS_NO_ENTRY')
+      await reverted(
+        index.getLocators(davidAddress, 10),
+        'START_ENTRY_NOT_FOUND'
+      )
     })
   })
 })

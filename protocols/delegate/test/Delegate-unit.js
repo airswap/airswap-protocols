@@ -31,13 +31,13 @@ contract('Delegate Unit Tests', async accounts => {
   let mockSwap
   let snapshotId
   let swapFunction
-  let mockStakeToken
-  let mockStakeToken_allowance
-  let mockStakeToken_transferFrom
-  let mockStakeToken_transfer
-  let mockStakeToken_approve
+  let mockStakingToken
+  let mockStakingToken_allowance
+  let mockStakingToken_transferFrom
+  let mockStakingToken_transfer
+  let mockStakingToken_approve
   let mockIndexer
-  let mockIndexer_getScore
+  let mockIndexer_getStakedAmount
 
   beforeEach(async () => {
     let snapShot = await takeSnapshot()
@@ -49,22 +49,22 @@ contract('Delegate Unit Tests', async accounts => {
   })
 
   async function setupMockTokens() {
-    mockStakeToken = await MockContract.new()
+    mockStakingToken = await MockContract.new()
     let mockFungibleTokenTemplate = await FungibleToken.new()
 
-    mockStakeToken_allowance = await mockFungibleTokenTemplate.contract.methods
+    mockStakingToken_allowance = await mockFungibleTokenTemplate.contract.methods
       .allowance(EMPTY_ADDRESS, EMPTY_ADDRESS)
       .encodeABI()
 
-    mockStakeToken_transferFrom = await mockFungibleTokenTemplate.contract.methods
+    mockStakingToken_transferFrom = await mockFungibleTokenTemplate.contract.methods
       .transferFrom(EMPTY_ADDRESS, EMPTY_ADDRESS, 0)
       .encodeABI()
 
-    mockStakeToken_transfer = await mockFungibleTokenTemplate.contract.methods
+    mockStakingToken_transfer = await mockFungibleTokenTemplate.contract.methods
       .transfer(EMPTY_ADDRESS, 0)
       .encodeABI()
 
-    mockStakeToken_approve = await mockFungibleTokenTemplate.contract.methods
+    mockStakingToken_approve = await mockFungibleTokenTemplate.contract.methods
       .approve(EMPTY_ADDRESS, 0)
       .encodeABI()
   }
@@ -95,18 +95,18 @@ contract('Delegate Unit Tests', async accounts => {
       .encodeABI()
     await mockIndexer.givenMethodReturnBool(mockIndexer_unsetIntent, true)
 
-    //mock stakeToken()
-    let mockIndexer_stakeToken = mockIndexerTemplate.contract.methods
-      .stakeToken()
+    //mock stakingToken()
+    let mockIndexer_stakingToken = mockIndexerTemplate.contract.methods
+      .stakingToken()
       .encodeABI()
     await mockIndexer.givenMethodReturnAddress(
-      mockIndexer_stakeToken,
-      mockStakeToken.address
+      mockIndexer_stakingToken,
+      mockStakingToken.address
     )
 
-    //mock getScore()
-    mockIndexer_getScore = mockIndexerTemplate.contract.methods
-      .getScore(EMPTY_ADDRESS, EMPTY_ADDRESS, EMPTY_ADDRESS)
+    //mock getStakedAmount()
+    mockIndexer_getStakedAmount = mockIndexerTemplate.contract.methods
+      .getStakedAmount(EMPTY_ADDRESS, EMPTY_ADDRESS, EMPTY_ADDRESS)
       .encodeABI()
   }
 
@@ -115,7 +115,7 @@ contract('Delegate Unit Tests', async accounts => {
     await setupMockSwap()
     await setupMockIndexer()
 
-    await mockStakeToken.givenMethodReturnBool(mockStakeToken_approve, true)
+    await mockStakingToken.givenMethodReturnBool(mockStakingToken_approve, true)
 
     delegate = await Delegate.new(
       mockSwap.address,
@@ -140,7 +140,10 @@ contract('Delegate Unit Tests', async accounts => {
     })
 
     it('Test constructor sets the owner as the trade wallet on empty address', async () => {
-      await mockStakeToken.givenMethodReturnBool(mockStakeToken_approve, true)
+      await mockStakingToken.givenMethodReturnBool(
+        mockStakingToken_approve,
+        true
+      )
 
       let newDelegate = await Delegate.new(
         mockSwap.address,
@@ -162,7 +165,10 @@ contract('Delegate Unit Tests', async accounts => {
     })
 
     it('Test owner is set correctly if provided an address', async () => {
-      await mockStakeToken.givenMethodReturnBool(mockStakeToken_approve, true)
+      await mockStakingToken.givenMethodReturnBool(
+        mockStakingToken_approve,
+        true
+      )
 
       let newDelegate = await Delegate.new(
         mockSwap.address,
@@ -295,13 +301,13 @@ contract('Delegate Unit Tests', async accounts => {
 
       let rule = [100000, 300, 0]
 
-      await mockStakeToken.givenMethodReturnUint(
-        mockStakeToken_allowance,
+      await mockStakingToken.givenMethodReturnUint(
+        mockStakingToken_allowance,
         intentAmount
       )
       //mock unsuccessful transfer
-      await mockStakeToken.givenMethodReturnBool(
-        mockStakeToken_transferFrom,
+      await mockStakingToken.givenMethodReturnBool(
+        mockStakingToken_transferFrom,
         false
       )
 
@@ -316,15 +322,18 @@ contract('Delegate Unit Tests', async accounts => {
 
       let rule = [100000, 300, 0]
 
-      await mockStakeToken.givenMethodReturnUint(
-        mockStakeToken_allowance,
+      await mockStakingToken.givenMethodReturnUint(
+        mockStakingToken_allowance,
         intentAmount
       )
-      await mockStakeToken.givenMethodReturnBool(
-        mockStakeToken_transferFrom,
+      await mockStakingToken.givenMethodReturnBool(
+        mockStakingToken_transferFrom,
         true
       )
-      await mockStakeToken.givenMethodReturnBool(mockStakeToken_approve, true)
+      await mockStakingToken.givenMethodReturnBool(
+        mockStakingToken_approve,
+        true
+      )
 
       await passes(
         delegate.setRuleAndIntent(MOCK_WETH, MOCK_DAI, rule, intentAmount)
@@ -337,10 +346,16 @@ contract('Delegate Unit Tests', async accounts => {
       let mockScore = 1000
 
       //mock the score/staked amount to be transferred
-      await mockIndexer.givenMethodReturnUint(mockIndexer_getScore, mockScore)
+      await mockIndexer.givenMethodReturnUint(
+        mockIndexer_getStakedAmount,
+        mockScore
+      )
 
       //mock a failed transfer
-      await mockStakeToken.givenMethodReturnBool(mockStakeToken_transfer, false)
+      await mockStakingToken.givenMethodReturnBool(
+        mockStakingToken_transfer,
+        false
+      )
 
       await reverted(
         delegate.unsetRuleAndIntent(MOCK_WETH, MOCK_DAI),
@@ -352,10 +367,16 @@ contract('Delegate Unit Tests', async accounts => {
       let mockScore = 1000
 
       //mock the score/staked amount to be transferred
-      await mockIndexer.givenMethodReturnUint(mockIndexer_getScore, mockScore)
+      await mockIndexer.givenMethodReturnUint(
+        mockIndexer_getStakedAmount,
+        mockScore
+      )
 
       //mock a successful transfer
-      await mockStakeToken.givenMethodReturnBool(mockStakeToken_transfer, true)
+      await mockStakingToken.givenMethodReturnBool(
+        mockStakingToken_transfer,
+        true
+      )
 
       await passes(delegate.unsetRuleAndIntent(MOCK_WETH, MOCK_DAI))
     })

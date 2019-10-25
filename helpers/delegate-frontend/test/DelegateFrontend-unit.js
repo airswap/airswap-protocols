@@ -27,9 +27,9 @@ contract('DelegateFrontend Unit Tests', async () => {
   let delegateFrontend
   let mockUserSendToken
   let mockUserReceiveToken
-  let indexer_getIntents
-  let mockStakeToken
-  let mockStakeToken_approve
+  let indexer_getLocators
+  let mockStakingToken
+  let mockStakingToken_approve
 
   let emptyLocator = padAddressToLocator(EMPTY_ADDRESS)
 
@@ -121,30 +121,30 @@ contract('DelegateFrontend Unit Tests', async () => {
   }
 
   async function setupMockTokens() {
-    mockStakeToken = await MockContract.new()
+    mockStakingToken = await MockContract.new()
     let mockFungibleTokenTemplate = await FungibleToken.new()
 
-    mockStakeToken_approve = await mockFungibleTokenTemplate.contract.methods
+    mockStakingToken_approve = await mockFungibleTokenTemplate.contract.methods
       .approve(EMPTY_ADDRESS, 0)
       .encodeABI()
 
-    await mockStakeToken.givenMethodReturnBool(mockStakeToken_approve, true)
+    await mockStakingToken.givenMethodReturnBool(mockStakingToken_approve, true)
   }
 
   async function setupMockIndexer() {
     let indexerTemplate = await Indexer.new(EMPTY_ADDRESS)
     mockIndexer = await MockContract.new()
 
-    indexer_getIntents = indexerTemplate.contract.methods
-      .getIntents(EMPTY_ADDRESS, EMPTY_ADDRESS, EMPTY_ADDRESS, 0)
+    indexer_getLocators = indexerTemplate.contract.methods
+      .getLocators(EMPTY_ADDRESS, EMPTY_ADDRESS, EMPTY_ADDRESS, 0)
       .encodeABI()
 
-    let mockIndexer_stakeToken = indexerTemplate.contract.methods
-      .stakeToken()
+    let mockIndexer_stakingToken = indexerTemplate.contract.methods
+      .stakingToken()
       .encodeABI()
     await mockIndexer.givenMethodReturnAddress(
-      mockIndexer_stakeToken,
-      mockStakeToken.address
+      mockIndexer_stakingToken,
+      mockStakingToken.address
     )
   }
 
@@ -185,9 +185,9 @@ contract('DelegateFrontend Unit Tests', async () => {
 
   describe('Test getBestSenderSideQuote()', async () => {
     it('test default values are returned with an empty indexer', async () => {
-      //mock indexer getIntents() where there are no locators
+      //mock indexer getLocators() where there are no locators
       await mockIndexer.givenMethodReturn(
-        indexer_getIntents,
+        indexer_getLocators,
         abi.rawEncode(['bytes32[]'], [[]])
       )
 
@@ -204,9 +204,9 @@ contract('DelegateFrontend Unit Tests', async () => {
     })
 
     it('test that the lowest cost delegate is returned with an indexer ordered high to low', async () => {
-      //mock indexer getIntents() where locators are ordered high to low
+      //mock indexer getLocators() where locators are ordered high to low
       await mockIndexer.givenMethodReturn(
-        indexer_getIntents,
+        indexer_getLocators,
         abi.rawEncode(
           ['bytes32[]'],
           [[mockDelegateHighLocator, mockDelegateLowLocator]]
@@ -226,9 +226,9 @@ contract('DelegateFrontend Unit Tests', async () => {
     })
 
     it('test that the lowest cost delegate is returned with an indexer ordered low to high', async () => {
-      //mock indexer getIntents() where locators are ordered low to high
+      //mock indexer getLocators() where locators are ordered low to high
       await mockIndexer.givenMethodReturn(
-        indexer_getIntents,
+        indexer_getLocators,
         abi.rawEncode(
           ['bytes32[]'],
           [[mockDelegateLowLocator, mockDelegateHighLocator]]
@@ -249,9 +249,9 @@ contract('DelegateFrontend Unit Tests', async () => {
 
   describe('Test getBestSignerSideQuote()', async () => {
     it('test default values are returned with an empty indexer', async () => {
-      //mock indexer getIntents() where there are no locators
+      //mock indexer getLocators() where there are no locators
       await mockIndexer.givenMethodReturn(
-        indexer_getIntents,
+        indexer_getLocators,
         abi.rawEncode(['bytes32[]'], [[]])
       )
 
@@ -268,9 +268,9 @@ contract('DelegateFrontend Unit Tests', async () => {
     })
 
     it('test that the lowest cost delegate is returned with an indexer ordered high to low', async () => {
-      //mock indexer getIntents() where locators are ordered high to low
+      //mock indexer getLocators() where locators are ordered high to low
       await mockIndexer.givenMethodReturn(
-        indexer_getIntents,
+        indexer_getLocators,
         abi.rawEncode(
           ['bytes32[]'],
           [[mockDelegateHighLocator, mockDelegateLowLocator]]
@@ -290,9 +290,9 @@ contract('DelegateFrontend Unit Tests', async () => {
     })
 
     it('test that the lowest cost delegate is returned with an indexer ordered low to high', async () => {
-      //mock indexer getIntents() where locators are ordered low to high
+      //mock indexer getLocators() where locators are ordered low to high
       await mockIndexer.givenMethodReturn(
-        indexer_getIntents,
+        indexer_getLocators,
         abi.rawEncode(
           ['bytes32[]'],
           [[mockDelegateLowLocator, mockDelegateHighLocator]]
@@ -313,9 +313,9 @@ contract('DelegateFrontend Unit Tests', async () => {
 
   describe('Test fillBestSenderSideOrder()', async () => {
     it('test by ensuring all internal methods are called', async () => {
-      //mock indexer getIntents() where locators are ordered low to high
+      //mock indexer getLocators() where locators are ordered low to high
       await mockIndexer.givenMethodReturn(
-        indexer_getIntents,
+        indexer_getLocators,
         abi.rawEncode(
           ['bytes32[]'],
           [[mockDelegateLowLocator, mockDelegateHighLocator]]
