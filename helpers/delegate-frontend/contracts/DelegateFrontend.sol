@@ -27,8 +27,10 @@ import "@airswap/swap/contracts/interfaces/ISwap.sol";
   */
 contract DelegateFrontend {
 
+  // The maximum integer that can be stored in 256 bits
   uint256 constant public MAX_INT =  2**256 - 1;
 
+  // The swap and indexer contracts for the protocol
   IIndexer public indexer;
   ISwap public swapContract;
 

@@ -33,22 +33,22 @@ import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 contract Delegate is IDelegate, Ownable {
   using SafeMath for uint256;
 
-  // The Swap contract to be used to settle trades.
+  // The Swap contract to be used to settle trades
   ISwap public swapContract;
 
-  // The Indexer to stake intent to trade on.
+  // The Indexer to stake intent to trade on
   IIndexer public indexer;
 
-  // Maximum integer for token transfer approval.
+  // Maximum integer for token transfer approval
   uint256 constant public MAX_INT =  2**256 - 1;
 
-  // The address holding tokens that will be trading through this delegate.
+  // The address holding tokens that will be trading through this delegate
   address private _tradeWallet;
 
-  // Mapping of senderToken to signerToken for rule lookup.
+  // Mapping of senderToken to signerToken for rule lookup
   mapping (address => mapping (address => Types.Rule)) public rules;
 
-  // ERC-20 (fungible token) interface identifier (ERC-165).
+  // ERC-20 (fungible token) interface identifier (ERC-165)
   bytes4 constant internal ERC20_INTERFACE_ID = 0x277f8169;
 
   /**

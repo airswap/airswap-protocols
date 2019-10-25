@@ -24,7 +24,10 @@ import "@airswap/indexer/contracts/interfaces/IIndexer.sol";
 
 contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
 
+  // Mapping specifying whether an address was deployed by this factory
   mapping(address => bool) internal deployedAddresses;
+
+  // The swap and indexer contracts to use in the deployment of Delegates
   ISwap public swapContract;
   IIndexer public indexerContract;
 

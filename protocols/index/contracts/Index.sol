@@ -23,13 +23,13 @@ import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
   */
 contract Index is Ownable {
 
-  // The number of entries in the index.
+  // The number of entries in the index
   uint256 public length;
 
-  // Identifier to use for the head of the list.
+  // Identifier to use for the head of the list
   address private constant HEAD = address(uint160(2**160-1));
 
-  // Mapping of an identifier to its entry.
+  // Mapping of an identifier to its entry
   mapping(address => Entry) private _entries;
 
   /**

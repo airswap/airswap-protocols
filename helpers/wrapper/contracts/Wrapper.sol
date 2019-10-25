@@ -26,10 +26,10 @@ import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
   */
 contract Wrapper {
 
-  // The Swap contract to settle trades.
+  // The Swap contract to settle trades
   ISwap public swapContract;
 
-  // The WETH contract to wrap ether.
+  // The WETH contract to wrap ether
   IWETH public wethContract;
 
   /**

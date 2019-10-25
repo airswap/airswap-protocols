@@ -28,16 +28,16 @@ import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
   */
 contract Indexer is IIndexer, Ownable {
 
-  // Token to be used for staking (ERC-20).
+  // Token to be used for staking (ERC-20)
   IERC20 public stakingToken;
 
-  // Mapping of signer token to sender token to index.
+  // Mapping of signer token to sender token to index
   mapping (address => mapping (address => Index)) public indexes;
 
-  // Mapping of token address to boolean.
+  // Mapping of token address to boolean
   mapping (address => bool) public blacklist;
 
-  // The whitelist contract for checking whether a peer is whitelisted.
+  // The whitelist contract for checking whether a peer is whitelisted
   address public locatorWhitelist;
 
   // Boolean marking when the contract is paused - users cannot call functions when true

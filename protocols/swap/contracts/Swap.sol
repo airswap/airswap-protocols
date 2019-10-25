@@ -26,7 +26,7 @@ import "openzeppelin-solidity/contracts/token/ERC721/IERC721.sol";
   */
 contract Swap is ISwap {
 
-  // Domain and version for use in signatures (EIP-712).
+  // Domain and version for use in signatures (EIP-712)
   bytes constant internal DOMAIN_NAME = "SWAP";
   bytes constant internal DOMAIN_VERSION = "2";
 
@@ -37,7 +37,7 @@ contract Swap is ISwap {
   byte constant private AVAILABLE = 0x00;
   byte constant private UNAVAILABLE = 0x01;
 
-  // ERC-721 (non-fungible token) interface identifier (ERC-165).
+  // ERC-721 (non-fungible token) interface identifier (ERC-165)
   bytes4 constant internal ERC721_INTERFACE_ID = 0x80ac58cd;
   /*
     bytes4(keccak256('balanceOf(address)')) ^
@@ -51,16 +51,16 @@ contract Swap is ISwap {
     bytes4(keccak256('safeTransferFrom(address,address,uint256,bytes)'));
   */
 
-  // Mapping of sender address to a delegated sender address and expiry.
+  // Mapping of sender address to a delegated sender address and expiry
   mapping (address => mapping (address => uint256)) public senderAuthorizations;
 
-  // Mapping of signer address to a delegated signer and expiry.
+  // Mapping of signer address to a delegated signer and expiry
   mapping (address => mapping (address => uint256)) public signerAuthorizations;
 
-  // Mapping of signers to nonces with value AVAILABLE (0x00) or UNAVAILABLE (0x01).
+  // Mapping of signers to nonces with value AVAILABLE (0x00) or UNAVAILABLE (0x01)
   mapping (address => mapping (uint256 => byte)) public signerNonceStatus;
 
-  // Mapping of signer addresses to an optionally set minimum valid nonce.
+  // Mapping of signer addresses to an optionally set minimum valid nonce
   mapping (address => uint256) public signerMinimumNonce;
 
   /**
