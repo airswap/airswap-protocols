@@ -24,6 +24,7 @@
     "eslint-config-airbnb-base": "^13.2.0",
     "eslint-plugin-import": "^2.18.0",
     "eslint-plugin-prettier": "^3.1.0",
+    "eslint-utils": "^1.4.2",
     "ethereumjs-abi": "^0.6.7",
     "ganache-cli": "^6.4.4",
     "lerna": "^3.15.0",
@@ -36,8 +37,5 @@
     "tabWidth": 2,
     "semi": false,
     "singleQuote": true
-  },
-  "dependencies": {
-    "eslint-utils": "^1.4.2"
   }
 }
