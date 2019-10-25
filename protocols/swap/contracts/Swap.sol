@@ -46,7 +46,7 @@ contract Swap is ISwap {
   // Mapping of signer address to a delegated signer and expiry
   mapping (address => mapping (address => uint256)) public signerAuthorizations;
 
-  // Mapping of signers to nonces with value _AVAILABLE (0x00) or _UNAVAILABLE (0x01)
+  // Mapping of signers to nonces with value AVAILABLE (0x00) or UNAVAILABLE (0x01)
   mapping (address => mapping (uint256 => byte)) public signerNonceStatus;
 
   // Mapping of signer addresses to an optionally set minimum valid nonce
@@ -76,7 +76,7 @@ contract Swap is ISwap {
     require(order.expiry > block.timestamp,
       "ORDER_EXPIRED");
 
-    // Ensure the nonce is _AVAILABLE (0x00).
+    // Ensure the nonce is AVAILABLE (0x00).
     require(signerNonceStatus[order.signer.wallet][order.nonce] == AVAILABLE,
       "ORDER_TAKEN_OR_CANCELLED");
 
@@ -84,7 +84,7 @@ contract Swap is ISwap {
     require(order.nonce >= signerMinimumNonce[order.signer.wallet],
       "NONCE_TOO_LOW");
 
-    // Mark the nonce _UNAVAILABLE (0x01).
+    // Mark the nonce UNAVAILABLE (0x01).
     signerNonceStatus[order.signer.wallet][order.nonce] = UNAVAILABLE;
 
     // Validate the sender side of the trade.
@@ -169,7 +169,7 @@ contract Swap is ISwap {
 
   /**
     * @notice Cancel one or more open orders by nonce
-    * @dev Cancelled nonces are marked _UNAVAILABLE (0x01)
+    * @dev Cancelled nonces are marked UNAVAILABLE (0x01)
     * @dev Emits a Cancel event
     * @param nonces uint256[] List of nonces to cancel
     */
