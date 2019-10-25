@@ -25,8 +25,11 @@ references:
           command: |
             yarn install
       - run:
-          name: yarn lint
+          name: Eslint
           command: yarn lint
+      - run:
+          name: Solhint
+          command: yarn hint
       - run:
           name: Run Tests
           command: |
