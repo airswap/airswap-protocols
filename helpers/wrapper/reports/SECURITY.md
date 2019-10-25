@@ -6,11 +6,11 @@ Wrapper [Source Code](https://github.com/airswap/airswap-protocols/tree/master/h
 
 ## Introduction
 
-Wrapper is a frontend for a Swap contract to enable sending and receiving ether (ETH) for wrapped ether (WETH) trades. The Swap contract only works with tokens, so WETH is required. Wrapper is written and primarily intended for the AirSwap Instant system. If an order does not specify WETH for either party, execution is passed directly through to the Swap contract. The following contracts are compiled with solidity 0.5.12.
+Wrapper is a shim over the Swap contract. The Swap contract only supports tokens (smart contracts), so for ether (ETH) to be used it must be wrapped (WETH). Wrapper determines whether to wrap and unwrap based on whether WETH is specified as the signerToken or senderToken on an order. If an order does not specify WETH for either party, execution is passed directly through to the Swap contract. Wrapper is written and primarily intended for the AirSwap Instant system. The following contracts are compiled with solidity 0.5.12.
 
 ## Structure
 
-Wrapper includes one contract and its dependencies.
+Wrapper is comprised of one contract and its dependencies.
 
 [@airswap/wrapper/contracts/Wrapper.sol](../contracts/Wrapper.sol) @ [2a83c1ff2e46e6befa45889aa556fdd31e5c71fb](https://github.com/airswap/airswap-protocols/commit/2a83c1ff2e46e6befa45889aa556fdd31e5c71fb)
 
@@ -51,7 +51,7 @@ contracts/Wrapper.sol
 
 ### Every `swap` through a Wrapper must be transacted by the sender specified on the order.
 
-- By inspection and testing, line 70 requires that the message sender (transaction originator) is the same as the order sender wallet.
+- By inspection and testing, line 70 requires that the message sender is the same as the order sender wallet.
 - **This invariant holds as-is.**
 
 ### Swap and WETH contracts used by a Wrapper are immutable and cannot be changed.
@@ -104,3 +104,8 @@ Wrapper.swap(Types.Order) (Full.sol#456-506) ignores return value by external ca
 Wrapper.swap(Types.Order) (Full.sol#456-506) ignores return value by external calls "wethContract.transferFrom(_order.sender.wallet,address(this),_order.signer.param)" (Full.sol#497)
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unused-return
 ```
+
+## Notes
+
+- When deploying a Wrapper contract, we recommend using the [canonical WETH contracts](https://blog.0xproject.com/canonical-weth-migration-8a7ab6caca71).
+- Trading ETH for WETH is neither an expected nor common use case for Swap, and is not supported by Wrapper. To convert between ETH and WETH, use the deposit and withdraw functions on the WETH contract.
