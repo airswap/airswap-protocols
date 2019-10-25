@@ -38,111 +38,6 @@ contract DelegateFrontend {
   }
 
   /**
-    * @notice Get a Sender-Side Quote from the Onchain Liquidity provider
-    * @dev want to fetch the lowest _signerAmount for requested _senderAmount
-    * @dev if no suitable Delegate found, defaults to 0x0 delegateLocator
-    * @param _senderAmount uint256 The amount of ERC-20 token the delegate would send
-    * @param _senderToken address The address of an ERC-20 token the delegate would send
-    * @param _signerToken address The address of an ERC-20 token the signer would send
-    * @param _maxIntents uint256 The maximum number of Peers to query
-    * @return delegateAddress bytes32 The locator to connect to the peer
-    * @return lowestCost uint256 The amount of ERC-20 tokens the signer would send
-    */
-  function getBestSenderSideQuote(
-    uint256 _senderAmount,
-    address _senderToken,
-    address _signerToken,
-    uint256 _maxIntents
-  ) public view returns (bytes32 delegateAddress, uint256 lowestAmount) {
-
-
-    // use the indexer to query delegates
-    lowestAmount = MAX_INT;
-
-    // Fetch an array of locators from the Indexer.
-    bytes32[] memory locators = indexer.getLocators(
-      _signerToken,
-      _senderToken,
-      address(0), // This is to start at the head of the list of intents
-      _maxIntents
-    );
-
-    // Iterate through locators
-    for (uint256 i; i < locators.length; i++) {
-
-      // the end of the locators has been reached
-      if (locators[i] == bytes32(0)) {
-        break;
-      }
-
-      // Get a buy quote from the Delegate.
-      uint256 signerAmount = IDelegate(address(bytes20(locators[i])))
-        .getSignerSideQuote(_senderAmount, _senderToken, _signerToken);
-
-      // Update the lowest cost.
-      if (signerAmount > 0 && signerAmount < lowestAmount) {
-        delegateAddress = locators[i];
-        lowestAmount = signerAmount;
-      }
-    }
-
-    // Return the Delegate address and amount.
-    return (delegateAddress, lowestAmount);
-
-  }
-
-  /**
-    * @notice Get a Signer-Side Quote from the Onchain Liquidity provider
-    * @dev want to fetch the highest _senderAmount for requested _signerAmount
-    * @dev if no suitable Delegate found, delegateLocator will be 0x0
-    * @param _signerAmount uint256 The amount of ERC-20 token the signer would send
-    * @param _signerToken address The address of an ERC-20 token the signer would send
-    * @param _senderToken address The address of an ERC-20 token the peer would send
-    * @param _maxIntents uint256 The maximum number of Delegates to query
-    * @return delegateLocator bytes32  The locator to connect to the delegate
-    * @return highAmount uint256 The amount of ERC-20 tokens the delegate would send
-    */
-  function getBestSignerSideQuote(
-    uint256 _signerAmount,
-    address _signerToken,
-    address _senderToken,
-    uint256 _maxIntents
-  ) public view returns (bytes32 delegateLocator, uint256 highAmount) {
-
-    highAmount = 0;
-
-    // Fetch an array of locators from the Indexer.
-    bytes32[] memory locators = indexer.getLocators(
-      _signerToken,
-      _senderToken,
-      address(0), // This is to start at the head of the list of intents
-      _maxIntents
-    );
-
-    // Iterate through locators.
-    for (uint256 i; i < locators.length; i++) {
-
-      // the end of the locators has been reached
-      if (locators[i] == bytes32(0)) {
-        break;
-      }
-
-      // Get a buy quote from the Delegate.
-      uint256 senderAmount = IDelegate(address(bytes20(locators[i])))
-        .getSenderSideQuote(_signerAmount, _signerToken, _senderToken);
-
-      // Update the highest amount.
-      if (senderAmount > 0 && senderAmount > highAmount) {
-        delegateLocator = locators[i];
-        highAmount = senderAmount;
-      }
-    }
-
-    // Return the Delegate address and amount.
-    return (delegateLocator, highAmount);
-  }
-
-  /**
     * @notice Get and fill Sender-Side Quote from the Onchain Liquidity provider
     * @dev want to fetch the lowest _signerAmount for requested _senderAmount
     * @dev if no suitable Delegate found, will revert by checking peerLocator is 0x0
@@ -281,5 +176,109 @@ contract DelegateFrontend {
 
     // DelegateFrontend transfers received amount to the User.
     IERC20(_senderToken).transfer(msg.sender, senderAmount);
+  }
+
+  /**
+    * @notice Get a Sender-Side Quote from the Onchain Liquidity provider
+    * @dev want to fetch the lowest _signerAmount for requested _senderAmount
+    * @dev if no suitable Delegate found, defaults to 0x0 delegateLocator
+    * @param _senderAmount uint256 The amount of ERC-20 token the delegate would send
+    * @param _senderToken address The address of an ERC-20 token the delegate would send
+    * @param _signerToken address The address of an ERC-20 token the signer would send
+    * @param _maxIntents uint256 The maximum number of Peers to query
+    * @return delegateAddress bytes32 The locator to connect to the peer
+    * @return lowestCost uint256 The amount of ERC-20 tokens the signer would send
+    */
+  function getBestSenderSideQuote(
+    uint256 _senderAmount,
+    address _senderToken,
+    address _signerToken,
+    uint256 _maxIntents
+  ) public view returns (bytes32 delegateAddress, uint256 lowestAmount) {
+
+    // use the indexer to query delegates
+    lowestAmount = MAX_INT;
+
+    // Fetch an array of locators from the Indexer.
+    bytes32[] memory locators = indexer.getLocators(
+      _signerToken,
+      _senderToken,
+      address(0), // This is to start at the head of the list of intents
+      _maxIntents
+    );
+
+    // Iterate through locators
+    for (uint256 i; i < locators.length; i++) {
+
+      // the end of the locators has been reached
+      if (locators[i] == bytes32(0)) {
+        break;
+      }
+
+      // Get a buy quote from the Delegate.
+      uint256 signerAmount = IDelegate(address(bytes20(locators[i])))
+        .getSignerSideQuote(_senderAmount, _senderToken, _signerToken);
+
+      // Update the lowest cost.
+      if (signerAmount > 0 && signerAmount < lowestAmount) {
+        delegateAddress = locators[i];
+        lowestAmount = signerAmount;
+      }
+    }
+
+    // Return the Delegate address and amount.
+    return (delegateAddress, lowestAmount);
+
+  }
+
+  /**
+    * @notice Get a Signer-Side Quote from the Onchain Liquidity provider
+    * @dev want to fetch the highest _senderAmount for requested _signerAmount
+    * @dev if no suitable Delegate found, delegateLocator will be 0x0
+    * @param _signerAmount uint256 The amount of ERC-20 token the signer would send
+    * @param _signerToken address The address of an ERC-20 token the signer would send
+    * @param _senderToken address The address of an ERC-20 token the peer would send
+    * @param _maxIntents uint256 The maximum number of Delegates to query
+    * @return delegateLocator bytes32  The locator to connect to the delegate
+    * @return highAmount uint256 The amount of ERC-20 tokens the delegate would send
+    */
+  function getBestSignerSideQuote(
+    uint256 _signerAmount,
+    address _signerToken,
+    address _senderToken,
+    uint256 _maxIntents
+  ) public view returns (bytes32 delegateLocator, uint256 highAmount) {
+
+    highAmount = 0;
+
+    // Fetch an array of locators from the Indexer.
+    bytes32[] memory locators = indexer.getLocators(
+      _signerToken,
+      _senderToken,
+      address(0), // This is to start at the head of the list of intents
+      _maxIntents
+    );
+
+    // Iterate through locators.
+    for (uint256 i; i < locators.length; i++) {
+
+      // the end of the locators has been reached
+      if (locators[i] == bytes32(0)) {
+        break;
+      }
+
+      // Get a buy quote from the Delegate.
+      uint256 senderAmount = IDelegate(address(bytes20(locators[i])))
+        .getSenderSideQuote(_signerAmount, _signerToken, _senderToken);
+
+      // Update the highest amount.
+      if (senderAmount > 0 && senderAmount > highAmount) {
+        delegateLocator = locators[i];
+        highAmount = senderAmount;
+      }
+    }
+
+    // Return the Delegate address and amount.
+    return (delegateLocator, highAmount);
   }
 }

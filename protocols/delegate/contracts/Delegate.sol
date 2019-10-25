@@ -192,6 +192,63 @@ contract Delegate is IDelegate, Ownable {
         .transfer(msg.sender, stakedAmount),"STAKING_TRANSFER_FAILED"
     );
   }
+
+  /**
+    * @notice Provide an Order
+    * @dev Rules get reset with new maxSenderAmount
+    * @param _order Types.Order
+    */
+  function provideOrder(
+    Types.Order calldata _order
+  ) external {
+
+    Types.Rule memory rule = rules[_order.sender.token][_order.signer.token];
+
+    require(_order.signer.wallet == msg.sender,
+      "SIGNER_MUST_BE_SENDER");
+
+    require(_order.sender.wallet == _tradeWallet,
+      "INVALID_SENDER_WALLET");
+
+    require(_order.signer.kind == ERC20_INTERFACE_ID,
+      "SIGNER_KIND_MUST_BE_ERC20");
+
+    require(_order.sender.kind == ERC20_INTERFACE_ID,
+      "SENDER_KIND_MUST_BE_ERC20");
+
+    // Ensure that a rule exists.
+    require(rule.maxSenderAmount != 0,
+      "TOKEN_PAIR_INACTIVE");
+
+    // Ensure the order does not exceed the maximum amount.
+    require(_order.sender.param <= rule.maxSenderAmount,
+      "AMOUNT_EXCEEDS_MAX");
+
+    // Ensure the order is priced according to the rule.
+    require(_order.sender.param == _order.signer.param
+      .mul(10 ** rule.priceExp).div(rule.priceCoef),
+      "PRICE_INCORRECT");
+
+    // Overwrite the rule with a decremented maxSenderAmount.
+    rules[_order.sender.token][_order.signer.token] = Types.Rule({
+      maxSenderAmount: (rule.maxSenderAmount).sub(_order.sender.param),
+      priceCoef: rule.priceCoef,
+      priceExp: rule.priceExp
+    });
+
+    // Perform the swap.
+    swapContract.swap(_order);
+  }
+
+  /**
+    * @notice Set a new trade wallet
+    * @param _newTradeWallet address The address of the new trade wallet
+    */
+  function setTradeWallet(address _newTradeWallet) external onlyOwner {
+    require(_newTradeWallet != address(0), "TRADE_WALLET_REQUIRED");
+    _tradeWallet = _newTradeWallet;
+  }
+
   /**
     * @notice Get a Signer-Side Quote from the Delegate
     * @param _senderParam uint256 The amount of ERC-20 token the delegate would send
@@ -284,62 +341,6 @@ contract Delegate is IDelegate, Ownable {
       );
     }
     return (0, 0);
-  }
-
-  /**
-    * @notice Provide an Order
-    * @dev Rules get reset with new maxSenderAmount
-    * @param _order Types.Order
-    */
-  function provideOrder(
-    Types.Order calldata _order
-  ) external {
-
-    Types.Rule memory rule = rules[_order.sender.token][_order.signer.token];
-
-    require(_order.signer.wallet == msg.sender,
-      "SIGNER_MUST_BE_SENDER");
-
-    require(_order.sender.wallet == _tradeWallet,
-      "INVALID_SENDER_WALLET");
-
-    require(_order.signer.kind == ERC20_INTERFACE_ID,
-      "SIGNER_KIND_MUST_BE_ERC20");
-
-    require(_order.sender.kind == ERC20_INTERFACE_ID,
-      "SENDER_KIND_MUST_BE_ERC20");
-
-    // Ensure that a rule exists.
-    require(rule.maxSenderAmount != 0,
-      "TOKEN_PAIR_INACTIVE");
-
-    // Ensure the order does not exceed the maximum amount.
-    require(_order.sender.param <= rule.maxSenderAmount,
-      "AMOUNT_EXCEEDS_MAX");
-
-    // Ensure the order is priced according to the rule.
-    require(_order.sender.param == _order.signer.param
-      .mul(10 ** rule.priceExp).div(rule.priceCoef),
-      "PRICE_INCORRECT");
-
-    // Overwrite the rule with a decremented maxSenderAmount.
-    rules[_order.sender.token][_order.signer.token] = Types.Rule({
-      maxSenderAmount: (rule.maxSenderAmount).sub(_order.sender.param),
-      priceCoef: rule.priceCoef,
-      priceExp: rule.priceExp
-    });
-
-    // Perform the swap.
-    swapContract.swap(_order);
-  }
-
-  /**
-    * @notice Set a new trade wallet
-    * @param _newTradeWallet address The address of the new trade wallet
-    */
-  function setTradeWallet(address _newTradeWallet) external onlyOwner {
-    require(_newTradeWallet != address(0), 'TRADE_WALLET_REQUIRED');
-    _tradeWallet = _newTradeWallet;
   }
 
   /**

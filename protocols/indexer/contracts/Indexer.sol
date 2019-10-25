@@ -57,7 +57,7 @@ contract Indexer is IIndexer, Ownable {
     * @notice Modifier to prevent function call unless the contract is not contractPaused
     */
   modifier notPaused() {
-    require(!contractPaused, 'CONTRACT_IS_PAUSED');
+    require(!contractPaused, "CONTRACT_IS_PAUSED");
     _;
   }
 
@@ -65,7 +65,7 @@ contract Indexer is IIndexer, Ownable {
     * @notice Modifier to prevent function call unless the contract is contractPaused
     */
   modifier paused() {
-    require(contractPaused, 'CONTRACT_NOT_PAUSED');
+    require(contractPaused, "CONTRACT_NOT_PAUSED");
     _;
   }
 
@@ -187,6 +187,41 @@ contract Indexer is IIndexer, Ownable {
   }
 
   /**
+    * @notice Unset Intent for a User
+    * @dev Only callable by owner
+    *
+    * @param _user address
+    * @param _signerToken address
+    * @param _senderToken address
+    */
+  function unsetIntentForUser(
+    address _user,
+    address _signerToken,
+    address _senderToken)
+  external onlyOwner {
+    unsetUserIntent(_user, _signerToken, _senderToken);
+  }
+
+  /**
+    * @notice Set whether the contract is paused
+    * @dev only callable by owner
+    *
+    * @param _newStatus bool
+    */
+  function setPausedStatus(bool _newStatus) external onlyOwner {
+    contractPaused = _newStatus;
+  }
+
+  /**
+    * @notice Destroy the Contract
+    * @dev Only callable by owner and when contractPaused
+    *
+    */
+  function killContract(address payable _recipient) external onlyOwner paused {
+    selfdestruct(_recipient);
+  }
+
+  /**
     * @notice Gets the Stake Amount for a User
     * @param _signerToken address
     * @param _senderToken address
@@ -236,41 +271,6 @@ contract Indexer is IIndexer, Ownable {
 
     // Return an array of locators for the index.
     return indexes[_signerToken][_senderToken].getLocators(_startAddress, _count);
-  }
-
-  /**
-    * @notice Set whether the contract is paused
-    * @dev only callable by owner
-    *
-    * @param _newStatus bool
-    */
-  function setPausedStatus(bool _newStatus) external onlyOwner {
-    contractPaused = _newStatus;
-  }
-
-  /**
-    * @notice Unset Intent for a User
-    * @dev Only callable by owner
-    *
-    * @param _user address
-    * @param _signerToken address
-    * @param _senderToken address
-    */
-  function unsetIntentForUser(
-    address _user,
-    address _signerToken,
-    address _senderToken)
-  external onlyOwner {
-    unsetUserIntent(_user, _signerToken, _senderToken);
-  }
-
-  /**
-    * @notice Destroy the Contract
-    * @dev Only callable by owner and when contractPaused
-    *
-    */
-  function killContract(address payable _recipient) external onlyOwner paused {
-    selfdestruct(_recipient);
   }
 
   /**

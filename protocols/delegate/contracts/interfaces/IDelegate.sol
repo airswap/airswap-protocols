@@ -49,6 +49,10 @@ interface IDelegate {
     address _signerToken
   ) external;
 
+  function provideOrder(
+    Types.Order calldata _order
+  ) external;
+
   function getSignerSideQuote(
     uint256 _senderParam,
     address _senderToken,
@@ -72,10 +76,6 @@ interface IDelegate {
     uint256 senderParam,
     uint256 signerParam
   );
-
-  function provideOrder(
-    Types.Order calldata _order
-  ) external;
 
   function owner()
     external view returns (address);

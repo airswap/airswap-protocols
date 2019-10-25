@@ -55,7 +55,7 @@ library Types {
     bytes32 s;                    // `s` value of an ECDSA signature
   }
 
-  bytes32 constant DOMAIN_TYPEHASH = keccak256(abi.encodePacked(
+  bytes32 constant internal DOMAIN_TYPEHASH = keccak256(abi.encodePacked(
     "EIP712Domain(",
     "string name,",
     "string version,",
@@ -63,7 +63,7 @@ library Types {
     ")"
   ));
 
-  bytes32 constant ORDER_TYPEHASH = keccak256(abi.encodePacked(
+  bytes32 constant internal ORDER_TYPEHASH = keccak256(abi.encodePacked(
     "Order(",
     "uint256 nonce,",
     "uint256 expiry,",
@@ -79,7 +79,7 @@ library Types {
     ")"
   ));
 
-  bytes32 constant PARTY_TYPEHASH = keccak256(abi.encodePacked(
+  bytes32 constant internal PARTY_TYPEHASH = keccak256(abi.encodePacked(
     "Party(",
     "bytes4 kind,",
     "address wallet,",

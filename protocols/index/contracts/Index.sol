@@ -149,7 +149,7 @@ contract Index is Ownable {
     // If a valid _start is provided, start there.
     if (_start != address(0) && _start != HEAD) {
       // Check that the provided _start identifier exists.
-      require(hasEntry(_start), 'START_ENTRY_NOT_FOUND');
+      require(hasEntry(_start), "START_ENTRY_NOT_FOUND");
       // Set the identifier to the provided _start.
       identifier = _start;
     }
