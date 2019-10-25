@@ -43,7 +43,7 @@ contract Delegate is IDelegate, Ownable {
   uint256 constant public MAX_INT =  2**256 - 1;
 
   // Address holding tokens that will be trading through this delegate
-  address private _tradeWallet;
+  address public tradeWallet;
 
   // Mapping of senderToken to signerToken for rule lookup
   mapping (address => mapping (address => Types.Rule)) public rules;
@@ -75,9 +75,9 @@ contract Delegate is IDelegate, Ownable {
 
     // If no trade wallet is provided, the owner's wallet is the trade wallet.
     if (_delegateTradeWallet != address(0)) {
-      _tradeWallet = _delegateTradeWallet;
+      tradeWallet = _delegateTradeWallet;
     } else {
-      _tradeWallet = owner();
+      tradeWallet = owner();
     }
 
     // Ensure that the indexer can pull funds from delegate account.
@@ -207,7 +207,7 @@ contract Delegate is IDelegate, Ownable {
       "SIGNER_MUST_BE_SENDER");
 
     // Ensure the order is for the trade wallet.
-    require(_order.sender.wallet == _tradeWallet,
+    require(_order.sender.wallet == tradeWallet,
       "INVALID_SENDER_WALLET");
 
     // Ensure the tokens are valid ERC20 tokens.
@@ -247,7 +247,7 @@ contract Delegate is IDelegate, Ownable {
     */
   function setTradeWallet(address _newTradeWallet) external onlyOwner {
     require(_newTradeWallet != address(0), "TRADE_WALLET_REQUIRED");
-    _tradeWallet = _newTradeWallet;
+    tradeWallet = _newTradeWallet;
   }
 
   /**
@@ -343,13 +343,6 @@ contract Delegate is IDelegate, Ownable {
       );
     }
     return (0, 0);
-  }
-
-  /**
-    * @notice Get the trade wallet address
-    */
-  function tradeWallet() external view returns (address) {
-    return _tradeWallet;
   }
 
   /**
