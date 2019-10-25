@@ -29,7 +29,7 @@ contract Swap is ISwap {
   // Domain and version for use in signatures (EIP-712).
   bytes constant internal DOMAIN_NAME = "SWAP";
   bytes constant internal DOMAIN_VERSION = "2";
-.
+
   // Unique domain identifier for use in signatures (EIP-712)
   bytes32 private domainSeparator;
 
