@@ -31,25 +31,14 @@ contract Swap is ISwap {
   bytes constant internal DOMAIN_VERSION = "2";
 
   // Unique domain identifier for use in signatures (EIP-712)
-  bytes32 private domainSeparator;
+  bytes32 private _domainSeparator;
 
   // Possible nonce statuses
-  byte constant private AVAILABLE = 0x00;
-  byte constant private UNAVAILABLE = 0x01;
+  byte constant internal AVAILABLE = 0x00;
+  byte constant internal UNAVAILABLE = 0x01;
 
-  // ERC-721 (non-fungible token) interface identifier (ERC-165)
+  // ERC-721 (non-fungible token) interface identifier (EIP-165)
   bytes4 constant internal ERC721_INTERFACE_ID = 0x80ac58cd;
-  /*
-    bytes4(keccak256('balanceOf(address)')) ^
-    bytes4(keccak256('ownerOf(uint256)')) ^
-    bytes4(keccak256('approve(address,uint256)')) ^
-    bytes4(keccak256('getApproved(uint256)')) ^
-    bytes4(keccak256('setApprovalForAll(address,bool)')) ^
-    bytes4(keccak256('isApprovedForAll(address,address)')) ^
-    bytes4(keccak256('transferFrom(address,address,uint256)')) ^
-    bytes4(keccak256('safeTransferFrom(address,address,uint256)')) ^
-    bytes4(keccak256('safeTransferFrom(address,address,uint256,bytes)'));
-  */
 
   // Mapping of sender address to a delegated sender address and expiry
   mapping (address => mapping (address => uint256)) public senderAuthorizations;
@@ -68,7 +57,7 @@ contract Swap is ISwap {
     * @dev Sets domain for signature validation (EIP-712)
     */
   constructor() public {
-    domainSeparator = Types.hashDomain(
+    _domainSeparator = Types.hashDomain(
       DOMAIN_NAME,
       DOMAIN_VERSION,
       address(this)
@@ -77,34 +66,34 @@ contract Swap is ISwap {
 
   /**
     * @notice Atomic Token Swap
-    * @param _order Types.Order Order to settle
+    * @param order Types.Order Order to settle
     */
   function swap(
-    Types.Order calldata _order
+    Types.Order calldata order
   ) external {
 
     // Ensure the order is not expired.
-    require(_order.expiry > block.timestamp,
+    require(order.expiry > block.timestamp,
       "ORDER_EXPIRED");
 
     // Ensure the nonce is AVAILABLE (0x00).
-    require(signerNonceStatus[_order.signer.wallet][_order.nonce] == AVAILABLE,
+    require(signerNonceStatus[order.signer.wallet][order.nonce] == AVAILABLE,
       "ORDER_TAKEN_OR_CANCELLED");
 
     // Ensure the order nonce is above the minimum.
-    require(_order.nonce >= signerMinimumNonce[_order.signer.wallet],
+    require(order.nonce >= signerMinimumNonce[order.signer.wallet],
       "NONCE_TOO_LOW");
 
     // Mark the nonce UNAVAILABLE (0x01).
-    signerNonceStatus[_order.signer.wallet][_order.nonce] = UNAVAILABLE;
+    signerNonceStatus[order.signer.wallet][order.nonce] = UNAVAILABLE;
 
     // Validate the sender side of the trade.
     address finalSenderWallet;
 
-    if (_order.sender.wallet == address(0)) {
+    if (order.sender.wallet == address(0)) {
       /**
         * Sender is not specified. The msg.sender of the transaction becomes
-        * the sender of the _order.
+        * the sender of the order.
         */
       finalSenderWallet = msg.sender;
 
@@ -113,20 +102,20 @@ contract Swap is ISwap {
         * Sender is specified. If the msg.sender is not the specified sender,
         * thus determines whether the msg.sender is an authorized sender.
         */
-      require(isSenderAuthorized(_order.sender.wallet, msg.sender),
+      require(isSenderAuthorized(order.sender.wallet, msg.sender),
           "SENDER_UNAUTHORIZED");
       // The specified sender is all clear.
-      finalSenderWallet = _order.sender.wallet;
+      finalSenderWallet = order.sender.wallet;
 
     }
 
     // Validate the signer side of the trade.
-    if (_order.signature.v == 0) {
+    if (order.signature.v == 0) {
       /**
         * Signature is not provided. The signer may have authorized the
         * msg.sender to swap on its behalf, which does not require a signature.
         */
-      require(isSignerAuthorized(_order.signer.wallet, msg.sender),
+      require(isSignerAuthorized(order.signer.wallet, msg.sender),
         "SIGNER_UNAUTHORIZED");
 
     } else {
@@ -134,47 +123,47 @@ contract Swap is ISwap {
         * The signature is provided. Determine whether the signer is
         * authorized and if so validate the signature itself.
         */
-      require(isSignerAuthorized(_order.signer.wallet, _order.signature.signatory),
+      require(isSignerAuthorized(order.signer.wallet, order.signature.signatory),
         "SIGNER_UNAUTHORIZED");
 
       // Ensure the signature is valid.
-      require(isValid(_order, domainSeparator),
+      require(isValid(order, _domainSeparator),
         "SIGNATURE_INVALID");
 
     }
     // Transfer token from sender to signer.
     transferToken(
       finalSenderWallet,
-      _order.signer.wallet,
-      _order.sender.param,
-      _order.sender.token,
-      _order.sender.kind
+      order.signer.wallet,
+      order.sender.param,
+      order.sender.token,
+      order.sender.kind
     );
 
     // Transfer token from signer to sender.
     transferToken(
-      _order.signer.wallet,
+      order.signer.wallet,
       finalSenderWallet,
-      _order.signer.param,
-      _order.signer.token,
-      _order.signer.kind
+      order.signer.param,
+      order.signer.token,
+      order.signer.kind
     );
 
     // Transfer token from signer to affiliate if specified.
-    if (_order.affiliate.wallet != address(0)) {
+    if (order.affiliate.wallet != address(0)) {
       transferToken(
-        _order.signer.wallet,
-        _order.affiliate.wallet,
-        _order.affiliate.param,
-        _order.affiliate.token,
-        _order.affiliate.kind
+        order.signer.wallet,
+        order.affiliate.wallet,
+        order.affiliate.param,
+        order.affiliate.token,
+        order.affiliate.kind
       );
     }
 
-    emit Swap(_order.nonce, block.timestamp,
-      _order.signer.wallet, _order.signer.param, _order.signer.token,
-      finalSenderWallet, _order.sender.param, _order.sender.token,
-      _order.affiliate.wallet, _order.affiliate.param, _order.affiliate.token
+    emit Swap(order.nonce, block.timestamp,
+      order.signer.wallet, order.signer.param, order.signer.token,
+      finalSenderWallet, order.sender.param, order.sender.token,
+      order.affiliate.wallet, order.affiliate.param, order.affiliate.token
     );
   }
 
@@ -182,15 +171,15 @@ contract Swap is ISwap {
     * @notice Cancel one or more open orders by nonce
     * @dev Cancelled nonces are marked UNAVAILABLE (0x01)
     * @dev Emits a Cancel event
-    * @param _nonces uint256[] List of nonces to cancel
+    * @param nonces uint256[] List of nonces to cancel
     */
   function cancel(
-    uint256[] calldata _nonces
+    uint256[] calldata nonces
   ) external {
-    for (uint256 i = 0; i < _nonces.length; i++) {
-      if (signerNonceStatus[msg.sender][_nonces[i]] == AVAILABLE) {
-        signerNonceStatus[msg.sender][_nonces[i]] = UNAVAILABLE;
-        emit Cancel(_nonces[i], msg.sender);
+    for (uint256 i = 0; i < nonces.length; i++) {
+      if (signerNonceStatus[msg.sender][nonces[i]] == AVAILABLE) {
+        signerNonceStatus[msg.sender][nonces[i]] = UNAVAILABLE;
+        emit Cancel(nonces[i], msg.sender);
       }
     }
   }
@@ -198,130 +187,131 @@ contract Swap is ISwap {
   /**
     * @notice Invalidate all orders below a nonce value
     * @dev Emits an Invalidate event
-    * @param _minimumNonce uint256 Minimum valid nonce
+    * @param minimumNonce uint256 Minimum valid nonce
     */
   function invalidate(
-    uint256 _minimumNonce
+    uint256 minimumNonce
   ) external {
-    signerMinimumNonce[msg.sender] = _minimumNonce;
-    emit Invalidate(_minimumNonce, msg.sender);
+    signerMinimumNonce[msg.sender] = minimumNonce;
+    emit Invalidate(minimumNonce, msg.sender);
   }
 
   /**
     * @notice Authorize a delegated sender
     * @dev Emits an AuthorizeSender event
-    * @param _authorizedSender address Address to authorize
-    * @param _expiry uint256 Expiry of the authorization
+    * @param authorizedSender address Address to authorize
+    * @param expiry uint256 Expiry of the authorization
     */
   function authorizeSender(
-    address _authorizedSender,
-    uint256 _expiry
+    address authorizedSender,
+    uint256 expiry
   ) external {
-    require(msg.sender != _authorizedSender, "INVALID_AUTH_SENDER");
-    require(_expiry > block.timestamp, "INVALID_AUTH_EXPIRY");
-    senderAuthorizations[msg.sender][_authorizedSender] = _expiry;
-    emit AuthorizeSender(msg.sender, _authorizedSender, _expiry);
+    require(msg.sender != authorizedSender, "INVALID_AUTH_SENDER");
+    require(expiry > block.timestamp, "INVALID_AUTH_EXPIRY");
+    senderAuthorizations[msg.sender][authorizedSender] = expiry;
+    emit AuthorizeSender(msg.sender, authorizedSender, expiry);
   }
 
   /**
     * @notice Authorize a delegated signer
     * @dev Emits an AuthorizeSigner event
-    * @param _authorizedSigner address Address to authorize
-    * @param _expiry uint256 Expiry of the authorization
+    * @param authorizedSigner address Address to authorize
+    * @param expiry uint256 Expiry of the authorization
     */
   function authorizeSigner(
-    address _authorizedSigner,
-    uint256 _expiry
+    address authorizedSigner,
+    uint256 expiry
   ) external {
-    require(msg.sender != _authorizedSigner, "INVALID_AUTH_SIGNER");
-    require(_expiry > block.timestamp, "INVALID_AUTH_EXPIRY");
-    signerAuthorizations[msg.sender][_authorizedSigner] = _expiry;
-    emit AuthorizeSigner(msg.sender, _authorizedSigner, _expiry);
+    require(msg.sender != authorizedSigner, "INVALID_AUTH_SIGNER");
+    require(expiry > block.timestamp, "INVALID_AUTH_EXPIRY");
+    signerAuthorizations[msg.sender][authorizedSigner] = expiry;
+    emit AuthorizeSigner(msg.sender, authorizedSigner, expiry);
   }
 
   /**
     * @notice Revoke an authorized sender
     * @dev Emits a RevokeSender event
-    * @param _authorizedSender address Address to revoke
+    * @param authorizedSender address Address to revoke
     */
   function revokeSender(
-    address _authorizedSender
+    address authorizedSender
   ) external {
-    delete senderAuthorizations[msg.sender][_authorizedSender];
-    emit RevokeSender(msg.sender, _authorizedSender);
+    delete senderAuthorizations[msg.sender][authorizedSender];
+    emit RevokeSender(msg.sender, authorizedSender);
   }
 
   /**
     * @notice Revoke an authorized signer
     * @dev Emits a RevokeSigner event
-    * @param _authorizedSigner address Address to revoke
+    * @param authorizedSigner address Address to revoke
     */
   function revokeSigner(
-    address _authorizedSigner
+    address authorizedSigner
   ) external {
-    delete signerAuthorizations[msg.sender][_authorizedSigner];
-    emit RevokeSigner(msg.sender, _authorizedSigner);
+    delete signerAuthorizations[msg.sender][authorizedSigner];
+    emit RevokeSigner(msg.sender, authorizedSigner);
   }
 
   /**
     * @notice Determine whether a sender delegate is authorized
-    * @param _authorizer address Address doing the authorization
-    * @param _delegate address Address being authorized
+    * @param authorizer address Address doing the authorization
+    * @param delegate address Address being authorized
     * @return bool True if a delegate is authorized to send
     */
   function isSenderAuthorized(
-    address _authorizer,
-    address _delegate
+    address authorizer,
+    address delegate
   ) internal view returns (bool) {
-    return ((_authorizer == _delegate) ||
-      senderAuthorizations[_authorizer][_delegate] > block.timestamp);
+    return ((authorizer == delegate) ||
+      senderAuthorizations[authorizer][delegate] > block.timestamp);
   }
 
   /**
     * @notice Determine whether a signer delegate is authorized
-    * @param _authorizer address Address doing the authorization
-    * @param _delegate address Address being authorized
+    * @param authorizer address Address doing the authorization
+    * @param delegate address Address being authorized
     * @return bool True if a delegate is authorized to sign
     */
   function isSignerAuthorized(
-    address _authorizer,
-    address _delegate
+    address authorizer,
+    address delegate
   ) internal view returns (bool) {
-    return ((_authorizer == _delegate) ||
-      (signerAuthorizations[_authorizer][_delegate] > block.timestamp));
+    return ((authorizer == delegate) ||
+      (signerAuthorizations[authorizer][delegate] > block.timestamp));
   }
 
   /**
     * @notice Validate signature using an EIP-712 typed data hash
-    * @param _order Types.Order Order to validate
-    * @param _domainSeparator bytes32 Domain identifier used in signatures (EIP-712)
+    * @param order Types.Order Order to validate
+    * @param domainSeparator bytes32 Domain identifier used in signatures (EIP-712)
     * @return bool True if order has a valid signature
     */
   function isValid(
-    Types.Order memory _order,
-    bytes32 _domainSeparator
+    Types.Order memory order,
+    bytes32 domainSeparator
   ) internal pure returns (bool) {
-    if (_order.signature.version == byte(0x01)) {
-      return _order.signature.signatory == ecrecover(
+    if (order.signature.version == byte(0x01)) {
+      return order.signature.signatory == ecrecover(
         Types.hashOrder(
-          _order,
-          _domainSeparator),
-          _order.signature.v,
-          _order.signature.r,
-          _order.signature.s
+          order,
+          domainSeparator
+        ),
+        order.signature.v,
+        order.signature.r,
+        order.signature.s
       );
     }
-    if (_order.signature.version == byte(0x45)) {
-      return _order.signature.signatory == ecrecover(
+    if (order.signature.version == byte(0x45)) {
+      return order.signature.signatory == ecrecover(
         keccak256(
           abi.encodePacked(
             "\x19Ethereum Signed Message:\n32",
-            Types.hashOrder(_order, _domainSeparator)
+            Types.hashOrder(order, domainSeparator)
           )
         ),
-        _order.signature.v,
-        _order.signature.r,
-        _order.signature.s
+        order.signature.v,
+        order.signature.r,
+        order.signature.s
       );
     }
     return false;
@@ -329,26 +319,26 @@ contract Swap is ISwap {
 
   /**
     * @notice Perform an ERC-20 or ERC-721 token transfer
-    * @dev Transfer type specified by the bytes4 _kind param
-    * @param _from address Wallet address to transfer from
-    * @param _to address Wallet address to transfer to
-    * @param _param uint256 Amount for ERC-20 or token ID for ERC-721
-    * @param _token address Contract address of token
-    * @param _kind bytes4 EIP-165 interface ID of the token
+    * @dev Transfer type specified by the bytes4 kind param
+    * @param from address Wallet address to transfer from
+    * @param to address Wallet address to transfer to
+    * @param param uint256 Amount for ERC-20 or token ID for ERC-721
+    * @param token address Contract address of token
+    * @param kind bytes4 EIP-165 interface ID of the token
     */
   function transferToken(
-      address _from,
-      address _to,
-      uint256 _param,
-      address _token,
-      bytes4 _kind
+      address from,
+      address to,
+      uint256 param,
+      address token,
+      bytes4 kind
   ) internal {
-    if (_kind == ERC721_INTERFACE_ID) {
+    if (kind == ERC721_INTERFACE_ID) {
       // Attempt to transfer an ERC-721 token.
-      IERC721(_token).safeTransferFrom(_from, _to, _param);
+      IERC721(token).safeTransferFrom(from, to, param);
     } else {
       // Attempt to transfer an ERC-20 token.
-      require(IERC20(_token).transferFrom(_from, _to, _param));
+      require(IERC20(token).transferFrom(from, to, param));
     }
   }
 }
