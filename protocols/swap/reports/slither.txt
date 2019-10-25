@@ -1,80 +1,89 @@
-Hash run on: ef5cff0613532d27ecedb332e222ae0a75079841
+Compilation warnings/errors on Full.sol:
+Full.sol:21:1: Warning: Experimental features are turned on. Do not use experimental features on live deployments.
+pragma experimental ABIEncoderV2;
+^-------------------------------^
 
 INFO:Detectors:
-Swap.swap (Swap.sol#92-198) uses timestamp for comparisons
-    Dangerous comparisons:
-    - require(bool,string)(_order.expiry > block.timestamp,ORDER_EXPIRED) (Swap.sol#100-101)
-Swap.authorize (Swap.sol#356-364) uses timestamp for comparisons
-    Dangerous comparisons:
-    - require(bool,string)(_expiry > block.timestamp,INVALID_AUTH_EXPIRY) (Swap.sol#361)
-Swap.isAuthorized (Swap.sol#384-390) uses timestamp for comparisons
-    Dangerous comparisons:
-    - (delegateApprovals[_approver][_delegate] > block.timestamp) (Swap.sol#389)
+Swap.swap(Types.Order) (Full.sol#534-631) uses timestamp for comparisons
+	Dangerous comparisons:
+	- require(bool,string)(_order.expiry > block.timestamp,ORDER_EXPIRED) (Full.sol#539-540)
+Swap.authorizeSender(address,uint256) (Full.sol#668-676) uses timestamp for comparisons
+	Dangerous comparisons:
+	- require(bool,string)(_expiry > block.timestamp,INVALID_AUTH_EXPIRY) (Full.sol#673)
+Swap.authorizeSigner(address,uint256) (Full.sol#684-692) uses timestamp for comparisons
+	Dangerous comparisons:
+	- require(bool,string)(_expiry > block.timestamp,INVALID_AUTH_EXPIRY) (Full.sol#689)
+Swap.isSenderAuthorized(address,address) (Full.sol#724-730) uses timestamp for comparisons
+	Dangerous comparisons:
+	- ((_approver == _delegate) || senderAuthorizations[_approver][_delegate] > block.timestamp) (Full.sol#728-729)
+Swap.isSignerAuthorized(address,address) (Full.sol#738-744) uses timestamp for comparisons
+	Dangerous comparisons:
+	- ((_approver == _delegate) || (signerAuthorizations[_approver][_delegate] > block.timestamp)) (Full.sol#742-743)
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#block-timestamp
 INFO:Detectors:
 Different versions of Solidity is used in :
-    - Version used: ['0.5.10', 'ABIEncoderV2', '^0.5.0']
-    - Migrations.sol#1 declares pragma solidity0.5.10
-    - ../types/contracts/Types.sol#17 declares pragma solidity0.5.10
-    - ../types/contracts/Types.sol#18 declares pragma experimentalABIEncoderV2
-    - ../../node_modules/openzeppelin-solidity/contracts/token/ERC721/IERC721.sol#1 declares pragma solidity^0.5.0
-    - ../../node_modules/openzeppelin-solidity/contracts/token/ERC20/IERC20.sol#1 declares pragma solidity^0.5.0
-    - ../../node_modules/openzeppelin-solidity/contracts/introspection/IERC165.sol#1 declares pragma solidity^0.5.0
-    - Imports.sol#1 declares pragma solidity0.5.10
-    - Swap.sol#17 declares pragma solidity0.5.10
-    - Swap.sol#18 declares pragma experimentalABIEncoderV2
-    - interfaces/ISwap.sol#17 declares pragma solidity0.5.10
-    - interfaces/ISwap.sol#18 declares pragma experimentalABIEncoderV2
+	- Version used: ['0.5.12', 'ABIEncoderV2', '^0.5.0']
+	- Full.sol#20 declares pragma solidity0.5.12
+	- Full.sol#21 declares pragma experimentalABIEncoderV2
+	- Full.sol#172 declares pragma solidity0.5.12
+	- Full.sol#295 declares pragma solidity^0.5.0
+	- Full.sol#374 declares pragma solidity^0.5.0
+	- Full.sol#399 declares pragma solidity^0.5.0
+	- Full.sol#470 declares pragma solidity0.5.12
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#different-pragma-directives-are-used
 INFO:Detectors:
-Migrations.setCompleted (Migrations.sol#15-17) should be declared external
-Migrations.upgrade (Migrations.sol#19-22) should be declared external
-IERC721.balanceOf (../../node_modules/openzeppelin-solidity/contracts/token/ERC721/IERC721.sol#16) should be declared external
-IERC721.ownerOf (../../node_modules/openzeppelin-solidity/contracts/token/ERC721/IERC721.sol#21) should be declared external
-IERC721.safeTransferFrom (../../node_modules/openzeppelin-solidity/contracts/token/ERC721/IERC721.sol#35) should be declared external
-IERC721.transferFrom (../../node_modules/openzeppelin-solidity/contracts/token/ERC721/IERC721.sol#44) should be declared external
-IERC721.approve (../../node_modules/openzeppelin-solidity/contracts/token/ERC721/IERC721.sol#45) should be declared external
-IERC721.getApproved (../../node_modules/openzeppelin-solidity/contracts/token/ERC721/IERC721.sol#46) should be declared external
-IERC721.setApprovalForAll (../../node_modules/openzeppelin-solidity/contracts/token/ERC721/IERC721.sol#48) should be declared external
-IERC721.isApprovedForAll (../../node_modules/openzeppelin-solidity/contracts/token/ERC721/IERC721.sol#49) should be declared external
-IERC721.safeTransferFrom (../../node_modules/openzeppelin-solidity/contracts/token/ERC721/IERC721.sol#52) should be declared external
-Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#public-function-that-could-be-declared-as-external
-INFO:Detectors:
-Pragma version "0.5.10" necessitates versions too recent to be trusted. Consider deploying with 0.5.3 (Migrations.sol#1)
-Pragma version "0.5.10" necessitates versions too recent to be trusted. Consider deploying with 0.5.3 (../types/contracts/Types.sol#17)
-Pragma version "^0.5.0" allows old versions (../../node_modules/openzeppelin-solidity/contracts/token/ERC721/IERC721.sol#1)
-Pragma version "^0.5.0" allows old versions (../../node_modules/openzeppelin-solidity/contracts/token/ERC20/IERC20.sol#1)
-Pragma version "^0.5.0" allows old versions (../../node_modules/openzeppelin-solidity/contracts/introspection/IERC165.sol#1)
-Pragma version "0.5.10" necessitates versions too recent to be trusted. Consider deploying with 0.5.3 (Imports.sol#1)
-Pragma version "0.5.10" necessitates versions too recent to be trusted. Consider deploying with 0.5.3 (Swap.sol#17)
-Pragma version "0.5.10" necessitates versions too recent to be trusted. Consider deploying with 0.5.3 (interfaces/ISwap.sol#17)
+Pragma version "0.5.12" allows old versions (Full.sol#20)
+Pragma version "0.5.12" allows old versions (Full.sol#172)
+Pragma version "^0.5.0" allows old versions (Full.sol#295)
+Pragma version "^0.5.0" allows old versions (Full.sol#374)
+Pragma version "^0.5.0" allows old versions (Full.sol#399)
+Pragma version "0.5.12" allows old versions (Full.sol#470)
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#incorrect-versions-of-solidity
 INFO:Detectors:
-Parameter '_order' of Types.hashOrder (../types/contracts/Types.sol#91) is not in mixedCase
-Parameter '_domainSeparator' of Types.hashOrder (../types/contracts/Types.sol#92) is not in mixedCase
-Parameter '_name' of Types.hashDomain (../types/contracts/Types.sol#135) is not in mixedCase
-Parameter '_version' of Types.hashDomain (../types/contracts/Types.sol#136) is not in mixedCase
-Parameter '_verifyingContract' of Types.hashDomain (../types/contracts/Types.sol#137) is not in mixedCase
-Parameter '_order' of Swap.swap (Swap.sol#93) is not in mixedCase
-Parameter '_signature' of Swap.swap (Swap.sol#94) is not in mixedCase
-Parameter '_nonces' of Swap.cancel (Swap.sol#328) is not in mixedCase
-Parameter '_minimumNonce' of Swap.invalidate (Swap.sol#344) is not in mixedCase
-Parameter '_delegate' of Swap.authorize (Swap.sol#357) is not in mixedCase
-Parameter '_expiry' of Swap.authorize (Swap.sol#358) is not in mixedCase
-Parameter '_delegate' of Swap.revoke (Swap.sol#372) is not in mixedCase
-Parameter '_approver' of Swap.isAuthorized (Swap.sol#385) is not in mixedCase
-Parameter '_delegate' of Swap.isAuthorized (Swap.sol#386) is not in mixedCase
-Parameter '_order' of Swap.isValid (Swap.sol#399) is not in mixedCase
-Parameter '_signature' of Swap.isValid (Swap.sol#400) is not in mixedCase
-Parameter '_domainSeparator' of Swap.isValid (Swap.sol#401) is not in mixedCase
-Parameter '_from' of Swap.transferToken (Swap.sol#439) is not in mixedCase
-Parameter '_to' of Swap.transferToken (Swap.sol#440) is not in mixedCase
-Parameter '_param' of Swap.transferToken (Swap.sol#441) is not in mixedCase
-Parameter '_token' of Swap.transferToken (Swap.sol#442) is not in mixedCase
-Parameter '_kind' of Swap.transferToken (Swap.sol#443) is not in mixedCase
-Parameter '' of ISwap.delegateApprovals (interfaces/ISwap.sol#60) is not in mixedCase
-Parameter '_scope_0' of ISwap.delegateApprovals (interfaces/ISwap.sol#60) is not in mixedCase
-Parameter '' of ISwap.makerOrderStatus (interfaces/ISwap.sol#61) is not in mixedCase
-Parameter '_scope_0' of ISwap.makerOrderStatus (interfaces/ISwap.sol#61) is not in mixedCase
-Parameter '' of ISwap.makerMinimumNonce (interfaces/ISwap.sol#62) is not in mixedCase
+Parameter '_order' of _order (Full.sol#96) is not in mixedCase
+Parameter '_domainSeparator' of _domainSeparator (Full.sol#97) is not in mixedCase
+Parameter '_name' of _name (Full.sol#140) is not in mixedCase
+Parameter '_version' of _version (Full.sol#141) is not in mixedCase
+Parameter '_verifyingContract' of _verifyingContract (Full.sol#142) is not in mixedCase
+Parameter '_order' of _order (Full.sol#535) is not in mixedCase
+Parameter '_nonces' of _nonces (Full.sol#640) is not in mixedCase
+Parameter '_minimumNonce' of _minimumNonce (Full.sol#656) is not in mixedCase
+Parameter '_authorizedSender' of _authorizedSender (Full.sol#669) is not in mixedCase
+Parameter '_expiry' of _expiry (Full.sol#670) is not in mixedCase
+Parameter '_authorizedSigner' of _authorizedSigner (Full.sol#685) is not in mixedCase
+Parameter '_expiry' of _expiry (Full.sol#686) is not in mixedCase
+Parameter '_authorizedSender' of _authorizedSender (Full.sol#700) is not in mixedCase
+Parameter '_authorizedSigner' of _authorizedSigner (Full.sol#712) is not in mixedCase
+Parameter '_approver' of _approver (Full.sol#725) is not in mixedCase
+Parameter '_delegate' of _delegate (Full.sol#726) is not in mixedCase
+Parameter '_approver' of _approver (Full.sol#739) is not in mixedCase
+Parameter '_delegate' of _delegate (Full.sol#740) is not in mixedCase
+Parameter '_order' of _order (Full.sol#752) is not in mixedCase
+Parameter '_domainSeparator' of _domainSeparator (Full.sol#753) is not in mixedCase
+Parameter '_from' of _from (Full.sol#791) is not in mixedCase
+Parameter '_to' of _to (Full.sol#792) is not in mixedCase
+Parameter '_param' of _param (Full.sol#793) is not in mixedCase
+Parameter '_token' of _token (Full.sol#794) is not in mixedCase
+Parameter '_kind' of _kind (Full.sol#795) is not in mixedCase
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#conformance-to-solidity-naming-conventions
+INFO:Detectors:
+balanceOf(address) should be declared external:
+	- IERC721.balanceOf(address) (Full.sol#413)
+ownerOf(uint256) should be declared external:
+	- IERC721.ownerOf(uint256) (Full.sol#418)
+safeTransferFrom(address,address,uint256) should be declared external:
+	- IERC721.safeTransferFrom(address,address,uint256) (Full.sol#432)
+transferFrom(address,address,uint256) should be declared external:
+	- IERC721.transferFrom(address,address,uint256) (Full.sol#441)
+approve(address,uint256) should be declared external:
+	- IERC721.approve(address,uint256) (Full.sol#442)
+getApproved(uint256) should be declared external:
+	- IERC721.getApproved(uint256) (Full.sol#443)
+setApprovalForAll(address,bool) should be declared external:
+	- IERC721.setApprovalForAll(address,bool) (Full.sol#445)
+isApprovedForAll(address,address) should be declared external:
+	- IERC721.isApprovedForAll(address,address) (Full.sol#446)
+safeTransferFrom(address,address,uint256,bytes) should be declared external:
+	- IERC721.safeTransferFrom(address,address,uint256,bytes) (Full.sol#449)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#public-function-that-could-be-declared-as-external
+INFO:Slither:Full.sol analyzed (6 contracts with 38 detectors), 46 result(s) found
