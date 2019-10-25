@@ -181,7 +181,7 @@ contract Delegate is IDelegate, Ownable {
     unsetRuleInternal(_senderToken, _signerToken);
 
     //query against indexer for amount staked
-    uint256 stakedAmount = indexer.getStakeAmount(address(this), _signerToken, _senderToken);
+    uint256 stakedAmount = indexer.getStakedAmount(address(this), _signerToken, _senderToken);
     indexer.unsetIntent(_signerToken, _senderToken);
 
     //upon unstaking the manager will be given the staking amount

@@ -78,7 +78,7 @@ interface IIndexer {
     address _senderToken
   ) external;
 
-  function getStakeAmount(
+  function getStakedAmount(
     address _user,
     address _signerToken,
     address _senderToken
@@ -94,7 +94,7 @@ interface IIndexer {
   function unsetIntentForUser(
     address _user,
     address _signerToken,
-    address _senderToken)
-  external;
+    address _senderToken
+  ) external;
 
 }

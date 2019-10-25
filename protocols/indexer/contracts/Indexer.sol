@@ -193,7 +193,7 @@ contract Indexer is IIndexer, Ownable {
     * @param _user address
     * @return uint256
     */
-  function getStakeAmount(
+  function getStakedAmount(
     address _user,
     address _signerToken,
     address _senderToken
@@ -292,7 +292,7 @@ contract Indexer is IIndexer, Ownable {
     uint256 score = indexes[_signerToken][_senderToken].getScore(_user);
 
     // Unset the locator on the index.
-    require(indexes[_signerToken][_senderToken].unsetLocator(_user), 'ENTRY_DOES_NOT_EXIST');
+    indexes[_signerToken][_senderToken].unsetLocator(_user);
 
     if (score > 0) {
       // Return the staked tokens. Reverts on failure.

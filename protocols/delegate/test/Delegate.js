@@ -160,7 +160,7 @@ contract('Delegate Integration Tests', async accounts => {
       })
 
       //check the score of the delegate before
-      let scoreBefore = await indexer.getStakeAmount(
+      let scoreBefore = await indexer.getStakedAmount(
         aliceDelegate.address,
         tokenDAI.address,
         tokenWETH.address
@@ -180,7 +180,7 @@ contract('Delegate Integration Tests', async accounts => {
       )
 
       //check the score of the manager after
-      let scoreAfter = await indexer.getStakeAmount(
+      let scoreAfter = await indexer.getStakedAmount(
         aliceDelegate.address,
         tokenDAI.address,
         tokenWETH.address
@@ -196,7 +196,7 @@ contract('Delegate Integration Tests', async accounts => {
   describe('Test unsetRuleAndIntent()', async () => {
     it('Test successfully calling unsetRuleAndIntent()', async () => {
       //check the score of the manager before
-      let scoreBefore = await indexer.getStakeAmount(
+      let scoreBefore = await indexer.getStakedAmount(
         aliceDelegate.address,
         tokenDAI.address,
         tokenWETH.address
@@ -210,7 +210,7 @@ contract('Delegate Integration Tests', async accounts => {
       )
 
       //check the score of the manager after
-      let scoreAfter = await indexer.getStakeAmount(
+      let scoreAfter = await indexer.getStakedAmount(
         aliceDelegate.address,
         tokenDAI.address,
         tokenWETH.address

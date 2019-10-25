@@ -199,12 +199,6 @@ contract('Index Unit Tests', async accounts => {
     })
 
     it('should unset the entry for a valid user', async () => {
-      // check it returns true
-      let returnValue = await index.unsetLocator.call(bobAddress, {
-        from: owner,
-      })
-      equal(returnValue, true, 'unsetLocator should have returned true')
-
       // check it emits an event correctly
       let result = await index.unsetLocator(bobAddress, { from: owner })
       emitted(result, 'UnsetLocator', event => {

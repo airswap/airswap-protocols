@@ -119,15 +119,13 @@ contract Index is Ownable {
 
     // Decrement the index length.
     length = length - 1;
-
     emit UnsetLocator(_identifier);
-    return true;
   }
 
   /**
     * @notice Get a Score
     * @param _identifier address
-    * @return (uint256, bytes32) score and locator
+    * @return uint256
     */
   function getScore(
     address _identifier

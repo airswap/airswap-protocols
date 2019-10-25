@@ -37,7 +37,7 @@ contract('Delegate Unit Tests', async accounts => {
   let mockStakingToken_transfer
   let mockStakingToken_approve
   let mockIndexer
-  let mockIndexer_getStakeAmount
+  let mockIndexer_getStakedAmount
 
   beforeEach(async () => {
     let snapShot = await takeSnapshot()
@@ -104,9 +104,9 @@ contract('Delegate Unit Tests', async accounts => {
       mockStakingToken.address
     )
 
-    //mock getStakeAmount()
-    mockIndexer_getStakeAmount = mockIndexerTemplate.contract.methods
-      .getStakeAmount(EMPTY_ADDRESS, EMPTY_ADDRESS, EMPTY_ADDRESS)
+    //mock getStakedAmount()
+    mockIndexer_getStakedAmount = mockIndexerTemplate.contract.methods
+      .getStakedAmount(EMPTY_ADDRESS, EMPTY_ADDRESS, EMPTY_ADDRESS)
       .encodeABI()
   }
 
@@ -347,7 +347,7 @@ contract('Delegate Unit Tests', async accounts => {
 
       //mock the score/staked amount to be transferred
       await mockIndexer.givenMethodReturnUint(
-        mockIndexer_getStakeAmount,
+        mockIndexer_getStakedAmount,
         mockScore
       )
 
@@ -368,7 +368,7 @@ contract('Delegate Unit Tests', async accounts => {
 
       //mock the score/staked amount to be transferred
       await mockIndexer.givenMethodReturnUint(
-        mockIndexer_getStakeAmount,
+        mockIndexer_getStakedAmount,
         mockScore
       )
 
