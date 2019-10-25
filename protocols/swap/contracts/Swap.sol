@@ -33,7 +33,7 @@ contract Swap is ISwap {
   // Unique domain identifier for use in signatures (EIP-712)
   bytes32 private domainSeparator;
 
-  // Possible nonce statuses.
+  // Possible nonce statuses
   byte constant private AVAILABLE = 0x00;
   byte constant private UNAVAILABLE = 0x01;
 
@@ -77,7 +77,7 @@ contract Swap is ISwap {
 
   /**
     * @notice Atomic Token Swap
-    * @param _order Types.Order The order being submitted for a swap
+    * @param _order Types.Order Order to settle
     */
   function swap(
     Types.Order calldata _order
@@ -182,7 +182,7 @@ contract Swap is ISwap {
     * @notice Cancel one or more open orders by nonce
     * @dev Cancelled nonces are marked UNAVAILABLE (0x01)
     * @dev Emits a Cancel event
-    * @param _nonces uint256[] The list of nonces to cancel
+    * @param _nonces uint256[] List of nonces to cancel
     */
   function cancel(
     uint256[] calldata _nonces
@@ -198,7 +198,7 @@ contract Swap is ISwap {
   /**
     * @notice Invalidate all orders below a nonce value
     * @dev Emits an Invalidate event
-    * @param _minimumNonce uint256 The minimum valid nonce
+    * @param _minimumNonce uint256 Minimum valid nonce
     */
   function invalidate(
     uint256 _minimumNonce
@@ -210,8 +210,8 @@ contract Swap is ISwap {
   /**
     * @notice Authorize a delegated sender
     * @dev Emits an AuthorizeSender event
-    * @param _authorizedSender address The authorized address
-    * @param _expiry uint256 The expiry of the authorization
+    * @param _authorizedSender address Address to authorize
+    * @param _expiry uint256 Expiry of the authorization
     */
   function authorizeSender(
     address _authorizedSender,
@@ -226,8 +226,8 @@ contract Swap is ISwap {
   /**
     * @notice Authorize a delegated signer
     * @dev Emits an AuthorizeSigner event
-    * @param _authorizedSigner address The authorized address
-    * @param _expiry uint256 The expiry of the authorization
+    * @param _authorizedSigner address Address to authorize
+    * @param _expiry uint256 Expiry of the authorization
     */
   function authorizeSigner(
     address _authorizedSigner,
@@ -242,7 +242,7 @@ contract Swap is ISwap {
   /**
     * @notice Revoke an authorized sender
     * @dev Emits a RevokeSender event
-    * @param _authorizedSender address The address being revoked
+    * @param _authorizedSender address Address to revoke
     */
   function revokeSender(
     address _authorizedSender
@@ -254,7 +254,7 @@ contract Swap is ISwap {
   /**
     * @notice Revoke an authorized signer
     * @dev Emits a RevokeSigner event
-    * @param _authorizedSigner address The address being revoked
+    * @param _authorizedSigner address Address to revoke
     */
   function revokeSigner(
     address _authorizedSigner
@@ -265,37 +265,37 @@ contract Swap is ISwap {
 
   /**
     * @notice Determine whether a sender delegate is authorized
-    * @param _approver address The address that did the authorization
-    * @param _delegate address The address that may be authorized
-    * @return bool True if a delegate is sender authorized
+    * @param _authorizer address Address doing the authorization
+    * @param _delegate address Address being authorized
+    * @return bool True if a delegate is authorized to send
     */
   function isSenderAuthorized(
-    address _approver,
+    address _authorizer,
     address _delegate
   ) internal view returns (bool) {
-    return ((_approver == _delegate) ||
-      senderAuthorizations[_approver][_delegate] > block.timestamp);
+    return ((_authorizer == _delegate) ||
+      senderAuthorizations[_authorizer][_delegate] > block.timestamp);
   }
 
   /**
     * @notice Determine whether a signer delegate is authorized
-    * @param _approver address The address that did the authorization
-    * @param _delegate address The address that may be authorized
-    * @return bool True if a delegate is signer authorized
+    * @param _authorizer address Address doing the authorization
+    * @param _delegate address Address being authorized
+    * @return bool True if a delegate is authorized to sign
     */
   function isSignerAuthorized(
-    address _approver,
+    address _authorizer,
     address _delegate
   ) internal view returns (bool) {
-    return ((_approver == _delegate) ||
-      (signerAuthorizations[_approver][_delegate] > block.timestamp));
+    return ((_authorizer == _delegate) ||
+      (signerAuthorizations[_authorizer][_delegate] > block.timestamp));
   }
 
   /**
     * @notice Validate signature using an EIP-712 typed data hash
-    * @param _order Order The order to validate
-    * @param _domainSeparator bytes32 Domain identifier used in signatures (EIP-712) 
-    * @return bool True if the signature + order is valid
+    * @param _order Types.Order Order to validate
+    * @param _domainSeparator bytes32 Domain identifier used in signatures (EIP-712)
+    * @return bool True if order has a valid signature
     */
   function isValid(
     Types.Order memory _order,
@@ -330,10 +330,10 @@ contract Swap is ISwap {
   /**
     * @notice Perform an ERC-20 or ERC-721 token transfer
     * @dev Transfer type specified by the bytes4 _kind param
-    * @param _from address The wallet address to send from
-    * @param _to address The wallet address to send to
-    * @param _param uint256 The amount for ERC-20 or token ID for ERC-721
-    * @param _token address The contract address of token
+    * @param _from address Wallet address to transfer from
+    * @param _to address Wallet address to transfer to
+    * @param _param uint256 Amount for ERC-20 or token ID for ERC-721
+    * @param _token address Contract address of token
     * @param _kind bytes4 EIP-165 interface ID of the token
     */
   function transferToken(
