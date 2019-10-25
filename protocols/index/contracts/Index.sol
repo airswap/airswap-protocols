@@ -23,21 +23,21 @@ import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
   */
 contract Index is Ownable {
 
-  // Number of entries in the index
+  // The number of entries in the index.
   uint256 public length;
 
-  // Identifier to use for the head
+  // Identifier to use for the head of the list.
   address private constant HEAD = address(uint160(2**160-1));
 
-  // Mapping of identifier to its entry
+  // Mapping of an identifier to its entry.
   mapping(address => Entry) private _entries;
 
   /**
     * @notice Index Entry
     * @param score uint256
     * @param locator bytes32
-    * @param prev address
-    * @param next address
+    * @param prev address The previous address in the linked list
+    * @param next address The next address in the linked list
     */
   struct Entry {
     bytes32 locator;
@@ -69,9 +69,9 @@ contract Index is Ownable {
 
   /**
     * @notice Set a Locator
-    * @param _identifier address
-    * @param _score uint256
-    * @param _locator bytes32
+    * @param _identifier address The on-chain address identifying the owner of a locator
+    * @param _score uint256 The score for the locator being set
+    * @param _locator bytes32 The locator
     */
   function setLocator(
     address _identifier,
@@ -98,7 +98,7 @@ contract Index is Ownable {
 
   /**
     * @notice Unset a Locator
-    * @param _identifier address
+    * @param _identifier address The on-chain address identifying the owner of a locator
     */
   function unsetLocator(
     address _identifier
@@ -123,8 +123,8 @@ contract Index is Ownable {
 
   /**
     * @notice Get a Score
-    * @param _identifier address
-    * @return uint256
+    * @param _identifier address The on-chain address identifying the owner of a locator
+    * @return uint256 The score corresponding to the identifier
     */
   function getScore(
     address _identifier
@@ -135,9 +135,9 @@ contract Index is Ownable {
   /**
     * @notice Get a Range of Locators
     * @dev _start value of 0x0 starts at the head
-    * @param _start address Identifier to start with
-    * @param _count uint256 Number of locators to return
-    * @return result bytes32[]
+    * @param _start address The identifier to start with
+    * @param _count uint256 The number of locators to return
+    * @return bytes32[] result The list of locators
     */
   function getLocators(
     address _start,
@@ -167,8 +167,8 @@ contract Index is Ownable {
 
   /**
     * @notice Check if the Index has an Entry
-    * @param _identifier address
-    * @return bool
+    * @param _identifier address The on-chain address identifying the owner of a locator
+    * @return bool True if the identifier corresponds to an Entry in the list
     */
   function hasEntry(
     address _identifier
@@ -177,9 +177,9 @@ contract Index is Ownable {
   }
 
   /**
-    * @notice Returns an Entry Lower than a Score
-    * @param _score uint256
-    * @return address
+    * @notice Returns the largest scoring Entry Lower than a Score
+    * @param _score uint256 The score in question
+    * @return address The identifier of the largest score lower than _score
     */
   function getEntryLowerThan(
     uint256 _score
@@ -198,5 +198,4 @@ contract Index is Ownable {
     }
     return identifier;
   }
-
 }

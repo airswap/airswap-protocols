@@ -92,9 +92,9 @@ library Types {
   /**
     * @notice Hash an order into bytes32
     * @dev EIP-191 header and domain separator included
-    * @param _order Order
+    * @param _order Order The order to be hashed
     * @param _domainSeparator bytes32
-    * @return bytes32 returns a keccak256 abi.encodePacked value
+    * @return bytes32 A keccak256 abi.encodePacked value
     */
   function hashOrder(
     Order calldata _order,

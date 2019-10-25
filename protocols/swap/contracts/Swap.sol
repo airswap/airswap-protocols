@@ -26,18 +26,18 @@ import "openzeppelin-solidity/contracts/token/ERC721/IERC721.sol";
   */
 contract Swap is ISwap {
 
-  // Domain and version for use in signatures (EIP-712)
+  // Domain and version for use in signatures (EIP-712).
   bytes constant internal DOMAIN_NAME = "SWAP";
   bytes constant internal DOMAIN_VERSION = "2";
-
+.
   // Unique domain identifier for use in signatures (EIP-712)
   bytes32 private domainSeparator;
 
-  // Possible nonce statuses
+  // Possible nonce statuses.
   byte constant private AVAILABLE = 0x00;
   byte constant private UNAVAILABLE = 0x01;
 
-  // ERC-721 (non-fungible token) interface identifier (ERC-165)
+  // ERC-721 (non-fungible token) interface identifier (ERC-165).
   bytes4 constant internal ERC721_INTERFACE_ID = 0x80ac58cd;
   /*
     bytes4(keccak256('balanceOf(address)')) ^
@@ -51,16 +51,16 @@ contract Swap is ISwap {
     bytes4(keccak256('safeTransferFrom(address,address,uint256,bytes)'));
   */
 
-  // Mapping of sender address to a delegated sender address and expiry
+  // Mapping of sender address to a delegated sender address and expiry.
   mapping (address => mapping (address => uint256)) public senderAuthorizations;
 
-  // Mapping of signer address to a delegated signer and expiry
+  // Mapping of signer address to a delegated signer and expiry.
   mapping (address => mapping (address => uint256)) public signerAuthorizations;
 
-  // Mapping of signers to nonces with value AVAILABLE (0x00) or UNAVAILABLE (0x01)
+  // Mapping of signers to nonces with value AVAILABLE (0x00) or UNAVAILABLE (0x01).
   mapping (address => mapping (uint256 => byte)) public signerNonceStatus;
 
-  // Mapping of signer addresses to an optionally set minimum valid nonce
+  // Mapping of signer addresses to an optionally set minimum valid nonce.
   mapping (address => uint256) public signerMinimumNonce;
 
   /**
@@ -77,7 +77,7 @@ contract Swap is ISwap {
 
   /**
     * @notice Atomic Token Swap
-    * @param _order Types.Order
+    * @param _order Types.Order The order being submitted for a swap
     */
   function swap(
     Types.Order calldata _order
@@ -182,7 +182,7 @@ contract Swap is ISwap {
     * @notice Cancel one or more open orders by nonce
     * @dev Cancelled nonces are marked UNAVAILABLE (0x01)
     * @dev Emits a Cancel event
-    * @param _nonces uint256[]
+    * @param _nonces uint256[] The list of nonces to cancel
     */
   function cancel(
     uint256[] calldata _nonces
@@ -198,7 +198,7 @@ contract Swap is ISwap {
   /**
     * @notice Invalidate all orders below a nonce value
     * @dev Emits an Invalidate event
-    * @param _minimumNonce uint256
+    * @param _minimumNonce uint256 The minimum valid nonce
     */
   function invalidate(
     uint256 _minimumNonce
@@ -210,8 +210,8 @@ contract Swap is ISwap {
   /**
     * @notice Authorize a delegated sender
     * @dev Emits an AuthorizeSender event
-    * @param _authorizedSender address to authorize
-    * @param _expiry uint256
+    * @param _authorizedSender address The authorized address
+    * @param _expiry uint256 The expiry of the authorization
     */
   function authorizeSender(
     address _authorizedSender,
@@ -226,8 +226,8 @@ contract Swap is ISwap {
   /**
     * @notice Authorize a delegated signer
     * @dev Emits an AuthorizeSigner event
-    * @param _authorizedSigner address to authorize
-    * @param _expiry uint256
+    * @param _authorizedSigner address The authorized address
+    * @param _expiry uint256 The expiry of the authorization
     */
   function authorizeSigner(
     address _authorizedSigner,
@@ -242,7 +242,7 @@ contract Swap is ISwap {
   /**
     * @notice Revoke an authorized sender
     * @dev Emits a RevokeSender event
-    * @param _authorizedSender address
+    * @param _authorizedSender address The address being revoked
     */
   function revokeSender(
     address _authorizedSender
@@ -254,7 +254,7 @@ contract Swap is ISwap {
   /**
     * @notice Revoke an authorized signer
     * @dev Emits a RevokeSigner event
-    * @param _authorizedSigner address
+    * @param _authorizedSigner address The address being revoked
     */
   function revokeSigner(
     address _authorizedSigner
@@ -265,9 +265,9 @@ contract Swap is ISwap {
 
   /**
     * @notice Determine whether a sender delegate is authorized
-    * @param _approver address
-    * @param _delegate address
-    * @return bool returns whether a delegate is sender authorized
+    * @param _approver address The address that did the authorization
+    * @param _delegate address The address that may be authorized
+    * @return bool True if a delegate is sender authorized
     */
   function isSenderAuthorized(
     address _approver,
@@ -279,9 +279,9 @@ contract Swap is ISwap {
 
   /**
     * @notice Determine whether a signer delegate is authorized
-    * @param _approver address
-    * @param _delegate address
-    * @return bool returns whether a delegate is signer authorized
+    * @param _approver address The address that did the authorization
+    * @param _delegate address The address that may be authorized
+    * @return bool True if a delegate is signer authorized
     */
   function isSignerAuthorized(
     address _approver,
@@ -293,8 +293,9 @@ contract Swap is ISwap {
 
   /**
     * @notice Validate signature using an EIP-712 typed data hash
-    * @param _order Order
-    * @return bool returns whether the signature + order is valid
+    * @param _order Order The order to validate
+    * @param _domainSeparator bytes32 Domain identifier used in signatures (EIP-712) 
+    * @return bool True if the signature + order is valid
     */
   function isValid(
     Types.Order memory _order,
@@ -329,10 +330,10 @@ contract Swap is ISwap {
   /**
     * @notice Perform an ERC-20 or ERC-721 token transfer
     * @dev Transfer type specified by the bytes4 _kind param
-    * @param _from address wallet address to send from
-    * @param _to address wallet address to send to
-    * @param _param uint256 amount for ERC-20 or token ID for ERC-721
-    * @param _token address contract address of token
+    * @param _from address The wallet address to send from
+    * @param _to address The wallet address to send to
+    * @param _param uint256 The amount for ERC-20 or token ID for ERC-721
+    * @param _token address The contract address of token
     * @param _kind bytes4 EIP-165 interface ID of the token
     */
   function transferToken(

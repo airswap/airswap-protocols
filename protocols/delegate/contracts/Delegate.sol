@@ -33,31 +33,31 @@ import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 contract Delegate is IDelegate, Ownable {
   using SafeMath for uint256;
 
-  // Swap contract to be used to settle trades
+  // The Swap contract to be used to settle trades.
   ISwap public swapContract;
 
-  // Indexer to stake intent to trade on
+  // The Indexer to stake intent to trade on.
   IIndexer public indexer;
 
-  // Maximum integer for token transfer approval
+  // Maximum integer for token transfer approval.
   uint256 constant public MAX_INT =  2**256 - 1;
 
-  // The address holding tokens that will be trading through this delegate
+  // The address holding tokens that will be trading through this delegate.
   address private _tradeWallet;
 
-  // Mapping of senderToken to signerToken for rule lookup
+  // Mapping of senderToken to signerToken for rule lookup.
   mapping (address => mapping (address => Types.Rule)) public rules;
 
-  // ERC-20 (fungible token) interface identifier (ERC-165)
+  // ERC-20 (fungible token) interface identifier (ERC-165).
   bytes4 constant internal ERC20_INTERFACE_ID = 0x277f8169;
 
   /**
     * @notice Contract Constructor
     * @dev owner defaults to msg.sender if _delegateContractOwner is not provided
-    * @param _delegateSwap address of the swap contract the delegate will deploy with
-    * @param _delegateIndexer address of the indexer contract the delegate will deploy with
-    * @param _delegateContractOwner address that should be the owner of the delegate
-    * @param _delegateTradeWallet the wallet the delegate will trade from
+    * @param _delegateSwap address The swap contract the delegate will deploy with
+    * @param _delegateIndexer address The indexer contract the delegate will deploy with
+    * @param _delegateContractOwner address The owner of the delegate
+    * @param _delegateTradeWallet address The wallet the delegate will trade from
     */
   constructor(
     ISwap _delegateSwap,
@@ -68,19 +68,19 @@ contract Delegate is IDelegate, Ownable {
     swapContract = _delegateSwap;
     indexer = _delegateIndexer;
 
-    // if no delegate owner is provided, the deploying address is the owner
+    // If no delegate owner is provided, the deploying address is the owner.
     if (_delegateContractOwner != address(0)) {
       transferOwnership(_delegateContractOwner);
     }
 
-    // if no trade wallet is provided, the owner's wallet is the trade wallet
+    // If no trade wallet is provided, the owner's wallet is the trade wallet.
     if (_delegateTradeWallet != address(0)) {
       _tradeWallet = _delegateTradeWallet;
     } else {
       _tradeWallet = owner();
     }
 
-    //ensure that the indexer can pull funds from delegate account
+    // Ensure that the indexer can pull funds from delegate account.
     require(
       IERC20(indexer.stakingToken())
       .approve(address(indexer), MAX_INT), "STAKING_APPROVAL_FAILED"
@@ -134,10 +134,10 @@ contract Delegate is IDelegate, Ownable {
     * @dev only callable by owner
     * @dev delegate needs to be given allowance from msg.sender for the _amountToStake
     * @dev swap needs to be given permission to move funds from the delegate
-    * @param _senderToken the token the delgeate will send
-    * @param _senderToken the token the delegate will receive
-    * @param _rule the rule to set on a delegate
-    * @param _amountToStake the amount to stake for an intent
+    * @param _senderToken address The token the delgeate will send
+    * @param _senderToken address The token the delegate will receive
+    * @param _rule Types.Rule The rule to set on a delegate
+    * @param _amountToStake uint256 The amount to stake for an intent
     */
   function setRuleAndIntent(
     address _senderToken,
@@ -153,6 +153,7 @@ contract Delegate is IDelegate, Ownable {
       _rule.priceExp
     );
 
+    // Transfer the staking tokens from the sender to the Delegate.
     require(
       IERC20(indexer.stakingToken())
       .transferFrom(msg.sender, address(this), _amountToStake), "STAKING_TRANSFER_FAILED"
@@ -164,14 +165,13 @@ contract Delegate is IDelegate, Ownable {
       _amountToStake,
       bytes32(uint256(address(this)) << 96) //NOTE: this will pad 0's to the right
     );
-
   }
 
   /**
     * @notice unsets a rule on the delegate and removes an intent on the indexer
     * @dev only callable by owner
-    * @param _senderToken the maker token in the token pair for rules and intents
-    * @param _signerToken the taker token  in the token pair for rules and intents
+    * @param _senderToken address The maker token in the token pair for rules and intents
+    * @param _signerToken address The taker token  in the token pair for rules and intents
     */
   function unsetRuleAndIntent(
     address _signerToken,
@@ -180,13 +180,12 @@ contract Delegate is IDelegate, Ownable {
 
     unsetRuleInternal(_senderToken, _signerToken);
 
-    //query against indexer for amount staked
+    // Query the indexer for the amount staked.
     uint256 stakedAmount = indexer.getStakedAmount(address(this), _signerToken, _senderToken);
     indexer.unsetIntent(_signerToken, _senderToken);
 
-    //upon unstaking the manager will be given the staking amount
-    //push the staking amount to the msg.sender
-
+    // Upon unstaking, the Delegate will be given the staking amount.
+    // This is returned to the msg.sender.
     require(
       IERC20(indexer.stakingToken())
         .transfer(msg.sender, stakedAmount),"STAKING_TRANSFER_FAILED"
@@ -196,7 +195,7 @@ contract Delegate is IDelegate, Ownable {
   /**
     * @notice Provide an Order
     * @dev Rules get reset with new maxSenderAmount
-    * @param _order Types.Order
+    * @param _order Types.Order The order a user wants to submit to Swap.
     */
   function provideOrder(
     Types.Order calldata _order
@@ -207,9 +206,11 @@ contract Delegate is IDelegate, Ownable {
     require(_order.signer.wallet == msg.sender,
       "SIGNER_MUST_BE_SENDER");
 
+    // Ensure the order is for the trade wallet.
     require(_order.sender.wallet == _tradeWallet,
       "INVALID_SENDER_WALLET");
 
+    // Ensure the tokens are valid ERC20 tokens.
     require(_order.signer.kind == ERC20_INTERFACE_ID,
       "SIGNER_KIND_MUST_BE_ERC20");
 
@@ -263,6 +264,7 @@ contract Delegate is IDelegate, Ownable {
   ) external view returns (
     uint256 signerParam
   ) {
+
     Types.Rule memory rule = rules[_senderToken][_signerToken];
 
     // Ensure that a rule exists.
@@ -302,11 +304,11 @@ contract Delegate is IDelegate, Ownable {
     // Ensure that a rule exists.
     if(rule.maxSenderAmount > 0) {
 
-      // Calculate the _senderParam.
+      // Calculate the senderParam.
       senderParam = _signerParam
         .mul(10 ** rule.priceExp).div(rule.priceCoef);
 
-      // Ensure the senderParam does not exceed maximum and is greater than zero.
+      // Ensure the senderParam does not exceed the maximum trade amount.
       if(senderParam <= rule.maxSenderAmount) {
         return senderParam;
       }
@@ -334,7 +336,7 @@ contract Delegate is IDelegate, Ownable {
     // Ensure that a rule exists.
     if(rule.maxSenderAmount > 0) {
 
-      // Return the maxSenderAmount and calculated _signerParam.
+      // Return the maxSenderAmount and calculated signerParam.
       return (
         rule.maxSenderAmount,
         rule.maxSenderAmount.mul(rule.priceCoef).div(10 ** rule.priceExp)

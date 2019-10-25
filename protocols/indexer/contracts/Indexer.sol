@@ -28,19 +28,19 @@ import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
   */
 contract Indexer is IIndexer, Ownable {
 
-  // Token to be used for staking (ERC-20)
+  // Token to be used for staking (ERC-20).
   IERC20 public stakingToken;
 
-  // Mapping of signer token to sender token to index
+  // Mapping of signer token to sender token to index.
   mapping (address => mapping (address => Index)) public indexes;
 
-  // Mapping of token address to boolean
+  // Mapping of token address to boolean.
   mapping (address => bool) public blacklist;
 
-  // The whitelist contract for checking whether a peer is whitelisted
+  // The whitelist contract for checking whether a peer is whitelisted.
   address public locatorWhitelist;
 
-  // boolean marks when contract is contractPaused - users cannot call function when contractPaused = true
+  // Boolean marking when the contract is paused - users cannot call functions when true
   bool public contractPaused = false;
 
   /**
@@ -54,7 +54,7 @@ contract Indexer is IIndexer, Ownable {
   }
 
   /**
-    * @notice Modifier to prevent function call unless the contract is not contractPaused
+    * @notice Modifier to prevent function calling unless the contract is not paused
     */
   modifier notPaused() {
     require(!contractPaused, "CONTRACT_IS_PAUSED");
@@ -62,7 +62,7 @@ contract Indexer is IIndexer, Ownable {
   }
 
   /**
-    * @notice Modifier to prevent function call unless the contract is contractPaused
+    * @notice Modifier to prevent function calling unless the contract is paused
     */
   modifier paused() {
     require(contractPaused, "CONTRACT_NOT_PAUSED");
@@ -72,7 +72,7 @@ contract Indexer is IIndexer, Ownable {
   /**
     * @notice Set the address of an ILocatorWhitelist to use
     * @dev Clear the whitelist with a null address (0x0)
-    * @param _locatorWhitelist address
+    * @param _locatorWhitelist address The locator whitelist
     */
   function setLocatorWhitelist(
     address _locatorWhitelist
@@ -84,8 +84,8 @@ contract Indexer is IIndexer, Ownable {
     * @notice Create an Index (List of Locators for a Token Pair)
     * @dev Deploys a new Index contract and stores the address
     *
-    * @param _signerToken address
-    * @param _senderToken address
+    * @param _signerToken address The signer token for the Index
+    * @param _senderToken address The sender token for the Index
     */
   function createIndex(
     address _signerToken,
@@ -96,6 +96,7 @@ contract Indexer is IIndexer, Ownable {
     if (indexes[_signerToken][_senderToken] == Index(0)) {
       // Create a new Index contract for the token pair.
       indexes[_signerToken][_senderToken] = new Index();
+
       emit CreateIndex(_signerToken, _senderToken);
     }
 
@@ -105,7 +106,7 @@ contract Indexer is IIndexer, Ownable {
 
   /**
     * @notice Add a Token to the Blacklist
-    * @param _token address
+    * @param _token address The token to blacklist
     */
   function addToBlacklist(
     address _token
@@ -118,7 +119,7 @@ contract Indexer is IIndexer, Ownable {
 
   /**
     * @notice Remove a Token from the Blacklist
-    * @param _token address
+    * @param _token address The token to remove from the blacklist
     */
   function removeFromBlacklist(
     address _token
@@ -133,10 +134,10 @@ contract Indexer is IIndexer, Ownable {
     * @notice Set an Intent to Trade
     * @dev Requires approval to transfer staking token for sender
     *
-    * @param _signerToken address
-    * @param _senderToken address
-    * @param _amount uint256
-    * @param _locator bytes32
+    * @param _signerToken address The signer token of the Index being staked
+    * @param _senderToken address The sender token of the Index being staked
+    * @param _amount uint256 The amount being staked
+    * @param _locator bytes32 The locator of the staker
     */
   function setIntent(
     address _signerToken,
@@ -144,13 +145,14 @@ contract Indexer is IIndexer, Ownable {
     uint256 _amount,
     bytes32 _locator
   ) external notPaused {
+
     // If whitelist set, ensure the locator is valid.
     if (locatorWhitelist != address(0)) {
       require(ILocatorWhitelist(locatorWhitelist).has(_locator),
       "LOCATOR_NOT_WHITELISTED");
     }
 
-    // Ensure both of the tokens are not blacklisted.
+    // Ensure neither of the tokens are blacklisted.
     require(!blacklist[_signerToken] && !blacklist[_senderToken],
       "PAIR_IS_BLACKLISTED");
 
@@ -176,8 +178,8 @@ contract Indexer is IIndexer, Ownable {
     * @notice Unset an Intent to Trade
     * @dev Users are allowed unstake from blacklisted indexes
     *
-    * @param _signerToken address
-    * @param _senderToken address
+    * @param _signerToken address The signer token of the Index being unstaked
+    * @param _senderToken address The sender token of the Index being staked
     */
   function unsetIntent(
     address _signerToken,
@@ -189,24 +191,25 @@ contract Indexer is IIndexer, Ownable {
   /**
     * @notice Unset Intent for a User
     * @dev Only callable by owner
+    * @dev This can be used when contractPaused to return staked tokens to users
     *
     * @param _user address
-    * @param _signerToken address
-    * @param _senderToken address
+    * @param _signerToken address The signer token of the Index being unstaked
+    * @param _senderToken address The signer token of the Index being unstaked
     */
   function unsetIntentForUser(
     address _user,
     address _signerToken,
-    address _senderToken)
-  external onlyOwner {
+    address _senderToken
+  ) external onlyOwner {
     unsetUserIntent(_user, _signerToken, _senderToken);
   }
 
   /**
     * @notice Set whether the contract is paused
-    * @dev only callable by owner
+    * @dev Only callable by owner
     *
-    * @param _newStatus bool
+    * @param _newStatus bool The new status of contractPaused
     */
   function setPausedStatus(bool _newStatus) external onlyOwner {
     contractPaused = _newStatus;
@@ -216,6 +219,7 @@ contract Indexer is IIndexer, Ownable {
     * @notice Destroy the Contract
     * @dev Only callable by owner and when contractPaused
     *
+    * @param _recipient address The recipient of any money in the contract
     */
   function killContract(address payable _recipient) external onlyOwner paused {
     selfdestruct(_recipient);
@@ -223,10 +227,10 @@ contract Indexer is IIndexer, Ownable {
 
   /**
     * @notice Gets the Stake Amount for a User
-    * @param _signerToken address
-    * @param _senderToken address
-    * @param _user address
-    * @return uint256
+    * @param _user address The user who staked
+    * @param _signerToken address The signer token the user staked on
+    * @param _senderToken address The sender token the user staked on
+    * @return uint256 The amount the user staked
     */
   function getStakedAmount(
     address _user,
@@ -245,8 +249,8 @@ contract Indexer is IIndexer, Ownable {
     * @notice Get the locators of those trading a token pair
     * @dev Users are allowed unstake from blacklisted indexes
     *
-    * @param _signerToken address
-    * @param _senderToken address
+    * @param _signerToken address The signer token of the trading pair
+    * @param _senderToken address The sender token of the trading pair
     * @param _startAddress address The address to start from
     * @param _count uint256 The total number of locators to return
     * @return locators bytes32[]
@@ -275,9 +279,9 @@ contract Indexer is IIndexer, Ownable {
 
   /**
     * @notice Unset intents and return staked tokens
-    * @param _user address
-    * @param _signerToken address
-    * @param _senderToken address
+    * @param _user address The address of the user who staked
+    * @param _signerToken address The signer token of the trading pair
+    * @param _senderToken address The sender token of the trading pair
     */
   function unsetUserIntent(
     address _user,

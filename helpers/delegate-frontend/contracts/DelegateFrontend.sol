@@ -61,7 +61,7 @@ contract DelegateFrontend {
       _maxIntents
     );
 
-    // check if delegateLocator exists
+    // Check if delegateLocator exists.
     require(delegateLocator != bytes32(0), "NO_LOCATOR, BAILING");
 
     address delegateContract = address(bytes20(delegateLocator));
@@ -131,7 +131,7 @@ contract DelegateFrontend {
       _maxIntents
     );
 
-    // check if delegateLocator exists
+    // Check if delegateLocator exists.
     require(delegateLocator != bytes32(0), "NO_LOCATOR, BAILING");
 
     address delegateContract = address(bytes20(delegateLocator));
@@ -186,8 +186,8 @@ contract DelegateFrontend {
     * @param _senderToken address The address of an ERC-20 token the delegate would send
     * @param _signerToken address The address of an ERC-20 token the signer would send
     * @param _maxIntents uint256 The maximum number of Peers to query
-    * @return delegateAddress bytes32 The locator to connect to the peer
-    * @return lowestCost uint256 The amount of ERC-20 tokens the signer would send
+    * @return bytes32 delegateAddress The locator to connect to the peer
+    * @return uint256 lowestCost The amount of ERC-20 tokens the signer would send
     */
   function getBestSenderSideQuote(
     uint256 _senderAmount,
@@ -196,21 +196,22 @@ contract DelegateFrontend {
     uint256 _maxIntents
   ) public view returns (bytes32 delegateAddress, uint256 lowestAmount) {
 
-    // use the indexer to query delegates
+    // Initialize the lowest amount as the highest integer.
     lowestAmount = MAX_INT;
 
     // Fetch an array of locators from the Indexer.
+    // Using address(0) ensures the indexer starts from the head of the list.
     bytes32[] memory locators = indexer.getLocators(
       _signerToken,
       _senderToken,
-      address(0), // This is to start at the head of the list of intents
+      address(0),
       _maxIntents
     );
 
-    // Iterate through locators
+    // Iterate through locators.
     for (uint256 i; i < locators.length; i++) {
 
-      // the end of the locators has been reached
+      // The end of the locators has been reached.
       if (locators[i] == bytes32(0)) {
         break;
       }
@@ -239,8 +240,8 @@ contract DelegateFrontend {
     * @param _signerToken address The address of an ERC-20 token the signer would send
     * @param _senderToken address The address of an ERC-20 token the peer would send
     * @param _maxIntents uint256 The maximum number of Delegates to query
-    * @return delegateLocator bytes32  The locator to connect to the delegate
-    * @return highAmount uint256 The amount of ERC-20 tokens the delegate would send
+    * @return bytes32 delegateLocator The locator to connect to the delegate
+    * @return uint256 highAmount The amount of ERC-20 tokens the delegate would send
     */
   function getBestSignerSideQuote(
     uint256 _signerAmount,
@@ -252,17 +253,18 @@ contract DelegateFrontend {
     highAmount = 0;
 
     // Fetch an array of locators from the Indexer.
+    // Using address(0) ensures the indexer starts from the head of the list.
     bytes32[] memory locators = indexer.getLocators(
       _signerToken,
       _senderToken,
-      address(0), // This is to start at the head of the list of intents
+      address(0),
       _maxIntents
     );
 
     // Iterate through locators.
     for (uint256 i; i < locators.length; i++) {
 
-      // the end of the locators has been reached
+      // The end of the locators has been reached.
       if (locators[i] == bytes32(0)) {
         break;
       }
