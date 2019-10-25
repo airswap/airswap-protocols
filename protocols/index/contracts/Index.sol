@@ -149,12 +149,11 @@ contract Index is Ownable {
 
     address identifier = _entries[HEAD].next;
 
-    // if there's a valid start user, start there instead of the head
+    // If a valid _start is provided, start there.
     if (_start != address(0) && _start != HEAD) {
-      // check they exist
+      // Check that the provided _start identifier exists.
       require(hasEntry(_start), 'START_ENTRY_NOT_FOUND');
-
-      // the locator of the start user
+      // Set the identifier to the provided _start.
       identifier = _start;
     }
 
