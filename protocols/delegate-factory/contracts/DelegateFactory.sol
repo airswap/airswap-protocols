@@ -37,10 +37,10 @@ contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
   constructor(ISwap _swapContract, IIndexer _indexerContract) public {
     // Ensure a swap contract is provided.
     require(address(_swapContract) != address(0),
-      'SWAP_CONTRACT_REQUIRED');
+      "SWAP_CONTRACT_REQUIRED");
 
     require(address(_indexerContract) != address(0),
-      'INDEXER_CONTRACT_REQUIRED');
+      "INDEXER_CONTRACT_REQUIRED");
 
     swapContract = _swapContract;
     indexerContract = _indexerContract;
@@ -58,7 +58,7 @@ contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
 
     // Ensure an owner for the delegate contract is provided.
     require(_delegateContractOwner != address(0),
-      'DELEGATE_CONTRACT_OWNER_REQUIRED');
+      "DELEGATE_CONTRACT_OWNER_REQUIRED");
 
     delegateContractAddress = address(
       new Delegate(swapContract, indexerContract, _delegateContractOwner, _delegateTradeWallet));
