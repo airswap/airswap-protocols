@@ -60,7 +60,7 @@ contract DelegateFrontend {
     lowestAmount = MAX_INT;
 
     // Fetch an array of locators from the Indexer.
-    bytes32[] memory locators = indexer.getIntents(
+    bytes32[] memory locators = indexer.getLocators(
       _signerToken,
       _senderToken,
       address(0), // This is to start at the head of the list of intents
@@ -112,7 +112,7 @@ contract DelegateFrontend {
     highAmount = 0;
 
     // Fetch an array of locators from the Indexer.
-    bytes32[] memory locators = indexer.getIntents(
+    bytes32[] memory locators = indexer.getLocators(
       _signerToken,
       _senderToken,
       address(0), // This is to start at the head of the list of intents

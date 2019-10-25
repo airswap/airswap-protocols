@@ -13,207 +13,197 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 */
-
 pragma solidity 0.5.12;
 pragma experimental ABIEncoderV2;
 
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 /**
-  * @title Index: A List of Entries
+  * @title Index: A List of Locators
   */
 contract Index is Ownable {
 
-  // Length of the linked list
+  // Number of entries in the index
   uint256 public length;
 
-  // Maximum address value to indicate the head
+  // Identifier to use for the head
   address private constant HEAD = address(uint160(2**160-1));
 
-  // Mapping of user address to its neighbors
-  mapping(address => Entry) private _listEntries;
+  // Mapping of identifier to its entry
+  mapping(address => Entry) private _entries;
 
   /**
-    * @notice Entry for a locator
-    * @dev locator is arbitrary e.g. may include an address
-    * @param user address
+    * @notice Index Entry
     * @param score uint256
     * @param locator bytes32
+    * @param prev address
+    * @param next address
     */
   struct Entry {
+    bytes32 locator;
+    uint256 score;
     address prev;
     address next;
-    uint256 score;
-    bytes32 locator;
   }
 
   /**
     * @notice Contract Events
-    * @dev Emitted with successful state changes
     */
-
-  event SetEntry(
+  event SetLocator(
+    address indexed identifier,
     uint256 score,
-    address indexed user,
     bytes32 indexed locator
   );
 
-  event UnsetEntry(
-    address indexed user
+  event UnsetLocator(
+    address indexed identifier
   );
 
   /**
     * @notice Contract Constructor
     */
   constructor() public {
-    // Initialize the linked list.
-    _listEntries[HEAD] = Entry(HEAD, HEAD, 0, bytes32(0));
+    // Create initial entry.
+    _entries[HEAD] = Entry(bytes32(0), 0, HEAD, HEAD);
   }
 
   /**
-    * @notice Set an Entry
-    *
-    * @param _user The account
+    * @notice Set a Locator
+    * @param _identifier address
     * @param _score uint256
     * @param _locator bytes32
     */
-  function setEntry(
-    address _user,
+  function setLocator(
+    address _identifier,
     uint256 _score,
     bytes32 _locator
   ) external onlyOwner {
 
-    require(!hasEntry(_user), "ENTRY_ALREADY_EXISTS");
+    // Ensure the entry does not already exist.
+    require(!hasEntry(_identifier), "ENTRY_ALREADY_EXISTS");
 
-    // Find the first user who has a lower stake, and insert before them
-    address nextUser = findPosition(_score);
+    // Find the first entry with a lower score.
+    address nextEntry = getEntryLowerThan(_score);
 
-    // Link the newUser into place.
-    address prevUser = _listEntries[nextUser].prev;
+    // Link the new entry between previous and next.
+    address prevEntry = _entries[nextEntry].prev;
+    _entries[prevEntry].next = _identifier;
+    _entries[nextEntry].prev = _identifier;
+    _entries[_identifier] = Entry(_locator, _score, prevEntry, nextEntry);
 
-    _listEntries[prevUser].next = _user;
-    _listEntries[nextUser].prev = _user;
-    _listEntries[_user] = Entry(prevUser, nextUser, _score, _locator);
-
-    // Increment the length of the linked list if successful.
+    // Increment the index length.
     length = length + 1;
-
-    emit SetEntry(_score, _user, _locator);
+    emit SetLocator(_identifier, _score, _locator);
   }
 
   /**
-    * @notice Unset an Entry
-    * @param _user address
+    * @notice Unset a Locator
+    * @param _identifier address
     * @return bool return true on success
     */
-  function unsetEntry(
-    address _user
+  function unsetLocator(
+    address _identifier
   ) external onlyOwner returns (bool) {
 
-    // Ensure the _user is in the linked list.
-    if (!hasEntry(_user)) {
-      return false;
-    }
+    // Ensure the entry exists.
+    require(hasEntry(_identifier), "ENTRY_DOES_NOT_EXIST");
 
-    // Link its neighbors together.
-    address prevUser = _listEntries[_user].prev;
-    address nextUser = _listEntries[_user].next;
+    // Link the previous and next entries together.
+    address prevUser = _entries[_identifier].prev;
+    address nextUser = _entries[_identifier].next;
+    _entries[prevUser].next = nextUser;
+    _entries[nextUser].prev = prevUser;
 
-    _listEntries[prevUser].next = nextUser;
-    _listEntries[nextUser].prev = prevUser;
+    // Delete entry from the index.
+    delete _entries[_identifier];
 
-    // Delete user from the list.
-    delete _listEntries[_user];
-
-    // Decrement the length of the linked list.
+    // Decrement the index length.
     length = length - 1;
 
-    emit UnsetEntry(_user);
+    emit UnsetLocator(_identifier);
     return true;
   }
 
   /**
-    * @notice Get the Entry information for a user
-    * @param _user address
+    * @notice Get a Score
+    * @param _identifier address
     * @return (uint256, bytes32) score and locator
     */
-  function getEntry(
-    address _user
-  ) external view returns (uint256, bytes32) {
-    return (_listEntries[_user].score, _listEntries[_user].locator);
+  function getScore(
+    address _identifier
+  ) external view returns (uint256) {
+    return _entries[_identifier].score;
   }
 
   /**
-    * @notice Get Valid Locators
-    * @dev if _startUser is provided as 0x0, the function starts from the head of the list
-    * @param _startUser address The user to start from
-    * @param _count uint256 The number of locators to return
+    * @notice Get a Range of Locators
+    * @dev _start value of 0x0 starts at the head
+    * @param _start address The identifier to start
+    * @param _count uint256 The number to return
     * @return result bytes32[]
     */
-  function fetchLocators(
-    address _startUser,
+  function getLocators(
+    address _start,
     uint256 _count
   ) external view returns (bytes32[] memory result) {
 
-    // start by holding the first user to consider
-    address user = _listEntries[HEAD].next;
+    address identifier = _entries[HEAD].next;
 
     // if there's a valid start user, start there instead of the head
-    if (_startUser != address(0) && _startUser != HEAD) {
+    if (_start != address(0) && _start != HEAD) {
       // check they exist
-      require(hasEntry(_startUser), 'USER_HAS_NO_ENTRY');
+      require(hasEntry(_start), 'START_ENTRY_NOT_FOUND');
 
       // the locator of the start user
-      user = _startUser;
+      identifier = _start;
     }
 
     result = new bytes32[](_count);
 
     // Iterate over the list until the end or count.
     uint8 i = 0;
-    while (i < _count && user != HEAD) {
-      result[i] = _listEntries[user].locator;
+    while (i < _count && identifier != HEAD) {
+      result[i] = _entries[identifier].locator;
       i = i + 1;
-      user = _listEntries[user].next;
+      identifier = _entries[identifier].next;
     }
   }
 
   /**
-    * @notice Determine Whether a user is in the Linked List
-    * @param _user address
-    * @return bool return true when user exists
+    * @notice Check if the Index has an Entry
+    * @param _identifier address
+    * @return bool
     */
   function hasEntry(
-    address _user
+    address _identifier
   ) internal view returns (bool) {
-    if (_listEntries[_user].locator != bytes32(0)) {
+    if (_entries[_identifier].locator != bytes32(0)) {
       return true;
     }
     return false;
   }
 
   /**
-    * @notice Returns the first user who staked less than _score
+    * @notice Returns an Entry Lower than a Score
     * @param _score uint256
-    * @return address of the user
+    * @return address
     */
-  function findPosition(
+  function getEntryLowerThan(
     uint256 _score
   ) internal view returns (address) {
 
-    // Get the first user in the linked list.
-    address user = _listEntries[HEAD].next;
+    address identifier = _entries[HEAD].next;
 
+    // Head indicates last because the list is circular.
     if (_score == 0) {
-      // return the head of the linked list
       return HEAD;
     }
 
-    // Iterate through the list until a lower score is found.
-    while (_score <= _listEntries[user].score) {
-      user = _listEntries[user].next;
+    // Iterate until a lower score is found.
+    while (_score <= _entries[identifier].score) {
+      identifier = _entries[identifier].next;
     }
-    return user;
+    return identifier;
   }
 
 }

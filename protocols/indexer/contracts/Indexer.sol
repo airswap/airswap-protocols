@@ -29,7 +29,7 @@ import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 contract Indexer is IIndexer, Ownable {
 
   // Token to be used for staking (ERC-20)
-  IERC20 public stakeToken;
+  IERC20 public stakingToken;
 
   // Mapping of signer token to sender token to index
   mapping (address => mapping (address => Index)) public indexes;
@@ -45,18 +45,16 @@ contract Indexer is IIndexer, Ownable {
 
   /**
     * @notice Contract Constructor
-    *
-    * @param _stakeToken address
+    * @param _stakingToken address
     */
   constructor(
-    address _stakeToken
+    address _stakingToken
   ) public {
-    stakeToken = IERC20(_stakeToken);
+    stakingToken = IERC20(_stakingToken);
   }
 
   /**
     * @notice Modifier to prevent function call unless the contract is not contractPaused
-    *
     */
   modifier notPaused() {
     require(!contractPaused, 'CONTRACT_IS_PAUSED');
@@ -65,11 +63,21 @@ contract Indexer is IIndexer, Ownable {
 
   /**
     * @notice Modifier to prevent function call unless the contract is contractPaused
-    *
     */
   modifier paused() {
     require(contractPaused, 'CONTRACT_NOT_PAUSED');
     _;
+  }
+
+  /**
+    * @notice Set the address of an ILocatorWhitelist to use
+    * @dev Clear the whitelist with a null address (0x0)
+    * @param _locatorWhitelist address
+    */
+  function setLocatorWhitelist(
+    address _locatorWhitelist
+  ) external onlyOwner {
+    locatorWhitelist = _locatorWhitelist;
   }
 
   /**
@@ -122,14 +130,6 @@ contract Indexer is IIndexer, Ownable {
   }
 
   /**
-    * set the locator whitelist address
-    * @param _locatorWhitelist address
-    */
-  function setLocatorWhitelist(address _locatorWhitelist) external onlyOwner {
-    locatorWhitelist = _locatorWhitelist;
-  }
-
-  /**
     * @notice Set an Intent to Trade
     * @dev Requires approval to transfer staking token for sender
     *
@@ -144,7 +144,7 @@ contract Indexer is IIndexer, Ownable {
     uint256 _amount,
     bytes32 _locator
   ) external notPaused {
-    // Ensure the locator is whitelisted, if relevant
+    // If whitelist set, ensure the locator is valid.
     if (locatorWhitelist != address(0)) {
       require(ILocatorWhitelist(locatorWhitelist).has(_locator),
       "LOCATOR_NOT_WHITELISTED");
@@ -162,14 +162,14 @@ contract Indexer is IIndexer, Ownable {
     if (_amount > 0) {
 
       // Transfer the _amount for staking.
-      require(stakeToken.transferFrom(msg.sender, address(this), _amount),
+      require(stakingToken.transferFrom(msg.sender, address(this), _amount),
         "UNABLE_TO_STAKE");
     }
 
     emit Stake(msg.sender, _signerToken, _senderToken, _amount);
 
     // Set the locator on the index.
-    indexes[_signerToken][_senderToken].setEntry(msg.sender, _amount, _locator);
+    indexes[_signerToken][_senderToken].setLocator(msg.sender, _amount, _locator);
   }
 
   /**
@@ -187,21 +187,23 @@ contract Indexer is IIndexer, Ownable {
   }
 
   /**
-    * @notice Gets the locator score for a token pair
+    * @notice Gets the Stake Amount for a User
     * @param _signerToken address
     * @param _senderToken address
-    * @return uint256 the locator score
+    * @param _user address
+    * @return uint256
     */
-  function getScore(address _signerToken, address _senderToken, address _user) external view returns (uint256) {
+  function getStakeAmount(
+    address _user,
+    address _signerToken,
+    address _senderToken
+  ) external view returns (uint256) {
     // Ensure the index exists.
     require(indexes[_signerToken][_senderToken] != Index(0),
       "INDEX_DOES_NOT_EXIST");
 
-    uint256 score;
-    bytes32 locator;
-
-    (score, locator) = indexes[_signerToken][_senderToken].getEntry(_user);
-    return score;
+    // Return the score, equivalent to the stake amount.
+    return indexes[_signerToken][_senderToken].getScore(_user);
   }
 
   /**
@@ -210,11 +212,11 @@ contract Indexer is IIndexer, Ownable {
     *
     * @param _signerToken address
     * @param _senderToken address
-    * @param _startAddress address The address to start from in the list of intents
-    * @param _count uint256 The total number of intents to return
-    * @return locators address[]
+    * @param _startAddress address The address to start from
+    * @param _count uint256 The total number of locators to return
+    * @return locators bytes32[]
     */
-  function getIntents(
+  function getLocators(
     address _signerToken,
     address _senderToken,
     address _startAddress,
@@ -233,11 +235,11 @@ contract Indexer is IIndexer, Ownable {
     }
 
     // Return an array of locators for the index.
-    return indexes[_signerToken][_senderToken].fetchLocators(_startAddress, _count);
+    return indexes[_signerToken][_senderToken].getLocators(_startAddress, _count);
   }
 
   /**
-    * @notice Allows the owner to pause and unpause the contract
+    * @notice Set whether the contract is paused
     * @dev only callable by owner
     *
     * @param _newStatus bool
@@ -247,20 +249,24 @@ contract Indexer is IIndexer, Ownable {
   }
 
   /**
-    * @notice Allows the owner to unset intent and return tokens
-    * @dev only callable by owner
+    * @notice Unset Intent for a User
+    * @dev Only callable by owner
     *
     * @param _user address
     * @param _signerToken address
     * @param _senderToken address
     */
-  function unsetIntentForUser(address _user, address _signerToken, address _senderToken) external onlyOwner {
+  function unsetIntentForUser(
+    address _user,
+    address _signerToken,
+    address _senderToken)
+  external onlyOwner {
     unsetUserIntent(_user, _signerToken, _senderToken);
   }
 
   /**
-    * @notice Allows the owner to destroy the contract when it is contractPaused
-    * @dev only callable by owner and when contractPaused
+    * @notice Destroy the Contract
+    * @dev Only callable by owner and when contractPaused
     *
     */
   function killContract(address payable _recipient) external onlyOwner paused {
@@ -268,28 +274,29 @@ contract Indexer is IIndexer, Ownable {
   }
 
   /**
-    * @notice Internal function that unsets a user's intent and returns tokens
+    * @notice Unset intents and return staked tokens
     * @param _user address
     * @param _signerToken address
     * @param _senderToken address
     */
-  function unsetUserIntent(address _user, address _signerToken, address _senderToken) internal {
+  function unsetUserIntent(
+    address _user,
+    address _signerToken,
+    address _senderToken
+  ) internal {
     // Ensure the index exists.
     require(indexes[_signerToken][_senderToken] != Index(0),
       "INDEX_DOES_NOT_EXIST");
 
-     // Get the score for the sender.
-    uint256 score;
-    bytes32 data;
-    (score, data) = indexes[_signerToken][_senderToken].getEntry(_user);
+     // Get the score for the _user.
+    uint256 score = indexes[_signerToken][_senderToken].getScore(_user);
 
     // Unset the locator on the index.
-    require(indexes[_signerToken][_senderToken].unsetEntry(_user), 'ENTRY_DOES_NOT_EXIST');
+    require(indexes[_signerToken][_senderToken].unsetLocator(_user), 'ENTRY_DOES_NOT_EXIST');
 
     if (score > 0) {
-      // Return the staked tokens.
-      // Need to revert when false is returned
-      require(stakeToken.transfer(_user, score));
+      // Return the staked tokens. Reverts on failure.
+      require(stakingToken.transfer(_user, score));
     }
 
     emit Unstake(_user, _signerToken, _senderToken, score);
