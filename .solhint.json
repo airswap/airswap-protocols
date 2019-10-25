@@ -15,7 +15,6 @@
     "quotes": "error",
     "max-line-length": "error",
     "no-unused-vars": "error",
-    "function-max-lines": "error",
     "no-complex-fallback": "warn",
     "check-send-result": "warn",
     "reentrancy": "warn",
