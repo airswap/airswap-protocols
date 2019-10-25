@@ -99,11 +99,10 @@ contract Index is Ownable {
   /**
     * @notice Unset a Locator
     * @param _identifier address
-    * @return bool return true on success
     */
   function unsetLocator(
     address _identifier
-  ) external onlyOwner returns (bool) {
+  ) external onlyOwner {
 
     // Ensure the entry exists.
     require(hasEntry(_identifier), "ENTRY_DOES_NOT_EXIST");
@@ -136,8 +135,8 @@ contract Index is Ownable {
   /**
     * @notice Get a Range of Locators
     * @dev _start value of 0x0 starts at the head
-    * @param _start address The identifier to start
-    * @param _count uint256 The number to return
+    * @param _start address Identifier to start with
+    * @param _count uint256 Number of locators to return
     * @return result bytes32[]
     */
   function getLocators(
@@ -174,10 +173,7 @@ contract Index is Ownable {
   function hasEntry(
     address _identifier
   ) internal view returns (bool) {
-    if (_entries[_identifier].locator != bytes32(0)) {
-      return true;
-    }
-    return false;
+    return _entries[_identifier].locator != bytes32(0);
   }
 
   /**
