@@ -27,18 +27,18 @@ import "openzeppelin-solidity/contracts/token/ERC721/IERC721.sol";
 contract Swap is ISwap {
 
   // Domain and version for use in signatures (EIP-712)
-  bytes constant internal _DOMAIN_NAME = "SWAP";
-  bytes constant internal _DOMAIN_VERSION = "2";
+  bytes constant internal DOMAIN_NAME = "SWAP";
+  bytes constant internal DOMAIN_VERSION = "2";
 
   // Unique domain identifier for use in signatures (EIP-712)
   bytes32 private _domainSeparator;
 
   // Possible nonce statuses
-  byte constant private _AVAILABLE = 0x00;
-  byte constant private _UNAVAILABLE = 0x01;
+  byte constant internal AVAILABLE = 0x00;
+  byte constant internal UNAVAILABLE = 0x01;
 
   // ERC-721 (non-fungible token) interface identifier (ERC-165)
-  bytes4 constant internal _ERC721_INTERFACE_ID = 0x80ac58cd;
+  bytes4 constant internal ERC721_INTERFACE_ID = 0x80ac58cd;
   /*
     bytes4(keccak256('balanceOf(address)')) ^
     bytes4(keccak256('ownerOf(uint256)')) ^
@@ -69,8 +69,8 @@ contract Swap is ISwap {
     */
   constructor() public {
     _domainSeparator = Types.hashDomain(
-      _DOMAIN_NAME,
-      _DOMAIN_VERSION,
+      DOMAIN_NAME,
+      DOMAIN_VERSION,
       address(this)
     );
   }
@@ -88,7 +88,7 @@ contract Swap is ISwap {
       "ORDER_EXPIRED");
 
     // Ensure the nonce is _AVAILABLE (0x00).
-    require(signerNonceStatus[order.signer.wallet][order.nonce] == _AVAILABLE,
+    require(signerNonceStatus[order.signer.wallet][order.nonce] == AVAILABLE,
       "ORDER_TAKEN_OR_CANCELLED");
 
     // Ensure the order nonce is above the minimum.
@@ -96,7 +96,7 @@ contract Swap is ISwap {
       "NONCE_TOO_LOW");
 
     // Mark the nonce _UNAVAILABLE (0x01).
-    signerNonceStatus[order.signer.wallet][order.nonce] = _UNAVAILABLE;
+    signerNonceStatus[order.signer.wallet][order.nonce] = UNAVAILABLE;
 
     // Validate the sender side of the trade.
     address finalSenderWallet;
@@ -188,8 +188,8 @@ contract Swap is ISwap {
     uint256[] calldata nonces
   ) external {
     for (uint256 i = 0; i < nonces.length; i++) {
-      if (signerNonceStatus[msg.sender][nonces[i]] == _AVAILABLE) {
-        signerNonceStatus[msg.sender][nonces[i]] = _UNAVAILABLE;
+      if (signerNonceStatus[msg.sender][nonces[i]] == AVAILABLE) {
+        signerNonceStatus[msg.sender][nonces[i]] = UNAVAILABLE;
         emit Cancel(nonces[i], msg.sender);
       }
     }
@@ -305,10 +305,11 @@ contract Swap is ISwap {
       return order.signature.signatory == ecrecover(
         Types.hashOrder(
           order,
-          domainSeparator),
-          order.signature.v,
-          order.signature.r,
-          order.signature.s
+          domainSeparator
+        ),
+        order.signature.v,
+        order.signature.r,
+        order.signature.s
       );
     }
     if (order.signature.version == byte(0x45)) {
@@ -343,7 +344,7 @@ contract Swap is ISwap {
       address token,
       bytes4 kind
   ) internal {
-    if (kind == _ERC721_INTERFACE_ID) {
+    if (kind == ERC721_INTERFACE_ID) {
       // Attempt to transfer an ERC-721 token.
       IERC721(token).safeTransferFrom(from, to, param);
     } else {
