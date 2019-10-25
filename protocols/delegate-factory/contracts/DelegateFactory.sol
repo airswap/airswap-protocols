@@ -24,15 +24,18 @@ import "@airswap/indexer/contracts/interfaces/IIndexer.sol";
 
 contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
 
+  // Mapping specifying whether an address was deployed by this factory
   mapping(address => bool) internal deployedAddresses;
+
+  // The swap and indexer contracts to use in the deployment of Delegates
   ISwap public swapContract;
   IIndexer public indexerContract;
 
   /**
     * @notice Create a new Delegate contract
     * @dev swapContract is unable to be changed after the factory sets it
-    * @param _swapContract address of the swap contract the delegate will deploy with
-    * @param _indexerContract address of the indexer contract the delegate will deploy with
+    * @param _swapContract address Swap contract the delegate will deploy with
+    * @param _indexerContract address Indexer contract the delegate will deploy with
     */
   constructor(ISwap _swapContract, IIndexer _indexerContract) public {
     // Ensure a swap contract is provided.
@@ -47,9 +50,9 @@ contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
   }
 
   /**
-    * @param _delegateContractOwner address that will become the delegate owner
-    * @param _delegateTradeWallet the wallet the delegate will trade from
-    * @return delegateContractAddress address of the delegate contract created
+    * @param _delegateContractOwner address Delegate owner
+    * @param _delegateTradeWallet address Wallet the delegate will trade from
+    * @return address delegateContractAddress Address of the delegate contract created
     */
   function createDelegate(
     address _delegateContractOwner,
@@ -78,8 +81,8 @@ contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
   /**
     * @notice To check whether a locator was deployed
     * @dev Implements ILocatorWhitelist.has
-    * @param _locator locator of the delegate in question
-    * @return bool true if the delegate was deployed by this contract
+    * @param _locator bytes32 Locator of the delegate in question
+    * @return bool True if the delegate was deployed by this contract
     */
   function has(bytes32 _locator) external view returns (bool) {
     return deployedAddresses[address(bytes20(_locator))];

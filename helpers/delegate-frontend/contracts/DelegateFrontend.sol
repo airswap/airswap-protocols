@@ -27,8 +27,10 @@ import "@airswap/swap/contracts/interfaces/ISwap.sol";
   */
 contract DelegateFrontend {
 
+  // The maximum integer that can be stored in 256 bits
   uint256 constant public MAX_INT =  2**256 - 1;
 
+  // The swap and indexer contracts for the protocol
   IIndexer public indexer;
   ISwap public swapContract;
 
@@ -41,10 +43,10 @@ contract DelegateFrontend {
     * @notice Get and fill Sender-Side Quote from the Onchain Liquidity provider
     * @dev want to fetch the lowest _signerAmount for requested _senderAmount
     * @dev if no suitable Delegate found, will revert by checking peerLocator is 0x0
-    * @param _senderAmount uint256 The amount of ERC-20 token the delegate would send
-    * @param _senderToken address The address of an ERC-20 token the delegate would send
-    * @param _signerToken address The address of an ERC-20 token the signer would send
-    * @param _maxIntents uint256 The maximum number of Delegates to query
+    * @param _senderAmount uint256 Amount of ERC-20 token the delegate would send
+    * @param _senderToken address Address of an ERC-20 token the delegate would send
+    * @param _signerToken address Address of an ERC-20 token the signer would send
+    * @param _maxIntents uint256 Maximum number of Delegates to query
     */
   function fillBestSenderSideOrder(
     uint256 _senderAmount,
@@ -61,7 +63,7 @@ contract DelegateFrontend {
       _maxIntents
     );
 
-    // check if delegateLocator exists
+    // Check if delegateLocator exists.
     require(delegateLocator != bytes32(0), "NO_LOCATOR, BAILING");
 
     address delegateContract = address(bytes20(delegateLocator));
@@ -111,10 +113,10 @@ contract DelegateFrontend {
     * @notice Get and fill Signer-Side Quote from the Onchain Liquidity provider
     * @dev want to fetch the highest _signerAmount for requested _senderAmount
     * @dev if no suitable Peer found, will revert by checking peerLocator is 0x0
-    * @param _signerAmount uint256 The amount of ERC-20 token the signer would send
-    * @param _signerToken address The address of an ERC-20 token the signer would send
-    * @param _senderToken address The address of an ERC-20 token the peer would send
-    * @param _maxIntents uint256 The maximum number of Peers to query
+    * @param _signerAmount uint256 Amount of ERC-20 token the signer would send
+    * @param _signerToken address Address of an ERC-20 token the signer would send
+    * @param _senderToken address Address of an ERC-20 token the peer would send
+    * @param _maxIntents uint256 Maximum number of Peers to query
     */
   function fillBestSignerSideOrder(
     uint256 _signerAmount,
@@ -131,7 +133,7 @@ contract DelegateFrontend {
       _maxIntents
     );
 
-    // check if delegateLocator exists
+    // Check if delegateLocator exists.
     require(delegateLocator != bytes32(0), "NO_LOCATOR, BAILING");
 
     address delegateContract = address(bytes20(delegateLocator));
@@ -182,12 +184,12 @@ contract DelegateFrontend {
     * @notice Get a Sender-Side Quote from the Onchain Liquidity provider
     * @dev want to fetch the lowest _signerAmount for requested _senderAmount
     * @dev if no suitable Delegate found, defaults to 0x0 delegateLocator
-    * @param _senderAmount uint256 The amount of ERC-20 token the delegate would send
-    * @param _senderToken address The address of an ERC-20 token the delegate would send
-    * @param _signerToken address The address of an ERC-20 token the signer would send
-    * @param _maxIntents uint256 The maximum number of Peers to query
-    * @return delegateAddress bytes32 The locator to connect to the peer
-    * @return lowestCost uint256 The amount of ERC-20 tokens the signer would send
+    * @param _senderAmount uint256 Amount of ERC-20 token the delegate would send
+    * @param _senderToken address Address of an ERC-20 token the delegate would send
+    * @param _signerToken address Address of an ERC-20 token the signer would send
+    * @param _maxIntents uint256 Maximum number of Peers to query
+    * @return bytes32 delegateAddress Locator to connect to the peer
+    * @return uint256 lowestCost Amount of ERC-20 tokens the signer would send
     */
   function getBestSenderSideQuote(
     uint256 _senderAmount,
@@ -196,21 +198,22 @@ contract DelegateFrontend {
     uint256 _maxIntents
   ) public view returns (bytes32 delegateAddress, uint256 lowestAmount) {
 
-    // use the indexer to query delegates
+    // Initialize the lowest amount as the highest integer.
     lowestAmount = MAX_INT;
 
     // Fetch an array of locators from the Indexer.
+    // Using address(0) ensures the indexer starts from the head of the list.
     bytes32[] memory locators = indexer.getLocators(
       _signerToken,
       _senderToken,
-      address(0), // This is to start at the head of the list of intents
+      address(0),
       _maxIntents
     );
 
-    // Iterate through locators
+    // Iterate through locators.
     for (uint256 i; i < locators.length; i++) {
 
-      // the end of the locators has been reached
+      // The end of the locators has been reached.
       if (locators[i] == bytes32(0)) {
         break;
       }
@@ -235,12 +238,12 @@ contract DelegateFrontend {
     * @notice Get a Signer-Side Quote from the Onchain Liquidity provider
     * @dev want to fetch the highest _senderAmount for requested _signerAmount
     * @dev if no suitable Delegate found, delegateLocator will be 0x0
-    * @param _signerAmount uint256 The amount of ERC-20 token the signer would send
-    * @param _signerToken address The address of an ERC-20 token the signer would send
-    * @param _senderToken address The address of an ERC-20 token the peer would send
-    * @param _maxIntents uint256 The maximum number of Delegates to query
-    * @return delegateLocator bytes32  The locator to connect to the delegate
-    * @return highAmount uint256 The amount of ERC-20 tokens the delegate would send
+    * @param _signerAmount uint256 Amount of ERC-20 token the signer would send
+    * @param _signerToken address Address of an ERC-20 token the signer would send
+    * @param _senderToken address Address of an ERC-20 token the peer would send
+    * @param _maxIntents uint256 Maximum number of Delegates to query
+    * @return bytes32 delegateLocator Locator to connect to the delegate
+    * @return uint256 highAmount Amount of ERC-20 tokens the delegate would send
     */
   function getBestSignerSideQuote(
     uint256 _signerAmount,
@@ -252,17 +255,18 @@ contract DelegateFrontend {
     highAmount = 0;
 
     // Fetch an array of locators from the Indexer.
+    // Using address(0) ensures the indexer starts from the head of the list.
     bytes32[] memory locators = indexer.getLocators(
       _signerToken,
       _senderToken,
-      address(0), // This is to start at the head of the list of intents
+      address(0),
       _maxIntents
     );
 
     // Iterate through locators.
     for (uint256 i; i < locators.length; i++) {
 
-      // the end of the locators has been reached
+      // The end of the locators has been reached.
       if (locators[i] == bytes32(0)) {
         break;
       }

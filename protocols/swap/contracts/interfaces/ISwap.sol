@@ -46,24 +46,24 @@ interface ISwap {
   );
 
   event AuthorizeSender(
-    address indexed approverAddress,
+    address indexed authorizerAddress,
     address indexed authorizedSender,
     uint256 expiry
   );
 
   event AuthorizeSigner(
-    address indexed approverAddress,
+    address indexed authorizerAddress,
     address indexed authorizedSigner,
     uint256 expiry
   );
 
   event RevokeSender(
-    address indexed approverAddress,
+    address indexed authorizerAddress,
     address indexed revokedSender
   );
 
   event RevokeSigner(
-    address indexed approverAddress,
+    address indexed authorizerAddress,
     address indexed revokedSigner
   );
 

@@ -26,10 +26,10 @@ import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
   */
 contract Wrapper {
 
-  // Swap contract to settle trades
+  // The Swap contract to settle trades
   ISwap public swapContract;
 
-  // WETH contract to wrap ether
+  // The WETH contract to wrap ether
   IWETH public wethContract;
 
   /**
@@ -60,7 +60,7 @@ contract Wrapper {
     * @notice Send an Order
     * @dev Sender must authorize this contract on the swapContract
     * @dev Sender must approve this contract on the wethContract
-    * @param _order Types.Order
+    * @param _order Types.Order The Order
     */
   function swap(
     Types.Order calldata _order
@@ -70,8 +70,8 @@ contract Wrapper {
     require(_order.sender.wallet == msg.sender,
       "MSG_SENDER_MUST_BE_ORDER_SENDER");
 
-    // Ensure that signature is present and
-    // will be explicitly checked in swap.
+    // Ensure that the signature is present.
+    // It will be explicitly checked in Swap.
     require(_order.signature.v != 0,
       "SIGNATURE_MUST_BE_SENT");
 
@@ -85,7 +85,7 @@ contract Wrapper {
       // Wrap (deposit) the ether.
       wethContract.deposit.value(msg.value)();
 
-      // Transfer from wrapper to sender.
+      // Transfer the WETH from the wrapper to sender.
       wethContract.transfer(_order.sender.wallet, _order.sender.param);
 
     } else {

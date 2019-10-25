@@ -225,7 +225,7 @@ contract('Swap Unit Tests', async accounts => {
       //check that event was emitted
       emitted(trx, 'AuthorizeSigner', e => {
         return (
-          e.approverAddress === sender &&
+          e.authorizerAddress === sender &&
           e.authorizedSigner === mockSigner &&
           e.expiry.toNumber() === futureTime
         )
@@ -243,7 +243,7 @@ contract('Swap Unit Tests', async accounts => {
 
       //check that the event was emitted
       emitted(trx, 'RevokeSigner', e => {
-        return e.approverAddress === sender && e.revokedSigner === mockSigner
+        return e.authorizerAddress === sender && e.revokedSigner === mockSigner
       })
     })
 
@@ -256,7 +256,7 @@ contract('Swap Unit Tests', async accounts => {
 
       //check that the event was emitted
       emitted(trx, 'RevokeSender', e => {
-        return e.approverAddress === sender && e.revokedSender === mockSender
+        return e.authorizerAddress === sender && e.revokedSender === mockSender
       })
     })
   })
