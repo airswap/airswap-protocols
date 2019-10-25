@@ -72,7 +72,7 @@ contract Indexer is IIndexer, Ownable {
   /**
     * @notice Set the address of an ILocatorWhitelist to use
     * @dev Clear the whitelist with a null address (0x0)
-    * @param _locatorWhitelist address The locator whitelist
+    * @param _locatorWhitelist address Locator whitelist
     */
   function setLocatorWhitelist(
     address _locatorWhitelist
@@ -84,8 +84,8 @@ contract Indexer is IIndexer, Ownable {
     * @notice Create an Index (List of Locators for a Token Pair)
     * @dev Deploys a new Index contract and stores the address
     *
-    * @param _signerToken address The signer token for the Index
-    * @param _senderToken address The sender token for the Index
+    * @param _signerToken address Signer token for the Index
+    * @param _senderToken address Sender token for the Index
     */
   function createIndex(
     address _signerToken,
@@ -106,7 +106,7 @@ contract Indexer is IIndexer, Ownable {
 
   /**
     * @notice Add a Token to the Blacklist
-    * @param _token address The token to blacklist
+    * @param _token address Token to blacklist
     */
   function addToBlacklist(
     address _token
@@ -119,7 +119,7 @@ contract Indexer is IIndexer, Ownable {
 
   /**
     * @notice Remove a Token from the Blacklist
-    * @param _token address The token to remove from the blacklist
+    * @param _token address Token to remove from the blacklist
     */
   function removeFromBlacklist(
     address _token
@@ -134,10 +134,10 @@ contract Indexer is IIndexer, Ownable {
     * @notice Set an Intent to Trade
     * @dev Requires approval to transfer staking token for sender
     *
-    * @param _signerToken address The signer token of the Index being staked
-    * @param _senderToken address The sender token of the Index being staked
-    * @param _amount uint256 The amount being staked
-    * @param _locator bytes32 The locator of the staker
+    * @param _signerToken address Signer token of the Index being staked
+    * @param _senderToken address Sender token of the Index being staked
+    * @param _amount uint256 Amount being staked
+    * @param _locator bytes32 Locator of the staker
     */
   function setIntent(
     address _signerToken,
@@ -178,8 +178,8 @@ contract Indexer is IIndexer, Ownable {
     * @notice Unset an Intent to Trade
     * @dev Users are allowed unstake from blacklisted indexes
     *
-    * @param _signerToken address The signer token of the Index being unstaked
-    * @param _senderToken address The sender token of the Index being staked
+    * @param _signerToken address Signer token of the Index being unstaked
+    * @param _senderToken address Sender token of the Index being staked
     */
   function unsetIntent(
     address _signerToken,
@@ -194,8 +194,8 @@ contract Indexer is IIndexer, Ownable {
     * @dev This can be used when contractPaused to return staked tokens to users
     *
     * @param _user address
-    * @param _signerToken address The signer token of the Index being unstaked
-    * @param _senderToken address The signer token of the Index being unstaked
+    * @param _signerToken address Signer token of the Index being unstaked
+    * @param _senderToken address Signer token of the Index being unstaked
     */
   function unsetIntentForUser(
     address _user,
@@ -209,7 +209,7 @@ contract Indexer is IIndexer, Ownable {
     * @notice Set whether the contract is paused
     * @dev Only callable by owner
     *
-    * @param _newStatus bool The new status of contractPaused
+    * @param _newStatus bool New status of contractPaused
     */
   function setPausedStatus(bool _newStatus) external onlyOwner {
     contractPaused = _newStatus;
@@ -219,7 +219,7 @@ contract Indexer is IIndexer, Ownable {
     * @notice Destroy the Contract
     * @dev Only callable by owner and when contractPaused
     *
-    * @param _recipient address The recipient of any money in the contract
+    * @param _recipient address Recipient of any money in the contract
     */
   function killContract(address payable _recipient) external onlyOwner paused {
     selfdestruct(_recipient);
@@ -227,10 +227,10 @@ contract Indexer is IIndexer, Ownable {
 
   /**
     * @notice Gets the Stake Amount for a User
-    * @param _user address The user who staked
-    * @param _signerToken address The signer token the user staked on
-    * @param _senderToken address The sender token the user staked on
-    * @return uint256 The amount the user staked
+    * @param _user address User who staked
+    * @param _signerToken address Signer token the user staked on
+    * @param _senderToken address Sender token the user staked on
+    * @return uint256 Amount the user staked
     */
   function getStakedAmount(
     address _user,
@@ -249,10 +249,10 @@ contract Indexer is IIndexer, Ownable {
     * @notice Get the locators of those trading a token pair
     * @dev Users are allowed unstake from blacklisted indexes
     *
-    * @param _signerToken address The signer token of the trading pair
-    * @param _senderToken address The sender token of the trading pair
-    * @param _startAddress address The address to start from
-    * @param _count uint256 The total number of locators to return
+    * @param _signerToken address Signer token of the trading pair
+    * @param _senderToken address Sender token of the trading pair
+    * @param _startAddress address Address to start from
+    * @param _count uint256 Total number of locators to return
     * @return locators bytes32[]
     */
   function getLocators(
@@ -279,9 +279,9 @@ contract Indexer is IIndexer, Ownable {
 
   /**
     * @notice Unset intents and return staked tokens
-    * @param _user address The address of the user who staked
-    * @param _signerToken address The signer token of the trading pair
-    * @param _senderToken address The sender token of the trading pair
+    * @param _user address Address of the user who staked
+    * @param _signerToken address Signer token of the trading pair
+    * @param _senderToken address Sender token of the trading pair
     */
   function unsetUserIntent(
     address _user,

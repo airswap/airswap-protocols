@@ -42,7 +42,7 @@ contract Delegate is IDelegate, Ownable {
   // Maximum integer for token transfer approval
   uint256 constant public MAX_INT =  2**256 - 1;
 
-  // The address holding tokens that will be trading through this delegate
+  // Address holding tokens that will be trading through this delegate
   address private _tradeWallet;
 
   // Mapping of senderToken to signerToken for rule lookup
@@ -54,10 +54,10 @@ contract Delegate is IDelegate, Ownable {
   /**
     * @notice Contract Constructor
     * @dev owner defaults to msg.sender if _delegateContractOwner is not provided
-    * @param _delegateSwap address The swap contract the delegate will deploy with
-    * @param _delegateIndexer address The indexer contract the delegate will deploy with
-    * @param _delegateContractOwner address The owner of the delegate
-    * @param _delegateTradeWallet address The wallet the delegate will trade from
+    * @param _delegateSwap address Swap contract the delegate will deploy with
+    * @param _delegateIndexer address Indexer contract the delegate will deploy with
+    * @param _delegateContractOwner address Owner of the delegate
+    * @param _delegateTradeWallet address Wallet the delegate will trade from
     */
   constructor(
     ISwap _delegateSwap,
@@ -91,11 +91,11 @@ contract Delegate is IDelegate, Ownable {
     * @notice Set a Trading Rule
     * @dev only callable by the owner of the contract
     * @dev 1 senderToken = priceCoef * 10^(-priceExp) * signerToken
-    * @param _senderToken address The address of an ERC-20 token the delegate would send
-    * @param _signerToken address The address of an ERC-20 token the consumer would send
-    * @param _maxSenderAmount uint256 The maximum amount of ERC-20 token the delegate would send
-    * @param _priceCoef uint256 The whole number that will be multiplied by 10^(-priceExp) - the price coefficient
-    * @param _priceExp uint256 The exponent of the price to indicate location of the decimal priceCoef * 10^(-priceExp)
+    * @param _senderToken address Address of an ERC-20 token the delegate would send
+    * @param _signerToken address Address of an ERC-20 token the consumer would send
+    * @param _maxSenderAmount uint256 Maximum amount of ERC-20 token the delegate would send
+    * @param _priceCoef uint256 Whole number that will be multiplied by 10^(-priceExp) - the price coefficient
+    * @param _priceExp uint256 Exponent of the price to indicate location of the decimal priceCoef * 10^(-priceExp)
     */
   function setRule(
     address _senderToken,
@@ -116,8 +116,8 @@ contract Delegate is IDelegate, Ownable {
   /**
     * @notice Unset a Trading Rule
     * @dev only callable by the owner of the contract, removes from a mapping
-    * @param _senderToken address The address of an ERC-20 token the delegate would send
-    * @param _signerToken address The address of an ERC-20 token the consumer would send
+    * @param _senderToken address Address of an ERC-20 token the delegate would send
+    * @param _signerToken address Address of an ERC-20 token the consumer would send
     */
   function unsetRule(
     address _senderToken,
@@ -134,10 +134,10 @@ contract Delegate is IDelegate, Ownable {
     * @dev only callable by owner
     * @dev delegate needs to be given allowance from msg.sender for the _amountToStake
     * @dev swap needs to be given permission to move funds from the delegate
-    * @param _senderToken address The token the delgeate will send
-    * @param _senderToken address The token the delegate will receive
-    * @param _rule Types.Rule The rule to set on a delegate
-    * @param _amountToStake uint256 The amount to stake for an intent
+    * @param _senderToken address Token the delgeate will send
+    * @param _senderToken address Token the delegate will receive
+    * @param _rule Types.Rule Rule to set on a delegate
+    * @param _amountToStake uint256 Amount to stake for an intent
     */
   function setRuleAndIntent(
     address _senderToken,
@@ -170,8 +170,8 @@ contract Delegate is IDelegate, Ownable {
   /**
     * @notice unsets a rule on the delegate and removes an intent on the indexer
     * @dev only callable by owner
-    * @param _senderToken address The maker token in the token pair for rules and intents
-    * @param _signerToken address The taker token  in the token pair for rules and intents
+    * @param _senderToken address Maker token in the token pair for rules and intents
+    * @param _signerToken address Taker token  in the token pair for rules and intents
     */
   function unsetRuleAndIntent(
     address _signerToken,
@@ -195,7 +195,7 @@ contract Delegate is IDelegate, Ownable {
   /**
     * @notice Provide an Order
     * @dev Rules get reset with new maxSenderAmount
-    * @param _order Types.Order The order a user wants to submit to Swap.
+    * @param _order Types.Order Order a user wants to submit to Swap.
     */
   function provideOrder(
     Types.Order calldata _order
@@ -243,7 +243,7 @@ contract Delegate is IDelegate, Ownable {
 
   /**
     * @notice Set a new trade wallet
-    * @param _newTradeWallet address The address of the new trade wallet
+    * @param _newTradeWallet address Address of the new trade wallet
     */
   function setTradeWallet(address _newTradeWallet) external onlyOwner {
     require(_newTradeWallet != address(0), "TRADE_WALLET_REQUIRED");
@@ -252,10 +252,10 @@ contract Delegate is IDelegate, Ownable {
 
   /**
     * @notice Get a Signer-Side Quote from the Delegate
-    * @param _senderParam uint256 The amount of ERC-20 token the delegate would send
-    * @param _senderToken address The address of an ERC-20 token the delegate would send
-    * @param _signerToken address The address of an ERC-20 token the consumer would send
-    * @return uint256 signerParam The amount of ERC-20 token the consumer would send
+    * @param _senderParam uint256 Amount of ERC-20 token the delegate would send
+    * @param _senderToken address Address of an ERC-20 token the delegate would send
+    * @param _signerToken address Address of an ERC-20 token the consumer would send
+    * @return uint256 signerParam Amount of ERC-20 token the consumer would send
     */
   function getSignerSideQuote(
     uint256 _senderParam,
@@ -286,10 +286,10 @@ contract Delegate is IDelegate, Ownable {
 
   /**
     * @notice Get a Sender-Side Quote from the Delegate
-    * @param _signerParam uint256 The amount of ERC-20 token the consumer would send
-    * @param _signerToken address The address of an ERC-20 token the consumer would send
-    * @param _senderToken address The address of an ERC-20 token the delegate would send
-    * @return uint256 senderParam The amount of ERC-20 token the delegate would send
+    * @param _signerParam uint256 Amount of ERC-20 token the consumer would send
+    * @param _signerToken address Address of an ERC-20 token the consumer would send
+    * @param _senderToken address Address of an ERC-20 token the delegate would send
+    * @return uint256 senderParam Amount of ERC-20 token the delegate would send
     */
   function getSenderSideQuote(
     uint256 _signerParam,
@@ -318,10 +318,10 @@ contract Delegate is IDelegate, Ownable {
 
   /**
     * @notice Get a Maximum Quote from the Delegate
-    * @param _senderToken address The address of an ERC-20 token the delegate would send
-    * @param _signerToken address The address of an ERC-20 token the consumer would send
-    * @return uint256 senderParam The amount the delegate would send
-    * @return uint256 signerParam The amount the consumer would send
+    * @param _senderToken address Address of an ERC-20 token the delegate would send
+    * @param _signerToken address Address of an ERC-20 token the consumer would send
+    * @return uint256 senderParam Amount the delegate would send
+    * @return uint256 signerParam Amount the consumer would send
     */
   function getMaxQuote(
     address _senderToken,
@@ -356,11 +356,11 @@ contract Delegate is IDelegate, Ownable {
     * @notice Set a Trading Rule
     * @dev only callable by the owner of the contract
     * @dev 1 senderToken = priceCoef * 10^(-priceExp) * signerToken
-    * @param _senderToken address The address of an ERC-20 token the delegate would send
-    * @param _signerToken address The address of an ERC-20 token the consumer would send
-    * @param _maxSenderAmount uint256 The maximum amount of ERC-20 token the delegate would send
-    * @param _priceCoef uint256 The whole number that will be multiplied by 10^(-priceExp) - the price coefficient
-    * @param _priceExp uint256 The exponent of the price to indicate location of the decimal priceCoef * 10^(-priceExp)
+    * @param _senderToken address Address of an ERC-20 token the delegate would send
+    * @param _signerToken address Address of an ERC-20 token the consumer would send
+    * @param _maxSenderAmount uint256 Maximum amount of ERC-20 token the delegate would send
+    * @param _priceCoef uint256 Whole number that will be multiplied by 10^(-priceExp) - the price coefficient
+    * @param _priceExp uint256 Exponent of the price to indicate location of the decimal priceCoef * 10^(-priceExp)
     */
   function setRuleInternal(
     address _senderToken,
@@ -387,8 +387,8 @@ contract Delegate is IDelegate, Ownable {
   /**
     * @notice Unset a Trading Rule
     * @dev only callable by the owner of the contract, removes from a mapping
-    * @param _senderToken address The address of an ERC-20 token the delegate would send
-    * @param _signerToken address The address of an ERC-20 token the consumer would send
+    * @param _senderToken address Address of an ERC-20 token the delegate would send
+    * @param _signerToken address Address of an ERC-20 token the consumer would send
     */
   function unsetRuleInternal(
     address _senderToken,

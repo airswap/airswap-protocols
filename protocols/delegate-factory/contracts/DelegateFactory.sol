@@ -34,8 +34,8 @@ contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
   /**
     * @notice Create a new Delegate contract
     * @dev swapContract is unable to be changed after the factory sets it
-    * @param _swapContract address The swap contract the delegate will deploy with
-    * @param _indexerContract address The indexer contract the delegate will deploy with
+    * @param _swapContract address Swap contract the delegate will deploy with
+    * @param _indexerContract address Indexer contract the delegate will deploy with
     */
   constructor(ISwap _swapContract, IIndexer _indexerContract) public {
     // Ensure a swap contract is provided.
@@ -50,9 +50,9 @@ contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
   }
 
   /**
-    * @param _delegateContractOwner address The delegate owner
-    * @param _delegateTradeWallet address The wallet the delegate will trade from
-    * @return address delegateContractAddress The address of the delegate contract created
+    * @param _delegateContractOwner address Delegate owner
+    * @param _delegateTradeWallet address Wallet the delegate will trade from
+    * @return address delegateContractAddress Address of the delegate contract created
     */
   function createDelegate(
     address _delegateContractOwner,
@@ -81,7 +81,7 @@ contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
   /**
     * @notice To check whether a locator was deployed
     * @dev Implements ILocatorWhitelist.has
-    * @param _locator bytes32 The locator of the delegate in question
+    * @param _locator bytes32 Locator of the delegate in question
     * @return bool True if the delegate was deployed by this contract
     */
   function has(bytes32 _locator) external view returns (bool) {

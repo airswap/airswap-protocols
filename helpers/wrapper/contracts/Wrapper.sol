@@ -60,7 +60,7 @@ contract Wrapper {
     * @notice Send an Order
     * @dev Sender must authorize this contract on the swapContract
     * @dev Sender must approve this contract on the wethContract
-    * @param _order Types.Order The order
+    * @param _order Types.Order The Order
     */
   function swap(
     Types.Order calldata _order
