@@ -28,8 +28,8 @@ contract('DelegateFrontend Unit Tests', async () => {
   let mockUserSendToken
   let mockUserReceiveToken
   let indexer_getLocators
-  let mockstakingToken
-  let mockstakingToken_approve
+  let mockStakingToken
+  let mockStakingToken_approve
 
   let emptyLocator = padAddressToLocator(EMPTY_ADDRESS)
 
@@ -121,14 +121,14 @@ contract('DelegateFrontend Unit Tests', async () => {
   }
 
   async function setupMockTokens() {
-    mockstakingToken = await MockContract.new()
+    mockStakingToken = await MockContract.new()
     let mockFungibleTokenTemplate = await FungibleToken.new()
 
-    mockstakingToken_approve = await mockFungibleTokenTemplate.contract.methods
+    mockStakingToken_approve = await mockFungibleTokenTemplate.contract.methods
       .approve(EMPTY_ADDRESS, 0)
       .encodeABI()
 
-    await mockstakingToken.givenMethodReturnBool(mockstakingToken_approve, true)
+    await mockStakingToken.givenMethodReturnBool(mockStakingToken_approve, true)
   }
 
   async function setupMockIndexer() {
@@ -144,7 +144,7 @@ contract('DelegateFrontend Unit Tests', async () => {
       .encodeABI()
     await mockIndexer.givenMethodReturnAddress(
       mockIndexer_stakingToken,
-      mockstakingToken.address
+      mockStakingToken.address
     )
   }
 

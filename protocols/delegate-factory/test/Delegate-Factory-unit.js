@@ -21,8 +21,8 @@ contract('Delegate Factory Tests', async accounts => {
   const tradeWalletTwo = accounts[5]
 
   let mockIndexer
-  let mockstakingToken
-  let mockstakingToken_approve
+  let mockStakingToken
+  let mockStakingToken_approve
 
   let snapshotId
   let delegateFactory
@@ -46,14 +46,14 @@ contract('Delegate Factory Tests', async accounts => {
   })
 
   async function setupMockToken() {
-    mockstakingToken = await MockContract.new()
+    mockStakingToken = await MockContract.new()
     let mockFungibleTokenTemplate = await FungibleToken.new()
 
-    mockstakingToken_approve = await mockFungibleTokenTemplate.contract.methods
+    mockStakingToken_approve = await mockFungibleTokenTemplate.contract.methods
       .approve(EMPTY_ADDRESS, 0)
       .encodeABI()
 
-    await mockstakingToken.givenMethodReturnBool(mockstakingToken_approve, true)
+    await mockStakingToken.givenMethodReturnBool(mockStakingToken_approve, true)
   }
 
   async function setupMockIndexer() {
@@ -66,7 +66,7 @@ contract('Delegate Factory Tests', async accounts => {
       .encodeABI()
     await mockIndexer.givenMethodReturnAddress(
       mockIndexer_stakingToken,
-      mockstakingToken.address
+      mockStakingToken.address
     )
   }
 
