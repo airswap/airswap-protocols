@@ -688,7 +688,7 @@ contract('Indexer Unit Tests', async accounts => {
   describe('Test getStakedAmount', async () => {
     it('should fail if the index does not exist', async () => {
       await reverted(
-        indexer.setIntent(tokenOne, tokenTwo, 1000, aliceLocator, {
+        indexer.getStakedAmount.call(aliceAddress, tokenOne, tokenTwo, {
           from: aliceAddress,
         }),
         'INDEX_DOES_NOT_EXIST'
@@ -702,11 +702,13 @@ contract('Indexer Unit Tests', async accounts => {
       })
 
       let stakeAmount = 1000
-      await indexer.setIntent(tokenOne, tokenTwo, stakeAmount, aliceLocator, {
-        from: aliceAddress,
-      })
+      await passes(
+        indexer.setIntent(tokenOne, tokenTwo, stakeAmount, aliceLocator, {
+          from: aliceAddress,
+        })
+      )
 
-      let val = await indexer.getStakedAmount(aliceAddress, tokenOne, tokenTwo)
+      let val = await indexer.getStakedAmount.call(aliceAddress, tokenOne, tokenTwo)
       equal(val.toNumber(), stakeAmount, 'stake was improperly saved')
     })
   })
