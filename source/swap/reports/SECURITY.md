@@ -2,7 +2,7 @@
 
 Security report by Team Fluidity (team[at]fluidity[dot]io). Smart contracts are a nascent space, and no security audit procedure has been perfected. We welcome any suggestions and comments on this report, its contents, our methodology, or potential gaps in coverage.
 
-Swap [Source Code](https://github.com/airswap/airswap-protocols/tree/master/protocols/swap) and [README](../README.md) are available in this repository. Commit used for report: [2a83c1ff2e46e6befa45889aa556fdd31e5c71fb](https://github.com/airswap/airswap-protocols/commit/2a83c1ff2e46e6befa45889aa556fdd31e5c71fb)
+Swap [Source Code](https://github.com/airswap/airswap-protocols/tree/master/source/swap) and [README](../README.md) are available in this repository. Commit used for report: [2a83c1ff2e46e6befa45889aa556fdd31e5c71fb](https://github.com/airswap/airswap-protocols/commit/2a83c1ff2e46e6befa45889aa556fdd31e5c71fb)
 
 ## Introduction
 
@@ -26,7 +26,7 @@ contracts/interfaces/ISwap.sol
 † openzeppelin-solidity/contracts/token/ERC721/IERC721.sol
 ```
 
-`*` [@airswap/types](https://github.com/airswap/airswap-protocols/tree/master/protocols/types)
+`*` [@airswap/types](https://github.com/airswap/airswap-protocols/tree/master/source/types)
 `†` [Open Zeppelin v2.0 Security Audit](https://drive.google.com/file/d/1gWUV0qz3n52VEUwoT-VlYmscPxxo9xhc/view)
 
 #### Public and external functions (non-getter functions)
