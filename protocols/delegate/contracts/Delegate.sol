@@ -53,7 +53,7 @@ contract Delegate is IDelegate, Ownable {
 
   /**
     * @notice Contract Constructor
-    * @dev owner defaults to msg.sender if delegateContractOwner is not provided
+    * @dev owner defaults to msg.sender if delegateContractOwner is provided as address(0)
     * @param delegateSwap address Swap contract the delegate will deploy with
     * @param delegateIndexer address Indexer contract the delegate will deploy with
     * @param delegateContractOwner address Owner of the delegate
