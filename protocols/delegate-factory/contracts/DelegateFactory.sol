@@ -25,7 +25,7 @@ import "@airswap/indexer/contracts/interfaces/IIndexer.sol";
 contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
 
   // Mapping specifying whether an address was deployed by this factory
-  mapping(address => bool) internal deployedAddresses;
+  mapping(address => bool) internal _deployedAddresses;
 
   // The swap and indexer contracts to use in the deployment of Delegates
   ISwap public swapContract;
@@ -34,45 +34,46 @@ contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
   /**
     * @notice Create a new Delegate contract
     * @dev swapContract is unable to be changed after the factory sets it
-    * @param _swapContract address Swap contract the delegate will deploy with
-    * @param _indexerContract address Indexer contract the delegate will deploy with
+    * @param factorySwapContract address Swap contract the delegate will deploy with
+    * @param factoryIndexerContract address Indexer contract the delegate will deploy with
     */
-  constructor(ISwap _swapContract, IIndexer _indexerContract) public {
+  constructor(ISwap factorySwapContract, IIndexer factoryIndexerContract) public {
     // Ensure a swap contract is provided.
-    require(address(_swapContract) != address(0),
+    require(address(factorySwapContract) != address(0),
       "SWAP_CONTRACT_REQUIRED");
 
-    require(address(_indexerContract) != address(0),
+    require(address(factoryIndexerContract) != address(0),
       "INDEXER_CONTRACT_REQUIRED");
 
-    swapContract = _swapContract;
-    indexerContract = _indexerContract;
+    swapContract = factorySwapContract;
+    indexerContract = factoryIndexerContract;
   }
 
   /**
-    * @param _delegateContractOwner address Delegate owner
-    * @param _delegateTradeWallet address Wallet the delegate will trade from
+    * @param delegateContractOwner address Delegate owner
+    * @param delegateTradeWallet address Wallet the delegate will trade from
     * @return address delegateContractAddress Address of the delegate contract created
     */
   function createDelegate(
-    address _delegateContractOwner,
-    address _delegateTradeWallet
+    address delegateContractOwner,
+    address delegateTradeWallet
   ) external returns (address delegateContractAddress) {
 
     // Ensure an owner for the delegate contract is provided.
-    require(_delegateContractOwner != address(0),
+    require(delegateContractOwner != address(0),
       "DELEGATE_CONTRACT_OWNER_REQUIRED");
 
     delegateContractAddress = address(
-      new Delegate(swapContract, indexerContract, _delegateContractOwner, _delegateTradeWallet));
-    deployedAddresses[delegateContractAddress] = true;
+      new Delegate(swapContract, indexerContract, delegateContractOwner, delegateTradeWallet)
+    );
+    _deployedAddresses[delegateContractAddress] = true;
 
     emit CreateDelegate(
       delegateContractAddress,
       address(swapContract),
       address(indexerContract),
-      _delegateContractOwner,
-      _delegateTradeWallet
+      delegateContractOwner,
+      delegateTradeWallet
     );
 
     return delegateContractAddress;
@@ -81,11 +82,11 @@ contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
   /**
     * @notice To check whether a locator was deployed
     * @dev Implements ILocatorWhitelist.has
-    * @param _locator bytes32 Locator of the delegate in question
+    * @param locator bytes32 Locator of the delegate in question
     * @return bool True if the delegate was deployed by this contract
     */
-  function has(bytes32 _locator) external view returns (bool) {
-    return deployedAddresses[address(bytes20(_locator))];
+  function has(bytes32 locator) external view returns (bool) {
+    return _deployedAddresses[address(bytes20(locator))];
   }
 
 }
