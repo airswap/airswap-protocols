@@ -70,7 +70,9 @@ jobs:
               NPM_VERSION=$(npm view $NPM_NAME version || :)
               LOCAL_VERSION=$(node -p "require('./package.json').version")
               if [[ $LOCAL_VERSION != $NPM_VERSION ]]; then
-                echo "Updating NPM..." # this is where we deploy the code to npm
+                echo "Generating build..."
+                yarn compile
+                echo "Publishing to NPM..." # this is where we deploy the code to npm
                 npm publish
                 npm access public $NPM_NAME
               fi
@@ -88,7 +90,9 @@ jobs:
               NPM_VERSION=$(npm view $NPM_NAME version || :)
               LOCAL_VERSION=$(node -p "require('./package.json').version")
               if [[ $LOCAL_VERSION != $NPM_VERSION ]]; then
-                echo "Updating NPM..." # this is where we deploy the code to npm
+                echo "Generating build..."
+                yarn compile
+                echo "Publishing to NPM..." # this is where we deploy the code to npm
                 npm publish
                 npm access public $NPM_NAME
               fi

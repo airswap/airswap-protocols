@@ -318,13 +318,13 @@ contract('Delegate Unit Tests', async accounts => {
 
   describe('Test setRuleAndIntent()', async () => {
     it('Test calling setRuleAndIntent with transfer error', async () => {
-      let intentAmount = 250
+      let stakeAmount = 250
 
       let rule = [100000, 300, 0]
 
       await mockStakingToken.givenMethodReturnUint(
         mockStakingToken_allowance,
-        intentAmount
+        stakeAmount
       )
       //mock unsuccessful transfer
       await mockStakingToken.givenMethodReturnBool(
@@ -333,19 +333,34 @@ contract('Delegate Unit Tests', async accounts => {
       )
 
       await reverted(
-        delegate.setRuleAndIntent(MOCK_WETH, MOCK_DAI, rule, intentAmount),
+        delegate.setRuleAndIntent(MOCK_WETH, MOCK_DAI, rule, stakeAmount),
         'STAKING_TRANSFER_FAILED'
       )
     })
 
-    it('Test successfully calling setRuleAndIntent', async () => {
-      let intentAmount = 250
+    it('Test successfully calling setRuleAndIntent with 0 staked amount', async () => {
+      let stakeAmount = 0
+
+      let rule = [100000, 300, 0]
+
+      await mockStakingToken.givenMethodReturnBool(
+        mockStakingToken_approve,
+        true
+      )
+
+      await passes(
+        delegate.setRuleAndIntent(MOCK_WETH, MOCK_DAI, rule, stakeAmount)
+      )
+    })
+
+    it('Test successfully calling setRuleAndIntent with staked amount', async () => {
+      let stakeAmount = 250
 
       let rule = [100000, 300, 0]
 
       await mockStakingToken.givenMethodReturnUint(
         mockStakingToken_allowance,
-        intentAmount
+        stakeAmount
       )
       await mockStakingToken.givenMethodReturnBool(
         mockStakingToken_transferFrom,
@@ -357,7 +372,7 @@ contract('Delegate Unit Tests', async accounts => {
       )
 
       await passes(
-        delegate.setRuleAndIntent(MOCK_WETH, MOCK_DAI, rule, intentAmount)
+        delegate.setRuleAndIntent(MOCK_WETH, MOCK_DAI, rule, stakeAmount)
       )
     })
   })
@@ -384,7 +399,19 @@ contract('Delegate Unit Tests', async accounts => {
       )
     })
 
-    it('Test successfully calling unsetRuleAndIntent()', async () => {
+    it('Test successfully calling unsetRuleAndIntent() with 0 staked amount', async () => {
+      let mockScore = 0
+
+      //mock the score/staked amount to be transferred
+      await mockIndexer.givenMethodReturnUint(
+        mockIndexer_getStakedAmount,
+        mockScore
+      )
+
+      await passes(delegate.unsetRuleAndIntent(MOCK_WETH, MOCK_DAI))
+    })
+
+    it('Test successfully calling unsetRuleAndIntent() with staked amount', async () => {
       let mockScore = 1000
 
       //mock the score/staked amount to be transferred
