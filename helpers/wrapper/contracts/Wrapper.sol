@@ -34,15 +34,15 @@ contract Wrapper {
 
   /**
     * @notice Contract Constructor
-    * @param _swapContract address
-    * @param _wethContract address
+    * @param wrapperSwapContract address
+    * @param wrapperWethContract address
     */
   constructor(
-    address _swapContract,
-    address _wethContract
+    address wrapperSwapContract,
+    address wrapperWethContract
   ) public {
-    swapContract = ISwap(_swapContract);
-    wethContract = IWETH(_wethContract);
+    swapContract = ISwap(wrapperSwapContract);
+    wethContract = IWETH(wrapperWethContract);
   }
 
   /**
@@ -60,33 +60,33 @@ contract Wrapper {
     * @notice Send an Order
     * @dev Sender must authorize this contract on the swapContract
     * @dev Sender must approve this contract on the wethContract
-    * @param _order Types.Order The Order
+    * @param order Types.Order The Order
     */
   function swap(
-    Types.Order calldata _order
+    Types.Order calldata order
   ) external payable {
 
     // Ensure msg.sender is sender wallet.
-    require(_order.sender.wallet == msg.sender,
-      "MSG_SENDER_MUST_BE_ORDER_SENDER");
+    require(order.sender.wallet == msg.sender,
+      "MSG_SENDER_MUST_BEorder_SENDER");
 
     // Ensure that the signature is present.
     // It will be explicitly checked in Swap.
-    require(_order.signature.v != 0,
+    require(order.signature.v != 0,
       "SIGNATURE_MUST_BE_SENT");
 
     // The sender is sending ether that must be wrapped.
-    if (_order.sender.token == address(wethContract)) {
+    if (order.sender.token == address(wethContract)) {
 
       // Ensure message value is sender param.
-      require(_order.sender.param == msg.value,
+      require(order.sender.param == msg.value,
         "VALUE_MUST_BE_SENT");
 
       // Wrap (deposit) the ether.
       wethContract.deposit.value(msg.value)();
 
       // Transfer the WETH from the wrapper to sender.
-      wethContract.transfer(_order.sender.wallet, _order.sender.param);
+      wethContract.transfer(order.sender.wallet, order.sender.param);
 
     } else {
 
@@ -97,20 +97,20 @@ contract Wrapper {
     }
 
     // Perform the swap.
-    swapContract.swap(_order);
+    swapContract.swap(order);
 
     // The sender is receiving ether that must be unwrapped.
-    if (_order.signer.token == address(wethContract)) {
+    if (order.signer.token == address(wethContract)) {
 
       // Transfer from the sender to the wrapper.
-      wethContract.transferFrom(_order.sender.wallet, address(this), _order.signer.param);
+      wethContract.transferFrom(order.sender.wallet, address(this), order.signer.param);
 
       // Unwrap (withdraw) the ether.
-      wethContract.withdraw(_order.signer.param);
+      wethContract.withdraw(order.signer.param);
 
       // Transfer ether to the user.
       // solium-disable-next-line security/no-call-value
-      msg.sender.call.value(_order.signer.param)("");
+      msg.sender.call.value(order.signer.param)("");
     }
   }
 }
