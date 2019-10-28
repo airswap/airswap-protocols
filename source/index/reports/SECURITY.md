@@ -3,7 +3,7 @@
 Smart Contract Security Report by Team Fluidity (team[at]fluidity[dot]io) and Phil Daian (feedback[at]stableset[dot]com)
 Hash of master used for report: [ef5cff0613532d27ecedb332e222ae0a75079841](https://github.com/airswap/airswap-protocols/commit/ef5cff0613532d27ecedb332e222ae0a75079841)
 
-Index [Source Code](https://github.com/airswap/airswap-protocols/tree/master/protocols/index) and [README](../README.md)
+Index [Source Code](https://github.com/airswap/airswap-protocols/tree/master/source/index) and [README](../README.md)
 
 ## Introduction
 
@@ -125,8 +125,8 @@ TODO
 #### Unit and Integration Tests
 
 ```
-protocols/index/test/Index-unit.js
-protocols/index/test/Index-test.js
+source/index/test/Index-unit.js
+source/index/test/Index-test.js
 ```
 
 #### Test Coverage
