@@ -45,7 +45,7 @@ contract Indexer is IIndexer, Ownable {
 
   /**
     * @notice Contract Constructor
-    * @param _stakingToken address
+    * @param indexerStakingToken address
     */
   constructor(
     address indexerStakingToken
@@ -72,7 +72,7 @@ contract Indexer is IIndexer, Ownable {
   /**
     * @notice Set the address of an ILocatorWhitelist to use
     * @dev Clear the whitelist with a null address (0x0)
-    * @param locatorWhitelist address Locator whitelist
+    * @param newLocatorWhitelist address Locator whitelist
     */
   function setLocatorWhitelist(
     address newLocatorWhitelist
