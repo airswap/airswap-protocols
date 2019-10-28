@@ -78,6 +78,13 @@ contract('Delegate Factory Tests', async accounts => {
       )
     })
 
+    it('should not deploy a factory with indexer address 0x0', async () => {
+      await reverted(
+        DelegateFactory.new(swapContract, EMPTY_ADDRESS),
+        'INDEXER_CONTRACT_REQUIRED'
+      )
+    })
+
     it('should have set swapContract', async () => {
       let val = await delegateFactory.swapContract.call()
       equal(
