@@ -188,7 +188,7 @@ contract Delegate is IDelegate, Ownable {
 
     // Upon unstaking, the Delegate will be given the staking amount.
     // This is returned to the msg.sender.
-    if (amountToStake > 0) {
+    if (stakedAmount > 0) {
       require(
         IERC20(indexer.stakingToken())
           .transfer(msg.sender, stakedAmount),"STAKING_TRANSFER_FAILED"
