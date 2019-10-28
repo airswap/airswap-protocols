@@ -50,51 +50,51 @@ interface IIndexer {
   function blacklist(address) external returns (bool);
 
   function setLocatorWhitelist(
-    address _locatorWhitelist
+    address locatorWhitelist
   ) external;
 
   function createIndex(
-    address _signerToken,
-    address _senderToken
+    address signerToken,
+    address senderToken
   ) external returns (address);
 
   function addToBlacklist(
-    address _token
+    address token
   ) external;
 
   function removeFromBlacklist(
-    address _token
+    address token
   ) external;
 
   function setIntent(
-    address _signerToken,
-    address _senderToken,
-    uint256 _amount,
-    bytes32 _locator
+    address signerToken,
+    address senderToken,
+    uint256 amount,
+    bytes32 locator
   ) external;
 
   function unsetIntent(
-    address _signerToken,
-    address _senderToken
+    address signerToken,
+    address senderToken
   ) external;
 
   function unsetIntentForUser(
-    address _user,
-    address _signerToken,
-    address _senderToken
+    address user,
+    address signerToken,
+    address senderToken
   ) external;
 
   function getStakedAmount(
-    address _user,
-    address _signerToken,
-    address _senderToken
+    address user,
+    address signerToken,
+    address senderToken
   ) external view returns (uint256);
 
   function getLocators(
-    address _signerToken,
-    address _senderToken,
-    address _startAddress,
-    uint256 _count
+    address signerToken,
+    address senderToken,
+    address startAddress,
+    uint256 count
   ) external view returns (bytes32[] memory);
 
 }
