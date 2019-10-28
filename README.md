@@ -20,21 +20,21 @@
 
 | Package                                                    | Version                                                                                                                   | Description                         |
 | :--------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------ | :---------------------------------- |
-| [`@airswap/swap`](/protocols/swap)                         | [![npm](https://img.shields.io/npm/v/@airswap/swap)](https://www.npmjs.com/package/@airswap/swap)                         | Atomic Swap Between Tokens          |
-| [`@airswap/indexer`](/protocols/indexer)                   | [![npm](https://img.shields.io/npm/v/@airswap/indexer)](https://www.npmjs.com/package/@airswap/indexer)                   | Counterparty Discovery with Staking |
-| [`@airswap/index`](/protocols/index)                       | [![npm](https://img.shields.io/npm/v/@airswap/index)](https://www.npmjs.com/package/@airswap/index)                       | Ordered List of Locators            |
-| [`@airswap/delegate`](/protocols/delegate)                 | [![npm](https://img.shields.io/npm/v/@airswap/delegate)](https://www.npmjs.com/package/@airswap/delegate)                 | Onchain Trading Delegate            |
-| [`@airswap/delegate-factory`](/protocols/delegate-factory) | [![npm](https://img.shields.io/npm/v/@airswap/delegate-factory)](https://www.npmjs.com/package/@airswap/delegate-factory) | Deploys New Delegates               |
-| [`@airswap/types`](/protocols/types)                       | [![npm](https://img.shields.io/npm/v/@airswap/types)](https://www.npmjs.com/package/@airswap/types)                       | Types and Hashes                    |
-| [`@airswap/wrapper`](/helpers/wrapper)                     | [![npm](https://img.shields.io/npm/v/@airswap/wrapper)](https://www.npmjs.com/package/@airswap/wrapper)                   | Use ether for WETH trades           |
-| [`@airswap/tokens`](/helpers/tokens)                       | [![npm](https://img.shields.io/npm/v/@airswap/tokens)](https://www.npmjs.com/package/@airswap/tokens)                     | Ethereum Tokens                     |
+| [`@airswap/swap`](/source/swap)                         | [![npm](https://img.shields.io/npm/v/@airswap/swap)](https://www.npmjs.com/package/@airswap/swap)                         | Atomic Swap Between Tokens          |
+| [`@airswap/indexer`](/source/indexer)                   | [![npm](https://img.shields.io/npm/v/@airswap/indexer)](https://www.npmjs.com/package/@airswap/indexer)                   | Counterparty Discovery with Staking |
+| [`@airswap/index`](/source/index)                       | [![npm](https://img.shields.io/npm/v/@airswap/index)](https://www.npmjs.com/package/@airswap/index)                       | Ordered List of Locators            |
+| [`@airswap/delegate`](/source/delegate)                 | [![npm](https://img.shields.io/npm/v/@airswap/delegate)](https://www.npmjs.com/package/@airswap/delegate)                 | Onchain Trading Delegate            |
+| [`@airswap/delegate-factory`](/source/delegate-factory) | [![npm](https://img.shields.io/npm/v/@airswap/delegate-factory)](https://www.npmjs.com/package/@airswap/delegate-factory) | Deploys New Delegates               |
+| [`@airswap/types`](/source/types)                       | [![npm](https://img.shields.io/npm/v/@airswap/types)](https://www.npmjs.com/package/@airswap/types)                       | Types and Hashes                    |
+| [`@airswap/wrapper`](/source/wrapper)                     | [![npm](https://img.shields.io/npm/v/@airswap/wrapper)](https://www.npmjs.com/package/@airswap/wrapper)                   | Use ether for WETH trades           |
+| [`@airswap/tokens`](/source/tokens)                       | [![npm](https://img.shields.io/npm/v/@airswap/tokens)](https://www.npmjs.com/package/@airswap/tokens)                     | Ethereum Tokens                     |
 
 ## JavaScript Libraries
 
 | Package                                         | Version                                                                                                         | Description            |
 | :---------------------------------------------- | :-------------------------------------------------------------------------------------------------------------- | :--------------------- |
-| [`@airswap/order-utils`](/packages/order-utils) | [![npm](https://img.shields.io/npm/v/@airswap/order-utils)](https://www.npmjs.com/package/@airswap/order-utils) | Create and Sign Orders |
-| [`@airswap/test-utils`](/packages/test-utils)   | [![npm](https://img.shields.io/npm/v/@airswap/test-utils)](https://www.npmjs.com/package/@airswap/test-utils)   | Test Utilities         |
+| [`@airswap/order-utils`](/utils/order-utils) | [![npm](https://img.shields.io/npm/v/@airswap/order-utils)](https://www.npmjs.com/package/@airswap/order-utils) | Create and Sign Orders |
+| [`@airswap/test-utils`](/utils/test-utils)   | [![npm](https://img.shields.io/npm/v/@airswap/test-utils)](https://www.npmjs.com/package/@airswap/test-utils)   | Test Utilities         |
 
 ## Commands
 

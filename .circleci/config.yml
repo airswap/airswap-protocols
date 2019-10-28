@@ -59,9 +59,9 @@ jobs:
           name: Set up the npm user
           command: npm-login-noninteractive
       - run:
-          name: NPM publish packages
+          name: NPM publish utils
           command: |
-            cd packages
+            cd utils
             ### ADD FOLDERS HERE TO PROCESS ###
             for file in order-utils test-utils
             do
@@ -77,29 +77,11 @@ jobs:
               cd ..
             done
       - run:
-          name: NPM publish helpers
+          name: NPM publish source
           command: |
-            cd helpers
+            cd source
             ### ADD FOLDERS HERE TO PROCESS ###
-            for file in tokens wrapper
-            do
-              cd $file
-              NPM_NAME=$(node -p "require('./package.json').name")
-              NPM_VERSION=$(npm view $NPM_NAME version || :)
-              LOCAL_VERSION=$(node -p "require('./package.json').version")
-              if [[ $LOCAL_VERSION != $NPM_VERSION ]]; then
-                echo "Updating NPM..." # this is where we deploy the code to npm
-                npm publish
-                npm access public $NPM_NAME
-              fi
-              cd ..
-            done
-      - run:
-          name: NPM publish protocols
-          command: |
-            cd protocols
-            ### ADD FOLDERS HERE TO PROCESS ###
-            for file in indexer index delegate delegate-factory swap types
+            for file in indexer index delegate delegate-factory swap types tokens wrapper
             do
               cd $file
               NPM_NAME=$(node -p "require('./package.json').name")
