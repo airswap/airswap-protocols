@@ -68,7 +68,7 @@ contract Wrapper {
 
     // Ensure msg.sender is sender wallet.
     require(order.sender.wallet == msg.sender,
-      "MSG_SENDER_MUST_BEorder_SENDER");
+      "MSG_SENDER_MUST_BE_ORDER_SENDER");
 
     // Ensure that the signature is present.
     // It will be explicitly checked in Swap.
