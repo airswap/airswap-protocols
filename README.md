@@ -33,8 +33,8 @@
 
 | Package                                         | Version                                                                                                         | Description            |
 | :---------------------------------------------- | :-------------------------------------------------------------------------------------------------------------- | :--------------------- |
-| [`@airswap/order-utils`](/packages/order-utils) | [![npm](https://img.shields.io/npm/v/@airswap/order-utils)](https://www.npmjs.com/package/@airswap/order-utils) | Create and Sign Orders |
-| [`@airswap/test-utils`](/packages/test-utils)   | [![npm](https://img.shields.io/npm/v/@airswap/test-utils)](https://www.npmjs.com/package/@airswap/test-utils)   | Test Utilities         |
+| [`@airswap/order-utils`](/utils/order-utils) | [![npm](https://img.shields.io/npm/v/@airswap/order-utils)](https://www.npmjs.com/package/@airswap/order-utils) | Create and Sign Orders |
+| [`@airswap/test-utils`](/utils/test-utils)   | [![npm](https://img.shields.io/npm/v/@airswap/test-utils)](https://www.npmjs.com/package/@airswap/test-utils)   | Test Utilities         |
 
 ## Commands
 

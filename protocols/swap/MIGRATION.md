@@ -26,7 +26,7 @@ const sig = await web3.eth.sign(ethUtil.bufferToHex(msg), signer)
 return ethUtil.fromRpcSig(sig)
 ```
 
-**V2** hashes arguments according to an [EIP712](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-712.md) structure. See [`@airswap/order-utils`](../../packages/order-utils) for the JavaScript source and [`@airswap/types`](../types) for the Solidity source.
+**V2** hashes arguments according to an [EIP712](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-712.md) structure. See [`@airswap/order-utils`](../../utils/order-utils) for the JavaScript source and [`@airswap/types`](../types) for the Solidity source.
 
 ```JavaScript
 const { hashes } = require('@airswap/order-utils')

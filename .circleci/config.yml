@@ -59,9 +59,9 @@ jobs:
           name: Set up the npm user
           command: npm-login-noninteractive
       - run:
-          name: NPM publish packages
+          name: NPM publish utils
           command: |
-            cd packages
+            cd utils
             ### ADD FOLDERS HERE TO PROCESS ###
             for file in order-utils test-utils
             do
