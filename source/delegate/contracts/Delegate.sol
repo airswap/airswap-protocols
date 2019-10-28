@@ -154,10 +154,12 @@ contract Delegate is IDelegate, Ownable {
     );
 
     // Transfer the staking tokens from the sender to the Delegate.
-    require(
-      IERC20(indexer.stakingToken())
-      .transferFrom(msg.sender, address(this), amountToStake), "STAKING_TRANSFER_FAILED"
-    );
+    if (amountToStake > 0) {
+      require(
+        IERC20(indexer.stakingToken())
+        .transferFrom(msg.sender, address(this), amountToStake), "STAKING_TRANSFER_FAILED"
+      );
+    }
 
     indexer.setIntent(
       signerToken,
@@ -186,10 +188,12 @@ contract Delegate is IDelegate, Ownable {
 
     // Upon unstaking, the Delegate will be given the staking amount.
     // This is returned to the msg.sender.
-    require(
-      IERC20(indexer.stakingToken())
-        .transfer(msg.sender, stakedAmount),"STAKING_TRANSFER_FAILED"
-    );
+    if (amountToStake > 0) {
+      require(
+        IERC20(indexer.stakingToken())
+          .transfer(msg.sender, stakedAmount),"STAKING_TRANSFER_FAILED"
+      );
+    }
   }
 
   /**
