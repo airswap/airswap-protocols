@@ -38,13 +38,6 @@ contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
     * @param factoryIndexerContract address Indexer contract the delegate will deploy with
     */
   constructor(ISwap factorySwapContract, IIndexer factoryIndexerContract) public {
-    // Ensure a swap contract is provided.
-    require(address(factorySwapContract) != address(0),
-      "SWAP_CONTRACT_REQUIRED");
-
-    require(address(factoryIndexerContract) != address(0),
-      "INDEXER_CONTRACT_REQUIRED");
-
     swapContract = factorySwapContract;
     indexerContract = factoryIndexerContract;
   }
