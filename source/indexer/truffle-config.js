@@ -1,6 +1,5 @@
-const HDWalletProvider = require("truffle-hdwallet-provider");
-
 require('dotenv').config()
+const HDWalletProvider = require("truffle-hdwallet-provider");
 
 module.exports = {
   networks: {
@@ -24,9 +23,7 @@ module.exports = {
         process.env.MNEMONIC,
         "https://rinkeby.infura.io/v3/" + process.env.INFURA_API_KEY
       ),
-      from: 
-      gasPrice: 2290000000, // currently 2.29 Gwei
-      gas: 4898551 // may need to change
+      from: process.env.ACCOUNT_0
     }
   },
   compilers: {
