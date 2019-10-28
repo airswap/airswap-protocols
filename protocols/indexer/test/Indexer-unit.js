@@ -702,11 +702,9 @@ contract('Indexer Unit Tests', async accounts => {
       })
 
       let stakeAmount = 1000
-      await passes(
-        indexer.setIntent(tokenOne, tokenTwo, stakeAmount, aliceLocator, {
-          from: aliceAddress,
-        })
-      )
+      await indexer.setIntent(tokenOne, tokenTwo, stakeAmount, aliceLocator, {
+        from: aliceAddress,
+      })
 
       let val = await indexer.getStakedAmount.call(
         aliceAddress,
