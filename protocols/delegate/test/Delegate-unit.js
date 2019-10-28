@@ -185,7 +185,7 @@ contract('Delegate Unit Tests', async accounts => {
       equal(val, notOwner, 'owner is incorrect - should be notOwner')
     })
 
-    it('Test indexer is unable to pull funds from delegate account', async() => {
+    it('Test indexer is unable to pull funds from delegate account', async () => {
       //force approval to fail
       await mockStakingToken.givenMethodReturnBool(
         mockStakingToken_approve,
@@ -201,8 +201,8 @@ contract('Delegate Unit Tests', async accounts => {
           {
             from: owner,
           }
-        ), 
-        "STAKING_APPROVAL_FAILED"
+        ),
+        'STAKING_APPROVAL_FAILED'
       )
     })
   })
