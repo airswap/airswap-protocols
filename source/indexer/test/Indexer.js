@@ -31,7 +31,6 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
     snapshotId = snapShot['result']
   })
 
-  
   after(async () => {
     await revertToSnapShot(snapshotId)
   })
