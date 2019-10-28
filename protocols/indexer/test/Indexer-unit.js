@@ -708,7 +708,11 @@ contract('Indexer Unit Tests', async accounts => {
         })
       )
 
-      let val = await indexer.getStakedAmount.call(aliceAddress, tokenOne, tokenTwo)
+      let val = await indexer.getStakedAmount.call(
+        aliceAddress,
+        tokenOne,
+        tokenTwo
+      )
       equal(val.toNumber(), stakeAmount, 'stake was improperly saved')
     })
   })
