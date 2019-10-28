@@ -80,10 +80,10 @@ contract Index is Ownable {
   ) external onlyOwner {
 
     // Ensure the entry does not already exist.
-    require(!hasEntry(identifier), "ENTRY_ALREADY_EXISTS");
+    require(!_hasEntry(identifier), "ENTRY_ALREADY_EXISTS");
 
     // Find the first entry with a lower score.
-    address nextEntry = getEntryLowerThan(score);
+    address nextEntry = _getEntryLowerThan(score);
 
     // Link the new entry between previous and next.
     address prevEntry = _entries[nextEntry].prev;
@@ -105,7 +105,7 @@ contract Index is Ownable {
   ) external onlyOwner {
 
     // Ensure the entry exists.
-    require(hasEntry(identifier), "ENTRY_DOES_NOT_EXIST");
+    require(_hasEntry(identifier), "ENTRY_DOES_NOT_EXIST");
 
     // Link the previous and next entries together.
     address prevUser = _entries[identifier].prev;
@@ -149,7 +149,7 @@ contract Index is Ownable {
     // If a valid start is provided, start there.
     if (start != address(0) && start != HEAD) {
       // Check that the provided start identifier exists.
-      require(hasEntry(start), "START_ENTRY_NOT_FOUND");
+      require(_hasEntry(start), "START_ENTRY_NOT_FOUND");
       // Set the identifier to the provided start.
       identifier = start;
     }
@@ -170,7 +170,7 @@ contract Index is Ownable {
     * @param identifier address On-chain address identifying the owner of a locator
     * @return bool True if the identifier corresponds to an Entry in the list
     */
-  function hasEntry(
+  function _hasEntry(
     address identifier
   ) internal view returns (bool) {
     return _entries[identifier].locator != bytes32(0);
@@ -181,7 +181,7 @@ contract Index is Ownable {
     * @param score uint256 Score in question
     * @return address Identifier of the largest score lower than score
     */
-  function getEntryLowerThan(
+  function _getEntryLowerThan(
     uint256 score
   ) internal view returns (address) {
 
