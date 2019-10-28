@@ -184,6 +184,27 @@ contract('Delegate Unit Tests', async accounts => {
       let val = await newDelegate.owner.call()
       equal(val, notOwner, 'owner is incorrect - should be notOwner')
     })
+
+    it('Test indexer is unable to pull funds from delegate account', async() => {
+      //force approval to fail
+      await mockStakingToken.givenMethodReturnBool(
+        mockStakingToken_approve,
+        false
+      )
+
+      await reverted(
+        Delegate.new(
+          mockSwap.address,
+          mockIndexer.address,
+          EMPTY_ADDRESS,
+          EMPTY_ADDRESS,
+          {
+            from: owner,
+          }
+        ), 
+        "STAKING_APPROVAL_FAILED"
+      )
+    })
   })
 
   describe('Test setRule', async () => {
