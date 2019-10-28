@@ -176,7 +176,7 @@ contract Indexer is IIndexer, Ownable {
 
   /**
     * @notice Unset an Intent to Trade
-    * @dev Users are allowed unstake from blacklisted indexes
+    * @dev Users are allowed to unstake from blacklisted indexes
     *
     * @param signerToken address Signer token of the Index being unstaked
     * @param senderToken address Sender token of the Index being staked
@@ -247,7 +247,7 @@ contract Indexer is IIndexer, Ownable {
 
   /**
     * @notice Get the locators of those trading a token pair
-    * @dev Users are allowed unstake from blacklisted indexes
+    * @dev Users are allowed to unstake from blacklisted indexes
     *
     * @param signerToken address Signer token of the trading pair
     * @param senderToken address Sender token of the trading pair
