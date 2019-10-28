@@ -27,10 +27,10 @@ contract Index is Ownable {
   uint256 public length;
 
   // Identifier to use for the head of the list
-  address private constant HEAD = address(uint160(2**160-1));
+  address constant internal HEAD = address(uint160(2**160-1));
 
   // Mapping of an identifier to its entry
-  mapping(address => Entry) private _entries;
+  mapping(address => Entry) public entries;
 
   /**
     * @notice Index Entry
@@ -64,7 +64,7 @@ contract Index is Ownable {
     */
   constructor() public {
     // Create initial entry.
-    _entries[HEAD] = Entry(bytes32(0), 0, HEAD, HEAD);
+    entries[HEAD] = Entry(bytes32(0), 0, HEAD, HEAD);
   }
 
   /**
@@ -86,10 +86,10 @@ contract Index is Ownable {
     address nextEntry = _getEntryLowerThan(score);
 
     // Link the new entry between previous and next.
-    address prevEntry = _entries[nextEntry].prev;
-    _entries[prevEntry].next = identifier;
-    _entries[nextEntry].prev = identifier;
-    _entries[identifier] = Entry(locator, score, prevEntry, nextEntry);
+    address prevEntry = entries[nextEntry].prev;
+    entries[prevEntry].next = identifier;
+    entries[nextEntry].prev = identifier;
+    entries[identifier] = Entry(locator, score, prevEntry, nextEntry);
 
     // Increment the index length.
     length = length + 1;
@@ -108,13 +108,13 @@ contract Index is Ownable {
     require(_hasEntry(identifier), "ENTRY_DOES_NOT_EXIST");
 
     // Link the previous and next entries together.
-    address prevUser = _entries[identifier].prev;
-    address nextUser = _entries[identifier].next;
-    _entries[prevUser].next = nextUser;
-    _entries[nextUser].prev = prevUser;
+    address prevUser = entries[identifier].prev;
+    address nextUser = entries[identifier].next;
+    entries[prevUser].next = nextUser;
+    entries[nextUser].prev = prevUser;
 
     // Delete entry from the index.
-    delete _entries[identifier];
+    delete entries[identifier];
 
     // Decrement the index length.
     length = length - 1;
@@ -129,7 +129,7 @@ contract Index is Ownable {
   function getScore(
     address identifier
   ) external view returns (uint256) {
-    return _entries[identifier].score;
+    return entries[identifier].score;
   }
 
   /**
@@ -144,7 +144,7 @@ contract Index is Ownable {
     uint256 count
   ) external view returns (bytes32[] memory result) {
 
-    address identifier = _entries[HEAD].next;
+    address identifier = entries[HEAD].next;
 
     // If a valid start is provided, start there.
     if (start != address(0) && start != HEAD) {
@@ -159,9 +159,9 @@ contract Index is Ownable {
     // Iterate over the list until the end or count.
     uint8 i = 0;
     while (i < count && identifier != HEAD) {
-      result[i] = _entries[identifier].locator;
+      result[i] = entries[identifier].locator;
       i = i + 1;
-      identifier = _entries[identifier].next;
+      identifier = entries[identifier].next;
     }
   }
 
@@ -173,7 +173,7 @@ contract Index is Ownable {
   function _hasEntry(
     address identifier
   ) internal view returns (bool) {
-    return _entries[identifier].locator != bytes32(0);
+    return entries[identifier].locator != bytes32(0);
   }
 
   /**
@@ -185,7 +185,7 @@ contract Index is Ownable {
     uint256 score
   ) internal view returns (address) {
 
-    address identifier = _entries[HEAD].next;
+    address identifier = entries[HEAD].next;
 
     // Head indicates last because the list is circular.
     if (score == 0) {
@@ -193,8 +193,8 @@ contract Index is Ownable {
     }
 
     // Iterate until a lower score is found.
-    while (score <= _entries[identifier].score) {
-      identifier = _entries[identifier].next;
+    while (score <= entries[identifier].score) {
+      identifier = entries[identifier].next;
     }
     return identifier;
   }
