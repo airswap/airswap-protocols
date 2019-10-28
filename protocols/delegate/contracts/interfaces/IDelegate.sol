@@ -37,41 +37,41 @@ interface IDelegate {
   function rules(address, address) external returns (Types.Rule memory);
 
   function setRule(
-    address _senderToken,
-    address _signerToken,
-    uint256 _maxSenderAmount,
-    uint256 _priceCoef,
-    uint256 _priceExp
+    address senderToken,
+    address signerToken,
+    uint256 maxSenderAmount,
+    uint256 priceCoef,
+    uint256 priceExp
   ) external;
 
   function unsetRule(
-    address _senderToken,
-    address _signerToken
+    address senderToken,
+    address signerToken
   ) external;
 
   function provideOrder(
-    Types.Order calldata _order
+    Types.Order calldata order
   ) external;
 
   function getSignerSideQuote(
-    uint256 _senderParam,
-    address _senderToken,
-    address _signerToken
+    uint256 senderParam,
+    address senderToken,
+    address signerToken
   ) external view returns (
     uint256 signerParam
   );
 
   function getSenderSideQuote(
-    uint256 _signerParam,
-    address _signerToken,
-    address _senderToken
+    uint256 signerParam,
+    address signerToken,
+    address senderToken
   ) external view returns (
     uint256 senderParam
   );
 
   function getMaxQuote(
-    address _senderToken,
-    address _signerToken
+    address senderToken,
+    address signerToken
   ) external view returns (
     uint256 senderParam,
     uint256 signerParam
