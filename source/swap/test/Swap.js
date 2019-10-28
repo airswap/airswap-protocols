@@ -2,6 +2,7 @@ const Swap = artifacts.require('Swap')
 const Types = artifacts.require('Types')
 const FungibleToken = artifacts.require('FungibleToken')
 const NonFungibleToken = artifacts.require('NonFungibleToken')
+const OMGToken = artifacts.require('OMGToken')
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 
 const {
@@ -34,6 +35,7 @@ contract('Swap', async accounts => {
   let swapAddress
   let tokenAST
   let tokenDAI
+  let tokenOMG
   let tokenTicket
   let tokenKitty
 
@@ -81,6 +83,10 @@ contract('Swap', async accounts => {
     it('Deployed test contract "DAI"', async () => {
       tokenDAI = await FungibleToken.new()
     })
+
+    it('Deployed test contract "OMG"', async () => {
+      tokenOMG = await OMGToken.new()
+    })
   })
 
   describe('Minting...', async () => {
@@ -88,6 +94,21 @@ contract('Swap', async accounts => {
       emitted(await tokenAST.mint(aliceAddress, 1000), 'Transfer')
       ok(
         await balances(aliceAddress, [[tokenAST, 1000], [tokenDAI, 0]]),
+        'Alice balances are incorrect'
+      )
+    })
+
+    it('Mints 1000 OMG for Alice', async () => {
+      emitted(
+        await tokenOMG.mint(aliceAddress, 1000, { from: aliceAddress }),
+        'Mint'
+      )
+      ok(
+        await balances(aliceAddress, [
+          [tokenAST, 1000],
+          [tokenOMG, 1000],
+          [tokenDAI, 0],
+        ]),
         'Alice balances are incorrect'
       )
     })
@@ -102,9 +123,13 @@ contract('Swap', async accounts => {
   })
 
   describe('Approving...', async () => {
-    it('Checks approvals (Alice 250 AST and 0 DAI, Bob 0 AST and 500 DAI)', async () => {
+    it('Checks approvals (Alice 250 AST, 200 OMG, and 0 DAI, Bob 0 AST and 500 DAI)', async () => {
       emitted(
-        await tokenAST.approve(swapAddress, 200, { from: aliceAddress }),
+        await tokenAST.approve(swapAddress, 250, { from: aliceAddress }),
+        'Approval'
+      )
+      emitted(
+        await tokenOMG.approve(swapAddress, 200, { from: aliceAddress }),
         'Approval'
       )
       emitted(
@@ -113,8 +138,9 @@ contract('Swap', async accounts => {
       )
       ok(
         await allowances(aliceAddress, swapAddress, [
-          [tokenAST, 200],
+          [tokenAST, 250],
           [tokenDAI, 0],
+          [tokenOMG, 200],
         ])
       )
       ok(
@@ -241,7 +267,7 @@ contract('Swap', async accounts => {
       // Bob's 1000 DAI approval has decreased by 50
       ok(
         await allowances(aliceAddress, swapAddress, [
-          [tokenAST, 0],
+          [tokenAST, 50],
           [tokenDAI, 0],
         ])
       )
@@ -249,6 +275,134 @@ contract('Swap', async accounts => {
         await allowances(bobAddress, swapAddress, [
           [tokenAST, 0],
           [tokenDAI, 950],
+        ])
+      )
+    })
+  })
+
+  describe('Swaps (Non-standard Fungible)', async () => {
+    let _order
+
+    before('Alice creates an order for Bob (200 OMG for 50 DAI)', async () => {
+      const order = await orders.getOrder({
+        signer: {
+          wallet: aliceAddress,
+          token: tokenOMG.address,
+          param: 200,
+        },
+        sender: {
+          wallet: bobAddress,
+          token: tokenDAI.address,
+          param: 50,
+        },
+      })
+      _order = order
+    })
+
+    it('Checks that Bob can swap with Alice (200 OMG for 50 DAI)', async () => {
+      emitted(await swap(_order, { from: bobAddress }), 'Swap')
+    })
+
+    it('Checks balances...', async () => {
+      ok(
+        await balances(aliceAddress, [[tokenOMG, 800], [tokenDAI, 100]]),
+        'Alice balances are incorrect'
+      )
+      ok(
+        await balances(bobAddress, [[tokenOMG, 200], [tokenDAI, 900]]),
+        'Bob balances are incorrect'
+      )
+    })
+
+    it('Checks that Bob cannot take the same order again (200 OMG for 50 DAI)', async () => {
+      await reverted(
+        swap(_order, { from: bobAddress }),
+        'ORDER_TAKEN_OR_CANCELLED'
+      )
+    })
+
+    it('Checks that Alice cannot trade more than approved (200 OMG)', async () => {
+      const order = await orders.getOrder({
+        signer: {
+          wallet: aliceAddress,
+          token: tokenOMG.address,
+          param: 200,
+        },
+      })
+      await reverted(swap(order, { from: bobAddress }))
+    })
+
+    it('Checks that Bob cannot take an expired order', async () => {
+      const order = await orders.getOrder({
+        signer: {
+          wallet: aliceAddress,
+        },
+        sender: {
+          wallet: bobAddress,
+        },
+        expiry: (await getLatestTimestamp()) - 10,
+      })
+      await reverted(swap(order, { from: bobAddress }), 'ORDER_EXPIRED')
+    })
+
+    it('Checks that an order is expired when expiry == block.timestamp', async () => {
+      // with this method, sometimes order.expiry is 1 second before block.timestamp
+      // however ~50% of the time they are equal. This is due to the fact that in the
+      // time it takes to create an order, some number of milliseconds pass. Sometimes
+      // that pushes the current time into the next second, and sometimes it doesnt.
+      // Therefore sometimes the current time is the same time as the expiry, and sometimes
+      // the current time is one second after the expiry
+
+      const ONE_DAY = SECONDS_IN_DAY * 1
+      const order = await orders.getOrder({
+        signer: {
+          wallet: aliceAddress,
+        },
+        sender: {
+          wallet: bobAddress,
+        },
+        expiry: await getTimestampPlusDays(1),
+      })
+      await advanceTime(ONE_DAY)
+      await reverted(swap(order, { from: bobAddress }), 'ORDER_EXPIRED')
+    })
+
+    it('Checks that Bob can not trade more than he holds', async () => {
+      const order = await orders.getOrder({
+        signer: {
+          wallet: bobAddress,
+          token: tokenDAI.address,
+          param: 1000,
+        },
+        sender: {
+          wallet: aliceAddress,
+        },
+      })
+      await reverted(swap(order, { from: aliceAddress }))
+    })
+
+    it('Checks remaining balances and approvals', async () => {
+      ok(
+        await balances(aliceAddress, [[tokenOMG, 800], [tokenDAI, 100]]),
+        'Alice balances are incorrect'
+      )
+      ok(
+        await balances(bobAddress, [[tokenOMG, 200], [tokenDAI, 900]]),
+        'Bob balances are incorrect'
+      )
+      // Alice and Bob swapped 200 AST for 50 DAI above, thereforeL
+      // Alice's 200 AST approval is now all gone
+      // Bob's 1000 DAI approval has decreased by 50
+      ok(
+        await allowances(aliceAddress, swapAddress, [
+          [tokenOMG, 0],
+          [tokenDAI, 0],
+        ])
+      )
+      ok(
+        await allowances(bobAddress, swapAddress, [
+          [tokenOMG, 0],
+          [tokenDAI, 900],
         ])
       )
     })
@@ -369,11 +523,11 @@ contract('Swap', async accounts => {
       // Alice and Bob swapped 50 AST for 10 DAI. Previous balances were:
       // Alice 800 AST 50 DAI, Bob 200 AST 950 DAI
       ok(
-        await balances(aliceAddress, [[tokenAST, 750], [tokenDAI, 60]]),
+        await balances(aliceAddress, [[tokenAST, 750], [tokenDAI, 110]]),
         'Alice balances are incorrect'
       )
       ok(
-        await balances(bobAddress, [[tokenAST, 250], [tokenDAI, 940]]),
+        await balances(bobAddress, [[tokenAST, 250], [tokenDAI, 890]]),
         'Bob balances are incorrect'
       )
       // Alice approved all her AST
@@ -386,7 +540,7 @@ contract('Swap', async accounts => {
       ok(
         await allowances(bobAddress, swapAddress, [
           [tokenAST, 0],
-          [tokenDAI, 940],
+          [tokenDAI, 890],
         ])
       )
     })
@@ -471,13 +625,13 @@ contract('Swap', async accounts => {
 
     it('Checks remaining balances and approvals', async () => {
       // Alice and Bob swapped 50 AST for 10 DAI again. Previous balances were:
-      // Alice 750 AST 60 DAI, Bob 250 AST 940 DAI
+      // Alice 700 AST 120 DAI, Bob 300 AST 880 DAI
       ok(
-        await balances(aliceAddress, [[tokenAST, 700], [tokenDAI, 70]]),
+        await balances(aliceAddress, [[tokenAST, 700], [tokenDAI, 120]]),
         'Alice balances are incorrect'
       )
       ok(
-        await balances(bobAddress, [[tokenAST, 300], [tokenDAI, 930]]),
+        await balances(bobAddress, [[tokenAST, 300], [tokenDAI, 880]]),
         'Bob balances are incorrect'
       )
       ok(
@@ -489,7 +643,7 @@ contract('Swap', async accounts => {
       ok(
         await allowances(bobAddress, swapAddress, [
           [tokenAST, 0],
-          [tokenDAI, 930],
+          [tokenDAI, 880],
         ])
       )
     })
@@ -538,13 +692,13 @@ contract('Swap', async accounts => {
 
     it('Checks remaining balances and approvals', async () => {
       // Alice and Bob swapped 25 AST for 5 DAI. Previous balances were:
-      // Alice 700 AST 70 DAI, Bob 300 AST 930 DAI
+      // Alice 675 AST 125 DAI, Bob 325 AST 875 DAI
       ok(
-        await balances(aliceAddress, [[tokenAST, 675], [tokenDAI, 75]]),
+        await balances(aliceAddress, [[tokenAST, 675], [tokenDAI, 125]]),
         'Alice balances are incorrect'
       )
       ok(
-        await balances(bobAddress, [[tokenAST, 325], [tokenDAI, 925]]),
+        await balances(bobAddress, [[tokenAST, 325], [tokenDAI, 875]]),
         'Bob balances are incorrect'
       )
       ok(
@@ -556,7 +710,7 @@ contract('Swap', async accounts => {
       ok(
         await allowances(bobAddress, swapAddress, [
           [tokenAST, 0],
-          [tokenDAI, 925],
+          [tokenDAI, 875],
         ])
       )
     })
@@ -601,13 +755,13 @@ contract('Swap', async accounts => {
 
     it('Checks remaining balances and approvals', async () => {
       // Alice and Bob swapped 25 AST for 5 DAI. Previous balances were:
-      // Alice 675 AST 75 DAI, Bob 325 AST 925 DAI
+      // Alice 650 AST 130 DAI, Bob 350 AST 870 DAI
       ok(
-        await balances(aliceAddress, [[tokenAST, 650], [tokenDAI, 80]]),
+        await balances(aliceAddress, [[tokenAST, 650], [tokenDAI, 130]]),
         'Alice balances are incorrect'
       )
       ok(
-        await balances(bobAddress, [[tokenAST, 350], [tokenDAI, 920]]),
+        await balances(bobAddress, [[tokenAST, 350], [tokenDAI, 870]]),
         'Bob balances are incorrect'
       )
       ok(
@@ -619,7 +773,7 @@ contract('Swap', async accounts => {
       ok(
         await allowances(bobAddress, swapAddress, [
           [tokenAST, 0],
-          [tokenDAI, 920],
+          [tokenDAI, 870],
         ])
       )
     })
@@ -685,14 +839,14 @@ contract('Swap', async accounts => {
       await reverted(swap(_orderThree, { from: bobAddress }), 'NONCE_TOO_LOW')
     })
 
-    it('Checks existing balances (Alice 650 AST and 80 DAI, Bob 750 AST and 920 DAI)', async () => {
+    it('Checks existing balances (Alice 650 AST and 180 DAI, Bob 350 AST and 820 DAI)', async () => {
       // No swaps happened in this section
       ok(
-        await balances(aliceAddress, [[tokenAST, 650], [tokenDAI, 80]]),
+        await balances(aliceAddress, [[tokenAST, 650], [tokenDAI, 130]]),
         'Alice balances are incorrect'
       )
       ok(
-        await balances(bobAddress, [[tokenAST, 350], [tokenDAI, 920]]),
+        await balances(bobAddress, [[tokenAST, 350], [tokenDAI, 870]]),
         'Bob balances are incorrect'
       )
       ok(
@@ -704,7 +858,7 @@ contract('Swap', async accounts => {
       ok(
         await allowances(bobAddress, swapAddress, [
           [tokenAST, 0],
-          [tokenDAI, 920],
+          [tokenDAI, 870],
         ])
       )
     })
@@ -734,11 +888,11 @@ contract('Swap', async accounts => {
 
     it('Checks balances...', async () => {
       ok(
-        await balances(aliceAddress, [[tokenAST, 500], [tokenDAI, 130]]),
+        await balances(aliceAddress, [[tokenAST, 500], [tokenDAI, 180]]),
         'Alice balances are incorrect'
       )
       ok(
-        await balances(bobAddress, [[tokenAST, 450], [tokenDAI, 870]]),
+        await balances(bobAddress, [[tokenAST, 450], [tokenDAI, 820]]),
         'Bob balances are incorrect'
       )
       ok(

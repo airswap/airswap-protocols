@@ -18,13 +18,15 @@ pragma solidity 0.5.12;
 pragma experimental ABIEncoderV2;
 
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
-import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
+import "@airswap/tokens/contracts/interfaces/IERC20.sol";
 import "openzeppelin-solidity/contracts/token/ERC721/IERC721.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 /**
   * @title Swap: The Atomic Swap used by the Swap Protocol
   */
 contract Swap is ISwap {
+  using SafeMath for uint256;
 
   // Domain and version for use in signatures (EIP-712)
   bytes constant internal DOMAIN_NAME = "SWAP";
@@ -335,10 +337,12 @@ contract Swap is ISwap {
   ) internal {
     if (kind == ERC721_INTERFACE_ID) {
       // Attempt to transfer an ERC-721 token.
-      IERC721(token).safeTransferFrom(from, to, param);
+      IERC721(token).transferFrom(from, to, param);
     } else {
-      // Attempt to transfer an ERC-20 token.
-      require(IERC20(token).transferFrom(from, to, param));
+      // Attempt to transfer an ERC-20 token. Taking into account non-standard ERC-20 tokens.
+      uint256 initBalance = IERC20(token).balanceOf(from);
+      IERC20(token).transferFrom(from, to, param);
+      require(initBalance.sub(param) == IERC20(token).balanceOf(from), "TRANSFER_FAILED");
     }
   }
 }

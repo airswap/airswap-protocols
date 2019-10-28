@@ -6,58 +6,7 @@
 
 pragma solidity 0.5.12;
 
-
-/**
- * Math operations with safety checks
- */
-library SafeMath {
-  function mul(uint a, uint b) internal returns (uint) {
-    uint c = a * b;
-    assert(a == 0 || c / a == b);
-    return c;
-  }
-
-  function div(uint a, uint b) internal returns (uint) {
-    // assert(b > 0); // Solidity automatically throws when dividing by 0
-    uint c = a / b;
-    // assert(a == b * c + a % b); // There is no case in which this doesn't hold
-    return c;
-  }
-
-  function sub(uint a, uint b) internal returns (uint) {
-    assert(b <= a);
-    return a - b;
-  }
-
-  function add(uint a, uint b) internal returns (uint) {
-    uint c = a + b;
-    assert(c >= a);
-    return c;
-  }
-
-  function max64(uint64 a, uint64 b) internal pure returns (uint64) {
-    return a >= b ? a : b;
-  }
-
-  function min64(uint64 a, uint64 b) internal pure returns (uint64) {
-    return a < b ? a : b;
-  }
-
-  function max256(uint256 a, uint256 b) internal pure returns (uint256) {
-    return a >= b ? a : b;
-  }
-
-  function min256(uint256 a, uint256 b) internal pure returns (uint256) {
-    return a < b ? a : b;
-  }
-
-  function assert(bool assertion) internal {
-    if (!assertion) {
-      revert('Safemath failuire');
-    }
-  }
-}
-
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 /**
  * @title ERC20Basic
@@ -85,7 +34,7 @@ contract BasicToken is ERC20Basic {
    * @dev Fix for the ERC20 short address attack.
    */
   modifier onlyPayloadSize(uint size) {
-     require(msg.data.length < size + 4, 'Payload attack');
+     require(msg.data.length >= size + 4, 'Payload attack');
      _;
   }
 
@@ -116,7 +65,7 @@ contract BasicToken is ERC20Basic {
  * @title ERC20 interface
  * @dev see https://github.com/ethereum/EIPs/issues/20
  */
-contract ERC20 is ERC20Basic {
+contract ERC202 is ERC20Basic {
   function allowance(address owner, address spender) public view returns (uint);
   function transferFrom(address from, address to, uint value) public ;
   function approve(address spender, uint value) public;
@@ -131,7 +80,7 @@ contract ERC20 is ERC20Basic {
  * @dev https://github.com/ethereum/EIPs/issues/20
  * @dev Based on code by FirstBlood: https://github.com/Firstbloodio/token/blob/master/smart_contract/FirstBloodToken.sol
  */
-contract StandardToken is BasicToken, ERC20 {
+contract StandardToken is BasicToken, ERC202 {
 
   mapping (address => mapping (address => uint)) public allowed;
 
@@ -165,7 +114,7 @@ contract StandardToken is BasicToken, ERC20 {
     //  allowance to zero by calling `approve(_spender, 0)` if it is not
     //  already 0 to mitigate the race condition described here:
     //  https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
-    require((_value != 0) && (allowed[msg.sender][_spender] != 0), 'Invalid approval');
+      require((_value != 0) && (allowed[msg.sender][_spender] == 0), 'Invalid approval');
 
     allowed[msg.sender][_spender] = _value;
     emit Approval(msg.sender, _spender, _value);
@@ -238,19 +187,13 @@ contract MintableToken is StandardToken, Ownable {
   bool public mintingFinished = false;
   uint public totalSupply = 0;
 
-
-  modifier canMint() {
-    require(mintingFinished, 'cannot mint');
-    _;
-  }
-
   /**
    * @dev Function to mint tokens
    * @param _to The address that will recieve the minted tokens.
    * @param _amount The amount of tokens to mint.
    * @return A boolean that indicates if the operation was successful.
    */
-  function mint(address _to, uint _amount) public onlyOwner canMint returns (bool) {
+  function mint(address _to, uint _amount) public returns (bool) {
     totalSupply = totalSupply.add(_amount);
     balances[_to] = balances[_to].add(_amount);
     emit Mint(_to, _amount);
@@ -284,7 +227,7 @@ contract Pausable is Ownable {
    * @dev modifier to allow actions only when the contract IS paused
    */
   modifier whenNotPaused() {
-    require(paused, 'NOT PAUSED');
+    require(!paused, 'NOT PAUSED');
     _;
   }
 
@@ -387,7 +330,7 @@ contract OMGToken is PausableToken, MintableToken {
    * @dev mint timelocked tokens
    */
   function mintTimelocked(address _to, uint256 _amount, uint256 _releaseTime)
-    public onlyOwner canMint returns (TokenTimelock) {
+    public onlyOwner returns (TokenTimelock) {
 
     TokenTimelock timelock = new TokenTimelock(this, _to, _releaseTime);
     mint(address(timelock), _amount);
