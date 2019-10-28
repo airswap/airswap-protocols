@@ -114,8 +114,6 @@ Wrapper.swap(Types.Order) (Full.sol#456-506) ignores return value by external ca
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unused-return
 ```
 
-The WETH contract that is used is known contract with its behavior well understood. The WETH contract will either return true or revert if there is a failure. As far as the code describes, there is no way that false could be returned or that true would be returned without the specified amount of WETH tokens transferred.
-
 ## Notes
 
 - When deploying a Wrapper contract, we recommend using the [canonical WETH contracts](https://blog.0xproject.com/canonical-weth-migration-8a7ab6caca71).
