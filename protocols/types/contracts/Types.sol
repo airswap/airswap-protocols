@@ -92,41 +92,41 @@ library Types {
   /**
     * @notice Hash an order into bytes32
     * @dev EIP-191 header and domain separator included
-    * @param _order Order The order to be hashed
-    * @param _domainSeparator bytes32
+    * @param order Order The order to be hashed
+    * @param domainSeparator bytes32
     * @return bytes32 A keccak256 abi.encodePacked value
     */
   function hashOrder(
-    Order calldata _order,
-    bytes32 _domainSeparator
+    Order calldata order,
+    bytes32 domainSeparator
   ) external pure returns (bytes32) {
     return keccak256(abi.encodePacked(
       EIP191_HEADER,
-      _domainSeparator,
+      domainSeparator,
       keccak256(abi.encode(
         ORDER_TYPEHASH,
-        _order.nonce,
-        _order.expiry,
+        order.nonce,
+        order.expiry,
         keccak256(abi.encode(
           PARTY_TYPEHASH,
-          _order.signer.kind,
-          _order.signer.wallet,
-          _order.signer.token,
-          _order.signer.param
+          order.signer.kind,
+          order.signer.wallet,
+          order.signer.token,
+          order.signer.param
         )),
         keccak256(abi.encode(
           PARTY_TYPEHASH,
-          _order.sender.kind,
-          _order.sender.wallet,
-          _order.sender.token,
-          _order.sender.param
+          order.sender.kind,
+          order.sender.wallet,
+          order.sender.token,
+          order.sender.param
         )),
         keccak256(abi.encode(
           PARTY_TYPEHASH,
-          _order.affiliate.kind,
-          _order.affiliate.wallet,
-          _order.affiliate.token,
-          _order.affiliate.param
+          order.affiliate.kind,
+          order.affiliate.wallet,
+          order.affiliate.token,
+          order.affiliate.param
         ))
       ))
     ));
@@ -135,20 +135,20 @@ library Types {
   /**
     * @notice Hash domain parameters into bytes32
     * @dev Used for signature validation (EIP-712)
-    * @param _name bytes
-    * @param _version bytes
+    * @param name bytes
+    * @param version bytes
     * @param _verifyingContract address
     * @return bytes32 returns a keccak256 abi.encodePacked value
     */
   function hashDomain(
-    bytes calldata _name,
-    bytes calldata _version,
+    bytes calldata name,
+    bytes calldata version,
     address _verifyingContract
   ) external pure returns (bytes32) {
     return keccak256(abi.encode(
       DOMAIN_TYPEHASH,
-      keccak256(_name),
-      keccak256(_version),
+      keccak256(name),
+      keccak256(version),
       _verifyingContract
     ));
   }
