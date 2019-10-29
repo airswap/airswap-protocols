@@ -100,11 +100,11 @@ contract Swap is ISwap {
     } else {
       /**
         * Sender is specified. If the msg.sender is not the specified sender,
-        * thus determines whether the msg.sender is an authorized sender.
+        * this determines whether the msg.sender is an authorized sender.
         */
       require(isSenderAuthorized(order.sender.wallet, msg.sender),
           "SENDER_UNAUTHORIZED");
-      // The specified sender is all clear.
+      // The msg.sender is authorized.
       finalSenderWallet = order.sender.wallet;
 
     }
