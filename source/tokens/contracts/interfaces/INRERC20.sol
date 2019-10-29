@@ -1,10 +1,11 @@
 pragma solidity ^0.5.0;
 
 /**
- * @dev Modded Interface of the ERC20 standard that does not return bool
+ * @notice Interface for non-returning ERC20 contract
+ * @dev Modified Interface of the ERC20 standard that does not return bool
  * for transfer and transferFrom functions
  */
-interface IERC20 {
+interface INRERC20 {
     /**
      * @dev Returns the amount of tokens in existence.
      */

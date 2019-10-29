@@ -18,7 +18,7 @@ pragma solidity 0.5.12;
 pragma experimental ABIEncoderV2;
 
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
-import "@airswap/tokens/contracts/interfaces/IERC20.sol";
+import "@airswap/tokens/contracts/interfaces/INRERC20.sol";
 import "openzeppelin-solidity/contracts/token/ERC721/IERC721.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
@@ -322,6 +322,8 @@ contract Swap is ISwap {
   /**
     * @notice Perform an ERC-20 or ERC-721 token transfer
     * @dev Transfer type specified by the bytes4 kind param
+    * @dev ERC721: uses transferFrom for transfer
+    * @dev ERC20: Takes into account non-standard ERC-20 tokens.
     * @param from address Wallet address to transfer from
     * @param to address Wallet address to transfer to
     * @param param uint256 Amount for ERC-20 or token ID for ERC-721
@@ -339,10 +341,11 @@ contract Swap is ISwap {
       // Attempt to transfer an ERC-721 token.
       IERC721(token).transferFrom(from, to, param);
     } else {
-      // Attempt to transfer an ERC-20 token. Taking into account non-standard ERC-20 tokens.
-      uint256 initBalance = IERC20(token).balanceOf(from);
-      IERC20(token).transferFrom(from, to, param);
-      require(initBalance.sub(param) == IERC20(token).balanceOf(from), "TRANSFER_FAILED");
+      require(from != to, "TO_CANNOT_EQUAL_FROM");
+      // Attempt to transfer an ERC-20 token and checks to begin and end balacnes.
+      uint256 initBalance = INRERC20(token).balanceOf(from);
+      INRERC20(token).transferFrom(from, to, param);
+      require(initBalance.sub(param) == INRERC20(token).balanceOf(from), "TRANSFER_FAILED");
     }
   }
 }

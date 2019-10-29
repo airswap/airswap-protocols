@@ -175,6 +175,25 @@ contract('Swap', async accounts => {
       emitted(await swap(_order, { from: bobAddress }), 'Swap')
     })
 
+    it('Checks that Alice cannot swap with herself (200 AST for 50 AST)', async () => {
+      const _selfOrder = await orders.getOrder({
+        signer: {
+          wallet: aliceAddress,
+          token: tokenAST.address,
+          param: 200,
+        },
+        sender: {
+          wallet: aliceAddress,
+          token: tokenAST.address,
+          param: 50,
+        },
+      })
+      await reverted(
+        swap(_selfOrder, { from: aliceAddress }),
+        'TO_CANNOT_EQUAL_FROM'
+      )
+    })
+
     it('Checks balances...', async () => {
       ok(
         await balances(aliceAddress, [[tokenAST, 800], [tokenDAI, 50]]),
