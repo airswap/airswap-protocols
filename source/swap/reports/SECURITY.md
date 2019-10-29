@@ -22,7 +22,7 @@ Swap is comprised of one contract, its interface, and their dependencies.
 contracts/Swap.sol
 contracts/interfaces/ISwap.sol
 * @airswap/types/contracts/Types.sol
-† openzeppelin-solidity/contracts/token/ERC20/IERC20.sol
+* @airswap/tokens/contracts/interfaces/INRERC20.sol
 † openzeppelin-solidity/contracts/token/ERC721/IERC721.sol
 ```
 
