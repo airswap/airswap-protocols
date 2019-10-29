@@ -337,12 +337,14 @@ contract Swap is ISwap {
       address token,
       bytes4 kind
   ) internal {
+
+    // Ensure cannot self-transfer
+    require(from != to, "TO_CANNOT_EQUAL_FROM");
     if (kind == ERC721_INTERFACE_ID) {
       // Attempt to transfer an ERC-721 token.
       IERC721(token).transferFrom(from, to, param);
     } else {
-      require(from != to, "TO_CANNOT_EQUAL_FROM");
-      // Attempt to transfer an ERC-20 token and checks to begin and end balacnes.
+      // Attempt to transfer an ERC-20 token with balance checks on `from` address.
       uint256 initBalance = INRERC20(token).balanceOf(from);
       INRERC20(token).transferFrom(from, to, param);
       require(initBalance.sub(param) == INRERC20(token).balanceOf(from), "TRANSFER_FAILED");
