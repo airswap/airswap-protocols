@@ -18,13 +18,15 @@ pragma solidity 0.5.12;
 pragma experimental ABIEncoderV2;
 
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
-import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
+import "@airswap/tokens/contracts/interfaces/INRERC20.sol";
 import "openzeppelin-solidity/contracts/token/ERC721/IERC721.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 /**
   * @title Swap: The Atomic Swap used by the Swap Protocol
   */
 contract Swap is ISwap {
+  using SafeMath for uint256;
 
   // Domain and version for use in signatures (EIP-712)
   bytes constant internal DOMAIN_NAME = "SWAP";
@@ -100,11 +102,11 @@ contract Swap is ISwap {
     } else {
       /**
         * Sender is specified. If the msg.sender is not the specified sender,
-        * thus determines whether the msg.sender is an authorized sender.
+        * this determines whether the msg.sender is an authorized sender.
         */
       require(isSenderAuthorized(order.sender.wallet, msg.sender),
           "SENDER_UNAUTHORIZED");
-      // The specified sender is all clear.
+      // The msg.sender is authorized.
       finalSenderWallet = order.sender.wallet;
 
     }
@@ -320,6 +322,8 @@ contract Swap is ISwap {
   /**
     * @notice Perform an ERC-20 or ERC-721 token transfer
     * @dev Transfer type specified by the bytes4 kind param
+    * @dev ERC721: uses transferFrom for transfer
+    * @dev ERC20: Takes into account non-standard ERC-20 tokens.
     * @param from address Wallet address to transfer from
     * @param to address Wallet address to transfer to
     * @param param uint256 Amount for ERC-20 or token ID for ERC-721
@@ -333,12 +337,17 @@ contract Swap is ISwap {
       address token,
       bytes4 kind
   ) internal {
+
+    // Ensure cannot self-transfer
+    require(from != to, "TO_CANNOT_EQUAL_FROM");
     if (kind == ERC721_INTERFACE_ID) {
       // Attempt to transfer an ERC-721 token.
-      IERC721(token).safeTransferFrom(from, to, param);
+      IERC721(token).transferFrom(from, to, param);
     } else {
-      // Attempt to transfer an ERC-20 token.
-      require(IERC20(token).transferFrom(from, to, param));
+      // Attempt to transfer an ERC-20 token with balance checks on `from` address.
+      uint256 initBalance = INRERC20(token).balanceOf(from);
+      INRERC20(token).transferFrom(from, to, param);
+      require(initBalance.sub(param) == INRERC20(token).balanceOf(from), "TRANSFER_FAILED");
     }
   }
 }

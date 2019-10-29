@@ -27,11 +27,20 @@ contracts/Wrapper.sol
 `†` [@airswap/tokens](https://github.com/airswap/airswap-protocols/tree/master/source/tokens)
 `‡` [Open Zeppelin v2.0 Security Audit](https://drive.google.com/file/d/1gWUV0qz3n52VEUwoT-VlYmscPxxo9xhc/view)
 
+## Constructor Params
+
+```
+`*` [@airswap/swap](https://github.com/airswap/airswap-protocols/tree/master/source/swap)
+`‡` [WETH9](https://etherscan.io/token/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2)
+```
+
+`‡` [WETH9 Security Audit](https://github.com/bokkypoobah/MakerDAOSaiContractAudit/blob/master/audit/code-review/makerdao/weth9-b353893.md)
+
 #### Public and external functions
 
 | Function   | Source      | Visibility | Params                        | Payable |
 | :--------- | :---------- | :--------- | :---------------------------- | :------ |
-| swap       | Wrapper.sol | external   | `Types.Order calldata _order` | yes     |
+| swap       | Wrapper.sol | external   | `Types.Order calldata order` | yes     |
 | [Fallback] | Wrapper.sol | external   | [None]                        | yes     |
 
 ## Invariants
@@ -61,7 +70,7 @@ contracts/Wrapper.sol
 
 ### All expected behavior of the Swap contract holds entirely.
 
-- By testing, the underlying `swap` function is executed and its variants hold as expected.
+- By testing, the underlying `swap` function is executed and its invariants hold as expected.
 - **This invariant holds as-is.**
 
 ## Testing
