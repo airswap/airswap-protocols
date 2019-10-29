@@ -254,8 +254,8 @@ contract('Index Unit Tests', async accounts => {
     })
   })
 
-  describe('Test getLocator', async () => {
-    beforeEach('Setup entries again', async () => {
+  describe('Test getScore', async () => {
+    beforeEach('Setup locators again', async () => {
       await index.setLocator(aliceAddress, 2000, aliceLocator, {
         from: owner,
       })
@@ -267,7 +267,7 @@ contract('Index Unit Tests', async accounts => {
       })
     })
 
-    it('should return empty entry for a non-user', async () => {
+    it('should return no score for a non-user', async () => {
       let davidScore = await index.getScore(davidAddress)
       equal(davidScore, 0, 'David: Locator score not correct')
 
@@ -277,12 +277,44 @@ contract('Index Unit Tests', async accounts => {
       equal(testScore, 0, 'Carol: Locator score not correct')
     })
 
-    it('should return the correct entry for a valid user', async () => {
+    it('should return the correct score for a valid user', async () => {
       let aliceScore = await index.getScore(aliceAddress)
       equal(aliceScore, 2000, 'Alice: Locator score not correct')
 
       let bobScore = await index.getScore(bobAddress)
       equal(bobScore, 500, 'Bob: Locator score not correct')
+    })
+  })
+
+  describe('Test getLocator', async () => {
+    beforeEach('Setup locators again', async () => {
+      await index.setLocator(aliceAddress, 2000, aliceLocator, {
+        from: owner,
+      })
+      await index.setLocator(bobAddress, 500, bobLocator, {
+        from: owner,
+      })
+      await index.setLocator(carolAddress, 1500, carolLocator, {
+        from: owner,
+      })
+    })
+
+    it('should return empty locator for a non-user', async () => {
+      let locator = await index.getLocator(davidAddress)
+      equal(locator, emptyLocator, 'David: Locator score not correct')
+
+      // now for a recently unset entry
+      await index.unsetLocator(carolAddress, { from: owner })
+      locator = await index.getLocator(carolAddress)
+      equal(locator, emptyLocator, 'Carol: Locator score not correct')
+    })
+
+    it('should return the correct locator for a valid user', async () => {
+      let locator = await index.getLocator(aliceAddress)
+      equal(locator, aliceLocator, 'Alice: Locator score not correct')
+
+      locator = await index.getLocator(bobAddress)
+      equal(locator, bobLocator, 'Bob: Locator score not correct')
     })
   })
 
