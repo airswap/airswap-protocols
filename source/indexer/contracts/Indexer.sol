@@ -255,7 +255,7 @@ contract Indexer is IIndexer, Ownable {
     address senderToken,
     address startAddress,
     uint256 count
-  ) external notPaused returns (
+  ) external view notPaused returns (
     bytes32[] memory locators
   ) {
     // Ensure neither token is blacklisted.
@@ -283,7 +283,7 @@ contract Indexer is IIndexer, Ownable {
     address user,
     address signerToken,
     address senderToken
-  ) public indexExists(signerToken, senderToken) returns (uint256) {
+  ) public view indexExists(signerToken, senderToken) returns (uint256) {
 
     // Return the score, equivalent to the stake amount.
     return indexes[signerToken][senderToken].getScore(user);

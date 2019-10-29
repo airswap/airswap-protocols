@@ -85,7 +85,6 @@ library Types {
     "address wallet,",
     "address token,",
     "uint256 param",
-
     ")"
   ));
 
