@@ -163,6 +163,33 @@ contract('Index Unit Tests', async accounts => {
     })
   })
 
+  describe('Test getting entries', async () => {
+    it('should return the entry of a user', async () => {
+      // set entry
+      await index.setLocator(aliceAddress, 2000, aliceLocator, {
+        from: owner,
+      })
+
+      // retrieve entry
+      let entry = await index.entries(aliceAddress)
+
+      equal(aliceLocator, entry[0], 'locator was incorrectly set')
+      equal(2000, entry[1], 'score was incorrectly set')
+      equal(HEAD, entry[2], 'prev was incorrectly set')
+      equal(HEAD, entry[3], 'next was incorrectly set')
+    })
+
+    it('should return empty entry for an unset user', async () => {
+      // retrieve entry without setting the locator
+      let entry = await index.entries(aliceAddress)
+
+      equal(emptyLocator, entry[0], 'locator was incorrectly set')
+      equal(0, entry[1], 'score was incorrectly set')
+      equal(EMPTY_ADDRESS, entry[2], 'prev was incorrectly set')
+      equal(EMPTY_ADDRESS, entry[3], 'next was incorrectly set')
+    })
+  })
+
   describe('Test unsetLocator', async () => {
     beforeEach('Setup entries', async () => {
       await index.setLocator(aliceAddress, 2000, aliceLocator, {
