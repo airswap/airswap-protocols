@@ -88,13 +88,13 @@ interface IIndexer {
     address user,
     address signerToken,
     address senderToken
-  ) external view returns (uint256);
+  ) external returns (uint256);
 
   function getLocators(
     address signerToken,
     address senderToken,
     address startAddress,
     uint256 count
-  ) external view returns (bytes32[] memory);
+  ) external returns (bytes32[] memory);
 
 }
