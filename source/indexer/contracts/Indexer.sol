@@ -297,22 +297,22 @@ contract Indexer is IIndexer, Ownable {
     bytes32 newLocator,
     uint256 oldAmount
   ) internal {
-      // If the new stake is bigger, collect the difference.
-      if (oldAmount < newAmount) {
-        require(stakingToken.transferFrom(user, address(this), newAmount - oldAmount),
-          "UNABLE_TO_STAKE");
-      }
+    // If the new stake is bigger, collect the difference.
+    if (oldAmount < newAmount) {
+      require(stakingToken.transferFrom(user, address(this), newAmount - oldAmount),
+        "UNABLE_TO_STAKE");
+    }
 
-      // If the old stake is bigger, return the excess.
-      if (newAmount < oldAmount) {
-        require(stakingToken.transfer(user, oldAmount - newAmount));
-      }
+    // If the old stake is bigger, return the excess.
+    if (newAmount < oldAmount) {
+      require(stakingToken.transfer(user, oldAmount - newAmount));
+    }
 
-      emit Stake(user, signerToken, senderToken, newAmount);
+    emit Stake(user, signerToken, senderToken, newAmount);
 
-      // Unset their old intent, and set their new intent.
-      indexes[signerToken][senderToken].unsetLocator(user);
-      indexes[signerToken][senderToken].setLocator(user, newAmount, newLocator);
+    // Unset their old intent, and set their new intent.
+    indexes[signerToken][senderToken].unsetLocator(user);
+    indexes[signerToken][senderToken].setLocator(user, newAmount, newLocator);
 
   }
 

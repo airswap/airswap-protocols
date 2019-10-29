@@ -194,6 +194,11 @@ contract('Indexer Unit Tests', async accounts => {
     })
 
     it('should not set an intent if the locator is not whitelisted', async () => {
+      // make the index first
+      await whitelistedIndexer.createIndex(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+
       await reverted(
         whitelistedIndexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
           from: aliceAddress,
@@ -203,6 +208,11 @@ contract('Indexer Unit Tests', async accounts => {
     })
 
     it('should not set an intent if a token is blacklisted', async () => {
+      // make the index first
+      await indexer.createIndex(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+
       // blacklist tokenOne
       await indexer.addToBlacklist(tokenOne, {
         from: owner,
@@ -311,7 +321,7 @@ contract('Indexer Unit Tests', async accounts => {
       })
     })
 
-    it('should not set an intent if the user has already staked', async () => {
+    it('should update an intent if the user has already staked', async () => {
       // make the index first
       await indexer.createIndex(tokenOne, tokenTwo, {
         from: aliceAddress,
@@ -322,13 +332,34 @@ contract('Indexer Unit Tests', async accounts => {
         from: aliceAddress,
       })
 
-      // now try to set another
-      await reverted(
-        indexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
-          from: aliceAddress,
-        }),
-        'ENTRY_ALREADY_EXISTS'
+      let stakedAmount = await indexer.getStakedAmount(
+        aliceAddress,
+        tokenOne,
+        tokenTwo
       )
+
+      equal(stakedAmount, 250, 'Staked amount incorrect')
+
+      // now try to set another - increasing the stake
+      let result = await indexer.setIntent(
+        tokenOne,
+        tokenTwo,
+        350,
+        aliceLocator,
+        {
+          from: aliceAddress,
+        }
+      )
+
+      emitted(result, 'Stake')
+
+      stakedAmount = await indexer.getStakedAmount(
+        aliceAddress,
+        tokenOne,
+        tokenTwo
+      )
+
+      equal(stakedAmount, 350, 'Staked amount did not increase')
     })
   })
 
