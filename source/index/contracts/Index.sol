@@ -132,6 +132,17 @@ contract Index is Ownable {
     return entries[identifier].score;
   }
 
+    /**
+    * @notice Get a Locator
+    * @param identifier address On-chain address identifying the owner of a locator
+    * @return uint256 Locator information
+    */
+  function getLocator(
+    address identifier
+  ) external view returns (uint256) {
+    return entries[identifier].locator;
+  }
+
   /**
     * @notice Get a Range of Locators
     * @dev start value of 0x0 starts at the head

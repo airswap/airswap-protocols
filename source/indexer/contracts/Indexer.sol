@@ -70,6 +70,15 @@ contract Indexer is IIndexer, Ownable {
   }
 
   /**
+    * @notice Modifier to check an index exists
+    */
+  modifier indexExists(signerToken, senderToken) {
+    require(indexes[signerToken][senderToken] != Index(0),
+      "INDEX_DOES_NOT_EXIST");
+    _;
+  }
+
+  /**
     * @notice Set the address of an ILocatorWhitelist to use
     * @dev Clear the whitelist with a null address (0x0)
     * @param newLocatorWhitelist address Locator whitelist
@@ -144,7 +153,7 @@ contract Indexer is IIndexer, Ownable {
     address senderToken,
     uint256 amount,
     bytes32 locator
-  ) external notPaused {
+  ) external notPaused indexExists(signerToken, senderToken) {
 
     // If whitelist set, ensure the locator is valid.
     if (locatorWhitelist != address(0)) {
@@ -155,10 +164,6 @@ contract Indexer is IIndexer, Ownable {
     // Ensure neither of the tokens are blacklisted.
     require(!blacklist[signerToken] && !blacklist[senderToken],
       "PAIR_IS_BLACKLISTED");
-
-    // Ensure the index exists.
-    require(indexes[signerToken][senderToken] != Index(0),
-      "INDEX_DOES_NOT_EXIST");
 
     // Only transfer for staking if amount is set.
     if (amount > 0) {
@@ -226,26 +231,6 @@ contract Indexer is IIndexer, Ownable {
   }
 
   /**
-    * @notice Gets the Stake Amount for a User
-    * @param user address User who staked
-    * @param signerToken address Signer token the user staked on
-    * @param senderToken address Sender token the user staked on
-    * @return uint256 Amount the user staked
-    */
-  function getStakedAmount(
-    address user,
-    address signerToken,
-    address senderToken
-  ) external view returns (uint256) {
-    // Ensure the index exists.
-    require(indexes[signerToken][senderToken] != Index(0),
-      "INDEX_DOES_NOT_EXIST");
-
-    // Return the score, equivalent to the stake amount.
-    return indexes[signerToken][senderToken].getScore(user);
-  }
-
-  /**
     * @notice Get the locators of those trading a token pair
     * @dev Users are allowed to unstake from blacklisted indexes
     *
@@ -278,6 +263,23 @@ contract Indexer is IIndexer, Ownable {
   }
 
   /**
+    * @notice Gets the Stake Amount for a User
+    * @param user address User who staked
+    * @param signerToken address Signer token the user staked on
+    * @param senderToken address Sender token the user staked on
+    * @return uint256 Amount the user staked
+    */
+  function getStakedAmount(
+    address user,
+    address signerToken,
+    address senderToken
+  ) public view indexExists(signerToken, senderToken) returns (uint256) {
+
+    // Return the score, equivalent to the stake amount.
+    return indexes[signerToken][senderToken].getScore(user);
+  }
+
+  /**
     * @notice Unset intents and return staked tokens
     * @param user address Address of the user who staked
     * @param signerToken address Signer token of the trading pair
@@ -287,10 +289,7 @@ contract Indexer is IIndexer, Ownable {
     address user,
     address signerToken,
     address senderToken
-  ) internal {
-    // Ensure the index exists.
-    require(indexes[signerToken][senderToken] != Index(0),
-      "INDEX_DOES_NOT_EXIST");
+  ) internal indexExists(signerToken, senderToken) {
 
      // Get the score for the user.
     uint256 score = indexes[signerToken][senderToken].getScore(user);
