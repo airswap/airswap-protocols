@@ -139,7 +139,7 @@ contract Index is Ownable {
     */
   function getLocator(
     address identifier
-  ) external view returns (uint256) {
+  ) external view returns (bytes32) {
     return entries[identifier].locator;
   }
 

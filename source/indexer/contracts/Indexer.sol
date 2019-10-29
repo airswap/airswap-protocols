@@ -72,7 +72,7 @@ contract Indexer is IIndexer, Ownable {
   /**
     * @notice Modifier to check an index exists
     */
-  modifier indexExists(signerToken, senderToken) {
+  modifier indexExists(address signerToken, address senderToken) {
     require(indexes[signerToken][senderToken] != Index(0),
       "INDEX_DOES_NOT_EXIST");
     _;
@@ -165,18 +165,28 @@ contract Indexer is IIndexer, Ownable {
     require(!blacklist[signerToken] && !blacklist[senderToken],
       "PAIR_IS_BLACKLISTED");
 
-    // Only transfer for staking if amount is set.
-    if (amount > 0) {
+    bool notPreviouslySet = (indexes[signerToken][senderToken].getLocator(msg.sender) == bytes32(0));
 
-      // Transfer the amount for staking.
-      require(stakingToken.transferFrom(msg.sender, address(this), amount),
-        "UNABLE_TO_STAKE");
+    if (notPreviouslySet) {
+      // Only transfer for staking if amount is set.
+      if (amount > 0) {
+
+        // Transfer the amount for staking.
+        require(stakingToken.transferFrom(msg.sender, address(this), amount),
+          "UNABLE_TO_STAKE");
+      }
+
+      emit Stake(msg.sender, signerToken, senderToken, amount);
+
+      // Set the locator on the index.
+      indexes[signerToken][senderToken].setLocator(msg.sender, amount, locator);
+    } else {
+
+      uint256 oldStake = indexes[signerToken][senderToken].getScore(msg.sender);
+
+      _updateIntent(msg.sender, signerToken, senderToken, amount, locator, oldStake);
+
     }
-
-    emit Stake(msg.sender, signerToken, senderToken, amount);
-
-    // Set the locator on the index.
-    indexes[signerToken][senderToken].setLocator(msg.sender, amount, locator);
   }
 
   /**
@@ -277,6 +287,33 @@ contract Indexer is IIndexer, Ownable {
 
     // Return the score, equivalent to the stake amount.
     return indexes[signerToken][senderToken].getScore(user);
+  }
+
+  function _updateIntent(
+    address user,
+    address signerToken,
+    address senderToken,
+    uint256 newAmount,
+    bytes32 newLocator,
+    uint256 oldAmount
+  ) internal {
+      // If the new stake is bigger, collect the difference.
+      if (oldAmount < newAmount) {
+        require(stakingToken.transferFrom(user, address(this), newAmount - oldAmount),
+          "UNABLE_TO_STAKE");
+      }
+
+      // If the old stake is bigger, return the excess.
+      if (newAmount < oldAmount) {
+        require(stakingToken.transfer(user, oldAmount - newAmount));
+      }
+
+      emit Stake(user, signerToken, senderToken, newAmount);
+
+      // Unset their old intent, and set their new intent.
+      indexes[signerToken][senderToken].unsetLocator(user);
+      indexes[signerToken][senderToken].setLocator(user, newAmount, newLocator);
+
   }
 
   /**
