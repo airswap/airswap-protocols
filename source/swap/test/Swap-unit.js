@@ -168,8 +168,9 @@ contract('Swap Unit Tests', async accounts => {
         signature,
       ]
 
+      const ONE_DAY_EXPIRY = await getTimestampPlusDays(1)
       // auth signer to be the sender of the order
-      await swap.authorizeSender(mockSigner, (await getTimestampPlusDays(1)), {
+      await swap.authorizeSender(mockSigner, ONE_DAY_EXPIRY, {
         from: mockSender,
       })
       // auth sender
@@ -207,8 +208,11 @@ contract('Swap Unit Tests', async accounts => {
         affiliate,
         signature,
       ]
+
+      const ONE_DAY_EXPIRY = await getTimestampPlusDays(1)
+
       // auth signer to be the sender of the order
-      await swap.authorizeSender(mockSigner,(await getTimestampPlusDays(1)), {
+      await swap.authorizeSender(mockSigner, ONE_DAY_EXPIRY, {
         from: mockSender,
       })
       // auth sender
