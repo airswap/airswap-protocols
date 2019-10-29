@@ -1,89 +1,80 @@
-Compilation warnings/errors on Full.sol:
-Full.sol:21:1: Warning: Experimental features are turned on. Do not use experimental features on live deployments.
-pragma experimental ABIEncoderV2;
-^-------------------------------^
+5283af3ea82165a28cce61e249006b655abe4dbe
 
+INRERC20 (../tokens/contracts/interfaces/INRERC20.sol#8-77) has incorrect ERC20 function interface: transfer(address,uint256) (../tokens/contracts/interfaces/INRERC20.sol#26)
+INRERC20 (../tokens/contracts/interfaces/INRERC20.sol#8-77) has incorrect ERC20 function interface: transferFrom(address,address,uint256) (../tokens/contracts/interfaces/INRERC20.sol#62)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#incorrect-erc20-interface
 INFO:Detectors:
-Swap.swap(Types.Order) (Full.sol#534-631) uses timestamp for comparisons
+Swap.transferToken(address,address,uint256,address,bytes4) (Swap.sol#337-356) uses a dangerous strict equality:
+	- require(bool,string)(initBalance.sub(param) == INRERC20(token).balanceOf(from),TRANSFER_FAILED)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#dangerous-strict-equalities
+INFO:Detectors:
+Swap.swap(Types.Order) (Swap.sol#77-174) uses timestamp for comparisons
 	Dangerous comparisons:
-	- require(bool,string)(_order.expiry > block.timestamp,ORDER_EXPIRED) (Full.sol#539-540)
-Swap.authorizeSender(address,uint256) (Full.sol#668-676) uses timestamp for comparisons
+	- require(bool,string)(order.expiry > block.timestamp,ORDER_EXPIRED) (Swap.sol#82-83)
+Swap.authorizeSender(address,uint256) (Swap.sol#211-219) uses timestamp for comparisons
 	Dangerous comparisons:
-	- require(bool,string)(_expiry > block.timestamp,INVALID_AUTH_EXPIRY) (Full.sol#673)
-Swap.authorizeSigner(address,uint256) (Full.sol#684-692) uses timestamp for comparisons
+	- require(bool,string)(expiry > block.timestamp,INVALID_AUTH_EXPIRY) (Swap.sol#216)
+Swap.authorizeSigner(address,uint256) (Swap.sol#227-235) uses timestamp for comparisons
 	Dangerous comparisons:
-	- require(bool,string)(_expiry > block.timestamp,INVALID_AUTH_EXPIRY) (Full.sol#689)
-Swap.isSenderAuthorized(address,address) (Full.sol#724-730) uses timestamp for comparisons
+	- require(bool,string)(expiry > block.timestamp,INVALID_AUTH_EXPIRY) (Swap.sol#232)
+Swap.isSenderAuthorized(address,address) (Swap.sol#267-273) uses timestamp for comparisons
 	Dangerous comparisons:
-	- ((_approver == _delegate) || senderAuthorizations[_approver][_delegate] > block.timestamp) (Full.sol#728-729)
-Swap.isSignerAuthorized(address,address) (Full.sol#738-744) uses timestamp for comparisons
+	- ((authorizer == delegate) || senderAuthorizations[authorizer][delegate] > block.timestamp) (Swap.sol#271-272)
+Swap.isSignerAuthorized(address,address) (Swap.sol#281-287) uses timestamp for comparisons
 	Dangerous comparisons:
-	- ((_approver == _delegate) || (signerAuthorizations[_approver][_delegate] > block.timestamp)) (Full.sol#742-743)
+	- ((authorizer == delegate) || (signerAuthorizations[authorizer][delegate] > block.timestamp)) (Swap.sol#285-286)
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#block-timestamp
 INFO:Detectors:
 Different versions of Solidity is used in :
-	- Version used: ['0.5.12', 'ABIEncoderV2', '^0.5.0']
-	- Full.sol#20 declares pragma solidity0.5.12
-	- Full.sol#21 declares pragma experimentalABIEncoderV2
-	- Full.sol#172 declares pragma solidity0.5.12
-	- Full.sol#295 declares pragma solidity^0.5.0
-	- Full.sol#374 declares pragma solidity^0.5.0
-	- Full.sol#399 declares pragma solidity^0.5.0
-	- Full.sol#470 declares pragma solidity0.5.12
+	- Version used: ['0.5.12', '>=0.4.21<0.6.0', 'ABIEncoderV2', '^0.5.0']
+	- Migrations.sol#1 declares pragma solidity>=0.4.21<0.6.0
+	- ../types/contracts/Types.sol#18 declares pragma solidity0.5.12
+	- ../types/contracts/Types.sol#19 declares pragma experimentalABIEncoderV2
+	- ../../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol#1 declares pragma solidity^0.5.0
+	- ../../node_modules/openzeppelin-solidity/contracts/token/ERC721/IERC721.sol#1 declares pragma solidity^0.5.0
+	- ../tokens/contracts/interfaces/INRERC20.sol#1 declares pragma solidity^0.5.0
+	- ../../node_modules/openzeppelin-solidity/contracts/introspection/IERC165.sol#1 declares pragma solidity^0.5.0
+	- Imports.sol#1 declares pragma solidity0.5.12
+	- Swap.sol#17 declares pragma solidity0.5.12
+	- Swap.sol#18 declares pragma experimentalABIEncoderV2
+	- interfaces/ISwap.sol#17 declares pragma solidity0.5.12
+	- interfaces/ISwap.sol#18 declares pragma experimentalABIEncoderV2
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#different-pragma-directives-are-used
 INFO:Detectors:
-Pragma version "0.5.12" allows old versions (Full.sol#20)
-Pragma version "0.5.12" allows old versions (Full.sol#172)
-Pragma version "^0.5.0" allows old versions (Full.sol#295)
-Pragma version "^0.5.0" allows old versions (Full.sol#374)
-Pragma version "^0.5.0" allows old versions (Full.sol#399)
-Pragma version "0.5.12" allows old versions (Full.sol#470)
+Pragma version ">=0.4.21<0.6.0" allows old versions (Migrations.sol#1)
+Pragma version "0.5.12" allows old versions (../types/contracts/Types.sol#18)
+Pragma version "^0.5.0" allows old versions (../../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol#1)
+Pragma version "^0.5.0" allows old versions (../../node_modules/openzeppelin-solidity/contracts/token/ERC721/IERC721.sol#1)
+Pragma version "^0.5.0" allows old versions (../tokens/contracts/interfaces/INRERC20.sol#1)
+Pragma version "^0.5.0" allows old versions (../../node_modules/openzeppelin-solidity/contracts/introspection/IERC165.sol#1)
+Pragma version "0.5.12" allows old versions (Imports.sol#1)
+Pragma version "0.5.12" allows old versions (Swap.sol#17)
+Pragma version "0.5.12" allows old versions (interfaces/ISwap.sol#17)
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#incorrect-versions-of-solidity
 INFO:Detectors:
-Parameter '_order' of _order (Full.sol#96) is not in mixedCase
-Parameter '_domainSeparator' of _domainSeparator (Full.sol#97) is not in mixedCase
-Parameter '_name' of _name (Full.sol#140) is not in mixedCase
-Parameter '_version' of _version (Full.sol#141) is not in mixedCase
-Parameter '_verifyingContract' of _verifyingContract (Full.sol#142) is not in mixedCase
-Parameter '_order' of _order (Full.sol#535) is not in mixedCase
-Parameter '_nonces' of _nonces (Full.sol#640) is not in mixedCase
-Parameter '_minimumNonce' of _minimumNonce (Full.sol#656) is not in mixedCase
-Parameter '_authorizedSender' of _authorizedSender (Full.sol#669) is not in mixedCase
-Parameter '_expiry' of _expiry (Full.sol#670) is not in mixedCase
-Parameter '_authorizedSigner' of _authorizedSigner (Full.sol#685) is not in mixedCase
-Parameter '_expiry' of _expiry (Full.sol#686) is not in mixedCase
-Parameter '_authorizedSender' of _authorizedSender (Full.sol#700) is not in mixedCase
-Parameter '_authorizedSigner' of _authorizedSigner (Full.sol#712) is not in mixedCase
-Parameter '_approver' of _approver (Full.sol#725) is not in mixedCase
-Parameter '_delegate' of _delegate (Full.sol#726) is not in mixedCase
-Parameter '_approver' of _approver (Full.sol#739) is not in mixedCase
-Parameter '_delegate' of _delegate (Full.sol#740) is not in mixedCase
-Parameter '_order' of _order (Full.sol#752) is not in mixedCase
-Parameter '_domainSeparator' of _domainSeparator (Full.sol#753) is not in mixedCase
-Parameter '_from' of _from (Full.sol#791) is not in mixedCase
-Parameter '_to' of _to (Full.sol#792) is not in mixedCase
-Parameter '_param' of _param (Full.sol#793) is not in mixedCase
-Parameter '_token' of _token (Full.sol#794) is not in mixedCase
-Parameter '_kind' of _kind (Full.sol#795) is not in mixedCase
+Parameter '_verifyingContract' of _verifyingContract (../types/contracts/Types.sol#146) is not in mixedCase
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#conformance-to-solidity-naming-conventions
 INFO:Detectors:
+setCompleted(uint256) should be declared external:
+	- Migrations.setCompleted(uint256) (Migrations.sol#15-17)
+upgrade(address) should be declared external:
+	- Migrations.upgrade(address) (Migrations.sol#19-22)
 balanceOf(address) should be declared external:
-	- IERC721.balanceOf(address) (Full.sol#413)
+	- IERC721.balanceOf(address) (../../node_modules/openzeppelin-solidity/contracts/token/ERC721/IERC721.sol#16)
 ownerOf(uint256) should be declared external:
-	- IERC721.ownerOf(uint256) (Full.sol#418)
+	- IERC721.ownerOf(uint256) (../../node_modules/openzeppelin-solidity/contracts/token/ERC721/IERC721.sol#21)
 safeTransferFrom(address,address,uint256) should be declared external:
-	- IERC721.safeTransferFrom(address,address,uint256) (Full.sol#432)
+	- IERC721.safeTransferFrom(address,address,uint256) (../../node_modules/openzeppelin-solidity/contracts/token/ERC721/IERC721.sol#35)
 transferFrom(address,address,uint256) should be declared external:
-	- IERC721.transferFrom(address,address,uint256) (Full.sol#441)
+	- IERC721.transferFrom(address,address,uint256) (../../node_modules/openzeppelin-solidity/contracts/token/ERC721/IERC721.sol#44)
 approve(address,uint256) should be declared external:
-	- IERC721.approve(address,uint256) (Full.sol#442)
+	- IERC721.approve(address,uint256) (../../node_modules/openzeppelin-solidity/contracts/token/ERC721/IERC721.sol#45)
 getApproved(uint256) should be declared external:
-	- IERC721.getApproved(uint256) (Full.sol#443)
+	- IERC721.getApproved(uint256) (../../node_modules/openzeppelin-solidity/contracts/token/ERC721/IERC721.sol#46)
 setApprovalForAll(address,bool) should be declared external:
-	- IERC721.setApprovalForAll(address,bool) (Full.sol#445)
+	- IERC721.setApprovalForAll(address,bool) (../../node_modules/openzeppelin-solidity/contracts/token/ERC721/IERC721.sol#48)
 isApprovedForAll(address,address) should be declared external:
-	- IERC721.isApprovedForAll(address,address) (Full.sol#446)
+	- IERC721.isApprovedForAll(address,address) (../../node_modules/openzeppelin-solidity/contracts/token/ERC721/IERC721.sol#49)
 safeTransferFrom(address,address,uint256,bytes) should be declared external:
-	- IERC721.safeTransferFrom(address,address,uint256,bytes) (Full.sol#449)
+	- IERC721.safeTransferFrom(address,address,uint256,bytes) (../../node_modules/openzeppelin-solidity/contracts/token/ERC721/IERC721.sol#52)
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#public-function-that-could-be-declared-as-external
-INFO:Slither:Full.sol analyzed (6 contracts with 38 detectors), 46 result(s) found
