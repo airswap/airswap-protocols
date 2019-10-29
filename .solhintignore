@@ -1,4 +1,4 @@
 Migrations.sol
 **/node_modules/
 ./source/tokens/
-.*Flattened.sol
+*_Flattened.sol
