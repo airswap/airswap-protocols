@@ -34,7 +34,8 @@ contract Wrapper is Ownable {
   IWETH public wethContract;
 
   // Boolean marking when the contract is paused - users cannot call functions when true
-  bool public contractPaused = false;
+  // defaults to false
+  bool public contractPaused;
 
   /**
     * @notice Contract Constructor
@@ -103,7 +104,7 @@ contract Wrapper is Ownable {
     */
   function swap(
     Types.Order calldata order
-  ) external payable {
+  ) external payable notPaused {
 
     // Ensure msg.sender is sender wallet.
     require(order.sender.wallet == msg.sender,
