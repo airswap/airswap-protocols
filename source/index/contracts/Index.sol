@@ -148,7 +148,9 @@ contract Index is Ownable {
     * @dev start value of 0x0 starts at the head
     * @param start address Identifier to start with
     * @param count uint256 Number of locators to return
-    * @return bytes32[] result List of locators
+    * @return bytes32[] List of locators
+    * @return uint256[] List of scores corresponding to locators
+    * @return address The next identifier to provide for pagination
     */
   function getLocators(
     address start,
