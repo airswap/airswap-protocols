@@ -20,11 +20,12 @@ pragma experimental ABIEncoderV2;
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "@airswap/tokens/contracts/interfaces/IWETH.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 /**
   * @title Wrapper: Send and receive ether for WETH trades
   */
-contract Wrapper {
+contract Wrapper is Ownable {
 
   // The Swap contract to settle trades
   ISwap public swapContract;
@@ -73,6 +74,25 @@ contract Wrapper {
     if(msg.sender != address(wethContract)) {
       revert("DO_NOT_SEND_ETHER");
     }
+  }
+  /**
+  * @notice Set whether the contract is paused
+  * @dev Only callable by owner
+  *
+  * @param newStatus bool New status of contractPaused
+  */
+  function setPausedStatus(bool newStatus) external onlyOwner {
+    contractPaused = newStatus;
+  }
+
+  /**
+    * @notice Destroy the Contract
+    * @dev Only callable by owner and when contractPaused
+    *
+    * @param recipient address Recipient of any money in the contract
+    */
+  function killContract(address payable recipient) external onlyOwner paused {
+    selfdestruct(recipient);
   }
 
   /**
