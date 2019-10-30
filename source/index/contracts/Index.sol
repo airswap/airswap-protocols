@@ -153,8 +153,11 @@ contract Index is Ownable {
   function getLocators(
     address start,
     uint256 count
-  ) external view returns (bytes32[] memory result) {
-
+  ) external view returns (
+    bytes32[] memory,
+    bytes32[] memory,
+    address
+  ) {
     address identifier = entries[HEAD].next;
 
     // If a valid start is provided, start there.
@@ -165,15 +168,19 @@ contract Index is Ownable {
       identifier = start;
     }
 
-    result = new bytes32[](count);
+    bytes32[] memory locators = new bytes32[](count);
+    bytes32[] memory scores = new bytes32[](count);
 
     // Iterate over the list until the end or count.
     uint256 i;
     while (i < count && identifier != HEAD) {
-      result[i] = entries[identifier].locator;
+      locators[i] = entries[identifier].locator;
+      scores[i] = entries[identifier].score;
       i = i + 1;
       identifier = entries[identifier].next;
     }
+
+    return (locators, scores, identifier)
   }
 
   /**
