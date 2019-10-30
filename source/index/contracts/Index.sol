@@ -168,7 +168,7 @@ contract Index is Ownable {
     result = new bytes32[](count);
 
     // Iterate over the list until the end or count.
-    uint8 i = 0;
+    uint256 i = 0;
     while (i < count && identifier != HEAD) {
       result[i] = entries[identifier].locator;
       i = i + 1;
