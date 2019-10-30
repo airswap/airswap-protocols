@@ -146,11 +146,11 @@ contract Index is Ownable {
   /**
     * @notice Get a Range of Locators
     * @dev start value of 0x0 starts at the head
-    * @param start address Identifier to start with
+    * @param start address Cursor to start with
     * @param limit uint256 Number of locators to return
     * @return bytes32[] List of locators
     * @return uint256[] List of scores corresponding to locators
-    * @return address The next identifier to provide for pagination
+    * @return address The next cursor to provide for pagination
     */
   function getLocators(
     address cursor,
@@ -162,11 +162,11 @@ contract Index is Ownable {
   ) {
     address identifier;
 
-    // If a valid start is provided, start there.
+    // If a valid cursor is provided, start there.
     if (cursor != address(0) && cursor != HEAD) {
-      // Check that the provided start exists.
+      // Check that the provided cursor exists.
       require(_hasEntry(cursor), "START_ENTRY_NOT_FOUND");
-      // Set the cursor to the provided start.
+      // Set the starting identifier to the provided cursor.
       identifier = cursor;
     } else {
       identifier = entries[HEAD].next;

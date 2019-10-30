@@ -246,21 +246,21 @@ contract Indexer is IIndexer, Ownable {
     *
     * @param signerToken address Signer token of the trading pair
     * @param senderToken address Sender token of the trading pair
-    * @param startAddress address Address to start from
+    * @param cursor address Address to start from
     * @param limit uint256 Total number of locators to return
     * @return bytes32[] List of locators
     * @return uint256[] List of scores corresponding to locators
-    * @return address The next identifier to provide for pagination
+    * @return address The next cursor to provide for pagination
     */
   function getLocators(
     address signerToken,
     address senderToken,
-    address startAddress,
+    address cursor,
     uint256 limit
   ) external view notPaused returns (
     bytes32[] memory locators,
     uint256[] memory scores,
-    address nextIdentifier
+    address nextCursor
   ) {
     // Ensure neither token is blacklisted.
     if (blacklist[signerToken] || blacklist[senderToken]) {
@@ -272,7 +272,7 @@ contract Indexer is IIndexer, Ownable {
       return (new bytes32[](0), new uint256[](0), address(0));
     }
 
-    return indexes[signerToken][senderToken].getLocators(startAddress, limit);
+    return indexes[signerToken][senderToken].getLocators(cursor, limit);
   }
 
   /**
