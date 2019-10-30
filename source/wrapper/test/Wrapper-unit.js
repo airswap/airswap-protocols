@@ -12,6 +12,7 @@ const { orders } = require('@airswap/order-utils')
 contract('Wrapper Unit Tests', async accounts => {
   const senderParam = 2
   const owner = accounts[0]
+  const notOwner = accounts[1]
   const mockToken = accounts[9]
   const mockSender = accounts[8]
   const mockSigner = accounts[7]
@@ -332,6 +333,10 @@ contract('Wrapper Unit Tests', async accounts => {
   })
 
   describe('Test pausability', async () => {
+    it('Test setPausedStatus is only callable by owner', async () => {
+      await reverted(wrapper.setPausedStatus(true, { from: notOwner }))
+    })
+
     it('Test swap when paused', async () => {
       let notWethContract = mockFT.address
 
