@@ -76,12 +76,12 @@ contract Wrapper is Ownable {
       revert("DO_NOT_SEND_ETHER");
     }
   }
+
   /**
-  * @notice Set whether the contract is paused
-  * @dev Only callable by owner
-  *
-  * @param newStatus bool New status of contractPaused
-  */
+    * @notice Set whether the contract is paused
+    * @dev Only callable by owner
+    * @param newStatus bool New status of contractPaused
+    */
   function setPausedStatus(bool newStatus) external onlyOwner {
     contractPaused = newStatus;
   }
@@ -89,8 +89,7 @@ contract Wrapper is Ownable {
   /**
     * @notice Destroy the Contract
     * @dev Only callable by owner and when contractPaused
-    *
-    * @param recipient address Recipient of any money in the contract
+    * @param recipient address Recipient of any ETH in the contract
     */
   function killContract(address payable recipient) external onlyOwner paused {
     selfdestruct(recipient);
