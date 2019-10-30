@@ -23,6 +23,8 @@ contract('Index Unit Tests', async accounts => {
   let snapshotId
   let index
 
+  let result
+
   let aliceLocator = padAddressToLocator(aliceAddress)
   let bobLocator = padAddressToLocator(bobAddress)
   let carolLocator = padAddressToLocator(carolAddress)
@@ -49,9 +51,11 @@ contract('Index Unit Tests', async accounts => {
       let listLength = await index.length()
       equal(listLength, 0, 'list length should be 0')
 
-      let locators = await index.getLocators(EMPTY_ADDRESS, 10)
-      equal(locators.length, 10, 'list should have 10 slots')
-      equal(locators[0], emptyLocator, 'The locator should be empty')
+      result = await index.getLocators(EMPTY_ADDRESS, 10)
+
+      equal(result[0].length, 0, 'locators list should have 0 slots')
+      equal(result[1].length, 0, 'scores list should have 0 slots')
+      equal(result[2], HEAD, 'The next slot should be the head')
     })
   })
 
@@ -79,10 +83,15 @@ contract('Index Unit Tests', async accounts => {
       })
 
       // check it has been inserted into the linked list correctly
-      let locators = await index.getLocators(EMPTY_ADDRESS, 10)
-      equal(locators.length, 10, 'list should be of size 10')
-      equal(locators[0], aliceLocator, 'Alice should be in list')
-      equal(locators[1], emptyLocator, 'The second locator should be empty')
+      result = await index.getLocators(EMPTY_ADDRESS, 10)
+
+      equal(result[0].length, 1, 'locators list should have 1 slots')
+      equal(result[0][0], aliceLocator, 'Alice should be in list')
+
+      equal(result[1].length, 1, 'scores list should have 1 slots')
+      equal(result[1][0], 2000, 'Alices count is incorrect')
+
+      equal(result[2], HEAD, 'The next slot should be the head')
 
       // check the length has increased
       let listLength = await index.length()

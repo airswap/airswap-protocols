@@ -170,12 +170,16 @@ contract Index is Ownable {
       identifier = start;
     }
 
-    bytes32[] memory locators = new bytes32[](count);
-    uint256[] memory scores = new uint256[](count);
+    // Although it's not known how many entries are between `start` and the end
+    // We know that it is no more than `length`
+    uint256 limit = (length < count) ? length : count;
 
-    // Iterate over the list until the end or count.
+    bytes32[] memory locators = new bytes32[](limit);
+    uint256[] memory scores = new uint256[](limit);
+
+    // Iterate over the list until the end or limit.
     uint256 i;
-    while (i < count && identifier != HEAD) {
+    while (i < limit && identifier != HEAD) {
       locators[i] = entries[identifier].locator;
       scores[i] = entries[identifier].score;
       i = i + 1;
