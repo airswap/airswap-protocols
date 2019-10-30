@@ -43,8 +43,6 @@ contract('Swap', async accounts => {
   let cancel
   let invalidate
 
-  let defaultAuthExpiry
-
   // One big snapshot - not snapshotting every test
   before('Setup', async () => {
     let snapShot = await takeSnapshot()
@@ -478,29 +476,17 @@ contract('Swap', async accounts => {
     })
 
     it('Alice attempts to incorrectly authorize herself to make orders', async () => {
-      defaultAuthExpiry = await orders.generateExpiry(1)
       await reverted(
-        swapContract.authorizeSigner(aliceAddress, defaultAuthExpiry, {
+        swapContract.authorizeSigner(aliceAddress, {
           from: aliceAddress,
         }),
         'INVALID_AUTH_SIGNER'
       )
     })
 
-    it('Alice attempts to authorize David to make orders on her behalf with an invalid expiry', async () => {
-      const authExpiry = (await getLatestTimestamp()) - 1
-      await reverted(
-        swapContract.authorizeSigner(davidAddress, authExpiry, {
-          from: aliceAddress,
-        }),
-        'INVALID_AUTH_EXPIRY'
-      )
-    })
-
     it('Alice authorizes David to make orders on her behalf', async () => {
-      defaultAuthExpiry = await orders.generateExpiry(1)
       emitted(
-        await swapContract.authorizeSigner(davidAddress, defaultAuthExpiry, {
+        await swapContract.authorizeSigner(davidAddress, {
           from: aliceAddress,
         }),
         'AuthorizeSigner'
@@ -593,26 +579,16 @@ contract('Swap', async accounts => {
 
     it('Bob tries to unsuccessfully authorize himself to be an authorized sender', async () => {
       await reverted(
-        swapContract.authorizeSender(bobAddress, defaultAuthExpiry, {
+        swapContract.authorizeSender(bobAddress, {
           from: bobAddress,
         }),
         'INVALID_AUTH_SENDER'
       )
     })
 
-    it('Bob tries to unsuccessfully authorize invalid time', async () => {
-      const authExpiry = (await getLatestTimestamp()) - 1
-      await reverted(
-        swapContract.authorizeSender(carolAddress, authExpiry, {
-          from: bobAddress,
-        }),
-        'INVALID_AUTH_EXPIRY'
-      )
-    })
-
     it('Bob authorizes Carol to take orders on his behalf', async () => {
       emitted(
-        await swapContract.authorizeSender(carolAddress, defaultAuthExpiry, {
+        await swapContract.authorizeSender(carolAddress, {
           from: bobAddress,
         }),
         'AuthorizeSender'
@@ -671,7 +647,7 @@ contract('Swap', async accounts => {
   describe('Signer and Sender Delegation (Three Way)', async () => {
     it('Alice approves David to make orders on her behalf', async () => {
       emitted(
-        await swapContract.authorizeSigner(davidAddress, defaultAuthExpiry, {
+        await swapContract.authorizeSigner(davidAddress, {
           from: aliceAddress,
         }),
         'AuthorizeSigner'
@@ -680,7 +656,7 @@ contract('Swap', async accounts => {
 
     it('Bob approves David to take orders on his behalf', async () => {
       emitted(
-        await swapContract.authorizeSender(davidAddress, defaultAuthExpiry, {
+        await swapContract.authorizeSender(davidAddress, {
           from: bobAddress,
         }),
         'AuthorizeSender'
@@ -738,7 +714,7 @@ contract('Swap', async accounts => {
   describe('Signer and Sender Delegation (Four Way)', async () => {
     it('Bob approves Carol to take orders on his behalf', async () => {
       emitted(
-        await swapContract.authorizeSender(carolAddress, defaultAuthExpiry, {
+        await swapContract.authorizeSender(carolAddress, {
           from: bobAddress,
         }),
         'AuthorizeSender'
@@ -1075,7 +1051,7 @@ contract('Swap', async accounts => {
 
     it('Alice authorizes Eve to make orders on her behalf', async () => {
       emitted(
-        await swapContract.authorizeSigner(eveAddress, defaultAuthExpiry, {
+        await swapContract.authorizeSigner(eveAddress, {
           from: aliceAddress,
         }),
         'AuthorizeSigner'

@@ -47,14 +47,12 @@ interface ISwap {
 
   event AuthorizeSender(
     address indexed authorizerAddress,
-    address indexed authorizedSender,
-    uint256 expiry
+    address indexed authorizedSender
   );
 
   event AuthorizeSigner(
     address indexed authorizerAddress,
-    address indexed authorizedSigner,
-    uint256 expiry
+    address indexed authorizedSigner
   );
 
   event RevokeSender(
@@ -100,21 +98,17 @@ interface ISwap {
   /**
     * @notice Authorize a delegated sender
     * @param authorizedSender address
-    * @param expiry uint256
     */
   function authorizeSender(
-    address authorizedSender,
-    uint256 expiry
+    address authorizedSender
   ) external;
 
   /**
     * @notice Authorize a delegated signer
     * @param authorizedSigner address
-    * @param expiry uint256
     */
   function authorizeSigner(
-    address authorizedSigner,
-    uint256 expiry
+    address authorizedSigner
   ) external;
 
 

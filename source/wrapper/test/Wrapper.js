@@ -13,11 +13,7 @@ const {
   ok,
 } = require('@airswap/test-utils').assert
 const { balances } = require('@airswap/test-utils').balances
-const {
-  getTimestampPlusDays,
-  takeSnapshot,
-  revertToSnapShot,
-} = require('@airswap/test-utils').time
+const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 const { orders, signatures } = require('@airswap/order-utils')
 
 let swapContract
@@ -97,8 +93,7 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
   })
 
   it('Bob authorizes the Wrapper to send orders on his behalf', async () => {
-    let expiry = await getTimestampPlusDays(1)
-    let tx = await swapContract.authorizeSender(wrapperAddress, expiry, {
+    let tx = await swapContract.authorizeSender(wrapperAddress, {
       from: bobAddress,
     })
     passes(tx)
@@ -145,8 +140,7 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
     })
 
     it('Alice authorizes the Wrapper to send orders on her behalf', async () => {
-      let expiry = await getTimestampPlusDays(1)
-      let tx = await swapContract.authorizeSender(wrapperAddress, expiry, {
+      let tx = await swapContract.authorizeSender(wrapperAddress, {
         from: aliceAddress,
       })
       passes(tx)
@@ -279,8 +273,7 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
     })
 
     it('Bob authorizes the Wrapper to send orders on her behalf', async () => {
-      let expiry = await getTimestampPlusDays(1)
-      let tx = await swapContract.authorizeSender(wrapperAddress, expiry, {
+      let tx = await swapContract.authorizeSender(wrapperAddress, {
         from: bobAddress,
       })
       passes(tx)
