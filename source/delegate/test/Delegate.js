@@ -466,18 +466,6 @@ contract('Delegate Integration Tests', async accounts => {
         },
       })
 
-      // authorize the delegate to be sender
-      /*      let tx = await swapContract.authorizeSender(
-        aliceDelegate.address,
-        {
-          from: aliceTradeWallet,
-        }
-      )
-      emitted(tx, 'AuthorizeSender')*/
-
-      // increase time past expiry
-      //await advanceTime(SECONDS_IN_DAY * 0.6)
-
       // Succeeds on the Delegate, fails on the Swap.
       // aliceTradeWallet approval has expired
       await reverted(
