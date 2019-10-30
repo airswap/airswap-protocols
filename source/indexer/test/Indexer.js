@@ -415,7 +415,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
 
       let whitelist = await indexer.locatorWhitelist.call()
 
-      equal(whitelist, delegateFactory.address)
+      equal(whitelist, EMPTY_ADDRESS)
     })
   })
 
