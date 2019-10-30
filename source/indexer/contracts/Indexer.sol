@@ -299,12 +299,14 @@ contract Indexer is IIndexer, Ownable {
   ) internal {
     // If the new stake is bigger, collect the difference.
     if (oldAmount < newAmount) {
+      // Note: SafeMath not required due to the inequality check above
       require(stakingToken.transferFrom(user, address(this), newAmount - oldAmount),
         "UNABLE_TO_STAKE");
     }
 
     // If the old stake is bigger, return the excess.
     if (newAmount < oldAmount) {
+      // Note: SafeMath not required due to the inequality check above
       require(stakingToken.transfer(user, oldAmount - newAmount));
     }
 
