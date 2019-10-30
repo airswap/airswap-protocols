@@ -248,7 +248,9 @@ contract Indexer is IIndexer, Ownable {
     * @param senderToken address Sender token of the trading pair
     * @param startAddress address Address to start from
     * @param count uint256 Total number of locators to return
-    * @return locators bytes32[]
+    * @return bytes32[] List of locators
+    * @return uint256[] List of scores corresponding to locators
+    * @return address The next identifier to provide for pagination
     */
   function getLocators(
     address signerToken,
