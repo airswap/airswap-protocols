@@ -32,6 +32,9 @@ contract Wrapper {
   // The WETH contract to wrap ether
   IWETH public wethContract;
 
+  // Boolean marking when the contract is paused - users cannot call functions when true
+  bool public contractPaused = false;
+
   /**
     * @notice Contract Constructor
     * @param wrapperSwapContract address
@@ -43,6 +46,22 @@ contract Wrapper {
   ) public {
     swapContract = ISwap(wrapperSwapContract);
     wethContract = IWETH(wrapperWethContract);
+  }
+
+  /**
+  * @notice Modifier to prevent function calling unless the contract is not paused
+  */
+  modifier notPaused() {
+    require(!contractPaused, "CONTRACT_IS_PAUSED");
+    _;
+  }
+
+  /**
+    * @notice Modifier to prevent function calling unless the contract is paused
+    */
+  modifier paused() {
+    require(contractPaused, "CONTRACT_NOT_PAUSED");
+    _;
   }
 
   /**
