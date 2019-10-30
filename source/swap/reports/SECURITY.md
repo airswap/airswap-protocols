@@ -33,13 +33,13 @@ contracts/interfaces/ISwap.sol
 
 | Function        | Source   | Visibility | Params                                         | Payable |
 | :-------------- | :------- | :--------- | :--------------------------------------------- | :------ |
-| swap            | Swap.sol | external   | `Types.Order _order`                           | no      |
-| cancel          | Swap.sol | external   | `uint256[] calldata _nonces`                   | no      |
-| invalidate      | Swap.sol | external   | `uint256 _minimumNonce`                        | no      |
-| authorizeSender | Swap.sol | external   | `address _authorizedSender`, `uint256 _expiry` | no      |
-| authorizeSigner | Swap.sol | external   | `address _authorizedSigner`, `uint256 _expiry` | no      |
-| revokeSender    | Swap.sol | external   | `address _authorizedSender`                    | no      |
-| revokeSigner    | Swap.sol | external   | `address _authorizedSender`                    | no      |
+| swap            | Swap.sol | external   | `Types.Order order`                            | no      |
+| cancel          | Swap.sol | external   | `uint256[] calldata nonces`                    | no      |
+| invalidate      | Swap.sol | external   | `uint256 minimumNonce`                         | no      |
+| authorizeSender | Swap.sol | external   | `address authorizedSender`, `uint256 expiry`   | no      |
+| authorizeSigner | Swap.sol | external   | `address authorizedSigner`, `uint256 expiry`   | no      |
+| revokeSender    | Swap.sol | external   | `address authorizedSender`                     | no      |
+| revokeSigner    | Swap.sol | external   | `address authorizedSender`                     | no      |
 
 ## Invariants
 
@@ -144,21 +144,21 @@ All files     |      100 |      100 |      100 |      100 |                |
 Slither generates warnings against using `block.timestamp`, which is necessary in the current design for order and authorization expiry.
 
 ```
-Swap.swap(Types.Order) (Full.sol#521-618) uses timestamp for comparisons
+Swap.swap(Types.Order) (Swap.sol#77-174) uses timestamp for comparisons
 	Dangerous comparisons:
-	- require(bool,string)(order.expiry > block.timestamp,ORDER_EXPIRED) (Full.sol#526-527)
-Swap.authorizeSender(address,uint256) (Full.sol#655-663) uses timestamp for comparisons
+	- require(bool,string)(order.expiry > block.timestamp,ORDER_EXPIRED) (Swap.sol#82-83)
+Swap.authorizeSender(address,uint256) (Swap.sol#211-219) uses timestamp for comparisons
 	Dangerous comparisons:
-	- require(bool,string)(expiry > block.timestamp,INVALID_AUTH_EXPIRY) (Full.sol#660)
-Swap.authorizeSigner(address,uint256) (Full.sol#671-679) uses timestamp for comparisons
+	- require(bool,string)(expiry > block.timestamp,INVALID_AUTH_EXPIRY) (Swap.sol#216)
+Swap.authorizeSigner(address,uint256) (Swap.sol#227-235) uses timestamp for comparisons
 	Dangerous comparisons:
-	- require(bool,string)(expiry > block.timestamp,INVALID_AUTH_EXPIRY) (Full.sol#676)
-Swap.isSenderAuthorized(address,address) (Full.sol#711-717) uses timestamp for comparisons
+	- require(bool,string)(expiry > block.timestamp,INVALID_AUTH_EXPIRY) (Swap.sol#232)
+Swap.isSenderAuthorized(address,address) (Swap.sol#267-273) uses timestamp for comparisons
 	Dangerous comparisons:
-	- ((approver == delegate) || senderAuthorizations[approver][delegate] > block.timestamp) (Full.sol#715-716)
-Swap.isSignerAuthorized(address,address) (Full.sol#725-731) uses timestamp for comparisons
+	- ((authorizer == delegate) || senderAuthorizations[authorizer][delegate] > block.timestamp) (Swap.sol#271-272)
+Swap.isSignerAuthorized(address,address) (Swap.sol#281-287) uses timestamp for comparisons
 	Dangerous comparisons:
-	- ((approver == delegate) || signerAuthorizations[approver][delegate] > block.timestamp) (Full.sol#729-730)
+	- ((authorizer == delegate) || (signerAuthorizations[authorizer][delegate] > block.timestamp)) (Swap.sol#285-286)
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#block-timestamp
 ```
 

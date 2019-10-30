@@ -137,19 +137,19 @@ library Types {
     * @dev Used for signature validation (EIP-712)
     * @param name bytes
     * @param version bytes
-    * @param _verifyingContract address
+    * @param verifyingContract address
     * @return bytes32 returns a keccak256 abi.encodePacked value
     */
   function hashDomain(
     bytes calldata name,
     bytes calldata version,
-    address _verifyingContract
+    address verifyingContract
   ) external pure returns (bytes32) {
     return keccak256(abi.encode(
       DOMAIN_TYPEHASH,
       keccak256(name),
       keccak256(version),
-      _verifyingContract
+      verifyingContract
     ));
   }
 }
