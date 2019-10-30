@@ -155,7 +155,7 @@ contract Index is Ownable {
     uint256 count
   ) external view returns (
     bytes32[] memory,
-    bytes32[] memory,
+    uint256[] memory,
     address
   ) {
     address identifier = entries[HEAD].next;
@@ -169,7 +169,7 @@ contract Index is Ownable {
     }
 
     bytes32[] memory locators = new bytes32[](count);
-    bytes32[] memory scores = new bytes32[](count);
+    uint256[] memory scores = new uint256[](count);
 
     // Iterate over the list until the end or count.
     uint256 i;
@@ -180,7 +180,7 @@ contract Index is Ownable {
       identifier = entries[identifier].next;
     }
 
-    return (locators, scores, identifier)
+    return (locators, scores, identifier);
   }
 
   /**
