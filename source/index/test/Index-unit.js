@@ -509,10 +509,7 @@ contract('Index Unit Tests', async accounts => {
         from: owner,
       })
 
-      await reverted(
-        index.getLocators(davidAddress, 10),
-        'CURSOR_NOT_FOUND'
-      )
+      await reverted(index.getLocators(davidAddress, 10), 'CURSOR_NOT_FOUND')
     })
   })
 })
