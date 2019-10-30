@@ -181,7 +181,7 @@ contract Index is Ownable {
 
     // Iterate over the list until the end or size.
     uint256 i;
-    while (i < size && nextCursor != HEAD) {
+    while (i < size && identifier != HEAD) {
       locators[i] = entries[identifier].locator;
       scores[i] = entries[identifier].score;
       i = i + 1;
