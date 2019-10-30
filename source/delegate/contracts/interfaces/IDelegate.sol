@@ -21,20 +21,28 @@ import "@airswap/types/contracts/Types.sol";
 
 interface IDelegate {
 
+  struct Rule {
+    uint256 maxSenderAmount;      // The maximum amount of ERC-20 token the delegate would send
+    uint256 priceCoef;            // Number to be multiplied by 10^(-priceExp) - the price coefficient
+    uint256 priceExp;             // Indicates location of the decimal priceCoef * 10^(-priceExp)
+  }
+
   event SetRule(
-    address senderToken,
-    address signerToken,
+    address indexed ruleOwner,
+    address indexed senderToken,
+    address indexed signerToken,
     uint256 maxSenderAmount,
     uint256 priceCoef,
     uint256 priceExp
   );
 
   event UnsetRule(
-    address senderToken,
-    address signerToken
+    address indexed ruleOwner,
+    address indexed senderToken,
+    address indexed signerToken
   );
 
-  function rules(address, address) external returns (Types.Rule memory);
+  function rules(address, address) external returns (Rule memory);
 
   function setRule(
     address senderToken,
