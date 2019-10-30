@@ -13,7 +13,7 @@ const {
 } = require('@airswap/test-utils').assert
 const { balances } = require('@airswap/test-utils').balances
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
-const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
+const { EMPTY_ADDRESS, HEAD } = require('@airswap/order-utils').constants
 const { padAddressToLocator } = require('@airswap/test-utils').padding
 
 let snapshotId
@@ -29,6 +29,12 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
   let tokenAST
   let tokenDAI
   let tokenWETH
+
+  let result
+
+  const LOCATORS = 0
+  const SCORES = 1
+  const NEXTID = 2
 
   let aliceLocator = padAddressToLocator(aliceAddress)
   let bobLocator = padAddressToLocator(bobAddress)
@@ -112,7 +118,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
     })
 
     it('Bob ensures no intents are on the Indexer for existing index', async () => {
-      const intents = await indexer.getLocators.call(
+      result = await indexer.getLocators.call(
         tokenWETH.address,
         tokenDAI.address,
         EMPTY_ADDRESS,
@@ -121,13 +127,14 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
           from: bobAddress,
         }
       )
-      equal(intents.length, 10)
-      equal(intents[0], emptyLocator)
-      equal(intents[1], emptyLocator)
+
+      equal(result[LOCATORS].length, 0)
+      equal(result[SCORES].length, 0)
+      equal(result[NEXTID], HEAD)
     })
 
     it('Bob ensures no intents are on the Indexer for non-existing index', async () => {
-      const intents = await indexer.getLocators.call(
+      result = await indexer.getLocators.call(
         tokenDAI.address,
         tokenWETH.address,
         EMPTY_ADDRESS,
@@ -136,7 +143,10 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
           from: bobAddress,
         }
       )
-      equal(intents.length, 0)
+
+      equal(result[LOCATORS].length, 0)
+      equal(result[SCORES].length, 0)
+      equal(result[NEXTID], EMPTY_ADDRESS)
     })
 
     it('Alice attempts to stake and set an intent but fails due to no index', async () => {
@@ -448,7 +458,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
 
   describe('Intent integrity', async () => {
     it('Bob ensures only one intent is on the Indexer', async () => {
-      const intents = await indexer.getLocators.call(
+      result = await indexer.getLocators.call(
         tokenWETH.address,
         tokenDAI.address,
         EMPTY_ADDRESS,
@@ -457,9 +467,14 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
           from: bobAddress,
         }
       )
-      equal(intents.length, 5)
-      equal(intents[0], whitelistedLocator)
-      equal(intents[1], emptyLocator)
+
+      equal(result[LOCATORS].length, 1)
+      equal(result[LOCATORS][0], whitelistedLocator)
+
+      equal(result[SCORES].length, 1)
+      equal(result[SCORES][0], 500)
+
+      equal(result[NEXTID], HEAD)
     })
 
     it('Alice attempts to unset non-existent index and reverts', async () => {
@@ -495,7 +510,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
     })
 
     it('Bob ensures there are no more intents the Indexer', async () => {
-      const intents = await indexer.getLocators.call(
+      result = await indexer.getLocators.call(
         tokenWETH.address,
         tokenDAI.address,
         EMPTY_ADDRESS,
@@ -504,9 +519,10 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
           from: bobAddress,
         }
       )
-      equal(intents.length, 10)
-      equal(intents[0], emptyLocator)
-      equal(intents[1], emptyLocator)
+
+      equal(result[LOCATORS].length, 0)
+      equal(result[SCORES].length, 0)
+      equal(result[NEXTID], HEAD)
     })
 
     it('Alice attempts to set an intent and succeeds', async () => {
@@ -544,8 +560,8 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
       )
     })
 
-    it('Bob tries to fetch intent on blacklisted token which returns 0', async () => {
-      const intents = await indexer.getLocators.call(
+    it('Bob tries to fetch intent on blacklisted token', async () => {
+      result = await indexer.getLocators.call(
         tokenWETH.address,
         tokenDAI.address,
         EMPTY_ADDRESS,
@@ -554,7 +570,10 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
           from: bobAddress,
         }
       )
-      equal(intents.length, 0)
+
+      equal(result[LOCATORS].length, 0)
+      equal(result[SCORES].length, 0)
+      equal(result[NEXTID], EMPTY_ADDRESS)
     })
 
     it('Owner attempts to blacklist same asset which does not emit a new event', async () => {
@@ -645,7 +664,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
     })
 
     it('Bob fetches intents starting at bobAddress', async () => {
-      const intents = await indexer.getLocators.call(
+      result = await indexer.getLocators.call(
         tokenWETH.address,
         tokenDAI.address,
         bobAddress,
@@ -654,10 +673,14 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
           from: bobAddress,
         }
       )
-      equal(intents.length, 3)
-      equal(intents[0], bobLocator)
-      equal(intents[1], emptyLocator)
-      equal(intents[2], emptyLocator)
+
+      equal(result[LOCATORS].length, 2)
+      equal(result[LOCATORS][0], bobLocator)
+      equal(result[LOCATORS][1], emptyLocator)
+
+      equal(result[SCORES].length, 2)
+      equal(result[SCORES][0], 50)
+      equal(result[SCORES][1], 0)
     })
   })
 

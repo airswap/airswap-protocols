@@ -32,6 +32,10 @@ contract('Indexer Unit Tests', async accounts => {
 
   let result
 
+  const LOCATORS = 0
+  const SCORES = 1
+  const NEXTID = 2
+
   let whitelistMock
   let whitelistAddress
   let whitelistedIndexer
@@ -595,9 +599,9 @@ contract('Indexer Unit Tests', async accounts => {
         EMPTY_ADDRESS,
         3
       )
-      equal(result[0].length, 0, 'locators array should be size 0')
-      equal(result[1].length, 0, 'scores array should be size 0')
-      equal(result[2], EMPTY_ADDRESS, 'next identifier should be 0x0')
+      equal(result[LOCATORS].length, 0, 'locators array should be size 0')
+      equal(result[SCORES].length, 0, 'scores array should be size 0')
+      equal(result[NEXTID], EMPTY_ADDRESS, 'next identifier should be 0x0')
     })
 
     it('should return blank results if a token is blacklisted', async () => {
@@ -623,9 +627,9 @@ contract('Indexer Unit Tests', async accounts => {
         EMPTY_ADDRESS,
         4
       )
-      equal(result[0].length, 0, 'locators array should be size 0')
-      equal(result[1].length, 0, 'scores array should be size 0')
-      equal(result[2], EMPTY_ADDRESS, 'next identifier should be 0x0')
+      equal(result[LOCATORS].length, 0, 'locators array should be size 0')
+      equal(result[SCORES].length, 0, 'scores array should be size 0')
+      equal(result[NEXTID], EMPTY_ADDRESS, 'next identifier should be 0x0')
     })
 
     it('should otherwise return the intents', async () => {
@@ -653,17 +657,17 @@ contract('Indexer Unit Tests', async accounts => {
         4
       )
 
-      equal(result[0].length, 3, 'locators array should be size 3')
-      equal(result[0][0], bobLocator, 'intent should be bob')
-      equal(result[0][1], carolLocator, 'intent should be carol')
-      equal(result[0][2], aliceLocator, 'intent should be alice')
+      equal(result[LOCATORS].length, 3, 'locators array should be size 3')
+      equal(result[LOCATORS][0], bobLocator, 'intent should be bob')
+      equal(result[LOCATORS][1], carolLocator, 'intent should be carol')
+      equal(result[LOCATORS][2], aliceLocator, 'intent should be alice')
 
-      equal(result[1].length, 3, 'scores array should be size 3')
-      equal(result[1][0], 100, 'score should be bob')
-      equal(result[1][1], 75, 'score should be carol')
-      equal(result[1][2], 50, 'score should be alice')
+      equal(result[SCORES].length, 3, 'scores array should be size 3')
+      equal(result[SCORES][0], 100, 'score should be bob')
+      equal(result[SCORES][1], 75, 'score should be carol')
+      equal(result[SCORES][2], 50, 'score should be alice')
 
-      equal(result[2], HEAD, 'next identifier should be the head')
+      equal(result[NEXTID], HEAD, 'next identifier should be the head')
 
       // should only get the number specified
       result = await indexer.getLocators.call(
@@ -672,11 +676,11 @@ contract('Indexer Unit Tests', async accounts => {
         EMPTY_ADDRESS,
         1
       )
-      equal(result[0].length, 1, 'locators array should be size 1')
-      equal(result[1].length, 1, 'scores array should be size 1')
-      equal(result[0][0], bobLocator, 'intent should be bob')
-      equal(result[1][0], 100, 'score should be bob')
-      equal(result[2], carolAddress, 'next identifier should be carol')
+      equal(result[LOCATORS].length, 1, 'locators array should be size 1')
+      equal(result[SCORES].length, 1, 'scores array should be size 1')
+      equal(result[LOCATORS][0], bobLocator, 'intent should be bob')
+      equal(result[SCORES][0], 100, 'score should be bob')
+      equal(result[NEXTID], carolAddress, 'next identifier should be carol')
 
       // should start in the specified location
       result = await indexer.getLocators.call(
@@ -686,16 +690,16 @@ contract('Indexer Unit Tests', async accounts => {
         5
       )
 
-      equal(result[0].length, 3, 'intents array should be size 3')
-      equal(result[0][0], carolLocator, 'intent should be carol')
-      equal(result[0][1], aliceLocator, 'intent should be alice')
-      equal(result[0][2], emptyLocator, 'intent should be empty')
+      equal(result[LOCATORS].length, 3, 'intents array should be size 3')
+      equal(result[LOCATORS][0], carolLocator, 'intent should be carol')
+      equal(result[LOCATORS][1], aliceLocator, 'intent should be alice')
+      equal(result[LOCATORS][2], emptyLocator, 'intent should be empty')
 
-      equal(result[1][0], 75, 'score should be carol')
-      equal(result[1][1], 50, 'score should be alice')
-      equal(result[1][2], 0, 'score should be empty')
+      equal(result[SCORES][0], 75, 'score should be carol')
+      equal(result[SCORES][1], 50, 'score should be alice')
+      equal(result[SCORES][2], 0, 'score should be empty')
 
-      equal(result[2], HEAD, 'next identifier should be the head')
+      equal(result[NEXTID], HEAD, 'next identifier should be the head')
     })
   })
 
