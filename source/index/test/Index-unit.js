@@ -433,7 +433,7 @@ contract('Index Unit Tests', async accounts => {
 
       result = await index.getLocators(bobAddress, 10)
 
-      equal(result[0].length, 3, 'locators list should have 3 slows')
+      equal(result[0].length, 3, 'locators list should have 3 slots')
       equal(result[0][0], bobLocator, 'Bob should be first')
       equal(result[0][1], emptyLocator, 'Second slot should be empty')
       equal(result[0][2], emptyLocator, 'Third slot should be empty')
