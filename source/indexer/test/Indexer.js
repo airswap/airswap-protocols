@@ -13,7 +13,13 @@ const {
 } = require('@airswap/test-utils').assert
 const { balances } = require('@airswap/test-utils').balances
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
-const { EMPTY_ADDRESS, HEAD } = require('@airswap/order-utils').constants
+const {
+  EMPTY_ADDRESS,
+  HEAD,
+  LOCATORS,
+  SCORES,
+  NEXTID,
+} = require('@airswap/order-utils').constants
 const { padAddressToLocator } = require('@airswap/test-utils').padding
 
 let snapshotId
@@ -31,10 +37,6 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
   let tokenWETH
 
   let result
-
-  const LOCATORS = 0
-  const SCORES = 1
-  const NEXTID = 2
 
   let aliceLocator = padAddressToLocator(aliceAddress)
   let bobLocator = padAddressToLocator(bobAddress)

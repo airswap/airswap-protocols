@@ -10,7 +10,13 @@ const {
   passes,
 } = require('@airswap/test-utils').assert
 const { revertToSnapShot, takeSnapshot } = require('@airswap/test-utils').time
-const { EMPTY_ADDRESS, HEAD } = require('@airswap/order-utils').constants
+const {
+  EMPTY_ADDRESS,
+  HEAD,
+  LOCATORS,
+  SCORES,
+  NEXTID,
+} = require('@airswap/order-utils').constants
 const { padAddressToLocator } = require('@airswap/test-utils').padding
 
 contract('Indexer Unit Tests', async accounts => {
@@ -31,10 +37,6 @@ contract('Indexer Unit Tests', async accounts => {
   let stakingTokenAddress
 
   let result
-
-  const LOCATORS = 0
-  const SCORES = 1
-  const NEXTID = 2
 
   let whitelistMock
   let whitelistAddress
