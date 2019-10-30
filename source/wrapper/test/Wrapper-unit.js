@@ -334,9 +334,10 @@ contract('Wrapper Unit Tests', async accounts => {
 
   describe('Test pausability', async () => {
     it('Test setPausedStatus is only callable by owner', async () => {
-      await reverted(wrapper.setPausedStatus(true, { from: notOwner }),
-        "Ownable: caller is not the owner"
-    )
+      await reverted(
+        wrapper.setPausedStatus(true, { from: notOwner }),
+        'Ownable: caller is not the owner'
+      )
     })
 
     it('Test swap when paused', async () => {
