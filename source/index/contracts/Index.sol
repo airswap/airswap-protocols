@@ -146,7 +146,7 @@ contract Index is Ownable {
   /**
     * @notice Get a Range of Locators
     * @dev start value of 0x0 starts at the head
-    * @param start address Cursor to start with
+    * @param cursor address Cursor to start with
     * @param limit uint256 Number of locators to return
     * @return bytes32[] List of locators
     * @return uint256[] List of scores corresponding to locators
