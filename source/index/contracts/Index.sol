@@ -132,6 +132,17 @@ contract Index is Ownable {
     return entries[identifier].score;
   }
 
+    /**
+    * @notice Get a Locator
+    * @param identifier address On-chain address identifying the owner of a locator
+    * @return bytes32 Locator information
+    */
+  function getLocator(
+    address identifier
+  ) external view returns (bytes32) {
+    return entries[identifier].locator;
+  }
+
   /**
     * @notice Get a Range of Locators
     * @dev start value of 0x0 starts at the head
@@ -157,7 +168,7 @@ contract Index is Ownable {
     result = new bytes32[](count);
 
     // Iterate over the list until the end or count.
-    uint8 i = 0;
+    uint256 i;
     while (i < count && identifier != HEAD) {
       result[i] = entries[identifier].locator;
       i = i + 1;

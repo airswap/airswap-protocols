@@ -11,6 +11,8 @@ const { orders } = require('@airswap/order-utils')
 
 contract('Wrapper Unit Tests', async accounts => {
   const senderParam = 2
+  const owner = accounts[0]
+  const notOwner = accounts[1]
   const mockToken = accounts[9]
   const mockSender = accounts[8]
   const mockSigner = accounts[7]
@@ -327,6 +329,75 @@ contract('Wrapper Unit Tests', async accounts => {
         1,
         'swap function was not called the expected number of times'
       )
+    })
+  })
+
+  describe('Test pausability', async () => {
+    it('Test setPausedStatus is only callable by owner', async () => {
+      await reverted(
+        wrapper.setPausedStatus(true, { from: notOwner }),
+        'Ownable: caller is not the owner'
+      )
+    })
+
+    it('Test swap when paused', async () => {
+      let notWethContract = mockFT.address
+
+      const order = await orders.getOrder({
+        signer: {
+          token: notWethContract,
+          wallet: mockSigner,
+        },
+        sender: {
+          wallet: mockSender,
+          param: senderParam,
+          token: notWethContract,
+        },
+      })
+
+      await wrapper.setPausedStatus(true)
+
+      await reverted(
+        wrapper.swap(order, {
+          value: 0,
+          from: mockSender,
+        }),
+        'CONTRACT_IS_PAUSED'
+      )
+    })
+
+    it('Test swap when not paused', async () => {
+      let notWethContract = mockFT.address
+
+      const order = await orders.getOrder({
+        signer: {
+          token: notWethContract,
+          wallet: mockSigner,
+        },
+        sender: {
+          wallet: mockSender,
+          param: senderParam,
+          token: notWethContract,
+        },
+      })
+
+      await passes(
+        wrapper.swap(order, {
+          value: 0,
+          from: mockSender,
+        })
+      )
+    })
+
+    it('Test self destruct when paused', async () => {
+      await wrapper.setPausedStatus(true)
+      await passes(wrapper.killContract(owner))
+      let contractCode = await web3.eth.getCode(wrapper.address)
+      equal(contractCode, '0x', 'contract did not self destruct')
+    })
+
+    it('Test self destruct when not paused', async () => {
+      await reverted(wrapper.killContract(owner), 'CONTRACT_NOT_PAUSED')
     })
   })
 })
