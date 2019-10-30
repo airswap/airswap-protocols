@@ -9,6 +9,7 @@ const {
   reverted,
   equal,
   ok,
+  passes,
 } = require('@airswap/test-utils').assert
 const { balances } = require('@airswap/test-utils').balances
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
@@ -22,7 +23,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
   let indexerAddress
 
   let delegateFactory
-  let swap
+  let swapContract
   let types
 
   let tokenAST
@@ -32,6 +33,8 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
   let aliceLocator = padAddressToLocator(aliceAddress)
   let bobLocator = padAddressToLocator(bobAddress)
   let emptyLocator = padAddressToLocator(EMPTY_ADDRESS)
+
+  let whitelistedLocator
 
   before('Setup', async () => {
     let snapShot = await takeSnapshot()
@@ -85,8 +88,11 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
     it('The owner can set and unset the locator whitelist', async () => {
       types = await Types.new()
       await Swap.link('Types', types.address)
-      swap = await Swap.new()
-      delegateFactory = await DelegateFactory.new(swap.address, indexer.address)
+      swapContract = await Swap.new()
+      delegateFactory = await DelegateFactory.new(
+        swapContract.address,
+        indexer.address
+      )
 
       await indexer.setLocatorWhitelist(delegateFactory.address, {
         from: ownerAddress,
@@ -354,31 +360,54 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
         ),
         'LOCATOR_NOT_WHITELISTED'
       )
-
-      await indexer.setLocatorWhitelist(EMPTY_ADDRESS, {
-        from: ownerAddress,
-      })
     })
 
-    it('Restake Alice and unstake Bob for future tests', async () => {
+    it('Deploy a whitelisted delegate for alice', async () => {
+      let tx = await delegateFactory.createDelegate(aliceAddress, aliceAddress)
+      passes(tx)
+
+      let whitelistedDelegate
+
+      // emitted event
+      emitted(tx, 'CreateDelegate', event => {
+        whitelistedDelegate = event.delegateContract
+        return (
+          event.swapContract === swapContract.address &&
+          event.indexerContract === indexer.address &&
+          event.delegateContractOwner === aliceAddress &&
+          event.delegateTradeWallet === aliceAddress
+        )
+      })
+
+      whitelistedLocator = padAddressToLocator(whitelistedDelegate)
+
       emitted(
         await indexer.setIntent(
           tokenWETH.address,
           tokenDAI.address,
           500,
-          aliceLocator,
+          whitelistedLocator,
           {
             from: aliceAddress,
           }
         ),
         'Stake'
       )
+    })
+
+    it('Bob can remove his unwhitelisted intent', async () => {
       emitted(
         await indexer.unsetIntent(tokenWETH.address, tokenDAI.address, {
           from: bobAddress,
         }),
         'Unstake'
       )
+    })
+
+    it('Remove locator whitelist', async () => {
+      await indexer.setLocatorWhitelist(EMPTY_ADDRESS, {
+        from: ownerAddress,
+      })
     })
   })
 
@@ -394,7 +423,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
         }
       )
       equal(intents.length, 5)
-      equal(intents[0], aliceLocator)
+      equal(intents[0], whitelistedLocator)
       equal(intents[1], emptyLocator)
     })
 
@@ -451,7 +480,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenWETH.address,
           tokenDAI.address,
           1000,
-          aliceLocator,
+          whitelistedLocator,
           {
             from: aliceAddress,
           }
@@ -508,7 +537,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenWETH.address,
           tokenDAI.address,
           1000,
-          aliceLocator,
+          whitelistedLocator,
           {
             from: aliceAddress,
           }
@@ -559,7 +588,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenWETH.address,
           tokenDAI.address,
           500,
-          aliceLocator,
+          whitelistedLocator,
           {
             from: aliceAddress,
           }
@@ -624,7 +653,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenWETH.address,
           tokenDAI.address,
           1000,
-          aliceLocator,
+          whitelistedLocator,
           {
             from: aliceAddress,
           }
@@ -676,7 +705,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenWETH.address,
           tokenDAI.address,
           500,
-          aliceLocator,
+          whitelistedLocator,
           {
             from: aliceAddress,
           }
