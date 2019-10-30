@@ -18,8 +18,15 @@ pragma experimental ABIEncoderV2;
 
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
+
 /**
   * @title Index: A List of Locators
+  * @notice The Locators are sorted in reverse order based on the score
+  * meaning that the first element in the list has the largest score
+  * and final element has the smallest
+  * @dev A mapping is used to mimic a circular linked list structure
+  * where every mapping Entry contains a pointer to the next
+  * and the previous
   */
 contract Index is Ownable {
 
