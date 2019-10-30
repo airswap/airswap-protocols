@@ -511,7 +511,7 @@ contract('Index Unit Tests', async accounts => {
 
       await reverted(
         index.getLocators(davidAddress, 10),
-        'START_ENTRY_NOT_FOUND'
+        'CURSOR_NOT_FOUND'
       )
     })
   })

@@ -147,7 +147,7 @@ contract Index is Ownable {
     * @notice Get a Range of Locators
     * @dev start value of 0x0 starts at the head
     * @param cursor address Cursor to start with
-    * @param limit uint256 Number of locators to return
+    * @param limit uint256 Maximum number of locators to return
     * @return bytes32[] List of locators
     * @return uint256[] List of scores corresponding to locators
     * @return address The next cursor to provide for pagination
@@ -165,7 +165,7 @@ contract Index is Ownable {
     // If a valid cursor is provided, start there.
     if (cursor != address(0) && cursor != HEAD) {
       // Check that the provided cursor exists.
-      require(_hasEntry(cursor), "START_ENTRY_NOT_FOUND");
+      require(_hasEntry(cursor), "CURSOR_NOT_FOUND");
       // Set the starting identifier to the provided cursor.
       identifier = cursor;
     } else {
