@@ -37,11 +37,11 @@ interface IIndexer {
     uint256 amount
   );
 
-  event AddToBlacklist(
+  event AddTokenToBlacklist(
     address token
   );
 
-  event RemoveFromBlacklist(
+  event RemoveTokenFromBlacklist(
     address token
   );
 
@@ -58,11 +58,11 @@ interface IIndexer {
     address senderToken
   ) external returns (address);
 
-  function addToBlacklist(
+  function addTokenToBlacklist(
     address token
   ) external;
 
-  function removeFromBlacklist(
+  function removeTokenFromBlacklist(
     address token
   ) external;
 

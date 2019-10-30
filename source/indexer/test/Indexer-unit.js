@@ -117,10 +117,10 @@ contract('Indexer Unit Tests', async accounts => {
     })
   })
 
-  describe('Test addToBlacklist and removeFromBlacklist', async () => {
+  describe('Test addTokenToBlacklist and removeTokenFromBlacklist', async () => {
     it('should not allow a non-owner to blacklist a token', async () => {
       await reverted(
-        indexer.addToBlacklist(tokenOne, {
+        indexer.addTokenToBlacklist(tokenOne, {
           from: nonOwner,
         }),
         'Ownable: caller is not the owner'
@@ -128,39 +128,39 @@ contract('Indexer Unit Tests', async accounts => {
     })
 
     it('should allow the owner to blacklist a token', async () => {
-      let result = await indexer.addToBlacklist(tokenOne, {
+      let result = await indexer.addTokenToBlacklist(tokenOne, {
         from: owner,
       })
 
       // check the event was emitted
-      emitted(result, 'AddToBlacklist', event => {
+      emitted(result, 'AddTokenToBlacklist', event => {
         return event.token === tokenOne
       })
 
       // check the token is now on the blacklist
-      let isBlacklisted = await indexer.blacklist.call(tokenOne)
+      let isBlacklisted = await indexer.tokenBlacklist.call(tokenOne)
       equal(isBlacklisted, true)
     })
 
     it('should not emit an event if token is already blacklisted', async () => {
       // add to blacklist
-      await indexer.addToBlacklist(tokenOne, {
+      await indexer.addTokenToBlacklist(tokenOne, {
         from: owner,
       })
 
       // now try to add it again
-      let tx = await indexer.addToBlacklist(tokenOne, {
+      let tx = await indexer.addTokenToBlacklist(tokenOne, {
         from: owner,
       })
 
       // passes but doesnt emit an event
       passes(tx)
-      notEmitted(tx, 'AddToBlacklist')
+      notEmitted(tx, 'AddTokenToBlacklist')
     })
 
     it('should not allow a non-owner to un-blacklist a token', async () => {
       await reverted(
-        indexer.removeFromBlacklist(tokenOne, {
+        indexer.removeTokenFromBlacklist(tokenOne, {
           from: nonOwner,
         }),
         'Ownable: caller is not the owner'
@@ -169,22 +169,22 @@ contract('Indexer Unit Tests', async accounts => {
 
     it('should allow the owner to un-blacklist a token', async () => {
       // removing from blacklist before the token is blacklisted emits no events
-      let result = await indexer.removeFromBlacklist(tokenOne, {
+      let result = await indexer.removeTokenFromBlacklist(tokenOne, {
         from: owner,
       })
-      notEmitted(result, 'RemoveFromBlacklist')
+      notEmitted(result, 'RemoveTokenFromBlacklist')
       passes(result)
 
       // Add the token to the blacklist
-      await indexer.addToBlacklist(tokenOne, {
+      await indexer.addTokenToBlacklist(tokenOne, {
         from: owner,
       })
 
       // Now removing it succeeds and emits an event
-      result = await indexer.removeFromBlacklist(tokenOne, {
+      result = await indexer.removeTokenFromBlacklist(tokenOne, {
         from: owner,
       })
-      emitted(result, 'RemoveFromBlacklist', event => {
+      emitted(result, 'RemoveTokenFromBlacklist', event => {
         return event.token === tokenOne
       })
       passes(result)
@@ -222,7 +222,7 @@ contract('Indexer Unit Tests', async accounts => {
       })
 
       // blacklist tokenOne
-      await indexer.addToBlacklist(tokenOne, {
+      await indexer.addTokenToBlacklist(tokenOne, {
         from: owner,
       })
 
@@ -234,12 +234,12 @@ contract('Indexer Unit Tests', async accounts => {
         'PAIR_IS_BLACKLISTED'
       )
 
-      await indexer.removeFromBlacklist(tokenOne, {
+      await indexer.removeTokenFromBlacklist(tokenOne, {
         from: owner,
       })
 
       // blacklist tokenTwo
-      await indexer.addToBlacklist(tokenTwo, {
+      await indexer.addTokenToBlacklist(tokenTwo, {
         from: owner,
       })
 
@@ -618,7 +618,7 @@ contract('Indexer Unit Tests', async accounts => {
       })
 
       // blacklist tokenOne
-      await indexer.addToBlacklist(tokenOne, {
+      await indexer.addTokenToBlacklist(tokenOne, {
         from: owner,
       })
 

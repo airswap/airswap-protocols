@@ -35,7 +35,7 @@ contract Indexer is IIndexer, Ownable {
   mapping (address => mapping (address => Index)) public indexes;
 
   // Mapping of token address to boolean
-  mapping (address => bool) public blacklist;
+  mapping (address => bool) public tokenBlacklist;
 
   // The whitelist contract for checking whether a peer is whitelisted
   address public locatorWhitelist;
@@ -117,12 +117,12 @@ contract Indexer is IIndexer, Ownable {
     * @notice Add a Token to the Blacklist
     * @param token address Token to blacklist
     */
-  function addToBlacklist(
+  function addTokenToBlacklist(
     address token
   ) external onlyOwner {
-    if (!blacklist[token]) {
-      blacklist[token] = true;
-      emit AddToBlacklist(token);
+    if (!tokenBlacklist[token]) {
+      tokenBlacklist[token] = true;
+      emit AddTokenToBlacklist(token);
     }
   }
 
@@ -130,12 +130,12 @@ contract Indexer is IIndexer, Ownable {
     * @notice Remove a Token from the Blacklist
     * @param token address Token to remove from the blacklist
     */
-  function removeFromBlacklist(
+  function removeTokenFromBlacklist(
     address token
   ) external onlyOwner {
-    if (blacklist[token]) {
-      blacklist[token] = false;
-      emit RemoveFromBlacklist(token);
+    if (tokenBlacklist[token]) {
+      tokenBlacklist[token] = false;
+      emit RemoveTokenFromBlacklist(token);
     }
   }
 
@@ -162,7 +162,7 @@ contract Indexer is IIndexer, Ownable {
     }
 
     // Ensure neither of the tokens are blacklisted.
-    require(!blacklist[signerToken] && !blacklist[senderToken],
+    require(!tokenBlacklist[signerToken] && !tokenBlacklist[senderToken],
       "PAIR_IS_BLACKLISTED");
 
     bool notPreviouslySet = (indexes[signerToken][senderToken].getLocator(msg.sender) == bytes32(0));
@@ -263,7 +263,7 @@ contract Indexer is IIndexer, Ownable {
     address nextCursor
   ) {
     // Ensure neither token is blacklisted.
-    if (blacklist[signerToken] || blacklist[senderToken]) {
+    if (tokenBlacklist[signerToken] || tokenBlacklist[senderToken]) {
       return (new bytes32[](0), new uint256[](0), address(0));
     }
 
