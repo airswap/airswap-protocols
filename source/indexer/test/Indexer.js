@@ -105,6 +105,10 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
       await indexer.setLocatorWhitelist(EMPTY_ADDRESS, {
         from: ownerAddress,
       })
+
+      whitelist = await indexer.locatorWhitelist.call()
+
+      equal(whitelist, EMPTY_ADDRESS)
     })
 
     it('Bob ensures no intents are on the Indexer for existing index', async () => {
@@ -408,6 +412,10 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
       await indexer.setLocatorWhitelist(EMPTY_ADDRESS, {
         from: ownerAddress,
       })
+
+      let whitelist = await indexer.locatorWhitelist.call()
+
+      equal(whitelist, delegateFactory.address)
     })
   })
 

@@ -135,7 +135,7 @@ contract Index is Ownable {
     /**
     * @notice Get a Locator
     * @param identifier address On-chain address identifying the owner of a locator
-    * @return uint256 Locator information
+    * @return bytes32 Locator information
     */
   function getLocator(
     address identifier
@@ -168,7 +168,7 @@ contract Index is Ownable {
     result = new bytes32[](count);
 
     // Iterate over the list until the end or count.
-    uint256 i = 0;
+    uint256 i;
     while (i < count && identifier != HEAD) {
       result[i] = entries[identifier].locator;
       i = i + 1;
