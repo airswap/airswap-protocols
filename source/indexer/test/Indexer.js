@@ -337,6 +337,29 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
       equal(staked, 1)
     })
 
+    it('Owner sets the locator whitelist, and alice cannot set intent', async () => {
+      await indexer.setLocatorWhitelist(delegateFactory.address, {
+        from: ownerAddress,
+      })
+
+      await reverted(
+        indexer.setIntent(
+          tokenWETH.address,
+          tokenDAI.address,
+          500,
+          aliceLocator,
+          {
+            from: aliceAddress,
+          }
+        ),
+        'LOCATOR_NOT_WHITELISTED'
+      )
+
+      await indexer.setLocatorWhitelist(EMPTY_ADDRESS, {
+        from: ownerAddress,
+      })
+    })
+
     it('Restake Alice and unstake Bob for future tests', async () => {
       emitted(
         await indexer.setIntent(
