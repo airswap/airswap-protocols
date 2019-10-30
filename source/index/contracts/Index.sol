@@ -158,16 +158,17 @@ contract Index is Ownable {
   ) external view returns (
     bytes32[] memory locators,
     uint256[] memory scores,
-    address nextIdentifier
+    address nextCursor
   ) {
-    address identifier = entries[HEAD].next;
 
     // If a valid start is provided, start there.
     if (start != address(0) && start != HEAD) {
-      // Check that the provided start identifier exists.
+      // Check that the provided start exists.
       require(_hasEntry(start), "START_ENTRY_NOT_FOUND");
-      // Set the identifier to the provided start.
-      identifier = start;
+      // Set the cursor to the provided start.
+      nextCursor = start;
+    } else {
+      nextCursor = entries[HEAD].next;
     }
 
     // Although it's not known how many entries are between `start` and the end
@@ -179,14 +180,14 @@ contract Index is Ownable {
 
     // Iterate over the list until the end or size.
     uint256 i;
-    while (i < size && identifier != HEAD) {
-      locators[i] = entries[identifier].locator;
-      scores[i] = entries[identifier].score;
+    while (i < size && nextCursor != HEAD) {
+      locators[i] = entries[nextCursor].locator;
+      scores[i] = entries[nextCursor].score;
       i = i + 1;
-      identifier = entries[identifier].next;
+      nextCursor = entries[nextCursor].next;
     }
 
-    return (locators, scores, identifier);
+    return (locators, scores, nextCursor);
   }
 
   /**
