@@ -392,6 +392,8 @@ contract('Wrapper Unit Tests', async accounts => {
     it('Test self destruct when paused', async () => {
       await wrapper.setPausedStatus(true)
       await passes(wrapper.killContract(owner))
+      let contractCode = await web3.eth.getCode(wrapper.address)
+      equal(contractCode, '0x', 'contract did not self destruct')
     })
 
     it('Test self destruct when not paused', async () => {
