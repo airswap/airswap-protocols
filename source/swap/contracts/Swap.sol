@@ -338,16 +338,22 @@ contract Swap is ISwap {
       bytes4 kind
   ) internal {
 
-    // Ensure cannot self-transfer
-    require(from != to, "TO_CANNOT_EQUAL_FROM");
+    // Ensure the transfer is not to self.
+    require(from != to, "INVALID_SELF_TRANSFER");
+
     if (kind == ERC721_INTERFACE_ID) {
+
       // Attempt to transfer an ERC-721 token.
       IERC721(token).transferFrom(from, to, param);
+
     } else {
-      // Attempt to transfer an ERC-20 token with balance checks on `from` address.
-      uint256 initBalance = INRERC20(token).balanceOf(from);
+      uint256 initialBalance = INRERC20(token).balanceOf(from);
+
+      // Attempt to transfer an ERC-20 token.
       INRERC20(token).transferFrom(from, to, param);
-      require(initBalance.sub(param) == INRERC20(token).balanceOf(from), "TRANSFER_FAILED");
+
+      // Ensure the amount has been transferred.
+      require(initialBalance.sub(param) == INRERC20(token).balanceOf(from), "TRANSFER_FAILED");
     }
   }
 }

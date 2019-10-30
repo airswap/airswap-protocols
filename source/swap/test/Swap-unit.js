@@ -133,7 +133,7 @@ contract('Swap Unit Tests', async accounts => {
 
       await reverted(
         swap.swap(order, { from: mockSender }),
-        'TO_CANNOT_EQUAL_FROM'
+        'INVALID_SELF_TRANSFER'
       )
     })
 

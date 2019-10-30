@@ -190,7 +190,7 @@ contract('Swap', async accounts => {
       })
       await reverted(
         swap(_selfOrder, { from: aliceAddress }),
-        'TO_CANNOT_EQUAL_FROM'
+        'INVALID_SELF_TRANSFER'
       )
     })
 
