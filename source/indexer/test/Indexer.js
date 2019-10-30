@@ -1,11 +1,15 @@
 const Indexer = artifacts.require('Indexer')
 const FungibleToken = artifacts.require('FungibleToken')
+const DelegateFactory = artifacts.require('DelegateFactory')
+const Swap = artifacts.require('Swap')
+const Types = artifacts.require('Types')
 const {
   emitted,
   notEmitted,
   reverted,
   equal,
   ok,
+  passes,
 } = require('@airswap/test-utils').assert
 const { balances } = require('@airswap/test-utils').balances
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
@@ -18,6 +22,10 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
   let indexer
   let indexerAddress
 
+  let delegateFactory
+  let swapContract
+  let types
+
   let tokenAST
   let tokenDAI
   let tokenWETH
@@ -25,6 +33,8 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
   let aliceLocator = padAddressToLocator(aliceAddress)
   let bobLocator = padAddressToLocator(bobAddress)
   let emptyLocator = padAddressToLocator(EMPTY_ADDRESS)
+
+  let whitelistedLocator
 
   before('Setup', async () => {
     let snapShot = await takeSnapshot()
@@ -73,6 +83,32 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
         }),
         'CreateIndex'
       )
+    })
+
+    it('The owner can set and unset the locator whitelist', async () => {
+      types = await Types.new()
+      await Swap.link('Types', types.address)
+      swapContract = await Swap.new()
+      delegateFactory = await DelegateFactory.new(
+        swapContract.address,
+        indexer.address
+      )
+
+      await indexer.setLocatorWhitelist(delegateFactory.address, {
+        from: ownerAddress,
+      })
+
+      let whitelist = await indexer.locatorWhitelist.call()
+
+      equal(whitelist, delegateFactory.address)
+
+      await indexer.setLocatorWhitelist(EMPTY_ADDRESS, {
+        from: ownerAddress,
+      })
+
+      whitelist = await indexer.locatorWhitelist.call()
+
+      equal(whitelist, EMPTY_ADDRESS)
     })
 
     it('Bob ensures no intents are on the Indexer for existing index', async () => {
@@ -231,9 +267,120 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
       ok(await balances(indexerAddress, [[tokenAST, 0]]))
     })
 
-    it('Restake for future tests', async () => {
+    it('Bob can set an intent', async () => {
       emitted(
         await indexer.setIntent(
+          tokenWETH.address,
+          tokenDAI.address,
+          400,
+          bobLocator,
+          {
+            from: bobAddress,
+          }
+        ),
+        'Stake'
+      )
+
+      // Bob has 400 fewer AST, now the indexer owns them
+      ok(await balances(bobAddress, [[tokenAST, 600]]))
+      ok(await balances(indexerAddress, [[tokenAST, 400]]))
+
+      let staked = await indexer.getStakedAmount.call(
+        bobAddress,
+        tokenWETH.address,
+        tokenDAI.address
+      )
+      equal(staked, 400)
+    })
+
+    it('Bob can increase his intent stake', async () => {
+      // Now he updates his stake to be larger
+      emitted(
+        await indexer.setIntent(
+          tokenWETH.address,
+          tokenDAI.address,
+          1000,
+          bobLocator,
+          {
+            from: bobAddress,
+          }
+        ),
+        'Stake'
+      )
+
+      // Bob has 0 tokens and has staked 1000 total now
+      ok(await balances(bobAddress, [[tokenAST, 0]]))
+      ok(await balances(indexerAddress, [[tokenAST, 1000]]))
+
+      let staked = await indexer.getStakedAmount.call(
+        bobAddress,
+        tokenWETH.address,
+        tokenDAI.address
+      )
+      equal(staked, 1000)
+    })
+
+    it('Bob can decrease his intent stake and change his locator', async () => {
+      // Now he updates his stake to be smaller
+      emitted(
+        await indexer.setIntent(
+          tokenWETH.address,
+          tokenDAI.address,
+          1,
+          aliceLocator,
+          {
+            from: bobAddress,
+          }
+        ),
+        'Stake'
+      )
+
+      // Bob has 999 tokens now
+      ok(await balances(bobAddress, [[tokenAST, 999]]))
+      ok(await balances(indexerAddress, [[tokenAST, 1]]))
+
+      let staked = await indexer.getStakedAmount.call(
+        bobAddress,
+        tokenWETH.address,
+        tokenDAI.address
+      )
+      equal(staked, 1)
+    })
+
+    it('Bob can keep the same stake amount', async () => {
+      // Now he updates his stake to be the same
+      emitted(
+        await indexer.setIntent(
+          tokenWETH.address,
+          tokenDAI.address,
+          1,
+          bobLocator,
+          {
+            from: bobAddress,
+          }
+        ),
+        'Stake'
+      )
+
+      // Bob still has
+      ok(await balances(bobAddress, [[tokenAST, 999]]))
+      ok(await balances(indexerAddress, [[tokenAST, 1]]))
+
+      let staked = await indexer.getStakedAmount.call(
+        bobAddress,
+        tokenWETH.address,
+        tokenDAI.address
+      )
+      equal(staked, 1)
+    })
+
+    it('Owner sets the locator whitelist, and alice cannot set intent', async () => {
+      await indexer.setLocatorWhitelist(delegateFactory.address, {
+        from: ownerAddress,
+      })
+
+      await reverted(
+        indexer.setIntent(
           tokenWETH.address,
           tokenDAI.address,
           500,
@@ -242,8 +389,60 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
             from: aliceAddress,
           }
         ),
+        'LOCATOR_NOT_WHITELISTED'
+      )
+    })
+
+    it('Deploy a whitelisted delegate for alice', async () => {
+      let tx = await delegateFactory.createDelegate(aliceAddress, aliceAddress)
+      passes(tx)
+
+      let whitelistedDelegate
+
+      // emitted event
+      emitted(tx, 'CreateDelegate', event => {
+        whitelistedDelegate = event.delegateContract
+        return (
+          event.swapContract === swapContract.address &&
+          event.indexerContract === indexer.address &&
+          event.delegateContractOwner === aliceAddress &&
+          event.delegateTradeWallet === aliceAddress
+        )
+      })
+
+      whitelistedLocator = padAddressToLocator(whitelistedDelegate)
+
+      emitted(
+        await indexer.setIntent(
+          tokenWETH.address,
+          tokenDAI.address,
+          500,
+          whitelistedLocator,
+          {
+            from: aliceAddress,
+          }
+        ),
         'Stake'
       )
+    })
+
+    it('Bob can remove his unwhitelisted intent', async () => {
+      emitted(
+        await indexer.unsetIntent(tokenWETH.address, tokenDAI.address, {
+          from: bobAddress,
+        }),
+        'Unstake'
+      )
+    })
+
+    it('Remove locator whitelist', async () => {
+      await indexer.setLocatorWhitelist(EMPTY_ADDRESS, {
+        from: ownerAddress,
+      })
+
+      let whitelist = await indexer.locatorWhitelist.call()
+
+      equal(whitelist, EMPTY_ADDRESS)
     })
   })
 
@@ -259,7 +458,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
         }
       )
       equal(intents.length, 5)
-      equal(intents[0], aliceLocator)
+      equal(intents[0], whitelistedLocator)
       equal(intents[1], emptyLocator)
     })
 
@@ -316,7 +515,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenWETH.address,
           tokenDAI.address,
           1000,
-          aliceLocator,
+          whitelistedLocator,
           {
             from: aliceAddress,
           }
@@ -373,7 +572,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenWETH.address,
           tokenDAI.address,
           1000,
-          aliceLocator,
+          whitelistedLocator,
           {
             from: aliceAddress,
           }
@@ -424,7 +623,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenWETH.address,
           tokenDAI.address,
           500,
-          aliceLocator,
+          whitelistedLocator,
           {
             from: aliceAddress,
           }
@@ -489,7 +688,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenWETH.address,
           tokenDAI.address,
           1000,
-          aliceLocator,
+          whitelistedLocator,
           {
             from: aliceAddress,
           }
@@ -541,7 +740,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
           tokenWETH.address,
           tokenDAI.address,
           500,
-          aliceLocator,
+          whitelistedLocator,
           {
             from: aliceAddress,
           }
