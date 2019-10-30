@@ -11,7 +11,7 @@
   distributed under the License is distributed on an "AS IS" BASIS,
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
-  limitations under the License.
+  sizeations under the License.
 */
 pragma solidity 0.5.12;
 pragma experimental ABIEncoderV2;
@@ -147,14 +147,14 @@ contract Index is Ownable {
     * @notice Get a Range of Locators
     * @dev start value of 0x0 starts at the head
     * @param start address Identifier to start with
-    * @param count uint256 Number of locators to return
+    * @param limit uint256 Number of locators to return
     * @return bytes32[] List of locators
     * @return uint256[] List of scores corresponding to locators
     * @return address The next identifier to provide for pagination
     */
   function getLocators(
     address start,
-    uint256 count
+    uint256 limit
   ) external view returns (
     bytes32[] memory locators,
     uint256[] memory scores,
@@ -172,14 +172,14 @@ contract Index is Ownable {
 
     // Although it's not known how many entries are between `start` and the end
     // We know that it is no more than `length`
-    uint256 limit = (length < count) ? length : count;
+    uint256 size = (length < limit) ? length : limit;
 
-    locators = new bytes32[](limit);
-    scores = new uint256[](limit);
+    locators = new bytes32[](size);
+    scores = new uint256[](size);
 
-    // Iterate over the list until the end or limit.
+    // Iterate over the list until the end or size.
     uint256 i;
-    while (i < limit && identifier != HEAD) {
+    while (i < size && identifier != HEAD) {
       locators[i] = entries[identifier].locator;
       scores[i] = entries[identifier].score;
       i = i + 1;
