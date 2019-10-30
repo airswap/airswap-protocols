@@ -1,5 +1,8 @@
 const Indexer = artifacts.require('Indexer')
 const FungibleToken = artifacts.require('FungibleToken')
+const DelegateFactory = artifacts.require('DelegateFactory')
+const Swap = artifacts.require('Swap')
+const Types = artifacts.require('Types')
 const {
   emitted,
   notEmitted,
@@ -17,6 +20,10 @@ let snapshotId
 contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
   let indexer
   let indexerAddress
+
+  let delegateFactory
+  let swap
+  let types
 
   let tokenAST
   let tokenDAI
@@ -73,6 +80,25 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
         }),
         'CreateIndex'
       )
+    })
+
+    it('The owner can set and unset the locator whitelist', async () => {
+      types = await Types.new()
+      await Swap.link('Types', types.address)
+      swap = await Swap.new()
+      delegateFactory = await DelegateFactory.new(swap.address, indexer.address)
+
+      await indexer.setLocatorWhitelist(delegateFactory.address, {
+        from: ownerAddress,
+      })
+
+      let whitelist = await indexer.locatorWhitelist.call()
+
+      equal(whitelist, delegateFactory.address)
+
+      await indexer.setLocatorWhitelist(EMPTY_ADDRESS, {
+        from: ownerAddress,
+      })
     })
 
     it('Bob ensures no intents are on the Indexer for existing index', async () => {
