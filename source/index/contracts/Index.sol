@@ -153,25 +153,26 @@ contract Index is Ownable {
     * @return address The next identifier to provide for pagination
     */
   function getLocators(
-    address start,
+    address cursor,
     uint256 limit
   ) external view returns (
     bytes32[] memory locators,
     uint256[] memory scores,
     address nextCursor
   ) {
+    address identifier;
 
     // If a valid start is provided, start there.
-    if (start != address(0) && start != HEAD) {
+    if (cursor != address(0) && cursor != HEAD) {
       // Check that the provided start exists.
-      require(_hasEntry(start), "START_ENTRY_NOT_FOUND");
+      require(_hasEntry(cursor), "START_ENTRY_NOT_FOUND");
       // Set the cursor to the provided start.
-      nextCursor = start;
+      identifier = cursor;
     } else {
-      nextCursor = entries[HEAD].next;
+      identifier = entries[HEAD].next;
     }
 
-    // Although it's not known how many entries are between `start` and the end
+    // Although it's not known how many entries are between `cursor` and the end
     // We know that it is no more than `length`
     uint256 size = (length < limit) ? length : limit;
 
@@ -181,13 +182,13 @@ contract Index is Ownable {
     // Iterate over the list until the end or size.
     uint256 i;
     while (i < size && nextCursor != HEAD) {
-      locators[i] = entries[nextCursor].locator;
-      scores[i] = entries[nextCursor].score;
+      locators[i] = entries[identifier].locator;
+      scores[i] = entries[identifier].score;
       i = i + 1;
-      nextCursor = entries[nextCursor].next;
+      identifier = entries[identifier].next;
     }
 
-    return (locators, scores, nextCursor);
+    return (locators, scores, identifier);
   }
 
   /**
