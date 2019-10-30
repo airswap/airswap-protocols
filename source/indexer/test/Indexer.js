@@ -231,7 +231,87 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
       ok(await balances(indexerAddress, [[tokenAST, 0]]))
     })
 
-    it('Restake for future tests', async () => {
+    it('Bob can set an intent', async () => {
+      emitted(
+        await indexer.setIntent(
+          tokenWETH.address,
+          tokenDAI.address,
+          400,
+          bobLocator,
+          {
+            from: bobAddress,
+          }
+        ),
+        'Stake'
+      )
+
+      // Bob has 400 fewer AST, now the indexer owns them
+      ok(await balances(bobAddress, [[tokenAST, 600]]))
+      ok(await balances(indexerAddress, [[tokenAST, 400]]))
+
+      let staked = await indexer.getStakedAmount.call(
+        bobAddress,
+        tokenWETH.address,
+        tokenDAI.address
+      )
+      equal(staked, 400)
+    })
+
+    it('Bob can increase his intent stake', async () => {
+      // Now he updates his stake to be larger
+      emitted(
+        await indexer.setIntent(
+          tokenWETH.address,
+          tokenDAI.address,
+          1000,
+          bobLocator,
+          {
+            from: bobAddress,
+          }
+        ),
+        'Stake'
+      )
+
+      // Bob has 0 tokens and has staked 1000 total now
+      ok(await balances(bobAddress, [[tokenAST, 0]]))
+      ok(await balances(indexerAddress, [[tokenAST, 1000]]))
+
+      let staked = await indexer.getStakedAmount.call(
+        bobAddress,
+        tokenWETH.address,
+        tokenDAI.address
+      )
+      equal(staked, 1000)
+    })
+
+    it('Bob can decrease his intent stake and change his locator', async () => {
+      // Now he updates his stake to be smaller
+      emitted(
+        await indexer.setIntent(
+          tokenWETH.address,
+          tokenDAI.address,
+          1,
+          aliceLocator,
+          {
+            from: bobAddress,
+          }
+        ),
+        'Stake'
+      )
+
+      // Bob has 999 tokens now
+      ok(await balances(bobAddress, [[tokenAST, 999]]))
+      ok(await balances(indexerAddress, [[tokenAST, 1]]))
+
+      let staked = await indexer.getStakedAmount.call(
+        bobAddress,
+        tokenWETH.address,
+        tokenDAI.address
+      )
+      equal(staked, 1)
+    })
+
+    it('Restake Alice and unstake Bob for future tests', async () => {
       emitted(
         await indexer.setIntent(
           tokenWETH.address,
@@ -243,6 +323,12 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
           }
         ),
         'Stake'
+      )
+      emitted(
+        await indexer.unsetIntent(tokenWETH.address, tokenDAI.address, {
+          from: bobAddress,
+        }),
+        'Unstake'
       )
     })
   })
