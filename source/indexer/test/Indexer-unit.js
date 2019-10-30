@@ -10,7 +10,7 @@ const {
   passes,
 } = require('@airswap/test-utils').assert
 const { revertToSnapShot, takeSnapshot } = require('@airswap/test-utils').time
-const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
+const { EMPTY_ADDRESS, HEAD } = require('@airswap/order-utils').constants
 const { padAddressToLocator } = require('@airswap/test-utils').padding
 
 contract('Indexer Unit Tests', async accounts => {
@@ -23,12 +23,14 @@ contract('Indexer Unit Tests', async accounts => {
   let aliceLocator = padAddressToLocator(aliceAddress)
   let bobLocator = padAddressToLocator(bobAddress)
   let carolLocator = padAddressToLocator(carolAddress)
-  let emptyLocatorData = padAddressToLocator(EMPTY_ADDRESS)
+  let emptyLocator = padAddressToLocator(EMPTY_ADDRESS)
 
   let indexer
   let snapshotId
   let stakingTokenMock
   let stakingTokenAddress
+
+  let result
 
   let whitelistMock
   let whitelistAddress
@@ -586,17 +588,19 @@ contract('Indexer Unit Tests', async accounts => {
   })
 
   describe('Test getLocators', async () => {
-    it('should return an empty array if the index doesnt exist', async () => {
-      let intents = await indexer.getLocators.call(
+    it('should return blank results if the index doesnt exist', async () => {
+      result = await indexer.getLocators.call(
         tokenOne,
         tokenTwo,
         EMPTY_ADDRESS,
         3
       )
-      equal(intents.length, 0, 'intents array should be size 0')
+      equal(result[0].length, 0, 'locators array should be size 0')
+      equal(result[1].length, 0, 'scores array should be size 0')
+      equal(result[2], EMPTY_ADDRESS, 'next identifier should be 0x0')
     })
 
-    it('should return an empty array if a token is blacklisted', async () => {
+    it('should return blank results if a token is blacklisted', async () => {
       // create index
       await indexer.createIndex(tokenOne, tokenTwo, {
         from: aliceAddress,
@@ -613,13 +617,15 @@ contract('Indexer Unit Tests', async accounts => {
       })
 
       // now try to get the intents
-      let intents = await indexer.getLocators.call(
+      result = await indexer.getLocators.call(
         tokenOne,
         tokenTwo,
         EMPTY_ADDRESS,
         4
       )
-      equal(intents.length, 0, 'intents array should be size 0')
+      equal(result[0].length, 0, 'locators array should be size 0')
+      equal(result[1].length, 0, 'scores array should be size 0')
+      equal(result[2], EMPTY_ADDRESS, 'next identifier should be 0x0')
     })
 
     it('should otherwise return the intents', async () => {
@@ -640,41 +646,56 @@ contract('Indexer Unit Tests', async accounts => {
       })
 
       // now try to get the intents
-      let intents = await indexer.getLocators.call(
+      result = await indexer.getLocators.call(
         tokenOne,
         tokenTwo,
         EMPTY_ADDRESS,
         4
       )
-      equal(intents.length, 4, 'intents array should be size 4')
-      equal(intents[0], bobLocator, 'intent should be bob')
-      equal(intents[1], carolLocator, 'intent should be carol')
-      equal(intents[2], aliceLocator, 'intent should be alice')
-      equal(intents[3], emptyLocatorData, 'intent should be empty')
+
+      equal(result[0].length, 3, 'locators array should be size 3')
+      equal(result[0][0], bobLocator, 'intent should be bob')
+      equal(result[0][1], carolLocator, 'intent should be carol')
+      equal(result[0][2], aliceLocator, 'intent should be alice')
+
+      equal(result[1].length, 3, 'scores array should be size 3')
+      equal(result[1][0], 100, 'score should be bob')
+      equal(result[1][1], 75, 'score should be carol')
+      equal(result[1][2], 50, 'score should be alice')
+
+      equal(result[2], HEAD, 'next identifier should be the head')
 
       // should only get the number specified
-      intents = await indexer.getLocators.call(
+      result = await indexer.getLocators.call(
         tokenOne,
         tokenTwo,
         EMPTY_ADDRESS,
         1
       )
-      equal(intents.length, 1, 'intents array should be size 1')
-      equal(intents[0], bobLocator, 'intent should be bob')
+      equal(result[0].length, 1, 'locators array should be size 1')
+      equal(result[1].length, 1, 'scores array should be size 1')
+      equal(result[0][0], bobLocator, 'intent should be bob')
+      equal(result[1][0], 100, 'score should be bob')
+      equal(result[2], carolAddress, 'next identifier should be carol')
 
       // should start in the specified location
-      intents = await indexer.getLocators.call(
+      result = await indexer.getLocators.call(
         tokenOne,
         tokenTwo,
         carolAddress,
         5
       )
 
-      equal(intents.length, 5, 'intents array should be size 5')
-      equal(intents[0], carolLocator, 'intent should be carol')
-      equal(intents[1], aliceLocator, 'intent should be alice')
-      equal(intents[2], emptyLocatorData, 'intent should be empty')
-      equal(intents[3], emptyLocatorData, 'intent should be empty')
+      equal(result[0].length, 3, 'intents array should be size 3')
+      equal(result[0][0], carolLocator, 'intent should be carol')
+      equal(result[0][1], aliceLocator, 'intent should be alice')
+      equal(result[0][2], emptyLocator, 'intent should be empty')
+
+      equal(result[1][0], 75, 'score should be carol')
+      equal(result[1][1], 50, 'score should be alice')
+      equal(result[1][2], 0, 'score should be empty')
+
+      equal(result[2], HEAD, 'next identifier should be the head')
     })
   })
 
