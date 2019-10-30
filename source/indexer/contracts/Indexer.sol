@@ -256,19 +256,20 @@ contract Indexer is IIndexer, Ownable {
     address startAddress,
     uint256 count
   ) external view notPaused returns (
-    bytes32[] memory locators
+    bytes32[] memory locators,
+    uint256[] memory scores,
+    address nextIdentifier
   ) {
     // Ensure neither token is blacklisted.
     if (blacklist[signerToken] || blacklist[senderToken]) {
-      return new bytes32[](0);
+      return (new bytes32[](0), new uint256[](0), address(0));
     }
 
     // Ensure the index exists.
     if (indexes[signerToken][senderToken] == Index(0)) {
-      return new bytes32[](0);
+      return (new bytes32[](0), new uint256[](0), address(0));
     }
 
-    // Return an array of locators for the index.
     return indexes[signerToken][senderToken].getLocators(startAddress, count);
   }
 
