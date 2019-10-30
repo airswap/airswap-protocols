@@ -347,6 +347,33 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
       equal(staked, 1)
     })
 
+    it('Bob can keep the same stake amount', async () => {
+      // Now he updates his stake to be the same
+      emitted(
+        await indexer.setIntent(
+          tokenWETH.address,
+          tokenDAI.address,
+          1,
+          bobLocator,
+          {
+            from: bobAddress,
+          }
+        ),
+        'Stake'
+      )
+
+      // Bob still has
+      ok(await balances(bobAddress, [[tokenAST, 999]]))
+      ok(await balances(indexerAddress, [[tokenAST, 1]]))
+
+      let staked = await indexer.getStakedAmount.call(
+        bobAddress,
+        tokenWETH.address,
+        tokenDAI.address
+      )
+      equal(staked, 1)
+    })
+
     it('Owner sets the locator whitelist, and alice cannot set intent', async () => {
       await indexer.setLocatorWhitelist(delegateFactory.address, {
         from: ownerAddress,
