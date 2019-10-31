@@ -24,7 +24,7 @@
     "@gnosis.pm/mock-contract": "^3.0.7"
   },
   "dependencies": {
-    "@airswap/types": "0.2.0",
+    "@airswap/types": "0.3.0",
     "openzeppelin-solidity": "^v2.2",
     "solidity-coverage": "^0.6.3",
     "solidity-docgen": "0.3.0-beta.3",
