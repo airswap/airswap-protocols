@@ -53,11 +53,11 @@ _\*\* OpenZeppelin contract_
 
 | Function            | Source      | Visibility | Params                                                                          | Payable |
 | :------------------ | :---------- | :--------- | :------------------------------------------------------------------------------ | :------ |
-| createIndex         | Indexer.sol | external   | `address _makerToken, address _takerToken`                                    | no      |
-| addTokenToBlacklist      | Indexer.sol | external   | `address[] calldata _tokens`                                                    | no      |
-| removeTokenFromBlacklist | Indexer.sol | external   | `address[] calldata _tokens`                                                    | no      |
-| setIntent           | Indexer.sol | external   | `address _makerToken, address _takerToken, uint256 _amount, bytes32 _locator` | no      |
-| unsetIntent         | Indexer.sol | external   | `address _makerToken, address _takerToken`                                    | no      |
+| createIndex         | Indexer.sol | external   | `address makerToken, address takerToken`                                    | no      |
+| addTokenToBlacklist      | Indexer.sol | external   | `address[] calldata tokens`                                                    | no      |
+| removeTokenFromBlacklist | Indexer.sol | external   | `address[] calldata tokens`                                                    | no      |
+| setIntent           | Indexer.sol | external   | `address makerToken, address takerToken, uint256 amount, bytes32 locator` | no      |
+| unsetIntent         | Indexer.sol | external   | `address makerToken, address takerToken`                                    | no      |
 
 ## Invariants
 
