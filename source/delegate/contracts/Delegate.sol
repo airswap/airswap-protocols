@@ -46,7 +46,7 @@ contract Delegate is IDelegate, Ownable {
   address public tradeWallet;
 
   // Mapping of senderToken to signerToken for rule lookup
-  mapping (address => mapping (address => Types.Rule)) public rules;
+  mapping (address => mapping (address => Rule)) public rules;
 
   // ERC-20 (fungible token) interface identifier (ERC-165)
   bytes4 constant internal ERC20_INTERFACE_ID = 0x277f8169;
@@ -136,13 +136,13 @@ contract Delegate is IDelegate, Ownable {
     * @dev swap needs to be given permission to move funds from the delegate
     * @param senderToken address Token the delgeate will send
     * @param senderToken address Token the delegate will receive
-    * @param rule Types.Rule Rule to set on a delegate
+    * @param rule Rule Rule to set on a delegate
     * @param amountToStake uint256 Amount to stake for an intent
     */
   function setRuleAndIntent(
     address senderToken,
     address signerToken,
-    Types.Rule calldata rule,
+    Rule calldata rule,
     uint256 amountToStake
   ) external onlyOwner {
     _setRule(
@@ -205,7 +205,7 @@ contract Delegate is IDelegate, Ownable {
     Types.Order calldata order
   ) external {
 
-    Types.Rule memory rule = rules[order.sender.token][order.signer.token];
+    Rule memory rule = rules[order.sender.token][order.signer.token];
 
     require(order.signer.wallet == msg.sender,
       "SIGNER_MUST_BE_SENDER");
@@ -235,7 +235,7 @@ contract Delegate is IDelegate, Ownable {
       "PRICE_INCORRECT");
 
     // Overwrite the rule with a decremented maxSenderAmount.
-    rules[order.sender.token][order.signer.token] = Types.Rule({
+    rules[order.sender.token][order.signer.token] = Rule({
       maxSenderAmount: (rule.maxSenderAmount).sub(order.sender.param),
       priceCoef: rule.priceCoef,
       priceExp: rule.priceExp
@@ -269,7 +269,7 @@ contract Delegate is IDelegate, Ownable {
     uint256 signerParam
   ) {
 
-    Types.Rule memory rule = rules[senderToken][signerToken];
+    Rule memory rule = rules[senderToken][signerToken];
 
     // Ensure that a rule exists.
     if(rule.maxSenderAmount > 0) {
@@ -303,7 +303,7 @@ contract Delegate is IDelegate, Ownable {
     uint256 senderParam
   ) {
 
-    Types.Rule memory rule = rules[senderToken][signerToken];
+    Rule memory rule = rules[senderToken][signerToken];
 
     // Ensure that a rule exists.
     if(rule.maxSenderAmount > 0) {
@@ -335,7 +335,7 @@ contract Delegate is IDelegate, Ownable {
     uint256 signerParam
   ) {
 
-    Types.Rule memory rule = rules[senderToken][signerToken];
+    Rule memory rule = rules[senderToken][signerToken];
 
     // Ensure that a rule exists.
     if(rule.maxSenderAmount > 0) {
@@ -366,13 +366,14 @@ contract Delegate is IDelegate, Ownable {
     uint256 priceCoef,
     uint256 priceExp
   ) internal {
-    rules[senderToken][signerToken] = Types.Rule({
+    rules[senderToken][signerToken] = Rule({
       maxSenderAmount: maxSenderAmount,
       priceCoef: priceCoef,
       priceExp: priceExp
     });
 
     emit SetRule(
+      owner(),
       senderToken,
       signerToken,
       maxSenderAmount,
@@ -396,6 +397,7 @@ contract Delegate is IDelegate, Ownable {
     delete rules[senderToken][signerToken];
 
     emit UnsetRule(
+      owner(),
       senderToken,
       signerToken
     );
