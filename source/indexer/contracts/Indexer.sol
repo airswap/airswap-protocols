@@ -41,7 +41,7 @@ contract Indexer is IIndexer, Ownable {
   address public locatorWhitelist;
 
   // Boolean marking when the contract is paused - users cannot call functions when true
-  bool public contractPaused = false;
+  bool public contractPaused;
 
   /**
     * @notice Contract Constructor
@@ -80,7 +80,7 @@ contract Indexer is IIndexer, Ownable {
 
   /**
     * @notice Set the address of an ILocatorWhitelist to use
-    * @dev Clear the whitelist with a null address (0x0)
+    * @dev Allows removal of locatorWhitelist by passing 0x0
     * @param newLocatorWhitelist address Locator whitelist
     */
   function setLocatorWhitelist(
