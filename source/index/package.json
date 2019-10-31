@@ -1,6 +1,6 @@
 {
   "name": "@airswap/index",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Manages a list of intents to trade a specific token pair in the Swap Protocol",
   "license": "Apache-2.0",
   "repository": {
