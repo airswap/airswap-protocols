@@ -287,7 +287,9 @@ contract Indexer is IIndexer, Ownable {
     address signerToken,
     address senderToken
   ) public view returns (uint256) {
-
+    if (indexes[signerToken][senderToken] == Index(0)) {
+      return 0;
+    }
     // Return the score, equivalent to the stake amount.
     return indexes[signerToken][senderToken].getScore(user);
   }
