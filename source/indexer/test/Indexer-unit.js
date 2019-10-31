@@ -290,7 +290,7 @@ contract('Indexer Unit Tests', async accounts => {
 
       emitted(result, 'Stake', event => {
         return (
-          event.wallet === aliceAddress &&
+          event.staker === aliceAddress &&
           event.signerToken === tokenOne &&
           event.senderToken == tokenTwo &&
           event.amount.toNumber() === 250
@@ -321,7 +321,7 @@ contract('Indexer Unit Tests', async accounts => {
 
       emitted(result, 'Stake', event => {
         return (
-          event.wallet === bobAddress &&
+          event.staker === bobAddress &&
           event.signerToken === tokenOne &&
           event.senderToken == tokenTwo &&
           event.amount.toNumber() === 250
@@ -498,7 +498,7 @@ contract('Indexer Unit Tests', async accounts => {
       passes(tx)
       emitted(tx, 'Unstake', event => {
         return (
-          event.wallet === aliceAddress &&
+          event.staker === aliceAddress &&
           event.signerToken === tokenOne &&
           event.senderToken == tokenTwo &&
           event.amount.toNumber() === 250
@@ -584,7 +584,7 @@ contract('Indexer Unit Tests', async accounts => {
       passes(tx)
       emitted(tx, 'Unstake', event => {
         return (
-          event.wallet === aliceAddress &&
+          event.staker === aliceAddress &&
           event.signerToken === tokenOne &&
           event.senderToken == tokenTwo &&
           event.amount.toNumber() === 250
