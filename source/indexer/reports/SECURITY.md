@@ -53,11 +53,11 @@ _\*\* OpenZeppelin contract_
 
 | Function            | Source      | Visibility | Params                                                                          | Payable |
 | :------------------ | :---------- | :--------- | :------------------------------------------------------------------------------ | :------ |
-| createIndex         | Indexer.sol | external   | `address _makerToken, address _takerToken`                                    | no      |
-| addToBlacklist      | Indexer.sol | external   | `address[] calldata _tokens`                                                    | no      |
-| removeFromBlacklist | Indexer.sol | external   | `address[] calldata _tokens`                                                    | no      |
-| setIntent           | Indexer.sol | external   | `address _makerToken, address _takerToken, uint256 _amount, bytes32 _locator` | no      |
-| unsetIntent         | Indexer.sol | external   | `address _makerToken, address _takerToken`                                    | no      |
+| createIndex         | Indexer.sol | external   | `address makerToken, address takerToken`                                    | no      |
+| addTokenToBlacklist      | Indexer.sol | external   | `address[] calldata tokens`                                                    | no      |
+| removeTokenFromBlacklist | Indexer.sol | external   | `address[] calldata tokens`                                                    | no      |
+| setIntent           | Indexer.sol | external   | `address makerToken, address takerToken, uint256 amount, bytes32 locator` | no      |
+| unsetIntent         | Indexer.sol | external   | `address makerToken, address takerToken`                                    | no      |
 
 ## Invariants
 
@@ -70,7 +70,7 @@ _\*\* OpenZeppelin contract_
 
 #### 2. Only the owner is able to modify the blacklist.
 
-- By inspection it can be seen that only 2 functions modify the blacklist: addToBlacklist() and removeFromBlacklist()
+- By inspection it can be seen that only 2 functions modify the blacklist: addTokenToBlacklist() and removeTokenFromBlacklist()
 - Both of these functions have the onlyOwner modifier, as defined in Ownable.sol
 - **This invariant currently holds as-is.**
 

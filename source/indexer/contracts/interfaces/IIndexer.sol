@@ -24,33 +24,33 @@ interface IIndexer {
   );
 
   event Stake(
-    address wallet,
-    address signerToken,
-    address senderToken,
-    uint256 amount
+    address indexed staker,
+    address indexed signerToken,
+    address indexed senderToken,
+    uint256 stakeAmount
   );
 
   event Unstake(
-    address wallet,
-    address signerToken,
-    address senderToken,
-    uint256 amount
+    address indexed staker,
+    address indexed signerToken,
+    address indexed senderToken,
+    uint256 stakeAmount
   );
 
-  event AddToBlacklist(
+  event AddTokenToBlacklist(
     address token
   );
 
-  event RemoveFromBlacklist(
+  event RemoveTokenFromBlacklist(
     address token
   );
 
   function stakingToken() external returns (address);
   function indexes(address, address) external returns (address);
-  function blacklist(address) external returns (bool);
+  function tokenBlacklist(address) external returns (bool);
 
   function setLocatorWhitelist(
-    address locatorWhitelist
+    address newLocatorWhitelist
   ) external;
 
   function createIndex(
@@ -58,18 +58,18 @@ interface IIndexer {
     address senderToken
   ) external returns (address);
 
-  function addToBlacklist(
+  function addTokenToBlacklist(
     address token
   ) external;
 
-  function removeFromBlacklist(
+  function removeTokenFromBlacklist(
     address token
   ) external;
 
   function setIntent(
     address signerToken,
     address senderToken,
-    uint256 amount,
+    uint256 stakingAmount,
     bytes32 locator
   ) external;
 
@@ -93,7 +93,7 @@ interface IIndexer {
   function getLocators(
     address signerToken,
     address senderToken,
-    address startAddress,
+    address cursor,
     uint256 limit
   ) external view returns (
     bytes32[] memory,

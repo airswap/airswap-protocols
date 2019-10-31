@@ -35,13 +35,13 @@ contract Indexer is IIndexer, Ownable {
   mapping (address => mapping (address => Index)) public indexes;
 
   // Mapping of token address to boolean
-  mapping (address => bool) public blacklist;
+  mapping (address => bool) public tokenBlacklist;
 
   // The whitelist contract for checking whether a peer is whitelisted
   address public locatorWhitelist;
 
   // Boolean marking when the contract is paused - users cannot call functions when true
-  bool public contractPaused = false;
+  bool public contractPaused;
 
   /**
     * @notice Contract Constructor
@@ -80,7 +80,7 @@ contract Indexer is IIndexer, Ownable {
 
   /**
     * @notice Set the address of an ILocatorWhitelist to use
-    * @dev Clear the whitelist with a null address (0x0)
+    * @dev Allows removal of locatorWhitelist by passing 0x0
     * @param newLocatorWhitelist address Locator whitelist
     */
   function setLocatorWhitelist(
@@ -91,8 +91,8 @@ contract Indexer is IIndexer, Ownable {
 
   /**
     * @notice Create an Index (List of Locators for a Token Pair)
-    * @dev Deploys a new Index contract and stores the address
-    *
+    * @dev Deploys a new Index contract and stores the address. If the Index already
+    * @dev exists, returns its address, and does not emit a CreateIndex event
     * @param signerToken address Signer token for the Index
     * @param senderToken address Sender token for the Index
     */
@@ -117,12 +117,12 @@ contract Indexer is IIndexer, Ownable {
     * @notice Add a Token to the Blacklist
     * @param token address Token to blacklist
     */
-  function addToBlacklist(
+  function addTokenToBlacklist(
     address token
   ) external onlyOwner {
-    if (!blacklist[token]) {
-      blacklist[token] = true;
-      emit AddToBlacklist(token);
+    if (!tokenBlacklist[token]) {
+      tokenBlacklist[token] = true;
+      emit AddTokenToBlacklist(token);
     }
   }
 
@@ -130,12 +130,12 @@ contract Indexer is IIndexer, Ownable {
     * @notice Remove a Token from the Blacklist
     * @param token address Token to remove from the blacklist
     */
-  function removeFromBlacklist(
+  function removeTokenFromBlacklist(
     address token
   ) external onlyOwner {
-    if (blacklist[token]) {
-      blacklist[token] = false;
-      emit RemoveFromBlacklist(token);
+    if (tokenBlacklist[token]) {
+      tokenBlacklist[token] = false;
+      emit RemoveTokenFromBlacklist(token);
     }
   }
 
@@ -145,13 +145,13 @@ contract Indexer is IIndexer, Ownable {
     *
     * @param signerToken address Signer token of the Index being staked
     * @param senderToken address Sender token of the Index being staked
-    * @param amount uint256 Amount being staked
+    * @param stakingAmount uint256 Amount being staked
     * @param locator bytes32 Locator of the staker
     */
   function setIntent(
     address signerToken,
     address senderToken,
-    uint256 amount,
+    uint256 stakingAmount,
     bytes32 locator
   ) external notPaused indexExists(signerToken, senderToken) {
 
@@ -162,30 +162,29 @@ contract Indexer is IIndexer, Ownable {
     }
 
     // Ensure neither of the tokens are blacklisted.
-    require(!blacklist[signerToken] && !blacklist[senderToken],
+    require(!tokenBlacklist[signerToken] && !tokenBlacklist[senderToken],
       "PAIR_IS_BLACKLISTED");
 
     bool notPreviouslySet = (indexes[signerToken][senderToken].getLocator(msg.sender) == bytes32(0));
 
     if (notPreviouslySet) {
-      // Only transfer for staking if amount is set.
-      if (amount > 0) {
+      // Only transfer for staking if stakingAmount is set.
+      if (stakingAmount > 0) {
 
-        // Transfer the amount for staking.
-        require(stakingToken.transferFrom(msg.sender, address(this), amount),
+        // Transfer the stakingAmount for staking.
+        require(stakingToken.transferFrom(msg.sender, address(this), stakingAmount),
           "UNABLE_TO_STAKE");
       }
-
-      emit Stake(msg.sender, signerToken, senderToken, amount);
-
       // Set the locator on the index.
-      indexes[signerToken][senderToken].setLocator(msg.sender, amount, locator);
+      indexes[signerToken][senderToken].setLocator(msg.sender, stakingAmount, locator);
+
+      emit Stake(msg.sender, signerToken, senderToken, stakingAmount);
+
     } else {
 
       uint256 oldStake = indexes[signerToken][senderToken].getScore(msg.sender);
 
-      _updateIntent(msg.sender, signerToken, senderToken, amount, locator, oldStake);
-
+      _updateIntent(msg.sender, signerToken, senderToken, stakingAmount, locator, oldStake);
     }
   }
 
@@ -257,13 +256,13 @@ contract Indexer is IIndexer, Ownable {
     address senderToken,
     address cursor,
     uint256 limit
-  ) external view notPaused returns (
+  ) external view returns (
     bytes32[] memory locators,
     uint256[] memory scores,
     address nextCursor
   ) {
     // Ensure neither token is blacklisted.
-    if (blacklist[signerToken] || blacklist[senderToken]) {
+    if (tokenBlacklist[signerToken] || tokenBlacklist[senderToken]) {
       return (new bytes32[](0), new uint256[](0), address(0));
     }
 
@@ -286,8 +285,10 @@ contract Indexer is IIndexer, Ownable {
     address user,
     address signerToken,
     address senderToken
-  ) public view indexExists(signerToken, senderToken) returns (uint256) {
-
+  ) public view returns (uint256 stakedAmount) {
+    if (indexes[signerToken][senderToken] == Index(0)) {
+      return 0;
+    }
     // Return the score, equivalent to the stake amount.
     return indexes[signerToken][senderToken].getScore(user);
   }
@@ -313,12 +314,11 @@ contract Indexer is IIndexer, Ownable {
       require(stakingToken.transfer(user, oldAmount - newAmount));
     }
 
-    emit Stake(user, signerToken, senderToken, newAmount);
-
     // Unset their old intent, and set their new intent.
     indexes[signerToken][senderToken].unsetLocator(user);
     indexes[signerToken][senderToken].setLocator(user, newAmount, newLocator);
 
+    emit Stake(user, signerToken, senderToken, newAmount);
   }
 
   /**
