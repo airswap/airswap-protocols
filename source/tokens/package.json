@@ -1,6 +1,6 @@
 {
   "name": "@airswap/tokens",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Solidity contracts and libraries used in the Swap Protocol",
   "license": "Apache-2.0",
   "repository": {
