@@ -145,13 +145,13 @@ contract Indexer is IIndexer, Ownable {
     *
     * @param signerToken address Signer token of the Index being staked
     * @param senderToken address Sender token of the Index being staked
-    * @param amount uint256 Amount being staked
+    * @param stakingAmount uint256 Amount being staked
     * @param locator bytes32 Locator of the staker
     */
   function setIntent(
     address signerToken,
     address senderToken,
-    uint256 amount,
+    uint256 stakingAmount,
     bytes32 locator
   ) external notPaused indexExists(signerToken, senderToken) {
 
@@ -168,23 +168,23 @@ contract Indexer is IIndexer, Ownable {
     bool notPreviouslySet = (indexes[signerToken][senderToken].getLocator(msg.sender) == bytes32(0));
 
     if (notPreviouslySet) {
-      // Only transfer for staking if amount is set.
-      if (amount > 0) {
+      // Only transfer for staking if stakingAmount is set.
+      if (stakingAmount > 0) {
 
-        // Transfer the amount for staking.
-        require(stakingToken.transferFrom(msg.sender, address(this), amount),
+        // Transfer the stakingAmount for staking.
+        require(stakingToken.transferFrom(msg.sender, address(this), stakingAmount),
           "UNABLE_TO_STAKE");
       }
 
-      emit Stake(msg.sender, signerToken, senderToken, amount);
+      emit Stake(msg.sender, signerToken, senderToken, stakingAmount);
 
       // Set the locator on the index.
-      indexes[signerToken][senderToken].setLocator(msg.sender, amount, locator);
+      indexes[signerToken][senderToken].setLocator(msg.sender, stakingAmount, locator);
     } else {
 
       uint256 oldStake = indexes[signerToken][senderToken].getScore(msg.sender);
 
-      _updateIntent(msg.sender, signerToken, senderToken, amount, locator, oldStake);
+      _updateIntent(msg.sender, signerToken, senderToken, stakingAmount, locator, oldStake);
 
     }
   }
