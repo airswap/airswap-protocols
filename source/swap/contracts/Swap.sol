@@ -42,11 +42,11 @@ contract Swap is ISwap {
   // ERC-721 (non-fungible token) interface identifier (EIP-165)
   bytes4 constant internal ERC721_INTERFACE_ID = 0x80ac58cd;
 
-  // Mapping of sender address to a delegated sender address and expiry
-  mapping (address => mapping (address => uint256)) public senderAuthorizations;
+  // Mapping of sender address to a delegated sender address and bool
+  mapping (address => mapping (address => bool)) public senderAuthorizations;
 
-  // Mapping of signer address to a delegated signer and expiry
-  mapping (address => mapping (address => uint256)) public signerAuthorizations;
+  // Mapping of signer address to a delegated signer and bool
+  mapping (address => mapping (address => bool)) public signerAuthorizations;
 
   // Mapping of signers to nonces with value AVAILABLE (0x00) or UNAVAILABLE (0x01)
   mapping (address => mapping (uint256 => byte)) public signerNonceStatus;
@@ -202,32 +202,26 @@ contract Swap is ISwap {
     * @notice Authorize a delegated sender
     * @dev Emits an AuthorizeSender event
     * @param authorizedSender address Address to authorize
-    * @param expiry uint256 Expiry of the authorization
     */
   function authorizeSender(
-    address authorizedSender,
-    uint256 expiry
+    address authorizedSender
   ) external {
     require(msg.sender != authorizedSender, "INVALID_AUTH_SENDER");
-    require(expiry > block.timestamp, "INVALID_AUTH_EXPIRY");
-    senderAuthorizations[msg.sender][authorizedSender] = expiry;
-    emit AuthorizeSender(msg.sender, authorizedSender, expiry);
+    senderAuthorizations[msg.sender][authorizedSender] = true;
+    emit AuthorizeSender(msg.sender, authorizedSender);
   }
 
   /**
     * @notice Authorize a delegated signer
     * @dev Emits an AuthorizeSigner event
     * @param authorizedSigner address Address to authorize
-    * @param expiry uint256 Expiry of the authorization
     */
   function authorizeSigner(
-    address authorizedSigner,
-    uint256 expiry
+    address authorizedSigner
   ) external {
     require(msg.sender != authorizedSigner, "INVALID_AUTH_SIGNER");
-    require(expiry > block.timestamp, "INVALID_AUTH_EXPIRY");
-    signerAuthorizations[msg.sender][authorizedSigner] = expiry;
-    emit AuthorizeSigner(msg.sender, authorizedSigner, expiry);
+    signerAuthorizations[msg.sender][authorizedSigner] = true;
+    emit AuthorizeSigner(msg.sender, authorizedSigner);
   }
 
   /**
@@ -265,7 +259,7 @@ contract Swap is ISwap {
     address delegate
   ) internal view returns (bool) {
     return ((authorizer == delegate) ||
-      senderAuthorizations[authorizer][delegate] > block.timestamp);
+      senderAuthorizations[authorizer][delegate]);
   }
 
   /**
@@ -279,7 +273,7 @@ contract Swap is ISwap {
     address delegate
   ) internal view returns (bool) {
     return ((authorizer == delegate) ||
-      (signerAuthorizations[authorizer][delegate] > block.timestamp));
+      signerAuthorizations[authorizer][delegate]);
   }
 
   /**

@@ -12,15 +12,8 @@ const {
   passes,
 } = require('@airswap/test-utils').assert
 const { balances } = require('@airswap/test-utils').balances
-const {
-  getTimestampPlusDays,
-  advanceTime,
-} = require('@airswap/test-utils').time
 const { orders } = require('@airswap/order-utils')
-const {
-  EMPTY_ADDRESS,
-  SECONDS_IN_DAY,
-} = require('@airswap/order-utils').constants
+const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 
 contract('Delegate Integration Tests', async accounts => {
   const STARTING_BALANCE = 700
@@ -459,7 +452,7 @@ contract('Delegate Integration Tests', async accounts => {
       )
     })
 
-    it("should not trade if the tradeWallet's authorization has expired", async () => {
+    it("should not trade if the tradeWallet's authorization has been revoked", async () => {
       const order = await orders.getOrder({
         signer: {
           wallet: bobAddress,
@@ -472,20 +465,6 @@ contract('Delegate Integration Tests', async accounts => {
           param: quote.toNumber(),
         },
       })
-
-      // authorize the delegate to be sender
-      let expiry = await getTimestampPlusDays(0.5)
-      let tx = await swapContract.authorizeSender(
-        aliceDelegate.address,
-        expiry,
-        {
-          from: aliceTradeWallet,
-        }
-      )
-      emitted(tx, 'AuthorizeSender')
-
-      // increase time past expiry
-      await advanceTime(SECONDS_IN_DAY * 0.6)
 
       // Succeeds on the Delegate, fails on the Swap.
       // aliceTradeWallet approval has expired
@@ -524,14 +503,9 @@ contract('Delegate Integration Tests', async accounts => {
       )
 
       // aliceTradeWallet must authorize the Delegate contract to swap
-      let expiry = await getTimestampPlusDays(0.5)
-      let tx = await swapContract.authorizeSender(
-        aliceDelegate.address,
-        expiry,
-        {
-          from: aliceTradeWallet,
-        }
-      )
+      let tx = await swapContract.authorizeSender(aliceDelegate.address, {
+        from: aliceTradeWallet,
+      })
       emitted(tx, 'AuthorizeSender')
 
       // both approve Swap to transfer tokens
@@ -544,13 +518,19 @@ contract('Delegate Integration Tests', async accounts => {
         'Approval'
       )
 
-      // Now the swap succeeds
-      await aliceDelegate.provideOrder(order, { from: bobAddress })
-
       // remove authorization
-      await swapContract.revokeSender(aliceDelegate.address, {
-        from: aliceTradeWallet,
-      })
+      emitted(
+        await swapContract.revokeSender(aliceDelegate.address, {
+          from: aliceTradeWallet,
+        }),
+        'RevokeSender'
+      )
+
+      // ensure revokeSender, causes swap to fail with sender unauthorized
+      await reverted(
+        aliceDelegate.provideOrder(order, { from: bobAddress }),
+        'SENDER_UNAUTHORIZED'
+      )
     })
   })
 

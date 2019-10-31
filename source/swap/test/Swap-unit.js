@@ -3,22 +3,13 @@ const MockContract = artifacts.require('MockContract')
 const FungibleToken = artifacts.require('FungibleToken')
 
 const {
-  passes,
   emitted,
   notEmitted,
   reverted,
   equal,
 } = require('@airswap/test-utils').assert
-const {
-  takeSnapshot,
-  revertToSnapShot,
-  advanceTime,
-  getTimestampPlusDays,
-} = require('@airswap/test-utils').time
-const {
-  SECONDS_IN_DAY,
-  EMPTY_ADDRESS,
-} = require('@airswap/order-utils').constants
+const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
+const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 
 const NONCE_AVAILABLE = 0x00
 const NONCE_UNAVAILABLE = 0x01
@@ -168,9 +159,8 @@ contract('Swap Unit Tests', async accounts => {
         signature,
       ]
 
-      const ONE_DAY_EXPIRY = await getTimestampPlusDays(1)
       // auth signer to be the sender of the order
-      await swap.authorizeSender(mockSigner, ONE_DAY_EXPIRY, {
+      await swap.authorizeSender(mockSigner, {
         from: mockSender,
       })
       // auth sender
@@ -209,10 +199,8 @@ contract('Swap Unit Tests', async accounts => {
         signature,
       ]
 
-      const ONE_DAY_EXPIRY = await getTimestampPlusDays(1)
-
       // auth signer to be the sender of the order
-      await swap.authorizeSender(mockSigner, ONE_DAY_EXPIRY, {
+      await swap.authorizeSender(mockSigner, {
         from: mockSender,
       })
       // auth sender
@@ -281,60 +269,9 @@ contract('Swap Unit Tests', async accounts => {
     it('test when the message sender is the authorized signer', async () => {
       let delegate = mockSigner
       await reverted(
-        swap.authorizeSigner(delegate, 0, { from: mockSigner }),
+        swap.authorizeSigner(delegate, { from: mockSigner }),
         'INVALID_AUTH_SIGNER'
       )
-    })
-
-    it('test when the expiration date has passed', async () => {
-      await reverted(
-        swap.authorizeSigner(mockSigner, 0, { from: sender }),
-        'INVALID_AUTH_EXPIRY'
-      )
-    })
-
-    it('test when the expiration == block.timestamp', async () => {
-      // with this method, sometimes ONE_DAY_EXPIRY is 1 second before block.timestamp
-      // however ~50% of the time they are equal. This is due to the fact that in the
-      // time it takes to perform the below commands, some number of milliseconds pass.
-      // Sometimes that pushes the current time into the next second, and sometimes it doesnt.
-      // Therefore sometimes the current time is the same time as the expiry, and sometimes
-      // the current time is one second after the expiry.
-
-      const ONE_DAY = SECONDS_IN_DAY * 1
-      const ONE_DAY_EXPIRY = await getTimestampPlusDays(1)
-
-      // advance the time one day
-      await advanceTime(ONE_DAY)
-
-      // set the expiry as the same time as the current time - revert
-      await reverted(
-        swap.authorizeSigner(mockSigner, ONE_DAY_EXPIRY, { from: sender }),
-        'INVALID_AUTH_EXPIRY'
-      )
-    })
-
-    it('test when there is a valid delegate and the expiration has not expired', async () => {
-      const block = await web3.eth.getBlock('latest')
-      const time = block.timestamp
-      const futureTime = time + 100
-      let trx = await swap.authorizeSigner(mockSigner, futureTime, {
-        from: sender,
-      })
-      await passes(trx)
-
-      //check delegateApproval was unset
-      let val = await swap.signerAuthorizations.call(sender, mockSigner)
-      equal(val, futureTime, 'signer approval was not properly set')
-
-      //check that event was emitted
-      emitted(trx, 'AuthorizeSigner', e => {
-        return (
-          e.authorizerAddress === sender &&
-          e.authorizedSigner === mockSigner &&
-          e.expiry.toNumber() === futureTime
-        )
-      })
     })
   })
 
