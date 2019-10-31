@@ -293,7 +293,7 @@ contract('Indexer Unit Tests', async accounts => {
           event.staker === aliceAddress &&
           event.signerToken === tokenOne &&
           event.senderToken == tokenTwo &&
-          event.amount.toNumber() === 250
+          event.stakedAmount.toNumber() === 250
         )
       })
     })
@@ -324,7 +324,7 @@ contract('Indexer Unit Tests', async accounts => {
           event.staker === bobAddress &&
           event.signerToken === tokenOne &&
           event.senderToken == tokenTwo &&
-          event.amount.toNumber() === 250
+          event.stakedAmount.toNumber() === 250
         )
       })
     })
@@ -501,7 +501,7 @@ contract('Indexer Unit Tests', async accounts => {
           event.staker === aliceAddress &&
           event.signerToken === tokenOne &&
           event.senderToken == tokenTwo &&
-          event.amount.toNumber() === 250
+          event.stakedAmount.toNumber() === 250
         )
       })
     })
@@ -587,7 +587,7 @@ contract('Indexer Unit Tests', async accounts => {
           event.staker === aliceAddress &&
           event.signerToken === tokenOne &&
           event.senderToken == tokenTwo &&
-          event.amount.toNumber() === 250
+          event.stakedAmount.toNumber() === 250
         )
       })
     })
