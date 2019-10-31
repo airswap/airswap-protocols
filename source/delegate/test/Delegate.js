@@ -519,9 +519,11 @@ contract('Delegate Integration Tests', async accounts => {
       )
 
       // remove authorization
-      emitted(await swapContract.revokeSender(aliceDelegate.address, {
-        from: aliceTradeWallet,
-      }), 'RevokeSender'
+      emitted(
+        await swapContract.revokeSender(aliceDelegate.address, {
+          from: aliceTradeWallet,
+        }),
+        'RevokeSender'
       )
 
       // ensure revokeSender, causes swap to fail with sender unauthorized
