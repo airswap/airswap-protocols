@@ -175,17 +175,16 @@ contract Indexer is IIndexer, Ownable {
         require(stakingToken.transferFrom(msg.sender, address(this), stakingAmount),
           "UNABLE_TO_STAKE");
       }
+      // Set the locator on the index.
+      indexes[signerToken][senderToken].setLocator(msg.sender, stakingAmount, locator);
 
       emit Stake(msg.sender, signerToken, senderToken, stakingAmount);
 
-      // Set the locator on the index.
-      indexes[signerToken][senderToken].setLocator(msg.sender, stakingAmount, locator);
     } else {
 
       uint256 oldStake = indexes[signerToken][senderToken].getScore(msg.sender);
 
       _updateIntent(msg.sender, signerToken, senderToken, stakingAmount, locator, oldStake);
-
     }
   }
 
@@ -315,12 +314,11 @@ contract Indexer is IIndexer, Ownable {
       require(stakingToken.transfer(user, oldAmount - newAmount));
     }
 
-    emit Stake(user, signerToken, senderToken, newAmount);
-
     // Unset their old intent, and set their new intent.
     indexes[signerToken][senderToken].unsetLocator(user);
     indexes[signerToken][senderToken].setLocator(user, newAmount, newLocator);
 
+    emit Stake(user, signerToken, senderToken, newAmount);
   }
 
   /**
