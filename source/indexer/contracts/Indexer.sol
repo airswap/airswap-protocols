@@ -285,7 +285,7 @@ contract Indexer is IIndexer, Ownable {
     address user,
     address signerToken,
     address senderToken
-  ) public view returns (uint256) {
+  ) public view returns (uint256 stakedAmount) {
     if (indexes[signerToken][senderToken] == Index(0)) {
       return 0;
     }
