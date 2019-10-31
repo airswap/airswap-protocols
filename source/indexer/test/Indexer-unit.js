@@ -826,13 +826,17 @@ contract('Indexer Unit Tests', async accounts => {
   })
 
   describe('Test getStakedAmount.call', async () => {
-    it('should fail if the index does not exist', async () => {
-      await reverted(
-        indexer.getStakedAmount.call(aliceAddress, tokenOne, tokenTwo, {
+    it('should return 0 if the index does not exist', async () => {
+      let val = await indexer.getStakedAmount.call(
+        aliceAddress,
+        tokenOne,
+        tokenTwo,
+        {
           from: aliceAddress,
-        }),
-        'INDEX_DOES_NOT_EXIST'
+        }
       )
+
+      equal(val, 0)
     })
 
     it('should retrieve the score on a token pair for a user', async () => {

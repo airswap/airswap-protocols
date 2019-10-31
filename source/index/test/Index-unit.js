@@ -497,7 +497,7 @@ contract('Index Unit Tests', async accounts => {
       equal(result[NEXTID], HEAD, 'The next slot should be the head')
     })
 
-    it('throws an error for an unstaked user', async () => {
+    it('returns nothing for an unstaked user', async () => {
       // add 3 locators
       await index.setLocator(aliceAddress, 2000, aliceLocator, {
         from: owner,
@@ -509,7 +509,11 @@ contract('Index Unit Tests', async accounts => {
         from: owner,
       })
 
-      await reverted(index.getLocators(davidAddress, 10), 'CURSOR_NOT_FOUND')
+      result = await index.getLocators(davidAddress, 10)
+
+      equal(result[LOCATORS].length, 0)
+      equal(result[SCORES].length, 0)
+      equal(result[NEXTID], EMPTY_ADDRESS)
     })
   })
 })

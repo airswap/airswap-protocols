@@ -47,10 +47,10 @@ interface IIndexer {
 
   function stakingToken() external returns (address);
   function indexes(address, address) external returns (address);
-  function blacklist(address) external returns (bool);
+  function tokenBlacklist(address) external returns (bool);
 
   function setLocatorWhitelist(
-    address locatorWhitelist
+    address newLocatorWhitelist
   ) external;
 
   function createIndex(
@@ -69,7 +69,7 @@ interface IIndexer {
   function setIntent(
     address signerToken,
     address senderToken,
-    uint256 amount,
+    uint256 stakingAmount,
     bytes32 locator
   ) external;
 
@@ -93,7 +93,7 @@ interface IIndexer {
   function getLocators(
     address signerToken,
     address senderToken,
-    address startAddress,
+    address cursor,
     uint256 limit
   ) external view returns (
     bytes32[] memory,
