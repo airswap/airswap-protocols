@@ -91,8 +91,8 @@ contract Indexer is IIndexer, Ownable {
 
   /**
     * @notice Create an Index (List of Locators for a Token Pair)
-    * @dev Deploys a new Index contract and stores the address
-    *
+    * @dev Deploys a new Index contract and stores the address. If the Index already
+    * @dev exists, returns its address, and does not emit a CreateIndex event
     * @param signerToken address Signer token for the Index
     * @param senderToken address Sender token for the Index
     */
