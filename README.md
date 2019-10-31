@@ -18,21 +18,23 @@
 
 ## Smart Contracts
 
-| Package                                                    | Version                                                                                                                   | Description                         |
-| :--------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------ | :---------------------------------- |
+Packages are versioned based on deploys. Major versions e.g. `1.x.x` are mainnet deploys, while minor versions e.g. `x.1.x` are rinkeby deploys. Packages that are not deployed increment patch versions e.g. `x.x.1`. Each package that includes a deployment includes the ABI files for that deployed contract in `builds/contracts` within the package.
+
+| Package                                                 | Version                                                                                                                   | Description                         |
+| :------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------ | :---------------------------------- |
 | [`@airswap/swap`](/source/swap)                         | [![npm](https://img.shields.io/npm/v/@airswap/swap)](https://www.npmjs.com/package/@airswap/swap)                         | Atomic Swap Between Tokens          |
 | [`@airswap/indexer`](/source/indexer)                   | [![npm](https://img.shields.io/npm/v/@airswap/indexer)](https://www.npmjs.com/package/@airswap/indexer)                   | Counterparty Discovery with Staking |
 | [`@airswap/index`](/source/index)                       | [![npm](https://img.shields.io/npm/v/@airswap/index)](https://www.npmjs.com/package/@airswap/index)                       | Ordered List of Locators            |
 | [`@airswap/delegate`](/source/delegate)                 | [![npm](https://img.shields.io/npm/v/@airswap/delegate)](https://www.npmjs.com/package/@airswap/delegate)                 | Onchain Trading Delegate            |
 | [`@airswap/delegate-factory`](/source/delegate-factory) | [![npm](https://img.shields.io/npm/v/@airswap/delegate-factory)](https://www.npmjs.com/package/@airswap/delegate-factory) | Deploys New Delegates               |
 | [`@airswap/types`](/source/types)                       | [![npm](https://img.shields.io/npm/v/@airswap/types)](https://www.npmjs.com/package/@airswap/types)                       | Types and Hashes                    |
-| [`@airswap/wrapper`](/source/wrapper)                     | [![npm](https://img.shields.io/npm/v/@airswap/wrapper)](https://www.npmjs.com/package/@airswap/wrapper)                   | Use ether for WETH trades           |
-| [`@airswap/tokens`](/source/tokens)                       | [![npm](https://img.shields.io/npm/v/@airswap/tokens)](https://www.npmjs.com/package/@airswap/tokens)                     | Ethereum Tokens                     |
+| [`@airswap/wrapper`](/source/wrapper)                   | [![npm](https://img.shields.io/npm/v/@airswap/wrapper)](https://www.npmjs.com/package/@airswap/wrapper)                   | Use ether for WETH trades           |
+| [`@airswap/tokens`](/source/tokens)                     | [![npm](https://img.shields.io/npm/v/@airswap/tokens)](https://www.npmjs.com/package/@airswap/tokens)                     | Ethereum Tokens                     |
 
 ## JavaScript Libraries
 
-| Package                                         | Version                                                                                                         | Description            |
-| :---------------------------------------------- | :-------------------------------------------------------------------------------------------------------------- | :--------------------- |
+| Package                                      | Version                                                                                                         | Description            |
+| :------------------------------------------- | :-------------------------------------------------------------------------------------------------------------- | :--------------------- |
 | [`@airswap/order-utils`](/utils/order-utils) | [![npm](https://img.shields.io/npm/v/@airswap/order-utils)](https://www.npmjs.com/package/@airswap/order-utils) | Create and Sign Orders |
 | [`@airswap/test-utils`](/utils/test-utils)   | [![npm](https://img.shields.io/npm/v/@airswap/test-utils)](https://www.npmjs.com/package/@airswap/test-utils)   | Test Utilities         |
 

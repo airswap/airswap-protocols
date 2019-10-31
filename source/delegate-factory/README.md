@@ -18,11 +18,11 @@
 - Blog → https://blog.airswap.io/
 - Support → https://support.airswap.io/
 
-## Deployments
+## Deploys
 
-| Contract    | Version | Network | Address                                                                                                                         |
-| :---------- | :------ | :------ | :------------------------------------------------------------------------------------------------------------------------------ |
-| DelegateFactory | `0.1.0` | Rinkeby | [`0x53d47a69A506Ceb97D5cafD93bab76bfFBA0B055`](https://rinkeby.etherscan.io/address/0x53d47a69A506Ceb97D5cafD93bab76bfFBA0B055) |
+| Version | Network   | Address                                      | Link                                                                                         |
+| :------ | :-------- | :------------------------------------------- | :------------------------------------------------------------------------------------------- |
+| `0.2.0` | `rinkeby` | `0x1b217076a9b43983e27036b9e7326fc6172b68da` | [Etherscan](https://rinkeby.etherscan.io/address/0x1b217076a9b43983e27036b9e7326fc6172b68da) |
 
 ## Commands
 

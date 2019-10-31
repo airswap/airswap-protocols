@@ -18,12 +18,11 @@
 
 To migrate from the V1 to V2 protocol please see [MIGRATION.md](MIGRATION.md).
 
-## Last Deploy
+## Deploys
 
-| Contract | Version | Network | Address                                                                                                                         |
-| :------- | :------ | :------ | :------------------------------------------------------------------------------------------------------------------------------ |
-| Swap     | `2.1.0` | Mainnet | [`0x251F752B85a9F7e1B3C42D802715B5D7A8Da3165`](https://etherscan.io/address/0x251F752B85a9F7e1B3C42D802715B5D7A8Da3165)         |
-| Swap     | `2.1.0` | Rinkeby | [`0x6f337bA064b0a92538a4AfdCF0e60F50eEAe0D5B`](https://rinkeby.etherscan.io/address/0x6f337bA064b0a92538a4AfdCF0e60F50eEAe0D5B) |
+| Version | Network   | Address                                      | Link                                                                                         |
+| :------ | :-------- | :------------------------------------------- | :------------------------------------------------------------------------------------------- |
+| `2.2.0` | `rinkeby` | `0x3a42c0ff0e06cc312b093e82bbca79c751654a62` | [Etherscan](https://rinkeby.etherscan.io/address/0x3a42c0ff0e06cc312b093e82bbca79c751654a62) |
 
 ## Commands
 
