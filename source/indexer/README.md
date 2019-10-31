@@ -18,6 +18,12 @@
 - Blog → https://blog.airswap.io/
 - Support → https://support.airswap.io/
 
+## Deploys
+
+| Version | Network   | Address                                      | Link                                                                                         |
+| :------ | :-------- | :------------------------------------------- | :------------------------------------------------------------------------------------------- |
+| `0.3.0` | `rinkeby` | `0x6299e178413d6b7903c365dda1d4f23e37868b25` | [Etherscan](https://rinkeby.etherscan.io/address/0x6299e178413d6b7903c365dda1d4f23e37868b25) |
+
 ## Commands
 
 | Command         | Description                                   |

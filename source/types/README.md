@@ -14,12 +14,11 @@
 - Blog → https://blog.airswap.io/
 - Support → https://support.airswap.io/
 
-## Deployments
+## Deploys
 
-| Contract | Version | Network | Address                                                                                                                         |
-| :------- | :------ | :------ | :------------------------------------------------------------------------------------------------------------------------------ |
-| Types    | `0.2.0` | Mainnet | [`0x2fA5d35f9c99E11a75F2D3cD9F6E6d904a1241C5`](https://etherscan.io/address/0x2fA5d35f9c99E11a75F2D3cD9F6E6d904a1241C5)         |
-| Types    | `0.2.0` | Rinkeby | [`0x4A041FA0a727c828616C83C090585913221641ba`](https://rinkeby.etherscan.io/address/0x4A041FA0a727c828616C83C090585913221641ba) |
+| Version | Network   | Address                                      | Link                                                                                         |
+| :------ | :-------- | :------------------------------------------- | :------------------------------------------------------------------------------------------- |
+| `0.3.0` | `rinkeby` | `0xb1AB33C12a59E8A0Df91Ae6aD9B111d9D16AC465` | [Etherscan](https://rinkeby.etherscan.io/address/0xb1AB33C12a59E8A0Df91Ae6aD9B111d9D16AC465) |
 
 ## Commands
 
