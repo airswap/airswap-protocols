@@ -21,6 +21,6 @@
     "solidity-coverage": "^0.6.3"
   },
   "dependencies": {
-    "openzeppelin-solidity": "^v2.2"
+    "openzeppelin-solidity": "2.3"
   }
 }

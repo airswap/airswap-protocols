@@ -12,6 +12,6 @@
     "compile": "truffle compile"
   },
   "dependencies": {
-    "openzeppelin-solidity": "^v2.2"
+    "openzeppelin-solidity": "2.3"
   }
 }
