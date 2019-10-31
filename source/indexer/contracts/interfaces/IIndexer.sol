@@ -27,14 +27,14 @@ interface IIndexer {
     address indexed staker,
     address indexed signerToken,
     address indexed senderToken,
-    uint256 amount
+    uint256 stakeAmount
   );
 
   event Unstake(
     address indexed staker,
     address indexed signerToken,
     address indexed senderToken,
-    uint256 amount
+    uint256 stakeAmount
   );
 
   event AddTokenToBlacklist(
