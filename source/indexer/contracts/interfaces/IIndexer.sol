@@ -94,7 +94,11 @@ interface IIndexer {
     address signerToken,
     address senderToken,
     address startAddress,
-    uint256 count
-  ) external view returns (bytes32[] memory);
+    uint256 limit
+  ) external view returns (
+    bytes32[] memory,
+    uint256[] memory,
+    address
+  );
 
 }

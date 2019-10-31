@@ -8,7 +8,13 @@ const {
 } = require('@airswap/test-utils').assert
 const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
 const { padAddressToLocator } = require('@airswap/test-utils').padding
-const { EMPTY_ADDRESS, HEAD } = require('@airswap/order-utils').constants
+const {
+  EMPTY_ADDRESS,
+  HEAD,
+  LOCATORS,
+  SCORES,
+  NEXTID,
+} = require('@airswap/order-utils').constants
 
 contract('Index Unit Tests', async accounts => {
   let owner = accounts[0]
@@ -22,6 +28,8 @@ contract('Index Unit Tests', async accounts => {
 
   let snapshotId
   let index
+
+  let result
 
   let aliceLocator = padAddressToLocator(aliceAddress)
   let bobLocator = padAddressToLocator(bobAddress)
@@ -49,9 +57,11 @@ contract('Index Unit Tests', async accounts => {
       let listLength = await index.length()
       equal(listLength, 0, 'list length should be 0')
 
-      let locators = await index.getLocators(EMPTY_ADDRESS, 10)
-      equal(locators.length, 10, 'list should have 10 slots')
-      equal(locators[0], emptyLocator, 'The locator should be empty')
+      result = await index.getLocators(EMPTY_ADDRESS, 10)
+
+      equal(result[LOCATORS].length, 0, 'locators list should have 0 slots')
+      equal(result[SCORES].length, 0, 'scores list should have 0 slots')
+      equal(result[NEXTID], HEAD, 'The next slot should be the head')
     })
   })
 
@@ -79,10 +89,15 @@ contract('Index Unit Tests', async accounts => {
       })
 
       // check it has been inserted into the linked list correctly
-      let locators = await index.getLocators(EMPTY_ADDRESS, 10)
-      equal(locators.length, 10, 'list should be of size 10')
-      equal(locators[0], aliceLocator, 'Alice should be in list')
-      equal(locators[1], emptyLocator, 'The second locator should be empty')
+      result = await index.getLocators(EMPTY_ADDRESS, 10)
+
+      equal(result[LOCATORS].length, 1, 'locators list should have 1 slots')
+      equal(result[LOCATORS][0], aliceLocator, 'Alice should be in list')
+
+      equal(result[SCORES].length, 1, 'scores list should have 1 slots')
+      equal(result[SCORES][0], 2000, 'Alices score is incorrect')
+
+      equal(result[NEXTID], HEAD, 'The next slot should be the head')
 
       // check the length has increased
       let listLength = await index.length()
@@ -116,10 +131,19 @@ contract('Index Unit Tests', async accounts => {
       let listLength = await index.length()
       equal(listLength, 3, 'list length should be 3')
 
-      const locators = await index.getLocators(EMPTY_ADDRESS, 7)
-      equal(locators[0], aliceLocator, 'Alice should be first')
-      equal(locators[1], carolLocator, 'Carol should be second')
-      equal(locators[2], bobLocator, 'Bob should be third')
+      result = await index.getLocators(EMPTY_ADDRESS, 7)
+
+      equal(result[LOCATORS].length, 3, 'locators list should have 3 slots')
+      equal(result[LOCATORS][0], aliceLocator, 'Alice should be in list')
+      equal(result[LOCATORS][1], carolLocator, 'Carol should be second')
+      equal(result[LOCATORS][2], bobLocator, 'Bob should be third')
+
+      equal(result[SCORES].length, 3, 'scores list should have 3 slots')
+      equal(result[SCORES][0], 2000, 'Alices score is incorrect')
+      equal(result[SCORES][1], 1500, 'Carols score is incorrect')
+      equal(result[SCORES][2], 500, 'Bobs score is incorrect')
+
+      equal(result[NEXTID], HEAD, 'The next slot should be the head')
     })
 
     it('should insert an identical stake after the pre-existing one', async () => {
@@ -141,11 +165,21 @@ contract('Index Unit Tests', async accounts => {
       let listLength = await index.length()
       equal(listLength, 4, 'Link list length should be 4')
 
-      const locators = await index.getLocators(EMPTY_ADDRESS, 7)
-      equal(locators[0], aliceLocator, 'Alice should be first')
-      equal(locators[1], carolLocator, 'Carol should be second')
-      equal(locators[2], bobLocator, 'Bob should be third')
-      equal(locators[3], davidLocator, 'David should be fourth')
+      result = await index.getLocators(EMPTY_ADDRESS, 7)
+
+      equal(result[LOCATORS].length, 4, 'locators list should have 4 slots')
+      equal(result[LOCATORS][0], aliceLocator, 'Alice should be in list')
+      equal(result[LOCATORS][1], carolLocator, 'Carol should be second')
+      equal(result[LOCATORS][2], bobLocator, 'Bob should be third')
+      equal(result[LOCATORS][3], davidLocator, 'David should be fourth')
+
+      equal(result[SCORES].length, 4, 'scores list should have 4 slots')
+      equal(result[SCORES][0], 2000, 'Alices score is incorrect')
+      equal(result[SCORES][1], 2000, 'Carols score is incorrect')
+      equal(result[SCORES][2], 0, 'Bobs score is incorrect')
+      equal(result[SCORES][3], 0, 'Davids score is incorrect')
+
+      equal(result[NEXTID], HEAD, 'The next slot should be the head')
     })
 
     it('should not be able to set a second locator if one already exists for an address', async () => {
@@ -219,10 +253,14 @@ contract('Index Unit Tests', async accounts => {
       let listLength = await index.length()
       equal(listLength, 3, 'list length should be 3')
 
-      const locators = await index.getLocators(EMPTY_ADDRESS, 7)
-      equal(locators[0], aliceLocator, 'Alice should be first')
-      equal(locators[1], carolLocator, 'Carol should be second')
-      equal(locators[2], bobLocator, 'Bob should be third')
+      result = await index.getLocators(EMPTY_ADDRESS, 7)
+      equal(result[LOCATORS].length, 3, 'locators list should have 3 slots')
+      equal(result[LOCATORS][0], aliceLocator, 'Alice should be in list')
+      equal(result[LOCATORS][1], carolLocator, 'Carol should be second')
+      equal(result[LOCATORS][2], bobLocator, 'Bob should be third')
+
+      equal(result[SCORES].length, 3, 'scores list should have 3 slots')
+      equal(result[NEXTID], HEAD, 'The next slot should be the head')
     })
 
     it('should unset the entry for a valid user', async () => {
@@ -235,9 +273,13 @@ contract('Index Unit Tests', async accounts => {
       let listLength = await index.length()
       equal(listLength, 2, 'list length should be 2')
 
-      let locators = await index.getLocators(EMPTY_ADDRESS, 7)
-      equal(locators[0], aliceLocator, 'Alice should be first')
-      equal(locators[1], carolLocator, 'Carol should be second')
+      result = await index.getLocators(EMPTY_ADDRESS, 7)
+      equal(result[LOCATORS].length, 2, 'locators list should have 2 slots')
+      equal(result[LOCATORS][0], aliceLocator, 'Alice should be in list')
+      equal(result[LOCATORS][1], carolLocator, 'Carol should be second')
+
+      equal(result[SCORES].length, 2, 'scores list should have 2 slots')
+      equal(result[NEXTID], HEAD, 'The next slot should be the head')
 
       await index.unsetLocator(aliceAddress, { from: owner })
       await index.unsetLocator(carolAddress, { from: owner })
@@ -245,12 +287,11 @@ contract('Index Unit Tests', async accounts => {
       listLength = await index.length()
       equal(listLength, 0, 'list length should be 0')
 
-      locators = await index.getLocators(EMPTY_ADDRESS, 4)
-      equal(locators.length, 4, 'list should have 4 locators')
-      equal(locators[0], emptyLocator, 'The first locator should be empty')
-      equal(locators[1], emptyLocator, 'The second locator should be empty')
-      equal(locators[2], emptyLocator, 'The third locator should be empty')
-      equal(locators[3], emptyLocator, 'The fouth locator should be empty')
+      result = await index.getLocators(EMPTY_ADDRESS, 10)
+
+      equal(result[LOCATORS].length, 0, 'locators list should have 0 slots')
+      equal(result[SCORES].length, 0, 'scores list should have 0 slots')
+      equal(result[NEXTID], HEAD, 'The next slot should be the head')
     })
   })
 
@@ -320,10 +361,10 @@ contract('Index Unit Tests', async accounts => {
 
   describe('Test getLocators', async () => {
     it('returns an array of empty locators', async () => {
-      const locators = await index.getLocators(EMPTY_ADDRESS, 7)
-      equal(locators.length, 7, 'there should be 7 locators')
-      equal(locators[0], emptyLocator, 'The first locator should be empty')
-      equal(locators[1], emptyLocator, 'The second locator should be empty')
+      result = await index.getLocators(EMPTY_ADDRESS, 7)
+      equal(result[LOCATORS].length, 0, 'locators list should have 0 slots')
+      equal(result[SCORES].length, 0, 'scores list should have 0 slots')
+      equal(result[NEXTID], HEAD, 'The next slot should be the head')
     })
 
     it('returns specified number of elements if < length', async () => {
@@ -338,18 +379,23 @@ contract('Index Unit Tests', async accounts => {
         from: owner,
       })
 
-      let locators = await index.getLocators(EMPTY_ADDRESS, 2)
-      equal(locators.length, 2, 'there should only be 2 locators returned')
+      result = await index.getLocators(EMPTY_ADDRESS, 2)
 
-      equal(locators[0], aliceLocator, 'Alice should be first')
-      equal(locators[1], carolLocator, 'Carol should be second')
+      equal(result[LOCATORS].length, 2, 'locators list should have 2 slots')
+      equal(result[LOCATORS][0], aliceLocator, 'Alice should be in list')
+      equal(result[LOCATORS][1], carolLocator, 'Carol should be second')
+
+      equal(result[SCORES].length, 2, 'scores list should have 2 slots')
+      equal(result[NEXTID], bobAddress, 'The next slot should be bob')
 
       // the same should happen passing HEAD
-      locators = await index.getLocators(HEAD, 2)
-      equal(locators.length, 2, 'there should only be 2 locators returned')
+      result = await index.getLocators(HEAD, 2)
+      equal(result[LOCATORS].length, 2, 'locators list should have 2 slots')
+      equal(result[LOCATORS][0], aliceLocator, 'Alice should be in list')
+      equal(result[LOCATORS][1], carolLocator, 'Carol should be second')
 
-      equal(locators[0], aliceLocator, 'Alice should be first')
-      equal(locators[1], carolLocator, 'Carol should be second')
+      equal(result[SCORES].length, 2, 'scores list should have 2 slots')
+      equal(result[NEXTID], bobAddress, 'The next slot should be bob')
     })
 
     it('returns only length if requested number if larger', async () => {
@@ -357,21 +403,26 @@ contract('Index Unit Tests', async accounts => {
       await index.setLocator(aliceAddress, 2000, aliceLocator, {
         from: owner,
       })
-      await index.setLocator(bobAddress, 500, bobLocator, {
+      await index.setLocator(bobAddress, 1700, bobLocator, {
         from: owner,
       })
       await index.setLocator(carolAddress, 1500, carolLocator, {
         from: owner,
       })
 
-      const locators = await index.getLocators(EMPTY_ADDRESS, 10)
-      equal(locators.length, 10, 'there should be 10 locators returned')
+      result = await index.getLocators(EMPTY_ADDRESS, 10)
 
-      equal(locators[0], aliceLocator, 'Alice should be first')
-      equal(locators[1], carolLocator, 'Carol should be second')
-      equal(locators[2], bobLocator, 'Bob should be third')
-      equal(locators[3], emptyLocator, 'Fourth slot should be empty')
-      equal(locators[4], emptyLocator, 'Fifth slot should be empty')
+      equal(result[LOCATORS].length, 3, 'locators list should have 3 slots')
+      equal(result[LOCATORS][0], aliceLocator, 'Alice should be in list')
+      equal(result[LOCATORS][1], bobLocator, 'Bob should be second')
+      equal(result[LOCATORS][2], carolLocator, 'Carol should be third')
+
+      equal(result[SCORES].length, 3, 'scores list should have 3 slots')
+      equal(result[SCORES][0], 2000, 'Alices score is incorrect')
+      equal(result[SCORES][1], 1700, 'Bobs score is incorrect')
+      equal(result[SCORES][2], 1500, 'Carols score is incorrect')
+
+      equal(result[NEXTID], HEAD, 'The next slot should be the head')
     })
 
     it('starts the array at the specified starting user', async () => {
@@ -386,12 +437,19 @@ contract('Index Unit Tests', async accounts => {
         from: owner,
       })
 
-      const locators = await index.getLocators(bobAddress, 10)
-      equal(locators.length, 10, 'there should be 10 locators returned')
+      result = await index.getLocators(bobAddress, 10)
 
-      equal(locators[0], bobLocator, 'Bob should be first')
-      equal(locators[1], emptyLocator, 'Second slot should be empty')
-      equal(locators[2], emptyLocator, 'Third slot should be empty')
+      equal(result[LOCATORS].length, 3, 'locators list should have 3 slots')
+      equal(result[LOCATORS][0], bobLocator, 'Bob should be first')
+      equal(result[LOCATORS][1], emptyLocator, 'Second slot should be empty')
+      equal(result[LOCATORS][2], emptyLocator, 'Third slot should be empty')
+
+      equal(result[SCORES].length, 3, 'scores list should have 3 slots')
+      equal(result[SCORES][0], 500, 'Bobs score is incorrect')
+      equal(result[SCORES][1], 0, 'Second slot should be empty')
+      equal(result[SCORES][2], 0, 'Third slot should be empty')
+
+      equal(result[NEXTID], HEAD, 'The next slot should be the head')
     })
 
     it('starts the array at the specified starting user - longer list', async () => {
@@ -416,21 +474,27 @@ contract('Index Unit Tests', async accounts => {
       })
 
       // fetch 4 from first element
-      let locators = await index.getLocators(fredAddress, 4)
-      equal(locators.length, 4, 'there should be 4 locators returned')
+      result = await index.getLocators(fredAddress, 4)
+      equal(result[LOCATORS].length, 4, 'there should be 4 locators returned')
 
-      equal(locators[0], fredLocator, 'Fred should be first')
-      equal(locators[1], aliceLocator, 'Alice should be second')
-      equal(locators[2], carolLocator, 'Carol should be third')
-      equal(locators[3], davidLocator, 'David should be fourth')
+      equal(result[LOCATORS][0], fredLocator, 'Fred should be first')
+      equal(result[LOCATORS][1], aliceLocator, 'Alice should be second')
+      equal(result[LOCATORS][2], carolLocator, 'Carol should be third')
+      equal(result[LOCATORS][3], davidLocator, 'David should be fourth')
+
+      equal(result[SCORES].length, 4, 'there should be 4 scores returned')
+      equal(result[NEXTID], bobAddress, 'The next slot should be bobAddress')
 
       // now fetch the next 4
-      locators = await index.getLocators(bobAddress, 4)
-      equal(locators.length, 4, 'there should be 4 locators returned')
-      equal(locators[0], bobLocator, 'Bob should be first')
-      equal(locators[1], emilyLocator, 'Emily should be second')
-      equal(locators[2], emptyLocator, 'Slot should be empty')
-      equal(locators[3], emptyLocator, 'Slot should be empty')
+      result = await index.getLocators(bobAddress, 4)
+      equal(result[LOCATORS].length, 4, 'there should be 4 returned')
+      equal(result[LOCATORS][0], bobLocator, 'Bob should be first')
+      equal(result[LOCATORS][1], emilyLocator, 'Emily should be second')
+      equal(result[LOCATORS][2], emptyLocator, 'Slot should be empty')
+      equal(result[LOCATORS][3], emptyLocator, 'Slot should be empty')
+
+      equal(result[SCORES].length, 4, 'there should be 4 scores returned')
+      equal(result[NEXTID], HEAD, 'The next slot should be the head')
     })
 
     it('throws an error for an unstaked user', async () => {
@@ -445,10 +509,7 @@ contract('Index Unit Tests', async accounts => {
         from: owner,
       })
 
-      await reverted(
-        index.getLocators(davidAddress, 10),
-        'START_ENTRY_NOT_FOUND'
-      )
+      await reverted(index.getLocators(davidAddress, 10), 'CURSOR_NOT_FOUND')
     })
   })
 })

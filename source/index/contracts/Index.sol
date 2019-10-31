@@ -153,34 +153,49 @@ contract Index is Ownable {
   /**
     * @notice Get a Range of Locators
     * @dev start value of 0x0 starts at the head
-    * @param start address Identifier to start with
-    * @param count uint256 Number of locators to return
-    * @return bytes32[] result List of locators
+    * @param cursor address Cursor to start with
+    * @param limit uint256 Maximum number of locators to return
+    * @return bytes32[] List of locators
+    * @return uint256[] List of scores corresponding to locators
+    * @return address The next cursor to provide for pagination
     */
   function getLocators(
-    address start,
-    uint256 count
-  ) external view returns (bytes32[] memory result) {
+    address cursor,
+    uint256 limit
+  ) external view returns (
+    bytes32[] memory locators,
+    uint256[] memory scores,
+    address nextCursor
+  ) {
+    address identifier;
 
-    address identifier = entries[HEAD].next;
-
-    // If a valid start is provided, start there.
-    if (start != address(0) && start != HEAD) {
-      // Check that the provided start identifier exists.
-      require(_hasEntry(start), "START_ENTRY_NOT_FOUND");
-      // Set the identifier to the provided start.
-      identifier = start;
+    // If a valid cursor is provided, start there.
+    if (cursor != address(0) && cursor != HEAD) {
+      // Check that the provided cursor exists.
+      require(_hasEntry(cursor), "CURSOR_NOT_FOUND");
+      // Set the starting identifier to the provided cursor.
+      identifier = cursor;
+    } else {
+      identifier = entries[HEAD].next;
     }
 
-    result = new bytes32[](count);
+    // Although it's not known how many entries are between `cursor` and the end
+    // We know that it is no more than `length`
+    uint256 size = (length < limit) ? length : limit;
 
-    // Iterate over the list until the end or count.
+    locators = new bytes32[](size);
+    scores = new uint256[](size);
+
+    // Iterate over the list until the end or size.
     uint256 i;
-    while (i < count && identifier != HEAD) {
-      result[i] = entries[identifier].locator;
+    while (i < size && identifier != HEAD) {
+      locators[i] = entries[identifier].locator;
+      scores[i] = entries[identifier].score;
       i = i + 1;
       identifier = entries[identifier].next;
     }
+
+    return (locators, scores, identifier);
   }
 
   /**

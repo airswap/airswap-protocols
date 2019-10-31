@@ -246,30 +246,33 @@ contract Indexer is IIndexer, Ownable {
     *
     * @param signerToken address Signer token of the trading pair
     * @param senderToken address Sender token of the trading pair
-    * @param startAddress address Address to start from
-    * @param count uint256 Total number of locators to return
-    * @return locators bytes32[]
+    * @param cursor address Address to start from
+    * @param limit uint256 Total number of locators to return
+    * @return bytes32[] List of locators
+    * @return uint256[] List of scores corresponding to locators
+    * @return address The next cursor to provide for pagination
     */
   function getLocators(
     address signerToken,
     address senderToken,
-    address startAddress,
-    uint256 count
+    address cursor,
+    uint256 limit
   ) external view notPaused returns (
-    bytes32[] memory locators
+    bytes32[] memory locators,
+    uint256[] memory scores,
+    address nextCursor
   ) {
     // Ensure neither token is blacklisted.
     if (blacklist[signerToken] || blacklist[senderToken]) {
-      return new bytes32[](0);
+      return (new bytes32[](0), new uint256[](0), address(0));
     }
 
     // Ensure the index exists.
     if (indexes[signerToken][senderToken] == Index(0)) {
-      return new bytes32[](0);
+      return (new bytes32[](0), new uint256[](0), address(0));
     }
 
-    // Return an array of locators for the index.
-    return indexes[signerToken][senderToken].getLocators(startAddress, count);
+    return indexes[signerToken][senderToken].getLocators(cursor, limit);
   }
 
   /**
