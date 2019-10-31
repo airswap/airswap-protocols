@@ -24,16 +24,16 @@ interface IIndexer {
   );
 
   event Stake(
-    address wallet,
-    address signerToken,
-    address senderToken,
+    address indexed staker,
+    address indexed signerToken,
+    address indexed senderToken,
     uint256 amount
   );
 
   event Unstake(
-    address wallet,
-    address signerToken,
-    address senderToken,
+    address indexed staker,
+    address indexed signerToken,
+    address indexed senderToken,
     uint256 amount
   );
 
