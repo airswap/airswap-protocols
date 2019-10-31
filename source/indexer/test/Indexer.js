@@ -203,7 +203,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
             from: aliceAddress,
           }
         ),
-        'ERC20: transfer amount exceeds balance'
+        'SafeMath: subtraction overflow'
       )
     })
 
@@ -223,7 +223,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
             from: aliceAddress,
           }
         ),
-        'ERC20: transfer amount exceeds allowance'
+        'SafeMath: subtraction overflow'
       )
     })
 

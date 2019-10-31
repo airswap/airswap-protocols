@@ -25,6 +25,6 @@
     "truffle": "^5.0.24"
   },
   "dependencies": {
-    "openzeppelin-solidity": "^v2.2"
+    "openzeppelin-solidity": "2.3"
   }
 }

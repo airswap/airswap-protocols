@@ -28,6 +28,6 @@
   },
   "dependencies": {
     "@airswap/types": "0.3.0",
-    "openzeppelin-solidity": "^v2.2"
+    "openzeppelin-solidity": "2.3"
   }
 }
