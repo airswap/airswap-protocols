@@ -172,7 +172,9 @@ contract Index is Ownable {
     // If a valid cursor is provided, start there.
     if (cursor != address(0) && cursor != HEAD) {
       // Check that the provided cursor exists.
-      require(_hasEntry(cursor), "CURSOR_NOT_FOUND");
+      if !(_hasEntry(cursor)) {
+        return (new bytes32[](0), new uint256[](0), address(0));
+      }
       // Set the starting identifier to the provided cursor.
       identifier = cursor;
     } else {

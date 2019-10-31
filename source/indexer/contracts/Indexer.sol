@@ -257,7 +257,7 @@ contract Indexer is IIndexer, Ownable {
     address senderToken,
     address cursor,
     uint256 limit
-  ) external view notPaused returns (
+  ) external view returns (
     bytes32[] memory locators,
     uint256[] memory scores,
     address nextCursor
@@ -286,7 +286,7 @@ contract Indexer is IIndexer, Ownable {
     address user,
     address signerToken,
     address senderToken
-  ) public view indexExists(signerToken, senderToken) returns (uint256) {
+  ) public view returns (uint256) {
 
     // Return the score, equivalent to the stake amount.
     return indexes[signerToken][senderToken].getScore(user);
