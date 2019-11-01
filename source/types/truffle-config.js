@@ -2,9 +2,8 @@ require('dotenv').config()
 const HDWalletProvider = require('truffle-hdwallet-provider')
 
 module.exports = {
-  contracts_directory: './flat',
+  contracts_directory: './flatten',
   networks: {
-    contracts_directory: './flat',
     development: {
       host: '127.0.0.1',
       port: 8545,

@@ -14,7 +14,10 @@
     "ganache": "ganache-cli -p 8545 --gasLimit 0xfffffffffff --time '2017-05-10T00:00:00+00:00'",
     "hint": "yarn solhint \"./contracts/**/*.sol\"",
     "lint": "yarn eslint \"./test/**/*.js\"",
-    "test": "truffle test"
+    "test": "truffle test",
+    "flatten": "truffle run flatten",
+    "migrate": "cp contracts/Migrations.sol flatten/; truffle migrate --skip-dry-run",
+    "verify": "truffle run verify"
   },
   "devDependencies": {
     "@airswap/tokens": "0.1.1",
