@@ -8,3 +8,4 @@ coverage.json
 coverage
 build
 flatten/
+.env
