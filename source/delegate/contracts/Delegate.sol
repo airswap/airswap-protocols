@@ -246,6 +246,7 @@ contract Delegate is IDelegate, Ownable {
 
     emit ProvideOrder(
       owner(),
+      tradeWallet,
       order.sender.token,
       order.signer.token,
       order.sender.param,

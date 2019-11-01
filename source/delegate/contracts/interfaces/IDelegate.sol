@@ -28,7 +28,7 @@ interface IDelegate {
   }
 
   event SetRule(
-    address indexed ruleOwner,
+    address indexed owner,
     address indexed senderToken,
     address indexed signerToken,
     uint256 maxSenderAmount,
@@ -37,13 +37,14 @@ interface IDelegate {
   );
 
   event UnsetRule(
-    address indexed ruleOwner,
+    address indexed owner,
     address indexed senderToken,
     address indexed signerToken
   );
 
   event ProvideOrder(
-    address indexed ruleOwner,
+    address indexed owner,
+    address tradeWallet,
     address indexed senderToken,
     address indexed signerToken,
     uint256 senderAmount,
