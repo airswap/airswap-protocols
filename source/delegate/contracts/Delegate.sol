@@ -176,8 +176,8 @@ contract Delegate is IDelegate, Ownable {
     * @param signerToken address Taker token  in the token pair for rules and intents
     */
   function unsetRuleAndIntent(
-    address signerToken,
-    address senderToken
+    address senderToken,
+    address signerToken
   ) external onlyOwner {
 
     _unsetRule(senderToken, signerToken);
