@@ -42,6 +42,15 @@ interface IDelegate {
     address indexed signerToken
   );
 
+  event Trade(
+    address indexed ruleOwner,
+    address indexed senderToken,
+    address indexed signerToken,
+    uint256 senderAmount,
+    uint256 priceCoef,
+    uint256 priceExp
+  );
+
   function rules(address, address) external returns (Rule memory);
 
   function setRule(

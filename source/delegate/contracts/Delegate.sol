@@ -243,6 +243,15 @@ contract Delegate is IDelegate, Ownable {
 
     // Perform the swap.
     swapContract.swap(order);
+
+    emit Trade(
+      owner(),
+      order.sender.token,
+      order.signer.token,
+      order.sender.param,
+      rule.priceCoef,
+      rule.priceExp
+    );
   }
 
   /**
