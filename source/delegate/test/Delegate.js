@@ -197,7 +197,7 @@ contract('Delegate Integration Tests', async accounts => {
       equal(scoreBefore.toNumber(), INTENT_AMOUNT, 'intent score is incorrect')
 
       await passes(
-        aliceDelegate.unsetRuleAndIntent(tokenDAI.address, tokenWETH.address, {
+        aliceDelegate.unsetRuleAndIntent(tokenWETH.address, tokenDAI.address, {
           from: aliceAddress,
         })
       )
