@@ -684,7 +684,7 @@ contract('Delegate Integration Tests', async accounts => {
       )
     })
 
-    it('Gets a quote to sell 1 WETH and takes it', async () => {
+    it('Gets a quote to sell 1 WETH and takes it, swap fails', async () => {
       // Note: Consumer is the order signer, Delegate is the order sender.
       const order = await orders.getOrder({
         signer: {
@@ -703,6 +703,32 @@ contract('Delegate Integration Tests', async accounts => {
       await reverted(
         aliceDelegate.provideOrder(order, { from: bobAddress }),
         'SENDER_UNAUTHORIZED'
+      )
+    })
+
+    it('Gets a quote to sell 1 WETH and takes it, swap passes', async () => {
+      // Note: Delegate is the order sender.
+      const order = await orders.getOrder({
+        signer: {
+          wallet: bobAddress,
+          token: tokenWETH.address,
+          param: 1,
+        },
+        sender: {
+          wallet: aliceTradeWallet,
+          token: tokenDAI.address,
+          param: quote.toNumber(),
+        },
+      })
+
+      // authorize the delegate to send trades
+      await swapContract.authorizeSender(aliceDelegate.address, {
+        from: aliceTradeWallet,
+      })
+
+      emitted(
+        await aliceDelegate.provideOrder(order, { from: bobAddress }),
+        'ProvideOrder'
       )
     })
   })

@@ -928,13 +928,13 @@ contract('Delegate Unit Tests', async accounts => {
         },
       })
 
-      await passes(
-        //mock swapContract
-        //test rule decrement
-        delegate.provideOrder(order, {
-          from: notOwner,
-        })
-      )
+      //mock swapContract
+      //test rule decrement
+      let tx = await delegate.provideOrder(order, {
+        from: notOwner,
+      })
+
+      emitted(tx, 'ProvideOrder')
 
       let ruleAfter = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
       equal(
@@ -981,13 +981,11 @@ contract('Delegate Unit Tests', async accounts => {
         },
       })
 
-      await passes(
-        //mock swapContract
-        //test rule decrement
-        delegate.provideOrder(order, {
-          from: notOwner,
-        })
-      )
+      let tx = await delegate.provideOrder(order, {
+        from: notOwner,
+      })
+
+      emitted(tx, 'ProvideOrder')
 
       let ruleAfter = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
       equal(
