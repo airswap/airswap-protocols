@@ -244,7 +244,7 @@ contract Delegate is IDelegate, Ownable {
     // Perform the swap.
     swapContract.swap(order);
 
-    emit Trade(
+    emit ProvideOrder(
       owner(),
       order.sender.token,
       order.signer.token,

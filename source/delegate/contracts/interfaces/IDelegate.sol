@@ -42,7 +42,7 @@ interface IDelegate {
     address indexed signerToken
   );
 
-  event Trade(
+  event ProvideOrder(
     address indexed ruleOwner,
     address indexed senderToken,
     address indexed signerToken,
