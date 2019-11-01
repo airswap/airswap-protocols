@@ -7,3 +7,4 @@ lerna-debug.log
 coverage.json
 coverage
 build
+flat/
