@@ -20,7 +20,6 @@ const {
 const { orders, signatures } = require('@airswap/order-utils')
 const {
   ERC721_INTERFACE_ID,
-  EMPTY_ADDRESS,
   SECONDS_IN_DAY,
 } = require('@airswap/order-utils').constants
 
@@ -173,26 +172,6 @@ contract('Swap', async accounts => {
 
     it('Checks that Bob can swap with Alice (200 AST for 50 DAI)', async () => {
       emitted(await swap(_order, { from: bobAddress }), 'Swap')
-    })
-
-    it('Checks that order swapcontract matches contract sent to', async () => {
-      const order = await orders.getOrder({
-        signatureVerifier: EMPTY_ADDRESS,
-        signer: {
-          wallet: aliceAddress,
-          token: tokenAST.address,
-          param: 200,
-        },
-        sender: {
-          wallet: bobAddress,
-          token: tokenDAI.address,
-          param: 50,
-        },
-      })
-      await reverted(
-        swap(order, { from: aliceAddress }),
-        'INVALID_SWAP_ADDRESS'
-      )
     })
 
     it('Checks that Alice cannot swap with herself (200 AST for 50 AST)', async () => {

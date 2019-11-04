@@ -73,11 +73,6 @@ contract Swap is ISwap {
   function swap(
     Types.Order calldata order
   ) external {
-
-    // Ensure signatureVerifier defined in order is this contract
-    require(order.signatureVerifier == address(this),
-      "INVALID_SWAP_ADDRESS");
-
     // Ensure the order is not expired.
     require(order.expiry > block.timestamp,
       "ORDER_EXPIRED");
