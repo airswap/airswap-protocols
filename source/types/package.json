@@ -11,7 +11,7 @@
     "hint": "yarn solhint \"./contracts/**/*.sol\"",
     "lint": "yarn eslint \"./test/**/*.js\"",
     "ganache": "ganache-cli -p 8545 --gasLimit 0xfffffffffff --time '2017-05-10T00:00:00+00:00'",
-    "clean": "rm -f ./build/*; rm -v ./flatten/*",
+    "clean": "rm -f ./build/*",
     "compile": "truffle compile",
     "coverage": "node_modules/.bin/solidity-coverage",
     "cp_migration_flat": "mkdir flatten/; cp contracts/Migrations.sol flatten/",
