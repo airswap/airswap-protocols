@@ -1,6 +1,6 @@
 {
   "name": "@airswap/tokens",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Solidity contracts and libraries used in the Swap Protocol",
   "license": "Apache-2.0",
   "repository": {
@@ -12,6 +12,6 @@
     "compile": "truffle compile"
   },
   "dependencies": {
-    "openzeppelin-solidity": "^v2.2"
+    "openzeppelin-solidity": "2.3"
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@airswap/index",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Manages a list of intents to trade a specific token pair in the Swap Protocol",
   "license": "Apache-2.0",
   "repository": {
@@ -20,11 +20,11 @@
     "@airswap/order-utils": "0.3.3",
     "@airswap/test-utils": "0.1.0",
     "@airswap/tokens": "0.1.1",
-    "truffle": "^5.0.24",
-    "bignumber.js": "^9.0.0"
+    "bignumber.js": "^9.0.0",
+    "solidity-coverage": "^0.6.3",
+    "truffle": "^5.0.24"
   },
   "dependencies": {
-    "openzeppelin-solidity": "^v2.2",
-    "solidity-coverage": "^0.6.3"
+    "openzeppelin-solidity": "2.3"
   }
 }

@@ -176,8 +176,8 @@ contract Delegate is IDelegate, Ownable {
     * @param signerToken address Taker token  in the token pair for rules and intents
     */
   function unsetRuleAndIntent(
-    address signerToken,
-    address senderToken
+    address senderToken,
+    address signerToken
   ) external onlyOwner {
 
     _unsetRule(senderToken, signerToken);
@@ -243,6 +243,16 @@ contract Delegate is IDelegate, Ownable {
 
     // Perform the swap.
     swapContract.swap(order);
+
+    emit ProvideOrder(
+      owner(),
+      tradeWallet,
+      order.sender.token,
+      order.signer.token,
+      order.sender.param,
+      rule.priceCoef,
+      rule.priceExp
+    );
   }
 
   /**
