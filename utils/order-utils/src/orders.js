@@ -14,7 +14,7 @@
   limitations under the License.
 */
 
-const { SECONDS_IN_DAY, defaults, NULL_ADDRESS } = require('./constants')
+const { SECONDS_IN_DAY, defaults, EMPTY_ADDRESS } = require('./constants')
 
 const signatures = require('./signatures')
 
@@ -26,7 +26,7 @@ let getLatestTimestamp = async () => {
 
 module.exports = {
   _knownAccounts: [],
-  _verifyingContract: NULL_ADDRESS,
+  _verifyingContract: EMPTY_ADDRESS,
   setKnownAccounts(knownAccounts) {
     this._knownAccounts = knownAccounts
   },
@@ -44,7 +44,7 @@ module.exports = {
     {
       expiry = '0',
       nonce = this.generateNonce(),
-      signatory = NULL_ADDRESS,
+      signatory = EMPTY_ADDRESS,
       signer = defaults.Party,
       sender = defaults.Party,
       affiliate = defaults.Party,
@@ -61,7 +61,8 @@ module.exports = {
       sender: { ...defaults.Party, ...sender },
       affiliate: { ...defaults.Party, ...affiliate },
     }
-    const wallet = signatory !== NULL_ADDRESS ? signatory : order.signer.wallet
+
+    const wallet = signatory !== EMPTY_ADDRESS ? signatory : order.signer.wallet
     if (!noSignature) {
       if (this._knownAccounts.indexOf(wallet) !== -1) {
         order.signature = await signatures.getWeb3Signature(
@@ -104,6 +105,7 @@ module.exports = {
       'param' in order['sender'] &&
       'param' in order['affiliate'] &&
       'signatory' in order['signature'] &&
+      'validator' in order['signature'] &&
       'r' in order['signature'] &&
       's' in order['signature'] &&
       'v' in order['signature']

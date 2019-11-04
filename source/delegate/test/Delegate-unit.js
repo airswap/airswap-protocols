@@ -75,8 +75,6 @@ contract('Delegate Unit Tests', async accounts => {
     swapFunction = swapTemplate.contract.methods.swap(order).encodeABI()
 
     mockSwap = await MockContract.new()
-
-    orders.setVerifyingContract(mockSwap.address)
   }
 
   async function setupMockIndexer() {
