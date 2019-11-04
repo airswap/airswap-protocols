@@ -27,7 +27,7 @@
   "dependencies": {
     "dotenv": "^8.2.0",
     "openzeppelin-solidity": "^v2.2",
-    "truffle-flatten": "^1.0.1",
+    "truffle-flatten": "^1.0.2",
     "truffle-hdwallet-provider": "^1.0.17",
     "truffle-verify": "^1.0.1"
   }
