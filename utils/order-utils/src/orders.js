@@ -42,7 +42,7 @@ module.exports = {
   },
   async getOrder(
     {
-      swapContract = this._verifyingContract,
+      signatureVerifier = this._verifyingContract,
       expiry = '0',
       nonce = this.generateNonce(),
       signatory = EMPTY_ADDRESS,
@@ -56,7 +56,7 @@ module.exports = {
       expiry = await this.generateExpiry(1)
     }
     const order = {
-      swapContract,
+      signatureVerifier,
       expiry,
       nonce,
       signer: { ...defaults.Party, ...signer },
@@ -91,7 +91,7 @@ module.exports = {
   },
   isValidOrder(order) {
     return (
-      'swapContract' in order &&
+      'signatureVerifier' in order &&
       'nonce' in order &&
       'expiry' in order &&
       'signer' in order &&

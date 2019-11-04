@@ -61,7 +61,7 @@ function hashOrder(order) {
       ],
       [
         ORDER_TYPEHASH,
-        order.swapContract,
+        order.signatureVerifier,
         order.nonce,
         order.expiry,
         hashParty(order.signer),

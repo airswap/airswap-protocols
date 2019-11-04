@@ -25,7 +25,7 @@ library Types {
   bytes constant internal EIP191_HEADER = "\x19\x01";
 
   struct Order {
-    address swapContract;
+    address signatureVerifier;    // Ensure order is meant for sent contract
     uint256 nonce;                // Unique per order and should be sequential
     uint256 expiry;               // Expiry in seconds since 1 January 1970
     Party signer;                 // Party to the trade that sets terms
@@ -59,7 +59,7 @@ library Types {
 
   bytes32 constant internal ORDER_TYPEHASH = keccak256(abi.encodePacked(
     "Order(",
-    "address swapContract,",
+    "address signatureVerifier,",
     "uint256 nonce,",
     "uint256 expiry,",
     "Party signer,",
@@ -99,7 +99,7 @@ library Types {
       domainSeparator,
       keccak256(abi.encode(
         ORDER_TYPEHASH,
-        order.swapContract,
+        order.signatureVerifier,
         order.nonce,
         order.expiry,
         keccak256(abi.encode(
