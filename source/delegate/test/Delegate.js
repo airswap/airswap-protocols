@@ -392,6 +392,7 @@ contract('Delegate Integration Tests', async accounts => {
 
     it('should not trade for a different wallet', async () => {
       const order = await orders.getOrder({
+        swapContract: swapAddress,
         signer: {
           wallet: bobAddress,
           token: tokenWETH.address,
@@ -709,6 +710,7 @@ contract('Delegate Integration Tests', async accounts => {
     it('Gets a quote to sell 1 WETH and takes it, swap passes', async () => {
       // Note: Delegate is the order sender.
       const order = await orders.getOrder({
+        swapContract: swapAddress,
         signer: {
           wallet: bobAddress,
           token: tokenWETH.address,

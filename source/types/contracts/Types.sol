@@ -25,7 +25,7 @@ library Types {
   bytes constant internal EIP191_HEADER = "\x19\x01";
 
   struct Order {
-    address swapContract;         // address of swap contract used in order
+    address swapContract;
     uint256 nonce;                // Unique per order and should be sequential
     uint256 expiry;               // Expiry in seconds since 1 January 1970
     Party signer;                 // Party to the trade that sets terms

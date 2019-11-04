@@ -42,6 +42,16 @@ contract('Swap Unit Tests', async accounts => {
   })
 
   describe('Test swap', async () => {
+    it('test when order swapContract does not match contract', async () => {
+      let signer = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
+      let sender = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
+      let affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
+      let signature = [EMPTY_ADDRESS, ver, v, r, s]
+      let order = [EMPTY_ADDRESS, 0, 0, signer, sender, affiliate, signature]
+
+      await reverted(swap.swap(order), 'INVALID_SWAP_ADDRESS')
+    })
+
     it('test when order is expired', async () => {
       let signer = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
       let sender = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]

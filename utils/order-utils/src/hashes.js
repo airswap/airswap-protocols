@@ -48,7 +48,6 @@ function hashParty(party) {
 }
 
 function hashOrder(order) {
-  console.log(order)
   return ethUtil.keccak256(
     abi.rawEncode(
       [
