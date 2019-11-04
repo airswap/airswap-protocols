@@ -14,7 +14,9 @@
     "ganache": "ganache-cli -p 8545 --gasLimit 0xfffffffffff --time '2017-05-10T00:00:00+00:00'",
     "hint": "yarn solhint \"./contracts/**/*.sol\"",
     "lint": "yarn eslint \"./test/**/*.js\"",
-    "test": "truffle test"
+    "test": "truffle test",
+    "doc-gen": "node_modules/.bin/solidity-docgen --solc-settings \"{remappings: ['openzeppelin-solidity/contracts=../../node_modules/openzeppelin-solidity/contracts', '@airswap=../../node_modules/@airswap', '@gnosis.pm=../../node_modules/@gnosis.pm']}\" --contract-pages --templates docsTemplate/"
+
   },
   "devDependencies": {
     "@airswap/order-utils": "0.3.3",
@@ -22,13 +24,12 @@
     "@airswap/tokens": "0.1.1",
     "@gnosis.pm/mock-contract": "^3.0.7",
     "solidity-coverage": "^0.6.3",
-    "solidity-docgen": "0.3.0-beta.3",
     "truffle": "^5.0.32",
     "truffle-hdwallet-provider-privkey": "1.0.3"
   },
   "dependencies": {
     "@airswap/types": "0.3.0",
     "openzeppelin-solidity": "2.3",
-    "solidity-docgen": "0.3.9"
+    "solidity-docgen": "0.3.8"
   }
 }
