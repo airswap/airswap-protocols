@@ -30,27 +30,27 @@ module.exports = {
     const orderHash = hashes.getOrderHash(order, verifyingContract)
     const orderHashHex = ethUtil.bufferToHex(orderHash)
     const sig = await web3.eth.sign(orderHashHex, signatory)
-    const { r, s, v } = ethUtil.fromRpcSig(sig)
+    const { v, r, s } = ethUtil.fromRpcSig(sig)
     return {
-      version: signatures.PERSONAL_SIGN,
-      validator: verifyingContract,
       signatory: signatory,
+      validator: verifyingContract,
+      version: signatures.PERSONAL_SIGN,
+      v,
       r,
       s,
-      v,
     }
   },
   getPrivateKeySignature(order, privateKey, verifyingContract) {
     const orderHash = hashes.getOrderHash(order, verifyingContract)
     const orderHashBuff = ethUtil.toBuffer(orderHash)
-    const { r, s, v } = ethUtil.ecsign(orderHashBuff, privateKey)
+    const { v, r, s } = ethUtil.ecsign(orderHashBuff, privateKey)
     return {
-      version: signatures.SIGN_TYPED_DATA,
-      validator: verifyingContract,
       signatory: ethUtil.privateToAddress(privateKey).toString('hex'),
+      validator: verifyingContract,
+      version: signatures.SIGN_TYPED_DATA,
+      v,
       r,
       s,
-      v,
     }
   },
   getPersonalSignature(order, privateKey, verifyingContract) {
@@ -58,14 +58,14 @@ module.exports = {
     const sig = sigUtil.personalSign(privateKey, {
       data: orderHash,
     })
-    const { r, s, v } = ethUtil.fromRpcSig(sig)
+    const { v, r, s } = ethUtil.fromRpcSig(sig)
     return {
-      version: signatures.PERSONAL_SIGN,
-      validator: verifyingContract,
       signatory: `0x${ethUtil.privateToAddress(privateKey).toString('hex')}`,
+      validator: verifyingContract,
+      version: signatures.PERSONAL_SIGN,
+      v,
       r,
       s,
-      v,
     }
   },
   getTypedDataSignature(order, privateKey, verifyingContract) {
@@ -81,21 +81,21 @@ module.exports = {
         message: order,
       },
     })
-    const { r, s, v } = ethUtil.fromRpcSig(sig)
+    const { v, r, s } = ethUtil.fromRpcSig(sig)
     return {
-      version: signatures.SIGN_TYPED_DATA,
-      validator: verifyingContract,
       signatory: `0x${ethUtil.privateToAddress(privateKey).toString('hex')}`,
+      validator: verifyingContract,
+      version: signatures.SIGN_TYPED_DATA,
+      v,
       r,
       s,
-      v,
     }
   },
   getEmptySignature() {
     return {
-      version: signatures.INTENDED_VALIDATOR,
-      validator: EMPTY_ADDRESS,
       signatory: EMPTY_ADDRESS,
+      validator: EMPTY_ADDRESS,
+      version: signatures.INTENDED_VALIDATOR,
       v: '0',
       r: '0x0',
       s: '0x0',
