@@ -42,7 +42,7 @@ module.exports = {
   },
   async getOrder(
     {
-      swapContract = verifyingContract,
+      swapContract = this._verifyingContract,
       expiry = '0',
       nonce = this.generateNonce(),
       signatory = NULL_ADDRESS,
@@ -55,7 +55,7 @@ module.exports = {
     if (expiry === '0') {
       expiry = await this.generateExpiry(1)
     }
-    const order =  {
+    const order = {
       swapContract,
       expiry,
       nonce,

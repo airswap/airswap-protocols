@@ -51,7 +51,15 @@ function hashOrder(order) {
   console.log(order)
   return ethUtil.keccak256(
     abi.rawEncode(
-      ['bytes32', 'address', 'uint256', 'uint256', 'bytes32', 'bytes32', 'bytes32'],
+      [
+        'bytes32',
+        'address',
+        'uint256',
+        'uint256',
+        'bytes32',
+        'bytes32',
+        'bytes32',
+      ],
       [
         ORDER_TYPEHASH,
         order.swapContract,
