@@ -38,7 +38,6 @@ module.exports = {
       { name: 'verifyingContract', type: 'address' },
     ],
     Order: [
-      { name: 'signatureVerifier', type: 'address' },
       { name: 'nonce', type: 'uint256' },
       { name: 'expiry', type: 'uint256' },
       { name: 'signer', type: 'Party' },

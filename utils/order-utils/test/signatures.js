@@ -46,14 +46,14 @@ describe('Signatures', async () => {
       version: '0x45',
       signatory: signerWallet,
       r: Buffer.from(
-        '111e4503ecef693936a96849feeb3b42f3966fd351514cb5e1a607bf3f554652',
+        '6ce2f4c1d5f21f9b101a8043ae1e9fecf93972720399a65237abd70e43cc05d8',
         'hex'
       ),
       s: Buffer.from(
-        '283754eab656d868fa6c2f7cd7617086c67bf2d39c3f1004729f083d87c7b1d8',
+        '39c1efa6505ef3e87c09e9105f63e449d9c29d11c50dc968f0070a5a860bfd49',
         'hex'
       ),
-      v: 27,
+      v: 28,
     })
   })
 
@@ -87,14 +87,14 @@ describe('Signatures', async () => {
       version: '0x01',
       signatory: signerWallet,
       r: Buffer.from(
-        '6113019103b71d2f7ec6bc1b28960c1c9b69125b3b31edb4094375052c56623b',
+        '3d884c1025eb35ec6f6d4305bebe65416ee7e8acb48ceefece3a585f74e44030',
         'hex'
       ),
       s: Buffer.from(
-        '1c0d31cfa9bdb85f47af8b799123d2396c1cb48212942584f69d862c8860340d',
+        '31f3161d9a3451841ff3fe6bd16738e17a284ea2f8c235ea769d04bf6aa12855',
         'hex'
       ),
-      v: 28,
+      v: 27,
     })
   })
 })

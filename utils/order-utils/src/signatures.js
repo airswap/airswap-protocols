@@ -33,6 +33,7 @@ module.exports = {
     const { r, s, v } = ethUtil.fromRpcSig(sig)
     return {
       version: signatures.PERSONAL_SIGN,
+      validator: verifyingContract,
       signatory: signatory,
       r,
       s,
@@ -45,6 +46,7 @@ module.exports = {
     const { r, s, v } = ethUtil.ecsign(orderHashBuff, privateKey)
     return {
       version: signatures.SIGN_TYPED_DATA,
+      validator: verifyingContract,
       signatory: ethUtil.privateToAddress(privateKey).toString('hex'),
       r,
       s,
@@ -59,6 +61,7 @@ module.exports = {
     const { r, s, v } = ethUtil.fromRpcSig(sig)
     return {
       version: signatures.PERSONAL_SIGN,
+      validator: verifyingContract,
       signatory: `0x${ethUtil.privateToAddress(privateKey).toString('hex')}`,
       r,
       s,
@@ -81,6 +84,7 @@ module.exports = {
     const { r, s, v } = ethUtil.fromRpcSig(sig)
     return {
       version: signatures.SIGN_TYPED_DATA,
+      validator: verifyingContract,
       signatory: `0x${ethUtil.privateToAddress(privateKey).toString('hex')}`,
       r,
       s,
@@ -90,6 +94,7 @@ module.exports = {
   getEmptySignature() {
     return {
       version: signatures.INTENDED_VALIDATOR,
+      validator: EMPTY_ADDRESS,
       signatory: EMPTY_ADDRESS,
       v: '0',
       r: '0x0',
