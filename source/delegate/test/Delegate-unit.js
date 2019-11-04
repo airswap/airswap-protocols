@@ -71,7 +71,7 @@ contract('Delegate Unit Tests', async accounts => {
 
   async function setupMockSwap() {
     let swapTemplate = await Swap.new()
-    const order = await orders.getOrder({ swapContract: EMPTY_ADDRESS })
+    const order = await orders.getOrder({})
     swapFunction = swapTemplate.contract.methods.swap(order).encodeABI()
 
     mockSwap = await MockContract.new()
@@ -914,7 +914,6 @@ contract('Delegate Unit Tests', async accounts => {
       let signerAmount = 100
 
       const order = await orders.getOrder({
-        swapContract: mockSwap.address,
         signer: {
           wallet: notOwner,
           param: signerAmount,
@@ -968,7 +967,6 @@ contract('Delegate Unit Tests', async accounts => {
       let senderAmount = Math.floor((signerAmount * 10 ** EXP) / PRICE_COEF)
 
       const order = await orders.getOrder({
-        swapContract: mockSwap.address,
         signer: {
           wallet: notOwner,
           param: signerAmount,
