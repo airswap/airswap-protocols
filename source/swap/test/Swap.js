@@ -155,6 +155,7 @@ contract('Swap', async accounts => {
 
     before('Alice creates an order for Bob (200 AST for 50 DAI)', async () => {
       const order = await orders.getOrder({
+        swapContract: swapAddress,
         signer: {
           wallet: aliceAddress,
           token: tokenAST.address,
@@ -175,6 +176,7 @@ contract('Swap', async accounts => {
 
     it('Checks that Alice cannot swap with herself (200 AST for 50 AST)', async () => {
       const _selfOrder = await orders.getOrder({
+        swapContract: swapAddress,
         signer: {
           wallet: aliceAddress,
           token: tokenAST.address,
@@ -212,6 +214,7 @@ contract('Swap', async accounts => {
 
     it('Checks that Alice cannot trade more than approved (200 AST)', async () => {
       const order = await orders.getOrder({
+        swapContract: swapAddress,
         signer: {
           wallet: aliceAddress,
           token: tokenAST.address,
@@ -223,6 +226,7 @@ contract('Swap', async accounts => {
 
     it('Checks that Bob cannot take an expired order', async () => {
       const order = await orders.getOrder({
+        swapContract: swapAddress,
         signer: {
           wallet: aliceAddress,
         },
@@ -244,6 +248,7 @@ contract('Swap', async accounts => {
 
       const ONE_DAY = SECONDS_IN_DAY * 1
       const order = await orders.getOrder({
+        swapContract: swapAddress,
         signer: {
           wallet: aliceAddress,
         },
@@ -258,6 +263,7 @@ contract('Swap', async accounts => {
 
     it('Checks that Bob can not trade more than he holds', async () => {
       const order = await orders.getOrder({
+        swapContract: swapAddress,
         signer: {
           wallet: bobAddress,
           token: tokenDAI.address,
@@ -302,6 +308,7 @@ contract('Swap', async accounts => {
 
     before('Alice creates an order for Bob (200 OMG for 50 DAI)', async () => {
       const order = await orders.getOrder({
+        swapContract: swapAddress,
         signer: {
           wallet: aliceAddress,
           token: tokenOMG.address,
@@ -340,6 +347,7 @@ contract('Swap', async accounts => {
 
     it('Checks that Alice cannot trade more than approved (200 OMG)', async () => {
       const order = await orders.getOrder({
+        swapContract: swapAddress,
         signer: {
           wallet: aliceAddress,
           token: tokenOMG.address,
@@ -351,6 +359,7 @@ contract('Swap', async accounts => {
 
     it('Checks that Bob cannot take an expired order', async () => {
       const order = await orders.getOrder({
+        swapContract: swapAddress,
         signer: {
           wallet: aliceAddress,
         },
@@ -372,6 +381,7 @@ contract('Swap', async accounts => {
 
       const ONE_DAY = SECONDS_IN_DAY * 1
       const order = await orders.getOrder({
+        swapContract: swapAddress,
         signer: {
           wallet: aliceAddress,
         },
@@ -386,6 +396,7 @@ contract('Swap', async accounts => {
 
     it('Checks that Bob can not trade more than he holds', async () => {
       const order = await orders.getOrder({
+        swapContract: swapAddress,
         signer: {
           wallet: bobAddress,
           token: tokenDAI.address,
@@ -431,6 +442,7 @@ contract('Swap', async accounts => {
 
     before('Alice creates an order for Bob (200 AST for 50 DAI)', async () => {
       const order = await orders.getOrder({
+        swapContract: swapAddress,
         signatory: davidAddress,
         signer: {
           wallet: aliceAddress,
@@ -446,6 +458,7 @@ contract('Swap', async accounts => {
       _order = order
       const unsignedOrder = await orders.getOrder(
         {
+          swapContract: swapAddress,
           signatory: davidAddress,
           signer: {
             wallet: aliceAddress,
@@ -556,6 +569,7 @@ contract('Swap', async accounts => {
 
     before('Alice creates an order for Bob (50 AST for 10 DAI)', async () => {
       const order = await orders.getOrder({
+        swapContract: swapAddress,
         signer: {
           wallet: aliceAddress,
           token: tokenAST.address,
@@ -665,6 +679,7 @@ contract('Swap', async accounts => {
 
     it('Alice gives an unsigned order to David who takes it for Bob', async () => {
       const order = await orders.getOrder({
+        swapContract: swapAddress,
         signer: {
           wallet: aliceAddress,
           token: tokenAST.address,
@@ -724,6 +739,7 @@ contract('Swap', async accounts => {
     it('David makes an order for Alice, Carol takes the order for Bob', async () => {
       // Alice has already approved David in the previous section
       const order = await orders.getOrder({
+        swapContract: swapAddress,
         signatory: davidAddress,
         signer: {
           wallet: aliceAddress,
@@ -862,6 +878,7 @@ contract('Swap', async accounts => {
   describe('Swaps with Fees', async () => {
     it('Checks that Carol gets paid 50 AST for facilitating a trade between Alice and Bob', async () => {
       const order = await orders.getOrder({
+        swapContract: swapAddress,
         signer: {
           wallet: aliceAddress,
           token: tokenAST.address,

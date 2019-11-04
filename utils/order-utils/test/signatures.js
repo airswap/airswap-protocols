@@ -18,6 +18,7 @@ describe('Signatures', async () => {
   it('Checks that a Version 0x45: personalSign signature is valid', async () => {
     const order = await orders.getOrder(
       {
+        swapContract: swapAddress,
         expiry: '1494460800',
         nonce: '101',
         signer: {
@@ -26,6 +27,7 @@ describe('Signatures', async () => {
           param: '0',
         },
         sender: {
+          swapContract: swapAddress,
           wallet: senderWallet,
           token: WETHAddress,
           param: '0',
@@ -44,20 +46,21 @@ describe('Signatures', async () => {
       version: '0x45',
       signatory: signerWallet,
       r: Buffer.from(
-        '6ce2f4c1d5f21f9b101a8043ae1e9fecf93972720399a65237abd70e43cc05d8',
+        'f96f06d53e654f7b7d32f66637a18aa09020960071c2d1eac5879697d5bbfdda',
         'hex'
       ),
       s: Buffer.from(
-        '39c1efa6505ef3e87c09e9105f63e449d9c29d11c50dc968f0070a5a860bfd49',
+        '20afb92d44bb4ab4cfe7d4cae6b4c45807c54af27ad3e59532f1d92fe2c634a8',
         'hex'
       ),
-      v: 28,
+      v: 27,
     })
   })
 
   it('Checks that a Version 0x01: signTypedData signature is valid', async () => {
     const order = await orders.getOrder(
       {
+        swapContract: swapAddress,
         expiry: '1494460800',
         nonce: '101',
         signer: {

@@ -11,6 +11,7 @@ describe('Orders', async () => {
 
   it('Checks that a generated order is valid', async () => {
     const order = await orders.getOrder({
+      swapContract: '0xbabe31056c0fe1b704d811b2405f6e9f5ae5e59d',
       expiry: '1494460800',
       nonce: '101',
       signer: {

@@ -47,7 +47,7 @@ contract('Swap Unit Tests', async accounts => {
       let sender = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
       let affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
       let signature = [EMPTY_ADDRESS, ver, v, r, s]
-      let order = [0, 0, signer, sender, affiliate, signature]
+      let order = [swap.address, 0, 0, signer, sender, affiliate, signature]
 
       await reverted(swap.swap(order), 'ORDER_EXPIRED')
     })
@@ -58,6 +58,7 @@ contract('Swap Unit Tests', async accounts => {
       let affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
       let signature = [EMPTY_ADDRESS, ver, v, r, s]
       let order = [
+        swap.address,
         0,
         Jun_06_2017T00_00_00_UTC,
         signer,
@@ -76,6 +77,7 @@ contract('Swap Unit Tests', async accounts => {
       let affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
       let signature = [EMPTY_ADDRESS, ver, v, r, s]
       let order = [
+        swap.address,
         0,
         Jun_06_2017T00_00_00_UTC,
         signer,
@@ -93,6 +95,7 @@ contract('Swap Unit Tests', async accounts => {
       let affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
       let signature = [EMPTY_ADDRESS, ver, 0, r, s]
       let order = [
+        swap.address,
         0,
         Jun_06_2017T00_00_00_UTC,
         signer,
@@ -114,6 +117,7 @@ contract('Swap Unit Tests', async accounts => {
       let affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 0]
       let signature = [EMPTY_ADDRESS, ver, 0, r, s]
       let order = [
+        swap.address,
         0,
         Jun_06_2017T00_00_00_UTC,
         signer,
@@ -151,6 +155,7 @@ contract('Swap Unit Tests', async accounts => {
       let affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 0]
       let signature = [EMPTY_ADDRESS, ver, 0, r, s]
       let order = [
+        swap.address,
         0,
         Jun_06_2017T00_00_00_UTC,
         signer,
@@ -191,6 +196,7 @@ contract('Swap Unit Tests', async accounts => {
       let affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 0]
       let signature = [EMPTY_ADDRESS, ver, 0, r, s]
       let order = [
+        swap.address,
         0,
         Jun_06_2017T00_00_00_UTC,
         signer,
