@@ -1,5 +1,5 @@
 require('dotenv').config()
-const HDWalletProvider = require('truffle-hdwallet-provider')
+const HDWalletProvider = require('@truffle/hdwallet-provider')
 
 module.exports = {
   // contracts_directory: './flatten',

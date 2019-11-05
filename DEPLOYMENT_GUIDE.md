@@ -22,10 +22,10 @@ Fill in these fields with the details you wish to use.
 "verify": "truffle run verify"
 ```
 
-5. Also in package.json, ensure the following dependencies are present as devDependencies:
+5. Also in the _root_ package.json, ensure the following dependencies are present as devDependencies:
 ```
     "truffle-flatten": "^1.0.5",
-    "truffle-hdwallet-provider": "^1.0.17",
+    "@truffle/hdwallet-provider": "^1.0.17",
     "truffle-verify": "^1.0.3"
 ```
 
