@@ -23,10 +23,7 @@
   "devDependencies": {
     "@airswap/order-utils": "0.3.3",
     "@airswap/test-utils": "0.1.1",
-    "solidity-coverage": "^0.6.3",
-    "truffle-flatten": "^1.0.5",
-    "truffle-hdwallet-provider": "^1.0.17",
-    "truffle-verify": "^1.0.3"
+    "solidity-coverage": "^0.6.3"
   },
   "dependencies": {
     "@airswap/swap": "2.2.1",
