@@ -1,5 +1,7 @@
-const Migrations = artifacts.require('Migrations')
+const Index = artifacts.require('Index')
 
-module.exports = (deployer) => {
-  deployer.deploy(Migrations)
-}
+module.exports = (deployer, network) => {
+  if (network == 'rinkeby') {
+    deployer.deploy(Index)
+  }
+};

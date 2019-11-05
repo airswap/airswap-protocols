@@ -3,7 +3,9 @@ const Types = artifacts.require('Types')
 
 module.exports = async (deployer, network) => {
   if (network == 'rinkeby') {
-    let types = await Types.at('0x1a1ec25DC08e98e5E93F1104B5e5cdD298707d31')
+    // fill in the address of this contract
+    const TYPES_ADDRESS = ''
+    let types = await Types.at(TYPES_ADDRESS)
     await Swap.link("Types", types.address)
     await deployer.deploy(Swap)
   }
