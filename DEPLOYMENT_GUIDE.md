@@ -44,14 +44,14 @@ Note:
 - To deploy on a different network than rinkeby, update the if statement in the migrations files to check for the correct network.
 
 8. Deploy!
-Replace the word `Indexer` in commands 1 and 4 with the name of the contract being deployed
+Replace the word `Types` in commands 1 and 4 with the name of the contract being deployed
 ```
-yarn flatten contracts/Indexer.sol
+yarn flatten contracts/Types.sol
 yarn migrate --network rinkeby
 sleep 20
-yarn verify Indexer flatten/Flattened.sol --network rinkeby
+yarn verify Types flatten/Flattened.sol --network rinkeby
 ```
 Or these can be chained together:
 ```
-yarn flatten contracts/Indexer.sol && yarn migrate --network rinkeby && sleep 20 && yarn verify Indexer flatten/Flattened.sol --network rinkeby
+yarn flatten contracts/Types.sol && yarn migrate --network rinkeby && sleep 20 && yarn verify Types flatten/Flattened.sol --network rinkeby
 ```
