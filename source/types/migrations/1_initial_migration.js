@@ -1,4 +1,6 @@
 const Types = artifacts.require('Types')
 module.exports = deployer => {
-  deployer.deploy(Types)
+  if (network == 'rinkeby') {
+    deployer.deploy(Types)
+  }
 }

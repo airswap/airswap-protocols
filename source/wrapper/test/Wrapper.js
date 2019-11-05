@@ -33,7 +33,7 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
     let snapShot = await takeSnapshot()
     snapshotId = snapShot['result']
     // link types to swap
-    await Swap.link(Types, (await Types.new()).address)
+    await Swap.link('Types', (await Types.new()).address)
     // now deploy swap
     swapContract = await Swap.new()
 

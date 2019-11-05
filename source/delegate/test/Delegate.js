@@ -58,7 +58,7 @@ contract('Delegate Integration Tests', async accounts => {
 
   before('Setup', async () => {
     // link types to swap
-    await Swap.link(Types, (await Types.new()).address)
+    await Swap.link('Types', (await Types.new()).address)
     // now deploy swap
     swapContract = await Swap.new()
     swapAddress = swapContract.address

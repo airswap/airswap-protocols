@@ -1,4 +1,5 @@
 const Swap = artifacts.require('Swap')
+const Types = artifacts.require('Types')
 const Wrapper = artifacts.require('Wrapper')
 const WETH9 = artifacts.require('WETH9')
 const FungibleToken = artifacts.require('FungibleToken')
@@ -79,6 +80,8 @@ contract('Wrapper Unit Tests', async accounts => {
   }
 
   async function setupMockSwap() {
+    let types = await Types.new()
+    await Swap.link('Types', types.address)
     let swapTemplate = await Swap.new()
     //mock the swap.swap method
     const order = await orders.getOrder({})
