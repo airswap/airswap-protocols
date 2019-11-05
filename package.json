@@ -19,6 +19,7 @@
   "devDependencies": {
     "@gnosis.pm/mock-contract": "^3.0.7",
     "babel-eslint": "^10.0.2",
+    "dotenv": "^8.2.0",
     "eslint": "^5.16.0",
     "eslint-config-airbnb-base": "^13.2.0",
     "eslint-plugin-import": "^2.18.0",
@@ -31,10 +32,9 @@
     "prettier": "^1.18.2",
     "solhint": "^2.1.0",
     "truffle": "^5.0.32",
-    "dotenv": "^8.2.0",
     "truffle-flatten": "^1.0.5",
     "truffle-verify": "^1.0.3",
-    "truffle-hdwallet-provider": "^1.0.17"
+    "@truffle/hdwallet-provider": "^1.0.17"
   },
   "prettier": {
     "trailingComma": "es5",
