@@ -15,12 +15,19 @@
     "hint": "yarn solhint \"./contracts/**/*.sol\"",
     "lint": "yarn eslint \"./test/**/*.js\"",
     "truffle": "node_modules/.bin/truffle --network development",
-    "test": "truffle test"
+    "cp_migration_flat": "mkdir flatten/; cp contracts/Migrations.sol flatten/",
+    "test": "truffle test",
+    "flatten": "truffle run flatten",
+    "migrate": "yarn cp_migration_flat; truffle migrate --skip-dry-run",
+    "verify": "truffle run verify"
   },
   "devDependencies": {
     "@airswap/order-utils": "0.3.3",
     "@airswap/test-utils": "0.1.1",
-    "solidity-coverage": "^0.6.3"
+    "solidity-coverage": "^0.6.3",
+    "truffle-flatten": "^1.0.5",
+    "truffle-hdwallet-provider": "^1.0.17",
+    "truffle-verify": "^1.0.3"
   },
   "dependencies": {
     "@airswap/swap": "2.2.1",
