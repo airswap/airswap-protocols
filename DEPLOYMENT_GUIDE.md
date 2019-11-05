@@ -1,6 +1,6 @@
 ## Deployment Guide
 
-The following instructions should be run out of the root folder of the contract you want to deploy. For example, to deploy Types.sol, first perform `cd source/types`.
+This guide walks through the process of deploying contracts to public Ethereum networks and verifying contracts on Etherscan. The steps require one to have an Ethereum address mneumonic, Etherescan API key, and Infura key. All of these are free to get. The instructions should be run out of the root folder of the contract you want to deploy. For example, to deploy Types.sol, first perform `cd source/types`.
 
 1. Create a .env file with:
 ```
