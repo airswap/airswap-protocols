@@ -26,10 +26,7 @@
     "@airswap/types": "0.3.1",
     "bignumber.js": "^9.0.0",
     "solidity-coverage": "^0.6.3",
-    "truffle": "^5.0.24",
-    "truffle-flatten": "^1.0.5",
-    "truffle-hdwallet-provider": "^1.0.17",
-    "truffle-verify": "^1.0.3"
+    "truffle": "^5.0.24"
   },
   "dependencies": {
     "openzeppelin-solidity": "2.3"

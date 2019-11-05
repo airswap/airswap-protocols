@@ -22,11 +22,8 @@
   },
   "devDependencies": {
     "@airswap/tokens": "0.1.1",
-    "solidity-coverage": "^0.6.3",
-    "truffle-flatten": "^1.0.5",
-    "truffle-hdwallet-provider": "^1.0.17",
-    "truffle-verify": "^1.0.3"
-  },
+    "solidity-coverage": "^0.6.3"
+ },
   "dependencies": {
     "openzeppelin-solidity": "^v2.2"
   }
