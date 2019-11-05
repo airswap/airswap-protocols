@@ -5,7 +5,7 @@ const FungibleToken = artifacts.require('FungibleToken')
 const MockContract = artifacts.require('MockContract')
 
 const { equal, reverted, passes } = require('@airswap/test-utils').assert
-const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
+const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
 const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 const { orders } = require('@airswap/order-utils')
 
@@ -35,7 +35,7 @@ contract('Wrapper Unit Tests', async accounts => {
   })
 
   afterEach(async () => {
-    await revertToSnapShot(snapshotId)
+    await revertToSnapshot(snapshotId)
   })
 
   async function setupMockWeth() {

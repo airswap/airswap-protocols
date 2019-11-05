@@ -13,7 +13,7 @@ const {
   ok,
 } = require('@airswap/test-utils').assert
 const { balances } = require('@airswap/test-utils').balances
-const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
+const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
 const { orders, signatures } = require('@airswap/order-utils')
 
 let swapContract
@@ -50,7 +50,7 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
   })
 
   after('Cleanup', async () => {
-    await revertToSnapShot(snapshotId)
+    await revertToSnapshot(snapshotId)
   })
 
   describe('Setup', async () => {

@@ -11,6 +11,13 @@
     ethereumjs-util "^6.1.0"
     web3 "^1.0.0-beta.55"
 
+"@airswap/tokens@0.1.1":
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/@airswap/tokens/-/tokens-0.1.1.tgz#29668681a78b84b8bbd29e29209f59927850fa7c"
+  integrity sha512-xfy7o/F+/BHxH9rnjtCf8tLG7s3EzrSio2MfUMR02aPeXL9uL3pMIOT+SLSxskoou1zxNM3tnAkCIHTshNpHPw==
+  dependencies:
+    openzeppelin-solidity "^v2.2"
+
 "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.5.5":
   version "7.5.5"
   resolved "https://registry.yarnpkg.com/@babel/code-frame/-/code-frame-7.5.5.tgz#bc0782f6d69f7b7d49531219699b988f669a8f9d"
@@ -4460,6 +4467,11 @@ ganache-cli@^6.4.4:
     source-map-support "0.5.12"
     yargs "13.2.4"
 
+ganache-time-traveler@^1.0.5:
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/ganache-time-traveler/-/ganache-time-traveler-1.0.5.tgz#8383518d6ea19614e57d78a9a156be83ed162771"
+  integrity sha512-46lhryBbHfNyixWq22zgK5OeRF4T8FgA67idiKMwYAePAvj1gqREaljVO2aV5GBouovtp8jg8qt+TXTXTtUEsQ==
+
 gauge@~2.7.3:
   version "2.7.4"
   resolved "https://registry.yarnpkg.com/gauge/-/gauge-2.7.4.tgz#2c03405c7538c39d7eb37b317022e325fb018bf7"
@@ -6895,6 +6907,11 @@ openzeppelin-solidity@2.3:
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/openzeppelin-solidity/-/openzeppelin-solidity-2.3.0.tgz#1ab7b4cc3782a5472ed61eb740c56a8bfdd74119"
   integrity sha512-QYeiPLvB1oSbDt6lDQvvpx7k8ODczvE474hb2kLXZBPKMsxKT1WxTCHBYrCU7kS7hfAku4DcJ0jqOyL+jvjwQw==
+
+openzeppelin-solidity@^v2.2:
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/openzeppelin-solidity/-/openzeppelin-solidity-2.4.0.tgz#5f0a7b30571c45493449166e57b947203415349d"
+  integrity sha512-533gc5jkspxW5YT0qJo02Za5q1LHwXK9CJCc48jNj/22ncNM/3M/3JfWLqfpB90uqLwOKOovpl0JfaMQTR+gXQ==
 
 optimist@^0.6.1:
   version "0.6.1"
