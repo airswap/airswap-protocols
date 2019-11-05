@@ -1,5 +1,6 @@
 const Delegate = artifacts.require('Delegate')
 const Swap = artifacts.require('Swap')
+const Types = artifacts.require('Types')
 const Indexer = artifacts.require('Indexer')
 const MockContract = artifacts.require('MockContract')
 const FungibleToken = artifacts.require('FungibleToken')
@@ -70,6 +71,8 @@ contract('Delegate Unit Tests', async accounts => {
   }
 
   async function setupMockSwap() {
+    let types = await Types.new()
+    await Swap.link('Types', types.address)
     let swapTemplate = await Swap.new()
     const order = await orders.getOrder({})
     swapFunction = swapTemplate.contract.methods.swap(order).encodeABI()

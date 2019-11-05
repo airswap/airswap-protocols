@@ -47,3 +47,7 @@ Packages are versioned based on deploys. Major versions e.g. `1.x.x` are mainnet
 | `yarn test`    | Run all contract tests in `test` folders    |
 | `yarn hint`    | Run a syntax linter for all Solidity code   |
 | `yarn lint`    | Run a syntax linter for all JavaScript code |
+
+## Deployments
+
+To deploy, please follow [this guide](./DEPLOYMENT_GUIDE.md)

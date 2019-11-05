@@ -63,7 +63,7 @@ contract('Swap', async accounts => {
   describe('Deploying...', async () => {
     it('Deployed Swap contract', async () => {
       const typesLib = await Types.new()
-      await Swap.link(Types, typesLib.address)
+      await Swap.link('Types', typesLib.address)
       swapContract = await Swap.new()
       swapAddress = swapContract.address
 

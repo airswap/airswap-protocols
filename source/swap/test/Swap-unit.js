@@ -1,4 +1,5 @@
 const Swap = artifacts.require('Swap')
+const Types = artifacts.require('Types')
 const MockContract = artifacts.require('MockContract')
 const FungibleToken = artifacts.require('FungibleToken')
 
@@ -27,6 +28,7 @@ contract('Swap Unit Tests', async accounts => {
 
   let snapshotId
   let swap
+  let types
 
   beforeEach(async () => {
     let snapShot = await takeSnapshot()
@@ -38,6 +40,8 @@ contract('Swap Unit Tests', async accounts => {
   })
 
   before('deploy Swap', async () => {
+    types = await Types.new()
+    await Swap.link('Types', types.address)
     swap = await Swap.new()
   })
 

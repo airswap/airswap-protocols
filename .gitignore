@@ -7,3 +7,5 @@ lerna-debug.log
 coverage.json
 coverage
 build
+flatten/
+.env
