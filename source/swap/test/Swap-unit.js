@@ -8,7 +8,7 @@ const {
   reverted,
   equal,
 } = require('@airswap/test-utils').assert
-const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
+const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
 const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 
 const NONCE_AVAILABLE = 0x00
@@ -34,7 +34,7 @@ contract('Swap Unit Tests', async accounts => {
   })
 
   afterEach(async () => {
-    await revertToSnapShot(snapshotId)
+    await revertToSnapshot(snapshotId)
   })
 
   before('deploy Swap', async () => {

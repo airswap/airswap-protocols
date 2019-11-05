@@ -7,7 +7,7 @@ const {
 } = require('@airswap/order-utils').constants
 const { hashDomain, getOrderHash } = require('@airswap/order-utils').hashes
 const { orders } = require('@airswap/order-utils')
-const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
+const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
 
 contract('Types Unit Tests', async ([defaultAccount]) => {
   let mockTypes
@@ -22,7 +22,7 @@ contract('Types Unit Tests', async ([defaultAccount]) => {
   })
 
   afterEach(async () => {
-    await revertToSnapShot(snapshotId)
+    await revertToSnapshot(snapshotId)
   })
 
   before('deploy MockTypes', async () => {

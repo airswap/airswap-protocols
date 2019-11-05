@@ -12,7 +12,7 @@ const {
   passes,
 } = require('@airswap/test-utils').assert
 const { balances } = require('@airswap/test-utils').balances
-const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
+const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
 const {
   EMPTY_ADDRESS,
   HEAD,
@@ -50,7 +50,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
   })
 
   after(async () => {
-    await revertToSnapShot(snapshotId)
+    await revertToSnapshot(snapshotId)
   })
 
   describe('Deploying...', async () => {
