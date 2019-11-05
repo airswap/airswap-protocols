@@ -17,9 +17,9 @@
     "test": "truffle test"
   },
   "devDependencies": {
-    "@airswap/index": "0.3.0",
-    "@airswap/test-utils": "0.1.0",
-    "@airswap/types": "0.3.0",
+    "@airswap/index": "0.3.1",
+    "@airswap/test-utils": "0.1.1",
+    "@airswap/types": "0.3.1",
     "bignumber.js": "^9.0.0",
     "solidity-coverage": "^0.6.3",
     "truffle": "^5.0.24"

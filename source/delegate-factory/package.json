@@ -18,11 +18,11 @@
   },
   "devDependencies": {
     "@airswap/order-utils": "0.3.0",
-    "@airswap/test-utils": "0.1.0",
+    "@airswap/test-utils": "0.1.1",
     "solidity-coverage": "^0.6.3"
   },
   "dependencies": {
-    "@airswap/delegate": "0.4.0",
+    "@airswap/delegate": "0.4.1",
     "openzeppelin-solidity": "2.3"
   }
 }

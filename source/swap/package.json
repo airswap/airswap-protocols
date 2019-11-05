@@ -19,7 +19,7 @@
   "devDependencies": {
     "@airswap/tokens": "0.1.1",
     "@airswap/order-utils": "0.3.3",
-    "@airswap/test-utils": "0.1.0",
+    "@airswap/test-utils": "0.1.1",
     "truffle": "^5.0.32",
     "@gnosis.pm/mock-contract": "^3.0.7",
     "solidity-coverage": "^0.6.3",
@@ -27,7 +27,7 @@
     "truffle-hdwallet-provider-privkey": "1.0.3"
   },
   "dependencies": {
-    "@airswap/types": "0.3.0",
+    "@airswap/types": "0.3.1",
     "openzeppelin-solidity": "2.3"
   }
 }
