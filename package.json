@@ -32,6 +32,7 @@
     "prettier": "^1.18.2",
     "solhint": "^2.1.0",
     "truffle": "^5.0.32",
+    "ganache-time-traveler": "^1.0.5"
     "truffle-flatten": "^1.0.5",
     "truffle-verify": "^1.0.3",
     "@truffle/hdwallet-provider": "^1.0.17"
@@ -46,5 +47,7 @@
     "hooks": {
       "pre-commit": "yarn lint && yarn hint"
     }
+  },
+  "dependencies": {
   }
 }

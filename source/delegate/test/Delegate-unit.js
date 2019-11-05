@@ -10,7 +10,7 @@ const {
   emitted,
   reverted,
 } = require('@airswap/test-utils').assert
-const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
+const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
 const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 
 const { orders } = require('@airswap/order-utils')
@@ -46,7 +46,7 @@ contract('Delegate Unit Tests', async accounts => {
   })
 
   afterEach(async () => {
-    await revertToSnapShot(snapshotId)
+    await revertToSnapshot(snapshotId)
   })
 
   async function setupMockTokens() {
