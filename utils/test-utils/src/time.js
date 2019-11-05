@@ -16,6 +16,7 @@ let getTimestampPlusDays = async days => {
 module.exports = {
   advanceTime: helper.advanceTime,
   advanceBlock: helper.advanceBlock,
+  advanceBlockAndSetTime: helper.advanceBlockAndSetTime,
   advanceTimeAndBlock: helper.advanceTimeAndBlock,
   takeSnapshot: helper.takeSnapshot,
   revertToSnapshot: helper.revertToSnapshot,
