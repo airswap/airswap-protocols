@@ -1,6 +1,6 @@
 {
   "name": "@airswap/delegate-factory",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Deploys Delegate contracts for use in the Swap Protocol",
   "license": "Apache-2.0",
   "repository": {

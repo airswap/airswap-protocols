@@ -1,6 +1,6 @@
 {
   "name": "@airswap/wrapper",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Wraps and unwraps ether for WETH trades in the Swap Protocol",
   "license": "Apache-2.0",
   "repository": {
@@ -27,7 +27,7 @@
     "solidity-coverage": "^0.6.3"
   },
   "dependencies": {
-    "@airswap/swap": "2.2.1",
+    "@airswap/swap": "2.2.2",
     "@airswap/tokens": "0.1.2"
   }
 }
