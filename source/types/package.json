@@ -1,6 +1,6 @@
 {
   "name": "@airswap/types",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Solidity structs and hashing used in the Swap Protocol",
   "license": "Apache-2.0",
   "repository": {
@@ -23,7 +23,7 @@
   "devDependencies": {
     "@airswap/tokens": "0.1.2",
     "solidity-coverage": "^0.6.3"
- },
+  },
   "dependencies": {
     "openzeppelin-solidity": "2.3"
   }
