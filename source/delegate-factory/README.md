@@ -22,7 +22,7 @@
 
 | Version | Network   | Address                                      | Link                                                                                         |
 | :------ | :-------- | :------------------------------------------- | :------------------------------------------------------------------------------------------- |
-| `0.2.0` | `rinkeby` | `0x1b217076a9b43983e27036b9e7326fc6172b68da` | [Etherscan](https://rinkeby.etherscan.io/address/0x1b217076a9b43983e27036b9e7326fc6172b68da) |
+| `0.2.0` | `rinkeby` | `0x72D6e964816c3faAaCfD4De76A3A5B037eD6aeBa` | [Etherscan](https://rinkeby.etherscan.io/address/0x72D6e964816c3faAaCfD4De76A3A5B037eD6aeBa) |
 
 ## Commands
 
