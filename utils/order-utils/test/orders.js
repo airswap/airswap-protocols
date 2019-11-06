@@ -26,4 +26,22 @@ describe('Orders', async () => {
     })
     expect(orders.isValidOrder(order)).to.equal(true)
   })
+
+  it('Runs check order on an order', async () => {
+    const order = await orders.getOrder({
+      expiry: '1494460800',
+      nonce: '101',
+      signer: {
+        wallet: signerWallet,
+        token: ASTAddress,
+        param: '0',
+      },
+      sender: {
+        wallet: senderWallet,
+        token: WETHAddress,
+        param: '0',
+      },
+    })
+    orders.checkOrder(order, 'rinkeby')
+  })
 })

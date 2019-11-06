@@ -81,6 +81,7 @@ let checkBalanceAndApproval = (
       console.log('Balance is too low')
     }
   })
+  console.log('here')
 
   // check approval
   tokenContract.allowance(walletAddress, approvedAddress).then(allowance => {
