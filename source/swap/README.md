@@ -20,9 +20,9 @@ To migrate from the V1 to V2 protocol please see [MIGRATION.md](MIGRATION.md).
 
 ## Deploys
 
-| Version | Network   | Address                                      | Link                                                                                         |
-| :------ | :-------- | :------------------------------------------- | :------------------------------------------------------------------------------------------- |
-| `2.2.0` | `rinkeby` | `0x43f18D371f388ABE40b9dDaac44D1C9c9185a078` | [Etherscan](https://rinkeby.etherscan.io/address/0x43f18D371f388ABE40b9dDaac44D1C9c9185a078) |
+| Network   | Address                                      | Link                                                                                         |
+| :-------- | :------------------------------------------- | :------------------------------------------------------------------------------------------- |
+| `rinkeby` | `0x43f18D371f388ABE40b9dDaac44D1C9c9185a078` | [Etherscan](https://rinkeby.etherscan.io/address/0x43f18D371f388ABE40b9dDaac44D1C9c9185a078) |
 
 ## Commands
 

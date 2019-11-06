@@ -16,9 +16,9 @@
 
 ## Deploys
 
-| Version | Network   | Address                                      | Link                                                                                         |
-| :------ | :-------- | :------------------------------------------- | :------------------------------------------------------------------------------------------- |
-| `0.3.0` | `rinkeby` | `0x1a1ec25DC08e98e5E93F1104B5e5cdD298707d31` | [Etherscan](https://rinkeby.etherscan.io/address/0x1a1ec25DC08e98e5E93F1104B5e5cdD298707d31) |
+| Network   | Address                                      | Link                                                                                         |
+| :-------- | :------------------------------------------- | :------------------------------------------------------------------------------------------- |
+| `rinkeby` | `0x1a1ec25DC08e98e5E93F1104B5e5cdD298707d31` | [Etherscan](https://rinkeby.etherscan.io/address/0x1a1ec25DC08e98e5E93F1104B5e5cdD298707d31) |
 
 ## Commands
 
