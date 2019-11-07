@@ -18,7 +18,7 @@ const ethUtil = require('ethereumjs-util')
 const sigUtil = require('eth-sig-util')
 const web3Eth = require('web3-eth')
 
-const eth = new web3Eth('ws://127.0.0.1:8545')
+const eth = new web3Eth('http://127.0.0.1:8545')
 
 const {
   DOMAIN_NAME,

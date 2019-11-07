@@ -12,7 +12,7 @@
     "compile": "lerna run compile",
     "hint": "yarn solhint \"./source/**/*.sol\"",
     "lint": "yarn eslint \"./**/*.js\"",
-    "ganache": "ganache-cli -p 8545 --gasLimit 0xfffffffffff --time '2017-05-10T00:00:00+00:00'",
+    "ganache": "ganache-cli -p 8545 --gasLimit 0xfffffffffff --time '2017-05-10T00:00:00+00:00' -s 0",
     "publish": "lerna publish",
     "test": "yarn clean && lerna run test --concurrency=1"
   },

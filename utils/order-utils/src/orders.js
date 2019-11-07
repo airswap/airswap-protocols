@@ -15,7 +15,7 @@
 */
 
 const ethers = require('ethers')
-const web3 = require('web3')
+const web3Eth = require('web3-eth')
 
 const { SECONDS_IN_DAY, defaults, EMPTY_ADDRESS } = require('./constants')
 
@@ -27,7 +27,7 @@ const signatures = require('./signatures')
 let nonce = 100
 
 let getLatestTimestamp = async () => {
-  return (await web3.eth.getBlock('latest')).timestamp
+  return (await web3Eth.getBlock('latest')).timestamp
 }
 
 // network is 'rinkeby' , 'mainnet' etc
