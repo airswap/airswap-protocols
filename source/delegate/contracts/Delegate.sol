@@ -132,18 +132,18 @@ contract Delegate is IDelegate, Ownable {
   /**
     * @notice sets a rule on the delegate and an intent on the indexer
     * @dev only callable by owner
-    * @dev delegate needs to be given allowance from msg.sender for the amountToStake
+    * @dev delegate needs to be given allowance from msg.sender for the newStakeAmount
     * @dev swap needs to be given permission to move funds from the delegate
     * @param senderToken address Token the delgeate will send
     * @param senderToken address Token the delegate will receive
     * @param rule Rule Rule to set on a delegate
-    * @param amountToStake uint256 Amount to stake for an intent
+    * @param newStakeAmount uint256 Amount to stake for an intent
     */
   function setRuleAndIntent(
     address senderToken,
     address signerToken,
     Rule calldata rule,
-    uint256 amountToStake
+    uint256 newStakeAmount
   ) external onlyOwner {
     _setRule(
       senderToken,
@@ -154,27 +154,27 @@ contract Delegate is IDelegate, Ownable {
     );
 
     // get currentAmount staked or 0 if never staked
-    uint256 oldStakingAmount = indexer.getStakedAmount(address(this), signerToken, senderToken);
-    if (oldStakingAmount < amountToStake) {
+    uint256 oldStakeAmount = indexer.getStakedAmount(address(this), signerToken, senderToken);
+    if (oldStakeAmount < newStakeAmount) {
       // transfer only the difference from the sender to the Delegate.
       require(
         IERC20(indexer.stakingToken())
-        .transferFrom(msg.sender, address(this), amountToStake - oldStakingAmount), "STAKING_TRANSFER_FAILED"
+        .transferFrom(msg.sender, address(this), newStakeAmount - oldStakeAmount), "STAKING_TRANSFER_FAILED"
       );
     }
 
     indexer.setIntent(
       signerToken,
       senderToken,
-      amountToStake,
+      newStakeAmount,
       bytes32(uint256(address(this)) << 96) //NOTE: this will pad 0's to the right
     );
 
-    if (oldStakingAmount > amountToStake) {
+    if (oldStakeAmount > newStakeAmount) {
       // return excess stake back
       require(
         IERC20(indexer.stakingToken())
-        .transfer(msg.sender, oldStakingAmount - amountToStake), "STAKING_TRANSFER_FAILED"
+        .transfer(msg.sender, oldStakeAmount - newStakeAmount), "STAKING_RETURN_FAILED"
       );
     }
   }
