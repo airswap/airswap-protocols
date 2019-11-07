@@ -4532,7 +4532,7 @@ functional-red-black-tree@^1.0.1:
   resolved "https://registry.yarnpkg.com/functional-red-black-tree/-/functional-red-black-tree-1.0.1.tgz#1b0ab3bd553b2a0d6399d29c0e3ea0b252078327"
   integrity sha1-GwqzvVU7Kg1jmdKcDj6gslIHgyc=
 
-ganache-cli@^6.4.4:
+ganache-cli@6.7.0:
   version "6.7.0"
   resolved "https://registry.yarnpkg.com/ganache-cli/-/ganache-cli-6.7.0.tgz#b59845578221bdf686cf124d007c5ee62e85a62f"
   integrity sha512-9CZsClo9hl5MxGL7hkk14mie89Q94P0idh92jcV7LmppTYTCG7SHatuwcfqN7emFHArMt3fneN4QbH2do2N6Ow==
@@ -9327,6 +9327,15 @@ truffle-verify@^1.0.3:
     axios "^0.19.0"
     delay "^4.3.0"
     querystring "^0.2.0"
+
+truffle@5.0.43:
+  version "5.0.43"
+  resolved "https://registry.yarnpkg.com/truffle/-/truffle-5.0.43.tgz#b5508807ec59789b90749daefb16f8b6fef8ce96"
+  integrity sha512-PbqOjgtYlkNAbJqzHeiMGvgBCLSuPVAWbM4+TNIGsRyqVCRIvXdLeQXUmdCRcGMWMteCvQ9Knhu4zNzT2Eo53A==
+  dependencies:
+    app-module-path "^2.2.0"
+    mocha "5.2.0"
+    original-require "1.0.1"
 
 truffle@^5.0.24, truffle@^5.0.32:
   version "5.0.42"

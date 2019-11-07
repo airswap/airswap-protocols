@@ -15,6 +15,7 @@
 */
 
 const ethers = require('ethers')
+const web3 = require('web3')
 
 const { SECONDS_IN_DAY, defaults, EMPTY_ADDRESS } = require('./constants')
 
@@ -49,8 +50,10 @@ let checkOrder = async (order, network) => {
   // Check signer balance and allowance
   errors = await checkBalanceAndApproval(order, 'signer', provider, errors)
 
-  // Check sender balance and allowance
-  errors = await checkBalanceAndApproval(order, 'sender', provider, errors)
+  // If sender, check balance and allowance
+  if (order['sender']['wallet'] != EMPTY_ADDRESS) {
+    errors = await checkBalanceAndApproval(order, 'sender', provider, errors)
+  }
 
   // If affiliate, check balance and allowance
   if (order['affiliate']['wallet'] != EMPTY_ADDRESS) {
@@ -72,6 +75,40 @@ let checkOrder = async (order, network) => {
     errors.push('Order expiry has passed')
   }
 
+  // Check order signature
+  if (order['signature']['v'] != 0) {
+    errors = await checkOrderSignature(order, provider, errors)
+  }
+
+  return errors
+}
+
+let checkOrderSignature = async (order, provider, errors) => {
+  // Check signature is valid
+  const isValid = await signatures.isSignatureValid(order)
+  if (!isValid) {
+    errors.push('Signature invalid')
+  }
+
+  // Check signer authorized signatory
+  if (order['signature']['signatory'] != order['signer']['wallet']) {
+    const swapContract = new ethers.Contract(
+      order['signature']['validator'],
+      Swap.abi,
+      provider
+    )
+
+    await swapContract
+      .isSignerAuthorized(
+        order['signer']['wallet'],
+        order['signature']['signatory']
+      )
+      .then(isAuthorized => {
+        if (!isAuthorized) {
+          errors.push(`Signatory not authorized`)
+        }
+      })
+  }
   return errors
 }
 

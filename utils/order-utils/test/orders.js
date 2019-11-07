@@ -5,6 +5,7 @@ const { orders } = require('@airswap/order-utils')
 describe('Orders', async () => {
   const senderWallet = '0xbabe31056c0fe1b704d811b2405f6e9f5ae5e59d'
   const signerWallet = '0x9d2fb0bcc90c6f3fa3a98d2c760623a4f6ee59b4'
+  const knownGanacheWallet = '0x3A7fAe1dBBE4cE4fd8F8F21b55d4E24248725925'
 
   const ASTAddress = '0xcc1cbd4f67cceb7c001bd4adf98451237a193ff8'
   const WETHAddress = '0xc778417e063141139fce010982780140aa0cd5ab'
@@ -31,11 +32,12 @@ describe('Orders', async () => {
 
   it('Runs check order on an order', async () => {
     orders.setVerifyingContract(rinkebySwap)
+    orders.setKnownAccounts(knownGanacheWallet)
     const order = await orders.getOrder({
       expiry: '1494460800',
       nonce: '101',
       signer: {
-        wallet: signerWallet,
+        wallet: knownGanacheWallet,
         token: ASTAddress,
         param: '400',
       },

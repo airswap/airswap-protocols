@@ -16,6 +16,10 @@
 
 const ethUtil = require('ethereumjs-util')
 const sigUtil = require('eth-sig-util')
+const web3Eth = require('web3-eth')
+
+const eth = new web3Eth('ws://127.0.0.1:8545')
+
 const {
   DOMAIN_NAME,
   DOMAIN_VERSION,
@@ -29,7 +33,7 @@ module.exports = {
   async getWeb3Signature(order, signatory, verifyingContract) {
     const orderHash = hashes.getOrderHash(order, verifyingContract)
     const orderHashHex = ethUtil.bufferToHex(orderHash)
-    const sig = await web3.eth.sign(orderHashHex, signatory)
+    const sig = await eth.sign(orderHashHex, signatory)
     const { v, r, s } = ethUtil.fromRpcSig(sig)
     return {
       signatory: signatory,
@@ -100,5 +104,22 @@ module.exports = {
       r: '0x0',
       s: '0x0',
     }
+  },
+  async isSignatureValid(order) {
+    console.log(order)
+    const signature = '\x19Ethereum Signed Message:\n32' + order['signature']
+    const orderHash = hashes.getOrderHash(order, signature['validator'])
+    const signingPubKey = ethUtil.ecrecover(
+      orderHash,
+      signature['v'],
+      signature['r'],
+      signature['s']
+    )
+    const signingAddress = ethUtil.bufferToHex(
+      ethUtil.pubToAddress(signingPubKey)
+    )
+    console.log(signature['signatory'])
+    console.log(signingAddress)
+    return signingAddress == signature['signatory']
   },
 }
