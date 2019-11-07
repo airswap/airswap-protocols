@@ -29,84 +29,101 @@ let getLatestTimestamp = async () => {
   return (await web3.eth.getBlock('latest')).timestamp
 }
 
-// network is 'rinkeby' or 'mainnet'
-let checkOrder = (order, network) => {
-  // check the order has all necessary fields
+// network is 'rinkeby' , 'mainnet' etc
+let checkOrder = async (order, network) => {
+  let errors = []
+  const provider = await ethers.getDefaultProvider(network)
+
+  // Check the order has all necessary fields
   if (!isValidOrder(order)) {
-    console.log('Order not valid')
-  } else {
-    // get the network provider
-    const provider = ethers.getDefaultProvider(network)
-
-    // check signer balance
-    checkBalanceAndApproval(
-      order['signer']['token'],
-      order['signer']['wallet'],
-      order['signer']['param'],
-      order['signature']['validator'],
-      provider
-    )
-
-    // check sender balance
-    checkBalanceAndApproval(
-      order['sender']['token'],
-      order['sender']['wallet'],
-      order['sender']['param'],
-      order['signature']['validator'],
-      provider
-    )
-
-    // check nonce
-    checkNonce(
-      order['signature']['validator'],
-      order['signer']['wallet'],
-      order['signature']['nonce'],
-      provider
-    )
+    errors.push('Order structured incorrectly')
+    return errors
   }
+
+  // Check swap address provided
+  if (order['signature']['validator'] == EMPTY_ADDRESS) {
+    errors.push('Order.signature.validator cannot be 0')
+    return errors
+  }
+
+  // Check signer balance and allowance
+  errors = await checkBalanceAndApproval(order, 'signer', provider, errors)
+
+  // Check sender balance and allowance
+  errors = await checkBalanceAndApproval(order, 'sender', provider, errors)
+
+  // If affiliate, check balance and allowance
+  if (order['affiliate']['wallet'] != EMPTY_ADDRESS) {
+    errors = await checkBalanceAndApproval(order, 'affiliate', provider, errors)
+  }
+
+  // Check nonce availability
+  errors = await checkNonce(
+    order['signature']['validator'],
+    order['signer']['wallet'],
+    order['nonce'],
+    provider,
+    errors
+  )
+
+  // Check order expiry
+  let latestBlock = await provider.getBlock(provider.getBlockNumber())
+  if (latestBlock.timestamp >= order['expiry']) {
+    errors.push('Order expiry has passed')
+  }
+
+  return errors
 }
 
-let checkBalanceAndApproval = (
-  tokenAddress,
-  walletAddress,
-  amount,
-  approvedAddress,
-  provider
-) => {
-  const tokenContract = new ethers.Contract(tokenAddress, IERC20.abi, provider)
+let checkBalanceAndApproval = async (order, partyName, provider, errors) => {
+  let party = order[partyName]
 
-  // check balance
-  tokenContract.balanceOf(walletAddress).then(balance => {
-    if (balance.toNumber() < amount) {
-      console.log('Balance is too low')
+  // If this is the affiliate, tokens come from the signer instead
+  if (partyName == 'affiliate') {
+    party['wallet'] = order['signer']['wallet']
+  }
+
+  const tokenContract = new ethers.Contract(
+    party['token'],
+    IERC20.abi,
+    provider
+  )
+
+  // Check balance
+  await tokenContract.balanceOf(party['wallet']).then(balance => {
+    if (balance.lt(party['param'])) {
+      errors.push(`${partyName} balance is too low`)
     }
   })
-  console.log('here')
 
   // check approval
-  tokenContract.allowance(walletAddress, approvedAddress).then(allowance => {
-    if (allowance.toNumber() < amount) {
-      console.log('Allowance is too low')
-    }
-  })
+  await tokenContract
+    .allowance(party['wallet'], order['signature']['validator'])
+    .then(allowance => {
+      if (allowance.lt(party['param'])) {
+        errors.push(`${partyName} allowance is too low`)
+      }
+    })
+  return errors
 }
 
-let checkNonce = (swapAddress, signer, nonce, provider) => {
+let checkNonce = async (swapAddress, signer, nonce, provider, errors) => {
   const swapContract = new ethers.Contract(swapAddress, Swap.abi, provider)
 
   // check not cancelled
-  swapContract.signerNonceStatus(signer, nonce).then(status => {
+  await swapContract.signerNonceStatus(signer, nonce).then(status => {
     if (status == '0x01') {
-      console.log('Nonce taken or cancelled')
+      errors.push(`Nonce taken or cancelled`)
     }
   })
 
   // check above minimum
-  swapContract.signerMinimumNonce(signer).then(minimum => {
+  await swapContract.signerMinimumNonce(signer).then(minimum => {
     if (minimum > nonce) {
-      console.log('Nonce too low')
+      errors.push(`Nonce too low`)
     }
   })
+  return errors
 }
 
 let isValidOrder = order => {
@@ -181,7 +198,7 @@ module.exports = {
           this._verifyingContract
         )
       } else {
-        order.signature = signatures.getEmptySignature()
+        order.signature = signatures.getEmptySignature(this._verifyingContract)
       }
     }
     return order

@@ -91,10 +91,10 @@ module.exports = {
       s,
     }
   },
-  getEmptySignature() {
+  getEmptySignature(verifyingContract) {
     return {
       signatory: EMPTY_ADDRESS,
-      validator: EMPTY_ADDRESS,
+      validator: verifyingContract,
       version: signatures.INTENDED_VALIDATOR,
       v: '0',
       r: '0x0',
