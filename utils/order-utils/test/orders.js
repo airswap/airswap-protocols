@@ -13,6 +13,9 @@ describe('Orders', async () => {
 
   const rinkebySwap = '0x43f18D371f388ABE40b9dDaac44D1C9c9185a078'
 
+  orders.setVerifyingContract(rinkebySwap)
+  orders.setKnownAccounts(knownGanacheWallet)
+
   it('Checks that a generated order is valid', async () => {
     const order = await orders.getOrder({
       expiry: '1494460800',
@@ -31,12 +34,86 @@ describe('Orders', async () => {
     expect(orders.isValidOrder(order)).to.equal(true)
   })
 
-  it('Runs check order on an order', async () => {
-    orders.setVerifyingContract(rinkebySwap)
-    orders.setKnownAccounts(knownGanacheWallet)
+  it('Check correct order without signature', async () => {
+    const order = await orders.getOrder({
+      expiry: '1604787494',
+      nonce: '0',
+      signer: {
+        wallet: signerWallet,
+        token: ASTAddress,
+        param: '0',
+      },
+      sender: {
+        wallet: senderWallet,
+        token: WETHAddress,
+        param: '0',
+      },
+    })
+    let errors = await orders.checkOrder(order, 'rinkeby')
+    assert.equal(errors.length, 0)
+  })
 
-    // this function does a web3 sign of the order and adds
-    // the signature field to the order
+  it('Check correct order with signature', async () => {
+    const order = await orders.getOrder({
+      expiry: '1604787494',
+      nonce: '0',
+      signer: {
+        wallet: knownGanacheWallet,
+        token: ASTAddress,
+        param: '0',
+      },
+      sender: {
+        wallet: senderWallet,
+        token: WETHAddress,
+        param: '0',
+      },
+    })
+    let errors = await orders.checkOrder(order, 'rinkeby')
+    assert.equal(errors.length, 0)
+  })
+
+  it('Check expired order', async () => {
+    const order = await orders.getOrder({
+      expiry: '1494460800',
+      nonce: '101',
+      signer: {
+        wallet: knownGanacheWallet,
+        token: ASTAddress,
+        param: '400',
+      },
+      sender: {
+        wallet: senderWallet,
+        token: WETHAddress,
+        param: '2',
+      },
+    })
+    let errors = await orders.checkOrder(order, 'rinkeby')
+    assert.equal(errors.length, 2)
+    assert.equal(errors[1], 'Order expiry has passed')
+  })
+
+  it('Check invalid signature', async () => {
+    const order = await orders.getOrder({
+      expiry: '1604787494',
+      nonce: '101',
+      signer: {
+        wallet: knownGanacheWallet,
+        token: ASTAddress,
+        param: '400',
+      },
+      sender: {
+        wallet: senderWallet,
+        token: WETHAddress,
+        param: '2',
+      },
+    })
+    order.signature.v += 1
+    let errors = await orders.checkOrder(order, 'rinkeby')
+    assert.equal(errors.length, 2)
+    assert.equal(errors[1], 'Signature invalid')
+  })
+
+  it('Check order without allowance', async () => {
     const order = await orders.getOrder({
       expiry: '1604787494',
       nonce: '101',
@@ -54,5 +131,25 @@ describe('Orders', async () => {
     let errors = await orders.checkOrder(order, 'rinkeby')
     assert.equal(errors.length, 1)
     assert.equal(errors[0], 'signer allowance is too low')
+  })
+
+  it('Check order without balance', async () => {
+    const order = await orders.getOrder({
+      expiry: '1604787494',
+      nonce: '101',
+      signer: {
+        wallet: knownGanacheWallet,
+        token: ASTAddress,
+        param: '100001000',
+      },
+      sender: {
+        wallet: senderWallet,
+        token: WETHAddress,
+        param: '2',
+      },
+    })
+    let errors = await orders.checkOrder(order, 'rinkeby')
+    assert.equal(errors.length, 2)
+    assert.equal(errors[0], 'signer balance is too low')
   })
 })
