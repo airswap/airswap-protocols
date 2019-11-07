@@ -43,7 +43,7 @@ let checkOrder = (order, network) => {
       order['signer']['token'],
       order['signer']['wallet'],
       order['signer']['param'],
-      order['validator'],
+      order['signature']['validator'],
       provider
     )
 
@@ -52,15 +52,15 @@ let checkOrder = (order, network) => {
       order['sender']['token'],
       order['sender']['wallet'],
       order['sender']['param'],
-      order['validator'],
+      order['signature']['validator'],
       provider
     )
 
     // check nonce
     checkNonce(
-      order['validator'],
+      order['signature']['validator'],
       order['signer']['wallet'],
-      order['nonce'],
+      order['signature']['nonce'],
       provider
     )
   }
