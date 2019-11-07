@@ -32,6 +32,7 @@ const hashes = require('./hashes')
 module.exports = {
   async getWeb3Signature(order, signatory, verifyingContract) {
     const orderHash = hashes.getOrderHash(order, verifyingContract)
+    console.log(orderHash)
     const orderHashHex = ethUtil.bufferToHex(orderHash)
     const sig = await eth.sign(orderHashHex, signatory)
     const { v, r, s } = ethUtil.fromRpcSig(sig)
@@ -106,9 +107,9 @@ module.exports = {
     }
   },
   async isSignatureValid(order) {
-    console.log(order)
-    const signature = '\x19Ethereum Signed Message:\n32' + order['signature']
+    const signature = order['signature']
     const orderHash = hashes.getOrderHash(order, signature['validator'])
+    console.log(orderHash)
     const signingPubKey = ethUtil.ecrecover(
       orderHash,
       signature['v'],
