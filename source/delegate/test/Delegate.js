@@ -247,7 +247,6 @@ contract('Delegate Integration Tests', async accounts => {
 
       //check owner stake balance has been reduced
       let stakingTokenBal = await stakingToken.balanceOf(aliceAddress)
-      console.log()
       equal(stakingTokenBal.toNumber(), STARTING_BALANCE - 2 * INTENT_AMOUNT)
     })
 
@@ -298,7 +297,6 @@ contract('Delegate Integration Tests', async accounts => {
 
       //check owner stake balance has been reduced
       let stakingTokenBal = await stakingToken.balanceOf(aliceAddress)
-      console.log()
       equal(stakingTokenBal.toNumber(), STARTING_BALANCE)
     })
 
@@ -422,7 +420,6 @@ contract('Delegate Integration Tests', async accounts => {
 
       //check owner stake balance has been reduced by 0
       let stakingTokenBal = await stakingToken.balanceOf(aliceAddress)
-      console.log()
       equal(stakingTokenBal.toNumber(), STARTING_BALANCE)
 
       await passes(

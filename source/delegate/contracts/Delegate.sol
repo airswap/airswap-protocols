@@ -201,7 +201,7 @@ contract Delegate is IDelegate, Ownable {
     if (stakedAmount > 0) {
       require(
         IERC20(indexer.stakingToken())
-          .transfer(msg.sender, stakedAmount),"STAKING_TRANSFER_FAILED"
+          .transfer(msg.sender, stakedAmount),"STAKING_RETURN_FAILED"
       );
     }
   }
