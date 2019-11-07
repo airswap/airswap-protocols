@@ -333,6 +333,9 @@ contract('Delegate Unit Tests', async accounts => {
         false
       )
 
+      //mock the score/staked amount to be transferred
+      await mockIndexer.givenMethodReturnUint(mockIndexer_getStakedAmount, 0)
+
       await reverted(
         delegate.setRuleAndIntent(MOCK_WETH, MOCK_DAI, rule, stakeAmount),
         'STAKING_TRANSFER_FAILED'
@@ -348,6 +351,9 @@ contract('Delegate Unit Tests', async accounts => {
         mockStakingToken_approve,
         true
       )
+
+      //mock the score/staked amount to be transferred
+      await mockIndexer.givenMethodReturnUint(mockIndexer_getStakedAmount, 0)
 
       await passes(
         delegate.setRuleAndIntent(MOCK_WETH, MOCK_DAI, rule, stakeAmount)
@@ -371,6 +377,9 @@ contract('Delegate Unit Tests', async accounts => {
         mockStakingToken_approve,
         true
       )
+
+      //mock the score/staked amount to be transferred
+      await mockIndexer.givenMethodReturnUint(mockIndexer_getStakedAmount, 250)
 
       await passes(
         delegate.setRuleAndIntent(MOCK_WETH, MOCK_DAI, rule, stakeAmount)

@@ -153,11 +153,13 @@ contract Delegate is IDelegate, Ownable {
       rule.priceExp
     );
 
-    // Transfer the staking tokens from the sender to the Delegate.
-    if (amountToStake > 0) {
+    // get currentAmount staked or 0 if never staked
+    uint256 oldStakingAmount = indexer.getStakedAmount(address(this), signerToken, senderToken);
+    if (oldStakingAmount < amountToStake) {
+      // transfer only the difference from the sender to the Delegate.
       require(
         IERC20(indexer.stakingToken())
-        .transferFrom(msg.sender, address(this), amountToStake), "STAKING_TRANSFER_FAILED"
+        .transferFrom(msg.sender, address(this), amountToStake - oldStakingAmount), "STAKING_TRANSFER_FAILED"
       );
     }
 
@@ -167,6 +169,14 @@ contract Delegate is IDelegate, Ownable {
       amountToStake,
       bytes32(uint256(address(this)) << 96) //NOTE: this will pad 0's to the right
     );
+
+    if (oldStakingAmount > amountToStake) {
+      // return excess stake back
+      require(
+        IERC20(indexer.stakingToken())
+        .transfer(msg.sender, oldStakingAmount - amountToStake), "STAKING_TRANSFER_FAILED"
+      );
+    }
   }
 
   /**
