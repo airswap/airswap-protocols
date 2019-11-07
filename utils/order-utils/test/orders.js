@@ -1,4 +1,5 @@
 var expect = require('chai').expect
+const assert = require('assert')
 
 const { orders } = require('@airswap/order-utils')
 
@@ -28,6 +29,7 @@ describe('Orders', async () => {
       },
     })
     expect(orders.isValidOrder(order)).to.equal(true)
+    console.log('line 31')
   })
 
   it('Runs check order on an order', async () => {
@@ -49,6 +51,7 @@ describe('Orders', async () => {
     })
     let errors = await orders.checkOrder(order, 'rinkeby')
     console.log(`errors: ${errors}`)
-    expect(errors.length == 0).to.equal(true)
+    assert.equal(errors.length, 3)
+    console.log('here')
   })
 })

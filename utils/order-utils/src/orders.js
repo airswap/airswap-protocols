@@ -33,7 +33,7 @@ let getLatestTimestamp = async () => {
 // network is 'rinkeby' , 'mainnet' etc
 let checkOrder = async (order, network) => {
   let errors = []
-  const provider = await ethers.getDefaultProvider(network)
+  const provider = ethers.getDefaultProvider(network)
 
   // Check the order has all necessary fields
   if (!isValidOrder(order)) {
