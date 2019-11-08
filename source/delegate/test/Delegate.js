@@ -69,10 +69,9 @@ contract('Delegate Integration Tests', async accounts => {
     await setupIndexer()
     await setupFactory()
 
-    let trx = await delegateFactory.createDelegate(
-      aliceAddress,
-      aliceTradeWallet
-    )
+    let trx = await delegateFactory.createDelegate(aliceTradeWallet, {
+      from: aliceAddress,
+    })
     let aliceDelegateAddress
     emitted(trx, 'CreateDelegate', e => {
       //capture the delegate address
