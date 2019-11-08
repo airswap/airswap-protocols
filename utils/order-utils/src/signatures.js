@@ -17,8 +17,9 @@
 const ethUtil = require('ethereumjs-util')
 const sigUtil = require('eth-sig-util')
 const web3Eth = require('web3-eth')
+const dotenv = require('dotenv')
 
-const eth = new web3Eth('http://127.0.0.1:8545')
+dotenv.config()
 
 const {
   DOMAIN_NAME,
@@ -33,6 +34,7 @@ module.exports = {
   async getWeb3Signature(order, signatory, verifyingContract) {
     const orderHash = hashes.getOrderHash(order, verifyingContract)
     const orderHashHex = ethUtil.bufferToHex(orderHash)
+    const eth = new web3Eth(process.env.WEB3_PROVIDER)
     const sig = await eth.sign(orderHashHex, signatory)
     const { v, r, s } = ethUtil.fromRpcSig(sig)
     return {
