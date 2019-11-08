@@ -43,21 +43,15 @@ contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
   }
 
   /**
-    * @param delegateContractOwner address Delegate owner
     * @param delegateTradeWallet address Wallet the delegate will trade from
     * @return address delegateContractAddress Address of the delegate contract created
     */
   function createDelegate(
-    address delegateContractOwner,
     address delegateTradeWallet
   ) external returns (address delegateContractAddress) {
 
-    // Ensure an owner for the delegate contract is provided.
-    require(delegateContractOwner != address(0),
-      "DELEGATE_CONTRACT_OWNER_REQUIRED");
-
     delegateContractAddress = address(
-      new Delegate(swapContract, indexerContract, delegateContractOwner, delegateTradeWallet)
+      new Delegate(swapContract, indexerContract, msg.sender, delegateTradeWallet)
     );
     _deployedAddresses[delegateContractAddress] = true;
 
@@ -65,7 +59,7 @@ contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
       delegateContractAddress,
       address(swapContract),
       address(indexerContract),
-      delegateContractOwner,
+      msg.sender,
       delegateTradeWallet
     );
 

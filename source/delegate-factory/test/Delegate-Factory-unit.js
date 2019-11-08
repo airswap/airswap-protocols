@@ -5,12 +5,7 @@ const FungibleToken = artifacts.require('FungibleToken')
 const Delegate = artifacts.require('Delegate')
 const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
 const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
-const {
-  reverted,
-  passes,
-  equal,
-  emitted,
-} = require('@airswap/test-utils').assert
+const { passes, equal, emitted } = require('@airswap/test-utils').assert
 const { padAddressToLocator } = require('@airswap/test-utils').padding
 
 contract('Delegate Factory Tests', async accounts => {
@@ -91,19 +86,11 @@ contract('Delegate Factory Tests', async accounts => {
   })
 
   describe('Test deploying delegates', async () => {
-    it('should not deploy a delegate with owner address 0x0', async () => {
-      await reverted(
-        delegateFactory.createDelegate(EMPTY_ADDRESS, tradeWalletOne),
-        'DELEGATE_CONTRACT_OWNER_REQUIRED'
-      )
-    })
-
     it('should emit event and update the mapping', async () => {
       // successful tx
-      let tx = await delegateFactory.createDelegate(
-        delegateOwnerOne,
-        tradeWalletOne
-      )
+      let tx = await delegateFactory.createDelegate(tradeWalletOne, {
+        from: delegateOwnerOne,
+      })
       passes(tx)
 
       let delegateAddress
@@ -129,10 +116,9 @@ contract('Delegate Factory Tests', async accounts => {
 
     it('should create delegate with the correct values', async () => {
       // deploy delegate
-      let tx = await delegateFactory.createDelegate(
-        delegateOwnerTwo,
-        tradeWalletTwo
-      )
+      let tx = await delegateFactory.createDelegate(tradeWalletTwo, {
+        from: delegateOwnerTwo,
+      })
 
       // get delegate address and pad
       let delegateAddress
