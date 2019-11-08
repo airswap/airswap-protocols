@@ -461,7 +461,7 @@ contract('Swap', async accounts => {
         true
       )
       _unsignedOrder = unsignedOrder
-      _unsignedOrder.signature = signatures.getEmptySignature()
+      _unsignedOrder.signature = signatures.getEmptySignature(swapAddress)
     })
 
     it('Checks that David cannot make an order on behalf of Alice', async () => {
@@ -676,7 +676,7 @@ contract('Swap', async accounts => {
           param: 5,
         },
       })
-      order.signature = signatures.getEmptySignature()
+      order.signature = signatures.getEmptySignature(swapAddress)
       emitted(
         await swap(order, {
           from: davidAddress,

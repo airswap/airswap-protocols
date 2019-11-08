@@ -30,11 +30,17 @@ const {
 } = require('./constants')
 const hashes = require('./hashes')
 
+//This has a default so that in tests it defaults to the
+// ganache endpoint without having to set it
+const provider = process.env.WEB3_PROVIDER
+  ? process.env.WEB3_PROVIDER
+  : 'http://127.0.0.1:8545'
+
 module.exports = {
   async getWeb3Signature(order, signatory, verifyingContract) {
     const orderHash = hashes.getOrderHash(order, verifyingContract)
     const orderHashHex = ethUtil.bufferToHex(orderHash)
-    const eth = new web3Eth(process.env.WEB3_PROVIDER)
+    const eth = new web3Eth(provider)
     const sig = await eth.sign(orderHashHex, signatory)
     const { v, r, s } = ethUtil.fromRpcSig(sig)
     return {
