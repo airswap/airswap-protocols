@@ -5,6 +5,7 @@ const Indexer = artifacts.require('Indexer')
 const FungibleToken = artifacts.require('FungibleToken')
 const {
   emitted,
+  notEmitted,
   reverted,
   equal,
   ok,
@@ -328,6 +329,50 @@ contract('Delegate Integration Tests', async accounts => {
         )
       )
 
+      ok(
+        await balances(aliceDelegate.address, [[stakingToken, 0]]),
+        'Trade Wallet balances are incorrect'
+      )
+
+      //check the score of the manager after
+      let scoreAfter = await indexer.getStakedAmount(
+        aliceDelegate.address,
+        tokenDAI.address,
+        tokenWETH.address
+      )
+      equal(scoreAfter.toNumber(), INTENT_AMOUNT, 'intent score is incorrect')
+
+      //check owner stake balance has been reduced
+      let stakingTokenBal = await stakingToken.balanceOf(aliceAddress)
+      equal(stakingTokenBal.toNumber(), STARTING_BALANCE - INTENT_AMOUNT)
+    })
+
+    it('Test successfully calling setRuleAndIntent with no-stake change', async () => {
+      let rule = [100000, 300, 0]
+
+      //give allowance to the delegate to pull staking amount
+      await stakingToken.approve(aliceDelegate.address, INTENT_AMOUNT, {
+        from: aliceAddress,
+      })
+
+      //check the score of the delegate before
+      let scoreBefore = await indexer.getStakedAmount(
+        aliceDelegate.address,
+        tokenDAI.address,
+        tokenWETH.address
+      )
+      equal(scoreBefore.toNumber(), INTENT_AMOUNT, 'intent score is incorrect')
+
+      let tx = aliceDelegate.setRuleAndIntent(
+        tokenWETH.address,
+        tokenDAI.address,
+        rule,
+        INTENT_AMOUNT, // 250
+        {
+          from: aliceAddress,
+        }
+      )
+      await notEmitted(await tx, 'Stake')
       ok(
         await balances(aliceDelegate.address, [[stakingToken, 0]]),
         'Trade Wallet balances are incorrect'

@@ -155,7 +155,9 @@ contract Delegate is IDelegate, Ownable {
 
     // get currentAmount staked or 0 if never staked
     uint256 oldStakeAmount = indexer.getStakedAmount(address(this), signerToken, senderToken);
-    if (oldStakeAmount < newStakeAmount) {
+    if (oldStakeAmount == newStakeAmount && oldStakeAmount > 0) {
+      return; // forgo trying to reset intent with non-zero same stake amount
+    } else if (oldStakeAmount < newStakeAmount) {
       // transfer only the difference from the sender to the Delegate.
       require(
         IERC20(indexer.stakingToken())
