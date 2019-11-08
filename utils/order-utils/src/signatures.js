@@ -105,7 +105,7 @@ module.exports = {
       s: '0x0',
     }
   },
-  async isSignatureValid(order) {
+  isSignatureValid(order) {
     const signature = order['signature']
     const orderHash = hashes.getOrderHash(order, signature['validator'])
     const prefix = new Buffer('\x19Ethereum Signed Message:\n')

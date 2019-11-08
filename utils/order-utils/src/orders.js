@@ -85,7 +85,7 @@ let checkOrder = async (order, network) => {
 
 let checkOrderSignature = async (order, provider, errors) => {
   // Check signature is valid
-  const isValid = await signatures.isSignatureValid(order)
+  const isValid = signatures.isSignatureValid(order)
   if (!isValid) {
     errors.push('Signature invalid')
   }
