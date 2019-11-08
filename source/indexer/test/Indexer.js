@@ -406,7 +406,9 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
     })
 
     it('Deploy a whitelisted delegate for alice', async () => {
-      let tx = await delegateFactory.createDelegate(aliceAddress, aliceAddress)
+      let tx = await delegateFactory.createDelegate(aliceAddress, {
+        from: aliceAddress,
+      })
       passes(tx)
 
       let whitelistedDelegate
