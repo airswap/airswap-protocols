@@ -17,7 +17,6 @@ describe('Orders', async () => {
   const rinkebySwap = '0x43f18D371f388ABE40b9dDaac44D1C9c9185a078'
 
   orders.setVerifyingContract(rinkebySwap)
-  orders.setKnownAccounts(knownGanacheWallet)
 
   it('Checks that a generated order is valid', async () => {
     const order = await orders.getOrder({

@@ -28,8 +28,6 @@ contract('Wrapper Unit Tests', async accounts => {
   let swap
   let snapshotId
 
-  orders.setKnownAccounts([mockSender, mockSigner])
-
   beforeEach(async () => {
     const snapShot = await takeSnapshot()
     snapshotId = snapShot['result']

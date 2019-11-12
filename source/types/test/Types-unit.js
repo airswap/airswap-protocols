@@ -13,7 +13,6 @@ contract('Types Unit Tests', async ([defaultAccount]) => {
   let mockTypes
   let snapshotId
 
-  orders.setKnownAccounts([defaultAccount])
   orders.setVerifyingContract(defaultAccount)
 
   beforeEach(async () => {

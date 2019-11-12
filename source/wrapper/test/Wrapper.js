@@ -45,7 +45,6 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
     tokenAST = await FungibleToken.new()
 
     orders.setVerifyingContract(swapAddress)
-    orders.setKnownAccounts([aliceAddress, bobAddress, carolAddress])
     wrappedSwap = wrapperContract.swap
   })
 
