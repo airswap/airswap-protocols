@@ -52,7 +52,7 @@ describe('Orders', async () => {
         param: '0',
       },
     })
-    let errors = await orders.checkOrder(order, 'rinkeby')
+    const errors = await orders.checkOrder(order, 'rinkeby')
     assert.equal(errors.length, 0)
   })
 
@@ -71,7 +71,7 @@ describe('Orders', async () => {
         param: '0',
       },
     })
-    let errors = await orders.checkOrder(order, 'rinkeby')
+    const errors = await orders.checkOrder(order, 'rinkeby')
     assert.equal(errors.length, 0)
   })
 
@@ -90,7 +90,7 @@ describe('Orders', async () => {
         param: '2',
       },
     })
-    let errors = await orders.checkOrder(order, 'rinkeby')
+    const errors = await orders.checkOrder(order, 'rinkeby')
     assert.equal(errors.length, 2)
     assert.equal(errors[1], 'Order expiry has passed')
   })
@@ -111,7 +111,7 @@ describe('Orders', async () => {
       },
     })
     order.signature.v += 1
-    let errors = await orders.checkOrder(order, 'rinkeby')
+    const errors = await orders.checkOrder(order, 'rinkeby')
     assert.equal(errors.length, 2)
     assert.equal(errors[1], 'Signature invalid')
   })
@@ -131,7 +131,7 @@ describe('Orders', async () => {
         param: '2',
       },
     })
-    let errors = await orders.checkOrder(order, 'rinkeby')
+    const errors = await orders.checkOrder(order, 'rinkeby')
     assert.equal(errors.length, 1)
     assert.equal(errors[0], 'signer allowance is too low')
   })
@@ -151,7 +151,7 @@ describe('Orders', async () => {
         param: '2',
       },
     })
-    let errors = await orders.checkOrder(order, 'rinkeby')
+    const errors = await orders.checkOrder(order, 'rinkeby')
     assert.equal(errors.length, 2)
     assert.equal(errors[0], 'signer balance is too low')
   })

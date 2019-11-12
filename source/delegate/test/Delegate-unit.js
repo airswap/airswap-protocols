@@ -41,7 +41,7 @@ contract('Delegate Unit Tests', async accounts => {
   let mockIndexer_getStakedAmount
 
   beforeEach(async () => {
-    let snapShot = await takeSnapshot()
+    const snapShot = await takeSnapshot()
     snapshotId = snapShot['result']
   })
 
@@ -71,9 +71,9 @@ contract('Delegate Unit Tests', async accounts => {
   }
 
   async function setupMockSwap() {
-    let types = await Types.new()
+    const types = await Types.new()
     await Swap.link('Types', types.address)
-    let swapTemplate = await Swap.new()
+    const swapTemplate = await Swap.new()
     const order = await orders.getOrder({})
     swapFunction = swapTemplate.contract.methods.swap(order).encodeABI()
 
@@ -82,22 +82,22 @@ contract('Delegate Unit Tests', async accounts => {
 
   async function setupMockIndexer() {
     mockIndexer = await MockContract.new()
-    let mockIndexerTemplate = await Indexer.new(EMPTY_ADDRESS)
+    const mockIndexerTemplate = await Indexer.new(EMPTY_ADDRESS)
 
     //mock setIntent()
-    let mockIndexer_setIntent = mockIndexerTemplate.contract.methods
+    const mockIndexer_setIntent = mockIndexerTemplate.contract.methods
       .setIntent(EMPTY_ADDRESS, EMPTY_ADDRESS, 0, web3.utils.fromAscii(''))
       .encodeABI()
     await mockIndexer.givenMethodReturnBool(mockIndexer_setIntent, true)
 
     //mock unsetIntent()
-    let mockIndexer_unsetIntent = mockIndexerTemplate.contract.methods
+    const mockIndexer_unsetIntent = mockIndexerTemplate.contract.methods
       .unsetIntent(EMPTY_ADDRESS, EMPTY_ADDRESS)
       .encodeABI()
     await mockIndexer.givenMethodReturnBool(mockIndexer_unsetIntent, true)
 
     //mock stakingToken()
-    let mockIndexer_stakingToken = mockIndexerTemplate.contract.methods
+    const mockIndexer_stakingToken = mockIndexerTemplate.contract.methods
       .stakingToken()
       .encodeABI()
     await mockIndexer.givenMethodReturnAddress(
@@ -131,12 +131,12 @@ contract('Delegate Unit Tests', async accounts => {
 
   describe('Test constructor', async () => {
     it('Test initial Swap Contract', async () => {
-      let val = await delegate.swapContract.call()
+      const val = await delegate.swapContract.call()
       equal(val, mockSwap.address, 'swap address is incorrect')
     })
 
     it('Test initial trade wallet value', async () => {
-      let val = await delegate.tradeWallet.call()
+      const val = await delegate.tradeWallet.call()
       equal(val, tradeWallet, 'trade wallet is incorrect')
     })
 
@@ -146,7 +146,7 @@ contract('Delegate Unit Tests', async accounts => {
         true
       )
 
-      let newDelegate = await Delegate.new(
+      const newDelegate = await Delegate.new(
         mockSwap.address,
         mockIndexer.address,
         EMPTY_ADDRESS,
@@ -156,12 +156,12 @@ contract('Delegate Unit Tests', async accounts => {
         }
       )
 
-      let val = await newDelegate.tradeWallet.call()
+      const val = await newDelegate.tradeWallet.call()
       equal(val, owner, 'trade wallet is incorrect')
     })
 
     it('Test owner is set correctly having been provided an empty address', async () => {
-      let val = await delegate.owner.call()
+      const val = await delegate.owner.call()
       equal(val, owner, 'owner is incorrect - should be owner')
     })
 
@@ -171,7 +171,7 @@ contract('Delegate Unit Tests', async accounts => {
         true
       )
 
-      let newDelegate = await Delegate.new(
+      const newDelegate = await Delegate.new(
         mockSwap.address,
         mockIndexer.address,
         notOwner,
@@ -182,7 +182,7 @@ contract('Delegate Unit Tests', async accounts => {
       )
 
       // being provided an empty address, it should leave the owner unchanged
-      let val = await newDelegate.owner.call()
+      const val = await newDelegate.owner.call()
       equal(val, notOwner, 'owner is incorrect - should be notOwner')
     })
 
@@ -237,7 +237,7 @@ contract('Delegate Unit Tests', async accounts => {
     })
 
     it('Test setRule', async () => {
-      let trx = await delegate.setRule(
+      const trx = await delegate.setRule(
         SENDER_TOKEN,
         SIGNER_TOKEN,
         MAX_SENDER_AMOUNT,
@@ -246,7 +246,7 @@ contract('Delegate Unit Tests', async accounts => {
       )
 
       //check if rule has been added
-      let rule = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
+      const rule = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
       equal(
         rule[0].toNumber(),
         MAX_SENDER_AMOUNT,
@@ -291,7 +291,7 @@ contract('Delegate Unit Tests', async accounts => {
       )
 
       //ensure rule has been added
-      let ruleBefore = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
+      const ruleBefore = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
       equal(
         ruleBefore[0].toNumber(),
         MAX_SENDER_AMOUNT,
@@ -301,7 +301,7 @@ contract('Delegate Unit Tests', async accounts => {
       trx = await delegate.unsetRule(SENDER_TOKEN, SIGNER_TOKEN)
 
       //check that the rule has been removed
-      let ruleAfter = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
+      const ruleAfter = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
       equal(
         ruleAfter[0].toNumber(),
         0,
@@ -319,9 +319,9 @@ contract('Delegate Unit Tests', async accounts => {
 
   describe('Test setRuleAndIntent()', async () => {
     it('Test calling setRuleAndIntent with transfer error', async () => {
-      let stakeAmount = 250
+      const stakeAmount = 250
 
-      let rule = [100000, 300, 0]
+      const rule = [100000, 300, 0]
 
       await mockStakingToken.givenMethodReturnUint(
         mockStakingToken_allowance,
@@ -343,9 +343,9 @@ contract('Delegate Unit Tests', async accounts => {
     })
 
     it('Test successfully calling setRuleAndIntent with 0 staked amount', async () => {
-      let stakeAmount = 0
+      const stakeAmount = 0
 
-      let rule = [100000, 300, 0]
+      const rule = [100000, 300, 0]
 
       await mockStakingToken.givenMethodReturnBool(
         mockStakingToken_approve,
@@ -361,9 +361,9 @@ contract('Delegate Unit Tests', async accounts => {
     })
 
     it('Test successfully calling setRuleAndIntent with staked amount', async () => {
-      let stakeAmount = 250
+      const stakeAmount = 250
 
-      let rule = [100000, 300, 0]
+      const rule = [100000, 300, 0]
 
       await mockStakingToken.givenMethodReturnUint(
         mockStakingToken_allowance,
@@ -387,9 +387,9 @@ contract('Delegate Unit Tests', async accounts => {
     })
 
     it('Test unsuccessfully calling setRuleAndIntent with decreased staked amount', async () => {
-      let stakeAmount = 100
+      const stakeAmount = 100
 
-      let rule = [100000, 300, 0]
+      const rule = [100000, 300, 0]
 
       await mockStakingToken.givenMethodReturnUint(
         mockStakingToken_allowance,
@@ -426,7 +426,7 @@ contract('Delegate Unit Tests', async accounts => {
 
   describe('Test unsetRuleAndIntent()', async () => {
     it('Test calling unsetRuleAndIntent() with transfer error', async () => {
-      let mockScore = 1000
+      const mockScore = 1000
 
       //mock the score/staked amount to be transferred
       await mockIndexer.givenMethodReturnUint(
@@ -447,7 +447,7 @@ contract('Delegate Unit Tests', async accounts => {
     })
 
     it('Test successfully calling unsetRuleAndIntent() with 0 staked amount', async () => {
-      let mockScore = 0
+      const mockScore = 0
 
       //mock the score/staked amount to be transferred
       await mockIndexer.givenMethodReturnUint(
@@ -459,7 +459,7 @@ contract('Delegate Unit Tests', async accounts => {
     })
 
     it('Test successfully calling unsetRuleAndIntent() with staked amount', async () => {
-      let mockScore = 1000
+      const mockScore = 1000
 
       //mock the score/staked amount to be transferred
       await mockIndexer.givenMethodReturnUint(
@@ -477,7 +477,7 @@ contract('Delegate Unit Tests', async accounts => {
     })
 
     it('Test successfully calling unsetRuleAndIntent() with staked amount', async () => {
-      let mockScore = 1000
+      const mockScore = 1000
 
       //mock the score/staked amount to be transferred
       await mockIndexer.givenMethodReturnUint(
@@ -515,7 +515,7 @@ contract('Delegate Unit Tests', async accounts => {
   describe('Test transfer of ownership', async () => {
     it('Test ownership after transfer', async () => {
       await delegate.transferOwnership(notOwner)
-      let val = await delegate.owner.call()
+      const val = await delegate.owner.call()
       equal(val, notOwner, 'owner was not passed properly')
     })
   })
@@ -523,7 +523,7 @@ contract('Delegate Unit Tests', async accounts => {
   describe('Test getSignerSideQuote', async () => {
     it('test when rule does not exist', async () => {
       const NON_EXISTENT_SIGNER_TOKEN = accounts[7]
-      let val = await delegate.getSignerSideQuote.call(
+      const val = await delegate.getSignerSideQuote.call(
         1234,
         SENDER_TOKEN,
         NON_EXISTENT_SIGNER_TOKEN
@@ -543,7 +543,7 @@ contract('Delegate Unit Tests', async accounts => {
         PRICE_COEF,
         EXP
       )
-      let val = await delegate.getSignerSideQuote.call(
+      const val = await delegate.getSignerSideQuote.call(
         MAX_SENDER_AMOUNT + 1,
         SENDER_TOKEN,
         SIGNER_TOKEN
@@ -563,7 +563,7 @@ contract('Delegate Unit Tests', async accounts => {
         PRICE_COEF,
         EXP
       )
-      let val = await delegate.getSignerSideQuote.call(
+      const val = await delegate.getSignerSideQuote.call(
         0,
         SENDER_TOKEN,
         SIGNER_TOKEN
@@ -584,19 +584,19 @@ contract('Delegate Unit Tests', async accounts => {
         EXP
       )
 
-      let val = await delegate.getSignerSideQuote.call(
+      const val = await delegate.getSignerSideQuote.call(
         1234,
         SENDER_TOKEN,
         SIGNER_TOKEN
       )
-      let expectedValue = Math.floor((1234 * PRICE_COEF) / 10 ** EXP)
+      const expectedValue = Math.floor((1234 * PRICE_COEF) / 10 ** EXP)
       equal(val.toNumber(), expectedValue, 'there should be a quote available')
     })
   })
 
   describe('Test getSenderSideQuote', async () => {
     it('test when rule does not exist', async () => {
-      let val = await delegate.getSenderSideQuote.call(
+      const val = await delegate.getSenderSideQuote.call(
         4312,
         SENDER_TOKEN,
         SIGNER_TOKEN
@@ -642,19 +642,19 @@ contract('Delegate Unit Tests', async accounts => {
         EXP
       )
 
-      let val = await delegate.getSenderSideQuote.call(
+      const val = await delegate.getSenderSideQuote.call(
         500,
         SIGNER_TOKEN,
         SENDER_TOKEN
       )
-      let expectedValue = Math.floor((500 * 10 ** EXP) / PRICE_COEF)
+      const expectedValue = Math.floor((500 * 10 ** EXP) / PRICE_COEF)
       equal(val.toNumber(), expectedValue, 'there should be a quote available')
     })
   })
 
   describe('Test getMaxQuote', async () => {
     it('test when rule does not exist', async () => {
-      let val = await delegate.getMaxQuote.call(SENDER_TOKEN, SIGNER_TOKEN)
+      const val = await delegate.getMaxQuote.call(SENDER_TOKEN, SIGNER_TOKEN)
       equal(
         val[0].toNumber(),
         0,
@@ -675,7 +675,7 @@ contract('Delegate Unit Tests', async accounts => {
         PRICE_COEF,
         EXP
       )
-      let val = await delegate.getMaxQuote.call(SENDER_TOKEN, SIGNER_TOKEN)
+      const val = await delegate.getMaxQuote.call(SENDER_TOKEN, SIGNER_TOKEN)
 
       equal(
         val[0].toNumber(),
@@ -683,7 +683,7 @@ contract('Delegate Unit Tests', async accounts => {
         'no quote should be available if a peer does not exist'
       )
 
-      let expectedValue = Math.floor(
+      const expectedValue = Math.floor(
         (MAX_SENDER_AMOUNT * PRICE_COEF) / 10 ** EXP
       )
       equal(
@@ -756,8 +756,8 @@ contract('Delegate Unit Tests', async accounts => {
         EXP
       )
 
-      let signerAmount = 100
-      let senderAmount = Math.floor((signerAmount * 10 ** EXP) / PRICE_COEF)
+      const signerAmount = 100
+      const senderAmount = Math.floor((signerAmount * 10 ** EXP) / PRICE_COEF)
 
       const order = await orders.getOrder({
         signer: {
@@ -817,8 +817,8 @@ contract('Delegate Unit Tests', async accounts => {
         EXP
       )
 
-      let signerAmount = 100
-      let senderAmount = Math.floor((signerAmount * 10 ** EXP) / PRICE_COEF)
+      const signerAmount = 100
+      const senderAmount = Math.floor((signerAmount * 10 ** EXP) / PRICE_COEF)
 
       const order = await orders.getOrder({
         signer: {
@@ -852,8 +852,8 @@ contract('Delegate Unit Tests', async accounts => {
         EXP
       )
 
-      let signerAmount = 100
-      let senderAmount = Math.floor((signerAmount * 10 ** EXP) / PRICE_COEF)
+      const signerAmount = 100
+      const senderAmount = Math.floor((signerAmount * 10 ** EXP) / PRICE_COEF)
 
       const order = await orders.getOrder({
         signer: {
@@ -888,8 +888,8 @@ contract('Delegate Unit Tests', async accounts => {
         EXP
       )
 
-      let signerAmount = 100
-      let senderAmount = Math.floor((signerAmount * 10 ** EXP) / PRICE_COEF)
+      const signerAmount = 100
+      const senderAmount = Math.floor((signerAmount * 10 ** EXP) / PRICE_COEF)
 
       const order = await orders.getOrder({
         signer: {
@@ -924,9 +924,9 @@ contract('Delegate Unit Tests', async accounts => {
         EXP
       )
 
-      let ruleBefore = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
+      const ruleBefore = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
 
-      let signerAmount = 100
+      const signerAmount = 100
 
       const order = await orders.getOrder({
         signer: {
@@ -949,7 +949,7 @@ contract('Delegate Unit Tests', async accounts => {
         })
       )
 
-      let ruleAfter = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
+      const ruleAfter = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
       equal(
         ruleAfter[0].toNumber(),
         ruleBefore[0].toNumber() - signerAmount,
@@ -957,7 +957,7 @@ contract('Delegate Unit Tests', async accounts => {
       )
 
       //check if swap() was called
-      let invocationCount = await mockSwap.invocationCountForMethod.call(
+      const invocationCount = await mockSwap.invocationCountForMethod.call(
         swapFunction
       )
       equal(
@@ -976,9 +976,9 @@ contract('Delegate Unit Tests', async accounts => {
         EXP
       )
 
-      let ruleBefore = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
+      const ruleBefore = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
 
-      let signerAmount = 100
+      const signerAmount = 100
 
       const order = await orders.getOrder({
         signer: {
@@ -995,13 +995,13 @@ contract('Delegate Unit Tests', async accounts => {
 
       //mock swapContract
       //test rule decrement
-      let tx = await delegate.provideOrder(order, {
+      const tx = await delegate.provideOrder(order, {
         from: notOwner,
       })
 
       emitted(tx, 'ProvideOrder')
 
-      let ruleAfter = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
+      const ruleAfter = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
       equal(
         ruleAfter[0].toNumber(),
         ruleBefore[0].toNumber() - signerAmount,
@@ -1009,7 +1009,7 @@ contract('Delegate Unit Tests', async accounts => {
       )
 
       //check if swap() was called
-      let invocationCount = await mockSwap.invocationCountForMethod.call(
+      const invocationCount = await mockSwap.invocationCountForMethod.call(
         swapFunction
       )
       equal(
@@ -1028,10 +1028,10 @@ contract('Delegate Unit Tests', async accounts => {
         EXP
       )
 
-      let ruleBefore = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
+      const ruleBefore = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
 
-      let signerAmount = 100
-      let senderAmount = Math.floor((signerAmount * 10 ** EXP) / PRICE_COEF)
+      const signerAmount = 100
+      const senderAmount = Math.floor((signerAmount * 10 ** EXP) / PRICE_COEF)
 
       const order = await orders.getOrder({
         signer: {
@@ -1046,13 +1046,13 @@ contract('Delegate Unit Tests', async accounts => {
         },
       })
 
-      let tx = await delegate.provideOrder(order, {
+      const tx = await delegate.provideOrder(order, {
         from: notOwner,
       })
 
       emitted(tx, 'ProvideOrder')
 
-      let ruleAfter = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
+      const ruleAfter = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
       equal(
         ruleAfter[0].toNumber(),
         ruleBefore[0].toNumber() - senderAmount,

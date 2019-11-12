@@ -5,11 +5,11 @@
 const { SECONDS_IN_DAY } = require('@airswap/order-utils').constants
 const helper = require('ganache-time-traveler')
 
-let getLatestTimestamp = async () => {
+const getLatestTimestamp = async () => {
   return (await web3.eth.getBlock('latest')).timestamp
 }
 
-let getTimestampPlusDays = async days => {
+const getTimestampPlusDays = async days => {
   return (await getLatestTimestamp()) + SECONDS_IN_DAY * days
 }
 
