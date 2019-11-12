@@ -3,7 +3,7 @@ const Types = artifacts.require('Types')
 const FungibleToken = artifacts.require('FungibleToken')
 const NonFungibleToken = artifacts.require('NonFungibleToken')
 const OMGToken = artifacts.require('OMGToken')
-const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
+const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
 
 const {
   emitted,
@@ -57,13 +57,13 @@ contract('Swap', async accounts => {
   ])
 
   after(async () => {
-    await revertToSnapShot(snapshotId)
+    await revertToSnapshot(snapshotId)
   })
 
   describe('Deploying...', async () => {
     it('Deployed Swap contract', async () => {
       const typesLib = await Types.new()
-      await Swap.link(Types, typesLib.address)
+      await Swap.link('Types', typesLib.address)
       swapContract = await Swap.new()
       swapAddress = swapContract.address
 

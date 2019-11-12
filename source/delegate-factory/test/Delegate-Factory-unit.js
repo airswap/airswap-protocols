@@ -3,7 +3,7 @@ const MockContract = artifacts.require('MockContract')
 const Indexer = artifacts.require('Indexer')
 const FungibleToken = artifacts.require('FungibleToken')
 const Delegate = artifacts.require('Delegate')
-const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
+const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
 const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 const {
   reverted,
@@ -33,7 +33,7 @@ contract('Delegate Factory Tests', async accounts => {
   })
 
   afterEach(async () => {
-    await revertToSnapShot(snapshotId)
+    await revertToSnapshot(snapshotId)
   })
 
   before('Deploy Delegate Factory', async () => {

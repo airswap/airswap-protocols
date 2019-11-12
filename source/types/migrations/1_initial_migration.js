@@ -1,5 +1,7 @@
-const Migrations = artifacts.require('Migrations')
+const Types = artifacts.require('Types')
 
-module.exports = deployer => {
-  deployer.deploy(Migrations)
+module.exports = (deployer, network) => {
+  if (network == 'rinkeby') {
+    deployer.deploy(Types)
+  }
 }

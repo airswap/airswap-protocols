@@ -9,7 +9,7 @@ const {
   equal,
   passes,
 } = require('@airswap/test-utils').assert
-const { revertToSnapShot, takeSnapshot } = require('@airswap/test-utils').time
+const { revertToSnapshot, takeSnapshot } = require('@airswap/test-utils').time
 const {
   EMPTY_ADDRESS,
   HEAD,
@@ -67,7 +67,7 @@ contract('Indexer Unit Tests', async accounts => {
   })
 
   afterEach(async () => {
-    await revertToSnapShot(snapshotId)
+    await revertToSnapshot(snapshotId)
   })
 
   before('Setup contracts', async () => {

@@ -6,7 +6,7 @@ const {
   reverted,
   emitted,
 } = require('@airswap/test-utils').assert
-const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
+const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
 const { padAddressToLocator } = require('@airswap/test-utils').padding
 const {
   EMPTY_ADDRESS,
@@ -45,7 +45,7 @@ contract('Index Unit Tests', async accounts => {
   })
 
   afterEach(async () => {
-    await revertToSnapShot(snapshotId)
+    await revertToSnapshot(snapshotId)
   })
 
   before('Setup', async () => {

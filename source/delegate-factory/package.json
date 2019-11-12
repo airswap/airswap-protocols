@@ -1,6 +1,6 @@
 {
   "name": "@airswap/delegate-factory",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Deploys Delegate contracts for use in the Swap Protocol",
   "license": "Apache-2.0",
   "repository": {
@@ -14,10 +14,14 @@
     "ganache": "ganache-cli -p 8545 --gasLimit 0xfffffffffff --time '2017-05-10T00:00:00+00:00'",
     "hint": "yarn solhint \"./contracts/**/*.sol\"",
     "lint": "yarn eslint \"./test/**/*.js\"",
-    "test": "truffle test"
+    "cp_migration_flat": "mkdir flatten/; cp contracts/Migrations.sol flatten/",
+    "test": "truffle test",
+    "flatten": "truffle run flatten",
+    "migrate": "yarn cp_migration_flat; truffle migrate --skip-dry-run",
+    "verify": "truffle run verify"
   },
   "devDependencies": {
-    "@airswap/order-utils": "0.3.0",
+    "@airswap/order-utils": "0.3.4",
     "@airswap/test-utils": "0.1.1",
     "solidity-coverage": "^0.6.3"
   },

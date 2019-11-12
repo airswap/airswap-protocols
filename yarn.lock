@@ -2,15 +2,6 @@
 # yarn lockfile v1
 
 
-"@airswap/order-utils@0.3.0":
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/@airswap/order-utils/-/order-utils-0.3.0.tgz#5bcfc8629c7e3d1a25cc0682b9f7a668a42e3bd3"
-  integrity sha512-wlS2JSFaNjOcd0/ewBOf5ixNAheH3AQe5gwc+Fuyl9y8z18ORE2dEhy71JujdrZEE5HT9XMxSyGjY91tl9CyhQ==
-  dependencies:
-    eth-sig-util "^2.2.0"
-    ethereumjs-util "^6.1.0"
-    web3 "^1.0.0-beta.55"
-
 "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.5.5":
   version "7.5.5"
   resolved "https://registry.yarnpkg.com/@babel/code-frame/-/code-frame-7.5.5.tgz#bc0782f6d69f7b7d49531219699b988f669a8f9d"
@@ -4459,6 +4450,11 @@ ganache-cli@^6.4.4:
     ethereumjs-util "6.1.0"
     source-map-support "0.5.12"
     yargs "13.2.4"
+
+ganache-time-traveler@^1.0.5:
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/ganache-time-traveler/-/ganache-time-traveler-1.0.5.tgz#8383518d6ea19614e57d78a9a156be83ed162771"
+  integrity sha512-46lhryBbHfNyixWq22zgK5OeRF4T8FgA67idiKMwYAePAvj1gqREaljVO2aV5GBouovtp8jg8qt+TXTXTtUEsQ==
 
 gauge@~2.7.3:
   version "2.7.4"

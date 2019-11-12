@@ -1,4 +1,5 @@
 const Swap = artifacts.require('Swap')
+const Types = artifacts.require('Types')
 const MockContract = artifacts.require('MockContract')
 const FungibleToken = artifacts.require('FungibleToken')
 
@@ -8,7 +9,7 @@ const {
   reverted,
   equal,
 } = require('@airswap/test-utils').assert
-const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
+const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
 const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 
 const NONCE_AVAILABLE = 0x00
@@ -27,6 +28,7 @@ contract('Swap Unit Tests', async accounts => {
 
   let snapshotId
   let swap
+  let types
 
   beforeEach(async () => {
     let snapShot = await takeSnapshot()
@@ -34,10 +36,12 @@ contract('Swap Unit Tests', async accounts => {
   })
 
   afterEach(async () => {
-    await revertToSnapShot(snapshotId)
+    await revertToSnapshot(snapshotId)
   })
 
   before('deploy Swap', async () => {
+    types = await Types.new()
+    await Swap.link('Types', types.address)
     swap = await Swap.new()
   })
 

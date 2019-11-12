@@ -1,11 +1,12 @@
 const Swap = artifacts.require('Swap')
+const Types = artifacts.require('Types')
 const Wrapper = artifacts.require('Wrapper')
 const WETH9 = artifacts.require('WETH9')
 const FungibleToken = artifacts.require('FungibleToken')
 const MockContract = artifacts.require('MockContract')
 
 const { equal, reverted, passes } = require('@airswap/test-utils').assert
-const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
+const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
 const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 const { orders } = require('@airswap/order-utils')
 
@@ -35,7 +36,7 @@ contract('Wrapper Unit Tests', async accounts => {
   })
 
   afterEach(async () => {
-    await revertToSnapShot(snapshotId)
+    await revertToSnapshot(snapshotId)
   })
 
   async function setupMockWeth() {
@@ -79,6 +80,8 @@ contract('Wrapper Unit Tests', async accounts => {
   }
 
   async function setupMockSwap() {
+    let types = await Types.new()
+    await Swap.link('Types', types.address)
     let swapTemplate = await Swap.new()
     //mock the swap.swap method
     const order = await orders.getOrder({})
