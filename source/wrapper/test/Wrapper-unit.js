@@ -141,7 +141,7 @@ contract('Wrapper Unit Tests', async accounts => {
       const nonSenderToken = mockToken
       const senderToken = mockToken
 
-      let order = await orders.getOrder({
+      const order = await orders.getOrder({
         sender: {
           wallet: mockSender,
           token: nonSenderToken,
@@ -169,7 +169,7 @@ contract('Wrapper Unit Tests', async accounts => {
     })
 
     it('Test when sender token == weth, ensure the sender amount matches sent ether', async () => {
-      let order = await orders.getOrder({
+      const order = await orders.getOrder({
         sender: {
           wallet: mockSender,
           param: 1,
@@ -199,7 +199,7 @@ contract('Wrapper Unit Tests', async accounts => {
     it('Test when sender token == weth, signer token == weth, and the transaction passes', async () => {
       //mock the weth.balance method
       await mockWeth.givenMethodReturnUint(weth_balance, 0)
-      let order = await orders.getOrder({
+      const order = await orders.getOrder({
         signer: {
           wallet: mockSigner,
           token: mockWeth.address,
@@ -237,7 +237,7 @@ contract('Wrapper Unit Tests', async accounts => {
     it('Test when sender token == weth, signer token != weth, and the transaction passes', async () => {
       const notWethContract = mockFT.address
 
-      let order = await orders.getOrder({
+      const order = await orders.getOrder({
         signer: {
           wallet: mockSigner,
           token: notWethContract,
@@ -283,7 +283,7 @@ contract('Wrapper Unit Tests', async accounts => {
       await mockFT.givenMethodReturnBool(mock_transfer, false)
       const notWethContract = mockFT.address
 
-      let order = await orders.getOrder({
+      const order = await orders.getOrder({
         signer: {
           wallet: mockSigner,
           token: notWethContract,
@@ -322,7 +322,7 @@ contract('Wrapper Unit Tests', async accounts => {
       const nonMockSender = accounts[7]
       const notWethContract = mockFT.address
 
-      let order = await orders.getOrder({
+      const order = await orders.getOrder({
         sender: {
           wallet: nonMockSender,
           param: 1,
@@ -352,7 +352,7 @@ contract('Wrapper Unit Tests', async accounts => {
     it('Test when sender token == non weth erc20, signer token == non weth erc20, and the transaction passes', async () => {
       const notWethContract = mockFT.address
 
-      let order = await orders.getOrder({
+      const order = await orders.getOrder({
         signer: {
           token: notWethContract,
           wallet: mockSigner,
@@ -425,7 +425,7 @@ contract('Wrapper Unit Tests', async accounts => {
     it('Test swap when not paused', async () => {
       const notWethContract = mockFT.address
 
-      let order = await orders.getOrder({
+      const order = await orders.getOrder({
         signer: {
           token: notWethContract,
           wallet: mockSigner,

@@ -102,7 +102,7 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
 
   describe('Wrap Buys', async () => {
     it('Checks that Bob take a WETH order from Alice using ETH', async () => {
-      let order = await orders.getOrder({
+      const order = await orders.getOrder({
         signer: {
           wallet: aliceAddress,
           token: tokenDAI.address,
@@ -163,7 +163,7 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
     })
 
     it('Checks that Alice receives ETH for a WETH order from Carol', async () => {
-      let order = await orders.getOrder({
+      const order = await orders.getOrder({
         signer: {
           wallet: carolAddress,
           token: tokenWETH.address,
@@ -225,7 +225,7 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
     })
 
     it('Send order where the sender does not send the correct amount of ETH', async () => {
-      let order = await orders.getOrder({
+      const order = await orders.getOrder({
         signer: {
           wallet: aliceAddress,
           token: tokenDAI.address,
@@ -255,7 +255,7 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
     })
 
     it('Send order where Bob sends Eth to Alice for DAI', async () => {
-      let order = await orders.getOrder({
+      const order = await orders.getOrder({
         signer: {
           wallet: aliceAddress,
           token: tokenDAI.address,
@@ -311,7 +311,7 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
     })
 
     it('Send order where Bob sends AST to Alice for DAI', async () => {
-      let order = await orders.getOrder({
+      const order = await orders.getOrder({
         signer: {
           wallet: aliceAddress,
           token: tokenDAI.address,
@@ -349,7 +349,7 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
     })
 
     it('Send order where the sender is not the sender of the order', async () => {
-      let order = await orders.getOrder({
+      const order = await orders.getOrder({
         signer: {
           wallet: aliceAddress,
           token: tokenDAI.address,
@@ -379,7 +379,7 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
     })
 
     it('Send order without WETH where ETH is incorrectly supplied', async () => {
-      let order = await orders.getOrder({
+      const order = await orders.getOrder({
         signer: {
           wallet: aliceAddress,
           token: tokenDAI.address,
@@ -409,7 +409,7 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
     })
 
     it('Send order where Bob sends AST to Alice for DAI w/ authorization but without signature', async () => {
-      let order = await orders.getOrder({
+      const order = await orders.getOrder({
         signer: {
           wallet: aliceAddress,
           token: tokenDAI.address,

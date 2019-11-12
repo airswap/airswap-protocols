@@ -57,7 +57,7 @@ describe('Orders', async () => {
   })
 
   it('Check correct order with signature', async () => {
-    let order = await orders.getOrder({
+    const order = await orders.getOrder({
       expiry: '1604787494',
       nonce: '0',
       signer: {
@@ -116,7 +116,7 @@ describe('Orders', async () => {
   })
 
   it('Check invalid signature', async () => {
-    let order = await orders.getOrder({
+    const order = await orders.getOrder({
       expiry: '1604787494',
       nonce: '101',
       signer: {
@@ -145,7 +145,7 @@ describe('Orders', async () => {
   })
 
   it('Check order without allowance', async () => {
-    let order = await orders.getOrder({
+    const order = await orders.getOrder({
       expiry: '1604787494',
       nonce: '101',
       signer: {
@@ -177,7 +177,7 @@ describe('Orders', async () => {
   })
 
   it('Check order without balance', async () => {
-    let order = await orders.getOrder({
+    const order = await orders.getOrder({
       expiry: '1604787494',
       nonce: '101',
       signer: {

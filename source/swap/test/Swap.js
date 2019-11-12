@@ -506,7 +506,7 @@ contract('Swap', async accounts => {
     })
 
     it('Checks that David can no longer make orders on behalf of Alice', async () => {
-      let order = await orders.getOrder({
+      const order = await orders.getOrder({
         signer: {
           wallet: aliceAddress,
         },
@@ -671,7 +671,7 @@ contract('Swap', async accounts => {
     })
 
     it('Alice gives an unsigned order to David who takes it for Bob', async () => {
-      let order = await orders.getOrder({
+      const order = await orders.getOrder({
         signer: {
           wallet: aliceAddress,
           token: tokenAST.address,
@@ -730,7 +730,7 @@ contract('Swap', async accounts => {
 
     it('David makes an order for Alice, Carol takes the order for Bob', async () => {
       // Alice has already approved David in the previous section
-      let order = await orders.getOrder({
+      const order = await orders.getOrder({
         signer: {
           wallet: aliceAddress,
           token: tokenAST.address,
@@ -875,7 +875,7 @@ contract('Swap', async accounts => {
 
   describe('Swaps with Fees', async () => {
     it('Checks that Carol gets paid 50 AST for facilitating a trade between Alice and Bob', async () => {
-      let order = await orders.getOrder({
+      const order = await orders.getOrder({
         signer: {
           wallet: aliceAddress,
           token: tokenAST.address,
@@ -921,7 +921,7 @@ contract('Swap', async accounts => {
 
   describe('Swap with Public Orders (No Sender Set)', async () => {
     it('Checks that a Swap succeeds without a sender wallet set', async () => {
-      let order = await orders.getOrder({
+      const order = await orders.getOrder({
         signer: {
           wallet: aliceAddress,
           token: tokenAST.address,
@@ -981,7 +981,7 @@ contract('Swap', async accounts => {
     })
 
     it('Bob buys Ticket #12345 from Alice for 1 DAI', async () => {
-      let order = await orders.getOrder({
+      const order = await orders.getOrder({
         signer: {
           wallet: aliceAddress,
           token: tokenTicket.address,
@@ -1013,7 +1013,7 @@ contract('Swap', async accounts => {
     })
 
     it('Alice buys Kitty #54321 from Bob for 50 AST', async () => {
-      let order = await orders.getOrder({
+      const order = await orders.getOrder({
         signer: {
           wallet: aliceAddress,
           token: tokenAST.address,
@@ -1044,7 +1044,7 @@ contract('Swap', async accounts => {
     })
 
     it('Checks that Carol gets paid Kitty #54321 for facilitating a trade between Alice and Bob', async () => {
-      let order = await orders.getOrder({
+      const order = await orders.getOrder({
         signer: {
           wallet: aliceAddress,
           token: tokenAST.address,
