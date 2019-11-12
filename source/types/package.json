@@ -22,6 +22,7 @@
   },
   "devDependencies": {
     "@airswap/tokens": "0.1.2",
+    "@airswap/order-utils": "0.3.5",
     "solidity-coverage": "^0.6.3"
   },
   "dependencies": {
