@@ -22,7 +22,7 @@
     "verify": "truffle run verify"
   },
   "devDependencies": {
-    "@airswap/order-utils": "0.3.4",
+    "@airswap/order-utils": "0.3.5",
     "@airswap/test-utils": "0.1.1",
     "solidity-coverage": "^0.6.3"
   },

@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "@airswap/tokens": "0.1.2",
-    "@airswap/order-utils": "0.3.4",
+    "@airswap/order-utils": "0.3.5",
     "@airswap/test-utils": "0.1.1",
     "truffle": "^5.0.32",
     "@gnosis.pm/mock-contract": "^3.0.7",
