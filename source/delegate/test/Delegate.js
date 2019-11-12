@@ -12,8 +12,11 @@ const {
   passes,
 } = require('@airswap/test-utils').assert
 const { balances } = require('@airswap/test-utils').balances
-const { orders } = require('@airswap/order-utils')
-const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
+const { orders, signatures } = require('@airswap/order-utils')
+const {
+  EMPTY_ADDRESS,
+  GANACHE_PROVIDER,
+} = require('@airswap/order-utils').constants
 
 contract('Delegate Integration Tests', async accounts => {
   const STARTING_BALANCE = 700
@@ -30,8 +33,6 @@ contract('Delegate Integration Tests', async accounts => {
   let swapContract
   let swapAddress
   let indexer
-
-  orders.setKnownAccounts([aliceAddress, bobAddress, carolAddress])
 
   async function setupTokens() {
     tokenWETH = await FungibleToken.new()
@@ -979,7 +980,7 @@ contract('Delegate Integration Tests', async accounts => {
 
     it('Gets a quote to sell 1 WETH and takes it, swap passes', async () => {
       // Note: Delegate is the order sender.
-      const order = await orders.getOrder({
+      let order = await orders.getOrder({
         signer: {
           wallet: bobAddress,
           token: tokenWETH.address,
@@ -991,6 +992,13 @@ contract('Delegate Integration Tests', async accounts => {
           param: quote.toNumber(),
         },
       })
+
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        bobAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
 
       // authorize the delegate to send trades
       await swapContract.authorizeSender(aliceDelegate.address, {
