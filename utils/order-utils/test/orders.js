@@ -1,7 +1,8 @@
 var expect = require('chai').expect
 const assert = require('assert')
 
-const { orders } = require('@airswap/order-utils')
+const { orders, signatures } = require('@airswap/order-utils')
+const { GANACHE_PROVIDER } = require('@airswap/order-utils').constants
 
 describe('Orders', async () => {
   const senderWallet = '0xbabe31056c0fe1b704d811b2405f6e9f5ae5e59d'
@@ -56,7 +57,7 @@ describe('Orders', async () => {
   })
 
   it('Check correct order with signature', async () => {
-    const order = await orders.getOrder({
+    let order = await orders.getOrder({
       expiry: '1604787494',
       nonce: '0',
       signer: {
@@ -70,7 +71,19 @@ describe('Orders', async () => {
         param: '0',
       },
     })
+<<<<<<< HEAD
     const errors = await orders.checkOrder(order, 'rinkeby')
+=======
+
+    order.signature = await signatures.getWeb3Signature(
+      order,
+      knownGanacheWallet,
+      rinkebySwap,
+      GANACHE_PROVIDER
+    )
+
+    let errors = await orders.checkOrder(order, 'rinkeby')
+>>>>>>> updated order utils tests
     assert.equal(errors.length, 0)
   })
 
@@ -89,13 +102,21 @@ describe('Orders', async () => {
         param: '2',
       },
     })
+
+    order.signature = await signatures.getWeb3Signature(
+      order,
+      knownGanacheWallet,
+      rinkebySwap,
+      GANACHE_PROVIDER
+    )
+
     const errors = await orders.checkOrder(order, 'rinkeby')
     assert.equal(errors.length, 2)
     assert.equal(errors[1], 'Order expiry has passed')
   })
 
   it('Check invalid signature', async () => {
-    const order = await orders.getOrder({
+    let order = await orders.getOrder({
       expiry: '1604787494',
       nonce: '101',
       signer: {
@@ -109,6 +130,14 @@ describe('Orders', async () => {
         param: '2',
       },
     })
+
+    order.signature = await signatures.getWeb3Signature(
+      order,
+      knownGanacheWallet,
+      rinkebySwap,
+      GANACHE_PROVIDER
+    )
+
     order.signature.v += 1
     const errors = await orders.checkOrder(order, 'rinkeby')
     assert.equal(errors.length, 2)
@@ -116,7 +145,7 @@ describe('Orders', async () => {
   })
 
   it('Check order without allowance', async () => {
-    const order = await orders.getOrder({
+    let order = await orders.getOrder({
       expiry: '1604787494',
       nonce: '101',
       signer: {
@@ -130,13 +159,25 @@ describe('Orders', async () => {
         param: '2',
       },
     })
+<<<<<<< HEAD
     const errors = await orders.checkOrder(order, 'rinkeby')
+=======
+
+    order.signature = await signatures.getWeb3Signature(
+      order,
+      knownGanacheWallet,
+      rinkebySwap,
+      GANACHE_PROVIDER
+    )
+
+    let errors = await orders.checkOrder(order, 'rinkeby')
+>>>>>>> updated order utils tests
     assert.equal(errors.length, 1)
     assert.equal(errors[0], 'signer allowance is too low')
   })
 
   it('Check order without balance', async () => {
-    const order = await orders.getOrder({
+    let order = await orders.getOrder({
       expiry: '1604787494',
       nonce: '101',
       signer: {
@@ -150,7 +191,19 @@ describe('Orders', async () => {
         param: '2',
       },
     })
+<<<<<<< HEAD
     const errors = await orders.checkOrder(order, 'rinkeby')
+=======
+
+    order.signature = await signatures.getWeb3Signature(
+      order,
+      knownGanacheWallet,
+      rinkebySwap,
+      GANACHE_PROVIDER
+    )
+
+    let errors = await orders.checkOrder(order, 'rinkeby')
+>>>>>>> updated order utils tests
     assert.equal(errors.length, 2)
     assert.equal(errors[0], 'signer balance is too low')
   })
