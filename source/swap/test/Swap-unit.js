@@ -31,7 +31,7 @@ contract('Swap Unit Tests', async accounts => {
   let types
 
   beforeEach(async () => {
-    let snapShot = await takeSnapshot()
+    const snapShot = await takeSnapshot()
     snapshotId = snapShot['result']
   })
 
@@ -47,21 +47,21 @@ contract('Swap Unit Tests', async accounts => {
 
   describe('Test swap', async () => {
     it('test when order is expired', async () => {
-      let signer = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
-      let sender = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
-      let affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
-      let signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, v, r, s]
-      let order = [0, 0, signer, sender, affiliate, signature]
+      const signer = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
+      const sender = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
+      const affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
+      const signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, v, r, s]
+      const order = [0, 0, signer, sender, affiliate, signature]
 
       await reverted(swap.swap(order), 'ORDER_EXPIRED')
     })
 
     it('test when order nonce is too low', async () => {
-      let signer = [kind, mockSigner, EMPTY_ADDRESS, 200]
-      let sender = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
-      let affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
-      let signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, v, r, s]
-      let order = [
+      const signer = [kind, mockSigner, EMPTY_ADDRESS, 200]
+      const sender = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
+      const affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
+      const signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, v, r, s]
+      const order = [
         0,
         Jun_06_2017T00_00_00_UTC,
         signer,
@@ -75,11 +75,11 @@ contract('Swap Unit Tests', async accounts => {
     })
 
     it('test when sender is provided, and the sender is unauthorized', async () => {
-      let signer = [kind, mockSigner, EMPTY_ADDRESS, 200]
-      let sender = [kind, mockSender, EMPTY_ADDRESS, 200]
-      let affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
-      let signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, v, r, s]
-      let order = [
+      const signer = [kind, mockSigner, EMPTY_ADDRESS, 200]
+      const sender = [kind, mockSender, EMPTY_ADDRESS, 200]
+      const affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
+      const signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, v, r, s]
+      const order = [
         0,
         Jun_06_2017T00_00_00_UTC,
         signer,
@@ -92,11 +92,11 @@ contract('Swap Unit Tests', async accounts => {
     })
 
     it('test when sender is provided, the sender is authorized, the signature.v is 0, and the signer wallet is unauthorized', async () => {
-      let signer = [kind, mockSigner, EMPTY_ADDRESS, 200]
-      let sender = [kind, mockSender, EMPTY_ADDRESS, 200]
-      let affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
-      let signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, 0, r, s]
-      let order = [
+      const signer = [kind, mockSigner, EMPTY_ADDRESS, 200]
+      const sender = [kind, mockSender, EMPTY_ADDRESS, 200]
+      const affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
+      const signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, 0, r, s]
+      const order = [
         0,
         Jun_06_2017T00_00_00_UTC,
         signer,
@@ -113,11 +113,11 @@ contract('Swap Unit Tests', async accounts => {
     })
 
     it('test swap when sender and signer are the same', async () => {
-      let signer = [kind, mockSender, EMPTY_ADDRESS, 200]
-      let sender = [kind, mockSender, EMPTY_ADDRESS, 200]
-      let affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 0]
-      let signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, 0, r, s]
-      let order = [
+      const signer = [kind, mockSender, EMPTY_ADDRESS, 200]
+      const sender = [kind, mockSender, EMPTY_ADDRESS, 200]
+      const affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 0]
+      const signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, 0, r, s]
+      const order = [
         0,
         Jun_06_2017T00_00_00_UTC,
         signer,
@@ -150,11 +150,11 @@ contract('Swap Unit Tests', async accounts => {
       // balance check should remain constant and thus fail
       await tokenMock.givenMethodReturnUint(token_balance, 1000)
 
-      let signer = [kind, mockSigner, tokenMock.address, 200]
-      let sender = [kind, mockSender, tokenMock.address, 200]
-      let affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 0]
-      let signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, 0, r, s]
-      let order = [
+      const signer = [kind, mockSigner, tokenMock.address, 200]
+      const sender = [kind, mockSender, tokenMock.address, 200]
+      const affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 0]
+      const signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, 0, r, s]
+      const order = [
         0,
         Jun_06_2017T00_00_00_UTC,
         signer,
@@ -190,11 +190,11 @@ contract('Swap Unit Tests', async accounts => {
       // balance check should remain constant and thus fail
       await tokenMock.givenMethodReturnUint(token_balance, 1000)
 
-      let signer = [kind, mockSigner, tokenMock.address, 200]
-      let sender = [kind, mockSender, tokenMock.address, 200]
-      let affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 0]
-      let signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, 0, r, s]
-      let order = [
+      const signer = [kind, mockSigner, tokenMock.address, 200]
+      const sender = [kind, mockSender, tokenMock.address, 200]
+      const affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 0]
+      const signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, 0, r, s]
+      const order = [
         0,
         Jun_06_2017T00_00_00_UTC,
         signer,
@@ -215,12 +215,12 @@ contract('Swap Unit Tests', async accounts => {
 
   describe('Test cancel', async () => {
     it('test cancellation with no items', async () => {
-      let trx = await swap.cancel([], { from: mockSigner })
+      const trx = await swap.cancel([], { from: mockSigner })
       await notEmitted(trx, 'Cancel')
     })
 
     it('test cancellation with one item', async () => {
-      let trx = await swap.cancel([6], { from: mockSigner })
+      const trx = await swap.cancel([6], { from: mockSigner })
 
       //ensure transaction was emitted
       await emitted(trx, 'Cancel', e => {
@@ -228,8 +228,7 @@ contract('Swap Unit Tests', async accounts => {
       })
 
       //ensure the value was set
-      let val
-      val = await swap.signerNonceStatus.call(mockSigner, 6)
+      const val = await swap.signerNonceStatus.call(mockSigner, 6)
       equal(val, NONCE_UNAVAILABLE)
     })
 
@@ -253,12 +252,12 @@ contract('Swap Unit Tests', async accounts => {
 
   describe('Test invalidate', async () => {
     it('test that given a minimum nonce for a signer is set', async () => {
-      let minNonceForSigner = await swap.signerMinimumNonce.call(mockSigner)
+      const minNonceForSigner = await swap.signerMinimumNonce.call(mockSigner)
       equal(minNonceForSigner, 0, 'mock signer should have min nonce of 0')
 
-      let trx = await swap.invalidate(5, { from: mockSigner })
+      const trx = await swap.invalidate(5, { from: mockSigner })
 
-      let newNonceForSigner = await swap.signerMinimumNonce.call(mockSigner)
+      const newNonceForSigner = await swap.signerMinimumNonce.call(mockSigner)
       equal(newNonceForSigner, 5, 'mock signer should have a min nonce of 5')
 
       emitted(trx, 'Invalidate', e => {
@@ -271,7 +270,7 @@ contract('Swap Unit Tests', async accounts => {
 
   describe('Test authorize signer', async () => {
     it('test when the message sender is the authorized signer', async () => {
-      let delegate = mockSigner
+      const delegate = mockSigner
       await reverted(
         swap.authorizeSigner(delegate, { from: mockSigner }),
         'INVALID_AUTH_SIGNER'
@@ -281,10 +280,10 @@ contract('Swap Unit Tests', async accounts => {
 
   describe('Test revoke', async () => {
     it('test that the revokeSigner is successfully removed', async () => {
-      let trx = await swap.revokeSigner(mockSigner, { from: sender })
+      const trx = await swap.revokeSigner(mockSigner, { from: sender })
 
       //check signerAuthorizations was unset
-      let val = await swap.signerAuthorizations.call(sender, mockSigner)
+      const val = await swap.signerAuthorizations.call(sender, mockSigner)
       equal(val, 0, 'signer approval was not properly unset')
 
       //check that the event was emitted
@@ -294,10 +293,10 @@ contract('Swap Unit Tests', async accounts => {
     })
 
     it('test that the revokeSender is successfully removed', async () => {
-      let trx = await swap.revokeSender(mockSender)
+      const trx = await swap.revokeSender(mockSender)
 
       //check senderAuthorizations was unset
-      let val = await swap.senderAuthorizations.call(sender, mockSender)
+      const val = await swap.senderAuthorizations.call(sender, mockSender)
       equal(val, 0, 'sender approval was not properly unset')
 
       //check that the event was emitted

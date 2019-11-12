@@ -26,10 +26,10 @@ const {
 let snapshotId
 
 contract('Swap', async accounts => {
-  let aliceAddress = accounts[0]
-  let bobAddress = accounts[1]
-  let carolAddress = accounts[2]
-  let davidAddress = accounts[3]
+  const aliceAddress = accounts[0]
+  const bobAddress = accounts[1]
+  const carolAddress = accounts[2]
+  const davidAddress = accounts[3]
 
   let swapContract
   let swapAddress
@@ -45,7 +45,7 @@ contract('Swap', async accounts => {
 
   // One big snapshot - not snapshotting every test
   before('Setup', async () => {
-    let snapShot = await takeSnapshot()
+    const snapShot = await takeSnapshot()
     snapshotId = snapShot['result']
   })
 

@@ -25,12 +25,12 @@ const signatures = require('./signatures')
 
 let nonce = 100
 
-let getLatestTimestamp = async () => {
+const getLatestTimestamp = async () => {
   return (await web3.eth.getBlock('latest')).timestamp
 }
 
 // network is 'rinkeby' , 'mainnet' etc
-let checkOrder = async (order, network) => {
+const checkOrder = async (order, network) => {
   let errors = []
   const provider = ethers.getDefaultProvider(network)
 
@@ -69,7 +69,7 @@ let checkOrder = async (order, network) => {
   )
 
   // Check order expiry
-  let latestBlock = await provider.getBlock(provider.getBlockNumber())
+  const latestBlock = await provider.getBlock(provider.getBlockNumber())
   if (latestBlock.timestamp >= order['expiry']) {
     errors.push('Order expiry has passed')
   }
@@ -82,7 +82,7 @@ let checkOrder = async (order, network) => {
   return errors
 }
 
-let checkOrderSignature = async (order, provider, errors) => {
+const checkOrderSignature = async (order, provider, errors) => {
   // Check signature is valid
   const isValid = signatures.isSignatureValid(order)
   if (!isValid) {
@@ -111,8 +111,8 @@ let checkOrderSignature = async (order, provider, errors) => {
   return errors
 }
 
-let checkBalanceAndApproval = async (order, partyName, provider, errors) => {
-  let party = order[partyName]
+const checkBalanceAndApproval = async (order, partyName, provider, errors) => {
+  const party = order[partyName]
 
   // If this is the affiliate, tokens come from the signer instead
   if (partyName == 'affiliate') {
@@ -143,7 +143,7 @@ let checkBalanceAndApproval = async (order, partyName, provider, errors) => {
   return errors
 }
 
-let checkNonce = async (swapAddress, signer, nonce, provider, errors) => {
+const checkNonce = async (swapAddress, signer, nonce, provider, errors) => {
   const swapContract = new ethers.Contract(swapAddress, Swap.abi, provider)
 
   // check not cancelled
@@ -162,7 +162,7 @@ let checkNonce = async (swapAddress, signer, nonce, provider, errors) => {
   return errors
 }
 
-let isValidOrder = order => {
+const isValidOrder = order => {
   return (
     'nonce' in order &&
     'expiry' in order &&

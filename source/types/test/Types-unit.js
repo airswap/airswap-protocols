@@ -17,7 +17,7 @@ contract('Types Unit Tests', async ([defaultAccount]) => {
   orders.setVerifyingContract(defaultAccount)
 
   beforeEach(async () => {
-    let snapShot = await takeSnapshot()
+    const snapShot = await takeSnapshot()
     snapshotId = snapShot['result']
   })
 
@@ -38,8 +38,8 @@ contract('Types Unit Tests', async ([defaultAccount]) => {
           wallet: defaultAccount,
         },
       })
-      let hashedDomain = '0x' + hashDomain(mockTypes.address).toString('hex')
-      let hashedOrder = await mockTypes.hashOrder.call(order, hashedDomain)
+      const hashedDomain = '0x' + hashDomain(mockTypes.address).toString('hex')
+      const hashedOrder = await mockTypes.hashOrder.call(order, hashedDomain)
       equal(
         hashedOrder,
         '0x' + getOrderHash(order, mockTypes.address).toString('hex'),
@@ -48,7 +48,7 @@ contract('Types Unit Tests', async ([defaultAccount]) => {
     })
 
     it('Test hashDomain', async () => {
-      let hashedDomain = await mockTypes.hashDomain.call(
+      const hashedDomain = await mockTypes.hashDomain.call(
         web3.utils.fromAscii(DOMAIN_NAME),
         web3.utils.fromAscii(DOMAIN_VERSION),
         mockTypes.address
