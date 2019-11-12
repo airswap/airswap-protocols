@@ -17,9 +17,6 @@
 const ethUtil = require('ethereumjs-util')
 const sigUtil = require('eth-sig-util')
 const web3Eth = require('web3-eth')
-const dotenv = require('dotenv')
-
-dotenv.config()
 
 const {
   DOMAIN_NAME,
