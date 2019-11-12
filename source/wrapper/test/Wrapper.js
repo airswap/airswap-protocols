@@ -15,6 +15,7 @@ const {
 const { balances } = require('@airswap/test-utils').balances
 const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
 const { orders, signatures } = require('@airswap/order-utils')
+const { GANACHE_PROVIDER } = require('@airswap/order-utils').constants
 
 let swapContract
 let wrapperContract
@@ -101,7 +102,7 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
 
   describe('Wrap Buys', async () => {
     it('Checks that Bob take a WETH order from Alice using ETH', async () => {
-      const order = await orders.getOrder({
+      let order = await orders.getOrder({
         signer: {
           wallet: aliceAddress,
           token: tokenDAI.address,
@@ -113,6 +114,13 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
           param: 10,
         },
       })
+
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        aliceAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
 
       let result = await wrappedSwap(order, {
         from: bobAddress,
@@ -155,7 +163,7 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
     })
 
     it('Checks that Alice receives ETH for a WETH order from Carol', async () => {
-      const order = await orders.getOrder({
+      let order = await orders.getOrder({
         signer: {
           wallet: carolAddress,
           token: tokenWETH.address,
@@ -167,6 +175,13 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
           param: 100,
         },
       })
+
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        carolAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
 
       let result = await wrappedSwap(order, { from: aliceAddress })
       passes(result)
@@ -210,7 +225,7 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
     })
 
     it('Send order where the sender does not send the correct amount of ETH', async () => {
-      const order = await orders.getOrder({
+      let order = await orders.getOrder({
         signer: {
           wallet: aliceAddress,
           token: tokenDAI.address,
@@ -222,6 +237,14 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
           param: 100,
         },
       })
+
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        aliceAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
       await reverted(
         wrappedSwap(order, {
           from: bobAddress,
@@ -232,7 +255,7 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
     })
 
     it('Send order where Bob sends Eth to Alice for DAI', async () => {
-      const order = await orders.getOrder({
+      let order = await orders.getOrder({
         signer: {
           wallet: aliceAddress,
           token: tokenDAI.address,
@@ -244,6 +267,14 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
           param: 10,
         },
       })
+
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        aliceAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
       let result = await wrappedSwap(order, {
         from: bobAddress,
         value: order.sender.param,
@@ -280,7 +311,7 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
     })
 
     it('Send order where Bob sends AST to Alice for DAI', async () => {
-      const order = await orders.getOrder({
+      let order = await orders.getOrder({
         signer: {
           wallet: aliceAddress,
           token: tokenDAI.address,
@@ -292,6 +323,14 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
           param: 100,
         },
       })
+
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        aliceAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
       let result = await wrappedSwap(order, {
         from: bobAddress,
         value: 0,
@@ -310,7 +349,7 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
     })
 
     it('Send order where the sender is not the sender of the order', async () => {
-      const order = await orders.getOrder({
+      let order = await orders.getOrder({
         signer: {
           wallet: aliceAddress,
           token: tokenDAI.address,
@@ -322,6 +361,14 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
           param: 100,
         },
       })
+
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        aliceAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
       await reverted(
         wrappedSwap(order, {
           from: carolAddress,
@@ -332,7 +379,7 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
     })
 
     it('Send order without WETH where ETH is incorrectly supplied', async () => {
-      const order = await orders.getOrder({
+      let order = await orders.getOrder({
         signer: {
           wallet: aliceAddress,
           token: tokenDAI.address,
@@ -344,6 +391,14 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
           param: 100,
         },
       })
+
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        aliceAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
       await reverted(
         wrappedSwap(order, {
           from: bobAddress,
@@ -354,23 +409,18 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
     })
 
     it('Send order where Bob sends AST to Alice for DAI w/ authorization but without signature', async () => {
-      const order = await orders.getOrder(
-        {
-          signer: {
-            wallet: aliceAddress,
-            token: tokenDAI.address,
-            param: 1,
-          },
-          sender: {
-            wallet: bobAddress,
-            token: tokenAST.address,
-            param: 100,
-          },
+      let order = await orders.getOrder({
+        signer: {
+          wallet: aliceAddress,
+          token: tokenDAI.address,
+          param: 1,
         },
-        true
-      )
-
-      order.signature = signatures.getEmptySignature(swapAddress)
+        sender: {
+          wallet: bobAddress,
+          token: tokenAST.address,
+          param: 100,
+        },
+      })
 
       const result = wrappedSwap(order, {
         from: bobAddress,
