@@ -9,7 +9,7 @@ describe('Orders', async () => {
   const signerWallet = '0x9d2fb0bcc90c6f3fa3a98d2c760623a4f6ee59b4'
 
   // this is accounts[0] when ganache seed == 0
-  const knownGanacheWallet = '0xe092b1fa25DF5786D151246E492Eed3d15EA4dAA'
+  const KNOWN_GANACHE_WALLET = '0xe092b1fa25DF5786D151246E492Eed3d15EA4dAA'
 
   // rinkeby addresses
   const ASTAddress = '0xcc1cbd4f67cceb7c001bd4adf98451237a193ff8'
@@ -61,7 +61,7 @@ describe('Orders', async () => {
       expiry: '1604787494',
       nonce: '0',
       signer: {
-        wallet: knownGanacheWallet,
+        wallet: KNOWN_GANACHE_WALLET,
         token: ASTAddress,
         param: '0',
       },
@@ -71,19 +71,15 @@ describe('Orders', async () => {
         param: '0',
       },
     })
-<<<<<<< HEAD
-    const errors = await orders.checkOrder(order, 'rinkeby')
-=======
 
     order.signature = await signatures.getWeb3Signature(
       order,
-      knownGanacheWallet,
+      KNOWN_GANACHE_WALLET,
       rinkebySwap,
       GANACHE_PROVIDER
     )
 
-    let errors = await orders.checkOrder(order, 'rinkeby')
->>>>>>> updated order utils tests
+    const errors = await orders.checkOrder(order, 'rinkeby')
     assert.equal(errors.length, 0)
   })
 
@@ -92,7 +88,7 @@ describe('Orders', async () => {
       expiry: '1494460800',
       nonce: '101',
       signer: {
-        wallet: knownGanacheWallet,
+        wallet: KNOWN_GANACHE_WALLET,
         token: ASTAddress,
         param: '400',
       },
@@ -105,7 +101,7 @@ describe('Orders', async () => {
 
     order.signature = await signatures.getWeb3Signature(
       order,
-      knownGanacheWallet,
+      KNOWN_GANACHE_WALLET,
       rinkebySwap,
       GANACHE_PROVIDER
     )
@@ -120,7 +116,7 @@ describe('Orders', async () => {
       expiry: '1604787494',
       nonce: '101',
       signer: {
-        wallet: knownGanacheWallet,
+        wallet: KNOWN_GANACHE_WALLET,
         token: ASTAddress,
         param: '400',
       },
@@ -133,7 +129,7 @@ describe('Orders', async () => {
 
     order.signature = await signatures.getWeb3Signature(
       order,
-      knownGanacheWallet,
+      KNOWN_GANACHE_WALLET,
       rinkebySwap,
       GANACHE_PROVIDER
     )
@@ -149,7 +145,7 @@ describe('Orders', async () => {
       expiry: '1604787494',
       nonce: '101',
       signer: {
-        wallet: knownGanacheWallet,
+        wallet: KNOWN_GANACHE_WALLET,
         token: ASTAddress,
         param: '400',
       },
@@ -159,19 +155,15 @@ describe('Orders', async () => {
         param: '2',
       },
     })
-<<<<<<< HEAD
-    const errors = await orders.checkOrder(order, 'rinkeby')
-=======
 
     order.signature = await signatures.getWeb3Signature(
       order,
-      knownGanacheWallet,
+      KNOWN_GANACHE_WALLET,
       rinkebySwap,
       GANACHE_PROVIDER
     )
 
-    let errors = await orders.checkOrder(order, 'rinkeby')
->>>>>>> updated order utils tests
+    const errors = await orders.checkOrder(order, 'rinkeby')
     assert.equal(errors.length, 1)
     assert.equal(errors[0], 'signer allowance is too low')
   })
@@ -181,7 +173,7 @@ describe('Orders', async () => {
       expiry: '1604787494',
       nonce: '101',
       signer: {
-        wallet: knownGanacheWallet,
+        wallet: KNOWN_GANACHE_WALLET,
         token: ASTAddress,
         param: '100001000',
       },
@@ -191,19 +183,15 @@ describe('Orders', async () => {
         param: '2',
       },
     })
-<<<<<<< HEAD
-    const errors = await orders.checkOrder(order, 'rinkeby')
-=======
 
     order.signature = await signatures.getWeb3Signature(
       order,
-      knownGanacheWallet,
+      KNOWN_GANACHE_WALLET,
       rinkebySwap,
       GANACHE_PROVIDER
     )
 
-    let errors = await orders.checkOrder(order, 'rinkeby')
->>>>>>> updated order utils tests
+    const errors = await orders.checkOrder(order, 'rinkeby')
     assert.equal(errors.length, 2)
     assert.equal(errors[0], 'signer balance is too low')
   })

@@ -47,34 +47,20 @@ contract('Swap Unit Tests', async accounts => {
 
   describe('Test swap', async () => {
     it('test when order is expired', async () => {
-<<<<<<< HEAD
       const signer = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
       const sender = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
       const affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
       const signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, v, r, s]
-=======
-      let signer = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
-      let sender = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
-      let affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
-      let signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, v, r, s]
->>>>>>> variables to constants
       const order = [0, 0, signer, sender, affiliate, signature]
 
       await reverted(swap.swap(order), 'ORDER_EXPIRED')
     })
 
     it('test when order nonce is too low', async () => {
-<<<<<<< HEAD
       const signer = [kind, mockSigner, EMPTY_ADDRESS, 200]
       const sender = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
       const affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
       const signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, v, r, s]
-=======
-      let signer = [kind, mockSigner, EMPTY_ADDRESS, 200]
-      let sender = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
-      let affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
-      let signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, v, r, s]
->>>>>>> variables to constants
       const order = [
         0,
         Jun_06_2017T00_00_00_UTC,
@@ -89,17 +75,10 @@ contract('Swap Unit Tests', async accounts => {
     })
 
     it('test when sender is provided, and the sender is unauthorized', async () => {
-<<<<<<< HEAD
       const signer = [kind, mockSigner, EMPTY_ADDRESS, 200]
       const sender = [kind, mockSender, EMPTY_ADDRESS, 200]
       const affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
       const signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, v, r, s]
-=======
-      let signer = [kind, mockSigner, EMPTY_ADDRESS, 200]
-      let sender = [kind, mockSender, EMPTY_ADDRESS, 200]
-      let affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
-      let signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, v, r, s]
->>>>>>> variables to constants
       const order = [
         0,
         Jun_06_2017T00_00_00_UTC,
@@ -113,17 +92,10 @@ contract('Swap Unit Tests', async accounts => {
     })
 
     it('test when sender is provided, the sender is authorized, the signature.v is 0, and the signer wallet is unauthorized', async () => {
-<<<<<<< HEAD
       const signer = [kind, mockSigner, EMPTY_ADDRESS, 200]
       const sender = [kind, mockSender, EMPTY_ADDRESS, 200]
       const affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
       const signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, 0, r, s]
-=======
-      let signer = [kind, mockSigner, EMPTY_ADDRESS, 200]
-      let sender = [kind, mockSender, EMPTY_ADDRESS, 200]
-      let affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
-      let signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, 0, r, s]
->>>>>>> variables to constants
       const order = [
         0,
         Jun_06_2017T00_00_00_UTC,
@@ -141,17 +113,10 @@ contract('Swap Unit Tests', async accounts => {
     })
 
     it('test swap when sender and signer are the same', async () => {
-<<<<<<< HEAD
       const signer = [kind, mockSender, EMPTY_ADDRESS, 200]
       const sender = [kind, mockSender, EMPTY_ADDRESS, 200]
       const affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 0]
       const signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, 0, r, s]
-=======
-      let signer = [kind, mockSender, EMPTY_ADDRESS, 200]
-      let sender = [kind, mockSender, EMPTY_ADDRESS, 200]
-      let affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 0]
-      let signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, 0, r, s]
->>>>>>> variables to constants
       const order = [
         0,
         Jun_06_2017T00_00_00_UTC,
@@ -185,17 +150,10 @@ contract('Swap Unit Tests', async accounts => {
       // balance check should remain constant and thus fail
       await tokenMock.givenMethodReturnUint(token_balance, 1000)
 
-<<<<<<< HEAD
       const signer = [kind, mockSigner, tokenMock.address, 200]
       const sender = [kind, mockSender, tokenMock.address, 200]
       const affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 0]
       const signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, 0, r, s]
-=======
-      let signer = [kind, mockSigner, tokenMock.address, 200]
-      let sender = [kind, mockSender, tokenMock.address, 200]
-      let affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 0]
-      let signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, 0, r, s]
->>>>>>> variables to constants
       const order = [
         0,
         Jun_06_2017T00_00_00_UTC,
@@ -232,17 +190,10 @@ contract('Swap Unit Tests', async accounts => {
       // balance check should remain constant and thus fail
       await tokenMock.givenMethodReturnUint(token_balance, 1000)
 
-<<<<<<< HEAD
       const signer = [kind, mockSigner, tokenMock.address, 200]
       const sender = [kind, mockSender, tokenMock.address, 200]
       const affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 0]
       const signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, 0, r, s]
-=======
-      let signer = [kind, mockSigner, tokenMock.address, 200]
-      let sender = [kind, mockSender, tokenMock.address, 200]
-      let affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 0]
-      let signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, 0, r, s]
->>>>>>> variables to constants
       const order = [
         0,
         Jun_06_2017T00_00_00_UTC,
