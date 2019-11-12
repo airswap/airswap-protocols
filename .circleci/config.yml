@@ -35,6 +35,10 @@ references:
           command: |
             yarn ganache > /dev/null &
             yarn test
+      - run:
+          name: Slither run
+          command: |
+            ./scripts/slither.sh
       - save_cache:
           paths:
             - node_modules
@@ -96,10 +100,6 @@ jobs:
               fi
               cd ..
             done
-      - run:
-          name: Slither run
-          command: |
-            ./scripts/slither.sh
       # Now we need to iterate over folders and deploy the folders that are listed
       # but only if the version changed
       - slack/status
