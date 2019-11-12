@@ -371,7 +371,7 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
         true
       )
 
-      order.signature = signatures.getEmptySignature()
+      order.signature = signatures.getEmptySignature(swapAddress)
 
       let result = wrappedSwap(order, {
         from: bobAddress,

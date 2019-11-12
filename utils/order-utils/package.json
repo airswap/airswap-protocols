@@ -1,6 +1,6 @@
 {
   "name": "@airswap/order-utils",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "description": "JavaScript utilities for orders, hashes, and signatures in the Swap Protocol",
   "license": "Apache-2.0",
   "repository": {
@@ -15,8 +15,13 @@
     "mocha": "^6.2.0"
   },
   "dependencies": {
+    "@airswap/swap": "2.2.2",
+    "@airswap/tokens": "0.1.2",
+    "dotenv": "^8.2.0",
     "eth-sig-util": "^2.2.0",
     "ethereumjs-util": "^6.1.0",
-    "web3": "^1.0.0-beta.55"
+    "ethers": "^4.0.27",
+    "web3-eth": "1.2.2",
+    "web3": "^1.0.0-beta.55"	
   }
 }
