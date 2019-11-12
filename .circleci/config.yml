@@ -35,10 +35,6 @@ references:
           command: |
             yarn ganache > /dev/null &
             yarn test
-      - run:
-          name: Slither run
-          command: |
-            ./scripts/slither.sh
       - save_cache:
           paths:
             - node_modules
