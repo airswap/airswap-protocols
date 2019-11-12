@@ -1,14 +1,15 @@
 var expect = require('chai').expect
 const assert = require('assert')
 
-const { orders } = require('@airswap/order-utils')
+const { orders, signatures } = require('@airswap/order-utils')
+const {
+  GANACHE_PROVIDER,
+  KNOWN_GANACHE_WALLET,
+} = require('@airswap/order-utils').constants
 
 describe('Orders', async () => {
   const senderWallet = '0xbabe31056c0fe1b704d811b2405f6e9f5ae5e59d'
   const signerWallet = '0x9d2fb0bcc90c6f3fa3a98d2c760623a4f6ee59b4'
-
-  // this is accounts[0] when ganache seed == 0
-  const knownGanacheWallet = '0xe092b1fa25DF5786D151246E492Eed3d15EA4dAA'
 
   // rinkeby addresses
   const ASTAddress = '0xcc1cbd4f67cceb7c001bd4adf98451237a193ff8'
@@ -17,7 +18,6 @@ describe('Orders', async () => {
   const rinkebySwap = '0x43f18D371f388ABE40b9dDaac44D1C9c9185a078'
 
   orders.setVerifyingContract(rinkebySwap)
-  orders.setKnownAccounts(knownGanacheWallet)
 
   it('Checks that a generated order is valid', async () => {
     const order = await orders.getOrder({
@@ -61,7 +61,7 @@ describe('Orders', async () => {
       expiry: '1604787494',
       nonce: '0',
       signer: {
-        wallet: knownGanacheWallet,
+        wallet: KNOWN_GANACHE_WALLET,
         token: ASTAddress,
         param: '0',
       },
@@ -71,6 +71,14 @@ describe('Orders', async () => {
         param: '0',
       },
     })
+
+    order.signature = await signatures.getWeb3Signature(
+      order,
+      KNOWN_GANACHE_WALLET,
+      rinkebySwap,
+      GANACHE_PROVIDER
+    )
+
     const errors = await orders.checkOrder(order, 'rinkeby')
     assert.equal(errors.length, 0)
   })
@@ -80,7 +88,7 @@ describe('Orders', async () => {
       expiry: '1494460800',
       nonce: '101',
       signer: {
-        wallet: knownGanacheWallet,
+        wallet: KNOWN_GANACHE_WALLET,
         token: ASTAddress,
         param: '400',
       },
@@ -90,6 +98,14 @@ describe('Orders', async () => {
         param: '2',
       },
     })
+
+    order.signature = await signatures.getWeb3Signature(
+      order,
+      KNOWN_GANACHE_WALLET,
+      rinkebySwap,
+      GANACHE_PROVIDER
+    )
+
     const errors = await orders.checkOrder(order, 'rinkeby')
     assert.equal(errors.length, 2)
     assert.equal(errors[1], 'Order expiry has passed')
@@ -100,7 +116,7 @@ describe('Orders', async () => {
       expiry: '1604787494',
       nonce: '101',
       signer: {
-        wallet: knownGanacheWallet,
+        wallet: KNOWN_GANACHE_WALLET,
         token: ASTAddress,
         param: '400',
       },
@@ -110,6 +126,14 @@ describe('Orders', async () => {
         param: '2',
       },
     })
+
+    order.signature = await signatures.getWeb3Signature(
+      order,
+      KNOWN_GANACHE_WALLET,
+      rinkebySwap,
+      GANACHE_PROVIDER
+    )
+
     order.signature.v += 1
     const errors = await orders.checkOrder(order, 'rinkeby')
     assert.equal(errors.length, 2)
@@ -121,7 +145,7 @@ describe('Orders', async () => {
       expiry: '1604787494',
       nonce: '101',
       signer: {
-        wallet: knownGanacheWallet,
+        wallet: KNOWN_GANACHE_WALLET,
         token: ASTAddress,
         param: '400',
       },
@@ -131,6 +155,14 @@ describe('Orders', async () => {
         param: '2',
       },
     })
+
+    order.signature = await signatures.getWeb3Signature(
+      order,
+      KNOWN_GANACHE_WALLET,
+      rinkebySwap,
+      GANACHE_PROVIDER
+    )
+
     const errors = await orders.checkOrder(order, 'rinkeby')
     assert.equal(errors.length, 1)
     assert.equal(errors[0], 'signer allowance is too low')
@@ -141,7 +173,7 @@ describe('Orders', async () => {
       expiry: '1604787494',
       nonce: '101',
       signer: {
-        wallet: knownGanacheWallet,
+        wallet: KNOWN_GANACHE_WALLET,
         token: ASTAddress,
         param: '100001000',
       },
@@ -151,6 +183,14 @@ describe('Orders', async () => {
         param: '2',
       },
     })
+
+    order.signature = await signatures.getWeb3Signature(
+      order,
+      KNOWN_GANACHE_WALLET,
+      rinkebySwap,
+      GANACHE_PROVIDER
+    )
+
     const errors = await orders.checkOrder(order, 'rinkeby')
     assert.equal(errors.length, 2)
     assert.equal(errors[0], 'signer balance is too low')
