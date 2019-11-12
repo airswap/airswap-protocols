@@ -2,14 +2,14 @@ var expect = require('chai').expect
 const assert = require('assert')
 
 const { orders, signatures } = require('@airswap/order-utils')
-const { GANACHE_PROVIDER } = require('@airswap/order-utils').constants
+const {
+  GANACHE_PROVIDER,
+  KNOWN_GANACHE_WALLET,
+} = require('@airswap/order-utils').constants
 
 describe('Orders', async () => {
   const senderWallet = '0xbabe31056c0fe1b704d811b2405f6e9f5ae5e59d'
   const signerWallet = '0x9d2fb0bcc90c6f3fa3a98d2c760623a4f6ee59b4'
-
-  // this is accounts[0] when ganache seed == 0
-  const KNOWN_GANACHE_WALLET = '0xe092b1fa25DF5786D151246E492Eed3d15EA4dAA'
 
   // rinkeby addresses
   const ASTAddress = '0xcc1cbd4f67cceb7c001bd4adf98451237a193ff8'
