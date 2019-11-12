@@ -8,6 +8,8 @@
 # Activate the virtualenv "source venv/bin/activate"
 # Install slither "pip install slither-analyzer"
 # From root directory run "./scripts/slither.sh"
+# Location of --solc may change dependent on local system
+# Run which solc and copy to path if different
 # ------------------------------------------------------------------
 
 
