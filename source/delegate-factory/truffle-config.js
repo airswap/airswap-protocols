@@ -36,7 +36,6 @@ module.exports = {
           runs: 20000,
         },
       },
-      optimization: false,
     },
   },
   plugins: ['truffle-verify', 'truffle-flatten'],
