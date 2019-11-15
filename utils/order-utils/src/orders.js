@@ -25,6 +25,7 @@ const {
 } = require('./constants')
 
 const IERC20 = require('@airswap/tokens/build/contracts/IERC20.json')
+const IERC721 = require('@airswap/tokens/build/contracts/OrderTest721.json')
 const Swap = require('@airswap/swap/build/contracts/Swap.json')
 
 const signatures = require('./signatures')
@@ -150,7 +151,43 @@ const checkERC20Transfer = async (order, partyName, provider, errors) => {
 }
 
 const checkERC721Transfer = async (order, partyName, provider, errors) => {
-  console.log('erc721 check')
+  const party = order[partyName]
+
+  // If this is the affiliate, tokens come from the signer instead
+  if (partyName == 'affiliate') {
+    party['wallet'] = order['signer']['wallet']
+  }
+
+  const tokenContract = new ethers.Contract(
+    party['token'],
+    IERC721.abi,
+    provider
+  )
+
+  // check balance
+  await tokenContract.ownerOf(party['param']).then(owner => {
+    if (owner !== party['wallet']) {
+      errors.push(`${partyName} doesn't own NFT`)
+    }
+  })
+
+  try {
+    // try a normal erc721 approval
+    await tokenContract.getApproved(party['param']).then(operator => {
+      if (operator !== order['signature']['validator']) {
+        errors.push(`${partyName} no NFT approval`)
+      }
+    })
+  } catch (error) {
+    // if it didn't exist try a cryptokitties approval
+    await tokenContract.kittyIndexToApproved(party['param']).then(operator => {
+      if (operator !== order['signature']['validator']) {
+        errors.push(`${partyName} no NFT approval`)
+      }
+    })
+  }
+
+  return errors
 }
 
 const checkBalanceAndApproval = async (order, partyName, provider, errors) => {
