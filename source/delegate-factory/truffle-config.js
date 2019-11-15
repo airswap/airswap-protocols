@@ -30,7 +30,12 @@ module.exports = {
   compilers: {
     solc: {
       version: '0.5.12',
-      optimization: false,
+      settings: {
+        optimizer: {
+          enabled: true,
+          runs: 20000,
+        },
+      },
     },
   },
   plugins: ['truffle-verify', 'truffle-flatten'],
