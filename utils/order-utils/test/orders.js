@@ -203,6 +203,36 @@ describe('Orders', async () => {
     assert.equal(errors[1], 'sender no NFT approval')
   })
 
+  it('Check invalid token kind', async () => {
+    const order = await orders.getOrder({
+      expiry: '1604787494',
+      nonce: '101',
+      signer: {
+        wallet: KNOWN_GANACHE_WALLET,
+        token: ASTAddress,
+        param: '0',
+        kind: ERC20_INTERFACE_ID,
+      },
+      sender: {
+        wallet: senderWallet,
+        token: cryptoKittiesAddress,
+        param: '460',
+        kind: 'INVALID_KIND',
+      },
+    })
+
+    order.signature = await signatures.getWeb3Signature(
+      order,
+      KNOWN_GANACHE_WALLET,
+      rinkebySwap,
+      GANACHE_PROVIDER
+    )
+
+    const errors = await orders.checkOrder(order, 'rinkeby')
+    assert.equal(errors.length, 1)
+    assert.equal(errors[0], 'sender token kind invalid')
+  })
+
   it('Check NFT order without allowance', async () => {
     const order = await orders.getOrder({
       expiry: '1604787494',
