@@ -163,7 +163,7 @@ const checkBalanceAndApproval = async (order, partyName, provider, errors) => {
       errors = await checkERC721Transfer(order, partyName, provider, errors)
       break
     default:
-      console.log('token kind must be 20 or 721')
+      errors.push(`${partyName} token kind invalid`)
   }
 
   return errors
