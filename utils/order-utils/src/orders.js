@@ -16,7 +16,13 @@
 
 const ethers = require('ethers')
 
-const { SECONDS_IN_DAY, defaults, EMPTY_ADDRESS } = require('./constants')
+const {
+  SECONDS_IN_DAY,
+  defaults,
+  EMPTY_ADDRESS,
+  ERC20_INTERFACE_ID,
+  ERC721_INTERFACE_ID,
+} = require('./constants')
 
 const IERC20 = require('@airswap/tokens/build/contracts/IERC20.json')
 const Swap = require('@airswap/swap/build/contracts/Swap.json')
@@ -111,7 +117,7 @@ const checkOrderSignature = async (order, provider, errors) => {
   return errors
 }
 
-const checkBalanceAndApproval = async (order, partyName, provider, errors) => {
+const checkERC20Transfer = async (order, partyName, provider, errors) => {
   const party = order[partyName]
 
   // If this is the affiliate, tokens come from the signer instead
@@ -140,6 +146,26 @@ const checkBalanceAndApproval = async (order, partyName, provider, errors) => {
         errors.push(`${partyName} allowance is too low`)
       }
     })
+  return errors
+}
+
+const checkERC721Transfer = async (order, partyName, provider, errors) => {
+  console.log('erc721 check')
+}
+
+const checkBalanceAndApproval = async (order, partyName, provider, errors) => {
+  // Check whether this token is ERC20 or ERC721
+  switch (order[partyName]['kind']) {
+    case ERC20_INTERFACE_ID:
+      errors = await checkERC20Transfer(order, partyName, provider, errors)
+      break
+    case ERC721_INTERFACE_ID:
+      errors = await checkERC721Transfer(order, partyName, provider, errors)
+      break
+    default:
+      console.log('token kind must be 20 or 721')
+  }
+
   return errors
 }
 
