@@ -77,7 +77,8 @@ const checkOrder = async (order, network) => {
 
   // Check order expiry
   const blockNumber = await provider.getBlockNumber()
-  const latestBlock = await provider.getBlock(blockNumber)
+  console.log(blockNumber)
+  const latestBlock = await provider.getBlock(blockNumber - 1)
   if (latestBlock.timestamp >= order['expiry']) {
     errors.push('Order expiry has passed')
   }
