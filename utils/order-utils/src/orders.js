@@ -153,10 +153,22 @@ const checkERC20Transfer = async (order, partyName, provider, errors) => {
 
 const checkERC721Transfer = async (order, partyName, provider, errors) => {
   const party = order[partyName]
+  let recipient
 
   // If this is the affiliate, tokens come from the signer instead
-  if (partyName == 'affiliate') {
-    party['wallet'] = order['signer']['wallet']
+  switch (partyName) {
+    case 'affiliate':
+      // the token goes from signer to affiliate
+      party['wallet'] = order['signer']['wallet']
+      recipient = 'affiliate'
+      break
+    case 'sender':
+      // the token goes from sender to signer
+      recipient = 'signer'
+      break
+    case 'signer':
+      // the token goes from signer to sender
+      recipient = 'sender'
   }
 
   const tokenContract = new ethers.Contract(
@@ -186,6 +198,13 @@ const checkERC721Transfer = async (order, partyName, provider, errors) => {
         errors.push(`${partyName} no NFT approval`)
       }
     })
+  }
+
+  // Check recipient can receive ERC721s
+  const code = await provider.getCode(order[recipient]['wallet'])
+  const isContract = code !== '0x'
+  if (isContract) {
+    errors.push(`warning: ${recipient} is contract receiving NFT`)
   }
 
   return errors

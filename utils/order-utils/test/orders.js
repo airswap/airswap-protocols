@@ -263,6 +263,31 @@ describe('Orders', async () => {
     assert.equal(errors[0], 'sender no NFT approval')
   })
 
+  it('Check NFT order to a contract', async () => {
+    const order = await orders.getOrder({
+      expiry: '1604787494',
+      nonce: '101',
+      signer: {
+        wallet: ASTAddress,
+        token: ASTAddress,
+        param: '0',
+        kind: ERC20_INTERFACE_ID,
+      },
+      sender: {
+        wallet: kittyWallet,
+        token: cryptoKittiesAddress,
+        param: '460',
+        kind: ERC721_INTERFACE_ID,
+      },
+    })
+
+    const errors = await orders.checkOrder(order, 'rinkeby')
+
+    assert.equal(errors.length, 2)
+    assert.equal(errors[0], 'sender no NFT approval')
+    assert.equal(errors[1], 'warning: signer is contract receiving NFT')
+  })
+
   it('Check order without balance', async () => {
     const order = await orders.getOrder({
       expiry: '1604787494',
