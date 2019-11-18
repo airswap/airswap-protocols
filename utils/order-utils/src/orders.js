@@ -26,6 +26,7 @@ const {
 
 const IERC20 = require('@airswap/tokens/build/contracts/IERC20.json')
 const IERC721 = require('@airswap/tokens/build/contracts/OrderTest721.json')
+const IERC721Receiver = require('@airswap/tokens/build/contracts/IERC721Receiver.json')
 const Swap = require('@airswap/swap/build/contracts/Swap.json')
 
 const signatures = require('./signatures')
@@ -204,7 +205,24 @@ const checkERC721Transfer = async (order, partyName, provider, errors) => {
   const code = await provider.getCode(order[recipient]['wallet'])
   const isContract = code !== '0x'
   if (isContract) {
-    errors.push(`warning: ${recipient} is contract receiving NFT`)
+    const nftReceiver = new ethers.Contract(
+      order[recipient]['wallet'],
+      IERC721Receiver.abi,
+      provider
+    )
+
+    try {
+      await nftReceiver.callStatic.onERC721Received(
+        party['wallet'],
+        party['wallet'],
+        party['param'],
+        '0x00'
+      )
+    } catch (error) {
+      if (error.code == 'CALL_EXCEPTION') {
+        errors.push(`${recipient} is not configured to receive NFTs`)
+      }
+    }
   }
 
   return errors

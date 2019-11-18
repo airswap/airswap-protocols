@@ -12,7 +12,12 @@ const {
 describe('Orders', async () => {
   const senderWallet = '0xbabe31056c0fe1b704d811b2405f6e9f5ae5e59d'
   const signerWallet = '0x9d2fb0bcc90c6f3fa3a98d2c760623a4f6ee59b4'
+
+  // Owns a crypto kitty
   const kittyWallet = '0x155862c29632E402d4068099B701891741221C25'
+
+  // Mock ERC721Receiver wallet on rinkeby
+  const erc721Wallet = '0xF727956c4CFd20b9C8D463218a65e751891da3e6'
 
   // rinkeby addresses
   const ASTAddress = '0xcc1cbd4f67cceb7c001bd4adf98451237a193ff8'
@@ -263,7 +268,7 @@ describe('Orders', async () => {
     assert.equal(errors[0], 'sender no NFT approval')
   })
 
-  it('Check NFT order to a contract', async () => {
+  it('Check NFT order to an invalid contract', async () => {
     const order = await orders.getOrder({
       expiry: '1604787494',
       nonce: '101',
@@ -285,7 +290,32 @@ describe('Orders', async () => {
 
     assert.equal(errors.length, 2)
     assert.equal(errors[0], 'sender no NFT approval')
-    assert.equal(errors[1], 'warning: signer is contract receiving NFT')
+    assert.equal(errors[1], 'signer is not configured to receive NFTs')
+  })
+
+  it('Check NFT order to a valid contract', async () => {
+    const order = await orders.getOrder({
+      expiry: '1604787494',
+      nonce: '101',
+      signer: {
+        wallet: erc721Wallet,
+        token: ASTAddress,
+        param: '0',
+        kind: ERC20_INTERFACE_ID,
+      },
+      sender: {
+        wallet: kittyWallet,
+        token: cryptoKittiesAddress,
+        param: '460',
+        kind: ERC721_INTERFACE_ID,
+      },
+    })
+
+    const errors = await orders.checkOrder(order, 'rinkeby')
+
+    // length 1 showing the contract was accepted
+    assert.equal(errors.length, 1)
+    assert.equal(errors[0], 'sender no NFT approval')
   })
 
   it('Check order without balance', async () => {
