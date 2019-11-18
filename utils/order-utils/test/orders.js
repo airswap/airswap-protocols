@@ -27,12 +27,13 @@ describe('Orders', async () => {
   const rinkebySwap = '0x43f18D371f388ABE40b9dDaac44D1C9c9185a078'
 
   const NOV_7_2020_22_18_14 = '1604787494'
+  const MAY_11_2017_00_00_00 = '1494460800'
 
   orders.setVerifyingContract(rinkebySwap)
 
   it('Checks that a generated order is valid', async () => {
     const order = await orders.getOrder({
-      expiry: '1494460800',
+      expiry: MAY_11_2017_00_00_00,
       nonce: '101',
       signer: {
         wallet: signerWallet,
@@ -96,7 +97,7 @@ describe('Orders', async () => {
 
   it('Check expired order', async () => {
     const order = await orders.getOrder({
-      expiry: '1494460800',
+      expiry: MAY_11_2017_00_00_00,
       nonce: '101',
       signer: {
         wallet: KNOWN_GANACHE_WALLET,
