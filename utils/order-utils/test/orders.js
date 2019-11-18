@@ -26,6 +26,8 @@ describe('Orders', async () => {
 
   const rinkebySwap = '0x43f18D371f388ABE40b9dDaac44D1C9c9185a078'
 
+  const NOV_7_2020_22_18_14 = '1604787494'
+
   orders.setVerifyingContract(rinkebySwap)
 
   it('Checks that a generated order is valid', async () => {
@@ -48,7 +50,7 @@ describe('Orders', async () => {
 
   it('Check correct order without signature', async () => {
     const order = await orders.getOrder({
-      expiry: '1604787494',
+      expiry: NOV_7_2020_22_18_14,
       nonce: '0',
       signer: {
         wallet: signerWallet,
@@ -67,7 +69,7 @@ describe('Orders', async () => {
 
   it('Check correct order with signature', async () => {
     const order = await orders.getOrder({
-      expiry: '1604787494',
+      expiry: NOV_7_2020_22_18_14,
       nonce: '0',
       signer: {
         wallet: KNOWN_GANACHE_WALLET,
@@ -122,7 +124,7 @@ describe('Orders', async () => {
 
   it('Check invalid signature', async () => {
     const order = await orders.getOrder({
-      expiry: '1604787494',
+      expiry: NOV_7_2020_22_18_14,
       nonce: '101',
       signer: {
         wallet: KNOWN_GANACHE_WALLET,
@@ -151,7 +153,7 @@ describe('Orders', async () => {
 
   it('Check order without allowance', async () => {
     const order = await orders.getOrder({
-      expiry: '1604787494',
+      expiry: NOV_7_2020_22_18_14,
       nonce: '101',
       signer: {
         wallet: KNOWN_GANACHE_WALLET,
@@ -179,7 +181,7 @@ describe('Orders', async () => {
 
   it('Check NFT order without balance or allowance', async () => {
     const order = await orders.getOrder({
-      expiry: '1604787494',
+      expiry: NOV_7_2020_22_18_14,
       nonce: '101',
       signer: {
         wallet: KNOWN_GANACHE_WALLET,
@@ -210,7 +212,7 @@ describe('Orders', async () => {
 
   it('Check invalid token kind', async () => {
     const order = await orders.getOrder({
-      expiry: '1604787494',
+      expiry: NOV_7_2020_22_18_14,
       nonce: '101',
       signer: {
         wallet: KNOWN_GANACHE_WALLET,
@@ -240,7 +242,7 @@ describe('Orders', async () => {
 
   it('Check NFT order without allowance', async () => {
     const order = await orders.getOrder({
-      expiry: '1604787494',
+      expiry: NOV_7_2020_22_18_14,
       nonce: '101',
       signer: {
         wallet: KNOWN_GANACHE_WALLET,
@@ -270,7 +272,7 @@ describe('Orders', async () => {
 
   it('Check NFT order to an invalid contract', async () => {
     const order = await orders.getOrder({
-      expiry: '1604787494',
+      expiry: NOV_7_2020_22_18_14,
       nonce: '101',
       signer: {
         wallet: ASTAddress,
@@ -295,7 +297,7 @@ describe('Orders', async () => {
 
   it('Check NFT order to a valid contract', async () => {
     const order = await orders.getOrder({
-      expiry: '1604787494',
+      expiry: NOV_7_2020_22_18_14,
       nonce: '101',
       signer: {
         wallet: erc721Wallet,
@@ -320,7 +322,7 @@ describe('Orders', async () => {
 
   it('Check order without balance', async () => {
     const order = await orders.getOrder({
-      expiry: '1604787494',
+      expiry: NOV_7_2020_22_18_14,
       nonce: '101',
       signer: {
         wallet: KNOWN_GANACHE_WALLET,
