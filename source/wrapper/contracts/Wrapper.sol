@@ -19,22 +19,17 @@ pragma experimental ABIEncoderV2;
 
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "@airswap/tokens/contracts/interfaces/IWETH.sol";
-import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 /**
   * @title Wrapper: Send and receive ether for WETH trades
   */
-contract Wrapper is Ownable {
+contract Wrapper {
 
   // The Swap contract to settle trades
   ISwap public swapContract;
 
   // The WETH contract to wrap ether
   IWETH public wethContract;
-
-  // Boolean marking when the contract is paused - users cannot call functions when true
-  // defaults to false
-  bool public contractPaused;
 
   /**
     * @notice Contract Constructor
@@ -50,22 +45,6 @@ contract Wrapper is Ownable {
   }
 
   /**
-  * @notice Modifier to prevent function calling unless the contract is not paused
-  */
-  modifier notPaused() {
-    require(!contractPaused, "CONTRACT_IS_PAUSED");
-    _;
-  }
-
-  /**
-    * @notice Modifier to prevent function calling unless the contract is paused
-    */
-  modifier paused() {
-    require(contractPaused, "CONTRACT_NOT_PAUSED");
-    _;
-  }
-
-  /**
     * @notice Required when withdrawing from WETH
     * @dev During unwraps, WETH.withdraw transfers ether to msg.sender (this contract)
     */
@@ -77,24 +56,6 @@ contract Wrapper is Ownable {
   }
 
   /**
-    * @notice Set whether the contract is paused
-    * @dev Only callable by owner
-    * @param newStatus bool New status of contractPaused
-    */
-  function setPausedStatus(bool newStatus) external onlyOwner {
-    contractPaused = newStatus;
-  }
-
-  /**
-    * @notice Destroy the Contract
-    * @dev Only callable by owner and when contractPaused
-    * @param recipient address Recipient of any ETH in the contract
-    */
-  function killContract(address payable recipient) external onlyOwner paused {
-    selfdestruct(recipient);
-  }
-
-  /**
     * @notice Send an Order
     * @dev Sender must authorize this contract on the swapContract
     * @dev Sender must approve this contract on the wethContract
@@ -102,7 +63,7 @@ contract Wrapper is Ownable {
     */
   function swap(
     Types.Order calldata order
-  ) external payable notPaused {
+  ) external payable {
 
     // Ensure msg.sender is sender wallet.
     require(order.sender.wallet == msg.sender,
