@@ -1,6 +1,7 @@
 const Swap = artifacts.require('Swap')
 const Types = artifacts.require('Types')
 const Wrapper = artifacts.require('Wrapper')
+const HelperMock = artifacts.require('HelperMock')
 const WETH9 = artifacts.require('WETH9')
 const FungibleToken = artifacts.require('FungibleToken')
 
@@ -19,9 +20,11 @@ const { GANACHE_PROVIDER } = require('@airswap/order-utils').constants
 
 let swapContract
 let wrapperContract
+let helperMockContract
 
 let swapAddress
 let wrapperAddress
+let helperMockAddress
 
 let wrappedSwap
 let tokenAST
@@ -42,6 +45,10 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
     tokenWETH = await WETH9.new()
     wrapperContract = await Wrapper.new(swapAddress, tokenWETH.address)
     wrapperAddress = wrapperContract.address
+
+    helperMockContract = await HelperMock.new(wrapperAddress)
+    helperMockAddress = helperMockContract.address
+
     tokenDAI = await FungibleToken.new()
     tokenAST = await FungibleToken.new()
 
@@ -207,6 +214,7 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
 
       equal(await web3.eth.getBalance(wrapperAddress), 0)
     })
+
     it('Sending WETH to the Wrapper Contract', async () => {
       const startingBalance = await tokenWETH.balanceOf(wrapperAddress)
       await tokenWETH.transfer(wrapperAddress, 5, { from: aliceAddress })
@@ -283,7 +291,65 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
       result = await getResult(swapContract, result.tx)
       emitted(result, 'Swap')
       equal(await web3.eth.getBalance(wrapperAddress), 0)
+
+      // Wrapper has 5 weth from test:
+      // Sending WETH to the Wrapper Contract
       ok(await balances(wrapperAddress, [[tokenDAI, 0], [tokenWETH, 5]]))
+    })
+
+    it('Reverts if the unwrapped ETH is sent to a non-payable contract', async () => {
+      const order = await orders.getOrder({
+        signer: {
+          wallet: carolAddress,
+          token: tokenWETH.address,
+          param: 100,
+        },
+        sender: {
+          wallet: helperMockAddress,
+          token: tokenDAI.address,
+          param: 100,
+        },
+      })
+
+      // mint the contract 100 DAI
+      await tokenDAI.mint(helperMockAddress, 1000)
+      ok(await balances(helperMockAddress, [[tokenDAI, 1000]]))
+
+      // Carol gets some WETH and approves the swap contract
+      let tx = await tokenWETH.deposit({ from: carolAddress, value: 10000 })
+      passes(tx)
+      emitted(tx, 'Deposit')
+      tx = await tokenWETH.approve(swapAddress, 10000, { from: carolAddress })
+      passes(tx)
+      emitted(tx, 'Approval')
+
+      // the helper contract authorizes wrapper to send orders for them
+      await helperMockContract.authorizeWrapperToSend()
+
+      // the helper contract authorizes the wrapper to move their WETH
+      await helperMockContract.approveToken(
+        tokenWETH.address,
+        wrapperAddress,
+        50000
+      )
+
+      // the helper contract approves swap to move DAI tokens
+      await helperMockContract.approveToken(
+        tokenDAI.address,
+        swapAddress,
+        50000
+      )
+
+      // Carol signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        carolAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
+      // Carol sends the order, via the helper and it reverts
+      await reverted(helperMockContract.forwardSwap(order), 'ETH_RETURN_FAILED')
     })
   })
 
