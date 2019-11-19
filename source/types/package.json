@@ -25,6 +25,7 @@
     "solidity-coverage": "^0.6.3"
   },
   "dependencies": {
-    "openzeppelin-solidity": "2.3"
+    "openzeppelin-solidity": "2.3",
+    "truffle-hdwallet-provider-privkey": "^1.0.3"
   }
 }

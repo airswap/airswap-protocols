@@ -21,17 +21,21 @@
     "verify": "truffle run verify"
   },
   "devDependencies": {
-    "@airswap/tokens": "0.1.2",
     "@airswap/order-utils": "0.3.4",
     "@airswap/test-utils": "0.1.1",
-    "truffle": "^5.0.32",
+    "@airswap/tokens": "0.1.2",
     "@gnosis.pm/mock-contract": "^3.0.7",
     "solidity-coverage": "^0.6.3",
     "solidity-docgen": "0.3.0-beta.3",
+    "truffle": "^5.0.32",
     "truffle-hdwallet-provider-privkey": "1.0.3"
   },
   "dependencies": {
+    "@0x/sol-profiler": "^3.1.14",
+    "@0x/sol-trace": "^2.0.20",
     "@airswap/types": "0.3.2",
-    "openzeppelin-solidity": "2.3"
+    "eth-gas-reporter": "^0.2.12",
+    "openzeppelin-solidity": "2.3",
+    "truffle-hdwallet-provider-privkey": "^1.0.3"
   }
 }
