@@ -15,8 +15,6 @@ const { orders, signatures } = require('@airswap/order-utils')
 
 contract('Wrapper Unit Tests', async accounts => {
   const senderParam = 2
-  const owner = accounts[0]
-  const notOwner = accounts[1]
   const mockToken = accounts[9]
   const mockSender = accounts[8]
   const mockSigner = accounts[7]
