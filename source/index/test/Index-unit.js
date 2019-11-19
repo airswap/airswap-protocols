@@ -17,30 +17,30 @@ const {
 } = require('@airswap/order-utils').constants
 
 contract('Index Unit Tests', async accounts => {
-  let owner = accounts[0]
-  let nonOwner = accounts[1]
-  let aliceAddress = accounts[1]
-  let bobAddress = accounts[2]
-  let carolAddress = accounts[3]
-  let davidAddress = accounts[4]
-  let emilyAddress = accounts[5]
-  let fredAddress = accounts[6]
+  const owner = accounts[0]
+  const nonOwner = accounts[1]
+  const aliceAddress = accounts[1]
+  const bobAddress = accounts[2]
+  const carolAddress = accounts[3]
+  const davidAddress = accounts[4]
+  const emilyAddress = accounts[5]
+  const fredAddress = accounts[6]
 
   let snapshotId
   let index
 
   let result
 
-  let aliceLocator = padAddressToLocator(aliceAddress)
-  let bobLocator = padAddressToLocator(bobAddress)
-  let carolLocator = padAddressToLocator(carolAddress)
-  let davidLocator = padAddressToLocator(davidAddress)
-  let emilyLocator = padAddressToLocator(emilyAddress)
-  let fredLocator = padAddressToLocator(fredAddress)
-  let emptyLocator = padAddressToLocator(EMPTY_ADDRESS)
+  const aliceLocator = padAddressToLocator(aliceAddress)
+  const bobLocator = padAddressToLocator(bobAddress)
+  const carolLocator = padAddressToLocator(carolAddress)
+  const davidLocator = padAddressToLocator(davidAddress)
+  const emilyLocator = padAddressToLocator(emilyAddress)
+  const fredLocator = padAddressToLocator(fredAddress)
+  const emptyLocator = padAddressToLocator(EMPTY_ADDRESS)
 
   beforeEach(async () => {
-    let snapShot = await takeSnapshot()
+    const snapShot = await takeSnapshot()
     snapshotId = snapShot['result']
   })
 
@@ -54,7 +54,7 @@ contract('Index Unit Tests', async accounts => {
 
   describe('Test constructor', async () => {
     it('should setup the linked locators as just a head, length 0', async () => {
-      let listLength = await index.length()
+      const listLength = await index.length()
       equal(listLength, 0, 'list length should be 0')
 
       result = await index.getLocators(EMPTY_ADDRESS, 10)
@@ -100,7 +100,7 @@ contract('Index Unit Tests', async accounts => {
       equal(result[NEXTID], HEAD, 'The next slot should be the head')
 
       // check the length has increased
-      let listLength = await index.length()
+      const listLength = await index.length()
       equal(listLength, 1, 'list length should be 1')
     })
 
@@ -128,7 +128,7 @@ contract('Index Unit Tests', async accounts => {
         from: owner,
       })
 
-      let listLength = await index.length()
+      const listLength = await index.length()
       equal(listLength, 3, 'list length should be 3')
 
       result = await index.getLocators(EMPTY_ADDRESS, 7)
@@ -162,7 +162,7 @@ contract('Index Unit Tests', async accounts => {
         from: owner,
       })
 
-      let listLength = await index.length()
+      const listLength = await index.length()
       equal(listLength, 4, 'Link list length should be 4')
 
       result = await index.getLocators(EMPTY_ADDRESS, 7)
@@ -192,7 +192,7 @@ contract('Index Unit Tests', async accounts => {
       })
       await reverted(trx, 'ENTRY_ALREADY_EXISTS')
 
-      let length = await index.length.call()
+      const length = await index.length.call()
       equal(length.toNumber(), 1, 'length increased, but total users has not')
     })
   })
@@ -205,7 +205,7 @@ contract('Index Unit Tests', async accounts => {
       })
 
       // retrieve entry
-      let entry = await index.entries(aliceAddress)
+      const entry = await index.entries(aliceAddress)
 
       equal(aliceLocator, entry[0], 'locator was incorrectly set')
       equal(2000, entry[1], 'score was incorrectly set')
@@ -215,7 +215,7 @@ contract('Index Unit Tests', async accounts => {
 
     it('should return empty entry for an unset user', async () => {
       // retrieve entry without setting the locator
-      let entry = await index.entries(aliceAddress)
+      const entry = await index.entries(aliceAddress)
 
       equal(emptyLocator, entry[0], 'locator was incorrectly set')
       equal(0, entry[1], 'score was incorrectly set')
@@ -245,12 +245,12 @@ contract('Index Unit Tests', async accounts => {
     })
 
     it('should leave state unchanged for someone who hasnt staked', async () => {
-      let trx = index.unsetLocator(davidAddress, {
+      const trx = index.unsetLocator(davidAddress, {
         from: owner,
       })
       await reverted(trx, 'ENTRY_DOES_NOT_EXIST')
 
-      let listLength = await index.length()
+      const listLength = await index.length()
       equal(listLength, 3, 'list length should be 3')
 
       result = await index.getLocators(EMPTY_ADDRESS, 7)
@@ -309,20 +309,20 @@ contract('Index Unit Tests', async accounts => {
     })
 
     it('should return no score for a non-user', async () => {
-      let davidScore = await index.getScore(davidAddress)
+      const davidScore = await index.getScore(davidAddress)
       equal(davidScore, 0, 'David: Locator score not correct')
 
       // now for a recently unset entry
       await index.unsetLocator(carolAddress, { from: owner })
-      let testScore = await index.getScore(carolAddress)
+      const testScore = await index.getScore(carolAddress)
       equal(testScore, 0, 'Carol: Locator score not correct')
     })
 
     it('should return the correct score for a valid user', async () => {
-      let aliceScore = await index.getScore(aliceAddress)
+      const aliceScore = await index.getScore(aliceAddress)
       equal(aliceScore, 2000, 'Alice: Locator score not correct')
 
-      let bobScore = await index.getScore(bobAddress)
+      const bobScore = await index.getScore(bobAddress)
       equal(bobScore, 500, 'Bob: Locator score not correct')
     })
   })

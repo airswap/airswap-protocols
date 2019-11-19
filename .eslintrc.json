@@ -16,6 +16,7 @@
   "plugins": ["prettier"],
   "rules": {
     "prettier/prettier": "error",
+    "prefer-const": "error",
     "no-undef": "warn",
     "no-unused-vars": "warn"
   }
