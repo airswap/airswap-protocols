@@ -117,7 +117,7 @@ contract('Indexer Unit Tests', async accounts => {
         from: aliceAddress,
       })
 
-      const index = await indexer.indexs(tokenOne, tokenTwo)
+      const index = await indexer.indexes(tokenOne, tokenTwo)
 
       notEmitted(result, 'CreateIndex', event => {
         return (
