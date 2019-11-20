@@ -94,9 +94,15 @@ contract('Indexer Unit Tests', async accounts => {
         from: aliceAddress,
       })
 
+      const index = await indexer.indexes(tokenOne, tokenTwo)
+
       // event is emitted
       emitted(result, 'CreateIndex', event => {
-        return event.signerToken === tokenOne && event.senderToken === tokenTwo
+        return (
+          event.signerToken === tokenOne &&
+          event.senderToken === tokenTwo &&
+          event.indexAddress === index
+        )
       })
     })
 
@@ -111,8 +117,14 @@ contract('Indexer Unit Tests', async accounts => {
         from: aliceAddress,
       })
 
+      const index = await indexer.indexes(tokenOne, tokenTwo)
+
       notEmitted(result, 'CreateIndex', event => {
-        return event.signerToken === tokenOne && event.senderToken === tokenTwo
+        return (
+          event.signerToken === tokenOne &&
+          event.senderToken === tokenTwo &&
+          event.indexAddress === index
+        )
       })
     })
   })
@@ -829,7 +841,7 @@ contract('Indexer Unit Tests', async accounts => {
       await indexer.setPausedStatus(true, { from: owner })
       await indexer.setPausedStatus(false, { from: owner })
 
-      // create market
+      // create index
       emitted(
         await indexer.createIndex(tokenTwo, bobAddress, {
           from: aliceAddress,

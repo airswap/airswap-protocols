@@ -106,7 +106,7 @@ contract Indexer is IIndexer, Ownable {
       // Create a new Index contract for the token pair.
       indexes[signerToken][senderToken] = new Index();
 
-      emit CreateIndex(signerToken, senderToken);
+      emit CreateIndex(signerToken, senderToken, address(indexes[signerToken][senderToken]));
     }
 
     // Return the address of the Index contract.

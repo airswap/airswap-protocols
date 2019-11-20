@@ -19,8 +19,9 @@ pragma solidity 0.5.12;
 interface IIndexer {
 
   event CreateIndex(
-    address signerToken,
-    address senderToken
+    address indexed signerToken,
+    address indexed senderToken,
+    address indexAddress
   );
 
   event Stake(
