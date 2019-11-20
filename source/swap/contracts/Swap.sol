@@ -206,8 +206,11 @@ contract Swap is ISwap {
     address authorizedSender
   ) external {
     require(msg.sender != authorizedSender, "INVALID_AUTH_SENDER");
-    senderAuthorizations[msg.sender][authorizedSender] = true;
-    emit AuthorizeSender(msg.sender, authorizedSender);
+    if (!senderAuthorizations[msg.sender][authorizedSender]) {
+      senderAuthorizations[msg.sender][authorizedSender] = true;
+      emit AuthorizeSender(msg.sender, authorizedSender);
+    }
+
   }
 
   /**
@@ -219,8 +222,10 @@ contract Swap is ISwap {
     address authorizedSigner
   ) external {
     require(msg.sender != authorizedSigner, "INVALID_AUTH_SIGNER");
-    signerAuthorizations[msg.sender][authorizedSigner] = true;
-    emit AuthorizeSigner(msg.sender, authorizedSigner);
+    if (!signerAuthorizations[msg.sender][authorizedSigner]) {
+      signerAuthorizations[msg.sender][authorizedSigner] = true;
+      emit AuthorizeSigner(msg.sender, authorizedSigner);
+    }
   }
 
   /**
@@ -231,8 +236,10 @@ contract Swap is ISwap {
   function revokeSender(
     address authorizedSender
   ) external {
-    delete senderAuthorizations[msg.sender][authorizedSender];
-    emit RevokeSender(msg.sender, authorizedSender);
+    if (senderAuthorizations[msg.sender][authorizedSender]) {
+      delete senderAuthorizations[msg.sender][authorizedSender];
+      emit RevokeSender(msg.sender, authorizedSender);
+    }
   }
 
   /**
@@ -243,8 +250,10 @@ contract Swap is ISwap {
   function revokeSigner(
     address authorizedSigner
   ) external {
-    delete signerAuthorizations[msg.sender][authorizedSigner];
-    emit RevokeSigner(msg.sender, authorizedSigner);
+    if (signerAuthorizations[msg.sender][authorizedSigner]) {
+      delete signerAuthorizations[msg.sender][authorizedSigner];
+      emit RevokeSigner(msg.sender, authorizedSigner);
+    }
   }
 
   /**
