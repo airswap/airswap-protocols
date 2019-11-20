@@ -357,7 +357,7 @@ contract Delegate is IDelegate, Ownable {
 
     Rule memory rule = rules[senderToken][signerToken];
 
-    uint256 senderParam = rule.maxSenderAmount;
+    senderParam = rule.maxSenderAmount;
 
     // Ensure that a rule exists.
     if (senderParam > 0) {
