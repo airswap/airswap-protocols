@@ -172,6 +172,7 @@ contract Swap is ISwap {
     * @notice Cancel one or more open orders by nonce
     * @dev Cancelled nonces are marked UNAVAILABLE (0x01)
     * @dev Emits a Cancel event
+    * @dev Out of gas may occur in arrays of length > 400
     * @param nonces uint256[] List of nonces to cancel
     */
   function cancel(
