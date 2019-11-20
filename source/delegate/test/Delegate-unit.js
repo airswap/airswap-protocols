@@ -839,7 +839,7 @@ contract('Delegate Unit Tests', async accounts => {
         delegate.provideOrder(order, {
           from: notOwner,
         }),
-        'PRICE_INCORRECT'
+        'PRICE_INVALID'
       )
     })
 

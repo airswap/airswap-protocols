@@ -244,7 +244,7 @@ contract Delegate is IDelegate, Ownable {
     // Ensure the order is priced according to the rule.
     require(order.sender.param <= order.signer.param
       .mul(10 ** rule.priceExp).div(rule.priceCoef),
-      "PRICE_INCORRECT");
+      "PRICE_INVALID");
 
     // Overwrite the rule with a decremented maxSenderAmount.
     rules[order.sender.token][order.signer.token] = Rule({

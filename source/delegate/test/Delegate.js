@@ -906,7 +906,7 @@ contract('Delegate Integration Tests', async accounts => {
 
       await reverted(
         aliceDelegate.provideOrder(order, { from: bobAddress }),
-        'PRICE_INCORRECT'
+        'PRICE_INVALID'
       )
     })
 
