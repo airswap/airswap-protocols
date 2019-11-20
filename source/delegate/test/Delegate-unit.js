@@ -1098,5 +1098,40 @@ contract('Delegate Unit Tests', async accounts => {
 
       passes(tx)
     })
+
+    it('test a getting a getMaxQuote and passing it into provideOrder', async () => {
+      await delegate.setRule(
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
+        PRICE_COEF,
+        EXP
+      )
+
+      const val = await delegate.getMaxQuote.call(SENDER_TOKEN, SIGNER_TOKEN)
+
+      const senderAmount = val[0].toNumber()
+      const signerAmount = val[1].toNumber()
+
+      // put that quote into an order
+      const order = await orders.getOrder({
+        signer: {
+          wallet: notOwner,
+          param: signerAmount,
+          token: SIGNER_TOKEN,
+        },
+        sender: {
+          wallet: tradeWallet,
+          param: senderAmount,
+          token: SENDER_TOKEN,
+        },
+      })
+
+      const tx = await delegate.provideOrder(order, {
+        from: notOwner,
+      })
+
+      passes(tx)
+    })
   })
 })
