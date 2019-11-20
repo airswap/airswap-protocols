@@ -370,6 +370,62 @@ contract('Indexer Unit Tests', async accounts => {
       equal(stakedAmount, 350, 'Staked amount did not increase')
     })
 
+    it('should failed updating intent when tranfers tokens fail', async () => {
+      // make the index first
+      await indexer.createIndex(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+
+      // set one intent
+      await indexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
+        from: aliceAddress,
+      })
+
+      let stakedAmount = await indexer.getStakedAmount.call(
+        aliceAddress,
+        tokenOne,
+        tokenTwo
+      )
+
+      equal(stakedAmount, 250, 'Staked amount incorrect')
+
+      // Ensure token transfers will now fail
+      await stakingTokenMock.givenAnyReturnBool(false)
+
+      // now try to update an intent by increasing transfer by 100
+      await reverted(
+        indexer.setIntent(tokenOne, tokenTwo, 350, aliceLocator, {
+          from: aliceAddress,
+        }),
+        'UNABLE_TO_STAKE'
+      )
+
+      stakedAmount = await indexer.getStakedAmount.call(
+        aliceAddress,
+        tokenOne,
+        tokenTwo
+      )
+
+      // Check that the staked amount has not been changed
+      equal(stakedAmount, 250, 'Staked amount incorrect')
+
+      // Reduce the intent with the transfer ultimately failing
+      await reverted(
+        indexer.setIntent(tokenOne, tokenTwo, 10, aliceLocator, {
+          from: aliceAddress,
+        })
+      )
+
+      stakedAmount = await indexer.getStakedAmount.call(
+        aliceAddress,
+        tokenOne,
+        tokenTwo
+      )
+
+      // ensure that the staked amount does not change
+      equal(stakedAmount, 250, 'Staked amount incorrect')
+    })
+
     it('should update an intent if the user has already staked - decrease stake', async () => {
       // make the index first
       await indexer.createIndex(tokenOne, tokenTwo, {
