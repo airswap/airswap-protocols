@@ -370,7 +370,7 @@ contract('Indexer Unit Tests', async accounts => {
       equal(stakedAmount, 350, 'Staked amount did not increase')
     })
 
-    it('should failed updating intent when tranfers tokens fail', async () => {
+    it('should fail updating the intent when transfer of staking tokens fails', async () => {
       // make the index first
       await indexer.createIndex(tokenOne, tokenTwo, {
         from: aliceAddress,
