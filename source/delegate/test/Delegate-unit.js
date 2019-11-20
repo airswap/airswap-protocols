@@ -1241,5 +1241,39 @@ contract('Delegate Unit Tests', async accounts => {
 
       passes(tx)
     })
+
+    it('test the signer trying to trade the exact amount of rule price - passes', async () => {
+      // 1 SenderToken for 0.005 SignerToken => 200 SenderToken for 1 SignerToken
+      await delegate.setRule(
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
+        5,
+        3
+      )
+
+      const senderAmount = 200
+      const signerAmount = 1
+
+      const order = await orders.getOrder({
+        signer: {
+          wallet: notOwner,
+          param: signerAmount,
+          token: SIGNER_TOKEN,
+        },
+        sender: {
+          wallet: tradeWallet,
+          param: senderAmount,
+          token: SENDER_TOKEN,
+        },
+      })
+
+      // check the delegate allows this
+      const tx = await delegate.provideOrder(order, {
+        from: notOwner,
+      })
+
+      passes(tx)
+    })
   })
 })
