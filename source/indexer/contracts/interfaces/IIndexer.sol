@@ -78,12 +78,6 @@ interface IIndexer {
     address senderToken
   ) external;
 
-  function unsetIntentForUser(
-    address user,
-    address signerToken,
-    address senderToken
-  ) external;
-
   function getStakedAmount(
     address user,
     address signerToken,

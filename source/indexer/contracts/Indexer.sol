@@ -40,9 +40,6 @@ contract Indexer is IIndexer, Ownable {
   // The whitelist contract for checking whether a peer is whitelisted
   address public locatorWhitelist;
 
-  // Boolean marking when the contract is paused - users cannot call functions when true
-  bool public contractPaused;
-
   /**
     * @notice Contract Constructor
     * @param indexerStakingToken address
@@ -51,22 +48,6 @@ contract Indexer is IIndexer, Ownable {
     address indexerStakingToken
   ) public {
     stakingToken = IERC20(indexerStakingToken);
-  }
-
-  /**
-    * @notice Modifier to prevent function calling unless the contract is not paused
-    */
-  modifier notPaused() {
-    require(!contractPaused, "CONTRACT_IS_PAUSED");
-    _;
-  }
-
-  /**
-    * @notice Modifier to prevent function calling unless the contract is paused
-    */
-  modifier paused() {
-    require(contractPaused, "CONTRACT_NOT_PAUSED");
-    _;
   }
 
   /**
@@ -99,7 +80,7 @@ contract Indexer is IIndexer, Ownable {
   function createIndex(
     address signerToken,
     address senderToken
-  ) external notPaused returns (address) {
+  ) external returns (address) {
 
     // If the Index does not exist, create it.
     if (indexes[signerToken][senderToken] == Index(0)) {
@@ -153,7 +134,7 @@ contract Indexer is IIndexer, Ownable {
     address senderToken,
     uint256 stakingAmount,
     bytes32 locator
-  ) external notPaused indexExists(signerToken, senderToken) {
+  ) external indexExists(signerToken, senderToken) {
 
     // If whitelist set, ensure the locator is valid.
     if (locatorWhitelist != address(0)) {
@@ -198,45 +179,8 @@ contract Indexer is IIndexer, Ownable {
   function unsetIntent(
     address signerToken,
     address senderToken
-  ) external notPaused {
+  ) external {
     _unsetIntent(msg.sender, signerToken, senderToken);
-  }
-
-  /**
-    * @notice Unset Intent for a User
-    * @dev Only callable by owner
-    * @dev This can be used when contractPaused to return staked tokens to users
-    *
-    * @param user address
-    * @param signerToken address Signer token of the Index being unstaked
-    * @param senderToken address Signer token of the Index being unstaked
-    */
-  function unsetIntentForUser(
-    address user,
-    address signerToken,
-    address senderToken
-  ) external onlyOwner {
-    _unsetIntent(user, signerToken, senderToken);
-  }
-
-  /**
-    * @notice Set whether the contract is paused
-    * @dev Only callable by owner
-    *
-    * @param newStatus bool New status of contractPaused
-    */
-  function setPausedStatus(bool newStatus) external onlyOwner {
-    contractPaused = newStatus;
-  }
-
-  /**
-    * @notice Destroy the Contract
-    * @dev Only callable by owner and when contractPaused
-    *
-    * @param recipient address Recipient of any money in the contract
-    */
-  function killContract(address payable recipient) external onlyOwner paused {
-    selfdestruct(recipient);
   }
 
   /**
