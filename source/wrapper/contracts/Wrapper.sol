@@ -109,7 +109,9 @@ contract Wrapper {
 
       // Transfer ether to the user.
       // solium-disable-next-line security/no-call-value
-      msg.sender.call.value(order.signer.param)("");
+      (bool success, ) = msg.sender.call.value(order.signer.param)("");
+
+      require(success, "ETH_RETURN_FAILED");
     }
   }
 }
