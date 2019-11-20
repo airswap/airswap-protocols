@@ -299,13 +299,7 @@ contract Delegate is IDelegate, Ownable {
       // Ensure the senderParam does not exceed maximum for the rule.
       if(senderParam <= rule.maxSenderAmount) {
 
-        uint256 multiplier = senderParam.mul(rule.priceCoef);
-        signerParam = multiplier.div(10 ** rule.priceExp);
-
-        // If the div rounded down, round up!
-        if (multiplier.mod(10 ** rule.priceExp) > 0) {
-          signerParam++;
-        }
+        signerParam = _calculateSignerParam(senderParam, rule.priceCoef, rule.priceExp);
 
         // Return the quote.
         return signerParam;
@@ -367,14 +361,8 @@ contract Delegate is IDelegate, Ownable {
 
     // Ensure that a rule exists.
     if (senderParam > 0) {
-      // calculate a signerParam
-      uint256 multiplier = senderParam.mul(rule.priceCoef);
-      signerParam = multiplier.div(10 ** rule.priceExp);
-
-      // If the div rounded down, round up!
-      if (multiplier.mod(10 ** rule.priceExp) > 0) {
-        signerParam++;
-      }
+      // calculate the signerParam
+      signerParam = _calculateSignerParam(senderParam, rule.priceCoef, rule.priceExp);
 
       // Return the maxSenderAmount and calculated signerParam.
       return (
@@ -437,5 +425,22 @@ contract Delegate is IDelegate, Ownable {
       senderToken,
       signerToken
     );
+  }
+
+  function _calculateSignerParam(
+    uint256 senderParam,
+    uint256 priceCoef,
+    uint256 priceExp
+  ) internal pure returns (
+    uint256 signerParam
+  ) {
+    // Calculate the param using the price formula
+    uint256 multiplier = senderParam.mul(priceCoef);
+    signerParam = multiplier.div(10 ** priceExp);
+
+    // If the div rounded down, round up
+    if (multiplier.mod(10 ** priceExp) > 0) {
+      signerParam++;
+    }
   }
 }
