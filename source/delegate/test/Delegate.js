@@ -1106,5 +1106,43 @@ contract('Delegate Integration Tests', async accounts => {
         'ProvideOrder'
       )
     })
+
+    it('Queries senderSideQuote and passes the value into an order', async () => {
+      const signerAmount = 2
+      const senderQuote = await aliceDelegate.getSignerSideQuote.call(
+        signerAmount,
+        tokenDAI.address,
+        tokenWETH.address
+      )
+
+      // Note: Delegate is the order sender.
+      const order = await orders.getOrder({
+        signer: {
+          wallet: bobAddress,
+          token: tokenWETH.address,
+          param: signerAmount,
+        },
+        sender: {
+          wallet: aliceTradeWallet,
+          token: tokenDAI.address,
+          param: senderQuote.toNumber(),
+        },
+      })
+
+      // Bob signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        bobAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
+      // Alice already authorized the delegate to send trades
+      // Now the trade passes
+      emitted(
+        await aliceDelegate.provideOrder(order, { from: bobAddress }),
+        'ProvideOrder'
+      )
+    })
   })
 })
