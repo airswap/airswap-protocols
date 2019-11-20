@@ -135,7 +135,7 @@ contract Delegate is IDelegate, Ownable {
     * @dev delegate needs to be given allowance from msg.sender for the newStakeAmount
     * @dev swap needs to be given permission to move funds from the delegate
     * @param senderToken address Token the delgeate will send
-    * @param senderToken address Token the delegate will receive
+    * @param signerToken address Token the delegate will receive
     * @param rule Rule Rule to set on a delegate
     * @param newStakeAmount uint256 Amount to stake for an intent
     */
