@@ -89,6 +89,58 @@ contract('Indexer Unit Tests', async accounts => {
   })
 
   describe('Test createIndex', async () => {
+    it.only('DOS the index', async () => {
+      const create_estimate = await indexer.createIndex.estimateGas(
+        tokenOne,
+        tokenTwo,
+        {
+          from: aliceAddress,
+        }
+      )
+      //console.log(`createIndex() gas estimate: ${ create_estimate }`)
+
+      let trx = await indexer.createIndex(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+      //console.log(`createIndex() gas cost: ${ trx.receipt.gasUsed }`)
+
+      const index = await indexer.indexes(tokenOne, tokenTwo)
+
+      accountIdx = 0
+      for (
+        amountToStake = accounts.length;
+        amountToStake > -1;
+        amountToStake--
+      ) {
+        //console.log("amount to stake: "+ amountToStake)
+        const mockLocator = await MockContract.new()
+        //console.log("locator: " + mockLocator.address)
+        //console.log("account: " + accounts[accountIdx])
+
+        const set_estimate = await indexer.setIntent.estimateGas(
+          tokenOne,
+          tokenTwo,
+          amountToStake,
+          mockLocator.address,
+          { from: accounts[accountIdx] }
+        )
+        console.log(`${set_estimate}`)
+
+        trx = await indexer.setIntent(
+          tokenOne,
+          tokenTwo,
+          amountToStake,
+          mockLocator.address,
+          { from: accounts[accountIdx] }
+        )
+        console.log(`${trx.receipt.gasUsed}`)
+        accountIdx++
+      }
+
+      //let locators = await indexer.getLocators.call(tokenOne, tokenTwo, EMPTY_ADDRESS, 1000)
+      //console.log(locators)
+    })
+
     it('createIndex should emit an event and create a new index', async () => {
       const result = await indexer.createIndex(tokenOne, tokenTwo, {
         from: aliceAddress,

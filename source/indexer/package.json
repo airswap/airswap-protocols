@@ -11,7 +11,7 @@
     "clean": "rm -rf ./build",
     "compile": "truffle compile",
     "coverage": "node_modules/.bin/solidity-coverage",
-    "ganache": "ganache-cli -p 8545 --gasLimit 0xfffffffffff --time '2017-05-10T00:00:00+00:00' -s 0",
+    "ganache": "ganache-cli -p 8545 --gasLimit 0x9851A9 --time '2017-05-10T00:00:00+00:00' -s 0 -a 1000",
     "hint": "yarn solhint \"./contracts/**/*.sol\"",
     "lint": "yarn eslint \"./test/**/*.js\"",
     "cp_migration_flat": "mkdir -p flatten/; cp contracts/Migrations.sol flatten/",
