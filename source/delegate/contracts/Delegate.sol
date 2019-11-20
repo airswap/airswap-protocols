@@ -408,7 +408,6 @@ contract Delegate is IDelegate, Ownable {
 
   /**
     * @notice Unset a Trading Rule
-    * @dev only callable by the owner of the contract, removes from a mapping
     * @param senderToken address Address of an ERC-20 token the delegate would send
     * @param signerToken address Address of an ERC-20 token the consumer would send
     */
@@ -427,6 +426,12 @@ contract Delegate is IDelegate, Ownable {
     );
   }
 
+  /**
+    * @notice Calculate the signer amount for a given sender amount and price
+    * @param senderParam uint256 The amount the delegate would send in the swap
+    * @param priceCoef uint256 Coefficient of the token price defined in the rule
+    * @param priceExp uint256 Exponent of the token price defined in the rule
+    */
   function _calculateSignerParam(
     uint256 senderParam,
     uint256 priceCoef,

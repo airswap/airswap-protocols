@@ -1099,6 +1099,45 @@ contract('Delegate Unit Tests', async accounts => {
       passes(tx)
     })
 
+    it('test a getting a senderSideQuote and passing it into provideOrder', async () => {
+      await delegate.setRule(
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
+        PRICE_COEF,
+        EXP
+      )
+
+      const signerAmount = 8425
+      const senderQuote = await delegate.getSenderSideQuote.call(
+        signerAmount,
+        SIGNER_TOKEN,
+        SENDER_TOKEN
+      )
+
+      const senderAmount = senderQuote.toNumber()
+
+      // put that quote into an order
+      const order = await orders.getOrder({
+        signer: {
+          wallet: notOwner,
+          param: signerAmount,
+          token: SIGNER_TOKEN,
+        },
+        sender: {
+          wallet: tradeWallet,
+          param: senderAmount,
+          token: SENDER_TOKEN,
+        },
+      })
+
+      const tx = await delegate.provideOrder(order, {
+        from: notOwner,
+      })
+
+      passes(tx)
+    })
+
     it('test a getting a getMaxQuote and passing it into provideOrder', async () => {
       await delegate.setRule(
         SENDER_TOKEN,
@@ -1132,6 +1171,41 @@ contract('Delegate Unit Tests', async accounts => {
       })
 
       passes(tx)
+    })
+
+    it('test the signer trying to trade just 1 unit over the rule price', async () => {
+      // 1 SenderToken for 0.005 SignerToken => 200 SenderToken for 1 SignerToken
+      await delegate.setRule(
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
+        5,
+        3
+      )
+
+      const senderAmount = 201 // 1 unit more than the delegate wants to send
+      const signerAmount = 1
+
+      const order = await orders.getOrder({
+        signer: {
+          wallet: notOwner,
+          param: signerAmount,
+          token: SIGNER_TOKEN,
+        },
+        sender: {
+          wallet: tradeWallet,
+          param: senderAmount,
+          token: SENDER_TOKEN,
+        },
+      })
+
+      // check the delegate doesnt allow this
+      await reverted(
+        delegate.provideOrder(order, {
+          from: notOwner,
+        }),
+        'PRICE_INVALID'
+      )
     })
   })
 })
