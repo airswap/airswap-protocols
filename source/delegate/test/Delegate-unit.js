@@ -589,7 +589,7 @@ contract('Delegate Unit Tests', async accounts => {
         SENDER_TOKEN,
         SIGNER_TOKEN
       )
-      const expectedValue = Math.floor((1234 * PRICE_COEF) / 10 ** EXP)
+      const expectedValue = Math.ceil((1234 * PRICE_COEF) / 10 ** EXP)
       equal(val.toNumber(), expectedValue, 'there should be a quote available')
     })
   })

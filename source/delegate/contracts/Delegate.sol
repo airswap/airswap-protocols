@@ -242,7 +242,7 @@ contract Delegate is IDelegate, Ownable {
       "AMOUNT_EXCEEDS_MAX");
 
     // Ensure the order is priced according to the rule.
-    require(order.sender.param == order.signer.param
+    require(order.sender.param <= order.signer.param
       .mul(10 ** rule.priceExp).div(rule.priceCoef),
       "PRICE_INCORRECT");
 
@@ -299,9 +299,15 @@ contract Delegate is IDelegate, Ownable {
       // Ensure the senderParam does not exceed maximum for the rule.
       if(senderParam <= rule.maxSenderAmount) {
 
-        signerParam = senderParam
-            .mul(rule.priceCoef)
-            .div(10 ** rule.priceExp);
+        uint256 multiplier = senderParam.mul(rule.priceCoef);
+        signerParam = multiplier.div(10 ** rule.priceExp);
+
+        // If the div rounded down, round up!
+        uint256 modulo = multiplier.mod(10 ** rule.priceExp);
+
+        if (modulo > 0) {
+          signerParam++;
+        }
 
         // Return the quote.
         return signerParam;
