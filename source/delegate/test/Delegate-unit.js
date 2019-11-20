@@ -680,16 +680,16 @@ contract('Delegate Unit Tests', async accounts => {
       equal(
         val[0].toNumber(),
         MAX_SENDER_AMOUNT,
-        'no quote should be available if a peer does not exist'
+        'get max quote returned incorrect sender quote'
       )
 
-      const expectedValue = Math.floor(
+      const expectedValue = Math.ceil(
         (MAX_SENDER_AMOUNT * PRICE_COEF) / 10 ** EXP
       )
       equal(
         val[1].toNumber(),
         expectedValue,
-        'no quote should be available if a delegate does not exist'
+        'get max quote returned incorrect signer quote'
       )
     })
   })
@@ -953,7 +953,7 @@ contract('Delegate Unit Tests', async accounts => {
       equal(
         ruleAfter[0].toNumber(),
         ruleBefore[0].toNumber() - signerAmount,
-        "rule's max peer amount was not decremented"
+        "rule's max sender amount was not decremented"
       )
 
       //check if swap() was called

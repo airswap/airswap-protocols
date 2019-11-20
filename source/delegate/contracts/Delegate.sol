@@ -303,9 +303,7 @@ contract Delegate is IDelegate, Ownable {
         signerParam = multiplier.div(10 ** rule.priceExp);
 
         // If the div rounded down, round up!
-        uint256 modulo = multiplier.mod(10 ** rule.priceExp);
-
-        if (modulo > 0) {
+        if (multiplier.mod(10 ** rule.priceExp) > 0) {
           signerParam++;
         }
 
@@ -365,13 +363,23 @@ contract Delegate is IDelegate, Ownable {
 
     Rule memory rule = rules[senderToken][signerToken];
 
+    uint256 senderParam = rule.maxSenderAmount;
+
     // Ensure that a rule exists.
-    if(rule.maxSenderAmount > 0) {
+    if (senderParam > 0) {
+      // calculate a signerParam
+      uint256 multiplier = senderParam.mul(rule.priceCoef);
+      signerParam = multiplier.div(10 ** rule.priceExp);
+
+      // If the div rounded down, round up!
+      if (multiplier.mod(10 ** rule.priceExp) > 0) {
+        signerParam++;
+      }
 
       // Return the maxSenderAmount and calculated signerParam.
       return (
-        rule.maxSenderAmount,
-        rule.maxSenderAmount.mul(rule.priceCoef).div(10 ** rule.priceExp)
+        senderParam,
+        signerParam
       );
     }
     return (0, 0);
