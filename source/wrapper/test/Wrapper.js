@@ -368,14 +368,6 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
       emitted(result, 'Approval')
     })
 
-    it('Bob authorizes the Wrapper to send orders on her behalf', async () => {
-      const tx = await swapContract.authorizeSender(wrapperAddress, {
-        from: bobAddress,
-      })
-      passes(tx)
-      emitted(tx, 'AuthorizeSender')
-    })
-
     it('Send order where Bob sends AST to Alice for DAI', async () => {
       const order = await orders.getOrder({
         signer: {

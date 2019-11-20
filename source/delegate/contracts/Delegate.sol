@@ -415,13 +415,15 @@ contract Delegate is IDelegate, Ownable {
     address signerToken
   ) internal {
 
-    // Delete the rule.
-    delete rules[senderToken][signerToken];
-
-    emit UnsetRule(
-      owner(),
-      senderToken,
-      signerToken
+    // using non-zero rule.priceCoef for rule existence check
+    if (rules[senderToken][signerToken].priceCoef > 0) {
+      // Delete the rule.
+      delete rules[senderToken][signerToken];
+      emit UnsetRule(
+        owner(),
+        senderToken,
+        signerToken
     );
+    }
   }
 }
