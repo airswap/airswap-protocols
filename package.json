@@ -12,9 +12,9 @@
     "compile": "lerna run compile",
     "hint": "yarn solhint \"./source/**/*.sol\"",
     "lint": "yarn eslint \"./**/*.js\"",
-    "ganache": "ganache-cli -p 8545 --gasLimit 0xfffffffffff --time '2017-05-10T00:00:00+00:00'",
+    "ganache": "ganache-cli -p 8545 --gasLimit 0xfffffffffff --time '2017-05-10T00:00:00+00:00' -s 0",
     "publish": "lerna publish",
-    "test": "yarn clean && lerna run test --concurrency=1"
+    "test": "yarn clean && yarn compile && lerna run test --concurrency=1"
   },
   "devDependencies": {
     "@gnosis.pm/mock-contract": "^3.0.7",
@@ -33,8 +33,8 @@
     "solhint": "^2.1.0",
     "truffle": "^5.0.32",
     "ganache-time-traveler": "^1.0.5",
-    "truffle-flatten": "^1.0.5",
-    "truffle-verify": "^1.0.3",
+    "truffle-flatten": "^1.0.6",
+    "truffle-verify": "^1.0.4",
     "@truffle/hdwallet-provider": "^1.0.17"
   },
   "prettier": {

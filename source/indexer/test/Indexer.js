@@ -38,14 +38,14 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
 
   let result
 
-  let aliceLocator = padAddressToLocator(aliceAddress)
-  let bobLocator = padAddressToLocator(bobAddress)
-  let emptyLocator = padAddressToLocator(EMPTY_ADDRESS)
+  const aliceLocator = padAddressToLocator(aliceAddress)
+  const bobLocator = padAddressToLocator(bobAddress)
+  const emptyLocator = padAddressToLocator(EMPTY_ADDRESS)
 
   let whitelistedLocator
 
   before('Setup', async () => {
-    let snapShot = await takeSnapshot()
+    const snapShot = await takeSnapshot()
     snapshotId = snapShot['result']
   })
 
@@ -297,7 +297,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
       ok(await balances(bobAddress, [[tokenAST, 600]]))
       ok(await balances(indexerAddress, [[tokenAST, 400]]))
 
-      let staked = await indexer.getStakedAmount.call(
+      const staked = await indexer.getStakedAmount.call(
         bobAddress,
         tokenWETH.address,
         tokenDAI.address
@@ -324,7 +324,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
       ok(await balances(bobAddress, [[tokenAST, 0]]))
       ok(await balances(indexerAddress, [[tokenAST, 1000]]))
 
-      let staked = await indexer.getStakedAmount.call(
+      const staked = await indexer.getStakedAmount.call(
         bobAddress,
         tokenWETH.address,
         tokenDAI.address
@@ -351,7 +351,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
       ok(await balances(bobAddress, [[tokenAST, 999]]))
       ok(await balances(indexerAddress, [[tokenAST, 1]]))
 
-      let staked = await indexer.getStakedAmount.call(
+      const staked = await indexer.getStakedAmount.call(
         bobAddress,
         tokenWETH.address,
         tokenDAI.address
@@ -378,7 +378,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
       ok(await balances(bobAddress, [[tokenAST, 999]]))
       ok(await balances(indexerAddress, [[tokenAST, 1]]))
 
-      let staked = await indexer.getStakedAmount.call(
+      const staked = await indexer.getStakedAmount.call(
         bobAddress,
         tokenWETH.address,
         tokenDAI.address
@@ -406,7 +406,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
     })
 
     it('Deploy a whitelisted delegate for alice', async () => {
-      let tx = await delegateFactory.createDelegate(aliceAddress, {
+      const tx = await delegateFactory.createDelegate(aliceAddress, {
         from: aliceAddress,
       })
       passes(tx)
@@ -454,7 +454,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
         from: ownerAddress,
       })
 
-      let whitelist = await indexer.locatorWhitelist.call()
+      const whitelist = await indexer.locatorWhitelist.call()
 
       equal(whitelist, EMPTY_ADDRESS)
     })
@@ -806,7 +806,7 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
       // KILL
       await indexer.killContract(ownerAddress, { from: ownerAddress })
 
-      let contractCode = await web3.eth.getCode(indexerAddress)
+      const contractCode = await web3.eth.getCode(indexerAddress)
       equal(contractCode, '0x', 'contract did not self destruct')
     })
   })

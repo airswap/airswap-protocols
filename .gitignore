@@ -9,3 +9,4 @@ coverage
 build
 flatten/
 .env
+venv

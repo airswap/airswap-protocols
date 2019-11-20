@@ -16,6 +16,8 @@
 
 const ethUtil = require('ethereumjs-util')
 const sigUtil = require('eth-sig-util')
+const web3Eth = require('web3-eth')
+
 const {
   DOMAIN_NAME,
   DOMAIN_VERSION,
@@ -26,10 +28,11 @@ const {
 const hashes = require('./hashes')
 
 module.exports = {
-  async getWeb3Signature(order, signatory, verifyingContract) {
+  async getWeb3Signature(order, signatory, verifyingContract, provider) {
     const orderHash = hashes.getOrderHash(order, verifyingContract)
     const orderHashHex = ethUtil.bufferToHex(orderHash)
-    const sig = await web3.eth.sign(orderHashHex, signatory)
+    const eth = new web3Eth(provider)
+    const sig = await eth.sign(orderHashHex, signatory)
     const { v, r, s } = ethUtil.fromRpcSig(sig)
     return {
       signatory: signatory,
@@ -91,14 +94,32 @@ module.exports = {
       s,
     }
   },
-  getEmptySignature() {
+  getEmptySignature(verifyingContract) {
     return {
       signatory: EMPTY_ADDRESS,
-      validator: EMPTY_ADDRESS,
+      validator: verifyingContract,
       version: signatures.INTENDED_VALIDATOR,
       v: '0',
       r: '0x0',
       s: '0x0',
     }
+  },
+  isSignatureValid(order) {
+    const signature = order['signature']
+    const orderHash = hashes.getOrderHash(order, signature['validator'])
+    const prefix = new Buffer('\x19Ethereum Signed Message:\n')
+    const prefixedOrderHash = ethUtil.keccak256(
+      Buffer.concat([prefix, new Buffer(String(orderHash.length)), orderHash])
+    )
+    const signingPubKey = ethUtil.ecrecover(
+      prefixedOrderHash,
+      signature['v'],
+      signature['r'],
+      signature['s']
+    )
+    const signingAddress = ethUtil.bufferToHex(
+      ethUtil.pubToAddress(signingPubKey)
+    )
+    return ethUtil.toChecksumAddress(signingAddress) == signature['signatory']
   },
 }

@@ -7,8 +7,11 @@ const MockContract = artifacts.require('MockContract')
 
 const { equal, reverted, passes } = require('@airswap/test-utils').assert
 const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
-const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
-const { orders } = require('@airswap/order-utils')
+const {
+  EMPTY_ADDRESS,
+  GANACHE_PROVIDER,
+} = require('@airswap/order-utils').constants
+const { orders, signatures } = require('@airswap/order-utils')
 
 contract('Wrapper Unit Tests', async accounts => {
   const senderParam = 2
@@ -18,6 +21,7 @@ contract('Wrapper Unit Tests', async accounts => {
   const mockSender = accounts[8]
   const mockSigner = accounts[7]
   let mockSwap
+  let mockSwapAddress
   let mockWeth
   let mockFT
   let wrapper
@@ -28,10 +32,8 @@ contract('Wrapper Unit Tests', async accounts => {
   let swap
   let snapshotId
 
-  orders.setKnownAccounts([mockSender, mockSigner])
-
   beforeEach(async () => {
-    let snapShot = await takeSnapshot()
+    const snapShot = await takeSnapshot()
     snapshotId = snapShot['result']
   })
 
@@ -49,46 +51,47 @@ contract('Wrapper Unit Tests', async accounts => {
       .encodeABI()
 
     //mock the weth.approve method
-    let weth_approve = wethTemplate.contract.methods
+    const weth_approve = wethTemplate.contract.methods
       .approve(EMPTY_ADDRESS, 0)
       .encodeABI()
     await mockWeth.givenMethodReturnBool(weth_approve, true)
 
     // mock the weth.allowance method
-    let weth_allowance = wethTemplate.contract.methods
+    const weth_allowance = wethTemplate.contract.methods
       .allowance(EMPTY_ADDRESS, EMPTY_ADDRESS)
       .encodeABI()
     await mockWeth.givenMethodReturnUint(weth_allowance, 100000)
 
     // mock the weth.balanceOf method
-    let weth_wrapper_balance = wethTemplate.contract.methods
+    const weth_wrapper_balance = wethTemplate.contract.methods
       .balanceOf(EMPTY_ADDRESS)
       .encodeABI()
     await mockWeth.givenMethodReturnUint(weth_wrapper_balance, 100000)
 
     //mock the weth.transfer method
-    let weth_transfer = wethTemplate.contract.methods
+    const weth_transfer = wethTemplate.contract.methods
       .transfer(EMPTY_ADDRESS, 0)
       .encodeABI()
     await mockWeth.givenMethodReturnBool(weth_transfer, true)
 
     //mock the weth.transferFrom method
-    let weth_transferFrom = wethTemplate.contract.methods
+    const weth_transferFrom = wethTemplate.contract.methods
       .transferFrom(EMPTY_ADDRESS, EMPTY_ADDRESS, 0)
       .encodeABI()
     await mockWeth.givenMethodReturnBool(weth_transferFrom, true)
   }
 
   async function setupMockSwap() {
-    let types = await Types.new()
+    const types = await Types.new()
     await Swap.link('Types', types.address)
-    let swapTemplate = await Swap.new()
+    const swapTemplate = await Swap.new()
     //mock the swap.swap method
     const order = await orders.getOrder({})
 
     swap = swapTemplate.contract.methods.swap(order).encodeABI()
 
     mockSwap = await MockContract.new()
+    mockSwapAddress = mockSwap.address
 
     await orders.setVerifyingContract(mockSwap.address)
   }
@@ -112,12 +115,12 @@ contract('Wrapper Unit Tests', async accounts => {
 
   describe('Test initial values', async () => {
     it('Test initial Swap Contract', async () => {
-      let val = await wrapper.swapContract.call()
+      const val = await wrapper.swapContract.call()
       equal(val, mockSwap.address, 'swap address is incorrect')
     })
 
     it('Test initial Weth Contract', async () => {
-      let val = await wrapper.wethContract.call()
+      const val = await wrapper.wethContract.call()
       equal(val, mockWeth.address, 'weth address is incorrect')
     })
   })
@@ -135,8 +138,8 @@ contract('Wrapper Unit Tests', async accounts => {
     })
 
     it('Test when sender token != weth, ensure no unexpected ether sent', async () => {
-      let nonSenderToken = mockToken
-      let senderToken = mockToken
+      const nonSenderToken = mockToken
+      const senderToken = mockToken
 
       const order = await orders.getOrder({
         sender: {
@@ -148,6 +151,13 @@ contract('Wrapper Unit Tests', async accounts => {
           token: senderToken,
         },
       })
+
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        mockSigner,
+        mockSwapAddress,
+        GANACHE_PROVIDER
+      )
 
       await reverted(
         wrapper.swap(order, {
@@ -169,6 +179,14 @@ contract('Wrapper Unit Tests', async accounts => {
           wallet: mockSigner,
         },
       })
+
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        mockSigner,
+        mockSwapAddress,
+        GANACHE_PROVIDER
+      )
+
       await reverted(
         wrapper.swap(order, {
           value: 2,
@@ -193,6 +211,13 @@ contract('Wrapper Unit Tests', async accounts => {
         },
       })
 
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        mockSigner,
+        mockSwapAddress,
+        GANACHE_PROVIDER
+      )
+
       await passes(
         wrapper.swap(order, {
           value: senderParam,
@@ -201,7 +226,7 @@ contract('Wrapper Unit Tests', async accounts => {
       )
 
       //check if swap() was called
-      let invocationCount = await mockSwap.invocationCountForMethod.call(swap)
+      const invocationCount = await mockSwap.invocationCountForMethod.call(swap)
       equal(
         invocationCount.toNumber(),
         1,
@@ -210,7 +235,7 @@ contract('Wrapper Unit Tests', async accounts => {
     })
 
     it('Test when sender token == weth, signer token != weth, and the transaction passes', async () => {
-      let notWethContract = mockFT.address
+      const notWethContract = mockFT.address
 
       const order = await orders.getOrder({
         signer: {
@@ -224,6 +249,13 @@ contract('Wrapper Unit Tests', async accounts => {
         },
       })
 
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        mockSigner,
+        mockSwapAddress,
+        GANACHE_PROVIDER
+      )
+
       await passes(
         wrapper.swap(order, {
           value: senderParam,
@@ -232,7 +264,7 @@ contract('Wrapper Unit Tests', async accounts => {
       )
 
       //check if swap() was called
-      let invocationCount = await mockSwap.invocationCountForMethod.call(swap)
+      const invocationCount = await mockSwap.invocationCountForMethod.call(swap)
       equal(
         invocationCount.toNumber(),
         1,
@@ -249,7 +281,7 @@ contract('Wrapper Unit Tests', async accounts => {
      */
     it('Test when sender token == weth, signer token != weth, and the wrapper token transfer fails', async () => {
       await mockFT.givenMethodReturnBool(mock_transfer, false)
-      let notWethContract = mockFT.address
+      const notWethContract = mockFT.address
 
       const order = await orders.getOrder({
         signer: {
@@ -262,6 +294,13 @@ contract('Wrapper Unit Tests', async accounts => {
         },
       })
 
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        mockSigner,
+        mockSwapAddress,
+        GANACHE_PROVIDER
+      )
+
       await reverted(
         wrapper.swap(order, {
           value: senderParam,
@@ -269,7 +308,7 @@ contract('Wrapper Unit Tests', async accounts => {
       )
 
       //check if swap() was called
-      let invocationCount = await mockSwap.invocationCountForMethod.call(swap)
+      const invocationCount = await mockSwap.invocationCountForMethod.call(swap)
       equal(
         invocationCount.toNumber(),
         0,
@@ -280,8 +319,8 @@ contract('Wrapper Unit Tests', async accounts => {
 
   describe('Test sending two ERC20s', async () => {
     it('Test when sender token == non weth erc20, signer token == non weth erc20 but msg.sender is not senderwallet', async () => {
-      let nonMockSender = accounts[7]
-      let notWethContract = mockFT.address
+      const nonMockSender = accounts[7]
+      const notWethContract = mockFT.address
 
       const order = await orders.getOrder({
         sender: {
@@ -294,6 +333,13 @@ contract('Wrapper Unit Tests', async accounts => {
         },
       })
 
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        mockSigner,
+        mockSwapAddress,
+        GANACHE_PROVIDER
+      )
+
       await reverted(
         wrapper.swap(order, {
           value: 0,
@@ -304,7 +350,7 @@ contract('Wrapper Unit Tests', async accounts => {
     })
 
     it('Test when sender token == non weth erc20, signer token == non weth erc20, and the transaction passes', async () => {
-      let notWethContract = mockFT.address
+      const notWethContract = mockFT.address
 
       const order = await orders.getOrder({
         signer: {
@@ -318,6 +364,13 @@ contract('Wrapper Unit Tests', async accounts => {
         },
       })
 
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        mockSigner,
+        mockSwapAddress,
+        GANACHE_PROVIDER
+      )
+
       await passes(
         wrapper.swap(order, {
           value: 0,
@@ -326,7 +379,7 @@ contract('Wrapper Unit Tests', async accounts => {
       )
 
       //check if swap() was called
-      let invocationCount = await mockSwap.invocationCountForMethod.call(swap)
+      const invocationCount = await mockSwap.invocationCountForMethod.call(swap)
       equal(
         invocationCount.toNumber(),
         1,
@@ -344,7 +397,7 @@ contract('Wrapper Unit Tests', async accounts => {
     })
 
     it('Test swap when paused', async () => {
-      let notWethContract = mockFT.address
+      const notWethContract = mockFT.address
 
       const order = await orders.getOrder({
         signer: {
@@ -370,7 +423,7 @@ contract('Wrapper Unit Tests', async accounts => {
     })
 
     it('Test swap when not paused', async () => {
-      let notWethContract = mockFT.address
+      const notWethContract = mockFT.address
 
       const order = await orders.getOrder({
         signer: {
@@ -384,6 +437,13 @@ contract('Wrapper Unit Tests', async accounts => {
         },
       })
 
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        mockSigner,
+        mockSwapAddress,
+        GANACHE_PROVIDER
+      )
+
       await passes(
         wrapper.swap(order, {
           value: 0,
@@ -395,7 +455,7 @@ contract('Wrapper Unit Tests', async accounts => {
     it('Test self destruct when paused', async () => {
       await wrapper.setPausedStatus(true)
       await passes(wrapper.killContract(owner))
-      let contractCode = await web3.eth.getCode(wrapper.address)
+      const contractCode = await web3.eth.getCode(wrapper.address)
       equal(contractCode, '0x', 'contract did not self destruct')
     })
 
