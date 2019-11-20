@@ -101,7 +101,7 @@ contract('Indexer Unit Tests', async accounts => {
         return (
           event.signerToken === tokenOne &&
           event.senderToken === tokenTwo &&
-          event.createdIndex === index
+          event.indexAddress === index
         )
       })
     })
@@ -123,7 +123,7 @@ contract('Indexer Unit Tests', async accounts => {
         return (
           event.signerToken === tokenOne &&
           event.senderToken === tokenTwo &&
-          event.createdIndex === index
+          event.indexAddress === index
         )
       })
     })
