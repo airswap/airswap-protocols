@@ -569,36 +569,47 @@ contract('Delegate Integration Tests', async accounts => {
       }
     )
 
-    it('Gets a quote to buy 20K DAI for WETH (Quote: 64 WETH)', async () => {
+    it('Gets a quote to buy 23412 DAI for WETH (Quote: 74.9184 WETH)', async () => {
+      const amount = 23412
       const quote = await aliceDelegate.getSignerSideQuote.call(
-        20000,
+        amount,
         tokenDAI.address,
         tokenWETH.address
       )
-      equal(quote, 64)
+      // This rounds up, just as getSignerSideQuote does
+      // 74.9184 becomes 75
+      const expectedValue = Math.ceil((amount * 32) / 10 ** 4)
+      equal(quote.toNumber(), expectedValue)
     })
 
     it('Gets a quote to sell 100K (Max) DAI for WETH (Quote: 320 WETH)', async () => {
+      const amount = 100000
       const quote = await aliceDelegate.getSignerSideQuote.call(
-        100000,
+        amount,
         tokenDAI.address,
         tokenWETH.address
       )
-      equal(quote, 320)
+      // This does not end up rounding up as the sum reaches a whole number - 320
+      const expectedValue = Math.ceil((amount * 32) / 10 ** 4)
+      equal(quote.toNumber(), expectedValue)
     })
 
-    it('Gets a quote to sell 1 WETH for DAI (Quote: 300 DAI)', async () => {
+    it('Gets a quote to sell 1 WETH for DAI (Quote: 312.5 DAI)', async () => {
+      const amount = 1
       const quote = await aliceDelegate.getSenderSideQuote.call(
-        1,
+        amount,
         tokenWETH.address,
         tokenDAI.address
       )
-      equal(quote, 312)
+      // This floors as solidity rounds down - 312.5 becomes 312
+      const expectedValue = Math.floor((amount * 10 ** 4) / 32)
+      equal(quote.toNumber(), expectedValue)
     })
 
     it('Gets a quote to sell 500 DAI for WETH (False: No rule)', async () => {
+      const amount = 500
       const quote = await aliceDelegate.getSenderSideQuote.call(
-        500,
+        amount,
         tokenDAI.address,
         tokenWETH.address
       )
