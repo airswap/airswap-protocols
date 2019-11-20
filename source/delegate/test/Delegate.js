@@ -3,6 +3,7 @@ const Swap = artifacts.require('Swap')
 const Types = artifacts.require('Types')
 const Indexer = artifacts.require('Indexer')
 const FungibleToken = artifacts.require('FungibleToken')
+const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
 const {
   emitted,
   notEmitted,
@@ -17,6 +18,8 @@ const {
   EMPTY_ADDRESS,
   GANACHE_PROVIDER,
 } = require('@airswap/order-utils').constants
+
+let snapshotId
 
 contract('Delegate Integration Tests', async accounts => {
   const STARTING_BALANCE = 700
@@ -50,6 +53,9 @@ contract('Delegate Integration Tests', async accounts => {
   }
 
   before('Setup', async () => {
+    const snapShot = await takeSnapshot()
+    snapshotId = snapShot['result']
+
     // link types to swap
     await Swap.link('Types', (await Types.new()).address)
     // now deploy swap
@@ -68,6 +74,12 @@ contract('Delegate Integration Tests', async accounts => {
       aliceTradeWallet
     )
     aliceDelegate = await delegateContract
+  })
+
+  before('Setup', async () => {})
+
+  after(async () => {
+    await revertToSnapshot(snapshotId)
   })
 
   describe('Test the delegate constructor', async () => {
