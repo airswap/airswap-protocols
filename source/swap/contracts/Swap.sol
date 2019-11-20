@@ -172,10 +172,7 @@ contract Swap is ISwap {
     * @notice Cancel one or more open orders by nonce
     * @dev Cancelled nonces are marked UNAVAILABLE (0x01)
     * @dev Emits a Cancel event
-    * @dev If the list of nonces to cancel is too long, 
-    * there is a potential issue of out of gas error. 
-    * It is best to break the list into smaller chunks 
-    * and submit the cancel() this way instead.
+    * @dev Out of gas may occur on arrays of length > 400
     * @param nonces uint256[] List of nonces to cancel
     */
   function cancel(
