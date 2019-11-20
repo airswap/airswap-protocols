@@ -14,7 +14,7 @@ describe('Orders', async () => {
   const signerWallet = '0x9d2fb0bcc90c6f3fa3a98d2c760623a4f6ee59b4'
 
   // Owns a crypto kitty
-  const kittyWallet = '0x155862c29632E402d4068099B701891741221C25'
+  const kittyWallet = '0x7F18BB4Dd92CF2404C54CBa1A9BE4A1153bdb078'
 
   // Mock ERC721Receiver wallet on rinkeby
   const erc721Wallet = '0xF727956c4CFd20b9C8D463218a65e751891da3e6'
