@@ -20,7 +20,8 @@ interface IIndexer {
 
   event CreateIndex(
     address signerToken,
-    address senderToken
+    address senderToken,
+    address indexAddress
   );
 
   event Stake(
