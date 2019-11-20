@@ -94,12 +94,14 @@ contract('Indexer Unit Tests', async accounts => {
         from: aliceAddress,
       })
 
+      const index = await indexer.indexers(tokenOne, tokenTwo)
+
       // event is emitted
       emitted(result, 'CreateIndex', event => {
         return (
           event.signerToken === tokenOne &&
           event.senderToken === tokenTwo &&
-          event.createdIndex !== EMPTY_ADDRESS
+          event.createdIndex === index
         )
       })
     })
@@ -115,11 +117,13 @@ contract('Indexer Unit Tests', async accounts => {
         from: aliceAddress,
       })
 
+      const index = await indexer.indexers(tokenOne, tokenTwo)
+
       notEmitted(result, 'CreateIndex', event => {
         return (
           event.signerToken === tokenOne &&
           event.senderToken === tokenTwo &&
-          event.createdIndex !== EMPTY_ADDRESS
+          event.createdIndex === index
         )
       })
     })
