@@ -187,7 +187,7 @@ contract Swap is ISwap {
 
   /**
     * @notice Cancels all orders below a nonce value
-    * @dev Emits an cancelUpTo event
+    * @dev Emits a CancelUpTo event
     * @param minimumNonce uint256 Minimum valid nonce
     */
   function cancelUpTo(
