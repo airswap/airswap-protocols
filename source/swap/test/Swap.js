@@ -42,7 +42,7 @@ contract('Swap', async accounts => {
 
   let swap
   let cancel
-  let invalidate
+  let cancelUpTo
 
   // One big snapshot - not snapshotting every test
   before('Setup', async () => {
@@ -63,7 +63,7 @@ contract('Swap', async accounts => {
 
       swap = swapContract.swap
       cancel = swapContract.methods['cancel(uint256[])']
-      invalidate = swapContract.methods['invalidate(uint256)']
+      cancelUpTo = swapContract.methods['cancelUpTo(uint256)']
 
       orders.setVerifyingContract(swapAddress)
     })
@@ -837,7 +837,7 @@ contract('Swap', async accounts => {
     })
 
     it('Checks that Alice is able to set a minimum nonce of 4', async () => {
-      emitted(await invalidate(4, { from: aliceAddress }), 'Invalidate')
+      emitted(await cancelUpTo(4, { from: aliceAddress }), 'CancelUpTo')
     })
 
     it('Checks that Bob is unable to take an order with nonce 2', async () => {

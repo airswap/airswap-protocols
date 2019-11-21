@@ -187,15 +187,15 @@ contract Swap is ISwap {
   }
 
   /**
-    * @notice Invalidate all orders below a nonce value
-    * @dev Emits an Invalidate event
+    * @notice Cancels all orders below a nonce value
+    * @dev Emits a CancelUpTo event
     * @param minimumNonce uint256 Minimum valid nonce
     */
-  function invalidate(
+  function cancelUpTo(
     uint256 minimumNonce
   ) external {
     signerMinimumNonce[msg.sender] = minimumNonce;
-    emit Invalidate(minimumNonce, msg.sender);
+    emit CancelUpTo(minimumNonce, msg.sender);
   }
 
   /**
