@@ -447,7 +447,7 @@ contract Delegate is IDelegate, Ownable {
     }
   }
 
-    /**
+  /**
     * @notice Calculate the signer amount for a given sender amount and price
     * @param signerParam uint256 The amount the signer would send in the swap
     * @param priceCoef uint256 Coefficient of the token price defined in the rule
@@ -462,7 +462,7 @@ contract Delegate is IDelegate, Ownable {
   ) {
     // Calculate the param using the price formula
     senderParam = signerParam
-        .mul(10 ** priceExp)
-        .div(priceCoef);
+      .mul(10 ** priceExp)
+      .div(priceCoef);
   }
 }

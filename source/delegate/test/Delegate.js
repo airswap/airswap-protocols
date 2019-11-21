@@ -76,8 +76,6 @@ contract('Delegate Integration Tests', async accounts => {
     aliceDelegate = await delegateContract
   })
 
-  before('Setup', async () => {})
-
   after(async () => {
     await revertToSnapshot(snapshotId)
   })
