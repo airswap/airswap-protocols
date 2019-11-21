@@ -388,7 +388,7 @@ contract Delegate is IDelegate, Ownable {
     uint256 priceCoef,
     uint256 priceExp
   ) internal {
-    require(priceCoef > 0, "REQUIRE_NONZERO_PRICE");
+    require(priceCoef > 0, "INVALID_PRICE_COEF");
     rules[senderToken][signerToken] = Rule({
       maxSenderAmount: maxSenderAmount,
       priceCoef: priceCoef,

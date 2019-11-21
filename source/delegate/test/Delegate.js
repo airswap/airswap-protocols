@@ -163,7 +163,7 @@ contract('Delegate Integration Tests', async accounts => {
         0,
         { from: aliceAddress }
       )
-      await reverted(trx, 'REQUIRE_NONZERO_PRICE')
+      await reverted(trx, 'INVALID_PRICE_COEF')
     })
   })
 

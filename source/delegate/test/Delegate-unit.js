@@ -275,7 +275,7 @@ contract('Delegate Unit Tests', async accounts => {
         0,
         EXP
       )
-      await reverted(trx, 'REQUIRE_NONZERO_PRICE')
+      await reverted(trx, 'INVALID_PRICE_COEF')
     })
   })
 
