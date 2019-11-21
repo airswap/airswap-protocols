@@ -388,6 +388,7 @@ contract Delegate is IDelegate, Ownable {
     uint256 priceCoef,
     uint256 priceExp
   ) internal {
+    require(priceCoef > 0, "INVALID_PRICE_COEF");
     rules[senderToken][signerToken] = Rule({
       maxSenderAmount: maxSenderAmount,
       priceCoef: priceCoef,
@@ -414,14 +415,16 @@ contract Delegate is IDelegate, Ownable {
     address signerToken
   ) internal {
 
-    // Delete the rule.
-    delete rules[senderToken][signerToken];
-
-    emit UnsetRule(
-      owner(),
-      senderToken,
-      signerToken
+    // using non-zero rule.priceCoef for rule existence check
+    if (rules[senderToken][signerToken].priceCoef > 0) {
+      // Delete the rule.
+      delete rules[senderToken][signerToken];
+      emit UnsetRule(
+        owner(),
+        senderToken,
+        signerToken
     );
+    }
   }
 
   /**

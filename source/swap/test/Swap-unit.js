@@ -286,10 +286,8 @@ contract('Swap Unit Tests', async accounts => {
       const val = await swap.signerAuthorizations.call(sender, mockSigner)
       equal(val, 0, 'signer approval was not properly unset')
 
-      //check that the event was emitted
-      emitted(trx, 'RevokeSigner', e => {
-        return e.authorizerAddress === sender && e.revokedSigner === mockSigner
-      })
+      //check that the event was not emitted as the authsigner did not exist
+      notEmitted(trx, 'RevokeSigner')
     })
 
     it('test that the revokeSender is successfully removed', async () => {
@@ -299,10 +297,8 @@ contract('Swap Unit Tests', async accounts => {
       const val = await swap.senderAuthorizations.call(sender, mockSender)
       equal(val, 0, 'sender approval was not properly unset')
 
-      //check that the event was emitted
-      emitted(trx, 'RevokeSender', e => {
-        return e.authorizerAddress === sender && e.revokedSender === mockSender
-      })
+      //check that the event was was not emitted as the authsender did not exist
+      notEmitted(trx, 'RevokeSender')
     })
   })
 })

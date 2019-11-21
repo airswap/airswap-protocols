@@ -153,6 +153,18 @@ contract('Delegate Integration Tests', async accounts => {
         0
       )
     })
+
+    it('Test setRule for zero priceCoef does revert', async () => {
+      const trx = aliceDelegate.setRule(
+        tokenWETH.address,
+        tokenDAI.address,
+        100000,
+        0,
+        0,
+        { from: aliceAddress }
+      )
+      await reverted(trx, 'INVALID_PRICE_COEF')
+    })
   })
 
   describe('Test setRuleAndIntent()', async () => {

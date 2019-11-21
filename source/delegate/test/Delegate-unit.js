@@ -266,6 +266,17 @@ contract('Delegate Unit Tests', async accounts => {
         )
       })
     })
+
+    it('Test setRule for zero priceCoef does revert', async () => {
+      const trx = delegate.setRule(
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
+        0,
+        EXP
+      )
+      await reverted(trx, 'INVALID_PRICE_COEF')
+    })
   })
 
   describe('Test unsetRule', async () => {

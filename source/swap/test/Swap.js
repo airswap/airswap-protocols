@@ -474,6 +474,15 @@ contract('Swap', async accounts => {
       )
     })
 
+    it('Alice authorizes David a second time does not emit an event', async () => {
+      notEmitted(
+        await swapContract.authorizeSigner(davidAddress, {
+          from: aliceAddress,
+        }),
+        'AuthorizeSigner'
+      )
+    })
+
     it('Alice approves Swap to spend the rest of her AST', async () => {
       emitted(
         await tokenAST.approve(swapAddress, 800, { from: aliceAddress }),
@@ -582,6 +591,15 @@ contract('Swap', async accounts => {
 
     it('Bob authorizes Carol to take orders on his behalf', async () => {
       emitted(
+        await swapContract.authorizeSender(carolAddress, {
+          from: bobAddress,
+        }),
+        'AuthorizeSender'
+      )
+    })
+
+    it('Bob authorizes Carol a second time does not emit an event', async () => {
+      notEmitted(
         await swapContract.authorizeSender(carolAddress, {
           from: bobAddress,
         }),
