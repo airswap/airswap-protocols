@@ -33,10 +33,8 @@
 
 ## Running Tests
 
-Run an instance of `ganache-cli` before running tests.
+:bulb: Prior to testing locally, run `yarn compile` in the `airswap-protocols` project root to build required artifacts. Then run an instance of `ganache-cli` before running `yarn test` in another shell.
 
 ```
 yarn ganache
 ```
-
-Delegate tests require build artifacts from `@airswap/swap` and `@airswap/tokens`. Before running tests, run `yarn compile` in both the [swap](../swap) and [tokens](../tokens) packages in this repository.
