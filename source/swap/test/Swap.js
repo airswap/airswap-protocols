@@ -3,7 +3,6 @@ const Types = artifacts.require('Types')
 const FungibleToken = artifacts.require('FungibleToken')
 const NonFungibleToken = artifacts.require('NonFungibleToken')
 const OMGToken = artifacts.require('OMGToken')
-const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
 
 const {
   emitted,
@@ -24,8 +23,6 @@ const {
   GANACHE_PROVIDER,
 } = require('@airswap/order-utils').constants
 
-let snapshotId
-
 contract('Swap', async accounts => {
   const aliceAddress = accounts[0]
   const bobAddress = accounts[1]
@@ -43,16 +40,6 @@ contract('Swap', async accounts => {
   let swap
   let cancel
   let cancelUpTo
-
-  // One big snapshot - not snapshotting every test
-  before('Setup', async () => {
-    const snapShot = await takeSnapshot()
-    snapshotId = snapShot['result']
-  })
-
-  after(async () => {
-    await revertToSnapshot(snapshotId)
-  })
 
   describe('Deploying...', async () => {
     it('Deployed Swap contract', async () => {

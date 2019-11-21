@@ -12,7 +12,6 @@ const {
   passes,
 } = require('@airswap/test-utils').assert
 const { balances } = require('@airswap/test-utils').balances
-const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
 const {
   EMPTY_ADDRESS,
   HEAD,
@@ -21,8 +20,6 @@ const {
   NEXTID,
 } = require('@airswap/order-utils').constants
 const { padAddressToLocator } = require('@airswap/test-utils').padding
-
-let snapshotId
 
 contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
   let indexer
@@ -43,15 +40,6 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
   const emptyLocator = padAddressToLocator(EMPTY_ADDRESS)
 
   let whitelistedLocator
-
-  before('Setup', async () => {
-    const snapShot = await takeSnapshot()
-    snapshotId = snapShot['result']
-  })
-
-  after(async () => {
-    await revertToSnapshot(snapshotId)
-  })
 
   describe('Deploying...', async () => {
     it('Deployed staking token "AST"', async () => {

@@ -14,7 +14,6 @@ const {
   ok,
 } = require('@airswap/test-utils').assert
 const { balances } = require('@airswap/test-utils').balances
-const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
 const { orders, signatures } = require('@airswap/order-utils')
 const { GANACHE_PROVIDER } = require('@airswap/order-utils').constants
 
@@ -30,12 +29,9 @@ let wrappedSwap
 let tokenAST
 let tokenDAI
 let tokenWETH
-let snapshotId
 
 contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
   before('Setup', async () => {
-    const snapShot = await takeSnapshot()
-    snapshotId = snapShot['result']
     // link types to swap
     await Swap.link('Types', (await Types.new()).address)
     // now deploy swap
@@ -54,10 +50,6 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
 
     orders.setVerifyingContract(swapAddress)
     wrappedSwap = wrapperContract.swap
-  })
-
-  after('Cleanup', async () => {
-    await revertToSnapshot(snapshotId)
   })
 
   describe('Setup', async () => {
