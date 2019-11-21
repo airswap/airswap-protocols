@@ -38,3 +38,5 @@ Run an instance of `ganache-cli` before running tests.
 ```
 yarn ganache
 ```
+
+Delegate tests require build artifacts from `@airswap/swap` and `@airswap/tokens`. Before running tests, run `yarn compile` in both the [swap](../swap) and [tokens](../tokens) packages in this repository.
