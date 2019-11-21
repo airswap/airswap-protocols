@@ -70,7 +70,7 @@ contract('Swap Unit Tests', async accounts => {
         signature,
       ]
 
-      await swap.invalidate(5, { from: mockSigner })
+      await swap.cancelUpto(5, { from: mockSigner })
       await reverted(swap.swap(order), 'NONCE_TOO_LOW')
     })
 
@@ -250,22 +250,22 @@ contract('Swap Unit Tests', async accounts => {
     })
   })
 
-  describe('Test invalidate', async () => {
+  describe('Test cancelUpTo functionality', async () => {
     it('test that given a minimum nonce for a signer is set', async () => {
       const minNonceForSigner = await swap.signerMinimumNonce.call(mockSigner)
       equal(minNonceForSigner, 0, 'mock signer should have min nonce of 0')
 
-      const trx = await swap.invalidate(5, { from: mockSigner })
+      const trx = await swap.cancelUpto(5, { from: mockSigner })
 
       const newNonceForSigner = await swap.signerMinimumNonce.call(mockSigner)
       equal(newNonceForSigner, 5, 'mock signer should have a min nonce of 5')
 
-      emitted(trx, 'Invalidate', e => {
+      emitted(trx, 'CancelUpto', e => {
         return e.nonce.toNumber() === 5 && e.signerWallet === mockSigner
       })
     })
 
-    it('test that given a minimum nonce that all orders below a nonce value are invalidated', async () => {})
+    it('test that given a minimum nonce that all orders below a nonce value are cancelled', async () => {})
   })
 
   describe('Test authorize signer', async () => {
