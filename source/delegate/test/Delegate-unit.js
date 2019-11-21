@@ -589,7 +589,7 @@ contract('Delegate Unit Tests', async accounts => {
         SENDER_TOKEN,
         SIGNER_TOKEN
       )
-      const expectedValue = Math.floor((1234 * PRICE_COEF) / 10 ** EXP)
+      const expectedValue = Math.ceil((1234 * PRICE_COEF) / 10 ** EXP)
       equal(val.toNumber(), expectedValue, 'there should be a quote available')
     })
   })
@@ -680,16 +680,16 @@ contract('Delegate Unit Tests', async accounts => {
       equal(
         val[0].toNumber(),
         MAX_SENDER_AMOUNT,
-        'no quote should be available if a peer does not exist'
+        'get max quote returned incorrect sender quote'
       )
 
-      const expectedValue = Math.floor(
+      const expectedValue = Math.ceil(
         (MAX_SENDER_AMOUNT * PRICE_COEF) / 10 ** EXP
       )
       equal(
         val[1].toNumber(),
         expectedValue,
-        'no quote should be available if a delegate does not exist'
+        'get max quote returned incorrect signer quote'
       )
     })
   })
@@ -839,7 +839,7 @@ contract('Delegate Unit Tests', async accounts => {
         delegate.provideOrder(order, {
           from: notOwner,
         }),
-        'PRICE_INCORRECT'
+        'PRICE_INVALID'
       )
     })
 
@@ -953,7 +953,7 @@ contract('Delegate Unit Tests', async accounts => {
       equal(
         ruleAfter[0].toNumber(),
         ruleBefore[0].toNumber() - signerAmount,
-        "rule's max peer amount was not decremented"
+        "rule's max sender amount was not decremented"
       )
 
       //check if swap() was called
@@ -1058,6 +1058,222 @@ contract('Delegate Unit Tests', async accounts => {
         ruleBefore[0].toNumber() - senderAmount,
         "rule's max delegate amount was not decremented"
       )
+    })
+
+    it('test a getting a signerSideQuote and passing it into provideOrder', async () => {
+      await delegate.setRule(
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
+        PRICE_COEF,
+        EXP
+      )
+
+      const senderAmount = 123
+      const signerQuote = await delegate.getSignerSideQuote.call(
+        senderAmount,
+        SENDER_TOKEN,
+        SIGNER_TOKEN
+      )
+
+      const signerAmount = signerQuote.toNumber()
+
+      // put that quote into an order
+      const order = await orders.getOrder({
+        signer: {
+          wallet: notOwner,
+          param: signerAmount,
+          token: SIGNER_TOKEN,
+        },
+        sender: {
+          wallet: tradeWallet,
+          param: senderAmount,
+          token: SENDER_TOKEN,
+        },
+      })
+
+      const tx = await delegate.provideOrder(order, {
+        from: notOwner,
+      })
+
+      passes(tx)
+    })
+
+    it('test a getting a senderSideQuote and passing it into provideOrder', async () => {
+      await delegate.setRule(
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
+        PRICE_COEF,
+        EXP
+      )
+
+      const signerAmount = 8425
+      const senderQuote = await delegate.getSenderSideQuote.call(
+        signerAmount,
+        SIGNER_TOKEN,
+        SENDER_TOKEN
+      )
+
+      const senderAmount = senderQuote.toNumber()
+
+      // put that quote into an order
+      const order = await orders.getOrder({
+        signer: {
+          wallet: notOwner,
+          param: signerAmount,
+          token: SIGNER_TOKEN,
+        },
+        sender: {
+          wallet: tradeWallet,
+          param: senderAmount,
+          token: SENDER_TOKEN,
+        },
+      })
+
+      const tx = await delegate.provideOrder(order, {
+        from: notOwner,
+      })
+
+      passes(tx)
+    })
+
+    it('test a getting a getMaxQuote and passing it into provideOrder', async () => {
+      await delegate.setRule(
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
+        PRICE_COEF,
+        EXP
+      )
+
+      const val = await delegate.getMaxQuote.call(SENDER_TOKEN, SIGNER_TOKEN)
+
+      const senderAmount = val[0].toNumber()
+      const signerAmount = val[1].toNumber()
+
+      // put that quote into an order
+      const order = await orders.getOrder({
+        signer: {
+          wallet: notOwner,
+          param: signerAmount,
+          token: SIGNER_TOKEN,
+        },
+        sender: {
+          wallet: tradeWallet,
+          param: senderAmount,
+          token: SENDER_TOKEN,
+        },
+      })
+
+      const tx = await delegate.provideOrder(order, {
+        from: notOwner,
+      })
+
+      passes(tx)
+    })
+
+    it('test the signer trying to trade just 1 unit over the rule price - fails', async () => {
+      // 1 SenderToken for 0.005 SignerToken => 200 SenderToken for 1 SignerToken
+      await delegate.setRule(
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
+        5,
+        3
+      )
+
+      const senderAmount = 201 // 1 unit more than the delegate wants to send
+      const signerAmount = 1
+
+      const order = await orders.getOrder({
+        signer: {
+          wallet: notOwner,
+          param: signerAmount,
+          token: SIGNER_TOKEN,
+        },
+        sender: {
+          wallet: tradeWallet,
+          param: senderAmount,
+          token: SENDER_TOKEN,
+        },
+      })
+
+      // check the delegate doesnt allow this
+      await reverted(
+        delegate.provideOrder(order, {
+          from: notOwner,
+        }),
+        'PRICE_INVALID'
+      )
+    })
+
+    it('test the signer trying to trade just 1 unit less than the rule price - passes', async () => {
+      // 1 SenderToken for 0.005 SignerToken => 200 SenderToken for 1 SignerToken
+      await delegate.setRule(
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
+        5,
+        3
+      )
+
+      const senderAmount = 199 // 1 unit less than the delegate rule
+      const signerAmount = 1
+
+      const order = await orders.getOrder({
+        signer: {
+          wallet: notOwner,
+          param: signerAmount,
+          token: SIGNER_TOKEN,
+        },
+        sender: {
+          wallet: tradeWallet,
+          param: senderAmount,
+          token: SENDER_TOKEN,
+        },
+      })
+
+      // check the delegate allows this
+      const tx = await delegate.provideOrder(order, {
+        from: notOwner,
+      })
+
+      passes(tx)
+    })
+
+    it('test the signer trying to trade the exact amount of rule price - passes', async () => {
+      // 1 SenderToken for 0.005 SignerToken => 200 SenderToken for 1 SignerToken
+      await delegate.setRule(
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
+        5,
+        3
+      )
+
+      const senderAmount = 200
+      const signerAmount = 1
+
+      const order = await orders.getOrder({
+        signer: {
+          wallet: notOwner,
+          param: signerAmount,
+          token: SIGNER_TOKEN,
+        },
+        sender: {
+          wallet: tradeWallet,
+          param: senderAmount,
+          token: SENDER_TOKEN,
+        },
+      })
+
+      // check the delegate allows this
+      const tx = await delegate.provideOrder(order, {
+        from: notOwner,
+      })
+
+      passes(tx)
     })
   })
 })

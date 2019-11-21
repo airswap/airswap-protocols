@@ -135,7 +135,7 @@ contract Delegate is IDelegate, Ownable {
     * @dev delegate needs to be given allowance from msg.sender for the newStakeAmount
     * @dev swap needs to be given permission to move funds from the delegate
     * @param senderToken address Token the delgeate will send
-    * @param senderToken address Token the delegate will receive
+    * @param signerToken address Token the delegate will receive
     * @param rule Rule Rule to set on a delegate
     * @param newStakeAmount uint256 Amount to stake for an intent
     */
@@ -242,9 +242,8 @@ contract Delegate is IDelegate, Ownable {
       "AMOUNT_EXCEEDS_MAX");
 
     // Ensure the order is priced according to the rule.
-    require(order.sender.param == order.signer.param
-      .mul(10 ** rule.priceExp).div(rule.priceCoef),
-      "PRICE_INCORRECT");
+    require(order.sender.param <= _calculateSenderParam(order.signer.param, rule.priceCoef, rule.priceExp),
+      "PRICE_INVALID");
 
     // Overwrite the rule with a decremented maxSenderAmount.
     rules[order.sender.token][order.signer.token] = Rule({
@@ -299,9 +298,7 @@ contract Delegate is IDelegate, Ownable {
       // Ensure the senderParam does not exceed maximum for the rule.
       if(senderParam <= rule.maxSenderAmount) {
 
-        signerParam = senderParam
-            .mul(rule.priceCoef)
-            .div(10 ** rule.priceExp);
+        signerParam = _calculateSignerParam(senderParam, rule.priceCoef, rule.priceExp);
 
         // Return the quote.
         return signerParam;
@@ -331,8 +328,7 @@ contract Delegate is IDelegate, Ownable {
     if(rule.maxSenderAmount > 0) {
 
       // Calculate the senderParam.
-      senderParam = signerParam
-        .mul(10 ** rule.priceExp).div(rule.priceCoef);
+      senderParam = _calculateSenderParam(signerParam, rule.priceCoef, rule.priceExp);
 
       // Ensure the senderParam does not exceed the maximum trade amount.
       if(senderParam <= rule.maxSenderAmount) {
@@ -359,13 +355,17 @@ contract Delegate is IDelegate, Ownable {
 
     Rule memory rule = rules[senderToken][signerToken];
 
+    senderParam = rule.maxSenderAmount;
+
     // Ensure that a rule exists.
-    if(rule.maxSenderAmount > 0) {
+    if (senderParam > 0) {
+      // calculate the signerParam
+      signerParam = _calculateSignerParam(senderParam, rule.priceCoef, rule.priceExp);
 
       // Return the maxSenderAmount and calculated signerParam.
       return (
-        rule.maxSenderAmount,
-        rule.maxSenderAmount.mul(rule.priceCoef).div(10 ** rule.priceExp)
+        senderParam,
+        signerParam
       );
     }
     return (0, 0);
@@ -406,7 +406,6 @@ contract Delegate is IDelegate, Ownable {
 
   /**
     * @notice Unset a Trading Rule
-    * @dev only callable by the owner of the contract, removes from a mapping
     * @param senderToken address Address of an ERC-20 token the delegate would send
     * @param signerToken address Address of an ERC-20 token the consumer would send
     */
@@ -423,5 +422,47 @@ contract Delegate is IDelegate, Ownable {
       senderToken,
       signerToken
     );
+  }
+
+  /**
+    * @notice Calculate the signer param (amount) for a given sender param and price
+    * @param senderParam uint256 The amount the delegate would send in the swap
+    * @param priceCoef uint256 Coefficient of the token price defined in the rule
+    * @param priceExp uint256 Exponent of the token price defined in the rule
+    */
+  function _calculateSignerParam(
+    uint256 senderParam,
+    uint256 priceCoef,
+    uint256 priceExp
+  ) internal pure returns (
+    uint256 signerParam
+  ) {
+    // Calculate the param using the price formula
+    uint256 multiplier = senderParam.mul(priceCoef);
+    signerParam = multiplier.div(10 ** priceExp);
+
+    // If the div rounded down, round up
+    if (multiplier.mod(10 ** priceExp) > 0) {
+      signerParam++;
+    }
+  }
+
+  /**
+    * @notice Calculate the sender param (amount) for a given signer param and price
+    * @param signerParam uint256 The amount the signer would send in the swap
+    * @param priceCoef uint256 Coefficient of the token price defined in the rule
+    * @param priceExp uint256 Exponent of the token price defined in the rule
+    */
+  function _calculateSenderParam(
+    uint256 signerParam,
+    uint256 priceCoef,
+    uint256 priceExp
+  ) internal pure returns (
+    uint256 senderParam
+  ) {
+    // Calculate the param using the price formula
+    senderParam = signerParam
+      .mul(10 ** priceExp)
+      .div(priceCoef);
   }
 }
