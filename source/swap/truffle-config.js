@@ -8,7 +8,7 @@ module.exports = {
       host: '127.0.0.1',
       port: 8545,
       network_id: '*',
-      gas: 0xfffffffffff,
+      gas: 0x9851a9,
       gasPrice: 0x01,
     },
     coverage: {
@@ -26,6 +26,9 @@ module.exports = {
         ),
       network_id: 4,
     },
+  },
+  mocha: {
+    timeout: 1000000,
   },
   compilers: {
     solc: {

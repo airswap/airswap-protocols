@@ -11,6 +11,7 @@ const {
 } = require('@airswap/test-utils').assert
 const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
 const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
+const { orders, signatures } = require('@airswap/order-utils')
 
 const NONCE_AVAILABLE = 0x00
 const NONCE_UNAVAILABLE = 0x01
@@ -304,5 +305,22 @@ contract('Swap Unit Tests', async accounts => {
         return e.authorizerAddress === sender && e.revokedSender === mockSender
       })
     })
+  })
+
+  it.only('Test cancel() DOS', async () => {
+    for (nonce = 1; nonce < 1000; nonce++) {
+      const ss = await takeSnapshot()
+      ssid = ss['result']
+
+      console.log('nonce amount: ' + nonce)
+      const nonces = []
+      for (i = 1; i <= nonce; i++) {
+        nonces.push(i)
+      }
+      const trx = await swap.cancel(nonces, { from: mockSigner })
+      console.log(trx.receipt.gasUsed)
+
+      await revertToSnapshot(ssid)
+    }
   })
 })
