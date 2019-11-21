@@ -242,8 +242,7 @@ contract Delegate is IDelegate, Ownable {
       "AMOUNT_EXCEEDS_MAX");
 
     // Ensure the order is priced according to the rule.
-    require(order.sender.param <= order.signer.param
-      .mul(10 ** rule.priceExp).div(rule.priceCoef),
+    require(order.sender.param <= _calculateSenderParam(order.signer.param, rule.priceCoef, rule.priceExp),
       "PRICE_INVALID");
 
     // Overwrite the rule with a decremented maxSenderAmount.
@@ -329,8 +328,7 @@ contract Delegate is IDelegate, Ownable {
     if(rule.maxSenderAmount > 0) {
 
       // Calculate the senderParam.
-      senderParam = signerParam
-        .mul(10 ** rule.priceExp).div(rule.priceCoef);
+      senderParam = _calculateSenderParam(signerParam, rule.priceCoef, rule.priceExp);
 
       // Ensure the senderParam does not exceed the maximum trade amount.
       if(senderParam <= rule.maxSenderAmount) {
@@ -447,5 +445,24 @@ contract Delegate is IDelegate, Ownable {
     if (multiplier.mod(10 ** priceExp) > 0) {
       signerParam++;
     }
+  }
+
+    /**
+    * @notice Calculate the signer amount for a given sender amount and price
+    * @param signerParam uint256 The amount the signer would send in the swap
+    * @param priceCoef uint256 Coefficient of the token price defined in the rule
+    * @param priceExp uint256 Exponent of the token price defined in the rule
+    */
+  function _calculateSenderParam(
+    uint256 signerParam,
+    uint256 priceCoef,
+    uint256 priceExp
+  ) internal pure returns (
+    uint256 senderParam
+  ) {
+    // Calculate the param using the price formula
+    senderParam = signerParam
+        .mul(10 ** priceExp)
+        .div(priceCoef);
   }
 }
