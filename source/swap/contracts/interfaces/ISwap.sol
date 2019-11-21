@@ -40,7 +40,7 @@ interface ISwap {
     address indexed signerWallet
   );
 
-  event CancelUpto(
+  event CancelUpTo(
     uint256 indexed nonce,
     address indexed signerWallet
   );
@@ -89,10 +89,10 @@ interface ISwap {
 
   /**
     * @notice Cancels all orders below a nonce value
-    * @dev These orders can be made active by reducing nonce
+    * @dev These orders can be made active by reducing the minimum nonce
     * @param minimumNonce uint256
     */
-  function cancelUpto(
+  function cancelUpTo(
     uint256 minimumNonce
   ) external;
 
