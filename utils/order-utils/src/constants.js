@@ -26,7 +26,7 @@ module.exports = {
   NEXTID: 2,
   ONE_ETH: 1000000000000000000,
   ERC721_INTERFACE_ID: '0x80ac58cd',
-  ERC20_INTERFACE_ID: '0x277f8169',
+  ERC20_INTERFACE_ID: '0x36372b07',
   GANACHE_PROVIDER: 'http://127.0.0.1:8545',
   signatures: {
     INTENDED_VALIDATOR: '0x00',
@@ -55,7 +55,7 @@ module.exports = {
   },
   defaults: {
     Party: {
-      kind: '0x277f8169',
+      kind: '0x36372b07',
       wallet: '0x0000000000000000000000000000000000000000',
       token: '0x0000000000000000000000000000000000000000',
       param: '0',

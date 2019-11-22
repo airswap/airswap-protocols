@@ -49,7 +49,7 @@ contract Delegate is IDelegate, Ownable {
   mapping (address => mapping (address => Rule)) public rules;
 
   // ERC-20 (fungible token) interface identifier (ERC-165)
-  bytes4 constant internal ERC20_INTERFACE_ID = 0x277f8169;
+  bytes4 constant internal ERC20_INTERFACE_ID = 0x36372b07;
 
   /**
     * @notice Contract Constructor
