@@ -146,7 +146,7 @@ describe('Orders', async () => {
       GANACHE_PROVIDER
     )
 
-    order.signature.v += 1
+    order.signature.v -= 1
     const errors = await orders.checkOrder(order, 'rinkeby')
     assert.equal(errors.length, 2)
     assert.equal(errors[1], 'Signature invalid')
