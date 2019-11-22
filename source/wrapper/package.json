@@ -28,6 +28,6 @@
   },
   "dependencies": {
     "@airswap/swap": "2.2.2",
-    "@airswap/tokens": "0.1.2"
+    "@airswap/tokens": "0.1.3"
   }
 }
