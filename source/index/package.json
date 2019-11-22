@@ -21,7 +21,7 @@
     "verify": "truffle run verify"
   },
   "devDependencies": {
-    "@airswap/order-utils": "0.3.7",
+    "@airswap/order-utils": "0.3.8",
     "@airswap/test-utils": "0.1.1",
     "@airswap/tokens": "0.1.3",
     "bignumber.js": "^9.0.0",
