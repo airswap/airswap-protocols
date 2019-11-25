@@ -1,6 +1,6 @@
 {
   "name": "@airswap/delegate",
-  "version": "0.4.1",
+  "version": "0.5.1",
   "description": "Manages delegated trading rules for use in the Swap Protocol",
   "license": "Apache-2.0",
   "repository": {
