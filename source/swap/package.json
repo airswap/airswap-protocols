@@ -1,6 +1,6 @@
 {
   "name": "@airswap/swap",
-  "version": "2.3.3",
+  "version": "2.3.4",
   "description": "The atomic swap used to trustlessly transfer tokens in the Swap Protocol",
   "license": "Apache-2.0",
   "repository": {

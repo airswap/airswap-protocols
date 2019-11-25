@@ -1,6 +1,6 @@
 {
   "name": "@airswap/delegate",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "Manages delegated trading rules for use in the Swap Protocol",
   "license": "Apache-2.0",
   "repository": {
@@ -26,8 +26,8 @@
     "solidity-coverage": "^0.6.3"
   },
   "dependencies": {
-    "@airswap/indexer": "0.4.3",
-    "@airswap/swap": "2.3.3",
+    "@airswap/indexer": "0.4.4",
+    "@airswap/swap": "2.3.4",
     "openzeppelin-solidity": "2.3"
   }
 }
