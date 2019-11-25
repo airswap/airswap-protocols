@@ -11,28 +11,29 @@ if __name__ == "__main__":
     pp = pprint.PrettyPrinter(indent=2)
 
     # go through all package files and extract their dependencies
-    for filename in Path('./source').rglob('package.json'):
-        if "node_modules" in str(filename):
-            continue
+    for directory in ['./source', './utils']:
+        for filename in Path(directory).rglob('package.json'):
+            if "node_modules" in str(filename):
+                continue
 
-        key = str(filename).split('/')[1]
+            key = str(filename).split('/')[1]
 
-        with open(filename) as f:
-            data = json.load(f)
-            dependency_graph[key] = {}
+            with open(filename) as f:
+                data = json.load(f)
+                dependency_graph[key] = {}
 
-            dependency_graph[key]['version'] = data['version']
+                dependency_graph[key]['version'] = data['version']
 
-            if DEV_DEP in data.keys():
-                dependency_graph[key][DEV_DEP] = data[DEV_DEP]
+                if DEV_DEP in data.keys():
+                    dependency_graph[key][DEV_DEP] = data[DEV_DEP]
 
-            if DEP in data.keys():
-                dependency_graph[key][DEP] = data[DEP]
+                if DEP in data.keys():
+                    dependency_graph[key][DEP] = data[DEP]
 
     # go through every package looking for where the dependency doesn't match the dependency graph
     for package in dependency_graph.items():
         for dependency in package[1][DEP].items():
-            if 'airswap' not in dependency[0]:
+            if 'airswap' not in dependency[0] and 'test-utils' not in dependency[0] and 'order-utils' not in dependency[0]:
                 continue
             dependency_name = dependency[0].split('/')[1]
 
