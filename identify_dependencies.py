@@ -16,7 +16,8 @@ if __name__ == "__main__":
             if "node_modules" in str(filename):
                 continue
 
-            key = str(filename).split('/')[1]
+            # prepend to make searching easier
+            key = "@airswap/" + str(filename).split('/')[1]
 
             with open(filename) as f:
                 data = json.load(f)
@@ -33,14 +34,18 @@ if __name__ == "__main__":
     # go through every package looking for where the dependency doesn't match the dependency graph
     for package in dependency_graph.items():
         for dependency in package[1][DEP].items():
-            if 'airswap' not in dependency[0] and 'test-utils' not in dependency[0] and 'order-utils' not in dependency[0]:
+
+            declared_dep = dependency[0]
+            declared_ver = dependency[1]
+
+            # skip if we don't see the packages we care about
+            if 'airswap' not in declared_dep and 'test-utils' not in declared_dep and 'order-utils' not in declared_dep:
                 continue
-            dependency_name = dependency[0].split('/')[1]
 
             # check version against declared version
-            expected_version = dependency_graph[dependency_name]['version']
-            declared_version = dependency[1]
+            expected_version = dependency_graph[declared_dep]['version']
+            declared_version = declared_ver
             if declared_version != expected_version:
-                print("'%s' version mismatch for %s. Is %s, but should be %s" % (package[0], dependency[0], declared_version, expected_version))
-            print("'%s' version for %s matches: %s" % (package[0], dependency[0], expected_version))
+                print("'%s' version mismatch for %s. Is %s, but should be %s" % (package[0], declared_dep, declared_version, expected_version))
+            print("'%s' version for %s matches: %s" % (package[0], declared_dep, expected_version))
 
