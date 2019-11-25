@@ -16,7 +16,7 @@
     "mocha": "^6.2.0"
   },
   "dependencies": {
-    "@airswap/swap": "2.2.2",
+    "@airswap/swap": "2.3.2",
     "@airswap/tokens": "0.1.3",
     "eth-sig-util": "^2.2.0",
     "ethereumjs-util": "^6.1.0",
