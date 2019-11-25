@@ -48,7 +48,7 @@ module.exports = {
     const orderHashBuff = ethUtil.toBuffer(orderHash)
     const { v, r, s } = ethUtil.ecsign(orderHashBuff, privateKey)
     return {
-      signatory: ethUtil.privateToAddress(privateKey).toString('hex'),
+      signatory: `0x${ethUtil.privateToAddress(privateKey).toString('hex')}`,
       validator: verifyingContract,
       version: signatures.SIGN_TYPED_DATA,
       v,
