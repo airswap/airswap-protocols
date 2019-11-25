@@ -4,6 +4,7 @@ import json
 
 DEV_DEP = "devDependencies"
 DEP = "dependencies"
+SEARCH_DIR = ['./source', './utils']
 
 if __name__ == "__main__":
 
@@ -11,8 +12,9 @@ if __name__ == "__main__":
     pp = pprint.PrettyPrinter(indent=2)
 
     # go through all package files and extract their dependencies
-    for directory in ['./source', './utils']:
+    for directory in SEARCH_DIR:
         for filename in Path(directory).rglob('package.json'):
+            #ignore node_modules
             if "node_modules" in str(filename):
                 continue
 
@@ -33,7 +35,8 @@ if __name__ == "__main__":
 
     # go through every package looking for where the dependency doesn't match the dependency graph
     for package in dependency_graph.items():
-        for dependency in package[1][DEP].items():
+        package_dependencies = package[1]
+        for dependency in package_dependencies[DEP].items():
 
             declared_dep = dependency[0]
             declared_ver = dependency[1]
