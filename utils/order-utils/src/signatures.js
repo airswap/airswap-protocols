@@ -52,8 +52,8 @@ module.exports = {
       validator: verifyingContract,
       version: signatures.SIGN_TYPED_DATA,
       v,
-      r,
-      s,
+      r: ethUtil.bufferToHex(r),
+      s: ethUtil.bufferToHex(s),
     }
   },
   getPersonalSignature(order, privateKey, verifyingContract) {
