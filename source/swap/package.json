@@ -1,6 +1,6 @@
 {
   "name": "@airswap/swap",
-  "version": "2.3.3",
+  "version": "2.3.4",
   "description": "The atomic swap used to trustlessly transfer tokens in the Swap Protocol",
   "license": "Apache-2.0",
   "repository": {
@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "@airswap/tokens": "0.1.3",
-    "@airswap/order-utils": "0.3.10",
+    "@airswap/order-utils": "0.3.11",
     "@airswap/test-utils": "0.1.1",
     "truffle": "^5.0.32",
     "@gnosis.pm/mock-contract": "^3.0.7",

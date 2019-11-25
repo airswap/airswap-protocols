@@ -46,10 +46,6 @@ interface IIndexer {
     address token
   );
 
-  function stakingToken() external returns (address);
-  function indexes(address, address) external returns (address);
-  function tokenBlacklist(address) external returns (bool);
-
   function setLocatorWhitelist(
     address newLocatorWhitelist
   ) external;
@@ -78,6 +74,10 @@ interface IIndexer {
     address signerToken,
     address senderToken
   ) external;
+
+  function stakingToken() external view returns (address);
+  function indexes(address, address) external view returns (address);
+  function tokenBlacklist(address) external view returns (bool);
 
   function getStakedAmount(
     address user,
