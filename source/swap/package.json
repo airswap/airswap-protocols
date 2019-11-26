@@ -1,6 +1,6 @@
 {
   "name": "@airswap/swap",
-  "version": "2.3.4",
+  "version": "3.3.4",
   "description": "The atomic swap used to trustlessly transfer tokens in the Swap Protocol",
   "license": "Apache-2.0",
   "repository": {
@@ -31,7 +31,7 @@
     "truffle-hdwallet-provider-privkey": "1.0.3"
   },
   "dependencies": {
-    "@airswap/types": "0.4.3",
+    "@airswap/types": "1.4.3",
     "openzeppelin-solidity": "2.3"
   }
 }
