@@ -1,0 +1,104 @@
+yarn flatten contracts/Wrapper.sol && yarn migrate --network mainnet && sleep 30 && yarn verify Wrapper flatten/Flattened.sol --network mainnet
+yarn run v1.17.3
+$ truffle run flatten contracts/Wrapper.sol
+artifactSource: contracts/Wrapper.sol
+Flatten file generated: flatten/Flattened.sol
+✨  Done in 4.22s.
+yarn run v1.17.3
+$ yarn cp_migration_flat; truffle migrate --network mainnet
+$ mkdir -p flatten/; cp contracts/Migrations.sol flatten/
+
+Compiling your contracts...
+===========================
+> Compiling ./flatten/Flattened.sol
+> Compiling ./flatten/Migrations.sol
+
+    > compilation warnings encountered:
+
+/Users/ejwessel/Dev/airswap-protocols/source/wrapper/flatten/Flattened.sol:2:1: Warning: Experimental features are turned on. Do not use experimental features on live deployments.
+pragma experimental ABIEncoderV2;
+^-------------------------------^
+
+> Artifacts written to /Users/ejwessel/Dev/airswap-protocols/source/wrapper/build/contracts
+> Compiled successfully using:
+   - solc: 0.5.12+commit.7709ece9.Emscripten.clang
+
+
+
+Migrations dry-run (simulation)
+===============================
+> Network name:    'mainnet-fork'
+> Network id:      1
+> Block gas limit: 0x981309
+
+
+1_initial_migration.js
+======================
+   -------------------------------------
+   > Total cost:                   0 ETH
+
+
+Summary
+=======
+> Total deployments:   0
+> Final cost:          0 ETH
+
+
+
+
+
+Starting migrations...
+======================
+> Network name:    'mainnet'
+> Network id:      1
+> Block gas limit: 0x981309
+
+
+1_initial_migration.js
+======================
+
+   Deploying 'Wrapper'
+   -------------------
+   > transaction hash:    0xfd7ac360a38cd18bf7c0123ad1cac69f129ba3263274692c4753e40d7dca2634
+   > Blocks: 1            Seconds: 48
+   > contract address:    0x200c6958F6B5dfb463F84f67792b9e8a9966829F
+   > block number:        9005070
+   > block timestamp:     1574784542
+   > account:             0x7eeAb4F134fcFA6FCAF3987D391f1d626f75F6E1
+   > balance:             0.164088044645997013
+   > gas used:            975744
+   > gas price:           15.9 gwei
+   > value sent:          0 ETH
+   > total cost:          0.0155143296 ETH
+
+   > Saving artifacts
+   -------------------------------------
+   > Total cost:        0.0155143296 ETH
+
+
+Summary
+=======
+> Total deployments:   1
+> Final cost:          0.0155143296 ETH
+
+
+
+✨  Done in 64.00s.
+yarn run v1.17.3
+$ truffle run verify Wrapper flatten/Flattened.sol --network mainnet
+Verifying Wrapper
+Pending in queue
+Pass - Verified
+Pass - Verified: https://etherscan.io/address/0x200c6958F6B5dfb463F84f67792b9e8a9966829F#contracts
+Starting the IPFS Upload
+Data IPFS Uploaded
+{ message: 'ok',
+  url: 'dweb:/ipfs/QmScdr6bzfNvoVETHKeD6KwtYT7whHwnDWeTv8uxrUKKkh',
+  hash: 'QmScdr6bzfNvoVETHKeD6KwtYT7whHwnDWeTv8uxrUKKkh' }
+Data IPFS Uploaded
+{ message: 'ok',
+  url: 'dweb:/ipfs/QmScdr6bzfNvoVETHKeD6KwtYT7whHwnDWeTv8uxrUKKkh',
+  hash: 'QmScdr6bzfNvoVETHKeD6KwtYT7whHwnDWeTv8uxrUKKkh' }
+
+Successfully verified 1 contract(s).
+✨  Done in 17.14s.

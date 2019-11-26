@@ -4191,15 +4191,7 @@ ethereumjs-abi@0.6.5:
     bn.js "^4.10.0"
     ethereumjs-util "^4.3.0"
 
-ethereumjs-abi@^0.6.5, ethereumjs-abi@^0.6.7:
-  version "0.6.8"
-  resolved "https://registry.yarnpkg.com/ethereumjs-abi/-/ethereumjs-abi-0.6.8.tgz#71bc152db099f70e62f108b7cdfca1b362c6fcae"
-  integrity sha512-Tx0r/iXI6r+lRsdvkFDlut0N08jWMnKRZ6Gkq+Nmw75lZe4e6o3EkSnkaBP5NF6+m5PTGAr9JP43N3LyeoglsA==
-  dependencies:
-    bn.js "^4.11.8"
-    ethereumjs-util "^6.0.0"
-
-"ethereumjs-abi@git+https://github.com/ethereumjs/ethereumjs-abi.git":
+ethereumjs-abi@^0.6.5, ethereumjs-abi@^0.6.7, "ethereumjs-abi@git+https://github.com/ethereumjs/ethereumjs-abi.git":
   version "0.6.8"
   resolved "git+https://github.com/ethereumjs/ethereumjs-abi.git#1cfbb13862f90f0b391d8a699544d5fe4dfb8c7b"
   dependencies:
@@ -5666,6 +5658,13 @@ ipaddr.js@1.9.0:
   resolved "https://registry.yarnpkg.com/ipaddr.js/-/ipaddr.js-1.9.0.tgz#37df74e430a0e47550fe54a2defe30d8acd95f65"
   integrity sha512-M4Sjn6N/+O6/IXSJseKqHoFc+5FdGJ22sXqnjTpdZweHK64MzEPAyQZyEU3R/KRv2GLoa7nNtg/C2Ev6m7z+eA==
 
+ipfs-mini@1.1.5:
+  version "1.1.5"
+  resolved "https://registry.yarnpkg.com/ipfs-mini/-/ipfs-mini-1.1.5.tgz#1ffd1f0b048814aabbdfa24c77cde255c5b11fc7"
+  integrity sha512-BzsoCa3V/gxN2eEHnyqggOdreAwnvbddj4jUvp6Q7jXuzXx9q5XakXe8mG8qV0bn4bMKdH/7BUDbiWBCEMuYBg==
+  dependencies:
+    xmlhttprequest "^1.8.0"
+
 is-accessor-descriptor@^0.1.6:
   version "0.1.6"
   resolved "https://registry.yarnpkg.com/is-accessor-descriptor/-/is-accessor-descriptor-0.1.6.tgz#a9e12cb3ae8d876727eeef3843f8a0897b5c98d6"
@@ -6470,7 +6469,7 @@ lodash.uniq@^4.5.0:
   resolved "https://registry.yarnpkg.com/lodash.uniq/-/lodash.uniq-4.5.0.tgz#d0225373aeb652adc1bc82e4945339a842754773"
   integrity sha1-0CJTc662Uq3BvILklFM5qEJ1R3M=
 
-lodash@^4.17.11, lodash@^4.17.12, lodash@^4.17.13, lodash@^4.17.14, lodash@^4.17.15, lodash@^4.17.4, lodash@^4.2.0, lodash@^4.2.1:
+lodash@4.17.15, lodash@^4.17.11, lodash@^4.17.12, lodash@^4.17.13, lodash@^4.17.14, lodash@^4.17.15, lodash@^4.17.4, lodash@^4.2.0, lodash@^4.2.1:
   version "4.17.15"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.15.tgz#b447f6670a0455bbfeedd11392eff330ea097548"
   integrity sha512-8xOcRHvCjnocdS5cpwXQXVzmmh5e5+saE2QGoeQmbKmRS6J3VQppPOIt0MnmE+4xlZoumy0GPG0D0MVIQbNA1A==
@@ -9677,12 +9676,13 @@ truffle-assertions@^0.9.1:
     assertion-error "^1.1.0"
     lodash.isequal "^4.5.0"
 
-truffle-flatten@^1.0.5:
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/truffle-flatten/-/truffle-flatten-1.0.5.tgz#0d39a73ae689b78cec8764bf09a9fe0dbd35f1ca"
-  integrity sha512-oGCmrj0h/Dpr5K2TDOEb7BQU5NG8pgDv0VLmPTL2+Il8Cd+BzgaT6E7+NpM52YeyCvPutYp5sAaEetDJqN1n/w==
+truffle-flatten@^1.0.6:
+  version "1.0.7"
+  resolved "https://registry.yarnpkg.com/truffle-flatten/-/truffle-flatten-1.0.7.tgz#f4e653ee82fd6b63ec4cab3bffcac8e61edf3789"
+  integrity sha512-lEoHTSi9GoAej5ko3OfF5FlKzHUi1UymDQOXzpE72rPkKBSz0NbCKDHj/zDOPzIRwOLMOoi21oUm8XPseuCNkw==
   dependencies:
     fs-extra "^8.1.0"
+    lodash "4.17.15"
     truffle-flattener "^1.4.2"
 
 truffle-flattener@^1.4.2:
@@ -9696,7 +9696,7 @@ truffle-flattener@^1.4.2:
     solidity-parser-antlr "^0.4.11"
     tsort "0.0.1"
 
-truffle-hdwallet-provider-privkey@1.0.3:
+truffle-hdwallet-provider-privkey@1.0.3, truffle-hdwallet-provider-privkey@^1.0.3:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/truffle-hdwallet-provider-privkey/-/truffle-hdwallet-provider-privkey-1.0.3.tgz#4effa51fd9cb4db340fa679e5f29cb8f89abd5fc"
   integrity sha512-SOG6Gdmm+roD4f3+fmG+VBoMJYzlK2kBrzW0rKcO/VsembHDavgSbTq5c0nDyp6hYFOE6a+Tyta/fq40VUhtRQ==
@@ -9706,13 +9706,15 @@ truffle-hdwallet-provider-privkey@1.0.3:
     web3 "1.0.0-beta.33"
     web3-provider-engine "git+https://github.com/cgewecke/provider-engine.git#web3-one"
 
-truffle-verify@^1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/truffle-verify/-/truffle-verify-1.0.3.tgz#c11a079dd546a97c580d209d1416f1707d281b12"
-  integrity sha512-TGpmkC3oskrgKU9wyLDOyMSSl3Dpi+1NO0q204XmVIW1nM1uZJPDnlzzCQ6yIbTzSnfBmYJIefDYcnALEbKIlg==
+truffle-verify@^1.0.4:
+  version "1.0.7"
+  resolved "https://registry.yarnpkg.com/truffle-verify/-/truffle-verify-1.0.7.tgz#c98d6a1d8666585e1ed701e0a3b5743af7390374"
+  integrity sha512-YMsPSXVXQZ3dgi6j9IPe+a5bcJlV2dPNQ0LvONP8039oWZ6TKrzVRiwY9uLH6PGHuEObkTKV8GnYfuM2wkH3Fg==
   dependencies:
     axios "^0.19.0"
     delay "^4.3.0"
+    ipfs-mini "1.1.5"
+    lodash "4.17.15"
     querystring "^0.2.0"
 
 truffle@^5.0.24, truffle@^5.0.32:
@@ -11032,7 +11034,7 @@ xhr@^2.0.4, xhr@^2.2.0, xhr@^2.3.3:
     parse-headers "^2.0.0"
     xtend "^4.0.0"
 
-xmlhttprequest@1.8.0:
+xmlhttprequest@1.8.0, xmlhttprequest@^1.8.0:
   version "1.8.0"
   resolved "https://registry.yarnpkg.com/xmlhttprequest/-/xmlhttprequest-1.8.0.tgz#67fe075c5c24fef39f9d65f5f7b7fe75171968fc"
   integrity sha1-Z/4HXFwk/vOfnWX197f+dRcZaPw=
