@@ -129,12 +129,7 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
       result = await getResult(swapContract, result.tx)
       emitted(result, 'Swap')
 
-      ok(
-        await balances(wrapperAddress, [
-          [tokenDAI, 0],
-          [tokenWETH, 0],
-        ])
-      )
+      ok(await balances(wrapperAddress, [[tokenDAI, 0], [tokenWETH, 0]]))
       ok(await balances(aliceAddress, [[tokenWETH, 10]]))
       ok(await balances(bobAddress, [[tokenDAI, 50]]))
     })
@@ -192,12 +187,7 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
       result = await getResult(swapContract, result.tx)
       emitted(result, 'Swap')
 
-      ok(
-        await balances(wrapperAddress, [
-          [tokenDAI, 0],
-          [tokenWETH, 0],
-        ])
-      )
+      ok(await balances(wrapperAddress, [[tokenDAI, 0], [tokenWETH, 0]]))
       ok(await balances(aliceAddress, [[tokenDAI, 850]]))
     })
   })
@@ -296,12 +286,7 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
 
       // Wrapper has 5 weth from test:
       // Sending WETH to the Wrapper Contract
-      ok(
-        await balances(wrapperAddress, [
-          [tokenDAI, 0],
-          [tokenWETH, 5],
-        ])
-      )
+      ok(await balances(wrapperAddress, [[tokenDAI, 0], [tokenWETH, 5]]))
     })
 
     it('Reverts if the unwrapped ETH is sent to a non-payable contract', async () => {
