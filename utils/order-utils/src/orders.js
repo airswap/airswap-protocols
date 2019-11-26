@@ -58,12 +58,12 @@ const checkOrder = async (order, network) => {
   errors = await checkBalanceAndApproval(order, 'signer', provider, errors)
 
   // If sender, check balance and allowance
-  if (order['sender']['wallet'] != EMPTY_ADDRESS) {
+  if (order['sender']['wallet'] !== EMPTY_ADDRESS) {
     errors = await checkBalanceAndApproval(order, 'sender', provider, errors)
   }
 
   // If affiliate, check balance and allowance
-  if (order['affiliate']['wallet'] != EMPTY_ADDRESS) {
+  if (order['affiliate']['wallet'] !== EMPTY_ADDRESS) {
     errors = await checkBalanceAndApproval(order, 'affiliate', provider, errors)
   }
 
@@ -99,7 +99,7 @@ const checkOrderSignature = async (order, provider, errors) => {
   }
 
   // Check signer authorized signatory
-  if (order['signature']['signatory'] != order['signer']['wallet']) {
+  if (order['signature']['signatory'] !== order['signer']['wallet']) {
     const swapContract = new ethers.Contract(
       order['signature']['validator'],
       Swap.abi,
@@ -107,7 +107,7 @@ const checkOrderSignature = async (order, provider, errors) => {
     )
 
     await swapContract
-      .isSignerAuthorized(
+      .signerAuthorizations(
         order['signer']['wallet'],
         order['signature']['signatory']
       )
@@ -180,7 +180,7 @@ const checkERC721Transfer = async (order, partyName, provider, errors) => {
 
   // check balance
   await tokenContract.ownerOf(party['param']).then(owner => {
-    if (owner !== party['wallet']) {
+    if (owner.toLowerCase() !== party['wallet']) {
       errors.push(`${partyName} doesn't own NFT`)
     }
   })
@@ -288,6 +288,18 @@ const isValidOrder = order => {
   )
 }
 
+function lowerCaseAddresses(order) {
+  for (var key in order) {
+    if (typeof order[key] === 'object') {
+      lowerCaseAddresses(order[key])
+    }
+    if (typeof order[key] === 'string' && order[key].indexOf('0x') === 0) {
+      order[key] = order[key].toLowerCase()
+    }
+  }
+  return order
+}
+
 module.exports = {
   _verifyingContract: EMPTY_ADDRESS,
   setVerifyingContract(verifyingContract) {
@@ -310,15 +322,14 @@ module.exports = {
     if (expiry === '0') {
       expiry = await this.generateExpiry(1)
     }
-    const order = {
+    return lowerCaseAddresses({
       expiry: String(expiry),
       nonce: String(nonce),
       signer: { ...defaults.Party, ...signer },
       sender: { ...defaults.Party, ...sender },
       affiliate: { ...defaults.Party, ...affiliate },
       signature: signatures.getEmptySignature(this._verifyingContract),
-    }
-    return order
+    })
   },
   isValidQuote(quote) {
     return (

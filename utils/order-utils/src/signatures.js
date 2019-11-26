@@ -35,12 +35,12 @@ module.exports = {
     const sig = await eth.sign(orderHashHex, signatory)
     const { v, r, s } = ethUtil.fromRpcSig(sig)
     return {
-      signatory: signatory,
-      validator: verifyingContract,
+      signatory: signatory.toLowerCase(),
+      validator: verifyingContract.toLowerCase(),
       version: signatures.PERSONAL_SIGN,
-      v,
-      r,
-      s,
+      v: String(v),
+      r: ethUtil.bufferToHex(r),
+      s: ethUtil.bufferToHex(s),
     }
   },
   getPrivateKeySignature(order, privateKey, verifyingContract) {
@@ -48,8 +48,10 @@ module.exports = {
     const orderHashBuff = ethUtil.toBuffer(orderHash)
     const { v, r, s } = ethUtil.ecsign(orderHashBuff, privateKey)
     return {
-      signatory: `0x${ethUtil.privateToAddress(privateKey).toString('hex')}`,
-      validator: verifyingContract,
+      signatory: `0x${ethUtil
+        .privateToAddress(privateKey)
+        .toString('hex')}`.toLowerCase(),
+      validator: verifyingContract.toLowerCase(),
       version: signatures.SIGN_TYPED_DATA,
       v: String(v),
       r: ethUtil.bufferToHex(r),
@@ -63,8 +65,10 @@ module.exports = {
     })
     const { v, r, s } = ethUtil.fromRpcSig(sig)
     return {
-      signatory: `0x${ethUtil.privateToAddress(privateKey).toString('hex')}`,
-      validator: verifyingContract,
+      signatory: `0x${ethUtil
+        .privateToAddress(privateKey)
+        .toString('hex')}`.toLowerCase(),
+      validator: verifyingContract.toLowerCase(),
       version: signatures.PERSONAL_SIGN,
       v,
       r,
@@ -86,8 +90,10 @@ module.exports = {
     })
     const { v, r, s } = ethUtil.fromRpcSig(sig)
     return {
-      signatory: `0x${ethUtil.privateToAddress(privateKey).toString('hex')}`,
-      validator: verifyingContract,
+      signatory: `0x${ethUtil
+        .privateToAddress(privateKey)
+        .toString('hex')}`.toLowerCase(),
+      validator: verifyingContract.toLowerCase(),
       version: signatures.SIGN_TYPED_DATA,
       v,
       r,
@@ -97,7 +103,7 @@ module.exports = {
   getEmptySignature(verifyingContract) {
     return {
       signatory: EMPTY_ADDRESS,
-      validator: verifyingContract,
+      validator: verifyingContract.toLowerCase(),
       version: signatures.INTENDED_VALIDATOR,
       v: '0',
       r: '0x0',
@@ -107,9 +113,9 @@ module.exports = {
   isSignatureValid(order) {
     const signature = order['signature']
     const orderHash = hashes.getOrderHash(order, signature['validator'])
-    const prefix = new Buffer('\x19Ethereum Signed Message:\n')
+    const prefix = Buffer.from('\x19Ethereum Signed Message:\n')
     const prefixedOrderHash = ethUtil.keccak256(
-      Buffer.concat([prefix, new Buffer(String(orderHash.length)), orderHash])
+      Buffer.concat([prefix, Buffer.from(String(orderHash.length)), orderHash])
     )
     const signingPubKey = ethUtil.ecrecover(
       prefixedOrderHash,
@@ -120,6 +126,6 @@ module.exports = {
     const signingAddress = ethUtil.bufferToHex(
       ethUtil.pubToAddress(signingPubKey)
     )
-    return ethUtil.toChecksumAddress(signingAddress) == signature['signatory']
+    return signingAddress.toLowerCase() == signature['signatory']
   },
 }

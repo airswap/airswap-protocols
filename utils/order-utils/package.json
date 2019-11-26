@@ -1,6 +1,6 @@
 {
   "name": "@airswap/order-utils",
-  "version": "0.3.11",
+  "version": "0.3.12",
   "description": "JavaScript utilities for orders, hashes, and signatures in the Swap Protocol",
   "license": "Apache-2.0",
   "repository": {
