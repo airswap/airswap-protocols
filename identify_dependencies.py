@@ -5,6 +5,7 @@ import json
 DEV_DEP = "devDependencies"
 DEP = "dependencies"
 SEARCH_DIR = ['./source', './utils']
+filter_search = { 'airswap', 'test-utils', 'order-utils' }
 pp = pprint.PrettyPrinter(indent=2)
 
 class DependencyChecker:
@@ -39,21 +40,26 @@ class DependencyChecker:
         # go through every package looking for where the dependency doesn't match the dependency graph
         for package in self.dependency_graph.items():
             package_dependencies = package[1]
-            for dependency in package_dependencies[DEP].items():
-
-                declared_dep = dependency[0]
-                declared_ver = dependency[1]
-
-                # skip if we don't see the packages we care about
-                if 'airswap' not in declared_dep and 'test-utils' not in declared_dep and 'order-utils' not in declared_dep:
+            for dep_type in [DEP, DEV_DEP]:
+                # if the package doesn't use a dependency types skip over it
+                if dep_type not in package_dependencies.keys():
                     continue
 
-                # check version against declared version
-                expected_version = self.dependency_graph[declared_dep]['version']
-                declared_version = declared_ver
-                if declared_version != expected_version:
-                    print("'%s' version mismatch for %s. Is %s, but should be %s" % (package[0], declared_dep, declared_version, expected_version))
-                print("'%s' version for %s matches: %s" % (package[0], declared_dep, expected_version))
+                # go through all the declared depdendencies in a package
+                for declared in package_dependencies[dep_type].items():
+                    declared_dep = declared[0]
+                    declared_ver = declared[1]
+
+                    # skip if we don't see the packages we care about
+                    if 'airswap' not in declared_dep and 'test-utils' not in declared_dep and 'order-utils' not in declared_dep:
+                        continue
+
+                    # check version against declared version
+                    expected_version = self.dependency_graph[declared_dep]['version']
+                    declared_version = declared_ver
+                    if declared_version != expected_version:
+                        print("'%s' version mismatch for %s. Is %s, but should be %s" % (package[0], declared_dep, declared_version, expected_version))
+                    print("'%s' version for %s matches: %s" % (package[0], declared_dep, expected_version))
 
 if __name__ == "__main__":
 
