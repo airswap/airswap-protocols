@@ -40,6 +40,10 @@ class DependencyChecker:
         for package in self.dependency_graph.items():
             package_name = package[0]
             package_dependencies = package[1]
+            package_version = self.dependency_graph[package_name]['version']
+
+            print("%s %s" % (package_name, package_version))
+
             for dep_type in [DEP, DEV_DEP]:
                 # if the package doesn't use a dependency types skip over it
                 if dep_type not in package_dependencies.keys():
@@ -58,8 +62,9 @@ class DependencyChecker:
                     expected_version = self.dependency_graph[declared_name]['version']
                     declared_version = declared_ver
                     if declared_version != expected_version:
-                        print("%s - %s Verison Mismatch. %s -> %s" % (package_name, declared_name, declared_version, expected_version))
-                    print("%s - %s -> %s" % (package_name, declared_name, expected_version))
+                        print(" - %s %s -> %s Version Mismatch" % (declared_name, declared_version, expected_version))
+                    print(" - %s -> %s" % (declared_name, expected_version))
+            print()
 
     def contains_packages(self, dep):
         for package_type in PACKAGE_TYPES:
