@@ -476,7 +476,7 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
         from: bobAddress,
         value: 0,
       })
-      await reverted(result, 'SIGNATURE_MUST_BE_SENT.')
+      await reverted(result, 'SIGNATURE_MUST_BE_SET.')
     })
   })
 })

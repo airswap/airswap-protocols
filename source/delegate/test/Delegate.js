@@ -947,10 +947,10 @@ contract('Delegate Integration Tests', async accounts => {
         },
       })
 
-      // Succeeds on the Delegate, fails on the Swap.
+      // Fails on Delegate as a signature isn't provided
       await reverted(
         aliceDelegate.provideOrder(order, { from: bobAddress }),
-        'SIGNATURE_MUST_BE_SENT'
+        'SIGNATURE_MUST_BE_SET'
       )
     })
 

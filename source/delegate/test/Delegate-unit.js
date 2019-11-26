@@ -1438,7 +1438,7 @@ contract('Delegate Unit Tests', async accounts => {
       // Succeeds on the Delegate, fails on the Swap.
       await reverted(
         delegate.provideOrder(order, { from: notOwner }),
-        'SIGNATURE_MUST_BE_SENT'
+        'SIGNATURE_MUST_BE_SET'
       )
     })
   })

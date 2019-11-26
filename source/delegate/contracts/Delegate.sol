@@ -220,7 +220,7 @@ contract Delegate is IDelegate, Ownable {
     Rule memory rule = rules[order.sender.token][order.signer.token];
 
     require(order.signature.v != 0,
-      "SIGNATURE_MUST_BE_SENT");
+      "SIGNATURE_MUST_BE_SET");
 
     // Ensure the order is for the trade wallet.
     require(order.sender.wallet == tradeWallet,

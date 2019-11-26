@@ -72,7 +72,7 @@ contract Wrapper {
     // Ensure that the signature is present.
     // It will be explicitly checked in Swap.
     require(order.signature.v != 0,
-      "SIGNATURE_MUST_BE_SENT");
+      "SIGNATURE_MUST_BE_SET");
 
     // The sender is sending ether that must be wrapped.
     if (order.sender.token == address(wethContract)) {
