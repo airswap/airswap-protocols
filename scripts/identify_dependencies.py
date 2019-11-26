@@ -2,6 +2,7 @@ from pathlib import Path
 import pprint
 import json
 import sys
+import os
 
 class bcolors:
     FAIL = '\033[91m'
@@ -10,7 +11,7 @@ class bcolors:
 pp = pprint.PrettyPrinter(indent=2)
 DEV_DEP = "devDependencies"
 DEP = "dependencies"
-SEARCH_DIR = ['./source', './utils']
+SEARCH_DIR = ['/source', '/utils']
 PACKAGE_TYPES = [ 'airswap', 'test-utils', 'order-utils' ]
 
 class DependencyChecker:
@@ -21,12 +22,12 @@ class DependencyChecker:
     def generate_graph(self):
         # go through all package files and extract their dependencies
         for directory in SEARCH_DIR:
-            for filename in Path(directory).rglob('package.json'):
+            for filename in Path(os.getcwd() + directory).rglob('package.json'):
                 #ignore node_modules
                 if "node_modules" in str(filename):
                     continue
 
-                with open(filename) as f:
+                with open(str(filename)) as f:
                     data = json.load(f)
 
                     # extract metadata
