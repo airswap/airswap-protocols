@@ -31,7 +31,9 @@ references:
             python get-pip.py
             pip install --user virtualenv
             virtualenv venv
-            source venv/bin/activate && python scripts/identify_dependencies.py
+            python --version
+            source venv/bin/activate
+            python scripts/identify_dependencies.py
       - run:
           name: Eslint
           command: yarn lint
