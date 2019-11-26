@@ -5,7 +5,7 @@ import json
 DEV_DEP = "devDependencies"
 DEP = "dependencies"
 SEARCH_DIR = ['./source', './utils']
-filter_search = { 'airswap', 'test-utils', 'order-utils' }
+filter_search = [ 'airswap', 'test-utils', 'order-utils' ]
 pp = pprint.PrettyPrinter(indent=2)
 
 class DependencyChecker:
@@ -39,6 +39,7 @@ class DependencyChecker:
     def identify_violations(self):
         # go through every package looking for where the dependency doesn't match the dependency graph
         for package in self.dependency_graph.items():
+            package_name = package[0]
             package_dependencies = package[1]
             for dep_type in [DEP, DEV_DEP]:
                 # if the package doesn't use a dependency types skip over it
@@ -46,20 +47,27 @@ class DependencyChecker:
                     continue
 
                 # go through all the declared depdendencies in a package
-                for declared in package_dependencies[dep_type].items():
-                    declared_dep = declared[0]
-                    declared_ver = declared[1]
+                for declared_dep in package_dependencies[dep_type].items():
+                    declared_name = declared_dep[0]
+                    declared_ver = declared_dep[1]
 
                     # skip if we don't see the packages we care about
-                    if 'airswap' not in declared_dep and 'test-utils' not in declared_dep and 'order-utils' not in declared_dep:
+                    if not self.contains_packages(declared_name):
                         continue
 
                     # check version against declared version
-                    expected_version = self.dependency_graph[declared_dep]['version']
+                    expected_version = self.dependency_graph[declared_name]['version']
                     declared_version = declared_ver
                     if declared_version != expected_version:
-                        print("'%s' version mismatch for %s. Is %s, but should be %s" % (package[0], declared_dep, declared_version, expected_version))
-                    print("'%s' version for %s matches: %s" % (package[0], declared_dep, expected_version))
+                        print("'%s' version mismatch for %s. Is %s, but should be %s" % (package_name, declared_name, declared_version, expected_version))
+                    print("'%s' version for %s matches: %s" % (package_name, declared_name, expected_version))
+
+    def contains_packages(self, dep):
+        for search_item in filter_search:
+            if search_item in dep:
+                return True
+        return False 
+
 
 if __name__ == "__main__":
 
