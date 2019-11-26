@@ -21,20 +21,16 @@ class DependencyChecker:
                 if "node_modules" in str(filename):
                     continue
 
-                # prepend to make searching easier
-                key = "@airswap/" + str(filename).split('/')[1]
-
                 with open(filename) as f:
                     data = json.load(f)
-                    self.dependency_graph[key] = {}
-
-                    self.dependency_graph[key]['version'] = data['version']
+                    package_name = data['name']
+                    self.dependency_graph[package_name] = {}
+                    self.dependency_graph[package_name]['version'] = data['version']
 
                     if DEV_DEP in data.keys():
-                        self.dependency_graph[key][DEV_DEP] = data[DEV_DEP]
-
+                        self.dependency_graph[package_name][DEV_DEP] = data[DEV_DEP]
                     if DEP in data.keys():
-                        self.dependency_graph[key][DEP] = data[DEP]
+                        self.dependency_graph[package_name][DEP] = data[DEP]
 
     def identify_violations(self):
         # go through every package looking for where the dependency doesn't match the dependency graph
