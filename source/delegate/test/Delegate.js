@@ -925,7 +925,7 @@ contract('Delegate Integration Tests', async accounts => {
       )
     })
 
-    it('Send order without signatures to the delegate', async () => {
+    it('Send order without signature to the delegate', async () => {
       // Signer wants to trade 1 WETH for x DAI
       const quote = await aliceDelegate.getSenderSideQuote.call(
         1,
@@ -949,7 +949,7 @@ contract('Delegate Integration Tests', async accounts => {
 
       // Succeeds on the Delegate, fails on the Swap.
       await reverted(
-        aliceDelegate.provideOrder(order, { from: carolAddress }),
+        aliceDelegate.provideOrder(order, { from: bobAddress }),
         'SIGNATURE_MUST_BE_SENT'
       )
     })
@@ -1144,6 +1144,41 @@ contract('Delegate Integration Tests', async accounts => {
       // Now the trade passes
       emitted(
         await aliceDelegate.provideOrder(order, { from: bobAddress }),
+        'ProvideOrder'
+      )
+    })
+
+    it('Gets a quote to sell 1 WETH where sender != signer, passes', async () => {
+      // Note: Delegate is the order sender.
+      const order = await orders.getOrder({
+        signer: {
+          wallet: bobAddress,
+          token: tokenWETH.address,
+          param: 1,
+        },
+        sender: {
+          wallet: aliceTradeWallet,
+          token: tokenDAI.address,
+          param: 200, // Rule is 1 WETH for 200 DAI
+        },
+      })
+
+      // Bob signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        bobAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
+      // Alice authorizes the delegate to send trades
+      await swapContract.authorizeSender(aliceDelegate.address, {
+        from: aliceTradeWallet,
+      })
+
+      // Now the trade passes
+      emitted(
+        await aliceDelegate.provideOrder(order, { from: carolAddress }),
         'ProvideOrder'
       )
     })

@@ -1419,5 +1419,27 @@ contract('Delegate Unit Tests', async accounts => {
 
       passes(tx)
     })
+
+    it('Send order without signature to the delegate', async () => {
+      // Note: Consumer is the order signer, Delegate is the order sender.
+      const order = await orders.getOrder({
+        signer: {
+          wallet: notOwner,
+          param: 500,
+          token: SIGNER_TOKEN,
+        },
+        sender: {
+          wallet: tradeWallet,
+          param: 500,
+          token: SENDER_TOKEN,
+        },
+      })
+
+      // Succeeds on the Delegate, fails on the Swap.
+      await reverted(
+        delegate.provideOrder(order, { from: notOwner }),
+        'SIGNATURE_MUST_BE_SENT'
+      )
+    })
   })
 })
