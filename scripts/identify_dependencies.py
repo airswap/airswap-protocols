@@ -74,8 +74,8 @@ class DependencyChecker:
                     declared_version = declared_ver
                     if declared_version != expected_version:
                         stable = False
-                        print(f" - {declared_name} {declared_version} -> {expected_version} {bcolors.FAIL} Version Mismatch {bcolors.ENDC}")
-                    print(f" - {declared_name} -> {expected_version}")
+                        print(" - %s %s -> %s %s Version Mismatch %s" % (declared_name, declared_version, expected_version, bcolors.FAIL, bcolors.ENDC))
+                    print(" - %s -> %s" % (declared_name, expected_version))
             print()
         return stable
 
