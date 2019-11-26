@@ -1,6 +1,6 @@
 {
   "name": "@airswap/indexer",
-  "version": "0.5.4",
+  "version": "1.5.4",
   "description": "Manages markets that store intents to trade in the Swap Protocol",
   "license": "Apache-2.0",
   "repository": {
