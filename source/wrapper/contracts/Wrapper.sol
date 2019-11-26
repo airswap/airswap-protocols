@@ -75,52 +75,67 @@ contract Wrapper {
     require(order.signature.v != 0,
       "SIGNATURE_MUST_BE_SENT");
 
-    // The sender is sending ether that must be wrapped.
-    if (order.sender.token == address(wethContract)) {
+    // Check if sender is sending ether that must be wrapped.
+    _wrapEther(order.sender);
 
-      // Ensure message value is sender param.
-      require(order.sender.param == msg.value,
+    // Perform the swap.
+    swapContract.swap(order);
+
+    // Check if sender is receiving ether that must be unwrapped.
+    _unwrapEther(order.sender.wallet, order.signer.token, order.signer.param);
+  }
+
+  function provideDelegateOrder(
+    Types.Order calldata order,
+    IDelegate delegate
+  ) external payable {
+    // Delegate trade wallet must be order sender - checked in Delegate
+    // Signature must be sent - checked in Delegate
+
+    // Check if signer is sending ether that must be wrapped.
+    _wrapEther(order.signer);
+
+    // Provide the order to the Delegate.
+    delegate.provideOrder(order);
+
+    // Check if signer is receiving ether that must be unwrapped.
+    _unwrapEther(order.signer.wallet, order.sender.token, order.sender.param);
+  }
+
+  function _wrapEther(Types.Party memory party) internal {
+    // Check whether ether needs wrapping
+    if (party.token == address(wethContract)) {
+      // Ensure message value is param.
+      require(party.param == msg.value,
         "VALUE_MUST_BE_SENT");
 
       // Wrap (deposit) the ether.
       wethContract.deposit.value(msg.value)();
 
-      // Transfer the WETH from the wrapper to sender.
-      wethContract.transfer(order.sender.wallet, order.sender.param);
+      // Transfer the WETH from the wrapper to signer.
+      wethContract.transfer(party.wallet, party.param);
 
     } else {
-
       // Ensure no unexpected ether is sent.
       require(msg.value == 0,
         "VALUE_MUST_BE_ZERO");
-
     }
+  }
 
-    // Perform the swap.
-    swapContract.swap(order);
+  function _unwrapEther(address recipientWallet, address receivingToken, uint256 amount) internal {
+    if (receivingToken == address(wethContract)) {
 
-    // The sender is receiving ether that must be unwrapped.
-    if (order.signer.token == address(wethContract)) {
-
-      // Transfer from the sender to the wrapper.
-      wethContract.transferFrom(order.sender.wallet, address(this), order.signer.param);
+      // Transfer weth from the recipient to the wrapper.
+      wethContract.transferFrom(recipientWallet, address(this), amount);
 
       // Unwrap (withdraw) the ether.
-      wethContract.withdraw(order.signer.param);
+      wethContract.withdraw(amount);
 
-      // Transfer ether to the user.
+      // Transfer ether to the recipient.
       // solium-disable-next-line security/no-call-value
-      (bool success, ) = msg.sender.call.value(order.signer.param)("");
+      (bool success, ) = recipientWallet.call.value(amount)("");
 
       require(success, "ETH_RETURN_FAILED");
     }
   }
-
-  function provideDelegateOrder(
-    Type.Order calldata order,
-    IDelegate delegate
-  ) external payable {
-
-  }
-
 }
