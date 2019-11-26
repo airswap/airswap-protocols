@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "@airswap/index": "0.3.2",
-    "@airswap/order-utils": "0.3.11",
+    "@airswap/order-utils": "0.3.12",
     "@airswap/test-utils": "0.1.1",
     "@airswap/types": "0.4.3",
     "bignumber.js": "^9.0.0",
