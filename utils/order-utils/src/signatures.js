@@ -51,7 +51,7 @@ module.exports = {
       signatory: `0x${ethUtil.privateToAddress(privateKey).toString('hex')}`,
       validator: verifyingContract,
       version: signatures.SIGN_TYPED_DATA,
-      v,
+      v: String(v),
       r: ethUtil.bufferToHex(r),
       s: ethUtil.bufferToHex(s),
     }

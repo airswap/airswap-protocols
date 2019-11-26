@@ -311,8 +311,8 @@ module.exports = {
       expiry = await this.generateExpiry(1)
     }
     const order = {
-      expiry,
-      nonce,
+      expiry: String(expiry),
+      nonce: String(nonce),
       signer: { ...defaults.Party, ...signer },
       sender: { ...defaults.Party, ...sender },
       affiliate: { ...defaults.Party, ...affiliate },
