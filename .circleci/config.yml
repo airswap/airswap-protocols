@@ -28,7 +28,7 @@ references:
           name: Check Dependencies
           command: |
             sudo apt install python3-pip
-            pip3 install pathlib
+            pip3 install -r requirements.txt
             python3 scripts/identify_dependencies.py
       - run:
           name: Eslint
