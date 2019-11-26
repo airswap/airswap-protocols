@@ -18,6 +18,7 @@ pragma solidity 0.5.12;
 pragma experimental ABIEncoderV2;
 
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
+import "@airswap/delegate/contracts/interfaces/IDelegate.sol";
 import "@airswap/tokens/contracts/interfaces/IWETH.sol";
 
 /**
@@ -114,4 +115,12 @@ contract Wrapper {
       require(success, "ETH_RETURN_FAILED");
     }
   }
+
+  function provideDelegateOrder(
+    Type.Order calldata order,
+    IDelegate delegate
+  ) external payable {
+
+  }
+
 }
