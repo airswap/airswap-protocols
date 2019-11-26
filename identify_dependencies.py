@@ -1,6 +1,8 @@
 from pathlib import Path
 import pprint
 import json
+import sys
+
 class bcolors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -45,6 +47,9 @@ class DependencyChecker:
                         self.dependency_graph[package_name][DEP] = data[DEP]
 
     def identify_violations(self):
+
+        stable = True
+
         # go through every package looking for where the dependency doesn't match the dependency graph
         for package in self.dependency_graph.items():
             package_name = package[0]
@@ -71,9 +76,11 @@ class DependencyChecker:
                     expected_version = self.dependency_graph[declared_name]['version']
                     declared_version = declared_ver
                     if declared_version != expected_version:
+                        stable = False
                         print(" - %s %s -> %s %s Version Mismatch %s" % (declared_name, declared_version, expected_version, bcolors.FAIL, bcolors.ENDC))
                     print(" - %s -> %s" % (declared_name, expected_version))
             print()
+        return stable
 
     def contains_packages(self, dep):
         for package_type in PACKAGE_TYPES:
@@ -85,5 +92,7 @@ class DependencyChecker:
 if __name__ == "__main__":
     checker = DependencyChecker()
     checker.generate_graph()
-    checker.identify_violations()
+    stable = checker.identify_violations()
+    if not stable:
+        sys.exit(1)
 
