@@ -1,9 +1,20 @@
 require('dotenv').config()
 const HDWalletProvider = require('@truffle/hdwallet-provider')
+const HDWalletProviderPriv = require('truffle-hdwallet-provider-privkey')
 
 module.exports = {
-  // contracts_directory: './flatten',
+  contracts_directory: './flatten',
   networks: {
+    mainnet: {
+      provider: () =>
+        new HDWalletProviderPriv(
+          [process.env.PRIVATE_KEY],
+          'https://mainnet.infura.io/v3/' + process.env.INFURA_API_KEY
+        ),
+      gas: 5898551,
+      gasPrice: 15900000000,
+      network_id: 1,
+    },
     development: {
       host: '127.0.0.1',
       port: 8545,
