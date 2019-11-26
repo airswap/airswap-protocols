@@ -46,7 +46,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "yarn lint && yarn hint && yarn check_dep_graph"
+      "pre-commit": "yarn lint && yarn hint"
     }
   },
   "dependencies": {
