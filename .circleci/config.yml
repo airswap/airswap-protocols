@@ -28,10 +28,6 @@ references:
           name: Check Dependencies
           command: |
             sudo apt install python3-pip
-            pip3 install --user virtualenv
-            virtualenv venv
-            python3 --version
-            source venv/bin/activate
             pip3 install pathlib
             python3 scripts/identify_dependencies.py
       - run:
