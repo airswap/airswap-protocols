@@ -59,9 +59,12 @@ class DependencyChecker:
             print("%s %s" % (package_name, package_version))
 
             for dep_type in [DEP, DEV_DEP]:
+
                 # if the package doesn't use a dependency types skip over it
                 if dep_type not in package_dependencies.keys():
                     continue
+
+                print( dep_type)
 
                 # go through all the declared depdendencies in a package
                 for declared_dep in package_dependencies[dep_type].items():
