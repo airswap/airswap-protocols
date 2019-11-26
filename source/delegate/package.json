@@ -21,13 +21,13 @@
     "verify": "truffle run verify"
   },
   "devDependencies": {
-    "@airswap/order-utils": "0.3.11",
+    "@airswap/order-utils": "0.3.12",
     "@airswap/test-utils": "0.1.1",
     "solidity-coverage": "^0.6.3"
   },
   "dependencies": {
-    "@airswap/indexer": "0.4.4",
-    "@airswap/swap": "2.3.4",
+    "@airswap/indexer": "1.5.4",
+    "@airswap/swap": "3.3.4",
     "openzeppelin-solidity": "2.3"
   }
 }
