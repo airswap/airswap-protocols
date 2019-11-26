@@ -23,10 +23,13 @@ class DependencyChecker:
 
                 with open(filename) as f:
                     data = json.load(f)
+
+                    # extract metadata
                     package_name = data['name']
                     self.dependency_graph[package_name] = {}
                     self.dependency_graph[package_name]['version'] = data['version']
 
+                    # set up the dependencies
                     if DEV_DEP in data.keys():
                         self.dependency_graph[package_name][DEV_DEP] = data[DEV_DEP]
                     if DEP in data.keys():
