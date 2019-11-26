@@ -2,11 +2,11 @@ from pathlib import Path
 import pprint
 import json
 
+pp = pprint.PrettyPrinter(indent=2)
 DEV_DEP = "devDependencies"
 DEP = "dependencies"
 SEARCH_DIR = ['./source', './utils']
-filter_search = [ 'airswap', 'test-utils', 'order-utils' ]
-pp = pprint.PrettyPrinter(indent=2)
+PACKAGE_TYPES = [ 'airswap', 'test-utils', 'order-utils' ]
 
 class DependencyChecker:
 
@@ -59,12 +59,12 @@ class DependencyChecker:
                     expected_version = self.dependency_graph[declared_name]['version']
                     declared_version = declared_ver
                     if declared_version != expected_version:
-                        print("'%s' version mismatch for %s. Is %s, but should be %s" % (package_name, declared_name, declared_version, expected_version))
-                    print("'%s' version for %s matches: %s" % (package_name, declared_name, expected_version))
+                        print("%s - %s Verison Mismatch. %s -> %s" % (package_name, declared_name, declared_version, expected_version))
+                    print("%s - %s -> %s" % (package_name, declared_name, expected_version))
 
     def contains_packages(self, dep):
-        for search_item in filter_search:
-            if search_item in dep:
+        for package_type in PACKAGE_TYPES:
+            if package_type in dep:
                 return True
         return False 
 
