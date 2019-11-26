@@ -12,7 +12,7 @@ module.exports = {
           'https://mainnet.infura.io/v3/' + process.env.INFURA_API_KEY
         ),
       gas: 5898551,
-      gasPrice: 8200000000,
+      gasPrice: 15900000000,
       network_id: 1,
     },
     development: {

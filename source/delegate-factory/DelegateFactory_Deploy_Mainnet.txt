@@ -1,0 +1,103 @@
+yarn run v1.17.3
+$ truffle run flatten contracts/DelegateFactory.sol
+artifactSource: contracts/DelegateFactory.sol
+Flatten file generated: flatten/Flattened.sol
+Done in 4.62s.
+yarn run v1.17.3
+$ yarn cp_migration_flat; truffle migrate --network mainnet
+$ mkdir -p flatten/; cp contracts/Migrations.sol flatten/
+
+Compiling your contracts...
+===========================
+> Compiling ./flatten/Flattened.sol
+> Compiling ./flatten/Migrations.sol
+
+    > compilation warnings encountered:
+
+/Users/ejwessel/Dev/airswap-protocols/source/delegate-factory/flatten/Flattened.sol:2:1: Warning: Experimental features are turned on. Do not use experimental features on live deployments.
+pragma experimental ABIEncoderV2;
+^-------------------------------^
+
+> Artifacts written to /Users/ejwessel/Dev/airswap-protocols/source/delegate-factory/build/contracts
+> Compiled successfully using:
+   - solc: 0.5.12+commit.7709ece9.Emscripten.clang
+
+
+
+Migrations dry-run (simulation)
+===============================
+> Network name:    'mainnet-fork'
+> Network id:      1
+> Block gas limit: 0x98379c
+
+
+1_initial_migration.js
+======================
+   -------------------------------------
+   > Total cost:                   0 ETH
+
+
+Summary
+=======
+> Total deployments:   0
+> Final cost:          0 ETH
+
+
+
+
+
+Starting migrations...
+======================
+> Network name:    'mainnet'
+> Network id:      1
+> Block gas limit: 0x98379c
+
+
+1_initial_migration.js
+======================
+
+   Deploying 'DelegateFactory'
+   ---------------------------
+   > transaction hash:    0xb73493f9f69662876199a34d46a1abad8155e6a474b5dca038541cfaf15d5800
+   > Blocks: 0            Seconds: 12
+   > contract address:    0x707197aA4f32E1cE56240396EFC4DA1ccBfE8141
+   > block number:        9006065
+   > block timestamp:     1574799873
+   > account:             0x7eeAb4F134fcFA6FCAF3987D391f1d626f75F6E1
+   > balance:             0.061313688245997013
+   > gas used:            3160913
+   > gas price:           15.9 gwei
+   > value sent:          0 ETH
+   > total cost:          0.0502585167 ETH
+
+   > Saving artifacts
+   -------------------------------------
+   > Total cost:        0.0502585167 ETH
+
+
+Summary
+=======
+> Total deployments:   1
+> Final cost:          0.0502585167 ETH
+
+
+
+Done in 28.94s.
+yarn run v1.17.3
+$ truffle run verify DelegateFactory flatten/Flattened.sol --network mainnet
+Verifying DelegateFactory
+Pending in queue
+Pass - Verified
+Pass - Verified: https://etherscan.io/address/0x707197aA4f32E1cE56240396EFC4DA1ccBfE8141#contracts
+Starting the IPFS Upload
+Data IPFS Uploaded
+{ message: 'ok',
+  url: 'dweb:/ipfs/QmXFGszKLZfF3a929Uvs7gR7DxfFZ4Ax2UmcEVyXkKzEfq',
+  hash: 'QmXFGszKLZfF3a929Uvs7gR7DxfFZ4Ax2UmcEVyXkKzEfq' }
+Data IPFS Uploaded
+{ message: 'ok',
+  url: 'dweb:/ipfs/QmXFGszKLZfF3a929Uvs7gR7DxfFZ4Ax2UmcEVyXkKzEfq',
+  hash: 'QmXFGszKLZfF3a929Uvs7gR7DxfFZ4Ax2UmcEVyXkKzEfq' }
+
+Successfully verified 1 contract(s).
+Done in 17.97s.
