@@ -950,7 +950,7 @@ contract('Delegate Integration Tests', async accounts => {
       // Fails on Delegate as a signature isn't provided
       await reverted(
         aliceDelegate.provideOrder(order, { from: bobAddress }),
-        'SIGNATURE_MUST_BE_SET'
+        'SIGNATURE_MUST_BE_SENT'
       )
     })
 
