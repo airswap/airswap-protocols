@@ -29,6 +29,7 @@ references:
           command: |
             curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
             sudo python get-pip.py
+            sudo pip install pathlib
             pip install --user virtualenv
             virtualenv venv
             python --version
