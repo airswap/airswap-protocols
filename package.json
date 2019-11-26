@@ -49,5 +49,6 @@
     }
   },
   "dependencies": {
+    "truffle-hdwallet-provider-privkey": "^1.0.3"
   }
 }
