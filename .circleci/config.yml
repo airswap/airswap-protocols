@@ -28,7 +28,7 @@ references:
           name: Check Dependencies
           command: |
             curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-            python get-pip.py
+            sudo python get-pip.py
             pip install --user virtualenv
             virtualenv venv
             python --version
