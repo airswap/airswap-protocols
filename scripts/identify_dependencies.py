@@ -48,6 +48,7 @@ class DependencyChecker:
 
     def identify_violations(self):
 
+        # flag to determine if return is 0 or 1
         stable = True
 
         # go through every package looking for where the dependency doesn't match the dependency graph
@@ -63,8 +64,6 @@ class DependencyChecker:
                 # if the package doesn't use a dependency types skip over it
                 if dep_type not in package_dependencies.keys():
                     continue
-
-                print( dep_type)
 
                 # go through all the declared depdendencies in a package
                 for declared_dep in package_dependencies[dep_type].items():
