@@ -83,9 +83,7 @@ class DependencyChecker:
 
 
 if __name__ == "__main__":
-
     checker = DependencyChecker()
     checker.generate_graph()
     checker.identify_violations()
-
 
