@@ -24,6 +24,12 @@ references:
           name: yarn install and dependencies
           command: |
             yarn install
+      - run: 
+          name: Check Dependencies
+          command: |
+            sudo apt install python3-pip
+            pip3 install -r requirements.txt
+            python3 scripts/identify_dependencies.py
       - run:
           name: Eslint
           command: yarn lint
