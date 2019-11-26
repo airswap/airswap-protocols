@@ -1,6 +1,6 @@
 {
   "name": "@airswap/types",
-  "version": "0.4.3",
+  "version": "1.4.3",
   "description": "Solidity structs and hashing used in the Swap Protocol",
   "license": "Apache-2.0",
   "repository": {
