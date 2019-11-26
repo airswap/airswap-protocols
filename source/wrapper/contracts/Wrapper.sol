@@ -123,8 +123,8 @@ contract Wrapper {
   }
 
   function _unwrapEther(address recipientWallet, address receivingToken, uint256 amount) internal {
+    // Check whether ether needs unwrapping
     if (receivingToken == address(wethContract)) {
-
       // Transfer weth from the recipient to the wrapper.
       wethContract.transferFrom(recipientWallet, address(this), amount);
 
