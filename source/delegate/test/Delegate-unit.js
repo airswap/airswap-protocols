@@ -11,9 +11,12 @@ const {
   reverted,
 } = require('@airswap/test-utils').assert
 const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
-const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
+const {
+  EMPTY_ADDRESS,
+  GANACHE_PROVIDER,
+} = require('@airswap/order-utils').constants
 
-const { orders } = require('@airswap/order-utils')
+const { orders, signatures } = require('@airswap/order-utils')
 
 contract('Delegate Unit Tests', async accounts => {
   const owner = accounts[0]
@@ -30,6 +33,7 @@ contract('Delegate Unit Tests', async accounts => {
   let mockFungibleTokenTemplate
   let delegate
   let mockSwap
+  let swapAddress
   let snapshotId
   let swapFunction
   let mockStakingToken
@@ -78,6 +82,7 @@ contract('Delegate Unit Tests', async accounts => {
     swapFunction = swapTemplate.contract.methods.swap(order).encodeABI()
 
     mockSwap = await MockContract.new()
+    swapAddress = mockSwap.address
   }
 
   async function setupMockIndexer() {
@@ -119,7 +124,7 @@ contract('Delegate Unit Tests', async accounts => {
     await mockStakingToken.givenMethodReturnBool(mockStakingToken_approve, true)
 
     delegate = await Delegate.new(
-      mockSwap.address,
+      swapAddress,
       mockIndexer.address,
       EMPTY_ADDRESS,
       tradeWallet,
@@ -132,7 +137,7 @@ contract('Delegate Unit Tests', async accounts => {
   describe('Test constructor', async () => {
     it('Test initial Swap Contract', async () => {
       const val = await delegate.swapContract.call()
-      equal(val, mockSwap.address, 'swap address is incorrect')
+      equal(val, swapAddress, 'swap address is incorrect')
     })
 
     it('Test initial trade wallet value', async () => {
@@ -147,7 +152,7 @@ contract('Delegate Unit Tests', async accounts => {
       )
 
       const newDelegate = await Delegate.new(
-        mockSwap.address,
+        swapAddress,
         mockIndexer.address,
         EMPTY_ADDRESS,
         EMPTY_ADDRESS,
@@ -172,7 +177,7 @@ contract('Delegate Unit Tests', async accounts => {
       )
 
       const newDelegate = await Delegate.new(
-        mockSwap.address,
+        swapAddress,
         mockIndexer.address,
         notOwner,
         tradeWallet,
@@ -195,7 +200,7 @@ contract('Delegate Unit Tests', async accounts => {
 
       await reverted(
         Delegate.new(
-          mockSwap.address,
+          swapAddress,
           mockIndexer.address,
           EMPTY_ADDRESS,
           EMPTY_ADDRESS,
@@ -720,6 +725,14 @@ contract('Delegate Unit Tests', async accounts => {
         },
       })
 
+      // Signer signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        notOwner,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
       await reverted(
         delegate.provideOrder(order, {
           from: notOwner,
@@ -749,6 +762,14 @@ contract('Delegate Unit Tests', async accounts => {
           token: SENDER_TOKEN,
         },
       })
+
+      // Signer signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        notOwner,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
 
       await reverted(
         delegate.provideOrder(order, {
@@ -783,6 +804,14 @@ contract('Delegate Unit Tests', async accounts => {
         },
       })
 
+      // Signer signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        notOwner,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
       await reverted(
         delegate.provideOrder(order, {
           from: notOwner,
@@ -811,6 +840,14 @@ contract('Delegate Unit Tests', async accounts => {
           token: SENDER_TOKEN,
         },
       })
+
+      // Signer signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        notOwner,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
 
       await reverted(
         delegate.provideOrder(order, {
@@ -843,6 +880,14 @@ contract('Delegate Unit Tests', async accounts => {
           token: SENDER_TOKEN,
         },
       })
+
+      // Signer signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        notOwner,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
 
       await reverted(
         //mock swapContract
@@ -880,6 +925,14 @@ contract('Delegate Unit Tests', async accounts => {
         },
       })
 
+      // Signer signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        notOwner,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
       await reverted(
         //mock swapContract
         //test rule decrement
@@ -916,6 +969,14 @@ contract('Delegate Unit Tests', async accounts => {
         },
       })
 
+      // Signer signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        notOwner,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
       await reverted(
         //mock swapContract
         //test rule decrement
@@ -951,6 +1012,14 @@ contract('Delegate Unit Tests', async accounts => {
           token: SENDER_TOKEN,
         },
       })
+
+      // Signer signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        notOwner,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
 
       await passes(
         //mock swapContract
@@ -1003,6 +1072,14 @@ contract('Delegate Unit Tests', async accounts => {
           token: SENDER_TOKEN,
         },
       })
+
+      // Signer signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        notOwner,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
 
       //mock swapContract
       //test rule decrement
@@ -1057,6 +1134,14 @@ contract('Delegate Unit Tests', async accounts => {
         },
       })
 
+      // Signer signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        notOwner,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
       const tx = await delegate.provideOrder(order, {
         from: notOwner,
       })
@@ -1103,6 +1188,14 @@ contract('Delegate Unit Tests', async accounts => {
         },
       })
 
+      // Signer signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        notOwner,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
       const tx = await delegate.provideOrder(order, {
         from: notOwner,
       })
@@ -1142,6 +1235,14 @@ contract('Delegate Unit Tests', async accounts => {
         },
       })
 
+      // Signer signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        notOwner,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
       const tx = await delegate.provideOrder(order, {
         from: notOwner,
       })
@@ -1177,6 +1278,14 @@ contract('Delegate Unit Tests', async accounts => {
         },
       })
 
+      // Signer signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        notOwner,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
       const tx = await delegate.provideOrder(order, {
         from: notOwner,
       })
@@ -1209,6 +1318,14 @@ contract('Delegate Unit Tests', async accounts => {
           token: SENDER_TOKEN,
         },
       })
+
+      // Signer signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        notOwner,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
 
       // check the delegate doesnt allow this
       await reverted(
@@ -1245,6 +1362,14 @@ contract('Delegate Unit Tests', async accounts => {
         },
       })
 
+      // Signer signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        notOwner,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
       // check the delegate allows this
       const tx = await delegate.provideOrder(order, {
         from: notOwner,
@@ -1278,6 +1403,14 @@ contract('Delegate Unit Tests', async accounts => {
           token: SENDER_TOKEN,
         },
       })
+
+      // Signer signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        notOwner,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
 
       // check the delegate allows this
       const tx = await delegate.provideOrder(order, {

@@ -699,10 +699,15 @@ contract('Delegate Integration Tests', async accounts => {
         },
       })
 
-      await reverted(
-        aliceDelegate.provideOrder(order, { from: bobAddress }),
-        'INVALID_SENDER_WALLET'
+      // Bob signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        bobAddress,
+        swapAddress,
+        GANACHE_PROVIDER
       )
+
+      await reverted(aliceDelegate.provideOrder(order), 'INVALID_SENDER_WALLET')
     })
 
     it('should not accept open trades', async () => {
@@ -719,10 +724,15 @@ contract('Delegate Integration Tests', async accounts => {
         },
       })
 
-      await reverted(
-        aliceDelegate.provideOrder(order, { from: bobAddress }),
-        'INVALID_SENDER_WALLET'
+      // Bob signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        bobAddress,
+        swapAddress,
+        GANACHE_PROVIDER
       )
+
+      await reverted(aliceDelegate.provideOrder(order), 'INVALID_SENDER_WALLET')
     })
 
     it("should not trade if the tradeWallet hasn't authorized the delegate to send", async () => {
@@ -739,12 +749,17 @@ contract('Delegate Integration Tests', async accounts => {
         },
       })
 
+      // Bob signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        bobAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
       // Succeeds on the Delegate, fails on the Swap.
       // aliceTradeWallet hasn't authorized Delegate to swap
-      await reverted(
-        aliceDelegate.provideOrder(order, { from: bobAddress }),
-        'SENDER_UNAUTHORIZED'
-      )
+      await reverted(aliceDelegate.provideOrder(order), 'SENDER_UNAUTHORIZED')
     })
 
     it("should not trade if the tradeWallet's authorization has been revoked", async () => {
@@ -760,6 +775,14 @@ contract('Delegate Integration Tests', async accounts => {
           param: quote.toNumber(),
         },
       })
+
+      // Bob signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        bobAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
 
       // Succeeds on the Delegate, fails on the Swap.
       // aliceTradeWallet approval has expired
@@ -782,6 +805,14 @@ contract('Delegate Integration Tests', async accounts => {
           param: quote.toNumber(),
         },
       })
+
+      // Bob signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        bobAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
 
       // tradeWallet needs DAI to trade
       emitted(await tokenDAI.mint(aliceTradeWallet, 300), 'Transfer')
@@ -879,6 +910,14 @@ contract('Delegate Integration Tests', async accounts => {
         },
       })
 
+      // Bob signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        bobAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
       // Succeeds on the Delegate, fails on the Swap.
       await reverted(
         aliceDelegate.provideOrder(order, { from: bobAddress }),
@@ -886,7 +925,7 @@ contract('Delegate Integration Tests', async accounts => {
       )
     })
 
-    it('Use quote with incorrect signer wallet', async () => {
+    it('Send order without signatures to the delegate', async () => {
       // Signer wants to trade 1 WETH for x DAI
       const quote = await aliceDelegate.getSenderSideQuote.call(
         1,
@@ -911,7 +950,7 @@ contract('Delegate Integration Tests', async accounts => {
       // Succeeds on the Delegate, fails on the Swap.
       await reverted(
         aliceDelegate.provideOrder(order, { from: carolAddress }),
-        'SIGNER_MUST_BE_SENDER'
+        'SIGNATURE_MUST_BE_SENT'
       )
     })
 
@@ -939,6 +978,14 @@ contract('Delegate Integration Tests', async accounts => {
         },
       })
 
+      // Bob signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        bobAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
       // 300 DAI is 3 WETH, which is more than the max
       await reverted(
         aliceDelegate.provideOrder(order, { from: bobAddress }),
@@ -959,6 +1006,14 @@ contract('Delegate Integration Tests', async accounts => {
           param: 201, // Rule is 1 WETH for 200 DAI
         },
       })
+
+      // Bob signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        bobAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
 
       await reverted(
         aliceDelegate.provideOrder(order, { from: bobAddress }),
@@ -981,6 +1036,14 @@ contract('Delegate Integration Tests', async accounts => {
           param: 200, // Rule is 1 WETH for 200 DAI
         },
       })
+
+      // Bob signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        bobAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
 
       // Succeeds on the Delegate, fails on the Swap.
       await reverted(
@@ -1005,6 +1068,14 @@ contract('Delegate Integration Tests', async accounts => {
         },
       })
 
+      // Bob signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        bobAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
       // Succeeds on the Delegate, fails on the Swap.
       await reverted(
         aliceDelegate.provideOrder(order, { from: bobAddress }),
@@ -1026,6 +1097,14 @@ contract('Delegate Integration Tests', async accounts => {
           param: 200, // Rule is 1 WETH for 200 DAI
         },
       })
+
+      // Bob signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        bobAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
 
       // Succeeds on the Delegate, fails on the Swap.
       await reverted(
