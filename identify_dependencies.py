@@ -1,6 +1,15 @@
 from pathlib import Path
 import pprint
 import json
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
 
 pp = pprint.PrettyPrinter(indent=2)
 DEV_DEP = "devDependencies"
@@ -62,7 +71,7 @@ class DependencyChecker:
                     expected_version = self.dependency_graph[declared_name]['version']
                     declared_version = declared_ver
                     if declared_version != expected_version:
-                        print(" - %s %s -> %s Version Mismatch" % (declared_name, declared_version, expected_version))
+                        print(" - %s %s -> %s %s Version Mismatch %s" % (declared_name, declared_version, expected_version, bcolors.FAIL, bcolors.ENDC))
                     print(" - %s -> %s" % (declared_name, expected_version))
             print()
 
