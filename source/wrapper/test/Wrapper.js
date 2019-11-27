@@ -717,11 +717,43 @@ contract('Wrapper', async accounts => {
         passes(tx)
         emitted(tx, 'Approval')
 
+        // Carol's eth balance before
+        const carolEthBefore = parseInt(await web3.eth.getBalance(carolAddress))
+        // delegateOwner's DAI balance before
+        const ownerDAIBefore = parseInt(await tokenDAI.balanceOf(delegateOwner))
+        // delegateOwner's WETH balance before
+        const ownerWETHBefore = parseInt(
+          await tokenWETH.balanceOf(delegateOwner)
+        )
+
         await passes(
           wrappedDelegate(order, delegateAddress, {
-            from: carolAddress,
+            from: aliceAddress,
             value: order.signer.param,
           })
+        )
+
+        // check all balances have updated correctly
+        const carolEthAfter = parseInt(await web3.eth.getBalance(carolAddress))
+        const ownerDAIAfter = parseInt(await tokenDAI.balanceOf(delegateOwner))
+        const ownerWETHAfter = parseInt(
+          await tokenWETH.balanceOf(delegateOwner)
+        )
+
+        equal(
+          carolEthBefore - order.signer.param,
+          carolEthAfter,
+          "Carol's ETH balance did not decrease"
+        )
+        equal(
+          ownerDAIBefore - order.sender.param,
+          ownerDAIAfter,
+          "Owner's DAI balance did not decrease"
+        )
+        equal(
+          ownerWETHBefore + order.signer.param,
+          ownerWETHAfter,
+          "Owner's WETH balance did not increase"
         )
       })
     })
