@@ -432,7 +432,7 @@ contract('Wrapper Unit Tests', async accounts => {
     })
   })
 
-  describe.only('Test provideDelegateOrder()', async () => {
+  describe('Test provideDelegateOrder()', async () => {
     before('Setup mock delegate', async () => {
       await setupMockDelegateAndIndexer()
     })
