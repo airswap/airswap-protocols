@@ -1,7 +1,7 @@
 const Delegate = artifacts.require('Delegate')
 
 module.exports = (deployer, network) => {
-  if (network == 'rinkeby') {
+  if (network == 'rinkeby' || network == 'mainnet') {
     // fill in the addresses below
     const SWAP_ADDRESS = ''
     const INDEXER_ADDRESS = ''
