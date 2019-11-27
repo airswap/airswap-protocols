@@ -1,7 +1,5 @@
 # Indexer
 
-**:warning: This package is under active development. Do not use in production.**
-
 [AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens. This package contains source code and tests for an `Indexer` used to manage intents to trade.
 
 :bulb: **Note**: `solidity-coverage` does not cooperate with `view` functions. To run test coverage, remove the `view` keywords from functions in `Indexer.sol`, `IIndexer.sol`, and `ILocatorWhitelist.sol`.

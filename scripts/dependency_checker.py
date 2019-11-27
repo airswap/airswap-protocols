@@ -1,5 +1,4 @@
 from pathlib import Path
-import pprint
 import json
 import sys
 import os
@@ -8,7 +7,6 @@ class bcolors:
     FAIL = '\033[91m'
     ENDC = '\033[0m'
 
-pp = pprint.PrettyPrinter(indent=2)
 DEV_DEP = "devDependencies"
 DEP = "dependencies"
 SEARCH_DIR = ['/source', '/utils']
@@ -36,9 +34,9 @@ class DependencyChecker:
                     self.dependency_graph[package_name]['version'] = data['version']
 
                     # set up the dependencies
-                    if DEV_DEP in data.keys():
+                    if DEV_DEP in data:
                         self.dependency_graph[package_name][DEV_DEP] = data[DEV_DEP]
-                    if DEP in data.keys():
+                    if DEP in data:
                         self.dependency_graph[package_name][DEP] = data[DEP]
 
     def identify_violations(self):
@@ -56,8 +54,8 @@ class DependencyChecker:
 
             for dep_type in [DEP, DEV_DEP]:
 
-                # if the package doesn't use a dependency types skip over it
-                if dep_type not in package_dependencies.keys():
+                # if the package doesn't use a dependency type skip over it
+                if dep_type not in package_dependencies:
                     continue
 
                 # go through all the declared depdendencies in a package
@@ -75,7 +73,8 @@ class DependencyChecker:
                     if declared_version != expected_version:
                         stable = False
                         print(" - %s %s -> %s %s Version Mismatch %s" % (declared_name, declared_version, expected_version, bcolors.FAIL, bcolors.ENDC))
-                    print(" - %s -> %s" % (declared_name, expected_version))
+                    else:
+                        print(" - %s -> %s" % (declared_name, expected_version))
             print()
         return stable
 
