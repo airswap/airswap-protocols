@@ -633,7 +633,7 @@ contract('Wrapper Unit Tests', async accounts => {
         })
       )
 
-      //check if provideOrder() was called
+      // check if provideOrder() was called
       const invocationCount = await mockDelegate.invocationCountForMethod.call(
         provideOrder
       )

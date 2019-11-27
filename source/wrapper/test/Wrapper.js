@@ -1,6 +1,8 @@
 const Swap = artifacts.require('Swap')
 const Types = artifacts.require('Types')
 const Wrapper = artifacts.require('Wrapper')
+const Delegate = artifacts.require('Delegate')
+const Indexer = artifacts.require('Indexer')
 const HelperMock = artifacts.require('HelperMock')
 const WETH9 = artifacts.require('WETH9')
 const FungibleToken = artifacts.require('FungibleToken')
@@ -30,7 +32,15 @@ let tokenAST
 let tokenDAI
 let tokenWETH
 
-contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
+let delegate
+let indexer
+
+contract('Wrapper', async accounts => {
+  const aliceAddress = accounts[0]
+  const bobAddress = accounts[1]
+  const carolAddress = accounts[2]
+  const delegateOwner = accounts[3]
+
   before('Setup', async () => {
     // link types to swap
     await Swap.link('Types', (await Types.new()).address)
@@ -47,6 +57,14 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
 
     tokenDAI = await FungibleToken.new()
     tokenAST = await FungibleToken.new()
+
+    indexer = await Indexer.new(tokenAST.address)
+    delegate = await Delegate.new(
+      swapAddress,
+      indexer.address,
+      delegateOwner,
+      delegateOwner
+    )
 
     orders.setVerifyingContract(swapAddress)
     wrappedSwap = wrapperContract.swap
@@ -89,14 +107,14 @@ contract('Wrapper', async ([aliceAddress, bobAddress, carolAddress]) => {
       })
       emitted(result, 'Approval')
     })
-  })
 
-  it('Bob authorizes the Wrapper to send orders on his behalf', async () => {
-    const tx = await swapContract.authorizeSender(wrapperAddress, {
-      from: bobAddress,
+    it('Bob authorizes the Wrapper to send orders on his behalf', async () => {
+      const tx = await swapContract.authorizeSender(wrapperAddress, {
+        from: bobAddress,
+      })
+      passes(tx)
+      emitted(tx, 'AuthorizeSender')
     })
-    passes(tx)
-    emitted(tx, 'AuthorizeSender')
   })
 
   describe('Wrap Buys', async () => {
