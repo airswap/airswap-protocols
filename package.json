@@ -36,7 +36,8 @@
     "ganache-time-traveler": "^1.0.5",
     "truffle-flatten": "^1.0.6",
     "truffle-verify": "^1.0.4",
-    "@truffle/hdwallet-provider": "^1.0.17"
+    "@truffle/hdwallet-provider": "^1.0.17",
+    "truffle-hdwallet-provider-privkey": "^1.0.3"
   },
   "prettier": {
     "trailingComma": "es5",

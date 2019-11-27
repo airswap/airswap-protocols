@@ -1,7 +1,7 @@
 const DelegateFactory = artifacts.require('DelegateFactory');
 
 module.exports = (deployer, network) => {
-  if (network == 'rinkeby') {
+  if (network == 'rinkeby' || network == 'mainnet') {
     // fill in the addresses of these contracts
     const SWAP_ADDRESS = ''
     const INDEXER_ADDRESS = ''
