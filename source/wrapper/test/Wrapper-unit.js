@@ -577,6 +577,36 @@ contract('Wrapper Unit Tests', async accounts => {
       )
     })
 
+    it('Test when signer token != weth, sender token == weth, wrapper cant transfer eth', async () => {
+      const order = await orders.getOrder({
+        sender: {
+          wallet: delegateOwner,
+          token: mockWethAddress,
+          param: 500,
+        },
+        signer: {
+          wallet: mockSigner,
+          token: mockToken,
+        },
+      })
+
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        mockSigner,
+        mockSwapAddress,
+        GANACHE_PROVIDER
+      )
+
+      // fails as the wrapper has no ETH to send
+      await reverted(
+        wrapper.provideDelegateOrder(order, mockDelegateAddress, {
+          from: mockSigner,
+          value: 0, // order signer is not sending weth
+        }),
+        'ETH_RETURN_FAILED'
+      )
+    })
+
     it('Test when signer token != weth, sender token == weth, tx passes', async () => {
       const order = await orders.getOrder({
         sender: {
