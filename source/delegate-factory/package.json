@@ -1,6 +1,6 @@
 {
   "name": "@airswap/delegate-factory",
-  "version": "0.4.4",
+  "version": "1.4.5",
   "description": "Deploys Delegate contracts for use in the Swap Protocol",
   "license": "Apache-2.0",
   "repository": {
@@ -26,7 +26,7 @@
     "solidity-coverage": "^0.6.3"
   },
   "dependencies": {
-    "@airswap/delegate": "0.5.3",
+    "@airswap/delegate": "0.5.4",
     "openzeppelin-solidity": "2.3"
   }
 }
