@@ -112,7 +112,7 @@ contract Wrapper {
       // Wrap (deposit) the ether.
       wethContract.deposit.value(msg.value)();
 
-      // Transfer the WETH from the wrapper to signer.
+      // Transfer the WETH from the wrapper to party.
       wethContract.transfer(party.wallet, party.param);
 
     } else {
