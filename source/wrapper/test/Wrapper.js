@@ -899,7 +899,7 @@ contract('Wrapper', async accounts => {
         )
 
         // carol approves wrapper to transfer WETH for her
-        tx = await tokenWETH.approve(wrapperAddress, 1, {
+        const tx = await tokenWETH.approve(wrapperAddress, 1, {
           from: carolAddress,
         })
         passes(tx)
