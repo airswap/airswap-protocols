@@ -509,6 +509,38 @@ contract('Wrapper', async accounts => {
   })
 
   describe('Test provideDelegateOrder()', async () => {
+    before('Setup delegate rules', async () => {
+      // Delegate will trade up to 10,000 DAI for WETH, at 200 DAI/WETH
+      await delegate.setRule(tokenDAI.address, tokenWETH.address, 10000, 5, 3, {
+        from: delegateOwner,
+      })
+
+      // Delegate will trade up to 100 WETH for DAI, at 0.005 WETH/DAI
+      await delegate.setRule(tokenWETH.address, tokenDAI.address, 100, 200, 0, {
+        from: delegateOwner,
+      })
+
+      // Give the delegate owner DAI
+      await tokenDAI.mint(delegateOwner, 10000)
+      ok(await balances(delegateOwner, [[tokenDAI, 10000]]))
+
+      // Give the delegate owner WETH
+      await tokenWETH.deposit({ from: delegateOwner, value: 100 })
+      ok(await balances(delegateOwner, [[tokenWETH, 100]]))
+
+      // Approve the swap contracts to swap delegate's tokens
+      let tx = await tokenWETH.approve(swapAddress, 100, {
+        from: delegateOwner,
+      })
+      passes(tx)
+      emitted(tx, 'Approval')
+      tx = await tokenDAI.approve(swapAddress, 10000, {
+        from: delegateOwner,
+      })
+      passes(tx)
+      emitted(tx, 'Approval')
+    })
+
     describe('Wrap Buys', async () => {
       it('Check Carol sending no ETH with order', async () => {
         const order = await orders.getOrder({
@@ -534,9 +566,167 @@ contract('Wrapper', async accounts => {
         await reverted(
           wrappedDelegate(order, delegateAddress, {
             from: carolAddress,
-            value: order.sender.param + 1,
+            value: order.signer.param + 1,
           }),
           'VALUE_MUST_BE_SENT'
+        )
+      })
+
+      it('Check Carol not signing order', async () => {
+        const order = await orders.getOrder({
+          signer: {
+            wallet: carolAddress,
+            token: tokenWETH.address,
+            param: 1,
+          },
+          sender: {
+            wallet: delegateOwner,
+            token: tokenDAI.address,
+            param: 200,
+          },
+        })
+
+        await reverted(
+          wrappedDelegate(order, delegateAddress, {
+            from: carolAddress,
+            value: order.signer.param,
+          }),
+          'SIGNATURE_MUST_BE_SENT'
+        )
+      })
+
+      it('Check Carol sets the wrong sender wallet', async () => {
+        const order = await orders.getOrder({
+          signer: {
+            wallet: carolAddress,
+            token: tokenWETH.address,
+            param: 1,
+          },
+          sender: {
+            wallet: delegateAddress,
+            token: tokenDAI.address,
+            param: 200,
+          },
+        })
+
+        order.signature = await signatures.getWeb3Signature(
+          order,
+          carolAddress,
+          swapAddress,
+          GANACHE_PROVIDER
+        )
+
+        await reverted(
+          wrappedDelegate(order, delegateAddress, {
+            from: carolAddress,
+            value: order.signer.param,
+          }),
+          'INVALID_SENDER_WALLET'
+        )
+      })
+
+      it('Check delegate owner hasnt authorised the delegate as sender swap', async () => {
+        const order = await orders.getOrder({
+          signer: {
+            wallet: carolAddress,
+            token: tokenWETH.address,
+            param: 1,
+          },
+          sender: {
+            wallet: delegateOwner,
+            token: tokenDAI.address,
+            param: 200,
+          },
+        })
+
+        order.signature = await signatures.getWeb3Signature(
+          order,
+          carolAddress,
+          swapAddress,
+          GANACHE_PROVIDER
+        )
+
+        await reverted(
+          wrappedDelegate(order, delegateAddress, {
+            from: carolAddress,
+            value: order.signer.param,
+          }),
+          'SENDER_UNAUTHORIZED'
+        )
+      })
+
+      it('Check carol hasnt given swap approval to swap WETH', async () => {
+        const order = await orders.getOrder({
+          signer: {
+            wallet: carolAddress,
+            token: tokenWETH.address,
+            param: 1,
+          },
+          sender: {
+            wallet: delegateOwner,
+            token: tokenDAI.address,
+            param: 200,
+          },
+        })
+
+        order.signature = await signatures.getWeb3Signature(
+          order,
+          carolAddress,
+          swapAddress,
+          GANACHE_PROVIDER
+        )
+
+        // delegateOwner authorized the delegate to send orders
+        await swapContract.authorizeSender(delegateAddress, {
+          from: delegateOwner,
+        })
+
+        // carol revokes approval for swap to transfer her WETH
+        await tokenWETH.approve(swapAddress, 0, {
+          from: carolAddress,
+        })
+
+        await reverted(
+          wrappedDelegate(order, delegateAddress, {
+            from: carolAddress,
+            value: order.signer.param,
+          })
+        )
+      })
+
+      it('Check carol hasnt given swap approval to swap WETH', async () => {
+        const order = await orders.getOrder({
+          signer: {
+            wallet: carolAddress,
+            token: tokenWETH.address,
+            param: 1,
+          },
+          sender: {
+            wallet: delegateOwner,
+            token: tokenDAI.address,
+            param: 200,
+          },
+        })
+
+        order.signature = await signatures.getWeb3Signature(
+          order,
+          carolAddress,
+          swapAddress,
+          GANACHE_PROVIDER
+        )
+
+        // carol approves swap to swap WETH for her
+        const tx = await tokenWETH.approve(swapAddress, 100, {
+          from: carolAddress,
+        })
+        passes(tx)
+        emitted(tx, 'Approval')
+
+        await passes(
+          wrappedDelegate(order, delegateAddress, {
+            from: carolAddress,
+            value: order.signer.param,
+          })
         )
       })
     })
