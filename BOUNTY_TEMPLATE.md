@@ -1,8 +1,6 @@
-The following bug bounty submission template. For details see the blog post at https://medium.com/fluidity/... For a prompt response, include the following content in an email to our team at bounty@airswap.io.
+This template is used for submitting bounty requests related to the AirSwap Protocols repository. Email us at bounty@airswap.io with all contents of this template for a prompt response.
 
 ===
-
-# Bug Submission
 
 ## Summary
 
