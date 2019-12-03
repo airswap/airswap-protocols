@@ -2,6 +2,12 @@
   "name": "airswap-protocols",
   "version": "0.0.1",
   "private": true,
+  "contributors": [
+    "Don Mosites <don.mosites@fluidity.io>",
+    "Deepa Sathaye <deepa.sathaye@fludity.io>",
+    "Ethan Wessel <ethan.wessel@fluidity.io>",
+    "Alice Henshaw <alice.henshaw@fluidity.io>"
+  ],
   "license": "Apache-2.0",
   "workspaces": [
     "utils/*",
