@@ -16,9 +16,7 @@
 
 ## Deploys
 
-| Network   | Address                                      | Link                                                                                         |
-| :-------- | :------------------------------------------- | :------------------------------------------------------------------------------------------- |
-| `rinkeby` | `0x1a1ec25DC08e98e5E93F1104B5e5cdD298707d31` | [Etherscan](https://rinkeby.etherscan.io/address/0x1a1ec25DC08e98e5E93F1104B5e5cdD298707d31) |
+See [deploys.json](./deploys.json) for latest contract deployments on Rinkeby (`4`) and Mainnet (`1`).
 
 ## Commands
 

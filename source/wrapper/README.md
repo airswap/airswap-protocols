@@ -4,12 +4,19 @@
 
 [![Discord](https://img.shields.io/discord/590643190281928738.svg)](https://discord.gg/ecQbV7H)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![CircleCI](https://circleci.com/gh/airswap/airswap-protocols.svg?style=svg&circle-token=73bd6668f836ce4306dbf6ca32109ddbb5b7e1fe)](https://circleci.com/gh/airswap/airswap-protocols)
+![Twitter Follow](https://img.shields.io/twitter/follow/airswap?style=social)
+
+## Resources
+
+- Docs → https://docs.airswap.io/
+- Website → https://www.airswap.io/
+- Blog → https://blog.airswap.io/
+- Support → https://support.airswap.io/
 
 ## Deploys
 
-| Network   | Address                                      | Link                                                                                         |
-| :-------- | :------------------------------------------- | :------------------------------------------------------------------------------------------- |
-| `rinkeby` | `0x7Aa243DFf538Fa83e28E80134D2415Bc2cF72F53` | [Etherscan](https://rinkeby.etherscan.io/address/0x7Aa243DFf538Fa83e28E80134D2415Bc2cF72F53) |
+See [deploys.json](./deploys.json) for latest contract deployments on Rinkeby (`4`) and Mainnet (`1`).
 
 ## Commands
 
