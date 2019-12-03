@@ -1,6 +1,6 @@
 const utils = require('web3-utils')
 
-let padAddressToLocator = address => {
+const padAddressToLocator = address => {
   if (!utils.isAddress(address)) {
     throw new Error(`Address must be a valid Ethereum address: ${address}`)
   }

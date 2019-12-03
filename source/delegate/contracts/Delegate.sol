@@ -49,7 +49,7 @@ contract Delegate is IDelegate, Ownable {
   mapping (address => mapping (address => Rule)) public rules;
 
   // ERC-20 (fungible token) interface identifier (ERC-165)
-  bytes4 constant internal ERC20_INTERFACE_ID = 0x277f8169;
+  bytes4 constant internal ERC20_INTERFACE_ID = 0x36372b07;
 
   /**
     * @notice Contract Constructor
@@ -132,18 +132,18 @@ contract Delegate is IDelegate, Ownable {
   /**
     * @notice sets a rule on the delegate and an intent on the indexer
     * @dev only callable by owner
-    * @dev delegate needs to be given allowance from msg.sender for the amountToStake
+    * @dev delegate needs to be given allowance from msg.sender for the newStakeAmount
     * @dev swap needs to be given permission to move funds from the delegate
     * @param senderToken address Token the delgeate will send
-    * @param senderToken address Token the delegate will receive
+    * @param signerToken address Token the delegate will receive
     * @param rule Rule Rule to set on a delegate
-    * @param amountToStake uint256 Amount to stake for an intent
+    * @param newStakeAmount uint256 Amount to stake for an intent
     */
   function setRuleAndIntent(
     address senderToken,
     address signerToken,
     Rule calldata rule,
-    uint256 amountToStake
+    uint256 newStakeAmount
   ) external onlyOwner {
     _setRule(
       senderToken,
@@ -153,20 +153,32 @@ contract Delegate is IDelegate, Ownable {
       rule.priceExp
     );
 
-    // Transfer the staking tokens from the sender to the Delegate.
-    if (amountToStake > 0) {
+    // get currentAmount staked or 0 if never staked
+    uint256 oldStakeAmount = indexer.getStakedAmount(address(this), signerToken, senderToken);
+    if (oldStakeAmount == newStakeAmount && oldStakeAmount > 0) {
+      return; // forgo trying to reset intent with non-zero same stake amount
+    } else if (oldStakeAmount < newStakeAmount) {
+      // transfer only the difference from the sender to the Delegate.
       require(
         IERC20(indexer.stakingToken())
-        .transferFrom(msg.sender, address(this), amountToStake), "STAKING_TRANSFER_FAILED"
+        .transferFrom(msg.sender, address(this), newStakeAmount - oldStakeAmount), "STAKING_TRANSFER_FAILED"
       );
     }
 
     indexer.setIntent(
       signerToken,
       senderToken,
-      amountToStake,
+      newStakeAmount,
       bytes32(uint256(address(this)) << 96) //NOTE: this will pad 0's to the right
     );
+
+    if (oldStakeAmount > newStakeAmount) {
+      // return excess stake back
+      require(
+        IERC20(indexer.stakingToken())
+        .transfer(msg.sender, oldStakeAmount - newStakeAmount), "STAKING_RETURN_FAILED"
+      );
+    }
   }
 
   /**
@@ -176,8 +188,8 @@ contract Delegate is IDelegate, Ownable {
     * @param signerToken address Taker token  in the token pair for rules and intents
     */
   function unsetRuleAndIntent(
-    address signerToken,
-    address senderToken
+    address senderToken,
+    address signerToken
   ) external onlyOwner {
 
     _unsetRule(senderToken, signerToken);
@@ -191,7 +203,7 @@ contract Delegate is IDelegate, Ownable {
     if (stakedAmount > 0) {
       require(
         IERC20(indexer.stakingToken())
-          .transfer(msg.sender, stakedAmount),"STAKING_TRANSFER_FAILED"
+          .transfer(msg.sender, stakedAmount),"STAKING_RETURN_FAILED"
       );
     }
   }
@@ -207,8 +219,8 @@ contract Delegate is IDelegate, Ownable {
 
     Rule memory rule = rules[order.sender.token][order.signer.token];
 
-    require(order.signer.wallet == msg.sender,
-      "SIGNER_MUST_BE_SENDER");
+    require(order.signature.v != 0,
+      "SIGNATURE_MUST_BE_SENT");
 
     // Ensure the order is for the trade wallet.
     require(order.sender.wallet == tradeWallet,
@@ -230,9 +242,8 @@ contract Delegate is IDelegate, Ownable {
       "AMOUNT_EXCEEDS_MAX");
 
     // Ensure the order is priced according to the rule.
-    require(order.sender.param == order.signer.param
-      .mul(10 ** rule.priceExp).div(rule.priceCoef),
-      "PRICE_INCORRECT");
+    require(order.sender.param <= _calculateSenderParam(order.signer.param, rule.priceCoef, rule.priceExp),
+      "PRICE_INVALID");
 
     // Overwrite the rule with a decremented maxSenderAmount.
     rules[order.sender.token][order.signer.token] = Rule({
@@ -243,6 +254,16 @@ contract Delegate is IDelegate, Ownable {
 
     // Perform the swap.
     swapContract.swap(order);
+
+    emit ProvideOrder(
+      owner(),
+      tradeWallet,
+      order.sender.token,
+      order.signer.token,
+      order.sender.param,
+      rule.priceCoef,
+      rule.priceExp
+    );
   }
 
   /**
@@ -277,9 +298,7 @@ contract Delegate is IDelegate, Ownable {
       // Ensure the senderParam does not exceed maximum for the rule.
       if(senderParam <= rule.maxSenderAmount) {
 
-        signerParam = senderParam
-            .mul(rule.priceCoef)
-            .div(10 ** rule.priceExp);
+        signerParam = _calculateSignerParam(senderParam, rule.priceCoef, rule.priceExp);
 
         // Return the quote.
         return signerParam;
@@ -309,8 +328,7 @@ contract Delegate is IDelegate, Ownable {
     if(rule.maxSenderAmount > 0) {
 
       // Calculate the senderParam.
-      senderParam = signerParam
-        .mul(10 ** rule.priceExp).div(rule.priceCoef);
+      senderParam = _calculateSenderParam(signerParam, rule.priceCoef, rule.priceExp);
 
       // Ensure the senderParam does not exceed the maximum trade amount.
       if(senderParam <= rule.maxSenderAmount) {
@@ -337,13 +355,17 @@ contract Delegate is IDelegate, Ownable {
 
     Rule memory rule = rules[senderToken][signerToken];
 
+    senderParam = rule.maxSenderAmount;
+
     // Ensure that a rule exists.
-    if(rule.maxSenderAmount > 0) {
+    if (senderParam > 0) {
+      // calculate the signerParam
+      signerParam = _calculateSignerParam(senderParam, rule.priceCoef, rule.priceExp);
 
       // Return the maxSenderAmount and calculated signerParam.
       return (
-        rule.maxSenderAmount,
-        rule.maxSenderAmount.mul(rule.priceCoef).div(10 ** rule.priceExp)
+        senderParam,
+        signerParam
       );
     }
     return (0, 0);
@@ -366,6 +388,7 @@ contract Delegate is IDelegate, Ownable {
     uint256 priceCoef,
     uint256 priceExp
   ) internal {
+    require(priceCoef > 0, "INVALID_PRICE_COEF");
     rules[senderToken][signerToken] = Rule({
       maxSenderAmount: maxSenderAmount,
       priceCoef: priceCoef,
@@ -384,7 +407,6 @@ contract Delegate is IDelegate, Ownable {
 
   /**
     * @notice Unset a Trading Rule
-    * @dev only callable by the owner of the contract, removes from a mapping
     * @param senderToken address Address of an ERC-20 token the delegate would send
     * @param signerToken address Address of an ERC-20 token the consumer would send
     */
@@ -393,13 +415,57 @@ contract Delegate is IDelegate, Ownable {
     address signerToken
   ) internal {
 
-    // Delete the rule.
-    delete rules[senderToken][signerToken];
-
-    emit UnsetRule(
-      owner(),
-      senderToken,
-      signerToken
+    // using non-zero rule.priceCoef for rule existence check
+    if (rules[senderToken][signerToken].priceCoef > 0) {
+      // Delete the rule.
+      delete rules[senderToken][signerToken];
+      emit UnsetRule(
+        owner(),
+        senderToken,
+        signerToken
     );
+    }
+  }
+
+  /**
+    * @notice Calculate the signer param (amount) for a given sender param and price
+    * @param senderParam uint256 The amount the delegate would send in the swap
+    * @param priceCoef uint256 Coefficient of the token price defined in the rule
+    * @param priceExp uint256 Exponent of the token price defined in the rule
+    */
+  function _calculateSignerParam(
+    uint256 senderParam,
+    uint256 priceCoef,
+    uint256 priceExp
+  ) internal pure returns (
+    uint256 signerParam
+  ) {
+    // Calculate the param using the price formula
+    uint256 multiplier = senderParam.mul(priceCoef);
+    signerParam = multiplier.div(10 ** priceExp);
+
+    // If the div rounded down, round up
+    if (multiplier.mod(10 ** priceExp) > 0) {
+      signerParam++;
+    }
+  }
+
+  /**
+    * @notice Calculate the sender param (amount) for a given signer param and price
+    * @param signerParam uint256 The amount the signer would send in the swap
+    * @param priceCoef uint256 Coefficient of the token price defined in the rule
+    * @param priceExp uint256 Exponent of the token price defined in the rule
+    */
+  function _calculateSenderParam(
+    uint256 signerParam,
+    uint256 priceCoef,
+    uint256 priceExp
+  ) internal pure returns (
+    uint256 senderParam
+  ) {
+    // Calculate the param using the price formula
+    senderParam = signerParam
+      .mul(10 ** priceExp)
+      .div(priceCoef);
   }
 }

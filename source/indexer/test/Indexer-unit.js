@@ -9,7 +9,7 @@ const {
   equal,
   passes,
 } = require('@airswap/test-utils').assert
-const { revertToSnapShot, takeSnapshot } = require('@airswap/test-utils').time
+const { revertToSnapshot, takeSnapshot } = require('@airswap/test-utils').time
 const {
   EMPTY_ADDRESS,
   HEAD,
@@ -20,16 +20,16 @@ const {
 const { padAddressToLocator } = require('@airswap/test-utils').padding
 
 contract('Indexer Unit Tests', async accounts => {
-  let owner = accounts[0]
-  let nonOwner = accounts[1]
-  let aliceAddress = accounts[2]
-  let bobAddress = accounts[3]
-  let carolAddress = accounts[4]
+  const owner = accounts[0]
+  const nonOwner = accounts[1]
+  const aliceAddress = accounts[2]
+  const bobAddress = accounts[3]
+  const carolAddress = accounts[4]
 
-  let aliceLocator = padAddressToLocator(aliceAddress)
-  let bobLocator = padAddressToLocator(bobAddress)
-  let carolLocator = padAddressToLocator(carolAddress)
-  let emptyLocator = padAddressToLocator(EMPTY_ADDRESS)
+  const aliceLocator = padAddressToLocator(aliceAddress)
+  const bobLocator = padAddressToLocator(bobAddress)
+  const carolLocator = padAddressToLocator(carolAddress)
+  const emptyLocator = padAddressToLocator(EMPTY_ADDRESS)
 
   let indexer
   let snapshotId
@@ -43,8 +43,8 @@ contract('Indexer Unit Tests', async accounts => {
   let whitelistedIndexer
   let fungibleTokenTemplate
 
-  let tokenOne = accounts[8]
-  let tokenTwo = accounts[9]
+  const tokenOne = accounts[8]
+  const tokenTwo = accounts[9]
 
   async function setupMockContracts() {
     stakingTokenMock = await MockContract.new()
@@ -62,12 +62,12 @@ contract('Indexer Unit Tests', async accounts => {
   }
 
   beforeEach(async () => {
-    let snapShot = await takeSnapshot()
+    const snapShot = await takeSnapshot()
     snapshotId = snapShot['result']
   })
 
   afterEach(async () => {
-    await revertToSnapShot(snapshotId)
+    await revertToSnapshot(snapshotId)
   })
 
   before('Setup contracts', async () => {
@@ -90,7 +90,7 @@ contract('Indexer Unit Tests', async accounts => {
 
   describe('Test createIndex', async () => {
     it('createIndex should emit an event and create a new index', async () => {
-      let result = await indexer.createIndex(tokenOne, tokenTwo, {
+      const result = await indexer.createIndex(tokenOne, tokenTwo, {
         from: aliceAddress,
       })
 
@@ -107,7 +107,7 @@ contract('Indexer Unit Tests', async accounts => {
       })
 
       // now trying to create it again will not emit the event
-      let result = await indexer.createIndex(tokenOne, tokenTwo, {
+      const result = await indexer.createIndex(tokenOne, tokenTwo, {
         from: aliceAddress,
       })
 
@@ -128,7 +128,7 @@ contract('Indexer Unit Tests', async accounts => {
     })
 
     it('should allow the owner to blacklist a token', async () => {
-      let result = await indexer.addTokenToBlacklist(tokenOne, {
+      const result = await indexer.addTokenToBlacklist(tokenOne, {
         from: owner,
       })
 
@@ -138,7 +138,7 @@ contract('Indexer Unit Tests', async accounts => {
       })
 
       // check the token is now on the blacklist
-      let isBlacklisted = await indexer.tokenBlacklist.call(tokenOne)
+      const isBlacklisted = await indexer.tokenBlacklist.call(tokenOne)
       equal(isBlacklisted, true)
     })
 
@@ -149,7 +149,7 @@ contract('Indexer Unit Tests', async accounts => {
       })
 
       // now try to add it again
-      let tx = await indexer.addTokenToBlacklist(tokenOne, {
+      const tx = await indexer.addTokenToBlacklist(tokenOne, {
         from: owner,
       })
 
@@ -277,7 +277,7 @@ contract('Indexer Unit Tests', async accounts => {
       })
 
       // now set an intent
-      let result = await indexer.setIntent(
+      const result = await indexer.setIntent(
         tokenOne,
         tokenTwo,
         250,
@@ -308,7 +308,7 @@ contract('Indexer Unit Tests', async accounts => {
       await whitelistMock.givenAnyReturnBool(true)
 
       // now set an intent
-      let result = await whitelistedIndexer.setIntent(
+      const result = await whitelistedIndexer.setIntent(
         tokenOne,
         tokenTwo,
         250,
@@ -349,7 +349,7 @@ contract('Indexer Unit Tests', async accounts => {
       equal(stakedAmount, 250, 'Staked amount incorrect')
 
       // now try to set another - increasing the stake
-      let result = await indexer.setIntent(
+      const result = await indexer.setIntent(
         tokenOne,
         tokenTwo,
         350,
@@ -368,6 +368,62 @@ contract('Indexer Unit Tests', async accounts => {
       )
 
       equal(stakedAmount, 350, 'Staked amount did not increase')
+    })
+
+    it('should fail updating the intent when transfer of staking tokens fails', async () => {
+      // make the index first
+      await indexer.createIndex(tokenOne, tokenTwo, {
+        from: aliceAddress,
+      })
+
+      // set one intent
+      await indexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
+        from: aliceAddress,
+      })
+
+      let stakedAmount = await indexer.getStakedAmount.call(
+        aliceAddress,
+        tokenOne,
+        tokenTwo
+      )
+
+      equal(stakedAmount, 250, 'Staked amount incorrect')
+
+      // Ensure token transfers will now fail
+      await stakingTokenMock.givenAnyReturnBool(false)
+
+      // now try to update an intent by increasing transfer by 100
+      await reverted(
+        indexer.setIntent(tokenOne, tokenTwo, 350, aliceLocator, {
+          from: aliceAddress,
+        }),
+        'UNABLE_TO_STAKE'
+      )
+
+      stakedAmount = await indexer.getStakedAmount.call(
+        aliceAddress,
+        tokenOne,
+        tokenTwo
+      )
+
+      // Check that the staked amount has not been changed
+      equal(stakedAmount, 250, 'Staked amount incorrect')
+
+      // Reduce the intent with the transfer ultimately failing
+      await reverted(
+        indexer.setIntent(tokenOne, tokenTwo, 10, aliceLocator, {
+          from: aliceAddress,
+        })
+      )
+
+      stakedAmount = await indexer.getStakedAmount.call(
+        aliceAddress,
+        tokenOne,
+        tokenTwo
+      )
+
+      // ensure that the staked amount does not change
+      equal(stakedAmount, 250, 'Staked amount incorrect')
     })
 
     it('should update an intent if the user has already staked - decrease stake', async () => {
@@ -390,7 +446,7 @@ contract('Indexer Unit Tests', async accounts => {
       equal(stakedAmount, 250, 'Staked amount incorrect')
 
       // now try to set another - decreasing the stake
-      let result = await indexer.setIntent(
+      const result = await indexer.setIntent(
         tokenOne,
         tokenTwo,
         150,
@@ -431,7 +487,7 @@ contract('Indexer Unit Tests', async accounts => {
       equal(stakedAmount, 250, 'Staked amount incorrect')
 
       // now try to set another - decreasing the stake
-      let result = await indexer.setIntent(
+      const result = await indexer.setIntent(
         tokenOne,
         tokenTwo,
         250,
@@ -490,7 +546,7 @@ contract('Indexer Unit Tests', async accounts => {
       })
 
       // now try to unset the intent
-      let tx = await indexer.unsetIntent(tokenOne, tokenTwo, {
+      const tx = await indexer.unsetIntent(tokenOne, tokenTwo, {
         from: aliceAddress,
       })
 
@@ -518,7 +574,7 @@ contract('Indexer Unit Tests', async accounts => {
       })
 
       // mock the token transfer method to fail
-      let token_transfer = fungibleTokenTemplate.contract.methods
+      const token_transfer = fungibleTokenTemplate.contract.methods
         .transfer(EMPTY_ADDRESS, 0)
         .encodeABI()
 
@@ -531,65 +587,6 @@ contract('Indexer Unit Tests', async accounts => {
           from: aliceAddress,
         })
       )
-    })
-  })
-
-  describe('Test unsetIntentForUser', async () => {
-    it('should not unset an intent if the index doesnt exist', async () => {
-      await reverted(
-        indexer.unsetIntentForUser(aliceAddress, tokenOne, tokenTwo, {
-          from: owner,
-        }),
-        'INDEX_DOES_NOT_EXIST'
-      )
-    })
-
-    it('should not unset an intent if the intent does not exist', async () => {
-      // create the index
-      await indexer.createIndex(tokenOne, tokenTwo, {
-        from: aliceAddress,
-      })
-
-      // now try to unset a non-existent intent
-      await reverted(
-        indexer.unsetIntentForUser(aliceAddress, tokenOne, tokenTwo, {
-          from: owner,
-        }),
-        'ENTRY_DOES_NOT_EXIST'
-      )
-    })
-
-    it('should successfully unset an intent', async () => {
-      // create the index
-      await indexer.createIndex(tokenOne, tokenTwo, {
-        from: aliceAddress,
-      })
-
-      // create the intent
-      await indexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
-        from: aliceAddress,
-      })
-
-      // now try to unset the intent
-      let tx = await indexer.unsetIntentForUser(
-        aliceAddress,
-        tokenOne,
-        tokenTwo,
-        {
-          from: owner,
-        }
-      )
-
-      // passes and emits and event
-      passes(tx)
-      emitted(tx, 'Unstake', event => {
-        return (
-          event.staker === aliceAddress &&
-          event.signerToken === tokenOne &&
-          event.senderToken == tokenTwo &&
-          event.stakeAmount.toNumber() === 250
-        )
-      })
     })
   })
 
@@ -705,129 +702,9 @@ contract('Indexer Unit Tests', async accounts => {
     })
   })
 
-  describe('Test pausing', async () => {
-    it('A non-owner cannot pause the indexer', async () => {
-      await reverted(
-        indexer.setPausedStatus(true, { from: aliceAddress }),
-        'Ownable: caller is not the owner'
-      )
-    })
-
-    it('The owner can pause the indexer', async () => {
-      let val = await indexer.contractPaused.call()
-      equal(val, false)
-
-      // pause the indexer
-      await indexer.setPausedStatus(true, { from: owner })
-
-      // now its paused
-      val = await indexer.contractPaused.call()
-      equal(val, true)
-    })
-
-    it('The owner can un-pause the indexer', async () => {
-      // pause the indexer
-      await indexer.setPausedStatus(true, { from: owner })
-
-      let val = await indexer.contractPaused.call()
-      equal(val, true)
-
-      // unpause the indexer
-      await indexer.setPausedStatus(false, { from: owner })
-
-      // now its not paused
-      val = await indexer.contractPaused.call()
-      equal(val, false)
-    })
-
-    it('Functions cannot be called when the indexer is paused', async () => {
-      // pause the indexer
-      await indexer.setPausedStatus(true, { from: owner })
-
-      // set intent
-      await reverted(
-        indexer.setIntent(tokenOne, tokenTwo, 1000, aliceLocator, {
-          from: aliceAddress,
-        }),
-        'CONTRACT_IS_PAUSED'
-      )
-
-      // unset intent
-      await reverted(
-        indexer.unsetIntent(tokenOne, tokenTwo, {
-          from: aliceAddress,
-        }),
-        'CONTRACT_IS_PAUSED'
-      )
-
-      // create market
-      await reverted(
-        indexer.createIndex(tokenOne, tokenTwo, {
-          from: aliceAddress,
-        }),
-        'CONTRACT_IS_PAUSED'
-      )
-    })
-
-    it('After unpausing functions can be called again', async () => {
-      await indexer.setPausedStatus(true, { from: owner })
-      await indexer.setPausedStatus(false, { from: owner })
-
-      // create market
-      emitted(
-        await indexer.createIndex(tokenTwo, bobAddress, {
-          from: aliceAddress,
-        }),
-        'CreateIndex'
-      )
-
-      // set intent
-      emitted(
-        await indexer.setIntent(tokenTwo, bobAddress, 500, aliceLocator, {
-          from: aliceAddress,
-        }),
-        'Stake'
-      )
-
-      // unset intent
-      emitted(
-        await indexer.unsetIntent(tokenTwo, bobAddress, {
-          from: aliceAddress,
-        }),
-        'Unstake'
-      )
-    })
-  })
-
-  describe('Test killContract', async () => {
-    it('A non-owner cannot call the function', async () => {
-      await reverted(
-        indexer.killContract(aliceAddress, { from: aliceAddress }),
-        'Ownable: caller is not the owner'
-      )
-    })
-
-    it('The owner cannot call the function when not paused', async () => {
-      await reverted(
-        indexer.killContract(owner, { from: owner }),
-        'CONTRACT_NOT_PAUSED'
-      )
-    })
-
-    it('The owner can call the function when the indexer is paused', async () => {
-      // pause the indexer
-      await indexer.setPausedStatus(true, { from: owner })
-      // KILL
-      await indexer.killContract(owner, { from: owner })
-
-      let contractCode = await web3.eth.getCode(indexer.address)
-      equal(contractCode, '0x', 'contract did not self destruct')
-    })
-  })
-
   describe('Test getStakedAmount.call', async () => {
     it('should return 0 if the index does not exist', async () => {
-      let val = await indexer.getStakedAmount.call(
+      const val = await indexer.getStakedAmount.call(
         aliceAddress,
         tokenOne,
         tokenTwo,
@@ -845,12 +722,12 @@ contract('Indexer Unit Tests', async accounts => {
         from: aliceAddress,
       })
 
-      let stakeAmount = 1000
+      const stakeAmount = 1000
       await indexer.setIntent(tokenOne, tokenTwo, stakeAmount, aliceLocator, {
         from: aliceAddress,
       })
 
-      let val = await indexer.getStakedAmount.call(
+      const val = await indexer.getStakedAmount.call(
         aliceAddress,
         tokenOne,
         tokenTwo

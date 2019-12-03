@@ -28,12 +28,10 @@ interface IDelegateFactory {
 
   /**
     * @notice Deploy a trusted delegate contract
-    * @param delegateContractOwner address that should be the owner of the delegate
     * @param delegateTradeWallet the wallet the delegate will trade from
     * @return delegateContractAddress address of the delegate contract created
     */
   function createDelegate(
-    address delegateContractOwner,
     address delegateTradeWallet
   ) external returns (address delegateContractAddress);
 }

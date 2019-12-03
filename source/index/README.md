@@ -1,7 +1,5 @@
 # Index
 
-**:warning: This package is under active development. Do not use in production.**
-
 [AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens. This package contains source code and tests for a `Index` that represents a list of signals to trade.
 
 [![Discord](https://img.shields.io/discord/590643190281928738.svg)](https://discord.gg/ecQbV7H)
@@ -15,7 +13,6 @@
 - Website → https://www.airswap.io/
 - Blog → https://blog.airswap.io/
 - Support → https://support.airswap.io/
-
 
 ## Commands
 
@@ -32,7 +29,7 @@
 
 ## Running Tests
 
-Run an instance of `ganache-cli` before running tests.
+:bulb: Prior to testing locally, run `yarn compile` in the `airswap-protocols` project root to build required artifacts. Then run an instance of `ganache-cli` before running `yarn test` in another shell.
 
 ```
 yarn ganache

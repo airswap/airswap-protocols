@@ -1,4 +1,3 @@
-
 /*
   Copyright 2019 Swap Holdings Ltd.
 
@@ -43,6 +42,7 @@ library Types {
 
   struct Signature {
     address signatory;            // Address of the wallet used to sign
+    address validator;            // Address of the intended swap contract
     bytes1 version;               // EIP-191 signature version
     uint8 v;                      // `v` value of an ECDSA signature
     bytes32 r;                    // `r` value of an ECDSA signature

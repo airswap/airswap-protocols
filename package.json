@@ -2,6 +2,12 @@
   "name": "airswap-protocols",
   "version": "0.0.1",
   "private": true,
+  "contributors": [
+    "Don Mosites <don.mosites@fluidity.io>",
+    "Deepa Sathaye <deepa.sathaye@fludity.io>",
+    "Ethan Wessel <ethan.wessel@fluidity.io>",
+    "Alice Henshaw <alice.henshaw@fluidity.io>"
+  ],
   "license": "Apache-2.0",
   "workspaces": [
     "utils/*",
@@ -12,13 +18,15 @@
     "compile": "lerna run compile",
     "hint": "yarn solhint \"./source/**/*.sol\"",
     "lint": "yarn eslint \"./**/*.js\"",
-    "ganache": "ganache-cli -p 8545 --gasLimit 0xfffffffffff --time '2017-05-10T00:00:00+00:00'",
+    "ganache": "ganache-cli -p 8545 --gasLimit 0xfffffffffff --time '2017-05-10T00:00:00+00:00' -s 0",
     "publish": "lerna publish",
-    "test": "yarn clean && lerna run test --concurrency=1"
+    "test": "yarn clean && yarn compile && lerna run test --concurrency=1",
+    "check_dep_graph": "source venv/bin/activate && pip3 install -r requirements.txt && python scripts/dependency_checker.py"
   },
   "devDependencies": {
     "@gnosis.pm/mock-contract": "^3.0.7",
     "babel-eslint": "^10.0.2",
+    "dotenv": "^8.2.0",
     "eslint": "^5.16.0",
     "eslint-config-airbnb-base": "^13.2.0",
     "eslint-plugin-import": "^2.18.0",
@@ -30,7 +38,12 @@
     "lerna": "^3.15.0",
     "prettier": "^1.18.2",
     "solhint": "^2.1.0",
-    "truffle": "^5.0.32"
+    "truffle": "^5.0.32",
+    "ganache-time-traveler": "^1.0.5",
+    "truffle-flatten": "^1.0.6",
+    "truffle-verify": "^1.0.4",
+    "@truffle/hdwallet-provider": "^1.0.17",
+    "truffle-hdwallet-provider-privkey": "^1.0.3"
   },
   "prettier": {
     "trailingComma": "es5",
@@ -42,5 +55,6 @@
     "hooks": {
       "pre-commit": "yarn lint && yarn hint"
     }
-  }
+  },
+  "dependencies": {}
 }

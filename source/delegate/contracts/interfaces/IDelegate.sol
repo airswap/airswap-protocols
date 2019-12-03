@@ -28,7 +28,7 @@ interface IDelegate {
   }
 
   event SetRule(
-    address indexed ruleOwner,
+    address indexed owner,
     address indexed senderToken,
     address indexed signerToken,
     uint256 maxSenderAmount,
@@ -37,12 +37,20 @@ interface IDelegate {
   );
 
   event UnsetRule(
-    address indexed ruleOwner,
+    address indexed owner,
     address indexed senderToken,
     address indexed signerToken
   );
 
-  function rules(address, address) external returns (Rule memory);
+  event ProvideOrder(
+    address indexed owner,
+    address tradeWallet,
+    address indexed senderToken,
+    address indexed signerToken,
+    uint256 senderAmount,
+    uint256 priceCoef,
+    uint256 priceExp
+  );
 
   function setRule(
     address senderToken,
@@ -60,6 +68,8 @@ interface IDelegate {
   function provideOrder(
     Types.Order calldata order
   ) external;
+
+  function rules(address, address) external view returns (Rule memory);
 
   function getSignerSideQuote(
     uint256 senderParam,

@@ -2,21 +2,24 @@ const Delegate = artifacts.require('Delegate')
 const Swap = artifacts.require('Swap')
 const Types = artifacts.require('Types')
 const Indexer = artifacts.require('Indexer')
-const DelegateFactory = artifacts.require('DelegateFactory')
 const FungibleToken = artifacts.require('FungibleToken')
 const {
   emitted,
+  notEmitted,
   reverted,
   equal,
   ok,
   passes,
 } = require('@airswap/test-utils').assert
 const { balances } = require('@airswap/test-utils').balances
-const { orders } = require('@airswap/order-utils')
-const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
+const { orders, signatures } = require('@airswap/order-utils')
+const {
+  EMPTY_ADDRESS,
+  GANACHE_PROVIDER,
+} = require('@airswap/order-utils').constants
 
 contract('Delegate Integration Tests', async accounts => {
-  const STARTING_BALANCE = 700
+  const STARTING_BALANCE = 100000000
   const INTENT_AMOUNT = 250
   const aliceAddress = accounts[1]
   const bobAddress = accounts[2]
@@ -30,9 +33,6 @@ contract('Delegate Integration Tests', async accounts => {
   let swapContract
   let swapAddress
   let indexer
-  let delegateFactory
-
-  orders.setKnownAccounts([aliceAddress, bobAddress, carolAddress])
 
   async function setupTokens() {
     tokenWETH = await FungibleToken.new()
@@ -44,13 +44,6 @@ contract('Delegate Integration Tests', async accounts => {
     await stakingToken.mint(aliceAddress, STARTING_BALANCE)
   }
 
-  async function setupFactory() {
-    delegateFactory = await DelegateFactory.new(
-      swapContract.address,
-      indexer.address
-    )
-  }
-
   async function setupIndexer() {
     indexer = await Indexer.new(stakingToken.address)
     await indexer.createIndex(tokenDAI.address, tokenWETH.address)
@@ -58,7 +51,7 @@ contract('Delegate Integration Tests', async accounts => {
 
   before('Setup', async () => {
     // link types to swap
-    await Swap.link(Types, (await Types.new()).address)
+    await Swap.link('Types', (await Types.new()).address)
     // now deploy swap
     swapContract = await Swap.new()
     swapAddress = swapContract.address
@@ -67,19 +60,38 @@ contract('Delegate Integration Tests', async accounts => {
 
     await setupTokens()
     await setupIndexer()
-    await setupFactory()
 
-    let trx = await delegateFactory.createDelegate(
+    const delegateContract = await Delegate.new(
+      swapAddress,
+      indexer.address,
       aliceAddress,
       aliceTradeWallet
     )
-    let aliceDelegateAddress
-    emitted(trx, 'CreateDelegate', e => {
-      //capture the delegate address
-      aliceDelegateAddress = e.delegateContract
-      return e.delegateContractOwner === aliceAddress
+    aliceDelegate = await delegateContract
+  })
+
+  describe('Test the delegate constructor', async () => {
+    it('Test that delegateOwner set as 0x0 passes', async () => {
+      await passes(
+        await Delegate.new(
+          swapAddress,
+          indexer.address,
+          EMPTY_ADDRESS,
+          aliceTradeWallet
+        )
+      )
     })
-    aliceDelegate = await Delegate.at(aliceDelegateAddress)
+
+    it('Test that trade wallet set as 0x0 passes', async () => {
+      await passes(
+        await Delegate.new(
+          swapAddress,
+          indexer.address,
+          aliceAddress,
+          EMPTY_ADDRESS
+        )
+      )
+    })
   })
 
   describe('Checks setTradeWallet', async () => {
@@ -95,7 +107,7 @@ contract('Delegate Integration Tests', async accounts => {
       await aliceDelegate.setTradeWallet(carolAddress, { from: aliceAddress })
 
       // check it set
-      let val = await aliceDelegate.tradeWallet.call()
+      const val = await aliceDelegate.tradeWallet.call()
       equal(val, carolAddress, 'trade wallet is incorrect')
 
       //change it back
@@ -141,11 +153,23 @@ contract('Delegate Integration Tests', async accounts => {
         0
       )
     })
+
+    it('Test setRule for zero priceCoef does revert', async () => {
+      const trx = aliceDelegate.setRule(
+        tokenWETH.address,
+        tokenDAI.address,
+        100000,
+        0,
+        0,
+        { from: aliceAddress }
+      )
+      await reverted(trx, 'INVALID_PRICE_COEF')
+    })
   })
 
   describe('Test setRuleAndIntent()', async () => {
     it('Test successfully calling setRuleAndIntent', async () => {
-      let rule = [100000, 300, 0]
+      const rule = [100000, 300, 0]
 
       //give allowance to the delegate to pull staking amount
       await stakingToken.approve(aliceDelegate.address, INTENT_AMOUNT, {
@@ -153,7 +177,7 @@ contract('Delegate Integration Tests', async accounts => {
       })
 
       //check the score of the delegate before
-      let scoreBefore = await indexer.getStakedAmount(
+      const scoreBefore = await indexer.getStakedAmount(
         aliceDelegate.address,
         tokenDAI.address,
         tokenWETH.address
@@ -165,15 +189,20 @@ contract('Delegate Integration Tests', async accounts => {
           tokenWETH.address,
           tokenDAI.address,
           rule,
-          INTENT_AMOUNT,
+          INTENT_AMOUNT, // 250
           {
             from: aliceAddress,
           }
         )
       )
 
+      ok(
+        await balances(aliceDelegate.address, [[stakingToken, 0]]),
+        'Trade Wallet balances are incorrect'
+      )
+
       //check the score of the manager after
-      let scoreAfter = await indexer.getStakedAmount(
+      const scoreAfter = await indexer.getStakedAmount(
         aliceDelegate.address,
         tokenDAI.address,
         tokenWETH.address
@@ -181,15 +210,20 @@ contract('Delegate Integration Tests', async accounts => {
       equal(scoreAfter.toNumber(), INTENT_AMOUNT, 'intent score is incorrect')
 
       //check owner stake balance has been reduced
-      let stakingTokenBal = await stakingToken.balanceOf(aliceAddress)
+      const stakingTokenBal = await stakingToken.balanceOf(aliceAddress)
       equal(stakingTokenBal.toNumber(), STARTING_BALANCE - INTENT_AMOUNT)
     })
-  })
 
-  describe('Test unsetRuleAndIntent()', async () => {
-    it('Test successfully calling unsetRuleAndIntent()', async () => {
-      //check the score of the manager before
-      let scoreBefore = await indexer.getStakedAmount(
+    it('Test successfully increasing stake with setRuleAndIntent', async () => {
+      const rule = [100000, 300, 0]
+
+      //give allowance to the delegate to pull staking amount
+      await stakingToken.approve(aliceDelegate.address, 2 * INTENT_AMOUNT, {
+        from: aliceAddress,
+      })
+
+      //check the score of the delegate before
+      const scoreBefore = await indexer.getStakedAmount(
         aliceDelegate.address,
         tokenDAI.address,
         tokenWETH.address
@@ -197,9 +231,241 @@ contract('Delegate Integration Tests', async accounts => {
       equal(scoreBefore.toNumber(), INTENT_AMOUNT, 'intent score is incorrect')
 
       await passes(
-        aliceDelegate.unsetRuleAndIntent(tokenDAI.address, tokenWETH.address, {
+        aliceDelegate.setRuleAndIntent(
+          tokenWETH.address,
+          tokenDAI.address,
+          rule,
+          2 * INTENT_AMOUNT, // 500
+          {
+            from: aliceAddress,
+          }
+        )
+      )
+
+      ok(
+        await balances(aliceDelegate.address, [[stakingToken, 0]]),
+        'Trade Wallet balances are incorrect'
+      )
+
+      //check the score of the manager after
+      const scoreAfter = await indexer.getStakedAmount(
+        aliceDelegate.address,
+        tokenDAI.address,
+        tokenWETH.address
+      )
+      equal(
+        scoreAfter.toNumber(),
+        2 * INTENT_AMOUNT,
+        'intent score is incorrect'
+      )
+
+      //check owner stake balance has been reduced
+      const stakingTokenBal = await stakingToken.balanceOf(aliceAddress)
+      equal(stakingTokenBal.toNumber(), STARTING_BALANCE - 2 * INTENT_AMOUNT)
+    })
+
+    it('Test successfully decreasing stake to 0 with setRuleAndIntent', async () => {
+      const rule = [100000, 300, 0]
+
+      //give allowance to the delegate to pull staking amount
+      await stakingToken.approve(aliceDelegate.address, 0, {
+        from: aliceAddress,
+      })
+
+      //check the score of the delegate before
+      const scoreBefore = await indexer.getStakedAmount(
+        aliceDelegate.address,
+        tokenDAI.address,
+        tokenWETH.address
+      )
+      equal(
+        scoreBefore.toNumber(),
+        2 * INTENT_AMOUNT,
+        'intent score is incorrect'
+      )
+
+      await passes(
+        aliceDelegate.setRuleAndIntent(
+          tokenWETH.address,
+          tokenDAI.address,
+          rule,
+          0,
+          {
+            from: aliceAddress,
+          }
+        )
+      )
+
+      ok(
+        await balances(aliceDelegate.address, [[stakingToken, 0]]),
+        'Trade Wallet balances are incorrect'
+      )
+
+      //check the score of the manager after
+      const scoreAfter = await indexer.getStakedAmount(
+        aliceDelegate.address,
+        tokenDAI.address,
+        tokenWETH.address
+      )
+      equal(scoreAfter.toNumber(), 0, 'intent score is incorrect')
+
+      //check owner stake balance has been reduced
+      const stakingTokenBal = await stakingToken.balanceOf(aliceAddress)
+      equal(stakingTokenBal.toNumber(), STARTING_BALANCE)
+    })
+
+    it('Test successfully calling setRuleAndIntent', async () => {
+      const rule = [100000, 300, 0]
+
+      //give allowance to the delegate to pull staking amount
+      await stakingToken.approve(aliceDelegate.address, INTENT_AMOUNT, {
+        from: aliceAddress,
+      })
+
+      //check the score of the delegate before
+      const scoreBefore = await indexer.getStakedAmount(
+        aliceDelegate.address,
+        tokenDAI.address,
+        tokenWETH.address
+      )
+      equal(scoreBefore.toNumber(), 0, 'intent score is incorrect')
+
+      await passes(
+        aliceDelegate.setRuleAndIntent(
+          tokenWETH.address,
+          tokenDAI.address,
+          rule,
+          INTENT_AMOUNT, // 250
+          {
+            from: aliceAddress,
+          }
+        )
+      )
+
+      ok(
+        await balances(aliceDelegate.address, [[stakingToken, 0]]),
+        'Trade Wallet balances are incorrect'
+      )
+
+      //check the score of the manager after
+      const scoreAfter = await indexer.getStakedAmount(
+        aliceDelegate.address,
+        tokenDAI.address,
+        tokenWETH.address
+      )
+      equal(scoreAfter.toNumber(), INTENT_AMOUNT, 'intent score is incorrect')
+
+      //check owner stake balance has been reduced
+      const stakingTokenBal = await stakingToken.balanceOf(aliceAddress)
+      equal(stakingTokenBal.toNumber(), STARTING_BALANCE - INTENT_AMOUNT)
+    })
+
+    it('Test successfully calling setRuleAndIntent with no-stake change', async () => {
+      const rule = [100000, 300, 0]
+
+      //give allowance to the delegate to pull staking amount
+      await stakingToken.approve(aliceDelegate.address, INTENT_AMOUNT, {
+        from: aliceAddress,
+      })
+
+      //check the score of the delegate before
+      const scoreBefore = await indexer.getStakedAmount(
+        aliceDelegate.address,
+        tokenDAI.address,
+        tokenWETH.address
+      )
+      equal(scoreBefore.toNumber(), INTENT_AMOUNT, 'intent score is incorrect')
+
+      const tx = aliceDelegate.setRuleAndIntent(
+        tokenWETH.address,
+        tokenDAI.address,
+        rule,
+        INTENT_AMOUNT, // 250
+        {
+          from: aliceAddress,
+        }
+      )
+      await notEmitted(await tx, 'Stake')
+      ok(
+        await balances(aliceDelegate.address, [[stakingToken, 0]]),
+        'Trade Wallet balances are incorrect'
+      )
+
+      //check the score of the manager after
+      const scoreAfter = await indexer.getStakedAmount(
+        aliceDelegate.address,
+        tokenDAI.address,
+        tokenWETH.address
+      )
+      equal(scoreAfter.toNumber(), INTENT_AMOUNT, 'intent score is incorrect')
+
+      //check owner stake balance has been reduced
+      const stakingTokenBal = await stakingToken.balanceOf(aliceAddress)
+      equal(stakingTokenBal.toNumber(), STARTING_BALANCE - INTENT_AMOUNT)
+    })
+  })
+
+  describe('Test unsetRuleAndIntent()', async () => {
+    it('Test successfully calling unsetRuleAndIntent()', async () => {
+      //check the score of the manager before
+      const scoreBefore = await indexer.getStakedAmount(
+        aliceDelegate.address,
+        tokenDAI.address,
+        tokenWETH.address
+      )
+      equal(scoreBefore.toNumber(), INTENT_AMOUNT, 'intent score is incorrect')
+
+      await passes(
+        aliceDelegate.unsetRuleAndIntent(tokenWETH.address, tokenDAI.address, {
           from: aliceAddress,
         })
+      )
+
+      //check the score of the manager after
+      const scoreAfter = await indexer.getStakedAmount(
+        aliceDelegate.address,
+        tokenDAI.address,
+        tokenWETH.address
+      )
+      equal(scoreAfter.toNumber(), 0, 'intent score is incorrect')
+
+      //check owner stake balance has been increased
+      const stakingTokenBal = await stakingToken.balanceOf(aliceAddress)
+
+      equal(stakingTokenBal.toNumber(), STARTING_BALANCE)
+    })
+
+    it('Test successfully setting stake to 0 with setRuleAndIntent and then unsetting', async () => {
+      const rule = [100000, 300, 0]
+
+      //give allowance to the delegate to pull staking amount
+      await stakingToken.approve(aliceDelegate.address, 0, {
+        from: aliceAddress,
+      })
+
+      //check the score of the delegate before
+      const scoreBefore = await indexer.getStakedAmount(
+        aliceDelegate.address,
+        tokenDAI.address,
+        tokenWETH.address
+      )
+      equal(scoreBefore.toNumber(), 0, 'intent score is incorrect')
+
+      await passes(
+        aliceDelegate.setRuleAndIntent(
+          tokenWETH.address,
+          tokenDAI.address,
+          rule,
+          0,
+          {
+            from: aliceAddress,
+          }
+        )
+      )
+
+      ok(
+        await balances(aliceDelegate.address, [[stakingToken, 0]]),
+        'Trade Wallet balances are incorrect'
       )
 
       //check the score of the manager after
@@ -210,8 +476,26 @@ contract('Delegate Integration Tests', async accounts => {
       )
       equal(scoreAfter.toNumber(), 0, 'intent score is incorrect')
 
-      //check owner stake balance has been increased
+      //check owner stake balance has been reduced by 0
       let stakingTokenBal = await stakingToken.balanceOf(aliceAddress)
+      equal(stakingTokenBal.toNumber(), STARTING_BALANCE)
+
+      await passes(
+        aliceDelegate.unsetRuleAndIntent(tokenWETH.address, tokenDAI.address, {
+          from: aliceAddress,
+        })
+      )
+
+      //check the score of the manager after
+      scoreAfter = await indexer.getStakedAmount(
+        aliceDelegate.address,
+        tokenDAI.address,
+        tokenWETH.address
+      )
+      equal(scoreAfter.toNumber(), 0, 'intent score is incorrect')
+
+      //check owner stake balance has been increased
+      stakingTokenBal = await stakingToken.balanceOf(aliceAddress)
 
       equal(stakingTokenBal.toNumber(), STARTING_BALANCE)
     })
@@ -297,36 +581,47 @@ contract('Delegate Integration Tests', async accounts => {
       }
     )
 
-    it('Gets a quote to buy 20K DAI for WETH (Quote: 64 WETH)', async () => {
+    it('Gets a quote to buy 23412 DAI for WETH (Quote: 74.9184 WETH)', async () => {
+      const amount = 23412
       const quote = await aliceDelegate.getSignerSideQuote.call(
-        20000,
+        amount,
         tokenDAI.address,
         tokenWETH.address
       )
-      equal(quote, 64)
+      // This rounds up, just as getSignerSideQuote does
+      // 74.9184 becomes 75
+      const expectedValue = Math.ceil((amount * 32) / 10 ** 4)
+      equal(quote.toNumber(), expectedValue)
     })
 
     it('Gets a quote to sell 100K (Max) DAI for WETH (Quote: 320 WETH)', async () => {
+      const amount = 100000
       const quote = await aliceDelegate.getSignerSideQuote.call(
-        100000,
+        amount,
         tokenDAI.address,
         tokenWETH.address
       )
-      equal(quote, 320)
+      // This does not end up rounding up as the sum reaches a whole number - 320
+      const expectedValue = Math.ceil((amount * 32) / 10 ** 4)
+      equal(quote.toNumber(), expectedValue)
     })
 
-    it('Gets a quote to sell 1 WETH for DAI (Quote: 300 DAI)', async () => {
+    it('Gets a quote to sell 1 WETH for DAI (Quote: 312.5 DAI)', async () => {
+      const amount = 1
       const quote = await aliceDelegate.getSenderSideQuote.call(
-        1,
+        amount,
         tokenWETH.address,
         tokenDAI.address
       )
-      equal(quote, 312)
+      // This floors as solidity rounds down - 312.5 becomes 312
+      const expectedValue = Math.floor((amount * 10 ** 4) / 32)
+      equal(quote.toNumber(), expectedValue)
     })
 
     it('Gets a quote to sell 500 DAI for WETH (False: No rule)', async () => {
+      const amount = 500
       const quote = await aliceDelegate.getSenderSideQuote.call(
-        500,
+        amount,
         tokenDAI.address,
         tokenWETH.address
       )
@@ -404,10 +699,15 @@ contract('Delegate Integration Tests', async accounts => {
         },
       })
 
-      await reverted(
-        aliceDelegate.provideOrder(order, { from: bobAddress }),
-        'INVALID_SENDER_WALLET'
+      // Bob signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        bobAddress,
+        swapAddress,
+        GANACHE_PROVIDER
       )
+
+      await reverted(aliceDelegate.provideOrder(order), 'INVALID_SENDER_WALLET')
     })
 
     it('should not accept open trades', async () => {
@@ -424,10 +724,15 @@ contract('Delegate Integration Tests', async accounts => {
         },
       })
 
-      await reverted(
-        aliceDelegate.provideOrder(order, { from: bobAddress }),
-        'INVALID_SENDER_WALLET'
+      // Bob signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        bobAddress,
+        swapAddress,
+        GANACHE_PROVIDER
       )
+
+      await reverted(aliceDelegate.provideOrder(order), 'INVALID_SENDER_WALLET')
     })
 
     it("should not trade if the tradeWallet hasn't authorized the delegate to send", async () => {
@@ -444,12 +749,17 @@ contract('Delegate Integration Tests', async accounts => {
         },
       })
 
+      // Bob signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        bobAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
       // Succeeds on the Delegate, fails on the Swap.
       // aliceTradeWallet hasn't authorized Delegate to swap
-      await reverted(
-        aliceDelegate.provideOrder(order, { from: bobAddress }),
-        'SENDER_UNAUTHORIZED'
-      )
+      await reverted(aliceDelegate.provideOrder(order), 'SENDER_UNAUTHORIZED')
     })
 
     it("should not trade if the tradeWallet's authorization has been revoked", async () => {
@@ -465,6 +775,14 @@ contract('Delegate Integration Tests', async accounts => {
           param: quote.toNumber(),
         },
       })
+
+      // Bob signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        bobAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
 
       // Succeeds on the Delegate, fails on the Swap.
       // aliceTradeWallet approval has expired
@@ -488,6 +806,14 @@ contract('Delegate Integration Tests', async accounts => {
         },
       })
 
+      // Bob signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        bobAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
       // tradeWallet needs DAI to trade
       emitted(await tokenDAI.mint(aliceTradeWallet, 300), 'Transfer')
       ok(
@@ -503,18 +829,22 @@ contract('Delegate Integration Tests', async accounts => {
       )
 
       // aliceTradeWallet must authorize the Delegate contract to swap
-      let tx = await swapContract.authorizeSender(aliceDelegate.address, {
+      const tx = await swapContract.authorizeSender(aliceDelegate.address, {
         from: aliceTradeWallet,
       })
       emitted(tx, 'AuthorizeSender')
 
       // both approve Swap to transfer tokens
       emitted(
-        await tokenDAI.approve(swapAddress, 200, { from: aliceTradeWallet }),
+        await tokenDAI.approve(swapAddress, STARTING_BALANCE, {
+          from: aliceTradeWallet,
+        }),
         'Approval'
       )
       emitted(
-        await tokenWETH.approve(swapAddress, 1, { from: bobAddress }),
+        await tokenWETH.approve(swapAddress, STARTING_BALANCE, {
+          from: bobAddress,
+        }),
         'Approval'
       )
 
@@ -535,16 +865,37 @@ contract('Delegate Integration Tests', async accounts => {
   })
 
   describe('Provide some orders to the Delegate', async () => {
-    let quote
-    before('Gets a quote for 1 WETH', async () => {
-      quote = await aliceDelegate.getSenderSideQuote.call(
-        1,
-        tokenWETH.address,
-        tokenDAI.address
+    before('Sets up rule and quote', async () => {
+      // Delegate will trade up to 10,000 DAI for WETH, at 200 DAI/WETH
+      await aliceDelegate.setRule(
+        tokenDAI.address, // Delegate's token
+        tokenWETH.address, // Signer's token
+        10000,
+        5,
+        3,
+        { from: aliceAddress }
+      )
+
+      // mint the relevant tokens
+      await tokenWETH.mint(bobAddress, STARTING_BALANCE)
+      await tokenDAI.mint(aliceTradeWallet, STARTING_BALANCE)
+
+      // grant swap token approvals
+      emitted(
+        await tokenDAI.approve(swapAddress, STARTING_BALANCE, {
+          from: aliceTradeWallet,
+        }),
+        'Approval'
+      )
+      emitted(
+        await tokenWETH.approve(swapAddress, STARTING_BALANCE, {
+          from: bobAddress,
+        }),
+        'Approval'
       )
     })
 
-    it('Use quote with non-extent rule', async () => {
+    it('Use quote with non-existent rule', async () => {
       // Note: Consumer is the order signer, Delegate is the order sender.
       const order = await orders.getOrder({
         signer: {
@@ -559,6 +910,14 @@ contract('Delegate Integration Tests', async accounts => {
         },
       })
 
+      // Bob signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        bobAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
       // Succeeds on the Delegate, fails on the Swap.
       await reverted(
         aliceDelegate.provideOrder(order, { from: bobAddress }),
@@ -566,7 +925,14 @@ contract('Delegate Integration Tests', async accounts => {
       )
     })
 
-    it('Use quote with incorrect signer wallet', async () => {
+    it('Send order without signature to the delegate', async () => {
+      // Signer wants to trade 1 WETH for x DAI
+      const quote = await aliceDelegate.getSenderSideQuote.call(
+        1,
+        tokenWETH.address,
+        tokenDAI.address
+      )
+
       // Note: Consumer is the order signer, Delegate is the order sender.
       const order = await orders.getOrder({
         signer: {
@@ -581,15 +947,15 @@ contract('Delegate Integration Tests', async accounts => {
         },
       })
 
-      // Succeeds on the Delegate, fails on the Swap.
+      // Fails on Delegate as a signature isn't provided
       await reverted(
-        aliceDelegate.provideOrder(order, { from: carolAddress }),
-        'SIGNER_MUST_BE_SENDER'
+        aliceDelegate.provideOrder(order, { from: bobAddress }),
+        'SIGNATURE_MUST_BE_SENT'
       )
     })
 
     it('Use quote larger than delegate rule', async () => {
-      // Delegate trades WETH for 100 DAI. Max trade is 2 WETH.
+      // Delegate trades 1 WETH for 100 DAI. Max trade is 2 WETH.
       await aliceDelegate.setRule(
         tokenWETH.address, // Delegate's token
         tokenDAI.address, // Signer's token
@@ -598,6 +964,7 @@ contract('Delegate Integration Tests', async accounts => {
         0,
         { from: aliceAddress }
       )
+      // Order is made for 300 DAI for 3 WETH
       const order = await orders.getOrder({
         signer: {
           wallet: bobAddress,
@@ -607,9 +974,17 @@ contract('Delegate Integration Tests', async accounts => {
         sender: {
           wallet: aliceTradeWallet,
           token: tokenWETH.address,
-          param: quote.toNumber(),
+          param: 3,
         },
       })
+
+      // Bob signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        bobAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
 
       // 300 DAI is 3 WETH, which is more than the max
       await reverted(
@@ -628,13 +1003,21 @@ contract('Delegate Integration Tests', async accounts => {
         sender: {
           wallet: aliceTradeWallet,
           token: tokenDAI.address,
-          param: 500, //this is more than the delegate rule would pay out
+          param: 201, // Rule is 1 WETH for 200 DAI
         },
       })
 
+      // Bob signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        bobAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
       await reverted(
         aliceDelegate.provideOrder(order, { from: bobAddress }),
-        'PRICE_INCORRECT'
+        'PRICE_INVALID'
       )
     })
 
@@ -650,9 +1033,17 @@ contract('Delegate Integration Tests', async accounts => {
         sender: {
           wallet: aliceTradeWallet,
           token: tokenDAI.address,
-          param: quote.toNumber(),
+          param: 200, // Rule is 1 WETH for 200 DAI
         },
       })
+
+      // Bob signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        bobAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
 
       // Succeeds on the Delegate, fails on the Swap.
       await reverted(
@@ -672,10 +1063,18 @@ contract('Delegate Integration Tests', async accounts => {
         sender: {
           wallet: aliceTradeWallet,
           token: tokenDAI.address,
-          param: quote.toNumber(),
+          param: 200, // Rule is 1 WETH for 200 DAI
           kind: '0x80ac58cd',
         },
       })
+
+      // Bob signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        bobAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
 
       // Succeeds on the Delegate, fails on the Swap.
       await reverted(
@@ -684,7 +1083,7 @@ contract('Delegate Integration Tests', async accounts => {
       )
     })
 
-    it('Gets a quote to sell 1 WETH and takes it', async () => {
+    it('Gets a quote to sell 1 WETH and takes it, swap fails', async () => {
       // Note: Consumer is the order signer, Delegate is the order sender.
       const order = await orders.getOrder({
         signer: {
@@ -695,14 +1094,207 @@ contract('Delegate Integration Tests', async accounts => {
         sender: {
           wallet: aliceTradeWallet,
           token: tokenDAI.address,
-          param: quote.toNumber(),
+          param: 200, // Rule is 1 WETH for 200 DAI
         },
       })
+
+      // Bob signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        bobAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
 
       // Succeeds on the Delegate, fails on the Swap.
       await reverted(
         aliceDelegate.provideOrder(order, { from: bobAddress }),
         'SENDER_UNAUTHORIZED'
+      )
+    })
+
+    it('Gets a quote to sell 1 WETH and takes it, swap passes', async () => {
+      // Note: Delegate is the order sender.
+      const order = await orders.getOrder({
+        signer: {
+          wallet: bobAddress,
+          token: tokenWETH.address,
+          param: 1,
+        },
+        sender: {
+          wallet: aliceTradeWallet,
+          token: tokenDAI.address,
+          param: 200, // Rule is 1 WETH for 200 DAI
+        },
+      })
+
+      // Bob signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        bobAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
+      // Alice authorizes the delegate to send trades
+      await swapContract.authorizeSender(aliceDelegate.address, {
+        from: aliceTradeWallet,
+      })
+
+      // Now the trade passes
+      emitted(
+        await aliceDelegate.provideOrder(order, { from: bobAddress }),
+        'ProvideOrder'
+      )
+    })
+
+    it('Gets a quote to sell 1 WETH where sender != signer, passes', async () => {
+      // Note: Delegate is the order sender.
+      const order = await orders.getOrder({
+        signer: {
+          wallet: bobAddress,
+          token: tokenWETH.address,
+          param: 1,
+        },
+        sender: {
+          wallet: aliceTradeWallet,
+          token: tokenDAI.address,
+          param: 200, // Rule is 1 WETH for 200 DAI
+        },
+      })
+
+      // Bob signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        bobAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
+      // Alice authorizes the delegate to send trades
+      await swapContract.authorizeSender(aliceDelegate.address, {
+        from: aliceTradeWallet,
+      })
+
+      // Now the trade passes
+      emitted(
+        await aliceDelegate.provideOrder(order, { from: carolAddress }),
+        'ProvideOrder'
+      )
+    })
+
+    it('Queries signerSideQuote and passes the value into an order', async () => {
+      const senderAmount = 123
+      const signerQuote = await aliceDelegate.getSignerSideQuote.call(
+        senderAmount,
+        tokenDAI.address,
+        tokenWETH.address
+      )
+
+      // Note: Delegate is the order sender.
+      const order = await orders.getOrder({
+        signer: {
+          wallet: bobAddress,
+          token: tokenWETH.address,
+          param: signerQuote.toNumber(),
+        },
+        sender: {
+          wallet: aliceTradeWallet,
+          token: tokenDAI.address,
+          param: senderAmount,
+        },
+      })
+
+      // Bob signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        bobAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
+      // Alice already authorized the delegate to send trades
+      // Now the trade passes
+      emitted(
+        await aliceDelegate.provideOrder(order, { from: bobAddress }),
+        'ProvideOrder'
+      )
+    })
+
+    it('Queries senderSideQuote and passes the value into an order', async () => {
+      const signerAmount = 2
+      const senderQuote = await aliceDelegate.getSignerSideQuote.call(
+        signerAmount,
+        tokenDAI.address,
+        tokenWETH.address
+      )
+
+      // Note: Delegate is the order sender.
+      const order = await orders.getOrder({
+        signer: {
+          wallet: bobAddress,
+          token: tokenWETH.address,
+          param: signerAmount,
+        },
+        sender: {
+          wallet: aliceTradeWallet,
+          token: tokenDAI.address,
+          param: senderQuote.toNumber(),
+        },
+      })
+
+      // Bob signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        bobAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
+      // Alice already authorized the delegate to send trades
+      // Now the trade passes
+      emitted(
+        await aliceDelegate.provideOrder(order, { from: bobAddress }),
+        'ProvideOrder'
+      )
+    })
+
+    it('Queries getMaxQuote and passes the value into an order', async () => {
+      const val = await aliceDelegate.getMaxQuote.call(
+        tokenDAI.address,
+        tokenWETH.address
+      )
+
+      const senderAmount = val[0].toNumber()
+      const signerAmount = val[1].toNumber()
+
+      // Note: Delegate is the order sender.
+      const order = await orders.getOrder({
+        signer: {
+          wallet: bobAddress,
+          token: tokenWETH.address,
+          param: signerAmount,
+        },
+        sender: {
+          wallet: aliceTradeWallet,
+          token: tokenDAI.address,
+          param: senderAmount,
+        },
+      })
+
+      // Bob signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        bobAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
+      // Alice already authorized the delegate to send trades
+      // Now the trade passes
+      emitted(
+        await aliceDelegate.provideOrder(order, { from: bobAddress }),
+        'ProvideOrder'
       )
     })
   })

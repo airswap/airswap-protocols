@@ -16,6 +16,8 @@
 
 const ethUtil = require('ethereumjs-util')
 const sigUtil = require('eth-sig-util')
+const web3Eth = require('web3-eth')
+
 const {
   DOMAIN_NAME,
   DOMAIN_VERSION,
@@ -26,29 +28,34 @@ const {
 const hashes = require('./hashes')
 
 module.exports = {
-  async getWeb3Signature(order, signatory, verifyingContract) {
+  async getWeb3Signature(order, signatory, verifyingContract, provider) {
     const orderHash = hashes.getOrderHash(order, verifyingContract)
     const orderHashHex = ethUtil.bufferToHex(orderHash)
-    const sig = await web3.eth.sign(orderHashHex, signatory)
-    const { r, s, v } = ethUtil.fromRpcSig(sig)
+    const eth = new web3Eth(provider)
+    const sig = await eth.sign(orderHashHex, signatory)
+    const { v, r, s } = ethUtil.fromRpcSig(sig)
     return {
+      signatory: signatory.toLowerCase(),
+      validator: verifyingContract.toLowerCase(),
       version: signatures.PERSONAL_SIGN,
-      signatory: signatory,
-      r,
-      s,
-      v,
+      v: String(v),
+      r: ethUtil.bufferToHex(r),
+      s: ethUtil.bufferToHex(s),
     }
   },
   getPrivateKeySignature(order, privateKey, verifyingContract) {
     const orderHash = hashes.getOrderHash(order, verifyingContract)
     const orderHashBuff = ethUtil.toBuffer(orderHash)
-    const { r, s, v } = ethUtil.ecsign(orderHashBuff, privateKey)
+    const { v, r, s } = ethUtil.ecsign(orderHashBuff, privateKey)
     return {
+      signatory: `0x${ethUtil
+        .privateToAddress(privateKey)
+        .toString('hex')}`.toLowerCase(),
+      validator: verifyingContract.toLowerCase(),
       version: signatures.SIGN_TYPED_DATA,
-      signatory: ethUtil.privateToAddress(privateKey).toString('hex'),
-      r,
-      s,
-      v,
+      v: String(v),
+      r: ethUtil.bufferToHex(r),
+      s: ethUtil.bufferToHex(s),
     }
   },
   getPersonalSignature(order, privateKey, verifyingContract) {
@@ -56,13 +63,16 @@ module.exports = {
     const sig = sigUtil.personalSign(privateKey, {
       data: orderHash,
     })
-    const { r, s, v } = ethUtil.fromRpcSig(sig)
+    const { v, r, s } = ethUtil.fromRpcSig(sig)
     return {
+      signatory: `0x${ethUtil
+        .privateToAddress(privateKey)
+        .toString('hex')}`.toLowerCase(),
+      validator: verifyingContract.toLowerCase(),
       version: signatures.PERSONAL_SIGN,
-      signatory: `0x${ethUtil.privateToAddress(privateKey).toString('hex')}`,
+      v,
       r,
       s,
-      v,
     }
   },
   getTypedDataSignature(order, privateKey, verifyingContract) {
@@ -78,22 +88,44 @@ module.exports = {
         message: order,
       },
     })
-    const { r, s, v } = ethUtil.fromRpcSig(sig)
+    const { v, r, s } = ethUtil.fromRpcSig(sig)
     return {
+      signatory: `0x${ethUtil
+        .privateToAddress(privateKey)
+        .toString('hex')}`.toLowerCase(),
+      validator: verifyingContract.toLowerCase(),
       version: signatures.SIGN_TYPED_DATA,
-      signatory: `0x${ethUtil.privateToAddress(privateKey).toString('hex')}`,
+      v,
       r,
       s,
-      v,
     }
   },
-  getEmptySignature() {
+  getEmptySignature(verifyingContract) {
     return {
-      version: signatures.INTENDED_VALIDATOR,
       signatory: EMPTY_ADDRESS,
+      validator: verifyingContract.toLowerCase(),
+      version: signatures.INTENDED_VALIDATOR,
       v: '0',
       r: '0x0',
       s: '0x0',
     }
+  },
+  isSignatureValid(order) {
+    const signature = order['signature']
+    const orderHash = hashes.getOrderHash(order, signature['validator'])
+    const prefix = Buffer.from('\x19Ethereum Signed Message:\n')
+    const prefixedOrderHash = ethUtil.keccak256(
+      Buffer.concat([prefix, Buffer.from(String(orderHash.length)), orderHash])
+    )
+    const signingPubKey = ethUtil.ecrecover(
+      prefixedOrderHash,
+      signature['v'],
+      signature['r'],
+      signature['s']
+    )
+    const signingAddress = ethUtil.bufferToHex(
+      ethUtil.pubToAddress(signingPubKey)
+    )
+    return signingAddress.toLowerCase() == signature['signatory']
   },
 }
