@@ -509,11 +509,11 @@ contract('Wrapper Unit Tests', async accounts => {
         },
       })
 
-      // Send no eth for weth order
+      // Send order without signature
       await reverted(
         wrapper.provideDelegateOrder(order, mockDelegateAddress, {
           from: mockSigner,
-          value: 0,
+          value: 500,
         }),
         'SIGNATURE_MUST_BE_SENT'
       )
