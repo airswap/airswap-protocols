@@ -98,19 +98,19 @@ contract Wrapper {
     Types.Order calldata order,
     IDelegate delegate
   ) external payable {
-    // Check if signer is sending ether that must be wrapped.
+    // Wraps ETH to WETH when the signer provides ETH and the order is WETH
     _wrapEther(order.signer);
 
     // Provide the order to the Delegate.
     delegate.provideOrder(order);
 
-    // Check if signer is receiving ether that must be unwrapped.
+    // Unwraps WETH to ETH when the signer receives WETH
     _unwrapEther(order.signer.wallet, order.sender.token, order.sender.param);
   }
 
   /**
     * @notice Wraps ETH to WETH when a trade requires it
-    * @param order Types.Party The side of the trade that may need wrapping
+    * @param party Types.Party The side of the trade that may need wrapping
     */
   function _wrapEther(Types.Party memory party) internal {
     // Check whether ether needs wrapping

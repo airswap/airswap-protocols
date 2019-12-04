@@ -17,10 +17,10 @@ const { orders, signatures } = require('@airswap/order-utils')
 
 contract('Wrapper Unit Tests', async accounts => {
   const senderParam = 2
-  const mockToken = accounts[9]
-  const mockSender = accounts[8]
-  const mockSigner = accounts[7]
-  const delegateOwner = accounts[5]
+  const mockToken = accounts[1]
+  const mockSender = accounts[2]
+  const mockSigner = accounts[3]
+  const delegateOwner = accounts[4]
   let mockSwap
   let mockSwapAddress
   let mockWeth
@@ -95,7 +95,7 @@ contract('Wrapper Unit Tests', async accounts => {
     mockSwap = await MockContract.new()
     mockSwapAddress = mockSwap.address
 
-    await orders.setVerifyingContract(mockSwap.address)
+    await orders.setVerifyingContract(mockSwapAddress)
   }
 
   async function setupMockFungibleToken() {
@@ -155,13 +155,13 @@ contract('Wrapper Unit Tests', async accounts => {
     await setupMockWeth()
     await setupMockSwap()
     await setupMockFungibleToken()
-    wrapper = await Wrapper.new(mockSwap.address, mockWethAddress)
+    wrapper = await Wrapper.new(mockSwapAddress, mockWethAddress)
   })
 
   describe('Test initial values', async () => {
     it('Test initial Swap Contract', async () => {
       const val = await wrapper.swapContract.call()
-      equal(val, mockSwap.address, 'swap address is incorrect')
+      equal(val, mockSwapAddress, 'swap address is incorrect')
     })
 
     it('Test initial Weth Contract', async () => {
