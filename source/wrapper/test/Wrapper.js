@@ -515,7 +515,7 @@ contract('Wrapper', async accounts => {
         from: delegateOwner,
       })
 
-      // Give the delegate owner and carol DAI
+      // Give the delegate owner DAI
       await tokenDAI.mint(delegateOwner, 10000)
       ok(await balances(delegateOwner, [[tokenDAI, 10000]]))
 
