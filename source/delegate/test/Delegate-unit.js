@@ -1,5 +1,6 @@
 const Delegate = artifacts.require('Delegate')
 const Swap = artifacts.require('Swap')
+const Types = artifacts.require('Types')
 const Indexer = artifacts.require('Indexer')
 const MockContract = artifacts.require('MockContract')
 const FungibleToken = artifacts.require('FungibleToken')
@@ -9,10 +10,13 @@ const {
   emitted,
   reverted,
 } = require('@airswap/test-utils').assert
-const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
-const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
+const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
+const {
+  EMPTY_ADDRESS,
+  GANACHE_PROVIDER,
+} = require('@airswap/order-utils').constants
 
-const { orders } = require('@airswap/order-utils')
+const { orders, signatures } = require('@airswap/order-utils')
 
 contract('Delegate Unit Tests', async accounts => {
   const owner = accounts[0]
@@ -26,9 +30,10 @@ contract('Delegate Unit Tests', async accounts => {
   const MAX_SENDER_AMOUNT = 12345
   const PRICE_COEF = 4321
   const EXP = 2
-
+  let mockFungibleTokenTemplate
   let delegate
   let mockSwap
+  let swapAddress
   let snapshotId
   let swapFunction
   let mockStakingToken
@@ -40,17 +45,17 @@ contract('Delegate Unit Tests', async accounts => {
   let mockIndexer_getStakedAmount
 
   beforeEach(async () => {
-    let snapShot = await takeSnapshot()
+    const snapShot = await takeSnapshot()
     snapshotId = snapShot['result']
   })
 
   afterEach(async () => {
-    await revertToSnapShot(snapshotId)
+    await revertToSnapshot(snapshotId)
   })
 
   async function setupMockTokens() {
     mockStakingToken = await MockContract.new()
-    let mockFungibleTokenTemplate = await FungibleToken.new()
+    mockFungibleTokenTemplate = await FungibleToken.new()
 
     mockStakingToken_allowance = await mockFungibleTokenTemplate.contract.methods
       .allowance(EMPTY_ADDRESS, EMPTY_ADDRESS)
@@ -70,33 +75,34 @@ contract('Delegate Unit Tests', async accounts => {
   }
 
   async function setupMockSwap() {
-    let swapTemplate = await Swap.new()
+    const types = await Types.new()
+    await Swap.link('Types', types.address)
+    const swapTemplate = await Swap.new()
     const order = await orders.getOrder({})
     swapFunction = swapTemplate.contract.methods.swap(order).encodeABI()
 
     mockSwap = await MockContract.new()
-
-    orders.setVerifyingContract(mockSwap.address)
+    swapAddress = mockSwap.address
   }
 
   async function setupMockIndexer() {
     mockIndexer = await MockContract.new()
-    let mockIndexerTemplate = await Indexer.new(EMPTY_ADDRESS)
+    const mockIndexerTemplate = await Indexer.new(EMPTY_ADDRESS)
 
     //mock setIntent()
-    let mockIndexer_setIntent = mockIndexerTemplate.contract.methods
+    const mockIndexer_setIntent = mockIndexerTemplate.contract.methods
       .setIntent(EMPTY_ADDRESS, EMPTY_ADDRESS, 0, web3.utils.fromAscii(''))
       .encodeABI()
     await mockIndexer.givenMethodReturnBool(mockIndexer_setIntent, true)
 
     //mock unsetIntent()
-    let mockIndexer_unsetIntent = mockIndexerTemplate.contract.methods
+    const mockIndexer_unsetIntent = mockIndexerTemplate.contract.methods
       .unsetIntent(EMPTY_ADDRESS, EMPTY_ADDRESS)
       .encodeABI()
     await mockIndexer.givenMethodReturnBool(mockIndexer_unsetIntent, true)
 
     //mock stakingToken()
-    let mockIndexer_stakingToken = mockIndexerTemplate.contract.methods
+    const mockIndexer_stakingToken = mockIndexerTemplate.contract.methods
       .stakingToken()
       .encodeABI()
     await mockIndexer.givenMethodReturnAddress(
@@ -118,7 +124,7 @@ contract('Delegate Unit Tests', async accounts => {
     await mockStakingToken.givenMethodReturnBool(mockStakingToken_approve, true)
 
     delegate = await Delegate.new(
-      mockSwap.address,
+      swapAddress,
       mockIndexer.address,
       EMPTY_ADDRESS,
       tradeWallet,
@@ -130,12 +136,12 @@ contract('Delegate Unit Tests', async accounts => {
 
   describe('Test constructor', async () => {
     it('Test initial Swap Contract', async () => {
-      let val = await delegate.swapContract.call()
-      equal(val, mockSwap.address, 'swap address is incorrect')
+      const val = await delegate.swapContract.call()
+      equal(val, swapAddress, 'swap address is incorrect')
     })
 
     it('Test initial trade wallet value', async () => {
-      let val = await delegate.tradeWallet.call()
+      const val = await delegate.tradeWallet.call()
       equal(val, tradeWallet, 'trade wallet is incorrect')
     })
 
@@ -145,8 +151,8 @@ contract('Delegate Unit Tests', async accounts => {
         true
       )
 
-      let newDelegate = await Delegate.new(
-        mockSwap.address,
+      const newDelegate = await Delegate.new(
+        swapAddress,
         mockIndexer.address,
         EMPTY_ADDRESS,
         EMPTY_ADDRESS,
@@ -155,12 +161,12 @@ contract('Delegate Unit Tests', async accounts => {
         }
       )
 
-      let val = await newDelegate.tradeWallet.call()
+      const val = await newDelegate.tradeWallet.call()
       equal(val, owner, 'trade wallet is incorrect')
     })
 
     it('Test owner is set correctly having been provided an empty address', async () => {
-      let val = await delegate.owner.call()
+      const val = await delegate.owner.call()
       equal(val, owner, 'owner is incorrect - should be owner')
     })
 
@@ -170,8 +176,8 @@ contract('Delegate Unit Tests', async accounts => {
         true
       )
 
-      let newDelegate = await Delegate.new(
-        mockSwap.address,
+      const newDelegate = await Delegate.new(
+        swapAddress,
         mockIndexer.address,
         notOwner,
         tradeWallet,
@@ -181,7 +187,7 @@ contract('Delegate Unit Tests', async accounts => {
       )
 
       // being provided an empty address, it should leave the owner unchanged
-      let val = await newDelegate.owner.call()
+      const val = await newDelegate.owner.call()
       equal(val, notOwner, 'owner is incorrect - should be notOwner')
     })
 
@@ -194,7 +200,7 @@ contract('Delegate Unit Tests', async accounts => {
 
       await reverted(
         Delegate.new(
-          mockSwap.address,
+          swapAddress,
           mockIndexer.address,
           EMPTY_ADDRESS,
           EMPTY_ADDRESS,
@@ -236,7 +242,7 @@ contract('Delegate Unit Tests', async accounts => {
     })
 
     it('Test setRule', async () => {
-      let trx = await delegate.setRule(
+      const trx = await delegate.setRule(
         SENDER_TOKEN,
         SIGNER_TOKEN,
         MAX_SENDER_AMOUNT,
@@ -245,7 +251,7 @@ contract('Delegate Unit Tests', async accounts => {
       )
 
       //check if rule has been added
-      let rule = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
+      const rule = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
       equal(
         rule[0].toNumber(),
         MAX_SENDER_AMOUNT,
@@ -264,6 +270,17 @@ contract('Delegate Unit Tests', async accounts => {
           e.priceExp.toNumber() === EXP
         )
       })
+    })
+
+    it('Test setRule for zero priceCoef does revert', async () => {
+      const trx = delegate.setRule(
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
+        0,
+        EXP
+      )
+      await reverted(trx, 'INVALID_PRICE_COEF')
     })
   })
 
@@ -290,7 +307,7 @@ contract('Delegate Unit Tests', async accounts => {
       )
 
       //ensure rule has been added
-      let ruleBefore = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
+      const ruleBefore = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
       equal(
         ruleBefore[0].toNumber(),
         MAX_SENDER_AMOUNT,
@@ -300,7 +317,7 @@ contract('Delegate Unit Tests', async accounts => {
       trx = await delegate.unsetRule(SENDER_TOKEN, SIGNER_TOKEN)
 
       //check that the rule has been removed
-      let ruleAfter = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
+      const ruleAfter = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
       equal(
         ruleAfter[0].toNumber(),
         0,
@@ -318,9 +335,9 @@ contract('Delegate Unit Tests', async accounts => {
 
   describe('Test setRuleAndIntent()', async () => {
     it('Test calling setRuleAndIntent with transfer error', async () => {
-      let stakeAmount = 250
+      const stakeAmount = 250
 
-      let rule = [100000, 300, 0]
+      const rule = [100000, 300, 0]
 
       await mockStakingToken.givenMethodReturnUint(
         mockStakingToken_allowance,
@@ -332,6 +349,9 @@ contract('Delegate Unit Tests', async accounts => {
         false
       )
 
+      //mock the score/staked amount to be transferred
+      await mockIndexer.givenMethodReturnUint(mockIndexer_getStakedAmount, 0)
+
       await reverted(
         delegate.setRuleAndIntent(MOCK_WETH, MOCK_DAI, rule, stakeAmount),
         'STAKING_TRANSFER_FAILED'
@@ -339,14 +359,17 @@ contract('Delegate Unit Tests', async accounts => {
     })
 
     it('Test successfully calling setRuleAndIntent with 0 staked amount', async () => {
-      let stakeAmount = 0
+      const stakeAmount = 0
 
-      let rule = [100000, 300, 0]
+      const rule = [100000, 300, 0]
 
       await mockStakingToken.givenMethodReturnBool(
         mockStakingToken_approve,
         true
       )
+
+      //mock the score/staked amount to be transferred
+      await mockIndexer.givenMethodReturnUint(mockIndexer_getStakedAmount, 0)
 
       await passes(
         delegate.setRuleAndIntent(MOCK_WETH, MOCK_DAI, rule, stakeAmount)
@@ -354,9 +377,9 @@ contract('Delegate Unit Tests', async accounts => {
     })
 
     it('Test successfully calling setRuleAndIntent with staked amount', async () => {
-      let stakeAmount = 250
+      const stakeAmount = 250
 
-      let rule = [100000, 300, 0]
+      const rule = [100000, 300, 0]
 
       await mockStakingToken.givenMethodReturnUint(
         mockStakingToken_allowance,
@@ -371,15 +394,55 @@ contract('Delegate Unit Tests', async accounts => {
         true
       )
 
+      //mock the score/staked amount to be transferred
+      await mockIndexer.givenMethodReturnUint(mockIndexer_getStakedAmount, 250)
+
       await passes(
         delegate.setRuleAndIntent(MOCK_WETH, MOCK_DAI, rule, stakeAmount)
+      )
+    })
+
+    it('Test unsuccessfully calling setRuleAndIntent with decreased staked amount', async () => {
+      const stakeAmount = 100
+
+      const rule = [100000, 300, 0]
+
+      await mockStakingToken.givenMethodReturnUint(
+        mockStakingToken_allowance,
+        stakeAmount
+      )
+      await mockStakingToken.givenMethodReturnBool(
+        mockStakingToken_transferFrom,
+        true
+      )
+
+      const transferToDelegateOwner = mockFungibleTokenTemplate.contract.methods
+        .transfer(accounts[0], 150)
+        .encodeABI()
+
+      await mockStakingToken.givenCalldataReturnBool(
+        transferToDelegateOwner,
+        false
+      )
+
+      await mockStakingToken.givenMethodReturnBool(
+        mockStakingToken_approve,
+        true
+      )
+
+      // mock the score/staked amount to be transferred
+      await mockIndexer.givenMethodReturnUint(mockIndexer_getStakedAmount, 250)
+
+      await reverted(
+        delegate.setRuleAndIntent(MOCK_WETH, MOCK_DAI, rule, stakeAmount),
+        'STAKING_RETURN_FAILED.'
       )
     })
   })
 
   describe('Test unsetRuleAndIntent()', async () => {
     it('Test calling unsetRuleAndIntent() with transfer error', async () => {
-      let mockScore = 1000
+      const mockScore = 1000
 
       //mock the score/staked amount to be transferred
       await mockIndexer.givenMethodReturnUint(
@@ -395,12 +458,12 @@ contract('Delegate Unit Tests', async accounts => {
 
       await reverted(
         delegate.unsetRuleAndIntent(MOCK_WETH, MOCK_DAI),
-        'STAKING_TRANSFER_FAILED'
+        'STAKING_RETURN_FAILED'
       )
     })
 
     it('Test successfully calling unsetRuleAndIntent() with 0 staked amount', async () => {
-      let mockScore = 0
+      const mockScore = 0
 
       //mock the score/staked amount to be transferred
       await mockIndexer.givenMethodReturnUint(
@@ -412,7 +475,25 @@ contract('Delegate Unit Tests', async accounts => {
     })
 
     it('Test successfully calling unsetRuleAndIntent() with staked amount', async () => {
-      let mockScore = 1000
+      const mockScore = 1000
+
+      //mock the score/staked amount to be transferred
+      await mockIndexer.givenMethodReturnUint(
+        mockIndexer_getStakedAmount,
+        mockScore
+      )
+
+      //mock a successful transfer
+      await mockStakingToken.givenMethodReturnBool(
+        mockStakingToken_transfer,
+        true
+      )
+
+      await passes(delegate.unsetRuleAndIntent(MOCK_WETH, MOCK_DAI))
+    })
+
+    it('Test successfully calling unsetRuleAndIntent() with staked amount', async () => {
+      const mockScore = 1000
 
       //mock the score/staked amount to be transferred
       await mockIndexer.givenMethodReturnUint(
@@ -450,7 +531,7 @@ contract('Delegate Unit Tests', async accounts => {
   describe('Test transfer of ownership', async () => {
     it('Test ownership after transfer', async () => {
       await delegate.transferOwnership(notOwner)
-      let val = await delegate.owner.call()
+      const val = await delegate.owner.call()
       equal(val, notOwner, 'owner was not passed properly')
     })
   })
@@ -458,7 +539,7 @@ contract('Delegate Unit Tests', async accounts => {
   describe('Test getSignerSideQuote', async () => {
     it('test when rule does not exist', async () => {
       const NON_EXISTENT_SIGNER_TOKEN = accounts[7]
-      let val = await delegate.getSignerSideQuote.call(
+      const val = await delegate.getSignerSideQuote.call(
         1234,
         SENDER_TOKEN,
         NON_EXISTENT_SIGNER_TOKEN
@@ -478,7 +559,7 @@ contract('Delegate Unit Tests', async accounts => {
         PRICE_COEF,
         EXP
       )
-      let val = await delegate.getSignerSideQuote.call(
+      const val = await delegate.getSignerSideQuote.call(
         MAX_SENDER_AMOUNT + 1,
         SENDER_TOKEN,
         SIGNER_TOKEN
@@ -498,7 +579,7 @@ contract('Delegate Unit Tests', async accounts => {
         PRICE_COEF,
         EXP
       )
-      let val = await delegate.getSignerSideQuote.call(
+      const val = await delegate.getSignerSideQuote.call(
         0,
         SENDER_TOKEN,
         SIGNER_TOKEN
@@ -519,19 +600,19 @@ contract('Delegate Unit Tests', async accounts => {
         EXP
       )
 
-      let val = await delegate.getSignerSideQuote.call(
+      const val = await delegate.getSignerSideQuote.call(
         1234,
         SENDER_TOKEN,
         SIGNER_TOKEN
       )
-      let expectedValue = Math.floor((1234 * PRICE_COEF) / 10 ** EXP)
+      const expectedValue = Math.ceil((1234 * PRICE_COEF) / 10 ** EXP)
       equal(val.toNumber(), expectedValue, 'there should be a quote available')
     })
   })
 
   describe('Test getSenderSideQuote', async () => {
     it('test when rule does not exist', async () => {
-      let val = await delegate.getSenderSideQuote.call(
+      const val = await delegate.getSenderSideQuote.call(
         4312,
         SENDER_TOKEN,
         SIGNER_TOKEN
@@ -577,19 +658,19 @@ contract('Delegate Unit Tests', async accounts => {
         EXP
       )
 
-      let val = await delegate.getSenderSideQuote.call(
+      const val = await delegate.getSenderSideQuote.call(
         500,
         SIGNER_TOKEN,
         SENDER_TOKEN
       )
-      let expectedValue = Math.floor((500 * 10 ** EXP) / PRICE_COEF)
+      const expectedValue = Math.floor((500 * 10 ** EXP) / PRICE_COEF)
       equal(val.toNumber(), expectedValue, 'there should be a quote available')
     })
   })
 
   describe('Test getMaxQuote', async () => {
     it('test when rule does not exist', async () => {
-      let val = await delegate.getMaxQuote.call(SENDER_TOKEN, SIGNER_TOKEN)
+      const val = await delegate.getMaxQuote.call(SENDER_TOKEN, SIGNER_TOKEN)
       equal(
         val[0].toNumber(),
         0,
@@ -610,21 +691,21 @@ contract('Delegate Unit Tests', async accounts => {
         PRICE_COEF,
         EXP
       )
-      let val = await delegate.getMaxQuote.call(SENDER_TOKEN, SIGNER_TOKEN)
+      const val = await delegate.getMaxQuote.call(SENDER_TOKEN, SIGNER_TOKEN)
 
       equal(
         val[0].toNumber(),
         MAX_SENDER_AMOUNT,
-        'no quote should be available if a peer does not exist'
+        'get max quote returned incorrect sender quote'
       )
 
-      let expectedValue = Math.floor(
+      const expectedValue = Math.ceil(
         (MAX_SENDER_AMOUNT * PRICE_COEF) / 10 ** EXP
       )
       equal(
         val[1].toNumber(),
         expectedValue,
-        'no quote should be available if a delegate does not exist'
+        'get max quote returned incorrect signer quote'
       )
     })
   })
@@ -643,6 +724,14 @@ contract('Delegate Unit Tests', async accounts => {
           token: SIGNER_TOKEN,
         },
       })
+
+      // Signer signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        notOwner,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
 
       await reverted(
         delegate.provideOrder(order, {
@@ -674,6 +763,14 @@ contract('Delegate Unit Tests', async accounts => {
         },
       })
 
+      // Signer signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        notOwner,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
       await reverted(
         delegate.provideOrder(order, {
           from: notOwner,
@@ -691,8 +788,8 @@ contract('Delegate Unit Tests', async accounts => {
         EXP
       )
 
-      let signerAmount = 100
-      let senderAmount = Math.floor((signerAmount * 10 ** EXP) / PRICE_COEF)
+      const signerAmount = 100
+      const senderAmount = Math.floor((signerAmount * 10 ** EXP) / PRICE_COEF)
 
       const order = await orders.getOrder({
         signer: {
@@ -706,6 +803,14 @@ contract('Delegate Unit Tests', async accounts => {
           token: SENDER_TOKEN,
         },
       })
+
+      // Signer signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        notOwner,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
 
       await reverted(
         delegate.provideOrder(order, {
@@ -736,6 +841,14 @@ contract('Delegate Unit Tests', async accounts => {
         },
       })
 
+      // Signer signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        notOwner,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
       await reverted(
         delegate.provideOrder(order, {
           from: notOwner,
@@ -752,8 +865,8 @@ contract('Delegate Unit Tests', async accounts => {
         EXP
       )
 
-      let signerAmount = 100
-      let senderAmount = Math.floor((signerAmount * 10 ** EXP) / PRICE_COEF)
+      const signerAmount = 100
+      const senderAmount = Math.floor((signerAmount * 10 ** EXP) / PRICE_COEF)
 
       const order = await orders.getOrder({
         signer: {
@@ -768,13 +881,21 @@ contract('Delegate Unit Tests', async accounts => {
         },
       })
 
+      // Signer signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        notOwner,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
       await reverted(
         //mock swapContract
         //test rule decrement
         delegate.provideOrder(order, {
           from: notOwner,
         }),
-        'PRICE_INCORRECT'
+        'PRICE_INVALID'
       )
     })
 
@@ -787,8 +908,8 @@ contract('Delegate Unit Tests', async accounts => {
         EXP
       )
 
-      let signerAmount = 100
-      let senderAmount = Math.floor((signerAmount * 10 ** EXP) / PRICE_COEF)
+      const signerAmount = 100
+      const senderAmount = Math.floor((signerAmount * 10 ** EXP) / PRICE_COEF)
 
       const order = await orders.getOrder({
         signer: {
@@ -803,6 +924,14 @@ contract('Delegate Unit Tests', async accounts => {
           token: SENDER_TOKEN,
         },
       })
+
+      // Signer signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        notOwner,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
 
       await reverted(
         //mock swapContract
@@ -823,8 +952,8 @@ contract('Delegate Unit Tests', async accounts => {
         EXP
       )
 
-      let signerAmount = 100
-      let senderAmount = Math.floor((signerAmount * 10 ** EXP) / PRICE_COEF)
+      const signerAmount = 100
+      const senderAmount = Math.floor((signerAmount * 10 ** EXP) / PRICE_COEF)
 
       const order = await orders.getOrder({
         signer: {
@@ -839,6 +968,14 @@ contract('Delegate Unit Tests', async accounts => {
           kind: '0x80ac58cd',
         },
       })
+
+      // Signer signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        notOwner,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
 
       await reverted(
         //mock swapContract
@@ -859,9 +996,9 @@ contract('Delegate Unit Tests', async accounts => {
         EXP
       )
 
-      let ruleBefore = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
+      const ruleBefore = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
 
-      let signerAmount = 100
+      const signerAmount = 100
 
       const order = await orders.getOrder({
         signer: {
@@ -876,6 +1013,14 @@ contract('Delegate Unit Tests', async accounts => {
         },
       })
 
+      // Signer signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        notOwner,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
       await passes(
         //mock swapContract
         //test rule decrement
@@ -884,15 +1029,15 @@ contract('Delegate Unit Tests', async accounts => {
         })
       )
 
-      let ruleAfter = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
+      const ruleAfter = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
       equal(
         ruleAfter[0].toNumber(),
         ruleBefore[0].toNumber() - signerAmount,
-        "rule's max peer amount was not decremented"
+        "rule's max sender amount was not decremented"
       )
 
       //check if swap() was called
-      let invocationCount = await mockSwap.invocationCountForMethod.call(
+      const invocationCount = await mockSwap.invocationCountForMethod.call(
         swapFunction
       )
       equal(
@@ -911,9 +1056,9 @@ contract('Delegate Unit Tests', async accounts => {
         EXP
       )
 
-      let ruleBefore = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
+      const ruleBefore = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
 
-      let signerAmount = 100
+      const signerAmount = 100
 
       const order = await orders.getOrder({
         signer: {
@@ -928,15 +1073,23 @@ contract('Delegate Unit Tests', async accounts => {
         },
       })
 
+      // Signer signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        notOwner,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
       //mock swapContract
       //test rule decrement
-      let tx = await delegate.provideOrder(order, {
+      const tx = await delegate.provideOrder(order, {
         from: notOwner,
       })
 
       emitted(tx, 'ProvideOrder')
 
-      let ruleAfter = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
+      const ruleAfter = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
       equal(
         ruleAfter[0].toNumber(),
         ruleBefore[0].toNumber() - signerAmount,
@@ -944,7 +1097,7 @@ contract('Delegate Unit Tests', async accounts => {
       )
 
       //check if swap() was called
-      let invocationCount = await mockSwap.invocationCountForMethod.call(
+      const invocationCount = await mockSwap.invocationCountForMethod.call(
         swapFunction
       )
       equal(
@@ -963,10 +1116,10 @@ contract('Delegate Unit Tests', async accounts => {
         EXP
       )
 
-      let ruleBefore = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
+      const ruleBefore = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
 
-      let signerAmount = 100
-      let senderAmount = Math.floor((signerAmount * 10 ** EXP) / PRICE_COEF)
+      const signerAmount = 100
+      const senderAmount = Math.floor((signerAmount * 10 ** EXP) / PRICE_COEF)
 
       const order = await orders.getOrder({
         signer: {
@@ -981,17 +1134,311 @@ contract('Delegate Unit Tests', async accounts => {
         },
       })
 
-      let tx = await delegate.provideOrder(order, {
+      // Signer signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        notOwner,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
+      const tx = await delegate.provideOrder(order, {
         from: notOwner,
       })
 
       emitted(tx, 'ProvideOrder')
 
-      let ruleAfter = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
+      const ruleAfter = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
       equal(
         ruleAfter[0].toNumber(),
         ruleBefore[0].toNumber() - senderAmount,
         "rule's max delegate amount was not decremented"
+      )
+    })
+
+    it('test a getting a signerSideQuote and passing it into provideOrder', async () => {
+      await delegate.setRule(
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
+        PRICE_COEF,
+        EXP
+      )
+
+      const senderAmount = 123
+      const signerQuote = await delegate.getSignerSideQuote.call(
+        senderAmount,
+        SENDER_TOKEN,
+        SIGNER_TOKEN
+      )
+
+      const signerAmount = signerQuote.toNumber()
+
+      // put that quote into an order
+      const order = await orders.getOrder({
+        signer: {
+          wallet: notOwner,
+          param: signerAmount,
+          token: SIGNER_TOKEN,
+        },
+        sender: {
+          wallet: tradeWallet,
+          param: senderAmount,
+          token: SENDER_TOKEN,
+        },
+      })
+
+      // Signer signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        notOwner,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
+      const tx = await delegate.provideOrder(order, {
+        from: notOwner,
+      })
+
+      passes(tx)
+    })
+
+    it('test a getting a senderSideQuote and passing it into provideOrder', async () => {
+      await delegate.setRule(
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
+        PRICE_COEF,
+        EXP
+      )
+
+      const signerAmount = 8425
+      const senderQuote = await delegate.getSenderSideQuote.call(
+        signerAmount,
+        SIGNER_TOKEN,
+        SENDER_TOKEN
+      )
+
+      const senderAmount = senderQuote.toNumber()
+
+      // put that quote into an order
+      const order = await orders.getOrder({
+        signer: {
+          wallet: notOwner,
+          param: signerAmount,
+          token: SIGNER_TOKEN,
+        },
+        sender: {
+          wallet: tradeWallet,
+          param: senderAmount,
+          token: SENDER_TOKEN,
+        },
+      })
+
+      // Signer signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        notOwner,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
+      const tx = await delegate.provideOrder(order, {
+        from: notOwner,
+      })
+
+      passes(tx)
+    })
+
+    it('test a getting a getMaxQuote and passing it into provideOrder', async () => {
+      await delegate.setRule(
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
+        PRICE_COEF,
+        EXP
+      )
+
+      const val = await delegate.getMaxQuote.call(SENDER_TOKEN, SIGNER_TOKEN)
+
+      const senderAmount = val[0].toNumber()
+      const signerAmount = val[1].toNumber()
+
+      // put that quote into an order
+      const order = await orders.getOrder({
+        signer: {
+          wallet: notOwner,
+          param: signerAmount,
+          token: SIGNER_TOKEN,
+        },
+        sender: {
+          wallet: tradeWallet,
+          param: senderAmount,
+          token: SENDER_TOKEN,
+        },
+      })
+
+      // Signer signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        notOwner,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
+      const tx = await delegate.provideOrder(order, {
+        from: notOwner,
+      })
+
+      passes(tx)
+    })
+
+    it('test the signer trying to trade just 1 unit over the rule price - fails', async () => {
+      // 1 SenderToken for 0.005 SignerToken => 200 SenderToken for 1 SignerToken
+      await delegate.setRule(
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
+        5,
+        3
+      )
+
+      const senderAmount = 201 // 1 unit more than the delegate wants to send
+      const signerAmount = 1
+
+      const order = await orders.getOrder({
+        signer: {
+          wallet: notOwner,
+          param: signerAmount,
+          token: SIGNER_TOKEN,
+        },
+        sender: {
+          wallet: tradeWallet,
+          param: senderAmount,
+          token: SENDER_TOKEN,
+        },
+      })
+
+      // Signer signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        notOwner,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
+      // check the delegate doesnt allow this
+      await reverted(
+        delegate.provideOrder(order, {
+          from: notOwner,
+        }),
+        'PRICE_INVALID'
+      )
+    })
+
+    it('test the signer trying to trade just 1 unit less than the rule price - passes', async () => {
+      // 1 SenderToken for 0.005 SignerToken => 200 SenderToken for 1 SignerToken
+      await delegate.setRule(
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
+        5,
+        3
+      )
+
+      const senderAmount = 199 // 1 unit less than the delegate rule
+      const signerAmount = 1
+
+      const order = await orders.getOrder({
+        signer: {
+          wallet: notOwner,
+          param: signerAmount,
+          token: SIGNER_TOKEN,
+        },
+        sender: {
+          wallet: tradeWallet,
+          param: senderAmount,
+          token: SENDER_TOKEN,
+        },
+      })
+
+      // Signer signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        notOwner,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
+      // check the delegate allows this
+      const tx = await delegate.provideOrder(order, {
+        from: notOwner,
+      })
+
+      passes(tx)
+    })
+
+    it('test the signer trying to trade the exact amount of rule price - passes', async () => {
+      // 1 SenderToken for 0.005 SignerToken => 200 SenderToken for 1 SignerToken
+      await delegate.setRule(
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
+        5,
+        3
+      )
+
+      const senderAmount = 200
+      const signerAmount = 1
+
+      const order = await orders.getOrder({
+        signer: {
+          wallet: notOwner,
+          param: signerAmount,
+          token: SIGNER_TOKEN,
+        },
+        sender: {
+          wallet: tradeWallet,
+          param: senderAmount,
+          token: SENDER_TOKEN,
+        },
+      })
+
+      // Signer signs the order
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        notOwner,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
+      // check the delegate allows this
+      const tx = await delegate.provideOrder(order, {
+        from: notOwner,
+      })
+
+      passes(tx)
+    })
+
+    it('Send order without signature to the delegate', async () => {
+      // Note: Consumer is the order signer, Delegate is the order sender.
+      const order = await orders.getOrder({
+        signer: {
+          wallet: notOwner,
+          param: 500,
+          token: SIGNER_TOKEN,
+        },
+        sender: {
+          wallet: tradeWallet,
+          param: 500,
+          token: SENDER_TOKEN,
+        },
+      })
+
+      // Succeeds on the Delegate, fails on the Swap.
+      await reverted(
+        delegate.provideOrder(order, { from: notOwner }),
+        'SIGNATURE_MUST_BE_SENT'
       )
     })
   })

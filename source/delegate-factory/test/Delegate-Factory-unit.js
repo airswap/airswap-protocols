@@ -3,14 +3,9 @@ const MockContract = artifacts.require('MockContract')
 const Indexer = artifacts.require('Indexer')
 const FungibleToken = artifacts.require('FungibleToken')
 const Delegate = artifacts.require('Delegate')
-const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
+const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
 const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
-const {
-  reverted,
-  passes,
-  equal,
-  emitted,
-} = require('@airswap/test-utils').assert
+const { passes, equal, emitted } = require('@airswap/test-utils').assert
 const { padAddressToLocator } = require('@airswap/test-utils').padding
 
 contract('Delegate Factory Tests', async accounts => {
@@ -28,12 +23,12 @@ contract('Delegate Factory Tests', async accounts => {
   let delegateFactory
 
   beforeEach(async () => {
-    let snapShot = await takeSnapshot()
+    const snapShot = await takeSnapshot()
     snapshotId = snapShot['result']
   })
 
   afterEach(async () => {
-    await revertToSnapShot(snapshotId)
+    await revertToSnapshot(snapshotId)
   })
 
   before('Deploy Delegate Factory', async () => {
@@ -47,7 +42,7 @@ contract('Delegate Factory Tests', async accounts => {
 
   async function setupMockToken() {
     mockStakingToken = await MockContract.new()
-    let mockFungibleTokenTemplate = await FungibleToken.new()
+    const mockFungibleTokenTemplate = await FungibleToken.new()
 
     mockStakingToken_approve = await mockFungibleTokenTemplate.contract.methods
       .approve(EMPTY_ADDRESS, 0)
@@ -58,10 +53,10 @@ contract('Delegate Factory Tests', async accounts => {
 
   async function setupMockIndexer() {
     mockIndexer = await MockContract.new()
-    let mockIndexerTemplate = await Indexer.new(EMPTY_ADDRESS)
+    const mockIndexerTemplate = await Indexer.new(EMPTY_ADDRESS)
 
     //mock stakingToken()
-    let mockIndexer_stakingToken = mockIndexerTemplate.contract.methods
+    const mockIndexer_stakingToken = mockIndexerTemplate.contract.methods
       .stakingToken()
       .encodeABI()
     await mockIndexer.givenMethodReturnAddress(
@@ -72,7 +67,7 @@ contract('Delegate Factory Tests', async accounts => {
 
   describe('Test deploying factory', async () => {
     it('should have set swapContract', async () => {
-      let val = await delegateFactory.swapContract.call()
+      const val = await delegateFactory.swapContract.call()
       equal(
         val,
         swapContract,
@@ -81,7 +76,7 @@ contract('Delegate Factory Tests', async accounts => {
     })
 
     it('should have set indexerContract', async () => {
-      let val = await delegateFactory.indexerContract.call()
+      const val = await delegateFactory.indexerContract.call()
       equal(
         val,
         mockIndexer.address,
@@ -91,19 +86,11 @@ contract('Delegate Factory Tests', async accounts => {
   })
 
   describe('Test deploying delegates', async () => {
-    it('should not deploy a delegate with owner address 0x0', async () => {
-      await reverted(
-        delegateFactory.createDelegate(EMPTY_ADDRESS, tradeWalletOne),
-        'DELEGATE_CONTRACT_OWNER_REQUIRED'
-      )
-    })
-
     it('should emit event and update the mapping', async () => {
       // successful tx
-      let tx = await delegateFactory.createDelegate(
-        delegateOwnerOne,
-        tradeWalletOne
-      )
+      const tx = await delegateFactory.createDelegate(tradeWalletOne, {
+        from: delegateOwnerOne,
+      })
       passes(tx)
 
       let delegateAddress
@@ -118,10 +105,10 @@ contract('Delegate Factory Tests', async accounts => {
         )
       })
 
-      let paddedDelegateAddress = padAddressToLocator(delegateAddress)
+      const paddedDelegateAddress = padAddressToLocator(delegateAddress)
 
       // mapping has been updated
-      let isTrustedDelegate = await delegateFactory.has.call(
+      const isTrustedDelegate = await delegateFactory.has.call(
         paddedDelegateAddress
       )
       equal(isTrustedDelegate, true)
@@ -129,10 +116,9 @@ contract('Delegate Factory Tests', async accounts => {
 
     it('should create delegate with the correct values', async () => {
       // deploy delegate
-      let tx = await delegateFactory.createDelegate(
-        delegateOwnerTwo,
-        tradeWalletTwo
-      )
+      const tx = await delegateFactory.createDelegate(tradeWalletTwo, {
+        from: delegateOwnerTwo,
+      })
 
       // get delegate address and pad
       let delegateAddress
@@ -144,18 +130,18 @@ contract('Delegate Factory Tests', async accounts => {
           event.delegateTradeWallet === tradeWalletTwo
         )
       })
-      let paddedDelegateAddress = padAddressToLocator(delegateAddress)
+      const paddedDelegateAddress = padAddressToLocator(delegateAddress)
 
-      let isTrustedDelegate = await delegateFactory.has.call(
+      const isTrustedDelegate = await delegateFactory.has.call(
         paddedDelegateAddress
       )
       equal(isTrustedDelegate, true)
 
       // get the swap and owner values of the delegate
-      let delegate = await Delegate.at(delegateAddress)
-      let actualSwap = await delegate.swapContract.call()
-      let actualOwner = await delegate.owner.call()
-      let actualTradeWallet = await delegate.tradeWallet.call()
+      const delegate = await Delegate.at(delegateAddress)
+      const actualSwap = await delegate.swapContract.call()
+      const actualOwner = await delegate.owner.call()
+      const actualTradeWallet = await delegate.tradeWallet.call()
 
       // check that the addresses are equal
       equal(swapContract, actualSwap, 'Delegate has incorrect swap address')

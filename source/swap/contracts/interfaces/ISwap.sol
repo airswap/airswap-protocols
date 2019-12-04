@@ -40,7 +40,7 @@ interface ISwap {
     address indexed signerWallet
   );
 
-  event Invalidate(
+  event CancelUpTo(
     uint256 indexed nonce,
     address indexed signerWallet
   );
@@ -65,12 +65,6 @@ interface ISwap {
     address indexed revokedSigner
   );
 
-  function senderAuthorizations(address, address) external returns (uint256);
-  function signerAuthorizations(address, address) external returns (uint256);
-
-  function signerNonceStatus(address, uint256) external returns (byte);
-  function signerMinimumNonce(address) external returns (uint256);
-
   /**
     * @notice Atomic Token Swap
     * @param order Types.Order
@@ -88,10 +82,11 @@ interface ISwap {
   ) external;
 
   /**
-    * @notice Invalidate all orders below a nonce value
+    * @notice Cancels all orders below a nonce value
+    * @dev These orders can be made active by reducing the minimum nonce
     * @param minimumNonce uint256
     */
-  function invalidate(
+  function cancelUpTo(
     uint256 minimumNonce
   ) external;
 
@@ -127,5 +122,11 @@ interface ISwap {
   function revokeSigner(
     address authorizedSigner
   ) external;
+
+  function senderAuthorizations(address, address) external view returns (bool);
+  function signerAuthorizations(address, address) external view returns (bool);
+
+  function signerNonceStatus(address, uint256) external view returns (byte);
+  function signerMinimumNonce(address) external view returns (uint256);
 
 }

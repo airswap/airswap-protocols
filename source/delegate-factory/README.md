@@ -1,7 +1,5 @@
 # DelegateFactory
 
-**:warning: This package is under active development. Do not use in production.**
-
 [AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens. This package contains source code and tests for a basic `DelegateFactory` contract that deploys `Delegate` contracts.
 
 :bulb: **Note**: `solidity-coverage` does not cooperate with `view` functions. To run test coverage, remove the `view` keywords from functions in `DelegateFactory.sol`.
@@ -20,9 +18,7 @@
 
 ## Deploys
 
-| Version | Network   | Address                                      | Link                                                                                         |
-| :------ | :-------- | :------------------------------------------- | :------------------------------------------------------------------------------------------- |
-| `0.2.0` | `rinkeby` | `0x1b217076a9b43983e27036b9e7326fc6172b68da` | [Etherscan](https://rinkeby.etherscan.io/address/0x1b217076a9b43983e27036b9e7326fc6172b68da) |
+See [deploys.json](./deploys.json) for latest contract deployments on Rinkeby (`4`) and Mainnet (`1`).
 
 ## Commands
 
@@ -39,7 +35,7 @@
 
 ## Running Tests
 
-Run an instance of `ganache-cli` before running tests.
+:bulb: Prior to testing locally, run `yarn compile` in the `airswap-protocols` project root to build required artifacts. Then run an instance of `ganache-cli` before running `yarn test` in another shell.
 
 ```
 yarn ganache

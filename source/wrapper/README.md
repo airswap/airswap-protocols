@@ -1,17 +1,22 @@
 # Wrapper
 
-**:warning: This package has not been fully audited. Do not use in production.**
-
 [AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens. This package contains an example contract that wraps and unwraps ether for WETH trades in the Swap Protocol. The Wrapper contract is designed to work primarily with AirSwap Instant application [https://instant.airswap.io/tokens]. It allows consumers to send ether and receive ether while the Swap protocol handles ERC20 and ERC721 token transfers.
 
 [![Discord](https://img.shields.io/discord/590643190281928738.svg)](https://discord.gg/ecQbV7H)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![CircleCI](https://circleci.com/gh/airswap/airswap-protocols.svg?style=svg&circle-token=73bd6668f836ce4306dbf6ca32109ddbb5b7e1fe)](https://circleci.com/gh/airswap/airswap-protocols)
+![Twitter Follow](https://img.shields.io/twitter/follow/airswap?style=social)
+
+## Resources
+
+- Docs → https://docs.airswap.io/
+- Website → https://www.airswap.io/
+- Blog → https://blog.airswap.io/
+- Support → https://support.airswap.io/
 
 ## Deploys
 
-| Version | Network   | Address                                      | Link                                                                                         |
-| :------ | :-------- | :------------------------------------------- | :------------------------------------------------------------------------------------------- |
-| `0.3.0` | `rinkeby` | `0x8481a5c5d2c23c8d43a812ec8913f1aa4d739db9` | [Etherscan](https://rinkeby.etherscan.io/address/0x8481a5c5d2c23c8d43a812ec8913f1aa4d739db9) |
+See [deploys.json](./deploys.json) for latest contract deployments on Rinkeby (`4`) and Mainnet (`1`).
 
 ## Commands
 
@@ -28,7 +33,7 @@
 
 ## Running Tests
 
-Run an instance of `ganache-cli` before running tests.
+:bulb: Prior to testing locally, run `yarn compile` in the `airswap-protocols` project root to build required artifacts. Then run an instance of `ganache-cli` before running `yarn test` in another shell.
 
 ```
 yarn ganache

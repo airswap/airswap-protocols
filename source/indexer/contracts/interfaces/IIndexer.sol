@@ -19,8 +19,9 @@ pragma solidity 0.5.12;
 interface IIndexer {
 
   event CreateIndex(
-    address signerToken,
-    address senderToken
+    address indexed signerToken,
+    address indexed senderToken,
+    address indexAddress
   );
 
   event Stake(
@@ -44,10 +45,6 @@ interface IIndexer {
   event RemoveTokenFromBlacklist(
     address token
   );
-
-  function stakingToken() external returns (address);
-  function indexes(address, address) external returns (address);
-  function tokenBlacklist(address) external returns (bool);
 
   function setLocatorWhitelist(
     address newLocatorWhitelist
@@ -78,11 +75,9 @@ interface IIndexer {
     address senderToken
   ) external;
 
-  function unsetIntentForUser(
-    address user,
-    address signerToken,
-    address senderToken
-  ) external;
+  function stakingToken() external view returns (address);
+  function indexes(address, address) external view returns (address);
+  function tokenBlacklist(address) external view returns (bool);
 
   function getStakedAmount(
     address user,

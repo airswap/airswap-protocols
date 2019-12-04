@@ -16,13 +16,11 @@
 
 ## For V1 Users
 
-To migrate from the V1 to V2 protocol please see [MIGRATION.md](MIGRATION.md).
+To migrate from the V1 to V2 protocol see [MIGRATION.md](./MIGRATION.md).
 
 ## Deploys
 
-| Version | Network   | Address                                      | Link                                                                                         |
-| :------ | :-------- | :------------------------------------------- | :------------------------------------------------------------------------------------------- |
-| `2.2.0` | `rinkeby` | `0x3a42c0ff0e06cc312b093e82bbca79c751654a62` | [Etherscan](https://rinkeby.etherscan.io/address/0x3a42c0ff0e06cc312b093e82bbca79c751654a62) |
+See [deploys.json](./deploys.json) for latest contract deployments on Rinkeby (`4`) and Mainnet (`1`).
 
 ## Commands
 
@@ -39,7 +37,7 @@ To migrate from the V1 to V2 protocol please see [MIGRATION.md](MIGRATION.md).
 
 ## Running Tests
 
-Run an instance of `ganache-cli` before running tests.
+:bulb: Prior to testing locally, run `yarn compile` in the `airswap-protocols` project root to build required artifacts. Then run an instance of `ganache-cli` before running `yarn test` in another shell.
 
 ```
 yarn ganache

@@ -52,8 +52,6 @@ interface IDelegate {
     uint256 priceExp
   );
 
-  function rules(address, address) external returns (Rule memory);
-
   function setRule(
     address senderToken,
     address signerToken,
@@ -70,6 +68,8 @@ interface IDelegate {
   function provideOrder(
     Types.Order calldata order
   ) external;
+
+  function rules(address, address) external view returns (Rule memory);
 
   function getSignerSideQuote(
     uint256 senderParam,

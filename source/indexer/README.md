@@ -1,7 +1,5 @@
 # Indexer
 
-**:warning: This package is under active development. Do not use in production.**
-
 [AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens. This package contains source code and tests for an `Indexer` used to manage intents to trade.
 
 :bulb: **Note**: `solidity-coverage` does not cooperate with `view` functions. To run test coverage, remove the `view` keywords from functions in `Indexer.sol`, `IIndexer.sol`, and `ILocatorWhitelist.sol`.
@@ -20,9 +18,7 @@
 
 ## Deploys
 
-| Version | Network   | Address                                      | Link                                                                                         |
-| :------ | :-------- | :------------------------------------------- | :------------------------------------------------------------------------------------------- |
-| `0.3.0` | `rinkeby` | `0x6299e178413d6b7903c365dda1d4f23e37868b25` | [Etherscan](https://rinkeby.etherscan.io/address/0x6299e178413d6b7903c365dda1d4f23e37868b25) |
+See [deploys.json](./deploys.json) for latest contract deployments on Rinkeby (`4`) and Mainnet (`1`).
 
 ## Commands
 
@@ -39,7 +35,7 @@
 
 ## Running Tests
 
-Run an instance of `ganache-cli` before running tests.
+:bulb: Prior to testing locally, run `yarn compile` in the `airswap-protocols` project root to build required artifacts. Then run an instance of `ganache-cli` before running `yarn test` in another shell.
 
 ```
 yarn ganache

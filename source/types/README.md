@@ -16,9 +16,7 @@
 
 ## Deploys
 
-| Version | Network   | Address                                      | Link                                                                                         |
-| :------ | :-------- | :------------------------------------------- | :------------------------------------------------------------------------------------------- |
-| `0.3.0` | `rinkeby` | `0xb1AB33C12a59E8A0Df91Ae6aD9B111d9D16AC465` | [Etherscan](https://rinkeby.etherscan.io/address/0xb1AB33C12a59E8A0Df91Ae6aD9B111d9D16AC465) |
+See [deploys.json](./deploys.json) for latest contract deployments on Rinkeby (`4`) and Mainnet (`1`).
 
 ## Commands
 
@@ -35,7 +33,7 @@
 
 ## Running Tests
 
-Run an instance of `ganache-cli` before running tests.
+:bulb: Prior to testing locally, run `yarn compile` in the `airswap-protocols` project root to build required artifacts. Then run an instance of `ganache-cli` before running `yarn test` in another shell.
 
 ```
 yarn ganache

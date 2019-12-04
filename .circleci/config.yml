@@ -24,6 +24,12 @@ references:
           name: yarn install and dependencies
           command: |
             yarn install
+      - run: 
+          name: Check Dependencies
+          command: |
+            sudo apt install python3-pip
+            pip3 install -r requirements.txt
+            python3 scripts/dependency_checker.py
       - run:
           name: Eslint
           command: yarn lint
@@ -70,8 +76,6 @@ jobs:
               NPM_VERSION=$(npm view $NPM_NAME version || :)
               LOCAL_VERSION=$(node -p "require('./package.json').version")
               if [[ $LOCAL_VERSION != $NPM_VERSION ]]; then
-                echo "Generating build..."
-                yarn compile
                 echo "Publishing to NPM..." # this is where we deploy the code to npm
                 npm publish
                 npm access public $NPM_NAME

@@ -73,7 +73,6 @@ contract Swap is ISwap {
   function swap(
     Types.Order calldata order
   ) external {
-
     // Ensure the order is not expired.
     require(order.expiry > block.timestamp,
       "ORDER_EXPIRED");
@@ -173,6 +172,7 @@ contract Swap is ISwap {
     * @notice Cancel one or more open orders by nonce
     * @dev Cancelled nonces are marked UNAVAILABLE (0x01)
     * @dev Emits a Cancel event
+    * @dev Out of gas may occur in arrays of length > 400
     * @param nonces uint256[] List of nonces to cancel
     */
   function cancel(
@@ -187,15 +187,15 @@ contract Swap is ISwap {
   }
 
   /**
-    * @notice Invalidate all orders below a nonce value
-    * @dev Emits an Invalidate event
+    * @notice Cancels all orders below a nonce value
+    * @dev Emits a CancelUpTo event
     * @param minimumNonce uint256 Minimum valid nonce
     */
-  function invalidate(
+  function cancelUpTo(
     uint256 minimumNonce
   ) external {
     signerMinimumNonce[msg.sender] = minimumNonce;
-    emit Invalidate(minimumNonce, msg.sender);
+    emit CancelUpTo(minimumNonce, msg.sender);
   }
 
   /**
@@ -207,8 +207,11 @@ contract Swap is ISwap {
     address authorizedSender
   ) external {
     require(msg.sender != authorizedSender, "INVALID_AUTH_SENDER");
-    senderAuthorizations[msg.sender][authorizedSender] = true;
-    emit AuthorizeSender(msg.sender, authorizedSender);
+    if (!senderAuthorizations[msg.sender][authorizedSender]) {
+      senderAuthorizations[msg.sender][authorizedSender] = true;
+      emit AuthorizeSender(msg.sender, authorizedSender);
+    }
+
   }
 
   /**
@@ -220,8 +223,10 @@ contract Swap is ISwap {
     address authorizedSigner
   ) external {
     require(msg.sender != authorizedSigner, "INVALID_AUTH_SIGNER");
-    signerAuthorizations[msg.sender][authorizedSigner] = true;
-    emit AuthorizeSigner(msg.sender, authorizedSigner);
+    if (!signerAuthorizations[msg.sender][authorizedSigner]) {
+      signerAuthorizations[msg.sender][authorizedSigner] = true;
+      emit AuthorizeSigner(msg.sender, authorizedSigner);
+    }
   }
 
   /**
@@ -232,8 +237,10 @@ contract Swap is ISwap {
   function revokeSender(
     address authorizedSender
   ) external {
-    delete senderAuthorizations[msg.sender][authorizedSender];
-    emit RevokeSender(msg.sender, authorizedSender);
+    if (senderAuthorizations[msg.sender][authorizedSender]) {
+      delete senderAuthorizations[msg.sender][authorizedSender];
+      emit RevokeSender(msg.sender, authorizedSender);
+    }
   }
 
   /**
@@ -244,8 +251,10 @@ contract Swap is ISwap {
   function revokeSigner(
     address authorizedSigner
   ) external {
-    delete signerAuthorizations[msg.sender][authorizedSigner];
-    emit RevokeSigner(msg.sender, authorizedSigner);
+    if (signerAuthorizations[msg.sender][authorizedSigner]) {
+      delete signerAuthorizations[msg.sender][authorizedSigner];
+      emit RevokeSigner(msg.sender, authorizedSigner);
+    }
   }
 
   /**
