@@ -1,6 +1,6 @@
 {
   "name": "@airswap/wrapper",
-  "version": "1.5.5",
+  "version": "1.5.6",
   "description": "Wraps and unwraps ether for WETH trades in the Swap Protocol",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>",
