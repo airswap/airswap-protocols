@@ -496,6 +496,29 @@ contract('Wrapper Unit Tests', async accounts => {
       )
     })
 
+    it('Test when signer token == weth, but no signature is sent', async () => {
+      const order = await orders.getOrder({
+        sender: {
+          wallet: delegateOwner,
+          token: mockToken,
+        },
+        signer: {
+          wallet: mockSigner,
+          token: mockWethAddress,
+          param: 500,
+        },
+      })
+
+      // Send no eth for weth order
+      await reverted(
+        wrapper.provideDelegateOrder(order, mockDelegateAddress, {
+          from: mockSigner,
+          value: 0,
+        }),
+        'SIGNATURE_MUST_BE_SENT'
+      )
+    })
+
     it('Test when signer token == weth, but incorrect amount of ether sent', async () => {
       const order = await orders.getOrder({
         sender: {

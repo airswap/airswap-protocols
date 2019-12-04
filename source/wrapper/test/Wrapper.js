@@ -773,6 +773,13 @@ contract('Wrapper', async accounts => {
           },
         })
 
+        order.signature = await signatures.getWeb3Signature(
+          order,
+          carolAddress,
+          swapAddress,
+          GANACHE_PROVIDER
+        )
+
         await reverted(
           wrappedDelegate(order, delegateAddress, {
             from: carolAddress,
