@@ -2,6 +2,12 @@
   "name": "airswap-protocols",
   "version": "0.0.1",
   "private": true,
+  "contributors": [
+    "Don Mosites <don.mosites@fluidity.io>",
+    "Deepa Sathaye <deepa.sathaye@fludity.io>",
+    "Ethan Wessel <ethan.wessel@fluidity.io>",
+    "Alice Henshaw <alice.henshaw@fluidity.io>"
+  ],
   "license": "Apache-2.0",
   "workspaces": [
     "utils/*",
@@ -15,7 +21,7 @@
     "ganache": "ganache-cli -p 8545 --gasLimit 0xfffffffffff --time '2017-05-10T00:00:00+00:00' -s 0",
     "publish": "lerna publish",
     "test": "yarn clean && yarn compile && lerna run test --concurrency=1",
-    "check_dep_graph": "source venv/bin/activate && pip3 install -r requirements.txt && python scripts/identify_dependencies.py"
+    "check_dep_graph": "source venv/bin/activate && pip3 install -r requirements.txt && python scripts/dependency_checker.py"
   },
   "devDependencies": {
     "@gnosis.pm/mock-contract": "^3.0.7",
@@ -50,6 +56,5 @@
       "pre-commit": "yarn lint && yarn hint"
     }
   },
-  "dependencies": {
-  }
+  "dependencies": {}
 }

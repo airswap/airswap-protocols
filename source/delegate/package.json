@@ -2,6 +2,12 @@
   "name": "@airswap/delegate",
   "version": "0.5.4",
   "description": "Manages delegated trading rules for use in the Swap Protocol",
+  "contributors": [
+    "Don Mosites <don.mosites@fluidity.io>",
+    "Deepa Sathaye <deepa.sathaye@fludity.io>",
+    "Ethan Wessel <ethan.wessel@fluidity.io>",
+    "Alice Henshaw <alice.henshaw@fluidity.io>"
+  ],
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -26,8 +32,8 @@
     "solidity-coverage": "^0.6.3"
   },
   "dependencies": {
-    "@airswap/indexer": "1.5.5",
-    "@airswap/swap": "3.3.4",
+    "@airswap/indexer": "1.5.6",
+    "@airswap/swap": "3.3.5",
     "openzeppelin-solidity": "2.3"
   }
 }

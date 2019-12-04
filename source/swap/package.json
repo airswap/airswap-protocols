@@ -1,7 +1,13 @@
 {
   "name": "@airswap/swap",
-  "version": "3.3.4",
+  "version": "3.3.5",
   "description": "The atomic swap used to trustlessly transfer tokens in the Swap Protocol",
+  "contributors": [
+    "Don Mosites <don.mosites@fluidity.io>",
+    "Deepa Sathaye <deepa.sathaye@fludity.io>",
+    "Ethan Wessel <ethan.wessel@fluidity.io>",
+    "Alice Henshaw <alice.henshaw@fluidity.io>"
+  ],
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -31,7 +37,7 @@
     "truffle-hdwallet-provider-privkey": "1.0.3"
   },
   "dependencies": {
-    "@airswap/types": "1.4.3",
+    "@airswap/types": "1.4.4",
     "openzeppelin-solidity": "2.3"
   }
 }

@@ -16,13 +16,11 @@
 
 ## For V1 Users
 
-To migrate from the V1 to V2 protocol please see [MIGRATION.md](MIGRATION.md).
+To migrate from the V1 to V2 protocol see [MIGRATION.md](./MIGRATION.md).
 
 ## Deploys
 
-| Network   | Address                                      | Link                                                                                         |
-| :-------- | :------------------------------------------- | :------------------------------------------------------------------------------------------- |
-| `rinkeby` | `0x43f18D371f388ABE40b9dDaac44D1C9c9185a078` | [Etherscan](https://rinkeby.etherscan.io/address/0x43f18D371f388ABE40b9dDaac44D1C9c9185a078) |
+See [deploys.json](./deploys.json) for latest contract deployments on Rinkeby (`4`) and Mainnet (`1`).
 
 ## Commands
 

@@ -2,6 +2,12 @@
   "name": "@airswap/order-utils",
   "version": "0.3.12",
   "description": "JavaScript utilities for orders, hashes, and signatures in the Swap Protocol",
+  "contributors": [
+    "Don Mosites <don.mosites@fluidity.io>",
+    "Deepa Sathaye <deepa.sathaye@fludity.io>",
+    "Ethan Wessel <ethan.wessel@fluidity.io>",
+    "Alice Henshaw <alice.henshaw@fluidity.io>"
+  ],
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -16,7 +22,7 @@
     "mocha": "^6.2.0"
   },
   "dependencies": {
-    "@airswap/swap": "3.3.4",
+    "@airswap/swap": "3.3.5",
     "@airswap/tokens": "0.1.3",
     "eth-sig-util": "^2.2.0",
     "ethereumjs-util": "^6.1.0",
