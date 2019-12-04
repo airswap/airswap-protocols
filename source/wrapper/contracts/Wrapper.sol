@@ -136,9 +136,9 @@ contract Wrapper {
   /**
     * @notice Unwraps WETH to ETH when a trade requires it
     * @dev The unwrapping only succeeds if recipientWallet has approved transferFrom
-    * @param address recipientWallet The trade recipient, who may have received WETH
-    * @param address receivingToken The token address the recipient received
-    * @param uint256 amount The amount of token the recipient received
+    * @param recipientWallet address The trade recipient, who may have received WETH
+    * @param receivingToken address The token address the recipient received
+    * @param amount uint256 The amount of token the recipient received
     */
   function _unwrapEther(address recipientWallet, address receivingToken, uint256 amount) internal {
     // Check whether ether needs unwrapping
