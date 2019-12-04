@@ -71,7 +71,7 @@ contract Wrapper {
       "MSG_SENDER_MUST_BE_ORDER_SENDER");
 
     // Ensure that the signature is present.
-    // It will be explicitly checked in Swap.
+    // The signature will be explicitly checked in Swap.
     require(order.signature.v != 0,
       "SIGNATURE_MUST_BE_SENT");
 
@@ -90,7 +90,6 @@ contract Wrapper {
     * @dev Sender must authorize the Delegate contract on the swapContract
     * @dev Sender must approve this contract on the wethContract
     * @dev Delegate's tradeWallet must be order.sender - checked in Delegate
-    * @dev Signature cannot be empty - checked in Delegate
     * @param order Types.Order The Order
     * @param delegate IDelegate The Delegate to provide the order to
     */
@@ -98,6 +97,11 @@ contract Wrapper {
     Types.Order calldata order,
     IDelegate delegate
   ) external payable {
+    // Ensure that the signature is present.
+    // The signature will be explicitly checked in Swap.
+    require(order.signature.v != 0,
+      "SIGNATURE_MUST_BE_SENT");
+
     // Wraps ETH to WETH when the signer provides ETH and the order is WETH
     _wrapEther(order.signer);
 
