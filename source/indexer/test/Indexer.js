@@ -21,7 +21,12 @@ const {
 } = require('@airswap/order-utils').constants
 const { padAddressToLocator } = require('@airswap/test-utils').padding
 
-contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
+contract('Indexer', async accounts => {
+  const ownerAddress = accounts[0]
+  const aliceAddress = accounts[1]
+  const bobAddress = accounts[2]
+  const maliciousMary = accounts[9]
+
   let indexer
   let indexerAddress
 
@@ -668,6 +673,81 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
       equal(result[SCORES].length, 2)
       equal(result[SCORES][0], 50)
       equal(result[SCORES][1], 0)
+    })
+
+    it("doesn't lock tokens when given a locator of 0", async () => {
+      // give mary 1000 staking tokens
+      emitted(await tokenAST.mint(maliciousMary, 1000), 'Transfer')
+      ok(await balances(maliciousMary, [[tokenAST, 1000]]))
+
+      // mary gives permission for the tokens to be staked
+      emitted(
+        await tokenAST.approve(indexerAddress, 10000, { from: maliciousMary }),
+        'Approval'
+      )
+      const indexerBefore = await tokenAST.balanceOf(indexerAddress)
+
+      // create the index
+      emitted(
+        await indexer.createIndex(tokenDAI.address, tokenWETH.address, {
+          from: maliciousMary,
+        }),
+        'CreateIndex'
+      )
+
+      // mary sets intent with a locator of 0 and stakes 1000 AST
+      emitted(
+        await indexer.setIntent(
+          tokenDAI.address,
+          tokenWETH.address,
+          1000,
+          emptyLocator,
+          {
+            from: maliciousMary,
+          }
+        ),
+        'Stake'
+      )
+
+      // check balances have updated by 1000
+      ok(await balances(maliciousMary, [[tokenAST, 0]]))
+      ok(
+        await balances(indexerAddress, [
+          [tokenAST, indexerBefore.toNumber() + 1000],
+        ])
+      )
+
+      // mary stakes again, this time with a stake of 0
+      emitted(
+        await indexer.setIntent(
+          tokenDAI.address,
+          tokenWETH.address,
+          0,
+          bobLocator,
+          {
+            from: maliciousMary,
+          }
+        ),
+        'Stake'
+      )
+
+      // Check mary's entry updated
+      const result = await indexer.getLocators(
+        tokenDAI.address,
+        tokenWETH.address,
+        maliciousMary,
+        1
+      )
+
+      equal(result[LOCATORS][0], bobLocator)
+      equal(result[SCORES][0], 0)
+
+      // Check mary got her tokens back
+      ok(
+        await balances(maliciousMary, [[tokenAST, 1000]]),
+        'Mary did not get her tokens back'
+      )
+      ok(await balances(indexerAddress, [[tokenAST, indexerBefore]]))
     })
   })
 })
