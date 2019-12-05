@@ -146,6 +146,34 @@ contract('Index Unit Tests', async accounts => {
       equal(result[NEXTID], HEAD, 'The next slot should be the head')
     })
 
+    it('should update correctly when a blank locator is set', async () => {
+      // insert alice
+      await index.setLocator(aliceAddress, 2000, emptyLocator, {
+        from: owner,
+      })
+
+      // retrieve entry, check it was inserted between HEAD and HEAD
+      let entry = await index.entries(aliceAddress)
+
+      equal(emptyLocator, entry[0], 'first: locator was incorrectly set')
+      equal(2000, entry[1], 'first: score was incorrectly set')
+      equal(HEAD, entry[2], 'first: prev was incorrectly set')
+      equal(HEAD, entry[3], 'first: next was incorrectly set')
+
+      // now update alice
+      await index.setLocator(aliceAddress, 0, aliceLocator, {
+        from: owner,
+      })
+
+      // retreive the new entry
+      entry = await index.entries(aliceAddress)
+
+      equal(aliceLocator, entry[0], 'second: locator was incorrectly set')
+      equal(0, entry[1], 'second: score was incorrectly set')
+      equal(HEAD, entry[2], 'second: prev was incorrectly set')
+      equal(HEAD, entry[3], 'second: next was incorrectly set')
+    })
+
     it('should insert an identical stake after the pre-existing one', async () => {
       // two at 2000 and two at 0
       await index.setLocator(aliceAddress, 2000, aliceLocator, {
