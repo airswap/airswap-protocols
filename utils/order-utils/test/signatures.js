@@ -16,23 +16,20 @@ describe('Signatures', async () => {
   const WETHAddress = '0xc778417e063141139fce010982780140aa0cd5ab'
 
   it('Checks that a Version 0x45: personalSign signature is valid', async () => {
-    const order = await orders.getOrder(
-      {
-        expiry: '1494460800',
-        nonce: '101',
-        signer: {
-          wallet: signerWallet,
-          token: ASTAddress,
-          param: '0',
-        },
-        sender: {
-          wallet: senderWallet,
-          token: WETHAddress,
-          param: '0',
-        },
+    const order = await orders.getOrder({
+      expiry: '1494460800',
+      nonce: '101',
+      signer: {
+        wallet: signerWallet,
+        token: ASTAddress,
+        param: '0',
       },
-      true
-    )
+      sender: {
+        wallet: senderWallet,
+        token: WETHAddress,
+        param: '0',
+      },
+    })
 
     const signature = signatures.getPersonalSignature(
       order,

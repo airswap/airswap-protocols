@@ -2,10 +2,10 @@
 
 [AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens. This package contains four helper libraries to help with truffle tests.
 
-- [assert.js](./src/constants.js)
-- [balances.js](./src/hashes.js)
-- [padding.js](./src/orders.js)
-- [time.js](./src/signatures.js)
+- [assert.js](./src/assert.js)
+- [balances.js](./src/balances.js)
+- [padding.js](./src/padding.js)
+- [time.js](./src/time.js)
 
 View the [helper library section of our docs]() for a detailed explanation of each of the functions in the libraries.
 
