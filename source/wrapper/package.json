@@ -32,9 +32,11 @@
     "@airswap/order-utils": "0.3.12",
     "@airswap/test-utils": "0.1.1",
     "solidity-coverage": "^0.6.3",
-    "solidity-docgen": "0.3.12"
+    "solidity-docgen": "0.3.12",
+    "@airswap/indexer": "1.5.6"
   },
   "dependencies": {
+    "@airswap/delegate": "0.5.4",
     "@airswap/swap": "3.3.5",
     "@airswap/tokens": "0.1.3"
   }

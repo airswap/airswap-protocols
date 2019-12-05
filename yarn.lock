@@ -9704,7 +9704,7 @@ truffle-flattener@^1.4.2:
     solidity-parser-antlr "^0.4.11"
     tsort "0.0.1"
 
-truffle-hdwallet-provider-privkey@1.0.3:
+truffle-hdwallet-provider-privkey@1.0.3, truffle-hdwallet-provider-privkey@^1.0.3:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/truffle-hdwallet-provider-privkey/-/truffle-hdwallet-provider-privkey-1.0.3.tgz#4effa51fd9cb4db340fa679e5f29cb8f89abd5fc"
   integrity sha512-SOG6Gdmm+roD4f3+fmG+VBoMJYzlK2kBrzW0rKcO/VsembHDavgSbTq5c0nDyp6hYFOE6a+Tyta/fq40VUhtRQ==
