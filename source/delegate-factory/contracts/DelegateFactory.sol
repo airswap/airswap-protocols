@@ -22,6 +22,11 @@ import "@airswap/indexer/contracts/interfaces/ILocatorWhitelist.sol";
 import "@airswap/delegate-factory/contracts/interfaces/IDelegateFactory.sol";
 import "@airswap/indexer/contracts/interfaces/IIndexer.sol";
 
+/**
+  * @title DelegateFactory
+  * @notice A DelegateFactory deploys Delegate contracts.
+  * @dev inherits IDelegateFactory, ILocatorWhitelist
+  */
 contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
 
   // Mapping specifying whether an address was deployed by this factory
@@ -32,7 +37,7 @@ contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
   IIndexer public indexerContract;
 
   /**
-    * @notice Create a new Delegate contract
+    * @notice Create a new DelegateFactory contract
     * @dev swapContract is unable to be changed after the factory sets it
     * @param factorySwapContract address Swap contract the delegate will deploy with
     * @param factoryIndexerContract address Indexer contract the delegate will deploy with
@@ -43,6 +48,7 @@ contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
   }
 
   /**
+    * @notice Create a new Delegate contract
     * @param delegateTradeWallet address Wallet the delegate will trade from
     * @return address delegateContractAddress Address of the delegate contract created
     */
@@ -67,7 +73,7 @@ contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
   }
 
   /**
-    * @notice To check whether a locator was deployed
+    * @notice To check whether a locator was deployed from this factory
     * @dev Implements ILocatorWhitelist.has
     * @param locator bytes32 Locator of the delegate in question
     * @return bool True if the delegate was deployed by this contract

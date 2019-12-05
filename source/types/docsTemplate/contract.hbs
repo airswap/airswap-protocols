@@ -1,0 +1,103 @@
+## <span id="{{anchor}}"></span> `{{name}}`
+
+ Delegate is a smart contract that sends orders based on rules. View the code on GitHub.
+
+`{{{natspec.title}}}`
+
+{{{natspec.userdoc}}}
+
+{{{natspec.devdoc}}}
+
+# Structs
+
+## `Order`
+
+| Param     | Type        | Description                                     |
+| :-------- | :---------- | :---------------------------------------------- |
+| nonce     | `uint256`   | Unique per signer and should be sequential      |
+| expiry    | `uint256`   | Expiry in seconds since 1 January 1970          |
+| signer    | `Party`     | Party to the trade that sets terms              |
+| sender    | `Party`     | Party to the trade that accepts terms           |
+| affiliate | `Party`     | Party compensated for facilitating \(optional\) |
+| signature | `Signature` | Signature of the order, described below         |
+
+## `Party`
+
+| Param  | Type      | Description                        |
+| :----- | :-------- | :--------------------------------- |
+| kind   | `bytes4`  | Interface ID of the token          |
+| wallet | `address` | Wallet address of the party        |
+| token  | `address` | Contract address of the token      |
+| param  | `uint256` | Value \(ERC-20\) or ID \(ERC-721\) |
+
+## `Signature`
+
+| Param     | Type      | Description                                                                               |
+| :-------- | :-------- | :---------------------------------------------------------------------------------------- |
+| signatory | `address` | Address of the wallet used to sign                                                        |
+| validator | `address` | Address of the intended swap contract                                                     |
+| version   | `bytes1`  | [EIP-191](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-191.md) signature version |
+| v         | `uint8`   | `v` value of an ECDSA signature                                                           |
+| r         | `bytes32` | `r` value of an ECDSA signature                                                           |
+| s         | `bytes32` | `s` value of an ECDSA signature                                                           |
+
+### Functions
+
+{{#ownFunctions}}
+### <span id="{{anchor}}"></span> `{{name}}({{args}}){{#if outputs}} → {{outputs}}{{/if}}` ({{visibility}})
+
+{{{natspec.userdoc}}}
+
+{{{natspec.devdoc}}}
+{{#if natspec.params}}
+| Param             | Description       |
+{{#each natspec.params}}
+{{#if @first}}
+| ----------------- | :------------    |
+{{/if}}|`{{param}}`|{{description~}}{{#raw}}|{{/raw}}{{/each}}{{/if}}
+
+{{#if natspec.returns}}
+|  Param    | Description   |
+{{#each natspec.returns}}
+{{#if @first}}
+|   ---------| :------------ |
+{{/if}}| `{{param}}`|  {{description~}}{{#raw}}|{{/raw}}{{/each}}{{/if}}
+
+{{/ownFunctions}}
+
+## Price Calculations
+
+All amounts are in the smallest unit (e.g. wei), so all calculations based on price result in a whole number. For calculations that would result in a decimal, the amount is rounded in the delegate's favor. For example, a price of 5.25 and senderParam of 2 results in signerParam of 11 rather than 10.5. Tokens have many decimal places so these differences are very small.
+
+### Examples
+
+### Examples using DAI and WETH tokens
+
+Set a rule to send up to 100,000 DAI for WETH at 0.0032 WETH/DAI. Note that DAI has a decimal representation of 18 and WETH has a decimal representation of 18 as well. Another way to think about this is that this rule is putting 100,000 DAI up for trade in return for WETH.
+
+Set a rule to send up to 100,000 DAI for WETH at 0.0032 WETH/DAI
+
+setRule(DAIAddress, WETHAddress, 100000000000000000000000, 32, 4)
+
+Set a rule to send up to 320 WETH for DAI at 0.0032 WETH/DAI.
+
+setRule(WETHAddress, DAIAddress, 320000000000000000000, 3125, 1)
+
+### Example using AST and WETH tokens
+
+setRule(ASTAddress, WETHAddress, 50000000, 40000000000, 0)
+
+Set a rule to send up to 2 WETH for AST at 0.0004 AST/WETH. Note that AST has a decimal representation of 4 and WETH has a decimal representation of 18.
+
+setRule(WETHAddress, ASTAddress, 2000000000000000000, 25, 12)
+
+### Events
+
+{{#events}}
+- [`{{name}}({{args}})`][{{{anchor}}}]
+{{/events}}
+
+
+{{#ownEvents}}
+### <span id="{{anchor}}"></span> `{{name}}({{args}})`
+{{/ownEvents}}

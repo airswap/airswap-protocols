@@ -40,6 +40,6 @@
     "@airswap/types": "1.4.4",
     "openzeppelin-solidity": "2.3",
     "solc": "0.5.11",
-    "solidity-docgen": "0.3.8"
+    "solidity-docgen": "0.3.12"
   }
 }

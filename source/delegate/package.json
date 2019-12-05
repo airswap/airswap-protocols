@@ -21,6 +21,7 @@
     "hint": "yarn solhint \"./contracts/**/*.sol\"",
     "lint": "yarn eslint \"./test/**/*.js\"",
     "cp_migration_flat": "mkdir -p flatten/; cp contracts/Migrations.sol flatten/",
+    "doc-gen": "node_modules/.bin/solidity-docgen --solc-settings \"{remappings: ['openzeppelin-solidity/contracts=../../node_modules/openzeppelin-solidity/contracts', '@airswap=../../node_modules/@airswap', '@gnosis.pm=../../node_modules/@gnosis.pm']}\" --contract-pages --templates docsTemplate/",
     "test": "truffle test",
     "flatten": "truffle run flatten",
     "migrate": "yarn cp_migration_flat; truffle migrate --skip-dry-run",
@@ -34,6 +35,7 @@
   "dependencies": {
     "@airswap/indexer": "1.5.6",
     "@airswap/swap": "3.3.5",
-    "openzeppelin-solidity": "2.3"
+    "openzeppelin-solidity": "2.3",
+    "solidity-docgen": "0.3.12"
   }
 }
