@@ -10,9 +10,13 @@ references:
   container_config: &container_config
     docker:
       - image: circleci/node:10
+    working_directory: *working_directory
+
+  working_directory: &working_directory
     working_directory: ~/repo
 
-  run_tests: &run_tests
+jobs:
+  run_tests:
     <<: *container_config
     steps:
       - checkout
@@ -37,6 +41,9 @@ references:
           name: Solhint
           command: yarn hint
       - run:
+          name: Compile
+          command: yarn compile
+      - run:
           name: Run Tests
           command: |
             yarn ganache > /dev/null &
@@ -46,18 +53,14 @@ references:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
       - persist_to_workspace:
-          root: ~/repo
+          root: *working_directory
           paths: .
-
-jobs:
-  run_tests:
-    <<: *run_tests
 
   deploy:
     <<: *container_config
     steps:
       - attach_workspace:
-          at: ~/repo
+          at: *working_directory
       - run:
           name: Install NPM non-interactive
           command: sudo npm install -g npm-login-noninteractive
