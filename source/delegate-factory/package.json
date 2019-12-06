@@ -30,11 +30,11 @@
   "devDependencies": {
     "@airswap/order-utils": "0.3.12",
     "@airswap/test-utils": "0.1.1",
-    "solidity-coverage": "^0.6.3"
+    "solidity-coverage": "^0.6.3",
+    "solidity-docgen-mod": "https://github.com/airswap/solidity-docgen.git#27f343f40a48aec60616056eca502b6c8353af98"
   },
   "dependencies": {
     "@airswap/delegate": "0.5.4",
-    "openzeppelin-solidity": "2.3",
-    "solidity-docgen": "0.3.12"
+    "openzeppelin-solidity": "2.3"
   }
 }

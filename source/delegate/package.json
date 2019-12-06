@@ -36,6 +36,6 @@
     "@airswap/indexer": "1.5.6",
     "@airswap/swap": "3.3.5",
     "openzeppelin-solidity": "2.3",
-    "solidity-docgen": "0.3.12"
+    "solidity-docgen-mod": "https://github.com/airswap/solidity-docgen.git#27f343f40a48aec60616056eca502b6c8353af98"
   }
 }

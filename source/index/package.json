@@ -33,7 +33,7 @@
     "bignumber.js": "^9.0.0",
     "solidity-coverage": "^0.6.3",
     "truffle": "^5.0.24",
-    "solidity-docgen": "0.3.12"
+    "solidity-docgen-mod": "https://github.com/airswap/solidity-docgen.git#27f343f40a48aec60616056eca502b6c8353af98"
   },
   "dependencies": {
     "openzeppelin-solidity": "2.3"
