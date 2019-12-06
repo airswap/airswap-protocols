@@ -148,7 +148,8 @@ workflows:
       - deploy:
           context: NPM_Publish
           requires:
-            - run_tests
+            - run_swap_tests
+            - run_indexer_tests
           filters:
             branches:
               only:
