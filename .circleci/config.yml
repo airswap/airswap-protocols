@@ -15,7 +15,6 @@ references:
       - image: circleci/node:10
     working_directory: *working_directory
 
-
 jobs:
   setup:
     <<: *container_config
@@ -44,7 +43,7 @@ jobs:
       - run:
           name: Compile
           command: yarn compile
-     - save_cache:
+      - save_cache:
           paths:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
