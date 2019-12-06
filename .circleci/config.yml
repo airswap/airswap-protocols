@@ -244,6 +244,8 @@ workflows:
           context: Development
           requires:
             - eslint
+            - solhint
+            - compile
       - indexer_tests:
           context: Development
           requires:
