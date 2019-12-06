@@ -51,7 +51,7 @@ jobs:
           root: *working_directory
           paths: .
 
-  run_tests:
+  run_swap_tests:
     <<: *container_config
     steps:
       - attach_workspace:
@@ -61,6 +61,20 @@ jobs:
           command: |
             yarn ganache > /dev/null &
             cd source/swap && yarn test
+      - persist_to_workspace:
+          root: *working_directory
+          paths: .
+
+  run_indexer_tests:
+    <<: *container_config
+    steps:
+      - attach_workspace:
+          at: *working_directory
+      - run:
+          name: Run Tests
+          command: |
+            yarn ganache > /dev/null &
+            cd source/indexer && yarn test
       - persist_to_workspace:
           root: *working_directory
           paths: .
@@ -123,7 +137,11 @@ workflows:
     jobs:
       - setup:
           context: Development
-      - run_tests:
+      - run_swap_tests:
+          context: Development
+          requires:
+            - setup
+      - run_indexer_tests:
           context: Development
           requires:
             - setup
