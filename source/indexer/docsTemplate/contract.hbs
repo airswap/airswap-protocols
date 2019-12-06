@@ -1,16 +1,15 @@
 ## <span id="{{anchor}}"></span> `{{name}}`
 
+An Indexer is a smart contract to discover trading parties by token pair.
+
 `{{{natspec.title}}}`
+
+The indexer contract deployed to the AirSwap network may have some administrative privileges. Specifically, AirSwap does maintain a token blacklist which disallows certain tokens from being added and queried through the Indexer. In addition, setLocatorWhitelist which dictates what interface if any locators must follow is also maintained by AirSwap.
 
 {{{natspec.userdoc}}}
 
 {{{natspec.devdoc}}}
 
-### Features
-
-**Authorizations** are for peers that trade on behalf of others. These peers are authorized by an individual to send or sign orders for them. Peers can be wallets (people or programs) or smart contracts.
-
-**Affiliates** are third-parties compensated for their part in bringing together the two parties of a trade, and can be other traders or software applications that connect traders on the network.
 
 {{#if modifiers}}
 ### Modifiers

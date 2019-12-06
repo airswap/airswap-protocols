@@ -73,7 +73,7 @@ contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
   }
 
   /**
-    * @notice To check whether a locator was deployed from this factory
+    * @notice Checks whether a locator was deployed from this factory
     * @dev Implements ILocatorWhitelist.has
     * @param locator bytes32 Locator of the delegate in question
     * @return bool True if the delegate was deployed by this contract
