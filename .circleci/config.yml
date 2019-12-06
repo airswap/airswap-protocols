@@ -239,35 +239,46 @@ workflows:
       - compile:
           context: Development
           requires: 
-            - eslint
-            - solhint
+            - setup
       - swap_tests:
           context: Development
           requires:
-            - compile
+            - eslint
       - indexer_tests:
           context: Development
           requires:
+            - eslint
+            - solhint
             - compile
       - index_tests:
           context: Development
           requires:
+            - eslint
+            - solhint
             - compile
       - delegate_tests:
           context: Development
           requires:
+            - eslint
+            - solhint
             - compile
       - delegate_factory_tests:
           context: Development
           requires:
+            - eslint
+            - solhint
             - compile
       - types_tests:
           context: Development
           requires:
+            - eslint
+            - solhint
             - compile
       - wrapper_tests:
           context: Development
           requires:
+            - eslint
+            - solhint
             - compile
       - deploy:
           context: NPM_Publish
