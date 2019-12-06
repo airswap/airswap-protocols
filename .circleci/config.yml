@@ -60,7 +60,8 @@ jobs:
           name: Run Tests
           command: |
             yarn ganache > /dev/null &
-            yarn test /source/swap/test
+            cd /source/swap &
+            yarn test
       - persist_to_workspace:
           root: *working_directory
           paths: .
