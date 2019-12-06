@@ -31,7 +31,7 @@
     "@airswap/order-utils": "0.3.12",
     "@airswap/test-utils": "0.1.1",
     "solidity-coverage": "^0.6.3",
-    "@airswap/indexer": "1.5.6"
+    "@airswap/indexer": "1.5.7"
   },
   "dependencies": {
     "@airswap/delegate": "0.5.4",

@@ -1,6 +1,6 @@
 {
   "name": "@airswap/index",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "Manages a list of intents to trade a specific token pair in the Swap Protocol",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>",
