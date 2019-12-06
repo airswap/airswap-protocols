@@ -675,7 +675,7 @@ contract('Indexer', async accounts => {
       equal(result[SCORES][1], 0)
     })
 
-    it("doesn't lock tokens when given a locator of 0", async () => {
+    it("shouldn't allow a locator of 0", async () => {
       // give mary 1000 staking tokens
       emitted(await tokenAST.mint(maliciousMary, 1000), 'Transfer')
       ok(await balances(maliciousMary, [[tokenAST, 1000]]))
@@ -685,7 +685,6 @@ contract('Indexer', async accounts => {
         await tokenAST.approve(indexerAddress, 10000, { from: maliciousMary }),
         'Approval'
       )
-      const indexerBefore = await tokenAST.balanceOf(indexerAddress)
 
       // create the index
       emitted(
@@ -695,9 +694,9 @@ contract('Indexer', async accounts => {
         'CreateIndex'
       )
 
-      // mary sets intent with a locator of 0 and stakes 1000 AST
-      emitted(
-        await indexer.setIntent(
+      // mary tries to set intent with a locator of 0
+      await reverted(
+        indexer.setIntent(
           tokenDAI.address,
           tokenWETH.address,
           1000,
@@ -706,23 +705,17 @@ contract('Indexer', async accounts => {
             from: maliciousMary,
           }
         ),
-        'Stake'
+        'LOCATOR_MUST_BE_SENT'
       )
+    })
 
-      // check balances have updated by 1000
-      ok(await balances(maliciousMary, [[tokenAST, 0]]))
-      ok(
-        await balances(indexerAddress, [
-          [tokenAST, indexerBefore.toNumber() + 1000],
-        ])
-      )
-
-      // mary stakes again, this time with a stake of 0
+    it("shouldn't allow a previous stake to be updated with locator 0", async () => {
+      // mary sets an intent with bobs locator
       emitted(
         await indexer.setIntent(
           tokenDAI.address,
           tokenWETH.address,
-          0,
+          500,
           bobLocator,
           {
             from: maliciousMary,
@@ -731,23 +724,19 @@ contract('Indexer', async accounts => {
         'Stake'
       )
 
-      // Check mary's entry updated
-      const result = await indexer.getLocators(
-        tokenDAI.address,
-        tokenWETH.address,
-        maliciousMary,
-        1
+      // mary tries to sets intent with a locator of 0
+      await reverted(
+        indexer.setIntent(
+          tokenDAI.address,
+          tokenWETH.address,
+          1000,
+          emptyLocator,
+          {
+            from: maliciousMary,
+          }
+        ),
+        'LOCATOR_MUST_BE_SENT'
       )
-
-      equal(result[LOCATORS][0], bobLocator)
-      equal(result[SCORES][0], 0)
-
-      // Check mary got her tokens back
-      ok(
-        await balances(maliciousMary, [[tokenAST, 1000]]),
-        'Mary did not get her tokens back'
-      )
-      ok(await balances(indexerAddress, [[tokenAST, indexerBefore]]))
     })
   })
 })

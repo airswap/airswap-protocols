@@ -86,6 +86,8 @@ contract Index is Ownable {
     bytes32 locator
   ) external onlyOwner {
 
+    require(locator != bytes32(0), "LOCATOR_MUST_BE_SENT");
+
     // Ensure the entry does not already exist.
     require(!_hasEntry(identifier), "ENTRY_ALREADY_EXISTS");
 
