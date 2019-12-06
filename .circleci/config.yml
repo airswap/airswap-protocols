@@ -125,6 +125,8 @@ workflows:
           context: Development
       - run_tests:
           context: Development
+          requires:
+            - setup
       - deploy:
           context: NPM_Publish
           requires:
