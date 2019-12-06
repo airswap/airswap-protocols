@@ -51,7 +51,7 @@ jobs:
           root: *working_directory
           paths: .
 
-  run_swap_tests:
+  swap_tests:
     <<: *container_config
     steps:
       - attach_workspace:
@@ -65,7 +65,7 @@ jobs:
           root: *working_directory
           paths: .
 
-  run_indexer_tests:
+  indexer_tests:
     <<: *container_config
     steps:
       - attach_workspace:
@@ -75,6 +75,90 @@ jobs:
           command: |
             yarn ganache > /dev/null &
             cd source/indexer && yarn test
+      - persist_to_workspace:
+          root: *working_directory
+          paths: .
+
+  index_tests:
+    <<: *container_config
+    steps:
+      - attach_workspace:
+          at: *working_directory
+      - run:
+          name: Run Tests
+          command: |
+            yarn ganache > /dev/null &
+            cd source/index && yarn test
+      - persist_to_workspace:
+          root: *working_directory
+          paths: .
+
+  delegate_tests:
+    <<: *container_config
+    steps:
+      - attach_workspace:
+          at: *working_directory
+      - run:
+          name: Run Tests
+          command: |
+            yarn ganache > /dev/null &
+            cd source/delegate && yarn test
+      - persist_to_workspace:
+          root: *working_directory
+          paths: .
+
+  delegate_factory_tests:
+    <<: *container_config
+    steps:
+      - attach_workspace:
+          at: *working_directory
+      - run:
+          name: Run Tests
+          command: |
+            yarn ganache > /dev/null &
+            cd source/delegate-factory && yarn test
+      - persist_to_workspace:
+          root: *working_directory
+          paths: .
+
+  tokens_tests:
+    <<: *container_config
+    steps:
+      - attach_workspace:
+          at: *working_directory
+      - run:
+          name: Run Tests
+          command: |
+            yarn ganache > /dev/null &
+            cd source/tokens && yarn test
+      - persist_to_workspace:
+          root: *working_directory
+          paths: .
+
+  types_tests:
+    <<: *container_config
+    steps:
+      - attach_workspace:
+          at: *working_directory
+      - run:
+          name: Run Tests
+          command: |
+            yarn ganache > /dev/null &
+            cd source/types && yarn test
+      - persist_to_workspace:
+          root: *working_directory
+          paths: .
+
+  wrapper_tests:
+    <<: *container_config
+    steps:
+      - attach_workspace:
+          at: *working_directory
+      - run:
+          name: Run Tests
+          command: |
+            yarn ganache > /dev/null &
+            cd source/wrapper && yarn test
       - persist_to_workspace:
           root: *working_directory
           paths: .
@@ -137,19 +221,49 @@ workflows:
     jobs:
       - setup:
           context: Development
-      - run_swap_tests:
+      - swap_tests:
           context: Development
           requires:
             - setup
-      - run_indexer_tests:
+      - indexer_tests:
+          context: Development
+          requires:
+            - setup
+      - index_tests:
+          context: Development
+          requires:
+            - setup
+      - delegate_tests:
+          context: Development
+          requires:
+            - setup
+      - delegate_factory_tests:
+          context: Development
+          requires:
+            - setup
+      - tokens_tests:
+          context: Development
+          requires:
+            - setup
+      - types_tests:
+          context: Development
+          requires:
+            - setup
+      - wrapper_tests:
           context: Development
           requires:
             - setup
       - deploy:
           context: NPM_Publish
           requires:
-            - run_swap_tests
-            - run_indexer_tests
+            - swap_tests
+            - indexer_tests
+            - index_tests
+            - delegate_tests
+            - delegate_factory_tests
+            - tokens_tests
+            - types_tests
+            - wrapper_tests
           filters:
             branches:
               only:
