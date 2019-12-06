@@ -17,7 +17,7 @@ references:
 
 
 jobs:
-  run_tests:
+  setup:
     <<: *container_config
     steps:
       - checkout
@@ -44,15 +44,24 @@ jobs:
       - run:
           name: Compile
           command: yarn compile
+     - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package.json" }}
+      - persist_to_workspace:
+          root: *working_directory
+          paths: .
+
+  run_tests:
+    <<: *container_config
+    steps:
+      - attach_workspace:
+        at: *working_directory
       - run:
           name: Run Tests
           command: |
             yarn ganache > /dev/null &
             yarn test
-      - save_cache:
-          paths:
-            - node_modules
-          key: v1-dependencies-{{ checksum "package.json" }}
       - persist_to_workspace:
           root: *working_directory
           paths: .
@@ -113,6 +122,8 @@ jobs:
 workflows:
   smart_contract:
     jobs:
+      - setup:
+          context: Development
       - run_tests:
           context: Development
       - deploy:
