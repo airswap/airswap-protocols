@@ -34,9 +34,6 @@ jobs:
             sudo apt install python3-pip
             pip3 install -r requirements.txt
             python3 scripts/dependency_checker.py
-      - run:
-          name: Compile
-          command: yarn compile
       - save_cache:
           paths:
             - node_modules
@@ -62,6 +59,18 @@ jobs:
       - run:
           name: Solhint
           command: yarn hint
+
+  compile:
+    <<: *container_config
+    steps:
+      - attach_workspace:
+          at: *working_directory
+      - run:
+          name: Compile
+          command: yarn compile
+      - persist_to_workspace:
+          root: *working_directory
+          paths: .
 
   swap_tests:
     <<: *container_config
@@ -227,34 +236,39 @@ workflows:
           context: Development
           requires:
             - setup
+      - compile:
+          context: Development
+          requires: 
+            - eslint
+            - solhint
       - swap_tests:
           context: Development
           requires:
-            - setup
+            - compile
       - indexer_tests:
           context: Development
           requires:
-            - setup
+            - compile
       - index_tests:
           context: Development
           requires:
-            - setup
+            - compile
       - delegate_tests:
           context: Development
           requires:
-            - setup
+            - compile
       - delegate_factory_tests:
           context: Development
           requires:
-            - setup
+            - compile
       - types_tests:
           context: Development
           requires:
-            - setup
+            - compile
       - wrapper_tests:
           context: Development
           requires:
-            - setup
+            - compile
       - deploy:
           context: NPM_Publish
           requires:
