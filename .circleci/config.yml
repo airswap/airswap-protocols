@@ -55,7 +55,7 @@ jobs:
     <<: *container_config
     steps:
       - attach_workspace:
-        at: *working_directory
+          at: *working_directory
       - run:
           name: Run Tests
           command: |
