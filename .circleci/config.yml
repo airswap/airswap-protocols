@@ -35,12 +35,6 @@ jobs:
             pip3 install -r requirements.txt
             python3 scripts/dependency_checker.py
       - run:
-          name: Eslint
-          command: yarn lint
-      - run:
-          name: Solhint
-          command: yarn hint
-      - run:
           name: Compile
           command: yarn compile
       - save_cache:
@@ -50,6 +44,24 @@ jobs:
       - persist_to_workspace:
           root: *working_directory
           paths: .
+
+  eslint:
+    <<: *container_config
+    steps:
+      - attach_workspace:
+          at: *working_directory
+      - run:
+          name: Eslint
+          command: yarn lint
+
+  solhint:
+    <<: *container_config
+    steps:
+      - attach_workspace:
+          at: *working_directory
+      - run:
+          name: Solhint
+          command: yarn hint
 
   swap_tests:
     <<: *container_config
@@ -207,6 +219,14 @@ workflows:
     jobs:
       - setup:
           context: Development
+      - eslint:
+          context: Development
+          requires:
+            - setup
+      - solhint:
+          context: Development
+          requires:
+            - setup
       - swap_tests:
           context: Development
           requires:
