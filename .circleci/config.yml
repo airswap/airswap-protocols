@@ -121,20 +121,6 @@ jobs:
           root: *working_directory
           paths: .
 
-  tokens_tests:
-    <<: *container_config
-    steps:
-      - attach_workspace:
-          at: *working_directory
-      - run:
-          name: Run Tests
-          command: |
-            yarn ganache > /dev/null &
-            cd source/tokens && yarn test
-      - persist_to_workspace:
-          root: *working_directory
-          paths: .
-
   types_tests:
     <<: *container_config
     steps:
@@ -241,10 +227,6 @@ workflows:
           context: Development
           requires:
             - setup
-      - tokens_tests:
-          context: Development
-          requires:
-            - setup
       - types_tests:
           context: Development
           requires:
@@ -261,7 +243,6 @@ workflows:
             - index_tests
             - delegate_tests
             - delegate_factory_tests
-            - tokens_tests
             - types_tests
             - wrapper_tests
           filters:
