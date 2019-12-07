@@ -25,6 +25,12 @@ jobs:
             - v1-dependencies-{{ checksum "package.json" }}
             - v1-dependencies-
       - run:
+          name: Eslint
+          command: yarn lint
+      - run:
+          name: Solhint
+          command: yarn hint
+      - run:
           name: yarn install and dependencies
           command: |
             yarn install
@@ -34,40 +40,13 @@ jobs:
             sudo apt install python3-pip
             pip3 install -r requirements.txt
             python3 scripts/dependency_checker.py
+      - run:
+          name: Compile
+          command: yarn compile
       - save_cache:
           paths:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
-      - persist_to_workspace:
-          root: *working_directory
-          paths: .
-
-  eslint:
-    <<: *container_config
-    steps:
-      - attach_workspace:
-          at: *working_directory
-      - run:
-          name: Eslint
-          command: yarn lint
-
-  solhint:
-    <<: *container_config
-    steps:
-      - attach_workspace:
-          at: *working_directory
-      - run:
-          name: Solhint
-          command: yarn hint
-
-  compile:
-    <<: *container_config
-    steps:
-      - attach_workspace:
-          at: *working_directory
-      - run:
-          name: Compile
-          command: yarn compile
       - persist_to_workspace:
           root: *working_directory
           paths: .
@@ -243,45 +222,31 @@ workflows:
       - swap_tests:
           context: Development
           requires:
-            - eslint
-            - solhint
-            - compile
+            - setup
       - indexer_tests:
           context: Development
           requires:
-            - eslint
-            - solhint
-            - compile
+            - setup
       - index_tests:
           context: Development
           requires:
-            - eslint
-            - solhint
-            - compile
+            - setup
       - delegate_tests:
           context: Development
           requires:
-            - eslint
-            - solhint
-            - compile
+            - setup
       - delegate_factory_tests:
           context: Development
           requires:
-            - eslint
-            - solhint
-            - compile
+            - setup
       - types_tests:
           context: Development
           requires:
-            - eslint
-            - solhint
-            - compile
+            - setup
       - wrapper_tests:
           context: Development
           requires:
-            - eslint
-            - solhint
-            - compile
+            - setup
       - deploy:
           context: NPM_Publish
           requires:
