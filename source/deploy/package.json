@@ -18,7 +18,6 @@
     "compile": "truffle compile",
     "ganache": "ganache-cli -p 8545 --gasLimit 0xfffffffffff --time '2017-05-10T00:00:00+00:00' -s 0",
     "cp_migration_flat": "mkdir -p flatten/; cp contracts/Migrations.sol flatten/",
-    "test": "truffle test",
     "flatten": "truffle run flatten",
     "migrate": "yarn cp_migration_flat; truffle migrate --skip-dry-run",
     "verify": "truffle run verify"
