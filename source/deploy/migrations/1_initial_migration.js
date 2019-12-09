@@ -1,4 +1,5 @@
-require('dotenv').config()
+require('dotenv').config();
+var assert = require('assert');
 const Types = artifacts.require('Types');
 const Swap = artifacts.require('Swap');
 const Wrapper = artifacts.require('Wrapper');
@@ -19,6 +20,9 @@ module.exports = async(deployer, network) => {
     STAKING_TOKEN_ADDRESS = process.env.MAINNET_AST
     WETH_ADDRESS = process.env.MAINNET_WETH
   }
+
+  assert(STAKING_TOKEN_ADDRESS, "Staking token is not set")
+  assert(WETH_ADDRESS, "WETH Token is not set")
 
   await deployer.deploy(Types)
   await Swap.link("Types", Types.address)
