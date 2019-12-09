@@ -61,9 +61,6 @@ jobs:
           command: |
             yarn ganache > /dev/null &
             cd source/swap && yarn test
-      - persist_to_workspace:
-          root: *working_directory
-          paths: .
 
   indexer_tests:
     <<: *container_config
@@ -75,9 +72,6 @@ jobs:
           command: |
             yarn ganache > /dev/null &
             cd source/indexer && yarn test
-      - persist_to_workspace:
-          root: *working_directory
-          paths: .
 
   index_tests:
     <<: *container_config
@@ -89,9 +83,6 @@ jobs:
           command: |
             yarn ganache > /dev/null &
             cd source/index && yarn test
-      - persist_to_workspace:
-          root: *working_directory
-          paths: .
 
   delegate_tests:
     <<: *container_config
@@ -103,9 +94,6 @@ jobs:
           command: |
             yarn ganache > /dev/null &
             cd source/delegate && yarn test
-      - persist_to_workspace:
-          root: *working_directory
-          paths: .
 
   delegate_factory_tests:
     <<: *container_config
@@ -117,9 +105,6 @@ jobs:
           command: |
             yarn ganache > /dev/null &
             cd source/delegate-factory && yarn test
-      - persist_to_workspace:
-          root: *working_directory
-          paths: .
 
   types_tests:
     <<: *container_config
@@ -131,9 +116,6 @@ jobs:
           command: |
             yarn ganache > /dev/null &
             cd source/types && yarn test
-      - persist_to_workspace:
-          root: *working_directory
-          paths: .
 
   wrapper_tests:
     <<: *container_config
@@ -145,9 +127,6 @@ jobs:
           command: |
             yarn ganache > /dev/null &
             cd source/wrapper && yarn test
-      - persist_to_workspace:
-          root: *working_directory
-          paths: .
 
   deploy:
     <<: *container_config
