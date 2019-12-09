@@ -7,12 +7,16 @@ orbs:
   datadog: airswap/datadog@volatile
 
 references:
+  working_directory: &working_directory
+    ~/repo
+
   container_config: &container_config
     docker:
       - image: circleci/node:10
-    working_directory: ~/repo
+    working_directory: *working_directory
 
-  run_tests: &run_tests
+jobs:
+  setup:
     <<: *container_config
     steps:
       - checkout
@@ -20,6 +24,12 @@ references:
           keys:
             - v1-dependencies-{{ checksum "package.json" }}
             - v1-dependencies-
+      - run:
+          name: Eslint
+          command: yarn lint
+      - run:
+          name: Solhint
+          command: yarn hint
       - run:
           name: yarn install and dependencies
           command: |
@@ -31,33 +41,119 @@ references:
             pip3 install -r requirements.txt
             python3 scripts/dependency_checker.py
       - run:
-          name: Eslint
-          command: yarn lint
-      - run:
-          name: Solhint
-          command: yarn hint
-      - run:
-          name: Run Tests
-          command: |
-            yarn ganache > /dev/null &
-            yarn test
+          name: Compile
+          command: yarn compile
       - save_cache:
           paths:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
       - persist_to_workspace:
-          root: ~/repo
+          root: *working_directory
           paths: .
 
-jobs:
-  run_tests:
-    <<: *run_tests
+  swap_tests:
+    <<: *container_config
+    steps:
+      - attach_workspace:
+          at: *working_directory
+      - run:
+          name: Run Tests
+          command: |
+            yarn ganache > /dev/null &
+            cd source/swap && yarn test
+      - persist_to_workspace:
+          root: *working_directory
+          paths: .
+
+  indexer_tests:
+    <<: *container_config
+    steps:
+      - attach_workspace:
+          at: *working_directory
+      - run:
+          name: Run Tests
+          command: |
+            yarn ganache > /dev/null &
+            cd source/indexer && yarn test
+      - persist_to_workspace:
+          root: *working_directory
+          paths: .
+
+  index_tests:
+    <<: *container_config
+    steps:
+      - attach_workspace:
+          at: *working_directory
+      - run:
+          name: Run Tests
+          command: |
+            yarn ganache > /dev/null &
+            cd source/index && yarn test
+      - persist_to_workspace:
+          root: *working_directory
+          paths: .
+
+  delegate_tests:
+    <<: *container_config
+    steps:
+      - attach_workspace:
+          at: *working_directory
+      - run:
+          name: Run Tests
+          command: |
+            yarn ganache > /dev/null &
+            cd source/delegate && yarn test
+      - persist_to_workspace:
+          root: *working_directory
+          paths: .
+
+  delegate_factory_tests:
+    <<: *container_config
+    steps:
+      - attach_workspace:
+          at: *working_directory
+      - run:
+          name: Run Tests
+          command: |
+            yarn ganache > /dev/null &
+            cd source/delegate-factory && yarn test
+      - persist_to_workspace:
+          root: *working_directory
+          paths: .
+
+  types_tests:
+    <<: *container_config
+    steps:
+      - attach_workspace:
+          at: *working_directory
+      - run:
+          name: Run Tests
+          command: |
+            yarn ganache > /dev/null &
+            cd source/types && yarn test
+      - persist_to_workspace:
+          root: *working_directory
+          paths: .
+
+  wrapper_tests:
+    <<: *container_config
+    steps:
+      - attach_workspace:
+          at: *working_directory
+      - run:
+          name: Run Tests
+          command: |
+            yarn ganache > /dev/null &
+            cd source/wrapper && yarn test
+      - persist_to_workspace:
+          root: *working_directory
+          paths: .
 
   deploy:
     <<: *container_config
     steps:
       - attach_workspace:
-          at: ~/repo
+          at: *working_directory
       - run:
           name: Install NPM non-interactive
           command: sudo npm install -g npm-login-noninteractive
@@ -109,12 +205,46 @@ jobs:
 workflows:
   smart_contract:
     jobs:
-      - run_tests:
+      - setup:
           context: Development
+      - swap_tests:
+          context: Development
+          requires:
+            - setup
+      - indexer_tests:
+          context: Development
+          requires:
+            - setup
+      - index_tests:
+          context: Development
+          requires:
+            - setup
+      - delegate_tests:
+          context: Development
+          requires:
+            - setup
+      - delegate_factory_tests:
+          context: Development
+          requires:
+            - setup
+      - types_tests:
+          context: Development
+          requires:
+            - setup
+      - wrapper_tests:
+          context: Development
+          requires:
+            - setup
       - deploy:
           context: NPM_Publish
           requires:
-            - run_tests
+            - swap_tests
+            - indexer_tests
+            - index_tests
+            - delegate_tests
+            - delegate_factory_tests
+            - types_tests
+            - wrapper_tests
           filters:
             branches:
               only:
