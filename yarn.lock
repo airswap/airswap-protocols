@@ -1749,9 +1749,9 @@ aws-sign2@~0.7.0:
   integrity sha1-tG6JCTSpWR8tL2+G1+ap8bP+dqg=
 
 aws4@^1.8.0:
-  version "1.8.0"
-  resolved "https://registry.yarnpkg.com/aws4/-/aws4-1.8.0.tgz#f0e003d9ca9e7f59c7a508945d7b2ef9a04a542f"
-  integrity sha512-ReZxvNHIOv88FlT7rxcXIIC0fPt4KZqZbOlivyWtXLt8ESx84zd3kMC6iK5jVeS2qt+g7ftS7ye4fi06X5rtRQ==
+  version "1.9.0"
+  resolved "https://registry.yarnpkg.com/aws4/-/aws4-1.9.0.tgz#24390e6ad61386b0a747265754d2a17219de862c"
+  integrity sha512-Uvq6hVe90D0B2WEnUqtdgY1bATGz3mw33nH9Y+dmA+w5DHvUmBgkr5rM/KCHpCsiFNRUfokW/szpPPgMK2hm4A==
 
 axios@^0.19.0:
   version "0.19.0"
@@ -4929,9 +4929,9 @@ ganache-cli@^6.4.4:
     yargs "13.2.4"
 
 ganache-time-traveler@^1.0.5:
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/ganache-time-traveler/-/ganache-time-traveler-1.0.5.tgz#8383518d6ea19614e57d78a9a156be83ed162771"
-  integrity sha512-46lhryBbHfNyixWq22zgK5OeRF4T8FgA67idiKMwYAePAvj1gqREaljVO2aV5GBouovtp8jg8qt+TXTXTtUEsQ==
+  version "1.0.11"
+  resolved "https://registry.yarnpkg.com/ganache-time-traveler/-/ganache-time-traveler-1.0.11.tgz#8d2cc81a09a0bca95db9a1b8bb2603f29840e38b"
+  integrity sha512-zRGGnPyDxNUFTgfmkUbopfZuFWiCBbc+OjGihosXOJ9nb6UQUQV0RkcUhNisWNbgSijm/dv1em4G6MQ0P780Ng==
 
 gauge@~2.7.3:
   version "2.7.4"
@@ -6732,7 +6732,19 @@ mime-db@1.40.0:
   resolved "https://registry.yarnpkg.com/mime-db/-/mime-db-1.40.0.tgz#a65057e998db090f732a68f6c276d387d4126c32"
   integrity sha512-jYdeOMPy9vnxEqFRRo6ZvTZ8d9oPb+k18PKoYNYUe2stVEBPPwsln/qWzdbmaIvnhZ9v2P+CuecK+fpUfsV2mA==
 
-mime-types@^2.1.12, mime-types@^2.1.16, mime-types@~2.1.19, mime-types@~2.1.24:
+mime-db@1.42.0:
+  version "1.42.0"
+  resolved "https://registry.yarnpkg.com/mime-db/-/mime-db-1.42.0.tgz#3e252907b4c7adb906597b4b65636272cf9e7bac"
+  integrity sha512-UbfJCR4UAVRNgMpfImz05smAXK7+c+ZntjaA26ANtkXLlOe947Aag5zdIcKQULAiF9Cq4WxBi9jUs5zkA84bYQ==
+
+mime-types@^2.1.12, mime-types@~2.1.19:
+  version "2.1.25"
+  resolved "https://registry.yarnpkg.com/mime-types/-/mime-types-2.1.25.tgz#39772d46621f93e2a80a856c53b86a62156a6437"
+  integrity sha512-5KhStqB5xpTAeGqKBAMgwaYMnQik7teQN4IAzC7npDv6kzeU6prfkR67bc87J1kWMPGkoaZSq1npmexMgkmEVg==
+  dependencies:
+    mime-db "1.42.0"
+
+mime-types@^2.1.16, mime-types@~2.1.24:
   version "2.1.24"
   resolved "https://registry.yarnpkg.com/mime-types/-/mime-types-2.1.24.tgz#b6f8d0b3e951efb77dedeca194cff6d16f676f81"
   integrity sha512-WaFHS3MCl5fapm3oLxU4eYDw77IQM2ACcxQ9RIxfaC3ooc6PFuBMGZZsYpvoXS5D5QTWPieo1jjLdAm3TBP3cQ==
@@ -7968,9 +7980,9 @@ pseudomap@^1.0.2:
   integrity sha1-8FKijacOYYkX7wqKw0wa5aaChrM=
 
 psl@^1.1.24:
-  version "1.4.0"
-  resolved "https://registry.yarnpkg.com/psl/-/psl-1.4.0.tgz#5dd26156cdb69fa1fdb8ab1991667d3f80ced7c2"
-  integrity sha512-HZzqCGPecFLyoRj5HLfuDSKYTJkAfB5thKBIkRHtGjWwY7p1dAyveIbXIq4tO0KYfDF2tHqPUgY9SDnGm00uFw==
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/psl/-/psl-1.6.0.tgz#60557582ee23b6c43719d9890fb4170ecd91e110"
+  integrity sha512-SYKKmVel98NCOYXpkwUqZqh0ahZeeKfmisiLIcEZdsb+WbLv02g/dI5BUmZnIyOe7RzZtLax81nnb2HbvC2tzA==
 
 public-encrypt@^4.0.0:
   version "4.0.3"
@@ -9715,9 +9727,9 @@ truffle-hdwallet-provider-privkey@1.0.3, truffle-hdwallet-provider-privkey@^1.0.
     web3-provider-engine "git+https://github.com/cgewecke/provider-engine.git#web3-one"
 
 truffle-verify@^1.0.4:
-  version "1.0.7"
-  resolved "https://registry.yarnpkg.com/truffle-verify/-/truffle-verify-1.0.7.tgz#c98d6a1d8666585e1ed701e0a3b5743af7390374"
-  integrity sha512-YMsPSXVXQZ3dgi6j9IPe+a5bcJlV2dPNQ0LvONP8039oWZ6TKrzVRiwY9uLH6PGHuEObkTKV8GnYfuM2wkH3Fg==
+  version "1.0.8"
+  resolved "https://registry.yarnpkg.com/truffle-verify/-/truffle-verify-1.0.8.tgz#6bfe3922c9b20dc8c839f18e1d6c7748ac32f171"
+  integrity sha512-ZH61ZtW5aJa9h0oPRRWGE8hN3hHXpKeEphS3s2av3zED1IoELa3rY+hNigs9JVPsUTZSAa5U0S4M1v2XF1QR9Q==
   dependencies:
     axios "^0.19.0"
     delay "^4.3.0"
