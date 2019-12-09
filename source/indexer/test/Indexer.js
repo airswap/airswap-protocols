@@ -21,7 +21,12 @@ const {
 } = require('@airswap/order-utils').constants
 const { padAddressToLocator } = require('@airswap/test-utils').padding
 
-contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
+contract('Indexer', async accounts => {
+  const ownerAddress = accounts[0]
+  const aliceAddress = accounts[1]
+  const bobAddress = accounts[2]
+  const maliciousMary = accounts[9]
+
   let indexer
   let indexerAddress
 
@@ -668,6 +673,70 @@ contract('Indexer', async ([ownerAddress, aliceAddress, bobAddress]) => {
       equal(result[SCORES].length, 2)
       equal(result[SCORES][0], 50)
       equal(result[SCORES][1], 0)
+    })
+
+    it("shouldn't allow a locator of 0", async () => {
+      // give mary 1000 staking tokens
+      emitted(await tokenAST.mint(maliciousMary, 1000), 'Transfer')
+      ok(await balances(maliciousMary, [[tokenAST, 1000]]))
+
+      // mary gives permission for the tokens to be staked
+      emitted(
+        await tokenAST.approve(indexerAddress, 10000, { from: maliciousMary }),
+        'Approval'
+      )
+
+      // create the index
+      emitted(
+        await indexer.createIndex(tokenDAI.address, tokenWETH.address, {
+          from: maliciousMary,
+        }),
+        'CreateIndex'
+      )
+
+      // mary tries to set intent with a locator of 0
+      await reverted(
+        indexer.setIntent(
+          tokenDAI.address,
+          tokenWETH.address,
+          1000,
+          emptyLocator,
+          {
+            from: maliciousMary,
+          }
+        ),
+        'LOCATOR_MUST_BE_SENT'
+      )
+    })
+
+    it("shouldn't allow a previous stake to be updated with locator 0", async () => {
+      // mary sets an intent with bobs locator
+      emitted(
+        await indexer.setIntent(
+          tokenDAI.address,
+          tokenWETH.address,
+          500,
+          bobLocator,
+          {
+            from: maliciousMary,
+          }
+        ),
+        'Stake'
+      )
+
+      // mary tries to sets intent with a locator of 0
+      await reverted(
+        indexer.setIntent(
+          tokenDAI.address,
+          tokenWETH.address,
+          1000,
+          emptyLocator,
+          {
+            from: maliciousMary,
+          }
+        ),
+        'LOCATOR_MUST_BE_SENT'
+      )
     })
   })
 })
