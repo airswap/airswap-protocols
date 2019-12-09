@@ -30,7 +30,9 @@
     "@gnosis.pm/mock-contract": "^3.0.7",
     "solidity-coverage": "^0.6.3",
     "solidity-docgen": "0.3.0-beta.3",
-    "truffle-hdwallet-provider-privkey": "1.0.3"
+    "truffle-hdwallet-provider-privkey": "1.0.3",
+    "truffle-flatten": "^1.0.6",
+    "truffle-verify": "^1.0.4"
   },
   "dependencies": {
     "@airswap/types": "1.4.4",
