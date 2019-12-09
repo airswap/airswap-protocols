@@ -73,6 +73,16 @@ contract('Index Unit Tests', async accounts => {
       )
     })
 
+    it('should not allow a blank locator to be set', async () => {
+      // insert alice
+      await reverted(
+        index.setLocator(aliceAddress, 2000, emptyLocator, {
+          from: owner,
+        }),
+        'LOCATOR_MUST_BE_SENT'
+      )
+    })
+
     it('should allow an entry to be inserted by the owner', async () => {
       // set an entry from the owner
       let result = await index.setLocator(aliceAddress, 2000, aliceLocator, {
