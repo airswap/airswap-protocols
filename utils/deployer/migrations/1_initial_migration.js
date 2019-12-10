@@ -8,12 +8,18 @@ const DelegateFactory = artifacts.require('DelegateFactory');
 
 module.exports = async(deployer, network) => {
 
-  assert.notEqual(network, 'development', "Please choose a network besides 'development'")
+  let STAKING_TOKEN_ADDRESS
+  let WETH_ADDRESS 
 
-  network = network.toUpperCase()
-
-  let STAKING_TOKEN_ADDRESS = process.env[network + "_AST"]
-  let WETH_ADDRESS = process.env[network + "_WETH"]
+  if (network == 'development') {
+    STAKING_TOKEN_ADDRESS = "0xCC1CBD4f67cCeb7c001bD4aDF98451237a193Ff8"
+    WETH_ADDRESS = "0xc778417E063141139Fce010982780140Aa0cD5Ab"
+  }
+  else {
+    network = network.toUpperCase()
+    STAKING_TOKEN_ADDRESS = process.env[network + "_AST"]
+    WETH_ADDRESS = process.env[network + "_WETH"]
+  }
 
   await deployer.deploy(Types)
   await Swap.link("Types", Types.address)
