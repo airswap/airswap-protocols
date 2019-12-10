@@ -1,0 +1,41 @@
+{
+  "name": "Deploy",
+  "version": "0.0.1",
+  "description": "Deploy to a network",
+  "contributors": [
+    "Don Mosites <don.mosites@fluidity.io>",
+    "Deepa Sathaye <deepa.sathaye@fludity.io>",
+    "Ethan Wessel <ethan.wessel@fluidity.io>",
+    "Alice Henshaw <alice.henshaw@fluidity.io>"
+  ],
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/airswap/airswap-protocols"
+  },
+  "scripts": {
+    "clean": "rm -rf ./build &&  rm -rf ./flatten",
+    "compile": "truffle compile",
+    "ganache": "ganache-cli -p 8545 --gasLimit 0xfffffffffff --time '2017-05-10T00:00:00+00:00' -s 0",
+    "cp_migration_flat": "mkdir -p flatten/; cp contracts/Migrations.sol flatten/",
+    "flatten": "truffle run flatten",
+    "migrate": "yarn flatten contracts/Imports.sol && yarn cp_migration_flat && truffle migrate --skip-dry-run",
+    "verify": "truffle run verify"
+  },
+  "devDependencies": {
+    "@airswap/tokens": "0.1.3",
+    "@airswap/order-utils": "0.3.12",
+    "@airswap/test-utils": "0.1.1",
+    "truffle": "^5.0.32",
+    "@gnosis.pm/mock-contract": "^3.0.7",
+    "solidity-coverage": "^0.6.3",
+    "solidity-docgen": "0.3.0-beta.3",
+    "truffle-hdwallet-provider-privkey": "1.0.3",
+    "truffle-flatten": "^1.0.6",
+    "truffle-verify": "^1.0.4"
+  },
+  "dependencies": {
+    "@airswap/types": "1.4.4",
+    "openzeppelin-solidity": "2.3"
+  }
+}

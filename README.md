@@ -51,4 +51,4 @@ Packages are versioned based on deploys. Major versions e.g. `1.x.x` are mainnet
 
 ## Deployments
 
-To deploy, please follow [this guide](./DEPLOYMENT_GUIDE.md)
+To deploy, please follow [this guide](./utils/deployer/DEPLOYMENT_GUIDE.md)
