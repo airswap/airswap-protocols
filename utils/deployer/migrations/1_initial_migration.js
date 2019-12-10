@@ -12,6 +12,7 @@ module.exports = async(deployer, network) => {
   let WETH_ADDRESS 
 
   if (network == 'development') {
+    // FILL WITH DEVELOPMENT VALUES
     STAKING_TOKEN_ADDRESS = "0xCC1CBD4f67cCeb7c001bD4aDF98451237a193Ff8"
     WETH_ADDRESS = "0xc778417E063141139Fce010982780140Aa0cD5Ab"
   }
