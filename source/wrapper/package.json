@@ -28,8 +28,8 @@
     "verify": "truffle run verify"
   },
   "devDependencies": {
-    "@airswap/order-utils": "0.3.12",
-    "@airswap/test-utils": "0.1.1",
+    "@airswap/order-utils": "0.3.13",
+    "@airswap/test-utils": "0.1.2",
     "solidity-coverage": "^0.6.3",
     "@airswap/indexer": "2.6.7"
   },
