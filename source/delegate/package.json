@@ -1,6 +1,6 @@
 {
   "name": "@airswap/delegate",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "description": "Manages delegated trading rules for use in the Swap Protocol",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>",
@@ -33,7 +33,7 @@
     "solidity-coverage": "^0.6.3"
   },
   "dependencies": {
-    "@airswap/indexer": "1.5.6",
+    "@airswap/indexer": "1.5.7",
     "@airswap/swap": "3.3.5",
     "openzeppelin-solidity": "2.3",
     "solidity-docgen-mod": "https://github.com/airswap/solidity-docgen.git#27f343f40a48aec60616056eca502b6c8353af98"

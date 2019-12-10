@@ -1,6 +1,6 @@
 {
   "name": "@airswap/indexer",
-  "version": "1.5.6",
+  "version": "1.5.7",
   "description": "Manages markets that store intents to trade in the Swap Protocol",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>",
@@ -28,7 +28,6 @@
     "verify": "truffle run verify"
   },
   "devDependencies": {
-    "@airswap/index": "0.3.3",
     "@airswap/order-utils": "0.3.12",
     "@airswap/test-utils": "0.1.1",
     "@airswap/types": "1.4.4",
@@ -38,6 +37,7 @@
     "solidity-docgen-mod": "https://github.com/airswap/solidity-docgen.git#27f343f40a48aec60616056eca502b6c8353af98"
   },
   "dependencies": {
+    "@airswap/index": "0.3.4",
     "openzeppelin-solidity": "2.3"
   }
 }
