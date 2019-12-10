@@ -13,16 +13,19 @@ MNEMONIC=""
 INFURA_API_KEY=""
 ETHERSCAN_API_KEY=""
 
-MAINNET_WETH="0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
-MAINNET_AST="0x27054b13b1b798b345b591a4d22e6562d47ea75a"
+DEVELOPMENT_WETH="FILL_WITH_ERC20"
+DEVELOPMENT_STAKE="FILL_WITH_ERC20"
 
 RINKEBY_WETH="0xc778417E063141139Fce010982780140Aa0cD5Ab"
-RINKEBY_AST="0xCC1CBD4f67cCeb7c001bD4aDF98451237a193Ff8"
+RINKEBY_STAKE="0xCC1CBD4f67cCeb7c001bD4aDF98451237a193Ff8" #ERC20 AST
 
-DEVELOPMENT_WETH="FILL_WITH_ERC20"
-DEVELOPMENT_AST="FILL_WITH_ERC20"
+MAINNET_WETH="0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+MAINNET_STAKE="0x27054b13b1b798b345b591a4d22e6562d47ea75a" #ERC20 AST
 ```
-Fill in these fields with the details you wish to use.
+- Fill in MNEMONIC, INFURA_API_KEY, and ETHERSCAN_API_KEY with your values.
+- Fill in the sections that say "FILL_WITH_ERC20" with contract addresses that map to the contracts addresses you wish to use.
+
+<network>_WETH expects a contract that can take in ETH and transform the value into an ERC20 token. Samples of both these contracts can be found within @airswap/tokens.
 
 3. Update `migrations/1_initial_migration.js` with correct deployment order
 
