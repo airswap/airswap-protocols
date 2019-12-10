@@ -1,6 +1,6 @@
 {
   "name": "@airswap/wrapper",
-  "version": "1.5.6",
+  "version": "1.5.7",
   "description": "Wraps and unwraps ether for WETH trades in the Swap Protocol",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>",
@@ -31,10 +31,10 @@
     "@airswap/order-utils": "0.3.12",
     "@airswap/test-utils": "0.1.1",
     "solidity-coverage": "^0.6.3",
-    "@airswap/indexer": "1.5.7"
+    "@airswap/indexer": "2.6.7"
   },
   "dependencies": {
-    "@airswap/delegate": "0.5.5",
+    "@airswap/delegate": "0.5.6",
     "@airswap/swap": "3.3.5",
     "@airswap/tokens": "0.1.3"
   }

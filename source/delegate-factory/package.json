@@ -1,6 +1,6 @@
 {
   "name": "@airswap/delegate-factory",
-  "version": "1.4.7",
+  "version": "2.5.7",
   "description": "Deploys Delegate contracts for use in the Swap Protocol",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>",
@@ -32,7 +32,7 @@
     "solidity-coverage": "^0.6.3"
   },
   "dependencies": {
-    "@airswap/delegate": "0.5.5",
+    "@airswap/delegate": "0.5.6",
     "openzeppelin-solidity": "2.3"
   }
 }
