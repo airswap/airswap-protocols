@@ -8,18 +8,9 @@ const DelegateFactory = artifacts.require('DelegateFactory');
 
 module.exports = async(deployer, network) => {
 
-  let STAKING_TOKEN_ADDRESS
-  let WETH_ADDRESS 
-
-  if (network == 'development') {
-    STAKING_TOKEN_ADDRESS = "FILL_WITH_ERC20"
-    WETH_ADDRESS = "FILL_WITH_ERC20"
-  }
-  else {
-    network = network.toUpperCase()
-    STAKING_TOKEN_ADDRESS = process.env[network + "_AST"]
-    WETH_ADDRESS = process.env[network + "_WETH"]
-  }
+  network = network.toUpperCase()
+  let STAKING_TOKEN_ADDRESS = process.env[network + "_STAKE"]
+  let WETH_ADDRESS = process.env[network + "_WETH"]
 
   await deployer.deploy(Types)
   await Swap.link("Types", Types.address)
