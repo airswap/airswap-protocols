@@ -1,6 +1,6 @@
 # Order Utils
 
-[AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens. This package contains helper libraries for creating, hashing, signing and manipulating orders for the AirSwap network.
+[AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens. This package contains helper libraries for creating, hashing, signing, and manipulating orders for the AirSwap network.
 
 A complete explanation of each library function, including parameter and return types, can be found on the [AirSwap documentation site](https://docs.airswap.io/helper-libraries/orders-and-quotes).
 

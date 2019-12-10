@@ -1,6 +1,6 @@
 # Test Utils
 
-[AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens. This package contains helper libraries to make writing truffle tests easier when dealing with tokens, time travel and AirSwap locators.
+[AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens. This package contains helper libraries to make writing truffle tests easier when dealing with tokens, time travel, and AirSwap locators.
 
 A complete explanation of each library function, including parameter and return types, can be found on the [AirSwap documentation site](https://docs.airswap.io/helper-libraries/testing-token-balances).
 
