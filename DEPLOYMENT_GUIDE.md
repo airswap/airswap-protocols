@@ -1,6 +1,6 @@
 # Deployment Guide
 
-This guide walks through the process of deploying contracts to public Ethereum networks and verifying contracts on Etherscan. The process requires an Ethereum mnemonic phrase, Etherscan API key, and Infura API key. All of these are free to get. All commands should be run out of the root folder of the contract you want to deploy. For example, to deploy Types.sol, run commands within the `source/types` package.
+This guide walks through the process of deploying contracts to public Ethereum networks and verifying contracts on Etherscan. The process requires an Ethereum mnemonic phrase, Etherscan API key, and Infura API key. All of these are free to get. All commands should be run out of the `utils/deployer` folder. 
 
 1. Create a .env file with:
 
@@ -8,6 +8,12 @@ This guide walks through the process of deploying contracts to public Ethereum n
 MNEMONIC=""
 INFURA_API_KEY=""
 ETHERSCAN_API_KEY=""
+
+MAINNET_WETH="0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+MAINNET_AST="0x27054b13b1b798b345b591a4d22e6562d47ea75a"
+
+RINKEBY_WETH="0xc778417E063141139Fce010982780140Aa0cD5Ab"
+RINKEBY_AST="0xCC1CBD4f67cCeb7c001bD4aDF98451237a193Ff8"
 ```
 
 Fill in these fields with the details you wish to use.
