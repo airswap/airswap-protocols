@@ -1,6 +1,6 @@
 {
   "name": "@airswap/delegate-factory",
-  "version": "1.4.8",
+  "version": "2.5.7",
   "description": "Deploys Delegate contracts for use in the Swap Protocol",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>",

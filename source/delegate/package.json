@@ -32,7 +32,7 @@
     "solidity-coverage": "^0.6.3"
   },
   "dependencies": {
-    "@airswap/indexer": "1.5.8",
+    "@airswap/indexer": "2.6.7",
     "@airswap/swap": "3.3.5",
     "openzeppelin-solidity": "2.3"
   }
