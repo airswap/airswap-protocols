@@ -1,6 +1,6 @@
 # Deployment Guide
 
-This guide walks through the process of deploying contracts to public Ethereum networks and verifying contracts on Etherscan. The process requires an Ethereum mnemonic phrase, Etherscan API key, and Infura API key. All of these are free to get. All commands should be run out of the `utils/deployer` folder. 
+This guide walks through the process of deploying contracts to public Ethereum networks and verifying contracts on Etherscan. The process requires an Ethereum mnemonic phrase, Etherscan API key, and Infura API key.
 
 1. Run `yarn install` from `airswap-protocols/` to ensure dependencies are installed
 
