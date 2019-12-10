@@ -27,9 +27,8 @@ MAINNET_STAKE="0x27054b13b1b798b345b591a4d22e6562d47ea75a"
 - `<network>_WETH` expects a contract that can take in ETH and transform the value into an ERC20 token.
 - Samples of both these contracts can be found within @airswap/tokens.
   
-*Note, the MAINNET_STAKE and RINKEBY_STAKE are AST ERC20 Tokens on those networks
-
-*Note, the MAINNET_WETH and RINKEBY_WETH are WETH ERC20 Tokens on those networks
+*Note, the `MAINNET_STAKE` and `RINKEBY_STAKE` are AST ERC20 Tokens on those networks
+*Note, the `MAINNET_WETH` and `RINKEBY_WETH` are WETH ERC20 Tokens on those networks
 
 3. Update `migrations/1_initial_migration.js` with correct deployment order
 
