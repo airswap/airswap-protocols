@@ -28,7 +28,7 @@
   },
   "devDependencies": {
     "@airswap/tokens": "0.1.3",
-    "@airswap/order-utils": "0.3.13"
+    "@airswap/order-utils": "0.3.14"
   },
   "dependencies": {
     "openzeppelin-solidity": "2.3"
