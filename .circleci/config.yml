@@ -259,4 +259,3 @@ workflows:
             branches:
               only:
                 - master
-order_utils_tests
