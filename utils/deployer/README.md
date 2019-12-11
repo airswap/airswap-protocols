@@ -1,4 +1,4 @@
-# Deployment Guide
+# Deployer
 
 This guide walks through the process of deploying contracts to public Ethereum networks and verifying contracts on Etherscan. The process requires an Ethereum mnemonic phrase, Etherscan API key, and Infura API key.
 
