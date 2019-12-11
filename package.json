@@ -33,12 +33,12 @@
     "eslint-plugin-import": "^2.18.0",
     "eslint-plugin-prettier": "^3.1.0",
     "eslint-utils": "^1.4.2",
-    "ethereumjs-abi": "^0.6.7",
     "ganache-cli": "^6.4.4",
     "husky": "^3.0.9",
     "lerna": "^3.15.0",
     "prettier": "^1.18.2",
     "solhint": "^2.1.0",
+    "solidity-coverage": "^0.6.3",
     "truffle": "^5.0.32",
     "truffle-flatten": "^1.0.6",
     "truffle-hdwallet-provider-privkey": "^1.0.3",
@@ -54,6 +54,5 @@
     "hooks": {
       "pre-commit": "yarn lint && yarn hint"
     }
-  },
-  "dependencies": {}
+  }
 }
