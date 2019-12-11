@@ -21,7 +21,7 @@
     "hint": "yarn solhint \"./contracts/**/*.sol\"",
     "lint": "yarn eslint \"./test/**/*.js\"",
     "cp_migration_flat": "mkdir -p flatten/; cp contracts/Migrations.sol flatten/",
-    "doc-gen": "node_modules/.bin/solidity-docgen --solc-settings \"{remappings: ['openzeppelin-solidity/contracts=../../node_modules/openzeppelin-solidity/contracts', '@airswap=../../node_modules/@airswap', '@gnosis.pm=../../node_modules/@gnosis.pm']}\" --contract-pages --templates docsTemplate/",
+    "doc-gen": "node_modules/.bin/solidity-docgen --solc-settings \"{remappings: ['openzeppelin-solidity/contracts=../../node_modules/openzeppelin-solidity/contracts', '@airswap=../../node_modules/@airswap', '@gnosis.pm=../../node_modules/@gnosis.pm']}\" --contract-pages --templates docsTemplate/ --exclude contracts/interfaces,contracts/Migration.sol",
     "test": "truffle test",
     "flatten": "truffle run flatten",
     "migrate": "yarn cp_migration_flat; truffle migrate --skip-dry-run",
@@ -36,6 +36,6 @@
     "@airswap/indexer": "1.5.7",
     "@airswap/swap": "3.3.5",
     "openzeppelin-solidity": "2.3",
-    "solidity-docgen-mod": "https://github.com/airswap/solidity-docgen.git#27f343f40a48aec60616056eca502b6c8353af98"
+    "solidity-docgen-mod": "/home/poiresel/Documents/Git/AirSwapProtocol/solidity-docgen"
   }
 }
