@@ -15,7 +15,7 @@
 
 ### Functions
 
-### <span id="Swap-constructor--"></span> `constructor()` (public)
+#### <span id="Swap-constructor--"></span> `constructor()` (public)
 
 Contract Constructor
 
@@ -25,7 +25,8 @@ Sets domain for signature validation (EIP-712)
 
 
 
-### <span id="Swap-swap-struct-Types-Order-"></span> `swap(struct Types.Order order)` (external)
+
+#### <span id="Swap-swap-struct-Types-Order-"></span> `swap(struct Types.Order order)` (external)
 
 Atomic Token Swap
 
@@ -37,13 +38,15 @@ Atomic Token Swap
 
 
 
-### <span id="Swap-cancel-uint256---"></span> `cancel(uint256[] nonces)` (external)
+
+#### <span id="Swap-cancel-uint256---"></span> `cancel(uint256[] nonces)` (external)
 
 Cancel one or more open orders by nonce
 
 
 Cancelled nonces are marked UNAVAILABLE (0x01)
 Emits a Cancel event
+Out of gas may occur in arrays of length > 400
 
 | Param             | Description       |
 | ----------------- | :------------    |
@@ -51,12 +54,13 @@ Emits a Cancel event
 
 
 
-### <span id="Swap-invalidate-uint256-"></span> `invalidate(uint256 minimumNonce)` (external)
 
-Invalidate all orders below a nonce value
+#### <span id="Swap-cancelUpTo-uint256-"></span> `cancelUpTo(uint256 minimumNonce)` (external)
+
+Cancels all orders below a nonce value
 
 
-Emits an Invalidate event
+Emits a CancelUpTo event
 
 | Param             | Description       |
 | ----------------- | :------------    |
@@ -64,7 +68,8 @@ Emits an Invalidate event
 
 
 
-### <span id="Swap-authorizeSender-address-"></span> `authorizeSender(address authorizedSender)` (external)
+
+#### <span id="Swap-authorizeSender-address-"></span> `authorizeSender(address authorizedSender)` (external)
 
 Authorize a delegated sender
 
@@ -77,7 +82,8 @@ Emits an AuthorizeSender event
 
 
 
-### <span id="Swap-authorizeSigner-address-"></span> `authorizeSigner(address authorizedSigner)` (external)
+
+#### <span id="Swap-authorizeSigner-address-"></span> `authorizeSigner(address authorizedSigner)` (external)
 
 Authorize a delegated signer
 
@@ -90,7 +96,8 @@ Emits an AuthorizeSigner event
 
 
 
-### <span id="Swap-revokeSender-address-"></span> `revokeSender(address authorizedSender)` (external)
+
+#### <span id="Swap-revokeSender-address-"></span> `revokeSender(address authorizedSender)` (external)
 
 Revoke an authorized sender
 
@@ -103,7 +110,8 @@ Emits a RevokeSender event
 
 
 
-### <span id="Swap-revokeSigner-address-"></span> `revokeSigner(address authorizedSigner)` (external)
+
+#### <span id="Swap-revokeSigner-address-"></span> `revokeSigner(address authorizedSigner)` (external)
 
 Revoke an authorized signer
 
@@ -116,7 +124,8 @@ Emits a RevokeSigner event
 
 
 
-### <span id="Swap-isSenderAuthorized-address-address-"></span> `isSenderAuthorized(address authorizer, address delegate) → bool` (internal)
+
+#### <span id="Swap-isSenderAuthorized-address-address-"></span> `isSenderAuthorized(address authorizer, address delegate) → bool` (internal)
 
 Determine whether a sender delegate is authorized
 
@@ -128,11 +137,13 @@ Determine whether a sender delegate is authorized
 |`delegate`|address Address being authorized
 
 
+
+## Returns
 |  Param    | Description   |
 |   ---------| :------------ |
 | `bool`|  True if a delegate is authorized to send
 
-### <span id="Swap-isSignerAuthorized-address-address-"></span> `isSignerAuthorized(address authorizer, address delegate) → bool` (internal)
+#### <span id="Swap-isSignerAuthorized-address-address-"></span> `isSignerAuthorized(address authorizer, address delegate) → bool` (internal)
 
 Determine whether a signer delegate is authorized
 
@@ -144,11 +155,13 @@ Determine whether a signer delegate is authorized
 |`delegate`|address Address being authorized
 
 
+
+## Returns
 |  Param    | Description   |
 |   ---------| :------------ |
 | `bool`|  True if a delegate is authorized to sign
 
-### <span id="Swap-isValid-struct-Types-Order-bytes32-"></span> `isValid(struct Types.Order order, bytes32 domainSeparator) → bool` (internal)
+#### <span id="Swap-isValid-struct-Types-Order-bytes32-"></span> `isValid(struct Types.Order order, bytes32 domainSeparator) → bool` (internal)
 
 Validate signature using an EIP-712 typed data hash
 
@@ -160,11 +173,13 @@ Validate signature using an EIP-712 typed data hash
 |`domainSeparator`|bytes32 Domain identifier used in signatures (EIP-712)
 
 
+
+## Returns
 |  Param    | Description   |
 |   ---------| :------------ |
 | `bool`|  True if order has a valid signature
 
-### <span id="Swap-transferToken-address-address-uint256-address-bytes4-"></span> `transferToken(address from, address to, uint256 param, address token, bytes4 kind)` (internal)
+#### <span id="Swap-transferToken-address-address-uint256-address-bytes4-"></span> `transferToken(address from, address to, uint256 param, address token, bytes4 kind)` (internal)
 
 Perform an ERC-20 or ERC-721 token transfer
 
@@ -184,11 +199,12 @@ ERC20: Takes into account non-standard ERC-20 tokens.
 
 
 
+
 ### Events
 
 - [`Swap(uint256 nonce, uint256 timestamp, address signerWallet, uint256 signerParam, address signerToken, address senderWallet, uint256 senderParam, address senderToken, address affiliateWallet, uint256 affiliateParam, address affiliateToken)`][ISwap-Swap-uint256-uint256-address-uint256-address-address-uint256-address-address-uint256-address-]
 - [`Cancel(uint256 nonce, address signerWallet)`][ISwap-Cancel-uint256-address-]
-- [`Invalidate(uint256 nonce, address signerWallet)`][ISwap-Invalidate-uint256-address-]
+- [`CancelUpTo(uint256 nonce, address signerWallet)`][ISwap-CancelUpTo-uint256-address-]
 - [`AuthorizeSender(address authorizerAddress, address authorizedSender)`][ISwap-AuthorizeSender-address-address-]
 - [`AuthorizeSigner(address authorizerAddress, address authorizedSigner)`][ISwap-AuthorizeSigner-address-address-]
 - [`RevokeSender(address authorizerAddress, address revokedSender)`][ISwap-RevokeSender-address-address-]

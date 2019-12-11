@@ -17,7 +17,7 @@
 
 ### Functions
 
-### <span id="Migrations-setCompleted-uint256-"></span> `setCompleted(uint256 completed)` (public)
+#### <span id="Migrations-setCompleted-uint256-"></span> `setCompleted(uint256 completed)` (public)
 
 
 
@@ -26,7 +26,9 @@
 
 
 
-### <span id="Migrations-upgrade-address-"></span> `upgrade(address newAddress)` (public)
+
+#### <span id="Migrations-upgrade-address-"></span> `upgrade(address newAddress)` (public)
+
 
 
 

@@ -1,6 +1,6 @@
 {
   "name": "@airswap/delegate-factory",
-  "version": "1.4.7",
+  "version": "2.5.7",
   "description": "Deploys Delegate contracts for use in the Swap Protocol",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>",
@@ -28,13 +28,13 @@
     "verify": "truffle run verify"
   },
   "devDependencies": {
-    "@airswap/order-utils": "0.3.12",
-    "@airswap/test-utils": "0.1.1",
+    "@airswap/order-utils": "0.3.13",
+    "@airswap/test-utils": "0.1.3",
     "solidity-coverage": "^0.6.3",
     "solidity-docgen-mod": "https://github.com/airswap/solidity-docgen.git#27f343f40a48aec60616056eca502b6c8353af98"
   },
   "dependencies": {
-    "@airswap/delegate": "0.5.5",
+    "@airswap/delegate": "0.5.6",
     "openzeppelin-solidity": "2.3"
   }
 }
