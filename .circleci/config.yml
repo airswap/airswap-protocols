@@ -7,12 +7,16 @@ orbs:
   datadog: airswap/datadog@volatile
 
 references:
+  working_directory: &working_directory
+    ~/repo
+
   container_config: &container_config
     docker:
       - image: circleci/node:10
-    working_directory: ~/repo
+    working_directory: *working_directory
 
-  run_tests: &run_tests
+jobs:
+  setup:
     <<: *container_config
     steps:
       - checkout
@@ -21,34 +25,114 @@ references:
             - v1-dependencies-{{ checksum "package.json" }}
             - v1-dependencies-
       - run:
+          name: Eslint
+          command: yarn lint
+      - run:
+          name: Solhint
+          command: yarn hint
+      - run:
           name: yarn install and dependencies
           command: |
             yarn install
-      - run:
-          name: yarn lint
-          command: yarn lint
-      - run:
-          name: Run Tests
+      - run: 
+          name: Check Dependencies
           command: |
-            yarn ganache > /dev/null &
-            yarn test
+            sudo apt install python3-pip
+            pip3 install -r requirements.txt
+            python3 scripts/dependency_checker.py
+      - run:
+          name: Compile
+          command: yarn compile
       - save_cache:
           paths:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
       - persist_to_workspace:
-          root: ~/repo
+          root: *working_directory
           paths: .
 
-jobs:
-  run_tests:
-    <<: *run_tests
+  swap_tests:
+    <<: *container_config
+    steps:
+      - attach_workspace:
+          at: *working_directory
+      - run:
+          name: Run Tests
+          command: |
+            yarn ganache > /dev/null &
+            cd source/swap && yarn test
+
+  indexer_tests:
+    <<: *container_config
+    steps:
+      - attach_workspace:
+          at: *working_directory
+      - run:
+          name: Run Tests
+          command: |
+            yarn ganache > /dev/null &
+            cd source/indexer && yarn test
+
+  index_tests:
+    <<: *container_config
+    steps:
+      - attach_workspace:
+          at: *working_directory
+      - run:
+          name: Run Tests
+          command: |
+            yarn ganache > /dev/null &
+            cd source/index && yarn test
+
+  delegate_tests:
+    <<: *container_config
+    steps:
+      - attach_workspace:
+          at: *working_directory
+      - run:
+          name: Run Tests
+          command: |
+            yarn ganache > /dev/null &
+            cd source/delegate && yarn test
+
+  delegate_factory_tests:
+    <<: *container_config
+    steps:
+      - attach_workspace:
+          at: *working_directory
+      - run:
+          name: Run Tests
+          command: |
+            yarn ganache > /dev/null &
+            cd source/delegate-factory && yarn test
+
+  types_tests:
+    <<: *container_config
+    steps:
+      - attach_workspace:
+          at: *working_directory
+      - run:
+          name: Run Tests
+          command: |
+            yarn ganache > /dev/null &
+            cd source/types && yarn test
+
+  wrapper_tests:
+    <<: *container_config
+    steps:
+      - attach_workspace:
+          at: *working_directory
+      - run:
+          name: Run Tests
+          command: |
+            yarn ganache > /dev/null &
+            cd source/wrapper && yarn test
 
   deploy:
     <<: *container_config
     steps:
       - attach_workspace:
-          at: ~/repo
+          at: *working_directory
       - run:
           name: Install NPM non-interactive
           command: sudo npm install -g npm-login-noninteractive
@@ -56,9 +140,9 @@ jobs:
           name: Set up the npm user
           command: npm-login-noninteractive
       - run:
-          name: NPM publish packages
+          name: NPM publish utils
           command: |
-            cd packages
+            cd utils
             ### ADD FOLDERS HERE TO PROCESS ###
             for file in order-utils test-utils
             do
@@ -67,43 +151,27 @@ jobs:
               NPM_VERSION=$(npm view $NPM_NAME version || :)
               LOCAL_VERSION=$(node -p "require('./package.json').version")
               if [[ $LOCAL_VERSION != $NPM_VERSION ]]; then
-                echo "Updating NPM..." # this is where we deploy the code to npm
+                echo "Publishing to NPM..." # this is where we deploy the code to npm
                 npm publish
                 npm access public $NPM_NAME
               fi
               cd ..
             done
       - run:
-          name: NPM publish helpers
+          name: NPM publish source
           command: |
-            cd helpers
+            cd source
             ### ADD FOLDERS HERE TO PROCESS ###
-            for file in tokens wrapper
+            for file in indexer index delegate delegate-factory swap types tokens wrapper
             do
               cd $file
               NPM_NAME=$(node -p "require('./package.json').name")
               NPM_VERSION=$(npm view $NPM_NAME version || :)
               LOCAL_VERSION=$(node -p "require('./package.json').version")
               if [[ $LOCAL_VERSION != $NPM_VERSION ]]; then
-                echo "Updating NPM..." # this is where we deploy the code to npm
-                npm publish
-                npm access public $NPM_NAME
-              fi
-              cd ..
-            done
-      - run:
-          name: NPM publish protocols
-          command: |
-            cd protocols
-            ### ADD FOLDERS HERE TO PROCESS ###
-            for file in indexer index delegate delegate-factory swap types
-            do
-              cd $file
-              NPM_NAME=$(node -p "require('./package.json').name")
-              NPM_VERSION=$(npm view $NPM_NAME version || :)
-              LOCAL_VERSION=$(node -p "require('./package.json').version")
-              if [[ $LOCAL_VERSION != $NPM_VERSION ]]; then
-                echo "Updating NPM..." # this is where we deploy the code to npm
+                echo "Generating build..."
+                yarn compile
+                echo "Publishing to NPM..." # this is where we deploy the code to npm
                 npm publish
                 npm access public $NPM_NAME
               fi
@@ -116,12 +184,46 @@ jobs:
 workflows:
   smart_contract:
     jobs:
-      - run_tests:
+      - setup:
           context: Development
+      - swap_tests:
+          context: Development
+          requires:
+            - setup
+      - indexer_tests:
+          context: Development
+          requires:
+            - setup
+      - index_tests:
+          context: Development
+          requires:
+            - setup
+      - delegate_tests:
+          context: Development
+          requires:
+            - setup
+      - delegate_factory_tests:
+          context: Development
+          requires:
+            - setup
+      - types_tests:
+          context: Development
+          requires:
+            - setup
+      - wrapper_tests:
+          context: Development
+          requires:
+            - setup
       - deploy:
           context: NPM_Publish
           requires:
-            - run_tests
+            - swap_tests
+            - indexer_tests
+            - index_tests
+            - delegate_tests
+            - delegate_factory_tests
+            - types_tests
+            - wrapper_tests
           filters:
             branches:
               only:

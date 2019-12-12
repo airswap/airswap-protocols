@@ -1,3 +1,4 @@
 Migrations.sol
 **/node_modules/
-./helpers/tokens/
+./source/tokens/
+flatten/
