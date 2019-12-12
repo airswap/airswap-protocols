@@ -7,10 +7,17 @@ import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
   * @title TransferHandlerRegistry: holds registry of contract to
   * facilitate token transfers
   */
-contract TransferHandlerRegistry is Ownable {
+contract TransferHandlerRegistry {
 
-  event AddHandler(bytes4 kind, address contractAddress);
-  event RemoveHandler(bytes4 kind, address contractAddress);
+  event AddTransferHandler(
+    bytes4 kind,
+    address contractAddress
+  );
+
+  event RemoveTransferHandler(
+    bytes4 kind,
+    address contractAddress
+  );
 
   // Mapping of bytes4 to contract interface type
   mapping (bytes4 => ITransferHandler) private transferHandlerMapping;
@@ -21,10 +28,10 @@ contract TransferHandlerRegistry is Ownable {
   * @param _kind bytes4
   * @param _transferHandler ITransferHandler
   */
-  function addHandler(bytes4 _kind, ITransferHandler _transferHandler)
-    external onlyOwner {
+  function addTransferHandler(bytes4 _kind, ITransferHandler _transferHandler)
+    external {
       transferHandlerMapping[_kind] = _transferHandler;
-      emit AddHandler(_kind, address(_transferHandler));
+      emit AddTransferHandler(_kind, address(_transferHandler));
     }
 
   /**
@@ -32,10 +39,10 @@ contract TransferHandlerRegistry is Ownable {
   * @dev only Owner is permissioned
   * @param _kind bytes4
   */
-  function removeHandler(bytes4 _kind)
-    external onlyOwner {
+  function removeTransferHandler(bytes4 _kind)
+    external {
       delete transferHandlerMapping[_kind];
-      emit RemoveHandler(_kind, address(transferHandlerMapping[_kind]));
+      emit RemoveTransferHandler(_kind, address(transferHandlerMapping[_kind]));
     }
 
   /**

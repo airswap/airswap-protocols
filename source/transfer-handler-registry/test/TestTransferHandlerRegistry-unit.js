@@ -1,11 +1,9 @@
 const TransferHandlerRegistry = artifacts.require('TransferHandlerRegistry')
-const { takeSnapshot, revertToSnapShot } = require('@airswap/test-utils').time
+const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
 const { reverted, equal, emitted } = require('@airswap/test-utils').assert
 const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 
 contract('TransferHandlerRegistry Unit Tests', async accounts => {
-  const owner = accounts[0]
-  const nonOwner = accounts[1]
   const erc20Asset = accounts[2]
   let snapshotId
   let transferhandlerregistry
@@ -16,11 +14,11 @@ contract('TransferHandlerRegistry Unit Tests', async accounts => {
   })
 
   afterEach(async () => {
-    await revertToSnapShot(snapshotId)
+    await revertToSnapshot(snapshotId)
   })
 
   before('Deploy TransferHandlerRegistry', async () => {
-    transferhandlerregistry = await TransferHandlerRegistry.new({ from: owner })
+    transferhandlerregistry = await TransferHandlerRegistry.new()
   })
 
   describe('Test fetching non-existent handler', async () => {
@@ -34,21 +32,13 @@ contract('TransferHandlerRegistry Unit Tests', async accounts => {
   })
 
   describe('Test adding to handler', async () => {
-    it('test adding when not the owner, should revert', async () => {
-      await reverted(
-        transferhandlerregistry.addHandler('0x80ac58cd', erc20Asset, {
-          from: nonOwner,
-        }),
-        'Ownable: caller is not the owner'
-      )
-    })
-
-    it('test adding when the owner, should pass', async () => {
+    it('test adding, should pass', async () => {
       await emitted(
-        await transferhandlerregistry.addHandler('0x80ac58cd', erc20Asset, {
-          from: owner,
-        }),
-        'AddHandler'
+        await transferhandlerregistry.addTransferHandler(
+          '0x80ac58cd',
+          erc20Asset
+        ),
+        'AddTransferHandler'
       )
 
       equal(
@@ -60,26 +50,18 @@ contract('TransferHandlerRegistry Unit Tests', async accounts => {
   })
 
   describe('Test removing from handler', async () => {
-    it('test removing when not the owner, should revert', async () => {
-      await reverted(
-        transferhandlerregistry.removeHandler('0x80ac58cd', { from: nonOwner }),
-        'Ownable: caller is not the owner'
-      )
-    })
-
-    it('test adding and then removing when the owner, should pass', async () => {
+    it('test adding and then removing, should pass', async () => {
       await emitted(
-        await transferhandlerregistry.addHandler('0x80ac58cd', erc20Asset, {
-          from: owner,
-        }),
-        'AddHandler'
+        await transferhandlerregistry.addTransferHandler(
+          '0x80ac58cd',
+          erc20Asset
+        ),
+        'AddTransferHandler'
       )
 
       await emitted(
-        await transferhandlerregistry.removeHandler('0x80ac58cd', {
-          from: owner,
-        }),
-        'RemoveHandler'
+        await transferhandlerregistry.removeTransferHandler('0x80ac58cd'),
+        'RemoveTransferHandler'
       )
     })
   })
