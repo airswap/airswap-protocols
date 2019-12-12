@@ -8,8 +8,8 @@ contract ERC20TransferHandler is ITransferHandler {
     address _from,
     address _to,
     uint256 _param,
-	address _token)
-  external returns (bool) {
+    address _token
+  ) external returns (bool) {
     require(IERC20(_token).transferFrom(_from, _to, _param));
     return true;
   }
