@@ -53,4 +53,20 @@ contract EchidnaIndexer is Indexer {
     (bytes32[] memory locators, uint256[] memory scores, address cursor) = this.getLocators(address(0), address(1), address(0), 3);
     return locators.length == 0 && scores.length == 0;
   }
+
+  function echidna_getStakedAmount() public returns(bool) {
+    //ensure whitelist is 0x0
+    locatorWhitelist = address(0);
+
+    this.createIndex(address(0), address(1));
+
+    //ensure tokens are not on blacklist
+    tokenBlacklist[address(0)] = false;
+    tokenBlacklist[address(1)] = false;
+
+    this.setIntent(address(0), address(1), 0, bytes32("5"));
+    uint256 amount = this.getStakedAmount(msg.sender, address(0), address(1));
+
+    return amount == 0;
+  }
 }
