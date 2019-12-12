@@ -21,7 +21,8 @@
     "ganache": "ganache-cli -p 8545 --gasLimit 0xfffffffffff --time '2017-05-10T00:00:00+00:00' -s 0",
     "publish": "lerna publish",
     "test": "yarn clean && yarn compile && lerna run test --concurrency=1",
-    "check_dep_graph": "source venv/bin/activate && pip3 install -r requirements.txt && python scripts/dependency_checker.py"
+    "gendocs": "yarn solidity-docgen --contract-pages -i source/ -t ./docs --solc-settings \"{remappings: ['openzeppelin-solidity/contracts=./node_modules/openzeppelin-solidity/contracts', '@airswap=./node_modules/@airswap', '@gnosis.pm=./node_modules/@gnosis.pm']}\" --solc-version v0.5.12+commit.7709ece9",
+    "checkdeps": "source venv/bin/activate && pip3 install -r requirements.txt && python scripts/dependency_checker.py"
   },
   "devDependencies": {
     "@gnosis.pm/mock-contract": "^3.0.7",
@@ -39,6 +40,7 @@
     "lerna": "^3.15.0",
     "prettier": "^1.18.2",
     "solhint": "^2.1.0",
+    "solidity-docgen": "https://github.com/airswap/solidity-docgen.git#5f0ea4dd7b09c887523b9ed11c4f6e430d00a73e",
     "truffle": "^5.0.32",
     "truffle-flatten": "^1.0.6",
     "truffle-hdwallet-provider-privkey": "^1.0.3",

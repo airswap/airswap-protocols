@@ -1,0 +1,46 @@
+## <span id="{{anchor}}"></span> `{{name}}`
+
+ Delegate is a smart contract that sends orders based on rules. View the code on GitHub.
+
+`{{{natspec.title}}}`
+
+{{{natspec.userdoc}}}
+
+{{{natspec.devdoc}}}
+
+### Functions
+
+{{#ownFunctions}}
+### <span id="{{anchor}}"></span> `{{name}}({{args}}){{#if outputs}} → {{outputs}}{{/if}}` ({{visibility}})
+
+{{{natspec.userdoc}}}
+
+{{{natspec.devdoc}}}
+{{#if natspec.params}}
+| Param             | Description       |
+{{#each natspec.params}}
+{{#if @first}}
+| ----------------- | :------------    |
+{{/if}}|`{{param}}`|{{description~}}{{#raw}}|{{/raw}}{{/each}}{{/if}}
+
+{{#if natspec.returns}}
+## Returns
+|  Param    | Description   |
+{{#each natspec.returns}}
+{{#if @first}}
+|   ---------| :------------ |
+{{/if}}| `{{param}}`|  {{description~}}{{#raw}}|{{/raw}}{{/each}}{{/if}}
+
+{{/ownFunctions}}
+
+
+### Events
+
+{{#events}}
+- [`{{name}}({{args}})`][{{{anchor}}}]
+{{/events}}
+
+
+{{#ownEvents}}
+### <span id="{{anchor}}"></span> `{{name}}({{args}})`
+{{/ownEvents}}
