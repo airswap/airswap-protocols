@@ -34,7 +34,7 @@ jobs:
           name: yarn install and dependencies
           command: |
             yarn install
-      - run: 
+      - run:
           name: Check Dependencies
           command: |
             sudo apt install python3-pip
@@ -105,6 +105,28 @@ jobs:
           command: |
             yarn ganache > /dev/null &
             cd source/delegate-factory && yarn test
+
+  order_utils_tests:
+    <<: *container_config
+    steps:
+      - attach_workspace:
+          at: *working_directory
+      - run:
+          name: Run Tests
+          command: |
+            yarn ganache > /dev/null &
+            sleep 10 && cd utils/order-utils && yarn test
+
+  pre_swap_checker_tests:
+    <<: *container_config
+    steps:
+      - attach_workspace:
+          at: *working_directory
+      - run:
+          name: Run Tests
+          command: |
+            yarn ganache > /dev/null &
+            cd utils/pre-swap-checker && yarn test
 
   types_tests:
     <<: *container_config
@@ -206,6 +228,14 @@ workflows:
           context: Development
           requires:
             - setup
+      - order_utils_tests:
+          context: Development
+          requires:
+            - setup
+      - pre_swap_checker_tests:
+          context: Development
+          requires:
+            - setup
       - types_tests:
           context: Development
           requires:
@@ -222,6 +252,7 @@ workflows:
             - index_tests
             - delegate_tests
             - delegate_factory_tests
+            - order_utils_tests
             - types_tests
             - wrapper_tests
           filters:
