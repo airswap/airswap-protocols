@@ -1,6 +1,6 @@
 const TransferHandlerRegistry = artifacts.require('TransferHandlerRegistry')
 const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
-const { reverted, equal, emitted } = require('@airswap/test-utils').assert
+const { equal, emitted } = require('@airswap/test-utils').assert
 const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 
 contract('TransferHandlerRegistry Unit Tests', async accounts => {
