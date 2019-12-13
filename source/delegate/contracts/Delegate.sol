@@ -242,7 +242,7 @@ contract Delegate is IDelegate, Ownable {
       "AMOUNT_EXCEEDS_MAX");
 
     // Ensure the order is priced according to the rule.
-    require(order.sender.amount <= _calculateSenderParam(order.signer.amount, rule.priceCoef, rule.priceExp),
+    require(order.sender.amount <= _calculateSenderAmount(order.signer.amount, rule.priceCoef, rule.priceExp),
       "PRICE_INVALID");
 
     // Overwrite the rule with a decremented maxSenderAmount.
@@ -298,7 +298,7 @@ contract Delegate is IDelegate, Ownable {
       // Ensure the senderParam does not exceed maximum for the rule.
       if(senderParam <= rule.maxSenderAmount) {
 
-        signerParam = _calculateSignerParam(senderParam, rule.priceCoef, rule.priceExp);
+        signerParam = _calculateSignerAmount(senderParam, rule.priceCoef, rule.priceExp);
 
         // Return the quote.
         return signerParam;
@@ -328,7 +328,7 @@ contract Delegate is IDelegate, Ownable {
     if(rule.maxSenderAmount > 0) {
 
       // Calculate the senderParam.
-      senderParam = _calculateSenderParam(signerParam, rule.priceCoef, rule.priceExp);
+      senderParam = _calculateSenderAmount(signerParam, rule.priceCoef, rule.priceExp);
 
       // Ensure the senderParam does not exceed the maximum trade amount.
       if(senderParam <= rule.maxSenderAmount) {
@@ -360,7 +360,7 @@ contract Delegate is IDelegate, Ownable {
     // Ensure that a rule exists.
     if (senderParam > 0) {
       // calculate the signerParam
-      signerParam = _calculateSignerParam(senderParam, rule.priceCoef, rule.priceExp);
+      signerParam = _calculateSignerAmount(senderParam, rule.priceCoef, rule.priceExp);
 
       // Return the maxSenderAmount and calculated signerParam.
       return (
@@ -433,7 +433,7 @@ contract Delegate is IDelegate, Ownable {
     * @param priceCoef uint256 Coefficient of the token price defined in the rule
     * @param priceExp uint256 Exponent of the token price defined in the rule
     */
-  function _calculateSignerParam(
+  function _calculateSignerAmount(
     uint256 senderParam,
     uint256 priceCoef,
     uint256 priceExp
@@ -456,7 +456,7 @@ contract Delegate is IDelegate, Ownable {
     * @param priceCoef uint256 Coefficient of the token price defined in the rule
     * @param priceExp uint256 Exponent of the token price defined in the rule
     */
-  function _calculateSenderParam(
+  function _calculateSenderAmount(
     uint256 signerParam,
     uint256 priceCoef,
     uint256 priceExp
