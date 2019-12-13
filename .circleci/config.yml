@@ -213,10 +213,6 @@ workflows:
           context: Development
           requires:
             - setup
-      - delegate_factory_tests:
-          context: Development
-          requires:
-            - setup
       - order_utils_tests:
           context: Development
           requires:
@@ -240,7 +236,6 @@ workflows:
             - indexer_tests
             - index_tests
             - delegate_tests
-            - delegate_factory_tests
             - order_utils_tests
             - types_tests
             - wrapper_tests
