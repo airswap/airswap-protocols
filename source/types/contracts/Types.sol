@@ -70,7 +70,7 @@ library Types {
     "bytes4 kind,",
     "address wallet,",
     "address token,",
-    "uint256 amount",
+    "uint256 amount,",
     "uint256 id",
     ")"
   ));
@@ -80,7 +80,7 @@ library Types {
     "bytes4 kind,",
     "address wallet,",
     "address token,",
-    "uint256 amount",
+    "uint256 amount,",
     "uint256 id",
     ")"
   ));
