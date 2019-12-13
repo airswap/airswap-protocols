@@ -34,7 +34,6 @@
     "truffle": "^5.0.24"
   },
   "dependencies": {
-    "@airswap/index": "0.3.4",
     "openzeppelin-solidity": "2.3"
   }
 }

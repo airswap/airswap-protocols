@@ -13,13 +13,13 @@ The Swap Protocol is a peer-to-peer protocol for trading Ethereum tokens that al
 
 Indexer is comprised of several contracts.
 
-[@airswap/index/contracts/interfaces/ILocatorWhitelist.sol](../contracts/ILocatorWhitelist.sol) @ [b87d292aaf6e28ede564b7ea28ece39219994607](https://github.com/airswap/airswap-protocols/commit/b87d292aaf6e28ede564b7ea28ece39219994607)
+[@airswap/indexer/contracts/interfaces/ILocatorWhitelist.sol](../contracts/ILocatorWhitelist.sol) @ [b87d292aaf6e28ede564b7ea28ece39219994607](https://github.com/airswap/airswap-protocols/commit/b87d292aaf6e28ede564b7ea28ece39219994607)
 
-[@airswap/index/contracts/interfacts/IIndexer.sol](../contracts/IIndexer.sol) @ [b87d292aaf6e28ede564b7ea28ece39219994607](https://github.com/airswap/airswap-protocols/commit/b87d292aaf6e28ede564b7ea28ece39219994607)
+[@airswap/indexer/contracts/interfacts/IIndexer.sol](../contracts/IIndexer.sol) @ [b87d292aaf6e28ede564b7ea28ece39219994607](https://github.com/airswap/airswap-protocols/commit/b87d292aaf6e28ede564b7ea28ece39219994607)
 
-[@airswap/index/contracts/Index.sol](../contracts/Index.sol) @ [b87d292aaf6e28ede564b7ea28ece39219994607](https://github.com/airswap/airswap-protocols/commit/b87d292aaf6e28ede564b7ea28ece39219994607)
+[@airswap/indexer/contracts/Indexer.sol](../contracts/Indexer.sol) @ [b87d292aaf6e28ede564b7ea28ece39219994607](https://github.com/airswap/airswap-protocols/commit/b87d292aaf6e28ede564b7ea28ece39219994607)
 
-[@airswap/index/contracts/Indexer.sol](../contracts/Indexer.sol) @ [b87d292aaf6e28ede564b7ea28ece39219994607](https://github.com/airswap/airswap-protocols/commit/b87d292aaf6e28ede564b7ea28ece39219994607)
+[@airswap/indexer/contracts/Index.sol](../contracts/Index.sol) @ [b87d292aaf6e28ede564b7ea28ece39219994607](https://github.com/airswap/airswap-protocols/commit/b87d292aaf6e28ede564b7ea28ece39219994607)
 
 Deployment of Indexer.sol was performed in the `@airswap/indexer` package in the `airswap-protocols` monorepo.
 

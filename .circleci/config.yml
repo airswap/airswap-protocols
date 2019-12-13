@@ -73,17 +73,6 @@ jobs:
             yarn ganache > /dev/null &
             cd source/indexer && yarn test
 
-  index_tests:
-    <<: *container_config
-    steps:
-      - attach_workspace:
-          at: *working_directory
-      - run:
-          name: Run Tests
-          command: |
-            yarn ganache > /dev/null &
-            cd source/index && yarn test
-
   delegate_tests:
     <<: *container_config
     steps:
@@ -184,7 +173,7 @@ jobs:
           command: |
             cd source
             ### ADD FOLDERS HERE TO PROCESS ###
-            for file in indexer index delegate delegate-factory swap types tokens wrapper
+            for file in indexer delegate delegate-factory swap types tokens wrapper
             do
               cd $file
               NPM_NAME=$(node -p "require('./package.json').name")
@@ -213,10 +202,6 @@ workflows:
           requires:
             - setup
       - indexer_tests:
-          context: Development
-          requires:
-            - setup
-      - index_tests:
           context: Development
           requires:
             - setup
@@ -249,7 +234,6 @@ workflows:
           requires:
             - swap_tests
             - indexer_tests
-            - index_tests
             - delegate_tests
             - delegate_factory_tests
             - order_utils_tests
