@@ -37,7 +37,7 @@
   },
   "dependencies": {
     "@airswap/types": "1.4.4",
-    "@airswap/transfer-handler-registry": "0.1.0",
+    "@airswap/transfers": "0.1.0",
     "openzeppelin-solidity": "2.3"
   }
 }
