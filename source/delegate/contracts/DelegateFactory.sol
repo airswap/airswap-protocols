@@ -16,10 +16,10 @@
 
 pragma solidity 0.5.12;
 
-import "@airswap/delegate/contracts/Delegate.sol";
+import "./Delegate.sol";
+import "./interfaces/IDelegateFactory.sol";
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "@airswap/indexer/contracts/interfaces/ILocatorWhitelist.sol";
-import "@airswap/delegate-factory/contracts/interfaces/IDelegateFactory.sol";
 import "@airswap/indexer/contracts/interfaces/IIndexer.sol";
 
 contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
