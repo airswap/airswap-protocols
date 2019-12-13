@@ -39,7 +39,11 @@ contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
     * @param factoryIndexerContract address Indexer contract the delegate will deploy with
     * @param factoryProtocol bytes2 Protocol type of the delegates the factory deploys
     */
-  constructor(ISwap factorySwapContract, IIndexer factoryIndexerContract, bytes2 factoryProtocol) public {
+  constructor(
+    ISwap factorySwapContract,
+    IIndexer factoryIndexerContract,
+    bytes2 factoryProtocol
+  ) public {
     swapContract = factorySwapContract;
     indexerContract = factoryIndexerContract;
     protocol = factoryProtocol;
