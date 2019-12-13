@@ -10,13 +10,13 @@ contract ERC1155TransferHandler is ITransferHandler {
     uint256 param,
     address token
   ) external returns (bool) {
-  IERC1155TransferHandler(token).safeTransferFrom(
-    from,
-    to,
-    0, // need to update once parameter is in
-    param,
-    ""
-  );
-  return true;
- }
+    IERC1155TransferHandler(token).safeTransferFrom(
+      from,
+      to,
+      0, // need to update once parameter is in
+      param,
+      ""
+    );
+    return true;
+  }
 }
