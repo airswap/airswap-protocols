@@ -38,12 +38,12 @@ describe('Orders', async () => {
       signer: {
         wallet: signerWallet,
         token: ASTAddress,
-        param: '0',
+        amount: '0',
       },
       sender: {
         wallet: senderWallet,
         token: WETHAddress,
-        param: '0',
+        amount: '0',
       },
     })
     expect(orders.isValidOrder(order)).to.equal(true)
@@ -56,12 +56,12 @@ describe('Orders', async () => {
       signer: {
         wallet: signerWallet,
         token: ASTAddress,
-        param: '0',
+        amount: '0',
       },
       sender: {
         wallet: senderWallet,
         token: WETHAddress,
-        param: '0',
+        amount: '0',
       },
     })
     const errors = await orders.checkOrder(order, 'rinkeby')
@@ -75,12 +75,12 @@ describe('Orders', async () => {
       signer: {
         wallet: KNOWN_GANACHE_WALLET,
         token: ASTAddress,
-        param: '0',
+        amount: '0',
       },
       sender: {
         wallet: senderWallet,
         token: WETHAddress,
-        param: '0',
+        amount: '0',
       },
     })
 
@@ -102,12 +102,12 @@ describe('Orders', async () => {
       signer: {
         wallet: KNOWN_GANACHE_WALLET,
         token: ASTAddress,
-        param: '400',
+        amount: '400',
       },
       sender: {
         wallet: senderWallet,
         token: WETHAddress,
-        param: '2',
+        amount: '2',
       },
     })
 
@@ -130,12 +130,12 @@ describe('Orders', async () => {
       signer: {
         wallet: KNOWN_GANACHE_WALLET,
         token: ASTAddress,
-        param: '400',
+        amount: '400',
       },
       sender: {
         wallet: senderWallet,
         token: WETHAddress,
-        param: '2',
+        amount: '2',
       },
     })
 
@@ -159,12 +159,12 @@ describe('Orders', async () => {
       signer: {
         wallet: KNOWN_GANACHE_WALLET,
         token: ASTAddress,
-        param: '400',
+        amount: '400',
       },
       sender: {
         wallet: senderWallet,
         token: WETHAddress,
-        param: '2',
+        amount: '2',
       },
     })
 
@@ -187,13 +187,13 @@ describe('Orders', async () => {
       signer: {
         wallet: KNOWN_GANACHE_WALLET,
         token: ASTAddress,
-        param: '0',
+        amount: '0',
         kind: ERC20_INTERFACE_ID,
       },
       sender: {
         wallet: senderWallet,
         token: cryptoKittiesAddress,
-        param: '460',
+        amount: '460',
         kind: ERC721_INTERFACE_ID,
       },
     })
@@ -218,13 +218,13 @@ describe('Orders', async () => {
       signer: {
         wallet: KNOWN_GANACHE_WALLET,
         token: ASTAddress,
-        param: '0',
+        amount: '0',
         kind: ERC20_INTERFACE_ID,
       },
       sender: {
         wallet: senderWallet,
         token: cryptoKittiesAddress,
-        param: '460',
+        amount: '460',
         kind: 'INVALID_KIND',
       },
     })
@@ -248,13 +248,13 @@ describe('Orders', async () => {
       signer: {
         wallet: KNOWN_GANACHE_WALLET,
         token: ASTAddress,
-        param: '0',
+        amount: '0',
         kind: ERC20_INTERFACE_ID,
       },
       sender: {
         wallet: kittyWallet,
         token: cryptoKittiesAddress,
-        param: '460',
+        amount: '460',
         kind: ERC721_INTERFACE_ID,
       },
     })
@@ -278,13 +278,13 @@ describe('Orders', async () => {
       signer: {
         wallet: ASTAddress,
         token: ASTAddress,
-        param: '0',
+        amount: '0',
         kind: ERC20_INTERFACE_ID,
       },
       sender: {
         wallet: kittyWallet,
         token: cryptoKittiesAddress,
-        param: '460',
+        amount: '460',
         kind: ERC721_INTERFACE_ID,
       },
     })
@@ -303,13 +303,13 @@ describe('Orders', async () => {
       signer: {
         wallet: erc721Wallet,
         token: ASTAddress,
-        param: '0',
+        amount: '0',
         kind: ERC20_INTERFACE_ID,
       },
       sender: {
         wallet: kittyWallet,
         token: cryptoKittiesAddress,
-        param: '460',
+        amount: '460',
         kind: ERC721_INTERFACE_ID,
       },
     })
@@ -328,12 +328,12 @@ describe('Orders', async () => {
       signer: {
         wallet: KNOWN_GANACHE_WALLET,
         token: ASTAddress,
-        param: '100001000',
+        amount: '100001000',
       },
       sender: {
         wallet: senderWallet,
         token: WETHAddress,
-        param: '2',
+        amount: '2',
       },
     })
 
