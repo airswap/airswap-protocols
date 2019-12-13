@@ -21,6 +21,7 @@ interface IIndexer {
   event CreateIndex(
     address indexed signerToken,
     address indexed senderToken,
+    bytes2 protocol,
     address indexAddress
   );
 
@@ -28,6 +29,7 @@ interface IIndexer {
     address indexed staker,
     address indexed signerToken,
     address indexed senderToken,
+    bytes2 protocol,
     uint256 stakeAmount
   );
 
@@ -35,6 +37,7 @@ interface IIndexer {
     address indexed staker,
     address indexed signerToken,
     address indexed senderToken,
+    bytes2 protocol,
     uint256 stakeAmount
   );
 
@@ -47,12 +50,14 @@ interface IIndexer {
   );
 
   function setLocatorWhitelist(
+    bytes2 protocol,
     address newLocatorWhitelist
   ) external;
 
   function createIndex(
     address signerToken,
-    address senderToken
+    address senderToken,
+    bytes2 protocol
   ) external returns (address);
 
   function addTokenToBlacklist(
@@ -66,28 +71,32 @@ interface IIndexer {
   function setIntent(
     address signerToken,
     address senderToken,
+    bytes2 protocol,
     uint256 stakingAmount,
     bytes32 locator
   ) external;
 
   function unsetIntent(
     address signerToken,
-    address senderToken
+    address senderToken,
+    bytes2 protocol
   ) external;
 
   function stakingToken() external view returns (address);
-  function indexes(address, address) external view returns (address);
+  function indexes(address, address, bytes2) external view returns (address);
   function tokenBlacklist(address) external view returns (bool);
 
   function getStakedAmount(
     address user,
     address signerToken,
-    address senderToken
+    address senderToken,
+    bytes2 protocol
   ) external view returns (uint256);
 
   function getLocators(
     address signerToken,
     address senderToken,
+    bytes2 protocol,
     address cursor,
     uint256 limit
   ) external view returns (

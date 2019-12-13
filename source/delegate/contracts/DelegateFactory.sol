@@ -30,16 +30,19 @@ contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
   // The swap and indexer contracts to use in the deployment of Delegates
   ISwap public swapContract;
   IIndexer public indexerContract;
+  bytes2 public protocol;
 
   /**
     * @notice Create a new Delegate contract
     * @dev swapContract is unable to be changed after the factory sets it
     * @param factorySwapContract address Swap contract the delegate will deploy with
     * @param factoryIndexerContract address Indexer contract the delegate will deploy with
+    * @param factoryProtocol bytes2 Protocol type of the delegates the factory deploys
     */
-  constructor(ISwap factorySwapContract, IIndexer factoryIndexerContract) public {
+  constructor(ISwap factorySwapContract, IIndexer factoryIndexerContract, bytes2 factoryProtocol) public {
     swapContract = factorySwapContract;
     indexerContract = factoryIndexerContract;
+    protocol = factoryProtocol;
   }
 
   /**
@@ -51,7 +54,7 @@ contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
   ) external returns (address delegateContractAddress) {
 
     delegateContractAddress = address(
-      new Delegate(swapContract, indexerContract, msg.sender, delegateTradeWallet)
+      new Delegate(swapContract, indexerContract, msg.sender, delegateTradeWallet, protocol)
     );
     _deployedAddresses[delegateContractAddress] = true;
 
