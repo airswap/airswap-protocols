@@ -37,7 +37,8 @@ library Types {
     bytes4 kind;                  // Interface ID of the token
     address wallet;               // Wallet address of the party
     address token;                // Contract address of the token
-    uint256 param;                // Value (ERC-20) or ID (ERC-721)
+    uint256 amount;               // Amount of (ERC-20) or (ERC-721)
+    uint256 id;                   // ID of ERC-721 token; 0 for ERC-20
   }
 
   struct Signature {
