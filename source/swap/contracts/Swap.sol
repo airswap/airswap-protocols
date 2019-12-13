@@ -343,7 +343,7 @@ contract Swap is ISwap {
     * @dev ERC20: Takes into account non-standard ERC-20 tokens.
     * @param from address Wallet address to transfer from
     * @param to address Wallet address to transfer to
-    * @param amount uint256 Amount for ERC-20 or token ID for ERC-721
+    * @param amount uint256 Amount for ERC-20
     * @param id token ID for ERC-721
     * @param token address Contract address of token
     * @param kind bytes4 EIP-165 interface ID of the token
