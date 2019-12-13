@@ -31,14 +31,14 @@ contract Indexer is IIndexer, Ownable {
   // Token to be used for staking (ERC-20)
   IERC20 public stakingToken;
 
-  // Mapping of signer token to sender token to index
-  mapping (address => mapping (address => Index)) public indexes;
+  // Mapping of signer token to sender token to type to index
+  mapping (address => mapping (address => mapping (bytes2 => Index))) public indexes;
+
+  // The whitelist contract for checking whether a peer is whitelisted per peer type
+  mapping (bytes2 => address) public locatorWhitelists;
 
   // Mapping of token address to boolean
   mapping (address => bool) public tokenBlacklist;
-
-  // The whitelist contract for checking whether a peer is whitelisted
-  address public locatorWhitelist;
 
   /**
     * @notice Contract Constructor
@@ -53,8 +53,8 @@ contract Indexer is IIndexer, Ownable {
   /**
     * @notice Modifier to check an index exists
     */
-  modifier indexExists(address signerToken, address senderToken) {
-    require(indexes[signerToken][senderToken] != Index(0),
+  modifier indexExists(address signerToken, address senderToken, bytes2 locatorType) {
+    require(indexes[signerToken][senderToken][locatorType] != Index(0),
       "INDEX_DOES_NOT_EXIST");
     _;
   }
@@ -65,9 +65,10 @@ contract Indexer is IIndexer, Ownable {
     * @param newLocatorWhitelist address Locator whitelist
     */
   function setLocatorWhitelist(
+    bytes2 locatorType,
     address newLocatorWhitelist
   ) external onlyOwner {
-    locatorWhitelist = newLocatorWhitelist;
+    locatorWhitelists[locatorType] = newLocatorWhitelist;
   }
 
   /**
@@ -79,19 +80,20 @@ contract Indexer is IIndexer, Ownable {
     */
   function createIndex(
     address signerToken,
-    address senderToken
+    address senderToken,
+    bytes2 locatorType
   ) external returns (address) {
 
     // If the Index does not exist, create it.
-    if (indexes[signerToken][senderToken] == Index(0)) {
+    if (indexes[signerToken][senderToken][locatorType] == Index(0)) {
       // Create a new Index contract for the token pair.
-      indexes[signerToken][senderToken] = new Index();
+      indexes[signerToken][senderToken][locatorType] = new Index();
 
-      emit CreateIndex(signerToken, senderToken, address(indexes[signerToken][senderToken]));
+      emit CreateIndex(signerToken, senderToken, address(indexes[signerToken][senderToken][locatorType]));
     }
 
     // Return the address of the Index contract.
-    return address(indexes[signerToken][senderToken]);
+    return address(indexes[signerToken][senderToken][locatorType]);
   }
 
   /**
@@ -132,13 +134,14 @@ contract Indexer is IIndexer, Ownable {
   function setIntent(
     address signerToken,
     address senderToken,
+    bytes2 locatorType,
     uint256 stakingAmount,
     bytes32 locator
-  ) external indexExists(signerToken, senderToken) {
+  ) external indexExists(signerToken, senderToken, locatorType) {
 
     // If whitelist set, ensure the locator is valid.
-    if (locatorWhitelist != address(0)) {
-      require(ILocatorWhitelist(locatorWhitelist).has(locator),
+    if (locatorWhitelists[locatorType] != address(0)) {
+      require(ILocatorWhitelist(locatorWhitelists[locatorType]).has(locator),
       "LOCATOR_NOT_WHITELISTED");
     }
 
@@ -146,7 +149,7 @@ contract Indexer is IIndexer, Ownable {
     require(!tokenBlacklist[signerToken] && !tokenBlacklist[senderToken],
       "PAIR_IS_BLACKLISTED");
 
-    bool notPreviouslySet = (indexes[signerToken][senderToken].getLocator(msg.sender) == bytes32(0));
+    bool notPreviouslySet = (indexes[signerToken][senderToken][locatorType].getLocator(msg.sender) == bytes32(0));
 
     if (notPreviouslySet) {
       // Only transfer for staking if stakingAmount is set.
@@ -157,15 +160,15 @@ contract Indexer is IIndexer, Ownable {
           "UNABLE_TO_STAKE");
       }
       // Set the locator on the index.
-      indexes[signerToken][senderToken].setLocator(msg.sender, stakingAmount, locator);
+      indexes[signerToken][senderToken][locatorType].setLocator(msg.sender, stakingAmount, locator);
 
       emit Stake(msg.sender, signerToken, senderToken, stakingAmount);
 
     } else {
 
-      uint256 oldStake = indexes[signerToken][senderToken].getScore(msg.sender);
+      uint256 oldStake = indexes[signerToken][senderToken][locatorType].getScore(msg.sender);
 
-      _updateIntent(msg.sender, signerToken, senderToken, stakingAmount, locator, oldStake);
+      _updateIntent(msg.sender, signerToken, senderToken, locatorType, stakingAmount, locator, oldStake);
     }
   }
 
@@ -178,9 +181,10 @@ contract Indexer is IIndexer, Ownable {
     */
   function unsetIntent(
     address signerToken,
-    address senderToken
+    address senderToken,
+    bytes2 locatorType
   ) external {
-    _unsetIntent(msg.sender, signerToken, senderToken);
+    _unsetIntent(msg.sender, signerToken, senderToken, locatorType);
   }
 
   /**
@@ -198,6 +202,7 @@ contract Indexer is IIndexer, Ownable {
   function getLocators(
     address signerToken,
     address senderToken,
+    bytes2 locatorType,
     address cursor,
     uint256 limit
   ) external view returns (
@@ -211,11 +216,11 @@ contract Indexer is IIndexer, Ownable {
     }
 
     // Ensure the index exists.
-    if (indexes[signerToken][senderToken] == Index(0)) {
+    if (indexes[signerToken][senderToken][locatorType] == Index(0)) {
       return (new bytes32[](0), new uint256[](0), address(0));
     }
 
-    return indexes[signerToken][senderToken].getLocators(cursor, limit);
+    return indexes[signerToken][senderToken][locatorType].getLocators(cursor, limit);
   }
 
   /**
@@ -228,19 +233,21 @@ contract Indexer is IIndexer, Ownable {
   function getStakedAmount(
     address user,
     address signerToken,
-    address senderToken
+    address senderToken,
+    bytes2 locatorType
   ) public view returns (uint256 stakedAmount) {
-    if (indexes[signerToken][senderToken] == Index(0)) {
+    if (indexes[signerToken][senderToken][locatorType] == Index(0)) {
       return 0;
     }
     // Return the score, equivalent to the stake amount.
-    return indexes[signerToken][senderToken].getScore(user);
+    return indexes[signerToken][senderToken][locatorType].getScore(user);
   }
 
   function _updateIntent(
     address user,
     address signerToken,
     address senderToken,
+    bytes2 locatorType,
     uint256 newAmount,
     bytes32 newLocator,
     uint256 oldAmount
@@ -259,8 +266,8 @@ contract Indexer is IIndexer, Ownable {
     }
 
     // Unset their old intent, and set their new intent.
-    indexes[signerToken][senderToken].unsetLocator(user);
-    indexes[signerToken][senderToken].setLocator(user, newAmount, newLocator);
+    indexes[signerToken][senderToken][locatorType].unsetLocator(user);
+    indexes[signerToken][senderToken][locatorType].setLocator(user, newAmount, newLocator);
 
     emit Stake(user, signerToken, senderToken, newAmount);
   }
@@ -274,14 +281,15 @@ contract Indexer is IIndexer, Ownable {
   function _unsetIntent(
     address user,
     address signerToken,
-    address senderToken
-  ) internal indexExists(signerToken, senderToken) {
+    address senderToken,
+    bytes2 locatorType
+  ) internal indexExists(signerToken, senderToken, locatorType) {
 
      // Get the score for the user.
-    uint256 score = indexes[signerToken][senderToken].getScore(user);
+    uint256 score = indexes[signerToken][senderToken][locatorType].getScore(user);
 
     // Unset the locator on the index.
-    indexes[signerToken][senderToken].unsetLocator(user);
+    indexes[signerToken][senderToken][locatorType].unsetLocator(user);
 
     if (score > 0) {
       // Return the staked tokens. Reverts on failure.
