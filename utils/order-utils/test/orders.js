@@ -193,7 +193,7 @@ describe('Orders', async () => {
       sender: {
         wallet: senderWallet,
         token: cryptoKittiesAddress,
-        amount: '460',
+        id: '460',
         kind: ERC721_INTERFACE_ID,
       },
     })
@@ -254,7 +254,7 @@ describe('Orders', async () => {
       sender: {
         wallet: kittyWallet,
         token: cryptoKittiesAddress,
-        amount: '460',
+        id: '460',
         kind: ERC721_INTERFACE_ID,
       },
     })
@@ -284,7 +284,7 @@ describe('Orders', async () => {
       sender: {
         wallet: kittyWallet,
         token: cryptoKittiesAddress,
-        amount: '460',
+        id: '460',
         kind: ERC721_INTERFACE_ID,
       },
     })
@@ -309,7 +309,7 @@ describe('Orders', async () => {
       sender: {
         wallet: kittyWallet,
         token: cryptoKittiesAddress,
-        amount: '460',
+        id: '460',
         kind: ERC721_INTERFACE_ID,
       },
     })
