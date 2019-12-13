@@ -299,7 +299,7 @@ contract('PreSwapChecker', async accounts => {
         sender: {
           wallet: bobAddress,
           token: tokenKitty.address,
-          amount: 54320,
+          id: 54320,
           kind: ERC721_INTERFACE_ID,
         },
       })
@@ -326,7 +326,7 @@ contract('PreSwapChecker', async accounts => {
         sender: {
           wallet: bobAddress,
           token: tokenKitty.address,
-          amount: 54321,
+          id: 54321,
           kind: ERC721_INTERFACE_ID,
         },
       })

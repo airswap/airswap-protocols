@@ -95,7 +95,7 @@ contract PreSwapChecker {
     Types.Party memory party
   ) internal view returns (bool) {
     if (party.kind == ERC721_INTERFACE_ID) {
-      address owner = IERC721(party.token).ownerOf(party.amount);
+      address owner = IERC721(party.token).ownerOf(party.id);
       return (owner == party.wallet);
     }
     uint256 balance = INRERC20(party.token).balanceOf(party.wallet);
@@ -108,7 +108,7 @@ contract PreSwapChecker {
     address swap
   ) internal view returns (bool) {
     if (party.kind == ERC721_INTERFACE_ID) {
-      address approved = IERC721(party.token).getApproved(party.amount);
+      address approved = IERC721(party.token).getApproved(party.id);
       return (swap == approved);
     }
     uint256 allowance = INRERC20(party.token).allowance(party.wallet, swap);
