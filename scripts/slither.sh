@@ -13,7 +13,7 @@
 # ------------------------------------------------------------------
 
 
- array=( indexer index delegate swap types wrapper )
+ array=( indexer delegate swap types wrapper )
 
  for package in "${array[@]}"
    do
