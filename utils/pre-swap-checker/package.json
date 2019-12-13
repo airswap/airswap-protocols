@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@airswap/swap": "3.3.5",
+    "@airswap/transfers": "0.1.0",
     "@airswap/tokens": "0.1.3",
     "@airswap/types": "1.4.4",
     "openzeppelin-solidity": "2.3"

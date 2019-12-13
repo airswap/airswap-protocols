@@ -29,9 +29,9 @@
   "devDependencies": {
     "@airswap/order-utils": "0.3.14",
     "@airswap/test-utils": "0.1.3",
+    "@airswap/transfers": "0.1.0",
     "@airswap/types": "1.4.4",
-    "bignumber.js": "^9.0.0",
-    "truffle": "^5.0.24"
+    "bignumber.js": "^9.0.0"
   },
   "dependencies": {
     "openzeppelin-solidity": "2.4"
