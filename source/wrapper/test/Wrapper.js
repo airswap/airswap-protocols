@@ -55,7 +55,7 @@ contract('Wrapper', async accounts => {
 
     const erc20TransferHandler = await ERC20TransferHandler.new()
     const transferHandlerRegistry = await TransferHandlerRegistry.new()
-    transferHandlerRegistry.addHandler(
+    transferHandlerRegistry.addTransferHandler(
       ERC20_INTERFACE_ID,
       erc20TransferHandler.address
     )
