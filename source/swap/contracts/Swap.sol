@@ -329,14 +329,14 @@ contract Swap is ISwap {
     * @dev ERC20: Takes into account non-standard ERC-20 tokens.
     * @param from address Wallet address to transfer from
     * @param to address Wallet address to transfer to
-    * @param param uint256 Amount for ERC-20 or token ID for ERC-721
+    * @param amount uint256 Amount for ERC-20 or token ID for ERC-721
     * @param token address Contract address of token
     * @param kind bytes4 EIP-165 interface ID of the token
     */
   function transferToken(
       address from,
       address to,
-      uint256 param,
+      uint256 amount,
       address token,
       bytes4 kind
   ) internal {
@@ -347,16 +347,16 @@ contract Swap is ISwap {
     if (kind == ERC721_INTERFACE_ID) {
 
       // Attempt to transfer an ERC-721 token.
-      IERC721(token).transferFrom(from, to, param);
+      IERC721(token).transferFrom(from, to, amount);
 
     } else {
       uint256 initialBalance = INRERC20(token).balanceOf(from);
 
       // Attempt to transfer an ERC-20 token.
-      INRERC20(token).transferFrom(from, to, param);
+      INRERC20(token).transferFrom(from, to, amount);
 
       // Ensure the amount has been transferred.
-      require(initialBalance.sub(param) == INRERC20(token).balanceOf(from), "TRANSFER_FAILED");
+      require(initialBalance.sub(amount) == INRERC20(token).balanceOf(from), "TRANSFER_FAILED");
     }
   }
 }
