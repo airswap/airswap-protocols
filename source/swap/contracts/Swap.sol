@@ -136,7 +136,7 @@ contract Swap is ISwap {
     transferToken(
       finalSenderWallet,
       order.signer.wallet,
-      order.sender.param,
+      order.sender.amount,
       order.sender.token,
       order.sender.kind
     );
@@ -145,7 +145,7 @@ contract Swap is ISwap {
     transferToken(
       order.signer.wallet,
       finalSenderWallet,
-      order.signer.param,
+      order.signer.amount,
       order.signer.token,
       order.signer.kind
     );
@@ -155,16 +155,16 @@ contract Swap is ISwap {
       transferToken(
         order.signer.wallet,
         order.affiliate.wallet,
-        order.affiliate.param,
+        order.affiliate.amount,
         order.affiliate.token,
         order.affiliate.kind
       );
     }
 
     emit Swap(order.nonce, block.timestamp,
-      order.signer.wallet, order.signer.param, order.signer.token,
-      finalSenderWallet, order.sender.param, order.sender.token,
-      order.affiliate.wallet, order.affiliate.param, order.affiliate.token
+      order.signer.wallet, order.signer.amount, order.signer.token,
+      finalSenderWallet, order.sender.amount, order.sender.token,
+      order.affiliate.wallet, order.affiliate.amount, order.affiliate.token
     );
   }
 

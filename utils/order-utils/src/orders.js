@@ -136,7 +136,7 @@ const checkERC20Transfer = async (order, partyName, provider, errors) => {
 
   // Check balance
   await tokenContract.balanceOf(party['wallet']).then(balance => {
-    if (balance.lt(party['param'])) {
+    if (balance.lt(party['amount'])) {
       errors.push(`${partyName} balance is too low`)
     }
   })
@@ -145,7 +145,7 @@ const checkERC20Transfer = async (order, partyName, provider, errors) => {
   await tokenContract
     .allowance(party['wallet'], order['signature']['validator'])
     .then(allowance => {
-      if (allowance.lt(party['param'])) {
+      if (allowance.lt(party['amount'])) {
         errors.push(`${partyName} allowance is too low`)
       }
     })
@@ -179,7 +179,7 @@ const checkERC721Transfer = async (order, partyName, provider, errors) => {
   )
 
   // check balance
-  await tokenContract.ownerOf(party['param']).then(owner => {
+  await tokenContract.ownerOf(party['amount']).then(owner => {
     if (owner.toLowerCase() !== party['wallet']) {
       errors.push(`${partyName} doesn't own NFT`)
     }
@@ -187,14 +187,14 @@ const checkERC721Transfer = async (order, partyName, provider, errors) => {
 
   try {
     // try a normal erc721 approval
-    await tokenContract.getApproved(party['param']).then(operator => {
+    await tokenContract.getApproved(party['amount']).then(operator => {
       if (operator !== order['signature']['validator']) {
         errors.push(`${partyName} no NFT approval`)
       }
     })
   } catch (error) {
     // if it didn't exist try a cryptokitties approval
-    await tokenContract.kittyIndexToApproved(party['param']).then(operator => {
+    await tokenContract.kittyIndexToApproved(party['amount']).then(operator => {
       if (operator !== order['signature']['validator']) {
         errors.push(`${partyName} no NFT approval`)
       }
@@ -215,7 +215,7 @@ const checkERC721Transfer = async (order, partyName, provider, errors) => {
       await nftReceiver.callStatic.onERC721Received(
         party['wallet'],
         party['wallet'],
-        party['param'],
+        party['amount'],
         '0x00'
       )
     } catch (error) {
@@ -277,9 +277,9 @@ const isValidOrder = order => {
     'token' in order['signer'] &&
     'token' in order['sender'] &&
     'token' in order['affiliate'] &&
-    'param' in order['signer'] &&
-    'param' in order['sender'] &&
-    'param' in order['affiliate'] &&
+    'amount' in order['signer'] &&
+    'amount' in order['sender'] &&
+    'amount' in order['affiliate'] &&
     'signatory' in order['signature'] &&
     'validator' in order['signature'] &&
     'r' in order['signature'] &&
@@ -337,8 +337,8 @@ module.exports = {
       'sender' in quote &&
       'token' in quote['signer'] &&
       'token' in quote['sender'] &&
-      'param' in quote['signer'] &&
-      'param' in quote['sender'] &&
+      'amount' in quote['signer'] &&
+      'amount' in quote['sender'] &&
       !('signature' in quote)
     )
   },

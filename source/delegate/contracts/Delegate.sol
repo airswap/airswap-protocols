@@ -238,16 +238,16 @@ contract Delegate is IDelegate, Ownable {
       "TOKEN_PAIR_INACTIVE");
 
     // Ensure the order does not exceed the maximum amount.
-    require(order.sender.param <= rule.maxSenderAmount,
+    require(order.sender.amount <= rule.maxSenderAmount,
       "AMOUNT_EXCEEDS_MAX");
 
     // Ensure the order is priced according to the rule.
-    require(order.sender.param <= _calculateSenderParam(order.signer.param, rule.priceCoef, rule.priceExp),
+    require(order.sender.amount <= _calculateSenderParam(order.signer.amount, rule.priceCoef, rule.priceExp),
       "PRICE_INVALID");
 
     // Overwrite the rule with a decremented maxSenderAmount.
     rules[order.sender.token][order.signer.token] = Rule({
-      maxSenderAmount: (rule.maxSenderAmount).sub(order.sender.param),
+      maxSenderAmount: (rule.maxSenderAmount).sub(order.sender.amount),
       priceCoef: rule.priceCoef,
       priceExp: rule.priceExp
     });
@@ -260,7 +260,7 @@ contract Delegate is IDelegate, Ownable {
       tradeWallet,
       order.sender.token,
       order.signer.token,
-      order.sender.param,
+      order.sender.amount,
       rule.priceCoef,
       rule.priceExp
     );

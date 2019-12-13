@@ -106,21 +106,24 @@ library Types {
           order.signer.kind,
           order.signer.wallet,
           order.signer.token,
-          order.signer.param
+          order.signer.amount,
+          order.signer.id
         )),
         keccak256(abi.encode(
           PARTY_TYPEHASH,
           order.sender.kind,
           order.sender.wallet,
           order.sender.token,
-          order.sender.param
+          order.sender.amount,
+          order.sender.id
         )),
         keccak256(abi.encode(
           PARTY_TYPEHASH,
           order.affiliate.kind,
           order.affiliate.wallet,
           order.affiliate.token,
-          order.affiliate.param
+          order.affiliate.amount,
+          order.affiliate.id
         ))
       ))
     ));
