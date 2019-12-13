@@ -26,7 +26,7 @@ import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 
 
 /**
-  * @title Delegate: Deployable Trading Rules for the Swap Protocol
+  * @title Delegate: Deployable Trading Rules for the AirSwap Network
   * @notice Supports fungible tokens (ERC-20)
   * @dev inherits IDelegate, Ownable uses SafeMath library
   */

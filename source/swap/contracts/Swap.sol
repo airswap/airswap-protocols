@@ -23,7 +23,7 @@ import "openzeppelin-solidity/contracts/token/ERC721/IERC721.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 /**
-  * @title Swap: The Atomic Swap used by the Swap Protocol
+  * @title Swap: The Atomic Swap used on the AirSwap Network
   */
 contract Swap is ISwap {
   using SafeMath for uint256;
