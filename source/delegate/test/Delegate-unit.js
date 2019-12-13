@@ -31,6 +31,8 @@ contract('Delegate Unit Tests', async accounts => {
   const MAX_SENDER_AMOUNT = 12345
   const PRICE_COEF = 4321
   const EXP = 2
+  const EMPTY_PROTOCOL = '0x0000'
+  const DELE_PROTOCOL = '0x0002'
   let mockFungibleTokenTemplate
   let delegate
   let mockSwap
@@ -92,13 +94,19 @@ contract('Delegate Unit Tests', async accounts => {
 
     //mock setIntent()
     const mockIndexer_setIntent = mockIndexerTemplate.contract.methods
-      .setIntent(EMPTY_ADDRESS, EMPTY_ADDRESS, 0, web3.utils.fromAscii(''))
+      .setIntent(
+        EMPTY_ADDRESS,
+        EMPTY_ADDRESS,
+        EMPTY_PROTOCOL,
+        0,
+        web3.utils.fromAscii('')
+      )
       .encodeABI()
     await mockIndexer.givenMethodReturnBool(mockIndexer_setIntent, true)
 
     //mock unsetIntent()
     const mockIndexer_unsetIntent = mockIndexerTemplate.contract.methods
-      .unsetIntent(EMPTY_ADDRESS, EMPTY_ADDRESS)
+      .unsetIntent(EMPTY_ADDRESS, EMPTY_ADDRESS, EMPTY_PROTOCOL)
       .encodeABI()
     await mockIndexer.givenMethodReturnBool(mockIndexer_unsetIntent, true)
 
@@ -113,7 +121,12 @@ contract('Delegate Unit Tests', async accounts => {
 
     //mock getStakedAmount()
     mockIndexer_getStakedAmount = mockIndexerTemplate.contract.methods
-      .getStakedAmount(EMPTY_ADDRESS, EMPTY_ADDRESS, EMPTY_ADDRESS)
+      .getStakedAmount(
+        EMPTY_ADDRESS,
+        EMPTY_ADDRESS,
+        EMPTY_ADDRESS,
+        EMPTY_PROTOCOL
+      )
       .encodeABI()
   }
 
@@ -129,6 +142,7 @@ contract('Delegate Unit Tests', async accounts => {
       mockIndexer.address,
       EMPTY_ADDRESS,
       tradeWallet,
+      DELE_PROTOCOL,
       {
         from: owner,
       }
@@ -146,6 +160,11 @@ contract('Delegate Unit Tests', async accounts => {
       equal(val, tradeWallet, 'trade wallet is incorrect')
     })
 
+    it('Test initial protocol value', async () => {
+      const val = await delegate.protocol.call()
+      equal(val, DELE_PROTOCOL, 'protocol is incorrect')
+    })
+
     it('Test constructor sets the owner as the trade wallet on empty address', async () => {
       await mockStakingToken.givenMethodReturnBool(
         mockStakingToken_approve,
@@ -157,6 +176,7 @@ contract('Delegate Unit Tests', async accounts => {
         mockIndexer.address,
         EMPTY_ADDRESS,
         EMPTY_ADDRESS,
+        DELE_PROTOCOL,
         {
           from: owner,
         }
@@ -182,6 +202,7 @@ contract('Delegate Unit Tests', async accounts => {
         mockIndexer.address,
         notOwner,
         tradeWallet,
+        DELE_PROTOCOL,
         {
           from: owner,
         }
@@ -205,6 +226,7 @@ contract('Delegate Unit Tests', async accounts => {
           mockIndexer.address,
           EMPTY_ADDRESS,
           EMPTY_ADDRESS,
+          DELE_PROTOCOL,
           {
             from: owner,
           }

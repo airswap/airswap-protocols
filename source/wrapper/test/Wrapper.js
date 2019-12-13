@@ -49,6 +49,8 @@ contract('Wrapper', async accounts => {
   const carolAddress = accounts[2]
   const delegateOwner = accounts[3]
 
+  const PROTOCOL = '0x0001'
+
   before('Setup', async () => {
     // link types to swap
     await Swap.link('Types', (await Types.new()).address)
@@ -78,7 +80,8 @@ contract('Wrapper', async accounts => {
       swapAddress,
       indexer.address,
       delegateOwner,
-      delegateOwner
+      delegateOwner,
+      PROTOCOL
     )
     delegateAddress = delegate.address
 

@@ -28,6 +28,7 @@ contract('Delegate Integration Tests', async accounts => {
   const bobAddress = accounts[2]
   const carolAddress = accounts[3]
   const aliceTradeWallet = accounts[4]
+  const PROTOCOL = '0x0002'
 
   let stakingToken
   let tokenDAI
@@ -49,7 +50,7 @@ contract('Delegate Integration Tests', async accounts => {
 
   async function setupIndexer() {
     indexer = await Indexer.new(stakingToken.address)
-    await indexer.createIndex(tokenDAI.address, tokenWETH.address)
+    await indexer.createIndex(tokenDAI.address, tokenWETH.address, PROTOCOL)
   }
 
   before('Setup', async () => {
@@ -75,7 +76,8 @@ contract('Delegate Integration Tests', async accounts => {
       swapAddress,
       indexer.address,
       aliceAddress,
-      aliceTradeWallet
+      aliceTradeWallet,
+      PROTOCOL
     )
     aliceDelegate = await delegateContract
   })
@@ -87,7 +89,8 @@ contract('Delegate Integration Tests', async accounts => {
           swapAddress,
           indexer.address,
           EMPTY_ADDRESS,
-          aliceTradeWallet
+          aliceTradeWallet,
+          PROTOCOL
         )
       )
     })
@@ -98,7 +101,8 @@ contract('Delegate Integration Tests', async accounts => {
           swapAddress,
           indexer.address,
           aliceAddress,
-          EMPTY_ADDRESS
+          EMPTY_ADDRESS,
+          PROTOCOL
         )
       )
     })
@@ -190,7 +194,8 @@ contract('Delegate Integration Tests', async accounts => {
       const scoreBefore = await indexer.getStakedAmount(
         aliceDelegate.address,
         tokenDAI.address,
-        tokenWETH.address
+        tokenWETH.address,
+        PROTOCOL
       )
       equal(scoreBefore.toNumber(), 0, 'intent score is incorrect')
 
@@ -215,7 +220,8 @@ contract('Delegate Integration Tests', async accounts => {
       const scoreAfter = await indexer.getStakedAmount(
         aliceDelegate.address,
         tokenDAI.address,
-        tokenWETH.address
+        tokenWETH.address,
+        PROTOCOL
       )
       equal(scoreAfter.toNumber(), INTENT_AMOUNT, 'intent score is incorrect')
 
@@ -236,7 +242,8 @@ contract('Delegate Integration Tests', async accounts => {
       const scoreBefore = await indexer.getStakedAmount(
         aliceDelegate.address,
         tokenDAI.address,
-        tokenWETH.address
+        tokenWETH.address,
+        PROTOCOL
       )
       equal(scoreBefore.toNumber(), INTENT_AMOUNT, 'intent score is incorrect')
 
@@ -261,7 +268,8 @@ contract('Delegate Integration Tests', async accounts => {
       const scoreAfter = await indexer.getStakedAmount(
         aliceDelegate.address,
         tokenDAI.address,
-        tokenWETH.address
+        tokenWETH.address,
+        PROTOCOL
       )
       equal(
         scoreAfter.toNumber(),
@@ -286,7 +294,8 @@ contract('Delegate Integration Tests', async accounts => {
       const scoreBefore = await indexer.getStakedAmount(
         aliceDelegate.address,
         tokenDAI.address,
-        tokenWETH.address
+        tokenWETH.address,
+        PROTOCOL
       )
       equal(
         scoreBefore.toNumber(),
@@ -315,7 +324,8 @@ contract('Delegate Integration Tests', async accounts => {
       const scoreAfter = await indexer.getStakedAmount(
         aliceDelegate.address,
         tokenDAI.address,
-        tokenWETH.address
+        tokenWETH.address,
+        PROTOCOL
       )
       equal(scoreAfter.toNumber(), 0, 'intent score is incorrect')
 
@@ -336,7 +346,8 @@ contract('Delegate Integration Tests', async accounts => {
       const scoreBefore = await indexer.getStakedAmount(
         aliceDelegate.address,
         tokenDAI.address,
-        tokenWETH.address
+        tokenWETH.address,
+        PROTOCOL
       )
       equal(scoreBefore.toNumber(), 0, 'intent score is incorrect')
 
@@ -361,7 +372,8 @@ contract('Delegate Integration Tests', async accounts => {
       const scoreAfter = await indexer.getStakedAmount(
         aliceDelegate.address,
         tokenDAI.address,
-        tokenWETH.address
+        tokenWETH.address,
+        PROTOCOL
       )
       equal(scoreAfter.toNumber(), INTENT_AMOUNT, 'intent score is incorrect')
 
@@ -382,7 +394,8 @@ contract('Delegate Integration Tests', async accounts => {
       const scoreBefore = await indexer.getStakedAmount(
         aliceDelegate.address,
         tokenDAI.address,
-        tokenWETH.address
+        tokenWETH.address,
+        PROTOCOL
       )
       equal(scoreBefore.toNumber(), INTENT_AMOUNT, 'intent score is incorrect')
 
@@ -405,7 +418,8 @@ contract('Delegate Integration Tests', async accounts => {
       const scoreAfter = await indexer.getStakedAmount(
         aliceDelegate.address,
         tokenDAI.address,
-        tokenWETH.address
+        tokenWETH.address,
+        PROTOCOL
       )
       equal(scoreAfter.toNumber(), INTENT_AMOUNT, 'intent score is incorrect')
 
@@ -421,7 +435,8 @@ contract('Delegate Integration Tests', async accounts => {
       const scoreBefore = await indexer.getStakedAmount(
         aliceDelegate.address,
         tokenDAI.address,
-        tokenWETH.address
+        tokenWETH.address,
+        PROTOCOL
       )
       equal(scoreBefore.toNumber(), INTENT_AMOUNT, 'intent score is incorrect')
 
@@ -435,7 +450,8 @@ contract('Delegate Integration Tests', async accounts => {
       const scoreAfter = await indexer.getStakedAmount(
         aliceDelegate.address,
         tokenDAI.address,
-        tokenWETH.address
+        tokenWETH.address,
+        PROTOCOL
       )
       equal(scoreAfter.toNumber(), 0, 'intent score is incorrect')
 
@@ -457,7 +473,8 @@ contract('Delegate Integration Tests', async accounts => {
       const scoreBefore = await indexer.getStakedAmount(
         aliceDelegate.address,
         tokenDAI.address,
-        tokenWETH.address
+        tokenWETH.address,
+        PROTOCOL
       )
       equal(scoreBefore.toNumber(), 0, 'intent score is incorrect')
 
@@ -482,7 +499,8 @@ contract('Delegate Integration Tests', async accounts => {
       let scoreAfter = await indexer.getStakedAmount(
         aliceDelegate.address,
         tokenDAI.address,
-        tokenWETH.address
+        tokenWETH.address,
+        PROTOCOL
       )
       equal(scoreAfter.toNumber(), 0, 'intent score is incorrect')
 
@@ -500,7 +518,8 @@ contract('Delegate Integration Tests', async accounts => {
       scoreAfter = await indexer.getStakedAmount(
         aliceDelegate.address,
         tokenDAI.address,
-        tokenWETH.address
+        tokenWETH.address,
+        PROTOCOL
       )
       equal(scoreAfter.toNumber(), 0, 'intent score is incorrect')
 
