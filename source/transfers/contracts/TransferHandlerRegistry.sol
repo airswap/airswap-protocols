@@ -1,7 +1,6 @@
 pragma solidity 0.5.12;
 
 import "./interfaces/ITransferHandler.sol";
-import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 /**
   * @title TransferHandlerRegistry: holds registry of contract to
@@ -24,7 +23,6 @@ contract TransferHandlerRegistry {
 
   /**
   * @notice Adds handler to mapping
-  * @dev only Owner is permissioned
   * @param _kind bytes4
   * @param _transferHandler ITransferHandler
   */
@@ -36,7 +34,6 @@ contract TransferHandlerRegistry {
 
   /**
   * @notice Removes handler from mapping
-  * @dev only Owner is permissioned
   * @param _kind bytes4
   */
   function removeTransferHandler(bytes4 _kind)

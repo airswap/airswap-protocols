@@ -21,7 +21,7 @@
     "@airswap/test-utils": "0.1.3"
   },
   "dependencies": {
-    "openzeppelin-solidity": "^v2.2",
+    "openzeppelin-solidity": "^v2.4",
     "solidity-coverage": "^0.6.3"
   }
 }

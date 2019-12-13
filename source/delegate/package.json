@@ -33,6 +33,6 @@
   "dependencies": {
     "@airswap/indexer": "2.6.7",
     "@airswap/swap": "3.3.5",
-    "openzeppelin-solidity": "2.3"
+    "openzeppelin-solidity": "2.4"
   }
 }

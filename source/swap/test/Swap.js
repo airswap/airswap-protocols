@@ -9,7 +9,6 @@ const PartialKittyCoreTransferHandler = artifacts.require(
 )
 const ERC20TransferHandler = artifacts.require('ERC20TransferHandler')
 const ERC721TransferHandler = artifacts.require('ERC721TransferHandler')
-const USDTTransferHandler = artifacts.require('USDTTransferHandler')
 
 const {
   emitted,
@@ -37,7 +36,8 @@ contract('Swap', async accounts => {
   const bobAddress = accounts[1]
   const carolAddress = accounts[2]
   const davidAddress = accounts[3]
-
+  const CKITTY_KIND = '0x9a20483d'
+  const UNKNOWN_KIND = '0xffffffff'
   let swapContract
   let swapAddress
   let tokenAST
@@ -87,13 +87,9 @@ contract('Swap', async accounts => {
       const kittyCore = await PartialKittyCoreTransferHandler.new()
       const erc20TransferHandler = await ERC20TransferHandler.new()
       const erc721TransferHandler = await ERC721TransferHandler.new()
-      const usdtaTransferHandler = await USDTTransferHandler.new()
 
       // add all 4 of these contracts into the TokenRegistry
-      transferHandlerRegistry.addTransferHandler(
-        '0x9a20483d',
-        kittyCore.address
-      )
+      transferHandlerRegistry.addTransferHandler(CKITTY_KIND, kittyCore.address)
       transferHandlerRegistry.addTransferHandler(
         ERC20_INTERFACE_ID,
         erc20TransferHandler.address
@@ -101,10 +97,6 @@ contract('Swap', async accounts => {
       transferHandlerRegistry.addTransferHandler(
         ERC721_INTERFACE_ID,
         erc721TransferHandler.address
-      )
-      transferHandlerRegistry.addTransferHandler(
-        '0xffffffff',
-        usdtaTransferHandler.address
       )
     })
 
@@ -338,7 +330,6 @@ contract('Swap', async accounts => {
               wallet: aliceAddress,
               token: tokenOMG.address,
               param: 200,
-              kind: '0xffffffff',
             },
             sender: {
               wallet: bobAddress,
@@ -1050,7 +1041,7 @@ contract('Swap', async accounts => {
             wallet: aliceAddress,
             token: tokenTicket.address,
             param: 12345,
-            kind: '0x1111111',
+            kind: UNKNOWN_KIND,
           },
           sender: {
             wallet: bobAddress,
