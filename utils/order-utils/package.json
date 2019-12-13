@@ -15,7 +15,7 @@
   },
   "scripts": {
     "ganache": "ganache-cli -p 8545 --gasLimit 0xfffffffffff --time '2017-05-10T00:00:00+00:00' -s 0",
-    "test": "mocha test --timeout 3000"
+    "test": "mocha test --timeout 3000 --exit"
   },
   "devDependencies": {
     "chai": "^4.2.0",
