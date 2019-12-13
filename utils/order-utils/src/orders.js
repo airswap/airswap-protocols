@@ -179,7 +179,7 @@ const checkERC721Transfer = async (order, partyName, provider, errors) => {
   )
 
   // check balance
-  await tokenContract.ownerOf(party['amount']).then(owner => {
+  await tokenContract.ownerOf(party['id']).then(owner => {
     if (owner.toLowerCase() !== party['wallet']) {
       errors.push(`${partyName} doesn't own NFT`)
     }
@@ -187,14 +187,14 @@ const checkERC721Transfer = async (order, partyName, provider, errors) => {
 
   try {
     // try a normal erc721 approval
-    await tokenContract.getApproved(party['amount']).then(operator => {
+    await tokenContract.getApproved(party['id']).then(operator => {
       if (operator !== order['signature']['validator']) {
         errors.push(`${partyName} no NFT approval`)
       }
     })
   } catch (error) {
     // if it didn't exist try a cryptokitties approval
-    await tokenContract.kittyIndexToApproved(party['amount']).then(operator => {
+    await tokenContract.kittyIndexToApproved(party['id']).then(operator => {
       if (operator !== order['signature']['validator']) {
         errors.push(`${partyName} no NFT approval`)
       }
@@ -215,7 +215,7 @@ const checkERC721Transfer = async (order, partyName, provider, errors) => {
       await nftReceiver.callStatic.onERC721Received(
         party['wallet'],
         party['wallet'],
-        party['amount'],
+        party['id'],
         '0x00'
       )
     } catch (error) {
@@ -280,6 +280,9 @@ const isValidOrder = order => {
     'amount' in order['signer'] &&
     'amount' in order['sender'] &&
     'amount' in order['affiliate'] &&
+    'id' in order['signer'] &&
+    'id' in order['sender'] &&
+    'id' in order['affiliate'] &&
     'signatory' in order['signature'] &&
     'validator' in order['signature'] &&
     'r' in order['signature'] &&
@@ -339,6 +342,8 @@ module.exports = {
       'token' in quote['sender'] &&
       'amount' in quote['signer'] &&
       'amount' in quote['sender'] &&
+      'id' in quote['signer'] &&
+      'id' in quote['sender'] &&
       !('signature' in quote)
     )
   },

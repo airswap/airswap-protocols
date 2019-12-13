@@ -50,7 +50,8 @@ module.exports = {
       { name: 'kind', type: 'bytes4' },
       { name: 'wallet', type: 'address' },
       { name: 'token', type: 'address' },
-      { name: 'param', type: 'uint256' },
+      { name: 'amount', type: 'uint256' },
+      { name: 'id', type: 'uint256' },
     ],
   },
   defaults: {
