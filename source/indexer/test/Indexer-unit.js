@@ -31,6 +31,9 @@ contract('Indexer Unit Tests', async accounts => {
   const carolLocator = padAddressToLocator(carolAddress)
   const emptyLocator = padAddressToLocator(EMPTY_ADDRESS)
 
+  const PROTOCOL_1 = '0x0001'
+  const PROTOCOL_2 = '0x0002'
+
   let indexer
   let snapshotId
   let stakingTokenMock
@@ -74,7 +77,7 @@ contract('Indexer Unit Tests', async accounts => {
     await setupMockContracts()
     indexer = await Indexer.new(stakingTokenAddress)
     whitelistedIndexer = await Indexer.new(stakingTokenAddress)
-    await whitelistedIndexer.setLocatorWhitelist(whitelistAddress)
+    await whitelistedIndexer.setLocatorWhitelist(PROTOCOL_1, whitelistAddress)
   })
 
   describe('Check constructor', async () => {
@@ -90,29 +93,37 @@ contract('Indexer Unit Tests', async accounts => {
 
   describe('Test createIndex', async () => {
     it('createIndex should emit an event and create a new index', async () => {
-      const result = await indexer.createIndex(tokenOne, tokenTwo, {
+      const result = await indexer.createIndex(tokenOne, tokenTwo, PROTOCOL_1, {
         from: aliceAddress,
       })
 
       // event is emitted
       emitted(result, 'CreateIndex', event => {
-        return event.signerToken === tokenOne && event.senderToken === tokenTwo
+        return (
+          event.signerToken === tokenOne &&
+          event.senderToken === tokenTwo &&
+          event.protocol == PROTOCOL_1
+        )
       })
     })
 
     it('createIndex should just return an address if the index exists', async () => {
       // create the index - so that it already exists
-      await indexer.createIndex(tokenOne, tokenTwo, {
+      await indexer.createIndex(tokenOne, tokenTwo, PROTOCOL_1, {
         from: aliceAddress,
       })
 
       // now trying to create it again will not emit the event
-      const result = await indexer.createIndex(tokenOne, tokenTwo, {
+      const result = await indexer.createIndex(tokenOne, tokenTwo, PROTOCOL_1, {
         from: aliceAddress,
       })
 
       notEmitted(result, 'CreateIndex', event => {
-        return event.signerToken === tokenOne && event.senderToken === tokenTwo
+        return (
+          event.signerToken === tokenOne &&
+          event.senderToken === tokenTwo &&
+          event.protocol === PROTOCOL_1
+        )
       })
     })
   })
@@ -194,7 +205,7 @@ contract('Indexer Unit Tests', async accounts => {
   describe('Test setIntent', async () => {
     it('should not set an intent if the index doesnt exist', async () => {
       await reverted(
-        indexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
+        indexer.setIntent(tokenOne, tokenTwo, PROTOCOL_1, 250, aliceLocator, {
           from: aliceAddress,
         }),
         'INDEX_DOES_NOT_EXIST'
@@ -203,21 +214,28 @@ contract('Indexer Unit Tests', async accounts => {
 
     it('should not set an intent if the locator is not whitelisted', async () => {
       // make the index first
-      await whitelistedIndexer.createIndex(tokenOne, tokenTwo, {
+      await whitelistedIndexer.createIndex(tokenOne, tokenTwo, PROTOCOL_1, {
         from: aliceAddress,
       })
 
       await reverted(
-        whitelistedIndexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
-          from: aliceAddress,
-        }),
+        whitelistedIndexer.setIntent(
+          tokenOne,
+          tokenTwo,
+          PROTOCOL_1,
+          250,
+          aliceLocator,
+          {
+            from: aliceAddress,
+          }
+        ),
         'LOCATOR_NOT_WHITELISTED'
       )
     })
 
     it('should not set an intent if a token is blacklisted', async () => {
       // make the index first
-      await indexer.createIndex(tokenOne, tokenTwo, {
+      await indexer.createIndex(tokenOne, tokenTwo, PROTOCOL_1, {
         from: aliceAddress,
       })
 
@@ -228,7 +246,7 @@ contract('Indexer Unit Tests', async accounts => {
 
       // now try to stake with a blacklisted tokenOne
       await reverted(
-        indexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
+        indexer.setIntent(tokenOne, tokenTwo, PROTOCOL_1, 250, aliceLocator, {
           from: aliceAddress,
         }),
         'PAIR_IS_BLACKLISTED'
@@ -245,7 +263,7 @@ contract('Indexer Unit Tests', async accounts => {
 
       // now try to stake with a blacklisted tokenTwo
       await reverted(
-        indexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
+        indexer.setIntent(tokenOne, tokenTwo, PROTOCOL_1, 250, aliceLocator, {
           from: aliceAddress,
         }),
         'PAIR_IS_BLACKLISTED'
@@ -254,7 +272,7 @@ contract('Indexer Unit Tests', async accounts => {
 
     it('should not set an intent if the staking tokens arent approved', async () => {
       // make the index first
-      await indexer.createIndex(tokenOne, tokenTwo, {
+      await indexer.createIndex(tokenOne, tokenTwo, PROTOCOL_1, {
         from: aliceAddress,
       })
 
@@ -263,7 +281,7 @@ contract('Indexer Unit Tests', async accounts => {
 
       // now try to set an intent
       await reverted(
-        indexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
+        indexer.setIntent(tokenOne, tokenTwo, PROTOCOL_1, 250, aliceLocator, {
           from: aliceAddress,
         }),
         'UNABLE_TO_STAKE'
@@ -272,7 +290,7 @@ contract('Indexer Unit Tests', async accounts => {
 
     it('should set a valid intent on a non-whitelisted indexer', async () => {
       // make the index first
-      await indexer.createIndex(tokenOne, tokenTwo, {
+      await indexer.createIndex(tokenOne, tokenTwo, PROTOCOL_1, {
         from: aliceAddress,
       })
 
@@ -280,6 +298,7 @@ contract('Indexer Unit Tests', async accounts => {
       const result = await indexer.setIntent(
         tokenOne,
         tokenTwo,
+        PROTOCOL_1,
         250,
         aliceLocator,
         {
@@ -300,7 +319,7 @@ contract('Indexer Unit Tests', async accounts => {
 
     it('should set a valid intent on a whitelisted indexer', async () => {
       // make the index first
-      await whitelistedIndexer.createIndex(tokenOne, tokenTwo, {
+      await whitelistedIndexer.createIndex(tokenOne, tokenTwo, PROTOCOL_1, {
         from: aliceAddress,
       })
 
@@ -311,6 +330,7 @@ contract('Indexer Unit Tests', async accounts => {
       const result = await whitelistedIndexer.setIntent(
         tokenOne,
         tokenTwo,
+        PROTOCOL_1,
         250,
         bobLocator,
         {
@@ -331,19 +351,27 @@ contract('Indexer Unit Tests', async accounts => {
 
     it('should update an intent if the user has already staked - increase stake', async () => {
       // make the index first
-      await indexer.createIndex(tokenOne, tokenTwo, {
+      await indexer.createIndex(tokenOne, tokenTwo, PROTOCOL_1, {
         from: aliceAddress,
       })
 
       // set one intent
-      await indexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
-        from: aliceAddress,
-      })
+      await indexer.setIntent(
+        tokenOne,
+        tokenTwo,
+        PROTOCOL_1,
+        250,
+        aliceLocator,
+        {
+          from: aliceAddress,
+        }
+      )
 
       let stakedAmount = await indexer.getStakedAmount.call(
         aliceAddress,
         tokenOne,
-        tokenTwo
+        tokenTwo,
+        PROTOCOL_1
       )
 
       equal(stakedAmount, 250, 'Staked amount incorrect')
@@ -352,6 +380,7 @@ contract('Indexer Unit Tests', async accounts => {
       const result = await indexer.setIntent(
         tokenOne,
         tokenTwo,
+        PROTOCOL_1,
         350,
         aliceLocator,
         {
@@ -364,7 +393,8 @@ contract('Indexer Unit Tests', async accounts => {
       stakedAmount = await indexer.getStakedAmount.call(
         aliceAddress,
         tokenOne,
-        tokenTwo
+        tokenTwo,
+        PROTOCOL_1
       )
 
       equal(stakedAmount, 350, 'Staked amount did not increase')
@@ -372,19 +402,27 @@ contract('Indexer Unit Tests', async accounts => {
 
     it('should fail updating the intent when transfer of staking tokens fails', async () => {
       // make the index first
-      await indexer.createIndex(tokenOne, tokenTwo, {
+      await indexer.createIndex(tokenOne, tokenTwo, PROTOCOL_1, {
         from: aliceAddress,
       })
 
       // set one intent
-      await indexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
-        from: aliceAddress,
-      })
+      await indexer.setIntent(
+        tokenOne,
+        tokenTwo,
+        PROTOCOL_1,
+        250,
+        aliceLocator,
+        {
+          from: aliceAddress,
+        }
+      )
 
       let stakedAmount = await indexer.getStakedAmount.call(
         aliceAddress,
         tokenOne,
-        tokenTwo
+        tokenTwo,
+        PROTOCOL_1
       )
 
       equal(stakedAmount, 250, 'Staked amount incorrect')
@@ -394,7 +432,7 @@ contract('Indexer Unit Tests', async accounts => {
 
       // now try to update an intent by increasing transfer by 100
       await reverted(
-        indexer.setIntent(tokenOne, tokenTwo, 350, aliceLocator, {
+        indexer.setIntent(tokenOne, tokenTwo, PROTOCOL_1, 350, aliceLocator, {
           from: aliceAddress,
         }),
         'UNABLE_TO_STAKE'
@@ -403,7 +441,8 @@ contract('Indexer Unit Tests', async accounts => {
       stakedAmount = await indexer.getStakedAmount.call(
         aliceAddress,
         tokenOne,
-        tokenTwo
+        tokenTwo,
+        PROTOCOL_1
       )
 
       // Check that the staked amount has not been changed
@@ -411,7 +450,7 @@ contract('Indexer Unit Tests', async accounts => {
 
       // Reduce the intent with the transfer ultimately failing
       await reverted(
-        indexer.setIntent(tokenOne, tokenTwo, 10, aliceLocator, {
+        indexer.setIntent(tokenOne, tokenTwo, PROTOCOL_1, 10, aliceLocator, {
           from: aliceAddress,
         })
       )
@@ -419,7 +458,8 @@ contract('Indexer Unit Tests', async accounts => {
       stakedAmount = await indexer.getStakedAmount.call(
         aliceAddress,
         tokenOne,
-        tokenTwo
+        tokenTwo,
+        PROTOCOL_1
       )
 
       // ensure that the staked amount does not change
@@ -428,19 +468,27 @@ contract('Indexer Unit Tests', async accounts => {
 
     it('should update an intent if the user has already staked - decrease stake', async () => {
       // make the index first
-      await indexer.createIndex(tokenOne, tokenTwo, {
+      await indexer.createIndex(tokenOne, tokenTwo, PROTOCOL_1, {
         from: aliceAddress,
       })
 
       // set one intent
-      await indexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
-        from: aliceAddress,
-      })
+      await indexer.setIntent(
+        tokenOne,
+        tokenTwo,
+        PROTOCOL_1,
+        250,
+        aliceLocator,
+        {
+          from: aliceAddress,
+        }
+      )
 
       let stakedAmount = await indexer.getStakedAmount.call(
         aliceAddress,
         tokenOne,
-        tokenTwo
+        tokenTwo,
+        PROTOCOL_1
       )
 
       equal(stakedAmount, 250, 'Staked amount incorrect')
@@ -449,6 +497,7 @@ contract('Indexer Unit Tests', async accounts => {
       const result = await indexer.setIntent(
         tokenOne,
         tokenTwo,
+        PROTOCOL_1,
         150,
         aliceLocator,
         {
@@ -461,7 +510,8 @@ contract('Indexer Unit Tests', async accounts => {
       stakedAmount = await indexer.getStakedAmount.call(
         aliceAddress,
         tokenOne,
-        tokenTwo
+        tokenTwo,
+        PROTOCOL_1
       )
 
       equal(stakedAmount, 150, 'Staked amount did not decrease')
@@ -469,19 +519,27 @@ contract('Indexer Unit Tests', async accounts => {
 
     it('should update an intent if the user has already staked - same stake', async () => {
       // make the index first
-      await indexer.createIndex(tokenOne, tokenTwo, {
+      await indexer.createIndex(tokenOne, tokenTwo, PROTOCOL_1, {
         from: aliceAddress,
       })
 
       // set one intent
-      await indexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
-        from: aliceAddress,
-      })
+      await indexer.setIntent(
+        tokenOne,
+        tokenTwo,
+        PROTOCOL_1,
+        250,
+        aliceLocator,
+        {
+          from: aliceAddress,
+        }
+      )
 
       let stakedAmount = await indexer.getStakedAmount.call(
         aliceAddress,
         tokenOne,
-        tokenTwo
+        tokenTwo,
+        PROTOCOL_1
       )
 
       equal(stakedAmount, 250, 'Staked amount incorrect')
@@ -490,6 +548,7 @@ contract('Indexer Unit Tests', async accounts => {
       const result = await indexer.setIntent(
         tokenOne,
         tokenTwo,
+        PROTOCOL_1,
         250,
         bobLocator,
         {
@@ -502,7 +561,8 @@ contract('Indexer Unit Tests', async accounts => {
       stakedAmount = await indexer.getStakedAmount.call(
         aliceAddress,
         tokenOne,
-        tokenTwo
+        tokenTwo,
+        PROTOCOL_1
       )
 
       equal(stakedAmount, 250, 'Staked amount did not stay same')
@@ -512,7 +572,7 @@ contract('Indexer Unit Tests', async accounts => {
   describe('Test unsetIntent', async () => {
     it('should not unset an intent if the index doesnt exist', async () => {
       await reverted(
-        indexer.unsetIntent(tokenOne, tokenTwo, {
+        indexer.unsetIntent(tokenOne, tokenTwo, PROTOCOL_1, {
           from: aliceAddress,
         }),
         'INDEX_DOES_NOT_EXIST'
@@ -521,13 +581,13 @@ contract('Indexer Unit Tests', async accounts => {
 
     it('should not unset an intent if the intent does not exist', async () => {
       // create the index
-      await indexer.createIndex(tokenOne, tokenTwo, {
+      await indexer.createIndex(tokenOne, tokenTwo, PROTOCOL_1, {
         from: aliceAddress,
       })
 
       // now try to unset a non-existent intent
       await reverted(
-        indexer.unsetIntent(tokenOne, tokenTwo, {
+        indexer.unsetIntent(tokenOne, tokenTwo, PROTOCOL_1, {
           from: aliceAddress,
         }),
         'ENTRY_DOES_NOT_EXIST'
@@ -536,17 +596,24 @@ contract('Indexer Unit Tests', async accounts => {
 
     it('should successfully unset an intent', async () => {
       // create the index
-      await indexer.createIndex(tokenOne, tokenTwo, {
+      await indexer.createIndex(tokenOne, tokenTwo, PROTOCOL_1, {
         from: aliceAddress,
       })
 
       // create the intent
-      await indexer.setIntent(tokenOne, tokenTwo, 250, aliceLocator, {
-        from: aliceAddress,
-      })
+      await indexer.setIntent(
+        tokenOne,
+        tokenTwo,
+        PROTOCOL_1,
+        250,
+        aliceLocator,
+        {
+          from: aliceAddress,
+        }
+      )
 
       // now try to unset the intent
-      const tx = await indexer.unsetIntent(tokenOne, tokenTwo, {
+      const tx = await indexer.unsetIntent(tokenOne, tokenTwo, PROTOCOL_1, {
         from: aliceAddress,
       })
 
@@ -564,14 +631,21 @@ contract('Indexer Unit Tests', async accounts => {
 
     it('should revert if unset an intent failed in token transfer', async () => {
       // create the index
-      await indexer.createIndex(tokenOne, tokenTwo, {
+      await indexer.createIndex(tokenOne, tokenTwo, PROTOCOL_1, {
         from: aliceAddress,
       })
 
       // create the intent
-      await indexer.setIntent(tokenOne, tokenTwo, 10, aliceLocator, {
-        from: aliceAddress,
-      })
+      await indexer.setIntent(
+        tokenOne,
+        tokenTwo,
+        PROTOCOL_1,
+        10,
+        aliceLocator,
+        {
+          from: aliceAddress,
+        }
+      )
 
       // mock the token transfer method to fail
       const token_transfer = fungibleTokenTemplate.contract.methods
@@ -583,7 +657,7 @@ contract('Indexer Unit Tests', async accounts => {
 
       // reverts if transfer failed
       await reverted(
-        indexer.unsetIntent(tokenOne, tokenTwo, {
+        indexer.unsetIntent(tokenOne, tokenTwo, PROTOCOL_1, {
           from: aliceAddress,
         })
       )
@@ -595,6 +669,7 @@ contract('Indexer Unit Tests', async accounts => {
       result = await indexer.getLocators.call(
         tokenOne,
         tokenTwo,
+        PROTOCOL_1,
         EMPTY_ADDRESS,
         3
       )
@@ -605,12 +680,12 @@ contract('Indexer Unit Tests', async accounts => {
 
     it('should return blank results if a token is blacklisted', async () => {
       // create index
-      await indexer.createIndex(tokenOne, tokenTwo, {
+      await indexer.createIndex(tokenOne, tokenTwo, PROTOCOL_1, {
         from: aliceAddress,
       })
 
       // set an intent staking 0
-      await indexer.setIntent(tokenOne, tokenTwo, 0, aliceLocator, {
+      await indexer.setIntent(tokenOne, tokenTwo, PROTOCOL_1, 0, aliceLocator, {
         from: aliceAddress,
       })
 
@@ -623,6 +698,7 @@ contract('Indexer Unit Tests', async accounts => {
       result = await indexer.getLocators.call(
         tokenOne,
         tokenTwo,
+        PROTOCOL_1,
         EMPTY_ADDRESS,
         4
       )
@@ -633,25 +709,40 @@ contract('Indexer Unit Tests', async accounts => {
 
     it('should otherwise return the intents', async () => {
       // create index
-      await indexer.createIndex(tokenOne, tokenTwo, {
+      await indexer.createIndex(tokenOne, tokenTwo, PROTOCOL_1, {
         from: aliceAddress,
       })
 
       // set two intents
-      await indexer.setIntent(tokenOne, tokenTwo, 50, aliceLocator, {
-        from: aliceAddress,
-      })
-      await indexer.setIntent(tokenOne, tokenTwo, 100, bobLocator, {
+      await indexer.setIntent(
+        tokenOne,
+        tokenTwo,
+        PROTOCOL_1,
+        50,
+        aliceLocator,
+        {
+          from: aliceAddress,
+        }
+      )
+      await indexer.setIntent(tokenOne, tokenTwo, PROTOCOL_1, 100, bobLocator, {
         from: bobAddress,
       })
-      await indexer.setIntent(tokenOne, tokenTwo, 75, carolLocator, {
-        from: carolAddress,
-      })
+      await indexer.setIntent(
+        tokenOne,
+        tokenTwo,
+        PROTOCOL_1,
+        75,
+        carolLocator,
+        {
+          from: carolAddress,
+        }
+      )
 
       // now try to get the intents
       result = await indexer.getLocators.call(
         tokenOne,
         tokenTwo,
+        PROTOCOL_1,
         EMPTY_ADDRESS,
         4
       )
@@ -672,6 +763,7 @@ contract('Indexer Unit Tests', async accounts => {
       result = await indexer.getLocators.call(
         tokenOne,
         tokenTwo,
+        PROTOCOL_1,
         EMPTY_ADDRESS,
         1
       )
@@ -685,6 +777,7 @@ contract('Indexer Unit Tests', async accounts => {
       result = await indexer.getLocators.call(
         tokenOne,
         tokenTwo,
+        PROTOCOL_1,
         carolAddress,
         5
       )
@@ -708,6 +801,7 @@ contract('Indexer Unit Tests', async accounts => {
         aliceAddress,
         tokenOne,
         tokenTwo,
+        PROTOCOL_1,
         {
           from: aliceAddress,
         }
@@ -718,19 +812,27 @@ contract('Indexer Unit Tests', async accounts => {
 
     it('should retrieve the score on a token pair for a user', async () => {
       // create index
-      await indexer.createIndex(tokenOne, tokenTwo, {
+      await indexer.createIndex(tokenOne, tokenTwo, PROTOCOL_1, {
         from: aliceAddress,
       })
 
       const stakeAmount = 1000
-      await indexer.setIntent(tokenOne, tokenTwo, stakeAmount, aliceLocator, {
-        from: aliceAddress,
-      })
+      await indexer.setIntent(
+        tokenOne,
+        tokenTwo,
+        PROTOCOL_1,
+        stakeAmount,
+        aliceLocator,
+        {
+          from: aliceAddress,
+        }
+      )
 
       const val = await indexer.getStakedAmount.call(
         aliceAddress,
         tokenOne,
-        tokenTwo
+        tokenTwo,
+        PROTOCOL_1
       )
       equal(val.toNumber(), stakeAmount, 'stake was improperly saved')
     })
