@@ -31,7 +31,7 @@ contract Indexer is IIndexer, Ownable {
   // Token to be used for staking (ERC-20)
   IERC20 public stakingToken;
 
-  // Mapping of signer token to sender token to type to index
+  // Mapping of signer token to sender token to protocol type to index
   mapping (address => mapping (address => mapping (bytes2 => Index))) public indexes;
 
   // The whitelist contract for checking whether a peer is whitelisted per peer type

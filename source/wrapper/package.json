@@ -30,7 +30,8 @@
   "devDependencies": {
     "@airswap/order-utils": "0.3.14",
     "@airswap/test-utils": "0.1.3",
-    "@airswap/indexer": "2.6.7"
+    "@airswap/indexer": "2.6.7",
+    "solidity-coverage": "^0.6.3"
   },
   "dependencies": {
     "@airswap/delegate": "0.5.6",
