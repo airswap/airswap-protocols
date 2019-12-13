@@ -107,6 +107,27 @@ contract('Indexer Unit Tests', async accounts => {
       })
     })
 
+    it('createIndex should create index for same token pair but different protocol', async () => {
+      // create an index for protocol 1
+      await indexer.createIndex(tokenOne, tokenTwo, PROTOCOL_1, {
+        from: aliceAddress,
+      })
+
+      // now create the same market but different protocol
+      const result = await indexer.createIndex(tokenOne, tokenTwo, PROTOCOL_2, {
+        from: aliceAddress,
+      })
+
+      // event is emitted
+      emitted(result, 'CreateIndex', event => {
+        return (
+          event.signerToken === tokenOne &&
+          event.senderToken === tokenTwo &&
+          event.protocol == PROTOCOL_2
+        )
+      })
+    })
+
     it('createIndex should just return an address if the index exists', async () => {
       // create the index - so that it already exists
       await indexer.createIndex(tokenOne, tokenTwo, PROTOCOL_1, {
@@ -313,6 +334,61 @@ contract('Indexer Unit Tests', async accounts => {
           event.signerToken === tokenOne &&
           event.senderToken == tokenTwo &&
           event.stakeAmount.toNumber() === 250
+        )
+      })
+    })
+
+    it('should set 2 intents for different protocols on the same market', async () => {
+      // make the indexes first
+      await indexer.createIndex(tokenOne, tokenTwo, PROTOCOL_1, {
+        from: aliceAddress,
+      })
+      // make the index first
+      await indexer.createIndex(tokenOne, tokenTwo, PROTOCOL_2, {
+        from: aliceAddress,
+      })
+
+      // now set an intent
+      let result = await indexer.setIntent(
+        tokenOne,
+        tokenTwo,
+        PROTOCOL_1,
+        100,
+        aliceLocator,
+        {
+          from: aliceAddress,
+        }
+      )
+      passes(result)
+
+      emitted(result, 'Stake', event => {
+        return (
+          event.staker === aliceAddress &&
+          event.signerToken === tokenOne &&
+          event.senderToken == tokenTwo &&
+          event.stakeAmount.toNumber() === 100
+        )
+      })
+
+      // now set the other intent
+      result = await indexer.setIntent(
+        tokenOne,
+        tokenTwo,
+        PROTOCOL_2,
+        150,
+        aliceLocator,
+        {
+          from: aliceAddress,
+        }
+      )
+      passes(result)
+
+      emitted(result, 'Stake', event => {
+        return (
+          event.staker === aliceAddress &&
+          event.signerToken === tokenOne &&
+          event.senderToken == tokenTwo &&
+          event.stakeAmount.toNumber() === 150
         )
       })
     })
