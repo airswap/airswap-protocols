@@ -990,7 +990,7 @@ contract('Swap', async accounts => {
         signer: {
           wallet: aliceAddress,
           token: tokenTicket.address,
-          amount: 12345,
+          id: 12345,
           kind: ERC721_INTERFACE_ID,
         },
         sender: {
@@ -1027,7 +1027,7 @@ contract('Swap', async accounts => {
         sender: {
           wallet: bobAddress,
           token: tokenKitty.address,
-          amount: 54321,
+          id: 54321,
           kind: ERC721_INTERFACE_ID,
         },
       })
@@ -1063,7 +1063,7 @@ contract('Swap', async accounts => {
         affiliate: {
           wallet: carolAddress,
           token: tokenKitty.address,
-          amount: 54321,
+          id: 54321,
           kind: ERC721_INTERFACE_ID,
         },
       })

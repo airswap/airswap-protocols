@@ -137,6 +137,7 @@ contract Swap is ISwap {
       finalSenderWallet,
       order.signer.wallet,
       order.sender.amount,
+      order.sender.id,
       order.sender.token,
       order.sender.kind
     );
@@ -146,6 +147,7 @@ contract Swap is ISwap {
       order.signer.wallet,
       finalSenderWallet,
       order.signer.amount,
+      order.signer.id,
       order.signer.token,
       order.signer.kind
     );
@@ -156,15 +158,27 @@ contract Swap is ISwap {
         order.signer.wallet,
         order.affiliate.wallet,
         order.affiliate.amount,
+        order.affiliate.id,
         order.affiliate.token,
         order.affiliate.kind
       );
     }
 
-    emit Swap(order.nonce, block.timestamp,
-      order.signer.wallet, order.signer.amount, order.signer.token,
-      finalSenderWallet, order.sender.amount, order.sender.token,
-      order.affiliate.wallet, order.affiliate.amount, order.affiliate.token
+    emit Swap(
+      order.nonce,
+      block.timestamp,
+      order.signer.wallet,
+      order.signer.amount,
+      order.signer.id,
+      order.signer.token,
+      finalSenderWallet,
+      order.sender.amount,
+      order.sender.id,
+      order.sender.token,
+      order.affiliate.wallet,
+      order.affiliate.amount,
+      order.affiliate.id,
+      order.affiliate.token
     );
   }
 
@@ -330,6 +344,7 @@ contract Swap is ISwap {
     * @param from address Wallet address to transfer from
     * @param to address Wallet address to transfer to
     * @param amount uint256 Amount for ERC-20 or token ID for ERC-721
+    * @param id token ID for ERC-721
     * @param token address Contract address of token
     * @param kind bytes4 EIP-165 interface ID of the token
     */
@@ -337,6 +352,7 @@ contract Swap is ISwap {
       address from,
       address to,
       uint256 amount,
+      uint256 id,
       address token,
       bytes4 kind
   ) internal {
@@ -347,7 +363,7 @@ contract Swap is ISwap {
     if (kind == ERC721_INTERFACE_ID) {
 
       // Attempt to transfer an ERC-721 token.
-      IERC721(token).transferFrom(from, to, amount);
+      IERC721(token).transferFrom(from, to, id);
 
     } else {
       uint256 initialBalance = INRERC20(token).balanceOf(from);
