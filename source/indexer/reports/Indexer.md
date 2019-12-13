@@ -19,6 +19,8 @@ Indexer is comprised of several contracts.
 
 [@airswap/indexer/contracts/Indexer.sol](../contracts/Indexer.sol) @ [b87d292aaf6e28ede564b7ea28ece39219994607](https://github.com/airswap/airswap-protocols/commit/b87d292aaf6e28ede564b7ea28ece39219994607)
 
+[@airswap/indexer/contracts/Index.sol](../contracts/Index.sol) @ [b87d292aaf6e28ede564b7ea28ece39219994607](https://github.com/airswap/airswap-protocols/commit/b87d292aaf6e28ede564b7ea28ece39219994607)
+
 Deployment of Indexer.sol was performed in the `@airswap/indexer` package in the `airswap-protocols` monorepo.
 
 ## Dependencies
