@@ -1,7 +1,7 @@
 {
   "name": "@airswap/indexer",
   "version": "2.6.7",
-  "description": "Manages markets that store intents to trade in the Swap Protocol",
+  "description": "Manage intent to trade on the AirSwap Network",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>",
     "Deepa Sathaye <deepa.sathaye@fludity.io>",
