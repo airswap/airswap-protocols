@@ -244,16 +244,16 @@ contract Delegate is IDelegate, Ownable {
       "TOKEN_PAIR_INACTIVE");
 
     // Ensure the order does not exceed the maximum amount.
-    require(order.sender.param <= rule.maxSenderAmount,
+    require(order.sender.amount <= rule.maxSenderAmount,
       "AMOUNT_EXCEEDS_MAX");
 
     // Ensure the order is priced according to the rule.
-    require(order.sender.param <= _calculateSenderParam(order.signer.param, rule.priceCoef, rule.priceExp),
+    require(order.sender.amount <= _calculateSenderAmount(order.signer.amount, rule.priceCoef, rule.priceExp),
       "PRICE_INVALID");
 
     // Overwrite the rule with a decremented maxSenderAmount.
     rules[order.sender.token][order.signer.token] = Rule({
-      maxSenderAmount: (rule.maxSenderAmount).sub(order.sender.param),
+      maxSenderAmount: (rule.maxSenderAmount).sub(order.sender.amount),
       priceCoef: rule.priceCoef,
       priceExp: rule.priceExp
     });
@@ -266,7 +266,7 @@ contract Delegate is IDelegate, Ownable {
       tradeWallet,
       order.sender.token,
       order.signer.token,
-      order.sender.param,
+      order.sender.amount,
       rule.priceCoef,
       rule.priceExp
     );
@@ -283,17 +283,17 @@ contract Delegate is IDelegate, Ownable {
 
   /**
     * @notice Get a Signer-Side Quote from the Delegate
-    * @param senderParam uint256 Amount of ERC-20 token the delegate would send
+    * @param senderAmount uint256 Amount of ERC-20 token the delegate would send
     * @param senderToken address Address of an ERC-20 token the delegate would send
     * @param signerToken address Address of an ERC-20 token the consumer would send
-    * @return uint256 signerParam Amount of ERC-20 token the consumer would send
+    * @return uint256 signerAmount Amount of ERC-20 token the consumer would send
     */
   function getSignerSideQuote(
-    uint256 senderParam,
+    uint256 senderAmount,
     address senderToken,
     address signerToken
   ) external view returns (
-    uint256 signerParam
+    uint256 signerAmount
   ) {
 
     Rule memory rule = rules[senderToken][signerToken];
@@ -301,13 +301,13 @@ contract Delegate is IDelegate, Ownable {
     // Ensure that a rule exists.
     if(rule.maxSenderAmount > 0) {
 
-      // Ensure the senderParam does not exceed maximum for the rule.
-      if(senderParam <= rule.maxSenderAmount) {
+      // Ensure the senderAmount does not exceed maximum for the rule.
+      if(senderAmount <= rule.maxSenderAmount) {
 
-        signerParam = _calculateSignerParam(senderParam, rule.priceCoef, rule.priceExp);
+        signerAmount = _calculateSignerAmount(senderAmount, rule.priceCoef, rule.priceExp);
 
         // Return the quote.
-        return signerParam;
+        return signerAmount;
       }
     }
     return 0;
@@ -315,17 +315,17 @@ contract Delegate is IDelegate, Ownable {
 
   /**
     * @notice Get a Sender-Side Quote from the Delegate
-    * @param signerParam uint256 Amount of ERC-20 token the consumer would send
+    * @param signerAmount uint256 Amount of ERC-20 token the consumer would send
     * @param signerToken address Address of an ERC-20 token the consumer would send
     * @param senderToken address Address of an ERC-20 token the delegate would send
-    * @return uint256 senderParam Amount of ERC-20 token the delegate would send
+    * @return uint256 senderAmount Amount of ERC-20 token the delegate would send
     */
   function getSenderSideQuote(
-    uint256 signerParam,
+    uint256 signerAmount,
     address signerToken,
     address senderToken
   ) external view returns (
-    uint256 senderParam
+    uint256 senderAmount
   ) {
 
     Rule memory rule = rules[senderToken][signerToken];
@@ -333,12 +333,12 @@ contract Delegate is IDelegate, Ownable {
     // Ensure that a rule exists.
     if(rule.maxSenderAmount > 0) {
 
-      // Calculate the senderParam.
-      senderParam = _calculateSenderParam(signerParam, rule.priceCoef, rule.priceExp);
+      // Calculate the senderAmount.
+      senderAmount = _calculateSenderAmount(signerAmount, rule.priceCoef, rule.priceExp);
 
-      // Ensure the senderParam does not exceed the maximum trade amount.
-      if(senderParam <= rule.maxSenderAmount) {
-        return senderParam;
+      // Ensure the senderAmount does not exceed the maximum trade amount.
+      if(senderAmount <= rule.maxSenderAmount) {
+        return senderAmount;
       }
     }
     return 0;
@@ -348,30 +348,30 @@ contract Delegate is IDelegate, Ownable {
     * @notice Get a Maximum Quote from the Delegate
     * @param senderToken address Address of an ERC-20 token the delegate would send
     * @param signerToken address Address of an ERC-20 token the consumer would send
-    * @return uint256 senderParam Amount the delegate would send
-    * @return uint256 signerParam Amount the consumer would send
+    * @return uint256 senderAmount Amount the delegate would send
+    * @return uint256 signerAmount Amount the consumer would send
     */
   function getMaxQuote(
     address senderToken,
     address signerToken
   ) external view returns (
-    uint256 senderParam,
-    uint256 signerParam
+    uint256 senderAmount,
+    uint256 signerAmount
   ) {
 
     Rule memory rule = rules[senderToken][signerToken];
 
-    senderParam = rule.maxSenderAmount;
+    senderAmount = rule.maxSenderAmount;
 
     // Ensure that a rule exists.
-    if (senderParam > 0) {
-      // calculate the signerParam
-      signerParam = _calculateSignerParam(senderParam, rule.priceCoef, rule.priceExp);
+    if (senderAmount > 0) {
+      // calculate the signerAmount
+      signerAmount = _calculateSignerAmount(senderAmount, rule.priceCoef, rule.priceExp);
 
-      // Return the maxSenderAmount and calculated signerParam.
+      // Return the maxSenderAmount and calculated signerAmount.
       return (
-        senderParam,
-        signerParam
+        senderAmount,
+        signerAmount
       );
     }
     return (0, 0);
@@ -434,43 +434,43 @@ contract Delegate is IDelegate, Ownable {
   }
 
   /**
-    * @notice Calculate the signer param (amount) for a given sender param and price
-    * @param senderParam uint256 The amount the delegate would send in the swap
+    * @notice Calculate the signer amount for a given sender param and price
+    * @param senderAmount uint256 The amount the delegate would send in the swap
     * @param priceCoef uint256 Coefficient of the token price defined in the rule
     * @param priceExp uint256 Exponent of the token price defined in the rule
     */
-  function _calculateSignerParam(
-    uint256 senderParam,
+  function _calculateSignerAmount(
+    uint256 senderAmount,
     uint256 priceCoef,
     uint256 priceExp
   ) internal pure returns (
-    uint256 signerParam
+    uint256 signerAmount
   ) {
     // Calculate the param using the price formula
-    uint256 multiplier = senderParam.mul(priceCoef);
-    signerParam = multiplier.div(10 ** priceExp);
+    uint256 multiplier = senderAmount.mul(priceCoef);
+    signerAmount = multiplier.div(10 ** priceExp);
 
     // If the div rounded down, round up
     if (multiplier.mod(10 ** priceExp) > 0) {
-      signerParam++;
+      signerAmount++;
     }
   }
 
   /**
-    * @notice Calculate the sender param (amount) for a given signer param and price
-    * @param signerParam uint256 The amount the signer would send in the swap
+    * @notice Calculate the sender amount for a given signer param and price
+    * @param signerAmount uint256 The amount the signer would send in the swap
     * @param priceCoef uint256 Coefficient of the token price defined in the rule
     * @param priceExp uint256 Exponent of the token price defined in the rule
     */
-  function _calculateSenderParam(
-    uint256 signerParam,
+  function _calculateSenderAmount(
+    uint256 signerAmount,
     uint256 priceCoef,
     uint256 priceExp
   ) internal pure returns (
-    uint256 senderParam
+    uint256 senderAmount
   ) {
     // Calculate the param using the price formula
-    senderParam = signerParam
+    senderAmount = signerAmount
       .mul(10 ** priceExp)
       .div(priceCoef);
   }

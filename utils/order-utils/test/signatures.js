@@ -22,12 +22,12 @@ describe('Signatures', async () => {
       signer: {
         wallet: signerWallet,
         token: ASTAddress,
-        param: '0',
+        amount: '0',
       },
       sender: {
         wallet: senderWallet,
         token: WETHAddress,
-        param: '0',
+        amount: '0',
       },
     })
 
@@ -41,11 +41,11 @@ describe('Signatures', async () => {
       version: '0x45',
       signatory: signerWallet,
       r: Buffer.from(
-        'a35bc1432b2f643462a2b800c8169635a4c047062a7f4623b72ecd6a770d0dab',
+        '408c8d6839154a95f768a0229f8d006cc1ae40e96ae689dc63134d3cc6e226a7',
         'hex'
       ),
       s: Buffer.from(
-        '51b4c9d0a807e46ffba56c75e3ca88b4fdb266bb8ebb8582df7e90c5a8a63db1',
+        '3c0bdc32aead5ac026854e79b64704325ec9dcef1d910e5e3fbed9094aebb76d',
         'hex'
       ),
       v: 28,
@@ -60,12 +60,12 @@ describe('Signatures', async () => {
         signer: {
           wallet: signerWallet,
           token: ASTAddress,
-          param: '0',
+          amount: '0',
         },
         sender: {
           wallet: senderWallet,
           token: WETHAddress,
-          param: '0',
+          amount: '0',
         },
       },
       true
@@ -81,14 +81,14 @@ describe('Signatures', async () => {
       version: '0x01',
       signatory: signerWallet,
       r: Buffer.from(
-        '04c094132c9d0a1d2f4472fdaaed033b941d374c5d202503023d2fc0a2657123',
+        '6415c617c746470f8df539b1027a0fa97e95ac23433d131528476576c7947fc1',
         'hex'
       ),
       s: Buffer.from(
-        '3299ec88d83eda85a93c724d9ac9e05ddc674ad8d34f9ee7e1e6939d0a79b817',
+        '3379b829a64d9fa6bbdead890783739c38a225d7fa74544105395dc46ab6423d',
         'hex'
       ),
-      v: 28,
+      v: 27,
     })
   })
 })

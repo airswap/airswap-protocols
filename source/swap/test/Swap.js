@@ -139,12 +139,12 @@ contract('Swap', async accounts => {
         signer: {
           wallet: aliceAddress,
           token: tokenAST.address,
-          param: 200,
+          amount: 200,
         },
         sender: {
           wallet: bobAddress,
           token: tokenDAI.address,
-          param: 50,
+          amount: 50,
         },
       })
 
@@ -165,12 +165,12 @@ contract('Swap', async accounts => {
         signer: {
           wallet: aliceAddress,
           token: tokenAST.address,
-          param: 200,
+          amount: 200,
         },
         sender: {
           wallet: aliceAddress,
           token: tokenAST.address,
-          param: 50,
+          amount: 50,
         },
       })
       await reverted(
@@ -202,7 +202,7 @@ contract('Swap', async accounts => {
         signer: {
           wallet: aliceAddress,
           token: tokenAST.address,
-          param: 200,
+          amount: 200,
         },
       })
       await reverted(swap(order, { from: bobAddress }))
@@ -248,7 +248,7 @@ contract('Swap', async accounts => {
         signer: {
           wallet: bobAddress,
           token: tokenDAI.address,
-          param: 1000,
+          amount: 1000,
         },
         sender: {
           wallet: aliceAddress,
@@ -292,12 +292,12 @@ contract('Swap', async accounts => {
         signer: {
           wallet: aliceAddress,
           token: tokenOMG.address,
-          param: 200,
+          amount: 200,
         },
         sender: {
           wallet: bobAddress,
           token: tokenDAI.address,
-          param: 50,
+          amount: 50,
         },
       })
 
@@ -336,7 +336,7 @@ contract('Swap', async accounts => {
         signer: {
           wallet: aliceAddress,
           token: tokenOMG.address,
-          param: 200,
+          amount: 200,
         },
       })
       await reverted(swap(order, { from: bobAddress }))
@@ -382,7 +382,7 @@ contract('Swap', async accounts => {
         signer: {
           wallet: bobAddress,
           token: tokenDAI.address,
-          param: 1000,
+          amount: 1000,
         },
         sender: {
           wallet: aliceAddress,
@@ -427,12 +427,12 @@ contract('Swap', async accounts => {
         signer: {
           wallet: aliceAddress,
           token: tokenAST.address,
-          param: 50,
+          amount: 50,
         },
         sender: {
           wallet: bobAddress,
           token: tokenDAI.address,
-          param: 10,
+          amount: 10,
         },
       })
 
@@ -556,12 +556,12 @@ contract('Swap', async accounts => {
         signer: {
           wallet: aliceAddress,
           token: tokenAST.address,
-          param: 50,
+          amount: 50,
         },
         sender: {
           wallet: bobAddress,
           token: tokenDAI.address,
-          param: 10,
+          amount: 10,
         },
       })
 
@@ -680,12 +680,12 @@ contract('Swap', async accounts => {
         signer: {
           wallet: aliceAddress,
           token: tokenAST.address,
-          param: 25,
+          amount: 25,
         },
         sender: {
           wallet: bobAddress,
           token: tokenDAI.address,
-          param: 5,
+          amount: 5,
         },
       })
 
@@ -739,12 +739,12 @@ contract('Swap', async accounts => {
         signer: {
           wallet: aliceAddress,
           token: tokenAST.address,
-          param: 25,
+          amount: 25,
         },
         sender: {
           wallet: bobAddress,
           token: tokenDAI.address,
-          param: 5,
+          amount: 5,
         },
       })
 
@@ -884,17 +884,17 @@ contract('Swap', async accounts => {
         signer: {
           wallet: aliceAddress,
           token: tokenAST.address,
-          param: 100,
+          amount: 100,
         },
         sender: {
           wallet: bobAddress,
           token: tokenDAI.address,
-          param: 50,
+          amount: 50,
         },
         affiliate: {
           wallet: carolAddress,
           token: tokenAST.address,
-          param: 50,
+          amount: 50,
         },
       })
 
@@ -930,11 +930,11 @@ contract('Swap', async accounts => {
         signer: {
           wallet: aliceAddress,
           token: tokenAST.address,
-          param: 5,
+          amount: 5,
         },
         sender: {
           token: tokenDAI.address,
-          param: '0',
+          amount: '0',
         },
       })
 
@@ -990,13 +990,13 @@ contract('Swap', async accounts => {
         signer: {
           wallet: aliceAddress,
           token: tokenTicket.address,
-          param: 12345,
+          id: 12345,
           kind: ERC721_INTERFACE_ID,
         },
         sender: {
           wallet: bobAddress,
           token: tokenDAI.address,
-          param: 100,
+          amount: 100,
         },
       })
 
@@ -1022,12 +1022,12 @@ contract('Swap', async accounts => {
         signer: {
           wallet: aliceAddress,
           token: tokenAST.address,
-          param: 50,
+          amount: 50,
         },
         sender: {
           wallet: bobAddress,
           token: tokenKitty.address,
-          param: 54321,
+          id: 54321,
           kind: ERC721_INTERFACE_ID,
         },
       })
@@ -1053,17 +1053,17 @@ contract('Swap', async accounts => {
         signer: {
           wallet: aliceAddress,
           token: tokenAST.address,
-          param: 50,
+          amount: 50,
         },
         sender: {
           wallet: bobAddress,
           token: tokenDAI.address,
-          param: 50,
+          amount: 50,
         },
         affiliate: {
           wallet: carolAddress,
           token: tokenKitty.address,
-          param: 54321,
+          id: 54321,
           kind: ERC721_INTERFACE_ID,
         },
       })
@@ -1123,12 +1123,12 @@ contract('Swap', async accounts => {
         signer: {
           wallet: aliceAddress,
           token: tokenAST.address,
-          param: '0',
+          amount: '0',
         },
         sender: {
           wallet: bobAddress,
           token: tokenDAI.address,
-          param: '0',
+          amount: '0',
         },
       })
       const orderTwo = await orders.getOrder({
@@ -1177,12 +1177,12 @@ contract('Swap', async accounts => {
           signer: {
             wallet: eveAddress,
             token: tokenAST.address,
-            param: '0',
+            amount: '0',
           },
           sender: {
             wallet: aliceAddress,
             token: tokenDAI.address,
-            param: '0',
+            amount: '0',
           },
         },
         true
@@ -1202,12 +1202,12 @@ contract('Swap', async accounts => {
         signer: {
           wallet: eveAddress,
           token: tokenAST.address,
-          param: '0',
+          amount: '0',
         },
         sender: {
           wallet: aliceAddress,
           token: tokenDAI.address,
-          param: '0',
+          amount: '0',
         },
       })
 

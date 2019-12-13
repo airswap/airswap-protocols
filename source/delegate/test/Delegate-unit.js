@@ -737,12 +737,12 @@ contract('Delegate Unit Tests', async accounts => {
       const order = await orders.getOrder({
         signer: {
           wallet: notOwner,
-          param: 555,
+          amount: 555,
           token: SENDER_TOKEN,
         },
         sender: {
           wallet: tradeWallet,
-          param: 999,
+          amount: 999,
           token: SIGNER_TOKEN,
         },
       })
@@ -775,12 +775,12 @@ contract('Delegate Unit Tests', async accounts => {
       const order = await orders.getOrder({
         signer: {
           wallet: notOwner,
-          param: 555,
+          amount: 555,
           token: SIGNER_TOKEN,
         },
         sender: {
           wallet: tradeWallet,
-          param: MAX_SENDER_AMOUNT + 1,
+          amount: MAX_SENDER_AMOUNT + 1,
           token: SENDER_TOKEN,
         },
       })
@@ -816,12 +816,12 @@ contract('Delegate Unit Tests', async accounts => {
       const order = await orders.getOrder({
         signer: {
           wallet: notOwner,
-          param: signerAmount,
+          amount: signerAmount,
           token: SIGNER_TOKEN,
         },
         sender: {
           wallet: notTradeWallet,
-          param: senderAmount,
+          amount: senderAmount,
           token: SENDER_TOKEN,
         },
       })
@@ -853,12 +853,12 @@ contract('Delegate Unit Tests', async accounts => {
 
       const order = await orders.getOrder({
         signer: {
-          param: 30,
+          amount: 30,
           token: SIGNER_TOKEN,
         },
         sender: {
           wallet: tradeWallet,
-          param: MAX_SENDER_AMOUNT,
+          amount: MAX_SENDER_AMOUNT,
           token: SENDER_TOKEN,
         },
       })
@@ -878,7 +878,7 @@ contract('Delegate Unit Tests', async accounts => {
       )
     })
 
-    it('test if order sender and signer param are not matching', async () => {
+    it('test if order sender and signer amount are not matching', async () => {
       await delegate.setRule(
         SENDER_TOKEN,
         SIGNER_TOKEN,
@@ -893,12 +893,12 @@ contract('Delegate Unit Tests', async accounts => {
       const order = await orders.getOrder({
         signer: {
           wallet: notOwner,
-          param: signerAmount - 100, //Fudge the price
+          amount: signerAmount - 100, //Fudge the price
           token: SIGNER_TOKEN,
         },
         sender: {
           wallet: tradeWallet,
-          param: senderAmount,
+          amount: senderAmount,
           token: SENDER_TOKEN,
         },
       })
@@ -936,13 +936,13 @@ contract('Delegate Unit Tests', async accounts => {
       const order = await orders.getOrder({
         signer: {
           wallet: notOwner,
-          param: signerAmount,
+          amount: signerAmount,
           token: SIGNER_TOKEN,
           kind: '0x80ac58cd',
         },
         sender: {
           wallet: tradeWallet,
-          param: senderAmount,
+          amount: senderAmount,
           token: SENDER_TOKEN,
         },
       })
@@ -980,12 +980,12 @@ contract('Delegate Unit Tests', async accounts => {
       const order = await orders.getOrder({
         signer: {
           wallet: notOwner,
-          param: signerAmount,
+          amount: signerAmount,
           token: SIGNER_TOKEN,
         },
         sender: {
           wallet: tradeWallet,
-          param: senderAmount,
+          amount: senderAmount,
           token: SENDER_TOKEN,
           kind: '0x80ac58cd',
         },
@@ -1025,12 +1025,12 @@ contract('Delegate Unit Tests', async accounts => {
       const order = await orders.getOrder({
         signer: {
           wallet: notOwner,
-          param: signerAmount,
+          amount: signerAmount,
           token: SIGNER_TOKEN,
         },
         sender: {
           wallet: tradeWallet,
-          param: 100,
+          amount: 100,
           token: SENDER_TOKEN,
         },
       })
@@ -1085,12 +1085,12 @@ contract('Delegate Unit Tests', async accounts => {
       const order = await orders.getOrder({
         signer: {
           wallet: notOwner,
-          param: signerAmount,
+          amount: signerAmount,
           token: SIGNER_TOKEN,
         },
         sender: {
           wallet: tradeWallet,
-          param: 100,
+          amount: 100,
           token: SENDER_TOKEN,
         },
       })
@@ -1146,12 +1146,12 @@ contract('Delegate Unit Tests', async accounts => {
       const order = await orders.getOrder({
         signer: {
           wallet: notOwner,
-          param: signerAmount,
+          amount: signerAmount,
           token: SIGNER_TOKEN,
         },
         sender: {
           wallet: tradeWallet,
-          param: senderAmount,
+          amount: senderAmount,
           token: SENDER_TOKEN,
         },
       })
@@ -1200,12 +1200,12 @@ contract('Delegate Unit Tests', async accounts => {
       const order = await orders.getOrder({
         signer: {
           wallet: notOwner,
-          param: signerAmount,
+          amount: signerAmount,
           token: SIGNER_TOKEN,
         },
         sender: {
           wallet: tradeWallet,
-          param: senderAmount,
+          amount: senderAmount,
           token: SENDER_TOKEN,
         },
       })
@@ -1247,12 +1247,12 @@ contract('Delegate Unit Tests', async accounts => {
       const order = await orders.getOrder({
         signer: {
           wallet: notOwner,
-          param: signerAmount,
+          amount: signerAmount,
           token: SIGNER_TOKEN,
         },
         sender: {
           wallet: tradeWallet,
-          param: senderAmount,
+          amount: senderAmount,
           token: SENDER_TOKEN,
         },
       })
@@ -1290,12 +1290,12 @@ contract('Delegate Unit Tests', async accounts => {
       const order = await orders.getOrder({
         signer: {
           wallet: notOwner,
-          param: signerAmount,
+          amount: signerAmount,
           token: SIGNER_TOKEN,
         },
         sender: {
           wallet: tradeWallet,
-          param: senderAmount,
+          amount: senderAmount,
           token: SENDER_TOKEN,
         },
       })
@@ -1331,12 +1331,12 @@ contract('Delegate Unit Tests', async accounts => {
       const order = await orders.getOrder({
         signer: {
           wallet: notOwner,
-          param: signerAmount,
+          amount: signerAmount,
           token: SIGNER_TOKEN,
         },
         sender: {
           wallet: tradeWallet,
-          param: senderAmount,
+          amount: senderAmount,
           token: SENDER_TOKEN,
         },
       })
@@ -1374,12 +1374,12 @@ contract('Delegate Unit Tests', async accounts => {
       const order = await orders.getOrder({
         signer: {
           wallet: notOwner,
-          param: signerAmount,
+          amount: signerAmount,
           token: SIGNER_TOKEN,
         },
         sender: {
           wallet: tradeWallet,
-          param: senderAmount,
+          amount: senderAmount,
           token: SENDER_TOKEN,
         },
       })
@@ -1416,12 +1416,12 @@ contract('Delegate Unit Tests', async accounts => {
       const order = await orders.getOrder({
         signer: {
           wallet: notOwner,
-          param: signerAmount,
+          amount: signerAmount,
           token: SIGNER_TOKEN,
         },
         sender: {
           wallet: tradeWallet,
-          param: senderAmount,
+          amount: senderAmount,
           token: SENDER_TOKEN,
         },
       })
@@ -1447,12 +1447,12 @@ contract('Delegate Unit Tests', async accounts => {
       const order = await orders.getOrder({
         signer: {
           wallet: notOwner,
-          param: 500,
+          amount: 500,
           token: SIGNER_TOKEN,
         },
         sender: {
           wallet: tradeWallet,
-          param: 500,
+          amount: 500,
           token: SENDER_TOKEN,
         },
       })

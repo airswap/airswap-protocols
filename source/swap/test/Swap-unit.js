@@ -47,9 +47,9 @@ contract('Swap Unit Tests', async accounts => {
 
   describe('Test swap', async () => {
     it('test when order is expired', async () => {
-      const signer = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
-      const sender = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
-      const affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
+      const signer = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200, 0]
+      const sender = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200, 0]
+      const affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200, 0]
       const signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, v, r, s]
       const order = [0, 0, signer, sender, affiliate, signature]
 
@@ -57,9 +57,9 @@ contract('Swap Unit Tests', async accounts => {
     })
 
     it('test when order nonce is too low', async () => {
-      const signer = [kind, mockSigner, EMPTY_ADDRESS, 200]
-      const sender = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
-      const affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
+      const signer = [kind, mockSigner, EMPTY_ADDRESS, 200, 0]
+      const sender = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200, 0]
+      const affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200, 0]
       const signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, v, r, s]
       const order = [
         0,
@@ -75,9 +75,9 @@ contract('Swap Unit Tests', async accounts => {
     })
 
     it('test when sender is provided, and the sender is unauthorized', async () => {
-      const signer = [kind, mockSigner, EMPTY_ADDRESS, 200]
-      const sender = [kind, mockSender, EMPTY_ADDRESS, 200]
-      const affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
+      const signer = [kind, mockSigner, EMPTY_ADDRESS, 200, 0]
+      const sender = [kind, mockSender, EMPTY_ADDRESS, 200, 0]
+      const affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200, 0]
       const signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, v, r, s]
       const order = [
         0,
@@ -92,9 +92,9 @@ contract('Swap Unit Tests', async accounts => {
     })
 
     it('test when sender is provided, the sender is authorized, the signature.v is 0, and the signer wallet is unauthorized', async () => {
-      const signer = [kind, mockSigner, EMPTY_ADDRESS, 200]
-      const sender = [kind, mockSender, EMPTY_ADDRESS, 200]
-      const affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
+      const signer = [kind, mockSigner, EMPTY_ADDRESS, 200, 0]
+      const sender = [kind, mockSender, EMPTY_ADDRESS, 200, 0]
+      const affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200, 0]
       const signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, 0, r, s]
       const order = [
         0,
@@ -113,9 +113,9 @@ contract('Swap Unit Tests', async accounts => {
     })
 
     it('test swap when sender and signer are the same', async () => {
-      const signer = [kind, mockSender, EMPTY_ADDRESS, 200]
-      const sender = [kind, mockSender, EMPTY_ADDRESS, 200]
-      const affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 0]
+      const signer = [kind, mockSender, EMPTY_ADDRESS, 200, 0]
+      const sender = [kind, mockSender, EMPTY_ADDRESS, 200, 0]
+      const affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 0, 0]
       const signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, 0, r, s]
       const order = [
         0,
@@ -150,9 +150,9 @@ contract('Swap Unit Tests', async accounts => {
       // balance check should remain constant and thus fail
       await tokenMock.givenMethodReturnUint(token_balance, 1000)
 
-      const signer = [kind, mockSigner, tokenMock.address, 200]
-      const sender = [kind, mockSender, tokenMock.address, 200]
-      const affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 0]
+      const signer = [kind, mockSigner, tokenMock.address, 200, 0]
+      const sender = [kind, mockSender, tokenMock.address, 200, 0]
+      const affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 0, 0]
       const signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, 0, r, s]
       const order = [
         0,
@@ -190,9 +190,9 @@ contract('Swap Unit Tests', async accounts => {
       // balance check should remain constant and thus fail
       await tokenMock.givenMethodReturnUint(token_balance, 1000)
 
-      const signer = [kind, mockSigner, tokenMock.address, 200]
-      const sender = [kind, mockSender, tokenMock.address, 200]
-      const affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 0]
+      const signer = [kind, mockSigner, tokenMock.address, 200, 0]
+      const sender = [kind, mockSender, tokenMock.address, 200, 0]
+      const affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 0, 0]
       const signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, 0, r, s]
       const order = [
         0,

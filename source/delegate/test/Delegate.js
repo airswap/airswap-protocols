@@ -709,12 +709,12 @@ contract('Delegate Integration Tests', async accounts => {
         signer: {
           wallet: bobAddress,
           token: tokenWETH.address,
-          param: 1,
+          amount: 1,
         },
         sender: {
           wallet: carolAddress,
           token: tokenDAI.address,
-          param: quote.toNumber(),
+          amount: quote.toNumber(),
         },
       })
 
@@ -734,12 +734,12 @@ contract('Delegate Integration Tests', async accounts => {
         signer: {
           wallet: bobAddress,
           token: tokenWETH.address,
-          param: 1,
+          amount: 1,
         },
         sender: {
           // no wallet provided means wallet = address(0)
           token: tokenDAI.address,
-          param: quote.toNumber(),
+          amount: quote.toNumber(),
         },
       })
 
@@ -759,12 +759,12 @@ contract('Delegate Integration Tests', async accounts => {
         signer: {
           wallet: bobAddress,
           token: tokenWETH.address,
-          param: 1,
+          amount: 1,
         },
         sender: {
           wallet: aliceTradeWallet, //correct trade wallet provided
           token: tokenDAI.address,
-          param: quote.toNumber(),
+          amount: quote.toNumber(),
         },
       })
 
@@ -786,12 +786,12 @@ contract('Delegate Integration Tests', async accounts => {
         signer: {
           wallet: bobAddress,
           token: tokenWETH.address,
-          param: 1,
+          amount: 1,
         },
         sender: {
           wallet: aliceTradeWallet, //correct trade wallet provided
           token: tokenDAI.address,
-          param: quote.toNumber(),
+          amount: quote.toNumber(),
         },
       })
 
@@ -816,12 +816,12 @@ contract('Delegate Integration Tests', async accounts => {
         signer: {
           wallet: bobAddress,
           token: tokenWETH.address,
-          param: 1,
+          amount: 1,
         },
         sender: {
           wallet: aliceTradeWallet, //correct trade wallet provided
           token: tokenDAI.address,
-          param: quote.toNumber(),
+          amount: quote.toNumber(),
         },
       })
 
@@ -920,12 +920,12 @@ contract('Delegate Integration Tests', async accounts => {
         signer: {
           wallet: bobAddress,
           token: tokenDAI.address,
-          param: 1,
+          amount: 1,
         },
         sender: {
           wallet: aliceTradeWallet,
           token: tokenDAI.address,
-          param: 1,
+          amount: 1,
         },
       })
 
@@ -957,12 +957,12 @@ contract('Delegate Integration Tests', async accounts => {
         signer: {
           wallet: bobAddress,
           token: tokenWETH.address,
-          param: 1,
+          amount: 1,
         },
         sender: {
           wallet: aliceTradeWallet,
           token: tokenDAI.address,
-          param: quote.toNumber(),
+          amount: quote.toNumber(),
         },
       })
 
@@ -988,12 +988,12 @@ contract('Delegate Integration Tests', async accounts => {
         signer: {
           wallet: bobAddress,
           token: tokenDAI.address,
-          param: 300,
+          amount: 300,
         },
         sender: {
           wallet: aliceTradeWallet,
           token: tokenWETH.address,
-          param: 3,
+          amount: 3,
         },
       })
 
@@ -1017,12 +1017,12 @@ contract('Delegate Integration Tests', async accounts => {
         signer: {
           wallet: bobAddress,
           token: tokenWETH.address,
-          param: 1,
+          amount: 1,
         },
         sender: {
           wallet: aliceTradeWallet,
           token: tokenDAI.address,
-          param: 201, // Rule is 1 WETH for 200 DAI
+          amount: 201, // Rule is 1 WETH for 200 DAI
         },
       })
 
@@ -1046,13 +1046,13 @@ contract('Delegate Integration Tests', async accounts => {
         signer: {
           wallet: bobAddress,
           token: tokenWETH.address,
-          param: 1,
+          amount: 1,
           kind: '0x80ac58cd',
         },
         sender: {
           wallet: aliceTradeWallet,
           token: tokenDAI.address,
-          param: 200, // Rule is 1 WETH for 200 DAI
+          amount: 200, // Rule is 1 WETH for 200 DAI
         },
       })
 
@@ -1077,12 +1077,12 @@ contract('Delegate Integration Tests', async accounts => {
         signer: {
           wallet: bobAddress,
           token: tokenWETH.address,
-          param: 1,
+          amount: 1,
         },
         sender: {
           wallet: aliceTradeWallet,
           token: tokenDAI.address,
-          param: 200, // Rule is 1 WETH for 200 DAI
+          amount: 200, // Rule is 1 WETH for 200 DAI
           kind: '0x80ac58cd',
         },
       })
@@ -1108,12 +1108,12 @@ contract('Delegate Integration Tests', async accounts => {
         signer: {
           wallet: bobAddress,
           token: tokenWETH.address,
-          param: 1,
+          amount: 1,
         },
         sender: {
           wallet: aliceTradeWallet,
           token: tokenDAI.address,
-          param: 200, // Rule is 1 WETH for 200 DAI
+          amount: 200, // Rule is 1 WETH for 200 DAI
         },
       })
 
@@ -1138,12 +1138,12 @@ contract('Delegate Integration Tests', async accounts => {
         signer: {
           wallet: bobAddress,
           token: tokenWETH.address,
-          param: 1,
+          amount: 1,
         },
         sender: {
           wallet: aliceTradeWallet,
           token: tokenDAI.address,
-          param: 200, // Rule is 1 WETH for 200 DAI
+          amount: 200, // Rule is 1 WETH for 200 DAI
         },
       })
 
@@ -1173,12 +1173,12 @@ contract('Delegate Integration Tests', async accounts => {
         signer: {
           wallet: bobAddress,
           token: tokenWETH.address,
-          param: 1,
+          amount: 1,
         },
         sender: {
           wallet: aliceTradeWallet,
           token: tokenDAI.address,
-          param: 200, // Rule is 1 WETH for 200 DAI
+          amount: 200, // Rule is 1 WETH for 200 DAI
         },
       })
 
@@ -1215,12 +1215,12 @@ contract('Delegate Integration Tests', async accounts => {
         signer: {
           wallet: bobAddress,
           token: tokenWETH.address,
-          param: signerQuote.toNumber(),
+          amount: signerQuote.toNumber(),
         },
         sender: {
           wallet: aliceTradeWallet,
           token: tokenDAI.address,
-          param: senderAmount,
+          amount: senderAmount,
         },
       })
 
@@ -1253,12 +1253,12 @@ contract('Delegate Integration Tests', async accounts => {
         signer: {
           wallet: bobAddress,
           token: tokenWETH.address,
-          param: signerAmount,
+          amount: signerAmount,
         },
         sender: {
           wallet: aliceTradeWallet,
           token: tokenDAI.address,
-          param: senderQuote.toNumber(),
+          amount: senderQuote.toNumber(),
         },
       })
 
@@ -1292,12 +1292,12 @@ contract('Delegate Integration Tests', async accounts => {
         signer: {
           wallet: bobAddress,
           token: tokenWETH.address,
-          param: signerAmount,
+          amount: signerAmount,
         },
         sender: {
           wallet: aliceTradeWallet,
           token: tokenDAI.address,
-          param: senderAmount,
+          amount: senderAmount,
         },
       })
 

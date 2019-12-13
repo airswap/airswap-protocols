@@ -41,8 +41,15 @@ const PARTY_TYPEHASH = ethUtil.keccak256(stringify('Party'))
 function hashParty(party) {
   return ethUtil.keccak256(
     abi.rawEncode(
-      ['bytes32', 'bytes4', 'address', 'address', 'uint256'],
-      [PARTY_TYPEHASH, party.kind, party.wallet, party.token, party.param]
+      ['bytes32', 'bytes4', 'address', 'address', 'uint256', 'uint256'],
+      [
+        PARTY_TYPEHASH,
+        party.kind,
+        party.wallet,
+        party.token,
+        party.amount,
+        party.id,
+      ]
     )
   )
 }
