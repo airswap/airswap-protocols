@@ -18,7 +18,7 @@
 
 ## Deploys
 
-See [deploys.json](./deploys.json) for latest contract deployments on Rinkeby (`4`) and Mainnet (`1`).
+[Indexer](./contracts/Indexer.sol) is deployed. See [deploys.json](./deploys.json) for latest contract deployments on Rinkeby (`4`) and Mainnet (`1`).
 
 ## Commands
 

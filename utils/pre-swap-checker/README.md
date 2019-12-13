@@ -1,8 +1,9 @@
-# DelegateFactory
+# Pre Swap Checker
 
-[AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens. This package contains source code and tests for a basic `DelegateFactory` contract that deploys `Delegate` contracts.
+**:warning: This package is under active development. Do not use in production.**
 
-:bulb: **Note**: `solidity-coverage` does not cooperate with `view` functions. To run test coverage, remove the `view` keywords from functions in `DelegateFactory.sol`.
+[AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens. This package contains source code and tests for a basic a pre-swap-checker contract that can work with with Swap protocol.
+
 
 [![Discord](https://img.shields.io/discord/590643190281928738.svg)](https://discord.gg/ecQbV7H)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
@@ -15,10 +16,6 @@
 - Website → https://www.airswap.io/
 - Blog → https://blog.airswap.io/
 - Support → https://support.airswap.io/
-
-## Deploys
-
-See [deploys.json](./deploys.json) for latest contract deployments on Rinkeby (`4`) and Mainnet (`1`).
 
 ## Commands
 

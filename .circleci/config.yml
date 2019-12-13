@@ -34,7 +34,7 @@ jobs:
           name: yarn install and dependencies
           command: |
             yarn install
-      - run: 
+      - run:
           name: Check Dependencies
           command: |
             sudo apt install python3-pip
@@ -73,17 +73,6 @@ jobs:
             yarn ganache > /dev/null &
             cd source/indexer && yarn test
 
-  index_tests:
-    <<: *container_config
-    steps:
-      - attach_workspace:
-          at: *working_directory
-      - run:
-          name: Run Tests
-          command: |
-            yarn ganache > /dev/null &
-            cd source/index && yarn test
-
   delegate_tests:
     <<: *container_config
     steps:
@@ -95,7 +84,7 @@ jobs:
             yarn ganache > /dev/null &
             cd source/delegate && yarn test
 
-  delegate_factory_tests:
+  order_utils_tests:
     <<: *container_config
     steps:
       - attach_workspace:
@@ -104,7 +93,18 @@ jobs:
           name: Run Tests
           command: |
             yarn ganache > /dev/null &
-            cd source/delegate-factory && yarn test
+            sleep 10 && cd utils/order-utils && yarn test
+
+  pre_swap_checker_tests:
+    <<: *container_config
+    steps:
+      - attach_workspace:
+          at: *working_directory
+      - run:
+          name: Run Tests
+          command: |
+            yarn ganache > /dev/null &
+            cd utils/pre-swap-checker && yarn test
 
   types_tests:
     <<: *container_config
@@ -162,7 +162,7 @@ jobs:
           command: |
             cd source
             ### ADD FOLDERS HERE TO PROCESS ###
-            for file in indexer index delegate delegate-factory swap types tokens wrapper
+            for file in indexer delegate swap types tokens wrapper
             do
               cd $file
               NPM_NAME=$(node -p "require('./package.json').name")
@@ -194,15 +194,15 @@ workflows:
           context: Development
           requires:
             - setup
-      - index_tests:
-          context: Development
-          requires:
-            - setup
       - delegate_tests:
           context: Development
           requires:
             - setup
-      - delegate_factory_tests:
+      - order_utils_tests:
+          context: Development
+          requires:
+            - setup
+      - pre_swap_checker_tests:
           context: Development
           requires:
             - setup
@@ -219,9 +219,8 @@ workflows:
           requires:
             - swap_tests
             - indexer_tests
-            - index_tests
             - delegate_tests
-            - delegate_factory_tests
+            - order_utils_tests
             - types_tests
             - wrapper_tests
           filters:

@@ -4,7 +4,7 @@
 
 [AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens. This package contains source code and tests for a basic `Delegate` contract that can be deployed with trading rules.
 
-:bulb: **Note**: `solidity-coverage` does not cooperate with `view` functions. To run test coverage, remove the `view` keywords from functions in `Delegate.sol` and `IDelegate.sol`. Make sure if you have modified other repos for running `solidity-coverage` i.e. indexer (`Indexer.sol`, `IIndexer.sol`, or `ILocatorWhitelist.sol`), revert those changes and only remove the `view` keywords from the repo being tested. 
+:bulb: **Note**: `solidity-coverage` does not cooperate with `view` functions. To run test coverage, remove the `view` keywords from functions in `Delegate.sol` and `IDelegate.sol`. Make sure if you have modified other repos for running `solidity-coverage` i.e. indexer (`Indexer.sol`, `IIndexer.sol`, or `ILocatorWhitelist.sol`), revert those changes and only remove the `view` keywords from the repo being tested.
 
 [![Discord](https://img.shields.io/discord/590643190281928738.svg)](https://discord.gg/ecQbV7H)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
@@ -17,6 +17,10 @@
 - Website → https://www.airswap.io/
 - Blog → https://blog.airswap.io/
 - Support → https://support.airswap.io/
+
+## Deploys
+
+[DelegateFactory](./contracts/DelegateFactory.sol) is deployed. See [deploys.json](./deploys.json) for latest contract deployments on Rinkeby (`4`) and Mainnet (`1`).
 
 ## Commands
 
