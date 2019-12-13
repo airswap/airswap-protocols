@@ -1,7 +1,7 @@
 {
-  "name": "@airswap/transfer-handler-registry",
+  "name": "@airswap/transfers",
   "version": "0.1.0",
-  "description": "Manages an authorized transfer-handler-registry for swap",
+  "description": "A registry to manage a variety of token transfers for the Swap Protocol",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",

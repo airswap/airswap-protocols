@@ -17,8 +17,8 @@
 pragma solidity 0.5.12;
 pragma experimental ABIEncoderV2;
 
-import "@airswap/transfer-handler-registry/contracts/interfaces/ITransferHandler.sol";
-import "@airswap/transfer-handler-registry/contracts/TransferHandlerRegistry.sol";
+import "@airswap/transfers/contracts/interfaces/ITransferHandler.sol";
+import "@airswap/transfers/contracts/TransferHandlerRegistry.sol";
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "@airswap/tokens/contracts/interfaces/INRERC20.sol";
 import "openzeppelin-solidity/contracts/token/ERC721/IERC721.sol";

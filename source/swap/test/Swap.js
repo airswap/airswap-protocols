@@ -90,16 +90,19 @@ contract('Swap', async accounts => {
       const usdtaTransferHandler = await USDTTransferHandler.new()
 
       // add all 4 of these contracts into the TokenRegistry
-      transferHandlerRegistry.addHandler('0x9a20483d', kittyCore.address)
-      transferHandlerRegistry.addHandler(
+      transferHandlerRegistry.addTransferHandler(
+        '0x9a20483d',
+        kittyCore.address
+      )
+      transferHandlerRegistry.addTransferHandler(
         ERC20_INTERFACE_ID,
         erc20TransferHandler.address
       )
-      transferHandlerRegistry.addHandler(
+      transferHandlerRegistry.addTransferHandler(
         ERC721_INTERFACE_ID,
         erc721TransferHandler.address
       )
-      transferHandlerRegistry.addHandler(
+      transferHandlerRegistry.addTransferHandler(
         '0xffffffff',
         usdtaTransferHandler.address
       )

@@ -5,8 +5,8 @@ import "@gnosis.pm/mock-contract/contracts/MockContract.sol";
 import "@airswap/delegate/contracts/DelegateFactory.sol";
 import "@airswap/swap/contracts/Swap.sol";
 import "@airswap/types/contracts/Types.sol";
-import "@airswap/transfer-handler-registry/contracts/TransferHandlerRegistry.sol";
-import "@airswap/transfer-handler-registry/contracts/ERC20TransferHandler.sol";
+import "@airswap/transfers/contracts/TransferHandlerRegistry.sol";
+import "@airswap/transfers/contracts/ERC20TransferHandler.sol";
 
 
 contract Imports {}
