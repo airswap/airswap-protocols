@@ -1,7 +1,7 @@
 {
   "name": "@airswap/delegate",
   "version": "0.5.6",
-  "description": "Manages delegated trading rules for use in the Swap Protocol",
+  "description": "Deployable Trading Rules for the AirSwap Network",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>",
     "Deepa Sathaye <deepa.sathaye@fludity.io>",
