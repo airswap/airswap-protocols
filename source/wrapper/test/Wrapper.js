@@ -128,12 +128,12 @@ contract('Wrapper', async accounts => {
         signer: {
           wallet: aliceAddress,
           token: tokenDAI.address,
-          param: 50,
+          amount: 50,
         },
         sender: {
           wallet: bobAddress,
           token: tokenWETH.address,
-          param: 10,
+          amount: 10,
         },
       })
 
@@ -146,7 +146,7 @@ contract('Wrapper', async accounts => {
 
       let result = await wrappedSwap(order, {
         from: bobAddress,
-        value: order.sender.param,
+        value: order.sender.amount,
       })
       await passes(result)
       result = await getResult(swapContract, result.tx)
@@ -189,12 +189,12 @@ contract('Wrapper', async accounts => {
         signer: {
           wallet: carolAddress,
           token: tokenWETH.address,
-          param: 10000,
+          amount: 10000,
         },
         sender: {
           wallet: aliceAddress,
           token: tokenDAI.address,
-          param: 100,
+          amount: 100,
         },
       })
 
@@ -252,12 +252,12 @@ contract('Wrapper', async accounts => {
         signer: {
           wallet: aliceAddress,
           token: tokenDAI.address,
-          param: 1,
+          amount: 1,
         },
         sender: {
           wallet: bobAddress,
           token: tokenWETH.address,
-          param: 100,
+          amount: 100,
         },
       })
 
@@ -282,12 +282,12 @@ contract('Wrapper', async accounts => {
         signer: {
           wallet: aliceAddress,
           token: tokenDAI.address,
-          param: 50,
+          amount: 50,
         },
         sender: {
           wallet: bobAddress,
           token: tokenWETH.address,
-          param: 10,
+          amount: 10,
         },
       })
 
@@ -300,7 +300,7 @@ contract('Wrapper', async accounts => {
 
       let result = await wrappedSwap(order, {
         from: bobAddress,
-        value: order.sender.param,
+        value: order.sender.amount,
       })
       await passes(result)
       result = await getResult(swapContract, result.tx)
@@ -317,12 +317,12 @@ contract('Wrapper', async accounts => {
         signer: {
           wallet: carolAddress,
           token: tokenWETH.address,
-          param: 100,
+          amount: 100,
         },
         sender: {
           wallet: helperMockAddress,
           token: tokenDAI.address,
-          param: 100,
+          amount: 100,
         },
       })
 
@@ -388,12 +388,12 @@ contract('Wrapper', async accounts => {
         signer: {
           wallet: aliceAddress,
           token: tokenDAI.address,
-          param: 1,
+          amount: 1,
         },
         sender: {
           wallet: bobAddress,
           token: tokenAST.address,
-          param: 100,
+          amount: 100,
         },
       })
 
@@ -426,12 +426,12 @@ contract('Wrapper', async accounts => {
         signer: {
           wallet: aliceAddress,
           token: tokenDAI.address,
-          param: 1,
+          amount: 1,
         },
         sender: {
           wallet: bobAddress,
           token: tokenAST.address,
-          param: 100,
+          amount: 100,
         },
       })
 
@@ -456,12 +456,12 @@ contract('Wrapper', async accounts => {
         signer: {
           wallet: aliceAddress,
           token: tokenDAI.address,
-          param: 1,
+          amount: 1,
         },
         sender: {
           wallet: bobAddress,
           token: tokenAST.address,
-          param: 100,
+          amount: 100,
         },
       })
 
@@ -486,12 +486,12 @@ contract('Wrapper', async accounts => {
         signer: {
           wallet: aliceAddress,
           token: tokenDAI.address,
-          param: 1,
+          amount: 1,
         },
         sender: {
           wallet: bobAddress,
           token: tokenAST.address,
-          param: 100,
+          amount: 100,
         },
       })
 
@@ -542,12 +542,12 @@ contract('Wrapper', async accounts => {
           signer: {
             wallet: carolAddress,
             token: tokenWETH.address,
-            param: 1,
+            amount: 1,
           },
           sender: {
             wallet: delegateOwner,
             token: tokenDAI.address,
-            param: 200,
+            amount: 200,
           },
         })
 
@@ -561,7 +561,7 @@ contract('Wrapper', async accounts => {
         await reverted(
           wrappedDelegate(order, delegateAddress, {
             from: carolAddress,
-            value: order.signer.param + 1,
+            value: order.signer.amount + 1,
           }),
           'VALUE_MUST_BE_SENT'
         )
@@ -572,19 +572,19 @@ contract('Wrapper', async accounts => {
           signer: {
             wallet: carolAddress,
             token: tokenWETH.address,
-            param: 1,
+            amount: 1,
           },
           sender: {
             wallet: delegateOwner,
             token: tokenDAI.address,
-            param: 200,
+            amount: 200,
           },
         })
 
         await reverted(
           wrappedDelegate(order, delegateAddress, {
             from: carolAddress,
-            value: order.signer.param,
+            value: order.signer.amount,
           }),
           'SIGNATURE_MUST_BE_SENT'
         )
@@ -595,12 +595,12 @@ contract('Wrapper', async accounts => {
           signer: {
             wallet: carolAddress,
             token: tokenWETH.address,
-            param: 1,
+            amount: 1,
           },
           sender: {
             wallet: delegateAddress,
             token: tokenDAI.address,
-            param: 200,
+            amount: 200,
           },
         })
 
@@ -614,7 +614,7 @@ contract('Wrapper', async accounts => {
         await reverted(
           wrappedDelegate(order, delegateAddress, {
             from: carolAddress,
-            value: order.signer.param,
+            value: order.signer.amount,
           }),
           'INVALID_SENDER_WALLET'
         )
@@ -625,12 +625,12 @@ contract('Wrapper', async accounts => {
           signer: {
             wallet: carolAddress,
             token: tokenWETH.address,
-            param: 1,
+            amount: 1,
           },
           sender: {
             wallet: delegateOwner,
             token: tokenDAI.address,
-            param: 200,
+            amount: 200,
           },
         })
 
@@ -644,7 +644,7 @@ contract('Wrapper', async accounts => {
         await reverted(
           wrappedDelegate(order, delegateAddress, {
             from: carolAddress,
-            value: order.signer.param,
+            value: order.signer.amount,
           }),
           'SENDER_UNAUTHORIZED'
         )
@@ -655,12 +655,12 @@ contract('Wrapper', async accounts => {
           signer: {
             wallet: carolAddress,
             token: tokenWETH.address,
-            param: 1,
+            amount: 1,
           },
           sender: {
             wallet: delegateOwner,
             token: tokenDAI.address,
-            param: 200,
+            amount: 200,
           },
         })
 
@@ -684,7 +684,7 @@ contract('Wrapper', async accounts => {
         await reverted(
           wrappedDelegate(order, delegateAddress, {
             from: carolAddress,
-            value: order.signer.param,
+            value: order.signer.amount,
           })
         )
       })
@@ -694,12 +694,12 @@ contract('Wrapper', async accounts => {
           signer: {
             wallet: carolAddress,
             token: tokenWETH.address,
-            param: 1,
+            amount: 1,
           },
           sender: {
             wallet: delegateOwner,
             token: tokenDAI.address,
-            param: 200,
+            amount: 200,
           },
         })
 
@@ -729,7 +729,7 @@ contract('Wrapper', async accounts => {
         await passes(
           wrappedDelegate(order, delegateAddress, {
             from: aliceAddress,
-            value: order.signer.param,
+            value: order.signer.amount,
           })
         )
 
@@ -741,17 +741,17 @@ contract('Wrapper', async accounts => {
         )
 
         equal(
-          carolEthBefore - order.signer.param,
+          carolEthBefore - order.signer.amount,
           carolEthAfter,
           "Carol's ETH balance did not decrease"
         )
         equal(
-          ownerDAIBefore - order.sender.param,
+          ownerDAIBefore - order.sender.amount,
           ownerDAIAfter,
           "Owner's DAI balance did not decrease"
         )
         equal(
-          ownerWETHBefore + order.signer.param,
+          ownerWETHBefore + order.signer.amount,
           ownerWETHAfter,
           "Owner's WETH balance did not increase"
         )
@@ -764,12 +764,12 @@ contract('Wrapper', async accounts => {
           signer: {
             wallet: carolAddress,
             token: tokenDAI.address,
-            param: 200,
+            amount: 200,
           },
           sender: {
             wallet: delegateOwner,
             token: tokenWETH.address,
-            param: 1,
+            amount: 1,
           },
         })
 
@@ -783,7 +783,7 @@ contract('Wrapper', async accounts => {
         await reverted(
           wrappedDelegate(order, delegateAddress, {
             from: carolAddress,
-            value: order.signer.param,
+            value: order.signer.amount,
           }),
           'VALUE_MUST_BE_ZERO'
         )
@@ -794,12 +794,12 @@ contract('Wrapper', async accounts => {
           signer: {
             wallet: carolAddress,
             token: tokenDAI.address,
-            param: 200,
+            amount: 200,
           },
           sender: {
             wallet: delegateOwner,
             token: tokenWETH.address,
-            param: 1,
+            amount: 1,
           },
         })
 
@@ -816,12 +816,12 @@ contract('Wrapper', async accounts => {
           signer: {
             wallet: carolAddress,
             token: tokenDAI.address,
-            param: 200,
+            amount: 200,
           },
           sender: {
             wallet: delegateOwner,
             token: tokenWETH.address,
-            param: 1,
+            amount: 1,
           },
         })
 
@@ -854,12 +854,12 @@ contract('Wrapper', async accounts => {
           signer: {
             wallet: carolAddress,
             token: tokenDAI.address,
-            param: 200,
+            amount: 200,
           },
           sender: {
             wallet: delegateOwner,
             token: tokenWETH.address,
-            param: 1,
+            amount: 1,
           },
         })
 
@@ -889,12 +889,12 @@ contract('Wrapper', async accounts => {
           signer: {
             wallet: carolAddress,
             token: tokenDAI.address,
-            param: 200,
+            amount: 200,
           },
           sender: {
             wallet: delegateOwner,
             token: tokenWETH.address,
-            param: 1,
+            amount: 1,
           },
         })
 
@@ -935,17 +935,17 @@ contract('Wrapper', async accounts => {
         )
 
         equal(
-          carolEthBefore - order.sender.param,
+          carolEthBefore - order.sender.amount,
           carolEthAfter,
           "Carol's ETH balance did not increase"
         )
         equal(
-          ownerDAIBefore + order.signer.param,
+          ownerDAIBefore + order.signer.amount,
           ownerDAIAfter,
           "Owner's DAI balance did not increase"
         )
         equal(
-          ownerWETHBefore - order.sender.param,
+          ownerWETHBefore - order.sender.amount,
           ownerWETHAfter,
           "Owner's WETH balance did not decrease"
         )
