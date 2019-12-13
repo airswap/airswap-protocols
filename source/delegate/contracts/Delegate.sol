@@ -51,6 +51,9 @@ contract Delegate is IDelegate, Ownable {
   // ERC-20 (fungible token) interface identifier (ERC-165)
   bytes4 constant internal ERC20_INTERFACE_ID = 0x36372b07;
 
+  // The protocol identifier for setting intents on an Index
+  bytes2 public protocol;
+
   /**
     * @notice Contract Constructor
     * @dev owner defaults to msg.sender if delegateContractOwner is provided as address(0)
@@ -63,10 +66,12 @@ contract Delegate is IDelegate, Ownable {
     ISwap delegateSwap,
     IIndexer delegateIndexer,
     address delegateContractOwner,
-    address delegateTradeWallet
+    address delegateTradeWallet,
+    bytes2 delegateProtocol
   ) public {
     swapContract = delegateSwap;
     indexer = delegateIndexer;
+    protocol = delegateProtocol;
 
     // If no delegate owner is provided, the deploying address is the owner.
     if (delegateContractOwner != address(0)) {
@@ -154,7 +159,7 @@ contract Delegate is IDelegate, Ownable {
     );
 
     // get currentAmount staked or 0 if never staked
-    uint256 oldStakeAmount = indexer.getStakedAmount(address(this), signerToken, senderToken);
+    uint256 oldStakeAmount = indexer.getStakedAmount(address(this), signerToken, senderToken, protocol);
     if (oldStakeAmount == newStakeAmount && oldStakeAmount > 0) {
       return; // forgo trying to reset intent with non-zero same stake amount
     } else if (oldStakeAmount < newStakeAmount) {
@@ -168,6 +173,7 @@ contract Delegate is IDelegate, Ownable {
     indexer.setIntent(
       signerToken,
       senderToken,
+      protocol,
       newStakeAmount,
       bytes32(uint256(address(this)) << 96) //NOTE: this will pad 0's to the right
     );
@@ -195,8 +201,8 @@ contract Delegate is IDelegate, Ownable {
     _unsetRule(senderToken, signerToken);
 
     // Query the indexer for the amount staked.
-    uint256 stakedAmount = indexer.getStakedAmount(address(this), signerToken, senderToken);
-    indexer.unsetIntent(signerToken, senderToken);
+    uint256 stakedAmount = indexer.getStakedAmount(address(this), signerToken, senderToken, protocol);
+    indexer.unsetIntent(signerToken, senderToken, protocol);
 
     // Upon unstaking, the Delegate will be given the staking amount.
     // This is returned to the msg.sender.

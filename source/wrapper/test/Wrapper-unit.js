@@ -21,6 +21,7 @@ contract('Wrapper Unit Tests', async accounts => {
   const mockSender = accounts[2]
   const mockSigner = accounts[3]
   const delegateOwner = accounts[4]
+  const PROTOCOL = '0x0001'
   let mockSwap
   let mockSwapAddress
   let mockWeth
@@ -141,7 +142,8 @@ contract('Wrapper Unit Tests', async accounts => {
       mockSwapAddress,
       mockIndexer.address,
       delegateOwner,
-      delegateOwner
+      delegateOwner,
+      PROTOCOL
     )
 
     // mock the Delegate.provideOrder method

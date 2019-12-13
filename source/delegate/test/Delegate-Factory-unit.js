@@ -22,6 +22,8 @@ contract('Delegate Factory Tests', async accounts => {
   let snapshotId
   let delegateFactory
 
+  const PROTOCOL = '0x0001'
+
   beforeEach(async () => {
     const snapShot = await takeSnapshot()
     snapshotId = snapShot['result']
@@ -36,7 +38,8 @@ contract('Delegate Factory Tests', async accounts => {
     await setupMockIndexer()
     delegateFactory = await DelegateFactory.new(
       swapContract,
-      mockIndexer.address
+      mockIndexer.address,
+      PROTOCOL
     )
   })
 
@@ -142,9 +145,11 @@ contract('Delegate Factory Tests', async accounts => {
       const actualSwap = await delegate.swapContract.call()
       const actualOwner = await delegate.owner.call()
       const actualTradeWallet = await delegate.tradeWallet.call()
+      const actualProtocol = await delegate.protocol.call()
 
       // check that the addresses are equal
       equal(swapContract, actualSwap, 'Delegate has incorrect swap address')
+      equal(PROTOCOL, actualProtocol, 'Delegate has incorrect protocol')
       equal(
         delegateOwnerTwo,
         actualOwner,
