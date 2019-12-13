@@ -333,6 +333,7 @@ contract('Indexer Unit Tests', async accounts => {
           event.staker === aliceAddress &&
           event.signerToken === tokenOne &&
           event.senderToken == tokenTwo &&
+          event.protocol === PROTOCOL_1 &&
           event.stakeAmount.toNumber() === 250
         )
       })
@@ -366,6 +367,7 @@ contract('Indexer Unit Tests', async accounts => {
           event.staker === aliceAddress &&
           event.signerToken === tokenOne &&
           event.senderToken == tokenTwo &&
+          event.protocol === PROTOCOL_1 &&
           event.stakeAmount.toNumber() === 100
         )
       })
@@ -388,6 +390,7 @@ contract('Indexer Unit Tests', async accounts => {
           event.staker === aliceAddress &&
           event.signerToken === tokenOne &&
           event.senderToken == tokenTwo &&
+          event.protocol === PROTOCOL_2 &&
           event.stakeAmount.toNumber() === 150
         )
       })
@@ -420,6 +423,7 @@ contract('Indexer Unit Tests', async accounts => {
           event.staker === bobAddress &&
           event.signerToken === tokenOne &&
           event.senderToken == tokenTwo &&
+          event.protocol === PROTOCOL_1 &&
           event.stakeAmount.toNumber() === 250
         )
       })
