@@ -52,7 +52,7 @@ contract Delegate is IDelegate, Ownable {
   bytes4 constant internal ERC20_INTERFACE_ID = 0x36372b07;
 
   // The protocol identifier for setting intents on an Index
-  bytes2 protocol;
+  bytes2 public protocol;
 
   /**
     * @notice Contract Constructor

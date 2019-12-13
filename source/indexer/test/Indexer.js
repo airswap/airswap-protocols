@@ -46,8 +46,8 @@ contract('Indexer', async accounts => {
 
   let whitelistedLocator
 
-  const TYPE_LIB_P2P = '0x1234'
-  const TYPE_DELEGATE = '0x9999'
+  const PROTOCOL_LIB_P2P = '0x1234'
+  const PROTOCOL_DELEGATE = '0x9999'
 
   describe('Deploying...', async () => {
     it('Deployed staking token "AST"', async () => {
@@ -76,7 +76,7 @@ contract('Indexer', async accounts => {
         await indexer.createIndex(
           tokenWETH.address,
           tokenDAI.address,
-          TYPE_LIB_P2P,
+          PROTOCOL_LIB_P2P,
           {
             from: bobAddress,
           }
@@ -90,7 +90,7 @@ contract('Indexer', async accounts => {
         await indexer.createIndex(
           tokenWETH.address,
           tokenDAI.address,
-          TYPE_LIB_P2P,
+          PROTOCOL_LIB_P2P,
           {
             from: bobAddress,
           }
@@ -104,7 +104,7 @@ contract('Indexer', async accounts => {
         await indexer.createIndex(
           tokenWETH.address,
           tokenDAI.address,
-          TYPE_DELEGATE,
+          PROTOCOL_DELEGATE,
           {
             from: bobAddress,
           }
@@ -119,26 +119,27 @@ contract('Indexer', async accounts => {
       swapContract = await Swap.new()
       delegateFactory = await DelegateFactory.new(
         swapContract.address,
-        indexer.address
+        indexer.address,
+        PROTOCOL_DELEGATE
       )
 
       await indexer.setLocatorWhitelist(
-        TYPE_DELEGATE,
+        PROTOCOL_DELEGATE,
         delegateFactory.address,
         {
           from: ownerAddress,
         }
       )
 
-      let whitelist = await indexer.locatorWhitelist.call(TYPE_DELEGATE)
+      let whitelist = await indexer.locatorWhitelists.call(PROTOCOL_DELEGATE)
 
       equal(whitelist, delegateFactory.address)
 
-      await indexer.setLocatorWhitelist(TYPE_DELEGATE, EMPTY_ADDRESS, {
+      await indexer.setLocatorWhitelist(PROTOCOL_DELEGATE, EMPTY_ADDRESS, {
         from: ownerAddress,
       })
 
-      whitelist = await indexer.locatorWhitelist.call(TYPE_DELEGATE)
+      whitelist = await indexer.locatorWhitelists.call(PROTOCOL_DELEGATE)
 
       equal(whitelist, EMPTY_ADDRESS)
     })
@@ -147,7 +148,7 @@ contract('Indexer', async accounts => {
       result = await indexer.getLocators.call(
         tokenWETH.address,
         tokenDAI.address,
-        TYPE_LIB_P2P,
+        PROTOCOL_LIB_P2P,
         EMPTY_ADDRESS,
         10,
         {
@@ -164,7 +165,7 @@ contract('Indexer', async accounts => {
       result = await indexer.getLocators.call(
         tokenDAI.address,
         tokenWETH.address,
-        TYPE_LIB_P2P,
+        PROTOCOL_LIB_P2P,
         EMPTY_ADDRESS,
         10,
         {
@@ -182,7 +183,7 @@ contract('Indexer', async accounts => {
         indexer.setIntent(
           tokenDAI.address,
           tokenWETH.address,
-          TYPE_LIB_P2P,
+          PROTOCOL_LIB_P2P,
           100,
           aliceAddress,
           {
@@ -200,7 +201,7 @@ contract('Indexer', async accounts => {
         await indexer.setIntent(
           tokenWETH.address,
           tokenDAI.address,
-          TYPE_LIB_P2P,
+          PROTOCOL_LIB_P2P,
           0,
           aliceLocator,
           {
@@ -216,7 +217,7 @@ contract('Indexer', async accounts => {
         await indexer.unsetIntent(
           tokenWETH.address,
           tokenDAI.address,
-          TYPE_LIB_P2P,
+          PROTOCOL_LIB_P2P,
           {
             from: aliceAddress,
           }
@@ -230,7 +231,7 @@ contract('Indexer', async accounts => {
         indexer.setIntent(
           tokenWETH.address,
           tokenDAI.address,
-          TYPE_LIB_P2P,
+          PROTOCOL_LIB_P2P,
           500,
           aliceAddress,
           {
@@ -251,7 +252,7 @@ contract('Indexer', async accounts => {
         indexer.setIntent(
           tokenWETH.address,
           tokenDAI.address,
-          TYPE_LIB_P2P,
+          PROTOCOL_LIB_P2P,
           500,
           aliceLocator,
           {
@@ -283,7 +284,7 @@ contract('Indexer', async accounts => {
         await indexer.setIntent(
           tokenWETH.address,
           tokenDAI.address,
-          TYPE_LIB_P2P,
+          PROTOCOL_LIB_P2P,
           500,
           aliceLocator,
           {
@@ -304,7 +305,7 @@ contract('Indexer', async accounts => {
         await indexer.unsetIntent(
           tokenWETH.address,
           tokenDAI.address,
-          TYPE_LIB_P2P,
+          PROTOCOL_LIB_P2P,
           {
             from: aliceAddress,
           }
@@ -320,7 +321,7 @@ contract('Indexer', async accounts => {
         await indexer.setIntent(
           tokenWETH.address,
           tokenDAI.address,
-          TYPE_LIB_P2P,
+          PROTOCOL_LIB_P2P,
           400,
           bobLocator,
           {
@@ -338,7 +339,7 @@ contract('Indexer', async accounts => {
         await indexer.setIntent(
           tokenWETH.address,
           tokenDAI.address,
-          TYPE_DELEGATE,
+          PROTOCOL_DELEGATE,
           200,
           bobLocator,
           {
@@ -357,7 +358,7 @@ contract('Indexer', async accounts => {
         bobAddress,
         tokenWETH.address,
         tokenDAI.address,
-        TYPE_LIB_P2P
+        PROTOCOL_LIB_P2P
       )
       equal(staked, 400)
 
@@ -366,7 +367,7 @@ contract('Indexer', async accounts => {
         bobAddress,
         tokenWETH.address,
         tokenDAI.address,
-        TYPE_DELEGATE
+        PROTOCOL_DELEGATE
       )
       equal(staked, 200)
     })
@@ -377,7 +378,7 @@ contract('Indexer', async accounts => {
         await indexer.setIntent(
           tokenWETH.address,
           tokenDAI.address,
-          TYPE_LIB_P2P,
+          PROTOCOL_LIB_P2P,
           800,
           bobLocator,
           {
@@ -396,7 +397,7 @@ contract('Indexer', async accounts => {
         bobAddress,
         tokenWETH.address,
         tokenDAI.address,
-        TYPE_LIB_P2P
+        PROTOCOL_LIB_P2P
       )
       equal(staked, 800)
     })
@@ -407,7 +408,7 @@ contract('Indexer', async accounts => {
         await indexer.setIntent(
           tokenWETH.address,
           tokenDAI.address,
-          TYPE_LIB_P2P,
+          PROTOCOL_LIB_P2P,
           1,
           aliceLocator,
           {
@@ -426,7 +427,7 @@ contract('Indexer', async accounts => {
         bobAddress,
         tokenWETH.address,
         tokenDAI.address,
-        TYPE_LIB_P2P
+        PROTOCOL_LIB_P2P
       )
       equal(staked, 1)
     })
@@ -437,7 +438,7 @@ contract('Indexer', async accounts => {
         await indexer.setIntent(
           tokenWETH.address,
           tokenDAI.address,
-          TYPE_LIB_P2P,
+          PROTOCOL_LIB_P2P,
           1,
           bobLocator,
           {
@@ -455,14 +456,14 @@ contract('Indexer', async accounts => {
         bobAddress,
         tokenWETH.address,
         tokenDAI.address,
-        TYPE_LIB_P2P
+        PROTOCOL_LIB_P2P
       )
       equal(staked, 1)
     })
 
     it('Owner sets the locator whitelist for delegates, and alice cannot set intent', async () => {
       await indexer.setLocatorWhitelist(
-        TYPE_DELEGATE,
+        PROTOCOL_DELEGATE,
         delegateFactory.address,
         {
           from: ownerAddress,
@@ -473,7 +474,7 @@ contract('Indexer', async accounts => {
         indexer.setIntent(
           tokenWETH.address,
           tokenDAI.address,
-          TYPE_DELEGATE,
+          PROTOCOL_DELEGATE,
           500,
           aliceLocator,
           {
@@ -510,7 +511,7 @@ contract('Indexer', async accounts => {
         await indexer.setIntent(
           tokenWETH.address,
           tokenDAI.address,
-          TYPE_DELEGATE,
+          PROTOCOL_DELEGATE,
           500,
           whitelistedLocator,
           {
@@ -526,7 +527,7 @@ contract('Indexer', async accounts => {
         await indexer.unsetIntent(
           tokenWETH.address,
           tokenDAI.address,
-          TYPE_DELEGATE,
+          PROTOCOL_DELEGATE,
           {
             from: bobAddress,
           }
@@ -536,11 +537,11 @@ contract('Indexer', async accounts => {
     })
 
     it('Remove locator whitelist from delegate index', async () => {
-      await indexer.setLocatorWhitelist(TYPE_DELEGATE, EMPTY_ADDRESS, {
+      await indexer.setLocatorWhitelist(PROTOCOL_DELEGATE, EMPTY_ADDRESS, {
         from: ownerAddress,
       })
 
-      const whitelist = await indexer.locatorWhitelist.call(TYPE_DELEGATE)
+      const whitelist = await indexer.locatorWhitelists.call(PROTOCOL_DELEGATE)
 
       equal(whitelist, EMPTY_ADDRESS)
     })
@@ -551,7 +552,7 @@ contract('Indexer', async accounts => {
       result = await indexer.getLocators.call(
         tokenWETH.address,
         tokenDAI.address,
-        TYPE_LIB_P2P,
+        PROTOCOL_LIB_P2P,
         EMPTY_ADDRESS,
         5,
         {
@@ -560,29 +561,48 @@ contract('Indexer', async accounts => {
       )
 
       equal(result[LOCATORS].length, 1)
-      equal(result[LOCATORS][0], whitelistedLocator)
+      equal(result[LOCATORS][0], bobLocator)
 
       equal(result[SCORES].length, 1)
-      equal(result[SCORES][0], 500)
+      equal(result[SCORES][0], 1)
 
       equal(result[NEXTID], HEAD)
     })
 
     it('Alice attempts to unset non-existent index and reverts', async () => {
       await reverted(
-        indexer.unsetIntent(tokenDAI.address, tokenWETH.address, TYPE_LIB_P2P, {
-          from: aliceAddress,
-        }),
+        indexer.unsetIntent(
+          tokenDAI.address,
+          tokenWETH.address,
+          PROTOCOL_LIB_P2P,
+          {
+            from: aliceAddress,
+          }
+        ),
         'INDEX_DOES_NOT_EXIST'
       )
     })
 
-    it('Alice attempts to unset an intent and succeeds', async () => {
+    it('Bob attempts to unset an intent and succeeds', async () => {
       emitted(
         await indexer.unsetIntent(
           tokenWETH.address,
           tokenDAI.address,
-          TYPE_LIB_P2P,
+          PROTOCOL_LIB_P2P,
+          {
+            from: bobAddress,
+          }
+        ),
+        'Unstake'
+      )
+    })
+
+    it('Alice unsets her intent on delegate index and succeeds', async () => {
+      emitted(
+        await indexer.unsetIntent(
+          tokenWETH.address,
+          tokenDAI.address,
+          PROTOCOL_DELEGATE,
           {
             from: aliceAddress,
           }
@@ -591,16 +611,22 @@ contract('Indexer', async accounts => {
       )
     })
 
-    it('Alice attempts to unset a the intent she just unset and reverts', async () => {
+    it('Bob attempts to unset the intent he just unset and reverts', async () => {
       await reverted(
-        indexer.unsetIntent(tokenWETH.address, tokenDAI.address, TYPE_LIB_P2P, {
-          from: aliceAddress,
-        }),
+        indexer.unsetIntent(
+          tokenWETH.address,
+          tokenDAI.address,
+          PROTOCOL_LIB_P2P,
+          {
+            from: bobAddress,
+          }
+        ),
         'ENTRY_DOES_NOT_EXIST'
       )
     })
 
     it('Checks balances', async () => {
+      ok(await balances(bobAddress, [[tokenAST, 1000]]))
       ok(await balances(aliceAddress, [[tokenAST, 1000]]))
       ok(await balances(indexerAddress, [[tokenAST, 0]]))
     })
@@ -609,7 +635,7 @@ contract('Indexer', async accounts => {
       result = await indexer.getLocators.call(
         tokenWETH.address,
         tokenDAI.address,
-        TYPE_LIB_P2P,
+        PROTOCOL_LIB_P2P,
         EMPTY_ADDRESS,
         10,
         {
@@ -627,7 +653,7 @@ contract('Indexer', async accounts => {
         await indexer.setIntent(
           tokenWETH.address,
           tokenDAI.address,
-          TYPE_LIB_P2P,
+          PROTOCOL_LIB_P2P,
           1000,
           whitelistedLocator,
           {
@@ -662,7 +688,7 @@ contract('Indexer', async accounts => {
       result = await indexer.getLocators.call(
         tokenWETH.address,
         tokenDAI.address,
-        TYPE_LIB_P2P,
+        PROTOCOL_LIB_P2P,
         EMPTY_ADDRESS,
         10,
         {
@@ -689,7 +715,7 @@ contract('Indexer', async accounts => {
         indexer.setIntent(
           tokenWETH.address,
           tokenDAI.address,
-          TYPE_LIB_P2P,
+          PROTOCOL_LIB_P2P,
           1000,
           whitelistedLocator,
           {
@@ -705,7 +731,7 @@ contract('Indexer', async accounts => {
         await indexer.unsetIntent(
           tokenWETH.address,
           tokenDAI.address,
-          TYPE_LIB_P2P,
+          PROTOCOL_LIB_P2P,
           {
             from: aliceAddress,
           }
@@ -746,7 +772,7 @@ contract('Indexer', async accounts => {
         await indexer.setIntent(
           tokenWETH.address,
           tokenDAI.address,
-          TYPE_LIB_P2P,
+          PROTOCOL_LIB_P2P,
           500,
           whitelistedLocator,
           {
@@ -759,7 +785,7 @@ contract('Indexer', async accounts => {
         await indexer.setIntent(
           tokenWETH.address,
           tokenDAI.address,
-          TYPE_LIB_P2P,
+          PROTOCOL_LIB_P2P,
           50,
           bobLocator,
           {
@@ -774,7 +800,7 @@ contract('Indexer', async accounts => {
       result = await indexer.getLocators.call(
         tokenWETH.address,
         tokenDAI.address,
-        TYPE_LIB_P2P,
+        PROTOCOL_LIB_P2P,
         bobAddress,
         3,
         {
@@ -807,7 +833,7 @@ contract('Indexer', async accounts => {
         await indexer.createIndex(
           tokenDAI.address,
           tokenWETH.address,
-          TYPE_LIB_P2P,
+          PROTOCOL_LIB_P2P,
           {
             from: maliciousMary,
           }
@@ -820,7 +846,7 @@ contract('Indexer', async accounts => {
         indexer.setIntent(
           tokenDAI.address,
           tokenWETH.address,
-          TYPE_LIB_P2P,
+          PROTOCOL_LIB_P2P,
           1000,
           emptyLocator,
           {
@@ -837,7 +863,7 @@ contract('Indexer', async accounts => {
         await indexer.setIntent(
           tokenDAI.address,
           tokenWETH.address,
-          TYPE_LIB_P2P,
+          PROTOCOL_LIB_P2P,
           500,
           bobLocator,
           {
@@ -852,7 +878,7 @@ contract('Indexer', async accounts => {
         indexer.setIntent(
           tokenDAI.address,
           tokenWETH.address,
-          TYPE_LIB_P2P,
+          PROTOCOL_LIB_P2P,
           1000,
           emptyLocator,
           {

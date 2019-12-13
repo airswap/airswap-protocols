@@ -68,7 +68,7 @@ contract Indexer is IIndexer, Ownable {
     bytes2 protocol,
     address newLocatorWhitelist
   ) external onlyOwner {
-  locatorWhitelists[protocol] = newLocatorWhitelist;
+    locatorWhitelists[protocol] = newLocatorWhitelist;
   }
 
   /**
