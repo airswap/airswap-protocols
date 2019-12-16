@@ -2,7 +2,7 @@ pragma solidity ^0.5.10;
 pragma experimental ABIEncoderV2;
 
 import "@airswap/types/contracts/Types.sol";
-import "@airswap/tokens/contracts/interfaces/INRERC20.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/token/ERC721/IERC721.sol";
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
 
@@ -98,7 +98,7 @@ contract PreSwapChecker {
       address owner = IERC721(party.token).ownerOf(party.id);
       return (owner == party.wallet);
     }
-    uint256 balance = INRERC20(party.token).balanceOf(party.wallet);
+    uint256 balance = IERC20(party.token).balanceOf(party.wallet);
     return (balance >= party.amount);
   }
 
@@ -111,7 +111,7 @@ contract PreSwapChecker {
       address approved = IERC721(party.token).getApproved(party.id);
       return (swap == approved);
     }
-    uint256 allowance = INRERC20(party.token).allowance(party.wallet, swap);
+    uint256 allowance = IERC20(party.token).allowance(party.wallet, swap);
     return (allowance >= party.amount);
   }
 
