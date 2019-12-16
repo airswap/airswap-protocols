@@ -177,6 +177,7 @@ contract('Swap', async accounts => {
         swapAddress,
         GANACHE_PROVIDER
       )
+
       await reverted(swap(order, { from: bobAddress }), 'NO_ID_FIELD_IN_ERC20')
     })
 
@@ -1009,7 +1010,7 @@ contract('Swap', async accounts => {
       )
     })
 
-    it('Bob cannot Ticket #12345 from Alice if he sends id and amount in Party struct', async () => {
+    it('Bob cannot buy Ticket #12345 from Alice if she sends id and amount in Party struct', async () => {
       const order = await orders.getOrder({
         signer: {
           wallet: aliceAddress,
@@ -1034,7 +1035,7 @@ contract('Swap', async accounts => {
 
       await reverted(
         swap(order, { from: bobAddress }),
-        'NO_AMOUNT_FIELD_IN_ERC721.'
+        'NO_AMOUNT_FIELD_IN_ERC721'
       )
     })
 
