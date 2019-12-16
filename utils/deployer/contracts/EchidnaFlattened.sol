@@ -70,3 +70,25 @@ contract EchidnaIndexer is Indexer {
     return amount == 0;
   }
 }
+
+contract EchidnaIndex is Index {
+  function echidna_getScore() public returns(bool) {
+    uint256 score = 100;
+    // Find the first entry with a lower score.
+    address nextEntry = _getEntryLowerThan(score);
+
+    // Link the new entry between previous and next.
+    address identifier = address(1);
+    address prevEntry = entries[nextEntry].prev;
+    entries[prevEntry].next = identifier;
+    entries[nextEntry].prev = identifier;
+    entries[identifier] = Entry("bamb", score, prevEntry, nextEntry);
+
+    // Increment the index length.
+    length = length + 1;
+
+    entries[address(1)].score = 100;
+    uint256 val = this.getScore(address(1));
+    return val == 100;
+  }
+}
