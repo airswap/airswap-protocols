@@ -16,6 +16,6 @@ module.exports = async(deployer, network) => {
   await Swap.link("Types", Types.address)
   await deployer.deploy(Swap)
   await deployer.deploy(Indexer, STAKING_TOKEN_ADDRESS)
-  await deployer.deploy(DelegateFactory, Swap.address, Indexer.address)
+  await deployer.deploy(DelegateFactory, Swap.address, Indexer.address, '0x0001')
   await deployer.deploy(Wrapper, Swap.address, WETH_ADDRESS)
 };
