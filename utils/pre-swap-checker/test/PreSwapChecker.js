@@ -123,12 +123,12 @@ contract('PreSwapChecker', async accounts => {
         signer: {
           wallet: aliceAddress,
           token: tokenAST.address,
-          param: 200,
+          amount: 200,
         },
         sender: {
           wallet: bobAddress,
           token: tokenDAI.address,
-          param: 50,
+          amount: 50,
         },
       })
 
@@ -152,12 +152,12 @@ contract('PreSwapChecker', async accounts => {
         signer: {
           wallet: aliceAddress,
           token: tokenAST.address,
-          param: 200,
+          amount: 200,
         },
         sender: {
           wallet: aliceAddress,
           token: tokenAST.address,
-          param: 50,
+          amount: 50,
         },
       })
 
@@ -176,12 +176,12 @@ contract('PreSwapChecker', async accounts => {
         signer: {
           wallet: aliceAddress,
           token: tokenAST.address,
-          param: 200000,
+          amount: 200000,
         },
         sender: {
           wallet: bobAddress,
           token: tokenAST.address,
-          param: 200000,
+          amount: 200000,
         },
       })
 
@@ -216,12 +216,12 @@ contract('PreSwapChecker', async accounts => {
         signer: {
           wallet: aliceAddress,
           token: tokenAST.address,
-          param: 20,
+          amount: 20,
         },
         sender: {
           wallet: bobAddress,
           token: tokenDAI.address,
-          param: 5,
+          amount: 5,
         },
         expiry: (await getLatestTimestamp()) - 10, // expired time
         nonce: 5, // nonce below minimum threshold
@@ -260,12 +260,12 @@ contract('PreSwapChecker', async accounts => {
         signer: {
           wallet: aliceAddress,
           token: tokenAST.address,
-          param: 20,
+          amount: 20,
         },
         sender: {
           wallet: EMPTY_ADDRESS,
           token: tokenDAI.address,
-          param: 50000,
+          amount: 50000,
         },
       })
 
@@ -305,12 +305,12 @@ contract('PreSwapChecker', async accounts => {
         signer: {
           wallet: aliceAddress,
           token: tokenAST.address,
-          param: 50,
+          amount: 50,
         },
         sender: {
           wallet: bobAddress,
           token: tokenKitty.address,
-          param: 54320,
+          id: 54320,
           kind: ERC721_INTERFACE_ID,
         },
       })
@@ -332,12 +332,12 @@ contract('PreSwapChecker', async accounts => {
         signer: {
           wallet: aliceAddress,
           token: tokenAST.address,
-          param: 50,
+          amount: 50,
         },
         sender: {
           wallet: bobAddress,
           token: tokenKitty.address,
-          param: 54321,
+          id: 54321,
           kind: ERC721_INTERFACE_ID,
         },
       })

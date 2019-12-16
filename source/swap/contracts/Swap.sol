@@ -143,7 +143,8 @@ contract Swap is ISwap {
     transferToken(
       finalSenderWallet,
       order.signer.wallet,
-      order.sender.param,
+      order.sender.amount,
+      order.sender.id,
       order.sender.token,
       order.sender.kind
     );
@@ -152,7 +153,8 @@ contract Swap is ISwap {
     transferToken(
       order.signer.wallet,
       finalSenderWallet,
-      order.signer.param,
+      order.signer.amount,
+      order.signer.id,
       order.signer.token,
       order.signer.kind
     );
@@ -162,16 +164,28 @@ contract Swap is ISwap {
       transferToken(
         order.signer.wallet,
         order.affiliate.wallet,
-        order.affiliate.param,
+        order.affiliate.amount,
+        order.affiliate.id,
         order.affiliate.token,
         order.affiliate.kind
       );
     }
 
-    emit Swap(order.nonce, block.timestamp,
-      order.signer.wallet, order.signer.param, order.signer.token,
-      finalSenderWallet, order.sender.param, order.sender.token,
-      order.affiliate.wallet, order.affiliate.param, order.affiliate.token
+    emit Swap(
+      order.nonce,
+      block.timestamp,
+      order.signer.wallet,
+      order.signer.amount,
+      order.signer.id,
+      order.signer.token,
+      finalSenderWallet,
+      order.sender.amount,
+      order.sender.id,
+      order.sender.token,
+      order.affiliate.wallet,
+      order.affiliate.amount,
+      order.affiliate.id,
+      order.affiliate.token
     );
   }
 
@@ -336,14 +350,16 @@ contract Swap is ISwap {
     * @dev ERC20: Takes into account non-standard ERC-20 tokens.
     * @param from address Wallet address to transfer from
     * @param to address Wallet address to transfer to
-    * @param param uint256 Amount for ERC-20 or token ID for ERC-721
+    * @param amount uint256 Amount for ERC-20
+    * @param id token ID for ERC-721
     * @param token address Contract address of token
     * @param kind bytes4 EIP-165 interface ID of the token
     */
   function transferToken(
       address from,
       address to,
-      uint256 param,
+      uint256 amount,
+      uint256 id,
       address token,
       bytes4 kind
   ) internal {
@@ -352,13 +368,14 @@ contract Swap is ISwap {
     require(from != to, "INVALID_SELF_TRANSFER");
     ITransferHandler transferHandler = registry.getTransferHandler(kind);
     require(address(transferHandler) != address(0x0), "UNKNOWN_TRANSFER_HANDLER");
-
+    // delegatecall required to pass msg.sender as Swap contract
     (bool success, bytes memory data) = address(transferHandler).
       delegatecall(abi.encodeWithSelector(
         transferHandler.transferTokens.selector,
         from,
         to,
-        param,
+        amount,
+        id,
         token
     ));
     require(success && abi.decode(data, (bool)), "TRANSFER_FAILED");

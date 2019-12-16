@@ -5,5 +5,5 @@ pragma solidity 0.5.12;
  * @dev transferFrom function from KittyCore
  */
 contract IPartialKittyCoreTransferHandler {
-  function transferFrom(address _from, address _to, uint256 _tokenId) external;
+  function transferFrom(address from, address to, uint256 tokenId) external;
 }

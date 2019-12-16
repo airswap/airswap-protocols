@@ -219,7 +219,7 @@ contract('Wrapper Unit Tests', async accounts => {
       const order = await orders.getOrder({
         sender: {
           wallet: mockSender,
-          param: 1,
+          amount: 1,
           token: mockWethAddress,
         },
         signer: {
@@ -253,7 +253,7 @@ contract('Wrapper Unit Tests', async accounts => {
         },
         sender: {
           wallet: mockSender,
-          param: senderParam,
+          amount: senderParam,
           token: mockWethAddress,
         },
       })
@@ -291,7 +291,7 @@ contract('Wrapper Unit Tests', async accounts => {
         },
         sender: {
           wallet: mockSender,
-          param: senderParam,
+          amount: senderParam,
           token: mockWethAddress,
         },
       })
@@ -336,7 +336,7 @@ contract('Wrapper Unit Tests', async accounts => {
           token: notWethContract,
         },
         sender: {
-          param: senderParam,
+          amount: senderParam,
           token: mockWethAddress,
         },
       })
@@ -372,7 +372,7 @@ contract('Wrapper Unit Tests', async accounts => {
       const order = await orders.getOrder({
         sender: {
           wallet: nonMockSender,
-          param: 1,
+          amount: 1,
           token: notWethContract,
         },
         signer: {
@@ -406,7 +406,7 @@ contract('Wrapper Unit Tests', async accounts => {
         },
         sender: {
           wallet: mockSender,
-          param: senderParam,
+          amount: senderParam,
           token: notWethContract,
         },
       })
@@ -478,7 +478,7 @@ contract('Wrapper Unit Tests', async accounts => {
         signer: {
           wallet: mockSigner,
           token: mockWethAddress,
-          param: 500,
+          amount: 500,
         },
       })
 
@@ -508,7 +508,7 @@ contract('Wrapper Unit Tests', async accounts => {
         signer: {
           wallet: mockSigner,
           token: mockWethAddress,
-          param: 500,
+          amount: 500,
         },
       })
 
@@ -531,7 +531,7 @@ contract('Wrapper Unit Tests', async accounts => {
         signer: {
           wallet: mockSigner,
           token: mockWethAddress,
-          param: 500,
+          amount: 500,
         },
       })
 
@@ -561,7 +561,7 @@ contract('Wrapper Unit Tests', async accounts => {
         signer: {
           wallet: mockSigner,
           token: mockWethAddress,
-          param: 500,
+          amount: 500,
         },
       })
 
@@ -608,7 +608,7 @@ contract('Wrapper Unit Tests', async accounts => {
         sender: {
           wallet: delegateOwner,
           token: mockWethAddress,
-          param: 500,
+          amount: 500,
         },
         signer: {
           wallet: mockSigner,

@@ -13,43 +13,29 @@ contract TransferHandlerRegistry {
     address contractAddress
   );
 
-  event RemoveTransferHandler(
-    bytes4 kind,
-    address contractAddress
-  );
-
   // Mapping of bytes4 to contract interface type
   mapping (bytes4 => ITransferHandler) private transferHandlerMapping;
 
   /**
   * @notice Adds handler to mapping
-  * @param _kind bytes4
-  * @param _transferHandler ITransferHandler
+  * @param kind bytes4
+  * @param transferHandler ITransferHandler
   */
-  function addTransferHandler(bytes4 _kind, ITransferHandler _transferHandler)
+  function addTransferHandler(bytes4 kind, ITransferHandler transferHandler)
     external {
-      transferHandlerMapping[_kind] = _transferHandler;
-      emit AddTransferHandler(_kind, address(_transferHandler));
-    }
-
-  /**
-  * @notice Removes handler from mapping
-  * @param _kind bytes4
-  */
-  function removeTransferHandler(bytes4 _kind)
-    external {
-      delete transferHandlerMapping[_kind];
-      emit RemoveTransferHandler(_kind, address(transferHandlerMapping[_kind]));
+      require(address(transferHandlerMapping[kind]) == address(0x0), "HANDLER_EXISTS_FOR_KIND");
+      transferHandlerMapping[kind] = transferHandler;
+      emit AddTransferHandler(kind, address(transferHandler));
     }
 
   /**
   * @notice Fetches from the transfer handler mapping
   * @dev will return 0x0 if not in mapping
-  * @param _kind bytes4
+  * @param kind bytes4
   * @return ITransferHandler return
   */
-  function getTransferHandler(bytes4 _kind) external
+  function getTransferHandler(bytes4 kind) external
     view returns (ITransferHandler) {
-    return transferHandlerMapping[_kind];
+    return transferHandlerMapping[kind];
   }
 }

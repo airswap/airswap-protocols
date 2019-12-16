@@ -6,12 +6,14 @@ import "./interfaces/IPartialKittyCoreTransferHandler.sol";
 contract PartialKittyCoreTransferHandler is ITransferHandler {
 
   function transferTokens(
-    address _from,
-    address _to,
-    uint256 _param,
-    address _token
+    address from,
+    address to,
+    uint256 amount,
+    uint256 id,
+    address token
   ) external returns (bool) {
-    IPartialKittyCoreTransferHandler(_token).transferFrom(_from, _to, _param);
+    require(amount == 0, "NO_AMOUNT_FIELD_IN_ERC721");
+    IPartialKittyCoreTransferHandler(token).transferFrom(from, to, id);
     return true;
   }
 }

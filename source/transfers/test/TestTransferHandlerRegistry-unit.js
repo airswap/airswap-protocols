@@ -1,6 +1,6 @@
 const TransferHandlerRegistry = artifacts.require('TransferHandlerRegistry')
 const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
-const { equal, emitted } = require('@airswap/test-utils').assert
+const { equal, emitted, reverted } = require('@airswap/test-utils').assert
 const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 
 contract('TransferHandlerRegistry Unit Tests', async accounts => {
@@ -49,7 +49,7 @@ contract('TransferHandlerRegistry Unit Tests', async accounts => {
     })
   })
 
-  describe('Test removing from handler', async () => {
+  describe('Test adding an existing handler from handler', async () => {
     it('test adding and then removing, should pass', async () => {
       await emitted(
         await transferhandlerregistry.addTransferHandler(
@@ -58,10 +58,9 @@ contract('TransferHandlerRegistry Unit Tests', async accounts => {
         ),
         'AddTransferHandler'
       )
-
-      await emitted(
-        await transferhandlerregistry.removeTransferHandler('0x80ac58cd'),
-        'RemoveTransferHandler'
+      await reverted(
+        transferhandlerregistry.addTransferHandler('0x80ac58cd', erc20Asset),
+        'HANDLER_EXISTS_FOR_KIND'
       )
     })
   })

@@ -9,10 +9,12 @@ contract ERC20TransferHandler is ITransferHandler {
   function transferTokens(
     address from,
     address to,
-    uint256 param,
+    uint256 amount,
+    uint256 id,
     address token
   ) external returns (bool) {
-    IERC20(token).safeTransferFrom(from, to, param);
+    require(id == 0, "NO_ID_FIELD_IN_ERC20");
+    IERC20(token).safeTransferFrom(from, to, amount);
     return true;
   }
 }

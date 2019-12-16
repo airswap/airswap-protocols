@@ -1,5 +1,12 @@
 pragma solidity ^0.5.0;
 
+/**
+ *
+ * Copied from OpenZeppelin ERC1155 feature branch from (20642cca30fa18fb167df6db1889b558742d189a)
+ * https://github.com/OpenZeppelin/openzeppelin-contracts/blob/feature-erc1155/contracts/token/ERC1155/ERC1155.sol
+ */
+
+
 import "./interfaces/IERC1155.sol";
 import "./interfaces/IERC1155Receiver.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";

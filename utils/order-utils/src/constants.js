@@ -50,7 +50,8 @@ module.exports = {
       { name: 'kind', type: 'bytes4' },
       { name: 'wallet', type: 'address' },
       { name: 'token', type: 'address' },
-      { name: 'param', type: 'uint256' },
+      { name: 'amount', type: 'uint256' },
+      { name: 'id', type: 'uint256' },
     ],
   },
   defaults: {
@@ -58,7 +59,8 @@ module.exports = {
       kind: '0x36372b07',
       wallet: '0x0000000000000000000000000000000000000000',
       token: '0x0000000000000000000000000000000000000000',
-      param: '0',
+      amount: '0',
+      id: '0',
     },
   },
 }

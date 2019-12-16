@@ -1,5 +1,8 @@
 const Swap = artifacts.require('Swap')
 const Types = artifacts.require('Types')
+const MockContract = artifacts.require('MockContract')
+//const TransferHandlerRegistry = artifacts.require('TransferHandlerRegistry')
+//const ERC20TransferHandler = artifacts.require('ERC20TransferHandler')
 
 const {
   emitted,
@@ -17,7 +20,7 @@ contract('Swap Unit Tests', async accounts => {
   const Jun_06_2017T00_00_00_UTC = 1497052800 //a date later than when ganache started
   const mockSigner = accounts[9]
   const mockSender = accounts[7]
-  const mockRegistry = accounts[6]
+
   const sender = accounts[0]
   const kind = web3.utils.asciiToHex('FFFF') // hex representation is "0x46464646" this is 4 bytes
   const v = 27
@@ -28,6 +31,7 @@ contract('Swap Unit Tests', async accounts => {
   let snapshotId
   let swap
   let types
+  let mockRegistry
 
   beforeEach(async () => {
     const snapShot = await takeSnapshot()
@@ -41,14 +45,15 @@ contract('Swap Unit Tests', async accounts => {
   before('deploy Swap', async () => {
     types = await Types.new()
     await Swap.link('Types', types.address)
-    swap = await Swap.new(mockRegistry)
+    mockRegistry = await MockContract.new()
+    swap = await Swap.new(mockRegistry.address)
   })
 
   describe('Test swap', async () => {
     it('test when order is expired', async () => {
-      const signer = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
-      const sender = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
-      const affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
+      const signer = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200, 0]
+      const sender = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200, 0]
+      const affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200, 0]
       const signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, v, r, s]
       const order = [0, 0, signer, sender, affiliate, signature]
 
@@ -56,9 +61,9 @@ contract('Swap Unit Tests', async accounts => {
     })
 
     it('test when order nonce is too low', async () => {
-      const signer = [kind, mockSigner, EMPTY_ADDRESS, 200]
-      const sender = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
-      const affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
+      const signer = [kind, mockSigner, EMPTY_ADDRESS, 200, 0]
+      const sender = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200, 0]
+      const affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200, 0]
       const signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, v, r, s]
       const order = [
         0,
@@ -74,9 +79,9 @@ contract('Swap Unit Tests', async accounts => {
     })
 
     it('test when sender is provided, and the sender is unauthorized', async () => {
-      const signer = [kind, mockSigner, EMPTY_ADDRESS, 200]
-      const sender = [kind, mockSender, EMPTY_ADDRESS, 200]
-      const affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
+      const signer = [kind, mockSigner, EMPTY_ADDRESS, 200, 0]
+      const sender = [kind, mockSender, EMPTY_ADDRESS, 200, 0]
+      const affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200, 0]
       const signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, v, r, s]
       const order = [
         0,
@@ -91,9 +96,9 @@ contract('Swap Unit Tests', async accounts => {
     })
 
     it('test when sender is provided, the sender is authorized, the signature.v is 0, and the signer wallet is unauthorized', async () => {
-      const signer = [kind, mockSigner, EMPTY_ADDRESS, 200]
-      const sender = [kind, mockSender, EMPTY_ADDRESS, 200]
-      const affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200]
+      const signer = [kind, mockSigner, EMPTY_ADDRESS, 200, 0]
+      const sender = [kind, mockSender, EMPTY_ADDRESS, 200, 0]
+      const affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200, 0]
       const signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, 0, r, s]
       const order = [
         0,
@@ -112,9 +117,9 @@ contract('Swap Unit Tests', async accounts => {
     })
 
     it('test swap when sender and signer are the same', async () => {
-      const signer = [kind, mockSender, EMPTY_ADDRESS, 200]
-      const sender = [kind, mockSender, EMPTY_ADDRESS, 200]
-      const affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 0]
+      const signer = [kind, mockSender, EMPTY_ADDRESS, 200, 0]
+      const sender = [kind, mockSender, EMPTY_ADDRESS, 200, 0]
+      const affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 0, 0]
       const signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, 0, r, s]
       const order = [
         0,
@@ -130,6 +135,48 @@ contract('Swap Unit Tests', async accounts => {
         'INVALID_SELF_TRANSFER'
       )
     })
+
+    /*    it('test adding token that does not transfer swap incorrectly and transfer returns false', async () => {
+      // create mocked contract to test transfer
+      const ERC20TransferHandlerTemplate = await ERC20TransferHandler.new()
+      const handlerTemplate = await MockContract.new()
+
+      const TransferHandlerRegistryTemplate = await TransferHandlerRegistry.new()
+
+      const getHandler = TransferHandlerRegistryTemplate.contract.methods
+        .getHandler(kind)
+        .encodeABI()
+
+      await mockRegistry.givenMethodReturnAddress(getHandler, handlerTemplate)
+
+      const token_transfer = ERC20TransferHandlerTemplate.contract.methods
+        .transferTokens(EMPTY_ADDRESS, EMPTY_ADDRESS, 0)
+        .encodeABI()
+
+      // The token transfer should return false
+      await handlerTemplate.givenMethodReturnBool(token_transfer, false)
+
+      const signer = [kind, mockSigner, tokenMock.address, 200, 0]
+      const sender = [kind, mockSender, tokenMock.address, 200, 0]
+      const affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 0, 0]
+      const signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, 0, r, s]
+      const order = [
+        0,
+        Jun_06_2017T00_00_00_UTC,
+        signer,
+        sender,
+        affiliate,
+        signature,
+      ]
+
+      // auth signer to be the sender of the order
+      await swap.authorizeSender(mockSigner, {
+        from: mockSender,
+      })
+      // auth sender
+      //mock sender will take the order
+      await reverted(swap.swap(order, { from: mockSigner }), 'TRANSFER_FAILED.')
+    })*/
   })
 
   describe('Test cancel', async () => {

@@ -82,7 +82,7 @@ contract Wrapper {
     swapContract.swap(order);
 
     // Unwraps WETH to ETH when the sender receives WETH
-    _unwrapEther(order.sender.wallet, order.signer.token, order.signer.param);
+    _unwrapEther(order.sender.wallet, order.signer.token, order.signer.amount);
   }
 
   /**
@@ -109,7 +109,7 @@ contract Wrapper {
     delegate.provideOrder(order);
 
     // Unwraps WETH to ETH when the signer receives WETH
-    _unwrapEther(order.signer.wallet, order.sender.token, order.sender.param);
+    _unwrapEther(order.signer.wallet, order.sender.token, order.sender.amount);
   }
 
   /**
@@ -120,7 +120,7 @@ contract Wrapper {
     // Check whether ether needs wrapping
     if (party.token == address(wethContract)) {
       // Ensure message value is param.
-      require(party.param == msg.value,
+      require(party.amount == msg.value,
         "VALUE_MUST_BE_SENT");
 
       // Wrap (deposit) the ether.
@@ -128,7 +128,7 @@ contract Wrapper {
 
       // Transfer the WETH from the wrapper to party.
       // Return value not checked - WETH throws on error and does not return false
-      wethContract.transfer(party.wallet, party.param);
+      wethContract.transfer(party.wallet, party.amount);
 
     } else {
       // Ensure no unexpected ether is sent.

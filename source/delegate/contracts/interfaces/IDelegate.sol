@@ -72,27 +72,27 @@ interface IDelegate {
   function rules(address, address) external view returns (Rule memory);
 
   function getSignerSideQuote(
-    uint256 senderParam,
+    uint256 senderAmount,
     address senderToken,
     address signerToken
   ) external view returns (
-    uint256 signerParam
+    uint256 signerAmount
   );
 
   function getSenderSideQuote(
-    uint256 signerParam,
+    uint256 signerAmount,
     address signerToken,
     address senderToken
   ) external view returns (
-    uint256 senderParam
+    uint256 senderAmount
   );
 
   function getMaxQuote(
     address senderToken,
     address signerToken
   ) external view returns (
-    uint256 senderParam,
-    uint256 signerParam
+    uint256 senderAmount,
+    uint256 signerAmount
   );
 
   function owner()
