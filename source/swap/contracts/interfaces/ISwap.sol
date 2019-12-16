@@ -34,7 +34,7 @@ interface ISwap {
     address senderToken,
     address affiliateWallet,
     uint256 affiliateAmount,
-    uint256 affiliateid,
+    uint256 affiliateId,
     address affiliateToken
   );
 
