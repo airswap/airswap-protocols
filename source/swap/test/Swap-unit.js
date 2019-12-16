@@ -169,47 +169,10 @@ contract('Swap Unit Tests', async accounts => {
       })
       // auth sender
       //mock sender will take the order
-      await reverted(swap.swap(order, { from: mockSigner }), 'TRANSFER_FAILED.')
-    })
-
-    it('test adding token that does not transfer swap incorrectly and transfer returns true', async () => {
-      // create mocked contract to test transfer
-      const fungibleTokenTemplate = await FungibleToken.new()
-      const tokenMock = await MockContract.new()
-
-      const token_balance = fungibleTokenTemplate.contract.methods
-        .balanceOf(EMPTY_ADDRESS)
-        .encodeABI()
-
-      const token_transfer = fungibleTokenTemplate.contract.methods
-        .transferFrom(EMPTY_ADDRESS, EMPTY_ADDRESS, 0)
-        .encodeABI()
-
-      // The token transfer should return true
-      await tokenMock.givenMethodReturnBool(token_transfer, true)
-      // balance check should remain constant and thus fail
-      await tokenMock.givenMethodReturnUint(token_balance, 1000)
-
-      const signer = [kind, mockSigner, tokenMock.address, 200, 0]
-      const sender = [kind, mockSender, tokenMock.address, 200, 0]
-      const affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 0, 0]
-      const signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, 0, r, s]
-      const order = [
-        0,
-        Jun_06_2017T00_00_00_UTC,
-        signer,
-        sender,
-        affiliate,
-        signature,
-      ]
-
-      // auth signer to be the sender of the order
-      await swap.authorizeSender(mockSigner, {
-        from: mockSender,
-      })
-      // auth sender
-      //mock sender will take the order
-      await reverted(swap.swap(order, { from: mockSigner }), 'TRANSFER_FAILED.')
+      await reverted(
+        swap.swap(order, { from: mockSigner }),
+        'SafeERC20: ERC20 operation did not succeed.'
+      )
     })
   })
 

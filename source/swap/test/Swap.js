@@ -156,6 +156,30 @@ contract('Swap', async accounts => {
       )
     })
 
+    it('Checks that for ERC20 transfers, cannot send an id value', async () => {
+      const order = await orders.getOrder({
+        signer: {
+          wallet: aliceAddress,
+          token: tokenAST.address,
+          amount: 200,
+          id: 34,
+        },
+        sender: {
+          wallet: bobAddress,
+          token: tokenDAI.address,
+          amount: 50,
+        },
+      })
+
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        aliceAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+      await reverted(swap(order, { from: bobAddress }), 'NO_ID_FIELD_IN_ERC20')
+    })
+
     it('Checks that Bob can swap with Alice (200 AST for 50 DAI)', async () => {
       emitted(await swap(_order, { from: bobAddress }), 'Swap')
     })
@@ -985,7 +1009,36 @@ contract('Swap', async accounts => {
       )
     })
 
-    it('Bob buys Ticket #12345 from Alice for 1 DAI', async () => {
+    it('Bob cannot Ticket #12345 from Alice if he sends id and amount in Party struct', async () => {
+      const order = await orders.getOrder({
+        signer: {
+          wallet: aliceAddress,
+          token: tokenTicket.address,
+          id: 12345,
+          amount: 100,
+          kind: ERC721_INTERFACE_ID,
+        },
+        sender: {
+          wallet: bobAddress,
+          token: tokenDAI.address,
+          amount: 100,
+        },
+      })
+
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        aliceAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
+      await reverted(
+        swap(order, { from: bobAddress }),
+        'NO_AMOUNT_FIELD_IN_ERC721.'
+      )
+    })
+
+    it('Bob buys Ticket #12345 from Alice for 100 DAI', async () => {
       const order = await orders.getOrder({
         signer: {
           wallet: aliceAddress,
