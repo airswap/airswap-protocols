@@ -61,6 +61,7 @@ contract Delegate is IDelegate, Ownable {
     * @param delegateIndexer address Indexer contract the delegate will deploy with
     * @param delegateContractOwner address Owner of the delegate
     * @param delegateTradeWallet address Wallet the delegate will trade from
+    * @param delegateProtocol bytes2 The protocol identifier for Delegate contracts
     */
   constructor(
     ISwap delegateSwap,
