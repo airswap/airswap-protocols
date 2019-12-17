@@ -25,15 +25,15 @@ jobs:
             - v1-dependencies-{{ checksum "package.json" }}
             - v1-dependencies-
       - run:
+          name: yarn install and dependencies
+          command: |
+            yarn install
+      - run:
           name: Eslint
           command: yarn lint
       - run:
           name: Solhint
           command: yarn hint
-      - run:
-          name: yarn install and dependencies
-          command: |
-            yarn install
       - run:
           name: Check Dependencies
           command: |
