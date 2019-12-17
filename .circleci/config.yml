@@ -45,6 +45,10 @@ jobs:
                 echo "local beta is different to npm beta"
                 echo $LOCAL_VERSION
                 echo $NPM_BETA_VERSION
+              else
+                echo "local beta is the same as npm beta"
+                echo $LOCAL_VERSION
+                echo $NPM_BETA_VERSION
               fi
             else
               echo "local version is NOT beta"
