@@ -836,20 +836,14 @@ contract('Delegate Integration Tests', async accounts => {
       // tradeWallet needs DAI to trade
       emitted(await tokenDAI.mint(aliceTradeWallet, 300), 'Transfer')
       ok(
-        await balances(aliceTradeWallet, [
-          [tokenDAI, 300],
-          [tokenWETH, 0],
-        ]),
+        await balances(aliceTradeWallet, [[tokenDAI, 300], [tokenWETH, 0]]),
         'Trade Wallet balances are incorrect'
       )
 
       // bob needs WETH to trade
       emitted(await tokenWETH.mint(bobAddress, 2), 'Transfer')
       ok(
-        await balances(bobAddress, [
-          [tokenDAI, 0],
-          [tokenWETH, 2],
-        ]),
+        await balances(bobAddress, [[tokenDAI, 0], [tokenWETH, 2]]),
         'Bob balances are incorrect'
       )
 
