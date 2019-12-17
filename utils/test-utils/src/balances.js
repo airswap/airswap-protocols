@@ -3,10 +3,9 @@ module.exports = {
     let index = allowances.length
     while (index--) {
       if (
-        (await allowances[index][0].allowance(
-          account,
-          withdrawer
-        )).toNumber() !== allowances[index][1]
+        (
+          await allowances[index][0].allowance(account, withdrawer)
+        ).toNumber() !== allowances[index][1]
       ) {
         return false
       }

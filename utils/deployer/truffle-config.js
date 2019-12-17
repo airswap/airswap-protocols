@@ -27,6 +27,8 @@ module.exports = {
           'https://rinkeby.infura.io/v3/' + process.env.INFURA_API_KEY
         ),
       network_id: 4,
+      gas: 5898551,
+      gasPrice: 1900000000, // CHECK THE CURRENT GASPRICE
     },
   },
 

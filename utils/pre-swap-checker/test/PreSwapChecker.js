@@ -65,7 +65,10 @@ contract('PreSwapChecker', async accounts => {
     it('Mints 1000 AST for Alice', async () => {
       emitted(await tokenAST.mint(aliceAddress, 1000), 'Transfer')
       ok(
-        await balances(aliceAddress, [[tokenAST, 1000], [tokenDAI, 0]]),
+        await balances(aliceAddress, [
+          [tokenAST, 1000],
+          [tokenDAI, 0],
+        ]),
         'Alice balances are incorrect'
       )
     })
@@ -73,7 +76,10 @@ contract('PreSwapChecker', async accounts => {
     it('Mints 1000 DAI for Bob', async () => {
       emitted(await tokenDAI.mint(bobAddress, 1000), 'Transfer')
       ok(
-        await balances(bobAddress, [[tokenAST, 0], [tokenDAI, 1000]]),
+        await balances(bobAddress, [
+          [tokenAST, 0],
+          [tokenDAI, 1000],
+        ]),
         'Bob balances are incorrect'
       )
     })
