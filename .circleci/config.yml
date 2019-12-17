@@ -42,7 +42,7 @@ jobs:
             if [[ $LOCAL_VERSION != $NPM_VERSION ]]; then
               echo "The versions are different..."
               echo "$LOCAL_VERSION"
-              if [[ $LOCAL_VERSION" == *"beta"* ]]; then
+              if [[ $LOCAL_VERSION == *"beta"* ]]; then
                 echo "It's a beta package..."
               else
                 echo "It's not a beta package..."
