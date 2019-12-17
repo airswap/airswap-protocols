@@ -149,11 +149,21 @@ jobs:
               cd $file
               NPM_NAME=$(node -p "require('./package.json').name")
               NPM_VERSION=$(npm view $NPM_NAME version || :)
+              NPM_BETA_VERSION=$(npm view $NPM_NAME dist-tags.beta || :)
               LOCAL_VERSION=$(node -p "require('./package.json').version")
-              if [[ $LOCAL_VERSION != $NPM_VERSION ]]; then
-                echo "Publishing to NPM..." # this is where we deploy the code to npm
-                npm publish
-                npm access public $NPM_NAME
+              ### Check if the local version is beta, otherwise publish normally
+              if [[ $LOCAL_VERSION == *"beta"* ]]; then
+                if [[ $LOCAL_VERSION != $NPM_BETA_VERSION ]]; then
+                  echo "Publishing package to NPM with 'beta' tag..."
+                  npm publish --tag beta
+                  npm access public $NPM_NAME
+                fi
+              else
+                if [[ $LOCAL_VERSION != $NPM_VERSION ]]; then
+                  echo "Publishing package to NPM with 'latest' tag..."
+                  npm publish
+                  npm access public $NPM_NAME
+                fi
               fi
               cd ..
             done
@@ -167,13 +177,27 @@ jobs:
               cd $file
               NPM_NAME=$(node -p "require('./package.json').name")
               NPM_VERSION=$(npm view $NPM_NAME version || :)
+              NPM_BETA_VERSION=$(npm view $NPM_NAME dist-tags.beta || :)
               LOCAL_VERSION=$(node -p "require('./package.json').version")
-              if [[ $LOCAL_VERSION != $NPM_VERSION ]]; then
-                echo "Generating build..."
-                yarn compile
-                echo "Publishing to NPM..." # this is where we deploy the code to npm
-                npm publish
-                npm access public $NPM_NAME
+              ### Check if the local version is beta, otherwise publish normally
+              if [[ $LOCAL_VERSION == *"beta"* ]]; then
+                if [[ $LOCAL_VERSION != $NPM_BETA_VERSION ]]; then
+                  echo "Generating build..."
+                  yarn compile
+                  ### This is where we deploy the package to NPM
+                  echo "Publishing package to NPM with 'beta' tag..."
+                  npm publish --tag beta
+                  npm access public $NPM_NAME
+                fi
+              else
+                if [[ $LOCAL_VERSION != $NPM_VERSION ]]; then
+                  echo "Generating build..."
+                  yarn compile
+                  ### This is where we deploy the package to NPM
+                  echo "Publishing package to NPM with 'latest' tag..."
+                  npm publish
+                  npm access public $NPM_NAME
+                fi
               fi
               cd ..
             done

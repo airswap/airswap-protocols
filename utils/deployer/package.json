@@ -1,5 +1,5 @@
 {
-  "name": "Deploy",
+  "name": "deploy",
   "version": "0.0.1",
   "description": "Deploy to a network",
   "contributors": [
