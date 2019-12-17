@@ -33,21 +33,7 @@ jobs:
           command: yarn lint
       - run:
           name: Solhint
-          command: |
-            cd utils/order-utils
-            NPM_NAME=$(node -p "require('./package.json').name")
-            NPM_VERSION=$(npm view $NPM_NAME version || :)
-            LOCAL_VERSION=$(node -p "require('./package.json').version")
-            echo "Are the versions different?"
-            if [[ $LOCAL_VERSION != $NPM_VERSION ]]; then
-              echo "The versions are different..."
-              echo "$LOCAL_VERSION"
-              if [[ $LOCAL_VERSION == *"beta"* ]]; then
-                echo "It's a beta package..."
-              else
-                echo "It's not a beta package..."
-              fi
-            fi
+          command: yarn hint
       - run:
           name: Check Dependencies
           command: |
@@ -165,8 +151,15 @@ jobs:
               NPM_VERSION=$(npm view $NPM_NAME version || :)
               LOCAL_VERSION=$(node -p "require('./package.json').version")
               if [[ $LOCAL_VERSION != $NPM_VERSION ]]; then
-                echo "Publishing to NPM..." # this is where we deploy the code to npm
-                npm publish
+                ### This is where we deploy the package to NPM
+                if [[ $LOCAL_VERSION == *"beta"* ]]; then
+                  echo "Publishing package to NPM with 'beta' tag..."
+                  npm publish --tag beta
+                else
+                  echo "Publishing package to NPM with 'latest' tag..."
+                  npm publish
+                fi
+                ### Both beta and latest have public access
                 npm access public $NPM_NAME
               fi
               cd ..
@@ -185,8 +178,15 @@ jobs:
               if [[ $LOCAL_VERSION != $NPM_VERSION ]]; then
                 echo "Generating build..."
                 yarn compile
-                echo "Publishing to NPM..." # this is where we deploy the code to npm
-                npm publish
+                ### This is where we deploy the package to NPM
+                if [[ $LOCAL_VERSION == *"beta"* ]]; then
+                  echo "Publishing package to NPM with 'beta' tag..."
+                  npm publish --tag beta
+                else
+                  echo "Publishing package to NPM with 'latest' tag..."
+                  npm publish
+                fi
+                ### Both beta and latest have public access
                 npm access public $NPM_NAME
               fi
               cd ..
