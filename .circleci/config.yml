@@ -33,7 +33,20 @@ jobs:
           command: yarn lint
       - run:
           name: Solhint
-          command: yarn hint
+          command: |
+            cd utils/order-utils
+            NPM_NAME=$(node -p "require('./package.json').name")
+            NPM_VERSION=$(npm view $NPM_NAME version || :)
+            LOCAL_VERSION=$(node -p "require('./package.json').version")
+            echo "Are the versions different?"
+            if [[ $LOCAL_VERSION != $NPM_VERSION ]]; then
+              echo "The versions are different..."
+              if [[ "'beta' in LOCAL_VERSION" ]]; then
+                echo "It's a beta package..."
+              else
+                echo "It's not a beta package..."
+              fi
+            fi
       - run:
           name: Check Dependencies
           command: |
