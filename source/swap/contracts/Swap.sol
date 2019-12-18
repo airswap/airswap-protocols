@@ -156,7 +156,7 @@ contract Swap is ISwap {
     );
 
     // Transfer token from signer to affiliate if specified.
-    if (order.affiliate.wallet != address(0)) {
+    if (order.affiliate.token != address(0)) {
       transferToken(
         order.signer.wallet,
         order.affiliate.wallet,

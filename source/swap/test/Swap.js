@@ -29,6 +29,7 @@ const {
   ERC721_INTERFACE_ID,
   SECONDS_IN_DAY,
   GANACHE_PROVIDER,
+  EMPTY_ADDRESS,
 } = require('@airswap/order-utils').constants
 
 contract('Swap', async accounts => {
@@ -361,6 +362,74 @@ contract('Swap', async accounts => {
       // Alice and Bob swapped 200 AST for 50 DAI above, thereforeL
       // Alice's 200 AST approval is now all gone
       // Bob's 1000 DAI approval has decreased by 50
+      ok(
+        await allowances(aliceAddress, swapAddress, [
+          [tokenAST, 50],
+          [tokenDAI, 0],
+        ])
+      )
+      ok(
+        await allowances(bobAddress, swapAddress, [
+          [tokenAST, 0],
+          [tokenDAI, 950],
+        ])
+      )
+    })
+
+    it('Checks that adding an affiliate address still swaps', async () => {
+      const order = await orders.getOrder({
+        signer: {
+          wallet: aliceAddress,
+          token: tokenAST.address,
+          amount: 1,
+        },
+        sender: {
+          wallet: bobAddress,
+          token: tokenDAI.address,
+          amount: 1,
+        },
+        affiliate: {
+          wallet: carolAddress,
+          token: EMPTY_ADDRESS,
+          amount: 0,
+        },
+      })
+
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        aliceAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
+      emitted(await swap(order, { from: bobAddress }), 'Swap')
+    })
+
+    it('Transfers tokens back for future tests', async () => {
+      // now transfer the tokens back to leave balances unchanged for future tests
+      await tokenDAI.transfer(bobAddress, 1, { from: aliceAddress })
+      await tokenAST.transfer(aliceAddress, 1, { from: bobAddress })
+
+      // previous balances unchanged
+      ok(
+        await balances(aliceAddress, [
+          [tokenAST, 800],
+          [tokenDAI, 50],
+        ]),
+        'Alice balances are incorrect'
+      )
+      ok(
+        await balances(bobAddress, [
+          [tokenAST, 200],
+          [tokenDAI, 950],
+        ]),
+        'Bob balances are incorrect'
+      )
+
+      // increase allowances again
+      await tokenAST.approve(swapAddress, 50, { from: aliceAddress })
+      await tokenDAI.approve(swapAddress, 950, { from: bobAddress })
+
       ok(
         await allowances(aliceAddress, swapAddress, [
           [tokenAST, 50],
@@ -1028,6 +1097,16 @@ contract('Swap', async accounts => {
     })
   })
 
+  describe('Deploying...', async () => {
+    it('Deployed test contract "ConcertTicket"', async () => {
+      tokenTicket = await NonFungibleToken.new()
+    })
+
+    it('Deployed test contract "Collectible"', async () => {
+      tokenKitty = await NonFungibleToken.new()
+    })
+  })
+
   describe('Swaps with Fees', async () => {
     it('Checks that Carol gets paid 50 AST for facilitating a trade between Alice and Bob', async () => {
       const order = await orders.getOrder({
@@ -1081,6 +1160,61 @@ contract('Swap', async accounts => {
         'Carol balances are incorrect'
       )
     })
+
+    it('Checks that Carol gets paid 1 CK for facilitating a trade between Alice and Bob', async () => {
+      const order = await orders.getOrder({
+        signer: {
+          wallet: aliceAddress,
+          token: tokenAST.address,
+          amount: 1,
+        },
+        sender: {
+          wallet: bobAddress,
+          token: tokenDAI.address,
+          amount: 1,
+        },
+        affiliate: {
+          wallet: carolAddress,
+          token: tokenTicket.address,
+          id: 121,
+          kind: ERC721_INTERFACE_ID,
+        },
+      })
+
+      // give alice token 121, she approves swap
+      emitted(await tokenTicket.mint(aliceAddress, 121), 'NFTTransfer')
+      emitted(
+        await tokenTicket.approve(swapAddress, 121, { from: aliceAddress }),
+        'NFTApproval'
+      )
+
+      ok(
+        await balances(aliceAddress, [[tokenTicket, 1]]),
+        'Alice balances are incorrect'
+      )
+      ok(
+        await balances(carolAddress, [[tokenTicket, 0]]),
+        'Carol balances are incorrect'
+      )
+
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        aliceAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
+      emitted(await swap(order, { from: bobAddress }), 'Swap')
+
+      ok(
+        await balances(aliceAddress, [[tokenTicket, 0]]),
+        'Alice balances are incorrect'
+      )
+      ok(
+        await balances(carolAddress, [[tokenTicket, 1]]),
+        'Carol balances are incorrect'
+      )
+    })
   })
 
   describe('Swap with Public Orders (No Sender Set)', async () => {
@@ -1105,16 +1239,6 @@ contract('Swap', async accounts => {
       )
 
       emitted(await swap(order, { from: bobAddress }), 'Swap')
-    })
-  })
-
-  describe('Deploying...', async () => {
-    it('Deployed test contract "ConcertTicket"', async () => {
-      tokenTicket = await NonFungibleToken.new()
-    })
-
-    it('Deployed test contract "Collectible"', async () => {
-      tokenKitty = await NonFungibleToken.new()
     })
   })
 
