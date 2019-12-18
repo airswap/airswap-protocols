@@ -126,7 +126,7 @@ contract Index is Ownable {
     _unsetLocator(identifier);
     _setLocator(identifier, score, locator);
 
-    emit SetLocator(identifier, score, locator)
+    emit SetLocator(identifier, score, locator);
   }
 
   /**
