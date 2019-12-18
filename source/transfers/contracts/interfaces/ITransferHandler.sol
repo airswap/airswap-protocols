@@ -8,5 +8,5 @@ interface ITransferHandler {
     uint256 amount,
     uint256 id,
     address token
-  ) external returns(bool);
+  ) external returns (bool);
 }
