@@ -120,6 +120,7 @@ Deepa Sathaye
 deepa.sathaye@fluidity.io
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### A
 
 Detailed Description
 Contract: swap contract
@@ -146,7 +147,7 @@ I would recommend deploying a dummy swap contract (different from swap contract)
 
 ------------------------------------------------------------------------
 
-Alessandro,
+### A
 
 Thanks for submitting to the bug bounty! This issue that you mentioned was already acknowledged by the AirSwap team in the audit report.
 Report: https://github.com/airswap/airswap-protocols/blob/master/security/QuantstampAuditReport.pdf
@@ -158,3 +159,124 @@ Deepa Sathaye
 deepa.sathaye@fluidity.io
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#### A
+
+Detailed Description
+Contract: swap contract
+This makes it impossible for the recipient contract to reject incorrect transactions of ERC20 tokens. For the Swap contract, it means that users can (and will) deposit their tokens via the transfer function, and the transaction will be completed successfully. Tokens will not be credited to the customer’s account. These tokens will be trapped inside the contract forever without the possibility of their recovery.
+This is a list of links to this kind of bug with several loss:
+https://github.com/ethereum/eips/issues/223
+https://www.reddit.com/r/ethereum/comments/6c68mw/new_record_holder_appears_lets_congratulate/
+https://www.reddit.com/r/ethtrader/comments/7lplwk/ive_accidentally_sent_130000_worth_of_salt_tokens/
+https://www.reddit.com/r/ethereum/comments/6e8y9o/the_ens_contract_becomes_token_holder_erc20/
+https://twitter.com/Dexaran/status/1108822849438052354
+
+
+Attack Scenario
+
+Swap Smart-contract assume that users will only deposit tokens using the approve+transferFrom pattern, but if a user uses transfer function, this will lead to the fact that the deposit will be sent to the contract, but will not be credited to the user’s balance. So tokens will be frozen forever. 
+It should be noted that sending tokens into a certain address at your exchange is a standard procedure of making deposits in crypto industry thus it is an intuitively-clear method of depositing crypto assets so assuming that users will never make this mistake is wrong. 
+Moreover, assuming that users are responsible for this kind of decisions is also wrong and it is described at the https://en.wikipedia.org/wiki/Vulnerability_(computing)#Software_vulnerabilities , paragraph: https://en.wikipedia.org/wiki/Victim_blaming.
+In addition, is not secure to rely on an assumption that the problem can be solved at UI side because AirSwap will have multiple variations of UI implemented by random developers and we can not guarantee that none of UI developers will make even a single mistake in the future.
+
+Proposed Impact
+This attack can produce a direct impact of users with tokens frozen as in situations described in the previous links.
+Moreover, it can produce also an indirect impact on your exchange because if some tokens were frozen you would have some bad publicity. 
+So this issue should be classified as high severity.
+
+Solution
+I suggest to implement an “owner emergency extraction function” in the swap contract that will serve to extract the “stuck” tokens from the contract. Then you can send this tokens back to users because it is relatively easy to recognize who this tokens belong to with a use of history of transactions.
+This solution is centralized but it’s better than frozen tokens:
+Function extractToken (address _token, address _recipient, uint256 _amount) external onlyOwner {                                                                            uint256 initialBalance = INRERC20(_token).balanceOf(_recipient);                                          INRERC20(token).transfer(_recipient, _amount);                                                                      require(initialBalance.add(_amount) == INRERC20(_token).balanceOf(_recipient), "TRANSFER_FAILED");                                                                                 }
+Please note: It is a better solution using erc20Wrapper than check balance as suggested by audit report
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+## AAAA
+
+Thanks for the submission!
+
+We have documented that this is a potential scenario that could arise within the security section of the repo. The Swap contract is non-custodial so we have chosen not to provide a backdoor recovery. This was also documented within the V1 audit of the contracts. In addition, none of the application layer products allow this behavior.
+
+"Tokens can however be sent to the contract by accident, and will remain as there is no withdrawal mechanism for any of the supported token standards. Looking at the Swap V1 contract (0x8fd3121013a07c57f0d69646e86e7a4880b467b7), there is 0 ether and < $.10 stored, so we are comfortable without implementing a recovery backdoor."
+
+https://github.com/airswap/airswap-protocols/blob/master/source/swap/reports/SECURITY.md
+
+Thanks
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Detailed Description
+Contract: Indexer contract
+This makes it impossible for the recipient contract to reject incorrect transactions of ERC20 tokens. For the Indexer contract, it means that users can (and will) deposit  staking tokens via the transfer function, and the transaction will be completed successfully. Tokens will not be credited to the customer’s account. These tokens will be trapped inside the contract forever without the possibility of their recovery.
+This is a list of links to this kind of bug with several loss:
+https://github.com/ethereum/eips/issues/223
+https://www.reddit.com/r/ethereum/comments/6c68mw/new_record_holder_appears_lets_congratulate/
+https://www.reddit.com/r/ethtrader/comments/7lplwk/ive_accidentally_sent_130000_worth_of_salt_tokens/
+https://www.reddit.com/r/ethereum/comments/6e8y9o/the_ens_contract_becomes_token_holder_erc20/
+https://twitter.com/Dexaran/status/1108822849438052354
+
+
+Attack Scenario
+
+Indexer Smart-contract assume that users will only deposit tokens using the approve+transferFrom pattern, but if a user uses transfer function, this will lead to the fact that the deposit will be sent to the contract, but will not be credited to the user’s balance. So tokens will be frozen forever. 
+It should be noted that sending tokens into a certain address at your exchange is a standard procedure of making deposits in crypto industry thus it is an intuitively-clear method of depositing crypto assets so assuming that users will never make this mistake is wrong. 
+Moreover, assuming that users are responsible for this kind of decisions is also wrong and it is described at the https://en.wikipedia.org/wiki/Vulnerability_(computing)#Software_vulnerabilities , paragraph: https://en.wikipedia.org/wiki/Victim_blaming.
+In addition, is not secure to rely on an assumption that the problem can be solved at UI side because AirSwap will have multiple variations of UI implemented by random developers and we can not guarantee that none of UI developers will make even a single mistake in the future.
+
+Proposed Impact
+This attack can produce a direct impact of users with tokens frozen as in situations described in the previous links.
+Moreover, it can produce also an indirect impact on your exchange because if some tokens were frozen you would have some bad publicity. 
+So this issue should be classified as high severity.
+
+Solution
+I suggest to implement an “owner emergency extraction function” in the Indexer contract that will serve to extract the “stuck” tokens from the contract. Then you can send this tokens back to users because it is relatively easy to recognize who this tokens belong to with a use of history of transactions.
+This solution is centralized but it’s better than frozen tokens:
+Function extractToken (address _token, address _recipient, uint256 _amount) external onlyOwner {                                                                            uint256 initialBalance = ERC20(_token).balanceOf(_recipient);                                          ERC20(token).transfer(_recipient, _amount);                                                                      require(initialBalance.add(_amount) == ERC20(_token).balanceOf(_recipient), "TRANSFER_FAILED");                                                                                 }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ ###### A
+Detailed Description
+Contract: Indexer contract
+There is a list of 120 tokens that implemented erc20 token standard without a return value
+for transfer and transferFrom function (due to incorrect OpenZeppelin
+implementation). If the stakingToken variable of the Indexer contract contains the
+address of one of this 120 tokens, the function setIntent and unsetIntent could fail if
+transfer or transferFrom reverts. In this case, the user can not stake tokens and so
+he can’t increase/decrease his score.
+
+Attack Scenario
+StakingToken is the address of an Erc20 token with missing return value of Transfer
+function. An user has X amount of token in stake and decide to take tokens back. He calls
+unsetIntent function that will fail because transfer function revert since transfer works
+but return a casual value that may be false. So the user has lost X token.
+
+Proposed Impact
+This attack can produce a direct impact of users with tokens for ever frozen since transfer
+function can not work due the bug of stakingToken contract.
+
+Solution
+I suggest to use a wrapper called SafeErc20 implemented by Openzeppelin. This wrapper
+uses inline assembly to manage the case of erc20 tokens without return value of transfer
+function.
+This is the link of the wrapper: https://github.com/OpenZeppelin/openzeppelin-
+contracts/blob/master/contracts/token/ERC20/SafeERC20.sol
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+##### A
+
+Thanks for reaching out! We've reviewed the issue that you've described. Unfortunately, it does not qualify for a reward as this behavior is working as intended and thus there is no critical impact.  
+
+The design of the protocol is that the token used for staking within the Indexer does have to be a standard ERC20 token. We have an open documentation item about this behavior: https://github.com/airswap/airswap-protocols/issues/227
+
+The staking token that is used in the Delegate and Indexer would not support non-standard ERC20. The only scenario, though unlikely, where this scenario could manifest is if a party were to create an Indexer with a non-standard ERC20 token in the constructor. In addition, then others would have to create a Delegate referencing this Indexer contract. Thus, there would be a non-functional Indexer and Delegate though users are not at risk of losing locked ether or other tokens, outside of gas fees.
+
+The actual token transfer functions within the Swap.sol contract does take into account non-standard ERC20 contracts. Thus, the Swap protocol will support tokens such as USDT and BNB. While the contract does not use SafeERC20.sol from OpenZeppelin, we created a custom interface as a workaround. It also takes into account non-standard ERC721 contracts as not all ERC721 implement safeTransferFrom.
+
+
+
+
+
+
+
