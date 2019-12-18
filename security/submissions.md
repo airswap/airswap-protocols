@@ -85,7 +85,7 @@ To fix this problem, use "SafeERC20" contract defined in OpenZeppelin library. Y
 
 https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v2.3.0/contracts/token/ERC20/SafeERC20.sol
 
----
+### Response from Team
 
 Thanks for reaching out! We've reviewed the issue that you've described. Unfortunately, it does not qualify for a reward as this behavior is working as intended and thus there is no critical impact.
 
@@ -135,7 +135,7 @@ Jitendra Chittoda
 Skype: jchittoda
 Twitter: JChittoda
 
-### Response
+### Response from Team
 
 Thank you for diving in and explaining the issue clearly! As soon as we saw your initial email, we also dived into the list with an adversarial perspective. We have confirmed the issue on our own end and agree that the repercussions of an input to the Index with locator 0x0 can distort the list and require a re-deploy of an Indexer.
 
@@ -175,7 +175,7 @@ Example of this attack: https://www.reddit.com/r/GolemProject/comments/71lrad/re
 
 I would recommend deploying a dummy swap contract (different from swap contract) at the same address at Ethereum fork-chains and Ethereum Classic. The address of the contract is determined by the creator’s address and the transaction nonce. So, a developer can use the same address that was used to create the contract at the Ethereum mainnet.
 
-### Response
+### Response from Team
 
 Thanks for submitting to the bug bounty! This issue that you mentioned was already acknowledged by the AirSwap team in the audit report.
 Report: https://github.com/airswap/airswap-protocols/blob/master/security/QuantstampAuditReport.pdf
@@ -219,7 +219,7 @@ This solution is centralized but it’s better than frozen tokens:
 Function extractToken (address \_token, address \_recipient, uint256 \_amount) external onlyOwner { uint256 initialBalance = INRERC20(\_token).balanceOf(\_recipient); INRERC20(token).transfer(\_recipient, \_amount); require(initialBalance.add(\_amount) == INRERC20(\_token).balanceOf(\_recipient), "TRANSFER_FAILED"); }
 Please note: It is a better solution using erc20Wrapper than check balance as suggested by audit report
 
-### Response
+### Response from Team
 
 Thanks for the submission!
 
@@ -264,7 +264,7 @@ function.
 This is the link of the wrapper: https://github.com/OpenZeppelin/openzeppelin-
 contracts/blob/master/contracts/token/ERC20/SafeERC20.sol
 
-### Response
+### Response from Team
 
 Thanks for reaching out! We've reviewed the issue that you've described. Unfortunately, it does not qualify for a reward as this behavior is working as intended and thus there is no critical impact.
 
