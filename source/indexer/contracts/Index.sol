@@ -66,6 +66,12 @@ contract Index is Ownable {
     address indexed identifier
   );
 
+  event UpdateLocator(
+    address indexed identifier,
+    uint256 score,
+    bytes32 indexed locator
+  );
+
   /**
     * @notice Contract Constructor
     */
@@ -110,6 +116,13 @@ contract Index is Ownable {
     emit UnsetLocator(identifier);
   }
 
+  /**
+    * @notice Update a Locator
+    * @dev score and/or locator do not need to be different from old values
+    * @param identifier address On-chain address identifying the owner of a locator
+    * @param score uint256 Score for the locator being set
+    * @param locator bytes32 Locator
+    */
   function updateLocator(
     address identifier,
     uint256 score,
@@ -118,6 +131,8 @@ contract Index is Ownable {
     // Don't need to update length as it is not used in set/unset logic
     _unsetLocator(identifier);
     _setLocator(identifier, score, locator);
+
+    emit UpdateLocator(identifier, score, locator)
   }
 
   /**
@@ -192,6 +207,12 @@ contract Index is Ownable {
     return (locators, scores, identifier);
   }
 
+  /**
+    * @notice Internal function to set a Locator
+    * @param identifier address On-chain address identifying the owner of a locator
+    * @param score uint256 Score for the locator being set
+    * @param locator bytes32 Locator
+    */
   function _setLocator(
     address identifier,
     uint256 score,
@@ -210,6 +231,10 @@ contract Index is Ownable {
     entries[identifier] = Entry(locator, score, prevEntry, nextEntry);
   }
 
+  /**
+    * @notice Internal function to unset a Locator
+    * @param identifier address On-chain address identifying the owner of a locator
+    */
   function _unsetLocator(
     address identifier
   ) internal {
