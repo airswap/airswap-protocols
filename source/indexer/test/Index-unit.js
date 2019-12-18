@@ -244,7 +244,7 @@ contract('Index Unit Tests', async accounts => {
 
     it('should allow an entry to be updated by the owner', async () => {
       // set an entry from the owner
-      let result = await index.setLocator(aliceAddress, 2000, aliceLocator, {
+      let result = await index.setLocator(aliceAddress, 2000, bobLocator, {
         from: owner,
       })
 
@@ -253,12 +253,12 @@ contract('Index Unit Tests', async accounts => {
         return (
           event.identifier === aliceAddress &&
           event.score.toNumber() === 2000 &&
-          event.locator === aliceLocator
+          event.locator === bobLocator
         )
       })
 
       // now update the locator
-      result = await index.updateLocator(aliceAddress, 200, bobLocator, {
+      result = await index.updateLocator(aliceAddress, 200, aliceLocator, {
         from: owner,
       })
 
@@ -267,7 +267,7 @@ contract('Index Unit Tests', async accounts => {
         return (
           event.identifier === aliceAddress &&
           event.score.toNumber() === 200 &&
-          event.locator === bobLocator
+          event.locator === aliceLocator
         )
       })
 
@@ -275,7 +275,7 @@ contract('Index Unit Tests', async accounts => {
       result = await index.getLocators(EMPTY_ADDRESS, 10)
 
       equal(result[LOCATORS].length, 1, 'locators list should have 1 slots')
-      equal(result[LOCATORS][0], bobLocator, 'Alice should be in list')
+      equal(result[LOCATORS][0], aliceLocator, 'Alice should be in list')
 
       equal(result[SCORES].length, 1, 'scores list should have 1 slots')
       equal(result[SCORES][0], 200, 'Alices score is incorrect')
@@ -285,6 +285,36 @@ contract('Index Unit Tests', async accounts => {
       // check the length has increased
       const listLength = await index.length()
       equal(listLength, 1, 'list length should be 1')
+    })
+
+    it('should update the list order on updated score', async () => {
+      // set an entry from the owner
+      await index.setLocator(aliceAddress, 2000, aliceLocator, {
+        from: owner,
+      })
+      // set an entry from the owner
+      await index.setLocator(bobAddress, 1000, bobLocator, {
+        from: owner,
+      })
+
+      // Check its been updated correctly
+      result = await index.getLocators(EMPTY_ADDRESS, 10)
+
+      equal(result[LOCATORS].length, 2, 'locators list should have 2 slots')
+      equal(result[LOCATORS][0], aliceLocator, 'Alice should be first in list')
+      equal(result[LOCATORS][1], bobLocator, 'Bob should be second in list')
+
+      // now update the locator for alice to a lower score
+      await index.updateLocator(aliceAddress, 500, aliceLocator, {
+        from: owner,
+      })
+
+      result = await index.getLocators(EMPTY_ADDRESS, 10)
+
+      // Alice is now AFTER Bob
+      equal(result[LOCATORS].length, 2, 'locators list should have 2 slots')
+      equal(result[LOCATORS][0], bobLocator, 'Bob should be first in list')
+      equal(result[LOCATORS][1], aliceLocator, 'Alice should be second in list')
     })
   })
 
