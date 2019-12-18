@@ -265,9 +265,8 @@ contract Indexer is IIndexer, Ownable {
       require(stakingToken.transfer(user, oldAmount - newAmount));
     }
 
-    // Unset their old intent, and set their new intent.
-    indexes[signerToken][senderToken][protocol].unsetLocator(user);
-    indexes[signerToken][senderToken][protocol].setLocator(user, newAmount, newLocator);
+    // Update their intent.
+    indexes[signerToken][senderToken][protocol].updateLocator(user, newAmount, newLocator);
 
     emit Stake(user, signerToken, senderToken, protocol, newAmount);
   }

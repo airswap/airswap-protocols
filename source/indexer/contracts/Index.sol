@@ -110,6 +110,16 @@ contract Index is Ownable {
     emit UnsetLocator(identifier);
   }
 
+  function updateLocator(
+    address identifier,
+    uint256 score,
+    bytes32 locator
+  ) external onlyOwner {
+    // Don't need to update length as it is not used in set/unset logic
+    _unsetLocator(identifier);
+    _setLocator(identifier, score, locator);
+  }
+
   /**
     * @notice Get a Score
     * @param identifier address On-chain address identifying the owner of a locator
