@@ -85,21 +85,10 @@ contract Index is Ownable {
     uint256 score,
     bytes32 locator
   ) external onlyOwner {
-
-    // Disallow locator set to 0x0 to ensure list integrity.
-    require(locator != bytes32(0), "LOCATOR_MUST_BE_SENT");
-
     // Ensure the entry does not already exist.
     require(!_hasEntry(identifier), "ENTRY_ALREADY_EXISTS");
 
-    // Find the first entry with a lower score.
-    address nextEntry = _getEntryLowerThan(score);
-
-    // Link the new entry between previous and next.
-    address prevEntry = entries[nextEntry].prev;
-    entries[prevEntry].next = identifier;
-    entries[nextEntry].prev = identifier;
-    entries[identifier] = Entry(locator, score, prevEntry, nextEntry);
+    _setLocator(identifier, score, locator);
 
     // Increment the index length.
     length = length + 1;
@@ -114,21 +103,30 @@ contract Index is Ownable {
     address identifier
   ) external onlyOwner {
 
-    // Ensure the entry exists.
-    require(_hasEntry(identifier), "ENTRY_DOES_NOT_EXIST");
-
-    // Link the previous and next entries together.
-    address prevUser = entries[identifier].prev;
-    address nextUser = entries[identifier].next;
-    entries[prevUser].next = nextUser;
-    entries[nextUser].prev = prevUser;
-
-    // Delete entry from the index.
-    delete entries[identifier];
+    _unsetLocator(identifier);
 
     // Decrement the index length.
     length = length - 1;
     emit UnsetLocator(identifier);
+  }
+
+  /**
+    * @notice Update a Locator
+    * @dev score and/or locator do not need to be different from old values
+    * @param identifier address On-chain address identifying the owner of a locator
+    * @param score uint256 Score for the locator being set
+    * @param locator bytes32 Locator
+    */
+  function updateLocator(
+    address identifier,
+    uint256 score,
+    bytes32 locator
+  ) external onlyOwner {
+    // Don't need to update length as it is not used in set/unset logic
+    _unsetLocator(identifier);
+    _setLocator(identifier, score, locator);
+
+    emit SetLocator(identifier, score, locator);
   }
 
   /**
@@ -201,6 +199,50 @@ contract Index is Ownable {
     }
 
     return (locators, scores, identifier);
+  }
+
+  /**
+    * @notice Internal function to set a Locator
+    * @param identifier address On-chain address identifying the owner of a locator
+    * @param score uint256 Score for the locator being set
+    * @param locator bytes32 Locator
+    */
+  function _setLocator(
+    address identifier,
+    uint256 score,
+    bytes32 locator
+  ) internal {
+    // Disallow locator set to 0x0 to ensure list integrity.
+    require(locator != bytes32(0), "LOCATOR_MUST_BE_SENT");
+
+    // Find the first entry with a lower score.
+    address nextEntry = _getEntryLowerThan(score);
+
+    // Link the new entry between previous and next.
+    address prevEntry = entries[nextEntry].prev;
+    entries[prevEntry].next = identifier;
+    entries[nextEntry].prev = identifier;
+    entries[identifier] = Entry(locator, score, prevEntry, nextEntry);
+  }
+
+  /**
+    * @notice Internal function to unset a Locator
+    * @param identifier address On-chain address identifying the owner of a locator
+    */
+  function _unsetLocator(
+    address identifier
+  ) internal {
+    // Ensure the entry exists.
+    require(_hasEntry(identifier), "ENTRY_DOES_NOT_EXIST");
+
+    // Link the previous and next entries together.
+    address prevUser = entries[identifier].prev;
+    address nextUser = entries[identifier].next;
+    entries[prevUser].next = nextUser;
+    entries[nextUser].prev = prevUser;
+
+    // Delete entry from the index.
+    delete entries[identifier];
   }
 
   /**
