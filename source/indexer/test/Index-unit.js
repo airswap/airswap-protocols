@@ -68,7 +68,7 @@ contract('Index Unit Tests', async accounts => {
   describe('Test setLocator', async () => {
     it('should not allow a non owner to call setLocator', async () => {
       await reverted(
-        index.setLocator(aliceAddress, 2000, aliceAddress, { from: nonOwner }),
+        index.setLocator(aliceAddress, 2000, aliceLocator, { from: nonOwner }),
         'Ownable: caller is not the owner'
       )
     })
@@ -204,6 +204,87 @@ contract('Index Unit Tests', async accounts => {
 
       const length = await index.length.call()
       equal(length.toNumber(), 1, 'length increased, but total users has not')
+    })
+  })
+
+  describe('Test updateLocator', async () => {
+    it('should not allow a non owner to call updateLocator', async () => {
+      await reverted(
+        index.updateLocator(aliceAddress, 2000, aliceLocator, {
+          from: nonOwner,
+        }),
+        'Ownable: caller is not the owner'
+      )
+    })
+
+    it('should not allow update to non-existent locator', async () => {
+      // try to update a non-existent locator
+      await reverted(
+        index.updateLocator(aliceAddress, 2000, aliceLocator, {
+          from: owner,
+        }),
+        'ENTRY_DOES_NOT_EXIST'
+      )
+    })
+
+    it('should not allow update to a blank locator', async () => {
+      // set the locator first
+      await index.setLocator(aliceAddress, 2000, aliceLocator, {
+        from: owner,
+      })
+
+      // now try to update the locator to an empty locator
+      await reverted(
+        index.updateLocator(aliceAddress, 2000, emptyLocator, {
+          from: owner,
+        }),
+        'LOCATOR_MUST_BE_SENT'
+      )
+    })
+
+    it('should allow an entry to be updated by the owner', async () => {
+      // set an entry from the owner
+      let result = await index.setLocator(aliceAddress, 2000, aliceLocator, {
+        from: owner,
+      })
+
+      // check the SetLocator event was emitted
+      emitted(result, 'SetLocator', event => {
+        return (
+          event.identifier === aliceAddress &&
+          event.score.toNumber() === 2000 &&
+          event.locator === aliceLocator
+        )
+      })
+
+      // now update the locator
+      result = await index.updateLocator(aliceAddress, 200, bobLocator, {
+        from: owner,
+      })
+
+      // check the SetLocator event was emitted
+      emitted(result, 'SetLocator', event => {
+        return (
+          event.identifier === aliceAddress &&
+          event.score.toNumber() === 200 &&
+          event.locator === bobLocator
+        )
+      })
+
+      // Check its been updated correctly
+      result = await index.getLocators(EMPTY_ADDRESS, 10)
+
+      equal(result[LOCATORS].length, 1, 'locators list should have 1 slots')
+      equal(result[LOCATORS][0], bobLocator, 'Alice should be in list')
+
+      equal(result[SCORES].length, 1, 'scores list should have 1 slots')
+      equal(result[SCORES][0], 200, 'Alices score is incorrect')
+
+      equal(result[NEXTID], HEAD, 'The next slot should be the head')
+
+      // check the length has increased
+      const listLength = await index.length()
+      equal(listLength, 1, 'list length should be 1')
     })
   })
 

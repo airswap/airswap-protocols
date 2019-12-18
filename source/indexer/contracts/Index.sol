@@ -66,12 +66,6 @@ contract Index is Ownable {
     address indexed identifier
   );
 
-  event UpdateLocator(
-    address indexed identifier,
-    uint256 score,
-    bytes32 indexed locator
-  );
-
   /**
     * @notice Contract Constructor
     */
@@ -132,7 +126,7 @@ contract Index is Ownable {
     _unsetLocator(identifier);
     _setLocator(identifier, score, locator);
 
-    emit UpdateLocator(identifier, score, locator)
+    emit SetLocator(identifier, score, locator)
   }
 
   /**
