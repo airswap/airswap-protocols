@@ -20,15 +20,11 @@ pragma experimental ABIEncoderV2;
 import "@airswap/transfers/contracts/interfaces/ITransferHandler.sol";
 import "@airswap/transfers/contracts/TransferHandlerRegistry.sol";
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
-import "@airswap/tokens/contracts/interfaces/INRERC20.sol";
-import "openzeppelin-solidity/contracts/token/ERC721/IERC721.sol";
-import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 /**
   * @title Swap: The Atomic Swap used on the AirSwap Network
   */
 contract Swap is ISwap {
-  using SafeMath for uint256;
 
   // Domain and version for use in signatures (EIP-712)
   bytes constant internal DOMAIN_NAME = "SWAP";
@@ -56,21 +52,21 @@ contract Swap is ISwap {
   // Mapping of signer addresses to an optionally set minimum valid nonce
   mapping (address => uint256) public signerMinimumNonce;
 
-  // contains registry of kind to asset types
+  // A registry storing a transfer handler for different token kinds
   TransferHandlerRegistry public registry;
 
   /**
     * @notice Contract Constructor
     * @dev Sets domain for signature validation (EIP-712)
-    * @param _registry TokenRegistry contract
+    * @param swapRegistry TransferHandlerRegistry
     */
-  constructor(TransferHandlerRegistry _registry) public {
+  constructor(TransferHandlerRegistry swapRegistry) public {
     _domainSeparator = Types.hashDomain(
       DOMAIN_NAME,
       DOMAIN_VERSION,
       address(this)
     );
-    registry = _registry;
+    registry = swapRegistry;
   }
 
   /**
@@ -367,7 +363,7 @@ contract Swap is ISwap {
     // Ensure the transfer is not to self.
     require(from != to, "INVALID_SELF_TRANSFER");
     ITransferHandler transferHandler = registry.getTransferHandler(kind);
-    require(address(transferHandler) != address(0x0), "UNKNOWN_TRANSFER_HANDLER");
+    require(address(transferHandler) != address(0), "UNKNOWN_TRANSFER_HANDLER");
     // delegatecall required to pass msg.sender as Swap contract
     (bool success, bytes memory data) = address(transferHandler).
       delegatecall(abi.encodeWithSelector(

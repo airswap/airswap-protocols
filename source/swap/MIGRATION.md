@@ -113,10 +113,11 @@ The `_order` argument has multiple `Party` structs.
 
 ```
 struct Party {
+  bytes4 kind;          // Interface ID of the token
   address wallet;       // Wallet address of the party
   address token;        // Contract address of the token
-  uint256 param;        // Value (ERC-20) or ID (ERC-721)
-  bytes4 kind;          // Interface ID of the token
+  uint256 amount;       // Amount for ERC-20 or ERC-1155
+  uint256 id;           // ID for ERC-721 or ERC-1155
 }
 ```
 

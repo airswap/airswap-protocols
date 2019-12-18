@@ -1,27 +1,18 @@
 const Swap = artifacts.require('Swap')
 const Types = artifacts.require('Types')
 const MockContract = artifacts.require('MockContract')
-//const TransferHandlerRegistry = artifacts.require('TransferHandlerRegistry')
-//const ERC20TransferHandler = artifacts.require('ERC20TransferHandler')
-
-const {
-  emitted,
-  notEmitted,
-  reverted,
-  equal,
-} = require('@airswap/test-utils').assert
+const TransferHandlerRegistry = artifacts.require('TransferHandlerRegistry')
+const ERC20TransferHandler = artifacts.require('ERC20TransferHandler')
+const FungibleToken = artifacts.require('FungibleToken')
+const { reverted } = require('@airswap/test-utils').assert
 const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
 const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
-
-const NONCE_AVAILABLE = 0x00
-const NONCE_UNAVAILABLE = 0x01
 
 contract('Swap Unit Tests', async accounts => {
   const Jun_06_2017T00_00_00_UTC = 1497052800 //a date later than when ganache started
   const mockSigner = accounts[9]
   const mockSender = accounts[7]
 
-  const sender = accounts[0]
   const kind = web3.utils.asciiToHex('FFFF') // hex representation is "0x46464646" this is 4 bytes
   const v = 27
   const r = web3.utils.asciiToHex('r')
@@ -136,25 +127,29 @@ contract('Swap Unit Tests', async accounts => {
       )
     })
 
-    /*    it('test adding token that does not transfer swap incorrectly and transfer returns false', async () => {
+    it('test adding token that does not transfer swap incorrectly and transfer returns false', async () => {
       // create mocked contract to test transfer
-      const ERC20TransferHandlerTemplate = await ERC20TransferHandler.new()
-      const handlerTemplate = await MockContract.new()
-
+      const handlerTemplate = await ERC20TransferHandler.new()
+      const tokenMock = await MockContract.new()
       const TransferHandlerRegistryTemplate = await TransferHandlerRegistry.new()
+      const FungibleTokenTemplate = await FungibleToken.new()
 
       const getHandler = TransferHandlerRegistryTemplate.contract.methods
-        .getHandler(kind)
+        .getTransferHandler(kind)
         .encodeABI()
 
-      await mockRegistry.givenMethodReturnAddress(getHandler, handlerTemplate)
+      await mockRegistry.givenMethodReturnAddress(
+        getHandler,
+        handlerTemplate.address
+      )
 
-      const token_transfer = ERC20TransferHandlerTemplate.contract.methods
-        .transferTokens(EMPTY_ADDRESS, EMPTY_ADDRESS, 0)
+      const token_transfer = FungibleTokenTemplate.contract.methods
+        .transferFrom(EMPTY_ADDRESS, EMPTY_ADDRESS, 0)
         .encodeABI()
 
       // The token transfer should return false
-      await handlerTemplate.givenMethodReturnBool(token_transfer, false)
+      //await handlerTemplate.givenMethodRevert(token_transfer)
+      await tokenMock.givenMethodReturnBool(token_transfer, false)
 
       const signer = [kind, mockSigner, tokenMock.address, 200, 0]
       const sender = [kind, mockSender, tokenMock.address, 200, 0]
@@ -175,11 +170,11 @@ contract('Swap Unit Tests', async accounts => {
       })
       // auth sender
       //mock sender will take the order
-      await reverted(swap.swap(order, { from: mockSigner }), 'TRANSFER_FAILED.')
-    })*/
-  })
 
-  describe('Test cancel', async () => {
+      await reverted(swap.swap(order, { from: mockSigner }), 'TRANSFER_FAILED.')
+    })
+  })
+  /*  describe('Test cancel', async () => {
     it('test cancellation with no items', async () => {
       const trx = await swap.cancel([], { from: mockSigner })
       await notEmitted(trx, 'Cancel')
@@ -266,5 +261,5 @@ contract('Swap Unit Tests', async accounts => {
       //check that the event was was not emitted as the authsender did not exist
       notEmitted(trx, 'RevokeSender')
     })
-  })
+  })*/
 })

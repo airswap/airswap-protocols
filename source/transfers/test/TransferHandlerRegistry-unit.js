@@ -4,7 +4,7 @@ const { equal, emitted, reverted } = require('@airswap/test-utils').assert
 const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 
 contract('TransferHandlerRegistry Unit Tests', async accounts => {
-  const erc20Asset = accounts[2]
+  const erc20Asset = accounts[1]
   let snapshotId
   let transferhandlerregistry
 

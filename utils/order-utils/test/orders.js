@@ -28,7 +28,7 @@ describe('Orders', async () => {
 
   const NOV_7_2020_22_18_14 = '1604787494'
   const MAY_11_2017_00_00_00 = '1494460800'
-
+  const INVALID_KIND = '0xFFFFFF'
   orders.setVerifyingContract(rinkebySwap)
 
   it('Checks that a generated order is valid', async () => {
@@ -225,7 +225,7 @@ describe('Orders', async () => {
         wallet: senderWallet,
         token: cryptoKittiesAddress,
         amount: '460',
-        kind: 'INVALID_KIND',
+        kind: INVALID_KIND,
       },
     })
 

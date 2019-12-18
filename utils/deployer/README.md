@@ -1,6 +1,6 @@
 # Deployer
 
-This guide walks through the process of deploying contracts to public Ethereum networks and verifying contracts on Etherscan. The process requires an Ethereum mnemonic phrase, Etherscan API key, and Infura API key.
+This guide walks through the process of deploying contracts to either a private Ethereum network or to a public Ethereum networks and verifying contracts on Etherscan. If deploying to a public testnet, the process requires an Ethereum mnemonic phrase, Etherscan API key, and Infura API key.
 
 1. Run `yarn install` from `airswap-protocols/` to ensure dependencies are installed
 
@@ -41,6 +41,3 @@ If looking to verify on a network besides `development`, one can append the veri
 ```
 yarn migrate --network rinkeby && sleep 40 && yarn verify Types Wrapper DelegateFactory Indexer Swap flatten/Flattened.sol --network rinkeby
 ```
-
-
-

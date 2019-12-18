@@ -61,6 +61,7 @@ contract Delegate is IDelegate, Ownable {
     * @param delegateIndexer address Indexer contract the delegate will deploy with
     * @param delegateContractOwner address Owner of the delegate
     * @param delegateTradeWallet address Wallet the delegate will trade from
+    * @param delegateProtocol bytes2 The protocol identifier for Delegate contracts
     */
   constructor(
     ISwap delegateSwap,
@@ -434,7 +435,7 @@ contract Delegate is IDelegate, Ownable {
   }
 
   /**
-    * @notice Calculate the signer amount for a given sender param and price
+    * @notice Calculate the signer amount for a given sender amount and price
     * @param senderAmount uint256 The amount the delegate would send in the swap
     * @param priceCoef uint256 Coefficient of the token price defined in the rule
     * @param priceExp uint256 Exponent of the token price defined in the rule
@@ -446,7 +447,7 @@ contract Delegate is IDelegate, Ownable {
   ) internal pure returns (
     uint256 signerAmount
   ) {
-    // Calculate the param using the price formula
+    // Calculate the signer amount using the price formula
     uint256 multiplier = senderAmount.mul(priceCoef);
     signerAmount = multiplier.div(10 ** priceExp);
 
@@ -457,7 +458,7 @@ contract Delegate is IDelegate, Ownable {
   }
 
   /**
-    * @notice Calculate the sender amount for a given signer param and price
+    * @notice Calculate the sender amount for a given signer amount and price
     * @param signerAmount uint256 The amount the signer would send in the swap
     * @param priceCoef uint256 Coefficient of the token price defined in the rule
     * @param priceExp uint256 Exponent of the token price defined in the rule
@@ -469,7 +470,7 @@ contract Delegate is IDelegate, Ownable {
   ) internal pure returns (
     uint256 senderAmount
   ) {
-    // Calculate the param using the price formula
+    // Calculate the sender anount using the price formula
     senderAmount = signerAmount
       .mul(10 ** priceExp)
       .div(priceCoef);

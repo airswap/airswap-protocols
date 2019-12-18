@@ -249,7 +249,7 @@ contract('Indexer', async accounts => {
             from: aliceAddress,
           }
         ),
-        ' ERC20: transfer amount exceeds balance.'
+        'ERC20: transfer amount exceeds balance'
       )
     })
 
@@ -270,7 +270,7 @@ contract('Indexer', async accounts => {
             from: aliceAddress,
           }
         ),
-        ' ERC20: transfer amount exceeds allowance.'
+        'ERC20: transfer amount exceeds allowance'
       )
     })
 
