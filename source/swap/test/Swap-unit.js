@@ -4,9 +4,17 @@ const MockContract = artifacts.require('MockContract')
 const TransferHandlerRegistry = artifacts.require('TransferHandlerRegistry')
 const ERC20TransferHandler = artifacts.require('ERC20TransferHandler')
 const FungibleToken = artifacts.require('FungibleToken')
-const { reverted } = require('@airswap/test-utils').assert
+const {
+  emitted,
+  reverted,
+  notEmitted,
+  equal,
+} = require('@airswap/test-utils').assert
 const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
 const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
+
+const NONCE_AVAILABLE = 0x00
+const NONCE_UNAVAILABLE = 0x01
 
 contract('Swap Unit Tests', async accounts => {
   const Jun_06_2017T00_00_00_UTC = 1497052800 //a date later than when ganache started
@@ -23,6 +31,7 @@ contract('Swap Unit Tests', async accounts => {
   let swap
   let types
   let mockRegistry
+  const sender = accounts[0]
 
   beforeEach(async () => {
     const snapShot = await takeSnapshot()
@@ -174,7 +183,7 @@ contract('Swap Unit Tests', async accounts => {
       await reverted(swap.swap(order, { from: mockSigner }), 'TRANSFER_FAILED.')
     })
   })
-  /*  describe('Test cancel', async () => {
+  describe('Test cancel', async () => {
     it('test cancellation with no items', async () => {
       const trx = await swap.cancel([], { from: mockSigner })
       await notEmitted(trx, 'Cancel')
@@ -261,5 +270,5 @@ contract('Swap Unit Tests', async accounts => {
       //check that the event was was not emitted as the authsender did not exist
       notEmitted(trx, 'RevokeSender')
     })
-  })*/
+  })
 })

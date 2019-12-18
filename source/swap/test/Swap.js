@@ -692,6 +692,13 @@ contract('Swap', async accounts => {
       )
     })
 
+    it('Alice fails to try to revokes authorization from David again', async () => {
+      notEmitted(
+        await swapContract.revokeSigner(davidAddress, { from: aliceAddress }),
+        'RevokeSigner'
+      )
+    })
+
     it('Checks that David can no longer make orders on behalf of Alice', async () => {
       const order = await orders.getOrder({
         signer: {
@@ -809,6 +816,13 @@ contract('Swap', async accounts => {
 
     it('Bob revokes sender authorization from Carol', async () => {
       emitted(
+        await swapContract.revokeSender(carolAddress, { from: bobAddress }),
+        'RevokeSender'
+      )
+    })
+
+    it('Bob fails to revoke sender authorization from Carol a second time', async () => {
+      notEmitted(
         await swapContract.revokeSender(carolAddress, { from: bobAddress }),
         'RevokeSender'
       )
