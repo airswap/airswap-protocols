@@ -241,7 +241,7 @@ workflows:
           context: Development
           requires:
             - setup
-      - transfer_tests:
+      - transfers_tests:
           context: Development
           requires:
             - setup
