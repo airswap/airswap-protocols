@@ -4,12 +4,11 @@ const FungibleToken = artifacts.require('FungibleToken')
 const NonFungibleToken = artifacts.require('NonFungibleToken')
 const OMGToken = artifacts.require('OMGToken')
 const TransferHandlerRegistry = artifacts.require('TransferHandlerRegistry')
-const PartialKittyCoreTransferHandler = artifacts.require(
-  'PartialKittyCoreTransferHandler'
-)
+const KittyCoreTransferHandler = artifacts.require('KittyCoreTransferHandler')
+const MintableERC1155Token = artifacts.require('MintableERC1155Token')
 const ERC20TransferHandler = artifacts.require('ERC20TransferHandler')
 const ERC721TransferHandler = artifacts.require('ERC721TransferHandler')
-
+const ERC1155TransferHandler = artifacts.require('ERC1155TransferHandler')
 const {
   emitted,
   reverted,
@@ -27,6 +26,7 @@ const { orders, signatures } = require('@airswap/order-utils')
 const {
   ERC20_INTERFACE_ID,
   ERC721_INTERFACE_ID,
+  ERC1155_INTERFACE_ID,
   SECONDS_IN_DAY,
   GANACHE_PROVIDER,
   EMPTY_ADDRESS,
@@ -46,6 +46,7 @@ contract('Swap', async accounts => {
   let tokenOMG
   let tokenTicket
   let tokenKitty
+  let tokenERC1155
 
   let transferHandlerRegistry
 
@@ -80,24 +81,36 @@ contract('Swap', async accounts => {
       tokenOMG = await OMGToken.new()
     })
 
+    it('Deployed test contract "MintableERC1155Token"', async () => {
+      tokenERC1155 = await MintableERC1155Token.new()
+    })
+
     it('Check that TransferHandlerRegistry correctly set', async () => {
       equal(await swapContract.registry.call(), transferHandlerRegistry.address)
     })
 
     it('Set up TokenRegistry', async () => {
-      const kittyCore = await PartialKittyCoreTransferHandler.new()
+      const kittyCore = await KittyCoreTransferHandler.new()
       const erc20TransferHandler = await ERC20TransferHandler.new()
       const erc721TransferHandler = await ERC721TransferHandler.new()
+      const erc1155TransferHandler = await ERC1155TransferHandler.new()
 
       // add all 4 of these contracts into the TokenRegistry
-      transferHandlerRegistry.addTransferHandler(CKITTY_KIND, kittyCore.address)
-      transferHandlerRegistry.addTransferHandler(
+      await transferHandlerRegistry.addTransferHandler(
+        CKITTY_KIND,
+        kittyCore.address
+      )
+      await transferHandlerRegistry.addTransferHandler(
         ERC20_INTERFACE_ID,
         erc20TransferHandler.address
       )
-      transferHandlerRegistry.addTransferHandler(
+      await transferHandlerRegistry.addTransferHandler(
         ERC721_INTERFACE_ID,
         erc721TransferHandler.address
+      )
+      await transferHandlerRegistry.addTransferHandler(
+        ERC1155_INTERFACE_ID,
+        erc1155TransferHandler.address
       )
     })
   })
@@ -1256,7 +1269,7 @@ contract('Swap', async accounts => {
     })
   })
 
-  describe('Minting...', async () => {
+  describe('Minting ERC721 Tokens', async () => {
     it('Mints a concert ticket (#12345) for Alice', async () => {
       emitted(await tokenTicket.mint(aliceAddress, 12345), 'NFTTransfer')
       ok(
@@ -1436,6 +1449,140 @@ contract('Swap', async accounts => {
       )
 
       emitted(await swap(order, { from: bobAddress }), 'Swap')
+    })
+  })
+
+  describe('Minting ERC1155 Tokens', async () => {
+    it('Mints 100 of Dragon game token (#10) for Alice', async () => {
+      emitted(await tokenERC1155.mint(aliceAddress, 10, 100), 'TransferSingle')
+
+      const aliceDragonBalance = await tokenERC1155.balanceOf.call(
+        aliceAddress,
+        10
+      )
+      equal(aliceDragonBalance, 100)
+    })
+
+    it('Mints 100 of Dragon game token (#10) for Alice', async () => {
+      emitted(await tokenERC1155.mint(bobAddress, 15, 200), 'TransferSingle')
+
+      const bobDragonBalance = await tokenERC1155.balanceOf.call(bobAddress, 15)
+      equal(bobDragonBalance, 200)
+    })
+  })
+
+  describe('Swaps (ERC-1155)', async () => {
+    it('Alice approves Swap to transfer all the ERC1155 tokens', async () => {
+      emitted(
+        await tokenERC1155.setApprovalForAll(swapAddress, true, {
+          from: aliceAddress,
+        }),
+        'ApprovalForAll'
+      )
+    })
+
+    it('Bob buys 50 Dragon Token 10  from Alice when she sends id and amount in Party struct', async () => {
+      const order = await orders.getOrder({
+        signer: {
+          wallet: aliceAddress,
+          token: tokenERC1155.address,
+          id: 10,
+          amount: 50,
+          kind: ERC1155_INTERFACE_ID,
+        },
+        sender: {
+          wallet: bobAddress,
+          token: tokenDAI.address,
+          amount: 100,
+        },
+      })
+
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        aliceAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
+      emitted(await swap(order, { from: bobAddress }), 'Swap')
+    })
+
+    it('Checks that Carol gets paid 10 Dragon Token 10 for facilitating a trade between Alice and Bob', async () => {
+      const order = await orders.getOrder({
+        signer: {
+          wallet: aliceAddress,
+          token: tokenAST.address,
+          amount: 50,
+        },
+        sender: {
+          wallet: bobAddress,
+          token: tokenDAI.address,
+          amount: 50,
+        },
+        affiliate: {
+          wallet: carolAddress,
+          token: tokenERC1155.address,
+          id: 10,
+          amount: 10,
+          kind: ERC1155_INTERFACE_ID,
+        },
+      })
+
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        aliceAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
+      emitted(await swap(order, { from: bobAddress }), 'Swap')
+    })
+
+    it('Check the balances of the ERC1155 token transfers', async () => {
+      ok(
+        await balances(aliceAddress, [
+          [tokenAST, 344],
+          [tokenDAI, 381],
+        ]),
+        'Alice balances are incorrect'
+      )
+
+      // check that Bob received 50 Dragon tokens from Alice
+      equal(
+        await tokenERC1155.balanceOf.call(bobAddress, 10),
+        50,
+        'Bob balances are incorrect'
+      )
+
+      // check that Carol received 10 Dragon tokens from Alice
+      equal(
+        await tokenERC1155.balanceOf.call(carolAddress, 10),
+        10,
+        'Carol balances are incorrect'
+      )
+
+      // check that Alice has only 40 Dragon tokens left
+      equal(
+        await tokenERC1155.balanceOf.call(aliceAddress, 10),
+        40,
+        'Alice balances are incorrect'
+      )
+
+      // check bob's ERC20 balances post transfers
+      ok(
+        await balances(bobAddress, [
+          [tokenAST, 606],
+          [tokenDAI, 619],
+        ]),
+        'Bob balances are incorrect'
+      )
+      ok(
+        await balances(carolAddress, [
+          [tokenAST, 50],
+          [tokenDAI, 0],
+        ]),
+        'Carol balances are incorrect'
+      )
     })
   })
 

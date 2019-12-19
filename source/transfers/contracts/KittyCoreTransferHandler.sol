@@ -1,15 +1,16 @@
 pragma solidity 0.5.12;
 
 import "./interfaces/ITransferHandler.sol";
-import "@airswap/tokens/contracts/interfaces/IERC1155.sol";
+import "./interfaces/IKittyCoreTokenTransfer.sol";
 
-contract ERC1155TransferHandler is ITransferHandler {
+contract KittyCoreTransferHandler is ITransferHandler {
+
  /**
-  * @notice Function to wrap safeTransferFrom for ERC1155
+  * @notice Function to wrap transferFrom for CKitty
   * @param from address Wallet address to transfer from
   * @param to address Wallet address to transfer to
-  * @param amount uint256 Amount for ERC-1155
-  * @param id uint256 token ID for ERC-1155
+  * @param amount uint256, must be 0 for this contract
+  * @param id uint256 ID for ERC721
   * @param token address Contract address of token
   * @return bool on success of the token transfer
   */
@@ -20,13 +21,8 @@ contract ERC1155TransferHandler is ITransferHandler {
     uint256 id,
     address token
   ) external returns (bool) {
-    IERC1155(token).safeTransferFrom(
-      from,
-      to,
-      id,
-      amount,
-      "" // bytes are empty
-    );
+    require(amount == 0, "NO_AMOUNT_FIELD_IN_ERC721");
+    IKittyCoreTokenTransfer(token).transferFrom(from, to, id);
     return true;
   }
 }

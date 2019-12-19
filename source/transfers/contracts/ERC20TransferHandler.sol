@@ -6,6 +6,16 @@ import "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
 
 contract ERC20TransferHandler is ITransferHandler {
   using SafeERC20 for IERC20;
+
+ /**
+  * @notice Function to wrap safeTransferFrom for ERC20
+  * @param from address Wallet address to transfer from
+  * @param to address Wallet address to transfer to
+  * @param amount uint256 Amount for ERC-20
+  * @param id uint256 ID, must be 0 for this contract
+  * @param token address Contract address of token
+  * @return bool on success of the token transfer
+  */
   function transferTokens(
     address from,
     address to,
