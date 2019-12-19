@@ -1,6 +1,6 @@
 {
   "name": "@airswap/delegate",
-  "version": "2.5.6",
+  "version": "1.5.6",
   "description": "Deployable Trading Rules for the AirSwap Network",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>",
