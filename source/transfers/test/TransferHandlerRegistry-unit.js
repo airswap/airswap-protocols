@@ -29,7 +29,7 @@ contract('TransferHandlerRegistry Unit Tests', async accounts => {
     it('test fetching non-existent handler, returns null address', async () => {
       equal(
         EMPTY_ADDRESS,
-        await transferHandlerRegistry.getTransferHandler.call(
+        await transferHandlerRegistry.transferHandlers.call(
           ERC721_INTERFACE_ID
         ),
         'Returns actual non-zero address'
@@ -49,9 +49,7 @@ contract('TransferHandlerRegistry Unit Tests', async accounts => {
 
       equal(
         erc20TransferHandler,
-        await transferHandlerRegistry.getTransferHandler.call(
-          ERC20_INTERFACE_ID
-        ),
+        await transferHandlerRegistry.transferHandlers.call(ERC20_INTERFACE_ID),
         'Unable to find match'
       )
     })

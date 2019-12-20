@@ -362,7 +362,7 @@ contract Swap is ISwap {
 
     // Ensure the transfer is not to self.
     require(from != to, "INVALID_SELF_TRANSFER");
-    ITransferHandler transferHandler = registry.getTransferHandler(kind);
+    ITransferHandler transferHandler = registry.transferHandlers(kind);
     require(address(transferHandler) != address(0), "UNKNOWN_TRANSFER_HANDLER");
     // delegatecall required to pass msg.sender as Swap contract to handle the
     // token transfer in the calling contract

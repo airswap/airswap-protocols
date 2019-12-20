@@ -27,15 +27,4 @@ contract TransferHandlerRegistry {
       transferHandlers[kind] = transferHandler;
       emit AddTransferHandler(kind, address(transferHandler));
     }
-
-  /**
-  * @notice Fetches from the transfer handler mapping
-  * @dev will return address(0) if not in mapping
-  * @param kind bytes4 Key value that defines a token type
-  * @return ITransferHandler return
-  */
-  function getTransferHandler(bytes4 kind) external
-    view returns (ITransferHandler) {
-    return transferHandlers[kind];
-  }
 }
