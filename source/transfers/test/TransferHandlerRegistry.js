@@ -93,7 +93,6 @@ contract('TransferHandlerRegistry', async accounts => {
         ERC721_INTERFACE_ID,
         erc721TransferHandler.address
       )
-      console.log('Is this none + ' + ERC1155_INTERFACE_ID)
       await transferHandlerRegistry.addTransferHandler(
         ERC1155_INTERFACE_ID,
         erc1155TransferHandler.address
@@ -326,7 +325,7 @@ contract('TransferHandlerRegistry', async accounts => {
         GANACHE_PROVIDER
       )
 
-      emitted(await swap(order, { from: bobAddress }), 'Swap')
+      await reverted(swap(order, { from: bobAddress }), 'TRANSFER_FAILED')
     })
 
     it('Checks that adding an affiliate address still swaps', async () => {
