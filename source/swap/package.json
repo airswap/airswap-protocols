@@ -35,7 +35,7 @@
     "solidity-docgen": "0.3.0-beta.3"
   },
   "dependencies": {
-    "@airswap/transfers": "0.1.0",
+    "@airswap/transfers": "0.0.1",
     "@airswap/types": "2.4.4",
     "openzeppelin-solidity": "2.4"
   }

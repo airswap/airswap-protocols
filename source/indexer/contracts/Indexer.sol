@@ -62,7 +62,7 @@ contract Indexer is IIndexer, Ownable {
   /**
     * @notice Set the address of an ILocatorWhitelist to use
     * @dev Allows removal of locatorWhitelist by passing 0x0
-    * @param protocol bytes2 protocol identifier for locators
+    * @param protocol bytes2 Protocol type for locators
     * @param newLocatorWhitelist address Locator whitelist
     */
   function setLocatorWhitelist(
@@ -130,7 +130,7 @@ contract Indexer is IIndexer, Ownable {
     *
     * @param signerToken address Signer token of the Index being staked
     * @param senderToken address Sender token of the Index being staked
-    * @param protocol bytes2 Protocol type for locators in Intent
+    * @param protocol bytes2 Protocol type for locator in Intent
     * @param stakingAmount uint256 Amount being staked
     * @param locator bytes32 Locator of the staker
     */

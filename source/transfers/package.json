@@ -1,6 +1,6 @@
 {
   "name": "@airswap/transfers",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "description": "A registry to manage a variety of token transfers for the Swap Protocol",
   "license": "Apache-2.0",
   "repository": {
