@@ -102,7 +102,7 @@ contract('Swap', async accounts => {
   })
 
   describe('Approving ERC20 tokens (AST and DAI)...', async () => {
-    it('Checks approvals (Alice 250 AST and 0 DAI, Bob 0 AST and 500 DAI)', async () => {
+    it('Checks approvals (Alice 250 AST and 0 DAI, Bob 0 AST and 1000 DAI)', async () => {
       emitted(
         await tokenAST.approve(swapAddress, 250, { from: aliceAddress }),
         'Approval'
@@ -196,7 +196,7 @@ contract('Swap', async accounts => {
       )
     })
 
-    it('Alice sends Bob with an unknown kind for 1 DAI', async () => {
+    it('Alice sends Bob with an unknown kind for 10 DAI', async () => {
       const order = await orders.getOrder({
         signer: {
           wallet: aliceAddress,
