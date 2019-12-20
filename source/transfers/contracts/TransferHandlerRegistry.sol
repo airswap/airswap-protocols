@@ -14,7 +14,7 @@ contract TransferHandlerRegistry {
   );
 
   // Mapping of bytes4 to contract interface type
-  mapping (bytes4 => ITransferHandler) private _transferHandlerMapping;
+  mapping (bytes4 => ITransferHandler) public transferHandlers;
 
   /**
   * @notice Adds handler to mapping
@@ -23,8 +23,8 @@ contract TransferHandlerRegistry {
   */
   function addTransferHandler(bytes4 kind, ITransferHandler transferHandler)
     external {
-      require(address(_transferHandlerMapping[kind]) == address(0), "HANDLER_EXISTS_FOR_KIND");
-      _transferHandlerMapping[kind] = transferHandler;
+      require(address(transferHandlers[kind]) == address(0), "HANDLER_EXISTS_FOR_KIND");
+      transferHandlers[kind] = transferHandler;
       emit AddTransferHandler(kind, address(transferHandler));
     }
 
@@ -36,6 +36,6 @@ contract TransferHandlerRegistry {
   */
   function getTransferHandler(bytes4 kind) external
     view returns (ITransferHandler) {
-    return _transferHandlerMapping[kind];
+    return transferHandlers[kind];
   }
 }
