@@ -144,12 +144,12 @@ contract('Swap Unit Tests', async accounts => {
         .transferTokens(EMPTY_ADDRESS, EMPTY_ADDRESS, 0, 0, EMPTY_ADDRESS)
         .encodeABI()
 
-      const registry_getTransferHandler = transferHandlerRegistryTemplate.contract.methods
-        .getTransferHandler(kind)
+      const registry_transferHandlers = transferHandlerRegistryTemplate.contract.methods
+        .transferHandlers(kind)
         .encodeABI()
 
       await mockRegistry.givenMethodReturnAddress(
-        registry_getTransferHandler,
+        registry_transferHandlers,
         handlerTemplateMock.address
       )
 
