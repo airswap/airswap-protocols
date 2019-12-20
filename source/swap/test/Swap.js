@@ -1,14 +1,8 @@
 const Swap = artifacts.require('Swap')
 const Types = artifacts.require('Types')
 const FungibleToken = artifacts.require('FungibleToken')
-const NonFungibleToken = artifacts.require('NonFungibleToken')
-const OMGToken = artifacts.require('OMGToken')
 const TransferHandlerRegistry = artifacts.require('TransferHandlerRegistry')
-const KittyCoreTransferHandler = artifacts.require('KittyCoreTransferHandler')
-const MintableERC1155Token = artifacts.require('MintableERC1155Token')
 const ERC20TransferHandler = artifacts.require('ERC20TransferHandler')
-const ERC721TransferHandler = artifacts.require('ERC721TransferHandler')
-const ERC1155TransferHandler = artifacts.require('ERC1155TransferHandler')
 const {
   emitted,
   reverted,
@@ -25,8 +19,6 @@ const {
 const { orders, signatures } = require('@airswap/order-utils')
 const {
   ERC20_INTERFACE_ID,
-  ERC721_INTERFACE_ID,
-  ERC1155_INTERFACE_ID,
   SECONDS_IN_DAY,
   GANACHE_PROVIDER,
   EMPTY_ADDRESS,
@@ -37,17 +29,11 @@ contract('Swap', async accounts => {
   const bobAddress = accounts[1]
   const carolAddress = accounts[2]
   const davidAddress = accounts[3]
-  const CKITTY_KIND = '0x9a20483d'
   const UNKNOWN_KIND = '0xffffffff'
   let swapContract
   let swapAddress
   let tokenAST
   let tokenDAI
-  let tokenOMG
-  let tokenTicket
-  let tokenKitty
-  let tokenERC1155
-
   let transferHandlerRegistry
 
   let swap
@@ -77,40 +63,16 @@ contract('Swap', async accounts => {
       tokenDAI = await FungibleToken.new()
     })
 
-    it('Deployed test contract "OMG"', async () => {
-      tokenOMG = await OMGToken.new()
-    })
-
-    it('Deployed test contract "MintableERC1155Token"', async () => {
-      tokenERC1155 = await MintableERC1155Token.new()
-    })
-
     it('Check that TransferHandlerRegistry correctly set', async () => {
       equal(await swapContract.registry.call(), transferHandlerRegistry.address)
     })
 
     it('Set up TokenRegistry', async () => {
-      const kittyCore = await KittyCoreTransferHandler.new()
       const erc20TransferHandler = await ERC20TransferHandler.new()
-      const erc721TransferHandler = await ERC721TransferHandler.new()
-      const erc1155TransferHandler = await ERC1155TransferHandler.new()
 
-      // add all 4 of these contracts into the TokenRegistry
-      await transferHandlerRegistry.addTransferHandler(
-        CKITTY_KIND,
-        kittyCore.address
-      )
       await transferHandlerRegistry.addTransferHandler(
         ERC20_INTERFACE_ID,
         erc20TransferHandler.address
-      )
-      await transferHandlerRegistry.addTransferHandler(
-        ERC721_INTERFACE_ID,
-        erc721TransferHandler.address
-      )
-      await transferHandlerRegistry.addTransferHandler(
-        ERC1155_INTERFACE_ID,
-        erc1155TransferHandler.address
       )
     })
   })
@@ -121,21 +83,6 @@ contract('Swap', async accounts => {
       ok(
         await balances(aliceAddress, [
           [tokenAST, 1000],
-          [tokenDAI, 0],
-        ]),
-        'Alice balances are incorrect'
-      )
-    })
-
-    it('Mints 1000 OMG for Alice', async () => {
-      emitted(
-        await tokenOMG.mint(aliceAddress, 1000, { from: aliceAddress }),
-        'Mint'
-      )
-      ok(
-        await balances(aliceAddress, [
-          [tokenAST, 1000],
-          [tokenOMG, 1000],
           [tokenDAI, 0],
         ]),
         'Alice balances are incorrect'
@@ -161,10 +108,6 @@ contract('Swap', async accounts => {
         'Approval'
       )
       emitted(
-        await tokenOMG.approve(swapAddress, 200, { from: aliceAddress }),
-        'Approval'
-      )
-      emitted(
         await tokenDAI.approve(swapAddress, 1000, { from: bobAddress }),
         'Approval'
       )
@@ -172,7 +115,6 @@ contract('Swap', async accounts => {
         await allowances(aliceAddress, swapAddress, [
           [tokenAST, 250],
           [tokenDAI, 0],
-          [tokenOMG, 200],
         ])
       )
       ok(
@@ -209,6 +151,29 @@ contract('Swap', async accounts => {
       )
     })
 
+    it('Checks that Alice cannot swap more than balance approved (2000 AST for 50 DAI)', async () => {
+      const order = await orders.getOrder({
+        signer: {
+          wallet: aliceAddress,
+          token: tokenAST.address,
+          amount: 2000,
+        },
+        sender: {
+          wallet: bobAddress,
+          token: tokenDAI.address,
+          amount: 50,
+        },
+      })
+
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        aliceAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+      await reverted(swap(order, { from: bobAddress }), 'TRANSFER_FAILED')
+    })
+
     it('Checks that Bob can swap with Alice (200 AST for 50 DAI)', async () => {
       emitted(await swap(_order, { from: bobAddress }), 'Swap')
     })
@@ -231,18 +196,18 @@ contract('Swap', async accounts => {
       )
     })
 
-    it('Checks that for ERC20 transfers, cannot send an id value', async () => {
+    it('Alice sends Bob with an unknown kind for 1 DAI', async () => {
       const order = await orders.getOrder({
         signer: {
           wallet: aliceAddress,
           token: tokenAST.address,
-          amount: 200,
-          id: 34,
+          amount: 1,
+          kind: UNKNOWN_KIND,
         },
         sender: {
           wallet: bobAddress,
           token: tokenDAI.address,
-          amount: 50,
+          amount: 10,
         },
       })
 
@@ -252,9 +217,11 @@ contract('Swap', async accounts => {
         swapAddress,
         GANACHE_PROVIDER
       )
-      //trxn = swap(order, { from: bobAddress })
 
-      await reverted(swap(order, { from: bobAddress }), 'TRANSFER_FAILED')
+      await reverted(
+        swap(order, { from: bobAddress }),
+        'UNKNOWN_TRANSFER_HANDLER'
+      )
     })
 
     it('Checks balances...', async () => {
@@ -458,170 +425,6 @@ contract('Swap', async accounts => {
     })
   })
 
-  describe('Swaps (Non-standard Fungible)', async () => {
-    let _order
-
-    before('Alice creates an order for Bob (200 OMG for 50 DAI)', async () => {
-      _order = await orders.getOrder({
-        signer: {
-          wallet: aliceAddress,
-          token: tokenOMG.address,
-          amount: 200,
-        },
-        sender: {
-          wallet: bobAddress,
-          token: tokenDAI.address,
-          amount: 50,
-        },
-      })
-
-      _order.signature = await signatures.getWeb3Signature(
-        _order,
-        aliceAddress,
-        swapAddress,
-        GANACHE_PROVIDER
-      )
-    })
-
-    it('Checks that Bob can swap with Alice (200 OMG for 50 DAI)', async () => {
-      emitted(await swap(_order, { from: bobAddress }), 'Swap')
-    })
-
-    it('Checks balances...', async () => {
-      ok(
-        await balances(aliceAddress, [
-          [tokenOMG, 800],
-          [tokenDAI, 100],
-        ]),
-        'Alice balances are incorrect'
-      )
-      ok(
-        await balances(bobAddress, [
-          [tokenOMG, 200],
-          [tokenDAI, 900],
-        ]),
-        'Bob balances are incorrect'
-      )
-    })
-
-    it('Checks that Bob cannot take the same order again (200 OMG for 50 DAI)', async () => {
-      await reverted(
-        swap(_order, { from: bobAddress }),
-        'ORDER_TAKEN_OR_CANCELLED'
-      )
-    })
-
-    it('Checks balances...', async () => {
-      ok(
-        await balances(aliceAddress, [
-          [tokenOMG, 800],
-          [tokenDAI, 100],
-        ]),
-        'Alice balances are incorrect'
-      )
-      ok(
-        await balances(bobAddress, [
-          [tokenOMG, 200],
-          [tokenDAI, 900],
-        ]),
-        'Bob balances are incorrect'
-      )
-    })
-
-    it('Checks that Alice cannot trade more than approved (200 OMG)', async () => {
-      const order = await orders.getOrder({
-        signer: {
-          wallet: aliceAddress,
-          token: tokenOMG.address,
-          amount: 200,
-        },
-      })
-
-      await reverted(swap(order, { from: bobAddress }))
-    })
-
-    it('Checks that Bob cannot take an expired order', async () => {
-      const order = await orders.getOrder({
-        signer: {
-          wallet: aliceAddress,
-        },
-        sender: {
-          wallet: bobAddress,
-        },
-        expiry: (await getLatestTimestamp()) - 10,
-      })
-      await reverted(swap(order, { from: bobAddress }), 'ORDER_EXPIRED')
-    })
-
-    it('Checks that an order is expired when expiry == block.timestamp', async () => {
-      // with this method, sometimes order.expiry is 1 second before block.timestamp
-      // however ~50% of the time they are equal. This is due to the fact that in the
-      // time it takes to create an order, some number of milliseconds pass. Sometimes
-      // that pushes the current time into the next second, and sometimes it doesnt.
-      // Therefore sometimes the current time is the same time as the expiry, and sometimes
-      // the current time is one second after the expiry
-
-      const ONE_DAY = SECONDS_IN_DAY * 1
-      const order = await orders.getOrder({
-        signer: {
-          wallet: aliceAddress,
-        },
-        sender: {
-          wallet: bobAddress,
-        },
-        expiry: await getTimestampPlusDays(1),
-      })
-      await advanceTime(ONE_DAY)
-      await reverted(swap(order, { from: bobAddress }), 'ORDER_EXPIRED')
-    })
-
-    it('Checks that Bob can not trade more than he holds', async () => {
-      const order = await orders.getOrder({
-        signer: {
-          wallet: bobAddress,
-          token: tokenDAI.address,
-          amount: 1000,
-        },
-        sender: {
-          wallet: aliceAddress,
-        },
-      })
-      await reverted(swap(order, { from: aliceAddress }))
-    })
-
-    it('Checks remaining balances and approvals', async () => {
-      ok(
-        await balances(aliceAddress, [
-          [tokenOMG, 800],
-          [tokenDAI, 100],
-        ]),
-        'Alice balances are incorrect'
-      )
-      ok(
-        await balances(bobAddress, [
-          [tokenOMG, 200],
-          [tokenDAI, 900],
-        ]),
-        'Bob balances are incorrect'
-      )
-      // Alice and Bob swapped 200 AST for 50 DAI above, thereforeL
-      // Alice's 200 AST approval is now all gone
-      // Bob's 1000 DAI approval has decreased by 50
-      ok(
-        await allowances(aliceAddress, swapAddress, [
-          [tokenOMG, 0],
-          [tokenDAI, 0],
-        ])
-      )
-      ok(
-        await allowances(bobAddress, swapAddress, [
-          [tokenOMG, 0],
-          [tokenDAI, 900],
-        ])
-      )
-    })
-  })
-
   describe('Signer Delegation (Signer-side)', async () => {
     let _order
     let _unsignedOrder
@@ -737,14 +540,14 @@ contract('Swap', async accounts => {
       ok(
         await balances(aliceAddress, [
           [tokenAST, 750],
-          [tokenDAI, 110],
+          [tokenDAI, 60],
         ]),
         'Alice balances are incorrect'
       )
       ok(
         await balances(bobAddress, [
           [tokenAST, 250],
-          [tokenDAI, 890],
+          [tokenDAI, 940],
         ]),
         'Bob balances are incorrect'
       )
@@ -755,10 +558,11 @@ contract('Swap', async accounts => {
           [tokenDAI, 0],
         ])
       )
+
       ok(
         await allowances(bobAddress, swapAddress, [
           [tokenAST, 0],
-          [tokenDAI, 890],
+          [tokenDAI, 940],
         ])
       )
     })
@@ -859,14 +663,14 @@ contract('Swap', async accounts => {
       ok(
         await balances(aliceAddress, [
           [tokenAST, 700],
-          [tokenDAI, 120],
+          [tokenDAI, 70],
         ]),
         'Alice balances are incorrect'
       )
       ok(
         await balances(bobAddress, [
           [tokenAST, 300],
-          [tokenDAI, 880],
+          [tokenDAI, 930],
         ]),
         'Bob balances are incorrect'
       )
@@ -879,7 +683,7 @@ contract('Swap', async accounts => {
       ok(
         await allowances(bobAddress, swapAddress, [
           [tokenAST, 0],
-          [tokenDAI, 880],
+          [tokenDAI, 930],
         ])
       )
     })
@@ -932,14 +736,14 @@ contract('Swap', async accounts => {
       ok(
         await balances(aliceAddress, [
           [tokenAST, 675],
-          [tokenDAI, 125],
+          [tokenDAI, 75],
         ]),
         'Alice balances are incorrect'
       )
       ok(
         await balances(bobAddress, [
           [tokenAST, 325],
-          [tokenDAI, 875],
+          [tokenDAI, 925],
         ]),
         'Bob balances are incorrect'
       )
@@ -952,7 +756,7 @@ contract('Swap', async accounts => {
       ok(
         await allowances(bobAddress, swapAddress, [
           [tokenAST, 0],
-          [tokenDAI, 875],
+          [tokenDAI, 925],
         ])
       )
     })
@@ -1008,14 +812,14 @@ contract('Swap', async accounts => {
       ok(
         await balances(aliceAddress, [
           [tokenAST, 650],
-          [tokenDAI, 130],
+          [tokenDAI, 80],
         ]),
         'Alice balances are incorrect'
       )
       ok(
         await balances(bobAddress, [
           [tokenAST, 350],
-          [tokenDAI, 870],
+          [tokenDAI, 920],
         ]),
         'Bob balances are incorrect'
       )
@@ -1028,7 +832,7 @@ contract('Swap', async accounts => {
       ok(
         await allowances(bobAddress, swapAddress, [
           [tokenAST, 0],
-          [tokenDAI, 870],
+          [tokenDAI, 920],
         ])
       )
     })
@@ -1098,14 +902,14 @@ contract('Swap', async accounts => {
       ok(
         await balances(aliceAddress, [
           [tokenAST, 650],
-          [tokenDAI, 130],
+          [tokenDAI, 80],
         ]),
         'Alice balances are incorrect'
       )
       ok(
         await balances(bobAddress, [
           [tokenAST, 350],
-          [tokenDAI, 870],
+          [tokenDAI, 920],
         ]),
         'Bob balances are incorrect'
       )
@@ -1118,19 +922,9 @@ contract('Swap', async accounts => {
       ok(
         await allowances(bobAddress, swapAddress, [
           [tokenAST, 0],
-          [tokenDAI, 870],
+          [tokenDAI, 920],
         ])
       )
-    })
-  })
-
-  describe('Deploying...', async () => {
-    it('Deployed test contract "ConcertTicket"', async () => {
-      tokenTicket = await NonFungibleToken.new()
-    })
-
-    it('Deployed test contract "Collectible"', async () => {
-      tokenKitty = await NonFungibleToken.new()
     })
   })
 
@@ -1168,14 +962,14 @@ contract('Swap', async accounts => {
       ok(
         await balances(aliceAddress, [
           [tokenAST, 500],
-          [tokenDAI, 180],
+          [tokenDAI, 130],
         ]),
         'Alice balances are incorrect'
       )
       ok(
         await balances(bobAddress, [
           [tokenAST, 450],
-          [tokenDAI, 820],
+          [tokenDAI, 870],
         ]),
         'Bob balances are incorrect'
       )
@@ -1184,61 +978,6 @@ contract('Swap', async accounts => {
           [tokenAST, 50],
           [tokenDAI, 0],
         ]),
-        'Carol balances are incorrect'
-      )
-    })
-
-    it('Checks that Carol gets paid 1 CK for facilitating a trade between Alice and Bob', async () => {
-      const order = await orders.getOrder({
-        signer: {
-          wallet: aliceAddress,
-          token: tokenAST.address,
-          amount: 1,
-        },
-        sender: {
-          wallet: bobAddress,
-          token: tokenDAI.address,
-          amount: 1,
-        },
-        affiliate: {
-          wallet: carolAddress,
-          token: tokenTicket.address,
-          id: 121,
-          kind: ERC721_INTERFACE_ID,
-        },
-      })
-
-      // give alice token 121, she approves swap
-      emitted(await tokenTicket.mint(aliceAddress, 121), 'NFTTransfer')
-      emitted(
-        await tokenTicket.approve(swapAddress, 121, { from: aliceAddress }),
-        'NFTApproval'
-      )
-
-      ok(
-        await balances(aliceAddress, [[tokenTicket, 1]]),
-        'Alice balances are incorrect'
-      )
-      ok(
-        await balances(carolAddress, [[tokenTicket, 0]]),
-        'Carol balances are incorrect'
-      )
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        aliceAddress,
-        swapAddress,
-        GANACHE_PROVIDER
-      )
-
-      emitted(await swap(order, { from: bobAddress }), 'Swap')
-
-      ok(
-        await balances(aliceAddress, [[tokenTicket, 0]]),
-        'Alice balances are incorrect'
-      )
-      ok(
-        await balances(carolAddress, [[tokenTicket, 1]]),
         'Carol balances are incorrect'
       )
     })
@@ -1266,323 +1005,6 @@ contract('Swap', async accounts => {
       )
 
       emitted(await swap(order, { from: bobAddress }), 'Swap')
-    })
-  })
-
-  describe('Minting ERC721 Tokens', async () => {
-    it('Mints a concert ticket (#12345) for Alice', async () => {
-      emitted(await tokenTicket.mint(aliceAddress, 12345), 'NFTTransfer')
-      ok(
-        await balances(aliceAddress, [[tokenTicket, 1]]),
-        'Alice balances are incorrect'
-      )
-    })
-
-    it('Mints a kitty collectible (#54321) for Bob', async () => {
-      emitted(await tokenKitty.mint(bobAddress, 54321), 'NFTTransfer')
-      ok(
-        await balances(bobAddress, [[tokenKitty, 1]]),
-        'Bob balances are incorrect'
-      )
-    })
-  })
-
-  describe('Swaps (Non-Fungible) with unknown kind', async () => {
-    it('Alice approves Swap to transfer her concert ticket', async () => {
-      emitted(
-        await tokenTicket.approve(swapAddress, 12345, { from: aliceAddress }),
-        'NFTApproval'
-      )
-    })
-
-    it('Alice sends Bob with an unknown kind for 1 DAI', async () => {
-      const order = await orders.getOrder({
-        signer: {
-          wallet: aliceAddress,
-          token: tokenTicket.address,
-          id: 12345,
-          kind: UNKNOWN_KIND,
-        },
-        sender: {
-          wallet: bobAddress,
-          token: tokenDAI.address,
-          param: 100,
-        },
-      })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        aliceAddress,
-        swapAddress,
-        GANACHE_PROVIDER
-      )
-
-      await reverted(
-        swap(order, { from: bobAddress }),
-        'UNKNOWN_TRANSFER_HANDLER'
-      )
-    })
-  })
-
-  describe('Swaps (Non-Fungible)', async () => {
-    it('Alice approves Swap to transfer her concert ticket', async () => {
-      emitted(
-        await tokenTicket.approve(swapAddress, 12345, { from: aliceAddress }),
-        'NFTApproval'
-      )
-    })
-
-    it('Bob cannot buy Ticket #12345 from Alice if she sends id and amount in Party struct', async () => {
-      const order = await orders.getOrder({
-        signer: {
-          wallet: aliceAddress,
-          token: tokenTicket.address,
-          id: 12345,
-          amount: 100,
-          kind: ERC721_INTERFACE_ID,
-        },
-        sender: {
-          wallet: bobAddress,
-          token: tokenDAI.address,
-          amount: 100,
-        },
-      })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        aliceAddress,
-        swapAddress,
-        GANACHE_PROVIDER
-      )
-
-      await reverted(swap(order, { from: bobAddress }), 'TRANSFER_FAILED')
-    })
-
-    it('Bob buys Ticket #12345 from Alice for 100 DAI', async () => {
-      const order = await orders.getOrder({
-        signer: {
-          wallet: aliceAddress,
-          token: tokenTicket.address,
-          id: 12345,
-          kind: ERC721_INTERFACE_ID,
-        },
-        sender: {
-          wallet: bobAddress,
-          token: tokenDAI.address,
-          param: 100,
-        },
-      })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        aliceAddress,
-        swapAddress,
-        GANACHE_PROVIDER
-      )
-
-      emitted(await swap(order, { from: bobAddress }), 'Swap')
-    })
-
-    it('Bob approves Swap to transfer his kitty collectible', async () => {
-      emitted(
-        await tokenKitty.approve(swapAddress, 54321, { from: bobAddress }),
-        'NFTApproval'
-      )
-    })
-
-    it('Alice buys Kitty #54321 from Bob for 50 AST', async () => {
-      const order = await orders.getOrder({
-        signer: {
-          wallet: aliceAddress,
-          token: tokenAST.address,
-          amount: 50,
-        },
-        sender: {
-          wallet: bobAddress,
-          token: tokenKitty.address,
-          id: 54321,
-          kind: ERC721_INTERFACE_ID,
-        },
-      })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        aliceAddress,
-        swapAddress,
-        GANACHE_PROVIDER
-      )
-      emitted(await swap(order, { from: bobAddress }), 'Swap')
-    })
-
-    it('Alice approves Swap to transfer her kitty collectible', async () => {
-      emitted(
-        await tokenKitty.approve(swapAddress, 54321, { from: aliceAddress }),
-        'NFTApproval'
-      )
-    })
-
-    it('Checks that Carol gets paid Kitty #54321 for facilitating a trade between Alice and Bob', async () => {
-      const order = await orders.getOrder({
-        signer: {
-          wallet: aliceAddress,
-          token: tokenAST.address,
-          amount: 50,
-        },
-        sender: {
-          wallet: bobAddress,
-          token: tokenDAI.address,
-          amount: 50,
-        },
-        affiliate: {
-          wallet: carolAddress,
-          token: tokenKitty.address,
-          id: 54321,
-          kind: ERC721_INTERFACE_ID,
-        },
-      })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        aliceAddress,
-        swapAddress,
-        GANACHE_PROVIDER
-      )
-
-      emitted(await swap(order, { from: bobAddress }), 'Swap')
-    })
-  })
-
-  describe('Minting ERC1155 Tokens', async () => {
-    it('Mints 100 of Dragon game token (#10) for Alice', async () => {
-      emitted(await tokenERC1155.mint(aliceAddress, 10, 100), 'TransferSingle')
-
-      const aliceDragonBalance = await tokenERC1155.balanceOf.call(
-        aliceAddress,
-        10
-      )
-      equal(aliceDragonBalance, 100)
-    })
-
-    it('Mints 100 of Dragon game token (#10) for Alice', async () => {
-      emitted(await tokenERC1155.mint(bobAddress, 15, 200), 'TransferSingle')
-
-      const bobDragonBalance = await tokenERC1155.balanceOf.call(bobAddress, 15)
-      equal(bobDragonBalance, 200)
-    })
-  })
-
-  describe('Swaps (ERC-1155)', async () => {
-    it('Alice approves Swap to transfer all the ERC1155 tokens', async () => {
-      emitted(
-        await tokenERC1155.setApprovalForAll(swapAddress, true, {
-          from: aliceAddress,
-        }),
-        'ApprovalForAll'
-      )
-    })
-
-    it('Bob buys 50 Dragon Token 10  from Alice when she sends id and amount in Party struct', async () => {
-      const order = await orders.getOrder({
-        signer: {
-          wallet: aliceAddress,
-          token: tokenERC1155.address,
-          id: 10,
-          amount: 50,
-          kind: ERC1155_INTERFACE_ID,
-        },
-        sender: {
-          wallet: bobAddress,
-          token: tokenDAI.address,
-          amount: 100,
-        },
-      })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        aliceAddress,
-        swapAddress,
-        GANACHE_PROVIDER
-      )
-
-      emitted(await swap(order, { from: bobAddress }), 'Swap')
-    })
-
-    it('Checks that Carol gets paid 10 Dragon Token 10 for facilitating a trade between Alice and Bob', async () => {
-      const order = await orders.getOrder({
-        signer: {
-          wallet: aliceAddress,
-          token: tokenAST.address,
-          amount: 50,
-        },
-        sender: {
-          wallet: bobAddress,
-          token: tokenDAI.address,
-          amount: 50,
-        },
-        affiliate: {
-          wallet: carolAddress,
-          token: tokenERC1155.address,
-          id: 10,
-          amount: 10,
-          kind: ERC1155_INTERFACE_ID,
-        },
-      })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        aliceAddress,
-        swapAddress,
-        GANACHE_PROVIDER
-      )
-
-      emitted(await swap(order, { from: bobAddress }), 'Swap')
-    })
-
-    it('Check the balances of the ERC1155 token transfers', async () => {
-      ok(
-        await balances(aliceAddress, [
-          [tokenAST, 344],
-          [tokenDAI, 381],
-        ]),
-        'Alice balances are incorrect'
-      )
-
-      // check that Bob received 50 Dragon tokens from Alice
-      equal(
-        await tokenERC1155.balanceOf.call(bobAddress, 10),
-        50,
-        'Bob balances are incorrect'
-      )
-
-      // check that Carol received 10 Dragon tokens from Alice
-      equal(
-        await tokenERC1155.balanceOf.call(carolAddress, 10),
-        10,
-        'Carol balances are incorrect'
-      )
-
-      // check that Alice has only 40 Dragon tokens left
-      equal(
-        await tokenERC1155.balanceOf.call(aliceAddress, 10),
-        40,
-        'Alice balances are incorrect'
-      )
-
-      // check bob's ERC20 balances post transfers
-      ok(
-        await balances(bobAddress, [
-          [tokenAST, 606],
-          [tokenDAI, 619],
-        ]),
-        'Bob balances are incorrect'
-      )
-      ok(
-        await balances(carolAddress, [
-          [tokenAST, 50],
-          [tokenDAI, 0],
-        ]),
-        'Carol balances are incorrect'
-      )
     })
   })
 
