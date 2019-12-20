@@ -67,7 +67,7 @@ contract('Swap', async accounts => {
       equal(await swapContract.registry.call(), transferHandlerRegistry.address)
     })
 
-    it('Set up TokenRegistry', async () => {
+    it('Set up TokenRegistry and ERC20TransferHandler', async () => {
       const erc20TransferHandler = await ERC20TransferHandler.new()
 
       await transferHandlerRegistry.addTransferHandler(
@@ -77,7 +77,7 @@ contract('Swap', async accounts => {
     })
   })
 
-  describe('Minting ERC20 tokens (AST, DAI, and OMG)...', async () => {
+  describe('Minting ERC20 tokens (AST and DAI)...', async () => {
     it('Mints 1000 AST for Alice', async () => {
       emitted(await tokenAST.mint(aliceAddress, 1000), 'Transfer')
       ok(
@@ -271,6 +271,11 @@ contract('Swap', async accounts => {
           token: tokenAST.address,
           amount: 200,
         },
+        sender: {
+          wallet: bobAddress,
+          token: tokenDAI.address,
+          amount: 10,
+        },
       })
 
       await reverted(swap(order, { from: bobAddress }))
@@ -356,7 +361,7 @@ contract('Swap', async accounts => {
       )
     })
 
-    it('Checks that adding an affiliate address still swaps', async () => {
+    it('Checks that adding an affiliate address but empty token address and amount still swaps', async () => {
       const order = await orders.getOrder({
         signer: {
           wallet: aliceAddress,
@@ -659,7 +664,7 @@ contract('Swap', async accounts => {
 
     it('Checks remaining balances and approvals', async () => {
       // Alice and Bob swapped 50 AST for 10 DAI again. Previous balances were:
-      // Alice 700 AST 120 DAI, Bob 300 AST 880 DAI
+      // Alice 750 AST 60 DAI, Bob 250 AST 940 DAI
       ok(
         await balances(aliceAddress, [
           [tokenAST, 700],
@@ -732,7 +737,7 @@ contract('Swap', async accounts => {
 
     it('Checks remaining balances and approvals', async () => {
       // Alice and Bob swapped 25 AST for 5 DAI. Previous balances were:
-      // Alice 675 AST 125 DAI, Bob 325 AST 875 DAI
+      // Alice 700 AST 70 DAI, Bob 300 AST 930 DAI
       ok(
         await balances(aliceAddress, [
           [tokenAST, 675],
@@ -808,7 +813,7 @@ contract('Swap', async accounts => {
 
     it('Checks remaining balances and approvals', async () => {
       // Alice and Bob swapped 25 AST for 5 DAI. Previous balances were:
-      // Alice 650 AST 130 DAI, Bob 350 AST 870 DAI
+      // Alice 675 AST 75 DAI, Bob 375 AST 925 DAI
       ok(
         await balances(aliceAddress, [
           [tokenAST, 650],

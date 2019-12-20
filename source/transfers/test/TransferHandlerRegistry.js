@@ -438,7 +438,7 @@ contract('TransferHandlerRegistry', async accounts => {
       )
     })
 
-    it('Checks balances...', async () => {
+    it('Checks balances and approvals...', async () => {
       ok(
         await balances(aliceAddress, [
           [tokenOMG, 800],
@@ -453,9 +453,15 @@ contract('TransferHandlerRegistry', async accounts => {
         ]),
         'Bob balances are incorrect'
       )
+      ok(
+        await allowances(aliceAddress, swapAddress, [
+          [tokenOMG, 0],
+          [tokenDAI, 0],
+        ])
+      )
     })
 
-    it('Checks that Alice cannot trade more than approved (200 OMG)', async () => {
+    it('Checks that Alice cannot trade 200 OMG when allowance is 0', async () => {
       const order = await orders.getOrder({
         signer: {
           wallet: aliceAddress,
@@ -472,7 +478,7 @@ contract('TransferHandlerRegistry', async accounts => {
       await reverted(swap(order, { from: bobAddress }))
     })
 
-    it('Checks that Bob can not trade more than he holds', async () => {
+    it('Checks that Bob can not trade more OMG tokens than he holds', async () => {
       const order = await orders.getOrder({
         signer: {
           wallet: bobAddress,
@@ -501,9 +507,6 @@ contract('TransferHandlerRegistry', async accounts => {
         ]),
         'Bob balances are incorrect'
       )
-      // Alice and Bob swapped 200 AST for 50 DAI above, thereforeL
-      // Alice's 200 AST approval is now all gone
-      // Bob's 1000 DAI approval has decreased by 50
       ok(
         await allowances(aliceAddress, swapAddress, [
           [tokenOMG, 0],
@@ -670,7 +673,7 @@ contract('TransferHandlerRegistry', async accounts => {
       )
     })
 
-    it('Alice sends Bob with an unknown kind for 1 DAI', async () => {
+    it('Alice sends Bob with an unknown kind for 100 DAI', async () => {
       const order = await orders.getOrder({
         signer: {
           wallet: aliceAddress,
@@ -912,7 +915,7 @@ contract('TransferHandlerRegistry', async accounts => {
       await reverted(swap(order, { from: bobAddress }))
     })
 
-    it('Bob buys 50 Dragon Token 10 from Alice when she sends id and amount in Party struct', async () => {
+    it('Bob buys 50 Dragon Token (#10) from Alice when she sends id and amount in Party struct', async () => {
       const order = await orders.getOrder({
         signer: {
           wallet: aliceAddress,
@@ -938,7 +941,7 @@ contract('TransferHandlerRegistry', async accounts => {
       emitted(await swap(order, { from: bobAddress }), 'Swap')
     })
 
-    it('Checks that Carol gets paid 10 Dragon Token 10 for facilitating a trade between Alice and Bob', async () => {
+    it('Checks that Carol gets paid 10 Dragon Token (#10) for facilitating a fungible token transfer trade between Alice and Bob', async () => {
       const order = await orders.getOrder({
         signer: {
           wallet: aliceAddress,
@@ -970,7 +973,7 @@ contract('TransferHandlerRegistry', async accounts => {
       emitted(await swap(order, { from: bobAddress }), 'Swap')
     })
 
-    it('Check the balances of the ERC1155 token transfers', async () => {
+    it('Check the balances after ERC1155 token transfers', async () => {
       ok(
         await balances(aliceAddress, [
           [tokenAST, 499],
