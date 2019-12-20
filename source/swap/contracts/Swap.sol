@@ -364,7 +364,8 @@ contract Swap is ISwap {
     require(from != to, "INVALID_SELF_TRANSFER");
     ITransferHandler transferHandler = registry.getTransferHandler(kind);
     require(address(transferHandler) != address(0), "UNKNOWN_TRANSFER_HANDLER");
-    // delegatecall required to pass msg.sender as Swap contract
+    // delegatecall required to pass msg.sender as Swap contract to handle the
+    // token transfer in the calling contract
     (bool success, bytes memory data) = address(transferHandler).
       delegatecall(abi.encodeWithSelector(
         transferHandler.transferTokens.selector,
