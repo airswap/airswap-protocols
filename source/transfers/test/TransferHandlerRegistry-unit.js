@@ -8,9 +8,9 @@ const {
 } = require('@airswap/order-utils').constants
 
 contract('TransferHandlerRegistry Unit Tests', async accounts => {
-  const erc20Asset = accounts[1]
+  const erc20TransferHandler = accounts[1]
   let snapshotId
-  let transferhandlerregistry
+  let transferHandlerRegistry
 
   beforeEach(async () => {
     const snapShot = await takeSnapshot()
@@ -22,14 +22,14 @@ contract('TransferHandlerRegistry Unit Tests', async accounts => {
   })
 
   before('Deploy TransferHandlerRegistry', async () => {
-    transferhandlerregistry = await TransferHandlerRegistry.new()
+    transferHandlerRegistry = await TransferHandlerRegistry.new()
   })
 
   describe('Test fetching non-existent handler', async () => {
     it('test fetching non-existent handler, returns null address', async () => {
       equal(
         EMPTY_ADDRESS,
-        await transferhandlerregistry.getTransferHandler.call(
+        await transferHandlerRegistry.getTransferHandler.call(
           ERC721_INTERFACE_ID
         ),
         'Returns actual non-zero address'
@@ -37,19 +37,19 @@ contract('TransferHandlerRegistry Unit Tests', async accounts => {
     })
   })
 
-  describe('Test adding to handler', async () => {
+  describe('Test adding handler to registry', async () => {
     it('test adding, should pass', async () => {
       await emitted(
-        await transferhandlerregistry.addTransferHandler(
+        await transferHandlerRegistry.addTransferHandler(
           ERC20_INTERFACE_ID,
-          erc20Asset
+          erc20TransferHandler
         ),
         'AddTransferHandler'
       )
 
       equal(
-        erc20Asset,
-        await transferhandlerregistry.getTransferHandler.call(
+        erc20TransferHandler,
+        await transferHandlerRegistry.getTransferHandler.call(
           ERC20_INTERFACE_ID
         ),
         'Unable to find match'
@@ -57,19 +57,19 @@ contract('TransferHandlerRegistry Unit Tests', async accounts => {
     })
   })
 
-  describe('Test adding an existing handler from handler', async () => {
-    it('test adding and then removing, should pass', async () => {
+  describe('Test adding an existing handler from registry will fail', async () => {
+    it('test adding an existing handler will fail', async () => {
       await emitted(
-        await transferhandlerregistry.addTransferHandler(
+        await transferHandlerRegistry.addTransferHandler(
           ERC20_INTERFACE_ID,
-          erc20Asset
+          erc20TransferHandler
         ),
         'AddTransferHandler'
       )
       await reverted(
-        transferhandlerregistry.addTransferHandler(
+        transferHandlerRegistry.addTransferHandler(
           ERC20_INTERFACE_ID,
-          erc20Asset
+          erc20TransferHandler
         ),
         'HANDLER_EXISTS_FOR_KIND'
       )
