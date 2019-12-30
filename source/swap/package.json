@@ -30,7 +30,6 @@
     "@airswap/order-utils": "0.3.16",
     "@airswap/test-utils": "0.1.3",
     "@airswap/tokens": "0.1.3",
-    "openzeppelin-solidity": "2.4",
     "solidity-coverage": "^0.6.3",
     "solidity-docgen": "0.3.0-beta.3"
   },
