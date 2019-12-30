@@ -2,6 +2,7 @@ const Swap = artifacts.require('Swap')
 const Types = artifacts.require('Types')
 const FungibleToken = artifacts.require('FungibleToken')
 const NonFungibleToken = artifacts.require('NonFungibleToken')
+const AdaptedKittyCore = artifacts.require('AdaptedKittyERC721')
 const OMGToken = artifacts.require('OMGToken')
 const TransferHandlerRegistry = artifacts.require('TransferHandlerRegistry')
 const KittyCoreTransferHandler = artifacts.require('KittyCoreTransferHandler')
@@ -69,7 +70,7 @@ contract('TransferHandlerRegistry', async accounts => {
     })
 
     it('Set up TokenRegistry', async () => {
-      const kittyCore = await KittyCoreTransferHandler.new()
+      const kittyCoreHandler = await KittyCoreTransferHandler.new()
       const erc20TransferHandler = await ERC20TransferHandler.new()
       const erc721TransferHandler = await ERC721TransferHandler.new()
       const erc1155TransferHandler = await ERC1155TransferHandler.new()
@@ -77,7 +78,7 @@ contract('TransferHandlerRegistry', async accounts => {
       // add all 4 of these contracts into the TokenRegistry
       await transferHandlerRegistry.addTransferHandler(
         CKITTY_KIND,
-        kittyCore.address
+        kittyCoreHandler.address
       )
       await transferHandlerRegistry.addTransferHandler(
         ERC20_INTERFACE_ID,
@@ -528,7 +529,7 @@ contract('TransferHandlerRegistry', async accounts => {
     })
 
     it('Deployed test contract "Collectible"', async () => {
-      tokenKitty = await NonFungibleToken.new()
+      tokenKitty = await AdaptedKittyCore.new()
     })
   })
 
@@ -657,7 +658,7 @@ contract('TransferHandlerRegistry', async accounts => {
     })
 
     it('Mints a kitty collectible (#54321) for Bob', async () => {
-      emitted(await tokenKitty.mint(bobAddress, 54321), 'NFTTransfer')
+      emitted(await tokenKitty.mint(bobAddress, 54321), 'NFTKittyTransfer')
       ok(
         await balances(bobAddress, [[tokenKitty, 1]]),
         'Bob balances are incorrect'
@@ -764,7 +765,7 @@ contract('TransferHandlerRegistry', async accounts => {
     it('Bob approves Swap to transfer his kitty collectible', async () => {
       emitted(
         await tokenKitty.approve(swapAddress, 54321, { from: bobAddress }),
-        'NFTApproval'
+        'NFTKittyApproval'
       )
     })
 
@@ -824,7 +825,7 @@ contract('TransferHandlerRegistry', async accounts => {
     it('Alice approves Swap to transfer her kitty collectible', async () => {
       emitted(
         await tokenKitty.approve(swapAddress, 54321, { from: aliceAddress }),
-        'NFTApproval'
+        'NFTKittyApproval'
       )
     })
 

@@ -8,18 +8,21 @@ import "openzeppelin-solidity/contracts/introspection/ERC165.sol";
 
 /**
  * @title ERC721 Non-Fungible Token Standard basic implementation
- * @dev see https://eips.ethereum.org/EIPS/eip-721
-*  @dev add custom event names to differentatiate between ERC721 and ERC20 transfers
+ * @dev see https://eips.ethereum.org/EIPS/eip-721 (draft version)
+ * @dev similar to AdaptedERC721 in the repo, it has updated event names
+ * @dev similar to KittyCore there is no transferFrom function and so its
+ * bytes4 interface signature is 0x9a20483d
+ * @dev AdaptedKittyERC721 can be minted by anyone
  */
-contract AdaptedERC721 is ERC165 {
+contract AdaptedKittyERC721 is ERC165 {
   using SafeMath for uint256;
   using Address for address;
   using Counters for Counters.Counter;
 
-  // NEW EVENTS NAMES to differentatiate between ERC721 and ERC20 transfers
-  event NFTTransfer(address indexed from, address indexed to, uint256 indexed tokenId);
-  event NFTApproval(address indexed owner, address indexed approved, uint256 indexed tokenId);
-  event NFTApprovalForAll(address indexed owner, address indexed operator, bool approved);
+  // NEW EVENTS
+  event NFTKittyTransfer(address indexed from, address indexed to, uint256 indexed tokenId);
+  event NFTKittyApproval(address indexed owner, address indexed approved, uint256 indexed tokenId);
+  event NFTKittyApprovalForAll(address indexed owner, address indexed operator, bool approved);
 
   // Equals to `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`
   // which can be also obtained as `IERC721Receiver(0).onERC721Received.selector`
@@ -37,25 +40,22 @@ contract AdaptedERC721 is ERC165 {
   // Mapping from owner to operator approvals
   mapping (address => mapping (address => bool)) private _operatorApprovals;
 
-  /*
-    *     bytes4(keccak256('balanceOf(address)')) == 0x70a08231
-    *     bytes4(keccak256('ownerOf(uint256)')) == 0x6352211e
-    *     bytes4(keccak256('approve(address,uint256)')) == 0x095ea7b3
-    *     bytes4(keccak256('getApproved(uint256)')) == 0x081812fc
-    *     bytes4(keccak256('setApprovalForAll(address,bool)')) == 0xa22cb465
-    *     bytes4(keccak256('isApprovedForAll(address,address)')) == 0xe985e9c5
-    *     bytes4(keccak256('transferFrom(address,address,uint256)')) == 0x23b872dd
-    *     bytes4(keccak256('safeTransferFrom(address,address,uint256)')) == 0x42842e0e
-    *     bytes4(keccak256('safeTransferFrom(address,address,uint256,bytes)')) == 0xb88d4fde
-    *
-    *     => 0x70a08231 ^ 0x6352211e ^ 0x095ea7b3 ^ 0x081812fc ^
-    *        0xa22cb465 ^ 0xe985e9c ^ 0x23b872dd ^ 0x42842e0e ^ 0xb88d4fde == 0x80ac58cd
-    */
-  bytes4 private constant _INTERFACE_ID_ERC721 = 0x80ac58cd;
+  // 0x9a20483d
+  bytes4 constant InterfaceSignature_ERC721 =
+      bytes4(keccak256('name()')) ^
+      bytes4(keccak256('symbol()')) ^
+      bytes4(keccak256('totalSupply()')) ^
+      bytes4(keccak256('balanceOf(address)')) ^
+      bytes4(keccak256('ownerOf(uint256)')) ^
+      bytes4(keccak256('approve(address,uint256)')) ^
+      bytes4(keccak256('transfer(address,uint256)')) ^
+      bytes4(keccak256('transferFrom(address,address,uint256)')) ^
+      bytes4(keccak256('tokensOfOwner(address)')) ^
+      bytes4(keccak256('tokenMetadata(uint256,string)'));
 
   constructor() public {
     // register the supported interfaces to conform to ERC721 via ERC165
-    _registerInterface(_INTERFACE_ID_ERC721);
+    _registerInterface(InterfaceSignature_ERC721);
   }
 
   /**
@@ -98,7 +98,7 @@ contract AdaptedERC721 is ERC165 {
     );
 
     _tokenApprovals[tokenId] = to;
-    emit NFTApproval(owner, to, tokenId);
+    emit NFTKittyApproval(owner, to, tokenId);
   }
 
   /**
@@ -123,7 +123,7 @@ contract AdaptedERC721 is ERC165 {
     require(to != msg.sender, "ERC721: approve to caller");
 
     _operatorApprovals[msg.sender][to] = approved;
-    emit NFTApprovalForAll(msg.sender, to, approved);
+    emit NFTKittyApprovalForAll(msg.sender, to, approved);
   }
 
   /**
@@ -138,7 +138,6 @@ contract AdaptedERC721 is ERC165 {
 
   /**
     * @dev Transfers the ownership of a given token ID to another address.
-    * Usage of this method is discouraged, use {safeTransferFrom} whenever possible.
     * Requires the msg.sender to be the owner, approved, or operator.
     * @param from current owner of the token
     * @param to address to receive the ownership of the given token ID
@@ -149,38 +148,6 @@ contract AdaptedERC721 is ERC165 {
     require(_isApprovedOrOwner(msg.sender, tokenId), "ERC721: transfer caller is not owner nor approved");
 
     _transferFrom(from, to, tokenId);
-  }
-
-  /**
-    * @dev Safely transfers the ownership of a given token ID to another address
-    * If the target address is a contract, it must implement {IERC721Receiver-onERC721Received},
-    * which is called upon a safe transfer, and return the magic value
-    * `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`; otherwise,
-    * the transfer is reverted.
-    * Requires the msg.sender to be the owner, approved, or operator
-    * @param from current owner of the token
-    * @param to address to receive the ownership of the given token ID
-    * @param tokenId uint256 ID of the token to be transferred
-    */
-  function safeTransferFrom(address from, address to, uint256 tokenId) public {
-    safeTransferFrom(from, to, tokenId, "");
-  }
-
-  /**
-    * @dev Safely transfers the ownership of a given token ID to another address
-    * If the target address is a contract, it must implement {IERC721Receiver-onERC721Received},
-    * which is called upon a safe transfer, and return the magic value
-    * `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`; otherwise,
-    * the transfer is reverted.
-    * Requires the msg.sender to be the owner, approved, or operator
-    * @param from current owner of the token
-    * @param to address to receive the ownership of the given token ID
-    * @param tokenId uint256 ID of the token to be transferred
-    * @param _data bytes data to send along with a safe transfer check
-    */
-  function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory _data) public {
-    transferFrom(from, to, tokenId);
-    require(_checkOnERC721Received(from, to, tokenId, _data), "ERC721: transfer to non ERC721Receiver implementer");
   }
 
   /**
@@ -219,7 +186,7 @@ contract AdaptedERC721 is ERC165 {
     _tokenOwner[tokenId] = to;
     _ownedTokensCount[to].increment();
 
-    emit NFTTransfer(address(0), to, tokenId);
+    emit NFTKittyTransfer(address(0), to, tokenId);
   }
 
   /**
@@ -237,7 +204,7 @@ contract AdaptedERC721 is ERC165 {
     _ownedTokensCount[owner].decrement();
     _tokenOwner[tokenId] = address(0);
 
-    emit NFTTransfer(owner, address(0), tokenId);
+    emit NFTKittyTransfer(owner, address(0), tokenId);
   }
 
   /**
@@ -267,7 +234,7 @@ contract AdaptedERC721 is ERC165 {
 
     _tokenOwner[tokenId] = to;
 
-    emit NFTTransfer(from, to, tokenId);
+    emit NFTKittyTransfer(from, to, tokenId);
   }
 
   /**
@@ -300,5 +267,16 @@ contract AdaptedERC721 is ERC165 {
     if (_tokenApprovals[tokenId] != address(0)) {
       _tokenApprovals[tokenId] = address(0);
     }
+  }
+
+  /**
+    * @dev Function to mint tokens.
+    * @param to The address that will receive the minted tokens.
+    * @param tokenId The token id to mint.
+    * @return A boolean that indicates if the operation was successful.
+    */
+  function mint(address to, uint256 tokenId) public returns (bool) {
+    _mint(to, tokenId);
+    return true;
   }
 }
