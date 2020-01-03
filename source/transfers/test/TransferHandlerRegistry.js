@@ -69,6 +69,20 @@ contract('TransferHandlerRegistry', async accounts => {
       tokenERC1155 = await MintableERC1155Token.new()
     })
 
+    it('Test adding transferHandler by non-owner reverts', async () => {
+      const kittyCoreHandler = await KittyCoreTransferHandler.new()
+
+      // failed to add kittyCore by bob since non-owner
+      reverted(
+        transferHandlerRegistry.addTransferHandler(
+          CKITTY_KIND,
+          kittyCoreHandler.address,
+          { from: bobAddress }
+        ),
+        'Ownable: caller is not the owner'
+      )
+    })
+
     it('Set up TokenRegistry', async () => {
       const kittyCoreHandler = await KittyCoreTransferHandler.new()
       const erc20TransferHandler = await ERC20TransferHandler.new()

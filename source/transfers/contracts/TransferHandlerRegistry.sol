@@ -1,12 +1,14 @@
 pragma solidity 0.5.12;
 
 import "./interfaces/ITransferHandler.sol";
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+
 
 /**
   * @title TransferHandlerRegistry: holds registry of contract to
   * facilitate token transfers
   */
-contract TransferHandlerRegistry {
+contract TransferHandlerRegistry is Ownable {
 
   event AddTransferHandler(
     bytes4 kind,
@@ -22,7 +24,7 @@ contract TransferHandlerRegistry {
   * @param transferHandler ITransferHandler
   */
   function addTransferHandler(bytes4 kind, ITransferHandler transferHandler)
-    external {
+    external onlyOwner {
       require(address(transferHandlers[kind]) == address(0), "HANDLER_EXISTS_FOR_KIND");
       transferHandlers[kind] = transferHandler;
       emit AddTransferHandler(kind, address(transferHandler));
