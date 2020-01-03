@@ -142,13 +142,16 @@ event Swap(
   uint256 indexed nonce,
   uint256 timestamp,
   address indexed signerWallet,
-  uint256 signerParam,
+  uint256 signerAmount,
+  uint256 signerId,
   address signerToken,
   address indexed senderWallet,
-  uint256 senderParam,
+  uint256 senderAmount,
+  uint256 senderId,
   address senderToken,
   address affiliateWallet,
-  uint256 affiliateParam,
+  uint256 affiliateAmount,
+  uint256 affiliateId,
   address affiliateToken
 );
 ```
