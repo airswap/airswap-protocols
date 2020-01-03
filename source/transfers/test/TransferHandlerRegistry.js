@@ -930,6 +930,49 @@ contract('TransferHandlerRegistry', async accounts => {
       await reverted(swap(order, { from: bobAddress }))
     })
 
+    it('Check the balances prior to ERC1155 token transfers', async () => {
+      ok(
+        await balances(aliceAddress, [
+          [tokenAST, 549],
+          [tokenDAI, 301],
+        ]),
+        'Alice balances are incorrect'
+      )
+
+      equal(
+        await tokenERC1155.balanceOf.call(bobAddress, 10),
+        0,
+        'Bob balances are incorrect'
+      )
+
+      equal(
+        await tokenERC1155.balanceOf.call(carolAddress, 10),
+        0,
+        'Carol balances are incorrect'
+      )
+
+      equal(
+        await tokenERC1155.balanceOf.call(aliceAddress, 10),
+        100,
+        'Alice balances are incorrect'
+      )
+
+      ok(
+        await balances(bobAddress, [
+          [tokenAST, 401],
+          [tokenDAI, 699],
+        ]),
+        'Bob balances are incorrect'
+      )
+      ok(
+        await balances(carolAddress, [
+          [tokenAST, 50],
+          [tokenDAI, 0],
+        ]),
+        'Carol balances are incorrect'
+      )
+    })
+
     it('Bob buys 50 Dragon Token (#10) from Alice when she sends id and amount in Party struct', async () => {
       const order = await orders.getOrder({
         signer: {
@@ -992,11 +1035,10 @@ contract('TransferHandlerRegistry', async accounts => {
       ok(
         await balances(aliceAddress, [
           [tokenAST, 499],
-          [tokenDAI, 351],
+          [tokenDAI, 451],
         ]),
         'Alice balances are incorrect'
       )
-
       // check that Bob received 50 Dragon tokens from Alice
       equal(
         await tokenERC1155.balanceOf.call(bobAddress, 10),
@@ -1021,7 +1063,7 @@ contract('TransferHandlerRegistry', async accounts => {
       ok(
         await balances(bobAddress, [
           [tokenAST, 451],
-          [tokenDAI, 649],
+          [tokenDAI, 549],
         ]),
         'Bob balances are incorrect'
       )
