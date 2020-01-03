@@ -699,7 +699,7 @@ contract('TransferHandlerRegistry', async accounts => {
         sender: {
           wallet: bobAddress,
           token: tokenDAI.address,
-          param: 100,
+          amount: 100,
         },
       })
 
@@ -762,7 +762,7 @@ contract('TransferHandlerRegistry', async accounts => {
         sender: {
           wallet: bobAddress,
           token: tokenDAI.address,
-          param: 100,
+          amount: 100,
         },
       })
 
