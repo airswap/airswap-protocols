@@ -16,7 +16,7 @@ const {
 const { orders, signatures } = require('@airswap/order-utils')
 
 contract('Wrapper Unit Tests', async accounts => {
-  const senderParam = 2
+  const senderAmount = 2
   const mockToken = accounts[1]
   const mockSender = accounts[2]
   const mockSigner = accounts[3]
@@ -252,7 +252,7 @@ contract('Wrapper Unit Tests', async accounts => {
         },
         sender: {
           wallet: mockSender,
-          amount: senderParam,
+          amount: senderAmount,
           token: mockWethAddress,
         },
       })
@@ -266,7 +266,7 @@ contract('Wrapper Unit Tests', async accounts => {
 
       await passes(
         wrapper.swap(order, {
-          value: senderParam,
+          value: senderAmount,
           from: mockSender,
         })
       )
@@ -290,7 +290,7 @@ contract('Wrapper Unit Tests', async accounts => {
         },
         sender: {
           wallet: mockSender,
-          amount: senderParam,
+          amount: senderAmount,
           token: mockWethAddress,
         },
       })
@@ -304,7 +304,7 @@ contract('Wrapper Unit Tests', async accounts => {
 
       await passes(
         wrapper.swap(order, {
-          value: senderParam,
+          value: senderAmount,
           from: mockSender,
         })
       )
@@ -335,7 +335,7 @@ contract('Wrapper Unit Tests', async accounts => {
           token: notWethContract,
         },
         sender: {
-          amount: senderParam,
+          amount: senderAmount,
           token: mockWethAddress,
         },
       })
@@ -349,7 +349,7 @@ contract('Wrapper Unit Tests', async accounts => {
 
       await reverted(
         wrapper.swap(order, {
-          value: senderParam,
+          value: senderAmount,
         })
       )
 
@@ -405,7 +405,7 @@ contract('Wrapper Unit Tests', async accounts => {
         },
         sender: {
           wallet: mockSender,
-          amount: senderParam,
+          amount: senderAmount,
           token: notWethContract,
         },
       })
