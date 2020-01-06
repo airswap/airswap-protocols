@@ -26,7 +26,7 @@ contract PreSwapChecker {
 
     // Check self transfer
     if (order.signer.wallet == order.sender.wallet) {
-      errors[errorCount] = 'INVALID_SELF_TRANSFER';
+      errors[errorCount] = 'SELF_TRANSFER_INVALID';
       errorCount++;
     }
 

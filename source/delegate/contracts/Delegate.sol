@@ -1,5 +1,5 @@
 /*
-  Copyright 2019 Swap Holdings Ltd.
+  Copyright 2020 Swap Holdings Ltd.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -231,7 +231,7 @@ contract Delegate is IDelegate, Ownable {
 
     // Ensure the order is for the trade wallet.
     require(order.sender.wallet == tradeWallet,
-      "INVALID_SENDER_WALLET");
+      "SENDER_WALLET_INVALID");
 
     // Ensure the tokens are valid ERC20 tokens.
     require(order.signer.kind == ERC20_INTERFACE_ID,
@@ -395,7 +395,7 @@ contract Delegate is IDelegate, Ownable {
     uint256 priceCoef,
     uint256 priceExp
   ) internal {
-    require(priceCoef > 0, "INVALID_PRICE_COEF");
+    require(priceCoef > 0, "PRICE_COEF_INVALID");
     rules[senderToken][signerToken] = Rule({
       maxSenderAmount: maxSenderAmount,
       priceCoef: priceCoef,

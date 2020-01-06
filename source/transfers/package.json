@@ -1,6 +1,6 @@
 {
   "name": "@airswap/transfers",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A registry to manage token transfers on the AirSwap Network",
   "license": "Apache-2.0",
   "repository": {
@@ -17,8 +17,8 @@
     "test": "truffle test"
   },
   "devDependencies": {
-    "@airswap/order-utils": "0.3.16",
-    "@airswap/test-utils": "0.1.3",
+    "@airswap/order-utils": "0.3.17",
+    "@airswap/test-utils": "0.1.4",
     "@airswap/tokens": "0.1.3",
     "solidity-coverage": "^0.6.3"
   },

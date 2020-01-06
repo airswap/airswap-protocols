@@ -1,6 +1,6 @@
 {
   "name": "@airswap/swap",
-  "version": "4.3.5",
+  "version": "4.3.6",
   "description": "Trustlessly swap tokens on the AirSwap Network",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>",
@@ -27,15 +27,15 @@
     "verify": "truffle run verify"
   },
   "devDependencies": {
-    "@airswap/order-utils": "0.3.16",
-    "@airswap/test-utils": "0.1.3",
+    "@airswap/order-utils": "0.3.17",
+    "@airswap/test-utils": "0.1.4",
     "@airswap/tokens": "0.1.3",
     "solidity-coverage": "^0.6.3",
     "solidity-docgen": "0.3.0-beta.3"
   },
   "dependencies": {
-    "@airswap/transfers": "0.0.1",
-    "@airswap/types": "2.4.4",
+    "@airswap/transfers": "0.0.2",
+    "@airswap/types": "2.4.5",
     "openzeppelin-solidity": "2.4"
   }
 }

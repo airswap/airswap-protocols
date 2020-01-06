@@ -1,5 +1,5 @@
 /*
-  Copyright 2019 Swap Holdings Ltd.
+  Copyright 2020 Swap Holdings Ltd.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -160,7 +160,7 @@ contract Indexer is IIndexer, Ownable {
 
         // Transfer the stakingAmount for staking.
         require(stakingToken.transferFrom(msg.sender, address(this), stakingAmount),
-          "UNABLE_TO_STAKE");
+          "STAKING_FAILED");
       }
       // Set the locator on the index.
       indexes[signerToken][senderToken][protocol].setLocator(msg.sender, stakingAmount, locator);
@@ -262,7 +262,7 @@ contract Indexer is IIndexer, Ownable {
     if (oldAmount < newAmount) {
       // Note: SafeMath not required due to the inequality check above
       require(stakingToken.transferFrom(user, address(this), newAmount - oldAmount),
-        "UNABLE_TO_STAKE");
+        "STAKING_FAILED");
     }
 
     // If the old stake is bigger, return the excess.

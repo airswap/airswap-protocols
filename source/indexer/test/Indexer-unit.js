@@ -304,7 +304,7 @@ contract('Indexer Unit Tests', async accounts => {
         indexer.setIntent(tokenOne, tokenTwo, PROTOCOL_1, 250, aliceLocator, {
           from: aliceAddress,
         }),
-        'UNABLE_TO_STAKE'
+        'STAKING_FAILED'
       )
     })
 
@@ -514,7 +514,7 @@ contract('Indexer Unit Tests', async accounts => {
         indexer.setIntent(tokenOne, tokenTwo, PROTOCOL_1, 350, aliceLocator, {
           from: aliceAddress,
         }),
-        'UNABLE_TO_STAKE'
+        'STAKING_FAILED'
       )
 
       stakedAmount = await indexer.getStakedAmount.call(

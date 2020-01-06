@@ -646,7 +646,7 @@ contract('Wrapper', async accounts => {
             from: carolAddress,
             value: order.signer.amount,
           }),
-          'INVALID_SENDER_WALLET'
+          'SENDER_WALLET_INVALID'
         )
       })
 

@@ -214,7 +214,7 @@ contract('TransferHandlerRegistry', async accounts => {
           tokenAST.address,
           { from: carolAddress }
         ),
-        'NO_ID_FIELD_IN_ERC20'
+        'ID_INVALID'
       )
     })
   })
@@ -281,7 +281,7 @@ contract('TransferHandlerRegistry', async accounts => {
           tokenTicket.address,
           { from: carolAddress }
         ),
-        'NO_AMOUNT_FIELD_IN_ERC721'
+        'AMOUNT_INVALID'
       )
     })
 
@@ -321,7 +321,7 @@ contract('TransferHandlerRegistry', async accounts => {
           tokenKitty.address,
           { from: carolAddress }
         ),
-        'NO_AMOUNT_FIELD_IN_ERC721'
+        'AMOUNT_INVALID'
       )
     })
 
