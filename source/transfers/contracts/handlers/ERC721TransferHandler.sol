@@ -22,7 +22,7 @@ contract ERC721TransferHandler is ITransferHandler {
     uint256 id,
     address token)
   external returns (bool) {
-    require(amount == 0, "NO_AMOUNT_FIELD_IN_ERC721");
+    require(amount == 0, "AMOUNT_MUST_BE_EMPTY_FOR_ERC721");
     IERC721(token).safeTransferFrom(from, to, id);
     return true;
   }

@@ -710,10 +710,7 @@ contract('TransferHandlerRegistry', async accounts => {
         GANACHE_PROVIDER
       )
 
-      await reverted(
-        swap(order, { from: bobAddress }),
-        'UNKNOWN_TRANSFER_HANDLER'
-      )
+      await reverted(swap(order, { from: bobAddress }), 'TOKEN_KIND_UNKNOWN')
     })
   })
 

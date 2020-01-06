@@ -303,7 +303,7 @@ contract('Delegate Unit Tests', async accounts => {
         0,
         EXP
       )
-      await reverted(trx, 'INVALID_PRICE_COEF')
+      await reverted(trx, 'PRICE_COEF_INVALID')
     })
   })
 
@@ -839,7 +839,7 @@ contract('Delegate Unit Tests', async accounts => {
         delegate.provideOrder(order, {
           from: notOwner,
         }),
-        'INVALID_SENDER_WALLET'
+        'SENDER_WALLET_INVALID'
       )
     })
 
