@@ -223,7 +223,7 @@ contract Swap is ISwap {
   function authorizeSender(
     address authorizedSender
   ) external {
-    require(msg.sender != authorizedSender, "INVALID_AUTH_SENDER");
+    require(msg.sender != authorizedSender, "SELF_AUTH_INVALID");
     if (!senderAuthorizations[msg.sender][authorizedSender]) {
       senderAuthorizations[msg.sender][authorizedSender] = true;
       emit AuthorizeSender(msg.sender, authorizedSender);
@@ -239,7 +239,7 @@ contract Swap is ISwap {
   function authorizeSigner(
     address authorizedSigner
   ) external {
-    require(msg.sender != authorizedSigner, "INVALID_AUTH_SIGNER");
+    require(msg.sender != authorizedSigner, "SELF_AUTH_INVALID");
     if (!signerAuthorizations[msg.sender][authorizedSigner]) {
       signerAuthorizations[msg.sender][authorizedSigner] = true;
       emit AuthorizeSigner(msg.sender, authorizedSigner);
@@ -361,9 +361,9 @@ contract Swap is ISwap {
   ) internal {
 
     // Ensure the transfer is not to self.
-    require(from != to, "INVALID_SELF_TRANSFER");
+    require(from != to, "SELF_TRANSFER_INVALID");
     ITransferHandler transferHandler = registry.transferHandlers(kind);
-    require(address(transferHandler) != address(0), "UNKNOWN_TRANSFER_HANDLER");
+    require(address(transferHandler) != address(0), "TOKEN_KIND_UNKNOWN");
     // delegatecall required to pass msg.sender as Swap contract to handle the
     // token transfer in the calling contract
     (bool success, bytes memory data) = address(transferHandler).

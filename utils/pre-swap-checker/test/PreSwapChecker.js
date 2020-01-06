@@ -173,7 +173,7 @@ contract('PreSwapChecker', async accounts => {
 
       const error = web3.utils.toAscii(errorCodes[0])
       const error1 = web3.utils.toAscii(errorCodes[1])
-      assert.include(error, 'INVALID_SELF_TRANSFER')
+      assert.include(error, 'SELF_TRANSFER_INVALID')
       assert.include(error1, 'SIGNER_UNAUTHORIZED')
     })
 

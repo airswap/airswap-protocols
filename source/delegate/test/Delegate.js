@@ -177,7 +177,7 @@ contract('Delegate Integration Tests', async accounts => {
         0,
         { from: aliceAddress }
       )
-      await reverted(trx, 'INVALID_PRICE_COEF')
+      await reverted(trx, 'PRICE_COEF_INVALID')
     })
   })
 
@@ -736,7 +736,7 @@ contract('Delegate Integration Tests', async accounts => {
         GANACHE_PROVIDER
       )
 
-      await reverted(aliceDelegate.provideOrder(order), 'INVALID_SENDER_WALLET')
+      await reverted(aliceDelegate.provideOrder(order), 'SENDER_WALLET_INVALID')
     })
 
     it('should not accept open trades', async () => {
@@ -761,7 +761,7 @@ contract('Delegate Integration Tests', async accounts => {
         GANACHE_PROVIDER
       )
 
-      await reverted(aliceDelegate.provideOrder(order), 'INVALID_SENDER_WALLET')
+      await reverted(aliceDelegate.provideOrder(order), 'SENDER_WALLET_INVALID')
     })
 
     it("should not trade if the tradeWallet hasn't authorized the delegate to send", async () => {

@@ -131,7 +131,7 @@ contract('Swap Unit Tests', async accounts => {
 
       await reverted(
         swap.swap(order, { from: mockSender }),
-        'INVALID_SELF_TRANSFER'
+        'SELF_TRANSFER_INVALID'
       )
     })
 
@@ -236,7 +236,7 @@ contract('Swap Unit Tests', async accounts => {
       const delegate = mockSigner
       await reverted(
         swap.authorizeSigner(delegate, { from: mockSigner }),
-        'INVALID_AUTH_SIGNER'
+        'SELF_AUTH_INVALID'
       )
     })
   })

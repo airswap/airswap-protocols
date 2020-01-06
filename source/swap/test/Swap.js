@@ -192,7 +192,7 @@ contract('Swap', async accounts => {
       })
       await reverted(
         swap(selfOrder, { from: aliceAddress }),
-        'INVALID_SELF_TRANSFER'
+        'SELF_TRANSFER_INVALID'
       )
     })
 
@@ -218,10 +218,7 @@ contract('Swap', async accounts => {
         GANACHE_PROVIDER
       )
 
-      await reverted(
-        swap(order, { from: bobAddress }),
-        'UNKNOWN_TRANSFER_HANDLER'
-      )
+      await reverted(swap(order, { from: bobAddress }), 'TOKEN_KIND_UNKNOWN')
     })
 
     it('Checks balances...', async () => {
@@ -473,7 +470,7 @@ contract('Swap', async accounts => {
         swapContract.authorizeSigner(aliceAddress, {
           from: aliceAddress,
         }),
-        'INVALID_AUTH_SIGNER'
+        'SELF_AUTH_INVALID'
       )
     })
 
@@ -610,7 +607,7 @@ contract('Swap', async accounts => {
         swapContract.authorizeSender(bobAddress, {
           from: bobAddress,
         }),
-        'INVALID_AUTH_SENDER'
+        'SELF_AUTH_INVALID'
       )
     })
 
