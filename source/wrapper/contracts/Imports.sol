@@ -7,7 +7,7 @@ import "@airswap/delegate/contracts/Delegate.sol";
 import "@airswap/indexer/contracts/Indexer.sol";
 import "@airswap/tokens/contracts/FungibleToken.sol";
 import "@airswap/transfers/contracts/TransferHandlerRegistry.sol";
-import "@airswap/transfers/contracts/ERC20TransferHandler.sol";
+import "@airswap/transfers/contracts/handlers/ERC20TransferHandler.sol";
 import "@gnosis.pm/mock-contract/contracts/MockContract.sol";
 
 contract Imports {}

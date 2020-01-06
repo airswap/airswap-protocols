@@ -12,10 +12,10 @@ import "@airswap/indexer/contracts/Indexer.sol";
 import "@airswap/swap/contracts/Swap.sol";
 import "@airswap/types/contracts/Types.sol";
 import "@airswap/transfers/contracts/TransferHandlerRegistry.sol";
-import "@airswap/transfers/contracts/ERC20TransferHandler.sol";
-import "@airswap/transfers/contracts/ERC721TransferHandler.sol";
-import "@airswap/transfers/contracts/ERC1155TransferHandler.sol";
-import "@airswap/transfers/contracts/KittyCoreTransferHandler.sol";
+import "@airswap/transfers/contracts/handlers/ERC20TransferHandler.sol";
+import "@airswap/transfers/contracts/handlers/ERC721TransferHandler.sol";
+import "@airswap/transfers/contracts/handlers/ERC1155TransferHandler.sol";
+import "@airswap/transfers/contracts/handlers/KittyCoreTransferHandler.sol";
 import "@gnosis.pm/mock-contract/contracts/MockContract.sol";
 
 contract Imports {}

@@ -1,12 +1,13 @@
 pragma solidity 0.5.12;
 
-import "./interfaces/ITransferHandler.sol";
-import "./interfaces/IKittyCoreTokenTransfer.sol";
+import "../interfaces/ITransferHandler.sol";
+import "openzeppelin-solidity/contracts/token/ERC721/IERC721.sol";
 
-contract KittyCoreTransferHandler is ITransferHandler {
+contract ERC721TransferHandler is ITransferHandler {
+
 
  /**
-  * @notice Function to wrap transferFrom for CKitty
+  * @notice Function to wrap safeTransferFrom for ERC721
   * @param from address Wallet address to transfer from
   * @param to address Wallet address to transfer to
   * @param amount uint256, must be 0 for this contract
@@ -19,10 +20,10 @@ contract KittyCoreTransferHandler is ITransferHandler {
     address to,
     uint256 amount,
     uint256 id,
-    address token
-  ) external returns (bool) {
+    address token)
+  external returns (bool) {
     require(amount == 0, "NO_AMOUNT_FIELD_IN_ERC721");
-    IKittyCoreTokenTransfer(token).transferFrom(from, to, id);
+    IERC721(token).safeTransferFrom(from, to, id);
     return true;
   }
 }
