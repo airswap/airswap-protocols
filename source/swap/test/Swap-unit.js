@@ -1,12 +1,12 @@
 const Swap = artifacts.require('Swap')
 const Types = artifacts.require('Types')
 const MockContract = artifacts.require('MockContract')
-const FungibleToken = artifacts.require('FungibleToken')
-
+const TransferHandlerRegistry = artifacts.require('TransferHandlerRegistry')
+const ERC20TransferHandler = artifacts.require('ERC20TransferHandler')
 const {
   emitted,
-  notEmitted,
   reverted,
+  notEmitted,
   equal,
 } = require('@airswap/test-utils').assert
 const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
@@ -17,9 +17,10 @@ const NONCE_UNAVAILABLE = 0x01
 
 contract('Swap Unit Tests', async accounts => {
   const Jun_06_2017T00_00_00_UTC = 1497052800 //a date later than when ganache started
-  const mockSigner = accounts[9]
-  const mockSender = accounts[7]
-  const sender = accounts[0]
+  const mockSigner = accounts[1]
+  const mockSender = accounts[2]
+  const sender = accounts[3]
+
   const kind = web3.utils.asciiToHex('FFFF') // hex representation is "0x46464646" this is 4 bytes
   const v = 27
   const r = web3.utils.asciiToHex('r')
@@ -29,6 +30,7 @@ contract('Swap Unit Tests', async accounts => {
   let snapshotId
   let swap
   let types
+  let mockRegistry
 
   beforeEach(async () => {
     const snapShot = await takeSnapshot()
@@ -42,7 +44,8 @@ contract('Swap Unit Tests', async accounts => {
   before('deploy Swap', async () => {
     types = await Types.new()
     await Swap.link('Types', types.address)
-    swap = await Swap.new()
+    mockRegistry = await MockContract.new()
+    swap = await Swap.new(mockRegistry.address)
   })
 
   describe('Test swap', async () => {
@@ -132,26 +135,28 @@ contract('Swap Unit Tests', async accounts => {
       )
     })
 
-    it('test adding token that does not transfer swap incorrectly and transfer returns false', async () => {
-      // create mocked contract to test transfer
-      const fungibleTokenTemplate = await FungibleToken.new()
-      const tokenMock = await MockContract.new()
+    it('test adding ERC20TransferHandler that does not swap incorrectly and transferTokens reverts', async () => {
+      const handlerTemplate = await ERC20TransferHandler.new()
+      const handlerTemplateMock = await MockContract.new()
+      const transferHandlerRegistryTemplate = await TransferHandlerRegistry.new()
 
-      const token_balance = fungibleTokenTemplate.contract.methods
-        .balanceOf(EMPTY_ADDRESS)
+      const handler_transferTokens = handlerTemplate.contract.methods
+        .transferTokens(EMPTY_ADDRESS, EMPTY_ADDRESS, 0, 0, EMPTY_ADDRESS)
         .encodeABI()
 
-      const token_transfer = fungibleTokenTemplate.contract.methods
-        .transferFrom(EMPTY_ADDRESS, EMPTY_ADDRESS, 0)
+      const registry_transferHandlers = transferHandlerRegistryTemplate.contract.methods
+        .transferHandlers(kind)
         .encodeABI()
 
-      // The token transfer should return true
-      await tokenMock.givenMethodReturnBool(token_transfer, false)
-      // balance check should remain constant and thus fail
-      await tokenMock.givenMethodReturnUint(token_balance, 1000)
+      await mockRegistry.givenMethodReturnAddress(
+        registry_transferHandlers,
+        handlerTemplateMock.address
+      )
 
-      const signer = [kind, mockSigner, tokenMock.address, 200, 0]
-      const sender = [kind, mockSender, tokenMock.address, 200, 0]
+      await handlerTemplateMock.givenMethodRevert(handler_transferTokens)
+
+      const signer = [kind, mockSigner, EMPTY_ADDRESS, 200, 0]
+      const sender = [kind, mockSender, EMPTY_ADDRESS, 200, 0]
       const affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 0, 0]
       const signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, 0, r, s]
       const order = [
@@ -167,15 +172,10 @@ contract('Swap Unit Tests', async accounts => {
       await swap.authorizeSender(mockSigner, {
         from: mockSender,
       })
-      // auth sender
-      //mock sender will take the order
-      await reverted(
-        swap.swap(order, { from: mockSigner }),
-        'SafeERC20: ERC20 operation did not succeed.'
-      )
+
+      await reverted(swap.swap(order, { from: mockSigner }))
     })
   })
-
   describe('Test cancel', async () => {
     it('test cancellation with no items', async () => {
       const trx = await swap.cancel([], { from: mockSigner })

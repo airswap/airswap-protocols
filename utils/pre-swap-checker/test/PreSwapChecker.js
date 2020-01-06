@@ -3,6 +3,8 @@ const Types = artifacts.require('Types')
 const FungibleToken = artifacts.require('FungibleToken')
 const NonFungibleToken = artifacts.require('NonFungibleToken')
 const PreSwapChecker = artifacts.require('PreSwapChecker')
+const TransferHandlerRegistry = artifacts.require('TransferHandlerRegistry')
+const ERC20TransferHandler = artifacts.require('ERC20TransferHandler')
 const { assert } = require('chai')
 const { emitted, reverted, ok } = require('@airswap/test-utils').assert
 const { allowances, balances } = require('@airswap/test-utils').balances
@@ -10,6 +12,7 @@ const { getLatestTimestamp } = require('@airswap/test-utils').time
 const { orders, signatures } = require('@airswap/order-utils')
 const {
   EMPTY_ADDRESS,
+  ERC20_INTERFACE_ID,
   ERC721_INTERFACE_ID,
   GANACHE_PROVIDER,
 } = require('@airswap/order-utils').constants
@@ -38,7 +41,15 @@ contract('PreSwapChecker', async accounts => {
     it('Deployed Swap contract', async () => {
       typesLib = await Types.new()
       await Swap.link('Types', typesLib.address)
-      swapContract = await Swap.new()
+
+      const erc20TransferHandler = await ERC20TransferHandler.new()
+      const transferHandlerRegistry = await TransferHandlerRegistry.new()
+      await transferHandlerRegistry.addTransferHandler(
+        ERC20_INTERFACE_ID,
+        erc20TransferHandler.address
+      )
+      // now deploy swap
+      swapContract = await Swap.new(transferHandlerRegistry.address)
       swapAddress = swapContract.address
 
       swap = swapContract.swap

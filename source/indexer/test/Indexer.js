@@ -1,6 +1,8 @@
 const Indexer = artifacts.require('Indexer')
 const FungibleToken = artifacts.require('FungibleToken')
 const DelegateFactory = artifacts.require('DelegateFactory')
+const TransferHandlerRegistry = artifacts.require('TransferHandlerRegistry')
+const ERC20TransferHandler = artifacts.require('ERC20TransferHandler')
 const Swap = artifacts.require('Swap')
 const Types = artifacts.require('Types')
 const {
@@ -14,6 +16,7 @@ const {
 const { balances } = require('@airswap/test-utils').balances
 const {
   EMPTY_ADDRESS,
+  ERC20_INTERFACE_ID,
   HEAD,
   LOCATORS,
   SCORES,
@@ -116,7 +119,15 @@ contract('Indexer', async accounts => {
     it('The owner can set and unset a locator whitelist for a locator type', async () => {
       types = await Types.new()
       await Swap.link('Types', types.address)
-      swapContract = await Swap.new()
+
+      const erc20TransferHandler = await ERC20TransferHandler.new()
+      const transferHandlerRegistry = await TransferHandlerRegistry.new()
+      await transferHandlerRegistry.addTransferHandler(
+        ERC20_INTERFACE_ID,
+        erc20TransferHandler.address
+      )
+      // now deploy swap
+      swapContract = await Swap.new(transferHandlerRegistry.address)
       delegateFactory = await DelegateFactory.new(
         swapContract.address,
         indexer.address,

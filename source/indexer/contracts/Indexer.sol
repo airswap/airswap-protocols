@@ -62,6 +62,7 @@ contract Indexer is IIndexer, Ownable {
   /**
     * @notice Set the address of an ILocatorWhitelist to use
     * @dev Allows removal of locatorWhitelist by passing 0x0
+    * @param protocol bytes2 Protocol type for locators
     * @param newLocatorWhitelist address Locator whitelist
     */
   function setLocatorWhitelist(
@@ -77,6 +78,7 @@ contract Indexer is IIndexer, Ownable {
     * @dev exists, returns its address, and does not emit a CreateIndex event
     * @param signerToken address Signer token for the Index
     * @param senderToken address Sender token for the Index
+    * @param protocol bytes2 Protocol type for locators in Index
     */
   function createIndex(
     address signerToken,
@@ -128,6 +130,7 @@ contract Indexer is IIndexer, Ownable {
     *
     * @param signerToken address Signer token of the Index being staked
     * @param senderToken address Sender token of the Index being staked
+    * @param protocol bytes2 Protocol type for locator in Intent
     * @param stakingAmount uint256 Amount being staked
     * @param locator bytes32 Locator of the staker
     */
@@ -178,6 +181,7 @@ contract Indexer is IIndexer, Ownable {
     *
     * @param signerToken address Signer token of the Index being unstaked
     * @param senderToken address Sender token of the Index being staked
+    * @param protocol bytes2 Protocol type for locators in Intent
     */
   function unsetIntent(
     address signerToken,
@@ -193,6 +197,7 @@ contract Indexer is IIndexer, Ownable {
     *
     * @param signerToken address Signer token of the trading pair
     * @param senderToken address Sender token of the trading pair
+    * @param protocol bytes2 Protocol type for locators in Intent
     * @param cursor address Address to start from
     * @param limit uint256 Total number of locators to return
     * @return bytes32[] List of locators
@@ -228,6 +233,7 @@ contract Indexer is IIndexer, Ownable {
     * @param user address User who staked
     * @param signerToken address Signer token the user staked on
     * @param senderToken address Sender token the user staked on
+    * @param protocol bytes2 Protocol type for locators in Intent
     * @return uint256 Amount the user staked
     */
   function getStakedAmount(
@@ -276,6 +282,7 @@ contract Indexer is IIndexer, Ownable {
     * @param user address Address of the user who staked
     * @param signerToken address Signer token of the trading pair
     * @param senderToken address Sender token of the trading pair
+    * @param protocol bytes2 Protocol type for locators in Intent
     */
   function _unsetIntent(
     address user,

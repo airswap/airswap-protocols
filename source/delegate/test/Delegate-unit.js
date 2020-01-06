@@ -27,6 +27,7 @@ contract('Delegate Unit Tests', async accounts => {
   const SENDER_TOKEN = accounts[5]
   const MOCK_WETH = accounts[6]
   const MOCK_DAI = accounts[7]
+  const mockRegistry = accounts[8]
   const MAX_SENDER_AMOUNT = 12345
   const PRICE_COEF = 4321
   const EXP = 2
@@ -79,7 +80,7 @@ contract('Delegate Unit Tests', async accounts => {
   async function setupMockSwap() {
     const types = await Types.new()
     await Swap.link('Types', types.address)
-    const swapTemplate = await Swap.new()
+    const swapTemplate = await Swap.new(mockRegistry)
     const order = await orders.getOrder({})
     swapFunction = swapTemplate.contract.methods.swap(order).encodeABI()
 

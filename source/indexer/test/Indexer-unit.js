@@ -1,7 +1,6 @@
 const Indexer = artifacts.require('Indexer')
 const MockContract = artifacts.require('MockContract')
 const FungibleToken = artifacts.require('FungibleToken')
-
 const {
   emitted,
   notEmitted,

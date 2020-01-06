@@ -17,18 +17,14 @@
 pragma solidity 0.5.12;
 pragma experimental ABIEncoderV2;
 
+import "@airswap/transfers/contracts/interfaces/ITransferHandler.sol";
+import "@airswap/transfers/contracts/TransferHandlerRegistry.sol";
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
-import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
-import "openzeppelin-solidity/contracts/token/ERC721/IERC721.sol";
-import "openzeppelin-solidity/contracts/math/SafeMath.sol";
-import "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
 
 /**
   * @title Swap: The Atomic Swap used on the AirSwap Network
   */
 contract Swap is ISwap {
-  using SafeMath for uint256;
-  using SafeERC20 for IERC20;
 
   // Domain and version for use in signatures (EIP-712)
   bytes constant internal DOMAIN_NAME = "SWAP";
@@ -56,16 +52,21 @@ contract Swap is ISwap {
   // Mapping of signer addresses to an optionally set minimum valid nonce
   mapping (address => uint256) public signerMinimumNonce;
 
+  // A registry storing a transfer handler for different token kinds
+  TransferHandlerRegistry public registry;
+
   /**
     * @notice Contract Constructor
     * @dev Sets domain for signature validation (EIP-712)
+    * @param swapRegistry TransferHandlerRegistry
     */
-  constructor() public {
+  constructor(TransferHandlerRegistry swapRegistry) public {
     _domainSeparator = Types.hashDomain(
       DOMAIN_NAME,
       DOMAIN_VERSION,
       address(this)
     );
+    registry = swapRegistry;
   }
 
   /**
@@ -339,7 +340,7 @@ contract Swap is ISwap {
   }
 
   /**
-    * @notice Perform an ERC-20 or ERC-721 token transfer
+    * @notice Perform token transfer for tokens in registry
     * @dev Transfer type specified by the bytes4 kind param
     * @dev ERC721: uses transferFrom for transfer
     * @dev ERC20: Takes into account non-standard ERC-20 tokens.
@@ -361,17 +362,19 @@ contract Swap is ISwap {
 
     // Ensure the transfer is not to self.
     require(from != to, "INVALID_SELF_TRANSFER");
-
-    if (kind == ERC721_INTERFACE_ID) {
-
-      require(amount == 0, "NO_AMOUNT_FIELD_IN_ERC721");
-      // Attempt to transfer an ERC-721 token.
-      IERC721(token).transferFrom(from, to, id);
-
-    } else {
-      require(id == 0, "NO_ID_FIELD_IN_ERC20");
-      // Attempt to transfer an ERC-20 token, underlying SafeERC20 calls require.
-      IERC20(token).safeTransferFrom(from, to, amount);
-    }
+    ITransferHandler transferHandler = registry.transferHandlers(kind);
+    require(address(transferHandler) != address(0), "UNKNOWN_TRANSFER_HANDLER");
+    // delegatecall required to pass msg.sender as Swap contract to handle the
+    // token transfer in the calling contract
+    (bool success, bytes memory data) = address(transferHandler).
+      delegatecall(abi.encodeWithSelector(
+        transferHandler.transferTokens.selector,
+        from,
+        to,
+        amount,
+        id,
+        token
+    ));
+    require(success && abi.decode(data, (bool)), "TRANSFER_FAILED");
   }
 }
