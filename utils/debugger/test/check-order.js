@@ -67,14 +67,12 @@ describe('Orders', async () => {
       },
     })
 
-    console.log('test failure on circle 1')
     order.signature = await signatures.getWeb3Signature(
       order,
       KNOWN_GANACHE_WALLET,
       rinkebySwap,
       GANACHE_PROVIDER
     )
-    console.log('test failure on circle 2')
 
     const errors = await checker.checkOrder(order, 'rinkeby')
     assert.equal(errors.length, 0)
@@ -95,7 +93,6 @@ describe('Orders', async () => {
         amount: '2',
       },
     })
-    console.log('test failure on circle 1')
 
     order.signature = await signatures.getWeb3Signature(
       order,
@@ -103,7 +100,6 @@ describe('Orders', async () => {
       rinkebySwap,
       GANACHE_PROVIDER
     )
-    console.log('test failure on circle 2')
 
     const errors = await checker.checkOrder(order, 'rinkeby')
     assert.equal(errors.length, 2)

@@ -31,9 +31,13 @@ module.exports = {
   async getWeb3Signature(order, signatory, verifyingContract, provider) {
     const orderHash = hashes.getOrderHash(order, verifyingContract)
     const orderHashHex = ethUtil.bufferToHex(orderHash)
+    console.log('order hash hex complete')
     const eth = new web3Eth(provider)
+    console.log('new web3 eth complete')
     const sig = await eth.sign(orderHashHex, signatory)
+    console.log('signature complete')
     const { v, r, s } = ethUtil.fromRpcSig(sig)
+    console.log('separation of v r s complete')
     return {
       signatory: signatory.toLowerCase(),
       validator: verifyingContract.toLowerCase(),
