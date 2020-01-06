@@ -148,7 +148,7 @@ jobs:
           name: Run Tests
           command: |
             yarn ganache > /dev/null &
-            cd utils/debugger && yarn test
+            sleep 10s && cd utils/debugger && yarn test
 
   deploy:
     <<: *container_config
