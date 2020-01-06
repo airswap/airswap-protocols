@@ -6,6 +6,7 @@
 
 [![Discord](https://img.shields.io/discord/590643190281928738.svg)](https://chat.airswap.io)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![lerna](https://img.shields.io/badge/maintained%20with-lerna-cc00ff.svg)](https://lerna.js.org/)
 [![CircleCI](https://circleci.com/gh/airswap/airswap-protocols.svg?style=svg&circle-token=73bd6668f836ce4306dbf6ca32109ddbb5b7e1fe)](https://circleci.com/gh/airswap/airswap-protocols)
 ![Twitter Follow](https://img.shields.io/twitter/follow/airswap?style=social)
 
@@ -20,14 +21,15 @@
 
 Packages are versioned based on deploys. Major versions e.g. `1.x.x` are mainnet deploys, while minor versions e.g. `x.1.x` are rinkeby deploys. Packages that are not deployed increment patch versions e.g. `x.x.1`. Each package that includes a deployment includes the ABI files for that deployed contract in `builds/contracts` within the package.
 
-| Package                                                 | Version                                                                                                                   | Description                         |
-| :------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------ | :---------------------------------- |
-| [`@airswap/swap`](/source/swap)                         | [![npm](https://img.shields.io/npm/v/@airswap/swap)](https://www.npmjs.com/package/@airswap/swap)                         | Atomic Swap Between Tokens          |
-| [`@airswap/indexer`](/source/indexer)                   | [![npm](https://img.shields.io/npm/v/@airswap/indexer)](https://www.npmjs.com/package/@airswap/indexer)                   | Counterparty Discovery with Staking |
-| [`@airswap/delegate`](/source/delegate)                 | [![npm](https://img.shields.io/npm/v/@airswap/delegate)](https://www.npmjs.com/package/@airswap/delegate)                 | Onchain Trading Delegate            |
-| [`@airswap/types`](/source/types)                       | [![npm](https://img.shields.io/npm/v/@airswap/types)](https://www.npmjs.com/package/@airswap/types)                       | Types and Hashes                    |
-| [`@airswap/wrapper`](/source/wrapper)                   | [![npm](https://img.shields.io/npm/v/@airswap/wrapper)](https://www.npmjs.com/package/@airswap/wrapper)                   | Use ether for WETH trades           |
-| [`@airswap/tokens`](/source/tokens)                     | [![npm](https://img.shields.io/npm/v/@airswap/tokens)](https://www.npmjs.com/package/@airswap/tokens)                     | Ethereum Tokens                     |
+| Package                                   | Version                                                                                                     | Description                         |
+| :---------------------------------------- | :---------------------------------------------------------------------------------------------------------- | :---------------------------------- |
+| [`@airswap/swap`](/source/swap)           | [![npm](https://img.shields.io/npm/v/@airswap/swap)](https://www.npmjs.com/package/@airswap/swap)           | Atomic Swap Between Tokens          |
+| [`@airswap/indexer`](/source/indexer)     | [![npm](https://img.shields.io/npm/v/@airswap/indexer)](https://www.npmjs.com/package/@airswap/indexer)     | Counterparty Discovery with Staking |
+| [`@airswap/delegate`](/source/delegate)   | [![npm](https://img.shields.io/npm/v/@airswap/delegate)](https://www.npmjs.com/package/@airswap/delegate)   | Onchain Trading Delegate            |
+| [`@airswap/types`](/source/types)         | [![npm](https://img.shields.io/npm/v/@airswap/types)](https://www.npmjs.com/package/@airswap/types)         | Types and Hashes                    |
+| [`@airswap/transfers`](/source/transfers) | [![npm](https://img.shields.io/npm/v/@airswap/transfers)](https://www.npmjs.com/package/@airswap/transfers) | Token Transfer Handlers             |
+| [`@airswap/wrapper`](/source/wrapper)     | [![npm](https://img.shields.io/npm/v/@airswap/wrapper)](https://www.npmjs.com/package/@airswap/wrapper)     | Use ether for WETH trades           |
+| [`@airswap/tokens`](/source/tokens)       | [![npm](https://img.shields.io/npm/v/@airswap/tokens)](https://www.npmjs.com/package/@airswap/tokens)       | Ethereum Tokens                     |
 
 ## JavaScript Libraries
 
@@ -38,14 +40,14 @@ Packages are versioned based on deploys. Major versions e.g. `1.x.x` are mainnet
 
 ## Commands
 
-| Command          | Description                                                                         |
-| :----------------| :---------------------------------------------------------------------------------- |
-| `yarn compile`   | Compile all contracts to `build` folders                                            |
-| `yarn clean`     | Delete all contract `build` folders                                                 |
-| `yarn ganache`   | Run a local `ganache` network on local host 8545                                    |
-| `yarn test`      | Run all contract tests in `test` folders. Requires `yarn ganache` to be run first.  |
-| `yarn hint`      | Run a syntax linter for all Solidity code                                           |
-| `yarn lint`      | Run a syntax linter for all JavaScript code                                         |
+| Command        | Description                                                                        |
+| :------------- | :--------------------------------------------------------------------------------- |
+| `yarn compile` | Compile all contracts to `build` folders                                           |
+| `yarn clean`   | Delete all contract `build` folders                                                |
+| `yarn ganache` | Run a local `ganache` network on local host 8545                                   |
+| `yarn test`    | Run all contract tests in `test` folders. Requires `yarn ganache` to be run first. |
+| `yarn hint`    | Run a syntax linter for all Solidity code                                          |
+| `yarn lint`    | Run a syntax linter for all JavaScript code                                        |
 
 ## Deployments
 
