@@ -260,6 +260,7 @@ workflows:
             - indexer_tests
             - delegate_tests
             - order_utils_tests
+            - transfers_tests
             - types_tests
             - wrapper_tests
           filters:
