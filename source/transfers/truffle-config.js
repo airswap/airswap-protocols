@@ -3,12 +3,21 @@ const HDWalletProvider = require('@truffle/hdwallet-provider')
 const HDWalletProviderPriv = require('truffle-hdwallet-provider-privkey')
 
 module.exports = {
-  contracts_directory: './flatten',
+  // contracts_directory: './flatten',
   networks: {
     development: {
       host: '127.0.0.1',
       port: 8545,
       network_id: '*',
+      gas: 0xfffffffffff,
+      gasPrice: 0x01,
+    },
+    coverage: {
+      host: 'localhost',
+      network_id: '*',
+      port: 8545,
+      gas: 0xfffffffffff,
+      gasPrice: 0x01,
     },
     mainnet: {
       provider: () =>
@@ -16,8 +25,8 @@ module.exports = {
           [process.env.PRIVATE_KEY],
           'https://mainnet.infura.io/v3/' + process.env.INFURA_API_KEY
         ),
-      gas: 7898551,
-      gasPrice: 10000000000, // CHECK THE CURRENT GASPRICE
+      gas: 5898551,
+      gasPrice: 15900000000, // CHECK THE CURRENT GASPRICE
       network_id: 1,
     },
     rinkeby: {
@@ -27,14 +36,7 @@ module.exports = {
           'https://rinkeby.infura.io/v3/' + process.env.INFURA_API_KEY
         ),
       network_id: 4,
-      gas: 5898551,
-      gasPrice: 1900000000, // CHECK THE CURRENT GASPRICE
     },
-  },
-
-  // Set default mocha options here, use special reporters etc.
-  mocha: {
-    // timeout: 100000
   },
   compilers: {
     solc: {

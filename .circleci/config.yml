@@ -106,6 +106,17 @@ jobs:
             yarn ganache > /dev/null &
             cd utils/pre-swap-checker && yarn test
 
+  transfers_tests:
+    <<: *container_config
+    steps:
+      - attach_workspace:
+          at: *working_directory
+      - run:
+          name: Run Tests
+          command: |
+            yarn ganache > /dev/null &
+            cd source/transfers && yarn test
+
   types_tests:
     <<: *container_config
     steps:
@@ -172,7 +183,7 @@ jobs:
           command: |
             cd source
             ### ADD FOLDERS HERE TO PROCESS ###
-            for file in indexer delegate swap types tokens wrapper
+            for file in indexer delegate swap tokens transfers types wrapper
             do
               cd $file
               NPM_NAME=$(node -p "require('./package.json').name")
@@ -230,6 +241,10 @@ workflows:
           context: Development
           requires:
             - setup
+      - transfers_tests:
+          context: Development
+          requires:
+            - setup
       - types_tests:
           context: Development
           requires:
@@ -245,6 +260,7 @@ workflows:
             - indexer_tests
             - delegate_tests
             - order_utils_tests
+            - transfers_tests
             - types_tests
             - wrapper_tests
           filters:

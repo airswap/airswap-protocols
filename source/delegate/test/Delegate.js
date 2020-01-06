@@ -1,8 +1,10 @@
 const Delegate = artifacts.require('Delegate')
+const TransferHandlerRegistry = artifacts.require('TransferHandlerRegistry')
 const Swap = artifacts.require('Swap')
 const Types = artifacts.require('Types')
 const Indexer = artifacts.require('Indexer')
 const FungibleToken = artifacts.require('FungibleToken')
+const ERC20TransferHandler = artifacts.require('ERC20TransferHandler')
 const {
   emitted,
   notEmitted,
@@ -14,6 +16,7 @@ const {
 const { balances } = require('@airswap/test-utils').balances
 const { orders, signatures } = require('@airswap/order-utils')
 const {
+  ERC20_INTERFACE_ID,
   EMPTY_ADDRESS,
   GANACHE_PROVIDER,
 } = require('@airswap/order-utils').constants
@@ -53,8 +56,15 @@ contract('Delegate Integration Tests', async accounts => {
   before('Setup', async () => {
     // link types to swap
     await Swap.link('Types', (await Types.new()).address)
+
+    const erc20TransferHandler = await ERC20TransferHandler.new()
+    const transferHandlerRegistry = await TransferHandlerRegistry.new()
+    await transferHandlerRegistry.addTransferHandler(
+      ERC20_INTERFACE_ID,
+      erc20TransferHandler.address
+    )
     // now deploy swap
-    swapContract = await Swap.new()
+    swapContract = await Swap.new(transferHandlerRegistry.address)
     swapAddress = swapContract.address
 
     orders.setVerifyingContract(swapAddress)
