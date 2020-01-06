@@ -93,7 +93,7 @@ jobs:
           name: Run Tests
           command: |
             yarn ganache > /dev/null &
-            sleep 10s && cd utils/order-utils && yarn test
+            cd utils/order-utils && yarn test
 
   pre_swap_checker_tests:
     <<: *container_config
