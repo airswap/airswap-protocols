@@ -25,7 +25,7 @@
     "openzeppelin-solidity": "2.4"
   },
   "devDependencies": {
-    "@airswap/order-utils": "0.3.17",
+    "@airswap/order-utils": "0.3.18",
     "@airswap/test-utils": "0.1.4",
     "chai": "^4.2.0"
   }

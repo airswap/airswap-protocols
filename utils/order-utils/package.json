@@ -1,6 +1,6 @@
 {
   "name": "@airswap/order-utils",
-  "version": "0.3.17",
+  "version": "0.3.18",
   "description": "JavaScript utilities for orders, hashes, and signatures on the AirSwap Network",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>",
