@@ -28,7 +28,7 @@
     "verify": "truffle run verify"
   },
   "devDependencies": {
-    "@airswap/order-utils": "0.3.17",
+    "@airswap/order-utils": "0.3.18",
     "@airswap/test-utils": "0.1.4",
     "@airswap/indexer": "3.6.8",
     "solidity-coverage": "^0.6.3"

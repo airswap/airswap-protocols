@@ -93,7 +93,7 @@ jobs:
           name: Run Tests
           command: |
             yarn ganache > /dev/null &
-            sleep 10s && cd utils/order-utils && yarn test
+            cd utils/order-utils && yarn test
 
   pre_swap_checker_tests:
     <<: *container_config
@@ -138,6 +138,17 @@ jobs:
           command: |
             yarn ganache > /dev/null &
             cd source/wrapper && yarn test
+
+  debugger_tests:
+    <<: *container_config
+    steps:
+      - attach_workspace:
+          at: *working_directory
+      - run:
+          name: Run Tests
+          command: |
+            yarn ganache > /dev/null &
+            sleep 10s && cd utils/debugger && yarn test
 
   deploy:
     <<: *container_config
@@ -253,6 +264,10 @@ workflows:
           context: Development
           requires:
             - setup
+      - debugger_tests:
+          context: Development
+          requires:
+            - setup
       - deploy:
           context: NPM_Publish
           requires:
@@ -263,6 +278,7 @@ workflows:
             - transfers_tests
             - types_tests
             - wrapper_tests
+            - debugger_tests
           filters:
             branches:
               only:
