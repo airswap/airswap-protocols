@@ -1,7 +1,7 @@
 {
-  "name": "deploy",
+  "name": "@airswap/deployer",
   "version": "0.0.1",
-  "description": "Deploy to a network",
+  "description": "Tools to deploy AirSwap contracts",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>",
     "Deepa Sathaye <deepa.sathaye@fludity.io>",
