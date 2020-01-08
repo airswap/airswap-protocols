@@ -117,12 +117,17 @@ module.exports = {
     const prefixedOrderHash = ethUtil.keccak256(
       Buffer.concat([prefix, Buffer.from(String(orderHash.length)), orderHash])
     )
-    const signingPubKey = ethUtil.ecrecover(
-      prefixedOrderHash,
-      signature['v'],
-      signature['r'],
-      signature['s']
-    )
+    let signingPubKey
+    try {
+      signingPubKey = ethUtil.ecrecover(
+        prefixedOrderHash,
+        signature['v'],
+        signature['r'],
+        signature['s']
+      )
+    } catch (e) {
+      return false
+    }
     const signingAddress = ethUtil.bufferToHex(
       ethUtil.pubToAddress(signingPubKey)
     )

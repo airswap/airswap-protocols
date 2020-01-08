@@ -21,11 +21,14 @@ const signatures = require('./signatures')
 let nonce = 100
 
 const getLatestTimestamp = async () => {
-  return (await web3.eth.getBlock('latest')).timestamp
+  if (typeof web3 !== 'undefined') {
+    return (await web3.eth.getBlock('latest')).timestamp
+  }
+  return new Date().getTime() / 1000
 }
 
 const isValidOrder = order => {
-  return (
+  if (
     'nonce' in order &&
     'expiry' in order &&
     'signer' in order &&
@@ -49,7 +52,10 @@ const isValidOrder = order => {
     'r' in order['signature'] &&
     's' in order['signature'] &&
     'v' in order['signature']
-  )
+  ) {
+    return signatures.isSignatureValid(order)
+  }
+  return false
 }
 
 function lowerCaseAddresses(order) {
