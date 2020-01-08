@@ -12,7 +12,6 @@ const checker = require('../src/check-order')
 
 describe('Orders', async () => {
   const senderWallet = '0xbabe31056c0fe1b704d811b2405f6e9f5ae5e59d'
-  const signerWallet = '0x9d2fb0bcc90c6f3fa3a98d2c760623a4f6ee59b4'
 
   // Owns a crypto kitty
   const kittyWallet = '0x7F18BB4Dd92CF2404C54CBa1A9BE4A1153bdb078'
