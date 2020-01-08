@@ -53,7 +53,7 @@ const isValidOrder = order => {
     's' in order['signature'] &&
     'v' in order['signature']
   ) {
-    return signatures.isSignatureValid(order)
+    return signatures.hasValidSignature(order)
   }
   return false
 }

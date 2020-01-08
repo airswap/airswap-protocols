@@ -20,8 +20,7 @@ const checkOrder = async (order, network) => {
 
   // Check the order has all necessary fields
   if (!orders.isValidOrder(order)) {
-    errors.push('Order structured incorrectly')
-    return errors
+    errors.push('Order structured incorrectly or signature invalid')
   }
 
   // Check swap address provided
@@ -69,7 +68,7 @@ const checkOrder = async (order, network) => {
 
 const checkOrderSignature = async (order, provider, errors) => {
   // Check signature is valid
-  const isValid = signatures.isSignatureValid(order)
+  const isValid = signatures.hasValidSignature(order)
   if (!isValid) {
     errors.push('Signature invalid')
   }
