@@ -25,9 +25,9 @@ We can run all tests with:
 
 
 Code Style
-When multiple people are working on the same body of code, it is important that they write code that conforms to a similar style. It often doesn’t matter as much which style, but rather that they conform to one style.
+When multiple people are working on the same body of code, it is important that conforms to a similar style. It often doesn’t matter as much which style, but rather that they conform to one style.
 
-To ensure your contribution conforms to the style being used in this project, we require that a linter is run prior to committing to ensure styling
+To ensure your contribution conforms to the style being used in this project, we require that a linter is run prior to committing to ensure styling.
 
 Run:
 
