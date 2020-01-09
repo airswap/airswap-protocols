@@ -110,19 +110,30 @@ module.exports = {
       s: '0x0',
     }
   },
-  isSignatureValid(order) {
+  hasValidSignature(order) {
     const signature = order['signature']
-    const orderHash = hashes.getOrderHash(order, signature['validator'])
-    const prefix = Buffer.from('\x19Ethereum Signed Message:\n')
-    const prefixedOrderHash = ethUtil.keccak256(
-      Buffer.concat([prefix, Buffer.from(String(orderHash.length)), orderHash])
-    )
-    const signingPubKey = ethUtil.ecrecover(
-      prefixedOrderHash,
-      signature['v'],
-      signature['r'],
-      signature['s']
-    )
+    let orderHash = hashes.getOrderHash(order, signature['validator'])
+    if (signature.version === '0x45') {
+      const prefix = Buffer.from('\x19Ethereum Signed Message:\n')
+      orderHash = ethUtil.keccak256(
+        Buffer.concat([
+          prefix,
+          Buffer.from(String(orderHash.length)),
+          orderHash,
+        ])
+      )
+    }
+    let signingPubKey
+    try {
+      signingPubKey = ethUtil.ecrecover(
+        orderHash,
+        signature['v'],
+        signature['r'],
+        signature['s']
+      )
+    } catch (e) {
+      return false
+    }
     const signingAddress = ethUtil.bufferToHex(
       ethUtil.pubToAddress(signingPubKey)
     )

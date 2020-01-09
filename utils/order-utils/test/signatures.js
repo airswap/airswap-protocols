@@ -31,13 +31,14 @@ describe('Signatures', async () => {
       },
     })
 
-    const signature = signatures.getPersonalSignature(
+    order.signature = signatures.getPersonalSignature(
       order,
       signerPrivKey,
       swapAddress
     )
 
-    expect(signature).to.deep.include({
+    expect(signatures.hasValidSignature(order)).to.equal(true)
+    expect(order.signature).to.deep.include({
       version: '0x45',
       signatory: signerWallet,
       r: Buffer.from(
@@ -71,13 +72,14 @@ describe('Signatures', async () => {
       true
     )
 
-    const signature = signatures.getTypedDataSignature(
+    order.signature = signatures.getTypedDataSignature(
       order,
       signerPrivKey,
       swapAddress
     )
 
-    expect(signature).to.deep.include({
+    expect(signatures.hasValidSignature(order)).to.equal(true)
+    expect(order.signature).to.deep.include({
       version: '0x01',
       signatory: signerWallet,
       r: Buffer.from(

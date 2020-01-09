@@ -12,7 +12,6 @@ const checker = require('../src/check-order')
 
 describe('Orders', async () => {
   const senderWallet = '0xbabe31056c0fe1b704d811b2405f6e9f5ae5e59d'
-  const signerWallet = '0x9d2fb0bcc90c6f3fa3a98d2c760623a4f6ee59b4'
 
   // Owns a crypto kitty
   const kittyWallet = '0x7F18BB4Dd92CF2404C54CBa1A9BE4A1153bdb078'
@@ -31,25 +30,6 @@ describe('Orders', async () => {
   const MAY_11_2017_00_00_00 = '1494460800'
   const INVALID_KIND = '0xFFFFFF'
   orders.setVerifyingContract(rinkebySwap)
-
-  it('Check correct order without signature', async () => {
-    const order = await orders.getOrder({
-      expiry: NOV_7_2020_22_18_14,
-      nonce: '0',
-      signer: {
-        wallet: signerWallet,
-        token: ASTAddress,
-        amount: '0',
-      },
-      sender: {
-        wallet: senderWallet,
-        token: WETHAddress,
-        amount: '0',
-      },
-    })
-    const errors = await checker.checkOrder(order, 'rinkeby')
-    assert.equal(errors.length, 0)
-  })
 
   it('Check correct order with signature', async () => {
     const order = await orders.getOrder({
@@ -131,8 +111,9 @@ describe('Orders', async () => {
 
     order.signature.v -= 1
     const errors = await checker.checkOrder(order, 'rinkeby')
-    assert.equal(errors.length, 2)
-    assert.equal(errors[1], 'Signature invalid')
+
+    assert.equal(errors.length, 3)
+    assert.equal(errors[2], 'Signature invalid')
   })
 
   it('Check order without allowance', async () => {
@@ -274,9 +255,10 @@ describe('Orders', async () => {
 
     const errors = await checker.checkOrder(order, 'rinkeby')
 
-    assert.equal(errors.length, 2)
-    assert.equal(errors[0], 'sender no NFT approval')
-    assert.equal(errors[1], 'signer is not configured to receive NFTs')
+    assert.equal(errors.length, 3)
+    assert.equal(errors[0], 'Order structured incorrectly or signature invalid')
+    assert.equal(errors[1], 'sender no NFT approval')
+    assert.equal(errors[2], 'signer is not configured to receive NFTs')
   })
 
   it('Check NFT order to a valid contract', async () => {
@@ -300,8 +282,8 @@ describe('Orders', async () => {
     const errors = await checker.checkOrder(order, 'rinkeby')
 
     // length 1 showing the contract was accepted
-    assert.equal(errors.length, 1)
-    assert.equal(errors[0], 'sender no NFT approval')
+    assert.equal(errors.length, 2)
+    assert.equal(errors[1], 'sender no NFT approval')
   })
 
   it('Check order without balance', async () => {
