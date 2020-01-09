@@ -26,7 +26,6 @@ const checkOrder = async (order, network) => {
   // Check swap address provided
   if (order['signature']['validator'] == EMPTY_ADDRESS) {
     errors.push('Order.signature.validator cannot be 0')
-    return errors
   }
 
   // Check signer balance and allowance
