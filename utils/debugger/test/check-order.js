@@ -256,6 +256,7 @@ describe('Orders', async () => {
     const errors = await checker.checkOrder(order, 'rinkeby')
 
     assert.equal(errors.length, 3)
+    assert.equal(errors[0], 'Order structured incorrectly or signature invalid')
     assert.equal(errors[1], 'sender no NFT approval')
     assert.equal(errors[2], 'signer is not configured to receive NFTs')
   })
