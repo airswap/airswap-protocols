@@ -5,6 +5,8 @@ import "@airswap/types/contracts/Types.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/token/ERC721/IERC721.sol";
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
+import "@airswap/swap/contracts/Swap.sol";
+import "@airswap/transfers/contracts/TransferHandlerRegistry.sol";
 
 contract PreSwapChecker {
 
@@ -12,7 +14,7 @@ contract PreSwapChecker {
   bytes constant internal DOM_VERSION = "2";
 
   bytes4 constant internal ERC721_INTERFACE_ID = 0x80ac58cd;
-
+  bytes4 constant internal ERC720_INTERFACE_ID = 0x36372b07;
 
   function checkSwapSwap(
     Types.Order calldata order
@@ -60,6 +62,12 @@ contract PreSwapChecker {
         errors[errorCount] = 'SENDER_ALLOWANCE';
         errorCount++;
       }
+
+      // Check valid token registry handler
+      if (!hasValidKind(order.sender, swap)) {
+        errors[errorCount] = 'SENDER_TOKEN_KIND_UNKNOWN';
+        errorCount++;
+      }
     }
 
     // Check the order signer
@@ -71,6 +79,12 @@ contract PreSwapChecker {
     // Check their approval
     if (!isApproved(order.signer, swap)) {
       errors[errorCount] = 'SIGNER_ALLOWANCE';
+      errorCount++;
+    }
+
+    // Check valid token registry handler
+    if (!hasValidKind(order.signer, swap)) {
+      errors[errorCount] = 'SIGNER_TOKEN_KIND_UNKNOWN';
       errorCount++;
     }
 
@@ -90,6 +104,15 @@ contract PreSwapChecker {
   }
 
 
+  // function to check a party has used a known kinda
+  function hasValidKind(
+    Types.Party memory party,
+    address swap
+  ) internal view returns (bool) {
+    TransferHandlerRegistry tokenRegistry = Swap(swap).registry();
+    return (address(tokenRegistry.transferHandlers(party.kind)) != address(0));
+  }
+
   // function to check a party has enough balance to swap
   function hasBalance(
     Types.Party memory party
@@ -98,6 +121,7 @@ contract PreSwapChecker {
       address owner = IERC721(party.token).ownerOf(party.id);
       return (owner == party.wallet);
     }
+
     uint256 balance = IERC20(party.token).balanceOf(party.wallet);
     return (balance >= party.amount);
   }
