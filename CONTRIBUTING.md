@@ -34,7 +34,7 @@ yarn test
 ## Code Style
 When multiple people are working on the same body of code, it is important that everyone conforms to a similar style. It often doesn’t matter as much which style, but rather that they conform to one style.
 
-To ensure your contribution conforms to the style being used in this project, we require that a linter is run prior to committing to ensure styling. We have also documented our (Solidity style guide)[SOLIDITY_STYLE_GUIDE.md] in the repo as well.
+To ensure your contribution conforms to the style being used in this project, we require that a linter is run prior to committing to ensure styling. We have also documented our [Solidity style guide](SOLIDITY_STYLE_GUIDE.md) in the repo as well.
 
 Run:
 
