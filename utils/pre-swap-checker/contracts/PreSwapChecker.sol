@@ -68,53 +68,54 @@ contract PreSwapChecker {
       errorCount++;
     }
 
+    // Check valid token registry handler for sender
+    if (hasValidKind(order.sender.kind, swap)) {
+      // Check the order sender
+      if (order.sender.wallet != address(0)) {
+        // The sender was specified
+        // Check if sender kind interface can correctly check balance
+        if (order.sender.kind == ERC721_INTERFACE_ID && !hasValidERC71Interface(order.sender)) {
+          errors[errorCount] = "SENDER_INVALID_ERC721";
+          errorCount++;
+        } else {
+          // Check the order sender token balance
+          if (!hasBalance(order.sender)) {
+            errors[errorCount] = "SENDER_BALANCE";
+            errorCount++;
+          }
 
-    // Check the order sender
-    if (order.sender.wallet != address(0)) {
-      // The sender was specified
+          // Check their approval
+          if (!isApproved(order.sender, swap)) {
+            errors[errorCount] = "SENDER_ALLOWANCE";
+            errorCount++;
+          }
+        }
+      }
+    } else {
+      errors[errorCount] = "SENDER_TOKEN_KIND_UNKNOWN";
+      errorCount++;
+    }
+
+     // Check valid token registry handler for signer
+    if (hasValidKind(order.signer.kind, swap)) {
       // Check if sender kind interface can correctly check balance
-      if (order.sender.kind == ERC721_INTERFACE_ID && !hasValidERC71Interface(order.sender)) {
-        errors[errorCount] = "SENDER_INVALID_ERC721";
+      if (order.signer.kind == ERC721_INTERFACE_ID && !hasValidERC71Interface(order.signer)) {
+        errors[errorCount] = "SIGNER_INVALID_ERC721";
         errorCount++;
       } else {
-        if (!hasBalance(order.sender)) { // Check their token balance
-          errors[errorCount] = "SENDER_BALANCE";
+        // Check the order signer token balance
+        if (!hasBalance(order.signer)) {
+          errors[errorCount] = "SIGNER_BALANCE";
           errorCount++;
         }
 
         // Check their approval
-        if (!isApproved(order.sender, swap)) {
-          errors[errorCount] = "SENDER_ALLOWANCE";
+        if (!isApproved(order.signer, swap)) {
+          errors[errorCount] = "SIGNER_ALLOWANCE";
           errorCount++;
         }
       }
-
-      // Check valid token registry handler
-      if (!hasValidKind(order.sender, swap)) {
-        errors[errorCount] = "SENDER_TOKEN_KIND_UNKNOWN";
-        errorCount++;
-      }
-    }
-
-    // Check if sender kind interface can correctly check balance
-    if (order.signer.kind == ERC721_INTERFACE_ID && !hasValidERC71Interface(order.signer)) {
-      errors[errorCount] = "SIGNER_INVALID_ERC721";
-      errorCount++;
     } else {
-      if (!hasBalance(order.signer)) {
-        errors[errorCount] = "SIGNER_BALANCE";  // Check the order signe
-        errorCount++;
-      }
-
-      // Check their approval
-      if (!isApproved(order.signer, swap)) {
-        errors[errorCount] = "SIGNER_ALLOWANCE";
-        errorCount++;
-      }
-    }
-
-    // Check valid token registry handler
-    if (!hasValidKind(order.signer, swap)) {
       errors[errorCount] = "SIGNER_TOKEN_KIND_UNKNOWN";
       errorCount++;
     }
@@ -136,11 +137,11 @@ contract PreSwapChecker {
 
   // function to check a party has used a known kinda
   function hasValidKind(
-    Types.Party memory party,
+    bytes4 kind,
     address swap
   ) internal view returns (bool) {
     TransferHandlerRegistry tokenRegistry = Swap(swap).registry();
-    return (address(tokenRegistry.transferHandlers(party.kind)) != address(0));
+    return (address(tokenRegistry.transferHandlers(kind)) != address(0));
   }
 
   // checks for valid interfaces for ERC165 tokens, ERC721

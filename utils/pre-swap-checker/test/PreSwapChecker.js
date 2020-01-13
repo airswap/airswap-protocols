@@ -418,20 +418,19 @@ contract('PreSwapChecker', async accounts => {
       errorCodes = await preSwapChecker.checkSwapSwap.call(order, {
         from: bobAddress,
       })
-      equal(errorCodes[0], 3)
+      equal(errorCodes[0], 2)
       assert.include(
         web3.utils.toAscii(errorCodes[1][0]),
         'SENDER_TOKEN_KIND_UNKNOWN'
       )
-      assert.include(web3.utils.toAscii(errorCodes[1][1]), 'SIGNER_ALLOWANCE')
       assert.include(
-        web3.utils.toAscii(errorCodes[1][2]),
+        web3.utils.toAscii(errorCodes[1][1]),
         'SIGNER_TOKEN_KIND_UNKNOWN'
       )
     })
   })
 
-  describe('Swaps (Unknown token kind and invalid token addresses)', async () => {
+  describe('Swaps (ERC20 token kind and invalid token addresses)', async () => {
     let order
 
     it('Alice creates an order for Bob (200 non-contract address for 50 non-contract address) will revert', async () => {
@@ -440,13 +439,13 @@ contract('PreSwapChecker', async accounts => {
           wallet: aliceAddress,
           token: aliceAddress,
           amount: 200,
-          kind: '0x9999',
+          kind: ERC20_INTERFACE_ID,
         },
         sender: {
           wallet: bobAddress,
           token: bobAddress,
           amount: 50,
-          kind: '0x9999',
+          kind: ERC20_INTERFACE_ID,
         },
       })
 
