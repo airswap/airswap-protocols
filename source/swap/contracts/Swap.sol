@@ -37,9 +37,6 @@ contract Swap is ISwap {
   byte constant internal AVAILABLE = 0x00;
   byte constant internal UNAVAILABLE = 0x01;
 
-  // ERC-721 (non-fungible token) interface identifier (EIP-165)
-  bytes4 constant internal ERC721_INTERFACE_ID = 0x80ac58cd;
-
   // Mapping of sender address to a delegated sender address and bool
   mapping (address => mapping (address => bool)) public senderAuthorizations;
 

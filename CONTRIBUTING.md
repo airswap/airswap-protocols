@@ -37,7 +37,7 @@ yarn hint (linting for the Solidity code)
 ```
 
 ## Pull Requests
-It’s a good idea to make pull requests early on. A pull request represents the start of a discussion, and doesn’t necessarily need to be the final, finished submission. Make it a [draft PR](https://github.blog/2019-02-14-introducing-draft-pull-requests/) if you're looking for feedback but not ready for a final review.
+It’s a good idea to make pull requests early on. A pull request represents the start of a discussion, and doesn’t necessarily need to be the final, finished submission. Make it a [draft PR](https://github.blog/2019-02-14-introducing-draft-pull-requests/) if you're looking for feedback but not ready for a final review. If the PR is in response to a Github issue, make sure to notate the issue as well.
 
 GitHub’s documentation for working on pull requests is available [here]( https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/about-pull-requests).
 
