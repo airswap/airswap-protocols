@@ -9,6 +9,11 @@ import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "@airswap/swap/contracts/Swap.sol";
 import "@airswap/transfers/contracts/TransferHandlerRegistry.sol";
 
+/**
+  * @title PreSwapChecker: Helper contract to Swap protocol
+  * @notice contains several helper methods that check whether
+  * a Swap.order is well-formed and counterparty criteria is met
+  */
 contract PreSwapChecker {
   using ERC165Checker for address;
 
@@ -18,6 +23,13 @@ contract PreSwapChecker {
   bytes4 constant internal ERC721_INTERFACE_ID = 0x80ac58cd;
   bytes4 constant internal ERC20_INTERFACE_ID = 0x36372b07;
 
+  /**
+    * @notice Takes in an order and outputs any
+    * errors that Swap would revert on
+    * @param order Types.Order Order to settle
+    * @param uint256 errorCount if any
+    * @param bytes32[] memory array of error messages
+    */
   function checkSwapSwap(
     Types.Order calldata order
   ) external view returns (uint256, bytes32[] memory) {
@@ -74,7 +86,7 @@ contract PreSwapChecker {
       if (order.sender.wallet != address(0)) {
         // The sender was specified
         // Check if sender kind interface can correctly check balance
-        if (order.sender.kind == ERC721_INTERFACE_ID && !hasValidERC71Interface(order.sender)) {
+        if (order.sender.kind == ERC721_INTERFACE_ID && !hasValidERC71Interface(order.sender.token)) {
           errors[errorCount] = "SENDER_INVALID_ERC721";
           errorCount++;
         } else {
@@ -99,7 +111,7 @@ contract PreSwapChecker {
      // Check valid token registry handler for signer
     if (hasValidKind(order.signer.kind, swap)) {
       // Check if sender kind interface can correctly check balance
-      if (order.signer.kind == ERC721_INTERFACE_ID && !hasValidERC71Interface(order.signer)) {
+      if (order.signer.kind == ERC721_INTERFACE_ID && !hasValidERC71Interface(order.signer.token)) {
         errors[errorCount] = "SIGNER_INVALID_ERC721";
         errorCount++;
       } else {
@@ -135,7 +147,14 @@ contract PreSwapChecker {
     return (errorCount, errors);
   }
 
-  // function to check a party has used a known kinda
+
+  /**
+    * @notice Checks if kind is found in
+    * Swap's Token Registry
+    * @param kind bytes4 token type to search for
+    * @param swap address Swap contract address
+    * @return bool whether kind inserted is valid
+    */
   function hasValidKind(
     bytes4 kind,
     address swap
@@ -144,14 +163,24 @@ contract PreSwapChecker {
     return (address(tokenRegistry.transferHandlers(kind)) != address(0));
   }
 
-  // checks for valid interfaces for ERC165 tokens, ERC721
+  /**
+    * @notice Checks for valid interfaces for
+    * ERC165 tokens, ERC721
+    * @param tokenAddress address address of potential ERC721 token
+    * @return bool whether address has valid interface
+    */
   function hasValidERC71Interface(
-    Types.Party memory party
+    address tokenAddress
   ) internal view returns (bool) {
-    return (party.kind == ERC721_INTERFACE_ID && (party.token)._supportsInterface(ERC721_INTERFACE_ID));
+    return (tokenAddress._supportsInterface(ERC721_INTERFACE_ID));
   }
 
-  // function to check a party has enough balance to swap
+  /**
+    * @notice Check a party has enough balance to swap
+    * for ERC721 and ERC20 tokens
+    * @param party Types.Party party to check balance for
+    * @return bool whether party has enough balance
+    */
   function hasBalance(
     Types.Party memory party
   ) internal view returns (bool) {
@@ -164,7 +193,13 @@ contract PreSwapChecker {
     return (balance >= party.amount);
   }
 
-  // function to check a party has enough allowance to swap
+  /**
+    * @notice Check a party has enough allowance to swap
+    * for ERC721 and ERC20 tokens
+    * @param party Types.Party party to check balance for
+    * @param swap address Swap address
+    * @return bool whether party has sufficient allowance
+    */
   function isApproved(
     Types.Party memory party,
     address swap
@@ -177,7 +212,12 @@ contract PreSwapChecker {
     return (allowance >= party.amount);
   }
 
-  // function to check order signature
+  /**
+    * @notice Check order signature is valid
+    * @param order Types.Order Order to validate
+    * @param domainSeparator bytes32 Domain identifier used in signatures (EIP-712)
+    * @return bool True if order has a valid signature
+    */
   function isValid(
     Types.Order memory order,
     bytes32 domainSeparator
