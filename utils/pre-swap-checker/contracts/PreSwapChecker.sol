@@ -37,7 +37,7 @@ contract PreSwapChecker {
     bytes32 domainSeparator = Types.hashDomain(DOM_NAME, DOM_VERSION, swap);
 
     // max size of the number of errors that could exist
-    bytes32[] memory errors = new bytes32[](10);
+    bytes32[] memory errors = new bytes32[](14);
     uint8 errorCount;
 
     // Check self transfer
@@ -166,7 +166,7 @@ contract PreSwapChecker {
   /**
     * @notice Checks for valid interfaces for
     * ERC165 tokens, ERC721
-    * @param tokenAddress address address of potential ERC721 token
+    * @param tokenAddress address potential ERC721 token address
     * @return bool whether address has valid interface
     */
   function hasValidERC71Interface(
