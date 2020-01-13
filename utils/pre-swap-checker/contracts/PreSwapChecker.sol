@@ -27,8 +27,8 @@ contract PreSwapChecker {
     * @notice Takes in an order and outputs any
     * errors that Swap would revert on
     * @param order Types.Order Order to settle
-    * @param uint256 errorCount if any
-    * @param bytes32[] memory array of error messages
+    * @return uint256 errorCount if any
+    * @return bytes32[] memory array of error messages
     */
   function checkSwapSwap(
     Types.Order calldata order
