@@ -27,6 +27,6 @@
   "devDependencies": {
     "@airswap/order-utils": "0.3.19",
     "@airswap/test-utils": "0.1.4",
-    "chai": "^4.2.0"
+    "solidity-coverage": "^0.6.3"
   }
 }
