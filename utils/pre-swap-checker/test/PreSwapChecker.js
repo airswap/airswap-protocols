@@ -163,7 +163,7 @@ contract('PreSwapChecker', async accounts => {
         from: bobAddress,
       })
       equal(checkerOutput[0], 0)
-      equal(checkerOutput[1][0], EMPTY_ADDRESS)
+      equal(checkerOutput[1][0].substring(0, 42), EMPTY_ADDRESS)
     })
 
     it('Checks that Alice cannot swap with herself (200 AST for 50 AST)', async () => {
@@ -186,7 +186,6 @@ contract('PreSwapChecker', async accounts => {
 
       const error = web3.utils.toUtf8(errorCodes[1][0])
       const error1 = web3.utils.toUtf8(errorCodes[1][1])
-      console.log(errorCodes[1])
       equal(error, 'SELF_TRANSFER_INVALID')
       equal(error1, 'SIGNER_UNAUTHORIZED')
       equal(errorCodes[0], 2)
@@ -302,7 +301,7 @@ contract('PreSwapChecker', async accounts => {
         from: bobAddress,
       })
       equal(errorCodes[0], 0)
-      equal(errorCodes[1][0], EMPTY_ADDRESS)
+      equal(errorCodes[1][0].substring(0, 42), EMPTY_ADDRESS)
     })
   })
 
