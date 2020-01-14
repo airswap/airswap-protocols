@@ -164,8 +164,7 @@ contract PreSwapChecker {
   }
 
   /**
-    * @notice Checks for valid interfaces for
-    * ERC165 tokens, ERC721
+    * @notice Checks token has valid ERC721 interface
     * @param tokenAddress address potential ERC721 token address
     * @return bool whether address has valid interface
     */
@@ -196,7 +195,7 @@ contract PreSwapChecker {
   /**
     * @notice Check a party has enough allowance to swap
     * for ERC721 and ERC20 tokens
-    * @param party Types.Party party to check balance for
+    * @param party Types.Party party to check allowance for
     * @param swap address Swap address
     * @return bool whether party has sufficient allowance
     */

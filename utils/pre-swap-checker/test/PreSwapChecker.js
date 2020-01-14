@@ -6,7 +6,6 @@ const PreSwapChecker = artifacts.require('PreSwapChecker')
 const TransferHandlerRegistry = artifacts.require('TransferHandlerRegistry')
 const ERC20TransferHandler = artifacts.require('ERC20TransferHandler')
 const ERC721TransferHandler = artifacts.require('ERC721TransferHandler')
-const { assert } = require('chai')
 const { emitted, reverted, ok, equal } = require('@airswap/test-utils').assert
 const { allowances, balances } = require('@airswap/test-utils').balances
 const { getLatestTimestamp } = require('@airswap/test-utils').time
@@ -164,7 +163,7 @@ contract('PreSwapChecker', async accounts => {
         from: bobAddress,
       })
       equal(checkerOutput[0], 0)
-      assert.include(checkerOutput[1][0], EMPTY_ADDRESS)
+      equal(checkerOutput[1][0], EMPTY_ADDRESS)
     })
 
     it('Checks that Alice cannot swap with herself (200 AST for 50 AST)', async () => {
@@ -185,10 +184,11 @@ contract('PreSwapChecker', async accounts => {
         from: bobAddress,
       })
 
-      const error = web3.utils.toAscii(errorCodes[1][0])
-      const error1 = web3.utils.toAscii(errorCodes[1][1])
-      assert.include(error, 'SELF_TRANSFER_INVALID')
-      assert.include(error1, 'SIGNER_UNAUTHORIZED')
+      const error = web3.utils.toUtf8(errorCodes[1][0])
+      const error1 = web3.utils.toUtf8(errorCodes[1][1])
+      console.log(errorCodes[1])
+      equal(error, 'SELF_TRANSFER_INVALID')
+      equal(error1, 'SIGNER_UNAUTHORIZED')
       equal(errorCodes[0], 2)
     })
 
@@ -210,14 +210,11 @@ contract('PreSwapChecker', async accounts => {
         from: bobAddress,
       })
       equal(errorCodes[0], 5)
-      assert.include(web3.utils.toAscii(errorCodes[1][0]), 'SENDER_BALANCE')
-      assert.include(web3.utils.toAscii(errorCodes[1][1]), 'SENDER_ALLOWANCE')
-      assert.include(web3.utils.toAscii(errorCodes[1][2]), 'SIGNER_BALANCE')
-      assert.include(web3.utils.toAscii(errorCodes[1][3]), 'SIGNER_ALLOWANCE')
-      assert.include(
-        web3.utils.toAscii(errorCodes[1][4]),
-        'SIGNER_UNAUTHORIZED'
-      )
+      equal(web3.utils.toUtf8(errorCodes[1][0]), 'SENDER_BALANCE')
+      equal(web3.utils.toUtf8(errorCodes[1][1]), 'SENDER_ALLOWANCE')
+      equal(web3.utils.toUtf8(errorCodes[1][2]), 'SIGNER_BALANCE')
+      equal(web3.utils.toUtf8(errorCodes[1][3]), 'SIGNER_ALLOWANCE')
+      equal(web3.utils.toUtf8(errorCodes[1][4]), 'SIGNER_UNAUTHORIZED')
     })
 
     it('Checks filled order emits error', async () => {
@@ -229,11 +226,8 @@ contract('PreSwapChecker', async accounts => {
         from: bobAddress,
       })
       equal(errorCodes[0], 2)
-      assert.include(
-        web3.utils.toAscii(errorCodes[1][0]),
-        'ORDER_TAKEN_OR_CANCELLED'
-      )
-      assert.include(web3.utils.toAscii(errorCodes[1][1]), 'SIGNER_ALLOWANCE')
+      equal(web3.utils.toUtf8(errorCodes[1][0]), 'ORDER_TAKEN_OR_CANCELLED')
+      equal(web3.utils.toUtf8(errorCodes[1][1]), 'SIGNER_ALLOWANCE')
     })
 
     it('Checks expired, low nonced, and invalid sig order emits error', async () => {
@@ -268,9 +262,9 @@ contract('PreSwapChecker', async accounts => {
         from: bobAddress,
       })
       equal(errorCodes[0], 3)
-      assert.include(web3.utils.toAscii(errorCodes[1][0]), 'ORDER_EXPIRED')
-      assert.include(web3.utils.toAscii(errorCodes[1][1]), 'NONCE_TOO_LOW')
-      assert.include(web3.utils.toAscii(errorCodes[1][2]), 'INVALID_SIG')
+      equal(web3.utils.toUtf8(errorCodes[1][0]), 'ORDER_EXPIRED')
+      equal(web3.utils.toUtf8(errorCodes[1][1]), 'NONCE_TOO_LOW')
+      equal(web3.utils.toUtf8(errorCodes[1][2]), 'INVALID_SIG')
     })
 
     it('Alice authorizes Carol to make orders on her behalf', async () => {
@@ -308,7 +302,7 @@ contract('PreSwapChecker', async accounts => {
         from: bobAddress,
       })
       equal(errorCodes[0], 0)
-      assert.include(errorCodes[1][0], EMPTY_ADDRESS)
+      equal(errorCodes[1][0], EMPTY_ADDRESS)
     })
   })
 
@@ -382,8 +376,8 @@ contract('PreSwapChecker', async accounts => {
         from: bobAddress,
       })
       equal(errorCodes[0], 2)
-      assert.include(web3.utils.toAscii(errorCodes[1][0]), 'SENDER_ALLOWANCE')
-      assert.include(web3.utils.toAscii(errorCodes[1][1]), 'INVALID_SIG')
+      equal(web3.utils.toUtf8(errorCodes[1][0]), 'SENDER_ALLOWANCE')
+      equal(web3.utils.toUtf8(errorCodes[1][1]), 'INVALID_SIG')
     })
   })
 
@@ -419,14 +413,8 @@ contract('PreSwapChecker', async accounts => {
         from: bobAddress,
       })
       equal(errorCodes[0], 2)
-      assert.include(
-        web3.utils.toAscii(errorCodes[1][0]),
-        'SENDER_TOKEN_KIND_UNKNOWN'
-      )
-      assert.include(
-        web3.utils.toAscii(errorCodes[1][1]),
-        'SIGNER_TOKEN_KIND_UNKNOWN'
-      )
+      equal(web3.utils.toUtf8(errorCodes[1][0]), 'SENDER_TOKEN_KIND_UNKNOWN')
+      equal(web3.utils.toUtf8(errorCodes[1][1]), 'SIGNER_TOKEN_KIND_UNKNOWN')
     })
   })
 
@@ -498,22 +486,10 @@ contract('PreSwapChecker', async accounts => {
         from: bobAddress,
       })
       equal(errorCodes[0], 4)
-      assert.include(
-        web3.utils.toAscii(errorCodes[1][0]),
-        'SENDER_INVALID_AMOUNT'
-      )
-      assert.include(
-        web3.utils.toAscii(errorCodes[1][1]),
-        'SIGNER_INVALID_AMOUNT'
-      )
-      assert.include(
-        web3.utils.toAscii(errorCodes[1][2]),
-        'SENDER_INVALID_ERC721'
-      )
-      assert.include(
-        web3.utils.toAscii(errorCodes[1][3]),
-        'SIGNER_INVALID_ERC721'
-      )
+      equal(web3.utils.toUtf8(errorCodes[1][0]), 'SENDER_INVALID_AMOUNT')
+      equal(web3.utils.toUtf8(errorCodes[1][1]), 'SIGNER_INVALID_AMOUNT')
+      equal(web3.utils.toUtf8(errorCodes[1][2]), 'SENDER_INVALID_ERC721')
+      equal(web3.utils.toUtf8(errorCodes[1][3]), 'SIGNER_INVALID_ERC721')
     })
   })
 
@@ -551,9 +527,9 @@ contract('PreSwapChecker', async accounts => {
         from: bobAddress,
       })
       equal(errorCodes[0], 3)
-      assert.include(web3.utils.toAscii(errorCodes[1][0]), 'SENDER_INVALID_ID')
-      assert.include(web3.utils.toAscii(errorCodes[1][1]), 'SIGNER_INVALID_ID')
-      assert.include(web3.utils.toAscii(errorCodes[1][2]), 'SIGNER_ALLOWANCE')
+      equal(web3.utils.toUtf8(errorCodes[1][0]), 'SENDER_INVALID_ID')
+      equal(web3.utils.toUtf8(errorCodes[1][1]), 'SIGNER_INVALID_ID')
+      equal(web3.utils.toUtf8(errorCodes[1][2]), 'SIGNER_ALLOWANCE')
     })
   })
 })
