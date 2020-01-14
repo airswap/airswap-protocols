@@ -8,6 +8,8 @@ import "openzeppelin-solidity/contracts/introspection/ERC165Checker.sol";
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "@airswap/swap/contracts/Swap.sol";
 import "@airswap/transfers/contracts/TransferHandlerRegistry.sol";
+import "@airswap/tokens/contracts/interfaces/IWETH.sol";
+import "@airswap/wrapper/contracts/Wrapper.sol";
 
 /**
   * @title PreSwapChecker: Helper contract to Swap protocol
@@ -158,9 +160,9 @@ contract PreSwapChecker {
   function checkSwapWrapper(
     Types.Order calldata order,
     address fromAddress,
-    address wrapper
+    address payable wrapper
     ) external view returns (uint256, bytes32[] memory ) {
-
+    IWETH wrapperContract =  Wrapper(wrapper).wethContract();
     // max size of the number of errors that could exist
     bytes32[] memory errors = new bytes32[](3);
     uint8 errorCount;
@@ -176,8 +178,9 @@ contract PreSwapChecker {
       errorCount++;
     }
 
+
     // if sender has WETH token, ensure sufficient ETH balance
-    if (order.sender.token = Wrapper(wrapper).wethContract()) {
+    if (order.sender.token == address(wrapperContract)) {
       if (address(order.sender.wallet).balance < order.sender.amount) {
         errors[errorCount] = "SENDER_INSUFFICIENT_ETH";
         errorCount++;
@@ -186,8 +189,8 @@ contract PreSwapChecker {
 
     // ensure that sender wallet if receiving weth has approve it to
     // transfer weth and deliver eth to the sender
-    IWETH wrapperContract =  Wrapper(wrapper).wethContract();
-    if (order.signer.token == Wrapper(wrapper).wethContract()) {
+
+    if (order.signer.token == address(wrapperContract)) {
       uint256 allowance = wrapperContract.allowance(order.sender.wallet, wrapper);
       if (allowance < order.signer.amount) {
         errors[errorCount] = "LOW_SENDER_ALLOWANCE_ON WRAPPER";
