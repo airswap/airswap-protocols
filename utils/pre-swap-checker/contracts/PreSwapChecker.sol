@@ -147,6 +147,56 @@ contract PreSwapChecker {
     return (errorCount, errors);
   }
 
+  /**
+    * @notice If order is going through wrapper to swap
+    * @param order Types.Order
+    * @param fromAddress address
+    * @param wrapper address
+    * @return uint256 errorCount if any
+    * @return bytes32[] memory array of error messages
+    */
+  function checkSwapWrapper(
+    Types.Order calldata order,
+    address fromAddress,
+    address wrapper
+    ) external view returns (uint256, bytes32[] memory ) {
+
+    // max size of the number of errors that could exist
+    bytes32[] memory errors = new bytes32[](3);
+    uint8 errorCount;
+
+    if (order.sender.wallet == fromAddress) {
+      errors[errorCount] = "MSG_SENDER_MUST_BE_ORDER_SENDER";
+      errorCount++;
+    }
+
+    // signature must be filled in order using Wrapper
+    if (order.signature.v == 0) {
+      errors[errorCount] = "SIGNATURE_MUST_BE_SENT";
+      errorCount++;
+    }
+
+    // if sender has WETH token, ensure sufficient ETH balance
+    if (order.sender.token = Wrapper(wrapper).wethContract()) {
+      if (address(order.sender.wallet).balance < order.sender.amount) {
+        errors[errorCount] = "SENDER_INSUFFICIENT_ETH";
+        errorCount++;
+      }
+    }
+
+    // ensure that sender wallet if receiving weth has approve it to
+    // transfer weth and deliver eth to the sender
+    IWETH wrapperContract =  Wrapper(wrapper).wethContract();
+    if (order.signer.token == Wrapper(wrapper).wethContract()) {
+      uint256 allowance = wrapperContract.allowance(order.sender.wallet, wrapper);
+      if (allowance < order.signer.amount) {
+        errors[errorCount] = "LOW_SENDER_ALLOWANCE_ON WRAPPER";
+        errorCount++;
+      }
+    }
+
+    return (errorCount, errors);
+  }
 
   /**
     * @notice Checks if kind is found in
