@@ -27,7 +27,6 @@ contract PreSwapChecker {
 
   IWETH public wethContract;
 
-
   /**
     * @notice Contract Constructor
     * @param preSwapCheckerWethContract address
@@ -92,7 +91,6 @@ contract PreSwapChecker {
 
     // ensure that sender wallet if receiving weth has approved
     // the wrapper to transfer weth and deliver eth to the sender
-
     if (order.signer.token == address(wethContract)) {
       uint256 allowance = wethContract.allowance(order.sender.wallet, wrapper);
       if (allowance < order.signer.amount) {
@@ -100,7 +98,6 @@ contract PreSwapChecker {
         errorCount++;
       }
     }
-
     return (errorCount, errors);
   }
 
@@ -228,7 +225,6 @@ contract PreSwapChecker {
         errorCount++;
       }
     }
-
     return (errorCount, errors);
   }
 
