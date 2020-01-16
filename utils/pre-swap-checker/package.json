@@ -22,7 +22,8 @@
     "@airswap/swap": "4.3.6",
     "@airswap/tokens": "0.1.4",
     "@airswap/types": "2.4.5",
-    "openzeppelin-solidity": "2.4"
+    "openzeppelin-solidity": "2.4",
+    "@airswap/wrapper": "2.5.7"
   },
   "devDependencies": {
     "@airswap/order-utils": "0.3.19",

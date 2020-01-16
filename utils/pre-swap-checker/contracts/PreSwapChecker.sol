@@ -8,6 +8,8 @@ import "openzeppelin-solidity/contracts/introspection/ERC165Checker.sol";
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "@airswap/swap/contracts/Swap.sol";
 import "@airswap/transfers/contracts/TransferHandlerRegistry.sol";
+import "@airswap/tokens/contracts/interfaces/IWETH.sol";
+import "@airswap/wrapper/contracts/Wrapper.sol";
 
 /**
   * @title PreSwapChecker: Helper contract to Swap protocol
@@ -23,6 +25,83 @@ contract PreSwapChecker {
   bytes4 constant internal ERC721_INTERFACE_ID = 0x80ac58cd;
   bytes4 constant internal ERC20_INTERFACE_ID = 0x36372b07;
 
+  IWETH public wethContract;
+
+  /**
+    * @notice Contract Constructor
+    * @param preSwapCheckerWethContract address
+    */
+  constructor(
+    address preSwapCheckerWethContract
+  ) public {
+    wethContract = IWETH(preSwapCheckerWethContract);
+  }
+
+  /**
+    * @notice If order is going through wrapper to swap
+    * @param order Types.Order
+    * @param fromAddress address
+    * @param wrapper address
+    * @return uint256 errorCount if any
+    * @return bytes32[] memory array of error messages
+    */
+  function checkSwapWrapper(
+    Types.Order calldata order,
+    address fromAddress,
+    address wrapper
+    ) external view returns (uint256, bytes32[] memory ) {
+    address swap = order.signature.validator;
+    // max size of the number of errors that could exist
+    bytes32[] memory errors = new bytes32[](20);
+    uint256 errorCount;
+
+    (uint256 swapErrorCount, bytes32[] memory swapErrors) = checkSwapSwap(order, true);
+
+    if (swapErrorCount > 0) {
+      errorCount = swapErrorCount;
+      // copies over errors from checkSwapSwap to be outputted
+      for (uint256 i = 0; i < swapErrorCount; i++) {
+        errors[i] = swapErrors[i];
+      }
+    }
+
+    if (order.sender.wallet != fromAddress) {
+      errors[errorCount] = "MSG_SENDER_MUST_BE_ORDER_SENDER";
+      errorCount++;
+    }
+
+    // ensure that sender has approved wrapper contract on swap
+    if (!ISwap(swap).senderAuthorizations(order.sender.wallet, wrapper)) {
+      errors[errorCount] = "SENDER_UNAUTHORIZED";
+      errorCount++;
+    }
+
+    // signature must be filled in order to use the Wrapper
+    if (order.signature.v == 0) {
+      errors[errorCount] = "SIGNATURE_MUST_BE_SENT";
+      errorCount++;
+    }
+
+    // if sender has WETH token, ensure sufficient ETH balance
+    if (order.sender.token == address(wethContract)) {
+      if (address(order.sender.wallet).balance < order.sender.amount) {
+        errors[errorCount] = "SENDER_INSUFFICIENT_ETH";
+        errorCount++;
+      }
+    }
+
+    // ensure that sender wallet if receiving weth has approved
+    // the wrapper to transfer weth and deliver eth to the sender
+    if (order.signer.token == address(wethContract)) {
+      uint256 allowance = wethContract.allowance(order.sender.wallet, wrapper);
+      if (allowance < order.signer.amount) {
+        errors[errorCount] = "LOW_SENDER_ALLOWANCE_ON_WRAPPER";
+        errorCount++;
+      }
+    }
+    return (errorCount, errors);
+  }
+
   /**
     * @notice Takes in an order and outputs any
     * errors that Swap would revert on
@@ -31,14 +110,15 @@ contract PreSwapChecker {
     * @return bytes32[] memory array of error messages
     */
   function checkSwapSwap(
-    Types.Order calldata order
-  ) external view returns (uint256, bytes32[] memory) {
+    Types.Order memory order,
+    bool usingWrapper
+  ) public view returns (uint256, bytes32[] memory) {
     address swap = order.signature.validator;
     bytes32 domainSeparator = Types.hashDomain(DOM_NAME, DOM_VERSION, swap);
 
     // max size of the number of errors that could exist
     bytes32[] memory errors = new bytes32[](14);
-    uint8 errorCount;
+    uint256 errorCount;
 
     // Check self transfer
     if (order.signer.wallet == order.sender.wallet) {
@@ -91,9 +171,12 @@ contract PreSwapChecker {
           errorCount++;
         } else {
           // Check the order sender token balance
-          if (!hasBalance(order.sender)) {
-            errors[errorCount] = "SENDER_BALANCE";
-            errorCount++;
+          if ((usingWrapper && order.sender.token != address(wethContract)) || !usingWrapper) {
+            //do the balance check
+            if (!hasBalance(order.sender)) {
+              errors[errorCount] = "SENDER_BALANCE";
+              errorCount++;
+            }
           }
 
           // Check their approval
@@ -133,7 +216,7 @@ contract PreSwapChecker {
     }
 
     if (!isValid(order, domainSeparator)) {
-      errors[errorCount] = "INVALID_SIG";
+      errors[errorCount] = "SIGNATURE_INVALID";
       errorCount++;
     }
 
@@ -143,10 +226,8 @@ contract PreSwapChecker {
         errorCount++;
       }
     }
-
     return (errorCount, errors);
   }
-
 
   /**
     * @notice Checks if kind is found in
