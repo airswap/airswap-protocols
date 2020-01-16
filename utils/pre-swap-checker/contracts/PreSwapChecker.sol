@@ -82,7 +82,6 @@ contract PreSwapChecker {
       errorCount++;
     }
 
-
     // if sender has WETH token, ensure sufficient ETH balance
     if (order.sender.token == address(wethContract)) {
       if (address(order.sender.wallet).balance < order.sender.amount) {
