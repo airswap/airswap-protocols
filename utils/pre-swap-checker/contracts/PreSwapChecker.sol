@@ -48,7 +48,7 @@ contract PreSwapChecker {
   function checkSwapWrapper(
     Types.Order calldata order,
     address fromAddress,
-    address payable wrapper
+    address wrapper
     ) external view returns (uint256, bytes32[] memory ) {
     address swap = order.signature.validator;
     // max size of the number of errors that could exist
@@ -64,6 +64,7 @@ contract PreSwapChecker {
         errors[i] = swapErrors[i];
       }
     }
+
     if (order.sender.wallet != fromAddress) {
       errors[errorCount] = "MSG_SENDER_MUST_BE_ORDER_SENDER";
       errorCount++;
