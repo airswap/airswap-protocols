@@ -89,7 +89,7 @@ contract('PreSwapChecker', async accounts => {
 
     it('Deployed SwapChecker contract', async () => {
       await PreSwapChecker.link('Types', typesLib.address)
-      preSwapChecker = await PreSwapChecker.new()
+      preSwapChecker = await PreSwapChecker.new(tokenWETH.address)
     })
 
     it('Deployed test contract "AST"', async () => {
@@ -182,9 +182,13 @@ contract('PreSwapChecker', async accounts => {
     })
 
     it('Checks fillable order is empty error array', async () => {
-      const checkerOutput = await preSwapChecker.checkSwapSwap.call(order, {
-        from: bobAddress,
-      })
+      const checkerOutput = await preSwapChecker.checkSwapSwap.call(
+        order,
+        false,
+        {
+          from: bobAddress,
+        }
+      )
       equal(checkerOutput[0], 0)
       equal(checkerOutput[1][0].substring(0, 42), EMPTY_ADDRESS)
     })
@@ -203,7 +207,7 @@ contract('PreSwapChecker', async accounts => {
         },
       })
 
-      errorCodes = await preSwapChecker.checkSwapSwap.call(selfOrder, {
+      errorCodes = await preSwapChecker.checkSwapSwap.call(selfOrder, false, {
         from: bobAddress,
       })
 
@@ -228,7 +232,7 @@ contract('PreSwapChecker', async accounts => {
         },
       })
 
-      errorCodes = await preSwapChecker.checkSwapSwap.call(order, {
+      errorCodes = await preSwapChecker.checkSwapSwap.call(order, false, {
         from: bobAddress,
       })
       equal(errorCodes[0], 5)
@@ -244,7 +248,7 @@ contract('PreSwapChecker', async accounts => {
       emitted(await swap(order, { from: bobAddress }), 'Swap')
 
       // Try to check if this order can be filled a second time
-      errorCodes = await preSwapChecker.checkSwapSwap.call(order, {
+      errorCodes = await preSwapChecker.checkSwapSwap.call(order, false, {
         from: bobAddress,
       })
       equal(errorCodes[0], 2)
@@ -280,13 +284,13 @@ contract('PreSwapChecker', async accounts => {
       order.signature.v = 3
 
       // Try to check if this order can be filled a second time
-      errorCodes = await preSwapChecker.checkSwapSwap.call(order, {
+      errorCodes = await preSwapChecker.checkSwapSwap.call(order, false, {
         from: bobAddress,
       })
       equal(errorCodes[0], 3)
       equal(web3.utils.toUtf8(errorCodes[1][0]), 'ORDER_EXPIRED')
       equal(web3.utils.toUtf8(errorCodes[1][1]), 'NONCE_TOO_LOW')
-      equal(web3.utils.toUtf8(errorCodes[1][2]), 'INVALID_SIG')
+      equal(web3.utils.toUtf8(errorCodes[1][2]), 'SIGNATURE_INVALID')
     })
 
     it('Alice authorizes Carol to make orders on her behalf', async () => {
@@ -320,7 +324,7 @@ contract('PreSwapChecker', async accounts => {
 
       order.signature.signatory = eveAddress
 
-      errorCodes = await preSwapChecker.checkSwapSwap.call(order, {
+      errorCodes = await preSwapChecker.checkSwapSwap.call(order, false, {
         from: bobAddress,
       })
       equal(errorCodes[0], 0)
@@ -365,7 +369,7 @@ contract('PreSwapChecker', async accounts => {
         GANACHE_PROVIDER
       )
       await reverted(
-        preSwapChecker.checkSwapSwap.call(order, { from: bobAddress }),
+        preSwapChecker.checkSwapSwap.call(order, false, { from: bobAddress }),
         'revert ERC721: owner query for nonexistent token'
       )
     })
@@ -394,12 +398,12 @@ contract('PreSwapChecker', async accounts => {
 
       order.signature.version = '0x99' // incorrect version
 
-      errorCodes = await preSwapChecker.checkSwapSwap.call(order, {
+      errorCodes = await preSwapChecker.checkSwapSwap.call(order, false, {
         from: bobAddress,
       })
       equal(errorCodes[0], 2)
       equal(web3.utils.toUtf8(errorCodes[1][0]), 'SENDER_ALLOWANCE')
-      equal(web3.utils.toUtf8(errorCodes[1][1]), 'INVALID_SIG')
+      equal(web3.utils.toUtf8(errorCodes[1][1]), 'SIGNATURE_INVALID')
     })
   })
 
@@ -431,7 +435,7 @@ contract('PreSwapChecker', async accounts => {
     })
 
     it('Checks malformed order errors out', async () => {
-      errorCodes = await preSwapChecker.checkSwapSwap.call(order, {
+      errorCodes = await preSwapChecker.checkSwapSwap.call(order, false, {
         from: bobAddress,
       })
       equal(errorCodes[0], 2)
@@ -469,7 +473,7 @@ contract('PreSwapChecker', async accounts => {
 
     it('Checks malformed order reverts out', async () => {
       await reverted(
-        preSwapChecker.checkSwapSwap.call(order, {
+        preSwapChecker.checkSwapSwap.call(order, false, {
           from: bobAddress,
         })
       )
@@ -504,7 +508,7 @@ contract('PreSwapChecker', async accounts => {
     })
 
     it('Checks malformed order errors out', async () => {
-      errorCodes = await preSwapChecker.checkSwapSwap.call(order, {
+      errorCodes = await preSwapChecker.checkSwapSwap.call(order, false, {
         from: bobAddress,
       })
       equal(errorCodes[0], 4)
@@ -545,7 +549,7 @@ contract('PreSwapChecker', async accounts => {
     })
 
     it('Checks malformed order errors out', async () => {
-      errorCodes = await preSwapChecker.checkSwapSwap.call(order, {
+      errorCodes = await preSwapChecker.checkSwapSwap.call(order, false, {
         from: bobAddress,
       })
       equal(errorCodes[0], 3)
@@ -561,7 +565,7 @@ contract('PreSwapChecker', async accounts => {
       const order = await orders.getOrder({
         signer: {
           wallet: aliceAddress,
-          token: tokenDAI.address,
+          token: tokenAST.address,
           amount: 50,
         },
         sender: {
@@ -590,17 +594,18 @@ contract('PreSwapChecker', async accounts => {
         wrapperAddress,
         { from: bobAddress }
       )
+
       equal(errorCodes[0], 0)
       equal(errorCodes[1][0].substring(0, 42), EMPTY_ADDRESS)
     })
 
-    it('Checks errors out with lack of allowance on wrapper', async () => {
+    it('Checks errors out with lack of balances and allowance on wrapper', async () => {
       // Bob take a WETH for DAI order from Alice using ETH
       const order = await orders.getOrder({
         sender: {
           wallet: aliceAddress,
           token: tokenDAI.address,
-          amount: 50,
+          amount: 50000,
         },
         signer: {
           wallet: bobAddress,
@@ -615,16 +620,21 @@ contract('PreSwapChecker', async accounts => {
         wrapperAddress,
         { from: bobAddress }
       )
-      equal(errorCodes[0], 4)
+
+      equal(errorCodes[0], 8)
+      equal(web3.utils.toUtf8(errorCodes[1][0]), 'SENDER_BALANCE')
+      equal(web3.utils.toUtf8(errorCodes[1][1]), 'SENDER_ALLOWANCE')
+      equal(web3.utils.toUtf8(errorCodes[1][2]), 'SIGNER_BALANCE')
+      equal(web3.utils.toUtf8(errorCodes[1][3]), 'SIGNER_UNAUTHORIZED')
       equal(
-        web3.utils.toUtf8(errorCodes[1][0]),
+        web3.utils.toUtf8(errorCodes[1][4]),
         'MSG_SENDER_MUST_BE_ORDER_SENDER'
       )
-      equal(web3.utils.toUtf8(errorCodes[1][1]), 'WRAPPER_UNAUTHORIZED')
-      equal(web3.utils.toUtf8(errorCodes[1][2]), 'SIGNATURE_MUST_BE_SENT')
+      equal(web3.utils.toUtf8(errorCodes[1][5]), 'SENDER_UNAUTHORIZED')
+      equal(web3.utils.toUtf8(errorCodes[1][6]), 'SIGNATURE_MUST_BE_SENT')
       equal(
-        web3.utils.toUtf8(errorCodes[1][3]),
-        'LOW_SENDER_ALLOWANCE_ON WRAPPER'
+        web3.utils.toUtf8(errorCodes[1][7]),
+        'LOW_SENDER_ALLOWANCE_ON_WRAPPER'
       )
     })
 
@@ -705,20 +715,14 @@ contract('PreSwapChecker', async accounts => {
         GANACHE_PROVIDER
       )
 
-      let errorCodes = await preSwapChecker.checkSwapWrapper.call(
+      const errorCodes = await preSwapChecker.checkSwapWrapper.call(
         order,
         bobAddress,
         wrapperAddress,
         { from: bobAddress }
       )
-      equal(errorCodes[0], 0)
-      equal(errorCodes[1][0].substring(0, 42), EMPTY_ADDRESS)
-
-      errorCodes = await preSwapChecker.checkSwapSwap.call(order, {
-        from: bobAddress,
-      })
-      equal(web3.utils.toUtf8(errorCodes[1][0]), 'SENDER_BALANCE')
-      equal(web3.utils.toUtf8(errorCodes[1][1]), 'SIGNER_ALLOWANCE')
+      equal(errorCodes[0], 1)
+      equal(web3.utils.toUtf8(errorCodes[1][0]), 'SIGNER_ALLOWANCE')
 
       emitted(
         await tokenAST.approve(swapAddress, 50, { from: aliceAddress }),
@@ -739,7 +743,7 @@ contract('PreSwapChecker', async accounts => {
         signer: {
           wallet: aliceAddress,
           token: tokenDAI.address,
-          amount: 50,
+          amount: '50',
         },
         sender: {
           wallet: bobAddress,
@@ -761,8 +765,10 @@ contract('PreSwapChecker', async accounts => {
         wrapperAddress,
         { from: bobAddress }
       )
-      equal(errorCodes[0], 1)
-      equal(web3.utils.toUtf8(errorCodes[1][0]), 'SENDER_INSUFFICIENT_ETH')
+      equal(errorCodes[0], 3)
+      equal(web3.utils.toUtf8(errorCodes[1][0]), 'SENDER_ALLOWANCE')
+      equal(web3.utils.toUtf8(errorCodes[1][1]), 'SIGNER_ALLOWANCE')
+      equal(web3.utils.toUtf8(errorCodes[1][2]), 'SENDER_INSUFFICIENT_ETH')
     })
   })
 })
