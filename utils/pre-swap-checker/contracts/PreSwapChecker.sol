@@ -40,7 +40,7 @@ contract PreSwapChecker {
 
     // max size of the number of errors that could exist
     bytes32[] memory errors = new bytes32[](14);
-    uint8 errorCount;
+    uint256 errorCount;
 
     // Check self transfer
     if (order.signer.wallet == order.sender.wallet) {
@@ -162,13 +162,20 @@ contract PreSwapChecker {
     address fromAddress,
     address payable wrapper
     ) external view returns (uint256, bytes32[] memory ) {
-    IWETH wrapperContract =  Wrapper(wrapper).wethContract();
+    IWETH wethContract =  Wrapper(wrapper).wethContract();
+    address swap = order.signature.validator;
     // max size of the number of errors that could exist
-    bytes32[] memory errors = new bytes32[](3);
-    uint8 errorCount;
+    bytes32[] memory errors = new bytes32[](4);
+    uint256 errorCount;
 
-    if (order.sender.wallet == fromAddress) {
+    if (order.sender.wallet != fromAddress) {
       errors[errorCount] = "MSG_SENDER_MUST_BE_ORDER_SENDER";
+      errorCount++;
+    }
+
+    // ensure that sender has approved wrapper contract on swap
+    if (!ISwap(swap).senderAuthorizations(order.sender.wallet, wrapper)) {
+      errors[errorCount] = "WRAPPER_UNAUTHORIZED";
       errorCount++;
     }
 
@@ -180,7 +187,7 @@ contract PreSwapChecker {
 
 
     // if sender has WETH token, ensure sufficient ETH balance
-    if (order.sender.token == address(wrapperContract)) {
+    if (order.sender.token == address(wethContract)) {
       if (address(order.sender.wallet).balance < order.sender.amount) {
         errors[errorCount] = "SENDER_INSUFFICIENT_ETH";
         errorCount++;
@@ -190,8 +197,8 @@ contract PreSwapChecker {
     // ensure that sender wallet if receiving weth has approve it to
     // transfer weth and deliver eth to the sender
 
-    if (order.signer.token == address(wrapperContract)) {
-      uint256 allowance = wrapperContract.allowance(order.sender.wallet, wrapper);
+    if (order.signer.token == address(wethContract)) {
+      uint256 allowance = wethContract.allowance(order.sender.wallet, wrapper);
       if (allowance < order.signer.amount) {
         errors[errorCount] = "LOW_SENDER_ALLOWANCE_ON WRAPPER";
         errorCount++;
