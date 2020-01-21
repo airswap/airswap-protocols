@@ -23,13 +23,13 @@
     "@airswap/tokens": "0.1.4",
     "@airswap/types": "2.4.5",
     "openzeppelin-solidity": "2.4",
-    "@airswap/wrapper": "2.5.7",
-    "@airswap/delegate": "1.5.7",
-    "@airswap/indexer": "3.6.8"
+    "@airswap/delegate": "1.5.7"
   },
   "devDependencies": {
     "@airswap/order-utils": "0.3.19",
     "@airswap/test-utils": "0.1.4",
-    "solidity-coverage": "^0.6.3"
+    "solidity-coverage": "^0.6.3",
+    "@airswap/wrapper": "2.5.7",
+    "@airswap/indexer": "3.6.8"
   }
 }

@@ -65,7 +65,7 @@ contract PreSwapChecker {
       }
     }
 
-    // signature must be filled in order to use the Wrapper
+    // signature must be filled in order to use the Delegate
     if (order.signature.v == 0) {
       errors[errorCount] = "SIGNATURE_MUST_BE_SENT";
       errorCount++;
