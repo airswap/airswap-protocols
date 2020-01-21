@@ -234,7 +234,7 @@ contract('PreSwapChecker', async accounts => {
         GANACHE_PROVIDER
       )
 
-      // create a rule for AST/DAI for alice
+      // create a rule for AST/DAI for Alice delegate by Alice
       await aliceDelegate.setRule(
         tokenAST.address,
         tokenDAI.address,
@@ -244,8 +244,8 @@ contract('PreSwapChecker', async accounts => {
         { from: aliceAddress }
       )
 
-      // Bob authorizes swap to send orders on his behalf
-      // function also checks that msg.sender == order.sender.wallet
+      // Alice's trade wallet authorizes aliceDelegate swap to send orders
+      // on its behalf to Swap
       await swapContract.authorizeSender(aliceDelegate.address, {
         from: aliceTradeWallet,
       })
@@ -286,18 +286,8 @@ contract('PreSwapChecker', async accounts => {
         GANACHE_PROVIDER
       )
 
-      // // create a rule for AST/DAI for alice
-      // await aliceDelegate.setRule(
-      //   tokenAST.address,
-      //   tokenDAI.address,
-      //   1000,
-      //   25,
-      //   2,
-      //   { from: aliceAddress }
-      // )
-
-      // Bob authorizes swap to send orders on his behalf
-      // function also checks that msg.sender == order.sender.wallet
+      // Alice's trade wallet authorizes aliceDelegate swap to send orders
+      // on its behalf to Swap
       await swapContract.authorizeSender(aliceDelegate.address, {
         from: aliceTradeWallet,
       })
