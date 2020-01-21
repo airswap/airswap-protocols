@@ -8,7 +8,6 @@ const WETH9 = artifacts.require('WETH9')
 const FungibleToken = artifacts.require('FungibleToken')
 const TransferHandlerRegistry = artifacts.require('TransferHandlerRegistry')
 const ERC20TransferHandler = artifacts.require('ERC20TransferHandler')
-
 const {
   emitted,
   reverted,

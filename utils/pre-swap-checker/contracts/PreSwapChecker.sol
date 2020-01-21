@@ -6,7 +6,6 @@ import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/token/ERC721/IERC721.sol";
 import "openzeppelin-solidity/contracts/introspection/ERC165Checker.sol";
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
-import "@airswap/swap/contracts/Swap.sol";
 import "@airswap/transfers/contracts/TransferHandlerRegistry.sol";
 import "@airswap/tokens/contracts/interfaces/IWETH.sol";
 import "@airswap/wrapper/contracts/Wrapper.sol";
@@ -322,7 +321,7 @@ contract PreSwapChecker {
     bytes4 kind,
     address swap
   ) internal view returns (bool) {
-    TransferHandlerRegistry tokenRegistry = Swap(swap).registry();
+    TransferHandlerRegistry tokenRegistry = ISwap(swap).registry();
     return (address(tokenRegistry.transferHandlers(kind)) != address(0));
   }
 
