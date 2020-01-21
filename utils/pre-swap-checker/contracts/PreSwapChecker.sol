@@ -6,10 +6,9 @@ import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/token/ERC721/IERC721.sol";
 import "openzeppelin-solidity/contracts/introspection/ERC165Checker.sol";
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
-import "@airswap/swap/contracts/Swap.sol";
 import "@airswap/transfers/contracts/TransferHandlerRegistry.sol";
 import "@airswap/tokens/contracts/interfaces/IWETH.sol";
-import "@airswap/wrapper/contracts/Wrapper.sol";
+import "@airswap/delegate/contracts/interfaces/IDelegate.sol";
 
 /**
   * @title PreSwapChecker: Helper contract to Swap protocol
@@ -35,6 +34,87 @@ contract PreSwapChecker {
     address preSwapCheckerWethContract
   ) public {
     wethContract = IWETH(preSwapCheckerWethContract);
+  }
+
+  /**
+    * @notice If order is going through delegate via provideOrder
+    * ensure necessary checks are set
+    * @param order Types.Order
+    * @param delegate IDelegate
+    * @return uint256 errorCount if any
+    * @return bytes32[] memory array of error messages
+    */
+  function checkSwapDelegate(
+    Types.Order calldata order,
+    IDelegate delegate
+    ) external view returns (uint256, bytes32[] memory ) {
+
+    bytes32[] memory errors = new bytes32[](20);
+    uint256 errorCount;
+    address swap = order.signature.validator;
+    IDelegate.Rule memory rule = delegate.rules(order.sender.token,order.signer.token);
+    (uint256 swapErrorCount, bytes32[] memory swapErrors) = checkSwapSwap(order, false);
+
+    if (swapErrorCount > 0) {
+      errorCount = swapErrorCount;
+      // copies over errors from checkSwapSwap to be outputted
+      for (uint256 i = 0; i < swapErrorCount; i++) {
+        errors[i] = swapErrors[i];
+      }
+    }
+
+    // signature must be filled in order to use the Delegate
+    if (order.signature.v == 0) {
+      errors[errorCount] = "SIGNATURE_MUST_BE_SENT";
+      errorCount++;
+    }
+
+    // check that the sender.wallet == tradewallet
+    if (order.sender.wallet != delegate.tradeWallet()) {
+      errors[errorCount] = "SENDER_WALLET_INVALID";
+      errorCount++;
+    }
+
+    // ensure signer kind is ERC20
+    if (order.signer.kind != ERC20_INTERFACE_ID) {
+      errors[errorCount] = "SIGNER_KIND_MUST_BE_ERC20";
+      errorCount++;
+    }
+
+    // ensure sender kind is ERC20
+    if (order.sender.kind != ERC20_INTERFACE_ID) {
+      errors[errorCount] = "SENDER_KIND_MUST_BE_ERC20";
+      errorCount++;
+    }
+
+    // ensure that token pair is active with non-zero maxSenderAmount
+    if (rule.maxSenderAmount == 0) {
+      errors[errorCount] = "TOKEN_PAIR_INACTIVE";
+      errorCount++;
+    }
+
+    if (order.sender.amount > rule.maxSenderAmount) {
+      errors[errorCount] = "ORDER_AMOUNT_EXCEEDS_MAX";
+      errorCount++;
+    }
+
+    // calls the getSenderSize quote to determine how much needs to be paid
+    uint256 senderAmount = delegate.getSenderSideQuote(order.signer.amount, order.signer.token, order.sender.token);
+    if (senderAmount == 0) {
+      errors[errorCount] = "DELEGATE_UNABLE_TO_PRICE";
+      errorCount++;
+    } else if (order.sender.amount > senderAmount) {
+      errors[errorCount] = "PRICE_INVALID";
+      errorCount++;
+    }
+
+    // ensure that tradeWallet has approved delegate contract on swap
+    if (!ISwap(swap).senderAuthorizations(order.sender.wallet, address(delegate))) {
+      errors[errorCount] = "SENDER_UNAUTHORIZED";
+      errorCount++;
+    }
+
+    return (errorCount, errors);
   }
 
   /**
@@ -240,7 +320,7 @@ contract PreSwapChecker {
     bytes4 kind,
     address swap
   ) internal view returns (bool) {
-    TransferHandlerRegistry tokenRegistry = Swap(swap).registry();
+    TransferHandlerRegistry tokenRegistry = ISwap(swap).registry();
     return (address(tokenRegistry.transferHandlers(kind)) != address(0));
   }
 

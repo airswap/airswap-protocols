@@ -1,6 +1,6 @@
 {
   "name": "@airswap/pre-swap-checker",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "repository": "git@github.com:airswap/airswap-protocols-accessory.git",
   "license": "Apache-2.0",
   "private": true,
@@ -23,11 +23,13 @@
     "@airswap/tokens": "0.1.4",
     "@airswap/types": "2.4.5",
     "openzeppelin-solidity": "2.4",
-    "@airswap/wrapper": "2.5.8"
+    "@airswap/delegate": "1.5.8"
   },
   "devDependencies": {
     "@airswap/order-utils": "0.3.19",
     "@airswap/test-utils": "0.1.4",
-    "solidity-coverage": "^0.6.3"
+    "solidity-coverage": "^0.6.3",
+    "@airswap/wrapper": "2.5.8",
+    "@airswap/indexer": "3.6.8"
   }
 }
