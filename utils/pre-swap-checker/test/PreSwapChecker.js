@@ -126,7 +126,7 @@ contract('PreSwapChecker', async accounts => {
   })
 
   describe('Approving...', async () => {
-    it('Checks approvals (Alice 250 AST and 0 DAI, Bob 0 AST and 500 DAI)', async () => {
+    it('Checks approvals (Alice 250 AST and 0 DAI, Bob 100 WETH and 1000 DAI)', async () => {
       emitted(
         await tokenAST.approve(swapAddress, 250, { from: aliceAddress }),
         'Approval'
