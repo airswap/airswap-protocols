@@ -1,6 +1,6 @@
 {
   "name": "@airswap/delegate",
-  "version": "1.5.7",
+  "version": "1.5.8",
   "description": "Deployable Trading Rules for the AirSwap Network",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>",
@@ -34,7 +34,7 @@
   },
   "dependencies": {
     "@airswap/indexer": "3.6.8",
-    "@airswap/swap": "4.3.6",
+    "@airswap/swap": "4.3.7",
     "openzeppelin-solidity": "2.4"
   }
 }

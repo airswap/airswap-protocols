@@ -72,14 +72,13 @@ contract('Delegate Integration Tests', async accounts => {
     await setupTokens()
     await setupIndexer()
 
-    const delegateContract = await Delegate.new(
+    aliceDelegate = await Delegate.new(
       swapAddress,
       indexer.address,
       aliceAddress,
       aliceTradeWallet,
       PROTOCOL
     )
-    aliceDelegate = await delegateContract
   })
 
   describe('Test the delegate constructor', async () => {
