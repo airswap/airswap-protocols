@@ -18,7 +18,6 @@ pragma solidity 0.5.12;
 pragma experimental ABIEncoderV2;
 
 import "@airswap/transfers/contracts/interfaces/ITransferHandler.sol";
-import "@airswap/transfers/contracts/TransferHandlerRegistry.sol";
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
 
 /**
