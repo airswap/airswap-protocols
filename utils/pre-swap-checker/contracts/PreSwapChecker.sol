@@ -96,7 +96,17 @@ contract PreSwapChecker {
     }
 
     if (order.sender.amount > rule.maxSenderAmount) {
-      errors[errorCount] = "AMOUNT_EXCEEDS_MAX";
+      errors[errorCount] = "ORDER_AMOUNT_EXCEEDS_MAX";
+      errorCount++;
+    }
+
+    // calls the getSenderSize quote to determine how much needs to be paid
+    uint256 senderAmount = delegate.getSenderSideQuote(order.signer.amount, order.signer.token, order.sender.token);
+    if (senderAmount == 0) {
+      errors[errorCount] = "DELEGATE_UNABLE_TO_PRICE";
+      errorCount++;
+    } else if (order.sender.amount > senderAmount) {
+      errors[errorCount] = "PRICE_INVALID";
       errorCount++;
     }
 

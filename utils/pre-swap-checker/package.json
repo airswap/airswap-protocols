@@ -24,7 +24,8 @@
     "@airswap/types": "2.4.5",
     "openzeppelin-solidity": "2.4",
     "@airswap/wrapper": "2.5.7",
-    "@airswap/delegate": "1.5.7"
+    "@airswap/delegate": "1.5.7",
+    "@airswap/indexer": "3.6.8"
   },
   "devDependencies": {
     "@airswap/order-utils": "0.3.19",
