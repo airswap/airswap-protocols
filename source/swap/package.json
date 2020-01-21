@@ -1,6 +1,6 @@
 {
   "name": "@airswap/swap",
-  "version": "4.3.6",
+  "version": "4.3.7",
   "description": "Trustlessly swap tokens on the AirSwap Network",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>",

@@ -18,6 +18,7 @@ pragma solidity 0.5.12;
 pragma experimental ABIEncoderV2;
 
 import "@airswap/types/contracts/Types.sol";
+import "@airswap/transfers/contracts/TransferHandlerRegistry.sol";
 
 interface ISwap {
 
@@ -131,5 +132,7 @@ interface ISwap {
 
   function signerNonceStatus(address, uint256) external view returns (byte);
   function signerMinimumNonce(address) external view returns (uint256);
+
+  function registry() external view returns (TransferHandlerRegistry);
 
 }
