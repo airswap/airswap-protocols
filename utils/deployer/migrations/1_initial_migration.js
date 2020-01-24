@@ -11,6 +11,8 @@ const Wrapper = artifacts.require('Wrapper');
 const Indexer = artifacts.require('Indexer');
 const Index = artifacts.require('Index');
 const DelegateFactory = artifacts.require('DelegateFactory');
+const PreSwapChecker = artifacts.require('PreSwapChecker');
+
 const {
   ERC20_INTERFACE_ID,
   ERC721_INTERFACE_ID,
@@ -41,6 +43,7 @@ module.exports = async(deployer, network) => {
   await deployer.deploy(DelegateFactory, Swap.address, Indexer.address, '0x0001')
   await deployer.deploy(Wrapper, Swap.address, WETH_ADDRESS)
 
+  await deployer.deploy(PreSwapChecker, WETH_ADDRESS)
   //Deploy Contract-Created Contracts that also need to be verified
   await deployer.deploy(Index)
   // add the linkage between the handlers to the registry within the migration script
