@@ -1,6 +1,6 @@
 {
   "name": "@airswap/deployer",
-  "version": "0.0.1",
+  "version": "0.1.1",
   "description": "Tools to deploy AirSwap contracts",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>",
@@ -29,7 +29,7 @@
     "solidity-docgen": "0.3.0-beta.3"
   },
   "dependencies": {
-    "@airswap/types": "2.4.5",
+    "@airswap/types": "2.5.5",
     "openzeppelin-solidity": "2.4"
   }
 }

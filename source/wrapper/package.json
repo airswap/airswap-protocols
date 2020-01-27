@@ -1,6 +1,6 @@
 {
   "name": "@airswap/wrapper",
-  "version": "2.5.8",
+  "version": "2.6.8",
   "description": "Wraps and unwraps ether for WETH trades on the AirSwap Network",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>",
@@ -30,12 +30,12 @@
   "devDependencies": {
     "@airswap/order-utils": "0.3.19",
     "@airswap/test-utils": "0.1.4",
-    "@airswap/indexer": "3.6.8",
+    "@airswap/indexer": "3.7.8",
     "solidity-coverage": "^0.6.3"
   },
   "dependencies": {
-    "@airswap/delegate": "1.5.8",
-    "@airswap/swap": "4.3.7",
+    "@airswap/delegate": "1.6.8",
+    "@airswap/swap": "4.4.7",
     "@airswap/tokens": "0.1.4"
   }
 }
