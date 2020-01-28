@@ -39,5 +39,5 @@ MAINNET_STAKE="0x27054b13b1b798b345b591a4d22e6562d47ea75a"
 
 If looking to verify on a network besides `development`, one can append the verification commands for the contracts that wish to be verified
 ```
-yarn migrate --network rinkeby && sleep 40 && yarn verify Types Wrapper DelegateFactory Indexer Swap PreSwapChecker Index Delegate flatten/Flattened.sol --network rinkeby
+yarn migrate --network mainnet && sleep 40 && yarn verify Types Wrapper DelegateFactory Indexer Swap TransferHandlerRegistry ERC1155TransferHandler ERC20TransferHandler ERC721TransferHandler KittyCoreTransferHandler flatten/Flattened.sol --network mainnet
 ```

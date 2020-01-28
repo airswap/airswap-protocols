@@ -14,10 +14,10 @@ module.exports = {
       provider: () =>
         new HDWalletProviderPriv(
           [process.env.PRIVATE_KEY],
-          'https://mainnet.infura.io/v3/' + process.env.INFURA_API_KEY
+          process.env.MAINNET_NODE
         ),
-      gas: 7898551,
-      gasPrice: 10000000000, // CHECK THE CURRENT GASPRICE
+      gas: 5898551,
+      gasPrice: 5000000000, // CHECK THE CURRENT GASPRICE
       network_id: 1,
     },
     rinkeby: {

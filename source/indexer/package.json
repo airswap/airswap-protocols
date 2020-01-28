@@ -1,6 +1,6 @@
 {
   "name": "@airswap/indexer",
-  "version": "3.7.8",
+  "version": "4.7.8",
   "description": "Manage intent to trade on the AirSwap Network",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>",
@@ -27,10 +27,10 @@
     "verify": "truffle run verify"
   },
   "devDependencies": {
-    "@airswap/order-utils": "0.3.19",
+    "@airswap/order-utils": "0.3.20",
     "@airswap/test-utils": "0.1.4",
-    "@airswap/transfers": "0.1.2",
-    "@airswap/types": "2.5.5",
+    "@airswap/transfers": "1.1.2",
+    "@airswap/types": "3.5.5",
     "bignumber.js": "^9.0.0",
     "solidity-coverage": "^0.6.3"
   },

@@ -11,6 +11,5 @@ import "@airswap/transfers/contracts/handlers/ERC1155TransferHandler.sol";
 import "@airswap/transfers/contracts/handlers/ERC20TransferHandler.sol";
 import "@airswap/transfers/contracts/handlers/ERC721TransferHandler.sol";
 import "@airswap/transfers/contracts/handlers/KittyCoreTransferHandler.sol";
-import "@airswap/pre-swap-checker/contracts/PreSwapChecker.sol";
 
 contract Imports {}

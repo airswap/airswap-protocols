@@ -18,18 +18,18 @@
     "verify": "truffle run verify"
   },
   "dependencies": {
-    "@airswap/transfers": "0.1.2",
-    "@airswap/swap": "4.4.7",
+    "@airswap/transfers": "1.1.2",
+    "@airswap/swap": "5.4.7",
     "@airswap/tokens": "0.1.4",
-    "@airswap/types": "2.5.5",
+    "@airswap/types": "3.5.5",
     "openzeppelin-solidity": "2.4",
-    "@airswap/delegate": "1.6.8"
+    "@airswap/delegate": "2.6.8"
   },
   "devDependencies": {
-    "@airswap/order-utils": "0.3.19",
+    "@airswap/order-utils": "0.3.20",
     "@airswap/test-utils": "0.1.4",
     "solidity-coverage": "^0.6.3",
-    "@airswap/wrapper": "2.6.8",
-    "@airswap/indexer": "3.7.8"
+    "@airswap/wrapper": "3.6.8",
+    "@airswap/indexer": "4.7.8"
   }
 }
