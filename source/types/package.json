@@ -1,6 +1,6 @@
 {
   "name": "@airswap/types",
-  "version": "3.5.5",
+  "version": "3.5.5-beta.1",
   "description": "Solidity structs and hashing used on the AirSwap Network",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>",
@@ -28,7 +28,7 @@
   },
   "devDependencies": {
     "@airswap/tokens": "0.1.4",
-    "@airswap/order-utils": "0.3.20",
+    "@airswap/order-utils": "0.3.20-beta.1",
     "solidity-coverage": "^0.6.3"
   },
   "dependencies": {
