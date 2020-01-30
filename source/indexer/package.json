@@ -1,6 +1,6 @@
 {
   "name": "@airswap/indexer",
-  "version": "4.7.8",
+  "version": "3.6.8",
   "description": "Manage intent to trade on the AirSwap Network",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>",
