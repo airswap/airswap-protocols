@@ -24,6 +24,6 @@
     "@airswap/order-utils": "0.3.20-beta.0",
     "@airswap/swap": "5.4.7-beta.0",
     "@airswap/tokens": "0.1.4",
-    "ethers": "^5.0.0-beta.059"
+    "ethers": "^5.0.0-beta.159"
   }
 }
