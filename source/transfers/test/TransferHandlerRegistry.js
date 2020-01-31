@@ -13,13 +13,13 @@ const {
   ERC20_INTERFACE_ID,
   ERC721_INTERFACE_ID,
   ERC1155_INTERFACE_ID,
+  CK_INTERFACE_ID,
 } = require('@airswap/order-utils').constants
 
 contract('TransferHandlerRegistry', async accounts => {
   const aliceAddress = accounts[0]
   const bobAddress = accounts[1]
   const carolAddress = accounts[2]
-  const CKITTY_KIND = '0x9a20483d'
   let tokenAST
   let tokenTicket
   let tokenKitty
@@ -55,7 +55,7 @@ contract('TransferHandlerRegistry', async accounts => {
       // failed to add kittyCore by bob since non-owner
       reverted(
         transferHandlerRegistry.addTransferHandler(
-          CKITTY_KIND,
+          CK_INTERFACE_ID,
           kittyCoreHandler.address,
           { from: bobAddress }
         ),
@@ -75,7 +75,7 @@ contract('TransferHandlerRegistry', async accounts => {
 
       // add all 4 of these contracts into the TokenRegistry
       await transferHandlerRegistry.addTransferHandler(
-        CKITTY_KIND,
+        CK_INTERFACE_ID,
         kittyCoreHandler.address
       )
       await transferHandlerRegistry.addTransferHandler(
@@ -304,12 +304,12 @@ contract('TransferHandlerRegistry', async accounts => {
 
     it('Carol fails to perform transfer of CKITTY collectable #54321 from Bob to Alice when an amount is set', async () => {
       const handlerAddress = await transferHandlerRegistry.transferHandlers.call(
-        CKITTY_KIND
+        CK_INTERFACE_ID
       )
       equal(
         handlerAddress,
         kittyCoreHandlerAddress,
-        'Kind does not match CKITTY interface id'
+        'Kind does not match CK_INTERFACE_ID'
       )
 
       await reverted(

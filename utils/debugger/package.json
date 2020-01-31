@@ -21,8 +21,8 @@
     "mocha": "^6.2.0"
   },
   "dependencies": {
-    "@airswap/order-utils": "0.3.19",
-    "@airswap/swap": "4.3.7",
+    "@airswap/order-utils": "0.3.20-beta.0",
+    "@airswap/swap": "5.4.7-beta.0",
     "@airswap/tokens": "0.1.4",
     "ethers": "^5.0.0-beta.159"
   }
