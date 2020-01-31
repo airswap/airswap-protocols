@@ -1,6 +1,6 @@
 {
   "name": "@airswap/delegate",
-  "version": "2.6.8-beta.1",
+  "version": "2.6.8-beta.0",
   "description": "Deployable Trading Rules for the AirSwap Network",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>",
@@ -27,14 +27,14 @@
     "verify": "truffle run verify"
   },
   "devDependencies": {
-    "@airswap/order-utils": "0.3.20-beta.1",
+    "@airswap/order-utils": "0.3.20-beta.0",
     "@airswap/test-utils": "0.1.4",
-    "@airswap/transfers": "1.1.2-beta.1",
+    "@airswap/transfers": "1.1.2-beta.0",
     "solidity-coverage": "^0.6.3"
   },
   "dependencies": {
     "@airswap/indexer": "3.6.8",
-    "@airswap/swap": "5.4.7-beta.1",
+    "@airswap/swap": "5.4.7-beta.0",
     "openzeppelin-solidity": "2.4"
   }
 }
