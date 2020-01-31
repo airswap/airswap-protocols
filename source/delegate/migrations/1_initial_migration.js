@@ -7,7 +7,7 @@ module.exports = async(deployer, network) => {
     const INDEXER_ADDRESS = ''
     const OWNER_ADDRESS = ''
     const TRADE_WALLET_ADDRESS = ''
-    const FACTORY_PROTOCOL = ''
+    const FACTORY_PROTOCOL = '0x0001'
 
   if (network == 'mainnet' || network == 'rinkeby') {
     await deployer.deploy(DelegateFactory, SWAP_ADDRESS, INDEXER_ADDRESS, FACTORY_PROTOCOL)
