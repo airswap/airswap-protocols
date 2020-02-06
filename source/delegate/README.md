@@ -1,7 +1,5 @@
 # Delegate
 
-**:warning: This package is under active development. Do not use in production.**
-
 [AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens. This package contains source code and tests for a basic `Delegate` contract that can be deployed with trading rules.
 
 :bulb: **Note**: `solidity-coverage` does not cooperate with `view` functions. To run test coverage, remove the `view` keywords from functions in `Delegate.sol` and `IDelegate.sol`. Make sure if you have modified other repos for running `solidity-coverage` i.e. indexer (`Indexer.sol`, `IIndexer.sol`, or `ILocatorWhitelist.sol`), revert those changes and only remove the `view` keywords from the repo being tested.
