@@ -1,0 +1,13 @@
+{
+  "name": "@airswap/utils",
+  "version": "0.1.0",
+  "description": "Utilities for AirSwap Developers",
+  "main": "index.ts",
+  "contributors": [
+    "Don Mosites <don.mosites@fluidity.io>"
+  ],
+  "license": "Apache-2.0",
+  "dependencies": {
+    "ethers": "^4.0.44"
+  }
+}

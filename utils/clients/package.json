@@ -1,0 +1,21 @@
+{
+  "name": "@airswap/clients",
+  "version": "0.1.0",
+  "description": "JavaScript Clients for AirSwap Protocols",
+  "main": "src/index.ts",
+  "contributors": [
+    "Don Mosites <don.mosites@fluidity.io>"
+  ],
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@airswap/indexer": "^3.6.8",
+    "@airswap/order-utils": "^0.3.20",
+    "@airswap/swap": "^5.4.7",
+    "bignumber.js": "^9.0.0",
+    "ethers": "^4.0.44",
+    "jayson": "^3.2.0"
+  },
+  "devDependencies": {
+    "eslint": "^6.8.0"
+  }
+}
