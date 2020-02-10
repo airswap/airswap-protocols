@@ -7,8 +7,7 @@ orbs:
   datadog: airswap/datadog@volatile
 
 references:
-  working_directory: &working_directory
-    ~/repo
+  working_directory: &working_directory ~/repo
 
   container_config: &container_config
     docker:
@@ -93,7 +92,7 @@ jobs:
           name: Run Tests
           command: |
             yarn ganache > /dev/null &
-            cd utils/order-utils && yarn test
+            cd tools/order-utils && yarn test
 
   pre_swap_checker_tests:
     <<: *container_config
@@ -104,7 +103,7 @@ jobs:
           name: Run Tests
           command: |
             yarn ganache > /dev/null &
-            cd utils/pre-swap-checker && yarn test
+            cd tools/pre-swap-checker && yarn test
 
   transfers_tests:
     <<: *container_config
@@ -148,7 +147,7 @@ jobs:
           name: Run Tests
           command: |
             yarn ganache > /dev/null &
-            sleep 10s && cd utils/debugger && yarn test
+            sleep 10s && cd tools/debugger && yarn test
 
   deploy:
     <<: *container_config
@@ -162,9 +161,9 @@ jobs:
           name: Set up the npm user
           command: npm-login-noninteractive
       - run:
-          name: NPM publish utils
+          name: NPM publish tools
           command: |
-            cd utils
+            cd tools
             ### ADD FOLDERS HERE TO PROCESS ###
             for file in order-utils test-utils
             do
