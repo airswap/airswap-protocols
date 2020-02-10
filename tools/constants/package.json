@@ -2,9 +2,23 @@
   "name": "@airswap/constants",
   "version": "0.1.0",
   "description": "Helpful Constants for AirSwap Developers",
-  "main": "index.ts",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>"
   ],
-  "license": "Apache-2.0"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/airswap/airswap-protocols"
+  },
+  "homepage": "https://github.com/airswap/airswap-protocols/tree/master/tools/constants",
+  "keywords": [
+    "airswap"
+  ],
+  "license": "Apache-2.0",
+  "main": "dist/index.js",
+  "files": [
+    "/dist"
+  ],
+  "scripts": {
+    "compile": "tsc -b"
+  }
 }

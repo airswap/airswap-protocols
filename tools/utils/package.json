@@ -2,12 +2,28 @@
   "name": "@airswap/utils",
   "version": "0.1.0",
   "description": "Utilities for AirSwap Developers",
-  "main": "index.ts",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/airswap/airswap-protocols"
+  },
+  "homepage": "https://github.com/airswap/airswap-protocols/tree/master/tools/utils",
+  "keywords": [
+    "airswap"
+  ],
   "license": "Apache-2.0",
+  "main": "dist/index.js",
+  "files": [
+    "/dist"
+  ],
+  "scripts": {
+    "compile": "tsc -b"
+  },
   "dependencies": {
-    "ethers": "^4.0.44"
+    "ethers": "^4.0.44",
+    "@airswap/constants": "0.1.0",
+    "@airswap/order-utils": "0.3.20"
   }
 }

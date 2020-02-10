@@ -15,7 +15,7 @@
 */
 
 import { ethers } from 'ethers'
-import { chainIds, chainNames, MIN_CONFIRMATIONS } from '@airswap/constants'
+import { chainIds, chainNames } from '@airswap/constants'
 import { BigNumber } from 'ethers/utils'
 
 const IERC20 = require('@airswap/tokens/build/contracts/IERC20.json')
@@ -31,6 +31,7 @@ export class ERC20 {
     signerOrProvider?: ethers.Signer | ethers.providers.Provider
   ) {
     this.address = address
+    this.chainId = chainId
     this.contract = new ethers.Contract(
       address,
       IERC20.abi,

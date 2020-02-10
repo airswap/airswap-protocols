@@ -18,8 +18,8 @@ import { BigNumber } from 'ethers/utils'
 import { defaults, signatureTypes, SECONDS_IN_DAY } from '@airswap/constants'
 import { hashes } from '@airswap/order-utils'
 
-function lowerCaseAddresses(obj) {
-  for (let key in obj) {
+function lowerCaseAddresses(obj: any) {
+  for (const key in obj) {
     if (typeof obj[key] === 'object') {
       lowerCaseAddresses(obj[key])
     }
@@ -76,10 +76,10 @@ export async function signOrder(
   const { r, s, v } = sig
 
   return {
-    signatory: await (await signer.getAddress()).toLowerCase(),
+    signatory: (await signer.getAddress()).toLowerCase(),
     validator: swapContract,
     version: signatureTypes.PERSONAL_SIGN,
-    v: v.toString(),
+    v: String(v),
     r,
     s,
   }

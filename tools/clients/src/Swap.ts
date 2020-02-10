@@ -47,14 +47,15 @@ export class Swap {
   async swap(order: any, signer?: ethers.Signer): Promise<string> {
     let contract = this.contract
     if (!this.contract.signer) {
-      if (signer === null) {
+      if (signer === undefined) {
         throw new Error('Signer must be provided')
+      } else {
+        contract = new ethers.Contract(
+          Swap.getAddress(this.chainId),
+          SwapContract.abi,
+          signer
+        )
       }
-      contract = new ethers.Contract(
-        Swap.getAddress(this.chainId),
-        SwapContract.abi,
-        signer
-      )
     }
     const tx = await contract.swap(order)
     await tx.wait(MIN_CONFIRMATIONS)

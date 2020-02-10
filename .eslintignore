@@ -3,3 +3,4 @@
 **/lcov-report/*.js
 **/node_modules/*
 **/venv/*
+**/dist/*

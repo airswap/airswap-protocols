@@ -17,7 +17,7 @@
     "clean": "lerna run clean",
     "compile": "lerna run compile",
     "hint": "yarn solhint \"./source/**/*.sol\"",
-    "lint": "yarn eslint \"./**/*.js\"",
+    "lint": "yarn eslint \"./**/*.js\" \"./**/*.ts\"",
     "ganache": "ganache-cli -p 8545 --gasLimit 0xfffffffffff --time '2017-05-10T00:00:00+00:00' -s 0",
     "publish": "lerna publish",
     "test": "yarn clean && yarn compile && lerna run test --concurrency=1",

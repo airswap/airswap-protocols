@@ -1,11 +1,15 @@
 {
   "compilerOptions": {
-    "declaration": true,
-    "importHelpers": true,
+    "target": "es5",
     "module": "commonjs",
-    "target": "es2017",
+    "moduleResolution": "node",
+    "lib": ["es2019", "dom"],
+    "esModuleInterop": true,
+    "skipLibCheck": false,
     "resolveJsonModule": true,
-    "esModuleInterop": true
-  },
-  "include": ["index.ts"]
+    "sourceMap": true,
+    "declaration": true,
+    "outDir": "./dist",
+    "strict": true
+  }
 }
