@@ -19,7 +19,7 @@
     "/dist"
   ],
   "scripts": {
-    "compile": "tsc --b"
+    "compile": "tsc -b"
   },
   "dependencies": {
     "ethers": "^4.0.44",
