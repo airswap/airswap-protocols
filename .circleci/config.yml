@@ -165,7 +165,7 @@ jobs:
           command: |
             cd tools
             ### ADD FOLDERS HERE TO PROCESS ###
-            for file in order-utils test-utils
+            for file in clients constants utils order-utils test-utils
             do
               cd $file
               NPM_NAME=$(node -p "require('./package.json').name")
@@ -175,12 +175,16 @@ jobs:
               ### Check if the local version is beta, otherwise publish normally
               if [[ $LOCAL_VERSION == *"beta"* ]]; then
                 if [[ $LOCAL_VERSION != $NPM_BETA_VERSION ]]; then
+                  echo "Compiling..."
+                  yarn compile
                   echo "Publishing package to NPM with 'beta' tag..."
                   npm publish --tag beta
                   npm access public $NPM_NAME
                 fi
               else
                 if [[ $LOCAL_VERSION != $NPM_VERSION ]]; then
+                  echo "Compiling..."
+                  yarn compile
                   echo "Publishing package to NPM with 'latest' tag..."
                   npm publish
                   npm access public $NPM_NAME
@@ -203,7 +207,7 @@ jobs:
               ### Check if the local version is beta, otherwise publish normally
               if [[ $LOCAL_VERSION == *"beta"* ]]; then
                 if [[ $LOCAL_VERSION != $NPM_BETA_VERSION ]]; then
-                  echo "Generating build..."
+                  echo "Compiling..."
                   yarn compile
                   ### This is where we deploy the package to NPM
                   echo "Publishing package to NPM with 'beta' tag..."
@@ -212,7 +216,7 @@ jobs:
                 fi
               else
                 if [[ $LOCAL_VERSION != $NPM_VERSION ]]; then
-                  echo "Generating build..."
+                  echo "Compiling..."
                   yarn compile
                   ### This is where we deploy the package to NPM
                   echo "Publishing package to NPM with 'latest' tag..."
