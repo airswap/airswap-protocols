@@ -9,7 +9,7 @@ class bcolors:
 
 DEV_DEP = "devDependencies"
 DEP = "dependencies"
-SEARCH_DIR = ['/source', '/utils']
+SEARCH_DIR = ['/source', '/tools']
 PACKAGE_TYPES = [ 'airswap', 'test-utils', 'order-utils' ]
 
 class DependencyChecker:
@@ -82,7 +82,7 @@ class DependencyChecker:
         for package_type in PACKAGE_TYPES:
             if package_type in dep:
                 return True
-        return False 
+        return False
 
 
 if __name__ == "__main__":

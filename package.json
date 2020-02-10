@@ -10,8 +10,8 @@
   ],
   "license": "Apache-2.0",
   "workspaces": [
-    "utils/*",
-    "source/*"
+    "source/*",
+    "tools/*"
   ],
   "scripts": {
     "clean": "lerna run clean",

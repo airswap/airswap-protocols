@@ -35,8 +35,8 @@ Packages are versioned based on deploys. Major versions e.g. `1.x.x` are mainnet
 
 | Package                                      | Version                                                                                                         | Description            |
 | :------------------------------------------- | :-------------------------------------------------------------------------------------------------------------- | :--------------------- |
-| [`@airswap/order-utils`](/utils/order-utils) | [![npm](https://img.shields.io/npm/v/@airswap/order-utils)](https://www.npmjs.com/package/@airswap/order-utils) | Create and Sign Orders |
-| [`@airswap/test-utils`](/utils/test-utils)   | [![npm](https://img.shields.io/npm/v/@airswap/test-utils)](https://www.npmjs.com/package/@airswap/test-utils)   | Test Utilities         |
+| [`@airswap/order-utils`](/tools/order-utils) | [![npm](https://img.shields.io/npm/v/@airswap/order-utils)](https://www.npmjs.com/package/@airswap/order-utils) | Create and Sign Orders |
+| [`@airswap/test-utils`](/tools/test-utils)   | [![npm](https://img.shields.io/npm/v/@airswap/test-utils)](https://www.npmjs.com/package/@airswap/test-utils)   | Test Utilities         |
 
 ## Commands
 
@@ -51,4 +51,4 @@ Packages are versioned based on deploys. Major versions e.g. `1.x.x` are mainnet
 
 ## Deployments
 
-To deploy, please follow [this guide](./utils/deployer)
+To deploy, please follow [this guide](./tools/deployer)
