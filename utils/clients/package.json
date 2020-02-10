@@ -1,12 +1,28 @@
 {
   "name": "@airswap/clients",
-  "version": "0.1.0",
+  "version": "0.3.0-beta",
   "description": "JavaScript Clients for AirSwap Protocols",
-  "main": "src/index.ts",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/airswap/airswap-protocols"
+  },
+  "homepage": "https://github.com/airswap/airswap-protocols/tree/master/tools/clients",
+  "keywords": [
+    "airswap"
+  ],
   "license": "Apache-2.0",
+  "main": "dist/index.js",
+  "files": [
+    "/dist"
+  ],
+  "scripts": {
+    "build": "tsc --build",
+    "publish:prod": "tsc --build && yarn publish",
+    "publish:beta": "tsc --build && yarn publish --tag beta"
+  },
   "dependencies": {
     "@airswap/indexer": "3.6.8",
     "@airswap/order-utils": "0.3.20",
