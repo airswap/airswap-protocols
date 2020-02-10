@@ -76,10 +76,10 @@ export async function signOrder(
   const { r, s, v } = sig
 
   return {
-    signatory: await (await signer.getAddress()).toLowerCase(),
+    signatory: (await signer.getAddress()).toLowerCase(),
     validator: swapContract,
     version: signatureTypes.PERSONAL_SIGN,
-    v: `${v}`,
+    v: String(v),
     r,
     s,
   }
