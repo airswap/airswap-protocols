@@ -85,10 +85,15 @@ export class Delegate {
   async provideOrder(order: any, signer?: ethers.Signer): Promise<string> {
     let contract = this.contract
     if (!this.contract.signer) {
-      if (signer === null) {
+      if (signer === undefined) {
         throw new Error('Signer must be provided')
+      } else {
+        contract = new ethers.Contract(
+          this.locator,
+          DelegateContract.abi,
+          signer
+        )
       }
-      contract = new ethers.Contract(this.locator, DelegateContract.abi, signer)
     }
     const tx = await contract.provideOrder(order)
     await tx.wait(MIN_CONFIRMATIONS)

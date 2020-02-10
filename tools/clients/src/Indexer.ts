@@ -28,6 +28,7 @@ export class Indexer {
     chainId = chainIds.RINKEBY,
     signerOrProvider?: ethers.Signer | ethers.providers.Provider
   ) {
+    this.chainId = chainId
     this.contract = new ethers.Contract(
       indexerDeploys[chainId],
       IndexerContract.abi,

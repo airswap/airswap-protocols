@@ -1,6 +1,6 @@
 {
   "name": "@airswap/clients",
-  "version": "0.3.0-beta",
+  "version": "0.3.0",
   "description": "JavaScript Clients for AirSwap Protocols",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>"
@@ -19,11 +19,10 @@
     "/dist"
   ],
   "scripts": {
-    "build": "tsc --build",
-    "publish:prod": "tsc --build && yarn publish",
-    "publish:beta": "tsc --build && yarn publish --tag beta"
+    "compile": "tsc --b"
   },
   "dependencies": {
+    "@airswap/constants": "0.1.0",
     "@airswap/indexer": "3.6.8",
     "@airswap/order-utils": "0.3.20",
     "@airswap/swap": "5.4.7",
