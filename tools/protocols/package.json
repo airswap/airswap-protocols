@@ -1,7 +1,7 @@
 {
-  "name": "@airswap/clients",
+  "name": "@airswap/protocols",
   "version": "0.3.1",
-  "description": "JavaScript Clients for AirSwap Protocols",
+  "description": "JavaScript Protocol Tools for AirSwap Developers",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>"
   ],
@@ -9,7 +9,7 @@
     "type": "git",
     "url": "https://github.com/airswap/airswap-protocols"
   },
-  "homepage": "https://github.com/airswap/airswap-protocols/tree/master/tools/clients",
+  "homepage": "https://github.com/airswap/airswap-protocols/tree/master/tools/protocols",
   "keywords": [
     "airswap"
   ],
