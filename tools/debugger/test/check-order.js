@@ -2,12 +2,12 @@ const assert = require('assert')
 
 const { orders, signatures } = require('@airswap/order-utils')
 const {
-  GANACHE_PROVIDER,
-  KNOWN_GANACHE_WALLET,
-  ERC721_INTERFACE_ID,
-  ERC20_INTERFACE_ID,
   CK_INTERFACE_ID,
   ERC1155_INTERFACE_ID,
+  ERC20_INTERFACE_ID,
+  ERC721_INTERFACE_ID,
+  GANACHE_PROVIDER,
+  KNOWN_GANACHE_WALLET,
 } = require('@airswap/order-utils').constants
 
 const checker = require('../src/check-order')
@@ -339,7 +339,7 @@ describe('Orders', async () => {
 
       const errors = await checker.checkOrder(order, 'rinkeby')
 
-      // length 1 showing the contract was accepted
+      // length 2 showing the contract was accepted
       assert.equal(errors.length, 2)
       assert.equal(errors[1], 'sender no NFT approval')
     })
@@ -456,7 +456,7 @@ describe('Orders', async () => {
 
       const errors = await checker.checkOrder(order, 'rinkeby')
 
-      // length 1 showing the contract was accepted
+      // length 2 showing the contract was accepted
       assert.equal(errors.length, 2)
       assert.equal(
         errors[0],
@@ -581,7 +581,7 @@ describe('Orders', async () => {
 
       const errors = await checker.checkOrder(order, 'rinkeby')
 
-      // length 1 showing the contract was accepted
+      // length 2 showing the contract was accepted
       assert.equal(errors.length, 2)
       assert.equal(
         errors[0],
