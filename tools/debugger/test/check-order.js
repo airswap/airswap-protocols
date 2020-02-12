@@ -37,7 +37,7 @@ describe('Orders', async () => {
   const creatureNFTAddress = '0x12adf24b46b05ea3cb13b8a7d96579966055946f'
   const mintable1155Address = '0x90fF319Eed5606110A12A0BCfD2C6258352a740e'
 
-  const rinkebySwap = '0x43f18D371f388ABE40b9dDaac44D1C9c9185a078'
+  const rinkebySwap = '0x2e7373D70732E0F37F4166D8FD9dBC89DD5BC476'
 
   const NOV_7_2020_22_18_14 = '1604787494'
   const MAY_11_2017_00_00_00 = '1494460800'
@@ -126,8 +126,11 @@ describe('Orders', async () => {
       )
 
       const errors = await checker.checkOrder(order, 'rinkeby')
-      assert.equal(errors.length, 2)
-      assert.equal(errors[1], 'Order expiry has passed')
+
+      assert.equal(errors.length, 3)
+      assert.equal(errors[0], 'signer allowance is too low')
+      assert.equal(errors[1], 'sender allowance is too low')
+      assert.equal(errors[2], 'Order expiry has passed')
     })
 
     it('Check invalid signature', async () => {
@@ -155,9 +158,14 @@ describe('Orders', async () => {
 
       order.signature.v -= 1
       const errors = await checker.checkOrder(order, 'rinkeby')
-
-      assert.equal(errors.length, 3)
-      assert.equal(errors[2], 'Signature invalid')
+      assert.equal(errors.length, 4)
+      assert.equal(
+        errors[0],
+        'Order structured incorrectly or signature invalid'
+      )
+      assert.equal(errors[1], 'signer allowance is too low')
+      assert.equal(errors[2], 'sender allowance is too low')
+      assert.equal(errors[3], 'Signature invalid')
     })
 
     it('Check order without allowance', async () => {
@@ -184,8 +192,9 @@ describe('Orders', async () => {
       )
 
       const errors = await checker.checkOrder(order, 'rinkeby')
-      assert.equal(errors.length, 1)
+      assert.equal(errors.length, 2)
       assert.equal(errors[0], 'signer allowance is too low')
+      assert.equal(errors[1], 'sender allowance is too low')
     })
 
     it('Check order without balance', async () => {
@@ -212,8 +221,10 @@ describe('Orders', async () => {
       )
 
       const errors = await checker.checkOrder(order, 'rinkeby')
-      assert.equal(errors.length, 2)
+      assert.equal(errors.length, 3)
       assert.equal(errors[0], 'signer balance is too low')
+      assert.equal(errors[1], 'signer allowance is too low')
+      assert.equal(errors[2], 'sender allowance is too low')
     })
   })
 
