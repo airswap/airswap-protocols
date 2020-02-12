@@ -46,26 +46,6 @@ const checkOrderSignature = async (order, provider, errors) => {
   return errors
 }
 
-const checkBalanceAndApproval = async (order, partyName, provider, errors) => {
-  // Check whether this token is ERC20 or ERC721
-  switch (order[partyName]['kind']) {
-    case ERC20_INTERFACE_ID:
-      errors = await checkERC20Transfer(order, partyName, provider, errors)
-      break
-    case CK_INTERFACE_ID:
-    case ERC721_INTERFACE_ID:
-      errors = await checkERC721Transfer(order, partyName, provider, errors)
-      break
-    case ERC1155_INTERFACE_ID:
-      errors = await checkERC1155Transfer(order, partyName, provider, errors)
-      break
-    default:
-      errors.push(`${partyName} token kind invalid`)
-  }
-
-  return errors
-}
-
 const checkERC20Transfer = async (order, partyName, provider, errors) => {
   const party = order[partyName]
 
@@ -241,6 +221,26 @@ const checkERC1155Transfer = async (order, partyName, provider, errors) => {
         errors.push(`${recipient} is not configured to receive ERC1155s`)
       }
     }
+  }
+
+  return errors
+}
+
+const checkBalanceAndApproval = async (order, partyName, provider, errors) => {
+  // Check whether this token is ERC20 or ERC721
+  switch (order[partyName]['kind']) {
+    case ERC20_INTERFACE_ID:
+      errors = await checkERC20Transfer(order, partyName, provider, errors)
+      break
+    case CK_INTERFACE_ID:
+    case ERC721_INTERFACE_ID:
+      errors = await checkERC721Transfer(order, partyName, provider, errors)
+      break
+    case ERC1155_INTERFACE_ID:
+      errors = await checkERC1155Transfer(order, partyName, provider, errors)
+      break
+    default:
+      errors.push(`${partyName} token kind invalid`)
   }
 
   return errors
