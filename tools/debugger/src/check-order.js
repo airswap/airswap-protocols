@@ -1,11 +1,11 @@
 const ethers = require('ethers')
 
 const {
+  CK_INTERFACE_ID,
   EMPTY_ADDRESS,
+  ERC1155_INTERFACE_ID,
   ERC20_INTERFACE_ID,
   ERC721_INTERFACE_ID,
-  CK_INTERFACE_ID,
-  ERC1155_INTERFACE_ID,
 } = require('@airswap/order-utils').constants
 
 const IERC20 = require('@airswap/tokens/build/contracts/IERC20.json')
