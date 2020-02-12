@@ -28,7 +28,7 @@ describe('Orders', async () => {
   const erc721Receiver = '0xF727956c4CFd20b9C8D463218a65e751891da3e6'
 
   // Mock ERC1155Receiver wallet on rinkeby
-  const erc1155Receiver = '0xF727956c4CFd20b9C8D463218a65e751891da3e6'
+  const erc1155Receiver = '0x55791bA427a47807FBC0E4D61e7908Db217FC475'
 
   // rinkeby addresses
   const ASTAddress = '0xcc1cbd4f67cceb7c001bd4adf98451237a193ff8'
