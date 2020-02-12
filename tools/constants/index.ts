@@ -14,6 +14,8 @@
   limitations under the License.
 */
 
+import { Party, Token } from '@airswap/ts'
+
 export const chainIds: { [key: string]: string } = {
   MAINNET: '1',
   RINKEBY: '4',
@@ -54,37 +56,40 @@ export const signatureTypes: { [key: string]: string } = {
   PERSONAL_SIGN: '0x45',
 }
 
-export const rinkebyTokens: { [key: string]: any } = {
+export const rinkebyTokens: { [key: string]: Token } = {
   DAI: {
     address: '0x5592ec0cfb4dbc12d3ab100b257153436a1f0fea',
     decimals: 18,
+    symbol: 'DAI',
   },
   WETH: {
     address: '0xc778417e063141139fce010982780140aa0cd5ab',
     decimals: 18,
+    symbol: 'WETH',
   },
   AST: {
     address: '0xcc1cbd4f67cceb7c001bd4adf98451237a193ff8',
     decimals: 4,
+    symbol: 'AST',
   },
 }
 
-export const stakingTokenAddresses: { [key: string]: any } = {
+export const stakingTokenAddresses: { [key: string]: string } = {
   '1': '0x27054b13b1b798b345b591a4d22e6562d47ea75a',
   '4': '0xcc1cbd4f67cceb7c001bd4adf98451237a193ff8',
 }
 
-export const deltaBalanceAddresses: { [key: string]: any } = {
+export const deltaBalanceAddresses: { [key: string]: string } = {
   '1': '0x5dfe850d4b029c25c7ef9531ec9986c97d90300f',
   '4': '0xa1e2c4132cbd33c3876e1254143a850466c97e32',
 }
 
-export const etherscanDomains: { [key: string]: any } = {
+export const etherscanDomains: { [key: string]: string } = {
   '1': 'etherscan.io',
   '4': 'rinkeby.etherscan.io',
 }
 
-export const defaults: { [key: string]: any } = {
+export const defaults: { [key: string]: Party } = {
   Party: {
     kind: '0x36372b07',
     wallet: '0x0000000000000000000000000000000000000000',

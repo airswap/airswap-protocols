@@ -16,13 +16,17 @@
 
 import { ethers } from 'ethers'
 import { chainIds, chainNames, protocols, INDEX_HEAD } from '@airswap/constants'
+import { LocatorResult } from '@airswap/ts'
 
-const IndexerContract = require('@airswap/indexer/build/contracts/Indexer.json')
-const indexerDeploys = require('@airswap/indexer/deploys.json')
+import * as IndexerContract from '@airswap/indexer/build/contracts/Indexer.json'
+import * as indexerDeploys from '@airswap/indexer/deploys.json'
+const IndexerInterface = new ethers.utils.Interface(
+  JSON.stringify(IndexerContract.abi)
+)
 
 export class Indexer {
   chainId: string
-  contract: any
+  contract: ethers.Contract
 
   constructor(
     chainId = chainIds.RINKEBY,
@@ -31,7 +35,7 @@ export class Indexer {
     this.chainId = chainId
     this.contract = new ethers.Contract(
       indexerDeploys[chainId],
-      IndexerContract.abi,
+      IndexerInterface,
       signerOrProvider ||
         ethers.getDefaultProvider(chainNames[chainId].toLowerCase())
     )
@@ -43,7 +47,7 @@ export class Indexer {
     protocol = '0x0000',
     limit = 10,
     cursor = INDEX_HEAD
-  ) {
+  ): Promise<LocatorResult> {
     const result = await this.contract.getLocators(
       signerToken,
       senderToken,
@@ -51,21 +55,19 @@ export class Indexer {
       cursor,
       limit
     )
-    let locator
     const locators = []
-    for (let i = 0; i < result.locators.length; i++) {
+    for (const locator of result.locators) {
       try {
         switch (protocol) {
           case protocols.SERVER:
-            locator = ethers.utils.parseBytes32String(result.locators[i])
+            locators.push(ethers.utils.parseBytes32String(locator))
             break
           case protocols.DELEGATE:
-            locator = ethers.utils.getAddress(result.locators[i].slice(0, 42))
+            locators.push(ethers.utils.getAddress(locator.slice(0, 42)))
             break
           default:
-            locator = result.locators[i]
+            locators.push(locator)
         }
-        locators.push(locator)
       } catch (e) {
         continue
       }

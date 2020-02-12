@@ -16,13 +16,17 @@
 
 import { ethers } from 'ethers'
 import { chainIds, chainNames, MIN_CONFIRMATIONS } from '@airswap/constants'
+import { Order } from '@airswap/ts'
 
-const SwapContract = require('@airswap/swap/build/contracts/Swap.json')
-const swapDeploys = require('@airswap/swap/deploys.json')
+import * as SwapContract from '@airswap/swap/build/contracts/Swap.json'
+import * as swapDeploys from '@airswap/swap/deploys.json'
+const SwapInterface = new ethers.utils.Interface(
+  JSON.stringify(SwapContract.abi)
+)
 
 export class Swap {
   chainId: string
-  contract: any
+  contract: ethers.Contract
 
   constructor(
     chainId = chainIds.RINKEBY,
@@ -31,7 +35,7 @@ export class Swap {
     this.chainId = chainId
     this.contract = new ethers.Contract(
       Swap.getAddress(chainId),
-      SwapContract.abi,
+      SwapInterface,
       signerOrProvider ||
         ethers.getDefaultProvider(chainNames[chainId].toLowerCase())
     )
@@ -44,7 +48,7 @@ export class Swap {
     throw new Error(`Swap deploy not found for chainId ${chainId}`)
   }
 
-  async swap(order: any, signer?: ethers.Signer): Promise<string> {
+  async swap(order: Order, signer?: ethers.Signer): Promise<string> {
     let contract = this.contract
     if (!this.contract.signer) {
       if (signer === undefined) {
@@ -52,7 +56,7 @@ export class Swap {
       } else {
         contract = new ethers.Contract(
           Swap.getAddress(this.chainId),
-          SwapContract.abi,
+          SwapInterface,
           signer
         )
       }

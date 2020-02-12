@@ -15,10 +15,17 @@
 */
 import { ethers } from 'ethers'
 import { BigNumber } from 'ethers/utils'
-import { defaults, signatureTypes, SECONDS_IN_DAY } from '@airswap/constants'
+import * as url from 'url'
+import {
+  defaults,
+  signatureTypes,
+  SECONDS_IN_DAY,
+  tokenKinds,
+} from '@airswap/constants'
 import { hashes } from '@airswap/order-utils'
+import { Quote, UnsignedOrder, Signature } from '@airswap/ts'
 
-function lowerCaseAddresses(obj: any) {
+function lowerCaseAddresses(obj: any): any {
   for (const key in obj) {
     if (typeof obj[key] === 'object') {
       lowerCaseAddresses(obj[key])
@@ -36,7 +43,7 @@ export function createOrder({
   signer = defaults.Party,
   sender = defaults.Party,
   affiliate = defaults.Party,
-}): any {
+}): UnsignedOrder {
   return lowerCaseAddresses({
     expiry: String(expiry),
     nonce: String(nonce),
@@ -46,18 +53,20 @@ export function createOrder({
   })
 }
 
-export function createOrderFromQuote(
-  quote: any,
+export function createOrderForQuote(
+  quote: Quote,
   signerWallet: string,
   senderWallet: string
-): any {
+): UnsignedOrder {
   return createOrder({
     signer: {
+      kind: tokenKinds.ERC20,
       token: quote.signer.token,
       amount: quote.signer.amount,
       wallet: signerWallet,
     },
     sender: {
+      kind: tokenKinds.ERC20,
       token: quote.sender.token,
       amount: quote.sender.amount,
       wallet: senderWallet,
@@ -65,11 +74,11 @@ export function createOrderFromQuote(
   })
 }
 
-export async function signOrder(
-  order: any,
+export async function createSignatureForOrder(
+  order: UnsignedOrder,
   signer: ethers.Signer,
   swapContract: string
-) {
+): Promise<Signature> {
   const orderHash = hashes.getOrderHash(order, swapContract)
   const signedMsg = await signer.signMessage(ethers.utils.arrayify(orderHash))
   const sig = ethers.utils.splitSignature(signedMsg)
@@ -85,6 +94,13 @@ export async function signOrder(
   }
 }
 
+export function parseUrl(locator: string): url.UrlWithStringQuery {
+  if (!/^http:\/\//.test(locator) && !/^https:\/\//.test(locator)) {
+    locator = `https://${locator}`
+  }
+  return url.parse(locator)
+}
+
 export function toDecimalString(
   value: string | BigNumber,
   decimals: string | number
@@ -95,6 +111,6 @@ export function toDecimalString(
 export function toAtomicString(
   value: string | BigNumber,
   decimals: string | number
-) {
+): string {
   return ethers.utils.parseUnits(value.toString(), decimals).toString()
 }

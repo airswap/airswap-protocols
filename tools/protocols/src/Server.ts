@@ -14,35 +14,31 @@
   limitations under the License.
 */
 
-import * as url from 'url'
 import * as jayson from 'jayson'
 import { BigNumber } from 'ethers/utils'
 import { REQUEST_TIMEOUT } from '@airswap/constants'
+import { parseUrl } from '@airswap/utils'
+import { Quote, Order } from '@airswap/ts'
 
 export class Server {
-  _client: any
+  _client: jayson.Client
 
   constructor(locator: string) {
-    if (!/^http:\/\//.test(locator) && !/^https:\/\//.test(locator)) {
-      locator = `https://${locator}`
-    }
-
-    const locatorUrl = url.parse(locator)
+    const locatorUrl = parseUrl(locator)
     const options = {
       protocol: locatorUrl.protocol,
       hostname: locatorUrl.hostname,
       port: locatorUrl.port,
       timeout: REQUEST_TIMEOUT,
     }
-
-    if (options.protocol === 'http:') {
-      this._client = jayson.Client.http(options)
-    } else if (options.protocol === 'https:') {
+    if (options.protocol === 'https:') {
       this._client = jayson.Client.https(options)
+    } else {
+      this._client = jayson.Client.http(options)
     }
   }
 
-  async getMaxQuote(signerToken: string, senderToken: string): Promise<any> {
+  async getMaxQuote(signerToken: string, senderToken: string): Promise<Quote> {
     return new Promise((resolve, reject) => {
       this._generateRequest(
         'getMaxQuote',
@@ -60,7 +56,7 @@ export class Server {
     senderAmount: string,
     signerToken: string,
     senderToken: string
-  ) {
+  ): Promise<Quote> {
     return new Promise((resolve, reject) => {
       this._generateRequest(
         'getSignerSideQuote',
@@ -79,7 +75,7 @@ export class Server {
     signerAmount: string,
     signerToken: string,
     senderToken: string
-  ) {
+  ): Promise<Quote> {
     return new Promise((resolve, reject) => {
       this._generateRequest(
         'getSenderSideQuote',
@@ -99,7 +95,7 @@ export class Server {
     signerToken: string,
     senderToken: string,
     senderWallet: string
-  ) {
+  ): Promise<Order> {
     return new Promise((resolve, reject) => {
       this._generateRequest(
         'getSignerSideOrder',
@@ -120,12 +116,12 @@ export class Server {
     signerToken: string,
     senderToken: string,
     senderWallet: string
-  ) {
+  ): Promise<Order> {
     return new Promise((resolve, reject) => {
       this._generateRequest(
         'getSenderSideOrder',
         {
-          signerAmount,
+          signerAmount: signerAmount.toString(),
           signerToken,
           senderToken,
           senderWallet,
@@ -138,11 +134,11 @@ export class Server {
 
   _generateRequest(
     method: string,
-    params: any,
+    params: { [key: string]: string },
     resolve: Function,
     reject: Function
-  ) {
-    this._client.request(
+  ): jayson.JSONRPCRequest {
+    return this._client.request(
       method,
       params,
       (err: any, error: any, result: any) => {

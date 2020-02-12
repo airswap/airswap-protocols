@@ -24,6 +24,7 @@
   "dependencies": {
     "ethers": "^4.0.44",
     "@airswap/constants": "0.1.0",
-    "@airswap/order-utils": "0.3.20"
+    "@airswap/order-utils": "0.3.20",
+    "@airswap/ts": "0.1.0"
   }
 }
