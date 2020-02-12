@@ -20,7 +20,7 @@
   ],
   "scripts": {
     "clean": "rm -rf ./build",
-    "compile": "rm -rf ./build && tsc -b"
+    "compile": "tsc -b"
   },
   "dependencies": {
     "@airswap/constants": "0.1.0",
