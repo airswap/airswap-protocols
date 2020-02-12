@@ -33,6 +33,14 @@ export type Quote = {
   }
 }
 
+export type Order = {
+  nonce: string
+  expiry: string
+  signer: Party
+  sender: Party
+  affiliate: Party
+}
+
 export type Signature = {
   version: string
   signatory: string
@@ -42,20 +50,7 @@ export type Signature = {
   s: string
 }
 
-export type UnsignedOrder = {
-  nonce: string
-  expiry: string
-  signer: Party
-  sender: Party
-  affiliate: Party
-}
-
-export type Order = {
-  nonce: string
-  expiry: string
-  signer: Party
-  sender: Party
-  affiliate: Party
+export type SignedOrder = Order & {
   signature: Signature
 }
 

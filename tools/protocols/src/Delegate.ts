@@ -16,7 +16,7 @@
 
 import { ethers } from 'ethers'
 import { chainIds, chainNames, MIN_CONFIRMATIONS } from '@airswap/constants'
-import { Quote, Order } from '@airswap/ts'
+import { Quote, SignedOrder } from '@airswap/ts'
 
 import * as DelegateContract from '@airswap/indexer/build/contracts/Indexer.json'
 const DelegateInterface = new ethers.utils.Interface(
@@ -86,7 +86,10 @@ export class Delegate {
     }
   }
 
-  async provideOrder(order: Order, signer?: ethers.Signer): Promise<string> {
+  async provideOrder(
+    order: SignedOrder,
+    signer?: ethers.Signer
+  ): Promise<string> {
     let contract = this.contract
     if (!this.contract.signer) {
       if (signer === undefined) {

@@ -18,7 +18,7 @@ import * as jayson from 'jayson'
 import { BigNumber } from 'ethers/utils'
 import { REQUEST_TIMEOUT } from '@airswap/constants'
 import { parseUrl } from '@airswap/utils'
-import { Quote, Order } from '@airswap/ts'
+import { Quote, SignedOrder } from '@airswap/ts'
 
 export class Server {
   _client: jayson.Client
@@ -95,7 +95,7 @@ export class Server {
     signerToken: string,
     senderToken: string,
     senderWallet: string
-  ): Promise<Order> {
+  ): Promise<SignedOrder> {
     return new Promise((resolve, reject) => {
       this._generateRequest(
         'getSignerSideOrder',
@@ -116,7 +116,7 @@ export class Server {
     signerToken: string,
     senderToken: string,
     senderWallet: string
-  ): Promise<Order> {
+  ): Promise<SignedOrder> {
     return new Promise((resolve, reject) => {
       this._generateRequest(
         'getSenderSideOrder',
@@ -134,7 +134,7 @@ export class Server {
 
   _generateRequest(
     method: string,
-    params: { [key: string]: string },
+    params: Record<string, string>,
     resolve: Function,
     reject: Function
   ): jayson.JSONRPCRequest {

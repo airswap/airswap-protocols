@@ -23,7 +23,7 @@ import {
   tokenKinds,
 } from '@airswap/constants'
 import { hashes } from '@airswap/order-utils'
-import { Quote, UnsignedOrder, Signature } from '@airswap/ts'
+import { Quote, Order, SignedOrder } from '@airswap/ts'
 
 function lowerCaseAddresses(obj: any): any {
   for (const key in obj) {
@@ -43,7 +43,7 @@ export function createOrder({
   signer = defaults.Party,
   sender = defaults.Party,
   affiliate = defaults.Party,
-}): UnsignedOrder {
+}): Order {
   return lowerCaseAddresses({
     expiry: String(expiry),
     nonce: String(nonce),
@@ -57,7 +57,7 @@ export function createOrderForQuote(
   quote: Quote,
   signerWallet: string,
   senderWallet: string
-): UnsignedOrder {
+): Order {
   return createOrder({
     signer: {
       kind: tokenKinds.ERC20,
@@ -74,23 +74,26 @@ export function createOrderForQuote(
   })
 }
 
-export async function createSignatureForOrder(
-  order: UnsignedOrder,
+export async function signOrder(
+  order: Order,
   signer: ethers.Signer,
   swapContract: string
-): Promise<Signature> {
+): Promise<SignedOrder> {
   const orderHash = hashes.getOrderHash(order, swapContract)
   const signedMsg = await signer.signMessage(ethers.utils.arrayify(orderHash))
   const sig = ethers.utils.splitSignature(signedMsg)
   const { r, s, v } = sig
 
   return {
-    signatory: (await signer.getAddress()).toLowerCase(),
-    validator: swapContract,
-    version: signatureTypes.PERSONAL_SIGN,
-    v: String(v),
-    r,
-    s,
+    ...order,
+    signature: {
+      signatory: (await signer.getAddress()).toLowerCase(),
+      validator: swapContract,
+      version: signatureTypes.PERSONAL_SIGN,
+      v: String(v),
+      r,
+      s,
+    },
   }
 }
 
