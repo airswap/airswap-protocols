@@ -23,7 +23,7 @@
     "compile": "tsc -b"
   },
   "dependencies": {
-    "@airswap/constants": "0.1.0",
+    "@airswap/constants": "0.3.0",
     "@airswap/delegate": "2.6.8",
     "@airswap/indexer": "3.6.8",
     "@airswap/swap": "5.4.7",
