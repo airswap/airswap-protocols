@@ -119,7 +119,7 @@ const checkERC721Transfer = async (order, partyName, provider, errors) => {
       }
     })
   } else {
-    // it ,must be a cryptokitty
+    // it must be a cryptokitty
     await tokenContract.kittyIndexToApproved(party['id']).then(operator => {
       if (operator !== order['signature']['validator']) {
         errors.push(`${partyName} no CK approval`)
