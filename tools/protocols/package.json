@@ -14,11 +14,12 @@
     "airswap"
   ],
   "license": "Apache-2.0",
-  "main": "dist/index.js",
+  "main": "build/index.js",
   "files": [
     "/build"
   ],
   "scripts": {
+    "clean": "rm -rf ./build",
     "compile": "tsc -b"
   },
   "dependencies": {
