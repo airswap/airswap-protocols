@@ -24,25 +24,6 @@ contract('Delegate Factory Tests', async accounts => {
 
   const PROTOCOL = '0x0001'
 
-  beforeEach(async () => {
-    const snapShot = await takeSnapshot()
-    snapshotId = snapShot['result']
-  })
-
-  afterEach(async () => {
-    await revertToSnapshot(snapshotId)
-  })
-
-  before('Deploy Delegate Factory', async () => {
-    await setupMockToken()
-    await setupMockIndexer()
-    delegateFactory = await DelegateFactory.new(
-      swapContract,
-      mockIndexer.address,
-      PROTOCOL
-    )
-  })
-
   async function setupMockToken() {
     mockStakingToken = await MockContract.new()
     const mockFungibleTokenTemplate = await FungibleToken.new()
@@ -67,6 +48,25 @@ contract('Delegate Factory Tests', async accounts => {
       mockStakingToken.address
     )
   }
+
+  beforeEach(async () => {
+    const snapShot = await takeSnapshot()
+    snapshotId = snapShot['result']
+  })
+
+  afterEach(async () => {
+    await revertToSnapshot(snapshotId)
+  })
+
+  before('Deploy Delegate Factory', async () => {
+    await setupMockToken()
+    await setupMockIndexer()
+    delegateFactory = await DelegateFactory.new(
+      swapContract,
+      mockIndexer.address,
+      PROTOCOL
+    )
+  })
 
   describe('Test deploying factory', async () => {
     it('should have set swapContract', async () => {

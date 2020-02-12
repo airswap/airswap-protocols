@@ -16,13 +16,17 @@
 
 import { ethers } from 'ethers'
 import { chainIds, chainNames, MIN_CONFIRMATIONS } from '@airswap/constants'
+import { Quote, SignedOrder } from '@airswap/types'
 
-const DelegateContract = require('@airswap/delegate/build/contracts/Delegate.json')
+import * as DelegateContract from '@airswap/indexer/build/contracts/Indexer.json'
+const DelegateInterface = new ethers.utils.Interface(
+  JSON.stringify(DelegateContract.abi)
+)
 
 export class Delegate {
   locator: string
   chainId: string
-  contract: any
+  contract: ethers.Contract
 
   constructor(
     locator: string,
@@ -33,7 +37,7 @@ export class Delegate {
     this.chainId = chainId
     this.contract = new ethers.Contract(
       locator,
-      DelegateContract.abi,
+      DelegateInterface,
       signerOrProvider ||
         ethers.getDefaultProvider(chainNames[chainId].toLowerCase())
     )
@@ -43,7 +47,7 @@ export class Delegate {
     return await this.contract.tradeWallet()
   }
 
-  async getMaxQuote(signerToken: string, senderToken: string): Promise<any> {
+  async getMaxQuote(signerToken: string, senderToken: string): Promise<Quote> {
     const result = await this.contract.getMaxQuote(signerToken, senderToken)
     return {
       signer: {
@@ -61,7 +65,7 @@ export class Delegate {
     senderAmount: string,
     senderToken: string,
     signerToken: string
-  ): Promise<any> {
+  ): Promise<Quote> {
     const signerAmount = await this.contract.getSignerSideQuote(
       senderAmount,
       senderToken,
@@ -82,17 +86,16 @@ export class Delegate {
     }
   }
 
-  async provideOrder(order: any, signer?: ethers.Signer): Promise<string> {
+  async provideOrder(
+    order: SignedOrder,
+    signer?: ethers.Signer
+  ): Promise<string> {
     let contract = this.contract
     if (!this.contract.signer) {
       if (signer === undefined) {
         throw new Error('Signer must be provided')
       } else {
-        contract = new ethers.Contract(
-          this.locator,
-          DelegateContract.abi,
-          signer
-        )
+        contract = new ethers.Contract(this.locator, DelegateInterface, signer)
       }
     }
     const tx = await contract.provideOrder(order)
