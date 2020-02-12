@@ -447,6 +447,10 @@ describe('Orders', async () => {
 
       // length 1 showing the contract was accepted
       assert.equal(errors.length, 2)
+      assert.equal(
+        errors[0],
+        'Order structured incorrectly or signature invalid'
+      )
       assert.equal(errors[1], 'sender no CK approval')
     })
   })
@@ -568,7 +572,10 @@ describe('Orders', async () => {
 
       // length 1 showing the contract was accepted
       assert.equal(errors.length, 2)
-      assert.equal(errors[1], 'sender no ERC1155 approval')
+      assert.equal(
+        errors[0],
+        'Order structured incorrectly or signature invalid'
+      )
     })
   })
 })
