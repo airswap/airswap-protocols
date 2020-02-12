@@ -4,6 +4,8 @@ const {
   EMPTY_ADDRESS,
   ERC20_INTERFACE_ID,
   ERC721_INTERFACE_ID,
+  CK_INTERFACE_ID,
+  ERC1155_INTERFACE_ID,
 } = require('@airswap/order-utils').constants
 
 const IERC20 = require('@airswap/tokens/build/contracts/IERC20.json')
@@ -39,6 +41,26 @@ const checkOrderSignature = async (order, provider, errors) => {
         }
       })
   }
+  return errors
+}
+
+const checkBalanceAndApproval = async (order, partyName, provider, errors) => {
+  // Check whether this token is ERC20 or ERC721
+  switch (order[partyName]['kind']) {
+    case ERC20_INTERFACE_ID:
+      errors = await checkERC20Transfer(order, partyName, provider, errors)
+      break
+    case CK_INTERFACE_ID:
+    case ERC721_INTERFACE_ID:
+      errors = await checkERC721Transfer(order, partyName, provider, errors)
+      break
+    case ERC1155_INTERFACE_ID:
+      errors = await checkERC1155Transfer(order, partyName, provider, errors)
+      break
+    default:
+      errors.push(`${partyName} token kind invalid`)
+  }
+
   return errors
 }
 
@@ -107,18 +129,18 @@ const checkERC721Transfer = async (order, partyName, provider, errors) => {
     }
   })
 
-  try {
-    // try a normal erc721 approval
+  if (party['kind'] == ERC721_INTERFACE_ID) {
+    // check normal erc721 approval
     await tokenContract.getApproved(party['id']).then(operator => {
       if (operator !== order['signature']['validator']) {
         errors.push(`${partyName} no NFT approval`)
       }
     })
-  } catch (error) {
-    // if it didn't exist try a cryptokitties approval
+  } else {
+    // it ,must be a cryptokitty
     await tokenContract.kittyIndexToApproved(party['id']).then(operator => {
       if (operator !== order['signature']['validator']) {
-        errors.push(`${partyName} no NFT approval`)
+        errors.push(`${partyName} no CK approval`)
       }
     })
   }
@@ -150,19 +172,7 @@ const checkERC721Transfer = async (order, partyName, provider, errors) => {
   return errors
 }
 
-const checkBalanceAndApproval = async (order, partyName, provider, errors) => {
-  // Check whether this token is ERC20 or ERC721
-  switch (order[partyName]['kind']) {
-    case ERC20_INTERFACE_ID:
-      errors = await checkERC20Transfer(order, partyName, provider, errors)
-      break
-    case ERC721_INTERFACE_ID:
-      errors = await checkERC721Transfer(order, partyName, provider, errors)
-      break
-    default:
-      errors.push(`${partyName} token kind invalid`)
-  }
-
+const checkERC1155Transfer = async (order, partyName, provider, errors) => {
   return errors
 }
 
