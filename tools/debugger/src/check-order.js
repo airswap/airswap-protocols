@@ -1,14 +1,18 @@
 const ethers = require('ethers')
 
 const {
+  CK_INTERFACE_ID,
   EMPTY_ADDRESS,
+  ERC1155_INTERFACE_ID,
   ERC20_INTERFACE_ID,
   ERC721_INTERFACE_ID,
 } = require('@airswap/order-utils').constants
 
 const IERC20 = require('@airswap/tokens/build/contracts/IERC20.json')
 const IERC721 = require('@airswap/tokens/build/contracts/OrderTest721.json')
+const IERC1155 = require('@airswap/tokens/build/contracts/IERC1155.json')
 const IERC721Receiver = require('@airswap/tokens/build/contracts/IERC721Receiver.json')
+const IERC1155Receiver = require('@airswap/tokens/build/contracts/IERC1155Receiver.json')
 const Swap = require('@airswap/swap/build/contracts/Swap.json')
 
 const { orders, signatures } = require('@airswap/order-utils')
@@ -107,18 +111,18 @@ const checkERC721Transfer = async (order, partyName, provider, errors) => {
     }
   })
 
-  try {
-    // try a normal erc721 approval
+  if (party['kind'] == ERC721_INTERFACE_ID) {
+    // check normal erc721 approval
     await tokenContract.getApproved(party['id']).then(operator => {
       if (operator !== order['signature']['validator']) {
         errors.push(`${partyName} no NFT approval`)
       }
     })
-  } catch (error) {
-    // if it didn't exist try a cryptokitties approval
+  } else {
+    // it must be a cryptokitty
     await tokenContract.kittyIndexToApproved(party['id']).then(operator => {
       if (operator !== order['signature']['validator']) {
-        errors.push(`${partyName} no NFT approval`)
+        errors.push(`${partyName} no CK approval`)
       }
     })
   }
@@ -150,14 +154,90 @@ const checkERC721Transfer = async (order, partyName, provider, errors) => {
   return errors
 }
 
+const checkERC1155Transfer = async (order, partyName, provider, errors) => {
+  const party = order[partyName]
+  let recipient
+
+  // If this is the affiliate, tokens come from the signer instead
+  switch (partyName) {
+    case 'affiliate':
+      // the token goes from signer to affiliate
+      party['wallet'] = order['signer']['wallet']
+      recipient = 'affiliate'
+      break
+    case 'sender':
+      // the token goes from sender to signer
+      recipient = 'signer'
+      break
+    case 'signer':
+      // the token goes from signer to sender
+      recipient = 'sender'
+  }
+
+  const tokenContract = new ethers.Contract(
+    party['token'],
+    IERC1155.abi,
+    provider
+  )
+
+  // Check balance of token 'id' is at least 'amount'
+  await tokenContract.balanceOf(party['wallet'], party['id']).then(balance => {
+    if (balance.lt(party['amount'])) {
+      errors.push(`${partyName} balance is too low`)
+    }
+  })
+
+  // check the swap contract is approved to transfer
+  await tokenContract
+    .isApprovedForAll(party['wallet'], order['signature']['validator'])
+    .then(isApproved => {
+      if (!isApproved) {
+        errors.push(`${partyName} no ERC1155 approval`)
+      }
+    })
+
+  // Check recipient can receive ERC1155s
+  const code = await provider.getCode(order[recipient]['wallet'])
+  const isContract = code !== '0x'
+
+  // if its a contract, try to call the necessary function
+  if (isContract) {
+    const erc1155Receiver = new ethers.Contract(
+      order[recipient]['wallet'],
+      IERC1155Receiver.abi,
+      provider
+    )
+
+    try {
+      await erc1155Receiver.callStatic.onERC1155Received(
+        party['wallet'],
+        party['wallet'],
+        party['id'],
+        party['amount'],
+        '0x00'
+      )
+    } catch (error) {
+      if (error.code == 'CALL_EXCEPTION') {
+        errors.push(`${recipient} is not configured to receive ERC1155s`)
+      }
+    }
+  }
+
+  return errors
+}
+
 const checkBalanceAndApproval = async (order, partyName, provider, errors) => {
   // Check whether this token is ERC20 or ERC721
   switch (order[partyName]['kind']) {
     case ERC20_INTERFACE_ID:
       errors = await checkERC20Transfer(order, partyName, provider, errors)
       break
+    case CK_INTERFACE_ID:
     case ERC721_INTERFACE_ID:
       errors = await checkERC721Transfer(order, partyName, provider, errors)
+      break
+    case ERC1155_INTERFACE_ID:
+      errors = await checkERC1155Transfer(order, partyName, provider, errors)
       break
     default:
       errors.push(`${partyName} token kind invalid`)
