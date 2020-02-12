@@ -40,14 +40,15 @@ Packages are versioned based on deploys. Major versions e.g. `1.x.x` are mainnet
 
 ## Commands
 
-| Command        | Description                                                                        |
-| :------------- | :--------------------------------------------------------------------------------- |
-| `yarn compile` | Compile all contracts to `build` folders                                           |
-| `yarn clean`   | Delete all contract `build` folders                                                |
-| `yarn ganache` | Run a local `ganache` network on local host 8545                                   |
-| `yarn test`    | Run all contract tests in `test` folders. Requires `yarn ganache` to be run first. |
-| `yarn hint`    | Run a syntax linter for all Solidity code                                          |
-| `yarn lint`    | Run a syntax linter for all JavaScript code                                        |
+| Command        | Description                                                                   |
+| :------------- | :---------------------------------------------------------------------------- |
+| `yarn compile` | Compile all contracts to `build` folders                                      |
+| `yarn clean`   | Delete all contract `build` folders                                           |
+| `yarn ganache` | Run a local `ganache` network on local host 8545                              |
+| `yarn test`    | Run all contract tests in `test` folders. Run `yarn ganache` elsewhere first. |
+| `yarn hint`    | Run a syntax linter for all Solidity code                                     |
+| `yarn lint`    | Run a syntax linter for all JavaScript code                                   |
+| `yarn deps`    | Run a dependency consistency check. Run `python3 -m venv ./venv` first.       |
 
 ## Deployments
 
