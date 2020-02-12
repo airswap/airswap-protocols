@@ -13,58 +13,6 @@ const Swap = require('@airswap/swap/build/contracts/Swap.json')
 
 const { orders, signatures } = require('@airswap/order-utils')
 
-// network is 'rinkeby' , 'mainnet' etc
-const checkOrder = async (order, network) => {
-  let errors = []
-  const provider = ethers.getDefaultProvider(network)
-
-  // Check the order has all necessary fields
-  if (!orders.isValidOrder(order)) {
-    errors.push('Order structured incorrectly or signature invalid')
-  }
-
-  // Check swap address provided
-  if (order['signature']['validator'] == EMPTY_ADDRESS) {
-    errors.push('Order.signature.validator cannot be 0')
-  }
-
-  // Check signer balance and allowance
-  errors = await checkBalanceAndApproval(order, 'signer', provider, errors)
-
-  // If sender, check balance and allowance
-  if (order['sender']['wallet'] !== EMPTY_ADDRESS) {
-    errors = await checkBalanceAndApproval(order, 'sender', provider, errors)
-  }
-
-  // If affiliate, check balance and allowance
-  if (order['affiliate']['wallet'] !== EMPTY_ADDRESS) {
-    errors = await checkBalanceAndApproval(order, 'affiliate', provider, errors)
-  }
-
-  // Check nonce availability
-  errors = await checkNonce(
-    order['signature']['validator'],
-    order['signer']['wallet'],
-    order['nonce'],
-    provider,
-    errors
-  )
-
-  // Check order expiry
-  const blockNumber = await provider.getBlockNumber()
-  const latestBlock = await provider.getBlock(blockNumber - 1)
-  if (latestBlock.timestamp >= order['expiry']) {
-    errors.push('Order expiry has passed')
-  }
-
-  // Check order signature
-  if (order['signature']['v'] != 0) {
-    errors = await checkOrderSignature(order, provider, errors)
-  }
-
-  return errors
-}
-
 const checkOrderSignature = async (order, provider, errors) => {
   // Check signature is valid
   const isValid = signatures.hasValidSignature(order)
@@ -234,6 +182,58 @@ const checkNonce = async (swapAddress, signer, nonce, provider, errors) => {
       errors.push(`Nonce too low`)
     }
   })
+  return errors
+}
+
+// network is 'rinkeby' , 'mainnet' etc
+const checkOrder = async (order, network) => {
+  let errors = []
+  const provider = ethers.getDefaultProvider(network)
+
+  // Check the order has all necessary fields
+  if (!orders.isValidOrder(order)) {
+    errors.push('Order structured incorrectly or signature invalid')
+  }
+
+  // Check swap address provided
+  if (order['signature']['validator'] == EMPTY_ADDRESS) {
+    errors.push('Order.signature.validator cannot be 0')
+  }
+
+  // Check signer balance and allowance
+  errors = await checkBalanceAndApproval(order, 'signer', provider, errors)
+
+  // If sender, check balance and allowance
+  if (order['sender']['wallet'] !== EMPTY_ADDRESS) {
+    errors = await checkBalanceAndApproval(order, 'sender', provider, errors)
+  }
+
+  // If affiliate, check balance and allowance
+  if (order['affiliate']['wallet'] !== EMPTY_ADDRESS) {
+    errors = await checkBalanceAndApproval(order, 'affiliate', provider, errors)
+  }
+
+  // Check nonce availability
+  errors = await checkNonce(
+    order['signature']['validator'],
+    order['signer']['wallet'],
+    order['nonce'],
+    provider,
+    errors
+  )
+
+  // Check order expiry
+  const blockNumber = await provider.getBlockNumber()
+  const latestBlock = await provider.getBlock(blockNumber - 1)
+  if (latestBlock.timestamp >= order['expiry']) {
+    errors.push('Order expiry has passed')
+  }
+
+  // Check order signature
+  if (order['signature']['v'] != 0) {
+    errors = await checkOrderSignature(order, provider, errors)
+  }
+
   return errors
 }
 

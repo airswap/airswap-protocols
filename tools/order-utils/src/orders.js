@@ -59,7 +59,7 @@ const isValidOrder = order => {
 }
 
 function lowerCaseAddresses(order) {
-  for (var key in order) {
+  for (const key in order) {
     if (typeof order[key] === 'object') {
       lowerCaseAddresses(order[key])
     }
