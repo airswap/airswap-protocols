@@ -16,7 +16,7 @@
 
 import { ethers } from 'ethers'
 import { chainIds, chainNames, MIN_CONFIRMATIONS } from '@airswap/constants'
-import { Quote, SignedOrder } from '@airswap/ts'
+import { Quote, SignedOrder } from '@airswap/types'
 
 import * as DelegateContract from '@airswap/indexer/build/contracts/Indexer.json'
 const DelegateInterface = new ethers.utils.Interface(

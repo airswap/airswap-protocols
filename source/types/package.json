@@ -1,7 +1,7 @@
 {
   "name": "@airswap/types",
-  "version": "3.5.5",
-  "description": "Solidity structs and hashing used on the AirSwap Network",
+  "version": "3.5.6",
+  "description": "TypeScript Types and Solidity Structs for AirSwap Developers",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>",
     "Deepa Sathaye <deepa.sathaye@fludity.io>",
@@ -13,12 +13,16 @@
     "type": "git",
     "url": "https://github.com/airswap/airswap-protocols"
   },
+  "main": "build/index.js",
+  "files": [
+    "/build"
+  ],
   "scripts": {
     "hint": "yarn solhint \"./contracts/**/*.sol\"",
     "lint": "yarn eslint \"./test/**/*.js\"",
     "ganache": "ganache-cli -p 8545 --gasLimit 0xfffffffffff --time '2017-05-10T00:00:00+00:00' -s 0",
     "clean": "rm -rf ./build",
-    "compile": "truffle compile",
+    "compile": "truffle compile && tsc -b",
     "coverage": "node_modules/.bin/solidity-coverage",
     "cp_migration_flat": "mkdir -p flatten/; cp contracts/Migrations.sol flatten/",
     "test": "truffle test",

@@ -9,7 +9,7 @@
     "resolveJsonModule": true,
     "sourceMap": true,
     "declaration": true,
-    "outDir": "./dist",
+    "outDir": "./build",
     "strict": true
   }
 }

@@ -16,7 +16,7 @@
 
 import { ethers } from 'ethers'
 import { chainIds, chainNames, protocols, INDEX_HEAD } from '@airswap/constants'
-import { LocatorResult } from '@airswap/ts'
+import { LocatorResult } from '@airswap/types'
 
 import * as IndexerContract from '@airswap/indexer/build/contracts/Indexer.json'
 import * as indexerDeploys from '@airswap/indexer/deploys.json'

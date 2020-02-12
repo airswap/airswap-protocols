@@ -16,7 +16,7 @@
 
 import { ethers } from 'ethers'
 import { chainIds, chainNames, MIN_CONFIRMATIONS } from '@airswap/constants'
-import { SignedOrder } from '@airswap/ts'
+import { SignedOrder } from '@airswap/types'
 
 import * as SwapContract from '@airswap/swap/build/contracts/Swap.json'
 import * as swapDeploys from '@airswap/swap/deploys.json'

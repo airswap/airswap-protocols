@@ -16,12 +16,12 @@
   "license": "Apache-2.0",
   "main": "dist/index.js",
   "files": [
-    "/dist"
+    "/build"
   ],
   "scripts": {
     "compile": "tsc -b"
   },
   "dependencies": {
-    "@airswap/ts": "0.1.0"
+    "@airswap/types": "3.5.6"
   }
 }

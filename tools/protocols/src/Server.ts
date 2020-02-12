@@ -18,7 +18,7 @@ import * as jayson from 'jayson'
 import { BigNumber } from 'ethers/utils'
 import { REQUEST_TIMEOUT } from '@airswap/constants'
 import { parseUrl } from '@airswap/utils'
-import { Quote, SignedOrder } from '@airswap/ts'
+import { Quote, SignedOrder } from '@airswap/types'
 
 export class Server {
   _client: jayson.Client

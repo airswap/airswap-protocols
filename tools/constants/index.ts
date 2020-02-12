@@ -14,7 +14,20 @@
   limitations under the License.
 */
 
-import { Party, Token } from '@airswap/ts'
+import { Party, Token } from '@airswap/types'
+
+export const DOMAIN_NAME = 'SWAP'
+export const DOMAIN_VERSION = '2'
+export const INDEX_HEAD = '0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF'
+export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
+export const LOCATOR_ZERO =
+  '0x0000000000000000000000000000000000000000000000000000000000000000'
+export const MAX_LOCATORS = 10
+export const MAX_APPROVAL_AMOUNT = '90071992547409910000000000'
+export const MIN_CONFIRMATIONS = 2
+export const DEFAULT_PORT = 3000
+export const REQUEST_TIMEOUT = 4000
+export const SECONDS_IN_DAY = 86400
 
 export const chainIds: Record<string, string> = {
   MAINNET: '1',
@@ -98,22 +111,3 @@ export const defaults: Record<string, Party> = {
     id: '0',
   },
 }
-
-export const INDEX_HEAD = '0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF'
-
-export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
-
-export const LOCATOR_ZERO =
-  '0x0000000000000000000000000000000000000000000000000000000000000000'
-
-export const MAX_LOCATORS = 10
-
-export const MAX_APPROVAL_AMOUNT = '90071992547409910000000000'
-
-export const MIN_CONFIRMATIONS = 2
-
-export const DEFAULT_PORT = 3000
-
-export const REQUEST_TIMEOUT = 4000
-
-export const SECONDS_IN_DAY = 86400

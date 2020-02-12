@@ -7,8 +7,10 @@
     "esModuleInterop": true,
     "skipLibCheck": false,
     "resolveJsonModule": true,
+    "suppressImplicitAnyIndexErrors": true,
     "sourceMap": true,
     "declaration": true,
-    "outDir": "./dist"
+    "outDir": "./build",
+    "strict": true
   }
 }

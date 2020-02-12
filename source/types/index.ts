@@ -65,3 +65,25 @@ export type LocatorResult = {
   scores: Array<string>
   nextCursor: string
 }
+
+export const EIP712 = {
+  EIP712Domain: [
+    { name: 'name', type: 'string' },
+    { name: 'version', type: 'string' },
+    { name: 'verifyingContract', type: 'address' },
+  ],
+  Order: [
+    { name: 'nonce', type: 'uint256' },
+    { name: 'expiry', type: 'uint256' },
+    { name: 'signer', type: 'Party' },
+    { name: 'sender', type: 'Party' },
+    { name: 'affiliate', type: 'Party' },
+  ],
+  Party: [
+    { name: 'kind', type: 'bytes4' },
+    { name: 'wallet', type: 'address' },
+    { name: 'token', type: 'address' },
+    { name: 'amount', type: 'uint256' },
+    { name: 'id', type: 'uint256' },
+  ],
+}

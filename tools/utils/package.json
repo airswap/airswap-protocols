@@ -16,15 +16,16 @@
   "license": "Apache-2.0",
   "main": "dist/index.js",
   "files": [
-    "/dist"
+    "/build"
   ],
   "scripts": {
     "compile": "tsc -b"
   },
   "dependencies": {
-    "ethers": "^4.0.44",
     "@airswap/constants": "0.1.0",
-    "@airswap/order-utils": "0.3.20",
-    "@airswap/ts": "0.1.0"
+    "@airswap/types": "3.5.6",
+    "@types/ethereumjs-abi": "^0.6.3",
+    "@types/ethereumjs-util": "^6.1.0",
+    "ethers": "^4.0.44"
   }
 }
