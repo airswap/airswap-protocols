@@ -23,7 +23,6 @@ contract PreSwapChecker {
 
   bytes4 constant internal ERC721_INTERFACE_ID = 0x80ac58cd;
   bytes4 constant internal ERC20_INTERFACE_ID = 0x36372b07;
-  bytes4 constant internal ERC1155_INTERFACE_ID= 0xd9b67a26;
 
   IWETH public wethContract;
 
@@ -46,7 +45,7 @@ contract PreSwapChecker {
     * @return uint256 errorCount if any
     * @return bytes32[] memory array of error messages
     */
-  function checkWrapperSwapDelegate(
+  function checkWrappedDelegate(
     Types.Order calldata order,
     IDelegate delegate,
     address wrapper
@@ -58,31 +57,31 @@ contract PreSwapChecker {
     (uint256 delegateErrorCount, bytes32[] memory delegateErrors) = coreDelegateChecks(order, delegate);
     if (swapErrorCount > 0) {
       errorCount = swapErrorCount;
-      // copies over errors from checkSwapSwap to be outputted
+      // copies over errors from coreSwapChecks
       for (uint256 i = 0; i < swapErrorCount; i++) {
         errors[i] = swapErrors[i];
       }
     }
     if (delegateErrorCount > 0) {
 
-      // copies over errors from checkSwapSwap to be outputted
+      // copies over errors from coreDelegateChecks
       for (uint256 i = 0; i < delegateErrorCount; i++) {
         errors[i + errorCount] = delegateErrors[i];
       }
-      errorCount = swapErrorCount + delegateErrorCount;
+      errorCount += delegateErrorCount;
     }
 
     // Check valid token registry handler for sender
     if (hasValidKind(order.sender.kind, swap) && order.sender.kind == ERC20_INTERFACE_ID) {
       // Check the order sender balance and allowance
       if (!hasBalance(order.sender)) {
-        errors[errorCount] = "SENDER_BALANCE";
+        errors[errorCount] = "SENDER_BALANCE_LOW";
         errorCount++;
       }
 
       // Check their approval
       if (!isApproved(order.sender, swap)) {
-        errors[errorCount] = "SENDER_ALLOWANCE";
+        errors[errorCount] = "SENDER_ALLOWANCE_LOW";
         errorCount++;
       }
     }
@@ -93,22 +92,19 @@ contract PreSwapChecker {
       if (order.signer.token != address(wethContract)) {
         // Check the order signer token balance
         if (!hasBalance(order.signer)) {
-          errors[errorCount] = "SIGNER_BALANCE";
+          errors[errorCount] = "SIGNER_BALANCE_LOW";
+          errorCount++;
+        }
+      } else {
+        if (address(order.signer.wallet).balance < order.signer.amount) {
+          errors[errorCount] = "SIGNER_ETHER_LOW";
           errorCount++;
         }
       }
 
       // Check their approval
       if (!isApproved(order.signer, swap)) {
-        errors[errorCount] = "SIGNER_ALLOWANCE";
-        errorCount++;
-      }
-    }
-
-    // if signer has WETH token, ensure sufficient ETH balance
-    if (order.signer.token == address(wethContract)) {
-      if (address(order.signer.wallet).balance < order.signer.amount) {
-        errors[errorCount] = "SIGNER_INSUFFICIENT_ETH";
+        errors[errorCount] = "SIGNER_ALLOWANCE_LOW";
         errorCount++;
       }
     }
@@ -118,7 +114,7 @@ contract PreSwapChecker {
     if (order.sender.token == address(wethContract)) {
       uint256 allowance = wethContract.allowance(order.signer.wallet, wrapper);
       if (allowance < order.sender.amount) {
-        errors[errorCount] = "LOW_SIGNER_ALLOWANCE_ON_WRAPPER";
+        errors[errorCount] = "SIGNER_WRAPPER_ALLOWANCE_LOW";
         errorCount++;
       }
     }
@@ -135,7 +131,7 @@ contract PreSwapChecker {
     * @return uint256 errorCount if any
     * @return bytes32[] memory array of error messages
     */
-  function checkSwapWrapper(
+  function checkWrappedSwap(
     Types.Order calldata order,
     address fromAddress,
     address wrapper
@@ -149,7 +145,7 @@ contract PreSwapChecker {
 
     if (swapErrorCount > 0) {
       errorCount = swapErrorCount;
-      // copies over errors from coreSwapChecks to be outputted
+      // copies over errors from coreSwapChecks
       for (uint256 i = 0; i < swapErrorCount; i++) {
         errors[i] = swapErrors[i];
       }
@@ -175,7 +171,7 @@ contract PreSwapChecker {
     // if sender has WETH token, ensure sufficient ETH balance
     if (order.sender.token == address(wethContract)) {
       if (address(order.sender.wallet).balance < order.sender.amount) {
-        errors[errorCount] = "SENDER_INSUFFICIENT_ETH";
+        errors[errorCount] = "SENDER_ETHER_LOW";
         errorCount++;
       }
     }
@@ -185,7 +181,7 @@ contract PreSwapChecker {
     if (order.signer.token == address(wethContract)) {
       uint256 allowance = wethContract.allowance(order.sender.wallet, wrapper);
       if (allowance < order.signer.amount) {
-        errors[errorCount] = "LOW_SENDER_ALLOWANCE_ON_WRAPPER";
+        errors[errorCount] = "SENDER_WRAPPER_ALLOWANCE_LOW";
         errorCount++;
       }
     }
@@ -204,14 +200,14 @@ contract PreSwapChecker {
           if (order.sender.token != address(wethContract)) {
             //do the balance check
             if (!hasBalance(order.sender)) {
-              errors[errorCount] = "SENDER_BALANCE";
+              errors[errorCount] = "SENDER_BALANCE_LOW";
               errorCount++;
             }
           }
 
           // Check their approval
           if (!isApproved(order.sender, swap)) {
-            errors[errorCount] = "SENDER_ALLOWANCE";
+            errors[errorCount] = "SENDER_ALLOWANCE_LOW";
             errorCount++;
           }
         }
@@ -230,13 +226,13 @@ contract PreSwapChecker {
       } else {
         // Check the order signer token balance
         if (!hasBalance(order.signer)) {
-          errors[errorCount] = "SIGNER_BALANCE";
+          errors[errorCount] = "SIGNER_BALANCE_LOW";
           errorCount++;
         }
 
         // Check their approval
         if (!isApproved(order.signer, swap)) {
-          errors[errorCount] = "SIGNER_ALLOWANCE";
+          errors[errorCount] = "SIGNER_ALLOWANCE_LOW";
           errorCount++;
         }
       }
@@ -255,7 +251,7 @@ contract PreSwapChecker {
     * @return uint256 errorCount if any
     * @return bytes32[] memory array of error messages
     */
-  function checkSwapSwap(
+  function checkSwap(
     Types.Order memory order
   ) public view returns (uint256, bytes32[] memory) {
 
@@ -266,7 +262,7 @@ contract PreSwapChecker {
 
     if (swapErrorCount > 0) {
       errorCount = swapErrorCount;
-      // copies over errors from coreSwapChecks to be outputted
+      // copies over errors from coreSwapChecks
       for (uint256 i = 0; i < swapErrorCount; i++) {
         errors[i] = swapErrors[i];
       }
@@ -285,13 +281,13 @@ contract PreSwapChecker {
           // Check the order sender token balance
           //do the balance check
           if (!hasBalance(order.sender)) {
-            errors[errorCount] = "SENDER_BALANCE";
+            errors[errorCount] = "SENDER_BALANCE_LOW";
             errorCount++;
           }
 
           // Check their approval
           if (!isApproved(order.sender, swap)) {
-            errors[errorCount] = "SENDER_ALLOWANCE";
+            errors[errorCount] = "SENDER_ALLOWANCE_LOW";
             errorCount++;
           }
         }
@@ -310,13 +306,13 @@ contract PreSwapChecker {
       } else {
         // Check the order signer token balance
         if (!hasBalance(order.signer)) {
-          errors[errorCount] = "SIGNER_BALANCE";
+          errors[errorCount] = "SIGNER_BALANCE_LOW";
           errorCount++;
         }
 
         // Check their approval
         if (!isApproved(order.signer, swap)) {
-          errors[errorCount] = "SIGNER_ALLOWANCE";
+          errors[errorCount] = "SIGNER_ALLOWANCE_LOW";
           errorCount++;
         }
       }
@@ -336,29 +332,29 @@ contract PreSwapChecker {
     * @return uint256 errorCount if any
     * @return bytes32[] memory array of error messages
     */
-  function checkSwapDelegate(
+  function checkDelegate(
     Types.Order memory order,
     IDelegate delegate
     ) public view returns (uint256, bytes32[] memory ) {
 
     bytes32[] memory errors = new bytes32[](20);
     uint256 errorCount;
-    (uint256 swapErrorCount, bytes32[] memory swapErrors) = checkSwapSwap(order);
+    (uint256 swapErrorCount, bytes32[] memory swapErrors) = checkSwap(order);
     (uint256 delegateErrorCount, bytes32[] memory delegateErrors) = coreDelegateChecks(order, delegate);
     if (swapErrorCount > 0) {
       errorCount = swapErrorCount;
-      // copies over errors from checkSwapSwap to be outputted
+      // copies over errors from checkSwap
       for (uint256 i = 0; i < swapErrorCount; i++) {
         errors[i] = swapErrors[i];
       }
     }
     if (delegateErrorCount > 0) {
 
-      // copies over errors from checkSwapSwap to be outputted
+      // copies over errors from coreDelegateChecks
       for (uint256 i = 0; i < delegateErrorCount; i++) {
         errors[i + errorCount] = delegateErrors[i];
       }
-      errorCount = swapErrorCount + delegateErrorCount;
+      errorCount += delegateErrorCount;
     }
 
     return (errorCount, errors);

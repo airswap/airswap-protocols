@@ -178,7 +178,7 @@ contract('PreSwapChecker', async accounts => {
     )
 
     it('Checks fillable swap order to delegate without a rule', async () => {
-      const checkerOutput = await preSwapChecker.checkSwapDelegate.call(
+      const checkerOutput = await preSwapChecker.checkDelegate.call(
         order,
         aliceDelegate.address,
         {
@@ -209,7 +209,7 @@ contract('PreSwapChecker', async accounts => {
         },
       })
 
-      errorCodes = await preSwapChecker.checkSwapDelegate.call(
+      errorCodes = await preSwapChecker.checkDelegate.call(
         selfOrder,
         aliceDelegate.address,
         {
@@ -267,7 +267,7 @@ contract('PreSwapChecker', async accounts => {
         from: aliceTradeWallet,
       })
 
-      errorCodes = await preSwapChecker.checkSwapDelegate.call(
+      errorCodes = await preSwapChecker.checkDelegate.call(
         order,
         aliceDelegate.address,
         {
@@ -309,7 +309,7 @@ contract('PreSwapChecker', async accounts => {
         from: aliceTradeWallet,
       })
 
-      errorCodes = await preSwapChecker.checkSwapDelegate.call(
+      errorCodes = await preSwapChecker.checkDelegate.call(
         order,
         aliceDelegate.address,
         {
@@ -370,7 +370,7 @@ contract('PreSwapChecker', async accounts => {
         },
       })
 
-      errorCodes = await preSwapChecker.checkWrapperSwapDelegate.call(
+      errorCodes = await preSwapChecker.checkWrappedDelegate.call(
         order,
         aliceDelegate.address,
         wrapperAddress,
@@ -384,14 +384,11 @@ contract('PreSwapChecker', async accounts => {
       equal(web3.utils.toUtf8(errorCodes[1][2]), 'TOKEN_PAIR_INACTIVE')
       equal(web3.utils.toUtf8(errorCodes[1][3]), 'ORDER_AMOUNT_EXCEEDS_MAX')
       equal(web3.utils.toUtf8(errorCodes[1][4]), 'DELEGATE_UNABLE_TO_PRICE')
-      equal(web3.utils.toUtf8(errorCodes[1][5]), 'SENDER_BALANCE')
-      equal(web3.utils.toUtf8(errorCodes[1][6]), 'SENDER_ALLOWANCE')
-      equal(web3.utils.toUtf8(errorCodes[1][7]), 'SIGNER_ALLOWANCE')
-      equal(web3.utils.toUtf8(errorCodes[1][8]), 'SIGNER_INSUFFICIENT_ETH')
-      equal(
-        web3.utils.toUtf8(errorCodes[1][9]),
-        'LOW_SIGNER_ALLOWANCE_ON_WRAPPER'
-      )
+      equal(web3.utils.toUtf8(errorCodes[1][5]), 'SENDER_BALANCE_LOW')
+      equal(web3.utils.toUtf8(errorCodes[1][6]), 'SENDER_ALLOWANCE_LOW')
+      equal(web3.utils.toUtf8(errorCodes[1][7]), 'SIGNER_ETHER_LOW')
+      equal(web3.utils.toUtf8(errorCodes[1][8]), 'SIGNER_ALLOWANCE_LOW')
+      equal(web3.utils.toUtf8(errorCodes[1][9]), 'SIGNER_WRAPPER_ALLOWANCE_LOW')
     })
 
     it('Create a rule and ensure appropriate approvals gets zero error codes', async () => {
@@ -436,7 +433,7 @@ contract('PreSwapChecker', async accounts => {
         from: bobAddress,
       })
 
-      errorCodes = await preSwapChecker.checkWrapperSwapDelegate.call(
+      errorCodes = await preSwapChecker.checkWrappedDelegate.call(
         order,
         aliceDelegate.address,
         wrapperAddress,
