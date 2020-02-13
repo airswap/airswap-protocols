@@ -20,7 +20,7 @@
     "test": "mocha test --timeout 3000 --exit"
   },
   "devDependencies": {
-    "mocha": "^6.2.0"
+    "mocha": "^7.0.1"
   },
   "dependencies": {
     "@airswap/order-utils": "0.3.20",
