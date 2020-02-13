@@ -11,6 +11,7 @@ const ERC721TransferHandler = artifacts.require('ERC721TransferHandler')
 const {
   emitted,
   equal,
+  getResult,
   passes,
   reverted,
   ok,
@@ -34,6 +35,7 @@ contract('PreSwapChecker', async accounts => {
     'hex'
   )
   const fakeTransferHandler = '0xFFFFF'
+  const UNKNOWN_KIND = '0x9999'
   let preSwapChecker
   let swapContract
   let swapAddress
@@ -412,13 +414,13 @@ contract('PreSwapChecker', async accounts => {
           wallet: aliceAddress,
           token: tokenAST.address,
           amount: 200,
-          kind: '0x9999',
+          kind: UNKNOWN_KIND,
         },
         sender: {
           wallet: bobAddress,
           token: tokenDAI.address,
           amount: 50,
-          kind: '0x9999',
+          kind: UNKNOWN_KIND,
         },
       })
 
@@ -765,6 +767,207 @@ contract('PreSwapChecker', async accounts => {
       equal(web3.utils.toUtf8(errorCodes[1][0]), 'SENDER_INSUFFICIENT_ETH')
       equal(web3.utils.toUtf8(errorCodes[1][1]), 'SENDER_ALLOWANCE')
       equal(web3.utils.toUtf8(errorCodes[1][2]), 'SIGNER_ALLOWANCE')
+    })
+  })
+
+  describe('Wrapper Receive ETH on Swap (Fungible)', async () => {
+    it('Checks errors out with lack of allowance on wrapper', async () => {
+      const order = await orders.getOrder({
+        sender: {
+          wallet: aliceAddress,
+          token: tokenAST.address,
+          amount: 50,
+        },
+        signer: {
+          wallet: bobAddress,
+          token: tokenWETH.address,
+          amount: 10,
+        },
+      })
+
+      const errorCodes = await preSwapChecker.checkSwapWrapper.call(
+        order,
+        aliceAddress,
+        wrapperAddress,
+        { from: aliceAddress }
+      )
+
+      equal(errorCodes[0], 5)
+      equal(web3.utils.toUtf8(errorCodes[1][0]), 'SIGNER_UNAUTHORIZED')
+      equal(web3.utils.toUtf8(errorCodes[1][1]), 'SIGNATURE_MUST_BE_SENT')
+      equal(
+        web3.utils.toUtf8(errorCodes[1][2]),
+        'LOW_SENDER_ALLOWANCE_ON_WRAPPER'
+      )
+      equal(web3.utils.toUtf8(errorCodes[1][3]), 'SENDER_ALLOWANCE')
+      equal(web3.utils.toUtf8(errorCodes[1][4]), 'SIGNER_BALANCE')
+    })
+
+    it('Checks sending empty address on sender does not break preswapchecker', async () => {
+      const order = await orders.getOrder({
+        signer: {
+          wallet: aliceAddress,
+          token: tokenAST.address,
+          amount: 50,
+        },
+        sender: {
+          wallet: EMPTY_ADDRESS,
+          token: tokenWETH.address,
+          amount: 10,
+        },
+      })
+
+      const errorCodes = await preSwapChecker.checkSwapWrapper.call(
+        order,
+        aliceAddress,
+        wrapperAddress,
+        { from: aliceAddress }
+      )
+
+      equal(errorCodes[0], 5)
+      equal(web3.utils.toUtf8(errorCodes[1][0]), 'SIGNER_UNAUTHORIZED')
+      equal(
+        web3.utils.toUtf8(errorCodes[1][1]),
+        'MSG_SENDER_MUST_BE_ORDER_SENDER'
+      )
+      equal(web3.utils.toUtf8(errorCodes[1][2]), 'SENDER_UNAUTHORIZED')
+      equal(web3.utils.toUtf8(errorCodes[1][3]), 'SIGNATURE_MUST_BE_SENT')
+      equal(web3.utils.toUtf8(errorCodes[1][4]), 'SIGNER_ALLOWANCE')
+    })
+
+    it('Adding approval allows for zero errors and successful fill of order signer WETH', async () => {
+      const order = await orders.getOrder({
+        sender: {
+          wallet: aliceAddress,
+          token: tokenAST.address,
+          amount: 50,
+        },
+        signer: {
+          wallet: bobAddress,
+          token: tokenWETH.address,
+          amount: 10,
+        },
+      })
+
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        bobAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
+      // Ensure bob has sufficient WETH
+      await tokenWETH.deposit({ from: bobAddress, value: 10 })
+
+      // Alice authorizes swap to send orders on his behalf
+      // function also checks that msg.sender == order.sender.wallet
+      await swapContract.authorizeSender(wrapperAddress, {
+        from: aliceAddress,
+      })
+
+      emitted(
+        await tokenWETH.approve(wrapperAddress, 10, { from: aliceAddress }),
+        'Approval'
+      )
+
+      emitted(
+        await tokenAST.approve(swapAddress, 50, { from: aliceAddress }),
+        'Approval'
+      )
+
+      const errorCodes = await preSwapChecker.checkSwapWrapper.call(
+        order,
+        aliceAddress,
+        wrapperAddress,
+        { from: aliceAddress }
+      )
+      equal(errorCodes[0], 0)
+      // Received zero exceptions so can send to wrapper and have a successful fill
+      let result = await wrapperContract.swap(order, { from: aliceAddress })
+      passes(result)
+      result = await getResult(swapContract, result.tx)
+      emitted(result, 'Swap')
+    })
+
+    it('Checks inserting unknown kind outputs error', async () => {
+      const order = await orders.getOrder({
+        sender: {
+          wallet: aliceAddress,
+          token: tokenAST.address,
+          amount: 50,
+          kind: UNKNOWN_KIND,
+        },
+        signer: {
+          wallet: bobAddress,
+          token: tokenWETH.address,
+          amount: 10,
+          kind: UNKNOWN_KIND,
+        },
+      })
+
+      // Bob authorizes swap to send orders on his behalf
+      // function also checks that msg.sender == order.sender.wallet
+      await swapContract.authorizeSender(wrapperAddress, {
+        from: bobAddress,
+      })
+
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        bobAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
+      const errorCodes = await preSwapChecker.checkSwapWrapper.call(
+        order,
+        aliceAddress,
+        wrapperAddress,
+        { from: aliceAddress }
+      )
+      //equal(errorCodes[0], 2)
+      equal(
+        web3.utils.toUtf8(errorCodes[1][0]),
+        'LOW_SENDER_ALLOWANCE_ON_WRAPPER'
+      )
+      equal(web3.utils.toUtf8(errorCodes[1][1]), 'SENDER_TOKEN_KIND_UNKNOWN')
+      equal(web3.utils.toUtf8(errorCodes[1][2]), 'SIGNER_TOKEN_KIND_UNKNOWN')
+    })
+
+    it('Checks malformed order errors out', async () => {
+      const order = await orders.getOrder({
+        signer: {
+          wallet: aliceAddress,
+          token: tokenAST.address,
+          amount: 200,
+          kind: ERC721_INTERFACE_ID,
+        },
+        sender: {
+          wallet: bobAddress,
+          token: tokenWETH.address,
+          amount: 50,
+          kind: ERC721_INTERFACE_ID,
+        },
+      })
+
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        aliceAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+      errorCodes = await preSwapChecker.checkSwapWrapper.call(
+        order,
+        bobAddress,
+        wrapperAddress,
+        {
+          from: bobAddress,
+        }
+      )
+      equal(errorCodes[0], 4)
+      equal(web3.utils.toUtf8(errorCodes[1][0]), 'SENDER_INVALID_AMOUNT')
+      equal(web3.utils.toUtf8(errorCodes[1][1]), 'SIGNER_INVALID_AMOUNT')
+      equal(web3.utils.toUtf8(errorCodes[1][2]), 'SENDER_INVALID_ERC721')
+      equal(web3.utils.toUtf8(errorCodes[1][3]), 'SIGNER_INVALID_ERC721')
     })
   })
 })
