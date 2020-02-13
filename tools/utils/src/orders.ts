@@ -97,7 +97,7 @@ export async function signOrder(
   }
 }
 
-export function getOrderByLowestSenderAmount(
+export function getBestByLowestSenderAmount(
   orders: Array<SignedOrder>
 ): SignedOrder {
   let best: any
@@ -109,7 +109,7 @@ export function getOrderByLowestSenderAmount(
   return best
 }
 
-export function getOrderByHighestSignerAmount(
+export function getBestByHighestSignerAmount(
   orders: Array<SignedOrder>
 ): SignedOrder {
   let best: any
