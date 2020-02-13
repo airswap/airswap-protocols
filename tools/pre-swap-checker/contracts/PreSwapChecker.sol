@@ -23,6 +23,7 @@ contract PreSwapChecker {
 
   bytes4 constant internal ERC721_INTERFACE_ID = 0x80ac58cd;
   bytes4 constant internal ERC20_INTERFACE_ID = 0x36372b07;
+  bytes4 constant internal ERC1155_INTERFACE_ID= 0xd9b67a26;
 
   IWETH public wethContract;
 
@@ -36,6 +37,297 @@ contract PreSwapChecker {
     wethContract = IWETH(preSwapCheckerWethContract);
   }
 
+
+  /**
+    * @notice If order is going through wrapper to a delegate
+    * @param order Types.Order
+    * @param delegate IDelegate
+    * @param wrapper address
+    * @return uint256 errorCount if any
+    * @return bytes32[] memory array of error messages
+    */
+  function checkWrapperSwapDelegate(
+    Types.Order calldata order,
+    IDelegate delegate,
+    address wrapper
+    ) external view returns (uint256, bytes32[] memory ) {
+    bytes32[] memory errors = new bytes32[](22);
+    uint256 errorCount;
+    address swap = order.signature.validator;
+    (uint256 swapErrorCount, bytes32[] memory swapErrors) = coreSwapChecks(order);
+    (uint256 delegateErrorCount, bytes32[] memory delegateErrors) = coreDelegateChecks(order, delegate);
+    if (swapErrorCount > 0) {
+      errorCount = swapErrorCount;
+      // copies over errors from checkSwapSwap to be outputted
+      for (uint256 i = 0; i < swapErrorCount; i++) {
+        errors[i] = swapErrors[i];
+      }
+    }
+    if (delegateErrorCount > 0) {
+
+      // copies over errors from checkSwapSwap to be outputted
+      for (uint256 i = 0; i < delegateErrorCount; i++) {
+        errors[i + errorCount] = delegateErrors[i];
+      }
+      errorCount = swapErrorCount + delegateErrorCount;
+    }
+
+    // Check valid token registry handler for sender
+    if (hasValidKind(order.sender.kind, swap) && order.sender.kind == ERC20_INTERFACE_ID) {
+      // Check the order sender balance and allowance
+      if (!hasBalance(order.sender)) {
+        errors[errorCount] = "SENDER_BALANCE";
+        errorCount++;
+      }
+
+      // Check their approval
+      if (!isApproved(order.sender, swap)) {
+        errors[errorCount] = "SENDER_ALLOWANCE";
+        errorCount++;
+      }
+    }
+
+
+     // Check valid token registry handler for signer
+    if (hasValidKind(order.signer.kind, swap) && order.signer.kind == ERC20_INTERFACE_ID) {
+      if (order.signer.token != address(wethContract)) {
+        // Check the order signer token balance
+        if (!hasBalance(order.signer)) {
+          errors[errorCount] = "SIGNER_BALANCE";
+          errorCount++;
+        }
+      }
+
+      // Check their approval
+      if (!isApproved(order.signer, swap)) {
+        errors[errorCount] = "SIGNER_ALLOWANCE";
+        errorCount++;
+      }
+    }
+
+    // if signer has WETH token, ensure sufficient ETH balance
+    if (order.signer.token == address(wethContract)) {
+      if (address(order.signer.wallet).balance < order.signer.amount) {
+        errors[errorCount] = "SIGNER_INSUFFICIENT_ETH";
+        errorCount++;
+      }
+    }
+
+    // ensure that sender wallet if receiving weth has approved
+    // the wrapper to transfer weth and deliver eth to the sender
+    if (order.sender.token == address(wethContract)) {
+      uint256 allowance = wethContract.allowance(order.signer.wallet, wrapper);
+      if (allowance < order.sender.amount) {
+        errors[errorCount] = "LOW_SIGNER_ALLOWANCE_ON_WRAPPER";
+        errorCount++;
+      }
+    }
+
+    return (errorCount, errors);
+  }
+
+
+  /**
+    * @notice If order is going through wrapper to swap
+    * @param order Types.Order
+    * @param fromAddress address
+    * @param wrapper address
+    * @return uint256 errorCount if any
+    * @return bytes32[] memory array of error messages
+    */
+  function checkSwapWrapper(
+    Types.Order calldata order,
+    address fromAddress,
+    address wrapper
+    ) external view returns (uint256, bytes32[] memory ) {
+    address swap = order.signature.validator;
+    // max size of the number of errors that could exist
+    bytes32[] memory errors = new bytes32[](20);
+    uint256 errorCount;
+
+    (uint256 swapErrorCount, bytes32[] memory swapErrors) = coreSwapChecks(order);
+
+    if (swapErrorCount > 0) {
+      errorCount = swapErrorCount;
+      // copies over errors from coreSwapChecks to be outputted
+      for (uint256 i = 0; i < swapErrorCount; i++) {
+        errors[i] = swapErrors[i];
+      }
+    }
+
+    if (order.sender.wallet != fromAddress) {
+      errors[errorCount] = "MSG_SENDER_MUST_BE_ORDER_SENDER";
+      errorCount++;
+    }
+
+    // ensure that sender has approved wrapper contract on swap
+    if (!ISwap(swap).senderAuthorizations(order.sender.wallet, wrapper)) {
+      errors[errorCount] = "SENDER_UNAUTHORIZED";
+      errorCount++;
+    }
+
+    // signature must be filled in order to use the Wrapper
+    if (order.signature.v == 0) {
+      errors[errorCount] = "SIGNATURE_MUST_BE_SENT";
+      errorCount++;
+    }
+
+    // if sender has WETH token, ensure sufficient ETH balance
+    if (order.sender.token == address(wethContract)) {
+      if (address(order.sender.wallet).balance < order.sender.amount) {
+        errors[errorCount] = "SENDER_INSUFFICIENT_ETH";
+        errorCount++;
+      }
+    }
+
+    // ensure that sender wallet if receiving weth has approved
+    // the wrapper to transfer weth and deliver eth to the sender
+    if (order.signer.token == address(wethContract)) {
+      uint256 allowance = wethContract.allowance(order.sender.wallet, wrapper);
+      if (allowance < order.signer.amount) {
+        errors[errorCount] = "LOW_SENDER_ALLOWANCE_ON_WRAPPER";
+        errorCount++;
+      }
+    }
+
+    // Check valid token registry handler for sender
+    if (hasValidKind(order.sender.kind, swap)) {
+      // Check the order sender
+      if (order.sender.wallet != address(0)) {
+        // The sender was specified
+        // Check if sender kind interface can correctly check balance
+        if (order.sender.kind == ERC721_INTERFACE_ID && !hasValidERC71Interface(order.sender.token)) {
+          errors[errorCount] = "SENDER_INVALID_ERC721";
+          errorCount++;
+        } else {
+          // Check the order sender token balance when sender is not WETH
+          if (order.sender.token != address(wethContract)) {
+            //do the balance check
+            if (!hasBalance(order.sender)) {
+              errors[errorCount] = "SENDER_BALANCE";
+              errorCount++;
+            }
+          }
+
+          // Check their approval
+          if (!isApproved(order.sender, swap)) {
+            errors[errorCount] = "SENDER_ALLOWANCE";
+            errorCount++;
+          }
+        }
+      }
+    } else {
+      errors[errorCount] = "SENDER_TOKEN_KIND_UNKNOWN";
+      errorCount++;
+    }
+
+     // Check valid token registry handler for signer
+    if (hasValidKind(order.signer.kind, swap)) {
+      // Check if sender kind interface can correctly check balance
+      if (order.signer.kind == ERC721_INTERFACE_ID && !hasValidERC71Interface(order.signer.token)) {
+        errors[errorCount] = "SIGNER_INVALID_ERC721";
+        errorCount++;
+      } else {
+        // Check the order signer token balance
+        if (!hasBalance(order.signer)) {
+          errors[errorCount] = "SIGNER_BALANCE";
+          errorCount++;
+        }
+
+        // Check their approval
+        if (!isApproved(order.signer, swap)) {
+          errors[errorCount] = "SIGNER_ALLOWANCE";
+          errorCount++;
+        }
+      }
+    } else {
+      errors[errorCount] = "SIGNER_TOKEN_KIND_UNKNOWN";
+      errorCount++;
+    }
+
+    return (errorCount, errors);
+  }
+
+  /**
+    * @notice Takes in an order and outputs any
+    * errors that Swap would revert on
+    * @param order Types.Order Order to settle
+    * @return uint256 errorCount if any
+    * @return bytes32[] memory array of error messages
+    */
+  function checkSwapSwap(
+    Types.Order memory order
+  ) public view returns (uint256, bytes32[] memory) {
+
+    bytes32[] memory errors = new bytes32[](14);
+    uint256 errorCount;
+    address swap = order.signature.validator;
+    (uint256 swapErrorCount, bytes32[] memory swapErrors) = coreSwapChecks(order);
+
+    if (swapErrorCount > 0) {
+      errorCount = swapErrorCount;
+      // copies over errors from coreSwapChecks to be outputted
+      for (uint256 i = 0; i < swapErrorCount; i++) {
+        errors[i] = swapErrors[i];
+      }
+    }
+
+    // Check valid token registry handler for sender
+    if (hasValidKind(order.sender.kind, swap)) {
+      // Check the order sender
+      if (order.sender.wallet != address(0)) {
+        // The sender was specified
+        // Check if sender kind interface can correctly check balance
+        if (order.sender.kind == ERC721_INTERFACE_ID && !hasValidERC71Interface(order.sender.token)) {
+          errors[errorCount] = "SENDER_INVALID_ERC721";
+          errorCount++;
+        } else {
+          // Check the order sender token balance
+          //do the balance check
+          if (!hasBalance(order.sender)) {
+            errors[errorCount] = "SENDER_BALANCE";
+            errorCount++;
+          }
+
+          // Check their approval
+          if (!isApproved(order.sender, swap)) {
+            errors[errorCount] = "SENDER_ALLOWANCE";
+            errorCount++;
+          }
+        }
+      }
+    } else {
+      errors[errorCount] = "SENDER_TOKEN_KIND_UNKNOWN";
+      errorCount++;
+    }
+
+     // Check valid token registry handler for signer
+    if (hasValidKind(order.signer.kind, swap)) {
+      // Check if sender kind interface can correctly check balance
+      if (order.signer.kind == ERC721_INTERFACE_ID && !hasValidERC71Interface(order.signer.token)) {
+        errors[errorCount] = "SIGNER_INVALID_ERC721";
+        errorCount++;
+      } else {
+        // Check the order signer token balance
+        if (!hasBalance(order.signer)) {
+          errors[errorCount] = "SIGNER_BALANCE";
+          errorCount++;
+        }
+
+        // Check their approval
+        if (!isApproved(order.signer, swap)) {
+          errors[errorCount] = "SIGNER_ALLOWANCE";
+          errorCount++;
+        }
+      }
+    } else {
+      errors[errorCount] = "SIGNER_TOKEN_KIND_UNKNOWN";
+      errorCount++;
+    }
+
+    return (errorCount, errors);
+  }
+
   /**
     * @notice If order is going through delegate via provideOrder
     * ensure necessary checks are set
@@ -45,16 +337,14 @@ contract PreSwapChecker {
     * @return bytes32[] memory array of error messages
     */
   function checkSwapDelegate(
-    Types.Order calldata order,
+    Types.Order memory order,
     IDelegate delegate
-    ) external view returns (uint256, bytes32[] memory ) {
+    ) public view returns (uint256, bytes32[] memory ) {
 
     bytes32[] memory errors = new bytes32[](20);
     uint256 errorCount;
-    address swap = order.signature.validator;
-    IDelegate.Rule memory rule = delegate.rules(order.sender.token,order.signer.token);
-    (uint256 swapErrorCount, bytes32[] memory swapErrors) = checkSwapSwap(order, false);
-
+    (uint256 swapErrorCount, bytes32[] memory swapErrors) = checkSwapSwap(order);
+    (uint256 delegateErrorCount, bytes32[] memory delegateErrors) = coreDelegateChecks(order, delegate);
     if (swapErrorCount > 0) {
       errorCount = swapErrorCount;
       // copies over errors from checkSwapSwap to be outputted
@@ -62,7 +352,107 @@ contract PreSwapChecker {
         errors[i] = swapErrors[i];
       }
     }
+    if (delegateErrorCount > 0) {
 
+      // copies over errors from checkSwapSwap to be outputted
+      for (uint256 i = 0; i < delegateErrorCount; i++) {
+        errors[i + errorCount] = delegateErrors[i];
+      }
+      errorCount = swapErrorCount + delegateErrorCount;
+    }
+
+    return (errorCount, errors);
+  }
+
+
+  /**
+    * @notice Condenses swap specific checks while excluding
+    * token balance or approval checks
+    * @param order Types.Order
+    * @return uint256 errorCount if any
+    * @return bytes32[] memory array of error messages
+    */
+  function coreSwapChecks(
+    Types.Order memory order
+    ) public view returns (uint256, bytes32[] memory ) {
+    address swap = order.signature.validator;
+    bytes32 domainSeparator = Types.hashDomain(DOM_NAME, DOM_VERSION, swap);
+
+    // max size of the number of errors that could exist
+    bytes32[] memory errors = new bytes32[](10);
+    uint256 errorCount;
+
+    // Check self transfer
+    if (order.signer.wallet == order.sender.wallet) {
+      errors[errorCount] = "SELF_TRANSFER_INVALID";
+      errorCount++;
+    }
+
+    // Check expiry
+    if (order.expiry < block.timestamp) {
+      errors[errorCount] = "ORDER_EXPIRED";
+      errorCount++;
+    }
+
+    if (ISwap(swap).signerNonceStatus(order.signer.wallet, order.nonce) != 0x00) {
+      errors[errorCount] = "ORDER_TAKEN_OR_CANCELLED";
+      errorCount++;
+    }
+
+    if (order.nonce < ISwap(swap).signerMinimumNonce(order.signer.wallet)) {
+      errors[errorCount] = "NONCE_TOO_LOW";
+      errorCount++;
+    }
+
+    // check if ERC721 or ERC20 only amount or id set for sender
+    if (order.sender.kind == ERC20_INTERFACE_ID && order.sender.id != 0) {
+      errors[errorCount] = "SENDER_INVALID_ID";
+      errorCount++;
+    } else if (order.sender.kind == ERC721_INTERFACE_ID && order.sender.amount != 0) {
+      errors[errorCount] = "SENDER_INVALID_AMOUNT";
+      errorCount++;
+    }
+
+    // check if ERC721 or ERC20 only amount or id set for signer
+    if (order.signer.kind == ERC20_INTERFACE_ID && order.signer.id != 0) {
+      errors[errorCount] = "SIGNER_INVALID_ID";
+      errorCount++;
+    } else if (order.signer.kind == ERC721_INTERFACE_ID && order.signer.amount != 0) {
+      errors[errorCount] = "SIGNER_INVALID_AMOUNT";
+      errorCount++;
+    }
+
+    if (!isValid(order, domainSeparator)) {
+      errors[errorCount] = "SIGNATURE_INVALID";
+      errorCount++;
+    }
+
+    if (order.signature.signatory != order.signer.wallet) {
+      if(!ISwap(swap).signerAuthorizations(order.signer.wallet, order.signature.signatory)) {
+        errors[errorCount] = "SIGNER_UNAUTHORIZED";
+        errorCount++;
+      }
+    }
+
+    return (errorCount, errors);
+  }
+
+  /**
+    * @notice Condenses Delegate specific checks
+    * and excludes swap or balance related checks
+    * @param order Types.Order
+    * @param delegate IDelegate Delegate to interface with
+    * @return uint256 errorCount if any
+    * @return bytes32[] memory array of error messages
+    */
+  function coreDelegateChecks(
+    Types.Order memory order,
+    IDelegate delegate
+    ) public view returns (uint256, bytes32[] memory )  {
+    IDelegate.Rule memory rule = delegate.rules(order.sender.token,order.signer.token);
+    bytes32[] memory errors = new bytes32[](9);
+    uint256 errorCount;
+    address swap = order.signature.validator;
     // signature must be filled in order to use the Delegate
     if (order.signature.v == 0) {
       errors[errorCount] = "SIGNATURE_MUST_BE_SENT";
@@ -117,197 +507,6 @@ contract PreSwapChecker {
     return (errorCount, errors);
   }
 
-  /**
-    * @notice If order is going through wrapper to swap
-    * @param order Types.Order
-    * @param fromAddress address
-    * @param wrapper address
-    * @return uint256 errorCount if any
-    * @return bytes32[] memory array of error messages
-    */
-  function checkSwapWrapper(
-    Types.Order calldata order,
-    address fromAddress,
-    address wrapper
-    ) external view returns (uint256, bytes32[] memory ) {
-    address swap = order.signature.validator;
-    // max size of the number of errors that could exist
-    bytes32[] memory errors = new bytes32[](20);
-    uint256 errorCount;
-
-    (uint256 swapErrorCount, bytes32[] memory swapErrors) = checkSwapSwap(order, true);
-
-    if (swapErrorCount > 0) {
-      errorCount = swapErrorCount;
-      // copies over errors from checkSwapSwap to be outputted
-      for (uint256 i = 0; i < swapErrorCount; i++) {
-        errors[i] = swapErrors[i];
-      }
-    }
-
-    if (order.sender.wallet != fromAddress) {
-      errors[errorCount] = "MSG_SENDER_MUST_BE_ORDER_SENDER";
-      errorCount++;
-    }
-
-    // ensure that sender has approved wrapper contract on swap
-    if (!ISwap(swap).senderAuthorizations(order.sender.wallet, wrapper)) {
-      errors[errorCount] = "SENDER_UNAUTHORIZED";
-      errorCount++;
-    }
-
-    // signature must be filled in order to use the Wrapper
-    if (order.signature.v == 0) {
-      errors[errorCount] = "SIGNATURE_MUST_BE_SENT";
-      errorCount++;
-    }
-
-    // if sender has WETH token, ensure sufficient ETH balance
-    if (order.sender.token == address(wethContract)) {
-      if (address(order.sender.wallet).balance < order.sender.amount) {
-        errors[errorCount] = "SENDER_INSUFFICIENT_ETH";
-        errorCount++;
-      }
-    }
-
-    // ensure that sender wallet if receiving weth has approved
-    // the wrapper to transfer weth and deliver eth to the sender
-    if (order.signer.token == address(wethContract)) {
-      uint256 allowance = wethContract.allowance(order.sender.wallet, wrapper);
-      if (allowance < order.signer.amount) {
-        errors[errorCount] = "LOW_SENDER_ALLOWANCE_ON_WRAPPER";
-        errorCount++;
-      }
-    }
-    return (errorCount, errors);
-  }
-
-  /**
-    * @notice Takes in an order and outputs any
-    * errors that Swap would revert on
-    * @param order Types.Order Order to settle
-    * @return uint256 errorCount if any
-    * @return bytes32[] memory array of error messages
-    */
-  function checkSwapSwap(
-    Types.Order memory order,
-    bool usingWrapper
-  ) public view returns (uint256, bytes32[] memory) {
-    address swap = order.signature.validator;
-    bytes32 domainSeparator = Types.hashDomain(DOM_NAME, DOM_VERSION, swap);
-
-    // max size of the number of errors that could exist
-    bytes32[] memory errors = new bytes32[](14);
-    uint256 errorCount;
-
-    // Check self transfer
-    if (order.signer.wallet == order.sender.wallet) {
-      errors[errorCount] = "SELF_TRANSFER_INVALID";
-      errorCount++;
-    }
-
-    // Check expiry
-    if (order.expiry < block.timestamp) {
-      errors[errorCount] = "ORDER_EXPIRED";
-      errorCount++;
-    }
-
-    if (ISwap(swap).signerNonceStatus(order.signer.wallet, order.nonce) != 0x00) {
-      errors[errorCount] = "ORDER_TAKEN_OR_CANCELLED";
-      errorCount++;
-    }
-
-    if (order.nonce < ISwap(swap).signerMinimumNonce(order.signer.wallet)) {
-      errors[errorCount] = "NONCE_TOO_LOW";
-      errorCount++;
-    }
-
-    // check if ERC721 or ERC20 only amount or id set for sender
-    if (order.sender.kind == ERC20_INTERFACE_ID && order.sender.id != 0) {
-      errors[errorCount] = "SENDER_INVALID_ID";
-      errorCount++;
-    } else if (order.sender.kind == ERC721_INTERFACE_ID && order.sender.amount != 0) {
-      errors[errorCount] = "SENDER_INVALID_AMOUNT";
-      errorCount++;
-    }
-
-    // check if ERC721 or ERC20 only amount or id set for signer
-    if (order.signer.kind == ERC20_INTERFACE_ID && order.signer.id != 0) {
-      errors[errorCount] = "SIGNER_INVALID_ID";
-      errorCount++;
-    } else if (order.signer.kind == ERC721_INTERFACE_ID && order.signer.amount != 0) {
-      errors[errorCount] = "SIGNER_INVALID_AMOUNT";
-      errorCount++;
-    }
-
-    // Check valid token registry handler for sender
-    if (hasValidKind(order.sender.kind, swap)) {
-      // Check the order sender
-      if (order.sender.wallet != address(0)) {
-        // The sender was specified
-        // Check if sender kind interface can correctly check balance
-        if (order.sender.kind == ERC721_INTERFACE_ID && !hasValidERC71Interface(order.sender.token)) {
-          errors[errorCount] = "SENDER_INVALID_ERC721";
-          errorCount++;
-        } else {
-          // Check the order sender token balance
-          if ((usingWrapper && order.sender.token != address(wethContract)) || !usingWrapper) {
-            //do the balance check
-            if (!hasBalance(order.sender)) {
-              errors[errorCount] = "SENDER_BALANCE";
-              errorCount++;
-            }
-          }
-
-          // Check their approval
-          if (!isApproved(order.sender, swap)) {
-            errors[errorCount] = "SENDER_ALLOWANCE";
-            errorCount++;
-          }
-        }
-      }
-    } else {
-      errors[errorCount] = "SENDER_TOKEN_KIND_UNKNOWN";
-      errorCount++;
-    }
-
-     // Check valid token registry handler for signer
-    if (hasValidKind(order.signer.kind, swap)) {
-      // Check if sender kind interface can correctly check balance
-      if (order.signer.kind == ERC721_INTERFACE_ID && !hasValidERC71Interface(order.signer.token)) {
-        errors[errorCount] = "SIGNER_INVALID_ERC721";
-        errorCount++;
-      } else {
-        // Check the order signer token balance
-        if (!hasBalance(order.signer)) {
-          errors[errorCount] = "SIGNER_BALANCE";
-          errorCount++;
-        }
-
-        // Check their approval
-        if (!isApproved(order.signer, swap)) {
-          errors[errorCount] = "SIGNER_ALLOWANCE";
-          errorCount++;
-        }
-      }
-    } else {
-      errors[errorCount] = "SIGNER_TOKEN_KIND_UNKNOWN";
-      errorCount++;
-    }
-
-    if (!isValid(order, domainSeparator)) {
-      errors[errorCount] = "SIGNATURE_INVALID";
-      errorCount++;
-    }
-
-    if (order.signature.signatory != order.signer.wallet) {
-      if(!ISwap(swap).signerAuthorizations(order.signer.wallet, order.signature.signatory)) {
-        errors[errorCount] = "SIGNER_UNAUTHORIZED";
-        errorCount++;
-      }
-    }
-    return (errorCount, errors);
-  }
 
   /**
     * @notice Checks if kind is found in
