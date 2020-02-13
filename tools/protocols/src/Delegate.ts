@@ -15,6 +15,7 @@
 */
 
 import { ethers } from 'ethers'
+import { bigNumberify } from 'ethers/utils'
 import { chainIds, chainNames, MIN_CONFIRMATIONS } from '@airswap/constants'
 import { Quote, SignedOrder } from '@airswap/types'
 import { ERC20 } from './ERC20'
@@ -49,41 +50,16 @@ export class Delegate {
   }
 
   async getMaxQuote(signerToken: string, senderToken: string): Promise<Quote> {
-    const { signerAmount, senderAmount } = await this.contract.getMaxQuote(
+    const { senderAmount, signerAmount } = await this.contract.getMaxQuote(
+      senderToken,
+      signerToken
+    )
+    return this.getQuotedOrMaxAvailable(
+      senderToken,
+      senderAmount,
       signerToken,
-      senderToken
+      signerAmount
     )
-    const balance = await new ERC20(senderToken, this.chainId).balanceOf(
-      this.address
-    )
-
-    if (balance.lt(senderAmount)) {
-      return {
-        signer: {
-          token: signerToken,
-          amount: senderAmount
-            .div(signerAmount)
-            .mul(balance)
-            .floor()
-            .toString(),
-        },
-        sender: {
-          token: senderToken,
-          amount: balance.toString(),
-        },
-      }
-    }
-
-    return {
-      signer: {
-        token: signerToken,
-        amount: signerAmount.toString(),
-      },
-      sender: {
-        token: senderToken,
-        amount: senderAmount.toString(),
-      },
-    }
   }
 
   async getSignerSideQuote(
@@ -97,18 +73,37 @@ export class Delegate {
       signerToken
     )
     if (signerAmount.isZero()) {
-      throw new Error('Not quoting for the requested pair')
+      throw new Error('Not quoting for requested amount or token pair')
     }
-    return {
-      signer: {
-        token: signerToken,
-        amount: signerAmount.toString(),
-      },
-      sender: {
-        token: senderToken,
-        amount: senderAmount,
-      },
+
+    return this.getQuotedOrMaxAvailable(
+      senderToken,
+      senderAmount,
+      signerToken,
+      signerAmount
+    )
+  }
+
+  async getSenderSideQuote(
+    signerAmount: string,
+    signerToken: string,
+    senderToken: string
+  ): Promise<Quote> {
+    const senderAmount = await this.contract.getSenderSideQuote(
+      signerAmount,
+      signerToken,
+      senderToken
+    )
+    if (senderAmount.isZero()) {
+      throw new Error('Not quoting for requested amount or token pair')
     }
+
+    return this.getQuotedOrMaxAvailable(
+      senderToken,
+      senderAmount,
+      signerToken,
+      signerAmount
+    )
   }
 
   async provideOrder(
@@ -126,5 +121,34 @@ export class Delegate {
     const tx = await contract.provideOrder(order)
     await tx.wait(MIN_CONFIRMATIONS)
     return tx.hash
+  }
+
+  async getQuotedOrMaxAvailable(
+    senderToken,
+    senderAmount,
+    signerToken,
+    signerAmount
+  ) {
+    const balance = await new ERC20(senderToken, this.chainId).balanceOf(
+      this.address
+    )
+    let finalSenderAmount = bigNumberify(senderAmount)
+    let finalSignerAmount = bigNumberify(signerAmount)
+    if (balance.lt(senderAmount)) {
+      finalSenderAmount = balance
+      finalSignerAmount = bigNumberify(senderAmount)
+        .div(signerAmount)
+        .mul(balance)
+    }
+    return {
+      signer: {
+        token: signerToken,
+        amount: finalSignerAmount.toString(),
+      },
+      sender: {
+        token: senderToken,
+        amount: finalSenderAmount.toString(),
+      },
+    }
   }
 }
