@@ -15,74 +15,16 @@
 */
 import { ethers } from 'ethers'
 import { BigNumber } from 'ethers/utils'
-import { defaults, signatureTypes, SECONDS_IN_DAY } from '@airswap/constants'
-import { hashes } from '@airswap/order-utils'
+import * as url from 'url'
 
-function lowerCaseAddresses(obj: any) {
-  for (const key in obj) {
-    if (typeof obj[key] === 'object') {
-      lowerCaseAddresses(obj[key])
-    }
-    if (typeof obj[key] === 'string' && obj[key].indexOf('0x') === 0) {
-      obj[key] = obj[key].toLowerCase()
-    }
+export * from './src/hashes'
+export * from './src/orders'
+
+export function parseUrl(locator: string): url.UrlWithStringQuery {
+  if (!/^http:\/\//.test(locator) && !/^https:\/\//.test(locator)) {
+    locator = `https://${locator}`
   }
-  return obj
-}
-
-export function createOrder({
-  expiry = Math.round(Date.now() / 1000 + SECONDS_IN_DAY).toString(),
-  nonce = Date.now(),
-  signer = defaults.Party,
-  sender = defaults.Party,
-  affiliate = defaults.Party,
-}): any {
-  return lowerCaseAddresses({
-    expiry: String(expiry),
-    nonce: String(nonce),
-    signer: { ...defaults.Party, ...signer },
-    sender: { ...defaults.Party, ...sender },
-    affiliate: { ...defaults.Party, ...affiliate },
-  })
-}
-
-export function createOrderFromQuote(
-  quote: any,
-  signerWallet: string,
-  senderWallet: string
-): any {
-  return createOrder({
-    signer: {
-      token: quote.signer.token,
-      amount: quote.signer.amount,
-      wallet: signerWallet,
-    },
-    sender: {
-      token: quote.sender.token,
-      amount: quote.sender.amount,
-      wallet: senderWallet,
-    },
-  })
-}
-
-export async function signOrder(
-  order: any,
-  signer: ethers.Signer,
-  swapContract: string
-) {
-  const orderHash = hashes.getOrderHash(order, swapContract)
-  const signedMsg = await signer.signMessage(ethers.utils.arrayify(orderHash))
-  const sig = ethers.utils.splitSignature(signedMsg)
-  const { r, s, v } = sig
-
-  return {
-    signatory: (await signer.getAddress()).toLowerCase(),
-    validator: swapContract,
-    version: signatureTypes.PERSONAL_SIGN,
-    v: String(v),
-    r,
-    s,
-  }
+  return url.parse(locator)
 }
 
 export function toDecimalString(
@@ -95,6 +37,6 @@ export function toDecimalString(
 export function toAtomicString(
   value: string | BigNumber,
   decimals: string | number
-) {
+): string {
   return ethers.utils.parseUnits(value.toString(), decimals).toString()
 }

@@ -10,4 +10,4 @@ build
 flatten/
 .env
 venv
-dist/
+build

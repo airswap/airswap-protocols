@@ -227,8 +227,6 @@ contract('Swap Unit Tests', async accounts => {
         return e.nonce.toNumber() === 5 && e.signerWallet === mockSigner
       })
     })
-
-    it('test that given a minimum nonce that all orders below a nonce value are cancelled', async () => {})
   })
 
   describe('Test authorize signer', async () => {

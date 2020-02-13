@@ -1,6 +1,6 @@
 {
   "name": "@airswap/constants",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "Helpful Constants for AirSwap Developers",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>"
@@ -14,11 +14,15 @@
     "airswap"
   ],
   "license": "Apache-2.0",
-  "main": "dist/index.js",
+  "main": "build/index.js",
   "files": [
-    "/dist"
+    "/build"
   ],
   "scripts": {
+    "clean": "rm -rf ./build",
     "compile": "tsc -b"
+  },
+  "dependencies": {
+    "@airswap/types": "3.5.6"
   }
 }

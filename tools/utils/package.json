@@ -1,6 +1,6 @@
 {
   "name": "@airswap/utils",
-  "version": "0.1.0",
+  "version": "0.3.1",
   "description": "Utilities for AirSwap Developers",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>"
@@ -14,16 +14,21 @@
     "airswap"
   ],
   "license": "Apache-2.0",
-  "main": "dist/index.js",
+  "main": "build/index.js",
   "files": [
-    "/dist"
+    "/build"
   ],
   "scripts": {
+    "clean": "rm -rf ./build",
     "compile": "tsc -b"
   },
   "dependencies": {
-    "ethers": "^4.0.44",
-    "@airswap/constants": "0.1.0",
-    "@airswap/order-utils": "0.3.20"
+    "@airswap/constants": "0.3.0",
+    "@airswap/types": "3.5.6",
+    "@types/ethereumjs-abi": "^0.6.3",
+    "@types/ethereumjs-util": "^6.1.0",
+    "ethereumjs-abi": "^0.6.8",
+    "ethereumjs-util": "^6.2.0",
+    "ethers": "^4.0.44"
   }
 }
