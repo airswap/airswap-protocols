@@ -17,26 +17,27 @@
 import { ethers } from 'ethers'
 import { chainIds, chainNames, MIN_CONFIRMATIONS } from '@airswap/constants'
 import { Quote, SignedOrder } from '@airswap/types'
+import { ERC20 } from './ERC20'
 
-import * as DelegateContract from '@airswap/indexer/build/contracts/Indexer.json'
+import * as DelegateContract from '@airswap/delegate/build/contracts/Delegate.json'
 const DelegateInterface = new ethers.utils.Interface(
   JSON.stringify(DelegateContract.abi)
 )
 
 export class Delegate {
-  locator: string
+  address: string
   chainId: string
   contract: ethers.Contract
 
   constructor(
-    locator: string,
+    address: string,
     chainId = chainIds.RINKEBY,
     signerOrProvider?: ethers.Signer | ethers.providers.Provider
   ) {
-    this.locator = locator
+    this.address = address
     this.chainId = chainId
     this.contract = new ethers.Contract(
-      locator,
+      address,
       DelegateInterface,
       signerOrProvider ||
         ethers.getDefaultProvider(chainNames[chainId].toLowerCase())
@@ -48,15 +49,39 @@ export class Delegate {
   }
 
   async getMaxQuote(signerToken: string, senderToken: string): Promise<Quote> {
-    const result = await this.contract.getMaxQuote(signerToken, senderToken)
+    const { signerAmount, senderAmount } = await this.contract.getMaxQuote(
+      signerToken,
+      senderToken
+    )
+    const balance = await new ERC20(senderToken, this.chainId).balanceOf(
+      this.address
+    )
+
+    if (balance.lt(senderAmount)) {
+      return {
+        signer: {
+          token: signerToken,
+          amount: senderAmount
+            .div(signerAmount)
+            .mul(balance)
+            .floor()
+            .toString(),
+        },
+        sender: {
+          token: senderToken,
+          amount: balance.toString(),
+        },
+      }
+    }
+
     return {
       signer: {
         token: signerToken,
-        amount: result.signerAmount.toString(),
+        amount: signerAmount.toString(),
       },
       sender: {
         token: senderToken,
-        amount: result.senderAmount.toString(),
+        amount: senderAmount.toString(),
       },
     }
   }
@@ -95,7 +120,7 @@ export class Delegate {
       if (signer === undefined) {
         throw new Error('Signer must be provided')
       } else {
-        contract = new ethers.Contract(this.locator, DelegateInterface, signer)
+        contract = new ethers.Contract(this.address, DelegateInterface, signer)
       }
     }
     const tx = await contract.provideOrder(order)
