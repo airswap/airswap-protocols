@@ -9,16 +9,16 @@ import {
 describe('Orders', async () => {
   it('Checks best order by lowest sender', async () => {
     const orders = []
-    let i = 5
+    let count = 5
     const lowestAmount = 50
-    while (i--) {
+    while (count--) {
       orders.push(
         createOrder({
           sender: {
             wallet: '',
             kind: '',
             token: '',
-            amount: String(i + lowestAmount),
+            amount: String(count + lowestAmount),
           },
         })
       )
@@ -30,8 +30,8 @@ describe('Orders', async () => {
   it('Checks best order by highest signer', async () => {
     const orders = []
     const highestAmount = 5
-    let count = -1
-    for (; count <= highestAmount; ++count) {
+    let count = 0
+    while (count++ < highestAmount) {
       orders.push(
         createOrder({
           signer: {
