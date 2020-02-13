@@ -29,21 +29,21 @@ describe('Orders', async () => {
 
   it('Checks best order by highest signer', async () => {
     const orders = []
-    const count = 5
-    const highestAmount = 50
-    for (let i = 0; i < count; i++) {
+    const highestAmount = 5
+    let count = -1
+    for (; count <= highestAmount; ++count) {
       orders.push(
         createOrder({
-          sender: {
+          signer: {
             wallet: '',
             kind: '',
             token: '',
-            amount: String(i + highestAmount),
+            amount: String(count),
           },
         })
       )
     }
     const best = getBestByHighestSignerAmount(orders)
-    expect(best.sender.amount).to.equal(String(highestAmount))
+    expect(best.signer.amount).to.equal(String(highestAmount))
   })
 })
