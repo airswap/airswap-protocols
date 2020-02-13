@@ -2,8 +2,8 @@ import { expect } from 'chai'
 
 import {
   createOrder,
-  getByLowestSenderAmount,
-  getByHighestSignerAmount,
+  getOrderByLowestSenderAmount,
+  getOrderByHighestSignerAmount,
 } from '../src/orders'
 
 describe('Orders', async () => {
@@ -23,7 +23,7 @@ describe('Orders', async () => {
         })
       )
     }
-    const best = getByLowestSenderAmount(orders)
+    const best = getOrderByLowestSenderAmount(orders)
     expect(best.sender.amount).to.equal(String(lowestAmount))
   })
 
@@ -43,7 +43,7 @@ describe('Orders', async () => {
         })
       )
     }
-    const best = getByHighestSignerAmount(orders)
+    const best = getOrderByHighestSignerAmount(orders)
     expect(best.sender.amount).to.equal(String(highestAmount))
   })
 })
