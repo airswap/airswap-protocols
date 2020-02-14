@@ -918,7 +918,7 @@ contract('PreSwapChecker', async accounts => {
         wrapperAddress,
         { from: aliceAddress }
       )
-      //equal(errorCodes[0], 2)
+      equal(errorCodes[0], 3)
       equal(web3.utils.toUtf8(errorCodes[1][0]), 'SENDER_WRAPPER_ALLOWANCE_LOW')
       equal(web3.utils.toUtf8(errorCodes[1][1]), 'SENDER_TOKEN_KIND_UNKNOWN')
       equal(web3.utils.toUtf8(errorCodes[1][2]), 'SIGNER_TOKEN_KIND_UNKNOWN')
