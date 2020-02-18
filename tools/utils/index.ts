@@ -19,6 +19,7 @@ import * as url from 'url'
 
 export * from './src/hashes'
 export * from './src/orders'
+export * from './src/quotes'
 
 export function parseUrl(locator: string): url.UrlWithStringQuery {
   if (!/^http:\/\//.test(locator) && !/^https:\/\//.test(locator)) {
