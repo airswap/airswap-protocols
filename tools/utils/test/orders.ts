@@ -4,7 +4,7 @@ import {
   createOrder,
   getBestByLowestSenderAmount,
   getBestByHighestSignerAmount,
-} from '../src/orders'
+} from '../index'
 
 describe('Orders', async () => {
   it('Best by lowest sender', async () => {

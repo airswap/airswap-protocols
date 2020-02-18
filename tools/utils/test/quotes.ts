@@ -4,7 +4,7 @@ import {
   createQuote,
   getTotalBySignerAmount,
   getTotalBySenderAmount,
-} from '../src/quotes'
+} from '../index'
 
 describe('Quotes', async () => {
   it('Total by signer amount', async () => {
