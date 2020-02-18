@@ -138,17 +138,6 @@ jobs:
             yarn ganache > /dev/null &
             cd source/wrapper && yarn test
 
-  debugger_tests:
-    <<: *container_config
-    steps:
-      - attach_workspace:
-          at: *working_directory
-      - run:
-          name: Run Tests
-          command: |
-            yarn ganache > /dev/null &
-            sleep 10s && cd tools/debugger && yarn test
-
   deploy:
     <<: *container_config
     steps:
@@ -165,7 +154,7 @@ jobs:
           command: |
             cd tools
             ### ADD FOLDERS HERE TO PROCESS ###
-            for file in constants protocols utils order-utils test-utils debugger
+            for file in constants protocols utils order-utils test-utils
             do
               cd $file
               NPM_NAME=$(node -p "require('./package.json').name")
@@ -267,10 +256,6 @@ workflows:
           context: Development
           requires:
             - setup
-      - debugger_tests:
-          context: Development
-          requires:
-            - setup
       - deploy:
           context: NPM_Publish
           requires:
@@ -281,7 +266,6 @@ workflows:
             - transfers_tests
             - types_tests
             - wrapper_tests
-            - debugger_tests
           filters:
             branches:
               only:

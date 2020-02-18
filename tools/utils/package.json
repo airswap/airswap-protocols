@@ -1,6 +1,6 @@
 {
   "name": "@airswap/utils",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Utilities for AirSwap Developers",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>"
@@ -20,7 +20,8 @@
   ],
   "scripts": {
     "clean": "rm -rf ./build",
-    "compile": "tsc -b"
+    "compile": "tsc -b",
+    "test": "mocha -r ts-node/register test/**/*.ts"
   },
   "dependencies": {
     "@airswap/constants": "0.3.0",
@@ -30,5 +31,11 @@
     "ethereumjs-abi": "^0.6.8",
     "ethereumjs-util": "^6.2.0",
     "ethers": "^4.0.44"
+  },
+  "devDependencies": {
+    "@types/mocha": "^7.0.1",
+    "chai": "^4.2.0",
+    "mocha": "^7.0.1",
+    "ts-node": "^8.6.2"
   }
 }
