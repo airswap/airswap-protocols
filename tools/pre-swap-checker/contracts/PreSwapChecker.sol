@@ -23,6 +23,7 @@ contract PreSwapChecker {
 
   bytes4 constant internal ERC721_INTERFACE_ID = 0x80ac58cd;
   bytes4 constant internal ERC20_INTERFACE_ID = 0x36372b07;
+  bytes4 constant internal CK_INTERFACE_ID = 0x9a20483d;
 
   IWETH public wethContract;
 
@@ -50,18 +51,11 @@ contract PreSwapChecker {
     IDelegate delegate,
     address wrapper
     ) external view returns (uint256, bytes32[] memory ) {
-    bytes32[] memory errors = new bytes32[](22);
-    uint256 errorCount;
+
     address swap = order.signature.validator;
-    (uint256 swapErrorCount, bytes32[] memory swapErrors) = coreSwapChecks(order);
+    (uint256 errorCount, bytes32[] memory errors) = coreSwapChecks(order);
     (uint256 delegateErrorCount, bytes32[] memory delegateErrors) = coreDelegateChecks(order, delegate);
-    if (swapErrorCount > 0) {
-      errorCount = swapErrorCount;
-      // copies over errors from coreSwapChecks
-      for (uint256 i = 0; i < swapErrorCount; i++) {
-        errors[i] = swapErrors[i];
-      }
-    }
+
     if (delegateErrorCount > 0) {
 
       // copies over errors from coreDelegateChecks
@@ -137,19 +131,8 @@ contract PreSwapChecker {
     address wrapper
     ) external view returns (uint256, bytes32[] memory ) {
     address swap = order.signature.validator;
-    // max size of the number of errors that could exist
-    bytes32[] memory errors = new bytes32[](20);
-    uint256 errorCount;
 
-    (uint256 swapErrorCount, bytes32[] memory swapErrors) = coreSwapChecks(order);
-
-    if (swapErrorCount > 0) {
-      errorCount = swapErrorCount;
-      // copies over errors from coreSwapChecks
-      for (uint256 i = 0; i < swapErrorCount; i++) {
-        errors[i] = swapErrors[i];
-      }
-    }
+    (uint256 errorCount, bytes32[] memory errors) = coreSwapChecks(order);
 
     if (order.sender.wallet != fromAddress) {
       errors[errorCount] = "MSG_SENDER_MUST_BE_ORDER_SENDER";
@@ -157,7 +140,7 @@ contract PreSwapChecker {
     }
 
     // ensure that sender has approved wrapper contract on swap
-    if (!ISwap(swap).senderAuthorizations(order.sender.wallet, wrapper)) {
+    if (swap != address(0x0) && !ISwap(swap).senderAuthorizations(order.sender.wallet, wrapper)) {
       errors[errorCount] = "SENDER_UNAUTHORIZED";
       errorCount++;
     }
@@ -255,18 +238,8 @@ contract PreSwapChecker {
     Types.Order memory order
   ) public view returns (uint256, bytes32[] memory) {
 
-    bytes32[] memory errors = new bytes32[](14);
-    uint256 errorCount;
     address swap = order.signature.validator;
-    (uint256 swapErrorCount, bytes32[] memory swapErrors) = coreSwapChecks(order);
-
-    if (swapErrorCount > 0) {
-      errorCount = swapErrorCount;
-      // copies over errors from coreSwapChecks
-      for (uint256 i = 0; i < swapErrorCount; i++) {
-        errors[i] = swapErrors[i];
-      }
-    }
+    (uint256 errorCount, bytes32[] memory errors) = coreSwapChecks(order);
 
     // Check valid token registry handler for sender
     if (hasValidKind(order.sender.kind, swap)) {
@@ -337,17 +310,9 @@ contract PreSwapChecker {
     IDelegate delegate
     ) public view returns (uint256, bytes32[] memory ) {
 
-    bytes32[] memory errors = new bytes32[](20);
-    uint256 errorCount;
-    (uint256 swapErrorCount, bytes32[] memory swapErrors) = checkSwap(order);
+    (uint256 errorCount, bytes32[] memory errors) = checkSwap(order);
     (uint256 delegateErrorCount, bytes32[] memory delegateErrors) = coreDelegateChecks(order, delegate);
-    if (swapErrorCount > 0) {
-      errorCount = swapErrorCount;
-      // copies over errors from checkSwap
-      for (uint256 i = 0; i < swapErrorCount; i++) {
-        errors[i] = swapErrors[i];
-      }
-    }
+
     if (delegateErrorCount > 0) {
 
       // copies over errors from coreDelegateChecks
@@ -374,8 +339,8 @@ contract PreSwapChecker {
     address swap = order.signature.validator;
     bytes32 domainSeparator = Types.hashDomain(DOM_NAME, DOM_VERSION, swap);
 
-    // max size of the number of errors that could exist
-    bytes32[] memory errors = new bytes32[](10);
+    // max size of the number of errors
+    bytes32[] memory errors = new bytes32[](20);
     uint256 errorCount;
 
     // Check self transfer
@@ -389,14 +354,26 @@ contract PreSwapChecker {
       errors[errorCount] = "ORDER_EXPIRED";
       errorCount++;
     }
+    if (swap != address(0x0)) {
+      ISwap swapContract = ISwap(swap);
+      if (swapContract.signerNonceStatus(order.signer.wallet, order.nonce) != 0x00) {
+        errors[errorCount] = "ORDER_TAKEN_OR_CANCELLED";
+        errorCount++;
+      }
 
-    if (ISwap(swap).signerNonceStatus(order.signer.wallet, order.nonce) != 0x00) {
-      errors[errorCount] = "ORDER_TAKEN_OR_CANCELLED";
-      errorCount++;
-    }
+      if (order.nonce < swapContract.signerMinimumNonce(order.signer.wallet)) {
+        errors[errorCount] = "NONCE_TOO_LOW";
+        errorCount++;
+      }
 
-    if (order.nonce < ISwap(swap).signerMinimumNonce(order.signer.wallet)) {
-      errors[errorCount] = "NONCE_TOO_LOW";
+      if (order.signature.signatory != order.signer.wallet) {
+        if(!swapContract.signerAuthorizations(order.signer.wallet, order.signature.signatory)) {
+          errors[errorCount] = "SIGNER_UNAUTHORIZED";
+          errorCount++;
+        }
+      }
+    } else {
+      errors[errorCount] = "VALIDATOR_INVALID";
       errorCount++;
     }
 
@@ -421,13 +398,6 @@ contract PreSwapChecker {
     if (!isValid(order, domainSeparator)) {
       errors[errorCount] = "SIGNATURE_INVALID";
       errorCount++;
-    }
-
-    if (order.signature.signatory != order.signer.wallet) {
-      if(!ISwap(swap).signerAuthorizations(order.signer.wallet, order.signature.signatory)) {
-        errors[errorCount] = "SIGNER_UNAUTHORIZED";
-        errorCount++;
-      }
     }
 
     return (errorCount, errors);
@@ -495,7 +465,7 @@ contract PreSwapChecker {
     }
 
     // ensure that tradeWallet has approved delegate contract on swap
-    if (!ISwap(swap).senderAuthorizations(order.sender.wallet, address(delegate))) {
+    if (swap != address(0x0) && !ISwap(swap).senderAuthorizations(order.sender.wallet, address(delegate))) {
       errors[errorCount] = "SENDER_UNAUTHORIZED";
       errorCount++;
     }
@@ -515,8 +485,12 @@ contract PreSwapChecker {
     bytes4 kind,
     address swap
   ) internal view returns (bool) {
-    TransferHandlerRegistry tokenRegistry = ISwap(swap).registry();
-    return (address(tokenRegistry.transferHandlers(kind)) != address(0));
+    if (swap != address(0x0)) {
+      TransferHandlerRegistry tokenRegistry = ISwap(swap).registry();
+      return (address(tokenRegistry.transferHandlers(kind)) != address(0));
+    } else {
+      return false;
+    }
   }
 
   /**

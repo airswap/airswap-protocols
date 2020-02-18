@@ -557,6 +557,50 @@ contract('PreSwapChecker', async accounts => {
     })
   })
 
+  describe('Swaps (ERC20 kind) and invalid validator and signature', async () => {
+    let order
+
+    it('Alice creates an order for Bob for kind with invalid validator address', async () => {
+      order = await orders.getOrder({
+        signer: {
+          wallet: aliceAddress,
+          token: tokenAST.address,
+          id: 200,
+          amount: 200,
+          kind: ERC20_INTERFACE_ID,
+        },
+        sender: {
+          wallet: bobAddress,
+          token: tokenDAI.address,
+          id: 50,
+          amount: 50,
+          kind: ERC20_INTERFACE_ID,
+        },
+      })
+
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        aliceAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+      order.signature.validator = EMPTY_ADDRESS
+    })
+
+    it('Checks malformed order errors out from invalid validator', async () => {
+      errorCodes = await preSwapChecker.checkSwap.call(order, {
+        from: bobAddress,
+      })
+      equal(errorCodes[0], 6)
+      equal(web3.utils.toUtf8(errorCodes[1][0]), 'VALIDATOR_INVALID')
+      equal(web3.utils.toUtf8(errorCodes[1][1]), 'SENDER_INVALID_ID')
+      equal(web3.utils.toUtf8(errorCodes[1][2]), 'SIGNER_INVALID_ID')
+      equal(web3.utils.toUtf8(errorCodes[1][3]), 'SIGNATURE_INVALID')
+      equal(web3.utils.toUtf8(errorCodes[1][4]), 'SENDER_TOKEN_KIND_UNKNOWN')
+      equal(web3.utils.toUtf8(errorCodes[1][5]), 'SIGNER_TOKEN_KIND_UNKNOWN')
+    })
+  })
+
   describe('Wrapper Buys on Swap (Fungible)', async () => {
     it('Checks that valid order has zero errors with WETH on sender wallet', async () => {
       // Bob take a WETH for DAI order from Alice using ETH
@@ -631,6 +675,42 @@ contract('PreSwapChecker', async accounts => {
       equal(web3.utils.toUtf8(errorCodes[1][5]), 'SENDER_BALANCE_LOW')
       equal(web3.utils.toUtf8(errorCodes[1][6]), 'SENDER_ALLOWANCE_LOW')
       equal(web3.utils.toUtf8(errorCodes[1][7]), 'SIGNER_BALANCE_LOW')
+    })
+
+    it('Checks errors out with invalid validator address', async () => {
+      // Bob take a WETH for DAI order from Alice using ETH
+      const order = await orders.getOrder({
+        sender: {
+          wallet: aliceAddress,
+          token: tokenDAI.address,
+          amount: 50000,
+        },
+        signer: {
+          wallet: bobAddress,
+          token: tokenWETH.address,
+          amount: 10,
+        },
+      })
+
+      order.signature.validator = EMPTY_ADDRESS
+
+      const errorCodes = await preSwapChecker.checkWrappedSwap.call(
+        order,
+        bobAddress,
+        wrapperAddress,
+        { from: bobAddress }
+      )
+
+      equal(errorCodes[0], 6)
+      equal(web3.utils.toUtf8(errorCodes[1][0]), 'VALIDATOR_INVALID')
+      equal(
+        web3.utils.toUtf8(errorCodes[1][1]),
+        'MSG_SENDER_MUST_BE_ORDER_SENDER'
+      )
+      equal(web3.utils.toUtf8(errorCodes[1][2]), 'SIGNATURE_MUST_BE_SENT')
+      equal(web3.utils.toUtf8(errorCodes[1][3]), 'SENDER_WRAPPER_ALLOWANCE_LOW')
+      equal(web3.utils.toUtf8(errorCodes[1][4]), 'SENDER_TOKEN_KIND_UNKNOWN')
+      equal(web3.utils.toUtf8(errorCodes[1][5]), 'SIGNER_TOKEN_KIND_UNKNOWN')
     })
 
     it('Adding approval allows for zero errors and successful fill of order signer WETH', async () => {
