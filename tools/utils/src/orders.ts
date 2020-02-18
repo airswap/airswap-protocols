@@ -15,6 +15,7 @@
 */
 
 import { ethers } from 'ethers'
+import { bigNumberify } from 'ethers/utils'
 import {
   defaults,
   signatureTypes,
@@ -94,4 +95,28 @@ export async function signOrder(
       s,
     },
   }
+}
+
+export function getBestByLowestSenderAmount(
+  orders: Array<SignedOrder>
+): SignedOrder {
+  let best: any
+  for (const order of orders) {
+    if (!best || bigNumberify(order.sender.amount).lt(best.sender.amount)) {
+      best = order
+    }
+  }
+  return best
+}
+
+export function getBestByHighestSignerAmount(
+  orders: Array<SignedOrder>
+): SignedOrder {
+  let best: any
+  for (const order of orders) {
+    if (!best || bigNumberify(order.signer.amount).gt(best.signer.amount)) {
+      best = order
+    }
+  }
+  return best
 }
