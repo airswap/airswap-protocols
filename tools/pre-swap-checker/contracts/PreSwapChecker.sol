@@ -72,7 +72,7 @@ contract PreSwapChecker {
     }
 
     // Check valid token registry handler for sender
-    if (hasValidKind(order.sender.kind, swap) && order.sender.kind == ERC20_INTERFACE_ID) {
+    if (order.sender.kind == ERC20_INTERFACE_ID) {
       // Check the order sender balance and allowance
       if (!hasBalance(order.sender)) {
         errors[errorCount] = "SENDER_BALANCE_LOW";
@@ -88,7 +88,7 @@ contract PreSwapChecker {
 
 
      // Check valid token registry handler for signer
-    if (hasValidKind(order.signer.kind, swap) && order.signer.kind == ERC20_INTERFACE_ID) {
+    if (order.signer.kind == ERC20_INTERFACE_ID) {
       if (order.signer.token != address(wethContract)) {
         // Check the order signer token balance
         if (!hasBalance(order.signer)) {
@@ -96,7 +96,7 @@ contract PreSwapChecker {
           errorCount++;
         }
       } else {
-        if (address(order.signer.wallet).balance < order.signer.amount) {
+        if ((order.signer.wallet).balance < order.signer.amount) {
           errors[errorCount] = "SIGNER_ETHER_LOW";
           errorCount++;
         }
@@ -170,7 +170,7 @@ contract PreSwapChecker {
 
     // if sender has WETH token, ensure sufficient ETH balance
     if (order.sender.token == address(wethContract)) {
-      if (address(order.sender.wallet).balance < order.sender.amount) {
+      if ((order.sender.wallet).balance < order.sender.amount) {
         errors[errorCount] = "SENDER_ETHER_LOW";
         errorCount++;
       }
