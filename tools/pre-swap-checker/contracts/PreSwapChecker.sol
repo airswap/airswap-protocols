@@ -23,7 +23,6 @@ contract PreSwapChecker {
 
   bytes4 constant internal ERC721_INTERFACE_ID = 0x80ac58cd;
   bytes4 constant internal ERC20_INTERFACE_ID = 0x36372b07;
-  bytes4 constant internal CK_INTERFACE_ID = 0x9a20483d;
 
   IWETH public wethContract;
 
