@@ -16,7 +16,13 @@
 
 import { ethers } from 'ethers'
 import { bigNumberify } from 'ethers/utils'
-import { chainIds, chainNames, MIN_CONFIRMATIONS } from '@airswap/constants'
+import {
+  chainIds,
+  chainNames,
+  MIN_CONFIRMATIONS,
+  protocols,
+} from '@airswap/constants'
+import { getTimestamp } from '@airswap/utils'
 import { Quote, Order } from '@airswap/types'
 import { ERC20 } from './ERC20'
 
@@ -80,10 +86,6 @@ export class Delegate {
       senderToken,
       signerToken
     )
-    if (signerAmount.isZero()) {
-      throw new Error('Not quoting for requested amount or token pair')
-    }
-
     return this.getQuotedOrMaxAvailable(
       senderToken,
       senderAmount,
@@ -102,10 +104,6 @@ export class Delegate {
       signerToken,
       senderToken
     )
-    if (senderAmount.isZero()) {
-      throw new Error('Not quoting for requested amount or token pair')
-    }
-
     return this.getQuotedOrMaxAvailable(
       senderToken,
       senderAmount,
@@ -148,9 +146,14 @@ export class Delegate {
         .div(signerAmount)
         .mul(balance)
     }
+    if (finalSenderAmount.isZero() || finalSignerAmount.isZero()) {
+      throw new Error('Not quoting for requested amount or token pair')
+    }
     return {
+      timestamp: getTimestamp(),
+      protocol: protocols.DELEGATE,
+      locator: this.address,
       sender: {
-        wallet: await this.getWallet(),
         token: senderToken,
         amount: finalSenderAmount.toString(),
       },

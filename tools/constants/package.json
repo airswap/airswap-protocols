@@ -23,6 +23,6 @@
     "compile": "tsc -b"
   },
   "dependencies": {
-    "@airswap/types": "3.5.7"
+    "@airswap/types": "3.5.8"
   }
 }
