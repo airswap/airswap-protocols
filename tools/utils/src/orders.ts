@@ -15,14 +15,13 @@
 */
 
 import { ethers } from 'ethers'
-import { bigNumberify } from 'ethers/utils'
 import {
   defaults,
   signatureTypes,
   SECONDS_IN_DAY,
   tokenKinds,
 } from '@airswap/constants'
-import { Quote, Order, SignedOrder } from '@airswap/types'
+import { Quote, UnsignedOrder, Order } from '@airswap/types'
 import { getOrderHash } from './hashes'
 
 function lowerCaseAddresses(obj: any): any {
@@ -43,7 +42,7 @@ export function createOrder({
   signer = defaults.Party,
   sender = defaults.Party,
   affiliate = defaults.Party,
-}): Order {
+}): UnsignedOrder {
   return lowerCaseAddresses({
     expiry: String(expiry),
     nonce: String(nonce),
@@ -57,7 +56,7 @@ export function createOrderForQuote(
   quote: Quote,
   signerWallet: string,
   senderWallet: string
-): Order {
+): UnsignedOrder {
   return createOrder({
     signer: {
       kind: tokenKinds.ERC20,
@@ -78,7 +77,7 @@ export async function signOrder(
   order: Order,
   signer: ethers.Signer,
   swapContract: string
-): Promise<SignedOrder> {
+): Promise<Order> {
   const orderHash = getOrderHash(order, swapContract)
   const signedMsg = await signer.signMessage(ethers.utils.arrayify(orderHash))
   const sig = ethers.utils.splitSignature(signedMsg)
@@ -95,28 +94,4 @@ export async function signOrder(
       s,
     },
   }
-}
-
-export function getBestByLowestSenderAmount(
-  orders: Array<SignedOrder>
-): SignedOrder {
-  let best: any
-  for (const order of orders) {
-    if (!best || bigNumberify(order.sender.amount).lt(best.sender.amount)) {
-      best = order
-    }
-  }
-  return best
-}
-
-export function getBestByHighestSignerAmount(
-  orders: Array<SignedOrder>
-): SignedOrder {
-  let best: any
-  for (const order of orders) {
-    if (!best || bigNumberify(order.signer.amount).gt(best.signer.amount)) {
-      best = order
-    }
-  }
-  return best
 }
