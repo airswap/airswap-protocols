@@ -83,17 +83,6 @@ jobs:
             yarn ganache > /dev/null &
             cd source/delegate && yarn test
 
-  order_utils_tests:
-    <<: *container_config
-    steps:
-      - attach_workspace:
-          at: *working_directory
-      - run:
-          name: Run Tests
-          command: |
-            yarn ganache > /dev/null &
-            cd tools/order-utils && yarn test
-
   pre_swap_checker_tests:
     <<: *container_config
     steps:
@@ -137,6 +126,26 @@ jobs:
           command: |
             yarn ganache > /dev/null &
             cd source/wrapper && yarn test
+
+  order_utils_tests:
+    <<: *container_config
+    steps:
+      - attach_workspace:
+          at: *working_directory
+      - run:
+          name: Run Tests
+          command: |
+            cd tools/order-utils && yarn test
+
+  utils_tests:
+    <<: *container_config
+    steps:
+      - attach_workspace:
+          at: *working_directory
+      - run:
+          name: Run Tests
+          command: |
+            cd tools/utils && yarn test
 
   deploy:
     <<: *container_config
@@ -236,10 +245,6 @@ workflows:
           context: Development
           requires:
             - setup
-      - order_utils_tests:
-          context: Development
-          requires:
-            - setup
       - pre_swap_checker_tests:
           context: Development
           requires:
@@ -256,16 +261,25 @@ workflows:
           context: Development
           requires:
             - setup
+      - order_utils_tests:
+          context: Development
+          requires:
+            - setup
+      - utils_tests:
+          context: Development
+          requires:
+            - setup
       - deploy:
           context: NPM_Publish
           requires:
             - swap_tests
             - indexer_tests
             - delegate_tests
-            - order_utils_tests
             - transfers_tests
             - types_tests
             - wrapper_tests
+            - order_utils_tests
+            - utils_tests
           filters:
             branches:
               only:
