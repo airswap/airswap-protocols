@@ -26,8 +26,9 @@ const DelegateInterface = new ethers.utils.Interface(
 )
 
 export class Delegate {
-  address: string
   chainId: string
+  address: string
+  tradeWallet: string
   contract: ethers.Contract
 
   constructor(
@@ -35,8 +36,9 @@ export class Delegate {
     chainId = chainIds.RINKEBY,
     signerOrProvider?: ethers.Signer | ethers.providers.Provider
   ) {
-    this.address = address
     this.chainId = chainId
+    this.address = address
+    this.tradeWallet = ''
     this.contract = new ethers.Contract(
       address,
       DelegateInterface,
@@ -46,7 +48,10 @@ export class Delegate {
   }
 
   async getWallet(): Promise<string> {
-    return await this.contract.tradeWallet()
+    if (this.tradeWallet === undefined) {
+      this.tradeWallet = await this.contract.tradeWallet()
+    }
+    return this.tradeWallet
   }
 
   async getMaxQuote(signerToken: string, senderToken: string): Promise<Quote> {
@@ -124,10 +129,10 @@ export class Delegate {
   }
 
   async getQuotedOrMaxAvailable(
-    senderToken,
-    senderAmount,
-    signerToken,
-    signerAmount
+    senderToken: string,
+    senderAmount: string,
+    signerToken: string,
+    signerAmount: string
   ) {
     const balance = await new ERC20(senderToken, this.chainId).balanceOf(
       this.address
@@ -141,13 +146,14 @@ export class Delegate {
         .mul(balance)
     }
     return {
+      sender: {
+        wallet: await this.getWallet(),
+        token: senderToken,
+        amount: finalSenderAmount.toString(),
+      },
       signer: {
         token: signerToken,
         amount: finalSignerAmount.toString(),
-      },
-      sender: {
-        token: senderToken,
-        amount: finalSenderAmount.toString(),
       },
     }
   }

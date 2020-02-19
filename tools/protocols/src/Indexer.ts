@@ -55,7 +55,7 @@ export class Indexer {
       cursor,
       limit
     )
-    const locators = []
+    const locators: Array<string> = []
     for (const locator of result.locators) {
       try {
         switch (protocol) {
