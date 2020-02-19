@@ -1,6 +1,6 @@
 {
   "name": "@airswap/utils",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "description": "Utilities for AirSwap Developers",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>"
@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "@airswap/constants": "0.3.0",
-    "@airswap/types": "3.5.7",
+    "@airswap/types": "3.5.8",
     "@types/ethereumjs-abi": "^0.6.3",
     "@types/ethereumjs-util": "^6.1.0",
     "ethereumjs-abi": "^0.6.8",

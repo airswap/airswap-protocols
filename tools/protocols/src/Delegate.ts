@@ -16,7 +16,13 @@
 
 import { ethers } from 'ethers'
 import { bigNumberify } from 'ethers/utils'
-import { chainIds, chainNames, MIN_CONFIRMATIONS } from '@airswap/constants'
+import {
+  chainIds,
+  chainNames,
+  MIN_CONFIRMATIONS,
+  protocols,
+} from '@airswap/constants'
+import { getTimestamp } from '@airswap/utils'
 import { Quote, Order } from '@airswap/types'
 import { ERC20 } from './ERC20'
 
@@ -149,8 +155,10 @@ export class Delegate {
         .mul(balance)
     }
     return {
+      timestamp: getTimestamp(),
+      protocol: protocols.DELEGATE,
+      locator: this.address,
       sender: {
-        wallet: await this.getWallet(),
         token: senderToken,
         amount: finalSenderAmount.toString(),
       },

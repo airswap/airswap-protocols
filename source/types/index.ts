@@ -23,6 +23,9 @@ export type Party = {
 }
 
 export type Quote = {
+  timestamp?: string
+  protocol?: string
+  locator?: string
   signer: {
     token: string
     amount: string
