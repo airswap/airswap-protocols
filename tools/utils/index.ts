@@ -16,34 +16,56 @@
 import { ethers } from 'ethers'
 import { BigNumber } from 'ethers/utils'
 import * as url from 'url'
+
+import { etherscanDomains } from '@airswap/constants'
 import { Quote, Order } from '@airswap/types'
 
 export * from './src/hashes'
 export * from './src/orders'
 export * from './src/quotes'
 
-export function getBestByLowestSenderAmount(
-  objects: Array<Quote> | Array<Order>
-): any {
+function getLowest(objects: Array<Quote> | Array<Order>, key: string): any {
   let best: any
   for (const obj of objects) {
-    if (!best || new BigNumber(obj.sender.amount).lt(best.sender.amount)) {
+    if (!best || new BigNumber(obj[key].amount).lt(best[key].amount)) {
       best = obj
     }
   }
   return best
 }
 
-export function getBestByHighestSignerAmount(
-  objects: Array<Quote> | Array<Order>
-): any {
+function getHighest(objects: Array<Quote> | Array<Order>, key: string): any {
   let best: any
   for (const obj of objects) {
-    if (!best || new BigNumber(obj.signer.amount).gt(best.signer.amount)) {
+    if (!best || new BigNumber(obj[key].amount).gt(best[key].amount)) {
       best = obj
     }
   }
   return best
+}
+
+export function getBestByLowestSenderAmount(
+  objects: Array<Quote> | Array<Order>
+): any {
+  return getLowest(objects, 'sender')
+}
+
+export function getBestByLowestSignerAmount(
+  objects: Array<Quote> | Array<Order>
+): any {
+  return getLowest(objects, 'signer')
+}
+
+export function getBestByHighestSignerAmount(
+  objects: Array<Quote> | Array<Order>
+): any {
+  return getHighest(objects, 'signer')
+}
+
+export function getBestByHighestSenderAmount(
+  objects: Array<Quote> | Array<Order>
+): any {
+  return getHighest(objects, 'sender')
 }
 
 export function toDecimalString(
@@ -69,4 +91,8 @@ export function parseUrl(locator: string): url.UrlWithStringQuery {
     locator = `https://${locator}`
   }
   return url.parse(locator)
+}
+
+export function getEtherscanURL(chainId: string, hash: string) {
+  return `https://${etherscanDomains[chainId]}/tx/${hash}`
 }
