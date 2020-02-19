@@ -1,7 +1,5 @@
 # Pre Swap Checker
 
-**:warning: This package is under active development. Do not use in production.**
-
 [AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens. This package contains source code and tests for a basic a pre-swap-checker contract that can work with with Swap protocol.
 
 
