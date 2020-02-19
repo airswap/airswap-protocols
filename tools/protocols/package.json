@@ -34,6 +34,7 @@
     "jayson": "^3.2.0"
   },
   "devDependencies": {
-    "eslint": "^6.8.0"
+    "eslint": "^6.8.0",
+    "typescript": "^3.7.5"
   }
 }

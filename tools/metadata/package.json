@@ -23,6 +23,12 @@
     "compile": "tsc -b"
   },
   "dependencies": {
-    "@airswap/types": "3.5.7"
+    "@airswap/types": "3.5.7",
+    "axios": "^0.19.2",
+    "eth-contract-metadata": "^1.12.1",
+    "ethers": "^4.0.45"
+  },
+  "devDependencies": {
+    "typescript": "^3.7.5"
   }
 }
