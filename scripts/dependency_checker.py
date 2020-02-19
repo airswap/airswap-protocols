@@ -43,14 +43,13 @@ class DependencyChecker:
 
         # flag to determine if return is 0 or 1
         stable = True
+        print()
 
         # go through every package looking for where the dependency doesn't match the dependency graph
         for package in self.dependency_graph.items():
             package_name = package[0]
             package_dependencies = package[1]
             package_version = self.dependency_graph[package_name]['version']
-
-            print("%s %s" % (package_name, package_version))
 
             for dep_type in [DEP, DEV_DEP]:
 
@@ -72,10 +71,8 @@ class DependencyChecker:
                     declared_version = declared_ver
                     if declared_version != expected_version:
                         stable = False
-                        print(" - %s %s -> %s %s Version Mismatch %s" % (declared_name, declared_version, expected_version, bcolors.FAIL, bcolors.ENDC))
-                    else:
-                        print(" - %s -> %s" % (declared_name, expected_version))
-            print()
+                        print("%s (%s): %s@%s -> %s Update to %s %s" % (package_name, dep_type, declared_name, declared_version, bcolors.FAIL, expected_version, bcolors.ENDC))
+        print()
         return stable
 
     def contains_packages(self, dep):
