@@ -4,10 +4,10 @@ import {
   createOrder,
   getBestByLowestSenderAmount,
   getBestByHighestSignerAmount,
-} from '../src/orders'
+} from '../index'
 
 describe('Orders', async () => {
-  it('Checks best order by lowest sender', async () => {
+  it('Best by lowest sender', async () => {
     const orders = []
     let count = 5
     const lowestAmount = 50
@@ -27,7 +27,7 @@ describe('Orders', async () => {
     expect(best.sender.amount).to.equal(String(lowestAmount))
   })
 
-  it('Checks best order by highest signer', async () => {
+  it('Best by highest signer', async () => {
     const orders = []
     const highestAmount = 5
     let count = 0
