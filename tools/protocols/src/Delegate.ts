@@ -17,7 +17,7 @@
 import { ethers } from 'ethers'
 import { bigNumberify } from 'ethers/utils'
 import { chainIds, chainNames, MIN_CONFIRMATIONS } from '@airswap/constants'
-import { Quote, SignedOrder } from '@airswap/types'
+import { Quote, Order } from '@airswap/types'
 import { ERC20 } from './ERC20'
 
 import * as DelegateContract from '@airswap/delegate/build/contracts/Delegate.json'
@@ -106,10 +106,7 @@ export class Delegate {
     )
   }
 
-  async provideOrder(
-    order: SignedOrder,
-    signer?: ethers.Signer
-  ): Promise<string> {
+  async provideOrder(order: Order, signer?: ethers.Signer): Promise<string> {
     let contract = this.contract
     if (!this.contract.signer) {
       if (signer === undefined) {
