@@ -131,7 +131,7 @@ export class Delegate {
     return tx.hash
   }
 
-  public async getQuotedOrMaxAvailable(
+  private async getQuotedOrMaxAvailable(
     senderToken: string,
     senderAmount: string,
     signerToken: string,
