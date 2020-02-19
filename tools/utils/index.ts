@@ -16,16 +16,34 @@
 import { ethers } from 'ethers'
 import { BigNumber } from 'ethers/utils'
 import * as url from 'url'
+import { Quote, Order } from '@airswap/types'
 
 export * from './src/hashes'
 export * from './src/orders'
 export * from './src/quotes'
 
-export function parseUrl(locator: string): url.UrlWithStringQuery {
-  if (!/^http:\/\//.test(locator) && !/^https:\/\//.test(locator)) {
-    locator = `https://${locator}`
+export function getBestByLowestSenderAmount(
+  objects: Array<Quote> | Array<Order>
+): any {
+  let best: any
+  for (const obj of objects) {
+    if (!best || new BigNumber(obj.sender.amount).lt(best.sender.amount)) {
+      best = obj
+    }
   }
-  return url.parse(locator)
+  return best
+}
+
+export function getBestByHighestSignerAmount(
+  objects: Array<Quote> | Array<Order>
+): any {
+  let best: any
+  for (const obj of objects) {
+    if (!best || new BigNumber(obj.signer.amount).gt(best.signer.amount)) {
+      best = obj
+    }
+  }
+  return best
 }
 
 export function toDecimalString(
@@ -40,4 +58,11 @@ export function toAtomicString(
   decimals: string | number
 ): string {
   return ethers.utils.parseUnits(value.toString(), decimals).toString()
+}
+
+export function parseUrl(locator: string): url.UrlWithStringQuery {
+  if (!/^http:\/\//.test(locator) && !/^https:\/\//.test(locator)) {
+    locator = `https://${locator}`
+  }
+  return url.parse(locator)
 }
