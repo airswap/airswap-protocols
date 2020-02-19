@@ -26,6 +26,11 @@ contract PreSwapChecker {
 
   IWETH public wethContract;
 
+  // size of fixed array that holds max returning error messages
+  uint256 constant internal MAX_ERROR_COUNT = 25;
+  // size of fixed array that holds errors from delegate contract checks
+  uint256 constant internal MAX_DELEGATE_ERROR_COUNT = 10;
+
   /**
     * @notice Contract Constructor
     * @param preSwapCheckerWethContract address
@@ -339,7 +344,7 @@ contract PreSwapChecker {
     bytes32 domainSeparator = Types.hashDomain(DOM_NAME, DOM_VERSION, swap);
 
     // max size of the number of errors
-    bytes32[] memory errors = new bytes32[](20);
+    bytes32[] memory errors = new bytes32[](MAX_ERROR_COUNT);
     uint256 errorCount;
 
     // Check self transfer
@@ -353,6 +358,7 @@ contract PreSwapChecker {
       errors[errorCount] = "ORDER_EXPIRED";
       errorCount++;
     }
+
     if (swap != address(0x0)) {
       ISwap swapContract = ISwap(swap);
       if (swapContract.signerNonceStatus(order.signer.wallet, order.nonce) != 0x00) {
@@ -415,7 +421,7 @@ contract PreSwapChecker {
     IDelegate delegate
     ) public view returns (uint256, bytes32[] memory )  {
     IDelegate.Rule memory rule = delegate.rules(order.sender.token,order.signer.token);
-    bytes32[] memory errors = new bytes32[](9);
+    bytes32[] memory errors = new bytes32[](MAX_DELEGATE_ERROR_COUNT);
     uint256 errorCount;
     address swap = order.signature.validator;
     // signature must be filled in order to use the Delegate
