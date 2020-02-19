@@ -28,7 +28,7 @@ export class Indexer {
   public chainId: string
   private contract: ethers.Contract
 
-  constructor(
+  public constructor(
     chainId = chainIds.RINKEBY,
     signerOrProvider?: ethers.Signer | ethers.providers.Provider
   ) {
@@ -41,7 +41,7 @@ export class Indexer {
     )
   }
 
-  async getLocators(
+  public async getLocators(
     signerToken: string,
     senderToken: string,
     protocol = '0x0000',

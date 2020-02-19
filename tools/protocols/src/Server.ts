@@ -23,7 +23,7 @@ import { Quote, Order } from '@airswap/types'
 export class Server {
   private _client: jayson.Client
 
-  constructor(locator: string) {
+  public constructor(locator: string) {
     const locatorUrl = parseUrl(locator)
     const options = {
       protocol: locatorUrl.protocol,
@@ -38,7 +38,10 @@ export class Server {
     }
   }
 
-  async getMaxQuote(signerToken: string, senderToken: string): Promise<Quote> {
+  public async getMaxQuote(
+    signerToken: string,
+    senderToken: string
+  ): Promise<Quote> {
     return new Promise((resolve, reject) => {
       this._generateRequest(
         'getMaxQuote',
@@ -52,7 +55,7 @@ export class Server {
     })
   }
 
-  async getSignerSideQuote(
+  public async getSignerSideQuote(
     senderAmount: string,
     signerToken: string,
     senderToken: string
@@ -71,7 +74,7 @@ export class Server {
     })
   }
 
-  async getSenderSideQuote(
+  public async getSenderSideQuote(
     signerAmount: string,
     signerToken: string,
     senderToken: string
@@ -90,7 +93,7 @@ export class Server {
     })
   }
 
-  async getSignerSideOrder(
+  public async getSignerSideOrder(
     senderAmount: string,
     signerToken: string,
     senderToken: string,
@@ -111,7 +114,7 @@ export class Server {
     })
   }
 
-  async getSenderSideOrder(
+  public async getSenderSideOrder(
     signerAmount: string | BigNumber,
     signerToken: string,
     senderToken: string,
@@ -132,7 +135,7 @@ export class Server {
     })
   }
 
-  _generateRequest(
+  private _generateRequest(
     method: string,
     params: Record<string, string>,
     resolve: Function,

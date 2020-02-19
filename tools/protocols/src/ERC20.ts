@@ -26,7 +26,7 @@ export class ERC20 {
   public address: string
   private contract: ethers.Contract
 
-  constructor(
+  public constructor(
     address: string,
     chainId = chainIds.RINKEBY,
     signerOrProvider?: ethers.Signer | ethers.providers.Provider
@@ -41,7 +41,7 @@ export class ERC20 {
     )
   }
 
-  async balanceOf(address: string): Promise<BigNumber> {
+  public async balanceOf(address: string): Promise<BigNumber> {
     return await this.contract.balanceOf(address)
   }
 }
