@@ -86,10 +86,6 @@ export class Delegate {
       senderToken,
       signerToken
     )
-    if (signerAmount.isZero()) {
-      throw new Error('Not quoting for requested amount or token pair')
-    }
-
     return this.getQuotedOrMaxAvailable(
       senderToken,
       senderAmount,
@@ -108,10 +104,6 @@ export class Delegate {
       signerToken,
       senderToken
     )
-    if (senderAmount.isZero()) {
-      throw new Error('Not quoting for requested amount or token pair')
-    }
-
     return this.getQuotedOrMaxAvailable(
       senderToken,
       senderAmount,
@@ -153,6 +145,9 @@ export class Delegate {
       finalSignerAmount = bigNumberify(senderAmount)
         .div(signerAmount)
         .mul(balance)
+    }
+    if (finalSenderAmount.isZero() || finalSignerAmount.isZero()) {
+      throw new Error('Not quoting for requested amount or token pair')
     }
     return {
       timestamp: getTimestamp(),
