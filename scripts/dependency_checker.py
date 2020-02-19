@@ -4,6 +4,7 @@ import sys
 import os
 
 class bcolors:
+    BOLD = '\033[1m'
     FAIL = '\033[91m'
     ENDC = '\033[0m'
 
@@ -71,7 +72,7 @@ class DependencyChecker:
                     declared_version = declared_ver
                     if declared_version != expected_version:
                         stable = False
-                        print("%s (%s): %s@%s -> %s Update to %s %s" % (package_name, dep_type, declared_name, declared_version, bcolors.FAIL, expected_version, bcolors.ENDC))
+                        print("%s%s%s (%s): %s@%s →%s Update to %s %s" % (bcolors.BOLD, package_name, bcolors.ENDC, dep_type, declared_name, declared_version, bcolors.FAIL, expected_version, bcolors.ENDC))
         print()
         return stable
 
