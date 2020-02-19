@@ -60,6 +60,10 @@ export function toAtomicString(
   return ethers.utils.parseUnits(value.toString(), decimals).toString()
 }
 
+export function getTimestamp(): string {
+  return Math.round(Date.now() / 1000).toString()
+}
+
 export function parseUrl(locator: string): url.UrlWithStringQuery {
   if (!/^http:\/\//.test(locator) && !/^https:\/\//.test(locator)) {
     locator = `https://${locator}`

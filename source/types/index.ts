@@ -23,6 +23,7 @@ export type Party = {
 }
 
 export type Quote = {
+  timestamp?: number
   protocol?: string
   locator?: string
   signer: {

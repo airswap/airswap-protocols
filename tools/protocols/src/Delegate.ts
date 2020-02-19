@@ -22,6 +22,7 @@ import {
   MIN_CONFIRMATIONS,
   protocols,
 } from '@airswap/constants'
+import { getTimestamp } from '@airswap/utils'
 import { Quote, Order } from '@airswap/types'
 import { ERC20 } from './ERC20'
 
@@ -154,6 +155,7 @@ export class Delegate {
         .mul(balance)
     }
     return {
+      timestamp: getTimestamp(),
       protocol: protocols.DELEGATE,
       locator: this.address,
       sender: {
