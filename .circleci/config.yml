@@ -280,7 +280,7 @@ workflows:
             - wrapper_tests
             - order_utils_tests
             - utils_tests
-            filters:
+          filters:
             branches:
               only:
                 - master
