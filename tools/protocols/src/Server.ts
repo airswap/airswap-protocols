@@ -21,9 +21,9 @@ import { parseUrl } from '@airswap/utils'
 import { Quote, Order } from '@airswap/types'
 
 export class Server {
-  _client: jayson.Client
+  private _client: jayson.Client
 
-  constructor(locator: string) {
+  public constructor(locator: string) {
     const locatorUrl = parseUrl(locator)
     const options = {
       protocol: locatorUrl.protocol,
@@ -38,9 +38,12 @@ export class Server {
     }
   }
 
-  async getMaxQuote(signerToken: string, senderToken: string): Promise<Quote> {
+  public async getMaxQuote(
+    signerToken: string,
+    senderToken: string
+  ): Promise<Quote> {
     return new Promise((resolve, reject) => {
-      this._generateRequest(
+      this.generateRequest(
         'getMaxQuote',
         {
           signerToken,
@@ -52,13 +55,13 @@ export class Server {
     })
   }
 
-  async getSignerSideQuote(
+  public async getSignerSideQuote(
     senderAmount: string,
     signerToken: string,
     senderToken: string
   ): Promise<Quote> {
     return new Promise((resolve, reject) => {
-      this._generateRequest(
+      this.generateRequest(
         'getSignerSideQuote',
         {
           senderAmount: senderAmount.toString(),
@@ -71,13 +74,13 @@ export class Server {
     })
   }
 
-  async getSenderSideQuote(
+  public async getSenderSideQuote(
     signerAmount: string,
     signerToken: string,
     senderToken: string
   ): Promise<Quote> {
     return new Promise((resolve, reject) => {
-      this._generateRequest(
+      this.generateRequest(
         'getSenderSideQuote',
         {
           signerAmount: signerAmount.toString(),
@@ -90,14 +93,14 @@ export class Server {
     })
   }
 
-  async getSignerSideOrder(
+  public async getSignerSideOrder(
     senderAmount: string,
     signerToken: string,
     senderToken: string,
     senderWallet: string
   ): Promise<Order> {
     return new Promise((resolve, reject) => {
-      this._generateRequest(
+      this.generateRequest(
         'getSignerSideOrder',
         {
           senderAmount: senderAmount.toString(),
@@ -111,14 +114,14 @@ export class Server {
     })
   }
 
-  async getSenderSideOrder(
+  public async getSenderSideOrder(
     signerAmount: string | BigNumber,
     signerToken: string,
     senderToken: string,
     senderWallet: string
   ): Promise<Order> {
     return new Promise((resolve, reject) => {
-      this._generateRequest(
+      this.generateRequest(
         'getSenderSideOrder',
         {
           signerAmount: signerAmount.toString(),
@@ -132,7 +135,7 @@ export class Server {
     })
   }
 
-  _generateRequest(
+  private generateRequest(
     method: string,
     params: Record<string, string>,
     resolve: Function,

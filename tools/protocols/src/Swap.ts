@@ -25,10 +25,10 @@ const SwapInterface = new ethers.utils.Interface(
 )
 
 export class Swap {
-  chainId: string
-  contract: ethers.Contract
+  public chainId: string
+  private contract: ethers.Contract
 
-  constructor(
+  public constructor(
     chainId = chainIds.RINKEBY,
     signerOrProvider?: ethers.Signer | ethers.providers.Provider
   ) {
@@ -41,14 +41,14 @@ export class Swap {
     )
   }
 
-  static getAddress(chainId = chainIds.RINKEBY): string {
+  public static getAddress(chainId = chainIds.RINKEBY): string {
     if (chainId in swapDeploys) {
       return swapDeploys[chainId]
     }
     throw new Error(`Swap deploy not found for chainId ${chainId}`)
   }
 
-  async swap(order: Order, signer?: ethers.Signer): Promise<string> {
+  public async swap(order: Order, signer?: ethers.Signer): Promise<string> {
     let contract = this.contract
     if (!this.contract.signer) {
       if (signer === undefined) {

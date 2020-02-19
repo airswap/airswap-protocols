@@ -26,17 +26,19 @@ const DelegateInterface = new ethers.utils.Interface(
 )
 
 export class Delegate {
-  address: string
-  chainId: string
-  contract: ethers.Contract
+  public chainId: string
+  public address: string
+  private tradeWallet: string
+  private contract: ethers.Contract
 
-  constructor(
+  public constructor(
     address: string,
     chainId = chainIds.RINKEBY,
     signerOrProvider?: ethers.Signer | ethers.providers.Provider
   ) {
-    this.address = address
     this.chainId = chainId
+    this.address = address
+    this.tradeWallet = ''
     this.contract = new ethers.Contract(
       address,
       DelegateInterface,
@@ -45,11 +47,17 @@ export class Delegate {
     )
   }
 
-  async getWallet(): Promise<string> {
-    return await this.contract.tradeWallet()
+  public async getWallet(): Promise<string> {
+    if (this.tradeWallet === '') {
+      this.tradeWallet = await this.contract.tradeWallet()
+    }
+    return this.tradeWallet
   }
 
-  async getMaxQuote(signerToken: string, senderToken: string): Promise<Quote> {
+  public async getMaxQuote(
+    signerToken: string,
+    senderToken: string
+  ): Promise<Quote> {
     const { senderAmount, signerAmount } = await this.contract.getMaxQuote(
       senderToken,
       signerToken
@@ -62,7 +70,7 @@ export class Delegate {
     )
   }
 
-  async getSignerSideQuote(
+  public async getSignerSideQuote(
     senderAmount: string,
     senderToken: string,
     signerToken: string
@@ -84,7 +92,7 @@ export class Delegate {
     )
   }
 
-  async getSenderSideQuote(
+  public async getSenderSideQuote(
     signerAmount: string,
     signerToken: string,
     senderToken: string
@@ -106,7 +114,10 @@ export class Delegate {
     )
   }
 
-  async provideOrder(order: Order, signer?: ethers.Signer): Promise<string> {
+  public async provideOrder(
+    order: Order,
+    signer?: ethers.Signer
+  ): Promise<string> {
     let contract = this.contract
     if (!this.contract.signer) {
       if (signer === undefined) {
@@ -120,11 +131,11 @@ export class Delegate {
     return tx.hash
   }
 
-  async getQuotedOrMaxAvailable(
-    senderToken,
-    senderAmount,
-    signerToken,
-    signerAmount
+  private async getQuotedOrMaxAvailable(
+    senderToken: string,
+    senderAmount: string,
+    signerToken: string,
+    signerAmount: string
   ) {
     const balance = await new ERC20(senderToken, this.chainId).balanceOf(
       this.address
@@ -138,13 +149,14 @@ export class Delegate {
         .mul(balance)
     }
     return {
+      sender: {
+        wallet: await this.getWallet(),
+        token: senderToken,
+        amount: finalSenderAmount.toString(),
+      },
       signer: {
         token: signerToken,
         amount: finalSignerAmount.toString(),
-      },
-      sender: {
-        token: senderToken,
-        amount: finalSenderAmount.toString(),
       },
     }
   }

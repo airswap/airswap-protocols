@@ -25,10 +25,10 @@ const IndexerInterface = new ethers.utils.Interface(
 )
 
 export class Indexer {
-  chainId: string
-  contract: ethers.Contract
+  public chainId: string
+  private contract: ethers.Contract
 
-  constructor(
+  public constructor(
     chainId = chainIds.RINKEBY,
     signerOrProvider?: ethers.Signer | ethers.providers.Provider
   ) {
@@ -41,7 +41,7 @@ export class Indexer {
     )
   }
 
-  async getLocators(
+  public async getLocators(
     signerToken: string,
     senderToken: string,
     protocol = '0x0000',
@@ -55,7 +55,7 @@ export class Indexer {
       cursor,
       limit
     )
-    const locators = []
+    const locators: Array<string> = []
     for (const locator of result.locators) {
       try {
         switch (protocol) {
