@@ -74,7 +74,7 @@ export function createOrderForQuote(
 }
 
 export async function signOrder(
-  order: Order,
+  order: UnsignedOrder,
   signer: ethers.Signer,
   swapContract: string
 ): Promise<Order> {

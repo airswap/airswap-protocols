@@ -17,7 +17,7 @@
 import * as ethUtil from 'ethereumjs-util'
 import * as ethAbi from 'ethereumjs-abi'
 import { DOMAIN_NAME, DOMAIN_VERSION } from '@airswap/constants'
-import { Party, Order, EIP712 } from '@airswap/types'
+import { Party, UnsignedOrder, EIP712 } from '@airswap/types'
 
 function stringify(type: string): string {
   let str = `${type}(`
@@ -57,7 +57,7 @@ export function hashParty(party: Party): Buffer {
   )
 }
 
-export function hashOrder(order: Order): Buffer {
+export function hashOrder(order: UnsignedOrder): Buffer {
   return ethUtil.keccak256(
     ethAbi.rawEncode(
       ['bytes32', 'uint256', 'uint256', 'bytes32', 'bytes32', 'bytes32'],
@@ -73,7 +73,7 @@ export function hashOrder(order: Order): Buffer {
   )
 }
 
-export function hashDomain(verifyingContract: string): Buffer {
+export function hashDomain(swapContract: string): Buffer {
   return ethUtil.keccak256(
     ethAbi.rawEncode(
       ['bytes32', 'bytes32', 'bytes32', 'address'],
@@ -81,17 +81,20 @@ export function hashDomain(verifyingContract: string): Buffer {
         EIP712_DOMAIN_TYPEHASH,
         ethUtil.keccak256(DOMAIN_NAME),
         ethUtil.keccak256(DOMAIN_VERSION),
-        verifyingContract,
+        swapContract,
       ]
     )
   )
 }
 
-export function getOrderHash(order: Order, verifyingContract: string): Buffer {
+export function getOrderHash(
+  order: UnsignedOrder,
+  swapContract: string
+): Buffer {
   return ethUtil.keccak256(
     Buffer.concat([
       Buffer.from('1901', 'hex'),
-      hashDomain(verifyingContract),
+      hashDomain(swapContract),
       hashOrder(order),
     ])
   )
