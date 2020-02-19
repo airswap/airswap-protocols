@@ -26,10 +26,10 @@ const DelegateInterface = new ethers.utils.Interface(
 )
 
 export class Delegate {
-  chainId: string
-  address: string
-  tradeWallet: string
-  contract: ethers.Contract
+  public chainId: string
+  public address: string
+  private tradeWallet: string
+  private contract: ethers.Contract
 
   constructor(
     address: string,

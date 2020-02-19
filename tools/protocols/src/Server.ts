@@ -21,7 +21,7 @@ import { parseUrl } from '@airswap/utils'
 import { Quote, Order } from '@airswap/types'
 
 export class Server {
-  _client: jayson.Client
+  private _client: jayson.Client
 
   constructor(locator: string) {
     const locatorUrl = parseUrl(locator)

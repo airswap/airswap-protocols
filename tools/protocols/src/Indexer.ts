@@ -25,8 +25,8 @@ const IndexerInterface = new ethers.utils.Interface(
 )
 
 export class Indexer {
-  chainId: string
-  contract: ethers.Contract
+  public chainId: string
+  private contract: ethers.Contract
 
   constructor(
     chainId = chainIds.RINKEBY,
