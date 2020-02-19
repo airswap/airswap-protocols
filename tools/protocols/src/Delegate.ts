@@ -48,7 +48,7 @@ export class Delegate {
   }
 
   async getWallet(): Promise<string> {
-    if (this.tradeWallet === undefined) {
+    if (this.tradeWallet === '') {
       this.tradeWallet = await this.contract.tradeWallet()
     }
     return this.tradeWallet
