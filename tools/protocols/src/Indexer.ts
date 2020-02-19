@@ -41,6 +41,13 @@ export class Indexer {
     )
   }
 
+  public static getAddress(chainId = chainIds.RINKEBY): string {
+    if (chainId in indexerDeploys) {
+      return indexerDeploys[chainId]
+    }
+    throw new Error(`Indexer deploy not found for chainId ${chainId}`)
+  }
+
   public async getLocators(
     signerToken: string,
     senderToken: string,
