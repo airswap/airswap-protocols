@@ -33,7 +33,7 @@ export type Quote = {
   }
 }
 
-export type Order = {
+export type UnsignedOrder = {
   nonce: string
   expiry: string
   signer: Party
@@ -50,7 +50,7 @@ export type Signature = {
   s: string
 }
 
-export type SignedOrder = Order & {
+export type Order = UnsignedOrder & {
   signature: Signature
 }
 
