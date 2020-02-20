@@ -149,24 +149,23 @@ class TokenMetadata {
     )
     if (match) {
       return match
-    } else {
-      const [tokenSymbol, tokenName, tokenDecimals] = await Promise.all([
-        getTokenSymbol(searchAddress),
-        getTokenName(searchAddress),
-        getTokenDecimals(searchAddress),
-      ])
-
-      const newToken: NormalizedToken = {
-        name: tokenName,
-        symbol: tokenSymbol,
-        address: searchAddress,
-        decimals: tokenDecimals,
-      }
-
-      this.tokens.push(newToken)
-      this._storeTokensByAddress()
-      return newToken
     }
+    const [tokenSymbol, tokenName, tokenDecimals] = await Promise.all([
+      getTokenSymbol(searchAddress),
+      getTokenName(searchAddress),
+      getTokenDecimals(searchAddress),
+    ])
+
+    const newToken: NormalizedToken = {
+      name: tokenName,
+      symbol: tokenSymbol,
+      address: searchAddress,
+      decimals: tokenDecimals,
+    }
+
+    this.tokens.push(newToken)
+    this._storeTokensByAddress()
+    return newToken
   }
 }
 
