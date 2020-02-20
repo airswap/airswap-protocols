@@ -513,7 +513,7 @@ contract('PreSwapChecker', async accounts => {
       equal(web3.utils.toUtf8(errorCodes[1][0]), 'SENDER_INVALID_AMOUNT')
       equal(web3.utils.toUtf8(errorCodes[1][1]), 'SIGNER_INVALID_AMOUNT')
       equal(web3.utils.toUtf8(errorCodes[1][2]), 'SENDER_TOKEN_KIND_INCORRECT')
-      equal(web3.utils.toUtf8(errorCodes[1][3]), 'SIGNER_INVALID_ERC721')
+      equal(web3.utils.toUtf8(errorCodes[1][3]), 'SIGNER_TOKEN_KIND_INCORRECT')
     })
   })
 
@@ -1038,7 +1038,7 @@ contract('PreSwapChecker', async accounts => {
       equal(web3.utils.toUtf8(errorCodes[1][0]), 'SENDER_INVALID_AMOUNT')
       equal(web3.utils.toUtf8(errorCodes[1][1]), 'SIGNER_INVALID_AMOUNT')
       equal(web3.utils.toUtf8(errorCodes[1][2]), 'SENDER_TOKEN_KIND_INCORRECT')
-      equal(web3.utils.toUtf8(errorCodes[1][3]), 'SIGNER_INVALID_ERC721')
+      equal(web3.utils.toUtf8(errorCodes[1][3]), 'SIGNER_TOKEN_KIND_INCORRECT')
     })
   })
 })
