@@ -21,7 +21,7 @@
     "ganache": "ganache-cli -p 8545 --gasLimit 0xfffffffffff --time '2017-05-10T00:00:00+00:00' -s 0",
     "publish": "lerna publish",
     "test": "yarn clean && yarn compile && lerna run test --concurrency=1",
-    "deps": "source venv/bin/activate && pip3 install -r requirements.txt && python3 scripts/dependency_checker.py"
+    "deps": "python3 -m venv ./venv && source venv/bin/activate && pip3 install -r requirements.txt && python3 scripts/dependency_checker.py"
   },
   "devDependencies": {
     "@gnosis.pm/mock-contract": "^3.0.7",
