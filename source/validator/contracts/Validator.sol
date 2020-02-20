@@ -2,9 +2,10 @@ pragma solidity ^0.5.10;
 pragma experimental ABIEncoderV2;
 
 import "@airswap/types/contracts/Types.sol";
+import "openzeppelin-solidity/contracts/introspection/ERC165Checker.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/token/ERC721/IERC721.sol";
-import "openzeppelin-solidity/contracts/introspection/ERC165Checker.sol";
+import "@airswap/tokens/contracts/interfaces/IERC1155.sol";
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "@airswap/transfers/contracts/TransferHandlerRegistry.sol";
 import "@airswap/tokens/contracts/interfaces/IWETH.sol";
@@ -22,6 +23,7 @@ contract Validator {
   bytes constant internal DOM_NAME = "SWAP";
   bytes constant internal DOM_VERSION = "2";
 
+  bytes4 constant internal ERC1155_INTERFACE_ID = 0xd9b67a26;
   bytes4 constant internal ERC721_INTERFACE_ID = 0x80ac58cd;
   bytes4 constant internal ERC20_INTERFACE_ID = 0x36372b07;
   bytes4 constant internal CK_INTERFACE_ID = 0x9a20483d;
@@ -85,7 +87,6 @@ contract Validator {
         errorCount++;
       }
     }
-
 
      // Check valid token registry handler for signer
     if (order.signer.kind == ERC20_INTERFACE_ID) {
@@ -505,8 +506,8 @@ contract Validator {
   }
 
   /**
-    * @notice Checks token has valid ERC721 interface
-    * @param tokenAddress address potential ERC721 token address
+    * @notice Checks token has valid interface
+    * @param tokenAddress address potential valid interface
     * @return bool whether address has valid interface
     */
   function hasValidInterface(
@@ -522,7 +523,7 @@ contract Validator {
 
   /**
     * @notice Check a party has enough balance to swap
-    * for ERC721, CryptoKitties, and ERC20 tokens
+    * for supported token types
     * @param party Types.Party party to check balance for
     * @return bool whether party has enough balance
     */
@@ -532,10 +533,13 @@ contract Validator {
     if (party.kind == ERC721_INTERFACE_ID || party.kind == CK_INTERFACE_ID) {
       address owner = IERC721(party.token).ownerOf(party.id);
       return (owner == party.wallet);
+    } else if (party.kind == ERC1155_INTERFACE_ID) {
+      uint256 balance = IERC1155(party.token).balanceOf(party.wallet, party.id);
+      return (balance >= party.amount);
+    } else {
+      uint256 balance = IERC20(party.token).balanceOf(party.wallet);
+      return (balance >= party.amount);
     }
-
-    uint256 balance = IERC20(party.token).balanceOf(party.wallet);
-    return (balance >= party.amount);
   }
 
   /**
@@ -555,10 +559,12 @@ contract Validator {
     } else if (party.kind == CK_INTERFACE_ID) {
       address approved = IAdaptedKittyERC721(party.token).kittyIndexToApproved(party.id);
       return (swap == approved);
+    } else if (party.kind == ERC1155_INTERFACE_ID) {
+      return IERC1155(party.token).isApprovedForAll(party.wallet, swap);
+    } else {
+      uint256 allowance = IERC20(party.token).allowance(party.wallet, swap);
+      return (allowance >= party.amount);
     }
-    // not ERC721 or CryptoKitties, so assume ERC20
-    uint256 allowance = IERC20(party.token).allowance(party.wallet, swap);
-    return (allowance >= party.amount);
   }
 
   /**

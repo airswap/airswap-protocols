@@ -1,6 +1,7 @@
 const Swap = artifacts.require('Swap')
 const Wrapper = artifacts.require('Wrapper')
 const Types = artifacts.require('Types')
+const MintableERC1155 = artifacts.require('MintableERC1155Token')
 const FungibleToken = artifacts.require('FungibleToken')
 const NonFungibleToken = artifacts.require('NonFungibleToken')
 const AdaptedKittyERC721 = artifacts.require('AdaptedKittyERC721')
@@ -9,6 +10,7 @@ const Validator = artifacts.require('Validator')
 const TransferHandlerRegistry = artifacts.require('TransferHandlerRegistry')
 const ERC20TransferHandler = artifacts.require('ERC20TransferHandler')
 const ERC721TransferHandler = artifacts.require('ERC721TransferHandler')
+const ERC1155TransferHandler = artifacts.require('ERC1155TransferHandler')
 const KittyCoreTransferHandler = artifacts.require('KittyCoreTransferHandler')
 const {
   emitted,
@@ -25,6 +27,7 @@ const {
   EMPTY_ADDRESS,
   ERC20_INTERFACE_ID,
   ERC721_INTERFACE_ID,
+  ERC1155_INTERFACE_ID,
   CK_INTERFACE_ID,
   GANACHE_PROVIDER,
 } = require('@airswap/order-utils').constants
@@ -50,6 +53,7 @@ contract('Validator', async accounts => {
   let cryptoKitties
   let typesLib
   let tokenWETH
+  let erc1155
 
   let swap
   let cancelUpTo
@@ -62,6 +66,7 @@ contract('Validator', async accounts => {
 
       const erc20TransferHandler = await ERC20TransferHandler.new()
       const erc721TransferHandler = await ERC721TransferHandler.new()
+      const erc1155TransferHandler = await ERC1155TransferHandler.new()
       const kittyCoreTransferHandler = await KittyCoreTransferHandler.new()
       const transferHandlerRegistry = await TransferHandlerRegistry.new()
       await transferHandlerRegistry.addTransferHandler(
@@ -75,6 +80,10 @@ contract('Validator', async accounts => {
       await transferHandlerRegistry.addTransferHandler(
         CK_INTERFACE_ID,
         kittyCoreTransferHandler.address
+      )
+      await transferHandlerRegistry.addTransferHandler(
+        ERC1155_INTERFACE_ID,
+        erc1155TransferHandler.address
       )
 
       // adding a bad transfer handler
@@ -499,6 +508,85 @@ contract('Validator', async accounts => {
           token: cryptoKitties.address,
           id: 123,
           kind: CK_INTERFACE_ID,
+        },
+      })
+
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        aliceAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
+      order.signature.version = '0x99' // incorrect version
+
+      errorCodes = await validator.checkSwap.call(order, {
+        from: bobAddress,
+      })
+      equal(errorCodes[0], 2)
+      equal(web3.utils.toUtf8(errorCodes[1][0]), 'SIGNATURE_INVALID')
+      equal(web3.utils.toUtf8(errorCodes[1][1]), 'SENDER_ALLOWANCE_LOW')
+    })
+  })
+
+  describe('Deploying ERC1155...', async () => {
+    it('Deployed test ERC1155 Contract', async () => {
+      erc1155 = await MintableERC1155.new()
+    })
+  })
+
+  describe('Minting and testing ERC1155', async () => {
+    it('Mints an ERC1155 collectable for Bob and Alice', async () => {
+      emitted(await erc1155.mint(bobAddress, 1234, 100), 'TransferSingle')
+      emitted(await erc1155.mint(aliceAddress, 3412, 1000), 'TransferSingle')
+
+      ok(await balances(bobAddress, [[erc1155, 1234, 100]]))
+      ok(await balances(aliceAddress, [[erc1155, 3412, 1000]]))
+    })
+
+    it('Alice tries to buy 10 non-owned asset #12355 from Bob for 50 AST', async () => {
+      const order = await orders.getOrder({
+        signer: {
+          wallet: aliceAddress,
+          token: tokenAST.address,
+          amount: 50,
+        },
+        sender: {
+          wallet: bobAddress,
+          token: erc1155.address,
+          id: 12355,
+          amount: 10,
+          kind: ERC1155_INTERFACE_ID,
+        },
+      })
+
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        aliceAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+      errorCodes = await validator.checkSwap.call(order, {
+        from: bobAddress,
+      })
+      equal(errorCodes[0], 2)
+      equal(web3.utils.toUtf8(errorCodes[1][0]), 'SENDER_BALANCE_LOW')
+      equal(web3.utils.toUtf8(errorCodes[1][1]), 'SENDER_ALLOWANCE_LOW')
+    })
+
+    it('Alice tries to buy 10 non approved asset #1234 from Bob for 50 AST', async () => {
+      const order = await orders.getOrder({
+        signer: {
+          wallet: aliceAddress,
+          token: tokenAST.address,
+          amount: 50,
+        },
+        sender: {
+          wallet: bobAddress,
+          token: erc1155.address,
+          id: 1234,
+          amount: 10,
+          kind: ERC1155_INTERFACE_ID,
         },
       })
 
