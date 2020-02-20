@@ -541,9 +541,14 @@ contract PreSwapChecker {
       address owner = IERC721(party.token).ownerOf(party.id);
       return (owner == party.wallet);
     }
-
-    uint256 balance = IERC20(party.token).balanceOf(party.wallet);
-    return (balance >= party.amount);
+    else if (party.kind == ERC1155_INTERFACE_ID) {
+      uint256 balance = IERC1155(party.token).balanceOf(party.wallet, party.id);
+      return (balance >= party.amount);
+    }
+    else {
+      uint256 balance = IERC20(party.token).balanceOf(party.wallet);
+      return (balance >= party.amount);
+    }
   }
 
   /**
@@ -561,8 +566,13 @@ contract PreSwapChecker {
       address approved = IERC721(party.token).getApproved(party.id);
       return (swap == approved);
     }
-    uint256 allowance = IERC20(party.token).allowance(party.wallet, swap);
-    return (allowance >= party.amount);
+    else if (party.kind == ERC1155_INTERFACE_ID) {
+      return IERC1155(party.token).isApprovedForAll(party.wallet, swap);
+    }
+    else {
+      uint256 allowance = IERC20(party.token).allowance(party.wallet, swap);
+      return (allowance >= party.amount);
+    }
   }
 
   /**
