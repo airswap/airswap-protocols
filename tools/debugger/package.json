@@ -16,8 +16,7 @@
   },
   "scripts": {
     "compile": ":",
-    "ganache": "ganache-cli -p 8545 --gasLimit 0xfffffffffff --time '2017-05-10T00:00:00+00:00' -s 0",
-    "test": "mocha test --timeout 3000 --exit"
+    "ganache": "ganache-cli -p 8545 --gasLimit 0xfffffffffff --time '2017-05-10T00:00:00+00:00' -s 0"
   },
   "devDependencies": {
     "mocha": "^7.0.1"
@@ -26,6 +25,6 @@
     "@airswap/order-utils": "0.3.20",
     "@airswap/swap": "5.4.7",
     "@airswap/tokens": "0.1.4",
-    "ethers": "^5.0.0-beta.159"
+    "ethers": "^4.0.45"
   }
 }
