@@ -142,35 +142,29 @@ class TokenMetadata {
 
   // given a token address, try to fetch name, symbol, and decimals from the contract and store it in memory tokens array
   crawlToken = async (searchAddress: string): Promise<NormalizedToken> => {
-    return new Promise(async (resolve, reject) => {
-      try {
-        const match = this.tokens.find(
-          ({ address }) => address === searchAddress.toLowerCase()
-        )
-        if (match) {
-          resolve(match)
-        } else {
-          const [tokenSymbol, tokenName, tokenDecimals] = await Promise.all([
-            getTokenSymbol(searchAddress),
-            getTokenName(searchAddress),
-            getTokenDecimals(searchAddress),
-          ])
+    const match = this.tokens.find(
+      ({ address }) => address === searchAddress.toLowerCase()
+    )
+    if (match) {
+      return match
+    } else {
+      const [tokenSymbol, tokenName, tokenDecimals] = await Promise.all([
+        getTokenSymbol(searchAddress),
+        getTokenName(searchAddress),
+        getTokenDecimals(searchAddress),
+      ])
 
-          const newToken: NormalizedToken = {
-            name: tokenName,
-            symbol: tokenSymbol,
-            address: searchAddress,
-            decimals: tokenDecimals,
-          }
-
-          this.tokens.push(newToken)
-          this._storeTokensByAddress()
-          resolve(newToken)
-        }
-      } catch (error) {
-        reject(error)
+      const newToken: NormalizedToken = {
+        name: tokenName,
+        symbol: tokenSymbol,
+        address: searchAddress,
+        decimals: tokenDecimals,
       }
-    })
+
+      this.tokens.push(newToken)
+      this._storeTokensByAddress()
+      return newToken
+    }
   }
 }
 
