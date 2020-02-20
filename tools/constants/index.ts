@@ -69,24 +69,6 @@ export const signatureTypes: Record<string, string> = {
   PERSONAL_SIGN: '0x45',
 }
 
-export const rinkebyTokens: Record<string, Token> = {
-  DAI: {
-    address: '0x5592ec0cfb4dbc12d3ab100b257153436a1f0fea',
-    decimals: 18,
-    symbol: 'DAI',
-  },
-  WETH: {
-    address: '0xc778417e063141139fce010982780140aa0cd5ab',
-    decimals: 18,
-    symbol: 'WETH',
-  },
-  AST: {
-    address: '0xcc1cbd4f67cceb7c001bd4adf98451237a193ff8',
-    decimals: 4,
-    symbol: 'AST',
-  },
-}
-
 export const stakingTokenAddresses: Record<string, string> = {
   '1': '0x27054b13b1b798b345b591a4d22e6562d47ea75a',
   '4': '0xcc1cbd4f67cceb7c001bd4adf98451237a193ff8',

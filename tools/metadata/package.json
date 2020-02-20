@@ -1,0 +1,35 @@
+{
+  "name": "@airswap/metadata",
+  "version": "0.1.0",
+  "description": "Token Metadata Tools for AirSwap Developers",
+  "contributors": [
+    "Don Mosites <don.mosites@fluidity.io>",
+    "Graham Perich <graham.perich@fluidity.io>"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/airswap/airswap-protocols"
+  },
+  "homepage": "https://github.com/airswap/airswap-protocols/tree/master/tools/metadata",
+  "keywords": [
+    "airswap"
+  ],
+  "license": "Apache-2.0",
+  "main": "build/index.js",
+  "files": [
+    "/build"
+  ],
+  "scripts": {
+    "clean": "rm -rf ./build",
+    "compile": "tsc -b"
+  },
+  "dependencies": {
+    "@airswap/types": "3.5.9",
+    "axios": "^0.19.2",
+    "eth-contract-metadata": "^1.12.1",
+    "ethers": "^4.0.45"
+  },
+  "devDependencies": {
+    "typescript": "^3.7.5"
+  }
+}

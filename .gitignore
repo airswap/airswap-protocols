@@ -11,3 +11,4 @@ flatten/
 .env
 venv
 build
+.vscode/

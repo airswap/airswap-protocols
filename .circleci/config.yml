@@ -163,7 +163,7 @@ jobs:
           command: |
             cd tools
             ### ADD FOLDERS HERE TO PROCESS ###
-            for file in constants protocols utils order-utils test-utils
+            for file in constants metadata protocols utils order-utils test-utils
             do
               cd $file
               NPM_NAME=$(node -p "require('./package.json').name")
