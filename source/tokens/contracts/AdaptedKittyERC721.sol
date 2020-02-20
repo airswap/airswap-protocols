@@ -107,7 +107,7 @@ contract AdaptedKittyERC721 is ERC165 {
     * @param tokenId uint256 ID of the token to query the approval of
     * @return address currently approved for the given token ID
     */
-  function getApproved(uint256 tokenId) public view returns (address) {
+  function kittyIndexToApproved(uint256 tokenId) public view returns (address) {
     require(_exists(tokenId), "ERC721: approved query for nonexistent token");
 
     return _tokenApprovals[tokenId];
@@ -170,7 +170,7 @@ contract AdaptedKittyERC721 is ERC165 {
   function _isApprovedOrOwner(address spender, uint256 tokenId) internal view returns (bool) {
     require(_exists(tokenId), "ERC721: operator query for nonexistent token");
     address owner = ownerOf(tokenId);
-    return (spender == owner || getApproved(tokenId) == spender || isApprovedForAll(owner, spender));
+    return (spender == owner || kittyIndexToApproved(tokenId) == spender || isApprovedForAll(owner, spender));
   }
 
   /**
