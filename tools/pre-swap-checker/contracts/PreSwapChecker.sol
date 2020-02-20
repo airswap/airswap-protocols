@@ -181,7 +181,7 @@ contract PreSwapChecker {
       if (order.sender.wallet != address(0)) {
         // The sender was specified
         // Check if sender kind interface can correctly check balance
-        if (order.sender.kind == ERC721_INTERFACE_ID && !hasValidERC71Interface(order.sender.token)) {
+        if (order.sender.kind == ERC721_INTERFACE_ID && !hasValidERC721Interface(order.sender.token)) {
           errors[errorCount] = "SENDER_INVALID_ERC721";
           errorCount++;
         } else {
@@ -209,7 +209,7 @@ contract PreSwapChecker {
      // Check valid token registry handler for signer
     if (hasValidKind(order.signer.kind, swap)) {
       // Check if sender kind interface can correctly check balance
-      if (order.signer.kind == ERC721_INTERFACE_ID && !hasValidERC71Interface(order.signer.token)) {
+      if (order.signer.kind == ERC721_INTERFACE_ID && !hasValidERC721Interface(order.signer.token)) {
         errors[errorCount] = "SIGNER_INVALID_ERC721";
         errorCount++;
       } else {
@@ -253,7 +253,7 @@ contract PreSwapChecker {
       if (order.sender.wallet != address(0)) {
         // The sender was specified
         // Check if sender kind interface can correctly check balance
-        if (order.sender.kind == ERC721_INTERFACE_ID && !hasValidERC71Interface(order.sender.token)) {
+        if (order.sender.kind == ERC721_INTERFACE_ID && !hasValidERC721Interface(order.sender.token)) {
           errors[errorCount] = "SENDER_INVALID_ERC721";
           errorCount++;
         } else {
@@ -279,7 +279,7 @@ contract PreSwapChecker {
      // Check valid token registry handler for signer
     if (hasValidKind(order.signer.kind, swap)) {
       // Check if sender kind interface can correctly check balance
-      if (order.signer.kind == ERC721_INTERFACE_ID && !hasValidERC71Interface(order.signer.token)) {
+      if (order.signer.kind == ERC721_INTERFACE_ID && !hasValidERC721Interface(order.signer.token)) {
         errors[errorCount] = "SIGNER_INVALID_ERC721";
         errorCount++;
       } else {
@@ -505,7 +505,7 @@ contract PreSwapChecker {
     * @param tokenAddress address potential ERC721 token address
     * @return bool whether address has valid interface
     */
-  function hasValidERC71Interface(
+  function hasValidERC721Interface(
     address tokenAddress
   ) internal view returns (bool) {
     return (tokenAddress._supportsInterface(ERC721_INTERFACE_ID));
