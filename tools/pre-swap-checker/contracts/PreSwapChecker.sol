@@ -2,9 +2,10 @@ pragma solidity ^0.5.10;
 pragma experimental ABIEncoderV2;
 
 import "@airswap/types/contracts/Types.sol";
+import "openzeppelin-solidity/contracts/introspection/ERC165Checker.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/token/ERC721/IERC721.sol";
-import "openzeppelin-solidity/contracts/introspection/ERC165Checker.sol";
+import "@airswap/tokens/contracts/interfaces/IERC1155.sol";
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "@airswap/transfers/contracts/TransferHandlerRegistry.sol";
 import "@airswap/tokens/contracts/interfaces/IWETH.sol";
