@@ -129,9 +129,7 @@ class TokenMetadata {
   }
 
   // given a token address, try to fetch name, symbol, and decimals from the contract and store it in memory tokens array
-  public crawlToken = async (
-    searchAddress: string
-  ): Promise<NormalizedToken> => {
+  public getToken = async (searchAddress: string): Promise<NormalizedToken> => {
     const match = this.tokens.find(
       ({ address }) => address === searchAddress.toLowerCase()
     )
