@@ -182,7 +182,7 @@ contract PreSwapChecker {
         // The sender was specified
         // Check if sender kind interface can correctly check balance
         if (!hasValidInterface(order.sender.token, order.sender.kind)) {
-          errors[errorCount] = "SENDER_TOKEN_KIND_INCORRECT";
+          errors[errorCount] = "SENDER_TOKEN_KIND_MISMATCH";
           errorCount++;
         } else {
           // Check the order sender token balance when sender is not WETH
@@ -210,7 +210,7 @@ contract PreSwapChecker {
     if (hasValidKind(order.signer.kind, swap)) {
       // Check if signer kind interface can correctly check balance
       if (!hasValidInterface(order.signer.token, order.signer.kind)) {
-          errors[errorCount] = "SIGNER_TOKEN_KIND_INCORRECT";
+          errors[errorCount] = "SIGNER_TOKEN_KIND_MISMATCH";
           errorCount++;
       } else {
         // Check the order signer token balance
@@ -254,7 +254,7 @@ contract PreSwapChecker {
         // The sender was specified
         // Check if sender kind interface can correctly check balance
         if (!hasValidInterface(order.sender.token, order.sender.kind)) {
-          errors[errorCount] = "SENDER_TOKEN_KIND_INCORRECT";
+          errors[errorCount] = "SENDER_TOKEN_KIND_MISMATCH";
           errorCount++;
         } else {
           // Check the order sender token balance
@@ -280,7 +280,7 @@ contract PreSwapChecker {
     if (hasValidKind(order.signer.kind, swap)) {
       // Check if signer kind interface can correctly check balance
       if (!hasValidInterface(order.signer.token, order.signer.kind)) {
-          errors[errorCount] = "SIGNER_TOKEN_KIND_INCORRECT";
+          errors[errorCount] = "SIGNER_TOKEN_KIND_MISMATCH";
           errorCount++;
       } else {
         // Check the order signer token balance
