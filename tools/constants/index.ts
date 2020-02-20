@@ -14,7 +14,7 @@
   limitations under the License.
 */
 
-import { OrderParty, Token } from '@airswap/types'
+import { OrderParty } from '@airswap/types'
 
 export const DOMAIN_NAME = 'SWAP'
 export const DOMAIN_VERSION = '2'
@@ -67,24 +67,6 @@ export const signatureTypes: Record<string, string> = {
   INTENDED_VALIDATOR: '0x00',
   SIGN_TYPED_DATA: '0x01',
   PERSONAL_SIGN: '0x45',
-}
-
-export const rinkebyTokens: Record<string, Token> = {
-  DAI: {
-    address: '0x5592ec0cfb4dbc12d3ab100b257153436a1f0fea',
-    decimals: 18,
-    symbol: 'DAI',
-  },
-  WETH: {
-    address: '0xc778417e063141139fce010982780140aa0cd5ab',
-    decimals: 18,
-    symbol: 'WETH',
-  },
-  AST: {
-    address: '0xcc1cbd4f67cceb7c001bd4adf98451237a193ff8',
-    decimals: 4,
-    symbol: 'AST',
-  },
 }
 
 export const stakingTokenAddresses: Record<string, string> = {

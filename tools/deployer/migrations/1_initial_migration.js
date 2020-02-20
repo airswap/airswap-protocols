@@ -11,7 +11,7 @@ const Wrapper = artifacts.require('Wrapper');
 const Indexer = artifacts.require('Indexer');
 const Index = artifacts.require('Index');
 const DelegateFactory = artifacts.require('DelegateFactory');
-const PreSwapChecker = artifacts.require('PreSwapChecker');
+const Validator = artifacts.require('Validator');
 
 const {
   CK_INTERFACE_ID,
@@ -44,8 +44,8 @@ module.exports = async(deployer, network) => {
   const delegateFactoryInstance = await deployer.deploy(DelegateFactory, Swap.address, Indexer.address, '0x0001')
   await deployer.deploy(Wrapper, Swap.address, WETH_ADDRESS)
   // link Types to Swap prior to deploy
-  await PreSwapChecker.link("Types", Types.address)
-  await deployer.deploy(PreSwapChecker, WETH_ADDRESS)
+  await Validator.link("Types", Types.address)
+  await deployer.deploy(Validator, WETH_ADDRESS)
   //Deploy Contract-Created Contracts that also need to be verified
   await indexerInstance.createIndex(WETH_ADDRESS, STAKING_TOKEN_ADDRESS,'0x0001')
 

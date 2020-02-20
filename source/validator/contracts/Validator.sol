@@ -13,11 +13,11 @@ import "@airswap/tokens/contracts/interfaces/IAdaptedKittyERC721.sol";
 import "@airswap/delegate/contracts/interfaces/IDelegate.sol";
 
 /**
-  * @title PreSwapChecker: Helper contract to Swap protocol
+  * @title Validator: Helper contract to Swap protocol
   * @notice contains several helper methods that check whether
   * a Swap.order is well-formed and counterparty criteria is met
   */
-contract PreSwapChecker {
+contract Validator {
   using ERC165Checker for address;
 
   bytes constant internal DOM_NAME = "SWAP";
@@ -37,12 +37,12 @@ contract PreSwapChecker {
 
   /**
     * @notice Contract Constructor
-    * @param preSwapCheckerWethContract address
+    * @param validatorWethContract address
     */
   constructor(
-    address preSwapCheckerWethContract
+    address validatorWethContract
   ) public {
-    wethContract = IWETH(preSwapCheckerWethContract);
+    wethContract = IWETH(validatorWethContract);
   }
 
 
@@ -211,8 +211,8 @@ contract PreSwapChecker {
     if (hasValidKind(order.signer.kind, swap)) {
       // Check if signer kind interface can correctly check balance
       if (!hasValidInterface(order.signer.token, order.signer.kind)) {
-          errors[errorCount] = "SIGNER_TOKEN_KIND_MISMATCH";
-          errorCount++;
+        errors[errorCount] = "SIGNER_TOKEN_KIND_MISMATCH";
+        errorCount++;
       } else {
         // Check the order signer token balance
         if (!hasBalance(order.signer)) {
@@ -281,8 +281,8 @@ contract PreSwapChecker {
     if (hasValidKind(order.signer.kind, swap)) {
       // Check if signer kind interface can correctly check balance
       if (!hasValidInterface(order.signer.token, order.signer.kind)) {
-          errors[errorCount] = "SIGNER_TOKEN_KIND_MISMATCH";
-          errorCount++;
+        errors[errorCount] = "SIGNER_TOKEN_KIND_MISMATCH";
+        errorCount++;
       } else {
         // Check the order signer token balance
         if (!hasBalance(order.signer)) {
@@ -389,7 +389,9 @@ contract PreSwapChecker {
     if (order.sender.kind == ERC20_INTERFACE_ID && order.sender.id != 0) {
       errors[errorCount] = "SENDER_INVALID_ID";
       errorCount++;
-    } else if ((order.sender.kind == ERC721_INTERFACE_ID || order.sender.kind == CK_INTERFACE_ID) && order.sender.amount != 0) {
+    } else if (
+      (order.sender.kind == ERC721_INTERFACE_ID || order.sender.kind == CK_INTERFACE_ID) && order.sender.amount != 0
+    ) {
       errors[errorCount] = "SENDER_INVALID_AMOUNT";
       errorCount++;
     }
@@ -398,7 +400,9 @@ contract PreSwapChecker {
     if (order.signer.kind == ERC20_INTERFACE_ID && order.signer.id != 0) {
       errors[errorCount] = "SIGNER_INVALID_ID";
       errorCount++;
-    } else if ((order.signer.kind == ERC721_INTERFACE_ID || order.signer.kind == CK_INTERFACE_ID) && order.signer.amount != 0) {
+    } else if (
+      (order.signer.kind == ERC721_INTERFACE_ID || order.signer.kind == CK_INTERFACE_ID) && order.signer.amount != 0
+    ) {
       errors[errorCount] = "SIGNER_INVALID_AMOUNT";
       errorCount++;
     }
