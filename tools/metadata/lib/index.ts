@@ -30,17 +30,17 @@ interface IdexTokens {
 }
 
 class TokenMetadata {
-  tokens: NormalizedToken[]
-  tokensByAddress: { [address: string]: NormalizedToken }
-  ready: Promise<NormalizedToken[]>
+  public tokens: NormalizedToken[]
+  public tokensByAddress: { [address: string]: NormalizedToken }
+  public ready: Promise<NormalizedToken[]>
 
-  constructor() {
+  public constructor() {
     this.tokens = []
     this.tokensByAddress = {}
     this.ready = this.init()
   }
 
-  init = async () => {
+  public init = async () => {
     const normalizeIdexToken = (
       token: IdexToken & { symbol: string }
     ): NormalizedToken => {
@@ -113,13 +113,13 @@ class TokenMetadata {
   }
 
   // get token objects in an array
-  getTokens = (): NormalizedToken[] => this.tokens
+  public getTokens = (): NormalizedToken[] => this.tokens
 
   // get token objects in an object keyed by address
-  getTokensByAddress = (): { [address: string]: NormalizedToken } =>
+  public getTokensByAddress = (): { [address: string]: NormalizedToken } =>
     this.tokensByAddress
 
-  _storeTokensByAddress = () => {
+  private _storeTokensByAddress = () => {
     const { tokensByAddress, tokens } = this
 
     tokens.forEach(token => {
@@ -132,16 +132,18 @@ class TokenMetadata {
   }
 
   // returns a URL string that may link to an image if one is available in Trust Wallet metadata, else will 404
-  getImageURL = (address: string): string =>
+  public getImageURL = (address: string): string =>
     `${TRUST_WALLET_IMAGE_API}/${address}/logo.png`
 
   // this will fail if the token you search isn't present in the Trust Wallet metadata, or if the letter casing doesn't match Trust's metadata
-  fetchImageBinaryUnstable = (address: string): Promise<string> => {
+  public fetchImageBinaryUnstable = (address: string): Promise<string> => {
     return axios.get(this.getImageURL(address))
   }
 
   // given a token address, try to fetch name, symbol, and decimals from the contract and store it in memory tokens array
-  crawlToken = async (searchAddress: string): Promise<NormalizedToken> => {
+  public crawlToken = async (
+    searchAddress: string
+  ): Promise<NormalizedToken> => {
     const match = this.tokens.find(
       ({ address }) => address === searchAddress.toLowerCase()
     )
