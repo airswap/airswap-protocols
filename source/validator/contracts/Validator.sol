@@ -12,11 +12,11 @@ import "@airswap/tokens/contracts/interfaces/IAdaptedKittyERC721.sol";
 import "@airswap/delegate/contracts/interfaces/IDelegate.sol";
 
 /**
-  * @title PreSwapChecker: Helper contract to Swap protocol
+  * @title Validator: Helper contract to Swap protocol
   * @notice contains several helper methods that check whether
   * a Swap.order is well-formed and counterparty criteria is met
   */
-contract PreSwapChecker {
+contract Validator {
   using ERC165Checker for address;
 
   bytes constant internal DOM_NAME = "SWAP";
@@ -35,12 +35,12 @@ contract PreSwapChecker {
 
   /**
     * @notice Contract Constructor
-    * @param preSwapCheckerWethContract address
+    * @param validatorWethContract address
     */
   constructor(
-    address preSwapCheckerWethContract
+    address validatorWethContract
   ) public {
-    wethContract = IWETH(preSwapCheckerWethContract);
+    wethContract = IWETH(validatorWethContract);
   }
 
 

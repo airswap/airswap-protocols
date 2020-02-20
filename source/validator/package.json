@@ -1,5 +1,5 @@
 {
-  "name": "@airswap/pre-swap-checker",
+  "name": "@airswap/validator",
   "version": "0.1.3",
   "repository": "git@github.com:airswap/airswap-protocols-accessory.git",
   "license": "Apache-2.0",

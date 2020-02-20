@@ -92,7 +92,7 @@ jobs:
           name: Run Tests
           command: |
             yarn ganache > /dev/null &
-            cd tools/pre-swap-checker && yarn test
+            cd source/validator && yarn test
 
   transfers_tests:
     <<: *container_config
