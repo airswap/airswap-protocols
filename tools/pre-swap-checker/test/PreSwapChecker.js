@@ -1,7 +1,7 @@
 const Swap = artifacts.require('Swap')
 const Wrapper = artifacts.require('Wrapper')
 const Types = artifacts.require('Types')
-const ERC1155 = artifacts.require('ERC1155')
+const MintableERC1155 = artifacts.require('MintableERC1155Token')
 const FungibleToken = artifacts.require('FungibleToken')
 const NonFungibleToken = artifacts.require('NonFungibleToken')
 const AdaptedKittyERC721 = artifacts.require('AdaptedKittyERC721')
@@ -526,6 +526,19 @@ contract('PreSwapChecker', async accounts => {
       equal(errorCodes[0], 2)
       equal(web3.utils.toUtf8(errorCodes[1][0]), 'SIGNATURE_INVALID')
       equal(web3.utils.toUtf8(errorCodes[1][1]), 'SENDER_ALLOWANCE_LOW')
+    })
+  })
+
+  describe('Deploying ERC1155...', async () => {
+    it('Deployed test ERC1155 Contract', async () => {
+      erc1155 = await MintableERC1155.new()
+    })
+  })
+
+  describe('Minting and testing ERC1155', async () => {
+    it('Mints an ERC1155 collectable for Bob and Alice', async () => {
+      await erc1155.mint(bobAddress, 1234, 100)
+      await erc1155.mint(aliceAddress, 3412, 1000)
     })
   })
 
