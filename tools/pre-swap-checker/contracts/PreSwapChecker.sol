@@ -184,7 +184,12 @@ contract PreSwapChecker {
         if (order.sender.kind == ERC721_INTERFACE_ID && !hasValidERC721Interface(order.sender.token)) {
           errors[errorCount] = "SENDER_INVALID_ERC721";
           errorCount++;
-        } else {
+        } 
+        else if (order.sender.kind == ERC1155_INTERFACE_ID && !hasValidERC1155Interface(order.sender.token)) {
+          errors[errorCount] = "SENDER_INVALID_ERC1155";
+          errorCount++;
+        }
+        else {
           // Check the order sender token balance when sender is not WETH
           if (order.sender.token != address(wethContract)) {
             //do the balance check
@@ -212,7 +217,12 @@ contract PreSwapChecker {
       if (order.signer.kind == ERC721_INTERFACE_ID && !hasValidERC721Interface(order.signer.token)) {
         errors[errorCount] = "SIGNER_INVALID_ERC721";
         errorCount++;
-      } else {
+      } 
+      else if (order.signer.kind == ERC1155_INTERFACE_ID && !hasValidERC1155Interface(order.signer.token)) {
+        errors[errorCount] = "SIGNER_INVALID_ERC1155";
+        errorCount++;
+      }
+      else {
         // Check the order signer token balance
         if (!hasBalance(order.signer)) {
           errors[errorCount] = "SIGNER_BALANCE_LOW";
