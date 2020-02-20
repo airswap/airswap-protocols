@@ -17,6 +17,16 @@ const Swap = require('@airswap/swap/build/contracts/Swap.json')
 
 const { orders, signatures } = require('@airswap/order-utils')
 
+// Utility to make a method constant for static calls
+function makeConstant(abi, name) {
+  for (const method of abi) {
+    if (method.name === name) {
+      method.constant = true
+    }
+  }
+  return abi
+}
+
 const checkOrderSignature = async (order, provider, errors) => {
   // Check signature is valid
   const isValid = signatures.hasValidSignature(order)
@@ -131,14 +141,15 @@ const checkERC721Transfer = async (order, partyName, provider, errors) => {
   const code = await provider.getCode(order[recipient]['wallet'])
   const isContract = code !== '0x'
   if (isContract) {
+    const abi = makeConstant(IERC721Receiver.abi, 'onERC721Received')
     const nftReceiver = new ethers.Contract(
       order[recipient]['wallet'],
-      IERC721Receiver.abi,
+      abi,
       provider
     )
 
     try {
-      await nftReceiver.callStatic.onERC721Received(
+      await nftReceiver.onERC721Received(
         party['wallet'],
         party['wallet'],
         party['id'],
@@ -202,14 +213,16 @@ const checkERC1155Transfer = async (order, partyName, provider, errors) => {
 
   // if its a contract, try to call the necessary function
   if (isContract) {
+    const abi = makeConstant(IERC1155Receiver.abi, 'onERC1155Received')
+
     const erc1155Receiver = new ethers.Contract(
       order[recipient]['wallet'],
-      IERC1155Receiver.abi,
+      abi,
       provider
     )
 
     try {
-      await erc1155Receiver.callStatic.onERC1155Received(
+      await erc1155Receiver.onERC1155Received(
         party['wallet'],
         party['wallet'],
         party['id'],

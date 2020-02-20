@@ -1,20 +1,35 @@
 import { BigNumber, bigNumberify } from 'ethers/utils'
 import { Quote } from '@airswap/types'
+import { tokenKinds } from '@airswap/constants'
+import { getTimestamp } from '..'
 
 export function createQuote(
-  signerToken: string,
   signerAmount: string,
+  signerToken: string,
+  senderAmount: string,
   senderToken: string,
-  senderAmount: string
+  protocol?: string,
+  locator?: string,
+  signerKind = tokenKinds.ERC20,
+  signerID = '',
+  senderKind = tokenKinds.ERC20,
+  senderID = ''
 ): Quote {
   return {
+    timestamp: getTimestamp(),
+    protocol,
+    locator,
     signer: {
+      kind: signerKind,
       token: signerToken,
       amount: signerAmount,
+      id: signerID,
     },
     sender: {
+      kind: senderKind,
       token: senderToken,
       amount: senderAmount,
+      id: senderID,
     },
   }
 }

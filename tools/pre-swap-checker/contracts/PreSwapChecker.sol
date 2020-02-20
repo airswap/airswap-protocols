@@ -9,6 +9,7 @@ import "@airswap/tokens/contracts/interfaces/IERC1155.sol";
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "@airswap/transfers/contracts/TransferHandlerRegistry.sol";
 import "@airswap/tokens/contracts/interfaces/IWETH.sol";
+import "@airswap/tokens/contracts/interfaces/IAdaptedKittyERC721.sol";
 import "@airswap/delegate/contracts/interfaces/IDelegate.sol";
 
 /**
@@ -25,6 +26,7 @@ contract PreSwapChecker {
   bytes4 constant internal ERC1155_INTERFACE_ID = 0xd9b67a26;
   bytes4 constant internal ERC721_INTERFACE_ID = 0x80ac58cd;
   bytes4 constant internal ERC20_INTERFACE_ID = 0x36372b07;
+  bytes4 constant internal CK_INTERFACE_ID = 0x9a20483d;
 
   IWETH public wethContract;
 
@@ -181,7 +183,7 @@ contract PreSwapChecker {
         // The sender was specified
         // Check if sender kind interface can correctly check balance
         if (!hasValidInterface(order.sender.token, order.sender.kind)) {
-          errors[errorCount] = "SENDER_TOKEN_KIND_INCORRECT";
+          errors[errorCount] = "SENDER_TOKEN_KIND_MISMATCH";
           errorCount++;
         } else {
           // Check the order sender token balance when sender is not WETH
@@ -207,10 +209,10 @@ contract PreSwapChecker {
 
      // Check valid token registry handler for signer
     if (hasValidKind(order.signer.kind, swap)) {
-      // Check if sender kind interface can correctly check balance
+      // Check if signer kind interface can correctly check balance
       if (!hasValidInterface(order.signer.token, order.signer.kind)) {
-        errors[errorCount] = "SIGNER_TOKEN_KIND_INCORRECT";
-        errorCount++;
+          errors[errorCount] = "SIGNER_TOKEN_KIND_MISMATCH";
+          errorCount++;
       } else {
         // Check the order signer token balance
         if (!hasBalance(order.signer)) {
@@ -253,7 +255,7 @@ contract PreSwapChecker {
         // The sender was specified
         // Check if sender kind interface can correctly check balance
         if (!hasValidInterface(order.sender.token, order.sender.kind)) {
-          errors[errorCount] = "SENDER_TOKEN_KIND_INCORRECT";
+          errors[errorCount] = "SENDER_TOKEN_KIND_MISMATCH";
           errorCount++;
         } else {
           // Check the order sender token balance
@@ -277,10 +279,10 @@ contract PreSwapChecker {
 
      // Check valid token registry handler for signer
     if (hasValidKind(order.signer.kind, swap)) {
-      // Check if sender kind interface can correctly check balance
+      // Check if signer kind interface can correctly check balance
       if (!hasValidInterface(order.signer.token, order.signer.kind)) {
-        errors[errorCount] = "SIGNER_TOKEN_KIND_INCORRECT";
-        errorCount++;
+          errors[errorCount] = "SIGNER_TOKEN_KIND_MISMATCH";
+          errorCount++;
       } else {
         // Check the order signer token balance
         if (!hasBalance(order.signer)) {
@@ -387,7 +389,7 @@ contract PreSwapChecker {
     if (order.sender.kind == ERC20_INTERFACE_ID && order.sender.id != 0) {
       errors[errorCount] = "SENDER_INVALID_ID";
       errorCount++;
-    } else if (order.sender.kind == ERC721_INTERFACE_ID && order.sender.amount != 0) {
+    } else if ((order.sender.kind == ERC721_INTERFACE_ID || order.sender.kind == CK_INTERFACE_ID) && order.sender.amount != 0) {
       errors[errorCount] = "SENDER_INVALID_AMOUNT";
       errorCount++;
     }
@@ -396,7 +398,7 @@ contract PreSwapChecker {
     if (order.signer.kind == ERC20_INTERFACE_ID && order.signer.id != 0) {
       errors[errorCount] = "SIGNER_INVALID_ID";
       errorCount++;
-    } else if (order.signer.kind == ERC721_INTERFACE_ID && order.signer.amount != 0) {
+    } else if ((order.signer.kind == ERC721_INTERFACE_ID || order.signer.kind == CK_INTERFACE_ID) && order.signer.amount != 0) {
       errors[errorCount] = "SIGNER_INVALID_AMOUNT";
       errorCount++;
     }
@@ -517,14 +519,14 @@ contract PreSwapChecker {
 
   /**
     * @notice Check a party has enough balance to swap
-    * for ERC721 and ERC20 tokens
+    * for ERC721, CryptoKitties, and ERC20 tokens
     * @param party Types.Party party to check balance for
     * @return bool whether party has enough balance
     */
   function hasBalance(
     Types.Party memory party
   ) internal view returns (bool) {
-    if (party.kind == ERC721_INTERFACE_ID) {
+    if (party.kind == ERC721_INTERFACE_ID || party.kind == CK_INTERFACE_ID) {
       address owner = IERC721(party.token).ownerOf(party.id);
       return (owner == party.wallet);
     }
@@ -540,7 +542,7 @@ contract PreSwapChecker {
 
   /**
     * @notice Check a party has enough allowance to swap
-    * for ERC721 and ERC20 tokens
+    * for ERC721, CryptoKitties, and ERC20 tokens
     * @param party Types.Party party to check allowance for
     * @param swap address Swap address
     * @return bool whether party has sufficient allowance
@@ -551,6 +553,9 @@ contract PreSwapChecker {
   ) internal view returns (bool) {
     if (party.kind == ERC721_INTERFACE_ID) {
       address approved = IERC721(party.token).getApproved(party.id);
+      return (swap == approved);
+    } else if (party.kind == CK_INTERFACE_ID) {
+      address approved = IAdaptedKittyERC721(party.token).kittyIndexToApproved(party.id);
       return (swap == approved);
     }
     else if (party.kind == ERC1155_INTERFACE_ID) {
