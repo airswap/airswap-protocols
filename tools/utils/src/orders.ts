@@ -39,16 +39,16 @@ function lowerCaseAddresses(obj: any): any {
 export function createOrder({
   expiry = Math.round(Date.now() / 1000 + SECONDS_IN_DAY).toString(),
   nonce = Date.now(),
-  signer = defaults.Party,
-  sender = defaults.Party,
-  affiliate = defaults.Party,
+  signer = {},
+  sender = {},
+  affiliate = {},
 }): UnsignedOrder {
   return lowerCaseAddresses({
     expiry: String(expiry),
     nonce: String(nonce),
-    signer: { ...defaults.Party, ...signer },
-    sender: { ...defaults.Party, ...sender },
-    affiliate: { ...defaults.Party, ...affiliate },
+    signer: { ...defaults.OrderParty, ...signer },
+    sender: { ...defaults.OrderParty, ...sender },
+    affiliate: { ...defaults.OrderParty, ...affiliate },
   })
 }
 
@@ -75,18 +75,18 @@ export function createOrderForQuote(
 
 export async function signOrder(
   order: UnsignedOrder,
-  signer: ethers.Signer,
+  wallet: ethers.Wallet,
   swapContract: string
 ): Promise<Order> {
   const orderHash = getOrderHash(order, swapContract)
-  const signedMsg = await signer.signMessage(ethers.utils.arrayify(orderHash))
+  const signedMsg = await wallet.signMessage(ethers.utils.arrayify(orderHash))
   const sig = ethers.utils.splitSignature(signedMsg)
   const { r, s, v } = sig
 
   return {
     ...order,
     signature: {
-      signatory: (await signer.getAddress()).toLowerCase(),
+      signatory: (await wallet.getAddress()).toLowerCase(),
       validator: swapContract,
       version: signatureTypes.PERSONAL_SIGN,
       v: String(v),

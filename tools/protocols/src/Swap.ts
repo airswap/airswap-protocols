@@ -30,13 +30,13 @@ export class Swap {
 
   public constructor(
     chainId = chainIds.RINKEBY,
-    signerOrProvider?: ethers.Signer | ethers.providers.Provider
+    walletOrProvider?: ethers.Wallet | ethers.providers.Provider
   ) {
     this.chainId = chainId
     this.contract = new ethers.Contract(
       Swap.getAddress(chainId),
       SwapInterface,
-      signerOrProvider ||
+      walletOrProvider ||
         ethers.getDefaultProvider(chainNames[chainId].toLowerCase())
     )
   }
@@ -48,16 +48,16 @@ export class Swap {
     throw new Error(`Swap deploy not found for chainId ${chainId}`)
   }
 
-  public async swap(order: Order, signer?: ethers.Signer): Promise<string> {
+  public async swap(order: Order, wallet?: ethers.Wallet): Promise<string> {
     let contract = this.contract
     if (!this.contract.signer) {
-      if (signer === undefined) {
-        throw new Error('Signer must be provided')
+      if (wallet === undefined) {
+        throw new Error('Wallet must be provided')
       } else {
         contract = new ethers.Contract(
           Swap.getAddress(this.chainId),
           SwapInterface,
-          signer
+          wallet
         )
       }
     }
