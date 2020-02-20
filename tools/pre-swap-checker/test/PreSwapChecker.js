@@ -3,11 +3,13 @@ const Wrapper = artifacts.require('Wrapper')
 const Types = artifacts.require('Types')
 const FungibleToken = artifacts.require('FungibleToken')
 const NonFungibleToken = artifacts.require('NonFungibleToken')
+const AdaptedKittyERC721 = artifacts.require('AdaptedKittyERC721')
 const WETH9 = artifacts.require('WETH9')
 const PreSwapChecker = artifacts.require('PreSwapChecker')
 const TransferHandlerRegistry = artifacts.require('TransferHandlerRegistry')
 const ERC20TransferHandler = artifacts.require('ERC20TransferHandler')
 const ERC721TransferHandler = artifacts.require('ERC721TransferHandler')
+const KittyCoreTransferHandler = artifacts.require('KittyCoreTransferHandler')
 const {
   emitted,
   equal,
@@ -23,6 +25,7 @@ const {
   EMPTY_ADDRESS,
   ERC20_INTERFACE_ID,
   ERC721_INTERFACE_ID,
+  CK_INTERFACE_ID,
   GANACHE_PROVIDER,
 } = require('@airswap/order-utils').constants
 
@@ -34,7 +37,7 @@ contract('PreSwapChecker', async accounts => {
     '4934d4ff925f39f91e3729fbce52ef12f25fdf93e014e291350f7d314c1a096b',
     'hex'
   )
-  const fakeTransferHandler = '0xFFFFF'
+  const FAKE_TRANSFER_HANDLER = '0xFFFFF'
   const UNKNOWN_KIND = '0x9999'
   let preSwapChecker
   let swapContract
@@ -43,7 +46,8 @@ contract('PreSwapChecker', async accounts => {
   let wrapperAddress
   let tokenAST
   let tokenDAI
-  let tokenKitty
+  let godsUnchained
+  let cryptoKitties
   let typesLib
   let tokenWETH
 
@@ -58,6 +62,7 @@ contract('PreSwapChecker', async accounts => {
 
       const erc20TransferHandler = await ERC20TransferHandler.new()
       const erc721TransferHandler = await ERC721TransferHandler.new()
+      const kittyCoreTransferHandler = await KittyCoreTransferHandler.new()
       const transferHandlerRegistry = await TransferHandlerRegistry.new()
       await transferHandlerRegistry.addTransferHandler(
         ERC20_INTERFACE_ID,
@@ -67,10 +72,14 @@ contract('PreSwapChecker', async accounts => {
         ERC721_INTERFACE_ID,
         erc721TransferHandler.address
       )
+      await transferHandlerRegistry.addTransferHandler(
+        CK_INTERFACE_ID,
+        kittyCoreTransferHandler.address
+      )
 
       // adding a bad transfer handler
       await transferHandlerRegistry.addTransferHandler(
-        fakeTransferHandler,
+        FAKE_TRANSFER_HANDLER,
         accounts[5]
       )
       // now deploy swap
@@ -332,20 +341,20 @@ contract('PreSwapChecker', async accounts => {
 
   describe('Deploying non-fungible token...', async () => {
     it('Deployed test contract "Collectible"', async () => {
-      tokenKitty = await NonFungibleToken.new()
+      godsUnchained = await NonFungibleToken.new()
     })
   })
 
   describe('Minting and testing non-fungible token...', async () => {
-    it('Mints a kitty collectible (#54321) for Bob', async () => {
-      emitted(await tokenKitty.mint(bobAddress, 54321), 'NFTTransfer')
+    it('Mints a NFT collectible (#54321) for Bob', async () => {
+      emitted(await godsUnchained.mint(bobAddress, 54321), 'NFTTransfer')
       ok(
-        await balances(bobAddress, [[tokenKitty, 1]]),
+        await balances(bobAddress, [[godsUnchained, 1]]),
         'Bob balances are incorrect'
       )
     })
 
-    it('Alice tries to buys non-owned Kitty #54320 from Bob for 50 AST causes revert', async () => {
+    it('Alice tries to buy non-owned NFT #54320 from Bob for 50 AST causes revert', async () => {
       const order = await orders.getOrder({
         signer: {
           wallet: aliceAddress,
@@ -354,7 +363,7 @@ contract('PreSwapChecker', async accounts => {
         },
         sender: {
           wallet: bobAddress,
-          token: tokenKitty.address,
+          token: godsUnchained.address,
           id: 54320,
           kind: ERC721_INTERFACE_ID,
         },
@@ -372,7 +381,7 @@ contract('PreSwapChecker', async accounts => {
       )
     })
 
-    it('Alice tries to buys non-approved Kitty #54321 from Bob for 50 AST', async () => {
+    it('Alice tries to buy non-approved NFT #54321 from Bob for 50 AST', async () => {
       const order = await orders.getOrder({
         signer: {
           wallet: aliceAddress,
@@ -381,9 +390,115 @@ contract('PreSwapChecker', async accounts => {
         },
         sender: {
           wallet: bobAddress,
-          token: tokenKitty.address,
+          token: godsUnchained.address,
           id: 54321,
           kind: ERC721_INTERFACE_ID,
+        },
+      })
+
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        aliceAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
+      order.signature.version = '0x99' // incorrect version
+
+      errorCodes = await preSwapChecker.checkSwap.call(order, {
+        from: bobAddress,
+      })
+      equal(errorCodes[0], 2)
+      equal(web3.utils.toUtf8(errorCodes[1][0]), 'SIGNATURE_INVALID')
+      equal(web3.utils.toUtf8(errorCodes[1][1]), 'SENDER_ALLOWANCE_LOW')
+    })
+  })
+
+  describe('Deploying cryptokitties...', async () => {
+    it('Deployed test contract "Collectible"', async () => {
+      cryptoKitties = await AdaptedKittyERC721.new()
+    })
+  })
+
+  describe('Minting and testing cryptokitties...', async () => {
+    it('Mints a kitty collectible (#123) for Bob and (#1) for Alice', async () => {
+      emitted(await cryptoKitties.mint(bobAddress, 123), 'NFTKittyTransfer')
+      emitted(await cryptoKitties.mint(aliceAddress, 1), 'NFTKittyTransfer')
+      ok(
+        await balances(bobAddress, [[cryptoKitties, 1]]),
+        'Bob balances are incorrect'
+      )
+    })
+
+    it('Alice tries to buy non-owned Kitty #124 from Bob for 50 AST causes revert', async () => {
+      const order = await orders.getOrder({
+        signer: {
+          wallet: aliceAddress,
+          token: tokenAST.address,
+          amount: 50,
+        },
+        sender: {
+          wallet: bobAddress,
+          token: cryptoKitties.address,
+          id: 124,
+          kind: CK_INTERFACE_ID,
+        },
+      })
+
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        aliceAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+      await reverted(
+        preSwapChecker.checkSwap.call(order, { from: bobAddress }),
+        'revert ERC721: owner query for nonexistent token'
+      )
+    })
+
+    it('Alice tries to buy a token that Bob doesnt own', async () => {
+      const order = await orders.getOrder({
+        signer: {
+          wallet: aliceAddress,
+          token: tokenAST.address,
+          amount: 50,
+        },
+        sender: {
+          wallet: bobAddress,
+          token: cryptoKitties.address,
+          id: 1,
+          kind: CK_INTERFACE_ID,
+        },
+      })
+
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        aliceAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
+      errorCodes = await preSwapChecker.checkSwap.call(order, {
+        from: bobAddress,
+      })
+      equal(errorCodes[0], 2)
+      equal(web3.utils.toUtf8(errorCodes[1][0]), 'SENDER_BALANCE_LOW')
+      equal(web3.utils.toUtf8(errorCodes[1][1]), 'SENDER_ALLOWANCE_LOW')
+    })
+
+    it('Alice tries to buy non-approved Kitty #123 from Bob for 50 AST', async () => {
+      const order = await orders.getOrder({
+        signer: {
+          wallet: aliceAddress,
+          token: tokenAST.address,
+          amount: 50,
+        },
+        sender: {
+          wallet: bobAddress,
+          token: cryptoKitties.address,
+          id: 123,
+          kind: CK_INTERFACE_ID,
         },
       })
 
@@ -512,8 +627,8 @@ contract('PreSwapChecker', async accounts => {
       equal(errorCodes[0], 4)
       equal(web3.utils.toUtf8(errorCodes[1][0]), 'SENDER_INVALID_AMOUNT')
       equal(web3.utils.toUtf8(errorCodes[1][1]), 'SIGNER_INVALID_AMOUNT')
-      equal(web3.utils.toUtf8(errorCodes[1][2]), 'SENDER_INVALID_ERC721')
-      equal(web3.utils.toUtf8(errorCodes[1][3]), 'SIGNER_INVALID_ERC721')
+      equal(web3.utils.toUtf8(errorCodes[1][2]), 'SENDER_TOKEN_KIND_MISMATCH')
+      equal(web3.utils.toUtf8(errorCodes[1][3]), 'SIGNER_TOKEN_KIND_MISMATCH')
     })
   })
 
@@ -1037,8 +1152,8 @@ contract('PreSwapChecker', async accounts => {
       equal(errorCodes[0], 4)
       equal(web3.utils.toUtf8(errorCodes[1][0]), 'SENDER_INVALID_AMOUNT')
       equal(web3.utils.toUtf8(errorCodes[1][1]), 'SIGNER_INVALID_AMOUNT')
-      equal(web3.utils.toUtf8(errorCodes[1][2]), 'SENDER_INVALID_ERC721')
-      equal(web3.utils.toUtf8(errorCodes[1][3]), 'SIGNER_INVALID_ERC721')
+      equal(web3.utils.toUtf8(errorCodes[1][2]), 'SENDER_TOKEN_KIND_MISMATCH')
+      equal(web3.utils.toUtf8(errorCodes[1][3]), 'SIGNER_TOKEN_KIND_MISMATCH')
     })
   })
 })
