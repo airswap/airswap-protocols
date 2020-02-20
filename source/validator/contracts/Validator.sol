@@ -523,7 +523,7 @@ contract Validator {
 
   /**
     * @notice Check a party has enough balance to swap
-    * for ERC721, CryptoKitties, and ERC20 tokens
+    * for supported token types
     * @param party Types.Party party to check balance for
     * @return bool whether party has enough balance
     */
