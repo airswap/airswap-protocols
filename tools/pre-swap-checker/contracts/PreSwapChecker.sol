@@ -8,7 +8,7 @@ import "openzeppelin-solidity/contracts/introspection/ERC165Checker.sol";
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "@airswap/transfers/contracts/TransferHandlerRegistry.sol";
 import "@airswap/tokens/contracts/interfaces/IWETH.sol";
-import "@airswap/tokens/contracts/AdaptedKittyERC721.sol";
+import "@airswap/tokens/contracts/interfaces/AdaptedKittyERC721.sol";
 import "@airswap/delegate/contracts/interfaces/IDelegate.sol";
 
 /**
