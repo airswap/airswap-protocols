@@ -119,18 +119,6 @@ class TokenMetadata {
   public getTokensByAddress = (): { [address: string]: NormalizedToken } =>
     this.tokensByAddress
 
-  private _storeTokensByAddress = () => {
-    const { tokensByAddress, tokens } = this
-
-    tokens.forEach(token => {
-      if (
-        !Object.prototype.hasOwnProperty.call(tokensByAddress, token.address)
-      ) {
-        tokensByAddress[token.address] = token
-      }
-    })
-  }
-
   // returns a URL string that may link to an image if one is available in Trust Wallet metadata, else will 404
   public getImageURL = (address: string): string =>
     `${TRUST_WALLET_IMAGE_API}/${address}/logo.png`
@@ -166,6 +154,18 @@ class TokenMetadata {
     this.tokens.push(newToken)
     this._storeTokensByAddress()
     return newToken
+  }
+
+  private _storeTokensByAddress = () => {
+    const { tokensByAddress, tokens } = this
+
+    tokens.forEach(token => {
+      if (
+        !Object.prototype.hasOwnProperty.call(tokensByAddress, token.address)
+      ) {
+        tokensByAddress[token.address] = token
+      }
+    })
   }
 }
 
