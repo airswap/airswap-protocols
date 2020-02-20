@@ -533,12 +533,10 @@ contract Validator {
     if (party.kind == ERC721_INTERFACE_ID || party.kind == CK_INTERFACE_ID) {
       address owner = IERC721(party.token).ownerOf(party.id);
       return (owner == party.wallet);
-    }
-    else if (party.kind == ERC1155_INTERFACE_ID) {
+    } else if (party.kind == ERC1155_INTERFACE_ID) {
       uint256 balance = IERC1155(party.token).balanceOf(party.wallet, party.id);
       return (balance >= party.amount);
-    }
-    else {
+    } else {
       uint256 balance = IERC20(party.token).balanceOf(party.wallet);
       return (balance >= party.amount);
     }
@@ -561,11 +559,9 @@ contract Validator {
     } else if (party.kind == CK_INTERFACE_ID) {
       address approved = IAdaptedKittyERC721(party.token).kittyIndexToApproved(party.id);
       return (swap == approved);
-    }
-    else if (party.kind == ERC1155_INTERFACE_ID) {
+    } else if (party.kind == ERC1155_INTERFACE_ID) {
       return IERC1155(party.token).isApprovedForAll(party.wallet, swap);
-    }
-    else {
+    } else {
       uint256 allowance = IERC20(party.token).allowance(party.wallet, swap);
       return (allowance >= party.amount);
     }
