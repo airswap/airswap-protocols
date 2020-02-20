@@ -181,8 +181,8 @@ contract PreSwapChecker {
       if (order.sender.wallet != address(0)) {
         // The sender was specified
         // Check if sender kind interface can correctly check balance
-        if (order.sender.kind == ERC721_INTERFACE_ID && !hasValidERC71Interface(order.sender.token)) {
-          errors[errorCount] = "SENDER_INVALID_ERC721";
+        if (!hasValidInterface(order.sender.token, order.sender.kind)) {
+          errors[errorCount] = "SENDER_TOKEN_KIND_INCORRECT";
           errorCount++;
         } else {
           // Check the order sender token balance when sender is not WETH
@@ -208,10 +208,10 @@ contract PreSwapChecker {
 
      // Check valid token registry handler for signer
     if (hasValidKind(order.signer.kind, swap)) {
-      // Check if sender kind interface can correctly check balance
-      if (order.signer.kind == ERC721_INTERFACE_ID && !hasValidERC71Interface(order.signer.token)) {
-        errors[errorCount] = "SIGNER_INVALID_ERC721";
-        errorCount++;
+      // Check if signer kind interface can correctly check balance
+      if (!hasValidInterface(order.signer.token, order.signer.kind)) {
+          errors[errorCount] = "SIGNER_TOKEN_KIND_INCORRECT";
+          errorCount++;
       } else {
         // Check the order signer token balance
         if (!hasBalance(order.signer)) {
@@ -253,8 +253,8 @@ contract PreSwapChecker {
       if (order.sender.wallet != address(0)) {
         // The sender was specified
         // Check if sender kind interface can correctly check balance
-        if (order.sender.kind == ERC721_INTERFACE_ID && !hasValidERC71Interface(order.sender.token)) {
-          errors[errorCount] = "SENDER_INVALID_ERC721";
+        if (!hasValidInterface(order.sender.token, order.sender.kind)) {
+          errors[errorCount] = "SENDER_TOKEN_KIND_INCORRECT";
           errorCount++;
         } else {
           // Check the order sender token balance
@@ -278,10 +278,10 @@ contract PreSwapChecker {
 
      // Check valid token registry handler for signer
     if (hasValidKind(order.signer.kind, swap)) {
-      // Check if sender kind interface can correctly check balance
-      if (order.signer.kind == ERC721_INTERFACE_ID && !hasValidERC71Interface(order.signer.token)) {
-        errors[errorCount] = "SIGNER_INVALID_ERC721";
-        errorCount++;
+      // Check if signer kind interface can correctly check balance
+      if (!hasValidInterface(order.signer.token, order.signer.kind)) {
+          errors[errorCount] = "SIGNER_TOKEN_KIND_INCORRECT";
+          errorCount++;
       } else {
         // Check the order signer token balance
         if (!hasBalance(order.signer)) {
@@ -505,10 +505,15 @@ contract PreSwapChecker {
     * @param tokenAddress address potential ERC721 token address
     * @return bool whether address has valid interface
     */
-  function hasValidERC71Interface(
-    address tokenAddress
+  function hasValidInterface(
+    address tokenAddress,
+    bytes4 interfaceID
   ) internal view returns (bool) {
-    return (tokenAddress._supportsInterface(ERC721_INTERFACE_ID));
+    // ERC20s don't normally implement this method
+    if (interfaceID != ERC20_INTERFACE_ID) {
+      return (tokenAddress._supportsInterface(interfaceID));
+    }
+    return true;
   }
 
   /**
