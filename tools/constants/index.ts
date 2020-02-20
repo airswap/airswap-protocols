@@ -14,7 +14,7 @@
   limitations under the License.
 */
 
-import { Party } from '@airswap/types'
+import { OrderParty, Token } from '@airswap/types'
 
 export const DOMAIN_NAME = 'SWAP'
 export const DOMAIN_VERSION = '2'
@@ -84,8 +84,8 @@ export const etherscanDomains: Record<string, string> = {
   '4': 'rinkeby.etherscan.io',
 }
 
-export const defaults: Record<string, Party> = {
-  Party: {
+export const defaults: Record<string, OrderParty> = {
+  OrderParty: {
     kind: '0x36372b07',
     wallet: '0x0000000000000000000000000000000000000000',
     token: '0x0000000000000000000000000000000000000000',

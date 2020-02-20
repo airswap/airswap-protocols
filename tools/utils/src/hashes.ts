@@ -17,7 +17,7 @@
 import * as ethUtil from 'ethereumjs-util'
 import * as ethAbi from 'ethereumjs-abi'
 import { DOMAIN_NAME, DOMAIN_VERSION } from '@airswap/constants'
-import { Party, UnsignedOrder, EIP712 } from '@airswap/types'
+import { OrderParty, UnsignedOrder, EIP712 } from '@airswap/types'
 
 function stringify(type: string): string {
   let str = `${type}(`
@@ -41,7 +41,7 @@ export const ORDER_TYPEHASH = ethUtil.keccak256(
 
 export const PARTY_TYPEHASH = ethUtil.keccak256(stringify('Party'))
 
-export function hashParty(party: Party): Buffer {
+export function hashParty(party: OrderParty): Buffer {
   return ethUtil.keccak256(
     ethAbi.rawEncode(
       ['bytes32', 'bytes4', 'address', 'address', 'uint256', 'uint256'],

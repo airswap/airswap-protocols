@@ -14,34 +14,41 @@
   limitations under the License.
 */
 
-export type Party = {
-  wallet: string
+type RequireAtLeastOne<T, Keys extends keyof T = keyof T> = Pick<
+  T,
+  Exclude<keyof T, Keys>
+> &
+  {
+    [K in Keys]-?: Required<Pick<T, K>> & Partial<Pick<T, Exclude<Keys, K>>>
+  }[Keys]
+
+type Party = {
   kind: string
   token: string
   amount?: string
   id?: string
 }
 
+export type QuoteParty = RequireAtLeastOne<Party, 'amount' | 'id'>
+
+export type OrderParty = QuoteParty & {
+  wallet: string
+}
+
 export type Quote = {
   timestamp?: string
   protocol?: string
   locator?: string
-  signer: {
-    token: string
-    amount: string
-  }
-  sender: {
-    token: string
-    amount: string
-  }
+  signer: QuoteParty
+  sender: QuoteParty
 }
 
 export type UnsignedOrder = {
   nonce: string
   expiry: string
-  signer: Party
-  sender: Party
-  affiliate: Party
+  signer: OrderParty
+  sender: OrderParty
+  affiliate: OrderParty
 }
 
 export type Signature = {
