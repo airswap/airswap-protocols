@@ -19,8 +19,9 @@ import { bigNumberify } from 'ethers/utils'
 import {
   chainIds,
   chainNames,
-  MIN_CONFIRMATIONS,
+  tokenKinds,
   protocols,
+  MIN_CONFIRMATIONS,
 } from '@airswap/constants'
 import { getTimestamp } from '@airswap/utils'
 import { Quote, Order } from '@airswap/types'
@@ -40,7 +41,7 @@ export class Delegate {
   public constructor(
     address: string,
     chainId = chainIds.RINKEBY,
-    signerOrProvider?: ethers.Signer | ethers.providers.Provider
+    walletOrProvider?: ethers.Wallet | ethers.providers.Provider
   ) {
     this.chainId = chainId
     this.address = address
@@ -48,7 +49,7 @@ export class Delegate {
     this.contract = new ethers.Contract(
       address,
       DelegateInterface,
-      signerOrProvider ||
+      walletOrProvider ||
         ethers.getDefaultProvider(chainNames[chainId].toLowerCase())
     )
   }
@@ -114,14 +115,14 @@ export class Delegate {
 
   public async provideOrder(
     order: Order,
-    signer?: ethers.Signer
+    wallet?: ethers.Wallet
   ): Promise<string> {
     let contract = this.contract
     if (!this.contract.signer) {
-      if (signer === undefined) {
-        throw new Error('Signer must be provided')
+      if (wallet === undefined) {
+        throw new Error('Wallet must be provided')
       } else {
-        contract = new ethers.Contract(this.address, DelegateInterface, signer)
+        contract = new ethers.Contract(this.address, DelegateInterface, wallet)
       }
     }
     const tx = await contract.provideOrder(order)
@@ -134,7 +135,7 @@ export class Delegate {
     senderAmount: string,
     signerToken: string,
     signerAmount: string
-  ) {
+  ): Promise<Quote> {
     const balance = await new ERC20(senderToken, this.chainId).balanceOf(
       this.address
     )
@@ -154,10 +155,12 @@ export class Delegate {
       protocol: protocols.DELEGATE,
       locator: this.address,
       sender: {
+        kind: tokenKinds.ERC20,
         token: senderToken,
         amount: finalSenderAmount.toString(),
       },
       signer: {
+        kind: tokenKinds.ERC20,
         token: signerToken,
         amount: finalSignerAmount.toString(),
       },

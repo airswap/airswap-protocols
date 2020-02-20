@@ -30,13 +30,13 @@ export class Indexer {
 
   public constructor(
     chainId = chainIds.RINKEBY,
-    signerOrProvider?: ethers.Signer | ethers.providers.Provider
+    walletOrProvider?: ethers.Wallet | ethers.providers.Provider
   ) {
     this.chainId = chainId
     this.contract = new ethers.Contract(
       indexerDeploys[chainId],
       IndexerInterface,
-      signerOrProvider ||
+      walletOrProvider ||
         ethers.getDefaultProvider(chainNames[chainId].toLowerCase())
     )
   }
@@ -51,7 +51,7 @@ export class Indexer {
   public async getLocators(
     signerToken: string,
     senderToken: string,
-    protocol = '0x0000',
+    protocol = protocols.SERVER,
     limit = 10,
     cursor = INDEX_HEAD
   ): Promise<LocatorResult> {

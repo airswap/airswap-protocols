@@ -29,14 +29,14 @@ export class ERC20 {
   public constructor(
     address: string,
     chainId = chainIds.RINKEBY,
-    signerOrProvider?: ethers.Signer | ethers.providers.Provider
+    walletOrProvider?: ethers.Wallet | ethers.providers.Provider
   ) {
     this.chainId = chainId
     this.address = address
     this.contract = new ethers.Contract(
       address,
       IERC20Interface,
-      signerOrProvider ||
+      walletOrProvider ||
         ethers.getDefaultProvider(chainNames[chainId].toLowerCase())
     )
   }
