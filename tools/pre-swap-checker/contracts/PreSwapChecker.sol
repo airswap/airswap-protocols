@@ -22,7 +22,7 @@ contract PreSwapChecker {
   bytes constant internal DOM_NAME = "SWAP";
   bytes constant internal DOM_VERSION = "2";
 
-  bytes4 constant internal ERC1155_INTERFACE_ID = ;
+  bytes4 constant internal ERC1155_INTERFACE_ID = 0xd9b67a26;
   bytes4 constant internal ERC721_INTERFACE_ID = 0x80ac58cd;
   bytes4 constant internal ERC20_INTERFACE_ID = 0x36372b07;
 
