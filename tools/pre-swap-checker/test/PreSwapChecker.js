@@ -1,6 +1,7 @@
 const Swap = artifacts.require('Swap')
 const Wrapper = artifacts.require('Wrapper')
 const Types = artifacts.require('Types')
+const ERC1155 = artifacts.require('ERC1155')
 const FungibleToken = artifacts.require('FungibleToken')
 const NonFungibleToken = artifacts.require('NonFungibleToken')
 const AdaptedKittyERC721 = artifacts.require('AdaptedKittyERC721')
@@ -52,6 +53,7 @@ contract('PreSwapChecker', async accounts => {
   let cryptoKitties
   let typesLib
   let tokenWETH
+  let erc1155
 
   let swap
   let cancelUpTo
