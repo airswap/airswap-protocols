@@ -537,8 +537,76 @@ contract('PreSwapChecker', async accounts => {
 
   describe('Minting and testing ERC1155', async () => {
     it('Mints an ERC1155 collectable for Bob and Alice', async () => {
-      await erc1155.mint(bobAddress, 1234, 100)
-      await erc1155.mint(aliceAddress, 3412, 1000)
+      emitted(await erc1155.mint(bobAddress, 1234, 100), 'TransferSingle')
+      emitted(await erc1155.mint(aliceAddress, 3412, 1000), 'TransferSingle')
+
+      const bobBalance = await erc1155.balanceOf(bobAddress, 1234)
+      const aliceBalance = await erc1155.balanceOf(aliceAddress, 3412)
+      equal(bobBalance.toNumber(), 100)
+      equal(aliceBalance.toNumber(), 1000)
+    })
+
+    it('Alice tries to buy 10 non-owned asset #12355 from Bob for 50 AST', async () => {
+      const order = await orders.getOrder({
+        signer: {
+          wallet: aliceAddress,
+          token: tokenAST.address,
+          amount: 50,
+        },
+        sender: {
+          wallet: bobAddress,
+          token: erc1155.address,
+          id: 12355,
+          amount: 10,
+          kind: ERC1155_INTERFACE_ID,
+        },
+      })
+
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        aliceAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+      errorCodes = await preSwapChecker.checkSwap.call(order, {
+        from: bobAddress,
+      })
+      equal(errorCodes[0], 2)
+      equal(web3.utils.toUtf8(errorCodes[1][0]), 'SENDER_BALANCE_LOW')
+      equal(web3.utils.toUtf8(errorCodes[1][1]), 'SENDER_ALLOWANCE_LOW')
+    })
+
+    it('Alice tries to buy 10 non approved asset #1234 from Bob for 50 AST', async () => {
+      const order = await orders.getOrder({
+        signer: {
+          wallet: aliceAddress,
+          token: tokenAST.address,
+          amount: 50,
+        },
+        sender: {
+          wallet: bobAddress,
+          token: erc1155.address,
+          id: 1234,
+          amount: 10,
+          kind: ERC1155_INTERFACE_ID,
+        },
+      })
+
+      order.signature = await signatures.getWeb3Signature(
+        order,
+        aliceAddress,
+        swapAddress,
+        GANACHE_PROVIDER
+      )
+
+      order.signature.version = '0x99' // incorrect version
+
+      errorCodes = await preSwapChecker.checkSwap.call(order, {
+        from: bobAddress,
+      })
+      equal(errorCodes[0], 2)
+      equal(web3.utils.toUtf8(errorCodes[1][0]), 'SIGNATURE_INVALID')
+      equal(web3.utils.toUtf8(errorCodes[1][1]), 'SENDER_ALLOWANCE_LOW')
     })
   })
 
