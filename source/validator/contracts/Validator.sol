@@ -342,7 +342,7 @@ contract Validator {
     */
   function coreSwapChecks(
     Types.Order memory order
-    ) internal view returns (uint256, bytes32[] memory ) {
+    ) public view returns (uint256, bytes32[] memory ) {
     address swap = order.signature.validator;
     bytes32 domainSeparator = Types.hashDomain(DOM_NAME, DOM_VERSION, swap);
 
@@ -426,7 +426,7 @@ contract Validator {
   function coreDelegateChecks(
     Types.Order memory order,
     IDelegate delegate
-    ) internal view returns (uint256, bytes32[] memory )  {
+    ) public view returns (uint256, bytes32[] memory )  {
     IDelegate.Rule memory rule = delegate.rules(order.sender.token,order.signer.token);
     bytes32[] memory errors = new bytes32[](MAX_DELEGATE_ERROR_COUNT);
     uint256 errorCount;
