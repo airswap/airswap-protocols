@@ -8,7 +8,7 @@ import "openzeppelin-solidity/contracts/introspection/ERC165Checker.sol";
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "@airswap/transfers/contracts/TransferHandlerRegistry.sol";
 import "@airswap/tokens/contracts/interfaces/IWETH.sol";
-import "@airswap/tokens/contracts/interfaces/AdaptedKittyERC721.sol";
+import "@airswap/tokens/contracts/interfaces/IAdaptedKittyERC721.sol";
 import "@airswap/delegate/contracts/interfaces/IDelegate.sol";
 
 /**
@@ -549,7 +549,7 @@ contract PreSwapChecker {
       address approved = IERC721(party.token).getApproved(party.id);
       return (swap == approved);
     } else if (party.kind == CK_INTERFACE_ID) {
-      address approved = AdaptedKittyERC721(party.token).kittyIndexToApproved(party.id);
+      address approved = IAdaptedKittyERC721(party.token).kittyIndexToApproved(party.id);
       return (swap == approved);
     }
     // not ERC721 or CryptoKitties, so assume ERC20
