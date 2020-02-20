@@ -256,6 +256,9 @@ contract PreSwapChecker {
         if (order.sender.kind == ERC721_INTERFACE_ID && !hasValidERC721Interface(order.sender.token)) {
           errors[errorCount] = "SENDER_INVALID_ERC721";
           errorCount++;
+        } else if (order.sender.kind == ERC1155_INTERFACE_ID && !hasValidERC1155Interface(order.sender.token)) {
+          errors[errorCount] = "SENDER_INVALID_ERC1155";
+          errorCount++;
         } else {
           // Check the order sender token balance
           //do the balance check
@@ -281,6 +284,9 @@ contract PreSwapChecker {
       // Check if sender kind interface can correctly check balance
       if (order.signer.kind == ERC721_INTERFACE_ID && !hasValidERC721Interface(order.signer.token)) {
         errors[errorCount] = "SIGNER_INVALID_ERC721";
+        errorCount++;
+      } else if (order.signer.kind == ERC1155_INTERFACE_ID && !hasValidERC1155Interface(order.signer.token)) {
+        errors[errorCount] = "SIGNER_INVALID_ERC1155";
         errorCount++;
       } else {
         // Check the order signer token balance
@@ -509,6 +515,17 @@ contract PreSwapChecker {
     address tokenAddress
   ) internal view returns (bool) {
     return (tokenAddress._supportsInterface(ERC721_INTERFACE_ID));
+  }
+
+  /**
+    * @notice Checks token has valid ERC1155 interface
+    * @param tokenAddress address potential ERC1155 token address
+    * @return bool whether address has valid interface
+    */
+  function hasValidERC1155Interface(
+    address tokenAddress
+  ) internal view returns (bool) {
+    return (tokenAddress._supportsInterface(ERC1155_INTERFACE_ID));
   }
 
   /**
