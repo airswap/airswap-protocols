@@ -568,7 +568,7 @@ contract('Validator', async accounts => {
         swapAddress,
         GANACHE_PROVIDER
       )
-      errorCodes = await preSwapChecker.checkSwap.call(order, {
+      errorCodes = await validator.checkSwap.call(order, {
         from: bobAddress,
       })
       equal(errorCodes[0], 2)
@@ -601,7 +601,7 @@ contract('Validator', async accounts => {
 
       order.signature.version = '0x99' // incorrect version
 
-      errorCodes = await preSwapChecker.checkSwap.call(order, {
+      errorCodes = await validator.checkSwap.call(order, {
         from: bobAddress,
       })
       equal(errorCodes[0], 2)
