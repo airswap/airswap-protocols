@@ -210,8 +210,8 @@ contract Validator {
     if (hasValidKind(order.signer.kind, swap)) {
       // Check if signer kind interface can correctly check balance
       if (!hasValidInterface(order.signer.token, order.signer.kind)) {
-          errors[errorCount] = "SIGNER_TOKEN_KIND_MISMATCH";
-          errorCount++;
+        errors[errorCount] = "SIGNER_TOKEN_KIND_MISMATCH";
+        errorCount++;
       } else {
         // Check the order signer token balance
         if (!hasBalance(order.signer)) {
@@ -280,8 +280,8 @@ contract Validator {
     if (hasValidKind(order.signer.kind, swap)) {
       // Check if signer kind interface can correctly check balance
       if (!hasValidInterface(order.signer.token, order.signer.kind)) {
-          errors[errorCount] = "SIGNER_TOKEN_KIND_MISMATCH";
-          errorCount++;
+        errors[errorCount] = "SIGNER_TOKEN_KIND_MISMATCH";
+        errorCount++;
       } else {
         // Check the order signer token balance
         if (!hasBalance(order.signer)) {
@@ -388,7 +388,9 @@ contract Validator {
     if (order.sender.kind == ERC20_INTERFACE_ID && order.sender.id != 0) {
       errors[errorCount] = "SENDER_INVALID_ID";
       errorCount++;
-    } else if ((order.sender.kind == ERC721_INTERFACE_ID || order.sender.kind == CK_INTERFACE_ID) && order.sender.amount != 0) {
+    } else if (
+      (order.sender.kind == ERC721_INTERFACE_ID || order.sender.kind == CK_INTERFACE_ID) && order.sender.amount != 0
+    ) {
       errors[errorCount] = "SENDER_INVALID_AMOUNT";
       errorCount++;
     }
@@ -397,7 +399,9 @@ contract Validator {
     if (order.signer.kind == ERC20_INTERFACE_ID && order.signer.id != 0) {
       errors[errorCount] = "SIGNER_INVALID_ID";
       errorCount++;
-    } else if ((order.signer.kind == ERC721_INTERFACE_ID || order.signer.kind == CK_INTERFACE_ID) && order.signer.amount != 0) {
+    } else if (
+      (order.signer.kind == ERC721_INTERFACE_ID || order.signer.kind == CK_INTERFACE_ID) && order.signer.amount != 0
+    ) {
       errors[errorCount] = "SIGNER_INVALID_AMOUNT";
       errorCount++;
     }

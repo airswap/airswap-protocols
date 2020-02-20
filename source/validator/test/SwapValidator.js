@@ -452,7 +452,7 @@ contract('Validator', async accounts => {
         GANACHE_PROVIDER
       )
       await reverted(
-        preSwapChecker.checkSwap.call(order, { from: bobAddress }),
+        validator.checkSwap.call(order, { from: bobAddress }),
         'revert ERC721: owner query for nonexistent token'
       )
     })
@@ -479,7 +479,7 @@ contract('Validator', async accounts => {
         GANACHE_PROVIDER
       )
 
-      errorCodes = await preSwapChecker.checkSwap.call(order, {
+      errorCodes = await validator.checkSwap.call(order, {
         from: bobAddress,
       })
       equal(errorCodes[0], 2)
@@ -511,7 +511,7 @@ contract('Validator', async accounts => {
 
       order.signature.version = '0x99' // incorrect version
 
-      errorCodes = await preSwapChecker.checkSwap.call(order, {
+      errorCodes = await validator.checkSwap.call(order, {
         from: bobAddress,
       })
       equal(errorCodes[0], 2)
