@@ -124,9 +124,9 @@ class TokenMetadata {
 
     tokens.forEach(token => {
       if (
-        !Object.prototype.hasOwnProperty.call(tokensByAddress, token.symbol)
+        !Object.prototype.hasOwnProperty.call(tokensByAddress, token.address)
       ) {
-        tokensByAddress[token.symbol] = token
+        tokensByAddress[token.address] = token
       }
     })
   }
