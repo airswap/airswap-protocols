@@ -98,7 +98,7 @@ contract('Validator', async accounts => {
       wrapperAddress = wrapperContract.address
     })
 
-    it('Deployed SwapChecker contract', async () => {
+    it('Deployed Validator contract', async () => {
       await Validator.link('Types', typesLib.address)
       validator = await Validator.new(tokenWETH.address)
     })
