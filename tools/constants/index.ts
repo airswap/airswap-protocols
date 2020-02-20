@@ -14,7 +14,7 @@
   limitations under the License.
 */
 
-import { OrderParty, Token } from '@airswap/types'
+import { OrderParty } from '@airswap/types'
 
 export const DOMAIN_NAME = 'SWAP'
 export const DOMAIN_VERSION = '2'

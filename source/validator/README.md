@@ -1,6 +1,6 @@
-# Pre Swap Checker
+# Validator
 
-[AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens. This package contains source code and tests for a basic a pre-swap-checker contract that can work with with Swap protocol.
+[AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens. This package contains source code and tests for a basic validator contract that can work with with Swap protocol.
 
 
 [![Discord](https://img.shields.io/discord/590643190281928738.svg)](https://discord.gg/ecQbV7H)

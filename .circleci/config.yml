@@ -83,7 +83,7 @@ jobs:
             yarn ganache > /dev/null &
             cd source/delegate && yarn test
 
-  pre_swap_checker_tests:
+  validator_tests:
     <<: *container_config
     steps:
       - attach_workspace:
@@ -92,7 +92,7 @@ jobs:
           name: Run Tests
           command: |
             yarn ganache > /dev/null &
-            cd tools/pre-swap-checker && yarn test
+            cd source/validator && yarn test
 
   transfers_tests:
     <<: *container_config
@@ -245,7 +245,7 @@ workflows:
           context: Development
           requires:
             - setup
-      - pre_swap_checker_tests:
+      - validator_tests:
           context: Development
           requires:
             - setup
