@@ -7,10 +7,13 @@ import {
   IDEX_TOKEN_API,
   TRUST_WALLET_IMAGE_API,
   METAMASK_IMAGE_API,
+  rinkebyTokensByAddress,
 } from './constants'
+
+import { chainIds } from '@airswap/constants'
 import { getTokenName, getTokenSymbol, getTokenDecimals } from './helpers'
 
-interface NormalizedToken {
+export interface NormalizedToken {
   name: string
   address: string
   symbol: string
@@ -33,14 +36,22 @@ class TokenMetadata {
   public tokens: NormalizedToken[]
   public tokensByAddress: { [address: string]: NormalizedToken }
   public ready: Promise<NormalizedToken[]>
+  public chainId: string
 
-  public constructor() {
+  public constructor(chainId = '1') {
+    this.chainId = String(chainId)
     this.tokens = []
     this.tokensByAddress = {}
     this.ready = this.init()
   }
 
   public init = async () => {
+    if (this.chainId === chainIds.RINKEBY) {
+      this.tokensByAddress = rinkebyTokensByAddress
+      this.tokens = Object.values(this.tokensByAddress)
+      return this.tokens
+    }
+
     const normalizeIdexToken = (
       token: IdexToken & { symbol: string }
     ): NormalizedToken => {
@@ -136,6 +147,11 @@ class TokenMetadata {
     if (match) {
       return match
     }
+    if (this.chainId === chainIds.RINKEBY) {
+      throw new Error(
+        `Can't fetch Rinkeby token data from contract. This feature is only avaialable on mainnet.`
+      )
+    }
     const [tokenSymbol, tokenName, tokenDecimals] = await Promise.all([
       getTokenSymbol(searchAddress),
       getTokenName(searchAddress),
@@ -155,13 +171,14 @@ class TokenMetadata {
   }
 
   private _storeTokensByAddress = () => {
-    const { tokensByAddress, tokens } = this
-
-    tokens.forEach(token => {
+    this.tokens.forEach(token => {
       if (
-        !Object.prototype.hasOwnProperty.call(tokensByAddress, token.address)
+        !Object.prototype.hasOwnProperty.call(
+          this.tokensByAddress,
+          token.address
+        )
       ) {
-        tokensByAddress[token.address] = token
+        this.tokensByAddress[token.address] = token
       }
     })
   }

@@ -1,3 +1,5 @@
+import { NormalizedToken } from './index'
+
 export const IDEX_TOKEN_API = 'https://api.idex.market/returnCurrencies'
 export const TRUST_WALLET_IMAGE_API =
   'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets'
@@ -240,3 +242,24 @@ export const ERC20_ABI = [
     type: 'event',
   },
 ]
+
+export const rinkebyTokensByAddress: Record<string, NormalizedToken> = {
+  DAI: {
+    name: 'Dai Stablecoin',
+    address: '0x5592ec0cfb4dbc12d3ab100b257153436a1f0fea',
+    decimals: 18,
+    symbol: 'DAI',
+  },
+  WETH: {
+    name: 'Wrapped Ether',
+    address: '0xc778417e063141139fce010982780140aa0cd5ab',
+    decimals: 18,
+    symbol: 'WETH',
+  },
+  AST: {
+    name: 'AirSwap Token',
+    address: '0xcc1cbd4f67cceb7c001bd4adf98451237a193ff8',
+    decimals: 4,
+    symbol: 'AST',
+  },
+}
