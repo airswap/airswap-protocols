@@ -505,7 +505,8 @@ contract PreSwapChecker {
     * @return bool whether address has valid interface
     */
   function hasValidInterface(
-    address tokenAddress
+    address tokenAddress,
+    bytes4 interfaceID
   ) internal view returns (bool) {
     // ERC20s don't normally implement this method
     if (interfaceID != ERC20_INTERFACE_ID) {
