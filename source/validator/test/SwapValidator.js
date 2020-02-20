@@ -540,10 +540,8 @@ contract('Validator', async accounts => {
       emitted(await erc1155.mint(bobAddress, 1234, 100), 'TransferSingle')
       emitted(await erc1155.mint(aliceAddress, 3412, 1000), 'TransferSingle')
 
-      const bobBalance = await erc1155.balanceOf(bobAddress, 1234)
-      const aliceBalance = await erc1155.balanceOf(aliceAddress, 3412)
-      equal(bobBalance.toNumber(), 100)
-      equal(aliceBalance.toNumber(), 1000)
+      ok(await balances(bobAddress, [[erc1155, 1234, 100]]))
+      ok(await balances(aliceAddress, [[erc1155, 3412, 1000]]))
     })
 
     it('Alice tries to buy 10 non-owned asset #12355 from Bob for 50 AST', async () => {
