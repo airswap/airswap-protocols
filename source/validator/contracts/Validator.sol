@@ -507,7 +507,7 @@ contract Validator {
 
   /**
     * @notice Checks token has valid interface
-    * @param tokenAddress address potential ERC721 or ERC1155 token address
+    * @param tokenAddress address potential valid interface
     * @return bool whether address has valid interface
     */
   function hasValidInterface(
