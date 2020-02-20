@@ -1,0 +1,177 @@
+import axios from 'axios'
+import contractMap, {
+  MetamaskToken,
+  MetamaskTokens,
+} from 'eth-contract-metadata'
+import {
+  IDEX_TOKEN_API,
+  TRUST_WALLET_IMAGE_API,
+  METAMASK_IMAGE_API,
+} from './constants'
+import { getTokenName, getTokenSymbol, getTokenDecimals } from './helpers'
+
+interface NormalizedToken {
+  name: string
+  address: string
+  symbol: string
+  decimals: number
+  image?: string
+}
+
+interface IdexToken {
+  name: string
+  decimals: number
+  address: string
+  slug: string
+}
+
+interface IdexTokens {
+  [symbol: string]: IdexToken
+}
+
+class TokenMetadata {
+  tokens: NormalizedToken[]
+  tokensByAddress: { [address: string]: NormalizedToken }
+  ready: Promise<NormalizedToken[]>
+
+  constructor() {
+    this.tokens = []
+    this.tokensByAddress = {}
+    this.ready = this.init()
+  }
+
+  init = async () => {
+    const normalizeIdexToken = (
+      token: IdexToken & { symbol: string }
+    ): NormalizedToken => {
+      return {
+        name: token.name,
+        address: token.address,
+        decimals: token.decimals,
+        symbol: token.symbol,
+        image: `${TRUST_WALLET_IMAGE_API}/${token.address}/logo.png`,
+      }
+    }
+
+    const normalizeMetamaskToken = (
+      token: MetamaskToken & { address: string }
+    ): NormalizedToken => {
+      if (typeof token.decimals !== 'number') {
+        token.decimals = parseFloat(token.decimals)
+      }
+      return {
+        name: token.name,
+        address: token.address,
+        decimals: token.decimals,
+        symbol: token.symbol,
+        image: `${METAMASK_IMAGE_API}/${token.logo}`,
+      }
+    }
+
+    // normalize metamask data
+    const metamaskTokenHashMap: { [key: string]: boolean } = {}
+    const normalizedMetamaskTokens: NormalizedToken[] = Object.entries(
+      contractMap as MetamaskTokens
+    )
+      .map(([address, data]) => {
+        // keep a hash map to give us O(1) lookup later
+        metamaskTokenHashMap[address.toLowerCase()] = true
+        return { ...data, address: address.toLowerCase() }
+      })
+      .filter(
+        contract => !!contract.erc20 && typeof contract.decimals === 'number'
+      )
+      .map(normalizeMetamaskToken)
+
+    // fetch and normalize idex data
+    const { data }: IdexTokens = await axios.get(IDEX_TOKEN_API)
+    const normalizedIdexTokens: NormalizedToken[] = Object.entries(data)
+      .map(([symbol, token]) => {
+        if (token.address) {
+          return { ...token, symbol }
+        }
+      })
+      .map(normalizeIdexToken)
+
+    // persist all metamask tokens to memory metadata array
+    this.tokens.push(...normalizedMetamaskTokens)
+
+    // persist all non-duplicate idex tokens to metadata
+    normalizedIdexTokens.forEach(idexToken => {
+      if (
+        !Object.prototype.hasOwnProperty.call(
+          metamaskTokenHashMap,
+          idexToken.address
+        )
+      ) {
+        this.tokens.push(idexToken)
+      }
+    })
+
+    this._storeTokensByAddress()
+    return this.tokens
+  }
+
+  // get token objects in an array
+  getTokens = (): NormalizedToken[] => this.tokens
+
+  // get token objects in an object keyed by address
+  getTokensByAddress = (): { [address: string]: NormalizedToken } =>
+    this.tokensByAddress
+
+  _storeTokensByAddress = () => {
+    const { tokensByAddress, tokens } = this
+
+    tokens.forEach(token => {
+      if (
+        !Object.prototype.hasOwnProperty.call(tokensByAddress, token.symbol)
+      ) {
+        tokensByAddress[token.symbol] = token
+      }
+    })
+  }
+
+  // returns a URL string that may link to an image if one is available in Trust Wallet metadata, else will 404
+  getImageURL = (address: string): string =>
+    `${TRUST_WALLET_IMAGE_API}/${address}/logo.png`
+
+  // this will fail if the token you search isn't present in the Trust Wallet metadata, or if the letter casing doesn't match Trust's metadata
+  fetchImageBinaryUnstable = (address: string): Promise<string> => {
+    return axios.get(this.getImageURL(address))
+  }
+
+  // given a token address, try to fetch name, symbol, and decimals from the contract and store it in memory tokens array
+  crawlToken = async (searchAddress: string): Promise<NormalizedToken> => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const match = this.tokens.find(
+          ({ address }) => address === searchAddress.toLowerCase()
+        )
+        if (match) {
+          resolve(match)
+        } else {
+          const [tokenSymbol, tokenName, tokenDecimals] = await Promise.all([
+            getTokenSymbol(searchAddress),
+            getTokenName(searchAddress),
+            getTokenDecimals(searchAddress),
+          ])
+
+          const newToken: NormalizedToken = {
+            name: tokenName,
+            symbol: tokenSymbol,
+            address: searchAddress,
+            decimals: tokenDecimals,
+          }
+
+          this.tokens.push(newToken)
+          this._storeTokensByAddress()
+          resolve(newToken)
+        }
+      } catch (error) {
+        reject(error)
+      }
+    })
+  }
+}
+
+export default TokenMetadata

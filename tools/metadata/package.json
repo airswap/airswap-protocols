@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "description": "Token Metadata Tools for AirSwap Developers",
   "contributors": [
-    "Don Mosites <don.mosites@fluidity.io>"
+    "Don Mosites <don.mosites@fluidity.io>",
+    "Graham Perich <graham.perich@fluidity.io>"
   ],
   "repository": {
     "type": "git",
