@@ -86,7 +86,6 @@ contract PreSwapChecker {
       }
     }
 
-
      // Check valid token registry handler for signer
     if (order.signer.kind == ERC20_INTERFACE_ID) {
       if (order.signer.token != address(wethContract)) {
