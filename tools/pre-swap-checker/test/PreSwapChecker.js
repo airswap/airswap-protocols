@@ -8,6 +8,7 @@ const PreSwapChecker = artifacts.require('PreSwapChecker')
 const TransferHandlerRegistry = artifacts.require('TransferHandlerRegistry')
 const ERC20TransferHandler = artifacts.require('ERC20TransferHandler')
 const ERC721TransferHandler = artifacts.require('ERC721TransferHandler')
+const ERC1155TransferHandler = artifacts.require('ERC1155TransferHandler')
 const {
   emitted,
   equal,
@@ -58,6 +59,7 @@ contract('PreSwapChecker', async accounts => {
 
       const erc20TransferHandler = await ERC20TransferHandler.new()
       const erc721TransferHandler = await ERC721TransferHandler.new()
+      const erc1155TransferHandler = await ERC1155TransferHandler.new()
       const transferHandlerRegistry = await TransferHandlerRegistry.new()
       await transferHandlerRegistry.addTransferHandler(
         ERC20_INTERFACE_ID,
@@ -66,6 +68,10 @@ contract('PreSwapChecker', async accounts => {
       await transferHandlerRegistry.addTransferHandler(
         ERC721_INTERFACE_ID,
         erc721TransferHandler.address
+      )
+      await transferHandlerRegistry.addTransferHandler(
+        ERC1155_INTERFACE_ID,
+        erc1155TransferHandler.address
       )
 
       // adding a bad transfer handler
