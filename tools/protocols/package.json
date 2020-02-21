@@ -1,6 +1,6 @@
 {
   "name": "@airswap/protocols",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "JavaScript Protocol Tools for AirSwap Developers",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>"
