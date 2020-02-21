@@ -16,6 +16,11 @@
   "keywords": [
     "airswap"
   ],
+  "files": [
+    "/build",
+    "/reasons",
+    "/deploys.json"
+  ],
   "scripts": {
     "clean": "rm -rf ./build",
     "compile": "truffle compile",
