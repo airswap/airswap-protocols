@@ -17,7 +17,7 @@
   "SIGNER_KIND_MUST_BE_ERC20": "Signer token kind must be ERC20 for this delegate",
   "SENDER_TOKEN_KIND_UNKNOWN": "Sender token kind is not recognized",
   "SIGNER_TOKEN_KIND_UNKNOWN": "Signer token kind is not recognized",
-  "SELF_TRANSFER_INVALID": " Signer and sender wallets must be different",
+  "SELF_TRANSFER_INVALID": "Signer and sender wallets must be different",
   "ORDER_EXPIRED": "Order is expired",
   "ORDER_TAKEN_OR_CANCELLED": "Order is already taken or cancelled",
   "NONCE_TOO_LOW": "Order nonce is below the required minimum",
