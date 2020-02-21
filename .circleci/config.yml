@@ -195,7 +195,7 @@ jobs:
           command: |
             cd source
             ### ADD FOLDERS HERE TO PROCESS ###
-            for file in indexer delegate swap tokens transfers types wrapper
+            for file in indexer delegate swap tokens transfers types validator wrapper
             do
               cd $file
               NPM_NAME=$(node -p "require('./package.json').name")
