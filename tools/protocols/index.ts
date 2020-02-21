@@ -14,8 +14,9 @@
   limitations under the License.
 */
 
-export { Swap } from './src/Swap'
-export { Indexer } from './src/Indexer'
-export { Server } from './src/Server'
 export { Delegate } from './src/Delegate'
 export { ERC20 } from './src/ERC20'
+export { Indexer } from './src/Indexer'
+export { Server } from './src/Server'
+export { Swap } from './src/Swap'
+export { Validator } from './src/Validator'
