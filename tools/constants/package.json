@@ -26,6 +26,6 @@
     "@airswap/types": "3.5.9"
   },
   "devDependencies": {
-    "typescript": "^3.7.5"
+    "typescript": "^3.8.2"
   }
 }
