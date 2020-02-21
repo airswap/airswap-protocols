@@ -24,12 +24,12 @@
   "SENDER_WRAPPER_ALLOWANCE_LOW": "Wrapper: Sender has not approved the wrapper",
   "SIGNER_WRAPPER_ALLOWANCE_LOW": "Wrapper: Signer has not approved the wrapper",
   "MSG_SENDER_MUST_BE_ORDER_SENDER": "Wrapper: Sender of the transaction must be the sender on the order",
-  "SENDER_KIND_MUST_BE_ERC20": "Delegate: Sender token kind must be ERC20 for this delegate",
-  "SIGNER_KIND_MUST_BE_ERC20": "Delegate: Signer token kind must be ERC20 for this delegate",
+  "SENDER_KIND_MUST_BE_ERC20": "Delegate: Sender token kind must be ERC20",
+  "SIGNER_KIND_MUST_BE_ERC20": "Delegate: Signer token kind must be ERC20",
   "TOKEN_PAIR_INACTIVE": "Delegate: Not trading the specified token pair",
   "ORDER_AMOUNT_EXCEEDS_MAX": "Delegate: Amount exceeds the amount available",
   "DELEGATE_UNABLE_TO_PRICE": "Delegate: Not quoting the requested amount or token pair",
-  "PRICE_INVALID": "Delegate: Price must match the quoted delegate price",
-  "SENDER_WALLET_INVALID": "Delegate: Order sender wallet must be the delegate trade wallet",
+  "PRICE_INVALID": "Delegate: Order price must match the quoted price",
+  "SENDER_WALLET_INVALID": "Delegate: Order sender wallet must match the trade wallet",
   "SIGNATURE_MUST_BE_SENT": "Signature is required"
 }
