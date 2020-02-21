@@ -1,9 +1,21 @@
 {
   "name": "@airswap/validator",
-  "version": "0.1.3",
-  "repository": "git@github.com:airswap/airswap-protocols-accessory.git",
+  "version": "1.2.3",
+  "contributors": [
+    "Don Mosites <don.mosites@fluidity.io>",
+    "Deepa Sathaye <deepa.sathaye@fludity.io>",
+    "Ethan Wessel <ethan.wessel@fluidity.io>",
+    "Alice Henshaw <alice.henshaw@fluidity.io>"
+  ],
   "license": "Apache-2.0",
-  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/airswap/airswap-protocols"
+  },
+  "homepage": "https://github.com/airswap/airswap-protocols/tree/master/source/validator",
+  "keywords": [
+    "airswap"
+  ],
   "scripts": {
     "clean": "rm -rf ./build",
     "compile": "truffle compile",
