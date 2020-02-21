@@ -31,9 +31,10 @@
     "verify": "truffle run verify"
   },
   "devDependencies": {
-    "@airswap/tokens": "0.1.4",
     "@airswap/order-utils": "0.3.20",
-    "solidity-coverage": "^0.6.3"
+    "@airswap/tokens": "0.1.4",
+    "solidity-coverage": "^0.6.3",
+    "typescript": "^3.8.2"
   },
   "dependencies": {
     "openzeppelin-solidity": "2.4"
