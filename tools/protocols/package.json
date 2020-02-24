@@ -1,7 +1,7 @@
 {
   "name": "@airswap/protocols",
-  "version": "0.4.2",
-  "description": "JavaScript Protocol Tools for AirSwap Developers",
+  "version": "0.4.3",
+  "description": "Protocol Libraries for AirSwap Developers",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>"
   ],
@@ -23,7 +23,7 @@
     "compile": "yarn clean && tsc -b"
   },
   "dependencies": {
-    "@airswap/constants": "0.3.1",
+    "@airswap/constants": "0.3.2",
     "@airswap/delegate": "2.6.8",
     "@airswap/indexer": "3.6.8",
     "@airswap/swap": "5.4.7",
