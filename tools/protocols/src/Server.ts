@@ -21,7 +21,7 @@ import { parseUrl } from '@airswap/utils'
 import { Quote, Order } from '@airswap/types'
 
 export class Server {
-  private _client: jayson.Client
+  private client: jayson.Client
 
   public constructor(locator: string) {
     const locatorUrl = parseUrl(locator)
@@ -32,9 +32,9 @@ export class Server {
       timeout: REQUEST_TIMEOUT,
     }
     if (options.protocol === 'https:') {
-      this._client = jayson.Client.https(options)
+      this.client = jayson.Client.https(options)
     } else {
-      this._client = jayson.Client.http(options)
+      this.client = jayson.Client.http(options)
     }
   }
 
@@ -135,20 +135,56 @@ export class Server {
     })
   }
 
+  /**
+   * Compare request params to a corresponding result
+   * Request params are camelCase, results are nested.objects
+   */
+  private compare(params: any, result: any): Array<string> {
+    const errors: Array<string> = []
+    for (const param in params) {
+      // Split param name by camelCase
+      const path = param.match(/([a-z]+)|([A-Z][a-z]+)/g)
+      // Only compare values at first or second level
+      // Always lowercase values (address comparison)
+      if (
+        typeof result[path[0]] === 'string' &&
+        result[path[0]].toLowerCase() !== params[param].toLowerCase()
+      ) {
+        errors.push(param)
+      } else if (
+        result[path[0]][path[1].toLowerCase()].toLowerCase() !==
+        params[param].toLowerCase()
+      ) {
+        errors.push(param)
+      }
+    }
+    return errors
+  }
+
   private generateRequest(
     method: string,
     params: Record<string, string>,
     resolve: Function,
     reject: Function
   ): jayson.JSONRPCRequest {
-    return this._client.request(
+    return this.client.request(
       method,
       params,
-      (err: any, error: any, result: any) => {
-        if (err || error) {
-          reject(err || error)
+      (connectionError: any, serverError: any, result: any) => {
+        if (connectionError) {
+          reject({ code: -1, message: connectionError.message })
+        } else if (serverError) {
+          reject(serverError)
         } else {
-          resolve(result)
+          const errors = this.compare(params, result)
+          if (errors.length) {
+            reject({
+              code: -1,
+              message: `Server response differs from request params: ${errors}`,
+            })
+          } else {
+            resolve(result)
+          }
         }
       }
     )
