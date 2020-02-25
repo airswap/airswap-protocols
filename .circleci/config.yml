@@ -173,16 +173,12 @@ jobs:
               ### Check if the local version is beta, otherwise publish normally
               if [[ $LOCAL_VERSION == *"beta"* ]]; then
                 if [[ $LOCAL_VERSION != $NPM_BETA_VERSION ]]; then
-                  echo "Compiling..."
-                  yarn compile
                   echo "Publishing package to NPM with 'beta' tag..."
                   npm publish --tag beta
                   npm access public $NPM_NAME
                 fi
               else
                 if [[ $LOCAL_VERSION != $NPM_VERSION ]]; then
-                  echo "Compiling..."
-                  yarn compile
                   echo "Publishing package to NPM with 'latest' tag..."
                   npm publish
                   npm access public $NPM_NAME
@@ -205,8 +201,6 @@ jobs:
               ### Check if the local version is beta, otherwise publish normally
               if [[ $LOCAL_VERSION == *"beta"* ]]; then
                 if [[ $LOCAL_VERSION != $NPM_BETA_VERSION ]]; then
-                  echo "Compiling..."
-                  yarn compile
                   ### This is where we deploy the package to NPM
                   echo "Publishing package to NPM with 'beta' tag..."
                   npm publish --tag beta
@@ -214,8 +208,6 @@ jobs:
                 fi
               else
                 if [[ $LOCAL_VERSION != $NPM_VERSION ]]; then
-                  echo "Compiling..."
-                  yarn compile
                   ### This is where we deploy the package to NPM
                   echo "Publishing package to NPM with 'latest' tag..."
                   npm publish
