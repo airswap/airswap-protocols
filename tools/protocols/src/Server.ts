@@ -147,13 +147,17 @@ export class Server {
       // Only compare values at first or second level
       // Always lowercase values (address comparison)
       if (
+        path[0] &&
         typeof result[path[0]] === 'string' &&
         result[path[0]].toLowerCase() !== params[param].toLowerCase()
       ) {
         errors.push(param)
       } else if (
+        path[1] &&
+        typeof result[path[0]] === 'object' &&
+        typeof result[path[0]][path[1].toLowerCase()] === 'string' &&
         result[path[0]][path[1].toLowerCase()].toLowerCase() !==
-        params[param].toLowerCase()
+          params[param].toLowerCase()
       ) {
         errors.push(param)
       }
