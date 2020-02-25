@@ -96,3 +96,24 @@ export function parseUrl(locator: string): url.UrlWithStringQuery {
 export function getEtherscanURL(chainId: string, hash: string) {
   return `https://${etherscanDomains[chainId]}/tx/${hash}`
 }
+
+function flattenRecurse(obj, propName, result) {
+  if (Object(obj) !== obj) {
+    result[propName] = obj
+  } else {
+    for (const prop in obj) {
+      flattenRecurse(
+        obj[prop],
+        propName
+          ? propName + prop.charAt(0).toUpperCase() + prop.slice(1)
+          : prop,
+        result
+      )
+    }
+  }
+  return result
+}
+
+export function flattenObject(obj: any) {
+  return flattenRecurse(obj, '', {})
+}

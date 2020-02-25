@@ -17,7 +17,7 @@
 import * as jayson from 'jayson'
 import { BigNumber } from 'ethers/utils'
 import { REQUEST_TIMEOUT } from '@airswap/constants'
-import { parseUrl } from '@airswap/utils'
+import { parseUrl, flattenObject } from '@airswap/utils'
 import { Quote, Order } from '@airswap/types'
 
 export class Server {
@@ -135,29 +135,13 @@ export class Server {
     })
   }
 
-  /**
-   * Compare request params to a corresponding result
-   * Request params are camelCase, results are nested.objects
-   */
   private compare(params: any, result: any): Array<string> {
     const errors: Array<string> = []
+    const flat: any = flattenObject(result)
     for (const param in params) {
-      // Split param name by camelCase
-      const path = param.match(/([a-z]+)|([A-Z][a-z]+)/g)
-      // Only compare values at first or second level
-      // Always lowercase values (address comparison)
       if (
-        path[0] &&
-        typeof result[path[0]] === 'string' &&
-        result[path[0]].toLowerCase() !== params[param].toLowerCase()
-      ) {
-        errors.push(param)
-      } else if (
-        path[1] &&
-        typeof result[path[0]] === 'object' &&
-        typeof result[path[0]][path[1].toLowerCase()] === 'string' &&
-        result[path[0]][path[1].toLowerCase()].toLowerCase() !==
-          params[param].toLowerCase()
+        param in flat &&
+        flat[param].toLowerCase() !== params[param].toLowerCase()
       ) {
         errors.push(param)
       }
