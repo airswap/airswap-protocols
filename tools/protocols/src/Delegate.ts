@@ -148,7 +148,10 @@ export class Delegate {
         .mul(balance)
     }
     if (finalSenderAmount.isZero() || finalSignerAmount.isZero()) {
-      throw new Error('Not quoting for requested amount or token pair')
+      throw {
+        code: -33601,
+        message: 'Not quoting for requested amount or token pair',
+      }
     }
     return {
       timestamp: getTimestamp(),
