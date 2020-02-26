@@ -96,3 +96,20 @@ export function parseUrl(locator: string): url.UrlWithStringQuery {
 export function getEtherscanURL(chainId: string, hash: string) {
   return `https://${etherscanDomains[chainId]}/tx/${hash}`
 }
+
+export function flattenObject(obj: any, propName = '', result = {}) {
+  if (Object(obj) !== obj) {
+    result[propName] = obj
+  } else {
+    for (const prop in obj) {
+      flattenObject(
+        obj[prop],
+        propName
+          ? propName + prop.charAt(0).toUpperCase() + prop.slice(1)
+          : prop,
+        result
+      )
+    }
+  }
+  return result
+}
