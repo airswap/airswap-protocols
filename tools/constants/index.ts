@@ -69,6 +69,11 @@ export const signatureTypes: Record<string, string> = {
   PERSONAL_SIGN: '0x45',
 }
 
+export const wethAddresses: Record<string, string> = {
+  '1': '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+  '4': '0xc778417e063141139fce010982780140aa0cd5ab',
+}
+
 export const stakingTokenAddresses: Record<string, string> = {
   '1': '0x27054b13b1b798b345b591a4d22e6562d47ea75a',
   '4': '0xcc1cbd4f67cceb7c001bd4adf98451237a193ff8',

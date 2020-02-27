@@ -1,6 +1,6 @@
 {
   "name": "@airswap/metadata",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Token Metadata Tools for AirSwap Developers",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>",
@@ -21,15 +21,19 @@
   ],
   "scripts": {
     "clean": "rm -rf ./build",
-    "compile": "tsc -b"
+    "compile": "tsc -b",
+    "test": "mocha -r ts-node/register test/**/*.ts"
   },
   "dependencies": {
+    "@airswap/constants": "0.3.3",
     "@airswap/types": "3.5.9",
     "axios": "^0.19.2",
     "eth-contract-metadata": "^1.12.1",
     "ethers": "^4.0.45"
   },
   "devDependencies": {
+    "mocha": "^7.1.0",
+    "ts-node": "^8.6.2",
     "typescript": "^3.7.5"
   }
 }
