@@ -1,4 +1,5 @@
 import axios from 'axios'
+import * as ethers from 'ethers'
 import contractMap, {
   MetamaskToken,
   MetamaskTokens,
@@ -60,7 +61,7 @@ class TokenMetadata {
         address: token.address,
         decimals: token.decimals,
         symbol: token.symbol,
-        image: `${TRUST_WALLET_IMAGE_API}/${token.address}/logo.png`,
+        image: this.getImageURL(token.address),
       }
     }
 
@@ -139,7 +140,9 @@ class TokenMetadata {
 
   // returns a URL string that may link to an image if one is available in Trust Wallet metadata, else will 404
   public getImageURL(address: string): string {
-    return `${TRUST_WALLET_IMAGE_API}/${address}/logo.png`
+    return `${TRUST_WALLET_IMAGE_API}/${ethers.utils.getAddress(
+      address
+    )}/logo.png`
   }
 
   // this will fail if the token you search isn't present in the Trust Wallet metadata, or if the letter casing doesn't match Trust's metadata
@@ -171,6 +174,7 @@ class TokenMetadata {
       symbol: tokenSymbol,
       address: searchAddress,
       decimals: tokenDecimals,
+      image: this.getImageURL(searchAddress),
     }
 
     this.tokens.push(newToken)
