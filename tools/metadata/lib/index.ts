@@ -10,7 +10,7 @@ import {
   rinkebyTokensByAddress,
 } from './constants'
 
-import { chainIds } from '@airswap/constants'
+import { chainIds, wethAddresses } from '@airswap/constants'
 import { getTokenName, getTokenSymbol, getTokenDecimals } from './helpers'
 
 export interface NormalizedToken {

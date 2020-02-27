@@ -244,19 +244,19 @@ export const ERC20_ABI = [
 ]
 
 export const rinkebyTokensByAddress: Record<string, NormalizedToken> = {
-  DAI: {
+  '0x5592ec0cfb4dbc12d3ab100b257153436a1f0fea': {
     name: 'Dai Stablecoin',
     address: '0x5592ec0cfb4dbc12d3ab100b257153436a1f0fea',
     decimals: 18,
     symbol: 'DAI',
   },
-  WETH: {
+  '0xc778417e063141139fce010982780140aa0cd5ab': {
     name: 'Wrapped Ether',
     address: '0xc778417e063141139fce010982780140aa0cd5ab',
     decimals: 18,
     symbol: 'WETH',
   },
-  AST: {
+  '0xcc1cbd4f67cceb7c001bd4adf98451237a193ff8': {
     name: 'AirSwap Token',
     address: '0xcc1cbd4f67cceb7c001bd4adf98451237a193ff8',
     decimals: 4,
