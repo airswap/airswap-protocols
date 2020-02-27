@@ -1,4 +1,5 @@
 import axios from 'axios'
+import * as ethers from 'ethers'
 import contractMap, {
   MetamaskToken,
   MetamaskTokens,
@@ -60,7 +61,9 @@ class TokenMetadata {
         address: token.address,
         decimals: token.decimals,
         symbol: token.symbol,
-        image: `${TRUST_WALLET_IMAGE_API}/${token.address}/logo.png`,
+        image: `${TRUST_WALLET_IMAGE_API}/${ethers.utils.getAddress(
+          token.address
+        )}/logo.png`,
       }
     }
 
@@ -139,12 +142,14 @@ class TokenMetadata {
 
   // returns a URL string that may link to an image if one is available in Trust Wallet metadata, else will 404
   public getImageURL(address: string): string {
-    return `${TRUST_WALLET_IMAGE_API}/${address}/logo.png`
+    return `${TRUST_WALLET_IMAGE_API}/${ethers.utils.getAddress(
+      address
+    )}/logo.png`
   }
 
   // this will fail if the token you search isn't present in the Trust Wallet metadata, or if the letter casing doesn't match Trust's metadata
   public fetchImageBinaryUnstable = (address: string): Promise<string> => {
-    return axios.get(this.getImageURL(address))
+    return axios.get(this.getImageURL(ethers.utils.getAddress(address)))
   }
 
   // given a token address, try to fetch name, symbol, and decimals from the contract and store it in memory tokens array
