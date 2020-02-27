@@ -1,6 +1,6 @@
 {
   "name": "@airswap/metadata",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Token Metadata Tools for AirSwap Developers",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>",
@@ -15,7 +15,7 @@
     "airswap"
   ],
   "license": "Apache-2.0",
-  "main": "build/index.js",
+  "main": "build/lib/index.js",
   "files": [
     "/build"
   ],
