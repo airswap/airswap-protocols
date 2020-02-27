@@ -61,9 +61,7 @@ class TokenMetadata {
         address: token.address,
         decimals: token.decimals,
         symbol: token.symbol,
-        image: `${TRUST_WALLET_IMAGE_API}/${ethers.utils.getAddress(
-          token.address
-        )}/logo.png`,
+        image: this.getImageURL(token.address),
       }
     }
 
@@ -149,7 +147,7 @@ class TokenMetadata {
 
   // this will fail if the token you search isn't present in the Trust Wallet metadata, or if the letter casing doesn't match Trust's metadata
   public fetchImageBinaryUnstable = (address: string): Promise<string> => {
-    return axios.get(this.getImageURL(ethers.utils.getAddress(address)))
+    return axios.get(this.getImageURL(address))
   }
 
   // given a token address, try to fetch name, symbol, and decimals from the contract and store it in memory tokens array
