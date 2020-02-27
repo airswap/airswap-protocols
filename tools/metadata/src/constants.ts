@@ -1,4 +1,4 @@
-import { NormalizedToken } from './index'
+import { NormalizedToken } from './types'
 
 export const IDEX_TOKEN_API = 'https://api.idex.market/returnCurrencies'
 export const TRUST_WALLET_IMAGE_API =

@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 
-import TokenMetadata from '../lib'
+import TokenMetadata from '..'
 import {
   chainIds,
   wethAddresses,

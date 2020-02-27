@@ -11,5 +11,6 @@
     "sourceMap": true,
     "declaration": true,
     "outDir": "./build"
-  }
+  },
+  "exclude": [ "**/test/" ]
 }

@@ -4,34 +4,16 @@ import contractMap, {
   MetamaskToken,
   MetamaskTokens,
 } from 'eth-contract-metadata'
+import { NormalizedToken, IdexToken, IdexTokens } from './src/types'
 import {
   IDEX_TOKEN_API,
   TRUST_WALLET_IMAGE_API,
   METAMASK_IMAGE_API,
   rinkebyTokensByAddress,
-} from './constants'
+} from './src/constants'
 
 import { chainIds } from '@airswap/constants'
-import { getTokenName, getTokenSymbol, getTokenDecimals } from './helpers'
-
-export interface NormalizedToken {
-  name: string
-  address: string
-  symbol: string
-  decimals: number
-  image?: string
-}
-
-interface IdexToken {
-  name: string
-  decimals: number
-  address: string
-  slug: string
-}
-
-interface IdexTokens {
-  [symbol: string]: IdexToken
-}
+import { getTokenName, getTokenSymbol, getTokenDecimals } from './src/helpers'
 
 class TokenMetadata {
   public chainId: string

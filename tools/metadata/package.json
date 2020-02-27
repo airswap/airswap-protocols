@@ -15,7 +15,7 @@
     "airswap"
   ],
   "license": "Apache-2.0",
-  "main": "build/lib/index.js",
+  "main": "build/index.js",
   "files": [
     "/build"
   ],
