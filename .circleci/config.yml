@@ -264,9 +264,9 @@ workflows:
           requires:
             - setup
       - metadata_tests:
-        context: Development
-        requires:
-          - setup
+          context: Development
+          requires:
+            - setup
       - order_utils_tests:
           context: Development
           requires:
