@@ -33,19 +33,19 @@ interface IdexTokens {
 }
 
 class TokenMetadata {
-  public tokens: NormalizedToken[]
-  public tokensByAddress: { [address: string]: NormalizedToken }
-  public ready: Promise<NormalizedToken[]>
   public chainId: string
+  public ready: Promise<NormalizedToken[]>
+  private tokens: NormalizedToken[]
+  private tokensByAddress: { [address: string]: NormalizedToken }
 
-  public constructor(chainId = '1') {
+  public constructor(chainId = chainIds.MAINNET) {
     this.chainId = String(chainId)
     this.tokens = []
     this.tokensByAddress = {}
-    this.ready = this.init()
+    this.ready = this.fetchKnownTokens()
   }
 
-  public init = async () => {
+  public async fetchKnownTokens(): Promise<Array<NormalizedToken>> {
     if (this.chainId === chainIds.RINKEBY) {
       this.tokensByAddress = rinkebyTokensByAddress
       this.tokens = Object.values(this.tokensByAddress)
@@ -87,7 +87,11 @@ class TokenMetadata {
       .map(([address, data]) => {
         // keep a hash map to give us O(1) lookup later
         metamaskTokenHashMap[address.toLowerCase()] = true
-        return { ...data, address: address.toLowerCase() }
+        const token: MetamaskToken = Object.assign(
+          { address: address.toLowerCase() },
+          data
+        )
+        return token
       })
       .filter(
         contract => !!contract.erc20 && typeof contract.decimals === 'number'
@@ -124,15 +128,19 @@ class TokenMetadata {
   }
 
   // get token objects in an array
-  public getTokens = (): NormalizedToken[] => this.tokens
+  public getTokens(): NormalizedToken[] {
+    return this.tokens
+  }
 
   // get token objects in an object keyed by address
-  public getTokensByAddress = (): { [address: string]: NormalizedToken } =>
-    this.tokensByAddress
+  public getTokensByAddress(): { [address: string]: NormalizedToken } {
+    return this.tokensByAddress
+  }
 
   // returns a URL string that may link to an image if one is available in Trust Wallet metadata, else will 404
-  public getImageURL = (address: string): string =>
-    `${TRUST_WALLET_IMAGE_API}/${address}/logo.png`
+  public getImageURL(address: string): string {
+    return `${TRUST_WALLET_IMAGE_API}/${address}/logo.png`
+  }
 
   // this will fail if the token you search isn't present in the Trust Wallet metadata, or if the letter casing doesn't match Trust's metadata
   public fetchImageBinaryUnstable = (address: string): Promise<string> => {
@@ -140,7 +148,7 @@ class TokenMetadata {
   }
 
   // given a token address, try to fetch name, symbol, and decimals from the contract and store it in memory tokens array
-  public getToken = async (searchAddress: string): Promise<NormalizedToken> => {
+  public async fetchToken(searchAddress: string): Promise<NormalizedToken> {
     const match = this.tokens.find(
       ({ address }) => address === searchAddress.toLowerCase()
     )
@@ -170,7 +178,7 @@ class TokenMetadata {
     return newToken
   }
 
-  private _storeTokensByAddress = () => {
+  private _storeTokensByAddress() {
     this.tokens.forEach(token => {
       if (
         !Object.prototype.hasOwnProperty.call(

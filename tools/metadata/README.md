@@ -25,7 +25,7 @@ yarn add @airswap/metadata
 Import into your application:
 
 ```TypeScript
-import { TokenMetadata } from '@airswap/metadata';
+import TokenMetadata from '@airswap/metadata';
 ```
 
 ## Commands

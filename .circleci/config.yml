@@ -127,6 +127,16 @@ jobs:
             yarn ganache > /dev/null &
             cd source/wrapper && yarn test
 
+  metadata_tests:
+    <<: *container_config
+    steps:
+      - attach_workspace:
+          at: *working_directory
+      - run:
+          name: Run Tests
+          command: |
+            cd tools/metadata && yarn test
+
   order_utils_tests:
     <<: *container_config
     steps:
@@ -253,6 +263,10 @@ workflows:
           context: Development
           requires:
             - setup
+      - metadata_tests:
+        context: Development
+        requires:
+          - setup
       - order_utils_tests:
           context: Development
           requires:
@@ -270,6 +284,7 @@ workflows:
             - transfers_tests
             - types_tests
             - wrapper_tests
+            - metadata_tests
             - order_utils_tests
             - utils_tests
           filters:
