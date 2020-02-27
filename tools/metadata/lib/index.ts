@@ -174,6 +174,7 @@ class TokenMetadata {
       symbol: tokenSymbol,
       address: searchAddress,
       decimals: tokenDecimals,
+      image: this.getImageURL(searchAddress),
     }
 
     this.tokens.push(newToken)
