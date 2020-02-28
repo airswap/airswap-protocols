@@ -4,6 +4,7 @@ declare module 'eth-contract-metadata' {
     logo?: string
     erc20?: boolean
     decimals?: number
+    address?: string
     symbol: string
   }
 

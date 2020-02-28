@@ -1,10 +1,11 @@
 import { expect } from 'chai'
 
-import TokenMetadata from '../lib'
+import TokenMetadata from '..'
 import {
   chainIds,
   wethAddresses,
   stakingTokenAddresses,
+  ADDRESS_ZERO,
 } from '@airswap/constants'
 
 describe('Metadata: Mainnet', async () => {
@@ -13,6 +14,10 @@ describe('Metadata: Mainnet', async () => {
   it('fetches all known tokens', async () => {
     const tokens = await metadata.fetchKnownTokens()
     expect(tokens.length).to.not.equal(0)
+  })
+  it('checks that ETH does not exist', async () => {
+    const byAddress = metadata.getTokensByAddress()
+    expect(byAddress[ADDRESS_ZERO]).to.be.undefined
   })
   it('checks that WETH exists', async () => {
     const byAddress = metadata.getTokensByAddress()
@@ -32,6 +37,10 @@ describe('Metadata: Rinkeby', async () => {
     metadata.fetchKnownTokens().then(tokens => {
       expect(tokens.length).to.not.equal(0)
     })
+  })
+  it('checks that ETH does not exist', async () => {
+    const byAddress = metadata.getTokensByAddress()
+    expect(byAddress[ADDRESS_ZERO]).to.be.undefined
   })
   it('checks that WETH exists', async () => {
     const byAddress = metadata.getTokensByAddress()

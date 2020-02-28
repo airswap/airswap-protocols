@@ -1,6 +1,6 @@
 {
   "name": "@airswap/metadata",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Token Metadata Tools for AirSwap Developers",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>",
@@ -15,14 +15,14 @@
     "airswap"
   ],
   "license": "Apache-2.0",
-  "main": "build/lib/index.js",
+  "main": "build/index.js",
   "files": [
     "/build"
   ],
   "scripts": {
     "clean": "rm -rf ./build",
     "compile": "tsc -b",
-    "test": "mocha -r ts-node/register test/**/*.ts"
+    "test": "yarn clean && mocha -r ts-node/register test/**/*.ts"
   },
   "dependencies": {
     "@airswap/constants": "0.3.3",
