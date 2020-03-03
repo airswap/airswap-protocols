@@ -17,7 +17,7 @@ module.exports = {
     let index = balances.length
     while (index--) {
       // length 3 is for ERC1155 [token, id, amount]
-      if (balances[index].length == 3) {
+      if (balances[index].length === 3) {
         if (
           (
             await balances[index][0].balanceOf(account, balances[index][1])

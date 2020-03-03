@@ -117,7 +117,7 @@ export function hasValidSignature(order) {
   const signingAddress = ethUtil.bufferToHex(
     ethUtil.pubToAddress(signingPubKey)
   )
-  return signingAddress.toLowerCase() == signature['signatory']
+  return signingAddress.toLowerCase() === signature['signatory']
 }
 
 export function isValidOrder(order: Order): boolean {
