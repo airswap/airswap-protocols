@@ -137,6 +137,6 @@ module.exports = {
     const signingAddress = ethUtil.bufferToHex(
       ethUtil.pubToAddress(signingPubKey)
     )
-    return signingAddress.toLowerCase() == signature['signatory']
+    return signingAddress.toLowerCase() === signature['signatory']
   },
 }

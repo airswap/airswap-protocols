@@ -113,3 +113,15 @@ export function flattenObject(obj: any, propName = '', result = {}) {
   }
   return result
 }
+
+export function lowerCaseAddresses(obj: any): any {
+  for (const key in obj) {
+    if (typeof obj[key] === 'object') {
+      lowerCaseAddresses(obj[key])
+    }
+    if (typeof obj[key] === 'string' && obj[key].indexOf('0x') === 0) {
+      obj[key] = obj[key].toLowerCase()
+    }
+  }
+  return obj
+}

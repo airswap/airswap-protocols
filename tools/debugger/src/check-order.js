@@ -60,7 +60,7 @@ const checkERC20Transfer = async (order, partyName, provider, errors) => {
   const party = order[partyName]
 
   // If this is the affiliate, tokens come from the signer instead
-  if (partyName == 'affiliate') {
+  if (partyName === 'affiliate') {
     party['wallet'] = order['signer']['wallet']
   }
 
@@ -121,7 +121,7 @@ const checkERC721Transfer = async (order, partyName, provider, errors) => {
     }
   })
 
-  if (party['kind'] == ERC721_INTERFACE_ID) {
+  if (party['kind'] === ERC721_INTERFACE_ID) {
     // check normal erc721 approval
     await tokenContract.getApproved(party['id']).then(operator => {
       if (operator !== order['signature']['validator']) {
@@ -156,7 +156,7 @@ const checkERC721Transfer = async (order, partyName, provider, errors) => {
         '0x00'
       )
     } catch (error) {
-      if (error.code == 'CALL_EXCEPTION') {
+      if (error.code === 'CALL_EXCEPTION') {
         errors.push(`${recipient} is not configured to receive NFTs`)
       }
     }
@@ -230,7 +230,7 @@ const checkERC1155Transfer = async (order, partyName, provider, errors) => {
         '0x00'
       )
     } catch (error) {
-      if (error.code == 'CALL_EXCEPTION') {
+      if (error.code === 'CALL_EXCEPTION') {
         errors.push(`${recipient} is not configured to receive ERC1155s`)
       }
     }
@@ -264,7 +264,7 @@ const checkNonce = async (swapAddress, signer, nonce, provider, errors) => {
 
   // check not cancelled
   await swapContract.signerNonceStatus(signer, nonce).then(status => {
-    if (status == '0x01') {
+    if (status === '0x01') {
       errors.push(`Nonce taken or cancelled`)
     }
   })
@@ -289,7 +289,7 @@ const checkOrder = async (order, network) => {
   }
 
   // Check swap address provided
-  if (order['signature']['validator'] == EMPTY_ADDRESS) {
+  if (order['signature']['validator'] === EMPTY_ADDRESS) {
     errors.push('Order.signature.validator cannot be 0')
   }
 

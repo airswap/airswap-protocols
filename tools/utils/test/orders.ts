@@ -1,12 +1,28 @@
 import { expect } from 'chai'
+import { getTestWallet } from '@airswap/test-utils'
+import { ADDRESS_ZERO } from '@airswap/constants'
 
 import {
   createOrder,
+  signOrder,
+  isValidOrder,
   getBestByLowestSenderAmount,
   getBestByHighestSignerAmount,
 } from '../index'
 
+const wallet = getTestWallet()
+
 describe('Orders', async () => {
+  it('Creates and validates an order', async () => {
+    const unsignedOrder = createOrder({
+      signer: {
+        wallet: wallet.address,
+      },
+    })
+    const order = await signOrder(unsignedOrder, wallet, ADDRESS_ZERO)
+    expect(isValidOrder(order)).to.equal(true)
+  })
+
   it('Best by lowest sender', async () => {
     const orders = []
     let count = 5

@@ -17,7 +17,12 @@
 import * as jayson from 'jayson'
 import { BigNumber } from 'ethers/utils'
 import { REQUEST_TIMEOUT } from '@airswap/constants'
-import { parseUrl, flattenObject } from '@airswap/utils'
+import {
+  parseUrl,
+  flattenObject,
+  isValidOrder,
+  isValidQuote,
+} from '@airswap/utils'
 import { Quote, Order } from '@airswap/types'
 
 export class Server {
@@ -171,7 +176,26 @@ export class Server {
               message: `Server response differs from request params: ${errors}`,
             })
           } else {
-            resolve(result)
+            if (method.indexOf('Quote') !== -1 && !isValidQuote(result)) {
+              reject({
+                code: -1,
+                message: `Server response is not a valid quote: ${JSON.stringify(
+                  result
+                )}`,
+              })
+            } else if (
+              method.indexOf('Order') !== -1 &&
+              !isValidOrder(result)
+            ) {
+              reject({
+                code: -1,
+                message: `Server response is not a valid order: ${JSON.stringify(
+                  result
+                )}`,
+              })
+            } else {
+              resolve(result)
+            }
           }
         }
       }
