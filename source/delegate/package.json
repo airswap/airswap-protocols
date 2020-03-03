@@ -28,7 +28,7 @@
   },
   "devDependencies": {
     "@airswap/order-utils": "0.3.20",
-    "@airswap/test-utils": "0.1.4",
+    "@airswap/test-utils": "0.1.5",
     "@airswap/transfers": "1.1.2",
     "solidity-coverage": "^0.6.3"
   },

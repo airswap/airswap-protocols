@@ -147,6 +147,16 @@ jobs:
           command: |
             cd tools/order-utils && yarn test
 
+  protocols_tests:
+    <<: *container_config
+    steps:
+      - attach_workspace:
+          at: *working_directory
+      - run:
+          name: Run Tests
+          command: |
+            cd tools/protocols && yarn test
+
   utils_tests:
     <<: *container_config
     steps:
@@ -271,6 +281,10 @@ workflows:
           context: Development
           requires:
             - setup
+      - protocols_tests:
+          context: Development
+          requires:
+            - setup
       - utils_tests:
           context: Development
           requires:
@@ -286,6 +300,7 @@ workflows:
             - wrapper_tests
             - metadata_tests
             - order_utils_tests
+            - protocols_tests
             - utils_tests
           filters:
             branches:
