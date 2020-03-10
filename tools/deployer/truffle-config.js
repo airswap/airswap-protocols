@@ -30,6 +30,26 @@ module.exports = {
       gas: 5898551,
       gasPrice: 1400000000, // CHECK THE CURRENT GASPRICE
     },
+    goerli: {
+      provider: () =>
+        new HDWalletProvider(
+          process.env.MNEMONIC,
+          'https://goerli.infura.io/v3/' + process.env.INFURA_API_KEY
+        ),
+      network_id: 5,
+      gas: 5898551,
+      gasPrice: 1000000000, // CHECK THE CURRENT GASPRICE
+    },
+    kovan: {
+      provider: () =>
+        new HDWalletProvider(
+          process.env.MNEMONIC,
+          'https://kovan.infura.io/v3/' + process.env.INFURA_API_KEY
+        ),
+      network_id: 42,
+      gas: 5898551,
+      gasPrice: 1000000000, // CHECK THE CURRENT GASPRICE
+    },
   },
 
   // Set default mocha options here, use special reporters etc.
