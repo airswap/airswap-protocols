@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { getTestWallet } from '@airswap/test-utils'
+import { functions } from '@airswap/test-utils'
 import { ADDRESS_ZERO } from '@airswap/constants'
 
 import {
@@ -10,7 +10,7 @@ import {
   getBestByHighestSignerAmount,
 } from '../index'
 
-const wallet = getTestWallet()
+const wallet = functions.getTestWallet()
 
 describe('Orders', async () => {
   it('Creates and validates an order', async () => {

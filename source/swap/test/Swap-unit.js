@@ -10,7 +10,7 @@ const {
   equal,
 } = require('@airswap/test-utils').assert
 const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
-const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
+const { ADDRESS_ZERO } = require('@airswap/constants')
 
 const NONCE_AVAILABLE = 0x00
 const NONCE_UNAVAILABLE = 0x01
@@ -50,20 +50,20 @@ contract('Swap Unit Tests', async accounts => {
 
   describe('Test swap', async () => {
     it('test when order is expired', async () => {
-      const signer = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200, 0]
-      const sender = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200, 0]
-      const affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200, 0]
-      const signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, v, r, s]
+      const signer = [kind, ADDRESS_ZERO, ADDRESS_ZERO, 200, 0]
+      const sender = [kind, ADDRESS_ZERO, ADDRESS_ZERO, 200, 0]
+      const affiliate = [kind, ADDRESS_ZERO, ADDRESS_ZERO, 200, 0]
+      const signature = [ADDRESS_ZERO, ADDRESS_ZERO, ver, v, r, s]
       const order = [0, 0, signer, sender, affiliate, signature]
 
       await reverted(swap.swap(order), 'ORDER_EXPIRED')
     })
 
     it('test when order nonce is too low', async () => {
-      const signer = [kind, mockSigner, EMPTY_ADDRESS, 200, 0]
-      const sender = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200, 0]
-      const affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200, 0]
-      const signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, v, r, s]
+      const signer = [kind, mockSigner, ADDRESS_ZERO, 200, 0]
+      const sender = [kind, ADDRESS_ZERO, ADDRESS_ZERO, 200, 0]
+      const affiliate = [kind, ADDRESS_ZERO, ADDRESS_ZERO, 200, 0]
+      const signature = [ADDRESS_ZERO, ADDRESS_ZERO, ver, v, r, s]
       const order = [
         0,
         Jun_06_2017T00_00_00_UTC,
@@ -78,10 +78,10 @@ contract('Swap Unit Tests', async accounts => {
     })
 
     it('test when sender is provided, and the sender is unauthorized', async () => {
-      const signer = [kind, mockSigner, EMPTY_ADDRESS, 200, 0]
-      const sender = [kind, mockSender, EMPTY_ADDRESS, 200, 0]
-      const affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200, 0]
-      const signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, v, r, s]
+      const signer = [kind, mockSigner, ADDRESS_ZERO, 200, 0]
+      const sender = [kind, mockSender, ADDRESS_ZERO, 200, 0]
+      const affiliate = [kind, ADDRESS_ZERO, ADDRESS_ZERO, 200, 0]
+      const signature = [ADDRESS_ZERO, ADDRESS_ZERO, ver, v, r, s]
       const order = [
         0,
         Jun_06_2017T00_00_00_UTC,
@@ -95,10 +95,10 @@ contract('Swap Unit Tests', async accounts => {
     })
 
     it('test when sender is provided, the sender is authorized, the signature.v is 0, and the signer wallet is unauthorized', async () => {
-      const signer = [kind, mockSigner, EMPTY_ADDRESS, 200, 0]
-      const sender = [kind, mockSender, EMPTY_ADDRESS, 200, 0]
-      const affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 200, 0]
-      const signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, 0, r, s]
+      const signer = [kind, mockSigner, ADDRESS_ZERO, 200, 0]
+      const sender = [kind, mockSender, ADDRESS_ZERO, 200, 0]
+      const affiliate = [kind, ADDRESS_ZERO, ADDRESS_ZERO, 200, 0]
+      const signature = [ADDRESS_ZERO, ADDRESS_ZERO, ver, 0, r, s]
       const order = [
         0,
         Jun_06_2017T00_00_00_UTC,
@@ -116,10 +116,10 @@ contract('Swap Unit Tests', async accounts => {
     })
 
     it('test swap when sender and signer are the same', async () => {
-      const signer = [kind, mockSender, EMPTY_ADDRESS, 200, 0]
-      const sender = [kind, mockSender, EMPTY_ADDRESS, 200, 0]
-      const affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 0, 0]
-      const signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, 0, r, s]
+      const signer = [kind, mockSender, ADDRESS_ZERO, 200, 0]
+      const sender = [kind, mockSender, ADDRESS_ZERO, 200, 0]
+      const affiliate = [kind, ADDRESS_ZERO, ADDRESS_ZERO, 0, 0]
+      const signature = [ADDRESS_ZERO, ADDRESS_ZERO, ver, 0, r, s]
       const order = [
         0,
         Jun_06_2017T00_00_00_UTC,
@@ -141,7 +141,7 @@ contract('Swap Unit Tests', async accounts => {
       const transferHandlerRegistryTemplate = await TransferHandlerRegistry.new()
 
       const handler_transferTokens = handlerTemplate.contract.methods
-        .transferTokens(EMPTY_ADDRESS, EMPTY_ADDRESS, 0, 0, EMPTY_ADDRESS)
+        .transferTokens(ADDRESS_ZERO, ADDRESS_ZERO, 0, 0, ADDRESS_ZERO)
         .encodeABI()
 
       const registry_transferHandlers = transferHandlerRegistryTemplate.contract.methods
@@ -155,10 +155,10 @@ contract('Swap Unit Tests', async accounts => {
 
       await handlerTemplateMock.givenMethodRevert(handler_transferTokens)
 
-      const signer = [kind, mockSigner, EMPTY_ADDRESS, 200, 0]
-      const sender = [kind, mockSender, EMPTY_ADDRESS, 200, 0]
-      const affiliate = [kind, EMPTY_ADDRESS, EMPTY_ADDRESS, 0, 0]
-      const signature = [EMPTY_ADDRESS, EMPTY_ADDRESS, ver, 0, r, s]
+      const signer = [kind, mockSigner, ADDRESS_ZERO, 200, 0]
+      const sender = [kind, mockSender, ADDRESS_ZERO, 200, 0]
+      const affiliate = [kind, ADDRESS_ZERO, ADDRESS_ZERO, 0, 0]
+      const signature = [ADDRESS_ZERO, ADDRESS_ZERO, ver, 0, r, s]
       const order = [
         0,
         Jun_06_2017T00_00_00_UTC,
