@@ -1,6 +1,6 @@
 {
   "name": "@airswap/debugger",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "JavaScript utilities for debugging an order",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>",
@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "@airswap/order-utils": "0.3.20",
-    "@airswap/swap": "5.4.7",
+    "@airswap/swap": "5.4.8",
     "@airswap/tokens": "0.1.4",
     "ethers": "^4.0.45"
   }
