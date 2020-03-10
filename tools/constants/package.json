@@ -19,8 +19,8 @@
     "/build"
   ],
   "scripts": {
-    "clean": "rm -rf ./build",
-    "compile": "yarn clean && tsc -b"
+    "clean": "rm -rf ./build/**/*",
+    "compile": "yarn clean; tsc -b"
   },
   "dependencies": {
     "@airswap/types": "3.5.10"
