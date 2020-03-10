@@ -16,7 +16,7 @@ const { createOrder, signOrder } = require('@airswap/utils')
 const { tokenKinds } = require('@airswap/constants')
 
 const {
-  GANACHE_PROVIDER,
+  constants: { GANACHE_PROVIDER },
   assert: { emitted, reverted, ok, equal },
   balances: { allowances, balances },
 } = require('@airswap/test-utils')

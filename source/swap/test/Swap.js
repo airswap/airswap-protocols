@@ -13,7 +13,7 @@ const {
 } = require('@airswap/constants')
 
 const {
-  GANACHE_PROVIDER,
+  constants: { GANACHE_PROVIDER },
   assert: { emitted, reverted, notEmitted, ok, equal },
   balances: { allowances, balances },
   functions: { getTestWallet, getTypedDataSignature },
