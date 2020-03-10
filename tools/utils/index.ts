@@ -118,9 +118,10 @@ export function lowerCaseAddresses(obj: any): any {
   for (const key in obj) {
     if (typeof obj[key] === 'object') {
       lowerCaseAddresses(obj[key])
-    }
-    if (typeof obj[key] === 'string' && obj[key].indexOf('0x') === 0) {
+    } else if (typeof obj[key] === 'string' && obj[key].indexOf('0x') === 0) {
       obj[key] = obj[key].toLowerCase()
+    } else {
+      obj[key] = obj[key].toString()
     }
   }
   return obj

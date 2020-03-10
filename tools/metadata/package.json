@@ -21,8 +21,8 @@
   ],
   "scripts": {
     "clean": "rm -rf ./build",
-    "compile": "tsc -b",
-    "test": "yarn clean && mocha -r ts-node/register test/**/*.ts"
+    "compile": "yarn clean; tsc -b",
+    "test": "yarn compile; mocha -r ts-node/register test/**/*.ts"
   },
   "dependencies": {
     "@airswap/constants": "0.3.5",
