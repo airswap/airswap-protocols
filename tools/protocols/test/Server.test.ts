@@ -3,13 +3,13 @@ import { expect } from 'chai'
 
 import { createQuote, createOrder, signOrder } from '@airswap/utils'
 import { emptySignature, ADDRESS_ZERO } from '@airswap/constants'
-import { getTestWallet } from '@airswap/test-utils'
+import { functions } from '@airswap/test-utils'
 
 import { Server } from '..'
 
 const badQuote = { bad: 'quote' }
 const emptyQuote = createQuote({})
-const wallet = getTestWallet()
+const wallet = functions.getTestWallet()
 
 function mockServer(api) {
   api.post('/').reply(200, async (uri, body) => {
