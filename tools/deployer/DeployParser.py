@@ -1,4 +1,5 @@
 import json
+import argparse
 
 MIGRATION_SUB_IDX = 17
 CHAIN_ID = {
@@ -9,13 +10,13 @@ CHAIN_ID = {
     'kovan': '42',
 }
 CONTRACT_DIR = {
-    'Types': '../../../source/types/deploys.json',
-    'DelegateFactory': '../../../source/delegate/deploys.json',
-    'Indexer': '../../../source/indexer/deploys.json',
-    'Swap': '../../../source/swap/deploys.json',
-    'TransferHandlerRegistry': '../../../source/swap/deploys.json',
-    'Validator': '../../../source/validator/deploys.json',
-    'Wrapper': '../../../source/wrapper/deploys.json'
+    'Types': '../../source/types/deploys.json',
+    'DelegateFactory': '../../source/delegate/deploys.json',
+    'Indexer': '../../source/indexer/deploys.json',
+    'Swap': '../../source/swap/deploys.json',
+    'TransferHandlerRegistry': '../../source/swap/deploys.json',
+    'Validator': '../../source/validator/deploys.json',
+    'Wrapper': '../../source/wrapper/deploys.json'
 }
 
 
@@ -58,4 +59,7 @@ def parse(file_input):
 
 
 if __name__ == "__main__":
-    parse("input.txt")
+    argument_parser = argparse.ArgumentParser()
+    argument_parser.add_argument("--file", required=True, help="The migration file to parse")
+    args = argument_parser.parse_args()
+    parse(args.file)
