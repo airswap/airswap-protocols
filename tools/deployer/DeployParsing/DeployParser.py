@@ -47,13 +47,14 @@ def parse(file_input):
     for contract_name, deploy_file in CONTRACT_DIR.items():
         print(contract_name)
 
-        with open(deploy_file) as data:
+        with open(deploy_file, "r+") as data:
             lines = data.readlines()
             string = '\n'.join(lines)
             json_obj = json.loads(string)
-            print(json.dumps(json_obj, indent=2))
             json_obj[CHAIN_ID[network]] = deploy_data[contract_name]
-            print(json.dumps(json_obj, indent=2))
+            # jump to beginning of file and write
+            data.seek(0)
+            data.write(json.dumps(json_obj, indent=2))
 
 
 if __name__ == "__main__":
