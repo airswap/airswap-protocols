@@ -1,5 +1,6 @@
 import json
 
+MIGRATION_SUB_IDX = 17
 CHAIN_ID = {
     'development': '-1',
     'mainnet': '1',
@@ -7,7 +8,15 @@ CHAIN_ID = {
     'goerli': '5',
     'kovan': '42',
 }
-MIGRATION_SUB_IDX = 17
+CONTRACT_DIR = {
+    'Types': '',
+    'DelegateFactory': '',
+    'Indexer': '',
+    'Swap': '',
+    'TransferHandlerRegistry': '',
+    'Validator': '',
+    'Wrapper': ''
+}
 
 
 def parse(file_input):
