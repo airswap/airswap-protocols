@@ -13,15 +13,15 @@ CONTRACT_DIR = {
     'DelegateFactory': '../../../source/delegate/deploys.json',
     'Indexer': '../../../source/indexer/deploys.json',
     'Swap': '../../../source/swap/deploys.json',
-    'TransferHandlerRegistry': '',
+    'TransferHandlerRegistry': '../../../source/swap/deploys.json',
     'Validator': '../../../source/validator/deploys.json',
     'Wrapper': '../../../source/wrapper/deploys.json'
 }
 
 
 def parse(file_input):
+    # separate the migration json and regular output
     migration_components = []
-
     with open(file_input) as data:
         for line in data:
             cleaned_line = line.rstrip()
@@ -30,20 +30,30 @@ def parse(file_input):
             else:
                 print(cleaned_line)
 
+    # collect all the new deploy information
+    network = "development"
+    deploy_data = {}
     for component in migration_components:
         json_obj = json.loads(component)
         if json_obj['status'] == 'preMigrate':
             network = json_obj['data']['network']
-            print("Network: " + network + ", " + CHAIN_ID[network])
+            deploy_data[network] = CHAIN_ID[network]
         elif json_obj['status'] == 'deployed':
             contract_name = json_obj['data']['contract']['contractName']
             contract_address = json_obj['data']['contract']['address']
-            print(contract_name + ": " + contract_address)
+            deploy_data[contract_name] = contract_address
 
+    # go through all deploys.json and update them
+    for contract_name, deploy_file in CONTRACT_DIR.items():
+        print(contract_name)
 
-    with open(CONTRACT_DIR['Wrapper']) as data:
-        for line in data:
-            print(line)
+        with open(deploy_file) as data:
+            lines = data.readlines()
+            string = '\n'.join(lines)
+            json_obj = json.loads(string)
+            print(json.dumps(json_obj, indent=2))
+            json_obj[CHAIN_ID[network]] = deploy_data[contract_name]
+            print(json.dumps(json_obj, indent=2))
 
 
 if __name__ == "__main__":
