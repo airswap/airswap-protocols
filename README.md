@@ -26,17 +26,20 @@ Packages are versioned based on deploys. Major versions e.g. `1.x.x` are mainnet
 | [`@airswap/swap`](/source/swap)           | [![npm](https://img.shields.io/npm/v/@airswap/swap)](https://www.npmjs.com/package/@airswap/swap)           | Atomic Swap Between Tokens          |
 | [`@airswap/indexer`](/source/indexer)     | [![npm](https://img.shields.io/npm/v/@airswap/indexer)](https://www.npmjs.com/package/@airswap/indexer)     | Counterparty Discovery with Staking |
 | [`@airswap/delegate`](/source/delegate)   | [![npm](https://img.shields.io/npm/v/@airswap/delegate)](https://www.npmjs.com/package/@airswap/delegate)   | Onchain Trading Delegate            |
+| [`@airswap/validator`](/source/validator) | [![npm](https://img.shields.io/npm/v/@airswap/validator)](https://www.npmjs.com/package/@airswap/validator) | Validation and Pre-Swap Checks      |
+| [`@airswap/wrapper`](/source/wrapper)     | [![npm](https://img.shields.io/npm/v/@airswap/wrapper)](https://www.npmjs.com/package/@airswap/wrapper)     | Use ether for WETH trades           |
 | [`@airswap/types`](/source/types)         | [![npm](https://img.shields.io/npm/v/@airswap/types)](https://www.npmjs.com/package/@airswap/types)         | Types and Hashes                    |
 | [`@airswap/transfers`](/source/transfers) | [![npm](https://img.shields.io/npm/v/@airswap/transfers)](https://www.npmjs.com/package/@airswap/transfers) | Token Transfer Handlers             |
-| [`@airswap/wrapper`](/source/wrapper)     | [![npm](https://img.shields.io/npm/v/@airswap/wrapper)](https://www.npmjs.com/package/@airswap/wrapper)     | Use ether for WETH trades           |
 | [`@airswap/tokens`](/source/tokens)       | [![npm](https://img.shields.io/npm/v/@airswap/tokens)](https://www.npmjs.com/package/@airswap/tokens)       | Ethereum Tokens                     |
 
 ## JavaScript Libraries
 
-| Package                                      | Version                                                                                                         | Description            |
-| :------------------------------------------- | :-------------------------------------------------------------------------------------------------------------- | :--------------------- |
-| [`@airswap/order-utils`](/tools/order-utils) | [![npm](https://img.shields.io/npm/v/@airswap/order-utils)](https://www.npmjs.com/package/@airswap/order-utils) | Create and Sign Orders |
-| [`@airswap/test-utils`](/tools/test-utils)   | [![npm](https://img.shields.io/npm/v/@airswap/test-utils)](https://www.npmjs.com/package/@airswap/test-utils)   | Test Utilities         |
+| Package                                  | Version                                                                                                     | Description           |
+| :--------------------------------------- | :---------------------------------------------------------------------------------------------------------- | :-------------------- |
+| [`@airswap/protocols`](/tools/protocols) | [![npm](https://img.shields.io/npm/v/@airswap/protocols)](https://www.npmjs.com/package/@airswap/protocols) | Protocol Clients      |
+| [`@airswap/utils`](/tools/utils)         | [![npm](https://img.shields.io/npm/v/@airswap/utils)](https://www.npmjs.com/package/@airswap/utils)         | Orders and Signatures |
+| [`@airswap/metadata`](/tools/metadata)   | [![npm](https://img.shields.io/npm/v/@airswap/metadata)](https://www.npmjs.com/package/@airswap/metadata)   | Metadata Management   |
+| [`@airswap/constants`](/tools/constants) | [![npm](https://img.shields.io/npm/v/@airswap/constants)](https://www.npmjs.com/package/@airswap/constants) | Helpful Constants     |
 
 ## Commands
 
