@@ -9,13 +9,13 @@ CHAIN_ID = {
     'kovan': '42',
 }
 CONTRACT_DIR = {
-    'Types': '',
-    'DelegateFactory': '',
-    'Indexer': '',
-    'Swap': '',
+    'Types': '../../../source/types/deploys.json',
+    'DelegateFactory': '../../../source/delegate/deploys.json',
+    'Indexer': '../../../source/indexer/deploys.json',
+    'Swap': '../../../source/swap/deploys.json',
     'TransferHandlerRegistry': '',
-    'Validator': '',
-    'Wrapper': ''
+    'Validator': '../../../source/validator/deploys.json',
+    'Wrapper': '../../../source/wrapper/deploys.json'
 }
 
 
@@ -39,6 +39,11 @@ def parse(file_input):
             contract_name = json_obj['data']['contract']['contractName']
             contract_address = json_obj['data']['contract']['address']
             print(contract_name + ": " + contract_address)
+
+
+    with open(CONTRACT_DIR['Wrapper']) as data:
+        for line in data:
+            print(line)
 
 
 if __name__ == "__main__":
