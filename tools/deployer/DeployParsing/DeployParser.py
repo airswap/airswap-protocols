@@ -13,7 +13,6 @@ class DeployParser:
                 else:
                     print(cleaned_line)
 
-        network = 'development'
         for component in migration_components:
             json_obj = json.loads(component)
             if json_obj['status'] == 'preMigrate':
