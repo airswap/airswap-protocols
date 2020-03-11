@@ -35,9 +35,11 @@ def parse(file_input):
     deploy_data = {}
     for component in migration_components:
         json_obj = json.loads(component)
+        # collect network
         if json_obj['status'] == 'preMigrate':
             network = json_obj['data']['network']
             deploy_data[network] = CHAIN_ID[network]
+        # collect new address for contract on network
         elif json_obj['status'] == 'deployed':
             contract_name = json_obj['data']['contract']['contractName']
             contract_address = json_obj['data']['contract']['address']
@@ -45,8 +47,6 @@ def parse(file_input):
 
     # go through all deploys.json and update them
     for contract_name, deploy_file in CONTRACT_DIR.items():
-        print(contract_name)
-
         with open(deploy_file, "r+") as data:
             lines = data.readlines()
             string = '\n'.join(lines)
