@@ -16,7 +16,6 @@ class DeployParser:
         network = 'development'
         for component in migration_components:
             json_obj = json.loads(component)
-            component_output = json.dumps(json_obj, indent=2)
             if json_obj['status'] == 'preMigrate':
                 network = json_obj['data']['network']
                 print("Network: " + network)
@@ -24,8 +23,6 @@ class DeployParser:
                 contract_name = json_obj['data']['contract']['contractName']
                 contract_address = json_obj['data']['contract']['address']
                 print(contract_name + ": " + contract_address)
-
-
 
 
 if __name__ == "__main__":

@@ -12,3 +12,4 @@ flatten/
 venv
 build
 .vscode/
+.idea/
