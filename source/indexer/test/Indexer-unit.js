@@ -1,6 +1,8 @@
 const Indexer = artifacts.require('Indexer')
 const MockContract = artifacts.require('MockContract')
 const FungibleToken = artifacts.require('FungibleToken')
+
+const { ADDRESS_ZERO, INDEX_HEAD } = require('@airswap/constants')
 const {
   emitted,
   notEmitted,
@@ -9,14 +11,11 @@ const {
   passes,
 } = require('@airswap/test-utils').assert
 const { revertToSnapshot, takeSnapshot } = require('@airswap/test-utils').time
-const {
-  EMPTY_ADDRESS,
-  HEAD,
-  LOCATORS,
-  SCORES,
-  NEXTID,
-} = require('@airswap/order-utils').constants
 const { padAddressToLocator } = require('@airswap/test-utils').padding
+
+const LOCATORS = 0
+const SCORES = 1
+const NEXTID = 2
 
 contract('Indexer Unit Tests', async accounts => {
   const owner = accounts[0]
@@ -28,7 +27,7 @@ contract('Indexer Unit Tests', async accounts => {
   const aliceLocator = padAddressToLocator(aliceAddress)
   const bobLocator = padAddressToLocator(bobAddress)
   const carolLocator = padAddressToLocator(carolAddress)
-  const emptyLocator = padAddressToLocator(EMPTY_ADDRESS)
+  const emptyLocator = padAddressToLocator(ADDRESS_ZERO)
 
   const PROTOCOL_1 = '0x0001'
   const PROTOCOL_2 = '0x0002'
@@ -728,7 +727,7 @@ contract('Indexer Unit Tests', async accounts => {
 
       // mock the token transfer method to fail
       const token_transfer = fungibleTokenTemplate.contract.methods
-        .transfer(EMPTY_ADDRESS, 0)
+        .transfer(ADDRESS_ZERO, 0)
         .encodeABI()
 
       // The token transfer should revert
@@ -749,12 +748,12 @@ contract('Indexer Unit Tests', async accounts => {
         tokenOne,
         tokenTwo,
         PROTOCOL_1,
-        EMPTY_ADDRESS,
+        ADDRESS_ZERO,
         3
       )
       equal(result[LOCATORS].length, 0, 'locators array should be size 0')
       equal(result[SCORES].length, 0, 'scores array should be size 0')
-      equal(result[NEXTID], EMPTY_ADDRESS, 'next identifier should be 0x0')
+      equal(result[NEXTID], ADDRESS_ZERO, 'next identifier should be 0x0')
     })
 
     it('should return blank results if a token is blacklisted', async () => {
@@ -778,12 +777,12 @@ contract('Indexer Unit Tests', async accounts => {
         tokenOne,
         tokenTwo,
         PROTOCOL_1,
-        EMPTY_ADDRESS,
+        ADDRESS_ZERO,
         4
       )
       equal(result[LOCATORS].length, 0, 'locators array should be size 0')
       equal(result[SCORES].length, 0, 'scores array should be size 0')
-      equal(result[NEXTID], EMPTY_ADDRESS, 'next identifier should be 0x0')
+      equal(result[NEXTID], ADDRESS_ZERO, 'next identifier should be 0x0')
     })
 
     it('should otherwise return the intents', async () => {
@@ -822,7 +821,7 @@ contract('Indexer Unit Tests', async accounts => {
         tokenOne,
         tokenTwo,
         PROTOCOL_1,
-        EMPTY_ADDRESS,
+        ADDRESS_ZERO,
         4
       )
 
@@ -836,14 +835,14 @@ contract('Indexer Unit Tests', async accounts => {
       equal(result[SCORES][1], 75, 'score should be carol')
       equal(result[SCORES][2], 50, 'score should be alice')
 
-      equal(result[NEXTID], HEAD, 'next identifier should be the head')
+      equal(result[NEXTID], INDEX_HEAD, 'next identifier should be the head')
 
       // should only get the number specified
       result = await indexer.getLocators.call(
         tokenOne,
         tokenTwo,
         PROTOCOL_1,
-        EMPTY_ADDRESS,
+        ADDRESS_ZERO,
         1
       )
       equal(result[LOCATORS].length, 1, 'locators array should be size 1')
@@ -870,7 +869,7 @@ contract('Indexer Unit Tests', async accounts => {
       equal(result[SCORES][1], 50, 'score should be alice')
       equal(result[SCORES][2], 0, 'score should be empty')
 
-      equal(result[NEXTID], HEAD, 'next identifier should be the head')
+      equal(result[NEXTID], INDEX_HEAD, 'next identifier should be the head')
     })
   })
 

@@ -27,15 +27,17 @@
     "migrate": "yarn cp_migration_flat; truffle migrate --skip-dry-run",
     "verify": "truffle run verify"
   },
-  "devDependencies": {
-    "@airswap/order-utils": "0.3.20",
-    "@airswap/test-utils": "0.1.6",
-    "@airswap/indexer": "3.6.9",
-    "solidity-coverage": "^0.6.3"
-  },
   "dependencies": {
     "@airswap/delegate": "2.6.9",
     "@airswap/swap": "5.4.8",
     "@airswap/tokens": "0.1.4"
+  },
+  "devDependencies": {
+    "@airswap/constants": "0.3.5",
+    "@airswap/indexer": "3.6.9",
+    "@airswap/test-utils": "0.1.6",
+    "@airswap/utils": "0.3.11",
+    "ethers": "^4.0.45",
+    "solidity-coverage": "^0.6.3"
   }
 }
