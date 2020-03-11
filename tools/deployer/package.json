@@ -19,7 +19,8 @@
     "ganache": "ganache-cli -p 8545 --gasLimit 0xfffffffffff --time '2017-05-10T00:00:00+00:00' -s 0",
     "cp_migration_flat": "mkdir -p flatten/; cp contracts/Migrations.sol flatten/",
     "flatten": "truffle run flatten",
-    "migrate": "yarn flatten contracts/Imports.sol && yarn cp_migration_flat && truffle migrate --skip-dry-run",
+    "update_addresses": "python3 -m venv ./venv && source venv/bin/activate && python3 deployParser.py",
+    "migrate": "yarn flatten contracts/Imports.sol && yarn cp_migration_flat && truffle migrate --skip-dry-run --describe-json",
     "verify": "truffle run verify"
   },
   "devDependencies": {
