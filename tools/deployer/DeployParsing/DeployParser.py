@@ -1,5 +1,13 @@
 import json
 
+CHAIN_ID = {
+    'development': '-1',
+    'mainnet': '1',
+    'rinkeby': '4',
+    'goerli': '5',
+    'kovan': '42',
+}
+
 class DeployParser:
 
     def parse(self, file_input):
@@ -17,7 +25,7 @@ class DeployParser:
             json_obj = json.loads(component)
             if json_obj['status'] == 'preMigrate':
                 network = json_obj['data']['network']
-                print("Network: " + network)
+                print("Network: " + network + ", " + CHAIN_ID[network])
             elif json_obj['status'] == 'deployed':
                 contract_name = json_obj['data']['contract']['contractName']
                 contract_address = json_obj['data']['contract']['address']
