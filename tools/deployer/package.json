@@ -15,7 +15,7 @@
   },
   "scripts": {
     "clean": "rm -rf ./build; rm -rf ./flatten",
-    "compile": "truffle compile",
+    "compile": "yarn clean; truffle compile",
     "ganache": "ganache-cli -p 8545 --gasLimit 0xfffffffffff --time '2017-05-10T00:00:00+00:00' -s 0",
     "cp_migration_flat": "mkdir -p flatten/; cp contracts/Migrations.sol flatten/",
     "flatten": "truffle run flatten",
@@ -28,7 +28,7 @@
     "solidity-docgen": "0.3.0-beta.3"
   },
   "dependencies": {
-    "@airswap/types": "3.5.10",
+    "@airswap/types": "3.5.11",
     "@airswap/constants": "0.3.6",
     "openzeppelin-solidity": "2.4"
   }

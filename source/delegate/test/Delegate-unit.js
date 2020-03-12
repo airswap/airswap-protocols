@@ -6,7 +6,8 @@ const MockContract = artifacts.require('MockContract')
 const FungibleToken = artifacts.require('FungibleToken')
 
 const ethers = require('ethers')
-const { emptySignature, ADDRESS_ZERO } = require('@airswap/constants')
+const { ADDRESS_ZERO } = require('@airswap/constants')
+const { emptySignature } = require('@airswap/types')
 const { createOrder, signOrder } = require('@airswap/utils')
 const {
   equal,

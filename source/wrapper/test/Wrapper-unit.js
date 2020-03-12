@@ -13,7 +13,8 @@ const { createOrder, signOrder } = require('@airswap/utils')
 const { equal, reverted, passes } = require('@airswap/test-utils').assert
 const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
 const { GANACHE_PROVIDER } = require('@airswap/test-utils').constants
-const { emptySignature, ADDRESS_ZERO } = require('@airswap/constants')
+const { ADDRESS_ZERO } = require('@airswap/constants')
+const { emptySignature } = require('@airswap/types')
 
 contract('Wrapper Unit Tests', async accounts => {
   const senderAmount = 2

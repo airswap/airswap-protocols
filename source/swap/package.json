@@ -15,13 +15,13 @@
   },
   "scripts": {
     "clean": "rm -rf ./build",
-    "compile": "truffle compile",
+    "compile": "yarn clean; truffle compile",
     "coverage": "node_modules/.bin/solidity-coverage",
     "ganache": "ganache-cli -p 8545 --gasLimit 0xfffffffffff --time '2017-05-10T00:00:00+00:00' -s 0",
     "hint": "yarn solhint \"./contracts/**/*.sol\"",
     "lint": "yarn eslint \"./test/**/*.js\"",
     "cp_migration_flat": "mkdir -p flatten/; cp contracts/Migrations.sol flatten/",
-    "test": "truffle test",
+    "test": "yarn compile; truffle test",
     "flatten": "truffle run flatten",
     "migrate": "yarn cp_migration_flat; truffle migrate --skip-dry-run",
     "verify": "truffle run verify"
@@ -37,7 +37,7 @@
   },
   "dependencies": {
     "@airswap/transfers": "1.1.3",
-    "@airswap/types": "3.5.10",
+    "@airswap/types": "3.5.11",
     "openzeppelin-solidity": "2.4"
   }
 }

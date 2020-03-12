@@ -14,6 +14,13 @@
   limitations under the License.
 */
 
+import {
+  tokenKinds,
+  signatureTypes,
+  ADDRESS_ZERO,
+  LOCATOR_ZERO,
+} from '@airswap/constants'
+
 type RequireAtLeastOne<T, Keys extends keyof T = keyof T> = Pick<
   T,
   Exclude<keyof T, Keys>
@@ -96,4 +103,28 @@ export const EIP712 = {
     { name: 'amount', type: 'uint256' },
     { name: 'id', type: 'uint256' },
   ],
+}
+
+export const emptyQuoteParty: QuoteParty = {
+  kind: tokenKinds.ERC20,
+  token: ADDRESS_ZERO,
+  amount: '0',
+  id: '0',
+}
+
+export const emptyOrderParty: OrderParty = {
+  kind: tokenKinds.ERC20,
+  wallet: ADDRESS_ZERO,
+  token: ADDRESS_ZERO,
+  amount: '0',
+  id: '0',
+}
+
+export const emptySignature: Signature = {
+  version: signatureTypes.PERSONAL_SIGN,
+  signatory: ADDRESS_ZERO,
+  validator: ADDRESS_ZERO,
+  r: LOCATOR_ZERO,
+  s: LOCATOR_ZERO,
+  v: '0',
 }

@@ -1,11 +1,8 @@
 const Types = artifacts.require('../contracts/Types')
 const MockTypes = artifacts.require('MockTypes')
 const { equal } = require('@airswap/test-utils').assert
-const {
-  emptySignature,
-  DOMAIN_NAME,
-  DOMAIN_VERSION,
-} = require('@airswap/constants')
+const { DOMAIN_NAME, DOMAIN_VERSION } = require('@airswap/constants')
+const { emptySignature } = require('..')
 
 const { createOrder, hashDomain, getOrderHash } = require('@airswap/utils')
 

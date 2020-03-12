@@ -16,13 +16,14 @@
 
 import * as ethUtil from 'ethereumjs-util'
 import { ethers } from 'ethers'
+import { signatureTypes, SECONDS_IN_DAY, tokenKinds } from '@airswap/constants'
 import {
+  Quote,
+  UnsignedOrder,
+  Order,
+  Signature,
   emptyOrderParty,
-  signatureTypes,
-  SECONDS_IN_DAY,
-  tokenKinds,
-} from '@airswap/constants'
-import { Quote, UnsignedOrder, Order, Signature } from '@airswap/types'
+} from '@airswap/types'
 import { getOrderHash } from './hashes'
 import { lowerCaseAddresses } from '..'
 

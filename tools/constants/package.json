@@ -22,9 +22,7 @@
     "clean": "rm -rf ./build",
     "compile": "yarn clean; tsc -b"
   },
-  "dependencies": {
-    "@airswap/types": "3.5.10"
-  },
+  "dependencies": {},
   "devDependencies": {
     "typescript": "^3.8.2"
   }

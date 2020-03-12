@@ -15,9 +15,8 @@
 */
 
 import { BigNumber, bigNumberify } from 'ethers/utils'
-import { Quote } from '@airswap/types'
+import { Quote, emptyQuoteParty } from '@airswap/types'
 import { lowerCaseAddresses } from '..'
-import { emptyQuoteParty } from '@airswap/constants'
 
 export function createQuote({ signer = {}, sender = {} }): Quote {
   return lowerCaseAddresses({
