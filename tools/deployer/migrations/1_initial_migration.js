@@ -13,6 +13,7 @@ const Index = artifacts.require('Index');
 const DelegateFactory = artifacts.require('DelegateFactory');
 const Delegate = artifacts.require('Delegate');
 const Validator = artifacts.require('Validator');
+const fs = require('fs')
 
 const {
   CK_INTERFACE_ID,
@@ -23,21 +24,21 @@ const {
 } = require('@airswap/order-utils').constants
 
 CHAIN_ID = {
-    'development': '-1',
-    'mainnet': '1',
-    'rinkeby': '4',
-    'goerli': '5',
-    'kovan': '42',
+    'DEVELOPMENT': '0',
+    'MAINNET': '1',
+    'RINKEBY': '4',
+    'GOERLI': '5',
+    'KOVAN': '42',
 }
 
 CONTRACT_DIR = {
-    'Types': '../../source/types/deploys.json',
-    'DelegateFactory': '../../source/delegate/deploys.json',
-    'Indexer': '../../source/indexer/deploys.json',
-    'Swap': '../../source/swap/deploys.json',
-    'TransferHandlerRegistry': '../../source/swap/deploys.json',
-    'Validator': '../../source/validator/deploys.json',
-    'Wrapper': '../../source/wrapper/deploys.json'
+    'Types': '../../../source/types/deploys.json',
+    'DelegateFactory': '../../../source/delegate/deploys.json',
+    'Indexer': '../../../source/indexer/deploys.json',
+    'Swap': '../../../source/swap/deploys.json',
+    'TransferHandlerRegistry': '../../../source/swap/deploys.json',
+    'Validator': '../../../source/validator/deploys.json',
+    'Wrapper': '../../../source/wrapper/deploys.json'
 }
 
 module.exports = async(deployer, network) => {
@@ -78,5 +79,27 @@ module.exports = async(deployer, network) => {
   if (network !== "DEVELOPMENT") {
     await deployer.deploy(Index)
     await deployer.deploy(Delegate, Swap.address, Indexer.address, EMPTY_ADDRESS, EMPTY_ADDRESS, '0x0001')
+  }
+
+  // Update deploys.jsons
+  let deploy_data = {}
+  deploy_data['Types'] = Types.address
+  deploy_data['TransferHandlerRegistry'] = TransferHandlerRegistry.address
+  deploy_data['Swap'] = Swap.address
+  deploy_data['Indexer'] = Indexer.address
+  deploy_data['DelegateFactory'] = DelegateFactory.address
+  deploy_data['Wrapper'] = Wrapper.address
+  deploy_data['Validator'] = Validator.address
+
+  for (let [contract_name, file_path] of Object.entries(CONTRACT_DIR)) {
+    // go through all deploys json and update them
+    address_json = require(file_path) 
+    console.log(address_json)
+    address_json[CHAIN_ID[network]] = deploy_data[contract_name]
+    console.log(address_json)
+    address_json_string = JSON.stringify(address_json, null, '  ')
+    fs.writeFileSync(file_path, address_json_string, (err) => {
+      if (err) throw err
+    })
   }
 };
