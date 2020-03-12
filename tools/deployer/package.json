@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "@airswap/types": "3.5.10",
+    "@airswap/constants": "0.3.5",
     "openzeppelin-solidity": "2.4"
   }
 }

@@ -12,9 +12,9 @@ const Index = artifacts.require('Index')
 const DelegateFactory = artifacts.require('DelegateFactory')
 const Delegate = artifacts.require('Delegate')
 const Validator = artifacts.require('Validator')
+const { ADDRESS_ZERO, tokenKinds } = require('@airswap/constants')
 const fs = require('fs')
 
-const { ADDRESS_ZERO, tokenKinds } = require('@airswap/constants')
 
 CHAIN_ID = {
     'DEVELOPMENT': '0',
