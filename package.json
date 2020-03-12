@@ -17,7 +17,8 @@
     "clean": "lerna run clean",
     "compile": "lerna run compile",
     "hint": "yarn solhint \"./source/**/*.sol\"",
-    "lint": "yarn eslint . --ext .js,.ts",
+    "lint:check": "yarn eslint . --ext .js,.ts",
+    "lint:fix": "yarn eslint . --ext .js,.ts --fix",
     "ganache": "ganache-cli -p 8545 --gasLimit 0xfffffffffff --time '2017-05-10T00:00:00+00:00' -s 0",
     "publish": "lerna publish",
     "test": "yarn clean && yarn compile && lerna run test --concurrency=1",
@@ -51,7 +52,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "yarn lint && yarn hint && yarn deps"
+      "pre-commit": "yarn deps && yarn hint && yarn lint:check && yarn pretty:check"
     }
   }
 }
