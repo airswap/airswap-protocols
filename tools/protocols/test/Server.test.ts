@@ -2,7 +2,8 @@ import { fancy } from 'fancy-test'
 import { expect } from 'chai'
 
 import { createQuote, createOrder, signOrder } from '@airswap/utils'
-import { emptySignature, ADDRESS_ZERO } from '@airswap/constants'
+import { ADDRESS_ZERO } from '@airswap/constants'
+import { emptySignature } from '@airswap/types'
 import { functions } from '@airswap/test-utils'
 
 import { Server } from '..'

@@ -15,7 +15,7 @@
   },
   "scripts": {
     "clean": "rm -rf ./build",
-    "compile": "truffle compile"
+    "compile": "yarn clean; truffle compile"
   },
   "dependencies": {
     "openzeppelin-solidity": "2.4"

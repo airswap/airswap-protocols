@@ -1,6 +1,6 @@
 {
   "name": "@airswap/constants",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "description": "Helpful Constants for AirSwap Developers",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>"
@@ -22,9 +22,7 @@
     "clean": "rm -rf ./build",
     "compile": "yarn clean; tsc -b"
   },
-  "dependencies": {
-    "@airswap/types": "3.5.10"
-  },
+  "dependencies": {},
   "devDependencies": {
     "typescript": "^3.8.2"
   }
