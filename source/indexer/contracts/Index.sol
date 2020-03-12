@@ -20,32 +20,31 @@ import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 
 /**
-  * @title Index: A List of Locators
-  * @notice The Locators are sorted in reverse order based on the score
-  * meaning that the first element in the list has the largest score
-  * and final element has the smallest
-  * @dev A mapping is used to mimic a circular linked list structure
-  * where every mapping Entry contains a pointer to the next
-  * and the previous
-  */
+ * @title Index: A List of Locators
+ * @notice The Locators are sorted in reverse order based on the score
+ * meaning that the first element in the list has the largest score
+ * and final element has the smallest
+ * @dev A mapping is used to mimic a circular linked list structure
+ * where every mapping Entry contains a pointer to the next
+ * and the previous
+ */
 contract Index is Ownable {
-
   // The number of entries in the index
   uint256 public length;
 
   // Identifier to use for the head of the list
-  address constant internal HEAD = address(uint160(2**160-1));
+  address internal constant HEAD = address(uint160(2**160 - 1));
 
   // Mapping of an identifier to its entry
   mapping(address => Entry) public entries;
 
   /**
-    * @notice Index Entry
-    * @param score uint256
-    * @param locator bytes32
-    * @param prev address Previous address in the linked list
-    * @param next address Next address in the linked list
-    */
+   * @notice Index Entry
+   * @param score uint256
+   * @param locator bytes32
+   * @param prev address Previous address in the linked list
+   * @param next address Next address in the linked list
+   */
   struct Entry {
     bytes32 locator;
     uint256 score;
@@ -54,37 +53,34 @@ contract Index is Ownable {
   }
 
   /**
-    * @notice Contract Events
-    */
+   * @notice Contract Events
+   */
   event SetLocator(
     address indexed identifier,
     uint256 score,
     bytes32 indexed locator
   );
 
-  event UnsetLocator(
-    address indexed identifier
-  );
+  event UnsetLocator(address indexed identifier);
 
   /**
-    * @notice Contract Constructor
-    */
+   * @notice Contract Constructor
+   */
   constructor() public {
     // Create initial entry.
     entries[HEAD] = Entry(bytes32(0), 0, HEAD, HEAD);
   }
 
   /**
-    * @notice Set a Locator
-    * @param identifier address On-chain address identifying the owner of a locator
-    * @param score uint256 Score for the locator being set
-    * @param locator bytes32 Locator
-    */
-  function setLocator(
-    address identifier,
-    uint256 score,
-    bytes32 locator
-  ) external onlyOwner {
+   * @notice Set a Locator
+   * @param identifier address On-chain address identifying the owner of a locator
+   * @param score uint256 Score for the locator being set
+   * @param locator bytes32 Locator
+   */
+  function setLocator(address identifier, uint256 score, bytes32 locator)
+    external
+    onlyOwner
+  {
     // Ensure the entry does not already exist.
     require(!_hasEntry(identifier), "ENTRY_ALREADY_EXISTS");
 
@@ -96,13 +92,10 @@ contract Index is Ownable {
   }
 
   /**
-    * @notice Unset a Locator
-    * @param identifier address On-chain address identifying the owner of a locator
-    */
-  function unsetLocator(
-    address identifier
-  ) external onlyOwner {
-
+   * @notice Unset a Locator
+   * @param identifier address On-chain address identifying the owner of a locator
+   */
+  function unsetLocator(address identifier) external onlyOwner {
     _unsetLocator(identifier);
 
     // Decrement the index length.
@@ -111,17 +104,16 @@ contract Index is Ownable {
   }
 
   /**
-    * @notice Update a Locator
-    * @dev score and/or locator do not need to be different from old values
-    * @param identifier address On-chain address identifying the owner of a locator
-    * @param score uint256 Score for the locator being set
-    * @param locator bytes32 Locator
-    */
-  function updateLocator(
-    address identifier,
-    uint256 score,
-    bytes32 locator
-  ) external onlyOwner {
+   * @notice Update a Locator
+   * @dev score and/or locator do not need to be different from old values
+   * @param identifier address On-chain address identifying the owner of a locator
+   * @param score uint256 Score for the locator being set
+   * @param locator bytes32 Locator
+   */
+  function updateLocator(address identifier, uint256 score, bytes32 locator)
+    external
+    onlyOwner
+  {
     // Don't need to update length as it is not used in set/unset logic
     _unsetLocator(identifier);
     _setLocator(identifier, score, locator);
@@ -130,44 +122,41 @@ contract Index is Ownable {
   }
 
   /**
-    * @notice Get a Score
-    * @param identifier address On-chain address identifying the owner of a locator
-    * @return uint256 Score corresponding to the identifier
-    */
-  function getScore(
-    address identifier
-  ) external view returns (uint256) {
+   * @notice Get a Score
+   * @param identifier address On-chain address identifying the owner of a locator
+   * @return uint256 Score corresponding to the identifier
+   */
+  function getScore(address identifier) external view returns (uint256) {
     return entries[identifier].score;
   }
 
-    /**
-    * @notice Get a Locator
-    * @param identifier address On-chain address identifying the owner of a locator
-    * @return bytes32 Locator information
-    */
-  function getLocator(
-    address identifier
-  ) external view returns (bytes32) {
+  /**
+   * @notice Get a Locator
+   * @param identifier address On-chain address identifying the owner of a locator
+   * @return bytes32 Locator information
+   */
+  function getLocator(address identifier) external view returns (bytes32) {
     return entries[identifier].locator;
   }
 
   /**
-    * @notice Get a Range of Locators
-    * @dev start value of 0x0 starts at the head
-    * @param cursor address Cursor to start with
-    * @param limit uint256 Maximum number of locators to return
-    * @return bytes32[] List of locators
-    * @return uint256[] List of scores corresponding to locators
-    * @return address The next cursor to provide for pagination
-    */
-  function getLocators(
-    address cursor,
-    uint256 limit
-  ) external view returns (
-    bytes32[] memory locators,
-    uint256[] memory scores,
-    address nextCursor
-  ) {
+   * @notice Get a Range of Locators
+   * @dev start value of 0x0 starts at the head
+   * @param cursor address Cursor to start with
+   * @param limit uint256 Maximum number of locators to return
+   * @return bytes32[] List of locators
+   * @return uint256[] List of scores corresponding to locators
+   * @return address The next cursor to provide for pagination
+   */
+  function getLocators(address cursor, uint256 limit)
+    external
+    view
+    returns (
+      bytes32[] memory locators,
+      uint256[] memory scores,
+      address nextCursor
+    )
+  {
     address identifier;
 
     // If a valid cursor is provided, start there.
@@ -202,16 +191,14 @@ contract Index is Ownable {
   }
 
   /**
-    * @notice Internal function to set a Locator
-    * @param identifier address On-chain address identifying the owner of a locator
-    * @param score uint256 Score for the locator being set
-    * @param locator bytes32 Locator
-    */
-  function _setLocator(
-    address identifier,
-    uint256 score,
-    bytes32 locator
-  ) internal {
+   * @notice Internal function to set a Locator
+   * @param identifier address On-chain address identifying the owner of a locator
+   * @param score uint256 Score for the locator being set
+   * @param locator bytes32 Locator
+   */
+  function _setLocator(address identifier, uint256 score, bytes32 locator)
+    internal
+  {
     // Disallow locator set to 0x0 to ensure list integrity.
     require(locator != bytes32(0), "LOCATOR_MUST_BE_SENT");
 
@@ -226,12 +213,10 @@ contract Index is Ownable {
   }
 
   /**
-    * @notice Internal function to unset a Locator
-    * @param identifier address On-chain address identifying the owner of a locator
-    */
-  function _unsetLocator(
-    address identifier
-  ) internal {
+   * @notice Internal function to unset a Locator
+   * @param identifier address On-chain address identifying the owner of a locator
+   */
+  function _unsetLocator(address identifier) internal {
     // Ensure the entry exists.
     require(_hasEntry(identifier), "ENTRY_DOES_NOT_EXIST");
 
@@ -246,25 +231,20 @@ contract Index is Ownable {
   }
 
   /**
-    * @notice Check if the Index has an Entry
-    * @param identifier address On-chain address identifying the owner of a locator
-    * @return bool True if the identifier corresponds to an Entry in the list
-    */
-  function _hasEntry(
-    address identifier
-  ) internal view returns (bool) {
+   * @notice Check if the Index has an Entry
+   * @param identifier address On-chain address identifying the owner of a locator
+   * @return bool True if the identifier corresponds to an Entry in the list
+   */
+  function _hasEntry(address identifier) internal view returns (bool) {
     return entries[identifier].locator != bytes32(0);
   }
 
   /**
-    * @notice Returns the largest scoring Entry Lower than a Score
-    * @param score uint256 Score in question
-    * @return address Identifier of the largest score lower than score
-    */
-  function _getEntryLowerThan(
-    uint256 score
-  ) internal view returns (address) {
-
+   * @notice Returns the largest scoring Entry Lower than a Score
+   * @param score uint256 Score in question
+   * @return address Identifier of the largest score lower than score
+   */
+  function _getEntryLowerThan(uint256 score) internal view returns (address) {
     address identifier = entries[HEAD].next;
 
     // Head indicates last because the list is circular.

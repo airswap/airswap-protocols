@@ -16,6 +16,7 @@
 
 pragma solidity 0.5.12;
 
+
 /**
  * @title IKittyCoreTokenTransfer
  * @dev transferFrom function from KittyCore

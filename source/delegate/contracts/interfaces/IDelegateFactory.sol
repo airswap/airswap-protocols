@@ -16,8 +16,8 @@
 
 pragma solidity 0.5.12;
 
-interface IDelegateFactory {
 
+interface IDelegateFactory {
   event CreateDelegate(
     address indexed delegateContract,
     address swapContract,
@@ -27,11 +27,11 @@ interface IDelegateFactory {
   );
 
   /**
-    * @notice Deploy a trusted delegate contract
-    * @param delegateTradeWallet the wallet the delegate will trade from
-    * @return delegateContractAddress address of the delegate contract created
-    */
-  function createDelegate(
-    address delegateTradeWallet
-  ) external returns (address delegateContractAddress);
+   * @notice Deploy a trusted delegate contract
+   * @param delegateTradeWallet the wallet the delegate will trade from
+   * @return delegateContractAddress address of the delegate contract created
+   */
+  function createDelegate(address delegateTradeWallet)
+    external
+    returns (address delegateContractAddress);
 }
