@@ -30,7 +30,6 @@
     "solidity-coverage": "^0.6.3"
   },
   "dependencies": {
-    "openzeppelin-solidity": "2.4",
-    "@airswap/tokens": "0.1.4"
+    "openzeppelin-solidity": "2.4"
   }
 }

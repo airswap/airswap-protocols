@@ -8,7 +8,6 @@
 pragma solidity 0.5.12;
 
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
-import "@airswap/tokens/contracts/interfaces/IWETH.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
 import "openzeppelin-solidity/contracts/utils/Address.sol";
@@ -37,7 +36,7 @@ contract BalanceChecker is Ownable {
     uint256[] memory balances = new uint256[](tokenAddresses.length);
 
     for(uint256 i = 0; i < tokenAddresses.length; i++){
-      if( tokenAddresses[i] != address(0x0) ) {
+      if (tokenAddresses[i] != address(0x0)) {
         balances[i] = tokenBalance(userAddress, tokenAddresses[i]);
       } else {
         balances[i] = userAddress.balance;
@@ -63,7 +62,7 @@ contract BalanceChecker is Ownable {
     require(tokenAddresses.length > 0);
     uint256[] memory allowances = new uint256[](tokenAddresses.length);
 
-    for(uint256 i = 0; i< tokenAddresses.length; i++) {
+    for(uint256 i = 0; i < tokenAddresses.length; i++) {
       allowances[i] = tokenAllowance(userAddress, spenderAddress, tokenAddresses[i]);
     }
     return allowances;
@@ -79,10 +78,10 @@ contract BalanceChecker is Ownable {
     * @return uint256[] token allowances array if possible
     */
   function allAllowancesForManyAccounts(
-      address[] calldata userAddresses,
-      address spenderAddress,
-      address[] calldata tokenAddresses
-    ) external view returns (uint256[] memory) {
+    address[] calldata userAddresses,
+    address spenderAddress,
+    address[] calldata tokenAddresses
+  ) external view returns (uint256[] memory) {
     uint256[] memory allowances = new uint256[](
       tokenAddresses.length * userAddresses.length);
 
@@ -121,24 +120,6 @@ contract BalanceChecker is Ownable {
   }
 
   /**
-    * @notice Checks WETH balances
-    * @param wethAddress address WETH addresses in case of several
-    * @param userAddresses address[]
-    * @return uint256[]
-    */
-  function allWETHbalances(
-    address wethAddress,
-    address[] calldata userAddresses
-  ) external view returns (uint256[] memory) {
-    IWETH wethContract = IWETH(wethAddress);
-    uint256[] memory balances = new uint256[](userAddresses.length);
-    for(uint256 k = 0; k < userAddresses.length; k++){
-      balances[k] = wethContract.balanceOf(userAddresses[k]);
-    }
-    return balances;
-  }
-
-  /**
     * @notice Self-destruct contract for clean-up
     */
   function destruct(address payable recipientAddress) public onlyOwner {
@@ -159,8 +140,8 @@ contract BalanceChecker is Ownable {
     * @param amount uint256
     */
   function withdrawToken(
-  address tokenAddress,
-  uint256 amount
+    address tokenAddress,
+    uint256 amount
   ) public onlyOwner {
     require(tokenAddress != address(0x0)); //use withdraw for ETH
     IERC20(tokenAddress).safeTransfer(msg.sender, amount);
