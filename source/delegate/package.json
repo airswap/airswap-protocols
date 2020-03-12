@@ -35,6 +35,7 @@
     "@airswap/constants": "0.3.5",
     "@airswap/test-utils": "0.1.6",
     "@airswap/transfers": "1.1.3",
+    "@airswap/utils": "0.3.11",
     "ethers": "^4.0.45",
     "solidity-coverage": "^0.6.3"
   }
