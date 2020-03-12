@@ -21,7 +21,8 @@
     "ganache": "ganache-cli -p 8545 --gasLimit 0xfffffffffff --time '2017-05-10T00:00:00+00:00' -s 0",
     "publish": "lerna publish",
     "test": "yarn clean && yarn compile && lerna run test --concurrency=1",
-    "deps": "python3 -m venv ./venv && source venv/bin/activate && pip3 install -r requirements.txt | { grep -v \"satisfied\" || :; } && python3 scripts/dependency_checker.py"
+    "deps": "python3 -m venv ./venv && source venv/bin/activate && pip3 install -r requirements.txt | { grep -v \"satisfied\" || :; } && python3 scripts/dependency_checker.py",
+    "pretty": "prettier --check \"./**/*.sol\" \"./**/*.ts\""
   },
   "devDependencies": {
     "@gnosis.pm/mock-contract": "^3.0.7",
@@ -40,17 +41,12 @@
     "husky": "^3.0.9",
     "lerna": "^3.15.0",
     "prettier": "^1.19.1",
+    "prettier-plugin-solidity": "^1.0.0-alpha.45",
     "solhint": "^2.1.0",
     "truffle": "^5.0.32",
     "truffle-flatten": "^1.0.6",
     "truffle-hdwallet-provider-privkey": "^1.0.3",
     "truffle-verify": "^1.0.4"
-  },
-  "prettier": {
-    "trailingComma": "es5",
-    "tabWidth": 2,
-    "semi": false,
-    "singleQuote": true
   },
   "husky": {
     "hooks": {
