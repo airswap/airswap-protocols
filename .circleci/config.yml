@@ -267,10 +267,6 @@ workflows:
           context: Development
           requires:
             - setup
-      - order_utils_tests:
-          context: Development
-          requires:
-            - setup
       - protocols_tests:
           context: Development
           requires:
@@ -289,7 +285,6 @@ workflows:
             - types_tests
             - wrapper_tests
             - metadata_tests
-            - order_utils_tests
             - protocols_tests
             - utils_tests
           filters:
