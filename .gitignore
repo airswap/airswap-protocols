@@ -12,6 +12,3 @@ flatten/
 venv
 build
 .vscode/
-.idea/
-deploys.txt
-
