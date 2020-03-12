@@ -4,6 +4,10 @@ const Types = artifacts.require('Types')
 const Indexer = artifacts.require('Indexer')
 const MockContract = artifacts.require('MockContract')
 const FungibleToken = artifacts.require('FungibleToken')
+
+const ethers = require('ethers')
+const { emptySignature, ADDRESS_ZERO } = require('@airswap/constants')
+const { createOrder, signOrder } = require('@airswap/utils')
 const {
   equal,
   passes,
@@ -11,18 +15,16 @@ const {
   reverted,
 } = require('@airswap/test-utils').assert
 const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
-const {
-  EMPTY_ADDRESS,
-  GANACHE_PROVIDER,
-} = require('@airswap/order-utils').constants
-
-const { orders, signatures } = require('@airswap/order-utils')
+const { GANACHE_PROVIDER } = require('@airswap/test-utils').constants
 
 contract('Delegate Unit Tests', async accounts => {
   const owner = accounts[0]
   const tradeWallet = accounts[1]
   const notOwner = accounts[2]
   const notTradeWallet = accounts[3]
+  const notOwnerSigner = new ethers.providers.JsonRpcProvider(
+    GANACHE_PROVIDER
+  ).getSigner(notOwner)
   const SIGNER_TOKEN = accounts[4]
   const SENDER_TOKEN = accounts[5]
   const MOCK_WETH = accounts[6]
@@ -61,19 +63,19 @@ contract('Delegate Unit Tests', async accounts => {
     mockFungibleTokenTemplate = await FungibleToken.new()
 
     mockStakingToken_allowance = await mockFungibleTokenTemplate.contract.methods
-      .allowance(EMPTY_ADDRESS, EMPTY_ADDRESS)
+      .allowance(ADDRESS_ZERO, ADDRESS_ZERO)
       .encodeABI()
 
     mockStakingToken_transferFrom = await mockFungibleTokenTemplate.contract.methods
-      .transferFrom(EMPTY_ADDRESS, EMPTY_ADDRESS, 0)
+      .transferFrom(ADDRESS_ZERO, ADDRESS_ZERO, 0)
       .encodeABI()
 
     mockStakingToken_transfer = await mockFungibleTokenTemplate.contract.methods
-      .transfer(EMPTY_ADDRESS, 0)
+      .transfer(ADDRESS_ZERO, 0)
       .encodeABI()
 
     mockStakingToken_approve = await mockFungibleTokenTemplate.contract.methods
-      .approve(EMPTY_ADDRESS, 0)
+      .approve(ADDRESS_ZERO, 0)
       .encodeABI()
   }
 
@@ -81,8 +83,10 @@ contract('Delegate Unit Tests', async accounts => {
     const types = await Types.new()
     await Swap.link('Types', types.address)
     const swapTemplate = await Swap.new(mockRegistry)
-    const order = await orders.getOrder({})
-    swapFunction = swapTemplate.contract.methods.swap(order).encodeABI()
+    const order = createOrder({})
+    swapFunction = swapTemplate.contract.methods
+      .swap({ ...order, signature: emptySignature })
+      .encodeABI()
 
     mockSwap = await MockContract.new()
     swapAddress = mockSwap.address
@@ -90,13 +94,13 @@ contract('Delegate Unit Tests', async accounts => {
 
   async function setupMockIndexer() {
     mockIndexer = await MockContract.new()
-    const mockIndexerTemplate = await Indexer.new(EMPTY_ADDRESS)
+    const mockIndexerTemplate = await Indexer.new(ADDRESS_ZERO)
 
     //mock setIntent()
     const mockIndexer_setIntent = mockIndexerTemplate.contract.methods
       .setIntent(
-        EMPTY_ADDRESS,
-        EMPTY_ADDRESS,
+        ADDRESS_ZERO,
+        ADDRESS_ZERO,
         EMPTY_PROTOCOL,
         0,
         web3.utils.fromAscii('')
@@ -106,7 +110,7 @@ contract('Delegate Unit Tests', async accounts => {
 
     //mock unsetIntent()
     const mockIndexer_unsetIntent = mockIndexerTemplate.contract.methods
-      .unsetIntent(EMPTY_ADDRESS, EMPTY_ADDRESS, EMPTY_PROTOCOL)
+      .unsetIntent(ADDRESS_ZERO, ADDRESS_ZERO, EMPTY_PROTOCOL)
       .encodeABI()
     await mockIndexer.givenMethodReturnBool(mockIndexer_unsetIntent, true)
 
@@ -121,12 +125,7 @@ contract('Delegate Unit Tests', async accounts => {
 
     //mock getStakedAmount()
     mockIndexer_getStakedAmount = mockIndexerTemplate.contract.methods
-      .getStakedAmount(
-        EMPTY_ADDRESS,
-        EMPTY_ADDRESS,
-        EMPTY_ADDRESS,
-        EMPTY_PROTOCOL
-      )
+      .getStakedAmount(ADDRESS_ZERO, ADDRESS_ZERO, ADDRESS_ZERO, EMPTY_PROTOCOL)
       .encodeABI()
   }
 
@@ -140,7 +139,7 @@ contract('Delegate Unit Tests', async accounts => {
     delegate = await Delegate.new(
       swapAddress,
       mockIndexer.address,
-      EMPTY_ADDRESS,
+      ADDRESS_ZERO,
       tradeWallet,
       DELE_PROTOCOL,
       {
@@ -174,8 +173,8 @@ contract('Delegate Unit Tests', async accounts => {
       const newDelegate = await Delegate.new(
         swapAddress,
         mockIndexer.address,
-        EMPTY_ADDRESS,
-        EMPTY_ADDRESS,
+        ADDRESS_ZERO,
+        ADDRESS_ZERO,
         DELE_PROTOCOL,
         {
           from: owner,
@@ -224,8 +223,8 @@ contract('Delegate Unit Tests', async accounts => {
         Delegate.new(
           swapAddress,
           mockIndexer.address,
-          EMPTY_ADDRESS,
-          EMPTY_ADDRESS,
+          ADDRESS_ZERO,
+          ADDRESS_ZERO,
           DELE_PROTOCOL,
           {
             from: owner,
@@ -545,7 +544,7 @@ contract('Delegate Unit Tests', async accounts => {
 
     it('Test setTradeWallet with empty address', async () => {
       await reverted(
-        delegate.setTradeWallet(EMPTY_ADDRESS, { from: owner }),
+        delegate.setTradeWallet(ADDRESS_ZERO, { from: owner }),
         'TRADE_WALLET_REQUIRED'
       )
     })
@@ -735,25 +734,21 @@ contract('Delegate Unit Tests', async accounts => {
 
   describe('Test provideOrder', async () => {
     it('test if a rule does not exist', async () => {
-      const order = await orders.getOrder({
-        signer: {
-          wallet: notOwner,
-          amount: 555,
-          token: SENDER_TOKEN,
-        },
-        sender: {
-          wallet: tradeWallet,
-          amount: 999,
-          token: SIGNER_TOKEN,
-        },
-      })
-
-      // Signer signs the order
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        notOwner,
-        swapAddress,
-        GANACHE_PROVIDER
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: notOwner,
+            amount: 555,
+            token: SENDER_TOKEN,
+          },
+          sender: {
+            wallet: tradeWallet,
+            amount: 999,
+            token: SIGNER_TOKEN,
+          },
+        }),
+        notOwnerSigner,
+        swapAddress
       )
 
       await reverted(
@@ -773,25 +768,21 @@ contract('Delegate Unit Tests', async accounts => {
         EXP
       )
 
-      const order = await orders.getOrder({
-        signer: {
-          wallet: notOwner,
-          amount: 555,
-          token: SIGNER_TOKEN,
-        },
-        sender: {
-          wallet: tradeWallet,
-          amount: MAX_SENDER_AMOUNT + 1,
-          token: SENDER_TOKEN,
-        },
-      })
-
-      // Signer signs the order
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        notOwner,
-        swapAddress,
-        GANACHE_PROVIDER
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: notOwner,
+            amount: 555,
+            token: SIGNER_TOKEN,
+          },
+          sender: {
+            wallet: tradeWallet,
+            amount: MAX_SENDER_AMOUNT + 1,
+            token: SENDER_TOKEN,
+          },
+        }),
+        notOwnerSigner,
+        swapAddress
       )
 
       await reverted(
@@ -814,25 +805,21 @@ contract('Delegate Unit Tests', async accounts => {
       const signerAmount = 100
       const senderAmount = Math.floor((signerAmount * 10 ** EXP) / PRICE_COEF)
 
-      const order = await orders.getOrder({
-        signer: {
-          wallet: notOwner,
-          amount: signerAmount,
-          token: SIGNER_TOKEN,
-        },
-        sender: {
-          wallet: notTradeWallet,
-          amount: senderAmount,
-          token: SENDER_TOKEN,
-        },
-      })
-
-      // Signer signs the order
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        notOwner,
-        swapAddress,
-        GANACHE_PROVIDER
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: notOwner,
+            amount: signerAmount,
+            token: SIGNER_TOKEN,
+          },
+          sender: {
+            wallet: notTradeWallet,
+            amount: senderAmount,
+            token: SENDER_TOKEN,
+          },
+        }),
+        notOwnerSigner,
+        swapAddress
       )
 
       await reverted(
@@ -852,24 +839,20 @@ contract('Delegate Unit Tests', async accounts => {
         EXP
       )
 
-      const order = await orders.getOrder({
-        signer: {
-          amount: 30,
-          token: SIGNER_TOKEN,
-        },
-        sender: {
-          wallet: tradeWallet,
-          amount: MAX_SENDER_AMOUNT,
-          token: SENDER_TOKEN,
-        },
-      })
-
-      // Signer signs the order
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        notOwner,
-        swapAddress,
-        GANACHE_PROVIDER
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            amount: 30,
+            token: SIGNER_TOKEN,
+          },
+          sender: {
+            wallet: tradeWallet,
+            amount: MAX_SENDER_AMOUNT,
+            token: SENDER_TOKEN,
+          },
+        }),
+        notOwnerSigner,
+        swapAddress
       )
 
       await reverted(
@@ -891,25 +874,21 @@ contract('Delegate Unit Tests', async accounts => {
       const signerAmount = 100
       const senderAmount = Math.floor((signerAmount * 10 ** EXP) / PRICE_COEF)
 
-      const order = await orders.getOrder({
-        signer: {
-          wallet: notOwner,
-          amount: signerAmount - 100, //Fudge the price
-          token: SIGNER_TOKEN,
-        },
-        sender: {
-          wallet: tradeWallet,
-          amount: senderAmount,
-          token: SENDER_TOKEN,
-        },
-      })
-
-      // Signer signs the order
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        notOwner,
-        swapAddress,
-        GANACHE_PROVIDER
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: notOwner,
+            amount: signerAmount - 100, //Fudge the price
+            token: SIGNER_TOKEN,
+          },
+          sender: {
+            wallet: tradeWallet,
+            amount: senderAmount,
+            token: SENDER_TOKEN,
+          },
+        }),
+        notOwnerSigner,
+        swapAddress
       )
 
       await reverted(
@@ -934,26 +913,22 @@ contract('Delegate Unit Tests', async accounts => {
       const signerAmount = 100
       const senderAmount = Math.floor((signerAmount * 10 ** EXP) / PRICE_COEF)
 
-      const order = await orders.getOrder({
-        signer: {
-          wallet: notOwner,
-          amount: signerAmount,
-          token: SIGNER_TOKEN,
-          kind: '0x80ac58cd',
-        },
-        sender: {
-          wallet: tradeWallet,
-          amount: senderAmount,
-          token: SENDER_TOKEN,
-        },
-      })
-
-      // Signer signs the order
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        notOwner,
-        swapAddress,
-        GANACHE_PROVIDER
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: notOwner,
+            amount: signerAmount,
+            token: SIGNER_TOKEN,
+            kind: '0x80ac58cd',
+          },
+          sender: {
+            wallet: tradeWallet,
+            amount: senderAmount,
+            token: SENDER_TOKEN,
+          },
+        }),
+        notOwnerSigner,
+        swapAddress
       )
 
       await reverted(
@@ -978,26 +953,22 @@ contract('Delegate Unit Tests', async accounts => {
       const signerAmount = 100
       const senderAmount = Math.floor((signerAmount * 10 ** EXP) / PRICE_COEF)
 
-      const order = await orders.getOrder({
-        signer: {
-          wallet: notOwner,
-          amount: signerAmount,
-          token: SIGNER_TOKEN,
-        },
-        sender: {
-          wallet: tradeWallet,
-          amount: senderAmount,
-          token: SENDER_TOKEN,
-          kind: '0x80ac58cd',
-        },
-      })
-
-      // Signer signs the order
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        notOwner,
-        swapAddress,
-        GANACHE_PROVIDER
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: notOwner,
+            amount: signerAmount,
+            token: SIGNER_TOKEN,
+          },
+          sender: {
+            wallet: tradeWallet,
+            amount: senderAmount,
+            token: SENDER_TOKEN,
+            kind: '0x80ac58cd',
+          },
+        }),
+        notOwnerSigner,
+        swapAddress
       )
 
       await reverted(
@@ -1023,25 +994,21 @@ contract('Delegate Unit Tests', async accounts => {
 
       const signerAmount = 100
 
-      const order = await orders.getOrder({
-        signer: {
-          wallet: notOwner,
-          amount: signerAmount,
-          token: SIGNER_TOKEN,
-        },
-        sender: {
-          wallet: tradeWallet,
-          amount: 100,
-          token: SENDER_TOKEN,
-        },
-      })
-
-      // Signer signs the order
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        notOwner,
-        swapAddress,
-        GANACHE_PROVIDER
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: notOwner,
+            amount: signerAmount,
+            token: SIGNER_TOKEN,
+          },
+          sender: {
+            wallet: tradeWallet,
+            amount: 100,
+            token: SENDER_TOKEN,
+          },
+        }),
+        notOwnerSigner,
+        swapAddress
       )
 
       await passes(
@@ -1083,25 +1050,21 @@ contract('Delegate Unit Tests', async accounts => {
 
       const signerAmount = 100
 
-      const order = await orders.getOrder({
-        signer: {
-          wallet: notOwner,
-          amount: signerAmount,
-          token: SIGNER_TOKEN,
-        },
-        sender: {
-          wallet: tradeWallet,
-          amount: 100,
-          token: SENDER_TOKEN,
-        },
-      })
-
-      // Signer signs the order
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        notOwner,
-        swapAddress,
-        GANACHE_PROVIDER
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: notOwner,
+            amount: signerAmount,
+            token: SIGNER_TOKEN,
+          },
+          sender: {
+            wallet: tradeWallet,
+            amount: 100,
+            token: SENDER_TOKEN,
+          },
+        }),
+        notOwnerSigner,
+        swapAddress
       )
 
       //mock swapContract
@@ -1144,25 +1107,21 @@ contract('Delegate Unit Tests', async accounts => {
       const signerAmount = 100
       const senderAmount = Math.floor((signerAmount * 10 ** EXP) / PRICE_COEF)
 
-      const order = await orders.getOrder({
-        signer: {
-          wallet: notOwner,
-          amount: signerAmount,
-          token: SIGNER_TOKEN,
-        },
-        sender: {
-          wallet: tradeWallet,
-          amount: senderAmount,
-          token: SENDER_TOKEN,
-        },
-      })
-
-      // Signer signs the order
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        notOwner,
-        swapAddress,
-        GANACHE_PROVIDER
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: notOwner,
+            amount: signerAmount,
+            token: SIGNER_TOKEN,
+          },
+          sender: {
+            wallet: tradeWallet,
+            amount: senderAmount,
+            token: SENDER_TOKEN,
+          },
+        }),
+        notOwnerSigner,
+        swapAddress
       )
 
       const tx = await delegate.provideOrder(order, {
@@ -1198,25 +1157,21 @@ contract('Delegate Unit Tests', async accounts => {
       const signerAmount = signerQuote.toNumber()
 
       // put that quote into an order
-      const order = await orders.getOrder({
-        signer: {
-          wallet: notOwner,
-          amount: signerAmount,
-          token: SIGNER_TOKEN,
-        },
-        sender: {
-          wallet: tradeWallet,
-          amount: senderAmount,
-          token: SENDER_TOKEN,
-        },
-      })
-
-      // Signer signs the order
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        notOwner,
-        swapAddress,
-        GANACHE_PROVIDER
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: notOwner,
+            amount: signerAmount,
+            token: SIGNER_TOKEN,
+          },
+          sender: {
+            wallet: tradeWallet,
+            amount: senderAmount,
+            token: SENDER_TOKEN,
+          },
+        }),
+        notOwnerSigner,
+        swapAddress
       )
 
       const tx = await delegate.provideOrder(order, {
@@ -1245,25 +1200,21 @@ contract('Delegate Unit Tests', async accounts => {
       const senderAmount = senderQuote.toNumber()
 
       // put that quote into an order
-      const order = await orders.getOrder({
-        signer: {
-          wallet: notOwner,
-          amount: signerAmount,
-          token: SIGNER_TOKEN,
-        },
-        sender: {
-          wallet: tradeWallet,
-          amount: senderAmount,
-          token: SENDER_TOKEN,
-        },
-      })
-
-      // Signer signs the order
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        notOwner,
-        swapAddress,
-        GANACHE_PROVIDER
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: notOwner,
+            amount: signerAmount,
+            token: SIGNER_TOKEN,
+          },
+          sender: {
+            wallet: tradeWallet,
+            amount: senderAmount,
+            token: SENDER_TOKEN,
+          },
+        }),
+        notOwnerSigner,
+        swapAddress
       )
 
       const tx = await delegate.provideOrder(order, {
@@ -1288,25 +1239,21 @@ contract('Delegate Unit Tests', async accounts => {
       const signerAmount = val[1].toNumber()
 
       // put that quote into an order
-      const order = await orders.getOrder({
-        signer: {
-          wallet: notOwner,
-          amount: signerAmount,
-          token: SIGNER_TOKEN,
-        },
-        sender: {
-          wallet: tradeWallet,
-          amount: senderAmount,
-          token: SENDER_TOKEN,
-        },
-      })
-
-      // Signer signs the order
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        notOwner,
-        swapAddress,
-        GANACHE_PROVIDER
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: notOwner,
+            amount: signerAmount,
+            token: SIGNER_TOKEN,
+          },
+          sender: {
+            wallet: tradeWallet,
+            amount: senderAmount,
+            token: SENDER_TOKEN,
+          },
+        }),
+        notOwnerSigner,
+        swapAddress
       )
 
       const tx = await delegate.provideOrder(order, {
@@ -1329,25 +1276,21 @@ contract('Delegate Unit Tests', async accounts => {
       const senderAmount = 201 // 1 unit more than the delegate wants to send
       const signerAmount = 1
 
-      const order = await orders.getOrder({
-        signer: {
-          wallet: notOwner,
-          amount: signerAmount,
-          token: SIGNER_TOKEN,
-        },
-        sender: {
-          wallet: tradeWallet,
-          amount: senderAmount,
-          token: SENDER_TOKEN,
-        },
-      })
-
-      // Signer signs the order
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        notOwner,
-        swapAddress,
-        GANACHE_PROVIDER
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: notOwner,
+            amount: signerAmount,
+            token: SIGNER_TOKEN,
+          },
+          sender: {
+            wallet: tradeWallet,
+            amount: senderAmount,
+            token: SENDER_TOKEN,
+          },
+        }),
+        notOwnerSigner,
+        swapAddress
       )
 
       // check the delegate doesnt allow this
@@ -1372,25 +1315,21 @@ contract('Delegate Unit Tests', async accounts => {
       const senderAmount = 199 // 1 unit less than the delegate rule
       const signerAmount = 1
 
-      const order = await orders.getOrder({
-        signer: {
-          wallet: notOwner,
-          amount: signerAmount,
-          token: SIGNER_TOKEN,
-        },
-        sender: {
-          wallet: tradeWallet,
-          amount: senderAmount,
-          token: SENDER_TOKEN,
-        },
-      })
-
-      // Signer signs the order
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        notOwner,
-        swapAddress,
-        GANACHE_PROVIDER
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: notOwner,
+            amount: signerAmount,
+            token: SIGNER_TOKEN,
+          },
+          sender: {
+            wallet: tradeWallet,
+            amount: senderAmount,
+            token: SENDER_TOKEN,
+          },
+        }),
+        notOwnerSigner,
+        swapAddress
       )
 
       // check the delegate allows this
@@ -1414,25 +1353,21 @@ contract('Delegate Unit Tests', async accounts => {
       const senderAmount = 200
       const signerAmount = 1
 
-      const order = await orders.getOrder({
-        signer: {
-          wallet: notOwner,
-          amount: signerAmount,
-          token: SIGNER_TOKEN,
-        },
-        sender: {
-          wallet: tradeWallet,
-          amount: senderAmount,
-          token: SENDER_TOKEN,
-        },
-      })
-
-      // Signer signs the order
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        notOwner,
-        swapAddress,
-        GANACHE_PROVIDER
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: notOwner,
+            amount: signerAmount,
+            token: SIGNER_TOKEN,
+          },
+          sender: {
+            wallet: tradeWallet,
+            amount: senderAmount,
+            token: SENDER_TOKEN,
+          },
+        }),
+        notOwnerSigner,
+        swapAddress
       )
 
       // check the delegate allows this
@@ -1445,7 +1380,7 @@ contract('Delegate Unit Tests', async accounts => {
 
     it('Send order without signature to the delegate', async () => {
       // Note: Consumer is the order signer, Delegate is the order sender.
-      const order = await orders.getOrder({
+      const order = createOrder({
         signer: {
           wallet: notOwner,
           amount: 500,
@@ -1457,6 +1392,8 @@ contract('Delegate Unit Tests', async accounts => {
           token: SENDER_TOKEN,
         },
       })
+
+      order.signature = emptySignature
 
       // Succeeds on the Delegate, fails on the Swap.
       await reverted(

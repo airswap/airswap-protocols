@@ -9,6 +9,9 @@ const FungibleToken = artifacts.require('FungibleToken')
 const Wrapper = artifacts.require('Wrapper')
 const WETH9 = artifacts.require('WETH9')
 
+const ethers = require('ethers')
+const { tokenKinds } = require('@airswap/constants')
+const { createOrder, signOrder } = require('@airswap/utils')
 const {
   emitted,
   equal,
@@ -17,19 +20,20 @@ const {
   passes,
 } = require('@airswap/test-utils').assert
 const { allowances, balances } = require('@airswap/test-utils').balances
-const { orders, signatures } = require('@airswap/order-utils')
-const {
-  ERC20_INTERFACE_ID,
-  ERC721_INTERFACE_ID,
-  GANACHE_PROVIDER,
-} = require('@airswap/order-utils').constants
+const { GANACHE_PROVIDER } = require('@airswap/test-utils').constants
 
-contract('Validator', async accounts => {
+contract('DelegateValidator', async accounts => {
   const aliceAddress = accounts[0]
   const bobAddress = accounts[1]
   const aliceTradeWallet = accounts[4]
+  const aliceSigner = new ethers.providers.JsonRpcProvider(
+    GANACHE_PROVIDER
+  ).getSigner(aliceAddress)
+  const bobSigner = new ethers.providers.JsonRpcProvider(
+    GANACHE_PROVIDER
+  ).getSigner(bobAddress)
   const PROTOCOL = '0x0002'
-  const UNKNOWN_KIND = '0x1234'
+  const UNKNOWN_KIND = '0x72bf82a0'
   let validator
   let aliceDelegate
   let bobDelegate
@@ -54,14 +58,13 @@ contract('Validator', async accounts => {
       const erc20TransferHandler = await ERC20TransferHandler.new()
       const transferHandlerRegistry = await TransferHandlerRegistry.new()
       await transferHandlerRegistry.addTransferHandler(
-        ERC20_INTERFACE_ID,
+        tokenKinds.ERC20,
         erc20TransferHandler.address
       )
 
       // now deploy swap
       swapContract = await Swap.new(transferHandlerRegistry.address)
       swapAddress = swapContract.address
-      orders.setVerifyingContract(swapAddress)
     })
 
     it('Deployed test contract "WETH"', async () => {
@@ -167,24 +170,21 @@ contract('Validator', async accounts => {
     before(
       'Bob creates and signs an order for Alice (200 AST for 50 DAI)',
       async () => {
-        order = await orders.getOrder({
-          sender: {
-            wallet: aliceTradeWallet,
-            token: tokenAST.address,
-            amount: 200,
-          },
-          signer: {
-            wallet: bobAddress,
-            token: tokenDAI.address,
-            amount: 50,
-          },
-        })
-
-        order.signature = await signatures.getWeb3Signature(
-          order,
-          bobAddress,
-          swapAddress,
-          GANACHE_PROVIDER
+        order = await signOrder(
+          createOrder({
+            sender: {
+              wallet: aliceTradeWallet,
+              token: tokenAST.address,
+              amount: 200,
+            },
+            signer: {
+              wallet: bobAddress,
+              token: tokenDAI.address,
+              amount: 50,
+            },
+          }),
+          bobSigner,
+          swapAddress
         )
       }
     )
@@ -206,20 +206,26 @@ contract('Validator', async accounts => {
     })
 
     it('Checks maximum delegate error generation for swap delegate', async () => {
-      const selfOrder = await orders.getOrder({
-        signer: {
-          wallet: aliceAddress,
-          token: tokenAST.address,
-          amount: 200,
-          kind: UNKNOWN_KIND,
-        },
-        sender: {
-          wallet: bobAddress,
-          token: tokenAST.address,
-          amount: 50,
-          kind: UNKNOWN_KIND,
-        },
-      })
+      const selfOrder = await signOrder(
+        createOrder({
+          signer: {
+            wallet: aliceAddress,
+            token: tokenAST.address,
+            amount: 200,
+            kind: UNKNOWN_KIND,
+          },
+          sender: {
+            wallet: bobAddress,
+            token: tokenAST.address,
+            amount: 50,
+            kind: UNKNOWN_KIND,
+          },
+        }),
+        bobSigner,
+        swapAddress
+      )
+
+      selfOrder.signature.v = 0
 
       errorCodes = await validator.checkDelegate.call(
         selfOrder,
@@ -243,24 +249,21 @@ contract('Validator', async accounts => {
     })
 
     it('Create a rule and ensure appropriate approvals gets zero error codes', async () => {
-      const order = await orders.getOrder({
-        sender: {
-          wallet: aliceTradeWallet,
-          token: tokenAST.address,
-          amount: 200,
-        },
-        signer: {
-          wallet: bobAddress,
-          token: tokenDAI.address,
-          amount: 50,
-        },
-      })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        bobAddress,
-        swapAddress,
-        GANACHE_PROVIDER
+      const order = await signOrder(
+        createOrder({
+          sender: {
+            wallet: aliceTradeWallet,
+            token: tokenAST.address,
+            amount: 200,
+          },
+          signer: {
+            wallet: bobAddress,
+            token: tokenDAI.address,
+            amount: 50,
+          },
+        }),
+        bobSigner,
+        swapAddress
       )
 
       // create a rule for AST/DAI for Alice delegate by Alice
@@ -295,24 +298,21 @@ contract('Validator', async accounts => {
     })
 
     it('Create a rule and ensure appropriate approvals but put in an invalid price', async () => {
-      const order = await orders.getOrder({
-        sender: {
-          wallet: aliceTradeWallet,
-          token: tokenAST.address,
-          amount: 200,
-        },
-        signer: {
-          wallet: bobAddress,
-          token: tokenDAI.address,
-          amount: 5000,
-        },
-      })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        bobAddress,
-        swapAddress,
-        GANACHE_PROVIDER
+      const order = await signOrder(
+        createOrder({
+          sender: {
+            wallet: aliceTradeWallet,
+            token: tokenAST.address,
+            amount: 200,
+          },
+          signer: {
+            wallet: bobAddress,
+            token: tokenDAI.address,
+            amount: 5000,
+          },
+        }),
+        bobSigner,
+        swapAddress
       )
 
       // Alice's trade wallet authorizes aliceDelegate swap to send orders
@@ -337,20 +337,26 @@ contract('Validator', async accounts => {
 
   describe('Bob interacting with Alice Delegate through a Wrapper contract', async () => {
     it('Checks wrapper specific errors for swap delegate', async () => {
-      const order = await orders.getOrder({
-        sender: {
-          wallet: aliceTradeWallet,
-          token: tokenWETH.address,
-          amount: 200,
-          kind: ERC20_INTERFACE_ID,
-        },
-        signer: {
-          wallet: bobAddress,
-          token: tokenWETH.address,
-          amount: '200000000000000000000',
-          kind: ERC20_INTERFACE_ID,
-        },
-      })
+      const order = await signOrder(
+        createOrder({
+          sender: {
+            wallet: aliceTradeWallet,
+            token: tokenWETH.address,
+            amount: 200,
+            kind: tokenKinds.ERC20,
+          },
+          signer: {
+            wallet: bobAddress,
+            token: tokenWETH.address,
+            amount: '200000000000000000000',
+            kind: tokenKinds.ERC20,
+          },
+        }),
+        aliceSigner,
+        swapAddress
+      )
+
+      order.signature.v = 0
 
       errorCodes = await validator.checkWrappedDelegate.call(
         order,
@@ -374,24 +380,21 @@ contract('Validator', async accounts => {
     })
 
     it('Create a rule and ensure appropriate approvals gets zero error codes', async () => {
-      const order = await orders.getOrder({
-        sender: {
-          wallet: aliceTradeWallet,
-          token: tokenAST.address,
-          amount: 200,
-        },
-        signer: {
-          wallet: bobAddress,
-          token: tokenWETH.address,
-          amount: 50,
-        },
-      })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        bobAddress,
-        swapAddress,
-        GANACHE_PROVIDER
+      const order = await signOrder(
+        createOrder({
+          sender: {
+            wallet: aliceTradeWallet,
+            token: tokenAST.address,
+            amount: 200,
+          },
+          signer: {
+            wallet: bobAddress,
+            token: tokenWETH.address,
+            amount: 50,
+          },
+        }),
+        bobSigner,
+        swapAddress
       )
 
       // create a rule for AST/DAI for Alice delegate by Alice
@@ -436,31 +439,28 @@ contract('Validator', async accounts => {
     })
 
     it('Checks inserting unknown kind outputs error', async () => {
-      const order = await orders.getOrder({
-        sender: {
-          wallet: aliceTradeWallet,
-          token: tokenAST.address,
-          amount: 50,
-          kind: UNKNOWN_KIND,
-        },
-        signer: {
-          wallet: bobAddress,
-          token: tokenWETH.address,
-          amount: 10,
-          kind: UNKNOWN_KIND,
-        },
-      })
+      const order = await signOrder(
+        createOrder({
+          sender: {
+            wallet: aliceTradeWallet,
+            token: tokenAST.address,
+            amount: 50,
+            kind: UNKNOWN_KIND,
+          },
+          signer: {
+            wallet: bobAddress,
+            token: tokenWETH.address,
+            amount: 10,
+            kind: UNKNOWN_KIND,
+          },
+        }),
+        bobSigner,
+        swapAddress
+      )
 
       await swapContract.authorizeSender(aliceDelegate.address, {
         from: aliceTradeWallet,
       })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        bobAddress,
-        swapAddress,
-        GANACHE_PROVIDER
-      )
 
       const errorCodes = await validator.checkWrappedDelegate.call(
         order,
@@ -475,27 +475,25 @@ contract('Validator', async accounts => {
     })
 
     it('Checks malformed order errors out', async () => {
-      const order = await orders.getOrder({
-        sender: {
-          wallet: aliceTradeWallet,
-          token: tokenAST.address,
-          amount: 200,
-          kind: ERC721_INTERFACE_ID,
-        },
-        signer: {
-          wallet: bobAddress,
-          token: tokenWETH.address,
-          amount: 50,
-          kind: ERC721_INTERFACE_ID,
-        },
-      })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        bobAddress,
-        swapAddress,
-        GANACHE_PROVIDER
+      const order = await signOrder(
+        createOrder({
+          sender: {
+            wallet: aliceTradeWallet,
+            token: tokenAST.address,
+            amount: 200,
+            kind: tokenKinds.ERC721,
+          },
+          signer: {
+            wallet: bobAddress,
+            token: tokenWETH.address,
+            amount: 50,
+            kind: tokenKinds.ERC721,
+          },
+        }),
+        bobSigner,
+        swapAddress
       )
+
       errorCodes = await validator.checkWrappedDelegate.call(
         order,
         aliceDelegate.address,
@@ -514,26 +512,23 @@ contract('Validator', async accounts => {
 
   describe('Alice interacting with Bob WETH Delegate through a Wrapper contract', async () => {
     it('Checks balance issues for weth delegate', async () => {
-      const order = await orders.getOrder({
-        signer: {
-          wallet: aliceAddress,
-          token: tokenAST.address,
-          amount: 200,
-          kind: ERC20_INTERFACE_ID,
-        },
-        sender: {
-          wallet: bobAddress,
-          token: tokenWETH.address,
-          amount: 2000,
-          kind: ERC20_INTERFACE_ID,
-        },
-      })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        aliceAddress,
-        swapAddress,
-        GANACHE_PROVIDER
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: aliceAddress,
+            token: tokenAST.address,
+            amount: 200,
+            kind: tokenKinds.ERC20,
+          },
+          sender: {
+            wallet: bobAddress,
+            token: tokenWETH.address,
+            amount: 2000,
+            kind: tokenKinds.ERC20,
+          },
+        }),
+        aliceSigner,
+        swapAddress
       )
 
       // create a rule for AST/DAI for Alice delegate by Alice
@@ -580,26 +575,23 @@ contract('Validator', async accounts => {
     })
 
     it('Checks balance issues for weth delegate', async () => {
-      const order = await orders.getOrder({
-        signer: {
-          wallet: aliceAddress,
-          token: tokenAST.address,
-          amount: 20,
-          kind: ERC20_INTERFACE_ID,
-        },
-        sender: {
-          wallet: bobAddress,
-          token: tokenWETH.address,
-          amount: 20,
-          kind: ERC20_INTERFACE_ID,
-        },
-      })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        aliceAddress,
-        swapAddress,
-        GANACHE_PROVIDER
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: aliceAddress,
+            token: tokenAST.address,
+            amount: 20,
+            kind: tokenKinds.ERC20,
+          },
+          sender: {
+            wallet: bobAddress,
+            token: tokenWETH.address,
+            amount: 20,
+            kind: tokenKinds.ERC20,
+          },
+        }),
+        aliceSigner,
+        swapAddress
       )
 
       // create a rule for AST/DAI for Alice delegate by Alice
