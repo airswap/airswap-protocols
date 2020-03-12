@@ -80,7 +80,7 @@ module.exports = async (deployer, network) => {
   //Deploy Factory-Created Contracts that also need to be verified
   if (network !== "DEVELOPMENT") {
     await deployer.deploy(Index)
-    await deployer.deploy(Delegate, Swap.address, Indexer.address, EMPTY_ADDRESS, EMPTY_ADDRESS, '0x0001')
+    await deployer.deploy(Delegate, Swap.address, Indexer.address, ADDRESS_ZERO, ADDRESS_ZERO, '0x0001')
 
   }
 
