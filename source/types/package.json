@@ -30,13 +30,13 @@
     "migrate": "yarn cp_migration_flat; truffle migrate --skip-dry-run",
     "verify": "truffle run verify"
   },
+  "dependencies": {
+    "openzeppelin-solidity": "2.4"
+  },
   "devDependencies": {
-    "@airswap/order-utils": "0.3.20",
+    "@airswap/constants": "0.3.5",
     "@airswap/tokens": "0.1.4",
     "solidity-coverage": "^0.6.3",
     "typescript": "^3.8.2"
-  },
-  "dependencies": {
-    "openzeppelin-solidity": "2.4"
   }
 }

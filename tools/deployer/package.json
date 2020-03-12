@@ -14,7 +14,7 @@
     "url": "https://github.com/airswap/airswap-protocols"
   },
   "scripts": {
-    "clean": "rm -rf ./build &&  rm -rf ./flatten",
+    "clean": "rm -rf ./build; rm -rf ./flatten",
     "compile": "truffle compile",
     "ganache": "ganache-cli -p 8545 --gasLimit 0xfffffffffff --time '2017-05-10T00:00:00+00:00' -s 0",
     "cp_migration_flat": "mkdir -p flatten/; cp contracts/Migrations.sol flatten/",
@@ -23,9 +23,8 @@
     "verify": "truffle run verify"
   },
   "devDependencies": {
-    "@airswap/tokens": "0.1.4",
-    "@airswap/order-utils": "0.3.20",
     "@airswap/test-utils": "0.1.6",
+    "@airswap/tokens": "0.1.4",
     "solidity-docgen": "0.3.0-beta.3"
   },
   "dependencies": {

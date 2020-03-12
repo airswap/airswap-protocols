@@ -11,7 +11,7 @@ class bcolors:
 DEV_DEP = "devDependencies"
 DEP = "dependencies"
 SEARCH_DIR = ['/source', '/tools']
-PACKAGE_TYPES = [ 'airswap', 'test-utils', 'order-utils' ]
+PACKAGE_TYPES = [ 'airswap', 'test-utils' ]
 
 class DependencyChecker:
 
