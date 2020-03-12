@@ -6,11 +6,8 @@ const ERC20TransferHandler = artifacts.require('ERC20TransferHandler')
 
 const ethers = require('ethers')
 const { createOrder, signOrder, createSignature } = require('@airswap/utils')
-const {
-  tokenKinds,
-  emptySignature,
-  SECONDS_IN_DAY,
-} = require('@airswap/constants')
+const { tokenKinds, SECONDS_IN_DAY } = require('@airswap/constants')
+const { emptySignature } = require('@airswap/types')
 
 const {
   constants: { GANACHE_PROVIDER },

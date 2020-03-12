@@ -11,7 +11,8 @@ const ERC20TransferHandler = artifacts.require('ERC20TransferHandler')
 
 const ethers = require('ethers')
 const { createOrder, signOrder } = require('@airswap/utils')
-const { tokenKinds, emptySignature } = require('@airswap/constants')
+const { tokenKinds } = require('@airswap/constants')
+const { emptySignature } = require('@airswap/types')
 
 const {
   emitted,

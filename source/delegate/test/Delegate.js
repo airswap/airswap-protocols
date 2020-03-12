@@ -7,11 +7,8 @@ const FungibleToken = artifacts.require('FungibleToken')
 const ERC20TransferHandler = artifacts.require('ERC20TransferHandler')
 
 const ethers = require('ethers')
-const {
-  tokenKinds,
-  emptySignature,
-  ADDRESS_ZERO,
-} = require('@airswap/constants')
+const { tokenKinds, ADDRESS_ZERO } = require('@airswap/constants')
+const { emptySignature } = require('@airswap/types')
 const { createOrder, signOrder } = require('@airswap/utils')
 const {
   emitted,
