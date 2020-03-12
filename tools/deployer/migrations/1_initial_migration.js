@@ -22,10 +22,27 @@ const {
   ERC1155_INTERFACE_ID
 } = require('@airswap/order-utils').constants
 
+CHAIN_ID = {
+    'development': '-1',
+    'mainnet': '1',
+    'rinkeby': '4',
+    'goerli': '5',
+    'kovan': '42',
+}
+
+CONTRACT_DIR = {
+    'Types': '../../source/types/deploys.json',
+    'DelegateFactory': '../../source/delegate/deploys.json',
+    'Indexer': '../../source/indexer/deploys.json',
+    'Swap': '../../source/swap/deploys.json',
+    'TransferHandlerRegistry': '../../source/swap/deploys.json',
+    'Validator': '../../source/validator/deploys.json',
+    'Wrapper': '../../source/wrapper/deploys.json'
+}
+
 module.exports = async(deployer, network) => {
 
   network = network.toUpperCase()
-
 
   let STAKING_TOKEN_ADDRESS = process.env[network + "_STAKE"]
   let WETH_ADDRESS = process.env[network + "_WETH"]
