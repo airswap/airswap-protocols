@@ -17,7 +17,7 @@
     "compile": ":"
   },
   "dependencies": {
-    "@airswap/constants": "0.3.5",
+    "@airswap/constants": "0.3.6",
     "eth-sig-util": "^2.2.0",
     "ethereumjs-util": "^6.1.0",
     "ethers": "^4.0.45",
