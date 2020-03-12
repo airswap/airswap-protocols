@@ -137,16 +137,6 @@ jobs:
           command: |
             cd tools/metadata && yarn test
 
-  order_utils_tests:
-    <<: *container_config
-    steps:
-      - attach_workspace:
-          at: *working_directory
-      - run:
-          name: Run Tests
-          command: |
-            cd tools/order-utils && yarn test
-
   protocols_tests:
     <<: *container_config
     steps:
@@ -183,7 +173,7 @@ jobs:
           command: |
             cd tools
             ### ADD FOLDERS HERE TO PROCESS ###
-            for file in constants metadata protocols utils order-utils test-utils
+            for file in constants metadata protocols utils test-utils
             do
               cd $file
               NPM_NAME=$(node -p "require('./package.json').name")
