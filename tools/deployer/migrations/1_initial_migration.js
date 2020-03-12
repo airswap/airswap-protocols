@@ -94,11 +94,9 @@ module.exports = async(deployer, network) => {
   for (let [contract_name, file_path] of Object.entries(CONTRACT_DIR)) {
     // go through all deploys json and update them
     address_json = require(file_path) 
-    console.log(address_json)
     address_json[CHAIN_ID[network]] = deploy_data[contract_name]
-    console.log(address_json)
     address_json_string = JSON.stringify(address_json, null, '  ')
-    fs.writeFileSync(file_path, address_json_string, (err) => {
+    fs.writeFileSync(__dirname + "/"+ file_path, address_json_string, (err) => {
       if (err) throw err
     })
   }
