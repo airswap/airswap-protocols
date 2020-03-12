@@ -12,17 +12,8 @@ const Index = artifacts.require('Index')
 const DelegateFactory = artifacts.require('DelegateFactory')
 const Delegate = artifacts.require('Delegate')
 const Validator = artifacts.require('Validator')
-const { ADDRESS_ZERO, tokenKinds } = require('@airswap/constants')
+const { ADDRESS_ZERO, tokenKinds, chainIds } = require('@airswap/constants')
 const fs = require('fs')
-
-
-CHAIN_ID = {
-    'DEVELOPMENT': '0',
-    'MAINNET': '1',
-    'RINKEBY': '4',
-    'GOERLI': '5',
-    'KOVAN': '42',
-}
 
 CONTRACT_DIR = {
     'Types': '../../../source/types/deploys.json',
@@ -104,8 +95,12 @@ module.exports = async (deployer, network) => {
   deploy_data['Validator'] = Validator.address
 
   for (let [contract_name, file_path] of Object.entries(CONTRACT_DIR)) {
+    // go through all deploys json and update them
+    address_json = require(file_path)
+    address_json[chainIds[network]] = deploy_data[contract_name]
     address_json_string = JSON.stringify(address_json, null, '  ')
     fs.writeFileSync(__dirname + "/"+ file_path, address_json_string, (err) => {
+      if (err) throw err
     })
   }
 }
