@@ -19,7 +19,7 @@
     "/build"
   ],
   "scripts": {
-    "clean": "rm -rf ./build/**/*",
+    "clean": "rm -rf ./build",
     "compile": "yarn clean; tsc -b"
   },
   "dependencies": {

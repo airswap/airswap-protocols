@@ -3,8 +3,9 @@ const MockContract = artifacts.require('MockContract')
 const Indexer = artifacts.require('Indexer')
 const FungibleToken = artifacts.require('FungibleToken')
 const Delegate = artifacts.require('Delegate')
+
+const { ADDRESS_ZERO } = require('@airswap/constants')
 const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
-const { EMPTY_ADDRESS } = require('@airswap/order-utils').constants
 const { passes, equal, emitted } = require('@airswap/test-utils').assert
 const { padAddressToLocator } = require('@airswap/test-utils').padding
 
@@ -29,7 +30,7 @@ contract('Delegate Factory Tests', async accounts => {
     const mockFungibleTokenTemplate = await FungibleToken.new()
 
     mockStakingToken_approve = await mockFungibleTokenTemplate.contract.methods
-      .approve(EMPTY_ADDRESS, 0)
+      .approve(ADDRESS_ZERO, 0)
       .encodeABI()
 
     await mockStakingToken.givenMethodReturnBool(mockStakingToken_approve, true)
@@ -37,7 +38,7 @@ contract('Delegate Factory Tests', async accounts => {
 
   async function setupMockIndexer() {
     mockIndexer = await MockContract.new()
-    const mockIndexerTemplate = await Indexer.new(EMPTY_ADDRESS)
+    const mockIndexerTemplate = await Indexer.new(ADDRESS_ZERO)
 
     //mock stakingToken()
     const mockIndexer_stakingToken = mockIndexerTemplate.contract.methods

@@ -14,10 +14,6 @@
 - Blog → https://blog.airswap.io/
 - Support → https://support.airswap.io/
 
-## For V1 Users
-
-To migrate from the V1 to V2 protocol see [MIGRATION.md](./MIGRATION.md).
-
 ## Deploys
 
 See [deploys.json](./deploys.json) for latest contract deployments on Rinkeby (`4`) and Mainnet (`1`).

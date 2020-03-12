@@ -12,6 +12,10 @@ const ERC20TransferHandler = artifacts.require('ERC20TransferHandler')
 const ERC721TransferHandler = artifacts.require('ERC721TransferHandler')
 const ERC1155TransferHandler = artifacts.require('ERC1155TransferHandler')
 const KittyCoreTransferHandler = artifacts.require('KittyCoreTransferHandler')
+
+const ethers = require('ethers')
+const { tokenKinds, ADDRESS_ZERO } = require('@airswap/constants')
+const { createOrder, signOrder } = require('@airswap/utils')
 const {
   emitted,
   equal,
@@ -22,24 +26,22 @@ const {
 } = require('@airswap/test-utils').assert
 const { allowances, balances } = require('@airswap/test-utils').balances
 const { getLatestTimestamp } = require('@airswap/test-utils').time
-const { orders, signatures } = require('@airswap/order-utils')
-const {
-  EMPTY_ADDRESS,
-  ERC20_INTERFACE_ID,
-  ERC721_INTERFACE_ID,
-  ERC1155_INTERFACE_ID,
-  CK_INTERFACE_ID,
-  GANACHE_PROVIDER,
-} = require('@airswap/order-utils').constants
+const { GANACHE_PROVIDER } = require('@airswap/test-utils').constants
+const { getTestWallet } = require('@airswap/test-utils').functions
 
-contract('Validator', async accounts => {
+contract('SwapValidator', async accounts => {
   const aliceAddress = accounts[0]
   const bobAddress = accounts[1]
-  const eveAddress = '0x9d2fB0BCC90C6F3Fa3a98D2C760623a4F6Ee59b4'
-  const evePrivKey = Buffer.from(
-    '4934d4ff925f39f91e3729fbce52ef12f25fdf93e014e291350f7d314c1a096b',
-    'hex'
-  )
+
+  const aliceSigner = new ethers.providers.JsonRpcProvider(
+    GANACHE_PROVIDER
+  ).getSigner(aliceAddress)
+  const bobSigner = new ethers.providers.JsonRpcProvider(
+    GANACHE_PROVIDER
+  ).getSigner(bobAddress)
+
+  const eveSigner = getTestWallet()
+
   const FAKE_TRANSFER_HANDLER = '0xFFFFF'
   const UNKNOWN_KIND = '0x9999'
   let validator
@@ -70,19 +72,19 @@ contract('Validator', async accounts => {
       const kittyCoreTransferHandler = await KittyCoreTransferHandler.new()
       const transferHandlerRegistry = await TransferHandlerRegistry.new()
       await transferHandlerRegistry.addTransferHandler(
-        ERC20_INTERFACE_ID,
+        tokenKinds.ERC20,
         erc20TransferHandler.address
       )
       await transferHandlerRegistry.addTransferHandler(
-        ERC721_INTERFACE_ID,
+        tokenKinds.ERC721,
         erc721TransferHandler.address
       )
       await transferHandlerRegistry.addTransferHandler(
-        CK_INTERFACE_ID,
+        tokenKinds.CKITTY,
         kittyCoreTransferHandler.address
       )
       await transferHandlerRegistry.addTransferHandler(
-        ERC1155_INTERFACE_ID,
+        tokenKinds.ERC1155,
         erc1155TransferHandler.address
       )
 
@@ -97,8 +99,6 @@ contract('Validator', async accounts => {
 
       swap = swapContract.swap
       cancelUpTo = swapContract.methods['cancelUpTo(uint256)']
-
-      orders.setVerifyingContract(swapAddress)
     })
 
     it('Deployed Wrapper contract', async () => {
@@ -180,24 +180,21 @@ contract('Validator', async accounts => {
     let order
 
     before('Alice creates an order for Bob (200 AST for 50 DAI)', async () => {
-      order = await orders.getOrder({
-        signer: {
-          wallet: aliceAddress,
-          token: tokenAST.address,
-          amount: 200,
-        },
-        sender: {
-          wallet: bobAddress,
-          token: tokenDAI.address,
-          amount: 50,
-        },
-      })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        aliceAddress,
-        swapAddress,
-        GANACHE_PROVIDER
+      order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: aliceAddress,
+            token: tokenAST.address,
+            amount: 200,
+          },
+          sender: {
+            wallet: bobAddress,
+            token: tokenDAI.address,
+            amount: 50,
+          },
+        }),
+        aliceSigner,
+        swapAddress
       )
     })
 
@@ -206,22 +203,26 @@ contract('Validator', async accounts => {
         from: bobAddress,
       })
       equal(checkerOutput[0], 0)
-      equal(checkerOutput[1][0].substring(0, 42), EMPTY_ADDRESS)
+      equal(checkerOutput[1][0].substring(0, 42), ADDRESS_ZERO)
     })
 
     it('Checks that Alice cannot swap with herself (200 AST for 50 AST)', async () => {
-      const selfOrder = await orders.getOrder({
-        signer: {
-          wallet: aliceAddress,
-          token: tokenAST.address,
-          amount: 200,
-        },
-        sender: {
-          wallet: aliceAddress,
-          token: tokenAST.address,
-          amount: 50,
-        },
-      })
+      const selfOrder = await signOrder(
+        createOrder({
+          signer: {
+            wallet: aliceAddress,
+            token: tokenAST.address,
+            amount: 200,
+          },
+          sender: {
+            wallet: aliceAddress,
+            token: tokenAST.address,
+            amount: 50,
+          },
+        }),
+        bobSigner,
+        swapAddress
+      )
 
       errorCodes = await validator.checkSwap.call(selfOrder, {
         from: bobAddress,
@@ -235,18 +236,22 @@ contract('Validator', async accounts => {
     })
 
     it('Checks error messages for invalid balances and approvals', async () => {
-      const order = await orders.getOrder({
-        signer: {
-          wallet: aliceAddress,
-          token: tokenAST.address,
-          amount: 200000,
-        },
-        sender: {
-          wallet: bobAddress,
-          token: tokenAST.address,
-          amount: 200000,
-        },
-      })
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: aliceAddress,
+            token: tokenAST.address,
+            amount: 200000,
+          },
+          sender: {
+            wallet: bobAddress,
+            token: tokenAST.address,
+            amount: 200000,
+          },
+        }),
+        bobSigner,
+        swapAddress
+      )
 
       errorCodes = await validator.checkSwap.call(order, {
         from: bobAddress,
@@ -275,27 +280,25 @@ contract('Validator', async accounts => {
     it('Checks expired, low nonced, and invalid sig order emits error', async () => {
       emitted(await cancelUpTo(10, { from: aliceAddress }), 'CancelUpTo')
 
-      const order = await orders.getOrder({
-        signer: {
-          wallet: aliceAddress,
-          token: tokenAST.address,
-          amount: 20,
-        },
-        sender: {
-          wallet: bobAddress,
-          token: tokenDAI.address,
-          amount: 5,
-        },
-        expiry: (await getLatestTimestamp()) - 10, // expired time
-        nonce: 5, // nonce below minimum threshold
-      })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        aliceAddress,
-        swapAddress,
-        GANACHE_PROVIDER
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: aliceAddress,
+            token: tokenAST.address,
+            amount: 20,
+          },
+          sender: {
+            wallet: bobAddress,
+            token: tokenDAI.address,
+            amount: 5,
+          },
+          expiry: (await getLatestTimestamp()) - 10, // expired time
+          nonce: 5, // nonce below minimum threshold
+        }),
+        aliceSigner,
+        swapAddress
       )
+
       // add an invalid signature
       order.signature.v = 3
 
@@ -311,7 +314,7 @@ contract('Validator', async accounts => {
 
     it('Alice authorizes Carol to make orders on her behalf', async () => {
       emitted(
-        await swapContract.authorizeSigner(eveAddress, {
+        await swapContract.authorizeSigner(eveSigner.address, {
           from: aliceAddress,
         }),
         'AuthorizeSigner'
@@ -319,32 +322,30 @@ contract('Validator', async accounts => {
     })
 
     it('Check from a different approved signer and empty sender address', async () => {
-      const order = await orders.getOrder({
-        signer: {
-          wallet: aliceAddress,
-          token: tokenAST.address,
-          amount: 20,
-        },
-        sender: {
-          wallet: EMPTY_ADDRESS,
-          token: tokenDAI.address,
-          amount: 50000,
-        },
-      })
-
-      order.signature = signatures.getPrivateKeySignature(
-        order,
-        evePrivKey,
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: aliceAddress,
+            token: tokenAST.address,
+            amount: 20,
+          },
+          sender: {
+            wallet: ADDRESS_ZERO,
+            token: tokenDAI.address,
+            amount: 50000,
+          },
+        }),
+        eveSigner,
         swapAddress
       )
 
-      order.signature.signatory = eveAddress
+      order.signature.signatory = eveSigner.address
 
       errorCodes = await validator.checkSwap.call(order, {
         from: bobAddress,
       })
       equal(errorCodes[0], 0)
-      equal(errorCodes[1][0].substring(0, 42), EMPTY_ADDRESS)
+      equal(errorCodes[1][0].substring(0, 42), ADDRESS_ZERO)
     })
   })
 
@@ -364,26 +365,24 @@ contract('Validator', async accounts => {
     })
 
     it('Alice tries to buy non-owned NFT #54320 from Bob for 50 AST causes revert', async () => {
-      const order = await orders.getOrder({
-        signer: {
-          wallet: aliceAddress,
-          token: tokenAST.address,
-          amount: 50,
-        },
-        sender: {
-          wallet: bobAddress,
-          token: godsUnchained.address,
-          id: 54320,
-          kind: ERC721_INTERFACE_ID,
-        },
-      })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        aliceAddress,
-        swapAddress,
-        GANACHE_PROVIDER
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: aliceAddress,
+            token: tokenAST.address,
+            amount: 50,
+          },
+          sender: {
+            wallet: bobAddress,
+            token: godsUnchained.address,
+            id: 54320,
+            kind: tokenKinds.ERC721,
+          },
+        }),
+        aliceSigner,
+        swapAddress
       )
+
       await reverted(
         validator.checkSwap.call(order, { from: bobAddress }),
         'revert ERC721: owner query for nonexistent token'
@@ -391,25 +390,22 @@ contract('Validator', async accounts => {
     })
 
     it('Alice tries to buy non-approved NFT #54321 from Bob for 50 AST', async () => {
-      const order = await orders.getOrder({
-        signer: {
-          wallet: aliceAddress,
-          token: tokenAST.address,
-          amount: 50,
-        },
-        sender: {
-          wallet: bobAddress,
-          token: godsUnchained.address,
-          id: 54321,
-          kind: ERC721_INTERFACE_ID,
-        },
-      })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        aliceAddress,
-        swapAddress,
-        GANACHE_PROVIDER
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: aliceAddress,
+            token: tokenAST.address,
+            amount: 50,
+          },
+          sender: {
+            wallet: bobAddress,
+            token: godsUnchained.address,
+            id: 54321,
+            kind: tokenKinds.ERC721,
+          },
+        }),
+        aliceSigner,
+        swapAddress
       )
 
       order.signature.version = '0x99' // incorrect version
@@ -440,26 +436,24 @@ contract('Validator', async accounts => {
     })
 
     it('Alice tries to buy non-owned Kitty #124 from Bob for 50 AST causes revert', async () => {
-      const order = await orders.getOrder({
-        signer: {
-          wallet: aliceAddress,
-          token: tokenAST.address,
-          amount: 50,
-        },
-        sender: {
-          wallet: bobAddress,
-          token: cryptoKitties.address,
-          id: 124,
-          kind: CK_INTERFACE_ID,
-        },
-      })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        aliceAddress,
-        swapAddress,
-        GANACHE_PROVIDER
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: aliceAddress,
+            token: tokenAST.address,
+            amount: 50,
+          },
+          sender: {
+            wallet: bobAddress,
+            token: cryptoKitties.address,
+            id: 124,
+            kind: tokenKinds.CKITTY,
+          },
+        }),
+        aliceSigner,
+        swapAddress
       )
+
       await reverted(
         validator.checkSwap.call(order, { from: bobAddress }),
         'revert ERC721: owner query for nonexistent token'
@@ -467,25 +461,22 @@ contract('Validator', async accounts => {
     })
 
     it('Alice tries to buy a token that Bob doesnt own', async () => {
-      const order = await orders.getOrder({
-        signer: {
-          wallet: aliceAddress,
-          token: tokenAST.address,
-          amount: 50,
-        },
-        sender: {
-          wallet: bobAddress,
-          token: cryptoKitties.address,
-          id: 1,
-          kind: CK_INTERFACE_ID,
-        },
-      })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        aliceAddress,
-        swapAddress,
-        GANACHE_PROVIDER
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: aliceAddress,
+            token: tokenAST.address,
+            amount: 50,
+          },
+          sender: {
+            wallet: bobAddress,
+            token: cryptoKitties.address,
+            id: 1,
+            kind: tokenKinds.CKITTY,
+          },
+        }),
+        aliceSigner,
+        swapAddress
       )
 
       errorCodes = await validator.checkSwap.call(order, {
@@ -497,25 +488,22 @@ contract('Validator', async accounts => {
     })
 
     it('Alice tries to buy non-approved Kitty #123 from Bob for 50 AST', async () => {
-      const order = await orders.getOrder({
-        signer: {
-          wallet: aliceAddress,
-          token: tokenAST.address,
-          amount: 50,
-        },
-        sender: {
-          wallet: bobAddress,
-          token: cryptoKitties.address,
-          id: 123,
-          kind: CK_INTERFACE_ID,
-        },
-      })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        aliceAddress,
-        swapAddress,
-        GANACHE_PROVIDER
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: aliceAddress,
+            token: tokenAST.address,
+            amount: 50,
+          },
+          sender: {
+            wallet: bobAddress,
+            token: cryptoKitties.address,
+            id: 123,
+            kind: tokenKinds.CKITTY,
+          },
+        }),
+        aliceSigner,
+        swapAddress
       )
 
       order.signature.version = '0x99' // incorrect version
@@ -545,27 +533,25 @@ contract('Validator', async accounts => {
     })
 
     it('Alice tries to buy 10 non-owned asset #12355 from Bob for 50 AST', async () => {
-      const order = await orders.getOrder({
-        signer: {
-          wallet: aliceAddress,
-          token: tokenAST.address,
-          amount: 50,
-        },
-        sender: {
-          wallet: bobAddress,
-          token: erc1155.address,
-          id: 12355,
-          amount: 10,
-          kind: ERC1155_INTERFACE_ID,
-        },
-      })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        aliceAddress,
-        swapAddress,
-        GANACHE_PROVIDER
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: aliceAddress,
+            token: tokenAST.address,
+            amount: 50,
+          },
+          sender: {
+            wallet: bobAddress,
+            token: erc1155.address,
+            id: 12355,
+            amount: 10,
+            kind: tokenKinds.ERC1155,
+          },
+        }),
+        aliceSigner,
+        swapAddress
       )
+
       errorCodes = await validator.checkSwap.call(order, {
         from: bobAddress,
       })
@@ -575,26 +561,23 @@ contract('Validator', async accounts => {
     })
 
     it('Alice tries to buy 10 non approved asset #1234 from Bob for 50 AST', async () => {
-      const order = await orders.getOrder({
-        signer: {
-          wallet: aliceAddress,
-          token: tokenAST.address,
-          amount: 50,
-        },
-        sender: {
-          wallet: bobAddress,
-          token: erc1155.address,
-          id: 1234,
-          amount: 10,
-          kind: ERC1155_INTERFACE_ID,
-        },
-      })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        aliceAddress,
-        swapAddress,
-        GANACHE_PROVIDER
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: aliceAddress,
+            token: tokenAST.address,
+            amount: 50,
+          },
+          sender: {
+            wallet: bobAddress,
+            token: erc1155.address,
+            id: 1234,
+            amount: 10,
+            kind: tokenKinds.ERC1155,
+          },
+        }),
+        aliceSigner,
+        swapAddress
       )
 
       order.signature.version = '0x99' // incorrect version
@@ -612,26 +595,23 @@ contract('Validator', async accounts => {
     let order
 
     it('Alice creates an order for Bob (200 AST for 50 DAI) with unknown kind', async () => {
-      order = await orders.getOrder({
-        signer: {
-          wallet: aliceAddress,
-          token: tokenAST.address,
-          amount: 200,
-          kind: UNKNOWN_KIND,
-        },
-        sender: {
-          wallet: bobAddress,
-          token: tokenDAI.address,
-          amount: 50,
-          kind: UNKNOWN_KIND,
-        },
-      })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        aliceAddress,
-        swapAddress,
-        GANACHE_PROVIDER
+      order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: aliceAddress,
+            token: tokenAST.address,
+            amount: 200,
+            kind: UNKNOWN_KIND,
+          },
+          sender: {
+            wallet: bobAddress,
+            token: tokenDAI.address,
+            amount: 50,
+            kind: UNKNOWN_KIND,
+          },
+        }),
+        aliceSigner,
+        swapAddress
       )
     })
 
@@ -649,26 +629,23 @@ contract('Validator', async accounts => {
     let order
 
     it('Alice creates an order for Bob (200 non-contract address for 50 non-contract address) will revert', async () => {
-      order = await orders.getOrder({
-        signer: {
-          wallet: aliceAddress,
-          token: aliceAddress,
-          amount: 200,
-          kind: ERC20_INTERFACE_ID,
-        },
-        sender: {
-          wallet: bobAddress,
-          token: bobAddress,
-          amount: 50,
-          kind: ERC20_INTERFACE_ID,
-        },
-      })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        aliceAddress,
-        swapAddress,
-        GANACHE_PROVIDER
+      order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: aliceAddress,
+            token: aliceAddress,
+            amount: 200,
+            kind: tokenKinds.ERC20,
+          },
+          sender: {
+            wallet: bobAddress,
+            token: bobAddress,
+            amount: 50,
+            kind: tokenKinds.ERC20,
+          },
+        }),
+        aliceSigner,
+        swapAddress
       )
     })
 
@@ -685,26 +662,23 @@ contract('Validator', async accounts => {
     let order
 
     it('Alice creates an order for Bob for incorrect kind will output errors and skip balance checks', async () => {
-      order = await orders.getOrder({
-        signer: {
-          wallet: aliceAddress,
-          token: aliceAddress,
-          amount: 200,
-          kind: ERC721_INTERFACE_ID,
-        },
-        sender: {
-          wallet: bobAddress,
-          token: bobAddress,
-          amount: 50,
-          kind: ERC721_INTERFACE_ID,
-        },
-      })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        aliceAddress,
-        swapAddress,
-        GANACHE_PROVIDER
+      order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: aliceAddress,
+            token: aliceAddress,
+            amount: 200,
+            kind: tokenKinds.ERC721,
+          },
+          sender: {
+            wallet: bobAddress,
+            token: bobAddress,
+            amount: 50,
+            kind: tokenKinds.ERC721,
+          },
+        }),
+        aliceSigner,
+        swapAddress
       )
     })
 
@@ -724,28 +698,25 @@ contract('Validator', async accounts => {
     let order
 
     it('Alice creates an order for Bob for kind with invalid ids', async () => {
-      order = await orders.getOrder({
-        signer: {
-          wallet: aliceAddress,
-          token: tokenAST.address,
-          id: 200,
-          amount: 200,
-          kind: ERC20_INTERFACE_ID,
-        },
-        sender: {
-          wallet: bobAddress,
-          token: tokenDAI.address,
-          id: 50,
-          amount: 50,
-          kind: ERC20_INTERFACE_ID,
-        },
-      })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        aliceAddress,
-        swapAddress,
-        GANACHE_PROVIDER
+      order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: aliceAddress,
+            token: tokenAST.address,
+            id: 200,
+            amount: 200,
+            kind: tokenKinds.ERC20,
+          },
+          sender: {
+            wallet: bobAddress,
+            token: tokenDAI.address,
+            id: 50,
+            amount: 50,
+            kind: tokenKinds.ERC20,
+          },
+        }),
+        aliceSigner,
+        swapAddress
       )
     })
 
@@ -764,30 +735,27 @@ contract('Validator', async accounts => {
     let order
 
     it('Alice creates an order for Bob for kind with invalid validator address', async () => {
-      order = await orders.getOrder({
-        signer: {
-          wallet: aliceAddress,
-          token: tokenAST.address,
-          id: 200,
-          amount: 200,
-          kind: ERC20_INTERFACE_ID,
-        },
-        sender: {
-          wallet: bobAddress,
-          token: tokenDAI.address,
-          id: 50,
-          amount: 50,
-          kind: ERC20_INTERFACE_ID,
-        },
-      })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        aliceAddress,
-        swapAddress,
-        GANACHE_PROVIDER
+      order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: aliceAddress,
+            token: tokenAST.address,
+            id: 200,
+            amount: 200,
+            kind: tokenKinds.ERC20,
+          },
+          sender: {
+            wallet: bobAddress,
+            token: tokenDAI.address,
+            id: 50,
+            amount: 50,
+            kind: tokenKinds.ERC20,
+          },
+        }),
+        aliceSigner,
+        swapAddress
       )
-      order.signature.validator = EMPTY_ADDRESS
+      order.signature.validator = ADDRESS_ZERO
     })
 
     it('Checks malformed order errors out from invalid validator', async () => {
@@ -807,31 +775,28 @@ contract('Validator', async accounts => {
   describe('Wrapper Buys on Swap (Fungible)', async () => {
     it('Checks that valid order has zero errors with WETH on sender wallet', async () => {
       // Bob take a WETH for DAI order from Alice using ETH
-      const order = await orders.getOrder({
-        signer: {
-          wallet: aliceAddress,
-          token: tokenAST.address,
-          amount: 50,
-        },
-        sender: {
-          wallet: bobAddress,
-          token: tokenWETH.address,
-          amount: 10,
-        },
-      })
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: aliceAddress,
+            token: tokenAST.address,
+            amount: 50,
+          },
+          sender: {
+            wallet: bobAddress,
+            token: tokenWETH.address,
+            amount: 10,
+          },
+        }),
+        aliceSigner,
+        swapAddress
+      )
 
       // Bob authorizes swap to send orders on his behalf
       // function also checks that msg.sender == order.sender.wallet
       await swapContract.authorizeSender(wrapperAddress, {
         from: bobAddress,
       })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        aliceAddress,
-        swapAddress,
-        GANACHE_PROVIDER
-      )
 
       const errorCodes = await validator.checkWrappedSwap.call(
         order,
@@ -841,23 +806,29 @@ contract('Validator', async accounts => {
       )
 
       equal(errorCodes[0], 0)
-      equal(errorCodes[1][0].substring(0, 42), EMPTY_ADDRESS)
+      equal(errorCodes[1][0].substring(0, 42), ADDRESS_ZERO)
     })
 
     it('Checks errors out with lack of balances and allowance on wrapper', async () => {
       // Bob take a WETH for DAI order from Alice using ETH
-      const order = await orders.getOrder({
-        sender: {
-          wallet: aliceAddress,
-          token: tokenDAI.address,
-          amount: 50000,
-        },
-        signer: {
-          wallet: bobAddress,
-          token: tokenWETH.address,
-          amount: 10,
-        },
-      })
+      const order = await signOrder(
+        createOrder({
+          sender: {
+            wallet: aliceAddress,
+            token: tokenDAI.address,
+            amount: 50000,
+          },
+          signer: {
+            wallet: bobAddress,
+            token: tokenWETH.address,
+            amount: 10,
+          },
+        }),
+        aliceSigner,
+        swapAddress
+      )
+
+      order.signature.v = 0
 
       const errorCodes = await validator.checkWrappedSwap.call(
         order,
@@ -882,20 +853,25 @@ contract('Validator', async accounts => {
 
     it('Checks errors out with invalid validator address', async () => {
       // Bob take a WETH for DAI order from Alice using ETH
-      const order = await orders.getOrder({
-        sender: {
-          wallet: aliceAddress,
-          token: tokenDAI.address,
-          amount: 50000,
-        },
-        signer: {
-          wallet: bobAddress,
-          token: tokenWETH.address,
-          amount: 10,
-        },
-      })
+      const order = await signOrder(
+        createOrder({
+          sender: {
+            wallet: aliceAddress,
+            token: tokenDAI.address,
+            amount: 50000,
+          },
+          signer: {
+            wallet: bobAddress,
+            token: tokenWETH.address,
+            amount: 10,
+          },
+        }),
+        bobSigner,
+        swapAddress
+      )
 
-      order.signature.validator = EMPTY_ADDRESS
+      order.signature.v = 0
+      order.signature.validator = ADDRESS_ZERO
 
       const errorCodes = await validator.checkWrappedSwap.call(
         order,
@@ -918,24 +894,21 @@ contract('Validator', async accounts => {
 
     it('Adding approval allows for zero errors and successful fill of order signer WETH', async () => {
       // Bob take a WETH for DAI order from Alice using ETH
-      const order = await orders.getOrder({
-        sender: {
-          wallet: aliceAddress,
-          token: tokenAST.address,
-          amount: 50,
-        },
-        signer: {
-          wallet: bobAddress,
-          token: tokenWETH.address,
-          amount: 10,
-        },
-      })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        bobAddress,
-        swapAddress,
-        GANACHE_PROVIDER
+      const order = await signOrder(
+        createOrder({
+          sender: {
+            wallet: aliceAddress,
+            token: tokenAST.address,
+            amount: 50,
+          },
+          signer: {
+            wallet: bobAddress,
+            token: tokenWETH.address,
+            amount: 10,
+          },
+        }),
+        bobSigner,
+        swapAddress
       )
 
       // Ensure bob has sufficient WETH
@@ -967,31 +940,28 @@ contract('Validator', async accounts => {
 
     it('Checks that valid order has zero errors with WETH on sender wallet', async () => {
       // Bob take a WETH for DAI order from Alice using ETH
-      const order = await orders.getOrder({
-        signer: {
-          wallet: aliceAddress,
-          token: tokenAST.address,
-          amount: 50,
-        },
-        sender: {
-          wallet: bobAddress,
-          token: tokenWETH.address,
-          amount: 10,
-        },
-      })
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: aliceAddress,
+            token: tokenAST.address,
+            amount: 50,
+          },
+          sender: {
+            wallet: bobAddress,
+            token: tokenWETH.address,
+            amount: 10,
+          },
+        }),
+        aliceSigner,
+        swapAddress
+      )
 
       // Bob authorizes swap to send orders on his behalf
       // function also checks that msg.sender == order.sender.wallet
       await swapContract.authorizeSender(wrapperAddress, {
         from: bobAddress,
       })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        aliceAddress,
-        swapAddress,
-        GANACHE_PROVIDER
-      )
 
       const errorCodes = await validator.checkWrappedSwap.call(
         order,
@@ -1017,24 +987,21 @@ contract('Validator', async accounts => {
 
     it('Checks that massive ETH trade will error if invalid balance', async () => {
       // Bob take a WETH for DAI order from Alice using ETH
-      const order = await orders.getOrder({
-        signer: {
-          wallet: aliceAddress,
-          token: tokenDAI.address,
-          amount: '50',
-        },
-        sender: {
-          wallet: bobAddress,
-          token: tokenWETH.address,
-          amount: '100000000000000000000000',
-        },
-      })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        aliceAddress,
-        swapAddress,
-        GANACHE_PROVIDER
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: aliceAddress,
+            token: tokenDAI.address,
+            amount: '50',
+          },
+          sender: {
+            wallet: bobAddress,
+            token: tokenWETH.address,
+            amount: '100000000000000000000000',
+          },
+        }),
+        aliceSigner,
+        swapAddress
       )
 
       const errorCodes = await validator.checkWrappedSwap.call(
@@ -1052,18 +1019,24 @@ contract('Validator', async accounts => {
 
   describe('Wrapper Receive ETH on Swap (Fungible)', async () => {
     it('Checks errors out with lack of allowance on wrapper', async () => {
-      const order = await orders.getOrder({
-        sender: {
-          wallet: aliceAddress,
-          token: tokenAST.address,
-          amount: 50,
-        },
-        signer: {
-          wallet: bobAddress,
-          token: tokenWETH.address,
-          amount: 10,
-        },
-      })
+      const order = await signOrder(
+        createOrder({
+          sender: {
+            wallet: aliceAddress,
+            token: tokenAST.address,
+            amount: 50,
+          },
+          signer: {
+            wallet: bobAddress,
+            token: tokenWETH.address,
+            amount: 10,
+          },
+        }),
+        aliceSigner,
+        swapAddress
+      )
+
+      order.signature.v = 0
 
       const errorCodes = await validator.checkWrappedSwap.call(
         order,
@@ -1081,18 +1054,24 @@ contract('Validator', async accounts => {
     })
 
     it('Checks sending empty address on sender does not break validator', async () => {
-      const order = await orders.getOrder({
-        signer: {
-          wallet: aliceAddress,
-          token: tokenAST.address,
-          amount: 50,
-        },
-        sender: {
-          wallet: EMPTY_ADDRESS,
-          token: tokenWETH.address,
-          amount: 10,
-        },
-      })
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: aliceAddress,
+            token: tokenAST.address,
+            amount: 50,
+          },
+          sender: {
+            wallet: ADDRESS_ZERO,
+            token: tokenWETH.address,
+            amount: 10,
+          },
+        }),
+        bobSigner,
+        swapAddress
+      )
+
+      order.signature.v = 0
 
       const errorCodes = await validator.checkWrappedSwap.call(
         order,
@@ -1113,24 +1092,21 @@ contract('Validator', async accounts => {
     })
 
     it('Adding approval allows for zero errors and successful fill of order signer WETH', async () => {
-      const order = await orders.getOrder({
-        sender: {
-          wallet: aliceAddress,
-          token: tokenAST.address,
-          amount: 50,
-        },
-        signer: {
-          wallet: bobAddress,
-          token: tokenWETH.address,
-          amount: 10,
-        },
-      })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        bobAddress,
-        swapAddress,
-        GANACHE_PROVIDER
+      const order = await signOrder(
+        createOrder({
+          sender: {
+            wallet: aliceAddress,
+            token: tokenAST.address,
+            amount: 50,
+          },
+          signer: {
+            wallet: bobAddress,
+            token: tokenWETH.address,
+            amount: 10,
+          },
+        }),
+        bobSigner,
+        swapAddress
       )
 
       // Ensure bob has sufficient WETH
@@ -1167,33 +1143,30 @@ contract('Validator', async accounts => {
     })
 
     it('Checks inserting unknown kind outputs error', async () => {
-      const order = await orders.getOrder({
-        sender: {
-          wallet: aliceAddress,
-          token: tokenAST.address,
-          amount: 50,
-          kind: UNKNOWN_KIND,
-        },
-        signer: {
-          wallet: bobAddress,
-          token: tokenWETH.address,
-          amount: 10,
-          kind: UNKNOWN_KIND,
-        },
-      })
+      const order = await signOrder(
+        createOrder({
+          sender: {
+            wallet: aliceAddress,
+            token: tokenAST.address,
+            amount: 50,
+            kind: UNKNOWN_KIND,
+          },
+          signer: {
+            wallet: bobAddress,
+            token: tokenWETH.address,
+            amount: 10,
+            kind: UNKNOWN_KIND,
+          },
+        }),
+        bobSigner,
+        swapAddress
+      )
 
       // Bob authorizes swap to send orders on his behalf
       // function also checks that msg.sender == order.sender.wallet
       await swapContract.authorizeSender(wrapperAddress, {
         from: bobAddress,
       })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        bobAddress,
-        swapAddress,
-        GANACHE_PROVIDER
-      )
 
       const errorCodes = await validator.checkWrappedSwap.call(
         order,
@@ -1208,27 +1181,25 @@ contract('Validator', async accounts => {
     })
 
     it('Checks malformed order errors out', async () => {
-      const order = await orders.getOrder({
-        signer: {
-          wallet: aliceAddress,
-          token: tokenAST.address,
-          amount: 200,
-          kind: ERC721_INTERFACE_ID,
-        },
-        sender: {
-          wallet: bobAddress,
-          token: tokenWETH.address,
-          amount: 50,
-          kind: ERC721_INTERFACE_ID,
-        },
-      })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        aliceAddress,
-        swapAddress,
-        GANACHE_PROVIDER
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: aliceAddress,
+            token: tokenAST.address,
+            amount: 200,
+            kind: tokenKinds.ERC721,
+          },
+          sender: {
+            wallet: bobAddress,
+            token: tokenWETH.address,
+            amount: 50,
+            kind: tokenKinds.ERC721,
+          },
+        }),
+        aliceSigner,
+        swapAddress
       )
+
       errorCodes = await validator.checkWrappedSwap.call(
         order,
         bobAddress,

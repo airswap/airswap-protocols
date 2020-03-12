@@ -9,12 +9,7 @@ const ERC721TransferHandler = artifacts.require('ERC721TransferHandler')
 const ERC1155TransferHandler = artifacts.require('ERC1155TransferHandler')
 const { emitted, reverted, ok, equal } = require('@airswap/test-utils').assert
 const { allowances, balances } = require('@airswap/test-utils').balances
-const {
-  ERC20_INTERFACE_ID,
-  ERC721_INTERFACE_ID,
-  ERC1155_INTERFACE_ID,
-  CK_INTERFACE_ID,
-} = require('@airswap/order-utils').constants
+const { tokenKinds } = require('@airswap/constants')
 
 contract('TransferHandlerRegistry', async accounts => {
   const aliceAddress = accounts[0]
@@ -55,7 +50,7 @@ contract('TransferHandlerRegistry', async accounts => {
       // failed to add kittyCore by bob since non-owner
       reverted(
         transferHandlerRegistry.addTransferHandler(
-          CK_INTERFACE_ID,
+          tokenKinds.CKITTY,
           kittyCoreHandler.address,
           { from: bobAddress }
         ),
@@ -75,19 +70,19 @@ contract('TransferHandlerRegistry', async accounts => {
 
       // add all 4 of these contracts into the TokenRegistry
       await transferHandlerRegistry.addTransferHandler(
-        CK_INTERFACE_ID,
+        tokenKinds.CKITTY,
         kittyCoreHandler.address
       )
       await transferHandlerRegistry.addTransferHandler(
-        ERC20_INTERFACE_ID,
+        tokenKinds.ERC20,
         erc20TransferHandler.address
       )
       await transferHandlerRegistry.addTransferHandler(
-        ERC721_INTERFACE_ID,
+        tokenKinds.ERC721,
         erc721TransferHandler.address
       )
       await transferHandlerRegistry.addTransferHandler(
-        ERC1155_INTERFACE_ID,
+        tokenKinds.ERC1155,
         erc1155TransferHandler.address
       )
     })
@@ -124,7 +119,7 @@ contract('TransferHandlerRegistry', async accounts => {
       'Carol initiates a transfer of AST tokens from Alice to Bob',
       async () => {
         const handlerAddress = await transferHandlerRegistry.transferHandlers.call(
-          ERC20_INTERFACE_ID
+          tokenKinds.ERC20
         )
         equal(
           handlerAddress,
@@ -239,7 +234,7 @@ contract('TransferHandlerRegistry', async accounts => {
       )
 
       const handlerAddress = await transferHandlerRegistry.transferHandlers.call(
-        ERC721_INTERFACE_ID
+        tokenKinds.ERC721
       )
       equal(
         handlerAddress,
@@ -304,12 +299,12 @@ contract('TransferHandlerRegistry', async accounts => {
 
     it('Carol fails to perform transfer of CKITTY collectable #54321 from Bob to Alice when an amount is set', async () => {
       const handlerAddress = await transferHandlerRegistry.transferHandlers.call(
-        CK_INTERFACE_ID
+        tokenKinds.CKITTY
       )
       equal(
         handlerAddress,
         kittyCoreHandlerAddress,
-        'Kind does not match CK_INTERFACE_ID'
+        'Kind does not match CKITTY'
       )
 
       await reverted(
@@ -384,7 +379,7 @@ contract('TransferHandlerRegistry', async accounts => {
 
     it('Carol initiates an ERC1155 transfer of Dragon game token (#10) from Alice to Bob', async () => {
       const handlerAddress = await transferHandlerRegistry.transferHandlers.call(
-        ERC1155_INTERFACE_ID
+        tokenKinds.ERC1155
       )
       equal(
         handlerAddress,
