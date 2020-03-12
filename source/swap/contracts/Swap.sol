@@ -20,42 +20,42 @@ pragma experimental ABIEncoderV2;
 import "@airswap/transfers/contracts/interfaces/ITransferHandler.sol";
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
 
-/**
-  * @title Swap: The Atomic Swap used on the AirSwap Network
-  */
-contract Swap is ISwap {
 
+/**
+ * @title Swap: The Atomic Swap used on the AirSwap Network
+ */
+contract Swap is ISwap {
   // Domain and version for use in signatures (EIP-712)
-  bytes constant internal DOMAIN_NAME = "SWAP";
-  bytes constant internal DOMAIN_VERSION = "2";
+  bytes internal constant DOMAIN_NAME = "SWAP";
+  bytes internal constant DOMAIN_VERSION = "2";
 
   // Unique domain identifier for use in signatures (EIP-712)
   bytes32 private _domainSeparator;
 
   // Possible nonce statuses
-  byte constant internal AVAILABLE = 0x00;
-  byte constant internal UNAVAILABLE = 0x01;
+  bytes1 internal constant AVAILABLE = 0x00;
+  bytes1 internal constant UNAVAILABLE = 0x01;
 
   // Mapping of sender address to a delegated sender address and bool
-  mapping (address => mapping (address => bool)) public senderAuthorizations;
+  mapping(address => mapping(address => bool)) public senderAuthorizations;
 
   // Mapping of signer address to a delegated signer and bool
-  mapping (address => mapping (address => bool)) public signerAuthorizations;
+  mapping(address => mapping(address => bool)) public signerAuthorizations;
 
   // Mapping of signers to nonces with value AVAILABLE (0x00) or UNAVAILABLE (0x01)
-  mapping (address => mapping (uint256 => byte)) public signerNonceStatus;
+  mapping(address => mapping(uint256 => bytes1)) public signerNonceStatus;
 
   // Mapping of signer addresses to an optionally set minimum valid nonce
-  mapping (address => uint256) public signerMinimumNonce;
+  mapping(address => uint256) public signerMinimumNonce;
 
   // A registry storing a transfer handler for different token kinds
   TransferHandlerRegistry public registry;
 
   /**
-    * @notice Contract Constructor
-    * @dev Sets domain for signature validation (EIP-712)
-    * @param swapRegistry TransferHandlerRegistry
-    */
+   * @notice Contract Constructor
+   * @dev Sets domain for signature validation (EIP-712)
+   * @param swapRegistry TransferHandlerRegistry
+   */
   constructor(TransferHandlerRegistry swapRegistry) public {
     _domainSeparator = Types.hashDomain(
       DOMAIN_NAME,
@@ -66,23 +66,24 @@ contract Swap is ISwap {
   }
 
   /**
-    * @notice Atomic Token Swap
-    * @param order Types.Order Order to settle
-    */
-  function swap(
-    Types.Order calldata order
-  ) external {
+   * @notice Atomic Token Swap
+   * @param order Types.Order Order to settle
+   */
+  function swap(Types.Order calldata order) external {
     // Ensure the order is not expired.
-    require(order.expiry > block.timestamp,
-      "ORDER_EXPIRED");
+    require(order.expiry > block.timestamp, "ORDER_EXPIRED");
 
     // Ensure the nonce is AVAILABLE (0x00).
-    require(signerNonceStatus[order.signer.wallet][order.nonce] == AVAILABLE,
-      "ORDER_TAKEN_OR_CANCELLED");
+    require(
+      signerNonceStatus[order.signer.wallet][order.nonce] == AVAILABLE,
+      "ORDER_TAKEN_OR_CANCELLED"
+    );
 
     // Ensure the order nonce is above the minimum.
-    require(order.nonce >= signerMinimumNonce[order.signer.wallet],
-      "NONCE_TOO_LOW");
+    require(
+      order.nonce >= signerMinimumNonce[order.signer.wallet],
+      "NONCE_TOO_LOW"
+    );
 
     // Mark the nonce UNAVAILABLE (0x01).
     signerNonceStatus[order.signer.wallet][order.nonce] = UNAVAILABLE;
@@ -92,44 +93,45 @@ contract Swap is ISwap {
 
     if (order.sender.wallet == address(0)) {
       /**
-        * Sender is not specified. The msg.sender of the transaction becomes
-        * the sender of the order.
-        */
+       * Sender is not specified. The msg.sender of the transaction becomes
+       * the sender of the order.
+       */
       finalSenderWallet = msg.sender;
-
     } else {
       /**
-        * Sender is specified. If the msg.sender is not the specified sender,
-        * this determines whether the msg.sender is an authorized sender.
-        */
-      require(isSenderAuthorized(order.sender.wallet, msg.sender),
-          "SENDER_UNAUTHORIZED");
+       * Sender is specified. If the msg.sender is not the specified sender,
+       * this determines whether the msg.sender is an authorized sender.
+       */
+      require(
+        isSenderAuthorized(order.sender.wallet, msg.sender),
+        "SENDER_UNAUTHORIZED"
+      );
       // The msg.sender is authorized.
       finalSenderWallet = order.sender.wallet;
-
     }
 
     // Validate the signer side of the trade.
     if (order.signature.v == 0) {
       /**
-        * Signature is not provided. The signer may have authorized the
-        * msg.sender to swap on its behalf, which does not require a signature.
-        */
-      require(isSignerAuthorized(order.signer.wallet, msg.sender),
-        "SIGNER_UNAUTHORIZED");
-
+       * Signature is not provided. The signer may have authorized the
+       * msg.sender to swap on its behalf, which does not require a signature.
+       */
+      require(
+        isSignerAuthorized(order.signer.wallet, msg.sender),
+        "SIGNER_UNAUTHORIZED"
+      );
     } else {
       /**
-        * The signature is provided. Determine whether the signer is
-        * authorized and if so validate the signature itself.
-        */
-      require(isSignerAuthorized(order.signer.wallet, order.signature.signatory),
-        "SIGNER_UNAUTHORIZED");
+       * The signature is provided. Determine whether the signer is
+       * authorized and if so validate the signature itself.
+       */
+      require(
+        isSignerAuthorized(order.signer.wallet, order.signature.signatory),
+        "SIGNER_UNAUTHORIZED"
+      );
 
       // Ensure the signature is valid.
-      require(isValid(order, _domainSeparator),
-        "SIGNATURE_INVALID");
-
+      require(isValid(order, _domainSeparator), "SIGNATURE_INVALID");
     }
     // Transfer token from sender to signer.
     transferToken(
@@ -182,15 +184,13 @@ contract Swap is ISwap {
   }
 
   /**
-    * @notice Cancel one or more open orders by nonce
-    * @dev Cancelled nonces are marked UNAVAILABLE (0x01)
-    * @dev Emits a Cancel event
-    * @dev Out of gas may occur in arrays of length > 400
-    * @param nonces uint256[] List of nonces to cancel
-    */
-  function cancel(
-    uint256[] calldata nonces
-  ) external {
+   * @notice Cancel one or more open orders by nonce
+   * @dev Cancelled nonces are marked UNAVAILABLE (0x01)
+   * @dev Emits a Cancel event
+   * @dev Out of gas may occur in arrays of length > 400
+   * @param nonces uint256[] List of nonces to cancel
+   */
+  function cancel(uint256[] calldata nonces) external {
     for (uint256 i = 0; i < nonces.length; i++) {
       if (signerNonceStatus[msg.sender][nonces[i]] == AVAILABLE) {
         signerNonceStatus[msg.sender][nonces[i]] = UNAVAILABLE;
@@ -200,41 +200,34 @@ contract Swap is ISwap {
   }
 
   /**
-    * @notice Cancels all orders below a nonce value
-    * @dev Emits a CancelUpTo event
-    * @param minimumNonce uint256 Minimum valid nonce
-    */
-  function cancelUpTo(
-    uint256 minimumNonce
-  ) external {
+   * @notice Cancels all orders below a nonce value
+   * @dev Emits a CancelUpTo event
+   * @param minimumNonce uint256 Minimum valid nonce
+   */
+  function cancelUpTo(uint256 minimumNonce) external {
     signerMinimumNonce[msg.sender] = minimumNonce;
     emit CancelUpTo(minimumNonce, msg.sender);
   }
 
   /**
-    * @notice Authorize a delegated sender
-    * @dev Emits an AuthorizeSender event
-    * @param authorizedSender address Address to authorize
-    */
-  function authorizeSender(
-    address authorizedSender
-  ) external {
+   * @notice Authorize a delegated sender
+   * @dev Emits an AuthorizeSender event
+   * @param authorizedSender address Address to authorize
+   */
+  function authorizeSender(address authorizedSender) external {
     require(msg.sender != authorizedSender, "SELF_AUTH_INVALID");
     if (!senderAuthorizations[msg.sender][authorizedSender]) {
       senderAuthorizations[msg.sender][authorizedSender] = true;
       emit AuthorizeSender(msg.sender, authorizedSender);
     }
-
   }
 
   /**
-    * @notice Authorize a delegated signer
-    * @dev Emits an AuthorizeSigner event
-    * @param authorizedSigner address Address to authorize
-    */
-  function authorizeSigner(
-    address authorizedSigner
-  ) external {
+   * @notice Authorize a delegated signer
+   * @dev Emits an AuthorizeSigner event
+   * @param authorizedSigner address Address to authorize
+   */
+  function authorizeSigner(address authorizedSigner) external {
     require(msg.sender != authorizedSigner, "SELF_AUTH_INVALID");
     if (!signerAuthorizations[msg.sender][authorizedSigner]) {
       signerAuthorizations[msg.sender][authorizedSigner] = true;
@@ -243,13 +236,11 @@ contract Swap is ISwap {
   }
 
   /**
-    * @notice Revoke an authorized sender
-    * @dev Emits a RevokeSender event
-    * @param authorizedSender address Address to revoke
-    */
-  function revokeSender(
-    address authorizedSender
-  ) external {
+   * @notice Revoke an authorized sender
+   * @dev Emits a RevokeSender event
+   * @param authorizedSender address Address to revoke
+   */
+  function revokeSender(address authorizedSender) external {
     if (senderAuthorizations[msg.sender][authorizedSender]) {
       delete senderAuthorizations[msg.sender][authorizedSender];
       emit RevokeSender(msg.sender, authorizedSender);
@@ -257,13 +248,11 @@ contract Swap is ISwap {
   }
 
   /**
-    * @notice Revoke an authorized signer
-    * @dev Emits a RevokeSigner event
-    * @param authorizedSigner address Address to revoke
-    */
-  function revokeSigner(
-    address authorizedSigner
-  ) external {
+   * @notice Revoke an authorized signer
+   * @dev Emits a RevokeSigner event
+   * @param authorizedSigner address Address to revoke
+   */
+  function revokeSigner(address authorizedSigner) external {
     if (signerAuthorizations[msg.sender][authorizedSigner]) {
       delete signerAuthorizations[msg.sender][authorizedSigner];
       emit RevokeSigner(msg.sender, authorizedSigner);
@@ -271,106 +260,110 @@ contract Swap is ISwap {
   }
 
   /**
-    * @notice Determine whether a sender delegate is authorized
-    * @param authorizer address Address doing the authorization
-    * @param delegate address Address being authorized
-    * @return bool True if a delegate is authorized to send
-    */
-  function isSenderAuthorized(
-    address authorizer,
-    address delegate
-  ) internal view returns (bool) {
+   * @notice Determine whether a sender delegate is authorized
+   * @param authorizer address Address doing the authorization
+   * @param delegate address Address being authorized
+   * @return bool True if a delegate is authorized to send
+   */
+  function isSenderAuthorized(address authorizer, address delegate)
+    internal
+    view
+    returns (bool)
+  {
     return ((authorizer == delegate) ||
       senderAuthorizations[authorizer][delegate]);
   }
 
   /**
-    * @notice Determine whether a signer delegate is authorized
-    * @param authorizer address Address doing the authorization
-    * @param delegate address Address being authorized
-    * @return bool True if a delegate is authorized to sign
-    */
-  function isSignerAuthorized(
-    address authorizer,
-    address delegate
-  ) internal view returns (bool) {
+   * @notice Determine whether a signer delegate is authorized
+   * @param authorizer address Address doing the authorization
+   * @param delegate address Address being authorized
+   * @return bool True if a delegate is authorized to sign
+   */
+  function isSignerAuthorized(address authorizer, address delegate)
+    internal
+    view
+    returns (bool)
+  {
     return ((authorizer == delegate) ||
       signerAuthorizations[authorizer][delegate]);
   }
 
   /**
-    * @notice Validate signature using an EIP-712 typed data hash
-    * @param order Types.Order Order to validate
-    * @param domainSeparator bytes32 Domain identifier used in signatures (EIP-712)
-    * @return bool True if order has a valid signature
-    */
-  function isValid(
-    Types.Order memory order,
-    bytes32 domainSeparator
-  ) internal pure returns (bool) {
-    if (order.signature.version == byte(0x01)) {
-      return order.signature.signatory == ecrecover(
-        Types.hashOrder(
-          order,
-          domainSeparator
-        ),
-        order.signature.v,
-        order.signature.r,
-        order.signature.s
-      );
+   * @notice Validate signature using an EIP-712 typed data hash
+   * @param order Types.Order Order to validate
+   * @param domainSeparator bytes32 Domain identifier used in signatures (EIP-712)
+   * @return bool True if order has a valid signature
+   */
+  function isValid(Types.Order memory order, bytes32 domainSeparator)
+    internal
+    pure
+    returns (bool)
+  {
+    if (order.signature.version == bytes1(0x01)) {
+      return
+        order.signature.signatory ==
+        ecrecover(
+          Types.hashOrder(order, domainSeparator),
+          order.signature.v,
+          order.signature.r,
+          order.signature.s
+        );
     }
-    if (order.signature.version == byte(0x45)) {
-      return order.signature.signatory == ecrecover(
-        keccak256(
-          abi.encodePacked(
-            "\x19Ethereum Signed Message:\n32",
-            Types.hashOrder(order, domainSeparator)
-          )
-        ),
-        order.signature.v,
-        order.signature.r,
-        order.signature.s
-      );
+    if (order.signature.version == bytes1(0x45)) {
+      return
+        order.signature.signatory ==
+        ecrecover(
+          keccak256(
+            abi.encodePacked(
+              "\x19Ethereum Signed Message:\n32",
+              Types.hashOrder(order, domainSeparator)
+            )
+          ),
+          order.signature.v,
+          order.signature.r,
+          order.signature.s
+        );
     }
     return false;
   }
 
   /**
-    * @notice Perform token transfer for tokens in registry
-    * @dev Transfer type specified by the bytes4 kind param
-    * @dev ERC721: uses transferFrom for transfer
-    * @dev ERC20: Takes into account non-standard ERC-20 tokens.
-    * @param from address Wallet address to transfer from
-    * @param to address Wallet address to transfer to
-    * @param amount uint256 Amount for ERC-20
-    * @param id token ID for ERC-721
-    * @param token address Contract address of token
-    * @param kind bytes4 EIP-165 interface ID of the token
-    */
+   * @notice Perform token transfer for tokens in registry
+   * @dev Transfer type specified by the bytes4 kind param
+   * @dev ERC721: uses transferFrom for transfer
+   * @dev ERC20: Takes into account non-standard ERC-20 tokens.
+   * @param from address Wallet address to transfer from
+   * @param to address Wallet address to transfer to
+   * @param amount uint256 Amount for ERC-20
+   * @param id token ID for ERC-721
+   * @param token address Contract address of token
+   * @param kind bytes4 EIP-165 interface ID of the token
+   */
   function transferToken(
-      address from,
-      address to,
-      uint256 amount,
-      uint256 id,
-      address token,
-      bytes4 kind
+    address from,
+    address to,
+    uint256 amount,
+    uint256 id,
+    address token,
+    bytes4 kind
   ) internal {
-
     // Ensure the transfer is not to self.
     require(from != to, "SELF_TRANSFER_INVALID");
     ITransferHandler transferHandler = registry.transferHandlers(kind);
     require(address(transferHandler) != address(0), "TOKEN_KIND_UNKNOWN");
     // delegatecall required to pass msg.sender as Swap contract to handle the
     // token transfer in the calling contract
-    (bool success, bytes memory data) = address(transferHandler).
-      delegatecall(abi.encodeWithSelector(
+    (bool success, bytes memory data) = address(transferHandler).delegatecall(
+      abi.encodeWithSelector(
         transferHandler.transferTokens.selector,
         from,
         to,
         amount,
         id,
         token
-    ));
+      )
+    );
     require(success && abi.decode(data, (bool)), "TRANSFER_FAILED");
   }
 }

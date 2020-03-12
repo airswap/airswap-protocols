@@ -22,7 +22,8 @@
     "publish": "lerna publish",
     "test": "yarn clean && yarn compile && lerna run test --concurrency=1",
     "deps": "python3 -m venv ./venv && source venv/bin/activate && pip3 install -r requirements.txt | { grep -v \"satisfied\" || :; } && python3 scripts/dependency_checker.py",
-    "pretty": "prettier --check \"./**/*.sol\" \"./**/*.ts\""
+    "pretty:check": "prettier --check \"./**/*.sol\" \"./**/*.ts\" \"./**/*.js\"",
+    "pretty:fix": "prettier --write \"./**/*.sol\" \"./**/*.ts\" \"./**/*.js\""
   },
   "devDependencies": {
     "@gnosis.pm/mock-contract": "^3.0.7",
