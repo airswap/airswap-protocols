@@ -25,6 +25,18 @@ DEPLOYS_JSON = {
     'Wrapper': '../../../source/wrapper/deploys.json'
 }
 
+async function updateDeployJsons(network, deploy_data) {
+  for (let [contract_name, file_path] of Object.entries(DEPLOYS_JSON)) {
+    // go through all deploys json and update them
+    address_json = require(file_path)
+    address_json[chainIds[network]] = deploy_data[contract_name]
+    address_json_string = JSON.stringify(address_json, null, '  ')
+    fs.writeFileSync(__dirname + "/"+ file_path, address_json_string, (err) => {
+      if (err) throw err
+    })
+  }
+}
+
 module.exports = async (deployer, network) => {
   network = network.toUpperCase()
 
@@ -84,7 +96,6 @@ module.exports = async (deployer, network) => {
 
   }
 
-  // Update deploys.jsons
   let deploy_data = {}
   deploy_data['Types'] = Types.address
   deploy_data['TransferHandlerRegistry'] = TransferHandlerRegistry.address
@@ -93,14 +104,5 @@ module.exports = async (deployer, network) => {
   deploy_data['DelegateFactory'] = DelegateFactory.address
   deploy_data['Wrapper'] = Wrapper.address
   deploy_data['Validator'] = Validator.address
-
-  for (let [contract_name, file_path] of Object.entries(DEPLOYS_JSON)) {
-    // go through all deploys json and update them
-    address_json = require(file_path)
-    address_json[chainIds[network]] = deploy_data[contract_name]
-    address_json_string = JSON.stringify(address_json, null, '  ')
-    fs.writeFileSync(__dirname + "/"+ file_path, address_json_string, (err) => {
-      if (err) throw err
-    })
-  }
+  await updateDeployJsons(network, deploy_data)
 }
