@@ -22,7 +22,8 @@
     "ganache": "ganache-cli -p 8545 --gasLimit 0xfffffffffff --time '2017-05-10T00:00:00+00:00' -s 0",
     "publish": "lerna publish",
     "test": "yarn compile; lerna run test --concurrency=1",
-    "deps": "python3 -m venv ./venv && source venv/bin/activate && pip3 install -r requirements.txt | { grep -v \"satisfied\" || :; } && python3 scripts/dependency_checker.py",
+    "deps:check": "python3 -m venv ./venv && source venv/bin/activate && pip3 install -r requirements.txt | { grep -v \"satisfied\" || :; } && python3 scripts/dependency_checker.py",
+    "deps:fix": "python3 -m venv ./venv && source venv/bin/activate && pip3 install -r requirements.txt | { grep -v \"satisfied\" || :; } && python3 scripts/dependency_checker.py --fix",
     "pretty:check": "prettier --check \"./**/*.sol\" \"./**/*.ts\" \"./**/*.js\"",
     "pretty:fix": "prettier --write \"./**/*.sol\" \"./**/*.ts\" \"./**/*.js\""
   },
@@ -52,7 +53,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "yarn deps && yarn hint && yarn lint:check && yarn pretty:check"
+      "pre-commit": "yarn deps:check && yarn hint && yarn lint:check && yarn pretty:check"
     }
   }
 }
