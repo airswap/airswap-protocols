@@ -14,8 +14,6 @@
   limitations under the License.
 */
 
-import { QuoteParty, OrderParty, Signature } from '@airswap/types'
-
 export const DOMAIN_NAME = 'SWAP'
 export const DOMAIN_VERSION = '2'
 export const INDEX_HEAD = '0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF'
@@ -97,28 +95,4 @@ export const etherscanDomains: Record<string, string> = {
   '4': 'rinkeby.etherscan.io',
   '5': 'goerli.etherscan.io',
   '42': 'kovan.etherscan.io',
-}
-
-export const emptyQuoteParty: QuoteParty = {
-  kind: tokenKinds.ERC20,
-  token: ADDRESS_ZERO,
-  amount: '0',
-  id: '0',
-}
-
-export const emptyOrderParty: OrderParty = {
-  kind: tokenKinds.ERC20,
-  wallet: ADDRESS_ZERO,
-  token: ADDRESS_ZERO,
-  amount: '0',
-  id: '0',
-}
-
-export const emptySignature: Signature = {
-  version: signatureTypes.PERSONAL_SIGN,
-  signatory: ADDRESS_ZERO,
-  validator: ADDRESS_ZERO,
-  r: LOCATOR_ZERO,
-  s: LOCATOR_ZERO,
-  v: '0',
 }

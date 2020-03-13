@@ -1,11 +1,7 @@
 const TransferHandlerRegistry = artifacts.require('TransferHandlerRegistry')
 const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
 const { equal, emitted, reverted } = require('@airswap/test-utils').assert
-const {
-  EMPTY_ADDRESS,
-  ERC20_INTERFACE_ID,
-  ERC721_INTERFACE_ID,
-} = require('@airswap/order-utils').constants
+const { tokenKinds, ADDRESS_ZERO } = require('@airswap/constants')
 
 contract('TransferHandlerRegistry Unit Tests', async accounts => {
   const erc20TransferHandler = accounts[1]
@@ -28,10 +24,8 @@ contract('TransferHandlerRegistry Unit Tests', async accounts => {
   describe('Test fetching non-existent handler', async () => {
     it('test fetching non-existent handler, returns null address', async () => {
       equal(
-        EMPTY_ADDRESS,
-        await transferHandlerRegistry.transferHandlers.call(
-          ERC721_INTERFACE_ID
-        ),
+        ADDRESS_ZERO,
+        await transferHandlerRegistry.transferHandlers.call(tokenKinds.ERC721),
         'Returns actual non-zero address'
       )
     })
@@ -41,7 +35,7 @@ contract('TransferHandlerRegistry Unit Tests', async accounts => {
     it('test adding, should pass', async () => {
       await emitted(
         await transferHandlerRegistry.addTransferHandler(
-          ERC20_INTERFACE_ID,
+          tokenKinds.ERC20,
           erc20TransferHandler
         ),
         'AddTransferHandler'
@@ -49,7 +43,7 @@ contract('TransferHandlerRegistry Unit Tests', async accounts => {
 
       equal(
         erc20TransferHandler,
-        await transferHandlerRegistry.transferHandlers.call(ERC20_INTERFACE_ID),
+        await transferHandlerRegistry.transferHandlers.call(tokenKinds.ERC20),
         'Unable to find match'
       )
     })
@@ -59,14 +53,14 @@ contract('TransferHandlerRegistry Unit Tests', async accounts => {
     it('test adding an existing handler will fail', async () => {
       await emitted(
         await transferHandlerRegistry.addTransferHandler(
-          ERC20_INTERFACE_ID,
+          tokenKinds.ERC20,
           erc20TransferHandler
         ),
         'AddTransferHandler'
       )
       await reverted(
         transferHandlerRegistry.addTransferHandler(
-          ERC20_INTERFACE_ID,
+          tokenKinds.ERC20,
           erc20TransferHandler
         ),
         'HANDLER_EXISTS_FOR_KIND'

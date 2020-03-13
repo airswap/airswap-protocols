@@ -1,19 +1,16 @@
 const Types = artifacts.require('../contracts/Types')
 const MockTypes = artifacts.require('MockTypes')
 const { equal } = require('@airswap/test-utils').assert
-const {
-  DOMAIN_NAME,
-  DOMAIN_VERSION,
-} = require('@airswap/order-utils').constants
-const { hashDomain, getOrderHash } = require('@airswap/order-utils').hashes
-const { orders } = require('@airswap/order-utils')
+const { DOMAIN_NAME, DOMAIN_VERSION } = require('@airswap/constants')
+const { emptySignature } = require('..')
+
+const { createOrder, hashDomain, getOrderHash } = require('@airswap/utils')
+
 const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
 
 contract('Types Unit Tests', async ([defaultAccount]) => {
   let mockTypes
   let snapshotId
-
-  orders.setVerifyingContract(defaultAccount)
 
   beforeEach(async () => {
     const snapShot = await takeSnapshot()
@@ -32,13 +29,16 @@ contract('Types Unit Tests', async ([defaultAccount]) => {
 
   describe('Test hashing functions within the library', async () => {
     it('Test hashOrder', async () => {
-      const order = await orders.getOrder({
+      const order = createOrder({
         signer: {
           wallet: defaultAccount,
         },
       })
       const hashedDomain = '0x' + hashDomain(mockTypes.address).toString('hex')
-      const hashedOrder = await mockTypes.hashOrder.call(order, hashedDomain)
+      const hashedOrder = await mockTypes.hashOrder.call(
+        { ...order, signature: emptySignature },
+        hashedDomain
+      )
       equal(
         hashedOrder,
         '0x' + getOrderHash(order, mockTypes.address).toString('hex'),

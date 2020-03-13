@@ -7,13 +7,14 @@ const WETH9 = artifacts.require('WETH9')
 const FungibleToken = artifacts.require('FungibleToken')
 const MockContract = artifacts.require('MockContract')
 
+const ethers = require('ethers')
+const { createOrder, signOrder } = require('@airswap/utils')
+
 const { equal, reverted, passes } = require('@airswap/test-utils').assert
 const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
-const {
-  EMPTY_ADDRESS,
-  GANACHE_PROVIDER,
-} = require('@airswap/order-utils').constants
-const { orders, signatures } = require('@airswap/order-utils')
+const { GANACHE_PROVIDER } = require('@airswap/test-utils').constants
+const { ADDRESS_ZERO } = require('@airswap/constants')
+const { emptySignature } = require('@airswap/types')
 
 contract('Wrapper Unit Tests', async accounts => {
   const senderAmount = 2
@@ -22,6 +23,9 @@ contract('Wrapper Unit Tests', async accounts => {
   const mockSigner = accounts[3]
   const delegateOwner = accounts[4]
   const mockRegistry = accounts[5]
+  const mockSignerSigner = new ethers.providers.JsonRpcProvider(
+    GANACHE_PROVIDER
+  ).getSigner(mockSigner)
   const PROTOCOL = '0x0001'
   let mockSwap
   let mockSwapAddress
@@ -56,31 +60,31 @@ contract('Wrapper Unit Tests', async accounts => {
 
     //mock the weth.approve method
     const weth_approve = wethTemplate.contract.methods
-      .approve(EMPTY_ADDRESS, 0)
+      .approve(ADDRESS_ZERO, 0)
       .encodeABI()
     await mockWeth.givenMethodReturnBool(weth_approve, true)
 
     // mock the weth.allowance method
     const weth_allowance = wethTemplate.contract.methods
-      .allowance(EMPTY_ADDRESS, EMPTY_ADDRESS)
+      .allowance(ADDRESS_ZERO, ADDRESS_ZERO)
       .encodeABI()
     await mockWeth.givenMethodReturnUint(weth_allowance, 100000)
 
     // mock the weth.balanceOf method
     weth_balance = wethTemplate.contract.methods
-      .balanceOf(EMPTY_ADDRESS)
+      .balanceOf(ADDRESS_ZERO)
       .encodeABI()
     await mockWeth.givenMethodReturnUint(weth_balance, 100000)
 
     //mock the weth.transfer method
     const weth_transfer = wethTemplate.contract.methods
-      .transfer(EMPTY_ADDRESS, 0)
+      .transfer(ADDRESS_ZERO, 0)
       .encodeABI()
     await mockWeth.givenMethodReturnBool(weth_transfer, true)
 
     //mock the weth.transferFrom method
     const weth_transferFrom = wethTemplate.contract.methods
-      .transferFrom(EMPTY_ADDRESS, EMPTY_ADDRESS, 0)
+      .transferFrom(ADDRESS_ZERO, ADDRESS_ZERO, 0)
       .encodeABI()
     await mockWeth.givenMethodReturnBool(weth_transferFrom, true)
   }
@@ -91,13 +95,13 @@ contract('Wrapper Unit Tests', async accounts => {
     const swapTemplate = await Swap.new(mockRegistry)
 
     // mock the Swap.swap method
-    const order = await orders.getOrder({})
-    swap = swapTemplate.contract.methods.swap(order).encodeABI()
+    const order = createOrder({})
+    swap = swapTemplate.contract.methods
+      .swap({ ...order, signature: emptySignature })
+      .encodeABI()
 
     mockSwap = await MockContract.new()
     mockSwapAddress = mockSwap.address
-
-    await orders.setVerifyingContract(mockSwapAddress)
   }
 
   async function setupMockFungibleToken() {
@@ -105,7 +109,7 @@ contract('Wrapper Unit Tests', async accounts => {
     fungibleTokenTemplate = await FungibleToken.new()
 
     mock_transfer = fungibleTokenTemplate.contract.methods
-      .transfer(EMPTY_ADDRESS, 0)
+      .transfer(ADDRESS_ZERO, 0)
       .encodeABI()
     await mockFT.givenMethodReturnBool(mock_transfer, true)
   }
@@ -119,13 +123,13 @@ contract('Wrapper Unit Tests', async accounts => {
 
     // Mock stakingToken.approve() - true
     const mockStakingToken_approve = await mockFungibleTokenTemplate.contract.methods
-      .approve(EMPTY_ADDRESS, 0)
+      .approve(ADDRESS_ZERO, 0)
       .encodeABI()
     await mockStakingToken.givenMethodReturnBool(mockStakingToken_approve, true)
 
     // Setup mock indexer
     const mockIndexer = await MockContract.new()
-    const mockIndexerTemplate = await Indexer.new(EMPTY_ADDRESS)
+    const mockIndexerTemplate = await Indexer.new(ADDRESS_ZERO)
 
     // Mock Indexer.stakingToken()
     const mockIndexer_stakingToken = mockIndexerTemplate.contract.methods
@@ -148,9 +152,9 @@ contract('Wrapper Unit Tests', async accounts => {
     )
 
     // mock the Delegate.provideOrder method
-    const order = await orders.getOrder({})
+    const order = createOrder({})
     provideOrder = delegateTemplate.contract.methods
-      .provideOrder(order)
+      .provideOrder({ ...order, signature: emptySignature })
       .encodeABI()
   }
 
@@ -188,22 +192,19 @@ contract('Wrapper Unit Tests', async accounts => {
     it('Test when sender token != weth, ensure no unexpected ether sent', async () => {
       const notWethToken = mockToken
 
-      const order = await orders.getOrder({
-        sender: {
-          wallet: mockSender,
-          token: notWethToken,
-        },
-        signer: {
-          wallet: mockSigner,
-          token: notWethToken,
-        },
-      })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        mockSigner,
-        mockSwapAddress,
-        GANACHE_PROVIDER
+      const order = await signOrder(
+        createOrder({
+          sender: {
+            wallet: mockSender,
+            token: notWethToken,
+          },
+          signer: {
+            wallet: mockSigner,
+            token: notWethToken,
+          },
+        }),
+        mockSignerSigner,
+        mockSwapAddress
       )
 
       await reverted(
@@ -216,22 +217,19 @@ contract('Wrapper Unit Tests', async accounts => {
     })
 
     it('Test when sender token == weth, ensure the sender amount matches sent ether', async () => {
-      const order = await orders.getOrder({
-        sender: {
-          wallet: mockSender,
-          amount: 1,
-          token: mockWethAddress,
-        },
-        signer: {
-          wallet: mockSigner,
-        },
-      })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        mockSigner,
-        mockSwapAddress,
-        GANACHE_PROVIDER
+      const order = await signOrder(
+        createOrder({
+          sender: {
+            wallet: mockSender,
+            amount: 1,
+            token: mockWethAddress,
+          },
+          signer: {
+            wallet: mockSigner,
+          },
+        }),
+        mockSignerSigner,
+        mockSwapAddress
       )
 
       await reverted(
@@ -246,23 +244,20 @@ contract('Wrapper Unit Tests', async accounts => {
     it('Test when sender token == weth, signer token == weth, and the transaction passes', async () => {
       //mock the weth.balance method
       await mockWeth.givenMethodReturnUint(weth_balance, 0)
-      const order = await orders.getOrder({
-        signer: {
-          wallet: mockSigner,
-          token: mockWethAddress,
-        },
-        sender: {
-          wallet: mockSender,
-          amount: senderAmount,
-          token: mockWethAddress,
-        },
-      })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        mockSigner,
-        mockSwapAddress,
-        GANACHE_PROVIDER
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: mockSigner,
+            token: mockWethAddress,
+          },
+          sender: {
+            wallet: mockSender,
+            amount: senderAmount,
+            token: mockWethAddress,
+          },
+        }),
+        mockSignerSigner,
+        mockSwapAddress
       )
 
       await passes(
@@ -284,23 +279,20 @@ contract('Wrapper Unit Tests', async accounts => {
     it('Test when sender token == weth, signer token != weth, and the transaction passes', async () => {
       const notWethContract = mockFT.address
 
-      const order = await orders.getOrder({
-        signer: {
-          wallet: mockSigner,
-          token: notWethContract,
-        },
-        sender: {
-          wallet: mockSender,
-          amount: senderAmount,
-          token: mockWethAddress,
-        },
-      })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        mockSigner,
-        mockSwapAddress,
-        GANACHE_PROVIDER
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: mockSigner,
+            token: notWethContract,
+          },
+          sender: {
+            wallet: mockSender,
+            amount: senderAmount,
+            token: mockWethAddress,
+          },
+        }),
+        mockSignerSigner,
+        mockSwapAddress
       )
 
       await passes(
@@ -330,22 +322,19 @@ contract('Wrapper Unit Tests', async accounts => {
       await mockFT.givenMethodReturnBool(mock_transfer, false)
       const notWethContract = mockFT.address
 
-      const order = await orders.getOrder({
-        signer: {
-          wallet: mockSigner,
-          token: notWethContract,
-        },
-        sender: {
-          amount: senderAmount,
-          token: mockWethAddress,
-        },
-      })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        mockSigner,
-        mockSwapAddress,
-        GANACHE_PROVIDER
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: mockSigner,
+            token: notWethContract,
+          },
+          sender: {
+            amount: senderAmount,
+            token: mockWethAddress,
+          },
+        }),
+        mockSignerSigner,
+        mockSwapAddress
       )
 
       await reverted(
@@ -369,22 +358,19 @@ contract('Wrapper Unit Tests', async accounts => {
       const nonMockSender = accounts[7]
       const notWethContract = mockFT.address
 
-      const order = await orders.getOrder({
-        sender: {
-          wallet: nonMockSender,
-          amount: 1,
-          token: notWethContract,
-        },
-        signer: {
-          wallet: mockSigner,
-        },
-      })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        mockSigner,
-        mockSwapAddress,
-        GANACHE_PROVIDER
+      const order = await signOrder(
+        createOrder({
+          sender: {
+            wallet: nonMockSender,
+            amount: 1,
+            token: notWethContract,
+          },
+          signer: {
+            wallet: mockSigner,
+          },
+        }),
+        mockSignerSigner,
+        mockSwapAddress
       )
 
       await reverted(
@@ -399,23 +385,20 @@ contract('Wrapper Unit Tests', async accounts => {
     it('Test when sender token == non weth erc20, signer token == non weth erc20, and the transaction passes', async () => {
       const notWethContract = mockFT.address
 
-      const order = await orders.getOrder({
-        signer: {
-          token: notWethContract,
-          wallet: mockSigner,
-        },
-        sender: {
-          wallet: mockSender,
-          amount: senderAmount,
-          token: notWethContract,
-        },
-      })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        mockSigner,
-        mockSwapAddress,
-        GANACHE_PROVIDER
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            token: notWethContract,
+            wallet: mockSigner,
+          },
+          sender: {
+            wallet: mockSender,
+            amount: senderAmount,
+            token: notWethContract,
+          },
+        }),
+        mockSignerSigner,
+        mockSwapAddress
       )
 
       await passes(
@@ -441,22 +424,19 @@ contract('Wrapper Unit Tests', async accounts => {
     })
 
     it('Test when signer token != weth, but unexpected ether sent', async () => {
-      const order = await orders.getOrder({
-        sender: {
-          wallet: delegateOwner,
-          token: mockWethAddress,
-        },
-        signer: {
-          wallet: mockSigner,
-          token: mockToken,
-        },
-      })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        mockSigner,
-        mockSwapAddress,
-        GANACHE_PROVIDER
+      const order = await signOrder(
+        createOrder({
+          sender: {
+            wallet: delegateOwner,
+            token: mockWethAddress,
+          },
+          signer: {
+            wallet: mockSigner,
+            token: mockToken,
+          },
+        }),
+        mockSignerSigner,
+        mockSwapAddress
       )
 
       // Send eth for non-weth order
@@ -470,23 +450,20 @@ contract('Wrapper Unit Tests', async accounts => {
     })
 
     it('Test when signer token == weth, but no ether is sent', async () => {
-      const order = await orders.getOrder({
-        sender: {
-          wallet: delegateOwner,
-          token: mockToken,
-        },
-        signer: {
-          wallet: mockSigner,
-          token: mockWethAddress,
-          amount: 500,
-        },
-      })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        mockSigner,
-        mockSwapAddress,
-        GANACHE_PROVIDER
+      const order = await signOrder(
+        createOrder({
+          sender: {
+            wallet: delegateOwner,
+            token: mockToken,
+          },
+          signer: {
+            wallet: mockSigner,
+            token: mockWethAddress,
+            amount: 500,
+          },
+        }),
+        mockSignerSigner,
+        mockSwapAddress
       )
 
       // Send no eth for weth order
@@ -500,17 +477,23 @@ contract('Wrapper Unit Tests', async accounts => {
     })
 
     it('Test when signer token == weth, but no signature is sent', async () => {
-      const order = await orders.getOrder({
-        sender: {
-          wallet: delegateOwner,
-          token: mockToken,
-        },
-        signer: {
-          wallet: mockSigner,
-          token: mockWethAddress,
-          amount: 500,
-        },
-      })
+      const order = await signOrder(
+        createOrder({
+          sender: {
+            wallet: delegateOwner,
+            token: mockToken,
+          },
+          signer: {
+            wallet: mockSigner,
+            token: mockWethAddress,
+            amount: 500,
+          },
+        }),
+        mockSignerSigner,
+        mockSwapAddress
+      )
+
+      order.signature.v = 0
 
       // Send order without signature
       await reverted(
@@ -523,23 +506,20 @@ contract('Wrapper Unit Tests', async accounts => {
     })
 
     it('Test when signer token == weth, but incorrect amount of ether sent', async () => {
-      const order = await orders.getOrder({
-        sender: {
-          wallet: delegateOwner,
-          token: mockToken,
-        },
-        signer: {
-          wallet: mockSigner,
-          token: mockWethAddress,
-          amount: 500,
-        },
-      })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        mockSigner,
-        mockSwapAddress,
-        GANACHE_PROVIDER
+      const order = await signOrder(
+        createOrder({
+          sender: {
+            wallet: delegateOwner,
+            token: mockToken,
+          },
+          signer: {
+            wallet: mockSigner,
+            token: mockWethAddress,
+            amount: 500,
+          },
+        }),
+        mockSignerSigner,
+        mockSwapAddress
       )
 
       // Send incorrect amount of eth
@@ -553,23 +533,20 @@ contract('Wrapper Unit Tests', async accounts => {
     })
 
     it('Test when signer token == weth, correct eth sent, tx passes', async () => {
-      const order = await orders.getOrder({
-        sender: {
-          wallet: delegateOwner,
-          token: mockToken,
-        },
-        signer: {
-          wallet: mockSigner,
-          token: mockWethAddress,
-          amount: 500,
-        },
-      })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        mockSigner,
-        mockSwapAddress,
-        GANACHE_PROVIDER
+      const order = await signOrder(
+        createOrder({
+          sender: {
+            wallet: delegateOwner,
+            token: mockToken,
+          },
+          signer: {
+            wallet: mockSigner,
+            token: mockWethAddress,
+            amount: 500,
+          },
+        }),
+        mockSignerSigner,
+        mockSwapAddress
       )
 
       // get the weth contract's balance before
@@ -604,23 +581,20 @@ contract('Wrapper Unit Tests', async accounts => {
     })
 
     it('Test when signer token != weth, sender token == weth, wrapper cant transfer eth', async () => {
-      const order = await orders.getOrder({
-        sender: {
-          wallet: delegateOwner,
-          token: mockWethAddress,
-          amount: 500,
-        },
-        signer: {
-          wallet: mockSigner,
-          token: mockToken,
-        },
-      })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        mockSigner,
-        mockSwapAddress,
-        GANACHE_PROVIDER
+      const order = await signOrder(
+        createOrder({
+          sender: {
+            wallet: delegateOwner,
+            token: mockWethAddress,
+            amount: 500,
+          },
+          signer: {
+            wallet: mockSigner,
+            token: mockToken,
+          },
+        }),
+        mockSignerSigner,
+        mockSwapAddress
       )
 
       // fails as the wrapper has no ETH to send
@@ -634,22 +608,19 @@ contract('Wrapper Unit Tests', async accounts => {
     })
 
     it('Test when signer token != weth, sender token == weth, tx passes', async () => {
-      const order = await orders.getOrder({
-        sender: {
-          wallet: delegateOwner,
-          token: mockWethAddress,
-        },
-        signer: {
-          wallet: mockSigner,
-          token: mockToken,
-        },
-      })
-
-      order.signature = await signatures.getWeb3Signature(
-        order,
-        mockSigner,
-        mockSwapAddress,
-        GANACHE_PROVIDER
+      const order = await signOrder(
+        createOrder({
+          sender: {
+            wallet: delegateOwner,
+            token: mockWethAddress,
+          },
+          signer: {
+            wallet: mockSigner,
+            token: mockToken,
+          },
+        }),
+        mockSignerSigner,
+        mockSwapAddress
       )
 
       await passes(

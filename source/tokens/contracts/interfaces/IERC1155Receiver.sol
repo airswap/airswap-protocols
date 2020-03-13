@@ -6,16 +6,15 @@ pragma solidity ^0.5.0;
  * https://github.com/OpenZeppelin/openzeppelin-contracts/blob/feature-erc1155/contracts/token/ERC1155/ERC1155.sol
  */
 
-
 import "openzeppelin-solidity/contracts/introspection/IERC165.sol";
+
 
 /**
     @title ERC-1155 Multi Token Receiver Interface
     @dev See https://eips.ethereum.org/EIPS/eip-1155
 */
 contract IERC1155Receiver is IERC165 {
-
-    /**
+  /**
         @dev Handles the receipt of a single ERC1155 token type. This function is
         called at the end of a `safeTransferFrom` after the balance has been updated.
         To accept the transfer, this must return
@@ -28,17 +27,15 @@ contract IERC1155Receiver is IERC165 {
         @param data Additional data with no specified format
         @return `bytes4(keccak256("onERC1155Received(address,address,uint256,uint256,bytes)"))` if transfer is allowed
     */
-    function onERC1155Received(
-        address operator,
-        address from,
-        uint256 id,
-        uint256 value,
-        bytes calldata data
-    )
-        external
-        returns(bytes4);
+  function onERC1155Received(
+    address operator,
+    address from,
+    uint256 id,
+    uint256 value,
+    bytes calldata data
+  ) external returns (bytes4);
 
-    /**
+  /**
         @dev Handles the receipt of a multiple ERC1155 token types. This function
         is called at the end of a `safeBatchTransferFrom` after the balances have
         been updated. To accept the transfer(s), this must return
@@ -51,13 +48,11 @@ contract IERC1155Receiver is IERC165 {
         @param data Additional data with no specified format
         @return `bytes4(keccak256("onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)"))` if transfer is allowed
     */
-    function onERC1155BatchReceived(
-        address operator,
-        address from,
-        uint256[] calldata ids,
-        uint256[] calldata values,
-        bytes calldata data
-    )
-        external
-        returns(bytes4);
+  function onERC1155BatchReceived(
+    address operator,
+    address from,
+    uint256[] calldata ids,
+    uint256[] calldata values,
+    bytes calldata data
+  ) external returns (bytes4);
 }

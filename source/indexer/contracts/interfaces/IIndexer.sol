@@ -16,8 +16,8 @@
 
 pragma solidity 0.5.12;
 
-interface IIndexer {
 
+interface IIndexer {
   event CreateIndex(
     address indexed signerToken,
     address indexed senderToken,
@@ -41,18 +41,12 @@ interface IIndexer {
     uint256 stakeAmount
   );
 
-  event AddTokenToBlacklist(
-    address token
-  );
+  event AddTokenToBlacklist(address token);
 
-  event RemoveTokenFromBlacklist(
-    address token
-  );
+  event RemoveTokenFromBlacklist(address token);
 
-  function setLocatorWhitelist(
-    bytes2 protocol,
-    address newLocatorWhitelist
-  ) external;
+  function setLocatorWhitelist(bytes2 protocol, address newLocatorWhitelist)
+    external;
 
   function createIndex(
     address signerToken,
@@ -60,13 +54,9 @@ interface IIndexer {
     bytes2 protocol
   ) external returns (address);
 
-  function addTokenToBlacklist(
-    address token
-  ) external;
+  function addTokenToBlacklist(address token) external;
 
-  function removeTokenFromBlacklist(
-    address token
-  ) external;
+  function removeTokenFromBlacklist(address token) external;
 
   function setIntent(
     address signerToken,
@@ -83,7 +73,9 @@ interface IIndexer {
   ) external;
 
   function stakingToken() external view returns (address);
+
   function indexes(address, address, bytes2) external view returns (address);
+
   function tokenBlacklist(address) external view returns (bool);
 
   function getStakedAmount(
@@ -99,10 +91,5 @@ interface IIndexer {
     bytes2 protocol,
     address cursor,
     uint256 limit
-  ) external view returns (
-    bytes32[] memory,
-    uint256[] memory,
-    address
-  );
-
+  ) external view returns (bytes32[] memory, uint256[] memory, address);
 }

@@ -5,6 +5,8 @@ const TransferHandlerRegistry = artifacts.require('TransferHandlerRegistry')
 const ERC20TransferHandler = artifacts.require('ERC20TransferHandler')
 const Swap = artifacts.require('Swap')
 const Types = artifacts.require('Types')
+
+const { tokenKinds, ADDRESS_ZERO, INDEX_HEAD } = require('@airswap/constants')
 const {
   emitted,
   notEmitted,
@@ -14,15 +16,11 @@ const {
   passes,
 } = require('@airswap/test-utils').assert
 const { balances } = require('@airswap/test-utils').balances
-const {
-  EMPTY_ADDRESS,
-  ERC20_INTERFACE_ID,
-  HEAD,
-  LOCATORS,
-  SCORES,
-  NEXTID,
-} = require('@airswap/order-utils').constants
 const { padAddressToLocator } = require('@airswap/test-utils').padding
+
+const LOCATORS = 0
+const SCORES = 1
+const NEXTID = 2
 
 contract('Indexer', async accounts => {
   const ownerAddress = accounts[0]
@@ -45,7 +43,7 @@ contract('Indexer', async accounts => {
 
   const aliceLocator = padAddressToLocator(aliceAddress)
   const bobLocator = padAddressToLocator(bobAddress)
-  const emptyLocator = padAddressToLocator(EMPTY_ADDRESS)
+  const emptyLocator = padAddressToLocator(ADDRESS_ZERO)
 
   let whitelistedLocator
 
@@ -123,7 +121,7 @@ contract('Indexer', async accounts => {
       const erc20TransferHandler = await ERC20TransferHandler.new()
       const transferHandlerRegistry = await TransferHandlerRegistry.new()
       await transferHandlerRegistry.addTransferHandler(
-        ERC20_INTERFACE_ID,
+        tokenKinds.ERC20,
         erc20TransferHandler.address
       )
       // now deploy swap
@@ -146,13 +144,13 @@ contract('Indexer', async accounts => {
 
       equal(whitelist, delegateFactory.address)
 
-      await indexer.setLocatorWhitelist(PROTOCOL_DELEGATE, EMPTY_ADDRESS, {
+      await indexer.setLocatorWhitelist(PROTOCOL_DELEGATE, ADDRESS_ZERO, {
         from: ownerAddress,
       })
 
       whitelist = await indexer.locatorWhitelists.call(PROTOCOL_DELEGATE)
 
-      equal(whitelist, EMPTY_ADDRESS)
+      equal(whitelist, ADDRESS_ZERO)
     })
 
     it('Bob ensures no intents are on the Indexer for existing index', async () => {
@@ -160,7 +158,7 @@ contract('Indexer', async accounts => {
         tokenWETH.address,
         tokenDAI.address,
         PROTOCOL_LIB_P2P,
-        EMPTY_ADDRESS,
+        ADDRESS_ZERO,
         10,
         {
           from: bobAddress,
@@ -169,7 +167,7 @@ contract('Indexer', async accounts => {
 
       equal(result[LOCATORS].length, 0)
       equal(result[SCORES].length, 0)
-      equal(result[NEXTID], HEAD)
+      equal(result[NEXTID], INDEX_HEAD)
     })
 
     it('Bob ensures no intents are on the Indexer for non-existing index', async () => {
@@ -177,7 +175,7 @@ contract('Indexer', async accounts => {
         tokenDAI.address,
         tokenWETH.address,
         PROTOCOL_LIB_P2P,
-        EMPTY_ADDRESS,
+        ADDRESS_ZERO,
         10,
         {
           from: bobAddress,
@@ -186,7 +184,7 @@ contract('Indexer', async accounts => {
 
       equal(result[LOCATORS].length, 0)
       equal(result[SCORES].length, 0)
-      equal(result[NEXTID], EMPTY_ADDRESS)
+      equal(result[NEXTID], ADDRESS_ZERO)
     })
 
     it('Alice attempts to stake and set an intent but fails due to no index', async () => {
@@ -548,13 +546,13 @@ contract('Indexer', async accounts => {
     })
 
     it('Remove locator whitelist from delegate index', async () => {
-      await indexer.setLocatorWhitelist(PROTOCOL_DELEGATE, EMPTY_ADDRESS, {
+      await indexer.setLocatorWhitelist(PROTOCOL_DELEGATE, ADDRESS_ZERO, {
         from: ownerAddress,
       })
 
       const whitelist = await indexer.locatorWhitelists.call(PROTOCOL_DELEGATE)
 
-      equal(whitelist, EMPTY_ADDRESS)
+      equal(whitelist, ADDRESS_ZERO)
     })
   })
 
@@ -564,7 +562,7 @@ contract('Indexer', async accounts => {
         tokenWETH.address,
         tokenDAI.address,
         PROTOCOL_LIB_P2P,
-        EMPTY_ADDRESS,
+        ADDRESS_ZERO,
         5,
         {
           from: bobAddress,
@@ -577,7 +575,7 @@ contract('Indexer', async accounts => {
       equal(result[SCORES].length, 1)
       equal(result[SCORES][0], 1)
 
-      equal(result[NEXTID], HEAD)
+      equal(result[NEXTID], INDEX_HEAD)
     })
 
     it('Alice attempts to unset non-existent index and reverts', async () => {
@@ -647,7 +645,7 @@ contract('Indexer', async accounts => {
         tokenWETH.address,
         tokenDAI.address,
         PROTOCOL_LIB_P2P,
-        EMPTY_ADDRESS,
+        ADDRESS_ZERO,
         10,
         {
           from: bobAddress,
@@ -656,7 +654,7 @@ contract('Indexer', async accounts => {
 
       equal(result[LOCATORS].length, 0)
       equal(result[SCORES].length, 0)
-      equal(result[NEXTID], HEAD)
+      equal(result[NEXTID], INDEX_HEAD)
     })
 
     it('Alice attempts to set an intent for libp2p and succeeds', async () => {
@@ -700,7 +698,7 @@ contract('Indexer', async accounts => {
         tokenWETH.address,
         tokenDAI.address,
         PROTOCOL_LIB_P2P,
-        EMPTY_ADDRESS,
+        ADDRESS_ZERO,
         10,
         {
           from: bobAddress,
@@ -709,7 +707,7 @@ contract('Indexer', async accounts => {
 
       equal(result[LOCATORS].length, 0)
       equal(result[SCORES].length, 0)
-      equal(result[NEXTID], EMPTY_ADDRESS)
+      equal(result[NEXTID], ADDRESS_ZERO)
     })
 
     it('Owner attempts to blacklist same asset which does not emit a new event', async () => {

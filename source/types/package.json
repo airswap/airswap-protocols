@@ -1,6 +1,6 @@
 {
   "name": "@airswap/types",
-  "version": "3.5.9",
+  "version": "3.5.11",
   "description": "TypeScript Types and Solidity Structs for AirSwap Developers",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>",
@@ -18,25 +18,22 @@
     "/build"
   ],
   "scripts": {
-    "hint": "yarn solhint \"./contracts/**/*.sol\"",
-    "lint": "yarn eslint \"./test/**/*.js\"",
-    "ganache": "ganache-cli -p 8545 --gasLimit 0xfffffffffff --time '2017-05-10T00:00:00+00:00' -s 0",
     "clean": "rm -rf ./build",
-    "compile": "truffle compile && tsc -b",
+    "compile": "yarn clean; truffle compile && tsc -b",
     "coverage": "node_modules/.bin/solidity-coverage",
     "cp_migration_flat": "mkdir -p flatten/; cp contracts/Migrations.sol flatten/",
-    "test": "truffle test",
+    "test": "yarn compile; truffle test",
     "flatten": "truffle run flatten",
     "migrate": "yarn cp_migration_flat; truffle migrate --skip-dry-run",
     "verify": "truffle run verify"
   },
+  "dependencies": {
+    "openzeppelin-solidity": "2.4"
+  },
   "devDependencies": {
-    "@airswap/order-utils": "0.3.20",
+    "@airswap/constants": "0.3.6",
     "@airswap/tokens": "0.1.4",
     "solidity-coverage": "^0.6.3",
     "typescript": "^3.8.2"
-  },
-  "dependencies": {
-    "openzeppelin-solidity": "2.4"
   }
 }
