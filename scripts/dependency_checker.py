@@ -8,7 +8,7 @@ import argparse
 class bcolors:
     BOLD = '\033[1m'
     FAIL = '\033[91m'
-    UPDATED = '\033[93m'
+    UPDATED = '\033[32m'
     ENDC = '\033[0m'
 
 DEV_DEP = "devDependencies"
