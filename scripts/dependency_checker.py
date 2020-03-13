@@ -2,6 +2,7 @@ from pathlib import Path
 import json
 import sys
 import os
+import argparse
 
 class bcolors:
     BOLD = '\033[1m'
@@ -11,7 +12,7 @@ class bcolors:
 DEV_DEP = "devDependencies"
 DEP = "dependencies"
 SEARCH_DIR = ['/source', '/tools']
-PACKAGE_TYPES = [ 'airswap', 'test-utils' ]
+PACKAGE_TYPES = ['airswap', 'test-utils']
 
 class DependencyChecker:
 
@@ -40,17 +41,16 @@ class DependencyChecker:
                     if DEP in data:
                         self.dependency_graph[package_name][DEP] = data[DEP]
 
-    def identify_violations(self):
+    def identify_and_fix_violations(self, fix):
 
         # flag to determine if return is 0 or 1
-        stable = True
+        is_stable = True
         print()
 
         # go through every package looking for where the dependency doesn't match the dependency graph
         for package in self.dependency_graph.items():
             package_name = package[0]
             package_dependencies = package[1]
-            package_version = self.dependency_graph[package_name]['version']
 
             for dep_type in [DEP, DEV_DEP]:
 
@@ -58,11 +58,8 @@ class DependencyChecker:
                 if dep_type not in package_dependencies:
                     continue
 
-                # go through all the declared depdendencies in a package
-                for declared_dep in package_dependencies[dep_type].items():
-                    declared_name = declared_dep[0]
-                    declared_ver = declared_dep[1]
-
+                # go through all the declared dependencies in a package
+                for declared_name, declared_ver in package_dependencies[dep_type].items():
                     # skip if we don't see the packages we care about
                     if not self.contains_packages(declared_name):
                         continue
@@ -71,10 +68,12 @@ class DependencyChecker:
                     expected_version = self.dependency_graph[declared_name]['version']
                     declared_version = declared_ver
                     if declared_version != expected_version:
-                        stable = False
+                        if fix:
+                            package_dependencies[dep_type][declared_name] = expected_version
+                        is_stable = False
                         print("%s%s%s (%s): %s@%s →%s Update to %s %s" % (bcolors.BOLD, package_name, bcolors.ENDC, dep_type, declared_name, declared_version, bcolors.FAIL, expected_version, bcolors.ENDC))
         print()
-        return stable
+        return is_stable
 
     def contains_packages(self, dep):
         for package_type in PACKAGE_TYPES:
@@ -84,9 +83,19 @@ class DependencyChecker:
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--fix",
+                        action='store_true',
+                        help="automatically fix dependency version mismatch")
+    args = parser.parse_args()
+
     checker = DependencyChecker()
     checker.generate_graph()
-    stable = checker.identify_violations()
+    stable = checker.identify_and_fix_violations(args.fix)
+    if args.fix:
+        # write the violations that have been fixed
+        print('would have written')
+
     if not stable:
         sys.exit(1)
 
