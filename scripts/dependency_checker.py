@@ -28,12 +28,14 @@ class DependencyChecker:
                 if "node_modules" in str(filename):
                     continue
 
-                with open(str(filename)) as f:
+                filename_str = str(filename)
+                with open(filename_str) as f:
                     data = json.load(f)
 
                     # extract metadata
                     package_name = data['name']
                     self.dependency_graph[package_name]['version'] = data['version']
+                    self.dependency_graph[package_name]['file_path'] = filename_str
 
                     # set up the dependencies
                     if DEV_DEP in data:
