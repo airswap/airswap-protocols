@@ -81,19 +81,22 @@ class DependencyChecker:
                 if "node_modules" in str(filename):
                     continue
 
-                with open(str(filename)) as f:
+                with open(str(filename), 'r+') as f:
                     data = json.load(f)
                     package_name = data['name']
-                    print(package_name)
+                    if package_name not in violation_fixes:
+                        continue
 
-                    # self.dependency_graph[package_name] = {}
-                    # self.dependency_graph[package_name]['version'] = data['version']
-                    #
-                    # # set up the dependencies
-                    # if DEV_DEP in data:
-                    #     self.dependency_graph[package_name][DEV_DEP] = data[DEV_DEP]
-                    # if DEP in data:
-                    #     self.dependency_graph[package_name][DEP] = data[DEP]
+                    if DEV_DEP in data:
+                        for dev_dependency in data[DEV_DEP]:
+                            if dev_dependency in violation_fixes[package_name][DEV_DEP]:
+                                data[DEV_DEP][dev_dependency] = violation_fixes[package_name][DEV_DEP][dev_dependency]
+                    if DEP in data:
+                        for dependency in data[DEP]:
+                            if dependency in violation_fixes[package_name][DEP]:
+                                data[DEP][dev_dependency] = violation_fixes[package_name][DEP][dev_dependency]
+                    f.seek(0)
+                    f.write(json.dumps(data, indent=2))
 
 
 if __name__ == "__main__":
