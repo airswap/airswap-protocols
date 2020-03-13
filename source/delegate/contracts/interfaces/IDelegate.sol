@@ -19,12 +19,12 @@ pragma experimental ABIEncoderV2;
 
 import "@airswap/types/contracts/Types.sol";
 
-interface IDelegate {
 
+interface IDelegate {
   struct Rule {
-    uint256 maxSenderAmount;      // The maximum amount of ERC-20 token the delegate would send
-    uint256 priceCoef;            // Number to be multiplied by 10^(-priceExp) - the price coefficient
-    uint256 priceExp;             // Indicates location of the decimal priceCoef * 10^(-priceExp)
+    uint256 maxSenderAmount; // The maximum amount of ERC-20 token the delegate would send
+    uint256 priceCoef; // Number to be multiplied by 10^(-priceExp) - the price coefficient
+    uint256 priceExp; // Indicates location of the decimal priceCoef * 10^(-priceExp)
   }
 
   event SetRule(
@@ -60,14 +60,9 @@ interface IDelegate {
     uint256 priceExp
   ) external;
 
-  function unsetRule(
-    address senderToken,
-    address signerToken
-  ) external;
+  function unsetRule(address senderToken, address signerToken) external;
 
-  function provideOrder(
-    Types.Order calldata order
-  ) external;
+  function provideOrder(Types.Order calldata order) external;
 
   function rules(address, address) external view returns (Rule memory);
 
@@ -75,30 +70,20 @@ interface IDelegate {
     uint256 senderAmount,
     address senderToken,
     address signerToken
-  ) external view returns (
-    uint256 signerAmount
-  );
+  ) external view returns (uint256 signerAmount);
 
   function getSenderSideQuote(
     uint256 signerAmount,
     address signerToken,
     address senderToken
-  ) external view returns (
-    uint256 senderAmount
-  );
+  ) external view returns (uint256 senderAmount);
 
-  function getMaxQuote(
-    address senderToken,
-    address signerToken
-  ) external view returns (
-    uint256 senderAmount,
-    uint256 signerAmount
-  );
+  function getMaxQuote(address senderToken, address signerToken)
+    external
+    view
+    returns (uint256 senderAmount, uint256 signerAmount);
 
-  function owner()
-    external view returns (address);
+  function owner() external view returns (address);
 
-  function tradeWallet()
-    external view returns (address);
-
+  function tradeWallet() external view returns (address);
 }

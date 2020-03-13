@@ -30,11 +30,15 @@ export const SECONDS_IN_DAY = 86400
 export const chainIds: Record<string, string> = {
   MAINNET: '1',
   RINKEBY: '4',
+  GOERLI: '5',
+  KOVAN: '42',
 }
 
 export const chainNames: Record<string, string> = {
   '1': 'MAINNET',
   '4': 'RINKEBY',
+  '5': 'GOERLI',
+  '42': 'KOVAN',
 }
 
 export const tokenKinds: Record<string, string> = {
@@ -70,19 +74,27 @@ export const signatureTypes: Record<string, string> = {
 export const wethAddresses: Record<string, string> = {
   '1': '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
   '4': '0xc778417e063141139fce010982780140aa0cd5ab',
+  '5': '0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6',
+  '42': '0xd0a1e359811322d97991e03f863a0c30c2cf029c',
 }
 
 export const stakingTokenAddresses: Record<string, string> = {
   '1': '0x27054b13b1b798b345b591a4d22e6562d47ea75a',
   '4': '0xcc1cbd4f67cceb7c001bd4adf98451237a193ff8',
+  '5': '0x1a1ec25DC08e98e5E93F1104B5e5cdD298707d31',
+  '42': '0x1a1ec25DC08e98e5E93F1104B5e5cdD298707d31',
 }
 
-export const deltaBalanceAddresses: Record<string, string> = {
+export const balanceCheckerAddresses: Record<string, string> = {
   '1': '0x5dfe850d4b029c25c7ef9531ec9986c97d90300f',
   '4': '0xa1e2c4132cbd33c3876e1254143a850466c97e32',
+  '5': '0x755aa03f420a62560e90502d7da23a73c301dad4',
+  '42': '0xe25b7504856bfb230b7c32bc87047479815cbc70',
 }
 
 export const etherscanDomains: Record<string, string> = {
   '1': 'etherscan.io',
   '4': 'rinkeby.etherscan.io',
+  '5': 'goerli.etherscan.io',
+  '42': 'kovan.etherscan.io',
 }

@@ -21,11 +21,11 @@ import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "@airswap/delegate/contracts/interfaces/IDelegate.sol";
 import "@airswap/tokens/contracts/interfaces/IWETH.sol";
 
-/**
-  * @title Wrapper: Send and receive ether for WETH trades
-  */
-contract Wrapper {
 
+/**
+ * @title Wrapper: Send and receive ether for WETH trades
+ */
+contract Wrapper {
   // The Swap contract to settle trades
   ISwap public swapContract;
 
@@ -33,47 +33,42 @@ contract Wrapper {
   IWETH public wethContract;
 
   /**
-    * @notice Contract Constructor
-    * @param wrapperSwapContract address
-    * @param wrapperWethContract address
-    */
-  constructor(
-    address wrapperSwapContract,
-    address wrapperWethContract
-  ) public {
+   * @notice Contract Constructor
+   * @param wrapperSwapContract address
+   * @param wrapperWethContract address
+   */
+  constructor(address wrapperSwapContract, address wrapperWethContract) public {
     swapContract = ISwap(wrapperSwapContract);
     wethContract = IWETH(wrapperWethContract);
   }
 
   /**
-    * @notice Required when withdrawing from WETH
-    * @dev During unwraps, WETH.withdraw transfers ether to msg.sender (this contract)
-    */
+   * @notice Required when withdrawing from WETH
+   * @dev During unwraps, WETH.withdraw transfers ether to msg.sender (this contract)
+   */
   function() external payable {
     // Ensure the message sender is the WETH contract.
-    if(msg.sender != address(wethContract)) {
+    if (msg.sender != address(wethContract)) {
       revert("DO_NOT_SEND_ETHER");
     }
   }
 
   /**
-    * @notice Send an Order to be forwarded to Swap
-    * @dev Sender must authorize this contract on the swapContract
-    * @dev Sender must approve this contract on the wethContract
-    * @param order Types.Order The Order
-    */
-  function swap(
-    Types.Order calldata order
-  ) external payable {
-
+   * @notice Send an Order to be forwarded to Swap
+   * @dev Sender must authorize this contract on the swapContract
+   * @dev Sender must approve this contract on the wethContract
+   * @param order Types.Order The Order
+   */
+  function swap(Types.Order calldata order) external payable {
     // Ensure msg.sender is sender wallet.
-    require(order.sender.wallet == msg.sender,
-      "MSG_SENDER_MUST_BE_ORDER_SENDER");
+    require(
+      order.sender.wallet == msg.sender,
+      "MSG_SENDER_MUST_BE_ORDER_SENDER"
+    );
 
     // Ensure that the signature is present.
     // The signature will be explicitly checked in Swap.
-    require(order.signature.v != 0,
-      "SIGNATURE_MUST_BE_SENT");
+    require(order.signature.v != 0, "SIGNATURE_MUST_BE_SENT");
 
     // Wraps ETH to WETH when the sender provides ETH and the order is WETH
     _wrapEther(order.sender);
@@ -86,21 +81,20 @@ contract Wrapper {
   }
 
   /**
-    * @notice Send an Order to be forwarded to a Delegate
-    * @dev Sender must authorize the Delegate contract on the swapContract
-    * @dev Sender must approve this contract on the wethContract
-    * @dev Delegate's tradeWallet must be order.sender - checked in Delegate
-    * @param order Types.Order The Order
-    * @param delegate IDelegate The Delegate to provide the order to
-    */
-  function provideDelegateOrder(
-    Types.Order calldata order,
-    IDelegate delegate
-  ) external payable {
+   * @notice Send an Order to be forwarded to a Delegate
+   * @dev Sender must authorize the Delegate contract on the swapContract
+   * @dev Sender must approve this contract on the wethContract
+   * @dev Delegate's tradeWallet must be order.sender - checked in Delegate
+   * @param order Types.Order The Order
+   * @param delegate IDelegate The Delegate to provide the order to
+   */
+  function provideDelegateOrder(Types.Order calldata order, IDelegate delegate)
+    external
+    payable
+  {
     // Ensure that the signature is present.
     // The signature will be explicitly checked in Swap.
-    require(order.signature.v != 0,
-      "SIGNATURE_MUST_BE_SENT");
+    require(order.signature.v != 0, "SIGNATURE_MUST_BE_SENT");
 
     // Wraps ETH to WETH when the signer provides ETH and the order is WETH
     _wrapEther(order.signer);
@@ -113,15 +107,14 @@ contract Wrapper {
   }
 
   /**
-    * @notice Wraps ETH to WETH when a trade requires it
-    * @param party Types.Party The side of the trade that may need wrapping
-    */
+   * @notice Wraps ETH to WETH when a trade requires it
+   * @param party Types.Party The side of the trade that may need wrapping
+   */
   function _wrapEther(Types.Party memory party) internal {
     // Check whether ether needs wrapping
     if (party.token == address(wethContract)) {
       // Ensure message value is param.
-      require(party.amount == msg.value,
-        "VALUE_MUST_BE_SENT");
+      require(party.amount == msg.value, "VALUE_MUST_BE_SENT");
 
       // Wrap (deposit) the ether.
       wethContract.deposit.value(msg.value)();
@@ -129,22 +122,24 @@ contract Wrapper {
       // Transfer the WETH from the wrapper to party.
       // Return value not checked - WETH throws on error and does not return false
       wethContract.transfer(party.wallet, party.amount);
-
     } else {
       // Ensure no unexpected ether is sent.
-      require(msg.value == 0,
-        "VALUE_MUST_BE_ZERO");
+      require(msg.value == 0, "VALUE_MUST_BE_ZERO");
     }
   }
 
   /**
-    * @notice Unwraps WETH to ETH when a trade requires it
-    * @dev The unwrapping only succeeds if recipientWallet has approved transferFrom
-    * @param recipientWallet address The trade recipient, who may have received WETH
-    * @param receivingToken address The token address the recipient received
-    * @param amount uint256 The amount of token the recipient received
-    */
-  function _unwrapEther(address recipientWallet, address receivingToken, uint256 amount) internal {
+   * @notice Unwraps WETH to ETH when a trade requires it
+   * @dev The unwrapping only succeeds if recipientWallet has approved transferFrom
+   * @param recipientWallet address The trade recipient, who may have received WETH
+   * @param receivingToken address The token address the recipient received
+   * @param amount uint256 The amount of token the recipient received
+   */
+  function _unwrapEther(
+    address recipientWallet,
+    address receivingToken,
+    uint256 amount
+  ) internal {
     // Check whether ether needs unwrapping
     if (receivingToken == address(wethContract)) {
       // Transfer weth from the recipient to the wrapper.

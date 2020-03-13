@@ -2,12 +2,13 @@
  * Submitted for verification at Etherscan.io on 2017-07-05
  * @note: represents a non-standard ERC20 token that contains a
  *        transferFrom function that does not return bool
-*/
+ */
 
 pragma solidity 0.5.12;
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+
 
 /**
  * @title ERC20Basic
@@ -15,10 +16,13 @@ import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
  * @dev see https://github.com/ethereum/EIPs/issues/20
  */
 contract ERC20Basic {
-  uint public totalSupply;
-  function balanceOf(address who) public view returns (uint);
-  function transfer(address to, uint value) public ;
-  event Transfer(address indexed from, address indexed to, uint value);
+  uint256 public totalSupply;
+
+  function balanceOf(address who) public view returns (uint256);
+
+  function transfer(address to, uint256 value) public;
+
+  event Transfer(address indexed from, address indexed to, uint256 value);
 }
 
 
@@ -27,38 +31,40 @@ contract ERC20Basic {
  * @dev Basic version of StandardToken, with no allowances.
  */
 contract BasicToken is ERC20Basic {
-  using SafeMath for uint;
+  using SafeMath for uint256;
 
-  mapping(address => uint) balances;
+  mapping(address => uint256) balances;
 
   /**
    * @dev Fix for the ERC20 short address attack.
    */
-  modifier onlyPayloadSize(uint size) {
-     require(msg.data.length >= size + 4, 'Payload attack');
-     _;
+  modifier onlyPayloadSize(uint256 size) {
+    require(msg.data.length >= size + 4, "Payload attack");
+    _;
   }
 
   /**
-  * @dev transfer token for a specified address
-  * @param _to The address to transfer to.
-  * @param _value The amount to be transferred.
-  */
-  function transfer(address _to, uint _value) public onlyPayloadSize(2 * 32) {
+   * @dev transfer token for a specified address
+   * @param _to The address to transfer to.
+   * @param _value The amount to be transferred.
+   */
+  function transfer(address _to, uint256 _value)
+    public
+    onlyPayloadSize(2 * 32)
+  {
     balances[msg.sender] = balances[msg.sender].sub(_value);
     balances[_to] = balances[_to].add(_value);
     emit Transfer(msg.sender, _to, _value);
   }
 
   /**
-  * @dev Gets the balance of the specified address.
-  * @param _owner The address to query the the balance of.
-  * @return An uint representing the amount owned by the passed address.
-  */
-  function balanceOf(address _owner) public view returns (uint balance) {
+   * @dev Gets the balance of the specified address.
+   * @param _owner The address to query the the balance of.
+   * @return An uint representing the amount owned by the passed address.
+   */
+  function balanceOf(address _owner) public view returns (uint256 balance) {
     return balances[_owner];
   }
-
 }
 
 
@@ -67,10 +73,16 @@ contract BasicToken is ERC20Basic {
  * @dev see https://github.com/ethereum/EIPs/issues/20
  */
 contract ERC202 is ERC20Basic {
-  function allowance(address owner, address spender) public view returns (uint);
-  function transferFrom(address from, address to, uint value) public ;
-  function approve(address spender, uint value) public;
-  event Approval(address indexed owner, address indexed spender, uint value);
+  function allowance(address owner, address spender)
+    public
+    view
+    returns (uint256);
+
+  function transferFrom(address from, address to, uint256 value) public;
+
+  function approve(address spender, uint256 value) public;
+
+  event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
 
@@ -82,9 +94,7 @@ contract ERC202 is ERC20Basic {
  * @dev Based on code by FirstBlood: https://github.com/Firstbloodio/token/blob/master/smart_contract/FirstBloodToken.sol
  */
 contract StandardToken is BasicToken, ERC202 {
-
-  mapping (address => mapping (address => uint)) public allowed;
-
+  mapping(address => mapping(address => uint256)) public allowed;
 
   /**
    * @dev Transfer tokens from one address to another
@@ -92,7 +102,10 @@ contract StandardToken is BasicToken, ERC202 {
    * @param _to address The address which you want to transfer to
    * @param _value uint the amout of tokens to be transfered
    */
-  function transferFrom(address _from, address _to, uint _value) public onlyPayloadSize(3 * 32) {
+  function transferFrom(address _from, address _to, uint256 _value)
+    public
+    onlyPayloadSize(3 * 32)
+  {
     uint256 _allowance = allowed[_from][msg.sender];
 
     // Check is not needed because sub(_allowance, _value) will already throw if this condition is not met
@@ -109,13 +122,15 @@ contract StandardToken is BasicToken, ERC202 {
    * @param _spender The address which will spend the funds.
    * @param _value The amount of tokens to be spent.
    */
-  function approve(address _spender, uint _value) public {
-
+  function approve(address _spender, uint256 _value) public {
     // To change the approve amount you first have to reduce the addresses`
     //  allowance to zero by calling `approve(_spender, 0)` if it is not
     //  already 0 to mitigate the race condition described here:
     //  https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
-      require((_value != 0) && (allowed[msg.sender][_spender] == 0), 'Invalid approval');
+    require(
+      (_value != 0) && (allowed[msg.sender][_spender] == 0),
+      "Invalid approval"
+    );
 
     allowed[msg.sender][_spender] = _value;
     emit Approval(msg.sender, _spender, _value);
@@ -127,10 +142,13 @@ contract StandardToken is BasicToken, ERC202 {
    * @param _spender address The address which will spend the funds.
    * @return A uint specifing the amount of tokens still avaible for the spender.
    */
-  function allowance(address _owner, address _spender) public view returns (uint remaining) {
+  function allowance(address _owner, address _spender)
+    public
+    view
+    returns (uint256 remaining)
+  {
     return allowed[_owner][_spender];
   }
-
 }
 
 
@@ -142,11 +160,11 @@ contract StandardToken is BasicToken, ERC202 {
  */
 
 contract MintableToken is StandardToken, Ownable {
-  event Mint(address indexed to, uint value);
+  event Mint(address indexed to, uint256 value);
   event MintFinished();
 
   bool public mintingFinished = false;
-  uint public totalSupply = 0;
+  uint256 public totalSupply = 0;
 
   /**
    * @dev Function to mint tokens
@@ -154,7 +172,7 @@ contract MintableToken is StandardToken, Ownable {
    * @param _amount The amount of tokens to mint.
    * @return A boolean that indicates if the operation was successful.
    */
-  function mint(address _to, uint _amount) public returns (bool) {
+  function mint(address _to, uint256 _amount) public returns (bool) {
     totalSupply = totalSupply.add(_amount);
     balances[_to] = balances[_to].add(_amount);
     emit Mint(_to, _amount);
@@ -183,12 +201,11 @@ contract Pausable is Ownable {
 
   bool public paused = false;
 
-
   /**
    * @dev modifier to allow actions only when the contract IS paused
    */
   modifier whenNotPaused() {
-    require(!paused, 'NOT PAUSED');
+    require(!paused, "NOT PAUSED");
     _;
   }
 
@@ -196,7 +213,7 @@ contract Pausable is Ownable {
    * @dev modifier to allow actions only when the contract IS NOT paused
    */
   modifier whenPaused {
-    require(paused, 'PAUSED');
+    require(paused, "PAUSED");
     _;
   }
 
@@ -227,12 +244,14 @@ contract Pausable is Ownable {
  **/
 
 contract PausableToken is StandardToken, Pausable {
-
-  function transfer(address _to, uint _value) public whenNotPaused {
+  function transfer(address _to, uint256 _value) public whenNotPaused {
     super.transfer(_to, _value);
   }
 
-  function transferFrom(address _from, address _to, uint _value) public whenNotPaused {
+  function transferFrom(address _from, address _to, uint256 _value)
+    public
+    whenNotPaused
+  {
     super.transferFrom(_from, _to, _value);
   }
 }
@@ -244,7 +263,6 @@ contract PausableToken is StandardToken, Pausable {
  * beneficiary to extract the tokens after a time has passed
  */
 contract TokenTimelock {
-
   // ERC20 basic token contract being held
   ERC20Basic token;
 
@@ -252,9 +270,11 @@ contract TokenTimelock {
   address beneficiary;
 
   // timestamp where token release is enabled
-  uint releaseTime;
+  uint256 releaseTime;
 
-  constructor(ERC20Basic _token, address _beneficiary, uint _releaseTime) public {
+  constructor(ERC20Basic _token, address _beneficiary, uint256 _releaseTime)
+    public
+  {
     require(_releaseTime > now);
     token = _token;
     beneficiary = _beneficiary;
@@ -268,7 +288,7 @@ contract TokenTimelock {
     require(msg.sender == beneficiary);
     require(now >= releaseTime);
 
-    uint amount = token.balanceOf(address(this));
+    uint256 amount = token.balanceOf(address(this));
     require(amount > 0);
 
     token.transfer(beneficiary, amount);
@@ -285,18 +305,19 @@ contract OMGToken is PausableToken, MintableToken {
 
   string public name = "OMGToken";
   string public symbol = "OMG";
-  uint public decimals = 18;
+  uint256 public decimals = 18;
 
   /**
    * @dev mint timelocked tokens
    */
   function mintTimelocked(address _to, uint256 _amount, uint256 _releaseTime)
-    public onlyOwner returns (TokenTimelock) {
-
+    public
+    onlyOwner
+    returns (TokenTimelock)
+  {
     TokenTimelock timelock = new TokenTimelock(this, _to, _releaseTime);
     mint(address(timelock), _amount);
 
     return timelock;
   }
-
 }

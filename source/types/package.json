@@ -18,9 +18,6 @@
     "/build"
   ],
   "scripts": {
-    "hint": "yarn solhint \"./contracts/**/*.sol\"",
-    "lint": "yarn eslint \"./test/**/*.js\"",
-    "ganache": "ganache-cli -p 8545 --gasLimit 0xfffffffffff --time '2017-05-10T00:00:00+00:00' -s 0",
     "clean": "rm -rf ./build",
     "compile": "yarn clean; truffle compile && tsc -b",
     "coverage": "node_modules/.bin/solidity-coverage",
@@ -34,7 +31,7 @@
     "openzeppelin-solidity": "2.4"
   },
   "devDependencies": {
-    "@airswap/constants": "0.3.6",
+    "@airswap/constants": "0.3.7",
     "@airswap/tokens": "0.1.4",
     "solidity-coverage": "^0.6.3",
     "typescript": "^3.8.2"
