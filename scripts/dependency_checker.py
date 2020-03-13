@@ -8,6 +8,7 @@ import argparse
 class bcolors:
     BOLD = '\033[1m'
     FAIL = '\033[91m'
+    UPDATED = '\033[93m'
     ENDC = '\033[0m'
 
 DEV_DEP = "devDependencies"
@@ -18,7 +19,7 @@ PACKAGE_TYPES = ['airswap', 'test-utils']
 class DependencyChecker:
 
     def __init__(self):
-        self.dependency_graph = defaultdict(lambda: defaultdict(defaultdict))
+        self.dependency_graph = {}
 
     def generate_graph(self):
         # go through all package files and extract their dependencies
@@ -34,6 +35,7 @@ class DependencyChecker:
 
                     # extract metadata
                     package_name = data['name']
+                    self.dependency_graph[package_name] = {}
                     self.dependency_graph[package_name]['version'] = data['version']
                     self.dependency_graph[package_name]['file_path'] = filename_str
 
@@ -49,8 +51,8 @@ class DependencyChecker:
                 return True
         return False
 
-    def identify_violations(self):
-        violation_needed_version = defaultdict(lambda: defaultdict(defaultdict))
+    def identify_violations(self, fix):
+        is_stable = True
         print()
 
         # go through every package looking for where the dependency doesn't match the dependency graph
@@ -70,34 +72,45 @@ class DependencyChecker:
                     # check version against declared version
                     expected_version = self.dependency_graph[declared_name]['version']
                     if declared_version != expected_version:
-                        violation_needed_version[package_name][dep_type][declared_name] = expected_version
-                        print("%s%s%s (%s): %s@%s →%s Update to %s %s" % (bcolors.BOLD, package_name, bcolors.ENDC, dep_type, declared_name, declared_version, bcolors.FAIL, expected_version, bcolors.ENDC))
+                        if fix:
+                            self.dependency_graph[package_name][dep_type][declared_name] = expected_version
+                            is_stable = False
+                            print("%s%s%s (%s): %s@%s →%s Updated to %s %s" %
+                                  (bcolors.BOLD, package_name, bcolors.ENDC, dep_type, declared_name, declared_version, bcolors.UPDATED, expected_version, bcolors.ENDC))
+                        else:
+                            print("%s%s%s (%s): %s@%s →%s Update to %s %s" %
+                                  (bcolors.BOLD, package_name, bcolors.ENDC, dep_type, declared_name, declared_version, bcolors.FAIL, expected_version, bcolors.ENDC))
         print()
-        return violation_needed_version
+        return is_stable
 
-    def write_fixes(self, violation_fixes):
-        for directory in SEARCH_DIR:
-            for filename in Path(os.getcwd() + directory).rglob('package.json'):
-                #ignore node_modules
-                if "node_modules" in str(filename):
-                    continue
+    def write_fixes(self):
+        for package in self.dependency_graph.keys():
+            filename = self.dependency_graph[package]['file_path']
 
-                with open(str(filename), 'r+') as f:
-                    data = json.load(f)
-                    package_name = data['name']
-                    if package_name not in violation_fixes:
-                        continue
+            with open(str(filename), 'r+') as f:
+                data = json.load(f)
+                package_name = data['name']
+                if DEV_DEP in data:
+                    data[DEV_DEP] = self.dependency_graph[package_name][DEV_DEP]
+                if DEP in data:
+                    data[DEP] = self.dependency_graph[package_name][DEP]
 
-                    if DEV_DEP in data:
-                        for dev_dependency in data[DEV_DEP]:
-                            if dev_dependency in violation_fixes[package_name][DEV_DEP]:
-                                data[DEV_DEP][dev_dependency] = violation_fixes[package_name][DEV_DEP][dev_dependency]
-                    if DEP in data:
-                        for dependency in data[DEP]:
-                            if dependency in violation_fixes[package_name][DEP]:
-                                data[DEP][dev_dependency] = violation_fixes[package_name][DEP][dev_dependency]
-                    f.seek(0)
-                    f.write(json.dumps(data, indent=2))
+                f.seek(0)
+                f.write(json.dumps(data, indent=2))
+
+        # for directory in SEARCH_DIR:
+        #     for filename in Path(os.getcwd() + directory).rglob('package.json'):
+        #         #ignore node_modules
+        #         if "node_modules" in str(filename):
+        #             continue
+        #
+        #         with open(str(filename), 'r+') as f:
+        #             data = json.load(f)
+        #             package_name = data['name']
+        #             data = self.dependency_graph[package_name]
+        #             print(data)
+        #             # f.seek(0)
+        #             # f.write(json.dumps(data, indent=2))
 
 
 if __name__ == "__main__":
@@ -109,11 +122,11 @@ if __name__ == "__main__":
 
     checker = DependencyChecker()
     checker.generate_graph()
-    violation_updates = checker.identify_violations()
-    if violation_updates and args.fix:
+    stable = checker.identify_violations(args.fix)
+    if not stable and args.fix:
         # fix violations, return 0
-        checker.write_fixes(violation_updates)
-    elif violation_updates:
+        checker.write_fixes()
+    elif not stable:
         # ignore violations, return 1
         sys.exit(1)
 
