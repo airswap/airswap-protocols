@@ -89,14 +89,12 @@ module.exports = async (deployer, network) => {
   await Validator.link('Types', Types.address)
   await deployer.deploy(Validator, WETH_ADDRESS)
 
-  //Deploy Factory-Created Contracts that also need to be verified
   if (network !== "DEVELOPMENT") {
+    //Deploy Factory-Created Contracts that also need to be verified
     await deployer.deploy(Index)
     await deployer.deploy(Delegate, Swap.address, Indexer.address, ADDRESS_ZERO, ADDRESS_ZERO, '0x0001')
 
-  }
-
-  if (network !== "DEVELOPMENT") {
+    //Update Jsons
     let deploy_data = {}
     deploy_data['Types'] = Types.address
     deploy_data['TransferHandlerRegistry'] = TransferHandlerRegistry.address
