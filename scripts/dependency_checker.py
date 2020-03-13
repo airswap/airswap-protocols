@@ -14,7 +14,7 @@ class bcolors:
 DEV_DEP = "devDependencies"
 DEP = "dependencies"
 SEARCH_DIR = ['/source', '/tools']
-PACKAGE_TYPES = ['airswap', 'test-utils']
+DEPENDENCY_KEYWORD = 'airswap'
 
 class DependencyChecker:
 
@@ -45,12 +45,6 @@ class DependencyChecker:
                     if DEP in data:
                         self.dependency_graph[package_name][DEP] = data[DEP]
 
-    def contains_packages(self, dep):
-        for package_type in PACKAGE_TYPES:
-            if package_type in dep:
-                return True
-        return False
-
     def identify_violations(self, fix):
         is_stable = True
         print()
@@ -66,7 +60,7 @@ class DependencyChecker:
                 # go through all the declared dependencies in a package
                 for declared_name, declared_version in package_dependencies[dep_type].items():
                     # skip if we don't see the packages we care about
-                    if not self.contains_packages(declared_name):
+                    if DEPENDENCY_KEYWORD not in declared_name:
                         continue
 
                     # check version against declared version
