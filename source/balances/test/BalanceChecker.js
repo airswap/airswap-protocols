@@ -6,12 +6,7 @@ const FungibleToken = artifacts.require('FungibleToken')
 const TransferHandlerRegistry = artifacts.require('TransferHandlerRegistry')
 const { ADDRESS_ZERO } = require('@airswap/constants')
 
-const {
-  emitted,
-  reverted,
-  passes,
-  ok,
-} = require('@airswap/test-utils').assert
+const { emitted, reverted, passes, ok } = require('@airswap/test-utils').assert
 const { balances } = require('@airswap/test-utils').balances
 const { GANACHE_PROVIDER } = require('@airswap/test-utils').constants
 
