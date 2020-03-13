@@ -109,8 +109,9 @@ if __name__ == "__main__":
     checker.generate_graph()
     violation_updates = checker.identify_violations()
     if violation_updates and args.fix:
+        # fix violations, return 0
         checker.write_fixes(violation_updates)
-
-    if not violation_updates:
+    elif violation_updates:
+        # ignore violations, return 1
         sys.exit(1)
 
