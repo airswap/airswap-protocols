@@ -16,13 +16,13 @@ const { ADDRESS_ZERO, tokenKinds, chainIds } = require('@airswap/constants')
 const fs = require('fs')
 
 DEPLOYS_JSON = {
-    'Types': '../../../source/types/deploys.json',
-    'DelegateFactory': '../../../source/delegate/deploys.json',
-    'Indexer': '../../../source/indexer/deploys.json',
-    'Swap': '../../../source/swap/deploys.json',
-    'TransferHandlerRegistry': '../../../source/swap/deploys.json',
-    'Validator': '../../../source/validator/deploys.json',
-    'Wrapper': '../../../source/wrapper/deploys.json'
+  Types: '../../../source/types/deploys.json',
+  DelegateFactory: '../../../source/delegate/deploys.json',
+  Indexer: '../../../source/indexer/deploys.json',
+  Swap: '../../../source/swap/deploys.json',
+  TransferHandlerRegistry: '../../../source/swap/deploys.json',
+  Validator: '../../../source/validator/deploys.json',
+  Wrapper: '../../../source/wrapper/deploys.json',
 }
 
 async function updateDeployJsons(network, deploy_data) {
@@ -31,7 +31,7 @@ async function updateDeployJsons(network, deploy_data) {
     address_json = require(file_path)
     address_json[chainIds[network]] = deploy_data[contract_name]
     address_json_string = JSON.stringify(address_json, null, '  ')
-    fs.writeFileSync(__dirname + "/"+ file_path, address_json_string, (err) => {
+    fs.writeFileSync(__dirname + '/' + file_path, address_json_string, err => {
       if (err) throw err
     })
   }
@@ -89,10 +89,17 @@ module.exports = async (deployer, network) => {
   await Validator.link('Types', Types.address)
   await deployer.deploy(Validator, WETH_ADDRESS)
 
-  if (network !== "DEVELOPMENT") {
+  if (network !== 'DEVELOPMENT') {
     //Deploy Factory-Created Contracts that also need to be verified
     await deployer.deploy(Index)
-    await deployer.deploy(Delegate, Swap.address, Indexer.address, ADDRESS_ZERO, ADDRESS_ZERO, '0x0001')
+    await deployer.deploy(
+      Delegate,
+      Swap.address,
+      Indexer.address,
+      ADDRESS_ZERO,
+      ADDRESS_ZERO,
+      '0x0001'
+    )
 
     //Update Jsons
     let deploy_data = {}

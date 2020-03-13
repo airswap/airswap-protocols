@@ -24,7 +24,7 @@
     "test": "yarn compile; mocha -r ts-node/register test/**/*.ts"
   },
   "dependencies": {
-    "@airswap/constants": "0.3.6",
+    "@airswap/constants": "0.3.7",
     "@airswap/delegate": "2.6.9",
     "@airswap/indexer": "3.6.9",
     "@airswap/swap": "5.4.8",
