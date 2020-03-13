@@ -96,13 +96,15 @@ module.exports = async (deployer, network) => {
 
   }
 
-  let deploy_data = {}
-  deploy_data['Types'] = Types.address
-  deploy_data['TransferHandlerRegistry'] = TransferHandlerRegistry.address
-  deploy_data['Swap'] = Swap.address
-  deploy_data['Indexer'] = Indexer.address
-  deploy_data['DelegateFactory'] = DelegateFactory.address
-  deploy_data['Wrapper'] = Wrapper.address
-  deploy_data['Validator'] = Validator.address
-  await updateDeployJsons(network, deploy_data)
+  if (network !== "DEVELOPMENT") {
+    let deploy_data = {}
+    deploy_data['Types'] = Types.address
+    deploy_data['TransferHandlerRegistry'] = TransferHandlerRegistry.address
+    deploy_data['Swap'] = Swap.address
+    deploy_data['Indexer'] = Indexer.address
+    deploy_data['DelegateFactory'] = DelegateFactory.address
+    deploy_data['Wrapper'] = Wrapper.address
+    deploy_data['Validator'] = Validator.address
+    await updateDeployJsons(network, deploy_data)
+  }
 }
