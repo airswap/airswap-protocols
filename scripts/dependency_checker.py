@@ -84,33 +84,21 @@ class DependencyChecker:
         return is_stable
 
     def write_fixes(self):
+        # go through the package.jsons and write the updated dependencies
         for package in self.dependency_graph.keys():
             filename = self.dependency_graph[package]['file_path']
-
             with open(str(filename), 'r+') as f:
+                # read old data
                 data = json.load(f)
+                # update data
                 package_name = data['name']
                 if DEV_DEP in data:
                     data[DEV_DEP] = self.dependency_graph[package_name][DEV_DEP]
                 if DEP in data:
                     data[DEP] = self.dependency_graph[package_name][DEP]
-
+                # write new data
                 f.seek(0)
                 f.write(json.dumps(data, indent=2))
-
-        # for directory in SEARCH_DIR:
-        #     for filename in Path(os.getcwd() + directory).rglob('package.json'):
-        #         #ignore node_modules
-        #         if "node_modules" in str(filename):
-        #             continue
-        #
-        #         with open(str(filename), 'r+') as f:
-        #             data = json.load(f)
-        #             package_name = data['name']
-        #             data = self.dependency_graph[package_name]
-        #             print(data)
-        #             # f.seek(0)
-        #             # f.write(json.dumps(data, indent=2))
 
 
 if __name__ == "__main__":
