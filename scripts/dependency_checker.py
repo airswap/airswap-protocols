@@ -74,7 +74,7 @@ class DependencyChecker:
         print()
         return violation_needed_version
 
-    def write_fixes(self):
+    def write_fixes(self, violation_fixes):
         for directory in SEARCH_DIR:
             for filename in Path(os.getcwd() + directory).rglob('package.json'):
                 #ignore node_modules
@@ -83,11 +83,8 @@ class DependencyChecker:
 
                 with open(str(filename)) as f:
                     data = json.load(f)
-
-
-
-                    # # extract metadata
                     package_name = data['name']
+                    print(package_name)
 
                     # self.dependency_graph[package_name] = {}
                     # self.dependency_graph[package_name]['version'] = data['version']
@@ -109,8 +106,8 @@ if __name__ == "__main__":
     checker = DependencyChecker()
     checker.generate_graph()
     violation_updates = checker.identify_violations()
-    if not violation_updates and args.fix:
-        checker.write_fixes()
+    if violation_updates and args.fix:
+        checker.write_fixes(violation_updates)
 
     if not violation_updates:
         sys.exit(1)
