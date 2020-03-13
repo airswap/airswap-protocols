@@ -3,7 +3,7 @@ const FungibleToken = artifacts.require('FungibleToken')
 const MockContract = artifacts.require('MockContract')
 const WETH9 = artifacts.require('WETH9')
 
-const { equal, reverted } = require('@airswap/test-utils').assert
+const { equal, notEqual, reverted } = require('@airswap/test-utils').assert
 const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
 const { ADDRESS_ZERO } = require('@airswap/constants')
 
@@ -110,10 +110,12 @@ contract('BalanceChecker Unit Tests', async accounts => {
       const balances = await balanceChecker.walletBalances.call(mockSender, [
         mockFT.address,
         mockFT.address,
+        ADDRESS_ZERO,
       ])
-      equal(balances.length, 2, 'balances array length is incorrect')
+      equal(balances.length, 3, 'balances array length is incorrect')
       equal(balances[0].toNumber(), BALANCE, 'balance is incorrect')
       equal(balances[1].toNumber(), BALANCE, 'balance is incorrect')
+      notEqual(balances[2].toString(), '0', 'balance is incorrect')
     })
 
     it('Test with empty token array', async () => {
@@ -124,7 +126,14 @@ contract('BalanceChecker Unit Tests', async accounts => {
       const balances = await balanceChecker.walletBalances.call(mockSender, [
         mockSigner,
       ])
-      equal(balances[0], 0, 'balances array is not empty')
+      equal(balances[0], 0, 'balances array is empty')
+    })
+
+    it('Test with non token contract array', async () => {
+      const balances = await balanceChecker.walletBalances.call(mockSender, [
+        balanceChecker.address,
+      ])
+      equal(balances[0], 0, 'balances array is empty')
     })
   })
 
@@ -152,7 +161,16 @@ contract('BalanceChecker Unit Tests', async accounts => {
         mockSpender,
         [mockSigner]
       )
-      equal(allowances[0], 0, 'allowances array is not empty')
+      equal(allowances[0], 0, 'allowances array is empty')
+    })
+
+    it('Test with non token contract array', async () => {
+      const allowances = await balanceChecker.walletAllowances.call(
+        mockSender,
+        mockSpender,
+        [balanceChecker.address]
+      )
+      equal(allowances[0], 0, 'allowances array is empty')
     })
   })
 
@@ -184,17 +202,20 @@ contract('BalanceChecker Unit Tests', async accounts => {
 
   describe('Test allBalancesForManyAccounts', async () => {
     it('Test multiple balances', async () => {
-      const allowances = await balanceChecker.allBalancesForManyAccounts.call(
+      const balances = await balanceChecker.allBalancesForManyAccounts.call(
         [mockSender, mockSender, mockSender],
-        [mockFT.address, mockWeth.address]
+        [mockFT.address, mockWeth.address, ADDRESS_ZERO]
       )
-      equal(allowances.length, 6, 'balance array length is incorrect')
-      equal(allowances[0], BALANCE, 'balance is incorrect')
-      equal(allowances[1], WETH_BALANCE, 'weth balance is incorrect')
-      equal(allowances[2], BALANCE, 'balance is incorrect')
-      equal(allowances[3], WETH_BALANCE, 'weth balance is incorrect')
-      equal(allowances[4], BALANCE, 'balance is incorrect')
-      equal(allowances[5], WETH_BALANCE, 'weth balance is incorrect')
+      equal(balances.length, 9, 'balance array length is incorrect')
+      equal(balances[0], BALANCE, 'balance is incorrect')
+      equal(balances[1], WETH_BALANCE, 'weth balance is incorrect')
+      notEqual(balances[2].toString(), '0', 'balance is incorrect')
+      equal(balances[3], BALANCE, 'weth balance is incorrect')
+      equal(balances[4], WETH_BALANCE, 'weth balance is incorrect')
+      notEqual(balances[5], '0', 'balance is incorrect')
+      equal(balances[6], BALANCE, 'weth balance is incorrect')
+      equal(balances[7], WETH_BALANCE, 'balance is incorrect')
+      notEqual(balances[8], '0', 'weth balance is incorrect')
     })
 
     it('Test with empty sender and token array', async () => {

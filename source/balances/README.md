@@ -1,4 +1,4 @@
-# Delegate
+# BalanceChecker
 
 [AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens. This package contains source code and tests for a basic ERC20 balance and allowance aggregator.
 

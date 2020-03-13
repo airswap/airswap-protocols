@@ -27,6 +27,7 @@
     "verify": "truffle run verify"
   },
   "devDependencies": {
+    "@airswap/swap": "5.4.8",
     "@airswap/tokens": "0.1.4",
     "solidity-coverage": "^0.6.3"
   },
