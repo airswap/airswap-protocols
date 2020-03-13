@@ -22,8 +22,8 @@ import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "@airswap/indexer/contracts/interfaces/ILocatorWhitelist.sol";
 import "@airswap/indexer/contracts/interfaces/IIndexer.sol";
 
-contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
 
+contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
   // Mapping specifying whether an address was deployed by this factory
   mapping(address => bool) internal _deployedAddresses;
 
@@ -33,12 +33,12 @@ contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
   bytes2 public protocol;
 
   /**
-    * @notice Create a new Delegate contract
-    * @dev swapContract is unable to be changed after the factory sets it
-    * @param factorySwapContract address Swap contract the delegate will deploy with
-    * @param factoryIndexerContract address Indexer contract the delegate will deploy with
-    * @param factoryProtocol bytes2 Protocol type of the delegates the factory deploys
-    */
+   * @notice Create a new Delegate contract
+   * @dev swapContract is unable to be changed after the factory sets it
+   * @param factorySwapContract address Swap contract the delegate will deploy with
+   * @param factoryIndexerContract address Indexer contract the delegate will deploy with
+   * @param factoryProtocol bytes2 Protocol type of the delegates the factory deploys
+   */
   constructor(
     ISwap factorySwapContract,
     IIndexer factoryIndexerContract,
@@ -50,15 +50,21 @@ contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
   }
 
   /**
-    * @param delegateTradeWallet address Wallet the delegate will trade from
-    * @return address delegateContractAddress Address of the delegate contract created
-    */
-  function createDelegate(
-    address delegateTradeWallet
-  ) external returns (address delegateContractAddress) {
-
+   * @param delegateTradeWallet address Wallet the delegate will trade from
+   * @return address delegateContractAddress Address of the delegate contract created
+   */
+  function createDelegate(address delegateTradeWallet)
+    external
+    returns (address delegateContractAddress)
+  {
     delegateContractAddress = address(
-      new Delegate(swapContract, indexerContract, msg.sender, delegateTradeWallet, protocol)
+      new Delegate(
+        swapContract,
+        indexerContract,
+        msg.sender,
+        delegateTradeWallet,
+        protocol
+      )
     );
     _deployedAddresses[delegateContractAddress] = true;
 
@@ -74,13 +80,12 @@ contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
   }
 
   /**
-    * @notice To check whether a locator was deployed
-    * @dev Implements ILocatorWhitelist.has
-    * @param locator bytes32 Locator of the delegate in question
-    * @return bool True if the delegate was deployed by this contract
-    */
+   * @notice To check whether a locator was deployed
+   * @dev Implements ILocatorWhitelist.has
+   * @param locator bytes32 Locator of the delegate in question
+   * @return bool True if the delegate was deployed by this contract
+   */
   function has(bytes32 locator) external view returns (bool) {
     return _deployedAddresses[address(bytes20(locator))];
   }
-
 }

@@ -28,11 +28,14 @@ jobs:
           command: |
             yarn install
       - run:
-          name: Eslint
-          command: yarn lint
-      - run:
           name: Solhint
           command: yarn hint
+      - run:
+          name: Eslint
+          command: yarn lint:check
+      - run:
+          name: Prettier
+          command: yarn pretty:check
       - run:
           name: Check Dependencies
           command: |
