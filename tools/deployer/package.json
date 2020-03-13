@@ -16,7 +16,6 @@
   "scripts": {
     "clean": "rm -rf ./build; rm -rf ./flatten",
     "compile": "yarn clean; truffle compile",
-    "ganache": "ganache-cli -p 8545 --gasLimit 0xfffffffffff --time '2017-05-10T00:00:00+00:00' -s 0",
     "cp_migration_flat": "mkdir -p flatten/; cp contracts/Migrations.sol flatten/",
     "flatten": "truffle run flatten",
     "migrate": "yarn flatten contracts/Imports.sol && yarn cp_migration_flat && truffle migrate --skip-dry-run",
