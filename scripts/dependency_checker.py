@@ -92,7 +92,7 @@ if __name__ == "__main__":
     checker = DependencyChecker()
     checker.generate_graph()
     stable = checker.identify_and_fix_violations(args.fix)
-    if args.fix:
+    if not stable and args.fix:
         # write the violations that have been fixed
         print('would have written')
 
