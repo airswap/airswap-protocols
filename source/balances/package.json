@@ -1,0 +1,37 @@
+{
+  "name": "@airswap/balances",
+  "version": "1.1.1",
+  "description": "Batch balance and allowance calls on Ethereum",
+  "contributors": [
+    "Don Mosites <don.mosites@fluidity.io>",
+    "Deepa Sathaye <deepa.sathaye@fludity.io>",
+    "Ethan Wessel <ethan.wessel@fluidity.io>",
+    "Alice Henshaw <alice.henshaw@fluidity.io>"
+  ],
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/airswap/airswap-protocols"
+  },
+  "scripts": {
+    "clean": "rm -rf ./build",
+    "compile": "truffle compile",
+    "coverage": "node_modules/.bin/solidity-coverage",
+    "ganache": "ganache-cli -p 8545 --gasLimit 0xfffffffffff --time '2017-05-10T00:00:00+00:00' -s 0",
+    "hint": "yarn solhint \"./contracts/**/*.sol\"",
+    "lint": "yarn eslint \"./test/**/*.js\"",
+    "cp_migration_flat": "mkdir -p flatten/; cp contracts/Migrations.sol flatten/",
+    "test": "truffle test",
+    "flatten": "truffle run flatten",
+    "migrate": "yarn cp_migration_flat; truffle migrate --skip-dry-run",
+    "verify": "truffle run verify"
+  },
+  "devDependencies": {
+    "@airswap/swap": "5.4.8",
+    "@airswap/tokens": "0.1.4",
+    "solidity-coverage": "^0.6.3"
+  },
+  "dependencies": {
+    "openzeppelin-solidity": "2.4"
+  }
+}
