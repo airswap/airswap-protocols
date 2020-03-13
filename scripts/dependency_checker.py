@@ -18,7 +18,7 @@ PACKAGE_TYPES = ['airswap', 'test-utils']
 class DependencyChecker:
 
     def __init__(self):
-        self.dependency_graph = {}
+        self.dependency_graph = defaultdict(lambda: defaultdict(defaultdict))
 
     def generate_graph(self):
         # go through all package files and extract their dependencies
@@ -33,7 +33,6 @@ class DependencyChecker:
 
                     # extract metadata
                     package_name = data['name']
-                    self.dependency_graph[package_name] = {}
                     self.dependency_graph[package_name]['version'] = data['version']
 
                     # set up the dependencies
