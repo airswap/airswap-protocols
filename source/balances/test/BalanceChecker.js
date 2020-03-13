@@ -4,18 +4,11 @@ const BalanceChecker = artifacts.require('BalanceChecker')
 const WETH9 = artifacts.require('WETH9')
 const FungibleToken = artifacts.require('FungibleToken')
 const TransferHandlerRegistry = artifacts.require('TransferHandlerRegistry')
-
-const ethers = require('ethers')
-const { createOrder, signOrder } = require('@airswap/utils')
-const { tokenKinds } = require('@airswap/constants')
-const { emptySignature } = require('@airswap/types')
 const { ADDRESS_ZERO } = require('@airswap/constants')
 
 const {
   emitted,
   reverted,
-  equal,
-  getResult,
   passes,
   ok,
 } = require('@airswap/test-utils').assert

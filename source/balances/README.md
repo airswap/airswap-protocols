@@ -16,7 +16,7 @@
 
 ## Deploys
 
-[BalanceChecker](./contracts/BalanceChecker.sol) is deployed. See [deploys.json](./deploys.json) for latest contract deployments on Goerli (`5`) and Kovan (`42`).
+[BalanceChecker](./contracts/BalanceChecker.sol) is deployed. See [deploys.json](./deploys.json) for latest contract deployments on Mainnet (`1`), Rinkeby (`4`), Goerli (`5`), and Kovan (`42`).
 
 ## Commands
 
