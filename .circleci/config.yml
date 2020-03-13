@@ -254,6 +254,10 @@ workflows:
           context: Development
           requires:
             - setup
+      - balances_tests:
+          context: Development
+          requires:
+            - setup
       - delegate_tests:
           context: Development
           requires:
