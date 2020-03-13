@@ -117,10 +117,7 @@ contract('BalanceChecker Unit Tests', async accounts => {
     })
 
     it('Test with empty token array', async () => {
-      await reverted(
-        balanceChecker.walletBalances.call(mockSender, []),
-        'empty token array did not cause revert'
-      )
+      await reverted(balanceChecker.walletBalances.call(mockSender, []))
     })
 
     it('Test with non-contract token array', async () => {
@@ -138,7 +135,7 @@ contract('BalanceChecker Unit Tests', async accounts => {
         mockSpender,
         [mockFT.address, mockFT.address]
       )
-      equal(allowances.length, 1, 'allowances array length is incorrect')
+      equal(allowances.length, 2, 'allowances array length is incorrect')
       equal(allowances[0], ALLOWANCE, 'allowance is incorrect')
       equal(allowances[1], ALLOWANCE, 'allowance is incorrect')
     })
