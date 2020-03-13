@@ -52,7 +52,7 @@ module.exports = {
           'https://kovan.infura.io/v3/' + process.env.INFURA_API_KEY
         ),
       network_id: 42,
-    }
+    },
   },
   compilers: {
     solc: {
