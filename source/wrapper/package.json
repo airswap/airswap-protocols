@@ -30,7 +30,7 @@
     "@airswap/tokens": "0.1.4"
   },
   "devDependencies": {
-    "@airswap/constants": "0.3.6",
+    "@airswap/constants": "0.3.7",
     "@airswap/indexer": "3.6.9",
     "@airswap/test-utils": "0.1.6",
     "@airswap/types": "3.5.11",

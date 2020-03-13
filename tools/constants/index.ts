@@ -85,9 +85,11 @@ export const stakingTokenAddresses: Record<string, string> = {
   '42': '0x1a1ec25DC08e98e5E93F1104B5e5cdD298707d31',
 }
 
-export const deltaBalanceAddresses: Record<string, string> = {
+export const balanceCheckerAddresses: Record<string, string> = {
   '1': '0x5dfe850d4b029c25c7ef9531ec9986c97d90300f',
   '4': '0xa1e2c4132cbd33c3876e1254143a850466c97e32',
+  '5': '0x755aa03f420a62560e90502d7da23a73c301dad4',
+  '42': '0xe25b7504856bfb230b7c32bc87047479815cbc70',
 }
 
 export const etherscanDomains: Record<string, string> = {

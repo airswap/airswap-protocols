@@ -25,7 +25,7 @@
     "test": "yarn compile; mocha -r ts-node/register test/**/*.ts"
   },
   "dependencies": {
-    "@airswap/constants": "0.3.6",
+    "@airswap/constants": "0.3.7",
     "@airswap/types": "3.5.11",
     "axios": "^0.19.2",
     "eth-contract-metadata": "^1.12.1",
