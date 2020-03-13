@@ -30,11 +30,15 @@ export const SECONDS_IN_DAY = 86400
 export const chainIds: Record<string, string> = {
   MAINNET: '1',
   RINKEBY: '4',
+  GOERLI: '5',
+  KOVAN: '42',
 }
 
 export const chainNames: Record<string, string> = {
   '1': 'MAINNET',
   '4': 'RINKEBY',
+  '5': 'GOERLI',
+  '42': 'KOVAN',
 }
 
 export const tokenKinds: Record<string, string> = {

@@ -12,8 +12,30 @@ const Index = artifacts.require('Index')
 const DelegateFactory = artifacts.require('DelegateFactory')
 const Delegate = artifacts.require('Delegate')
 const Validator = artifacts.require('Validator')
+const { ADDRESS_ZERO, tokenKinds, chainIds } = require('@airswap/constants')
+const fs = require('fs')
 
-const { ADDRESS_ZERO, tokenKinds } = require('@airswap/constants')
+DEPLOYS_JSON = {
+    'Types': '../../../source/types/deploys.json',
+    'DelegateFactory': '../../../source/delegate/deploys.json',
+    'Indexer': '../../../source/indexer/deploys.json',
+    'Swap': '../../../source/swap/deploys.json',
+    'TransferHandlerRegistry': '../../../source/swap/deploys.json',
+    'Validator': '../../../source/validator/deploys.json',
+    'Wrapper': '../../../source/wrapper/deploys.json'
+}
+
+async function updateDeployJsons(network, deploy_data) {
+  for (let [contract_name, file_path] of Object.entries(DEPLOYS_JSON)) {
+    // go through all deploys json and update them
+    address_json = require(file_path)
+    address_json[chainIds[network]] = deploy_data[contract_name]
+    address_json_string = JSON.stringify(address_json, null, '  ')
+    fs.writeFileSync(__dirname + "/"+ file_path, address_json_string, (err) => {
+      if (err) throw err
+    })
+  }
+}
 
 module.exports = async (deployer, network) => {
   network = network.toUpperCase()
@@ -67,14 +89,20 @@ module.exports = async (deployer, network) => {
   await Validator.link('Types', Types.address)
   await deployer.deploy(Validator, WETH_ADDRESS)
 
-  //Deploy Contract-Created Contracts that also need to be verified
-  await deployer.deploy(Index)
-  await deployer.deploy(
-    Delegate,
-    Swap.address,
-    Indexer.address,
-    ADDRESS_ZERO,
-    ADDRESS_ZERO,
-    '0x0001'
-  )
+  if (network !== "DEVELOPMENT") {
+    //Deploy Factory-Created Contracts that also need to be verified
+    await deployer.deploy(Index)
+    await deployer.deploy(Delegate, Swap.address, Indexer.address, ADDRESS_ZERO, ADDRESS_ZERO, '0x0001')
+
+    //Update Jsons
+    let deploy_data = {}
+    deploy_data['Types'] = Types.address
+    deploy_data['TransferHandlerRegistry'] = TransferHandlerRegistry.address
+    deploy_data['Swap'] = Swap.address
+    deploy_data['Indexer'] = Indexer.address
+    deploy_data['DelegateFactory'] = DelegateFactory.address
+    deploy_data['Wrapper'] = Wrapper.address
+    deploy_data['Validator'] = Validator.address
+    await updateDeployJsons(network, deploy_data)
+  }
 }
