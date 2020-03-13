@@ -72,9 +72,9 @@ class DependencyChecker:
                     # check version against declared version
                     expected_version = self.dependency_graph[declared_name]['version']
                     if declared_version != expected_version:
+                        is_stable = False
                         if fix:
                             self.dependency_graph[package_name][dep_type][declared_name] = expected_version
-                            is_stable = False
                             print("%s%s%s (%s): %s@%s →%s Updated to %s %s" %
                                   (bcolors.BOLD, package_name, bcolors.ENDC, dep_type, declared_name, declared_version, bcolors.UPDATED, expected_version, bcolors.ENDC))
                         else:
