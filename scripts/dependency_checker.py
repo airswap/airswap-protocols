@@ -116,5 +116,7 @@ if __name__ == "__main__":
         checker.write_fixes()
     elif not stable:
         # ignore violations, return 1
+        print("To fix run with '--fix'")
+        print()
         sys.exit(1)
 
