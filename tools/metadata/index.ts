@@ -10,6 +10,8 @@ import {
   TRUST_WALLET_IMAGE_API,
   METAMASK_IMAGE_API,
   rinkebyTokensByAddress,
+  goerliTokensByAddress,
+  kovanTokensByAddress,
 } from './src/constants'
 
 import { chainIds, ADDRESS_ZERO } from '@airswap/constants'
@@ -66,10 +68,19 @@ class TokenMetadata {
   }
 
   public async fetchKnownTokens(): Promise<Array<NormalizedToken>> {
-    if (this.chainId === chainIds.RINKEBY) {
-      this.tokensByAddress = rinkebyTokensByAddress
-      this.tokens = Object.values(this.tokensByAddress)
-      return this.tokens
+    switch (this.chainId) {
+      case chainIds.RINKEBY:
+        this.tokensByAddress = rinkebyTokensByAddress
+        this.tokens = Object.values(this.tokensByAddress)
+        return this.tokens
+      case chainIds.GOERLI:
+        this.tokensByAddress = goerliTokensByAddress
+        this.tokens = Object.values(this.tokensByAddress)
+        return this.tokens
+      case chainIds.KOVAN:
+        this.tokensByAddress = kovanTokensByAddress
+        this.tokens = Object.values(this.tokensByAddress)
+        return this.tokens
     }
 
     // normalize metamask data
@@ -140,14 +151,14 @@ class TokenMetadata {
   // given a token address, try to fetch name, symbol, and decimals from the contract and store it in memory tokens array
   public async fetchToken(searchAddress: string): Promise<NormalizedToken> {
     const match = this.tokens.find(
-      ({ address }) => address === searchAddress.toLowerCase()
+      ({ address }) => address.toLowerCase() === searchAddress.toLowerCase()
     )
     if (match) {
       return match
     }
-    if (this.chainId === chainIds.RINKEBY) {
+    if (this.chainId !== chainIds.MAINNET) {
       throw new Error(
-        `Can't fetch Rinkeby token data from contract. This feature is only avaialable on mainnet.`
+        `Fetching data from a contract is only available on mainnet.`
       )
     }
     const [tokenSymbol, tokenName, tokenDecimals] = await Promise.all([

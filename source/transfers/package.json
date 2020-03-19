@@ -14,7 +14,7 @@
     "coverage": "node_modules/.bin/solidity-coverage"
   },
   "devDependencies": {
-    "@airswap/constants": "0.3.7",
+    "@airswap/constants": "0.3.8",
     "@airswap/test-utils": "0.1.6",
     "@airswap/tokens": "0.1.4",
     "solidity-coverage": "^0.6.3"
