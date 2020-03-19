@@ -8,17 +8,16 @@ const { ADDRESS_ZERO } = require('@airswap/constants')
 
 const { emitted, reverted, passes, ok } = require('@airswap/test-utils').assert
 const { balances } = require('@airswap/test-utils').balances
-const { GANACHE_PROVIDER } = require('@airswap/test-utils').constants
 
 contract('Balance Checker', async accounts => {
   const owner = accounts[0]
   const aliceAddress = accounts[1]
   const bobAddress = accounts[2]
   let balanceCheckerContract
+  let balanceCheckerAddress
 
+  let swapContract
   let swapAddress
-  let wrapperAddress
-  let helperMockAddress
 
   let tokenAST
   let tokenWETH
@@ -95,13 +94,9 @@ contract('Balance Checker', async accounts => {
     })
 
     it('Owner withdraws the tokens from BalanceChecker', async () => {
-      const result = await balanceCheckerContract.withdrawToken(
-        tokenAST.address,
-        50,
-        {
-          from: owner,
-        }
-      )
+      await balanceCheckerContract.withdrawToken(tokenAST.address, 50, {
+        from: owner,
+      })
     })
 
     it('Owner now has 50 AST tokens in wallet', async () => {
