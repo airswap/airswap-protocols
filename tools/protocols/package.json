@@ -21,7 +21,8 @@
   "scripts": {
     "clean": "rm -rf ./build",
     "compile": "yarn clean; tsc -b",
-    "test": "yarn compile; mocha -r ts-node/register test/**/*.ts"
+    "test": "yarn compile; mocha -r ts-node/register test/**/*.ts",
+    "ganache_fork": "ganache-cli -f $(node get_infura.js) -m \"$(node get_mnemonic.js)\""
   },
   "dependencies": {
     "@airswap/constants": "0.3.7",
@@ -39,7 +40,6 @@
   "devDependencies": {
     "eslint": "^6.8.0",
     "fancy-test": "^1.4.7",
-    "nock": "^12.0.1",
-    "typescript": "^3.8.2"
+    "nock": "^12.0.1"
   }
 }
