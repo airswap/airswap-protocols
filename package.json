@@ -55,5 +55,8 @@
     "hooks": {
       "pre-commit": "yarn deps:check && yarn hint && yarn lint:check && yarn pretty:check"
     }
+  },
+  "dependencies": {
+    "simple-mock": "^0.8.0"
   }
 }
