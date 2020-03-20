@@ -6,7 +6,7 @@ import { ADDRESS_ZERO } from '@airswap/constants'
 
 import { Delegate } from '..'
 
-class Contract {
+class MockContract {
   public tradeWallet() {
     return 'tradeWallet'
   }
@@ -29,14 +29,14 @@ class Contract {
 
 describe('Delegate', () => {
   fancy
-    .stub(ethers, 'Contract', () => new Contract())
+    .stub(ethers, 'Contract', () => new MockContract())
     .it('Delegate getWallet()', async () => {
       const wallet = await new Delegate(ADDRESS_ZERO).getWallet()
       expect(wallet).to.equal('tradeWallet')
     })
 
   fancy
-    .stub(ethers, 'Contract', () => new Contract())
+    .stub(ethers, 'Contract', () => new MockContract())
     .it('Delegate getMaxQuote()', async () => {
       const quote = await new Delegate(ADDRESS_ZERO).getMaxQuote('', '')
       expect(quote.protocol).to.equal('0x0001')
@@ -48,7 +48,7 @@ describe('Delegate', () => {
     })
 
   fancy
-    .stub(ethers, 'Contract', () => new Contract())
+    .stub(ethers, 'Contract', () => new MockContract())
     .it('Delegate getSignerSideQuote()', async () => {
       const quote = await new Delegate(ADDRESS_ZERO).getSignerSideQuote(
         '333',

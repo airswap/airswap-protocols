@@ -6,7 +6,7 @@ import { ADDRESS_ZERO } from '@airswap/constants'
 import { ERC20 } from '..'
 
 const BALANCE = 100
-class Contract {
+class MockContract {
   public balanceOf() {
     return BALANCE
   }
@@ -14,7 +14,7 @@ class Contract {
 
 describe('ERC20', () => {
   fancy
-    .stub(ethers, 'Contract', () => new Contract())
+    .stub(ethers, 'Contract', () => new MockContract())
     .it('expects to return correct balance', async () => {
       const bal = await new ERC20(ADDRESS_ZERO).balanceOf(ADDRESS_ZERO)
       expect(bal).to.equal(BALANCE)
