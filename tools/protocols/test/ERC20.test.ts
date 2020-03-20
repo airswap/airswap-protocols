@@ -1,16 +1,22 @@
-import { ethers } from 'ethers'
+import { fancy } from 'fancy-test'
 import { expect } from 'chai'
+import { ethers } from 'ethers'
+import { ADDRESS_ZERO } from '@airswap/constants'
 
 import { ERC20 } from '..'
-const simple = require('simple-mock')
 
 const BALANCE = 100
+class Contract {
+  public balanceOf() {
+    return BALANCE
+  }
+}
 
-describe('ERC20', async () => {
-  it('Tests balanceOf()', async () => {
-    const contract = new ERC20('')
-    simple.mock(contract, 'balanceOf').returnWith(100)
-    const val = await contract.balanceOf('')
-    expect(val).to.equal(100)
-  })
+describe('ERC20', () => {
+  fancy
+    .stub(ethers, 'Contract', () => new Contract())
+    .it('expects to return correct balance', async () => {
+      const bal = await new ERC20(ADDRESS_ZERO).balanceOf(ADDRESS_ZERO)
+      expect(bal).to.equal(BALANCE)
+    })
 })
