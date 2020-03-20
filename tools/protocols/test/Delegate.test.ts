@@ -18,6 +18,10 @@ class Contract {
     }
   }
 
+  public getSignerSideQuote(senderAmount, senderToken, signerToken) {
+    return 999
+  }
+
   public balanceOf() {
     return bigNumberify(1000)
   }
@@ -35,6 +39,22 @@ describe('Delegate', () => {
     .stub(ethers, 'Contract', () => new Contract())
     .it('Delegate getMaxQuote()', async () => {
       const quote = await new Delegate(ADDRESS_ZERO).getMaxQuote('', '')
+      expect(quote.protocol).to.equal('0x0001')
+      expect(quote.locator).to.equal(
+        '0x0000000000000000000000000000000000000000'
+      )
+      expect(quote.sender.amount).to.equal('333')
+      expect(quote.signer.amount).to.equal('999')
+    })
+
+  fancy
+    .stub(ethers, 'Contract', () => new Contract())
+    .it('Delegate getSignerSideQuote()', async () => {
+      const quote = await new Delegate(ADDRESS_ZERO).getSignerSideQuote(
+        '333',
+        '',
+        ''
+      )
       expect(quote.protocol).to.equal('0x0001')
       expect(quote.locator).to.equal(
         '0x0000000000000000000000000000000000000000'
