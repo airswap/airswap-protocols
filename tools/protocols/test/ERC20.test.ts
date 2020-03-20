@@ -12,6 +12,10 @@ describe('ERC20 Test', () => {
     const provider = new ethers.providers.JsonRpcProvider(
       'http://localhost:8545'
     )
-    await new ERC20(AST_ADDRESS, chainIds.RINKEBY, provider.getSigner())
+    const contract = await new ERC20(AST_ADDRESS, chainIds.RINKEBY, provider)
+    const balance = await contract.balanceOf(
+      '0x7F18BB4Dd92CF2404C54CBa1A9BE4A1153bdb078'
+    )
+    //console.log(balance.toNumber())
   })
 })
