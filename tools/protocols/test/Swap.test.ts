@@ -26,7 +26,29 @@ class MockContract {
   }
 }
 
+let signer
+let order
+
 describe('Swap', () => {
+  before(async () => {
+    signer = functions.getTestWallet()
+    order = await signOrder(
+      createOrder({
+        signer: {
+          wallet: '',
+          token: '',
+          amount: 0,
+        },
+        sender: {
+          wallet: '',
+          token: '',
+          amount: 0,
+        },
+      }),
+      signer,
+      ''
+    )
+  })
   fancy
     .stub(ethers, 'Contract', () => new MockContract())
     .it('Swap getAddress()', async () => {
@@ -35,25 +57,22 @@ describe('Swap', () => {
     })
   fancy
     .stub(ethers, 'Contract', () => new MockContract())
+    .do(async () => {
+      await Swap.getAddress('9')
+    })
+    .catch(/Swap deploy not found for chainId/)
+    .it('Swap getAddress() throw')
+  fancy
+    .stub(ethers, 'Contract', () => new MockContract())
     .it('Swap swap()', async () => {
-      const signer = functions.getTestWallet()
-      const order = await signOrder(
-        createOrder({
-          signer: {
-            wallet: '',
-            token: '',
-            amount: 0,
-          },
-          sender: {
-            wallet: '',
-            token: '',
-            amount: 0,
-          },
-        }),
-        signer,
-        ''
-      )
       const trx = await new Swap().swap(order, signer)
       expect(trx).to.equal('trxHash')
     })
+  fancy
+    .stub(ethers, 'Contract', () => new MockContract())
+    .do(async () => {
+      await new Swap().swap(order)
+    })
+    .catch(/Wallet must be provided/)
+    .it('Swap swap() throw')
 })
