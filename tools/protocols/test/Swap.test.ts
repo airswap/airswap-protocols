@@ -3,16 +3,26 @@ import { expect } from 'chai'
 import { ethers } from 'ethers'
 import { bigNumberify } from 'ethers/utils'
 import { ADDRESS_ZERO } from '@airswap/constants'
+import { functions } from '@airswap/test-utils'
+import { createOrder, signOrder } from '@airswap/utils'
 
 import { Swap } from '..'
 
+class MockTransaction {
+  public hash: string
+
+  public constructor() {
+    this.hash = 'trxHash'
+  }
+
+  public wait(confirmations) {
+    return
+  }
+}
+
 class MockContract {
-  public getLocators(signerToken, senderToken, protocol, limit, cursor) {
-    return {
-      locators: ['locator1', 'locator2'],
-      scores: [100, 10],
-      nextCursor: ADDRESS_ZERO,
-    }
+  public swap(order) {
+    return new MockTransaction()
   }
 }
 
@@ -26,6 +36,24 @@ describe('Swap', () => {
   fancy
     .stub(ethers, 'Contract', () => new MockContract())
     .it('Swap swap()', async () => {
-      // TODO
+      const signer = functions.getTestWallet()
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: '',
+            token: '',
+            amount: 0,
+          },
+          sender: {
+            wallet: '',
+            token: '',
+            amount: 0,
+          },
+        }),
+        signer,
+        ''
+      )
+      const trx = await new Swap().swap(order, signer)
+      expect(trx).to.equal('trxHash')
     })
 })
