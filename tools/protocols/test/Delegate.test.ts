@@ -62,9 +62,7 @@ describe('Delegate', () => {
     .it('Delegate getMaxQuote()', async () => {
       const quote = await new Delegate(ADDRESS_ZERO).getMaxQuote('', '')
       expect(quote.protocol).to.equal('0x0001')
-      expect(quote.locator).to.equal(
-        '0x0000000000000000000000000000000000000000'
-      )
+      expect(quote.locator).to.equal(ADDRESS_ZERO)
       expect(quote.sender.amount).to.equal('333')
       expect(quote.signer.amount).to.equal('999')
     })
@@ -78,9 +76,7 @@ describe('Delegate', () => {
         ''
       )
       expect(quote.protocol).to.equal('0x0001')
-      expect(quote.locator).to.equal(
-        '0x0000000000000000000000000000000000000000'
-      )
+      expect(quote.locator).to.equal(ADDRESS_ZERO)
       expect(quote.sender.amount).to.equal('333')
       expect(quote.signer.amount).to.equal('999')
     })
@@ -94,9 +90,7 @@ describe('Delegate', () => {
         ''
       )
       expect(quote.protocol).to.equal('0x0001')
-      expect(quote.locator).to.equal(
-        '0x0000000000000000000000000000000000000000'
-      )
+      expect(quote.locator).to.equal(ADDRESS_ZERO)
       expect(quote.sender.amount).to.equal('333')
       expect(quote.signer.amount).to.equal('999')
     })
