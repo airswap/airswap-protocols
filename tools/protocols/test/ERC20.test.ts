@@ -15,7 +15,7 @@ class MockContract {
 describe('ERC20', () => {
   fancy
     .stub(ethers, 'Contract', () => new MockContract())
-    .it('expects to return correct balance', async () => {
+    .it('ERC20 balanceOf()', async () => {
       const bal = await new ERC20(ADDRESS_ZERO).balanceOf(ADDRESS_ZERO)
       expect(bal).to.equal(BALANCE)
     })

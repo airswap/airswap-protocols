@@ -11,6 +11,7 @@ import { Server } from '..'
 const badQuote = { bad: 'quote' }
 const emptyQuote = createQuote({})
 const wallet = functions.getTestWallet()
+const URL = 'maker.example.com'
 
 function mockServer(api) {
   api.post('/').reply(200, async (uri, body) => {
@@ -72,58 +73,44 @@ function mockServer(api) {
   })
 }
 
-describe('Server:Quotes', () => {
+describe('Server', () => {
   fancy
-    .nock('https://maker.example.com', mockServer)
-    .it('fails receiving a bad quote', async () => {
-      try {
-        await new Server('maker.example.com').getSignerSideQuote('', '', '')
-      } catch (e) {
-        expect(e.message).to.equal(
-          'Server response is not a valid quote: {"bad":"quote"}'
-        )
-      }
+    .nock('https://' + URL, mockServer)
+    .do(async () => {
+      await new Server(URL).getSignerSideQuote('', '', '')
     })
-
+    .catch(/Server response is not a valid quote: {"bad":"quote"}/)
+    .it('Server getSignerSideQuote() throws')
   fancy
-    .nock('https://maker.example.com', mockServer)
-    .it('fails receiving a request-response mismatch', async () => {
-      try {
-        await new Server('maker.example.com').getMaxQuote('', '')
-      } catch (e) {
-        expect(e.message).to.equal(
-          'Server response differs from request params: signerToken,senderToken'
-        )
-      }
+    .nock('https://' + URL, mockServer)
+    .do(async () => {
+      await new Server(URL).getMaxQuote('', '')
     })
-
+    .catch(
+      /Server response differs from request params: signerToken,senderToken/
+    )
+    .it('Server getMaxQuote() throws')
   fancy
-    .nock('https://maker.example.com', mockServer)
-    .it('succeeds receiving a good quote', async () => {
-      const quote = await new Server('maker.example.com').getSenderSideQuote(
+    .nock('https://' + URL, mockServer)
+    .it('Server getSenderSideQuote()', async () => {
+      const quote = await new Server(URL).getSenderSideQuote(
         '1',
         'SIGNERTOKEN',
         ''
       )
       expect(quote.signer.token).to.equal('SIGNERTOKEN')
     })
-})
-describe('Server:Orders', () => {
   fancy
-    .nock('https://maker.example.com', mockServer)
-    .it('fails receiving a bad order', async () => {
-      try {
-        await new Server('maker.example.com').getSenderSideOrder('', '', '', '')
-      } catch (e) {
-        expect(
-          e.message.indexOf('Server response is not a valid order')
-        ).to.equal(0)
-      }
+    .nock('https://' + URL, mockServer)
+    .do(async () => {
+      await new Server(URL).getSenderSideOrder('', '', '', '')
     })
+    .catch(/Server response is not a valid order/)
+    .it('Server getSenderSideOrder throws')
   fancy
-    .nock('https://maker.example.com', mockServer)
-    .it('succeeds receiving a good order', async () => {
-      const order = await new Server('maker.example.com').getSignerSideOrder(
+    .nock('https://' + URL, mockServer)
+    .it('Sever getSignerSideOrder()', async () => {
+      const order = await new Server(URL).getSignerSideOrder(
         '0',
         ADDRESS_ZERO,
         ADDRESS_ZERO,
