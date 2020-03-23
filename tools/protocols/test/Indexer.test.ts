@@ -6,13 +6,17 @@ import { ADDRESS_ZERO, protocols } from '@airswap/constants'
 
 import { Indexer } from '..'
 
+// ethers.utils.formatBytes32String('locator1')
+const LOCATOR_1 =
+  '0x6c6f6361746f7231000000000000000000000000000000000000000000000000'
+// ethers.utils.formatBytes32String('locator2')
+const LOCATOR_2 =
+  '0x6c6f6361746f7232000000000000000000000000000000000000000000000000'
+
 class MockContract {
   public getLocators(signerToken, senderToken, protocol, limit, cursor) {
     return {
-      locators: [
-        '0x6c6f6361746f7231000000000000000000000000000000000000000000000000', // ethers.utils.formatBytes32String('locator1')
-        '0x6c6f6361746f7232000000000000000000000000000000000000000000000000', // ethers.utils.formatBytes32String('locator2')
-      ],
+      locators: [LOCATOR_1, LOCATOR_2],
       scores: [100, 10],
       nextCursor: ADDRESS_ZERO,
     }
@@ -73,12 +77,8 @@ describe('Indexer', () => {
     .stub(ethers, 'Contract', () => new MockContract())
     .it('Indexer DEFAULT getLocators()', async () => {
       const result = await new Indexer().getLocators('', '', 'DEFAULT', 0, '')
-      expect(result.locators[0]).to.equal(
-        '0x6c6f6361746f7231000000000000000000000000000000000000000000000000'
-      )
-      expect(result.locators[1]).to.equal(
-        '0x6c6f6361746f7232000000000000000000000000000000000000000000000000'
-      )
+      expect(result.locators[0]).to.equal(LOCATOR_1)
+      expect(result.locators[1]).to.equal(LOCATOR_2)
       expect(result.scores[0]).to.equal(100)
       expect(result.scores[1]).to.equal(10)
       expect(result.nextCursor).to.equal(ADDRESS_ZERO)
