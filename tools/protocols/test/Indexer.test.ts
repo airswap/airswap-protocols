@@ -28,6 +28,13 @@ describe('Indexer', () => {
     })
   fancy
     .stub(ethers, 'Contract', () => new MockContract())
+    .do(async () => {
+      await Indexer.getAddress('9')
+    })
+    .catch(/Indexer deploy not found for chainId/)
+    .it('Indexer getAddress() throw')
+  fancy
+    .stub(ethers, 'Contract', () => new MockContract())
     .it('Indexer SERVER getLocators()', async () => {
       const result = await new Indexer().getLocators(
         '',
