@@ -109,7 +109,7 @@ describe('Server', () => {
     .it('Server getSenderSideOrder throws')
   fancy
     .nock('https://' + URL, mockServer)
-    .it('Sever getSignerSideOrder()', async () => {
+    .it('Server getSignerSideOrder()', async () => {
       const order = await new Server(URL).getSignerSideOrder(
         '0',
         ADDRESS_ZERO,
