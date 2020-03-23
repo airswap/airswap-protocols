@@ -34,6 +34,20 @@ class MockContract {
       ['0x746573744572726f720000000000000000000000000000000000000000000000'],
     ] //ethers.utils.formatBytes32String('testError')
   }
+
+  public checkDelegate(order, delegateAddress) {
+    return [
+      bigNumberify(1),
+      ['0x746573744572726f720000000000000000000000000000000000000000000000'],
+    ] //ethers.utils.formatBytes32String('testError')
+  }
+
+  public checkWrappedDelegate(order, delegateAddress, wrapperAddress) {
+    return [
+      bigNumberify(1),
+      ['0x746573744572726f720000000000000000000000000000000000000000000000'],
+    ] //ethers.utils.formatBytes32String('testError')
+  }
 }
 
 let signer
@@ -81,6 +95,18 @@ describe('Validator', () => {
     .stub(ethers, 'Contract', () => new MockContract())
     .it('Validator checkWrappedSwap()', async () => {
       const errors = await new Validator().checkWrappedSwap(order, '', '')
+      expect(errors[0]).to.equal('testError')
+    })
+  fancy
+    .stub(ethers, 'Contract', () => new MockContract())
+    .it('Validator checkDelegate()', async () => {
+      const errors = await new Validator().checkDelegate(order, '')
+      expect(errors[0]).to.equal('testError')
+    })
+  fancy
+    .stub(ethers, 'Contract', () => new MockContract())
+    .it('Validator checkWrappedDelegate()', async () => {
+      const errors = await new Validator().checkWrappedDelegate(order, '', '')
       expect(errors[0]).to.equal('testError')
     })
 })
