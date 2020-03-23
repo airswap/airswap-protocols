@@ -3,8 +3,22 @@ import { expect } from 'chai'
 import { ethers } from 'ethers'
 import { bigNumberify } from 'ethers/utils'
 import { ADDRESS_ZERO } from '@airswap/constants'
+import { functions } from '@airswap/test-utils'
+import { createOrder, signOrder } from '@airswap/utils'
 
 import { Delegate } from '..'
+
+class MockTransaction {
+  public hash: string
+
+  public constructor() {
+    this.hash = 'trxHash'
+  }
+
+  public wait(confirmations) {
+    return
+  }
+}
 
 class MockContract {
   public tradeWallet() {
@@ -27,7 +41,7 @@ class MockContract {
   }
 
   public provideOrder(order) {
-    return 'trxHash'
+    return new MockTransaction()
   }
 
   public balanceOf() {
@@ -90,24 +104,24 @@ describe('Delegate', () => {
   fancy
     .stub(ethers, 'Contract', () => new MockContract())
     .it('Delegate provideOrder()', async () => {
-      //      const order = await signOrder(
-      //        createOrder({
-      //          signer: {
-      //            wallet: '',
-      //            token: '',
-      //            amount: 0,
-      //          },
-      //          sender: {
-      //            wallet: '',
-      //            token: '',
-      //            amount: 0,
-      //          },
-      //        }),
-      //        ,
-      //        ''
-      //      )
-      //      console.log(order)
-      //      const trx = await new Delegate(ADDRESS_ZERO).provideOrder(order)
-      //      console.log(trx)
+      const signer = functions.getTestWallet()
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: '',
+            token: '',
+            amount: 0,
+          },
+          sender: {
+            wallet: '',
+            token: '',
+            amount: 0,
+          },
+        }),
+        signer,
+        ''
+      )
+      const trx = await new Delegate(ADDRESS_ZERO).provideOrder(order, signer)
+      expect(trx).to.equal('trxHash')
     })
 })
