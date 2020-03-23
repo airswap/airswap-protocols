@@ -20,33 +20,25 @@ class MockTransaction {
   }
 }
 
+//ethers.utils.formatBytes32String('testError')
+const BYTES32_ERROR_MSG =
+  '0x746573744572726f720000000000000000000000000000000000000000000000'
+
 class MockContract {
   public checkSwap(order) {
-    return [
-      bigNumberify(1),
-      ['0x746573744572726f720000000000000000000000000000000000000000000000'],
-    ] //ethers.utils.formatBytes32String('testError')
+    return [bigNumberify(1), [BYTES32_ERROR_MSG]]
   }
 
   public checkWrappedSwap(order, delegateAddress, wrapperAddress) {
-    return [
-      bigNumberify(1),
-      ['0x746573744572726f720000000000000000000000000000000000000000000000'],
-    ] //ethers.utils.formatBytes32String('testError')
+    return [bigNumberify(1), [BYTES32_ERROR_MSG]]
   }
 
   public checkDelegate(order, delegateAddress) {
-    return [
-      bigNumberify(1),
-      ['0x746573744572726f720000000000000000000000000000000000000000000000'],
-    ] //ethers.utils.formatBytes32String('testError')
+    return [bigNumberify(1), [BYTES32_ERROR_MSG]]
   }
 
   public checkWrappedDelegate(order, delegateAddress, wrapperAddress) {
-    return [
-      bigNumberify(1),
-      ['0x746573744572726f720000000000000000000000000000000000000000000000'],
-    ] //ethers.utils.formatBytes32String('testError')
+    return [bigNumberify(1), [BYTES32_ERROR_MSG]]
   }
 }
 
