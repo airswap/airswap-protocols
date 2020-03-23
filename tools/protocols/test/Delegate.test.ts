@@ -65,10 +65,6 @@ class MockContractBAD {
     return 0
   }
 
-  public provideOrder(order) {
-    return new MockTransaction()
-  }
-
   public balanceOf() {
     return bigNumberify(0)
   }
