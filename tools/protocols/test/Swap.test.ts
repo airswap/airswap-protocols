@@ -1,8 +1,6 @@
 import { fancy } from 'fancy-test'
 import { expect } from 'chai'
 import { ethers } from 'ethers'
-import { bigNumberify } from 'ethers/utils'
-import { ADDRESS_ZERO } from '@airswap/constants'
 import { functions } from '@airswap/test-utils'
 import { createOrder, signOrder } from '@airswap/utils'
 
@@ -15,13 +13,13 @@ class MockTransaction {
     this.hash = 'trxHash'
   }
 
-  public wait(confirmations) {
+  public wait() {
     return
   }
 }
 
 class MockContract {
-  public swap(order) {
+  public swap() {
     return new MockTransaction()
   }
 }

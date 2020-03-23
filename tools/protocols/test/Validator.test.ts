@@ -2,42 +2,29 @@ import { fancy } from 'fancy-test'
 import { expect } from 'chai'
 import { ethers } from 'ethers'
 import { bigNumberify } from 'ethers/utils'
-import { ADDRESS_ZERO } from '@airswap/constants'
 import { functions } from '@airswap/test-utils'
 import { createOrder, signOrder } from '@airswap/utils'
 
 import { Validator } from '..'
-
-class MockTransaction {
-  public hash: string
-
-  public constructor() {
-    this.hash = 'trxHash'
-  }
-
-  public wait(confirmations) {
-    return
-  }
-}
 
 //ethers.utils.formatBytes32String('testError')
 const BYTES32_ERROR_MSG =
   '0x746573744572726f720000000000000000000000000000000000000000000000'
 
 class MockContract {
-  public checkSwap(order) {
+  public checkSwap() {
     return [bigNumberify(1), [BYTES32_ERROR_MSG]]
   }
 
-  public checkWrappedSwap(order, delegateAddress, wrapperAddress) {
+  public checkWrappedSwap() {
     return [bigNumberify(1), [BYTES32_ERROR_MSG]]
   }
 
-  public checkDelegate(order, delegateAddress) {
+  public checkDelegate() {
     return [bigNumberify(1), [BYTES32_ERROR_MSG]]
   }
 
-  public checkWrappedDelegate(order, delegateAddress, wrapperAddress) {
+  public checkWrappedDelegate() {
     return [bigNumberify(1), [BYTES32_ERROR_MSG]]
   }
 }

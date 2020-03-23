@@ -15,7 +15,7 @@ class MockTransaction {
     this.hash = 'trxHash'
   }
 
-  public wait(confirmations) {
+  public wait() {
     return
   }
 }
@@ -25,22 +25,22 @@ class MockContract {
     return 'tradeWallet'
   }
 
-  public getMaxQuote(senderToken, signerToken) {
+  public getMaxQuote() {
     return {
       senderAmount: 333,
       signerAmount: 999,
     }
   }
 
-  public getSignerSideQuote(senderAmount, senderToken, signerToken) {
+  public getSignerSideQuote() {
     return 999
   }
 
-  public getSenderSideQuote(signerAmount, signerToken, senderToken) {
+  public getSenderSideQuote() {
     return 333
   }
 
-  public provideOrder(order) {
+  public provideOrder() {
     return new MockTransaction()
   }
 
@@ -50,18 +50,18 @@ class MockContract {
 }
 
 class MockContractBAD {
-  public getMaxQuote(senderToken, signerToken) {
+  public getMaxQuote() {
     return {
       senderAmount: 0,
       signerAmount: 0,
     }
   }
 
-  public getSignerSideQuote(senderAmount, senderToken, signerToken) {
+  public getSignerSideQuote() {
     return 0
   }
 
-  public getSenderSideQuote(signerAmount, signerToken, senderToken) {
+  public getSenderSideQuote() {
     return 0
   }
 

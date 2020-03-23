@@ -1,7 +1,6 @@
 import { fancy } from 'fancy-test'
 import { expect } from 'chai'
 import { ethers } from 'ethers'
-import { bigNumberify } from 'ethers/utils'
 import { ADDRESS_ZERO, protocols } from '@airswap/constants'
 
 import { Indexer } from '..'
@@ -14,7 +13,7 @@ const LOCATOR_2 =
   '0x6c6f6361746f7232000000000000000000000000000000000000000000000000'
 
 class MockContract {
-  public getLocators(signerToken, senderToken, protocol, limit, cursor) {
+  public getLocators() {
     return {
       locators: [LOCATOR_1, LOCATOR_2],
       scores: [100, 10],
