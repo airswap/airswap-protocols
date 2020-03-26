@@ -27,6 +27,7 @@ export * from './src/quotes'
 function getLowest(objects: Array<Quote> | Array<Order>, key: string): any {
   let best: any
   for (const obj of objects) {
+    if (!obj[key]) continue
     if (!best || new BigNumber(obj[key].amount).lt(best[key].amount)) {
       best = obj
     }
@@ -37,6 +38,7 @@ function getLowest(objects: Array<Quote> | Array<Order>, key: string): any {
 function getHighest(objects: Array<Quote> | Array<Order>, key: string): any {
   let best: any
   for (const obj of objects) {
+    if (!obj[key]) continue
     if (!best || new BigNumber(obj[key].amount).gt(best[key].amount)) {
       best = obj
     }
