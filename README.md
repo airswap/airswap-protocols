@@ -2,7 +2,7 @@
 <img src="https://swap.tech/images/airswap-high-res.png" width="500"/>
 <br />
 
-[AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens, initially built on the [Swap Protocol](https://swap.tech/whitepaper/). The AirSwap product family includes [DexIndex](https://dexindex.io/), [AirSwap Instant](https://instant.airswap.io/), [AirSwap Trader](https://trader.airswap.io/), and [AirSwap Spaces](https://spaces.airswap.io/). This repository contains smart contracts and JavaScript packages for use by developers and traders on the AirSwap network.
+[AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens, initially built on the [Swap Protocol](https://swap.tech/whitepaper/). The AirSwap product family includes [DexIndex](https://dexindex.io/), [AirSwap Instant](https://instant.airswap.io/), and [AirSwap Trader](https://trader.airswap.io/). This repository contains smart contracts and JavaScript packages for use by developers and traders on the AirSwap network.
 
 [![Discord](https://img.shields.io/discord/590643190281928738.svg)](https://chat.airswap.io)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
