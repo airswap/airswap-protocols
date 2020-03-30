@@ -1,0 +1,38 @@
+specVersion: 0.0.2
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: Contract
+    network: mainnet
+    source:
+      address: "0xbA9aB9710Bd461F30C247f4cA2Cb7f453C22570e"
+      abi: Contract
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - AddTokenToBlacklist
+        - CreateIndex
+        - OwnershipTransferred
+        - RemoveTokenFromBlacklist
+        - Stake
+        - Unstake
+      abis:
+        - name: Contract
+          file: ./abis/Contract.json
+      eventHandlers:
+        - event: AddTokenToBlacklist(address)
+          handler: handleAddTokenToBlacklist
+        - event: CreateIndex(indexed address,indexed address,bytes2,address)
+          handler: handleCreateIndex
+        - event: OwnershipTransferred(indexed address,indexed address)
+          handler: handleOwnershipTransferred
+        - event: RemoveTokenFromBlacklist(address)
+          handler: handleRemoveTokenFromBlacklist
+        - event: Stake(indexed address,indexed address,indexed address,bytes2,uint256)
+          handler: handleStake
+        - event: Unstake(indexed address,indexed address,indexed address,bytes2,uint256)
+          handler: handleUnstake
+      file: ./src/mapping.ts
