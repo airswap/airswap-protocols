@@ -4,9 +4,9 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: Contract
-    network: mainnet
+    network: '{{network}}'
     source:
-      address: "0xbA9aB9710Bd461F30C247f4cA2Cb7f453C22570e"
+      address: '{{address}}'
       abi: Contract
     mapping:
       kind: ethereum/events
