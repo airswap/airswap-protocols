@@ -1,0 +1,17 @@
+{
+  "name": "swap",
+  "version": "0.0.1",
+  "license": "UNLICENSED",
+  "scripts": {
+    "codegen": "graph codegen",
+    "build": "graph build",
+    "deploy": "graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ airswap/swap",
+    "create-local": "graph create --node http://localhost:8020/ airswap/swap",
+    "remove-local": "graph remove --node http://localhost:8020/ airswap/swap",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 airswap/swap"
+  },
+  "dependencies": {
+    "@graphprotocol/graph-cli": "0.17.1",
+    "@graphprotocol/graph-ts": "0.17.0"
+  }
+}

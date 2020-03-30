@@ -1,0 +1,6 @@
+type ExampleEntity @entity {
+  id: ID!
+  count: BigInt!
+  authorizerAddress: Bytes! # address
+  authorizedSender: Bytes! # address
+}
