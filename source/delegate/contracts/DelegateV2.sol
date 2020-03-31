@@ -150,7 +150,25 @@ contract Delegate is IDelegateV2, Ownable {
   ) external view returns (
     uint256 signerAmount
   ) {
+    uint256 remainingAmount = senderAmount;
+    uint256 ruleID = firstRuleID[senderToken][signerToken];
 
+    while (remainingAmount > 0 && ruleID != NO_RULE) {
+      // if the entirety of the current rule is needed, we add it and move to the next one
+      if (remainingAmount > rules[ruleID].signerAmount) {
+        signerAmount = signerAmount.add(rules[ruleID].signerAmount);
+        remainingAmount -= rules[ruleID].senderAmount;
+        ruleID = rules[ruleID].nextRuleID;
+      } else {
+        // only a fraction of this rule is needed so we calculate the sender amount
+        // neither divisions can have a denominator of 0. removing safemath preserves some calculation accuracy
+        uint256 signerFraction = rules[ruleID].signerAmount / (rules[ruleID].senderAmount / remainingAmount);
+        signerAmount = signerAmount.add(signerFraction);
+        remainingAmount = 0;
+      }
+    }
+
+    if (remainingAmount > 0) return 0;
   }
 
   function getSenderSideQuote(
@@ -160,7 +178,25 @@ contract Delegate is IDelegateV2, Ownable {
   ) external view returns (
     uint256 senderAmount
   ) {
+    uint256 remainingAmount = signerAmount;
+    uint256 ruleID = firstRuleID[senderToken][signerToken];
 
+    while (remainingAmount > 0 && ruleID != NO_RULE) {
+      // if the entirety of the current rule is needed, we add it and move to the next one
+      if (remainingAmount > rules[ruleID].signerAmount) {
+        senderAmount = senderAmount.add(rules[ruleID].senderAmount);
+        remainingAmount -= rules[ruleID].signerAmount;
+        ruleID = rules[ruleID].nextRuleID;
+      } else {
+        // only a fraction of this rule is needed so we calculate the sender amount
+        // neither divisions can have a denominator of 0. removing safemath preserves some calculation accuracy
+        uint256 senderFraction = rules[ruleID].senderAmount / (rules[ruleID].signerAmount / remainingAmount);
+        senderAmount = senderAmount.add(senderFraction);
+        remainingAmount = 0;
+      }
+    }
+    // even if remainingAmount > 0, we can still return the quote
+    // this is because this quote is to the delegate's advantage
   }
 
   function getMaxQuote(
@@ -174,6 +210,7 @@ contract Delegate is IDelegateV2, Ownable {
 
     // exit when the end of the list of rules is found
     while (ruleID != NO_RULE) {
+      // keep a running total of the signer and sender amounts
       senderAmount = senderAmount.add(rules[ruleID].senderAmount);
       signerAmount = signerAmount.add(rules[ruleID].signerAmount);
       ruleID = rules[ruleID].nextRuleID;
