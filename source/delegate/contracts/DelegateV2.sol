@@ -141,7 +141,64 @@ contract Delegate is IDelegateV2, Ownable {
 
   function provideOrder(
     Types.Order calldata order
-  ) external;
+  ) external {
+    uint256 ruleID = firstRuleID[order.sender.token][order.signer.token];
+
+    require(order.signature.v != 0,
+      "SIGNATURE_MUST_BE_SENT");
+
+    // Ensure the order is for the trade wallet.
+    require(order.sender.wallet == tradeWallet,
+      "SENDER_WALLET_INVALID");
+
+    // Ensure the tokens are valid ERC20 tokens.
+    require(order.signer.kind == ERC20_INTERFACE_ID,
+      "SIGNER_KIND_MUST_BE_ERC20");
+
+    require(order.sender.kind == ERC20_INTERFACE_ID,
+      "SENDER_KIND_MUST_BE_ERC20");
+
+    // Ensure that a rule exists.
+    require(ruleID != NO_RULE,
+      "TOKEN_PAIR_INACTIVE");
+
+    uint256 signerAmount = order.signer.amount;
+    uint256 senderAmount = order.sender.amount;
+
+    while (ruleID != NO_RULE && senderAmount > 0) {
+      if (senderAmount >= rules[ruleID].senderAmount) {
+        require(signerAmount >= rules[ruleID].signerAmount, 'PRICE_INVALID');
+        // enough sender and signer amount have been sent for this rule
+        senderAmount -= rules[ruleID].senderAmount;
+        signerAmount -= rules[ruleID].signerAmount;
+        ruleID = rules[ruleID].nextRuleID;
+        _deleteRule(rules[ruleID].prevRuleID);
+      } else {
+        // only a fraction of this rule is needed so we calculate the signer amount
+        // neither divisions can have a denominator of 0. removing safemath preserves some calculation accuracy
+        uint256 signerFraction = rules[ruleID].signerAmount / (rules[ruleID].senderAmount / senderAmount);
+        require(signerFraction <= signerAmount, 'PRICE_INVALID');
+
+        // update whats remaining of the rule
+        rules[ruleID].senderAmount -= senderAmount;
+        rules[ruleID].signerAmount -= signerFraction;
+        // signerAmount is large enough for the senderAmount sent
+        senderAmount = 0;
+      }
+    }
+
+    // Perform the swap.
+    swapContract.swap(order);
+
+    emit ProvideOrder(
+      owner(),
+      tradeWallet,
+      order.sender.token,
+      order.signer.token,
+      order.sender.amount,
+      order.signer.amount
+    );
+  }
 
   function getSignerSideQuote(
     uint256 senderAmount,
@@ -155,7 +212,7 @@ contract Delegate is IDelegateV2, Ownable {
 
     while (remainingAmount > 0 && ruleID != NO_RULE) {
       // if the entirety of the current rule is needed, we add it and move to the next one
-      if (remainingAmount > rules[ruleID].signerAmount) {
+      if (remainingAmount >= rules[ruleID].senderAmount) {
         signerAmount = signerAmount.add(rules[ruleID].signerAmount);
         remainingAmount -= rules[ruleID].senderAmount;
         ruleID = rules[ruleID].nextRuleID;
@@ -168,6 +225,7 @@ contract Delegate is IDelegateV2, Ownable {
       }
     }
 
+    //  for signer side if remaining amount is not 0 the quote cannot be filled
     if (remainingAmount > 0) return 0;
   }
 
@@ -183,7 +241,7 @@ contract Delegate is IDelegateV2, Ownable {
 
     while (remainingAmount > 0 && ruleID != NO_RULE) {
       // if the entirety of the current rule is needed, we add it and move to the next one
-      if (remainingAmount > rules[ruleID].signerAmount) {
+      if (remainingAmount >= rules[ruleID].signerAmount) {
         senderAmount = senderAmount.add(rules[ruleID].senderAmount);
         remainingAmount -= rules[ruleID].signerAmount;
         ruleID = rules[ruleID].nextRuleID;
