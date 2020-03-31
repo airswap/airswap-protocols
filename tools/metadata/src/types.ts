@@ -4,6 +4,7 @@ export interface NormalizedToken {
   symbol: string
   decimals: number
   image?: string
+  kind: 'ERC20' | 'ERC721'
 }
 
 export interface IdexToken {

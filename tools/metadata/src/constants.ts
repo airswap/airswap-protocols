@@ -7,6 +7,8 @@ export const TRUST_WALLET_IMAGE_API =
 export const METAMASK_IMAGE_API =
   'https://raw.githubusercontent.com/MetaMask/eth-contract-metadata/master/images'
 
+export const OPEN_SEA_API_URL = 'https://api.opensea.io/api/v1'
+
 export const ERC20_BYTES32_ABI = [
   {
     constant: true,
