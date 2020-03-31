@@ -31,7 +31,7 @@ import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
   * @notice Supports fungible tokens (ERC-20)
   * @dev inherits IDelegate, Ownable uses SafeMath library
   */
-contract Delegate is IDelegate, Ownable {
+contract Delegate is IDelegateV2, Ownable {
   using SafeMath for uint256;
 
   // The Swap contract to be used to settle trades
@@ -40,17 +40,23 @@ contract Delegate is IDelegate, Ownable {
   // The Indexer to stake intent to trade on
   IIndexer public indexer;
 
+  // Holds the number of rules created over time. This is used to determined the next ruleID.
+  uint256 public ruleIDCounter;
+
   // Maximum integer for token transfer approval
   uint256 constant internal MAX_INT =  2**256 - 1;
+
+  // If no rule exists, the value of 0 will be stored in pointers
+  uint256 constant internal NO_RULE = 0;
 
   // Address holding tokens that will be trading through this delegate
   address public tradeWallet;
 
   // Mapping of ruleID to rule
-  mapping (uint256 => Rule)) public rules;
+  mapping (uint256 => Rule) public rules;
 
   // Mapping of senderToken to signerToken to the first ruleID for this pair
-  mapping(address => mapping(address => uint256)) public getFirstRuleID;
+  mapping(address => mapping(address => uint256)) public firstRuleID;
 
   // ERC-20 (fungible token) interface identifier (ERC-165)
   bytes4 constant internal ERC20_INTERFACE_ID = 0x36372b07;
@@ -97,16 +103,41 @@ contract Delegate is IDelegate, Ownable {
     );
   }
 
-  function setRule(
+  function createRule(
     address senderToken,
     address signerToken,
     uint256 senderAmount,
     uint256 signerAmount
-  ) external;
+  ) external {
+    // Rules created now holds this rule's ID
+    ruleIDCounter += 1;
 
-  function unsetRule(
+    // prev and next rule IDs are initialised to 0
+    rules[ruleIDCounter] = Rule({
+      signerToken: signerToken,
+      senderToken: senderToken,
+      senderAmount: senderAmount,
+      signerAmount: signerAmount,
+      nextRuleID: NO_RULE,
+      prevRuleID: NO_RULE
+    });
+
+    if (firstRuleID[senderToken][signerToken] == NO_RULE) {
+      firstRuleID[senderToken][signerToken] = ruleIDCounter;
+    } else {
+      _insertRuleInList(senderToken, signerToken, ruleIDCounter);
+    }
+
+    emit CreateRule(owner(), senderToken, signerToken, ruleIDCounter, senderAmount, signerAmount);
+  }
+
+  function deleteRule(
     uint256 ruleID
-  ) external;
+  ) external {
+    _deleteRule(ruleID);
+
+    emit DeleteRule(owner(), ruleID);
+  }
 
   function provideOrder(
     Types.Order calldata order
@@ -135,5 +166,75 @@ contract Delegate is IDelegate, Ownable {
     uint256 senderAmount,
     uint256 signerAmount
   );
+
+  function _deleteRule(
+    uint256 ruleID
+  ) internal {
+    Rule memory rule = rules[ruleID];
+
+    // if its first in the list, update first
+    if (firstRuleID[rule.senderToken][rule.signerToken] == ruleID) {
+      // whether or not this was the only rule in the list, we update firstRuleID
+      firstRuleID[rule.senderToken][rule.signerToken] = rule.nextRuleID;
+    } else {
+      // otherwise, make the rule before it point to the one after it
+      rules[rule.prevRuleID].nextRuleID = rule.nextRuleID;
+    }
+
+    // if its not last in the list, make the next rule point to the one before it
+    if (rule.nextRuleID != NO_RULE) {
+      rules[rule.nextRuleID].prevRuleID = rule.prevRuleID;
+    }
+
+    delete rules[ruleID];
+  }
+
+  // entering this funciton we know that the given list has at least 1 element in it
+  function _insertRuleInList(
+    address senderToken,
+    address signerToken,
+    uint256 newRuleID
+  ) internal {
+    // iterate down list until its location
+    uint256 next = firstRuleID[senderToken][signerToken];
+    uint256 previous;
+
+    // while we aren't at the end of the list, and the new rule goes after next
+    while (next != NO_RULE && _isAfterListElement(next, newRuleID)) {
+      previous = next;
+      next = rules[next].nextRuleID;
+    }
+
+    // next is the element after our new element in the list
+    // previous is the element before our new element in the list
+
+    // if next is NO_RULE, our new element is at the end of the list
+    if (next == NO_RULE) {
+      rules[newRuleID].prevRuleID = previous;
+      rules[previous].nextRuleID = newRuleID;
+    } else {
+      // the new rule is not at the end of the list - there's something after it
+      rules[newRuleID].nextRuleID = next;
+      rules[next].prevRuleID = newRuleID;
+
+      // if the new rule is at the beginning of the list
+      if (previous == NO_RULE) {
+        firstRuleID[senderToken][signerToken] = newRuleID;
+      } else {
+        rules[newRuleID].prevRuleID = previous;
+        rules[previous].nextRuleID = newRuleID;
+      }
+    }
+  }
+
+  function _isAfterListElement(
+    uint256 firstElement,
+    uint256 secondElement
+  ) internal returns (bool) {
+    uint256 x = rules[firstElement].senderAmount.mul(rules[secondElement].signerAmount);
+    uint256 y = rules[secondElement].senderAmount.mul(rules[firstElement].signerAmount);
+    return (x > y);
+  }
+
 
 }

@@ -23,23 +23,26 @@ import "@airswap/types/contracts/Types.sol";
 interface IDelegateV2 {
 
   struct Rule {
+    address senderToken;
+    address signerToken;
     uint256 senderAmount;
     uint256 signerAmount;
     uint256 nextRuleID;
     uint256 prevRuleID;
   }
 
-  event SetRule(
+  event CreateRule(
     address indexed owner,
     address indexed senderToken,
     address indexed signerToken,
+    uint256 ruleID,
     uint256 senderAmount,
     uint256 signerAmount
   );
 
-  event UnsetRule(
+  event DeleteRule(
     address indexed owner,
-    uint256 indexed ruleID,
+    uint256 indexed ruleID
   );
 
   event ProvideOrder(
@@ -48,17 +51,17 @@ interface IDelegateV2 {
     address indexed senderToken,
     address indexed signerToken,
     uint256 senderAmount,
-    uint256 signerAmount,
+    uint256 signerAmount
   );
 
-  function setRule(
+  function createRule(
     address senderToken,
     address signerToken,
     uint256 senderAmount,
     uint256 signerAmount
   ) external;
 
-  function unsetRule(
+  function deleteRule(
     uint256 ruleID
   ) external;
 
