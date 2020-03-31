@@ -167,7 +167,7 @@ contract Delegate is IDelegateV2, Ownable {
 
     while (ruleID != NO_RULE && senderAmount > 0) {
       if (senderAmount >= rules[ruleID].senderAmount) {
-        require(signerAmount >= rules[ruleID].signerAmount, 'PRICE_INVALID');
+        require(signerAmount >= rules[ruleID].signerAmount, "PRICE_INVALID");
         // enough sender and signer amount have been sent for this rule
         senderAmount -= rules[ruleID].senderAmount;
         signerAmount -= rules[ruleID].signerAmount;
@@ -177,7 +177,7 @@ contract Delegate is IDelegateV2, Ownable {
         // only a fraction of this rule is needed so we calculate the signer amount
         // neither divisions can have a denominator of 0. removing safemath preserves some calculation accuracy
         uint256 signerFraction = rules[ruleID].signerAmount / (rules[ruleID].senderAmount / senderAmount);
-        require(signerFraction <= signerAmount, 'PRICE_INVALID');
+        require(signerFraction <= signerAmount, "PRICE_INVALID");
 
         // update whats remaining of the rule
         rules[ruleID].senderAmount -= senderAmount;
