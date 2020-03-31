@@ -149,7 +149,9 @@ contract Delegate is IDelegateV2, Ownable {
     address signerToken
   ) external view returns (
     uint256 signerAmount
-  );
+  ) {
+
+  }
 
   function getSenderSideQuote(
     uint256 signerAmount,
@@ -157,7 +159,9 @@ contract Delegate is IDelegateV2, Ownable {
     address senderToken
   ) external view returns (
     uint256 senderAmount
-  );
+  ) {
+
+  }
 
   function getMaxQuote(
     address senderToken,
@@ -165,7 +169,16 @@ contract Delegate is IDelegateV2, Ownable {
   ) external view returns (
     uint256 senderAmount,
     uint256 signerAmount
-  );
+  ) {
+    uint256 ruleID = firstRuleID[senderToken][signerToken];
+
+    // exit when the end of the list of rules is found
+    while (ruleID != NO_RULE) {
+      senderAmount = senderAmount.add(rules[ruleID].senderAmount);
+      signerAmount = signerAmount.add(rules[ruleID].signerAmount);
+      ruleID = rules[ruleID].nextRuleID;
+    }
+  }
 
   function _deleteRule(
     uint256 ruleID
@@ -235,6 +248,5 @@ contract Delegate is IDelegateV2, Ownable {
     uint256 y = rules[secondElement].senderAmount.mul(rules[firstElement].signerAmount);
     return (x > y);
   }
-
 
 }
