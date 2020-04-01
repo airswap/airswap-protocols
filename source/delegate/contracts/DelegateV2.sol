@@ -259,7 +259,21 @@ contract Delegate is IDelegateV2, Ownable {
     uint256 remainingSenderAmount;
     (signerAmount, remainingSenderAmount) = _getSignerSideQuote(senderBalance, senderToken, signerToken);
     senderAmount = senderBalance.sub(remainingSenderAmount);
-    
+  }
+
+  function getLevels(
+    address senderToken,
+    address signerToken
+  ) external view returns (
+    uint256[] memory senderAmounts,
+    uint256[] memory signerAmounts
+  ) {
+    uint256 ruleID = firstRuleID[senderToken][signerToken];
+    while (ruleID != NO_RULE) {
+      senderAmounts.push(rules[ruleID].senderAmount);
+      signerAmounts.push(rules[ruleID].signerAmount);
+      ruleID = rules[ruleID].nextRuleID;
+    }
   }
 
   function _deleteRule(
