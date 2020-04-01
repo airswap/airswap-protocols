@@ -15,7 +15,7 @@ import {
   OPEN_SEA_API_URL,
 } from './src/constants'
 
-import { chainIds, ADDRESS_ZERO } from '@airswap/constants'
+import { chainIds, ADDRESS_ZERO, tokenKinds } from '@airswap/constants'
 import { getTokenName, getTokenSymbol, getTokenDecimals } from './src/helpers'
 
 export function getTrustImage(address: string): string {
@@ -44,7 +44,7 @@ function normalizeIdexToken(
     address: token.address,
     decimals: token.decimals,
     symbol: token.symbol,
-    kind: 'ERC20',
+    kind: tokenKinds.ERC20,
     image: getTrustImage(token.address),
   }
 }
@@ -60,7 +60,7 @@ function normalizeMetamaskToken(
     address: token.address,
     decimals: token.decimals,
     symbol: token.symbol,
-    kind: 'ERC20',
+    kind: tokenKinds.ERC20,
     image: getMetamaskImage(token.logo),
   }
 }
@@ -150,11 +150,11 @@ class TokenMetadata {
   }
 
   public getERC20Tokens(): NormalizedToken[] {
-    return this.getTokens().filter(token => token.kind === 'ERC20')
+    return this.getTokens().filter(token => token.kind === tokenKinds.ERC20)
   }
 
   public getERC721Tokens(): NormalizedToken[] {
-    return this.getTokens().filter(token => token.kind === 'ERC721')
+    return this.getTokens().filter(token => token.kind === tokenKinds.ERC721)
   }
 
   // get token objects in an object keyed by address
@@ -196,7 +196,7 @@ class TokenMetadata {
           openseaContractData.symbol || openseaContractData.name.toUpperCase(),
         address: openseaContractData.address,
         decimals: 0,
-        kind: 'ERC721',
+        kind: tokenKinds.ERC721,
         image: openseaContractData.image_url,
       }
 
@@ -217,7 +217,7 @@ class TokenMetadata {
       address: searchAddress,
       decimals: tokenDecimals,
       image: getTrustImage(searchAddress),
-      kind: 'ERC20',
+      kind: tokenKinds.ERC20,
     }
 
     this.tokens.push(newToken)
