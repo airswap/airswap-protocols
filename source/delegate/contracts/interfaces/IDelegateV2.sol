@@ -33,9 +33,9 @@ interface IDelegateV2 {
 
   event CreateRule(
     address indexed owner,
-    address indexed senderToken,
-    address indexed signerToken,
-    uint256 ruleID,
+    uint256 indexed ruleID,
+    address senderToken,
+    address signerToken,
     uint256 senderAmount,
     uint256 signerAmount
   );
@@ -45,11 +45,9 @@ interface IDelegateV2 {
     uint256 indexed ruleID
   );
 
-  event ProvideOrder(
+  event FillRule(
     address indexed owner,
-    address tradeWallet,
-    address indexed senderToken,
-    address indexed signerToken,
+    uint256 indexed ruleID,
     uint256 senderAmount,
     uint256 signerAmount
   );

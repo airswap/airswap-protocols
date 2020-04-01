@@ -131,15 +131,13 @@ contract Delegate is IDelegateV2, Ownable {
 
     totalActiveRules[senderToken][signerToken] += 1;
 
-    emit CreateRule(owner(), senderToken, signerToken, ruleIDCounter, senderAmount, signerAmount);
+    emit CreateRule(owner(), ruleIDCounter, senderToken, signerToken, senderAmount, signerAmount);
   }
 
   function deleteRule(
     uint256 ruleID
   ) external {
     _deleteRule(ruleID);
-
-    emit DeleteRule(owner(), ruleID);
   }
 
   function provideOrder(
@@ -174,6 +172,9 @@ contract Delegate is IDelegateV2, Ownable {
         // enough sender and signer amount have been sent for this rule
         senderAmount -= rules[ruleID].senderAmount;
         signerAmount -= rules[ruleID].signerAmount;
+
+        emit FillRule(owner(), ruleID, rules[ruleID].senderAmount, rules[ruleID].signerAmount);
+
         ruleID = rules[ruleID].nextRuleID;
         _deleteRule(rules[ruleID].prevRuleID);
       } else {
@@ -185,6 +186,9 @@ contract Delegate is IDelegateV2, Ownable {
         // update whats remaining of the rule
         rules[ruleID].senderAmount -= senderAmount;
         rules[ruleID].signerAmount -= signerFraction;
+
+        emit FillRule(owner(), ruleID, senderAmount, signerFraction);
+
         // signerAmount is large enough for the senderAmount sent
         senderAmount = 0;
       }
@@ -192,15 +196,6 @@ contract Delegate is IDelegateV2, Ownable {
 
     // Perform the swap.
     swapContract.swap(order);
-
-    emit ProvideOrder(
-      owner(),
-      tradeWallet,
-      order.sender.token,
-      order.signer.token,
-      order.sender.amount,
-      order.signer.amount
-    );
   }
 
   function getSignerSideQuote(
@@ -305,6 +300,8 @@ contract Delegate is IDelegateV2, Ownable {
     totalActiveRules[rule.senderToken][rule.signerToken] -= 1;
 
     delete rules[ruleID];
+
+    emit DeleteRule(owner(), ruleID);
   }
 
   // entering this funciton we know that the given list has at least 1 element in it
