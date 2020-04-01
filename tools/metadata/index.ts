@@ -12,9 +12,10 @@ import {
   rinkebyTokensByAddress,
   goerliTokensByAddress,
   kovanTokensByAddress,
+  OPEN_SEA_API_URL,
 } from './src/constants'
 
-import { chainIds, ADDRESS_ZERO } from '@airswap/constants'
+import { chainIds, ADDRESS_ZERO, tokenKinds } from '@airswap/constants'
 import { getTokenName, getTokenSymbol, getTokenDecimals } from './src/helpers'
 
 export function getTrustImage(address: string): string {
@@ -27,6 +28,14 @@ export function getMetamaskImage(logo: string): string {
   return `${METAMASK_IMAGE_API}/${logo}`
 }
 
+function getOpenseaContractMetadata(address): Promise<Record<string, any>> {
+  return axios
+    .get(`${OPEN_SEA_API_URL}/asset_contract/${address}`)
+    .then(response => {
+      return response.data
+    })
+}
+
 function normalizeIdexToken(
   token: IdexToken & { symbol: string }
 ): NormalizedToken {
@@ -35,6 +44,7 @@ function normalizeIdexToken(
     address: token.address,
     decimals: token.decimals,
     symbol: token.symbol,
+    kind: tokenKinds.ERC20,
     image: getTrustImage(token.address),
   }
 }
@@ -50,6 +60,7 @@ function normalizeMetamaskToken(
     address: token.address,
     decimals: token.decimals,
     symbol: token.symbol,
+    kind: tokenKinds.ERC20,
     image: getMetamaskImage(token.logo),
   }
 }
@@ -138,6 +149,14 @@ class TokenMetadata {
     return this.tokens
   }
 
+  public getERC20Tokens(): NormalizedToken[] {
+    return this.getTokens().filter(token => token.kind === tokenKinds.ERC20)
+  }
+
+  public getERC721Tokens(): NormalizedToken[] {
+    return this.getTokens().filter(token => token.kind === tokenKinds.ERC721)
+  }
+
   // get token objects in an object keyed by address
   public getTokensByAddress(): { [address: string]: NormalizedToken } {
     return this.tokensByAddress
@@ -161,6 +180,31 @@ class TokenMetadata {
         `Fetching data from a contract is only available on mainnet.`
       )
     }
+
+    // check if the token is an NFT
+    let openseaContractData
+    try {
+      openseaContractData = await getOpenseaContractMetadata(searchAddress)
+    } catch (error) {
+      openseaContractData = null
+    }
+
+    if (openseaContractData && openseaContractData.schema_name === 'ERC721') {
+      const normalizedOpenSeaToken: NormalizedToken = {
+        name: openseaContractData.name,
+        symbol:
+          openseaContractData.symbol || openseaContractData.name.toUpperCase(),
+        address: openseaContractData.address,
+        decimals: 0,
+        kind: tokenKinds.ERC721,
+        image: openseaContractData.image_url,
+      }
+
+      this.tokens.push(normalizedOpenSeaToken)
+      this._storeTokensByAddress()
+      return normalizedOpenSeaToken
+    }
+
     const [tokenSymbol, tokenName, tokenDecimals] = await Promise.all([
       getTokenSymbol(searchAddress),
       getTokenName(searchAddress),
@@ -173,6 +217,7 @@ class TokenMetadata {
       address: searchAddress,
       decimals: tokenDecimals,
       image: getTrustImage(searchAddress),
+      kind: tokenKinds.ERC20,
     }
 
     this.tokens.push(newToken)
