@@ -251,18 +251,21 @@ export const rinkebyTokensByAddress: Record<string, NormalizedToken> = {
     address: '0x5592ec0cfb4dbc12d3ab100b257153436a1f0fea',
     decimals: 18,
     symbol: 'DAI',
+    kind: 'ERC20',
   },
   '0xc778417e063141139fce010982780140aa0cd5ab': {
     name: 'Wrapped Ether',
     address: '0xc778417e063141139fce010982780140aa0cd5ab',
     decimals: 18,
     symbol: 'WETH',
+    kind: 'ERC20',
   },
   '0xcc1cbd4f67cceb7c001bd4adf98451237a193ff8': {
     name: 'AirSwap Token',
     address: '0xcc1cbd4f67cceb7c001bd4adf98451237a193ff8',
     decimals: 4,
     symbol: 'AST',
+    kind: 'ERC20',
   },
 }
 
@@ -272,12 +275,14 @@ export const goerliTokensByAddress: Record<string, NormalizedToken> = {
     address: '0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6',
     decimals: 18,
     symbol: 'WETH',
+    kind: 'ERC20',
   },
   '0x1a1ec25DC08e98e5E93F1104B5e5cdD298707d31': {
     name: 'AirSwap Token',
     address: '0x1a1ec25DC08e98e5E93F1104B5e5cdD298707d31',
     decimals: 4,
     symbol: 'AST',
+    kind: 'ERC20',
   },
 }
 
@@ -287,11 +292,13 @@ export const kovanTokensByAddress: Record<string, NormalizedToken> = {
     address: '0xd0a1e359811322d97991e03f863a0c30c2cf029c',
     decimals: 18,
     symbol: 'WETH',
+    kind: 'ERC20',
   },
   '0x1a1ec25DC08e98e5E93F1104B5e5cdD298707d31': {
     name: 'AirSwap Token',
     address: '0x1a1ec25DC08e98e5E93F1104B5e5cdD298707d31',
     decimals: 4,
     symbol: 'AST',
+    kind: 'ERC20',
   },
 }
