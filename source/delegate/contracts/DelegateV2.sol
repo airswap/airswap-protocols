@@ -57,6 +57,7 @@ contract Delegate is IDelegateV2, Ownable {
 
   // Mapping of senderToken to signerToken to the first ruleID for this pair
   mapping(address => mapping(address => uint256)) public firstRuleID;
+  mapping(address => mapping(address => uint256)) public totalActiveRules;
 
   // ERC-20 (fungible token) interface identifier (ERC-165)
   bytes4 constant internal ERC20_INTERFACE_ID = 0x36372b07;
@@ -127,6 +128,8 @@ contract Delegate is IDelegateV2, Ownable {
     } else {
       _insertRuleInList(senderToken, signerToken, ruleIDCounter);
     }
+
+    totalActiveRules[senderToken][signerToken] += 1;
 
     emit CreateRule(owner(), senderToken, signerToken, ruleIDCounter, senderAmount, signerAmount);
   }
@@ -268,10 +271,14 @@ contract Delegate is IDelegateV2, Ownable {
     uint256[] memory senderAmounts,
     uint256[] memory signerAmounts
   ) {
+    uint256 activeRules = totalActiveRules[senderToken][signerToken];
+    senderAmounts = new uint256[](activeRules);
+    signerAmounts = new uint256[](activeRules);
+
     uint256 ruleID = firstRuleID[senderToken][signerToken];
-    while (ruleID != NO_RULE) {
-      senderAmounts.push(rules[ruleID].senderAmount);
-      signerAmounts.push(rules[ruleID].signerAmount);
+    for (uint256 i = 0; i < activeRules; i++) {
+      senderAmounts[i] = rules[ruleID].senderAmount;
+      signerAmounts[i] = rules[ruleID].signerAmount;
       ruleID = rules[ruleID].nextRuleID;
     }
   }
@@ -294,6 +301,8 @@ contract Delegate is IDelegateV2, Ownable {
     if (rule.nextRuleID != NO_RULE) {
       rules[rule.nextRuleID].prevRuleID = rule.prevRuleID;
     }
+
+    totalActiveRules[rule.senderToken][rule.signerToken] -= 1;
 
     delete rules[ruleID];
   }
