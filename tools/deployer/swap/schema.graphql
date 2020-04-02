@@ -1,6 +1,34 @@
-type ExampleEntity @entity {
-  id: ID!
-  count: BigInt!
-  authorizerAddress: Bytes! # address
-  authorizedSender: Bytes! # address
+type User @entity {
+  id: ID! # wallet address
+  authorizedSigners: [User!]! # signers this user has authorized
+  authorizedSenders: [User!]! # senders this user has authorized
+  executedOrders: [ExecutedOrder!]! # orders this user has that have been completed
+  cancelledNonces: [Int]!
+}
+
+type ExecutedOrder @entity {
+  id: ID! # combination of user and nonce? Transaction hash? Hash entire object?
+  # trx can have multiple orders, need to differentiate
+
+  nonce: Int # order nonce for a user
+  expiry: Int
+
+  from: Bytes # address of the originator of the transaction
+  to: Bytes # who the originator sent the transaction to
+  value: Int # value sent with the transaction
+
+  signer: User
+  signerAmount: Int
+  signerTokenId: Bytes
+  signerTokenAddress: Bytes
+
+  sender: User
+  senderAmount: Int
+  senderTokenId: Bytes
+  senderTokenAddress: Bytes
+
+  affiliate: User
+  affiliateAmount: Int
+  affiliateTokenType: Bytes
+  affiliateTokenAddress: Bytes
 }

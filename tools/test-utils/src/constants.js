@@ -15,5 +15,5 @@
 */
 
 module.exports = {
-  GANACHE_PROVIDER: 'http://127.0.0.1:8545',
+  GANACHE_PROVIDER: 'http://0.0.0.0:8545',
 }

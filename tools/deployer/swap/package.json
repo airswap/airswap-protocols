@@ -9,6 +9,7 @@
     "create-local": "graph create --node http://localhost:8020/ airswap/swap",
     "remove-local": "graph remove --node http://localhost:8020/ airswap/swap",
     "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 airswap/swap",
+    "prepare:development": "mustache config/development.json subgraph.template.yaml > subgraph.yaml",
     "prepare:mainnet": "mustache config/mainnet.json subgraph.template.yaml > subgraph.yaml",
     "prepare:rinkeby": "mustache config/rinkeby.json subgraph.template.yaml > subgraph.yaml",
     "prepare:kovan": "mustache config/kovan.json subgraph.template.yaml > subgraph.yaml",
