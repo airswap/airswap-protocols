@@ -18,7 +18,7 @@ const {
 const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
 const { GANACHE_PROVIDER } = require('@airswap/test-utils').constants
 
-contract('Delegate Unit Tests', async accounts => {
+contract('DelegateV2 Unit Tests', async accounts => {
   const owner = accounts[0]
   const tradeWallet = accounts[1]
   const mockTokenOne = accounts[2]
@@ -27,6 +27,8 @@ contract('Delegate Unit Tests', async accounts => {
   const notOwner = accounts[4]
 
   const PROTOCOL = '0x0006'
+
+  const NO_RULE = 0
 
   let swap_swap
   let mockSwap
@@ -184,6 +186,118 @@ contract('Delegate Unit Tests', async accounts => {
         ),
         'STAKING_APPROVAL_FAILED'
       )
+    })
+  })
+
+  describe('Test createRule', async () => {
+    it('Should not create a rule with a 0 amount', async () => {
+      await reverted(
+        delegate.createRule(mockTokenOne, mockTokenTwo, 0, 400),
+        'AMOUNTS_CANNOT_BE_0'
+      )
+
+      await reverted(
+        delegate.createRule(mockTokenOne, mockTokenTwo, 400, 0),
+        'AMOUNTS_CANNOT_BE_0'
+      )
+    })
+
+    it('Should successfully create a rule and update the contract', async () => {
+      const tx = await delegate.createRule(
+        mockTokenOne,
+        mockTokenTwo,
+        1000,
+        200
+      )
+
+      // check it's stored in the mapping correctly
+      const rule = await delegate.rules.call(1)
+
+      equal(rule['senderToken'], mockTokenOne, 'sender token incorrectly set')
+      equal(rule['signerToken'], mockTokenTwo, 'signer token incorrectly set')
+      equal(
+        rule['senderAmount'].toNumber(),
+        1000,
+        'sender amount incorrectly set'
+      )
+      equal(
+        rule['signerAmount'].toNumber(),
+        200,
+        'signer amount incorrectly set'
+      )
+      equal(rule['prevRuleID'].toNumber(), NO_RULE, 'prev rule incorrectly set')
+      equal(rule['nextRuleID'].toNumber(), NO_RULE, 'next rule incorrectly set')
+
+      // check the token pair's list was updated correctly
+      const ruleID = await delegate.firstRuleID.call(mockTokenOne, mockTokenTwo)
+      equal(ruleID, 1, 'Link list first rule ID incorrect')
+      const activeRules = await delegate.totalActiveRules.call(
+        mockTokenOne,
+        mockTokenTwo
+      )
+      equal(activeRules, 1, 'Total active rules incorrect')
+
+      // check the contract's total rules created is correct
+      const ruleCounter = await delegate.ruleIDCounter.call()
+      equal(ruleCounter, 1, 'Rule counter incorrect')
+
+      // check the event emitted correctly
+      emitted(tx, 'CreateRule', e => {
+        return (
+          e.owner === owner &&
+          e.ruleID.toNumber() === 1 &&
+          e.senderToken === mockTokenOne &&
+          e.signerToken === mockTokenTwo &&
+          e.senderAmount.toNumber() === 1000 &&
+          e.signerAmount.toNumber() === 200
+        )
+      })
+    })
+
+    it('Should successfully insert a second rule at the beginning of the same market', async () => {
+      // insert the first rule, as in the previous test
+      // in this rule, every 1 signerToken gets 5 senderTokens
+      let tx = await delegate.createRule(mockTokenOne, mockTokenTwo, 1000, 200)
+
+      emitted(tx, 'CreateRule')
+
+      // now insert another rule on the same token pair
+      // in this rule every 1 signerToken gets 6 senderTokens
+      // this rule therefore goes BEFORE the other rule in the list
+      tx = await delegate.createRule(mockTokenOne, mockTokenTwo, 300, 50)
+
+      // check the event emitted correctly
+      emitted(tx, 'CreateRule', e => {
+        return (
+          e.owner === owner &&
+          e.ruleID.toNumber() === 2 &&
+          e.senderToken === mockTokenOne &&
+          e.signerToken === mockTokenTwo &&
+          e.senderAmount.toNumber() === 300 &&
+          e.signerAmount.toNumber() === 50
+        )
+      })
+
+      let rule = await delegate.rules.call(1)
+      // check it is updated to now be after the new rule
+      equal(rule['prevRuleID'].toNumber(), 2, 'prev rule incorrectly set')
+      equal(rule['nextRuleID'].toNumber(), NO_RULE, 'next rule incorrectly set')
+      rule = await delegate.rules.call(2)
+      equal(rule['prevRuleID'].toNumber(), NO_RULE, 'prev rule incorrectly set')
+      equal(rule['nextRuleID'].toNumber(), 1, 'next rule incorrectly set')
+
+      // check that rule 2 is now the first rule in the market's list
+      const ruleID = await delegate.firstRuleID.call(mockTokenOne, mockTokenTwo)
+      equal(ruleID, 2, 'Link list first rule ID incorrect')
+      const activeRules = await delegate.totalActiveRules.call(
+        mockTokenOne,
+        mockTokenTwo
+      )
+      equal(activeRules, 2, 'Total active rules incorrect')
+
+      // check the contract's total rules created is correct
+      const ruleCounter = await delegate.ruleIDCounter.call()
+      equal(ruleCounter, 2, 'Rule counter incorrect')
     })
   })
 })

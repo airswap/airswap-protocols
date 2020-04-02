@@ -109,6 +109,7 @@ contract DelegateV2 is IDelegateV2, Ownable {
     uint256 senderAmount,
     uint256 signerAmount
   ) external {
+    require(senderAmount != 0 && signerAmount != 0, "AMOUNTS_CANNOT_BE_0");
     // Rules created now holds this rule's ID
     ruleIDCounter += 1;
 
