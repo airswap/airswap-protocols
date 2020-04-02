@@ -14,14 +14,13 @@
   limitations under the License.
 */
 
-
 pragma solidity 0.5.12;
 pragma experimental ABIEncoderV2;
 
 import "@airswap/types/contracts/Types.sol";
 
-interface IDelegateV2 {
 
+interface IDelegateV2 {
   struct Rule {
     address senderToken;
     address signerToken;
@@ -40,10 +39,7 @@ interface IDelegateV2 {
     uint256 signerAmount
   );
 
-  event DeleteRule(
-    address indexed owner,
-    uint256 indexed ruleID
-  );
+  event DeleteRule(address indexed owner, uint256 indexed ruleID);
 
   event FillRule(
     address indexed owner,
@@ -59,42 +55,28 @@ interface IDelegateV2 {
     uint256 signerAmount
   ) external;
 
-  function deleteRule(
-    uint256 ruleID
-  ) external;
+  function deleteRule(uint256 ruleID) external;
 
-  function provideOrder(
-    Types.Order calldata order
-  ) external;
+  function provideOrder(Types.Order calldata order) external;
 
   function getSignerSideQuote(
     uint256 senderAmount,
     address senderToken,
     address signerToken
-  ) external view returns (
-    uint256 signerAmount
-  );
+  ) external view returns (uint256 signerAmount);
 
   function getSenderSideQuote(
     uint256 signerAmount,
     address signerToken,
     address senderToken
-  ) external view returns (
-    uint256 senderAmount
-  );
+  ) external view returns (uint256 senderAmount);
 
-  function getMaxQuote(
-    address senderToken,
-    address signerToken
-  ) external view returns (
-    uint256 senderAmount,
-    uint256 signerAmount
-  );
+  function getMaxQuote(address senderToken, address signerToken)
+    external
+    view
+    returns (uint256 senderAmount, uint256 signerAmount);
 
-  function owner()
-    external view returns (address);
+  function owner() external view returns (address);
 
-  function tradeWallet()
-    external view returns (address);
-
+  function tradeWallet() external view returns (address);
 }
