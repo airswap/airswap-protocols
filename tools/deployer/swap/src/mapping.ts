@@ -12,17 +12,34 @@ import {
 import { User, ExecutedOrder } from "../generated/schema"
 
 export function handleAuthorizeSender(event: AuthorizeSender): void {
-//  let entity = AuthorizedSender.load(event.transaction.hash.toHex())
+  let authorizerAddress = event.params.authorizerAddress.toHex()
+  let authorizer = User.load(authorizerAddress)
 
-//  if (entity == null) {
-//    entity = new AuthorizedSender(event.transaction.hash.toHex())
-//  }
-//
-//  entity.isAuthorized = true
-//  entity.authorizerAddress = event.params.authorizerAddress
-//  entity.authorizedSender = event.params.authorizedSender
-//  entity.save()
-  log.info("handleAuthorizeSender not implemented", [])
+  // handle new creation of User
+  if (authorizer == null) {
+    authorizer = new User(authorizerAddress)
+    authorizer.authorizedSigners = new Array<string>()
+    authorizer.authorizedSenders = new Array<string>()
+    authorizer.executedOrders = new Array<string>()
+    authorizer.cancelledNonces = new Array<BigInt>()
+  }
+
+  let senderAddress = event.params.authorizedSender.toHex()
+  let sender = User.load(senderAddress) 
+  // handle new creation of User
+  if (sender == null) {
+    sender = new User(senderAddress)
+    sender.authorizedSigners = new Array<string>()
+    sender.authorizedSenders = new Array<string>()
+    sender.executedOrders = new Array<string>()
+    sender.cancelledNonces = new Array<BigInt>()
+    sender.save()
+  }
+
+  let authorizedSenders = authorizer.authorizedSenders
+  // authorizedSenders.push(sender)
+  // authorizer.authorizedSenders = authorizedSenders
+  authorizer.save()
 }
 
 export function handleAuthorizeSigner(event: AuthorizeSigner): void {
