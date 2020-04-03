@@ -1,4 +1,4 @@
-import { BigInt, Address, log } from "@graphprotocol/graph-ts"
+import { BigInt, log } from "@graphprotocol/graph-ts"
 import {
   Contract,
   AuthorizeSender,
@@ -22,32 +22,44 @@ export function handleAuthorizeSender(event: AuthorizeSender): void {
 //  entity.authorizerAddress = event.params.authorizerAddress
 //  entity.authorizedSender = event.params.authorizedSender
 //  entity.save()
+  log.info("handleAuthorizeSender not implemented", [])
 }
 
-export function handleAuthorizeSigner(event: AuthorizeSigner): void {}
+export function handleAuthorizeSigner(event: AuthorizeSigner): void {
+  log.info("handleAuthorizeSigner not implemented", [])
+}
 
 export function handleCancel(event: Cancel): void {
-  let signer = event.params.signerWallet.toString()
+  let signer = event.params.signerWallet.toHex()
   let user = User.load(signer)
 
+  // handle new creation of User
   if (user == null) {
     user = new User(signer)
+    user.authorizedSigners = new Array<string>()
+    user.authorizedSenders = new Array<string>()
+    user.executedOrders = new Array<string>()
+    user.cancelledNonces = new Array<BigInt>()
   }
 
-  let nonce = event.params.nonce
-  log.info("NONCE: {}", [nonce.toString()])
-
   let cancelledNonces = user.cancelledNonces
-  cancelledNonces.push(nonce.toI32())
-  //user.cancelledNonces = cancelledNonces
-
+  cancelledNonces.push(event.params.nonce)
+  user.cancelledNonces = cancelledNonces
   user.save()
 }
 
-export function handleCancelUpTo(event: CancelUpTo): void {}
+export function handleCancelUpTo(event: CancelUpTo): void {
+  log.info("handleCancelUpTo not implemented", [])
+}
 
-export function handleRevokeSender(event: RevokeSender): void {}
+export function handleRevokeSender(event: RevokeSender): void {
+  log.info("handleRevokeSender not implemented", [])
+}
 
-export function handleRevokeSigner(event: RevokeSigner): void {}
+export function handleRevokeSigner(event: RevokeSigner): void {
+  log.info("handleRevokeSigner not implemented", [])
+}
 
-export function handleSwap(event: Swap): void {}
+export function handleSwap(event: Swap): void {
+  log.info("handleSwap not implemented", [])
+}

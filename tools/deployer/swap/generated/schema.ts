@@ -69,13 +69,13 @@ export class User extends Entity {
     this.set("executedOrders", Value.fromStringArray(value));
   }
 
-  get cancelledNonces(): Array<i32> {
+  get cancelledNonces(): Array<BigInt> {
     let value = this.get("cancelledNonces");
-    return value.toI32Array();
+    return value.toBigIntArray();
   }
 
-  set cancelledNonces(value: Array<i32>) {
-    this.set("cancelledNonces", Value.fromI32Array(value));
+  set cancelledNonces(value: Array<BigInt>) {
+    this.set("cancelledNonces", Value.fromBigIntArray(value));
   }
 }
 
