@@ -1,4 +1,4 @@
-import { BigInt, log } from "@graphprotocol/graph-ts"
+import { BigInt, Address, log } from "@graphprotocol/graph-ts"
 import {
   Contract,
   AuthorizeSender,
@@ -27,16 +27,19 @@ export function handleAuthorizeSender(event: AuthorizeSender): void {
 export function handleAuthorizeSigner(event: AuthorizeSigner): void {}
 
 export function handleCancel(event: Cancel): void {
-  let signer = event.params.signerWallet
+  let signer = event.params.signerWallet.toString()
   let user = User.load(signer)
 
   if (user == null) {
     user = new User(signer)
   }
 
+  let nonce = event.params.nonce
+  log.info("NONCE: {}", [nonce.toString()])
+
   let cancelledNonces = user.cancelledNonces
-  cancelledNonces.push(event.params.nonce)
-  user.cancelledNonces = cancelledNonces
+  cancelledNonces.push(nonce.toI32())
+  //user.cancelledNonces = cancelledNonces
 
   user.save()
 }

@@ -12,7 +12,7 @@ import {
   BigDecimal
 } from "@graphprotocol/graph-ts";
 
-export class ExampleEntity extends Entity {
+export class User extends Entity {
   constructor(id: string) {
     super();
     this.set("id", Value.fromString(id));
@@ -20,17 +20,17 @@ export class ExampleEntity extends Entity {
 
   save(): void {
     let id = this.get("id");
-    assert(id !== null, "Cannot save ExampleEntity entity without an ID");
+    assert(id !== null, "Cannot save User entity without an ID");
     assert(
       id.kind == ValueKind.STRING,
-      "Cannot save ExampleEntity entity with non-string ID. " +
+      "Cannot save User entity with non-string ID. " +
         'Considering using .toHex() to convert the "id" to a string.'
     );
-    store.set("ExampleEntity", id.toString(), this);
+    store.set("User", id.toString(), this);
   }
 
-  static load(id: string): ExampleEntity | null {
-    return store.get("ExampleEntity", id) as ExampleEntity | null;
+  static load(id: string): User | null {
+    return store.get("User", id) as User | null;
   }
 
   get id(): string {
@@ -42,30 +42,311 @@ export class ExampleEntity extends Entity {
     this.set("id", Value.fromString(value));
   }
 
-  get count(): BigInt {
-    let value = this.get("count");
-    return value.toBigInt();
+  get authorizedSigners(): Array<string> {
+    let value = this.get("authorizedSigners");
+    return value.toStringArray();
   }
 
-  set count(value: BigInt) {
-    this.set("count", Value.fromBigInt(value));
+  set authorizedSigners(value: Array<string>) {
+    this.set("authorizedSigners", Value.fromStringArray(value));
   }
 
-  get authorizerAddress(): Bytes {
-    let value = this.get("authorizerAddress");
-    return value.toBytes();
+  get authorizedSenders(): Array<string> {
+    let value = this.get("authorizedSenders");
+    return value.toStringArray();
   }
 
-  set authorizerAddress(value: Bytes) {
-    this.set("authorizerAddress", Value.fromBytes(value));
+  set authorizedSenders(value: Array<string>) {
+    this.set("authorizedSenders", Value.fromStringArray(value));
   }
 
-  get authorizedSender(): Bytes {
-    let value = this.get("authorizedSender");
-    return value.toBytes();
+  get executedOrders(): Array<string> {
+    let value = this.get("executedOrders");
+    return value.toStringArray();
   }
 
-  set authorizedSender(value: Bytes) {
-    this.set("authorizedSender", Value.fromBytes(value));
+  set executedOrders(value: Array<string>) {
+    this.set("executedOrders", Value.fromStringArray(value));
+  }
+
+  get cancelledNonces(): Array<i32> {
+    let value = this.get("cancelledNonces");
+    return value.toI32Array();
+  }
+
+  set cancelledNonces(value: Array<i32>) {
+    this.set("cancelledNonces", Value.fromI32Array(value));
+  }
+}
+
+export class ExecutedOrder extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id !== null, "Cannot save ExecutedOrder entity without an ID");
+    assert(
+      id.kind == ValueKind.STRING,
+      "Cannot save ExecutedOrder entity with non-string ID. " +
+        'Considering using .toHex() to convert the "id" to a string.'
+    );
+    store.set("ExecutedOrder", id.toString(), this);
+  }
+
+  static load(id: string): ExecutedOrder | null {
+    return store.get("ExecutedOrder", id) as ExecutedOrder | null;
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get nonce(): i32 {
+    let value = this.get("nonce");
+    return value.toI32();
+  }
+
+  set nonce(value: i32) {
+    this.set("nonce", Value.fromI32(value));
+  }
+
+  get expiry(): i32 {
+    let value = this.get("expiry");
+    return value.toI32();
+  }
+
+  set expiry(value: i32) {
+    this.set("expiry", Value.fromI32(value));
+  }
+
+  get from(): Bytes | null {
+    let value = this.get("from");
+    if (value === null) {
+      return null;
+    } else {
+      return value.toBytes();
+    }
+  }
+
+  set from(value: Bytes | null) {
+    if (value === null) {
+      this.unset("from");
+    } else {
+      this.set("from", Value.fromBytes(value as Bytes));
+    }
+  }
+
+  get to(): Bytes | null {
+    let value = this.get("to");
+    if (value === null) {
+      return null;
+    } else {
+      return value.toBytes();
+    }
+  }
+
+  set to(value: Bytes | null) {
+    if (value === null) {
+      this.unset("to");
+    } else {
+      this.set("to", Value.fromBytes(value as Bytes));
+    }
+  }
+
+  get value(): i32 {
+    let value = this.get("value");
+    return value.toI32();
+  }
+
+  set value(value: i32) {
+    this.set("value", Value.fromI32(value));
+  }
+
+  get signer(): string | null {
+    let value = this.get("signer");
+    if (value === null) {
+      return null;
+    } else {
+      return value.toString();
+    }
+  }
+
+  set signer(value: string | null) {
+    if (value === null) {
+      this.unset("signer");
+    } else {
+      this.set("signer", Value.fromString(value as string));
+    }
+  }
+
+  get signerAmount(): i32 {
+    let value = this.get("signerAmount");
+    return value.toI32();
+  }
+
+  set signerAmount(value: i32) {
+    this.set("signerAmount", Value.fromI32(value));
+  }
+
+  get signerTokenId(): Bytes | null {
+    let value = this.get("signerTokenId");
+    if (value === null) {
+      return null;
+    } else {
+      return value.toBytes();
+    }
+  }
+
+  set signerTokenId(value: Bytes | null) {
+    if (value === null) {
+      this.unset("signerTokenId");
+    } else {
+      this.set("signerTokenId", Value.fromBytes(value as Bytes));
+    }
+  }
+
+  get signerTokenAddress(): Bytes | null {
+    let value = this.get("signerTokenAddress");
+    if (value === null) {
+      return null;
+    } else {
+      return value.toBytes();
+    }
+  }
+
+  set signerTokenAddress(value: Bytes | null) {
+    if (value === null) {
+      this.unset("signerTokenAddress");
+    } else {
+      this.set("signerTokenAddress", Value.fromBytes(value as Bytes));
+    }
+  }
+
+  get sender(): string | null {
+    let value = this.get("sender");
+    if (value === null) {
+      return null;
+    } else {
+      return value.toString();
+    }
+  }
+
+  set sender(value: string | null) {
+    if (value === null) {
+      this.unset("sender");
+    } else {
+      this.set("sender", Value.fromString(value as string));
+    }
+  }
+
+  get senderAmount(): i32 {
+    let value = this.get("senderAmount");
+    return value.toI32();
+  }
+
+  set senderAmount(value: i32) {
+    this.set("senderAmount", Value.fromI32(value));
+  }
+
+  get senderTokenId(): Bytes | null {
+    let value = this.get("senderTokenId");
+    if (value === null) {
+      return null;
+    } else {
+      return value.toBytes();
+    }
+  }
+
+  set senderTokenId(value: Bytes | null) {
+    if (value === null) {
+      this.unset("senderTokenId");
+    } else {
+      this.set("senderTokenId", Value.fromBytes(value as Bytes));
+    }
+  }
+
+  get senderTokenAddress(): Bytes | null {
+    let value = this.get("senderTokenAddress");
+    if (value === null) {
+      return null;
+    } else {
+      return value.toBytes();
+    }
+  }
+
+  set senderTokenAddress(value: Bytes | null) {
+    if (value === null) {
+      this.unset("senderTokenAddress");
+    } else {
+      this.set("senderTokenAddress", Value.fromBytes(value as Bytes));
+    }
+  }
+
+  get affiliate(): string | null {
+    let value = this.get("affiliate");
+    if (value === null) {
+      return null;
+    } else {
+      return value.toString();
+    }
+  }
+
+  set affiliate(value: string | null) {
+    if (value === null) {
+      this.unset("affiliate");
+    } else {
+      this.set("affiliate", Value.fromString(value as string));
+    }
+  }
+
+  get affiliateAmount(): i32 {
+    let value = this.get("affiliateAmount");
+    return value.toI32();
+  }
+
+  set affiliateAmount(value: i32) {
+    this.set("affiliateAmount", Value.fromI32(value));
+  }
+
+  get affiliateTokenType(): Bytes | null {
+    let value = this.get("affiliateTokenType");
+    if (value === null) {
+      return null;
+    } else {
+      return value.toBytes();
+    }
+  }
+
+  set affiliateTokenType(value: Bytes | null) {
+    if (value === null) {
+      this.unset("affiliateTokenType");
+    } else {
+      this.set("affiliateTokenType", Value.fromBytes(value as Bytes));
+    }
+  }
+
+  get affiliateTokenAddress(): Bytes | null {
+    let value = this.get("affiliateTokenAddress");
+    if (value === null) {
+      return null;
+    } else {
+      return value.toBytes();
+    }
+  }
+
+  set affiliateTokenAddress(value: Bytes | null) {
+    if (value === null) {
+      this.unset("affiliateTokenAddress");
+    } else {
+      this.set("affiliateTokenAddress", Value.fromBytes(value as Bytes));
+    }
   }
 }

@@ -3,7 +3,7 @@ type User @entity {
   authorizedSigners: [User!]! # signers this user has authorized
   authorizedSenders: [User!]! # senders this user has authorized
   executedOrders: [ExecutedOrder!]! # orders this user has that have been completed
-  cancelledNonces: [Int]!
+  cancelledNonces: [Int!]!
 }
 
 type ExecutedOrder @entity {
