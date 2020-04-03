@@ -37,8 +37,8 @@ export function handleAuthorizeSender(event: AuthorizeSender): void {
   }
 
   let authorizedSenders = authorizer.authorizedSenders
-  // authorizedSenders.push(sender)
-  // authorizer.authorizedSenders = authorizedSenders
+  authorizedSenders.push(sender.id)
+  authorizer.authorizedSenders = authorizedSenders
   authorizer.save()
 }
 
