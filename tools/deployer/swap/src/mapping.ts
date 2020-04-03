@@ -44,12 +44,34 @@ export function handleCancel(event: Cancel): void {
 
   let cancelledNonces = user.cancelledNonces
   cancelledNonces.push(event.params.nonce)
+  cancelledNonces.sort()
   user.cancelledNonces = cancelledNonces
   user.save()
 }
 
 export function handleCancelUpTo(event: CancelUpTo): void {
-  log.info("handleCancelUpTo not implemented", [])
+  let signer = event.params.signerWallet.toHex()
+  let user = User.load(signer)
+
+  // handle new creation of User
+  if (user == null) {
+    user = new User(signer)
+    user.authorizedSigners = new Array<string>()
+    user.authorizedSenders = new Array<string>()
+    user.executedOrders = new Array<string>()
+    user.cancelledNonces = new Array<BigInt>()
+  }
+  let cancelledNonces = user.cancelledNonces
+  for (let i = BigInt.fromI32(0); i.lt(event.params.nonce); i = i.plus(BigInt.fromI32(1))) {
+    // prevent duplicates
+    if (cancelledNonces.indexOf(i) > -1) {
+      continue
+    }
+    cancelledNonces.push(i)
+  }
+  cancelledNonces.sort()
+  user.cancelledNonces = cancelledNonces
+  user.save()
 }
 
 export function handleRevokeSender(event: RevokeSender): void {
