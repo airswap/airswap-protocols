@@ -571,5 +571,28 @@ contract('DelegateV2 Unit Tests', async accounts => {
         'sender amount incorrect'
       )
     })
+
+    it('Should allow a quote for the maximum signer amount', async () => {
+      // total sender amount in rules is 5416, and signer amounts is 956
+      const senderAmount = await delegate.getSenderSideQuote(
+        956,
+        mockTokenOne,
+        mockTokenTwo
+      )
+
+      equal(senderAmount.toNumber(), 5416, 'sender amount incorrect')
+    })
+
+    it('Should return max sender amount for even larger signer amounts', async () => {
+      // total sender amount in rules is 5416, and signer amounts is 956
+      const senderAmount = await delegate.getSenderSideQuote(
+        1000, // bigger than the total of the rules
+        mockTokenOne,
+        mockTokenTwo
+      )
+
+      // returns max sender amount as this rate change is in the delegate's favour
+      equal(senderAmount.toNumber(), 5416, 'sender amount incorrect')
+    })
   })
 })
