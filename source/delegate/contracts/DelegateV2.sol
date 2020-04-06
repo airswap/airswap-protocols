@@ -142,6 +142,7 @@ contract DelegateV2 is IDelegateV2, Ownable {
   }
 
   function deleteRule(uint256 ruleID) external {
+    require(rules[ruleID].senderAmount != 0, "RULE_NOT_ACTIVE");
     _deleteRule(ruleID);
   }
 

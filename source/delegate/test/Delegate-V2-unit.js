@@ -41,6 +41,41 @@ contract('DelegateV2 Unit Tests', async accounts => {
 
   let delegate
 
+  async function checkLinkedList(senderToken, signerToken, correctIDs) {
+    // pad correctIDs with null values for null pointers
+    correctIDs = [0].concat(correctIDs).concat([0])
+
+    // get the first rule: rule 3. Now iterate through the rules using 'nextRuleID'
+    let ruleID = await delegate.firstRuleID.call(senderToken, signerToken)
+    let rule
+
+    // loop through the list in the contract, checking it is correctly ordered
+    for (let i = 1; i <= correctIDs.length - 2; i++) {
+      // check the ruleID is right
+      equal(
+        ruleID,
+        correctIDs[i],
+        'Link list rule wrong. Should be: ' +
+          correctIDs[i] +
+          ' but got: ' +
+          ruleID
+      )
+      // fetch the rule, and from that the next rule/previous rule
+      rule = await delegate.rules.call(ruleID)
+      equal(
+        rule['prevRuleID'].toNumber(),
+        correctIDs[i - 1],
+        'prev rule incorrectly set'
+      )
+      equal(
+        rule['nextRuleID'].toNumber(),
+        correctIDs[i + 1],
+        'next rule incorrectly set'
+      )
+      ruleID = rule['nextRuleID'].toNumber()
+    }
+  }
+
   async function setupMockStakingToken() {
     mockStakingToken = await MockContract.new()
     mockFungibleTokenTemplate = await FungibleToken.new()
@@ -322,37 +357,7 @@ contract('DelegateV2 Unit Tests', async accounts => {
       emitted(tx, 'CreateRule')
 
       // CORRECT RULE ORDER: 3, 1, 5, 2, 4
-      const correctIDs = [0, 3, 1, 5, 2, 4, 0] // surrounded by null pointers
-
-      // get the first rule: rule 3. Now iterate through the rules using 'nextRuleID'
-      let ruleID = await delegate.firstRuleID.call(mockTokenOne, mockTokenTwo)
-      let rule
-
-      // loop through the list in the contract, checking it is correctly ordered
-      for (let i = 1; i <= 5; i++) {
-        // check the ruleID is right
-        equal(
-          ruleID,
-          correctIDs[i],
-          'Link list rule wrong. Should be: ' +
-            correctIDs[i] +
-            ' but got: ' +
-            ruleID
-        )
-        // fetch the rule, and from that the next rule/previous rule
-        rule = await delegate.rules.call(ruleID)
-        equal(
-          rule['prevRuleID'].toNumber(),
-          correctIDs[i - 1],
-          'prev rule incorrectly set'
-        )
-        equal(
-          rule['nextRuleID'].toNumber(),
-          correctIDs[i + 1],
-          'next rule incorrectly set'
-        )
-        ruleID = rule['nextRuleID'].toNumber()
-      }
+      await checkLinkedList(mockTokenOne, mockTokenTwo, [3, 1, 5, 2, 4])
 
       const activeRules = await delegate.totalActiveRules.call(
         mockTokenOne,
@@ -363,6 +368,47 @@ contract('DelegateV2 Unit Tests', async accounts => {
       // check the contract's total rules created is correct
       const ruleCounter = await delegate.ruleIDCounter.call()
       equal(ruleCounter, 5, 'Rule counter incorrect')
+    })
+
+    it('Should successfully insert 2 rules with the same price')
+  })
+
+  describe('Test deleteRule', async () => {
+    const correctIDs = [3, 1, 5, 2, 4] // surrounded by null pointers
+
+    beforeEach(async () => {
+      // add 5 rules - same rules as test above
+      await delegate.createRule(mockTokenOne, mockTokenTwo, 300, 50)
+      await delegate.createRule(mockTokenOne, mockTokenTwo, 1000, 200)
+      await delegate.createRule(mockTokenOne, mockTokenTwo, 2002, 286)
+      await delegate.createRule(mockTokenOne, mockTokenTwo, 450, 100)
+      await delegate.createRule(mockTokenOne, mockTokenTwo, 1664, 320)
+      // CORRECT RULE ORDER: 3, 1, 5, 2, 4
+    })
+
+    it('Should not delete a non-existent rule', async () => {
+      await reverted(
+        delegate.deleteRule(correctIDs.length + 1),
+        'RULE_NOT_ACTIVE'
+      )
+    })
+
+    it('Should delete the last rule in the list', async () => {
+      const tx = await delegate.deleteRule(correctIDs[correctIDs.length - 1])
+
+      // check the event emitted correctly
+      emitted(tx, 'DeleteRule', e => {
+        return (
+          e.owner === owner &&
+          e.ruleID.toNumber() === correctIDs[correctIDs.length - 1]
+        )
+      })
+
+      await checkLinkedList(
+        mockTokenOne,
+        mockTokenTwo,
+        correctIDs.slice(0, correctIDs.length - 1)
+      )
     })
   })
 })
