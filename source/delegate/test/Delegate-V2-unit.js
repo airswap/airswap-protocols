@@ -5,18 +5,10 @@ const Indexer = artifacts.require('Indexer')
 const MockContract = artifacts.require('MockContract')
 const FungibleToken = artifacts.require('FungibleToken')
 
-const ethers = require('ethers')
 const { ADDRESS_ZERO } = require('@airswap/constants')
 const { emptySignature } = require('@airswap/types')
-const { createOrder, signOrder } = require('@airswap/utils')
-const {
-  equal,
-  passes,
-  emitted,
-  reverted,
-} = require('@airswap/test-utils').assert
+const { equal, emitted, reverted } = require('@airswap/test-utils').assert
 const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
-const { GANACHE_PROVIDER } = require('@airswap/test-utils').constants
 
 contract('DelegateV2 Unit Tests', async accounts => {
   const owner = accounts[0]
@@ -30,7 +22,6 @@ contract('DelegateV2 Unit Tests', async accounts => {
 
   const NO_RULE = 0
 
-  let swap_swap
   let mockSwap
   let swapAddress
   let mockIndexer
