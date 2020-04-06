@@ -299,5 +299,70 @@ contract('DelegateV2 Unit Tests', async accounts => {
       const ruleCounter = await delegate.ruleIDCounter.call()
       equal(ruleCounter, 2, 'Rule counter incorrect')
     })
+
+    it('Should successfully insert 5 rules to the same market', async () => {
+      // RULE 1: in this rule every 1 signerToken gets 6 senderTokens
+      let tx = await delegate.createRule(mockTokenOne, mockTokenTwo, 300, 50)
+      emitted(tx, 'CreateRule')
+
+      // RULE 2: in this rule, every 1 signerToken gets 5 senderTokens
+      tx = await delegate.createRule(mockTokenOne, mockTokenTwo, 1000, 200)
+      emitted(tx, 'CreateRule')
+
+      // RULE 3: in this rule, every 1 signerToken gets 7 senderTokens
+      tx = await delegate.createRule(mockTokenOne, mockTokenTwo, 2002, 286)
+      emitted(tx, 'CreateRule')
+
+      // RULE 4: in this rule, every 1 signerToken gets 4.5 senderTokens
+      tx = await delegate.createRule(mockTokenOne, mockTokenTwo, 450, 100)
+      emitted(tx, 'CreateRule')
+
+      // RULE 5: in this rule, every 1 signerToken gets 5.2 senderTokens
+      tx = await delegate.createRule(mockTokenOne, mockTokenTwo, 1664, 320)
+      emitted(tx, 'CreateRule')
+
+      // CORRECT RULE ORDER: 3, 1, 5, 2, 4
+      const correctIDs = [0, 3, 1, 5, 2, 4, 0] // surrounded by null pointers
+
+      // get the first rule: rule 3. Now iterate through the rules using 'nextRuleID'
+      let ruleID = await delegate.firstRuleID.call(mockTokenOne, mockTokenTwo)
+      let rule
+
+      // loop through the list in the contract, checking it is correctly ordered
+      for (let i = 1; i <= 5; i++) {
+        // check the ruleID is right
+        equal(
+          ruleID,
+          correctIDs[i],
+          'Link list rule wrong. Should be: ' +
+            correctIDs[i] +
+            ' but got: ' +
+            ruleID
+        )
+        // fetch the rule, and from that the next rule/previous rule
+        rule = await delegate.rules.call(ruleID)
+        equal(
+          rule['prevRuleID'].toNumber(),
+          correctIDs[i - 1],
+          'prev rule incorrectly set'
+        )
+        equal(
+          rule['nextRuleID'].toNumber(),
+          correctIDs[i + 1],
+          'next rule incorrectly set'
+        )
+        ruleID = rule['nextRuleID'].toNumber()
+      }
+
+      const activeRules = await delegate.totalActiveRules.call(
+        mockTokenOne,
+        mockTokenTwo
+      )
+      equal(activeRules, 5, 'Total active rules incorrect')
+
+      // check the contract's total rules created is correct
+      const ruleCounter = await delegate.ruleIDCounter.call()
+      equal(ruleCounter, 5, 'Rule counter incorrect')
+    })
   })
 })
