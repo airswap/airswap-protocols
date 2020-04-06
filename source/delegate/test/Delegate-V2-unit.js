@@ -409,6 +409,50 @@ contract('DelegateV2 Unit Tests', async accounts => {
         mockTokenTwo,
         correctIDs.slice(0, correctIDs.length - 1)
       )
+
+      const activeRules = await delegate.totalActiveRules.call(
+        mockTokenOne,
+        mockTokenTwo
+      )
+      equal(activeRules, correctIDs.length - 1, 'Total active rules incorrect')
+    })
+
+    it('Should delete the first rule in the list', async () => {
+      const tx = await delegate.deleteRule(correctIDs[0])
+
+      // check the event emitted correctly
+      emitted(tx, 'DeleteRule', e => {
+        return e.owner === owner && e.ruleID.toNumber() === correctIDs[0]
+      })
+
+      await checkLinkedList(mockTokenOne, mockTokenTwo, correctIDs.slice(1))
+
+      const activeRules = await delegate.totalActiveRules.call(
+        mockTokenOne,
+        mockTokenTwo
+      )
+      equal(activeRules, correctIDs.length - 1, 'Total active rules incorrect')
+    })
+
+    it('Should delete the middle rule in the list', async () => {
+      const tx = await delegate.deleteRule(correctIDs[2])
+
+      // check the event emitted correctly
+      emitted(tx, 'DeleteRule', e => {
+        return e.owner === owner && e.ruleID.toNumber() === correctIDs[2]
+      })
+
+      await checkLinkedList(
+        mockTokenOne,
+        mockTokenTwo,
+        correctIDs.slice(0, 2).concat(correctIDs.slice(3))
+      )
+
+      const activeRules = await delegate.totalActiveRules.call(
+        mockTokenOne,
+        mockTokenTwo
+      )
+      equal(activeRules, correctIDs.length - 1, 'Total active rules incorrect')
     })
   })
 })
