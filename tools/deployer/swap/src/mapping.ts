@@ -119,7 +119,39 @@ export function handleCancelUpTo(event: CancelUpTo): void {
 }
 
 export function handleRevokeSender(event: RevokeSender): void {
-  log.info("handleRevokeSender not implemented", [])
+  let deauthorizerAddress = event.params.authorizerAddress.toHex()
+  let deauthorizer = User.load(deauthorizerAddress)
+
+  // handle new creation of User
+  if (deauthorizer == null) {
+    deauthorizer = new User(deauthorizerAddress)
+    deauthorizer.authorizedSigners = new Array<string>()
+    deauthorizer.authorizedSenders = new Array<string>()
+    deauthorizer.executedOrders = new Array<string>()
+    deauthorizer.cancelledNonces = new Array<BigInt>()
+  }
+
+  let senderAddress = event.params.revokedSender.toHex()
+  let sender = User.load(senderAddress) 
+  // handle new creation of User (sender)
+  if (sender == null) {
+    sender = new User(senderAddress)
+    sender.authorizedSigners = new Array<string>()
+    sender.authorizedSenders = new Array<string>()
+    sender.executedOrders = new Array<string>()
+    sender.cancelledNonces = new Array<BigInt>()
+    sender.save()
+  }
+
+  // handle removal
+  let authorizedSenders = deauthorizer.authorizedSenders
+  let idxToRemove = authorizedSenders.indexOf(sender.id)
+  // only remove if the sender exists
+  if (idxToRemove > -1) {
+    authorizedSenders.splice(idxToRemove, 1);
+    deauthorizer.authorizedSenders = authorizedSenders
+    deauthorizer.save()
+  }
 }
 
 export function handleRevokeSigner(event: RevokeSigner): void {
