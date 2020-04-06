@@ -8,9 +8,18 @@ import {
   Stake,
   Unstake
 } from "../generated/Contract/Contract"
-import { ExampleEntity } from "../generated/schema"
+import { Token } from "../generated/schema"
 
-export function handleAddTokenToBlacklist(event: AddTokenToBlacklist): void {}
+export function handleAddTokenToBlacklist(event: AddTokenToBlacklist): void {
+  let token = Token.load(event.params.token.toHex())
+  // create token if it doesn't exist
+  if (token == null) {
+    token = new Token(event.params.token.toHex())
+  }
+  // set token to blacklisted
+  token.isBlacklisted = true
+  token.save()
+}
 
 export function handleCreateIndex(event: CreateIndex): void {}
 
@@ -18,7 +27,16 @@ export function handleOwnershipTransferred(event: OwnershipTransferred): void {}
 
 export function handleRemoveTokenFromBlacklist(
   event: RemoveTokenFromBlacklist
-): void {}
+): void {
+  let token = Token.load(event.params.token.toHex())
+  // create token if it doesn't exist
+  if (token == null) {
+    token = new Token(event.params.token.toHex())
+  }
+  // set token to blacklisted
+  token.isBlacklisted = false
+  token.save()
+}
 
 export function handleStake(event: Stake): void {}
 
