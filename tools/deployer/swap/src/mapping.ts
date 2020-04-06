@@ -26,7 +26,7 @@ export function handleAuthorizeSender(event: AuthorizeSender): void {
 
   let senderAddress = event.params.authorizedSender.toHex()
   let sender = User.load(senderAddress) 
-  // handle new creation of User
+  // handle new creation of User (sender)
   if (sender == null) {
     sender = new User(senderAddress)
     sender.authorizedSigners = new Array<string>()
@@ -43,7 +43,34 @@ export function handleAuthorizeSender(event: AuthorizeSender): void {
 }
 
 export function handleAuthorizeSigner(event: AuthorizeSigner): void {
-  log.info("handleAuthorizeSigner not implemented", [])
+  let authorizerAddress = event.params.authorizerAddress.toHex()
+  let authorizer = User.load(authorizerAddress)
+
+  // handle new creation 
+  if (authorizer == null) {
+    authorizer = new User(authorizerAddress)
+    authorizer.authorizedSigners = new Array<string>()
+    authorizer.authorizedSenders = new Array<string>()
+    authorizer.executedOrders = new Array<string>()
+    authorizer.cancelledNonces = new Array<BigInt>()
+  }
+
+  let signerAddress = event.params.authorizedSigner.toHex()
+  let signer = User.load(signerAddress) 
+  // handle new creation of User (signer)
+  if (signer == null) {
+    signer = new User(signerAddress)
+    signer.authorizedSigners = new Array<string>()
+    signer.authorizedSenders = new Array<string>()
+    signer.executedOrders = new Array<string>()
+    signer.cancelledNonces = new Array<BigInt>()
+    signer.save()
+  }
+
+  let authorizedSigners = authorizer.authorizedSigners
+  authorizedSigners.push(signer.id)
+  authorizer.authorizedSigners = authorizedSigners
+  authorizer.save()
 }
 
 export function handleCancel(event: Cancel): void {
