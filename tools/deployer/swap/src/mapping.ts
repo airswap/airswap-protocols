@@ -37,16 +37,20 @@ export function handleAuthorizeSender(event: AuthorizeSender): void {
   }
 
   let authorizedSenders = authorizer.authorizedSenders
-  authorizedSenders.push(sender.id)
-  authorizer.authorizedSenders = authorizedSenders
-  authorizer.save()
+  let currentIdx = authorizedSenders.indexOf(sender.id)
+  // only add if sender is not in the list
+  if (currentIdx == -1) {
+    authorizedSenders.push(sender.id)
+    authorizer.authorizedSenders = authorizedSenders
+    authorizer.save()
+  }
 }
 
 export function handleAuthorizeSigner(event: AuthorizeSigner): void {
   let authorizerAddress = event.params.authorizerAddress.toHex()
   let authorizer = User.load(authorizerAddress)
 
-  // handle new creation 
+  // handle new creation of User
   if (authorizer == null) {
     authorizer = new User(authorizerAddress)
     authorizer.authorizedSigners = new Array<string>()
@@ -68,9 +72,14 @@ export function handleAuthorizeSigner(event: AuthorizeSigner): void {
   }
 
   let authorizedSigners = authorizer.authorizedSigners
-  authorizedSigners.push(signer.id)
-  authorizer.authorizedSigners = authorizedSigners
-  authorizer.save()
+  let currentIdx = authorizedSigners.indexOf(signer.id)
+  // only add if signer is not in the list
+  if (currentIdx == -1) {
+    log.info("signer: {} not found for sender: {}, adding", [signer.id, authorizer.id])
+    authorizedSigners.push(signer.id)
+    authorizer.authorizedSigners = authorizedSigners
+    authorizer.save()
+  }
 }
 
 export function handleCancel(event: Cancel): void {
