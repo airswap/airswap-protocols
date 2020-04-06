@@ -16,7 +16,7 @@ export function handleAuthorizeSender(event: AuthorizeSender): void {
   let authorizer = User.load(authorizerAddress)
 
   // handle new creation of User
-  if (authorizer == null) {
+  if (!authorizer) {
     authorizer = new User(authorizerAddress)
     authorizer.authorizedSigners = new Array<string>()
     authorizer.authorizedSenders = new Array<string>()
@@ -27,7 +27,7 @@ export function handleAuthorizeSender(event: AuthorizeSender): void {
   let senderAddress = event.params.authorizedSender.toHex()
   let sender = User.load(senderAddress) 
   // handle new creation of User (sender)
-  if (sender == null) {
+  if (!sender) {
     sender = new User(senderAddress)
     sender.authorizedSigners = new Array<string>()
     sender.authorizedSenders = new Array<string>()
@@ -51,7 +51,7 @@ export function handleAuthorizeSigner(event: AuthorizeSigner): void {
   let authorizer = User.load(authorizerAddress)
 
   // handle new creation of User
-  if (authorizer == null) {
+  if (!authorizer) {
     authorizer = new User(authorizerAddress)
     authorizer.authorizedSigners = new Array<string>()
     authorizer.authorizedSenders = new Array<string>()
@@ -62,7 +62,7 @@ export function handleAuthorizeSigner(event: AuthorizeSigner): void {
   let signerAddress = event.params.authorizedSigner.toHex()
   let signer = User.load(signerAddress) 
   // handle new creation of User (signer)
-  if (signer == null) {
+  if (!signer) {
     signer = new User(signerAddress)
     signer.authorizedSigners = new Array<string>()
     signer.authorizedSenders = new Array<string>()
@@ -87,7 +87,7 @@ export function handleCancel(event: Cancel): void {
   let user = User.load(signer)
 
   // handle new creation of User
-  if (user == null) {
+  if (!user) {
     user = new User(signer)
     user.authorizedSigners = new Array<string>()
     user.authorizedSenders = new Array<string>()
@@ -107,7 +107,7 @@ export function handleCancelUpTo(event: CancelUpTo): void {
   let user = User.load(signer)
 
   // handle new creation of User
-  if (user == null) {
+  if (!user) {
     user = new User(signer)
     user.authorizedSigners = new Array<string>()
     user.authorizedSenders = new Array<string>()
@@ -132,7 +132,7 @@ export function handleRevokeSender(event: RevokeSender): void {
   let deauthorizer = User.load(deauthorizerAddress)
 
   // handle new creation of User
-  if (deauthorizer == null) {
+  if (!deauthorizer) {
     deauthorizer = new User(deauthorizerAddress)
     deauthorizer.authorizedSigners = new Array<string>()
     deauthorizer.authorizedSenders = new Array<string>()
@@ -143,7 +143,7 @@ export function handleRevokeSender(event: RevokeSender): void {
   let revokedSenderAddress = event.params.revokedSender.toHex()
   let revokedSender = User.load(revokedSenderAddress) 
   // handle new creation of User (revokedSender)
-  if (revokedSender == null) {
+  if (!revokedSender) {
     revokedSender = new User(revokedSenderAddress)
     revokedSender.authorizedSigners = new Array<string>()
     revokedSender.authorizedSenders = new Array<string>()
@@ -168,7 +168,7 @@ export function handleRevokeSigner(event: RevokeSigner): void {
   let deauthorizer = User.load(deauthorizerAddress)
 
   // handle new creation of User
-  if (deauthorizer == null) {
+  if (!deauthorizer) {
     deauthorizer = new User(deauthorizerAddress)
     deauthorizer.authorizedSigners = new Array<string>()
     deauthorizer.authorizedSenders = new Array<string>()
@@ -179,7 +179,7 @@ export function handleRevokeSigner(event: RevokeSigner): void {
   let revokedSignerAddress = event.params.revokedSigner.toHex()
   let revokedSigner = User.load(revokedSignerAddress) 
   // handle new creation of User (revokedSigner)
-  if (revokedSigner == null) {
+  if (!revokedSigner) {
     revokedSigner = new User(revokedSignerAddress)
     revokedSigner.authorizedSigners = new Array<string>()
     revokedSigner.authorizedSenders = new Array<string>()
