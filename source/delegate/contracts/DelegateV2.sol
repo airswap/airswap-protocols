@@ -227,28 +227,30 @@ contract DelegateV2 is IDelegateV2, Ownable {
 
   function getSenderSideQuote(
     uint256 signerAmount,
-    address signerToken,
-    address senderToken
+    address senderToken,
+    address signerToken
   ) external view returns (uint256 senderAmount) {
-    uint256 remainingSenderAmount = signerAmount;
+    uint256 remainingSignerAmount = signerAmount;
     uint256 ruleID = firstRuleID[senderToken][signerToken];
 
-    while (remainingSenderAmount > 0 && ruleID != NO_RULE) {
+    while (remainingSignerAmount > 0 && ruleID != NO_RULE) {
       // if the entirety of the current rule is needed, we add it and move to the next one
-      if (remainingSenderAmount >= rules[ruleID].signerAmount) {
+      if (remainingSignerAmount >= rules[ruleID].signerAmount) {
         senderAmount = senderAmount.add(rules[ruleID].senderAmount);
-        remainingSenderAmount -= rules[ruleID].signerAmount;
+        remainingSignerAmount -= rules[ruleID].signerAmount;
         ruleID = rules[ruleID].nextRuleID;
       } else {
         // only a fraction of this rule is needed so we calculate the sender amount
-        // neither divisions can have a denominator of 0. removing safemath preserves some calculation accuracy
-        uint256 senderFraction = rules[ruleID].senderAmount /
-          (rules[ruleID].signerAmount / remainingSenderAmount);
+        uint256 senderFraction = rules[ruleID]
+          .senderAmount
+          .mul(remainingSignerAmount)
+          .div(rules[ruleID].signerAmount);
+
         senderAmount = senderAmount.add(senderFraction);
-        remainingSenderAmount = 0;
+        remainingSignerAmount = 0;
       }
     }
-    // even if remainingSenderAmount > 0, we can still return the quote
+    // even if remainingSignerAmount > 0, we can still return the quote
     // this is because this quote is to the delegate's advantage
   }
 
@@ -389,9 +391,10 @@ contract DelegateV2 is IDelegateV2, Ownable {
         ruleID = rules[ruleID].nextRuleID;
       } else {
         // only a fraction of this rule is needed so we calculate the sender amount
-        // neither divisions can have a denominator of 0. removing safemath preserves some calculation accuracy
-        uint256 signerFraction = rules[ruleID].signerAmount /
-          (rules[ruleID].senderAmount / remainingSenderAmount);
+        uint256 signerFraction = rules[ruleID]
+          .signerAmount
+          .mul(remainingSenderAmount)
+          .div(rules[ruleID].senderAmount);
         signerAmount = signerAmount.add(signerFraction);
         remainingSenderAmount = 0;
       }

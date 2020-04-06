@@ -469,5 +469,107 @@ contract('DelegateV2 Unit Tests', async accounts => {
 
       equal(signerAmount, 0, 'signer amount should be 0')
     })
+
+    it('Should return a quote that just involves the smallest rule', async () => {
+      const signerAmount = await delegate.getSignerSideQuote(
+        700,
+        mockTokenOne,
+        mockTokenTwo
+      )
+
+      equal(
+        signerAmount.toNumber(),
+        (700 * 286) / 2002,
+        'signer amount incorrect'
+      )
+    })
+
+    it('Should return a quote that uses multiple rules', async () => {
+      // entirety of 3 rules, plus some more = 2002 (r3) + 300 (r1) + 1664 (r5) + 200 (1/5 r2)
+      const signerAmount = await delegate.getSignerSideQuote(
+        4166,
+        mockTokenOne,
+        mockTokenTwo
+      )
+
+      equal(
+        signerAmount.toNumber(),
+        286 + 50 + 320 + 200 / 5,
+        'signer amount incorrect'
+      )
+    })
+
+    it('Should allow a quote for the maximum sender amount', async () => {
+      // total sender amount in rules is 5416, and signer amounts is 956
+      const signerAmount = await delegate.getSignerSideQuote(
+        5416,
+        mockTokenOne,
+        mockTokenTwo
+      )
+
+      equal(signerAmount.toNumber(), 956, 'signer amount incorrect')
+    })
+
+    it('Should return 0 for a sender amount more than the total', async () => {
+      // total sender amount in rules is 5416
+      const signerAmount = await delegate.getSignerSideQuote(
+        5417,
+        mockTokenOne,
+        mockTokenTwo
+      )
+
+      equal(signerAmount.toNumber(), 0, 'signer amount should be 0')
+    })
+  })
+
+  describe('Test getSenderSideQuote', async () => {
+    beforeEach(async () => {
+      // add 5 rules - same rules as test above
+      await delegate.createRule(mockTokenOne, mockTokenTwo, 300, 50)
+      await delegate.createRule(mockTokenOne, mockTokenTwo, 1000, 200)
+      await delegate.createRule(mockTokenOne, mockTokenTwo, 2002, 286)
+      await delegate.createRule(mockTokenOne, mockTokenTwo, 450, 100)
+      await delegate.createRule(mockTokenOne, mockTokenTwo, 1664, 320)
+      // CORRECT RULE ORDER: 3, 1, 5, 2, 4
+    })
+
+    it('Should return 0 for a market with no rules', async () => {
+      const senderAmount = await delegate.getSenderSideQuote(
+        1,
+        mockTokenTwo,
+        mockTokenOne
+      )
+
+      equal(senderAmount, 0, 'sender amount should be 0')
+    })
+
+    it('Should return a quote that just involves the smallest rule', async () => {
+      const senderAmount = await delegate.getSenderSideQuote(
+        84,
+        mockTokenOne,
+        mockTokenTwo
+      )
+
+      equal(
+        senderAmount.toNumber(),
+        (84 * 2002) / 286,
+        'sender amount incorrect'
+      )
+    })
+
+    it('Should return a quote that uses multiple rules', async () => {
+      // entirety of 4 rules, plus some = 286 (r3) + 50 (r1) + 320 (r5) + 200 (r2) + 5 (r4)
+      const senderAmount = await delegate.getSenderSideQuote(
+        861,
+        mockTokenOne,
+        mockTokenTwo
+      )
+
+      equal(
+        senderAmount.toNumber(),
+        Math.floor(2002 + 300 + 1664 + 1000 + 450 / 20),
+        'sender amount incorrect'
+      )
+    })
   })
 })
