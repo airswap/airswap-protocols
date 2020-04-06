@@ -726,4 +726,58 @@ contract('DelegateV2 Unit Tests', async accounts => {
       )
     })
   })
+
+  describe('Test getLevels', async () => {
+    beforeEach(async () => {
+      // add 5 rules - same rules as test above
+      await delegate.createRule(mockTokenOneAddr, mockTokenTwoAddr, 300, 50)
+      await delegate.createRule(mockTokenOneAddr, mockTokenTwoAddr, 1000, 200)
+      await delegate.createRule(mockTokenOneAddr, mockTokenTwoAddr, 2002, 286)
+      await delegate.createRule(mockTokenOneAddr, mockTokenTwoAddr, 450, 100)
+      await delegate.createRule(mockTokenOneAddr, mockTokenTwoAddr, 1664, 320)
+      // CORRECT RULE ORDER: 3, 1, 5, 2, 4
+    })
+
+    it('Should return no levels if none exist', async () => {
+      const result = await delegate.getLevels(
+        mockTokenTwoAddr,
+        mockTokenOneAddr
+      )
+
+      equal(
+        result['senderAmounts'].length,
+        0,
+        'There should be no sender amounts'
+      )
+      equal(
+        result['signerAmounts'].length,
+        0,
+        'There should be no signer amounts'
+      )
+    })
+
+    it('Should return all levels in order', async () => {
+      const result = await delegate.getLevels(
+        mockTokenOneAddr,
+        mockTokenTwoAddr
+      )
+      const senderAmounts = result['senderAmounts'].map(x => x.toNumber())
+      const signerAmounts = result['signerAmounts'].map(x => x.toNumber())
+      const expectedSenderAmounts = [2002, 300, 1664, 1000, 450]
+      const expectedSignerAmounts = [286, 50, 320, 200, 100]
+
+      for (let i = 0; i < expectedSenderAmounts.length; i++) {
+        equal(
+          senderAmounts[i],
+          expectedSenderAmounts[i],
+          'Sender amount incorrect'
+        )
+        equal(
+          signerAmounts[i],
+          expectedSignerAmounts[i],
+          'Signer amount incorrect'
+        )
+      }
+    })
+  })
 })
