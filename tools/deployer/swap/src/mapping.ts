@@ -200,5 +200,24 @@ export function handleRevokeSigner(event: RevokeSigner): void {
 }
 
 export function handleSwap(event: Swap): void {
-  log.info("handleSwap not implemented", [])
+  let executedOrder = new ExecutedOrder(event.transaction.hash.toHex())
+  executedOrder.nonce = event.params.nonce
+  executedOrder.expiry = event.params.timestamp
+
+  executedOrder.signer = event.params.signerWallet.toHex()
+  executedOrder.signerAmount = event.params.signerAmount
+  executedOrder.signerTokenId = event.params.signerId
+  executedOrder.signerTokenAddress = event.params.signerToken
+
+  executedOrder.sender = event.params.senderWallet.toHex()
+  executedOrder.senderAmount = event.params.senderAmount
+  executedOrder.senderTokenId = event.params.senderId
+  executedOrder.senderTokenAddress = event.params.senderToken
+
+  executedOrder.affiliate = event.params.affiliateWallet.toHex()
+  executedOrder.affiliateAmount = event.params.affiliateAmount
+  executedOrder.affiliateTokenId = event.params.affiliateId
+  executedOrder.affiliateTokenAddress = event.params.affiliateToken
+
+  executedOrder.save()
 }

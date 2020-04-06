@@ -109,22 +109,38 @@ export class ExecutedOrder extends Entity {
     this.set("id", Value.fromString(value));
   }
 
-  get nonce(): i32 {
+  get nonce(): BigInt | null {
     let value = this.get("nonce");
-    return value.toI32();
+    if (value === null) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
   }
 
-  set nonce(value: i32) {
-    this.set("nonce", Value.fromI32(value));
+  set nonce(value: BigInt | null) {
+    if (value === null) {
+      this.unset("nonce");
+    } else {
+      this.set("nonce", Value.fromBigInt(value as BigInt));
+    }
   }
 
-  get expiry(): i32 {
+  get expiry(): BigInt | null {
     let value = this.get("expiry");
-    return value.toI32();
+    if (value === null) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
   }
 
-  set expiry(value: i32) {
-    this.set("expiry", Value.fromI32(value));
+  set expiry(value: BigInt | null) {
+    if (value === null) {
+      this.unset("expiry");
+    } else {
+      this.set("expiry", Value.fromBigInt(value as BigInt));
+    }
   }
 
   get from(): Bytes | null {
@@ -161,13 +177,21 @@ export class ExecutedOrder extends Entity {
     }
   }
 
-  get value(): i32 {
+  get value(): BigInt | null {
     let value = this.get("value");
-    return value.toI32();
+    if (value === null) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
   }
 
-  set value(value: i32) {
-    this.set("value", Value.fromI32(value));
+  set value(value: BigInt | null) {
+    if (value === null) {
+      this.unset("value");
+    } else {
+      this.set("value", Value.fromBigInt(value as BigInt));
+    }
   }
 
   get signer(): string | null {
@@ -187,29 +211,37 @@ export class ExecutedOrder extends Entity {
     }
   }
 
-  get signerAmount(): i32 {
+  get signerAmount(): BigInt | null {
     let value = this.get("signerAmount");
-    return value.toI32();
+    if (value === null) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
   }
 
-  set signerAmount(value: i32) {
-    this.set("signerAmount", Value.fromI32(value));
+  set signerAmount(value: BigInt | null) {
+    if (value === null) {
+      this.unset("signerAmount");
+    } else {
+      this.set("signerAmount", Value.fromBigInt(value as BigInt));
+    }
   }
 
-  get signerTokenId(): Bytes | null {
+  get signerTokenId(): BigInt | null {
     let value = this.get("signerTokenId");
     if (value === null) {
       return null;
     } else {
-      return value.toBytes();
+      return value.toBigInt();
     }
   }
 
-  set signerTokenId(value: Bytes | null) {
+  set signerTokenId(value: BigInt | null) {
     if (value === null) {
       this.unset("signerTokenId");
     } else {
-      this.set("signerTokenId", Value.fromBytes(value as Bytes));
+      this.set("signerTokenId", Value.fromBigInt(value as BigInt));
     }
   }
 
@@ -247,29 +279,37 @@ export class ExecutedOrder extends Entity {
     }
   }
 
-  get senderAmount(): i32 {
+  get senderAmount(): BigInt | null {
     let value = this.get("senderAmount");
-    return value.toI32();
+    if (value === null) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
   }
 
-  set senderAmount(value: i32) {
-    this.set("senderAmount", Value.fromI32(value));
+  set senderAmount(value: BigInt | null) {
+    if (value === null) {
+      this.unset("senderAmount");
+    } else {
+      this.set("senderAmount", Value.fromBigInt(value as BigInt));
+    }
   }
 
-  get senderTokenId(): Bytes | null {
+  get senderTokenId(): BigInt | null {
     let value = this.get("senderTokenId");
     if (value === null) {
       return null;
     } else {
-      return value.toBytes();
+      return value.toBigInt();
     }
   }
 
-  set senderTokenId(value: Bytes | null) {
+  set senderTokenId(value: BigInt | null) {
     if (value === null) {
       this.unset("senderTokenId");
     } else {
-      this.set("senderTokenId", Value.fromBytes(value as Bytes));
+      this.set("senderTokenId", Value.fromBigInt(value as BigInt));
     }
   }
 
@@ -307,29 +347,37 @@ export class ExecutedOrder extends Entity {
     }
   }
 
-  get affiliateAmount(): i32 {
+  get affiliateAmount(): BigInt | null {
     let value = this.get("affiliateAmount");
-    return value.toI32();
-  }
-
-  set affiliateAmount(value: i32) {
-    this.set("affiliateAmount", Value.fromI32(value));
-  }
-
-  get affiliateTokenType(): Bytes | null {
-    let value = this.get("affiliateTokenType");
     if (value === null) {
       return null;
     } else {
-      return value.toBytes();
+      return value.toBigInt();
     }
   }
 
-  set affiliateTokenType(value: Bytes | null) {
+  set affiliateAmount(value: BigInt | null) {
     if (value === null) {
-      this.unset("affiliateTokenType");
+      this.unset("affiliateAmount");
     } else {
-      this.set("affiliateTokenType", Value.fromBytes(value as Bytes));
+      this.set("affiliateAmount", Value.fromBigInt(value as BigInt));
+    }
+  }
+
+  get affiliateTokenId(): BigInt | null {
+    let value = this.get("affiliateTokenId");
+    if (value === null) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set affiliateTokenId(value: BigInt | null) {
+    if (value === null) {
+      this.unset("affiliateTokenId");
+    } else {
+      this.set("affiliateTokenId", Value.fromBigInt(value as BigInt));
     }
   }
 

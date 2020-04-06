@@ -10,25 +10,25 @@ type ExecutedOrder @entity {
   id: ID! # combination of user and nonce? Transaction hash? Hash entire object?
   # trx can have multiple orders, need to differentiate
 
-  nonce: Int # order nonce for a user
-  expiry: Int
+  nonce: BigInt # order nonce for a user
+  expiry: BigInt
 
   from: Bytes # address of the originator of the transaction
   to: Bytes # who the originator sent the transaction to
-  value: Int # value sent with the transaction
+  value: BigInt # value sent with the transaction
 
   signer: User
-  signerAmount: Int
-  signerTokenId: Bytes
+  signerAmount: BigInt
+  signerTokenId: BigInt
   signerTokenAddress: Bytes
 
   sender: User
-  senderAmount: Int
-  senderTokenId: Bytes
+  senderAmount: BigInt
+  senderTokenId: BigInt
   senderTokenAddress: Bytes
 
   affiliate: User
-  affiliateAmount: Int
-  affiliateTokenType: Bytes
+  affiliateAmount: BigInt
+  affiliateTokenId: BigInt
   affiliateTokenAddress: Bytes
 }
