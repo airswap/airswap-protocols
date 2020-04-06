@@ -7,6 +7,7 @@ const FungibleToken = artifacts.require('FungibleToken')
 
 const { ADDRESS_ZERO } = require('@airswap/constants')
 const { emptySignature } = require('@airswap/types')
+const { createOrder, signOrder } = require('@airswap/utils')
 const { equal, emitted, reverted } = require('@airswap/test-utils').assert
 const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
 
@@ -22,6 +23,7 @@ contract('DelegateV2 Unit Tests', async accounts => {
 
   const NO_RULE = 0
 
+  let swap_swap
   let mockSwap
   let swapAddress
   let mockIndexer
@@ -444,6 +446,28 @@ contract('DelegateV2 Unit Tests', async accounts => {
         mockTokenTwo
       )
       equal(activeRules, correctIDs.length - 1, 'Total active rules incorrect')
+    })
+  })
+
+  describe('Test getSignerSideQuote', async () => {
+    beforeEach(async () => {
+      // add 5 rules - same rules as test above
+      await delegate.createRule(mockTokenOne, mockTokenTwo, 300, 50)
+      await delegate.createRule(mockTokenOne, mockTokenTwo, 1000, 200)
+      await delegate.createRule(mockTokenOne, mockTokenTwo, 2002, 286)
+      await delegate.createRule(mockTokenOne, mockTokenTwo, 450, 100)
+      await delegate.createRule(mockTokenOne, mockTokenTwo, 1664, 320)
+      // CORRECT RULE ORDER: 3, 1, 5, 2, 4
+    })
+
+    it('Should return 0 for a market with no rules', async () => {
+      const signerAmount = await delegate.getSignerSideQuote(
+        1,
+        mockTokenTwo,
+        mockTokenOne
+      )
+
+      equal(signerAmount, 0, 'signer amount should be 0')
     })
   })
 })
