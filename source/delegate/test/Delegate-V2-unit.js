@@ -520,7 +520,7 @@ contract('DelegateV2 Unit Tests', async accounts => {
     })
 
     it('Should return 0 for a market with no rules', async () => {
-      const signerAmount = await delegate.getSignerSideQuote(
+      const signerAmount = await delegate.getSignerSideQuote.call(
         1,
         mockTokenTwoAddr,
         mockTokenOneAddr
@@ -530,7 +530,7 @@ contract('DelegateV2 Unit Tests', async accounts => {
     })
 
     it('Should return a quote that just involves the smallest rule', async () => {
-      const signerAmount = await delegate.getSignerSideQuote(
+      const signerAmount = await delegate.getSignerSideQuote.call(
         700,
         mockTokenOneAddr,
         mockTokenTwoAddr
@@ -545,7 +545,7 @@ contract('DelegateV2 Unit Tests', async accounts => {
 
     it('Should return a quote that uses multiple rules', async () => {
       // entirety of 3 rules, plus some more = 2002 (r3) + 300 (r1) + 1664 (r5) + 200 (1/5 r2)
-      const signerAmount = await delegate.getSignerSideQuote(
+      const signerAmount = await delegate.getSignerSideQuote.call(
         4166,
         mockTokenOneAddr,
         mockTokenTwoAddr
@@ -560,7 +560,7 @@ contract('DelegateV2 Unit Tests', async accounts => {
 
     it('Should allow a quote for the maximum sender amount', async () => {
       // total sender amount in rules is 5416, and signer amounts is 956
-      const signerAmount = await delegate.getSignerSideQuote(
+      const signerAmount = await delegate.getSignerSideQuote.call(
         5416,
         mockTokenOneAddr,
         mockTokenTwoAddr
@@ -571,7 +571,7 @@ contract('DelegateV2 Unit Tests', async accounts => {
 
     it('Should return 0 for a sender amount more than the total', async () => {
       // total sender amount in rules is 5416
-      const signerAmount = await delegate.getSignerSideQuote(
+      const signerAmount = await delegate.getSignerSideQuote.call(
         5417,
         mockTokenOneAddr,
         mockTokenTwoAddr
@@ -593,7 +593,7 @@ contract('DelegateV2 Unit Tests', async accounts => {
     })
 
     it('Should return 0 for a market with no rules', async () => {
-      const senderAmount = await delegate.getSenderSideQuote(
+      const senderAmount = await delegate.getSenderSideQuote.call(
         1,
         mockTokenTwoAddr,
         mockTokenOneAddr
@@ -603,7 +603,7 @@ contract('DelegateV2 Unit Tests', async accounts => {
     })
 
     it('Should return a quote that just involves the smallest rule', async () => {
-      const senderAmount = await delegate.getSenderSideQuote(
+      const senderAmount = await delegate.getSenderSideQuote.call(
         84,
         mockTokenOneAddr,
         mockTokenTwoAddr
@@ -618,7 +618,7 @@ contract('DelegateV2 Unit Tests', async accounts => {
 
     it('Should return a quote that uses multiple rules', async () => {
       // entirety of 4 rules, plus some = 286 (r3) + 50 (r1) + 320 (r5) + 200 (r2) + 5 (r4)
-      const senderAmount = await delegate.getSenderSideQuote(
+      const senderAmount = await delegate.getSenderSideQuote.call(
         861,
         mockTokenOneAddr,
         mockTokenTwoAddr
@@ -633,7 +633,7 @@ contract('DelegateV2 Unit Tests', async accounts => {
 
     it('Should allow a quote for the maximum signer amount', async () => {
       // total sender amount in rules is 5416, and signer amounts is 956
-      const senderAmount = await delegate.getSenderSideQuote(
+      const senderAmount = await delegate.getSenderSideQuote.call(
         956,
         mockTokenOneAddr,
         mockTokenTwoAddr
@@ -644,7 +644,7 @@ contract('DelegateV2 Unit Tests', async accounts => {
 
     it('Should return max sender amount for even larger signer amounts', async () => {
       // total sender amount in rules is 5416, and signer amounts is 956
-      const senderAmount = await delegate.getSenderSideQuote(
+      const senderAmount = await delegate.getSenderSideQuote.call(
         1000, // bigger than the total of the rules
         mockTokenOneAddr,
         mockTokenTwoAddr
@@ -666,7 +666,7 @@ contract('DelegateV2 Unit Tests', async accounts => {
       await mockTokenOne.givenMethodReturnUint(mockToken_balanceOf, 0)
       await mockTokenOne.givenMethodReturnUint(mockToken_allowance, 0)
 
-      const result = await delegate.getMaxQuote(
+      const result = await delegate.getMaxQuote.call(
         mockTokenOneAddr,
         mockTokenTwoAddr
       )
@@ -681,7 +681,7 @@ contract('DelegateV2 Unit Tests', async accounts => {
       await mockTokenOne.givenMethodReturnUint(mockToken_balanceOf, 1000000)
       await mockTokenOne.givenMethodReturnUint(mockToken_allowance, 1000000)
 
-      const result = await delegate.getMaxQuote(
+      const result = await delegate.getMaxQuote.call(
         mockTokenOneAddr,
         mockTokenTwoAddr
       )
@@ -696,7 +696,7 @@ contract('DelegateV2 Unit Tests', async accounts => {
       await mockTokenOne.givenMethodReturnUint(mockToken_balanceOf, 1000)
       await mockTokenOne.givenMethodReturnUint(mockToken_allowance, 1000000)
 
-      const result = await delegate.getMaxQuote(
+      const result = await delegate.getMaxQuote.call(
         mockTokenOneAddr,
         mockTokenTwoAddr
       )
@@ -711,7 +711,7 @@ contract('DelegateV2 Unit Tests', async accounts => {
       await mockTokenOne.givenMethodReturnUint(mockToken_balanceOf, 1000000)
       await mockTokenOne.givenMethodReturnUint(mockToken_allowance, 504)
 
-      const result = await delegate.getMaxQuote(
+      const result = await delegate.getMaxQuote.call(
         mockTokenOneAddr,
         mockTokenTwoAddr
       )
@@ -779,5 +779,9 @@ contract('DelegateV2 Unit Tests', async accounts => {
         )
       }
     })
+  })
+
+  describe('Test provideOrder', async () => {
+    it('Should return all levels in order')
   })
 })
