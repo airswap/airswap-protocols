@@ -5,17 +5,24 @@ const Indexer = artifacts.require('Indexer')
 const MockContract = artifacts.require('MockContract')
 const FungibleToken = artifacts.require('FungibleToken')
 
+const ethers = require('ethers')
 const { ADDRESS_ZERO } = require('@airswap/constants')
 const { emptySignature } = require('@airswap/types')
 const { createOrder, signOrder } = require('@airswap/utils')
 const { equal, emitted, reverted } = require('@airswap/test-utils').assert
 const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
+const { GANACHE_PROVIDER } = require('@airswap/test-utils').constants
 
 contract('DelegateV2 Unit Tests', async accounts => {
   const owner = accounts[0]
   const tradeWallet = accounts[1]
   const mockRegistry = accounts[2]
   const notOwner = accounts[3]
+  const aliceAddress = accounts[4]
+
+  const aliceSigner = new ethers.providers.JsonRpcProvider(
+    GANACHE_PROVIDER
+  ).getSigner(aliceAddress)
 
   const PROTOCOL = '0x0006'
 
@@ -31,10 +38,10 @@ contract('DelegateV2 Unit Tests', async accounts => {
   let mockToken_approve
   let mockToken_allowance
   let mockToken_balanceOf
-  let mockTokenOne
-  let mockTokenOneAddr
-  let mockTokenTwo
-  let mockTokenTwoAddr
+  let SENDER_TOKEN
+  let SENDER_TOKEN_ADDR
+  let SIGNER_TOKEN
+  let SIGNER_TOKEN_ADDR
 
   let delegate
 
@@ -75,12 +82,12 @@ contract('DelegateV2 Unit Tests', async accounts => {
 
   async function setupMockTokens() {
     mockStakingToken = await MockContract.new()
-    mockTokenOne = await MockContract.new()
-    mockTokenTwo = await MockContract.new()
+    SENDER_TOKEN = await MockContract.new()
+    SIGNER_TOKEN = await MockContract.new()
     mockFungibleTokenTemplate = await FungibleToken.new()
 
-    mockTokenOneAddr = mockTokenOne.address
-    mockTokenTwoAddr = mockTokenTwo.address
+    SENDER_TOKEN_ADDR = SENDER_TOKEN.address
+    SIGNER_TOKEN_ADDR = SIGNER_TOKEN.address
 
     mockToken_approve = await mockFungibleTokenTemplate.contract.methods
       .approve(ADDRESS_ZERO, 0)
@@ -226,20 +233,20 @@ contract('DelegateV2 Unit Tests', async accounts => {
   describe('Test createRule', async () => {
     it('Should not create a rule with a 0 amount', async () => {
       await reverted(
-        delegate.createRule(mockTokenOneAddr, mockTokenTwoAddr, 0, 400),
+        delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 0, 400),
         'AMOUNTS_CANNOT_BE_0'
       )
 
       await reverted(
-        delegate.createRule(mockTokenOneAddr, mockTokenTwoAddr, 400, 0),
+        delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 400, 0),
         'AMOUNTS_CANNOT_BE_0'
       )
     })
 
     it('Should successfully create a rule and update the contract', async () => {
       const tx = await delegate.createRule(
-        mockTokenOneAddr,
-        mockTokenTwoAddr,
+        SENDER_TOKEN_ADDR,
+        SIGNER_TOKEN_ADDR,
         1000,
         200
       )
@@ -249,12 +256,12 @@ contract('DelegateV2 Unit Tests', async accounts => {
 
       equal(
         rule['senderToken'],
-        mockTokenOneAddr,
+        SENDER_TOKEN_ADDR,
         'sender token incorrectly set'
       )
       equal(
         rule['signerToken'],
-        mockTokenTwoAddr,
+        SIGNER_TOKEN_ADDR,
         'signer token incorrectly set'
       )
       equal(
@@ -272,13 +279,13 @@ contract('DelegateV2 Unit Tests', async accounts => {
 
       // check the token pair's list was updated correctly
       const ruleID = await delegate.firstRuleID.call(
-        mockTokenOneAddr,
-        mockTokenTwoAddr
+        SENDER_TOKEN_ADDR,
+        SIGNER_TOKEN_ADDR
       )
       equal(ruleID, 1, 'Link list first rule ID incorrect')
       const activeRules = await delegate.totalActiveRules.call(
-        mockTokenOneAddr,
-        mockTokenTwoAddr
+        SENDER_TOKEN_ADDR,
+        SIGNER_TOKEN_ADDR
       )
       equal(activeRules, 1, 'Total active rules incorrect')
 
@@ -291,8 +298,8 @@ contract('DelegateV2 Unit Tests', async accounts => {
         return (
           e.owner === owner &&
           e.ruleID.toNumber() === 1 &&
-          e.senderToken === mockTokenOneAddr &&
-          e.signerToken === mockTokenTwoAddr &&
+          e.senderToken === SENDER_TOKEN_ADDR &&
+          e.signerToken === SIGNER_TOKEN_ADDR &&
           e.senderAmount.toNumber() === 1000 &&
           e.signerAmount.toNumber() === 200
         )
@@ -303,8 +310,8 @@ contract('DelegateV2 Unit Tests', async accounts => {
       // insert the first rule, as in the previous test
       // in this rule, every 1 signerToken gets 5 senderTokens
       let tx = await delegate.createRule(
-        mockTokenOneAddr,
-        mockTokenTwoAddr,
+        SENDER_TOKEN_ADDR,
+        SIGNER_TOKEN_ADDR,
         1000,
         200
       )
@@ -315,8 +322,8 @@ contract('DelegateV2 Unit Tests', async accounts => {
       // in this rule every 1 signerToken gets 6 senderTokens
       // this rule therefore goes BEFORE the other rule in the list
       tx = await delegate.createRule(
-        mockTokenOneAddr,
-        mockTokenTwoAddr,
+        SENDER_TOKEN_ADDR,
+        SIGNER_TOKEN_ADDR,
         300,
         50
       )
@@ -326,8 +333,8 @@ contract('DelegateV2 Unit Tests', async accounts => {
         return (
           e.owner === owner &&
           e.ruleID.toNumber() === 2 &&
-          e.senderToken === mockTokenOneAddr &&
-          e.signerToken === mockTokenTwoAddr &&
+          e.senderToken === SENDER_TOKEN_ADDR &&
+          e.signerToken === SIGNER_TOKEN_ADDR &&
           e.senderAmount.toNumber() === 300 &&
           e.signerAmount.toNumber() === 50
         )
@@ -343,13 +350,13 @@ contract('DelegateV2 Unit Tests', async accounts => {
 
       // check that rule 2 is now the first rule in the market's list
       const ruleID = await delegate.firstRuleID.call(
-        mockTokenOneAddr,
-        mockTokenTwoAddr
+        SENDER_TOKEN_ADDR,
+        SIGNER_TOKEN_ADDR
       )
       equal(ruleID, 2, 'Link list first rule ID incorrect')
       const activeRules = await delegate.totalActiveRules.call(
-        mockTokenOneAddr,
-        mockTokenTwoAddr
+        SENDER_TOKEN_ADDR,
+        SIGNER_TOKEN_ADDR
       )
       equal(activeRules, 2, 'Total active rules incorrect')
 
@@ -361,8 +368,8 @@ contract('DelegateV2 Unit Tests', async accounts => {
     it('Should successfully insert 5 rules to the same market', async () => {
       // RULE 1: in this rule every 1 signerToken gets 6 senderTokens
       let tx = await delegate.createRule(
-        mockTokenOneAddr,
-        mockTokenTwoAddr,
+        SENDER_TOKEN_ADDR,
+        SIGNER_TOKEN_ADDR,
         300,
         50
       )
@@ -370,8 +377,8 @@ contract('DelegateV2 Unit Tests', async accounts => {
 
       // RULE 2: in this rule, every 1 signerToken gets 5 senderTokens
       tx = await delegate.createRule(
-        mockTokenOneAddr,
-        mockTokenTwoAddr,
+        SENDER_TOKEN_ADDR,
+        SIGNER_TOKEN_ADDR,
         1000,
         200
       )
@@ -379,8 +386,8 @@ contract('DelegateV2 Unit Tests', async accounts => {
 
       // RULE 3: in this rule, every 1 signerToken gets 7 senderTokens
       tx = await delegate.createRule(
-        mockTokenOneAddr,
-        mockTokenTwoAddr,
+        SENDER_TOKEN_ADDR,
+        SIGNER_TOKEN_ADDR,
         2002,
         286
       )
@@ -388,8 +395,8 @@ contract('DelegateV2 Unit Tests', async accounts => {
 
       // RULE 4: in this rule, every 1 signerToken gets 4.5 senderTokens
       tx = await delegate.createRule(
-        mockTokenOneAddr,
-        mockTokenTwoAddr,
+        SENDER_TOKEN_ADDR,
+        SIGNER_TOKEN_ADDR,
         450,
         100
       )
@@ -397,19 +404,25 @@ contract('DelegateV2 Unit Tests', async accounts => {
 
       // RULE 5: in this rule, every 1 signerToken gets 5.2 senderTokens
       tx = await delegate.createRule(
-        mockTokenOneAddr,
-        mockTokenTwoAddr,
+        SENDER_TOKEN_ADDR,
+        SIGNER_TOKEN_ADDR,
         1664,
         320
       )
       emitted(tx, 'CreateRule')
 
       // CORRECT RULE ORDER: 3, 1, 5, 2, 4
-      await checkLinkedList(mockTokenOneAddr, mockTokenTwoAddr, [3, 1, 5, 2, 4])
+      await checkLinkedList(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, [
+        3,
+        1,
+        5,
+        2,
+        4,
+      ])
 
       const activeRules = await delegate.totalActiveRules.call(
-        mockTokenOneAddr,
-        mockTokenTwoAddr
+        SENDER_TOKEN_ADDR,
+        SIGNER_TOKEN_ADDR
       )
       equal(activeRules, 5, 'Total active rules incorrect')
 
@@ -426,11 +439,11 @@ contract('DelegateV2 Unit Tests', async accounts => {
 
     beforeEach(async () => {
       // add 5 rules - same rules as test above
-      await delegate.createRule(mockTokenOneAddr, mockTokenTwoAddr, 300, 50)
-      await delegate.createRule(mockTokenOneAddr, mockTokenTwoAddr, 1000, 200)
-      await delegate.createRule(mockTokenOneAddr, mockTokenTwoAddr, 2002, 286)
-      await delegate.createRule(mockTokenOneAddr, mockTokenTwoAddr, 450, 100)
-      await delegate.createRule(mockTokenOneAddr, mockTokenTwoAddr, 1664, 320)
+      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 300, 50)
+      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 1000, 200)
+      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 2002, 286)
+      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 450, 100)
+      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 1664, 320)
       // CORRECT RULE ORDER: 3, 1, 5, 2, 4
     })
 
@@ -453,14 +466,14 @@ contract('DelegateV2 Unit Tests', async accounts => {
       })
 
       await checkLinkedList(
-        mockTokenOneAddr,
-        mockTokenTwoAddr,
+        SENDER_TOKEN_ADDR,
+        SIGNER_TOKEN_ADDR,
         correctIDs.slice(0, correctIDs.length - 1)
       )
 
       const activeRules = await delegate.totalActiveRules.call(
-        mockTokenOneAddr,
-        mockTokenTwoAddr
+        SENDER_TOKEN_ADDR,
+        SIGNER_TOKEN_ADDR
       )
       equal(activeRules, correctIDs.length - 1, 'Total active rules incorrect')
     })
@@ -474,14 +487,14 @@ contract('DelegateV2 Unit Tests', async accounts => {
       })
 
       await checkLinkedList(
-        mockTokenOneAddr,
-        mockTokenTwoAddr,
+        SENDER_TOKEN_ADDR,
+        SIGNER_TOKEN_ADDR,
         correctIDs.slice(1)
       )
 
       const activeRules = await delegate.totalActiveRules.call(
-        mockTokenOneAddr,
-        mockTokenTwoAddr
+        SENDER_TOKEN_ADDR,
+        SIGNER_TOKEN_ADDR
       )
       equal(activeRules, correctIDs.length - 1, 'Total active rules incorrect')
     })
@@ -495,14 +508,14 @@ contract('DelegateV2 Unit Tests', async accounts => {
       })
 
       await checkLinkedList(
-        mockTokenOneAddr,
-        mockTokenTwoAddr,
+        SENDER_TOKEN_ADDR,
+        SIGNER_TOKEN_ADDR,
         correctIDs.slice(0, 2).concat(correctIDs.slice(3))
       )
 
       const activeRules = await delegate.totalActiveRules.call(
-        mockTokenOneAddr,
-        mockTokenTwoAddr
+        SENDER_TOKEN_ADDR,
+        SIGNER_TOKEN_ADDR
       )
       equal(activeRules, correctIDs.length - 1, 'Total active rules incorrect')
     })
@@ -511,19 +524,19 @@ contract('DelegateV2 Unit Tests', async accounts => {
   describe('Test getSignerSideQuote', async () => {
     beforeEach(async () => {
       // add 5 rules - same rules as test above
-      await delegate.createRule(mockTokenOneAddr, mockTokenTwoAddr, 300, 50)
-      await delegate.createRule(mockTokenOneAddr, mockTokenTwoAddr, 1000, 200)
-      await delegate.createRule(mockTokenOneAddr, mockTokenTwoAddr, 2002, 286)
-      await delegate.createRule(mockTokenOneAddr, mockTokenTwoAddr, 450, 100)
-      await delegate.createRule(mockTokenOneAddr, mockTokenTwoAddr, 1664, 320)
+      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 300, 50)
+      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 1000, 200)
+      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 2002, 286)
+      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 450, 100)
+      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 1664, 320)
       // CORRECT RULE ORDER: 3, 1, 5, 2, 4
     })
 
     it('Should return 0 for a market with no rules', async () => {
       const signerAmount = await delegate.getSignerSideQuote.call(
         1,
-        mockTokenTwoAddr,
-        mockTokenOneAddr
+        SIGNER_TOKEN_ADDR,
+        SENDER_TOKEN_ADDR
       )
 
       equal(signerAmount, 0, 'signer amount should be 0')
@@ -532,8 +545,8 @@ contract('DelegateV2 Unit Tests', async accounts => {
     it('Should return a quote that just involves the smallest rule', async () => {
       const signerAmount = await delegate.getSignerSideQuote.call(
         700,
-        mockTokenOneAddr,
-        mockTokenTwoAddr
+        SENDER_TOKEN_ADDR,
+        SIGNER_TOKEN_ADDR
       )
 
       equal(
@@ -547,8 +560,8 @@ contract('DelegateV2 Unit Tests', async accounts => {
       // entirety of 3 rules, plus some more = 2002 (r3) + 300 (r1) + 1664 (r5) + 200 (1/5 r2)
       const signerAmount = await delegate.getSignerSideQuote.call(
         4166,
-        mockTokenOneAddr,
-        mockTokenTwoAddr
+        SENDER_TOKEN_ADDR,
+        SIGNER_TOKEN_ADDR
       )
 
       equal(
@@ -562,8 +575,8 @@ contract('DelegateV2 Unit Tests', async accounts => {
       // total sender amount in rules is 5416, and signer amounts is 956
       const signerAmount = await delegate.getSignerSideQuote.call(
         5416,
-        mockTokenOneAddr,
-        mockTokenTwoAddr
+        SENDER_TOKEN_ADDR,
+        SIGNER_TOKEN_ADDR
       )
 
       equal(signerAmount.toNumber(), 956, 'signer amount incorrect')
@@ -573,8 +586,8 @@ contract('DelegateV2 Unit Tests', async accounts => {
       // total sender amount in rules is 5416
       const signerAmount = await delegate.getSignerSideQuote.call(
         5417,
-        mockTokenOneAddr,
-        mockTokenTwoAddr
+        SENDER_TOKEN_ADDR,
+        SIGNER_TOKEN_ADDR
       )
 
       equal(signerAmount.toNumber(), 0, 'signer amount should be 0')
@@ -584,19 +597,19 @@ contract('DelegateV2 Unit Tests', async accounts => {
   describe('Test getSenderSideQuote', async () => {
     beforeEach(async () => {
       // add 5 rules - same rules as test above
-      await delegate.createRule(mockTokenOneAddr, mockTokenTwoAddr, 300, 50)
-      await delegate.createRule(mockTokenOneAddr, mockTokenTwoAddr, 1000, 200)
-      await delegate.createRule(mockTokenOneAddr, mockTokenTwoAddr, 2002, 286)
-      await delegate.createRule(mockTokenOneAddr, mockTokenTwoAddr, 450, 100)
-      await delegate.createRule(mockTokenOneAddr, mockTokenTwoAddr, 1664, 320)
+      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 300, 50)
+      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 1000, 200)
+      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 2002, 286)
+      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 450, 100)
+      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 1664, 320)
       // CORRECT RULE ORDER: 3, 1, 5, 2, 4
     })
 
     it('Should return 0 for a market with no rules', async () => {
       const senderAmount = await delegate.getSenderSideQuote.call(
         1,
-        mockTokenTwoAddr,
-        mockTokenOneAddr
+        SIGNER_TOKEN_ADDR,
+        SENDER_TOKEN_ADDR
       )
 
       equal(senderAmount, 0, 'sender amount should be 0')
@@ -605,8 +618,8 @@ contract('DelegateV2 Unit Tests', async accounts => {
     it('Should return a quote that just involves the smallest rule', async () => {
       const senderAmount = await delegate.getSenderSideQuote.call(
         84,
-        mockTokenOneAddr,
-        mockTokenTwoAddr
+        SENDER_TOKEN_ADDR,
+        SIGNER_TOKEN_ADDR
       )
 
       equal(
@@ -620,8 +633,8 @@ contract('DelegateV2 Unit Tests', async accounts => {
       // entirety of 4 rules, plus some = 286 (r3) + 50 (r1) + 320 (r5) + 200 (r2) + 5 (r4)
       const senderAmount = await delegate.getSenderSideQuote.call(
         861,
-        mockTokenOneAddr,
-        mockTokenTwoAddr
+        SENDER_TOKEN_ADDR,
+        SIGNER_TOKEN_ADDR
       )
 
       equal(
@@ -635,8 +648,8 @@ contract('DelegateV2 Unit Tests', async accounts => {
       // total sender amount in rules is 5416, and signer amounts is 956
       const senderAmount = await delegate.getSenderSideQuote.call(
         956,
-        mockTokenOneAddr,
-        mockTokenTwoAddr
+        SENDER_TOKEN_ADDR,
+        SIGNER_TOKEN_ADDR
       )
 
       equal(senderAmount.toNumber(), 5416, 'sender amount incorrect')
@@ -646,8 +659,8 @@ contract('DelegateV2 Unit Tests', async accounts => {
       // total sender amount in rules is 5416, and signer amounts is 956
       const senderAmount = await delegate.getSenderSideQuote.call(
         1000, // bigger than the total of the rules
-        mockTokenOneAddr,
-        mockTokenTwoAddr
+        SENDER_TOKEN_ADDR,
+        SIGNER_TOKEN_ADDR
       )
 
       // returns max sender amount as this rate change is in the delegate's favour
@@ -658,17 +671,17 @@ contract('DelegateV2 Unit Tests', async accounts => {
   describe('Test getMaxQuote', async () => {
     beforeEach(async () => {
       // add 2 rules - same rules as test above
-      await delegate.createRule(mockTokenOneAddr, mockTokenTwoAddr, 300, 50)
-      await delegate.createRule(mockTokenOneAddr, mockTokenTwoAddr, 1000, 200)
+      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 300, 50)
+      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 1000, 200)
     })
 
     it('Should return 0 if the trade wallet has no tokens', async () => {
-      await mockTokenOne.givenMethodReturnUint(mockToken_balanceOf, 0)
-      await mockTokenOne.givenMethodReturnUint(mockToken_allowance, 0)
+      await SENDER_TOKEN.givenMethodReturnUint(mockToken_balanceOf, 0)
+      await SENDER_TOKEN.givenMethodReturnUint(mockToken_allowance, 0)
 
       const result = await delegate.getMaxQuote.call(
-        mockTokenOneAddr,
-        mockTokenTwoAddr
+        SENDER_TOKEN_ADDR,
+        SIGNER_TOKEN_ADDR
       )
       const senderAmount = result['senderAmount']
       const signerAmount = result['signerAmount']
@@ -678,12 +691,12 @@ contract('DelegateV2 Unit Tests', async accounts => {
     })
 
     it('Should return the maximum if the trade wallet has ample tokens', async () => {
-      await mockTokenOne.givenMethodReturnUint(mockToken_balanceOf, 1000000)
-      await mockTokenOne.givenMethodReturnUint(mockToken_allowance, 1000000)
+      await SENDER_TOKEN.givenMethodReturnUint(mockToken_balanceOf, 1000000)
+      await SENDER_TOKEN.givenMethodReturnUint(mockToken_allowance, 1000000)
 
       const result = await delegate.getMaxQuote.call(
-        mockTokenOneAddr,
-        mockTokenTwoAddr
+        SENDER_TOKEN_ADDR,
+        SIGNER_TOKEN_ADDR
       )
       const senderAmount = result['senderAmount']
       const signerAmount = result['signerAmount']
@@ -693,12 +706,12 @@ contract('DelegateV2 Unit Tests', async accounts => {
     })
 
     it('Should return a smaller quote if the balance is low', async () => {
-      await mockTokenOne.givenMethodReturnUint(mockToken_balanceOf, 1000)
-      await mockTokenOne.givenMethodReturnUint(mockToken_allowance, 1000000)
+      await SENDER_TOKEN.givenMethodReturnUint(mockToken_balanceOf, 1000)
+      await SENDER_TOKEN.givenMethodReturnUint(mockToken_allowance, 1000000)
 
       const result = await delegate.getMaxQuote.call(
-        mockTokenOneAddr,
-        mockTokenTwoAddr
+        SENDER_TOKEN_ADDR,
+        SIGNER_TOKEN_ADDR
       )
       const senderAmount = result['senderAmount']
       const signerAmount = result['signerAmount']
@@ -708,12 +721,12 @@ contract('DelegateV2 Unit Tests', async accounts => {
     })
 
     it('Should return a smaller quote if the allowance is low', async () => {
-      await mockTokenOne.givenMethodReturnUint(mockToken_balanceOf, 1000000)
-      await mockTokenOne.givenMethodReturnUint(mockToken_allowance, 504)
+      await SENDER_TOKEN.givenMethodReturnUint(mockToken_balanceOf, 1000000)
+      await SENDER_TOKEN.givenMethodReturnUint(mockToken_allowance, 504)
 
       const result = await delegate.getMaxQuote.call(
-        mockTokenOneAddr,
-        mockTokenTwoAddr
+        SENDER_TOKEN_ADDR,
+        SIGNER_TOKEN_ADDR
       )
       const senderAmount = result['senderAmount']
       const signerAmount = result['signerAmount']
@@ -730,18 +743,18 @@ contract('DelegateV2 Unit Tests', async accounts => {
   describe('Test getLevels', async () => {
     beforeEach(async () => {
       // add 5 rules - same rules as test above
-      await delegate.createRule(mockTokenOneAddr, mockTokenTwoAddr, 300, 50)
-      await delegate.createRule(mockTokenOneAddr, mockTokenTwoAddr, 1000, 200)
-      await delegate.createRule(mockTokenOneAddr, mockTokenTwoAddr, 2002, 286)
-      await delegate.createRule(mockTokenOneAddr, mockTokenTwoAddr, 450, 100)
-      await delegate.createRule(mockTokenOneAddr, mockTokenTwoAddr, 1664, 320)
+      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 300, 50)
+      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 1000, 200)
+      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 2002, 286)
+      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 450, 100)
+      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 1664, 320)
       // CORRECT RULE ORDER: 3, 1, 5, 2, 4
     })
 
     it('Should return no levels if none exist', async () => {
       const result = await delegate.getLevels(
-        mockTokenTwoAddr,
-        mockTokenOneAddr
+        SIGNER_TOKEN_ADDR,
+        SENDER_TOKEN_ADDR
       )
 
       equal(
@@ -758,8 +771,8 @@ contract('DelegateV2 Unit Tests', async accounts => {
 
     it('Should return all levels in order', async () => {
       const result = await delegate.getLevels(
-        mockTokenOneAddr,
-        mockTokenTwoAddr
+        SENDER_TOKEN_ADDR,
+        SIGNER_TOKEN_ADDR
       )
       const senderAmounts = result['senderAmounts'].map(x => x.toNumber())
       const signerAmounts = result['signerAmounts'].map(x => x.toNumber())
@@ -782,6 +795,122 @@ contract('DelegateV2 Unit Tests', async accounts => {
   })
 
   describe('Test provideOrder', async () => {
-    it('Should return all levels in order')
+    beforeEach(async () => {
+      // add 5 rules - same rules as test above
+      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 300, 50)
+      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 1000, 200)
+      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 2002, 286)
+      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 450, 100)
+      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 1664, 320)
+      // CORRECT RULE ORDER: 3, 1, 5, 2, 4
+    })
+
+    it('Should fail if no signature is sent', async () => {
+      const order = createOrder({
+        signer: {
+          wallet: aliceAddress,
+          amount: 500,
+          token: SIGNER_TOKEN_ADDR,
+        },
+        sender: {
+          wallet: tradeWallet,
+          amount: 500,
+          token: SENDER_TOKEN_ADDR,
+        },
+      })
+
+      order.signature = emptySignature
+
+      // Succeeds on the Delegate, fails on the Swap.
+      await reverted(
+        delegate.provideOrder(order, { from: notOwner }),
+        'SIGNATURE_MUST_BE_SENT'
+      )
+    })
+
+    it('Should fail if sender token is not ERC20', async () => {
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: aliceAddress,
+            amount: 500,
+            token: SIGNER_TOKEN_ADDR,
+          },
+          sender: {
+            wallet: tradeWallet,
+            amount: 500,
+            token: SENDER_TOKEN_ADDR,
+            kind: '0x80ac58cd',
+          },
+        }),
+        aliceSigner,
+        swapAddress
+      )
+
+      await reverted(
+        delegate.provideOrder(order, {
+          from: aliceAddress,
+        }),
+        'SENDER_KIND_MUST_BE_ERC20'
+      )
+    })
+
+    it('Should fail if signer token is not ERC20', async () => {
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: aliceAddress,
+            amount: 500,
+            token: SIGNER_TOKEN_ADDR,
+            kind: '0x80ac58cd',
+          },
+          sender: {
+            wallet: tradeWallet,
+            amount: 500,
+            token: SENDER_TOKEN_ADDR,
+          },
+        }),
+        aliceSigner,
+        swapAddress
+      )
+
+      await reverted(
+        delegate.provideOrder(order, {
+          from: aliceAddress,
+        }),
+        'SIGNER_KIND_MUST_BE_ERC20'
+      )
+    })
+
+    it('Should fail if there are no rules for the given token pair', async () => {
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: aliceAddress,
+            amount: 500,
+            token: SENDER_TOKEN_ADDR,
+          },
+          sender: {
+            wallet: tradeWallet,
+            amount: 500,
+            token: SIGNER_TOKEN_ADDR,
+          },
+        }),
+        aliceSigner,
+        swapAddress
+      )
+
+      await reverted(
+        delegate.provideOrder(order, {
+          from: aliceAddress,
+        }),
+        'TOKEN_PAIR_INACTIVE'
+      )
+    })
+
+    it('Should accept an order that partially fills the first rule')
+    it('Should accept an order that fills multiple rules - rules deleted')
+    it('Should reject an order thats priced to the signers advantage')
+    it('Should accept an order thats priced to the delegates advantage')
   })
 })
