@@ -1011,15 +1011,138 @@ contract('DelegateV2 Unit Tests', async accounts => {
       const invocationCount = await mockSwap.invocationCountForMethod.call(
         swap_swap
       )
-      equal(
-        invocationCount,
-        1,
-        'swap function was not called the expected number of times'
+      equal(invocationCount, 1, 'swap function was not called')
+    })
+
+    it('Should accept an order that fills multiple rules - rules deleted', async () => {
+      // fills first 2 rules and half of 3rd: 2002+300+(0.5*1664) and 286+50+(0.5*320)
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: aliceAddress,
+            amount: 496,
+            token: SIGNER_TOKEN_ADDR,
+          },
+          sender: {
+            wallet: tradeWallet,
+            amount: 3134,
+            token: SENDER_TOKEN_ADDR,
+          },
+        }),
+        aliceSigner,
+        swapAddress
+      )
+
+      const tx = await delegate.provideOrder(order, {
+        from: aliceAddress,
+      })
+      // fill and delete for rule 3
+      emitted(tx, 'FillRule', e => {
+        return (
+          e.owner === owner &&
+          e.ruleID.toNumber() === 3 &&
+          e.senderAmount.toNumber() === 2002 &&
+          e.signerAmount.toNumber() === 286
+        )
+      })
+      emitted(tx, 'DeleteRule', e => {
+        return e.owner === owner && e.ruleID.toNumber() === 3
+      })
+
+      // fill and delete for rule 1
+      emitted(tx, 'FillRule', e => {
+        return (
+          e.owner === owner &&
+          e.ruleID.toNumber() === 1 &&
+          e.senderAmount.toNumber() === 300 &&
+          e.signerAmount.toNumber() === 50
+        )
+      })
+      emitted(tx, 'DeleteRule', e => {
+        return e.owner === owner && e.ruleID.toNumber() === 1
+      })
+
+      // partial fill for rule 5
+      emitted(tx, 'FillRule', e => {
+        return (
+          e.owner === owner &&
+          e.ruleID.toNumber() === 5 &&
+          e.senderAmount.toNumber() === 832 &&
+          e.signerAmount.toNumber() === 160
+        )
+      })
+
+      // check the linked list - 3 and 1 now gone
+      await checkLinkedList(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, [5, 2, 4])
+
+      // check swap was called
+      const invocationCount = await mockSwap.invocationCountForMethod.call(
+        swap_swap
+      )
+      equal(invocationCount, 1, 'swap function was not called')
+    })
+
+    it('Should reject an order thats priced to the signers advantage', async () => {
+      // same amounts as the previous test, but 1 more sender token
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: aliceAddress,
+            amount: 496,
+            token: SIGNER_TOKEN_ADDR,
+          },
+          sender: {
+            wallet: tradeWallet,
+            amount: 3140,
+            token: SENDER_TOKEN_ADDR,
+          },
+        }),
+        aliceSigner,
+        swapAddress
+      )
+
+      await reverted(
+        delegate.provideOrder(order, {
+          from: aliceAddress,
+        }),
+        'PRICE_INVALID'
       )
     })
 
-    it('Should accept an order that fills multiple rules - rules deleted')
-    it('Should reject an order thats priced to the signers advantage')
-    it('Should accept an order thats priced to the delegates advantage')
+    it('Should accept an order thats priced to the delegates advantage', async () => {
+      // again same amount as the test 2 above, but 1 more sender token
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: aliceAddress,
+            amount: 497,
+            token: SIGNER_TOKEN_ADDR,
+          },
+          sender: {
+            wallet: tradeWallet,
+            amount: 3134,
+            token: SENDER_TOKEN_ADDR,
+          },
+        }),
+        aliceSigner,
+        swapAddress
+      )
+
+      const tx = await delegate.provideOrder(order, {
+        from: aliceAddress,
+      })
+
+      // we know rules 3 and 1 will have filled in entirety
+      // the partial fill for rule 5 sticks to the rule ratio
+      // the extra token sent is not included in the rule fill
+      emitted(tx, 'FillRule', e => {
+        return (
+          e.owner === owner &&
+          e.ruleID.toNumber() === 5 &&
+          e.senderAmount.toNumber() === 832 &&
+          e.signerAmount.toNumber() === 160
+        )
+      })
+    })
   })
 })
