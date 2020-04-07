@@ -7,8 +7,7 @@ type User @entity {
 }
 
 type ExecutedOrder @entity {
-  id: ID! # combination of user and nonce? Transaction hash? Hash entire object?
-  # trx can have multiple orders, need to differentiate
+  id: ID! # signer address + nonce
 
   nonce: BigInt # order nonce for a user
   expiry: BigInt
