@@ -431,7 +431,27 @@ contract('DelegateV2 Unit Tests', async accounts => {
       equal(ruleCounter, 5, 'Rule counter incorrect')
     })
 
-    it('Should successfully insert 2 rules with the same price')
+    it('Should successfully insert 2 rules with the same price', async () => {
+      let tx = await delegate.createRule(
+        SENDER_TOKEN_ADDR,
+        SIGNER_TOKEN_ADDR,
+        300,
+        50
+      )
+      emitted(tx, 'CreateRule')
+
+      // this rule has the same price: 1 signer token => 6 sender tokens
+      tx = await delegate.createRule(
+        SENDER_TOKEN_ADDR,
+        SIGNER_TOKEN_ADDR,
+        1200,
+        200
+      )
+      emitted(tx, 'CreateRule')
+
+      // assert the new rule is AFTER the original rule
+      await checkLinkedList(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, [1, 2])
+    })
   })
 
   describe('Test deleteRule', async () => {
@@ -882,6 +902,32 @@ contract('DelegateV2 Unit Tests', async accounts => {
       )
     })
 
+    it('Should fail if the sender wallet is not the tradeWallet', async () => {
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: aliceAddress,
+            amount: 500,
+            token: SIGNER_TOKEN_ADDR,
+          },
+          sender: {
+            wallet: notOwner,
+            amount: 500,
+            token: SENDER_TOKEN_ADDR,
+          },
+        }),
+        aliceSigner,
+        swapAddress
+      )
+
+      await reverted(
+        delegate.provideOrder(order, {
+          from: aliceAddress,
+        }),
+        'SENDER_WALLET_INVALID'
+      )
+    })
+
     it('Should fail if there are no rules for the given token pair', async () => {
       const order = await signOrder(
         createOrder({
@@ -908,7 +954,70 @@ contract('DelegateV2 Unit Tests', async accounts => {
       )
     })
 
-    it('Should accept an order that partially fills the first rule')
+    it('Should accept an order that partially fills the first rule', async () => {
+      // the first rule is SENDER_TOKEN 2002, SIGNER_TOKEN 286 -> this is 1:7
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: aliceAddress,
+            amount: 100,
+            token: SIGNER_TOKEN_ADDR,
+          },
+          sender: {
+            wallet: tradeWallet,
+            amount: 700,
+            token: SENDER_TOKEN_ADDR,
+          },
+        }),
+        aliceSigner,
+        swapAddress
+      )
+
+      const tx = await delegate.provideOrder(order, {
+        from: aliceAddress,
+      })
+      emitted(tx, 'FillRule', e => {
+        return (
+          e.owner === owner &&
+          e.ruleID.toNumber() === 3 &&
+          e.senderAmount.toNumber() === 700 &&
+          e.signerAmount.toNumber() === 100
+        )
+      })
+
+      // now check the rule is updated
+      const rule = await delegate.rules.call(3)
+      equal(
+        rule['senderAmount'].toNumber(),
+        2002 - 700,
+        'sender amount incorrectly set'
+      )
+      equal(
+        rule['signerAmount'].toNumber(),
+        286 - 100,
+        'signer amount incorrectly set'
+      )
+
+      // check the linked list is still in tact
+      await checkLinkedList(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, [
+        3,
+        1,
+        5,
+        2,
+        4,
+      ])
+
+      // check swap was called
+      const invocationCount = await mockSwap.invocationCountForMethod.call(
+        swap_swap
+      )
+      equal(
+        invocationCount,
+        1,
+        'swap function was not called the expected number of times'
+      )
+    })
+
     it('Should accept an order that fills multiple rules - rules deleted')
     it('Should reject an order thats priced to the signers advantage')
     it('Should accept an order thats priced to the delegates advantage')

@@ -190,8 +190,10 @@ contract DelegateV2 is IDelegateV2, Ownable {
       } else {
         // only a fraction of this rule is needed so we calculate the signer amount
         // neither divisions can have a denominator of 0. removing safemath preserves some calculation accuracy
-        uint256 signerFraction = rules[ruleID].signerAmount /
-          (rules[ruleID].senderAmount / senderAmount);
+        uint256 signerFraction = rules[ruleID]
+          .signerAmount
+          .mul(senderAmount)
+          .div(rules[ruleID].senderAmount);
         require(signerFraction <= signerAmount, "PRICE_INVALID");
 
         // update whats remaining of the rule
@@ -368,7 +370,7 @@ contract DelegateV2 is IDelegateV2, Ownable {
     uint256 y = rules[secondElement].senderAmount.mul(
       rules[firstElement].signerAmount
     );
-    return (x > y);
+    return (x >= y);
   }
 
   function _getSignerSideQuote(
