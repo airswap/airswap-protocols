@@ -200,7 +200,7 @@ export function handleRevokeSigner(event: RevokeSigner): void {
 }
 
 export function handleSwap(event: Swap): void {
-  let executedOrder = new ExecutedOrder(event.transaction.hash.toHex())
+  let executedOrder = new ExecutedOrder(event.params.signerWallet.toHex() + event.params.nonce.toString())
   executedOrder.nonce = event.params.nonce
   executedOrder.expiry = event.params.timestamp
 
