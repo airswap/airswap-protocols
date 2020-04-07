@@ -1,4 +1,5 @@
 {
   "network": "development",
-  "address": "0xCF838C40A3ac9ac3D859745EC36F1b303CA8274c"
+  "address": "0xCF838C40A3ac9ac3D859745EC36F1b303CA8274c",
+  "startBlock": 0
 }
