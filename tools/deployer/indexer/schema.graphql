@@ -7,13 +7,15 @@ type Index @entity {
   id: ID! # index address + protocol
   signerToken: Token!
   senderToken: Token!
+  protocol: Bytes!
 }
 
-type Stake @entity {
+type StakedAmount @entity {
   id: ID! # staker + signerToken + senderToken + protocol
   staker: Bytes! # user address of user that staked
   signerToken: Token!
   senderToken: Token!
   protocol: Bytes!
   stakeAmount: BigInt
+  active: Boolean # needed since it's possible to stake 0
 }

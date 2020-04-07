@@ -99,9 +99,18 @@ export class Index extends Entity {
   set senderToken(value: string) {
     this.set("senderToken", Value.fromString(value));
   }
+
+  get protocol(): Bytes {
+    let value = this.get("protocol");
+    return value.toBytes();
+  }
+
+  set protocol(value: Bytes) {
+    this.set("protocol", Value.fromBytes(value));
+  }
 }
 
-export class Stake extends Entity {
+export class StakedAmount extends Entity {
   constructor(id: string) {
     super();
     this.set("id", Value.fromString(id));
@@ -109,17 +118,17 @@ export class Stake extends Entity {
 
   save(): void {
     let id = this.get("id");
-    assert(id !== null, "Cannot save Stake entity without an ID");
+    assert(id !== null, "Cannot save StakedAmount entity without an ID");
     assert(
       id.kind == ValueKind.STRING,
-      "Cannot save Stake entity with non-string ID. " +
+      "Cannot save StakedAmount entity with non-string ID. " +
         'Considering using .toHex() to convert the "id" to a string.'
     );
-    store.set("Stake", id.toString(), this);
+    store.set("StakedAmount", id.toString(), this);
   }
 
-  static load(id: string): Stake | null {
-    return store.get("Stake", id) as Stake | null;
+  static load(id: string): StakedAmount | null {
+    return store.get("StakedAmount", id) as StakedAmount | null;
   }
 
   get id(): string {
@@ -182,5 +191,14 @@ export class Stake extends Entity {
     } else {
       this.set("stakeAmount", Value.fromBigInt(value as BigInt));
     }
+  }
+
+  get active(): boolean {
+    let value = this.get("active");
+    return value.toBoolean();
+  }
+
+  set active(value: boolean) {
+    this.set("active", Value.fromBoolean(value));
   }
 }
