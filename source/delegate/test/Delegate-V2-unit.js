@@ -1144,5 +1144,32 @@ contract('DelegateV2 Unit Tests', async accounts => {
         )
       })
     })
+
+    it('Should reject an order that fills the sender but not signer of a rule', async () => {
+      // fills the first rule's sender amount but not signer amount
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: aliceAddress,
+            amount: 285,
+            token: SIGNER_TOKEN_ADDR,
+          },
+          sender: {
+            wallet: tradeWallet,
+            amount: 2002,
+            token: SENDER_TOKEN_ADDR,
+          },
+        }),
+        aliceSigner,
+        swapAddress
+      )
+
+      await reverted(
+        delegate.provideOrder(order, {
+          from: aliceAddress,
+        }),
+        'PRICE_INVALID'
+      )
+    })
   })
 })
