@@ -24,7 +24,6 @@ export function handleSetRule(event: SetRule): void {
 }
 
 export function handleUnsetRule(event: UnsetRule): void {
-  log.info("UNSET RULE!", [])
   var ruleIdentifier = 
     event.params.owner.toHex() + 
     event.params.senderToken.toHex() + 
