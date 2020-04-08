@@ -3,11 +3,11 @@ schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
-    name: Factory
+    name: DelegateFactory
     network: '{{network}}'
     source:
       address: '{{address}}'
-      abi: Factory
+      abi: DelegateFactory
       startBlock: '{{startBlock}}'
     mapping:
       kind: ethereum/events
@@ -16,12 +16,12 @@ dataSources:
       entities:
         - CreateDelegate
       abis:
-        - name: Contract
-          file: ./abis/Contract.json
+        - name: DelegateFactory
+          file: ./abis/DelegateFactory.json
       eventHandlers:
         - event: CreateDelegate(indexed address,address,address,indexed address,address)
           handler: handleCreateDelegate
-      file: ./src/mapping.ts
+      file: ./src/DelegateFactoryMapping.ts
 templates:
   - name: Delegate
     kind: ethereum/contract
@@ -32,7 +32,7 @@ templates:
       kind: ethereum/events
       apiVersion: 0.0.3
       language: wasm/assemblyscript
-      file: ./src/mappings/delegate.ts
+      file: ./src/DelegateMapping.ts
       entities:
         - Delegate
       abis:
