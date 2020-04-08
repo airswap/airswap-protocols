@@ -1,6 +1,28 @@
-type ExampleEntity @entity {
+type DelegateContract @entity {
+  id: ID! # delegate contract address
+  swapContract: Bytes! # swap contract address
+  indexerContarct: Bytes! # indexer contract address
+  delegateContractOwner: Bytes!
+  delegateTradeWallet: Bytes!
+}
+
+type DelegateRule @entity {
   id: ID!
-  count: BigInt!
-  delegateContract: Bytes! # address
-  swapContract: Bytes! # address
+  owner: Bytes! # address
+  signerToken: Bytes! # MAKE TOKEN
+  senderToken: Bytes! # MAKE TOKEN
+  maxSenderAmount: BigInt!
+  priceCoef: BigInt!
+  priceExp: BigInt!
+}
+
+type Order @entity {
+  id: ID!
+  owner: Bytes!
+  tradeWallet: Bytes! # MAKE USER
+  signerToken: Bytes! # MAKE TOKEN
+  senderToken: Bytes! # MAKE TOKEN
+  senderAmount: BigInt!
+  priceCoef: BigInt!
+  priceExp: BigInt!
 }
