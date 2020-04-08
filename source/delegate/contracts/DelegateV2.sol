@@ -190,10 +190,14 @@ contract DelegateV2 is IDelegateV2, Ownable {
       } else {
         // only a fraction of this rule is needed so we calculate the signer amount
         // neither divisions can have a denominator of 0. removing safemath preserves some calculation accuracy
-        uint256 signerFraction = rules[ruleID]
-          .signerAmount
-          .mul(senderAmount)
-          .div(rules[ruleID].senderAmount);
+        uint256 numerator = rules[ruleID].signerAmount.mul(senderAmount);
+        uint256 signerFraction = numerator.div(rules[ruleID].senderAmount);
+
+        // we round up not down for the delegate's advantage
+        if (numerator.mod(rules[ruleID].senderAmount) > 0) {
+          signerFraction++;
+        }
+
         require(signerFraction <= signerAmount, "PRICE_INVALID");
 
         // update whats remaining of the rule
@@ -393,10 +397,16 @@ contract DelegateV2 is IDelegateV2, Ownable {
         ruleID = rules[ruleID].nextRuleID;
       } else {
         // only a fraction of this rule is needed so we calculate the sender amount
-        uint256 signerFraction = rules[ruleID]
-          .signerAmount
-          .mul(remainingSenderAmount)
-          .div(rules[ruleID].senderAmount);
+        uint256 numerator = rules[ruleID].signerAmount.mul(
+          remainingSenderAmount
+        );
+        uint256 signerFraction = numerator.div(rules[ruleID].senderAmount);
+
+        // we round up not down for the delegate's advantage
+        if (numerator.mod(rules[ruleID].senderAmount) > 0) {
+          signerFraction++;
+        }
+
         signerAmount = signerAmount.add(signerFraction);
         remainingSenderAmount = 0;
       }

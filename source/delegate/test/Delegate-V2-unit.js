@@ -577,16 +577,18 @@ contract('DelegateV2 Unit Tests', async accounts => {
     })
 
     it('Should return a quote that uses multiple rules', async () => {
-      // entirety of 3 rules, plus some more = 2002 (r3) + 300 (r1) + 1664 (r5) + 200 (1/5 r2)
+      // entirety of 3 rules, plus some more = 2002 (r3) + 300 (r1) + 833 (r5)
       const signerAmount = await delegate.getSignerSideQuote.call(
-        4166,
+        3135,
         SENDER_TOKEN_ADDR,
         SIGNER_TOKEN_ADDR
       )
 
+      // result should round up so its in the delegate's advantage
+      // therefore it should round up
       equal(
         signerAmount.toNumber(),
-        286 + 50 + 320 + 200 / 5,
+        Math.ceil(286 + 50 + 320 * (833 / 1664)),
         'signer amount incorrect'
       )
     })
@@ -754,7 +756,7 @@ contract('DelegateV2 Unit Tests', async accounts => {
       equal(senderAmount, 504, 'sender amount incorrect')
       equal(
         signerAmount,
-        50 + Math.floor((200 * 204) / 1000),
+        50 + Math.ceil((200 * 204) / 1000),
         'signer amount incorrect'
       )
     })
@@ -1093,7 +1095,7 @@ contract('DelegateV2 Unit Tests', async accounts => {
           },
           sender: {
             wallet: tradeWallet,
-            amount: 3140,
+            amount: 3135,
             token: SENDER_TOKEN_ADDR,
           },
         }),
