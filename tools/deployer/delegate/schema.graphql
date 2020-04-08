@@ -1,4 +1,4 @@
-type Delegate @entity {
+type DelegateContract @entity {
   id: ID! # delegate contract address
   swapContract: Bytes! # swap contract address
   indexerContarct: Bytes! # indexer contract address
