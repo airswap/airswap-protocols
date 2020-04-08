@@ -42,22 +42,31 @@ export class DelegateContract extends Entity {
     this.set("id", Value.fromString(value));
   }
 
-  get swapContract(): Bytes {
-    let value = this.get("swapContract");
+  get factory(): Bytes {
+    let value = this.get("factory");
     return value.toBytes();
   }
 
-  set swapContract(value: Bytes) {
-    this.set("swapContract", Value.fromBytes(value));
+  set factory(value: Bytes) {
+    this.set("factory", Value.fromBytes(value));
   }
 
-  get indexerContarct(): Bytes {
-    let value = this.get("indexerContarct");
+  get swap(): Bytes {
+    let value = this.get("swap");
     return value.toBytes();
   }
 
-  set indexerContarct(value: Bytes) {
-    this.set("indexerContarct", Value.fromBytes(value));
+  set swap(value: Bytes) {
+    this.set("swap", Value.fromBytes(value));
+  }
+
+  get indexer(): Bytes {
+    let value = this.get("indexer");
+    return value.toBytes();
+  }
+
+  set indexer(value: Bytes) {
+    this.set("indexer", Value.fromBytes(value));
   }
 
   get delegateContractOwner(): Bytes {

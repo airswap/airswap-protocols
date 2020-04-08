@@ -1,7 +1,8 @@
 type DelegateContract @entity {
   id: ID! # delegate contract address
-  swapContract: Bytes! # swap contract address
-  indexerContarct: Bytes! # indexer contract address
+  factory: Bytes! #factory that created this delegate
+  swap: Bytes! # swap contract address
+  indexer: Bytes! # indexer contract address
   delegateContractOwner: Bytes!
   delegateTradeWallet: Bytes!
 }
