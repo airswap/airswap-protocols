@@ -7,7 +7,7 @@ type DelegateContract @entity {
 }
 
 type DelegateRule @entity {
-  id: ID!
+  id: ID! # owner address + signerToken + senderToken
   owner: Bytes! # address
   signerToken: Bytes! # MAKE TOKEN
   senderToken: Bytes! # MAKE TOKEN
@@ -16,7 +16,7 @@ type DelegateRule @entity {
   priceExp: BigInt!
 }
 
-type Order @entity {
+type ProvidedOrder @entity {
   id: ID!
   owner: Bytes!
   tradeWallet: Bytes! # MAKE USER
