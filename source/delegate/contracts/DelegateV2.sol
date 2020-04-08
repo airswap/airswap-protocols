@@ -108,42 +108,91 @@ contract DelegateV2 is IDelegateV2, Ownable {
     address signerToken,
     uint256 senderAmount,
     uint256 signerAmount
-  ) external {
-    require(senderAmount != 0 && signerAmount != 0, "AMOUNTS_CANNOT_BE_0");
-    // Rules created now holds this rule's ID
-    ruleIDCounter += 1;
-
-    // prev and next rule IDs are initialised to 0
-    rules[ruleIDCounter] = Rule({
-      signerToken: signerToken,
-      senderToken: senderToken,
-      senderAmount: senderAmount,
-      signerAmount: signerAmount,
-      nextRuleID: NO_RULE,
-      prevRuleID: NO_RULE
-    });
-
-    if (firstRuleID[senderToken][signerToken] == NO_RULE) {
-      firstRuleID[senderToken][signerToken] = ruleIDCounter;
-    } else {
-      _insertRuleInList(senderToken, signerToken, ruleIDCounter);
-    }
-
-    totalActiveRules[senderToken][signerToken] += 1;
-
-    emit CreateRule(
-      owner(),
-      ruleIDCounter,
-      senderToken,
-      signerToken,
-      senderAmount,
-      signerAmount
-    );
+  ) external onlyOwner {
+    _createRule(senderToken, signerToken, senderAmount, signerAmount);
   }
 
-  function deleteRule(uint256 ruleID) external {
+  function deleteRule(uint256 ruleID) external onlyOwner {
     require(rules[ruleID].senderAmount != 0, "RULE_NOT_ACTIVE");
     _deleteRule(ruleID);
+  }
+
+  function createRuleAndSetIntent(
+    address senderToken,
+    address signerToken,
+    uint256 senderAmount,
+    uint256 signerAmount,
+    uint256 newStakeAmount
+  ) external onlyOwner {
+    _createRule(senderToken, signerToken, senderAmount, signerAmount);
+
+    // get currentAmount staked or 0 if never staked
+    uint256 oldStakeAmount = indexer.getStakedAmount(
+      address(this),
+      signerToken,
+      senderToken,
+      protocol
+    );
+
+    if (oldStakeAmount == newStakeAmount && oldStakeAmount > 0) {
+      return; // forgo trying to reset intent with non-zero same stake amount
+    } else if (oldStakeAmount < newStakeAmount) {
+      // transfer only the difference from the sender to the Delegate.
+      require(
+        IERC20(indexer.stakingToken()).transferFrom(
+          msg.sender,
+          address(this),
+          newStakeAmount - oldStakeAmount
+        ),
+        "STAKING_TRANSFER_FAILED"
+      );
+    }
+
+    indexer.setIntent(
+      signerToken,
+      senderToken,
+      protocol,
+      newStakeAmount,
+      bytes32(uint256(address(this)) << 96) //NOTE: this will pad 0's to the right
+    );
+
+    if (oldStakeAmount > newStakeAmount) {
+      // return excess stake back
+      require(
+        IERC20(indexer.stakingToken()).transfer(
+          msg.sender,
+          oldStakeAmount - newStakeAmount
+        ),
+        "STAKING_RETURN_FAILED"
+      );
+    }
+  }
+
+  function deleteRuleAndUnsetIntent(uint256 ruleID) external onlyOwner {
+    require(rules[ruleID].senderAmount != 0, "RULE_NOT_ACTIVE");
+    _deleteRule(ruleID);
+
+    // Query the indexer for the amount staked.
+    uint256 stakedAmount = indexer.getStakedAmount(
+      address(this),
+      rules[ruleID].signerToken,
+      rules[ruleID].senderToken,
+      protocol
+    );
+    indexer.unsetIntent(
+      rules[ruleID].signerToken,
+      rules[ruleID].senderToken,
+      protocol
+    );
+
+    // Upon unstaking, the Delegate will be given the staking amount.
+    // This is returned to the msg.sender.
+    if (stakedAmount > 0) {
+      require(
+        IERC20(indexer.stakingToken()).transfer(msg.sender, stakedAmount),
+        "STAKING_RETURN_FAILED"
+      );
+    }
   }
 
   function provideOrder(Types.Order calldata order) external {
@@ -213,6 +262,15 @@ contract DelegateV2 is IDelegateV2, Ownable {
 
     // Perform the swap.
     swapContract.swap(order);
+  }
+
+  /**
+   * @notice Set a new trade wallet
+   * @param newTradeWallet address Address of the new trade wallet
+   */
+  function setTradeWallet(address newTradeWallet) external onlyOwner {
+    require(newTradeWallet != address(0), "TRADE_WALLET_REQUIRED");
+    tradeWallet = newTradeWallet;
   }
 
   function getSignerSideQuote(
@@ -299,6 +357,44 @@ contract DelegateV2 is IDelegateV2, Ownable {
       signerAmounts[i] = rules[ruleID].signerAmount;
       ruleID = rules[ruleID].nextRuleID;
     }
+  }
+
+  function _createRule(
+    address senderToken,
+    address signerToken,
+    uint256 senderAmount,
+    uint256 signerAmount
+  ) internal {
+    require(senderAmount != 0 && signerAmount != 0, "AMOUNTS_CANNOT_BE_0");
+    // Rules created now holds this rule's ID
+    ruleIDCounter += 1;
+
+    // prev and next rule IDs are initialised to 0
+    rules[ruleIDCounter] = Rule({
+      signerToken: signerToken,
+      senderToken: senderToken,
+      senderAmount: senderAmount,
+      signerAmount: signerAmount,
+      nextRuleID: NO_RULE,
+      prevRuleID: NO_RULE
+    });
+
+    if (firstRuleID[senderToken][signerToken] == NO_RULE) {
+      firstRuleID[senderToken][signerToken] = ruleIDCounter;
+    } else {
+      _insertRuleInList(senderToken, signerToken, ruleIDCounter);
+    }
+
+    totalActiveRules[senderToken][signerToken] += 1;
+
+    emit CreateRule(
+      owner(),
+      ruleIDCounter,
+      senderToken,
+      signerToken,
+      senderAmount,
+      signerAmount
+    );
   }
 
   function _deleteRule(uint256 ruleID) internal {

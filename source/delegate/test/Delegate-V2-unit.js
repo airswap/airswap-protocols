@@ -753,6 +753,7 @@ contract('DelegateV2 Unit Tests', async accounts => {
       const senderAmount = result['senderAmount']
       const signerAmount = result['signerAmount']
 
+      // rounds up for the delegate's advantage
       equal(senderAmount, 504, 'sender amount incorrect')
       equal(
         signerAmount,
