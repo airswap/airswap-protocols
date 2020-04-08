@@ -118,6 +118,15 @@ export class DelegateRule extends Entity {
     this.set("id", Value.fromString(value));
   }
 
+  get delegate(): Bytes {
+    let value = this.get("delegate");
+    return value.toBytes();
+  }
+
+  set delegate(value: Bytes) {
+    this.set("delegate", Value.fromBytes(value));
+  }
+
   get owner(): Bytes {
     let value = this.get("owner");
     return value.toBytes();
@@ -170,6 +179,15 @@ export class DelegateRule extends Entity {
 
   set priceExp(value: BigInt) {
     this.set("priceExp", Value.fromBigInt(value));
+  }
+
+  get active(): boolean {
+    let value = this.get("active");
+    return value.toBoolean();
+  }
+
+  set active(value: boolean) {
+    this.set("active", Value.fromBoolean(value));
   }
 }
 

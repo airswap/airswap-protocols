@@ -9,12 +9,14 @@ type DelegateContract @entity {
 
 type DelegateRule @entity {
   id: ID! # owner address + signerToken + senderToken
+  delegate: Bytes! # address
   owner: Bytes! # address
   signerToken: Bytes! # MAKE TOKEN
   senderToken: Bytes! # MAKE TOKEN
   maxSenderAmount: BigInt!
   priceCoef: BigInt!
   priceExp: BigInt!
+  active: Boolean
 }
 
 type ProvidedOrder @entity {
