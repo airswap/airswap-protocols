@@ -38,4 +38,6 @@ export function handleUnsetRule(event: UnsetRule): void {
 }
 
 export function handleProvideOrder(event: ProvideOrder): void {
+  // should update the Delegate rule's values 
+  // original rule - all trades = new rule
 }
