@@ -9,7 +9,12 @@ const ethers = require('ethers')
 const { ADDRESS_ZERO } = require('@airswap/constants')
 const { emptySignature } = require('@airswap/types')
 const { createOrder, signOrder } = require('@airswap/utils')
-const { equal, emitted, reverted } = require('@airswap/test-utils').assert
+const {
+  equal,
+  passes,
+  emitted,
+  reverted,
+} = require('@airswap/test-utils').assert
 const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
 const { GANACHE_PROVIDER } = require('@airswap/test-utils').constants
 
@@ -25,6 +30,7 @@ contract('DelegateV2 Unit Tests', async accounts => {
   ).getSigner(aliceAddress)
 
   const PROTOCOL = '0x0006'
+  const EMPTY_PROTOCOL = '0x0000'
 
   const NO_RULE = 0
 
@@ -38,6 +44,9 @@ contract('DelegateV2 Unit Tests', async accounts => {
   let mockToken_approve
   let mockToken_allowance
   let mockToken_balanceOf
+  let mockToken_transfer
+  let mockToken_transferFrom
+  let mockIndexer_getStakedAmount
   let SENDER_TOKEN
   let SENDER_TOKEN_ADDR
   let SIGNER_TOKEN
@@ -98,6 +107,12 @@ contract('DelegateV2 Unit Tests', async accounts => {
     mockToken_balanceOf = await mockFungibleTokenTemplate.contract.methods
       .balanceOf(ADDRESS_ZERO)
       .encodeABI()
+    mockToken_transfer = await mockFungibleTokenTemplate.contract.methods
+      .transfer(ADDRESS_ZERO, 0)
+      .encodeABI()
+    mockToken_transferFrom = await mockFungibleTokenTemplate.contract.methods
+      .transferFrom(ADDRESS_ZERO, ADDRESS_ZERO, 0)
+      .encodeABI()
   }
 
   async function setupMockSwap() {
@@ -120,6 +135,9 @@ contract('DelegateV2 Unit Tests', async accounts => {
     //mock stakingToken()
     const mockIndexer_stakingToken = mockIndexerTemplate.contract.methods
       .stakingToken()
+      .encodeABI()
+    mockIndexer_getStakedAmount = mockIndexerTemplate.contract.methods
+      .getStakedAmount(ADDRESS_ZERO, ADDRESS_ZERO, ADDRESS_ZERO, EMPTY_PROTOCOL)
       .encodeABI()
     await mockIndexer.givenMethodReturnAddress(
       mockIndexer_stakingToken,
@@ -1173,6 +1191,166 @@ contract('DelegateV2 Unit Tests', async accounts => {
         }),
         'PRICE_INVALID'
       )
+    })
+  })
+
+  describe('Test createRuleAndSetIntent()', async () => {
+    it('Test calling createRuleAndSetIntent with transfer error', async () => {
+      const stakeAmount = 250
+
+      await mockStakingToken.givenMethodReturnUint(
+        mockToken_allowance,
+        stakeAmount
+      )
+      //mock unsuccessful transfer
+      await mockStakingToken.givenMethodReturnBool(
+        mockToken_transferFrom,
+        false
+      )
+
+      //mock the score/staked amount to be transferred
+      await mockIndexer.givenMethodReturnUint(mockIndexer_getStakedAmount, 0)
+
+      await reverted(
+        delegate.createRuleAndSetIntent(
+          SENDER_TOKEN_ADDR,
+          SIGNER_TOKEN_ADDR,
+          200,
+          200,
+          stakeAmount
+        ),
+        'STAKING_TRANSFER_FAILED'
+      )
+    })
+
+    it('Test successfully calling createRuleAndSetIntent with 0 staked amount', async () => {
+      const stakeAmount = 0
+
+      await mockStakingToken.givenMethodReturnBool(mockToken_approve, true)
+
+      //mock the score/staked amount to be transferred
+      await mockIndexer.givenMethodReturnUint(mockIndexer_getStakedAmount, 0)
+
+      await passes(
+        delegate.createRuleAndSetIntent(
+          SENDER_TOKEN_ADDR,
+          SIGNER_TOKEN_ADDR,
+          200,
+          200,
+          stakeAmount
+        )
+      )
+    })
+
+    it('Test successfully calling createRuleAndSetIntent with staked amount', async () => {
+      const stakeAmount = 250
+
+      await mockStakingToken.givenMethodReturnUint(
+        mockToken_allowance,
+        stakeAmount
+      )
+      await mockStakingToken.givenMethodReturnBool(mockToken_transferFrom, true)
+      await mockStakingToken.givenMethodReturnBool(mockToken_approve, true)
+
+      //mock the score/staked amount to be transferred
+      await mockIndexer.givenMethodReturnUint(mockIndexer_getStakedAmount, 250)
+
+      await passes(
+        delegate.createRuleAndSetIntent(
+          SENDER_TOKEN_ADDR,
+          SIGNER_TOKEN_ADDR,
+          200,
+          200,
+          stakeAmount
+        )
+      )
+    })
+
+    it('Test unsuccessfully calling createRuleAndSetIntent with decreased staked amount', async () => {
+      const stakeAmount = 100
+
+      await mockStakingToken.givenMethodReturnUint(
+        mockToken_allowance,
+        stakeAmount
+      )
+      await mockStakingToken.givenMethodReturnBool(mockToken_transferFrom, true)
+
+      const transferToDelegateOwner = mockFungibleTokenTemplate.contract.methods
+        .transfer(accounts[0], 150)
+        .encodeABI()
+
+      await mockStakingToken.givenCalldataReturnBool(
+        transferToDelegateOwner,
+        false
+      )
+
+      await mockStakingToken.givenMethodReturnBool(mockToken_approve, true)
+
+      // mock the score/staked amount to be transferred
+      await mockIndexer.givenMethodReturnUint(mockIndexer_getStakedAmount, 250)
+
+      await reverted(
+        delegate.createRuleAndSetIntent(
+          SENDER_TOKEN_ADDR,
+          SIGNER_TOKEN_ADDR,
+          200,
+          200,
+          stakeAmount
+        ),
+        'STAKING_RETURN_FAILED.'
+      )
+    })
+  })
+
+  describe('Test deleteRuleAndUnsetIntent()', async () => {
+    beforeEach(async () => {
+      // add a rule with ID 1
+      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 300, 50)
+    })
+
+    it('Test calling deleteRuleAndUnsetIntent() with transfer error', async () => {
+      const mockScore = 1000
+
+      //mock the score/staked amount to be transferred
+      await mockIndexer.givenMethodReturnUint(
+        mockIndexer_getStakedAmount,
+        mockScore
+      )
+
+      //mock a failed transfer
+      await mockStakingToken.givenMethodReturnBool(mockToken_transfer, false)
+
+      await reverted(
+        delegate.deleteRuleAndUnsetIntent(1),
+        'STAKING_RETURN_FAILED'
+      )
+    })
+
+    it('Test successfully calling deleteRuleAndUnsetIntent() with 0 staked amount', async () => {
+      const mockScore = 0
+
+      //mock the score/staked amount to be transferred
+      await mockIndexer.givenMethodReturnUint(
+        mockIndexer_getStakedAmount,
+        mockScore
+      )
+
+      await passes(delegate.deleteRuleAndUnsetIntent(1))
+    })
+
+    it('Test successfully calling deleteRuleAndUnsetIntent() with staked amount', async () => {
+      const mockScore = 1000
+
+      //mock the score/staked amount to be transferred
+      await mockIndexer.givenMethodReturnUint(
+        mockIndexer_getStakedAmount,
+        mockScore
+      )
+
+      //mock a successful transfer
+      await mockStakingToken.givenMethodReturnBool(mockToken_transfer, true)
+
+      await passes(delegate.deleteRuleAndUnsetIntent(1))
     })
   })
 })
