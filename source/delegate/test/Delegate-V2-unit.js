@@ -248,6 +248,23 @@ contract('DelegateV2 Unit Tests', async accounts => {
     })
   })
 
+  describe('Test setTradeWallet', async () => {
+    it('Test setTradeWallet when not owner', async () => {
+      await reverted(delegate.setTradeWallet(notOwner, { from: notOwner }))
+    })
+
+    it('Test setTradeWallet when owner', async () => {
+      await passes(delegate.setTradeWallet(notOwner, { from: owner }))
+    })
+
+    it('Test setTradeWallet with empty address', async () => {
+      await reverted(
+        delegate.setTradeWallet(ADDRESS_ZERO, { from: owner }),
+        'TRADE_WALLET_REQUIRED'
+      )
+    })
+  })
+
   describe('Test createRule', async () => {
     it('Should not create a rule with a 0 amount', async () => {
       await reverted(
