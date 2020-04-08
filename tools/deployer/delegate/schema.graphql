@@ -1,4 +1,4 @@
-type DelegateContract @entity {
+type Delegate @entity {
   id: ID! # delegate contract address
   swapContract: Bytes! # swap contract address
   indexerContarct: Bytes! # indexer contract address
@@ -17,7 +17,7 @@ type DelegateRule @entity {
 }
 
 type ProvidedOrder @entity {
-  id: ID!
+  id: ID! # signer(owner) + nonce : find this through Executed Orders?
   owner: Bytes!
   tradeWallet: Bytes! # MAKE USER
   signerToken: Bytes! # MAKE TOKEN

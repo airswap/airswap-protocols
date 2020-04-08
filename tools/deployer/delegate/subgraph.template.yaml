@@ -8,7 +8,7 @@ dataSources:
     source:
       address: '{{address}}'
       abi: DelegateFactory
-      startBlock: '{{startBlock}}'
+      startBlock: {{startBlock}}
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
@@ -25,7 +25,7 @@ dataSources:
 templates:
   - name: Delegate
     kind: ethereum/contract
-    network: mainnet
+    network: '{{network}}'
     source:
       abi: Delegate
     mapping: 
@@ -39,10 +39,10 @@ templates:
         - name: Delegate
           file: ./abis/Delegate.json
       eventHandlers: 
-        - event: SetRule(address,address,address,uint256,uint256,uint256)
+        - event: SetRule(indexed address,indexed address,indexed address,uint256,uint256,uint256)
           handler: handleSetRule
-        - event: UnsetRule(address,address,address)
+        - event: UnsetRule(indexed address,indexed address,indexed address)
           handler: handleUnsetRule
-        - event: ProvideOrder(address,address,address,address,uint256,uint256,uint256)
+        - event: ProvideOrder(indexed address,address,indexed address,indexed address,uint256,uint256,uint256)
           handler: handleProvideOrder
 

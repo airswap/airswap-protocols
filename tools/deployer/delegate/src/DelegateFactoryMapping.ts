@@ -1,6 +1,6 @@
 import { BigInt } from "@graphprotocol/graph-ts"
-import { Contract, CreateDelegate } from "../generated/Contract/Contract"
-import { ExampleEntity } from "../generated/schema"
+import { DelegateFactory, CreateDelegate } from "../generated/DelegateFactory/DelegateFactory"
+import { Delegate } from "../generated/schema"
 
 export function handleCreateDelegate(event: CreateDelegate): void {
 }

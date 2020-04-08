@@ -49,9 +49,9 @@ export class CreateDelegate__Params {
   }
 }
 
-export class Contract extends SmartContract {
-  static bind(address: Address): Contract {
-    return new Contract("Contract", address);
+export class DelegateFactory extends SmartContract {
+  static bind(address: Address): DelegateFactory {
+    return new DelegateFactory("DelegateFactory", address);
   }
 
   createDelegate(delegateTradeWallet: Address): Address {

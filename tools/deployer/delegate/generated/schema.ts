@@ -12,7 +12,7 @@ import {
   BigDecimal
 } from "@graphprotocol/graph-ts";
 
-export class ExampleEntity extends Entity {
+export class Delegate extends Entity {
   constructor(id: string) {
     super();
     this.set("id", Value.fromString(id));
@@ -20,17 +20,17 @@ export class ExampleEntity extends Entity {
 
   save(): void {
     let id = this.get("id");
-    assert(id !== null, "Cannot save ExampleEntity entity without an ID");
+    assert(id !== null, "Cannot save Delegate entity without an ID");
     assert(
       id.kind == ValueKind.STRING,
-      "Cannot save ExampleEntity entity with non-string ID. " +
+      "Cannot save Delegate entity with non-string ID. " +
         'Considering using .toHex() to convert the "id" to a string.'
     );
-    store.set("ExampleEntity", id.toString(), this);
+    store.set("Delegate", id.toString(), this);
   }
 
-  static load(id: string): ExampleEntity | null {
-    return store.get("ExampleEntity", id) as ExampleEntity | null;
+  static load(id: string): Delegate | null {
+    return store.get("Delegate", id) as Delegate | null;
   }
 
   get id(): string {
@@ -42,24 +42,6 @@ export class ExampleEntity extends Entity {
     this.set("id", Value.fromString(value));
   }
 
-  get count(): BigInt {
-    let value = this.get("count");
-    return value.toBigInt();
-  }
-
-  set count(value: BigInt) {
-    this.set("count", Value.fromBigInt(value));
-  }
-
-  get delegateContract(): Bytes {
-    let value = this.get("delegateContract");
-    return value.toBytes();
-  }
-
-  set delegateContract(value: Bytes) {
-    this.set("delegateContract", Value.fromBytes(value));
-  }
-
   get swapContract(): Bytes {
     let value = this.get("swapContract");
     return value.toBytes();
@@ -67,5 +49,211 @@ export class ExampleEntity extends Entity {
 
   set swapContract(value: Bytes) {
     this.set("swapContract", Value.fromBytes(value));
+  }
+
+  get indexerContarct(): Bytes {
+    let value = this.get("indexerContarct");
+    return value.toBytes();
+  }
+
+  set indexerContarct(value: Bytes) {
+    this.set("indexerContarct", Value.fromBytes(value));
+  }
+
+  get delegateContractOwner(): Bytes {
+    let value = this.get("delegateContractOwner");
+    return value.toBytes();
+  }
+
+  set delegateContractOwner(value: Bytes) {
+    this.set("delegateContractOwner", Value.fromBytes(value));
+  }
+
+  get delegateTradeWallet(): Bytes {
+    let value = this.get("delegateTradeWallet");
+    return value.toBytes();
+  }
+
+  set delegateTradeWallet(value: Bytes) {
+    this.set("delegateTradeWallet", Value.fromBytes(value));
+  }
+}
+
+export class DelegateRule extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id !== null, "Cannot save DelegateRule entity without an ID");
+    assert(
+      id.kind == ValueKind.STRING,
+      "Cannot save DelegateRule entity with non-string ID. " +
+        'Considering using .toHex() to convert the "id" to a string.'
+    );
+    store.set("DelegateRule", id.toString(), this);
+  }
+
+  static load(id: string): DelegateRule | null {
+    return store.get("DelegateRule", id) as DelegateRule | null;
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get owner(): Bytes {
+    let value = this.get("owner");
+    return value.toBytes();
+  }
+
+  set owner(value: Bytes) {
+    this.set("owner", Value.fromBytes(value));
+  }
+
+  get signerToken(): Bytes {
+    let value = this.get("signerToken");
+    return value.toBytes();
+  }
+
+  set signerToken(value: Bytes) {
+    this.set("signerToken", Value.fromBytes(value));
+  }
+
+  get senderToken(): Bytes {
+    let value = this.get("senderToken");
+    return value.toBytes();
+  }
+
+  set senderToken(value: Bytes) {
+    this.set("senderToken", Value.fromBytes(value));
+  }
+
+  get maxSenderAmount(): BigInt {
+    let value = this.get("maxSenderAmount");
+    return value.toBigInt();
+  }
+
+  set maxSenderAmount(value: BigInt) {
+    this.set("maxSenderAmount", Value.fromBigInt(value));
+  }
+
+  get priceCoef(): BigInt {
+    let value = this.get("priceCoef");
+    return value.toBigInt();
+  }
+
+  set priceCoef(value: BigInt) {
+    this.set("priceCoef", Value.fromBigInt(value));
+  }
+
+  get priceExp(): BigInt {
+    let value = this.get("priceExp");
+    return value.toBigInt();
+  }
+
+  set priceExp(value: BigInt) {
+    this.set("priceExp", Value.fromBigInt(value));
+  }
+}
+
+export class ProvidedOrder extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id !== null, "Cannot save ProvidedOrder entity without an ID");
+    assert(
+      id.kind == ValueKind.STRING,
+      "Cannot save ProvidedOrder entity with non-string ID. " +
+        'Considering using .toHex() to convert the "id" to a string.'
+    );
+    store.set("ProvidedOrder", id.toString(), this);
+  }
+
+  static load(id: string): ProvidedOrder | null {
+    return store.get("ProvidedOrder", id) as ProvidedOrder | null;
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get owner(): Bytes {
+    let value = this.get("owner");
+    return value.toBytes();
+  }
+
+  set owner(value: Bytes) {
+    this.set("owner", Value.fromBytes(value));
+  }
+
+  get tradeWallet(): Bytes {
+    let value = this.get("tradeWallet");
+    return value.toBytes();
+  }
+
+  set tradeWallet(value: Bytes) {
+    this.set("tradeWallet", Value.fromBytes(value));
+  }
+
+  get signerToken(): Bytes {
+    let value = this.get("signerToken");
+    return value.toBytes();
+  }
+
+  set signerToken(value: Bytes) {
+    this.set("signerToken", Value.fromBytes(value));
+  }
+
+  get senderToken(): Bytes {
+    let value = this.get("senderToken");
+    return value.toBytes();
+  }
+
+  set senderToken(value: Bytes) {
+    this.set("senderToken", Value.fromBytes(value));
+  }
+
+  get senderAmount(): BigInt {
+    let value = this.get("senderAmount");
+    return value.toBigInt();
+  }
+
+  set senderAmount(value: BigInt) {
+    this.set("senderAmount", Value.fromBigInt(value));
+  }
+
+  get priceCoef(): BigInt {
+    let value = this.get("priceCoef");
+    return value.toBigInt();
+  }
+
+  set priceCoef(value: BigInt) {
+    this.set("priceCoef", Value.fromBigInt(value));
+  }
+
+  get priceExp(): BigInt {
+    let value = this.get("priceExp");
+    return value.toBigInt();
+  }
+
+  set priceExp(value: BigInt) {
+    this.set("priceExp", Value.fromBigInt(value));
   }
 }
