@@ -3,11 +3,11 @@ schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
-    name: Contract
+    name: Indexer
     network: '{{network}}'
     source:
       address: '{{address}}'
-      abi: Contract
+      abi: Indexer
       startBlock: {{startBlock}}
     mapping:
       kind: ethereum/events
@@ -21,8 +21,8 @@ dataSources:
         - Stake
         - Unstake
       abis:
-        - name: Contract
-          file: ./abis/Contract.json
+        - name: Indexer
+          file: ./abis/Indexer.json
       eventHandlers:
         - event: AddTokenToBlacklist(address)
           handler: handleAddTokenToBlacklist
@@ -36,4 +36,25 @@ dataSources:
           handler: handleStake
         - event: Unstake(indexed address,indexed address,indexed address,bytes2,uint256)
           handler: handleUnstake
-      file: ./src/mapping.ts
+      file: ./src/IndexerMapping.ts
+templates:
+  - name: Index
+    kind: ethereum/contract
+    network: '{{network}}'
+    source:
+      abi: Index
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      file: ./src/IndexMapping.ts 
+      entities:
+        - Index
+      abis:
+        - name: Index
+          file: ./abis/Index.json
+      eventHandlers: 
+        - event: SetLocator(indexed address,uint256,indexed bytes32)
+          handler: handleSetLocator
+        - event: UnsetLocator(indexed address)
+          handler: handleUnsetLocator
