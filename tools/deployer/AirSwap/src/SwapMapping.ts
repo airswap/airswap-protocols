@@ -1,6 +1,6 @@
 import { BigInt, log } from "@graphprotocol/graph-ts"
 import {
-  Contract,
+  SwapContract,
   AuthorizeSender,
   AuthorizeSigner,
   Cancel,
@@ -8,7 +8,7 @@ import {
   RevokeSender,
   RevokeSigner,
   Swap
-} from "../generated/Contract/Contract"
+} from "../generated/SwapContract/SwapContract"
 import { User, ExecutedOrder } from "../generated/schema"
 
 export function handleAuthorizeSender(event: AuthorizeSender): void {

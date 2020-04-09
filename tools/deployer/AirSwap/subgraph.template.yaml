@@ -3,11 +3,11 @@ schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
-    name: Swap
+    name: SwapContract
     network: '{{network}}'
     source:
       address: '{{address}}'
-      abi: Swap
+      abi: SwapContract
       startBlock: {{startBlock}}
     mapping:
       kind: ethereum/events
@@ -22,7 +22,7 @@ dataSources:
         - RevokeSigner
         - Swap
       abis:
-        - name: Swap
+        - name: SwapContract
           file: ../build/contracts/Swap.json
       eventHandlers:
         - event: AuthorizeSender(indexed address,indexed address)
