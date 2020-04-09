@@ -46,6 +46,42 @@ export function handleAuthorizeSender(event: AuthorizeSender): void {
   }
 }
 
+export function handleRevokeSender(event: RevokeSender): void {
+  let deauthorizerAddress = event.params.authorizerAddress.toHex()
+  let deauthorizer = User.load(deauthorizerAddress)
+
+  // handle new creation of User
+  if (!deauthorizer) {
+    deauthorizer = new User(deauthorizerAddress)
+    deauthorizer.authorizedSigners = new Array<string>()
+    deauthorizer.authorizedSenders = new Array<string>()
+    deauthorizer.executedOrders = new Array<string>()
+    deauthorizer.cancelledNonces = new Array<BigInt>()
+  }
+
+  let revokedSenderAddress = event.params.revokedSender.toHex()
+  let revokedSender = User.load(revokedSenderAddress) 
+  // handle new creation of User (revokedSender)
+  if (!revokedSender) {
+    revokedSender = new User(revokedSenderAddress)
+    revokedSender.authorizedSigners = new Array<string>()
+    revokedSender.authorizedSenders = new Array<string>()
+    revokedSender.executedOrders = new Array<string>()
+    revokedSender.cancelledNonces = new Array<BigInt>()
+    revokedSender.save()
+  }
+
+  // handle removal
+  let authorizedSenders = deauthorizer.authorizedSenders
+  let idxToRemove = authorizedSenders.indexOf(revokedSender.id)
+  // only remove if the revokedSender exists
+  if (idxToRemove > -1) {
+    authorizedSenders.splice(idxToRemove, 1);
+    deauthorizer.authorizedSenders = authorizedSenders
+    deauthorizer.save()
+  }
+}
+
 export function handleAuthorizeSigner(event: AuthorizeSigner): void {
   let authorizerAddress = event.params.authorizerAddress.toHex()
   let authorizer = User.load(authorizerAddress)
@@ -79,6 +115,41 @@ export function handleAuthorizeSigner(event: AuthorizeSigner): void {
     authorizedSigners.push(signer.id)
     authorizer.authorizedSigners = authorizedSigners
     authorizer.save()
+  }
+}
+
+export function handleRevokeSigner(event: RevokeSigner): void {
+  let deauthorizerAddress = event.params.authorizerAddress.toHex()
+  let deauthorizer = User.load(deauthorizerAddress)
+  // handle new creation of User
+  if (!deauthorizer) {
+    deauthorizer = new User(deauthorizerAddress)
+    deauthorizer.authorizedSigners = new Array<string>()
+    deauthorizer.authorizedSenders = new Array<string>()
+    deauthorizer.executedOrders = new Array<string>()
+    deauthorizer.cancelledNonces = new Array<BigInt>()
+  }
+
+  let revokedSignerAddress = event.params.revokedSigner.toHex()
+  let revokedSigner = User.load(revokedSignerAddress) 
+  // handle new creation of User (revokedSigner)
+  if (!revokedSigner) {
+    revokedSigner = new User(revokedSignerAddress)
+    revokedSigner.authorizedSigners = new Array<string>()
+    revokedSigner.authorizedSenders = new Array<string>()
+    revokedSigner.executedOrders = new Array<string>()
+    revokedSigner.cancelledNonces = new Array<BigInt>()
+    revokedSigner.save()
+  }
+
+  // handle removal
+  let authorizedSigners = deauthorizer.authorizedSigners
+  let idxToRemove = authorizedSigners.indexOf(revokedSigner.id)
+  // only remove if the revokedSigner exists
+  if (idxToRemove > -1) {
+    authorizedSigners.splice(idxToRemove, 1);
+    deauthorizer.authorizedSigners = authorizedSigners
+    deauthorizer.save()
   }
 }
 
@@ -125,78 +196,6 @@ export function handleCancelUpTo(event: CancelUpTo): void {
   cancelledNonces.sort()
   user.cancelledNonces = cancelledNonces
   user.save()
-}
-
-export function handleRevokeSender(event: RevokeSender): void {
-  let deauthorizerAddress = event.params.authorizerAddress.toHex()
-  let deauthorizer = User.load(deauthorizerAddress)
-
-  // handle new creation of User
-  if (!deauthorizer) {
-    deauthorizer = new User(deauthorizerAddress)
-    deauthorizer.authorizedSigners = new Array<string>()
-    deauthorizer.authorizedSenders = new Array<string>()
-    deauthorizer.executedOrders = new Array<string>()
-    deauthorizer.cancelledNonces = new Array<BigInt>()
-  }
-
-  let revokedSenderAddress = event.params.revokedSender.toHex()
-  let revokedSender = User.load(revokedSenderAddress) 
-  // handle new creation of User (revokedSender)
-  if (!revokedSender) {
-    revokedSender = new User(revokedSenderAddress)
-    revokedSender.authorizedSigners = new Array<string>()
-    revokedSender.authorizedSenders = new Array<string>()
-    revokedSender.executedOrders = new Array<string>()
-    revokedSender.cancelledNonces = new Array<BigInt>()
-    revokedSender.save()
-  }
-
-  // handle removal
-  let authorizedSenders = deauthorizer.authorizedSenders
-  let idxToRemove = authorizedSenders.indexOf(revokedSender.id)
-  // only remove if the revokedSender exists
-  if (idxToRemove > -1) {
-    authorizedSenders.splice(idxToRemove, 1);
-    deauthorizer.authorizedSenders = authorizedSenders
-    deauthorizer.save()
-  }
-}
-
-export function handleRevokeSigner(event: RevokeSigner): void {
-  let deauthorizerAddress = event.params.authorizerAddress.toHex()
-  let deauthorizer = User.load(deauthorizerAddress)
-
-  // handle new creation of User
-  if (!deauthorizer) {
-    deauthorizer = new User(deauthorizerAddress)
-    deauthorizer.authorizedSigners = new Array<string>()
-    deauthorizer.authorizedSenders = new Array<string>()
-    deauthorizer.executedOrders = new Array<string>()
-    deauthorizer.cancelledNonces = new Array<BigInt>()
-  }
-
-  let revokedSignerAddress = event.params.revokedSigner.toHex()
-  let revokedSigner = User.load(revokedSignerAddress) 
-  // handle new creation of User (revokedSigner)
-  if (!revokedSigner) {
-    revokedSigner = new User(revokedSignerAddress)
-    revokedSigner.authorizedSigners = new Array<string>()
-    revokedSigner.authorizedSenders = new Array<string>()
-    revokedSigner.executedOrders = new Array<string>()
-    revokedSigner.cancelledNonces = new Array<BigInt>()
-    revokedSigner.save()
-  }
-
-  // handle removal
-  let authorizedSigners = deauthorizer.authorizedSigners
-  let idxToRemove = authorizedSigners.indexOf(revokedSigner.id)
-  // only remove if the revokedSigner exists
-  if (idxToRemove > -1) {
-    authorizedSigners.splice(idxToRemove, 1);
-    deauthorizer.authorizedSigners = authorizedSigners
-    deauthorizer.save()
-  }
 }
 
 export function handleSwap(event: Swap): void {
