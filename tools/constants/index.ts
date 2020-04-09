@@ -41,11 +41,18 @@ export const chainNames: Record<string, string> = {
   '42': 'KOVAN',
 }
 
-export const tokenKinds: Record<string, string> = {
-  ERC20: '0x36372b07',
-  ERC721: '0x80ac58cd',
-  ERC1155: '0xd9b67a26',
-  CKITTY: '0x9a20483d',
+export enum TokenKinds {
+  ERC20 = '0x36372b07',
+  ERC721 = '0x80ac58cd',
+  ERC1155 = '0xd9b67a26',
+  CKITTY = '0x9a20483d',
+}
+
+export const tokenKinds = {
+  ERC20: TokenKinds.ERC20,
+  ERC721: TokenKinds.ERC721,
+  ERC1155: TokenKinds.ERC1155,
+  CKITTY: TokenKinds.CKITTY,
 }
 
 export const tokenKindNames: Record<string, string> = {

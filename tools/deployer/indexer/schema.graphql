@@ -1,0 +1,34 @@
+type Token @entity {
+  id: ID! # token address
+  isBlacklisted: Boolean
+}
+
+type Indexer @entity {
+  id: ID! # indexer address
+}
+
+type Index @entity {
+  id: ID! # index address
+  indexer: Indexer! # the indexer that created the index
+  signerToken: Token!
+  senderToken: Token!
+  protocol: Bytes!
+}
+
+type StakedAmount @entity {
+  id: ID! # staker + indexer
+  indexer: Indexer! # the indexer that emitted
+  staker: Bytes! # user address of user that staked
+  signerToken: Token!
+  senderToken: Token!
+  protocol: Bytes!
+  stakeAmount: BigInt!
+}
+
+type Locator @entity {
+  id: ID! # owner + index
+  owner: Bytes! # the owner of the locator
+  index: Index!
+  score: BigInt!
+  locator: Bytes!
+}
