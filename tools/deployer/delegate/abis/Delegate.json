@@ -1,0 +1,710 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "contract ISwap",
+        "name": "delegateSwap",
+        "type": "address"
+      },
+      {
+        "internalType": "contract IIndexer",
+        "name": "delegateIndexer",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "delegateContractOwner",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "delegateTradeWallet",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes2",
+        "name": "delegateProtocol",
+        "type": "bytes2"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "previousOwner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnershipTransferred",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "tradeWallet",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "senderToken",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "signerToken",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "senderAmount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "priceCoef",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "priceExp",
+        "type": "uint256"
+      }
+    ],
+    "name": "ProvideOrder",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "senderToken",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "signerToken",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "maxSenderAmount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "priceCoef",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "priceExp",
+        "type": "uint256"
+      }
+    ],
+    "name": "SetRule",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "senderToken",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "signerToken",
+        "type": "address"
+      }
+    ],
+    "name": "UnsetRule",
+    "type": "event"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "senderToken",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "signerToken",
+        "type": "address"
+      }
+    ],
+    "name": "getMaxQuote",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "senderAmount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "signerAmount",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "signerAmount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "signerToken",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "senderToken",
+        "type": "address"
+      }
+    ],
+    "name": "getSenderSideQuote",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "senderAmount",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "senderAmount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "senderToken",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "signerToken",
+        "type": "address"
+      }
+    ],
+    "name": "getSignerSideQuote",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "signerAmount",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "indexer",
+    "outputs": [
+      {
+        "internalType": "contract IIndexer",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "isOwner",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "owner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "protocol",
+    "outputs": [
+      {
+        "internalType": "bytes2",
+        "name": "",
+        "type": "bytes2"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "nonce",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "expiry",
+            "type": "uint256"
+          },
+          {
+            "components": [
+              {
+                "internalType": "bytes4",
+                "name": "kind",
+                "type": "bytes4"
+              },
+              {
+                "internalType": "address",
+                "name": "wallet",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "token",
+                "type": "address"
+              },
+              {
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct Types.Party",
+            "name": "signer",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              {
+                "internalType": "bytes4",
+                "name": "kind",
+                "type": "bytes4"
+              },
+              {
+                "internalType": "address",
+                "name": "wallet",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "token",
+                "type": "address"
+              },
+              {
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct Types.Party",
+            "name": "sender",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              {
+                "internalType": "bytes4",
+                "name": "kind",
+                "type": "bytes4"
+              },
+              {
+                "internalType": "address",
+                "name": "wallet",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "token",
+                "type": "address"
+              },
+              {
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct Types.Party",
+            "name": "affiliate",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "signatory",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "validator",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes1",
+                "name": "version",
+                "type": "bytes1"
+              },
+              {
+                "internalType": "uint8",
+                "name": "v",
+                "type": "uint8"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "r",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "s",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct Types.Signature",
+            "name": "signature",
+            "type": "tuple"
+          }
+        ],
+        "internalType": "struct Types.Order",
+        "name": "order",
+        "type": "tuple"
+      }
+    ],
+    "name": "provideOrder",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [],
+    "name": "renounceOwnership",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "rules",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "maxSenderAmount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "priceCoef",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "priceExp",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "senderToken",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "signerToken",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "maxSenderAmount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "priceCoef",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "priceExp",
+        "type": "uint256"
+      }
+    ],
+    "name": "setRule",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "senderToken",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "signerToken",
+        "type": "address"
+      },
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "maxSenderAmount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "priceCoef",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "priceExp",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct IDelegate.Rule",
+        "name": "rule",
+        "type": "tuple"
+      },
+      {
+        "internalType": "uint256",
+        "name": "newStakeAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "setRuleAndIntent",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "newTradeWallet",
+        "type": "address"
+      }
+    ],
+    "name": "setTradeWallet",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "swapContract",
+    "outputs": [
+      {
+        "internalType": "contract ISwap",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "tradeWallet",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "transferOwnership",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "senderToken",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "signerToken",
+        "type": "address"
+      }
+    ],
+    "name": "unsetRule",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "senderToken",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "signerToken",
+        "type": "address"
+      }
+    ],
+    "name": "unsetRuleAndIntent",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]

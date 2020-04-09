@@ -1,0 +1,48 @@
+specVersion: 0.0.2
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: DelegateFactory
+    network: '{{network}}'
+    source:
+      address: '{{address}}'
+      abi: DelegateFactory
+      startBlock: {{startBlock}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - CreateDelegate
+      abis:
+        - name: DelegateFactory
+          file: ./abis/DelegateFactory.json
+      eventHandlers:
+        - event: CreateDelegate(indexed address,address,address,indexed address,address)
+          handler: handleCreateDelegate
+      file: ./src/DelegateFactoryMapping.ts
+templates:
+  - name: Delegate
+    kind: ethereum/contract
+    network: '{{network}}'
+    source:
+      abi: Delegate
+    mapping: 
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      file: ./src/DelegateMapping.ts
+      entities:
+        - Delegate
+      abis:
+        - name: Delegate
+          file: ./abis/Delegate.json
+      eventHandlers: 
+        - event: SetRule(indexed address,indexed address,indexed address,uint256,uint256,uint256)
+          handler: handleSetRule
+        - event: UnsetRule(indexed address,indexed address,indexed address)
+          handler: handleUnsetRule
+        - event: ProvideOrder(indexed address,address,indexed address,indexed address,uint256,uint256,uint256)
+          handler: handleProvideOrder
+
