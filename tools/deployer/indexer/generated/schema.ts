@@ -192,13 +192,4 @@ export class StakedAmount extends Entity {
       this.set("stakeAmount", Value.fromBigInt(value as BigInt));
     }
   }
-
-  get active(): boolean {
-    let value = this.get("active");
-    return value.toBoolean();
-  }
-
-  set active(value: boolean) {
-    this.set("active", Value.fromBoolean(value));
-  }
 }

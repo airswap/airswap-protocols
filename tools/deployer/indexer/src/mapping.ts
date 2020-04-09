@@ -1,4 +1,4 @@
-import { BigInt, Bytes, log} from "@graphprotocol/graph-ts"
+import { BigInt, log, store} from "@graphprotocol/graph-ts"
 import {
   Contract,
   AddTokenToBlacklist,
@@ -82,7 +82,6 @@ export function handleStake(event: Stake): void {
    stakedAmount.protocol = event.params.protocol
   }
   stakedAmount.stakeAmount = event.params.stakeAmount
-  stakedAmount.active = true
   stakedAmount.save()
 }
 
@@ -92,9 +91,5 @@ export function handleUnstake(event: Unstake): void {
     event.params.signerToken.toHex() + 
     event.params.senderToken.toHex() + 
     event.params.protocol.toHex()
-
-  let stakedAmount = StakedAmount.load(stakeIdentifier)
-  stakedAmount.stakeAmount = BigInt.fromI32(0)
-  stakedAmount.active = false
-  stakedAmount.save()
+  store.remove("StakedAmount", stakeIdentifier)
 }

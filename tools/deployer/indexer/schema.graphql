@@ -17,5 +17,4 @@ type StakedAmount @entity {
   senderToken: Token!
   protocol: Bytes!
   stakeAmount: BigInt
-  active: Boolean # needed since it's possible to stake 0
 }
