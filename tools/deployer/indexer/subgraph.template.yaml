@@ -1,0 +1,60 @@
+specVersion: 0.0.2
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: Indexer
+    network: '{{network}}'
+    source:
+      address: '{{address}}'
+      abi: Indexer
+      startBlock: {{startBlock}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - AddTokenToBlacklist
+        - CreateIndex
+        - OwnershipTransferred
+        - RemoveTokenFromBlacklist
+        - Stake
+        - Unstake
+      abis:
+        - name: Indexer
+          file: ./abis/Indexer.json
+      eventHandlers:
+        - event: AddTokenToBlacklist(address)
+          handler: handleAddTokenToBlacklist
+        - event: CreateIndex(indexed address,indexed address,bytes2,address)
+          handler: handleCreateIndex
+        - event: OwnershipTransferred(indexed address,indexed address)
+          handler: handleOwnershipTransferred
+        - event: RemoveTokenFromBlacklist(address)
+          handler: handleRemoveTokenFromBlacklist
+        - event: Stake(indexed address,indexed address,indexed address,bytes2,uint256)
+          handler: handleStake
+        - event: Unstake(indexed address,indexed address,indexed address,bytes2,uint256)
+          handler: handleUnstake
+      file: ./src/IndexerMapping.ts
+templates:
+  - name: Index
+    kind: ethereum/contract
+    network: '{{network}}'
+    source:
+      abi: Index
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      file: ./src/IndexMapping.ts 
+      entities:
+        - Index
+      abis:
+        - name: Index
+          file: ./abis/Index.json
+      eventHandlers: 
+        - event: SetLocator(indexed address,uint256,indexed bytes32)
+          handler: handleSetLocator
+        - event: UnsetLocator(indexed address)
+          handler: handleUnsetLocator
