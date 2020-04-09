@@ -320,6 +320,7 @@ contract('Delegate Integration Tests', async accounts => {
         stakeAmount,
         'stake set incorrectly'
       )
+      await checkLinkedList(daiAddress, wethAddress, [1])
     })
 
     it('should increase stake with a new rule', async () => {
@@ -384,6 +385,7 @@ contract('Delegate Integration Tests', async accounts => {
         stakeAmount,
         'stake set incorrectly'
       )
+      await checkLinkedList(daiAddress, wethAddress, [2, 1])
     })
 
     it('should decrease stake with a new rule', async () => {
@@ -448,9 +450,7 @@ contract('Delegate Integration Tests', async accounts => {
         stakeAmount,
         'stake set incorrectly'
       )
-    })
 
-    it('should have correctly added the 3 rules to the delegate', async () => {
       await checkLinkedList(daiAddress, wethAddress, [2, 3, 1])
     })
   })
