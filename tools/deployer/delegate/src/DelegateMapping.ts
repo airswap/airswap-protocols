@@ -38,6 +38,15 @@ export function handleUnsetRule(event: UnsetRule): void {
 }
 
 export function handleProvideOrder(event: ProvideOrder): void {
-  // should update the Delegate rule's values 
-  // original rule - all trades = new rule
+  var ruleIdentifier = 
+    event.params.owner.toHex() + 
+    event.params.senderToken.toHex() + 
+    event.params.signerToken.toHex()
+  var rule = DelegateRule.load(ruleIdentifier)
+  rule.maxSenderAmount = BigInt.fromI32(rule.maxSenderAmount.toI32() - event.params.senderAmount.toI32())
+  // if there is nothing mark the rule as inactive
+  if (rule.maxSenderAmount == BigInt.fromI32(0)) {
+    rule.active = false
+  }
+  rule.save()
 }
