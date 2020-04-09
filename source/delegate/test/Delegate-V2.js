@@ -16,6 +16,7 @@ const { GANACHE_PROVIDER } = require('@airswap/test-utils').constants
 
 contract('Delegate Integration Tests', async accounts => {
   const STARTING_BALANCE = 100000000
+  const notOwner = accounts[0]
   const aliceAddress = accounts[1]
   const bobAddress = accounts[2]
   const carolAddress = accounts[3]
@@ -80,6 +81,45 @@ contract('Delegate Integration Tests', async accounts => {
     it('should set the swap contract address', async () => {
       const val = await aliceDelegate.swapContract.call()
       equal(val, swapAddress, 'swap address is incorrect')
+    })
+
+    it('should set the indexer contract address', async () => {
+      const val = await aliceDelegate.indexer.call()
+      equal(val, indexer.address, 'indexer address is incorrect')
+    })
+
+    it('should set the tradeWallet address', async () => {
+      const val = await aliceDelegate.tradeWallet.call()
+      equal(val, aliceTradeWallet, 'trade wallet is incorrect')
+    })
+
+    it('should set the protocol value', async () => {
+      const val = await aliceDelegate.protocol.call()
+      equal(val, PROTOCOL, 'protocol is incorrect')
+    })
+
+    it('should set the owner value', async () => {
+      const val = await aliceDelegate.owner.call()
+      equal(val, aliceAddress, 'owner is incorrect')
+    })
+
+    it('should set the owner and trade wallet if none are provided', async () => {
+      const newDelegate = await DelegateV2.new(
+        swapAddress,
+        indexer.address,
+        ADDRESS_ZERO,
+        ADDRESS_ZERO,
+        PROTOCOL,
+        {
+          from: notOwner,
+        }
+      )
+
+      const owner = await newDelegate.owner.call()
+      const tradeWallet = await newDelegate.tradeWallet.call()
+
+      equal(owner, notOwner, 'owner is incorrect')
+      equal(tradeWallet, notOwner, 'trade wallet is incorrect')
     })
   })
 })
