@@ -1,0 +1,42 @@
+specVersion: 0.0.2
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: Contract
+    network: '{{network}}'
+    source:
+      address: '{{address}}'
+      abi: Contract
+      startBlock: {{startBlock}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - AuthorizeSender
+        - AuthorizeSigner
+        - Cancel
+        - CancelUpTo
+        - RevokeSender
+        - RevokeSigner
+        - Swap
+      abis:
+        - name: Contract
+          file: ./abis/Contract.json
+      eventHandlers:
+        - event: AuthorizeSender(indexed address,indexed address)
+          handler: handleAuthorizeSender
+        - event: AuthorizeSigner(indexed address,indexed address)
+          handler: handleAuthorizeSigner
+        - event: Cancel(indexed uint256,indexed address)
+          handler: handleCancel
+        - event: CancelUpTo(indexed uint256,indexed address)
+          handler: handleCancelUpTo
+        - event: RevokeSender(indexed address,indexed address)
+          handler: handleRevokeSender
+        - event: RevokeSigner(indexed address,indexed address)
+          handler: handleRevokeSigner
+        - event: Swap(indexed uint256,uint256,indexed address,uint256,uint256,address,indexed address,uint256,uint256,address,address,uint256,uint256,address)
+          handler: handleSwap
+      file: ./src/mapping.ts

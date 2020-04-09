@@ -1,0 +1,33 @@
+type User @entity {
+  id: ID! # wallet address
+  authorizedSigners: [User!]! # signers this user has authorized
+  authorizedSenders: [User!]! # senders this user has authorized
+  executedOrders: [ExecutedOrder!]! # orders this user has that have been completed
+  cancelledNonces: [BigInt!]!
+}
+
+type ExecutedOrder @entity {
+  id: ID! # signer address + nonce
+
+  nonce: BigInt # order nonce for a user
+  expiry: BigInt
+
+  from: Bytes # address of the originator of the transaction
+  to: Bytes # who the originator sent the transaction to
+  value: BigInt # value sent with the transaction
+
+  signer: User
+  signerAmount: BigInt
+  signerTokenId: BigInt
+  signerTokenAddress: Bytes
+
+  sender: User
+  senderAmount: BigInt
+  senderTokenId: BigInt
+  senderTokenAddress: Bytes
+
+  affiliate: User
+  affiliateAmount: BigInt
+  affiliateTokenId: BigInt
+  affiliateTokenAddress: Bytes
+}
