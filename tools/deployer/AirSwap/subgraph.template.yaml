@@ -23,7 +23,7 @@ dataSources:
         - Swap
       abis:
         - name: Swap
-          file: ./build/contracts/Swap.json
+          file: ../build/contracts/Swap.json
       eventHandlers:
         - event: AuthorizeSender(indexed address,indexed address)
           handler: handleAuthorizeSender
