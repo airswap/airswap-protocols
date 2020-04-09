@@ -17,7 +17,7 @@ type Index @entity {
 
 type StakedAmount @entity {
   id: ID! # staker + indexer
-  indexer: Indexer!
+  indexer: Indexer! # the indexer that emitted
   staker: Bytes! # user address of user that staked
   signerToken: Token!
   senderToken: Token!
@@ -28,7 +28,7 @@ type StakedAmount @entity {
 type Locator @entity {
   id: ID! # owner + index
   owner: Bytes! # the owner of the locator
-  index: Index! # make this Index
+  index: Index!
   score: BigInt!
   locator: Bytes!
 }
