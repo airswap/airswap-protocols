@@ -9,6 +9,7 @@ export function handleSetRule(event: SetRule): void {
     event.params.signerToken.toHex()
 
   var rule = DelegateRule.load(ruleIdentifier)
+  // create base portion of rule if it doesn't not exist
   if (!rule) {
     rule = new DelegateRule(ruleIdentifier)
     rule.delegate = event.address
@@ -37,6 +38,7 @@ export function handleProvideOrder(event: ProvideOrder): void {
     event.params.signerToken.toHex()
   var rule = DelegateRule.load(ruleIdentifier)
   rule.maxSenderAmount = BigInt.fromI32(rule.maxSenderAmount.toI32() - event.params.senderAmount.toI32())
+  // if rule is to have been fully consumed, remove it
   if (rule.maxSenderAmount == BigInt.fromI32(0)) {
     store.remove("DelegateRule", ruleIdentifier)
   } else {
