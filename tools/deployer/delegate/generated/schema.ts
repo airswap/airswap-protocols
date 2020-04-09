@@ -12,6 +12,37 @@ import {
   BigDecimal
 } from "@graphprotocol/graph-ts";
 
+export class DelegateFactory extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id !== null, "Cannot save DelegateFactory entity without an ID");
+    assert(
+      id.kind == ValueKind.STRING,
+      "Cannot save DelegateFactory entity with non-string ID. " +
+        'Considering using .toHex() to convert the "id" to a string.'
+    );
+    store.set("DelegateFactory", id.toString(), this);
+  }
+
+  static load(id: string): DelegateFactory | null {
+    return store.get("DelegateFactory", id) as DelegateFactory | null;
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+}
+
 export class DelegateContract extends Entity {
   constructor(id: string) {
     super();
@@ -42,13 +73,13 @@ export class DelegateContract extends Entity {
     this.set("id", Value.fromString(value));
   }
 
-  get factory(): Bytes {
+  get factory(): string {
     let value = this.get("factory");
-    return value.toBytes();
+    return value.toString();
   }
 
-  set factory(value: Bytes) {
-    this.set("factory", Value.fromBytes(value));
+  set factory(value: string) {
+    this.set("factory", Value.fromString(value));
   }
 
   get swap(): Bytes {
@@ -69,26 +100,26 @@ export class DelegateContract extends Entity {
     this.set("indexer", Value.fromBytes(value));
   }
 
-  get delegateContractOwner(): Bytes {
-    let value = this.get("delegateContractOwner");
+  get owner(): Bytes {
+    let value = this.get("owner");
     return value.toBytes();
   }
 
-  set delegateContractOwner(value: Bytes) {
-    this.set("delegateContractOwner", Value.fromBytes(value));
+  set owner(value: Bytes) {
+    this.set("owner", Value.fromBytes(value));
   }
 
-  get delegateTradeWallet(): Bytes {
-    let value = this.get("delegateTradeWallet");
+  get tradeWallet(): Bytes {
+    let value = this.get("tradeWallet");
     return value.toBytes();
   }
 
-  set delegateTradeWallet(value: Bytes) {
-    this.set("delegateTradeWallet", Value.fromBytes(value));
+  set tradeWallet(value: Bytes) {
+    this.set("tradeWallet", Value.fromBytes(value));
   }
 }
 
-export class DelegateRule extends Entity {
+export class Rule extends Entity {
   constructor(id: string) {
     super();
     this.set("id", Value.fromString(id));
@@ -96,17 +127,17 @@ export class DelegateRule extends Entity {
 
   save(): void {
     let id = this.get("id");
-    assert(id !== null, "Cannot save DelegateRule entity without an ID");
+    assert(id !== null, "Cannot save Rule entity without an ID");
     assert(
       id.kind == ValueKind.STRING,
-      "Cannot save DelegateRule entity with non-string ID. " +
+      "Cannot save Rule entity with non-string ID. " +
         'Considering using .toHex() to convert the "id" to a string.'
     );
-    store.set("DelegateRule", id.toString(), this);
+    store.set("Rule", id.toString(), this);
   }
 
-  static load(id: string): DelegateRule | null {
-    return store.get("DelegateRule", id) as DelegateRule | null;
+  static load(id: string): Rule | null {
+    return store.get("Rule", id) as Rule | null;
   }
 
   get id(): string {
@@ -118,13 +149,13 @@ export class DelegateRule extends Entity {
     this.set("id", Value.fromString(value));
   }
 
-  get delegate(): Bytes {
+  get delegate(): string {
     let value = this.get("delegate");
-    return value.toBytes();
+    return value.toString();
   }
 
-  set delegate(value: Bytes) {
-    this.set("delegate", Value.fromBytes(value));
+  set delegate(value: string) {
+    this.set("delegate", Value.fromString(value));
   }
 
   get owner(): Bytes {

@@ -1,15 +1,19 @@
-type DelegateContract @entity {
-  id: ID! # delegate contract address
-  factory: Bytes! #factory that created this delegate
-  swap: Bytes! # swap contract address
-  indexer: Bytes! # indexer contract address
-  delegateContractOwner: Bytes!
-  delegateTradeWallet: Bytes!
+type DelegateFactory @entity {
+  id: ID! # address of the delegate factory
 }
 
-type DelegateRule @entity {
-  id: ID! # owner address + signerToken + senderToken
-  delegate: Bytes! # address
+type DelegateContract @entity {
+  id: ID! # delegate contract address
+  factory: DelegateFactory! #factory that created this delegate
+  swap: Bytes! # swap contract address
+  indexer: Bytes! # indexer contract address
+  owner: Bytes!
+  tradeWallet: Bytes!
+}
+
+type Rule @entity {
+  id: ID! # delegate address + signerToken + senderToken
+  delegate: DelegateContract! # address
   owner: Bytes! # address
   signerToken: Bytes! # MAKE TOKEN
   senderToken: Bytes! # MAKE TOKEN
