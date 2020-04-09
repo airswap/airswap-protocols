@@ -10,17 +10,9 @@ type Indexer @entity {
 type Index @entity {
   id: ID! # index address
   indexer: Indexer! # the indexer that created the index
-  protocol: Bytes!
   signerToken: Token!
   senderToken: Token!
-}
-
-type Locator @entity {
-  id: ID! # owner + index
-  owner: Bytes! # the owner of the locator
-  index: Index! # make this Index
-  score: BigInt!
-  locator: Bytes!
+  protocol: Bytes!
 }
 
 type StakedAmount @entity {
@@ -31,4 +23,12 @@ type StakedAmount @entity {
   senderToken: Token!
   protocol: Bytes!
   stakeAmount: BigInt!
+}
+
+type Locator @entity {
+  id: ID! # owner + index
+  owner: Bytes! # the owner of the locator
+  index: Index! # make this Index
+  score: BigInt!
+  locator: Bytes!
 }
