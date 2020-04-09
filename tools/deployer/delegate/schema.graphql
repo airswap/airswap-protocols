@@ -16,16 +16,4 @@ type DelegateRule @entity {
   maxSenderAmount: BigInt!
   priceCoef: BigInt!
   priceExp: BigInt!
-  active: Boolean
-}
-
-type ProvidedOrder @entity {
-  id: ID! # signer(owner) + nonce : find this through Executed Orders?
-  owner: Bytes!
-  tradeWallet: Bytes! # MAKE USER
-  signerToken: Bytes! # MAKE TOKEN
-  senderToken: Bytes! # MAKE TOKEN
-  senderAmount: BigInt!
-  priceCoef: BigInt!
-  priceExp: BigInt!
 }
