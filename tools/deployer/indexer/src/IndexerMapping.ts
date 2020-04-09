@@ -1,4 +1,4 @@
-import { log, store} from "@graphprotocol/graph-ts"
+import { Bytes, log, store } from "@graphprotocol/graph-ts"
 import {
   AddTokenToBlacklist,
   CreateIndex,
@@ -6,7 +6,7 @@ import {
   Stake,
   Unstake
 } from "../generated/Indexer/Indexer"
-import { Token, Index, StakedAmount } from "../generated/schema"
+import { Token, Indexer, Index, StakedAmount } from "../generated/schema"
 
 export function handleAddTokenToBlacklist(event: AddTokenToBlacklist): void {
   let token = Token.load(event.params.token.toHex())
@@ -31,8 +31,6 @@ export function handleRemoveTokenFromBlacklist(event: RemoveTokenFromBlacklist):
 }
 
 export function handleCreateIndex(event: CreateIndex): void {
-  let index = new Index(event.params.indexAddress.toHex() + event.params.protocol.toHex())
-
   // handle creation of signer tokens if it doesn't exist
   let signerToken = Token.load(event.params.signerToken.toHex())
   if (signerToken == null) {
@@ -48,8 +46,16 @@ export function handleCreateIndex(event: CreateIndex): void {
     senderToken.isBlacklisted = false
     senderToken.save()
   }
-  
-  index.indexer = event.address
+
+  // handle creation of indexer if it doesn't exist
+  let indexer = Indexer.load(event.address.toHex())
+  if (!indexer) {
+    indexer = new Indexer(event.address.toHex())
+    indexer.save()
+  }
+
+  let index = new Index(event.params.indexAddress.toHex())
+  index.indexer = indexer.id
   index.protocol = event.params.protocol
   index.signerToken = signerToken.id
   index.senderToken = senderToken.id
@@ -57,16 +63,12 @@ export function handleCreateIndex(event: CreateIndex): void {
 }
 
 export function handleStake(event: Stake): void {
-  let stakeIdentifier = 
-    event.params.staker.toHex() + 
-    event.params.signerToken.toHex() + 
-    event.params.senderToken.toHex() + 
-    event.params.protocol.toHex()
-
+  let stakeIdentifier = event.params.staker.toHex() + event.address.toHex()
   let stakedAmount = StakedAmount.load(stakeIdentifier)
   // create base portion of stake if it doesn't exist
   if (!stakedAmount) {
     stakedAmount = new StakedAmount(stakeIdentifier)
+    stakedAmount.indexer = Indexer.load(event.address.toHex()).id
     stakedAmount.staker = event.params.staker
     stakedAmount.signerToken = Token.load(event.params.signerToken.toHex()).id
     stakedAmount.senderToken = Token.load(event.params.senderToken.toHex()).id
@@ -77,10 +79,6 @@ export function handleStake(event: Stake): void {
 }
 
 export function handleUnstake(event: Unstake): void {
-  let stakeIdentifier = 
-    event.params.staker.toHex() + 
-    event.params.signerToken.toHex() + 
-    event.params.senderToken.toHex() + 
-    event.params.protocol.toHex()
+  let stakeIdentifier = event.params.staker.toHex() + event.address.toHex() 
   store.remove("StakedAmount", stakeIdentifier)
 }
