@@ -28,7 +28,6 @@ export function handleUnsetRule(event: UnsetRule): void {
     event.params.senderToken.toHex() + 
     event.params.signerToken.toHex()
   store.remove("DelegateRule", ruleIdentifier)
-  log.info("DELETE!", [])
 }
 
 export function handleProvideOrder(event: ProvideOrder): void {
@@ -39,7 +38,6 @@ export function handleProvideOrder(event: ProvideOrder): void {
   var rule = DelegateRule.load(ruleIdentifier)
   rule.maxSenderAmount = BigInt.fromI32(rule.maxSenderAmount.toI32() - event.params.senderAmount.toI32())
   if (rule.maxSenderAmount == BigInt.fromI32(0)) {
-    log.info("DELETE!!!", [])
     store.remove("DelegateRule", ruleIdentifier)
   } else {
     rule.save()
