@@ -15,7 +15,7 @@ export function handleAuthorizeSender(event: AuthorizeSender): void {
   let authorizerAddress = event.params.authorizerAddress.toHex()
   let authorizer = User.load(authorizerAddress)
 
-  // handle new creation of User
+  // handle new creation of User (signer)
   if (!authorizer) {
     authorizer = new User(authorizerAddress)
     authorizer.authorizedSigners = new Array<string>()
