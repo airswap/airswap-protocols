@@ -1,9 +1,8 @@
-import { BigInt, log, store} from "@graphprotocol/graph-ts"
+import { log, store} from "@graphprotocol/graph-ts"
 import {
   Contract,
   AddTokenToBlacklist,
   CreateIndex,
-  OwnershipTransferred,
   RemoveTokenFromBlacklist,
   Stake,
   Unstake
@@ -21,9 +20,18 @@ export function handleAddTokenToBlacklist(event: AddTokenToBlacklist): void {
   token.save()
 }
 
+export function handleRemoveTokenFromBlacklist(event: RemoveTokenFromBlacklist): void {
+  let token = Token.load(event.params.token.toHex())
+  // create token if it doesn't exist
+  if (token == null) {
+    token = new Token(event.params.token.toHex())
+  }
+  // set token to blacklisted
+  token.isBlacklisted = false
+  token.save()
+}
+
 export function handleCreateIndex(event: CreateIndex): void {
-  // 0x0000000000000000000000000000000000000000 + 0x0000
-  // -> 0x00000000000000000000000000000000000000000x0000
   let index = new Index(event.params.indexAddress.toHex() + event.params.protocol.toHex())
 
   // handle creation of signer tokens if it doesn't exist
@@ -46,23 +54,6 @@ export function handleCreateIndex(event: CreateIndex): void {
   index.senderToken = senderToken.id
   index.protocol = event.params.protocol
   index.save()
-}
-
-export function handleOwnershipTransferred(event: OwnershipTransferred): void {
-  /* Not Implemented or Tracked */
-}
-
-export function handleRemoveTokenFromBlacklist(
-  event: RemoveTokenFromBlacklist
-): void {
-  let token = Token.load(event.params.token.toHex())
-  // create token if it doesn't exist
-  if (token == null) {
-    token = new Token(event.params.token.toHex())
-  }
-  // set token to blacklisted
-  token.isBlacklisted = false
-  token.save()
 }
 
 export function handleStake(event: Stake): void {
