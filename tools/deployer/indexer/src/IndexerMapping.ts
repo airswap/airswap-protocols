@@ -2,11 +2,16 @@ import { Bytes, log, store } from "@graphprotocol/graph-ts"
 import {
   AddTokenToBlacklist,
   CreateIndex,
+  OwnershipTransferred,
   RemoveTokenFromBlacklist,
   Stake,
   Unstake
 } from "../generated/Indexer/Indexer"
 import { Token, Indexer, Index, StakedAmount } from "../generated/schema"
+
+export function handleOwnershipTransferred(event: OwnershipTransferred): void {	
+  /* Not Implemented or Tracked */	
+}
 
 export function handleAddTokenToBlacklist(event: AddTokenToBlacklist): void {
   let token = Token.load(event.params.token.toHex())
