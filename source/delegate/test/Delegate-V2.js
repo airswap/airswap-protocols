@@ -459,6 +459,127 @@ contract('Delegate Integration Tests', async accounts => {
     })
   })
 
+  describe('Test setIntent', async () => {
+    const stakeAmount = 100
+    it('should not let a non-owner set intent', async () => {
+      await reverted(
+        aliceDelegate.setIntent(daiAddress, wethAddress, stakeAmount, {
+          from: notOwner,
+        }),
+        'Ownable: caller is not the owner'
+      )
+    })
+
+    it('should not let intent be set on a market with no rules', async () => {
+      await reverted(
+        aliceDelegate.setIntent(wethAddress, wethAddress, stakeAmount, {
+          from: aliceAddress,
+        }),
+        'NO_RULE_EXISTS'
+      )
+    })
+
+    it('should set intent for a market successfully', async () => {
+      // create the index
+      await indexer.createIndex(daiAddress, stakingToken.address, PROTOCOL)
+
+      // create a rule for a market
+      await aliceDelegate.createRule(stakingToken.address, daiAddress, 5, 5, {
+        from: aliceAddress,
+      })
+
+      const aliceBalanceBefore = await stakingToken.balanceOf(aliceAddress)
+      const indexerBalanceBefore = await stakingToken.balanceOf(indexerAddress)
+
+      await aliceDelegate.setIntent(
+        stakingToken.address,
+        daiAddress,
+        stakeAmount,
+        {
+          from: aliceAddress,
+        }
+      )
+
+      const aliceBalanceAfter = await stakingToken.balanceOf(aliceAddress)
+      const indexerBalanceAfter = await stakingToken.balanceOf(indexerAddress)
+
+      const intents = await indexer.getLocators(
+        daiAddress,
+        stakingToken.address,
+        PROTOCOL,
+        ADDRESS_ZERO,
+        1
+      )
+
+      // no intents on the market
+      equal(
+        intents['locators'][0],
+        padAddressToLocator(aliceDeleAddress),
+        'locator incorrect'
+      )
+      equal(intents['scores'][0], stakeAmount, 'score set incorrectly')
+
+      equal(
+        aliceBalanceBefore.toNumber() - stakeAmount,
+        aliceBalanceAfter.toNumber(),
+        'Alice incorrect stake amount'
+      )
+      equal(
+        indexerBalanceBefore.toNumber() + stakeAmount,
+        indexerBalanceAfter.toNumber(),
+        'Indexer incorrect stake amount'
+      )
+    })
+  })
+
+  describe('Test unsetIntent', async () => {
+    it('should not let a non-owner unset intent', async () => {
+      await reverted(
+        aliceDelegate.unsetIntent(daiAddress, wethAddress, {
+          from: notOwner,
+        }),
+        'Ownable: caller is not the owner'
+      )
+    })
+
+    it('should unset intent for a market successfully', async () => {
+      // previous section staked 100 tokens on this market
+      const stakeAmount = 100
+
+      const aliceBalanceBefore = await stakingToken.balanceOf(aliceAddress)
+      const indexerBalanceBefore = await stakingToken.balanceOf(indexerAddress)
+
+      await aliceDelegate.unsetIntent(stakingToken.address, daiAddress, {
+        from: aliceAddress,
+      })
+
+      const aliceBalanceAfter = await stakingToken.balanceOf(aliceAddress)
+      const indexerBalanceAfter = await stakingToken.balanceOf(indexerAddress)
+
+      const intents = await indexer.getLocators(
+        daiAddress,
+        stakingToken.address,
+        PROTOCOL,
+        ADDRESS_ZERO,
+        1
+      )
+
+      // no intents on the market
+      equal(intents['locators'].length, 0, 'locators should be empty')
+
+      equal(
+        aliceBalanceBefore.toNumber() + stakeAmount,
+        aliceBalanceAfter.toNumber(),
+        'Alice incorrect stake amount'
+      )
+      equal(
+        indexerBalanceBefore.toNumber() - stakeAmount,
+        indexerBalanceAfter.toNumber(),
+        'Indexer incorrect stake amount'
+      )
+    })
+  })
+
   describe('Test deleteRuleAndUnsetIntent', async () => {
     it('should not let a non-owner set a rule', async () => {
       await reverted(
@@ -478,7 +599,7 @@ contract('Delegate Integration Tests', async accounts => {
       )
 
       await reverted(
-        aliceDelegate.deleteRuleAndUnsetIntent(4, {
+        aliceDelegate.deleteRuleAndUnsetIntent(5, {
           from: aliceAddress,
         }),
         'RULE_NOT_ACTIVE'
@@ -533,6 +654,84 @@ contract('Delegate Integration Tests', async accounts => {
 
       // no intents on the market
       equal(intents['locators'].length, 0, 'locators should be empty')
+    })
+
+    it('should delete a rule and unset intent with 0 stake', async () => {
+      // market has no intents
+      let intents = await indexer.getLocators(
+        wethAddress,
+        daiAddress,
+        PROTOCOL,
+        ADDRESS_ZERO,
+        1
+      )
+      equal(intents['locators'].length, 0, 'locators should be empty')
+
+      const aliceBalanceBefore = await stakingToken.balanceOf(aliceAddress)
+      const indexerBalanceBefore = await stakingToken.balanceOf(indexerAddress)
+
+      // add an intent first
+      await aliceDelegate.setIntent(daiAddress, wethAddress, 0, {
+        from: aliceAddress,
+      })
+
+      equal(
+        aliceBalanceBefore.toNumber(),
+        (await stakingToken.balanceOf(aliceAddress)).toNumber(),
+        'alices balance shouldnt have changed'
+      )
+      equal(
+        indexerBalanceBefore.toNumber(),
+        (await stakingToken.balanceOf(indexerAddress)).toNumber(),
+        'indexer balance shouldnt have changed'
+      )
+
+      // now alice has an intent on the indexer
+      intents = await indexer.getLocators(
+        wethAddress,
+        daiAddress,
+        PROTOCOL,
+        ADDRESS_ZERO,
+        1
+      )
+      equal(
+        intents['locators'][0],
+        padAddressToLocator(aliceDeleAddress),
+        'locator set incorrectly'
+      )
+
+      // check the current state of the linked list
+      await checkLinkedList(daiAddress, wethAddress, [2, 3])
+
+      // now delete rule 2 and unset intent
+      await aliceDelegate.deleteRuleAndUnsetIntent(2, {
+        from: aliceAddress,
+      })
+
+      // check the current state of the linked list
+      await checkLinkedList(daiAddress, wethAddress, [3])
+
+      // check intent is unset
+      intents = await indexer.getLocators(
+        wethAddress,
+        daiAddress,
+        PROTOCOL,
+        ADDRESS_ZERO,
+        1
+      )
+      equal(intents['locators'].length, 0, 'locators should be empty')
+
+      // check balances still unchanged
+      equal(
+        aliceBalanceBefore.toNumber(),
+        (await stakingToken.balanceOf(aliceAddress)).toNumber(),
+        'alices balance shouldnt have changed'
+      )
+      equal(
+        indexerBalanceBefore.toNumber(),
+        (await stakingToken.balanceOf(indexerAddress)).toNumber(),
+        'indexer balance shouldnt have changed'
+      )
     })
   })
   describe.skip('Test provideOrder')
