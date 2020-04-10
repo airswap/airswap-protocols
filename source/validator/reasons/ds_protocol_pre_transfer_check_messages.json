@@ -26,13 +26,13 @@
   "20": {
     "maker": {
       "message": "You need to connect a wallet that is registered with the issuer.",
-      "buttonText": "Create an account",
-      "redirectUrl": "https://dashboard.spice.com"
+      "action": "Create an account",
+      "actionUrl": "https://dashboard.spice.com"
     },
     "taker": {
       "message": "You need to connect a wallet that is registered with the issuer.",
-      "buttonText": "Create an account",
-      "redirectUrl": "https://dashboard.spice.com"
+      "action": "Create an account",
+      "actionUrl": "https://dashboard.spice.com"
     }
   },
   "25": {
