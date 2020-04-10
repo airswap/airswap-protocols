@@ -1,4 +1,4 @@
-import { Bytes, log, store } from "@graphprotocol/graph-ts"
+import { BigInt, log, store } from "@graphprotocol/graph-ts"
 import {
   AddTokenToBlacklist,
   CreateIndex,
@@ -7,7 +7,8 @@ import {
   Stake,
   Unstake
 } from "../generated/Indexer/Indexer"
-import { User, Token, Indexer, Index, StakedAmount } from "../generated/schema"
+import { Index } from '../generated/templates'
+import { User, Token, Indexer, IndexContract, StakedAmount } from "../generated/schema"
 
 export function handleOwnershipTransferred(event: OwnershipTransferred): void {	
   /* Not Implemented or Tracked */	
@@ -59,7 +60,8 @@ export function handleCreateIndex(event: CreateIndex): void {
     indexer.save()
   }
 
-  let index = new Index(event.params.indexAddress.toHex())
+  Index.create(event.params.indexAddress)
+  let index = new IndexContract(event.params.indexAddress.toHex())
   index.indexer = indexer.id
   index.protocol = event.params.protocol
   index.signerToken = signerToken.id
@@ -68,13 +70,24 @@ export function handleCreateIndex(event: CreateIndex): void {
 }
 
 export function handleStake(event: Stake): void {
+  // create user if it doesn't exist
+  var staker = User.load(event.params.staker.toHex())
+  if (!staker) {
+    staker = new User(event.params.staker.toHex())
+    staker.authorizedSigners = new Array<string>()
+    staker.authorizedSenders = new Array<string>()
+    staker.executedOrders = new Array<string>()
+    staker.cancelledNonces = new Array<BigInt>()
+    staker.save()
+  }
+
   let stakeIdentifier = event.params.staker.toHex() + event.address.toHex()
   let stakedAmount = StakedAmount.load(stakeIdentifier)
   // create base portion of stake if it doesn't exist
   if (!stakedAmount) {
     stakedAmount = new StakedAmount(stakeIdentifier)
     stakedAmount.indexer = Indexer.load(event.address.toHex()).id
-    stakedAmount.staker = User.load(event.params.staker.toHex()).id
+    stakedAmount.staker = staker.id
     stakedAmount.signerToken = Token.load(event.params.signerToken.toHex()).id
     stakedAmount.senderToken = Token.load(event.params.senderToken.toHex()).id
     stakedAmount.protocol = event.params.protocol
