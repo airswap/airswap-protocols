@@ -206,8 +206,8 @@ export function handleSwap(event: Swap): void {
     swap.save()
   }
 
-  let signerAddress = event.params.signerWallet.toHex()
-  let signer = User.load(signerAddress) 
+  var signerAddress = event.params.signerWallet.toHex()
+  var signer = User.load(signerAddress) 
   // handle new creation of User (signer)
   if (!signer) {
     signer = new User(signerAddress)
@@ -218,8 +218,8 @@ export function handleSwap(event: Swap): void {
     signer.save()
   }
 
-  let senderAddress = event.params.senderWallet.toHex()
-  let sender = User.load(senderAddress) 
+  var senderAddress = event.params.senderWallet.toHex()
+  var sender = User.load(senderAddress) 
   // handle new creation of User (sender)
   if (!sender) {
     sender = new User(senderAddress)
@@ -242,6 +242,30 @@ export function handleSwap(event: Swap): void {
     affiliate.save()
   }
 
+  var signerTokenAddress = event.params.signerToken.toHex()
+  var signerToken = Token.load(signerTokenAddress)
+  if (!signerToken) {
+    signerToken = new Token(signerTokenAddress)
+    signerToken.isBlacklisted = false
+    signerToken.save()
+  }
+
+  var senderTokenAddress = event.params.senderToken.toHex()
+  var senderToken = Token.load(senderTokenAddress)
+  if (!senderToken) {
+    senderToken = new Token(senderTokenAddress)
+    senderToken.isBlacklisted = false
+    senderToken.save()
+  }
+
+  var affiliateTokenAddress = event.params.affiliateToken.toHex()
+  var affiliateToken = Token.load(affiliateTokenAddress)
+  if (!affiliateToken) {
+    affiliateToken = new Token(affiliateTokenAddress)
+    affiliateToken.isBlacklisted = false
+    affiliateToken.save()
+  }
+
   executedOrder.swap = swap.id
   executedOrder.from = event.transaction.from
   executedOrder.to = event.transaction.to
@@ -253,17 +277,17 @@ export function handleSwap(event: Swap): void {
   executedOrder.signer = signer.id
   executedOrder.signerAmount = event.params.signerAmount
   executedOrder.signerTokenType = event.params.signerId
-  executedOrder.signerToken = Token.load(event.params.signerToken.toHex()).id
+  executedOrder.signerToken = signerToken.id
 
-  executedOrder.sender = signer.id
+  executedOrder.sender = sender.id
   executedOrder.senderAmount = event.params.senderAmount
   executedOrder.senderTokenType = event.params.senderId
-  executedOrder.senderToken = Token.load(event.params.senderToken.toHex()).id
+  executedOrder.senderToken = senderToken.id
 
   executedOrder.affiliate = affiliate.id
   executedOrder.affiliateAmount = event.params.affiliateAmount
   executedOrder.affiliateTokenType = event.params.affiliateId
-  executedOrder.affiliateToken = Token.load(event.params.affiliateToken.toHex()).id
+  executedOrder.affiliateToken = affiliateToken.id
 
   executedOrder.save()
 }
