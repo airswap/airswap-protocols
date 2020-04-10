@@ -16,7 +16,7 @@ export function handleOwnershipTransferred(event: OwnershipTransferred): void {
 export function handleAddTokenToBlacklist(event: AddTokenToBlacklist): void {
   let token = Token.load(event.params.token.toHex())
   // create token if it doesn't exist
-  if (token == null) {
+  if (!token) {
     token = new Token(event.params.token.toHex())
   }
   // set token to blacklisted
@@ -27,7 +27,7 @@ export function handleAddTokenToBlacklist(event: AddTokenToBlacklist): void {
 export function handleRemoveTokenFromBlacklist(event: RemoveTokenFromBlacklist): void {
   let token = Token.load(event.params.token.toHex())
   // create token if it doesn't exist
-  if (token == null) {
+  if (!token) {
     token = new Token(event.params.token.toHex())
   }
   // set token to blacklisted
@@ -38,7 +38,7 @@ export function handleRemoveTokenFromBlacklist(event: RemoveTokenFromBlacklist):
 export function handleCreateIndex(event: CreateIndex): void {
   // handle creation of signer tokens if it doesn't exist
   let signerToken = Token.load(event.params.signerToken.toHex())
-  if (signerToken == null) {
+  if (!signerToken) {
     signerToken = new Token(event.params.signerToken.toHex())
     signerToken.isBlacklisted = false
     signerToken.save()
@@ -46,7 +46,7 @@ export function handleCreateIndex(event: CreateIndex): void {
 
   // handle creation of sender tokens if it doesn't exist
   let senderToken = Token.load(event.params.senderToken.toHex())
-  if (senderToken == null) {
+  if (!senderToken) {
     senderToken = new Token(event.params.senderToken.toHex())
     senderToken.isBlacklisted = false
     senderToken.save()
@@ -75,9 +75,6 @@ export function handleStake(event: Stake): void {
     stakedAmount = new StakedAmount(stakeIdentifier)
     stakedAmount.indexer = Indexer.load(event.address.toHex()).id
     stakedAmount.staker = User.load(event.params.staker.toHex()).id
-    stakedAmount.signerToken = Token.load(event.params.signerToken.toHex()).id
-    stakedAmount.senderToken = Token.load(event.params.senderToken.toHex()).id
-   stakedAmount.protocol = event.params.protocol
   }
   stakedAmount.stakeAmount = event.params.stakeAmount
   stakedAmount.save()
