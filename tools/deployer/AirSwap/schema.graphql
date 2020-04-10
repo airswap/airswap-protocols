@@ -60,6 +60,9 @@ type StakedAmount @entity {
   id: ID! # staker + indexer
   indexer: Indexer! # the indexer that emitted
   staker: User! # user address of user that staked
+  signerToken: Token!
+  senderToken: Token!
+  protocol: Bytes!
   stakeAmount: BigInt!
 }
 

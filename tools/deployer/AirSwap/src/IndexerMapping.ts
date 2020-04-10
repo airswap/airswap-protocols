@@ -75,6 +75,9 @@ export function handleStake(event: Stake): void {
     stakedAmount = new StakedAmount(stakeIdentifier)
     stakedAmount.indexer = Indexer.load(event.address.toHex()).id
     stakedAmount.staker = User.load(event.params.staker.toHex()).id
+    stakedAmount.signerToken = Token.load(event.params.signerToken.toHex()).id
+    stakedAmount.senderToken = Token.load(event.params.senderToken.toHex()).id
+    stakedAmount.protocol = event.params.protocol
   }
   stakedAmount.stakeAmount = event.params.stakeAmount
   stakedAmount.save()
