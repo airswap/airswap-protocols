@@ -9,7 +9,7 @@ import {
   RevokeSigner,
   Swap
 } from "../generated/SwapContract/SwapContract"
-import { User, ExecutedOrder } from "../generated/schema"
+import { User, Token, ExecutedOrder } from "../generated/schema"
 
 export function handleAuthorizeSender(event: AuthorizeSender): void {
   let authorizerAddress = event.params.authorizerAddress.toHex()
@@ -205,18 +205,18 @@ export function handleSwap(event: Swap): void {
 
   executedOrder.signer = event.params.signerWallet.toHex()
   executedOrder.signerAmount = event.params.signerAmount
-  executedOrder.signerTokenId = event.params.signerId
-  executedOrder.signerTokenAddress = event.params.signerToken
+  executedOrder.signerTokenType = event.params.signerId
+  executedOrder.signerToken = Token.load(event.params.signerToken.toHex()).id
 
   executedOrder.sender = event.params.senderWallet.toHex()
   executedOrder.senderAmount = event.params.senderAmount
-  executedOrder.senderTokenId = event.params.senderId
-  executedOrder.senderTokenAddress = event.params.senderToken
+  executedOrder.senderTokenType = event.params.senderId
+  executedOrder.senderToken = Token.load(event.params.senderToken.toHex()).id
 
   executedOrder.affiliate = event.params.affiliateWallet.toHex()
   executedOrder.affiliateAmount = event.params.affiliateAmount
-  executedOrder.affiliateTokenId = event.params.affiliateId
-  executedOrder.affiliateTokenAddress = event.params.affiliateToken
+  executedOrder.affiliateTokenType = event.params.affiliateId
+  executedOrder.affiliateToken = Token.load(event.params.affiliateToken.toHex()).id
 
   executedOrder.save()
 }

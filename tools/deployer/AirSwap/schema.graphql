@@ -7,30 +7,35 @@ type User @entity {
   cancelledNonces: [BigInt!]!
 }
 
+type SwapContract @entity {
+  id: ID! # address of the swap contract
+}
+
 type ExecutedOrder @entity {
   id: ID! # signer address + nonce
 
-  nonce: BigInt # order nonce for a user
-  expiry: BigInt
-
+  swap: SwapContract! # address of swap contract that executed this order
   from: Bytes # address of the originator of the transaction
   to: Bytes # who the originator sent the transaction to
   value: BigInt # value sent with the transaction
 
+  nonce: BigInt # order nonce for a user
+  expiry: BigInt
+
   signer: User
   signerAmount: BigInt
-  signerTokenId: BigInt
-  signerTokenAddress: Bytes
+  signerTokenType: BigInt
+  signerToken: Token
 
   sender: User
   senderAmount: BigInt
-  senderTokenId: BigInt
-  senderTokenAddress: Bytes
+  senderTokenType: BigInt
+  senderToken: Token
 
   affiliate: User
   affiliateAmount: BigInt
-  affiliateTokenId: BigInt
-  affiliateTokenAddress: Bytes
+  affiliateTokenType: BigInt
+  affiliateToken: Token
 }
 
 # Indexer
@@ -54,7 +59,7 @@ type Index @entity {
 type StakedAmount @entity {
   id: ID! # staker + indexer
   indexer: Indexer! # the indexer that emitted
-  staker: Bytes! # user address of user that staked
+  staker: User! # user address of user that staked
   signerToken: Token!
   senderToken: Token!
   protocol: Bytes!
@@ -63,7 +68,7 @@ type StakedAmount @entity {
 
 type Locator @entity {
   id: ID! # owner + index
-  owner: Bytes! # the owner of the locator
+  owner: User! # the owner of the locator
   index: Index!
   score: BigInt!
   locator: Bytes!
@@ -77,18 +82,18 @@ type DelegateFactory @entity {
 type DelegateContract @entity {
   id: ID! # delegate contract address
   factory: DelegateFactory! #factory that created this delegate
-  swap: Bytes! # swap contract address
-  indexer: Bytes! # indexer contract address
-  owner: Bytes!
+  swap: SwapContract!
+  indexer: Indexer!
+  owner: User!
   tradeWallet: Bytes!
 }
 
 type Rule @entity {
   id: ID! # delegate address + signerToken + senderToken
-  delegate: DelegateContract! # address
-  owner: Bytes! # address
-  signerToken: Bytes! # MAKE TOKEN
-  senderToken: Bytes! # MAKE TOKEN
+  delegate: DelegateContract!
+  owner: User!
+  signerToken: Token!
+  senderToken: Token!
   maxSenderAmount: BigInt!
   priceCoef: BigInt!
   priceExp: BigInt!
