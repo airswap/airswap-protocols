@@ -124,48 +124,22 @@ contract DelegateV2 is IDelegateV2, Ownable {
     uint256 signerAmount,
     uint256 newStakeAmount
   ) external onlyOwner {
+    // create rule and
     _createRule(senderToken, signerToken, senderAmount, signerAmount);
 
-    // get currentAmount staked or 0 if never staked
-    uint256 oldStakeAmount = indexer.getStakedAmount(
-      address(this),
-      signerToken,
-      senderToken,
-      protocol
-    );
+    // set intent
+    _setIntent(senderToken, signerToken, newStakeAmount);
+  }
 
-    if (oldStakeAmount == newStakeAmount && oldStakeAmount > 0) {
-      return; // forgo trying to reset intent with non-zero same stake amount
-    } else if (oldStakeAmount < newStakeAmount) {
-      // transfer only the difference from the sender to the Delegate.
-      require(
-        IERC20(indexer.stakingToken()).transferFrom(
-          msg.sender,
-          address(this),
-          newStakeAmount - oldStakeAmount
-        ),
-        "STAKING_TRANSFER_FAILED"
-      );
-    }
+  function setIntent(
+    address senderToken,
+    address signerToken,
+    uint256 newStakeAmount
+  ) external onlyOwner {
+    // check whether the delegate has a rule for that market
+    require(firstRuleID[senderToken][signerToken] != NO_RULE, "NO_RULE_EXISTS");
 
-    indexer.setIntent(
-      signerToken,
-      senderToken,
-      protocol,
-      newStakeAmount,
-      bytes32(uint256(address(this)) << 96) //NOTE: this will pad 0's to the right
-    );
-
-    if (oldStakeAmount > newStakeAmount) {
-      // return excess stake back
-      require(
-        IERC20(indexer.stakingToken()).transfer(
-          msg.sender,
-          oldStakeAmount - newStakeAmount
-        ),
-        "STAKING_RETURN_FAILED"
-      );
-    }
+    _setIntent(senderToken, signerToken, newStakeAmount);
   }
 
   function deleteRuleAndUnsetIntent(uint256 ruleID) external onlyOwner {
@@ -173,25 +147,17 @@ contract DelegateV2 is IDelegateV2, Ownable {
 
     address signerToken = rules[ruleID].signerToken;
     address senderToken = rules[ruleID].senderToken;
+
     _deleteRule(ruleID);
 
-    // Query the indexer for the amount staked.
-    uint256 stakedAmount = indexer.getStakedAmount(
-      address(this),
-      signerToken,
-      senderToken,
-      protocol
-    );
-    indexer.unsetIntent(signerToken, senderToken, protocol);
+    _unsetIntent(senderToken, signerToken);
+  }
 
-    // Upon unstaking, the Delegate will be given the staking amount.
-    // This is returned to the msg.sender.
-    if (stakedAmount > 0) {
-      require(
-        IERC20(indexer.stakingToken()).transfer(msg.sender, stakedAmount),
-        "STAKING_RETURN_FAILED"
-      );
-    }
+  function unsetIntent(address senderToken, address signerToken)
+    external
+    onlyOwner
+  {
+    _unsetIntent(senderToken, signerToken);
   }
 
   function provideOrder(Types.Order calldata order) external {
@@ -455,6 +421,73 @@ contract DelegateV2 is IDelegateV2, Ownable {
         rules[newRuleID].prevRuleID = previous;
         rules[previous].nextRuleID = newRuleID;
       }
+    }
+  }
+
+  function _setIntent(
+    address senderToken,
+    address signerToken,
+    uint256 newStakeAmount
+  ) internal {
+    // get currentAmount staked or 0 if never staked
+    uint256 oldStakeAmount = indexer.getStakedAmount(
+      address(this),
+      signerToken,
+      senderToken,
+      protocol
+    );
+
+    if (oldStakeAmount == newStakeAmount && oldStakeAmount > 0) {
+      return; // forgo trying to reset intent with non-zero same stake amount
+    } else if (oldStakeAmount < newStakeAmount) {
+      // transfer only the difference from the sender to the Delegate.
+      require(
+        IERC20(indexer.stakingToken()).transferFrom(
+          msg.sender,
+          address(this),
+          newStakeAmount - oldStakeAmount
+        ),
+        "STAKING_TRANSFER_FAILED"
+      );
+    }
+
+    indexer.setIntent(
+      signerToken,
+      senderToken,
+      protocol,
+      newStakeAmount,
+      bytes32(uint256(address(this)) << 96) //NOTE: this will pad 0's to the right
+    );
+
+    if (oldStakeAmount > newStakeAmount) {
+      // return excess stake back
+      require(
+        IERC20(indexer.stakingToken()).transfer(
+          msg.sender,
+          oldStakeAmount - newStakeAmount
+        ),
+        "STAKING_RETURN_FAILED"
+      );
+    }
+  }
+
+  function _unsetIntent(address senderToken, address signerToken) internal {
+    // Query the indexer for the amount staked.
+    uint256 stakedAmount = indexer.getStakedAmount(
+      address(this),
+      signerToken,
+      senderToken,
+      protocol
+    );
+    indexer.unsetIntent(signerToken, senderToken, protocol);
+
+    // Upon unstaking, the Delegate will be given the staking amount.
+    // This is returned to the msg.sender.
+    if (stakedAmount > 0) {
+      require(
+        IERC20(indexer.stakingToken()).transfer(msg.sender, stakedAmount),
+        "STAKING_RETURN_FAILED"
+      );
     }
   }
 
