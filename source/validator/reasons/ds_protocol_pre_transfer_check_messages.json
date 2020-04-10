@@ -1,0 +1,110 @@
+{
+  "10": {
+    "maker": {
+      "message": "Trading is not permited at this time. Please try again later or contact us."
+    },
+    "taker": {
+      "message": "Trading is not permited at this time. Please try again later or contact us."
+    }
+  },
+  "15": {
+    "maker": {
+      "message": "You don't have enough tokens available for this trade."
+    },
+    "taker": {
+      "message": "The tokens are no longer available to be exchanged."
+    }
+  },
+  "16": {
+    "maker": {
+      "message": "You are not allowed to trade your tokens at this moment."
+    },
+    "taker": {
+      "message": "Tokens are not allowed to be traded at this moment."
+    }
+  },
+  "20": {
+    "maker": {
+      "message": "You need to connect a wallet that is registered with the issuer.",
+      "buttonText": "Create an account",
+      "redirectUrl": "https://dashboard.spice.com"
+    },
+    "taker": {
+      "message": "You need to connect a wallet that is registered with the issuer.",
+      "buttonText": "Create an account",
+      "redirectUrl": "https://dashboard.spice.com"
+    }
+  },
+  "25": {
+    "maker": {
+      "message": "At this moment, US citizens are not permitted to acquire tokens."
+    },
+    "taker": {
+      "message": "At this moment, US citizens are not permitted to acquire tokens."
+    }
+  },
+  "26": {
+    "maker": {
+      "message": "Trading with investors located in the jurisdiction that this wallet is located in is restricted."
+    },
+    "taker": {
+      "message": "Trading with investors located in the jurisdiction that this wallet is located in is restricted."
+    }
+  },
+  "30": {
+    "maker": {
+      "message": "Trading is locked."
+    },
+    "taker": {
+      "message": "Trading is locked."
+    }
+  },
+  "31": {
+    "maker": {
+      "message": "Trading is locked for 90 days."
+    },
+    "taker": {
+      "message": "Trading is locked for 90 days."
+    }
+  },
+  "32": {
+    "maker": {
+      "message": "Trading is locked for one year."
+    },
+    "taker": {
+      "message": "Trading is locked for one year."
+    }
+  },
+  "40": {
+    "maker": {
+      "message": "The maximum amount of investors has been reached. You must transfer all of your tokens if you want to make a trade."
+    },
+    "taker": {
+      "message": "The maximum amount of investors has been reached. The maker must transfer all of their tokens for this trade to succeed."
+    }
+  },
+  "41": {
+    "maker": {
+      "message": "You must transfer all of your tokens in order to execute a trade."
+    },
+    "taker": {
+      "message": "The maker must transfer all of their tokens in order to execute the trade."
+    }
+  },
+  "50": {
+    "maker": {
+      "message": "You must transfer all of your tokens in order to execute a trade."
+    },
+    "taker": {
+      "message": "The maker must transfer all of their tokens in order to execute the trade."
+    }
+  },
+  "51": {
+    "maker": {
+      "message": "You cannot transfer this quantity of tokens because the remaining amount of your holdings would be below the minimum required. Either transfer less or transfer all of them."
+    },
+    "taker": {
+      "message": "You cannot be transferred this quantity of tokens because the maker's remaining holdings would be below the minimum required."
+    }
+  }
+}
