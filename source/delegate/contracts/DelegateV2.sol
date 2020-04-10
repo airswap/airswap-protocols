@@ -170,20 +170,19 @@ contract DelegateV2 is IDelegateV2, Ownable {
 
   function deleteRuleAndUnsetIntent(uint256 ruleID) external onlyOwner {
     require(rules[ruleID].senderAmount != 0, "RULE_NOT_ACTIVE");
+
+    address signerToken = rules[ruleID].signerToken;
+    address senderToken = rules[ruleID].senderToken;
     _deleteRule(ruleID);
 
     // Query the indexer for the amount staked.
     uint256 stakedAmount = indexer.getStakedAmount(
       address(this),
-      rules[ruleID].signerToken,
-      rules[ruleID].senderToken,
+      signerToken,
+      senderToken,
       protocol
     );
-    indexer.unsetIntent(
-      rules[ruleID].signerToken,
-      rules[ruleID].senderToken,
-      protocol
-    );
+    indexer.unsetIntent(signerToken, senderToken, protocol);
 
     // Upon unstaking, the Delegate will be given the staking amount.
     // This is returned to the msg.sender.

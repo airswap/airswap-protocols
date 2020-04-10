@@ -37,9 +37,11 @@ contract('Delegate Integration Tests', async accounts => {
   let daiAddress
   let wethAddress
   let aliceDelegate
+  let aliceDeleAddress
   let swap
   let swapAddress
   let indexer
+  let indexerAddress
 
   async function checkLinkedList(senderToken, signerToken, correctIDs) {
     // pad correctIDs with null values for null pointers
@@ -91,6 +93,7 @@ contract('Delegate Integration Tests', async accounts => {
 
   async function setupIndexer() {
     indexer = await Indexer.new(stakingToken.address)
+    indexerAddress = indexer.address
     await indexer.createIndex(tokenDAI.address, tokenWETH.address, PROTOCOL)
   }
 
@@ -116,11 +119,12 @@ contract('Delegate Integration Tests', async accounts => {
 
     aliceDelegate = await DelegateV2.new(
       swapAddress,
-      indexer.address,
+      indexerAddress,
       aliceAddress,
       aliceTradeWallet,
       PROTOCOL
     )
+    aliceDeleAddress = aliceDelegate.address
   })
 
   describe('Test constructor', async () => {
@@ -131,7 +135,7 @@ contract('Delegate Integration Tests', async accounts => {
 
     it('should set the indexer contract address', async () => {
       const val = await aliceDelegate.indexer.call()
-      equal(val, indexer.address, 'indexer address is incorrect')
+      equal(val, indexerAddress, 'indexer address is incorrect')
     })
 
     it('should set the tradeWallet address', async () => {
@@ -152,7 +156,7 @@ contract('Delegate Integration Tests', async accounts => {
     it('should set the owner and trade wallet if none are provided', async () => {
       const newDelegate = await DelegateV2.new(
         swapAddress,
-        indexer.address,
+        indexerAddress,
         ADDRESS_ZERO,
         ADDRESS_ZERO,
         PROTOCOL,
@@ -237,7 +241,7 @@ contract('Delegate Integration Tests', async accounts => {
     })
 
     it('should not be able to set intent on a non-existent index', async () => {
-      await stakingToken.approve(aliceDelegate.address, STARTING_BALANCE, {
+      await stakingToken.approve(aliceDeleAddress, STARTING_BALANCE, {
         from: aliceAddress,
       })
 
@@ -257,14 +261,14 @@ contract('Delegate Integration Tests', async accounts => {
     })
 
     it('should succeed with allowance and an index created', async () => {
-      await stakingToken.approve(aliceDelegate.address, STARTING_BALANCE, {
+      await stakingToken.approve(aliceDeleAddress, STARTING_BALANCE, {
         from: aliceAddress,
       })
 
       await indexer.createIndex(wethAddress, daiAddress, PROTOCOL)
 
       const aliceBalanceBefore = await stakingToken.balanceOf(aliceAddress)
-      const indexerBalanceBefore = await stakingToken.balanceOf(indexer.address)
+      const indexerBalanceBefore = await stakingToken.balanceOf(indexerAddress)
 
       const tx = await aliceDelegate.createRuleAndSetIntent(
         daiAddress,
@@ -290,7 +294,7 @@ contract('Delegate Integration Tests', async accounts => {
       })
 
       const aliceBalanceAfter = await stakingToken.balanceOf(aliceAddress)
-      const indexerBalanceAfter = await stakingToken.balanceOf(indexer.address)
+      const indexerBalanceAfter = await stakingToken.balanceOf(indexerAddress)
 
       equal(
         aliceBalanceBefore.toNumber(),
@@ -312,7 +316,7 @@ contract('Delegate Integration Tests', async accounts => {
       )
       equal(
         intents['locators'][0],
-        padAddressToLocator(aliceDelegate.address),
+        padAddressToLocator(aliceDeleAddress),
         'locator set incorrectly'
       )
       equal(
@@ -325,7 +329,7 @@ contract('Delegate Integration Tests', async accounts => {
 
     it('should increase stake with a new rule', async () => {
       const aliceBalanceBefore = await stakingToken.balanceOf(aliceAddress)
-      const indexerBalanceBefore = await stakingToken.balanceOf(indexer.address)
+      const indexerBalanceBefore = await stakingToken.balanceOf(indexerAddress)
 
       senderDaiAmount = 500
       signerWethAmount = 2
@@ -355,7 +359,7 @@ contract('Delegate Integration Tests', async accounts => {
       })
 
       const aliceBalanceAfter = await stakingToken.balanceOf(aliceAddress)
-      const indexerBalanceAfter = await stakingToken.balanceOf(indexer.address)
+      const indexerBalanceAfter = await stakingToken.balanceOf(indexerAddress)
 
       equal(
         aliceBalanceBefore.toNumber(),
@@ -377,7 +381,7 @@ contract('Delegate Integration Tests', async accounts => {
       )
       equal(
         intents['locators'][0],
-        padAddressToLocator(aliceDelegate.address),
+        padAddressToLocator(aliceDeleAddress),
         'locator set incorrectly'
       )
       equal(
@@ -390,7 +394,7 @@ contract('Delegate Integration Tests', async accounts => {
 
     it('should decrease stake with a new rule', async () => {
       const aliceBalanceBefore = await stakingToken.balanceOf(aliceAddress)
-      const indexerBalanceBefore = await stakingToken.balanceOf(indexer.address)
+      const indexerBalanceBefore = await stakingToken.balanceOf(indexerAddress)
 
       senderDaiAmount = 660
       signerWethAmount = 3
@@ -420,7 +424,7 @@ contract('Delegate Integration Tests', async accounts => {
       })
 
       const aliceBalanceAfter = await stakingToken.balanceOf(aliceAddress)
-      const indexerBalanceAfter = await stakingToken.balanceOf(indexer.address)
+      const indexerBalanceAfter = await stakingToken.balanceOf(indexerAddress)
 
       equal(
         aliceBalanceBefore.toNumber(),
@@ -442,7 +446,7 @@ contract('Delegate Integration Tests', async accounts => {
       )
       equal(
         intents['locators'][0],
-        padAddressToLocator(aliceDelegate.address),
+        padAddressToLocator(aliceDeleAddress),
         'locator set incorrectly'
       )
       equal(
@@ -455,7 +459,82 @@ contract('Delegate Integration Tests', async accounts => {
     })
   })
 
-  describe.skip('Test deleteRuleAndUnsetIntent')
+  describe('Test deleteRuleAndUnsetIntent', async () => {
+    it('should not let a non-owner set a rule', async () => {
+      await reverted(
+        aliceDelegate.deleteRuleAndUnsetIntent(1, {
+          from: notOwner,
+        }),
+        'Ownable: caller is not the owner'
+      )
+    })
+
+    it('should not succeed for a non-existent rule', async () => {
+      await reverted(
+        aliceDelegate.deleteRuleAndUnsetIntent(0, {
+          from: aliceAddress,
+        }),
+        'RULE_NOT_ACTIVE'
+      )
+
+      await reverted(
+        aliceDelegate.deleteRuleAndUnsetIntent(4, {
+          from: aliceAddress,
+        }),
+        'RULE_NOT_ACTIVE'
+      )
+    })
+
+    it('should delete a rule and unset intent for the entire market', async () => {
+      let intents = await indexer.getLocators(
+        wethAddress,
+        daiAddress,
+        PROTOCOL,
+        ADDRESS_ZERO,
+        1
+      )
+      const aliceStaked = intents['scores'][0].toNumber()
+
+      const aliceBalanceBefore = await stakingToken.balanceOf(aliceAddress)
+      const indexerBalanceBefore = await stakingToken.balanceOf(indexerAddress)
+
+      const tx = await aliceDelegate.deleteRuleAndUnsetIntent(1, {
+        from: aliceAddress,
+      })
+
+      const aliceBalanceAfter = await stakingToken.balanceOf(aliceAddress)
+      const indexerBalanceAfter = await stakingToken.balanceOf(indexerAddress)
+
+      emitted(tx, 'DeleteRule', e => {
+        return e.owner === aliceAddress && e.ruleID.toNumber() === 1
+      })
+
+      equal(
+        aliceBalanceBefore.toNumber() + aliceStaked,
+        aliceBalanceAfter.toNumber(),
+        'Alice stake not returned'
+      )
+      equal(
+        indexerBalanceBefore.toNumber() - aliceStaked,
+        indexerBalanceAfter.toNumber(),
+        'Indexer balance incorrect'
+      )
+
+      // rule 1 no longer on the delegate
+      await checkLinkedList(daiAddress, wethAddress, [2, 3])
+
+      intents = await indexer.getLocators(
+        wethAddress,
+        daiAddress,
+        PROTOCOL,
+        ADDRESS_ZERO,
+        1
+      )
+
+      // no intents on the market
+      equal(intents['locators'].length, 0, 'locators should be empty')
+    })
+  })
   describe.skip('Test provideOrder')
   describe.skip('Test getMaxQuote')
 })
