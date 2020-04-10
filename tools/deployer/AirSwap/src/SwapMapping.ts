@@ -109,7 +109,6 @@ export function handleAuthorizeSigner(event: AuthorizeSigner): void {
   let currentIdx = authorizedSigners.indexOf(signer.id)
   // only add if signer is not in the list
   if (currentIdx == -1) {
-    log.info("signer: {} not found for sender: {}, adding", [signer.id, authorizer.id])
     authorizedSigners.push(signer.id)
     authorizer.authorizedSigners = authorizedSigners
     authorizer.save()
