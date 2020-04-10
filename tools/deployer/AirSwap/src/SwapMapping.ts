@@ -1,6 +1,5 @@
 import { BigInt, log } from "@graphprotocol/graph-ts"
 import {
-  SwapContract,
   AuthorizeSender,
   AuthorizeSigner,
   Cancel,
@@ -9,12 +8,11 @@ import {
   RevokeSigner,
   Swap
 } from "../generated/SwapContract/SwapContract"
-import { User, Token, ExecutedOrder } from "../generated/schema"
+import { User, Token, SwapContract, ExecutedOrder } from "../generated/schema"
 
 export function handleAuthorizeSender(event: AuthorizeSender): void {
   let authorizerAddress = event.params.authorizerAddress.toHex()
   let authorizer = User.load(authorizerAddress)
-
   // handle new creation of User (signer)
   if (!authorizer) {
     authorizer = new User(authorizerAddress)
@@ -200,20 +198,69 @@ export function handleCancelUpTo(event: CancelUpTo): void {
 
 export function handleSwap(event: Swap): void {
   let executedOrder = new ExecutedOrder(event.params.signerWallet.toHex() + event.params.nonce.toString())
+
+  // create swap contract if it doesn't exist
+  var swap = SwapContract.load(event.address.toHex())
+  if (!swap) {
+    swap = new SwapContract(event.address.toHex())
+    swap.save()
+  }
+
+  let signerAddress = event.params.signerWallet.toHex()
+  let signer = User.load(signerAddress) 
+  // handle new creation of User (signer)
+  if (!signer) {
+    signer = new User(signerAddress)
+    signer.authorizedSigners = new Array<string>()
+    signer.authorizedSenders = new Array<string>()
+    signer.executedOrders = new Array<string>()
+    signer.cancelledNonces = new Array<BigInt>()
+    signer.save()
+  }
+
+  let senderAddress = event.params.senderWallet.toHex()
+  let sender = User.load(senderAddress) 
+  // handle new creation of User (sender)
+  if (!sender) {
+    sender = new User(senderAddress)
+    sender.authorizedSigners = new Array<string>()
+    sender.authorizedSenders = new Array<string>()
+    sender.executedOrders = new Array<string>()
+    sender.cancelledNonces = new Array<BigInt>()
+    sender.save()
+  }
+
+  let affiliateAddress = event.params.affiliateWallet.toHex()
+  let affiliate = User.load(affiliateAddress) 
+  // handle new creation of User (affiliate)
+  if (!affiliate) {
+    affiliate = new User(affiliateAddress)
+    affiliate.authorizedSigners = new Array<string>()
+    affiliate.authorizedSenders = new Array<string>()
+    affiliate.executedOrders = new Array<string>()
+    affiliate.cancelledNonces = new Array<BigInt>()
+    affiliate.save()
+  }
+
+  executedOrder.swap = swap.id
+  executedOrder.from = event.transaction.from
+  executedOrder.to = event.transaction.to
+  executedOrder.value = event.transaction.value
+
   executedOrder.nonce = event.params.nonce
   executedOrder.expiry = event.params.timestamp
 
-  executedOrder.signer = event.params.signerWallet.toHex()
+  executedOrder.signer = signer.id
   executedOrder.signerAmount = event.params.signerAmount
   executedOrder.signerTokenType = event.params.signerId
   executedOrder.signerToken = Token.load(event.params.signerToken.toHex()).id
 
-  executedOrder.sender = event.params.senderWallet.toHex()
+  executedOrder.sender = signer.id
   executedOrder.senderAmount = event.params.senderAmount
   executedOrder.senderTokenType = event.params.senderId
   executedOrder.senderToken = Token.load(event.params.senderToken.toHex()).id
 
-  executedOrder.affiliate = event.params.affiliateWallet.toHex()
+  executedOrder.affiliate = affiliate.id
   executedOrder.affiliateAmount = event.params.affiliateAmount
   executedOrder.affiliateTokenType = event.params.affiliateId
   executedOrder.affiliateToken = Token.load(event.params.affiliateToken.toHex()).id
