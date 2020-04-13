@@ -3,7 +3,10 @@ import { ERC20_ABI, ERC20_BYTES32_ABI } from './constants'
 import { Arrayish } from 'ethers/utils'
 
 export function getContract(address: string, ABI: any, network = 'mainnet') {
-  const provider = ethers.getDefaultProvider(network)
+  const provider =
+    network === 'mainnet'
+      ? ethers.getDefaultProvider()
+      : ethers.getDefaultProvider(network.toLowerCase())
   if (!address || !address.startsWith('0x')) {
     throw Error(`Invalid 'address' parameter '${address}'.`)
   }
