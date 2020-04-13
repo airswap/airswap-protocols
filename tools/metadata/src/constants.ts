@@ -8,7 +8,16 @@ export const TRUST_WALLET_IMAGE_API =
 export const METAMASK_IMAGE_API =
   'https://raw.githubusercontent.com/MetaMask/eth-contract-metadata/master/images'
 
-export const OPEN_SEA_API_URL = 'https://api.opensea.io/api/v1'
+export const getOpenSeaUrl = chainId => {
+  switch (Number(chainId)) {
+    case 4:
+      return 'https://rinkeby-api.opensea.io/api/v1'
+    case 1:
+      return 'https://api.opensea.io/api/v1'
+    default:
+      throw new Error('OpenSea only supports rinkeby and mainnet')
+  }
+}
 
 export const ERC20_BYTES32_ABI = [
   {
