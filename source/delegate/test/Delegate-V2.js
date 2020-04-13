@@ -86,8 +86,6 @@ contract('Delegate Integration Tests', async accounts => {
     daiAddress = tokenDAI.address
     wethAddress = tokenWETH.address
 
-    await tokenWETH.mint(aliceTradeWallet, STARTING_BALANCE)
-    await tokenDAI.mint(aliceTradeWallet, STARTING_BALANCE)
     await stakingToken.mint(aliceAddress, STARTING_BALANCE)
   }
 
@@ -261,10 +259,6 @@ contract('Delegate Integration Tests', async accounts => {
     })
 
     it('should succeed with allowance and an index created', async () => {
-      await stakingToken.approve(aliceDeleAddress, STARTING_BALANCE, {
-        from: aliceAddress,
-      })
-
       await indexer.createIndex(wethAddress, daiAddress, PROTOCOL)
 
       const aliceBalanceBefore = await stakingToken.balanceOf(aliceAddress)
@@ -734,6 +728,154 @@ contract('Delegate Integration Tests', async accounts => {
       )
     })
   })
+
+  describe('Test getMaxQuote', async () => {
+    it('should return 0 for a market with no rule', async () => {
+      // show this market has no rules
+      const ruleID = await aliceDelegate.firstRuleID.call(
+        wethAddress,
+        daiAddress
+      )
+      equal(ruleID, 0, 'Market should have no rules')
+
+      // fetch the max quote for the market
+      const maxQuote = await aliceDelegate.getMaxQuote.call(
+        wethAddress,
+        daiAddress
+      )
+
+      equal(maxQuote['senderAmount'].toNumber(), 0, 'Quote should be 0')
+      equal(maxQuote['signerAmount'].toNumber(), 0, 'Quote should be 0')
+    })
+
+    it('should return 0 if the tradewallet has no balance', async () => {
+      // show this time the market has rules
+      await checkLinkedList(daiAddress, wethAddress, [3])
+
+      // check sender token balance is 0
+      const balance = await tokenDAI.balanceOf.call(aliceTradeWallet)
+      equal(balance.toNumber(), 0, 'balance should be 0')
+
+      // check sender token allowance is 0
+      const allowance = await tokenDAI.allowance.call(
+        aliceTradeWallet,
+        swapAddress
+      )
+      equal(allowance.toNumber(), 0, 'allowance should be 0')
+
+      // fetch the max quote for the market
+      const maxQuote = await aliceDelegate.getMaxQuote.call(
+        daiAddress,
+        wethAddress
+      )
+
+      equal(maxQuote['senderAmount'].toNumber(), 0, 'Quote should be 0')
+      equal(maxQuote['signerAmount'].toNumber(), 0, 'Quote should be 0')
+    })
+
+    it('should return 0 if the tradewallet has no allowance', async () => {
+      // show this time the market has rules
+      await checkLinkedList(daiAddress, wethAddress, [3])
+
+      // check sender token allowance is 0
+      const allowance = await tokenDAI.allowance.call(
+        aliceTradeWallet,
+        swapAddress
+      )
+      equal(allowance.toNumber(), 0, 'allowance should be 0')
+
+      // mint tokens to the trade wallet
+      await tokenDAI.mint(aliceTradeWallet, 1000)
+      const balance = await tokenDAI.balanceOf.call(aliceTradeWallet)
+      equal(balance.toNumber(), 1000, 'balance is incorrect')
+
+      // fetch the max quote for the market
+      const maxQuote = await aliceDelegate.getMaxQuote.call(
+        daiAddress,
+        wethAddress
+      )
+
+      equal(maxQuote['senderAmount'].toNumber(), 0, 'Quote should be 0')
+      equal(maxQuote['signerAmount'].toNumber(), 0, 'Quote should be 0')
+    })
+
+    it('should return max possible if balance/allowance are limited', async () => {
+      // alice has a DAI balance of 1000 and allowance of 0, per the previous test
+      // there is 1 rule on DAI/WETH: rule 3
+
+      // approve 1100
+      await tokenDAI.approve(swapAddress, 1100, {
+        from: aliceTradeWallet,
+      })
+
+      // check the amounts on rule 3 are 660 DAI for 3 WETH
+      const rule = await aliceDelegate.rules.call(3)
+      equal(
+        rule['senderAmount'].toNumber(),
+        660,
+        'sender amount incorrectly set'
+      )
+      equal(rule['signerAmount'].toNumber(), 3, 'signer amount incorrectly set')
+
+      // add 2 more rules:
+      await aliceDelegate.createRule(daiAddress, wethAddress, 1000, 5, {
+        from: aliceAddress,
+      })
+      await aliceDelegate.createRule(daiAddress, wethAddress, 500, 2, {
+        from: aliceAddress,
+      })
+      // rule 5: 250 DAI/WETH, rule 3: 220 DAI/WETH, rule 4: 200 DAI/WETH
+      await checkLinkedList(daiAddress, wethAddress, [6, 3, 5])
+
+      // fetch the max quote for the market
+      const maxQuote = await aliceDelegate.getMaxQuote.call(
+        daiAddress,
+        wethAddress
+      )
+
+      // sender balance is 1000 and allowance is 1100, so limit of 1000
+      // therefore: all of the first rule (500), and 500 of the 660 in the second rule
+      equal(
+        maxQuote['senderAmount'].toNumber(),
+        500 + 500,
+        'Sender amount incorrect'
+      )
+      //
+      equal(
+        maxQuote['signerAmount'].toNumber(),
+        2 + Math.ceil((3 * 500) / 660),
+        'Signer amount incorrect'
+      )
+    })
+
+    it('should return full rule if balance/allowance are large enough', async () => {
+      // mint loads and approve loads
+      await tokenDAI.approve(swapAddress, 100000000, {
+        from: aliceTradeWallet,
+      })
+      await tokenDAI.mint(aliceTradeWallet, 100000000)
+
+      // fetch the max quote for the market
+      const maxQuote = await aliceDelegate.getMaxQuote.call(
+        daiAddress,
+        wethAddress
+      )
+
+      // sender balance is 1000 and allowance is 1100, so limit of 1000
+      // therefore: all of the first rule (500), and 500 of the 660 in the second rule
+      equal(
+        maxQuote['senderAmount'].toNumber(),
+        500 + 660 + 1000,
+        'Sender amount incorrect'
+      )
+      //
+      equal(
+        maxQuote['signerAmount'].toNumber(),
+        2 + 3 + 5,
+        'Signer amount incorrect'
+      )
+    })
+  })
+
   describe.skip('Test provideOrder')
-  describe.skip('Test getMaxQuote')
 })
