@@ -68,7 +68,7 @@ function normalizeMetamaskToken(
     decimals: token.decimals,
     symbol: token.symbol,
     kind: tokenKinds.ERC20,
-    image: getMetamaskImage(token.logo),
+    image: getTrustImage(token.address),
   }
 }
 
