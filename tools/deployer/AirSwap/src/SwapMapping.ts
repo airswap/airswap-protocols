@@ -9,30 +9,11 @@ import {
   Swap
 } from "../generated/SwapContract/SwapContract"
 import { User, Token, SwapContract, ExecutedOrder } from "../generated/schema"
+import { getUser } from "./helper"
 
 export function handleAuthorizeSender(event: AuthorizeSender): void {
-  let authorizerAddress = event.params.authorizerAddress.toHex()
-  let authorizer = User.load(authorizerAddress)
-  // handle new creation of User (signer)
-  if (!authorizer) {
-    authorizer = new User(authorizerAddress)
-    authorizer.authorizedSigners = new Array<string>()
-    authorizer.authorizedSenders = new Array<string>()
-    authorizer.executedOrders = new Array<string>()
-    authorizer.cancelledNonces = new Array<BigInt>()
-  }
-
-  let senderAddress = event.params.authorizedSender.toHex()
-  let sender = User.load(senderAddress) 
-  // handle new creation of User (sender)
-  if (!sender) {
-    sender = new User(senderAddress)
-    sender.authorizedSigners = new Array<string>()
-    sender.authorizedSenders = new Array<string>()
-    sender.executedOrders = new Array<string>()
-    sender.cancelledNonces = new Array<BigInt>()
-    sender.save()
-  }
+  let authorizer = getUser(event.params.authorizerAddress.toHex())
+  let sender = getUser(event.params.authorizedSender.toHex())
 
   let authorizedSenders = authorizer.authorizedSenders
   let currentIdx = authorizedSenders.indexOf(sender.id)
