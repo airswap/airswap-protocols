@@ -1,5 +1,5 @@
 import { BigInt, log } from "@graphprotocol/graph-ts"
-import { User, Token } from "../generated/schema"
+import { User, Token, Indexer } from "../generated/schema"
 
 export function getUser(userAddress: string): User {
   let user = User.load(userAddress)
@@ -24,4 +24,13 @@ export function getToken(tokenAddress: string): Token {
     token.save()
   }
   return token as Token
+}
+
+export function getIndexer(indexerAddress: string): Indexer {
+  let indexer = Indexer.load(indexerAddress)
+  if (!indexer) {
+    indexer = new Indexer(indexerAddress)
+    indexer.save()
+  }
+  return indexer as Indexer
 }
