@@ -96,18 +96,18 @@ export function handleSwap(event: Swap): void {
   let executedOrder = new ExecutedOrder(event.params.signerWallet.toHex() + event.params.nonce.toString())
 
   // create swap contract if it doesn't exist
-  var swap = SwapContract.load(event.address.toHex())
+  let swap = SwapContract.load(event.address.toHex())
   if (!swap) {
     swap = new SwapContract(event.address.toHex())
     swap.save()
   }
 
-  var signer = getUser(event.params.signerWallet.toHex())
-  var sender = getUser(event.params.senderWallet.toHex())
-  var affiliate = getUser(event.params.affiliateWallet.toHex())
-  var signerToken = getToken(event.params.signerToken.toHex())
-  var senderToken = getToken(event.params.senderToken.toHex())
-  var affiliateToken = getToken(event.params.senderToken.toHex())
+  let signer = getUser(event.params.signerWallet.toHex())
+  let sender = getUser(event.params.senderWallet.toHex())
+  let affiliate = getUser(event.params.affiliateWallet.toHex())
+  let signerToken = getToken(event.params.signerToken.toHex())
+  let senderToken = getToken(event.params.senderToken.toHex())
+  let affiliateToken = getToken(event.params.senderToken.toHex())
 
   executedOrder.swap = swap.id
   executedOrder.from = event.transaction.from
