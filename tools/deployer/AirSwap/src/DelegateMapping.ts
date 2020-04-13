@@ -43,7 +43,7 @@ export function handleProvideOrder(event: ProvideOrder): void {
     event.params.signerToken.toHex()
 
   let rule = Rule.load(ruleIdentifier)
-  rule.maxSenderAmount = BigInt.fromI32(rule.maxSenderAmount.toI32() - event.params.senderAmount.toI32())
+  rule.maxSenderAmount = rule.maxSenderAmount.minus(event.params.senderAmount)
   // if rule is to have been fully consumed, remove it
   if (rule.maxSenderAmount == BigInt.fromI32(0)) {
     store.remove("Rule", ruleIdentifier)
