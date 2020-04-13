@@ -17,7 +17,6 @@ const {
   emitted,
   reverted,
 } = require('@airswap/test-utils').assert
-const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
 const { GANACHE_PROVIDER } = require('@airswap/test-utils').constants
 
 contract('Delegate Integration Tests', async accounts => {
@@ -25,7 +24,6 @@ contract('Delegate Integration Tests', async accounts => {
   const notOwner = accounts[0]
   const aliceAddress = accounts[1]
   const bobAddress = accounts[2]
-  const carolAddress = accounts[3]
   const aliceTradeWallet = accounts[4]
   const bobSigner = new ethers.providers.JsonRpcProvider(
     GANACHE_PROVIDER
@@ -821,7 +819,7 @@ contract('Delegate Integration Tests', async accounts => {
       await aliceDelegate.createRule(daiAddress, wethAddress, 500, 2, {
         from: aliceAddress,
       })
-      // rule 5: 250 DAI/WETH, rule 3: 220 DAI/WETH, rule 4: 200 DAI/WETH
+      // rule 6: 250 DAI/WETH, rule 3: 220 DAI/WETH, rule 5: 200 DAI/WETH
       await checkLinkedList(daiAddress, wethAddress, [6, 3, 5])
 
       // fetch the max quote for the market
@@ -875,6 +873,15 @@ contract('Delegate Integration Tests', async accounts => {
   })
 
   describe('Test provideOrder', async () => {
+    // rule 6: 250 DAI/WETH: 500 DAI for 2 WETH
+    // rule 3: 220 DAI/WETH: 660 DAI for 3 WETH
+    // rule 5: 200 DAI/WETH: 1000 DAI for 5 WETH
+
+    // all of rule 6, and then 600/660 of rule 3
+    const senderAmount = 500 + 600
+    // sender amount is rounded UP, which is how the delegate prices
+    const signerAmount = 2 + Math.ceil((3 * 600) / 660)
+
     it('Should fail if no signature is sent', async () => {
       const order = createOrder({
         signer: {
@@ -951,7 +958,7 @@ contract('Delegate Integration Tests', async accounts => {
       )
     })
 
-    it('Should fail if signer token is not ERC20', async () => {
+    it('Should fail if the token pair has no rules', async () => {
       const order = await signOrder(
         createOrder({
           signer: {
@@ -975,6 +982,145 @@ contract('Delegate Integration Tests', async accounts => {
         }),
         'TOKEN_PAIR_INACTIVE'
       )
+    })
+
+    it('Should fail if the order is rounded in the signers favour', async () => {
+      // exact same as signerAmount, but rounded down instead
+      const badSignerAmount = 2 + Math.floor((3 * 600) / 660)
+
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: bobAddress,
+            amount: badSignerAmount,
+            token: wethAddress,
+          },
+          sender: {
+            wallet: aliceTradeWallet,
+            amount: senderAmount,
+            token: daiAddress,
+          },
+        }),
+        bobSigner,
+        swapAddress
+      )
+
+      await reverted(
+        aliceDelegate.provideOrder(order, {
+          from: bobAddress,
+        }),
+        'PRICE_INVALID'
+      )
+    })
+
+    it('Should fail on swap if tradeWallet hasnt authorised the delegate', async () => {
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: bobAddress,
+            amount: signerAmount,
+            token: wethAddress,
+          },
+          sender: {
+            wallet: aliceTradeWallet,
+            amount: senderAmount,
+            token: daiAddress,
+          },
+        }),
+        bobSigner,
+        swapAddress
+      )
+
+      await reverted(
+        aliceDelegate.provideOrder(order, {
+          from: bobAddress,
+        }),
+        'SENDER_UNAUTHORIZED'
+      )
+    })
+
+    it('Should fail on swap if bob hasnt approved swap to transfer his WETH', async () => {
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: bobAddress,
+            amount: signerAmount,
+            token: wethAddress,
+          },
+          sender: {
+            wallet: aliceTradeWallet,
+            amount: senderAmount,
+            token: daiAddress,
+          },
+        }),
+        bobSigner,
+        swapAddress
+      )
+
+      // trade wallet authorises the delegate on swap
+      await swap.authorizeSender(aliceDeleAddress, { from: aliceTradeWallet })
+
+      await reverted(
+        aliceDelegate.provideOrder(order, {
+          from: bobAddress,
+        }),
+        'TRANSFER_FAILED'
+      )
+    })
+
+    it('Should succeed on swap now that all authorisations are given', async () => {
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: bobAddress,
+            amount: signerAmount,
+            token: wethAddress,
+          },
+          sender: {
+            wallet: aliceTradeWallet,
+            amount: senderAmount,
+            token: daiAddress,
+          },
+        }),
+        bobSigner,
+        swapAddress
+      )
+
+      // bob authroises swap to transfer WETH
+      await tokenWETH.approve(swapAddress, STARTING_BALANCE, {
+        from: bobAddress,
+      })
+
+      // mint bob the money he needs
+      await tokenWETH.mint(bobAddress, signerAmount)
+      const tx = await aliceDelegate.provideOrder(order, {
+        from: bobAddress,
+      })
+
+      // check fill rule and delete rule events were emitted
+      emitted(tx, 'FillRule', e => {
+        return (
+          e.owner === aliceAddress &&
+          e.ruleID.toNumber() === 6 &&
+          e.senderAmount.toNumber() === 500 &&
+          e.signerAmount.toNumber() === 2
+        )
+      })
+
+      emitted(tx, 'DeleteRule', e => {
+        return e.owner === aliceAddress && e.ruleID.toNumber() === 6
+      })
+
+      emitted(tx, 'FillRule', e => {
+        return (
+          e.owner === aliceAddress &&
+          e.ruleID.toNumber() === 3 &&
+          e.senderAmount.toNumber() === 600 &&
+          e.signerAmount.toNumber() === signerAmount - 2
+        )
+      })
+
+      await checkLinkedList(daiAddress, wethAddress, [3, 5])
     })
   })
 })
