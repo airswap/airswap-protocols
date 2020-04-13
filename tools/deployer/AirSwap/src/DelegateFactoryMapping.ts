@@ -10,7 +10,7 @@ export function handleCreateDelegate(event: CreateDelegate): void {
   let indexer = getIndexer(event.params.indexerContract.toHex())
   let owner = getUser(event.params.delegateContractOwner.toHex())
 
-  Delegate.create(event.params.delegateContract)
+  Delegate.create(event.params.delegateContract) // begins indexing this delegate
   let delegate = new DelegateContract(event.params.delegateContract.toHex())
   delegate.factory = delegateFactory.id
   delegate.swap = swap.id
