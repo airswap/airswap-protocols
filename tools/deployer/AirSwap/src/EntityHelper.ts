@@ -1,5 +1,5 @@
 import { BigInt, log } from "@graphprotocol/graph-ts"
-import { User, Token, Indexer } from "../generated/schema"
+import { User, Token, Indexer, DelegateFactory, SwapContract } from "../generated/schema"
 
 export function getUser(userAddress: string): User {
   let user = User.load(userAddress)
@@ -33,4 +33,22 @@ export function getIndexer(indexerAddress: string): Indexer {
     indexer.save()
   }
   return indexer as Indexer
+}
+
+export function getDelegateFactory(delegateFactoryAddress: string): DelegateFactory {
+  let delegateFactory = DelegateFactory.load(delegateFactoryAddress)
+  if (!delegateFactory) {
+    delegateFactory = new DelegateFactory(delegateFactoryAddress)
+    delegateFactory.save()
+  }
+  return delegateFactory as DelegateFactory
+}
+
+export function getSwapContract(swapAddress: string): SwapContract {
+  let swap = SwapContract.load(swapAddress)
+  if (!swap) {
+    swap = new SwapContract(swapAddress)
+    swap.save()
+  }  
+  return swap as SwapContract
 }
