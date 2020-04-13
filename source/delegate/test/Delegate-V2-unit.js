@@ -879,7 +879,6 @@ contract('DelegateV2 Unit Tests', async accounts => {
 
       order.signature = emptySignature
 
-      // Succeeds on the Delegate, fails on the Swap.
       await reverted(
         delegate.provideOrder(order, { from: notOwner }),
         'SIGNATURE_MUST_BE_SENT'

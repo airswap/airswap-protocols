@@ -36,6 +36,7 @@ contract('Delegate Integration Tests', async accounts => {
   let tokenWETH
   let daiAddress
   let wethAddress
+  let stakingTokenAddr
   let aliceDelegate
   let aliceDeleAddress
   let swap
@@ -85,12 +86,13 @@ contract('Delegate Integration Tests', async accounts => {
 
     daiAddress = tokenDAI.address
     wethAddress = tokenWETH.address
+    stakingTokenAddr = stakingToken.address
 
     await stakingToken.mint(aliceAddress, STARTING_BALANCE)
   }
 
   async function setupIndexer() {
-    indexer = await Indexer.new(stakingToken.address)
+    indexer = await Indexer.new(stakingTokenAddr)
     indexerAddress = indexer.address
     await indexer.createIndex(tokenDAI.address, tokenWETH.address, PROTOCOL)
   }
@@ -126,32 +128,32 @@ contract('Delegate Integration Tests', async accounts => {
   })
 
   describe('Test constructor', async () => {
-    it('should set the swap contract address', async () => {
+    it('Should set the swap contract address', async () => {
       const val = await aliceDelegate.swapContract.call()
       equal(val, swapAddress, 'swap address is incorrect')
     })
 
-    it('should set the indexer contract address', async () => {
+    it('Should set the indexer contract address', async () => {
       const val = await aliceDelegate.indexer.call()
       equal(val, indexerAddress, 'indexer address is incorrect')
     })
 
-    it('should set the tradeWallet address', async () => {
+    it('Should set the tradeWallet address', async () => {
       const val = await aliceDelegate.tradeWallet.call()
       equal(val, aliceTradeWallet, 'trade wallet is incorrect')
     })
 
-    it('should set the protocol value', async () => {
+    it('Should set the protocol value', async () => {
       const val = await aliceDelegate.protocol.call()
       equal(val, PROTOCOL, 'protocol is incorrect')
     })
 
-    it('should set the owner value', async () => {
+    it('Should set the owner value', async () => {
       const val = await aliceDelegate.owner.call()
       equal(val, aliceAddress, 'owner is incorrect')
     })
 
-    it('should set the owner and trade wallet if none are provided', async () => {
+    it('Should set the owner and trade wallet if none are provided', async () => {
       const newDelegate = await DelegateV2.new(
         swapAddress,
         indexerAddress,
@@ -176,7 +178,7 @@ contract('Delegate Integration Tests', async accounts => {
     let signerWethAmount = 5
     let stakeAmount = 50
 
-    it('should not let a non-owner set a rule', async () => {
+    it('Should not let a non-owner set a rule', async () => {
       await reverted(
         aliceDelegate.createRuleAndSetIntent(
           daiAddress,
@@ -192,7 +194,7 @@ contract('Delegate Integration Tests', async accounts => {
       )
     })
 
-    it('should not let a rule be created with amount 0', async () => {
+    it('Should not let a rule be created with amount 0', async () => {
       await reverted(
         aliceDelegate.createRuleAndSetIntent(
           daiAddress,
@@ -222,7 +224,7 @@ contract('Delegate Integration Tests', async accounts => {
       )
     })
 
-    it('should not succeed if alice hasnt given staking token allowance', async () => {
+    it('Should not succeed if alice hasnt given staking token allowance', async () => {
       await reverted(
         aliceDelegate.createRuleAndSetIntent(
           daiAddress,
@@ -238,7 +240,7 @@ contract('Delegate Integration Tests', async accounts => {
       )
     })
 
-    it('should not be able to set intent on a non-existent index', async () => {
+    it('Should not be able to set intent on a non-existent index', async () => {
       await stakingToken.approve(aliceDeleAddress, STARTING_BALANCE, {
         from: aliceAddress,
       })
@@ -258,7 +260,7 @@ contract('Delegate Integration Tests', async accounts => {
       )
     })
 
-    it('should succeed with allowance and an index created', async () => {
+    it('Should succeed with allowance and an index created', async () => {
       await indexer.createIndex(wethAddress, daiAddress, PROTOCOL)
 
       const aliceBalanceBefore = await stakingToken.balanceOf(aliceAddress)
@@ -321,7 +323,7 @@ contract('Delegate Integration Tests', async accounts => {
       await checkLinkedList(daiAddress, wethAddress, [1])
     })
 
-    it('should increase stake with a new rule', async () => {
+    it('Should increase stake with a new rule', async () => {
       const aliceBalanceBefore = await stakingToken.balanceOf(aliceAddress)
       const indexerBalanceBefore = await stakingToken.balanceOf(indexerAddress)
 
@@ -386,7 +388,7 @@ contract('Delegate Integration Tests', async accounts => {
       await checkLinkedList(daiAddress, wethAddress, [2, 1])
     })
 
-    it('should decrease stake with a new rule', async () => {
+    it('Should decrease stake with a new rule', async () => {
       const aliceBalanceBefore = await stakingToken.balanceOf(aliceAddress)
       const indexerBalanceBefore = await stakingToken.balanceOf(indexerAddress)
 
@@ -455,7 +457,7 @@ contract('Delegate Integration Tests', async accounts => {
 
   describe('Test setIntent', async () => {
     const stakeAmount = 100
-    it('should not let a non-owner set intent', async () => {
+    it('Should not let a non-owner set intent', async () => {
       await reverted(
         aliceDelegate.setIntent(daiAddress, wethAddress, stakeAmount, {
           from: notOwner,
@@ -464,7 +466,7 @@ contract('Delegate Integration Tests', async accounts => {
       )
     })
 
-    it('should not let intent be set on a market with no rules', async () => {
+    it('Should not let intent be set on a market with no rules', async () => {
       await reverted(
         aliceDelegate.setIntent(wethAddress, wethAddress, stakeAmount, {
           from: aliceAddress,
@@ -473,33 +475,28 @@ contract('Delegate Integration Tests', async accounts => {
       )
     })
 
-    it('should set intent for a market successfully', async () => {
+    it('Should set intent for a market successfully', async () => {
       // create the index
-      await indexer.createIndex(daiAddress, stakingToken.address, PROTOCOL)
+      await indexer.createIndex(daiAddress, stakingTokenAddr, PROTOCOL)
 
       // create a rule for a market
-      await aliceDelegate.createRule(stakingToken.address, daiAddress, 5, 5, {
+      await aliceDelegate.createRule(stakingTokenAddr, daiAddress, 5, 5, {
         from: aliceAddress,
       })
 
       const aliceBalanceBefore = await stakingToken.balanceOf(aliceAddress)
       const indexerBalanceBefore = await stakingToken.balanceOf(indexerAddress)
 
-      await aliceDelegate.setIntent(
-        stakingToken.address,
-        daiAddress,
-        stakeAmount,
-        {
-          from: aliceAddress,
-        }
-      )
+      await aliceDelegate.setIntent(stakingTokenAddr, daiAddress, stakeAmount, {
+        from: aliceAddress,
+      })
 
       const aliceBalanceAfter = await stakingToken.balanceOf(aliceAddress)
       const indexerBalanceAfter = await stakingToken.balanceOf(indexerAddress)
 
       const intents = await indexer.getLocators(
         daiAddress,
-        stakingToken.address,
+        stakingTokenAddr,
         PROTOCOL,
         ADDRESS_ZERO,
         1
@@ -527,7 +524,7 @@ contract('Delegate Integration Tests', async accounts => {
   })
 
   describe('Test unsetIntent', async () => {
-    it('should not let a non-owner unset intent', async () => {
+    it('Should not let a non-owner unset intent', async () => {
       await reverted(
         aliceDelegate.unsetIntent(daiAddress, wethAddress, {
           from: notOwner,
@@ -536,14 +533,14 @@ contract('Delegate Integration Tests', async accounts => {
       )
     })
 
-    it('should unset intent for a market successfully', async () => {
+    it('Should unset intent for a market successfully', async () => {
       // previous section staked 100 tokens on this market
       const stakeAmount = 100
 
       const aliceBalanceBefore = await stakingToken.balanceOf(aliceAddress)
       const indexerBalanceBefore = await stakingToken.balanceOf(indexerAddress)
 
-      await aliceDelegate.unsetIntent(stakingToken.address, daiAddress, {
+      await aliceDelegate.unsetIntent(stakingTokenAddr, daiAddress, {
         from: aliceAddress,
       })
 
@@ -552,7 +549,7 @@ contract('Delegate Integration Tests', async accounts => {
 
       const intents = await indexer.getLocators(
         daiAddress,
-        stakingToken.address,
+        stakingTokenAddr,
         PROTOCOL,
         ADDRESS_ZERO,
         1
@@ -575,7 +572,7 @@ contract('Delegate Integration Tests', async accounts => {
   })
 
   describe('Test deleteRuleAndUnsetIntent', async () => {
-    it('should not let a non-owner set a rule', async () => {
+    it('Should not let a non-owner set a rule', async () => {
       await reverted(
         aliceDelegate.deleteRuleAndUnsetIntent(1, {
           from: notOwner,
@@ -584,7 +581,7 @@ contract('Delegate Integration Tests', async accounts => {
       )
     })
 
-    it('should not succeed for a non-existent rule', async () => {
+    it('Should not succeed for a non-existent rule', async () => {
       await reverted(
         aliceDelegate.deleteRuleAndUnsetIntent(0, {
           from: aliceAddress,
@@ -600,7 +597,7 @@ contract('Delegate Integration Tests', async accounts => {
       )
     })
 
-    it('should delete a rule and unset intent for the entire market', async () => {
+    it('Should delete a rule and unset intent for the entire market', async () => {
       let intents = await indexer.getLocators(
         wethAddress,
         daiAddress,
@@ -650,7 +647,7 @@ contract('Delegate Integration Tests', async accounts => {
       equal(intents['locators'].length, 0, 'locators should be empty')
     })
 
-    it('should delete a rule and unset intent with 0 stake', async () => {
+    it('Should delete a rule and unset intent with 0 stake', async () => {
       // market has no intents
       let intents = await indexer.getLocators(
         wethAddress,
@@ -730,7 +727,7 @@ contract('Delegate Integration Tests', async accounts => {
   })
 
   describe('Test getMaxQuote', async () => {
-    it('should return 0 for a market with no rule', async () => {
+    it('Should return 0 for a market with no rule', async () => {
       // show this market has no rules
       const ruleID = await aliceDelegate.firstRuleID.call(
         wethAddress,
@@ -748,7 +745,7 @@ contract('Delegate Integration Tests', async accounts => {
       equal(maxQuote['signerAmount'].toNumber(), 0, 'Quote should be 0')
     })
 
-    it('should return 0 if the tradewallet has no balance', async () => {
+    it('Should return 0 if the tradewallet has no balance', async () => {
       // show this time the market has rules
       await checkLinkedList(daiAddress, wethAddress, [3])
 
@@ -773,7 +770,7 @@ contract('Delegate Integration Tests', async accounts => {
       equal(maxQuote['signerAmount'].toNumber(), 0, 'Quote should be 0')
     })
 
-    it('should return 0 if the tradewallet has no allowance', async () => {
+    it('Should return 0 if the tradewallet has no allowance', async () => {
       // show this time the market has rules
       await checkLinkedList(daiAddress, wethAddress, [3])
 
@@ -799,7 +796,7 @@ contract('Delegate Integration Tests', async accounts => {
       equal(maxQuote['signerAmount'].toNumber(), 0, 'Quote should be 0')
     })
 
-    it('should return max possible if balance/allowance are limited', async () => {
+    it('Should return max possible if balance/allowance are limited', async () => {
       // alice has a DAI balance of 1000 and allowance of 0, per the previous test
       // there is 1 rule on DAI/WETH: rule 3
 
@@ -848,7 +845,7 @@ contract('Delegate Integration Tests', async accounts => {
       )
     })
 
-    it('should return full rule if balance/allowance are large enough', async () => {
+    it('Should return full rule if balance/allowance are large enough', async () => {
       // mint loads and approve loads
       await tokenDAI.approve(swapAddress, 100000000, {
         from: aliceTradeWallet,
@@ -877,5 +874,107 @@ contract('Delegate Integration Tests', async accounts => {
     })
   })
 
-  describe.skip('Test provideOrder')
+  describe('Test provideOrder', async () => {
+    it('Should fail if no signature is sent', async () => {
+      const order = createOrder({
+        signer: {
+          wallet: bobAddress,
+          amount: 500,
+          token: wethAddress,
+        },
+        sender: {
+          wallet: aliceTradeWallet,
+          amount: 500,
+          token: daiAddress,
+        },
+      })
+
+      order.signature = emptySignature
+
+      await reverted(
+        aliceDelegate.provideOrder(order, { from: bobAddress }),
+        'SIGNATURE_MUST_BE_SENT'
+      )
+    })
+
+    it('Should fail if sender token is not ERC20', async () => {
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: bobAddress,
+            amount: 500,
+            token: wethAddress,
+          },
+          sender: {
+            wallet: aliceTradeWallet,
+            amount: 500,
+            token: daiAddress,
+            kind: '0x80ac58cd',
+          },
+        }),
+        bobSigner,
+        swapAddress
+      )
+
+      await reverted(
+        aliceDelegate.provideOrder(order, {
+          from: bobAddress,
+        }),
+        'SENDER_KIND_MUST_BE_ERC20'
+      )
+    })
+
+    it('Should fail if signer token is not ERC20', async () => {
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: bobAddress,
+            amount: 500,
+            token: wethAddress,
+            kind: '0x80ac58cd',
+          },
+          sender: {
+            wallet: aliceTradeWallet,
+            amount: 500,
+            token: daiAddress,
+          },
+        }),
+        bobSigner,
+        swapAddress
+      )
+
+      await reverted(
+        aliceDelegate.provideOrder(order, {
+          from: bobAddress,
+        }),
+        'SIGNER_KIND_MUST_BE_ERC20'
+      )
+    })
+
+    it('Should fail if signer token is not ERC20', async () => {
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: bobAddress,
+            amount: 500,
+            token: wethAddress,
+          },
+          sender: {
+            wallet: aliceTradeWallet,
+            amount: 500,
+            token: stakingTokenAddr,
+          },
+        }),
+        bobSigner,
+        swapAddress
+      )
+
+      await reverted(
+        aliceDelegate.provideOrder(order, {
+          from: bobAddress,
+        }),
+        'TOKEN_PAIR_INACTIVE'
+      )
+    })
+  })
 })
