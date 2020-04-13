@@ -8,8 +8,8 @@ import {
   RevokeSigner,
   Swap
 } from "../generated/SwapContract/SwapContract"
-import { User, Token, SwapContract, ExecutedOrder } from "../generated/schema"
-import { getUser } from "./helper"
+import { SwapContract, ExecutedOrder } from "../generated/schema"
+import { getUser, getToken } from "./EntityHelper"
 
 export function handleAuthorizeSender(event: AuthorizeSender): void {
   let authorizer = getUser(event.params.authorizerAddress.toHex())
@@ -26,31 +26,9 @@ export function handleAuthorizeSender(event: AuthorizeSender): void {
 }
 
 export function handleRevokeSender(event: RevokeSender): void {
-  let deauthorizerAddress = event.params.authorizerAddress.toHex()
-  let deauthorizer = User.load(deauthorizerAddress)
+  let deauthorizer = getUser(event.params.authorizerAddress.toHex())
+  let revokedSender = getUser(event.params.revokedSender.toHex())
 
-  // handle new creation of User
-  if (!deauthorizer) {
-    deauthorizer = new User(deauthorizerAddress)
-    deauthorizer.authorizedSigners = new Array<string>()
-    deauthorizer.authorizedSenders = new Array<string>()
-    deauthorizer.executedOrders = new Array<string>()
-    deauthorizer.cancelledNonces = new Array<BigInt>()
-  }
-
-  let revokedSenderAddress = event.params.revokedSender.toHex()
-  let revokedSender = User.load(revokedSenderAddress) 
-  // handle new creation of User (revokedSender)
-  if (!revokedSender) {
-    revokedSender = new User(revokedSenderAddress)
-    revokedSender.authorizedSigners = new Array<string>()
-    revokedSender.authorizedSenders = new Array<string>()
-    revokedSender.executedOrders = new Array<string>()
-    revokedSender.cancelledNonces = new Array<BigInt>()
-    revokedSender.save()
-  }
-
-  // handle removal
   let authorizedSenders = deauthorizer.authorizedSenders
   let idxToRemove = authorizedSenders.indexOf(revokedSender.id)
   // only remove if the revokedSender exists
@@ -62,29 +40,8 @@ export function handleRevokeSender(event: RevokeSender): void {
 }
 
 export function handleAuthorizeSigner(event: AuthorizeSigner): void {
-  let authorizerAddress = event.params.authorizerAddress.toHex()
-  let authorizer = User.load(authorizerAddress)
-
-  // handle new creation of User
-  if (!authorizer) {
-    authorizer = new User(authorizerAddress)
-    authorizer.authorizedSigners = new Array<string>()
-    authorizer.authorizedSenders = new Array<string>()
-    authorizer.executedOrders = new Array<string>()
-    authorizer.cancelledNonces = new Array<BigInt>()
-  }
-
-  let signerAddress = event.params.authorizedSigner.toHex()
-  let signer = User.load(signerAddress) 
-  // handle new creation of User (signer)
-  if (!signer) {
-    signer = new User(signerAddress)
-    signer.authorizedSigners = new Array<string>()
-    signer.authorizedSenders = new Array<string>()
-    signer.executedOrders = new Array<string>()
-    signer.cancelledNonces = new Array<BigInt>()
-    signer.save()
-  }
+  let authorizer = getUser(event.params.authorizerAddress.toHex())
+  let signer = getUser(event.params.authorizedSigner.toHex())
 
   let authorizedSigners = authorizer.authorizedSigners
   let currentIdx = authorizedSigners.indexOf(signer.id)
@@ -97,28 +54,8 @@ export function handleAuthorizeSigner(event: AuthorizeSigner): void {
 }
 
 export function handleRevokeSigner(event: RevokeSigner): void {
-  let deauthorizerAddress = event.params.authorizerAddress.toHex()
-  let deauthorizer = User.load(deauthorizerAddress)
-  // handle new creation of User
-  if (!deauthorizer) {
-    deauthorizer = new User(deauthorizerAddress)
-    deauthorizer.authorizedSigners = new Array<string>()
-    deauthorizer.authorizedSenders = new Array<string>()
-    deauthorizer.executedOrders = new Array<string>()
-    deauthorizer.cancelledNonces = new Array<BigInt>()
-  }
-
-  let revokedSignerAddress = event.params.revokedSigner.toHex()
-  let revokedSigner = User.load(revokedSignerAddress) 
-  // handle new creation of User (revokedSigner)
-  if (!revokedSigner) {
-    revokedSigner = new User(revokedSignerAddress)
-    revokedSigner.authorizedSigners = new Array<string>()
-    revokedSigner.authorizedSenders = new Array<string>()
-    revokedSigner.executedOrders = new Array<string>()
-    revokedSigner.cancelledNonces = new Array<BigInt>()
-    revokedSigner.save()
-  }
+  let deauthorizer = getUser(event.params.authorizerAddress.toHex())
+  let revokedSigner = getUser(event.params.revokedSigner.toHex())
 
   // handle removal
   let authorizedSigners = deauthorizer.authorizedSigners
@@ -132,18 +69,7 @@ export function handleRevokeSigner(event: RevokeSigner): void {
 }
 
 export function handleCancel(event: Cancel): void {
-  let signer = event.params.signerWallet.toHex()
-  let user = User.load(signer)
-
-  // handle new creation of User
-  if (!user) {
-    user = new User(signer)
-    user.authorizedSigners = new Array<string>()
-    user.authorizedSenders = new Array<string>()
-    user.executedOrders = new Array<string>()
-    user.cancelledNonces = new Array<BigInt>()
-  }
-
+  let user = getUser(event.params.signerWallet.toHex())
   let cancelledNonces = user.cancelledNonces
   cancelledNonces.push(event.params.nonce)
   cancelledNonces.sort()
@@ -152,17 +78,7 @@ export function handleCancel(event: Cancel): void {
 }
 
 export function handleCancelUpTo(event: CancelUpTo): void {
-  let signer = event.params.signerWallet.toHex()
-  let user = User.load(signer)
-
-  // handle new creation of User
-  if (!user) {
-    user = new User(signer)
-    user.authorizedSigners = new Array<string>()
-    user.authorizedSenders = new Array<string>()
-    user.executedOrders = new Array<string>()
-    user.cancelledNonces = new Array<BigInt>()
-  }
+  let user = getUser(event.params.signerWallet.toHex())
   let cancelledNonces = user.cancelledNonces
   for (let i = BigInt.fromI32(0); i.lt(event.params.nonce); i = i.plus(BigInt.fromI32(1))) {
     // prevent duplicates
@@ -186,65 +102,12 @@ export function handleSwap(event: Swap): void {
     swap.save()
   }
 
-  var signerAddress = event.params.signerWallet.toHex()
-  var signer = User.load(signerAddress) 
-  // handle new creation of User (signer)
-  if (!signer) {
-    signer = new User(signerAddress)
-    signer.authorizedSigners = new Array<string>()
-    signer.authorizedSenders = new Array<string>()
-    signer.executedOrders = new Array<string>()
-    signer.cancelledNonces = new Array<BigInt>()
-    signer.save()
-  }
-
-  var senderAddress = event.params.senderWallet.toHex()
-  var sender = User.load(senderAddress) 
-  // handle new creation of User (sender)
-  if (!sender) {
-    sender = new User(senderAddress)
-    sender.authorizedSigners = new Array<string>()
-    sender.authorizedSenders = new Array<string>()
-    sender.executedOrders = new Array<string>()
-    sender.cancelledNonces = new Array<BigInt>()
-    sender.save()
-  }
-
-  let affiliateAddress = event.params.affiliateWallet.toHex()
-  let affiliate = User.load(affiliateAddress) 
-  // handle new creation of User (affiliate)
-  if (!affiliate) {
-    affiliate = new User(affiliateAddress)
-    affiliate.authorizedSigners = new Array<string>()
-    affiliate.authorizedSenders = new Array<string>()
-    affiliate.executedOrders = new Array<string>()
-    affiliate.cancelledNonces = new Array<BigInt>()
-    affiliate.save()
-  }
-
-  var signerTokenAddress = event.params.signerToken.toHex()
-  var signerToken = Token.load(signerTokenAddress)
-  if (!signerToken) {
-    signerToken = new Token(signerTokenAddress)
-    signerToken.isBlacklisted = false
-    signerToken.save()
-  }
-
-  var senderTokenAddress = event.params.senderToken.toHex()
-  var senderToken = Token.load(senderTokenAddress)
-  if (!senderToken) {
-    senderToken = new Token(senderTokenAddress)
-    senderToken.isBlacklisted = false
-    senderToken.save()
-  }
-
-  var affiliateTokenAddress = event.params.affiliateToken.toHex()
-  var affiliateToken = Token.load(affiliateTokenAddress)
-  if (!affiliateToken) {
-    affiliateToken = new Token(affiliateTokenAddress)
-    affiliateToken.isBlacklisted = false
-    affiliateToken.save()
-  }
+  var signer = getUser(event.params.signerWallet.toHex())
+  var sender = getUser(event.params.senderWallet.toHex())
+  var affiliate = getUser(event.params.affiliateWallet.toHex())
+  var signerToken = getToken(event.params.signerToken.toHex())
+  var senderToken = getToken(event.params.senderToken.toHex())
+  var affiliateToken = getToken(event.params.senderToken.toHex())
 
   executedOrder.swap = swap.id
   executedOrder.from = event.transaction.from
