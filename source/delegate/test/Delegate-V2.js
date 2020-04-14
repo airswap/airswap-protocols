@@ -469,7 +469,7 @@ contract('Delegate Integration Tests', async accounts => {
         aliceDelegate.setIntent(wethAddress, wethAddress, stakeAmount, {
           from: aliceAddress,
         }),
-        'NO_RULE_EXISTS'
+        'RULE_MUST_EXIST'
       )
     })
 

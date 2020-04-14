@@ -137,7 +137,10 @@ contract DelegateV2 is IDelegateV2, Ownable {
     uint256 newStakeAmount
   ) external onlyOwner {
     // check whether the delegate has a rule for that market
-    require(firstRuleID[senderToken][signerToken] != NO_RULE, "NO_RULE_EXISTS");
+    require(
+      firstRuleID[senderToken][signerToken] != NO_RULE,
+      "RULE_MUST_EXIST"
+    );
 
     _setIntent(senderToken, signerToken, newStakeAmount);
   }
@@ -182,15 +185,18 @@ contract DelegateV2 is IDelegateV2, Ownable {
     // Ensure that a rule exists.
     require(ruleID != NO_RULE, "TOKEN_PAIR_INACTIVE");
 
-    uint256 signerAmount = order.signer.amount;
-    uint256 senderAmount = order.sender.amount;
+    uint256 remainingSignerAmount = order.signer.amount;
+    uint256 remainingSenderAmount = order.sender.amount;
 
-    while (ruleID != NO_RULE && senderAmount > 0) {
-      if (senderAmount >= rules[ruleID].senderAmount) {
-        require(signerAmount >= rules[ruleID].signerAmount, "PRICE_INVALID");
+    while (ruleID != NO_RULE && remainingSenderAmount > 0) {
+      if (remainingSenderAmount >= rules[ruleID].senderAmount) {
+        require(
+          remainingSignerAmount >= rules[ruleID].signerAmount,
+          "PRICE_INVALID"
+        );
         // enough sender and signer amount have been sent for this rule
-        senderAmount -= rules[ruleID].senderAmount;
-        signerAmount -= rules[ruleID].signerAmount;
+        remainingSenderAmount -= rules[ruleID].senderAmount;
+        remainingSignerAmount -= rules[ruleID].signerAmount;
 
         emit FillRule(
           owner(),
@@ -204,24 +210,33 @@ contract DelegateV2 is IDelegateV2, Ownable {
       } else {
         // only a fraction of this rule is needed so we calculate the signer amount
         // neither divisions can have a denominator of 0. removing safemath preserves some calculation accuracy
-        uint256 numerator = rules[ruleID].signerAmount.mul(senderAmount);
-        uint256 signerFraction = numerator.div(rules[ruleID].senderAmount);
+        uint256 numerator = rules[ruleID].signerAmount.mul(
+          remainingSenderAmount
+        );
+        uint256 signerAmountFraction = numerator.div(
+          rules[ruleID].senderAmount
+        );
 
         // we round up not down for the delegate's advantage
         if (numerator.mod(rules[ruleID].senderAmount) > 0) {
-          signerFraction++;
+          signerAmountFraction++;
         }
 
-        require(signerFraction <= signerAmount, "PRICE_INVALID");
+        require(signerAmountFraction <= remainingSignerAmount, "PRICE_INVALID");
 
         // update whats remaining of the rule
-        rules[ruleID].senderAmount -= senderAmount;
-        rules[ruleID].signerAmount -= signerFraction;
+        rules[ruleID].senderAmount -= remainingSenderAmount;
+        rules[ruleID].signerAmount -= signerAmountFraction;
 
-        emit FillRule(owner(), ruleID, senderAmount, signerFraction);
+        emit FillRule(
+          owner(),
+          ruleID,
+          remainingSenderAmount,
+          signerAmountFraction
+        );
 
         // signerAmount is large enough for the senderAmount sent
-        senderAmount = 0;
+        remainingSenderAmount = 0;
       }
     }
 
@@ -262,7 +277,7 @@ contract DelegateV2 is IDelegateV2, Ownable {
     uint256 remainingSignerAmount = signerAmount;
     uint256 ruleID = firstRuleID[senderToken][signerToken];
 
-    while (remainingSignerAmount > 0 && ruleID != NO_RULE) {
+    while (ruleID != NO_RULE && remainingSignerAmount > 0) {
       // if the entirety of the current rule is needed, we add it and move to the next one
       if (remainingSignerAmount >= rules[ruleID].signerAmount) {
         senderAmount = senderAmount.add(rules[ruleID].senderAmount);
@@ -270,12 +285,12 @@ contract DelegateV2 is IDelegateV2, Ownable {
         ruleID = rules[ruleID].nextRuleID;
       } else {
         // only a fraction of this rule is needed so we calculate the sender amount
-        uint256 senderFraction = rules[ruleID]
+        uint256 senderAmountFraction = rules[ruleID]
           .senderAmount
           .mul(remainingSignerAmount)
           .div(rules[ruleID].signerAmount);
 
-        senderAmount = senderAmount.add(senderFraction);
+        senderAmount = senderAmount.add(senderAmountFraction);
         remainingSignerAmount = 0;
       }
     }
@@ -517,7 +532,7 @@ contract DelegateV2 is IDelegateV2, Ownable {
     remainingSenderAmount = senderAmount;
     uint256 ruleID = firstRuleID[senderToken][signerToken];
 
-    while (remainingSenderAmount > 0 && ruleID != NO_RULE) {
+    while (ruleID != NO_RULE && remainingSenderAmount > 0) {
       // if the entirety of the current rule is needed, we add it and move to the next one
       if (remainingSenderAmount >= rules[ruleID].senderAmount) {
         signerAmount = signerAmount.add(rules[ruleID].signerAmount);
@@ -528,14 +543,16 @@ contract DelegateV2 is IDelegateV2, Ownable {
         uint256 numerator = rules[ruleID].signerAmount.mul(
           remainingSenderAmount
         );
-        uint256 signerFraction = numerator.div(rules[ruleID].senderAmount);
+        uint256 signerAmountFraction = numerator.div(
+          rules[ruleID].senderAmount
+        );
 
         // we round up not down for the delegate's advantage
         if (numerator.mod(rules[ruleID].senderAmount) > 0) {
-          signerFraction++;
+          signerAmountFraction++;
         }
 
-        signerAmount = signerAmount.add(signerFraction);
+        signerAmount = signerAmount.add(signerAmountFraction);
         remainingSenderAmount = 0;
       }
     }
