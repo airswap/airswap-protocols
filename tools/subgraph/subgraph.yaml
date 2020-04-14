@@ -4,14 +4,14 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: SwapContract
-    network: 'development'
+    network: 'mainnet'
     source:
-      address: '0x2C35C3E7aaF67F0CaBb310c37B193f5e76832327'
+      address: '0x4572f2554421Bd64Bef1c22c8a81840E8D496BeA'
       abi: SwapContract
-      startBlock: 0
+      startBlock: 9371103
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.3
+      apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
         - AuthorizeSender
@@ -42,14 +42,14 @@ dataSources:
       file: ./src/SwapMapping.ts
   - kind: ethereum/contract
     name: Indexer
-    network: 'development'
+    network: 'mainnet'
     source:
-      address: '0xdF76317a7DC3B454B3A590cC5f014e679757732B'
+      address: '0xbA9aB9710Bd461F30C247f4cA2Cb7f453C22570e'
       abi: Indexer
-      startBlock: 0
+      startBlock: 9371103
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.3
+      apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
         - AddTokenToBlacklist
@@ -77,14 +77,14 @@ dataSources:
       file: ./src/IndexerMapping.ts
   - kind: ethereum/contract
     name: DelegateFactory
-    network: 'development'
+    network: 'mainnet'
     source:
-      address: '0xeB33D1F2F68D7Ba0b750F56d8e706c3347d630AC'
+      address: '0x072073f78a2d58610Ee3d5e170CA7AC9CB58a345'
       abi: DelegateFactory
-      startBlock: 0
+      startBlock: 9371103
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.3
+      apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
         - CreateDelegate
@@ -98,12 +98,12 @@ dataSources:
 templates:
   - name: Index
     kind: ethereum/contract
-    network: 'development'
+    network: 'mainnet'
     source:
       abi: Index
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.3
+      apiVersion: 0.0.4
       language: wasm/assemblyscript
       file: ./src/IndexMapping.ts 
       entities:
@@ -118,12 +118,12 @@ templates:
           handler: handleUnsetLocator
   - name: Delegate
     kind: ethereum/contract
-    network: 'development'
+    network: 'mainnet'
     source:
       abi: Delegate
     mapping: 
       kind: ethereum/events
-      apiVersion: 0.0.3
+      apiVersion: 0.0.4
       language: wasm/assemblyscript
       file: ./src/DelegateMapping.ts
       entities:
