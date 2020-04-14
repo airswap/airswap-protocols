@@ -798,7 +798,7 @@ contract('DelegateV2 Unit Tests', async accounts => {
     })
   })
 
-  describe('Test getLevels', async () => {
+  describe('Test getRules', async () => {
     beforeEach(async () => {
       // add 5 rules - same rules as test above
       await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 300, 50)
@@ -810,7 +810,7 @@ contract('DelegateV2 Unit Tests', async accounts => {
     })
 
     it('Should return no levels if none exist', async () => {
-      const result = await delegate.getLevels(
+      const result = await delegate.getRules.call(
         SIGNER_TOKEN_ADDR,
         SENDER_TOKEN_ADDR
       )
@@ -828,7 +828,7 @@ contract('DelegateV2 Unit Tests', async accounts => {
     })
 
     it('Should return all levels in order', async () => {
-      const result = await delegate.getLevels(
+      const result = await delegate.getRules.call(
         SENDER_TOKEN_ADDR,
         SIGNER_TOKEN_ADDR
       )

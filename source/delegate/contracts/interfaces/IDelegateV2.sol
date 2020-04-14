@@ -76,6 +76,11 @@ interface IDelegateV2 {
     view
     returns (uint256 senderAmount, uint256 signerAmount);
 
+  function getRules(address senderToken, address signerToken)
+    external
+    view
+    returns (uint256[] memory senderAmounts, uint256[] memory signerAmounts);
+
   function owner() external view returns (address);
 
   function tradeWallet() external view returns (address);

@@ -307,7 +307,7 @@ contract DelegateV2 is IDelegateV2, Ownable {
     senderAmount = senderBalance.sub(remainingSenderAmount);
   }
 
-  function getLevels(address senderToken, address signerToken)
+  function getRules(address senderToken, address signerToken)
     external
     view
     returns (uint256[] memory senderAmounts, uint256[] memory signerAmounts)
