@@ -3,3 +3,4 @@ Imports.sol
 build/
 node_modules/
 **/deployer/*
+**/subgraph/*

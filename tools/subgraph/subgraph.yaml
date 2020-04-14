@@ -4,11 +4,11 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: SwapContract
-    network: '{{network}}'
+    network: 'mainnet'
     source:
-      address: '{{swap_address}}'
+      address: '0x4572f2554421Bd64Bef1c22c8a81840E8D496BeA'
       abi: SwapContract
-      startBlock: {{startBlock}}
+      startBlock: 9371103
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -42,11 +42,11 @@ dataSources:
       file: ./src/SwapMapping.ts
   - kind: ethereum/contract
     name: Indexer
-    network: '{{network}}'
+    network: 'mainnet'
     source:
-      address: '{{indexer_address}}'
+      address: '0xbA9aB9710Bd461F30C247f4cA2Cb7f453C22570e'
       abi: Indexer
-      startBlock: {{startBlock}}
+      startBlock: 9371103
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -77,11 +77,11 @@ dataSources:
       file: ./src/IndexerMapping.ts
   - kind: ethereum/contract
     name: DelegateFactory
-    network: '{{network}}'
+    network: 'mainnet'
     source:
-      address: '{{delegateFactory_address}}'
+      address: '0x072073f78a2d58610Ee3d5e170CA7AC9CB58a345'
       abi: DelegateFactory
-      startBlock: {{startBlock}}
+      startBlock: 9371103
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -98,7 +98,7 @@ dataSources:
 templates:
   - name: Index
     kind: ethereum/contract
-    network: '{{network}}'
+    network: 'mainnet'
     source:
       abi: Index
     mapping:
@@ -118,7 +118,7 @@ templates:
           handler: handleUnsetLocator
   - name: Delegate
     kind: ethereum/contract
-    network: '{{network}}'
+    network: 'mainnet'
     source:
       abi: Delegate
     mapping: 

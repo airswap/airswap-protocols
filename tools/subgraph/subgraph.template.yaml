@@ -4,14 +4,14 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: SwapContract
-    network: 'development'
+    network: '{{network}}'
     source:
-      address: '0x2C35C3E7aaF67F0CaBb310c37B193f5e76832327'
+      address: '{{swap_address}}'
       abi: SwapContract
-      startBlock: 0
+      startBlock: {{startBlock}}
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.3
+      apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
         - AuthorizeSender
@@ -23,7 +23,7 @@ dataSources:
         - Swap
       abis:
         - name: SwapContract
-          file: ../build/contracts/Swap.json
+          file: ../deployer/build/contracts/Swap.json
       eventHandlers:
         - event: AuthorizeSender(indexed address,indexed address)
           handler: handleAuthorizeSender
@@ -42,14 +42,14 @@ dataSources:
       file: ./src/SwapMapping.ts
   - kind: ethereum/contract
     name: Indexer
-    network: 'development'
+    network: '{{network}}'
     source:
-      address: '0xdF76317a7DC3B454B3A590cC5f014e679757732B'
+      address: '{{indexer_address}}'
       abi: Indexer
-      startBlock: 0
+      startBlock: {{startBlock}}
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.3
+      apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
         - AddTokenToBlacklist
@@ -60,7 +60,7 @@ dataSources:
         - Unstake
       abis:
         - name: Indexer
-          file: ../build/contracts/Indexer.json
+          file: ../deployer/build/contracts/Indexer.json
       eventHandlers:
         - event: AddTokenToBlacklist(address)
           handler: handleAddTokenToBlacklist
@@ -77,20 +77,20 @@ dataSources:
       file: ./src/IndexerMapping.ts
   - kind: ethereum/contract
     name: DelegateFactory
-    network: 'development'
+    network: '{{network}}'
     source:
-      address: '0xeB33D1F2F68D7Ba0b750F56d8e706c3347d630AC'
+      address: '{{delegateFactory_address}}'
       abi: DelegateFactory
-      startBlock: 0
+      startBlock: {{startBlock}}
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.3
+      apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
         - CreateDelegate
       abis:
         - name: DelegateFactory
-          file: ../build/contracts/DelegateFactory.json
+          file: ../deployer/build/contracts/DelegateFactory.json
       eventHandlers:
         - event: CreateDelegate(indexed address,address,address,indexed address,address)
           handler: handleCreateDelegate
@@ -98,19 +98,19 @@ dataSources:
 templates:
   - name: Index
     kind: ethereum/contract
-    network: 'development'
+    network: '{{network}}'
     source:
       abi: Index
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.3
+      apiVersion: 0.0.4
       language: wasm/assemblyscript
       file: ./src/IndexMapping.ts 
       entities:
         - Index
       abis:
         - name: Index
-          file: ../build/contracts/Index.json
+          file: ../deployer/build/contracts/Index.json
       eventHandlers: 
         - event: SetLocator(indexed address,uint256,indexed bytes32)
           handler: handleSetLocator
@@ -118,19 +118,19 @@ templates:
           handler: handleUnsetLocator
   - name: Delegate
     kind: ethereum/contract
-    network: 'development'
+    network: '{{network}}'
     source:
       abi: Delegate
     mapping: 
       kind: ethereum/events
-      apiVersion: 0.0.3
+      apiVersion: 0.0.4
       language: wasm/assemblyscript
       file: ./src/DelegateMapping.ts
       entities:
         - Delegate
       abis:
         - name: Delegate
-          file: ../build/contracts/Delegate.json
+          file: ../deployer/build/contracts/Delegate.json
       eventHandlers: 
         - event: SetRule(indexed address,indexed address,indexed address,uint256,uint256,uint256)
           handler: handleSetRule
