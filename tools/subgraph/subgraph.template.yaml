@@ -23,7 +23,7 @@ dataSources:
         - Swap
       abis:
         - name: SwapContract
-          file: ../build/contracts/Swap.json
+          file: ../deployer/build/contracts/Swap.json
       eventHandlers:
         - event: AuthorizeSender(indexed address,indexed address)
           handler: handleAuthorizeSender
@@ -60,7 +60,7 @@ dataSources:
         - Unstake
       abis:
         - name: Indexer
-          file: ../build/contracts/Indexer.json
+          file: ../deployer/build/contracts/Indexer.json
       eventHandlers:
         - event: AddTokenToBlacklist(address)
           handler: handleAddTokenToBlacklist
@@ -90,7 +90,7 @@ dataSources:
         - CreateDelegate
       abis:
         - name: DelegateFactory
-          file: ../build/contracts/DelegateFactory.json
+          file: ../deployer/build/contracts/DelegateFactory.json
       eventHandlers:
         - event: CreateDelegate(indexed address,address,address,indexed address,address)
           handler: handleCreateDelegate
@@ -110,7 +110,7 @@ templates:
         - Index
       abis:
         - name: Index
-          file: ../build/contracts/Index.json
+          file: ../deployer/build/contracts/Index.json
       eventHandlers: 
         - event: SetLocator(indexed address,uint256,indexed bytes32)
           handler: handleSetLocator
@@ -130,7 +130,7 @@ templates:
         - Delegate
       abis:
         - name: Delegate
-          file: ../build/contracts/Delegate.json
+          file: ../deployer/build/contracts/Delegate.json
       eventHandlers: 
         - event: SetRule(indexed address,indexed address,indexed address,uint256,uint256,uint256)
           handler: handleSetRule
