@@ -1,0 +1,97 @@
+type User @entity {
+  id: ID! # wallet address
+  authorizedSigners: [User!]! # signers this user has authorized
+  authorizedSenders: [User!]! # senders this user has authorized
+  executedOrders: [ExecutedOrder!]! # orders this user has that have been completed
+  cancelledNonces: [BigInt!]!
+}
+
+type SwapContract @entity {
+  id: ID! # address of the swap contract
+}
+
+type ExecutedOrder @entity {
+  id: ID! # signer address + nonce
+
+  swap: SwapContract! # address of swap contract that executed this order
+  from: Bytes # address of the originator of the transaction
+  to: Bytes # who the originator sent the transaction to
+  value: BigInt # value sent with the transaction
+
+  nonce: BigInt # order nonce for a user
+  expiry: BigInt
+
+  signer: User
+  signerAmount: BigInt
+  signerTokenType: BigInt
+  signerToken: Token
+
+  sender: User
+  senderAmount: BigInt
+  senderTokenType: BigInt
+  senderToken: Token
+
+  affiliate: User
+  affiliateAmount: BigInt
+  affiliateTokenType: BigInt
+  affiliateToken: Token
+}
+
+type Token @entity {
+  id: ID! # token address
+  isBlacklisted: Boolean
+}
+
+type Indexer @entity {
+  id: ID! # indexer address
+}
+
+type IndexContract @entity {
+  id: ID! # index address
+  indexer: Indexer! # the indexer that created the index
+  signerToken: Token!
+  senderToken: Token!
+  protocol: Bytes!
+}
+
+type StakedAmount @entity {
+  id: ID! # staker + indexer
+  indexer: Indexer! # the indexer that emitted
+  staker: User! # user address of user that staked
+  signerToken: Token!
+  senderToken: Token!
+  protocol: Bytes!
+  stakeAmount: BigInt!
+}
+
+type Locator @entity {
+  id: ID! # owner + index
+  owner: User! # the owner of the locator
+  index: IndexContract!
+  score: BigInt!
+  locator: Bytes!
+}
+
+type DelegateFactory @entity {
+  id: ID! # address of the delegate factory
+}
+
+type DelegateContract @entity {
+  id: ID! # delegate contract address
+  factory: DelegateFactory! #factory that created this delegate
+  swap: SwapContract!
+  indexer: Indexer!
+  owner: User!
+  tradeWallet: Bytes!
+}
+
+type Rule @entity {
+  id: ID! # delegate address + signerToken + senderToken
+  delegate: DelegateContract!
+  owner: User!
+  signerToken: Token!
+  senderToken: Token!
+  maxSenderAmount: BigInt!
+  priceCoef: BigInt!
+  priceExp: BigInt!
+}

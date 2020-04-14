@@ -1,4 +1,5 @@
 const Delegate = artifacts.require('Delegate')
+const DelegateFactory = artifacts.require('DelegateFactory')
 const TransferHandlerRegistry = artifacts.require('TransferHandlerRegistry')
 const Swap = artifacts.require('Swap')
 const Types = artifacts.require('Types')
@@ -72,13 +73,27 @@ contract('Delegate Integration Tests', async accounts => {
     await setupTokens()
     await setupIndexer()
 
-    aliceDelegate = await Delegate.new(
+    const delegateFactory = await DelegateFactory.new(
       swapAddress,
       indexer.address,
-      aliceAddress,
-      aliceTradeWallet,
       PROTOCOL
     )
+
+    const tx = await delegateFactory.createDelegate(aliceTradeWallet, {
+      from: aliceAddress,
+    })
+
+    let delegateAddress
+    emitted(tx, 'CreateDelegate', event => {
+      delegateAddress = event.delegateContract
+      return (
+        event.swapContract === swapAddress &&
+        event.delegateContractOwner === aliceAddress &&
+        event.delegateTradeWallet === aliceTradeWallet
+      )
+    })
+
+    aliceDelegate = await Delegate.at(delegateAddress)
   })
 
   describe('Test the delegate constructor', async () => {
