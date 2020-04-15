@@ -113,6 +113,8 @@ contract('DelegateV2 Unit Tests', async accounts => {
     mockToken_transferFrom = await mockFungibleTokenTemplate.contract.methods
       .transferFrom(ADDRESS_ZERO, ADDRESS_ZERO, 0)
       .encodeABI()
+
+    await mockStakingToken.givenMethodReturnBool(mockToken_approve, true)
   }
 
   async function setupMockSwap() {
@@ -158,8 +160,6 @@ contract('DelegateV2 Unit Tests', async accounts => {
     await setupMockSwap()
     await setupMockTokens()
     await setupMockIndexer()
-
-    await mockStakingToken.givenMethodReturnBool(mockToken_approve, true)
 
     delegate = await DelegateV2.new(
       mockSwap.address,
@@ -223,7 +223,6 @@ contract('DelegateV2 Unit Tests', async accounts => {
         }
       )
 
-      // being provided an empty address, it should leave the owner unchanged
       const val = await newDelegate.owner.call()
       equal(val, notOwner, 'owner is incorrect - should be notOwner')
     })
