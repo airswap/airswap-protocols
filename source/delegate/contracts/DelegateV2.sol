@@ -103,6 +103,14 @@ contract DelegateV2 is IDelegateV2, Ownable {
     );
   }
 
+  /**
+   * @notice Creates a new trading rule
+   * @dev The price is determined by the ratio of senderAmount to signerAmount
+   * @param senderToken address The token the delegate owner will supply in an order
+   * @param signerToken address The token they want to trade with
+   * @param senderAmount uint256 The total number of sender tokens they want to send
+   * @param signerAmount uint256 The total number of signer tokens they want to receive
+   */
   function createRule(
     address senderToken,
     address signerToken,
@@ -112,11 +120,25 @@ contract DelegateV2 is IDelegateV2, Ownable {
     _createRule(senderToken, signerToken, senderAmount, signerAmount);
   }
 
+  /**
+   * @notice Deletes a trading rule
+   * @param ruleID uint256 The ID of the rule to be deleted
+   */
   function deleteRule(uint256 ruleID) external onlyOwner {
     require(rules[ruleID].senderAmount != 0, "RULE_NOT_ACTIVE");
     _deleteRule(ruleID);
   }
 
+  /**
+   * @notice Creates a new trading rule and sets intent to trade that pair on the indexer
+   * @dev The price is determined by the ratio of senderAmount to signerAmount
+   * @dev The staked tokens are transferred from the owner's address
+   * @param senderToken address The token the delegate owner will supply in an order
+   * @param signerToken address The token they want to trade with
+   * @param senderAmount uint256 The total amount of sender tokens they want to send
+   * @param signerAmount uint256 The total amount of signer tokens they want to receive
+   * @param newStakeAmount uint256 The amount of stakingToken to stake on this token pair
+   */
   function createRuleAndSetIntent(
     address senderToken,
     address signerToken,
@@ -131,6 +153,14 @@ contract DelegateV2 is IDelegateV2, Ownable {
     _setIntent(senderToken, signerToken, newStakeAmount);
   }
 
+  /**
+   * @notice Sets intent to trade a token pair on the indexer
+   * @dev A rule must exist for the given token pair to be able to stake
+   * @dev The staked tokens are transferred from the owner's address
+   * @param senderToken address The token the delegate owner will supply in an order
+   * @param signerToken address The token they want to trade with
+   * @param newStakeAmount uint256 The amount of stakingToken to stake on this token pair
+   */
   function setIntent(
     address senderToken,
     address signerToken,
@@ -145,6 +175,10 @@ contract DelegateV2 is IDelegateV2, Ownable {
     _setIntent(senderToken, signerToken, newStakeAmount);
   }
 
+  /**
+   * @notice Deletes a rule and unsets intent to trade on that market on the indexer
+   * @param ruleID uint256 The ID of the rule to delete
+   */
   function deleteRuleAndUnsetIntent(uint256 ruleID) external onlyOwner {
     require(rules[ruleID].senderAmount != 0, "RULE_NOT_ACTIVE");
 
@@ -156,6 +190,12 @@ contract DelegateV2 is IDelegateV2, Ownable {
     _unsetIntent(senderToken, signerToken);
   }
 
+  /**
+   * @notice Unsets intent to trade a token pair on the indexer
+   * @dev The staked tokens are returned to the contract owner
+   * @param senderToken address The token the delegate owner would supply in an order
+   * @param signerToken address The token they would trade with
+   */
   function unsetIntent(address senderToken, address signerToken)
     external
     onlyOwner
@@ -163,6 +203,10 @@ contract DelegateV2 is IDelegateV2, Ownable {
     _unsetIntent(senderToken, signerToken);
   }
 
+  /**
+   * @notice Takes an order to trade with the delegate and forwards it to the swap contract
+   * @param order Types.Order The order to carry out a trade with the delegate
+   */
   function provideOrder(Types.Order calldata order) external {
     uint256 ruleID = firstRuleID[order.sender.token][order.signer.token];
 
