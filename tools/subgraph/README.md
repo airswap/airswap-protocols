@@ -16,13 +16,13 @@ ID: `Qma3GJn9Wucuo3AaJMQBmLXyiooiWNcwVrGUWWxTkiGtoD`
 1. In another window run local integration tests and collect deployed contract addresses
 1. Update `config/development.json` with deployed contract addresses
 1. In another window, start the Graph Node: `cd graph-node/docker; docker-compose up` 
-1. From `airswap-protocols/tools/subgraph/` run `yarn prepare:development && yarn codegen && yarn remove-local; yarn create-local; yarn deploy-local`
+1. From `airswap-protocols/tools/subgraph` run `yarn prepare:development && yarn codegen && yarn remove-local; yarn create-local; yarn deploy-local`
 1. Run queries against the endpoint at the end of the previous step
 
 ## Deploying to hosted service
 1. Authenticate against with ` graph auth https://api.thegraph.com/deploy/ <ACCESS_TOKEN>`
 1. From `airswap-protocols/tools/deployer` run `yarn flatten contracts/Imports.sol && yarn cp_migration_flat && truffle compile` to generate abis
-1. From `airswap-protocols/tools/subgraph/` run `yarn prepare:development && yarn codegen && yarn remove-local; yarn create-local; yarn deploy-local`
+1. From `airswap-protocols/tools/subgraph` run `yarn prepare:development && yarn codegen && yarn remove-local; yarn create-local; yarn deploy-local`
 1. Wait for the hosted service to index the blockchain (this can take anywhere from minutes to hours)
 1. Run queries against the endpoint at the end of the previous step
 
