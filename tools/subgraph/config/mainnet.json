@@ -1,0 +1,7 @@
+{
+  "network": "mainnet",
+  "swap_address": "0x4572f2554421Bd64Bef1c22c8a81840E8D496BeA",
+  "indexer_address" : "0xbA9aB9710Bd461F30C247f4cA2Cb7f453C22570e",
+  "delegateFactory_address" : "0x072073f78a2d58610Ee3d5e170CA7AC9CB58a345",
+  "startBlock": 9371103
+}

@@ -12,10 +12,15 @@ import {
   rinkebyTokensByAddress,
   goerliTokensByAddress,
   kovanTokensByAddress,
-  OPEN_SEA_API_URL,
+  getOpenSeaUrl,
 } from './src/constants'
 
-import { chainIds, ADDRESS_ZERO, tokenKinds } from '@airswap/constants'
+import {
+  chainIds,
+  ADDRESS_ZERO,
+  tokenKinds,
+  chainNames,
+} from '@airswap/constants'
 import { getTokenName, getTokenSymbol, getTokenDecimals } from './src/helpers'
 
 export function getTrustImage(address: string): string {
@@ -28,12 +33,14 @@ export function getMetamaskImage(logo: string): string {
   return `${METAMASK_IMAGE_API}/${logo}`
 }
 
-function getOpenseaContractMetadata(address): Promise<Record<string, any>> {
-  return axios
-    .get(`${OPEN_SEA_API_URL}/asset_contract/${address}`)
-    .then(response => {
-      return response.data
-    })
+function getOpenseaContractMetadata(
+  address,
+  chainId = 1
+): Promise<Record<string, any>> {
+  const openSeaUrl = getOpenSeaUrl(chainId)
+  return axios.get(`${openSeaUrl}/asset_contract/${address}`).then(response => {
+    return response.data
+  })
 }
 
 function normalizeIdexToken(
@@ -61,7 +68,7 @@ function normalizeMetamaskToken(
     decimals: token.decimals,
     symbol: token.symbol,
     kind: tokenKinds.ERC20,
-    image: getMetamaskImage(token.logo),
+    image: getTrustImage(token.address),
   }
 }
 
@@ -175,16 +182,16 @@ class TokenMetadata {
     if (match) {
       return match
     }
-    if (this.chainId !== chainIds.MAINNET) {
-      throw new Error(
-        `Fetching data from a contract is only available on mainnet.`
-      )
-    }
 
     // check if the token is an NFT
-    let openseaContractData
+    let openseaContractData = null
     try {
-      openseaContractData = await getOpenseaContractMetadata(searchAddress)
+      if (this.chainId === '1' || this.chainId === '4') {
+        openseaContractData = await getOpenseaContractMetadata(
+          searchAddress,
+          Number(this.chainId)
+        )
+      }
     } catch (error) {
       openseaContractData = null
     }
@@ -206,9 +213,9 @@ class TokenMetadata {
     }
 
     const [tokenSymbol, tokenName, tokenDecimals] = await Promise.all([
-      getTokenSymbol(searchAddress),
-      getTokenName(searchAddress),
-      getTokenDecimals(searchAddress),
+      getTokenSymbol(searchAddress, chainNames[this.chainId]),
+      getTokenName(searchAddress, chainNames[this.chainId]),
+      getTokenDecimals(searchAddress, chainNames[this.chainId]),
     ])
 
     const newToken: NormalizedToken = {

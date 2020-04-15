@@ -1,0 +1,141 @@
+specVersion: 0.0.2
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: SwapContract
+    network: 'mainnet'
+    source:
+      address: '0x4572f2554421Bd64Bef1c22c8a81840E8D496BeA'
+      abi: SwapContract
+      startBlock: 9371103
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - AuthorizeSender
+        - AuthorizeSigner
+        - Cancel
+        - CancelUpTo
+        - RevokeSender
+        - RevokeSigner
+        - Swap
+      abis:
+        - name: SwapContract
+          file: ../build/contracts/Swap.json
+      eventHandlers:
+        - event: AuthorizeSender(indexed address,indexed address)
+          handler: handleAuthorizeSender
+        - event: AuthorizeSigner(indexed address,indexed address)
+          handler: handleAuthorizeSigner
+        - event: Cancel(indexed uint256,indexed address)
+          handler: handleCancel
+        - event: CancelUpTo(indexed uint256,indexed address)
+          handler: handleCancelUpTo
+        - event: RevokeSender(indexed address,indexed address)
+          handler: handleRevokeSender
+        - event: RevokeSigner(indexed address,indexed address)
+          handler: handleRevokeSigner
+        - event: Swap(indexed uint256,uint256,indexed address,uint256,uint256,address,indexed address,uint256,uint256,address,address,uint256,uint256,address)
+          handler: handleSwap
+      file: ./src/SwapMapping.ts
+  - kind: ethereum/contract
+    name: Indexer
+    network: 'mainnet'
+    source:
+      address: '0xbA9aB9710Bd461F30C247f4cA2Cb7f453C22570e'
+      abi: Indexer
+      startBlock: 9371103
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - AddTokenToBlacklist
+        - CreateIndex
+        - OwnershipTransferred
+        - RemoveTokenFromBlacklist
+        - Stake
+        - Unstake
+      abis:
+        - name: Indexer
+          file: ../build/contracts/Indexer.json
+      eventHandlers:
+        - event: AddTokenToBlacklist(address)
+          handler: handleAddTokenToBlacklist
+        - event: CreateIndex(indexed address,indexed address,bytes2,address)
+          handler: handleCreateIndex
+        - event: OwnershipTransferred(indexed address,indexed address)
+          handler: handleOwnershipTransferred
+        - event: RemoveTokenFromBlacklist(address)
+          handler: handleRemoveTokenFromBlacklist
+        - event: Stake(indexed address,indexed address,indexed address,bytes2,uint256)
+          handler: handleStake
+        - event: Unstake(indexed address,indexed address,indexed address,bytes2,uint256)
+          handler: handleUnstake
+      file: ./src/IndexerMapping.ts
+  - kind: ethereum/contract
+    name: DelegateFactory
+    network: 'mainnet'
+    source:
+      address: '0x072073f78a2d58610Ee3d5e170CA7AC9CB58a345'
+      abi: DelegateFactory
+      startBlock: 9371103
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - CreateDelegate
+      abis:
+        - name: DelegateFactory
+          file: ../build/contracts/DelegateFactory.json
+      eventHandlers:
+        - event: CreateDelegate(indexed address,address,address,indexed address,address)
+          handler: handleCreateDelegate
+      file: ./src/DelegateFactoryMapping.ts
+templates:
+  - name: Index
+    kind: ethereum/contract
+    network: 'mainnet'
+    source:
+      abi: Index
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      file: ./src/IndexMapping.ts 
+      entities:
+        - Index
+      abis:
+        - name: Index
+          file: ../build/contracts/Index.json
+      eventHandlers: 
+        - event: SetLocator(indexed address,uint256,indexed bytes32)
+          handler: handleSetLocator
+        - event: UnsetLocator(indexed address)
+          handler: handleUnsetLocator
+  - name: Delegate
+    kind: ethereum/contract
+    network: 'mainnet'
+    source:
+      abi: Delegate
+    mapping: 
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      file: ./src/DelegateMapping.ts
+      entities:
+        - Delegate
+      abis:
+        - name: Delegate
+          file: ../build/contracts/Delegate.json
+      eventHandlers: 
+        - event: SetRule(indexed address,indexed address,indexed address,uint256,uint256,uint256)
+          handler: handleSetRule
+        - event: UnsetRule(indexed address,indexed address,indexed address)
+          handler: handleUnsetRule
+        - event: ProvideOrder(indexed address,address,indexed address,indexed address,uint256,uint256,uint256)
+          handler: handleProvideOrder
+
