@@ -108,8 +108,8 @@ contract DelegateV2 is IDelegateV2, Ownable {
    * @dev The price is determined by the ratio of senderAmount to signerAmount
    * @param senderToken address The token the delegate owner will supply in an order
    * @param signerToken address The token they want to trade with
-   * @param senderAmount uint256 The total number of sender tokens they want to send
-   * @param signerAmount uint256 The total number of signer tokens they want to receive
+   * @param senderAmount uint256 The total number of sender tokens they want to receive
+   * @param signerAmount uint256 The total number of signer tokens they want to send
    */
   function createRule(
     address senderToken,
@@ -134,9 +134,9 @@ contract DelegateV2 is IDelegateV2, Ownable {
    * @dev The price is determined by the ratio of senderAmount to signerAmount
    * @dev The staked tokens are transferred from the owner's address
    * @param senderToken address The token the delegate owner will supply in an order
-   * @param signerToken address The token they want to trade with
-   * @param senderAmount uint256 The total amount of sender tokens they want to send
-   * @param signerAmount uint256 The total amount of signer tokens they want to receive
+   * @param signerToken address The token the user will send
+   * @param senderAmount uint256 The total amount of sender tokens they want to receive
+   * @param signerAmount uint256 The total amount of signer tokens they want to send
    * @param newStakeAmount uint256 The amount of stakingToken to stake on this token pair
    */
   function createRuleAndSetIntent(
@@ -158,7 +158,7 @@ contract DelegateV2 is IDelegateV2, Ownable {
    * @dev A rule must exist for the given token pair to be able to stake
    * @dev The staked tokens are transferred from the owner's address
    * @param senderToken address The token the delegate owner will supply in an order
-   * @param signerToken address The token they want to trade with
+   * @param signerToken address The token the user will send
    * @param newStakeAmount uint256 The amount of stakingToken to stake on this token pair
    */
   function setIntent(
@@ -194,7 +194,7 @@ contract DelegateV2 is IDelegateV2, Ownable {
    * @notice Unsets intent to trade a token pair on the indexer
    * @dev The staked tokens are returned to the contract owner
    * @param senderToken address The token the delegate owner would supply in an order
-   * @param signerToken address The token they would trade with
+   * @param signerToken address The token the user will send
    */
   function unsetIntent(address senderToken, address signerToken)
     external
@@ -297,6 +297,13 @@ contract DelegateV2 is IDelegateV2, Ownable {
     tradeWallet = newTradeWallet;
   }
 
+  /**
+   * @notice Get the signer-side quote for a trade
+   * @param senderAmount uint256 The amount of tokens the user wants to receive from the delegate
+   * @param senderToken address The token the delegate will supply in an order
+   * @param signerToken address The token the user will send
+   * @return signerAmount uint256 The amount of signerToken quoted for the order
+   */
   function getSignerSideQuote(
     uint256 senderAmount,
     address senderToken,
@@ -313,6 +320,13 @@ contract DelegateV2 is IDelegateV2, Ownable {
     if (remainingSenderAmount > 0) return 0;
   }
 
+  /**
+   * @notice Get the signer-side quote for a trade
+   * @param signerAmount uint256 The amount of tokens they want to send
+   * @param senderToken address The token the delegate will supply in an order
+   * @param signerToken address The token the user will send
+   * @return senderAmount uint256 The amount of senderToken the user can receive
+   */
   function getSenderSideQuote(
     uint256 signerAmount,
     address senderToken,
@@ -342,6 +356,13 @@ contract DelegateV2 is IDelegateV2, Ownable {
     // this is because this quote is to the delegate's advantage
   }
 
+  /**
+   * @notice Get the maximum amount the delegate can trade on a token pair
+   * @param senderToken address The token the delegate will supply in an order
+   * @param signerToken address The token the user will send
+   * @return senderAmount uint256 The amount of senderToken the delegate would send
+   * @return signerAmount uint256 The amount of tokens the user would send
+   */
   function getMaxQuote(address senderToken, address signerToken)
     external
     view
@@ -353,9 +374,11 @@ contract DelegateV2 is IDelegateV2, Ownable {
       tradeWallet,
       address(swapContract)
     );
+
     if (senderAllowance < senderBalance) {
       senderBalance = senderAllowance;
     }
+
     // senderBalance is now the maximum the tradeWallet can trade
     uint256 remainingSenderAmount;
     (signerAmount, remainingSenderAmount) = _getSignerSideQuote(
@@ -366,6 +389,13 @@ contract DelegateV2 is IDelegateV2, Ownable {
     senderAmount = senderBalance.sub(remainingSenderAmount);
   }
 
+  /**
+   * @notice Get all of the rules for a given token pair
+   * @param senderToken address The token the delegate will supply in an order
+   * @param signerToken address The token the user will send
+   * @return senderAmounts uint256[] The amounts the delegate would send in each rule
+   * @return signerAmounts uint256[] The amounts the user would send in each rule
+   */
   function getRules(address senderToken, address signerToken)
     external
     view
