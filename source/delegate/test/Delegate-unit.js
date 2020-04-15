@@ -514,24 +514,6 @@ contract('Delegate Unit Tests', async accounts => {
 
       await passes(delegate.unsetRuleAndIntent(MOCK_WETH, MOCK_DAI))
     })
-
-    it('Test successfully calling unsetRuleAndIntent() with staked amount', async () => {
-      const mockScore = 1000
-
-      //mock the score/staked amount to be transferred
-      await mockIndexer.givenMethodReturnUint(
-        mockIndexer_getStakedAmount,
-        mockScore
-      )
-
-      //mock a successful transfer
-      await mockStakingToken.givenMethodReturnBool(
-        mockStakingToken_transfer,
-        true
-      )
-
-      await passes(delegate.unsetRuleAndIntent(MOCK_WETH, MOCK_DAI))
-    })
   })
 
   describe('Test setTradeWallet', async () => {
