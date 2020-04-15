@@ -32,7 +32,7 @@ HTTP: `https://api.thegraph.com/subgraphs/name/airswap/airswap`
 Subscriptions (WS): 
 `wss://api.thegraph.com/subgraphs/name/airswap/airswap`
 
-Download our Postman Example Queries [here]()
+Download our Postman Example Queries from `airswap-protocols/tools/subgraph/AirSwap.postman.json`
 
 
 Visit the Playground [here](https://thegraph.com/explorer/subgraph/airswap/airswap?selected=playground)
