@@ -13,4 +13,4 @@ venv
 .vscode/
 .idea/
 subgraph.yaml
-tools/subgraph/generated
+subgraph/generated

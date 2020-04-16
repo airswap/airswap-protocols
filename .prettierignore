@@ -4,4 +4,4 @@ build/
 node_modules/
 coverage/
 **/deployer/*
-**/subgraph/*
+subgraph/*
