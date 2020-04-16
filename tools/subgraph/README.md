@@ -19,7 +19,7 @@ ID: `Qma3GJn9Wucuo3AaJMQBmLXyiooiWNcwVrGUWWxTkiGtoD`
 1. Run queries against the endpoint at the end of the previous step
 
 ## Deploying to hosted service
-1. Authenticate against with ` graph auth https://api.thegraph.com/deploy/ <ACCESS_TOKEN>`
+1. Authenticate with ` graph auth https://api.thegraph.com/deploy/ <ACCESS_TOKEN>`
 1. In another window and within `airswap-protocols`, run `yarn test`
 1. From `airswap-protocols/tools/subgraph` run `yarn prepare:mainnet && yarn codegen && yarn remove-local; yarn create-local; yarn deploy-local`
 1. Wait for the hosted service to index the blockchain (this can take anywhere from minutes to hours)
