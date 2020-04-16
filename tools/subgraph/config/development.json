@@ -1,7 +1,7 @@
 {
   "network": "development",
-  "swap_address": "0x4572f2554421Bd64Bef1c22c8a81840E8D496BeA",
-  "indexer_address" : "0xbA9aB9710Bd461F30C247f4cA2Cb7f453C22570e",
-  "delegateFactory_address" : "0x072073f78a2d58610Ee3d5e170CA7AC9CB58a345",
+  "swap_address": "0xf19A2A01B70519f67ADb309a994Ec8c69A967E8b",
+  "indexer_address" : "0xaD888d0Ade988EbEe74B8D4F39BF29a8d0fe8A8D",
+  "delegateFactory_address" : "0xB0015714B541A99265f529c7c0d34DA47deCA5b2",
   "startBlock": 0
 }
