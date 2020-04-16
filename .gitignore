@@ -12,3 +12,4 @@ flatten/
 venv
 .vscode/
 .idea/
+subgraph.yaml
