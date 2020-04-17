@@ -14,7 +14,7 @@ ID: `Qma3GJn9Wucuo3AaJMQBmLXyiooiWNcwVrGUWWxTkiGtoD`
 1. Start ganache: `yarn ganache -h 0.0.0.0`
 1. In another window and within `airswap-protocols`, run `yarn test`
 1. In another window and within `graph-node/docker/docker-compose.yml` replace ethereum: `'mainnet:http://host.docker.internal:8545'` with ethereum: `'development:http://host.docker.internal:8545'`
-1. Start the Graph Node: `cd graph-node/docker; docker-compose up` 
+1. Start the graph node from `graph-node/docker` by running `docker-compose up` 
 1. From `airswap-protocols/tools/subgraph` run `yarn prepare:development && yarn codegen && yarn remove-local; yarn create-local; yarn deploy-local`
 1. Run queries against the endpoint at the end of the previous step
 
