@@ -1,0 +1,7 @@
+{
+  "network": "development",
+  "swap_address": "0xf19A2A01B70519f67ADb309a994Ec8c69A967E8b",
+  "indexer_address" : "0xaD888d0Ade988EbEe74B8D4F39BF29a8d0fe8A8D",
+  "delegateFactory_address" : "0xB0015714B541A99265f529c7c0d34DA47deCA5b2",
+  "startBlock": 0
+}
