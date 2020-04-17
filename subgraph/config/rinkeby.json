@@ -1,5 +1,7 @@
 {
   "network": "rinkeby",
-  "address": "0x2e7373D70732E0F37F4166D8FD9dBC89DD5BC476",
-  "startBlock": 0
+  "swap_address": "0x2e7373D70732E0F37F4166D8FD9dBC89DD5BC476",
+  "indexer_address" : "0x10F6702447414cE1250Af5f7000D7c9A0f04E824",
+  "delegateFactory_address" : "0xe01cE51C3CB0B68b5Fa07CCBD9544AeEcd006e6E",
+  "startBlock": 5849844
 }
