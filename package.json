@@ -9,10 +9,10 @@
     "Alice Henshaw <alice.henshaw@fluidity.io>"
   ],
   "license": "Apache-2.0",
-  "workspaces": [
-    "source/*",
-    "tools/*"
-  ],
+  "workspaces": {
+    "packages":["source/*", "tools/*"],
+    "nohoist":["@airswap/subgraph", "**/@airswap/subgraph/**"]
+  },
   "scripts": {
     "clean": "lerna run clean",
     "compile": "yarn clean; lerna run compile",
