@@ -11,7 +11,7 @@
   "license": "Apache-2.0",
   "workspaces": {
     "packages":["source/*", "tools/*"],
-    "nohoist":["@airswap/subgraph", "**/@airswap/subgraph/**"]
+    "nohoist":["**/@graphprotocol", "**/@graphprotocol/**"]
   },
   "scripts": {
     "clean": "lerna run clean",
