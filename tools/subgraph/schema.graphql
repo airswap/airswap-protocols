@@ -14,6 +14,7 @@ type ExecutedOrder @entity {
   id: ID! # signer address + nonce
 
   swap: SwapContract! # address of swap contract that executed this order
+  block: BigInt # The block this trade was executed at
   from: Bytes # address of the originator of the transaction
   to: Bytes # who the originator sent the transaction to
   value: BigInt # value sent with the transaction

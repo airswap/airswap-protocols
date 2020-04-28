@@ -110,6 +110,7 @@ export function handleSwap(event: Swap): void {
   let affiliateToken = getToken(event.params.senderToken.toHex())
 
   executedOrder.swap = swap.id
+  executedOrder.block = event.block.number
   executedOrder.from = event.transaction.from
   executedOrder.to = event.transaction.to
   executedOrder.value = event.transaction.value
