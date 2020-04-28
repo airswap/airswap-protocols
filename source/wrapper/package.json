@@ -16,7 +16,7 @@
   "scripts": {
     "clean": "rm -rf ./build",
     "compile": "yarn clean; truffle compile",
-    "coverage": "node_modules/.bin/solidity-coverage",
+    "coverage": "truffle run coverage",
     "truffle": "node_modules/.bin/truffle --network development",
     "cp_migration_flat": "mkdir -p flatten/; cp contracts/Migrations.sol flatten/",
     "test": "yarn compile; truffle test",
@@ -36,6 +36,6 @@
     "@airswap/types": "3.5.11",
     "@airswap/utils": "0.3.12",
     "ethers": "^4.0.45",
-    "solidity-coverage": "^0.6.3"
+    "solidity-coverage": "^0.7.4"
   }
 }

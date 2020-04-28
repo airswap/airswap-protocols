@@ -12,7 +12,7 @@ const { createOrder, signOrder } = require('@airswap/utils')
 
 const { equal, reverted, passes } = require('@airswap/test-utils').assert
 const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
-const { GANACHE_PROVIDER } = require('@airswap/test-utils').constants
+const PROVIDER_URL = web3.currentProvider.host
 const { ADDRESS_ZERO } = require('@airswap/constants')
 const { emptySignature } = require('@airswap/types')
 
@@ -24,7 +24,7 @@ contract('Wrapper Unit Tests', async accounts => {
   const delegateOwner = accounts[4]
   const mockRegistry = accounts[5]
   const mockSignerSigner = new ethers.providers.JsonRpcProvider(
-    GANACHE_PROVIDER
+    PROVIDER_URL
   ).getSigner(mockSigner)
   const PROTOCOL = '0x0001'
   let mockSwap

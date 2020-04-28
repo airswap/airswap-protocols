@@ -16,23 +16,20 @@ const { createOrder, signOrder } = require('@airswap/utils')
 const { tokenKinds } = require('@airswap/constants')
 
 const {
-  constants: { GANACHE_PROVIDER },
   assert: { emitted, reverted, ok, equal },
   balances: { allowances, balances },
 } = require('@airswap/test-utils')
+
+const PROVIDER_URL = web3.currentProvider.host
 
 contract('Swap Handler Checks', async accounts => {
   const aliceAddress = accounts[0]
   const bobAddress = accounts[1]
   const carolAddress = accounts[2]
 
-  const aliceSigner = new ethers.providers.JsonRpcProvider(
-    GANACHE_PROVIDER
-  ).getSigner(aliceAddress)
-
-  const bobSigner = new ethers.providers.JsonRpcProvider(
-    GANACHE_PROVIDER
-  ).getSigner(bobAddress)
+  const provider = new ethers.providers.JsonRpcProvider(PROVIDER_URL)
+  const aliceSigner = provider.getSigner(aliceAddress)
+  const bobSigner = provider.getSigner(bobAddress)
 
   const CKITTY_KIND = '0x9a20483d'
   const UNKNOWN_KIND = '0xffffffff'

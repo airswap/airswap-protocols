@@ -20,7 +20,7 @@
   "scripts": {
     "clean": "rm -rf ./build",
     "compile": "yarn clean; truffle compile && tsc -b",
-    "coverage": "node_modules/.bin/solidity-coverage",
+    "coverage": "truffle run coverage",
     "cp_migration_flat": "mkdir -p flatten/; cp contracts/Migrations.sol flatten/",
     "test": "yarn compile; truffle test",
     "flatten": "truffle run flatten",
@@ -33,7 +33,7 @@
   "devDependencies": {
     "@airswap/constants": "0.3.9",
     "@airswap/tokens": "0.1.4",
-    "solidity-coverage": "^0.6.3",
+    "solidity-coverage": "^0.7.4",
     "typescript": "^3.8.2"
   }
 }

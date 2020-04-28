@@ -23,7 +23,7 @@ const {
   ok,
 } = require('@airswap/test-utils').assert
 const { balances } = require('@airswap/test-utils').balances
-const { GANACHE_PROVIDER } = require('@airswap/test-utils').constants
+const PROVIDER_URL = web3.currentProvider.host
 
 let swapContract
 let wrapperContract
@@ -51,11 +51,11 @@ contract('Wrapper', async accounts => {
   const delegateOwner = accounts[3]
 
   const aliceSigner = new ethers.providers.JsonRpcProvider(
-    GANACHE_PROVIDER
+    PROVIDER_URL
   ).getSigner(aliceAddress)
 
   const carolSigner = new ethers.providers.JsonRpcProvider(
-    GANACHE_PROVIDER
+    PROVIDER_URL
   ).getSigner(carolAddress)
 
   const PROTOCOL = '0x0001'

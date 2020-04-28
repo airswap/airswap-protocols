@@ -16,7 +16,7 @@ const {
   reverted,
 } = require('@airswap/test-utils').assert
 const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
-const { GANACHE_PROVIDER } = require('@airswap/test-utils').constants
+const PROVIDER_URL = web3.currentProvider.host
 
 contract('DelegateV2 Unit Tests', async accounts => {
   const owner = accounts[0]
@@ -26,7 +26,7 @@ contract('DelegateV2 Unit Tests', async accounts => {
   const aliceAddress = accounts[4]
 
   const aliceSigner = new ethers.providers.JsonRpcProvider(
-    GANACHE_PROVIDER
+    PROVIDER_URL
   ).getSigner(aliceAddress)
 
   const PROTOCOL = '0x0006'
