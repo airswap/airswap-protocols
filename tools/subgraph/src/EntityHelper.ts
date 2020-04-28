@@ -1,4 +1,4 @@
-import { BigInt, log } from "@graphprotocol/graph-ts"
+import { BigInt } from "@graphprotocol/graph-ts"
 import { User, Token, Indexer, DelegateFactory, SwapContract } from "../generated/schema"
 
 export function getUser(userAddress: string): User {
