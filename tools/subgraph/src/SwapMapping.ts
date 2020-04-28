@@ -96,10 +96,10 @@ export function handleSwap(event: SwapEvent): void {
   let completedSwap = new Swap(event.params.signerWallet.toHex() + event.params.nonce.toString())
 
   // create swap contract if it doesn't exist
-  let swap = SwapContract.load(event.address.toHex())
-  if (!swap) {
-    swap = new SwapContract(event.address.toHex())
-    swap.save()
+  let swapContract = SwapContract.load(event.address.toHex())
+  if (!swapContract) {
+    swapContract = new SwapContract(event.address.toHex())
+    swapContract.save()
   }
 
   let signer = getUser(event.params.signerWallet.toHex())
@@ -109,7 +109,7 @@ export function handleSwap(event: SwapEvent): void {
   let senderToken = getToken(event.params.senderToken.toHex())
   let affiliateToken = getToken(event.params.senderToken.toHex())
 
-  completedSwap.swap = swap.id
+  completedSwap.swap = swapContract.id
   completedSwap.block = event.block.number
   completedSwap.from = event.transaction.from
   completedSwap.to = event.transaction.to
