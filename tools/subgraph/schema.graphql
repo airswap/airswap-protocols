@@ -9,7 +9,7 @@ type SwapContract @entity {
   id: ID! # address of the swap contract
 }
 
-type ExecutedOrder @entity {
+type Swap @entity {
   id: ID! # signer address + nonce
 
   swap: SwapContract! # address of swap contract that executed this order
