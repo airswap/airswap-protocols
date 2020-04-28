@@ -1,6 +1,6 @@
-import { BigInt, log, store } from "@graphprotocol/graph-ts"
+import { BigInt, store } from "@graphprotocol/graph-ts"
 import { ProvideOrder, SetRule, UnsetRule } from "../generated/templates/Delegate/Delegate"
-import { User, Token, DelegateContract, Rule } from "../generated/schema"
+import { Delegate, Rule } from "../generated/schema"
 import { getUser, getToken } from "./EntityHelper"
 
 export function handleSetRule(event: SetRule): void {
@@ -17,7 +17,7 @@ export function handleSetRule(event: SetRule): void {
   // create base portion of rule if it doesn't not exist
   if (!rule) {
     rule = new Rule(ruleIdentifier)
-    rule.delegate = DelegateContract.load(event.address.toHex()).id
+    rule.delegate = Delegate.load(event.address.toHex()).id
     rule.owner = owner.id
     rule.signerToken = signerToken.id
     rule.senderToken = senderToken.id

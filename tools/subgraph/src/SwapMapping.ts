@@ -6,9 +6,9 @@ import {
   CancelUpTo,
   RevokeSender,
   RevokeSigner,
-  Swap
+  Swap as SwapEvent
 } from "../generated/SwapContract/SwapContract"
-import { SwapContract, ExecutedOrder } from "../generated/schema"
+import { SwapContract, Swap } from "../generated/schema"
 import { getUser, getToken } from "./EntityHelper"
 
 export function handleAuthorizeSender(event: AuthorizeSender): void {
@@ -92,14 +92,14 @@ export function handleCancelUpTo(event: CancelUpTo): void {
   user.save()
 }
 
-export function handleSwap(event: Swap): void {
-  let executedOrder = new ExecutedOrder(event.params.signerWallet.toHex() + event.params.nonce.toString())
+export function handleSwap(event: SwapEvent): void {
+  let completedSwap = new Swap(event.params.signerWallet.toHex() + event.params.nonce.toString())
 
   // create swap contract if it doesn't exist
-  let swap = SwapContract.load(event.address.toHex())
-  if (!swap) {
-    swap = new SwapContract(event.address.toHex())
-    swap.save()
+  let swapContract = SwapContract.load(event.address.toHex())
+  if (!swapContract) {
+    swapContract = new SwapContract(event.address.toHex())
+    swapContract.save()
   }
 
   let signer = getUser(event.params.signerWallet.toHex())
@@ -109,28 +109,29 @@ export function handleSwap(event: Swap): void {
   let senderToken = getToken(event.params.senderToken.toHex())
   let affiliateToken = getToken(event.params.senderToken.toHex())
 
-  executedOrder.swap = swap.id
-  executedOrder.from = event.transaction.from
-  executedOrder.to = event.transaction.to
-  executedOrder.value = event.transaction.value
+  completedSwap.swap = swapContract.id
+  completedSwap.block = event.block.number
+  completedSwap.from = event.transaction.from
+  completedSwap.to = event.transaction.to
+  completedSwap.value = event.transaction.value
 
-  executedOrder.nonce = event.params.nonce
-  executedOrder.expiry = event.params.timestamp
+  completedSwap.nonce = event.params.nonce
+  completedSwap.expiry = event.params.timestamp
 
-  executedOrder.signer = signer.id
-  executedOrder.signerAmount = event.params.signerAmount
-  executedOrder.signerTokenType = event.params.signerId
-  executedOrder.signerToken = signerToken.id
+  completedSwap.signer = signer.id
+  completedSwap.signerAmount = event.params.signerAmount
+  completedSwap.signerTokenType = event.params.signerId
+  completedSwap.signerToken = signerToken.id
 
-  executedOrder.sender = sender.id
-  executedOrder.senderAmount = event.params.senderAmount
-  executedOrder.senderTokenType = event.params.senderId
-  executedOrder.senderToken = senderToken.id
+  completedSwap.sender = sender.id
+  completedSwap.senderAmount = event.params.senderAmount
+  completedSwap.senderTokenType = event.params.senderId
+  completedSwap.senderToken = senderToken.id
 
-  executedOrder.affiliate = affiliate.id
-  executedOrder.affiliateAmount = event.params.affiliateAmount
-  executedOrder.affiliateTokenType = event.params.affiliateId
-  executedOrder.affiliateToken = affiliateToken.id
+  completedSwap.affiliate = affiliate.id
+  completedSwap.affiliateAmount = event.params.affiliateAmount
+  completedSwap.affiliateTokenType = event.params.affiliateId
+  completedSwap.affiliateToken = affiliateToken.id
 
-  executedOrder.save()
+  completedSwap.save()
 }

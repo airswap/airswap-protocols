@@ -1,4 +1,4 @@
-import { BigInt, log } from "@graphprotocol/graph-ts"
+import { BigInt } from "@graphprotocol/graph-ts"
 import { User, Token, Indexer, DelegateFactory, SwapContract } from "../generated/schema"
 
 export function getUser(userAddress: string): User {
@@ -8,7 +8,6 @@ export function getUser(userAddress: string): User {
     user = new User(userAddress)
     user.authorizedSigners = new Array<string>()
     user.authorizedSenders = new Array<string>()
-    user.executedOrders = new Array<string>()
     user.cancelledNonces = new Array<BigInt>()
     user.save()
   }

@@ -1,9 +1,9 @@
-import { BigInt, log, store } from "@graphprotocol/graph-ts"
+import { store } from "@graphprotocol/graph-ts"
 import {
   SetLocator,
   UnsetLocator
 } from "../generated/templates/Index/Index"
-import { IndexContract, Locator } from "../generated/schema"
+import { Index, Locator } from "../generated/schema"
 import { getUser } from "./EntityHelper"
 
 export function handleSetLocator(event: SetLocator): void {
@@ -13,7 +13,7 @@ export function handleSetLocator(event: SetLocator): void {
   if (!locator) {
     locator = new Locator(identifier)
     locator.owner = user.id
-    locator.index = IndexContract.load(event.address.toHex()).id
+    locator.index = Index.load(event.address.toHex()).id
   }
   locator.score = event.params.score
   locator.locator = event.params.locator
