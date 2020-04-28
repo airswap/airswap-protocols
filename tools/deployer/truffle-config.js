@@ -67,7 +67,7 @@ module.exports = {
       },
     },
   },
-  plugins: ['truffle-verify', 'truffle-flatten', 'solidity-coverage'],
+  plugins: ['truffle-verify', 'truffle-flatten'],
   api_keys: {
     etherscan: process.env.ETHERSCAN_API_KEY,
   },
