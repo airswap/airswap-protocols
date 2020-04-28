@@ -8,7 +8,6 @@ export function getUser(userAddress: string): User {
     user = new User(userAddress)
     user.authorizedSigners = new Array<string>()
     user.authorizedSenders = new Array<string>()
-    user.executedOrders = new Array<string>()
     user.cancelledNonces = new Array<BigInt>()
     user.save()
   }
