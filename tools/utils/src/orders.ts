@@ -43,6 +43,42 @@ export function createOrder({
   })
 }
 
+export function parseOrderFromHex(data: string): Order {
+  return {
+    nonce: `${parseInt(data.slice(10, 74), 16)}`,
+    expiry: `${parseInt(data.slice(74, 138), 16)}`,
+    signer: {
+      kind: `0x${data.slice(138, 146)}`,
+      wallet: `0x${data.slice(226, 266)}`,
+      token: `0x${data.slice(290, 330)}`,
+      amount: `${parseInt(data.slice(330, 394), 16)}`,
+      id: `${parseInt(data.slice(394, 458), 16)}`,
+    },
+    sender: {
+      kind: `0x${data.slice(458, 466)}`,
+      wallet: `0x${data.slice(546, 586)}`,
+      token: `0x${data.slice(610, 650)}`,
+      amount: `${parseInt(data.slice(650, 714), 16)}`,
+      id: `${parseInt(data.slice(714, 778), 16)}`,
+    },
+    affiliate: {
+      kind: `0x${data.slice(778, 786)}`,
+      wallet: `0x${data.slice(866, 906)}`,
+      token: `0x${data.slice(930, 970)}`,
+      amount: `${parseInt(data.slice(970, 1034), 16)}`,
+      id: `${parseInt(data.slice(1034, 1098), 16)}`,
+    },
+    signature: {
+      signatory: `0x${data.slice(1122, 1162)}`,
+      validator: `0x${data.slice(1186, 1226)}`,
+      version: `0x${data.slice(1226, 1228)}`,
+      v: `${parseInt(data.slice(1352, 1354), 16)}`,
+      r: `0x${data.slice(1354, 1418)}`,
+      s: `0x${data.slice(1418, 1482)}`,
+    },
+  }
+}
+
 export function createOrderForQuote(
   quote: Quote,
   signerWallet: string,
