@@ -78,11 +78,13 @@ class TokenMetadata {
   private tokens: NormalizedToken[]
   private tokensByAddress: { [address: string]: NormalizedToken }
 
-  public constructor(chainId = chainIds.MAINNET) {
+  public constructor(chainId = chainIds.MAINNET, initializeTokens = true) {
     this.chainId = String(chainId)
     this.tokens = []
     this.tokensByAddress = {}
-    this.ready = this.fetchKnownTokens()
+    if (initializeTokens) {
+      this.ready = this.fetchKnownTokens()
+    }
   }
 
   public async fetchKnownTokens(): Promise<Array<NormalizedToken>> {
