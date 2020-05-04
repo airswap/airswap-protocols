@@ -43,7 +43,7 @@ export function createOrder({
   })
 }
 
-export function parseOrderFromHex(data: string): UnsignedOrder {
+export function parseOrderFromHex(data: string): Order {
   return {
     nonce: data.slice(10, 74),
     expiry: data.slice(74, 138),
@@ -67,6 +67,14 @@ export function parseOrderFromHex(data: string): UnsignedOrder {
       token: data.slice(930, 970),
       amount: data.slice(970, 1034),
       id: data.slice(1034, 1098),
+    },
+    signature: {
+      signatory: data.slice(1122, 1162),
+      validator: data.slice(1186, 1226),
+      version: data.slice(1226, 1228),
+      v: data.slice(1352, 1354),
+      r: data.slice(1354, 1418),
+      s: data.slice(1418, 1482),
     },
   }
 }
