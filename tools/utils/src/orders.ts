@@ -43,6 +43,34 @@ export function createOrder({
   })
 }
 
+export function parseOrderFromHex(data: string): UnsignedOrder {
+  return {
+    nonce: data.slice(10, 74),
+    expiry: data.slice(74, 138),
+    signer: {
+      kind: data.slice(138, 146),
+      wallet: data.slice(226, 266),
+      token: data.slice(290, 330),
+      amount: data.slice(330, 394),
+      id: data.slice(394, 458),
+    },
+    sender: {
+      kind: data.slice(458, 466),
+      wallet: data.slice(546, 586),
+      token: data.slice(610, 650),
+      amount: data.slice(650, 714),
+      id: data.slice(714, 778),
+    },
+    affiliate: {
+      kind: data.slice(778, 786),
+      wallet: data.slice(866, 906),
+      token: data.slice(930, 970),
+      amount: data.slice(970, 1034),
+      id: data.slice(1034, 1098),
+    },
+  }
+}
+
 export function createOrderForQuote(
   quote: Quote,
   signerWallet: string,
