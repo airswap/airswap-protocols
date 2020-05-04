@@ -230,7 +230,12 @@ contract Delegate is IDelegate, Ownable {
   function provideOrder(Types.Order calldata order) external {
     Rule memory rule = rules[order.sender.token][order.signer.token];
 
-    require(order.signature.v != 0, "SIGNATURE_MUST_BE_SENT");
+    require(
+      order.signature.v != 0 ||
+        order.signer == msg.sender ||
+        wrapper == msg.sender,
+      "UPDATE THIS"
+    );
 
     // Ensure the order is for the trade wallet.
     require(order.sender.wallet == tradeWallet, "SENDER_WALLET_INVALID");
