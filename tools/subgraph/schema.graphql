@@ -13,7 +13,8 @@ type Swap @entity {
   id: ID! # signer address + nonce
 
   swap: SwapContract! # address of swap contract that executed this order
-  block: BigInt # The block this trade was executed at
+  block: BigInt # The block this swap was executed at
+  transactionHash: Bytes # The transaction hash the swap was executed at
   from: Bytes # address of the originator of the transaction
   to: Bytes # who the originator sent the transaction to
   value: BigInt # value sent with the transaction

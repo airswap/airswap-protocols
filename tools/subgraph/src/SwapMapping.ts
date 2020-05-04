@@ -111,6 +111,7 @@ export function handleSwap(event: SwapEvent): void {
 
   completedSwap.swap = swapContract.id
   completedSwap.block = event.block.number
+  completedSwap.transactionHash = event.transaction.hash
   completedSwap.from = event.transaction.from
   completedSwap.to = event.transaction.to
   completedSwap.value = event.transaction.value
