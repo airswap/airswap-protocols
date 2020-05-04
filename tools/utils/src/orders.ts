@@ -72,7 +72,7 @@ export function parseOrderFromHex(data: string): Order {
       signatory: `0x${data.slice(1122, 1162)}`,
       validator: `0x${data.slice(1186, 1226)}`,
       version: `0x${data.slice(1226, 1228)}`,
-      v: `0x${data.slice(1352, 1354)}`,
+      v: `${parseInt(data.slice(1352, 1354), 16)}`,
       r: `0x${data.slice(1354, 1418)}`,
       s: `0x${data.slice(1418, 1482)}`,
     },
