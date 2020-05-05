@@ -9,14 +9,17 @@ const {
   notEmitted,
   equal,
 } = require('@airswap/test-utils').assert
-const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
+const {
+  takeSnapshot,
+  revertToSnapshot,
+  getTimestampPlusDays,
+} = require('@airswap/test-utils').time
 const { ADDRESS_ZERO } = require('@airswap/constants')
 
 const NONCE_AVAILABLE = 0x00
 const NONCE_UNAVAILABLE = 0x01
 
 contract('Swap Unit Tests', async accounts => {
-  const Jun_06_2017T00_00_00_UTC = 1497052800 //a date later than when ganache started
   const mockSigner = accounts[1]
   const mockSender = accounts[2]
   const sender = accounts[3]
@@ -60,53 +63,35 @@ contract('Swap Unit Tests', async accounts => {
     })
 
     it('test when order nonce is too low', async () => {
+      const expiry = await getTimestampPlusDays(1)
       const signer = [kind, mockSigner, ADDRESS_ZERO, 200, 0]
       const sender = [kind, ADDRESS_ZERO, ADDRESS_ZERO, 200, 0]
       const affiliate = [kind, ADDRESS_ZERO, ADDRESS_ZERO, 200, 0]
       const signature = [ADDRESS_ZERO, ADDRESS_ZERO, ver, v, r, s]
-      const order = [
-        0,
-        Jun_06_2017T00_00_00_UTC,
-        signer,
-        sender,
-        affiliate,
-        signature,
-      ]
+      const order = [0, expiry, signer, sender, affiliate, signature]
 
       await swap.cancelUpTo(5, { from: mockSigner })
       await reverted(swap.swap(order), 'NONCE_TOO_LOW')
     })
 
     it('test when sender is provided, and the sender is unauthorized', async () => {
+      const expiry = await getTimestampPlusDays(1)
       const signer = [kind, mockSigner, ADDRESS_ZERO, 200, 0]
       const sender = [kind, mockSender, ADDRESS_ZERO, 200, 0]
       const affiliate = [kind, ADDRESS_ZERO, ADDRESS_ZERO, 200, 0]
       const signature = [ADDRESS_ZERO, ADDRESS_ZERO, ver, v, r, s]
-      const order = [
-        0,
-        Jun_06_2017T00_00_00_UTC,
-        signer,
-        sender,
-        affiliate,
-        signature,
-      ]
+      const order = [0, expiry, signer, sender, affiliate, signature]
 
       await reverted(swap.swap(order), 'SENDER_UNAUTHORIZED')
     })
 
     it('test when sender is provided, the sender is authorized, the signature.v is 0, and the signer wallet is unauthorized', async () => {
+      const expiry = await getTimestampPlusDays(1)
       const signer = [kind, mockSigner, ADDRESS_ZERO, 200, 0]
       const sender = [kind, mockSender, ADDRESS_ZERO, 200, 0]
       const affiliate = [kind, ADDRESS_ZERO, ADDRESS_ZERO, 200, 0]
       const signature = [ADDRESS_ZERO, ADDRESS_ZERO, ver, 0, r, s]
-      const order = [
-        0,
-        Jun_06_2017T00_00_00_UTC,
-        signer,
-        sender,
-        affiliate,
-        signature,
-      ]
+      const order = [0, expiry, signer, sender, affiliate, signature]
 
       //mock sender will take the order
       await reverted(
@@ -116,18 +101,12 @@ contract('Swap Unit Tests', async accounts => {
     })
 
     it('test swap when sender and signer are the same', async () => {
+      const expiry = await getTimestampPlusDays(1)
       const signer = [kind, mockSender, ADDRESS_ZERO, 200, 0]
       const sender = [kind, mockSender, ADDRESS_ZERO, 200, 0]
       const affiliate = [kind, ADDRESS_ZERO, ADDRESS_ZERO, 0, 0]
       const signature = [ADDRESS_ZERO, ADDRESS_ZERO, ver, 0, r, s]
-      const order = [
-        0,
-        Jun_06_2017T00_00_00_UTC,
-        signer,
-        sender,
-        affiliate,
-        signature,
-      ]
+      const order = [0, expiry, signer, sender, affiliate, signature]
 
       await reverted(
         swap.swap(order, { from: mockSender }),
@@ -155,18 +134,12 @@ contract('Swap Unit Tests', async accounts => {
 
       await handlerTemplateMock.givenMethodRevert(handler_transferTokens)
 
+      const expiry = await getTimestampPlusDays(1)
       const signer = [kind, mockSigner, ADDRESS_ZERO, 200, 0]
       const sender = [kind, mockSender, ADDRESS_ZERO, 200, 0]
       const affiliate = [kind, ADDRESS_ZERO, ADDRESS_ZERO, 0, 0]
       const signature = [ADDRESS_ZERO, ADDRESS_ZERO, ver, 0, r, s]
-      const order = [
-        0,
-        Jun_06_2017T00_00_00_UTC,
-        signer,
-        sender,
-        affiliate,
-        signature,
-      ]
+      const order = [0, expiry, signer, sender, affiliate, signature]
 
       // auth signer to be the sender of the order
       await swap.authorizeSender(mockSigner, {

@@ -20,7 +20,7 @@ const {
   passes,
 } = require('@airswap/test-utils').assert
 const { balances } = require('@airswap/test-utils').balances
-const { GANACHE_PROVIDER } = require('@airswap/test-utils').constants
+const PROVIDER_URL = web3.currentProvider.host
 
 contract('Delegate Integration Tests', async accounts => {
   const STARTING_BALANCE = 100000000
@@ -30,7 +30,7 @@ contract('Delegate Integration Tests', async accounts => {
   const carolAddress = accounts[3]
   const aliceTradeWallet = accounts[4]
   const bobSigner = new ethers.providers.JsonRpcProvider(
-    GANACHE_PROVIDER
+    PROVIDER_URL
   ).getSigner(bobAddress)
   const PROTOCOL = '0x0002'
   let stakingToken

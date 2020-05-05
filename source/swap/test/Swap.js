@@ -10,12 +10,13 @@ const { tokenKinds, SECONDS_IN_DAY } = require('@airswap/constants')
 const { emptySignature } = require('@airswap/types')
 
 const {
-  constants: { GANACHE_PROVIDER },
   assert: { emitted, reverted, notEmitted, ok, equal },
   balances: { allowances, balances },
   functions: { getTestWallet, getTypedDataSignature },
   time: { getLatestTimestamp, getTimestampPlusDays, advanceTime },
 } = require('@airswap/test-utils')
+
+const PROVIDER_URL = web3.currentProvider.host
 
 contract('Swap', async accounts => {
   const aliceAddress = accounts[0]
@@ -23,13 +24,9 @@ contract('Swap', async accounts => {
   const carolAddress = accounts[2]
   const davidAddress = accounts[3]
 
-  const aliceSigner = new ethers.providers.JsonRpcProvider(
-    GANACHE_PROVIDER
-  ).getSigner(aliceAddress)
-
-  const davidSigner = new ethers.providers.JsonRpcProvider(
-    GANACHE_PROVIDER
-  ).getSigner(davidAddress)
+  const provider = new ethers.providers.JsonRpcProvider(PROVIDER_URL)
+  const aliceSigner = provider.getSigner(aliceAddress)
+  const davidSigner = provider.getSigner(davidAddress)
 
   const eveSigner = getTestWallet()
 
@@ -146,6 +143,7 @@ contract('Swap', async accounts => {
             token: tokenDAI.address,
             amount: 50,
           },
+          expiry: await getTimestampPlusDays(1),
         }),
         aliceSigner,
         swapContractAddress
@@ -165,6 +163,7 @@ contract('Swap', async accounts => {
             token: tokenDAI.address,
             amount: 50,
           },
+          expiry: await getTimestampPlusDays(1),
         }),
         aliceSigner,
         swapContractAddress
@@ -188,6 +187,7 @@ contract('Swap', async accounts => {
             token: tokenAST.address,
             amount: 50,
           },
+          expiry: await getTimestampPlusDays(1),
         }),
         aliceSigner,
         swapContractAddress
@@ -213,6 +213,7 @@ contract('Swap', async accounts => {
             token: tokenDAI.address,
             amount: 10,
           },
+          expiry: await getTimestampPlusDays(1),
         }),
         aliceSigner,
         swapContractAddress
@@ -274,6 +275,7 @@ contract('Swap', async accounts => {
             token: tokenDAI.address,
             amount: 10,
           },
+          expiry: await getTimestampPlusDays(1),
         }),
         aliceSigner,
         swapContractAddress
@@ -393,6 +395,7 @@ contract('Swap', async accounts => {
             wallet: carolAddress,
             amount: 0,
           },
+          expiry: await getTimestampPlusDays(1),
         }),
         aliceSigner,
         swapContractAddress
@@ -457,6 +460,7 @@ contract('Swap', async accounts => {
           token: tokenDAI.address,
           amount: 10,
         },
+        expiry: await getTimestampPlusDays(1),
       })
       _order = await signOrder(_unsignedOrder, davidSigner, swapContractAddress)
     })
@@ -538,6 +542,7 @@ contract('Swap', async accounts => {
           sender: {
             wallet: bobAddress,
           },
+          expiry: await getTimestampPlusDays(1),
         }),
         davidSigner,
         swapContractAddress
@@ -595,6 +600,7 @@ contract('Swap', async accounts => {
             token: tokenDAI.address,
             amount: 10,
           },
+          expiry: await getTimestampPlusDays(1),
         }),
         aliceSigner,
         swapContractAddress
@@ -662,6 +668,7 @@ contract('Swap', async accounts => {
           sender: {
             wallet: bobAddress,
           },
+          expiry: await getTimestampPlusDays(1),
         }),
         aliceSigner,
         swapContractAddress
@@ -734,6 +741,7 @@ contract('Swap', async accounts => {
             token: tokenDAI.address,
             amount: 5,
           },
+          expiry: await getTimestampPlusDays(1),
         }),
         aliceSigner,
         swapContractAddress
@@ -803,6 +811,7 @@ contract('Swap', async accounts => {
             token: tokenDAI.address,
             amount: 5,
           },
+          expiry: await getTimestampPlusDays(1),
         }),
         davidSigner,
         swapContractAddress
@@ -864,6 +873,7 @@ contract('Swap', async accounts => {
             wallet: aliceAddress,
           },
           nonce: 1,
+          expiry: await getTimestampPlusDays(1),
         }),
         aliceSigner,
         swapContractAddress
@@ -875,6 +885,7 @@ contract('Swap', async accounts => {
             wallet: aliceAddress,
           },
           nonce: 2,
+          expiry: await getTimestampPlusDays(1),
         }),
         aliceSigner,
         swapContractAddress
@@ -886,6 +897,7 @@ contract('Swap', async accounts => {
             wallet: aliceAddress,
           },
           nonce: 3,
+          expiry: await getTimestampPlusDays(1),
         }),
         aliceSigner,
         swapContractAddress
@@ -971,6 +983,7 @@ contract('Swap', async accounts => {
             token: tokenAST.address,
             amount: 50,
           },
+          expiry: await getTimestampPlusDays(1),
         }),
         aliceSigner,
         swapContractAddress
@@ -1017,6 +1030,7 @@ contract('Swap', async accounts => {
             token: tokenDAI.address,
             amount: '0',
           },
+          expiry: await getTimestampPlusDays(1),
         }),
         aliceSigner,
         swapContractAddress
@@ -1036,6 +1050,7 @@ contract('Swap', async accounts => {
           sender: {
             wallet: bobAddress,
           },
+          expiry: await getTimestampPlusDays(1),
         }),
         eveSigner,
         swapContractAddress
@@ -1067,6 +1082,7 @@ contract('Swap', async accounts => {
             token: tokenDAI.address,
             amount: '0',
           },
+          expiry: await getTimestampPlusDays(1),
         }),
         aliceSigner,
         swapContractAddress
@@ -1079,6 +1095,7 @@ contract('Swap', async accounts => {
         sender: {
           wallet: bobAddress,
         },
+        expiry: await getTimestampPlusDays(1),
       })
 
       const signatureTwo = await createSignature(
@@ -1100,6 +1117,7 @@ contract('Swap', async accounts => {
           sender: {
             wallet: bobAddress,
           },
+          expiry: await getTimestampPlusDays(1),
         }),
         eveSigner,
         swapContractAddress
@@ -1122,6 +1140,7 @@ contract('Swap', async accounts => {
             token: tokenDAI.address,
             amount: '0',
           },
+          expiry: await getTimestampPlusDays(1),
         }),
         eveSigner,
         swapContractAddress
@@ -1141,6 +1160,7 @@ contract('Swap', async accounts => {
           token: tokenDAI.address,
           amount: '0',
         },
+        expiry: await getTimestampPlusDays(1),
       })
 
       order.signature = getTypedDataSignature(
