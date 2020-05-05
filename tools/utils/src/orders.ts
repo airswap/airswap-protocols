@@ -45,14 +45,14 @@ export function createOrder({
 }
 
 export function parseOrderFromHex(data: string): object {
-  const functionSigs = {
+  const functionNames = {
     '0x67641c2f': 'swap',
     '0xc7d26c86': 'delegateProvideOrder',
     '0x7a2d107c': 'provideOrder',
   }
 
   const response = {
-    functionName: functionSigs[data.slice(0, 10)],
+    functionName: functionNames[data.slice(0, 10)],
     order: {
       nonce: `${bigNumberify('0x' + data.slice(10, 74))}`,
       expiry: `${bigNumberify('0x' + data.slice(74, 138))}`,
@@ -88,7 +88,7 @@ export function parseOrderFromHex(data: string): object {
     },
   }
 
-  if (response.functionName == 'wrapper.delegateProvideOrder') {
+  if (response.functionName == 'delegateProvideOrder') {
     response['delegateAddress'] = `0x${data.slice(1506, 1546)}`
   }
 
