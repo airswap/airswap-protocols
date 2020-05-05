@@ -137,20 +137,18 @@ contract Swap is ISwap {
     transferToken(
       finalSenderWallet,
       order.signer.wallet,
-      order.sender.amount,
-      order.sender.id,
       order.sender.token,
-      order.sender.kind
+      order.sender.kind,
+      order.sender.data
     );
 
     // Transfer token from signer to sender.
     transferToken(
       order.signer.wallet,
       finalSenderWallet,
-      order.signer.amount,
-      order.signer.id,
       order.signer.token,
-      order.signer.kind
+      order.signer.kind,
+      order.signer.data
     );
 
     // Transfer token from signer to affiliate if specified.
@@ -158,10 +156,9 @@ contract Swap is ISwap {
       transferToken(
         order.signer.wallet,
         order.affiliate.wallet,
-        order.affiliate.amount,
-        order.affiliate.id,
         order.affiliate.token,
-        order.affiliate.kind
+        order.affiliate.kind,
+        order.affiliate.data
       );
     }
 
@@ -169,16 +166,13 @@ contract Swap is ISwap {
       order.nonce,
       block.timestamp,
       order.signer.wallet,
-      order.signer.amount,
-      order.signer.id,
+      order.signer.data,
       order.signer.token,
       finalSenderWallet,
-      order.sender.amount,
-      order.sender.id,
+      order.sender.data,
       order.sender.token,
       order.affiliate.wallet,
-      order.affiliate.amount,
-      order.affiliate.id,
+      order.affiliate.data,
       order.affiliate.token
     );
   }
@@ -343,10 +337,9 @@ contract Swap is ISwap {
   function transferToken(
     address from,
     address to,
-    uint256 amount,
-    uint256 id,
     address token,
-    bytes4 kind
+    bytes4 kind,
+    bytes data
   ) internal {
     // Ensure the transfer is not to self.
     require(from != to, "SELF_TRANSFER_INVALID");
@@ -354,16 +347,15 @@ contract Swap is ISwap {
     require(address(transferHandler) != address(0), "TOKEN_KIND_UNKNOWN");
     // delegatecall required to pass msg.sender as Swap contract to handle the
     // token transfer in the calling contract
-    (bool success, bytes memory data) = address(transferHandler).delegatecall(
+    (bool success, bytes memory returnData) = address(transferHandler).delegatecall(
       abi.encodeWithSelector(
         transferHandler.transferTokens.selector,
         from,
         to,
-        amount,
-        id,
-        token
+        token,
+        data
       )
     );
-    require(success && abi.decode(data, (bool)), "TRANSFER_FAILED");
+    require(success && abi.decode(returnData, (bool)), "TRANSFER_FAILED");
   }
 }

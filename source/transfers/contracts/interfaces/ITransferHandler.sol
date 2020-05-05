@@ -33,8 +33,7 @@ interface ITransferHandler {
   function transferTokens(
     address from,
     address to,
-    uint256 amount,
-    uint256 id,
-    address token
+    address token,
+    bytes data
   ) external returns (bool);
 }

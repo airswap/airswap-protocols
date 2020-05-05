@@ -33,9 +33,8 @@ contract ERC1155TransferHandler is ITransferHandler {
   function transferTokens(
     address from,
     address to,
-    uint256 amount,
-    uint256 id,
-    address token
+    address token,
+    bytes data
   ) external returns (bool) {
     IERC1155(token).safeTransferFrom(
       from,

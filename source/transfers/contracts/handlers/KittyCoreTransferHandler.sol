@@ -33,9 +33,8 @@ contract KittyCoreTransferHandler is ITransferHandler {
   function transferTokens(
     address from,
     address to,
-    uint256 amount,
-    uint256 id,
-    address token
+    address token,
+    bytes data
   ) external returns (bool) {
     require(amount == 0, "AMOUNT_INVALID");
     IKittyCoreTokenTransfer(token).transferFrom(from, to, id);
