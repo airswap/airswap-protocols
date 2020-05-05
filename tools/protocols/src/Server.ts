@@ -14,7 +14,7 @@
   limitations under the License.
 */
 
-import * as jayson from 'jayson'
+import { Client, JSONRPCRequest } from 'jayson'
 import { BigNumber } from 'ethers/utils'
 import { REQUEST_TIMEOUT } from '@airswap/constants'
 import {
@@ -25,8 +25,15 @@ import {
 } from '@airswap/utils'
 import { Quote, Order } from '@airswap/types'
 
+let jaysonClient
+if (window) {
+  jaysonClient = require('jayson/lib/client/browser')
+} else {
+  jaysonClient = require('jayson/lib/client')
+}
+
 export class Server {
-  private client: jayson.Client
+  private client: Client
 
   public constructor(locator: string) {
     const locatorUrl = parseUrl(locator)
@@ -37,9 +44,9 @@ export class Server {
       timeout: REQUEST_TIMEOUT,
     }
     if (options.protocol === 'https:') {
-      this.client = jayson.Client.https(options)
+      this.client = jaysonClient.https(options)
     } else {
-      this.client = jayson.Client.http(options)
+      this.client = jaysonClient.http(options)
     }
   }
 
@@ -159,7 +166,7 @@ export class Server {
     params: Record<string, string>,
     resolve: Function,
     reject: Function
-  ): jayson.JSONRPCRequest {
+  ): JSONRPCRequest {
     return this.client.request(
       method,
       params,
