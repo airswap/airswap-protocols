@@ -26,7 +26,7 @@ import {
 import { Quote, Order } from '@airswap/types'
 
 let jaysonClient
-if (window) {
+if (typeof window !== 'undefined') {
   jaysonClient = require('jayson/lib/client/browser')
 } else {
   jaysonClient = require('jayson/lib/client')
