@@ -47,12 +47,12 @@ export function createOrder({
 export function parseOrderFromHex(data: string): object {
   const functionSigs = {
     '0x67641c2f': 'swap',
-    '0xc7d26c86': 'wrapper.delegateProvideOrder',
-    '0x7a2d107c': 'delegate.provideOrder',
+    '0xc7d26c86': 'delegateProvideOrder',
+    '0x7a2d107c': 'provideOrder',
   }
 
   const response = {
-    functionSig: functionSigs[data.slice(0, 10)],
+    functionName: functionSigs[data.slice(0, 10)],
     order: {
       nonce: `${bigNumberify('0x' + data.slice(10, 74))}`,
       expiry: `${bigNumberify('0x' + data.slice(74, 138))}`,
