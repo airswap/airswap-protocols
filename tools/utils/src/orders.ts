@@ -88,7 +88,7 @@ export function parseOrderFromHex(data: string): object {
     },
   }
 
-  if (response.functionSig == 'wrapper.delegateProvideOrder') {
+  if (response.functionName == 'wrapper.delegateProvideOrder') {
     response['delegateAddress'] = `0x${data.slice(1506, 1546)}`
   }
 
