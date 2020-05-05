@@ -27,7 +27,7 @@
     "@airswap/constants": "0.3.9",
     "@airswap/test-utils": "0.1.6",
     "@airswap/tokens": "0.1.4",
-    "@airswap/utils": "0.3.14",
+    "@airswap/utils": "0.3.15",
     "ethers": "^4.0.45",
     "solidity-coverage": "^0.6.3",
     "solidity-docgen": "0.3.0-beta.3"
