@@ -14,7 +14,7 @@ contract MockBytesManipulator {
     return BytesManipulator.get32Bytes(data, offset);
   }
 
-  function getFirst32Bytes(bytes calldata data) external returns (bytes32) {
-    return BytesManipulator.getFirst32Bytes(data);
+  function get32BytesAssembly(bytes calldata data, uint256 offset) external returns (bytes32) {
+    return BytesManipulator.get32BytesAssembly(data, offset);
   }
 }

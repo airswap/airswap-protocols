@@ -10,9 +10,9 @@ library BytesManipulator {
     }
   }
 
-  function getFirst32Bytes(bytes memory data) internal returns (bytes32 result) {
+  function get32BytesAssembly(bytes memory data, uint256 offset) internal returns (bytes32 result) {
     assembly {
-        result := mload(add(data, 32))
+        result := mload(add(data, add(offset, 32)))
     }
   }
 
