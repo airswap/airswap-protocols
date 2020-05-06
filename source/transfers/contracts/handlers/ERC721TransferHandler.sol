@@ -14,7 +14,7 @@
   limitations under the License.
 */
 
-pragma solidity 0.5.12;
+pragma solidity 0.5.16;
 
 import "../interfaces/ITransferHandler.sol";
 import "openzeppelin-solidity/contracts/token/ERC721/IERC721.sol";

@@ -1,4 +1,4 @@
-pragma solidity 0.5.12;
+pragma solidity 0.5.16;
 
 import "@airswap/tokens/contracts/FungibleToken.sol";
 import "@airswap/tokens/contracts/WETH9.sol";

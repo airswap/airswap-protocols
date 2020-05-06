@@ -5,7 +5,7 @@
     Contains an admin - owner to return any lost ether or tokens if necessary
 */
 
-pragma solidity 0.5.12;
+pragma solidity 0.5.16;
 
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";

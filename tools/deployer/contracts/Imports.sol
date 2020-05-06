@@ -1,4 +1,4 @@
-pragma solidity 0.5.12;
+pragma solidity 0.5.16;
 
 //Import all the contracts desired to be deployed
 import "@airswap/validator/contracts/Validator.sol";

@@ -17,11 +17,7 @@
 pragma solidity 0.5.16;
 pragma experimental ABIEncoderV2;
 
-
-/**
- * @title Types: Library of Swap Protocol Types and Hashes
- */
-library Types {
+contract Encoder {
   bytes internal constant EIP191_HEADER = "\x19\x01";
 
   struct Order {
@@ -37,7 +33,7 @@ library Types {
     bytes4 kind; // Interface ID of the token
     address wallet; // Wallet address of the party
     address token; // Contract address of the token
-    bytes data;
+    bytes data; // new generic data field
   }
 
   struct Signature {
@@ -48,16 +44,6 @@ library Types {
     bytes32 r; // `r` value of an ECDSA signature
     bytes32 s; // `s` value of an ECDSA signature
   }
-
-  bytes32 internal constant DOMAIN_TYPEHASH = keccak256(
-    abi.encodePacked(
-      "EIP712Domain(",
-      "string name,",
-      "string version,",
-      "address verifyingContract",
-      ")"
-    )
-  );
 
   bytes32 internal constant ORDER_TYPEHASH = keccak256(
     abi.encodePacked(
@@ -95,14 +81,13 @@ library Types {
    * @param domainSeparator bytes32
    * @return bytes32 A keccak256 abi.encodePacked value
    */
-  function hashOrder(Order calldata order, bytes32 domainSeparator)
+  function hashOrderEncode(Order calldata order, bytes32 domainSeparator)
     external
-    pure
     returns (bytes32)
   {
     return
       keccak256(
-        abi.encodePacked(
+        abi.encode(
           EIP191_HEADER,
           domainSeparator,
           keccak256(
@@ -143,27 +128,98 @@ library Types {
       );
   }
 
-  /**
-   * @notice Hash domain parameters into bytes32
-   * @dev Used for signature validation (EIP-712)
-   * @param name bytes
-   * @param version bytes
-   * @param verifyingContract address
-   * @return bytes32 returns a keccak256 abi.encodePacked value
-   */
-  function hashDomain(
-    bytes calldata name,
-    bytes calldata version,
-    address verifyingContract
-  ) external pure returns (bytes32) {
+  function hashOrderEncodePacked(Order calldata order, bytes32 domainSeparator)
+    external
+    returns (bytes32)
+  {
     return
       keccak256(
-        abi.encode(
-          DOMAIN_TYPEHASH,
-          keccak256(name),
-          keccak256(version),
-          verifyingContract
+        abi.encodePacked(
+          EIP191_HEADER,
+          domainSeparator,
+          keccak256(
+            abi.encodePacked(
+              ORDER_TYPEHASH,
+              order.nonce,
+              order.expiry,
+              keccak256(
+                abi.encodePacked(
+                  PARTY_TYPEHASH,
+                  order.signer.kind,
+                  order.signer.wallet,
+                  order.signer.token,
+                  order.signer.data
+                )
+              ),
+              keccak256(
+                abi.encodePacked(
+                  PARTY_TYPEHASH,
+                  order.sender.kind,
+                  order.sender.wallet,
+                  order.sender.token,
+                  order.sender.data
+                )
+              ),
+              keccak256(
+                abi.encodePacked(
+                  PARTY_TYPEHASH,
+                  order.affiliate.kind,
+                  order.affiliate.wallet,
+                  order.affiliate.token,
+                  order.affiliate.data
+                )
+              )
+            )
+          )
         )
       );
   }
+
+  function hashDataThenEncode(Order calldata order, bytes32 domainSeparator)
+    external
+    returns (bytes32)
+  {
+    return
+      keccak256(
+        abi.encode(
+          EIP191_HEADER,
+          domainSeparator,
+          keccak256(
+            abi.encode(
+              ORDER_TYPEHASH,
+              order.nonce,
+              order.expiry,
+              keccak256(
+                abi.encode(
+                  PARTY_TYPEHASH,
+                  order.signer.kind,
+                  order.signer.wallet,
+                  order.signer.token,
+                  keccak256(order.signer.data)
+                )
+              ),
+              keccak256(
+                abi.encode(
+                  PARTY_TYPEHASH,
+                  order.sender.kind,
+                  order.sender.wallet,
+                  order.sender.token,
+                  keccak256(order.sender.data)
+                )
+              ),
+              keccak256(
+                abi.encode(
+                  PARTY_TYPEHASH,
+                  order.affiliate.kind,
+                  order.affiliate.wallet,
+                  order.affiliate.token,
+                  keccak256(order.affiliate.data)
+                )
+              )
+            )
+          )
+        )
+      );
+  }
+
 }
