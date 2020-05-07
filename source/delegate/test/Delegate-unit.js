@@ -1361,7 +1361,39 @@ contract('Delegate Unit Tests', async accounts => {
       passes(tx)
     })
 
-    it('Send order without signature to the delegate', async () => {
+    it('Signer sends order without signature to the delegate - passes', async () => {
+      // 1 SenderToken for 0.005 SignerToken => 200 SenderToken for 1 SignerToken
+      await delegate.setRule(
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
+        5,
+        3
+      )
+
+      const senderAmount = 200
+      const signerAmount = 1
+
+      const order = createOrder({
+        signer: {
+          wallet: notOwner,
+          amount: signerAmount,
+          token: SIGNER_TOKEN,
+        },
+        sender: {
+          wallet: tradeWallet,
+          amount: senderAmount,
+          token: SENDER_TOKEN,
+        },
+      })
+
+      // signer of order sends to delegate with an empty signature
+      order.signature = emptySignature
+      const tx = await delegate.provideOrder(order, { from: notOwner })
+      passes(tx)
+    })
+
+    it('Not signer sends order without signature to the delegate - fails', async () => {
       // Note: Consumer is the order signer, Delegate is the order sender.
       const order = createOrder({
         signer: {
@@ -1376,12 +1408,11 @@ contract('Delegate Unit Tests', async accounts => {
         },
       })
 
+      // empty signature
       order.signature = emptySignature
-
-      // Succeeds on the Delegate, fails on the Swap.
       await reverted(
-        delegate.provideOrder(order, { from: notOwner }),
-        'SIGNATURE_MUST_BE_SENT'
+        delegate.provideOrder(order, { from: tradeWallet }),
+        'UPDATE THIS'
       )
     })
   })
