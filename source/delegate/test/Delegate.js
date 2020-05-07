@@ -1003,14 +1003,23 @@ contract('Delegate Integration Tests', async accounts => {
           amount: quote.toNumber(),
         },
       })
+      order.signature = emptySignature
+
+      await swapContract.authorizeSender(aliceDelegate.address, {
+        from: aliceTradeWallet,
+      })
+      await swapContract.authorizeSigner(aliceDelegate.address, {
+        from: bobAddress,
+      })
 
       // Fails on Delegate as a signature isn't provided
-      const tx = await aliceDelegate.provideOrder(
-        { ...order, signature: emptySignature },
-        { from: bobAddress }
-      )
+      const tx = await aliceDelegate.provideOrder(order, { from: bobAddress })
 
       passes(tx)
+
+      await swapContract.revokeSender(aliceDelegate.address, {
+        from: aliceTradeWallet,
+      })
     })
 
     it('Use quote larger than delegate rule', async () => {

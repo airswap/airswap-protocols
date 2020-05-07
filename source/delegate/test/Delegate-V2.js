@@ -19,7 +19,7 @@ const {
 } = require('@airswap/test-utils').assert
 const PROVIDER_URL = web3.currentProvider.host
 
-contract('Delegate Integration Tests', async accounts => {
+contract('DelegateV2 Integration Tests', async accounts => {
   const STARTING_BALANCE = 100000000
   const notOwner = accounts[0]
   const aliceAddress = accounts[1]
@@ -1136,10 +1136,9 @@ contract('Delegate Integration Tests', async accounts => {
           token: daiAddress,
         },
       })
+      order.signature = emptySignature
 
       await swap.authorizeSigner(aliceDelegate.address, { from: bobAddress })
-
-      order.signature = emptySignature
 
       // bob authroises swap to transfer WETH
       await tokenWETH.approve(swapAddress, STARTING_BALANCE, {
