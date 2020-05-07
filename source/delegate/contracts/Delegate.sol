@@ -231,9 +231,7 @@ contract Delegate is IDelegate, Ownable {
     Rule memory rule = rules[order.sender.token][order.signer.token];
 
     require(
-      order.signature.v != 0 ||
-        order.signer == msg.sender ||
-        wrapper == msg.sender,
+      order.signature.v != 0 || order.signer == msg.sender,
       "UPDATE THIS"
     );
 
