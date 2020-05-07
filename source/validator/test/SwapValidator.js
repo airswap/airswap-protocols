@@ -26,7 +26,7 @@ const {
 } = require('@airswap/test-utils').assert
 const { allowances, balances } = require('@airswap/test-utils').balances
 const { getLatestTimestamp } = require('@airswap/test-utils').time
-const { GANACHE_PROVIDER } = require('@airswap/test-utils').constants
+const PROVIDER_URL = web3.currentProvider.host
 const { getTestWallet } = require('@airswap/test-utils').functions
 
 contract('SwapValidator', async accounts => {
@@ -34,10 +34,10 @@ contract('SwapValidator', async accounts => {
   const bobAddress = accounts[1]
 
   const aliceSigner = new ethers.providers.JsonRpcProvider(
-    GANACHE_PROVIDER
+    PROVIDER_URL
   ).getSigner(aliceAddress)
   const bobSigner = new ethers.providers.JsonRpcProvider(
-    GANACHE_PROVIDER
+    PROVIDER_URL
   ).getSigner(bobAddress)
 
   const eveSigner = getTestWallet()

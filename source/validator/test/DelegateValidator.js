@@ -20,17 +20,17 @@ const {
   passes,
 } = require('@airswap/test-utils').assert
 const { allowances, balances } = require('@airswap/test-utils').balances
-const { GANACHE_PROVIDER } = require('@airswap/test-utils').constants
+const PROVIDER_URL = web3.currentProvider.host
 
 contract('DelegateValidator', async accounts => {
   const aliceAddress = accounts[0]
   const bobAddress = accounts[1]
   const aliceTradeWallet = accounts[4]
   const aliceSigner = new ethers.providers.JsonRpcProvider(
-    GANACHE_PROVIDER
+    PROVIDER_URL
   ).getSigner(aliceAddress)
   const bobSigner = new ethers.providers.JsonRpcProvider(
-    GANACHE_PROVIDER
+    PROVIDER_URL
   ).getSigner(bobAddress)
   const PROTOCOL = '0x0002'
   const UNKNOWN_KIND = '0x72bf82a0'
