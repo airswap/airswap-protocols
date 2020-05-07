@@ -94,7 +94,7 @@ contract Wrapper {
   {
     // Ensure that the signature is present.
     // The signature will be explicitly checked in Swap.
-    require(order.signature.v != 0, "UPDATE THIS");
+    require(order.signature.v != 0, "SIGNATURE_MUST_BE_SENT");
 
     // Wraps ETH to WETH when the signer provides ETH and the order is WETH
     _wrapEther(order.signer);
