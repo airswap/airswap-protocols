@@ -950,7 +950,7 @@ contract('Delegate Integration Tests', async accounts => {
       )
     })
 
-    it('Send order without signature to the delegate', async () => {
+    it('Send order without signature to the delegate not by order signer', async () => {
       // Signer wants to trade 1 WETH for x DAI
       const quote = await aliceDelegate.getSenderSideQuote.call(
         1,
@@ -973,13 +973,44 @@ contract('Delegate Integration Tests', async accounts => {
       })
 
       // Fails on Delegate as a signature isn't provided
-      await reverted(
+      await revertedpasses(
         aliceDelegate.provideOrder(
           { ...order, signature: emptySignature },
-          { from: bobAddress }
+          { from: aliceAddress }
         ),
-        'SIGNATURE_MUST_BE_SENT'
+        'UPDATE THIS'
       )
+    })
+
+    it('Send order without signature to the delegate by order signer', async () => {
+      // Signer wants to trade 1 WETH for x DAI
+      const quote = await aliceDelegate.getSenderSideQuote.call(
+        1,
+        tokenWETH.address,
+        tokenDAI.address
+      )
+
+      // Note: Consumer is the order signer, Delegate is the order sender.
+      const order = createOrder({
+        signer: {
+          wallet: bobAddress,
+          token: tokenWETH.address,
+          amount: 1,
+        },
+        sender: {
+          wallet: aliceTradeWallet,
+          token: tokenDAI.address,
+          amount: quote.toNumber(),
+        },
+      })
+
+      // Fails on Delegate as a signature isn't provided
+      const tx = await aliceDelegate.provideOrder(
+        { ...order, signature: emptySignature },
+        { from: bobAddress }
+      )
+
+      passes(tx)
     })
 
     it('Use quote larger than delegate rule', async () => {
