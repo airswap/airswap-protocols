@@ -211,7 +211,7 @@ contract DelegateV2 is IDelegateV2, Ownable {
     uint256 ruleID = firstRuleID[order.sender.token][order.signer.token];
 
     require(
-      order.signature.v != 0 || order.signer == msg.sender,
+      order.signature.v != 0 || order.signer.wallet == msg.sender,
       "UPDATE THIS"
     );
 
