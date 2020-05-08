@@ -1410,8 +1410,8 @@ contract('Delegate Unit Tests', async accounts => {
         },
       })
 
-      // empty signature
       order.signature = emptySignature
+
       await reverted(
         delegate.provideOrder(order, { from: tradeWallet }),
         'UPDATE THIS'
