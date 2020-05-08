@@ -1138,12 +1138,8 @@ contract('DelegateV2 Integration Tests', async accounts => {
       })
       order.signature = emptySignature
 
+      // Bob MUST authorize Alice's delegate
       await swap.authorizeSigner(aliceDelegate.address, { from: bobAddress })
-
-      // bob authroises swap to transfer WETH
-      await tokenWETH.approve(swapAddress, STARTING_BALANCE, {
-        from: bobAddress,
-      })
 
       // mint bob the money he needs
       await tokenWETH.mint(bobAddress, signerAmount)
