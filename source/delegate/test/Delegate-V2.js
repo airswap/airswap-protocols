@@ -1119,7 +1119,7 @@ contract('DelegateV2 Integration Tests', async accounts => {
 
       await reverted(
         aliceDelegate.provideOrder(order, { from: aliceAddress }),
-        'UPDATE THIS'
+        'SIG_MISSING_AND_SIGNER_INVALID'
       )
     })
 

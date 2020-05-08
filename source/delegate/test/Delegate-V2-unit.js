@@ -902,7 +902,7 @@ contract('DelegateV2 Unit Tests', async accounts => {
 
       await reverted(
         delegate.provideOrder(order, { from: notOwner }),
-        'UPDATE THIS'
+        'SIG_MISSING_AND_SIGNER_INVALID'
       )
     })
 

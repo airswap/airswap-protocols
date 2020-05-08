@@ -1414,7 +1414,7 @@ contract('Delegate Unit Tests', async accounts => {
 
       await reverted(
         delegate.provideOrder(order, { from: tradeWallet }),
-        'UPDATE THIS'
+        'SIG_MISSING_AND_SIGNER_INVALID'
       )
     })
   })

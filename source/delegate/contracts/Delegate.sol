@@ -232,7 +232,7 @@ contract Delegate is IDelegate, Ownable {
 
     require(
       order.signature.v != 0 || order.signer.wallet == msg.sender,
-      "UPDATE THIS"
+      "SIG_MISSING_AND_SIGNER_INVALID"
     );
 
     // Ensure the order is for the trade wallet.

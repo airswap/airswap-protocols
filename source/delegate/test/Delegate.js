@@ -1282,7 +1282,7 @@ contract('Delegate Integration Tests', async accounts => {
           { ...order, signature: emptySignature },
           { from: aliceAddress }
         ),
-        'UPDATE THIS'
+        'SIG_MISSING_AND_SIGNER_INVALID'
       )
     })
 
