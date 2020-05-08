@@ -876,6 +876,8 @@ contract('DelegateV2 Unit Tests', async accounts => {
         },
       })
 
+      // NOTE: Swap Contract swap() is mocked to always pass
+
       order.signature = emptySignature
 
       const tx = await delegate.provideOrder(order, { from: aliceAddress })
