@@ -9,7 +9,6 @@ const ERC20TransferHandler = artifacts.require('ERC20TransferHandler')
 
 const ethers = require('ethers')
 const { tokenKinds, ADDRESS_ZERO } = require('@airswap/constants')
-const { emptySignature } = require('@airswap/types')
 const { createOrder, signOrder } = require('@airswap/utils')
 const {
   emitted,
@@ -1252,88 +1251,6 @@ contract('Delegate Integration Tests', async accounts => {
         await aliceDelegate.provideOrder(order, { from: bobAddress }),
         'ProvideOrder'
       )
-    })
-
-    it('Send order without signature to the delegate not by order signer', async () => {
-      // Signer wants to trade 1 WETH for x DAI
-      const quote = await aliceDelegate.getSenderSideQuote.call(
-        1,
-        tokenWETH.address,
-        tokenDAI.address
-      )
-
-      // Note: Consumer is the order signer, Delegate is the order sender.
-      const order = createOrder({
-        signer: {
-          wallet: bobAddress,
-          token: tokenWETH.address,
-          amount: 1,
-        },
-        sender: {
-          wallet: aliceTradeWallet,
-          token: tokenDAI.address,
-          amount: quote.toNumber(),
-        },
-      })
-
-      // Fails on Delegate as a signature isn't provided
-      await reverted(
-        aliceDelegate.provideOrder(
-          { ...order, signature: emptySignature },
-          { from: aliceAddress }
-        ),
-        'SIG_MISSING_AND_SIGNER_INVALID'
-      )
-    })
-
-    it('Send order without signature to the delegate by order signer', async () => {
-      // Delegate will trade up to 10,000 DAI for WETH, at 200 DAI/WETH
-      await aliceDelegate.setRule(
-        tokenDAI.address, // Delegate's token
-        tokenWETH.address, // Signer's token
-        10000,
-        5,
-        3,
-        { from: aliceAddress }
-      )
-
-      // mint the relevant tokens
-      await tokenWETH.mint(bobAddress, STARTING_BALANCE)
-      await tokenDAI.mint(aliceTradeWallet, STARTING_BALANCE)
-
-      // Signer wants to trade 1 WETH for x DAI
-      const quote = await aliceDelegate.getSenderSideQuote.call(
-        1,
-        tokenWETH.address,
-        tokenDAI.address
-      )
-
-      // Note: Consumer is the order signer, Delegate is the order sender.
-      const order = createOrder({
-        signer: {
-          wallet: bobAddress,
-          token: tokenWETH.address,
-          amount: 1,
-        },
-        sender: {
-          wallet: aliceTradeWallet,
-          token: tokenDAI.address,
-          amount: quote.toNumber(),
-        },
-      })
-      order.signature = emptySignature
-
-      await swapContract.authorizeSender(aliceDelegate.address, {
-        from: aliceTradeWallet,
-      })
-      await swapContract.authorizeSigner(aliceDelegate.address, {
-        from: bobAddress,
-      })
-
-      // Fails on Delegate as a signature isn't provided
-      const tx = await aliceDelegate.provideOrder(order, { from: bobAddress })
-
-      passes(tx)
     })
   })
 })
