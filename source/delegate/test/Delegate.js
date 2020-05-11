@@ -9,6 +9,7 @@ const ERC20TransferHandler = artifacts.require('ERC20TransferHandler')
 
 const ethers = require('ethers')
 const { tokenKinds, ADDRESS_ZERO } = require('@airswap/constants')
+const { emptySignature } = require('@airswap/types')
 const { createOrder, signOrder } = require('@airswap/utils')
 const {
   emitted,
@@ -946,6 +947,38 @@ contract('Delegate Integration Tests', async accounts => {
       await reverted(
         aliceDelegate.provideOrder(order, { from: bobAddress }),
         'TOKEN_PAIR_INACTIVE'
+      )
+    })
+
+    it('Send order without signature to the delegate', async () => {
+      // Signer wants to trade 1 WETH for x DAI
+      const quote = await aliceDelegate.getSenderSideQuote.call(
+        1,
+        tokenWETH.address,
+        tokenDAI.address
+      )
+
+      // Note: Consumer is the order signer, Delegate is the order sender.
+      const order = createOrder({
+        signer: {
+          wallet: bobAddress,
+          token: tokenWETH.address,
+          amount: 1,
+        },
+        sender: {
+          wallet: aliceTradeWallet,
+          token: tokenDAI.address,
+          amount: quote.toNumber(),
+        },
+      })
+
+      // Fails on Delegate as a signature isn't provided
+      await reverted(
+        aliceDelegate.provideOrder(
+          { ...order, signature: emptySignature },
+          { from: bobAddress }
+        ),
+        'SIGNATURE_MUST_BE_SENT'
       )
     })
 
