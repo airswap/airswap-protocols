@@ -212,7 +212,7 @@ contract DelegateV2 is IDelegateV2, Ownable {
 
     require(
       order.signature.v != 0 || order.signer.wallet == msg.sender,
-      "SIG_MISSING_AND_SIGNER_INVALID"
+      "MUST_BE_SIGNED_OR_SENT_BY_SIGNER"
     );
 
     // Ensure the order is for the trade wallet.
