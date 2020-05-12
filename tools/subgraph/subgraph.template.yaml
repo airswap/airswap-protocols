@@ -113,7 +113,7 @@ dataSources:
           file: ../deployer/build/contracts/DelegateV2Factory.json
       eventHandlers:
         - event: CreateDelegate(indexed address,address,address,indexed address,address)
-          handler: handleCreateDelegate
+          handler: handleCreateDelegateV2
       file: ./src/DelegateV2FactoryMapping.ts
 templates:
   - name: Index
