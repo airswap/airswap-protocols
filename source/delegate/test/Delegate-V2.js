@@ -1,4 +1,5 @@
 const DelegateV2 = artifacts.require('DelegateV2')
+const DelegateV2Factory = artifacts.require('DelegateV2Factory')
 const Swap = artifacts.require('Swap')
 const Types = artifacts.require('Types')
 const TransferHandlerRegistry = artifacts.require('TransferHandlerRegistry')
@@ -19,7 +20,7 @@ const {
 } = require('@airswap/test-utils').assert
 const PROVIDER_URL = web3.currentProvider.host
 
-contract('Delegate Integration Tests', async accounts => {
+contract('DelegateV2 Integration Tests', async accounts => {
   const STARTING_BALANCE = 100000000
   const notOwner = accounts[0]
   const aliceAddress = accounts[1]
@@ -115,13 +116,27 @@ contract('Delegate Integration Tests', async accounts => {
     await setupIndexer()
     await setupSwap()
 
-    aliceDelegate = await DelegateV2.new(
+    const delegateV2Factory = await DelegateV2Factory.new(
       swapAddress,
       indexerAddress,
-      aliceAddress,
-      aliceTradeWallet,
       PROTOCOL
     )
+
+    const tx = await delegateV2Factory.createDelegate(aliceTradeWallet, {
+      from: aliceAddress,
+    })
+
+    let delegateAddress
+    emitted(tx, 'CreateDelegate', event => {
+      delegateAddress = event.delegateContract
+      return (
+        event.swapContract === swapAddress &&
+        event.delegateContractOwner === aliceAddress &&
+        event.delegateTradeWallet === aliceTradeWallet
+      )
+    })
+
+    aliceDelegate = await DelegateV2.at(delegateAddress)
     aliceDeleAddress = aliceDelegate.address
   })
 

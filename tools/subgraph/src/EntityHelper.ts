@@ -1,5 +1,5 @@
 import { BigInt } from "@graphprotocol/graph-ts"
-import { User, Token, Indexer, DelegateFactory, SwapContract } from "../generated/schema"
+import { User, Token, Indexer, DelegateFactory, DelegateV2Factory, SwapContract } from "../generated/schema"
 
 export function getUser(userAddress: string): User {
   let user = User.load(userAddress)
@@ -41,6 +41,15 @@ export function getDelegateFactory(delegateFactoryAddress: string): DelegateFact
     delegateFactory.save()
   }
   return delegateFactory as DelegateFactory
+}
+
+export function getDelegateV2Factory(delegateFactoryAddress: string): DelegateV2Factory {
+  let delegateFactory = DelegateV2Factory.load(delegateFactoryAddress)
+  if (!delegateFactory) {
+    delegateFactory = new DelegateV2Factory(delegateFactoryAddress)
+    delegateFactory.save()
+  }
+  return delegateFactory as DelegateV2Factory
 }
 
 export function getSwapContract(swapAddress: string): SwapContract {

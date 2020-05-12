@@ -78,9 +78,22 @@ type DelegateFactory @entity {
   id: ID! # address of the delegate factory
 }
 
+type DelegateV2Factory @entity {
+  id: ID! # address of the delegate factory
+}
+
 type Delegate @entity {
   id: ID! # delegate contract address
   factory: DelegateFactory! #factory that created this delegate
+  swap: SwapContract!
+  indexer: Indexer!
+  owner: User!
+  tradeWallet: Bytes!
+}
+
+type DelegateV2 @entity {
+  id: ID! # delegate contract address
+  factory: DelegateV2Factory! #factory that created this delegate
   swap: SwapContract!
   indexer: Indexer!
   owner: User!
@@ -96,4 +109,14 @@ type Rule @entity {
   maxSenderAmount: BigInt!
   priceCoef: BigInt!
   priceExp: BigInt!
+}
+
+type RuleV2 @entity {
+  id: ID! # delegate address + signerToken + senderToken
+  delegate: DelegateV2!
+  owner: User!
+  signerToken: Token!
+  senderToken: Token!
+  signerAmount: BigInt!
+  senderAmount: BigInt!
 }

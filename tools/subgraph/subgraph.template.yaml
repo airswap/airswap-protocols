@@ -95,6 +95,26 @@ dataSources:
         - event: CreateDelegate(indexed address,address,address,indexed address,address)
           handler: handleCreateDelegate
       file: ./src/DelegateFactoryMapping.ts
+  - kind: ethereum/contract
+    name: DelegateV2Factory
+    network: '{{network}}'
+    source:
+      address: '{{delegateV2Factory_address}}'
+      abi: DelegateV2Factory
+      startBlock: {{startBlock}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - CreateDelegate
+      abis:
+        - name: DelegateV2Factory
+          file: ../deployer/build/contracts/DelegateV2Factory.json
+      eventHandlers:
+        - event: CreateDelegate(indexed address,address,address,indexed address,address)
+          handler: handleCreateDelegate
+      file: ./src/DelegateV2FactoryMapping.ts
 templates:
   - name: Index
     kind: ethereum/contract
@@ -138,4 +158,27 @@ templates:
           handler: handleUnsetRule
         - event: ProvideOrder(indexed address,address,indexed address,indexed address,uint256,uint256,uint256)
           handler: handleProvideOrder
+  - name: DelegateV2
+    kind: ethereum/contract
+    network: '{{network}}'
+    source:
+      abi: DelegateV2
+    mapping: 
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      file: ./src/DelegateV2Mapping.ts
+      entities:
+        - DelegateV2
+      abis:
+        - name: DelegateV2
+          file: ../deployer/build/contracts/DelegateV2.json
+      eventHandlers: 
+        - event: CreateRule(indexed address,indexed uint256,address,address,uint256,uint256)
+          handler: handleCreateRule
+        - event: DeleteRule(indexed address,indexed uint256)
+          handler: handleDeleteRule
+        - event: FillRule(indexed address,indexed uint256,uint256,uint256)
+          handler: handleFillRule
+
 
