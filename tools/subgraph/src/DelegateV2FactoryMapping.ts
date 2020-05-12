@@ -1,9 +1,9 @@
-import { CreateDelegate } from "../generated/DelegateFactory/DelegateFactory"
+import { CreateDelegate } from "../generated/DelegateV2Factory/DelegateV2Factory"
 import { DelegateV2 as DelegateV2Contract } from '../generated/templates'
 import { DelegateV2 } from "../generated/schema"
 import { getUser, getDelegateV2Factory, getIndexer, getSwapContract } from "./EntityHelper"
 
-export function handleCreateDelegate(event: CreateDelegate): void {
+export function handleCreateDelegateV2(event: CreateDelegate): void {
   let delegateFactory = getDelegateV2Factory(event.address.toHex())
   let swap = getSwapContract(event.params.swapContract.toHex())
   let indexer = getIndexer(event.params.indexerContract.toHex())
