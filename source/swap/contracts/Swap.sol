@@ -131,8 +131,9 @@ contract Swap is ISwap {
       );
 
       // Ensure the signature is valid.
-      require(isValid(order, _domainSeparator), "SIGNATURE_INVALID");
+      require(this.isValid(order, _domainSeparator), "SIGNATURE_INVALID");
     }
+
     // Transfer token from sender to signer.
     transferToken(
       finalSenderWallet,
@@ -254,43 +255,13 @@ contract Swap is ISwap {
   }
 
   /**
-   * @notice Determine whether a sender delegate is authorized
-   * @param authorizer address Address doing the authorization
-   * @param delegate address Address being authorized
-   * @return bool True if a delegate is authorized to send
-   */
-  function isSenderAuthorized(address authorizer, address delegate)
-    internal
-    view
-    returns (bool)
-  {
-    return ((authorizer == delegate) ||
-      senderAuthorizations[authorizer][delegate]);
-  }
-
-  /**
-   * @notice Determine whether a signer delegate is authorized
-   * @param authorizer address Address doing the authorization
-   * @param delegate address Address being authorized
-   * @return bool True if a delegate is authorized to sign
-   */
-  function isSignerAuthorized(address authorizer, address delegate)
-    internal
-    view
-    returns (bool)
-  {
-    return ((authorizer == delegate) ||
-      signerAuthorizations[authorizer][delegate]);
-  }
-
-  /**
    * @notice Validate signature using an EIP-712 typed data hash
    * @param order Types.Order Order to validate
    * @param domainSeparator bytes32 Domain identifier used in signatures (EIP-712)
    * @return bool True if order has a valid signature
    */
-  function isValid(Types.Order memory order, bytes32 domainSeparator)
-    internal
+  function isValid(Types.Order calldata order, bytes32 domainSeparator)
+    external
     pure
     returns (bool)
   {
@@ -320,6 +291,36 @@ contract Swap is ISwap {
         );
     }
     return false;
+  }
+
+  /**
+   * @notice Determine whether a sender delegate is authorized
+   * @param authorizer address Address doing the authorization
+   * @param delegate address Address being authorized
+   * @return bool True if a delegate is authorized to send
+   */
+  function isSenderAuthorized(address authorizer, address delegate)
+    internal
+    view
+    returns (bool)
+  {
+    return ((authorizer == delegate) ||
+      senderAuthorizations[authorizer][delegate]);
+  }
+
+  /**
+   * @notice Determine whether a signer delegate is authorized
+   * @param authorizer address Address doing the authorization
+   * @param delegate address Address being authorized
+   * @return bool True if a delegate is authorized to sign
+   */
+  function isSignerAuthorized(address authorizer, address delegate)
+    internal
+    view
+    returns (bool)
+  {
+    return ((authorizer == delegate) ||
+      signerAuthorizations[authorizer][delegate]);
   }
 
   /**

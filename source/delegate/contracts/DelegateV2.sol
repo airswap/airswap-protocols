@@ -232,7 +232,7 @@ contract DelegateV2 is IDelegateV2, Ownable {
     require(ruleID != NO_RULE, "TOKEN_PAIR_INACTIVE");
 
     uint256 remainingSignerAmount = order.signer.data.getUint256(0);
-    uint256 remainingSenderAmount = order.signer.data.getUint256(0);
+    uint256 remainingSenderAmount = order.sender.data.getUint256(0);
 
     while (ruleID != NO_RULE && remainingSenderAmount > 0) {
       if (remainingSenderAmount >= rules[ruleID].senderAmount) {
