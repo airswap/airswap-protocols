@@ -17,13 +17,20 @@
 pragma solidity 0.5.12;
 
 import "./DelegateV2.sol";
-import "./interfaces/IDelegateFactory.sol";
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "@airswap/indexer/contracts/interfaces/ILocatorWhitelist.sol";
 import "@airswap/indexer/contracts/interfaces/IIndexer.sol";
 
 
-contract DelegateV2Factory is IDelegateFactory, ILocatorWhitelist {
+contract DelegateV2Factory is ILocatorWhitelist {
+  event CreateDelegateV2(
+    address indexed delegateContract,
+    address swapContract,
+    address indexerContract,
+    address indexed delegateContractOwner,
+    address delegateTradeWallet
+  );
+
   // Mapping specifying whether an address was deployed by this factory
   mapping(address => bool) internal _deployedAddresses;
 
@@ -68,7 +75,7 @@ contract DelegateV2Factory is IDelegateFactory, ILocatorWhitelist {
     );
     _deployedAddresses[delegateContractAddress] = true;
 
-    emit CreateDelegate(
+    emit CreateDelegateV2(
       delegateContractAddress,
       address(swapContract),
       address(indexerContract),

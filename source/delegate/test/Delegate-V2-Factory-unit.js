@@ -100,7 +100,7 @@ contract('DelegateV2 Factory Tests', async accounts => {
       let delegateAddress
 
       // emitted event
-      emitted(tx, 'CreateDelegate', event => {
+      emitted(tx, 'CreateDelegateV2', event => {
         delegateAddress = event.delegateContract
         return (
           event.swapContract === swapContract &&
@@ -126,7 +126,7 @@ contract('DelegateV2 Factory Tests', async accounts => {
 
       // get delegate address and pad
       let delegateAddress
-      emitted(tx, 'CreateDelegate', event => {
+      emitted(tx, 'CreateDelegateV2', event => {
         delegateAddress = event.delegateContract
         return (
           event.swapContract === swapContract &&

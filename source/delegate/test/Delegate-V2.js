@@ -127,7 +127,7 @@ contract('DelegateV2 Integration Tests', async accounts => {
     })
 
     let delegateAddress
-    emitted(tx, 'CreateDelegate', event => {
+    emitted(tx, 'CreateDelegateV2', event => {
       delegateAddress = event.delegateContract
       return (
         event.swapContract === swapAddress &&

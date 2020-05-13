@@ -75,6 +75,7 @@ dataSources:
         - event: Unstake(indexed address,indexed address,indexed address,bytes2,uint256)
           handler: handleUnstake
       file: ./src/IndexerMapping.ts
+
   - kind: ethereum/contract
     name: DelegateFactory
     network: '{{network}}'
@@ -95,6 +96,7 @@ dataSources:
         - event: CreateDelegate(indexed address,address,address,indexed address,address)
           handler: handleCreateDelegate
       file: ./src/DelegateFactoryMapping.ts
+
   - kind: ethereum/contract
     name: DelegateV2Factory
     network: '{{network}}'
@@ -107,14 +109,15 @@ dataSources:
       apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
-        - CreateDelegate
+        - CreateDelegateV2
       abis:
         - name: DelegateV2Factory
           file: ../deployer/build/contracts/DelegateV2Factory.json
       eventHandlers:
-        - event: CreateDelegate(indexed address,address,address,indexed address,address)
+        - event: CreateDelegateV2(indexed address,address,address,indexed address,address)
           handler: handleCreateDelegateV2
       file: ./src/DelegateV2FactoryMapping.ts
+
 templates:
   - name: Index
     kind: ethereum/contract

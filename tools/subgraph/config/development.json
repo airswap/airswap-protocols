@@ -3,6 +3,6 @@
   "swap_address": "0xf19A2A01B70519f67ADb309a994Ec8c69A967E8b",
   "indexer_address" : "0xaD888d0Ade988EbEe74B8D4F39BF29a8d0fe8A8D",
   "delegateFactory_address" : "0xB0015714B541A99265f529c7c0d34DA47deCA5b2",
-  "delegateV2Factory_address" : "0x8be8DFCDC90F50562b5022DE1f8D83fe93b0b055",
+  "delegateV2Factory_address" : "0x5b9b42d6e4B2e4Bf8d42Eba32D46918e10899B66",
   "startBlock": 0
 }
