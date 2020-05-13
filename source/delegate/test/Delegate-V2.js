@@ -19,7 +19,7 @@ const {
 } = require('@airswap/test-utils').assert
 const PROVIDER_URL = web3.currentProvider.host
 
-contract('Delegate Integration Tests', async accounts => {
+contract('DelegateV2 Integration Tests', async accounts => {
   const STARTING_BALANCE = 100000000
   const notOwner = accounts[0]
   const aliceAddress = accounts[1]
@@ -882,28 +882,6 @@ contract('Delegate Integration Tests', async accounts => {
     // sender amount is rounded UP, which is how the delegate prices
     const signerAmount = 2 + Math.ceil((3 * 600) / 660)
 
-    it('Should fail if no signature is sent', async () => {
-      const order = createOrder({
-        signer: {
-          wallet: bobAddress,
-          amount: 500,
-          token: wethAddress,
-        },
-        sender: {
-          wallet: aliceTradeWallet,
-          amount: 500,
-          token: daiAddress,
-        },
-      })
-
-      order.signature = emptySignature
-
-      await reverted(
-        aliceDelegate.provideOrder(order, { from: bobAddress }),
-        'SIGNATURE_MUST_BE_SENT'
-      )
-    })
-
     it('Should fail if sender token is not ERC20', async () => {
       const order = await signOrder(
         createOrder({
@@ -1121,6 +1099,57 @@ contract('Delegate Integration Tests', async accounts => {
       })
 
       await checkLinkedList(daiAddress, wethAddress, [3, 5])
+    })
+
+    it('Should fail if order has no signature and is not sent by order signer', async () => {
+      const order = createOrder({
+        signer: {
+          wallet: bobAddress,
+          amount: 500,
+          token: wethAddress,
+        },
+        sender: {
+          wallet: aliceTradeWallet,
+          amount: 500,
+          token: daiAddress,
+        },
+      })
+
+      order.signature = emptySignature
+
+      await reverted(
+        aliceDelegate.provideOrder(order, { from: aliceAddress }),
+        'MUST_BE_SIGNED_OR_SENT_BY_SIGNER'
+      )
+    })
+
+    it('Should pass if order has no signature and is sent by order signer', async () => {
+      const order = createOrder({
+        signer: {
+          wallet: bobAddress,
+          amount: 1,
+          token: wethAddress,
+        },
+        sender: {
+          wallet: aliceTradeWallet,
+          amount: 1,
+          token: daiAddress,
+        },
+      })
+      order.signature = emptySignature
+
+      // Bob MUST authorize Alice's delegate
+      await swap.authorizeSigner(aliceDelegate.address, { from: bobAddress })
+
+      // mint bob the money he needs
+      await tokenWETH.mint(bobAddress, signerAmount)
+
+      const tx = await aliceDelegate.provideOrder(
+        { ...order, signature: emptySignature },
+        { from: bobAddress }
+      )
+
+      passes(tx)
     })
   })
 })

@@ -862,7 +862,29 @@ contract('DelegateV2 Unit Tests', async accounts => {
       // CORRECT RULE ORDER: 3, 1, 5, 2, 4
     })
 
-    it('Should fail if no signature is sent', async () => {
+    it('Should pass if the order has no signature, but sent to the delegate by the signer', async () => {
+      const order = createOrder({
+        signer: {
+          wallet: aliceAddress,
+          amount: 500,
+          token: SIGNER_TOKEN_ADDR,
+        },
+        sender: {
+          wallet: tradeWallet,
+          amount: 500,
+          token: SENDER_TOKEN_ADDR,
+        },
+      })
+
+      // NOTE: Swap Contract swap() is mocked to always pass
+
+      order.signature = emptySignature
+
+      const tx = await delegate.provideOrder(order, { from: aliceAddress })
+      passes(tx)
+    })
+
+    it('Should fail if the order has no signature and is sent to the delegate not by the signer', async () => {
       const order = createOrder({
         signer: {
           wallet: aliceAddress,
@@ -880,7 +902,7 @@ contract('DelegateV2 Unit Tests', async accounts => {
 
       await reverted(
         delegate.provideOrder(order, { from: notOwner }),
-        'SIGNATURE_MUST_BE_SENT'
+        'MUST_BE_SIGNED_OR_SENT_BY_SIGNER'
       )
     })
 
