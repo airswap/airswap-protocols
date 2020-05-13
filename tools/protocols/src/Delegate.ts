@@ -137,7 +137,7 @@ export class Delegate {
     signerAmount: string
   ): Promise<Quote> {
     const balance = await new ERC20(senderToken, this.chainId).balanceOf(
-      this.address
+      this.tradeWallet
     )
     let finalSenderAmount = bigNumberify(senderAmount)
     let finalSignerAmount = bigNumberify(signerAmount)
