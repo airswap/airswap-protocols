@@ -23,6 +23,7 @@ import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
+import "@airswap/types/contracts/BytesManipulator.sol";
 
 
 /**
@@ -32,6 +33,7 @@ import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
  */
 contract Delegate is IDelegate, Ownable {
   using SafeMath for uint256;
+  using BytesManipulator for bytes;
 
   // The Swap contract to be used to settle trades
   ISwap public swapContract;
@@ -249,14 +251,16 @@ contract Delegate is IDelegate, Ownable {
     // Ensure that a rule exists.
     require(rule.maxSenderAmount != 0, "TOKEN_PAIR_INACTIVE");
 
+    uint256 senderAmount = order.sender.data.getUint256(0);
+
     // Ensure the order does not exceed the maximum amount.
-    require(order.sender.amount <= rule.maxSenderAmount, "AMOUNT_EXCEEDS_MAX");
+    require(senderAmount <= rule.maxSenderAmount, "AMOUNT_EXCEEDS_MAX");
 
     // Ensure the order is priced according to the rule.
     require(
-      order.sender.amount <=
+      senderAmount <=
         _calculateSenderAmount(
-          order.signer.amount,
+          order.signer.data.getUint256(0),
           rule.priceCoef,
           rule.priceExp
         ),
@@ -265,7 +269,7 @@ contract Delegate is IDelegate, Ownable {
 
     // Overwrite the rule with a decremented maxSenderAmount.
     rules[order.sender.token][order.signer.token] = Rule({
-      maxSenderAmount: (rule.maxSenderAmount).sub(order.sender.amount),
+      maxSenderAmount: (rule.maxSenderAmount).sub(senderAmount),
       priceCoef: rule.priceCoef,
       priceExp: rule.priceExp
     });
@@ -278,7 +282,7 @@ contract Delegate is IDelegate, Ownable {
       tradeWallet,
       order.sender.token,
       order.signer.token,
-      order.sender.amount,
+      senderAmount,
       rule.priceCoef,
       rule.priceExp
     );

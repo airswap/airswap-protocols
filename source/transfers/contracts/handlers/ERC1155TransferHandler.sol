@@ -18,15 +18,18 @@ pragma solidity 0.5.16;
 
 import "../interfaces/ITransferHandler.sol";
 import "@airswap/tokens/contracts/interfaces/IERC1155.sol";
+import "@airswap/types/contracts/BytesManipulator.sol";
 
 
 contract ERC1155TransferHandler is ITransferHandler {
+  using BytesManipulator for bytes;
+
   /**
    * @notice Function to wrap safeTransferFrom for ERC1155
    * @param from address Wallet address to transfer from
    * @param to address Wallet address to transfer to
-   * @param amount uint256 Amount for ERC-1155
-   * @param id uint256 token ID for ERC-1155
+   * amount uint256 Amount for ERC-1155
+   * id uint256 token ID for ERC-1155
    * @param token address Contract address of token
    * @return bool on success of the token transfer
    */
@@ -34,14 +37,24 @@ contract ERC1155TransferHandler is ITransferHandler {
     address from,
     address to,
     address token,
-    bytes data
+    bytes calldata data
   ) external returns (bool) {
+    require(data.length >= 64, "DATA_MUST_BE_64_BYTES");
+
+    uint256 id = data.getUint256(0);
+    uint256 amount = data.getUint256(32);
+    bytes memory extraData = "";
+
+    if (data.length > 64) {
+      extraData = data.slice(64, data.length - 64);
+    }
+
     IERC1155(token).safeTransferFrom(
       from,
       to,
       id,
       amount,
-      "" // bytes are empty
+      extraData
     );
     return true;
   }

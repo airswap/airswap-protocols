@@ -11,6 +11,7 @@ import "@airswap/transfers/contracts/TransferHandlerRegistry.sol";
 import "@airswap/tokens/contracts/interfaces/IWETH.sol";
 import "@airswap/tokens/contracts/interfaces/IAdaptedKittyERC721.sol";
 import "@airswap/delegate/contracts/interfaces/IDelegate.sol";
+import "@airswap/types/contracts/BytesManipulator.sol";
 
 
 /**
@@ -20,6 +21,7 @@ import "@airswap/delegate/contracts/interfaces/IDelegate.sol";
  */
 contract Validator {
   using ERC165Checker for address;
+  using BytesManipulator for bytes;
 
   bytes internal constant DOM_NAME = "SWAP";
   bytes internal constant DOM_VERSION = "2";
@@ -96,7 +98,7 @@ contract Validator {
           errorCount++;
         }
       } else {
-        if ((order.signer.wallet).balance < order.signer.amount) {
+        if ((order.signer.wallet).balance < order.signer.data.getUint256(0)) {
           errors[errorCount] = "SIGNER_ETHER_LOW";
           errorCount++;
         }
@@ -113,7 +115,7 @@ contract Validator {
     // the wrapper to transfer weth and deliver eth to the sender
     if (order.sender.token == address(wethContract)) {
       uint256 allowance = wethContract.allowance(order.signer.wallet, wrapper);
-      if (allowance < order.sender.amount) {
+      if (allowance < order.sender.data.getUint256(0)) {
         errors[errorCount] = "SIGNER_WRAPPER_ALLOWANCE_LOW";
         errorCount++;
       }
@@ -161,7 +163,7 @@ contract Validator {
 
     // if sender has WETH token, ensure sufficient ETH balance
     if (order.sender.token == address(wethContract)) {
-      if ((order.sender.wallet).balance < order.sender.amount) {
+      if ((order.sender.wallet).balance < order.sender.data.getUint256(0)) {
         errors[errorCount] = "SENDER_ETHER_LOW";
         errorCount++;
       }
@@ -171,7 +173,7 @@ contract Validator {
     // the wrapper to transfer weth and deliver eth to the sender
     if (order.signer.token == address(wethContract)) {
       uint256 allowance = wethContract.allowance(order.sender.wallet, wrapper);
-      if (allowance < order.signer.amount) {
+      if (allowance < order.signer.data.getUint256(0)) {
         errors[errorCount] = "SENDER_WRAPPER_ALLOWANCE_LOW";
         errorCount++;
       }
@@ -398,27 +400,23 @@ contract Validator {
     }
 
     // check if ERC721 or ERC20 only amount or id set for sender
-    if (order.sender.kind == ERC20_INTERFACE_ID && order.sender.id != 0) {
-      errors[errorCount] = "SENDER_INVALID_ID";
-      errorCount++;
-    } else if (
-      (order.sender.kind == ERC721_INTERFACE_ID ||
-        order.sender.kind == CK_INTERFACE_ID) && order.sender.amount != 0
-    ) {
-      errors[errorCount] = "SENDER_INVALID_AMOUNT";
-      errorCount++;
+    if (order.sender.data.length != 32) {
+      if (order.sender.kind != ERC20_INTERFACE_ID &&
+        order.sender.kind != ERC721_INTERFACE_ID &&
+        order.sender.kind != CK_INTERFACE_ID) {
+        errors[errorCount] = "SENDER_INVALID_DATA";
+        errorCount++;
+      }
     }
 
     // check if ERC721 or ERC20 only amount or id set for signer
-    if (order.signer.kind == ERC20_INTERFACE_ID && order.signer.id != 0) {
-      errors[errorCount] = "SIGNER_INVALID_ID";
-      errorCount++;
-    } else if (
-      (order.signer.kind == ERC721_INTERFACE_ID ||
-        order.signer.kind == CK_INTERFACE_ID) && order.signer.amount != 0
-    ) {
-      errors[errorCount] = "SIGNER_INVALID_AMOUNT";
-      errorCount++;
+    if (order.signer.data.length != 32) {
+      if (order.signer.kind != ERC20_INTERFACE_ID &&
+        order.signer.kind != ERC721_INTERFACE_ID &&
+        order.signer.kind != CK_INTERFACE_ID) {
+        errors[errorCount] = "SIGNER_INVALID_DATA";
+        errorCount++;
+      }
     }
 
     if (!isValid(order, domainSeparator)) {
@@ -479,21 +477,21 @@ contract Validator {
       errorCount++;
     }
 
-    if (order.sender.amount > rule.maxSenderAmount) {
+    if (order.sender.data.getUint256(0) > rule.maxSenderAmount) {
       errors[errorCount] = "ORDER_AMOUNT_EXCEEDS_MAX";
       errorCount++;
     }
 
     // calls the getSenderSize quote to determine how much needs to be paid
     uint256 senderAmount = delegate.getSenderSideQuote(
-      order.signer.amount,
+      order.signer.data.getUint256(0),
       order.signer.token,
       order.sender.token
     );
     if (senderAmount == 0) {
       errors[errorCount] = "DELEGATE_UNABLE_TO_PRICE";
       errorCount++;
-    } else if (order.sender.amount > senderAmount) {
+    } else if (order.sender.data.getUint256(0) > senderAmount) {
       errors[errorCount] = "PRICE_INVALID";
       errorCount++;
     }
@@ -554,15 +552,16 @@ contract Validator {
    * @return bool whether party has enough balance
    */
   function hasBalance(Types.Party memory party) internal view returns (bool) {
+    uint256 firstParameter = party.data.getUint256(0);
     if (party.kind == ERC721_INTERFACE_ID || party.kind == CK_INTERFACE_ID) {
-      address owner = IERC721(party.token).ownerOf(party.id);
+      address owner = IERC721(party.token).ownerOf(firstParameter);
       return (owner == party.wallet);
     } else if (party.kind == ERC1155_INTERFACE_ID) {
-      uint256 balance = IERC1155(party.token).balanceOf(party.wallet, party.id);
-      return (balance >= party.amount);
+      uint256 balance = IERC1155(party.token).balanceOf(party.wallet, firstParameter);
+      return (balance >= party.data.getUint256(32));
     } else {
       uint256 balance = IERC20(party.token).balanceOf(party.wallet);
-      return (balance >= party.amount);
+      return (balance >= firstParameter);
     }
   }
 
@@ -578,19 +577,20 @@ contract Validator {
     view
     returns (bool)
   {
+    uint256 parameter = party.data.getUint256(0);
     if (party.kind == ERC721_INTERFACE_ID) {
-      address approved = IERC721(party.token).getApproved(party.id);
+      address approved = IERC721(party.token).getApproved(parameter);
       return (swap == approved);
     } else if (party.kind == CK_INTERFACE_ID) {
       address approved = IAdaptedKittyERC721(party.token).kittyIndexToApproved(
-        party.id
+        parameter
       );
       return (swap == approved);
     } else if (party.kind == ERC1155_INTERFACE_ID) {
       return IERC1155(party.token).isApprovedForAll(party.wallet, swap);
     } else {
       uint256 allowance = IERC20(party.token).allowance(party.wallet, swap);
-      return (allowance >= party.amount);
+      return (allowance >= parameter);
     }
   }
 

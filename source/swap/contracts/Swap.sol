@@ -329,8 +329,7 @@ contract Swap is ISwap {
    * @dev ERC20: Takes into account non-standard ERC-20 tokens.
    * @param from address Wallet address to transfer from
    * @param to address Wallet address to transfer to
-   * @param amount uint256 Amount for ERC-20
-   * @param id token ID for ERC-721
+   * @param data bytes Concatenated parameters for token transfer
    * @param token address Contract address of token
    * @param kind bytes4 EIP-165 interface ID of the token
    */
@@ -339,7 +338,7 @@ contract Swap is ISwap {
     address to,
     address token,
     bytes4 kind,
-    bytes data
+    bytes memory data
   ) internal {
     // Ensure the transfer is not to self.
     require(from != to, "SELF_TRANSFER_INVALID");

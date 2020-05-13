@@ -10,11 +10,16 @@ import "./BytesManipulator.sol";
  *
  */
 contract MockBytesManipulator {
-  function get32Bytes(bytes calldata data, uint256 offset) external returns (bytes32) {
-    return BytesManipulator.get32Bytes(data, offset);
+  function getBytes32(bytes calldata data, uint256 start) external returns (bytes32) {
+    return BytesManipulator.getBytes32(data, start);
   }
 
-  function get32BytesAssembly(bytes calldata data, uint256 offset) external returns (bytes32) {
-    return BytesManipulator.get32BytesAssembly(data, offset);
+  function getUint256(bytes calldata data, uint256 start) external returns (uint256) {
+    return BytesManipulator.getUint256(data, start);
   }
+
+  function getBytesAssembly(bytes calldata data, uint256 start, uint256 count) external returns (bytes memory) {
+    return BytesManipulator.slice(data, start, count);
+  }
+
 }

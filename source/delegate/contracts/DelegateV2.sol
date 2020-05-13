@@ -23,6 +23,7 @@ import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
+import "@airswap/types/contracts/BytesManipulator.sol";
 
 
 /**
@@ -32,6 +33,7 @@ import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
  */
 contract DelegateV2 is IDelegateV2, Ownable {
   using SafeMath for uint256;
+  using BytesManipulator for bytes;
 
   // The Swap contract to be used to settle trades
   ISwap public swapContract;
@@ -229,8 +231,8 @@ contract DelegateV2 is IDelegateV2, Ownable {
     // Ensure that a rule exists.
     require(ruleID != NO_RULE, "TOKEN_PAIR_INACTIVE");
 
-    uint256 remainingSignerAmount = order.signer.amount;
-    uint256 remainingSenderAmount = order.sender.amount;
+    uint256 remainingSignerAmount = order.signer.data.getUint256(0);
+    uint256 remainingSenderAmount = order.signer.data.getUint256(0);
 
     while (ruleID != NO_RULE && remainingSenderAmount > 0) {
       if (remainingSenderAmount >= rules[ruleID].senderAmount) {

@@ -20,12 +20,15 @@ pragma experimental ABIEncoderV2;
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "@airswap/delegate/contracts/interfaces/IDelegate.sol";
 import "@airswap/tokens/contracts/interfaces/IWETH.sol";
+import "@airswap/types/contracts/BytesManipulator.sol";
 
 
 /**
  * @title Wrapper: Send and receive ether for WETH trades
  */
 contract Wrapper {
+  using BytesManipulator for bytes;
+
   // The Swap contract to settle trades
   ISwap public swapContract;
 
@@ -77,7 +80,7 @@ contract Wrapper {
     swapContract.swap(order);
 
     // Unwraps WETH to ETH when the sender receives WETH
-    _unwrapEther(order.sender.wallet, order.signer.token, order.signer.amount);
+    _unwrapEther(order.sender.wallet, order.signer.token, order.signer.data.getUint256(0));
   }
 
   /**
@@ -103,7 +106,7 @@ contract Wrapper {
     delegate.provideOrder(order);
 
     // Unwraps WETH to ETH when the signer receives WETH
-    _unwrapEther(order.signer.wallet, order.sender.token, order.sender.amount);
+    _unwrapEther(order.signer.wallet, order.sender.token, order.sender.data.getUint256(0));
   }
 
   /**
@@ -111,17 +114,18 @@ contract Wrapper {
    * @param party Types.Party The side of the trade that may need wrapping
    */
   function _wrapEther(Types.Party memory party) internal {
+    uint256 amount = party.data.getUint256(0);
     // Check whether ether needs wrapping
     if (party.token == address(wethContract)) {
       // Ensure message value is param.
-      require(party.amount == msg.value, "VALUE_MUST_BE_SENT");
+      require(amount == msg.value, "VALUE_MUST_BE_SENT");
 
       // Wrap (deposit) the ether.
       wethContract.deposit.value(msg.value)();
 
       // Transfer the WETH from the wrapper to party.
       // Return value not checked - WETH throws on error and does not return false
-      wethContract.transfer(party.wallet, party.amount);
+      wethContract.transfer(party.wallet, amount);
     } else {
       // Ensure no unexpected ether is sent.
       require(msg.value == 0, "VALUE_MUST_BE_ZERO");
