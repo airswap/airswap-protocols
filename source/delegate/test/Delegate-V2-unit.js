@@ -18,7 +18,7 @@ const {
 const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
 const PROVIDER_URL = web3.currentProvider.host
 
-contract('DelegateV2 Unit Tests', async accounts => {
+contract.skip('DelegateV2 Unit Tests', async accounts => {
   const owner = accounts[0]
   const tradeWallet = accounts[1]
   const mockRegistry = accounts[2]

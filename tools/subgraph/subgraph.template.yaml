@@ -90,7 +90,7 @@ dataSources:
         - CreateDelegate
       abis:
         - name: DelegateFactory
-          file: ../deployer/build/contracts/DelegateFactory.json
+          file: ../../source/delegate/build/contracts/DelegateFactory.json
       eventHandlers:
         - event: CreateDelegate(indexed address,address,address,indexed address,address)
           handler: handleCreateDelegate
@@ -110,7 +110,7 @@ dataSources:
         - CreateDelegate
       abis:
         - name: DelegateV2Factory
-          file: ../deployer/build/contracts/DelegateV2Factory.json
+          file: ../../source/delegate/build/contracts/DelegateV2Factory.json
       eventHandlers:
         - event: CreateDelegate(indexed address,address,address,indexed address,address)
           handler: handleCreateDelegateV2

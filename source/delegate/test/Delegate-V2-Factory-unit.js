@@ -9,7 +9,7 @@ const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
 const { passes, equal, emitted } = require('@airswap/test-utils').assert
 const { padAddressToLocator } = require('@airswap/test-utils').padding
 
-contract('DelegateV2 Factory Tests', async accounts => {
+contract.skip('DelegateV2 Factory Tests', async accounts => {
   const swapContract = accounts[1]
   const delegateOwnerOne = accounts[2]
   const delegateOwnerTwo = accounts[3]

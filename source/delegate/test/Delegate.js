@@ -79,6 +79,8 @@ contract('Delegate Integration Tests', async accounts => {
       PROTOCOL
     )
 
+    console.log(delegateFactory.address)
+
     const tx = await delegateFactory.createDelegate(aliceTradeWallet, {
       from: aliceAddress,
     })

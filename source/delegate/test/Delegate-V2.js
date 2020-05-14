@@ -122,6 +122,8 @@ contract('DelegateV2 Integration Tests', async accounts => {
       PROTOCOL
     )
 
+    console.log(delegateV2Factory.address)
+
     const tx = await delegateV2Factory.createDelegate(aliceTradeWallet, {
       from: aliceAddress,
     })
