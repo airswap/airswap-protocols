@@ -106,8 +106,7 @@ export const EIP712 = {
     { name: 'kind', type: 'bytes4' },
     { name: 'wallet', type: 'address' },
     { name: 'token', type: 'address' },
-    { name: 'amount', type: 'uint256' },
-    { name: 'id', type: 'uint256' },
+    { name: 'data', type: 'bytes' },
   ],
 }
 
