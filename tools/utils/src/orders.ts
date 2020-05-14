@@ -33,9 +33,9 @@ import {
 import { getOrderHash } from './hashes'
 import { lowerCaseAddresses } from '..'
 
-export function numberToBytes(number): string {
+export function numberToBytes32(number): string {
   const hexString = number.toString(16)
-  return hexString.padStart(64, '0')
+  return `0x${hexString.padStart(64, '0')}`
 }
 
 export function formatPartyData({
@@ -49,16 +49,16 @@ export function formatPartyData({
   let data
   switch (kind) {
     case tokenKinds.ERC20:
-      data = `0x${numberToBytes(amount)}`
+      data = numberToBytes32(amount)
       break
     case tokenKinds.ERC721:
     case tokenKinds.CKITTY:
-      data = `0x${numberToBytes(id)}`
+      data = numberToBytes32(id)
       break
     case tokenKinds.ERC1155:
-      data = `0x${numberToBytes(id)
-        .concat(numberToBytes(amount))
-        .concat(transferData)}`
+      data = numberToBytes32(id)
+        .concat(numberToBytes32(amount).slice(2))
+        .concat(transferData)
   }
   return {
     kind,

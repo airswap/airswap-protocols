@@ -116,14 +116,14 @@ export const emptyQuoteParty: QuoteParty = {
   token: ADDRESS_ZERO,
   amount: '0',
   id: '0',
-  transferData: '',
+  transferData: '0x',
 }
 
 export const emptyOrderParty: OrderParty = {
   kind: tokenKinds.ERC20,
   wallet: ADDRESS_ZERO,
   token: ADDRESS_ZERO,
-  data: LOCATOR_ZERO,
+  data: '0x',
 }
 
 export const emptySignature: Signature = {

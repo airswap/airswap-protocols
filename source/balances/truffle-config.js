@@ -62,6 +62,7 @@ module.exports = {
           enabled: true,
           runs: 20000,
         },
+        evmVersion: 'petersburg',
       },
     },
   },
