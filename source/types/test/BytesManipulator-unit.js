@@ -31,7 +31,7 @@ contract('BytesManipulator Unit Tests', async () => {
 
       // calculate gas usage
       const tx = await bytesManipulator.getBytes32(data, 0)
-      console.log('full order bytes ' + tx.receipt.gasUsed)
+      // console.log('full order bytes ' + tx.receipt.gasUsed)
     })
 
     it('Test get first 32 bytes of 32 bytes ', async () => {
@@ -44,7 +44,7 @@ contract('BytesManipulator Unit Tests', async () => {
 
       // calculate gas usage
       const tx = await bytesManipulator.getBytes32(data, 0)
-      console.log('32 bytes ' + tx.receipt.gasUsed)
+      // console.log('32 bytes ' + tx.receipt.gasUsed)
     })
 
     it('Test get first 32 bytes of 64 bytes ', async () => {
@@ -57,7 +57,7 @@ contract('BytesManipulator Unit Tests', async () => {
 
       // calculate gas usage
       const tx = await bytesManipulator.getBytes32(data, 0)
-      console.log('64 bytes ' + tx.receipt.gasUsed)
+      // console.log('64 bytes ' + tx.receipt.gasUsed)
     })
 
     it('Test get second 32 bytes ', async () => {
@@ -70,7 +70,7 @@ contract('BytesManipulator Unit Tests', async () => {
 
       // calculate gas usage
       const tx = await bytesManipulator.getBytes32(data, 32)
-      console.log('full order bytes ' + tx.receipt.gasUsed)
+      // console.log('full order bytes ' + tx.receipt.gasUsed)
     })
   })
 
@@ -89,7 +89,7 @@ contract('BytesManipulator Unit Tests', async () => {
 
       // calculate gas usage
       const tx = await bytesManipulator.getUint256(data, 0)
-      console.log('full order bytes ' + tx.receipt.gasUsed)
+      // console.log('full order bytes ' + tx.receipt.gasUsed)
     })
   })
 
@@ -112,7 +112,7 @@ contract('BytesManipulator Unit Tests', async () => {
 
       // calculate gas usage
       const tx = await bytesManipulator.getBytesAssembly(data, 0, 32)
-      console.log('getBytesAssembly ' + tx.receipt.gasUsed)
+      // console.log('getBytesAssembly ' + tx.receipt.gasUsed)
     })
   })
 })

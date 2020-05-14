@@ -49,13 +49,7 @@ contract ERC1155TransferHandler is ITransferHandler {
       extraData = data.slice(64, data.length - 64);
     }
 
-    IERC1155(token).safeTransferFrom(
-      from,
-      to,
-      id,
-      amount,
-      extraData
-    );
+    IERC1155(token).safeTransferFrom(from, to, id, amount, extraData);
     return true;
   }
 }

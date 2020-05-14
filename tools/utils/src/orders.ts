@@ -17,16 +17,56 @@
 import * as ethUtil from 'ethereumjs-util'
 import { ethers } from 'ethers'
 import { bigNumberify } from 'ethers/utils'
-import { signatureTypes, SECONDS_IN_DAY, tokenKinds } from '@airswap/constants'
+import {
+  signatureTypes,
+  SECONDS_IN_DAY,
+  tokenKinds,
+  ADDRESS_ZERO,
+} from '@airswap/constants'
 import {
   Quote,
   UnsignedOrder,
   Order,
   Signature,
-  emptyOrderParty,
+  OrderParty,
 } from '@airswap/types'
 import { getOrderHash } from './hashes'
 import { lowerCaseAddresses } from '..'
+
+export function numberToBytes(number): string {
+  const hexString = number.toString(16)
+  return hexString.padStart(64, '0')
+}
+
+export function formatPartyData({
+  kind = tokenKinds.ERC20, // default to ERC20
+  wallet = ADDRESS_ZERO,
+  token = ADDRESS_ZERO,
+  amount = 0,
+  id = 0,
+  transferData = '',
+}): OrderParty {
+  let data
+  switch (kind) {
+    case tokenKinds.ERC20:
+      data = `0x${numberToBytes(amount)}`
+      break
+    case tokenKinds.ERC721:
+    case tokenKinds.CKITTY:
+      data = `0x${numberToBytes(id)}`
+      break
+    case tokenKinds.ERC1155:
+      data = `0x${numberToBytes(id)
+        .concat(numberToBytes(amount))
+        .concat(transferData)}`
+  }
+  return {
+    kind,
+    wallet,
+    token,
+    data,
+  }
+}
 
 export function createOrder({
   expiry = Math.round(Date.now() / 1000 + SECONDS_IN_DAY).toString(),
@@ -38,9 +78,9 @@ export function createOrder({
   return lowerCaseAddresses({
     expiry: String(expiry),
     nonce: String(nonce),
-    signer: { ...emptyOrderParty, ...signer },
-    sender: { ...emptyOrderParty, ...sender },
-    affiliate: { ...emptyOrderParty, ...affiliate },
+    signer: formatPartyData(signer),
+    sender: formatPartyData(sender),
+    affiliate: formatPartyData(affiliate),
   })
 }
 

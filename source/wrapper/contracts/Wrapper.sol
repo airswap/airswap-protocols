@@ -73,14 +73,26 @@ contract Wrapper {
     // The signature will be explicitly checked in Swap.
     require(order.signature.v != 0, "SIGNATURE_MUST_BE_SENT");
 
+    // copy struct into memory for internal function call
+    Types.Party memory orderSender = Types.Party({
+      kind: order.sender.kind,
+      wallet: order.sender.wallet,
+      token: order.sender.token,
+      data: order.sender.data
+    });
+
     // Wraps ETH to WETH when the sender provides ETH and the order is WETH
-    _wrapEther(order.sender);
+    _wrapEther(orderSender);
 
     // Perform the swap.
     swapContract.swap(order);
 
     // Unwraps WETH to ETH when the sender receives WETH
-    _unwrapEther(order.sender.wallet, order.signer.token, order.signer.data.getUint256(0));
+    _unwrapEther(
+      order.sender.wallet,
+      order.signer.token,
+      order.signer.data.getUint256(0)
+    );
   }
 
   /**
@@ -99,14 +111,26 @@ contract Wrapper {
     // The signature will be explicitly checked in Swap.
     require(order.signature.v != 0, "SIGNATURE_MUST_BE_SENT");
 
+    // copy struct into memory for internal function call
+    Types.Party memory orderSigner = Types.Party({
+      kind: order.signer.kind,
+      wallet: order.signer.wallet,
+      token: order.signer.token,
+      data: order.signer.data
+    });
+
     // Wraps ETH to WETH when the signer provides ETH and the order is WETH
-    _wrapEther(order.signer);
+    _wrapEther(orderSigner);
 
     // Provide the order to the Delegate.
     delegate.provideOrder(order);
 
     // Unwraps WETH to ETH when the signer receives WETH
-    _unwrapEther(order.signer.wallet, order.sender.token, order.sender.data.getUint256(0));
+    _unwrapEther(
+      order.signer.wallet,
+      order.sender.token,
+      order.sender.data.getUint256(0)
+    );
   }
 
   /**

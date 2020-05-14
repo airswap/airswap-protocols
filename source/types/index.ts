@@ -32,14 +32,20 @@ type RequireAtLeastOne<T, Keys extends keyof T = keyof T> = Pick<
 type Party = {
   kind: string
   token: string
-  amount?: string
-  id?: string
 }
 
-export type QuoteParty = RequireAtLeastOne<Party, 'amount' | 'id'>
+export type QuoteParty = RequireAtLeastOne<
+  Party & {
+    id?: string
+    amount?: string
+    transferData?: string
+  },
+  'amount' | 'id'
+>
 
-export type OrderParty = QuoteParty & {
+export type OrderParty = Party & {
   wallet: string
+  data: string
 }
 
 export type Quote = {
@@ -110,14 +116,14 @@ export const emptyQuoteParty: QuoteParty = {
   token: ADDRESS_ZERO,
   amount: '0',
   id: '0',
+  transferData: '',
 }
 
 export const emptyOrderParty: OrderParty = {
   kind: tokenKinds.ERC20,
   wallet: ADDRESS_ZERO,
   token: ADDRESS_ZERO,
-  amount: '0',
-  id: '0',
+  data: LOCATOR_ZERO,
 }
 
 export const emptySignature: Signature = {

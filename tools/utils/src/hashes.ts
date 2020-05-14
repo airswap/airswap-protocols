@@ -44,15 +44,8 @@ export const PARTY_TYPEHASH = ethUtil.keccak256(stringify('Party'))
 export function hashParty(party: OrderParty): Buffer {
   return ethUtil.keccak256(
     ethAbi.rawEncode(
-      ['bytes32', 'bytes4', 'address', 'address', 'uint256', 'uint256'],
-      [
-        PARTY_TYPEHASH,
-        party.kind,
-        party.wallet,
-        party.token,
-        party.amount,
-        party.id,
-      ]
+      ['bytes32', 'bytes4', 'address', 'address', 'bytes'],
+      [PARTY_TYPEHASH, party.kind, party.wallet, party.token, party.data]
     )
   )
 }
