@@ -18,6 +18,14 @@ ID: `Qma3GJn9Wucuo3AaJMQBmLXyiooiWNcwVrGUWWxTkiGtoD`
 1. From `airswap-protocols/tools/subgraph` run `yarn prepare:development && yarn codegen && yarn remove-local; yarn create-local; yarn deploy-local`
 1. Run queries against the endpoint at the end of the previous step
 
+Note: When developing locally develop the entities and mappings in isolation. 
+This is because:
+
+> Truffle provides a clean room environment when running your test files. When running your tests against Ganache or Truffle Develop, Truffle will use advanced snapshotting features to ensure your test files don't share state with each other.
+
+This can confuse the graph and prevent indexing on contracts. 
+ If the individual components work as intended then it can be assumed with high confidence that they will not conflict over one another in production.
+
 ## Deploying to hosted service
 1. Authenticate with ` graph auth https://api.thegraph.com/deploy/ <ACCESS_TOKEN>`
 1. In another window and within `airswap-protocols`, run `yarn test`
