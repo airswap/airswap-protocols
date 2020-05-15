@@ -25,17 +25,17 @@ type Swap @entity {
 
   signer: User
   signerAmount: BigInt
-  signerTokenId: BigInt
+  signerId: BigInt
   signerToken: Token
 
   sender: User
   senderAmount: BigInt
-  senderTokenId: BigInt
+  senderId: BigInt
   senderToken: Token
 
   affiliate: User
   affiliateAmount: BigInt
-  affiliateTokenId: BigInt
+  affiliateId: BigInt
   affiliateToken: Token
 }
 
