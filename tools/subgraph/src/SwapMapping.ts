@@ -122,17 +122,17 @@ export function handleSwap(event: SwapEvent): void {
 
   completedSwap.signer = signer.id
   completedSwap.signerAmount = event.params.signerAmount
-  completedSwap.signerTokenType = event.params.signerId
+  completedSwap.signerId = event.params.signerId
   completedSwap.signerToken = signerToken.id
 
   completedSwap.sender = sender.id
   completedSwap.senderAmount = event.params.senderAmount
-  completedSwap.senderTokenType = event.params.senderId
+  completedSwap.senderId = event.params.senderId
   completedSwap.senderToken = senderToken.id
 
   completedSwap.affiliate = affiliate.id
   completedSwap.affiliateAmount = event.params.affiliateAmount
-  completedSwap.affiliateTokenType = event.params.affiliateId
+  completedSwap.affiliateId = event.params.affiliateId
   completedSwap.affiliateToken = affiliateToken.id
 
   completedSwap.save()
