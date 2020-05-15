@@ -29,7 +29,7 @@ describe('Metadata: Mainnet', async () => {
     })
   })
   it('finds the airswap token', async () => {
-    const tokens = metadata.findBySymbol('AST')
+    const tokens = metadata.findTokensBySymbol('AST')
     expect(tokens[0].address).to.equal(stakingTokenAddresses[chainIds.MAINNET])
   })
 })
@@ -57,7 +57,7 @@ describe('Metadata: Rinkeby', async () => {
     expect(token.symbol).to.equal('AST')
   })
   it('finds the airswap token', async () => {
-    const tokens = metadata.findBySymbol('AST')
+    const tokens = metadata.findTokensBySymbol('AST')
     expect(tokens[0].address).to.equal(stakingTokenAddresses[chainIds.RINKEBY])
   })
 })
@@ -85,7 +85,7 @@ describe('Metadata: Goerli', async () => {
     expect(token.symbol).to.equal('AST')
   })
   it('finds the airswap token', async () => {
-    const tokens = metadata.findBySymbol('AST')
+    const tokens = metadata.findTokensBySymbol('AST')
     expect(tokens[0].address).to.equal(stakingTokenAddresses[chainIds.GOERLI])
   })
 })
@@ -113,7 +113,7 @@ describe('Metadata: Kovan', async () => {
     expect(token.symbol).to.equal('AST')
   })
   it('finds the airswap token', async () => {
-    const tokens = metadata.findBySymbol('AST')
+    const tokens = metadata.findTokensBySymbol('AST')
     expect(tokens[0].address).to.equal(stakingTokenAddresses[chainIds.KOVAN])
   })
 })

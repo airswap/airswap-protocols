@@ -170,7 +170,7 @@ class TokenMetadata {
   }
 
   // get token objects with symbols that match a query
-  public findBySymbol(query: string): NormalizedToken[] {
+  public findTokensBySymbol(query: string): NormalizedToken[] {
     const tokens = []
     this.tokens.forEach(token => {
       if (token.symbol.toUpperCase() === query.toUpperCase()) {
