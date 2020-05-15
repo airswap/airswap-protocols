@@ -96,7 +96,7 @@ dataSources:
           handler: handleCreateDelegate
       file: ./src/DelegateFactoryMapping.ts
   - kind: ethereum/contract
-    name: DelegateV2Factory
+    name: V2DelegateFactory
     network: '{{network}}'
     source:
       address: '{{delegateV2Factory_address}}'
@@ -114,7 +114,7 @@ dataSources:
       eventHandlers:
         - event: CreateDelegate(indexed address,address,address,indexed address,address)
           handler: handleCreateDelegateV2
-      file: ./src/DelegateV2FactoryMapping.ts
+      file: ./src/V2DelegateFactoryMapping.ts
 templates:
   - name: Index
     kind: ethereum/contract
@@ -158,7 +158,7 @@ templates:
           handler: handleUnsetRule
         - event: ProvideOrder(indexed address,address,indexed address,indexed address,uint256,uint256,uint256)
           handler: handleProvideOrder
-  - name: DelegateV2
+  - name: V2Delegate
     kind: ethereum/contract
     network: '{{network}}'
     source:
@@ -167,9 +167,9 @@ templates:
       kind: ethereum/events
       apiVersion: 0.0.4
       language: wasm/assemblyscript
-      file: ./src/DelegateV2Mapping.ts
+      file: ./src/V2DelegateMapping.ts
       entities:
-        - DelegateV2
+        - V2Delegate
       abis:
         - name: DelegateV2
           file: ../deployer/build/contracts/DelegateV2.json

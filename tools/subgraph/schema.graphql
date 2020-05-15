@@ -91,7 +91,7 @@ type Delegate @entity {
   tradeWallet: Bytes!
 }
 
-type DelegateV2 @entity {
+type V2Delegate @entity {
   id: ID! # delegate contract address
   factory: DelegateV2Factory! #factory that created this delegate
   swap: SwapContract!
@@ -111,9 +111,9 @@ type Rule @entity {
   priceExp: BigInt!
 }
 
-type RuleV2 @entity {
-  id: ID! # delegate address + signerToken + senderToken
-  delegate: DelegateV2!
+type V2Rule @entity {
+  id: ID! # delegate address + ruleID
+  delegate: V2Delegate!
   owner: User!
   signerToken: Token!
   senderToken: Token!

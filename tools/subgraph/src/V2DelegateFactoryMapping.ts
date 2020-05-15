@@ -1,6 +1,6 @@
 import { CreateDelegate } from "../generated/DelegateV2Factory/DelegateV2Factory"
-import { DelegateV2 as DelegateV2Contract } from '../generated/templates'
-import { DelegateV2 } from "../generated/schema"
+import { V2Delegate as DelegateV2Contract } from '../generated/templates'
+import { V2Delegate } from "../generated/schema"
 import { getUser, getDelegateV2Factory, getIndexer, getSwapContract } from "./EntityHelper"
 
 export function handleCreateDelegateV2(event: CreateDelegate): void {
@@ -10,7 +10,7 @@ export function handleCreateDelegateV2(event: CreateDelegate): void {
   let owner = getUser(event.params.delegateContractOwner.toHex())
 
   DelegateV2Contract.create(event.params.delegateContract) // begins indexing this delegate
-  let delegate = new DelegateV2(event.params.delegateContract.toHex())
+  let delegate = new V2Delegate(event.params.delegateContract.toHex())
   delegate.factory = delegateFactory.id
   delegate.swap = swap.id
   delegate.indexer = indexer.id
