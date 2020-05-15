@@ -287,9 +287,9 @@ export const goerliTokensByAddress: Record<string, NormalizedToken> = {
     symbol: 'WETH',
     kind: tokenKinds.ERC20,
   },
-  '0x1a1ec25DC08e98e5E93F1104B5e5cdD298707d31': {
+  '0x1a1ec25dc08e98e5e93f1104b5e5cdd298707d31': {
     name: 'AirSwap Token',
-    address: '0x1a1ec25DC08e98e5E93F1104B5e5cdD298707d31',
+    address: '0x1a1ec25dc08e98e5e93f1104b5e5cdd298707d31',
     decimals: 4,
     symbol: 'AST',
     kind: tokenKinds.ERC20,
@@ -304,9 +304,9 @@ export const kovanTokensByAddress: Record<string, NormalizedToken> = {
     symbol: 'WETH',
     kind: tokenKinds.ERC20,
   },
-  '0x1a1ec25DC08e98e5E93F1104B5e5cdD298707d31': {
+  '0x1a1ec25dc08e98e5e93f1104b5e5cdd298707d31': {
     name: 'AirSwap Token',
-    address: '0x1a1ec25DC08e98e5E93F1104B5e5cdD298707d31',
+    address: '0x1a1ec25dc08e98e5e93f1104b5e5cdd298707d31',
     decimals: 4,
     symbol: 'AST',
     kind: tokenKinds.ERC20,

@@ -169,6 +169,17 @@ class TokenMetadata {
     return this.tokensByAddress
   }
 
+  // get token objects with symbols that match a query
+  public findBySymbol(query: string): NormalizedToken[] {
+    const tokens = []
+    this.tokens.forEach(token => {
+      if (token.symbol.toUpperCase() === query.toUpperCase()) {
+        tokens.push(token)
+      }
+    })
+    return tokens
+  }
+
   // this will fail if the token you search isn't present in the Trust Wallet metadata, or if the letter casing doesn't match Trust's metadata
   public fetchImageBinaryUnstable = (address: string): Promise<string> => {
     return axios.get(getTrustImage(address))
