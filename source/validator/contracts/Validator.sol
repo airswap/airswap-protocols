@@ -396,27 +396,43 @@ contract Validator {
     }
 
     // check if ERC721 or ERC20 only amount or id set for sender
-    if (order.sender.data.length != 32) {
-      if (
-        order.sender.kind != ERC20_INTERFACE_ID &&
-        order.sender.kind != ERC721_INTERFACE_ID &&
-        order.sender.kind != CK_INTERFACE_ID
-      ) {
-        errors[errorCount] = "SENDER_INVALID_DATA";
+    if (
+      order.sender.kind == ERC20_INTERFACE_ID ||
+      order.sender.kind == ERC721_INTERFACE_ID ||
+      order.sender.kind == CK_INTERFACE_ID
+    ) {
+      if (order.sender.data.length != 32) {
+        errors[errorCount] = "DATA_MUST_BE_32_BYTES";
         errorCount++;
       }
     }
 
+    if (
+      order.sender.kind == ERC1155_INTERFACE_ID &&
+      order.sender.data.length != 64
+    ) {
+      errors[errorCount] = "DATA_MUST_BE_64_BYTES";
+      errorCount++;
+    }
+
     // check if ERC721 or ERC20 only amount or id set for signer
-    if (order.signer.data.length != 32) {
-      if (
-        order.signer.kind != ERC20_INTERFACE_ID &&
-        order.signer.kind != ERC721_INTERFACE_ID &&
-        order.signer.kind != CK_INTERFACE_ID
-      ) {
-        errors[errorCount] = "SIGNER_INVALID_DATA";
+    if (
+      order.signer.kind == ERC20_INTERFACE_ID ||
+      order.signer.kind == ERC721_INTERFACE_ID ||
+      order.signer.kind == CK_INTERFACE_ID
+    ) {
+      if (order.signer.data.length != 32) {
+        errors[errorCount] = "DATA_MUST_BE_32_BYTES";
         errorCount++;
       }
+    }
+
+    if (
+      order.signer.kind == ERC1155_INTERFACE_ID &&
+      order.signer.data.length != 64
+    ) {
+      errors[errorCount] = "DATA_MUST_BE_64_BYTES";
+      errorCount++;
     }
 
     if (!this.isValid(order, domainSeparator)) {

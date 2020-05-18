@@ -212,13 +212,13 @@ contract('DelegateValidator', async accounts => {
             wallet: aliceAddress,
             token: tokenAST.address,
             amount: 200,
-            kind: UNKNOWN_KIND,
+            kind: tokenKinds.ERC20,
           },
           sender: {
             wallet: bobAddress,
             token: tokenAST.address,
             amount: 50,
-            kind: UNKNOWN_KIND,
+            kind: tokenKinds.ERC20,
           },
         }),
         bobSigner,
@@ -226,6 +226,8 @@ contract('DelegateValidator', async accounts => {
       )
 
       selfOrder.signature.v = 0
+      selfOrder.sender.kind = UNKNOWN_KIND
+      selfOrder.signer.kind = UNKNOWN_KIND
 
       errorCodes = await validator.checkDelegate.call(
         selfOrder,
@@ -439,24 +441,25 @@ contract('DelegateValidator', async accounts => {
     })
 
     it('Checks inserting unknown kind outputs error', async () => {
-      const order = await signOrder(
-        createOrder({
-          sender: {
-            wallet: aliceTradeWallet,
-            token: tokenAST.address,
-            amount: 50,
-            kind: UNKNOWN_KIND,
-          },
-          signer: {
-            wallet: bobAddress,
-            token: tokenWETH.address,
-            amount: 10,
-            kind: UNKNOWN_KIND,
-          },
-        }),
-        bobSigner,
-        swapAddress
-      )
+      let order = createOrder({
+        sender: {
+          wallet: aliceTradeWallet,
+          token: tokenAST.address,
+          amount: 50,
+          kind: tokenKinds.ERC20,
+        },
+        signer: {
+          wallet: bobAddress,
+          token: tokenWETH.address,
+          amount: 10,
+          kind: tokenKinds.ERC20,
+        },
+      })
+
+      order.sender.kind = UNKNOWN_KIND
+      order.signer.kind = UNKNOWN_KIND
+
+      order = await signOrder(order, bobSigner, swapAddress)
 
       await swapContract.authorizeSender(aliceDelegate.address, {
         from: aliceTradeWallet,
@@ -475,24 +478,24 @@ contract('DelegateValidator', async accounts => {
     })
 
     it('Checks malformed order errors out', async () => {
-      const order = await signOrder(
-        createOrder({
-          sender: {
-            wallet: aliceTradeWallet,
-            token: tokenAST.address,
-            amount: 200,
-            kind: tokenKinds.ERC721,
-          },
-          signer: {
-            wallet: bobAddress,
-            token: tokenWETH.address,
-            amount: 50,
-            kind: tokenKinds.ERC721,
-          },
-        }),
-        bobSigner,
-        swapAddress
-      )
+      let order = createOrder({
+        sender: {
+          wallet: aliceTradeWallet,
+          token: tokenAST.address,
+          id: 200,
+          kind: tokenKinds.ERC721,
+        },
+        signer: {
+          wallet: bobAddress,
+          token: tokenWETH.address,
+          i: 50,
+          kind: tokenKinds.ERC721,
+        },
+      })
+      order.sender.data = order.sender.data.concat('000000000')
+      order.signer.data = order.signer.data.concat('000000000')
+
+      order = await signOrder(order, bobSigner, swapAddress)
 
       errorCodes = await validator.checkWrappedDelegate.call(
         order,
@@ -502,9 +505,9 @@ contract('DelegateValidator', async accounts => {
           from: bobAddress,
         }
       )
-      equal(errorCodes[0], 4)
-      equal(web3.utils.toUtf8(errorCodes[1][0]), 'SENDER_INVALID_AMOUNT')
-      equal(web3.utils.toUtf8(errorCodes[1][1]), 'SIGNER_INVALID_AMOUNT')
+      // equal(errorCodes[0], 2)
+      equal(web3.utils.toUtf8(errorCodes[1][0]), 'DATA_MUST_BE_32_BYTES')
+      equal(web3.utils.toUtf8(errorCodes[1][1]), 'DATA_MUST_BE_32_BYTES')
       equal(web3.utils.toUtf8(errorCodes[1][2]), 'SIGNER_KIND_MUST_BE_ERC20')
       equal(web3.utils.toUtf8(errorCodes[1][3]), 'SENDER_KIND_MUST_BE_ERC20')
     })
