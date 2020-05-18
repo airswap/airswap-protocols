@@ -59,6 +59,9 @@ export function formatPartyData({
       data = numberToBytes32(id)
         .concat(numberToBytes32(amount).slice(2))
         .concat(transferData)
+      break
+    default:
+      data = '0x'
   }
   return {
     kind,
@@ -228,12 +231,9 @@ export function isValidOrder(order: Order): boolean {
     'token' in order['signer'] &&
     'token' in order['sender'] &&
     'token' in order['affiliate'] &&
-    'amount' in order['signer'] &&
-    'amount' in order['sender'] &&
-    'amount' in order['affiliate'] &&
-    'id' in order['signer'] &&
-    'id' in order['sender'] &&
-    'id' in order['affiliate'] &&
+    'data' in order['signer'] &&
+    'data' in order['sender'] &&
+    'data' in order['affiliate'] &&
     'signatory' in order['signature'] &&
     'validator' in order['signature'] &&
     'r' in order['signature'] &&

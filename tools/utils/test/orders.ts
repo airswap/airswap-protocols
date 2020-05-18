@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import { functions } from '@airswap/test-utils'
-import { ADDRESS_ZERO } from '@airswap/constants'
+import { ADDRESS_ZERO, tokenKinds } from '@airswap/constants'
 
 import {
   createOrder,
@@ -32,15 +32,15 @@ describe('Orders', async () => {
         createOrder({
           sender: {
             wallet: '',
-            kind: '',
+            kind: tokenKinds.ERC20,
             token: '',
-            amount: String(count + lowestAmount),
+            amount: count + lowestAmount,
           },
         })
       )
     }
     const best = getBestByLowestSenderAmount(orders)
-    expect(best.sender.amount).to.equal(String(lowestAmount))
+    expect(parseInt(best.sender.data.slice(2), 16)).to.equal(lowestAmount)
   })
 
   it('Best by highest signer', async () => {
@@ -52,14 +52,14 @@ describe('Orders', async () => {
         createOrder({
           signer: {
             wallet: '',
-            kind: '',
+            kind: tokenKinds.ERC20,
             token: '',
-            amount: String(count),
+            amount: count,
           },
         })
       )
     }
     const best = getBestByHighestSignerAmount(orders)
-    expect(best.signer.amount).to.equal(String(highestAmount))
+    expect(parseInt(best.signer.data.slice(2), 16)).to.equal(highestAmount)
   })
 })

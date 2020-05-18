@@ -15,6 +15,8 @@ const {
   getTimestampPlusDays,
 } = require('@airswap/test-utils').time
 const { ADDRESS_ZERO } = require('@airswap/constants')
+const { createOrder, signOrder } = require('@airswap/utils')
+const { emptySignature } = require('@airswap/types')
 
 const NONCE_AVAILABLE = 0x00
 const NONCE_UNAVAILABLE = 0x01
@@ -53,63 +55,159 @@ contract('Swap Unit Tests', async accounts => {
 
   describe('Test swap', async () => {
     it('test when order is expired', async () => {
-      const signer = [kind, ADDRESS_ZERO, ADDRESS_ZERO, 200, 0]
-      const sender = [kind, ADDRESS_ZERO, ADDRESS_ZERO, 200, 0]
-      const affiliate = [kind, ADDRESS_ZERO, ADDRESS_ZERO, 200, 0]
-      const signature = [ADDRESS_ZERO, ADDRESS_ZERO, ver, v, r, s]
-      const order = [0, 0, signer, sender, affiliate, signature]
+      const order = createOrder({
+        expiry: 0,
+        nonce: 0,
+        signer: {
+          kind: kind,
+          wallet: ADDRESS_ZERO,
+          amount: 200,
+          token: ADDRESS_ZERO,
+        },
+        sender: {
+          kind: kind,
+          wallet: ADDRESS_ZERO,
+          amount: 200,
+          token: ADDRESS_ZERO,
+        },
+        affiliate: {
+          kind: kind,
+          wallet: ADDRESS_ZERO,
+          amount: 200,
+          token: ADDRESS_ZERO,
+        },
+      })
 
-      await reverted(swap.swap(order), 'ORDER_EXPIRED')
+      await reverted(
+        swap.swap({ ...order, signature: emptySignature }),
+        'ORDER_EXPIRED'
+      )
     })
 
     it('test when order nonce is too low', async () => {
-      const expiry = await getTimestampPlusDays(1)
-      const signer = [kind, mockSigner, ADDRESS_ZERO, 200, 0]
-      const sender = [kind, ADDRESS_ZERO, ADDRESS_ZERO, 200, 0]
-      const affiliate = [kind, ADDRESS_ZERO, ADDRESS_ZERO, 200, 0]
-      const signature = [ADDRESS_ZERO, ADDRESS_ZERO, ver, v, r, s]
-      const order = [0, expiry, signer, sender, affiliate, signature]
+      const order = createOrder({
+        expiry: await getTimestampPlusDays(1),
+        nonce: 0,
+        signer: {
+          kind: kind,
+          wallet: mockSigner,
+          amount: 200,
+          token: ADDRESS_ZERO,
+        },
+        sender: {
+          kind: kind,
+          wallet: ADDRESS_ZERO,
+          amount: 200,
+          token: ADDRESS_ZERO,
+        },
+        affiliate: {
+          kind: kind,
+          wallet: ADDRESS_ZERO,
+          amount: 200,
+          token: ADDRESS_ZERO,
+        },
+      })
 
       await swap.cancelUpTo(5, { from: mockSigner })
-      await reverted(swap.swap(order), 'NONCE_TOO_LOW')
+      await reverted(
+        swap.swap({ ...order, signature: emptySignature }),
+        'NONCE_TOO_LOW'
+      )
     })
 
     it('test when sender is provided, and the sender is unauthorized', async () => {
-      const expiry = await getTimestampPlusDays(1)
-      const signer = [kind, mockSigner, ADDRESS_ZERO, 200, 0]
-      const sender = [kind, mockSender, ADDRESS_ZERO, 200, 0]
-      const affiliate = [kind, ADDRESS_ZERO, ADDRESS_ZERO, 200, 0]
-      const signature = [ADDRESS_ZERO, ADDRESS_ZERO, ver, v, r, s]
-      const order = [0, expiry, signer, sender, affiliate, signature]
+      const order = createOrder({
+        expiry: await getTimestampPlusDays(1),
+        nonce: 0,
+        signer: {
+          kind: kind,
+          wallet: mockSigner,
+          amount: 200,
+          token: ADDRESS_ZERO,
+        },
+        sender: {
+          kind: kind,
+          wallet: mockSender,
+          amount: 200,
+          token: ADDRESS_ZERO,
+        },
+        affiliate: {
+          kind: kind,
+          wallet: ADDRESS_ZERO,
+          amount: 200,
+          token: ADDRESS_ZERO,
+        },
+      })
 
-      await reverted(swap.swap(order), 'SENDER_UNAUTHORIZED')
+      await reverted(
+        swap.swap({ ...order, signature: emptySignature }),
+        'SENDER_UNAUTHORIZED'
+      )
     })
 
     it('test when sender is provided, the sender is authorized, the signature.v is 0, and the signer wallet is unauthorized', async () => {
-      const expiry = await getTimestampPlusDays(1)
-      const signer = [kind, mockSigner, ADDRESS_ZERO, 200, 0]
-      const sender = [kind, mockSender, ADDRESS_ZERO, 200, 0]
-      const affiliate = [kind, ADDRESS_ZERO, ADDRESS_ZERO, 200, 0]
-      const signature = [ADDRESS_ZERO, ADDRESS_ZERO, ver, 0, r, s]
-      const order = [0, expiry, signer, sender, affiliate, signature]
+      const order = createOrder({
+        expiry: await getTimestampPlusDays(1),
+        nonce: 0,
+        signer: {
+          kind: kind,
+          wallet: mockSigner,
+          amount: 200,
+          token: ADDRESS_ZERO,
+        },
+        sender: {
+          kind: kind,
+          wallet: mockSender,
+          amount: 200,
+          token: ADDRESS_ZERO,
+        },
+        affiliate: {
+          kind: kind,
+          wallet: ADDRESS_ZERO,
+          amount: 200,
+          token: ADDRESS_ZERO,
+        },
+      })
 
       //mock sender will take the order
       await reverted(
-        swap.swap(order, { from: mockSender }),
+        swap.swap(
+          { ...order, signature: emptySignature },
+          { from: mockSender }
+        ),
         'SIGNER_UNAUTHORIZED.'
       )
     })
 
     it('test swap when sender and signer are the same', async () => {
-      const expiry = await getTimestampPlusDays(1)
-      const signer = [kind, mockSender, ADDRESS_ZERO, 200, 0]
-      const sender = [kind, mockSender, ADDRESS_ZERO, 200, 0]
-      const affiliate = [kind, ADDRESS_ZERO, ADDRESS_ZERO, 0, 0]
-      const signature = [ADDRESS_ZERO, ADDRESS_ZERO, ver, 0, r, s]
-      const order = [0, expiry, signer, sender, affiliate, signature]
+      const order = createOrder({
+        expiry: await getTimestampPlusDays(1),
+        nonce: 0,
+        signer: {
+          kind: kind,
+          wallet: mockSender,
+          amount: 200,
+          token: ADDRESS_ZERO,
+        },
+        sender: {
+          kind: kind,
+          wallet: mockSender,
+          amount: 200,
+          token: ADDRESS_ZERO,
+        },
+        affiliate: {
+          kind: kind,
+          wallet: ADDRESS_ZERO,
+          amount: 200,
+          token: ADDRESS_ZERO,
+        },
+      })
 
       await reverted(
-        swap.swap(order, { from: mockSender }),
+        swap.swap(
+          { ...order, signature: emptySignature },
+          { from: mockSender }
+        ),
         'SELF_TRANSFER_INVALID'
       )
     })
@@ -120,7 +218,7 @@ contract('Swap Unit Tests', async accounts => {
       const transferHandlerRegistryTemplate = await TransferHandlerRegistry.new()
 
       const handler_transferTokens = handlerTemplate.contract.methods
-        .transferTokens(ADDRESS_ZERO, ADDRESS_ZERO, 0, 0, ADDRESS_ZERO)
+        .transferTokens(ADDRESS_ZERO, ADDRESS_ZERO, ADDRESS_ZERO, '0x')
         .encodeABI()
 
       const registry_transferHandlers = transferHandlerRegistryTemplate.contract.methods
@@ -134,19 +232,37 @@ contract('Swap Unit Tests', async accounts => {
 
       await handlerTemplateMock.givenMethodRevert(handler_transferTokens)
 
-      const expiry = await getTimestampPlusDays(1)
-      const signer = [kind, mockSigner, ADDRESS_ZERO, 200, 0]
-      const sender = [kind, mockSender, ADDRESS_ZERO, 200, 0]
-      const affiliate = [kind, ADDRESS_ZERO, ADDRESS_ZERO, 0, 0]
-      const signature = [ADDRESS_ZERO, ADDRESS_ZERO, ver, 0, r, s]
-      const order = [0, expiry, signer, sender, affiliate, signature]
+      const order = createOrder({
+        expiry: await getTimestampPlusDays(1),
+        nonce: 0,
+        signer: {
+          kind: kind,
+          wallet: mockSigner,
+          amount: 200,
+          token: ADDRESS_ZERO,
+        },
+        sender: {
+          kind: kind,
+          wallet: mockSender,
+          amount: 200,
+          token: ADDRESS_ZERO,
+        },
+        affiliate: {
+          kind: kind,
+          wallet: ADDRESS_ZERO,
+          amount: 200,
+          token: ADDRESS_ZERO,
+        },
+      })
 
       // auth signer to be the sender of the order
       await swap.authorizeSender(mockSigner, {
         from: mockSender,
       })
 
-      await reverted(swap.swap(order, { from: mockSigner }))
+      await reverted(
+        swap.swap({ ...order, signature: emptySignature }, { from: mockSender })
+      )
     })
   })
   describe('Test cancel', async () => {

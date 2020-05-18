@@ -14,15 +14,15 @@
   limitations under the License.
 */
 
-const ethUtil = require('ethereumjs-util')
-const sigUtil = require('eth-sig-util')
+// const ethUtil = require('ethereumjs-util')
+// const sigUtil = require('eth-sig-util')
 const ethers = require('ethers')
-const {
-  DOMAIN_NAME,
-  DOMAIN_VERSION,
-  signatureTypes,
-} = require('@airswap/constants')
-const { EIP712 } = require('@airswap/types')
+// const {
+//   DOMAIN_NAME,
+//   DOMAIN_VERSION,
+//   signatureTypes,
+// } = require('@airswap/constants')
+// const { EIP712 } = require('@airswap/types')
 
 module.exports = {
   getTestWallet: function(network = 'rinkeby') {
@@ -31,29 +31,29 @@ module.exports = {
     const provider = ethers.getDefaultProvider(network)
     return new ethers.Wallet(signerPrivateKey, provider)
   },
-  getTypedDataSignature: function(order, privateKey, verifyingContract) {
-    const sig = sigUtil.signTypedData(privateKey, {
-      data: {
-        types: EIP712,
-        domain: {
-          name: DOMAIN_NAME,
-          version: DOMAIN_VERSION,
-          verifyingContract,
-        },
-        primaryType: 'Order',
-        message: order,
-      },
-    })
-    const { v, r, s } = ethUtil.fromRpcSig(sig)
-    return {
-      signatory: `0x${ethUtil
-        .privateToAddress(privateKey)
-        .toString('hex')}`.toLowerCase(),
-      validator: verifyingContract.toLowerCase(),
-      version: signatureTypes.SIGN_TYPED_DATA,
-      v,
-      r,
-      s,
-    }
-  },
+  // getTypedDataSignature: function(order, privateKey, verifyingContract) {
+  //   const sig = sigUtil.signTypedData(privateKey, {
+  //     data: {
+  //       types: EIP712,
+  //       domain: {
+  //         name: DOMAIN_NAME,
+  //         version: DOMAIN_VERSION,
+  //         verifyingContract,
+  //       },
+  //       primaryType: 'Order',
+  //       message: order,
+  //     },
+  //   })
+  //   const { v, r, s } = ethUtil.fromRpcSig(sig)
+  //   return {
+  //     signatory: `0x${ethUtil
+  //       .privateToAddress(privateKey)
+  //       .toString('hex')}`.toLowerCase(),
+  //     validator: verifyingContract.toLowerCase(),
+  //     version: signatureTypes.SIGN_TYPED_DATA,
+  //     v,
+  //     r,
+  //     s,
+  //   }
+  // },
 }

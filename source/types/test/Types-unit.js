@@ -4,13 +4,7 @@ const { equal } = require('@airswap/test-utils').assert
 const { DOMAIN_NAME, DOMAIN_VERSION } = require('@airswap/constants')
 const { emptySignature } = require('..')
 
-const {
-  createOrder,
-  hashDomain,
-  getOrderHash,
-  hashParty,
-  PARTY_TYPEHASH,
-} = require('@airswap/utils')
+const { createOrder, hashDomain, getOrderHash } = require('@airswap/utils')
 
 const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
 
