@@ -6,6 +6,7 @@ import { functions } from '@airswap/test-utils'
 import { createOrder, signOrder } from '@airswap/utils'
 
 import { Validator } from '..'
+import { ADDRESS_ZERO } from '@airswap/constants'
 
 //ethers.utils.formatBytes32String('testError')
 const BYTES32_ERROR_MSG =
@@ -38,18 +39,14 @@ describe('Validator', () => {
     order = await signOrder(
       createOrder({
         signer: {
-          wallet: '',
-          token: '',
           amount: 0,
         },
         sender: {
-          wallet: '',
-          token: '',
           amount: 0,
         },
       }),
       signer,
-      ''
+      ADDRESS_ZERO
     )
   })
   fancy

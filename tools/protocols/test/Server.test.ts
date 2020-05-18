@@ -103,7 +103,12 @@ describe('Server', () => {
   fancy
     .nock('https://' + URL, mockServer)
     .do(async () => {
-      await new Server(URL).getSenderSideOrder('', '', '', '')
+      await new Server(URL).getSenderSideOrder(
+        '',
+        ADDRESS_ZERO,
+        ADDRESS_ZERO,
+        ADDRESS_ZERO
+      )
     })
     .catch(/Server response is not a valid order/)
     .it('Server getSenderSideOrder() throws')

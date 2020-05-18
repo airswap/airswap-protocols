@@ -5,6 +5,7 @@ import { functions } from '@airswap/test-utils'
 import { createOrder, signOrder } from '@airswap/utils'
 
 import { Swap } from '..'
+import { ADDRESS_ZERO } from '@airswap/constants'
 
 class MockTransaction {
   public hash: string
@@ -33,18 +34,14 @@ describe('Swap', () => {
     order = await signOrder(
       createOrder({
         signer: {
-          wallet: '',
-          token: '',
           amount: 0,
         },
         sender: {
-          wallet: '',
-          token: '',
           amount: 0,
         },
       }),
       signer,
-      ''
+      ADDRESS_ZERO
     )
   })
   fancy
