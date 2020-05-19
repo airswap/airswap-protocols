@@ -146,8 +146,8 @@ contract BalanceChecker is Ownable {
    * @notice Allow owner to withdraw ether from contract
    */
   function withdraw() public onlyOwner {
-    address payable payableOwner = address(uint160(owner()));
-    payableOwner.transfer(address(this).balance);
+    (bool success, ) = address(owner()).call.value(address(this).balance)("");
+    require(success, "ETH_WITHDRAW_FAILED");
   }
 
   /**
