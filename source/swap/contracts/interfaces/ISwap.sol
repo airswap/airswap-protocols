@@ -26,14 +26,17 @@ interface ISwap {
     uint256 indexed nonce,
     uint256 timestamp,
     address indexed signerWallet,
-    bytes senderData,
     address signerToken,
-    address indexed senderWallet,
+    bytes4 signerKind,
     bytes signerData,
+    address indexed senderWallet,
     address senderToken,
+    bytes4 senderKind,
+    bytes senderData,
     address affiliateWallet,
-    bytes affiliateData,
-    address affiliateToken
+    address affiliateToken,
+    bytes4 affiliateKind,
+    bytes affiliateData
   );
 
   event Cancel(uint256 indexed nonce, address indexed signerWallet);
