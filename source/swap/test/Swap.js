@@ -12,7 +12,7 @@ const { emptySignature } = require('@airswap/types')
 const {
   assert: { emitted, reverted, notEmitted, ok, equal },
   balances: { allowances, balances },
-  functions: { getTestWallet, getTypedDataSignature },
+  functions: { getTestWallet },
   time: { getLatestTimestamp, getTimestampPlusDays, advanceTime },
 } = require('@airswap/test-utils')
 

@@ -15,7 +15,7 @@ const {
   getTimestampPlusDays,
 } = require('@airswap/test-utils').time
 const { ADDRESS_ZERO } = require('@airswap/constants')
-const { createOrder, signOrder } = require('@airswap/utils')
+const { createOrder } = require('@airswap/utils')
 const { emptySignature } = require('@airswap/types')
 
 const NONCE_AVAILABLE = 0x00
@@ -27,10 +27,6 @@ contract('Swap Unit Tests', async accounts => {
   const sender = accounts[3]
 
   const kind = web3.utils.asciiToHex('FFFF') // hex representation is "0x46464646" this is 4 bytes
-  const v = 27
-  const r = web3.utils.asciiToHex('r')
-  const s = web3.utils.asciiToHex('s')
-  const ver = web3.utils.asciiToHex('F') //F is 70 in ASCII. 70 is "0x46" in Hex
 
   let snapshotId
   let swap

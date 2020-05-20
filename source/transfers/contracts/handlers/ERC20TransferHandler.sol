@@ -30,9 +30,8 @@ contract ERC20TransferHandler is ITransferHandler {
    * @notice Function to wrap safeTransferFrom for ERC20
    * @param from address Wallet address to transfer from
    * @param to address Wallet address to transfer to
-   * amount uint256 Amount for ERC-20
-   * id uint256 ID, must be 0 for this contract
    * @param token address Contract address of token
+   * @param data bytes The ERC20 amount, encoded in 32 bytes
    * @return bool on success of the token transfer
    */
   function transferTokens(

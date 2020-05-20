@@ -28,9 +28,8 @@ contract KittyCoreTransferHandler is ITransferHandler {
    * @notice Function to wrap transferFrom for CKitty
    * @param from address Wallet address to transfer from
    * @param to address Wallet address to transfer to
-   * amount uint256, must be 0 for this contract
-   * id uint256 ID for ERC721
    * @param token address Contract address of token
+   * @param data bytes The kitty ID, encoded in 32 bytes
    * @return bool on success of the token transfer
    */
   function transferTokens(

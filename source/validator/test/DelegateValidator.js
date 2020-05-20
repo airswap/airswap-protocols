@@ -488,7 +488,7 @@ contract('DelegateValidator', async accounts => {
         signer: {
           wallet: bobAddress,
           token: tokenWETH.address,
-          i: 50,
+          id: 50,
           kind: tokenKinds.ERC721,
         },
       })
@@ -505,7 +505,7 @@ contract('DelegateValidator', async accounts => {
           from: bobAddress,
         }
       )
-      // equal(errorCodes[0], 2)
+      equal(errorCodes[0], 4)
       equal(web3.utils.toUtf8(errorCodes[1][0]), 'DATA_MUST_BE_32_BYTES')
       equal(web3.utils.toUtf8(errorCodes[1][1]), 'DATA_MUST_BE_32_BYTES')
       equal(web3.utils.toUtf8(errorCodes[1][2]), 'SIGNER_KIND_MUST_BE_ERC20')

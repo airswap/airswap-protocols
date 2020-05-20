@@ -555,7 +555,7 @@ contract('SwapValidator', async accounts => {
       errorCodes = await validator.checkSwap.call(order, {
         from: bobAddress,
       })
-      // equal(errorCodes[0], 2)
+      equal(errorCodes[0], 2)
       equal(web3.utils.toUtf8(errorCodes[1][0]), 'SENDER_BALANCE_LOW')
       equal(web3.utils.toUtf8(errorCodes[1][1]), 'SENDER_ALLOWANCE_LOW')
     })

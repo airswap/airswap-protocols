@@ -28,9 +28,8 @@ contract ERC1155TransferHandler is ITransferHandler {
    * @notice Function to wrap safeTransferFrom for ERC1155
    * @param from address Wallet address to transfer from
    * @param to address Wallet address to transfer to
-   * amount uint256 Amount for ERC-1155
-   * id uint256 token ID for ERC-1155
    * @param token address Contract address of token
+   * @param data bytes The id then amount, encoded in 64 bytes
    * @return bool on success of the token transfer
    */
   function transferTokens(
@@ -41,6 +40,7 @@ contract ERC1155TransferHandler is ITransferHandler {
   ) external returns (bool) {
     require(data.length >= 64, "DATA_MUST_BE_64_BYTES");
 
+    // first 32 bytes ID, second 32 bytes amount
     uint256 id = data.getUint256(0);
     uint256 amount = data.getUint256(32);
     bytes memory extraData = "";
