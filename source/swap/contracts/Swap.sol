@@ -167,17 +167,10 @@ contract Swap is ISwap {
       order.nonce,
       block.timestamp,
       order.signer.wallet,
-      order.signer.token,
-      order.signer.kind,
-      order.signer.data,
       finalSenderWallet,
-      order.sender.token,
-      order.sender.kind,
-      order.sender.data,
-      order.affiliate.wallet,
-      order.affiliate.token,
-      order.affiliate.kind,
-      order.affiliate.data
+      order.signer,
+      order.sender,
+      order.affiliate
     );
   }
 
