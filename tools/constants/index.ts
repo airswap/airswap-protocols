@@ -105,3 +105,176 @@ export const etherscanDomains: Record<string, string> = {
   '5': 'goerli.etherscan.io',
   '42': 'kovan.etherscan.io',
 }
+
+export const partyABI = [
+  {
+    components: [
+      {
+        internalType: 'bytes4',
+        name: 'kind',
+        type: 'bytes4',
+      },
+      {
+        internalType: 'address',
+        name: 'wallet',
+        type: 'address',
+      },
+      {
+        internalType: 'address',
+        name: 'token',
+        type: 'address',
+      },
+      {
+        internalType: 'bytes',
+        name: 'data',
+        type: 'bytes',
+      },
+    ],
+    internalType: 'struct Types.Party',
+    name: 'party',
+    type: 'tuple',
+  },
+  {
+    internalType: 'address',
+    name: 'swap',
+    type: 'address',
+  },
+]
+
+export const orderABI = [
+  {
+    components: [
+      {
+        internalType: 'uint256',
+        name: 'nonce',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256',
+        name: 'expiry',
+        type: 'uint256',
+      },
+      {
+        components: [
+          {
+            internalType: 'bytes4',
+            name: 'kind',
+            type: 'bytes4',
+          },
+          {
+            internalType: 'address',
+            name: 'wallet',
+            type: 'address',
+          },
+          {
+            internalType: 'address',
+            name: 'token',
+            type: 'address',
+          },
+          {
+            internalType: 'bytes',
+            name: 'data',
+            type: 'bytes',
+          },
+        ],
+        internalType: 'struct Types.Party',
+        name: 'signer',
+        type: 'tuple',
+      },
+      {
+        components: [
+          {
+            internalType: 'bytes4',
+            name: 'kind',
+            type: 'bytes4',
+          },
+          {
+            internalType: 'address',
+            name: 'wallet',
+            type: 'address',
+          },
+          {
+            internalType: 'address',
+            name: 'token',
+            type: 'address',
+          },
+          {
+            internalType: 'bytes',
+            name: 'data',
+            type: 'bytes',
+          },
+        ],
+        internalType: 'struct Types.Party',
+        name: 'sender',
+        type: 'tuple',
+      },
+      {
+        components: [
+          {
+            internalType: 'bytes4',
+            name: 'kind',
+            type: 'bytes4',
+          },
+          {
+            internalType: 'address',
+            name: 'wallet',
+            type: 'address',
+          },
+          {
+            internalType: 'address',
+            name: 'token',
+            type: 'address',
+          },
+          {
+            internalType: 'bytes',
+            name: 'data',
+            type: 'bytes',
+          },
+        ],
+        internalType: 'struct Types.Party',
+        name: 'affiliate',
+        type: 'tuple',
+      },
+      {
+        components: [
+          {
+            internalType: 'address',
+            name: 'signatory',
+            type: 'address',
+          },
+          {
+            internalType: 'address',
+            name: 'validator',
+            type: 'address',
+          },
+          {
+            internalType: 'bytes1',
+            name: 'version',
+            type: 'bytes1',
+          },
+          {
+            internalType: 'uint8',
+            name: 'v',
+            type: 'uint8',
+          },
+          {
+            internalType: 'bytes32',
+            name: 'r',
+            type: 'bytes32',
+          },
+          {
+            internalType: 'bytes32',
+            name: 's',
+            type: 'bytes32',
+          },
+        ],
+        internalType: 'struct Types.Signature',
+        name: 'signature',
+        type: 'tuple',
+      },
+    ],
+    internalType: 'struct Types.Order',
+    name: 'order',
+    type: 'tuple',
+  },
+]

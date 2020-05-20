@@ -15,11 +15,15 @@
 */
 
 import * as ethUtil from 'ethereumjs-util'
-import { DOMAIN_NAME, DOMAIN_VERSION } from '@airswap/constants'
+import {
+  DOMAIN_NAME,
+  DOMAIN_VERSION,
+  partyABI,
+  orderABI,
+} from '@airswap/constants'
 import { OrderParty, UnsignedOrder, EIP712 } from '@airswap/types'
-
-const Web3 = require('web3')
-const web3 = new Web3()
+const ethers = require('ethers')
+const abiCoder = ethers.utils.defaultAbiCoder
 
 function stringify(type: string): string {
   let str = `${type}(`
@@ -45,17 +49,19 @@ export const PARTY_TYPEHASH = ethUtil.keccak256(stringify('Party'))
 
 export function hashParty(party: OrderParty): Buffer {
   return ethUtil.keccak256(
-    web3.eth.abi.encodeParameters(
-      ['bytes32', 'bytes4', 'address', 'address', 'bytes'],
-      [PARTY_TYPEHASH, party.kind, party.wallet, party.token, party.data]
-    )
+    abiCoder.encode(partyABI, [
+      PARTY_TYPEHASH,
+      party.kind,
+      party.wallet,
+      party.token,
+      party.data,
+    ])
   )
 }
 
 export function hashOrder(order: UnsignedOrder): Buffer {
   return ethUtil.keccak256(
-    web3.eth.abi.encodeParameters(
-      ['bytes32', 'uint256', 'uint256', 'bytes32', 'bytes32', 'bytes32'],
+    abiCoder.encode(orderABI, [
       [
         ORDER_TYPEHASH,
         order.nonce,
@@ -63,8 +69,8 @@ export function hashOrder(order: UnsignedOrder): Buffer {
         hashParty(order.signer),
         hashParty(order.sender),
         hashParty(order.affiliate),
-      ]
-    )
+      ],
+    ])
   )
 }
 
