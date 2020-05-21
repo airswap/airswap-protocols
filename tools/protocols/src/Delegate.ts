@@ -27,7 +27,7 @@ import { getTimestamp } from '@airswap/utils'
 import { Quote, Order } from '@airswap/types'
 import { ERC20 } from './ERC20'
 
-import * as DelegateContract from '@airswap/delegate/build/contracts/Delegate.json'
+import * as DelegateContract from '@airswap/delegate/build/contracts/DelegateV2.json'
 const DelegateInterface = new ethers.utils.Interface(
   JSON.stringify(DelegateContract.abi)
 )
