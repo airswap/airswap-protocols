@@ -1,7 +1,7 @@
 const Swap = artifacts.require('Swap')
 const Types = artifacts.require('Types')
 const Wrapper = artifacts.require('Wrapper')
-const Delegate = artifacts.require('Delegate')
+const DelegateV2 = artifacts.require('DelegateV2')
 const Indexer = artifacts.require('Indexer')
 const HelperMock = artifacts.require('HelperMock')
 const WETH9 = artifacts.require('WETH9')
@@ -85,7 +85,7 @@ contract('Wrapper', async accounts => {
     tokenAST = await FungibleToken.new()
 
     indexer = await Indexer.new(tokenAST.address)
-    delegate = await Delegate.new(
+    delegate = await DelegateV2.new(
       swapAddress,
       indexer.address,
       delegateOwner,
@@ -527,14 +527,26 @@ contract('Wrapper', async accounts => {
   describe('Test provideDelegateOrder()', async () => {
     before('Setup delegate rules', async () => {
       // Delegate will trade up to 10,000 DAI for WETH, at 200 DAI/WETH
-      await delegate.setRule(tokenDAI.address, tokenWETH.address, 10000, 5, 3, {
-        from: delegateOwner,
-      })
+      await delegate.createRule(
+        tokenDAI.address,
+        tokenWETH.address,
+        10000,
+        50,
+        {
+          from: delegateOwner,
+        }
+      )
 
       // Delegate will trade up to 100 WETH for DAI, at 0.005 WETH/DAI
-      await delegate.setRule(tokenWETH.address, tokenDAI.address, 100, 200, 0, {
-        from: delegateOwner,
-      })
+      await delegate.createRule(
+        tokenWETH.address,
+        tokenDAI.address,
+        100,
+        20000,
+        {
+          from: delegateOwner,
+        }
+      )
 
       // Give the delegate owner DAI
       await tokenDAI.mint(delegateOwner, 10000)
