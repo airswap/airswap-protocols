@@ -10,7 +10,7 @@ import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "@airswap/transfers/contracts/TransferHandlerRegistry.sol";
 import "@airswap/tokens/contracts/interfaces/IWETH.sol";
 import "@airswap/tokens/contracts/interfaces/IAdaptedKittyERC721.sol";
-import "@airswap/delegate/contracts/interfaces/IDelegate.sol";
+import "@airswap/delegate/contracts/interfaces/IDelegateV2.sol";
 import "@airswap/types/contracts/BytesManipulator.sol";
 
 
@@ -49,14 +49,14 @@ contract Validator {
   /**
    * @notice If order is going through wrapper to a delegate
    * @param order Types.Order
-   * @param delegate IDelegate
+   * @param delegate IDelegateV2
    * @param wrapper address
    * @return uint256 errorCount if any
    * @return bytes32[] memory array of error messages
    */
   function checkWrappedDelegate(
     Types.Order calldata order,
-    IDelegate delegate,
+    IDelegateV2 delegate,
     address wrapper
   ) external view returns (uint256, bytes32[] memory) {
     address swap = order.signature.validator;
@@ -310,11 +310,11 @@ contract Validator {
    * @notice If order is going through delegate via provideOrder
    * ensure necessary checks are set
    * @param order Types.Order
-   * @param delegate IDelegate
+   * @param delegate IDelegateV2
    * @return uint256 errorCount if any
    * @return bytes32[] memory array of error messages
    */
-  function checkDelegate(Types.Order calldata order, IDelegate delegate)
+  function checkDelegate(Types.Order calldata order, IDelegateV2 delegate)
     external
     view
     returns (uint256, bytes32[] memory)
@@ -447,19 +447,28 @@ contract Validator {
    * @notice Condenses Delegate specific checks
    * and excludes swap or balance related checks
    * @param order Types.Order
-   * @param delegate IDelegate Delegate to interface with
+   * @param delegate IDelegateV2 Delegate to interface with
    * @return uint256 errorCount if any
    * @return bytes32[] memory array of error messages
    */
-  function coreDelegateChecks(Types.Order calldata order, IDelegate delegate)
+  function coreDelegateChecks(Types.Order calldata order, IDelegateV2 delegate)
     external
     view
     returns (uint256, bytes32[] memory)
   {
-    IDelegate.Rule memory rule = delegate.rules(
+    uint256 maxSender;
+    uint256 maxSigner;
+
+    (maxSender, maxSigner) = delegate.getMaxQuote(
       order.sender.token,
       order.signer.token
     );
+
+    uint256 firstRuleID = delegate.firstRuleID(
+      order.sender.token,
+      order.signer.token
+    );
+
     bytes32[] memory errors = new bytes32[](MAX_DELEGATE_ERROR_COUNT);
     uint256 errorCount;
     address swap = order.signature.validator;
@@ -487,27 +496,27 @@ contract Validator {
       errorCount++;
     }
 
-    // ensure that token pair is active with non-zero maxSenderAmount
-    if (rule.maxSenderAmount == 0) {
+    // ensure that token pair is active
+    if (firstRuleID == 0) {
       errors[errorCount] = "TOKEN_PAIR_INACTIVE";
       errorCount++;
     }
 
-    if (order.sender.data.getUint256(0) > rule.maxSenderAmount) {
+    // check the delegate will trade this much
+    if (order.sender.data.getUint256(0) > maxSender) {
       errors[errorCount] = "ORDER_AMOUNT_EXCEEDS_MAX";
       errorCount++;
     }
 
-    // calls the getSenderSize quote to determine how much needs to be paid
-    uint256 senderAmount = delegate.getSenderSideQuote(
-      order.signer.data.getUint256(0),
-      order.signer.token,
-      order.sender.token
+    // get the signer's amount according to delegate pricing
+    uint256 signerAmount = delegate.getSignerSideQuote(
+      order.sender.data.getUint256(0),
+      order.sender.token,
+      order.signer.token
     );
-    if (senderAmount == 0) {
-      errors[errorCount] = "DELEGATE_UNABLE_TO_PRICE";
-      errorCount++;
-    } else if (order.sender.data.getUint256(0) > senderAmount) {
+
+    // check the order is paying enough
+    if (order.signer.data.getUint256(0) < signerAmount) {
       errors[errorCount] = "PRICE_INVALID";
       errorCount++;
     }

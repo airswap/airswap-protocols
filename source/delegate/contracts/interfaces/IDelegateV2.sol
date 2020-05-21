@@ -59,6 +59,10 @@ interface IDelegateV2 {
 
   function provideOrder(Types.Order calldata order) external;
 
+  function rules(uint256) external view returns (Rule memory);
+
+  function firstRuleID(address, address) external view returns (uint256);
+
   function getSignerSideQuote(
     uint256 senderAmount,
     address senderToken,

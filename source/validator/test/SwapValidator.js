@@ -43,7 +43,7 @@ contract('SwapValidator', async accounts => {
   const eveSigner = getTestWallet()
 
   const FAKE_TRANSFER_HANDLER = '0xFFFFF'
-  const UNKNOWN_KIND = '0x9999'
+  const UNKNOWN_KIND = '0x99999999'
   let validator
   let swapContract
   let swapAddress
