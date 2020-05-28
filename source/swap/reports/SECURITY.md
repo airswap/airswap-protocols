@@ -6,7 +6,7 @@ Swap [Source Code](https://github.com/airswap/airswap-protocols/tree/master/sour
 
 ## Introduction
 
-Swap is a non-custodial exchange settlement contract. It is used in the Swap Protocol, a peer-to-peer trading protocol for Ethereum tokens. The implementation supports trading ERC-20 and ERC-721 tokens. Additional features include the ability to authorize another party to sign or send orders on one's behalf, and the ability to optionally set an affiliate that is compensated for bringing together trading parties. This contract only transfers tokens, no raw ether (ETH). The following contracts are compiled with solidity 0.5.12.
+Swap is a non-custodial exchange settlement contract. It is used in the Swap Protocol, a peer-to-peer trading protocol for Ethereum tokens. The implementation supports trading ERC-20 and ERC-721 tokens. Additional features include the ability to authorize another party to sign or send orders on one's behalf, and the ability to optionally set an affiliate that is compensated for bringing together trading parties. This contract only transfers tokens, no raw ether (ETH). The following contracts are compiled with solidity 0.5.16.
 
 ## Structure
 

@@ -1,9 +1,9 @@
-pragma solidity 0.5.12;
+pragma solidity 0.5.16;
 
 import "@airswap/tokens/contracts/FungibleToken.sol";
 import "@airswap/tokens/contracts/WETH9.sol";
 import "@airswap/swap/contracts/Swap.sol";
-import "@airswap/delegate/contracts/Delegate.sol";
+import "@airswap/delegate/contracts/DelegateV2.sol";
 import "@airswap/indexer/contracts/Indexer.sol";
 import "@airswap/tokens/contracts/FungibleToken.sol";
 import "@airswap/transfers/contracts/TransferHandlerRegistry.sol";

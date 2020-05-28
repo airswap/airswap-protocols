@@ -1,4 +1,4 @@
-pragma solidity 0.5.12;
+pragma solidity 0.5.16;
 
 import "@airswap/tokens/contracts/MintableERC1155Token.sol";
 import "@airswap/tokens/contracts/FungibleToken.sol";
@@ -12,6 +12,6 @@ import "@airswap/transfers/contracts/handlers/ERC1155TransferHandler.sol";
 import "@airswap/transfers/contracts/handlers/KittyCoreTransferHandler.sol";
 import "@airswap/wrapper/contracts/Wrapper.sol";
 import "@airswap/indexer/contracts/Indexer.sol";
-import "@airswap/delegate/contracts/Delegate.sol";
+import "@airswap/delegate/contracts/DelegateV2.sol";
 
 contract Imports {}

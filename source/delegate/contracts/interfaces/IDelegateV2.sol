@@ -14,7 +14,7 @@
   limitations under the License.
 */
 
-pragma solidity 0.5.12;
+pragma solidity 0.5.16;
 pragma experimental ABIEncoderV2;
 
 import "@airswap/types/contracts/Types.sol";
@@ -58,6 +58,10 @@ interface IDelegateV2 {
   function deleteRule(uint256 ruleID) external;
 
   function provideOrder(Types.Order calldata order) external;
+
+  function rules(uint256) external view returns (Rule memory);
+
+  function firstRuleID(address, address) external view returns (uint256);
 
   function getSignerSideQuote(
     uint256 senderAmount,

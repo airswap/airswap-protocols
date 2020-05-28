@@ -79,18 +79,14 @@ describe('Delegate', () => {
     order = await signOrder(
       createOrder({
         signer: {
-          wallet: '',
-          token: '',
           amount: 0,
         },
         sender: {
-          wallet: '',
-          token: '',
           amount: 0,
         },
       }),
       signer,
-      ''
+      ADDRESS_ZERO
     )
   })
   fancy

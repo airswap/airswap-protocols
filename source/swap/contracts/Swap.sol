@@ -14,7 +14,7 @@
   limitations under the License.
 */
 
-pragma solidity 0.5.12;
+pragma solidity 0.5.16;
 pragma experimental ABIEncoderV2;
 
 import "@airswap/transfers/contracts/interfaces/ITransferHandler.sol";
@@ -131,26 +131,25 @@ contract Swap is ISwap {
       );
 
       // Ensure the signature is valid.
-      require(isValid(order, _domainSeparator), "SIGNATURE_INVALID");
+      require(this.isValid(order, _domainSeparator), "SIGNATURE_INVALID");
     }
+
     // Transfer token from sender to signer.
     transferToken(
       finalSenderWallet,
       order.signer.wallet,
-      order.sender.amount,
-      order.sender.id,
       order.sender.token,
-      order.sender.kind
+      order.sender.kind,
+      order.sender.data
     );
 
     // Transfer token from signer to sender.
     transferToken(
       order.signer.wallet,
       finalSenderWallet,
-      order.signer.amount,
-      order.signer.id,
       order.signer.token,
-      order.signer.kind
+      order.signer.kind,
+      order.signer.data
     );
 
     // Transfer token from signer to affiliate if specified.
@@ -158,10 +157,9 @@ contract Swap is ISwap {
       transferToken(
         order.signer.wallet,
         order.affiliate.wallet,
-        order.affiliate.amount,
-        order.affiliate.id,
         order.affiliate.token,
-        order.affiliate.kind
+        order.affiliate.kind,
+        order.affiliate.data
       );
     }
 
@@ -169,17 +167,10 @@ contract Swap is ISwap {
       order.nonce,
       block.timestamp,
       order.signer.wallet,
-      order.signer.amount,
-      order.signer.id,
-      order.signer.token,
       finalSenderWallet,
-      order.sender.amount,
-      order.sender.id,
-      order.sender.token,
-      order.affiliate.wallet,
-      order.affiliate.amount,
-      order.affiliate.id,
-      order.affiliate.token
+      order.signer,
+      order.sender,
+      order.affiliate
     );
   }
 
@@ -260,43 +251,13 @@ contract Swap is ISwap {
   }
 
   /**
-   * @notice Determine whether a sender delegate is authorized
-   * @param authorizer address Address doing the authorization
-   * @param delegate address Address being authorized
-   * @return bool True if a delegate is authorized to send
-   */
-  function isSenderAuthorized(address authorizer, address delegate)
-    internal
-    view
-    returns (bool)
-  {
-    return ((authorizer == delegate) ||
-      senderAuthorizations[authorizer][delegate]);
-  }
-
-  /**
-   * @notice Determine whether a signer delegate is authorized
-   * @param authorizer address Address doing the authorization
-   * @param delegate address Address being authorized
-   * @return bool True if a delegate is authorized to sign
-   */
-  function isSignerAuthorized(address authorizer, address delegate)
-    internal
-    view
-    returns (bool)
-  {
-    return ((authorizer == delegate) ||
-      signerAuthorizations[authorizer][delegate]);
-  }
-
-  /**
    * @notice Validate signature using an EIP-712 typed data hash
    * @param order Types.Order Order to validate
    * @param domainSeparator bytes32 Domain identifier used in signatures (EIP-712)
    * @return bool True if order has a valid signature
    */
-  function isValid(Types.Order memory order, bytes32 domainSeparator)
-    internal
+  function isValid(Types.Order calldata order, bytes32 domainSeparator)
+    external
     pure
     returns (bool)
   {
@@ -329,24 +290,52 @@ contract Swap is ISwap {
   }
 
   /**
+   * @notice Determine whether a sender delegate is authorized
+   * @param authorizer address Address doing the authorization
+   * @param delegate address Address being authorized
+   * @return bool True if a delegate is authorized to send
+   */
+  function isSenderAuthorized(address authorizer, address delegate)
+    internal
+    view
+    returns (bool)
+  {
+    return ((authorizer == delegate) ||
+      senderAuthorizations[authorizer][delegate]);
+  }
+
+  /**
+   * @notice Determine whether a signer delegate is authorized
+   * @param authorizer address Address doing the authorization
+   * @param delegate address Address being authorized
+   * @return bool True if a delegate is authorized to sign
+   */
+  function isSignerAuthorized(address authorizer, address delegate)
+    internal
+    view
+    returns (bool)
+  {
+    return ((authorizer == delegate) ||
+      signerAuthorizations[authorizer][delegate]);
+  }
+
+  /**
    * @notice Perform token transfer for tokens in registry
    * @dev Transfer type specified by the bytes4 kind param
    * @dev ERC721: uses transferFrom for transfer
    * @dev ERC20: Takes into account non-standard ERC-20 tokens.
    * @param from address Wallet address to transfer from
    * @param to address Wallet address to transfer to
-   * @param amount uint256 Amount for ERC-20
-   * @param id token ID for ERC-721
+   * @param data bytes Concatenated parameters for token transfer
    * @param token address Contract address of token
    * @param kind bytes4 EIP-165 interface ID of the token
    */
   function transferToken(
     address from,
     address to,
-    uint256 amount,
-    uint256 id,
     address token,
-    bytes4 kind
+    bytes4 kind,
+    bytes memory data
   ) internal {
     // Ensure the transfer is not to self.
     require(from != to, "SELF_TRANSFER_INVALID");
@@ -354,16 +343,16 @@ contract Swap is ISwap {
     require(address(transferHandler) != address(0), "TOKEN_KIND_UNKNOWN");
     // delegatecall required to pass msg.sender as Swap contract to handle the
     // token transfer in the calling contract
-    (bool success, bytes memory data) = address(transferHandler).delegatecall(
+    (bool success, bytes memory returnData) = address(transferHandler)
+      .delegatecall(
       abi.encodeWithSelector(
         transferHandler.transferTokens.selector,
         from,
         to,
-        amount,
-        id,
-        token
+        token,
+        data
       )
     );
-    require(success && abi.decode(data, (bool)), "TRANSFER_FAILED");
+    require(success && abi.decode(returnData, (bool)), "TRANSFER_FAILED");
   }
 }

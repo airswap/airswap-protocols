@@ -1,9 +1,9 @@
-pragma solidity 0.5.12;
+pragma solidity 0.5.16;
 
 //Import all the contracts desired to be deployed
 import "@airswap/validator/contracts/Validator.sol";
-import "@airswap/delegate/contracts/DelegateFactory.sol";
-import "@airswap/delegate/contracts/Delegate.sol";
+import "@airswap/delegate/contracts/DelegateV2Factory.sol";
+import "@airswap/delegate/contracts/DelegateV2.sol";
 import "@airswap/indexer/contracts/Indexer.sol";
 import "@airswap/indexer/contracts/Index.sol";
 import "@airswap/swap/contracts/Swap.sol";

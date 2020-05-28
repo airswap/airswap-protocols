@@ -12,7 +12,7 @@ const { emptySignature } = require('@airswap/types')
 const {
   assert: { emitted, reverted, notEmitted, ok, equal },
   balances: { allowances, balances },
-  functions: { getTestWallet, getTypedDataSignature },
+  functions: { getTestWallet },
   time: { getLatestTimestamp, getTimestampPlusDays, advanceTime },
 } = require('@airswap/test-utils')
 
@@ -172,7 +172,11 @@ contract('Swap', async accounts => {
     })
 
     it('Checks that Bob can swap with Alice (200 AST for 50 DAI)', async () => {
-      emitted(await swap(_order, { from: bobAddress }), 'Swap')
+      emitted(await swap(_order, { from: bobAddress }), 'Swap', e => {
+        return (
+          e.signerWallet === aliceAddress && e.signer.wallet === aliceAddress
+        )
+      })
     })
     it('Checks that Alice cannot swap with herself (200 AST for 50 AST)', async () => {
       const selfOrder = await signOrder(
@@ -1148,28 +1152,28 @@ contract('Swap', async accounts => {
 
       emitted(await swap(order, { from: aliceAddress }), 'Swap')
     })
-    it('Checks that a typed data (EIP712) signature is valid', async () => {
-      const order = createOrder({
-        signer: {
-          wallet: eveSigner.address,
-          token: tokenAST.address,
-          amount: '0',
-        },
-        sender: {
-          wallet: aliceAddress,
-          token: tokenDAI.address,
-          amount: '0',
-        },
-        expiry: await getTimestampPlusDays(1),
-      })
+    // it('Checks that a typed data (EIP712) signature is valid', async () => {
+    //   const order = createOrder({
+    //     signer: {
+    //       wallet: eveSigner.address,
+    //       token: tokenAST.address,
+    //       amount: '0',
+    //     },
+    //     sender: {
+    //       wallet: aliceAddress,
+    //       token: tokenDAI.address,
+    //       amount: '0',
+    //     },
+    //     expiry: await getTimestampPlusDays(1),
+    //   })
 
-      order.signature = getTypedDataSignature(
-        order,
-        Buffer.from(eveSigner.privateKey.slice(2), 'hex'),
-        swapContractAddress
-      )
+    //   order.signature = getTypedDataSignature(
+    //     order,
+    //     Buffer.from(eveSigner.privateKey.slice(2), 'hex'),
+    //     swapContractAddress
+    //   )
 
-      emitted(await swap(order, { from: aliceAddress }), 'Swap')
-    })
+    //   emitted(await swap(order, { from: aliceAddress }), 'Swap')
+    // })
   })
 })

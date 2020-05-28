@@ -6,7 +6,7 @@ Wrapper [Source Code](https://github.com/airswap/airswap-protocols/tree/master/s
 
 ## Introduction
 
-Wrapper is a shim over the Swap contract. The Swap contract only supports tokens (smart contracts), so for ether (ETH) to be used it must be wrapped (WETH). Wrapper determines whether to wrap and unwrap based on whether WETH is specified as the signerToken or senderToken on an order. If an order does not specify WETH for either party, execution is passed directly through to the Swap contract. Wrapper is written and primarily intended for the AirSwap Instant system. The following contracts are compiled with solidity 0.5.12.
+Wrapper is a shim over the Swap contract. The Swap contract only supports tokens (smart contracts), so for ether (ETH) to be used it must be wrapped (WETH). Wrapper determines whether to wrap and unwrap based on whether WETH is specified as the signerToken or senderToken on an order. If an order does not specify WETH for either party, execution is passed directly through to the Swap contract. Wrapper is written and primarily intended for the AirSwap Instant system. The following contracts are compiled with solidity 0.5.16.
 
 ## Structure
 

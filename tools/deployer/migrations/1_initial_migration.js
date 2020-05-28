@@ -9,15 +9,15 @@ const Swap = artifacts.require('Swap')
 const Wrapper = artifacts.require('Wrapper')
 const Indexer = artifacts.require('Indexer')
 const Index = artifacts.require('Index')
-const DelegateFactory = artifacts.require('DelegateFactory')
-const Delegate = artifacts.require('Delegate')
+const DelegateV2Factory = artifacts.require('DelegateV2Factory')
+const DelegateV2 = artifacts.require('DelegateV2')
 const Validator = artifacts.require('Validator')
 const { ADDRESS_ZERO, tokenKinds, chainIds } = require('@airswap/constants')
 const fs = require('fs')
 
 DEPLOYS_JSON = {
   Types: '../../../source/types/deploys.json',
-  DelegateFactory: '../../../source/delegate/deploys.json',
+  DelegateV2Factory: '../../../source/delegate/deploys.json',
   Indexer: '../../../source/indexer/deploys.json',
   Swap: '../../../source/swap/deploys.json',
   TransferHandlerRegistry: '../../../source/swap/deploys.json',
@@ -78,7 +78,7 @@ module.exports = async (deployer, network) => {
   await deployer.deploy(Swap, TransferHandlerRegistry.address)
   const indexerInstance = await deployer.deploy(Indexer, STAKING_TOKEN_ADDRESS)
   const delegateFactoryInstance = await deployer.deploy(
-    DelegateFactory,
+    DelegateV2Factory,
     Swap.address,
     Indexer.address,
     '0x0001'
@@ -93,7 +93,7 @@ module.exports = async (deployer, network) => {
     //Deploy Factory-Created Contracts that also need to be verified
     await deployer.deploy(Index)
     await deployer.deploy(
-      Delegate,
+      DelegateV2,
       Swap.address,
       Indexer.address,
       ADDRESS_ZERO,
@@ -107,7 +107,7 @@ module.exports = async (deployer, network) => {
     deploy_data['TransferHandlerRegistry'] = TransferHandlerRegistry.address
     deploy_data['Swap'] = Swap.address
     deploy_data['Indexer'] = Indexer.address
-    deploy_data['DelegateFactory'] = DelegateFactory.address
+    deploy_data['DelegateV2Factory'] = DelegateV2Factory.address
     deploy_data['Wrapper'] = Wrapper.address
     deploy_data['Validator'] = Validator.address
     await updateDeployJsons(network, deploy_data)

@@ -1,4 +1,4 @@
-pragma solidity 0.5.12;
+pragma solidity 0.5.16;
 
 import "@airswap/swap/contracts/Swap.sol";
 import "@airswap/transfers/contracts/TransferHandlerRegistry.sol";

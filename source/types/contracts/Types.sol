@@ -14,7 +14,7 @@
   limitations under the License.
 */
 
-pragma solidity 0.5.12;
+pragma solidity 0.5.16;
 pragma experimental ABIEncoderV2;
 
 
@@ -37,8 +37,7 @@ library Types {
     bytes4 kind; // Interface ID of the token
     address wallet; // Wallet address of the party
     address token; // Contract address of the token
-    uint256 amount; // Amount for ERC-20 or ERC-1155
-    uint256 id; // ID for ERC-721 or ERC-1155
+    bytes data;
   }
 
   struct Signature {
@@ -73,8 +72,7 @@ library Types {
       "bytes4 kind,",
       "address wallet,",
       "address token,",
-      "uint256 amount,",
-      "uint256 id",
+      "bytes data",
       ")"
     )
   );
@@ -85,8 +83,7 @@ library Types {
       "bytes4 kind,",
       "address wallet,",
       "address token,",
-      "uint256 amount,",
-      "uint256 id",
+      "bytes data",
       ")"
     )
   );
@@ -119,8 +116,7 @@ library Types {
                   order.signer.kind,
                   order.signer.wallet,
                   order.signer.token,
-                  order.signer.amount,
-                  order.signer.id
+                  order.signer.data
                 )
               ),
               keccak256(
@@ -129,8 +125,7 @@ library Types {
                   order.sender.kind,
                   order.sender.wallet,
                   order.sender.token,
-                  order.sender.amount,
-                  order.sender.id
+                  order.sender.data
                 )
               ),
               keccak256(
@@ -139,8 +134,7 @@ library Types {
                   order.affiliate.kind,
                   order.affiliate.wallet,
                   order.affiliate.token,
-                  order.affiliate.amount,
-                  order.affiliate.id
+                  order.affiliate.data
                 )
               )
             )

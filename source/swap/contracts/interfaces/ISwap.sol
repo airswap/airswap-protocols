@@ -14,7 +14,7 @@
   limitations under the License.
 */
 
-pragma solidity 0.5.12;
+pragma solidity 0.5.16;
 pragma experimental ABIEncoderV2;
 
 import "@airswap/types/contracts/Types.sol";
@@ -26,17 +26,10 @@ interface ISwap {
     uint256 indexed nonce,
     uint256 timestamp,
     address indexed signerWallet,
-    uint256 signerAmount,
-    uint256 signerId,
-    address signerToken,
     address indexed senderWallet,
-    uint256 senderAmount,
-    uint256 senderId,
-    address senderToken,
-    address affiliateWallet,
-    uint256 affiliateAmount,
-    uint256 affiliateId,
-    address affiliateToken
+    Types.Party signer,
+    Types.Party sender,
+    Types.Party affiliate
   );
 
   event Cancel(uint256 indexed nonce, address indexed signerWallet);

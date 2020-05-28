@@ -14,33 +14,35 @@
   limitations under the License.
 */
 
-pragma solidity 0.5.12;
+pragma solidity 0.5.16;
 
 import "../interfaces/ITransferHandler.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
+import "@airswap/types/contracts/BytesManipulator.sol";
 
 
 contract ERC20TransferHandler is ITransferHandler {
   using SafeERC20 for IERC20;
+  using BytesManipulator for bytes;
 
   /**
    * @notice Function to wrap safeTransferFrom for ERC20
    * @param from address Wallet address to transfer from
    * @param to address Wallet address to transfer to
-   * @param amount uint256 Amount for ERC-20
-   * @param id uint256 ID, must be 0 for this contract
    * @param token address Contract address of token
+   * @param data bytes The ERC20 amount, encoded in 32 bytes
    * @return bool on success of the token transfer
    */
   function transferTokens(
     address from,
     address to,
-    uint256 amount,
-    uint256 id,
-    address token
+    address token,
+    bytes calldata data
   ) external returns (bool) {
-    require(id == 0, "ID_INVALID");
+    require(data.length == 32, "DATA_MUST_BE_32_BYTES");
+
+    uint256 amount = data.getUint256(0);
     IERC20(token).safeTransferFrom(from, to, amount);
     return true;
   }

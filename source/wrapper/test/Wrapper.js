@@ -1,7 +1,7 @@
 const Swap = artifacts.require('Swap')
 const Types = artifacts.require('Types')
 const Wrapper = artifacts.require('Wrapper')
-const Delegate = artifacts.require('Delegate')
+const DelegateV2 = artifacts.require('DelegateV2')
 const Indexer = artifacts.require('Indexer')
 const HelperMock = artifacts.require('HelperMock')
 const WETH9 = artifacts.require('WETH9')
@@ -85,7 +85,7 @@ contract('Wrapper', async accounts => {
     tokenAST = await FungibleToken.new()
 
     indexer = await Indexer.new(tokenAST.address)
-    delegate = await Delegate.new(
+    delegate = await DelegateV2.new(
       swapAddress,
       indexer.address,
       delegateOwner,
@@ -147,6 +147,7 @@ contract('Wrapper', async accounts => {
 
   describe('Test swap(): Wrap Buys', async () => {
     it('Checks that Bob take a WETH order from Alice using ETH', async () => {
+      const senderAmount = 10
       const order = await signOrder(
         createOrder({
           signer: {
@@ -166,7 +167,7 @@ contract('Wrapper', async accounts => {
 
       let result = await wrappedSwap(order, {
         from: bobAddress,
-        value: order.sender.amount,
+        value: senderAmount,
       })
       await passes(result)
       result = await getResult(swapContract, result.tx)
@@ -302,6 +303,7 @@ contract('Wrapper', async accounts => {
     })
 
     it('Send order where Bob sends Eth to Alice for DAI', async () => {
+      const senderAmount = 10
       const order = await signOrder(
         createOrder({
           signer: {
@@ -312,7 +314,7 @@ contract('Wrapper', async accounts => {
           sender: {
             wallet: bobAddress,
             token: tokenWETH.address,
-            amount: 10,
+            amount: senderAmount,
           },
         }),
         aliceSigner,
@@ -321,7 +323,7 @@ contract('Wrapper', async accounts => {
 
       let result = await wrappedSwap(order, {
         from: bobAddress,
-        value: order.sender.amount,
+        value: senderAmount,
       })
       await passes(result)
       result = await getResult(swapContract, result.tx)
@@ -525,14 +527,26 @@ contract('Wrapper', async accounts => {
   describe('Test provideDelegateOrder()', async () => {
     before('Setup delegate rules', async () => {
       // Delegate will trade up to 10,000 DAI for WETH, at 200 DAI/WETH
-      await delegate.setRule(tokenDAI.address, tokenWETH.address, 10000, 5, 3, {
-        from: delegateOwner,
-      })
+      await delegate.createRule(
+        tokenDAI.address,
+        tokenWETH.address,
+        10000,
+        50,
+        {
+          from: delegateOwner,
+        }
+      )
 
       // Delegate will trade up to 100 WETH for DAI, at 0.005 WETH/DAI
-      await delegate.setRule(tokenWETH.address, tokenDAI.address, 100, 200, 0, {
-        from: delegateOwner,
-      })
+      await delegate.createRule(
+        tokenWETH.address,
+        tokenDAI.address,
+        100,
+        20000,
+        {
+          from: delegateOwner,
+        }
+      )
 
       // Give the delegate owner DAI
       await tokenDAI.mint(delegateOwner, 10000)
@@ -557,12 +571,13 @@ contract('Wrapper', async accounts => {
 
     describe('Wrap Buys', async () => {
       it('Check Carol sending no ETH with order', async () => {
+        const signerAmount = 1
         const order = await signOrder(
           createOrder({
             signer: {
               wallet: carolAddress,
               token: tokenWETH.address,
-              amount: 1,
+              amount: signerAmount,
             },
             sender: {
               wallet: delegateOwner,
@@ -577,18 +592,19 @@ contract('Wrapper', async accounts => {
         await reverted(
           wrappedDelegate(order, delegateAddress, {
             from: carolAddress,
-            value: order.signer.amount + 1,
+            value: signerAmount + 1,
           }),
           'VALUE_MUST_BE_SENT'
         )
       })
 
       it('Check Carol not signing order', async () => {
+        const signerAmount = 1
         const order = createOrder({
           signer: {
             wallet: carolAddress,
             token: tokenWETH.address,
-            amount: 1,
+            amount: signerAmount,
           },
           sender: {
             wallet: delegateOwner,
@@ -603,7 +619,7 @@ contract('Wrapper', async accounts => {
             delegateAddress,
             {
               from: carolAddress,
-              value: order.signer.amount,
+              value: signerAmount,
             }
           ),
           'SIGNATURE_MUST_BE_SENT'
@@ -611,12 +627,13 @@ contract('Wrapper', async accounts => {
       })
 
       it('Check Carol sets the wrong sender wallet', async () => {
+        const signerAmount = 1
         const order = await signOrder(
           createOrder({
             signer: {
               wallet: carolAddress,
               token: tokenWETH.address,
-              amount: 1,
+              amount: signerAmount,
             },
             sender: {
               wallet: delegateAddress,
@@ -631,19 +648,20 @@ contract('Wrapper', async accounts => {
         await reverted(
           wrappedDelegate(order, delegateAddress, {
             from: carolAddress,
-            value: order.signer.amount,
+            value: signerAmount,
           }),
           'SENDER_WALLET_INVALID'
         )
       })
 
       it('Check delegate owner hasnt authorised the delegate as sender swap', async () => {
+        const signerAmount = 1
         const order = await signOrder(
           createOrder({
             signer: {
               wallet: carolAddress,
               token: tokenWETH.address,
-              amount: 1,
+              amount: signerAmount,
             },
             sender: {
               wallet: delegateOwner,
@@ -658,19 +676,20 @@ contract('Wrapper', async accounts => {
         await reverted(
           wrappedDelegate(order, delegateAddress, {
             from: carolAddress,
-            value: order.signer.amount,
+            value: signerAmount,
           }),
           'SENDER_UNAUTHORIZED'
         )
       })
 
       it('Check Carol hasnt given swap approval to swap WETH', async () => {
+        const signerAmount = 1
         const order = await signOrder(
           createOrder({
             signer: {
               wallet: carolAddress,
               token: tokenWETH.address,
-              amount: 1,
+              amount: signerAmount,
             },
             sender: {
               wallet: delegateOwner,
@@ -695,23 +714,25 @@ contract('Wrapper', async accounts => {
         await reverted(
           wrappedDelegate(order, delegateAddress, {
             from: carolAddress,
-            value: order.signer.amount,
+            value: signerAmount,
           })
         )
       })
 
       it('Check successful ETH wrap and swap through delegate contract', async () => {
+        const signerAmount = 1
+        const senderAmount = 200
         const order = await signOrder(
           createOrder({
             signer: {
               wallet: carolAddress,
               token: tokenWETH.address,
-              amount: 1,
+              amount: signerAmount,
             },
             sender: {
               wallet: delegateOwner,
               token: tokenDAI.address,
-              amount: 200,
+              amount: senderAmount,
             },
           }),
           carolSigner,
@@ -737,7 +758,7 @@ contract('Wrapper', async accounts => {
         await passes(
           wrappedDelegate(order, delegateAddress, {
             from: aliceAddress,
-            value: order.signer.amount,
+            value: signerAmount,
           })
         )
 
@@ -749,17 +770,17 @@ contract('Wrapper', async accounts => {
         )
 
         equal(
-          carolEthBefore - parseInt(order.signer.amount),
+          carolEthBefore - parseInt(signerAmount),
           carolEthAfter,
           "Carol's ETH balance did not decrease"
         )
         equal(
-          ownerDAIBefore - parseInt(order.sender.amount),
+          ownerDAIBefore - parseInt(senderAmount),
           ownerDAIAfter,
           "Owner's DAI balance did not decrease"
         )
         equal(
-          ownerWETHBefore + parseInt(order.signer.amount),
+          ownerWETHBefore + parseInt(signerAmount),
           ownerWETHAfter,
           "Owner's WETH balance did not increase"
         )
@@ -768,12 +789,13 @@ contract('Wrapper', async accounts => {
 
     describe('Unwrap Sells', async () => {
       it('Check Carol sending ETH when she shouldnt', async () => {
+        const signerAmount = 200
         const order = await signOrder(
           createOrder({
             signer: {
               wallet: carolAddress,
               token: tokenDAI.address,
-              amount: 200,
+              amount: signerAmount,
             },
             sender: {
               wallet: delegateOwner,
@@ -788,7 +810,7 @@ contract('Wrapper', async accounts => {
         await reverted(
           wrappedDelegate(order, delegateAddress, {
             from: carolAddress,
-            value: order.signer.amount,
+            value: signerAmount,
           }),
           'VALUE_MUST_BE_ZERO'
         )
@@ -888,17 +910,19 @@ contract('Wrapper', async accounts => {
       })
 
       it('Check successful ETH wrap and swap through delegate contract', async () => {
+        const senderAmount = 1
+        const signerAmount = 200
         const order = await signOrder(
           createOrder({
             signer: {
               wallet: carolAddress,
               token: tokenDAI.address,
-              amount: 200,
+              amount: signerAmount,
             },
             sender: {
               wallet: delegateOwner,
               token: tokenWETH.address,
-              amount: 1,
+              amount: senderAmount,
             },
           }),
           carolSigner,
@@ -935,17 +959,17 @@ contract('Wrapper', async accounts => {
         )
 
         equal(
-          carolEthBefore - parseInt(order.sender.amount),
+          carolEthBefore - parseInt(senderAmount),
           carolEthAfter,
           "Carol's ETH balance did not increase"
         )
         equal(
-          ownerDAIBefore + parseInt(order.signer.amount),
+          ownerDAIBefore + parseInt(signerAmount),
           ownerDAIAfter,
           "Owner's DAI balance did not increase"
         )
         equal(
-          ownerWETHBefore - parseInt(order.sender.amount),
+          ownerWETHBefore - parseInt(senderAmount),
           ownerWETHAfter,
           "Owner's WETH balance did not decrease"
         )

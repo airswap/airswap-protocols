@@ -31,7 +31,6 @@ contract('Swap Handler Checks', async accounts => {
   const aliceSigner = provider.getSigner(aliceAddress)
   const bobSigner = provider.getSigner(bobAddress)
 
-  const CKITTY_KIND = '0x9a20483d'
   const UNKNOWN_KIND = '0xffffffff'
   let swapContract
   let swapContractAddress
@@ -79,7 +78,7 @@ contract('Swap Handler Checks', async accounts => {
       // failed to add kittyCore by bob since non-owner
       reverted(
         transferHandlerRegistry.addTransferHandler(
-          CKITTY_KIND,
+          tokenKinds.CKITTY,
           kittyCoreHandler.address,
           { from: bobAddress }
         ),
@@ -95,7 +94,7 @@ contract('Swap Handler Checks', async accounts => {
 
       // add all 4 of these contracts into the TokenRegistry
       await transferHandlerRegistry.addTransferHandler(
-        CKITTY_KIND,
+        tokenKinds.CKITTY,
         kittyCoreHandler.address
       )
       await transferHandlerRegistry.addTransferHandler(
@@ -310,24 +309,24 @@ contract('Swap Handler Checks', async accounts => {
       )
     })
 
-    it('Adding an id with Fungible token will cause revert', async () => {
-      const order = await signOrder(
-        createOrder({
-          signer: {
-            wallet: aliceAddress,
-            token: tokenAST.address,
-            amount: 1,
-            id: 30,
-          },
-          sender: {
-            wallet: bobAddress,
-            token: tokenDAI.address,
-            amount: 1,
-          },
-        }),
-        aliceSigner,
-        swapContractAddress
-      )
+    it('Adding extra bytes with ERC20 will cause revert', async () => {
+      let order = createOrder({
+        signer: {
+          wallet: aliceAddress,
+          token: tokenAST.address,
+          amount: 1,
+        },
+        sender: {
+          wallet: bobAddress,
+          token: tokenDAI.address,
+          amount: 1,
+        },
+      })
+
+      order.sender.data = order.sender.data.concat('00')
+
+      order = await signOrder(order, aliceSigner, swapContractAddress)
+
       await reverted(swap(order, { from: bobAddress }), 'TRANSFER_FAILED')
     })
 
@@ -718,24 +717,23 @@ contract('Swap Handler Checks', async accounts => {
     })
 
     it('Bob cannot buy Ticket #12345 from Alice if she sends id and amount in Party struct', async () => {
-      const order = await signOrder(
-        createOrder({
-          signer: {
-            wallet: aliceAddress,
-            token: tokenTicket.address,
-            id: 12345,
-            amount: 100,
-            kind: tokenKinds.ERC721,
-          },
-          sender: {
-            wallet: bobAddress,
-            token: tokenDAI.address,
-            amount: 100,
-          },
-        }),
-        aliceSigner,
-        swapContractAddress
-      )
+      let order = createOrder({
+        signer: {
+          wallet: aliceAddress,
+          token: tokenTicket.address,
+          id: 12345,
+          kind: tokenKinds.ERC721,
+        },
+        sender: {
+          wallet: bobAddress,
+          token: tokenDAI.address,
+          amount: 100,
+        },
+      })
+
+      order.signer.data = order.signer.data.concat('00')
+
+      order = await signOrder(order, aliceSigner, swapContractAddress)
       await reverted(swap(order, { from: bobAddress }), 'TRANSFER_FAILED')
     })
 
@@ -770,24 +768,23 @@ contract('Swap Handler Checks', async accounts => {
     })
 
     it('Alice cannot buy Kitty #54321 from Bob for 50 AST if Kitty amount specified', async () => {
-      const order = await signOrder(
-        createOrder({
-          signer: {
-            wallet: aliceAddress,
-            token: tokenAST.address,
-            amount: 50,
-          },
-          sender: {
-            wallet: bobAddress,
-            token: tokenKitty.address,
-            id: 54321,
-            amount: 1000,
-            kind: CKITTY_KIND,
-          },
-        }),
-        aliceSigner,
-        swapContractAddress
-      )
+      let order = createOrder({
+        signer: {
+          wallet: aliceAddress,
+          token: tokenAST.address,
+          amount: 50,
+        },
+        sender: {
+          wallet: bobAddress,
+          token: tokenKitty.address,
+          id: 54321,
+          kind: tokenKinds.CKITTY,
+        },
+      })
+
+      order.sender.data = order.sender.data.concat('00')
+
+      order = await signOrder(order, aliceSigner, swapContractAddress)
       await tokenAST.approve(swapContractAddress, 50, { from: aliceAddress })
       await reverted(swap(order, { from: bobAddress }))
     })
@@ -804,7 +801,7 @@ contract('Swap Handler Checks', async accounts => {
             wallet: bobAddress,
             token: tokenKitty.address,
             id: 54321,
-            kind: CKITTY_KIND,
+            kind: tokenKinds.CKITTY,
           },
         }),
         aliceSigner,
@@ -840,7 +837,7 @@ contract('Swap Handler Checks', async accounts => {
             wallet: carolAddress,
             token: tokenKitty.address,
             id: 54321,
-            kind: CKITTY_KIND,
+            kind: tokenKinds.CKITTY,
           },
         }),
         aliceSigner,

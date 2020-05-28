@@ -15,7 +15,7 @@
 */
 
 import * as ethUtil from 'ethereumjs-util'
-import * as ethAbi from 'ethereumjs-abi'
+import { ethers } from 'ethers'
 import { DOMAIN_NAME, DOMAIN_VERSION } from '@airswap/constants'
 import { OrderParty, UnsignedOrder, EIP712 } from '@airswap/types'
 
@@ -43,23 +43,16 @@ export const PARTY_TYPEHASH = ethUtil.keccak256(stringify('Party'))
 
 export function hashParty(party: OrderParty): Buffer {
   return ethUtil.keccak256(
-    ethAbi.rawEncode(
-      ['bytes32', 'bytes4', 'address', 'address', 'uint256', 'uint256'],
-      [
-        PARTY_TYPEHASH,
-        party.kind,
-        party.wallet,
-        party.token,
-        party.amount,
-        party.id,
-      ]
+    ethers.utils.defaultAbiCoder.encode(
+      ['bytes32', 'bytes4', 'address', 'address', 'bytes'],
+      [PARTY_TYPEHASH, party.kind, party.wallet, party.token, party.data]
     )
   )
 }
 
 export function hashOrder(order: UnsignedOrder): Buffer {
   return ethUtil.keccak256(
-    ethAbi.rawEncode(
+    ethers.utils.defaultAbiCoder.encode(
       ['bytes32', 'uint256', 'uint256', 'bytes32', 'bytes32', 'bytes32'],
       [
         ORDER_TYPEHASH,
@@ -75,7 +68,7 @@ export function hashOrder(order: UnsignedOrder): Buffer {
 
 export function hashDomain(swapContract: string): Buffer {
   return ethUtil.keccak256(
-    ethAbi.rawEncode(
+    ethers.utils.defaultAbiCoder.encode(
       ['bytes32', 'bytes32', 'bytes32', 'address'],
       [
         EIP712_DOMAIN_TYPEHASH,

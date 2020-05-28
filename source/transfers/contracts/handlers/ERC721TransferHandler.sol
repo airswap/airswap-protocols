@@ -14,30 +14,33 @@
   limitations under the License.
 */
 
-pragma solidity 0.5.12;
+pragma solidity 0.5.16;
 
 import "../interfaces/ITransferHandler.sol";
 import "openzeppelin-solidity/contracts/token/ERC721/IERC721.sol";
+import "@airswap/types/contracts/BytesManipulator.sol";
 
 
 contract ERC721TransferHandler is ITransferHandler {
+  using BytesManipulator for bytes;
+
   /**
    * @notice Function to wrap safeTransferFrom for ERC721
    * @param from address Wallet address to transfer from
    * @param to address Wallet address to transfer to
-   * @param amount uint256, must be 0 for this contract
-   * @param id uint256 ID for ERC721
    * @param token address Contract address of token
+   * @param data bytes The ERC721 id, encoded in 32 bytes
    * @return bool on success of the token transfer
    */
   function transferTokens(
     address from,
     address to,
-    uint256 amount,
-    uint256 id,
-    address token
+    address token,
+    bytes calldata data
   ) external returns (bool) {
-    require(amount == 0, "AMOUNT_INVALID");
+    require(data.length == 32, "DATA_MUST_BE_32_BYTES");
+
+    uint256 id = data.getUint256(0);
     IERC721(token).safeTransferFrom(from, to, id);
     return true;
   }
