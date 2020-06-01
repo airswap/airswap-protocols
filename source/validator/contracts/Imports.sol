@@ -12,6 +12,6 @@ import "@airswap/transfers/contracts/handlers/ERC1155TransferHandler.sol";
 import "@airswap/transfers/contracts/handlers/KittyCoreTransferHandler.sol";
 import "@airswap/wrapper/contracts/Wrapper.sol";
 import "@airswap/indexer/contracts/Indexer.sol";
-import "@airswap/delegate/contracts/DelegateV2.sol";
+import "@airswap/delegate/contracts/Delegate.sol";
 
 contract Imports {}

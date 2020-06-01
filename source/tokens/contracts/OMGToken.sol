@@ -9,7 +9,6 @@ pragma solidity 0.5.16;
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
-
 /**
  * @title ERC20Basic
  * @dev Simpler version of ERC20 interface
@@ -24,7 +23,6 @@ contract ERC20Basic {
 
   event Transfer(address indexed from, address indexed to, uint256 value);
 }
-
 
 /**
  * @title Basic token
@@ -67,7 +65,6 @@ contract BasicToken is ERC20Basic {
   }
 }
 
-
 /**
  * @title ERC20 interface
  * @dev see https://github.com/ethereum/EIPs/issues/20
@@ -78,13 +75,16 @@ contract ERC202 is ERC20Basic {
     view
     returns (uint256);
 
-  function transferFrom(address from, address to, uint256 value) public;
+  function transferFrom(
+    address from,
+    address to,
+    uint256 value
+  ) public;
 
   function approve(address spender, uint256 value) public;
 
   event Approval(address indexed owner, address indexed spender, uint256 value);
 }
-
 
 /**
  * @title Standard ERC20 token
@@ -102,10 +102,11 @@ contract StandardToken is BasicToken, ERC202 {
    * @param _to address The address which you want to transfer to
    * @param _value uint the amout of tokens to be transfered
    */
-  function transferFrom(address _from, address _to, uint256 _value)
-    public
-    onlyPayloadSize(3 * 32)
-  {
+  function transferFrom(
+    address _from,
+    address _to,
+    uint256 _value
+  ) public onlyPayloadSize(3 * 32) {
     uint256 _allowance = allowed[_from][msg.sender];
 
     // Check is not needed because sub(_allowance, _value) will already throw if this condition is not met
@@ -151,7 +152,6 @@ contract StandardToken is BasicToken, ERC202 {
   }
 }
 
-
 /**
  * @title Mintable token
  * @dev Simple ERC20 Token example, with mintable token creation
@@ -189,7 +189,6 @@ contract MintableToken is StandardToken, Ownable {
     return true;
   }
 }
-
 
 /**
  * @title Pausable
@@ -236,7 +235,6 @@ contract Pausable is Ownable {
   }
 }
 
-
 /**
  * Pausable token
  *
@@ -248,14 +246,14 @@ contract PausableToken is StandardToken, Pausable {
     super.transfer(_to, _value);
   }
 
-  function transferFrom(address _from, address _to, uint256 _value)
-    public
-    whenNotPaused
-  {
+  function transferFrom(
+    address _from,
+    address _to,
+    uint256 _value
+  ) public whenNotPaused {
     super.transferFrom(_from, _to, _value);
   }
 }
-
 
 /**
  * @title TokenTimelock
@@ -272,9 +270,11 @@ contract TokenTimelock {
   // timestamp where token release is enabled
   uint256 releaseTime;
 
-  constructor(ERC20Basic _token, address _beneficiary, uint256 _releaseTime)
-    public
-  {
+  constructor(
+    ERC20Basic _token,
+    address _beneficiary,
+    uint256 _releaseTime
+  ) public {
     require(_releaseTime > now);
     token = _token;
     beneficiary = _beneficiary;
@@ -295,7 +295,6 @@ contract TokenTimelock {
   }
 }
 
-
 /**
  * @title OMGToken
  * @dev Omise Go Token contract
@@ -310,11 +309,11 @@ contract OMGToken is PausableToken, MintableToken {
   /**
    * @dev mint timelocked tokens
    */
-  function mintTimelocked(address _to, uint256 _amount, uint256 _releaseTime)
-    public
-    onlyOwner
-    returns (TokenTimelock)
-  {
+  function mintTimelocked(
+    address _to,
+    uint256 _amount,
+    uint256 _releaseTime
+  ) public onlyOwner returns (TokenTimelock) {
     TokenTimelock timelock = new TokenTimelock(this, _to, _releaseTime);
     mint(address(timelock), _amount);
 

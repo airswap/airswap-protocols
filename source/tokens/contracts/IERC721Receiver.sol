@@ -1,6 +1,5 @@
 pragma solidity 0.5.16;
 
-
 /**
  *
  * Copied from OpenZeppelin ERC1155 feature branch from (20642cca30fa18fb167df6db1889b558742d189a)

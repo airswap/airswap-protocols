@@ -1,15 +1,15 @@
-const DelegateV2Factory = artifacts.require('DelegateV2Factory')
+const DelegateFactory = artifacts.require('DelegateFactory')
 const MockContract = artifacts.require('MockContract')
 const Indexer = artifacts.require('Indexer')
 const FungibleToken = artifacts.require('FungibleToken')
-const DelegateV2 = artifacts.require('DelegateV2')
+const Delegate = artifacts.require('Delegate')
 
 const { ADDRESS_ZERO } = require('@airswap/constants')
 const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
 const { passes, equal, emitted } = require('@airswap/test-utils').assert
 const { padAddressToLocator } = require('@airswap/test-utils').padding
 
-contract('DelegateV2 Factory Tests', async accounts => {
+contract('Delegate Factory Tests', async accounts => {
   const swapContract = accounts[1]
   const delegateOwnerOne = accounts[2]
   const delegateOwnerTwo = accounts[3]
@@ -59,10 +59,10 @@ contract('DelegateV2 Factory Tests', async accounts => {
     await revertToSnapshot(snapshotId)
   })
 
-  before('Deploy DelegateV2 Factory', async () => {
+  before('Deploy Delegate Factory', async () => {
     await setupMockToken()
     await setupMockIndexer()
-    delegateFactory = await DelegateV2Factory.new(
+    delegateFactory = await DelegateFactory.new(
       swapContract,
       mockIndexer.address,
       PROTOCOL
@@ -142,7 +142,7 @@ contract('DelegateV2 Factory Tests', async accounts => {
       equal(isTrustedDelegate, true)
 
       // get the swap and owner values of the delegate
-      const delegate = await DelegateV2.at(delegateAddress)
+      const delegate = await Delegate.at(delegateAddress)
       const actualSwap = await delegate.swapContract.call()
       const actualOwner = await delegate.owner.call()
       const actualTradeWallet = await delegate.tradeWallet.call()

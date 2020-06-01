@@ -17,7 +17,6 @@
 pragma solidity 0.5.16;
 pragma experimental ABIEncoderV2;
 
-
 /**
  * @title Types: Library of Swap Protocol Types and Hashes
  */

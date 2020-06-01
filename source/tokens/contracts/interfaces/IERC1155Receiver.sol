@@ -8,7 +8,6 @@ pragma solidity ^0.5.0;
 
 import "openzeppelin-solidity/contracts/introspection/IERC165.sol";
 
-
 /**
     @title ERC-1155 Multi Token Receiver Interface
     @dev See https://eips.ethereum.org/EIPS/eip-1155

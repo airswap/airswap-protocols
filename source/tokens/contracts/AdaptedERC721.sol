@@ -6,7 +6,6 @@ import "openzeppelin-solidity/contracts/utils/Address.sol";
 import "openzeppelin-solidity/contracts/drafts/Counters.sol";
 import "openzeppelin-solidity/contracts/introspection/ERC165.sol";
 
-
 /**
  * @title ERC721 Non-Fungible Token Standard basic implementation
  * @dev see https://eips.ethereum.org/EIPS/eip-721
@@ -162,7 +161,11 @@ contract AdaptedERC721 is ERC165 {
    * @param to address to receive the ownership of the given token ID
    * @param tokenId uint256 ID of the token to be transferred
    */
-  function transferFrom(address from, address to, uint256 tokenId) public {
+  function transferFrom(
+    address from,
+    address to,
+    uint256 tokenId
+  ) public {
     //solhint-disable-next-line max-line-length
     require(
       _isApprovedOrOwner(msg.sender, tokenId),
@@ -183,7 +186,11 @@ contract AdaptedERC721 is ERC165 {
    * @param to address to receive the ownership of the given token ID
    * @param tokenId uint256 ID of the token to be transferred
    */
-  function safeTransferFrom(address from, address to, uint256 tokenId) public {
+  function safeTransferFrom(
+    address from,
+    address to,
+    uint256 tokenId
+  ) public {
     safeTransferFrom(from, to, tokenId, "");
   }
 
@@ -291,7 +298,11 @@ contract AdaptedERC721 is ERC165 {
    * @param to address to receive the ownership of the given token ID
    * @param tokenId uint256 ID of the token to be transferred
    */
-  function _transferFrom(address from, address to, uint256 tokenId) internal {
+  function _transferFrom(
+    address from,
+    address to,
+    uint256 tokenId
+  ) internal {
     require(
       ownerOf(tokenId) == from,
       "ERC721: transfer of token that is not own"

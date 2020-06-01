@@ -10,9 +10,8 @@ import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "@airswap/transfers/contracts/TransferHandlerRegistry.sol";
 import "@airswap/tokens/contracts/interfaces/IWETH.sol";
 import "@airswap/tokens/contracts/interfaces/IAdaptedKittyERC721.sol";
-import "@airswap/delegate/contracts/interfaces/IDelegateV2.sol";
+import "@airswap/delegate/contracts/interfaces/IDelegate.sol";
 import "@airswap/types/contracts/BytesManipulator.sol";
-
 
 /**
  * @title Validator: Helper contract to Swap protocol
@@ -49,14 +48,14 @@ contract Validator {
   /**
    * @notice If order is going through wrapper to a delegate
    * @param order Types.Order
-   * @param delegate IDelegateV2
+   * @param delegate IDelegate
    * @param wrapper address
    * @return uint256 errorCount if any
    * @return bytes32[] memory array of error messages
    */
   function checkWrappedDelegate(
     Types.Order calldata order,
-    IDelegateV2 delegate,
+    IDelegate delegate,
     address wrapper
   ) external view returns (uint256, bytes32[] memory) {
     address swap = order.signature.validator;
@@ -310,11 +309,11 @@ contract Validator {
    * @notice If order is going through delegate via provideOrder
    * ensure necessary checks are set
    * @param order Types.Order
-   * @param delegate IDelegateV2
+   * @param delegate IDelegate
    * @return uint256 errorCount if any
    * @return bytes32[] memory array of error messages
    */
-  function checkDelegate(Types.Order calldata order, IDelegateV2 delegate)
+  function checkDelegate(Types.Order calldata order, IDelegate delegate)
     external
     view
     returns (uint256, bytes32[] memory)
@@ -447,11 +446,11 @@ contract Validator {
    * @notice Condenses Delegate specific checks
    * and excludes swap or balance related checks
    * @param order Types.Order
-   * @param delegate IDelegateV2 Delegate to interface with
+   * @param delegate IDelegate Delegate to interface with
    * @return uint256 errorCount if any
    * @return bytes32[] memory array of error messages
    */
-  function coreDelegateChecks(Types.Order calldata order, IDelegateV2 delegate)
+  function coreDelegateChecks(Types.Order calldata order, IDelegate delegate)
     external
     view
     returns (uint256, bytes32[] memory)

@@ -20,7 +20,6 @@ pragma experimental ABIEncoderV2;
 import "@airswap/transfers/contracts/interfaces/ITransferHandler.sol";
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
 
-
 /**
  * @title Swap: The Atomic Swap used on the AirSwap Network
  */

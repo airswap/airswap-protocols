@@ -20,7 +20,6 @@ import "../interfaces/ITransferHandler.sol";
 import "openzeppelin-solidity/contracts/token/ERC721/IERC721.sol";
 import "@airswap/types/contracts/BytesManipulator.sol";
 
-
 contract ERC721TransferHandler is ITransferHandler {
   using BytesManipulator for bytes;
 

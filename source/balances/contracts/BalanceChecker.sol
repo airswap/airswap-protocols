@@ -12,7 +12,6 @@ import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
 import "openzeppelin-solidity/contracts/utils/Address.sol";
 
-
 /**
  * @title BalanceChecker: Contract for checking balances and allowances for ERC20 tokens
  * @notice Supports checks for fungible tokens (ERC-20)

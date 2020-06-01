@@ -1,6 +1,6 @@
 const Indexer = artifacts.require('Indexer')
 const FungibleToken = artifacts.require('FungibleToken')
-const DelegateV2Factory = artifacts.require('DelegateV2Factory')
+const DelegateFactory = artifacts.require('DelegateFactory')
 const TransferHandlerRegistry = artifacts.require('TransferHandlerRegistry')
 const ERC20TransferHandler = artifacts.require('ERC20TransferHandler')
 const Swap = artifacts.require('Swap')
@@ -126,7 +126,7 @@ contract('Indexer', async accounts => {
       )
       // now deploy swap
       swapContract = await Swap.new(transferHandlerRegistry.address)
-      delegateFactory = await DelegateV2Factory.new(
+      delegateFactory = await DelegateFactory.new(
         swapContract.address,
         indexer.address,
         PROTOCOL_DELEGATE

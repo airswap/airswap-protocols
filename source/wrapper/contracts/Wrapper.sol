@@ -18,10 +18,9 @@ pragma solidity 0.5.16;
 pragma experimental ABIEncoderV2;
 
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
-import "@airswap/delegate/contracts/interfaces/IDelegateV2.sol";
+import "@airswap/delegate/contracts/interfaces/IDelegate.sol";
 import "@airswap/tokens/contracts/interfaces/IWETH.sol";
 import "@airswap/types/contracts/BytesManipulator.sol";
-
 
 /**
  * @title Wrapper: Send and receive ether for WETH trades
@@ -101,12 +100,12 @@ contract Wrapper {
    * @dev Sender must approve this contract on the wethContract
    * @dev Delegate's tradeWallet must be order.sender - checked in Delegate
    * @param order Types.Order The Order
-   * @param delegate IDelegateV2 The Delegate to provide the order to
+   * @param delegate IDelegate The Delegate to provide the order to
    */
-  function provideDelegateOrder(
-    Types.Order calldata order,
-    IDelegateV2 delegate
-  ) external payable {
+  function provideDelegateOrder(Types.Order calldata order, IDelegate delegate)
+    external
+    payable
+  {
     // Ensure that the signature is present.
     // The signature will be explicitly checked in Swap.
     require(order.signature.v != 0, "SIGNATURE_MUST_BE_SENT");

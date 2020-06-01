@@ -1,7 +1,7 @@
 const Swap = artifacts.require('Swap')
 const Types = artifacts.require('Types')
 const Wrapper = artifacts.require('Wrapper')
-const DelegateV2 = artifacts.require('DelegateV2')
+const Delegate = artifacts.require('Delegate')
 const Indexer = artifacts.require('Indexer')
 const WETH9 = artifacts.require('WETH9')
 const FungibleToken = artifacts.require('FungibleToken')
@@ -143,7 +143,7 @@ contract('Wrapper Unit Tests', async accounts => {
     // Now create a delegate
     mockDelegate = await MockContract.new()
     mockDelegateAddress = mockDelegate.address
-    const delegateTemplate = await DelegateV2.new(
+    const delegateTemplate = await Delegate.new(
       mockSwapAddress,
       mockIndexer.address,
       delegateOwner,

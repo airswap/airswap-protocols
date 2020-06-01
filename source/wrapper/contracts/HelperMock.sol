@@ -5,7 +5,6 @@ import "@airswap/types/contracts/Types.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "./Wrapper.sol";
 
-
 /**
  * @title HelperMock: This mock contract has been created to test the Wrapper.
  *
@@ -32,9 +31,11 @@ contract HelperMock {
     swap.authorizeSender(address(wrapper));
   }
 
-  function approveToken(IERC20 token, address toApprove, uint256 amount)
-    external
-  {
+  function approveToken(
+    IERC20 token,
+    address toApprove,
+    uint256 amount
+  ) external {
     token.approve(toApprove, amount);
   }
 }

@@ -3,7 +3,6 @@ pragma experimental ABIEncoderV2;
 
 import "./Types.sol";
 
-
 /**
  * @notice Contract is a wrapper for Types library
  * for use with testing only

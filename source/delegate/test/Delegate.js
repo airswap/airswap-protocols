@@ -1,4 +1,4 @@
-const DelegateV2 = artifacts.require('DelegateV2')
+const Delegate = artifacts.require('Delegate')
 const Swap = artifacts.require('Swap')
 const Types = artifacts.require('Types')
 const TransferHandlerRegistry = artifacts.require('TransferHandlerRegistry')
@@ -19,7 +19,7 @@ const {
 } = require('@airswap/test-utils').assert
 const PROVIDER_URL = web3.currentProvider.host
 
-contract('DelegateV2 Integration Tests', async accounts => {
+contract('Delegate Integration Tests', async accounts => {
   const STARTING_BALANCE = 100000000
   const notOwner = accounts[0]
   const aliceAddress = accounts[1]
@@ -115,7 +115,7 @@ contract('DelegateV2 Integration Tests', async accounts => {
     await setupIndexer()
     await setupSwap()
 
-    aliceDelegate = await DelegateV2.new(
+    aliceDelegate = await Delegate.new(
       swapAddress,
       indexerAddress,
       aliceAddress,
@@ -152,7 +152,7 @@ contract('DelegateV2 Integration Tests', async accounts => {
     })
 
     it('Should set the owner and trade wallet if none are provided', async () => {
-      const newDelegate = await DelegateV2.new(
+      const newDelegate = await Delegate.new(
         swapAddress,
         indexerAddress,
         ADDRESS_ZERO,

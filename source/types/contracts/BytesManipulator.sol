@@ -1,6 +1,5 @@
 pragma solidity 0.5.16;
 
-
 library BytesManipulator {
   function getBytes32(bytes memory data, uint256 offset)
     internal
@@ -27,11 +26,11 @@ library BytesManipulator {
    * @author Gonçalo Sá <goncalo.sa@consensys.net>
    * Original: github.com/GNSPS/solidity-bytes-utils/blob/master/contracts/BytesLib.sol
    */
-  function slice(bytes memory _bytes, uint256 _start, uint256 _length)
-    internal
-    pure
-    returns (bytes memory)
-  {
+  function slice(
+    bytes memory _bytes,
+    uint256 _start,
+    uint256 _length
+  ) internal pure returns (bytes memory) {
     require(_bytes.length >= (_start + _length), "Read out of bounds");
 
     bytes memory tempBytes;

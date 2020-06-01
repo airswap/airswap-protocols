@@ -20,7 +20,6 @@ import "../interfaces/ITransferHandler.sol";
 import "../interfaces/IKittyCoreTokenTransfer.sol";
 import "@airswap/types/contracts/BytesManipulator.sol";
 
-
 contract KittyCoreTransferHandler is ITransferHandler {
   using BytesManipulator for bytes;
 
