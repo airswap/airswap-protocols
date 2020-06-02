@@ -1,7 +1,7 @@
 const Swap = artifacts.require('Swap')
 const Types = artifacts.require('Types')
 const Wrapper = artifacts.require('Wrapper')
-const DelegateV2 = artifacts.require('DelegateV2')
+const Delegate = artifacts.require('Delegate')
 const Indexer = artifacts.require('Indexer')
 const HelperMock = artifacts.require('HelperMock')
 const WETH9 = artifacts.require('WETH9')
@@ -85,7 +85,7 @@ contract('Wrapper', async accounts => {
     tokenAST = await FungibleToken.new()
 
     indexer = await Indexer.new(tokenAST.address)
-    delegate = await DelegateV2.new(
+    delegate = await Delegate.new(
       swapAddress,
       indexer.address,
       delegateOwner,

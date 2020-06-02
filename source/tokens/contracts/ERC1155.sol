@@ -12,7 +12,6 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/utils/Address.sol";
 import "openzeppelin-solidity/contracts/introspection/ERC165.sol";
 
-
 /**
  * @title Standard ERC1155 token
  *
@@ -220,9 +219,12 @@ contract ERC1155 is ERC165, IERC1155 {
    * @param value Amount of the token to be minted
    * @param data Data forwarded to `onERC1155Received` if `to` is a contract receiver
    */
-  function _mint(address to, uint256 id, uint256 value, bytes memory data)
-    internal
-  {
+  function _mint(
+    address to,
+    uint256 id,
+    uint256 value,
+    bytes memory data
+  ) internal {
     require(to != address(0), "ERC1155: mint to the zero address");
 
     _balances[id][to] = _balances[id][to].add(value);
@@ -272,7 +274,11 @@ contract ERC1155 is ERC165, IERC1155 {
    * @param id ID of the token to be burnt
    * @param value Amount of the token to be burnt
    */
-  function _burn(address account, uint256 id, uint256 value) internal {
+  function _burn(
+    address account,
+    uint256 id,
+    uint256 value
+  ) internal {
     require(
       account != address(0),
       "ERC1155: attempting to burn tokens on zero account"

@@ -16,7 +16,6 @@
 // solhint-disable
 pragma solidity 0.5.16;
 
-
 contract WETH9 {
   string public name = "Wrapped Ether";
   string public symbol = "WETH";
@@ -64,10 +63,11 @@ contract WETH9 {
     return transferFrom(msg.sender, dst, wad);
   }
 
-  function transferFrom(address src, address dst, uint256 wad)
-    public
-    returns (bool)
-  {
+  function transferFrom(
+    address src,
+    address dst,
+    uint256 wad
+  ) public returns (bool) {
     require(balanceOf[src] >= wad);
 
     if (src != msg.sender && allowance[src][msg.sender] != uint256(-1)) {

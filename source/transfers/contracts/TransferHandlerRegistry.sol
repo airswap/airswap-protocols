@@ -19,7 +19,6 @@ pragma solidity 0.5.16;
 import "./interfaces/ITransferHandler.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
-
 /**
  * @title TransferHandlerRegistry: holds registry of contract to
  * facilitate token transfers

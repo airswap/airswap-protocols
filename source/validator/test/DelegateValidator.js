@@ -1,7 +1,7 @@
 const Swap = artifacts.require('Swap')
 const Types = artifacts.require('Types')
 const Indexer = artifacts.require('Indexer')
-const DelegateV2 = artifacts.require('DelegateV2')
+const Delegate = artifacts.require('Delegate')
 const Validator = artifacts.require('Validator')
 const TransferHandlerRegistry = artifacts.require('TransferHandlerRegistry')
 const ERC20TransferHandler = artifacts.require('ERC20TransferHandler')
@@ -22,7 +22,7 @@ const {
 const { allowances, balances } = require('@airswap/test-utils').balances
 const PROVIDER_URL = web3.currentProvider.host
 
-contract('DelegateV2Validator', async accounts => {
+contract('DelegateValidator', async accounts => {
   const aliceAddress = accounts[0]
   const bobAddress = accounts[1]
   const aliceTradeWallet = accounts[4]
@@ -91,7 +91,7 @@ contract('DelegateV2Validator', async accounts => {
     })
 
     it('Deployed Delegate for Alice address AST indexer', async () => {
-      aliceDelegate = await DelegateV2.new(
+      aliceDelegate = await Delegate.new(
         swapAddress,
         indexer.address,
         aliceAddress,
@@ -101,7 +101,7 @@ contract('DelegateV2Validator', async accounts => {
     })
 
     it('Deployed Delegate for Bob address AST indexer', async () => {
-      bobDelegate = await DelegateV2.new(
+      bobDelegate = await Delegate.new(
         swapAddress,
         indexer.address,
         bobAddress,

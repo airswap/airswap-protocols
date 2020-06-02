@@ -16,7 +16,6 @@
 
 pragma solidity 0.5.16;
 
-
 /**
  * @title ITransferHandler: interface for token transfers
  */

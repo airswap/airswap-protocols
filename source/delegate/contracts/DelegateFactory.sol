@@ -16,14 +16,13 @@
 
 pragma solidity 0.5.16;
 
-import "./DelegateV2.sol";
+import "./Delegate.sol";
 import "./interfaces/IDelegateFactory.sol";
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "@airswap/indexer/contracts/interfaces/ILocatorWhitelist.sol";
 import "@airswap/indexer/contracts/interfaces/IIndexer.sol";
 
-
-contract DelegateV2Factory is IDelegateFactory, ILocatorWhitelist {
+contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
   // Mapping specifying whether an address was deployed by this factory
   mapping(address => bool) internal _deployedAddresses;
 
@@ -33,7 +32,7 @@ contract DelegateV2Factory is IDelegateFactory, ILocatorWhitelist {
   bytes2 public protocol;
 
   /**
-   * @notice Create a new DelegateV2Factory contract
+   * @notice Create a new DelegateFactory contract
    * @dev swapContract is unable to be changed after the factory sets it
    * @param factorySwapContract address Swap contract the delegate will deploy with
    * @param factoryIndexerContract address Indexer contract the delegate will deploy with
@@ -58,7 +57,7 @@ contract DelegateV2Factory is IDelegateFactory, ILocatorWhitelist {
     returns (address delegateContractAddress)
   {
     delegateContractAddress = address(
-      new DelegateV2(
+      new Delegate(
         swapContract,
         indexerContract,
         msg.sender,

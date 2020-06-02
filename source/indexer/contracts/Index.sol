@@ -18,7 +18,6 @@ pragma experimental ABIEncoderV2;
 
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
-
 /**
  * @title Index: A List of Locators
  * @notice The Locators are sorted in reverse order based on the score
@@ -77,10 +76,11 @@ contract Index is Ownable {
    * @param score uint256 Score for the locator being set
    * @param locator bytes32 Locator
    */
-  function setLocator(address identifier, uint256 score, bytes32 locator)
-    external
-    onlyOwner
-  {
+  function setLocator(
+    address identifier,
+    uint256 score,
+    bytes32 locator
+  ) external onlyOwner {
     // Ensure the entry does not already exist.
     require(!_hasEntry(identifier), "ENTRY_ALREADY_EXISTS");
 
@@ -110,10 +110,11 @@ contract Index is Ownable {
    * @param score uint256 Score for the locator being set
    * @param locator bytes32 Locator
    */
-  function updateLocator(address identifier, uint256 score, bytes32 locator)
-    external
-    onlyOwner
-  {
+  function updateLocator(
+    address identifier,
+    uint256 score,
+    bytes32 locator
+  ) external onlyOwner {
     // Don't need to update length as it is not used in set/unset logic
     _unsetLocator(identifier);
     _setLocator(identifier, score, locator);
@@ -196,9 +197,11 @@ contract Index is Ownable {
    * @param score uint256 Score for the locator being set
    * @param locator bytes32 Locator
    */
-  function _setLocator(address identifier, uint256 score, bytes32 locator)
-    internal
-  {
+  function _setLocator(
+    address identifier,
+    uint256 score,
+    bytes32 locator
+  ) internal {
     // Disallow locator set to 0x0 to ensure list integrity.
     require(locator != bytes32(0), "LOCATOR_MUST_BE_SENT");
 

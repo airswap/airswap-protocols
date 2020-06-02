@@ -1,6 +1,5 @@
 pragma solidity ^0.5.0;
 
-
 contract OrderTest721 {
   event Transfer(
     address indexed from,
@@ -22,7 +21,11 @@ contract OrderTest721 {
 
   function ownerOf(uint256 tokenId) public view returns (address owner);
 
-  function transferFrom(address from, address to, uint256 tokenId) public;
+  function transferFrom(
+    address from,
+    address to,
+    uint256 tokenId
+  ) public;
 
   function approve(address to, uint256 tokenId) public;
 

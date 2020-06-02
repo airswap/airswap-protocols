@@ -1,4 +1,4 @@
-const DelegateV2 = artifacts.require('DelegateV2')
+const Delegate = artifacts.require('Delegate')
 const Swap = artifacts.require('Swap')
 const Types = artifacts.require('Types')
 const Indexer = artifacts.require('Indexer')
@@ -18,7 +18,7 @@ const {
 const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
 const PROVIDER_URL = web3.currentProvider.host
 
-contract('DelegateV2 Unit Tests', async accounts => {
+contract('Delegate Unit Tests', async accounts => {
   const owner = accounts[0]
   const tradeWallet = accounts[1]
   const mockRegistry = accounts[2]
@@ -156,12 +156,12 @@ contract('DelegateV2 Unit Tests', async accounts => {
     await revertToSnapshot(snapshotId)
   })
 
-  before('Setup DelegateV2 Contract', async () => {
+  before('Setup Delegate Contract', async () => {
     await setupMockSwap()
     await setupMockTokens()
     await setupMockIndexer()
 
-    delegate = await DelegateV2.new(
+    delegate = await Delegate.new(
       mockSwap.address,
       mockIndexer.address,
       ADDRESS_ZERO,
@@ -189,7 +189,7 @@ contract('DelegateV2 Unit Tests', async accounts => {
     it('Test constructor sets the owner as the trade wallet on empty address', async () => {
       await mockStakingToken.givenMethodReturnBool(mockToken_approve, true)
 
-      const newDelegate = await DelegateV2.new(
+      const newDelegate = await Delegate.new(
         swapAddress,
         mockIndexer.address,
         ADDRESS_ZERO,
@@ -212,7 +212,7 @@ contract('DelegateV2 Unit Tests', async accounts => {
     it('Test owner is set correctly if provided an address', async () => {
       await mockStakingToken.givenMethodReturnBool(mockToken_approve, true)
 
-      const newDelegate = await DelegateV2.new(
+      const newDelegate = await Delegate.new(
         swapAddress,
         mockIndexer.address,
         notOwner,
@@ -232,7 +232,7 @@ contract('DelegateV2 Unit Tests', async accounts => {
       await mockStakingToken.givenMethodReturnBool(mockToken_approve, false)
 
       await reverted(
-        DelegateV2.new(
+        Delegate.new(
           swapAddress,
           mockIndexer.address,
           ADDRESS_ZERO,

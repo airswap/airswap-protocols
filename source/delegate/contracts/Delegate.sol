@@ -17,7 +17,7 @@
 pragma solidity 0.5.16;
 pragma experimental ABIEncoderV2;
 
-import "@airswap/delegate/contracts/interfaces/IDelegateV2.sol";
+import "@airswap/delegate/contracts/interfaces/IDelegate.sol";
 import "@airswap/indexer/contracts/interfaces/IIndexer.sol";
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
@@ -25,13 +25,12 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "@airswap/types/contracts/BytesManipulator.sol";
 
-
 /**
- * @title DelegateV2: Deployable Trading Rules for the AirSwap Network
+ * @title Delegate: Deployable Trading Rules for the AirSwap Network
  * @notice Supports fungible tokens (ERC-20)
  * @dev inherits IDelegate, Ownable uses SafeMath library
  */
-contract DelegateV2 is IDelegateV2, Ownable {
+contract Delegate is IDelegate, Ownable {
   using SafeMath for uint256;
   using BytesManipulator for bytes;
 

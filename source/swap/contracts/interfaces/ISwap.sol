@@ -20,7 +20,6 @@ pragma experimental ABIEncoderV2;
 import "@airswap/types/contracts/Types.sol";
 import "@airswap/transfers/contracts/TransferHandlerRegistry.sol";
 
-
 interface ISwap {
   event Swap(
     uint256 indexed nonce,

@@ -16,7 +16,6 @@
 
 pragma solidity 0.5.16;
 
-
 interface IDelegateFactory {
   event CreateDelegate(
     address indexed delegateContract,

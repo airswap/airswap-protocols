@@ -3,7 +3,6 @@ pragma solidity 0.5.16;
 import "openzeppelin-solidity/contracts/access/roles/MinterRole.sol";
 import "./AdaptedERC721.sol";
 
-
 // This contract definiition is the same as ERC721Mintable, however it uses an
 // adapted ERC721 - with different event names
 contract NonFungibleToken is AdaptedERC721, MinterRole {

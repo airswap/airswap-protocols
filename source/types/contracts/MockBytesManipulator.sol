@@ -3,7 +3,6 @@ pragma experimental ABIEncoderV2;
 
 import "./BytesManipulator.sol";
 
-
 /**
  * @notice Contract is a wrapper for Types library
  * for use with testing only
@@ -24,10 +23,11 @@ contract MockBytesManipulator {
     return BytesManipulator.getUint256(data, start);
   }
 
-  function getBytesAssembly(bytes calldata data, uint256 start, uint256 count)
-    external
-    returns (bytes memory)
-  {
+  function getBytesAssembly(
+    bytes calldata data,
+    uint256 start,
+    uint256 count
+  ) external returns (bytes memory) {
     return BytesManipulator.slice(data, start, count);
   }
 }

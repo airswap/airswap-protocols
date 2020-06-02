@@ -20,7 +20,6 @@ import "../interfaces/ITransferHandler.sol";
 import "@airswap/tokens/contracts/interfaces/IERC1155.sol";
 import "@airswap/types/contracts/BytesManipulator.sol";
 
-
 contract ERC1155TransferHandler is ITransferHandler {
   using BytesManipulator for bytes;
 

@@ -16,7 +16,6 @@
 
 pragma solidity 0.5.16;
 
-
 interface IIndexer {
   event CreateIndex(
     address indexed signerToken,
@@ -74,7 +73,11 @@ interface IIndexer {
 
   function stakingToken() external view returns (address);
 
-  function indexes(address, address, bytes2) external view returns (address);
+  function indexes(
+    address,
+    address,
+    bytes2
+  ) external view returns (address);
 
   function tokenBlacklist(address) external view returns (bool);
 
@@ -91,5 +94,12 @@ interface IIndexer {
     bytes2 protocol,
     address cursor,
     uint256 limit
-  ) external view returns (bytes32[] memory, uint256[] memory, address);
+  )
+    external
+    view
+    returns (
+      bytes32[] memory,
+      uint256[] memory,
+      address
+    );
 }
