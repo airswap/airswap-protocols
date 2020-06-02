@@ -69,6 +69,10 @@ export function handleStake(event: StakeEvent): void {
 }
 
 export function handleUnstake(event: Unstake): void {
-  let stakeIdentifier = event.params.staker.toHex() + event.address.toHex() 
+  let stakeIdentifier =
+    event.params.staker.toHex() + 
+    event.address.toHex() +
+    event.params.signerToken.toHex() +
+    event.params.senderToken.toHex()
   store.remove("Stake", stakeIdentifier)
 }
