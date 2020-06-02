@@ -45,7 +45,11 @@ export function handleCreateIndex(event: CreateIndex): void {
 
 export function handleStake(event: StakeEvent): void {
   let staker = getUser(event.params.staker.toHex())
-  let stakeIdentifier = event.params.staker.toHex() + event.address.toHex()
+  let stakeIdentifier =
+    event.params.staker.toHex() + 
+    event.address.toHex() +
+    event.params.signerToken.toHex() +
+    event.params.senderToken.toHex()
 
   let stake = Stake.load(stakeIdentifier)
   // create base portion of stake if it doesn't exist
