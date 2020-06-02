@@ -14,18 +14,18 @@
 - Blog → https://blog.airswap.io/
 - Support → https://support.airswap.io/
 
-## Deploys
+## Usage
 
-[BalanceChecker](./contracts/BalanceChecker.sol) is deployed. See [deploys.json](./deploys.json) for latest contract deployments on Mainnet (`1`), Rinkeby (`4`), Goerli (`5`), and Kovan (`42`).
+:warning: This package is under active development. The [BalanceChecker](./contracts/BalanceChecker.sol) contract is deployed; see [deploys.json](./deploys.json) for latest. For all AirSwap contract deployments see [Deployed Contracts](https://docs.airswap.io/system/contract-deployments).
 
 ## Commands
 
-| Command         | Description                                   |
-| :-------------- | :-------------------------------------------- |
-| `yarn`          | Install dependencies                          |
-| `yarn clean`    | Delete the contract `build` folder            |
-| `yarn compile`  | Compile all contracts to `build` folder       |
-| `yarn test`     | Run all contract tests in `test` folder       |
+| Command        | Description                             |
+| :------------- | :-------------------------------------- |
+| `yarn`         | Install dependencies                    |
+| `yarn clean`   | Delete the contract `build` folder      |
+| `yarn compile` | Compile all contracts to `build` folder |
+| `yarn test`    | Run all contract tests in `test` folder |
 
 ## Running Tests
 
