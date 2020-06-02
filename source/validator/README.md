@@ -14,9 +14,9 @@
 - Blog → https://blog.airswap.io/
 - Support → https://support.airswap.io/
 
-## Deploys
+## Usage
 
-See [deploys.json](./deploys.json) for latest contract deployments on Rinkeby (`4`) and Mainnet (`1`).
+:warning: This package is under active development. The [Validator](./contracts/Validator.sol) contract is deployed; see [deploys.json](./deploys.json) for latest. For all AirSwap contract deployments see [Deployed Contracts](https://docs.airswap.io/system/contract-deployments).
 
 ## Commands
 
