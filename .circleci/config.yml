@@ -3,8 +3,6 @@ version: 2.1
 orbs:
   airswap: airswap/assume-role@volatile
   aws-cli: airswap/aws-cli@volatile
-  slack: circleci/slack@0.1.1
-  datadog: airswap/datadog@volatile
 
 references:
   working_directory: &working_directory ~/repo
@@ -242,7 +240,6 @@ jobs:
             done
       # Now we need to iterate over folders and deploy the folders that are listed
       # but only if the version changed
-      - slack/status
 
 workflows:
   smart_contract:
