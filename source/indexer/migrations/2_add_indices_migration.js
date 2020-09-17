@@ -28,9 +28,10 @@ module.exports = async (deployer, network) => {
     const sUSD = '0x57ab1ec28d129707052df4df418d58a2d46d5f51'
     const PNK = '0x93ed3fbe21207ec2e8f2d3c3de6e058cb73bc04d'
     const MKR = '0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2'
+    const UNI = '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984'
 
     // const pairs = [[WBTC, USDC], [AST, WBTC], [WBTC, USDT], [AST, USDT], [CHI, WBTC], [GST2, WBTC], [WBTC, sUSD], [PNK, WETH], [MKR, WETH]]
-    const pairs = [[PNK, WETH], [MKR, WETH]]
+    const pairs = [[UNI, WETH], [WETH, UNI]]
     pairArrays = _.unzip(pairs)
     console.log(pairArrays)
 
