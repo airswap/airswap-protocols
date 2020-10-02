@@ -16,7 +16,7 @@
 
 ## Usage
 
-:warning: This package is under active development and contains unaudited code. The audited [Indexer](./contracts/Indexer.sol) contract is deployed; see [deploys.json](./deploys.json) for latest. For all AirSwap contract deployments see [Deployed Contracts](https://docs.airswap.io/system/contract-deployments).
+:warning: This package is under active development and contains unaudited code. The audited [Indexer](https://github.com/airswap/airswap-protocols/blob/48da430ca23876b9d01743d59b548f7fb59660ab/source/indexer/contracts/Indexer.sol) contract is deployed; see [deploys.json](./deploys.json) for latest. For all AirSwap contract deployments see [Deployed Contracts](https://docs.airswap.io/system/contract-deployments).
 
 ## Commands
 
