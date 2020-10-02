@@ -16,7 +16,7 @@
 
 ## Usage
 
-:warning: This package is under active development and contains unaudited code. The audited [Swap](./contracts/Swap.sol) contract is deployed; see [deploys.json](./deploys.json) for latest. For all AirSwap contract deployments see [Deployed Contracts](https://docs.airswap.io/system/contract-deployments).
+:warning: This package is under active development and contains unaudited code. The audited [Swap](https://github.com/airswap/airswap-protocols/blob/953956f308c65ec53d1f1b20d35f47fe04b936af/source/swap/contracts/Swap.sol) contract is deployed; see [deploys.json](./deploys.json) for latest. For all AirSwap contract deployments see [Deployed Contracts](https://docs.airswap.io/system/contract-deployments).
 
 ## Commands
 
