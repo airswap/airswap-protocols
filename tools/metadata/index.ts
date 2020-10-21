@@ -4,7 +4,7 @@ import contractMap, {
   MetamaskToken,
   MetamaskTokens,
 } from 'eth-contract-metadata'
-import { NormalizedToken, IdexToken, IdexTokens } from './src/types'
+import { NormalizedToken, IdexToken, IdexResponse } from './src/types'
 import {
   IDEX_TOKEN_API,
   TRUST_WALLET_IMAGE_API,
@@ -48,11 +48,11 @@ function normalizeIdexToken(
 ): NormalizedToken {
   return {
     name: token.name,
-    address: token.address,
-    decimals: token.decimals,
+    address: token.contractAddress,
+    decimals: token.assetDecimals,
     symbol: token.symbol,
     kind: tokenKinds.ERC20,
-    image: getTrustImage(token.address),
+    image: getTrustImage(token.contractAddress),
   }
 }
 
@@ -122,14 +122,18 @@ class TokenMetadata {
       .map(normalizeMetamaskToken)
 
     // fetch and normalize idex data
-    const { data }: IdexTokens = await axios.get(IDEX_TOKEN_API)
-    const normalizedIdexTokens: NormalizedToken[] = Object.entries(data)
-      .map(([symbol, token]) => {
-        if (token.address) {
-          return { ...token, address: token.address.toLowerCase(), symbol }
+    const { data }: IdexResponse = await axios.get(IDEX_TOKEN_API)
+
+    const normalizedIdexTokens: NormalizedToken[] = data
+      .map(token => {
+        if (token.contractAddress) {
+          return {
+            ...token,
+            contractAddress: token.contractAddress.toLowerCase(),
+          }
         }
       })
-      .filter(token => token.address !== ADDRESS_ZERO)
+      .filter(token => token.contractAddress !== ADDRESS_ZERO)
       .map(normalizeIdexToken)
 
     // persist all metamask tokens to memory metadata array

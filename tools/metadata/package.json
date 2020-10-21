@@ -1,6 +1,6 @@
 {
   "name": "@airswap/metadata",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "Token Metadata Tools for AirSwap Developers",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>",
