@@ -11,11 +11,11 @@ export interface NormalizedToken {
 
 export interface IdexToken {
   name: string
-  decimals: number
-  address: string
-  slug: string
+  assetDecimals: number
+  contractAddress: string
+  symbol: string
 }
 
-export interface IdexTokens {
-  [symbol: string]: IdexToken
+export interface IdexResponse {
+  [data: string]: Array<IdexToken>
 }

@@ -1,7 +1,7 @@
 import { NormalizedToken } from './types'
 import { tokenKinds } from '@airswap/constants'
 
-export const IDEX_TOKEN_API = 'https://api.idex.market/returnCurrencies'
+export const IDEX_TOKEN_API = 'https://api.idex.io/v1/assets'
 export const TRUST_WALLET_IMAGE_API =
   'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets'
 
