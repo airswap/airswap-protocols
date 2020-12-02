@@ -12,7 +12,7 @@
     "type": "git",
     "url": "https://github.com/airswap/airswap-protocols"
   },
-  "homepage": "https://github.com/airswap/airswap-protocols/tree/master/source/validator",
+  "homepage": "https://github.com/airswap/airswap-protocols/tree/master/source/helpers/validator",
   "keywords": [
     "airswap"
   ],

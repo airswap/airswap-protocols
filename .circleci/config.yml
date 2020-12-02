@@ -62,6 +62,39 @@ jobs:
             yarn ganache > /dev/null &
             cd source/core/swap && yarn test
 
+  transfers_tests:
+    <<: *container_config
+    steps:
+      - attach_workspace:
+          at: *working_directory
+      - run:
+          name: Run Tests
+          command: |
+            yarn ganache > /dev/null &
+            cd source/core/transfers && yarn test
+
+  types_tests:
+    <<: *container_config
+    steps:
+      - attach_workspace:
+          at: *working_directory
+      - run:
+          name: Run Tests
+          command: |
+            yarn ganache > /dev/null &
+            cd source/core/types && yarn test
+
+  delegate_tests:
+    <<: *container_config
+    steps:
+      - attach_workspace:
+          at: *working_directory
+      - run:
+          name: Run Tests
+          command: |
+            yarn ganache > /dev/null &
+            cd source/delegation/delegate && yarn test
+
   indexer_tests:
     <<: *container_config
     steps:
@@ -84,17 +117,6 @@ jobs:
             yarn ganache > /dev/null &
             cd source/helpers/balances && yarn test
 
-  delegate_tests:
-    <<: *container_config
-    steps:
-      - attach_workspace:
-          at: *working_directory
-      - run:
-          name: Run Tests
-          command: |
-            yarn ganache > /dev/null &
-            cd source/delegation/delegate && yarn test
-
   validator_tests:
     <<: *container_config
     steps:
@@ -105,28 +127,6 @@ jobs:
           command: |
             yarn ganache > /dev/null &
             cd source/helpers/validator && yarn test
-
-  transfers_tests:
-    <<: *container_config
-    steps:
-      - attach_workspace:
-          at: *working_directory
-      - run:
-          name: Run Tests
-          command: |
-            yarn ganache > /dev/null &
-            cd source/helpers/transfers && yarn test
-
-  types_tests:
-    <<: *container_config
-    steps:
-      - attach_workspace:
-          at: *working_directory
-      - run:
-          name: Run Tests
-          command: |
-            yarn ganache > /dev/null &
-            cd source/core/types && yarn test
 
   wrapper_tests:
     <<: *container_config
