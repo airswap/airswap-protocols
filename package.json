@@ -10,7 +10,7 @@
   ],
   "license": "Apache-2.0",
   "workspaces": {
-    "packages":["source/*", "tools/*"],
+    "packages":["source/core/*", "source/delegation/*", "source/discovery/*", "source/incentives/*", "source/helpers/*", "tools/*"],
     "nohoist":["**/@graphprotocol", "**/@graphprotocol/**"]
   },
   "scripts": {

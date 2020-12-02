@@ -1,6 +1,6 @@
 {
   "lerna": "3.15.0",
-  "packages": ["source/*", "tools/*"],
+  "packages": ["source/core", "source/delegation", "source/discovery", "source/incentives", "source/helpers", "tools/*"],
   "version": "independent",
   "npmClient": "yarn",
   "useWorkspaces": true

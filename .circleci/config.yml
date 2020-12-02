@@ -60,7 +60,7 @@ jobs:
           name: Run Tests
           command: |
             yarn ganache > /dev/null &
-            cd source/swap && yarn test
+            cd source/core/swap && yarn test
 
   indexer_tests:
     <<: *container_config
@@ -71,7 +71,7 @@ jobs:
           name: Run Tests
           command: |
             yarn ganache > /dev/null &
-            cd source/indexer && yarn test
+            cd source/discovery/indexer && yarn test
 
   balances_tests:
     <<: *container_config
@@ -82,7 +82,7 @@ jobs:
           name: Run Tests
           command: |
             yarn ganache > /dev/null &
-            cd source/balances && yarn test
+            cd source/helpers/balances && yarn test
 
   delegate_tests:
     <<: *container_config
@@ -93,7 +93,7 @@ jobs:
           name: Run Tests
           command: |
             yarn ganache > /dev/null &
-            cd source/delegate && yarn test
+            cd source/delegation/delegate && yarn test
 
   validator_tests:
     <<: *container_config
@@ -104,7 +104,7 @@ jobs:
           name: Run Tests
           command: |
             yarn ganache > /dev/null &
-            cd source/validator && yarn test
+            cd source/helpers/validator && yarn test
 
   transfers_tests:
     <<: *container_config
@@ -115,7 +115,7 @@ jobs:
           name: Run Tests
           command: |
             yarn ganache > /dev/null &
-            cd source/transfers && yarn test
+            cd source/helpers/transfers && yarn test
 
   types_tests:
     <<: *container_config
@@ -126,7 +126,7 @@ jobs:
           name: Run Tests
           command: |
             yarn ganache > /dev/null &
-            cd source/types && yarn test
+            cd source/core/types && yarn test
 
   wrapper_tests:
     <<: *container_config
@@ -137,7 +137,7 @@ jobs:
           name: Run Tests
           command: |
             yarn ganache > /dev/null &
-            cd source/wrapper && yarn test
+            cd source/helpers/wrapper && yarn test
 
   metadata_tests:
     <<: *container_config

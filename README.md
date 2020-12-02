@@ -34,12 +34,12 @@ Packages are versioned based on deploys. Major versions e.g. `1.x.x` are mainnet
 
 ## JavaScript Libraries
 
-| Package                                  | Version                                                                                                     | Description           |
-| :--------------------------------------- | :---------------------------------------------------------------------------------------------------------- | :-------------------- |
-| [`@airswap/protocols`](/tools/protocols) | [![npm](https://img.shields.io/npm/v/@airswap/protocols)](https://www.npmjs.com/package/@airswap/protocols) | Protocol Clients      |
-| [`@airswap/utils`](/tools/utils)         | [![npm](https://img.shields.io/npm/v/@airswap/utils)](https://www.npmjs.com/package/@airswap/utils)         | Orders and Signatures |
-| [`@airswap/metadata`](/tools/metadata)   | [![npm](https://img.shields.io/npm/v/@airswap/metadata)](https://www.npmjs.com/package/@airswap/metadata)   | Metadata Management   |
-| [`@airswap/constants`](/tools/constants) | [![npm](https://img.shields.io/npm/v/@airswap/constants)](https://www.npmjs.com/package/@airswap/constants) | Helpful Constants     |
+| Package                                     | Version                                                                                                     | Description           |
+| :------------------------------------------ | :---------------------------------------------------------------------------------------------------------- | :-------------------- |
+| [`@airswap/protocols`](/packages/protocols) | [![npm](https://img.shields.io/npm/v/@airswap/protocols)](https://www.npmjs.com/package/@airswap/protocols) | Protocol Clients      |
+| [`@airswap/utils`](/packages/utils)         | [![npm](https://img.shields.io/npm/v/@airswap/utils)](https://www.npmjs.com/package/@airswap/utils)         | Orders and Signatures |
+| [`@airswap/metadata`](/packages/metadata)   | [![npm](https://img.shields.io/npm/v/@airswap/metadata)](https://www.npmjs.com/package/@airswap/metadata)   | Metadata Management   |
+| [`@airswap/constants`](/packages/constants) | [![npm](https://img.shields.io/npm/v/@airswap/constants)](https://www.npmjs.com/package/@airswap/constants) | Helpful Constants     |
 
 ## Commands
 
@@ -55,4 +55,4 @@ Packages are versioned based on deploys. Major versions e.g. `1.x.x` are mainnet
 
 ## Deployments
 
-To deploy, please follow [this guide](./tools/deployer)
+To deploy, please follow [this guide](./packages/deployer)
