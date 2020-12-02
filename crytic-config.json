@@ -1,5 +1,5 @@
 {
-   "cwd": "source/swap",
+   "cwd": "source/core/swap",
    "truffle": {
         "enabled": true
     }

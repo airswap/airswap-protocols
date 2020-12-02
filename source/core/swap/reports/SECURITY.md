@@ -2,7 +2,7 @@
 
 Security report by Team Fluidity (team[at]fluidity[dot]io). Smart contracts are a nascent space, and no security audit procedure has been perfected. We welcome any suggestions and comments on this report, its contents, our methodology, or potential gaps in coverage.
 
-Swap [Source Code](https://github.com/airswap/airswap-protocols/tree/master/source/swap) and [README](../README.md) are available in this repository. Commit used for report: [2a83c1ff2e46e6befa45889aa556fdd31e5c71fb](https://github.com/airswap/airswap-protocols/commit/2a83c1ff2e46e6befa45889aa556fdd31e5c71fb)
+Swap [Source Code](https://github.com/airswap/airswap-protocols/tree/master/source/core/swap) and [README](../README.md) are available in this repository. Commit used for report: [2a83c1ff2e46e6befa45889aa556fdd31e5c71fb](https://github.com/airswap/airswap-protocols/commit/2a83c1ff2e46e6befa45889aa556fdd31e5c71fb)
 
 ## Introduction
 
@@ -31,15 +31,15 @@ contracts/interfaces/ISwap.sol
 
 #### Public and external functions (non-getter functions)
 
-| Function        | Source   | Visibility | Params                                         | Payable |
-| :-------------- | :------- | :--------- | :--------------------------------------------- | :------ |
-| swap            | Swap.sol | external   | `Types.Order order`                            | no      |
-| cancel          | Swap.sol | external   | `uint256[] calldata nonces`                    | no      |
-| invalidate      | Swap.sol | external   | `uint256 minimumNonce`                         | no      |
-| authorizeSender | Swap.sol | external   | `address authorizedSender`, `uint256 expiry`   | no      |
-| authorizeSigner | Swap.sol | external   | `address authorizedSigner`, `uint256 expiry`   | no      |
-| revokeSender    | Swap.sol | external   | `address authorizedSender`                     | no      |
-| revokeSigner    | Swap.sol | external   | `address authorizedSender`                     | no      |
+| Function        | Source   | Visibility | Params                                       | Payable |
+| :-------------- | :------- | :--------- | :------------------------------------------- | :------ |
+| swap            | Swap.sol | external   | `Types.Order order`                          | no      |
+| cancel          | Swap.sol | external   | `uint256[] calldata nonces`                  | no      |
+| invalidate      | Swap.sol | external   | `uint256 minimumNonce`                       | no      |
+| authorizeSender | Swap.sol | external   | `address authorizedSender`, `uint256 expiry` | no      |
+| authorizeSigner | Swap.sol | external   | `address authorizedSigner`, `uint256 expiry` | no      |
+| revokeSender    | Swap.sol | external   | `address authorizedSender`                   | no      |
+| revokeSigner    | Swap.sol | external   | `address authorizedSender`                   | no      |
 
 ## Invariants
 

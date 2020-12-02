@@ -21,16 +21,16 @@
 
 Packages are versioned based on deploys. Major versions e.g. `1.x.x` are mainnet deploys, while minor versions e.g. `x.1.x` are rinkeby deploys. Packages that are not deployed increment patch versions e.g. `x.x.1`. Each package that includes a deployment includes the ABI files for that deployed contract in `builds/contracts` within the package.
 
-| Package                                   | Version                                                                                                     | Description                         |
-| :---------------------------------------- | :---------------------------------------------------------------------------------------------------------- | :---------------------------------- |
-| [`@airswap/swap`](/source/swap)           | [![npm](https://img.shields.io/npm/v/@airswap/swap)](https://www.npmjs.com/package/@airswap/swap)           | Atomic Swap Between Tokens          |
-| [`@airswap/indexer`](/source/indexer)     | [![npm](https://img.shields.io/npm/v/@airswap/indexer)](https://www.npmjs.com/package/@airswap/indexer)     | Counterparty Discovery with Staking |
-| [`@airswap/delegate`](/source/delegate)   | [![npm](https://img.shields.io/npm/v/@airswap/delegate)](https://www.npmjs.com/package/@airswap/delegate)   | Onchain Trading Delegate            |
-| [`@airswap/validator`](/source/validator) | [![npm](https://img.shields.io/npm/v/@airswap/validator)](https://www.npmjs.com/package/@airswap/validator) | Validation and Pre-Swap Checks      |
-| [`@airswap/wrapper`](/source/wrapper)     | [![npm](https://img.shields.io/npm/v/@airswap/wrapper)](https://www.npmjs.com/package/@airswap/wrapper)     | Use ether for WETH trades           |
-| [`@airswap/types`](/source/types)         | [![npm](https://img.shields.io/npm/v/@airswap/types)](https://www.npmjs.com/package/@airswap/types)         | Types and Hashes                    |
-| [`@airswap/transfers`](/source/transfers) | [![npm](https://img.shields.io/npm/v/@airswap/transfers)](https://www.npmjs.com/package/@airswap/transfers) | Token Transfer Handlers             |
-| [`@airswap/tokens`](/source/tokens)       | [![npm](https://img.shields.io/npm/v/@airswap/tokens)](https://www.npmjs.com/package/@airswap/tokens)       | Ethereum Tokens                     |
+| Package                                            | Version                                                                                                     | Description                         |
+| :------------------------------------------------- | :---------------------------------------------------------------------------------------------------------- | :---------------------------------- |
+| [`@airswap/swap`](/source/core/swap)               | [![npm](https://img.shields.io/npm/v/@airswap/swap)](https://www.npmjs.com/package/@airswap/swap)           | Atomic Swap Between Tokens          |
+| [`@airswap/indexer`](/source/discovery/indexer)    | [![npm](https://img.shields.io/npm/v/@airswap/indexer)](https://www.npmjs.com/package/@airswap/indexer)     | Counterparty Discovery with Staking |
+| [`@airswap/delegate`](/source/delegation/delegate) | [![npm](https://img.shields.io/npm/v/@airswap/delegate)](https://www.npmjs.com/package/@airswap/delegate)   | Onchain Trading Delegate            |
+| [`@airswap/validator`](/source/helpers/validator)  | [![npm](https://img.shields.io/npm/v/@airswap/validator)](https://www.npmjs.com/package/@airswap/validator) | Validation and Pre-Swap Checks      |
+| [`@airswap/wrapper`](/source/helpers/wrapper)      | [![npm](https://img.shields.io/npm/v/@airswap/wrapper)](https://www.npmjs.com/package/@airswap/wrapper)     | Use ether for WETH trades           |
+| [`@airswap/types`](/source/core/types)             | [![npm](https://img.shields.io/npm/v/@airswap/types)](https://www.npmjs.com/package/@airswap/types)         | Types and Hashes                    |
+| [`@airswap/transfers`](/source/core/transfers)     | [![npm](https://img.shields.io/npm/v/@airswap/transfers)](https://www.npmjs.com/package/@airswap/transfers) | Token Transfer Handlers             |
+| [`@airswap/tokens`](/source/helpers/tokens)        | [![npm](https://img.shields.io/npm/v/@airswap/tokens)](https://www.npmjs.com/package/@airswap/tokens)       | Ethereum Tokens                     |
 
 ## JavaScript Libraries
 

@@ -27,7 +27,7 @@ We can run all tests from the root with:
 If you want to run the tests of just 1 sub-repo, then run the same command inside the sub-repo.
 
 ```
-cd source/swap
+cd source/core/swap
 yarn test
 ```
 

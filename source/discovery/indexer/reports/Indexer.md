@@ -3,7 +3,7 @@
 Smart Contract Security Report by Team Fluidity (team[at]fluidity[dot]io) and Phil Daian (feedback[at]stableset[dot]com)
 Hash of master used for report: [b87d292aaf6e28ede564b7ea28ece39219994607](https://github.com/airswap/airswap-protocols/commit/b87d292aaf6e28ede564b7ea28ece39219994607)
 
-Index [Source Code](https://github.com/airswap/airswap-protocols/tree/master/source/index) and [README](../README.md)
+Indexer [Source Code](https://github.com/airswap/airswap-protocols/tree/b87d292aaf6e28ede564b7ea28ece39219994607/source/indexer) and [README](../README.md)
 
 ## Introduction
 
@@ -13,13 +13,11 @@ The Swap Protocol is a peer-to-peer protocol for trading Ethereum tokens that al
 
 Indexer is comprised of several contracts.
 
-[@airswap/indexer/contracts/interfaces/ILocatorWhitelist.sol](../contracts/ILocatorWhitelist.sol) @ [b87d292aaf6e28ede564b7ea28ece39219994607](https://github.com/airswap/airswap-protocols/commit/b87d292aaf6e28ede564b7ea28ece39219994607)
+[@airswap/indexer/contracts/interfaces/ILocatorWhitelist.sol](https://github.com/airswap/airswap-protocols/tree/b87d292aaf6e28ede564b7ea28ece39219994607/source/indexer/contracts/ILocatorWhitelist.sol) @ [b87d292aaf6e28ede564b7ea28ece39219994607](https://github.com/airswap/airswap-protocols/commit/b87d292aaf6e28ede564b7ea28ece39219994607)
 
-[@airswap/indexer/contracts/interfacts/IIndexer.sol](../contracts/IIndexer.sol) @ [b87d292aaf6e28ede564b7ea28ece39219994607](https://github.com/airswap/airswap-protocols/commit/b87d292aaf6e28ede564b7ea28ece39219994607)
+[@airswap/indexer/contracts/interfacts/IIndexer.sol](https://github.com/airswap/airswap-protocols/tree/b87d292aaf6e28ede564b7ea28ece39219994607/source/indexer/contracts/IIndexer.sol) @ [b87d292aaf6e28ede564b7ea28ece39219994607](https://github.com/airswap/airswap-protocols/commit/b87d292aaf6e28ede564b7ea28ece39219994607)
 
-[@airswap/indexer/contracts/Indexer.sol](../contracts/Indexer.sol) @ [b87d292aaf6e28ede564b7ea28ece39219994607](https://github.com/airswap/airswap-protocols/commit/b87d292aaf6e28ede564b7ea28ece39219994607)
-
-[@airswap/indexer/contracts/Index.sol](../contracts/Index.sol) @ [b87d292aaf6e28ede564b7ea28ece39219994607](https://github.com/airswap/airswap-protocols/commit/b87d292aaf6e28ede564b7ea28ece39219994607)
+[@airswap/indexer/contracts/Indexer.sol](https://github.com/airswap/airswap-protocols/tree/b87d292aaf6e28ede564b7ea28ece39219994607/source/indexer/contracts/Indexer.sol) @ [b87d292aaf6e28ede564b7ea28ece39219994607](https://github.com/airswap/airswap-protocols/commit/b87d292aaf6e28ede564b7ea28ece39219994607)
 
 Deployment of Indexer.sol was performed in the `@airswap/indexer` package in the `airswap-protocols` monorepo.
 
@@ -51,18 +49,17 @@ _\*\* OpenZeppelin contract_
 
 #### Public or external functions (non-getter functions)
 
-| Function            | Source      | Visibility | Params                                                                          | Payable |
-| :------------------ | :---------- | :--------- | :------------------------------------------------------------------------------ | :------ |
-| createIndex         | Indexer.sol | external   | `address signerToken, address senderToken`                                    | no      |
-| addTokenToBlacklist      | Indexer.sol | external   | `address token`                                                    | no      |
-| removeTokenFromBlacklist | Indexer.sol | external   | `address tokens`                                                    | no      |
-| setIntent           | Indexer.sol | external   | `address signerToken, address senderToken, uint256 stakingAmount, bytes32 locator` | no      |
-| unsetIntent         | Indexer.sol | external   | `address signerToken, address senderToken`                                    | no      |
-| unsetIntentForUser         | Indexer.sol | external   | `address user, address signerToken, address senderToken`                                    | no      |
-| setPausedStatus         | Indexer.sol | external   | `bool newStatus`                                    | no      |
-| killContract         | Indexer.sol | external   | `address payable recipient`                                    | no      |
-|setLocatorWhitelist | Indexer.sol | external | `address newLocatorWhitelist` | no |
-
+| Function                 | Source      | Visibility | Params                                                                             | Payable |
+| :----------------------- | :---------- | :--------- | :--------------------------------------------------------------------------------- | :------ |
+| createIndex              | Indexer.sol | external   | `address signerToken, address senderToken`                                         | no      |
+| addTokenToBlacklist      | Indexer.sol | external   | `address token`                                                                    | no      |
+| removeTokenFromBlacklist | Indexer.sol | external   | `address tokens`                                                                   | no      |
+| setIntent                | Indexer.sol | external   | `address signerToken, address senderToken, uint256 stakingAmount, bytes32 locator` | no      |
+| unsetIntent              | Indexer.sol | external   | `address signerToken, address senderToken`                                         | no      |
+| unsetIntentForUser       | Indexer.sol | external   | `address user, address signerToken, address senderToken`                           | no      |
+| setPausedStatus          | Indexer.sol | external   | `bool newStatus`                                                                   | no      |
+| killContract             | Indexer.sol | external   | `address payable recipient`                                                        | no      |
+| setLocatorWhitelist      | Indexer.sol | external   | `address newLocatorWhitelist`                                                      | no      |
 
 ## Invariants
 
@@ -176,8 +173,8 @@ TODO
 #### Unit and Integration Tests
 
 ```
-source/indexer/test/Indexer-unit.js
-source/indexer/test/Indexer.js
+source/discovery/indexer/test/Indexer-unit.js
+source/discovery/indexer/test/Indexer.js
 ```
 
 #### Test Coverage

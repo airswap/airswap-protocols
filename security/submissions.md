@@ -233,7 +233,7 @@ We have documented that this is a potential scenario that could arise within the
 
 "Tokens can however be sent to the contract by accident, and will remain as there is no withdrawal mechanism for any of the supported token standards. Looking at the Swap V1 contract (0x8fd3121013a07c57f0d69646e86e7a4880b467b7), there is 0 ether and < \$.10 stored, so we are comfortable without implementing a recovery backdoor."
 
-https://github.com/airswap/airswap-protocols/blob/master/source/swap/reports/SECURITY.md
+https://github.com/airswap/airswap-protocols/blob/master/source/core/swap/reports/SECURITY.md
 
 Thanks
 
