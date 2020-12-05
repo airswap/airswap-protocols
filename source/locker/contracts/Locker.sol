@@ -28,7 +28,7 @@ contract Locker is Ownable, Pausable {
   using SafeMath for uint256;
 
   // Token to be used for staking (ERC-20)
-  ERC20 private _lockingToken;
+  ERC20 private _lockerToken;
 
   mapping(address => uint256) private _balances;
 
@@ -45,18 +45,18 @@ contract Locker is Ownable, Pausable {
 
   /**
    * @notice Contract Constructor
-   * @param lockingToken_ address
+   * @param lockerToken_ address
    */
   constructor(
     string memory name_,
     string memory symbol_,
     uint8 decimals_,
-    address lockingToken_
+    address lockerToken_
   ) public {
     _name = name_;
     _symbol = symbol_;
     _decimals = decimals_;
-    _lockingToken = ERC20(lockingToken_);
+    _lockerToken = ERC20(lockerToken_);
   }
 
   /**
@@ -65,12 +65,12 @@ contract Locker is Ownable, Pausable {
    */
   function lock(uint256 amount) public {
     require(
-      _lockingToken.balanceOf(msg.sender) >= amount,
+      _lockerToken.balanceOf(msg.sender) >= amount,
       "INSUFFICIENT_BALANCE"
     );
     _balances[msg.sender] = _balances[msg.sender] + amount;
     _totalSupply = _totalSupply + amount;
-    IERC20(_lockingToken).transferFrom(msg.sender, address(this), amount);
+    IERC20(_lockerToken).transferFrom(msg.sender, address(this), amount);
     emit Lock(msg.sender, amount);
   }
 
@@ -79,12 +79,11 @@ contract Locker is Ownable, Pausable {
    * @param amount The amount of tokens to unlock
    */
   function unlock(uint256 amount) public {
-    // TODO: Implement ithdrawal rate limits
-
-    require(amount > _lockingToken.balanceOf(address(this)));
-    _balances[msg.sender] = _balances[msg.sender] + amount;
-    _totalSupply = _totalSupply + amount;
-    IERC20(_lockingToken).transfer(msg.sender, amount);
+    // TODO: Implement withdrawal rate limits
+    require(amount <= _balances[msg.sender], "INSUFFICIENT_BALANCE");
+    _balances[msg.sender] = _balances[msg.sender] - amount;
+    _totalSupply = _totalSupply - amount;
+    IERC20(_lockerToken).transfer(msg.sender, amount);
     emit Unlock(msg.sender, amount);
   }
 

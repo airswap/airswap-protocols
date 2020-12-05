@@ -21,9 +21,9 @@ contract('Pool', async accounts => {
   const CLAIM_SCALE = 10
   const CLAIM_MAX = 50
 
-  const ALICE_CREDITS = toWei(100000, 4)
-  const BOB_CREDITS = toWei(150000, 4)
-  const CAROL_CREDITS = toWei(500000, 4)
+  const ALICE_CREDITS = toWei(10000, 4)
+  const BOB_CREDITS = toWei(100000, 4)
+  const CAROL_CREDITS = toWei(1000000, 4)
 
   let feeToken
   let pool
@@ -51,7 +51,7 @@ contract('Pool', async accounts => {
         'Transfer'
       )
     })
-    it(`Alice uses ${toDec(ALICE_CREDITS, 4)} to claim ~45`, async () => {
+    it(`Alice uses ${toDec(ALICE_CREDITS, 4)} to claim ~5`, async () => {
       emitted(
         await pool.claim(ALICE_CREDITS, feeToken.address, {
           from: aliceAddress,
@@ -60,14 +60,14 @@ contract('Pool', async accounts => {
       )
       equal(
         (await feeToken.balanceOf(aliceAddress)).toString(),
-        toWei('45.454545454545454545')
+        toWei('4.950495049504950495')
       )
       equal(
         (await feeToken.balanceOf(pool.address)).toString(),
-        toWei('954.545454545454545455')
+        toWei('995.049504950495049505')
       )
     })
-    it(`Bob uses ${toDec(BOB_CREDITS, 4)} to claim ~62`, async () => {
+    it(`Bob uses ${toDec(BOB_CREDITS, 4)} to claim ~45`, async () => {
       emitted(
         await pool.claim(BOB_CREDITS, feeToken.address, {
           from: bobAddress,
@@ -76,22 +76,22 @@ contract('Pool', async accounts => {
       )
       equal(
         (await feeToken.balanceOf(bobAddress)).toString(),
-        toWei('62.252964426877470355')
+        toWei('45.229522952295229522')
       )
       equal(
         (await feeToken.balanceOf(pool.address)).toString(),
-        toWei('892.292490118577075100')
+        toWei('949.819981998199819983')
       )
     })
-    it('Fees are added to the pool: 3000', async () => {
+    it('Fees are added to the pool: 1000', async () => {
       emitted(
-        await feeToken.transfer(pool.address, toWei(3000), {
+        await feeToken.transfer(pool.address, toWei(1000), {
           from: feeCollectorAddress,
         }),
         'Transfer'
       )
     })
-    it(`Carol uses ${toDec(CAROL_CREDITS, 4)} to claim ~648`, async () => {
+    it(`Carol uses ${toDec(CAROL_CREDITS, 4)} to claim ~487`, async () => {
       emitted(
         await pool.claim(CAROL_CREDITS, feeToken.address, {
           from: carolAddress,
@@ -100,11 +100,11 @@ contract('Pool', async accounts => {
       )
       equal(
         (await feeToken.balanceOf(carolAddress)).toString(),
-        toWei('648.715415019762845850')
+        toWei('487.454995499549954995')
       )
       equal(
         (await feeToken.balanceOf(pool.address)).toString(),
-        toWei('3243.577075098814229250')
+        toWei('1462.364986498649864988')
       )
     })
   })
