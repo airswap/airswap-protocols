@@ -1,7 +1,7 @@
 const Locker = artifacts.require('Locker')
 const FungibleToken = artifacts.require('FungibleToken')
 
-const { emitted, equal } = require('@airswap/test-utils').assert
+const { emitted, reverted, equal } = require('@airswap/test-utils').assert
 
 contract('Locker', async accounts => {
   const ownerAddress = accounts[0]
@@ -42,7 +42,7 @@ contract('Locker', async accounts => {
     })
   })
 
-  describe('locker and Unlocker', async () => {
+  describe('Locking and unlocking', async () => {
     it('Alice locks some tokens', async () => {
       emitted(
         await locker.lock(1000000, {
@@ -53,15 +53,23 @@ contract('Locker', async accounts => {
       equal((await locker.balanceOf(aliceAddress)).toString(), '1000000')
       equal((await locker.totalSupply()).toString(), '1000000')
     })
-    it('Alice unlocks some tokens', async () => {
+    it('Alice attempts to unlock too many tokens', async () => {
+      await reverted(
+        locker.unlock(100001, {
+          from: aliceAddress,
+        }),
+        'AMOUNT_EXCEEDS_LIMIT'
+      )
+    })
+    it('Alice attempts to unlock 10% of her tokens', async () => {
       emitted(
-        await locker.unlock(250000, {
+        await locker.unlock(100000, {
           from: aliceAddress,
         }),
         'Unlock'
       )
-      equal((await locker.balanceOf(aliceAddress)).toString(), '750000')
-      equal((await locker.totalSupply()).toString(), '750000')
+      equal((await locker.balanceOf(aliceAddress)).toString(), '900000')
+      equal((await locker.totalSupply()).toString(), '900000')
     })
     it('Bob locks some tokens', async () => {
       emitted(
@@ -71,7 +79,17 @@ contract('Locker', async accounts => {
         'Lock'
       )
       equal((await locker.balanceOf(bobAddress)).toString(), '500000')
-      equal((await locker.totalSupply()).toString(), '1250000')
+      equal((await locker.totalSupply()).toString(), '1400000')
+    })
+    it('Alice locks some tokens for Bob', async () => {
+      emitted(
+        await locker.lockFor(bobAddress, 200000, {
+          from: aliceAddress,
+        }),
+        'Lock'
+      )
+      equal((await locker.balanceOf(bobAddress)).toString(), '700000')
+      equal((await locker.totalSupply()).toString(), '1600000')
     })
   })
 })

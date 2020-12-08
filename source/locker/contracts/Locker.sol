@@ -27,10 +27,17 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 contract Locker is Ownable, Pausable {
   using SafeMath for uint256;
 
+  uint256 internal constant EPOCH_LENGTH = 7 * 86400;
+  uint256 internal constant THROTTLE = 10;
+
   // Token to be used for staking (ERC-20)
   ERC20 private _lockerToken;
 
+  // Locked account balances
   mapping(address => uint256) private _balances;
+
+  // Previous withdrawals per epoch
+  mapping(address => mapping(uint256 => uint256)) private _withdrawals;
 
   uint256 private _totalSupply;
   string private _name;
@@ -60,7 +67,7 @@ contract Locker is Ownable, Pausable {
   }
 
   /**
-   * @notice Transfers tokens to the contract balance for for msg.sender
+   * @notice Transfers tokens from msg.sender to the Locker
    * @param amount The amount of tokens to lock
    */
   function lock(uint256 amount) public {
@@ -75,16 +82,41 @@ contract Locker is Ownable, Pausable {
   }
 
   /**
+   * @notice Transfers tokens from msg.sender to the Locker for another account
+   * @param amount The amount of tokens to lock
+   */
+  function lockFor(address account, uint256 amount) public {
+    require(
+      _lockerToken.balanceOf(msg.sender) >= amount,
+      "INSUFFICIENT_BALANCE"
+    );
+    _balances[account] = _balances[account] + amount;
+    _totalSupply = _totalSupply + amount;
+    IERC20(_lockerToken).transferFrom(msg.sender, address(this), amount);
+    emit Lock(account, amount);
+  }
+
+  /**
    * @notice Unlocks and transfers tokens msg.sender
    * @param amount The amount of tokens to unlock
    */
   function unlock(uint256 amount) public {
-    // TODO: Implement withdrawal rate limits
+    uint256 previous = _withdrawals[msg.sender][epoch()];
+    require(
+      (previous + amount) <= ((THROTTLE * _balances[msg.sender]) / 100),
+      "AMOUNT_EXCEEDS_LIMIT"
+    );
+
     require(amount <= _balances[msg.sender], "INSUFFICIENT_BALANCE");
     _balances[msg.sender] = _balances[msg.sender] - amount;
     _totalSupply = _totalSupply - amount;
+    _withdrawals[msg.sender][epoch()] = previous + amount;
     IERC20(_lockerToken).transfer(msg.sender, amount);
     emit Unlock(msg.sender, amount);
+  }
+
+  function epoch() public view returns (uint256) {
+    return block.timestamp - (block.timestamp % EPOCH_LENGTH);
   }
 
   /**
