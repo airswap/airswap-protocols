@@ -16,7 +16,7 @@
     "test": "yarn compile; truffle test"
   },
   "dependencies": {
-    "@airswap/tokens": "0.1.4"
+    "@openzeppelin/contracts": "^3.3.0"
   },
   "devDependencies": {
     "@airswap/test-utils": "0.1.6",

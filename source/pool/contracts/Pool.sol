@@ -14,12 +14,14 @@
   limitations under the License.
 */
 
-pragma solidity 0.5.16;
+pragma solidity ^0.6.0;
+pragma experimental ABIEncoderV2;
 
-import "openzeppelin-solidity/contracts/lifecycle/Pausable.sol";
-import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
-import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
-import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/Pausable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/cryptography/MerkleProof.sol";
 
 /**
  * @title Pool: Claim Tokens Based on a Pricing Function
@@ -27,24 +29,38 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 contract Pool is Ownable, Pausable {
   using SafeMath for uint256;
 
-  // Maximum integer for token transfer approval
-  bytes1 internal constant NOTTRUSTED = 0x00;
-  bytes1 internal constant TRUSTED = 0x01;
-
   // Higher the scale, lower the output for a claim
   uint256 public _scale;
 
-  // Percentage available for a claim with infinite credits
+  // Max percentage for a claim with infinite score
   uint256 public _max;
 
-  mapping(address => bytes2) public signers;
+  // Mapping of tree root to boolean to enable claims
+  mapping(bytes32 => bool) public _roots;
+
+  // Mapping of tree root to account to boolean to mark as claimed
+  mapping(bytes32 => mapping(address => bool)) public _claimed;
 
   /**
    * @notice Events
    */
-  event Claim(address account, address token, uint256 amount);
-  event AddSigner(address signer);
-  event RemoveSigner(address signer);
+  event Enable(bytes32 root);
+  event ClaimSingle(address account, address token, uint256 amount);
+  event ClaimMultiple(
+    bytes32[] ids,
+    address account,
+    address token,
+    uint256 amount
+  );
+
+  /**
+   * @notice Structs
+   */
+  struct Claim {
+    bytes32 root;
+    uint256 score;
+    bytes32[] proof;
+  }
 
   /**
    * @notice Constructor
@@ -56,42 +72,98 @@ contract Pool is Ownable, Pausable {
     _max = max_;
   }
 
-  function addSigner(address signer) public onlyOwner {
-    signers[signer] = TRUSTED;
-    emit AddSigner(signer);
-  }
-
-  function removeSigner(address signer) public onlyOwner {
-    signers[signer] = NOTTRUSTED;
-    emit RemoveSigner(signer);
+  /**
+   * @notice Enables claims on the merkle tree of a set of scores
+   * @param root bytes32
+   */
+  function enable(bytes32 root) external onlyOwner {
+    require(_roots[root] == false, "ROOT_EXISTS");
+    _roots[root] = true;
+    emit Enable(root);
   }
 
   /**
-   * @notice Claims a portion of available tokens and transfers to the participant (msg.sender)
-   * @param credits uint256
+   * @notice Single claim of tokens to be transferred to msg.sender
+   * @param root bytes32
+   * @param score uint256
+   * @param proof bytes32[]
    * @param token address
    */
-  function claim(uint256 credits, address token) public {
-    // TODO: Replace "credits" with "signature" and implement checks to determine value
+  function claimSingle(
+    bytes32 root,
+    uint256 score,
+    bytes32[] memory proof,
+    address token
+  ) public {
+    require(_roots[root], "ROOT_NOT_ENABLED");
+    require(!_claimed[root][msg.sender], "ALREADY_CLAIMED");
+    require(verifyClaim(msg.sender, root, score, proof), "PROOF_INVALID");
 
-    uint256 amount = getOutput(credits, token);
+    _claimed[root][msg.sender] = true;
+
+    uint256 amount = getOutput(score, token);
     IERC20(token).transfer(msg.sender, amount);
-    emit Claim(msg.sender, token, amount);
+    emit ClaimSingle(msg.sender, token, amount);
   }
 
   /**
-   * @notice Get output amount for an input
-   * @param input uint256
+   * @notice Multiple claim of tokens to be transferred to msg.sender
+   * @param claims Claim[]
    * @param token address
    */
-  function getOutput(uint256 input, address token)
+  function claimMultiple(Claim[] memory claims, address token) public {
+    uint256 totalScore = 0;
+    bytes32[] memory roots = new bytes32[](claims.length);
+    Claim memory claim;
+    for (uint256 i = 0; i < claims.length; i++) {
+      claim = claims[i];
+
+      require(!_claimed[claim.root][msg.sender], "ALREADY_CLAIMED");
+      require(
+        verifyClaim(msg.sender, claim.root, claim.score, claim.proof),
+        "PROOF_INVALID"
+      );
+
+      totalScore += claim.score;
+      roots[i] = claim.root;
+      _claimed[claim.root][msg.sender] = true;
+    }
+
+    uint256 amount = getOutput(totalScore, token);
+    IERC20(token).transfer(msg.sender, amount);
+    emit ClaimMultiple(roots, msg.sender, token, amount);
+  }
+
+  /**
+   * @notice Get output amount for an input score
+   * @param score uint256
+   * @param token address
+   */
+  function getOutput(uint256 score, address token)
     public
     view
     returns (uint256 amount)
   {
     return
       (_max *
-        ((input * IERC20(token).balanceOf(address(this))) /
-          ((10**_scale) + input))) / 100;
+        ((score * IERC20(token).balanceOf(address(this))) /
+          ((10**_scale) + score))) / 100;
+  }
+
+  /**
+   * @notice Verify a claim proof
+   * @param participant address
+   * @param root bytes32
+   * @param score uint256
+   * @param proof bytes32[]
+   */
+  function verifyClaim(
+    address participant,
+    bytes32 root,
+    uint256 score,
+    bytes32[] memory proof
+  ) public view returns (bool valid) {
+    bytes32 leaf = keccak256(abi.encodePacked(participant, score));
+    return MerkleProof.verify(proof, root, leaf);
   }
 }
