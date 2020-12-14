@@ -24,10 +24,13 @@ import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
  * facilitate token transfers
  */
 contract TransferHandlerRegistry is Ownable {
-  event AddTransferHandler(bytes4 kind, address contractAddress);
-
   // Mapping of bytes4 to contract interface type
   mapping(bytes4 => ITransferHandler) public transferHandlers;
+
+  /**
+   * @notice Contract Events
+   */
+  event AddTransferHandler(bytes4 kind, address contractAddress);
 
   /**
    * @notice Adds handler to mapping

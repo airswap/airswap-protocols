@@ -21,8 +21,6 @@ pragma experimental ABIEncoderV2;
  * @title Types: Library of Swap Protocol Types and Hashes
  */
 library Types {
-  bytes internal constant EIP191_HEADER = "\x19\x01";
-
   struct Order {
     uint256 nonce; // Unique per order and should be sequential
     uint256 expiry; // Expiry in seconds since 1 January 1970
@@ -47,6 +45,8 @@ library Types {
     bytes32 r; // `r` value of an ECDSA signature
     bytes32 s; // `s` value of an ECDSA signature
   }
+
+  bytes internal constant EIP191_HEADER = "\x19\x01";
 
   bytes32 internal constant DOMAIN_TYPEHASH = keccak256(
     abi.encodePacked(
