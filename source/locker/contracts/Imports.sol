@@ -1,5 +1,5 @@
-pragma solidity 0.5.16;
+pragma solidity ^0.6.0;
 
-import "@airswap/tokens/contracts/FungibleToken.sol";
+import "@openzeppelin/contracts/presets/ERC20PresetMinterPauser.sol";
 
 contract Imports {}

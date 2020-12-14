@@ -14,12 +14,12 @@
   limitations under the License.
 */
 
-pragma solidity 0.5.16;
+pragma solidity ^0.6.5;
 
-import "openzeppelin-solidity/contracts/lifecycle/Pausable.sol";
-import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
-import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
-import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/Pausable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
 
 /**
  * @title Locker: Lock and Unlock a Token Balance
@@ -27,128 +27,150 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 contract Locker is Ownable, Pausable {
   using SafeMath for uint256;
 
-  uint256 internal constant EPOCH_LENGTH = 7 * 86400;
-  uint256 internal constant THROTTLE = 10;
-
   // Token to be used for staking (ERC-20)
-  ERC20 private _lockerToken;
+  ERC20 public immutable token;
 
   // Locked account balances
-  mapping(address => uint256) private _balances;
+  mapping(address => uint256) public balances;
 
   // Previous withdrawals per epoch
-  mapping(address => mapping(uint256 => uint256)) private _withdrawals;
+  mapping(address => mapping(uint256 => uint256)) public previousWithdrawals;
 
-  uint256 private _totalSupply;
-  string private _name;
-  string private _symbol;
-  uint8 private _decimals;
+  // Total amount locked
+  uint256 public totalSupply;
+
+  // ERC-20 token properties
+  string public name;
+  string public symbol;
+  uint8 public decimals;
+
+  // Maximum unlockable percentage per epoch
+  uint256 public throttlingPercentage;
+
+  // Duration of each epoch
+  uint256 public throttlingDuration;
+
+  // Balance above which percentage kicks in
+  uint256 public throttlingBalance;
 
   /**
    * @notice Contract Events
    */
   event Lock(address participant, uint256 amount);
   event Unlock(address participant, uint256 amount);
+  event SetThrottlingPercentage(uint256 throttlingPercentage);
+  event SetThrottlingDuration(uint256 throttlingDuration);
+  event SetThrottlingBalance(uint256 throttlingBalance);
 
   /**
    * @notice Contract Constructor
-   * @param lockerToken_ address
+   * @param _token address
+   * @param _name string
+   * @param _symbol string
+   * @param _decimals uint8
+   * @param _throttlingPercentage uint256
+   * @param _throttlingDuration uint256
+   * @param _throttlingBalance uint256
    */
   constructor(
-    string memory name_,
-    string memory symbol_,
-    uint8 decimals_,
-    address lockerToken_
+    address _token,
+    string memory _name,
+    string memory _symbol,
+    uint8 _decimals,
+    uint256 _throttlingPercentage,
+    uint256 _throttlingDuration,
+    uint256 _throttlingBalance
   ) public {
-    _name = name_;
-    _symbol = symbol_;
-    _decimals = decimals_;
-    _lockerToken = ERC20(lockerToken_);
+    require(_throttlingPercentage <= 100, "PERCENTAGE_TOO_HIGH");
+
+    token = ERC20(_token);
+    name = _name;
+    symbol = _symbol;
+    decimals = _decimals;
+    throttlingPercentage = _throttlingPercentage;
+    throttlingDuration = _throttlingDuration;
+    throttlingBalance = _throttlingBalance;
+
+    emit SetThrottlingPercentage(_throttlingPercentage);
+    emit SetThrottlingDuration(_throttlingDuration);
+    emit SetThrottlingBalance(_throttlingBalance);
   }
 
   /**
-   * @notice Transfers tokens from msg.sender to the Locker
-   * @param amount The amount of tokens to lock
+   * @notice Locks tokens from the msg.sender.
+   * @param amount Amount of tokens to lock
    */
   function lock(uint256 amount) public {
-    require(
-      _lockerToken.balanceOf(msg.sender) >= amount,
-      "INSUFFICIENT_BALANCE"
-    );
-    _balances[msg.sender] = _balances[msg.sender] + amount;
-    _totalSupply = _totalSupply + amount;
-    IERC20(_lockerToken).transferFrom(msg.sender, address(this), amount);
+    require(token.balanceOf(msg.sender) >= amount, "BALANCE_INSUFFICIENT");
+    balances[msg.sender] = balances[msg.sender] + amount;
+    totalSupply = totalSupply + amount;
+    IERC20(token).transferFrom(msg.sender, address(this), amount);
     emit Lock(msg.sender, amount);
   }
 
   /**
-   * @notice Transfers tokens from msg.sender to the Locker for another account
-   * @param amount The amount of tokens to lock
+   * @notice Locks tokens on behalf of another account.
+   * @param amount Amount of tokens to lock
    */
   function lockFor(address account, uint256 amount) public {
-    require(
-      _lockerToken.balanceOf(msg.sender) >= amount,
-      "INSUFFICIENT_BALANCE"
-    );
-    _balances[account] = _balances[account] + amount;
-    _totalSupply = _totalSupply + amount;
-    IERC20(_lockerToken).transferFrom(msg.sender, address(this), amount);
+    require(token.balanceOf(msg.sender) >= amount, "BALANCE_INSUFFICIENT");
+    balances[account] = balances[account] + amount;
+    totalSupply = totalSupply + amount;
+    IERC20(token).transferFrom(msg.sender, address(this), amount);
     emit Lock(account, amount);
   }
 
   /**
-   * @notice Unlocks and transfers tokens msg.sender
-   * @param amount The amount of tokens to unlock
+   * @notice Unlocks and transfers tokens to msg.sender.
+   * @param amount Amount of tokens to unlock
    */
   function unlock(uint256 amount) public {
-    uint256 previous = _withdrawals[msg.sender][epoch()];
-    require(
-      (previous + amount) <= ((THROTTLE * _balances[msg.sender]) / 100),
-      "AMOUNT_EXCEEDS_LIMIT"
-    );
+    uint256 previous = previousWithdrawals[msg.sender][epoch()];
 
-    require(amount <= _balances[msg.sender], "INSUFFICIENT_BALANCE");
-    _balances[msg.sender] = _balances[msg.sender] - amount;
-    _totalSupply = _totalSupply - amount;
-    _withdrawals[msg.sender][epoch()] = previous + amount;
-    IERC20(_lockerToken).transfer(msg.sender, amount);
+    // Only enforce percentage above a certain balance
+    if (balances[msg.sender] > throttlingBalance) {
+      require(
+        (previous + amount) <= ((throttlingPercentage * balances[msg.sender]) / 100),
+        "AMOUNT_EXCEEDS_LIMIT"
+      );
+    } else {
+      require(amount <= balances[msg.sender], "BALANCE_INSUFFICIENT");
+    }
+
+    balances[msg.sender] = balances[msg.sender] - amount;
+    totalSupply = totalSupply - amount;
+    previousWithdrawals[msg.sender][epoch()] = previous + amount;
+    IERC20(token).transfer(msg.sender, amount);
     emit Unlock(msg.sender, amount);
   }
 
+  function setThrottlingPercentage(uint256 _throttlingPercentage) public onlyOwner {
+    require(_throttlingPercentage <= 100, "PERCENTAGE_TOO_HIGH");
+    throttlingPercentage = _throttlingPercentage;
+    emit SetThrottlingPercentage(throttlingPercentage);
+  }
+
+  function setThrottlingDuration(uint256 _throttlingDuration) public onlyOwner  {
+    throttlingDuration = _throttlingDuration;
+    emit SetThrottlingDuration(throttlingDuration);
+  }
+
+  function setThrottlingBalance(uint256 _throttlingBalance) public onlyOwner  {
+    throttlingBalance = _throttlingBalance;
+    emit SetThrottlingBalance(throttlingBalance);
+  }
+
+  /**
+   * @dev Returns the current epoch.
+   */
   function epoch() public view returns (uint256) {
-    return block.timestamp - (block.timestamp % EPOCH_LENGTH);
-  }
-
-  /**
-   * @dev Returns the name of the token.
-   */
-  function name() public view returns (string memory) {
-    return _name;
-  }
-
-  /**
-   * @dev Returns the symbol of the token, usually a shorter version of the
-   * name.
-   */
-  function symbol() public view returns (string memory) {
-    return _symbol;
-  }
-
-  function decimals() public view returns (uint8) {
-    return _decimals;
-  }
-
-  /**
-   * @dev See {IERC20-totalSupply}.
-   */
-  function totalSupply() public view returns (uint256) {
-    return _totalSupply;
+    return block.timestamp - (block.timestamp % throttlingDuration);
   }
 
   /**
    * @dev See {IERC20-balanceOf}.
    */
   function balanceOf(address account) public view returns (uint256) {
-    return _balances[account];
+    return balances[account];
   }
 }

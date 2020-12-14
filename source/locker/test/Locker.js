@@ -1,5 +1,5 @@
 const Locker = artifacts.require('Locker')
-const FungibleToken = artifacts.require('FungibleToken')
+const ERC20PresetMinterPauser = artifacts.require('ERC20PresetMinterPauser')
 
 const { emitted, reverted, equal } = require('@airswap/test-utils').assert
 
@@ -8,18 +8,36 @@ contract('Locker', async accounts => {
   const aliceAddress = accounts[1]
   const bobAddress = accounts[2]
 
+  const SECONDS_IN_DAY = 86400
+
+  const THROTTLING_PERCENTAGE = 10
+  const THROTTLING_DURATION = 7 * SECONDS_IN_DAY
+  const THROTTLING_BALANCE = 100
+
   let lockerToken
   let locker
 
   describe('Deploying...', async () => {
     it('Deployed locker token', async () => {
-      lockerToken = await FungibleToken.new()
+      lockerToken = await ERC20PresetMinterPauser.new('Fee', 'FEE')
     })
 
     it('Deployed Locker contract', async () => {
-      locker = await Locker.new('Locker', 'LCK', 4, lockerToken.address, {
-        from: ownerAddress,
-      })
+      locker = await Locker.new(
+        lockerToken.address,
+        'Locker',
+        'LCK',
+        4,
+        THROTTLING_PERCENTAGE,
+        THROTTLING_DURATION,
+        THROTTLING_BALANCE,
+        {
+          from: ownerAddress,
+        }
+      )
+      equal((await locker.name()).toString(), 'Locker')
+      equal((await locker.symbol()).toString(), 'LCK')
+      equal((await locker.decimals()).toString(), '4')
     })
 
     it('Mints some tokens for Alice and Bob', async () => {
@@ -81,6 +99,14 @@ contract('Locker', async accounts => {
       equal((await locker.balanceOf(bobAddress)).toString(), '500000')
       equal((await locker.totalSupply()).toString(), '1400000')
     })
+    it('Bob tries to lock more than he has', async () => {
+      await reverted(
+        locker.lock(100000000, {
+          from: bobAddress,
+        }),
+        'BALANCE_INSUFFICIENT'
+      )
+    })
     it('Alice locks some tokens for Bob', async () => {
       emitted(
         await locker.lockFor(bobAddress, 200000, {
@@ -90,6 +116,42 @@ contract('Locker', async accounts => {
       )
       equal((await locker.balanceOf(bobAddress)).toString(), '700000')
       equal((await locker.totalSupply()).toString(), '1600000')
+    })
+    it('Alice tries to lock more than she has for Bob', async () => {
+      await reverted(
+        locker.lockFor(bobAddress, 100000000, {
+          from: aliceAddress,
+        }),
+        'BALANCE_INSUFFICIENT'
+      )
+    })
+    it('Updates percentage, duration, and lowest', async () => {
+      emitted(
+        await locker.setThrottlingPercentage(100, {
+          from: ownerAddress,
+        }),
+        'SetThrottlingPercentage'
+      )
+      emitted(
+        await locker.setThrottlingDuration(SECONDS_IN_DAY, {
+          from: ownerAddress,
+        }),
+        'SetThrottlingDuration'
+      )
+      emitted(
+        await locker.setThrottlingBalance(100000000, {
+          from: ownerAddress,
+        }),
+        'SetThrottlingBalance'
+      )
+    })
+    it('Alice tries to unlock more than she has locked', async () => {
+      await reverted(
+        locker.unlock(100000000, {
+          from: aliceAddress,
+        }),
+        'BALANCE_INSUFFICIENT'
+      )
     })
   })
 })
