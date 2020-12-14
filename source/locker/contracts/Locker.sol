@@ -130,7 +130,8 @@ contract Locker is Ownable, Pausable {
     // Only enforce percentage above a certain balance
     if (balances[msg.sender] > throttlingBalance) {
       require(
-        (previous + amount) <= ((throttlingPercentage * balances[msg.sender]) / 100),
+        (previous + amount) <=
+          ((throttlingPercentage * balances[msg.sender]) / 100),
         "AMOUNT_EXCEEDS_LIMIT"
       );
     } else {
@@ -144,18 +145,21 @@ contract Locker is Ownable, Pausable {
     emit Unlock(msg.sender, amount);
   }
 
-  function setThrottlingPercentage(uint256 _throttlingPercentage) public onlyOwner {
+  function setThrottlingPercentage(uint256 _throttlingPercentage)
+    public
+    onlyOwner
+  {
     require(_throttlingPercentage <= 100, "PERCENTAGE_TOO_HIGH");
     throttlingPercentage = _throttlingPercentage;
     emit SetThrottlingPercentage(throttlingPercentage);
   }
 
-  function setThrottlingDuration(uint256 _throttlingDuration) public onlyOwner  {
+  function setThrottlingDuration(uint256 _throttlingDuration) public onlyOwner {
     throttlingDuration = _throttlingDuration;
     emit SetThrottlingDuration(throttlingDuration);
   }
 
-  function setThrottlingBalance(uint256 _throttlingBalance) public onlyOwner  {
+  function setThrottlingBalance(uint256 _throttlingBalance) public onlyOwner {
     throttlingBalance = _throttlingBalance;
     emit SetThrottlingBalance(throttlingBalance);
   }
