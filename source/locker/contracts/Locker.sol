@@ -14,7 +14,7 @@
   limitations under the License.
 */
 
-pragma solidity ^0.6.5;
+pragma solidity ^0.6.12;
 
 import "@openzeppelin/contracts/utils/Pausable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";

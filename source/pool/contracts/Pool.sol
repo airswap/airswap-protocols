@@ -14,7 +14,7 @@
   limitations under the License.
 */
 
-pragma solidity ^0.6.0;
+pragma solidity ^0.6.12;
 pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts/utils/Pausable.sol";
@@ -30,16 +30,16 @@ contract Pool is Ownable, Pausable {
   using SafeMath for uint256;
 
   // Higher the scale, lower the output for a claim
-  uint256 public _scale;
+  uint256 public immutable scale;
 
   // Max percentage for a claim with infinite score
-  uint256 public _max;
+  uint256 public immutable max;
 
   // Mapping of tree root to boolean to enable claims
-  mapping(bytes32 => bool) public _roots;
+  mapping(bytes32 => bool) public roots;
 
   // Mapping of tree root to account to boolean to mark as claimed
-  mapping(bytes32 => mapping(address => bool)) public _claimed;
+  mapping(bytes32 => mapping(address => bool)) public claimed;
 
   /**
    * @notice Events
@@ -59,12 +59,12 @@ contract Pool is Ownable, Pausable {
 
   /**
    * @notice Constructor
-   * @param scale_ uint256
-   * @param max_ uint256
+   * @param _scale uint256
+   * @param _max uint256
    */
-  constructor(uint256 scale_, uint256 max_) public {
-    _scale = scale_;
-    _max = max_;
+  constructor(uint256 _scale, uint256 _max) public {
+    scale = _scale;
+    max = _max;
   }
 
   /**
@@ -72,8 +72,8 @@ contract Pool is Ownable, Pausable {
    * @param root bytes32
    */
   function enable(bytes32 root) external onlyOwner {
-    require(_roots[root] == false, "ROOT_EXISTS");
-    _roots[root] = true;
+    require(roots[root] == false, "ROOT_EXISTS");
+    roots[root] = true;
     emit Enable(root);
   }
 
@@ -90,10 +90,10 @@ contract Pool is Ownable, Pausable {
     bytes32[] memory proof,
     address token
   ) public {
-    require(_roots[root], "ROOT_NOT_ENABLED");
-    require(!_claimed[root][msg.sender], "CLAIM_INVALID");
+    require(roots[root], "ROOT_NOT_ENABLED");
+    require(!claimed[root][msg.sender], "CLAIM_INVALID");
     require(verify(msg.sender, root, score, proof), "PROOF_INVALID");
-    _claimed[root][msg.sender] = true;
+    claimed[root][msg.sender] = true;
 
     uint256 amount = getOutput(score, token);
     IERC20(token).transfer(msg.sender, amount);
@@ -108,22 +108,22 @@ contract Pool is Ownable, Pausable {
   function bulk(Claim[] memory claims, address token) public {
     require(claims.length > 0, "NO_CLAIMS_PROVIDED");
     uint256 totalScore = 0;
-    bytes32[] memory roots = new bytes32[](claims.length);
+    bytes32[] memory rootList = new bytes32[](claims.length);
     Claim memory claim;
     for (uint256 i = 0; i < claims.length; i++) {
       claim = claims[i];
-      require(_roots[claim.root], "ROOT_NOT_ENABLED");
-      require(!_claimed[claim.root][msg.sender], "CLAIM_INVALID");
+      require(roots[claim.root], "ROOT_NOT_ENABLED");
+      require(!claimed[claim.root][msg.sender], "CLAIM_INVALID");
       require(
         verify(msg.sender, claim.root, claim.score, claim.proof),
         "PROOF_INVALID"
       );
       totalScore = totalScore + claim.score;
-      _claimed[claim.root][msg.sender] = true;
+      claimed[claim.root][msg.sender] = true;
     }
     uint256 amount = getOutput(totalScore, token);
     IERC20(token).transfer(msg.sender, amount);
-    emit Bulk(roots, msg.sender, token, amount);
+    emit Bulk(rootList, msg.sender, token, amount);
   }
 
   /**
@@ -137,9 +137,9 @@ contract Pool is Ownable, Pausable {
     returns (uint256 amount)
   {
     return
-      (_max *
+      (max *
         ((score * IERC20(token).balanceOf(address(this))) /
-          ((10**_scale) + score))) / 100;
+          ((10**scale) + score))) / 100;
   }
 
   /**
