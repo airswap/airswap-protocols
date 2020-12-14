@@ -19,7 +19,11 @@ export * from './src/merkle'
 import { soliditySha3 } from 'web3-utils'
 import { MerkleTree } from './src/merkle'
 
-export function generateTreeForData(data) {
+export function generateTreeFromElements(elements) {
+  return new MerkleTree(elements)
+}
+
+export function generateTreeFromData(data) {
   const elements = []
   for (const idx in data) {
     elements.push(soliditySha3(idx, data[idx]))

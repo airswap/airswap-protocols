@@ -1,6 +1,6 @@
-# Utils
+# Merkle
 
-Utilities for AirSwap Developers
+Merkle Tree Utilities
 
 [![Discord](https://img.shields.io/discord/590643190281928738.svg)](https://discord.gg/ecQbV7H)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
@@ -19,13 +19,13 @@ Utilities for AirSwap Developers
 Add the package to your project:
 
 ```console
-yarn add @airswap/utils
+yarn add @airswap/merkle
 ```
 
 Import into your application:
 
 ```TypeScript
-import { toDecimalString, toAtomicString } from '@airswap/utils';
+import { generateTreeFromData, generateTreeFromElements, getRoot, getProof } from '@airswap/merkle';
 ```
 
 ## Commands

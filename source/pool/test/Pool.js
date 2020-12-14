@@ -6,7 +6,7 @@ const { soliditySha3 } = require('web3-utils')
 const { toAtomicString, toDecimalString } = require('@airswap/utils')
 const { emitted, equal, reverted } = require('@airswap/test-utils').assert
 
-const { generateTreeForData, getRoot, getProof } = require('@airswap/merkle')
+const { generateTreeFromData, getRoot, getProof } = require('@airswap/merkle')
 
 function toWei(value, places) {
   return toAtomicString(value, places || 18)
@@ -50,7 +50,7 @@ contract('Pool', async accounts => {
   })
 
   describe('Seeding', async () => {
-    tree = generateTreeForData({
+    tree = generateTreeFromData({
       [aliceAddress]: ALICE_SCORE,
       [bobAddress]: BOB_SCORE,
       [carolAddress]: CAROL_SCORE,
@@ -131,7 +131,7 @@ contract('Pool', async accounts => {
       )
     })
     it(`Carol tries to claim using a bad tree`, async () => {
-      const badTree = generateTreeForData({
+      const badTree = generateTreeFromData({
         [aliceAddress]: ALICE_SCORE,
         [bobAddress]: BOB_SCORE,
         [carolAddress]: CAROL_BAD_SCORE,
@@ -156,7 +156,7 @@ contract('Pool', async accounts => {
     })
     it(`Carol tries to claim more than available`, async () => {
       const proof = getProof(
-        generateTreeForData({
+        generateTreeFromData({
           [aliceAddress]: ALICE_SCORE,
           [bobAddress]: BOB_SCORE,
           [carolAddress]: CAROL_BAD_SCORE,
@@ -171,7 +171,7 @@ contract('Pool', async accounts => {
       )
     })
     it(`Carol tries to claim using a bad tree`, async () => {
-      const badTree = generateTreeForData({
+      const badTree = generateTreeFromData({
         [aliceAddress]: ALICE_SCORE,
         [bobAddress]: BOB_SCORE,
         [carolAddress]: CAROL_BAD_SCORE,
@@ -200,7 +200,7 @@ contract('Pool', async accounts => {
     })
     it(`Carol tries to claim more than available`, async () => {
       const proof = getProof(
-        generateTreeForData({
+        generateTreeFromData({
           [aliceAddress]: ALICE_SCORE,
           [bobAddress]: BOB_SCORE,
           [carolAddress]: CAROL_BAD_SCORE,

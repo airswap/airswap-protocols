@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import { soliditySha3 } from 'web3-utils'
-import { generateTreeForData, getRoot, getProof } from '../index'
+import { generateTreeFromData, getRoot, getProof } from '../index'
 
 describe('Merkle', async () => {
   let tree
@@ -12,7 +12,7 @@ describe('Merkle', async () => {
   ]
 
   it('Creates and validates tree', async () => {
-    tree = generateTreeForData({
+    tree = generateTreeFromData({
       a: '1',
       b: '2',
       c: '3',
