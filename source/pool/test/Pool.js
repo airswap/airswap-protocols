@@ -80,16 +80,10 @@ contract('Pool', async accounts => {
       const proof = getProof(tree, soliditySha3(aliceAddress, ALICE_SCORE))
 
       emitted(
-        await pool.claimSingle(
-          getRoot(tree),
-          ALICE_SCORE,
-          proof,
-          feeToken.address,
-          {
-            from: aliceAddress,
-          }
-        ),
-        'ClaimSingle'
+        await pool.single(getRoot(tree), ALICE_SCORE, proof, feeToken.address, {
+          from: aliceAddress,
+        }),
+        'Single'
       )
       equal(
         (await feeToken.balanceOf(aliceAddress)).toString(),
@@ -104,16 +98,10 @@ contract('Pool', async accounts => {
       const proof = getProof(tree, soliditySha3(bobAddress, BOB_SCORE))
 
       emitted(
-        await pool.claimSingle(
-          getRoot(tree),
-          BOB_SCORE,
-          proof,
-          feeToken.address,
-          {
-            from: bobAddress,
-          }
-        ),
-        'ClaimSingle'
+        await pool.single(getRoot(tree), BOB_SCORE, proof, feeToken.address, {
+          from: bobAddress,
+        }),
+        'Single'
       )
       equal(
         (await feeToken.balanceOf(bobAddress)).toString(),
@@ -128,10 +116,10 @@ contract('Pool', async accounts => {
       const proof = getProof(tree, soliditySha3(bobAddress, BOB_SCORE))
 
       await reverted(
-        pool.claimSingle(getRoot(tree), BOB_SCORE, proof, feeToken.address, {
+        pool.single(getRoot(tree), BOB_SCORE, proof, feeToken.address, {
           from: bobAddress,
         }),
-        'ALREADY_CLAIMED'
+        'CLAIM_INVALID'
       )
     })
     it('Fees are added to the pool: 1000', async () => {
@@ -154,7 +142,7 @@ contract('Pool', async accounts => {
       )
 
       await reverted(
-        pool.claimSingle(
+        pool.single(
           getRoot(badTree),
           CAROL_BAD_SCORE,
           proof,
@@ -176,10 +164,32 @@ contract('Pool', async accounts => {
         soliditySha3(carolAddress, CAROL_BAD_SCORE)
       )
       await reverted(
-        pool.claimSingle(
-          getRoot(tree),
-          CAROL_BAD_SCORE,
-          proof,
+        pool.single(getRoot(tree), CAROL_BAD_SCORE, proof, feeToken.address, {
+          from: carolAddress,
+        }),
+        'PROOF_INVALID'
+      )
+    })
+    it(`Carol tries to claim using a bad tree`, async () => {
+      const badTree = generateTreeForData({
+        [aliceAddress]: ALICE_SCORE,
+        [bobAddress]: BOB_SCORE,
+        [carolAddress]: CAROL_BAD_SCORE,
+      })
+      const proof = getProof(
+        badTree,
+        soliditySha3(carolAddress, CAROL_BAD_SCORE)
+      )
+
+      await reverted(
+        pool.bulk(
+          [
+            {
+              root: getRoot(tree),
+              score: CAROL_BAD_SCORE,
+              proof: proof,
+            },
+          ],
           feeToken.address,
           {
             from: carolAddress,
@@ -188,20 +198,53 @@ contract('Pool', async accounts => {
         'PROOF_INVALID'
       )
     })
-    it(`Carol uses ${toDec(CAROL_SCORE, 4)} to claim ~487`, async () => {
-      const proof = getProof(tree, soliditySha3(carolAddress, CAROL_SCORE))
-
-      emitted(
-        await pool.claimSingle(
-          getRoot(tree),
-          CAROL_SCORE,
-          proof,
+    it(`Carol tries to claim more than available`, async () => {
+      const proof = getProof(
+        generateTreeForData({
+          [aliceAddress]: ALICE_SCORE,
+          [bobAddress]: BOB_SCORE,
+          [carolAddress]: CAROL_BAD_SCORE,
+        }),
+        soliditySha3(carolAddress, CAROL_BAD_SCORE)
+      )
+      await reverted(
+        pool.bulk(
+          [
+            {
+              root: getRoot(tree),
+              score: CAROL_BAD_SCORE,
+              proof: proof,
+            },
+          ],
           feeToken.address,
           {
             from: carolAddress,
           }
         ),
-        'ClaimSingle'
+        'PROOF_INVALID'
+      )
+    })
+    it(`Carol tries to bulk claim zero claims and fails`, async () => {
+      await reverted(pool.bulk([], feeToken.address), 'NO_CLAIMS_PROVIDED')
+    })
+    it(`Carol uses ${toDec(CAROL_SCORE, 4)} to claim ~487`, async () => {
+      const proof = getProof(tree, soliditySha3(carolAddress, CAROL_SCORE))
+
+      emitted(
+        await pool.bulk(
+          [
+            {
+              root: getRoot(tree),
+              score: CAROL_SCORE,
+              proof: proof,
+            },
+          ],
+          feeToken.address,
+          {
+            from: carolAddress,
+          }
+        ),
+        'Bulk'
       )
       equal(
         (await feeToken.balanceOf(carolAddress)).toString(),
@@ -210,6 +253,26 @@ contract('Pool', async accounts => {
       equal(
         (await feeToken.balanceOf(pool.address)).toString(),
         toWei('1462.364986498649864988')
+      )
+    })
+    it(`Carol tries to claim again and fails`, async () => {
+      const proof = getProof(tree, soliditySha3(carolAddress, CAROL_SCORE))
+
+      await reverted(
+        pool.bulk(
+          [
+            {
+              root: getRoot(tree),
+              score: CAROL_SCORE,
+              proof: proof,
+            },
+          ],
+          feeToken.address,
+          {
+            from: carolAddress,
+          }
+        ),
+        'CLAIM_INVALID'
       )
     })
   })

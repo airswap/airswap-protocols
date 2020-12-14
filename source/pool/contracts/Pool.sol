@@ -45,13 +45,8 @@ contract Pool is Ownable, Pausable {
    * @notice Events
    */
   event Enable(bytes32 root);
-  event ClaimSingle(address account, address token, uint256 amount);
-  event ClaimMultiple(
-    bytes32[] ids,
-    address account,
-    address token,
-    uint256 amount
-  );
+  event Single(bytes32 root, address account, address token, uint256 amount);
+  event Bulk(bytes32[] roots, address account, address token, uint256 amount);
 
   /**
    * @notice Structs
@@ -89,49 +84,46 @@ contract Pool is Ownable, Pausable {
    * @param proof bytes32[]
    * @param token address
    */
-  function claimSingle(
+  function single(
     bytes32 root,
     uint256 score,
     bytes32[] memory proof,
     address token
   ) public {
     require(_roots[root], "ROOT_NOT_ENABLED");
-    require(!_claimed[root][msg.sender], "ALREADY_CLAIMED");
-    require(verifyClaim(msg.sender, root, score, proof), "PROOF_INVALID");
-
+    require(!_claimed[root][msg.sender], "CLAIM_INVALID");
+    require(verify(msg.sender, root, score, proof), "PROOF_INVALID");
     _claimed[root][msg.sender] = true;
 
     uint256 amount = getOutput(score, token);
     IERC20(token).transfer(msg.sender, amount);
-    emit ClaimSingle(msg.sender, token, amount);
+    emit Single(root, msg.sender, token, amount);
   }
 
   /**
-   * @notice Multiple claim of tokens to be transferred to msg.sender
+   * @notice Bulk claim of tokens to be transferred to msg.sender
    * @param claims Claim[]
    * @param token address
    */
-  function claimMultiple(Claim[] memory claims, address token) public {
+  function bulk(Claim[] memory claims, address token) public {
+    require(claims.length > 0, "NO_CLAIMS_PROVIDED");
     uint256 totalScore = 0;
     bytes32[] memory roots = new bytes32[](claims.length);
     Claim memory claim;
     for (uint256 i = 0; i < claims.length; i++) {
       claim = claims[i];
-
-      require(!_claimed[claim.root][msg.sender], "ALREADY_CLAIMED");
+      require(_roots[claim.root], "ROOT_NOT_ENABLED");
+      require(!_claimed[claim.root][msg.sender], "CLAIM_INVALID");
       require(
-        verifyClaim(msg.sender, claim.root, claim.score, claim.proof),
+        verify(msg.sender, claim.root, claim.score, claim.proof),
         "PROOF_INVALID"
       );
-
-      totalScore += claim.score;
-      roots[i] = claim.root;
+      totalScore = totalScore + claim.score;
       _claimed[claim.root][msg.sender] = true;
     }
-
     uint256 amount = getOutput(totalScore, token);
     IERC20(token).transfer(msg.sender, amount);
-    emit ClaimMultiple(roots, msg.sender, token, amount);
+    emit Bulk(roots, msg.sender, token, amount);
   }
 
   /**
@@ -157,7 +149,7 @@ contract Pool is Ownable, Pausable {
    * @param score uint256
    * @param proof bytes32[]
    */
-  function verifyClaim(
+  function verify(
     address participant,
     bytes32 root,
     uint256 score,
