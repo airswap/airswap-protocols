@@ -98,31 +98,24 @@ contract Locker is Ownable, Pausable {
 
   /**
    * @notice Locks tokens from the msg.sender.
-   * @param amount Amount of tokens to lock
+   * @param amount of tokens to lock
    */
   function lock(uint256 amount) public {
-    require(token.balanceOf(msg.sender) >= amount, "BALANCE_INSUFFICIENT");
-    balances[msg.sender] = balances[msg.sender] + amount;
-    totalSupply = totalSupply + amount;
-    IERC20(token).transferFrom(msg.sender, address(this), amount);
-    emit Lock(msg.sender, amount);
+    _lock(msg.sender, msg.sender, amount);
   }
 
   /**
    * @notice Locks tokens on behalf of another account.
-   * @param amount Amount of tokens to lock
+   * @param account to lock tokens for
+   * @param amount of tokens to lock
    */
   function lockFor(address account, uint256 amount) public {
-    require(token.balanceOf(msg.sender) >= amount, "BALANCE_INSUFFICIENT");
-    balances[account] = balances[account] + amount;
-    totalSupply = totalSupply + amount;
-    IERC20(token).transferFrom(msg.sender, address(this), amount);
-    emit Lock(account, amount);
+    _lock(msg.sender, account, amount);
   }
 
   /**
    * @notice Unlocks and transfers tokens to msg.sender.
-   * @param amount Amount of tokens to unlock
+   * @param amount of tokens to unlock
    */
   function unlock(uint256 amount) public {
     uint256 previous = previousWithdrawals[msg.sender][epoch()];
@@ -176,5 +169,23 @@ contract Locker is Ownable, Pausable {
    */
   function balanceOf(address account) public view returns (uint256) {
     return balances[account];
+  }
+
+  /**
+   * @dev Perform a lock transfer
+   * @param from address
+   * @param account address
+   * @param amount uint256
+   */
+  function _lock(
+    address from,
+    address account,
+    uint256 amount
+  ) private {
+    require(token.balanceOf(from) >= amount, "BALANCE_INSUFFICIENT");
+    balances[account] = balances[account] + amount;
+    totalSupply = totalSupply + amount;
+    IERC20(token).transferFrom(from, address(this), amount);
+    emit Lock(account, amount);
   }
 }
