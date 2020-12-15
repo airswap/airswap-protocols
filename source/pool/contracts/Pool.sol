@@ -30,10 +30,10 @@ contract Pool is Ownable, Pausable {
   using SafeMath for uint256;
 
   // Higher the scale, lower the output for a claim
-  uint256 public immutable scale;
+  uint256 public scale;
 
   // Max percentage for a claim with infinite score
-  uint256 public immutable max;
+  uint256 public max;
 
   // Mapping of tree root to boolean to enable claims
   mapping(bytes32 => bool) public roots;
@@ -51,6 +51,8 @@ contract Pool is Ownable, Pausable {
     address token,
     uint256 amount
   );
+  event SetScale(uint256 scale);
+  event SetMax(uint256 max);
 
   /**
    * @notice Structs
@@ -67,6 +69,7 @@ contract Pool is Ownable, Pausable {
    * @param _max uint256
    */
   constructor(uint256 _scale, uint256 _max) public {
+    require(_max <= 100, "MAX_TOO_HIGH");
     scale = _scale;
     max = _max;
   }
@@ -138,5 +141,16 @@ contract Pool is Ownable, Pausable {
   ) public view returns (bool valid) {
     bytes32 leaf = keccak256(abi.encodePacked(participant, score));
     return MerkleProof.verify(proof, root, leaf);
+  }
+
+  function setScale(uint256 _scale) public onlyOwner {
+    scale = _scale;
+    emit SetScale(scale);
+  }
+
+  function setMax(uint256 _max) public onlyOwner {
+    require(_max <= 100, "MAX_TOO_HIGH");
+    max = _max;
+    emit SetMax(max);
   }
 }

@@ -295,5 +295,19 @@ contract('Pool', async accounts => {
         'CLAIM_INVALID'
       )
     })
+    it('Updates scale and max', async () => {
+      emitted(
+        await pool.setScale(5, {
+          from: ownerAddress,
+        }),
+        'SetScale'
+      )
+      emitted(
+        await pool.setMax(100, {
+          from: ownerAddress,
+        }),
+        'SetMax'
+      )
+    })
   })
 })
