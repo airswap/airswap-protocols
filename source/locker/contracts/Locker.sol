@@ -27,6 +27,8 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 contract Locker is Ownable, Pausable {
   using SafeMath for uint256;
 
+  uint256 internal constant MAX_PERCENTAGE = 100;
+
   // Token to be used for staking (ERC-20)
   ERC20 public immutable token;
 
@@ -81,7 +83,7 @@ contract Locker is Ownable, Pausable {
     uint256 _throttlingDuration,
     uint256 _throttlingBalance
   ) public {
-    require(_throttlingPercentage <= 100, "PERCENTAGE_TOO_HIGH");
+    require(_throttlingPercentage <= MAX_PERCENTAGE, "PERCENTAGE_TOO_HIGH");
 
     token = ERC20(_token);
     name = _name;
@@ -142,7 +144,7 @@ contract Locker is Ownable, Pausable {
     public
     onlyOwner
   {
-    require(_throttlingPercentage <= 100, "PERCENTAGE_TOO_HIGH");
+    require(_throttlingPercentage <= MAX_PERCENTAGE, "PERCENTAGE_TOO_HIGH");
     throttlingPercentage = _throttlingPercentage;
     emit SetThrottlingPercentage(throttlingPercentage);
   }

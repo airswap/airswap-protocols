@@ -29,6 +29,8 @@ import "@openzeppelin/contracts/cryptography/MerkleProof.sol";
 contract Pool is Ownable, Pausable {
   using SafeMath for uint256;
 
+  uint256 internal constant MAX_PERCENTAGE = 100;
+
   // Higher the scale, lower the output for a claim
   uint256 public scale;
 
@@ -69,7 +71,7 @@ contract Pool is Ownable, Pausable {
    * @param _max uint256
    */
   constructor(uint256 _scale, uint256 _max) public {
-    require(_max <= 100, "MAX_TOO_HIGH");
+    require(_max <= MAX_PERCENTAGE, "MAX_TOO_HIGH");
     scale = _scale;
     max = _max;
   }
@@ -149,7 +151,7 @@ contract Pool is Ownable, Pausable {
   }
 
   function setMax(uint256 _max) public onlyOwner {
-    require(_max <= 100, "MAX_TOO_HIGH");
+    require(_max <= MAX_PERCENTAGE, "MAX_TOO_HIGH");
     max = _max;
     emit SetMax(max);
   }
