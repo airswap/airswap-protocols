@@ -80,10 +80,20 @@ contract('Pool', async accounts => {
       const proof = getProof(tree, soliditySha3(aliceAddress, ALICE_SCORE))
 
       emitted(
-        await pool.single(getRoot(tree), ALICE_SCORE, proof, feeToken.address, {
-          from: aliceAddress,
-        }),
-        'Single'
+        await pool.withdraw(
+          [
+            {
+              root: getRoot(tree),
+              score: ALICE_SCORE,
+              proof,
+            },
+          ],
+          feeToken.address,
+          {
+            from: aliceAddress,
+          }
+        ),
+        'Withdraw'
       )
       equal(
         (await feeToken.balanceOf(aliceAddress)).toString(),
@@ -98,10 +108,14 @@ contract('Pool', async accounts => {
       const proof = getProof(tree, soliditySha3(bobAddress, BOB_SCORE))
 
       emitted(
-        await pool.single(getRoot(tree), BOB_SCORE, proof, feeToken.address, {
-          from: bobAddress,
-        }),
-        'Single'
+        await pool.withdraw(
+          [{ root: getRoot(tree), score: BOB_SCORE, proof }],
+          feeToken.address,
+          {
+            from: bobAddress,
+          }
+        ),
+        'Withdraw'
       )
       equal(
         (await feeToken.balanceOf(bobAddress)).toString(),
@@ -116,9 +130,13 @@ contract('Pool', async accounts => {
       const proof = getProof(tree, soliditySha3(bobAddress, BOB_SCORE))
 
       await reverted(
-        pool.single(getRoot(tree), BOB_SCORE, proof, feeToken.address, {
-          from: bobAddress,
-        }),
+        pool.withdraw(
+          [{ root: getRoot(tree), score: BOB_SCORE, proof }],
+          feeToken.address,
+          {
+            from: bobAddress,
+          }
+        ),
         'CLAIM_INVALID'
       )
     })
@@ -142,10 +160,8 @@ contract('Pool', async accounts => {
       )
 
       await reverted(
-        pool.single(
-          getRoot(badTree),
-          CAROL_BAD_SCORE,
-          proof,
+        pool.withdraw(
+          [{ root: getRoot(badTree), score: CAROL_BAD_SCORE, proof }],
           feeToken.address,
           {
             from: carolAddress,
@@ -164,9 +180,13 @@ contract('Pool', async accounts => {
         soliditySha3(carolAddress, CAROL_BAD_SCORE)
       )
       await reverted(
-        pool.single(getRoot(tree), CAROL_BAD_SCORE, proof, feeToken.address, {
-          from: carolAddress,
-        }),
+        pool.withdraw(
+          [{ root: getRoot(tree), score: CAROL_BAD_SCORE, proof }],
+          feeToken.address,
+          {
+            from: carolAddress,
+          }
+        ),
         'PROOF_INVALID'
       )
     })
@@ -182,7 +202,7 @@ contract('Pool', async accounts => {
       )
 
       await reverted(
-        pool.bulk(
+        pool.withdraw(
           [
             {
               root: getRoot(tree),
@@ -208,7 +228,7 @@ contract('Pool', async accounts => {
         soliditySha3(carolAddress, CAROL_BAD_SCORE)
       )
       await reverted(
-        pool.bulk(
+        pool.withdraw(
           [
             {
               root: getRoot(tree),
@@ -224,14 +244,14 @@ contract('Pool', async accounts => {
         'PROOF_INVALID'
       )
     })
-    it(`Carol tries to bulk claim zero claims and fails`, async () => {
-      await reverted(pool.bulk([], feeToken.address), 'NO_CLAIMS_PROVIDED')
+    it(`Carol tries to withdraw claim zero claims and fails`, async () => {
+      await reverted(pool.withdraw([], feeToken.address), 'NO_CLAIMS_PROVIDED')
     })
     it(`Carol uses ${toDec(CAROL_SCORE, 4)} to claim ~487`, async () => {
       const proof = getProof(tree, soliditySha3(carolAddress, CAROL_SCORE))
 
       emitted(
-        await pool.bulk(
+        await pool.withdraw(
           [
             {
               root: getRoot(tree),
@@ -244,7 +264,7 @@ contract('Pool', async accounts => {
             from: carolAddress,
           }
         ),
-        'Bulk'
+        'Withdraw'
       )
       equal(
         (await feeToken.balanceOf(carolAddress)).toString(),
@@ -259,7 +279,7 @@ contract('Pool', async accounts => {
       const proof = getProof(tree, soliditySha3(carolAddress, CAROL_SCORE))
 
       await reverted(
-        pool.bulk(
+        pool.withdraw(
           [
             {
               root: getRoot(tree),

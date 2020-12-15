@@ -45,8 +45,12 @@ contract Pool is Ownable, Pausable {
    * @notice Events
    */
   event Enable(bytes32 root);
-  event Single(bytes32 root, address account, address token, uint256 amount);
-  event Bulk(bytes32[] roots, address account, address token, uint256 amount);
+  event Withdraw(
+    bytes32[] roots,
+    address account,
+    address token,
+    uint256 amount
+  );
 
   /**
    * @notice Structs
@@ -78,34 +82,11 @@ contract Pool is Ownable, Pausable {
   }
 
   /**
-   * @notice Single claim of tokens to be transferred to msg.sender
-   * @param root bytes32
-   * @param score uint256
-   * @param proof bytes32[]
-   * @param token address
-   */
-  function single(
-    bytes32 root,
-    uint256 score,
-    bytes32[] memory proof,
-    address token
-  ) public {
-    require(roots[root], "ROOT_NOT_ENABLED");
-    require(!claimed[root][msg.sender], "CLAIM_INVALID");
-    require(verify(msg.sender, root, score, proof), "PROOF_INVALID");
-    claimed[root][msg.sender] = true;
-
-    uint256 amount = getOutput(score, token);
-    IERC20(token).transfer(msg.sender, amount);
-    emit Single(root, msg.sender, token, amount);
-  }
-
-  /**
    * @notice Bulk claim of tokens to be transferred to msg.sender
    * @param claims Claim[]
    * @param token address
    */
-  function bulk(Claim[] memory claims, address token) public {
+  function withdraw(Claim[] memory claims, address token) public {
     require(claims.length > 0, "NO_CLAIMS_PROVIDED");
     uint256 totalScore = 0;
     bytes32[] memory rootList = new bytes32[](claims.length);
@@ -123,7 +104,7 @@ contract Pool is Ownable, Pausable {
     }
     uint256 amount = getOutput(totalScore, token);
     IERC20(token).transfer(msg.sender, amount);
-    emit Bulk(rootList, msg.sender, token, amount);
+    emit Withdraw(rootList, msg.sender, token, amount);
   }
 
   /**
