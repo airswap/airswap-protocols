@@ -1,4 +1,3 @@
-
 # Solidity Style Guide for AirSwap
 
 ## Constants
@@ -12,12 +11,15 @@ We use camelCase variable names with capitals between words.
 ### Private
 
 Prefix with underscore. e.g.
+
 ```
     private address _tradeWallet
 ```
+
 ### Arguments
 
 Function arguments are camelCase.
+
 ```
     function setRule(
       address senderToken,
@@ -27,17 +29,22 @@ Function arguments are camelCase.
       uint256 priceExp
     ) external onlyAdmin
 ```
+
 Function arguments should be separated by newlines.
+
 ```
     function setRule(address senderToken, address signerToken)
-```    
+```
+
     ...becomes...
-```    
+
+```
     function setRules(
         address senderToken,
         address signerToken
     )
 ```
+
 ## Functions
 
 ### Naming
@@ -48,7 +55,7 @@ Internal and private functions are named with leading underscore.
 
 ### Ordering
 
-Functions are ordered by their visibility however this is also affected by whether they are a `view`, `pure` or not. 
+Functions are ordered by their visibility however this is also affected by whether they are a `view`, `pure` or not.
 
 - public
 - external
@@ -62,6 +69,7 @@ Run `yarn hint` and solhint will enforce the correct ordering.
 ### Arguments
 
 Prefix all arguments with the name of the current contract.
+
 ```
     contract Delegate {
     ...
@@ -73,15 +81,17 @@ Prefix all arguments with the name of the current contract.
     ...
     }
 ```
+
 ## Events
 
 - Use the same name as the function that emits them e.g.
-    - e.g. function setIntent() —> emit SetIntent(...)
+  - e.g. function setIntent() —> emit SetIntent(...)
 - If there's an interface, the event definitions go in the interface
 
 ## Comments
 
 Function documentation should follow [NatSpec](https://solidity.readthedocs.io/en/v0.5.12/natspec-format.html). Periods not required on statements. Interfaces do not need to have Natspec on them if there is only a single implemented contract from them, example ISwap.sol.
+
 ```
     /**
       * @notice Unset a Trading Rule
@@ -90,6 +100,7 @@ Function documentation should follow [NatSpec](https://solidity.readthedocs.io/e
       * @param signerToken address The token the consumer would send
       */
 ```
+
 Comments in the body should use `//` and be full, punctuated sentences.
 
     // Transfer ownership to an address if specified.
@@ -101,6 +112,7 @@ Comments in the body should use `//` and be full, punctuated sentences.
 ## Solhint
 
 Run from the root directory of `airswap-protocols` using `yarn hint`
+
 ```
     {
       "extends": "solhint:default",
@@ -115,14 +127,13 @@ Run from the root directory of `airswap-protocols` using `yarn hint`
         "visibility-modifier-order": "error",
         "func-visibility": "error",
         "state-visibility": "error",
-        "func-order": "error",
+        "ordering": "error",
         "quotes": "error",
         "max-line-length": "error",
         "no-unused-vars": "error",
         "no-complex-fallback": "warn",
         "check-send-result": "warn",
-        "reentrancy": "warn",
-        "indent": ["error", 2]
+        "reentrancy": "warn"
       }
     }
 ```

@@ -11,13 +11,12 @@
     "visibility-modifier-order": "error",
     "func-visibility": "error",
     "state-visibility": "error",
-    "func-order": "error",
+    "ordering": "error",
     "quotes": "error",
     "max-line-length": "error",
     "no-unused-vars": "error",
     "no-complex-fallback": "warn",
     "check-send-result": "warn",
-    "reentrancy": "warn",
-    "indent": ["error", 2]
+    "reentrancy": "warn"
   }
 }
