@@ -100,7 +100,10 @@ contract Pool is Ownable {
     for (uint256 i = 0; i < claims.length; i++) {
       claim = claims[i];
       require(roots[claim.root], "ROOT_NOT_ENABLED");
-      require(claimed[claim.root][msg.sender] == UNCLAIMED, "CLAIM_ALREADY_MADE");
+      require(
+        claimed[claim.root][msg.sender] == UNCLAIMED,
+        "CLAIM_ALREADY_MADE"
+      );
       require(
         verify(msg.sender, claim.root, claim.score, claim.proof),
         "PROOF_INVALID"
@@ -124,8 +127,13 @@ contract Pool is Ownable {
     returns (uint256 amount)
   {
     return
-      (max.mul((score.mul(IERC20(token).balanceOf(address(this)))) /
-          ((10**scale) + score))).div(100);
+      (
+        max.mul(
+          (score.mul(IERC20(token).balanceOf(address(this)))) /
+            ((10**scale) + score)
+        )
+      )
+        .div(100);
   }
 
   /**
