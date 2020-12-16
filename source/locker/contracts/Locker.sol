@@ -98,7 +98,7 @@ contract Locker is Ownable {
   }
 
   /**
-   * @notice Locks tokens for msg.sender
+   * @notice Lock tokens for msg.sender
    * @param amount of tokens to lock
    */
   function lock(uint256 amount) public {
@@ -106,7 +106,7 @@ contract Locker is Ownable {
   }
 
   /**
-   * @notice Locks tokens on behalf of another account
+   * @notice Lock tokens on behalf of another account
    * @param account to lock tokens for
    * @param amount of tokens to lock
    */
@@ -115,7 +115,7 @@ contract Locker is Ownable {
   }
 
   /**
-   * @notice Unlocks and transfers to msg.sender
+   * @notice Unlock and transfer to msg.sender
    * @param amount of tokens to unlock
    */
   function unlock(uint256 amount) public {
@@ -140,7 +140,7 @@ contract Locker is Ownable {
   }
 
   /**
-   * @notice Sets throttling percentage
+   * @notice Set throttling percentage
    * @dev Only owner
    */
   function setThrottlingPercentage(uint256 _throttlingPercentage)
@@ -153,7 +153,7 @@ contract Locker is Ownable {
   }
 
   /**
-   * @notice Sets throttling duration
+   * @notice Set throttling duration
    * @dev Only owner
    */
   function setThrottlingDuration(uint256 _throttlingDuration) public onlyOwner {
@@ -162,7 +162,7 @@ contract Locker is Ownable {
   }
 
   /**
-   * @notice Sets throttling balance
+   * @notice Set throttling balance
    * @dev Only owner
    */
   function setThrottlingBalance(uint256 _throttlingBalance) public onlyOwner {
@@ -171,21 +171,21 @@ contract Locker is Ownable {
   }
 
   /**
-   * @dev Returns the current epoch
+   * @notice Return current epoch
    */
   function epoch() public view returns (uint256) {
     return block.timestamp.sub(block.timestamp.mod(throttlingDuration));
   }
 
   /**
-   * @dev See {IERC20-balanceOf}
+   * @notice See {IERC20-balanceOf}
    */
   function balanceOf(address account) public view returns (uint256) {
     return balances[account];
   }
 
   /**
-   * @dev Perform a locking token transfer
+   * @notice Perform a locking token transfer
    * @param from address
    * @param account address
    * @param amount uint256
