@@ -36,7 +36,7 @@ contract('Pool', async accounts => {
   let pool
 
   describe('Deploying...', async () => {
-    it('Deployed staking token', async () => {
+    it('Deployed fee token', async () => {
       feeToken = await ERC20PresetMinterPauser.new('Fee', 'FEE')
       emitted(
         await feeToken.mint(feeCollectorAddress, toWei(1000000)),
@@ -137,7 +137,7 @@ contract('Pool', async accounts => {
             from: bobAddress,
           }
         ),
-        'CLAIM_INVALID'
+        'CLAIM_ALREADY_MADE'
       )
     })
     it('Fees are added to the pool: 1000', async () => {
@@ -245,7 +245,10 @@ contract('Pool', async accounts => {
       )
     })
     it(`Carol tries to withdraw claim zero claims and fails`, async () => {
-      await reverted(pool.withdraw([], feeToken.address), 'NO_CLAIMS_PROVIDED')
+      await reverted(
+        pool.withdraw([], feeToken.address),
+        'CLAIMS_MUST_BE_PROVIDED'
+      )
     })
     it(`Carol uses ${toDec(CAROL_SCORE, 4)} to claim ~487`, async () => {
       const proof = getProof(tree, soliditySha3(carolAddress, CAROL_SCORE))
@@ -292,7 +295,7 @@ contract('Pool', async accounts => {
             from: carolAddress,
           }
         ),
-        'CLAIM_INVALID'
+        'CLAIM_ALREADY_MADE'
       )
     })
     it('Updates scale and max', async () => {

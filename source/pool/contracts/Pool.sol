@@ -17,7 +17,6 @@
 pragma solidity ^0.6.12;
 pragma experimental ABIEncoderV2;
 
-import "@openzeppelin/contracts/utils/Pausable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
@@ -26,12 +25,14 @@ import "@openzeppelin/contracts/cryptography/MerkleProof.sol";
 /**
  * @title Pool: Claim Tokens Based on a Pricing Function
  */
-contract Pool is Ownable, Pausable {
+contract Pool is Ownable {
   using SafeMath for uint256;
 
   uint256 internal constant MAX_PERCENTAGE = 100;
+  bytes1 internal constant UNCLAIMED = 0x00;
+  bytes1 internal constant CLAIMED = 0x01;
 
-  // Higher the scale, lower the output for a claim
+  // Larger the scale, lower the output for a claim
   uint256 public scale;
 
   // Max percentage for a claim with infinite score
@@ -40,8 +41,8 @@ contract Pool is Ownable, Pausable {
   // Mapping of tree root to boolean to enable claims
   mapping(bytes32 => bool) public roots;
 
-  // Mapping of tree root to account to boolean to mark as claimed
-  mapping(bytes32 => mapping(address => bool)) public claimed;
+  // Mapping of tree root to account to mark as claimed
+  mapping(bytes32 => mapping(address => bytes1)) public claimed;
 
   /**
    * @notice Events
@@ -77,7 +78,7 @@ contract Pool is Ownable, Pausable {
   }
 
   /**
-   * @notice Enables claims on the merkle tree of a set of scores
+   * @notice Enables claims for a merkle tree of a set of scores
    * @param root bytes32
    */
   function enable(bytes32 root) external onlyOwner {
@@ -87,45 +88,44 @@ contract Pool is Ownable, Pausable {
   }
 
   /**
-   * @notice Bulk claim of tokens to be transferred to msg.sender
+   * @notice Withdraw tokens from the pool using claims
    * @param claims Claim[]
    * @param token address
    */
   function withdraw(Claim[] memory claims, address token) public {
-    require(claims.length > 0, "NO_CLAIMS_PROVIDED");
+    require(claims.length > 0, "CLAIMS_MUST_BE_PROVIDED");
     uint256 totalScore = 0;
     bytes32[] memory rootList = new bytes32[](claims.length);
     Claim memory claim;
     for (uint256 i = 0; i < claims.length; i++) {
       claim = claims[i];
       require(roots[claim.root], "ROOT_NOT_ENABLED");
-      require(!claimed[claim.root][msg.sender], "CLAIM_INVALID");
+      require(claimed[claim.root][msg.sender] == UNCLAIMED, "CLAIM_ALREADY_MADE");
       require(
         verify(msg.sender, claim.root, claim.score, claim.proof),
         "PROOF_INVALID"
       );
-      totalScore = totalScore + claim.score;
-      claimed[claim.root][msg.sender] = true;
+      totalScore = totalScore.add(claim.score);
+      claimed[claim.root][msg.sender] = CLAIMED;
     }
-    uint256 amount = getOutput(totalScore, token);
+    uint256 amount = calculate(totalScore, token);
     IERC20(token).transfer(msg.sender, amount);
     emit Withdraw(rootList, msg.sender, token, amount);
   }
 
   /**
-   * @notice Get output amount for an input score
+   * @notice Calculate output amount for an input score
    * @param score uint256
    * @param token address
    */
-  function getOutput(uint256 score, address token)
+  function calculate(uint256 score, address token)
     public
     view
     returns (uint256 amount)
   {
     return
-      (max *
-        ((score * IERC20(token).balanceOf(address(this))) /
-          ((10**scale) + score))) / 100;
+      (max.mul((score.mul(IERC20(token).balanceOf(address(this)))) /
+          ((10**scale) + score))).div(100);
   }
 
   /**
@@ -145,11 +145,19 @@ contract Pool is Ownable, Pausable {
     return MerkleProof.verify(proof, root, leaf);
   }
 
+  /**
+   * @notice Set scale
+   * @dev Only owner
+   */
   function setScale(uint256 _scale) public onlyOwner {
     scale = _scale;
     emit SetScale(scale);
   }
 
+  /**
+   * @notice Set max
+   * @dev Only owner
+   */
   function setMax(uint256 _max) public onlyOwner {
     require(_max <= MAX_PERCENTAGE, "MAX_TOO_HIGH");
     max = _max;
