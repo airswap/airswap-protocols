@@ -16,27 +16,26 @@
 
 pragma solidity ^0.6.12;
 
-import "@openzeppelin/contracts/utils/Pausable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
 /**
- * @title Locker: Lock and Unlock a Token Balance
+ * @title Locker: Lock and Unlock Token Balances
  */
-contract Locker is Ownable, Pausable {
+contract Locker is Ownable {
   using SafeMath for uint256;
 
   uint256 internal constant MAX_PERCENTAGE = 100;
 
-  // Token to be used for staking (ERC-20)
+  // Token to be locked (ERC-20)
   ERC20 public immutable token;
 
-  // Locked account balances
+  // Locked token balances per account
   mapping(address => uint256) public balances;
 
   // Previous withdrawals per epoch
-  mapping(address => mapping(uint256 => uint256)) public previousWithdrawals;
+  mapping(address => mapping(uint256 => uint256)) public withdrawals;
 
   // Total amount locked
   uint256 public totalSupply;
@@ -49,14 +48,14 @@ contract Locker is Ownable, Pausable {
   // Maximum unlockable percentage per epoch
   uint256 public throttlingPercentage;
 
-  // Duration of each epoch
+  // Duration of each epoch in seconds
   uint256 public throttlingDuration;
 
-  // Balance above which percentage kicks in
+  // Balance above which maximum percentage kicks in
   uint256 public throttlingBalance;
 
   /**
-   * @notice Contract Events
+   * @notice Events
    */
   event Lock(address participant, uint256 amount);
   event Unlock(address participant, uint256 amount);
@@ -65,7 +64,7 @@ contract Locker is Ownable, Pausable {
   event SetThrottlingBalance(uint256 throttlingBalance);
 
   /**
-   * @notice Contract Constructor
+   * @notice Constructor
    * @param _token address
    * @param _name string
    * @param _symbol string
@@ -99,7 +98,7 @@ contract Locker is Ownable, Pausable {
   }
 
   /**
-   * @notice Locks tokens from the msg.sender.
+   * @notice Locks tokens for msg.sender
    * @param amount of tokens to lock
    */
   function lock(uint256 amount) public {
@@ -107,7 +106,7 @@ contract Locker is Ownable, Pausable {
   }
 
   /**
-   * @notice Locks tokens on behalf of another account.
+   * @notice Locks tokens on behalf of another account
    * @param account to lock tokens for
    * @param amount of tokens to lock
    */
@@ -116,30 +115,34 @@ contract Locker is Ownable, Pausable {
   }
 
   /**
-   * @notice Unlocks and transfers tokens to msg.sender.
+   * @notice Unlocks and transfers to msg.sender
    * @param amount of tokens to unlock
    */
   function unlock(uint256 amount) public {
-    uint256 previous = previousWithdrawals[msg.sender][epoch()];
+    uint256 previous = withdrawals[msg.sender][epoch()];
 
     // Only enforce percentage above a certain balance
     if (balances[msg.sender] > throttlingBalance) {
       require(
-        (previous + amount) <=
-          ((throttlingPercentage * balances[msg.sender]) / 100),
+        (previous.add(amount)) <=
+          ((throttlingPercentage.mul(balances[msg.sender])).div(100)),
         "AMOUNT_EXCEEDS_LIMIT"
       );
     } else {
       require(amount <= balances[msg.sender], "BALANCE_INSUFFICIENT");
     }
 
-    balances[msg.sender] = balances[msg.sender] - amount;
-    totalSupply = totalSupply - amount;
-    previousWithdrawals[msg.sender][epoch()] = previous + amount;
+    balances[msg.sender] = balances[msg.sender].sub(amount);
+    totalSupply = totalSupply.sub(amount);
+    withdrawals[msg.sender][epoch()] = previous.add(amount);
     IERC20(token).transfer(msg.sender, amount);
     emit Unlock(msg.sender, amount);
   }
 
+  /**
+   * @notice Sets throttling percentage
+   * @dev Only owner
+   */
   function setThrottlingPercentage(uint256 _throttlingPercentage)
     public
     onlyOwner
@@ -149,32 +152,40 @@ contract Locker is Ownable, Pausable {
     emit SetThrottlingPercentage(throttlingPercentage);
   }
 
+  /**
+   * @notice Sets throttling duration
+   * @dev Only owner
+   */
   function setThrottlingDuration(uint256 _throttlingDuration) public onlyOwner {
     throttlingDuration = _throttlingDuration;
     emit SetThrottlingDuration(throttlingDuration);
   }
 
+  /**
+   * @notice Sets throttling balance
+   * @dev Only owner
+   */
   function setThrottlingBalance(uint256 _throttlingBalance) public onlyOwner {
     throttlingBalance = _throttlingBalance;
     emit SetThrottlingBalance(throttlingBalance);
   }
 
   /**
-   * @dev Returns the current epoch.
+   * @dev Returns the current epoch
    */
   function epoch() public view returns (uint256) {
-    return block.timestamp - (block.timestamp % throttlingDuration);
+    return block.timestamp.sub(block.timestamp.mod(throttlingDuration));
   }
 
   /**
-   * @dev See {IERC20-balanceOf}.
+   * @dev See {IERC20-balanceOf}
    */
   function balanceOf(address account) public view returns (uint256) {
     return balances[account];
   }
 
   /**
-   * @dev Perform a lock transfer
+   * @dev Perform a locking token transfer
    * @param from address
    * @param account address
    * @param amount uint256
@@ -185,8 +196,8 @@ contract Locker is Ownable, Pausable {
     uint256 amount
   ) private {
     require(token.balanceOf(from) >= amount, "BALANCE_INSUFFICIENT");
-    balances[account] = balances[account] + amount;
-    totalSupply = totalSupply + amount;
+    balances[account] = balances[account].add(amount);
+    totalSupply = totalSupply.add(amount);
     IERC20(token).transferFrom(from, address(this), amount);
     emit Lock(account, amount);
   }
