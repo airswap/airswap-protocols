@@ -1,0 +1,28 @@
+{
+  "name": "@airswap/pool",
+  "version": "0.0.1",
+  "description": "Token balances claimable using signed messages",
+  "contributors": [
+    "Don Mosites <mosites@gmail.com>"
+  ],
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/airswap/airswap-protocols"
+  },
+  "scripts": {
+    "clean": "rm -rf ./build",
+    "compile": "yarn clean; truffle compile",
+    "coverage": "truffle run coverage",
+    "test": "yarn compile; truffle test"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^3.3.0"
+  },
+  "devDependencies": {
+    "@airswap/test-utils": "0.1.6",
+    "@airswap/merkle": "0.0.1",
+    "@airswap/utils": "0.3.15",
+    "solidity-coverage": "^0.7.13"
+  }
+}
