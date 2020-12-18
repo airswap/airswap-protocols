@@ -20,14 +20,13 @@ export async function getTokenName(
   if (!tokenAddress || !tokenAddress.startsWith('0x')) {
     throw Error(`Invalid 'tokenAddress' parameter`)
   }
-
-  return getContract(tokenAddress, ERC20_ABI, provider)
-    .name()
-    .catch(() =>
-      getContract(tokenAddress, ERC20_BYTES32_ABI, provider)
-        .name()
-        .then((bytes32: Arrayish) => ethers.utils.parseBytes32String(bytes32))
+  try {
+    return await getContract(tokenAddress, ERC20_ABI, provider).name()
+  } catch {
+    return ethers.utils.parseBytes32String(
+      await getContract(tokenAddress, ERC20_BYTES32_ABI, provider).name()
     )
+  }
 }
 
 export async function getTokenSymbol(
@@ -38,13 +37,13 @@ export async function getTokenSymbol(
     throw Error(`Invalid 'tokenAddress' parameter`)
   }
 
-  return getContract(tokenAddress, ERC20_ABI, provider)
-    .symbol()
-    .catch(() =>
-      getContract(tokenAddress, ERC20_BYTES32_ABI, provider)
-        .symbol()
-        .then((bytes32: Arrayish) => ethers.utils.parseBytes32String(bytes32))
+  try {
+    return await getContract(tokenAddress, ERC20_ABI, provider).symbol()
+  } catch {
+    return ethers.utils.parseBytes32String(
+      await getContract(tokenAddress, ERC20_BYTES32_ABI, provider).symbol()
     )
+  }
 }
 
 export async function getTokenDecimals(
@@ -55,5 +54,5 @@ export async function getTokenDecimals(
     throw Error(`Invalid 'tokenAddress' parameter`)
   }
 
-  return getContract(tokenAddress, ERC20_ABI, provider).decimals()
+  return await getContract(tokenAddress, ERC20_ABI, provider).decimals()
 }
