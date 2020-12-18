@@ -1,4 +1,5 @@
 import { expect } from 'chai'
+import * as ethers from 'ethers'
 
 import TokenMetadata from '..'
 import {
@@ -9,7 +10,8 @@ import {
 } from '@airswap/constants'
 
 describe('Metadata: Mainnet', async () => {
-  const metadata = new TokenMetadata(chainIds.MAINNET)
+  const provider = ethers.getDefaultProvider('mainnet')
+  const metadata = new TokenMetadata(provider)
 
   it('fetches all known tokens', async () => {
     const tokens = await metadata.fetchKnownTokens()
@@ -35,7 +37,8 @@ describe('Metadata: Mainnet', async () => {
 })
 
 describe('Metadata: Rinkeby', async () => {
-  const metadata = new TokenMetadata(chainIds.RINKEBY)
+  const provider = ethers.getDefaultProvider('rinkeby')
+  const metadata = new TokenMetadata(provider)
 
   it('fetches all known tokens', async () => {
     metadata.fetchKnownTokens().then(tokens => {
@@ -63,7 +66,8 @@ describe('Metadata: Rinkeby', async () => {
 })
 
 describe('Metadata: Goerli', async () => {
-  const metadata = new TokenMetadata(chainIds.GOERLI)
+  const provider = ethers.getDefaultProvider('goerli')
+  const metadata = new TokenMetadata(provider)
 
   it('fetches all known tokens', async () => {
     metadata.fetchKnownTokens().then(tokens => {
@@ -91,7 +95,8 @@ describe('Metadata: Goerli', async () => {
 })
 
 describe('Metadata: Kovan', async () => {
-  const metadata = new TokenMetadata(chainIds.KOVAN)
+  const provider = ethers.getDefaultProvider('kovan')
+  const metadata = new TokenMetadata(provider)
 
   it('fetches all known tokens', async () => {
     metadata.fetchKnownTokens().then(tokens => {

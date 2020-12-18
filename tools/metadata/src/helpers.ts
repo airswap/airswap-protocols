@@ -1,51 +1,63 @@
 import * as ethers from 'ethers'
 import { ERC20_ABI, ERC20_BYTES32_ABI } from './constants'
-import { Arrayish } from 'ethers/utils'
 
-export function getContract(address: string, ABI: any, network = 'mainnet') {
-  const provider =
-    network === 'mainnet'
-      ? ethers.getDefaultProvider()
-      : ethers.getDefaultProvider(network.toLowerCase())
+export function getContract(
+  address: string,
+  ABI: any,
+  provider: ethers.providers.BaseProvider
+) {
   if (!address || !address.startsWith('0x')) {
     throw Error(`Invalid 'address' parameter '${address}'.`)
   }
-
   return new ethers.Contract(address, ABI, provider)
 }
 
-export async function getTokenName(tokenAddress: string, network: string) {
+export async function getTokenName(
+  tokenAddress: string,
+  provider: ethers.providers.BaseProvider
+) {
   if (!tokenAddress || !tokenAddress.startsWith('0x')) {
     throw Error(`Invalid 'tokenAddress' parameter`)
   }
-
-  return getContract(tokenAddress, ERC20_ABI, network)
-    .name()
-    .catch(() =>
-      getContract(tokenAddress, ERC20_BYTES32_ABI, network)
-        .name()
-        .then((bytes32: Arrayish) => ethers.utils.parseBytes32String(bytes32))
-    )
+  try {
+    return await getContract(tokenAddress, ERC20_ABI, provider).name()
+  } catch {
+    const name = await getContract(
+      tokenAddress,
+      ERC20_BYTES32_ABI,
+      provider
+    ).name()
+    return ethers.utils.parseBytes32String(name)
+  }
 }
 
-export async function getTokenSymbol(tokenAddress: string, network: string) {
+export async function getTokenSymbol(
+  tokenAddress: string,
+  provider: ethers.providers.BaseProvider
+) {
   if (!tokenAddress || !tokenAddress.startsWith('0x')) {
     throw Error(`Invalid 'tokenAddress' parameter`)
   }
 
-  return getContract(tokenAddress, ERC20_ABI, network)
-    .symbol()
-    .catch(() =>
-      getContract(tokenAddress, ERC20_BYTES32_ABI, network)
-        .symbol()
-        .then((bytes32: Arrayish) => ethers.utils.parseBytes32String(bytes32))
-    )
+  try {
+    return await getContract(tokenAddress, ERC20_ABI, provider).symbol()
+  } catch {
+    const symbol = await getContract(
+      tokenAddress,
+      ERC20_BYTES32_ABI,
+      provider
+    ).symbol()
+    return ethers.utils.parseBytes32String(symbol)
+  }
 }
 
-export async function getTokenDecimals(tokenAddress: string, network: string) {
+export function getTokenDecimals(
+  tokenAddress: string,
+  provider: ethers.providers.BaseProvider
+) {
   if (!tokenAddress || !tokenAddress.startsWith('0x')) {
     throw Error(`Invalid 'tokenAddress' parameter`)
   }
 
-  return getContract(tokenAddress, ERC20_ABI, network).decimals()
+  return getContract(tokenAddress, ERC20_ABI, provider).decimals()
 }
