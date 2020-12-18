@@ -15,12 +15,7 @@ import {
   getOpenSeaUrl,
 } from './src/constants'
 
-import {
-  chainIds,
-  ADDRESS_ZERO,
-  tokenKinds,
-  chainNames,
-} from '@airswap/constants'
+import { chainIds, ADDRESS_ZERO, tokenKinds } from '@airswap/constants'
 import { getTokenName, getTokenSymbol, getTokenDecimals } from './src/helpers'
 
 export function getTrustImage(address: string): string {
