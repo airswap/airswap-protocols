@@ -51,7 +51,7 @@ export async function getTokenSymbol(
   }
 }
 
-export async function getTokenDecimals(
+export function getTokenDecimals(
   tokenAddress: string,
   provider: ethers.providers.BaseProvider
 ) {
@@ -59,5 +59,5 @@ export async function getTokenDecimals(
     throw Error(`Invalid 'tokenAddress' parameter`)
   }
 
-  return await getContract(tokenAddress, ERC20_ABI, provider).decimals()
+  return getContract(tokenAddress, ERC20_ABI, provider).decimals()
 }
