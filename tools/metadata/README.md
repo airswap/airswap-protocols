@@ -26,6 +26,11 @@ Import into your application:
 
 ```TypeScript
 import TokenMetadata from '@airswap/metadata';
+import * as ethers from 'ethers';
+
+const provider = ethers.getDefaultProvider('mainnet');
+const metadata = new TokenMetadata(provider);
+const tokens = await metadata.fetchKnownTokens();
 ```
 
 ## Commands

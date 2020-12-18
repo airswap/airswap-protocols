@@ -73,29 +73,29 @@ function normalizeMetamaskToken(
 }
 
 class TokenMetadata {
-  public chainId: string
+  public provider: ethers.providers.BaseProvider
   public ready: Promise<NormalizedToken[]>
   private tokens: NormalizedToken[]
   private tokensByAddress: { [address: string]: NormalizedToken }
 
-  public constructor(chainId = chainIds.MAINNET) {
-    this.chainId = String(chainId)
+  public constructor(provider = ethers.getDefaultProvider()) {
+    this.provider = provider
     this.tokens = []
     this.tokensByAddress = {}
     this.ready = this.fetchKnownTokens()
   }
 
   public async fetchKnownTokens(): Promise<Array<NormalizedToken>> {
-    switch (this.chainId) {
-      case chainIds.RINKEBY:
+    switch (this.provider.network.chainId) {
+      case Number(chainIds.RINKEBY):
         this.tokensByAddress = rinkebyTokensByAddress
         this.tokens = Object.values(this.tokensByAddress)
         return this.tokens
-      case chainIds.GOERLI:
+      case Number(chainIds.GOERLI):
         this.tokensByAddress = goerliTokensByAddress
         this.tokens = Object.values(this.tokensByAddress)
         return this.tokens
-      case chainIds.KOVAN:
+      case Number(chainIds.KOVAN):
         this.tokensByAddress = kovanTokensByAddress
         this.tokens = Object.values(this.tokensByAddress)
         return this.tokens
@@ -201,10 +201,13 @@ class TokenMetadata {
     // check if the token is an NFT
     let openseaContractData = null
     try {
-      if (this.chainId === '1' || this.chainId === '4') {
+      if (
+        this.provider.network.chainId === 1 ||
+        this.provider.network.chainId === 4
+      ) {
         openseaContractData = await getOpenseaContractMetadata(
           searchAddress,
-          Number(this.chainId)
+          this.provider.network.chainId
         )
       }
     } catch (error) {
@@ -228,9 +231,9 @@ class TokenMetadata {
     }
 
     const [tokenSymbol, tokenName, tokenDecimals] = await Promise.all([
-      getTokenSymbol(searchAddress, chainNames[this.chainId]),
-      getTokenName(searchAddress, chainNames[this.chainId]),
-      getTokenDecimals(searchAddress, chainNames[this.chainId]),
+      getTokenSymbol(searchAddress, this.provider),
+      getTokenName(searchAddress, this.provider),
+      getTokenDecimals(searchAddress, this.provider),
     ])
 
     const newToken: NormalizedToken = {
