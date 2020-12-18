@@ -22,9 +22,12 @@ export async function getTokenName(
   try {
     return await getContract(tokenAddress, ERC20_ABI, provider).name()
   } catch {
-    return ethers.utils.parseBytes32String(
-      await getContract(tokenAddress, ERC20_BYTES32_ABI, provider).name()
-    )
+    const name = await getContract(
+      tokenAddress,
+      ERC20_BYTES32_ABI,
+      provider
+    ).name()
+    return ethers.utils.parseBytes32String(name)
   }
 }
 
@@ -39,9 +42,12 @@ export async function getTokenSymbol(
   try {
     return await getContract(tokenAddress, ERC20_ABI, provider).symbol()
   } catch {
-    return ethers.utils.parseBytes32String(
-      await getContract(tokenAddress, ERC20_BYTES32_ABI, provider).symbol()
-    )
+    const symbol = await getContract(
+      tokenAddress,
+      ERC20_BYTES32_ABI,
+      provider
+    ).symbol()
+    return ethers.utils.parseBytes32String(symbol)
   }
 }
 
