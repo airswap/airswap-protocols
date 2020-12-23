@@ -22,7 +22,7 @@
   "devDependencies": {
     "@airswap/test-utils": "0.1.6",
     "@airswap/merkle": "0.0.1",
-    "@airswap/utils": "0.3.15",
+    "@airswap/utils": "0.3.16",
     "solidity-coverage": "^0.7.13"
   }
 }

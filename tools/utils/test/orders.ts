@@ -9,11 +9,16 @@ import {
   getBestByLowestSenderAmount,
   getBestByHighestSignerAmount,
 } from '../index'
+import {
+  createLightOrder,
+  createLightSignature,
+  getSignerFromLightSignature,
+} from '../src/orders'
 
 const wallet = functions.getTestWallet()
 
 describe('Orders', async () => {
-  it('Creates and validates an order', async () => {
+  it('Signs and validates an order', async () => {
     const unsignedOrder = createOrder({
       signer: {
         wallet: wallet.address,
@@ -21,6 +26,13 @@ describe('Orders', async () => {
     })
     const order = await signOrder(unsignedOrder, wallet, ADDRESS_ZERO)
     expect(isValidOrder(order)).to.equal(true)
+  })
+
+  it('Signs and validates a light order', async () => {
+    const order = createLightOrder({})
+    const signature = await createLightSignature(order, wallet)
+    const signerWallet = getSignerFromLightSignature(order, signature)
+    expect(signerWallet).to.equal(wallet.address)
   })
 
   it('Best by lowest sender', async () => {
