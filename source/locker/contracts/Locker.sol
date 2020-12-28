@@ -181,13 +181,6 @@ contract Locker is Ownable {
   }
 
   /**
-   * @notice See {IERC20-balanceOf}
-   */
-  function balanceOf(address account) public view returns (uint256) {
-    return balances[account];
-  }
-
-  /**
    * @notice Perform a locking token transfer
    * @param from address
    * @param account address
