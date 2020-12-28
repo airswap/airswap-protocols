@@ -84,7 +84,7 @@ contract Locker is Ownable {
   ) public {
     require(_throttlingPercentage <= MAX_PERCENTAGE, "PERCENTAGE_TOO_HIGH");
 
-    token = ERC20(_token);
+    token = IERC20(_token);
     name = _name;
     symbol = _symbol;
     decimals = _decimals;
