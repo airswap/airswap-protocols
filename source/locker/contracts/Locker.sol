@@ -135,8 +135,8 @@ contract Locker is Ownable {
     balances[msg.sender] = balances[msg.sender].sub(amount);
     totalSupply = totalSupply.sub(amount);
     withdrawals[msg.sender][epoch()] = previous.add(amount);
-    emit Unlock(msg.sender, amount);
     token.transfer(msg.sender, amount);
+    emit Unlock(msg.sender, amount);
   }
 
   /**
@@ -194,7 +194,7 @@ contract Locker is Ownable {
     require(token.balanceOf(from) >= amount, "BALANCE_INSUFFICIENT");
     balances[account] = balances[account].add(amount);
     totalSupply = totalSupply.add(amount);
-    emit Lock(account, amount);
     token.transferFrom(from, address(this), amount);
+    emit Lock(account, amount);
   }
 }
