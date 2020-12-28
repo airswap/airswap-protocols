@@ -92,7 +92,7 @@ contract Pool is Ownable {
    * @param claims Claim[]
    * @param token address
    */
-  function withdraw(Claim[] memory claims, address token) public {
+  function withdraw(Claim[] calldata claims, address token) external {
     require(claims.length > 0, "CLAIMS_MUST_BE_PROVIDED");
     uint256 totalScore = 0;
     bytes32[] memory rootList = new bytes32[](claims.length);
@@ -147,8 +147,8 @@ contract Pool is Ownable {
     address participant,
     bytes32 root,
     uint256 score,
-    bytes32[] memory proof
-  ) public view returns (bool valid) {
+    bytes32[] calldata proof
+  ) external view returns (bool valid) {
     bytes32 leaf = keccak256(abi.encodePacked(participant, score));
     return MerkleProof.verify(proof, root, leaf);
   }
@@ -157,7 +157,7 @@ contract Pool is Ownable {
    * @notice Set scale
    * @dev Only owner
    */
-  function setScale(uint256 _scale) public onlyOwner {
+  function setScale(uint256 _scale) external onlyOwner {
     scale = _scale;
     emit SetScale(scale);
   }
@@ -166,7 +166,7 @@ contract Pool is Ownable {
    * @notice Set max
    * @dev Only owner
    */
-  function setMax(uint256 _max) public onlyOwner {
+  function setMax(uint256 _max) external onlyOwner {
     require(_max <= MAX_PERCENTAGE, "MAX_TOO_HIGH");
     max = _max;
     emit SetMax(max);

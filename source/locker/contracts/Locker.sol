@@ -101,7 +101,7 @@ contract Locker is Ownable {
    * @notice Lock tokens for msg.sender
    * @param amount of tokens to lock
    */
-  function lock(uint256 amount) public {
+  function lock(uint256 amount) external {
     _lock(msg.sender, msg.sender, amount);
   }
 
@@ -110,7 +110,7 @@ contract Locker is Ownable {
    * @param account to lock tokens for
    * @param amount of tokens to lock
    */
-  function lockFor(address account, uint256 amount) public {
+  function lockFor(address account, uint256 amount) external {
     _lock(msg.sender, account, amount);
   }
 
@@ -118,7 +118,7 @@ contract Locker is Ownable {
    * @notice Unlock and transfer to msg.sender
    * @param amount of tokens to unlock
    */
-  function unlock(uint256 amount) public {
+  function unlock(uint256 amount) external {
     uint256 previous = withdrawals[msg.sender][epoch()];
 
     // Only enforce percentage above a certain balance
@@ -156,7 +156,10 @@ contract Locker is Ownable {
    * @notice Set throttling duration
    * @dev Only owner
    */
-  function setThrottlingDuration(uint256 _throttlingDuration) public onlyOwner {
+  function setThrottlingDuration(uint256 _throttlingDuration)
+    external
+    onlyOwner
+  {
     throttlingDuration = _throttlingDuration;
     emit SetThrottlingDuration(throttlingDuration);
   }
@@ -165,7 +168,7 @@ contract Locker is Ownable {
    * @notice Set throttling balance
    * @dev Only owner
    */
-  function setThrottlingBalance(uint256 _throttlingBalance) public onlyOwner {
+  function setThrottlingBalance(uint256 _throttlingBalance) external onlyOwner {
     throttlingBalance = _throttlingBalance;
     emit SetThrottlingBalance(throttlingBalance);
   }
