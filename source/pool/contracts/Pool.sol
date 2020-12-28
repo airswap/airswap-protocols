@@ -20,12 +20,14 @@ pragma experimental ABIEncoderV2;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts/cryptography/MerkleProof.sol";
 
 /**
  * @title Pool: Claim Tokens Based on a Pricing Function
  */
 contract Pool is Ownable {
+  using SafeERC20 for IERC20;
   using SafeMath for uint256;
 
   uint256 internal constant MAX_PERCENTAGE = 100;
@@ -112,7 +114,7 @@ contract Pool is Ownable {
       claimed[claim.root][msg.sender] = CLAIMED;
     }
     uint256 amount = calculate(totalScore, token);
-    IERC20(token).transfer(msg.sender, amount);
+    IERC20(token).safeTransfer(msg.sender, amount);
     emit Withdraw(rootList, msg.sender, token, amount);
   }
 

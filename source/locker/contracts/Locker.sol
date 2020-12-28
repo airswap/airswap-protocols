@@ -19,11 +19,13 @@ pragma solidity ^0.6.12;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 
 /**
  * @title Locker: Lock and Unlock Token Balances
  */
 contract Locker is Ownable {
+  using SafeERC20 for IERC20;
   using SafeMath for uint256;
 
   uint256 internal constant MAX_PERCENTAGE = 100;
@@ -135,7 +137,7 @@ contract Locker is Ownable {
     balances[msg.sender] = balances[msg.sender].sub(amount);
     totalSupply = totalSupply.sub(amount);
     withdrawals[msg.sender][epoch()] = previous.add(amount);
-    token.transfer(msg.sender, amount);
+    token.safeTransfer(msg.sender, amount);
     emit Unlock(msg.sender, amount);
   }
 
@@ -194,7 +196,7 @@ contract Locker is Ownable {
     require(token.balanceOf(from) >= amount, "BALANCE_INSUFFICIENT");
     balances[account] = balances[account].add(amount);
     totalSupply = totalSupply.add(amount);
-    token.transferFrom(from, address(this), amount);
+    token.safeTransferFrom(from, address(this), amount);
     emit Lock(account, amount);
   }
 }
