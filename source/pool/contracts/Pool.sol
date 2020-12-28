@@ -112,8 +112,8 @@ contract Pool is Ownable {
       claimed[claim.root][msg.sender] = CLAIMED;
     }
     uint256 amount = calculate(totalScore, token);
-    IERC20(token).transfer(msg.sender, amount);
     emit Withdraw(rootList, msg.sender, token, amount);
+    IERC20(token).transfer(msg.sender, amount);
   }
 
   /**
