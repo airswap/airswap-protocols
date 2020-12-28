@@ -31,8 +31,6 @@ contract Pool is Ownable {
   using SafeMath for uint256;
 
   uint256 internal constant MAX_PERCENTAGE = 100;
-  bytes1 internal constant UNCLAIMED = 0x00;
-  bytes1 internal constant CLAIMED = 0x01;
 
   // Larger the scale, lower the output for a claim
   uint256 public scale;
@@ -44,7 +42,7 @@ contract Pool is Ownable {
   mapping(bytes32 => bool) public roots;
 
   // Mapping of tree root to account to mark as claimed
-  mapping(bytes32 => mapping(address => bytes1)) public claimed;
+  mapping(bytes32 => mapping(address => bool)) public claimed;
 
   /**
    * @notice Events
@@ -102,16 +100,13 @@ contract Pool is Ownable {
     for (uint256 i = 0; i < claims.length; i++) {
       claim = claims[i];
       require(roots[claim.root], "ROOT_NOT_ENABLED");
-      require(
-        claimed[claim.root][msg.sender] == UNCLAIMED,
-        "CLAIM_ALREADY_MADE"
-      );
+      require(!claimed[claim.root][msg.sender], "CLAIM_ALREADY_MADE");
       require(
         verify(msg.sender, claim.root, claim.score, claim.proof),
         "PROOF_INVALID"
       );
       totalScore = totalScore.add(claim.score);
-      claimed[claim.root][msg.sender] = CLAIMED;
+      claimed[claim.root][msg.sender] = true;
     }
     uint256 amount = calculate(totalScore, token);
     IERC20(token).safeTransfer(msg.sender, amount);
