@@ -147,8 +147,8 @@ contract Pool is Ownable {
     address participant,
     bytes32 root,
     uint256 score,
-    bytes32[] calldata proof
-  ) external view returns (bool valid) {
+    bytes32[] memory proof
+  ) public view returns (bool valid) {
     bytes32 leaf = keccak256(abi.encodePacked(participant, score));
     return MerkleProof.verify(proof, root, leaf);
   }
