@@ -17,7 +17,7 @@
 pragma solidity ^0.6.12;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
 /**
@@ -29,7 +29,7 @@ contract Locker is Ownable {
   uint256 internal constant MAX_PERCENTAGE = 100;
 
   // Token to be locked (ERC-20)
-  ERC20 public immutable token;
+  IERC20 public immutable token;
 
   // Locked token balances per account
   mapping(address => uint256) public balances;
@@ -136,7 +136,7 @@ contract Locker is Ownable {
     totalSupply = totalSupply.sub(amount);
     withdrawals[msg.sender][epoch()] = previous.add(amount);
     emit Unlock(msg.sender, amount);
-    IERC20(token).transfer(msg.sender, amount);
+    token.transfer(msg.sender, amount);
   }
 
   /**
@@ -199,6 +199,6 @@ contract Locker is Ownable {
     balances[account] = balances[account].add(amount);
     totalSupply = totalSupply.add(amount);
     emit Lock(account, amount);
-    IERC20(token).transferFrom(from, address(this), amount);
+    token.transferFrom(from, address(this), amount);
   }
 }
