@@ -129,8 +129,9 @@ contract Pool is Ownable {
     return
       (
         max.mul(
-          (score.mul(IERC20(token).balanceOf(address(this)))) /
-            ((10**scale) + score)
+          (score.mul(IERC20(token).balanceOf(address(this)))).div(
+            ((uint256(10)**scale).add(score))
+          )
         )
       )
         .div(100);
