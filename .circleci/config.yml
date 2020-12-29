@@ -139,6 +139,16 @@ jobs:
             yarn ganache > /dev/null &
             cd source/wrapper && yarn test
 
+  merkle_tests:
+    <<: *container_config
+    steps:
+      - attach_workspace:
+          at: *working_directory
+      - run:
+          name: Run Tests
+          command: |
+            cd tools/merkle && yarn test
+
   metadata_tests:
     <<: *container_config
     steps:
@@ -185,7 +195,7 @@ jobs:
           command: |
             cd tools
             ### ADD FOLDERS HERE TO PROCESS ###
-            for file in constants metadata protocols utils test-utils
+            for file in constants merkle metadata protocols utils test-utils
             do
               cd $file
               NPM_NAME=$(node -p "require('./package.json').name")
@@ -278,6 +288,10 @@ workflows:
           context: Development
           requires:
             - setup
+      - merkle_tests:
+          context: Development
+          requires:
+            - setup
       - metadata_tests:
           context: Development
           requires:
@@ -300,6 +314,7 @@ workflows:
             - transfers_tests
             - types_tests
             - wrapper_tests
+            - merkle_tests
             - metadata_tests
             - protocols_tests
             - utils_tests
