@@ -68,7 +68,7 @@ contract('Locker', async accounts => {
         }),
         'Lock'
       )
-      equal((await locker.balances(aliceAddress)).toString(), '1000000')
+      equal((await locker.balanceOf(aliceAddress)).toString(), '1000000')
       equal((await locker.totalSupply()).toString(), '1000000')
     })
     it('Alice attempts to unlock too many tokens', async () => {
@@ -86,7 +86,7 @@ contract('Locker', async accounts => {
         }),
         'Unlock'
       )
-      equal((await locker.balances(aliceAddress)).toString(), '900000')
+      equal((await locker.balanceOf(aliceAddress)).toString(), '900000')
       equal((await locker.totalSupply()).toString(), '900000')
     })
     it('Bob locks some tokens', async () => {
@@ -96,7 +96,7 @@ contract('Locker', async accounts => {
         }),
         'Lock'
       )
-      equal((await locker.balances(bobAddress)).toString(), '500000')
+      equal((await locker.balanceOf(bobAddress)).toString(), '500000')
       equal((await locker.totalSupply()).toString(), '1400000')
     })
     it('Bob tries to lock more than he has', async () => {
@@ -114,7 +114,7 @@ contract('Locker', async accounts => {
         }),
         'Lock'
       )
-      equal((await locker.balances(bobAddress)).toString(), '700000')
+      equal((await locker.balanceOf(bobAddress)).toString(), '700000')
       equal((await locker.totalSupply()).toString(), '1600000')
     })
     it('Alice tries to lock more than she has for Bob', async () => {
