@@ -146,7 +146,7 @@ contract Locker is Ownable {
    * @dev Only owner
    */
   function setThrottlingPercentage(uint256 _throttlingPercentage)
-    public
+    external
     onlyOwner
   {
     require(_throttlingPercentage <= MAX_PERCENTAGE, "PERCENTAGE_TOO_HIGH");
