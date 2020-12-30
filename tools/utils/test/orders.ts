@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import { functions } from '@airswap/test-utils'
-import { ADDRESS_ZERO, tokenKinds } from '@airswap/constants'
+import { ADDRESS_ZERO, SECONDS_IN_DAY, tokenKinds } from '@airswap/constants'
 
 import {
   createOrder,
@@ -10,7 +10,6 @@ import {
   getBestByHighestSignerAmount,
 } from '../index'
 import {
-  createLightOrder,
   createLightSignature,
   getSignerFromLightSignature,
 } from '../src/orders'
@@ -29,7 +28,17 @@ describe('Orders', async () => {
   })
 
   it('Signs and validates a light order', async () => {
-    const order = createLightOrder({})
+    const order = {
+      nonce: Date.now().toString(),
+      expiry: Math.round(Date.now() / 1000 + SECONDS_IN_DAY).toString(),
+      signerToken: ADDRESS_ZERO,
+      signerAmount: '0',
+      senderWallet: ADDRESS_ZERO,
+      senderToken: ADDRESS_ZERO,
+      senderAmount: '0',
+      swapContract: ADDRESS_ZERO,
+      chainId: '1',
+    }
     const signature = await createLightSignature(order, wallet)
     const signerWallet = getSignerFromLightSignature(order, signature)
     expect(signerWallet).to.equal(wallet.address)

@@ -248,30 +248,6 @@ export function isValidOrder(order: Order): boolean {
   return false
 }
 
-export function createLightOrder({
-  nonce = Date.now().toString(),
-  expiry = Math.round(Date.now() / 1000 + SECONDS_IN_DAY).toString(),
-  signerToken = ADDRESS_ZERO,
-  signerAmount = '0',
-  senderWallet = ADDRESS_ZERO,
-  senderToken = ADDRESS_ZERO,
-  senderAmount = '0',
-  swapContract = ADDRESS_ZERO,
-  chainId = '1',
-}) {
-  return {
-    nonce,
-    expiry,
-    signerToken,
-    signerAmount,
-    senderWallet,
-    senderToken,
-    senderAmount,
-    swapContract,
-    chainId,
-  }
-}
-
 export async function createLightSignature(
   order: LightOrder,
   signer: ethers.Signer
