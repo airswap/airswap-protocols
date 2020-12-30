@@ -77,6 +77,18 @@ export type Order = UnsignedOrder & {
   signature: Signature
 }
 
+export type LightOrder = {
+  nonce: string
+  expiry: string
+  signerToken: string
+  signerAmount: string
+  senderWallet: string
+  senderToken: string
+  senderAmount: string
+  swapContract: string
+  chainId: string
+}
+
 export type Token = {
   address: string
   symbol: string
