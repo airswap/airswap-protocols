@@ -34,7 +34,7 @@ contract Locker is Ownable {
   IERC20 public immutable token;
 
   // Locked token balances per account
-  mapping(address => uint256) public balances;
+  mapping(address => uint256) internal balances;
 
   // Previous withdrawals per epoch
   mapping(address => mapping(uint256 => uint256)) public withdrawals;
@@ -85,7 +85,6 @@ contract Locker is Ownable {
     uint256 _throttlingBalance
   ) public {
     require(_throttlingPercentage <= MAX_PERCENTAGE, "PERCENTAGE_TOO_HIGH");
-
     token = IERC20(_token);
     name = _name;
     symbol = _symbol;
@@ -93,10 +92,6 @@ contract Locker is Ownable {
     throttlingPercentage = _throttlingPercentage;
     throttlingDuration = _throttlingDuration;
     throttlingBalance = _throttlingBalance;
-
-    emit SetThrottlingPercentage(_throttlingPercentage);
-    emit SetThrottlingDuration(_throttlingDuration);
-    emit SetThrottlingBalance(_throttlingBalance);
   }
 
   /**
