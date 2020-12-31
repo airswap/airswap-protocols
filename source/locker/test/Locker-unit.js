@@ -48,7 +48,7 @@ contract('Locker Unit Tests', async accounts => {
     )
   })
 
-  describe('Test Constructior', async () => {
+  describe('Test Constructor', async () => {
     it('Test Constructor successful', async () => {
       const instance = await Locker.new(
         lockerToken.address,
@@ -124,6 +124,9 @@ contract('Locker Unit Tests', async accounts => {
       emitted(tx, 'Lock', e => {
         return e.participant === ownerAddress && e.amount.toString() === '50'
       })
+
+      const totalSupply = await locker.totalSupply()
+      equal(totalSupply.toString(), '50')
     })
 
     it('Test successful locking for', async () => {
@@ -140,6 +143,52 @@ contract('Locker Unit Tests', async accounts => {
       const tx = await locker.lockFor(aliceAddress, '50')
       emitted(tx, 'Lock', e => {
         return e.participant === aliceAddress && e.amount.toString() === '50'
+      })
+    })
+  })
+
+  describe('Test Unlocking', async () => {
+    it('Test Unlocking amount exceeds limit', async () => {
+      const mockToken_balanceOf = await mockFungibleTokenTemplate.contract.methods
+        .balanceOf(ADDRESS_ZERO)
+        .encodeABI()
+      await lockerToken.givenMethodReturnUint(mockToken_balanceOf, '10000000')
+
+      const mockToken_transferFrom = await mockFungibleTokenTemplate.contract.methods
+        .transferFrom(ADDRESS_ZERO, ADDRESS_ZERO, 0)
+        .encodeABI()
+      await lockerToken.givenMethodReturnBool(mockToken_transferFrom, true)
+
+      await locker.lock('1000000')
+
+      await reverted(
+        locker.unlock(ethers.constants.MaxUint256.div(2).toString()),
+        'AMOUNT_EXCEEDS_LIMIT'
+      )
+    })
+
+    it('Test Unlocking succeeds', async () => {
+      const mockToken_balanceOf = await mockFungibleTokenTemplate.contract.methods
+        .balanceOf(ADDRESS_ZERO)
+        .encodeABI()
+      await lockerToken.givenMethodReturnUint(mockToken_balanceOf, '10000000')
+
+      const mockToken_transferFrom = await mockFungibleTokenTemplate.contract.methods
+        .transferFrom(ADDRESS_ZERO, ADDRESS_ZERO, 0)
+        .encodeABI()
+      await lockerToken.givenMethodReturnBool(mockToken_transferFrom, true)
+
+      const mockToken_transfer = await mockFungibleTokenTemplate.contract.methods
+        .transfer(ADDRESS_ZERO, 0)
+        .encodeABI()
+      await lockerToken.givenMethodReturnBool(mockToken_transfer, true)
+
+      await locker.lock('1000000')
+
+      const trx = await locker.unlock('10')
+
+      emitted(trx, 'Unlock', e => {
+        return e.participant === ownerAddress && e.amount.toString() === '10'
       })
     })
   })
