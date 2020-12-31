@@ -127,6 +127,9 @@ contract('Locker Unit Tests', async accounts => {
 
       const totalSupply = await locker.totalSupply()
       equal(totalSupply.toString(), '50')
+
+      const userBal = await locker.balanceOf(ownerAddress)
+      equal(userBal.toString(), '50')
     })
 
     it('Test successful locking for', async () => {
@@ -144,6 +147,9 @@ contract('Locker Unit Tests', async accounts => {
       emitted(tx, 'Lock', e => {
         return e.participant === aliceAddress && e.amount.toString() === '50'
       })
+
+      const userBal = await locker.balanceOf(aliceAddress)
+      equal(userBal.toString(), '50')
     })
   })
 
@@ -190,120 +196,52 @@ contract('Locker Unit Tests', async accounts => {
       emitted(trx, 'Unlock', e => {
         return e.participant === ownerAddress && e.amount.toString() === '10'
       })
+
+      const totalSupply = await locker.totalSupply()
+      equal(totalSupply.toString(), '999990')
+
+      const userBal = await locker.balanceOf(ownerAddress)
+      equal(userBal.toString(), '999990')
     })
   })
 
-  //   it('Mints some tokens for Alice and Bob', async () => {
-  //     emitted(await lockerToken.mint(aliceAddress, 100000000), 'Transfer')
-  //     emitted(await lockerToken.mint(bobAddress, 100000000), 'Transfer')
-  //   })
-  //   it('Approves tokens for Alice and Bob', async () => {
-  //     emitted(
-  //       await lockerToken.approve(locker.address, 100000000, {
-  //         from: aliceAddress,
-  //       }),
-  //       'Approval'
-  //     )
-  //     emitted(
-  //       await lockerToken.approve(locker.address, 100000000, {
-  //         from: bobAddress,
-  //       }),
-  //       'Approval'
-  //     )
-  //   })
-  // })
+  describe('Test set throttling percentage', async () => {
+    it('Test set throttling percentage reverts', async () => {
+      await reverted(
+        locker.setThrottlingPercentage(ethers.constants.MaxUint256),
+        'PERCENTAGE_TOO_HIGH'
+      )
+    })
 
-  // describe('Locking and unlocking', async () => {
-  //   it('Alice locks some tokens', async () => {
-  //     emitted(
-  //       await locker.lock(1000000, {
-  //         from: aliceAddress,
-  //       }),
-  //       'Lock'
-  //     )
-  //     equal((await locker.balanceOf(aliceAddress)).toString(), '1000000')
-  //     equal((await locker.totalSupply()).toString(), '1000000')
-  //   })
-  //   it('Alice attempts to unlock too many tokens', async () => {
-  //     await reverted(
-  //       locker.unlock(100001, {
-  //         from: aliceAddress,
-  //       }),
-  //       'AMOUNT_EXCEEDS_LIMIT'
-  //     )
-  //   })
-  //   it('Alice attempts to unlock 10% of her tokens', async () => {
-  //     emitted(
-  //       await locker.unlock(100000, {
-  //         from: aliceAddress,
-  //       }),
-  //       'Unlock'
-  //     )
-  //     equal((await locker.balanceOf(aliceAddress)).toString(), '900000')
-  //     equal((await locker.totalSupply()).toString(), '900000')
-  //   })
-  //   it('Bob locks some tokens', async () => {
-  //     emitted(
-  //       await locker.lock(500000, {
-  //         from: bobAddress,
-  //       }),
-  //       'Lock'
-  //     )
-  //     equal((await locker.balanceOf(bobAddress)).toString(), '500000')
-  //     equal((await locker.totalSupply()).toString(), '1400000')
-  //   })
-  //   it('Bob tries to lock more than he has', async () => {
-  //     await reverted(
-  //       locker.lock(100000000, {
-  //         from: bobAddress,
-  //       }),
-  //       'BALANCE_INSUFFICIENT'
-  //     )
-  //   })
-  //   it('Alice locks some tokens for Bob', async () => {
-  //     emitted(
-  //       await locker.lockFor(bobAddress, 200000, {
-  //         from: aliceAddress,
-  //       }),
-  //       'Lock'
-  //     )
-  //     equal((await locker.balanceOf(bobAddress)).toString(), '700000')
-  //     equal((await locker.totalSupply()).toString(), '1600000')
-  //   })
-  //   it('Alice tries to lock more than she has for Bob', async () => {
-  //     await reverted(
-  //       locker.lockFor(bobAddress, 100000000, {
-  //         from: aliceAddress,
-  //       }),
-  //       'BALANCE_INSUFFICIENT'
-  //     )
-  //   })
-  //   it('Updates percentage, duration, and lowest', async () => {
-  //     emitted(
-  //       await locker.setThrottlingPercentage(100, {
-  //         from: ownerAddress,
-  //       }),
-  //       'SetThrottlingPercentage'
-  //     )
-  //     emitted(
-  //       await locker.setThrottlingDuration(SECONDS_IN_DAY, {
-  //         from: ownerAddress,
-  //       }),
-  //       'SetThrottlingDuration'
-  //     )
-  //     emitted(
-  //       await locker.setThrottlingBalance(100000000, {
-  //         from: ownerAddress,
-  //       }),
-  //       'SetThrottlingBalance'
-  //     )
-  //   })
-  //   it('Alice tries to unlock more than she has locked', async () => {
-  //     await reverted(
-  //       locker.unlock(100000000, {
-  //         from: aliceAddress,
-  //       }),
-  //       'BALANCE_INSUFFICIENT'
-  //     )
-  //   })
+    it('Test set throttling percentage success', async () => {
+      const trx = await locker.setThrottlingPercentage('5')
+      emitted(trx, 'SetThrottlingPercentage', e => {
+        return e.throttlingPercentage.toString() === '5'
+      })
+      const throttlePercentage = await locker.throttlingPercentage()
+      equal(throttlePercentage.toString(), '5')
+    })
+  })
+
+  describe('Test set throttling balance', async () => {
+    it('Test set throttling balance', async () => {
+      const trx = await locker.setThrottlingBalance('5')
+      emitted(trx, 'SetThrottlingBalance', e => {
+        return e.throttlingBalance.toString() === '5'
+      })
+      const bal = await locker.throttlingBalance()
+      equal(bal.toString(), '5')
+    })
+  })
+
+  describe('Test set throttling duration', async () => {
+    it('Test set throttling duration', async () => {
+      const trx = await locker.setThrottlingDuration('5')
+      emitted(trx, 'SetThrottlingDuration', e => {
+        return e.throttlingDuration.toString() === '5'
+      })
+      const bal = await locker.throttlingDuration()
+      equal(bal.toString(), '5')
+    })
+  })
 })
