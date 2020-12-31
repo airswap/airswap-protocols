@@ -173,6 +173,22 @@ contract('Locker Unit Tests', async accounts => {
       )
     })
 
+    it('Test Unlocking amount exceeds balance', async () => {
+      const mockToken_balanceOf = await mockFungibleTokenTemplate.contract.methods
+        .balanceOf(ADDRESS_ZERO)
+        .encodeABI()
+      await lockerToken.givenMethodReturnUint(mockToken_balanceOf, '10000000')
+
+      const mockToken_transferFrom = await mockFungibleTokenTemplate.contract.methods
+        .transferFrom(ADDRESS_ZERO, ADDRESS_ZERO, 0)
+        .encodeABI()
+      await lockerToken.givenMethodReturnBool(mockToken_transferFrom, true)
+
+      await locker.lock('10')
+
+      await reverted(locker.unlock('20'), 'SafeMath: subtraction overflow')
+    })
+
     it('Test Unlocking succeeds', async () => {
       const mockToken_balanceOf = await mockFungibleTokenTemplate.contract.methods
         .balanceOf(ADDRESS_ZERO)
