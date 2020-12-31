@@ -125,6 +125,23 @@ contract('Locker Unit Tests', async accounts => {
         return e.participant === ownerAddress && e.amount.toString() === '50'
       })
     })
+
+    it('Test successful locking for', async () => {
+      const mockToken_balanceOf = await mockFungibleTokenTemplate.contract.methods
+        .balanceOf(ADDRESS_ZERO)
+        .encodeABI()
+      await lockerToken.givenMethodReturnUint(mockToken_balanceOf, '100')
+
+      const mockToken_transferFrom = await mockFungibleTokenTemplate.contract.methods
+        .transferFrom(ADDRESS_ZERO, ADDRESS_ZERO, 0)
+        .encodeABI()
+      await lockerToken.givenMethodReturnBool(mockToken_transferFrom, true)
+
+      const tx = await locker.lockFor(aliceAddress, '50')
+      emitted(tx, 'Lock', e => {
+        return e.participant === aliceAddress && e.amount.toString() === '50'
+      })
+    })
   })
 
   //   it('Mints some tokens for Alice and Bob', async () => {
