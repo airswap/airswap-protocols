@@ -130,10 +130,7 @@ contract Locker is Ownable {
           ((throttlingPercentage.mul(balances[msg.sender])).div(100)),
         "AMOUNT_EXCEEDS_LIMIT"
       );
-    } else {
-      require(amount <= balances[msg.sender], "BALANCE_INSUFFICIENT");
     }
-
     balances[msg.sender] = balances[msg.sender].sub(amount);
     totalSupply = totalSupply.sub(amount);
     withdrawals[msg.sender][epoch()] = previous.add(amount);
@@ -200,6 +197,10 @@ contract Locker is Ownable {
     address account,
     uint256 amount
   ) private {
+    require(
+      balances[account].add(amount) <= (type(uint256).max).div(100),
+      "OVERFLOW_PROTECTION"
+    );
     require(token.balanceOf(from) >= amount, "BALANCE_INSUFFICIENT");
     balances[account] = balances[account].add(amount);
     totalSupply = totalSupply.add(amount);
