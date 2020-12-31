@@ -9,7 +9,6 @@ const { emitted, reverted, equal } = require('@airswap/test-utils').assert
 contract('Locker Unit Tests', async accounts => {
   const ownerAddress = accounts[0]
   const aliceAddress = accounts[1]
-  const bobAddress = accounts[2]
 
   const SECONDS_IN_DAY = 86400
   const THROTTLING_PERCENTAGE = 10
