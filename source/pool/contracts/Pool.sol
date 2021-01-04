@@ -134,6 +134,19 @@ contract Pool is Ownable {
         .div(100);
   }
 
+  function calculateMultiple(uint256 score, address[] calldata tokens)
+    external
+    view
+    returns (uint256[] memory)
+  {
+    uint256[] memory outputAmounts = new uint256[](tokens.length);
+    for (uint256 i = 0; i < tokens.length; i++) {
+      uint256 output = calculate(score, tokens[i]);
+      outputAmounts[i] = output;
+    }
+    return outputAmounts;
+  }
+
   /**
    * @notice Verify a claim proof
    * @param participant address

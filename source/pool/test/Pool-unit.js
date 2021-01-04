@@ -240,6 +240,22 @@ contract('Pool Unit Tests', async accounts => {
     })
   })
 
+  describe('Test Calculate Multiple', async () => {
+    it('Test calculation input and output', async () => {
+      const mockToken_balanceOf = await mockFungibleTokenTemplate.contract.methods
+        .balanceOf(ADDRESS_ZERO)
+        .encodeABI()
+      await feeToken.givenMethodReturnUint(mockToken_balanceOf, '100000')
+
+      const amounts = await pool.calculateMultiple(ALICE_SCORE, [
+        feeToken.address,
+        feeToken.address,
+      ])
+      equal(amounts[0].toString(), '495')
+      equal(amounts[1].toString(), '495')
+    })
+  })
+
   describe('Test Verify', async () => {
     it('Test verification is valid', async () => {
       const root = getRoot(tree)
