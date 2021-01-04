@@ -118,8 +118,7 @@ contract('Pool Unit Tests', async accounts => {
 
       emitted(trx, 'Withdraw', e => {
         return (
-          e.roots[0] ===
-            '0x0000000000000000000000000000000000000000000000000000000000000000' &&
+          e.roots[0] === root &&
           e.account === aliceAddress &&
           e.token === feeToken.address &&
           e.amount.toString() === '495'

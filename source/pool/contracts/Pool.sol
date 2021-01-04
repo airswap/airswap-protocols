@@ -107,6 +107,7 @@ contract Pool is Ownable {
       );
       totalScore = totalScore.add(claim.score);
       claimed[claim.root][msg.sender] = true;
+      rootList[i] = claim.root;
     }
     uint256 amount = calculate(totalScore, token);
     IERC20(token).safeTransfer(msg.sender, amount);
