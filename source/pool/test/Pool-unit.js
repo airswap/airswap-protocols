@@ -24,6 +24,7 @@ contract('Pool Unit Tests', async accounts => {
 
   let tree
   let feeToken
+  let feeToken2
   let pool
   let mockFungibleTokenTemplate
   let snapshotId
@@ -45,6 +46,7 @@ contract('Pool Unit Tests', async accounts => {
       [carolAddress]: CAROL_SCORE,
     })
     feeToken = await MockContract.new()
+    feeToken2 = await MockContract.new()
     mockFungibleTokenTemplate = await ERC20PresetMinterPauser.new('Fee', 'FEE')
   })
 
@@ -246,13 +248,14 @@ contract('Pool Unit Tests', async accounts => {
         .balanceOf(ADDRESS_ZERO)
         .encodeABI()
       await feeToken.givenMethodReturnUint(mockToken_balanceOf, '100000')
+      await feeToken2.givenMethodReturnUint(mockToken_balanceOf, '10000')
 
       const amounts = await pool.calculateMultiple(ALICE_SCORE, [
         feeToken.address,
-        feeToken.address,
+        feeToken2.address,
       ])
       equal(amounts[0].toString(), '495')
-      equal(amounts[1].toString(), '495')
+      equal(amounts[1].toString(), '49')
     })
   })
 
