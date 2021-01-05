@@ -147,7 +147,6 @@ contract Pool is Ownable {
       uint256 output = calculate(score, tokens[i]);
       outputAmounts[i] = output;
     }
-    // return outputAmounts;
   }
 
   /**
