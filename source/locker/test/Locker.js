@@ -35,6 +35,7 @@ contract('Locker', async accounts => {
           from: ownerAddress,
         }
       )
+      const bal = await locker.balanceOf(ownerAddress)
       equal((await locker.name()).toString(), 'Locker')
       equal((await locker.symbol()).toString(), 'LCK')
       equal((await locker.decimals()).toString(), '4')
@@ -150,7 +151,7 @@ contract('Locker', async accounts => {
         locker.unlock(100000000, {
           from: aliceAddress,
         }),
-        'BALANCE_INSUFFICIENT'
+        'SafeMath: subtraction overflow'
       )
     })
   })
