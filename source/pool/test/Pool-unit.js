@@ -69,7 +69,7 @@ contract('Pool Unit Tests', async accounts => {
     it('Test Constructor reverts when scale is too high', async () => {
       await reverted(
         Pool.new(78, CLAIM_MAX, { from: ownerAddress }),
-        'MAX_TOO_HIGH'
+        'SCALE_TOO_HIGH'
       )
     })
   })
@@ -292,7 +292,7 @@ contract('Pool Unit Tests', async accounts => {
     })
 
     it('Test setScale reverts', async () => {
-      await reverted(pool.setScale(1000), 'MAX_TOO_HIGH')
+      await reverted(pool.setScale(1000), 'SCALE_TOO_HIGH')
     })
   })
 
