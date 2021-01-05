@@ -82,11 +82,9 @@ export type LightOrder = {
   expiry: string
   signerToken: string
   signerAmount: string
-  senderWallet: string
+  sender: string
   senderToken: string
   senderAmount: string
-  swapContract: string
-  chainId: string
 }
 
 export type Token = {
@@ -119,6 +117,24 @@ export const EIP712 = {
     { name: 'wallet', type: 'address' },
     { name: 'token', type: 'address' },
     { name: 'data', type: 'bytes' },
+  ],
+}
+
+export const EIP712Light = {
+  EIP712Domain: [
+    { name: 'name', type: 'string' },
+    { name: 'version', type: 'string' },
+    { name: 'chainId', type: 'uint256' },
+    { name: 'verifyingContract', type: 'address' },
+  ],
+  LightOrder: [
+    { name: 'nonce', type: 'uint256' },
+    { name: 'expiry', type: 'uint256' },
+    { name: 'sender', type: 'address' },
+    { name: 'signerToken', type: 'address' },
+    { name: 'signerAmount', type: 'uint256' },
+    { name: 'senderToken', type: 'address' },
+    { name: 'senderAmount', type: 'uint256' },
   ],
 }
 
