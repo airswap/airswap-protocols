@@ -14,7 +14,7 @@
   limitations under the License.
 */
 
-import * as ethUtil from 'ethereumjs-util'
+import * as util from 'ethereumjs-util'
 import { ethers } from 'ethers'
 import { bigNumberify } from 'ethers/utils'
 import {
@@ -28,9 +28,14 @@ import {
   UnsignedOrder,
   Order,
   Signature,
+  LightOrder,
   OrderParty,
 } from '@airswap/types'
-import { getOrderHash } from './hashes'
+import {
+  getOrderHash,
+  getLightOrderHash,
+  getPrefixedLightOrderHash,
+} from './hashes'
 import { lowerCaseAddresses } from '..'
 
 export function numberToBytes32(number): string {
@@ -192,17 +197,17 @@ export async function signOrder(
 
 export function hasValidSignature(order) {
   const signature = order['signature']
-  let orderHash = getOrderHash(order, signature['validator'])
+  let hash = getOrderHash(order, signature['validator'])
   if (signature.version === '0x45') {
     const prefix = Buffer.from('\x19Ethereum Signed Message:\n')
-    orderHash = ethUtil.keccak256(
-      Buffer.concat([prefix, Buffer.from(String(orderHash.length)), orderHash])
+    hash = util.keccak256(
+      Buffer.concat([prefix, Buffer.from(String(hash.length)), hash])
     )
   }
   let signingPubKey
   try {
-    signingPubKey = ethUtil.ecrecover(
-      orderHash,
+    signingPubKey = util.ecrecover(
+      hash,
       signature['v'],
       signature['r'],
       signature['s']
@@ -210,9 +215,7 @@ export function hasValidSignature(order) {
   } catch (e) {
     return false
   }
-  const signingAddress = ethUtil.bufferToHex(
-    ethUtil.pubToAddress(signingPubKey)
-  )
+  const signingAddress = util.bufferToHex(util.pubToAddress(signingPubKey))
   return signingAddress.toLowerCase() === signature['signatory']
 }
 
@@ -243,4 +246,23 @@ export function isValidOrder(order: Order): boolean {
     return hasValidSignature(order)
   }
   return false
+}
+
+export async function createLightSignature(
+  order: LightOrder,
+  signer: ethers.Signer
+): Promise<string> {
+  return await signer.signMessage(
+    ethers.utils.arrayify(getLightOrderHash(order))
+  )
+}
+
+export function getSignerFromLightSignature(
+  order: LightOrder,
+  signature: string
+) {
+  return ethers.utils.recoverAddress(
+    getPrefixedLightOrderHash(order),
+    signature
+  )
 }
