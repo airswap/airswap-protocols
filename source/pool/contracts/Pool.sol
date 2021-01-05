@@ -31,6 +31,7 @@ contract Pool is Ownable {
   using SafeMath for uint256;
 
   uint256 internal constant MAX_PERCENTAGE = 100;
+  uint256 internal constant MAX_SCALE = 77;
 
   // Larger the scale, lower the output for a claim
   uint256 public scale;
@@ -73,6 +74,7 @@ contract Pool is Ownable {
    */
   constructor(uint256 _scale, uint256 _max) public {
     require(_max <= MAX_PERCENTAGE, "MAX_TOO_HIGH");
+    require(_scale <= MAX_SCALE, "MAX_TOO_HIGH");
     scale = _scale;
     max = _max;
   }
@@ -170,6 +172,7 @@ contract Pool is Ownable {
    * @dev Only owner
    */
   function setScale(uint256 _scale) external onlyOwner {
+    require(_scale <= MAX_SCALE, "MAX_TOO_HIGH");
     scale = _scale;
     emit SetScale(scale);
   }
