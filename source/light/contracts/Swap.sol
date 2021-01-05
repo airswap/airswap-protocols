@@ -235,6 +235,6 @@ contract Swap is ISwap {
     );
 
     // Recover the signer from the orderHash and signature
-    return digest.toEthSignedMessageHash().recover(signature);
+    return digest.recover(signature);
   }
 }

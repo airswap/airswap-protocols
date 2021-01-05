@@ -16,10 +16,6 @@ const ERC20Interface = new ethers.utils.Interface(IERC20.abi)
 const encodeERC20Call = (name, args) =>
   ERC20Interface.functions[name].encode(args)
 
-const PROVIDER_URL = web3.currentProvider.host
-
-const provider = new ethers.providers.JsonRpcProvider(PROVIDER_URL)
-
 function createOrder({
   expiry = Math.round(Date.now() / 1000 + SECONDS_IN_DAY).toString(),
   nonce = Date.now(),
@@ -56,10 +52,7 @@ function orderToParams(order) {
 
 contract('Swap Light Unit Tests', async accounts => {
   const mockSender = accounts[1]
-
-  let mockSigner
-  let mockSignerWallet
-  //   const sender = accounts[3]
+  const mockSigner = accounts[2]
 
   let snapshotId
   let swap
@@ -86,9 +79,6 @@ contract('Swap Light Unit Tests', async accounts => {
     swap = await Swap.new()
     mockSignerToken = await MockContract.new()
     mockSenderToken = await MockContract.new()
-    const signer = await provider.getSigner()
-    mockSigner = await signer.getAddress()
-    mockSignerWallet = signer
   })
 
   describe('Test swap', async () => {
@@ -98,7 +88,7 @@ contract('Swap Light Unit Tests', async accounts => {
         signerAmount: 1,
         sender: mockSender,
       })
-      const signedOrder = await signOrder(order, mockSignerWallet, swap.address)
+      const signedOrder = await signOrder(order, mockSigner, swap.address)
 
       await mockSignerToken.givenAnyReturnBool(true)
       await mockSenderToken.givenAnyReturnBool(true)
@@ -157,7 +147,7 @@ contract('Swap Light Unit Tests', async accounts => {
         sender: mockSender,
       })
 
-      const signedOrder = await signOrder(order, mockSignerWallet, swap.address)
+      const signedOrder = await signOrder(order, mockSigner, swap.address)
 
       await swap.cancelUpTo(5, { from: mockSigner })
 
@@ -179,7 +169,7 @@ contract('Swap Light Unit Tests', async accounts => {
         sender: mockSender,
       })
 
-      const signedOrder = await signOrder(order, mockSignerWallet, swap.address)
+      const signedOrder = await signOrder(order, mockSigner, swap.address)
 
       await mockSignerToken.givenAnyReturnBool(true)
       await mockSenderToken.givenAnyReturnBool(true)
@@ -200,7 +190,7 @@ contract('Swap Light Unit Tests', async accounts => {
         sender: mockSender,
       })
 
-      const signedOrder = await signOrder(order, mockSignerWallet, swap.address)
+      const signedOrder = await signOrder(order, mockSigner, swap.address)
 
       await mockSignerToken.givenAnyReturnBool(true)
       await mockSenderToken.givenAnyReturnBool(true)
