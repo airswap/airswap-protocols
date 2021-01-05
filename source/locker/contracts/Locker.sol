@@ -122,7 +122,9 @@ contract Locker is Ownable {
     if (balances[msg.sender] > throttlingBalance) {
       require(
         (previous.add(amount)) <=
-          ((throttlingPercentage.mul(balances[msg.sender])).div(100)),
+          (
+            (throttlingPercentage.mul(balances[msg.sender])).div(MAX_PERCENTAGE)
+          ),
         "AMOUNT_EXCEEDS_LIMIT"
       );
     }
