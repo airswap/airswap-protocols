@@ -1,11 +1,11 @@
 {
   "name": "@airswap/light",
-  "version": "5.4.8",
-  "description": "Light version of the Swap smart contracts",
+  "version": "0.0.1",
+  "description": "Light version of @airswap/swap",
   "contributors": [
+    "Vicente Dragicevic <vicente.dragicevic@consensys.net>",
     "Don Mosites <don.mosites@fluidity.io>",
-    "Ethan Wessel <ethan.wessel@fluidity.io>",
-    "Vicente Dragicevic <vicente.dragicevic@consensys.net>"
+    "Ethan Wessel <ethan.wessel@fluidity.io>"
   ],
   "license": "Apache-2.0",
   "repository": {

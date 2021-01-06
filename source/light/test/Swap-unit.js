@@ -7,7 +7,7 @@ const { ADDRESS_ZERO, SECONDS_IN_DAY } = require('@airswap/constants')
 
 const { signOrder } = require('./utils')
 
-const Swap = artifacts.require('Swap')
+const Light = artifacts.require('Light')
 const IERC20 = artifacts.require('IERC20')
 const MockContract = artifacts.require('MockContract')
 
@@ -76,7 +76,7 @@ contract('Swap Light Unit Tests', async accounts => {
   })
 
   before('deploy Swap', async () => {
-    swap = await Swap.new()
+    swap = await Light.new()
     mockSignerToken = await MockContract.new()
     mockSenderToken = await MockContract.new()
   })
@@ -136,7 +136,7 @@ contract('Swap Light Unit Tests', async accounts => {
         expiry: 0,
       })
 
-      await reverted(swap.swap(...orderToParams(order)), 'ORDER_EXPIRED')
+      await reverted(swap.swap(...orderToParams(order)), 'EXPIRY_PASSED')
     })
 
     it('test when order nonce is too low', async () => {

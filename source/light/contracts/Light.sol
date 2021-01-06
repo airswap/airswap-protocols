@@ -1,12 +1,3 @@
-/* solhint-disable var-name-mixedcase */
-pragma solidity ^0.6.0;
-
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
-import "@openzeppelin/contracts/cryptography/ECDSA.sol";
-
-import "./interfaces/ISwap.sol";
-
 /*
   Copyright 2020 Swap Holdings Ltd.
 
@@ -23,10 +14,20 @@ import "./interfaces/ISwap.sol";
   limitations under the License.
 */
 
+/* solhint-disable var-name-mixedcase */
+pragma solidity ^0.6.0;
+
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "@openzeppelin/contracts/cryptography/ECDSA.sol";
+
+import "./interfaces/ILight.sol";
+
 /**
- * @title Swap: The Atomic Swap used on the AirSwap Network
+ * @title Light: Simple atomic swap used on the AirSwap network
+ * @notice https://www.airswap.io/
  */
-contract Swap is ISwap {
+contract Light is ILight {
   using SafeERC20 for IERC20;
   using ECDSA for bytes32;
 
@@ -86,10 +87,10 @@ contract Swap is ISwap {
   ) external override {
     require(DOMAIN_CHAIN_ID == getChainId(), "CHAIN_ID_CHANGED");
 
-    // Ensure the order is not expired.
-    require(expiry > block.timestamp, "ORDER_EXPIRED");
+    // Ensure the expiry has not passed.
+    require(expiry > block.timestamp, "EXPIRY_PASSED");
 
-    bytes32 orderHash = _hashOrder(
+    bytes32 hashed = _getHash(
       nonce,
       expiry,
       signerToken,
@@ -98,10 +99,10 @@ contract Swap is ISwap {
       senderAmount
     );
 
-    // Recover the signer from the orderHash and signature
-    address signer = _getSigner(orderHash, signature);
+    // Recover the signer from the hash and signature.
+    address signer = _getSigner(hashed, signature);
 
-    // Ensure the order nonce is above the minimum.
+    // Ensure the nonce is above the minimum.
     require(nonce >= signerMinimumNonce[signer], "NONCE_TOO_LOW");
 
     // Mark the nonce as used and ensure it hasn't been used before.
@@ -126,7 +127,7 @@ contract Swap is ISwap {
   }
 
   /**
-   * @notice Cancel one or more open orders by nonce
+   * @notice Cancel one or more nonces
    * @dev Cancelled nonces are marked as used
    * @dev Emits a Cancel event
    * @dev Out of gas may occur in arrays of length > 400
@@ -142,7 +143,7 @@ contract Swap is ISwap {
   }
 
   /**
-   * @notice Cancels all orders below a nonce value
+   * @notice Cancels all nonces below a value
    * @dev Emits a CancelUpTo event
    * @param minimumNonce uint256 Minimum valid nonce
    */
@@ -202,7 +203,7 @@ contract Swap is ISwap {
     return true;
   }
 
-  function _hashOrder(
+  function _getHash(
     uint256 nonce,
     uint256 expiry,
     IERC20 signerToken,
