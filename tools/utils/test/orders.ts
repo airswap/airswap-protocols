@@ -36,11 +36,19 @@ describe('Orders', async () => {
       senderWallet: ADDRESS_ZERO,
       senderToken: ADDRESS_ZERO,
       senderAmount: '0',
-      swapContract: ADDRESS_ZERO,
-      chainId: '1',
     }
-    const signature = await createLightSignature(order, wallet)
-    const signerWallet = getSignerFromLightSignature(order, signature)
+    const signature = await createLightSignature(
+      order,
+      wallet.privateKey,
+      ADDRESS_ZERO,
+      1
+    )
+    const signerWallet = getSignerFromLightSignature(
+      order,
+      ADDRESS_ZERO,
+      1,
+      signature
+    )
     expect(signerWallet).to.equal(wallet.address)
   })
 

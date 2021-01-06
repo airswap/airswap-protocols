@@ -27,6 +27,7 @@
     "@airswap/constants": "0.3.9",
     "@airswap/types": "3.5.12",
     "@types/ethereumjs-util": "^6.1.0",
+    "eth-sig-util": "^3.0.0",
     "ethereumjs-util": "^6.2.0",
     "ethers": "^4.0.45"
   },

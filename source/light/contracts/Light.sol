@@ -36,7 +36,7 @@ contract Light is ILight {
   );
 
   bytes32 public constant ORDER_TYPEHASH = keccak256(
-    "LightOrder(uint256 nonce,uint256 expiry,address sender,address signerToken,uint256 signerAmount,address senderToken,uint256 senderAmount)" // solhint-disable-line max-line-length
+    "LightOrder(uint256 nonce,uint256 expiry,address senderWallet,address signerToken,uint256 signerAmount,address senderToken,uint256 senderAmount)" // solhint-disable-line max-line-length
   );
 
   bytes32 public constant DOMAIN_NAME = keccak256("SWAP_LIGHT");

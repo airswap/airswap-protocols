@@ -35,7 +35,7 @@
   "dependencies": {
     "@airswap/transfers": "1.1.3",
     "@airswap/types": "3.5.12",
-    "@openzeppelin/contracts": "^3.3.0",
-    "eth-sig-util": "^3.0.0"
+    "@airswap/utils": "0.3.16",
+    "@openzeppelin/contracts": "^3.3.0"
   }
 }

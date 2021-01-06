@@ -82,7 +82,7 @@ export type LightOrder = {
   expiry: string
   signerToken: string
   signerAmount: string
-  sender: string
+  senderWallet: string
   senderToken: string
   senderAmount: string
 }
@@ -130,7 +130,7 @@ export const EIP712Light = {
   LightOrder: [
     { name: 'nonce', type: 'uint256' },
     { name: 'expiry', type: 'uint256' },
-    { name: 'sender', type: 'address' },
+    { name: 'senderWallet', type: 'address' },
     { name: 'signerToken', type: 'address' },
     { name: 'signerAmount', type: 'uint256' },
     { name: 'senderToken', type: 'address' },

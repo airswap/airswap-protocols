@@ -4,8 +4,8 @@ const {
   assert: { emitted, reverted, notEmitted, equal },
 } = require('@airswap/test-utils')
 const { ADDRESS_ZERO, SECONDS_IN_DAY } = require('@airswap/constants')
-
-const { signOrder } = require('./utils')
+const { createLightSignature } = require('@airswap/utils')
+const { getPrivateKeyFromGanacheAccount } = require('./utils')
 
 const Light = artifacts.require('Light')
 const IERC20 = artifacts.require('IERC20')
@@ -19,7 +19,7 @@ const encodeERC20Call = (name, args) =>
 function createOrder({
   expiry = Math.round(Date.now() / 1000 + SECONDS_IN_DAY).toString(),
   nonce = Date.now(),
-  sender = ADDRESS_ZERO,
+  senderWallet = ADDRESS_ZERO,
   signerToken = ADDRESS_ZERO,
   senderToken = ADDRESS_ZERO,
   signerAmount = 0,
@@ -29,11 +29,20 @@ function createOrder({
   return {
     expiry,
     nonce,
-    sender,
+    senderWallet,
     signerToken,
     senderToken,
     signerAmount,
     senderAmount,
+    signature,
+  }
+}
+
+const signOrder = async (order, account, swapContract) => {
+  const privKey = getPrivateKeyFromGanacheAccount(account)
+  const signature = await createLightSignature(order, privKey, swapContract, 1)
+  return {
+    ...order,
     signature,
   }
 }
@@ -86,7 +95,7 @@ contract('Swap Light Unit Tests', async accounts => {
       const order = createOrderWithMockTokens({
         senderAmount: 1,
         signerAmount: 1,
-        sender: mockSender,
+        senderWallet: mockSender,
       })
       const signedOrder = await signOrder(order, mockSigner, swap.address)
 
@@ -101,7 +110,7 @@ contract('Swap Light Unit Tests', async accounts => {
         return (
           e.nonce.toNumber() === order.nonce &&
           e.signerWallet === mockSigner &&
-          e.senderWallet === order.sender &&
+          e.senderWallet === order.senderWallet &&
           e.signerToken === order.signerToken &&
           e.senderToken === order.senderToken &&
           e.signerAmount.toNumber() === order.signerAmount &&
@@ -144,7 +153,7 @@ contract('Swap Light Unit Tests', async accounts => {
         nonce: 0,
         signerAmount: 200,
         senderAmount: 200,
-        sender: mockSender,
+        senderWallet: mockSender,
       })
 
       const signedOrder = await signOrder(order, mockSigner, swap.address)
@@ -166,7 +175,7 @@ contract('Swap Light Unit Tests', async accounts => {
         nonce: 0,
         signerAmount: 200,
         senderAmount: 200,
-        sender: mockSender,
+        senderWallet: mockSender,
       })
 
       const signedOrder = await signOrder(order, mockSigner, swap.address)
@@ -187,7 +196,7 @@ contract('Swap Light Unit Tests', async accounts => {
         nonce: 0,
         signerAmount: 200,
         senderAmount: 200,
-        sender: mockSender,
+        senderWallet: mockSender,
       })
 
       const signedOrder = await signOrder(order, mockSigner, swap.address)
@@ -210,7 +219,7 @@ contract('Swap Light Unit Tests', async accounts => {
 
     it('test cancellation with duplicated items', async () => {
       const trx = await swap.cancel([1, 1], { from: mockSigner })
-      await emitted(trx, 'Cancel', e => {
+      emitted(trx, 'Cancel', e => {
         return e.nonce.toNumber() === 1 && e.signerWallet === mockSigner
       })
 
@@ -221,11 +230,11 @@ contract('Swap Light Unit Tests', async accounts => {
 
     it('test cancellation of same item twice', async () => {
       const trx = await swap.cancel([1], { from: mockSigner })
-      await emitted(trx, 'Cancel', e => {
+      emitted(trx, 'Cancel', e => {
         return e.nonce.toNumber() === 1 && e.signerWallet === mockSigner
       })
       const trx2 = await swap.cancel([1], { from: mockSigner })
-      await notEmitted(trx2, 'Cancel')
+      notEmitted(trx2, 'Cancel')
 
       //ensure the value was set
       const val = await swap.nonceUsed.call(mockSigner, 1)
@@ -236,7 +245,7 @@ contract('Swap Light Unit Tests', async accounts => {
       const trx = await swap.cancel([6], { from: mockSigner })
 
       //ensure transaction was emitted
-      await emitted(trx, 'Cancel', e => {
+      emitted(trx, 'Cancel', e => {
         return e.nonce.toNumber() === 6 && e.signerWallet === mockSigner
       })
 
