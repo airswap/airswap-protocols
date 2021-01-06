@@ -57,6 +57,7 @@ contract Pool is Ownable {
   );
   event SetScale(uint256 scale);
   event SetMax(uint256 max);
+  event DrainTo(IERC20[] tokens, address dest);
 
   /**
    * @notice Structs
@@ -183,5 +184,19 @@ contract Pool is Ownable {
     require(_max <= MAX_PERCENTAGE, "MAX_TOO_HIGH");
     max = _max;
     emit SetMax(max);
+  }
+
+  /**
+   * @notice Admin function to migrate funds
+   * @dev Only owner
+   * @param tokens IERC20[]
+   * @param dest address
+   */
+  function drainTo(IERC20[] calldata tokens, address dest) external onlyOwner {
+    for (uint256 i = 0; i < tokens.length; i++) {
+      uint256 bal = tokens[i].balanceOf(address(this));
+      tokens[i].safeTransfer(dest, bal);
+    }
+    emit DrainTo(tokens, dest);
   }
 }

@@ -310,4 +310,41 @@ contract('Pool Unit Tests', async accounts => {
       await reverted(pool.setMax(101), 'MAX_TOO_HIGH')
     })
   })
+
+  describe('Test drain to', async () => {
+    it('Test drain to is successful', async () => {
+      const mockToken_transfer = await mockFungibleTokenTemplate.contract.methods
+        .transfer(ADDRESS_ZERO, 0)
+        .encodeABI()
+      const mockToken_balanceOf = await mockFungibleTokenTemplate.contract.methods
+        .balanceOf(ADDRESS_ZERO)
+        .encodeABI()
+      await feeToken.givenMethodReturnBool(mockToken_transfer, true)
+      await feeToken.givenMethodReturnUint(mockToken_balanceOf, 10)
+      await feeToken2.givenMethodReturnBool(mockToken_transfer, true)
+      await feeToken2.givenMethodReturnUint(mockToken_balanceOf, 10)
+
+      const trx = await pool.drainTo(
+        [feeToken.address, feeToken2.address],
+        carolAddress
+      )
+
+      emitted(trx, 'DrainTo', e => {
+        return (
+          e.tokens[0] === feeToken.address &&
+          e.tokens[1] === feeToken2.address &&
+          e.dest === carolAddress
+        )
+      })
+    })
+
+    it('Test dtain to is only callable by owner', async () => {
+      await reverted(
+        pool.drainTo([feeToken.address, feeToken2.address], carolAddress, {
+          from: aliceAddress,
+        }),
+        'Ownable: caller is not the owner'
+      )
+    })
+  })
 })
