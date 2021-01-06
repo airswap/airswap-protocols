@@ -1,6 +1,6 @@
-# Swap
+# Light
 
-[AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens. This package contains source code and tests for the atomic `Swap` used to perform trustless token transfers between parties.
+[AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens. This package contains source code and tests for the `Light` atomic swap used to perform trustless token transfers between parties. Light functions as a simplified version of the [Swap](https://github.com/airswap/airswap-protocols/tree/master/source/swap) contract for specific use cases that do not require full features.
 
 [![Discord](https://img.shields.io/discord/590643190281928738.svg)](https://discord.gg/ecQbV7H)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
@@ -16,7 +16,7 @@
 
 ## Usage
 
-:warning: This package is under active development and contains unaudited code. The audited [Swap](https://github.com/airswap/airswap-protocols/blob/953956f308c65ec53d1f1b20d35f47fe04b936af/source/swap/contracts/Swap.sol) contract is deployed; see [deploys.json](./deploys.json) for latest. For all AirSwap contract deployments see [Deployed Contracts](https://docs.airswap.io/system/contract-deployments).
+:warning: This package is under active development and contains unaudited code. For all AirSwap contract deployments see [Deployed Contracts](https://docs.airswap.io/system/contract-deployments).
 
 ## Commands
 
