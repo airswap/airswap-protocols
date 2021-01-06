@@ -128,7 +128,7 @@ contract Pool is Ownable {
   {
     uint256 balance = token.balanceOf(address(this));
     uint256 divisor = (uint256(10)**scale).add(score);
-    return max.mul((score.mul(balance).div(divisor))).div(100);
+    return max.mul(score).mul(balance).div(divisor).div(100);
   }
 
   /**
