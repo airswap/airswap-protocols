@@ -49,7 +49,7 @@ describe('Orders', async () => {
       1,
       signature
     )
-    expect(signerWallet).to.equal(wallet.address)
+    expect(signerWallet.toLowerCase()).to.equal(wallet.address.toLowerCase())
   })
 
   it('Best by lowest sender', async () => {
