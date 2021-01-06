@@ -52,7 +52,7 @@ contract Pool is Ownable {
   event Withdraw(
     bytes32[] roots,
     address account,
-    address token,
+    IERC20 token,
     uint256 amount
   );
   event SetScale(uint256 scale);
@@ -92,9 +92,9 @@ contract Pool is Ownable {
   /**
    * @notice Withdraw tokens from the pool using claims
    * @param claims Claim[]
-   * @param token address
+   * @param token IERC20
    */
-  function withdraw(Claim[] memory claims, address token) external {
+  function withdraw(Claim[] memory claims, IERC20 token) external {
     require(claims.length > 0, "CLAIMS_MUST_BE_PROVIDED");
     uint256 totalScore = 0;
     bytes32[] memory rootList = new bytes32[](claims.length);
@@ -112,32 +112,31 @@ contract Pool is Ownable {
       rootList[i] = claim.root;
     }
     uint256 amount = calculate(totalScore, token);
-    IERC20(token).safeTransfer(msg.sender, amount);
+    token.safeTransfer(msg.sender, amount);
     emit Withdraw(rootList, msg.sender, token, amount);
   }
 
   /**
    * @notice Calculate output amount for an input score
    * @param score uint256
-   * @param token address
+   * @param token IERC20
    */
-  function calculate(uint256 score, address token)
+  function calculate(uint256 score, IERC20 token)
     public
     view
     returns (uint256 amount)
   {
-    return
-      (
-        max.mul(
-          (score.mul(IERC20(token).balanceOf(address(this)))).div(
-            ((uint256(10)**scale).add(score))
-          )
-        )
-      )
-        .div(100);
+    uint256 balance = token.balanceOf(address(this));
+    uint256 divisor = (uint256(10)**scale).add(score);
+    return max.mul((score.mul(balance).div(divisor))).div(100);
   }
 
-  function calculateMultiple(uint256 score, address[] calldata tokens)
+  /**
+   * @notice Calculate output amount for an input score
+   * @param score uint256
+   * @param tokens IERC20[]
+   */
+  function calculateMultiple(uint256 score, IERC20[] calldata tokens)
     external
     view
     returns (uint256[] memory outputAmounts)
