@@ -16,14 +16,25 @@
 
 import * as util from 'ethereumjs-util'
 import { ethers } from 'ethers'
-import { DOMAIN_NAME, DOMAIN_VERSION } from '@airswap/constants'
-import { OrderParty, UnsignedOrder, LightOrder, EIP712 } from '@airswap/types'
+import {
+  DOMAIN_NAME,
+  DOMAIN_VERSION,
+  LIGHT_DOMAIN_NAME,
+  LIGHT_DOMAIN_VERSION,
+} from '@airswap/constants'
+import {
+  OrderParty,
+  UnsignedOrder,
+  LightOrder,
+  EIP712,
+  EIP712Light,
+} from '@airswap/types'
 
-function stringify(type: string): string {
-  let str = `${type}(`
-  const keys = Object.keys(EIP712[type])
+function stringify(types: any, primaryType: string): string {
+  let str = `${primaryType}(`
+  const keys = Object.keys(types[primaryType])
   for (let i = 0; i < keys.length; i++) {
-    str += `${EIP712[type][i].type} ${EIP712[type][i].name}`
+    str += `${types[primaryType][i].type} ${types[primaryType][i].name}`
     if (i !== keys.length - 1) {
       str += ','
     }
@@ -31,13 +42,22 @@ function stringify(type: string): string {
   return `${str})`
 }
 
-export const EIP712_DOMAIN_TYPEHASH = util.keccak256(stringify('EIP712Domain'))
-
-export const ORDER_TYPEHASH = util.keccak256(
-  stringify('Order') + stringify('Party')
+export const EIP712_DOMAIN_TYPEHASH = util.keccak256(
+  stringify(EIP712, 'EIP712Domain')
+)
+export const LIGHT_EIP712_DOMAIN_TYPEHASH = util.keccak256(
+  stringify(EIP712Light, 'EIP712Light')
 )
 
-export const PARTY_TYPEHASH = util.keccak256(stringify('Party'))
+export const ORDER_TYPEHASH = util.keccak256(
+  stringify(EIP712, 'Order') + stringify(EIP712, 'Party')
+)
+
+export const PARTY_TYPEHASH = util.keccak256(stringify(EIP712, 'Party'))
+
+export const LIGHT_ORDER_TYPEHASH = util.keccak256(
+  stringify(EIP712Light, 'LightOrder')
+)
 
 export function hashParty(party: OrderParty): Buffer {
   return util.keccak256(
@@ -64,6 +84,31 @@ export function hashOrder(order: UnsignedOrder): Buffer {
   )
 }
 
+export function hashLightOrder(order: LightOrder): Buffer {
+  return util.keccak256(
+    ethers.utils.defaultAbiCoder.encode(
+      [
+        'uint256',
+        'uint256',
+        'address',
+        'address',
+        'uint256',
+        'address',
+        'uint256',
+      ],
+      [
+        order.nonce,
+        order.expiry,
+        order.sender,
+        order.signerToken,
+        order.signerAmount,
+        order.senderToken,
+        order.senderAmount,
+      ]
+    )
+  )
+}
+
 export function hashDomain(swapContract: string): Buffer {
   return util.keccak256(
     ethers.utils.defaultAbiCoder.encode(
@@ -72,6 +117,21 @@ export function hashDomain(swapContract: string): Buffer {
         EIP712_DOMAIN_TYPEHASH,
         util.keccak256(DOMAIN_NAME),
         util.keccak256(DOMAIN_VERSION),
+        swapContract,
+      ]
+    )
+  )
+}
+
+export function hashLightDomain(swapContract: string, chainId: number): Buffer {
+  return util.keccak256(
+    ethers.utils.defaultAbiCoder.encode(
+      ['bytes32', 'bytes32', 'bytes32', 'uint256', 'address'],
+      [
+        LIGHT_EIP712_DOMAIN_TYPEHASH,
+        util.keccak256(LIGHT_DOMAIN_NAME),
+        util.keccak256(LIGHT_DOMAIN_VERSION),
+        chainId,
         swapContract,
       ]
     )
@@ -87,6 +147,20 @@ export function getOrderHash(
       Buffer.from('1901', 'hex'),
       hashDomain(swapContract),
       hashOrder(order),
+    ])
+  )
+}
+
+export function getLightOrderHash(
+  order: LightOrder,
+  swapContract: string,
+  chainId: number
+): Buffer {
+  return util.keccak256(
+    Buffer.concat([
+      Buffer.from('1901', 'hex'),
+      hashLightDomain(swapContract, chainId),
+      hashLightOrder(order),
     ])
   )
 }
