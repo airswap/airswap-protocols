@@ -35,7 +35,7 @@ import {
   EIP712Light,
   OrderParty,
 } from '@airswap/types'
-import { getLightOrderHash, getOrderHash } from './hashes'
+import { getOrderHash } from './hashes'
 import { lowerCaseAddresses } from '..'
 
 export function numberToBytes32(number): string {
@@ -280,8 +280,18 @@ export function getSignerFromLightSignature(
   chainId: number,
   signature: string
 ) {
-  return ethers.utils.recoverAddress(
-    getLightOrderHash(order, swapContract, chainId),
-    signature
-  )
+  return sigUtil.recoverTypedSignature_v4({
+    data: {
+      types: EIP712Light,
+      domain: {
+        name: LIGHT_DOMAIN_NAME,
+        version: LIGHT_DOMAIN_VERSION,
+        chainId,
+        verifyingContract: swapContract,
+      },
+      primaryType: 'LightOrder',
+      message: order,
+    },
+    sig: signature,
+  })
 }

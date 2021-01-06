@@ -88,6 +88,7 @@ export function hashLightOrder(order: LightOrder): Buffer {
   return util.keccak256(
     ethers.utils.defaultAbiCoder.encode(
       [
+        'bytes32',
         'uint256',
         'uint256',
         'address',
@@ -97,6 +98,7 @@ export function hashLightOrder(order: LightOrder): Buffer {
         'uint256',
       ],
       [
+        LIGHT_ORDER_TYPEHASH,
         order.nonce,
         order.expiry,
         order.senderWallet,
