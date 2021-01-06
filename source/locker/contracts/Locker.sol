@@ -195,7 +195,7 @@ contract Locker is Ownable {
     uint256 amount
   ) private {
     require(
-      balances[account].add(amount) <= (type(uint256).max).div(100),
+      balances[account].add(amount) <= (type(uint256).max).div(MAX_PERCENTAGE),
       "OVERFLOW_PROTECTION"
     );
     require(token.balanceOf(from) >= amount, "BALANCE_INSUFFICIENT");
