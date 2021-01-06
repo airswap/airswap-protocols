@@ -46,7 +46,7 @@ export const EIP712_DOMAIN_TYPEHASH = util.keccak256(
   stringify(EIP712, 'EIP712Domain')
 )
 export const LIGHT_EIP712_DOMAIN_TYPEHASH = util.keccak256(
-  stringify(EIP712Light, 'EIP712Light')
+  stringify(EIP712Light, 'EIP712Domain')
 )
 
 export const ORDER_TYPEHASH = util.keccak256(
@@ -99,7 +99,7 @@ export function hashLightOrder(order: LightOrder): Buffer {
       [
         order.nonce,
         order.expiry,
-        order.sender,
+        order.senderWallet,
         order.signerToken,
         order.signerAmount,
         order.senderToken,
