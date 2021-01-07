@@ -14,7 +14,8 @@
   limitations under the License.
 */
 
-import * as util from 'ethereumjs-util'
+import * as ethUtil from 'ethereumjs-util'
+import * as sigUtil from 'eth-sig-util'
 import { ethers } from 'ethers'
 import { bigNumberify } from 'ethers/utils'
 import {
@@ -22,6 +23,8 @@ import {
   SECONDS_IN_DAY,
   tokenKinds,
   ADDRESS_ZERO,
+  LIGHT_DOMAIN_VERSION,
+  LIGHT_DOMAIN_NAME,
 } from '@airswap/constants'
 import {
   Quote,
@@ -29,13 +32,10 @@ import {
   Order,
   Signature,
   LightOrder,
+  EIP712Light,
   OrderParty,
 } from '@airswap/types'
-import {
-  getOrderHash,
-  getLightOrderHash,
-  getPrefixedLightOrderHash,
-} from './hashes'
+import { getOrderHash } from './hashes'
 import { lowerCaseAddresses } from '..'
 
 export function numberToBytes32(number): string {
@@ -200,13 +200,13 @@ export function hasValidSignature(order) {
   let hash = getOrderHash(order, signature['validator'])
   if (signature.version === '0x45') {
     const prefix = Buffer.from('\x19Ethereum Signed Message:\n')
-    hash = util.keccak256(
+    hash = ethUtil.keccak256(
       Buffer.concat([prefix, Buffer.from(String(hash.length)), hash])
     )
   }
   let signingPubKey
   try {
-    signingPubKey = util.ecrecover(
+    signingPubKey = ethUtil.ecrecover(
       hash,
       signature['v'],
       signature['r'],
@@ -215,7 +215,9 @@ export function hasValidSignature(order) {
   } catch (e) {
     return false
   }
-  const signingAddress = util.bufferToHex(util.pubToAddress(signingPubKey))
+  const signingAddress = ethUtil.bufferToHex(
+    ethUtil.pubToAddress(signingPubKey)
+  )
   return signingAddress.toLowerCase() === signature['signatory']
 }
 
@@ -250,19 +252,46 @@ export function isValidOrder(order: Order): boolean {
 
 export async function createLightSignature(
   order: LightOrder,
-  signer: ethers.Signer
+  privateKey: string,
+  swapContract: string,
+  chainId: number
 ): Promise<string> {
-  return await signer.signMessage(
-    ethers.utils.arrayify(getLightOrderHash(order))
-  )
+  const sig = sigUtil.signTypedData_v4(ethUtil.toBuffer(privateKey), {
+    data: {
+      types: EIP712Light,
+      domain: {
+        name: LIGHT_DOMAIN_NAME,
+        version: LIGHT_DOMAIN_VERSION,
+        chainId,
+        verifyingContract: swapContract,
+      },
+      primaryType: 'LightOrder',
+      message: order,
+    },
+  })
+
+  const v = ethers.utils.splitSignature(sig).v
+  return `${sig.slice(0, 130)}${(v === 0 || v === 1 ? v + 27 : v).toString(16)}`
 }
 
 export function getSignerFromLightSignature(
   order: LightOrder,
+  swapContract: string,
+  chainId: number,
   signature: string
 ) {
-  return ethers.utils.recoverAddress(
-    getPrefixedLightOrderHash(order),
-    signature
-  )
+  return sigUtil.recoverTypedSignature_v4({
+    data: {
+      types: EIP712Light,
+      domain: {
+        name: LIGHT_DOMAIN_NAME,
+        version: LIGHT_DOMAIN_VERSION,
+        chainId,
+        verifyingContract: swapContract,
+      },
+      primaryType: 'LightOrder',
+      message: order,
+    },
+    sig: signature,
+  })
 }

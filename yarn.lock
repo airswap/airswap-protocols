@@ -403,6 +403,11 @@
   dependencies:
     ethereumjs-abi "^0.6.5"
 
+"@gnosis.pm/mock-contract@^4.0.0":
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/@gnosis.pm/mock-contract/-/mock-contract-4.0.0.tgz#eaf500fddcab81b5f6c22280a7b22ff891dd6f87"
+  integrity sha512-SkRq2KwPx6vo0LAjSc8JhgQstrQFXRyn2yqquIfub7r2WHi5nUbF8beeSSXsd36hvBcQxQfmOIYNYRpj9JOhrQ==
+
 "@graphprotocol/graph-cli@0.17.1":
   version "0.17.1"
   resolved "https://registry.yarnpkg.com/@graphprotocol/graph-cli/-/graph-cli-0.17.1.tgz#d1e1ded8d405574439ebfafa5c765bd6681d09ef"
@@ -4943,6 +4948,18 @@ eth-sig-util@^1.4.2:
   dependencies:
     ethereumjs-abi "git+https://github.com/ethereumjs/ethereumjs-abi.git"
     ethereumjs-util "^5.1.1"
+
+eth-sig-util@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/eth-sig-util/-/eth-sig-util-3.0.0.tgz#75133b3d7c20a5731af0690c385e184ab942b97e"
+  integrity sha512-4eFkMOhpGbTxBQ3AMzVf0haUX2uTur7DpWiHzWyTURa28BVJJtOkcb9Ok5TV0YvEPG61DODPW7ZUATbJTslioQ==
+  dependencies:
+    buffer "^5.2.1"
+    elliptic "^6.4.0"
+    ethereumjs-abi "0.6.5"
+    ethereumjs-util "^5.1.1"
+    tweetnacl "^1.0.0"
+    tweetnacl-util "^0.15.0"
 
 eth-tx-summary@^3.1.2:
   version "3.2.4"
