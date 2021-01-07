@@ -2386,7 +2386,7 @@ aws4@^1.8.0:
   resolved "https://registry.yarnpkg.com/aws4/-/aws4-1.10.0.tgz#a17b3a8ea811060e74d47d306122400ad4497ae2"
   integrity sha512-3YDiu347mtVtjpyV3u5kVqQLP242c06zwDOgpeRnybmXlYYsLbtTrUBUm8i8srONt+FWobl5aibnU1030PeeuA==
 
-axios@^0.19.0, axios@^0.19.2:
+axios@0.19.2, axios@^0.19.0, axios@^0.19.2:
   version "0.19.2"
   resolved "https://registry.yarnpkg.com/axios/-/axios-0.19.2.tgz#3ea36c5d8818d0d5f8a8a97a6d36b86cdc00cb27"
   integrity sha512-fjgm5MvRHLhx+osE2xoekY70AhARk3a6hkN+3Io1jc00jtquGvxYlKlsFUhmUET0V5te6CcZI7lcv2Ym61mjHA==
@@ -3589,6 +3589,11 @@ cipher-base@^1.0.0, cipher-base@^1.0.1, cipher-base@^1.0.3:
     inherits "^2.0.1"
     safe-buffer "^5.0.1"
 
+circular@^1.0.5:
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/circular/-/circular-1.0.5.tgz#7da77af98bbde9ce4b5b358cd556b5dded2d3149"
+  integrity sha1-fad6+Yu96c5LWzWM1Va13e0tMUk=
+
 class-is@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/class-is/-/class-is-1.1.0.tgz#9d3c0fba0440d211d843cec3dedfa48055005825"
@@ -3623,6 +3628,19 @@ cli-cursor@^3.1.0:
   dependencies:
     restore-cursor "^3.1.0"
 
+cli-logger@0.5.40:
+  version "0.5.40"
+  resolved "https://registry.yarnpkg.com/cli-logger/-/cli-logger-0.5.40.tgz#097f0e11b072c7c698a26c47f588a29c20b48b0b"
+  integrity sha1-CX8OEbByx8aYomxH9YiinCC0iws=
+  dependencies:
+    circular "^1.0.5"
+    cli-util "~1.1.27"
+
+cli-regexp@~0.1.0:
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/cli-regexp/-/cli-regexp-0.1.2.tgz#6bcd93b09fb2ed1025d30a1155d5997954a53512"
+  integrity sha1-a82TsJ+y7RAl0woRVdWZeVSlNRI=
+
 cli-spinners@^2.2.0:
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/cli-spinners/-/cli-spinners-2.3.0.tgz#0632239a4b5aa4c958610142c34bb7a651fc8df5"
@@ -3637,6 +3655,13 @@ cli-table3@~0.5.0:
     string-width "^2.1.1"
   optionalDependencies:
     colors "^1.1.2"
+
+cli-util@~1.1.27:
+  version "1.1.27"
+  resolved "https://registry.yarnpkg.com/cli-util/-/cli-util-1.1.27.tgz#42d69e36a040a321fc9cf851c1513cadc5093054"
+  integrity sha1-QtaeNqBAoyH8nPhRwVE8rcUJMFQ=
+  dependencies:
+    cli-regexp "~0.1.0"
 
 cli-width@^2.0.0:
   version "2.2.1"
@@ -4332,7 +4357,7 @@ defined@~1.0.0:
   resolved "https://registry.yarnpkg.com/defined/-/defined-1.0.0.tgz#c98d9bcef75674188e110969151199e39b1fa693"
   integrity sha1-yY2bzvdWdBiOEQlpFRGZ45sfppM=
 
-delay@^4.3.0:
+delay@4.3.0, delay@^4.3.0:
   version "4.3.0"
   resolved "https://registry.yarnpkg.com/delay/-/delay-4.3.0.tgz#efeebfb8f545579cb396b3a722443ec96d14c50e"
   integrity sha512-Lwaf3zVFDMBop1yDuFZ19F9WyGcZcGacsbdlZtWjQmM50tOcMntm1njF/Nb/Vjij3KaSvCF+sEYGKrrjObu2NA==
@@ -10224,7 +10249,7 @@ query-string@^5.0.1:
     object-assign "^4.1.0"
     strict-uri-encode "^1.0.0"
 
-querystring@^0.2.0:
+querystring@0.2.0, querystring@^0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/querystring/-/querystring-0.2.0.tgz#b209849203bb25df820da756e747005878521620"
   integrity sha1-sgmEkgO7Jd+CDadW50cAWHhSFiA=
@@ -12117,6 +12142,16 @@ truffle-hdwallet-provider-privkey@^1.0.3:
     ethereumjs-wallet "^0.6.0"
     web3 "1.0.0-beta.33"
     web3-provider-engine "git+https://github.com/cgewecke/provider-engine.git#web3-one"
+
+truffle-plugin-verify@^0.5.4:
+  version "0.5.4"
+  resolved "https://registry.yarnpkg.com/truffle-plugin-verify/-/truffle-plugin-verify-0.5.4.tgz#9e8d5ab048f0a2fc52a6ec4a01207f4570c78140"
+  integrity sha512-cFqhypLZ3C/71jh9muVWm37pKd+I1AHr/hu+h7Y3GEKaMFu5YoQ97mj/0AnrY4MO8pgoaghSqkCPiIj/xXCaoA==
+  dependencies:
+    axios "0.19.2"
+    cli-logger "0.5.40"
+    delay "4.3.0"
+    querystring "0.2.0"
 
 truffle-verify@^1.0.4:
   version "1.0.8"
