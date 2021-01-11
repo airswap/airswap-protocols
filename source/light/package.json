@@ -23,10 +23,10 @@
     "verify": "truffle run verify"
   },
   "devDependencies": {
-    "@airswap/constants": "0.3.9",
+    "@airswap/constants": "0.3.10",
     "@airswap/test-utils": "0.1.6",
     "@airswap/tokens": "0.1.4",
-    "@airswap/utils": "0.3.18",
+    "@airswap/utils": "0.3.19",
     "@gnosis.pm/mock-contract": "^4.0.0",
     "ethers": "^4.0.45",
     "solidity-coverage": "^0.7.4",
