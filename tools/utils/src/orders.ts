@@ -31,6 +31,7 @@ import {
   UnsignedOrder,
   Order,
   Signature,
+  UnsignedLightOrder,
   LightOrder,
   EIP712Light,
   OrderParty,
@@ -251,7 +252,7 @@ export function isValidOrder(order: Order): boolean {
 }
 
 export async function createLightSignature(
-  order: LightOrder,
+  unsignedOrder: UnsignedLightOrder,
   privateKey: string,
   swapContract: string,
   chainId: number
@@ -266,7 +267,7 @@ export async function createLightSignature(
         verifyingContract: swapContract,
       },
       primaryType: 'LightOrder',
-      message: order,
+      message: unsignedOrder,
     },
   })
 

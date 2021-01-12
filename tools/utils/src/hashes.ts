@@ -25,7 +25,7 @@ import {
 import {
   OrderParty,
   UnsignedOrder,
-  LightOrder,
+  UnsignedLightOrder,
   EIP712,
   EIP712Light,
 } from '@airswap/types'
@@ -84,7 +84,7 @@ export function hashOrder(order: UnsignedOrder): Buffer {
   )
 }
 
-export function hashLightOrder(order: LightOrder): Buffer {
+export function hashLightOrder(order: UnsignedLightOrder): Buffer {
   return util.keccak256(
     ethers.utils.defaultAbiCoder.encode(
       [
