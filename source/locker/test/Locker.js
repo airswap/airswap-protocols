@@ -79,9 +79,27 @@ contract('Locker', async accounts => {
         'AMOUNT_EXCEEDS_LIMIT'
       )
     })
-    it('Alice attempts to unlock 10% of her tokens', async () => {
+    it('Alice unlocks 5% of her tokens', async () => {
       emitted(
-        await locker.unlock(100000, {
+        await locker.unlock(50000, {
+          from: aliceAddress,
+        }),
+        'Unlock'
+      )
+      equal((await locker.balanceOf(aliceAddress)).toString(), '950000')
+      equal((await locker.totalSupply()).toString(), '950000')
+    })
+    it('Alice attempts to unlock additional 10% and fails', async () => {
+      await reverted(
+        locker.unlock(100000, {
+          from: aliceAddress,
+        }),
+        'AMOUNT_EXCEEDS_LIMIT'
+      )
+    })
+    it('Alice unlocks remaining 5% of her tokens', async () => {
+      emitted(
+        await locker.unlock(50000, {
           from: aliceAddress,
         }),
         'Unlock'
@@ -150,7 +168,7 @@ contract('Locker', async accounts => {
         locker.unlock(100000000, {
           from: aliceAddress,
         }),
-        'BALANCE_INSUFFICIENT'
+        'SafeMath: subtraction overflow'
       )
     })
   })

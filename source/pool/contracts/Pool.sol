@@ -18,19 +18,20 @@ pragma solidity ^0.6.12;
 pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts/cryptography/MerkleProof.sol";
 
 /**
  * @title Pool: Claim Tokens Based on a Pricing Function
  */
 contract Pool is Ownable {
+  using SafeERC20 for IERC20;
   using SafeMath for uint256;
 
   uint256 internal constant MAX_PERCENTAGE = 100;
-  bytes1 internal constant UNCLAIMED = 0x00;
-  bytes1 internal constant CLAIMED = 0x01;
+  uint256 internal constant MAX_SCALE = 77;
 
   // Larger the scale, lower the output for a claim
   uint256 public scale;
@@ -42,7 +43,7 @@ contract Pool is Ownable {
   mapping(bytes32 => bool) public roots;
 
   // Mapping of tree root to account to mark as claimed
-  mapping(bytes32 => mapping(address => bytes1)) public claimed;
+  mapping(bytes32 => mapping(address => bool)) public claimed;
 
   /**
    * @notice Events
@@ -51,11 +52,12 @@ contract Pool is Ownable {
   event Withdraw(
     bytes32[] roots,
     address account,
-    address token,
+    IERC20 token,
     uint256 amount
   );
   event SetScale(uint256 scale);
   event SetMax(uint256 max);
+  event DrainTo(IERC20[] tokens, address dest);
 
   /**
    * @notice Structs
@@ -73,6 +75,7 @@ contract Pool is Ownable {
    */
   constructor(uint256 _scale, uint256 _max) public {
     require(_max <= MAX_PERCENTAGE, "MAX_TOO_HIGH");
+    require(_scale <= MAX_SCALE, "SCALE_TOO_HIGH");
     scale = _scale;
     max = _max;
   }
@@ -90,9 +93,9 @@ contract Pool is Ownable {
   /**
    * @notice Withdraw tokens from the pool using claims
    * @param claims Claim[]
-   * @param token address
+   * @param token IERC20
    */
-  function withdraw(Claim[] memory claims, address token) public {
+  function withdraw(Claim[] memory claims, IERC20 token) external {
     require(claims.length > 0, "CLAIMS_MUST_BE_PROVIDED");
     uint256 totalScore = 0;
     bytes32[] memory rootList = new bytes32[](claims.length);
@@ -100,40 +103,50 @@ contract Pool is Ownable {
     for (uint256 i = 0; i < claims.length; i++) {
       claim = claims[i];
       require(roots[claim.root], "ROOT_NOT_ENABLED");
-      require(
-        claimed[claim.root][msg.sender] == UNCLAIMED,
-        "CLAIM_ALREADY_MADE"
-      );
+      require(!claimed[claim.root][msg.sender], "CLAIM_ALREADY_MADE");
       require(
         verify(msg.sender, claim.root, claim.score, claim.proof),
         "PROOF_INVALID"
       );
       totalScore = totalScore.add(claim.score);
-      claimed[claim.root][msg.sender] = CLAIMED;
+      claimed[claim.root][msg.sender] = true;
+      rootList[i] = claim.root;
     }
     uint256 amount = calculate(totalScore, token);
-    IERC20(token).transfer(msg.sender, amount);
+    token.safeTransfer(msg.sender, amount);
     emit Withdraw(rootList, msg.sender, token, amount);
   }
 
   /**
    * @notice Calculate output amount for an input score
    * @param score uint256
-   * @param token address
+   * @param token IERC20
    */
-  function calculate(uint256 score, address token)
+  function calculate(uint256 score, IERC20 token)
     public
     view
     returns (uint256 amount)
   {
-    return
-      (
-        max.mul(
-          (score.mul(IERC20(token).balanceOf(address(this)))) /
-            ((10**scale) + score)
-        )
-      )
-        .div(100);
+    uint256 balance = token.balanceOf(address(this));
+    uint256 divisor = (uint256(10)**scale).add(score);
+    return max.mul(score).mul(balance).div(divisor).div(100);
+  }
+
+  /**
+   * @notice Calculate output amount for an input score
+   * @param score uint256
+   * @param tokens IERC20[]
+   */
+  function calculateMultiple(uint256 score, IERC20[] calldata tokens)
+    external
+    view
+    returns (uint256[] memory outputAmounts)
+  {
+    outputAmounts = new uint256[](tokens.length);
+    for (uint256 i = 0; i < tokens.length; i++) {
+      uint256 output = calculate(score, tokens[i]);
+      outputAmounts[i] = output;
+    }
   }
 
   /**
@@ -157,7 +170,8 @@ contract Pool is Ownable {
    * @notice Set scale
    * @dev Only owner
    */
-  function setScale(uint256 _scale) public onlyOwner {
+  function setScale(uint256 _scale) external onlyOwner {
+    require(_scale <= MAX_SCALE, "SCALE_TOO_HIGH");
     scale = _scale;
     emit SetScale(scale);
   }
@@ -166,9 +180,23 @@ contract Pool is Ownable {
    * @notice Set max
    * @dev Only owner
    */
-  function setMax(uint256 _max) public onlyOwner {
+  function setMax(uint256 _max) external onlyOwner {
     require(_max <= MAX_PERCENTAGE, "MAX_TOO_HIGH");
     max = _max;
     emit SetMax(max);
+  }
+
+  /**
+   * @notice Admin function to migrate funds
+   * @dev Only owner
+   * @param tokens IERC20[]
+   * @param dest address
+   */
+  function drainTo(IERC20[] calldata tokens, address dest) external onlyOwner {
+    for (uint256 i = 0; i < tokens.length; i++) {
+      uint256 bal = tokens[i].balanceOf(address(this));
+      tokens[i].safeTransfer(dest, bal);
+    }
+    emit DrainTo(tokens, dest);
   }
 }
