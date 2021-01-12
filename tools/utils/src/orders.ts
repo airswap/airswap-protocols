@@ -32,7 +32,6 @@ import {
   Order,
   Signature,
   UnsignedLightOrder,
-  LightOrder,
   EIP712Light,
   OrderParty,
 } from '@airswap/types'
