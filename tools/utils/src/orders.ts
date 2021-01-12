@@ -276,7 +276,7 @@ export async function createLightSignature(
 }
 
 export function getSignerFromLightSignature(
-  order: LightOrder,
+  order: UnsignedLightOrder,
   swapContract: string,
   chainId: number,
   signature: string

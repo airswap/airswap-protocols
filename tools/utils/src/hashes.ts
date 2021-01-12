@@ -154,7 +154,7 @@ export function getOrderHash(
 }
 
 export function getLightOrderHash(
-  order: LightOrder,
+  unsignedOrder: UnsignedLightOrder,
   swapContract: string,
   chainId: number
 ): Buffer {
@@ -162,7 +162,7 @@ export function getLightOrderHash(
     Buffer.concat([
       Buffer.from('1901', 'hex'),
       hashLightDomain(swapContract, chainId),
-      hashLightOrder(order),
+      hashLightOrder(unsignedOrder),
     ])
   )
 }

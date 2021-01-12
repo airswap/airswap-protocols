@@ -28,7 +28,7 @@ describe('Orders', async () => {
   })
 
   it('Signs and validates a light order', async () => {
-    const order = {
+    const unsignedOrder = {
       nonce: Date.now().toString(),
       expiry: Math.round(Date.now() / 1000 + SECONDS_IN_DAY).toString(),
       signerToken: ADDRESS_ZERO,
@@ -38,13 +38,13 @@ describe('Orders', async () => {
       senderAmount: '0',
     }
     const signature = await createLightSignature(
-      order,
+      unsignedOrder,
       wallet.privateKey,
       ADDRESS_ZERO,
       1
     )
     const signerWallet = getSignerFromLightSignature(
-      order,
+      unsignedOrder,
       ADDRESS_ZERO,
       1,
       signature
