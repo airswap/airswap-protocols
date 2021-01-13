@@ -86,9 +86,8 @@ contract BalanceChecker is Ownable {
     address spenderAddress,
     address[] calldata tokenAddresses
   ) external view returns (uint256[] memory) {
-    uint256[] memory allowances = new uint256[](
-      tokenAddresses.length * userAddresses.length
-    );
+    uint256[] memory allowances =
+      new uint256[](tokenAddresses.length * userAddresses.length);
 
     for (uint256 user = 0; user < userAddresses.length; user++) {
       for (uint256 token = 0; token < tokenAddresses.length; token++) {
@@ -114,9 +113,8 @@ contract BalanceChecker is Ownable {
     address[] calldata userAddresses,
     address[] calldata tokenAddresses
   ) external view returns (uint256[] memory) {
-    uint256[] memory balances = new uint256[](
-      tokenAddresses.length * userAddresses.length
-    );
+    uint256[] memory balances =
+      new uint256[](tokenAddresses.length * userAddresses.length);
     for (uint256 user = 0; user < userAddresses.length; user++) {
       for (uint256 token = 0; token < tokenAddresses.length; token++) {
         if (tokenAddresses[token] != address(0x0)) {
@@ -178,13 +176,14 @@ contract BalanceChecker is Ownable {
     if (tokenAddress.isContract()) {
       IERC20 token = IERC20(tokenAddress);
       // Check if allowance succeeds as a call else returns 0.
-      (bool success, ) = address(token).staticcall(
-        abi.encodeWithSelector(
-          token.allowance.selector,
-          userAddress,
-          spenderAddress
-        )
-      );
+      (bool success, ) =
+        address(token).staticcall(
+          abi.encodeWithSelector(
+            token.allowance.selector,
+            userAddress,
+            spenderAddress
+          )
+        );
       if (success) {
         return token.allowance(userAddress, spenderAddress);
       }
@@ -208,9 +207,10 @@ contract BalanceChecker is Ownable {
     if (tokenAddress.isContract()) {
       IERC20 token = IERC20(tokenAddress);
       //  Check if balanceOf succeeds.
-      (bool success, ) = address(token).staticcall(
-        abi.encodeWithSelector(token.balanceOf.selector, userAddress)
-      );
+      (bool success, ) =
+        address(token).staticcall(
+          abi.encodeWithSelector(token.balanceOf.selector, userAddress)
+        );
       if (success) {
         return token.balanceOf(userAddress);
       }

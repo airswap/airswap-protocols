@@ -53,16 +53,17 @@ contract AdaptedKittyERC721 is ERC165 {
   mapping(address => mapping(address => bool)) private _operatorApprovals;
 
   // 0x9a20483d
-  bytes4 constant InterfaceSignature_ERC721 = bytes4(keccak256("name()")) ^
-    bytes4(keccak256("symbol()")) ^
-    bytes4(keccak256("totalSupply()")) ^
-    bytes4(keccak256("balanceOf(address)")) ^
-    bytes4(keccak256("ownerOf(uint256)")) ^
-    bytes4(keccak256("approve(address,uint256)")) ^
-    bytes4(keccak256("transfer(address,uint256)")) ^
-    bytes4(keccak256("transferFrom(address,address,uint256)")) ^
-    bytes4(keccak256("tokensOfOwner(address)")) ^
-    bytes4(keccak256("tokenMetadata(uint256,string)"));
+  bytes4 constant InterfaceSignature_ERC721 =
+    bytes4(keccak256("name()")) ^
+      bytes4(keccak256("symbol()")) ^
+      bytes4(keccak256("totalSupply()")) ^
+      bytes4(keccak256("balanceOf(address)")) ^
+      bytes4(keccak256("ownerOf(uint256)")) ^
+      bytes4(keccak256("approve(address,uint256)")) ^
+      bytes4(keccak256("transfer(address,uint256)")) ^
+      bytes4(keccak256("transferFrom(address,address,uint256)")) ^
+      bytes4(keccak256("tokensOfOwner(address)")) ^
+      bytes4(keccak256("tokenMetadata(uint256,string)"));
 
   constructor() public {
     // register the supported interfaces to conform to ERC721 via ERC165
@@ -294,12 +295,8 @@ contract AdaptedKittyERC721 is ERC165 {
       return true;
     }
 
-    bytes4 retval = IERC721Receiver(to).onERC721Received(
-      msg.sender,
-      from,
-      tokenId,
-      _data
-    );
+    bytes4 retval =
+      IERC721Receiver(to).onERC721Received(msg.sender, from, tokenId, _data);
     return (retval == _ERC721_RECEIVED);
   }
 

@@ -60,8 +60,8 @@ contract Validator {
   ) external view returns (uint256, bytes32[] memory) {
     address swap = order.signature.validator;
     (uint256 errorCount, bytes32[] memory errors) = this.coreSwapChecks(order);
-    (uint256 delegateErrorCount, bytes32[] memory delegateErrors) = this
-      .coreDelegateChecks(order, delegate);
+    (uint256 delegateErrorCount, bytes32[] memory delegateErrors) =
+      this.coreDelegateChecks(order, delegate);
 
     if (delegateErrorCount > 0) {
       // copies over errors from coreDelegateChecks
@@ -319,8 +319,8 @@ contract Validator {
     returns (uint256, bytes32[] memory)
   {
     (uint256 errorCount, bytes32[] memory errors) = this.checkSwap(order);
-    (uint256 delegateErrorCount, bytes32[] memory delegateErrors) = this
-      .coreDelegateChecks(order, delegate);
+    (uint256 delegateErrorCount, bytes32[] memory delegateErrors) =
+      this.coreDelegateChecks(order, delegate);
 
     if (delegateErrorCount > 0) {
       // copies over errors from coreDelegateChecks
@@ -463,10 +463,8 @@ contract Validator {
       order.signer.token
     );
 
-    uint256 firstRuleID = delegate.firstRuleID(
-      order.sender.token,
-      order.signer.token
-    );
+    uint256 firstRuleID =
+      delegate.firstRuleID(order.sender.token, order.signer.token);
 
     bytes32[] memory errors = new bytes32[](MAX_DELEGATE_ERROR_COUNT);
     uint256 errorCount;
@@ -508,11 +506,12 @@ contract Validator {
     }
 
     // get the signer's amount according to delegate pricing
-    uint256 signerAmount = delegate.getSignerSideQuote(
-      order.sender.data.getUint256(0),
-      order.sender.token,
-      order.signer.token
-    );
+    uint256 signerAmount =
+      delegate.getSignerSideQuote(
+        order.sender.data.getUint256(0),
+        order.sender.token,
+        order.signer.token
+      );
 
     // check the order is paying enough
     if (order.signer.data.getUint256(0) < signerAmount) {
@@ -544,10 +543,8 @@ contract Validator {
       address owner = IERC721(party.token).ownerOf(firstParameter);
       return (owner == party.wallet);
     } else if (party.kind == ERC1155_INTERFACE_ID) {
-      uint256 balance = IERC1155(party.token).balanceOf(
-        party.wallet,
-        firstParameter
-      );
+      uint256 balance =
+        IERC1155(party.token).balanceOf(party.wallet, firstParameter);
       return (balance >= party.data.getUint256(32));
     } else {
       uint256 balance = IERC20(party.token).balanceOf(party.wallet);
@@ -572,9 +569,8 @@ contract Validator {
       address approved = IERC721(party.token).getApproved(parameter);
       return (swap == approved);
     } else if (party.kind == CK_INTERFACE_ID) {
-      address approved = IAdaptedKittyERC721(party.token).kittyIndexToApproved(
-        parameter
-      );
+      address approved =
+        IAdaptedKittyERC721(party.token).kittyIndexToApproved(parameter);
       return (swap == approved);
     } else if (party.kind == ERC1155_INTERFACE_ID) {
       return IERC1155(party.token).isApprovedForAll(party.wallet, swap);

@@ -18,11 +18,11 @@
   },
   "dependencies": {
     "@gnosis.pm/mock-contract": "^4.0.0",
-    "@openzeppelin/contracts": "^3.3.0",
-    "ethers": "^5.0.24"
+    "@openzeppelin/contracts": "^3.3.0"
   },
   "devDependencies": {
-    "@airswap/test-utils": "0.1.6",
-    "solidity-coverage": "^0.7.13"
+    "@airswap/test-utils": "0.1.7",
+    "solidity-coverage": "^0.7.13",
+    "ethers": "^5.0.25"
   }
 }

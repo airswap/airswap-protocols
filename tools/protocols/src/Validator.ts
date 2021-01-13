@@ -15,7 +15,6 @@
 */
 
 import { ethers } from 'ethers'
-import { BigNumber } from 'ethers/utils'
 import { chainIds, chainNames } from '@airswap/constants'
 import { Order } from '@airswap/types'
 
@@ -96,7 +95,7 @@ export class Validator {
     return this.convertToArray(count, errors)
   }
 
-  private convertToArray(count: BigNumber, errors: Array<string>) {
+  private convertToArray(count: ethers.BigNumber, errors: Array<string>) {
     const res: Array<string> = []
     for (let idx = 0; idx < count.toNumber(); idx++) {
       res.push(ethers.utils.parseBytes32String(errors[idx]))

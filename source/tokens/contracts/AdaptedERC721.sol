@@ -340,12 +340,8 @@ contract AdaptedERC721 is ERC165 {
       return true;
     }
 
-    bytes4 retval = IERC721Receiver(to).onERC721Received(
-      msg.sender,
-      from,
-      tokenId,
-      _data
-    );
+    bytes4 retval =
+      IERC721Receiver(to).onERC721Received(msg.sender, from, tokenId, _data);
     return (retval == _ERC721_RECEIVED);
   }
 

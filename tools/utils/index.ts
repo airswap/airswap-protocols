@@ -14,7 +14,6 @@
   limitations under the License.
 */
 import { ethers } from 'ethers'
-import { BigNumber } from 'ethers/utils'
 import * as url from 'url'
 
 import { etherscanDomains } from '@airswap/constants'
@@ -32,10 +31,10 @@ function getLowest(objects: Array<Quote> | Array<Order>, key: string): any {
     if (!obj[key]) continue
     if (obj[key].amount != undefined) {
       // if its a quote, it has .amount
-      amount = new BigNumber(obj[key].amount)
+      amount = ethers.BigNumber.from(obj[key].amount)
     } else {
       // if its an order, it has .data
-      amount = new BigNumber(obj[key].data.slice(0, 66))
+      amount = ethers.BigNumber.from(obj[key].data.slice(0, 66))
     }
     if (!best || amount.lt(bestAmount)) {
       bestAmount = amount
@@ -53,10 +52,10 @@ function getHighest(objects: Array<Quote> | Array<Order>, key: string): any {
     if (!obj[key]) continue
     if (obj[key].amount != undefined) {
       // if its a quote, it has .amount
-      amount = new BigNumber(obj[key].amount)
+      amount = ethers.BigNumber.from(obj[key].amount)
     } else {
       // if its an order, it has .data
-      amount = new BigNumber(obj[key].data.slice(0, 66))
+      amount = ethers.BigNumber.from(obj[key].data.slice(0, 66))
     }
     if (!best || amount.gt(bestAmount)) {
       bestAmount = amount
@@ -91,14 +90,14 @@ export function getBestByHighestSenderAmount(
 }
 
 export function toDecimalString(
-  value: string | BigNumber,
+  value: string | ethers.BigNumber,
   decimals: string | number
 ): string {
   return ethers.utils.formatUnits(value.toString(), decimals).toString()
 }
 
 export function toAtomicString(
-  value: string | BigNumber,
+  value: string | ethers.BigNumber,
   decimals: string | number
 ): string {
   return ethers.utils.parseUnits(value.toString(), decimals).toString()

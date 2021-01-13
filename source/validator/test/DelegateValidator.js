@@ -488,8 +488,8 @@ contract('DelegateValidator', async accounts => {
           kind: tokenKinds.ERC721,
         },
       })
-      order.sender.data = order.sender.data.concat('000000000')
-      order.signer.data = order.signer.data.concat('000000000')
+      order.sender.data = order.sender.data.concat('0000000000')
+      order.signer.data = order.signer.data.concat('0000000000')
 
       order = await signOrder(order, bobSigner, swapAddress)
 

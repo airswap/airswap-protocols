@@ -1,7 +1,6 @@
 import { fancy } from 'fancy-test'
 import { expect } from 'chai'
 import { ethers } from 'ethers'
-import { bigNumberify } from 'ethers/utils'
 import { ADDRESS_ZERO } from '@airswap/constants'
 import { functions } from '@airswap/test-utils'
 import { createOrder, signOrder } from '@airswap/utils'
@@ -45,7 +44,7 @@ class MockContract {
   }
 
   public balanceOf() {
-    return bigNumberify(1000)
+    return ethers.BigNumber.from(1000)
   }
 }
 
@@ -66,7 +65,7 @@ class MockContractBAD {
   }
 
   public balanceOf() {
-    return bigNumberify(0)
+    return ethers.BigNumber.from(0)
   }
 }
 
@@ -127,7 +126,7 @@ describe('Delegate', () => {
   fancy
     .stub(ethers, 'Contract', () => new MockContractBAD())
     .do(async () => {
-      await new Delegate(ADDRESS_ZERO).getSignerSideQuote('', '', '')
+      await new Delegate(ADDRESS_ZERO).getSignerSideQuote('0', '0', '0')
     })
     .catch(/Not quoting for requested amount or token pair/)
     .it('Delegate getSignerSideQuote() throw')
@@ -147,7 +146,7 @@ describe('Delegate', () => {
   fancy
     .stub(ethers, 'Contract', () => new MockContractBAD())
     .do(async () => {
-      await new Delegate(ADDRESS_ZERO).getSenderSideQuote('', '', '')
+      await new Delegate(ADDRESS_ZERO).getSenderSideQuote('0', '0', '0')
     })
     .catch(/Not quoting for requested amount or token pair/)
     .it('Delegate getSenderSideQuote() throw')

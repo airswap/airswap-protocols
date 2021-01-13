@@ -1,6 +1,6 @@
 {
   "name": "@airswap/metadata",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Token Metadata Tools for AirSwap Developers",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>",
@@ -29,7 +29,8 @@
     "@airswap/types": "3.5.14",
     "axios": "^0.21.1",
     "eth-contract-metadata": "^1.12.1",
-    "ethers": "^4.0.45"
+    "ethereumjs-abi": "^0.6.8",
+    "ethers": "^5.0.25"
   },
   "devDependencies": {
     "mocha": "^7.1.0",

@@ -14,7 +14,7 @@ const MockContract = artifacts.require('MockContract')
 const emptySignature = web3.utils.randomHex(65)
 const ERC20Interface = new ethers.utils.Interface(IERC20.abi)
 const encodeERC20Call = (name, args) =>
-  ERC20Interface.functions[name].encode(args)
+  ERC20Interface.encodeFunctionData(name, args)
 
 function createOrder({
   expiry = Math.round(Date.now() / 1000 + SECONDS_IN_DAY).toString(),
