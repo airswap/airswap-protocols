@@ -29,7 +29,8 @@
     "@airswap/types": "3.5.14",
     "axios": "^0.21.1",
     "eth-contract-metadata": "^1.12.1",
-    "ethers": "^4.0.45"
+    "ethereumjs-abi": "^0.6.8",
+    "ethers": "^5.0.25"
   },
   "devDependencies": {
     "mocha": "^7.1.0",

@@ -14,8 +14,8 @@
   limitations under the License.
 */
 
+import { ethers } from 'ethers'
 import { Client, JSONRPCRequest } from 'jayson'
-import { BigNumber } from 'ethers/utils'
 import { REQUEST_TIMEOUT } from '@airswap/constants'
 import {
   parseUrl,
@@ -127,7 +127,7 @@ export class Server {
   }
 
   public async getSenderSideOrder(
-    signerAmount: string | BigNumber,
+    signerAmount: string | ethers.BigNumber,
     signerToken: string,
     senderToken: string,
     senderWallet: string

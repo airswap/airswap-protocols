@@ -17,7 +17,6 @@
 import * as ethUtil from 'ethereumjs-util'
 import * as sigUtil from 'eth-sig-util'
 import { ethers } from 'ethers'
-import { bigNumberify } from 'ethers/utils'
 import {
   signatureTypes,
   SECONDS_IN_DAY,
@@ -102,34 +101,34 @@ export function parseOrderFromHex(data: string): object {
   const response = {
     functionName: functionNames[data.slice(0, 10)],
     order: {
-      nonce: `${bigNumberify('0x' + data.slice(10, 74))}`,
-      expiry: `${bigNumberify('0x' + data.slice(74, 138))}`,
+      nonce: `${ethers.BigNumber.from('0x' + data.slice(10, 74))}`,
+      expiry: `${ethers.BigNumber.from('0x' + data.slice(74, 138))}`,
       signer: {
         kind: `0x${data.slice(138, 146)}`,
         wallet: `0x${data.slice(226, 266)}`,
         token: `0x${data.slice(290, 330)}`,
-        amount: `${bigNumberify('0x' + data.slice(330, 394))}`,
-        id: `${bigNumberify('0x' + data.slice(394, 458))}`,
+        amount: `${ethers.BigNumber.from('0x' + data.slice(330, 394))}`,
+        id: `${ethers.BigNumber.from('0x' + data.slice(394, 458))}`,
       },
       sender: {
         kind: `0x${data.slice(458, 466)}`,
         wallet: `0x${data.slice(546, 586)}`,
         token: `0x${data.slice(610, 650)}`,
-        amount: `${bigNumberify('0x' + data.slice(650, 714))}`,
-        id: `${bigNumberify('0x' + data.slice(714, 778))}`,
+        amount: `${ethers.BigNumber.from('0x' + data.slice(650, 714))}`,
+        id: `${ethers.BigNumber.from('0x' + data.slice(714, 778))}`,
       },
       affiliate: {
         kind: `0x${data.slice(778, 786)}`,
         wallet: `0x${data.slice(866, 906)}`,
         token: `0x${data.slice(930, 970)}`,
-        amount: `${bigNumberify('0x' + data.slice(970, 1034))}`,
-        id: `${bigNumberify('0x' + data.slice(1034, 1098))}`,
+        amount: `${ethers.BigNumber.from('0x' + data.slice(970, 1034))}`,
+        id: `${ethers.BigNumber.from('0x' + data.slice(1034, 1098))}`,
       },
       signature: {
         signatory: `0x${data.slice(1122, 1162)}`,
         validator: `0x${data.slice(1186, 1226)}`,
         version: `0x${data.slice(1226, 1228)}`,
-        v: `${bigNumberify('0x' + data.slice(1352, 1354))}`,
+        v: `${ethers.BigNumber.from('0x' + data.slice(1352, 1354))}`,
         r: `0x${data.slice(1354, 1418)}`,
         s: `0x${data.slice(1418, 1482)}`,
       },

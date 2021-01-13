@@ -34,7 +34,7 @@
     "@airswap/transfers": "1.1.3",
     "@airswap/types": "3.5.14",
     "@airswap/utils": "0.3.20",
-    "ethers": "^4.0.45",
+    "ethers": "^5.0.25",
     "solidity-coverage": "^0.7.4"
   }
 }

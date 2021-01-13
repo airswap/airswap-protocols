@@ -20,7 +20,7 @@
     "@airswap/constants": "0.3.10",
     "eth-sig-util": "2.5.3",
     "ethereumjs-util": "^6.1.0",
-    "ethers": "^4.0.45",
+    "ethers": "^5.0.25",
     "ganache-time-traveler": "^1.0.5",
     "truffle-assertions": "^0.9.1",
     "web3": "^1.0.0-beta.55"

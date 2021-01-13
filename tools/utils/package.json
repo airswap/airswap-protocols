@@ -29,7 +29,7 @@
     "@types/ethereumjs-util": "^6.1.0",
     "eth-sig-util": "^3.0.0",
     "ethereumjs-util": "^6.2.0",
-    "ethers": "^4.0.45"
+    "ethers": "^5.0.25"
   },
   "devDependencies": {
     "@types/mocha": "^7.0.1",

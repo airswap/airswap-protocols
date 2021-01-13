@@ -1,7 +1,6 @@
 import { fancy } from 'fancy-test'
 import { expect } from 'chai'
 import { ethers } from 'ethers'
-import { bigNumberify } from 'ethers/utils'
 import { functions } from '@airswap/test-utils'
 import { createOrder, signOrder } from '@airswap/utils'
 
@@ -14,19 +13,19 @@ const BYTES32_ERROR_MSG =
 
 class MockContract {
   public checkSwap() {
-    return [bigNumberify(1), [BYTES32_ERROR_MSG]]
+    return [ethers.BigNumber.from(1), [BYTES32_ERROR_MSG]]
   }
 
   public checkWrappedSwap() {
-    return [bigNumberify(1), [BYTES32_ERROR_MSG]]
+    return [ethers.BigNumber.from(1), [BYTES32_ERROR_MSG]]
   }
 
   public checkDelegate() {
-    return [bigNumberify(1), [BYTES32_ERROR_MSG]]
+    return [ethers.BigNumber.from(1), [BYTES32_ERROR_MSG]]
   }
 
   public checkWrappedDelegate() {
-    return [bigNumberify(1), [BYTES32_ERROR_MSG]]
+    return [ethers.BigNumber.from(1), [BYTES32_ERROR_MSG]]
   }
 }
 

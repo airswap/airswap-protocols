@@ -45,7 +45,7 @@
     "@airswap/test-utils": "0.1.6",
     "@airswap/utils": "0.3.20",
     "@airswap/wrapper": "3.6.9",
-    "ethers": "^4.0.45",
+    "ethers": "^5.0.25",
     "solidity-coverage": "^0.7.4"
   }
 }

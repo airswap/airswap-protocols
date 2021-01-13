@@ -712,7 +712,7 @@ contract('SwapValidator', async accounts => {
       })
 
       order.signer.data = order.signer.data.concat('00129472')
-      order.sender.data = order.sender.data.concat('0')
+      order.sender.data = order.sender.data.concat('00')
 
       order = await signOrder(order, aliceSigner, swapAddress)
     })
