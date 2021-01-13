@@ -15,9 +15,8 @@
   },
   "scripts": {
     "clean": "rm -rf ./build; rm -rf ./flatten",
-    "compile": "yarn clean; yarn flatten contracts/Imports.sol && yarn cp_migration_flat && truffle compile",
     "cp_migration_flat": "mkdir -p flatten/; cp contracts/Migrations.sol flatten/",
-    "flatten": "truffle run flatten",
+    "flatten": "yarn clean; truffle run flatten contracts/Imports.sol && yarn cp_migration_flat && truffle compile",
     "migrate": "yarn flatten contracts/Imports.sol && yarn cp_migration_flat && truffle migrate --skip-dry-run",
     "verify": "truffle run verify"
   },
