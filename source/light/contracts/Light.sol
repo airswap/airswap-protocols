@@ -31,30 +31,32 @@ contract Light is ILight {
   using SafeERC20 for IERC20;
   using ECDSA for bytes32;
 
-  bytes32 public constant DOMAIN_TYPEHASH = keccak256(
-    abi.encodePacked(
-      "EIP712Domain(",
-      "string name,",
-      "string version,",
-      "uint256 chainId,",
-      "address verifyingContract",
-      ")"
-    )
-  );
+  bytes32 public constant DOMAIN_TYPEHASH =
+    keccak256(
+      abi.encodePacked(
+        "EIP712Domain(",
+        "string name,",
+        "string version,",
+        "uint256 chainId,",
+        "address verifyingContract",
+        ")"
+      )
+    );
 
-  bytes32 public constant ORDER_TYPEHASH = keccak256(
-    abi.encodePacked(
-      "LightOrder(",
-      "uint256 nonce,",
-      "uint256 expiry,",
-      "address senderWallet,",
-      "address signerToken,",
-      "uint256 signerAmount,",
-      "address senderToken,",
-      "uint256 senderAmount",
-      ")"
-    )
-  );
+  bytes32 public constant ORDER_TYPEHASH =
+    keccak256(
+      abi.encodePacked(
+        "LightOrder(",
+        "uint256 nonce,",
+        "uint256 expiry,",
+        "address senderWallet,",
+        "address signerToken,",
+        "uint256 signerAmount,",
+        "address senderToken,",
+        "uint256 senderAmount",
+        ")"
+      )
+    );
 
   bytes32 public constant DOMAIN_NAME = keccak256("SWAP_LIGHT");
   bytes32 public constant DOMAIN_VERSION = keccak256("3");
@@ -107,14 +109,15 @@ contract Light is ILight {
     // Ensure the expiry has not passed.
     require(expiry > block.timestamp, "EXPIRY_PASSED");
 
-    bytes32 hashed = _getHash(
-      nonce,
-      expiry,
-      signerToken,
-      signerAmount,
-      senderToken,
-      senderAmount
-    );
+    bytes32 hashed =
+      _getHash(
+        nonce,
+        expiry,
+        signerToken,
+        signerAmount,
+        senderToken,
+        senderAmount
+      );
 
     // Recover the signer from the hash and signature.
     address signer = _getSigner(hashed, signature);
@@ -176,8 +179,8 @@ contract Light is ILight {
    */
   function nonceUsed(address signer, uint256 nonce)
     public
-    override
     view
+    override
     returns (bool)
   {
     uint256 groupKey = nonce / 256;
@@ -248,9 +251,8 @@ contract Light is ILight {
     view
     returns (address)
   {
-    bytes32 digest = keccak256(
-      abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR, orderHash)
-    );
+    bytes32 digest =
+      keccak256(abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR, orderHash));
 
     // Recover the signer from the orderHash and signature
     return digest.recover(signature);

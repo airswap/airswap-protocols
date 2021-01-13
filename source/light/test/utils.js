@@ -8,7 +8,9 @@ const GANACHE_MNEMONIC =
 
 const HD_PATH = "m/44'/60'/0'/0/"
 
-const hdwallet = hdkey.fromMasterSeed(bip39.mnemonicToSeed(GANACHE_MNEMONIC))
+const hdwallet = hdkey.fromMasterSeed(
+  bip39.mnemonicToSeedSync(GANACHE_MNEMONIC)
+)
 
 function getPrivateKeyFromGanacheAccount(account) {
   for (let i = 0; i < 100; i++) {

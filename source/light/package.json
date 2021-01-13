@@ -29,6 +29,7 @@
     "@airswap/utils": "0.3.21",
     "@gnosis.pm/mock-contract": "^4.0.0",
     "ethers": "^5.0.25",
+    "bip39": "^3.0.3",
     "solidity-coverage": "^0.7.4",
     "solidity-docgen": "0.3.0-beta.3"
   },
