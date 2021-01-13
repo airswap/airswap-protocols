@@ -42,8 +42,8 @@
   "devDependencies": {
     "@airswap/constants": "0.3.10",
     "@airswap/indexer": "3.6.9",
-    "@airswap/test-utils": "0.1.6",
-    "@airswap/utils": "0.3.20",
+    "@airswap/test-utils": "0.1.7",
+    "@airswap/utils": "0.3.21",
     "@airswap/wrapper": "3.6.9",
     "ethers": "^5.0.25",
     "solidity-coverage": "^0.7.4"

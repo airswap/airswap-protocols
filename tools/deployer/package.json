@@ -22,7 +22,7 @@
     "verify": "truffle run verify"
   },
   "devDependencies": {
-    "@airswap/test-utils": "0.1.6",
+    "@airswap/test-utils": "0.1.7",
     "@airswap/tokens": "0.1.4",
     "solidity-docgen": "0.3.0-beta.3"
   },
