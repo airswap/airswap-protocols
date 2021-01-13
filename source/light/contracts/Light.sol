@@ -32,11 +32,28 @@ contract Light is ILight {
   using ECDSA for bytes32;
 
   bytes32 public constant DOMAIN_TYPEHASH = keccak256(
-    "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
+    abi.encodePacked(
+      "EIP712Domain(",
+      "string name,",
+      "string version,",
+      "uint256 chainId,",
+      "address verifyingContract",
+      ")"
+    )
   );
 
   bytes32 public constant ORDER_TYPEHASH = keccak256(
-    "LightOrder(uint256 nonce,uint256 expiry,address senderWallet,address signerToken,uint256 signerAmount,address senderToken,uint256 senderAmount)" // solhint-disable-line max-line-length
+    abi.encodePacked(
+      "LightOrder(",
+      "uint256 nonce,",
+      "uint256 expiry,",
+      "address senderWallet,",
+      "address signerToken,",
+      "uint256 signerAmount,",
+      "address senderToken,",
+      "uint256 senderAmount",
+      ")"
+    )
   );
 
   bytes32 public constant DOMAIN_NAME = keccak256("SWAP_LIGHT");
