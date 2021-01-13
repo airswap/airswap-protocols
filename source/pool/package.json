@@ -20,9 +20,10 @@
     "@openzeppelin/contracts": "^3.3.0"
   },
   "devDependencies": {
+    "@gnosis.pm/mock-contract": "^4.0.0",
     "@airswap/test-utils": "0.1.6",
     "@airswap/merkle": "0.0.1",
-    "@airswap/utils": "0.3.17",
+    "@airswap/utils": "0.3.20",
     "solidity-coverage": "^0.7.13"
   }
 }

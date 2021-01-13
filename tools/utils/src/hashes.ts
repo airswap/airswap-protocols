@@ -25,7 +25,7 @@ import {
 import {
   OrderParty,
   UnsignedOrder,
-  LightOrder,
+  UnsignedLightOrder,
   EIP712,
   EIP712Light,
 } from '@airswap/types'
@@ -84,7 +84,7 @@ export function hashOrder(order: UnsignedOrder): Buffer {
   )
 }
 
-export function hashLightOrder(order: LightOrder): Buffer {
+export function hashLightOrder(order: UnsignedLightOrder): Buffer {
   return util.keccak256(
     ethers.utils.defaultAbiCoder.encode(
       [
@@ -154,7 +154,7 @@ export function getOrderHash(
 }
 
 export function getLightOrderHash(
-  order: LightOrder,
+  unsignedOrder: UnsignedLightOrder,
   swapContract: string,
   chainId: number
 ): Buffer {
@@ -162,7 +162,7 @@ export function getLightOrderHash(
     Buffer.concat([
       Buffer.from('1901', 'hex'),
       hashLightDomain(swapContract, chainId),
-      hashLightOrder(order),
+      hashLightOrder(unsignedOrder),
     ])
   )
 }

@@ -31,7 +31,7 @@ import {
   UnsignedOrder,
   Order,
   Signature,
-  LightOrder,
+  UnsignedLightOrder,
   EIP712Light,
   OrderParty,
 } from '@airswap/types'
@@ -251,7 +251,7 @@ export function isValidOrder(order: Order): boolean {
 }
 
 export async function createLightSignature(
-  order: LightOrder,
+  unsignedOrder: UnsignedLightOrder,
   privateKey: string,
   swapContract: string,
   chainId: number
@@ -266,7 +266,7 @@ export async function createLightSignature(
         verifyingContract: swapContract,
       },
       primaryType: 'LightOrder',
-      message: order,
+      message: unsignedOrder,
     },
   })
 
@@ -275,7 +275,7 @@ export async function createLightSignature(
 }
 
 export function getSignerFromLightSignature(
-  order: LightOrder,
+  order: UnsignedLightOrder,
   swapContract: string,
   chainId: number,
   signature: string

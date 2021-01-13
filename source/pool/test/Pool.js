@@ -313,4 +313,19 @@ contract('Pool', async accounts => {
       )
     })
   })
+
+  describe('Draining', async () => {
+    it('Assert the drained balances', async () => {
+      const balBefore = await feeToken.balanceOf(pool.address)
+      const carolBalBefore = await feeToken.balanceOf(carolAddress)
+
+      await pool.drainTo([feeToken.address], carolAddress)
+
+      const balAfter = await feeToken.balanceOf(pool.address)
+      const carolBalAfter = await feeToken.balanceOf(carolAddress)
+
+      equal(balAfter.toString(), '0')
+      equal(carolBalAfter.toString(), carolBalBefore.add(balBefore).toString())
+    })
+  })
 })
