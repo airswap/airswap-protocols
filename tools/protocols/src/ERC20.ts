@@ -16,7 +16,6 @@
 
 import { ethers } from 'ethers'
 import { chainIds, chainNames } from '@airswap/constants'
-import { BigNumber } from 'ethers/utils'
 
 import * as IERC20 from '@airswap/tokens/build/contracts/IERC20.json'
 const IERC20Interface = new ethers.utils.Interface(JSON.stringify(IERC20.abi))
@@ -41,7 +40,7 @@ export class ERC20 {
     )
   }
 
-  public async balanceOf(address: string): Promise<BigNumber> {
+  public async balanceOf(address: string): Promise<ethers.BigNumber> {
     return await this.contract.balanceOf(address)
   }
 }

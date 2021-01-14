@@ -48,44 +48,47 @@ library Types {
 
   bytes internal constant EIP191_HEADER = "\x19\x01";
 
-  bytes32 internal constant DOMAIN_TYPEHASH = keccak256(
-    abi.encodePacked(
-      "EIP712Domain(",
-      "string name,",
-      "string version,",
-      "address verifyingContract",
-      ")"
-    )
-  );
+  bytes32 internal constant DOMAIN_TYPEHASH =
+    keccak256(
+      abi.encodePacked(
+        "EIP712Domain(",
+        "string name,",
+        "string version,",
+        "address verifyingContract",
+        ")"
+      )
+    );
 
-  bytes32 internal constant ORDER_TYPEHASH = keccak256(
-    abi.encodePacked(
-      "Order(",
-      "uint256 nonce,",
-      "uint256 expiry,",
-      "Party signer,",
-      "Party sender,",
-      "Party affiliate",
-      ")",
-      "Party(",
-      "bytes4 kind,",
-      "address wallet,",
-      "address token,",
-      "bytes data",
-      ")"
-    )
-  );
+  bytes32 internal constant ORDER_TYPEHASH =
+    keccak256(
+      abi.encodePacked(
+        "Order(",
+        "uint256 nonce,",
+        "uint256 expiry,",
+        "Party signer,",
+        "Party sender,",
+        "Party affiliate",
+        ")",
+        "Party(",
+        "bytes4 kind,",
+        "address wallet,",
+        "address token,",
+        "bytes data",
+        ")"
+      )
+    );
 
-  bytes32 internal constant PARTY_TYPEHASH = keccak256(
-    abi.encodePacked(
-      "Party(",
-      "bytes4 kind,",
-      "address wallet,",
-      "address token,",
-      "bytes data",
-      ")"
-    )
-  );
+  bytes32 internal constant PARTY_TYPEHASH =
+    keccak256(
+      abi.encodePacked(
+        "Party(",
+        "bytes4 kind,",
+        "address wallet,",
+        "address token,",
+        "bytes data",
+        ")"
+      )
+    );
 
   /**
    * @notice Hash an order into bytes32

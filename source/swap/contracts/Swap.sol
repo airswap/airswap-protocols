@@ -342,16 +342,16 @@ contract Swap is ISwap {
     require(address(transferHandler) != address(0), "TOKEN_KIND_UNKNOWN");
     // delegatecall required to pass msg.sender as Swap contract to handle the
     // token transfer in the calling contract
-    (bool success, bytes memory returnData) = address(transferHandler)
-      .delegatecall(
-      abi.encodeWithSelector(
-        transferHandler.transferTokens.selector,
-        from,
-        to,
-        token,
-        data
-      )
-    );
+    (bool success, bytes memory returnData) =
+      address(transferHandler).delegatecall(
+        abi.encodeWithSelector(
+          transferHandler.transferTokens.selector,
+          from,
+          to,
+          token,
+          data
+        )
+      );
     require(success && abi.decode(returnData, (bool)), "TRANSFER_FAILED");
   }
 }

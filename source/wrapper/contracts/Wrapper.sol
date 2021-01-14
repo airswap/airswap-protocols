@@ -73,12 +73,13 @@ contract Wrapper {
     require(order.signature.v != 0, "SIGNATURE_MUST_BE_SENT");
 
     // copy struct into memory for internal function call
-    Types.Party memory orderSender = Types.Party({
-      kind: order.sender.kind,
-      wallet: order.sender.wallet,
-      token: order.sender.token,
-      data: order.sender.data
-    });
+    Types.Party memory orderSender =
+      Types.Party({
+        kind: order.sender.kind,
+        wallet: order.sender.wallet,
+        token: order.sender.token,
+        data: order.sender.data
+      });
 
     // Wraps ETH to WETH when the sender provides ETH and the order is WETH
     _wrapEther(orderSender);
@@ -111,12 +112,13 @@ contract Wrapper {
     require(order.signature.v != 0, "SIGNATURE_MUST_BE_SENT");
 
     // copy struct into memory for internal function call
-    Types.Party memory orderSigner = Types.Party({
-      kind: order.signer.kind,
-      wallet: order.signer.wallet,
-      token: order.signer.token,
-      data: order.signer.data
-    });
+    Types.Party memory orderSigner =
+      Types.Party({
+        kind: order.signer.kind,
+        wallet: order.signer.wallet,
+        token: order.signer.token,
+        data: order.signer.data
+      });
 
     // Wraps ETH to WETH when the signer provides ETH and the order is WETH
     _wrapEther(orderSigner);

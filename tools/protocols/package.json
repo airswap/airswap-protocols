@@ -1,6 +1,6 @@
 {
   "name": "@airswap/protocols",
-  "version": "0.4.9",
+  "version": "0.4.10",
   "description": "Protocol Libraries for AirSwap Developers",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>"
@@ -24,16 +24,16 @@
     "test": "yarn compile; mocha -r ts-node/register test/**/*.ts"
   },
   "dependencies": {
-    "@airswap/constants": "0.3.9",
+    "@airswap/constants": "0.3.10",
     "@airswap/delegate": "2.6.9",
     "@airswap/indexer": "3.6.9",
     "@airswap/swap": "5.4.8",
     "@airswap/tokens": "0.1.4",
-    "@airswap/types": "3.5.12",
-    "@airswap/utils": "0.3.16",
+    "@airswap/types": "3.5.14",
+    "@airswap/utils": "0.3.21",
     "@airswap/validator": "1.2.6",
     "bignumber.js": "^9.0.0",
-    "ethers": "^4.0.45",
+    "ethers": "^5.0.25",
     "jayson": "^3.2.0"
   },
   "devDependencies": {

@@ -31,7 +31,8 @@ contract Indexer is IIndexer, Ownable {
   IERC20 public stakingToken;
 
   // Mapping of signer token to sender token to protocol type to index
-  mapping(address => mapping(address => mapping(bytes2 => Index))) public indexes;
+  mapping(address => mapping(address => mapping(bytes2 => Index)))
+    public indexes;
 
   // The whitelist contract for checking whether a peer is whitelisted per peer type
   mapping(bytes2 => address) public locatorWhitelists;
@@ -158,8 +159,9 @@ contract Indexer is IIndexer, Ownable {
       "PAIR_IS_BLACKLISTED"
     );
 
-    bool notPreviouslySet = (indexes[signerToken][senderToken][protocol]
-      .getLocator(msg.sender) == bytes32(0));
+    bool notPreviouslySet =
+      (indexes[signerToken][senderToken][protocol].getLocator(msg.sender) ==
+        bytes32(0));
 
     if (notPreviouslySet) {
       // Only transfer for staking if stakingAmount is set.
@@ -179,9 +181,8 @@ contract Indexer is IIndexer, Ownable {
 
       emit Stake(msg.sender, signerToken, senderToken, protocol, stakingAmount);
     } else {
-      uint256 oldStake = indexes[signerToken][senderToken][protocol].getScore(
-        msg.sender
-      );
+      uint256 oldStake =
+        indexes[signerToken][senderToken][protocol].getScore(msg.sender);
 
       _updateIntent(
         msg.sender,

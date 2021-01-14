@@ -258,12 +258,10 @@ contract Delegate is IDelegate, Ownable {
       } else {
         // only a fraction of this rule is needed so we calculate the signer amount
         // neither divisions can have a denominator of 0. removing safemath preserves some calculation accuracy
-        uint256 numerator = rules[ruleID].signerAmount.mul(
-          remainingSenderAmount
-        );
-        uint256 signerAmountFraction = numerator.div(
-          rules[ruleID].senderAmount
-        );
+        uint256 numerator =
+          rules[ruleID].signerAmount.mul(remainingSenderAmount);
+        uint256 signerAmountFraction =
+          numerator.div(rules[ruleID].senderAmount);
 
         // we round up not down for the delegate's advantage
         if (numerator.mod(rules[ruleID].senderAmount) > 0) {
@@ -347,10 +345,10 @@ contract Delegate is IDelegate, Ownable {
         ruleID = rules[ruleID].nextRuleID;
       } else {
         // only a fraction of this rule is needed so we calculate the sender amount
-        uint256 senderAmountFraction = rules[ruleID]
-          .senderAmount
-          .mul(remainingSignerAmount)
-          .div(rules[ruleID].signerAmount);
+        uint256 senderAmountFraction =
+          rules[ruleID].senderAmount.mul(remainingSignerAmount).div(
+            rules[ruleID].signerAmount
+          );
 
         senderAmount = senderAmount.add(senderAmountFraction);
         remainingSignerAmount = 0;
@@ -374,10 +372,8 @@ contract Delegate is IDelegate, Ownable {
   {
     // max quote includes the amount the trade wallet can actually trade
     uint256 senderBalance = IERC20(senderToken).balanceOf(tradeWallet);
-    uint256 senderAllowance = IERC20(senderToken).allowance(
-      tradeWallet,
-      address(swapContract)
-    );
+    uint256 senderAllowance =
+      IERC20(senderToken).allowance(tradeWallet, address(swapContract));
 
     if (senderAllowance < senderBalance) {
       senderBalance = senderAllowance;
@@ -523,12 +519,13 @@ contract Delegate is IDelegate, Ownable {
     uint256 newStakeAmount
   ) internal {
     // get currentAmount staked or 0 if never staked
-    uint256 oldStakeAmount = indexer.getStakedAmount(
-      address(this),
-      signerToken,
-      senderToken,
-      protocol
-    );
+    uint256 oldStakeAmount =
+      indexer.getStakedAmount(
+        address(this),
+        signerToken,
+        senderToken,
+        protocol
+      );
 
     if (oldStakeAmount == newStakeAmount && oldStakeAmount > 0) {
       return; // forgo trying to reset intent with non-zero same stake amount
@@ -566,12 +563,13 @@ contract Delegate is IDelegate, Ownable {
 
   function _unsetIntent(address senderToken, address signerToken) internal {
     // Query the indexer for the amount staked.
-    uint256 stakedAmount = indexer.getStakedAmount(
-      address(this),
-      signerToken,
-      senderToken,
-      protocol
-    );
+    uint256 stakedAmount =
+      indexer.getStakedAmount(
+        address(this),
+        signerToken,
+        senderToken,
+        protocol
+      );
     indexer.unsetIntent(signerToken, senderToken, protocol);
 
     // Upon unstaking, the Delegate will be given the staking amount.
@@ -589,12 +587,10 @@ contract Delegate is IDelegate, Ownable {
     view
     returns (bool)
   {
-    uint256 x = rules[firstElement].senderAmount.mul(
-      rules[secondElement].signerAmount
-    );
-    uint256 y = rules[secondElement].senderAmount.mul(
-      rules[firstElement].signerAmount
-    );
+    uint256 x =
+      rules[firstElement].senderAmount.mul(rules[secondElement].signerAmount);
+    uint256 y =
+      rules[secondElement].senderAmount.mul(rules[firstElement].signerAmount);
     return (x >= y);
   }
 
@@ -618,12 +614,10 @@ contract Delegate is IDelegate, Ownable {
         ruleID = rules[ruleID].nextRuleID;
       } else {
         // only a fraction of this rule is needed so we calculate the sender amount
-        uint256 numerator = rules[ruleID].signerAmount.mul(
-          remainingSenderAmount
-        );
-        uint256 signerAmountFraction = numerator.div(
-          rules[ruleID].senderAmount
-        );
+        uint256 numerator =
+          rules[ruleID].signerAmount.mul(remainingSenderAmount);
+        uint256 signerAmountFraction =
+          numerator.div(rules[ruleID].senderAmount);
 
         // we round up not down for the delegate's advantage
         if (numerator.mod(rules[ruleID].senderAmount) > 0) {

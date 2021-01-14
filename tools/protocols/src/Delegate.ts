@@ -15,7 +15,6 @@
 */
 
 import { ethers } from 'ethers'
-import { bigNumberify } from 'ethers/utils'
 import {
   chainIds,
   chainNames,
@@ -139,11 +138,11 @@ export class Delegate {
     const balance = await new ERC20(senderToken, this.chainId).balanceOf(
       this.tradeWallet
     )
-    let finalSenderAmount = bigNumberify(senderAmount)
-    let finalSignerAmount = bigNumberify(signerAmount)
+    let finalSenderAmount = ethers.BigNumber.from(senderAmount)
+    let finalSignerAmount = ethers.BigNumber.from(signerAmount)
     if (balance.lt(senderAmount)) {
       finalSenderAmount = balance
-      finalSignerAmount = bigNumberify(senderAmount)
+      finalSignerAmount = ethers.BigNumber.from(senderAmount)
         .div(signerAmount)
         .mul(balance)
     }

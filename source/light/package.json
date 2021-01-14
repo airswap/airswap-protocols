@@ -1,12 +1,11 @@
 {
-  "name": "@airswap/delegate",
-  "version": "2.6.9",
-  "description": "Deployable Trading Rules for the AirSwap Network",
+  "name": "@airswap/light",
+  "version": "1.1.0",
+  "description": "Light version of @airswap/swap",
   "contributors": [
+    "Vicente Dragicevic <vicente.dragicevic@consensys.net>",
     "Don Mosites <don.mosites@fluidity.io>",
-    "Deepa Sathaye <deepa.sathaye@fludity.io>",
-    "Ethan Wessel <ethan.wessel@fluidity.io>",
-    "Alice Henshaw <alice.henshaw@fluidity.io>"
+    "Ethan Wessel <ethan.wessel@fluidity.io>"
   ],
   "license": "Apache-2.0",
   "repository": {
@@ -17,24 +16,26 @@
     "clean": "rm -rf ./build",
     "compile": "yarn clean; truffle compile",
     "coverage": "truffle run coverage",
-    "cp_migration_flat": "mkdir -p flatten/; cp contracts/Migrations.sol flatten/",
     "test": "yarn compile; truffle test",
+    "cp_migration_flat": "mkdir -p flatten/; cp contracts/Migrations.sol flatten/",
     "flatten": "truffle run flatten",
     "migrate": "yarn cp_migration_flat; truffle migrate --skip-dry-run",
     "verify": "truffle run verify"
   },
-  "dependencies": {
-    "@airswap/indexer": "3.6.9",
-    "@airswap/swap": "5.4.8",
-    "openzeppelin-solidity": "2.4"
-  },
   "devDependencies": {
     "@airswap/constants": "0.3.10",
     "@airswap/test-utils": "0.1.7",
+    "@airswap/tokens": "0.1.4",
+    "@airswap/utils": "0.3.21",
+    "@gnosis.pm/mock-contract": "^4.0.0",
+    "ethers": "^5.0.25",
+    "bip39": "^3.0.3",
+    "solidity-coverage": "^0.7.4",
+    "solidity-docgen": "0.3.0-beta.3"
+  },
+  "dependencies": {
     "@airswap/transfers": "1.1.3",
     "@airswap/types": "3.5.14",
-    "@airswap/utils": "0.3.21",
-    "ethers": "^5.0.25",
-    "solidity-coverage": "^0.7.4"
+    "@openzeppelin/contracts": "^3.3.0"
   }
 }

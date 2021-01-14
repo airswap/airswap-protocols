@@ -28,7 +28,7 @@ describe('Orders', async () => {
   })
 
   it('Signs and validates a light order', async () => {
-    const order = {
+    const unsignedOrder = {
       nonce: Date.now().toString(),
       expiry: Math.round(Date.now() / 1000 + SECONDS_IN_DAY).toString(),
       signerToken: ADDRESS_ZERO,
@@ -36,12 +36,20 @@ describe('Orders', async () => {
       senderWallet: ADDRESS_ZERO,
       senderToken: ADDRESS_ZERO,
       senderAmount: '0',
-      swapContract: ADDRESS_ZERO,
-      chainId: '1',
     }
-    const signature = await createLightSignature(order, wallet)
-    const signerWallet = getSignerFromLightSignature(order, signature)
-    expect(signerWallet).to.equal(wallet.address)
+    const signature = await createLightSignature(
+      unsignedOrder,
+      wallet.privateKey,
+      ADDRESS_ZERO,
+      1
+    )
+    const signerWallet = getSignerFromLightSignature(
+      unsignedOrder,
+      ADDRESS_ZERO,
+      1,
+      signature
+    )
+    expect(signerWallet.toLowerCase()).to.equal(wallet.address.toLowerCase())
   })
 
   it('Best by lowest sender', async () => {
