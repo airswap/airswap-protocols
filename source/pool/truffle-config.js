@@ -25,8 +25,8 @@ module.exports = {
           [process.env.PRIVATE_KEY],
           'https://mainnet.infura.io/v3/' + process.env.INFURA_API_KEY
         ),
-      gas: 5898551,
-      gasPrice: 15900000000, // CHECK THE CURRENT GASPRICE
+      // gas: 5898551,
+      gasPrice: 110e9, // CHECK THE CURRENT GASPRICE
       network_id: 1,
     },
     rinkeby: {
