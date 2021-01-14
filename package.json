@@ -21,7 +21,7 @@
   },
   "scripts": {
     "clean": "lerna run clean",
-    "compile": "yarn clean; lerna run compile",
+    "compile": "yarn clean; lerna run compile --concurrency=1",
     "hint": "yarn solhint \"./source/**/*.sol\"",
     "lint:check": "yarn eslint . --ext .js,.ts",
     "lint:fix": "yarn eslint . --ext .js,.ts --fix",
