@@ -21,7 +21,7 @@
   },
   "devDependencies": {
     "@gnosis.pm/mock-contract": "^4.0.0",
-    "@airswap/test-utils": "0.1.7",
+    "@airswap/test-utils": "0.1.9",
     "@airswap/merkle": "0.0.1",
     "@airswap/utils": "0.3.21",
     "solidity-coverage": "^0.7.13"

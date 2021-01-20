@@ -25,7 +25,7 @@
   },
   "devDependencies": {
     "@airswap/constants": "0.3.10",
-    "@airswap/test-utils": "0.1.7",
+    "@airswap/test-utils": "0.1.9",
     "@airswap/tokens": "0.1.4",
     "@airswap/utils": "0.3.21",
     "ethers": "^5.0.25",
