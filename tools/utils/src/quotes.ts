@@ -15,13 +15,13 @@
 */
 
 import { ethers } from 'ethers'
-import { Quote, emptyQuoteParty } from '@airswap/types'
+import { Quote, emptyParty } from '@airswap/types'
 import { lowerCaseAddresses } from '..'
 
 export function createQuote({ signer = {}, sender = {} }): Quote {
   return lowerCaseAddresses({
-    signer: { ...emptyQuoteParty, ...signer },
-    sender: { ...emptyQuoteParty, ...sender },
+    signer: { ...emptyParty, ...signer },
+    sender: { ...emptyParty, ...sender },
   })
 }
 

@@ -24,15 +24,16 @@ interface ITransferHandler {
    * @notice Function to wrap token transfer for different token types
    * @param from address Wallet address to transfer from
    * @param to address Wallet address to transfer to
-   * amount uint256 Amount for ERC-20
-   * id token ID for ERC-721
+   * @param amount uint256 Amount for ERC-20
+   * @param id token ID for ERC-721
    * @param token address Contract address of token
    * @return bool on success of the token transfer
    */
   function transferTokens(
     address from,
     address to,
-    address token,
-    bytes calldata data
+    uint256 amount,
+    uint256 id,
+    address token
   ) external returns (bool);
 }

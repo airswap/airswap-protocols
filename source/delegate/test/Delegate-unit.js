@@ -5,9 +5,8 @@ const Indexer = artifacts.require('Indexer')
 const MockContract = artifacts.require('MockContract')
 const FungibleToken = artifacts.require('FungibleToken')
 
-const ethers = require('ethers')
-const { ADDRESS_ZERO } = require('@airswap/constants')
-const { emptySignature } = require('@airswap/types')
+const { ethers } = require('ethers')
+const { ADDRESS_ZERO, LOCATOR_ZERO } = require('@airswap/constants')
 const { createOrder, signOrder } = require('@airswap/utils')
 const {
   equal,
@@ -21,131 +20,34 @@ const PROVIDER_URL = web3.currentProvider.host
 contract('Delegate Unit Tests', async accounts => {
   const owner = accounts[0]
   const tradeWallet = accounts[1]
-  const mockRegistry = accounts[2]
-  const notOwner = accounts[3]
-  const aliceAddress = accounts[4]
-
-  const aliceSigner = new ethers.providers.JsonRpcProvider(
-    PROVIDER_URL
-  ).getSigner(aliceAddress)
-
-  const PROTOCOL = '0x0006'
+  const notOwner = accounts[2]
+  const notTradeWallet = accounts[3]
+  const SIGNER_TOKEN = accounts[4]
+  const SENDER_TOKEN = accounts[5]
+  const MOCK_WETH = accounts[6]
+  const MOCK_DAI = accounts[7]
+  const mockRegistry = accounts[8]
+  const MAX_SENDER_AMOUNT = 12345
+  const PRICE_COEF = 4321
+  const EXP = 2
   const EMPTY_PROTOCOL = '0x0000'
-
-  const NO_RULE = 0
-
-  let swap_swap
+  const DELE_PROTOCOL = '0x0002'
+  let mockFungibleTokenTemplate
+  let delegate
   let mockSwap
   let swapAddress
-  let mockIndexer
   let snapshotId
+  let swapFunction
   let mockStakingToken
-  let mockFungibleTokenTemplate
-  let mockToken_approve
-  let mockToken_allowance
-  let mockToken_balanceOf
-  let mockToken_transfer
-  let mockToken_transferFrom
+  let mockStakingToken_allowance
+  let mockStakingToken_transferFrom
+  let mockStakingToken_transfer
+  let mockStakingToken_approve
+  let mockIndexer
   let mockIndexer_getStakedAmount
-  let SENDER_TOKEN
-  let SENDER_TOKEN_ADDR
-  let SIGNER_TOKEN
-  let SIGNER_TOKEN_ADDR
 
-  let delegate
-
-  async function checkLinkedList(senderToken, signerToken, correctIDs) {
-    // pad correctIDs with null values for null pointers
-    correctIDs = [0].concat(correctIDs).concat([0])
-
-    // get the first rule: rule 3. Now iterate through the rules using 'nextRuleID'
-    let ruleID = await delegate.firstRuleID.call(senderToken, signerToken)
-    let rule
-
-    // loop through the list in the contract, checking it is correctly ordered
-    for (let i = 1; i <= correctIDs.length - 2; i++) {
-      // check the ruleID is right
-      equal(
-        ruleID,
-        correctIDs[i],
-        'Link list rule wrong. Should be: ' +
-          correctIDs[i] +
-          ' but got: ' +
-          ruleID
-      )
-      // fetch the rule, and from that the next rule/previous rule
-      rule = await delegate.rules.call(ruleID)
-      equal(
-        rule['prevRuleID'].toNumber(),
-        correctIDs[i - 1],
-        'prev rule incorrectly set'
-      )
-      equal(
-        rule['nextRuleID'].toNumber(),
-        correctIDs[i + 1],
-        'next rule incorrectly set'
-      )
-      ruleID = rule['nextRuleID'].toNumber()
-    }
-  }
-
-  async function setupMockTokens() {
-    mockStakingToken = await MockContract.new()
-    SENDER_TOKEN = await MockContract.new()
-    SIGNER_TOKEN = await MockContract.new()
-    mockFungibleTokenTemplate = await FungibleToken.new()
-
-    SENDER_TOKEN_ADDR = SENDER_TOKEN.address
-    SIGNER_TOKEN_ADDR = SIGNER_TOKEN.address
-
-    mockToken_approve = await mockFungibleTokenTemplate.contract.methods
-      .approve(ADDRESS_ZERO, 0)
-      .encodeABI()
-    mockToken_allowance = await mockFungibleTokenTemplate.contract.methods
-      .allowance(ADDRESS_ZERO, ADDRESS_ZERO)
-      .encodeABI()
-    mockToken_balanceOf = await mockFungibleTokenTemplate.contract.methods
-      .balanceOf(ADDRESS_ZERO)
-      .encodeABI()
-    mockToken_transfer = await mockFungibleTokenTemplate.contract.methods
-      .transfer(ADDRESS_ZERO, 0)
-      .encodeABI()
-    mockToken_transferFrom = await mockFungibleTokenTemplate.contract.methods
-      .transferFrom(ADDRESS_ZERO, ADDRESS_ZERO, 0)
-      .encodeABI()
-
-    await mockStakingToken.givenMethodReturnBool(mockToken_approve, true)
-  }
-
-  async function setupMockSwap() {
-    const types = await Types.new()
-    await Swap.link('Types', types.address)
-    const swapTemplate = await Swap.new(mockRegistry)
-    const order = createOrder({})
-    swap_swap = swapTemplate.contract.methods
-      .swap({ ...order, signature: emptySignature })
-      .encodeABI()
-
-    mockSwap = await MockContract.new()
-    swapAddress = mockSwap.address
-  }
-
-  async function setupMockIndexer() {
-    mockIndexer = await MockContract.new()
-    const mockIndexerTemplate = await Indexer.new(ADDRESS_ZERO)
-
-    //mock stakingToken()
-    const mockIndexer_stakingToken = mockIndexerTemplate.contract.methods
-      .stakingToken()
-      .encodeABI()
-    mockIndexer_getStakedAmount = mockIndexerTemplate.contract.methods
-      .getStakedAmount(ADDRESS_ZERO, ADDRESS_ZERO, ADDRESS_ZERO, EMPTY_PROTOCOL)
-      .encodeABI()
-    await mockIndexer.givenMethodReturnAddress(
-      mockIndexer_stakingToken,
-      mockStakingToken.address
-    )
-  }
+  const provider = new ethers.providers.JsonRpcProvider(PROVIDER_URL)
+  const notOwnerSigner = provider.getSigner(notOwner)
 
   beforeEach(async () => {
     const snapShot = await takeSnapshot()
@@ -156,17 +58,99 @@ contract('Delegate Unit Tests', async accounts => {
     await revertToSnapshot(snapshotId)
   })
 
-  before('Setup Delegate Contract', async () => {
-    await setupMockSwap()
+  async function setupMockTokens() {
+    mockStakingToken = await MockContract.new()
+    mockFungibleTokenTemplate = await FungibleToken.new()
+
+    mockStakingToken_allowance = await mockFungibleTokenTemplate.contract.methods
+      .allowance(ADDRESS_ZERO, ADDRESS_ZERO)
+      .encodeABI()
+
+    mockStakingToken_transferFrom = await mockFungibleTokenTemplate.contract.methods
+      .transferFrom(ADDRESS_ZERO, ADDRESS_ZERO, 0)
+      .encodeABI()
+
+    mockStakingToken_transfer = await mockFungibleTokenTemplate.contract.methods
+      .transfer(ADDRESS_ZERO, 0)
+      .encodeABI()
+
+    mockStakingToken_approve = await mockFungibleTokenTemplate.contract.methods
+      .approve(ADDRESS_ZERO, 0)
+      .encodeABI()
+  }
+
+  async function setupMockSwap() {
+    const types = await Types.new()
+    await Swap.link('Types', types.address)
+    const swapTemplate = await Swap.new(mockRegistry)
+    const order = await createOrder({})
+    order.signature = {
+      signatory: ADDRESS_ZERO,
+      validator: ADDRESS_ZERO,
+      version: '0x00',
+      v: '0',
+      r: LOCATOR_ZERO,
+      s: LOCATOR_ZERO,
+    }
+    swapFunction = swapTemplate.contract.methods.swap(order).encodeABI()
+
+    mockSwap = await MockContract.new()
+    swapAddress = mockSwap.address
+  }
+
+  async function setupMockIndexer() {
+    mockIndexer = await MockContract.new()
+    const mockIndexerTemplate = await Indexer.new(ADDRESS_ZERO)
+
+    //mock setIntent()
+    const mockIndexer_setIntent = mockIndexerTemplate.contract.methods
+      .setIntent(
+        ADDRESS_ZERO,
+        ADDRESS_ZERO,
+        EMPTY_PROTOCOL,
+        0,
+        web3.utils.fromAscii('')
+      )
+      .encodeABI()
+    await mockIndexer.givenMethodReturnBool(mockIndexer_setIntent, true)
+
+    //mock unsetIntent()
+    const mockIndexer_unsetIntent = mockIndexerTemplate.contract.methods
+      .unsetIntent(ADDRESS_ZERO, ADDRESS_ZERO, EMPTY_PROTOCOL)
+      .encodeABI()
+    await mockIndexer.givenMethodReturnBool(mockIndexer_unsetIntent, true)
+
+    //mock stakingToken()
+    const mockIndexer_stakingToken = mockIndexerTemplate.contract.methods
+      .stakingToken()
+      .encodeABI()
+    await mockIndexer.givenMethodReturnAddress(
+      mockIndexer_stakingToken,
+      mockStakingToken.address
+    )
+
+    //mock getStakedAmount()
+    mockIndexer_getStakedAmount = mockIndexerTemplate.contract.methods
+      .getStakedAmount(ADDRESS_ZERO, ADDRESS_ZERO, ADDRESS_ZERO, EMPTY_PROTOCOL)
+      .encodeABI()
+  }
+
+  before('deploy Delegate', async () => {
     await setupMockTokens()
+    await setupMockSwap()
     await setupMockIndexer()
 
+    await mockStakingToken.givenMethodReturnBool(mockStakingToken_approve, true)
+
     delegate = await Delegate.new(
-      mockSwap.address,
+      swapAddress,
       mockIndexer.address,
       ADDRESS_ZERO,
       tradeWallet,
-      PROTOCOL
+      DELE_PROTOCOL,
+      {
+        from: owner,
+      }
     )
   })
 
@@ -183,18 +167,21 @@ contract('Delegate Unit Tests', async accounts => {
 
     it('Test initial protocol value', async () => {
       const val = await delegate.protocol.call()
-      equal(val, PROTOCOL, 'protocol is incorrect')
+      equal(val, DELE_PROTOCOL, 'protocol is incorrect')
     })
 
     it('Test constructor sets the owner as the trade wallet on empty address', async () => {
-      await mockStakingToken.givenMethodReturnBool(mockToken_approve, true)
+      await mockStakingToken.givenMethodReturnBool(
+        mockStakingToken_approve,
+        true
+      )
 
       const newDelegate = await Delegate.new(
         swapAddress,
         mockIndexer.address,
         ADDRESS_ZERO,
         ADDRESS_ZERO,
-        PROTOCOL,
+        DELE_PROTOCOL,
         {
           from: owner,
         }
@@ -210,26 +197,33 @@ contract('Delegate Unit Tests', async accounts => {
     })
 
     it('Test owner is set correctly if provided an address', async () => {
-      await mockStakingToken.givenMethodReturnBool(mockToken_approve, true)
+      await mockStakingToken.givenMethodReturnBool(
+        mockStakingToken_approve,
+        true
+      )
 
       const newDelegate = await Delegate.new(
         swapAddress,
         mockIndexer.address,
         notOwner,
         tradeWallet,
-        PROTOCOL,
+        DELE_PROTOCOL,
         {
           from: owner,
         }
       )
 
+      // being provided an empty address, it should leave the owner unchanged
       const val = await newDelegate.owner.call()
       equal(val, notOwner, 'owner is incorrect - should be notOwner')
     })
 
     it('Test indexer is unable to pull funds from delegate account', async () => {
       //force approval to fail
-      await mockStakingToken.givenMethodReturnBool(mockToken_approve, false)
+      await mockStakingToken.givenMethodReturnBool(
+        mockStakingToken_approve,
+        false
+      )
 
       await reverted(
         Delegate.new(
@@ -237,13 +231,311 @@ contract('Delegate Unit Tests', async accounts => {
           mockIndexer.address,
           ADDRESS_ZERO,
           ADDRESS_ZERO,
-          PROTOCOL,
+          DELE_PROTOCOL,
           {
             from: owner,
           }
         ),
         'STAKING_APPROVAL_FAILED'
       )
+    })
+  })
+
+  describe('Test setRule', async () => {
+    it('Test setRule permissions as not owner', async () => {
+      await reverted(
+        delegate.setRule(
+          SENDER_TOKEN,
+          SIGNER_TOKEN,
+          MAX_SENDER_AMOUNT,
+          PRICE_COEF,
+          EXP,
+          { from: notOwner }
+        ),
+        'Ownable: caller is not the owner'
+      )
+    })
+
+    it('Test setRule permissions as owner', async () => {
+      await passes(
+        delegate.setRule(
+          SENDER_TOKEN,
+          SIGNER_TOKEN,
+          MAX_SENDER_AMOUNT,
+          PRICE_COEF,
+          EXP,
+          { from: owner }
+        )
+      )
+    })
+
+    it('Test setRule', async () => {
+      const trx = await delegate.setRule(
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
+        PRICE_COEF,
+        EXP
+      )
+
+      //check if rule has been added
+      const rule = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
+      equal(
+        rule[0].toNumber(),
+        MAX_SENDER_AMOUNT,
+        'max delegate amount is incorrectly saved'
+      )
+      equal(rule[1].toNumber(), PRICE_COEF, 'price coef is incorrectly saved')
+      equal(rule[2].toNumber(), EXP, 'price exp is incorrectly saved')
+
+      //check emitted event
+      emitted(trx, 'SetRule', e => {
+        return (
+          e.signerToken === SIGNER_TOKEN &&
+          e.senderToken === SENDER_TOKEN &&
+          e.maxSenderAmount.toNumber() === MAX_SENDER_AMOUNT &&
+          e.priceCoef.toNumber() === PRICE_COEF &&
+          e.priceExp.toNumber() === EXP
+        )
+      })
+    })
+
+    it('Test setRule for zero priceCoef does revert', async () => {
+      const trx = delegate.setRule(
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
+        0,
+        EXP
+      )
+      await reverted(trx, 'PRICE_COEF_INVALID')
+    })
+  })
+
+  describe('Test unsetRule', async () => {
+    it('Test unsetRule permissions as not owner', async () => {
+      await reverted(
+        delegate.unsetRule(SENDER_TOKEN, SIGNER_TOKEN, { from: notOwner })
+      )
+    })
+
+    it('Test unsetRule permissions', async () => {
+      await passes(
+        delegate.unsetRule(SENDER_TOKEN, SIGNER_TOKEN, { from: owner })
+      )
+    })
+
+    it('Test unsetRule', async () => {
+      let trx = await delegate.setRule(
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
+        PRICE_COEF,
+        EXP
+      )
+
+      //ensure rule has been added
+      const ruleBefore = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
+      equal(
+        ruleBefore[0].toNumber(),
+        MAX_SENDER_AMOUNT,
+        'max delegate amount is incorrectly saved'
+      )
+
+      trx = await delegate.unsetRule(SENDER_TOKEN, SIGNER_TOKEN)
+
+      //check that the rule has been removed
+      const ruleAfter = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
+      equal(
+        ruleAfter[0].toNumber(),
+        0,
+        'max delgate amount is incorrectly saved'
+      )
+      equal(ruleAfter[1].toNumber(), 0, 'price coef is incorrectly saved')
+      equal(ruleAfter[2].toNumber(), 0, 'price exp is incorrectly saved')
+
+      //check emitted event
+      emitted(trx, 'UnsetRule', e => {
+        return e.senderToken === SENDER_TOKEN && e.signerToken === SIGNER_TOKEN
+      })
+    })
+  })
+
+  describe('Test setRuleAndIntent()', async () => {
+    it('Test calling setRuleAndIntent with transfer error', async () => {
+      const stakeAmount = 250
+
+      const rule = [100000, 300, 0]
+
+      await mockStakingToken.givenMethodReturnUint(
+        mockStakingToken_allowance,
+        stakeAmount
+      )
+      //mock unsuccessful transfer
+      await mockStakingToken.givenMethodReturnBool(
+        mockStakingToken_transferFrom,
+        false
+      )
+
+      //mock the score/staked amount to be transferred
+      await mockIndexer.givenMethodReturnUint(mockIndexer_getStakedAmount, 0)
+
+      await reverted(
+        delegate.setRuleAndIntent(MOCK_WETH, MOCK_DAI, rule, stakeAmount),
+        'STAKING_TRANSFER_FAILED'
+      )
+    })
+
+    it('Test successfully calling setRuleAndIntent with 0 staked amount', async () => {
+      const stakeAmount = 0
+
+      const rule = [100000, 300, 0]
+
+      await mockStakingToken.givenMethodReturnBool(
+        mockStakingToken_approve,
+        true
+      )
+
+      //mock the score/staked amount to be transferred
+      await mockIndexer.givenMethodReturnUint(mockIndexer_getStakedAmount, 0)
+
+      await passes(
+        delegate.setRuleAndIntent(MOCK_WETH, MOCK_DAI, rule, stakeAmount)
+      )
+    })
+
+    it('Test successfully calling setRuleAndIntent with staked amount', async () => {
+      const stakeAmount = 250
+
+      const rule = [100000, 300, 0]
+
+      await mockStakingToken.givenMethodReturnUint(
+        mockStakingToken_allowance,
+        stakeAmount
+      )
+      await mockStakingToken.givenMethodReturnBool(
+        mockStakingToken_transferFrom,
+        true
+      )
+      await mockStakingToken.givenMethodReturnBool(
+        mockStakingToken_approve,
+        true
+      )
+
+      //mock the score/staked amount to be transferred
+      await mockIndexer.givenMethodReturnUint(mockIndexer_getStakedAmount, 250)
+
+      await passes(
+        delegate.setRuleAndIntent(MOCK_WETH, MOCK_DAI, rule, stakeAmount)
+      )
+    })
+
+    it('Test unsuccessfully calling setRuleAndIntent with decreased staked amount', async () => {
+      const stakeAmount = 100
+
+      const rule = [100000, 300, 0]
+
+      await mockStakingToken.givenMethodReturnUint(
+        mockStakingToken_allowance,
+        stakeAmount
+      )
+      await mockStakingToken.givenMethodReturnBool(
+        mockStakingToken_transferFrom,
+        true
+      )
+
+      const transferToDelegateOwner = mockFungibleTokenTemplate.contract.methods
+        .transfer(accounts[0], 150)
+        .encodeABI()
+
+      await mockStakingToken.givenCalldataReturnBool(
+        transferToDelegateOwner,
+        false
+      )
+
+      await mockStakingToken.givenMethodReturnBool(
+        mockStakingToken_approve,
+        true
+      )
+
+      // mock the score/staked amount to be transferred
+      await mockIndexer.givenMethodReturnUint(mockIndexer_getStakedAmount, 250)
+
+      await reverted(
+        delegate.setRuleAndIntent(MOCK_WETH, MOCK_DAI, rule, stakeAmount),
+        'STAKING_RETURN_FAILED.'
+      )
+    })
+  })
+
+  describe('Test unsetRuleAndIntent()', async () => {
+    it('Test calling unsetRuleAndIntent() with transfer error', async () => {
+      const mockScore = 1000
+
+      //mock the score/staked amount to be transferred
+      await mockIndexer.givenMethodReturnUint(
+        mockIndexer_getStakedAmount,
+        mockScore
+      )
+
+      //mock a failed transfer
+      await mockStakingToken.givenMethodReturnBool(
+        mockStakingToken_transfer,
+        false
+      )
+
+      await reverted(
+        delegate.unsetRuleAndIntent(MOCK_WETH, MOCK_DAI),
+        'STAKING_RETURN_FAILED'
+      )
+    })
+
+    it('Test successfully calling unsetRuleAndIntent() with 0 staked amount', async () => {
+      const mockScore = 0
+
+      //mock the score/staked amount to be transferred
+      await mockIndexer.givenMethodReturnUint(
+        mockIndexer_getStakedAmount,
+        mockScore
+      )
+
+      await passes(delegate.unsetRuleAndIntent(MOCK_WETH, MOCK_DAI))
+    })
+
+    it('Test successfully calling unsetRuleAndIntent() with staked amount', async () => {
+      const mockScore = 1000
+
+      //mock the score/staked amount to be transferred
+      await mockIndexer.givenMethodReturnUint(
+        mockIndexer_getStakedAmount,
+        mockScore
+      )
+
+      //mock a successful transfer
+      await mockStakingToken.givenMethodReturnBool(
+        mockStakingToken_transfer,
+        true
+      )
+
+      await passes(delegate.unsetRuleAndIntent(MOCK_WETH, MOCK_DAI))
+    })
+
+    it('Test successfully calling unsetRuleAndIntent() with staked amount', async () => {
+      const mockScore = 1000
+
+      //mock the score/staked amount to be transferred
+      await mockIndexer.givenMethodReturnUint(
+        mockIndexer_getStakedAmount,
+        mockScore
+      )
+
+      //mock a successful transfer
+      await mockStakingToken.givenMethodReturnBool(
+        mockStakingToken_transfer,
+        true
+      )
+
+      await passes(delegate.unsetRuleAndIntent(MOCK_WETH, MOCK_DAI))
     })
   })
 
@@ -264,1130 +556,832 @@ contract('Delegate Unit Tests', async accounts => {
     })
   })
 
-  describe('Test createRule', async () => {
-    it('Should not create a rule with a 0 amount', async () => {
-      await reverted(
-        delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 0, 400),
-        'AMOUNTS_CANNOT_BE_0'
-      )
-
-      await reverted(
-        delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 400, 0),
-        'AMOUNTS_CANNOT_BE_0'
-      )
-    })
-
-    it('Should successfully create a rule and update the contract', async () => {
-      const tx = await delegate.createRule(
-        SENDER_TOKEN_ADDR,
-        SIGNER_TOKEN_ADDR,
-        1000,
-        200
-      )
-
-      // check it's stored in the mapping correctly
-      const rule = await delegate.rules.call(1)
-
-      equal(
-        rule['senderToken'],
-        SENDER_TOKEN_ADDR,
-        'sender token incorrectly set'
-      )
-      equal(
-        rule['signerToken'],
-        SIGNER_TOKEN_ADDR,
-        'signer token incorrectly set'
-      )
-      equal(
-        rule['senderAmount'].toNumber(),
-        1000,
-        'sender amount incorrectly set'
-      )
-      equal(
-        rule['signerAmount'].toNumber(),
-        200,
-        'signer amount incorrectly set'
-      )
-      equal(rule['prevRuleID'].toNumber(), NO_RULE, 'prev rule incorrectly set')
-      equal(rule['nextRuleID'].toNumber(), NO_RULE, 'next rule incorrectly set')
-
-      // check the token pair's list was updated correctly
-      const ruleID = await delegate.firstRuleID.call(
-        SENDER_TOKEN_ADDR,
-        SIGNER_TOKEN_ADDR
-      )
-      equal(ruleID, 1, 'Link list first rule ID incorrect')
-      const activeRules = await delegate.totalActiveRules.call(
-        SENDER_TOKEN_ADDR,
-        SIGNER_TOKEN_ADDR
-      )
-      equal(activeRules, 1, 'Total active rules incorrect')
-
-      // check the contract's total rules created is correct
-      const ruleCounter = await delegate.ruleIDCounter.call()
-      equal(ruleCounter, 1, 'Rule counter incorrect')
-
-      // check the event emitted correctly
-      emitted(tx, 'CreateRule', e => {
-        return (
-          e.owner === owner &&
-          e.ruleID.toNumber() === 1 &&
-          e.senderToken === SENDER_TOKEN_ADDR &&
-          e.signerToken === SIGNER_TOKEN_ADDR &&
-          e.senderAmount.toNumber() === 1000 &&
-          e.signerAmount.toNumber() === 200
-        )
-      })
-    })
-
-    it('Should successfully insert a second rule at the beginning of the same market', async () => {
-      // insert the first rule, as in the previous test
-      // in this rule, every 1 signerToken gets 5 senderTokens
-      let tx = await delegate.createRule(
-        SENDER_TOKEN_ADDR,
-        SIGNER_TOKEN_ADDR,
-        1000,
-        200
-      )
-
-      emitted(tx, 'CreateRule')
-
-      // now insert another rule on the same token pair
-      // in this rule every 1 signerToken gets 6 senderTokens
-      // this rule therefore goes BEFORE the other rule in the list
-      tx = await delegate.createRule(
-        SENDER_TOKEN_ADDR,
-        SIGNER_TOKEN_ADDR,
-        300,
-        50
-      )
-
-      // check the event emitted correctly
-      emitted(tx, 'CreateRule', e => {
-        return (
-          e.owner === owner &&
-          e.ruleID.toNumber() === 2 &&
-          e.senderToken === SENDER_TOKEN_ADDR &&
-          e.signerToken === SIGNER_TOKEN_ADDR &&
-          e.senderAmount.toNumber() === 300 &&
-          e.signerAmount.toNumber() === 50
-        )
-      })
-
-      let rule = await delegate.rules.call(1)
-      // check it is updated to now be after the new rule
-      equal(rule['prevRuleID'].toNumber(), 2, 'prev rule incorrectly set')
-      equal(rule['nextRuleID'].toNumber(), NO_RULE, 'next rule incorrectly set')
-      rule = await delegate.rules.call(2)
-      equal(rule['prevRuleID'].toNumber(), NO_RULE, 'prev rule incorrectly set')
-      equal(rule['nextRuleID'].toNumber(), 1, 'next rule incorrectly set')
-
-      // check that rule 2 is now the first rule in the market's list
-      const ruleID = await delegate.firstRuleID.call(
-        SENDER_TOKEN_ADDR,
-        SIGNER_TOKEN_ADDR
-      )
-      equal(ruleID, 2, 'Link list first rule ID incorrect')
-      const activeRules = await delegate.totalActiveRules.call(
-        SENDER_TOKEN_ADDR,
-        SIGNER_TOKEN_ADDR
-      )
-      equal(activeRules, 2, 'Total active rules incorrect')
-
-      // check the contract's total rules created is correct
-      const ruleCounter = await delegate.ruleIDCounter.call()
-      equal(ruleCounter, 2, 'Rule counter incorrect')
-    })
-
-    it('Should successfully insert 5 rules to the same market', async () => {
-      // RULE 1: in this rule every 1 signerToken gets 6 senderTokens
-      let tx = await delegate.createRule(
-        SENDER_TOKEN_ADDR,
-        SIGNER_TOKEN_ADDR,
-        300,
-        50
-      )
-      emitted(tx, 'CreateRule')
-
-      // RULE 2: in this rule, every 1 signerToken gets 5 senderTokens
-      tx = await delegate.createRule(
-        SENDER_TOKEN_ADDR,
-        SIGNER_TOKEN_ADDR,
-        1000,
-        200
-      )
-      emitted(tx, 'CreateRule')
-
-      // RULE 3: in this rule, every 1 signerToken gets 7 senderTokens
-      tx = await delegate.createRule(
-        SENDER_TOKEN_ADDR,
-        SIGNER_TOKEN_ADDR,
-        2002,
-        286
-      )
-      emitted(tx, 'CreateRule')
-
-      // RULE 4: in this rule, every 1 signerToken gets 4.5 senderTokens
-      tx = await delegate.createRule(
-        SENDER_TOKEN_ADDR,
-        SIGNER_TOKEN_ADDR,
-        450,
-        100
-      )
-      emitted(tx, 'CreateRule')
-
-      // RULE 5: in this rule, every 1 signerToken gets 5.2 senderTokens
-      tx = await delegate.createRule(
-        SENDER_TOKEN_ADDR,
-        SIGNER_TOKEN_ADDR,
-        1664,
-        320
-      )
-      emitted(tx, 'CreateRule')
-
-      // CORRECT RULE ORDER: 3, 1, 5, 2, 4
-      await checkLinkedList(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, [
-        3,
-        1,
-        5,
-        2,
-        4,
-      ])
-
-      const activeRules = await delegate.totalActiveRules.call(
-        SENDER_TOKEN_ADDR,
-        SIGNER_TOKEN_ADDR
-      )
-      equal(activeRules, 5, 'Total active rules incorrect')
-
-      // check the contract's total rules created is correct
-      const ruleCounter = await delegate.ruleIDCounter.call()
-      equal(ruleCounter, 5, 'Rule counter incorrect')
-    })
-
-    it('Should successfully insert 2 rules with the same price', async () => {
-      let tx = await delegate.createRule(
-        SENDER_TOKEN_ADDR,
-        SIGNER_TOKEN_ADDR,
-        300,
-        50
-      )
-      emitted(tx, 'CreateRule')
-
-      // this rule has the same price: 1 signer token => 6 sender tokens
-      tx = await delegate.createRule(
-        SENDER_TOKEN_ADDR,
-        SIGNER_TOKEN_ADDR,
-        1200,
-        200
-      )
-      emitted(tx, 'CreateRule')
-
-      // assert the new rule is AFTER the original rule
-      await checkLinkedList(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, [1, 2])
-    })
-  })
-
-  describe('Test deleteRule', async () => {
-    const correctIDs = [3, 1, 5, 2, 4] // surrounded by null pointers
-
-    beforeEach(async () => {
-      // add 5 rules - same rules as test above
-      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 300, 50)
-      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 1000, 200)
-      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 2002, 286)
-      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 450, 100)
-      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 1664, 320)
-      // CORRECT RULE ORDER: 3, 1, 5, 2, 4
-    })
-
-    it('Should not delete a non-existent rule', async () => {
-      await reverted(
-        delegate.deleteRule(correctIDs.length + 1),
-        'RULE_NOT_ACTIVE'
-      )
-    })
-
-    it('Should delete the last rule in the list', async () => {
-      const tx = await delegate.deleteRule(correctIDs[correctIDs.length - 1])
-
-      // check the event emitted correctly
-      emitted(tx, 'DeleteRule', e => {
-        return (
-          e.owner === owner &&
-          e.ruleID.toNumber() === correctIDs[correctIDs.length - 1]
-        )
-      })
-
-      await checkLinkedList(
-        SENDER_TOKEN_ADDR,
-        SIGNER_TOKEN_ADDR,
-        correctIDs.slice(0, correctIDs.length - 1)
-      )
-
-      const activeRules = await delegate.totalActiveRules.call(
-        SENDER_TOKEN_ADDR,
-        SIGNER_TOKEN_ADDR
-      )
-      equal(activeRules, correctIDs.length - 1, 'Total active rules incorrect')
-    })
-
-    it('Should delete the first rule in the list', async () => {
-      const tx = await delegate.deleteRule(correctIDs[0])
-
-      // check the event emitted correctly
-      emitted(tx, 'DeleteRule', e => {
-        return e.owner === owner && e.ruleID.toNumber() === correctIDs[0]
-      })
-
-      await checkLinkedList(
-        SENDER_TOKEN_ADDR,
-        SIGNER_TOKEN_ADDR,
-        correctIDs.slice(1)
-      )
-
-      const activeRules = await delegate.totalActiveRules.call(
-        SENDER_TOKEN_ADDR,
-        SIGNER_TOKEN_ADDR
-      )
-      equal(activeRules, correctIDs.length - 1, 'Total active rules incorrect')
-    })
-
-    it('Should delete the middle rule in the list', async () => {
-      const tx = await delegate.deleteRule(correctIDs[2])
-
-      // check the event emitted correctly
-      emitted(tx, 'DeleteRule', e => {
-        return e.owner === owner && e.ruleID.toNumber() === correctIDs[2]
-      })
-
-      await checkLinkedList(
-        SENDER_TOKEN_ADDR,
-        SIGNER_TOKEN_ADDR,
-        correctIDs.slice(0, 2).concat(correctIDs.slice(3))
-      )
-
-      const activeRules = await delegate.totalActiveRules.call(
-        SENDER_TOKEN_ADDR,
-        SIGNER_TOKEN_ADDR
-      )
-      equal(activeRules, correctIDs.length - 1, 'Total active rules incorrect')
+  describe('Test transfer of ownership', async () => {
+    it('Test ownership after transfer', async () => {
+      await delegate.transferOwnership(notOwner)
+      const val = await delegate.owner.call()
+      equal(val, notOwner, 'owner was not passed properly')
     })
   })
 
   describe('Test getSignerSideQuote', async () => {
-    beforeEach(async () => {
-      // add 5 rules - same rules as test above
-      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 300, 50)
-      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 1000, 200)
-      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 2002, 286)
-      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 450, 100)
-      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 1664, 320)
-      // CORRECT RULE ORDER: 3, 1, 5, 2, 4
-    })
-
-    it('Should return 0 for a market with no rules', async () => {
-      const signerAmount = await delegate.getSignerSideQuote.call(
-        1,
-        SIGNER_TOKEN_ADDR,
-        SENDER_TOKEN_ADDR
+    it('test when rule does not exist', async () => {
+      const NON_EXISTENT_SIGNER_TOKEN = accounts[7]
+      const val = await delegate.getSignerSideQuote.call(
+        1234,
+        SENDER_TOKEN,
+        NON_EXISTENT_SIGNER_TOKEN
       )
-
-      equal(signerAmount, 0, 'signer amount should be 0')
-    })
-
-    it('Should return a quote that just involves the smallest rule', async () => {
-      const signerAmount = await delegate.getSignerSideQuote.call(
-        700,
-        SENDER_TOKEN_ADDR,
-        SIGNER_TOKEN_ADDR
-      )
-
       equal(
-        signerAmount.toNumber(),
-        (700 * 286) / 2002,
-        'signer amount incorrect'
+        val.toNumber(),
+        0,
+        'no quote should be available if a delegate does not exist'
       )
     })
 
-    it('Should return a quote that uses multiple rules', async () => {
-      // entirety of 3 rules, plus some more = 2002 (r3) + 300 (r1) + 833 (r5)
-      const signerAmount = await delegate.getSignerSideQuote.call(
-        3135,
-        SENDER_TOKEN_ADDR,
-        SIGNER_TOKEN_ADDR
+    it('test when delegate amount is greater than max delegate amount', async () => {
+      await delegate.setRule(
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
+        PRICE_COEF,
+        EXP
       )
-
-      // result should round up so its in the delegate's advantage
-      // therefore it should round up
+      const val = await delegate.getSignerSideQuote.call(
+        MAX_SENDER_AMOUNT + 1,
+        SENDER_TOKEN,
+        SIGNER_TOKEN
+      )
       equal(
-        signerAmount.toNumber(),
-        Math.ceil(286 + 50 + 320 * (833 / 1664)),
-        'signer amount incorrect'
+        val.toNumber(),
+        0,
+        'no quote should be available if delegate amount is greater than delegate max amount'
       )
     })
 
-    it('Should allow a quote for the maximum sender amount', async () => {
-      // total sender amount in rules is 5416, and signer amounts is 956
-      const signerAmount = await delegate.getSignerSideQuote.call(
-        5416,
-        SENDER_TOKEN_ADDR,
-        SIGNER_TOKEN_ADDR
+    it('test when delegate amount is 0', async () => {
+      await delegate.setRule(
+        SIGNER_TOKEN,
+        SENDER_TOKEN,
+        MAX_SENDER_AMOUNT,
+        PRICE_COEF,
+        EXP
       )
-
-      equal(signerAmount.toNumber(), 956, 'signer amount incorrect')
+      const val = await delegate.getSignerSideQuote.call(
+        0,
+        SENDER_TOKEN,
+        SIGNER_TOKEN
+      )
+      equal(
+        val.toNumber(),
+        0,
+        'no quote should be available if delegate amount is 0'
+      )
     })
 
-    it('Should return 0 for a sender amount more than the total', async () => {
-      // total sender amount in rules is 5416
-      const signerAmount = await delegate.getSignerSideQuote.call(
-        5417,
-        SENDER_TOKEN_ADDR,
-        SIGNER_TOKEN_ADDR
+    it('test a successful call - getSignerSideQuote', async () => {
+      await delegate.setRule(
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
+        PRICE_COEF,
+        EXP
       )
 
-      equal(signerAmount.toNumber(), 0, 'signer amount should be 0')
+      const val = await delegate.getSignerSideQuote.call(
+        1234,
+        SENDER_TOKEN,
+        SIGNER_TOKEN
+      )
+      const expectedValue = Math.ceil((1234 * PRICE_COEF) / 10 ** EXP)
+      equal(val.toNumber(), expectedValue, 'there should be a quote available')
     })
   })
 
   describe('Test getSenderSideQuote', async () => {
-    beforeEach(async () => {
-      // add 5 rules - same rules as test above
-      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 300, 50)
-      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 1000, 200)
-      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 2002, 286)
-      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 450, 100)
-      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 1664, 320)
-      // CORRECT RULE ORDER: 3, 1, 5, 2, 4
-    })
-
-    it('Should return 0 for a market with no rules', async () => {
-      const senderAmount = await delegate.getSenderSideQuote.call(
-        1,
-        SIGNER_TOKEN_ADDR,
-        SENDER_TOKEN_ADDR
+    it('test when rule does not exist', async () => {
+      const val = await delegate.getSenderSideQuote.call(
+        4312,
+        SENDER_TOKEN,
+        SIGNER_TOKEN
       )
-
-      equal(senderAmount, 0, 'sender amount should be 0')
-    })
-
-    it('Should return a quote that just involves the smallest rule', async () => {
-      const senderAmount = await delegate.getSenderSideQuote.call(
-        84,
-        SENDER_TOKEN_ADDR,
-        SIGNER_TOKEN_ADDR
-      )
-
       equal(
-        senderAmount.toNumber(),
-        (84 * 2002) / 286,
-        'sender amount incorrect'
+        val.toNumber(),
+        0,
+        'no quote should be available if a delegate does not exist'
       )
     })
 
-    it('Should return a quote that uses multiple rules', async () => {
-      // entirety of 4 rules, plus some = 286 (r3) + 50 (r1) + 320 (r5) + 200 (r2) + 5 (r4)
-      const senderAmount = await delegate.getSenderSideQuote.call(
-        861,
-        SENDER_TOKEN_ADDR,
-        SIGNER_TOKEN_ADDR
+    it('test when delegate amount is not within acceptable value bounds', async () => {
+      await delegate.setRule(SENDER_TOKEN, SIGNER_TOKEN, 100, 1, 0)
+      let val = await delegate.getSenderSideQuote.call(
+        0,
+        SIGNER_TOKEN,
+        SENDER_TOKEN
       )
-
       equal(
-        senderAmount.toNumber(),
-        Math.floor(2002 + 300 + 1664 + 1000 + 450 / 20),
-        'sender amount incorrect'
+        val.toNumber(),
+        0,
+        'no quote should be available if returned delegate amount is 0'
+      )
+
+      val = await delegate.getSenderSideQuote.call(
+        MAX_SENDER_AMOUNT,
+        SIGNER_TOKEN,
+        SENDER_TOKEN
+      )
+      equal(
+        val.toNumber(),
+        0,
+        'no quote should be available if returned greater than max delegate amount'
       )
     })
 
-    it('Should allow a quote for the maximum signer amount', async () => {
-      // total sender amount in rules is 5416, and signer amounts is 956
-      const senderAmount = await delegate.getSenderSideQuote.call(
-        956,
-        SENDER_TOKEN_ADDR,
-        SIGNER_TOKEN_ADDR
+    it('test a successful call - getSenderSideQuote', async () => {
+      await delegate.setRule(
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
+        PRICE_COEF,
+        EXP
       )
 
-      equal(senderAmount.toNumber(), 5416, 'sender amount incorrect')
-    })
-
-    it('Should return max sender amount for even larger signer amounts', async () => {
-      // total sender amount in rules is 5416, and signer amounts is 956
-      const senderAmount = await delegate.getSenderSideQuote.call(
-        1000, // bigger than the total of the rules
-        SENDER_TOKEN_ADDR,
-        SIGNER_TOKEN_ADDR
+      const val = await delegate.getSenderSideQuote.call(
+        500,
+        SIGNER_TOKEN,
+        SENDER_TOKEN
       )
-
-      // returns max sender amount as this rate change is in the delegate's favour
-      equal(senderAmount.toNumber(), 5416, 'sender amount incorrect')
+      const expectedValue = Math.floor((500 * 10 ** EXP) / PRICE_COEF)
+      equal(val.toNumber(), expectedValue, 'there should be a quote available')
     })
   })
 
   describe('Test getMaxQuote', async () => {
-    beforeEach(async () => {
-      // add 2 rules - same rules as test above
-      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 300, 50)
-      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 1000, 200)
-    })
-
-    it('Should return 0 if the trade wallet has no tokens', async () => {
-      await SENDER_TOKEN.givenMethodReturnUint(mockToken_balanceOf, 0)
-      await SENDER_TOKEN.givenMethodReturnUint(mockToken_allowance, 0)
-
-      const result = await delegate.getMaxQuote.call(
-        SENDER_TOKEN_ADDR,
-        SIGNER_TOKEN_ADDR
-      )
-      const senderAmount = result['senderAmount']
-      const signerAmount = result['signerAmount']
-
-      equal(senderAmount, 0, 'sender amount should be 0')
-      equal(signerAmount, 0, 'signer amount should be 0')
-    })
-
-    it('Should return the maximum if the trade wallet has ample tokens', async () => {
-      await SENDER_TOKEN.givenMethodReturnUint(mockToken_balanceOf, 1000000)
-      await SENDER_TOKEN.givenMethodReturnUint(mockToken_allowance, 1000000)
-
-      const result = await delegate.getMaxQuote.call(
-        SENDER_TOKEN_ADDR,
-        SIGNER_TOKEN_ADDR
-      )
-      const senderAmount = result['senderAmount']
-      const signerAmount = result['signerAmount']
-
-      equal(senderAmount, 1300, 'sender amount incorrect')
-      equal(signerAmount, 250, 'signer amount incorrect')
-    })
-
-    it('Should return a smaller quote if the balance is low', async () => {
-      await SENDER_TOKEN.givenMethodReturnUint(mockToken_balanceOf, 1000)
-      await SENDER_TOKEN.givenMethodReturnUint(mockToken_allowance, 1000000)
-
-      const result = await delegate.getMaxQuote.call(
-        SENDER_TOKEN_ADDR,
-        SIGNER_TOKEN_ADDR
-      )
-      const senderAmount = result['senderAmount']
-      const signerAmount = result['signerAmount']
-
-      equal(senderAmount, 1000, 'sender amount incorrect')
-      equal(signerAmount, 50 + (200 * 700) / 1000, 'signer amount incorrect')
-    })
-
-    it('Should return a smaller quote if the allowance is low', async () => {
-      await SENDER_TOKEN.givenMethodReturnUint(mockToken_balanceOf, 1000000)
-      await SENDER_TOKEN.givenMethodReturnUint(mockToken_allowance, 504)
-
-      const result = await delegate.getMaxQuote.call(
-        SENDER_TOKEN_ADDR,
-        SIGNER_TOKEN_ADDR
-      )
-      const senderAmount = result['senderAmount']
-      const signerAmount = result['signerAmount']
-
-      // rounds up for the delegate's advantage
-      equal(senderAmount, 504, 'sender amount incorrect')
+    it('test when rule does not exist', async () => {
+      const val = await delegate.getMaxQuote.call(SENDER_TOKEN, SIGNER_TOKEN)
       equal(
-        signerAmount,
-        50 + Math.ceil((200 * 204) / 1000),
-        'signer amount incorrect'
-      )
-    })
-  })
-
-  describe('Test getRules', async () => {
-    beforeEach(async () => {
-      // add 5 rules - same rules as test above
-      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 300, 50)
-      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 1000, 200)
-      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 2002, 286)
-      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 450, 100)
-      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 1664, 320)
-      // CORRECT RULE ORDER: 3, 1, 5, 2, 4
-    })
-
-    it('Should return no levels if none exist', async () => {
-      const result = await delegate.getRules.call(
-        SIGNER_TOKEN_ADDR,
-        SENDER_TOKEN_ADDR
-      )
-
-      equal(
-        result['senderAmounts'].length,
+        val[0].toNumber(),
         0,
-        'There should be no sender amounts'
+        'no quote should be available if a delegate does not exist'
       )
       equal(
-        result['signerAmounts'].length,
+        val[1].toNumber(),
         0,
-        'There should be no signer amounts'
+        'no quote should be available if a delegate does not exist'
       )
     })
 
-    it('Should return all levels in order', async () => {
-      const result = await delegate.getRules.call(
-        SENDER_TOKEN_ADDR,
-        SIGNER_TOKEN_ADDR
+    it('test a successful call - getMaxQuote', async () => {
+      await delegate.setRule(
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
+        PRICE_COEF,
+        EXP
       )
-      const senderAmounts = result['senderAmounts'].map(x => x.toNumber())
-      const signerAmounts = result['signerAmounts'].map(x => x.toNumber())
-      const expectedSenderAmounts = [2002, 300, 1664, 1000, 450]
-      const expectedSignerAmounts = [286, 50, 320, 200, 100]
+      const val = await delegate.getMaxQuote.call(SENDER_TOKEN, SIGNER_TOKEN)
 
-      for (let i = 0; i < expectedSenderAmounts.length; i++) {
-        equal(
-          senderAmounts[i],
-          expectedSenderAmounts[i],
-          'Sender amount incorrect'
-        )
-        equal(
-          signerAmounts[i],
-          expectedSignerAmounts[i],
-          'Signer amount incorrect'
-        )
-      }
+      equal(
+        val[0].toNumber(),
+        MAX_SENDER_AMOUNT,
+        'get max quote returned incorrect sender quote'
+      )
+
+      const expectedValue = Math.ceil(
+        (MAX_SENDER_AMOUNT * PRICE_COEF) / 10 ** EXP
+      )
+      equal(
+        val[1].toNumber(),
+        expectedValue,
+        'get max quote returned incorrect signer quote'
+      )
     })
   })
 
   describe('Test provideOrder', async () => {
-    beforeEach(async () => {
-      // add 5 rules - same rules as test above
-      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 300, 50)
-      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 1000, 200)
-      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 2002, 286)
-      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 450, 100)
-      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 1664, 320)
-      // CORRECT RULE ORDER: 3, 1, 5, 2, 4
-    })
-
-    it('Should pass if the order has no signature, but sent to the delegate by the signer', async () => {
-      const order = createOrder({
-        signer: {
-          wallet: aliceAddress,
-          amount: 500,
-          token: SIGNER_TOKEN_ADDR,
-        },
-        sender: {
-          wallet: tradeWallet,
-          amount: 500,
-          token: SENDER_TOKEN_ADDR,
-        },
-      })
-
-      // NOTE: Swap Contract swap() is mocked to always pass
-
-      order.signature = emptySignature
-
-      const tx = await delegate.provideOrder(order, { from: aliceAddress })
-      passes(tx)
-    })
-
-    it('Should fail if the order has no signature and is sent to the delegate not by the signer', async () => {
-      const order = createOrder({
-        signer: {
-          wallet: aliceAddress,
-          amount: 500,
-          token: SIGNER_TOKEN_ADDR,
-        },
-        sender: {
-          wallet: tradeWallet,
-          amount: 500,
-          token: SENDER_TOKEN_ADDR,
-        },
-      })
-
-      order.signature = emptySignature
-
-      await reverted(
-        delegate.provideOrder(order, { from: notOwner }),
-        'MUST_BE_SIGNED_OR_SENT_BY_SIGNER'
-      )
-    })
-
-    it('Should fail if sender token is not ERC20', async () => {
+    it('test if a rule does not exist', async () => {
       const order = await signOrder(
         createOrder({
           signer: {
-            wallet: aliceAddress,
-            amount: 500,
-            token: SIGNER_TOKEN_ADDR,
-          },
-          sender: {
-            wallet: tradeWallet,
-            amount: 500,
-            token: SENDER_TOKEN_ADDR,
-            kind: '0x80ac58cd',
-          },
-        }),
-        aliceSigner,
-        swapAddress
-      )
-
-      await reverted(
-        delegate.provideOrder(order, {
-          from: aliceAddress,
-        }),
-        'SENDER_KIND_MUST_BE_ERC20'
-      )
-    })
-
-    it('Should fail if signer token is not ERC20', async () => {
-      const order = await signOrder(
-        createOrder({
-          signer: {
-            wallet: aliceAddress,
-            amount: 500,
-            token: SIGNER_TOKEN_ADDR,
-            kind: '0x80ac58cd',
-          },
-          sender: {
-            wallet: tradeWallet,
-            amount: 500,
-            token: SENDER_TOKEN_ADDR,
-          },
-        }),
-        aliceSigner,
-        swapAddress
-      )
-
-      await reverted(
-        delegate.provideOrder(order, {
-          from: aliceAddress,
-        }),
-        'SIGNER_KIND_MUST_BE_ERC20'
-      )
-    })
-
-    it('Should fail if the sender wallet is not the tradeWallet', async () => {
-      const order = await signOrder(
-        createOrder({
-          signer: {
-            wallet: aliceAddress,
-            amount: 500,
-            token: SIGNER_TOKEN_ADDR,
-          },
-          sender: {
             wallet: notOwner,
-            amount: 500,
-            token: SENDER_TOKEN_ADDR,
-          },
-        }),
-        aliceSigner,
-        swapAddress
-      )
-
-      await reverted(
-        delegate.provideOrder(order, {
-          from: aliceAddress,
-        }),
-        'SENDER_WALLET_INVALID'
-      )
-    })
-
-    it('Should fail if there are no rules for the given token pair', async () => {
-      const order = await signOrder(
-        createOrder({
-          signer: {
-            wallet: aliceAddress,
-            amount: 500,
-            token: SENDER_TOKEN_ADDR,
+            amount: 555,
+            token: SENDER_TOKEN,
           },
           sender: {
             wallet: tradeWallet,
-            amount: 500,
-            token: SIGNER_TOKEN_ADDR,
+            amount: 999,
+            token: SIGNER_TOKEN,
           },
         }),
-        aliceSigner,
+        notOwnerSigner,
         swapAddress
       )
 
       await reverted(
         delegate.provideOrder(order, {
-          from: aliceAddress,
+          from: notOwner,
         }),
         'TOKEN_PAIR_INACTIVE'
       )
     })
 
-    it('Should accept an order that partially fills the first rule', async () => {
-      // the first rule is SENDER_TOKEN 2002, SIGNER_TOKEN 286 -> this is 1:7
+    it('test if an order exceeds maximum amount', async () => {
+      await delegate.setRule(
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
+        PRICE_COEF,
+        EXP
+      )
+
       const order = await signOrder(
         createOrder({
           signer: {
-            wallet: aliceAddress,
+            wallet: notOwner,
+            amount: 555,
+            token: SIGNER_TOKEN,
+          },
+          sender: {
+            wallet: tradeWallet,
+            amount: MAX_SENDER_AMOUNT + 1,
+            token: SENDER_TOKEN,
+          },
+        }),
+        notOwnerSigner,
+        swapAddress
+      )
+
+      await reverted(
+        delegate.provideOrder(order, {
+          from: notOwner,
+        }),
+        'AMOUNT_EXCEEDS_MAX'
+      )
+    })
+
+    it('test if the sender is not empty and not the trade wallet', async () => {
+      await delegate.setRule(
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
+        PRICE_COEF,
+        EXP
+      )
+
+      const signerAmount = 100
+      const senderAmount = Math.floor((signerAmount * 10 ** EXP) / PRICE_COEF)
+
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: notOwner,
+            amount: signerAmount,
+            token: SIGNER_TOKEN,
+          },
+          sender: {
+            wallet: notTradeWallet,
+            amount: senderAmount,
+            token: SENDER_TOKEN,
+          },
+        }),
+        notOwnerSigner,
+        swapAddress
+      )
+
+      await reverted(
+        delegate.provideOrder(order, {
+          from: notOwner,
+        }),
+        'SENDER_WALLET_INVALID'
+      )
+    })
+
+    it('test if order is not priced according to the rule', async () => {
+      await delegate.setRule(
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
+        PRICE_COEF,
+        EXP
+      )
+
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            amount: 30,
+            token: SIGNER_TOKEN,
+          },
+          sender: {
+            wallet: tradeWallet,
+            amount: MAX_SENDER_AMOUNT,
+            token: SENDER_TOKEN,
+          },
+        }),
+        notOwnerSigner,
+        swapAddress
+      )
+
+      await reverted(
+        delegate.provideOrder(order, {
+          from: notOwner,
+        })
+      )
+    })
+
+    it('test if order sender and signer amount are not matching', async () => {
+      await delegate.setRule(
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
+        PRICE_COEF,
+        EXP
+      )
+
+      const signerAmount = 100
+      const senderAmount = Math.floor((signerAmount * 10 ** EXP) / PRICE_COEF)
+
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: notOwner,
+            amount: signerAmount - 100, //Fudge the price
+            token: SIGNER_TOKEN,
+          },
+          sender: {
+            wallet: tradeWallet,
+            amount: senderAmount,
+            token: SENDER_TOKEN,
+          },
+        }),
+        notOwnerSigner,
+        swapAddress
+      )
+
+      await reverted(
+        //mock swapContract
+        //test rule decrement
+        delegate.provideOrder(order, {
+          from: notOwner,
+        }),
+        'PRICE_INVALID'
+      )
+    })
+
+    it('test if order signer kind is not an ERC20 interface id', async () => {
+      await delegate.setRule(
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
+        PRICE_COEF,
+        EXP
+      )
+
+      const signerAmount = 100
+      const senderAmount = Math.floor((signerAmount * 10 ** EXP) / PRICE_COEF)
+
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: notOwner,
+            amount: signerAmount,
+            token: SIGNER_TOKEN,
+            kind: '0x80ac58cd',
+          },
+          sender: {
+            wallet: tradeWallet,
+            amount: senderAmount,
+            token: SENDER_TOKEN,
+          },
+        }),
+        notOwnerSigner,
+        swapAddress
+      )
+
+      await reverted(
+        //mock swapContract
+        //test rule decrement
+        delegate.provideOrder(order, {
+          from: notOwner,
+        }),
+        'SIGNER_KIND_MUST_BE_ERC20'
+      )
+    })
+
+    it('test if order sender kind is not an ERC20 interface id', async () => {
+      await delegate.setRule(
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
+        PRICE_COEF,
+        EXP
+      )
+
+      const signerAmount = 100
+      const senderAmount = Math.floor((signerAmount * 10 ** EXP) / PRICE_COEF)
+
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: notOwner,
+            amount: signerAmount,
+            token: SIGNER_TOKEN,
+          },
+          sender: {
+            wallet: tradeWallet,
+            amount: senderAmount,
+            token: SENDER_TOKEN,
+            kind: '0x80ac58cd',
+          },
+        }),
+        notOwnerSigner,
+        swapAddress
+      )
+
+      await reverted(
+        //mock swapContract
+        //test rule decrement
+        delegate.provideOrder(order, {
+          from: notOwner,
+        }),
+        'SENDER_KIND_MUST_BE_ERC20'
+      )
+    })
+
+    it('test a successful transaction with integer values', async () => {
+      await delegate.setRule(
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
+        100,
+        EXP
+      )
+
+      const ruleBefore = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
+
+      const signerAmount = 100
+
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: notOwner,
+            amount: signerAmount,
+            token: SIGNER_TOKEN,
+          },
+          sender: {
+            wallet: tradeWallet,
             amount: 100,
-            token: SIGNER_TOKEN_ADDR,
-          },
-          sender: {
-            wallet: tradeWallet,
-            amount: 700,
-            token: SENDER_TOKEN_ADDR,
+            token: SENDER_TOKEN,
           },
         }),
-        aliceSigner,
+        notOwnerSigner,
         swapAddress
       )
 
-      const tx = await delegate.provideOrder(order, {
-        from: aliceAddress,
-      })
-      emitted(tx, 'FillRule', e => {
-        return (
-          e.owner === owner &&
-          e.ruleID.toNumber() === 3 &&
-          e.senderAmount.toNumber() === 700 &&
-          e.signerAmount.toNumber() === 100
-        )
-      })
-
-      // now check the rule is updated
-      const rule = await delegate.rules.call(3)
-      equal(
-        rule['senderAmount'].toNumber(),
-        2002 - 700,
-        'sender amount incorrectly set'
-      )
-      equal(
-        rule['signerAmount'].toNumber(),
-        286 - 100,
-        'signer amount incorrectly set'
+      await passes(
+        //mock swapContract
+        //test rule decrement
+        delegate.provideOrder(order, {
+          from: notOwner,
+        })
       )
 
-      // check the linked list is still in tact
-      await checkLinkedList(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, [
-        3,
+      const ruleAfter = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
+      equal(
+        ruleAfter[0].toNumber(),
+        ruleBefore[0].toNumber() - signerAmount,
+        "rule's max sender amount was not decremented"
+      )
+
+      //check if swap() was called
+      const invocationCount = await mockSwap.invocationCountForMethod.call(
+        swapFunction
+      )
+      equal(
+        invocationCount,
         1,
+        'swap function was not called the expected number of times'
+      )
+    })
+
+    it('test a successful transaction with trade wallet as sender', async () => {
+      await delegate.setRule(
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
+        100,
+        EXP
+      )
+
+      const ruleBefore = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
+
+      const signerAmount = 100
+
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: notOwner,
+            amount: signerAmount,
+            token: SIGNER_TOKEN,
+          },
+          sender: {
+            wallet: tradeWallet,
+            amount: 100,
+            token: SENDER_TOKEN,
+          },
+        }),
+        notOwnerSigner,
+        swapAddress
+      )
+
+      //mock swapContract
+      //test rule decrement
+      const tx = await delegate.provideOrder(order, {
+        from: notOwner,
+      })
+
+      emitted(tx, 'ProvideOrder')
+
+      const ruleAfter = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
+      equal(
+        ruleAfter[0].toNumber(),
+        ruleBefore[0].toNumber() - signerAmount,
+        "rule's max delegate amount was not decremented"
+      )
+
+      //check if swap() was called
+      const invocationCount = await mockSwap.invocationCountForMethod.call(
+        swapFunction
+      )
+      equal(
+        invocationCount,
+        1,
+        'swap function was not called the expected number of times'
+      )
+    })
+
+    it('test a successful transaction with decimal values', async () => {
+      await delegate.setRule(
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
+        PRICE_COEF,
+        EXP
+      )
+
+      const ruleBefore = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
+
+      const signerAmount = 100
+      const senderAmount = Math.floor((signerAmount * 10 ** EXP) / PRICE_COEF)
+
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: notOwner,
+            amount: signerAmount,
+            token: SIGNER_TOKEN,
+          },
+          sender: {
+            wallet: tradeWallet,
+            amount: senderAmount,
+            token: SENDER_TOKEN,
+          },
+        }),
+        notOwnerSigner,
+        swapAddress
+      )
+
+      const tx = await delegate.provideOrder(order, {
+        from: notOwner,
+      })
+
+      emitted(tx, 'ProvideOrder')
+
+      const ruleAfter = await delegate.rules.call(SENDER_TOKEN, SIGNER_TOKEN)
+      equal(
+        ruleAfter[0].toNumber(),
+        ruleBefore[0].toNumber() - senderAmount,
+        "rule's max delegate amount was not decremented"
+      )
+    })
+
+    it('test a getting a signerSideQuote and passing it into provideOrder', async () => {
+      await delegate.setRule(
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
+        PRICE_COEF,
+        EXP
+      )
+
+      const senderAmount = 123
+      const signerQuote = await delegate.getSignerSideQuote.call(
+        senderAmount,
+        SENDER_TOKEN,
+        SIGNER_TOKEN
+      )
+
+      const signerAmount = signerQuote.toNumber()
+
+      // put that quote into an order
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: notOwner,
+            amount: signerAmount,
+            token: SIGNER_TOKEN,
+          },
+          sender: {
+            wallet: tradeWallet,
+            amount: senderAmount,
+            token: SENDER_TOKEN,
+          },
+        }),
+        notOwnerSigner,
+        swapAddress
+      )
+
+      const tx = await delegate.provideOrder(order, {
+        from: notOwner,
+      })
+
+      passes(tx)
+    })
+
+    it('test a getting a senderSideQuote and passing it into provideOrder', async () => {
+      await delegate.setRule(
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
+        PRICE_COEF,
+        EXP
+      )
+
+      const signerAmount = 8425
+      const senderQuote = await delegate.getSenderSideQuote.call(
+        signerAmount,
+        SIGNER_TOKEN,
+        SENDER_TOKEN
+      )
+
+      const senderAmount = senderQuote.toNumber()
+
+      // put that quote into an order
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: notOwner,
+            amount: signerAmount,
+            token: SIGNER_TOKEN,
+          },
+          sender: {
+            wallet: tradeWallet,
+            amount: senderAmount,
+            token: SENDER_TOKEN,
+          },
+        }),
+        notOwnerSigner,
+        swapAddress
+      )
+
+      const tx = await delegate.provideOrder(order, {
+        from: notOwner,
+      })
+
+      passes(tx)
+    })
+
+    it('test a getting a getMaxQuote and passing it into provideOrder', async () => {
+      await delegate.setRule(
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
+        PRICE_COEF,
+        EXP
+      )
+
+      const val = await delegate.getMaxQuote.call(SENDER_TOKEN, SIGNER_TOKEN)
+
+      const senderAmount = val[0].toNumber()
+      const signerAmount = val[1].toNumber()
+
+      // put that quote into an order
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: notOwner,
+            amount: signerAmount,
+            token: SIGNER_TOKEN,
+          },
+          sender: {
+            wallet: tradeWallet,
+            amount: senderAmount,
+            token: SENDER_TOKEN,
+          },
+        }),
+        notOwnerSigner,
+        swapAddress
+      )
+
+      const tx = await delegate.provideOrder(order, {
+        from: notOwner,
+      })
+
+      passes(tx)
+    })
+
+    it('test the signer trying to trade just 1 unit over the rule price - fails', async () => {
+      // 1 SenderToken for 0.005 SignerToken => 200 SenderToken for 1 SignerToken
+      await delegate.setRule(
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
         5,
-        2,
-        4,
-      ])
-
-      // check swap was called
-      const invocationCount = await mockSwap.invocationCountForMethod.call(
-        swap_swap
+        3
       )
-      equal(invocationCount, 1, 'swap function was not called')
-    })
 
-    it('Should accept an order that fills multiple rules - rules deleted', async () => {
-      // fills first 2 rules and half of 3rd: 2002+300+(0.5*1664) and 286+50+(0.5*320)
+      const senderAmount = 201 // 1 unit more than the delegate wants to send
+      const signerAmount = 1
+
       const order = await signOrder(
         createOrder({
           signer: {
-            wallet: aliceAddress,
-            amount: 496,
-            token: SIGNER_TOKEN_ADDR,
+            wallet: notOwner,
+            amount: signerAmount,
+            token: SIGNER_TOKEN,
           },
           sender: {
             wallet: tradeWallet,
-            amount: 3134,
-            token: SENDER_TOKEN_ADDR,
+            amount: senderAmount,
+            token: SENDER_TOKEN,
           },
         }),
-        aliceSigner,
+        notOwnerSigner,
         swapAddress
       )
 
-      const tx = await delegate.provideOrder(order, {
-        from: aliceAddress,
-      })
-      // fill and delete for rule 3
-      emitted(tx, 'FillRule', e => {
-        return (
-          e.owner === owner &&
-          e.ruleID.toNumber() === 3 &&
-          e.senderAmount.toNumber() === 2002 &&
-          e.signerAmount.toNumber() === 286
-        )
-      })
-      emitted(tx, 'DeleteRule', e => {
-        return e.owner === owner && e.ruleID.toNumber() === 3
-      })
-
-      // fill and delete for rule 1
-      emitted(tx, 'FillRule', e => {
-        return (
-          e.owner === owner &&
-          e.ruleID.toNumber() === 1 &&
-          e.senderAmount.toNumber() === 300 &&
-          e.signerAmount.toNumber() === 50
-        )
-      })
-      emitted(tx, 'DeleteRule', e => {
-        return e.owner === owner && e.ruleID.toNumber() === 1
-      })
-
-      // partial fill for rule 5
-      emitted(tx, 'FillRule', e => {
-        return (
-          e.owner === owner &&
-          e.ruleID.toNumber() === 5 &&
-          e.senderAmount.toNumber() === 832 &&
-          e.signerAmount.toNumber() === 160
-        )
-      })
-
-      // check the linked list - 3 and 1 now gone
-      await checkLinkedList(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, [5, 2, 4])
-
-      // check swap was called
-      const invocationCount = await mockSwap.invocationCountForMethod.call(
-        swap_swap
-      )
-      equal(invocationCount, 1, 'swap function was not called')
-    })
-
-    it('Should reject an order thats priced to the signers advantage', async () => {
-      // same amounts as the previous test, but 1 more sender token
-      const order = await signOrder(
-        createOrder({
-          signer: {
-            wallet: aliceAddress,
-            amount: 496,
-            token: SIGNER_TOKEN_ADDR,
-          },
-          sender: {
-            wallet: tradeWallet,
-            amount: 3135,
-            token: SENDER_TOKEN_ADDR,
-          },
-        }),
-        aliceSigner,
-        swapAddress
-      )
-
+      // check the delegate doesnt allow this
       await reverted(
         delegate.provideOrder(order, {
-          from: aliceAddress,
+          from: notOwner,
         }),
         'PRICE_INVALID'
       )
     })
 
-    it('Should accept an order thats priced to the delegates advantage', async () => {
-      // again same amount as the test 2 above, but 1 more sender token
+    it('test the signer trying to trade just 1 unit less than the rule price - passes', async () => {
+      // 1 SenderToken for 0.005 SignerToken => 200 SenderToken for 1 SignerToken
+      await delegate.setRule(
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
+        5,
+        3
+      )
+
+      const senderAmount = 199 // 1 unit less than the delegate rule
+      const signerAmount = 1
+
       const order = await signOrder(
         createOrder({
           signer: {
-            wallet: aliceAddress,
-            amount: 497,
-            token: SIGNER_TOKEN_ADDR,
+            wallet: notOwner,
+            amount: signerAmount,
+            token: SIGNER_TOKEN,
           },
           sender: {
             wallet: tradeWallet,
-            amount: 3134,
-            token: SENDER_TOKEN_ADDR,
+            amount: senderAmount,
+            token: SENDER_TOKEN,
           },
         }),
-        aliceSigner,
+        notOwnerSigner,
         swapAddress
       )
 
+      // check the delegate allows this
       const tx = await delegate.provideOrder(order, {
-        from: aliceAddress,
+        from: notOwner,
       })
 
-      // we know rules 3 and 1 will have filled in entirety
-      // the partial fill for rule 5 sticks to the rule ratio
-      // the extra token sent is not included in the rule fill
-      emitted(tx, 'FillRule', e => {
-        return (
-          e.owner === owner &&
-          e.ruleID.toNumber() === 5 &&
-          e.senderAmount.toNumber() === 832 &&
-          e.signerAmount.toNumber() === 160
-        )
-      })
+      passes(tx)
     })
 
-    it('Should reject an order that fills the sender but not signer of a rule', async () => {
-      // fills the first rule's sender amount but not signer amount
+    it('test the signer trying to trade the exact amount of rule price - passes', async () => {
+      // 1 SenderToken for 0.005 SignerToken => 200 SenderToken for 1 SignerToken
+      await delegate.setRule(
+        SENDER_TOKEN,
+        SIGNER_TOKEN,
+        MAX_SENDER_AMOUNT,
+        5,
+        3
+      )
+
+      const senderAmount = 200
+      const signerAmount = 1
+
       const order = await signOrder(
         createOrder({
           signer: {
-            wallet: aliceAddress,
-            amount: 285,
-            token: SIGNER_TOKEN_ADDR,
+            wallet: notOwner,
+            amount: signerAmount,
+            token: SIGNER_TOKEN,
           },
           sender: {
             wallet: tradeWallet,
-            amount: 2002,
-            token: SENDER_TOKEN_ADDR,
+            amount: senderAmount,
+            token: SENDER_TOKEN,
           },
         }),
-        aliceSigner,
+        notOwnerSigner,
         swapAddress
       )
 
-      await reverted(
-        delegate.provideOrder(order, {
-          from: aliceAddress,
-        }),
-        'PRICE_INVALID'
-      )
-    })
-  })
+      // check the delegate allows this
+      const tx = await delegate.provideOrder(order, {
+        from: notOwner,
+      })
 
-  describe('Test createRuleAndSetIntent()', async () => {
-    it('Test calling createRuleAndSetIntent with transfer error', async () => {
-      const stakeAmount = 250
-
-      await mockStakingToken.givenMethodReturnUint(
-        mockToken_allowance,
-        stakeAmount
-      )
-      //mock unsuccessful transfer
-      await mockStakingToken.givenMethodReturnBool(
-        mockToken_transferFrom,
-        false
-      )
-
-      //mock the score/staked amount to be transferred
-      await mockIndexer.givenMethodReturnUint(mockIndexer_getStakedAmount, 0)
-
-      await reverted(
-        delegate.createRuleAndSetIntent(
-          SENDER_TOKEN_ADDR,
-          SIGNER_TOKEN_ADDR,
-          200,
-          200,
-          stakeAmount
-        ),
-        'STAKING_TRANSFER_FAILED'
-      )
-    })
-
-    it('Test successfully calling createRuleAndSetIntent with 0 staked amount', async () => {
-      const stakeAmount = 0
-
-      await mockStakingToken.givenMethodReturnBool(mockToken_approve, true)
-
-      //mock the score/staked amount to be transferred
-      await mockIndexer.givenMethodReturnUint(mockIndexer_getStakedAmount, 0)
-
-      await passes(
-        delegate.createRuleAndSetIntent(
-          SENDER_TOKEN_ADDR,
-          SIGNER_TOKEN_ADDR,
-          200,
-          200,
-          stakeAmount
-        )
-      )
-    })
-
-    it('Test successfully calling createRuleAndSetIntent with staked amount', async () => {
-      const stakeAmount = 250
-
-      await mockStakingToken.givenMethodReturnUint(
-        mockToken_allowance,
-        stakeAmount
-      )
-      await mockStakingToken.givenMethodReturnBool(mockToken_transferFrom, true)
-      await mockStakingToken.givenMethodReturnBool(mockToken_approve, true)
-
-      //mock the score/staked amount to be transferred
-      await mockIndexer.givenMethodReturnUint(mockIndexer_getStakedAmount, 250)
-
-      await passes(
-        delegate.createRuleAndSetIntent(
-          SENDER_TOKEN_ADDR,
-          SIGNER_TOKEN_ADDR,
-          200,
-          200,
-          stakeAmount
-        )
-      )
-    })
-
-    it('Test unsuccessfully calling createRuleAndSetIntent with decreased staked amount', async () => {
-      const stakeAmount = 100
-
-      await mockStakingToken.givenMethodReturnUint(
-        mockToken_allowance,
-        stakeAmount
-      )
-      await mockStakingToken.givenMethodReturnBool(mockToken_transferFrom, true)
-
-      const transferToDelegateOwner = mockFungibleTokenTemplate.contract.methods
-        .transfer(accounts[0], 150)
-        .encodeABI()
-
-      await mockStakingToken.givenCalldataReturnBool(
-        transferToDelegateOwner,
-        false
-      )
-
-      await mockStakingToken.givenMethodReturnBool(mockToken_approve, true)
-
-      // mock the score/staked amount to be transferred
-      await mockIndexer.givenMethodReturnUint(mockIndexer_getStakedAmount, 250)
-
-      await reverted(
-        delegate.createRuleAndSetIntent(
-          SENDER_TOKEN_ADDR,
-          SIGNER_TOKEN_ADDR,
-          200,
-          200,
-          stakeAmount
-        ),
-        'STAKING_RETURN_FAILED.'
-      )
-    })
-  })
-
-  describe('Test deleteRuleAndUnsetIntent()', async () => {
-    beforeEach(async () => {
-      // add a rule with ID 1
-      await delegate.createRule(SENDER_TOKEN_ADDR, SIGNER_TOKEN_ADDR, 300, 50)
-    })
-
-    it('Test calling deleteRuleAndUnsetIntent() with transfer error', async () => {
-      const mockScore = 1000
-
-      //mock the score/staked amount to be transferred
-      await mockIndexer.givenMethodReturnUint(
-        mockIndexer_getStakedAmount,
-        mockScore
-      )
-
-      //mock a failed transfer
-      await mockStakingToken.givenMethodReturnBool(mockToken_transfer, false)
-
-      await reverted(
-        delegate.deleteRuleAndUnsetIntent(1),
-        'STAKING_RETURN_FAILED'
-      )
-    })
-
-    it('Test successfully calling deleteRuleAndUnsetIntent() with 0 staked amount', async () => {
-      const mockScore = 0
-
-      //mock the score/staked amount to be transferred
-      await mockIndexer.givenMethodReturnUint(
-        mockIndexer_getStakedAmount,
-        mockScore
-      )
-
-      await passes(delegate.deleteRuleAndUnsetIntent(1))
-    })
-
-    it('Test successfully calling deleteRuleAndUnsetIntent() with staked amount', async () => {
-      const mockScore = 1000
-
-      //mock the score/staked amount to be transferred
-      await mockIndexer.givenMethodReturnUint(
-        mockIndexer_getStakedAmount,
-        mockScore
-      )
-
-      //mock a successful transfer
-      await mockStakingToken.givenMethodReturnBool(mockToken_transfer, true)
-
-      await passes(delegate.deleteRuleAndUnsetIntent(1))
+      passes(tx)
     })
   })
 })

@@ -527,26 +527,14 @@ contract('Wrapper', async accounts => {
   describe('Test provideDelegateOrder()', async () => {
     before('Setup delegate rules', async () => {
       // Delegate will trade up to 10,000 DAI for WETH, at 200 DAI/WETH
-      await delegate.createRule(
-        tokenDAI.address,
-        tokenWETH.address,
-        10000,
-        50,
-        {
-          from: delegateOwner,
-        }
-      )
+      await delegate.setRule(tokenDAI.address, tokenWETH.address, 10000, 5, 3, {
+        from: delegateOwner,
+      })
 
       // Delegate will trade up to 100 WETH for DAI, at 0.005 WETH/DAI
-      await delegate.createRule(
-        tokenWETH.address,
-        tokenDAI.address,
-        100,
-        20000,
-        {
-          from: delegateOwner,
-        }
-      )
+      await delegate.setRule(tokenWETH.address, tokenDAI.address, 100, 200, 0, {
+        from: delegateOwner,
+      })
 
       // Give the delegate owner DAI
       await tokenDAI.mint(delegateOwner, 10000)

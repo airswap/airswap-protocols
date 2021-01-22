@@ -20,14 +20,11 @@ pragma experimental ABIEncoderV2;
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "@airswap/delegate/contracts/interfaces/IDelegate.sol";
 import "@airswap/tokens/contracts/interfaces/IWETH.sol";
-import "@airswap/types/contracts/BytesManipulator.sol";
 
 /**
  * @title Wrapper: Send and receive ether for WETH trades
  */
 contract Wrapper {
-  using BytesManipulator for bytes;
-
   // The Swap contract to settle trades
   ISwap public swapContract;
 
@@ -72,27 +69,14 @@ contract Wrapper {
     // The signature will be explicitly checked in Swap.
     require(order.signature.v != 0, "SIGNATURE_MUST_BE_SENT");
 
-    // copy struct into memory for internal function call
-    Types.Party memory orderSender =
-      Types.Party({
-        kind: order.sender.kind,
-        wallet: order.sender.wallet,
-        token: order.sender.token,
-        data: order.sender.data
-      });
-
     // Wraps ETH to WETH when the sender provides ETH and the order is WETH
-    _wrapEther(orderSender);
+    _wrapEther(order.sender);
 
     // Perform the swap.
     swapContract.swap(order);
 
     // Unwraps WETH to ETH when the sender receives WETH
-    _unwrapEther(
-      order.sender.wallet,
-      order.signer.token,
-      order.signer.data.getUint256(0)
-    );
+    _unwrapEther(order.sender.wallet, order.signer.token, order.signer.amount);
   }
 
   /**
@@ -111,27 +95,14 @@ contract Wrapper {
     // The signature will be explicitly checked in Swap.
     require(order.signature.v != 0, "SIGNATURE_MUST_BE_SENT");
 
-    // copy struct into memory for internal function call
-    Types.Party memory orderSigner =
-      Types.Party({
-        kind: order.signer.kind,
-        wallet: order.signer.wallet,
-        token: order.signer.token,
-        data: order.signer.data
-      });
-
     // Wraps ETH to WETH when the signer provides ETH and the order is WETH
-    _wrapEther(orderSigner);
+    _wrapEther(order.signer);
 
     // Provide the order to the Delegate.
     delegate.provideOrder(order);
 
     // Unwraps WETH to ETH when the signer receives WETH
-    _unwrapEther(
-      order.signer.wallet,
-      order.sender.token,
-      order.sender.data.getUint256(0)
-    );
+    _unwrapEther(order.signer.wallet, order.sender.token, order.sender.amount);
   }
 
   /**
@@ -139,18 +110,17 @@ contract Wrapper {
    * @param party Types.Party The side of the trade that may need wrapping
    */
   function _wrapEther(Types.Party memory party) internal {
-    uint256 amount = party.data.getUint256(0);
     // Check whether ether needs wrapping
     if (party.token == address(wethContract)) {
       // Ensure message value is param.
-      require(amount == msg.value, "VALUE_MUST_BE_SENT");
+      require(party.amount == msg.value, "VALUE_MUST_BE_SENT");
 
       // Wrap (deposit) the ether.
       wethContract.deposit.value(msg.value)();
 
       // Transfer the WETH from the wrapper to party.
       // Return value not checked - WETH throws on error and does not return false
-      wethContract.transfer(party.wallet, amount);
+      wethContract.transfer(party.wallet, party.amount);
     } else {
       // Ensure no unexpected ether is sent.
       require(msg.value == 0, "VALUE_MUST_BE_ZERO");
