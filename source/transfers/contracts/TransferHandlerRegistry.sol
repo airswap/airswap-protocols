@@ -27,6 +27,9 @@ contract TransferHandlerRegistry is Ownable {
   // Mapping of bytes4 to contract interface type
   mapping(bytes4 => ITransferHandler) public transferHandlers;
 
+  /**
+   * @notice Contract Events
+   */
   event AddTransferHandler(bytes4 kind, address contractAddress);
 
   /**

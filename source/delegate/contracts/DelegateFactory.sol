@@ -32,7 +32,7 @@ contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
   bytes2 public protocol;
 
   /**
-   * @notice Create a new Delegate contract
+   * @notice Create a new DelegateFactory contract
    * @dev swapContract is unable to be changed after the factory sets it
    * @param factorySwapContract address Swap contract the delegate will deploy with
    * @param factoryIndexerContract address Indexer contract the delegate will deploy with

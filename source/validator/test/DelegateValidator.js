@@ -116,7 +116,7 @@ contract('DelegateValidator', async accounts => {
     })
   })
   describe('Minting...', async () => {
-    it('Mints 1000 AST for Alice Tradee Wallet', async () => {
+    it('Mints 1000 AST for Alice Trade Wallet', async () => {
       emitted(await tokenAST.mint(aliceTradeWallet, 1000), 'Transfer')
       ok(
         await balances(aliceTradeWallet, [
