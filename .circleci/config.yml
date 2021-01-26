@@ -150,6 +150,28 @@ jobs:
             yarn ganache > /dev/null &
             cd source/wrapper && yarn test
 
+  locker_tests:
+    <<: *container_config
+    steps:
+      - attach_workspace:
+          at: *working_directory
+      - run:
+          name: Run Tests
+          command: |
+            yarn ganache > /dev/null &
+            cd source/locker && yarn test
+
+  pool_tests:
+    <<: *container_config
+    steps:
+      - attach_workspace:
+          at: *working_directory
+      - run:
+          name: Run Tests
+          command: |
+            yarn ganache > /dev/null &
+            cd source/pool && yarn test
+
   merkle_tests:
     <<: *container_config
     steps:
@@ -234,7 +256,7 @@ jobs:
           command: |
             cd source
             ### ADD FOLDERS HERE TO PROCESS ###
-            for file in indexer balances delegate swap light tokens transfers types validator wrapper
+            for file in indexer balances delegate swap light locker pool tokens transfers types validator wrapper
             do
               cd $file
               NPM_NAME=$(node -p "require('./package.json').name")
@@ -303,6 +325,14 @@ workflows:
           context: Development
           requires:
             - setup
+      - locker_tests:
+          context: Development
+          requires:
+            - setup
+      - pool_tests:
+          context: Development
+          requires:
+            - setup
       - merkle_tests:
           context: Development
           requires:
@@ -330,6 +360,8 @@ workflows:
             - transfers_tests
             - types_tests
             - wrapper_tests
+            - locker_tests
+            - pool_tests
             - merkle_tests
             - metadata_tests
             - protocols_tests

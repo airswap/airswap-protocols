@@ -1,7 +1,7 @@
 {
   "name": "@airswap/locker",
-  "version": "0.0.1",
-  "description": "Locked token balances",
+  "version": "1.1.0",
+  "description": "Locked token balances with throttled withdrawals",
   "contributors": [
     "Don Mosites <mosites@gmail.com>"
   ],
