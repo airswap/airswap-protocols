@@ -33,6 +33,7 @@ import {
   UnsignedLightOrder,
   EIP712Light,
   OrderParty,
+  LightSignature,
 } from '@airswap/types'
 import { getOrderHash } from './hashes'
 import { lowerCaseAddresses } from '..'
@@ -254,7 +255,7 @@ export async function createLightSignature(
   privateKey: string,
   swapContract: string,
   chainId: number
-): Promise<string> {
+): Promise<LightSignature> {
   const sig = sigUtil.signTypedData_v4(ethUtil.toBuffer(privateKey), {
     data: {
       types: EIP712Light,
@@ -269,16 +270,19 @@ export async function createLightSignature(
     },
   })
 
-  const v = ethers.utils.splitSignature(sig).v
-  return `${sig.slice(0, 130)}${(v === 0 || v === 1 ? v + 27 : v).toString(16)}`
+  const { r, s, v } = ethers.utils.splitSignature(sig)
+  return { r, s, v: String(v) }
 }
 
 export function getSignerFromLightSignature(
   order: UnsignedLightOrder,
   swapContract: string,
   chainId: number,
-  signature: string
+  v: string,
+  r: string,
+  s: string
 ) {
+  const sig = `${r}${s.slice(2)}${ethers.BigNumber.from(v).toHexString()}`
   return sigUtil.recoverTypedSignature_v4({
     data: {
       types: EIP712Light,
@@ -291,6 +295,6 @@ export function getSignerFromLightSignature(
       primaryType: 'LightOrder',
       message: order,
     },
-    sig: signature,
+    sig,
   })
 }

@@ -11,7 +11,11 @@ const Light = artifacts.require('Light')
 const IERC20 = artifacts.require('IERC20')
 const MockContract = artifacts.require('MockContract')
 
-const emptySignature = web3.utils.randomHex(65)
+const emptySignature = {
+  r: web3.utils.randomHex(32),
+  s: web3.utils.randomHex(32),
+  v: 0,
+}
 const ERC20Interface = new ethers.utils.Interface(IERC20.abi)
 const encodeERC20Call = (name, args) =>
   ERC20Interface.encodeFunctionData(name, args)
@@ -24,7 +28,9 @@ function createOrder({
   senderToken = ADDRESS_ZERO,
   signerAmount = 0,
   senderAmount = 0,
-  signature = emptySignature,
+  v = emptySignature.v,
+  r = emptySignature.r,
+  s = emptySignature.s,
 }) {
   return {
     expiry,
@@ -34,16 +40,26 @@ function createOrder({
     senderToken,
     signerAmount,
     senderAmount,
-    signature,
+    v,
+    r,
+    s,
   }
 }
 
 const signOrder = async (order, account, swapContract) => {
   const privKey = getPrivateKeyFromGanacheAccount(account)
-  const signature = await createLightSignature(order, privKey, swapContract, 1)
+  const { v, r, s } = await createLightSignature(
+    order,
+    privKey,
+    swapContract,
+    1
+  )
+
   return {
     ...order,
-    signature,
+    v,
+    r,
+    s,
   }
 }
 
@@ -55,7 +71,9 @@ function orderToParams(order) {
     order.signerAmount,
     order.senderToken,
     order.senderAmount,
-    order.signature,
+    order.v,
+    order.r,
+    order.s,
   ]
 }
 
