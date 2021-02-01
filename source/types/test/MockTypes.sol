@@ -1,7 +1,7 @@
-pragma solidity 0.5.16;
+pragma solidity ^0.5.0;
 pragma experimental ABIEncoderV2;
 
-import "./Types.sol";
+import "../contracts/Types.sol";
 
 /**
  * @notice Contract is a wrapper for Types library

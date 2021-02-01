@@ -21,46 +21,49 @@ import "@airswap/types/contracts/Types.sol";
 
 interface IDelegate {
   struct Rule {
-    address senderToken;
-    address signerToken;
-    uint256 senderAmount;
-    uint256 signerAmount;
-    uint256 nextRuleID;
-    uint256 prevRuleID;
+    uint256 maxSenderAmount; // The maximum amount of ERC-20 token the delegate would send
+    uint256 priceCoef; // Number to be multiplied by 10^(-priceExp) - the price coefficient
+    uint256 priceExp; // Indicates location of the decimal priceCoef * 10^(-priceExp)
   }
 
-  event CreateRule(
+  event SetRule(
     address indexed owner,
-    uint256 indexed ruleID,
-    address senderToken,
-    address signerToken,
-    uint256 senderAmount,
-    uint256 signerAmount
+    address indexed senderToken,
+    address indexed signerToken,
+    uint256 maxSenderAmount,
+    uint256 priceCoef,
+    uint256 priceExp
   );
 
-  event DeleteRule(address indexed owner, uint256 indexed ruleID);
-
-  event FillRule(
+  event UnsetRule(
     address indexed owner,
-    uint256 indexed ruleID,
-    uint256 senderAmount,
-    uint256 signerAmount
+    address indexed senderToken,
+    address indexed signerToken
   );
 
-  function createRule(
+  event ProvideOrder(
+    address indexed owner,
+    address tradeWallet,
+    address indexed senderToken,
+    address indexed signerToken,
+    uint256 senderAmount,
+    uint256 priceCoef,
+    uint256 priceExp
+  );
+
+  function setRule(
     address senderToken,
     address signerToken,
-    uint256 senderAmount,
-    uint256 signerAmount
+    uint256 maxSenderAmount,
+    uint256 priceCoef,
+    uint256 priceExp
   ) external;
 
-  function deleteRule(uint256 ruleID) external;
+  function unsetRule(address senderToken, address signerToken) external;
 
   function provideOrder(Types.Order calldata order) external;
 
-  function rules(uint256) external view returns (Rule memory);
-
-  function firstRuleID(address, address) external view returns (uint256);
+  function rules(address, address) external view returns (Rule memory);
 
   function getSignerSideQuote(
     uint256 senderAmount,
@@ -78,11 +81,6 @@ interface IDelegate {
     external
     view
     returns (uint256 senderAmount, uint256 signerAmount);
-
-  function getRules(address senderToken, address signerToken)
-    external
-    view
-    returns (uint256[] memory senderAmounts, uint256[] memory signerAmounts);
 
   function owner() external view returns (address);
 
