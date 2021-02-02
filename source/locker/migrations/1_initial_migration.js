@@ -4,9 +4,9 @@ module.exports = (deployer, network) => {
   if (network == 'rinkeby' || network == 'mainnet') {
     const SECONDS_IN_DAY = 86400
     // Fill in these values prior to deploying
-    const LOCKING_TOKEN_ADDRESS = '0xcc1cbd4f67cceb7c001bd4adf98451237a193ff8'
-    const LOCKER_NAME = 'Locker'
-    const LOCKER_SYMBOL = 'LCK'
+    const LOCKING_TOKEN_ADDRESS = '0x27054b13b1b798b345b591a4d22e6562d47ea75a'
+    const LOCKER_NAME = 'Staked AST'
+    const LOCKER_SYMBOL = 'sAST'
     const LOCKER_DECIMALS = 4
     const THROTTLING_PERCENTAGE = 10
     const THROTTLING_DURATION = 7 * SECONDS_IN_DAY

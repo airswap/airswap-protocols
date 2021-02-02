@@ -26,7 +26,7 @@ module.exports = {
           'https://mainnet.infura.io/v3/' + process.env.INFURA_API_KEY
         ),
       // gas: 5898551,
-      gasPrice: 140e9, // CHECK THE CURRENT GASPRICE
+      gasPrice: 120e9, // CHECK THE CURRENT GASPRICE
       network_id: 1,
     },
     rinkeby: {
