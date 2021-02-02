@@ -47,22 +47,12 @@ contract Light is ILight {
         "LightOrder(",
         "uint256 nonce,",
         "uint256 expiry,",
-        "address senderWallet,",
+        "address signerWallet,",
         "address signerToken,",
         "uint256 signerAmount,",
+        "address senderWallet,",
         "address senderToken,",
         "uint256 senderAmount",
-        ")"
-      )
-    );
-
-  bytes32 public constant SIGNER_WALLET_TYPEHASH =
-    keccak256(
-      abi.encodePacked(
-        "SignerWallet(",
-        "uint256 nonce,",
-        "uint256 expiry",
-        "address signerWallet",
         ")"
       )
     );
@@ -80,7 +70,7 @@ contract Light is ILight {
   // Mapping of signer addresses to an optionally set minimum valid nonce
   mapping(address => uint256) public override signerMinimumNonce;
 
-  mapping(address => address) public signerWallet;
+  mapping(address => address) public authorized;
 
   constructor() public {
     uint256 currentChainId = getChainId();
@@ -108,6 +98,7 @@ contract Light is ILight {
   function swap(
     uint256 nonce,
     uint256 expiry,
+    address signerWallet,
     IERC20 signerToken,
     uint256 signerAmount,
     IERC20 senderToken,
@@ -125,32 +116,34 @@ contract Light is ILight {
       _getOrderHash(
         nonce,
         expiry,
-        msg.sender,
+        signerWallet,
         signerToken,
         signerAmount,
+        msg.sender,
         senderToken,
         senderAmount
       );
 
     // Recover the signer from the hash and signature.
     address signer = _getSigner(hashed, v, r, s);
-    address wallet = signerWallet[signer];
 
     // Ensure the nonce is above the minimum.
+    // TODO: should we check the wallet or signer noce?
     require(nonce >= signerMinimumNonce[signer], "NONCE_TOO_LOW");
 
     // Mark the nonce as used and ensure it hasn't been used before.
+    // TODO: should we check the wallet or signer noce?
     require(_markNonceAsUsed(signer, nonce), "NONCE_ALREADY_USED");
 
-    if (wallet == address(0)) {
-      wallet = signer;
+    if (signerWallet != signer) {
+      require(authorized[signerWallet] == signer, "UNAUTHORIZED");
     }
 
     // Transfer token from sender to signer.
-    senderToken.safeTransferFrom(msg.sender, wallet, senderAmount);
+    senderToken.safeTransferFrom(msg.sender, signerWallet, senderAmount);
 
     // Transfer token from signer to sender.
-    signerToken.safeTransferFrom(wallet, msg.sender, signerAmount);
+    signerToken.safeTransferFrom(signerWallet, msg.sender, signerAmount);
 
     emit Swap(
       nonce,
@@ -164,23 +157,12 @@ contract Light is ILight {
     );
   }
 
-  function authorize(
-    uint256 nonce,
-    uint256 expiry,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
-  ) external {
-    bytes32 hashed = _getSignerWalletHash(nonce, expiry, msg.sender);
-
-    address signer = _getSigner(hashed, v, r, s);
-
-    signerWallet[signer] = msg.sender;
+  function authorize(address signer) external override {
+    authorized[msg.sender] = signer;
   }
 
-  function removeAuthorization(address signer) external {
-    require(signerWallet[signer] == msg.sender, "INVALID_WALLET");
-    delete signerWallet[signer];
+  function revoke() external override {
+    delete authorized[msg.sender];
   }
 
   /**
@@ -263,9 +245,10 @@ contract Light is ILight {
   function _getOrderHash(
     uint256 nonce,
     uint256 expiry,
-    address sender,
+    address signerWallet,
     IERC20 signerToken,
     uint256 signerAmount,
+    address senderWallet,
     IERC20 senderToken,
     uint256 senderAmount
   ) internal pure returns (bytes32) {
@@ -275,21 +258,14 @@ contract Light is ILight {
           ORDER_TYPEHASH,
           nonce,
           expiry,
-          sender,
+          signerWallet,
           signerToken,
           signerAmount,
+          senderWallet,
           senderToken,
           senderAmount
         )
       );
-  }
-
-  function _getSignerWalletHash(
-    uint256 nonce,
-    uint256 expiry,
-    address wallet
-  ) internal pure returns (bytes32) {
-    return keccak256(abi.encode(SIGNER_WALLET_TYPEHASH, nonce, expiry, wallet));
   }
 
   function _getSigner(

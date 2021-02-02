@@ -77,9 +77,16 @@ export type Order = UnsignedOrder & {
   signature: Signature
 }
 
+export type LightSignature = {
+  v: string
+  r: string
+  s: string
+}
+
 export type UnsignedLightOrder = {
   nonce: string
   expiry: string
+  signerWallet: string
   signerToken: string
   signerAmount: string
   senderWallet: string
@@ -90,12 +97,12 @@ export type UnsignedLightOrder = {
 export type LightOrder = {
   nonce: string
   expiry: string
+  signerWallet: string
   signerToken: string
   signerAmount: string
   senderToken: string
   senderAmount: string
-  signature: string
-}
+} & LightSignature
 
 export type Token = {
   address: string
@@ -140,9 +147,10 @@ export const EIP712Light = {
   LightOrder: [
     { name: 'nonce', type: 'uint256' },
     { name: 'expiry', type: 'uint256' },
-    { name: 'senderWallet', type: 'address' },
+    { name: 'signerWallet', type: 'address' },
     { name: 'signerToken', type: 'address' },
     { name: 'signerAmount', type: 'uint256' },
+    { name: 'senderWallet', type: 'address' },
     { name: 'senderToken', type: 'address' },
     { name: 'senderAmount', type: 'uint256' },
   ],

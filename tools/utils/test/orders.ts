@@ -31,6 +31,7 @@ describe('Orders', async () => {
     const unsignedOrder = {
       nonce: Date.now().toString(),
       expiry: Math.round(Date.now() / 1000 + SECONDS_IN_DAY).toString(),
+      signerWallet: ADDRESS_ZERO,
       signerToken: ADDRESS_ZERO,
       signerAmount: '0',
       senderWallet: ADDRESS_ZERO,

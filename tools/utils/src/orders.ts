@@ -282,7 +282,9 @@ export function getSignerFromLightSignature(
   r: string,
   s: string
 ) {
-  const sig = `${r}${s.slice(2)}${ethers.BigNumber.from(v).toHexString()}`
+  const sig = `${r}${s.slice(2)}${ethers.BigNumber.from(v)
+    .toHexString()
+    .slice(2)}`
   return sigUtil.recoverTypedSignature_v4({
     data: {
       types: EIP712Light,

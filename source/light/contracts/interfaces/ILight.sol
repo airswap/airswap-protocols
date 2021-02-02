@@ -46,6 +46,7 @@ interface ILight {
   function swap(
     uint256 nonce,
     uint256 expiry,
+    address signerWallet,
     IERC20 signerToken,
     uint256 signerAmount,
     IERC20 senderToken,
@@ -54,6 +55,10 @@ interface ILight {
     bytes32 r,
     bytes32 s
   ) external;
+
+  function authorize(address sender) external;
+
+  function revoke() external;
 
   /**
    * @notice Cancel one or more open orders by nonce

@@ -23,10 +23,11 @@ const encodeERC20Call = (name, args) =>
 function createOrder({
   expiry = Math.round(Date.now() / 1000 + SECONDS_IN_DAY).toString(),
   nonce = Date.now(),
-  senderWallet = ADDRESS_ZERO,
+  signerWallet = ADDRESS_ZERO,
   signerToken = ADDRESS_ZERO,
-  senderToken = ADDRESS_ZERO,
   signerAmount = 0,
+  senderWallet = ADDRESS_ZERO,
+  senderToken = ADDRESS_ZERO,
   senderAmount = 0,
   v = emptySignature.v,
   r = emptySignature.r,
@@ -35,10 +36,11 @@ function createOrder({
   return {
     expiry,
     nonce,
-    senderWallet,
+    signerWallet,
     signerToken,
-    senderToken,
     signerAmount,
+    senderWallet,
+    senderToken,
     senderAmount,
     v,
     r,
@@ -48,15 +50,18 @@ function createOrder({
 
 const signOrder = async (order, account, swapContract) => {
   const privKey = getPrivateKeyFromGanacheAccount(account)
+  const signerWallet =
+    order.signerWallet === ADDRESS_ZERO ? account : order.signerWallet
+  const orderWithSigner = { ...order, signerWallet }
   const { v, r, s } = await createLightSignature(
-    order,
+    orderWithSigner,
     privKey,
     swapContract,
     1
   )
 
   return {
-    ...order,
+    ...orderWithSigner,
     v,
     r,
     s,
@@ -67,6 +72,7 @@ function orderToParams(order) {
   return [
     order.nonce,
     order.expiry,
+    order.signerWallet,
     order.signerToken,
     order.signerAmount,
     order.senderToken,
@@ -116,7 +122,6 @@ contract('Swap Light Unit Tests', async accounts => {
         senderWallet: mockSender,
       })
       const signedOrder = await signOrder(order, mockSigner, swap.address)
-
       await mockSignerToken.givenAnyReturnBool(true)
       await mockSenderToken.givenAnyReturnBool(true)
 

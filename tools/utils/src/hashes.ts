@@ -95,15 +95,17 @@ export function hashLightOrder(order: UnsignedLightOrder): Buffer {
         'address',
         'uint256',
         'address',
+        'address',
         'uint256',
       ],
       [
         LIGHT_ORDER_TYPEHASH,
         order.nonce,
         order.expiry,
-        order.senderWallet,
+        order.signerWallet,
         order.signerToken,
         order.signerAmount,
+        order.senderWallet,
         order.senderToken,
         order.senderAmount,
       ]
