@@ -60,7 +60,7 @@ dataSources:
         - Unstake
       abis:
         - name: Indexer
-          file: ./abis//Indexer.json
+          file: ./abis/Indexer.json
       eventHandlers:
         - event: AddTokenToBlacklist(address)
           handler: handleAddTokenToBlacklist
@@ -90,7 +90,7 @@ dataSources:
         - CreateDelegate
       abis:
         - name: DelegateFactory
-          file: ./abis//DelegateFactory.json
+          file: ./abis/DelegateFactory.json
       eventHandlers:
         - event: CreateDelegate(indexed address,address,address,indexed address,address)
           handler: handleCreateDelegate
@@ -137,7 +137,7 @@ templates:
         - Index
       abis:
         - name: Index
-          file: ./abis//Index.json
+          file: ./abis/Index.json
       eventHandlers: 
         - event: SetLocator(indexed address,uint256,indexed bytes32)
           handler: handleSetLocator
