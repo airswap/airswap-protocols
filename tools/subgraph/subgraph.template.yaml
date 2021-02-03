@@ -121,7 +121,38 @@ dataSources:
         - event: Swap(indexed uint256,uint256,indexed address,indexed address,address,address,uint256,uint256)
           handler: handleSwap
       file: ./src/SwapLightMapping.ts
-
+  - kind: ethereum/contract
+    name: LockerContract
+    network: '{{network}}'
+    source:
+      address: '{{locker_address}}'
+      abi: LockerContract
+      startBlock: {{start_block_locker}}
+    mapping:
+      kind: ethereum/Events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - Lock
+        - Unlock
+        - SetThrottlingPercentage
+        - SetThrottlingDuration
+        - SetThrottlingBalance
+      abis:
+        - name: LockerContract
+          file: ./abis/Locker.json
+      eventHandlers:
+        - event: Lock(address,uint256)
+          handler: handleLock
+        - event: Unlock(address,uint256)
+          handler: handleUnlock
+        - event: SetThrottlingPercentage(uint256)
+          handler: handleSetThrottlingPercentage
+        - event: SetThrottlingDuration(uint256)
+          handler: handleSetThrottlingDuration
+        - event: SetThrottlingBalance(uint256)
+          handler: handleSetThrottlingBalance
+      file: ./src/LockerMapping.ts
 templates:
   - name: Index
     kind: ethereum/contract

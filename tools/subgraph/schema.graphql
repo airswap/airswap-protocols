@@ -4,6 +4,7 @@ type User @entity {
   authorizedSenders: [User!]! # senders this user has authorized
   cancelledSwapNonces: [BigInt!]!
   cancelledSwapLightNonces: [BigInt!]!
+  amountInLocker: BigInt
 }
 
 type SwapContract @entity {
@@ -124,4 +125,11 @@ type Rule @entity {
   maxSenderAmount: BigInt!
   priceCoef: BigInt!
   priceExp: BigInt!
+}
+
+type Locker @entity {
+  id: ID! # address of the locker
+  throttlingPercentage: BigInt
+  throttlingDuration: BigInt
+  throttlingBalance: BigInt
 }

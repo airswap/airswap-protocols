@@ -1,5 +1,5 @@
 import { BigInt } from "@graphprotocol/graph-ts"
-import { User, Token, Indexer, DelegateFactory, SwapContract } from "../generated/schema"
+import { User, Token, Indexer, DelegateFactory, SwapContract, Locker } from "../generated/schema"
 
 export function getUser(userAddress: string): User {
   let user = User.load(userAddress)
@@ -10,6 +10,7 @@ export function getUser(userAddress: string): User {
     user.authorizedSenders = new Array<string>()
     user.cancelledSwapNonces = new Array<BigInt>()
     user.cancelledSwapLightNonces = new Array<BigInt>()
+    user.amountInLocker = BigInt.fromI32(0)
     user.save()
   }
   return user as User
@@ -51,4 +52,17 @@ export function getSwapContract(swapAddress: string): SwapContract {
     swap.save()
   }
   return swap as SwapContract
+}
+
+export function getLocker(lockerAddress: string): Locker {
+  let locker = Locker.load(lockerAddress)
+  if (!locker) {
+    locker = new Locker(lockerAddress)
+    // defaults
+    locker.throttlingPercentage = BigInt.fromI32(10)
+    locker.throttlingDuration = BigInt.fromI32(604800)
+    locker.throttlingBalance = BigInt.fromI32(100)
+    locker.save()
+  }
+  return locker as Locker
 }
