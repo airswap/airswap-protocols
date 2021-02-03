@@ -8,7 +8,7 @@ dataSources:
     source:
       address: '{{swap_address}}'
       abi: SwapContract
-      startBlock: {{startBlock}}
+      startBlock: {{start_block_swap}}
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -46,7 +46,7 @@ dataSources:
     source:
       address: '{{indexer_address}}'
       abi: Indexer
-      startBlock: {{startBlock}}
+      startBlock: {{start_block_indexer}}
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -81,7 +81,7 @@ dataSources:
     source:
       address: '{{delegateFactory_address}}'
       abi: DelegateFactory
-      startBlock: {{startBlock}}
+      startBlock: {{start_block_delegateFactory}}
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -95,6 +95,33 @@ dataSources:
         - event: CreateDelegate(indexed address,address,address,indexed address,address)
           handler: handleCreateDelegate
       file: ./src/DelegateFactoryMapping.ts
+  - kind: ethereum/contract
+    name: LightSwapContract
+    network: '{{network}}'
+    source:
+      address: '{{swap_light_address}}'
+      abi: NOTSURE
+      startBlock: {{start_block_light}}
+    mapping:
+      kind: ethereum/Events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - Cancel
+        - CancelUpTo
+        - Swap
+      abis:
+        - name: SwapLightContract
+          file: ../deployer/build/contracts/Light.json
+      eventHandlers:
+        - event: Cancel(indexed uint256,indexed address)
+          handler: handleCancel
+        - event: CancelUpTo(indexed uint256,indexed address)
+          handler: handleCancelUpTo
+        - event: Swap(indexed uint256,uint256,indexed address,indexed address,address,address,uint256,uint256)
+          handler: handleSwap
+      file: ./src/SwapLightMapping.ts
+
 templates:
   - name: Index
     kind: ethereum/contract
