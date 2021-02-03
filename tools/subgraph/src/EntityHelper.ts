@@ -8,7 +8,8 @@ export function getUser(userAddress: string): User {
     user = new User(userAddress)
     user.authorizedSigners = new Array<string>()
     user.authorizedSenders = new Array<string>()
-    user.cancelledNonces = new Array<BigInt>()
+    user.cancelledSwapNonces = new Array<BigInt>()
+    user.cancelledSwapLightNonces = new Array<BigInt>()
     user.save()
   }
   return user as User
@@ -48,6 +49,6 @@ export function getSwapContract(swapAddress: string): SwapContract {
   if (!swap) {
     swap = new SwapContract(swapAddress)
     swap.save()
-  }  
+  }
   return swap as SwapContract
 }

@@ -13,7 +13,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "{\n    users {\n        id\n        authorizedSigners {\n            id\n        }\n        authorizedSenders {\n            id\n        }\n        cancelledNonces\n    }\n    swaps {\n        id\n        signer {\n            id\n        }\n        sender {\n            id\n        }\n        swap {\n            id\n        }\n    }\n}",
+						"query": "{\n    users {\n        id\n        authorizedSigners {\n            id\n        }\n        authorizedSenders {\n            id\n        }\n        cancelledSwapNonces\n    }\n    swaps {\n        id\n        signer {\n            id\n        }\n        sender {\n            id\n        }\n        swap {\n            id\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
@@ -42,7 +42,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "{\n    users {\n        id\n        authorizedSigners {\n            id\n        }\n        authorizedSenders {\n            id\n        }\n        cancelledNonces\n    }\n    swaps {\n        id\n        signer {\n            id\n        }\n        sender {\n            id\n        }\n        swap {\n            id\n        }\n    }\n}",
+						"query": "{\n    users {\n        id\n        authorizedSigners {\n            id\n        }\n        authorizedSenders {\n            id\n        }\n        cancelledSwapNonces\n    }\n    swaps {\n        id\n        signer {\n            id\n        }\n        sender {\n            id\n        }\n        swap {\n            id\n        }\n    }\n}",
 						"variables": ""
 					}
 				},

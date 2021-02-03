@@ -8,27 +8,27 @@ import { SwapLightContract, SwapLight } from "../generated/schema"
 import { getUser, getToken } from "./EntityHelper"
 
 export function handleCancel(event: Cancel): void {
-  // let user = getUser(event.params.signerWallet.toHex())
-  // let cancelledNonces = user.cancelledNonces
-  // cancelledNonces.push(event.params.nonce)
-  // cancelledNonces.sort()
-  // user.cancelledNonces = cancelledNonces
-  // user.save()
+  let user = getUser(event.params.signerWallet.toHex())
+  let cancelledNonces = user.cancelledSwapLightNonces
+  cancelledNonces.push(event.params.nonce)
+  cancelledNonces.sort()
+  user.cancelledSwapLightNonces = cancelledNonces
+  user.save()
 }
 
 export function handleCancelUpTo(event: CancelUpTo): void {
-  // let user = getUser(event.params.signerWallet.toHex())
-  // let cancelledNonces = user.cancelledNonces
-  // for (let i = BigInt.fromI32(0); i.lt(event.params.nonce); i = i.plus(BigInt.fromI32(1))) {
-  //   // prevent duplicates
-  //   if (cancelledNonces.indexOf(i) > -1) {
-  //     continue
-  //   }
-  //   cancelledNonces.push(i)
-  // }
-  // cancelledNonces.sort()
-  // user.cancelledNonces = cancelledNonces
-  // user.save()
+  let user = getUser(event.params.signerWallet.toHex())
+  let cancelledNonces = user.cancelledSwapLightNonces
+  for (let i = BigInt.fromI32(0); i.lt(event.params.nonce); i = i.plus(BigInt.fromI32(1))) {
+    // prevent duplicates
+    if (cancelledNonces.indexOf(i) > -1) {
+      continue
+    }
+    cancelledNonces.push(i)
+  }
+  cancelledNonces.sort()
+  user.cancelledSwapLightNonces = cancelledNonces
+  user.save()
 }
 
 export function handleSwap(event: SwapEvent): void {

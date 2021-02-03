@@ -2,7 +2,8 @@ type User @entity {
   id: ID! # wallet address
   authorizedSigners: [User!]! # signers this user has authorized
   authorizedSenders: [User!]! # senders this user has authorized
-  cancelledNonces: [BigInt!]!
+  cancelledSwapNonces: [BigInt!]!
+  cancelledSwapLightNonces: [BigInt!]!
 }
 
 type SwapContract @entity {
