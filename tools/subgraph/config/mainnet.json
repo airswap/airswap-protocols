@@ -1,8 +1,11 @@
 {
   "network": "mainnet",
   "swap_address": "0x4572f2554421Bd64Bef1c22c8a81840E8D496BeA",
+  "swap_light_address": "0xC50cB225e0F45E814fd41Bcb3a120463aB1f04C3",
   "indexer_address": "0xbA9aB9710Bd461F30C247f4cA2Cb7f453C22570e",
   "delegateFactory_address": "0x072073f78a2d58610Ee3d5e170CA7AC9CB58a345",
+  "locker_address": "0xa4C5107184a88D4B324Dd10D98a11dd8037823Fe",
+  "pool_address": "0x7296333e1615721f4Bd9Df1a3070537484A50CF8",
   "start_block_swap": 9371103,
   "start_block_indexer": 9371103,
   "start_block_delegateFactory": 9371103,
