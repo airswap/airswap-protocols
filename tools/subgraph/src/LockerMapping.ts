@@ -13,19 +13,19 @@ export function handleUnlock(event: Unlock): void {
   user.save()
 }
 
-export function handleSetThrottlingPercentage(event: SetThrottlingPercentage) {
+export function handleSetThrottlingPercentage(event: SetThrottlingPercentage): void {
   let locker = getLocker(event.address.toHex())
   locker.throttlingPercentage = event.params.throttlingPercentage
   locker.save()
 }
 
-export function handleSetThrottlingDuration(event: SetThrottlingDuration) {
+export function handleSetThrottlingDuration(event: SetThrottlingDuration): void {
   let locker = getLocker(event.address.toHex())
   locker.throttlingPercentage = event.params.throttlingDuration
   locker.save()
 }
 
-export function handleSetThrottlingBalance(event: SetThrottlingBalance) {
+export function handleSetThrottlingBalance(event: SetThrottlingBalance): void {
   let locker = getLocker(event.address.toHex())
   locker.throttlingPercentage = event.params.throttlingBalance
   locker.save()
