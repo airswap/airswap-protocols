@@ -3,7 +3,7 @@ import {
   Cancel,
   CancelUpTo,
   Swap as SwapEvent
-} from "../generated/SwapContract/SwapContract"
+} from "../generated/SwapLightContract/SwapLightContract"
 import { SwapLightContract, SwapLight } from "../generated/schema"
 import { getUser, getToken } from "./EntityHelper"
 

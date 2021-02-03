@@ -96,7 +96,7 @@ dataSources:
           handler: handleCreateDelegate
       file: ./src/DelegateFactoryMapping.ts
   - kind: ethereum/contract
-    name: LightSwapContract
+    name: SwapLightContract
     network: '{{network}}'
     source:
       address: '{{swap_light_address}}'
