@@ -100,24 +100,24 @@ dataSources:
     network: '{{network}}'
     source:
       address: '{{swap_light_address}}'
-      abi: NOTSURE
+      abi: SwapLightContract
       startBlock: {{start_block_light}}
     mapping:
       kind: ethereum/Events
       apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
-        - Cancel
-        - CancelUpTo
+        # - Cancel
+        # - CancelUpTo
         - Swap
       abis:
         - name: SwapLightContract
           file: ./abis/Light.json
       eventHandlers:
-        - event: Cancel(indexed uint256,indexed address)
-          handler: handleCancel
-        - event: CancelUpTo(indexed uint256,indexed address)
-          handler: handleCancelUpTo
+        # - event: Cancel(indexed uint256,indexed address)
+        #   handler: handleCancel
+        # - event: CancelUpTo(indexed uint256,indexed address)
+        #   handler: handleCancelUpTo
         - event: Swap(indexed uint256,uint256,indexed address,indexed address,address,address,uint256,uint256)
           handler: handleSwap
       file: ./src/SwapLightMapping.ts
