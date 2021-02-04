@@ -153,6 +153,36 @@ dataSources:
         - event: SetThrottlingBalance(uint256)
           handler: handleSetThrottlingBalance
       file: ./src/LockerMapping.ts
+  - kind: ethereum/contract
+    name: PoolContract
+    network: '{{network}}'
+    source:
+      address: '{{pool_address}}'
+      abi: PoolContract
+      startBlock: {{start_block_pool}}
+    mapping:
+      kind: ethereum/Events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - Enable
+        - Withdraw
+        - SetScale
+        - SetMax
+      abis:
+        - name: PoolContract
+          file: ./abis/Pool.json
+      eventHandlers:
+        - event: Enable(bytes32)
+          handler: handleEnable
+        - event: Withdraw(bytes32[],address,address,uint256)
+          handler: handleWithdraw
+        - event: SetScale(uint256)
+          handler: handleSetScale
+        - event: SetMax(uint256)
+          handler: handleSetMax
+      file: ./src/PoolMapping.ts
+
 templates:
   - name: Index
     kind: ethereum/contract

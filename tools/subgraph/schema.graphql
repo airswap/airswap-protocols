@@ -133,3 +133,18 @@ type Locker @entity {
   throttlingDuration: BigInt
   throttlingBalance: BigInt
 }
+
+type Pool @entity {
+  id: ID! # address of the pool
+  scale: BigInt
+  max: BigInt
+  roots: [Bytes!]!
+}
+
+type PoolClaims @entity {
+  id: ID! # claim address + timestamp + token
+  rootList: [Bytes!]!
+  user: User!
+  token: Token!
+  amount: BigInt!
+}

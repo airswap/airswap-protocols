@@ -1,5 +1,5 @@
-import { BigInt } from "@graphprotocol/graph-ts"
-import { User, Token, Indexer, DelegateFactory, SwapContract, Locker } from "../generated/schema"
+import { BigInt, Bytes } from "@graphprotocol/graph-ts"
+import { User, Token, Indexer, DelegateFactory, SwapContract, Locker, Pool } from "../generated/schema"
 
 export function getUser(userAddress: string): User {
   let user = User.load(userAddress)
@@ -65,4 +65,17 @@ export function getLocker(lockerAddress: string): Locker {
     locker.save()
   }
   return locker as Locker
+}
+
+export function getPool(poolAddress: string): Pool {
+  let pool = Pool.load(poolAddress)
+  if (!pool) {
+    pool = new Pool(poolAddress)
+    // defaults
+    pool.scale = BigInt.fromI32(10)
+    pool.max = BigInt.fromI32(604800)
+    pool.roots = new Array<Bytes>()
+    pool.save()
+  }
+  return pool as Pool
 }
