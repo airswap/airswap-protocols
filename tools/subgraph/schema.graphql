@@ -143,6 +143,7 @@ type Pool @entity {
 
 type PoolClaim @entity {
   id: ID! # claim address + token + timestamp
+  pool: Pool!
   transactionHash: Bytes! # The transaction hash the swap was executed at
   user: User!
   token: Token!

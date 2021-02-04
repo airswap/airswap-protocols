@@ -13,6 +13,7 @@ export function handleEnable(event: Enable): void {
 export function handleWithdraw(event: Withdraw): void {
   let identifier = event.params.account.toHex() + event.params.token.toHex() + event.block.timestamp.toString()
   let claim = new PoolClaim(identifier)
+  claim.pool = getPool(event.address.toHex()).id
   claim.transactionHash = event.transaction.hash
   claim.user = getUser(event.params.account.toHex()).id
   claim.token = getToken(event.params.token.toHex()).id
