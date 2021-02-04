@@ -141,10 +141,16 @@ type Pool @entity {
   roots: [Bytes!]!
 }
 
-type PoolClaims @entity {
-  id: ID! # claim address + timestamp + token
-  rootList: [Bytes!]!
+type PoolClaim @entity {
+  id: ID! # claim address + token + timestamp
+  transactionHash: Bytes! # The transaction hash the swap was executed at
   user: User!
   token: Token!
   amount: BigInt!
+}
+
+type EnabledRoot @entity {
+  id: ID! #Pool + root
+  pool: Pool!
+  root: Bytes!
 }
