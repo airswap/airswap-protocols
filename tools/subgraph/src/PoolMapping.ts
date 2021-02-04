@@ -3,7 +3,7 @@ import { PoolClaim, EnabledRoot } from "../generated/schema"
 import { getUser, getPool, getToken } from "./EntityHelper"
 
 export function handleEnable(event: Enable): void {
-  let identifier = event.address.toHex() + event.params.root
+  let identifier = event.address.toHex() + event.params.root.toString()
   let enabledRoot = new EnabledRoot(identifier)
   enabledRoot.pool = getPool(event.address.toHex()).id
   enabledRoot.root = event.params.root
