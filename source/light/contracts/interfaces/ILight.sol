@@ -34,6 +34,10 @@ interface ILight {
 
   event CancelUpTo(uint256 indexed nonce, address indexed signerWallet);
 
+  event Authorized(address indexed signer, address indexed signerWallet);
+
+  event Revoked(address indexed revokedSigner, address indexed signerWallet);
+
   /**
    * @notice Atomic Token Swap
    * @param nonce Unique per order and should be sequential
@@ -76,4 +80,6 @@ interface ILight {
   function nonceUsed(address, uint256) external view returns (bool);
 
   function signerMinimumNonce(address) external view returns (uint256);
+
+  function authorized(address) external view returns (address);
 }

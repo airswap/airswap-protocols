@@ -84,8 +84,7 @@ function orderToParams(order) {
 }
 
 contract('Swap Light Unit Tests', async accounts => {
-  const mockSender = accounts[1]
-  const mockSigner = accounts[2]
+  const [_, mockSender, mockSigner, anyone] = accounts
 
   let snapshotId
   let swap
@@ -148,6 +147,56 @@ contract('Swap Light Unit Tests', async accounts => {
       ])
       const signerTransferData = encodeERC20Call('transferFrom', [
         mockSigner,
+        mockSender,
+        1,
+      ])
+
+      const senderTransferCalls = await mockSenderToken.invocationCountForCalldata.call(
+        senderTransferData
+      )
+      const signerTransferCalls = await mockSignerToken.invocationCountForCalldata.call(
+        signerTransferData
+      )
+
+      equal(senderTransferCalls.toNumber(), 1)
+      equal(signerTransferCalls.toNumber(), 1)
+    })
+
+    it('test authorized signer', async () => {
+      const order = createOrderWithMockTokens({
+        senderAmount: 1,
+        signerAmount: 1,
+        senderWallet: mockSender,
+        signerWallet: anyone,
+      })
+      await swap.authorize(mockSigner, { from: anyone })
+      const signedOrder = await signOrder(order, mockSigner, swap.address)
+      await mockSignerToken.givenAnyReturnBool(true)
+      await mockSenderToken.givenAnyReturnBool(true)
+
+      const tx = await swap.swap(...orderToParams(signedOrder), {
+        from: mockSender,
+      })
+
+      emitted(tx, 'Swap', e => {
+        return (
+          e.nonce.toNumber() === order.nonce &&
+          e.signerWallet === order.signerWallet &&
+          e.senderWallet === order.senderWallet &&
+          e.signerToken === order.signerToken &&
+          e.senderToken === order.senderToken &&
+          e.signerAmount.toNumber() === order.signerAmount &&
+          e.senderAmount.toNumber() === order.senderAmount
+        )
+      })
+
+      const senderTransferData = encodeERC20Call('transferFrom', [
+        mockSender,
+        anyone,
+        1,
+      ])
+      const signerTransferData = encodeERC20Call('transferFrom', [
+        anyone,
         mockSender,
         1,
       ])
@@ -231,6 +280,50 @@ contract('Swap Light Unit Tests', async accounts => {
         swap.swap(...orderToParams(signedOrder), { from: mockSender }),
         'NONCE_ALREADY_USED'
       )
+    })
+
+    it('test when signer not authorized', async () => {
+      const order = createOrderWithMockTokens({
+        nonce: 0,
+        signerAmount: 200,
+        senderAmount: 200,
+        senderWallet: anyone,
+      })
+
+      const signedOrder = await signOrder(order, mockSigner, swap.address)
+
+      await mockSignerToken.givenAnyReturnBool(true)
+      await mockSenderToken.givenAnyReturnBool(true)
+
+      await reverted(
+        swap.swap(...orderToParams(signedOrder), { from: mockSender }),
+        'UNAUTHORIZED'
+      )
+    })
+  })
+
+  describe('Test authorization', async () => {
+    it('test authorized is set', async () => {
+      const trx = await swap.authorize(mockSigner, { from: anyone })
+      emitted(
+        trx,
+        'Authorized',
+        e => e.signer === mockSigner && e.signerWallet === anyone
+      )
+      const authorized = await swap.authorized(anyone)
+      equal(authorized, mockSigner)
+    })
+
+    it('test revoke', async () => {
+      await swap.authorize(mockSigner, { from: anyone })
+      const trx = await swap.revoke({ from: anyone })
+      emitted(
+        trx,
+        'Revoked',
+        e => e.revokedSigner === mockSigner && e.signerWallet === anyone
+      )
+      const authorized = await swap.authorized(anyone)
+      equal(authorized, ADDRESS_ZERO)
     })
   })
 

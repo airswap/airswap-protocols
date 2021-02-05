@@ -70,7 +70,7 @@ contract Light is ILight {
   // Mapping of signer addresses to an optionally set minimum valid nonce
   mapping(address => uint256) public override signerMinimumNonce;
 
-  mapping(address => address) public authorized;
+  mapping(address => address) public override authorized;
 
   constructor() public {
     uint256 currentChainId = getChainId();
@@ -128,11 +128,9 @@ contract Light is ILight {
     address signer = _getSigner(hashed, v, r, s);
 
     // Ensure the nonce is above the minimum.
-    // TODO: should we check the wallet or signer noce?
     require(nonce >= signerMinimumNonce[signer], "NONCE_TOO_LOW");
 
     // Mark the nonce as used and ensure it hasn't been used before.
-    // TODO: should we check the wallet or signer noce?
     require(_markNonceAsUsed(signer, nonce), "NONCE_ALREADY_USED");
 
     if (signerWallet != signer) {
@@ -148,7 +146,7 @@ contract Light is ILight {
     emit Swap(
       nonce,
       block.timestamp,
-      signer,
+      signerWallet,
       msg.sender,
       signerToken,
       senderToken,
@@ -159,10 +157,13 @@ contract Light is ILight {
 
   function authorize(address signer) external override {
     authorized[msg.sender] = signer;
+    emit Authorized(signer, msg.sender);
   }
 
   function revoke() external override {
+    address tmp = authorized[msg.sender];
     delete authorized[msg.sender];
+    emit Revoked(tmp, msg.sender);
   }
 
   /**
