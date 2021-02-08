@@ -36,7 +36,7 @@ interface ILight {
 
   event Authorized(address indexed signer, address indexed signerWallet);
 
-  event Revoked(address indexed revokedSigner, address indexed signerWallet);
+  event Revoked(address indexed signer, address indexed signerWallet);
 
   /**
    * @notice Atomic Token Swap

@@ -320,7 +320,7 @@ contract('Swap Light Unit Tests', async accounts => {
       emitted(
         trx,
         'Revoked',
-        e => e.revokedSigner === mockSigner && e.signerWallet === anyone
+        e => e.signer === mockSigner && e.signerWallet === anyone
       )
       const authorized = await swap.authorized(anyone)
       equal(authorized, ADDRESS_ZERO)
