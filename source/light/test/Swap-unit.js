@@ -84,7 +84,7 @@ function orderToParams(order) {
 }
 
 contract('Swap Light Unit Tests', async accounts => {
-  const [_, mockSender, mockSigner, feeWallet, anyone] = accounts
+  const [_, owner, mockSender, mockSigner, feeWallet, anyone] = accounts
 
   let snapshotId
   let swap
@@ -108,9 +108,16 @@ contract('Swap Light Unit Tests', async accounts => {
   })
 
   before('deploy Swap', async () => {
-    swap = await Light.new(feeWallet, 0)
+    swap = await Light.new(feeWallet, 0, { from: owner })
     mockSignerToken = await MockContract.new()
     mockSenderToken = await MockContract.new()
+  })
+
+  it('test setting fee and fee wallet correctly', async () => {
+    const storedFee = await swap.fee.call()
+    const storedFeeWallet = await swap.feeWallet.call()
+    equal(storedFee.toNumber(), 0)
+    equal(storedFeeWallet, feeWallet)
   })
 
   describe('Test swap', async () => {
@@ -160,6 +167,66 @@ contract('Swap Light Unit Tests', async accounts => {
 
       equal(senderTransferCalls.toNumber(), 1)
       equal(signerTransferCalls.toNumber(), 1)
+    })
+
+    it('test transfers with fee', async () => {
+      const fee = 100 // 1%
+      await swap.setFee(fee, { from: owner })
+      const order = createOrderWithMockTokens({
+        senderAmount: 1000,
+        signerAmount: 1000,
+        senderWallet: mockSender,
+      })
+      const signedOrder = await signOrder(order, mockSigner, swap.address)
+      await mockSignerToken.givenAnyReturnBool(true)
+      await mockSenderToken.givenAnyReturnBool(true)
+
+      const tx = await swap.swap(...orderToParams(signedOrder), {
+        from: mockSender,
+      })
+
+      emitted(tx, 'Swap', e => {
+        return (
+          e.nonce.toNumber() === order.nonce &&
+          e.signerWallet === mockSigner &&
+          e.senderWallet === order.senderWallet &&
+          e.signerToken === order.signerToken &&
+          e.senderToken === order.senderToken &&
+          e.signerAmount.toNumber() === order.signerAmount &&
+          e.senderAmount.toNumber() === order.senderAmount
+        )
+      })
+
+      const senderTransferData = encodeERC20Call('transferFrom', [
+        mockSender,
+        mockSigner,
+        1000,
+      ])
+      const signerTransferData = encodeERC20Call('transferFrom', [
+        mockSigner,
+        mockSender,
+        1000,
+      ])
+
+      const feeTransferData = encodeERC20Call('transferFrom', [
+        mockSigner,
+        feeWallet,
+        10,
+      ])
+
+      const senderTransferCalls = await mockSenderToken.invocationCountForCalldata.call(
+        senderTransferData
+      )
+      const signerTransferCalls = await mockSignerToken.invocationCountForCalldata.call(
+        signerTransferData
+      )
+      const feeTransferCalls = await mockSignerToken.invocationCountForCalldata.call(
+        feeTransferData
+      )
+
+      equal(senderTransferCalls.toNumber(), 1)
+      equal(signerTransferCalls.toNumber(), 1)
+      equal(feeTransferCalls.toNumber(), 1)
     })
 
     it('test authorized signer', async () => {
