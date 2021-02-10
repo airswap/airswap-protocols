@@ -17,6 +17,8 @@
 /* solhint-disable var-name-mixedcase */
 pragma solidity ^0.6.0;
 
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 
@@ -26,8 +28,9 @@ import "./interfaces/ILight.sol";
  * @title Light: Simple atomic swap used on the AirSwap network
  * @notice https://www.airswap.io/
  */
-contract Light is ILight {
+contract Light is ILight, Ownable {
   using SafeERC20 for IERC20;
+  using SafeMath for uint256;
 
   bytes32 public constant DOMAIN_TYPEHASH =
     keccak256(
@@ -57,6 +60,7 @@ contract Light is ILight {
       )
     );
 
+  uint256 public constant FEE_DIVISOR = 10000;
   bytes32 public constant DOMAIN_NAME = keccak256("SWAP_LIGHT");
   bytes32 public constant DOMAIN_VERSION = keccak256("3");
   uint256 public immutable DOMAIN_CHAIN_ID;
@@ -72,7 +76,10 @@ contract Light is ILight {
 
   mapping(address => address) public override authorized;
 
-  constructor() public {
+  address public feeWallet;
+  uint256 public fee;
+
+  constructor(address _feeWallet, uint256 _fee) public {
     uint256 currentChainId = getChainId();
     DOMAIN_CHAIN_ID = currentChainId;
     DOMAIN_SEPARATOR = keccak256(
@@ -84,6 +91,9 @@ contract Light is ILight {
         this
       )
     );
+
+    feeWallet = _feeWallet;
+    fee = _fee;
   }
 
   /**
@@ -143,6 +153,12 @@ contract Light is ILight {
     // Transfer token from signer to sender.
     signerToken.safeTransferFrom(signerWallet, msg.sender, signerAmount);
 
+    // Transfer fee
+    if (fee > 0) {
+      uint256 feeAmount = signerAmount.mul(fee).div(FEE_DIVISOR);
+      signerToken.safeTransferFrom(signerWallet, feeWallet, feeAmount);
+    }
+
     emit Swap(
       nonce,
       block.timestamp,
@@ -153,6 +169,14 @@ contract Light is ILight {
       signerAmount,
       senderAmount
     );
+  }
+
+  function setFee(uint256 newFee) external onlyOwner {
+    fee = newFee;
+  }
+
+  function setFeeWallet(address newFeeWallet) external onlyOwner {
+    feeWallet = newFeeWallet;
   }
 
   function authorize(address signer) external override {
