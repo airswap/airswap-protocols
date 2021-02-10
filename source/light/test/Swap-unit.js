@@ -84,7 +84,7 @@ function orderToParams(order) {
 }
 
 contract('Swap Light Unit Tests', async accounts => {
-  const [_, mockSender, mockSigner, anyone] = accounts
+  const [_, mockSender, mockSigner, feeWallet, anyone] = accounts
 
   let snapshotId
   let swap
@@ -108,7 +108,7 @@ contract('Swap Light Unit Tests', async accounts => {
   })
 
   before('deploy Swap', async () => {
-    swap = await Light.new()
+    swap = await Light.new(feeWallet, 0)
     mockSignerToken = await MockContract.new()
     mockSenderToken = await MockContract.new()
   })
