@@ -47,6 +47,29 @@ interface ILight {
    * @param senderToken Contract address of the ERC20 token that will be transferred from the sender
    * @param senderAmount Amount for senderToken
    */
+  function swapWithRecipient(
+    address recipient,
+    uint256 nonce,
+    uint256 expiry,
+    address signerWallet,
+    IERC20 signerToken,
+    uint256 signerAmount,
+    IERC20 senderToken,
+    uint256 senderAmount,
+    uint8 v,
+    bytes32 r,
+    bytes32 s
+  ) external;
+
+  /**
+   * @notice Atomic Token Swap
+   * @param nonce Unique per order and should be sequential
+   * @param expiry Expiry in seconds since 1 January 1970
+   * @param signerToken Contract address of the ERC20 token that will be transferred from the signer
+   * @param signerAmount Amount for signerToken
+   * @param senderToken Contract address of the ERC20 token that will be transferred from the sender
+   * @param senderAmount Amount for senderToken
+   */
   function swap(
     uint256 nonce,
     uint256 expiry,

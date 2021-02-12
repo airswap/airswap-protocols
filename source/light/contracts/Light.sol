@@ -61,6 +61,8 @@ contract Light is ILight, Ownable {
     );
 
   uint256 public constant FEE_DIVISOR = 10000;
+  uint256 public immutable FEE;
+
   bytes32 public constant DOMAIN_NAME = keccak256("SWAP_LIGHT");
   bytes32 public constant DOMAIN_VERSION = keccak256("3");
   uint256 public immutable DOMAIN_CHAIN_ID;
@@ -77,9 +79,10 @@ contract Light is ILight, Ownable {
   mapping(address => address) public override authorized;
 
   address public feeWallet;
-  uint256 public fee;
 
   constructor(address _feeWallet, uint256 _fee) public {
+    require(_feeWallet != address(0), "INVALID_FEE_WALLET");
+    require(_fee < FEE_DIVISOR, "INVALID_FEE");
     uint256 currentChainId = getChainId();
     DOMAIN_CHAIN_ID = currentChainId;
     DOMAIN_SEPARATOR = keccak256(
@@ -93,7 +96,7 @@ contract Light is ILight, Ownable {
     );
 
     feeWallet = _feeWallet;
-    fee = _fee;
+    FEE = _fee;
   }
 
   /**
@@ -117,6 +120,44 @@ contract Light is ILight, Ownable {
     bytes32 r,
     bytes32 s
   ) external override {
+    swapWithRecipient(
+      msg.sender,
+      nonce,
+      expiry,
+      signerWallet,
+      signerToken,
+      signerAmount,
+      senderToken,
+      senderAmount,
+      v,
+      r,
+      s
+    );
+  }
+
+  /**
+   * @notice Atomic Token Swap
+   * @param recipient Recipient of the funds
+   * @param nonce Unique per order and should be sequential
+   * @param expiry Expiry in seconds since 1 January 1970
+   * @param signerToken Contract address of the ERC20 token that will be transferred from the signer
+   * @param signerAmount Amount for signerToken
+   * @param senderToken Contract address of the ERC20 token that will be transferred from the sender
+   * @param senderAmount Amount for senderToken
+   */
+  function swapWithRecipient(
+    address recipient,
+    uint256 nonce,
+    uint256 expiry,
+    address signerWallet,
+    IERC20 signerToken,
+    uint256 signerAmount,
+    IERC20 senderToken,
+    uint256 senderAmount,
+    uint8 v,
+    bytes32 r,
+    bytes32 s
+  ) public override {
     require(DOMAIN_CHAIN_ID == getChainId(), "CHAIN_ID_CHANGED");
 
     // Ensure the expiry has not passed.
@@ -150,12 +191,12 @@ contract Light is ILight, Ownable {
     // Transfer token from sender to signer.
     senderToken.safeTransferFrom(msg.sender, signerWallet, senderAmount);
 
-    // Transfer token from signer to sender.
-    signerToken.safeTransferFrom(signerWallet, msg.sender, signerAmount);
+    // Transfer token from signer to recipient.
+    signerToken.safeTransferFrom(signerWallet, recipient, signerAmount);
 
     // Transfer fee
-    if (fee > 0) {
-      uint256 feeAmount = signerAmount.mul(fee).div(FEE_DIVISOR);
+    uint256 feeAmount = FEE > 0 ? signerAmount.mul(FEE).div(FEE_DIVISOR) : 0;
+    if (feeAmount > 0) {
       signerToken.safeTransferFrom(signerWallet, feeWallet, feeAmount);
     }
 
@@ -171,11 +212,8 @@ contract Light is ILight, Ownable {
     );
   }
 
-  function setFee(uint256 newFee) external onlyOwner {
-    fee = newFee;
-  }
-
   function setFeeWallet(address newFeeWallet) external onlyOwner {
+    require(newFeeWallet != address(0), "INVALID_FEE_WALLET");
     feeWallet = newFeeWallet;
   }
 

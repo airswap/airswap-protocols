@@ -107,20 +107,31 @@ contract('Swap Light Unit Tests', async accounts => {
     await revertToSnapshot(snapshotId)
   })
 
-  before('deploy Swap', async () => {
-    swap = await Light.new(feeWallet, 0, { from: owner })
-    mockSignerToken = await MockContract.new()
-    mockSenderToken = await MockContract.new()
+  describe('Setup', () => {
+    const fee = 300
+    before('deploy Swap', async () => {
+      swap = await Light.new(feeWallet, fee, { from: owner })
+      mockSignerToken = await MockContract.new()
+      mockSenderToken = await MockContract.new()
+    })
+
+    it('test setting fee and fee wallet correctly', async () => {
+      const storedFee = await swap.FEE.call()
+      const storedFeeWallet = await swap.feeWallet.call()
+      equal(storedFee.toNumber(), fee)
+      equal(storedFeeWallet, feeWallet)
+    })
   })
 
-  it('test setting fee and fee wallet correctly', async () => {
-    const storedFee = await swap.fee.call()
-    const storedFeeWallet = await swap.feeWallet.call()
-    equal(storedFee.toNumber(), 0)
-    equal(storedFeeWallet, feeWallet)
-  })
+  describe('Test swap', () => {
+    before('deploy Swap', async () => {
+      swap = await Light.new(feeWallet, 0, {
+        from: owner,
+      })
+      mockSignerToken = await MockContract.new()
+      mockSenderToken = await MockContract.new()
+    })
 
-  describe('Test swap', async () => {
     it('test transfers', async () => {
       const order = createOrderWithMockTokens({
         senderAmount: 1,
@@ -169,66 +180,6 @@ contract('Swap Light Unit Tests', async accounts => {
       equal(signerTransferCalls.toNumber(), 1)
     })
 
-    it('test transfers with fee', async () => {
-      const fee = 100 // 1%
-      await swap.setFee(fee, { from: owner })
-      const order = createOrderWithMockTokens({
-        senderAmount: 1000,
-        signerAmount: 1000,
-        senderWallet: mockSender,
-      })
-      const signedOrder = await signOrder(order, mockSigner, swap.address)
-      await mockSignerToken.givenAnyReturnBool(true)
-      await mockSenderToken.givenAnyReturnBool(true)
-
-      const tx = await swap.swap(...orderToParams(signedOrder), {
-        from: mockSender,
-      })
-
-      emitted(tx, 'Swap', e => {
-        return (
-          e.nonce.toNumber() === order.nonce &&
-          e.signerWallet === mockSigner &&
-          e.senderWallet === order.senderWallet &&
-          e.signerToken === order.signerToken &&
-          e.senderToken === order.senderToken &&
-          e.signerAmount.toNumber() === order.signerAmount &&
-          e.senderAmount.toNumber() === order.senderAmount
-        )
-      })
-
-      const senderTransferData = encodeERC20Call('transferFrom', [
-        mockSender,
-        mockSigner,
-        1000,
-      ])
-      const signerTransferData = encodeERC20Call('transferFrom', [
-        mockSigner,
-        mockSender,
-        1000,
-      ])
-
-      const feeTransferData = encodeERC20Call('transferFrom', [
-        mockSigner,
-        feeWallet,
-        10,
-      ])
-
-      const senderTransferCalls = await mockSenderToken.invocationCountForCalldata.call(
-        senderTransferData
-      )
-      const signerTransferCalls = await mockSignerToken.invocationCountForCalldata.call(
-        signerTransferData
-      )
-      const feeTransferCalls = await mockSignerToken.invocationCountForCalldata.call(
-        feeTransferData
-      )
-
-      equal(senderTransferCalls.toNumber(), 1)
-      equal(signerTransferCalls.toNumber(), 1)
-      equal(feeTransferCalls.toNumber(), 1)
-    })
-
     it('test authorized signer', async () => {
       const order = createOrderWithMockTokens({
         senderAmount: 1,
@@ -236,7 +187,9 @@ contract('Swap Light Unit Tests', async accounts => {
         senderWallet: mockSender,
         signerWallet: anyone,
       })
-      await swap.authorize(mockSigner, { from: anyone })
+      await swap.authorize(mockSigner, {
+        from: anyone,
+      })
       const signedOrder = await signOrder(order, mockSigner, swap.address)
       await mockSignerToken.givenAnyReturnBool(true)
       await mockSenderToken.givenAnyReturnBool(true)
@@ -324,7 +277,9 @@ contract('Swap Light Unit Tests', async accounts => {
 
       await swap.swap(...orderToParams(signedOrder), { from: mockSender })
       await reverted(
-        swap.swap(...orderToParams(signedOrder), { from: mockSender }),
+        swap.swap(...orderToParams(signedOrder), {
+          from: mockSender,
+        }),
         'NONCE_ALREADY_USED'
       )
     })
@@ -344,7 +299,9 @@ contract('Swap Light Unit Tests', async accounts => {
       await mockSenderToken.givenAnyReturnBool(true)
 
       await reverted(
-        swap.swap(...orderToParams(signedOrder), { from: mockSender }),
+        swap.swap(...orderToParams(signedOrder), {
+          from: mockSender,
+        }),
         'NONCE_ALREADY_USED'
       )
     })
@@ -363,13 +320,92 @@ contract('Swap Light Unit Tests', async accounts => {
       await mockSenderToken.givenAnyReturnBool(true)
 
       await reverted(
-        swap.swap(...orderToParams(signedOrder), { from: mockSender }),
+        swap.swap(...orderToParams(signedOrder), {
+          from: mockSender,
+        }),
         'UNAUTHORIZED'
       )
     })
   })
 
-  describe('Test authorization', async () => {
+  describe('Test fees', () => {
+    const fee = 300
+    before('deploy Swap', async () => {
+      swap = await Light.new(feeWallet, fee, {
+        from: owner,
+      })
+      mockSignerToken = await MockContract.new()
+      mockSenderToken = await MockContract.new()
+    })
+
+    it('test transfers with fee', async () => {
+      const order = createOrderWithMockTokens({
+        senderAmount: 1000,
+        signerAmount: 1000,
+        senderWallet: mockSender,
+      })
+      const signedOrder = await signOrder(order, mockSigner, swap.address)
+      await mockSignerToken.givenAnyReturnBool(true)
+      await mockSenderToken.givenAnyReturnBool(true)
+
+      const tx = await swap.swap(...orderToParams(signedOrder), {
+        from: mockSender,
+      })
+
+      emitted(tx, 'Swap', e => {
+        return (
+          e.nonce.toNumber() === order.nonce &&
+          e.signerWallet === mockSigner &&
+          e.senderWallet === order.senderWallet &&
+          e.signerToken === order.signerToken &&
+          e.senderToken === order.senderToken &&
+          e.signerAmount.toNumber() === order.signerAmount &&
+          e.senderAmount.toNumber() === order.senderAmount
+        )
+      })
+
+      const senderTransferData = encodeERC20Call('transferFrom', [
+        mockSender,
+        mockSigner,
+        1000,
+      ])
+      const signerTransferData = encodeERC20Call('transferFrom', [
+        mockSigner,
+        mockSender,
+        1000,
+      ])
+
+      const feeTransferData = encodeERC20Call('transferFrom', [
+        mockSigner,
+        feeWallet,
+        30,
+      ])
+
+      const senderTransferCalls = await mockSenderToken.invocationCountForCalldata.call(
+        senderTransferData
+      )
+      const signerTransferCalls = await mockSignerToken.invocationCountForCalldata.call(
+        signerTransferData
+      )
+      const feeTransferCalls = await mockSignerToken.invocationCountForCalldata.call(
+        feeTransferData
+      )
+
+      equal(senderTransferCalls.toNumber(), 1)
+      equal(signerTransferCalls.toNumber(), 1)
+      equal(feeTransferCalls.toNumber(), 1)
+    })
+  })
+
+  describe('Test authorization', () => {
+    beforeEach('deploy Swap', async () => {
+      swap = await Light.new(feeWallet, 0, {
+        from: owner,
+      })
+      mockSignerToken = await MockContract.new()
+      mockSenderToken = await MockContract.new()
+    })
+
     it('test authorized is set', async () => {
       const trx = await swap.authorize(mockSigner, { from: anyone })
       emitted(
@@ -395,6 +431,14 @@ contract('Swap Light Unit Tests', async accounts => {
   })
 
   describe('Test cancel', async () => {
+    beforeEach('deploy Swap', async () => {
+      swap = await Light.new(feeWallet, 0, {
+        from: owner,
+      })
+      mockSignerToken = await MockContract.new()
+      mockSenderToken = await MockContract.new()
+    })
+
     it('test cancellation with no items', async () => {
       const trx = await swap.cancel([], { from: mockSigner })
       await notEmitted(trx, 'Cancel')
@@ -456,6 +500,14 @@ contract('Swap Light Unit Tests', async accounts => {
   })
 
   describe('Test cancelUpTo functionality', async () => {
+    beforeEach('deploy Swap', async () => {
+      swap = await Light.new(feeWallet, 0, {
+        from: owner,
+      })
+      mockSignerToken = await MockContract.new()
+      mockSenderToken = await MockContract.new()
+    })
+
     it('test that given a minimum nonce for a signer is set', async () => {
       const minNonceForSigner = await swap.signerMinimumNonce.call(mockSigner)
       equal(minNonceForSigner, 0, 'mock signer should have min nonce of 0')
