@@ -176,8 +176,13 @@ contract('Swap Light Unit Tests', async accounts => {
         signerTransferData
       )
 
+      const allSignerTransferCalls = await mockSignerToken.invocationCountForMethod.call(
+        signerTransferData
+      )
+
       equal(senderTransferCalls.toNumber(), 1)
       equal(signerTransferCalls.toNumber(), 1)
+      equal(allSignerTransferCalls.toNumber(), 1)
     })
 
     it('test authorized signer', async () => {
