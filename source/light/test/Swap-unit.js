@@ -134,12 +134,14 @@ contract('Swap Light Unit Tests', async accounts => {
         Light.new(feeWallet, 100000000000, { from: owner }),
         'INVALID_FEE'
       )
+
+      await reverted(Light.new(feeWallet, 0, { from: owner }), 'INVALID_FEE')
     })
   })
 
   describe('Test swap', () => {
     before('deploy Swap', async () => {
-      swap = await Light.new(feeWallet, 0, {
+      swap = await Light.new(feeWallet, 1, {
         from: owner,
       })
       mockSignerToken = await MockContract.new()
@@ -431,7 +433,7 @@ contract('Swap Light Unit Tests', async accounts => {
 
   describe('Test authorization', () => {
     beforeEach('deploy Swap', async () => {
-      swap = await Light.new(feeWallet, 0, {
+      swap = await Light.new(feeWallet, 1, {
         from: owner,
       })
       mockSignerToken = await MockContract.new()
@@ -464,7 +466,7 @@ contract('Swap Light Unit Tests', async accounts => {
 
   describe('Test cancel', async () => {
     beforeEach('deploy Swap', async () => {
-      swap = await Light.new(feeWallet, 0, {
+      swap = await Light.new(feeWallet, 1, {
         from: owner,
       })
       mockSignerToken = await MockContract.new()

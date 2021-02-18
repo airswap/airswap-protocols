@@ -79,7 +79,7 @@ contract Light is ILight, Ownable {
 
   constructor(address _feeWallet, uint256 _fee) public {
     require(_feeWallet != address(0), "INVALID_FEE_WALLET");
-    require(_fee < FEE_DIVISOR, "INVALID_FEE");
+    require(0 < _fee && _fee < FEE_DIVISOR, "INVALID_FEE");
     uint256 currentChainId = getChainId();
     DOMAIN_CHAIN_ID = currentChainId;
     DOMAIN_SEPARATOR = keccak256(
@@ -189,7 +189,7 @@ contract Light is ILight, Ownable {
     signerToken.safeTransferFrom(signerWallet, recipient, signerAmount);
 
     // Transfer fee
-    uint256 feeAmount = FEE > 0 ? signerAmount.mul(FEE).div(FEE_DIVISOR) : 0;
+    uint256 feeAmount = signerAmount.mul(FEE).div(FEE_DIVISOR);
     if (feeAmount > 0) {
       signerToken.safeTransferFrom(signerWallet, feeWallet, feeAmount);
     }
