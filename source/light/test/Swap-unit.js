@@ -134,8 +134,6 @@ contract('Swap Light Unit Tests', async accounts => {
         Light.new(feeWallet, 100000000000, { from: owner }),
         'INVALID_FEE'
       )
-
-      await reverted(Light.new(feeWallet, 0, { from: owner }), 'INVALID_FEE')
     })
   })
 

@@ -79,7 +79,7 @@ contract Light is ILight, Ownable {
 
   constructor(address _feeWallet, uint256 _fee) public {
     require(_feeWallet != address(0), "INVALID_FEE_WALLET");
-    require(0 < _fee && _fee < FEE_DIVISOR, "INVALID_FEE");
+    require(_fee < FEE_DIVISOR, "INVALID_FEE");
     uint256 currentChainId = getChainId();
     DOMAIN_CHAIN_ID = currentChainId;
     DOMAIN_SEPARATOR = keccak256(
