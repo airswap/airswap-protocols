@@ -73,9 +73,6 @@ contract Light is ILight, Ownable {
   // The nonce states are encoded as 256 bits, for each nonce in the group 0 means available and 1 means used.
   mapping(address => mapping(uint256 => uint256)) internal _nonceGroups;
 
-  // Mapping of signer addresses to an optionally set minimum valid nonce
-  mapping(address => uint256) public override signerMinimumNonce;
-
   mapping(address => address) public override authorized;
 
   address public feeWallet;
@@ -178,9 +175,6 @@ contract Light is ILight, Ownable {
     // Recover the signer from the hash and signature.
     address signer = _getSigner(hashed, v, r, s);
 
-    // Ensure the nonce is above the minimum.
-    require(nonce >= signerMinimumNonce[signer], "NONCE_TOO_LOW");
-
     // Mark the nonce as used and ensure it hasn't been used before.
     require(_markNonceAsUsed(signer, nonce), "NONCE_ALREADY_USED");
 
@@ -242,16 +236,6 @@ contract Light is ILight, Ownable {
         emit Cancel(nonce, msg.sender);
       }
     }
-  }
-
-  /**
-   * @notice Cancels all nonces below a value
-   * @dev Emits a CancelUpTo event
-   * @param minimumNonce uint256 Minimum valid nonce
-   */
-  function cancelUpTo(uint256 minimumNonce) external override {
-    signerMinimumNonce[msg.sender] = minimumNonce;
-    emit CancelUpTo(minimumNonce, msg.sender);
   }
 
   /**

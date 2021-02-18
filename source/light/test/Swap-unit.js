@@ -259,28 +259,6 @@ contract('Swap Light Unit Tests', async accounts => {
       await reverted(swap.swap(...orderToParams(order)), 'EXPIRY_PASSED')
     })
 
-    it('test when order nonce is too low', async () => {
-      const order = createOrderWithMockTokens({
-        nonce: 0,
-        signerAmount: 200,
-        senderAmount: 200,
-        senderWallet: mockSender,
-      })
-
-      const signedOrder = await signOrder(order, mockSigner, swap.address)
-
-      await swap.cancelUpTo(5, { from: mockSigner })
-
-      await mockSignerToken.givenAnyReturnBool(true)
-      await mockSenderToken.givenAnyReturnBool(true)
-      await reverted(
-        swap.swap(...orderToParams(signedOrder), {
-          from: mockSender,
-        }),
-        'NONCE_TOO_LOW'
-      )
-    })
-
     it('test when nonce has already been used', async () => {
       const order = createOrderWithMockTokens({
         nonce: 0,
@@ -550,30 +528,6 @@ contract('Swap Light Unit Tests', async accounts => {
       equal(val, false)
       val = await swap.nonceUsed.call(mockSigner, 6)
       equal(val, true)
-    })
-  })
-
-  describe('Test cancelUpTo functionality', async () => {
-    beforeEach('deploy Swap', async () => {
-      swap = await Light.new(feeWallet, 0, {
-        from: owner,
-      })
-      mockSignerToken = await MockContract.new()
-      mockSenderToken = await MockContract.new()
-    })
-
-    it('test that given a minimum nonce for a signer is set', async () => {
-      const minNonceForSigner = await swap.signerMinimumNonce.call(mockSigner)
-      equal(minNonceForSigner, 0, 'mock signer should have min nonce of 0')
-
-      const trx = await swap.cancelUpTo(5, { from: mockSigner })
-
-      const newNonceForSigner = await swap.signerMinimumNonce.call(mockSigner)
-      equal(newNonceForSigner, 5, 'mock signer should have a min nonce of 5')
-
-      emitted(trx, 'CancelUpTo', e => {
-        return e.nonce.toNumber() === 5 && e.signerWallet === mockSigner
-      })
     })
   })
 })

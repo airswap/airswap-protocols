@@ -32,8 +32,6 @@ interface ILight {
 
   event Cancel(uint256 indexed nonce, address indexed signerWallet);
 
-  event CancelUpTo(uint256 indexed nonce, address indexed signerWallet);
-
   event Authorized(address indexed signer, address indexed signerWallet);
 
   event Revoked(address indexed signer, address indexed signerWallet);
@@ -93,16 +91,7 @@ interface ILight {
    */
   function cancel(uint256[] calldata nonces) external;
 
-  /**
-   * @notice Cancels all orders below a nonce value
-   * @dev These orders can be made active by reducing the minimum nonce
-   * @param minimumNonce uint256
-   */
-  function cancelUpTo(uint256 minimumNonce) external;
-
   function nonceUsed(address, uint256) external view returns (bool);
-
-  function signerMinimumNonce(address) external view returns (uint256);
 
   function authorized(address) external view returns (address);
 }
