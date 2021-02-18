@@ -110,16 +110,30 @@ contract('Swap Light Unit Tests', async accounts => {
   describe('Setup', () => {
     const fee = 300
     before('deploy Swap', async () => {
-      swap = await Light.new(feeWallet, fee, { from: owner })
       mockSignerToken = await MockContract.new()
       mockSenderToken = await MockContract.new()
     })
 
     it('test setting fee and fee wallet correctly', async () => {
+      swap = await Light.new(feeWallet, fee, { from: owner })
       const storedFee = await swap.FEE.call()
       const storedFeeWallet = await swap.feeWallet.call()
       equal(storedFee.toNumber(), fee)
       equal(storedFeeWallet, feeWallet)
+    })
+
+    it('test invalid feeWallet', async () => {
+      await reverted(
+        Light.new(ADDRESS_ZERO, fee, { from: owner }),
+        'INVALID_FEE_WALLET'
+      )
+    })
+
+    it('test invalid fee', async () => {
+      await reverted(
+        Light.new(feeWallet, 100000000000, { from: owner }),
+        'INVALID_FEE'
+      )
     })
   })
 
@@ -331,6 +345,20 @@ contract('Swap Light Unit Tests', async accounts => {
         'UNAUTHORIZED'
       )
     })
+
+    it('test invalid signature', async () => {
+      const invalidOrder = createOrderWithMockTokens({
+        v: 123,
+        r: '0x1',
+        s: '0x2',
+      })
+      await reverted(
+        swap.swap(...orderToParams(invalidOrder), {
+          from: mockSender,
+        }),
+        'INVALID_SIG'
+      )
+    })
   })
 
   describe('Test fees', () => {
@@ -341,6 +369,27 @@ contract('Swap Light Unit Tests', async accounts => {
       })
       mockSignerToken = await MockContract.new()
       mockSenderToken = await MockContract.new()
+    })
+
+    it('test changing fee wallet', async () => {
+      await swap.setFeeWallet(anyone, { from: owner })
+
+      const storedFeeWallet = await swap.feeWallet.call()
+      equal(storedFeeWallet, anyone)
+    })
+
+    it('test only owner can change fee wallet', async () => {
+      await reverted(
+        swap.setFeeWallet(anyone, { from: anyone }),
+        'Ownable: caller is not the owner'
+      )
+    })
+
+    it('test invalid fee wallet', async () => {
+      await reverted(
+        swap.setFeeWallet(ADDRESS_ZERO, { from: owner }),
+        'INVALID_FEE_WALLET'
+      )
     })
 
     it('test transfers with fee', async () => {
