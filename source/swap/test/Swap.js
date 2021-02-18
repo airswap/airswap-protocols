@@ -173,9 +173,7 @@ contract('Swap', async accounts => {
 
     it('Checks that Bob can swap with Alice (200 AST for 50 DAI)', async () => {
       emitted(await swap(_order, { from: bobAddress }), 'Swap', e => {
-        return (
-          e.signerWallet === aliceAddress && e.signer.wallet === aliceAddress
-        )
+        return e.signerWallet === aliceAddress
       })
     })
     it('Checks that Alice cannot swap with herself (200 AST for 50 AST)', async () => {

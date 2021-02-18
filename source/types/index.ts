@@ -29,31 +29,23 @@ type RequireAtLeastOne<T, Keys extends keyof T = keyof T> = Pick<
     [K in Keys]-?: Required<Pick<T, K>> & Partial<Pick<T, Exclude<Keys, K>>>
   }[Keys]
 
-type Party = {
+export type Party = {
   kind: string
   token: string
+  id?: string
+  amount?: string
 }
-
-export type QuoteParty = RequireAtLeastOne<
-  Party & {
-    id?: string
-    amount?: string
-    transferData?: string
-  },
-  'amount' | 'id'
->
 
 export type OrderParty = Party & {
   wallet: string
-  data: string
 }
 
 export type Quote = {
   timestamp?: string
   protocol?: string
   locator?: string
-  signer: QuoteParty
-  sender: QuoteParty
+  signer: Party
+  sender: Party
 }
 
 export type UnsignedOrder = {
@@ -133,7 +125,8 @@ export const EIP712 = {
     { name: 'kind', type: 'bytes4' },
     { name: 'wallet', type: 'address' },
     { name: 'token', type: 'address' },
-    { name: 'data', type: 'bytes' },
+    { name: 'amount', type: 'uint256' },
+    { name: 'id', type: 'uint256' },
   ],
 }
 
@@ -156,19 +149,19 @@ export const EIP712Light = {
   ],
 }
 
-export const emptyQuoteParty: QuoteParty = {
+export const emptyParty: Party = {
   kind: tokenKinds.ERC20,
   token: ADDRESS_ZERO,
   amount: '0',
   id: '0',
-  transferData: '0x',
 }
 
 export const emptyOrderParty: OrderParty = {
-  kind: tokenKinds.ERC20,
   wallet: ADDRESS_ZERO,
+  kind: tokenKinds.ERC20,
   token: ADDRESS_ZERO,
-  data: '0x',
+  amount: '0',
+  id: '0',
 }
 
 export const emptySignature: Signature = {

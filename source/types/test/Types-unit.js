@@ -1,16 +1,24 @@
 const Types = artifacts.require('../contracts/Types')
 const MockTypes = artifacts.require('MockTypes')
+const { ethers } = require('ethers')
 const { equal } = require('@airswap/test-utils').assert
-const { DOMAIN_NAME, DOMAIN_VERSION } = require('@airswap/constants')
-const { emptySignature } = require('..')
-
-const { createOrder, hashDomain, getOrderHash } = require('@airswap/utils')
-
+const {
+  DOMAIN_NAME,
+  DOMAIN_VERSION,
+  ADDRESS_ZERO,
+} = require('@airswap/constants')
+const { hashDomain, getOrderHash } = require('@airswap/utils')
 const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
+const { createOrder, signOrder } = require('@airswap/utils')
+
+const PROVIDER_URL = web3.currentProvider.host
 
 contract('Types Unit Tests', async ([defaultAccount]) => {
   let mockTypes
   let snapshotId
+
+  const provider = new ethers.providers.JsonRpcProvider(PROVIDER_URL)
+  const signer = provider.getSigner(defaultAccount)
 
   beforeEach(async () => {
     const snapShot = await takeSnapshot()
@@ -29,16 +37,18 @@ contract('Types Unit Tests', async ([defaultAccount]) => {
 
   describe('Test hashing functions within the library', async () => {
     it('Test hashOrder', async () => {
-      const order = createOrder({
-        signer: {
-          wallet: defaultAccount,
-        },
-      })
-      const hashedDomain = '0x' + hashDomain(mockTypes.address).toString('hex')
-      const hashedOrder = await mockTypes.hashOrder.call(
-        { ...order, signature: emptySignature },
-        hashedDomain
+      const order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: defaultAccount,
+          },
+        }),
+        signer,
+        ADDRESS_ZERO
       )
+
+      const hashedDomain = '0x' + hashDomain(mockTypes.address).toString('hex')
+      const hashedOrder = await mockTypes.hashOrder.call(order, hashedDomain)
       equal(
         hashedOrder,
         '0x' + getOrderHash(order, mockTypes.address).toString('hex'),

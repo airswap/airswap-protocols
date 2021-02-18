@@ -72,7 +72,7 @@ describe('Orders', async () => {
       )
     }
     const best = getBestByLowestSenderAmount(orders)
-    expect(parseInt(best.sender.data.slice(2), 16)).to.equal(lowestAmount)
+    expect(best.sender.amount).to.equal(String(lowestAmount))
   })
 
   it('Best by highest signer', async () => {
@@ -92,6 +92,6 @@ describe('Orders', async () => {
       )
     }
     const best = getBestByHighestSignerAmount(orders)
-    expect(parseInt(best.signer.data.slice(2), 16)).to.equal(highestAmount)
+    expect(best.signer.amount).to.equal(String(highestAmount))
   })
 })

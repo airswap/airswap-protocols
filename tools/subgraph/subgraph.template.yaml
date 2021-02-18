@@ -8,7 +8,7 @@ dataSources:
     source:
       address: '{{swap_address}}'
       abi: SwapContract
-      startBlock: {{startBlock}}
+      startBlock: {{start_block_swap}}
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -23,7 +23,7 @@ dataSources:
         - Swap
       abis:
         - name: SwapContract
-          file: ../deployer/build/contracts/Swap.json
+          file: ./abis/Swap.json
       eventHandlers:
         - event: AuthorizeSender(indexed address,indexed address)
           handler: handleAuthorizeSender
@@ -46,7 +46,7 @@ dataSources:
     source:
       address: '{{indexer_address}}'
       abi: Indexer
-      startBlock: {{startBlock}}
+      startBlock: {{start_block_indexer}}
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -60,7 +60,7 @@ dataSources:
         - Unstake
       abis:
         - name: Indexer
-          file: ../deployer/build/contracts/Indexer.json
+          file: ./abis/Indexer.json
       eventHandlers:
         - event: AddTokenToBlacklist(address)
           handler: handleAddTokenToBlacklist
@@ -81,7 +81,7 @@ dataSources:
     source:
       address: '{{delegateFactory_address}}'
       abi: DelegateFactory
-      startBlock: {{startBlock}}
+      startBlock: {{start_block_delegateFactory}}
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -90,11 +90,99 @@ dataSources:
         - CreateDelegate
       abis:
         - name: DelegateFactory
-          file: ../deployer/build/contracts/DelegateFactory.json
+          file: ./abis/DelegateFactory.json
       eventHandlers:
         - event: CreateDelegate(indexed address,address,address,indexed address,address)
           handler: handleCreateDelegate
       file: ./src/DelegateFactoryMapping.ts
+  - kind: ethereum/contract
+    name: SwapLightContract
+    network: '{{network}}'
+    source:
+      address: '{{swap_light_address}}'
+      abi: SwapLightContract
+      startBlock: {{start_block_light}}
+    mapping:
+      kind: ethereum/Events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - Cancel
+        - CancelUpTo
+        - Swap
+      abis:
+        - name: SwapLightContract
+          file: ./abis/Light.json
+      eventHandlers:
+        - event: Cancel(indexed uint256,indexed address)
+          handler: handleCancel
+        - event: CancelUpTo(indexed uint256,indexed address)
+          handler: handleCancelUpTo
+        - event: Swap(indexed uint256,uint256,indexed address,indexed address,address,address,uint256,uint256)
+          handler: handleSwap
+      file: ./src/SwapLightMapping.ts
+  - kind: ethereum/contract
+    name: LockerContract
+    network: '{{network}}'
+    source:
+      address: '{{locker_address}}'
+      abi: LockerContract
+      startBlock: {{start_block_locker}}
+    mapping:
+      kind: ethereum/Events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - Lock
+        - Unlock
+        - SetThrottlingPercentage
+        - SetThrottlingDuration
+        - SetThrottlingBalance
+      abis:
+        - name: LockerContract
+          file: ./abis/Locker.json
+      eventHandlers:
+        - event: Lock(address,uint256)
+          handler: handleLock
+        - event: Unlock(address,uint256)
+          handler: handleUnlock
+        - event: SetThrottlingPercentage(uint256)
+          handler: handleSetThrottlingPercentage
+        - event: SetThrottlingDuration(uint256)
+          handler: handleSetThrottlingDuration
+        - event: SetThrottlingBalance(uint256)
+          handler: handleSetThrottlingBalance
+      file: ./src/LockerMapping.ts
+  - kind: ethereum/contract
+    name: PoolContract
+    network: '{{network}}'
+    source:
+      address: '{{pool_address}}'
+      abi: PoolContract
+      startBlock: {{start_block_pool}}
+    mapping:
+      kind: ethereum/Events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - Enable
+        - Withdraw
+        - SetScale
+        - SetMax
+      abis:
+        - name: PoolContract
+          file: ./abis/Pool.json
+      eventHandlers:
+        - event: Enable(bytes32)
+          handler: handleEnable
+        - event: Withdraw(bytes32[],address,address,uint256)
+          handler: handleWithdraw
+        - event: SetScale(uint256)
+          handler: handleSetScale
+        - event: SetMax(uint256)
+          handler: handleSetMax
+      file: ./src/PoolMapping.ts
+
 templates:
   - name: Index
     kind: ethereum/contract
@@ -110,7 +198,7 @@ templates:
         - Index
       abis:
         - name: Index
-          file: ../deployer/build/contracts/Index.json
+          file: ./abis/Index.json
       eventHandlers: 
         - event: SetLocator(indexed address,uint256,indexed bytes32)
           handler: handleSetLocator
@@ -130,7 +218,7 @@ templates:
         - Delegate
       abis:
         - name: Delegate
-          file: ../deployer/build/contracts/Delegate.json
+          file: ./abis/Delegate.json
       eventHandlers: 
         - event: SetRule(indexed address,indexed address,indexed address,uint256,uint256,uint256)
           handler: handleSetRule

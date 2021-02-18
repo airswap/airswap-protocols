@@ -43,37 +43,12 @@ export function numberToBytes32(number): string {
   return `0x${hexString.padStart(64, '0')}`
 }
 
-export function formatPartyData({
-  kind = tokenKinds.ERC20, // default to ERC20
-  wallet = ADDRESS_ZERO,
-  token = ADDRESS_ZERO,
-  amount = 0,
-  id = 0,
-  transferData = '',
-}): OrderParty {
-  let data
-  switch (kind) {
-    case tokenKinds.ERC20:
-      data = numberToBytes32(amount)
-      break
-    case tokenKinds.ERC721:
-    case tokenKinds.CKITTY:
-      data = numberToBytes32(id)
-      break
-    case tokenKinds.ERC1155:
-      data = numberToBytes32(id)
-        .concat(numberToBytes32(amount).slice(2))
-        .concat(transferData)
-      break
-    default:
-      data = '0x'
-  }
-  return {
-    kind,
-    wallet,
-    token,
-    data,
-  }
+const defaultParty: OrderParty = {
+  kind: '0x36372b07',
+  wallet: ADDRESS_ZERO,
+  token: ADDRESS_ZERO,
+  amount: '0',
+  id: '0',
 }
 
 export function createOrder({
@@ -86,9 +61,9 @@ export function createOrder({
   return lowerCaseAddresses({
     expiry: String(expiry),
     nonce: String(nonce),
-    signer: formatPartyData(signer),
-    sender: formatPartyData(sender),
-    affiliate: formatPartyData(affiliate),
+    signer: { ...defaultParty, ...signer },
+    sender: { ...defaultParty, ...sender },
+    affiliate: { ...defaultParty, ...affiliate },
   })
 }
 
@@ -236,9 +211,12 @@ export function isValidOrder(order: Order): boolean {
     'token' in order['signer'] &&
     'token' in order['sender'] &&
     'token' in order['affiliate'] &&
-    'data' in order['signer'] &&
-    'data' in order['sender'] &&
-    'data' in order['affiliate'] &&
+    'amount' in order['signer'] &&
+    'amount' in order['sender'] &&
+    'amount' in order['affiliate'] &&
+    'id' in order['signer'] &&
+    'id' in order['sender'] &&
+    'id' in order['affiliate'] &&
     'signatory' in order['signature'] &&
     'validator' in order['signature'] &&
     'r' in order['signature'] &&

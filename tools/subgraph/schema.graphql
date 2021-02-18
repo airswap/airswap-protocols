@@ -2,10 +2,16 @@ type User @entity {
   id: ID! # wallet address
   authorizedSigners: [User!]! # signers this user has authorized
   authorizedSenders: [User!]! # senders this user has authorized
-  cancelledNonces: [BigInt!]!
+  cancelledSwapNonces: [BigInt!]!
+  cancelledSwapLightNonces: [BigInt!]!
+  amountInLocker: BigInt
 }
 
 type SwapContract @entity {
+  id: ID! # address of the swap contract
+}
+
+type SwapLightContract @entity {
   id: ID! # address of the swap contract
 }
 
@@ -37,6 +43,29 @@ type Swap @entity {
   affiliateAmount: BigInt
   affiliateId: BigInt
   affiliateToken: Token
+}
+
+type SwapLight @entity {
+  id: ID! # signer address + nonce
+
+  swap: SwapLightContract! # address of swap contract that executed this order
+  block: BigInt # The block this swap was executed at
+  transactionHash: Bytes # The transaction hash the swap was executed at
+  timestamp: BigInt # The timestamp the hash was executed at
+  from: Bytes # address of the originator of the transaction
+  to: Bytes # who the originator sent the transaction to
+  value: BigInt # value sent with the transaction
+
+  nonce: BigInt # order nonce for a user
+  expiry: BigInt
+
+  signer: User
+  signerAmount: BigInt
+  signerToken: Token
+
+  sender: User
+  senderAmount: BigInt
+  senderToken: Token
 }
 
 type Token @entity {
@@ -96,4 +125,33 @@ type Rule @entity {
   maxSenderAmount: BigInt!
   priceCoef: BigInt!
   priceExp: BigInt!
+}
+
+type Locker @entity {
+  id: ID! # address of the locker
+  throttlingPercentage: BigInt
+  throttlingDuration: BigInt
+  throttlingBalance: BigInt
+}
+
+type Pool @entity {
+  id: ID! # address of the pool
+  scale: BigInt
+  max: BigInt
+  roots: [Bytes!]!
+}
+
+type PoolClaim @entity {
+  id: ID! # claim address + token + timestamp
+  pool: Pool!
+  transactionHash: Bytes! # The transaction hash the swap was executed at
+  user: User!
+  token: Token!
+  amount: BigInt!
+}
+
+type EnabledRoot @entity {
+  id: ID! #Pool + root
+  pool: Pool!
+  root: Bytes!
 }

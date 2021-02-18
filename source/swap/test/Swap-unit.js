@@ -214,7 +214,7 @@ contract('Swap Unit Tests', async accounts => {
       const transferHandlerRegistryTemplate = await TransferHandlerRegistry.new()
 
       const handler_transferTokens = handlerTemplate.contract.methods
-        .transferTokens(ADDRESS_ZERO, ADDRESS_ZERO, ADDRESS_ZERO, '0x')
+        .transferTokens(ADDRESS_ZERO, ADDRESS_ZERO, 0, 0, ADDRESS_ZERO)
         .encodeABI()
 
       const registry_transferHandlers = transferHandlerRegistryTemplate.contract.methods
