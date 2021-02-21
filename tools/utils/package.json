@@ -1,6 +1,6 @@
 {
   "name": "@airswap/utils",
-  "version": "0.3.21",
+  "version": "0.4.0",
   "description": "Utilities for AirSwap Developers",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>"
