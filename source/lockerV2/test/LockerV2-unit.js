@@ -16,6 +16,7 @@ describe('Locker V2', () => {
   const CLIFF = 10 //blocks
   const PERIOD_LENGTH = 1 //blocks
   const PERCENT_PER_PERIOD = 1 //percent
+  // every 1 block 1% is vested, user can only claim starting afater 10 blocks, or 10% vested
 
   beforeEach(async () => {
     const snapshot = await timeMachine.takeSnapshot()
@@ -104,12 +105,25 @@ describe('Locker V2', () => {
       await expect(
         locker.connect(account1).unstake('0', '50')
       ).to.be.revertedWith('insufficient claimable amount')
-      // const userStakes = await locker
-      //   .connect(account1)
-      //   .getStakes(account1.address)
-      // expect(userStakes.length).to.equal(1)
-      // expect(userStakes[0].initialAmount).to.equal(100)
-      // expect(userStakes[0].claimableAmount).to.equal(50)
+    })
+
+    it('test a successful unstaking', async () => {
+      await stakingToken.mock.transferFrom.returns(true)
+      await stakingToken.mock.transfer.returns(true)
+      await locker.connect(account1).stake('100')
+
+      // move 10 blocks forward
+      for (let index = 0; index < 10; index++) {
+        await timeMachine.advanceBlock()
+      }
+
+      await locker.connect(account1).unstake('0', '10')
+      const userStakes = await locker
+        .connect(account1)
+        .getStakes(account1.address)
+      expect(userStakes.length).to.equal(1)
+      expect(userStakes[0].initialAmount).to.equal(100)
+      expect(userStakes[0].claimableAmount).to.equal(90)
     })
   })
 })
