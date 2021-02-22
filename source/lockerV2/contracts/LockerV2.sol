@@ -47,20 +47,20 @@ contract LockerV2 is Ownable {
   function unstake(uint256 index, uint256 amount) external {
     Stake storage stakeData = stakes[msg.sender][index];
     require(
-      block.number.sub(stakeData.blockNumber) < cliff,
+      block.number.sub(stakeData.blockNumber) >= cliff,
       "cliff not reached"
     );
     uint256 vested = vested(index, msg.sender);
     uint256 withdrawableAmount = availableToUnstake(index, msg.sender);
-    uint256 amountToWithdraw = Math.min(withdrawableAmount, amount);
-    stakeData.claimableAmount = stakeData.claimableAmount.sub(amountToWithdraw);
+    require(amount <= withdrawableAmount, "insufficient claimable amount");
+    stakeData.claimableAmount = stakeData.claimableAmount.sub(amount);
     if (stakeData.claimableAmount == 0) {
       // remove stake element if claimable amount goes to 0
       Stake[] storage accountStakes = stakes[msg.sender];
       stakeData = accountStakes[accountStakes.length.sub(1)];
       stakes[msg.sender].pop();
     }
-    stakingToken.transfer(msg.sender, amountToWithdraw);
+    stakingToken.transfer(msg.sender, amount);
   }
 
   function vested(uint256 index, address account)

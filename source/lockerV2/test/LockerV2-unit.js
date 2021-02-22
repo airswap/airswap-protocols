@@ -13,9 +13,9 @@ describe('Locker V2', () => {
   let stakingToken
   let lockerFactory
   let locker
-  const CLIFF = 10
-  const PERIOD_LENGTH = 3
-  const PERCENT_PER_PERIOD = 10
+  const CLIFF = 10 //blocks
+  const PERIOD_LENGTH = 1 //blocks
+  const PERCENT_PER_PERIOD = 1 //percent
 
   beforeEach(async () => {
     const snapshot = await timeMachine.takeSnapshot()
@@ -76,6 +76,40 @@ describe('Locker V2', () => {
       expect(userStakes.length).to.equal(1)
       expect(userStakes[0].initialAmount).to.equal(170)
       expect(userStakes[0].claimableAmount).to.equal(170)
+    })
+
+    //TEST failure on transfers
+  })
+
+  describe('Unstake', async () => {
+    it('test unstaking fails when cliff has not passed', async () => {
+      await stakingToken.mock.transferFrom.returns(true)
+      await stakingToken.mock.transfer.returns(true)
+      await locker.connect(account1).stake('100')
+      await expect(
+        locker.connect(account1).unstake('0', '50')
+      ).to.be.revertedWith('cliff not reached')
+    })
+
+    it('test unstaking fails when attempting to claim more than is available', async () => {
+      await stakingToken.mock.transferFrom.returns(true)
+      await stakingToken.mock.transfer.returns(true)
+      await locker.connect(account1).stake('100')
+
+      // move 10 blocks forward
+      for (let index = 0; index < 10; index++) {
+        await timeMachine.advanceBlock()
+      }
+
+      await expect(
+        locker.connect(account1).unstake('0', '50')
+      ).to.be.revertedWith('insufficient claimable amount')
+      // const userStakes = await locker
+      //   .connect(account1)
+      //   .getStakes(account1.address)
+      // expect(userStakes.length).to.equal(1)
+      // expect(userStakes[0].initialAmount).to.equal(100)
+      // expect(userStakes[0].claimableAmount).to.equal(50)
     })
   })
 })
