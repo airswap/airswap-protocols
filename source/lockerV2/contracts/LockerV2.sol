@@ -9,10 +9,6 @@ import "@openzeppelin/contracts/math/Math.sol";
 contract LockerV2 is Ownable {
   using SafeERC20 for IERC20;
   using SafeMath for uint256;
-
-  // event Stake(address participant, uint256 amount);
-  // event Unstake(address participant, uint256 amount);
-
   struct Stake {
     uint256 initialAmount;
     uint256 claimableAmount;
@@ -40,13 +36,11 @@ contract LockerV2 is Ownable {
   function stake(uint256 amount) external {
     stakes[msg.sender].push(Stake(amount, amount, block.number));
     stakingToken.safeTransferFrom(msg.sender, address(this), amount);
-    // emit Stake(msg.sender, amount);
   }
 
   function stakeFor(address account, uint256 amount) external {
     stakes[account].push(Stake(amount, amount, block.number));
     stakingToken.safeTransferFrom(account, address(this), amount);
-    // emit Stake(account, amount);
   }
 
   function unstake(uint256 index, uint256 amount) external {
@@ -56,7 +50,7 @@ contract LockerV2 is Ownable {
       "cliff not reached"
     );
     uint256 vested = vested(index, msg.sender);
-    uint256 withdrawableAmount = unstakeable(index, msg.sender);
+    uint256 withdrawableAmount = availableToUnstake(index, msg.sender);
     uint256 amountToWithdraw = Math.min(withdrawableAmount, amount);
     stakeData.claimableAmount = stakeData.claimableAmount.sub(amountToWithdraw);
     if (stakeData.claimableAmount == 0) {
@@ -65,7 +59,6 @@ contract LockerV2 is Ownable {
       stakeData = accountStakes[accountStakes.length.sub(1)];
       stakes[msg.sender].pop();
     }
-    // emit Unstake(msg.sender, amountToWithdraw);
     stakingToken.transfer(msg.sender, amountToWithdraw);
   }
 
@@ -81,7 +74,7 @@ contract LockerV2 is Ownable {
       (percentPerPeriod.mul(numPeriods).mul(stakeData.initialAmount)).div(100);
   }
 
-  function unstakeable(uint256 index, address account)
+  function availableToUnstake(uint256 index, address account)
     public
     view
     returns (uint256)
@@ -91,7 +84,7 @@ contract LockerV2 is Ownable {
     return Math.min(vestedAmount, claimableAmount);
   }
 
-  function stakedBalance(address account) external view returns (uint256) {
+  function balanceOf(address account) external view returns (uint256) {
     Stake[] memory accountStakes = stakes[account];
     uint256 stakedBalance = 0;
     for (uint256 i = 0; i < accountStakes.length; i++) {

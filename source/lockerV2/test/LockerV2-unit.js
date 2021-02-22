@@ -5,11 +5,16 @@ const { deployMockContract } = waffle
 const IERC20 = artifacts.require('IERC20')
 const IERC20_Interface = new ethers.utils.Interface(IERC20.abi)
 
-describe('Locker V2', function () {
+describe('Locker V2', () => {
   let snapshotId
   let deployer
   let randomUser
   let stakingToken
+  let lockerFactory
+  let locker
+  const CLIFF = 10
+  const PERIOD_LENGTH = 3
+  const PERCENT_PER_PERIOD = 10
 
   beforeEach(async () => {
     const snapshot = await timeMachine.takeSnapshot()
@@ -23,22 +28,33 @@ describe('Locker V2', function () {
   before(async () => {
     [deployer, randomUser] = await ethers.getSigners()
     stakingToken = await deployMockContract(deployer, IERC20.abi)
+    lockerFactory = await ethers.getContractFactory('LockerV2')
+    locker = await lockerFactory.deploy(
+      stakingToken.address,
+      CLIFF,
+      PERIOD_LENGTH,
+      PERCENT_PER_PERIOD
+    )
+    await locker.deployed()
   })
 
-  it('test constructor sets default values', async function () {
-    const LockerFactory = await ethers.getContractFactory('LockerV2')
-    const locker = await LockerFactory.deploy(stakingToken.address, 5, 2, 10)
-    await locker.deployed()
-    const owner = await locker.owner()
-    const tokenAddress = await locker.stakingToken()
-    const cliff = await locker.cliff()
-    const periodLength = await locker.periodLength()
-    const percentPerPeriod = await locker.percentPerPeriod()
+  describe('Default Values', async () => {
+    it('test constructor sets default values', async () => {
+      const owner = await locker.owner()
+      const tokenAddress = await locker.stakingToken()
+      const cliff = await locker.cliff()
+      const periodLength = await locker.periodLength()
+      const percentPerPeriod = await locker.percentPerPeriod()
 
-    expect(owner).to.equal(deployer.address)
-    expect(tokenAddress).to.equal(stakingToken.address)
-    expect(cliff).to.equal(5)
-    expect(periodLength).to.equal(2)
-    expect(percentPerPeriod).to.equal(10)
+      expect(owner).to.equal(deployer.address)
+      expect(tokenAddress).to.equal(stakingToken.address)
+      expect(cliff).to.equal(CLIFF)
+      expect(periodLength).to.equal(PERIOD_LENGTH)
+      expect(percentPerPeriod).to.equal(PERCENT_PER_PERIOD)
+    })
+  })
+
+  describe('Stake', async () => {
+    it('test', async () => { })
   })
 })
