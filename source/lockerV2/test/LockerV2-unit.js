@@ -8,7 +8,8 @@ const IERC20_Interface = new ethers.utils.Interface(IERC20.abi)
 describe('Locker V2', () => {
   let snapshotId
   let deployer
-  let randomUser
+  let account1
+  let account2
   let stakingToken
   let lockerFactory
   let locker
@@ -26,7 +27,7 @@ describe('Locker V2', () => {
   })
 
   before(async () => {
-    [deployer, randomUser] = await ethers.getSigners()
+    [deployer, account1, account2] = await ethers.getSigners()
     stakingToken = await deployMockContract(deployer, IERC20.abi)
     lockerFactory = await ethers.getContractFactory('LockerV2')
     locker = await lockerFactory.deploy(
@@ -57,13 +58,24 @@ describe('Locker V2', () => {
   describe('Stake', async () => {
     it('test successful staking', async () => {
       await stakingToken.mock.transferFrom.returns(true)
-      await locker.connect(randomUser).stake('100')
+      await locker.connect(account1).stake('100')
       const userStakes = await locker
-        .connect(randomUser)
-        .getStakes(randomUser.address)
+        .connect(account1)
+        .getStakes(account1.address)
       expect(userStakes.length).to.equal(1)
       expect(userStakes[0].initialAmount).to.equal(100)
       expect(userStakes[0].claimableAmount).to.equal(100)
+    })
+
+    it('test successful staking for', async () => {
+      await stakingToken.mock.transferFrom.returns(true)
+      await locker.connect(account1).stakeFor(account2.address, '170')
+      const userStakes = await locker
+        .connect(account1)
+        .getStakes(account2.address)
+      expect(userStakes.length).to.equal(1)
+      expect(userStakes[0].initialAmount).to.equal(170)
+      expect(userStakes[0].claimableAmount).to.equal(170)
     })
   })
 })
