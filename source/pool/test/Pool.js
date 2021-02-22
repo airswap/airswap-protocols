@@ -89,7 +89,6 @@ contract('Pool', async accounts => {
             },
           ],
           feeToken.address,
-          0,
           {
             from: aliceAddress,
           }
@@ -112,7 +111,6 @@ contract('Pool', async accounts => {
         await pool.withdraw(
           [{ root: getRoot(tree), score: BOB_SCORE, proof }],
           feeToken.address,
-          0,
           {
             from: bobAddress,
           }
@@ -135,7 +133,6 @@ contract('Pool', async accounts => {
         pool.withdraw(
           [{ root: getRoot(tree), score: BOB_SCORE, proof }],
           feeToken.address,
-          0,
           {
             from: bobAddress,
           }
@@ -166,7 +163,6 @@ contract('Pool', async accounts => {
         pool.withdraw(
           [{ root: getRoot(badTree), score: CAROL_BAD_SCORE, proof }],
           feeToken.address,
-          0,
           {
             from: carolAddress,
           }
@@ -187,7 +183,6 @@ contract('Pool', async accounts => {
         pool.withdraw(
           [{ root: getRoot(tree), score: CAROL_BAD_SCORE, proof }],
           feeToken.address,
-          0,
           {
             from: carolAddress,
           }
@@ -216,7 +211,6 @@ contract('Pool', async accounts => {
             },
           ],
           feeToken.address,
-          0,
           {
             from: carolAddress,
           }
@@ -243,7 +237,6 @@ contract('Pool', async accounts => {
             },
           ],
           feeToken.address,
-          0,
           {
             from: carolAddress,
           }
@@ -253,7 +246,7 @@ contract('Pool', async accounts => {
     })
     it(`Carol tries to withdraw claim zero claims and fails`, async () => {
       await reverted(
-        pool.withdraw([], feeToken.address, 0),
+        pool.withdraw([], feeToken.address),
         'CLAIMS_MUST_BE_PROVIDED'
       )
     })
@@ -270,7 +263,6 @@ contract('Pool', async accounts => {
             },
           ],
           feeToken.address,
-          0,
           {
             from: carolAddress,
           }
@@ -299,7 +291,6 @@ contract('Pool', async accounts => {
             },
           ],
           feeToken.address,
-          0,
           {
             from: carolAddress,
           }

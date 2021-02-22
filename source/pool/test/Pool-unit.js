@@ -118,7 +118,7 @@ contract('Pool Unit Tests', async accounts => {
           },
         ],
         feeToken.address,
-        0,
+
         {
           from: aliceAddress,
         }
@@ -139,7 +139,7 @@ contract('Pool Unit Tests', async accounts => {
 
     it('Test withdraw reverts with no claims provided', async () => {
       await reverted(
-        pool.withdraw([], feeToken.address, 0, {
+        pool.withdraw([], feeToken.address, {
           from: aliceAddress,
         }),
         'CLAIMS_MUST_BE_PROVIDED'
@@ -158,7 +158,7 @@ contract('Pool Unit Tests', async accounts => {
             },
           ],
           feeToken.address,
-          0,
+
           {
             from: aliceAddress,
           }
@@ -186,7 +186,7 @@ contract('Pool Unit Tests', async accounts => {
           },
         ],
         feeToken.address,
-        0,
+
         {
           from: aliceAddress,
         }
@@ -201,7 +201,7 @@ contract('Pool Unit Tests', async accounts => {
             },
           ],
           feeToken.address,
-          0,
+
           {
             from: aliceAddress,
           }
@@ -231,7 +231,7 @@ contract('Pool Unit Tests', async accounts => {
             },
           ],
           feeToken.address,
-          0,
+
           {
             from: aliceAddress,
           }
