@@ -3,7 +3,6 @@ const timeMachine = require('ganache-time-traveler')
 const { artifacts, ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
 const IERC20 = artifacts.require('IERC20')
-const IERC20_Interface = new ethers.utils.Interface(IERC20.abi)
 
 describe('Locker V2', () => {
   let snapshotId
@@ -79,7 +78,8 @@ describe('Locker V2', () => {
       expect(userStakes[0].claimableAmount).to.equal(170)
     })
 
-    //TEST failure on transfers
+    // TEST failure on transfers
+    // TEST  more than 1 stake
   })
 
   describe('Unstake', async () => {
@@ -97,7 +97,7 @@ describe('Locker V2', () => {
       await stakingToken.mock.transfer.returns(true)
       await locker.connect(account1).stake('100')
 
-      // move 10 blocks forward
+      // move 10 blocks forward - 10% vested
       for (let index = 0; index < 10; index++) {
         await timeMachine.advanceBlock()
       }
@@ -112,7 +112,7 @@ describe('Locker V2', () => {
       await stakingToken.mock.transfer.returns(true)
       await locker.connect(account1).stake('100')
 
-      // move 10 blocks forward
+      // move 10 blocks forward - 10% vested
       for (let index = 0; index < 10; index++) {
         await timeMachine.advanceBlock()
       }
@@ -124,6 +124,83 @@ describe('Locker V2', () => {
       expect(userStakes.length).to.equal(1)
       expect(userStakes[0].initialAmount).to.equal(100)
       expect(userStakes[0].claimableAmount).to.equal(90)
+    })
+
+    it('test a successful unstaking and removal of stake', async () => {
+      await stakingToken.mock.transferFrom.returns(true)
+      await stakingToken.mock.transfer.returns(true)
+      await locker.connect(account1).stake('100')
+
+      // move 100 blocks forward - 100% vested
+      for (let index = 0; index < 100; index++) {
+        await timeMachine.advanceBlock()
+      }
+
+      await locker.connect(account1).unstake('0', '100')
+      const userStakes = await locker
+        .connect(account1)
+        .getStakes(account1.address)
+      expect(userStakes.length).to.equal(0)
+    })
+  })
+
+  describe('Vested', async () => {
+    it('test getting vested amounts match expected amount per block', async () => {
+      await stakingToken.mock.transferFrom.returns(true)
+      await stakingToken.mock.transfer.returns(true)
+      await locker.connect(account1).stake('100')
+      // move 5 blocks forward - 5%
+      for (let index = 0; index < 5; index++) {
+        await timeMachine.advanceBlock()
+      }
+      const vestedAmount = await locker.vested('0', account1.address)
+      expect(vestedAmount).to.equal('5')
+    })
+  })
+
+  describe('Available to unstake', async () => {
+    it('test available to unstake is 0, if cliff has not passed', async () => {
+      await stakingToken.mock.transferFrom.returns(true)
+      await stakingToken.mock.transfer.returns(true)
+      await locker.connect(account1).stake('100')
+      const availableToUnstake = await locker.availableToUnstake(
+        '0',
+        account1.address
+      )
+
+      for (let index = 0; index < CLIFF - 1; index++) {
+        await timeMachine.advanceBlock()
+      }
+      expect(availableToUnstake).to.equal('0')
+    })
+
+    it('test available to unstake is > 0, if cliff has passed', async () => {
+      await stakingToken.mock.transferFrom.returns(true)
+      await stakingToken.mock.transfer.returns(true)
+      await locker.connect(account1).stake('100')
+      for (let index = 0; index < CLIFF; index++) {
+        await timeMachine.advanceBlock()
+      }
+
+      const availableToUnstake = await locker.availableToUnstake(
+        '0',
+        account1.address
+      )
+      // every 1 block 1% is vested, user can only claim starting afater 10 blocks, or 10% vested
+      expect(availableToUnstake).to.equal('10')
+    })
+  })
+
+  describe('Balance of all stakes', async () => {
+    it('test get balance of all stakes', async () => {
+      await stakingToken.mock.transferFrom.returns(true)
+      await stakingToken.mock.transfer.returns(true)
+      // stake 400 over 4 blocks
+      for (let index = 0; index < 4; index++) {
+        await locker.connect(account1).stake('100')
+      }
+      const balance = await locker.connect(account1).balanceOf(account1.address)
+      expect(balance).to.equal('400')
     })
   })
 })

@@ -81,7 +81,11 @@ contract LockerV2 is Ownable {
     returns (uint256)
   {
     uint256 vestedAmount = vested(index, account);
-    uint256 claimableAmount = stakes[account][index].claimableAmount;
+    uint256 claimableAmount = 0;
+    Stake memory stakeData = stakes[account][index];
+    if (block.number.sub(stakeData.blockNumber) >= cliff) {
+      claimableAmount = stakeData.claimableAmount;
+    }
     return Math.min(vestedAmount, claimableAmount);
   }
 
