@@ -1,5 +1,6 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.7.6;
+pragma abicoder v2;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
@@ -91,5 +92,19 @@ contract LockerV2 is Ownable {
       stakedBalance = stakedBalance.add(accountStakes[i].claimableAmount);
     }
     return stakedBalance;
+  }
+
+  function getStakes(address account)
+    external
+    view
+    returns (Stake[] memory accountStakes)
+  {
+    uint256 length = stakes[account].length;
+    accountStakes = new Stake[](length);
+    for (uint256 i = 0; i < length; i++) {
+      Stake memory stakeData = stakes[account][i];
+      accountStakes[i] = stakeData;
+    }
+    return accountStakes;
   }
 }

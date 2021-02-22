@@ -55,6 +55,15 @@ describe('Locker V2', () => {
   })
 
   describe('Stake', async () => {
-    it('test', async () => { })
+    it('test successful staking', async () => {
+      await stakingToken.mock.transferFrom.returns(true)
+      await locker.connect(randomUser).stake('100')
+      const userStakes = await locker
+        .connect(randomUser)
+        .getStakes(randomUser.address)
+      expect(userStakes.length).to.equal(1)
+      expect(userStakes[0].initialAmount).to.equal(100)
+      expect(userStakes[0].claimableAmount).to.equal(100)
+    })
   })
 })
