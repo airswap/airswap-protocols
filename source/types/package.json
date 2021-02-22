@@ -1,6 +1,6 @@
 {
   "name": "@airswap/types",
-  "version": "3.5.14",
+  "version": "3.5.15",
   "description": "TypeScript Types and Solidity Structs for AirSwap Developers",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>",
