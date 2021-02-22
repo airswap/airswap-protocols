@@ -2,8 +2,8 @@ const { expect } = require('chai')
 const timeMachine = require('ganache-time-traveler')
 const { artifacts, ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
-const ERC20 = artifacts.require('ERC20')
-const ERC20_Interface = new ethers.utils.Interface(ERC20.abi)
+const IERC20 = artifacts.require('IERC20')
+const IERC20_Interface = new ethers.utils.Interface(IERC20.abi)
 
 describe('Locker V2', function () {
   let snapshotId
@@ -22,7 +22,7 @@ describe('Locker V2', function () {
 
   before(async () => {
     [deployer, randomUser] = await ethers.getSigners()
-    stakingToken = await deployMockContract(ERC20.abi)
+    stakingToken = await deployMockContract(deployer, IERC20.abi)
   })
 
   it('Constructor', async function () {
