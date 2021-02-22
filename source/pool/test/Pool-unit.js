@@ -118,7 +118,6 @@ contract('Pool Unit Tests', async accounts => {
           },
         ],
         feeToken.address,
-
         {
           from: aliceAddress,
         }
@@ -158,7 +157,6 @@ contract('Pool Unit Tests', async accounts => {
             },
           ],
           feeToken.address,
-
           {
             from: aliceAddress,
           }
@@ -186,7 +184,6 @@ contract('Pool Unit Tests', async accounts => {
           },
         ],
         feeToken.address,
-
         {
           from: aliceAddress,
         }
@@ -201,7 +198,6 @@ contract('Pool Unit Tests', async accounts => {
             },
           ],
           feeToken.address,
-
           {
             from: aliceAddress,
           }
@@ -231,7 +227,6 @@ contract('Pool Unit Tests', async accounts => {
             },
           ],
           feeToken.address,
-
           {
             from: aliceAddress,
           }
