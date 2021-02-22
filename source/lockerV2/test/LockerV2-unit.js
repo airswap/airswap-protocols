@@ -25,9 +25,20 @@ describe('Locker V2', function () {
     stakingToken = await deployMockContract(deployer, IERC20.abi)
   })
 
-  it('Constructor', async function () {
+  it('test constructor sets default values', async function () {
     const LockerFactory = await ethers.getContractFactory('LockerV2')
     const locker = await LockerFactory.deploy(stakingToken.address, 5, 2, 10)
     await locker.deployed()
+    const owner = await locker.owner()
+    const tokenAddress = await locker.stakingToken()
+    const cliff = await locker.cliff()
+    const periodLength = await locker.periodLength()
+    const percentPerPeriod = await locker.percentPerPeriod()
+
+    expect(owner).to.equal(deployer.address)
+    expect(tokenAddress).to.equal(stakingToken.address)
+    expect(cliff).to.equal(5)
+    expect(periodLength).to.equal(2)
+    expect(percentPerPeriod).to.equal(10)
   })
 })
