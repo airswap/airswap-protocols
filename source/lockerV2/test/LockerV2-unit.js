@@ -4,7 +4,7 @@ const { artifacts, ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
 const IERC20 = artifacts.require('IERC20')
 
-describe('Locker V2', () => {
+describe('LockerV2 Unit', () => {
   let snapshotId
   let deployer
   let account1
