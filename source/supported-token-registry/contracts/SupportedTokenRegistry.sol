@@ -64,8 +64,9 @@ contract SupportedTokenRegistry is Ownable {
   function removeAllTokens() external {
     EnumerableSet.AddressSet storage supportedTokenList =
       supportedTokens[msg.sender];
-    for (uint256 i = 0; i < supportedTokenList.length(); i++) {
-      address token = supportedTokenList.at(i);
+    uint256 length = supportedTokenList.length();
+    for (uint256 i = 0; i < length; i++) {
+      address token = supportedTokenList.at(0);
       supportedTokenList.remove(token);
       supportingStakers[token].remove(msg.sender);
     }

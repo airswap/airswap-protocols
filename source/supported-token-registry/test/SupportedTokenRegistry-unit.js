@@ -60,12 +60,90 @@ describe('SupportedTokenRegistry Unit', () => {
   })
 
   describe('Add Tokens', async () => {
-    it('add a list of tokens', async () => {
+    it('add a list of tokens when there is sufficient stake token', async () => {
       await stakingToken.mock.transferFrom.returns(true)
       await registry
         .connect(account1)
         .addTokens([token1.address, token2.address, token3.address])
       const tokens = await registry.getSupportedTokens(account1.address)
+      expect(tokens.length).to.equal(3)
+      expect(tokens[0]).to.equal(token1.address)
+      expect(tokens[1]).to.equal(token2.address)
+      expect(tokens[2]).to.equal(token3.address)
+
+      //TODO: test supporting stakers for tokens
+    })
+
+    it('add a lsit of tokens when there is insufficent stake token', async () => {
+      await stakingToken.mock.transferFrom.revertsWithReason(
+        'Insufficient Funds'
+      )
+      await expect(
+        registry
+          .connect(account1)
+          .addTokens([token1.address, token2.address, token3.address])
+      ).to.be.revertedWith('Insufficient Funds')
+    })
+
+    // TODO: add duplicates and show that the total number of tokens hasn't increased
+  })
+
+  describe('Remove Tokens', async () => {
+    it('remove a list of tokens', async () => {
+      await stakingToken.mock.transfer.returns(true)
+      await stakingToken.mock.transferFrom.returns(true)
+      await registry
+        .connect(account1)
+        .addTokens([token1.address, token2.address, token3.address])
+
+      await registry
+        .connect(account1)
+        .removeTokens([token1.address, token2.address, token3.address])
+
+      const tokens = await registry.getSupportedTokens(account1.address)
+      expect(tokens.length).to.equal(0)
+
+      //TODO: test supporting stakers for tokens
+    })
+
+    it('remove all tokens for an staker', async () => {
+      await stakingToken.mock.transfer.returns(true)
+      await stakingToken.mock.transferFrom.returns(true)
+      await registry
+        .connect(account1)
+        .addTokens([token1.address, token2.address, token3.address])
+      await registry.connect(account1).removeAllTokens()
+      const tokens = await registry.getSupportedTokens(account1.address)
+      expect(tokens.length).to.equal(0)
+
+      //TODO test supporting stakers for tokens
+    })
+  })
+
+  describe('Set Locator', async () => {
+    it('successful setting of locator', async () => {
+      await registry
+        .connect(account1)
+        .setLocator(ethers.utils.formatBytes32String('www.noneLocator.com'))
+
+      const locator = await registry.locator(account1.address)
+      expect(ethers.utils.parseBytes32String(locator)).to.equal(
+        'www.noneLocator.com'
+      )
+    })
+
+    it('successful changing of locator', async () => {
+      await registry
+        .connect(account1)
+        .setLocator(ethers.utils.formatBytes32String('www.noneLocator.com'))
+      await registry
+        .connect(account1)
+        .setLocator(ethers.utils.formatBytes32String('www.TheCatsMeow.com'))
+
+      const locator = await registry.locator(account1.address)
+      expect(ethers.utils.parseBytes32String(locator)).to.equal(
+        'www.TheCatsMeow.com'
+      )
     })
   })
 })
