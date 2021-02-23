@@ -1,14 +1,8 @@
-require("@nomiclabs/hardhat-waffle");
 
-// This is a sample Hardhat task. To learn how to create your own go to
-// https://hardhat.org/guides/create-task.html
-task("accounts", "Prints the list of accounts", async () => {
-  const accounts = await ethers.getSigners();
-
-  for (const account of accounts) {
-    console.log(account.address);
-  }
-});
+require('@nomiclabs/hardhat-ethers')
+require('@nomiclabs/hardhat-truffle5')
+require('@nomiclabs/hardhat-waffle')
+require('@nomiclabs/hardhat-etherscan')
 
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
@@ -17,6 +11,33 @@ task("accounts", "Prints the list of accounts", async () => {
  * @type import('hardhat/config').HardhatUserConfig
  */
 module.exports = {
-  solidity: "0.7.3",
-};
-
+  networks: {
+    localhost: {
+      url: 'http://127.0.0.1:8545',
+      timeout: 1000000,
+    },
+    coverage: {
+      url: 'http://localhost:8555',
+    },
+    mainnet: {
+      url: 'https://mainnet.infura.io/v3/' + process.env.INFURA_API_KEY,
+      gasPrice: 72e9,
+      accounts: {
+        mnemonic: process.env.MNEMONIC || '',
+      },
+      timeout: 1000000,
+    },
+  },
+  solidity: {
+    version: '0.7.6',
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 999999,
+      },
+    },
+  },
+  mocha: {
+    timeout: 1000000,
+  },
+}
