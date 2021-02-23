@@ -146,4 +146,29 @@ describe('SupportedTokenRegistry Unit', () => {
       )
     })
   })
+
+  describe('Balance Of', async () => {
+    it('verify staking balance after a user has added tokens', async () => {
+      await stakingToken.mock.transferFrom.returns(true)
+      await registry
+        .connect(account1)
+        .addTokens([token1.address, token2.address, token3.address])
+
+      const balance = await registry.balanceOf(account1.address)
+      expect(balance).to.equal(OBLIGATION_COST + TOKEN_COST * 3)
+    })
+
+    it('verify staking balance after a user has removed tokens', async () => {
+      await stakingToken.mock.transfer.returns(true)
+      await stakingToken.mock.transferFrom.returns(true)
+      await registry
+        .connect(account1)
+        .addTokens([token1.address, token2.address, token3.address])
+
+      await registry.connect(account1).removeTokens([token2.address])
+
+      const balance = await registry.balanceOf(account1.address)
+      expect(balance).to.equal(OBLIGATION_COST + TOKEN_COST * 2)
+    })
+  })
 })

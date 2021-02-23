@@ -102,4 +102,9 @@ contract SupportedTokenRegistry is Ownable {
   function setLocator(bytes32 _locator) external {
     locator[msg.sender] = _locator;
   }
+
+  function balanceOf(address staker) external view returns (uint256) {
+    uint256 tokenCount = supportedTokens[staker].length();
+    return (obligationCost.add(tokenCost.mul(tokenCount)));
+  }
 }
