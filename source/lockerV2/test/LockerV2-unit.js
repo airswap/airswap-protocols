@@ -223,6 +223,43 @@ describe('LockerV2 Unit', () => {
       // every 1 block 1% is vested, user can only claim starting afater 10 blocks, or 10% vested
       expect(availableToUnstake).to.equal('10')
     })
+
+    it('available to unstake with multiple stakes and varying passed cliffs', async () => {
+      await stakingToken.mock.transferFrom.returns(true)
+      await stakingToken.mock.transfer.returns(true)
+      await locker.connect(account1).stake('100')
+      // 10% of first stake is unlocked
+      for (let index = 0; index < CLIFF; index++) {
+        await timeMachine.advanceBlock()
+      }
+      await locker.connect(account1).stake('160')
+      // 13% of second stake is unlocked
+      for (let index = 0; index < 13; index++) {
+        await timeMachine.advanceBlock()
+      }
+      await locker.connect(account1).stake('170')
+
+      // 10 blocks + 1 stake + 13 blocks + 1 block = 24 total blocks passed for first stake
+      // 13 blocks + 1 block = 14 total blocks passed for second stake
+      // 0 blocks = 0 total blocks passed for third stake
+
+      const availableStake1 = await locker.availableToUnstake(
+        '0',
+        account1.address
+      )
+      const availableStake2 = await locker.availableToUnstake(
+        '1',
+        account1.address
+      )
+      const availableStake3 = await locker.availableToUnstake(
+        '2',
+        account1.address
+      )
+      // every 1 block 1% is vested, user can only claim starting afater 10 blocks, or 10% vested
+      expect(availableStake1).to.equal('25')
+      expect(availableStake2).to.equal('22')
+      expect(availableStake3).to.equal('0')
+    })
   })
 
   describe('Balance of all stakes', async () => {
