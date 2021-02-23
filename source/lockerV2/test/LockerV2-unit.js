@@ -40,7 +40,7 @@ describe('LockerV2 Unit', () => {
   })
 
   describe('Default Values', async () => {
-    it('test constructor sets default values', async () => {
+    it('constructor sets default values', async () => {
       const owner = await locker.owner()
       const tokenAddress = await locker.stakingToken()
       const cliff = await locker.cliff()
@@ -56,7 +56,7 @@ describe('LockerV2 Unit', () => {
   })
 
   describe('Stake', async () => {
-    it('test successful staking', async () => {
+    it('successful staking', async () => {
       await stakingToken.mock.transferFrom.returns(true)
       await locker.connect(account1).stake('100')
       const userStakes = await locker
@@ -67,7 +67,7 @@ describe('LockerV2 Unit', () => {
       expect(userStakes[0].claimableAmount).to.equal(100)
     })
 
-    it('test successful staking for', async () => {
+    it('successful staking for', async () => {
       await stakingToken.mock.transferFrom.returns(true)
       await locker.connect(account1).stakeFor(account2.address, '170')
       const userStakes = await locker
@@ -78,12 +78,46 @@ describe('LockerV2 Unit', () => {
       expect(userStakes[0].claimableAmount).to.equal(170)
     })
 
-    // TEST failure on transfers
-    // TEST  more than 1 stake
+    it('successful multiple stakes', async () => {
+      await stakingToken.mock.transferFrom.returns(true)
+      await locker.connect(account1).stake('100')
+      await locker.connect(account1).stake('140')
+      const userStakes = await locker
+        .connect(account1)
+        .getStakes(account1.address)
+      expect(userStakes.length).to.equal(2)
+      expect(userStakes[0].initialAmount).to.equal(100)
+      expect(userStakes[0].claimableAmount).to.equal(100)
+      expect(userStakes[1].initialAmount).to.equal(140)
+      expect(userStakes[1].claimableAmount).to.equal(140)
+    })
+
+    it('successful multiple stake fors', async () => {
+      await stakingToken.mock.transferFrom.returns(true)
+      await locker.connect(account1).stakeFor(account2.address, '100')
+      await locker.connect(account1).stakeFor(account2.address, '140')
+      const userStakes = await locker
+        .connect(account1)
+        .getStakes(account2.address)
+      expect(userStakes.length).to.equal(2)
+      expect(userStakes[0].initialAmount).to.equal(100)
+      expect(userStakes[0].claimableAmount).to.equal(100)
+      expect(userStakes[1].initialAmount).to.equal(140)
+      expect(userStakes[1].claimableAmount).to.equal(140)
+    })
+
+    it('unsuccessful staking', async () => {
+      await stakingToken.mock.transferFrom.revertsWithReason(
+        'Insufficient Funds'
+      )
+      await expect(locker.connect(account1).stake('100')).to.be.revertedWith(
+        'Insufficient Funds'
+      )
+    })
   })
 
   describe('Unstake', async () => {
-    it('test unstaking fails when cliff has not passed', async () => {
+    it('unstaking fails when cliff has not passed', async () => {
       await stakingToken.mock.transferFrom.returns(true)
       await stakingToken.mock.transfer.returns(true)
       await locker.connect(account1).stake('100')
@@ -92,7 +126,7 @@ describe('LockerV2 Unit', () => {
       ).to.be.revertedWith('cliff not reached')
     })
 
-    it('test unstaking fails when attempting to claim more than is available', async () => {
+    it('unstaking fails when attempting to claim more than is available', async () => {
       await stakingToken.mock.transferFrom.returns(true)
       await stakingToken.mock.transfer.returns(true)
       await locker.connect(account1).stake('100')
@@ -107,7 +141,7 @@ describe('LockerV2 Unit', () => {
       ).to.be.revertedWith('insufficient claimable amount')
     })
 
-    it('test a successful unstaking', async () => {
+    it('successful unstaking', async () => {
       await stakingToken.mock.transferFrom.returns(true)
       await stakingToken.mock.transfer.returns(true)
       await locker.connect(account1).stake('100')
@@ -126,7 +160,7 @@ describe('LockerV2 Unit', () => {
       expect(userStakes[0].claimableAmount).to.equal(90)
     })
 
-    it('test a successful unstaking and removal of stake', async () => {
+    it('successful unstaking and removal of stake', async () => {
       await stakingToken.mock.transferFrom.returns(true)
       await stakingToken.mock.transfer.returns(true)
       await locker.connect(account1).stake('100')
@@ -145,7 +179,7 @@ describe('LockerV2 Unit', () => {
   })
 
   describe('Vested', async () => {
-    it('test getting vested amounts match expected amount per block', async () => {
+    it('vested amounts match expected amount per block', async () => {
       await stakingToken.mock.transferFrom.returns(true)
       await stakingToken.mock.transfer.returns(true)
       await locker.connect(account1).stake('100')
@@ -159,7 +193,7 @@ describe('LockerV2 Unit', () => {
   })
 
   describe('Available to unstake', async () => {
-    it('test available to unstake is 0, if cliff has not passed', async () => {
+    it('available to unstake is 0, if cliff has not passed', async () => {
       await stakingToken.mock.transferFrom.returns(true)
       await stakingToken.mock.transfer.returns(true)
       await locker.connect(account1).stake('100')
@@ -174,7 +208,7 @@ describe('LockerV2 Unit', () => {
       expect(availableToUnstake).to.equal('0')
     })
 
-    it('test available to unstake is > 0, if cliff has passed', async () => {
+    it('available to unstake is > 0, if cliff has passed', async () => {
       await stakingToken.mock.transferFrom.returns(true)
       await stakingToken.mock.transfer.returns(true)
       await locker.connect(account1).stake('100')
@@ -192,7 +226,7 @@ describe('LockerV2 Unit', () => {
   })
 
   describe('Balance of all stakes', async () => {
-    it('test get balance of all stakes', async () => {
+    it('get balance of all stakes', async () => {
       await stakingToken.mock.transferFrom.returns(true)
       await stakingToken.mock.transfer.returns(true)
       // stake 400 over 4 blocks
