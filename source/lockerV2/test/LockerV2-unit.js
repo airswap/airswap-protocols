@@ -63,8 +63,8 @@ describe('LockerV2 Unit', () => {
         .connect(account1)
         .getStakes(account1.address)
       expect(userStakes.length).to.equal(1)
-      expect(userStakes[0].initialAmount).to.equal(100)
-      expect(userStakes[0].claimableAmount).to.equal(100)
+      expect(userStakes[0].initialBalance).to.equal(100)
+      expect(userStakes[0].currentBalance).to.equal(100)
     })
 
     it('successful staking for', async () => {
@@ -74,8 +74,8 @@ describe('LockerV2 Unit', () => {
         .connect(account1)
         .getStakes(account2.address)
       expect(userStakes.length).to.equal(1)
-      expect(userStakes[0].initialAmount).to.equal(170)
-      expect(userStakes[0].claimableAmount).to.equal(170)
+      expect(userStakes[0].initialBalance).to.equal(170)
+      expect(userStakes[0].currentBalance).to.equal(170)
     })
 
     it('successful multiple stakes', async () => {
@@ -86,10 +86,10 @@ describe('LockerV2 Unit', () => {
         .connect(account1)
         .getStakes(account1.address)
       expect(userStakes.length).to.equal(2)
-      expect(userStakes[0].initialAmount).to.equal(100)
-      expect(userStakes[0].claimableAmount).to.equal(100)
-      expect(userStakes[1].initialAmount).to.equal(140)
-      expect(userStakes[1].claimableAmount).to.equal(140)
+      expect(userStakes[0].initialBalance).to.equal(100)
+      expect(userStakes[0].currentBalance).to.equal(100)
+      expect(userStakes[1].initialBalance).to.equal(140)
+      expect(userStakes[1].currentBalance).to.equal(140)
     })
 
     it('successful multiple stake fors', async () => {
@@ -100,10 +100,10 @@ describe('LockerV2 Unit', () => {
         .connect(account1)
         .getStakes(account2.address)
       expect(userStakes.length).to.equal(2)
-      expect(userStakes[0].initialAmount).to.equal(100)
-      expect(userStakes[0].claimableAmount).to.equal(100)
-      expect(userStakes[1].initialAmount).to.equal(140)
-      expect(userStakes[1].claimableAmount).to.equal(140)
+      expect(userStakes[0].initialBalance).to.equal(100)
+      expect(userStakes[0].currentBalance).to.equal(100)
+      expect(userStakes[1].initialBalance).to.equal(140)
+      expect(userStakes[1].currentBalance).to.equal(140)
     })
 
     it('unsuccessful staking', async () => {
@@ -156,8 +156,8 @@ describe('LockerV2 Unit', () => {
         .connect(account1)
         .getStakes(account1.address)
       expect(userStakes.length).to.equal(1)
-      expect(userStakes[0].initialAmount).to.equal(100)
-      expect(userStakes[0].claimableAmount).to.equal(90)
+      expect(userStakes[0].initialBalance).to.equal(100)
+      expect(userStakes[0].currentBalance).to.equal(90)
     })
 
     it('successful unstaking and removal of stake', async () => {

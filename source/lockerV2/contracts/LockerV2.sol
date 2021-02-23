@@ -11,8 +11,8 @@ contract LockerV2 is Ownable {
   using SafeERC20 for IERC20;
   using SafeMath for uint256;
   struct Stake {
-    uint256 initialAmount;
-    uint256 claimableAmount;
+    uint256 initialBalance;
+    uint256 currentBalance;
     uint256 blockNumber;
   }
 
@@ -53,8 +53,8 @@ contract LockerV2 is Ownable {
     uint256 vested = vested(index, msg.sender);
     uint256 withdrawableAmount = availableToUnstake(index, msg.sender);
     require(amount <= withdrawableAmount, "insufficient claimable amount");
-    stakeData.claimableAmount = stakeData.claimableAmount.sub(amount);
-    if (stakeData.claimableAmount == 0) {
+    stakeData.currentBalance = stakeData.currentBalance.sub(amount);
+    if (stakeData.currentBalance == 0) {
       // remove stake element if claimable amount goes to 0
       Stake[] storage accountStakes = stakes[msg.sender];
       stakeData = accountStakes[accountStakes.length.sub(1)];
@@ -72,7 +72,7 @@ contract LockerV2 is Ownable {
     uint256 numPeriods =
       (block.number.sub(stakeData.blockNumber)).div(periodLength);
     return
-      (percentPerPeriod.mul(numPeriods).mul(stakeData.initialAmount)).div(100);
+      (percentPerPeriod.mul(numPeriods).mul(stakeData.initialBalance)).div(100);
   }
 
   function availableToUnstake(uint256 index, address account)
@@ -81,19 +81,19 @@ contract LockerV2 is Ownable {
     returns (uint256)
   {
     uint256 vestedAmount = vested(index, account);
-    uint256 claimableAmount = 0;
+    uint256 currentBalance = 0;
     Stake memory stakeData = stakes[account][index];
     if (block.number.sub(stakeData.blockNumber) >= cliff) {
-      claimableAmount = stakeData.claimableAmount;
+      currentBalance = stakeData.currentBalance;
     }
-    return Math.min(vestedAmount, claimableAmount);
+    return Math.min(vestedAmount, currentBalance);
   }
 
   function balanceOf(address account) external view returns (uint256) {
     Stake[] memory accountStakes = stakes[account];
     uint256 stakedBalance = 0;
     for (uint256 i = 0; i < accountStakes.length; i++) {
-      stakedBalance = stakedBalance.add(accountStakes[i].claimableAmount);
+      stakedBalance = stakedBalance.add(accountStakes[i].currentBalance);
     }
     return stakedBalance;
   }
