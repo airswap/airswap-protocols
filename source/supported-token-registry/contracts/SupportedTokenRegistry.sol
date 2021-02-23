@@ -12,11 +12,11 @@ contract SupportedTokenRegistry is Ownable {
   using SafeMath for uint256;
   using EnumerableSet for EnumerableSet.AddressSet;
 
-  address public immutable stakingToken;
+  IERC20 public immutable stakingToken;
   uint256 public immutable obligationCost;
   uint256 public immutable tokenCost;
-  mapping(address => EnumerableSet.AddressSet) public supportedTokens;
-  mapping(address => EnumerableSet.AddressSet) public supportingStakers;
+  mapping(address => EnumerableSet.AddressSet) internal supportedTokens;
+  mapping(address => EnumerableSet.AddressSet) internal supportingStakers;
   mapping(address => bytes32) public locator;
 
   constructor(
@@ -29,7 +29,7 @@ contract SupportedTokenRegistry is Ownable {
     tokenCost = _tokenCost;
   }
 
-  function addTokens(address[] tokenList) external {
+  function addTokens(address[] calldata tokenList) external {
     uint256 transferAmount = 0;
     if (supportedTokens[msg.sender].length() == 0) {
       transferAmount.add(obligationCost);
@@ -45,7 +45,7 @@ contract SupportedTokenRegistry is Ownable {
     stakingToken.safeTransferFrom(msg.sender, address(this), transferAmount);
   }
 
-  function removeTokens(address[] tokenList) external {
+  function removeTokens(address[] calldata tokenList) external {
     uint256 transferAmount = 0;
     for (uint256 i = 0; i < tokenList.length; i++) {
       address token = tokenList[i];
@@ -62,7 +62,8 @@ contract SupportedTokenRegistry is Ownable {
   }
 
   function removeAllTokens() external {
-    EnumerableSet.AddressSet supportedTokenList = supportedTokens[msg.sender];
+    EnumerableSet.AddressSet storage supportedTokenList =
+      supportedTokens[msg.sender];
     for (uint256 i = 0; i < supportedTokenList.length(); i++) {
       address token = supportedTokenList.at(i);
       supportedTokenList.remove(token);
@@ -76,10 +77,10 @@ contract SupportedTokenRegistry is Ownable {
   function getSupportedTokens(address staker)
     external
     view
-    returns (address[] tokenList)
+    returns (address[] memory tokenList)
   {
     uint256 length = supportedTokens[staker].length();
-    tokenList = address[](length);
+    tokenList = new address[](length);
     for (uint256 i = 0; i < length; i++) {
       tokenList[i] = supportedTokens[staker].at(i);
     }
@@ -88,16 +89,16 @@ contract SupportedTokenRegistry is Ownable {
   function getSupportingStakers(address token)
     external
     view
-    returns (address[] stakerList)
+    returns (address[] memory stakerList)
   {
     uint256 length = supportingStakers[token].length();
-    stakerList = address[](length);
+    stakerList = new address[](length);
     for (uint256 i = 0; i < length; i++) {
       stakerList[i] = supportingStakers[token].at(i);
     }
   }
 
-  function setLocator(bytes32 locator) external {
-    locator[msg.sender] = locator;
+  function setLocator(bytes32 _locator) external {
+    locator[msg.sender] = _locator;
   }
 }
