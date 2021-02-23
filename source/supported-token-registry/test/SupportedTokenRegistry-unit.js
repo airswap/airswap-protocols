@@ -9,6 +9,9 @@ describe('SupportedTokenRegistry Unit', () => {
   let deployer
   let account1
   let account2
+  let token1
+  let token2
+  let token3
   let stakingToken
   let registryFactory
   let registry
@@ -25,7 +28,14 @@ describe('SupportedTokenRegistry Unit', () => {
   })
 
   before(async () => {
-    ;[deployer, account1, account2] = await ethers.getSigners()
+    ;[
+      deployer,
+      account1,
+      account2,
+      token1,
+      token2,
+      token3,
+    ] = await ethers.getSigners()
     stakingToken = await deployMockContract(deployer, IERC20.abi)
     registryFactory = await ethers.getContractFactory('SupportedTokenRegistry')
     registry = await registryFactory.deploy(
@@ -46,6 +56,16 @@ describe('SupportedTokenRegistry Unit', () => {
       expect(tokenAddress).to.equal(stakingToken.address)
       expect(obligationCost).to.equal(OBLIGATION_COST)
       expect(tokenCost).to.equal(TOKEN_COST)
+    })
+  })
+
+  describe('Add Tokens', async () => {
+    it('add a list of tokens', async () => {
+      await stakingToken.mock.transferFrom.returns(true)
+      await registry
+        .connect(account1)
+        .addTokens([token1.address, token2.address, token3.address])
+      const tokens = await registry.getSupportedTokens(account1.address)
     })
   })
 })
