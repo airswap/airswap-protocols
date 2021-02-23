@@ -27,7 +27,7 @@ describe('LockerV2 Unit', () => {
   })
 
   before(async () => {
-    [deployer, account1, account2] = await ethers.getSigners()
+    ;[deployer, account1, account2] = await ethers.getSigners()
     stakingToken = await deployMockContract(deployer, IERC20.abi)
     lockerFactory = await ethers.getContractFactory('LockerV2')
     locker = await lockerFactory.deploy(
@@ -190,6 +190,38 @@ describe('LockerV2 Unit', () => {
       const vestedAmount = await locker.vested('0', account1.address)
       expect(vestedAmount).to.equal('5')
     })
+
+    it('multiple vested amounts match expected amount per block', async () => {
+      await stakingToken.mock.transferFrom.returns(true)
+      await stakingToken.mock.transfer.returns(true)
+      await locker.connect(account1).stake('100')
+      // 10% of first stake is unlocked
+      for (let index = 0; index < CLIFF; index++) {
+        await timeMachine.advanceBlock()
+      }
+      await locker.connect(account1).stake('160')
+      // 13% of second stake is unlocked
+      for (let index = 0; index < 13; index++) {
+        await timeMachine.advanceBlock()
+      }
+      await locker.connect(account1).stake('170')
+      // 3% of third stake is unlocked
+      for (let index = 0; index < 3; index++) {
+        await timeMachine.advanceBlock()
+      }
+
+      // every 1 block 1% is vested, user can only claim starting after 10 blocks, or 10% vested
+      // 10 blocks + 1 stake + 13 blocks + 1 stake + 3 blocks = 28 total blocks passed for first stake
+      // 13 blocks + 1 stake + 3 blocks = 17 total blocks passed for second stake
+      // 3 blocks = 3 total blocks passed for third stake
+
+      const vestedAmount1 = await locker.vested('0', account1.address)
+      const vestedAmount2 = await locker.vested('1', account1.address)
+      const vestedAmount3 = await locker.vested('2', account1.address)
+      expect(vestedAmount1).to.equal('28')
+      expect(vestedAmount2).to.equal('27')
+      expect(vestedAmount3).to.equal('5')
+    })
   })
 
   describe('Available to unstake', async () => {
@@ -238,10 +270,15 @@ describe('LockerV2 Unit', () => {
         await timeMachine.advanceBlock()
       }
       await locker.connect(account1).stake('170')
+      // 3% of third stake is unlocked
+      for (let index = 0; index < 3; index++) {
+        await timeMachine.advanceBlock()
+      }
 
-      // 10 blocks + 1 stake + 13 blocks + 1 block = 24 total blocks passed for first stake
-      // 13 blocks + 1 block = 14 total blocks passed for second stake
-      // 0 blocks = 0 total blocks passed for third stake
+      // every 1 block 1% is vested, user can only claim starting after 10 blocks, or 10% vested
+      // 10 blocks + 1 stake + 13 blocks + 1 stake + 3 blocks = 28 total blocks passed for first stake
+      // 13 blocks + 1 stake + 3 blocks = 17 total blocks passed for second stake
+      // 3 blocks = 3 total blocks passed for third stake
 
       const availableStake1 = await locker.availableToUnstake(
         '0',
@@ -255,9 +292,8 @@ describe('LockerV2 Unit', () => {
         '2',
         account1.address
       )
-      // every 1 block 1% is vested, user can only claim starting afater 10 blocks, or 10% vested
-      expect(availableStake1).to.equal('25')
-      expect(availableStake2).to.equal('22')
+      expect(availableStake1).to.equal('28')
+      expect(availableStake2).to.equal('27')
       expect(availableStake3).to.equal('0')
     })
   })
