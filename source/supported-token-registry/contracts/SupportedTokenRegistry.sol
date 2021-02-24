@@ -32,12 +32,12 @@ contract SupportedTokenRegistry is Ownable {
   function addTokens(address[] calldata tokenList) external {
     uint256 transferAmount = 0;
     if (supportedTokens[msg.sender].length() == 0) {
-      transferAmount.add(obligationCost);
+      transferAmount = transferAmount.add(obligationCost);
     }
     for (uint256 i = 0; i < tokenList.length; i++) {
       address token = tokenList[i];
       if (!supportedTokens[msg.sender].contains(token)) {
-        transferAmount.add(tokenCost);
+        transferAmount = transferAmount.add(tokenCost);
         supportedTokens[msg.sender].add(token);
         supportingStakers[token].add(msg.sender);
       }
@@ -50,13 +50,13 @@ contract SupportedTokenRegistry is Ownable {
     for (uint256 i = 0; i < tokenList.length; i++) {
       address token = tokenList[i];
       if (supportedTokens[msg.sender].contains(token)) {
-        transferAmount.add(tokenCost);
+        transferAmount = transferAmount.add(tokenCost);
         supportedTokens[msg.sender].remove(token);
         supportingStakers[token].remove(msg.sender);
       }
     }
     if (supportedTokens[msg.sender].length() == 0) {
-      transferAmount.add(obligationCost);
+      transferAmount = transferAmount.add(obligationCost);
     }
     stakingToken.safeTransfer(msg.sender, transferAmount);
   }
