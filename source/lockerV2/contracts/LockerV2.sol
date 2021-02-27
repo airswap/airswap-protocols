@@ -11,15 +11,18 @@ contract LockerV2 is Ownable {
   using SafeERC20 for IERC20;
   using SafeMath for uint256;
   struct Stake {
+    uint256 cliff;
+    uint256 periodLength;
+    uint256 percentPerPeriod;
     uint256 initialBalance;
     uint256 currentBalance;
     uint256 blockNumber;
   }
 
   IERC20 public immutable stakingToken;
-  uint256 public immutable cliff;
-  uint256 public immutable periodLength;
-  uint256 public immutable percentPerPeriod;
+  uint256 public cliff;
+  uint256 public periodLength;
+  uint256 public percentPerPeriod;
   mapping(address => Stake[]) public stakes;
 
   constructor(
@@ -34,20 +37,34 @@ contract LockerV2 is Ownable {
     percentPerPeriod = _percentPerPeriod;
   }
 
+  function setVestingSchedule(
+    uint256 _cliff,
+    uint256 _periodLength,
+    uint256 _percentPerPeriod
+  ) external onlyOwner {
+    cliff = _cliff;
+    periodLength = _periodLength;
+    percentPerPeriod = _percentPerPeriod;
+  }
+
   function stake(uint256 amount) external {
-    stakes[msg.sender].push(Stake(amount, amount, block.number));
+    stakes[msg.sender].push(
+      Stake(cliff, periodLength, percentPerPeriod, amount, amount, block.number)
+    );
     stakingToken.safeTransferFrom(msg.sender, address(this), amount);
   }
 
   function stakeFor(address account, uint256 amount) external {
-    stakes[account].push(Stake(amount, amount, block.number));
+    stakes[account].push(
+      Stake(cliff, periodLength, percentPerPeriod, amount, amount, block.number)
+    );
     stakingToken.safeTransferFrom(account, address(this), amount);
   }
 
   function unstake(uint256 index, uint256 amount) external {
     Stake storage stakeData = stakes[msg.sender][index];
     require(
-      block.number.sub(stakeData.blockNumber) >= cliff,
+      block.number.sub(stakeData.blockNumber) >= stakeData.cliff,
       "cliff not reached"
     );
     uint256 vested = vested(index, msg.sender);
@@ -70,9 +87,10 @@ contract LockerV2 is Ownable {
   {
     Stake storage stakeData = stakes[account][index];
     uint256 numPeriods =
-      (block.number.sub(stakeData.blockNumber)).div(periodLength);
+      (block.number.sub(stakeData.blockNumber)).div(stakeData.periodLength);
     return
-      (percentPerPeriod.mul(numPeriods).mul(stakeData.initialBalance)).div(100);
+      (stakeData.percentPerPeriod.mul(numPeriods).mul(stakeData.initialBalance))
+        .div(100);
   }
 
   function availableToUnstake(uint256 index, address account)
@@ -83,7 +101,7 @@ contract LockerV2 is Ownable {
     uint256 vestedAmount = vested(index, account);
     uint256 currentBalance = 0;
     Stake memory stakeData = stakes[account][index];
-    if (block.number.sub(stakeData.blockNumber) >= cliff) {
+    if (block.number.sub(stakeData.blockNumber) >= stakeData.cliff) {
       currentBalance = stakeData.currentBalance;
     }
     return Math.min(vestedAmount, currentBalance);

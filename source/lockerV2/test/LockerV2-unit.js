@@ -55,6 +55,27 @@ describe('LockerV2 Unit', () => {
     })
   })
 
+  describe('Set Vesting Schedule', async () => {
+    it('non owner cannot set vesting schedule', async () => {
+      await expect(
+        locker.connect(account1).setVestingSchedule(0, 0, 0)
+      ).to.be.revertedWith('Ownable: caller is not the owner')
+    })
+
+    it('owner can set vesting schedule', async () => {
+      await locker
+        .connect(deployer)
+        .setVestingSchedule(CLIFF, PERIOD_LENGTH, 2 * PERCENT_PER_PERIOD)
+
+      const cliff = await locker.cliff()
+      const periodLength = await locker.periodLength()
+      const percentPerPeriod = await locker.percentPerPeriod()
+      expect(cliff).to.equal(CLIFF)
+      expect(periodLength).to.equal(PERIOD_LENGTH)
+      expect(percentPerPeriod).to.equal(2 * PERCENT_PER_PERIOD)
+    })
+  })
+
   describe('Stake', async () => {
     it('successful staking', async () => {
       await stakingToken.mock.transferFrom.returns(true)
@@ -65,6 +86,9 @@ describe('LockerV2 Unit', () => {
       expect(userStakes.length).to.equal(1)
       expect(userStakes[0].initialBalance).to.equal(100)
       expect(userStakes[0].currentBalance).to.equal(100)
+      expect(userStakes[0].cliff).to.equal(CLIFF)
+      expect(userStakes[0].periodLength).to.equal(PERIOD_LENGTH)
+      expect(userStakes[0].percentPerPeriod).to.equal(PERCENT_PER_PERIOD)
     })
 
     it('successful staking for', async () => {
@@ -76,6 +100,9 @@ describe('LockerV2 Unit', () => {
       expect(userStakes.length).to.equal(1)
       expect(userStakes[0].initialBalance).to.equal(170)
       expect(userStakes[0].currentBalance).to.equal(170)
+      expect(userStakes[0].cliff).to.equal(CLIFF)
+      expect(userStakes[0].periodLength).to.equal(PERIOD_LENGTH)
+      expect(userStakes[0].percentPerPeriod).to.equal(PERCENT_PER_PERIOD)
     })
 
     it('successful multiple stakes', async () => {
@@ -86,10 +113,44 @@ describe('LockerV2 Unit', () => {
         .connect(account1)
         .getStakes(account1.address)
       expect(userStakes.length).to.equal(2)
+
       expect(userStakes[0].initialBalance).to.equal(100)
       expect(userStakes[0].currentBalance).to.equal(100)
+      expect(userStakes[0].cliff).to.equal(CLIFF)
+      expect(userStakes[0].periodLength).to.equal(PERIOD_LENGTH)
+      expect(userStakes[0].percentPerPeriod).to.equal(PERCENT_PER_PERIOD)
+
       expect(userStakes[1].initialBalance).to.equal(140)
       expect(userStakes[1].currentBalance).to.equal(140)
+      expect(userStakes[1].cliff).to.equal(CLIFF)
+      expect(userStakes[1].periodLength).to.equal(PERIOD_LENGTH)
+      expect(userStakes[1].percentPerPeriod).to.equal(PERCENT_PER_PERIOD)
+    })
+
+    it('successful multiple stakes with an updated vesting schedule', async () => {
+      await stakingToken.mock.transferFrom.returns(true)
+      await locker.connect(account1).stake('100')
+      await locker
+        .connect(deployer)
+        .setVestingSchedule(CLIFF, PERIOD_LENGTH, 2 * PERCENT_PER_PERIOD)
+      await locker.connect(account1).stake('140')
+
+      const userStakes = await locker
+        .connect(account1)
+        .getStakes(account1.address)
+      expect(userStakes.length).to.equal(2)
+
+      expect(userStakes[0].initialBalance).to.equal(100)
+      expect(userStakes[0].currentBalance).to.equal(100)
+      expect(userStakes[0].cliff).to.equal(CLIFF)
+      expect(userStakes[0].periodLength).to.equal(PERIOD_LENGTH)
+      expect(userStakes[0].percentPerPeriod).to.equal(PERCENT_PER_PERIOD)
+
+      expect(userStakes[1].initialBalance).to.equal(140)
+      expect(userStakes[1].currentBalance).to.equal(140)
+      expect(userStakes[1].cliff).to.equal(CLIFF)
+      expect(userStakes[1].periodLength).to.equal(PERIOD_LENGTH)
+      expect(userStakes[1].percentPerPeriod).to.equal(2 * PERCENT_PER_PERIOD)
     })
 
     it('successful multiple stake fors', async () => {
@@ -100,10 +161,18 @@ describe('LockerV2 Unit', () => {
         .connect(account1)
         .getStakes(account2.address)
       expect(userStakes.length).to.equal(2)
+
       expect(userStakes[0].initialBalance).to.equal(100)
       expect(userStakes[0].currentBalance).to.equal(100)
+      expect(userStakes[0].cliff).to.equal(CLIFF)
+      expect(userStakes[0].periodLength).to.equal(PERIOD_LENGTH)
+      expect(userStakes[0].percentPerPeriod).to.equal(PERCENT_PER_PERIOD)
+
       expect(userStakes[1].initialBalance).to.equal(140)
       expect(userStakes[1].currentBalance).to.equal(140)
+      expect(userStakes[1].cliff).to.equal(CLIFF)
+      expect(userStakes[1].periodLength).to.equal(PERIOD_LENGTH)
+      expect(userStakes[1].percentPerPeriod).to.equal(PERCENT_PER_PERIOD)
     })
 
     it('unsuccessful staking', async () => {
@@ -160,6 +229,29 @@ describe('LockerV2 Unit', () => {
       expect(userStakes[0].currentBalance).to.equal(90)
     })
 
+    it('successful unstaking with updated vesting schedule', async () => {
+      await stakingToken.mock.transferFrom.returns(true)
+      await stakingToken.mock.transfer.returns(true)
+      await locker.connect(account1).stake('100')
+      await locker
+        .connect(deployer)
+        .setVestingSchedule(CLIFF, PERIOD_LENGTH, 2 * PERCENT_PER_PERIOD)
+      await locker.connect(account1).stake('100')
+
+      // move 10 blocks forward - 20% vested for second stake
+      for (let index = 0; index < 10; index++) {
+        await timeMachine.advanceBlock()
+      }
+
+      await locker.connect(account1).unstake('1', '20')
+      const userStakes = await locker
+        .connect(account1)
+        .getStakes(account1.address)
+      expect(userStakes.length).to.equal(2)
+      expect(userStakes[1].initialBalance).to.equal(100)
+      expect(userStakes[1].currentBalance).to.equal(80)
+    })
+
     it('successful unstaking and removal of stake', async () => {
       await stakingToken.mock.transferFrom.returns(true)
       await stakingToken.mock.transfer.returns(true)
@@ -189,6 +281,21 @@ describe('LockerV2 Unit', () => {
       }
       const vestedAmount = await locker.vested('0', account1.address)
       expect(vestedAmount).to.equal('5')
+    })
+
+    it('vested amounts match expected amount per block with an updated vesting schedule', async () => {
+      await stakingToken.mock.transferFrom.returns(true)
+      await stakingToken.mock.transfer.returns(true)
+      await locker
+        .connect(deployer)
+        .setVestingSchedule(CLIFF, PERIOD_LENGTH, 2 * PERCENT_PER_PERIOD)
+      await locker.connect(account1).stake('100')
+      // move 5 blocks forward - 10%
+      for (let index = 0; index < 5; index++) {
+        await timeMachine.advanceBlock()
+      }
+      const vestedAmount = await locker.vested('0', account1.address)
+      expect(vestedAmount).to.equal('10')
     })
 
     it('multiple vested amounts match expected amount per block', async () => {
@@ -229,14 +336,33 @@ describe('LockerV2 Unit', () => {
       await stakingToken.mock.transferFrom.returns(true)
       await stakingToken.mock.transfer.returns(true)
       await locker.connect(account1).stake('100')
+      // move 1 block before cliff
+      for (let index = 0; index < CLIFF - 1; index++) {
+        await timeMachine.advanceBlock()
+      }
       const availableToUnstake = await locker.availableToUnstake(
         '0',
         account1.address
       )
+      expect(availableToUnstake).to.equal('0')
+    })
 
+    it('available to unstake is 0, if cliff has not passed with an updated vesting schedule', async () => {
+      await stakingToken.mock.transferFrom.returns(true)
+      await stakingToken.mock.transfer.returns(true)
+      await locker.connect(account1).stake('100')
+      await locker
+        .connect(deployer)
+        .setVestingSchedule(CLIFF, PERIOD_LENGTH, 2 * PERCENT_PER_PERIOD)
+      await locker.connect(account1).stake('100')
+      // move 1 block before cliff for second stake
       for (let index = 0; index < CLIFF - 1; index++) {
         await timeMachine.advanceBlock()
       }
+      const availableToUnstake = await locker.availableToUnstake(
+        '1',
+        account1.address
+      )
       expect(availableToUnstake).to.equal('0')
     })
 
@@ -244,6 +370,7 @@ describe('LockerV2 Unit', () => {
       await stakingToken.mock.transferFrom.returns(true)
       await stakingToken.mock.transfer.returns(true)
       await locker.connect(account1).stake('100')
+      // move to cliff block
       for (let index = 0; index < CLIFF; index++) {
         await timeMachine.advanceBlock()
       }
@@ -254,6 +381,26 @@ describe('LockerV2 Unit', () => {
       )
       // every 1 block 1% is vested, user can only claim starting afater 10 blocks, or 10% vested
       expect(availableToUnstake).to.equal('10')
+    })
+
+    it('available to unstake is > 0, if cliff has passed with an updated vesting schedule', async () => {
+      await stakingToken.mock.transferFrom.returns(true)
+      await stakingToken.mock.transfer.returns(true)
+      await locker.connect(account1).stake('100')
+      await locker
+        .connect(deployer)
+        .setVestingSchedule(CLIFF, PERIOD_LENGTH, 2 * PERCENT_PER_PERIOD)
+      await locker.connect(account1).stake('100')
+      // move to cliff block
+      for (let index = 0; index < CLIFF; index++) {
+        await timeMachine.advanceBlock()
+      }
+      const availableToUnstake = await locker.availableToUnstake(
+        '1',
+        account1.address
+      )
+      // every 1 block 2% is vested, user can only claim starting afater 10 blocks, or 20% vested
+      expect(availableToUnstake).to.equal('20')
     })
 
     it('available to unstake with multiple stakes and varying passed cliffs', async () => {
