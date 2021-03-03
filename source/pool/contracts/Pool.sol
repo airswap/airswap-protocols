@@ -96,6 +96,14 @@ contract Pool is Ownable {
    * @param token IERC20
    */
   function withdraw(Claim[] memory claims, IERC20 token) external {
+    withdrawProtected(claims, token, 0);
+  }
+
+  function withdrawProtected(
+    Claim[] memory claims,
+    IERC20 token,
+    uint256 minimumAmount
+  ) public {
     require(claims.length > 0, "CLAIMS_MUST_BE_PROVIDED");
     uint256 totalScore = 0;
     bytes32[] memory rootList = new bytes32[](claims.length);
@@ -113,6 +121,7 @@ contract Pool is Ownable {
       rootList[i] = claim.root;
     }
     uint256 amount = calculate(totalScore, token);
+    require(amount >= minimumAmount, "INSUFFICIENT_AMOUNT");
     token.safeTransfer(msg.sender, amount);
     emit Withdraw(rootList, msg.sender, token, amount);
   }
