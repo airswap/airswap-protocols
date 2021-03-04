@@ -309,27 +309,6 @@ contract('Swap Handler Checks', async accounts => {
       )
     })
 
-    it('Adding extra bytes with ERC20 will cause revert', async () => {
-      let order = createOrder({
-        signer: {
-          wallet: aliceAddress,
-          token: tokenAST.address,
-          amount: 1,
-        },
-        sender: {
-          wallet: bobAddress,
-          token: tokenDAI.address,
-          amount: 1,
-        },
-      })
-
-      order.sender.data = order.sender.data.concat('00')
-
-      order = await signOrder(order, aliceSigner, swapContractAddress)
-
-      await reverted(swap(order, { from: bobAddress }), 'TRANSFER_FAILED')
-    })
-
     it('Checks that adding an affiliate address still swaps', async () => {
       const order = await signOrder(
         createOrder({
@@ -722,6 +701,7 @@ contract('Swap Handler Checks', async accounts => {
           wallet: aliceAddress,
           token: tokenTicket.address,
           id: 12345,
+          amount: 123,
           kind: tokenKinds.ERC721,
         },
         sender: {
@@ -730,8 +710,6 @@ contract('Swap Handler Checks', async accounts => {
           amount: 100,
         },
       })
-
-      order.signer.data = order.signer.data.concat('00')
 
       order = await signOrder(order, aliceSigner, swapContractAddress)
       await reverted(swap(order, { from: bobAddress }), 'TRANSFER_FAILED')
@@ -778,11 +756,10 @@ contract('Swap Handler Checks', async accounts => {
           wallet: bobAddress,
           token: tokenKitty.address,
           id: 54321,
+          amount: 123,
           kind: tokenKinds.CKITTY,
         },
       })
-
-      order.sender.data = order.sender.data.concat('00')
 
       order = await signOrder(order, aliceSigner, swapContractAddress)
       await tokenAST.approve(swapContractAddress, 50, { from: aliceAddress })

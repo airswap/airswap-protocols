@@ -22,6 +22,8 @@ import {
   SECONDS_IN_DAY,
   tokenKinds,
   ADDRESS_ZERO,
+  DOMAIN_NAME,
+  DOMAIN_VERSION,
   LIGHT_DOMAIN_VERSION,
   LIGHT_DOMAIN_NAME,
 } from '@airswap/constants'
@@ -31,6 +33,7 @@ import {
   Order,
   Signature,
   UnsignedLightOrder,
+  EIP712,
   EIP712Light,
   OrderParty,
 } from '@airswap/types'
@@ -42,37 +45,12 @@ export function numberToBytes32(number): string {
   return `0x${hexString.padStart(64, '0')}`
 }
 
-export function formatPartyData({
-  kind = tokenKinds.ERC20, // default to ERC20
-  wallet = ADDRESS_ZERO,
-  token = ADDRESS_ZERO,
-  amount = 0,
-  id = 0,
-  transferData = '',
-}): OrderParty {
-  let data
-  switch (kind) {
-    case tokenKinds.ERC20:
-      data = numberToBytes32(amount)
-      break
-    case tokenKinds.ERC721:
-    case tokenKinds.CKITTY:
-      data = numberToBytes32(id)
-      break
-    case tokenKinds.ERC1155:
-      data = numberToBytes32(id)
-        .concat(numberToBytes32(amount).slice(2))
-        .concat(transferData)
-      break
-    default:
-      data = '0x'
-  }
-  return {
-    kind,
-    wallet,
-    token,
-    data,
-  }
+const defaultParty: OrderParty = {
+  kind: '0x36372b07',
+  wallet: ADDRESS_ZERO,
+  token: ADDRESS_ZERO,
+  amount: '0',
+  id: '0',
 }
 
 export function createOrder({
@@ -85,9 +63,9 @@ export function createOrder({
   return lowerCaseAddresses({
     expiry: String(expiry),
     nonce: String(nonce),
-    signer: formatPartyData(signer),
-    sender: formatPartyData(sender),
-    affiliate: formatPartyData(affiliate),
+    signer: { ...defaultParty, ...signer },
+    sender: { ...defaultParty, ...sender },
+    affiliate: { ...defaultParty, ...affiliate },
   })
 }
 
@@ -194,6 +172,51 @@ export async function signOrder(
   }
 }
 
+export async function createTypedDataSignature(
+  unsignedOrder: UnsignedOrder,
+  privateKey: string,
+  swapContract: string
+): Promise<Signature> {
+  const signedMsg = sigUtil.signTypedData_v4(ethUtil.toBuffer(privateKey), {
+    data: {
+      types: EIP712,
+      domain: {
+        name: DOMAIN_NAME,
+        version: DOMAIN_VERSION,
+        verifyingContract: swapContract,
+      },
+      primaryType: 'Order',
+      message: unsignedOrder,
+    },
+  })
+
+  const sig = ethers.utils.splitSignature(signedMsg)
+  const { r, s, v } = sig
+
+  return {
+    signatory: `0x${ethUtil
+      .privateToAddress(ethUtil.toBuffer(privateKey))
+      .toString('hex')
+      .toLowerCase()}`,
+    validator: swapContract.toLowerCase(),
+    version: signatureTypes.SIGN_TYPED_DATA,
+    v: String(v),
+    r,
+    s,
+  }
+}
+
+export async function signTypedDataOrder(
+  order: UnsignedOrder,
+  privateKey: string,
+  swapContract: string
+): Promise<Order> {
+  return {
+    ...order,
+    signature: await createTypedDataSignature(order, privateKey, swapContract),
+  }
+}
+
 export function hasValidSignature(order) {
   const signature = order['signature']
   let hash = getOrderHash(order, signature['validator'])
@@ -235,9 +258,12 @@ export function isValidOrder(order: Order): boolean {
     'token' in order['signer'] &&
     'token' in order['sender'] &&
     'token' in order['affiliate'] &&
-    'data' in order['signer'] &&
-    'data' in order['sender'] &&
-    'data' in order['affiliate'] &&
+    'amount' in order['signer'] &&
+    'amount' in order['sender'] &&
+    'amount' in order['affiliate'] &&
+    'id' in order['signer'] &&
+    'id' in order['sender'] &&
+    'id' in order['affiliate'] &&
     'signatory' in order['signature'] &&
     'validator' in order['signature'] &&
     'r' in order['signature'] &&

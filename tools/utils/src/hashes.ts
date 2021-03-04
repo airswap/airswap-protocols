@@ -62,8 +62,15 @@ export const LIGHT_ORDER_TYPEHASH = util.keccak256(
 export function hashParty(party: OrderParty): Buffer {
   return util.keccak256(
     ethers.utils.defaultAbiCoder.encode(
-      ['bytes32', 'bytes4', 'address', 'address', 'bytes'],
-      [PARTY_TYPEHASH, party.kind, party.wallet, party.token, party.data]
+      ['bytes32', 'bytes4', 'address', 'address', 'uint256', 'uint256'],
+      [
+        PARTY_TYPEHASH,
+        party.kind,
+        party.wallet,
+        party.token,
+        party.amount,
+        party.id,
+      ]
     )
   )
 }

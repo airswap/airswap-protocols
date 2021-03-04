@@ -1,0 +1,534 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "indexerStakingToken",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      }
+    ],
+    "name": "AddTokenToBlacklist",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "signerToken",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "senderToken",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes2",
+        "name": "protocol",
+        "type": "bytes2"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "indexAddress",
+        "type": "address"
+      }
+    ],
+    "name": "CreateIndex",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "previousOwner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnershipTransferred",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      }
+    ],
+    "name": "RemoveTokenFromBlacklist",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "staker",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "signerToken",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "senderToken",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes2",
+        "name": "protocol",
+        "type": "bytes2"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "stakeAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "Stake",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "staker",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "signerToken",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "senderToken",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes2",
+        "name": "protocol",
+        "type": "bytes2"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "stakeAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "Unstake",
+    "type": "event"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      }
+    ],
+    "name": "addTokenToBlacklist",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "signerToken",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "senderToken",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes2",
+        "name": "protocol",
+        "type": "bytes2"
+      }
+    ],
+    "name": "createIndex",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "signerToken",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "senderToken",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes2",
+        "name": "protocol",
+        "type": "bytes2"
+      },
+      {
+        "internalType": "address",
+        "name": "cursor",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "limit",
+        "type": "uint256"
+      }
+    ],
+    "name": "getLocators",
+    "outputs": [
+      {
+        "internalType": "bytes32[]",
+        "name": "locators",
+        "type": "bytes32[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "scores",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "address",
+        "name": "nextCursor",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "signerToken",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "senderToken",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes2",
+        "name": "protocol",
+        "type": "bytes2"
+      }
+    ],
+    "name": "getStakedAmount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "stakedAmount",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes2",
+        "name": "",
+        "type": "bytes2"
+      }
+    ],
+    "name": "indexes",
+    "outputs": [
+      {
+        "internalType": "contract Index",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "isOwner",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "internalType": "bytes2",
+        "name": "",
+        "type": "bytes2"
+      }
+    ],
+    "name": "locatorWhitelists",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "owner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      }
+    ],
+    "name": "removeTokenFromBlacklist",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [],
+    "name": "renounceOwnership",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "signerToken",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "senderToken",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes2",
+        "name": "protocol",
+        "type": "bytes2"
+      },
+      {
+        "internalType": "uint256",
+        "name": "stakingAmount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "locator",
+        "type": "bytes32"
+      }
+    ],
+    "name": "setIntent",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "bytes2",
+        "name": "protocol",
+        "type": "bytes2"
+      },
+      {
+        "internalType": "address",
+        "name": "newLocatorWhitelist",
+        "type": "address"
+      }
+    ],
+    "name": "setLocatorWhitelist",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "stakingToken",
+    "outputs": [
+      {
+        "internalType": "contract IERC20",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "tokenBlacklist",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "transferOwnership",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "signerToken",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "senderToken",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes2",
+        "name": "protocol",
+        "type": "bytes2"
+      }
+    ],
+    "name": "unsetIntent",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]

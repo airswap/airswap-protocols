@@ -24,9 +24,9 @@
   },
   "devDependencies": {
     "@airswap/constants": "0.3.10",
-    "@airswap/test-utils": "0.1.7",
+    "@airswap/test-utils": "0.1.9",
     "@airswap/tokens": "0.1.4",
-    "@airswap/utils": "0.3.21",
+    "@airswap/utils": "0.4.2",
     "@gnosis.pm/mock-contract": "^4.0.0",
     "ethers": "^5.0.25",
     "bip39": "^3.0.3",
@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "@airswap/transfers": "1.1.3",
-    "@airswap/types": "3.5.14",
+    "@airswap/types": "3.5.15",
     "@openzeppelin/contracts": "^3.3.0"
   }
 }

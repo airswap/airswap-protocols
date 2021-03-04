@@ -10,7 +10,6 @@ const ERC1155TransferHandler = artifacts.require('ERC1155TransferHandler')
 const { emitted, reverted, ok, equal } = require('@airswap/test-utils').assert
 const { allowances, balances } = require('@airswap/test-utils').balances
 const { tokenKinds } = require('@airswap/constants')
-const { numberToBytes32 } = require('@airswap/utils')
 
 contract('TransferHandlerRegistry', async accounts => {
   const aliceAddress = accounts[0]
@@ -132,8 +131,9 @@ contract('TransferHandlerRegistry', async accounts => {
           await erc20TransferHandler.transferTokens(
             aliceAddress,
             bobAddress,
+            200,
+            0,
             tokenAST.address,
-            numberToBytes32(200),
             { from: carolAddress }
           )
         )
@@ -167,8 +167,9 @@ contract('TransferHandlerRegistry', async accounts => {
         erc20TransferHandler.transferTokens(
           aliceAddress,
           bobAddress,
+          200,
+          0,
           tokenAST.address,
-          numberToBytes32(200),
           { from: carolAddress }
         )
       )
@@ -203,11 +204,12 @@ contract('TransferHandlerRegistry', async accounts => {
         erc20TransferHandler.transferTokens(
           aliceAddress,
           bobAddress,
+          200,
+          15,
           tokenAST.address,
-          numberToBytes32(200).concat('00'),
           { from: carolAddress }
         ),
-        'DATA_MUST_BE_32_BYTES'
+        'ID_INVALID'
       )
     })
   })
@@ -244,8 +246,9 @@ contract('TransferHandlerRegistry', async accounts => {
         await erc721TransferHandler.transferTokens(
           aliceAddress,
           bobAddress,
+          0,
+          121,
           tokenTicket.address,
-          numberToBytes32(121),
           { from: carolAddress }
         )
       )
@@ -268,11 +271,12 @@ contract('TransferHandlerRegistry', async accounts => {
         erc721TransferHandler.transferTokens(
           bobAddress,
           aliceAddress,
+          100,
+          54321,
           tokenTicket.address,
-          numberToBytes32(54321).concat('100'),
           { from: carolAddress }
         ),
-        'DATA_MUST_BE_32_BYTES'
+        'AMOUNT_INVALID'
       )
     })
 
@@ -307,11 +311,12 @@ contract('TransferHandlerRegistry', async accounts => {
         kittyCoreHandler.transferTokens(
           bobAddress,
           aliceAddress,
+          100,
+          54321,
           tokenKitty.address,
-          numberToBytes32(54321).concat('100'),
           { from: carolAddress }
         ),
-        'DATA_MUST_BE_32_BYTES'
+        'AMOUNT_INVALID'
       )
     })
 
@@ -320,8 +325,9 @@ contract('TransferHandlerRegistry', async accounts => {
         await kittyCoreHandler.transferTokens(
           bobAddress,
           aliceAddress,
+          0,
+          54321,
           tokenKitty.address,
-          numberToBytes32(54321),
           { from: carolAddress }
         )
       )
@@ -385,8 +391,9 @@ contract('TransferHandlerRegistry', async accounts => {
         await erc1155TransferHandler.transferTokens(
           aliceAddress,
           bobAddress,
+          50,
+          10,
           tokenERC1155.address,
-          numberToBytes32(10).concat(numberToBytes32(50).slice(2)),
           { from: carolAddress }
         )
       )

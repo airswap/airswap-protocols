@@ -104,7 +104,7 @@ describe('Server', () => {
     .nock('https://' + URL, mockServer)
     .do(async () => {
       await new Server(URL).getSenderSideOrder(
-        '',
+        '0',
         ADDRESS_ZERO,
         ADDRESS_ZERO,
         ADDRESS_ZERO

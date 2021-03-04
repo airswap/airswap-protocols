@@ -26,8 +26,8 @@ const {
 } = require('@airswap/test-utils').assert
 const { allowances, balances } = require('@airswap/test-utils').balances
 const { getLatestTimestamp } = require('@airswap/test-utils').time
-const PROVIDER_URL = web3.currentProvider.host
 const { getTestWallet } = require('@airswap/test-utils').functions
+const PROVIDER_URL = web3.currentProvider.host
 
 contract('SwapValidator', async accounts => {
   const aliceAddress = accounts[0]
@@ -686,9 +686,11 @@ contract('SwapValidator', async accounts => {
       errorCodes = await validator.checkSwap.call(order, {
         from: bobAddress,
       })
-      equal(errorCodes[0], 2)
-      equal(web3.utils.toUtf8(errorCodes[1][0]), 'SENDER_TOKEN_KIND_MISMATCH')
-      equal(web3.utils.toUtf8(errorCodes[1][1]), 'SIGNER_TOKEN_KIND_MISMATCH')
+      equal(errorCodes[0], 4)
+      equal(web3.utils.toUtf8(errorCodes[1][0]), 'SENDER_INVALID_AMOUNT')
+      equal(web3.utils.toUtf8(errorCodes[1][1]), 'SIGNER_INVALID_AMOUNT')
+      equal(web3.utils.toUtf8(errorCodes[1][2]), 'SENDER_TOKEN_KIND_MISMATCH')
+      equal(web3.utils.toUtf8(errorCodes[1][3]), 'SIGNER_TOKEN_KIND_MISMATCH')
     })
   })
 
@@ -696,25 +698,26 @@ contract('SwapValidator', async accounts => {
     let order
 
     it('Alice creates an order for Bob for kind with invalid ids', async () => {
-      order = createOrder({
-        signer: {
-          wallet: aliceAddress,
-          token: tokenAST.address,
-          amount: 200,
-          kind: tokenKinds.ERC20,
-        },
-        sender: {
-          wallet: bobAddress,
-          token: tokenDAI.address,
-          amount: 50,
-          kind: tokenKinds.ERC20,
-        },
-      })
-
-      order.signer.data = order.signer.data.concat('00129472')
-      order.sender.data = order.sender.data.concat('00')
-
-      order = await signOrder(order, aliceSigner, swapAddress)
+      order = await signOrder(
+        createOrder({
+          signer: {
+            wallet: aliceAddress,
+            token: tokenAST.address,
+            id: 200,
+            amount: 200,
+            kind: tokenKinds.ERC20,
+          },
+          sender: {
+            wallet: bobAddress,
+            token: tokenDAI.address,
+            id: 50,
+            amount: 50,
+            kind: tokenKinds.ERC20,
+          },
+        }),
+        aliceSigner,
+        swapAddress
+      )
     })
 
     it('Checks malformed order errors out', async () => {
@@ -722,8 +725,8 @@ contract('SwapValidator', async accounts => {
         from: bobAddress,
       })
       equal(errorCodes[0], 3)
-      equal(web3.utils.toUtf8(errorCodes[1][0]), 'DATA_MUST_BE_32_BYTES')
-      equal(web3.utils.toUtf8(errorCodes[1][1]), 'DATA_MUST_BE_32_BYTES')
+      equal(web3.utils.toUtf8(errorCodes[1][0]), 'SENDER_INVALID_ID')
+      equal(web3.utils.toUtf8(errorCodes[1][1]), 'SIGNER_INVALID_ID')
       equal(web3.utils.toUtf8(errorCodes[1][2]), 'SIGNER_ALLOWANCE_LOW')
     })
   })
@@ -737,12 +740,14 @@ contract('SwapValidator', async accounts => {
           signer: {
             wallet: aliceAddress,
             token: tokenAST.address,
+            id: 200,
             amount: 200,
             kind: tokenKinds.ERC20,
           },
           sender: {
             wallet: bobAddress,
             token: tokenDAI.address,
+            id: 50,
             amount: 50,
             kind: tokenKinds.ERC20,
           },
@@ -757,11 +762,13 @@ contract('SwapValidator', async accounts => {
       errorCodes = await validator.checkSwap.call(order, {
         from: bobAddress,
       })
-      equal(errorCodes[0], 4)
+      equal(errorCodes[0], 6)
       equal(web3.utils.toUtf8(errorCodes[1][0]), 'VALIDATOR_INVALID')
-      equal(web3.utils.toUtf8(errorCodes[1][1]), 'SIGNATURE_INVALID')
-      equal(web3.utils.toUtf8(errorCodes[1][2]), 'SENDER_TOKEN_KIND_UNKNOWN')
-      equal(web3.utils.toUtf8(errorCodes[1][3]), 'SIGNER_TOKEN_KIND_UNKNOWN')
+      equal(web3.utils.toUtf8(errorCodes[1][1]), 'SENDER_INVALID_ID')
+      equal(web3.utils.toUtf8(errorCodes[1][2]), 'SIGNER_INVALID_ID')
+      equal(web3.utils.toUtf8(errorCodes[1][3]), 'SIGNATURE_INVALID')
+      equal(web3.utils.toUtf8(errorCodes[1][4]), 'SENDER_TOKEN_KIND_UNKNOWN')
+      equal(web3.utils.toUtf8(errorCodes[1][5]), 'SIGNER_TOKEN_KIND_UNKNOWN')
     })
   })
 
@@ -1003,11 +1010,10 @@ contract('SwapValidator', async accounts => {
         wrapperAddress,
         { from: bobAddress }
       )
-      equal(errorCodes[0], 4)
+      equal(errorCodes[0], 3)
       equal(web3.utils.toUtf8(errorCodes[1][0]), 'SENDER_ETHER_LOW')
       equal(web3.utils.toUtf8(errorCodes[1][1]), 'SENDER_ALLOWANCE_LOW')
-      equal(web3.utils.toUtf8(errorCodes[1][2]), 'SIGNER_BALANCE_LOW')
-      equal(web3.utils.toUtf8(errorCodes[1][3]), 'SIGNER_ALLOWANCE_LOW')
+      equal(web3.utils.toUtf8(errorCodes[1][2]), 'SIGNER_ALLOWANCE_LOW')
     })
   })
 
@@ -1168,9 +1174,10 @@ contract('SwapValidator', async accounts => {
         wrapperAddress,
         { from: aliceAddress }
       )
-      equal(errorCodes[0], 2)
-      equal(web3.utils.toUtf8(errorCodes[1][0]), 'SENDER_TOKEN_KIND_UNKNOWN')
-      equal(web3.utils.toUtf8(errorCodes[1][1]), 'SIGNER_TOKEN_KIND_UNKNOWN')
+      equal(errorCodes[0], 3)
+      equal(web3.utils.toUtf8(errorCodes[1][0]), 'SENDER_WRAPPER_ALLOWANCE_LOW')
+      equal(web3.utils.toUtf8(errorCodes[1][1]), 'SENDER_TOKEN_KIND_UNKNOWN')
+      equal(web3.utils.toUtf8(errorCodes[1][2]), 'SIGNER_TOKEN_KIND_UNKNOWN')
     })
 
     it('Checks malformed order errors out', async () => {
@@ -1185,7 +1192,7 @@ contract('SwapValidator', async accounts => {
           sender: {
             wallet: bobAddress,
             token: tokenWETH.address,
-            id: 50,
+            amount: 50,
             kind: tokenKinds.ERC721,
           },
         }),
@@ -1201,9 +1208,11 @@ contract('SwapValidator', async accounts => {
           from: bobAddress,
         }
       )
-      equal(errorCodes[0], 2)
-      equal(web3.utils.toUtf8(errorCodes[1][0]), 'SENDER_TOKEN_KIND_MISMATCH')
-      equal(web3.utils.toUtf8(errorCodes[1][1]), 'SIGNER_TOKEN_KIND_MISMATCH')
+      equal(errorCodes[0], 4)
+      equal(web3.utils.toUtf8(errorCodes[1][0]), 'SENDER_INVALID_AMOUNT')
+      equal(web3.utils.toUtf8(errorCodes[1][1]), 'SIGNER_INVALID_AMOUNT')
+      equal(web3.utils.toUtf8(errorCodes[1][2]), 'SENDER_TOKEN_KIND_MISMATCH')
+      equal(web3.utils.toUtf8(errorCodes[1][3]), 'SIGNER_TOKEN_KIND_MISMATCH')
     })
   })
 })

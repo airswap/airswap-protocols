@@ -70,25 +70,25 @@ export function handleRevokeSigner(event: RevokeSigner): void {
 
 export function handleCancel(event: Cancel): void {
   let user = getUser(event.params.signerWallet.toHex())
-  let cancelledNonces = user.cancelledNonces
-  cancelledNonces.push(event.params.nonce)
-  cancelledNonces.sort()
-  user.cancelledNonces = cancelledNonces
+  let cancelledSwapNonces = user.cancelledSwapNonces
+  cancelledSwapNonces.push(event.params.nonce)
+  cancelledSwapNonces.sort()
+  user.cancelledSwapNonces = cancelledSwapNonces
   user.save()
 }
 
 export function handleCancelUpTo(event: CancelUpTo): void {
   let user = getUser(event.params.signerWallet.toHex())
-  let cancelledNonces = user.cancelledNonces
+  let cancelledSwapNonces = user.cancelledSwapNonces
   for (let i = BigInt.fromI32(0); i.lt(event.params.nonce); i = i.plus(BigInt.fromI32(1))) {
     // prevent duplicates
-    if (cancelledNonces.indexOf(i) > -1) {
+    if (cancelledSwapNonces.indexOf(i) > -1) {
       continue
     }
-    cancelledNonces.push(i)
+    cancelledSwapNonces.push(i)
   }
-  cancelledNonces.sort()
-  user.cancelledNonces = cancelledNonces
+  cancelledSwapNonces.sort()
+  user.cancelledSwapNonces = cancelledSwapNonces
   user.save()
 }
 
