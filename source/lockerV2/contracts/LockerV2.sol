@@ -30,7 +30,7 @@ contract LockerV2 is Ownable {
     uint256 _cliff,
     uint256 _periodLength,
     uint256 _percentPerPeriod
-  ) public {
+  ) {
     stakingToken = _stakingToken;
     cliff = _cliff;
     periodLength = _periodLength;
@@ -48,16 +48,44 @@ contract LockerV2 is Ownable {
   }
 
   function stake(uint256 amount) external {
-    stakes[msg.sender].push(
-      Stake(cliff, periodLength, percentPerPeriod, amount, amount, block.number)
-    );
-    stakingToken.safeTransferFrom(msg.sender, address(this), amount);
+    stakeFor(msg.sender, amount);
   }
 
-  function stakeFor(address account, uint256 amount) external {
+  function stakeFor(address account, uint256 amount) public {
     stakes[account].push(
       Stake(cliff, periodLength, percentPerPeriod, amount, amount, block.number)
     );
+    stakingToken.safeTransferFrom(account, address(this), amount);
+  }
+
+  function addToStake(uint256 index, uint256 amount) external {
+    addToStakeFor(index, msg.sender, amount);
+  }
+
+  function addToStakeFor(
+    uint256 index,
+    address account,
+    uint256 amount
+  ) public {
+    Stake storage stakeData = stakes[msg.sender][index];
+
+    uint256 newInitialBalance = stakeData.initialBalance.add(amount);
+    uint256 newCurrentBalance = stakeData.currentBalance.add(amount);
+    uint256 newBlockNumber =
+      stakeData.blockNumber +
+        amount.mul(block.number.sub(stakeData.blockNumber)).div(
+          newInitialBalance
+        );
+
+    stakes[msg.sender][index] = Stake(
+      stakeData.cliff,
+      stakeData.periodLength,
+      stakeData.percentPerPeriod,
+      newInitialBalance,
+      newCurrentBalance,
+      newBlockNumber
+    );
+
     stakingToken.safeTransferFrom(account, address(this), amount);
   }
 
@@ -67,7 +95,6 @@ contract LockerV2 is Ownable {
       block.number.sub(stakeData.blockNumber) >= stakeData.cliff,
       "cliff not reached"
     );
-    uint256 vested = vested(index, msg.sender);
     uint256 withdrawableAmount = availableToUnstake(index, msg.sender);
     require(amount <= withdrawableAmount, "insufficient claimable amount");
     stakeData.currentBalance = stakeData.currentBalance.sub(amount);
