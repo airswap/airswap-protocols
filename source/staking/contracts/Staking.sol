@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/math/Math.sol";
 
-contract LockerV2 is Ownable {
+contract Staking is Ownable {
   using SafeERC20 for IERC20;
   using SafeMath for uint256;
   struct Stake {

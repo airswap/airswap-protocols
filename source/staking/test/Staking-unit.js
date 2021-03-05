@@ -4,7 +4,7 @@ const { artifacts, ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
 const IERC20 = artifacts.require('IERC20')
 
-describe('LockerV2 Unit', () => {
+describe('Staking Unit', () => {
   let snapshotId
   let deployer
   let account1
@@ -29,7 +29,7 @@ describe('LockerV2 Unit', () => {
   before(async () => {
     ;[deployer, account1, account2] = await ethers.getSigners()
     stakingToken = await deployMockContract(deployer, IERC20.abi)
-    lockerFactory = await ethers.getContractFactory('LockerV2')
+    lockerFactory = await ethers.getContractFactory('Staking')
     locker = await lockerFactory.deploy(
       stakingToken.address,
       CLIFF,
