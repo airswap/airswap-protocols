@@ -78,9 +78,9 @@ contract LockerV2 is Ownable {
         );
 
     stakes[msg.sender][index] = Stake(
-      stakeData.cliff,
-      stakeData.periodLength,
-      stakeData.percentPerPeriod,
+      cliff,
+      periodLength,
+      percentPerPeriod,
       newInitialBalance,
       newCurrentBalance,
       newBlockNumber
