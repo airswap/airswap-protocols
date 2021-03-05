@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "description": "Stake and unstake tokens on a vesting schedule",
   "contributors": [
+    "Ethan Wessel <ethan.wessel@consensys.net>",
     "Don Mosites <don.mosites@consensys.net>"
   ],
   "license": "Apache-2.0",
