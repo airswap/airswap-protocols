@@ -183,6 +183,29 @@ describe('Staking Unit', () => {
         'Insufficient Funds'
       )
     })
+
+    it('unsuccessful add to stake when no stakes made', async () => {
+      await stakingToken.mock.transferFrom.returns(true)
+      await expect(locker.connect(account1).addToStake('0', '100')).to.be
+        .reverted
+    })
+
+    it('successful add to stake stake has been made', async () => {
+      await stakingToken.mock.transferFrom.returns(true)
+      await locker.connect(account1).stake('100')
+      await locker.connect(account1).addToStake('0', '120')
+
+      const userStakes = await locker
+        .connect(account1)
+        .getStakes(account1.address)
+      expect(userStakes.length).to.equal(1)
+
+      expect(userStakes[0].initialBalance).to.equal(220)
+      expect(userStakes[0].currentBalance).to.equal(220)
+      expect(userStakes[0].cliff).to.equal(CLIFF)
+      expect(userStakes[0].periodLength).to.equal(PERIOD_LENGTH)
+      expect(userStakes[0].percentPerPeriod).to.equal(PERCENT_PER_PERIOD)
+    })
   })
 
   describe('Unstake', async () => {
