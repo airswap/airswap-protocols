@@ -74,7 +74,15 @@ contract LockerV2 is Ownable {
     if (stakeData.currentBalance == 0) {
       // remove stake element if claimable amount goes to 0
       Stake[] storage accountStakes = stakes[msg.sender];
-      stakeData = accountStakes[accountStakes.length.sub(1)];
+      Stake storage lastStake = accountStakes[accountStakes.length.sub(1)];
+      // replace stake at index with last stake
+      stakeData.cliff = lastStake.cliff;
+      stakeData.periodLength = lastStake.periodLength;
+      stakeData.percentPerPeriod = lastStake.percentPerPeriod;
+      stakeData.initialBalance = lastStake.initialBalance;
+      stakeData.currentBalance = lastStake.currentBalance;
+      stakeData.blockNumber = lastStake.blockNumber;
+      // remove last stake
       stakes[msg.sender].pop();
     }
     stakingToken.transfer(msg.sender, amount);

@@ -256,8 +256,10 @@ describe('LockerV2 Unit', () => {
       await stakingToken.mock.transferFrom.returns(true)
       await stakingToken.mock.transfer.returns(true)
       await locker.connect(account1).stake('100')
+      await locker.connect(account1).stake('200')
+      await locker.connect(account1).stake('300')
 
-      // move 100 blocks forward - 100% vested
+      // move 100 blocks forward + 2 stakes = 102% vested
       for (let index = 0; index < 100; index++) {
         await timeMachine.advanceBlock()
       }
@@ -266,7 +268,13 @@ describe('LockerV2 Unit', () => {
       const userStakes = await locker
         .connect(account1)
         .getStakes(account1.address)
-      expect(userStakes.length).to.equal(0)
+      expect(userStakes.length).to.equal(2)
+
+      // ensure stake 0 was overwritten with last stake
+      expect(userStakes[0].initialBalance).to.equal(300)
+      expect(userStakes[0].currentBalance).to.equal(300)
+      expect(userStakes[1].initialBalance).to.equal(200)
+      expect(userStakes[1].currentBalance).to.equal(200)
     })
   })
 
