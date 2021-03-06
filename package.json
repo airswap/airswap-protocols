@@ -22,7 +22,7 @@
   "scripts": {
     "clean": "lerna run clean",
     "compile": "yarn clean; lerna run compile --concurrency=1",
-    "hint": "yarn solhint \"./source/**/*.sol\"",
+    "hint": ":",
     "lint:check": "yarn eslint . --ext .js,.ts",
     "lint:fix": "yarn eslint . --ext .js,.ts --fix",
     "ganache": "ganache-cli -p 8545 --gasLimit 0xfffffffffff --time '2017-05-10T00:00:00+00:00' -d",
