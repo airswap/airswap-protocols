@@ -14,8 +14,8 @@ describe('Staking Unit', () => {
   let locker
   const CLIFF = 10 //blocks
   const PERIOD_LENGTH = 1 //blocks
-  const PERCENT_PER_PERIOD = 1 //percent
-  // every 1 block 1% is vested, user can only claim starting afater 10 blocks, or 10% vested
+  const PERCENT_PER_PERIOD = 100 //percent
+  // every 1 block 1.00% is vested, user can only claim starting afater 10 blocks, or 10% vested
 
   beforeEach(async () => {
     const snapshot = await timeMachine.takeSnapshot()
