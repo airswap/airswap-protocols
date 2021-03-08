@@ -93,10 +93,10 @@ contract Staking is Ownable {
     Stake storage stakeData = stakes[msg.sender][index];
     require(
       block.number.sub(stakeData.blockNumber) >= stakeData.cliff,
-      "cliff not reached"
+      "CLIFF_NOT_REACHED"
     );
     uint256 withdrawableAmount = availableToUnstake(index, msg.sender);
-    require(amount <= withdrawableAmount, "insufficient claimable amount");
+    require(amount <= withdrawableAmount, "AMOUNT_EXCEEDS_AVAILABLE");
     stakeData.currentBalance = stakeData.currentBalance.sub(amount);
     if (stakeData.currentBalance == 0) {
       // remove stake element if claimable amount goes to 0
@@ -123,9 +123,11 @@ contract Staking is Ownable {
     Stake storage stakeData = stakes[account][index];
     uint256 numPeriods =
       (block.number.sub(stakeData.blockNumber)).div(stakeData.periodLength);
+
+    // Divide by 10000 to allow two-place percentage precision.
     return
       (stakeData.percentPerPeriod.mul(numPeriods).mul(stakeData.initialBalance))
-        .div(100);
+        .div(10000);
   }
 
   function availableToUnstake(uint256 index, address account)

@@ -215,7 +215,7 @@ describe('Staking Unit', () => {
       await locker.connect(account1).stake('100')
       await expect(
         locker.connect(account1).unstake('0', '50')
-      ).to.be.revertedWith('cliff not reached')
+      ).to.be.revertedWith('CLIFF_NOT_REACHED')
     })
 
     it('unstaking fails when attempting to claim more than is available', async () => {
@@ -230,7 +230,7 @@ describe('Staking Unit', () => {
 
       await expect(
         locker.connect(account1).unstake('0', '50')
-      ).to.be.revertedWith('insufficient claimable amount')
+      ).to.be.revertedWith('AMOUNT_EXCEEDS_AVAILABLE')
     })
 
     it('successful unstaking', async () => {
