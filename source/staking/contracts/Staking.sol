@@ -11,40 +11,51 @@ contract Staking is Ownable {
   using SafeERC20 for IERC20;
   using SafeMath for uint256;
   struct Stake {
+    uint256 duration;
     uint256 cliff;
-    uint256 periodLength;
-    uint256 percentPerPeriod;
     uint256 initialBalance;
     uint256 currentBalance;
-    uint256 blockNumber;
+    uint256 timestamp;
   }
 
-  IERC20 public immutable stakingToken;
+  // Token to be staked
+  IERC20 public immutable token;
+
+  // Vesting duration and cliff
+  uint256 public duration;
   uint256 public cliff;
-  uint256 public periodLength;
-  uint256 public percentPerPeriod;
+
+  // Mapping of account to stakes
   mapping(address => Stake[]) public stakes;
 
+  // ERC-20 token properties
+  uint256 public totalSupply;
+  string public name;
+  string public symbol;
+  uint8 public decimals;
+
+  // ERC-20 Transfer event for accounting
+  event Transfer(address indexed from, address indexed to, uint256 tokens);
+
   constructor(
-    IERC20 _stakingToken,
-    uint256 _cliff,
-    uint256 _periodLength,
-    uint256 _percentPerPeriod
-  ) {
-    stakingToken = _stakingToken;
+    IERC20 _token,
+    string memory _name,
+    string memory _symbol,
+    uint8 _decimals,
+    uint256 _duration,
+    uint256 _cliff
+  ) public {
+    token = _token;
+    name = _name;
+    symbol = _symbol;
+    decimals = _decimals;
+    duration = _duration;
     cliff = _cliff;
-    periodLength = _periodLength;
-    percentPerPeriod = _percentPerPeriod;
   }
 
-  function setVestingSchedule(
-    uint256 _cliff,
-    uint256 _periodLength,
-    uint256 _percentPerPeriod
-  ) external onlyOwner {
+  function setSchedule(uint256 _duration, uint256 _cliff) external onlyOwner {
+    duration = _duration;
     cliff = _cliff;
-    periodLength = _periodLength;
-    percentPerPeriod = _percentPerPeriod;
   }
 
   function stake(uint256 amount) external {
@@ -52,10 +63,13 @@ contract Staking is Ownable {
   }
 
   function stakeFor(address account, uint256 amount) public {
+    require(amount > 0, "AMOUNT_INVALID");
     stakes[account].push(
-      Stake(cliff, periodLength, percentPerPeriod, amount, amount, block.number)
+      Stake(duration, cliff, amount, amount, block.timestamp)
     );
-    stakingToken.safeTransferFrom(account, address(this), amount);
+    token.safeTransferFrom(account, address(this), amount);
+    totalSupply = totalSupply + amount;
+    emit Transfer(address(0), account, amount);
   }
 
   function addToStake(uint256 index, uint256 amount) external {
@@ -67,35 +81,41 @@ contract Staking is Ownable {
     address account,
     uint256 amount
   ) public {
-    Stake storage stakeData = stakes[msg.sender][index];
+    require(amount > 0, "AMOUNT_INVALID");
 
-    uint256 newInitialBalance = stakeData.initialBalance.add(amount);
-    uint256 newCurrentBalance = stakeData.currentBalance.add(amount);
-    uint256 newBlockNumber =
-      stakeData.blockNumber +
-        amount.mul(block.number.sub(stakeData.blockNumber)).div(
-          newInitialBalance
-        );
+    Stake storage existing = stakes[msg.sender][index];
+
+    uint256 newInitialBalance = existing.initialBalance.add(amount);
+    uint256 newCurrentBalance = existing.currentBalance.add(amount);
+    uint256 passed = block.timestamp.sub(existing.timestamp);
+    uint256 newTimestamp;
+
+    // If already vested or amount exceeds balance reset timestamp
+    if (passed > duration || amount > existing.initialBalance) {
+      newTimestamp = block.timestamp;
+    } else {
+      newTimestamp = existing.timestamp + passed.mul(passed).div(duration);
+    }
 
     stakes[msg.sender][index] = Stake(
+      duration,
       cliff,
-      periodLength,
-      percentPerPeriod,
       newInitialBalance,
       newCurrentBalance,
-      newBlockNumber
+      newTimestamp
     );
-
-    stakingToken.safeTransferFrom(account, address(this), amount);
+    token.safeTransferFrom(account, address(this), amount);
+    totalSupply = totalSupply + amount;
+    emit Transfer(address(0), account, amount);
   }
 
   function unstake(uint256 index, uint256 amount) external {
     Stake storage stakeData = stakes[msg.sender][index];
     require(
-      block.number.sub(stakeData.blockNumber) >= stakeData.cliff,
+      block.timestamp.sub(stakeData.timestamp) >= stakeData.cliff,
       "CLIFF_NOT_REACHED"
     );
-    uint256 withdrawableAmount = availableToUnstake(index, msg.sender);
+    uint256 withdrawableAmount = availableToUnstake(msg.sender, index);
     require(amount <= withdrawableAmount, "AMOUNT_EXCEEDS_AVAILABLE");
     stakeData.currentBalance = stakeData.currentBalance.sub(amount);
     if (stakeData.currentBalance == 0) {
@@ -103,45 +123,47 @@ contract Staking is Ownable {
       Stake[] storage accountStakes = stakes[msg.sender];
       Stake storage lastStake = accountStakes[accountStakes.length.sub(1)];
       // replace stake at index with last stake
+      stakeData.duration = lastStake.duration;
       stakeData.cliff = lastStake.cliff;
-      stakeData.periodLength = lastStake.periodLength;
-      stakeData.percentPerPeriod = lastStake.percentPerPeriod;
       stakeData.initialBalance = lastStake.initialBalance;
       stakeData.currentBalance = lastStake.currentBalance;
-      stakeData.blockNumber = lastStake.blockNumber;
+      stakeData.timestamp = lastStake.timestamp;
       // remove last stake
       stakes[msg.sender].pop();
     }
-    stakingToken.transfer(msg.sender, amount);
+    token.transfer(msg.sender, amount);
+    totalSupply = totalSupply - amount;
+    emit Transfer(msg.sender, address(0), amount);
   }
 
-  function vested(uint256 index, address account)
+  function vested(address account, uint256 index)
     public
     view
     returns (uint256)
   {
     Stake storage stakeData = stakes[account][index];
-    uint256 numPeriods =
-      (block.number.sub(stakeData.blockNumber)).div(stakeData.periodLength);
-
-    // Divide by 10000 to allow two-place percentage precision.
+    if (block.timestamp.sub(stakeData.timestamp) > duration) {
+      return stakeData.initialBalance;
+    }
     return
-      (stakeData.percentPerPeriod.mul(numPeriods).mul(stakeData.initialBalance))
-        .div(10000);
+      stakeData
+        .initialBalance
+        .mul(block.timestamp.sub(stakeData.timestamp))
+        .div(stakeData.duration);
   }
 
-  function availableToUnstake(uint256 index, address account)
+  function availableToUnstake(address account, uint256 index)
     public
     view
     returns (uint256)
   {
-    uint256 vestedAmount = vested(index, account);
+    uint256 vestedAmount = vested(account, index);
     uint256 currentBalance = 0;
     Stake memory stakeData = stakes[account][index];
-    if (block.number.sub(stakeData.blockNumber) >= stakeData.cliff) {
+    if (block.timestamp.sub(stakeData.timestamp) >= stakeData.cliff) {
       currentBalance = stakeData.currentBalance;
     }
-    return Math.min(vestedAmount, currentBalance);
+    return Math.min(vestedAmount, vestedAmount - (stakeData.initialBalance - currentBalance));
   }
 
   function balanceOf(address account) external view returns (uint256) {
