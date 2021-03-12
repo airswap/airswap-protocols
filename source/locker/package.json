@@ -21,7 +21,7 @@
     "@openzeppelin/contracts": "^3.3.0"
   },
   "devDependencies": {
-    "@airswap/test-utils": "0.1.9",
+    "@airswap/test-utils": "0.1.10",
     "solidity-coverage": "^0.7.13",
     "ethers": "^5.0.25"
   }
