@@ -1,54 +1,50 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.7.6;
 pragma abicoder v2;
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/math/Math.sol";
 
 contract Staking is Ownable {
-  using SafeERC20 for IERC20;
+  using SafeERC20 for ERC20;
   using SafeMath for uint256;
   struct Stake {
     uint256 duration;
     uint256 cliff;
-    uint256 initialBalance;
-    uint256 currentBalance;
+    uint256 initial;
+    uint256 balance;
     uint256 timestamp;
   }
 
   // Token to be staked
-  IERC20 public immutable token;
+  ERC20 public immutable token;
 
   // Vesting duration and cliff
   uint256 public duration;
   uint256 public cliff;
 
   // Mapping of account to stakes
-  mapping(address => Stake[]) public stakes;
+  mapping(address => Stake[]) public accountStakes;
 
   // ERC-20 token properties
-  uint256 public totalSupply;
   string public name;
   string public symbol;
-  uint8 public decimals;
 
-  // ERC-20 Transfer event for accounting
+  // ERC-20 Transfer event
   event Transfer(address indexed from, address indexed to, uint256 tokens);
 
   constructor(
-    IERC20 _token,
+    ERC20 _token,
     string memory _name,
     string memory _symbol,
-    uint8 _decimals,
     uint256 _duration,
     uint256 _cliff
   ) public {
     token = _token;
     name = _name;
     symbol = _symbol;
-    decimals = _decimals;
     duration = _duration;
     cliff = _cliff;
   }
@@ -64,11 +60,10 @@ contract Staking is Ownable {
 
   function stakeFor(address account, uint256 amount) public {
     require(amount > 0, "AMOUNT_INVALID");
-    stakes[account].push(
+    accountStakes[account].push(
       Stake(duration, cliff, amount, amount, block.timestamp)
     );
     token.safeTransferFrom(account, address(this), amount);
-    totalSupply = totalSupply + amount;
     emit Transfer(address(0), account, amount);
   }
 
@@ -83,56 +78,46 @@ contract Staking is Ownable {
   ) public {
     require(amount > 0, "AMOUNT_INVALID");
 
-    Stake storage existing = stakes[msg.sender][index];
+    Stake storage selected = accountStakes[msg.sender][index];
 
-    uint256 newInitialBalance = existing.initialBalance.add(amount);
-    uint256 newCurrentBalance = existing.currentBalance.add(amount);
-    uint256 passed = block.timestamp.sub(existing.timestamp);
-    uint256 newTimestamp;
+    uint256 newInitial = selected.initial.add(amount);
+    uint256 newBalance = selected.balance.add(amount);
+    uint256 newTimestamp =
+      selected.timestamp +
+        amount.mul(block.timestamp.sub(selected.timestamp)).div(newInitial);
 
-    // If already vested or amount exceeds balance reset timestamp
-    if (passed > duration || amount > existing.initialBalance) {
-      newTimestamp = block.timestamp;
-    } else {
-      newTimestamp = existing.timestamp + passed.mul(passed).div(duration);
-    }
-
-    stakes[msg.sender][index] = Stake(
+    accountStakes[msg.sender][index] = Stake(
       duration,
       cliff,
-      newInitialBalance,
-      newCurrentBalance,
+      newInitial,
+      newBalance,
       newTimestamp
     );
     token.safeTransferFrom(account, address(this), amount);
-    totalSupply = totalSupply + amount;
     emit Transfer(address(0), account, amount);
   }
 
   function unstake(uint256 index, uint256 amount) external {
-    Stake storage stakeData = stakes[msg.sender][index];
+    Stake storage selected = accountStakes[msg.sender][index];
     require(
-      block.timestamp.sub(stakeData.timestamp) >= stakeData.cliff,
+      block.timestamp.sub(selected.timestamp) >= selected.cliff,
       "CLIFF_NOT_REACHED"
     );
     uint256 withdrawableAmount = availableToUnstake(msg.sender, index);
     require(amount <= withdrawableAmount, "AMOUNT_EXCEEDS_AVAILABLE");
-    stakeData.currentBalance = stakeData.currentBalance.sub(amount);
-    if (stakeData.currentBalance == 0) {
-      // remove stake element if claimable amount goes to 0
-      Stake[] storage accountStakes = stakes[msg.sender];
-      Stake storage lastStake = accountStakes[accountStakes.length.sub(1)];
-      // replace stake at index with last stake
-      stakeData.duration = lastStake.duration;
-      stakeData.cliff = lastStake.cliff;
-      stakeData.initialBalance = lastStake.initialBalance;
-      stakeData.currentBalance = lastStake.currentBalance;
-      stakeData.timestamp = lastStake.timestamp;
-      // remove last stake
-      stakes[msg.sender].pop();
+    selected.balance = selected.balance.sub(amount);
+
+    if (selected.balance == 0) {
+      Stake[] storage stakes = accountStakes[msg.sender];
+      Stake storage last = stakes[stakes.length.sub(1)];
+      selected.duration = last.duration;
+      selected.cliff = last.cliff;
+      selected.initial = last.initial;
+      selected.balance = last.balance;
+      selected.timestamp = last.timestamp;
+      accountStakes[msg.sender].pop();
     }
     token.transfer(msg.sender, amount);
-    totalSupply = totalSupply - amount;
     emit Transfer(msg.sender, address(0), amount);
   }
 
@@ -141,15 +126,14 @@ contract Staking is Ownable {
     view
     returns (uint256)
   {
-    Stake storage stakeData = stakes[account][index];
+    Stake storage stakeData = accountStakes[account][index];
     if (block.timestamp.sub(stakeData.timestamp) > duration) {
-      return stakeData.initialBalance;
+      return stakeData.initial;
     }
     return
-      stakeData
-        .initialBalance
-        .mul(block.timestamp.sub(stakeData.timestamp))
-        .div(stakeData.duration);
+      stakeData.initial.mul(block.timestamp.sub(stakeData.timestamp)).div(
+        stakeData.duration
+      );
   }
 
   function availableToUnstake(address account, uint256 index)
@@ -157,35 +141,40 @@ contract Staking is Ownable {
     view
     returns (uint256)
   {
-    uint256 vestedAmount = vested(account, index);
-    uint256 currentBalance = 0;
-    Stake memory stakeData = stakes[account][index];
-    if (block.timestamp.sub(stakeData.timestamp) >= stakeData.cliff) {
-      currentBalance = stakeData.currentBalance;
+    Stake memory selected = accountStakes[account][index];
+
+    if (block.timestamp.sub(selected.timestamp) < selected.cliff) {
+      return 0;
     }
-    return Math.min(vestedAmount, vestedAmount - (stakeData.initialBalance - currentBalance));
+    return vested(account, index) - (selected.initial - selected.balance);
   }
 
-  function balanceOf(address account) external view returns (uint256) {
-    Stake[] memory accountStakes = stakes[account];
-    uint256 stakedBalance = 0;
-    for (uint256 i = 0; i < accountStakes.length; i++) {
-      stakedBalance = stakedBalance.add(accountStakes[i].currentBalance);
+  function totalSupply() external view returns (uint256) {
+    return token.balanceOf(address(this));
+  }
+
+  function decimals() external view returns (uint8) {
+    return token.decimals();
+  }
+
+  function balanceOf(address account) external view returns (uint256 total) {
+    Stake[] memory stakes = accountStakes[account];
+    for (uint256 i = 0; i < stakes.length; i++) {
+      total = total.add(stakes[i].balance);
     }
-    return stakedBalance;
+    return total;
   }
 
   function getStakes(address account)
     external
     view
-    returns (Stake[] memory accountStakes)
+    returns (Stake[] memory stakes)
   {
-    uint256 length = stakes[account].length;
-    accountStakes = new Stake[](length);
+    uint256 length = accountStakes[account].length;
+    stakes = new Stake[](length);
     for (uint256 i = 0; i < length; i++) {
-      Stake memory stakeData = stakes[account][i];
-      accountStakes[i] = stakeData;
+      stakes[i] = accountStakes[account][i];
     }
-    return accountStakes;
+    return stakes;
   }
 }
