@@ -75,6 +75,7 @@ describe('Staking Unit', () => {
     it('successful staking', async () => {
       await token.mock.transferFrom.returns(true)
       await staking.connect(account1).stake('100')
+      const block = await ethers.provider.getBlock()
       const userStakes = await staking
         .connect(account1)
         .getStakes(account1.address)
@@ -82,8 +83,7 @@ describe('Staking Unit', () => {
       expect(userStakes[0].initial).to.equal(100)
       expect(userStakes[0].balance).to.equal(100)
       expect(userStakes[0].cliff).to.equal(CLIFF)
-      expect(userStakes[0].duration).to.equal(DURATION)
-      expect(userStakes[0].timestamp).to.not.equal(0)
+      expect(userStakes[0].timestamp).to.equal(block.timestamp)
     })
 
     it('successful staking for', async () => {
@@ -92,18 +92,21 @@ describe('Staking Unit', () => {
       const userStakes = await staking
         .connect(account1)
         .getStakes(account2.address)
+      const block = await ethers.provider.getBlock()
       expect(userStakes.length).to.equal(1)
       expect(userStakes[0].initial).to.equal(170)
       expect(userStakes[0].balance).to.equal(170)
       expect(userStakes[0].cliff).to.equal(CLIFF)
       expect(userStakes[0].duration).to.equal(DURATION)
-      expect(userStakes[0].timestamp).to.not.equal(0)
+      expect(userStakes[0].timestamp).to.equal(block.timestamp)
     })
 
     it('successful multiple stakes', async () => {
       await token.mock.transferFrom.returns(true)
       await staking.connect(account1).stake('100')
+      const block0 = await ethers.provider.getBlock()
       await staking.connect(account1).stake('140')
+      const block1 = await ethers.provider.getBlock()
       const userStakes = await staking
         .connect(account1)
         .getStakes(account1.address)
@@ -113,20 +116,22 @@ describe('Staking Unit', () => {
       expect(userStakes[0].balance).to.equal(100)
       expect(userStakes[0].cliff).to.equal(CLIFF)
       expect(userStakes[0].duration).to.equal(DURATION)
-      expect(userStakes[0].timestamp).to.not.equal(0)
+      expect(userStakes[0].timestamp).to.equal(block0.timestamp)
 
       expect(userStakes[1].initial).to.equal(140)
       expect(userStakes[1].balance).to.equal(140)
       expect(userStakes[1].cliff).to.equal(CLIFF)
       expect(userStakes[1].duration).to.equal(DURATION)
-      expect(userStakes[1].timestamp).to.not.equal(0)
+      expect(userStakes[1].timestamp).to.equal(block1.timestamp)
     })
 
     it('successful multiple stakes with an updated vesting schedule', async () => {
       await token.mock.transferFrom.returns(true)
       await staking.connect(account1).stake('100')
+      const block0 = await ethers.provider.getBlock()
       await staking.connect(deployer).setSchedule(DURATION * 2, CLIFF)
       await staking.connect(account1).stake('140')
+      const block1 = await ethers.provider.getBlock()
 
       const userStakes = await staking
         .connect(account1)
@@ -137,19 +142,21 @@ describe('Staking Unit', () => {
       expect(userStakes[0].balance).to.equal(100)
       expect(userStakes[0].cliff).to.equal(CLIFF)
       expect(userStakes[0].duration).to.equal(DURATION)
-      expect(userStakes[0].timestamp).to.not.equal(0)
+      expect(userStakes[0].timestamp).to.equal(block0.timestamp)
 
       expect(userStakes[1].initial).to.equal(140)
       expect(userStakes[1].balance).to.equal(140)
       expect(userStakes[1].cliff).to.equal(CLIFF)
       expect(userStakes[1].duration).to.equal(DURATION * 2)
-      expect(userStakes[1].timestamp).to.not.equal(0)
+      expect(userStakes[1].timestamp).to.equal(block1.timestamp)
     })
 
     it('successful multiple stake fors', async () => {
       await token.mock.transferFrom.returns(true)
       await staking.connect(account1).stakeFor(account2.address, '100')
+      const block0 = await ethers.provider.getBlock()
       await staking.connect(account1).stakeFor(account2.address, '140')
+      const block1 = await ethers.provider.getBlock()
       const userStakes = await staking
         .connect(account1)
         .getStakes(account2.address)
@@ -159,13 +166,13 @@ describe('Staking Unit', () => {
       expect(userStakes[0].balance).to.equal(100)
       expect(userStakes[0].cliff).to.equal(CLIFF)
       expect(userStakes[0].duration).to.equal(DURATION)
-      expect(userStakes[0].timestamp).to.not.equal(0)
+      expect(userStakes[0].timestamp).to.equal(block0.timestamp)
 
       expect(userStakes[1].initial).to.equal(140)
       expect(userStakes[1].balance).to.equal(140)
       expect(userStakes[1].cliff).to.equal(CLIFF)
       expect(userStakes[1].duration).to.equal(DURATION)
-      expect(userStakes[1].timestamp).to.not.equal(0)
+      expect(userStakes[1].timestamp).to.equal(block1.timestamp)
     })
 
     it('unsuccessful staking', async () => {
@@ -190,6 +197,7 @@ describe('Staking Unit', () => {
     it('successful add to stake stake has been made', async () => {
       await token.mock.transferFrom.returns(true)
       await staking.connect(account1).stake('100')
+      const block = await ethers.provider.getBlock()
       await staking.connect(account1).addToStake('0', '120')
 
       const userStakes = await staking
@@ -201,21 +209,16 @@ describe('Staking Unit', () => {
       expect(userStakes[0].balance).to.equal(220)
       expect(userStakes[0].cliff).to.equal(CLIFF)
       expect(userStakes[0].duration).to.equal(DURATION)
-      expect(userStakes[0].timestamp).to.not.equal(0)
+      expect(userStakes[0].timestamp).to.equal(block.timestamp)
     })
 
     it('successful add to stake and timestamp updates to appropriate value', async () => {
       await token.mock.transferFrom.returns(true)
       await staking.connect(account1).stake('100')
-
-      const initialStakeTimestamp = await staking
-        .connect(account1)
-        .getStakes(account1.address)
+      const block0 = await ethers.provider.getBlock()
 
       // move 100000 seconds forward
-      const block = await ethers.provider.getBlockNumber()
-      const blockInfo = await ethers.provider.getBlock(block)
-      await timeMachine.advanceBlockAndSetTime(blockInfo.timestamp + 100000)
+      await timeMachine.advanceBlockAndSetTime(block0.timestamp + 100000)
 
       const blockNewTime = await ethers.provider.getBlockNumber()
       const blockNewTimeInfo = await ethers.provider.getBlock(blockNewTime)
@@ -231,14 +234,15 @@ describe('Staking Unit', () => {
       expect(userStakes[0].cliff).to.equal(CLIFF)
       expect(userStakes[0].duration).to.equal(DURATION)
 
-      const diff = BN.from(blockNewTimeInfo.timestamp).sub(
-        initialStakeTimestamp[0].timestamp
-      )
+      // check if timestamp was updated appropriately
+      const diff = BN.from(blockNewTimeInfo.timestamp).sub(block0.timestamp)
       const product = BN.from(120).mul(diff)
       const quotient = product.div(BN.from(220))
       // + 1 because number rounds up to nearest whole
-      const sum = initialStakeTimestamp[0].timestamp.add(quotient).add(1)
-      expect(userStakes[0].timestamp.toString()).to.equal(sum.toString())
+      const sum = BN.from(block0.timestamp)
+        .add(BN.from(quotient))
+        .add(1)
+      expect(userStakes[0].timestamp).to.equal(sum)
     })
   })
 
@@ -308,7 +312,9 @@ describe('Staking Unit', () => {
       await token.mock.transfer.returns(true)
       await staking.connect(account1).stake('100')
       await staking.connect(account1).stake('200')
+      const block0 = await ethers.provider.getBlock()
       await staking.connect(account1).stake('300')
+      const block1 = await ethers.provider.getBlock()
 
       // move 100 blocks forward + 2 stakes = 102% vested
       for (let index = 0; index < 100; index++) {
@@ -324,8 +330,10 @@ describe('Staking Unit', () => {
       // ensure stake 0 was overwritten with last stake
       expect(userStakes[0].initial).to.equal(300)
       expect(userStakes[0].balance).to.equal(300)
+      expect(userStakes[0].timestamp).to.equal(block1.timestamp)
       expect(userStakes[1].initial).to.equal(200)
       expect(userStakes[1].balance).to.equal(200)
+      expect(userStakes[1].timestamp).to.equal(block0.timestamp)
     })
   })
 
