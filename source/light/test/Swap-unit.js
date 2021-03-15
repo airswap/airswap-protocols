@@ -21,6 +21,8 @@ const encodeERC20Call = (name, args) =>
   ERC20Interface.encodeFunctionData(name, args)
 
 const SIGNER_FEE = 300
+const HIGHER_FEE = 500
+const FEE_DIVISOR = 10000
 
 function createOrder({
   expiry = Math.round(Date.now() / 1000 + SECONDS_IN_DAY).toString(),
@@ -429,6 +431,42 @@ contract('Swap Light Unit Tests', async accounts => {
       equal(senderTransferCalls.toNumber(), 1)
       equal(signerTransferCalls.toNumber(), 1)
       equal(feeTransferCalls.toNumber(), 1)
+    })
+
+    it('test changing fee', async () => {
+      await swap.setFee(HIGHER_FEE, { from: owner })
+
+      const storedSignerFee = await swap.signerFee.call()
+      equal(storedSignerFee, HIGHER_FEE)
+    })
+
+    it('test only owner can change fee', async () => {
+      await reverted(
+        swap.setFee(anyone, { from: anyone }),
+        'Ownable: caller is not the owner'
+      )
+    })
+
+    it('test invalid fee', async () => {
+      await reverted(
+        swap.setFee(FEE_DIVISOR + 1, { from: owner }),
+        'INVALID_FEE'
+      )
+    })
+
+    it('test when signed with incorrect fee', async () => {
+      const order = createOrderWithMockTokens({
+        signerFee: SIGNER_FEE,
+      })
+
+      const signedOrder = await signOrder(order, mockSigner, swap.address)
+
+      await reverted(
+        swap.swap(...orderToParams(signedOrder), {
+          from: mockSender,
+        }),
+        'UNAUTHORIZED'
+      )
     })
   })
 
