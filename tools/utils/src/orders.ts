@@ -22,6 +22,8 @@ import {
   SECONDS_IN_DAY,
   tokenKinds,
   ADDRESS_ZERO,
+  DOMAIN_NAME,
+  DOMAIN_VERSION,
   LIGHT_DOMAIN_VERSION,
   LIGHT_DOMAIN_NAME,
 } from '@airswap/constants'
@@ -31,6 +33,7 @@ import {
   Order,
   Signature,
   UnsignedLightOrder,
+  EIP712,
   EIP712Light,
   OrderParty,
   LightSignature,
@@ -167,6 +170,51 @@ export async function signOrder(
   return {
     ...order,
     signature: await createSignature(order, wallet, swapContract),
+  }
+}
+
+export async function createTypedDataSignature(
+  unsignedOrder: UnsignedOrder,
+  privateKey: string,
+  swapContract: string
+): Promise<Signature> {
+  const signedMsg = sigUtil.signTypedData_v4(ethUtil.toBuffer(privateKey), {
+    data: {
+      types: EIP712,
+      domain: {
+        name: DOMAIN_NAME,
+        version: DOMAIN_VERSION,
+        verifyingContract: swapContract,
+      },
+      primaryType: 'Order',
+      message: unsignedOrder,
+    },
+  })
+
+  const sig = ethers.utils.splitSignature(signedMsg)
+  const { r, s, v } = sig
+
+  return {
+    signatory: `0x${ethUtil
+      .privateToAddress(ethUtil.toBuffer(privateKey))
+      .toString('hex')
+      .toLowerCase()}`,
+    validator: swapContract.toLowerCase(),
+    version: signatureTypes.SIGN_TYPED_DATA,
+    v: String(v),
+    r,
+    s,
+  }
+}
+
+export async function signTypedDataOrder(
+  order: UnsignedOrder,
+  privateKey: string,
+  swapContract: string
+): Promise<Order> {
+  return {
+    ...order,
+    signature: await createTypedDataSignature(order, privateKey, swapContract),
   }
 }
 
