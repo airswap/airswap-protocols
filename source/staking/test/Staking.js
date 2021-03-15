@@ -107,7 +107,7 @@ contract('Staking', async accounts => {
     })
     it('Alice adds to her stake', async () => {
       emitted(
-        await staking.addToStake(0, 500000, {
+        await staking.extend(0, 500000, {
           from: aliceAddress,
         }),
         'Transfer'

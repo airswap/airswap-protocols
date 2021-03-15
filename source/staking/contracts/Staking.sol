@@ -67,11 +67,11 @@ contract Staking is Ownable {
     emit Transfer(address(0), account, amount);
   }
 
-  function addToStake(uint256 index, uint256 amount) external {
-    addToStakeFor(index, msg.sender, amount);
+  function extend(uint256 index, uint256 amount) external {
+    extendFor(index, msg.sender, amount);
   }
 
-  function addToStakeFor(
+  function extendFor(
     uint256 index,
     address account,
     uint256 amount
@@ -103,7 +103,7 @@ contract Staking is Ownable {
       block.timestamp.sub(selected.timestamp) >= selected.cliff,
       "CLIFF_NOT_REACHED"
     );
-    uint256 withdrawableAmount = availableToUnstake(msg.sender, index);
+    uint256 withdrawableAmount = available(msg.sender, index);
     require(amount <= withdrawableAmount, "AMOUNT_EXCEEDS_AVAILABLE");
     selected.balance = selected.balance.sub(amount);
 
@@ -136,7 +136,7 @@ contract Staking is Ownable {
       );
   }
 
-  function availableToUnstake(address account, uint256 index)
+  function available(address account, uint256 index)
     public
     view
     returns (uint256)
@@ -147,22 +147,6 @@ contract Staking is Ownable {
       return 0;
     }
     return vested(account, index) - (selected.initial - selected.balance);
-  }
-
-  function totalSupply() external view returns (uint256) {
-    return token.balanceOf(address(this));
-  }
-
-  function decimals() external view returns (uint8) {
-    return token.decimals();
-  }
-
-  function balanceOf(address account) external view returns (uint256 total) {
-    Stake[] memory stakes = accountStakes[account];
-    for (uint256 i = 0; i < stakes.length; i++) {
-      total = total.add(stakes[i].balance);
-    }
-    return total;
   }
 
   function getStakes(address account)
@@ -176,5 +160,21 @@ contract Staking is Ownable {
       stakes[i] = accountStakes[account][i];
     }
     return stakes;
+  }
+
+  function totalSupply() external view returns (uint256) {
+    return token.balanceOf(address(this));
+  }
+
+  function balanceOf(address account) external view returns (uint256 total) {
+    Stake[] memory stakes = accountStakes[account];
+    for (uint256 i = 0; i < stakes.length; i++) {
+      total = total.add(stakes[i].balance);
+    }
+    return total;
+  }
+
+  function decimals() external view returns (uint8) {
+    return token.decimals();
   }
 }

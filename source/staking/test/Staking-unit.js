@@ -190,15 +190,14 @@ describe('Staking Unit', () => {
 
     it('unsuccessful add to stake when no stakes made', async () => {
       await token.mock.transferFrom.returns(true)
-      await expect(staking.connect(account1).addToStake('0', '100')).to.be
-        .reverted
+      await expect(staking.connect(account1).extend('0', '100')).to.be.reverted
     })
 
     it('successful add to stake stake has been made', async () => {
       await token.mock.transferFrom.returns(true)
       await staking.connect(account1).stake('100')
       const block = await ethers.provider.getBlock()
-      await staking.connect(account1).addToStake('0', '120')
+      await staking.connect(account1).extend('0', '120')
 
       const userStakes = await staking
         .connect(account1)
@@ -222,7 +221,7 @@ describe('Staking Unit', () => {
 
       const blockNewTime = await ethers.provider.getBlockNumber()
       const blockNewTimeInfo = await ethers.provider.getBlock(blockNewTime)
-      await staking.connect(account1).addToStake('0', '120')
+      await staking.connect(account1).extend('0', '120')
 
       const userStakes = await staking
         .connect(account1)
@@ -399,11 +398,8 @@ describe('Staking Unit', () => {
       await staking.connect(account1).stake('100')
 
       timeMachine.advanceTimeAndBlock(CLIFF - 1)
-      const availableToUnstake = await staking.availableToUnstake(
-        account1.address,
-        '0'
-      )
-      expect(availableToUnstake).to.equal('0')
+      const available = await staking.available(account1.address, '0')
+      expect(available).to.equal('0')
     })
 
     it('available to unstake is 0, if cliff has not passed with an updated vesting schedule', async () => {
@@ -416,11 +412,8 @@ describe('Staking Unit', () => {
       for (let index = 0; index < CLIFF - 1; index++) {
         await timeMachine.advanceBlock()
       }
-      const availableToUnstake = await staking.availableToUnstake(
-        account1.address,
-        '1'
-      )
-      expect(availableToUnstake).to.equal('0')
+      const available = await staking.available(account1.address, '1')
+      expect(available).to.equal('0')
     })
 
     it('available to unstake is > 0, if cliff has passed', async () => {
@@ -429,12 +422,9 @@ describe('Staking Unit', () => {
       await staking.connect(account1).stake('100')
 
       timeMachine.advanceTimeAndBlock(CLIFF)
-      const availableToUnstake = await staking.availableToUnstake(
-        account1.address,
-        '0'
-      )
+      const available = await staking.available(account1.address, '0')
       // every 1 block 1% is vested, user can only claim starting afater 10 blocks, or 10% vested
-      expect(availableToUnstake).to.equal('10')
+      expect(available).to.equal('10')
     })
 
     it('available to unstake is > 0, if cliff has passed with an updated vesting schedule', async () => {
@@ -445,12 +435,9 @@ describe('Staking Unit', () => {
       await staking.connect(account1).stake('100')
 
       timeMachine.advanceTimeAndBlock(CLIFF)
-      const availableToUnstake = await staking.availableToUnstake(
-        account1.address,
-        '1'
-      )
+      const available = await staking.available(account1.address, '1')
       // every 1 block 2% is vested, user can only claim starting afater 10 blocks, or 20% vested
-      expect(availableToUnstake).to.equal('10')
+      expect(available).to.equal('10')
     })
 
     it('available to unstake with multiple stakes and varying passed cliffs', async () => {
@@ -477,18 +464,9 @@ describe('Staking Unit', () => {
       // 13 blocks + 1 stake + 3 blocks = 17 total blocks passed for second stake
       // 3 blocks = 3 total blocks passed for third stake
 
-      const availableStake1 = await staking.availableToUnstake(
-        account1.address,
-        '0'
-      )
-      const availableStake2 = await staking.availableToUnstake(
-        account1.address,
-        '1'
-      )
-      const availableStake3 = await staking.availableToUnstake(
-        account1.address,
-        '2'
-      )
+      const availableStake1 = await staking.available(account1.address, '0')
+      const availableStake2 = await staking.available(account1.address, '1')
+      const availableStake3 = await staking.available(account1.address, '2')
       expect(availableStake1).to.equal('28')
       expect(availableStake2).to.equal('27')
       expect(availableStake3).to.equal('0')
