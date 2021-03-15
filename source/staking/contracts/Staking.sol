@@ -7,6 +7,9 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/math/Math.sol";
 
+/**
+ * @title Staking: Stake and Unstake Tokens
+ */
 contract Staking is Ownable {
   using SafeERC20 for ERC20;
   using SafeMath for uint256;
@@ -35,6 +38,14 @@ contract Staking is Ownable {
   // ERC-20 Transfer event
   event Transfer(address indexed from, address indexed to, uint256 tokens);
 
+  /**
+   * @notice Constructor
+   * @param _token address
+   * @param _name string
+   * @param _symbol string
+   * @param _duration uint256
+   * @param _cliff uint256
+   */
   constructor(
     ERC20 _token,
     string memory _name,
@@ -49,15 +60,29 @@ contract Staking is Ownable {
     cliff = _cliff;
   }
 
+  /**
+   * @notice Set the staking duration and cliff
+   * @param _duration uint256
+   * @param _cliff uint256
+   */
   function setSchedule(uint256 _duration, uint256 _cliff) external onlyOwner {
     duration = _duration;
     cliff = _cliff;
   }
 
+  /**
+   * @notice Stake tokens
+   * @param amount uint256
+   */
   function stake(uint256 amount) external {
     stakeFor(msg.sender, amount);
   }
 
+  /**
+   * @notice Stake tokens for a user
+   * @param account address
+   * @param amount uint256
+   */
   function stakeFor(address account, uint256 amount) public {
     require(amount > 0, "AMOUNT_INVALID");
     accountStakes[account].push(
@@ -67,10 +92,20 @@ contract Staking is Ownable {
     emit Transfer(address(0), account, amount);
   }
 
+  /**
+   * @notice Extend a stake
+   * @param amount uint256
+   */
   function extend(uint256 index, uint256 amount) external {
     extendFor(index, msg.sender, amount);
   }
 
+  /**
+   * @notice Extend a stake for a user
+   * @param index uint256
+   * @param account address
+   * @param amount uint256
+   */
   function extendFor(
     uint256 index,
     address account,
@@ -97,6 +132,11 @@ contract Staking is Ownable {
     emit Transfer(address(0), account, amount);
   }
 
+  /**
+   * @notice Unstake tokens
+   * @param index uint256
+   * @param amount uint256
+   */
   function unstake(uint256 index, uint256 amount) external {
     Stake storage selected = accountStakes[msg.sender][index];
     require(
@@ -121,6 +161,11 @@ contract Staking is Ownable {
     emit Transfer(msg.sender, address(0), amount);
   }
 
+  /**
+   * @notice Calculate vested amount
+   * @param account uint256
+   * @param index uint256
+   */
   function vested(address account, uint256 index)
     public
     view
@@ -136,6 +181,11 @@ contract Staking is Ownable {
       );
   }
 
+  /**
+   * @notice Calculate available amount
+   * @param account uint256
+   * @param index uint256
+   */
   function available(address account, uint256 index)
     public
     view
@@ -149,6 +199,10 @@ contract Staking is Ownable {
     return vested(account, index) - (selected.initial - selected.balance);
   }
 
+  /**
+   * @notice Get all stakes for a user
+   * @param account uint256
+   */
   function getStakes(address account)
     external
     view
@@ -162,10 +216,16 @@ contract Staking is Ownable {
     return stakes;
   }
 
+  /**
+   * @notice Get total supply (ERC-20)
+   */
   function totalSupply() external view returns (uint256) {
     return token.balanceOf(address(this));
   }
 
+  /**
+   * @notice Get balance of a user (ERC-20)
+   */
   function balanceOf(address account) external view returns (uint256 total) {
     Stake[] memory stakes = accountStakes[account];
     for (uint256 i = 0; i < stakes.length; i++) {
@@ -174,6 +234,9 @@ contract Staking is Ownable {
     return total;
   }
 
+  /**
+   * @notice Get decimals of underlying token (ERC-20)
+   */
   function decimals() external view returns (uint8) {
     return token.decimals();
   }
