@@ -89,8 +89,8 @@ function orderToParams(order) {
   ]
 }
 
-contract('Swap Light Unit Tests', async accounts => {
-  const [_, owner, mockSender, mockSigner, feeWallet, anyone] = accounts
+contract('Light Unit Tests', async accounts => {
+  const [owner, mockSender, mockSigner, feeWallet, anyone] = accounts
 
   let snapshotId
   let swap
@@ -114,7 +114,7 @@ contract('Swap Light Unit Tests', async accounts => {
   })
 
   describe('Setup', () => {
-    before('deploy Swap', async () => {
+    before('deploy Light', async () => {
       mockSignerToken = await MockContract.new()
       mockSenderToken = await MockContract.new()
     })
@@ -143,7 +143,7 @@ contract('Swap Light Unit Tests', async accounts => {
   })
 
   describe('Test swap', () => {
-    before('deploy Swap', async () => {
+    before('deploy Light', async () => {
       swap = await Light.new(feeWallet, SIGNER_FEE, {
         from: owner,
       })
@@ -346,7 +346,7 @@ contract('Swap Light Unit Tests', async accounts => {
 
   describe('Test fees', () => {
     const fee = 300
-    before('deploy Swap', async () => {
+    before('deploy Light', async () => {
       swap = await Light.new(feeWallet, fee, {
         from: owner,
       })
@@ -471,7 +471,7 @@ contract('Swap Light Unit Tests', async accounts => {
   })
 
   describe('Test authorization', () => {
-    beforeEach('deploy Swap', async () => {
+    beforeEach('deploy Light', async () => {
       swap = await Light.new(feeWallet, 1, {
         from: owner,
       })
@@ -504,7 +504,7 @@ contract('Swap Light Unit Tests', async accounts => {
   })
 
   describe('Test cancel', async () => {
-    beforeEach('deploy Swap', async () => {
+    beforeEach('deploy Light', async () => {
       swap = await Light.new(feeWallet, 1, {
         from: owner,
       })
