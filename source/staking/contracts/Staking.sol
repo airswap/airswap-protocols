@@ -117,6 +117,9 @@ contract Staking is Ownable {
 
     uint256 newInitial = selected.initial.add(amount);
     uint256 newBalance = selected.balance.add(amount);
+
+    // Calculate a new timestamp proportional to the new amount
+    // Limited to current block timestamp (amount / newInitial approaches 1)
     uint256 newTimestamp =
       selected.timestamp +
         amount.mul(block.timestamp.sub(selected.timestamp)).div(newInitial);
