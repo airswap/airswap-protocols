@@ -11,6 +11,7 @@ import {
 } from '../index'
 import {
   createLightSignature,
+  signTypedDataOrder,
   getSignerFromLightSignature,
 } from '../src/orders'
 
@@ -27,6 +28,20 @@ describe('Orders', async () => {
     expect(isValidOrder(order)).to.equal(true)
   })
 
+  it('Signs with typed data and validates an order', async () => {
+    const unsignedOrder = createOrder({
+      signer: {
+        wallet: wallet.address,
+      },
+    })
+    const order = await signTypedDataOrder(
+      unsignedOrder,
+      wallet.privateKey,
+      ADDRESS_ZERO
+    )
+    expect(isValidOrder(order)).to.equal(true)
+  })
+
   it('Signs and validates a light order', async () => {
     const unsignedOrder = {
       nonce: Date.now().toString(),
@@ -34,6 +49,7 @@ describe('Orders', async () => {
       signerWallet: ADDRESS_ZERO,
       signerToken: ADDRESS_ZERO,
       signerAmount: '0',
+      signerFee: '300',
       senderWallet: ADDRESS_ZERO,
       senderToken: ADDRESS_ZERO,
       senderAmount: '0',

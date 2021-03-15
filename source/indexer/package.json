@@ -25,9 +25,9 @@
   },
   "devDependencies": {
     "@airswap/constants": "0.3.10",
-    "@airswap/test-utils": "0.1.9",
+    "@airswap/test-utils": "0.1.10",
     "@airswap/transfers": "1.1.3",
-    "@airswap/types": "3.5.14",
+    "@airswap/types": "3.5.15",
     "bignumber.js": "^9.0.0",
     "solidity-coverage": "^0.7.4"
   },

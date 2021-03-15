@@ -20,12 +20,15 @@ const ERC20Interface = new ethers.utils.Interface(IERC20.abi)
 const encodeERC20Call = (name, args) =>
   ERC20Interface.encodeFunctionData(name, args)
 
+const SIGNER_FEE = 300
+
 function createOrder({
   expiry = Math.round(Date.now() / 1000 + SECONDS_IN_DAY).toString(),
   nonce = Date.now(),
   signerWallet = ADDRESS_ZERO,
   signerToken = ADDRESS_ZERO,
   signerAmount = 0,
+  signerFee = SIGNER_FEE,
   senderWallet = ADDRESS_ZERO,
   senderToken = ADDRESS_ZERO,
   senderAmount = 0,
@@ -39,6 +42,7 @@ function createOrder({
     signerWallet,
     signerToken,
     signerAmount,
+    signerFee,
     senderWallet,
     senderToken,
     senderAmount,
@@ -108,23 +112,22 @@ contract('Swap Light Unit Tests', async accounts => {
   })
 
   describe('Setup', () => {
-    const fee = 300
     before('deploy Swap', async () => {
       mockSignerToken = await MockContract.new()
       mockSenderToken = await MockContract.new()
     })
 
     it('test setting fee and fee wallet correctly', async () => {
-      swap = await Light.new(feeWallet, fee, { from: owner })
-      const storedFee = await swap.FEE.call()
+      swap = await Light.new(feeWallet, SIGNER_FEE, { from: owner })
+      const storedFee = await swap.signerFee.call()
       const storedFeeWallet = await swap.feeWallet.call()
-      equal(storedFee.toNumber(), fee)
+      equal(storedFee.toNumber(), SIGNER_FEE)
       equal(storedFeeWallet, feeWallet)
     })
 
     it('test invalid feeWallet', async () => {
       await reverted(
-        Light.new(ADDRESS_ZERO, fee, { from: owner }),
+        Light.new(ADDRESS_ZERO, SIGNER_FEE, { from: owner }),
         'INVALID_FEE_WALLET'
       )
     })
@@ -139,7 +142,7 @@ contract('Swap Light Unit Tests', async accounts => {
 
   describe('Test swap', () => {
     before('deploy Swap', async () => {
-      swap = await Light.new(feeWallet, 1, {
+      swap = await Light.new(feeWallet, SIGNER_FEE, {
         from: owner,
       })
       mockSignerToken = await MockContract.new()

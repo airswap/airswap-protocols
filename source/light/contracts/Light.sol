@@ -53,6 +53,7 @@ contract Light is ILight, Ownable {
         "address signerWallet,",
         "address signerToken,",
         "uint256 signerAmount,",
+        "uint256 signerFee,",
         "address senderWallet,",
         "address senderToken,",
         "uint256 senderAmount",
@@ -60,13 +61,13 @@ contract Light is ILight, Ownable {
       )
     );
 
-  uint256 public constant FEE_DIVISOR = 10000;
-  uint256 public immutable FEE;
-
   bytes32 public constant DOMAIN_NAME = keccak256("SWAP_LIGHT");
   bytes32 public constant DOMAIN_VERSION = keccak256("3");
   uint256 public immutable DOMAIN_CHAIN_ID;
   bytes32 public immutable DOMAIN_SEPARATOR;
+
+  uint256 public constant FEE_DIVISOR = 10000;
+  uint256 public signerFee;
 
   // Double mapping of signers to nonce groups to nonce states.
   // The nonce group is computed as nonce / 256, so each group of 256 sequential nonces use the same key.
@@ -93,7 +94,7 @@ contract Light is ILight, Ownable {
     );
 
     feeWallet = _feeWallet;
-    FEE = _fee;
+    signerFee = _fee;
   }
 
   /**
@@ -167,6 +168,7 @@ contract Light is ILight, Ownable {
         signerWallet,
         signerToken,
         signerAmount,
+        signerFee,
         msg.sender,
         senderToken,
         senderAmount
@@ -189,7 +191,7 @@ contract Light is ILight, Ownable {
     signerToken.safeTransferFrom(signerWallet, recipient, signerAmount);
 
     // Transfer fee
-    uint256 feeAmount = signerAmount.mul(FEE).div(FEE_DIVISOR);
+    uint256 feeAmount = signerAmount.mul(signerFee).div(FEE_DIVISOR);
     if (feeAmount > 0) {
       signerToken.safeTransferFrom(signerWallet, feeWallet, feeAmount);
     }
@@ -209,6 +211,11 @@ contract Light is ILight, Ownable {
   function setFeeWallet(address newFeeWallet) external onlyOwner {
     require(newFeeWallet != address(0), "INVALID_FEE_WALLET");
     feeWallet = newFeeWallet;
+  }
+
+  function setFee(uint256 newSignerFee) external onlyOwner {
+    require(newSignerFee < FEE_DIVISOR, "INVALID_FEE");
+    signerFee = newSignerFee;
   }
 
   function authorize(address signer) external override {
@@ -295,6 +302,7 @@ contract Light is ILight, Ownable {
     address signerWallet,
     IERC20 signerToken,
     uint256 signerAmount,
+    uint256 signerFee,
     address senderWallet,
     IERC20 senderToken,
     uint256 senderAmount
@@ -308,6 +316,7 @@ contract Light is ILight, Ownable {
           signerWallet,
           signerToken,
           signerAmount,
+          signerFee,
           senderWallet,
           senderToken,
           senderAmount

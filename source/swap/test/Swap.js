@@ -450,28 +450,35 @@ contract('Swap', async accounts => {
     let _order
     let _unsignedOrder
 
-    before('Alice creates an order for Bob (200 AST for 50 DAI)', async () => {
-      _unsignedOrder = createOrder({
-        signer: {
-          wallet: aliceAddress,
-          token: tokenAST.address,
-          amount: 50,
-        },
-        sender: {
-          wallet: bobAddress,
-          token: tokenDAI.address,
-          amount: 10,
-        },
-        expiry: await getTimestampPlusDays(1),
-      })
-      _order = await signOrder(_unsignedOrder, davidSigner, swapContractAddress)
-    })
+    before(
+      'David makes an order for Alice and Bob (200 AST for 50 DAI)',
+      async () => {
+        _unsignedOrder = createOrder({
+          signer: {
+            wallet: aliceAddress,
+            token: tokenAST.address,
+            amount: 50,
+          },
+          sender: {
+            wallet: bobAddress,
+            token: tokenDAI.address,
+            amount: 10,
+          },
+          expiry: await getTimestampPlusDays(1),
+        })
+        _order = await signOrder(
+          _unsignedOrder,
+          davidSigner,
+          swapContractAddress
+        )
+      }
+    )
 
-    it('Checks that David cannot make an order on behalf of Alice', async () => {
+    it('Checks that David cannot sign an order on behalf of Alice', async () => {
       await reverted(swap(_order, { from: bobAddress }), 'SIGNER_UNAUTHORIZED')
     })
 
-    it('Checks that David cannot make an order on behalf of Alice without signature', async () => {
+    it('Checks that David cannot sign an order on behalf of Alice without signature', async () => {
       await reverted(
         swap(
           { ..._unsignedOrder, signature: emptySignature },
@@ -481,7 +488,7 @@ contract('Swap', async accounts => {
       )
     })
 
-    it('Alice attempts to incorrectly authorize herself to make orders', async () => {
+    it('Alice attempts and fails to authorize herself to sign orders on her own behalf', async () => {
       await reverted(
         swapContract.authorizeSigner(aliceAddress, {
           from: aliceAddress,
@@ -490,7 +497,7 @@ contract('Swap', async accounts => {
       )
     })
 
-    it('Alice authorizes David to make orders on her behalf', async () => {
+    it('Alice authorizes David to sign orders on her behalf', async () => {
       emitted(
         await swapContract.authorizeSigner(davidAddress, {
           from: aliceAddress,
@@ -499,7 +506,7 @@ contract('Swap', async accounts => {
       )
     })
 
-    it('Alice authorizes David a second time does not emit an event', async () => {
+    it('Alice tries and fails to authorize David twice', async () => {
       notEmitted(
         await swapContract.authorizeSigner(davidAddress, {
           from: aliceAddress,
@@ -517,7 +524,7 @@ contract('Swap', async accounts => {
       )
     })
 
-    it('Checks that David can make an order on behalf of Alice', async () => {
+    it('David signs an order on behalf of Alice successfully taken by Bob', async () => {
       emitted(await swap(_order, { from: bobAddress }), 'Swap')
     })
 
@@ -528,14 +535,14 @@ contract('Swap', async accounts => {
       )
     })
 
-    it('Alice fails to try to revokes authorization from David again', async () => {
+    it('Alice tries and fails to revoke authorization from David twice', async () => {
       notEmitted(
         await swapContract.revokeSigner(davidAddress, { from: aliceAddress }),
         'RevokeSigner'
       )
     })
 
-    it('Checks that David can no longer make orders on behalf of Alice', async () => {
+    it('Checks that David can no longer sign orders on behalf of Alice', async () => {
       const order = await signOrder(
         createOrder({
           signer: {
