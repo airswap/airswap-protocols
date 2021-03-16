@@ -188,6 +188,13 @@ describe('Staking Unit', () => {
       )
     })
 
+    it('unsuccessful add to stake when amount is 0', async () => {
+      await token.mock.transferFrom.returns(true)
+      await expect(
+        staking.connect(account1).extend('0', '0')
+      ).to.be.revertedWith('AMOUNT_INVALID')
+    })
+
     it('unsuccessful add to stake when no stakes made', async () => {
       await token.mock.transferFrom.returns(true)
       await expect(staking.connect(account1).extend('0', '100')).to.be.reverted

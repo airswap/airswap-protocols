@@ -14,6 +14,7 @@
   "scripts": {
     "clean": "hardhat clean",
     "compile": "hardhat compile",
+    "coverage": "hardhat coverage",
     "test": "hardhat test"
   },
   "devDependencies": {
