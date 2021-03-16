@@ -1,5 +1,5 @@
 /*
-  Copyright 2020 Swap Holdings Ltd.
+  Copyright 2021 Swap Holdings Ltd.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -23,10 +23,11 @@ interface ILight {
     uint256 indexed nonce,
     uint256 timestamp,
     address indexed signerWallet,
-    address indexed senderWallet,
     IERC20 signerToken,
-    IERC20 senderToken,
     uint256 signerAmount,
+    uint256 signerFee,
+    address indexed senderWallet,
+    IERC20 senderToken,
     uint256 senderAmount
   );
 
