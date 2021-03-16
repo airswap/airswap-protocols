@@ -1,5 +1,5 @@
 /*
-  Copyright 2020 Swap Holdings Ltd.
+  Copyright 2021 Swap Holdings Ltd.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "./interfaces/ILight.sol";
 
 /**
- * @title Light: Simple atomic swap used on the AirSwap network
+ * @title Light: Simple atomic swap
  * @notice https://www.airswap.io/
  */
 contract Light is ILight, Ownable {
@@ -69,9 +69,11 @@ contract Light is ILight, Ownable {
   uint256 public constant FEE_DIVISOR = 10000;
   uint256 public signerFee;
 
-  // Double mapping of signers to nonce groups to nonce states.
-  // The nonce group is computed as nonce / 256, so each group of 256 sequential nonces use the same key.
-  // The nonce states are encoded as 256 bits, for each nonce in the group 0 means available and 1 means used.
+  /**
+   * @notice Double mapping of signers to nonce groups to nonce states.
+   * @dev The nonce group is computed as nonce / 256, so each group of 256 sequential nonces use the same key.
+   * @dev The nonce states are encoded as 256 bits, for each nonce in the group 0 means available and 1 means used.
+   */
   mapping(address => mapping(uint256 => uint256)) internal _nonceGroups;
 
   mapping(address => address) public override authorized;
@@ -99,12 +101,16 @@ contract Light is ILight, Ownable {
 
   /**
    * @notice Atomic Token Swap
-   * @param nonce Unique per order and should be sequential
-   * @param expiry Expiry in seconds since 1 January 1970
-   * @param signerToken Contract address of the ERC20 token that will be transferred from the signer
-   * @param signerAmount Amount for signerToken
-   * @param senderToken Contract address of the ERC20 token that will be transferred from the sender
-   * @param senderAmount Amount for senderToken
+   * @param nonce uint256 Unique per order and should be sequential
+   * @param expiry uint256 Expiry in seconds since 1 January 1970
+   * @param signerWallet address Wallet of the signer
+   * @param signerToken address ERC20 token to transfer from the signer
+   * @param signerAmount uint256 Amount to transfer from the signer
+   * @param senderToken address ERC20 token to transfer from the sender
+   * @param senderAmount uint256 Amount to transfer from the sender
+   * @param v uint8 Value of the ECDSA signature
+   * @param r bytes32 Value of the ECDSA signature
+   * @param s bytes32 Value of the ECDSA signature
    */
   function swap(
     uint256 nonce,
@@ -134,14 +140,18 @@ contract Light is ILight, Ownable {
   }
 
   /**
-   * @notice Atomic Token Swap
-   * @param recipient Recipient of the funds
-   * @param nonce Unique per order and should be sequential
-   * @param expiry Expiry in seconds since 1 January 1970
-   * @param signerToken Contract address of the ERC20 token that will be transferred from the signer
-   * @param signerAmount Amount for signerToken
-   * @param senderToken Contract address of the ERC20 token that will be transferred from the sender
-   * @param senderAmount Amount for senderToken
+   * @notice Atomic Token Swap with Recipient
+   * @param recipient Wallet of the recipient
+   * @param nonce uint256 Unique per order and should be sequential
+   * @param expiry uint256 Expiry in seconds since 1 January 1970
+   * @param signerWallet address Wallet of the signer
+   * @param signerToken address ERC20 token to transfer from the signer
+   * @param signerAmount uint256 Amount to transfer from the signer
+   * @param senderToken address ERC20 token to transfer from the sender
+   * @param senderAmount uint256 Amount to transfer from the sender
+   * @param v uint8 Value of the ECDSA signature
+   * @param r bytes32 Value of the ECDSA signature
+   * @param s bytes32 Value of the ECDSA signature
    */
   function swapWithRecipient(
     address recipient,
@@ -158,7 +168,7 @@ contract Light is ILight, Ownable {
   ) public override {
     require(DOMAIN_CHAIN_ID == getChainId(), "CHAIN_ID_CHANGED");
 
-    // Ensure the expiry has not passed.
+    // Ensure the expiry has not passed
     require(expiry > block.timestamp, "EXPIRY_PASSED");
 
     bytes32 hashed =
@@ -174,23 +184,23 @@ contract Light is ILight, Ownable {
         senderAmount
       );
 
-    // Recover the signer from the hash and signature.
+    // Recover the signer from the hash and signature
     address signer = _getSigner(hashed, v, r, s);
 
-    // Mark the nonce as used and ensure it hasn't been used before.
+    // Mark the nonce as used and ensure it hasn't been used before
     require(_markNonceAsUsed(signer, nonce), "NONCE_ALREADY_USED");
 
     if (signerWallet != signer) {
       require(authorized[signerWallet] == signer, "UNAUTHORIZED");
     }
 
-    // Transfer token from sender to signer.
+    // Transfer token from sender to signer
     senderToken.safeTransferFrom(msg.sender, signerWallet, senderAmount);
 
-    // Transfer token from signer to recipient.
+    // Transfer token from signer to recipient
     signerToken.safeTransferFrom(signerWallet, recipient, signerAmount);
 
-    // Transfer fee
+    // Transfer fee from signer to feeWallet
     uint256 feeAmount = signerAmount.mul(signerFee).div(FEE_DIVISOR);
     if (feeAmount > 0) {
       signerToken.safeTransferFrom(signerWallet, feeWallet, feeAmount);
@@ -208,25 +218,42 @@ contract Light is ILight, Ownable {
     );
   }
 
+  /**
+   * @notice Set the fee wallet
+   * @param newFeeWallet address Wallet to transfer signerFee to
+   */
   function setFeeWallet(address newFeeWallet) external onlyOwner {
     require(newFeeWallet != address(0), "INVALID_FEE_WALLET");
     feeWallet = newFeeWallet;
   }
 
+  /**
+   * @notice Set the fee
+   * @param newSignerFee uint256 Value of the fee in basis points
+   */
   function setFee(uint256 newSignerFee) external onlyOwner {
     require(newSignerFee < FEE_DIVISOR, "INVALID_FEE");
     signerFee = newSignerFee;
   }
 
+  /**
+   * @notice Authorize a signer
+   * @param signer address Wallet of the signer to authorize
+   * @dev Emits an Authorize event
+   */
   function authorize(address signer) external override {
     authorized[msg.sender] = signer;
-    emit Authorized(signer, msg.sender);
+    emit Authorize(signer, msg.sender);
   }
 
+  /**
+   * @notice Revoke authorization of a signer
+   * @dev Emits a Revoke event
+   */
   function revoke() external override {
     address tmp = authorized[msg.sender];
     delete authorized[msg.sender];
-    emit Revoked(tmp, msg.sender);
+    emit Revoke(tmp, msg.sender);
   }
 
   /**
@@ -246,7 +273,7 @@ contract Light is ILight, Ownable {
   }
 
   /**
-   * @dev Returns true if the nonce has been used
+   * @notice Returns true if the nonce has been used
    * @param signer address Address of the signer
    * @param nonce uint256 Nonce being checked
    */
@@ -262,7 +289,7 @@ contract Light is ILight, Ownable {
   }
 
   /**
-   * @dev Returns the current chainId using the chainid opcode
+   * @notice Returns the current chainId using the chainid opcode
    * @return id uint256 The chain id
    */
   function getChainId() public pure returns (uint256 id) {
@@ -273,7 +300,7 @@ contract Light is ILight, Ownable {
   }
 
   /**
-   * @dev Marks a nonce as used for the given signer
+   * @notice Marks a nonce as used for the given signer
    * @param signer address Address of the signer for which to mark the nonce as used
    * @param nonce uint256 Nonce to be marked as used
    * @return bool True if the nonce was not marked as used already
@@ -296,6 +323,17 @@ contract Light is ILight, Ownable {
     return true;
   }
 
+  /**
+   * @notice Hash order parameters
+   * @param nonce uint256
+   * @param expiry uint256
+   * @param signerWallet address
+   * @param signerToken address
+   * @param signerAmount uint256
+   * @param senderToken address
+   * @param senderAmount uint256
+   * @return bytes32
+   */
   function _getOrderHash(
     uint256 nonce,
     uint256 expiry,
@@ -324,6 +362,13 @@ contract Light is ILight, Ownable {
       );
   }
 
+  /**
+   * @notice Recover the signer from a signature
+   * @param hash bytes32
+   * @param v uint8
+   * @param r bytes32
+   * @param s bytes32
+   */
   function _getSigner(
     bytes32 hash,
     uint8 v,

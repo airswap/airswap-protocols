@@ -483,7 +483,7 @@ contract('Light Unit Tests', async accounts => {
       const trx = await swap.authorize(mockSigner, { from: anyone })
       emitted(
         trx,
-        'Authorized',
+        'Authorize',
         e => e.signer === mockSigner && e.signerWallet === anyone
       )
       const authorized = await swap.authorized(anyone)
@@ -495,7 +495,7 @@ contract('Light Unit Tests', async accounts => {
       const trx = await swap.revoke({ from: anyone })
       emitted(
         trx,
-        'Revoked',
+        'Revoke',
         e => e.signer === mockSigner && e.signerWallet === anyone
       )
       const authorized = await swap.authorized(anyone)

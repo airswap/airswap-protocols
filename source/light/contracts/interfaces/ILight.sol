@@ -32,19 +32,10 @@ interface ILight {
 
   event Cancel(uint256 indexed nonce, address indexed signerWallet);
 
-  event Authorized(address indexed signer, address indexed signerWallet);
+  event Authorize(address indexed signer, address indexed signerWallet);
 
-  event Revoked(address indexed signer, address indexed signerWallet);
+  event Revoke(address indexed signer, address indexed signerWallet);
 
-  /**
-   * @notice Atomic Token Swap
-   * @param nonce Unique per order and should be sequential
-   * @param expiry Expiry in seconds since 1 January 1970
-   * @param signerToken Contract address of the ERC20 token that will be transferred from the signer
-   * @param signerAmount Amount for signerToken
-   * @param senderToken Contract address of the ERC20 token that will be transferred from the sender
-   * @param senderAmount Amount for senderToken
-   */
   function swapWithRecipient(
     address recipient,
     uint256 nonce,
@@ -59,15 +50,6 @@ interface ILight {
     bytes32 s
   ) external;
 
-  /**
-   * @notice Atomic Token Swap
-   * @param nonce Unique per order and should be sequential
-   * @param expiry Expiry in seconds since 1 January 1970
-   * @param signerToken Contract address of the ERC20 token that will be transferred from the signer
-   * @param signerAmount Amount for signerToken
-   * @param senderToken Contract address of the ERC20 token that will be transferred from the sender
-   * @param senderAmount Amount for senderToken
-   */
   function swap(
     uint256 nonce,
     uint256 expiry,
@@ -85,10 +67,6 @@ interface ILight {
 
   function revoke() external;
 
-  /**
-   * @notice Cancel one or more open orders by nonce
-   * @param nonces uint256[]
-   */
   function cancel(uint256[] calldata nonces) external;
 
   function nonceUsed(address, uint256) external view returns (bool);
