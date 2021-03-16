@@ -57,12 +57,12 @@ describe('Staking Unit', () => {
   describe('Set Vesting Schedule', async () => {
     it('non owner cannot set vesting schedule', async () => {
       await expect(
-        staking.connect(account1).setSchedule(0, 0)
+        staking.connect(account1).setVesting(0, 0)
       ).to.be.revertedWith('Ownable: caller is not the owner')
     })
 
     it('owner can set vesting schedule', async () => {
-      await staking.connect(deployer).setSchedule(2 * DURATION, CLIFF)
+      await staking.connect(deployer).setVesting(2 * DURATION, CLIFF)
 
       const cliff = await staking.cliff()
       const duration = await staking.duration()
@@ -129,7 +129,7 @@ describe('Staking Unit', () => {
       await token.mock.transferFrom.returns(true)
       await staking.connect(account1).stake('100')
       const block0 = await ethers.provider.getBlock()
-      await staking.connect(deployer).setSchedule(DURATION * 2, CLIFF)
+      await staking.connect(deployer).setVesting(DURATION * 2, CLIFF)
       await staking.connect(account1).stake('140')
       const block1 = await ethers.provider.getBlock()
 
@@ -296,7 +296,7 @@ describe('Staking Unit', () => {
       await token.mock.transferFrom.returns(true)
       await token.mock.transfer.returns(true)
       await staking.connect(account1).stake('100')
-      await staking.connect(deployer).setSchedule(DURATION * 2, CLIFF)
+      await staking.connect(deployer).setVesting(DURATION * 2, CLIFF)
       await staking.connect(account1).stake('100')
 
       // move 10 blocks forward - 20% vested for second stake
@@ -357,7 +357,7 @@ describe('Staking Unit', () => {
     it('vested amounts match expected amount per block with an updated vesting schedule', async () => {
       await token.mock.transferFrom.returns(true)
       await token.mock.transfer.returns(true)
-      await staking.connect(deployer).setSchedule(DURATION * 2, CLIFF)
+      await staking.connect(deployer).setVesting(DURATION * 2, CLIFF)
       await staking.connect(account1).stake('100')
 
       timeMachine.advanceTimeAndBlock(20)
@@ -413,7 +413,7 @@ describe('Staking Unit', () => {
       await token.mock.transferFrom.returns(true)
       await token.mock.transfer.returns(true)
       await staking.connect(account1).stake('100')
-      await staking.connect(deployer).setSchedule(DURATION, CLIFF)
+      await staking.connect(deployer).setVesting(DURATION, CLIFF)
       await staking.connect(account1).stake('100')
       // move 1 block before cliff for second stake
       for (let index = 0; index < CLIFF - 1; index++) {
@@ -438,7 +438,7 @@ describe('Staking Unit', () => {
       await token.mock.transferFrom.returns(true)
       await token.mock.transfer.returns(true)
       await staking.connect(account1).stake('100')
-      await staking.connect(deployer).setSchedule(DURATION, CLIFF)
+      await staking.connect(deployer).setVesting(DURATION, CLIFF)
       await staking.connect(account1).stake('100')
 
       timeMachine.advanceTimeAndBlock(CLIFF)

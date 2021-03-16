@@ -29,7 +29,7 @@ contract Staking is Ownable {
   uint256 public cliff;
 
   // Mapping of account to stakes
-  mapping(address => Stake[]) public accountStakes;
+  mapping(address => Stake[]) public allStakes;
 
   // ERC-20 token properties
   string public name;
@@ -52,7 +52,7 @@ contract Staking is Ownable {
     string memory _symbol,
     uint256 _duration,
     uint256 _cliff
-  ) public {
+  ) {
     token = _token;
     name = _name;
     symbol = _symbol;
@@ -61,11 +61,11 @@ contract Staking is Ownable {
   }
 
   /**
-   * @notice Set staking duration and cliff
+   * @notice Set vesting duration and cliff
    * @param _duration uint256
    * @param _cliff uint256
    */
-  function setSchedule(uint256 _duration, uint256 _cliff) external onlyOwner {
+  function setVesting(uint256 _duration, uint256 _cliff) external onlyOwner {
     duration = _duration;
     cliff = _cliff;
   }
@@ -85,7 +85,7 @@ contract Staking is Ownable {
    */
   function stakeFor(address account, uint256 amount) public {
     require(amount > 0, "AMOUNT_INVALID");
-    accountStakes[account].push(
+    allStakes[account].push(
       Stake(duration, cliff, amount, amount, block.timestamp)
     );
     token.safeTransferFrom(account, address(this), amount);
@@ -113,7 +113,7 @@ contract Staking is Ownable {
   ) public {
     require(amount > 0, "AMOUNT_INVALID");
 
-    Stake storage selected = accountStakes[msg.sender][index];
+    Stake storage selected = allStakes[msg.sender][index];
 
     uint256 newInitial = selected.initial.add(amount);
     uint256 newBalance = selected.balance.add(amount);
@@ -124,7 +124,7 @@ contract Staking is Ownable {
       selected.timestamp +
         amount.mul(block.timestamp.sub(selected.timestamp)).div(newInitial);
 
-    accountStakes[msg.sender][index] = Stake(
+    allStakes[msg.sender][index] = Stake(
       duration,
       cliff,
       newInitial,
@@ -141,7 +141,7 @@ contract Staking is Ownable {
    * @param amount uint256
    */
   function unstake(uint256 index, uint256 amount) external {
-    Stake storage selected = accountStakes[msg.sender][index];
+    Stake storage selected = allStakes[msg.sender][index];
     require(
       block.timestamp.sub(selected.timestamp) >= selected.cliff,
       "CLIFF_NOT_REACHED"
@@ -151,14 +151,14 @@ contract Staking is Ownable {
     selected.balance = selected.balance.sub(amount);
 
     if (selected.balance == 0) {
-      Stake[] storage stakes = accountStakes[msg.sender];
+      Stake[] storage stakes = allStakes[msg.sender];
       Stake storage last = stakes[stakes.length.sub(1)];
       selected.duration = last.duration;
       selected.cliff = last.cliff;
       selected.initial = last.initial;
       selected.balance = last.balance;
       selected.timestamp = last.timestamp;
-      accountStakes[msg.sender].pop();
+      allStakes[msg.sender].pop();
     }
     token.transfer(msg.sender, amount);
     emit Transfer(msg.sender, address(0), amount);
@@ -174,7 +174,7 @@ contract Staking is Ownable {
     view
     returns (uint256)
   {
-    Stake storage stakeData = accountStakes[account][index];
+    Stake storage stakeData = allStakes[account][index];
     if (block.timestamp.sub(stakeData.timestamp) > duration) {
       return stakeData.initial;
     }
@@ -194,7 +194,7 @@ contract Staking is Ownable {
     view
     returns (uint256)
   {
-    Stake memory selected = accountStakes[account][index];
+    Stake memory selected = allStakes[account][index];
 
     if (block.timestamp.sub(selected.timestamp) < selected.cliff) {
       return 0;
@@ -211,10 +211,10 @@ contract Staking is Ownable {
     view
     returns (Stake[] memory stakes)
   {
-    uint256 length = accountStakes[account].length;
+    uint256 length = allStakes[account].length;
     stakes = new Stake[](length);
     for (uint256 i = 0; i < length; i++) {
-      stakes[i] = accountStakes[account][i];
+      stakes[i] = allStakes[account][i];
     }
     return stakes;
   }
@@ -230,7 +230,7 @@ contract Staking is Ownable {
    * @notice Balance of an account (ERC-20)
    */
   function balanceOf(address account) external view returns (uint256 total) {
-    Stake[] memory stakes = accountStakes[account];
+    Stake[] memory stakes = allStakes[account];
     for (uint256 i = 0; i < stakes.length; i++) {
       total = total.add(stakes[i].balance);
     }
