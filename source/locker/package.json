@@ -3,7 +3,7 @@
   "version": "1.1.0",
   "description": "Locked token balances with throttled withdrawals",
   "contributors": [
-    "Don Mosites <mosites@gmail.com>"
+    "Don Mosites <don.mosites@consensys.net>"
   ],
   "license": "Apache-2.0",
   "repository": {
