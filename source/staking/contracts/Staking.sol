@@ -114,24 +114,29 @@ contract Staking is Ownable {
 
     Stake storage selected = allStakes[msg.sender][index];
 
-    uint256 newInitial = selected.initial.add(amount);
-    uint256 newBalance = selected.balance.add(amount);
+    // If this stake is fully vested create a new stake
+    if (vested(account, index) == selected.initial) {
+      stakeFor(account, amount);
+    } else {
+      uint256 newInitial = selected.initial.add(amount);
+      uint256 newBalance = selected.balance.add(amount);
 
-    // Calculate a new timestamp proportional to the new amount
-    // Limited to current block timestamp (amount / newInitial approaches 1)
-    uint256 newTimestamp =
-      selected.timestamp +
-        amount.mul(block.timestamp.sub(selected.timestamp)).div(newInitial);
+      // Calculate a new timestamp proportional to the new amount
+      // Limited to current block timestamp (amount / newInitial approaches 1)
+      uint256 newTimestamp =
+        selected.timestamp +
+          amount.mul(block.timestamp.sub(selected.timestamp)).div(newInitial);
 
-    allStakes[msg.sender][index] = Stake(
-      duration,
-      cliff,
-      newInitial,
-      newBalance,
-      newTimestamp
-    );
-    token.safeTransferFrom(account, address(this), amount);
-    emit Transfer(address(0), account, amount);
+      allStakes[msg.sender][index] = Stake(
+        duration,
+        cliff,
+        newInitial,
+        newBalance,
+        newTimestamp
+      );
+      token.safeTransferFrom(account, address(this), amount);
+      emit Transfer(address(0), account, amount);
+    }
   }
 
   /**
