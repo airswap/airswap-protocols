@@ -15,7 +15,7 @@
   "scripts": {
     "clean": "rm -rf ./build",
     "compile": "yarn clean; truffle compile",
-    "coverage": "truffle run coverage",
+    "coverage": "node --max-old-space-size=4096 ../../node_modules/.bin/truffle run coverage",
     "test": "yarn compile; truffle test",
     "cp_migration_flat": "mkdir -p flatten/; cp contracts/Migrations.sol flatten/",
     "flatten": "truffle run flatten",
