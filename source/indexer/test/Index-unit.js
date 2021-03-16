@@ -317,7 +317,7 @@ contract('Index Unit Tests', async accounts => {
   })
 
   describe('Test getting entries', async () => {
-    it('should return the entry of a user', async () => {
+    it('should return the entry for an account', async () => {
       // set entry
       await index.setLocator(aliceAddress, 2000, aliceLocator, {
         from: owner,

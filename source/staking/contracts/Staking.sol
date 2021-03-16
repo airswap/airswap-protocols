@@ -61,7 +61,7 @@ contract Staking is Ownable {
   }
 
   /**
-   * @notice Set the staking duration and cliff
+   * @notice Set staking duration and cliff
    * @param _duration uint256
    * @param _cliff uint256
    */
@@ -79,7 +79,7 @@ contract Staking is Ownable {
   }
 
   /**
-   * @notice Stake tokens for a user
+   * @notice Stake tokens for an account
    * @param account address
    * @param amount uint256
    */
@@ -101,7 +101,7 @@ contract Staking is Ownable {
   }
 
   /**
-   * @notice Extend a stake for a user
+   * @notice Extend a stake for an account
    * @param index uint256
    * @param account address
    * @param amount uint256
@@ -165,7 +165,7 @@ contract Staking is Ownable {
   }
 
   /**
-   * @notice Calculate vested amount
+   * @notice Vested amount for an account
    * @param account uint256
    * @param index uint256
    */
@@ -185,7 +185,7 @@ contract Staking is Ownable {
   }
 
   /**
-   * @notice Calculate available amount
+   * @notice Available amount for an account
    * @param account uint256
    * @param index uint256
    */
@@ -203,7 +203,7 @@ contract Staking is Ownable {
   }
 
   /**
-   * @notice Get all stakes for a user
+   * @notice All stakes for an account
    * @param account uint256
    */
   function getStakes(address account)
@@ -220,14 +220,14 @@ contract Staking is Ownable {
   }
 
   /**
-   * @notice Get total supply (ERC-20)
+   * @notice Total balance of all accounts (ERC-20)
    */
   function totalSupply() external view returns (uint256) {
     return token.balanceOf(address(this));
   }
 
   /**
-   * @notice Get balance of a user (ERC-20)
+   * @notice Balance of an account (ERC-20)
    */
   function balanceOf(address account) external view returns (uint256 total) {
     Stake[] memory stakes = accountStakes[account];
@@ -238,7 +238,7 @@ contract Staking is Ownable {
   }
 
   /**
-   * @notice Get decimals of underlying token (ERC-20)
+   * @notice Decimals of underlying token (ERC-20)
    */
   function decimals() external view returns (uint8) {
     return token.decimals();
