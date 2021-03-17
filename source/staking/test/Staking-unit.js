@@ -13,9 +13,8 @@ describe('Staking Unit', () => {
   let token
   let stakingFactory
   let staking
-  const CLIFF = 10 //blocks
-  const DURATION = 100 //blocks
-  // every 1 block 1.00% is vested, user can only claim starting afater 10 blocks, or 10% vested
+  const CLIFF = 10 // time in seconds
+  const DURATION = 100 // time in seconds
 
   beforeEach(async () => {
     const snapshot = await timeMachine.takeSnapshot()
@@ -188,19 +187,19 @@ describe('Staking Unit', () => {
       )
     })
 
-    it('unsuccessful add to stake when amount is 0', async () => {
+    it('unsuccessful extend stake when amount is 0', async () => {
       await token.mock.transferFrom.returns(true)
       await expect(
         staking.connect(account1).extend('0', '0')
       ).to.be.revertedWith('AMOUNT_INVALID')
     })
 
-    it('unsuccessful add to stake when no stakes made', async () => {
+    it('unsuccessful extend stake when no stakes made', async () => {
       await token.mock.transferFrom.returns(true)
       await expect(staking.connect(account1).extend('0', '100')).to.be.reverted
     })
 
-    it('successful add to stake stake has been made', async () => {
+    it('successful extend stake stake has been made', async () => {
       await token.mock.transferFrom.returns(true)
       await staking.connect(account1).stake('100')
       const block = await ethers.provider.getBlock()
@@ -218,13 +217,13 @@ describe('Staking Unit', () => {
       expect(userStakes[0].timestamp).to.equal(block.timestamp)
     })
 
-    it('successful add to stake and timestamp updates to appropriate value', async () => {
+    it('successful extend stake and timestamp updates to appropriate value', async () => {
       await token.mock.transferFrom.returns(true)
       await staking.connect(account1).stake('100')
       const block0 = await ethers.provider.getBlock()
 
       // move 100000 seconds forward
-      await timeMachine.advanceBlockAndSetTime(block0.timestamp + 100000)
+      await timeMachine.advanceBlockAndSetTime(block0.timestamp + CLIFF)
 
       const blockNewTime = await ethers.provider.getBlockNumber()
       const blockNewTimeInfo = await ethers.provider.getBlock(blockNewTime)
@@ -249,6 +248,30 @@ describe('Staking Unit', () => {
         .add(BN.from(quotient))
         .add(1)
       expect(userStakes[0].timestamp).to.equal(sum)
+    })
+
+    it('successful extend creates a new stake due to existing being fully vested', async () => {
+      await token.mock.transferFrom.returns(true)
+      await staking.connect(account1).stake('100')
+      const block0 = await ethers.provider.getBlock()
+
+      // advance to fully vest
+      await timeMachine.advanceBlockAndSetTime(block0.timestamp + DURATION)
+      await staking.connect(account1).extend('0', '120')
+
+      const userStakes = await staking
+        .connect(account1)
+        .getStakes(account1.address)
+      expect(userStakes.length).to.equal(2)
+
+      expect(userStakes[1].initial).to.equal(120)
+      expect(userStakes[1].balance).to.equal(120)
+      expect(userStakes[1].cliff).to.equal(CLIFF)
+      expect(userStakes[1].duration).to.equal(DURATION)
+
+      // check if timestamp was updated appropriately
+      const block1 = await ethers.provider.getBlock()
+      expect(userStakes[1].timestamp).to.equal(block1.timestamp)
     })
   })
 
@@ -278,7 +301,7 @@ describe('Staking Unit', () => {
       await token.mock.transfer.returns(true)
       await staking.connect(account1).stake('100')
 
-      // move 10 blocks forward - 10% vested
+      // move 10 seconds forward - 10% vested
       for (let index = 0; index < 10; index++) {
         await timeMachine.advanceBlock()
       }
@@ -299,7 +322,7 @@ describe('Staking Unit', () => {
       await staking.connect(deployer).setVesting(DURATION * 2, CLIFF)
       await staking.connect(account1).stake('100')
 
-      // move 10 blocks forward - 20% vested for second stake
+      // move 10 seconds forward - 20% vested for second stake
       for (let index = 0; index < 10; index++) {
         await timeMachine.advanceBlock()
       }
@@ -322,7 +345,7 @@ describe('Staking Unit', () => {
       await staking.connect(account1).stake('300')
       const block1 = await ethers.provider.getBlock()
 
-      // move 100 blocks forward + 2 stakes = 102% vested
+      // move 100 seconds forward + 2 stakes = 102% vested
       for (let index = 0; index < 100; index++) {
         await timeMachine.advanceBlock()
       }
