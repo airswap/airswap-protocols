@@ -1,6 +1,8 @@
 const ethUtil = require('ethereumjs-util')
 const bip39 = require('bip39')
 const hdkey = require('ethereumjs-wallet/hdkey')
+const { createLightSignature } = require('@airswap/utils')
+const { ADDRESS_ZERO } = require('@airswap/constants')
 
 // We assume deterministic ganache mnemonic is being used
 const GANACHE_MNEMONIC =
@@ -26,6 +28,25 @@ function getPrivateKeyFromGanacheAccount(account) {
   throw new Error('No private key found for address')
 }
 
+const signOrder = async (order, account, swapContract) => {
+  const privKey = getPrivateKeyFromGanacheAccount(account)
+  const signerWallet =
+    order.signerWallet === ADDRESS_ZERO ? account : order.signerWallet
+  const orderWithSigner = { ...order, signerWallet }
+  const { v, r, s } = await createLightSignature(
+    orderWithSigner,
+    privKey,
+    swapContract,
+    1
+  )
+  return {
+    ...orderWithSigner,
+    v,
+    r,
+    s,
+  }
+}
+
 module.exports = {
-  getPrivateKeyFromGanacheAccount,
+  signOrder,
 }
