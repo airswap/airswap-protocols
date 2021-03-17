@@ -276,6 +276,30 @@ export function isValidOrder(order: Order): boolean {
   return false
 }
 
+export function createLightOrder({
+  expiry = Math.round(Date.now() / 1000 + SECONDS_IN_DAY),
+  nonce = Date.now(),
+  signerWallet = ADDRESS_ZERO,
+  signerToken = ADDRESS_ZERO,
+  signerAmount = 0,
+  signerFee = 0,
+  senderWallet = ADDRESS_ZERO,
+  senderToken = ADDRESS_ZERO,
+  senderAmount = 0,
+}) {
+  return {
+    expiry: String(expiry),
+    nonce: String(nonce),
+    signerWallet,
+    signerToken,
+    signerAmount: String(signerAmount),
+    signerFee: String(signerFee),
+    senderWallet,
+    senderToken,
+    senderAmount: String(senderAmount),
+  }
+}
+
 export async function createLightSignature(
   unsignedOrder: UnsignedLightOrder,
   privateKey: string,
@@ -325,4 +349,19 @@ export function getSignerFromLightSignature(
     },
     sig,
   })
+}
+
+export function lightOrderToParams(order) {
+  return [
+    order.nonce,
+    order.expiry,
+    order.signerWallet,
+    order.signerToken,
+    order.signerAmount,
+    order.senderToken,
+    order.senderAmount,
+    order.v,
+    order.r,
+    order.s,
+  ]
 }

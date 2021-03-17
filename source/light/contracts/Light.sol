@@ -44,7 +44,7 @@ contract Light is ILight, Ownable {
       )
     );
 
-  bytes32 public constant ORDER_TYPEHASH =
+  bytes32 public constant LIGHT_ORDER_TYPEHASH =
     keccak256(
       abi.encodePacked(
         "LightOrder(",
@@ -353,7 +353,7 @@ contract Light is ILight, Ownable {
     return
       keccak256(
         abi.encode(
-          ORDER_TYPEHASH,
+          LIGHT_ORDER_TYPEHASH,
           nonce,
           expiry,
           signerWallet,
