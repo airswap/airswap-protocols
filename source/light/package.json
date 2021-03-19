@@ -1,6 +1,6 @@
 {
   "name": "@airswap/light",
-  "version": "1.1.0",
+  "version": "2.2.0",
   "description": "Light version of @airswap/swap",
   "contributors": [
     "Vicente Dragicevic <vicente.dragicevic@consensys.net>",
