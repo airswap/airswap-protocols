@@ -30,15 +30,17 @@ contract Registry is Ownable {
   }
 
   function addTokens(address[] calldata tokenList) external {
+    EnumerableSet.AddressSet storage supportedTokenList =
+      supportedTokens[msg.sender];
     uint256 transferAmount = 0;
-    if (supportedTokens[msg.sender].length() == 0) {
+    if (supportedTokenList.length() == 0) {
       transferAmount = transferAmount.add(obligationCost);
     }
     for (uint256 i = 0; i < tokenList.length; i++) {
       address token = tokenList[i];
-      if (!supportedTokens[msg.sender].contains(token)) {
+      if (!supportedTokenList.contains(token)) {
         transferAmount = transferAmount.add(tokenCost);
-        supportedTokens[msg.sender].add(token);
+        supportedTokenList.add(token);
         supportingStakers[token].add(msg.sender);
       }
     }
@@ -46,16 +48,18 @@ contract Registry is Ownable {
   }
 
   function removeTokens(address[] calldata tokenList) external {
+    EnumerableSet.AddressSet storage supportedTokenList =
+      supportedTokens[msg.sender];
     uint256 transferAmount = 0;
     for (uint256 i = 0; i < tokenList.length; i++) {
       address token = tokenList[i];
-      if (supportedTokens[msg.sender].contains(token)) {
+      if (supportedTokenList.contains(token)) {
         transferAmount = transferAmount.add(tokenCost);
-        supportedTokens[msg.sender].remove(token);
+        supportedTokenList.remove(token);
         supportingStakers[token].remove(msg.sender);
       }
     }
-    if (supportedTokens[msg.sender].length() == 0) {
+    if (supportedTokenList.length() == 0) {
       transferAmount = transferAmount.add(obligationCost);
     }
     stakingToken.safeTransfer(msg.sender, transferAmount);
@@ -81,10 +85,12 @@ contract Registry is Ownable {
     view
     returns (address[] memory tokenList)
   {
-    uint256 length = supportedTokens[staker].length();
+    EnumerableSet.AddressSet storage supportedTokenList =
+      supportedTokens[staker];
+    uint256 length = supportedTokenList.length();
     tokenList = new address[](length);
     for (uint256 i = 0; i < length; i++) {
-      tokenList[i] = supportedTokens[staker].at(i);
+      tokenList[i] = supportedTokenList.at(i);
     }
   }
 
