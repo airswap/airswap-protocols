@@ -66,7 +66,7 @@ contract Registry is Ownable {
       supportedTokens[msg.sender];
     uint256 length = supportedTokenList.length();
     while (length --> 0) {
-      address token = supportedTokenList.at(0);
+      address token = supportedTokenList.at(length);
       supportedTokenList.remove(token);
       supportingStakers[token].remove(msg.sender);
     }
