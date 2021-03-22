@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/EnumerableSet.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract SupportedTokenRegistry is Ownable {
+contract Registry is Ownable {
   using SafeERC20 for IERC20;
   using SafeMath for uint256;
   using EnumerableSet for EnumerableSet.AddressSet;

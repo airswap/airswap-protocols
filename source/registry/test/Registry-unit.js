@@ -4,11 +4,10 @@ const { artifacts, ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
 const IERC20 = artifacts.require('IERC20')
 
-describe('SupportedTokenRegistry Unit', () => {
+describe('Registry Unit', () => {
   let snapshotId
   let deployer
   let account1
-  let account2
   let token1
   let token2
   let token3
@@ -28,16 +27,9 @@ describe('SupportedTokenRegistry Unit', () => {
   })
 
   before(async () => {
-    ;[
-      deployer,
-      account1,
-      account2,
-      token1,
-      token2,
-      token3,
-    ] = await ethers.getSigners()
+    ;[deployer, account1, token1, token2, token3] = await ethers.getSigners()
     stakingToken = await deployMockContract(deployer, IERC20.abi)
-    registryFactory = await ethers.getContractFactory('SupportedTokenRegistry')
+    registryFactory = await ethers.getContractFactory('Registry')
     registry = await registryFactory.deploy(
       stakingToken.address,
       OBLIGATION_COST,
