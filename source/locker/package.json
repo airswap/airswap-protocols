@@ -3,7 +3,7 @@
   "version": "1.1.0",
   "description": "Locked token balances with throttled withdrawals",
   "contributors": [
-    "Don Mosites <mosites@gmail.com>"
+    "Don Mosites <don.mosites@consensys.net>"
   ],
   "license": "Apache-2.0",
   "repository": {
@@ -21,7 +21,7 @@
     "@openzeppelin/contracts": "^3.3.0"
   },
   "devDependencies": {
-    "@airswap/test-utils": "0.1.9",
+    "@airswap/test-utils": "0.1.10",
     "solidity-coverage": "^0.7.13",
     "ethers": "^5.0.25"
   }

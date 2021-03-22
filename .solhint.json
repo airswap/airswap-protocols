@@ -9,7 +9,7 @@
     "contract-name-camelcase": "error",
     "const-name-snakecase": "error",
     "visibility-modifier-order": "error",
-    "func-visibility": "error",
+    "func-visibility": ["warn", {"ignoreConstructors": true}],
     "state-visibility": "error",
     "ordering": "error",
     "quotes": "error",

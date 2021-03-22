@@ -46,13 +46,15 @@ describe('Orders', async () => {
     const unsignedOrder = {
       nonce: Date.now().toString(),
       expiry: Math.round(Date.now() / 1000 + SECONDS_IN_DAY).toString(),
+      signerWallet: ADDRESS_ZERO,
       signerToken: ADDRESS_ZERO,
       signerAmount: '0',
+      signerFee: '300',
       senderWallet: ADDRESS_ZERO,
       senderToken: ADDRESS_ZERO,
       senderAmount: '0',
     }
-    const signature = await createLightSignature(
+    const { v, r, s } = await createLightSignature(
       unsignedOrder,
       wallet.privateKey,
       ADDRESS_ZERO,
@@ -62,7 +64,9 @@ describe('Orders', async () => {
       unsignedOrder,
       ADDRESS_ZERO,
       1,
-      signature
+      v,
+      r,
+      s
     )
     expect(signerWallet.toLowerCase()).to.equal(wallet.address.toLowerCase())
   })

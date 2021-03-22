@@ -36,6 +36,7 @@ import {
   EIP712,
   EIP712Light,
   OrderParty,
+  LightSignature,
 } from '@airswap/types'
 import { getOrderHash } from './hashes'
 import { lowerCaseAddresses } from '..'
@@ -275,12 +276,36 @@ export function isValidOrder(order: Order): boolean {
   return false
 }
 
+export function createLightOrder({
+  expiry = Math.round(Date.now() / 1000 + SECONDS_IN_DAY),
+  nonce = Date.now(),
+  signerWallet = ADDRESS_ZERO,
+  signerToken = ADDRESS_ZERO,
+  signerAmount = 0,
+  signerFee = 0,
+  senderWallet = ADDRESS_ZERO,
+  senderToken = ADDRESS_ZERO,
+  senderAmount = 0,
+}) {
+  return {
+    expiry: String(expiry),
+    nonce: String(nonce),
+    signerWallet,
+    signerToken,
+    signerAmount: String(signerAmount),
+    signerFee: String(signerFee),
+    senderWallet,
+    senderToken,
+    senderAmount: String(senderAmount),
+  }
+}
+
 export async function createLightSignature(
   unsignedOrder: UnsignedLightOrder,
   privateKey: string,
   swapContract: string,
   chainId: number
-): Promise<string> {
+): Promise<LightSignature> {
   const sig = sigUtil.signTypedData_v4(ethUtil.toBuffer(privateKey), {
     data: {
       types: EIP712Light,
@@ -295,16 +320,21 @@ export async function createLightSignature(
     },
   })
 
-  const v = ethers.utils.splitSignature(sig).v
-  return `${sig.slice(0, 130)}${(v === 0 || v === 1 ? v + 27 : v).toString(16)}`
+  const { r, s, v } = ethers.utils.splitSignature(sig)
+  return { r, s, v: String(v) }
 }
 
 export function getSignerFromLightSignature(
   order: UnsignedLightOrder,
   swapContract: string,
   chainId: number,
-  signature: string
+  v: string,
+  r: string,
+  s: string
 ) {
+  const sig = `${r}${s.slice(2)}${ethers.BigNumber.from(v)
+    .toHexString()
+    .slice(2)}`
   return sigUtil.recoverTypedSignature_v4({
     data: {
       types: EIP712Light,
@@ -317,6 +347,21 @@ export function getSignerFromLightSignature(
       primaryType: 'LightOrder',
       message: order,
     },
-    sig: signature,
+    sig,
   })
+}
+
+export function lightOrderToParams(order) {
+  return [
+    order.nonce,
+    order.expiry,
+    order.signerWallet,
+    order.signerToken,
+    order.signerAmount,
+    order.senderToken,
+    order.senderAmount,
+    order.v,
+    order.r,
+    order.s,
+  ]
 }

@@ -32,9 +32,9 @@
   "devDependencies": {
     "@airswap/constants": "0.3.10",
     "@airswap/indexer": "3.6.9",
-    "@airswap/test-utils": "0.1.9",
-    "@airswap/types": "3.5.15",
-    "@airswap/utils": "0.4.2",
+    "@airswap/test-utils": "0.1.10",
+    "@airswap/types": "3.5.16",
+    "@airswap/utils": "0.4.3",
     "ethers": "^5.0.25",
     "solidity-coverage": "^0.7.4"
   }
