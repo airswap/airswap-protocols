@@ -65,7 +65,7 @@ contract Registry is Ownable {
     EnumerableSet.AddressSet storage supportedTokenList =
       supportedTokens[msg.sender];
     uint256 length = supportedTokenList.length();
-    for (uint256 i = 0; i < length; i++) {
+    while (length --> 0) {
       address token = supportedTokenList.at(0);
       supportedTokenList.remove(token);
       supportingStakers[token].remove(msg.sender);
