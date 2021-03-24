@@ -281,7 +281,7 @@ describe('Staking Unit', () => {
       await token.mock.transfer.returns(true)
       await staking.connect(account1).stake('100')
       await expect(
-        staking.connect(account1).unstake('0', '50')
+        staking.connect(account1).unstake([{ index: '0', amount: '50' }])
       ).to.be.revertedWith('CLIFF_NOT_REACHED')
     })
 
@@ -292,7 +292,7 @@ describe('Staking Unit', () => {
 
       timeMachine.advanceTimeAndBlock(CLIFF)
       await expect(
-        staking.connect(account1).unstake('0', '100')
+        staking.connect(account1).unstake([{ index: '0', amount: '100' }])
       ).to.be.revertedWith('AMOUNT_EXCEEDS_AVAILABLE')
     })
 
@@ -306,7 +306,7 @@ describe('Staking Unit', () => {
         await timeMachine.advanceBlock()
       }
 
-      await staking.connect(account1).unstake('0', '10')
+      await staking.connect(account1).unstake([{ index: '0', amount: '10' }])
       const userStakes = await staking
         .connect(account1)
         .getStakes(account1.address)
@@ -327,7 +327,7 @@ describe('Staking Unit', () => {
         await timeMachine.advanceBlock()
       }
 
-      await staking.connect(account1).unstake('1', '5')
+      await staking.connect(account1).unstake([{ index: '1', amount: '5' }])
       const userStakes = await staking
         .connect(account1)
         .getStakes(account1.address)
@@ -350,7 +350,7 @@ describe('Staking Unit', () => {
         await timeMachine.advanceBlock()
       }
 
-      await staking.connect(account1).unstake('0', '100')
+      await staking.connect(account1).unstake([{ index: '0', amount: '100' }])
       const userStakes = await staking
         .connect(account1)
         .getStakes(account1.address)
