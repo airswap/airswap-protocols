@@ -6,6 +6,7 @@ import {
   createOrder,
   signOrder,
   isValidOrder,
+  isValidLightOrder,
   getBestByLowestSenderAmount,
   getBestByHighestSignerAmount,
 } from '../index'
@@ -68,6 +69,7 @@ describe('Orders', async () => {
       r,
       s
     )
+    expect(isValidLightOrder({ ...unsignedOrder, v, r, s })).to.equal(true)
     expect(signerWallet.toLowerCase()).to.equal(wallet.address.toLowerCase())
   })
 

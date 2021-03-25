@@ -33,6 +33,7 @@ import {
   Order,
   Signature,
   UnsignedLightOrder,
+  LightOrder,
   EIP712,
   EIP712Light,
   OrderParty,
@@ -274,6 +275,22 @@ export function isValidOrder(order: Order): boolean {
     return hasValidSignature(order)
   }
   return false
+}
+
+export function isValidLightOrder(order: LightOrder): boolean {
+  return (
+    order &&
+    'nonce' in order &&
+    'expiry' in order &&
+    'signerWallet' in order &&
+    'signerToken' in order &&
+    'signerAmount' in order &&
+    'senderToken' in order &&
+    'senderAmount' in order &&
+    'r' in order &&
+    's' in order &&
+    'v' in order
+  )
 }
 
 export function createLightOrder({
