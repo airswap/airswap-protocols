@@ -253,13 +253,8 @@ contract Staking is Ownable {
     require(amount <= available(msg.sender, index), "AMOUNT_EXCEEDS_AVAILABLE");
     selected.balance = selected.balance.sub(amount);
     if (selected.balance == 0) {
-      Stake[] storage stakes = allStakes[msg.sender];
-      Stake storage last = stakes[stakes.length.sub(1)];
-      selected.duration = last.duration;
-      selected.cliff = last.cliff;
-      selected.initial = last.initial;
-      selected.balance = last.balance;
-      selected.timestamp = last.timestamp;
+      Stake[] memory stakes = allStakes[msg.sender];
+      allStakes[msg.sender][index] = stakes[stakes.length.sub(1)];
       allStakes[msg.sender].pop();
     }
   }
