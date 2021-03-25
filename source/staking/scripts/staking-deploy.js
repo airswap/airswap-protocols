@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 require('dotenv').config()
 const hre = require('hardhat')
 const { ethers } = hre
