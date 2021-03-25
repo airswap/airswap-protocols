@@ -73,7 +73,7 @@ contract('Staking', async accounts => {
     })
     it('Alice attempts to unstake prior to cliff', async () => {
       await reverted(
-        staking.unstake(0, 250000, {
+        staking.unstake([{ index: 0, amount: 250000 }], {
           from: aliceAddress,
         }),
         'CLIFF_NOT_REACHED'
@@ -82,7 +82,7 @@ contract('Staking', async accounts => {
     it('Alice attempts to unstake too much after cliff', async () => {
       await advanceTimeAndBlock(CLIFF)
       await reverted(
-        staking.unstake(0, 500000, {
+        staking.unstake([{ index: 0, amount: 500000 }], {
           from: aliceAddress,
         }),
         'AMOUNT_EXCEEDS_AVAILABLE'
@@ -90,7 +90,7 @@ contract('Staking', async accounts => {
     })
     it('Alice unstakes a valid amount after cliff', async () => {
       emitted(
-        await staking.unstake(0, 250000, {
+        await staking.unstake([{ index: 0, amount: 250000 }], {
           from: aliceAddress,
         }),
         'Transfer'
@@ -99,7 +99,7 @@ contract('Staking', async accounts => {
     })
     it('Alice attempts to unstake too much', async () => {
       await reverted(
-        staking.unstake(0, 10000, {
+        staking.unstake([{ index: 0, amount: 10000 }], {
           from: aliceAddress,
         }),
         'AMOUNT_EXCEEDS_AVAILABLE'
@@ -118,11 +118,38 @@ contract('Staking', async accounts => {
     it('Alice attempts to unstake too much', async () => {
       await advanceTimeAndBlock(CLIFF)
       await reverted(
-        staking.unstake(0, 500000, {
+        staking.unstake([{ index: 0, amount: 500000 }], {
           from: aliceAddress,
         }),
         'AMOUNT_EXCEEDS_AVAILABLE'
       )
+    })
+    it('Alice multi unstake', async () => {
+      await staking.stake(1000000, {
+        from: aliceAddress,
+      })
+      await staking.stake(2000000, {
+        from: aliceAddress,
+      })
+      await advanceTimeAndBlock(DURATION)
+      emitted(
+        await staking.unstake(
+          [
+            { index: 0, amount: 1250000 },
+            { index: 1, amount: 1000000 },
+            { index: 2, amount: 2000000 },
+          ],
+          {
+            from: aliceAddress,
+          }
+        ),
+        'Transfer'
+      )
+      equal(
+        (await stakingToken.balanceOf(aliceAddress)).toString(),
+        '100000000'
+      )
+      equal((await staking.balanceOf(aliceAddress)).toString(), '0')
     })
   })
 })

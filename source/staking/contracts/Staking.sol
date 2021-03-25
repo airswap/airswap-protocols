@@ -20,6 +20,11 @@ contract Staking is Ownable {
     uint256 timestamp;
   }
 
+  struct Unstake {
+    uint256 index;
+    uint256 amount;
+  }
+
   // Token to be staked
   ERC20 public immutable token;
 
@@ -140,32 +145,18 @@ contract Staking is Ownable {
   }
 
   /**
-   * @notice Unstake tokens
-   * @param index uint256
-   * @param amount uint256
+   * @notice Unstake multiple
+   * @param unstakes Unstake[]
    */
-  function unstake(uint256 index, uint256 amount) external {
-    Stake storage selected = allStakes[msg.sender][index];
-    require(
-      block.timestamp.sub(selected.timestamp) >= selected.cliff,
-      "CLIFF_NOT_REACHED"
-    );
-    uint256 withdrawableAmount = available(msg.sender, index);
-    require(amount <= withdrawableAmount, "AMOUNT_EXCEEDS_AVAILABLE");
-    selected.balance = selected.balance.sub(amount);
-
-    if (selected.balance == 0) {
-      Stake[] storage stakes = allStakes[msg.sender];
-      Stake storage last = stakes[stakes.length.sub(1)];
-      selected.duration = last.duration;
-      selected.cliff = last.cliff;
-      selected.initial = last.initial;
-      selected.balance = last.balance;
-      selected.timestamp = last.timestamp;
-      allStakes[msg.sender].pop();
+  function unstake(Unstake[] calldata unstakes) external {
+    uint256 totalAmount = 0;
+    uint256 length = unstakes.length;
+    while (length-- > 0) {
+      _unstake(unstakes[length].index, unstakes[length].amount);
+      totalAmount += unstakes[length].amount;
     }
-    token.transfer(msg.sender, amount);
-    emit Transfer(msg.sender, address(0), amount);
+    token.transfer(msg.sender, totalAmount);
+    emit Transfer(msg.sender, address(0), totalAmount);
   }
 
   /**
@@ -246,5 +237,25 @@ contract Staking is Ownable {
    */
   function decimals() external view returns (uint8) {
     return token.decimals();
+  }
+
+  /**
+   * @notice Unstake tokens
+   * @param index uint256
+   * @param amount uint256
+   */
+  function _unstake(uint256 index, uint256 amount) internal {
+    Stake storage selected = allStakes[msg.sender][index];
+    require(
+      block.timestamp.sub(selected.timestamp) >= selected.cliff,
+      "CLIFF_NOT_REACHED"
+    );
+    require(amount <= available(msg.sender, index), "AMOUNT_EXCEEDS_AVAILABLE");
+    selected.balance = selected.balance.sub(amount);
+    if (selected.balance == 0) {
+      Stake[] memory stakes = allStakes[msg.sender];
+      allStakes[msg.sender][index] = stakes[stakes.length.sub(1)];
+      allStakes[msg.sender].pop();
+    }
   }
 }
