@@ -124,7 +124,7 @@ contract('Staking', async accounts => {
         'AMOUNT_EXCEEDS_AVAILABLE'
       )
     })
-    it('Alice multiple stakes and single unstake', async () => {
+    it('Alice multi unstake', async () => {
       await staking.stake(1000000, {
         from: aliceAddress,
       })
@@ -145,6 +145,11 @@ contract('Staking', async accounts => {
         ),
         'Transfer'
       )
+      equal(
+        (await stakingToken.balanceOf(aliceAddress)).toString(),
+        '100000000'
+      )
+      equal((await staking.balanceOf(aliceAddress)).toString(), '0')
     })
   })
 })

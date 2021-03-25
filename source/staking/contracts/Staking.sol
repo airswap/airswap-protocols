@@ -149,10 +149,14 @@ contract Staking is Ownable {
    * @param unstakes Unstake[]
    */
   function unstake(Unstake[] calldata unstakes) external {
+    uint256 totalAmount = 0;
     uint256 length = unstakes.length;
     while (length-- > 0) {
       _unstake(unstakes[length].index, unstakes[length].amount);
+      totalAmount += unstakes[length].amount;
     }
+    token.transfer(msg.sender, totalAmount);
+    emit Transfer(msg.sender, address(0), totalAmount);
   }
 
   /**
@@ -246,10 +250,8 @@ contract Staking is Ownable {
       block.timestamp.sub(selected.timestamp) >= selected.cliff,
       "CLIFF_NOT_REACHED"
     );
-    uint256 withdrawableAmount = available(msg.sender, index);
-    require(amount <= withdrawableAmount, "AMOUNT_EXCEEDS_AVAILABLE");
+    require(amount <= available(msg.sender, index), "AMOUNT_EXCEEDS_AVAILABLE");
     selected.balance = selected.balance.sub(amount);
-
     if (selected.balance == 0) {
       Stake[] storage stakes = allStakes[msg.sender];
       Stake storage last = stakes[stakes.length.sub(1)];
@@ -260,7 +262,5 @@ contract Staking is Ownable {
       selected.timestamp = last.timestamp;
       allStakes[msg.sender].pop();
     }
-    token.transfer(msg.sender, amount);
-    emit Transfer(msg.sender, address(0), amount);
   }
 }
