@@ -43,7 +43,7 @@
     "@airswap/constants": "0.3.10",
     "@airswap/indexer": "3.6.9",
     "@airswap/test-utils": "0.1.10",
-    "@airswap/utils": "0.4.3",
+    "@airswap/utils": "0.4.4",
     "@airswap/wrapper": "3.6.9",
     "ethers": "^5.0.25",
     "solidity-coverage": "^0.7.4"
