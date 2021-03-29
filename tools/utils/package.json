@@ -24,7 +24,7 @@
     "test": "yarn compile; mocha -r ts-node/register test/**/*.ts"
   },
   "dependencies": {
-    "@airswap/constants": "0.3.12",
+    "@airswap/constants": "0.3.13",
     "@airswap/types": "3.5.16",
     "@types/ethereumjs-util": "^6.1.0",
     "eth-sig-util": "^3.0.0",
