@@ -94,8 +94,16 @@ class TokenMetadata {
         this.tokensByAddress = kovanTokensByAddress
         this.tokens = Object.values(this.tokensByAddress)
         return this.tokens
+      case Number(chainIds.MAINNET):
+        return this.fetchMainnetTokens()
+      default:
+        this.tokensByAddress = {}
+        this.tokens = []
+        return []
     }
+  }
 
+  public async fetchMainnetTokens(): Promise<Array<NormalizedToken>> {
     // normalize metamask data
     const metamaskTokenHashMap: { [key: string]: boolean } = {}
     const normalizedMetamaskTokens: NormalizedToken[] = Object.entries(
