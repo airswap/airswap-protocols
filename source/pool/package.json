@@ -1,6 +1,6 @@
 {
   "name": "@airswap/pool",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Tokens pooled and claimable using merkle proofs",
   "contributors": [
     "Don Mosites <don.mosites@consensys.net>"
