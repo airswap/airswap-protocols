@@ -45,6 +45,14 @@ export const chainNames: Record<string, string> = {
   '56': 'BINANCE',
 }
 
+export const chainCurrencies: Record<string, string> = {
+  '1': 'ETH',
+  '4': 'Rinkeby ETH',
+  '5': 'Goerli ETH',
+  '42': 'Kovan ETH',
+  '56': 'BNB',
+}
+
 export enum TokenKinds {
   ERC20 = '0x36372b07',
   ERC721 = '0x80ac58cd',
