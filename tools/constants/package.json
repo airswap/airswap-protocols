@@ -1,6 +1,6 @@
 {
   "name": "@airswap/constants",
-  "version": "0.3.10",
+  "version": "0.3.11",
   "description": "Helpful Constants for AirSwap Developers",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>"

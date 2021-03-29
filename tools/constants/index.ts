@@ -34,6 +34,7 @@ export const chainIds: Record<string, string> = {
   RINKEBY: '4',
   GOERLI: '5',
   KOVAN: '42',
+  BINANCE: '56',
 }
 
 export const chainNames: Record<string, string> = {
@@ -41,6 +42,7 @@ export const chainNames: Record<string, string> = {
   '4': 'RINKEBY',
   '5': 'GOERLI',
   '42': 'KOVAN',
+  '56': 'BINANCE',
 }
 
 export enum TokenKinds {
@@ -106,4 +108,5 @@ export const etherscanDomains: Record<string, string> = {
   '4': 'rinkeby.etherscan.io',
   '5': 'goerli.etherscan.io',
   '42': 'kovan.etherscan.io',
+  '56': 'bscscan.com',
 }
