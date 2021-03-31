@@ -20,11 +20,6 @@ contract Staking is Ownable {
     uint256 timestamp;
   }
 
-  struct Unstake {
-    uint256 index;
-    uint256 amount;
-  }
-
   // Token to be staked
   ERC20 public immutable token;
 
@@ -159,14 +154,14 @@ contract Staking is Ownable {
 
   /**
    * @notice Unstake multiple
-   * @param unstakes Unstake[]
+   * @param amounts uint256[]
    */
-  function unstake(Unstake[] calldata unstakes) external {
+  function unstake(uint256[] calldata amounts) external {
     uint256 totalAmount = 0;
-    uint256 length = unstakes.length;
+    uint256 length = amounts.length;
     while (length-- > 0) {
-      _unstake(unstakes[length].index, unstakes[length].amount);
-      totalAmount += unstakes[length].amount;
+      _unstake(length, amounts[length]);
+      totalAmount += amounts[length];
     }
     token.transfer(msg.sender, totalAmount);
     emit Transfer(msg.sender, address(0), totalAmount);
