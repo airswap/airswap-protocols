@@ -65,13 +65,26 @@ contract Staking is Ownable {
   }
 
   /**
-   * @notice Set vesting duration and cliff
+   * @notice Set vesting config
    * @param _duration uint256
    * @param _cliff uint256
    */
   function setVesting(uint256 _duration, uint256 _cliff) external onlyOwner {
     duration = _duration;
     cliff = _cliff;
+  }
+
+  /**
+   * @notice Set metadata config
+   * @param _name string
+   * @param _symbol string
+   */
+  function setMetaData(string memory _name, string memory _symbol)
+    external
+    onlyOwner
+  {
+    name = _name;
+    symbol = _symbol;
   }
 
   /**
@@ -119,7 +132,7 @@ contract Staking is Ownable {
 
     Stake storage selected = allStakes[msg.sender][index];
 
-    // If this stake is fully vested create a new stake
+    // If selected stake is fully vested create a new stake
     if (vested(account, index) == selected.initial) {
       stakeFor(account, amount);
     } else {
@@ -127,7 +140,7 @@ contract Staking is Ownable {
       uint256 newBalance = selected.balance.add(amount);
 
       // Calculate a new timestamp proportional to the new amount
-      // Limited to current block timestamp (amount / newInitial approaches 1)
+      // New timestamp limited to current timestamp (amount / newInitial approaches 1)
       uint256 newTimestamp =
         selected.timestamp +
           amount.mul(block.timestamp.sub(selected.timestamp)).div(newInitial);
@@ -190,7 +203,6 @@ contract Staking is Ownable {
     returns (uint256)
   {
     Stake memory selected = allStakes[account][index];
-
     if (block.timestamp.sub(selected.timestamp) < selected.cliff) {
       return 0;
     }
@@ -208,8 +220,8 @@ contract Staking is Ownable {
   {
     uint256 length = allStakes[account].length;
     stakes = new Stake[](length);
-    for (uint256 i = 0; i < length; i++) {
-      stakes[i] = allStakes[account][i];
+    while (length-- > 0) {
+      stakes[length] = allStakes[account][length];
     }
     return stakes;
   }
@@ -226,8 +238,9 @@ contract Staking is Ownable {
    */
   function balanceOf(address account) external view returns (uint256 total) {
     Stake[] memory stakes = allStakes[account];
-    for (uint256 i = 0; i < stakes.length; i++) {
-      total = total.add(stakes[i].balance);
+    uint256 length = stakes.length;
+    while (length-- > 0) {
+      total = total.add(stakes[length].balance);
     }
     return total;
   }

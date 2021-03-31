@@ -53,6 +53,23 @@ describe('Staking Unit', () => {
     })
   })
 
+  describe('Set Metadata', async () => {
+    it('non owner cannot set metadata', async () => {
+      await expect(
+        staking.connect(account1).setMetaData('Staked AST2', 'sAST2')
+      ).to.be.revertedWith('Ownable: caller is not the owner')
+    })
+
+    it('owner can set metadata', async () => {
+      await staking.connect(deployer).setMetaData('Staked AST2', 'sAST2')
+
+      const name = await staking.name()
+      const symbol = await staking.symbol()
+      expect(name).to.equal('Staked AST2')
+      expect(symbol).to.equal('sAST2')
+    })
+  })
+
   describe('Set Vesting Schedule', async () => {
     it('non owner cannot set vesting schedule', async () => {
       await expect(
