@@ -133,7 +133,27 @@ contract('Staking', async accounts => {
       })
       await advanceTimeAndBlock(DURATION)
       emitted(
-        await staking.unstake([1250000, 1000000, 2000000], {
+        await staking.unstake([0, 0, 2000000], {
+          from: aliceAddress,
+        }),
+        'Transfer'
+      )
+      equal((await stakingToken.balanceOf(aliceAddress)).toString(), '97750000')
+      equal((await staking.balanceOf(aliceAddress)).toString(), '2250000')
+    })
+    it('Alice multi unstake fails with out of range', async () => {
+      await reverted(
+        staking.unstake([0, 0, 1], {
+          from: aliceAddress,
+        }),
+        'INDEX_OUT_OF_RANGE'
+      )
+      equal((await stakingToken.balanceOf(aliceAddress)).toString(), '97750000')
+      equal((await staking.balanceOf(aliceAddress)).toString(), '2250000')
+    })
+    it('Alice multi unstake remaining', async () => {
+      emitted(
+        await staking.unstake([1250000, 1000000], {
           from: aliceAddress,
         }),
         'Transfer'
