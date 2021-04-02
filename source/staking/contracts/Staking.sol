@@ -100,7 +100,7 @@ contract Staking is Ownable {
     allStakes[account].push(
       Stake(duration, cliff, amount, amount, block.timestamp)
     );
-    token.safeTransferFrom(account, address(this), amount);
+    token.safeTransferFrom(msg.sender, address(this), amount);
     emit Transfer(address(0), account, amount);
   }
 
@@ -125,7 +125,7 @@ contract Staking is Ownable {
   ) public {
     require(amount > 0, "AMOUNT_INVALID");
 
-    Stake storage selected = allStakes[msg.sender][index];
+    Stake storage selected = allStakes[account][index];
 
     // If selected stake is fully vested create a new stake
     if (vested(account, index) == selected.initial) {
@@ -140,14 +140,14 @@ contract Staking is Ownable {
         selected.timestamp +
           amount.mul(block.timestamp.sub(selected.timestamp)).div(newInitial);
 
-      allStakes[msg.sender][index] = Stake(
+      allStakes[account][index] = Stake(
         duration,
         cliff,
         newInitial,
         newBalance,
         newTimestamp
       );
-      token.safeTransferFrom(account, address(this), amount);
+      token.safeTransferFrom(msg.sender, address(this), amount);
       emit Transfer(address(0), account, amount);
     }
   }
