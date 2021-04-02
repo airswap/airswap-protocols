@@ -8,6 +8,7 @@ contract('Staking', async accounts => {
   const ownerAddress = accounts[0]
   const aliceAddress = accounts[1]
   const bobAddress = accounts[2]
+  const carolAddress = accounts[3]
 
   const SECONDS_IN_DAY = 86400
 
@@ -48,12 +49,6 @@ contract('Staking', async accounts => {
       emitted(
         await stakingToken.approve(staking.address, 100000000, {
           from: aliceAddress,
-        }),
-        'Approval'
-      )
-      emitted(
-        await stakingToken.approve(staking.address, 100000000, {
-          from: bobAddress,
         }),
         'Approval'
       )
@@ -163,6 +158,44 @@ contract('Staking', async accounts => {
         '100000000'
       )
       equal((await staking.balanceOf(aliceAddress)).toString(), '0')
+    })
+    it('Alice stakes for Bob', async () => {
+      emitted(
+        await staking.stakeFor(bobAddress, 1000000, {
+          from: aliceAddress,
+        }),
+        'Transfer'
+      )
+    })
+    it('Bob stakes for Carol but fails for approval', async () => {
+      await reverted(
+        staking.stakeFor(carolAddress, 1000000, {
+          from: bobAddress,
+        })
+      )
+    })
+    it('Bob approves for trade and stakes for Alice', async () => {
+      emitted(
+        await stakingToken.approve(staking.address, 100000000, {
+          from: bobAddress,
+        }),
+        'Approval'
+      )
+      emitted(
+        await staking.stakeFor(carolAddress, 1000000, {
+          from: bobAddress,
+        }),
+        'Transfer'
+      )
+    })
+    it('Alice extends for Carol', async () => {
+      emitted(
+        await staking.extendFor(0, carolAddress, 1000000, {
+          from: aliceAddress,
+        }),
+        'Transfer'
+      )
+      equal((await staking.balanceOf(carolAddress)).toString(), '2000000')
     })
   })
 })
