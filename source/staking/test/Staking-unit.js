@@ -290,6 +290,61 @@ describe('Staking Unit', () => {
       const block1 = await ethers.provider.getBlock()
       expect(userStakes[1].timestamp).to.equal(block1.timestamp)
     })
+
+    it('unsuccessful extendFor when amount <= 0', async () => {
+      await expect(
+        staking.connect(account1).extendFor('0', account2.address, '0')
+      ).to.be.revertedWith('AMOUNT_INVALID')
+    })
+
+    it('unsuccessful extendFor when user extending for has no take at selected index', async () => {
+      await expect(
+        staking.connect(account1).extendFor('0', account2.address, '0')
+      ).to.be.reverted
+    })
+
+    it('successful extendFor when existing stake is not fully vested', async () => {
+      await token.mock.transferFrom.returns(true)
+      await staking.connect(account2).stake('100')
+      await expect(
+        staking.connect(account1).extendFor('0', account2.address, '1')
+      ).to.not.be.reverted
+
+      const userStakes = await staking
+        .connect(account1)
+        .getStakes(account2.address)
+      expect(userStakes.length).to.equal(1)
+
+      expect(userStakes[0].initial).to.equal(101)
+      expect(userStakes[0].balance).to.equal(101)
+      expect(userStakes[0].cliff).to.equal(CLIFF)
+      expect(userStakes[0].duration).to.equal(DURATION)
+    })
+
+    it('successful extendFor when existing stake is fully vested', async () => {
+      await token.mock.transferFrom.returns(true)
+      await staking.connect(account2).stake('100')
+
+      // move 10 seconds forward - 100% vested
+      for (let index = 0; index < 100; index++) {
+        await timeMachine.advanceBlock()
+      }
+
+      await expect(
+        staking.connect(account1).extendFor('0', account2.address, '1')
+      ).to.not.be.reverted
+
+      //if the first stake is fully vested a second stake is created
+      const userStakes = await staking
+        .connect(account1)
+        .getStakes(account2.address)
+      expect(userStakes.length).to.equal(2)
+
+      expect(userStakes[1].initial).to.equal(1)
+      expect(userStakes[1].balance).to.equal(1)
+      expect(userStakes[1].cliff).to.equal(CLIFF)
+      expect(userStakes[1].duration).to.equal(DURATION)
+    })
   })
 
   describe('Unstake', async () => {
