@@ -1,6 +1,6 @@
 {
   "name": "@airswap/staking",
-  "version": "1.2.0",
+  "version": "2.3.0",
   "description": "Stake and unstake tokens on a schedule",
   "contributors": [
     "Ethan Wessel <ethan.wessel@consensys.net>",
