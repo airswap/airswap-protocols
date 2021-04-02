@@ -100,7 +100,7 @@ contract Staking is Ownable {
     allStakes[account].push(
       Stake(duration, cliff, amount, amount, block.timestamp)
     );
-    token.safeTransferFrom(account, address(this), amount);
+    token.safeTransferFrom(msg.sender, address(this), amount);
     emit Transfer(address(0), account, amount);
   }
 
