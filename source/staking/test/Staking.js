@@ -174,7 +174,7 @@ contract('Staking', async accounts => {
         })
       )
     })
-    it('Bob approves for trade and stakes for Alice', async () => {
+    it('Bob approves for trade and stakes for Carol', async () => {
       emitted(
         await stakingToken.approve(staking.address, 100000000, {
           from: bobAddress,
