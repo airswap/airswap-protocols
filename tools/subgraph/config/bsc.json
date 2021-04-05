@@ -1,0 +1,15 @@
+{
+  "network": "bsc",
+  "swap_light_address": "0xc98314a5077DBa8F12991B29bcE39F834E82e197",
+  "indexer_address": "0x0fEE96B8d44C0fD9E6D6472531E2aD159CCba73d",
+  "pool_address": "0xF636776aCfca2132E019E714a1fC881124B3bAfC",
+  "swap_address": "0x0000000000000000000000000000000000000000",
+  "delegateFactory_address": "0x0000000000000000000000000000000000000000",
+  "locker_address": "0x0000000000000000000000000000000000000000",
+  "start_block_light": 5940537,
+  "start_block_indexer": 5940888,
+  "start_block_pool": 5940495,
+  "start_block_swap": 5940888,
+  "start_block_delegateFactory": 5940888,
+  "start_block_locker": 5940888
+}
