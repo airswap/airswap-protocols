@@ -312,3 +312,13 @@ export const kovanTokensByAddress: Record<string, NormalizedToken> = {
     kind: tokenKinds.ERC20,
   },
 }
+
+export const binanceTokensByAddress: Record<string, NormalizedToken> = {
+  '0x1ac0d76f11875317f8a7d791db94cdd82bd02bd1': {
+    name: 'AirSwap Token',
+    address: '0x1ac0d76f11875317f8a7d791db94cdd82bd02bd1',
+    decimals: 4,
+    symbol: 'AST',
+    kind: tokenKinds.ERC20,
+  },
+}

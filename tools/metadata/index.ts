@@ -12,6 +12,7 @@ import {
   rinkebyTokensByAddress,
   goerliTokensByAddress,
   kovanTokensByAddress,
+  binanceTokensByAddress,
   getOpenSeaUrl,
 } from './src/constants'
 
@@ -92,6 +93,10 @@ class TokenMetadata {
         return this.tokens
       case Number(chainIds.KOVAN):
         this.tokensByAddress = kovanTokensByAddress
+        this.tokens = Object.values(this.tokensByAddress)
+        return this.tokens
+      case Number(chainIds.BINANCE):
+        this.tokensByAddress = binanceTokensByAddress
         this.tokens = Object.values(this.tokensByAddress)
         return this.tokens
       case Number(chainIds.MAINNET):
