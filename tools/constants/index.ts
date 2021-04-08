@@ -35,6 +35,8 @@ export const chainIds: Record<string, string> = {
   GOERLI: '5',
   KOVAN: '42',
   BINANCE: '56',
+  HECO: '128',
+  HECOTEST: '256',
 }
 
 export const chainNames: Record<string, string> = {
@@ -43,6 +45,8 @@ export const chainNames: Record<string, string> = {
   '5': 'GOERLI',
   '42': 'KOVAN',
   '56': 'BINANCE',
+  '128': 'HECO',
+  '256': 'HECOTEST',
 }
 
 export const chainCurrencies: Record<string, string> = {
@@ -51,6 +55,8 @@ export const chainCurrencies: Record<string, string> = {
   '5': 'Goerli ETH',
   '42': 'Kovan ETH',
   '56': 'BNB',
+  '128': 'HT',
+  '256': 'HT',
 }
 
 export enum TokenKinds {
@@ -95,6 +101,8 @@ export const wethAddresses: Record<string, string> = {
   '4': '0xc778417e063141139fce010982780140aa0cd5ab',
   '5': '0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6',
   '42': '0xd0a1e359811322d97991e03f863a0c30c2cf029c',
+  '128': '0x5545153CCFcA01fbd7Dd11C0b23ba694D9509A6F', // heco
+  '256': '0x7af326b6351c8a9b8fb8cd205cbe11d4ac5fa836', // heco test
 }
 
 export const stakingTokenAddresses: Record<string, string> = {
@@ -118,4 +126,6 @@ export const etherscanDomains: Record<string, string> = {
   '5': 'goerli.etherscan.io',
   '42': 'kovan.etherscan.io',
   '56': 'bscscan.com',
+  '128': 'hecoinfo.com',
+  '256': 'scan-testnet.huobichain.com',
 }
