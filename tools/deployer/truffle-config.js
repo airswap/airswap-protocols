@@ -50,6 +50,26 @@ module.exports = {
       gas: 5898551,
       gasPrice: 1000000000, // CHECK THE CURRENT GASPRICE
     },
+    hecoTest: {
+      provider: () =>
+          new HDWalletProvider(
+              process.env.MNEMONIC,
+              'http://http-testnet.huobichain.com'
+          ),
+      network_id: 256,
+      gas: 5898551,
+      gasPrice: 1000000000, // CHECK THE CURRENT GASPRICE
+    },
+    heco: {
+      provider: () =>
+          new HDWalletProvider(
+              process.env.MNEMONIC,
+              'https://kovan.infura.io/v3/' + process.env.INFURA_API_KEY
+          ),
+      network_id: 128,
+      gas: 5898551,
+      gasPrice: 1000000000, // CHECK THE CURRENT GASPRICE
+    },
   },
 
   // Set default mocha options here, use special reporters etc.
