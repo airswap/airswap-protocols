@@ -1,0 +1,32 @@
+{
+  "name": "batch-indexer",
+  "version": "1.0.0",
+  "description": "Batch Index Deployer",
+  "contributors": [
+    "Ethan Wessel <ethan.wessel@consensys.net>",
+    "Don Mosites <don.mosites@consensys.net>"
+  ],
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/airswap/airswap-protocols"
+  },
+  "scripts": {
+    "clean": "hardhat clean",
+    "compile": "hardhat compile",
+    "coverage": "hardhat coverage",
+    "test": "hardhat test"
+  },
+  "devDependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.0.1",
+    "@nomiclabs/hardhat-etherscan": "^2.1.1",
+    "@nomiclabs/hardhat-truffle5": "^2.0.0",
+    "@nomiclabs/hardhat-waffle": "^2.0.1",
+    "@nomiclabs/hardhat-web3": "^2.0.0",
+    "hardhat": "^2.0.10",
+    "ethereum-waffle": "^3.0.0",
+    "@openzeppelin/contracts": "^3.4.0",
+    "ganache-time-traveler": "^1.0.15",
+    "ethers": "^5.0.0"
+  }
+}

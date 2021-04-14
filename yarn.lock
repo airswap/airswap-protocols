@@ -1755,6 +1755,11 @@
   resolved "https://registry.yarnpkg.com/@nomiclabs/hardhat-ethers/-/hardhat-ethers-2.0.1.tgz#f86a6fa210dbe6270adffccc75e93ed60a856904"
   integrity sha512-uTFHDhhvJ+UjfvvMeQxD3ZALuzuI3FXzTYT1Z5N3ebyZL5z4Ogwt55GB0R9tdKY0p5HhDhBjU/gsCjUEwIVoaw==
 
+"@nomiclabs/hardhat-ethers@^2.0.2":
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/@nomiclabs/hardhat-ethers/-/hardhat-ethers-2.0.2.tgz#c472abcba0c5185aaa4ad4070146e95213c68511"
+  integrity sha512-6quxWe8wwS4X5v3Au8q1jOvXYEPkS1Fh+cME5u6AwNdnI4uERvPlVjlgRWzpnb+Rrt1l/cEqiNRH9GlsBMSDQg==
+
 "@nomiclabs/hardhat-etherscan@^2.1.1":
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/@nomiclabs/hardhat-etherscan/-/hardhat-etherscan-2.1.1.tgz#186f3fa652a0ca20fb77aa857cfad2da845d5cbf"
@@ -2167,6 +2172,11 @@
   version "0.11.0"
   resolved "https://registry.yarnpkg.com/@solidity-parser/parser/-/parser-0.11.0.tgz#28bc1972e1620f7b388b485bca76a78ac2cb5c59"
   integrity sha512-IaC4IaW8uoOB8lmEkw6c19y1vJBK/+7SzAbGQ+LmBYRPXSLNB+UgpORvmcAJEXhB04kWKyz/Os1U8onqm6U/+w==
+
+"@solidity-parser/parser@^0.12.0":
+  version "0.12.1"
+  resolved "https://registry.yarnpkg.com/@solidity-parser/parser/-/parser-0.12.1.tgz#10ce249890d32ba500e9ce449e60a2b26b11be7a"
+  integrity sha512-ikxVpwskNxEp2fvYS1BdRImnevHmM97zdPFBa1cVtjtNpoqCm/EmljATTZk0s9G/zsN5ZbPf9OAIAW4gbBJiRA==
 
 "@solidity-parser/parser@^0.8.0", "@solidity-parser/parser@^0.8.1", "@solidity-parser/parser@^0.8.2":
   version "0.8.2"
@@ -13173,6 +13183,31 @@ solidity-coverage@^0.7.13, solidity-coverage@^0.7.4:
   integrity sha512-06r0R+/j8lgl5/Z57VwxWNFZId0ZavcQU45W2gCfsBmEt/1Y6Xgm96oMSa6JBIvwrPR8H4T3icxTLiUVsMFNeg==
   dependencies:
     "@solidity-parser/parser" "^0.8.1"
+    "@truffle/provider" "^0.2.24"
+    chalk "^2.4.2"
+    death "^1.1.0"
+    detect-port "^1.3.0"
+    fs-extra "^8.1.0"
+    ganache-cli "^6.11.0"
+    ghost-testrpc "^0.0.2"
+    global-modules "^2.0.0"
+    globby "^10.0.1"
+    jsonschema "^1.2.4"
+    lodash "^4.17.15"
+    node-emoji "^1.10.0"
+    pify "^4.0.1"
+    recursive-readdir "^2.2.2"
+    sc-istanbul "^0.4.5"
+    semver "^7.3.4"
+    shelljs "^0.8.3"
+    web3-utils "^1.3.0"
+
+solidity-coverage@^0.7.16:
+  version "0.7.16"
+  resolved "https://registry.yarnpkg.com/solidity-coverage/-/solidity-coverage-0.7.16.tgz#c8c8c46baa361e2817bbf275116ddd2ec90a55fb"
+  integrity sha512-ttBOStywE6ZOTJmmABSg4b8pwwZfYKG8zxu40Nz+sRF5bQX7JULXWj/XbX0KXps3Fsp8CJXg8P29rH3W54ipxw==
+  dependencies:
+    "@solidity-parser/parser" "^0.12.0"
     "@truffle/provider" "^0.2.24"
     chalk "^2.4.2"
     death "^1.1.0"
