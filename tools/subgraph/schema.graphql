@@ -62,6 +62,7 @@ type SwapLight @entity {
   signer: User
   signerAmount: BigInt
   signerToken: Token
+  signerFee: BigInt
 
   sender: User
   senderAmount: BigInt

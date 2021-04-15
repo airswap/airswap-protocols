@@ -1,7 +1,6 @@
 import { BigInt, log } from "@graphprotocol/graph-ts"
 import {
   Cancel,
-  CancelUpTo,
   Swap as SwapEvent
 } from "../generated/SwapLightContract/SwapLightContract"
 import { SwapLightContract, SwapLight } from "../generated/schema"
@@ -11,21 +10,6 @@ export function handleCancel(event: Cancel): void {
   let user = getUser(event.params.signerWallet.toHex())
   let cancelledNonces = user.cancelledSwapLightNonces
   cancelledNonces.push(event.params.nonce)
-  cancelledNonces.sort()
-  user.cancelledSwapLightNonces = cancelledNonces
-  user.save()
-}
-
-export function handleCancelUpTo(event: CancelUpTo): void {
-  let user = getUser(event.params.signerWallet.toHex())
-  let cancelledNonces = user.cancelledSwapLightNonces
-  for (let i = BigInt.fromI32(0); i.lt(event.params.nonce); i = i.plus(BigInt.fromI32(1))) {
-    // prevent duplicates
-    if (cancelledNonces.indexOf(i) > -1) {
-      continue
-    }
-    cancelledNonces.push(i)
-  }
   cancelledNonces.sort()
   user.cancelledSwapLightNonces = cancelledNonces
   user.save()
@@ -60,6 +44,7 @@ export function handleSwap(event: SwapEvent): void {
   completedSwap.signer = signer.id
   completedSwap.signerAmount = event.params.signerAmount
   completedSwap.signerToken = signerToken.id
+  completedSwap.signerFee = event.params.signerFee
 
   completedSwap.sender = sender.id
   completedSwap.senderAmount = event.params.senderAmount
