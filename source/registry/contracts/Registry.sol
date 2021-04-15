@@ -70,8 +70,7 @@ contract Registry is Ownable {
       supportedTokenList.remove(token);
       supportingStakers[token].remove(msg.sender);
     }
-    uint256 transferAmount =
-      obligationCost.add(tokenCost.mul(supportedTokenList.length()));
+    uint256 transferAmount = obligationCost.add(tokenCost.mul(length));
     stakingToken.safeTransfer(msg.sender, transferAmount);
   }
 
