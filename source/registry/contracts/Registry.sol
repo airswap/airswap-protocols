@@ -30,6 +30,7 @@ contract Registry is Ownable {
   }
 
   function addTokens(address[] calldata tokenList) external {
+    require(tokenList.length > 0, "empty list");
     uint256 transferAmount = 0;
     if (supportedTokens[msg.sender].length() == 0) {
       transferAmount = transferAmount.add(obligationCost);
@@ -104,6 +105,9 @@ contract Registry is Ownable {
 
   function balanceOf(address staker) external view returns (uint256) {
     uint256 tokenCount = supportedTokens[staker].length();
+    if (tokenCount == 0) {
+      return 0;
+    }
     return (obligationCost.add(tokenCost.mul(tokenCount)));
   }
 }

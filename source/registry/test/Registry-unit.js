@@ -52,6 +52,12 @@ describe('Registry Unit', () => {
   })
 
   describe('Add Tokens', async () => {
+    it('add an empty list of tokens', async () => {
+      await expect(registry.connect(account1).addTokens([])).to.be.revertedWith(
+        'empty list'
+      )
+    })
+
     it('add a list of tokens when there is sufficient stake token', async () => {
       await stakingToken.mock.transferFrom.returns(true)
       await registry
@@ -189,6 +195,11 @@ describe('Registry Unit', () => {
   })
 
   describe('Balance Of', async () => {
+    it('verify expected balance when a user has no tokens', async () => {
+      const balance = await registry.balanceOf(account1.address)
+      expect(balance).to.equal(0)
+    })
+
     it('verify expected staking balance after a user has added tokens', async () => {
       await stakingToken.mock.transferFrom.returns(true)
       await registry
