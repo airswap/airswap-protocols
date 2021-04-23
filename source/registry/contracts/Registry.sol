@@ -22,7 +22,7 @@ contract Registry {
     IERC20 _stakingToken,
     uint256 _obligationCost,
     uint256 _tokenCost
-  ) public {
+  ) {
     stakingToken = _stakingToken;
     obligationCost = _obligationCost;
     tokenCost = _tokenCost;
@@ -32,7 +32,7 @@ contract Registry {
     require(tokenList.length > 0, "empty list");
     uint256 transferAmount = 0;
     if (supportedTokens[msg.sender].length() == 0) {
-      transferAmount = transferAmount.add(obligationCost);
+      transferAmount = obligationCost;
     }
     for (uint256 i = 0; i < tokenList.length; i++) {
       address token = tokenList[i];
