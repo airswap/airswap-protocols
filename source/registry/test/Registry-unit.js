@@ -40,11 +40,9 @@ describe('Registry Unit', () => {
 
   describe('Default Values', async () => {
     it('constructor set default values', async () => {
-      const owner = await registry.owner()
       const tokenAddress = await registry.stakingToken()
       const obligationCost = await registry.obligationCost()
       const tokenCost = await registry.tokenCost()
-      expect(owner).to.equal(deployer.address)
       expect(tokenAddress).to.equal(stakingToken.address)
       expect(obligationCost).to.equal(OBLIGATION_COST)
       expect(tokenCost).to.equal(TOKEN_COST)
@@ -52,7 +50,7 @@ describe('Registry Unit', () => {
   })
 
   describe('Add Tokens', async () => {
-    it('add an empty list of tokens', async () => {
+    it('add an empty list of tokens fails', async () => {
       await expect(registry.connect(account1).addTokens([])).to.be.revertedWith(
         'empty list'
       )
@@ -104,6 +102,14 @@ describe('Registry Unit', () => {
   })
 
   describe('Remove Tokens', async () => {
+    it('remove an empty list of tokens fails', async () => {
+      await expect(
+        registry
+          .connect(account1)
+          .removeTokens([token1.address, token2.address, token3.address])
+      ).to.be.revertedWith('supported tokens is empty')
+    })
+
     it('remove a list of tokens', async () => {
       await stakingToken.mock.transfer.returns(true)
       await stakingToken.mock.transferFrom.returns(true)
@@ -124,6 +130,12 @@ describe('Registry Unit', () => {
       expect(token1Stakers.length).to.equal(0)
       expect(token2Stakers.length).to.equal(0)
       expect(token3Stakers.length).to.equal(0)
+    })
+
+    it('remove all tokens for a staker fails when there are no tokens to remove', async () => {
+      await expect(
+        registry.connect(account1).removeAllTokens()
+      ).to.be.revertedWith('supported tokens is empty')
     })
 
     it('remove all tokens for an staker', async () => {

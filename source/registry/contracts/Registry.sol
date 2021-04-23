@@ -46,6 +46,10 @@ contract Registry {
   }
 
   function removeTokens(address[] calldata tokenList) external {
+    require(
+      supportedTokens[msg.sender].length() > 0,
+      "supported tokens is empty"
+    );
     uint256 transferAmount = 0;
     for (uint256 i = 0; i < tokenList.length; i++) {
       address token = tokenList[i];
@@ -62,6 +66,10 @@ contract Registry {
   }
 
   function removeAllTokens() external {
+    require(
+      supportedTokens[msg.sender].length() > 0,
+      "supported tokens is empty"
+    );
     EnumerableSet.AddressSet storage supportedTokenList =
       supportedTokens[msg.sender];
     uint256 length = supportedTokenList.length();
