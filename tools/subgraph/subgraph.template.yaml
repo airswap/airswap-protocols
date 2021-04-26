@@ -116,9 +116,7 @@ dataSources:
       eventHandlers:
         - event: Cancel(indexed uint256,indexed address)
           handler: handleCancel
-        - event: CancelUpTo(indexed uint256,indexed address)
-          handler: handleCancelUpTo
-        - event: Swap(indexed uint256,uint256,indexed address,indexed address,address,address,uint256,uint256)
+        - event: Swap(indexed uint256,uint256,indexed address,address,uint256,uint256,indexed address,address,uint256)
           handler: handleSwap
       file: ./src/SwapLightMapping.ts
   - kind: ethereum/contract
