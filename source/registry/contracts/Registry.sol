@@ -11,6 +11,10 @@ contract Registry {
   using SafeMath for uint256;
   using EnumerableSet for EnumerableSet.AddressSet;
 
+  event TokensAdded(address account, address[] tokens);
+  event TokensRemoved(address account, address[] tokens);
+  event LocatorSet(address account, bytes32 locator);
+
   IERC20 public immutable stakingToken;
   uint256 public immutable obligationCost;
   uint256 public immutable tokenCost;
@@ -45,6 +49,7 @@ contract Registry {
       supportingStakers[token].add(msg.sender);
     }
     transferAmount = transferAmount.add(tokenCost.mul(length));
+    emit TokensAdded(msg.sender, tokenList);
     stakingToken.safeTransferFrom(msg.sender, address(this), transferAmount);
   }
 
@@ -60,6 +65,7 @@ contract Registry {
     if (supportedTokens[msg.sender].length() == 0) {
       transferAmount = transferAmount.add(obligationCost);
     }
+    emit TokensRemoved(msg.sender, tokenList);
     stakingToken.safeTransfer(msg.sender, transferAmount);
   }
 
@@ -68,12 +74,15 @@ contract Registry {
     EnumerableSet.AddressSet storage supportedTokenList =
       supportedTokens[msg.sender];
     uint256 length = supportedTokenList.length();
+    address[] memory tokenList = new address[](length);
     for (uint256 i = 0; i < length; i++) {
       address token = supportedTokenList.at(0);
+      tokenList[i] = token;
       supportedTokenList.remove(token);
       supportingStakers[token].remove(msg.sender);
     }
     uint256 transferAmount = obligationCost.add(tokenCost.mul(length));
+    emit TokensRemoved(msg.sender, tokenList);
     stakingToken.safeTransfer(msg.sender, transferAmount);
   }
 
@@ -111,6 +120,7 @@ contract Registry {
 
   function setLocator(bytes32 _locator) external {
     locator[msg.sender] = _locator;
+    emit LocatorSet(msg.sender, _locator);
   }
 
   function balanceOf(address staker) external view returns (uint256) {

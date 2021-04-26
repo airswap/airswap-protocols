@@ -58,9 +58,18 @@ describe('Registry Unit', () => {
 
     it('add a list of tokens when there is sufficient stake token', async () => {
       await stakingToken.mock.transferFrom.returns(true)
-      await registry
-        .connect(account1)
-        .addTokens([token1.address, token2.address, token3.address])
+      await expect(
+        registry
+          .connect(account1)
+          .addTokens([token1.address, token2.address, token3.address])
+      )
+        .to.emit(registry, 'TokensAdded')
+        .withArgs(account1.address, [
+          token1.address,
+          token2.address,
+          token3.address,
+        ])
+
       const tokens = await registry.getSupportedTokens(account1.address)
       expect(tokens.length).to.equal(3)
       expect(tokens[0]).to.equal(token1.address)
@@ -139,9 +148,17 @@ describe('Registry Unit', () => {
         .connect(account1)
         .addTokens([token1.address, token2.address, token3.address])
 
-      await registry
-        .connect(account1)
-        .removeTokens([token1.address, token2.address, token3.address])
+      await expect(
+        registry
+          .connect(account1)
+          .removeTokens([token1.address, token2.address, token3.address])
+      )
+        .to.emit(registry, 'TokensRemoved')
+        .withArgs(account1.address, [
+          token1.address,
+          token2.address,
+          token3.address,
+        ])
 
       const tokens = await registry.getSupportedTokens(account1.address)
       expect(tokens.length).to.equal(0)
@@ -182,7 +199,16 @@ describe('Registry Unit', () => {
       await registry
         .connect(account1)
         .addTokens([token1.address, token2.address, token3.address])
-      await registry.connect(account1).removeAllTokens()
+      await expect(registry.connect(account1).removeAllTokens())
+        .to.emit(registry, 'TokensRemoved')
+        .withArgs(account1.address, [
+          token1.address,
+          token3.address,
+          token2.address,
+        ])
+
+      //NOTE: Note that there are no guarantees on the ordering of values inside the array, and it may change when more values are added or removed.
+      // this is why token1, token3, token2 are in the above order
       const tokens = await registry.getSupportedTokens(account1.address)
       expect(tokens.length).to.equal(0)
 
@@ -227,9 +253,16 @@ describe('Registry Unit', () => {
 
   describe('Set Locator', async () => {
     it('successful setting of locator', async () => {
-      await registry
-        .connect(account1)
-        .setLocator(ethers.utils.formatBytes32String('www.noneLocator.com'))
+      await expect(
+        registry
+          .connect(account1)
+          .setLocator(ethers.utils.formatBytes32String('www.noneLocator.com'))
+      )
+        .to.emit(registry, 'LocatorSet')
+        .withArgs(
+          account1.address,
+          ethers.utils.formatBytes32String('www.noneLocator.com')
+        )
 
       const locator = await registry.locator(account1.address)
       expect(ethers.utils.parseBytes32String(locator)).to.equal(
