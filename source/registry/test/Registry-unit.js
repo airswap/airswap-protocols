@@ -105,25 +105,31 @@ describe('Registry Unit', () => {
       ).to.be.revertedWith('Insufficient Funds')
     })
 
-    it('add a list of duplicate tokens and verify duplicates are not saved', async () => {
+    it('add a list of duplicate tokens fails', async () => {
+      await stakingToken.mock.transferFrom.returns(true)
+      await expect(
+        registry
+          .connect(account1)
+          .addTokens([token1.address, token2.address, token1.address])
+      ).to.be.revertedWith('token already supported')
+    })
+
+    it('add a duplicate token', async () => {
       await stakingToken.mock.transferFrom.returns(true)
       await registry
         .connect(account1)
-        .addTokens([token1.address, token2.address, token1.address])
-      const tokens = await registry.getSupportedTokens(account1.address)
-      expect(tokens.length).to.equal(2)
-      expect(tokens[0]).to.equal(token1.address)
-      expect(tokens[1]).to.equal(token2.address)
+        .addTokens([token1.address, token2.address])
+      await expect(
+        registry.connect(account1).addTokens([token1.address])
+      ).to.be.revertedWith('token already supported')
     })
   })
 
   describe('Remove Tokens', async () => {
     it('remove an empty list of tokens fails', async () => {
       await expect(
-        registry
-          .connect(account1)
-          .removeTokens([token1.address, token2.address, token3.address])
-      ).to.be.revertedWith('supported tokens is empty')
+        registry.connect(account1).removeTokens([])
+      ).to.be.revertedWith('empty list')
     })
 
     it('remove a list of tokens', async () => {
@@ -167,7 +173,7 @@ describe('Registry Unit', () => {
     it('remove all tokens for a staker fails when there are no tokens to remove', async () => {
       await expect(
         registry.connect(account1).removeAllTokens()
-      ).to.be.revertedWith('supported tokens is empty')
+      ).to.be.revertedWith('no supported tokens')
     })
 
     it('remove all tokens for an staker', async () => {
@@ -188,7 +194,21 @@ describe('Registry Unit', () => {
       expect(token3Stakers.length).to.equal(0)
     })
 
-    it('remove a list of duplicate tokens', async () => {
+    it('remove a list of duplicate tokens fails', async () => {
+      await stakingToken.mock.transfer.returns(true)
+      await stakingToken.mock.transferFrom.returns(true)
+      await registry
+        .connect(account1)
+        .addTokens([token1.address, token2.address, token3.address])
+
+      await expect(
+        registry
+          .connect(account1)
+          .removeTokens([token1.address, token2.address, token1.address])
+      ).to.be.revertedWith('token not supported')
+    })
+
+    it('remove a token already removed fails', async () => {
       await stakingToken.mock.transfer.returns(true)
       await stakingToken.mock.transferFrom.returns(true)
       await registry
@@ -197,17 +217,11 @@ describe('Registry Unit', () => {
 
       await registry
         .connect(account1)
-        .removeTokens([token1.address, token2.address, token1.address])
+        .removeTokens([token1.address, token2.address, token3.address])
 
-      const tokens = await registry.getSupportedTokens(account1.address)
-      expect(tokens.length).to.equal(1)
-
-      const token1Stakers = await registry.getSupportingStakers(token1.address)
-      const token2Stakers = await registry.getSupportingStakers(token2.address)
-      const token3Stakers = await registry.getSupportingStakers(token3.address)
-      expect(token1Stakers.length).to.equal(0)
-      expect(token2Stakers.length).to.equal(0)
-      expect(token3Stakers.length).to.equal(1)
+      await expect(
+        registry.connect(account1).removeTokens([token1.address])
+      ).to.be.revertedWith('token not supported')
     })
   })
 
@@ -262,16 +276,6 @@ describe('Registry Unit', () => {
         .addTokens([token1.address, token2.address, token3.address])
 
       await registry.connect(account1).removeTokens([token2.address])
-
-      const balance = await registry.balanceOf(account1.address)
-      expect(balance).to.equal(OBLIGATION_COST + TOKEN_COST * 2)
-    })
-
-    it('verify expected staking balance when a user has added duplicate tokens', async () => {
-      await stakingToken.mock.transferFrom.returns(true)
-      await registry
-        .connect(account1)
-        .addTokens([token1.address, token2.address, token1.address])
 
       const balance = await registry.balanceOf(account1.address)
       expect(balance).to.equal(OBLIGATION_COST + TOKEN_COST * 2)

@@ -29,36 +29,34 @@ contract Registry {
   }
 
   function addTokens(address[] calldata tokenList) external {
-    require(tokenList.length > 0, "empty list");
+    uint256 length = tokenList.length;
+    require(length > 0, "empty list");
+
     uint256 transferAmount = 0;
     if (supportedTokens[msg.sender].length() == 0) {
       transferAmount = obligationCost;
     }
-    for (uint256 i = 0; i < tokenList.length; i++) {
+    for (uint256 i = 0; i < length; i++) {
       address token = tokenList[i];
-      if (!supportedTokens[msg.sender].contains(token)) {
-        transferAmount = transferAmount.add(tokenCost);
-        supportedTokens[msg.sender].add(token);
-        supportingStakers[token].add(msg.sender);
-      }
+      require(
+        supportedTokens[msg.sender].add(token),
+        "token already supported"
+      );
+      supportingStakers[token].add(msg.sender);
     }
+    transferAmount = transferAmount.add(tokenCost.mul(length));
     stakingToken.safeTransferFrom(msg.sender, address(this), transferAmount);
   }
 
   function removeTokens(address[] calldata tokenList) external {
-    require(
-      supportedTokens[msg.sender].length() > 0,
-      "supported tokens is empty"
-    );
-    uint256 transferAmount = 0;
-    for (uint256 i = 0; i < tokenList.length; i++) {
+    uint256 length = tokenList.length;
+    require(length > 0, "empty list");
+    for (uint256 i = 0; i < length; i++) {
       address token = tokenList[i];
-      if (supportedTokens[msg.sender].contains(token)) {
-        transferAmount = transferAmount.add(tokenCost);
-        supportedTokens[msg.sender].remove(token);
-        supportingStakers[token].remove(msg.sender);
-      }
+      require(supportedTokens[msg.sender].remove(token), "token not supported");
+      supportingStakers[token].remove(msg.sender);
     }
+    uint256 transferAmount = tokenCost.mul(length);
     if (supportedTokens[msg.sender].length() == 0) {
       transferAmount = transferAmount.add(obligationCost);
     }
@@ -66,10 +64,7 @@ contract Registry {
   }
 
   function removeAllTokens() external {
-    require(
-      supportedTokens[msg.sender].length() > 0,
-      "supported tokens is empty"
-    );
+    require(supportedTokens[msg.sender].length() > 0, "no supported tokens");
     EnumerableSet.AddressSet storage supportedTokenList =
       supportedTokens[msg.sender];
     uint256 length = supportedTokenList.length();
