@@ -76,6 +76,22 @@ describe('Registry Unit', () => {
       expect(token1Stakers[0]).to.equal(account1.address)
       expect(token2Stakers[0]).to.equal(account1.address)
       expect(token3Stakers[0]).to.equal(account1.address)
+
+      const token1Supported = await registry.supportsToken(
+        account1.address,
+        token1.address
+      )
+      const token2Supported = await registry.supportsToken(
+        account1.address,
+        token2.address
+      )
+      const token3Supported = await registry.supportsToken(
+        account1.address,
+        token3.address
+      )
+      expect(token1Supported).to.equal(true)
+      expect(token2Supported).to.equal(true)
+      expect(token3Supported).to.equal(true)
     })
 
     it('add a list of tokens when there is insufficent stake token', async () => {
@@ -130,6 +146,22 @@ describe('Registry Unit', () => {
       expect(token1Stakers.length).to.equal(0)
       expect(token2Stakers.length).to.equal(0)
       expect(token3Stakers.length).to.equal(0)
+
+      const token1Supported = await registry.supportsToken(
+        account1.address,
+        token1.address
+      )
+      const token2Supported = await registry.supportsToken(
+        account1.address,
+        token2.address
+      )
+      const token3Supported = await registry.supportsToken(
+        account1.address,
+        token3.address
+      )
+      expect(token1Supported).to.equal(false)
+      expect(token2Supported).to.equal(false)
+      expect(token3Supported).to.equal(false)
     })
 
     it('remove all tokens for a staker fails when there are no tokens to remove', async () => {

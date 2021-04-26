@@ -82,6 +82,14 @@ contract Registry {
     stakingToken.safeTransfer(msg.sender, transferAmount);
   }
 
+  function supportsToken(address staker, address token)
+    public
+    view
+    returns (bool)
+  {
+    return supportedTokens[staker].contains(token);
+  }
+
   function getSupportedTokens(address staker)
     external
     view
