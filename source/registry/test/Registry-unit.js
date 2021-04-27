@@ -52,7 +52,7 @@ describe('Registry Unit', () => {
   describe('Add Tokens', async () => {
     it('add an empty list of tokens fails', async () => {
       await expect(registry.connect(account1).addTokens([])).to.be.revertedWith(
-        'empty list'
+        'NO_TOKENS_TO_ADD'
       )
     })
 
@@ -120,7 +120,7 @@ describe('Registry Unit', () => {
         registry
           .connect(account1)
           .addTokens([token1.address, token2.address, token1.address])
-      ).to.be.revertedWith('token already supported')
+      ).to.be.revertedWith('TOKEN_EXISTS')
     })
 
     it('add a duplicate token', async () => {
@@ -130,7 +130,7 @@ describe('Registry Unit', () => {
         .addTokens([token1.address, token2.address])
       await expect(
         registry.connect(account1).addTokens([token1.address])
-      ).to.be.revertedWith('token already supported')
+      ).to.be.revertedWith('TOKEN_EXISTS')
     })
   })
 
@@ -138,7 +138,7 @@ describe('Registry Unit', () => {
     it('remove an empty list of tokens fails', async () => {
       await expect(
         registry.connect(account1).removeTokens([])
-      ).to.be.revertedWith('empty list')
+      ).to.be.revertedWith('NO_TOKENS_TO_REMOVE')
     })
 
     it('remove a list of tokens', async () => {
@@ -190,7 +190,7 @@ describe('Registry Unit', () => {
     it('remove all tokens for a staker fails when there are no tokens to remove', async () => {
       await expect(
         registry.connect(account1).removeAllTokens()
-      ).to.be.revertedWith('no supported tokens')
+      ).to.be.revertedWith('NO_TOKENS_TO_REMOVE')
     })
 
     it('remove all tokens for an staker', async () => {
@@ -231,7 +231,7 @@ describe('Registry Unit', () => {
         registry
           .connect(account1)
           .removeTokens([token1.address, token2.address, token1.address])
-      ).to.be.revertedWith('token not supported')
+      ).to.be.revertedWith('TOKEN_DOES_NOT_EXIST')
     })
 
     it('remove a token already removed fails', async () => {
@@ -247,7 +247,7 @@ describe('Registry Unit', () => {
 
       await expect(
         registry.connect(account1).removeTokens([token1.address])
-      ).to.be.revertedWith('token not supported')
+      ).to.be.revertedWith('TOKEN_DOES_NOT_EXIST')
     })
   })
 

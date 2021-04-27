@@ -34,7 +34,7 @@ contract Registry {
 
   function addTokens(address[] calldata tokenList) external {
     uint256 length = tokenList.length;
-    require(length > 0, "empty list");
+    require(length > 0, "NO_TOKENS_TO_ADD");
 
     uint256 transferAmount = 0;
     if (supportedTokens[msg.sender].length() == 0) {
@@ -42,10 +42,7 @@ contract Registry {
     }
     for (uint256 i = 0; i < length; i++) {
       address token = tokenList[i];
-      require(
-        supportedTokens[msg.sender].add(token),
-        "token already supported"
-      );
+      require(supportedTokens[msg.sender].add(token), "TOKEN_EXISTS");
       supportingStakers[token].add(msg.sender);
     }
     transferAmount = transferAmount.add(tokenCost.mul(length));
@@ -55,10 +52,13 @@ contract Registry {
 
   function removeTokens(address[] calldata tokenList) external {
     uint256 length = tokenList.length;
-    require(length > 0, "empty list");
+    require(length > 0, "NO_TOKENS_TO_REMOVE");
     for (uint256 i = 0; i < length; i++) {
       address token = tokenList[i];
-      require(supportedTokens[msg.sender].remove(token), "token not supported");
+      require(
+        supportedTokens[msg.sender].remove(token),
+        "TOKEN_DOES_NOT_EXIST"
+      );
       supportingStakers[token].remove(msg.sender);
     }
     uint256 transferAmount = tokenCost.mul(length);
@@ -70,7 +70,7 @@ contract Registry {
   }
 
   function removeAllTokens() external {
-    require(supportedTokens[msg.sender].length() > 0, "no supported tokens");
+    require(supportedTokens[msg.sender].length() > 0, "NO_TOKENS_TO_REMOVE");
     EnumerableSet.AddressSet storage supportedTokenList =
       supportedTokens[msg.sender];
     uint256 length = supportedTokenList.length();
