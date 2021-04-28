@@ -6,6 +6,10 @@ import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/EnumerableSet.sol";
 
+/// @title Supported Token Registry Contract
+/// @author Ethan Wessel, Don Mosites, William Morriss
+/// @notice Allows market makers to announce a set of tokens they can quote
+
 contract Registry {
   using SafeERC20 for IERC20;
   using SafeMath for uint256;
@@ -22,6 +26,12 @@ contract Registry {
   mapping(address => EnumerableSet.AddressSet) internal supportingStakers;
   mapping(address => bytes32) public locator;
 
+  /// @notice Constructor
+  /// @param _stakingToken address of the token used for obligation and token cost
+  /// @param _obligationCost amount of _stakingToken a maker must stake in order
+  /// to announce a set of tokens they can quote
+  /// @param _tokenCost amount of _stakingToken per supported token a maker must
+  /// stake when announcing a set of tokens they can quote
   constructor(
     IERC20 _stakingToken,
     uint256 _obligationCost,
@@ -32,6 +42,8 @@ contract Registry {
     tokenCost = _tokenCost;
   }
 
+  /// @notice Adds list of supported tokens to a maker's address
+  /// @param tokenList an array of token addresses a maker wants to indicate they support
   function addTokens(address[] calldata tokenList) external {
     uint256 length = tokenList.length;
     require(length > 0, "NO_TOKENS_TO_ADD");
@@ -50,6 +62,8 @@ contract Registry {
     stakingToken.safeTransferFrom(msg.sender, address(this), transferAmount);
   }
 
+  /// @notice Removes list of supported tokens from a maker's address
+  /// @param tokenList an array of token addresses a maker wants to indicate they no longer support
   function removeTokens(address[] calldata tokenList) external {
     uint256 length = tokenList.length;
     require(length > 0, "NO_TOKENS_TO_REMOVE");
@@ -69,6 +83,7 @@ contract Registry {
     stakingToken.safeTransfer(msg.sender, transferAmount);
   }
 
+  /// @notice Removes all supported tokens from a maker's address
   function removeAllTokens() external {
     require(supportedTokens[msg.sender].length() > 0, "NO_TOKENS_TO_REMOVE");
     EnumerableSet.AddressSet storage supportedTokenList =
@@ -86,6 +101,10 @@ contract Registry {
     stakingToken.safeTransfer(msg.sender, transferAmount);
   }
 
+  /// @notice Indicates whether a maker supports a given token
+  /// @param staker the maker's address
+  /// @param token the token's address
+  /// @return bool true if they support a token otherwise false
   function supportsToken(address staker, address token)
     public
     view
@@ -94,6 +113,9 @@ contract Registry {
     return supportedTokens[staker].contains(token);
   }
 
+  /// @notice Returns a list of all supported tokens for a given maker
+  /// @param staker the maker's address
+  /// @return tokenList an array of all the supported tokens by a maker
   function getSupportedTokens(address staker)
     external
     view
@@ -106,6 +128,9 @@ contract Registry {
     }
   }
 
+  /// @notice Returns a list of all stakers supporting a given token
+  /// @param token the token address
+  /// @return stakerList an array of all makers that support a given token
   function getSupportingStakers(address token)
     external
     view
@@ -118,11 +143,16 @@ contract Registry {
     }
   }
 
+  /// @notice Sets a locator for a given maker
+  /// @param _locator the locator to attach for a maker
   function setLocator(bytes32 _locator) external {
     locator[msg.sender] = _locator;
     emit LocatorSet(msg.sender, _locator);
   }
 
+  /// @notice Returns the total amount of the staked token a maker has within the Registry
+  /// @param staker the address of the maker
+  /// @return uint256 the outstanding balance of all _staking token that has been staked
   function balanceOf(address staker) external view returns (uint256) {
     uint256 tokenCount = supportedTokens[staker].length();
     if (tokenCount == 0) {
