@@ -150,7 +150,7 @@ contract Registry {
     emit LocatorSet(msg.sender, _locator);
   }
 
-  /// @notice Gets the locators given provided array of staker addresses
+  /// @notice Gets the locators provided an array of staker addresses
   /// @param stakers an array of maker addresses
   /// @return locators an array of maker locators. Positions are relative to stakers input array
   function getLocators(address[] calldata stakers)
