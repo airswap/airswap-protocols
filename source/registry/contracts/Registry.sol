@@ -42,7 +42,7 @@ contract Registry {
     tokenCost = _tokenCost;
   }
 
-  /// @notice Adds list of tokens supported by a server account
+  /// @notice Adds a list of tokens supported by a server account
   /// @param tokenList an array of token addresses supported by the server account
   function addTokens(address[] calldata tokenList) external {
     uint256 length = tokenList.length;
@@ -150,7 +150,7 @@ contract Registry {
     emit LocatorSet(msg.sender, _locator);
   }
 
-  /// @notice Gets the locators provided an array of staker addresses
+  /// @notice Gets the locators provided an array of server accounts
   /// @param stakers an array of server accounts
   /// @return locators an array of server locators. Positions are relative to stakers input array
   function getLocators(address[] calldata stakers)
