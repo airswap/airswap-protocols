@@ -24,7 +24,7 @@ contract Registry {
   uint256 public immutable tokenCost;
   mapping(address => EnumerableSet.AddressSet) internal supportedTokens;
   mapping(address => EnumerableSet.AddressSet) internal supportingStakers;
-  mapping(address => bytes32) public locator;
+  mapping(address => bytes32) internal locator;
 
   /// @notice Constructor
   /// @param _stakingToken address of the token used for obligation and token cost
@@ -148,6 +148,21 @@ contract Registry {
   function setLocator(bytes32 _locator) external {
     locator[msg.sender] = _locator;
     emit LocatorSet(msg.sender, _locator);
+  }
+
+  /// @notice Gets the locators given provided array of staker addresses
+  /// @param stakers an array of maker addresses
+  /// @return locators an array of maker locators. Positions are relative to stakers input array
+  function getLocators(address[] calldata stakers)
+    external
+    view
+    returns (bytes32[] memory locators)
+  {
+    uint256 stakersLength = stakers.length;
+    locators = new bytes32[](stakersLength);
+    for (uint256 i = 0; i < stakersLength; i++) {
+      locators[i] = locator[stakers[i]];
+    }
   }
 
   /// @notice Returns the total amount of the staked token a maker has within the Registry
