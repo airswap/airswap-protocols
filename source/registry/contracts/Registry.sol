@@ -85,10 +85,10 @@ contract Registry {
 
   /// @notice Removes all tokens supported by a server account
   function removeAllTokens() external {
-    require(supportedTokens[msg.sender].length() > 0, "NO_TOKENS_TO_REMOVE");
     EnumerableSet.AddressSet storage supportedTokenList =
       supportedTokens[msg.sender];
     uint256 length = supportedTokenList.length();
+    require(length > 0, "NO_TOKENS_TO_REMOVE");
     address[] memory tokenList = new address[](length);
     for (uint256 i = 0; i < length; i++) {
       address token = supportedTokenList.at(0);
@@ -106,7 +106,7 @@ contract Registry {
   /// @param token the token address
   /// @return bool true if the server account support a token otherwise false
   function supportsToken(address staker, address token)
-    public
+    external
     view
     returns (bool)
   {
