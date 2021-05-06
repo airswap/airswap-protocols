@@ -211,8 +211,8 @@ describe('Registry Unit', () => {
         .to.emit(registry, 'TokensRemoved')
         .withArgs(account1.address, [
           token1.address,
-          token3.address,
           token2.address,
+          token3.address,
         ])
 
       //NOTE: Note that there are no guarantees on the ordering of values inside the array, and it may change when more values are added or removed.
