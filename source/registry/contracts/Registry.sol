@@ -17,14 +17,14 @@ contract Registry {
 
   event TokensAdded(address account, address[] tokens);
   event TokensRemoved(address account, address[] tokens);
-  event LocatorSet(address account, bytes32 locator);
+  event LocatorSet(address account, string locator);
 
   IERC20 public immutable stakingToken;
   uint256 public immutable obligationCost;
   uint256 public immutable tokenCost;
   mapping(address => EnumerableSet.AddressSet) internal supportedTokens;
   mapping(address => EnumerableSet.AddressSet) internal supportingStakers;
-  mapping(address => bytes32) internal locator;
+  mapping(address => string) internal locator;
 
   /// @notice Constructor
   /// @param _stakingToken address of the token used for obligation and token cost
@@ -85,10 +85,10 @@ contract Registry {
 
   /// @notice Removes all tokens supported by a server account
   function removeAllTokens() external {
-    require(supportedTokens[msg.sender].length() > 0, "NO_TOKENS_TO_REMOVE");
     EnumerableSet.AddressSet storage supportedTokenList =
       supportedTokens[msg.sender];
     uint256 length = supportedTokenList.length();
+    require(length > 0, "NO_TOKENS_TO_REMOVE");
     address[] memory tokenList = new address[](length);
     for (uint256 i = 0; i < length; i++) {
       address token = supportedTokenList.at(0);
@@ -106,7 +106,7 @@ contract Registry {
   /// @param token the token address
   /// @return bool true if the server account support a token otherwise false
   function supportsToken(address staker, address token)
-    public
+    external
     view
     returns (bool)
   {
@@ -145,7 +145,7 @@ contract Registry {
 
   /// @notice Sets a locator for a server account
   /// @param _locator the locator to attach to a server account
-  function setLocator(bytes32 _locator) external {
+  function setLocator(string calldata _locator) external {
     locator[msg.sender] = _locator;
     emit LocatorSet(msg.sender, _locator);
   }
@@ -156,10 +156,10 @@ contract Registry {
   function getLocators(address[] calldata stakers)
     external
     view
-    returns (bytes32[] memory locators)
+    returns (string[] memory locators)
   {
     uint256 stakersLength = stakers.length;
-    locators = new bytes32[](stakersLength);
+    locators = new string[](stakersLength);
     for (uint256 i = 0; i < stakersLength; i++) {
       locators[i] = locator[stakers[i]];
     }

@@ -261,74 +261,47 @@ describe('Registry Unit', () => {
 
   describe('Set Locator', async () => {
     it('successful setting of locator', async () => {
-      await expect(
-        registry
-          .connect(account1)
-          .setLocator(ethers.utils.formatBytes32String('www.noneLocator.com'))
-      )
+      await expect(registry.connect(account1).setLocator('www.noneLocator.com'))
         .to.emit(registry, 'LocatorSet')
-        .withArgs(
-          account1.address,
-          ethers.utils.formatBytes32String('www.noneLocator.com')
-        )
+        .withArgs(account1.address, 'www.noneLocator.com')
 
       const locators = await registry.getLocators([account1.address])
       expect(locators.length).to.equal(1)
-      expect(ethers.utils.parseBytes32String(locators[0])).to.equal(
-        'www.noneLocator.com'
-      )
+      expect(locators[0]).to.equal('www.noneLocator.com')
     })
 
     it('successful changing of locator', async () => {
-      await registry
-        .connect(account1)
-        .setLocator(ethers.utils.formatBytes32String('www.noneLocator.com'))
-      await registry
-        .connect(account1)
-        .setLocator(ethers.utils.formatBytes32String('www.TheCatsMeow.com'))
+      await registry.connect(account1).setLocator('www.noneLocator.com')
+      await registry.connect(account1).setLocator('www.TheCatsMeow.com')
 
       const locators = await registry.getLocators([account1.address])
       expect(locators.length).to.equal(1)
-      expect(ethers.utils.parseBytes32String(locators[0])).to.equal(
-        'www.TheCatsMeow.com'
-      )
+      expect(locators[0]).to.equal('www.TheCatsMeow.com')
     })
 
     it('successful fetching of multiple locators', async () => {
-      await registry
-        .connect(account1)
-        .setLocator(ethers.utils.formatBytes32String('www.noneLocator.com'))
-      await registry
-        .connect(account2)
-        .setLocator(ethers.utils.formatBytes32String('www.TheCatsMeow.com'))
+      await registry.connect(account1).setLocator('www.noneLocator.com')
+      await registry.connect(account2).setLocator('www.TheCatsMeow.com')
 
       const locators = await registry.getLocators([
         account1.address,
         account2.address,
       ])
       expect(locators.length).to.equal(2)
-      expect(ethers.utils.parseBytes32String(locators[0])).to.equal(
-        'www.noneLocator.com'
-      )
-      expect(ethers.utils.parseBytes32String(locators[1])).to.equal(
-        'www.TheCatsMeow.com'
-      )
+      expect(locators[0]).to.equal('www.noneLocator.com')
+      expect(locators[1]).to.equal('www.TheCatsMeow.com')
     })
 
     it('successful fetching of multiple locators where one address has an empty locator', async () => {
-      await registry
-        .connect(account1)
-        .setLocator(ethers.utils.formatBytes32String('www.noneLocator.com'))
+      await registry.connect(account1).setLocator('www.noneLocator.com')
 
       const locators = await registry.getLocators([
         account1.address,
         account2.address,
       ])
       expect(locators.length).to.equal(2)
-      expect(ethers.utils.parseBytes32String(locators[0])).to.equal(
-        'www.noneLocator.com'
-      )
-      expect(ethers.utils.parseBytes32String(locators[1])).to.equal('')
+      expect(locators[0]).to.equal('www.noneLocator.com')
+      expect(locators[1]).to.equal('')
     })
   })
 
