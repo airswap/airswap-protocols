@@ -3,7 +3,6 @@ pragma solidity ^0.8.0;
 pragma abicoder v2;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 
@@ -13,7 +12,6 @@ import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 contract Registry {
   using SafeERC20 for IERC20;
-  using SafeMath for uint256;
   using EnumerableSet for EnumerableSet.AddressSet;
 
   event TokensAdded(address account, address[] tokens);
@@ -59,7 +57,7 @@ contract Registry {
       require(tokens.add(token), "TOKEN_EXISTS");
       supportingStakers[token].add(msg.sender);
     }
-    transferAmount = transferAmount.add(tokenCost.mul(length));
+    transferAmount += tokenCost * length;
     emit TokensAdded(msg.sender, tokenList);
     stakingToken.safeTransferFrom(msg.sender, address(this), transferAmount);
   }
@@ -78,7 +76,7 @@ contract Registry {
       );
       supportingStakers[token].remove(msg.sender);
     }
-    uint256 transferAmount = tokenCost.mul(length);
+    uint256 transferAmount = tokenCost * length;
     if (tokens.length() == 0) {
       transferAmount += obligationCost;
     }
