@@ -1,10 +1,10 @@
 //SPDX-License-Identifier: Unlicense
-pragma solidity ^0.7.6;
+pragma solidity ^0.8.0;
 pragma abicoder v2;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
-import "@openzeppelin/contracts/utils/EnumerableSet.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+
 
 /// @title AirSwap Server Registry
 /// @author Ethan Wessel, Don Mosites, William Morriss
@@ -12,7 +12,6 @@ import "@openzeppelin/contracts/utils/EnumerableSet.sol";
 
 contract Registry {
   using SafeERC20 for IERC20;
-  using SafeMath for uint256;
   using EnumerableSet for EnumerableSet.AddressSet;
 
   event TokensAdded(address account, address[] tokens);
@@ -47,17 +46,18 @@ contract Registry {
   function addTokens(address[] calldata tokenList) external {
     uint256 length = tokenList.length;
     require(length > 0, "NO_TOKENS_TO_ADD");
+    EnumerableSet.AddressSet storage tokens = supportedTokens[msg.sender];
 
     uint256 transferAmount = 0;
-    if (supportedTokens[msg.sender].length() == 0) {
+    if (tokens.length() == 0) {
       transferAmount = obligationCost;
     }
     for (uint256 i = 0; i < length; i++) {
       address token = tokenList[i];
-      require(supportedTokens[msg.sender].add(token), "TOKEN_EXISTS");
+      require(tokens.add(token), "TOKEN_EXISTS");
       supportingStakers[token].add(msg.sender);
     }
-    transferAmount = transferAmount.add(tokenCost.mul(length));
+    transferAmount += tokenCost * length;
     emit TokensAdded(msg.sender, tokenList);
     stakingToken.safeTransferFrom(msg.sender, address(this), transferAmount);
   }
@@ -67,17 +67,18 @@ contract Registry {
   function removeTokens(address[] calldata tokenList) external {
     uint256 length = tokenList.length;
     require(length > 0, "NO_TOKENS_TO_REMOVE");
+    EnumerableSet.AddressSet storage tokens = supportedTokens[msg.sender];
     for (uint256 i = 0; i < length; i++) {
       address token = tokenList[i];
       require(
-        supportedTokens[msg.sender].remove(token),
+        tokens.remove(token),
         "TOKEN_DOES_NOT_EXIST"
       );
       supportingStakers[token].remove(msg.sender);
     }
-    uint256 transferAmount = tokenCost.mul(length);
-    if (supportedTokens[msg.sender].length() == 0) {
-      transferAmount = transferAmount.add(obligationCost);
+    uint256 transferAmount = tokenCost * length;
+    if (tokens.length() == 0) {
+      transferAmount += obligationCost;
     }
     emit TokensRemoved(msg.sender, tokenList);
     stakingToken.safeTransfer(msg.sender, transferAmount);
@@ -90,13 +91,15 @@ contract Registry {
     uint256 length = supportedTokenList.length();
     require(length > 0, "NO_TOKENS_TO_REMOVE");
     address[] memory tokenList = new address[](length);
-    for (uint256 i = 0; i < length; i++) {
-      address token = supportedTokenList.at(0);
+        
+    for (uint256 i = length; i > 0;) {
+      i--;
+      address token = supportedTokenList.at(i);
       tokenList[i] = token;
       supportedTokenList.remove(token);
       supportingStakers[token].remove(msg.sender);
     }
-    uint256 transferAmount = obligationCost.add(tokenCost.mul(length));
+    uint256 transferAmount = obligationCost + tokenCost * length;
     emit TokensRemoved(msg.sender, tokenList);
     stakingToken.safeTransfer(msg.sender, transferAmount);
   }
@@ -121,10 +124,11 @@ contract Registry {
     view
     returns (address[] memory tokenList)
   {
-    uint256 length = supportedTokens[staker].length();
+    EnumerableSet.AddressSet storage tokens = supportedTokens[staker];
+    uint256 length = tokens.length();
     tokenList = new address[](length);
     for (uint256 i = 0; i < length; i++) {
-      tokenList[i] = supportedTokens[staker].at(i);
+      tokenList[i] = tokens.at(i);
     }
   }
 
@@ -136,10 +140,11 @@ contract Registry {
     view
     returns (address[] memory stakerList)
   {
-    uint256 length = supportingStakers[token].length();
+    EnumerableSet.AddressSet storage stakers = supportingStakers[token];
+    uint256 length = stakers.length();
     stakerList = new address[](length);
     for (uint256 i = 0; i < length; i++) {
-      stakerList[i] = supportingStakers[token].at(i);
+      stakerList[i] = stakers.at(i);
     }
   }
 
@@ -173,6 +178,6 @@ contract Registry {
     if (tokenCount == 0) {
       return 0;
     }
-    return (obligationCost.add(tokenCost.mul(tokenCount)));
+    return obligationCost + tokenCost * tokenCount;
   }
 }
