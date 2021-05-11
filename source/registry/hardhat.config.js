@@ -1,3 +1,4 @@
+require('dotenv').config()
 require('@nomiclabs/hardhat-ethers')
 require('@nomiclabs/hardhat-truffle5')
 require('@nomiclabs/hardhat-waffle')
@@ -18,6 +19,13 @@ module.exports = {
     coverage: {
       url: 'http://localhost:8555',
     },
+    rinkeby: {
+      url: 'https://rinkeby.infura.io/v3/' + process.env.INFURA_API_KEY,
+      accounts: {
+        mnemonic: process.env.MNEMONIC || '',
+      },
+      timeout: 1000000,
+    },
     mainnet: {
       url: 'https://mainnet.infura.io/v3/' + process.env.INFURA_API_KEY,
       gasPrice: 72e9,
@@ -26,6 +34,9 @@ module.exports = {
       },
       timeout: 1000000,
     },
+  },
+  etherscan: {
+    apiKey: process.env.ETHERSCAN,
   },
   solidity: {
     version: '0.8.4',

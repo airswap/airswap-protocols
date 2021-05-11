@@ -5,7 +5,6 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
-
 /// @title AirSwap Server Registry
 /// @author Ethan Wessel, Don Mosites, William Morriss
 /// @notice Enables AirSwap servers to announce location and supported tokens
@@ -70,10 +69,7 @@ contract Registry {
     EnumerableSet.AddressSet storage tokens = supportedTokens[msg.sender];
     for (uint256 i = 0; i < length; i++) {
       address token = tokenList[i];
-      require(
-        tokens.remove(token),
-        "TOKEN_DOES_NOT_EXIST"
-      );
+      require(tokens.remove(token), "TOKEN_DOES_NOT_EXIST");
       supportingStakers[token].remove(msg.sender);
     }
     uint256 transferAmount = tokenCost * length;
@@ -91,8 +87,8 @@ contract Registry {
     uint256 length = supportedTokenList.length();
     require(length > 0, "NO_TOKENS_TO_REMOVE");
     address[] memory tokenList = new address[](length);
-        
-    for (uint256 i = length; i > 0;) {
+
+    for (uint256 i = length; i > 0; ) {
       i--;
       address token = supportedTokenList.at(i);
       tokenList[i] = token;

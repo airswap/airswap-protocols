@@ -1,6 +1,6 @@
 {
   "name": "@airswap/registry",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Registry of RFQ server locators",
   "contributors": [
     "Ethan Wessel <ethan.wessel@consensys.net>",
@@ -14,7 +14,6 @@
   "scripts": {
     "clean": "hardhat clean",
     "compile": "hardhat compile",
-    "coverage": "hardhat coverage",
     "test": "hardhat test"
   },
   "devDependencies": {
