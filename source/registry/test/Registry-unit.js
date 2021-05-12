@@ -84,9 +84,9 @@ describe('Registry Unit', () => {
       expect(tokens[1]).to.equal(token2.address)
       expect(tokens[2]).to.equal(token3.address)
 
-      const token1Stakers = await registry.getSupportingStakers(token1.address)
-      const token2Stakers = await registry.getSupportingStakers(token2.address)
-      const token3Stakers = await registry.getSupportingStakers(token3.address)
+      const token1Stakers = await registry.getStakersForToken(token1.address)
+      const token2Stakers = await registry.getStakersForToken(token2.address)
+      const token3Stakers = await registry.getStakersForToken(token3.address)
       expect(token1Stakers.length).to.equal(1)
       expect(token2Stakers.length).to.equal(1)
       expect(token3Stakers.length).to.equal(1)
@@ -171,9 +171,9 @@ describe('Registry Unit', () => {
       const tokens = await registry.getSupportedTokens(account1.address)
       expect(tokens.length).to.equal(0)
 
-      const token1Stakers = await registry.getSupportingStakers(token1.address)
-      const token2Stakers = await registry.getSupportingStakers(token2.address)
-      const token3Stakers = await registry.getSupportingStakers(token3.address)
+      const token1Stakers = await registry.getStakersForToken(token1.address)
+      const token2Stakers = await registry.getStakersForToken(token2.address)
+      const token3Stakers = await registry.getStakersForToken(token3.address)
       expect(token1Stakers.length).to.equal(0)
       expect(token2Stakers.length).to.equal(0)
       expect(token3Stakers.length).to.equal(0)
@@ -220,9 +220,9 @@ describe('Registry Unit', () => {
       const tokens = await registry.getSupportedTokens(account1.address)
       expect(tokens.length).to.equal(0)
 
-      const token1Stakers = await registry.getSupportingStakers(token1.address)
-      const token2Stakers = await registry.getSupportingStakers(token2.address)
-      const token3Stakers = await registry.getSupportingStakers(token3.address)
+      const token1Stakers = await registry.getStakersForToken(token1.address)
+      const token2Stakers = await registry.getStakersForToken(token2.address)
+      const token3Stakers = await registry.getStakersForToken(token3.address)
       expect(token1Stakers.length).to.equal(0)
       expect(token2Stakers.length).to.equal(0)
       expect(token3Stakers.length).to.equal(0)
@@ -265,16 +265,38 @@ describe('Registry Unit', () => {
         .to.emit(registry, 'LocatorSet')
         .withArgs(account1.address, 'www.noneLocator.com')
 
-      const locators = await registry.getLocators([account1.address])
+      const locators = await registry.getLocatorsForStakers([account1.address])
       expect(locators.length).to.equal(1)
       expect(locators[0]).to.equal('www.noneLocator.com')
     })
 
-    it('successful changing of locator', async () => {
+    it('successful changing of locator, check by staker', async () => {
       await registry.connect(account1).setLocator('www.noneLocator.com')
       await registry.connect(account1).setLocator('www.TheCatsMeow.com')
 
-      const locators = await registry.getLocators([account1.address])
+      const locators = await registry.getLocatorsForStakers([account1.address])
+      expect(locators.length).to.equal(1)
+      expect(locators[0]).to.equal('www.TheCatsMeow.com')
+    })
+
+    it('successful changing of locator, check by token', async () => {
+      await registry.connect(account1).setLocator('www.noneLocator.com')
+      await registry.connect(account1).setLocator('www.TheCatsMeow.com')
+
+      await stakingToken.mock.transferFrom.returns(true)
+      await expect(
+        registry
+          .connect(account1)
+          .addTokens([token1.address, token2.address, token3.address])
+      )
+        .to.emit(registry, 'TokensAdded')
+        .withArgs(account1.address, [
+          token1.address,
+          token2.address,
+          token3.address,
+        ])
+
+      const locators = await registry.getLocatorsForToken(token3.address)
       expect(locators.length).to.equal(1)
       expect(locators[0]).to.equal('www.TheCatsMeow.com')
     })
@@ -283,7 +305,7 @@ describe('Registry Unit', () => {
       await registry.connect(account1).setLocator('www.noneLocator.com')
       await registry.connect(account2).setLocator('www.TheCatsMeow.com')
 
-      const locators = await registry.getLocators([
+      const locators = await registry.getLocatorsForStakers([
         account1.address,
         account2.address,
       ])
@@ -295,7 +317,7 @@ describe('Registry Unit', () => {
     it('successful fetching of multiple locators where one address has an empty locator', async () => {
       await registry.connect(account1).setLocator('www.noneLocator.com')
 
-      const locators = await registry.getLocators([
+      const locators = await registry.getLocatorsForStakers([
         account1.address,
         account2.address,
       ])
