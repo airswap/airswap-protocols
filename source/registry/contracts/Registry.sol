@@ -131,7 +131,7 @@ contract Registry {
   /// @notice Returns a list of all server accounts supporting a given token
   /// @param token the token address
   /// @return stakerList an array of all server accounts that support a given token
-  function getSupportingStakers(address token)
+  function getStakersForToken(address token)
     external
     view
     returns (address[] memory stakerList)
@@ -151,10 +151,26 @@ contract Registry {
     emit LocatorSet(msg.sender, _locator);
   }
 
+  /// @notice Returns a list of all server locators supporting a given token
+  /// @param token the token address
+  /// @return stakerList an array of all server locators that support a given token
+  function getLocatorsForToken(address token)
+    external
+    view
+    returns (string[] memory stakerList)
+  {
+    EnumerableSet.AddressSet storage stakers = supportingStakers[token];
+    uint256 length = stakers.length();
+    stakerList = new string[](length);
+    for (uint256 i = 0; i < length; i++) {
+      stakerList[i] = locator[address(stakers.at(i))];
+    }
+  }
+
   /// @notice Gets the locators provided an array of server accounts
   /// @param stakers an array of server accounts
   /// @return locators an array of server locators. Positions are relative to stakers input array
-  function getLocators(address[] calldata stakers)
+  function getLocatorsForStakers(address[] calldata stakers)
     external
     view
     returns (string[] memory locators)
