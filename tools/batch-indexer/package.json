@@ -1,6 +1,6 @@
 {
   "name": "batch-indexer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Batch Index Deployer",
   "contributors": [
     "Ethan Wessel <ethan.wessel@consensys.net>",
