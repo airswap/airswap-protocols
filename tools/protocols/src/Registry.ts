@@ -16,6 +16,7 @@
 
 import { ethers } from 'ethers'
 import { chainIds, chainNames } from '@airswap/constants'
+import { Server } from './Server'
 
 import * as RegistryContract from '@airswap/registry/build/contracts/Registry.sol/Registry.json'
 import * as registryDeploys from '@airswap/registry/deploys.json'
@@ -50,9 +51,13 @@ export class Registry {
   public async getServers(
     signerToken: string,
     senderToken: string
-  ): Promise<Array<string>> {
+  ): Promise<Array<any>> {
     const signerTokenURLs = await this.contract.getServersForToken(signerToken)
     const senderTokenURLs = await this.contract.getServersForToken(senderToken)
-    return signerTokenURLs.filter(value => senderTokenURLs.includes(value))
+    return signerTokenURLs
+      .filter(value => senderTokenURLs.includes(value))
+      .map(url => {
+        return new Server(url)
+      })
   }
 }
