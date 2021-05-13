@@ -71,7 +71,7 @@ describe('Registry Unit', () => {
           .connect(account1)
           .addTokens([token1.address, token2.address, token3.address])
       )
-        .to.emit(registry, 'TokensAdded')
+        .to.emit(registry, 'AddTokens')
         .withArgs(account1.address, [
           token1.address,
           token2.address,
@@ -161,7 +161,7 @@ describe('Registry Unit', () => {
           .connect(account1)
           .removeTokens([token1.address, token2.address, token3.address])
       )
-        .to.emit(registry, 'TokensRemoved')
+        .to.emit(registry, 'RemoveTokens')
         .withArgs(account1.address, [
           token1.address,
           token2.address,
@@ -208,7 +208,7 @@ describe('Registry Unit', () => {
         .connect(account1)
         .addTokens([token1.address, token2.address, token3.address])
       await expect(registry.connect(account1).removeAllTokens())
-        .to.emit(registry, 'TokensRemoved')
+        .to.emit(registry, 'RemoveTokens')
         .withArgs(account1.address, [
           token1.address,
           token2.address,
@@ -262,7 +262,7 @@ describe('Registry Unit', () => {
   describe('Set Locator', async () => {
     it('successful setting of locator', async () => {
       await expect(registry.connect(account1).setLocator('www.noneLocator.com'))
-        .to.emit(registry, 'LocatorSet')
+        .to.emit(registry, 'SetLocator')
         .withArgs(account1.address, 'www.noneLocator.com')
 
       const locators = await registry.getLocatorsForStakers([account1.address])
@@ -289,7 +289,7 @@ describe('Registry Unit', () => {
           .connect(account1)
           .addTokens([token1.address, token2.address, token3.address])
       )
-        .to.emit(registry, 'TokensAdded')
+        .to.emit(registry, 'AddTokens')
         .withArgs(account1.address, [
           token1.address,
           token2.address,
