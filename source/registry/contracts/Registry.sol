@@ -15,14 +15,14 @@ contract Registry {
 
   event AddTokens(address account, address[] tokens);
   event RemoveTokens(address account, address[] tokens);
-  event SetLocator(address account, string locator);
+  event SetURL(address account, string url);
 
   IERC20 public immutable stakingToken;
   uint256 public immutable obligationCost;
   uint256 public immutable tokenCost;
   mapping(address => EnumerableSet.AddressSet) internal supportedTokens;
   mapping(address => EnumerableSet.AddressSet) internal supportingStakers;
-  mapping(address => string) internal locator;
+  mapping(address => string) internal urls;
 
   /// @notice Constructor
   /// @param _stakingToken address of the token used for obligation and token cost
@@ -144,17 +144,17 @@ contract Registry {
     }
   }
 
-  /// @notice Sets a locator for a server account
-  /// @param _locator the locator to attach to a server account
-  function setLocator(string calldata _locator) external {
-    locator[msg.sender] = _locator;
-    emit SetLocator(msg.sender, _locator);
+  /// @notice Sets a URL for a server account
+  /// @param _url the URL of the server account
+  function setURL(string calldata _url) external {
+    urls[msg.sender] = _url;
+    emit SetURL(msg.sender, _url);
   }
 
-  /// @notice Returns a list of all server locators supporting a given token
+  /// @notice Returns a list of all server URLs supporting a given token
   /// @param token the token address
-  /// @return stakerList an array of all server locators that support a given token
-  function getLocatorsForToken(address token)
+  /// @return stakerList an array of all server URLs that support a given token
+  function getServersForToken(address token)
     external
     view
     returns (string[] memory stakerList)
@@ -163,22 +163,22 @@ contract Registry {
     uint256 length = stakers.length();
     stakerList = new string[](length);
     for (uint256 i = 0; i < length; i++) {
-      stakerList[i] = locator[address(stakers.at(i))];
+      stakerList[i] = urls[address(stakers.at(i))];
     }
   }
 
-  /// @notice Gets the locators provided an array of server accounts
+  /// @notice Gets URLs given an array of server accounts
   /// @param stakers an array of server accounts
-  /// @return locators an array of server locators. Positions are relative to stakers input array
-  function getLocatorsForStakers(address[] calldata stakers)
+  /// @return urlList an array of server URLs. Positions are relative to stakers input array
+  function getServersForStakers(address[] calldata stakers)
     external
     view
-    returns (string[] memory locators)
+    returns (string[] memory urlList)
   {
     uint256 stakersLength = stakers.length;
-    locators = new string[](stakersLength);
+    urlList = new string[](stakersLength);
     for (uint256 i = 0; i < stakersLength; i++) {
-      locators[i] = locator[stakers[i]];
+      urlList[i] = urls[stakers[i]];
     }
   }
 
