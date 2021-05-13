@@ -13,9 +13,9 @@ contract Registry {
   using SafeERC20 for IERC20;
   using EnumerableSet for EnumerableSet.AddressSet;
 
-  event TokensAdded(address account, address[] tokens);
-  event TokensRemoved(address account, address[] tokens);
-  event LocatorSet(address account, string locator);
+  event AddTokens(address account, address[] tokens);
+  event RemoveTokens(address account, address[] tokens);
+  event SetLocator(address account, string locator);
 
   IERC20 public immutable stakingToken;
   uint256 public immutable obligationCost;
@@ -57,7 +57,7 @@ contract Registry {
       supportingStakers[token].add(msg.sender);
     }
     transferAmount += tokenCost * length;
-    emit TokensAdded(msg.sender, tokenList);
+    emit AddTokens(msg.sender, tokenList);
     stakingToken.safeTransferFrom(msg.sender, address(this), transferAmount);
   }
 
@@ -76,7 +76,7 @@ contract Registry {
     if (tokens.length() == 0) {
       transferAmount += obligationCost;
     }
-    emit TokensRemoved(msg.sender, tokenList);
+    emit RemoveTokens(msg.sender, tokenList);
     stakingToken.safeTransfer(msg.sender, transferAmount);
   }
 
@@ -96,7 +96,7 @@ contract Registry {
       supportingStakers[token].remove(msg.sender);
     }
     uint256 transferAmount = obligationCost + tokenCost * length;
-    emit TokensRemoved(msg.sender, tokenList);
+    emit RemoveTokens(msg.sender, tokenList);
     stakingToken.safeTransfer(msg.sender, transferAmount);
   }
 
@@ -148,7 +148,7 @@ contract Registry {
   /// @param _locator the locator to attach to a server account
   function setLocator(string calldata _locator) external {
     locator[msg.sender] = _locator;
-    emit LocatorSet(msg.sender, _locator);
+    emit SetLocator(msg.sender, _locator);
   }
 
   /// @notice Returns a list of all server locators supporting a given token
