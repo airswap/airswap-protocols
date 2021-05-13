@@ -52,8 +52,8 @@ export class Registry {
     signerToken: string,
     senderToken: string
   ): Promise<Array<any>> {
-    const signerTokenURLs = await this.contract.getServersForToken(signerToken)
-    const senderTokenURLs = await this.contract.getServersForToken(senderToken)
+    const signerTokenURLs = await this.contract.getURLsForToken(signerToken)
+    const senderTokenURLs = await this.contract.getURLsForToken(senderToken)
     return signerTokenURLs
       .filter(value => senderTokenURLs.includes(value))
       .map(url => {
