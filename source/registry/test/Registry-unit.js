@@ -259,29 +259,29 @@ describe('Registry Unit', () => {
     })
   })
 
-  describe('Set Locator', async () => {
-    it('successful setting of locator', async () => {
-      await expect(registry.connect(account1).setLocator('www.noneLocator.com'))
-        .to.emit(registry, 'SetLocator')
-        .withArgs(account1.address, 'www.noneLocator.com')
+  describe('Set URL', async () => {
+    it('successful setting of url', async () => {
+      await expect(registry.connect(account1).setURL('www.noneURL.com'))
+        .to.emit(registry, 'SetURL')
+        .withArgs(account1.address, 'www.noneURL.com')
 
-      const locators = await registry.getLocatorsForStakers([account1.address])
-      expect(locators.length).to.equal(1)
-      expect(locators[0]).to.equal('www.noneLocator.com')
+      const urls = await registry.getURLsForStakers([account1.address])
+      expect(urls.length).to.equal(1)
+      expect(urls[0]).to.equal('www.noneURL.com')
     })
 
-    it('successful changing of locator, check by staker', async () => {
-      await registry.connect(account1).setLocator('www.noneLocator.com')
-      await registry.connect(account1).setLocator('www.TheCatsMeow.com')
+    it('successful changing of url, check by staker', async () => {
+      await registry.connect(account1).setURL('www.noneURL.com')
+      await registry.connect(account1).setURL('www.TheCatsMeow.com')
 
-      const locators = await registry.getLocatorsForStakers([account1.address])
-      expect(locators.length).to.equal(1)
-      expect(locators[0]).to.equal('www.TheCatsMeow.com')
+      const urls = await registry.getURLsForStakers([account1.address])
+      expect(urls.length).to.equal(1)
+      expect(urls[0]).to.equal('www.TheCatsMeow.com')
     })
 
-    it('successful changing of locator, check by token', async () => {
-      await registry.connect(account1).setLocator('www.noneLocator.com')
-      await registry.connect(account1).setLocator('www.TheCatsMeow.com')
+    it('successful changing of url, check by token', async () => {
+      await registry.connect(account1).setURL('www.noneURL.com')
+      await registry.connect(account1).setURL('www.TheCatsMeow.com')
 
       await stakingToken.mock.transferFrom.returns(true)
       await expect(
@@ -296,34 +296,34 @@ describe('Registry Unit', () => {
           token3.address,
         ])
 
-      const locators = await registry.getLocatorsForToken(token3.address)
-      expect(locators.length).to.equal(1)
-      expect(locators[0]).to.equal('www.TheCatsMeow.com')
+      const urls = await registry.getURLsForToken(token3.address)
+      expect(urls.length).to.equal(1)
+      expect(urls[0]).to.equal('www.TheCatsMeow.com')
     })
 
-    it('successful fetching of multiple locators', async () => {
-      await registry.connect(account1).setLocator('www.noneLocator.com')
-      await registry.connect(account2).setLocator('www.TheCatsMeow.com')
+    it('successful fetching of multiple urls', async () => {
+      await registry.connect(account1).setURL('www.noneURL.com')
+      await registry.connect(account2).setURL('www.TheCatsMeow.com')
 
-      const locators = await registry.getLocatorsForStakers([
+      const urls = await registry.getURLsForStakers([
         account1.address,
         account2.address,
       ])
-      expect(locators.length).to.equal(2)
-      expect(locators[0]).to.equal('www.noneLocator.com')
-      expect(locators[1]).to.equal('www.TheCatsMeow.com')
+      expect(urls.length).to.equal(2)
+      expect(urls[0]).to.equal('www.noneURL.com')
+      expect(urls[1]).to.equal('www.TheCatsMeow.com')
     })
 
-    it('successful fetching of multiple locators where one address has an empty locator', async () => {
-      await registry.connect(account1).setLocator('www.noneLocator.com')
+    it('successful fetching of multiple urls where one address has an empty url', async () => {
+      await registry.connect(account1).setURL('www.noneURL.com')
 
-      const locators = await registry.getLocatorsForStakers([
+      const urls = await registry.getURLsForStakers([
         account1.address,
         account2.address,
       ])
-      expect(locators.length).to.equal(2)
-      expect(locators[0]).to.equal('www.noneLocator.com')
-      expect(locators[1]).to.equal('')
+      expect(urls.length).to.equal(2)
+      expect(urls[0]).to.equal('www.noneURL.com')
+      expect(urls[1]).to.equal('')
     })
   })
 
