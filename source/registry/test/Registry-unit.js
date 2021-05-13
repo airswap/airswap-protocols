@@ -265,7 +265,7 @@ describe('Registry Unit', () => {
         .to.emit(registry, 'SetURL')
         .withArgs(account1.address, 'www.noneURL.com')
 
-      const urls = await registry.getServersForStakers([account1.address])
+      const urls = await registry.getURLsForStakers([account1.address])
       expect(urls.length).to.equal(1)
       expect(urls[0]).to.equal('www.noneURL.com')
     })
@@ -274,7 +274,7 @@ describe('Registry Unit', () => {
       await registry.connect(account1).setURL('www.noneURL.com')
       await registry.connect(account1).setURL('www.TheCatsMeow.com')
 
-      const urls = await registry.getServersForStakers([account1.address])
+      const urls = await registry.getURLsForStakers([account1.address])
       expect(urls.length).to.equal(1)
       expect(urls[0]).to.equal('www.TheCatsMeow.com')
     })
@@ -296,7 +296,7 @@ describe('Registry Unit', () => {
           token3.address,
         ])
 
-      const urls = await registry.getServersForToken(token3.address)
+      const urls = await registry.getURLsForToken(token3.address)
       expect(urls.length).to.equal(1)
       expect(urls[0]).to.equal('www.TheCatsMeow.com')
     })
@@ -305,7 +305,7 @@ describe('Registry Unit', () => {
       await registry.connect(account1).setURL('www.noneURL.com')
       await registry.connect(account2).setURL('www.TheCatsMeow.com')
 
-      const urls = await registry.getServersForStakers([
+      const urls = await registry.getURLsForStakers([
         account1.address,
         account2.address,
       ])
@@ -317,7 +317,7 @@ describe('Registry Unit', () => {
     it('successful fetching of multiple urls where one address has an empty url', async () => {
       await registry.connect(account1).setURL('www.noneURL.com')
 
-      const urls = await registry.getServersForStakers([
+      const urls = await registry.getURLsForStakers([
         account1.address,
         account2.address,
       ])

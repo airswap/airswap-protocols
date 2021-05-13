@@ -154,7 +154,7 @@ contract Registry {
   /// @notice Returns a list of all server URLs supporting a given token
   /// @param token the token address
   /// @return stakerList an array of all server URLs that support a given token
-  function getServersForToken(address token)
+  function getURLsForToken(address token)
     external
     view
     returns (string[] memory stakerList)
@@ -170,7 +170,7 @@ contract Registry {
   /// @notice Gets URLs given an array of server accounts
   /// @param stakers an array of server accounts
   /// @return urlList an array of server URLs. Positions are relative to stakers input array
-  function getServersForStakers(address[] calldata stakers)
+  function getURLsForStakers(address[] calldata stakers)
     external
     view
     returns (string[] memory urlList)
