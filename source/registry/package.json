@@ -1,7 +1,7 @@
 {
   "name": "@airswap/registry",
-  "version": "0.2.1",
-  "description": "Registry of RFQ server locators",
+  "version": "0.3.0",
+  "description": "Registry of AirSwap server URLs",
   "contributors": [
     "Ethan Wessel <ethan.wessel@consensys.net>",
     "Don Mosites <don.mosites@consensys.net>"
