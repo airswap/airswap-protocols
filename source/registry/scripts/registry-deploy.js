@@ -8,8 +8,8 @@ async function main() {
   const [deployer] = await ethers.getSigners()
   console.log(`Deployer Address: ${deployer.address}`)
   const stakingToken = '0xcc1cbd4f67cceb7c001bd4adf98451237a193ff8'
-  const obligationCost = 10000000
-  const tokenCost = 100000
+  const obligationCost = 100000
+  const tokenCost = 10000
   const registryFactory = await ethers.getContractFactory('Registry')
   const registryContract = await registryFactory.deploy(
     stakingToken,
