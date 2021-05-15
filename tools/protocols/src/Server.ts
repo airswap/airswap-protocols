@@ -15,6 +15,7 @@
 */
 
 import { ethers } from 'ethers'
+import * as url from 'url'
 import { Client, JSONRPCRequest } from 'jayson'
 import { REQUEST_TIMEOUT } from '@airswap/constants'
 import {
@@ -39,7 +40,7 @@ export class Server {
     if (typeof window !== 'undefined') {
       const jaysonClient = require('jayson/lib/client/browser')
       this.client = new jaysonClient((request, callback) => {
-        fetch(locatorUrl.toString(), {
+        fetch(url.format(locatorUrl), {
           method: 'POST',
           body: request,
           headers: {
