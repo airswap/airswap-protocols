@@ -25,13 +25,6 @@ import {
 } from '@airswap/utils'
 import { Quote, Order } from '@airswap/types'
 
-let jaysonClient
-if (typeof window !== 'undefined') {
-  jaysonClient = require('jayson/lib/client/browser')
-} else {
-  jaysonClient = require('jayson/lib/client')
-}
-
 export class Server {
   private client: Client
 
@@ -43,10 +36,33 @@ export class Server {
       port: locatorUrl.port,
       timeout: REQUEST_TIMEOUT,
     }
-    if (options.protocol === 'https:') {
-      this.client = jaysonClient.https(options)
+    if (typeof window !== 'undefined') {
+      const jaysonClient = require('jayson/lib/client/browser')
+      this.client = new jaysonClient((request, callback) => {
+        fetch(locatorUrl.toString(), {
+          method: 'POST',
+          body: request,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+          .then(function(res) {
+            return res.text()
+          })
+          .then(function(text) {
+            callback(null, text)
+          })
+          .catch(function(err) {
+            callback(err)
+          })
+      }, options)
     } else {
-      this.client = jaysonClient.http(options)
+      const jaysonClient = require('jayson/lib/client')
+      if (options.protocol === 'https:') {
+        this.client = jaysonClient.https(options)
+      } else {
+        this.client = jaysonClient.http(options)
+      }
     }
   }
 
