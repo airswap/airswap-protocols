@@ -15,37 +15,41 @@
 */
 
 import { ethers } from 'ethers'
-import { chainIds, chainNames, MAX_APPROVAL_AMOUNT } from '@airswap/constants'
+import { chainIds, chainNames } from '@airswap/constants'
+import { LightOrder } from '@airswap/types'
 
-import * as IERC20 from '@airswap/tokens/build/contracts/IERC20.json'
-const IERC20Interface = new ethers.utils.Interface(JSON.stringify(IERC20.abi))
+import * as LightContract from '@airswap/light/build/contracts/Light.json'
+import * as lightDeploys from '@airswap/light/deploys.json'
+const LightInterface = new ethers.utils.Interface(
+  JSON.stringify(LightContract.abi)
+)
 
-export class ERC20 {
+export class Light {
   public chainId: string
-  public address: string
   private contract: ethers.Contract
 
   public constructor(
-    address: string,
     chainId = chainIds.RINKEBY,
-    walletOrProvider?: ethers.Wallet | ethers.providers.Provider
+    signerOrProvider?: ethers.Signer | ethers.providers.Provider
   ) {
     this.chainId = chainId
-    this.address = address
     this.contract = new ethers.Contract(
-      address,
-      IERC20Interface,
-      walletOrProvider ||
+      Light.getAddress(chainId),
+      LightInterface,
+      signerOrProvider ||
         ethers.getDefaultProvider(chainNames[chainId].toLowerCase())
     )
   }
 
-  public async balanceOf(address: string): Promise<ethers.BigNumber> {
-    return await this.contract.balanceOf(address)
+  public static getAddress(chainId = chainIds.RINKEBY): string {
+    if (chainId in lightDeploys) {
+      return lightDeploys[chainId]
+    }
+    throw new Error(`Light deploy not found for chainId ${chainId}`)
   }
 
-  public async approve(
-    spender: string,
+  public async swap(
+    order: LightOrder,
     signer?: ethers.Signer
   ): Promise<string> {
     let contract = this.contract
@@ -56,6 +60,17 @@ export class ERC20 {
         contract = contract.connect(signer)
       }
     }
-    return await contract.approve(spender, MAX_APPROVAL_AMOUNT)
+    return await contract.swap(
+      order.nonce,
+      order.expiry,
+      order.signerWallet,
+      order.signerToken,
+      order.signerAmount,
+      order.senderToken,
+      order.senderAmount,
+      order.v,
+      order.r,
+      order.s
+    )
   }
 }
