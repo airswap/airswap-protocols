@@ -18,18 +18,16 @@ import { ethers } from 'ethers'
 import * as url from 'url'
 import { Client, JSONRPCRequest } from 'jayson'
 import { REQUEST_TIMEOUT } from '@airswap/constants'
-import {
-  parseUrl,
-  flattenObject,
-  isValidOrder,
-  isValidQuote,
-} from '@airswap/utils'
+import { parseUrl, flattenObject, isValidQuote } from '@airswap/utils'
 import { Quote, Order } from '@airswap/types'
+import { Light } from './Light'
 
 export class Server {
   private client: Client
+  private swapContract: string
 
-  public constructor(locator: string) {
+  public constructor(locator: string, swapContract = Light.getAddress()) {
+    this.swapContract = swapContract
     const locatorUrl = parseUrl(locator)
     const options = {
       protocol: locatorUrl.protocol,
@@ -184,6 +182,7 @@ export class Server {
     resolve: Function,
     reject: Function
   ): JSONRPCRequest {
+    params.swapContract = this.swapContract
     return this.client.request(
       method,
       params,
@@ -204,16 +203,6 @@ export class Server {
               reject({
                 code: -1,
                 message: `Server response is not a valid quote: ${JSON.stringify(
-                  result
-                )}`,
-              })
-            } else if (
-              method.indexOf('Order') !== -1 &&
-              !isValidOrder(result)
-            ) {
-              reject({
-                code: -1,
-                message: `Server response is not a valid order: ${JSON.stringify(
                   result
                 )}`,
               })
