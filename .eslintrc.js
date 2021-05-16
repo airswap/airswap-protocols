@@ -17,6 +17,7 @@ module.exports = {
     artifacts: true,
     contract: true,
     web3: true,
+    fetch: true,
   },
   plugins: ['prettier', '@typescript-eslint'],
   extends: [

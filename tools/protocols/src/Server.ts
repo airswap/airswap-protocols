@@ -21,6 +21,7 @@ import { REQUEST_TIMEOUT } from '@airswap/constants'
 import { parseUrl, flattenObject, isValidQuote } from '@airswap/utils'
 import { Quote, Order } from '@airswap/types'
 import { Light } from './Light'
+import { isBrowser } from 'browser-or-node'
 
 export class Server {
   private client: Client
@@ -35,7 +36,7 @@ export class Server {
       port: locatorUrl.port,
       timeout: REQUEST_TIMEOUT,
     }
-    if (typeof window !== 'undefined') {
+    if (isBrowser) {
       const jaysonClient = require('jayson/lib/client/browser')
       this.client = new jaysonClient((request, callback) => {
         fetch(url.format(locatorUrl), {
@@ -45,13 +46,13 @@ export class Server {
             'Content-Type': 'application/json',
           },
         })
-          .then(function(res) {
+          .then(res => {
             return res.text()
           })
-          .then(function(text) {
+          .then(text => {
             callback(null, text)
           })
-          .catch(function(err) {
+          .catch(err => {
             callback(err)
           })
       }, options)
