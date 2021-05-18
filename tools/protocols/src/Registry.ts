@@ -17,6 +17,7 @@
 import { ethers } from 'ethers'
 import { chainIds, chainNames } from '@airswap/constants'
 import { Server } from './Server'
+import { Light } from './Light'
 
 import * as RegistryContract from '@airswap/registry/build/contracts/Registry.sol/Registry.json'
 import * as registryDeploys from '@airswap/registry/deploys.json'
@@ -57,7 +58,7 @@ export class Registry {
     return signerTokenURLs
       .filter(value => senderTokenURLs.includes(value))
       .map(url => {
-        return new Server(url)
+        return new Server(url, Light.getAddress(this.chainId))
       })
   }
 }

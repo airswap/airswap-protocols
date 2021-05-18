@@ -1,6 +1,6 @@
 {
   "name": "@airswap/protocols",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "Protocol Libraries for AirSwap Developers",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>"
