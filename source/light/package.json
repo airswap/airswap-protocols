@@ -23,7 +23,7 @@
     "verify": "truffle run verify"
   },
   "devDependencies": {
-    "@airswap/constants": "0.3.13",
+    "@airswap/constants": "0.4.0",
     "@airswap/test-utils": "0.1.10",
     "@airswap/tokens": "0.1.4",
     "@airswap/utils": "0.4.4",

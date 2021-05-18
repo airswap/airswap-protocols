@@ -25,7 +25,7 @@ const IndexerInterface = new ethers.utils.Interface(
 )
 
 export class Indexer {
-  public chainId: string
+  public chainId: number
   private contract: ethers.Contract
 
   public constructor(

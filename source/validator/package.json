@@ -40,7 +40,7 @@
     "openzeppelin-solidity": "2.4"
   },
   "devDependencies": {
-    "@airswap/constants": "0.3.13",
+    "@airswap/constants": "0.4.0",
     "@airswap/indexer": "3.6.10",
     "@airswap/test-utils": "0.1.10",
     "@airswap/utils": "0.4.4",

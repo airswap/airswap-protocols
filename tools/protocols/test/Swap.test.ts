@@ -53,7 +53,7 @@ describe('Swap', () => {
   fancy
     .stub(ethers, 'Contract', () => new MockContract())
     .do(async () => {
-      await Swap.getAddress('9')
+      await Swap.getAddress(9)
     })
     .catch(/Swap deploy not found for chainId/)
     .it('Swap getAddress() throw')

@@ -25,7 +25,7 @@ const LightInterface = new ethers.utils.Interface(
 )
 
 export class Light {
-  public chainId: string
+  public chainId: number
   private contract: ethers.Contract
 
   public constructor(
