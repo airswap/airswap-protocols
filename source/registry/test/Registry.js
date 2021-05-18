@@ -137,7 +137,7 @@ describe('Registry Integration', () => {
       expect(token3Supported).to.equal(true)
     })
 
-    it('add a list of tokens when there is insufficent stake token', async () => {
+    it.skip('add a list of tokens when there is insufficent stake token', async () => {
       await stakingToken.connect(account2).approve(registry.address, MaxUint256)
       await expect(
         registry
