@@ -16,10 +16,12 @@ describe('Registry Integration', () => {
   let stakingToken
   let registryFactory
   let registry
-  const OBLIGATION_COST = 1000
-  const TOKEN_COST = 10
-  const AST = '0x27054b13b1B798B345b591a4d22e6562d47eA75a'
-  const AST_WHALE = '0x9440266c911256ec21868c63d96bcf80982380cf'
+  const OBLIGATION_COST = 0
+  const TOKEN_COST = 0
+  // const STAKING_TOKEN = '0x27054b13b1B798B345b591a4d22e6562d47eA75a'
+  // const STAKING_TOKEN_WHALE = '0x9440266c911256ec21868c63d96bcf80982380cf'
+  const STAKING_TOKEN = '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+  const STAKING_TOKEN_WHALE = '0x47ac0fb4f2d84898e4d9e7b4dab3c24507a6d503'
 
   beforeEach(async () => {
     const snapshot = await timeMachine.takeSnapshot()
@@ -39,7 +41,7 @@ describe('Registry Integration', () => {
       token2,
       token3,
     ] = await ethers.getSigners()
-    stakingToken = await ethers.getContractAt(ERC20.abi, AST)
+    stakingToken = await ethers.getContractAt(ERC20.abi, STAKING_TOKEN)
     const stakingDecimals = await stakingToken.decimals()
     registryFactory = await ethers.getContractFactory('Registry')
     registry = await registryFactory.deploy(
@@ -49,15 +51,18 @@ describe('Registry Integration', () => {
     )
     await registry.deployed()
 
-    // const balanceBefore = await stakingToken.balanceOf(account1.address)
-    // console.log(balanceBefore.toString())
+    // Provide Whales with sufficient Ether for transactions
+    await deployer.sendTransaction({
+      value: ethers.utils.parseEther('1.0'),
+      to: STAKING_TOKEN_WHALE,
+    })
 
-    //acquire AST
+    //acquire STAKING_TOKEN
     await network.provider.request({
       method: 'hardhat_impersonateAccount',
-      params: [AST_WHALE],
+      params: [STAKING_TOKEN_WHALE],
     })
-    const astWhaleSigner = await ethers.provider.getSigner(AST_WHALE)
+    const astWhaleSigner = await ethers.provider.getSigner(STAKING_TOKEN_WHALE)
     await stakingToken
       .connect(astWhaleSigner)
       .transfer(
@@ -66,9 +71,6 @@ describe('Registry Integration', () => {
       )
 
     await stakingToken.connect(account1).approve(registry.address, MaxUint256)
-
-    // const balanceAfter = await stakingToken.balanceOf(account1.address)
-    // console.log(balanceAfter.toString())
   })
 
   describe('Default Values', async () => {
