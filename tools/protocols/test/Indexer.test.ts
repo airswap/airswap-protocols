@@ -32,7 +32,7 @@ describe('Indexer', () => {
   fancy
     .stub(ethers, 'Contract', () => new MockContract())
     .do(async () => {
-      await Indexer.getAddress('9')
+      await Indexer.getAddress(9)
     })
     .catch(/Indexer deploy not found for chainId/)
     .it('Indexer getAddress() throw')
