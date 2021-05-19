@@ -16,13 +16,13 @@ const { ADDRESS_ZERO, tokenKinds, chainIds } = require('@airswap/constants')
 const fs = require('fs')
 
 DEPLOYS_JSON = {
-  Types: '../../../source/types/deploys.json',
-  DelegateFactory: '../../../source/delegate/deploys.json',
-  Indexer: '../../../source/indexer/deploys.json',
-  Swap: '../../../source/swap/deploys.json',
-  TransferHandlerRegistry: '../../../source/swap/deploys.json',
-  Validator: '../../../source/validator/deploys.json',
-  Wrapper: '../../../source/wrapper/deploys.json',
+  Types: '../../../source/types/deploys.js',
+  DelegateFactory: '../../../source/delegate/deploys.js',
+  Indexer: '../../../source/indexer/deploys.js',
+  Swap: '../../../source/swap/deploys.js',
+  TransferHandlerRegistry: '../../../source/swap/deploys.js',
+  Validator: '../../../source/validator/deploys.js',
+  Wrapper: '../../../source/wrapper/deploys.js',
 }
 
 async function updateDeployJsons(network, deploy_data) {

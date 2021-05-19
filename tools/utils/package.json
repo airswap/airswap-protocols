@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "@airswap/constants": "0.4.0",
-    "@airswap/types": "3.5.16",
+    "@airswap/types": "3.5.17",
     "@types/ethereumjs-util": "^6.1.0",
     "eth-sig-util": "^3.0.0",
     "ethereumjs-util": "^6.2.0",

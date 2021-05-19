@@ -19,7 +19,7 @@ import { chainIds, chainNames } from '@airswap/constants'
 import { LightOrder } from '@airswap/types'
 
 import * as LightContract from '@airswap/light/build/contracts/Light.json'
-import * as lightDeploys from '@airswap/light/deploys.json'
+import * as lightDeploys from '@airswap/light/deploys.js'
 const LightInterface = new ethers.utils.Interface(
   JSON.stringify(LightContract.abi)
 )

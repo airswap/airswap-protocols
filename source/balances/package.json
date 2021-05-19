@@ -1,6 +1,6 @@
 {
   "name": "@airswap/balances",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Batch balance and allowance calls on Ethereum",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>",
@@ -27,7 +27,7 @@
     "verify": "truffle run verify"
   },
   "devDependencies": {
-    "@airswap/swap": "5.4.8",
+    "@airswap/swap": "5.4.9",
     "@airswap/tokens": "0.1.4",
     "solidity-coverage": "^0.7.4"
   },

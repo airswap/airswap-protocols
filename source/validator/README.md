@@ -16,7 +16,7 @@
 
 ## Usage
 
-:warning: This package is under active development. The [Validator](./contracts/Validator.sol) contract is deployed; see [deploys.json](./deploys.json) for latest. For all AirSwap contract deployments see [Deployed Contracts](https://docs.airswap.io/system/contract-deployments).
+:warning: This package is under active development. The [Validator](./contracts/Validator.sol) contract is deployed; see [deploys.js](./deploys.js) for latest. For all AirSwap contract deployments see [Deployed Contracts](https://docs.airswap.io/system/contract-deployments).
 
 ## Commands
 
