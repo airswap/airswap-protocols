@@ -25,7 +25,7 @@ const SwapInterface = new ethers.utils.Interface(
 )
 
 export class Swap {
-  public chainId: string
+  public chainId: number
   private contract: ethers.Contract
 
   public constructor(

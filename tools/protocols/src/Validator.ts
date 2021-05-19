@@ -26,7 +26,7 @@ const ValidatorInterface = new ethers.utils.Interface(
 )
 
 export class Validator {
-  public chainId: string
+  public chainId: number
   private contract: ethers.Contract
 
   public constructor(

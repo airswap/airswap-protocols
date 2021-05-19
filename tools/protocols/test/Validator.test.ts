@@ -57,7 +57,7 @@ describe('Validator', () => {
   fancy
     .stub(ethers, 'Contract', () => new MockContract())
     .do(async () => {
-      await Validator.getAddress('9')
+      await Validator.getAddress(9)
     })
     .catch(/Validator deploy not found for chainId/)
     .it('Validator getAddress() throw')

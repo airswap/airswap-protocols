@@ -114,7 +114,7 @@ export function parseUrl(locator: string): url.UrlWithStringQuery {
   return url.parse(locator)
 }
 
-export function getEtherscanURL(chainId: string, hash: string) {
+export function getEtherscanURL(chainId: number, hash: string) {
   return `https://${etherscanDomains[chainId]}/tx/${hash}`
 }
 

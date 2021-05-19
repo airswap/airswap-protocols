@@ -21,7 +21,7 @@ import * as IERC20 from '@airswap/tokens/build/contracts/IERC20.json'
 const IERC20Interface = new ethers.utils.Interface(JSON.stringify(IERC20.abi))
 
 export class ERC20 {
-  public chainId: string
+  public chainId: number
   public address: string
   private contract: ethers.Contract
 

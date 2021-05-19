@@ -26,7 +26,7 @@ const RegistryInterface = new ethers.utils.Interface(
 )
 
 export class Registry {
-  public chainId: string
+  public chainId: number
   private contract: ethers.Contract
 
   public constructor(
