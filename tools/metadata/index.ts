@@ -53,3 +53,12 @@ export function findTokensBySymbol(
     return token.symbol === symbol
   })
 }
+
+export function firstTokenBySymbol(
+  symbol: string,
+  tokens: TokenInfo[]
+): TokenInfo {
+  return tokens.find(token => {
+    return token.symbol === symbol
+  })
+}

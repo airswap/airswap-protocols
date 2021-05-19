@@ -1,6 +1,11 @@
 import { expect } from 'chai'
 
-import { fetchTokens, findTokenByAddress, findTokensBySymbol } from '../index'
+import {
+  fetchTokens,
+  findTokenByAddress,
+  findTokensBySymbol,
+  firstTokenBySymbol,
+} from '../index'
 import {
   chainIds,
   wethAddresses,
@@ -22,8 +27,11 @@ describe('Metadata: Mainnet', async () => {
     expect(findTokenByAddress(wethAddresses[chainIds.MAINNET], tokens)).to.not
       .be.undefined
   })
-  it('finds the airswap token', async () => {
+  it('finds the AirSwap token', async () => {
     expect(findTokensBySymbol('AST', tokens)[0].address).to.equal(
+      stakingTokenAddresses[chainIds.MAINNET]
+    )
+    expect(firstTokenBySymbol('AST', tokens).address).to.equal(
       stakingTokenAddresses[chainIds.MAINNET]
     )
   })
@@ -43,8 +51,11 @@ describe('Metadata: Rinkeby', async () => {
     expect(findTokenByAddress(wethAddresses[chainIds.RINKEBY], tokens)).to.not
       .be.undefined
   })
-  it('finds the airswap token', async () => {
+  it('finds the AirSwap token', async () => {
     expect(findTokensBySymbol('AST', tokens)[0].address).to.equal(
+      stakingTokenAddresses[chainIds.RINKEBY]
+    )
+    expect(firstTokenBySymbol('AST', tokens).address).to.equal(
       stakingTokenAddresses[chainIds.RINKEBY]
     )
   })
