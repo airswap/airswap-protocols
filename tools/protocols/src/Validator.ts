@@ -19,7 +19,7 @@ import { chainIds, chainNames } from '@airswap/constants'
 import { Order } from '@airswap/types'
 
 import * as ValidatorContract from '@airswap/validator/build/contracts/Validator.json'
-import * as validatorDeploys from '@airswap/validator/deploys.json'
+import * as validatorDeploys from '@airswap/validator/deploys.js'
 import * as reasons from '@airswap/validator/reasons/en_us.json'
 const ValidatorInterface = new ethers.utils.Interface(
   JSON.stringify(ValidatorContract.abi)

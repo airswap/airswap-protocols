@@ -20,7 +20,7 @@ import { Server } from './Server'
 import { Light } from './Light'
 
 import * as RegistryContract from '@airswap/registry/build/contracts/Registry.sol/Registry.json'
-import * as registryDeploys from '@airswap/registry/deploys.json'
+import * as registryDeploys from '@airswap/registry/deploys.js'
 const RegistryInterface = new ethers.utils.Interface(
   JSON.stringify(RegistryContract.abi)
 )
