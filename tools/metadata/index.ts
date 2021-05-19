@@ -13,6 +13,7 @@ export async function fetchTokens(chainId: number): Promise<Array<TokenInfo>> {
   )
   tokens.push(defaults)
   return [].concat(...tokens).filter(token => {
+    token.address = token.address.toLowerCase()
     return token.chainId === chainId
   })
 }
@@ -29,7 +30,7 @@ export async function scrapeToken(
 
   return {
     chainId: provider.network.chainId,
-    address,
+    address: address.toLowerCase(),
     name: tokenName,
     symbol: tokenSymbol,
     decimals: tokenDecimals,
