@@ -19,7 +19,7 @@ import { chainIds, chainNames, MIN_CONFIRMATIONS } from '@airswap/constants'
 import { Order } from '@airswap/types'
 
 import * as SwapContract from '@airswap/swap/build/contracts/Swap.json'
-import * as swapDeploys from '@airswap/swap/deploys.json'
+import * as swapDeploys from '@airswap/swap/deploys.js'
 const SwapInterface = new ethers.utils.Interface(
   JSON.stringify(SwapContract.abi)
 )

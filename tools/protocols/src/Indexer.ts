@@ -19,7 +19,7 @@ import { chainIds, chainNames, protocols, INDEX_HEAD } from '@airswap/constants'
 import { LocatorResult } from '@airswap/types'
 
 import * as IndexerContract from '@airswap/indexer/build/contracts/Indexer.json'
-import * as indexerDeploys from '@airswap/indexer/deploys.json'
+import * as indexerDeploys from '@airswap/indexer/deploys.js'
 const IndexerInterface = new ethers.utils.Interface(
   JSON.stringify(IndexerContract.abi)
 )
