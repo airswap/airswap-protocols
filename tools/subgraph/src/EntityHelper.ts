@@ -1,5 +1,5 @@
 import { BigInt, Bytes } from "@graphprotocol/graph-ts"
-import { User, Token, Indexer, DelegateFactory, SwapContract, Locker, Pool } from "../generated/schema"
+import { User, Token, Indexer, DelegateFactory, SwapContract, Locker, Pool, CollectedFees } from "../generated/schema"
 
 export function getUser(userAddress: string): User {
   let user = User.load(userAddress)
@@ -78,4 +78,14 @@ export function getPool(poolAddress: string): Pool {
     pool.save()
   }
   return pool as Pool
+}
+
+export function getCollectedFees(): CollectedFees {
+  let fees = CollectedFees.load("0")
+  if (!fees) {
+    fees = new CollectedFees("0")
+    fees.amount = BigInt.fromI32(0)
+    fees.save()
+  }
+  return fees as CollectedFees
 }

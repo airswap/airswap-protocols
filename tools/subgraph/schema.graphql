@@ -156,3 +156,8 @@ type EnabledRoot @entity {
   pool: Pool!
   root: Bytes!
 }
+
+type CollectedFees @entity {
+  id: ID!
+  amount: BigInt!
+}
