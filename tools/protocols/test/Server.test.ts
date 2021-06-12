@@ -1,16 +1,13 @@
 import { fancy } from 'fancy-test'
 import { expect } from 'chai'
 
-import { createQuote, createOrder, signOrder } from '@airswap/utils'
+import { createQuote, createLightOrder } from '@airswap/utils'
 import { ADDRESS_ZERO } from '@airswap/constants'
-import { emptySignature } from '@airswap/types'
-import { functions } from '@airswap/test-utils'
 
 import { Server } from '..'
 
 const badQuote = { bad: 'quote' }
 const emptyQuote = createQuote({})
-const wallet = functions.getTestWallet()
 const URL = 'maker.example.com'
 
 function mockServer(api) {
@@ -35,34 +32,13 @@ function mockServer(api) {
           },
         })
         break
-      case 'getSenderSideOrder':
-        res = createOrder({
-          signer: {
-            token: params.signerToken,
-            amount: params.signerAmount,
-          },
-          sender: {
-            token: params.senderToken,
-            wallet: params.senderWallet,
-          },
-        })
-        res.signature = { ...emptySignature }
-        break
       case 'getSignerSideOrder':
-        res = await signOrder(
-          createOrder({
-            signer: {
-              token: params.signerToken,
-            },
-            sender: {
-              token: params.senderToken,
-              amount: params.senderAmount,
-              wallet: params.senderWallet,
-            },
-          }),
-          wallet,
-          ADDRESS_ZERO
-        )
+        res = createLightOrder({
+          signerToken: params.signerToken,
+          senderToken: params.senderToken,
+          senderAmount: params.senderAmount,
+          senderWallet: params.senderWallet,
+        })
         break
     }
     return {
@@ -109,6 +85,6 @@ describe('Server', () => {
         ADDRESS_ZERO,
         ADDRESS_ZERO
       )
-      expect(order.signer.token).to.equal(ADDRESS_ZERO)
+      expect(order.signerToken).to.equal(ADDRESS_ZERO)
     })
 })
