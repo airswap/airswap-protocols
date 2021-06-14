@@ -7,9 +7,9 @@ async function main() {
   await hre.run('compile')
   const [deployer] = await ethers.getSigners()
   console.log(`Deployer Address: ${deployer.address}`)
-  const stakingToken = '0xcc1cbd4f67cceb7c001bd4adf98451237a193ff8'
-  const obligationCost = 0
-  const tokenCost = 0
+  const stakingToken = '0x27054b13b1b798b345b591a4d22e6562d47ea75a'
+  const obligationCost = 1000000000
+  const tokenCost = 1000000
   const registryFactory = await ethers.getContractFactory('Registry')
   const registryContract = await registryFactory.deploy(
     stakingToken,
