@@ -19,7 +19,7 @@ import * as url from 'url'
 import { Client, JSONRPCRequest } from 'jayson'
 import { REQUEST_TIMEOUT } from '@airswap/constants'
 import { parseUrl, flattenObject, isValidQuote } from '@airswap/utils'
-import { Quote, Order } from '@airswap/types'
+import { Quote, LightOrder } from '@airswap/types'
 import { Light } from './Light'
 import { isBrowser } from 'browser-or-node'
 
@@ -126,7 +126,7 @@ export class Server {
     signerToken: string,
     senderToken: string,
     senderWallet: string
-  ): Promise<Order> {
+  ): Promise<LightOrder> {
     return new Promise((resolve, reject) => {
       this.generateRequest(
         'getSignerSideOrder',
@@ -147,7 +147,7 @@ export class Server {
     signerToken: string,
     senderToken: string,
     senderWallet: string
-  ): Promise<Order> {
+  ): Promise<LightOrder> {
     return new Promise((resolve, reject) => {
       this.generateRequest(
         'getSenderSideOrder',
