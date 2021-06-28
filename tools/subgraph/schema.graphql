@@ -160,4 +160,9 @@ type EnabledRoot @entity {
 type CollectedFees @entity {
   id: ID!
   amount: BigInt!
+  date: BigInt!
+}
+
+type Oracle @entity {
+  id: ID! # Address of Oracle
 }
