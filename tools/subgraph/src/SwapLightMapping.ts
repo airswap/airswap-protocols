@@ -1,11 +1,12 @@
 import { BigInt, log } from "@graphprotocol/graph-ts"
 import {
   Cancel,
-  Swap as SwapEvent
+  Swap as SwapEvent,
+  SwapLightContract as SwapContract
 } from "../generated/SwapLightContract/SwapLightContract"
 import { SwapLightContract, SwapLight } from "../generated/schema"
 import { getUser, getToken, getCollectedFees } from "./EntityHelper"
-import { getPrice } from "./PricingHelper"
+import { getPrice, computeFeeAmountUsd } from "./PricingHelper"
 
 export function handleCancel(event: Cancel): void {
   let user = getUser(event.params.signerWallet.toHex())
@@ -53,9 +54,10 @@ export function handleSwap(event: SwapEvent): void {
 
   completedSwap.save()
 
-  const signerTokenPrice = getPrice(signerToken.id)
+  let divisor = SwapContract.bind(event.address).try_FEE_DIVISOR()
+  let feeAmountUsd = computeFeeAmountUsd(event.params.signerToken.toHex(), event.params.signerAmount, event.params.signerFee, divisor.value)
 
   let collectedFees = getCollectedFees()
-  collectedFees.amount = collectedFees.amount.plus(event.params.signerFee)
+  collectedFees.amount = collectedFees.amount.plus(feeAmountUsd)
   collectedFees.save()
 }
