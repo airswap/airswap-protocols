@@ -18,5 +18,6 @@ export function getPrice(tokenAddress: string): BigInt {
   if (roundData.reverted) {
     return BigInt.fromI32(0)
   }
-  return roundData.value.value1
+  // (roundId, answer, startedAt, updatedAt, answeredInRound)
+  return roundData.value.value1 //answer
 }
