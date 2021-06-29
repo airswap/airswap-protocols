@@ -6,7 +6,7 @@ import {
 } from "../generated/SwapLightContract/SwapLightContract"
 import { SwapLightContract, SwapLight } from "../generated/schema"
 import { getUser, getToken, getCollectedFees } from "./EntityHelper"
-import { getPrice, computeFeeAmountUsd } from "./PricingHelper"
+import { computeFeeAmountUsd } from "./PricingHelper"
 
 export function handleCancel(event: Cancel): void {
   let user = getUser(event.params.signerWallet.toHex())

@@ -8,7 +8,7 @@ const supportedOracles: Record<string, string> = {
   '0xdac17f958d2ee523a2206206994597c13d831ec7': '0x2ca5A90D34cA333661083F89D831f757A9A50148', // USDT  
 }
 
-export function getPrice(tokenAddress: string): BigInt {
+function getPrice(tokenAddress: string): BigInt {
   if (!supportedOracles.Keys.includes(tokenAddress)) {
     return BigInt.fromI32(0)
   }

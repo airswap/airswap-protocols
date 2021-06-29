@@ -26,6 +26,8 @@ dataSources:
           file: ./abis/Swap.json
         - name: Oracle
           file: ./abis/AggregatorV3Interface.json
+        - name: ERC20
+          file: ./abis/ERC20.json
       eventHandlers:
         - event: AuthorizeSender(indexed address,indexed address)
           handler: handleAuthorizeSender
