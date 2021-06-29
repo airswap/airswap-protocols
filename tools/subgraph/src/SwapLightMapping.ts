@@ -5,6 +5,7 @@ import {
 } from "../generated/SwapLightContract/SwapLightContract"
 import { SwapLightContract, SwapLight } from "../generated/schema"
 import { getUser, getToken, getCollectedFees } from "./EntityHelper"
+import { getPrice } from "./PricingHelper"
 
 export function handleCancel(event: Cancel): void {
   let user = getUser(event.params.signerWallet.toHex())
@@ -24,8 +25,6 @@ export function handleSwap(event: SwapEvent): void {
     swapContract = new SwapLightContract(event.address.toHex())
     swapContract.save()
   }
-
-  let collectedFees = getCollectedFees()
 
   let signer = getUser(event.params.signerWallet.toHex())
   let sender = getUser(event.params.senderWallet.toHex())
@@ -54,6 +53,9 @@ export function handleSwap(event: SwapEvent): void {
 
   completedSwap.save()
 
+  const signerTokenPrice = getPrice(signerToken.id)
+
+  let collectedFees = getCollectedFees()
   collectedFees.amount = collectedFees.amount.plus(event.params.signerFee)
   collectedFees.save()
 }
