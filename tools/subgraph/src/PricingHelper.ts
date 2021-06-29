@@ -1,6 +1,6 @@
-import { BigInt, Bytes } from "@graphprotocol/graph-ts"
+import { BigInt, Bytes, Address } from "@graphprotocol/graph-ts"
 import { User, Token, Indexer, DelegateFactory, SwapContract, Locker, Pool, CollectedFees } from "../generated/schema"
-import { ERC20 } from '../generated/ERC20/ERC20'
+import { Oracle } from '../generated/SwapContract/Oracle'
 
 const supportedOracles: Record<string, string> = {
   '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2': '', // WETH
@@ -10,10 +10,13 @@ const supportedOracles: Record<string, string> = {
 }
 
 export function getPrice(tokenAddress: string): BigInt {
-  let tokenContract = ERC20.bind(tokenAddress)
-
-  //check if tokenAddress is in supportedOracles
-  //if not in supportedOracles return 0
-  //if in supporteedOracles then query and return price
-  return BigInt.fromI32(0)
+  if (!supportedOracles.Keys.includes(tokenAddress)) {
+    return BigInt.fromI32(0)
+  }
+  const oracleContract = Oracle.bind(Address.fromString(supportedOracles[tokenAddress]))
+  const roundData = oracleContract.try_latestRoundData()
+  if (roundData.reverted) {
+    return BigInt.fromI32(0)
+  }
+  return roundData.value.value1
 }

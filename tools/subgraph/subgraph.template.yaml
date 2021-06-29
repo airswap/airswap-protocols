@@ -24,6 +24,8 @@ dataSources:
       abis:
         - name: SwapContract
           file: ./abis/Swap.json
+        - name: Oracle
+          file: ./abis/AggregatorV3Interface.json
       eventHandlers:
         - event: AuthorizeSender(indexed address,indexed address)
           handler: handleAuthorizeSender
