@@ -1,5 +1,6 @@
 import { BigInt, Address, TypedMap } from "@graphprotocol/graph-ts"
-import { Oracle as OracleContract } from '../generated/SwapContract/Oracle'
+import { Oracle as OracleContract } from '../generated/SwapLightContract/Oracle'
+import { ERC20 } from '../generated/SwapLightContract/ERC20'
 
 let supportedOracles: TypedMap<string, string> = new TypedMap<string, string>()
 supportedOracles.set('0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', '0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419') // WETH
@@ -21,9 +22,19 @@ function getPrice(tokenAddress: string): BigInt {
   return roundData.value.value1 //answer
 }
 
+function getTokenDecimals(tokenAddress: string): BigInt {
+  let tokenContract = ERC20.bind(Address.fromString(tokenAddress))
+  let value = tokenContract.try_decimals()
+  if (value.reverted) {
+    return BigInt.fromI32(0)
+  }
+  return value.value
+}
+
 export function computeFeeAmountUsd(signerToken: string, signerAmount: BigInt, signerFee: BigInt, divisor: BigInt): BigInt {
   //TODO: current math here is wrong because the decimals are inconsistent between feeAmount(token decimals) and usd(8 decimals)
   let signerTokenPrice = getPrice(signerToken) // 8 decimals USD
+  let tokenDecimals = getTokenDecimals(signerToken) // 6/8/18 decimals - depends on the token
   let feeAmount = signerAmount.times(signerFee).div(divisor) // quantity of token
   return signerTokenPrice.times(feeAmount)
 }

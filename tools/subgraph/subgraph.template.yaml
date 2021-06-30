@@ -24,10 +24,6 @@ dataSources:
       abis:
         - name: SwapContract
           file: ./abis/Swap.json
-        - name: Oracle
-          file: ./abis/AggregatorV3Interface.json
-        - name: ERC20
-          file: ./abis/ERC20.json
       eventHandlers:
         - event: AuthorizeSender(indexed address,indexed address)
           handler: handleAuthorizeSender
@@ -117,6 +113,10 @@ dataSources:
       abis:
         - name: SwapLightContract
           file: ./abis/Light.json
+        - name: Oracle
+          file: ./abis/AggregatorV3Interface.json
+        - name: ERC20
+          file: ./abis/ERC20.json
       eventHandlers:
         - event: Cancel(indexed uint256,indexed address)
           handler: handleCancel
