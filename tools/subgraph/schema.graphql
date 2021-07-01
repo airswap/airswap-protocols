@@ -157,7 +157,7 @@ type EnabledRoot @entity {
   root: Bytes!
 }
 
-type CollectedFees @entity {
+type CollectedFeesDay @entity {
   id: ID!
   date: Int!
   amount: BigDecimal!

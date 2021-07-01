@@ -5,7 +5,7 @@ import {
   SwapLightContract as SwapContract
 } from "../generated/SwapLightContract/SwapLightContract"
 import { SwapLightContract, SwapLight } from "../generated/schema"
-import { getUser, getToken, getCollectedFees } from "./EntityHelper"
+import { getUser, getToken, getCollectedFeesDay } from "./EntityHelper"
 import { computeFeeAmountUsd } from "./PricingHelper"
 
 export function handleCancel(event: Cancel): void {
@@ -57,7 +57,7 @@ export function handleSwap(event: SwapEvent): void {
   let divisor = SwapContract.bind(event.address).try_FEE_DIVISOR()
   let feeAmountUsd = computeFeeAmountUsd(event.params.signerToken.toHex(), event.params.signerAmount, event.params.signerFee, divisor.value)
 
-  let collectedFees = getCollectedFees(event.block.timestamp)
+  let collectedFees = getCollectedFeesDay(event.block.timestamp)
   collectedFees.amount = collectedFees.amount.plus(feeAmountUsd.toBigDecimal())
   collectedFees.save()
 }
