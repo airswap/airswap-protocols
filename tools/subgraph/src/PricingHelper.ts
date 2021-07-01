@@ -27,7 +27,7 @@ function getTokenDecimals(tokenAddress: string): BigInt {
   if (value.reverted) {
     return BigInt.fromI32(0)
   }
-  return value.value
+  return BigInt.fromI32(value.value)
 }
 
 export function computeFeeAmountUsd(signerToken: string, signerAmount: BigInt, signerFee: BigInt, divisor: BigInt): BigInt {
@@ -37,8 +37,8 @@ export function computeFeeAmountUsd(signerToken: string, signerAmount: BigInt, s
   let signerTokenPriceNormalizedx64 = signerTokenPrice.times(base64).div(BigInt.fromI32(10).pow(8)) //should be a decimal whole, precision kept by base64
 
   let feeAmount = signerAmount.times(signerFee).div(divisor) // quantity of token
-  let tokenDecimals = getTokenDecimals(signerToken) // 6,8,18 decimals - depends on the token
-  let feeAmountNormalizedx64 = feeAmount.times(base64).div(BigInt.fromI32(10).pow(tokenDecimals)) // should be a decimal whole, precision kept by base64
+  let tokenDecimals: BigInt = getTokenDecimals(signerToken) // 6,8,18 decimals - depends on the token
+  let feeAmountNormalizedx64 = feeAmount.times(base64).div(BigInt.fromI32(10).pow(<u8>tokenDecimals)) // should be a decimal whole, precision kept by base64
 
   let priceUsdx64 = feeAmountNormalizedx64.times(signerTokenPriceNormalizedx64)
   let priceUsd = priceUsdx64.div(base64)
