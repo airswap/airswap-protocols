@@ -161,7 +161,3 @@ type CollectedFees @entity {
   id: ID!
   amount: BigInt!
 }
-
-type Oracle @entity {
-  id: ID! # Address of Oracle
-}
