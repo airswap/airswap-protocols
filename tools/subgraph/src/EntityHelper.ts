@@ -80,17 +80,15 @@ export function getPool(poolAddress: string): Pool {
   return pool as Pool
 }
 
-export function getCollectedFeesDay(timestamp: BigInt): CollectedFeesDay {
+export function getCollectedFeesDay(dayId: string): CollectedFeesDay {
   //the following uses integer division based on the number of seconds in a day to generate the id and date
-  let dayId = timestamp.toI32() / 86400
-  let dayStartTimestamp = dayId * 86400
-
   let fees = CollectedFeesDay.load(dayId.toString())
   if (!fees) {
     fees = new CollectedFeesDay(dayId.toString())
-    fees.date = dayStartTimestamp
+    fees.date = 0
     fees.amount = BigDecimal.fromString('0')
     fees.save()
   }
   return fees as CollectedFeesDay
+
 }

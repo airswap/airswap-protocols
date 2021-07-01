@@ -1,6 +1,11 @@
 import { BigInt, Address, TypedMap } from "@graphprotocol/graph-ts"
 import { Oracle as OracleContract } from '../generated/SwapLightContract/Oracle'
 import { ERC20 } from '../generated/SwapLightContract/ERC20'
+import { getCollectedFeesDay } from "./EntityHelper"
+import {
+  Swap as SwapEvent,
+  SwapLightContract as SwapContract
+} from "../generated/SwapLightContract/SwapLightContract"
 
 let supportedOracles: TypedMap<string, string> = new TypedMap<string, string>()
 supportedOracles.set('0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', '0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419') // WETH
@@ -30,7 +35,7 @@ function getTokenDecimals(tokenAddress: string): BigInt {
   return BigInt.fromI32(value.value)
 }
 
-export function computeFeeAmountUsd(signerToken: string, signerAmount: BigInt, signerFee: BigInt, divisor: BigInt): BigInt {
+function computeFeeAmountUsd(signerToken: string, signerAmount: BigInt, signerFee: BigInt, divisor: BigInt): BigInt {
   let base64 = BigInt.fromI32(2).pow(64) //used to keep precision
 
   let signerTokenPrice = getPrice(signerToken) // 8 decimals USD
@@ -44,4 +49,21 @@ export function computeFeeAmountUsd(signerToken: string, signerAmount: BigInt, s
   let priceUsd = priceUsdx64.div(base64)
 
   return priceUsd
+}
+
+export function updateCollectedFeesDay(event: SwapEvent): void {
+  let divisor = SwapContract.bind(event.address).try_FEE_DIVISOR()
+  let feeAmountUsd = computeFeeAmountUsd(event.params.signerToken.toHex(), event.params.signerAmount, event.params.signerFee, divisor.value)
+
+  //the following uses integer division based on the number of seconds in a day to generate the id and date
+  let dayId = event.block.timestamp.toI32() / 86400
+  let dayStartTimestamp = dayId * 86400
+
+  let feesDay = getCollectedFeesDay(dayId.toString())
+  //setup the dayStartTimeStamp if the entity is new
+  if (feesDay.date == 0) {
+    feesDay.date = dayStartTimestamp
+  }
+  feesDay.amount = feesDay.amount.plus(feeAmountUsd.toBigDecimal())
+  feesDay.save()
 }
