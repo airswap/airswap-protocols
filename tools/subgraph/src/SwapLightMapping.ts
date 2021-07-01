@@ -1,4 +1,4 @@
-import { BigInt, log } from "@graphprotocol/graph-ts"
+import { BigInt, BigDecimal, log } from "@graphprotocol/graph-ts"
 import {
   Cancel,
   Swap as SwapEvent,
@@ -57,7 +57,7 @@ export function handleSwap(event: SwapEvent): void {
   let divisor = SwapContract.bind(event.address).try_FEE_DIVISOR()
   let feeAmountUsd = computeFeeAmountUsd(event.params.signerToken.toHex(), event.params.signerAmount, event.params.signerFee, divisor.value)
 
-  let collectedFees = getCollectedFees()
-  collectedFees.amount = collectedFees.amount.plus(feeAmountUsd)
+  let collectedFees = getCollectedFees(event.block.timestamp)
+  collectedFees.amount = collectedFees.amount.plus(feeAmountUsd.toBigDecimal())
   collectedFees.save()
 }

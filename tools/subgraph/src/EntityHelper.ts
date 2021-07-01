@@ -1,4 +1,4 @@
-import { BigInt, Bytes } from "@graphprotocol/graph-ts"
+import { BigDecimal, BigInt, Bytes } from "@graphprotocol/graph-ts"
 import { User, Token, Indexer, DelegateFactory, SwapContract, Locker, Pool, CollectedFees } from "../generated/schema"
 
 export function getUser(userAddress: string): User {
@@ -80,11 +80,16 @@ export function getPool(poolAddress: string): Pool {
   return pool as Pool
 }
 
-export function getCollectedFees(): CollectedFees {
-  let fees = CollectedFees.load("0")
+export function getCollectedFees(timestamp: BigInt): CollectedFees {
+  //the following uses integer division based on the number of seconds in a day to generate the id and date
+  let dayId = timestamp.toI32() / 86400
+  let dayStartTimestamp = dayId * 86400
+
+  let fees = CollectedFees.load(dayId.toString())
   if (!fees) {
-    fees = new CollectedFees("0")
-    fees.amount = BigInt.fromI32(0)
+    fees = new CollectedFees(dayId.toString())
+    fees.date = dayStartTimestamp
+    fees.amount = BigDecimal.fromString('0')
     fees.save()
   }
   return fees as CollectedFees
