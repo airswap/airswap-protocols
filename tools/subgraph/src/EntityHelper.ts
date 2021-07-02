@@ -82,9 +82,9 @@ export function getPool(poolAddress: string): Pool {
 
 export function getCollectedFeesDay(dayId: string): CollectedFeesDay {
   //the following uses integer division based on the number of seconds in a day to generate the id and date
-  let fees = CollectedFeesDay.load(dayId.toString())
+  let fees = CollectedFeesDay.load(dayId)
   if (!fees) {
-    fees = new CollectedFeesDay(dayId.toString())
+    fees = new CollectedFeesDay(dayId)
     fees.date = 0
     fees.amount = BigDecimal.fromString('0')
     fees.save()
