@@ -90,5 +90,4 @@ export function getCollectedFeesDay(dayId: string): CollectedFeesDay {
     fees.save()
   }
   return fees as CollectedFeesDay
-
 }
