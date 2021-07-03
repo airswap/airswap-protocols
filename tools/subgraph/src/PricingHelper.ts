@@ -52,8 +52,8 @@ function computeFeeAmountUsd(signerToken: string, signerAmount: BigInt, signerFe
 }
 
 export function updateCollectedFeesDay(event: SwapEvent): void {
-  let divisor = SwapContract.bind(event.address).try_FEE_DIVISOR()
-  let feeAmountUsd = computeFeeAmountUsd(event.params.signerToken.toHex(), event.params.signerAmount, event.params.signerFee, divisor.value)
+  let divisor = SwapContract.bind(event.address).FEE_DIVISOR()
+  let feeAmountUsd = computeFeeAmountUsd(event.params.signerToken.toHex(), event.params.signerAmount, event.params.signerFee, divisor)
 
   //the following uses integer division based on the number of seconds in a day to generate the id and date
   let dayId = event.block.timestamp.toI32() / 86400
