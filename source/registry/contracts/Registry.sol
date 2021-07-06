@@ -13,16 +13,18 @@ contract Registry {
   using SafeERC20 for IERC20;
   using EnumerableSet for EnumerableSet.AddressSet;
 
-  event AddTokens(address account, address[] tokens);
-  event RemoveTokens(address account, address[] tokens);
-  event SetURL(address account, string url);
+  event InitialStake(address indexed account);
+  event FullUnstake(address indexed account);
+  event AddTokens(address indexed account, address[] tokens);
+  event RemoveTokens(address indexed account, address[] tokens);
+  event SetURL(address indexed account, string url);
 
   IERC20 public immutable stakingToken;
   uint256 public immutable obligationCost;
   uint256 public immutable tokenCost;
   mapping(address => EnumerableSet.AddressSet) internal supportedTokens;
   mapping(address => EnumerableSet.AddressSet) internal supportingStakers;
-  mapping(address => string) internal stakerURLs;
+  mapping(address => string) public stakerURLs;
 
   /**
    * @notice Constructor
@@ -96,6 +98,7 @@ contract Registry {
     uint256 transferAmount = 0;
     if (tokenList.length() == 0) {
       transferAmount = obligationCost;
+      emit InitialStake(msg.sender);
     }
     for (uint256 i = 0; i < length; i++) {
       address token = tokens[i];
@@ -123,6 +126,7 @@ contract Registry {
     uint256 transferAmount = tokenCost * length;
     if (tokenList.length() == 0) {
       transferAmount += obligationCost;
+      emit FullUnstake(msg.sender);
     }
     emit RemoveTokens(msg.sender, tokens);
     stakingToken.safeTransfer(msg.sender, transferAmount);
@@ -146,6 +150,7 @@ contract Registry {
       supportingStakers[token].remove(msg.sender);
     }
     uint256 transferAmount = obligationCost + tokenCost * length;
+    emit FullUnstake(msg.sender);
     emit RemoveTokens(msg.sender, tokenList);
     stakingToken.safeTransfer(msg.sender, transferAmount);
   }
