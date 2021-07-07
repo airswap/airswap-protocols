@@ -13,18 +13,18 @@ contract Registry {
   using SafeERC20 for IERC20;
   using EnumerableSet for EnumerableSet.AddressSet;
 
-  event InitialStake(address indexed account);
-  event FullUnstake(address indexed account);
-  event AddTokens(address indexed account, address[] tokens);
-  event RemoveTokens(address indexed account, address[] tokens);
-  event SetURL(address indexed account, string url);
-
   IERC20 public immutable stakingToken;
   uint256 public immutable obligationCost;
   uint256 public immutable tokenCost;
   mapping(address => EnumerableSet.AddressSet) internal supportedTokens;
   mapping(address => EnumerableSet.AddressSet) internal supportingStakers;
   mapping(address => string) public stakerURLs;
+
+  event InitialStake(address indexed account);
+  event FullUnstake(address indexed account);
+  event AddTokens(address indexed account, address[] tokens);
+  event RemoveTokens(address indexed account, address[] tokens);
+  event SetURL(address indexed account, string url);
 
   /**
    * @notice Constructor
@@ -49,41 +49,6 @@ contract Registry {
   function setURL(string calldata _url) external {
     stakerURLs[msg.sender] = _url;
     emit SetURL(msg.sender, _url);
-  }
-
-  /**
-   * @notice Return a list of all server URLs supporting a given token
-   * @param token address of the token
-   * @return urls array of server URLs supporting the token
-   */
-  function getURLsForToken(address token)
-    external
-    view
-    returns (string[] memory urls)
-  {
-    EnumerableSet.AddressSet storage stakers = supportingStakers[token];
-    uint256 length = stakers.length();
-    urls = new string[](length);
-    for (uint256 i = 0; i < length; i++) {
-      urls[i] = stakerURLs[address(stakers.at(i))];
-    }
-  }
-
-  /**
-   * @notice Get the URLs for an array of stakers
-   * @param stakers array of staker addresses
-   * @return urls array of server URLs in the same order
-   */
-  function getURLsForStakers(address[] calldata stakers)
-    external
-    view
-    returns (string[] memory urls)
-  {
-    uint256 stakersLength = stakers.length;
-    urls = new string[](stakersLength);
-    for (uint256 i = 0; i < stakersLength; i++) {
-      urls[i] = stakerURLs[stakers[i]];
-    }
   }
 
   /**
@@ -153,6 +118,41 @@ contract Registry {
     emit FullUnstake(msg.sender);
     emit RemoveTokens(msg.sender, tokenList);
     stakingToken.safeTransfer(msg.sender, transferAmount);
+  }
+
+  /**
+   * @notice Return a list of all server URLs supporting a given token
+   * @param token address of the token
+   * @return urls array of server URLs supporting the token
+   */
+  function getURLsForToken(address token)
+    external
+    view
+    returns (string[] memory urls)
+  {
+    EnumerableSet.AddressSet storage stakers = supportingStakers[token];
+    uint256 length = stakers.length();
+    urls = new string[](length);
+    for (uint256 i = 0; i < length; i++) {
+      urls[i] = stakerURLs[address(stakers.at(i))];
+    }
+  }
+
+  /**
+   * @notice Get the URLs for an array of stakers
+   * @param stakers array of staker addresses
+   * @return urls array of server URLs in the same order
+   */
+  function getURLsForStakers(address[] calldata stakers)
+    external
+    view
+    returns (string[] memory urls)
+  {
+    uint256 stakersLength = stakers.length;
+    urls = new string[](stakersLength);
+    for (uint256 i = 0; i < stakersLength; i++) {
+      urls[i] = stakerURLs[stakers[i]];
+    }
   }
 
   /**
