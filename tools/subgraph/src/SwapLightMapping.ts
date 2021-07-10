@@ -1,10 +1,10 @@
-import { BigInt, log } from "@graphprotocol/graph-ts"
 import {
   Cancel,
-  Swap as SwapEvent
+  Swap as SwapEvent,
 } from "../generated/SwapLightContract/SwapLightContract"
 import { SwapLightContract, SwapLight } from "../generated/schema"
-import { getUser, getToken } from "./EntityHelper"
+import { getUser, getToken, } from "./EntityHelper"
+import { updateCollectedFeesDay } from "./PricingHelper"
 
 export function handleCancel(event: Cancel): void {
   let user = getUser(event.params.signerWallet.toHex())
@@ -51,4 +51,5 @@ export function handleSwap(event: SwapEvent): void {
   completedSwap.senderToken = senderToken.id
 
   completedSwap.save()
+  updateCollectedFeesDay(event)
 }
