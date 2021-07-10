@@ -72,7 +72,9 @@ contract Registry {
     }
     transferAmount += tokenCost * length;
     emit AddTokens(msg.sender, tokens);
-    stakingToken.safeTransferFrom(msg.sender, address(this), transferAmount);
+    if (transferAmount > 0) {
+      stakingToken.safeTransferFrom(msg.sender, address(this), transferAmount);
+    }
   }
 
   /**
@@ -94,7 +96,9 @@ contract Registry {
       emit FullUnstake(msg.sender);
     }
     emit RemoveTokens(msg.sender, tokens);
-    stakingToken.safeTransfer(msg.sender, transferAmount);
+    if (transferAmount > 0) {
+      stakingToken.safeTransfer(msg.sender, transferAmount);
+    }
   }
 
   /**
@@ -117,7 +121,9 @@ contract Registry {
     uint256 transferAmount = obligationCost + tokenCost * length;
     emit FullUnstake(msg.sender);
     emit RemoveTokens(msg.sender, tokenList);
-    stakingToken.safeTransfer(msg.sender, transferAmount);
+    if (transferAmount > 0) {
+      stakingToken.safeTransfer(msg.sender, transferAmount);
+    }
   }
 
   /**
