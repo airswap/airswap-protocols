@@ -4,18 +4,34 @@ import { TokenInfo } from '@uniswap/token-lists'
 import { defaults, known } from './src/constants'
 import { getTokenName, getTokenSymbol, getTokenDecimals } from './src/helpers'
 
-export async function fetchTokens(chainId: number): Promise<Array<TokenInfo>> {
-  const tokens = await Promise.all(
+export async function fetchTokens(
+  chainId: number
+): Promise<{ tokens: TokenInfo[]; errors: string[] }> {
+  const errors = []
+  let tokens = []
+  const promises = await Promise.allSettled(
     known.map(async url => {
-      const { data } = await axios.get(url)
-      return data.tokens
+      try {
+        const res = await axios.get(url)
+        return res.data.tokens
+      } catch (e) {
+        throw new Error(e.message)
+      }
     })
   )
-  tokens.push(defaults)
-  return [].concat(...tokens).filter(token => {
+  tokens.push(...defaults)
+  promises.forEach(promise => {
+    if (promise.status === 'rejected') {
+      errors.push(promise.reason.message)
+    } else {
+      tokens.push(...promise.value)
+    }
+  })
+  tokens = tokens.filter(token => {
     token.address = token.address.toLowerCase()
     return token.chainId === chainId
   })
+  return { tokens, errors }
 }
 
 export async function scrapeToken(
