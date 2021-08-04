@@ -15,14 +15,14 @@ export async function fetchTokens(
         const res = await axios.get(url)
         return res.data.tokens
       } catch (e) {
-        throw new Error(e.message)
+        throw e.message
       }
     })
   )
   tokens.push(...defaults)
   promises.forEach(promise => {
     if (promise.status === 'rejected') {
-      errors.push(promise.reason.message)
+      errors.push(promise.reason)
     } else {
       tokens.push(...promise.value)
     }
