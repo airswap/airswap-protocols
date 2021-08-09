@@ -33,7 +33,7 @@
     "@airswap/test-utils": "0.1.10",
     "@airswap/transfers": "1.1.4",
     "@airswap/types": "3.5.17",
-    "@airswap/utils": "0.4.4",
+    "@airswap/utils": "0.4.5",
     "ethers": "^5.0.25",
     "solidity-coverage": "^0.7.4"
   }
