@@ -34,7 +34,7 @@
     "@airswap/indexer": "3.6.11",
     "@airswap/test-utils": "0.1.10",
     "@airswap/types": "3.5.17",
-    "@airswap/utils": "0.4.4",
+    "@airswap/utils": "0.4.5",
     "ethers": "^5.0.25",
     "solidity-coverage": "^0.7.4"
   }

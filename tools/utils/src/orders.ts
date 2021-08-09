@@ -294,15 +294,15 @@ export function isValidLightOrder(order: LightOrder): boolean {
 }
 
 export function createLightOrder({
-  expiry = Math.round(Date.now() / 1000 + SECONDS_IN_DAY),
-  nonce = Date.now(),
+  expiry = Math.round(Date.now() / 1000 + SECONDS_IN_DAY).toString(),
+  nonce = Date.now().toString(),
   signerWallet = ADDRESS_ZERO,
   signerToken = ADDRESS_ZERO,
-  signerAmount = 0,
-  signerFee = 0,
+  signerAmount = '0',
+  signerFee = '0',
   senderWallet = ADDRESS_ZERO,
   senderToken = ADDRESS_ZERO,
-  senderAmount = 0,
+  senderAmount = '0',
 }) {
   return {
     expiry: String(expiry),

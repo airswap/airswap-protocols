@@ -26,7 +26,7 @@
     "@airswap/constants": "0.4.0",
     "@airswap/test-utils": "0.1.10",
     "@airswap/tokens": "0.1.4",
-    "@airswap/utils": "0.4.4",
+    "@airswap/utils": "0.4.5",
     "@gnosis.pm/mock-contract": "^4.0.0",
     "bip39": "^3.0.3",
     "ethers": "^5.0.25",
