@@ -1,6 +1,6 @@
 {
   "name": "@airswap/metadata",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "Token Metadata Tools for AirSwap Developers",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>",
@@ -37,5 +37,6 @@
     "mocha": "^7.1.0",
     "ts-node": "^8.6.2",
     "typescript": "^3.7.5"
-  }
+  },
+  "engines" : { "node" : ">=12.22.2" }
 }
