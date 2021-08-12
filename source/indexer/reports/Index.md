@@ -3,7 +3,7 @@
 Smart Contract Security Report by Team Fluidity (team[at]fluidity[dot]io) and Phil Daian (feedback[at]stableset[dot]com)
 Hash of master used for report: [ef5cff0613532d27ecedb332e222ae0a75079841](https://github.com/airswap/airswap-protocols/commit/ef5cff0613532d27ecedb332e222ae0a75079841)
 
-Index [Source Code](https://github.com/airswap/airswap-protocols/tree/master/source/index) and [README](../README.md)
+Index [Source Code](https://github.com/airswap/airswap-protocols/tree/main/source/index) and [README](../README.md)
 
 ## Introduction
 
@@ -44,11 +44,11 @@ _\*\* OpenZeppelin contract_
 
 #### Public and external functions (non-getter functions)
 
-| Function     | Source      | Visibility   | Params                                                             | Payable |
-| :-------     | :---------- | :----------- | :----------------------------------------------------------------- | :------ |
-| setLocator   | Index.sol   | external     | `address _user, uint256 _score, bytes32 _data`                     | no      |
-| unsetLocator | Index.sol   | external     | `address _user`                                                    | no      |
-| fetchLocators| Index.sol   | external view| `uint256 _count`                                                   | no      |
+| Function      | Source    | Visibility    | Params                                         | Payable |
+| :------------ | :-------- | :------------ | :--------------------------------------------- | :------ |
+| setLocator    | Index.sol | external      | `address _user, uint256 _score, bytes32 _data` | no      |
+| unsetLocator  | Index.sol | external      | `address _user`                                | no      |
+| fetchLocators | Index.sol | external view | `uint256 _count`                               | no      |
 
 ## Invariants
 
@@ -63,33 +63,33 @@ _\*\* OpenZeppelin contract_
 #### 2. The linked list of Locators may only be modified by the contract owner.
 
 - The locatorsLinkedList is modified in 3 places in the contract. In all places, there is a modifier onlyOwner at the beginning:
-    - First, the constructor. The caller of the constructor of the contract becomes the contract’s owner by definition of OpenZeppelin’s Ownable contract.
-    - Second in unsetLocator. This function is marked as onlyOwner, meaning that it can only be called successfully by the contract's owner.
-    - Third in setLocator. This function is marked as onlyOwner, meaning that it can only be called successfully by the contract's owner.
+  - First, the constructor. The caller of the constructor of the contract becomes the contract’s owner by definition of OpenZeppelin’s Ownable contract.
+  - Second in unsetLocator. This function is marked as onlyOwner, meaning that it can only be called successfully by the contract's owner.
+  - Third in setLocator. This function is marked as onlyOwner, meaning that it can only be called successfully by the contract's owner.
 - **This invariant currently holds as-is.**
-
 
 #### 3. Linked list ordering by score must be preserved at all times (Highest -> Lowest).
 
 a. Inserting Locators preserves the ordering of the list.
 By induction:
+
 - Case where the list is empty:
-    - There are no locators in the list and the list is merely the HEAD that points to itself (this is setup in the constructor).
-    - The invariant is vacuously true for the base case
+  - There are no locators in the list and the list is merely the HEAD that points to itself (this is setup in the constructor).
+  - The invariant is vacuously true for the base case
 - Given a new Locator, we call setLocator
-    - Assuming the new locator is a valid Locator.
-        - set by the owner
-        - has a user who has not previously set a Locator
-    - The location to insert the new locator in is found using the function findPosition(score)
-        - If its score is 0, the location for the new locator is the end of the list
-        - Otherwise findPosition looks at the list of locators in decreasing score value, and returns the first score that is lower than the new score.
-        - If there is an equal score, the new Locator is placed after the previous same-scored Locator.
-    - This is guaranteed to happen, as all locators are in a fixed ordering, and HEAD has a score of 0, meaning if the new locator is the new tail of the list the HEAD will be returned.
-    - The Locator is then inserted in its rightful position, and the list is still in descending order of score.
+  - Assuming the new locator is a valid Locator.
+    - set by the owner
+    - has a user who has not previously set a Locator
+  - The location to insert the new locator in is found using the function findPosition(score)
+    - If its score is 0, the location for the new locator is the end of the list
+    - Otherwise findPosition looks at the list of locators in decreasing score value, and returns the first score that is lower than the new score.
+    - If there is an equal score, the new Locator is placed after the previous same-scored Locator.
+  - This is guaranteed to happen, as all locators are in a fixed ordering, and HEAD has a score of 0, meaning if the new locator is the new tail of the list the HEAD will be returned.
+  - The Locator is then inserted in its rightful position, and the list is still in descending order of score.
 - **This invariant currently holds as-is.**
-b. Removing locators preserves the ordering of the list
+  b. Removing locators preserves the ordering of the list
 - Given a list starting with n > 0 locators in it, one locator, x, is removed by calling unsetLocator
-unsetIntent first links together the element before and after x in the list so that they point to each other instead of to x
+  unsetIntent first links together the element before and after x in the list so that they point to each other instead of to x
 - The data stored in x’s pointers is then deleted, so that if it is looked up in future it is clear that this locator does not exist
 - The edge case is when one of the ‘locators’ before or after x in the list is actually the head of the list (meaning x was first and/or last in the list).
 - In this case, the head is simply linked to the new first/last element in the list, and the ordering is preserved.
@@ -109,6 +109,7 @@ unsetIntent first links together the element before and after x in the list so t
 - **This invariant currently holds as-is.**
 
 #### 6. The length variable is always equal to the number of Locators on the locator linked list.
+
 - Length is initialised as 0, and the list is initialised as empty
 - Length is only edited in the functions setLocator and unsetLocator, directly after a new element has been added or removed respectively.
 - If adding or removing an element fails in these functions, then the transaction will revert, and the length will not be updated.
@@ -134,15 +135,17 @@ source/index/test/Index-test.js
 100% coverage between unit and integration tests.
 
 |--------------|----------|----------|----------|----------|----------------|
-|File          |  % Stmts | % Branch |  % Funcs |  % Lines |Uncovered Lines |
+|File | % Stmts | % Branch | % Funcs | % Lines |Uncovered Lines |
 |--------------|----------|----------|----------|----------|----------------|
-| contracts/   |      100 |      100 |      100 |      100 |                |
-|  Index.sol   |      100 |      100 |      100 |      100 |                |
+| contracts/ | 100 | 100 | 100 | 100 | |
+| Index.sol | 100 | 100 | 100 | 100 | |
 |--------------|----------|----------|----------|----------|----------------|
-|All files     |      100 |      100 |      100 |      100 |                |
+|All files | 100 | 100 | 100 | 100 | |
 |--------------|----------|----------|----------|----------|----------------|
+
 ## Migrations
- N/A
+
+N/A
 
 ## Notes
 

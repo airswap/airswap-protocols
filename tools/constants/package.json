@@ -9,7 +9,7 @@
     "type": "git",
     "url": "https://github.com/airswap/airswap-protocols"
   },
-  "homepage": "https://github.com/airswap/airswap-protocols/tree/master/tools/constants",
+  "homepage": "https://github.com/airswap/airswap-protocols/tree/main/tools/constants",
   "keywords": [
     "airswap"
   ],
