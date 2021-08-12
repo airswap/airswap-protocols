@@ -13,7 +13,7 @@ export function handleSetLocator(event: SetLocator): void {
   if (!locator) {
     locator = new Locator(identifier)
     locator.owner = user.id
-    locator.index = Index.load(event.address.toHex()).id
+    locator.index = Index.load(event.address.toHex())!.id
   }
   locator.score = event.params.score
   locator.locator = event.params.locator

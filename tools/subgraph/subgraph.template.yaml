@@ -11,7 +11,7 @@ dataSources:
       startBlock: {{start_block_swap}}
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.4
+      apiVersion: 0.0.5
       language: wasm/assemblyscript
       entities:
         - AuthorizeSender
@@ -49,7 +49,7 @@ dataSources:
       startBlock: {{start_block_indexer}}
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.4
+      apiVersion: 0.0.5
       language: wasm/assemblyscript
       entities:
         - AddTokenToBlacklist
@@ -84,7 +84,7 @@ dataSources:
       startBlock: {{start_block_delegateFactory}}
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.4
+      apiVersion: 0.0.5
       language: wasm/assemblyscript
       entities:
         - CreateDelegate
@@ -104,7 +104,7 @@ dataSources:
       startBlock: {{start_block_light}}
     mapping:
       kind: ethereum/Events
-      apiVersion: 0.0.4
+      apiVersion: 0.0.5
       language: wasm/assemblyscript
       entities:
         - Cancel
@@ -132,7 +132,7 @@ dataSources:
       startBlock: {{start_block_locker}}
     mapping:
       kind: ethereum/Events
-      apiVersion: 0.0.4
+      apiVersion: 0.0.5
       language: wasm/assemblyscript
       entities:
         - Lock
@@ -164,7 +164,7 @@ dataSources:
       startBlock: {{start_block_pool}}
     mapping:
       kind: ethereum/Events
-      apiVersion: 0.0.4
+      apiVersion: 0.0.5
       language: wasm/assemblyscript
       entities:
         - Enable
@@ -193,7 +193,7 @@ templates:
       abi: Index
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.4
+      apiVersion: 0.0.5
       language: wasm/assemblyscript
       file: ./src/IndexMapping.ts 
       entities:
@@ -213,7 +213,7 @@ templates:
       abi: Delegate
     mapping: 
       kind: ethereum/events
-      apiVersion: 0.0.4
+      apiVersion: 0.0.5
       language: wasm/assemblyscript
       file: ./src/DelegateMapping.ts
       entities:

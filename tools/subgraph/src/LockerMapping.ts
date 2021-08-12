@@ -3,13 +3,13 @@ import { getUser, getLocker } from "./EntityHelper"
 
 export function handleLock(event: Lock): void {
   let user = getUser(event.params.participant.toHex())
-  user.amountInLocker = user.amountInLocker.plus(event.params.amount)
+  user.amountInLocker = user.amountInLocker!.plus(event.params.amount)
   user.save()
 }
 
 export function handleUnlock(event: Unlock): void {
   let user = getUser(event.params.participant.toHex())
-  user.amountInLocker = user.amountInLocker.minus(event.params.amount)
+  user.amountInLocker = user.amountInLocker!.minus(event.params.amount)
   user.save()
 }
 
