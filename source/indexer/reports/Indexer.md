@@ -3,7 +3,7 @@
 Smart Contract Security Report by Team Fluidity (team[at]fluidity[dot]io) and Phil Daian (feedback[at]stableset[dot]com)
 Hash of master used for report: [b87d292aaf6e28ede564b7ea28ece39219994607](https://github.com/airswap/airswap-protocols/commit/b87d292aaf6e28ede564b7ea28ece39219994607)
 
-Index [Source Code](https://github.com/airswap/airswap-protocols/tree/master/source/index) and [README](../README.md)
+Index [Source Code](https://github.com/airswap/airswap-protocols/tree/main/source/index) and [README](../README.md)
 
 ## Introduction
 
@@ -51,18 +51,17 @@ _\*\* OpenZeppelin contract_
 
 #### Public or external functions (non-getter functions)
 
-| Function            | Source      | Visibility | Params                                                                          | Payable |
-| :------------------ | :---------- | :--------- | :------------------------------------------------------------------------------ | :------ |
-| createIndex         | Indexer.sol | external   | `address signerToken, address senderToken`                                    | no      |
-| addTokenToBlacklist      | Indexer.sol | external   | `address token`                                                    | no      |
-| removeTokenFromBlacklist | Indexer.sol | external   | `address tokens`                                                    | no      |
-| setIntent           | Indexer.sol | external   | `address signerToken, address senderToken, uint256 stakingAmount, bytes32 locator` | no      |
-| unsetIntent         | Indexer.sol | external   | `address signerToken, address senderToken`                                    | no      |
-| unsetIntentForUser         | Indexer.sol | external   | `address user, address signerToken, address senderToken`                                    | no      |
-| setPausedStatus         | Indexer.sol | external   | `bool newStatus`                                    | no      |
-| killContract         | Indexer.sol | external   | `address payable recipient`                                    | no      |
-|setLocatorWhitelist | Indexer.sol | external | `address newLocatorWhitelist` | no |
-
+| Function                 | Source      | Visibility | Params                                                                             | Payable |
+| :----------------------- | :---------- | :--------- | :--------------------------------------------------------------------------------- | :------ |
+| createIndex              | Indexer.sol | external   | `address signerToken, address senderToken`                                         | no      |
+| addTokenToBlacklist      | Indexer.sol | external   | `address token`                                                                    | no      |
+| removeTokenFromBlacklist | Indexer.sol | external   | `address tokens`                                                                   | no      |
+| setIntent                | Indexer.sol | external   | `address signerToken, address senderToken, uint256 stakingAmount, bytes32 locator` | no      |
+| unsetIntent              | Indexer.sol | external   | `address signerToken, address senderToken`                                         | no      |
+| unsetIntentForUser       | Indexer.sol | external   | `address user, address signerToken, address senderToken`                           | no      |
+| setPausedStatus          | Indexer.sol | external   | `bool newStatus`                                                                   | no      |
+| killContract             | Indexer.sol | external   | `address payable recipient`                                                        | no      |
+| setLocatorWhitelist      | Indexer.sol | external   | `address newLocatorWhitelist`                                                      | no      |
 
 ## Invariants
 
