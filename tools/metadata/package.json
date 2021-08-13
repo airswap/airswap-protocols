@@ -31,12 +31,12 @@
     "axios": "^0.21.1",
     "eth-contract-metadata": "^1.12.1",
     "ethereumjs-abi": "^0.6.8",
-    "ethers": "^5.0.25"
+    "ethers": "^5.0.25",
+    "promise.allsettled": "^1.0.4"
   },
   "devDependencies": {
     "mocha": "^7.1.0",
     "ts-node": "^8.6.2",
     "typescript": "^3.7.5"
-  },
-  "engines" : { "node" : ">=12.22.2" }
+  }
 }
