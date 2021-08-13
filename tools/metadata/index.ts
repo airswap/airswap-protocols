@@ -4,6 +4,9 @@ import { TokenInfo } from '@uniswap/token-lists'
 import { defaults, known } from './src/constants'
 import { getTokenName, getTokenSymbol, getTokenDecimals } from './src/helpers'
 
+import allSettled from 'promise.allsettled'
+allSettled.shim()
+
 export async function fetchTokens(
   chainId: number
 ): Promise<{ tokens: TokenInfo[]; errors: string[] }> {
