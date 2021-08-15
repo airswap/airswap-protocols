@@ -19,7 +19,7 @@
     "@openzeppelinstaking/contracts": "npm:@openzeppelin/contracts@^3.4.0-solc-0.7",
     "@uniswap/lib": "^1.1.1",
     "@uniswap/v2-core": "^1.0.1",
-    "@uniswap/v2-periphery": "*",
+    "@uniswap/v2-periphery": "1.1.0-beta.0",
     "chai": "^4.3.4",
     "dotenv": "^10.0.0",
     "ethereum-waffle": "^3.4.0",
