@@ -22,6 +22,7 @@ async function main() {
   await converter.deployed()
 }
 
+/* eslint-disable */
 main()
   .then(() => process.exit(0))
   .catch(error => {
