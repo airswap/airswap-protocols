@@ -3,3 +3,4 @@ Migrations.sol
 ./source/tokens/
 flatten/
 build/
+./source/converter/contracts/test
