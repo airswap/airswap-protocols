@@ -8,16 +8,16 @@ export function handleSetRule(event: SetRule): void {
   let signerToken = getToken(event.params.signerToken.toHex())
   let senderToken = getToken(event.params.senderToken.toHex())
 
-  let ruleIdentifier = 
-    event.address.toHex() + 
-    event.params.senderToken.toHex() + 
+  let ruleIdentifier =
+    event.address.toHex() +
+    event.params.senderToken.toHex() +
     event.params.signerToken.toHex()
 
   let rule = Rule.load(ruleIdentifier)
   // create base portion of rule if it doesn't not exist
   if (!rule) {
     rule = new Rule(ruleIdentifier)
-    rule.delegate = Delegate.load(event.address.toHex()).id
+    rule.delegate = Delegate.load(event.address.toHex())!.id
     rule.owner = owner.id
     rule.signerToken = signerToken.id
     rule.senderToken = senderToken.id
@@ -29,25 +29,25 @@ export function handleSetRule(event: SetRule): void {
 }
 
 export function handleUnsetRule(event: UnsetRule): void {
-  let ruleIdentifier = 
-    event.address.toHex() + 
-    event.params.senderToken.toHex() + 
+  let ruleIdentifier =
+    event.address.toHex() +
+    event.params.senderToken.toHex() +
     event.params.signerToken.toHex()
   store.remove("Rule", ruleIdentifier)
 }
 
 export function handleProvideOrder(event: ProvideOrder): void {
-  let ruleIdentifier = 
-    event.address.toHex() + 
-    event.params.senderToken.toHex() + 
+  let ruleIdentifier =
+    event.address.toHex() +
+    event.params.senderToken.toHex() +
     event.params.signerToken.toHex()
 
   let rule = Rule.load(ruleIdentifier)
-  rule.maxSenderAmount = rule.maxSenderAmount.minus(event.params.senderAmount)
+  rule!.maxSenderAmount = rule!.maxSenderAmount.minus(event.params.senderAmount)
   // if rule is to have been fully consumed, remove it
-  if (rule.maxSenderAmount == BigInt.fromI32(0)) {
+  if (rule!.maxSenderAmount == BigInt.fromI32(0)) {
     store.remove("Rule", ruleIdentifier)
   } else {
-    rule.save()
+    rule!.save()
   }
 }

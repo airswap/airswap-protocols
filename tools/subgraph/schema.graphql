@@ -156,3 +156,9 @@ type EnabledRoot @entity {
   pool: Pool!
   root: Bytes!
 }
+
+type CollectedFeesDay @entity {
+  id: ID!
+  date: Int!
+  amount: BigDecimal!
+}
