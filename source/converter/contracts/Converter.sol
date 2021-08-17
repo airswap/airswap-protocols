@@ -33,6 +33,8 @@ contract Converter is Ownable, TokenPaymentSplitter, ReentrancyGuard {
 
   mapping(address => address[]) private tokenPathMapping;
 
+  address[] public currTokens;
+
   event ConvertAndTransfer(
     address triggerAccount,
     IERC20 swapFromToken,
@@ -80,6 +82,7 @@ contract Converter is Ownable, TokenPaymentSplitter, ReentrancyGuard {
     uint256 pathLength = _tokenPath.length;
     for (uint256 i = 0; i < pathLength; i++) {
       tokenPathMapping[_token].push(_tokenPath[i]);
+      currTokens.push(_token);
     }
   }
 
@@ -106,6 +109,7 @@ contract Converter is Ownable, TokenPaymentSplitter, ReentrancyGuard {
       if (tokenPathMapping[_swapFromToken].length > 0) {
         path = getTokenPath(_swapFromToken);
       } else {
+        currTokens.push(_swapFromToken);
         tokenPathMapping[_swapFromToken].push(_swapFromToken);
         tokenPathMapping[_swapFromToken].push(WETH);
         tokenPathMapping[_swapFromToken].push(swapToToken);
@@ -141,6 +145,19 @@ contract Converter is Ownable, TokenPaymentSplitter, ReentrancyGuard {
       totalPayeeAmount,
       _payees
     );
+  }
+
+  /**
+   * @dev Drains contract funds to a specified address
+   * @param _transferTo Address of the recipient.
+   */
+  function drainAll(address _transferTo) public onlyOwner {
+    for (uint256 i = 0; i < currTokens.length; i++) {
+      uint256 balance = _balanceOfErc20(currTokens[i]);
+      if (balance > 0) {
+        _transferErc20(_transferTo, currTokens[i], balance);
+      }
+    }
   }
 
   /**

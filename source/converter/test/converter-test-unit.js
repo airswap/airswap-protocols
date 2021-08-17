@@ -250,6 +250,16 @@ describe('Converter Unit', () => {
       expect(_tokenPath[1]).to.equal(testBToken.address)
       expect(_tokenPath[2]).to.equal(swapToToken.address)
     })
+
+    it('token is added to current tokens list', async () => {
+      const aAddress = testAToken.address
+      const bAddress = testBToken.address
+      const cAddress = swapToToken.address
+      const path = [aAddress, bAddress, cAddress]
+      await converter.connect(deployer).setTokenPath(aAddress, path)
+      const addedToken = await converter.currTokens(0)
+      expect(addedToken).to.equal(aAddress)
+    })
   })
 
   describe('Add Payee', async () => {
@@ -452,6 +462,19 @@ describe('Converter Unit', () => {
           24750,
           payees
         )
+    })
+  })
+
+  describe('Drain all', () => {
+    it('drains all the tokens held in the contract to a specified address', async () => {
+      const aAddress = testAToken.address
+      const bAddress = testBToken.address
+      const cAddress = swapToToken.address
+      const path = [aAddress, bAddress, cAddress]
+      await converter.connect(deployer).setTokenPath(aAddress, path)
+      await converter.drainAll(account1.address)
+      expect(await testAToken.balanceOf(converter.address)).to.equal(0)
+      expect(await testAToken.balanceOf(account1.address)).to.equal(25000)
     })
   })
 })
