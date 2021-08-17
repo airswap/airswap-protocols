@@ -2,7 +2,7 @@ const { expect } = require('chai')
 const timeMachine = require('ganache-time-traveler')
 const { ethers } = require('hardhat')
 
-describe('Converter Unit', () => {
+describe('Converter E2E', () => {
   let snapshotId
   let deployer
   let payeeA
