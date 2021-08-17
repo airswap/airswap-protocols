@@ -6,6 +6,7 @@ pragma experimental ABIEncoderV2;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./TokenPaymentSplitter.sol";
 
@@ -21,6 +22,7 @@ interface IUniswapV2Router02 {
 
 contract Converter is Ownable, TokenPaymentSplitter, ReentrancyGuard {
   using SafeMath for uint256;
+  using SafeERC20 for IERC20;
 
   address public constant WETH =
     address(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
@@ -220,7 +222,7 @@ contract Converter is Ownable, TokenPaymentSplitter, ReentrancyGuard {
       erc.balanceOf(address(this)) >= _transferAmount,
       "Not enough funds to transfer"
     );
-    erc.transfer(_recipient, _transferAmount);
+    erc.safeTransfer(_recipient, _transferAmount);
   }
 
   /**
