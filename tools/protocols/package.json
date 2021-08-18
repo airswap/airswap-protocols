@@ -1,6 +1,6 @@
 {
   "name": "@airswap/protocols",
-  "version": "0.5.7",
+  "version": "0.5.8",
   "description": "Protocol Libraries for AirSwap Developers",
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>"
@@ -28,7 +28,7 @@
     "@airswap/delegate": "2.6.10",
     "@airswap/indexer": "3.6.11",
     "@airswap/light": "2.2.2",
-    "@airswap/registry": "4.6.1",
+    "@airswap/registry": "4.7.1",
     "@airswap/swap": "5.4.9",
     "@airswap/tokens": "0.1.4",
     "@airswap/types": "3.5.17",
