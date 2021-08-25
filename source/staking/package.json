@@ -28,5 +28,8 @@
     "@openzeppelin/contracts": "^3.4.0",
     "ganache-time-traveler": "^1.0.15",
     "ethers": "^5.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

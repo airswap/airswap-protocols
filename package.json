@@ -58,9 +58,6 @@
     "truffle-hdwallet-provider-privkey": "^1.0.3",
     "truffle-verify": "^1.0.4"
   },
-  "publishConfig": {
-    "access": "public"
-  },
   "husky": {
     "hooks": {
       "pre-commit": "yarn deps:check && yarn hint && yarn lint:check && yarn pretty:check"
