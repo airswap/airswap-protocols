@@ -12,7 +12,9 @@ jobs:
         with:
           node-version: '10.x'
           registry-url: 'https://registry.npmjs.org'
-      - run: cat /home/runner/work/_temp/.npmrc
+      - run: echo $NODE_AUTH_TOKEN
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - run: yarn
       - run: lerna publish from-package --yes
         env:
