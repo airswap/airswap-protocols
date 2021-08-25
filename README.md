@@ -7,7 +7,6 @@
 [![Discord](https://img.shields.io/discord/590643190281928738.svg)](https://chat.airswap.io)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![lerna](https://img.shields.io/badge/maintained%20with-lerna-cc00ff.svg)](https://lerna.js.org/)
-[![CircleCI](https://circleci.com/gh/airswap/airswap-protocols.svg?style=svg&circle-token=73bd6668f836ce4306dbf6ca32109ddbb5b7e1fe)](https://circleci.com/gh/airswap/airswap-protocols)
 ![Twitter Follow](https://img.shields.io/twitter/follow/airswap?style=social)
 
 ## Resources
