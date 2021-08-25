@@ -1,4 +1,4 @@
-name: Tests
+name: Test
 on:
   pull_request:
     branches:
@@ -15,7 +15,7 @@ jobs:
       - run: yarn
       - run: yarn ganache > /dev/null &
       - run: yarn test
-      - name: Tests ✅
+      - name: Success ✅
         if: ${{ success() }}
         run: |
           curl --request POST           --url https://api.github.com/repos/${{ github.repository }}/statuses/${{ github.sha }}           --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}'           --header 'content-type: application/json'           --data '{
@@ -24,7 +24,7 @@ jobs:
             "description": "Tests passed",
             "target_url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           }'
-      - name: Tests 🚨
+      - name: Failure 🚨
         if: ${{ failure() }}
         run: |
           curl --request POST           --url https://api.github.com/repos/${{ github.repository }}/statuses/${{ github.sha }}           --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}'           --header 'content-type: application/json'           --data '{
