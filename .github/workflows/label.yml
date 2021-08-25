@@ -1,0 +1,17 @@
+name: Labeler
+
+on:
+  pull_request:
+    types: [opened]
+    branches:
+      - main
+
+jobs:
+  labelPR:
+    name: Add package labels to PRs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Label PRs
+        uses: adamzolyak/monorepo-pr-labeler-action@patching
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
