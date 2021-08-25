@@ -8,10 +8,13 @@ on:
 
 jobs:
   labelPR:
-    name: Add package labels to PRs
+    name: add labels
     runs-on: ubuntu-latest
     steps:
       - name: Label PRs
         uses: adamzolyak/monorepo-pr-labeler-action@patching
         env:
+          BASE_DIRS: 'source|tools'
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          prefix: ''
