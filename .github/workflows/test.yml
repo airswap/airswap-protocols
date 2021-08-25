@@ -11,7 +11,7 @@ jobs:
       - name: Test using Node.js
         uses: actions/setup-node@v1
         with:
-          node-version: '10'
+          node-version: '10.x'
       - run: yarn
       - run: yarn ganache > /dev/null &
       - run: yarn test
