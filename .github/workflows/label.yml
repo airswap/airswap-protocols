@@ -17,4 +17,4 @@ jobs:
           BASE_DIRS: 'source|tools'
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          prefix: ''
+          prefix: 'package: '
