@@ -2,6 +2,7 @@
   "name": "@airswap/deployer",
   "version": "0.1.2",
   "description": "Tools to deploy AirSwap contracts",
+  "private": true,
   "contributors": [
     "Don Mosites <don.mosites@fluidity.io>",
     "Deepa Sathaye <deepa.sathaye@fludity.io>",
