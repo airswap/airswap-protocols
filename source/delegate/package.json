@@ -36,5 +36,8 @@
     "@airswap/utils": "0.4.5",
     "ethers": "^5.0.25",
     "solidity-coverage": "^0.7.4"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

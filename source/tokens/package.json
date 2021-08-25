@@ -19,5 +19,8 @@
   },
   "dependencies": {
     "openzeppelin-solidity": "2.4"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

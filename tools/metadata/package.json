@@ -38,5 +38,8 @@
     "mocha": "^7.1.0",
     "ts-node": "^8.6.2",
     "typescript": "^3.7.5"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

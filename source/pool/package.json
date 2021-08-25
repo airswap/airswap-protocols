@@ -25,5 +25,8 @@
     "@airswap/merkle": "0.0.1",
     "@airswap/utils": "0.4.5",
     "solidity-coverage": "^0.7.13"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

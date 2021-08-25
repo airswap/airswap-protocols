@@ -36,5 +36,8 @@
     "@airswap/transfers": "1.1.4",
     "@airswap/types": "3.5.17",
     "openzeppelin-solidity": "2.4"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
