@@ -1,8 +1,6 @@
 const { expect } = require("chai");
 const timeMachine = require("ganache-time-traveler");
-const { artifacts, ethers, waffle } = require("hardhat");
-const BN = ethers.BigNumber;
-const { deployMockContract } = waffle;
+const { ethers } = require("hardhat");
 
 describe("Converter", () => {
     let snapshotId;
@@ -34,25 +32,25 @@ describe("Converter", () => {
     before(async () => {
         [deployer, account1, account2, payeeA, payeeB, payeeC, payeeD] = await ethers.getSigners();
 
-        TestAToken = await ethers.getContractFactory("ERC20PresetMinterPauser");
+        const TestAToken = await ethers.getContractFactory("ERC20PresetMinterPauser");
         testAToken = await TestAToken.deploy("TestAToken", "TESTA");
         await testAToken.deployed();
 
         await testAToken.mint(deployer.address, 1000000);
 
-        TestBToken = await ethers.getContractFactory("ERC20PresetMinterPauser");
+        const TestBToken = await ethers.getContractFactory("ERC20PresetMinterPauser");
         testBToken = await TestBToken.deploy("TestBToken", "TESTB");
         await testBToken.deployed();
 
         await testBToken.mint(deployer.address, 1000000);
 
-        SwapToToken = await ethers.getContractFactory("ERC20PresetMinterPauser");
+        const SwapToToken = await ethers.getContractFactory("ERC20PresetMinterPauser");
         swapToToken = await SwapToToken.deploy("SwapToToken", "SWAPTO");
         await swapToToken.deployed();
 
         await swapToToken.mint(deployer.address, 1000000);
 
-        UniswapV2Router02Contract = await ethers.getContractFactory("UniswapV2Router02");
+        const UniswapV2Router02Contract = await ethers.getContractFactory("UniswapV2Router02");
         uniswapV2Router02Contract = await UniswapV2Router02Contract.deploy("0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f", "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2");
         await uniswapV2Router02Contract.deployed();
 

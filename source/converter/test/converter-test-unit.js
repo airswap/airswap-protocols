@@ -133,7 +133,6 @@ describe("Converter Unit", () => {
     await converter.deployed();
 
     await testAToken.transfer(converter.address, 25000)
-
   });
 
   describe("Token Setup", async () => {
