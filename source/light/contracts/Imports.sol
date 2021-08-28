@@ -1,5 +1,6 @@
-pragma solidity ^0.6.0;
+// SPDX-License-Identifier: Apache-2.0
 
-import "@gnosis.pm/mock-contract/contracts/MockContract.sol";
-import "@openzeppelin/contracts/presets/ERC20PresetMinterPauser.sol";
+pragma solidity ^0.8.7;
+
+import "@openzeppelin/contracts/token/ERC20/presets/ERC20PresetMinterPauser.sol";
 contract Imports {}

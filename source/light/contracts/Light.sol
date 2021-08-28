@@ -12,15 +12,17 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
+
+  SPDX-License-Identifier: Apache-2.0
 */
 
 /* solhint-disable var-name-mixedcase */
-pragma solidity ^0.6.0;
+pragma solidity ^0.8.7;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import "./interfaces/ILight.sol";
 
@@ -80,7 +82,7 @@ contract Light is ILight, Ownable {
 
   address public feeWallet;
 
-  constructor(address _feeWallet, uint256 _fee) public {
+  constructor(address _feeWallet, uint256 _fee) {
     // Ensure the fee wallet is not null
     require(_feeWallet != address(0), "INVALID_FEE_WALLET");
     // Ensure the fee is less than divisor
@@ -118,9 +120,9 @@ contract Light is ILight, Ownable {
     uint256 nonce,
     uint256 expiry,
     address signerWallet,
-    IERC20 signerToken,
+    address signerToken,
     uint256 signerAmount,
-    IERC20 senderToken,
+    address senderToken,
     uint256 senderAmount,
     uint8 v,
     bytes32 r,
@@ -160,9 +162,9 @@ contract Light is ILight, Ownable {
     uint256 nonce,
     uint256 expiry,
     address signerWallet,
-    IERC20 signerToken,
+    address signerToken,
     uint256 signerAmount,
-    IERC20 senderToken,
+    address senderToken,
     uint256 senderAmount,
     uint8 v,
     bytes32 r,
@@ -197,15 +199,19 @@ contract Light is ILight, Ownable {
     }
 
     // Transfer token from sender to signer
-    senderToken.safeTransferFrom(msg.sender, signerWallet, senderAmount);
+    IERC20(senderToken).safeTransferFrom(
+      msg.sender,
+      signerWallet,
+      senderAmount
+    );
 
     // Transfer token from signer to recipient
-    signerToken.safeTransferFrom(signerWallet, recipient, signerAmount);
+    IERC20(signerToken).safeTransferFrom(signerWallet, recipient, signerAmount);
 
     // Transfer fee from signer to feeWallet
     uint256 feeAmount = signerAmount.mul(signerFee).div(FEE_DIVISOR);
     if (feeAmount > 0) {
-      signerToken.safeTransferFrom(signerWallet, feeWallet, feeAmount);
+      IERC20(signerToken).safeTransferFrom(signerWallet, feeWallet, feeAmount);
     }
 
     // Emit a Swap event
@@ -230,6 +236,7 @@ contract Light is ILight, Ownable {
     // Ensure the new fee wallet is not null
     require(newFeeWallet != address(0), "INVALID_FEE_WALLET");
     feeWallet = newFeeWallet;
+    emit SetFeeWallet(newFeeWallet);
   }
 
   /**
@@ -240,6 +247,7 @@ contract Light is ILight, Ownable {
     // Ensure the fee is less than divisor
     require(newSignerFee < FEE_DIVISOR, "INVALID_FEE");
     signerFee = newSignerFee;
+    emit SetFee(newSignerFee);
   }
 
   /**
@@ -298,7 +306,7 @@ contract Light is ILight, Ownable {
    * @notice Returns the current chainId using the chainid opcode
    * @return id uint256 The chain id
    */
-  function getChainId() public pure returns (uint256 id) {
+  function getChainId() public view returns (uint256 id) {
     // no-inline-assembly
     assembly {
       id := chainid()
@@ -344,10 +352,10 @@ contract Light is ILight, Ownable {
     uint256 nonce,
     uint256 expiry,
     address signerWallet,
-    IERC20 signerToken,
+    address signerToken,
     uint256 signerAmount,
     address senderWallet,
-    IERC20 senderToken,
+    address senderToken,
     uint256 senderAmount
   ) internal view returns (bytes32) {
     return

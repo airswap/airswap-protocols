@@ -31,6 +31,9 @@
     "hardhat": "^2.0.11",
     "solidity-coverage": "^0.7.16"
   },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.3.1"
+  },
   "publishConfig": {
     "access": "public"
   }

@@ -13,30 +13,27 @@
     "url": "https://github.com/airswap/airswap-protocols"
   },
   "scripts": {
-    "clean": "rm -rf ./build",
-    "compile": "yarn clean; truffle compile",
-    "coverage": "node --max-old-space-size=4096 ../../node_modules/.bin/truffle run coverage",
-    "test": "yarn compile; truffle test",
-    "cp_migration_flat": "mkdir -p flatten/; cp contracts/Migrations.sol flatten/",
-    "flatten": "truffle run flatten",
-    "migrate": "yarn cp_migration_flat; truffle migrate --skip-dry-run",
-    "verify": "truffle run verify"
+    "clean": "hardhat clean",
+    "compile": "hardhat compile",
+    "coverage": "hardhat coverage",
+    "test": "hardhat test"
   },
   "devDependencies": {
     "@airswap/constants": "0.4.0",
     "@airswap/test-utils": "0.1.10",
     "@airswap/tokens": "0.1.4",
     "@airswap/utils": "0.4.5",
-    "@gnosis.pm/mock-contract": "^4.0.0",
-    "bip39": "^3.0.3",
-    "ethers": "^5.0.25",
-    "solidity-coverage": "^0.7.4",
-    "solidity-docgen": "0.3.0-beta.3"
+    "@nomiclabs/hardhat-ethers": "^2.0.2",
+    "@nomiclabs/hardhat-etherscan": "^2.1.5",
+    "@nomiclabs/hardhat-truffle5": "^2.0.0",
+    "@nomiclabs/hardhat-waffle": "^2.0.1",
+    "@nomiclabs/hardhat-web3": "^2.0.0",
+    "ganache-time-traveler": "^1.0.15",
+    "hardhat": "^2.0.10",
+    "solidity-coverage": "^0.7.4"
   },
   "dependencies": {
-    "@airswap/transfers": "1.1.4",
-    "@airswap/types": "3.5.17",
-    "@openzeppelin/contracts": "^3.3.0"
+    "@openzeppelin/contracts": "^4.3.1"
   },
   "publishConfig": {
     "access": "public"

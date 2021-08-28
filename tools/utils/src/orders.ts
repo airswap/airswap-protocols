@@ -319,24 +319,37 @@ export function createLightOrder({
 
 export async function createLightSignature(
   unsignedOrder: UnsignedLightOrder,
-  privateKey: string,
+  signer: ethers.VoidSigner | string,
   swapContract: string,
   chainId: number
 ): Promise<LightSignature> {
-  const sig = sigUtil.signTypedData_v4(ethUtil.toBuffer(privateKey), {
-    data: {
-      types: EIP712Light,
-      domain: {
+  let sig
+  if (typeof signer === 'string') {
+    sig = sigUtil.signTypedData_v4(ethUtil.toBuffer(signer), {
+      data: {
+        types: EIP712Light,
+        domain: {
+          name: LIGHT_DOMAIN_NAME,
+          version: LIGHT_DOMAIN_VERSION,
+          chainId,
+          verifyingContract: swapContract,
+        },
+        primaryType: 'LightOrder',
+        message: unsignedOrder,
+      },
+    })
+  } else {
+    sig = await signer._signTypedData(
+      {
         name: LIGHT_DOMAIN_NAME,
         version: LIGHT_DOMAIN_VERSION,
         chainId,
         verifyingContract: swapContract,
       },
-      primaryType: 'LightOrder',
-      message: unsignedOrder,
-    },
-  })
-
+      { LightOrder: EIP712Light.LightOrder },
+      unsignedOrder
+    )
+  }
   const { r, s, v } = ethers.utils.splitSignature(sig)
   return { r, s, v: String(v) }
 }

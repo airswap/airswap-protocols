@@ -12,22 +12,22 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
+
+  SPDX-License-Identifier: Apache-2.0
 */
 
-pragma solidity ^0.6.0;
-
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+pragma solidity ^0.8.7;
 
 interface ILight {
   event Swap(
     uint256 indexed nonce,
     uint256 timestamp,
     address indexed signerWallet,
-    IERC20 signerToken,
+    address signerToken,
     uint256 signerAmount,
     uint256 signerFee,
     address indexed senderWallet,
-    IERC20 senderToken,
+    address senderToken,
     uint256 senderAmount
   );
 
@@ -37,14 +37,18 @@ interface ILight {
 
   event Revoke(address indexed signer, address indexed signerWallet);
 
+  event SetFee(uint256 indexed signerFee);
+
+  event SetFeeWallet(address indexed feeWallet);
+
   function swapWithRecipient(
     address recipient,
     uint256 nonce,
     uint256 expiry,
     address signerWallet,
-    IERC20 signerToken,
+    address signerToken,
     uint256 signerAmount,
-    IERC20 senderToken,
+    address senderToken,
     uint256 senderAmount,
     uint8 v,
     bytes32 r,
@@ -55,9 +59,9 @@ interface ILight {
     uint256 nonce,
     uint256 expiry,
     address signerWallet,
-    IERC20 signerToken,
+    address signerToken,
     uint256 signerAmount,
-    IERC20 senderToken,
+    address senderToken,
     uint256 senderAmount,
     uint8 v,
     bytes32 r,
