@@ -360,7 +360,7 @@ describe("Converter Unit", () => {
     });
 
     it('user can transfer swapToToken', async () => {
-      await swapToToken.transfer(converter.address, 25000)
+      await swapToToken.transfer(converter.address, 25000);
       await converter.connect(deployer).convertAndTransfer(swapToToken.address, 0);
 
       const converterTokenABalance = await swapToToken.balanceOf(converter.address);
@@ -405,27 +405,32 @@ describe("Converter Unit", () => {
 
   });
 
-  describe('Drain all', () => {
-    it('drains all the tokens held in the contract to a specified address', async () => {
-      const aAddress = testAToken.address
-      const bAddress = testBToken.address
-      const cAddress = swapToToken.address
-      const path = [aAddress, bAddress, cAddress]
-      await converter.connect(deployer).setTokenPath(aAddress, path)
-      await converter.drainto(account1.address)
-      expect(await testAToken.balanceOf(converter.address)).to.equal(0)
-      expect(await testAToken.balanceOf(account1.address)).to.equal(25000)
+  describe('Drain to', () => {
+    it('drains specified tokens held in the contract to a specified address', async () => {
+      const aAddress = testAToken.address;
+      const bAddress = testBToken.address;
+      const cAddress = swapToToken.address;
+      const path = [aAddress, bAddress, cAddress];
+      await testBToken.transfer(converter.address, 25000);
+      await swapToToken.transfer(converter.address, 25000);
+      await converter.connect(deployer).setTokenPath(aAddress, path);
+      await converter.drainTo(account1.address, path);
+      expect(await testAToken.balanceOf(converter.address)).to.equal(0);
+      expect(await testBToken.balanceOf(converter.address)).to.equal(0);
+      expect(await swapToToken.balanceOf(converter.address)).to.equal(0);
+      expect(await testAToken.balanceOf(account1.address)).to.equal(25000);
+      expect(await testBToken.balanceOf(account1.address)).to.equal(25000);
+      expect(await swapToToken.balanceOf(account1.address)).to.equal(25000);
     });
 
     it('event DrainTo is emitted when user successfully calls drainTo', async () => {
-      const aAddress = testAToken.address
-      const bAddress = testBToken.address
-      const cAddress = swapToToken.address
-      const path = [aAddress, bAddress, cAddress]
-      await converter.connect(deployer).setTokenPath(aAddress, path)
-      await expect(converter.connect(deployer).drainto(account1.address))
+      const aAddress = testAToken.address;
+      const bAddress = testBToken.address;
+      const cAddress = swapToToken.address;
+      const tokenArray = [aAddress, bAddress, cAddress];
+      await expect(converter.connect(deployer).drainTo(account1.address, tokenArray))
         .to.emit(converter, 'DrainTo')
-        .withArgs(account1.address, [aAddress, bAddress, cAddress]);
+        .withArgs([aAddress, bAddress, cAddress], account1.address);
     });
   });
 });

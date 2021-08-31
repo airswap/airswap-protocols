@@ -12,9 +12,9 @@
   },
   "scripts": {
     "clean": "rm -rf ./build",
-    "compile": "yarn clean; truffle compile",
+    "compile": "yarn clean && truffle compile",
     "coverage": "truffle run coverage",
-    "test": "yarn compile; truffle test"
+    "test": "yarn compile && truffle test"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^3.3.0"
