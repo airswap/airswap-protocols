@@ -8,7 +8,7 @@ A complete explanation of each library function, including parameter and return 
 
 - About → https://about.airswap.io/
 - Website → https://www.airswap.io/
-- Blog → https://blog.airswap.io/
+- Twitter → https://twitter.com/airswap
 - Chat → https://chat.airswap.io/
 
 [![Discord](https://img.shields.io/discord/590643190281928738.svg)](https://discord.gg/ecQbV7H)

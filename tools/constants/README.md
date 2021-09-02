@@ -10,7 +10,7 @@ Helpful Constants for AirSwap Developers
 
 - About → https://about.airswap.io/
 - Website → https://www.airswap.io/
-- Blog → https://blog.airswap.io/
+- Twitter → https://twitter.com/airswap
 - Chat → https://chat.airswap.io/
 
 ## Usage
