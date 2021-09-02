@@ -8,10 +8,10 @@ Utilities for AirSwap Developers
 
 ## Resources
 
-- Docs → https://docs.airswap.io/
+- About → https://about.airswap.io/
 - Website → https://www.airswap.io/
 - Blog → https://blog.airswap.io/
-- Support → https://support.airswap.io/
+- Chat → https://chat.airswap.io/
 
 ## Usage
 
