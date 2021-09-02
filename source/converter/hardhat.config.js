@@ -1,9 +1,9 @@
-require('dotenv').config();
-require('@nomiclabs/hardhat-ethers');
-require('@nomiclabs/hardhat-truffle5');
-require('@nomiclabs/hardhat-waffle');
-require('ganache-time-traveler');
-require("solidity-coverage");
+require('dotenv').config()
+require('@nomiclabs/hardhat-ethers')
+require('@nomiclabs/hardhat-truffle5')
+require('@nomiclabs/hardhat-waffle')
+require('ganache-time-traveler')
+require('solidity-coverage')
 
 module.exports = {
   networks: {
@@ -13,9 +13,10 @@ module.exports = {
     },
     hardhat: {
       forking: {
-        url: 'https://eth-mainnet.alchemyapi.io/v2/' + process.env.ALCHEMY_API_KEY,
+        url:
+          'https://eth-mainnet.alchemyapi.io/v2/' + process.env.ALCHEMY_API_KEY,
         blockNumber: 12904065,
-      }
+      },
     },
     coverage: {
       url: 'http://localhost:8555',
@@ -40,41 +41,41 @@ module.exports = {
     },
   },
   solidity: {
-    compilers: [{
-      version: '0.8.0',
-    },
-    {
-      version: '0.7.6',
-    },
-    {
-      version: '0.6.6',
-      settings: {          // See the solidity docs for advice about optimization and evmVersion
-        optimizer: {
-          enabled: true,
-          runs: 999999
+    compilers: [
+      {
+        version: '0.8.0',
+      },
+      {
+        version: '0.7.6',
+      },
+      {
+        version: '0.6.6',
+        settings: {
+          // See the solidity docs for advice about optimization and evmVersion
+          optimizer: {
+            enabled: true,
+            runs: 999999,
+          },
+          evmVersion: 'istanbul',
+          outputSelection: {
+            '*': {
+              '': ['ast'],
+              '*': [
+                'evm.bytecode.object',
+                'evm.deployedBytecode.object',
+                'abi',
+                'evm.bytecode.sourceMap',
+                'evm.deployedBytecode.sourceMap',
+                'metadata',
+              ],
+            },
+          },
         },
-        evmVersion: "istanbul", 
-        outputSelection: {
-         "*": {
-           "": [
-             "ast"
-           ],
-           "*": [
-             "evm.bytecode.object",
-             "evm.deployedBytecode.object",
-             "abi",
-             "evm.bytecode.sourceMap",
-             "evm.deployedBytecode.sourceMap",
-             "metadata"
-           ]
-         },
-       }
-       }
-    },
-    {
-      version: '0.5.16',
-    }
-    ]
+      },
+      {
+        version: '0.5.16',
+      },
+    ],
   },
   mocha: {
     timeout: 1000000,

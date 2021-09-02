@@ -46,10 +46,7 @@ contract Converter is Ownable, ReentrancyGuard, TokenPaymentSplitter {
     address[] recievedAddresses
   );
 
-  event DrainTo(
-    address[] tokens,
-    address dest
-  );
+  event DrainTo(address[] tokens, address dest);
 
   constructor(
     address _swapToToken,
@@ -128,12 +125,12 @@ contract Converter is Ownable, ReentrancyGuard, TokenPaymentSplitter {
       // Calls the swap function from the on-chain AMM to swap token from fee pool into reward token.
       IUniswapV2Router02(uniRouter)
         .swapExactTokensForTokensSupportingFeeOnTransferTokens(
-          tokenBalance,
-          _amountOutMin,
-          path,
-          address(this),
-          block.timestamp
-        );
+        tokenBalance,
+        _amountOutMin,
+        path,
+        address(this),
+        block.timestamp
+      );
     }
     // Calls the balanceOf function from the reward token to get the new balance post-swap.
     uint256 newTokenBalance = _balanceOfErc20(swapToToken);
@@ -143,9 +140,8 @@ contract Converter is Ownable, ReentrancyGuard, TokenPaymentSplitter {
     // Transfers remaining amount to reward payee address(es).
     uint256 totalPayeeAmount = newTokenBalance.sub(triggerFeeAmount);
     for (uint256 i = 0; i < _payees.length; i++) {
-      uint256 payeeAmount = (totalPayeeAmount.mul(_shares[_payees[i]])).div(
-        _totalShares
-      );
+      uint256 payeeAmount =
+        (totalPayeeAmount.mul(_shares[_payees[i]])).div(_totalShares);
       _transferErc20(_payees[i], swapToToken, payeeAmount);
     }
     emit ConvertAndTransfer(
@@ -163,7 +159,10 @@ contract Converter is Ownable, ReentrancyGuard, TokenPaymentSplitter {
    * @param _transferTo Address of the recipient.
    * @param _tokens List of tokens to transfer from the contract
    */
-  function drainTo(address _transferTo, address[] calldata _tokens) public onlyOwner {
+  function drainTo(address _transferTo, address[] calldata _tokens)
+    public
+    onlyOwner
+  {
     for (uint256 i = 0; i < _tokens.length; i++) {
       uint256 balance = _balanceOfErc20(_tokens[i]);
       if (balance > 0) {
