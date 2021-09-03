@@ -362,7 +362,7 @@ describe('Staking Unit', () => {
       await token.mock.transfer.returns(true)
       await staking.connect(account1).stake('100')
 
-      timeMachine.advanceTimeAndBlock(CLIFF)
+      await timeMachine.advanceTimeAndBlock(CLIFF)
       await expect(
         staking.connect(account1).unstake(['100'])
       ).to.be.revertedWith('AMOUNT_EXCEEDS_AVAILABLE')
@@ -444,7 +444,7 @@ describe('Staking Unit', () => {
       await token.mock.transfer.returns(true)
       await staking.connect(account1).stake('100')
 
-      timeMachine.advanceTimeAndBlock(5)
+      await timeMachine.advanceTimeAndBlock(5)
       const vestedAmount = await staking.vested(account1.address, '0')
       expect(vestedAmount).to.equal('5')
     })
@@ -455,7 +455,7 @@ describe('Staking Unit', () => {
       await staking.connect(deployer).setVesting(DURATION * 2, CLIFF)
       await staking.connect(account1).stake('100')
 
-      timeMachine.advanceTimeAndBlock(20)
+      await timeMachine.advanceTimeAndBlock(20)
       const vestedAmount = await staking.vested(account1.address, '0')
       expect(vestedAmount).to.equal('10')
     })
@@ -499,7 +499,7 @@ describe('Staking Unit', () => {
       await token.mock.transfer.returns(true)
       await staking.connect(account1).stake('100')
 
-      timeMachine.advanceTimeAndBlock(CLIFF - 1)
+      await timeMachine.advanceTimeAndBlock(CLIFF - 1)
       const available = await staking.available(account1.address, '0')
       expect(available).to.equal('0')
     })
@@ -523,7 +523,7 @@ describe('Staking Unit', () => {
       await token.mock.transfer.returns(true)
       await staking.connect(account1).stake('100')
 
-      timeMachine.advanceTimeAndBlock(CLIFF)
+      await timeMachine.advanceTimeAndBlock(CLIFF)
       const available = await staking.available(account1.address, '0')
       // every 1 block 1% is vested, user can only claim starting afater 10 blocks, or 10% vested
       expect(available).to.equal('10')
@@ -536,7 +536,7 @@ describe('Staking Unit', () => {
       await staking.connect(deployer).setVesting(DURATION, CLIFF)
       await staking.connect(account1).stake('100')
 
-      timeMachine.advanceTimeAndBlock(CLIFF)
+      await timeMachine.advanceTimeAndBlock(CLIFF)
       const available = await staking.available(account1.address, '1')
       // every 1 block 2% is vested, user can only claim starting afater 10 blocks, or 20% vested
       expect(available).to.equal('10')
