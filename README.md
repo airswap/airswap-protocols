@@ -22,7 +22,7 @@ Packages are versioned based on deploys. Major versions e.g. `1.x.x` are mainnet
 
 | Package                                 | Version                                                                                                   | Description                    |
 | :-------------------------------------- | :-------------------------------------------------------------------------------------------------------- | :----------------------------- |
-| [`@airswap/light`](/source/light)       | [![npm](https://img.shields.io/npm/v/@airswap/swap)](https://www.npmjs.com/package/@airswap/swap)         | Atomic Swap Between Tokens     |
+| [`@airswap/light`](/source/light)       | [![npm](https://img.shields.io/npm/v/@airswap/light)](https://www.npmjs.com/package/@airswap/light)       | Atomic Swap Between Tokens     |
 | [`@airswap/registry`](/source/registry) | [![npm](https://img.shields.io/npm/v/@airswap/registry)](https://www.npmjs.com/package/@airswap/registry) | Counterparty Discovery         |
 | [`@airswap/staking`](/source/staking)   | [![npm](https://img.shields.io/npm/v/@airswap/staking)](https://www.npmjs.com/package/@airswap/staking)   | Staking for Participation      |
 | [`@airswap/pool`](/source/pool)         | [![npm](https://img.shields.io/npm/v/@airswap/pool)](https://www.npmjs.com/package/@airswap/pool)         | Rewards Pool for Participation |
