@@ -21,10 +21,9 @@ pragma solidity ^0.8.7;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-
 import "./interfaces/ILight.sol";
+import "./interfaces/IWETH.sol";
 
 /**
  * @title Light: Simple atomic swap
@@ -82,7 +81,13 @@ contract Light is ILight, Ownable {
 
   address public feeWallet;
 
-  constructor(address _feeWallet, uint256 _fee) {
+  IWETH public wethContract;
+
+  constructor(
+    address _feeWallet,
+    uint256 _fee,
+    address _wethContract
+  ) {
     // Ensure the fee wallet is not null
     require(_feeWallet != address(0), "INVALID_FEE_WALLET");
     // Ensure the fee is less than divisor
@@ -101,10 +106,11 @@ contract Light is ILight, Ownable {
 
     feeWallet = _feeWallet;
     signerFee = _fee;
+    wethContract = IWETH(_wethContract);
   }
 
   /**
-   * @notice Atomic Token Swap
+   * @notice Atomic ERC20 Swap
    * @param nonce uint256 Unique and should be sequential
    * @param expiry uint256 Expiry in seconds since 1 January 1970
    * @param signerWallet address Wallet of the signer
@@ -144,7 +150,162 @@ contract Light is ILight, Ownable {
   }
 
   /**
-   * @notice Atomic Token Swap with Recipient
+   * @notice Atomic ERC20 Swap with Ether
+   * @param nonce uint256 Unique and should be sequential
+   * @param expiry uint256 Expiry in seconds since 1 January 1970
+   * @param signerWallet address Wallet of the signer
+   * @param signerToken address ERC20 token transferred from the signer
+   * @param signerAmount uint256 Amount transferred from the signer
+   * @param senderToken address ERC20 token transferred from the sender
+   * @param senderAmount uint256 Amount transferred from the sender
+   * @param v uint8 "v" value of the ECDSA signature
+   * @param r bytes32 "r" value of the ECDSA signature
+   * @param s bytes32 "s" value of the ECDSA signature
+   */
+  function swapWithEther(
+    uint256 nonce,
+    uint256 expiry,
+    address signerWallet,
+    address signerToken,
+    uint256 signerAmount,
+    address senderToken,
+    uint256 senderAmount,
+    uint8 v,
+    bytes32 r,
+    bytes32 s
+  ) external payable override {
+    swapWithEtherWithRecipient(
+      msg.sender,
+      nonce,
+      expiry,
+      signerWallet,
+      signerToken,
+      signerAmount,
+      senderToken,
+      senderAmount,
+      v,
+      r,
+      s
+    );
+  }
+
+  /**
+   * @notice Set the fee wallet
+   * @param newFeeWallet address Wallet to transfer signerFee to
+   */
+  function setFeeWallet(address newFeeWallet) external onlyOwner {
+    // Ensure the new fee wallet is not null
+    require(newFeeWallet != address(0), "INVALID_FEE_WALLET");
+    feeWallet = newFeeWallet;
+    emit SetFeeWallet(newFeeWallet);
+  }
+
+  /**
+   * @notice Set the fee
+   * @param newSignerFee uint256 Value of the fee in basis points
+   */
+  function setFee(uint256 newSignerFee) external onlyOwner {
+    // Ensure the fee is less than divisor
+    require(newSignerFee < FEE_DIVISOR, "INVALID_FEE");
+    signerFee = newSignerFee;
+    emit SetFee(newSignerFee);
+  }
+
+  /**
+   * @notice Authorize a signer
+   * @param signer address Wallet of the signer to authorize
+   * @dev Emits an Authorize event
+   */
+  function authorize(address signer) external override {
+    authorized[msg.sender] = signer;
+    emit Authorize(signer, msg.sender);
+  }
+
+  /**
+   * @notice Revoke authorization of a signer
+   * @dev Emits a Revoke event
+   */
+  function revoke() external override {
+    address tmp = authorized[msg.sender];
+    delete authorized[msg.sender];
+    emit Revoke(tmp, msg.sender);
+  }
+
+  /**
+   * @notice Cancel one or more nonces
+   * @dev Cancelled nonces are marked as used
+   * @dev Emits a Cancel event
+   * @dev Out of gas may occur in arrays of length > 400
+   * @param nonces uint256[] List of nonces to cancel
+   */
+  function cancel(uint256[] calldata nonces) external override {
+    for (uint256 i = 0; i < nonces.length; i++) {
+      uint256 nonce = nonces[i];
+      if (_markNonceAsUsed(msg.sender, nonce)) {
+        emit Cancel(nonce, msg.sender);
+      }
+    }
+  }
+
+  /**
+   * @notice Atomic ERC20 Swap with Ether with Recipient
+   * @param recipient Wallet of the recipient
+   * @param nonce uint256 Unique and should be sequential
+   * @param expiry uint256 Expiry in seconds since 1 January 1970
+   * @param signerWallet address Wallet of the signer
+   * @param signerToken address ERC20 token transferred from the signer
+   * @param signerAmount uint256 Amount transferred from the signer
+   * @param senderToken address ERC20 token transferred from the sender
+   * @param senderAmount uint256 Amount transferred from the sender
+   * @param v uint8 "v" value of the ECDSA signature
+   * @param r bytes32 "r" value of the ECDSA signature
+   * @param s bytes32 "s" value of the ECDSA signature
+   */
+  function swapWithEtherWithRecipient(
+    address recipient,
+    uint256 nonce,
+    uint256 expiry,
+    address signerWallet,
+    address signerToken,
+    uint256 signerAmount,
+    address senderToken,
+    uint256 senderAmount,
+    uint8 v,
+    bytes32 r,
+    bytes32 s
+  ) public payable override {
+    if (senderToken == address(wethContract)) {
+      // Ensure message value is param
+      require(senderAmount == msg.value, "VALUE_MUST_BE_SENT");
+      // Wrap (deposit) the ether
+      wethContract.deposit{value: msg.value}();
+    }
+
+    swapWithRecipient(
+      recipient,
+      nonce,
+      expiry,
+      signerWallet,
+      signerToken,
+      signerAmount,
+      senderToken,
+      senderAmount,
+      v,
+      r,
+      s
+    );
+
+    if (signerToken == address(wethContract)) {
+      // Unwrap (withdraw) the ether
+      wethContract.withdraw(signerAmount);
+      // Transfer ether to the recipient
+      (bool success, ) = msg.sender.call{value: signerAmount}("");
+      require(success, "ETH_RETURN_FAILED");
+    }
+  }
+
+  /**
+   * @notice Atomic ERC20 Swap with Recipient
    * @param recipient Wallet of the recipient
    * @param nonce uint256 Unique and should be sequential
    * @param expiry uint256 Expiry in seconds since 1 January 1970
@@ -226,64 +387,6 @@ contract Light is ILight, Ownable {
       senderToken,
       senderAmount
     );
-  }
-
-  /**
-   * @notice Set the fee wallet
-   * @param newFeeWallet address Wallet to transfer signerFee to
-   */
-  function setFeeWallet(address newFeeWallet) external onlyOwner {
-    // Ensure the new fee wallet is not null
-    require(newFeeWallet != address(0), "INVALID_FEE_WALLET");
-    feeWallet = newFeeWallet;
-    emit SetFeeWallet(newFeeWallet);
-  }
-
-  /**
-   * @notice Set the fee
-   * @param newSignerFee uint256 Value of the fee in basis points
-   */
-  function setFee(uint256 newSignerFee) external onlyOwner {
-    // Ensure the fee is less than divisor
-    require(newSignerFee < FEE_DIVISOR, "INVALID_FEE");
-    signerFee = newSignerFee;
-    emit SetFee(newSignerFee);
-  }
-
-  /**
-   * @notice Authorize a signer
-   * @param signer address Wallet of the signer to authorize
-   * @dev Emits an Authorize event
-   */
-  function authorize(address signer) external override {
-    authorized[msg.sender] = signer;
-    emit Authorize(signer, msg.sender);
-  }
-
-  /**
-   * @notice Revoke authorization of a signer
-   * @dev Emits a Revoke event
-   */
-  function revoke() external override {
-    address tmp = authorized[msg.sender];
-    delete authorized[msg.sender];
-    emit Revoke(tmp, msg.sender);
-  }
-
-  /**
-   * @notice Cancel one or more nonces
-   * @dev Cancelled nonces are marked as used
-   * @dev Emits a Cancel event
-   * @dev Out of gas may occur in arrays of length > 400
-   * @param nonces uint256[] List of nonces to cancel
-   */
-  function cancel(uint256[] calldata nonces) external override {
-    for (uint256 i = 0; i < nonces.length; i++) {
-      uint256 nonce = nonces[i];
-      if (_markNonceAsUsed(msg.sender, nonce)) {
-        emit Cancel(nonce, msg.sender);
-      }
-    }
   }
 
   /**

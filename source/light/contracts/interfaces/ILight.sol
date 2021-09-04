@@ -41,6 +41,32 @@ interface ILight {
 
   event SetFeeWallet(address indexed feeWallet);
 
+  function swap(
+    uint256 nonce,
+    uint256 expiry,
+    address signerWallet,
+    address signerToken,
+    uint256 signerAmount,
+    address senderToken,
+    uint256 senderAmount,
+    uint8 v,
+    bytes32 r,
+    bytes32 s
+  ) external;
+
+  function swapWithEther(
+    uint256 nonce,
+    uint256 expiry,
+    address signerWallet,
+    address signerToken,
+    uint256 signerAmount,
+    address senderToken,
+    uint256 senderAmount,
+    uint8 v,
+    bytes32 r,
+    bytes32 s
+  ) external payable;
+
   function swapWithRecipient(
     address recipient,
     uint256 nonce,
@@ -55,7 +81,8 @@ interface ILight {
     bytes32 s
   ) external;
 
-  function swap(
+  function swapWithEtherWithRecipient(
+    address recipient,
     uint256 nonce,
     uint256 expiry,
     address signerWallet,
@@ -66,7 +93,7 @@ interface ILight {
     uint8 v,
     bytes32 r,
     bytes32 s
-  ) external;
+  ) external payable;
 
   function authorize(address sender) external;
 
