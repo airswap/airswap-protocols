@@ -22,7 +22,7 @@
     "lint": "yarn eslint \"./test/**/*.js\"",
     "cp_migration_flat": "mkdir -p flatten/; cp contracts/Migrations.sol flatten/",
     "test": "truffle test",
-    "test:unit": "hardhat test ./test/BalanceChecker-unit.js",
+    "test:unit": "truffle test ./test/BalanceChecker-unit.js",
     "flatten": "truffle run flatten",
     "migrate": "yarn cp_migration_flat; truffle migrate --skip-dry-run",
     "verify": "truffle run verify"
