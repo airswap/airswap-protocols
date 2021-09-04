@@ -15,6 +15,8 @@ jobs:
       - run: yarn
       - run: yarn ganache > /dev/null &
       - run: yarn test
+        env:
+          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
       - name: Success ✅
         if: ${{ success() }}
         run: |
