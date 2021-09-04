@@ -14,16 +14,24 @@ export async function fetchTokens(
   let tokens = []
   const promises = await Promise.allSettled(
     known.map(async url => {
-      const res = await axios.get(url)
-      return res.data.tokens
+      try {
+        const res = await axios.get(url)
+        return res.data.tokens
+      } catch (e) {
+        return { url, message: e.message }
+      }
     })
   )
   tokens.push(...defaults)
   promises.forEach(promise => {
-    if (promise.status === 'rejected') {
-      errors.push(promise.reason.message)
+    if (promise.status === 'fulfilled') {
+      if (promise.value.message) {
+        errors.push(promise.value)
+      } else {
+        tokens.push(...promise.value)
+      }
     } else {
-      tokens.push(...promise.value)
+      errors.push(promise.reason.message)
     }
   })
   tokens = tokens.filter(token => {
