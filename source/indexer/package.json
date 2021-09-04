@@ -15,8 +15,9 @@
   },
   "scripts": {
     "clean": "rm -rf ./build",
-    "compile": "yarn clean; truffle compile",
-    "test": "yarn compile; truffle test",
+    "compile": "yarn clean && truffle compile",
+    "test": "yarn compile && truffle test",
+    "test:unit": "hardhat test ./test/Index-unit.js hardhat test ./test/Indexer-unit.js",
     "coverage": "truffle run coverage",
     "cp_migration_flat": "mkdir -p flatten/; cp contracts/Migrations.sol flatten/",
     "flatten": "truffle run flatten",
