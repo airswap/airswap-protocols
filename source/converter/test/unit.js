@@ -5,7 +5,7 @@ const { deployMockContract } = waffle
 const UniswapV2Router02 = artifacts.require('UniswapV2Router02')
 const ERC20PresetMinterPauser = artifacts.require('ERC20PresetMinterPauser')
 
-describe('Converter Unit', () => {
+describe('Converter Unit Tests', () => {
   let snapshotId
   let deployer
   let account1
@@ -29,15 +29,21 @@ describe('Converter Unit', () => {
   })
 
   before(async () => {
-    [deployer, account1, account2] = await ethers.getSigners()
+    ;[deployer, account1, account2] = await ethers.getSigners()
 
     testAToken = await deployMockContract(deployer, ERC20PresetMinterPauser.abi)
 
     testBToken = await deployMockContract(deployer, ERC20PresetMinterPauser.abi)
 
-    swapToToken = await deployMockContract(deployer, ERC20PresetMinterPauser.abi)
+    swapToToken = await deployMockContract(
+      deployer,
+      ERC20PresetMinterPauser.abi
+    )
 
-    uniswapV2Router02Contract = await deployMockContract(deployer, UniswapV2Router02.abi)
+    uniswapV2Router02Contract = await deployMockContract(
+      deployer,
+      UniswapV2Router02.abi
+    )
 
     const Converter = await ethers.getContractFactory('Converter')
     converter = await Converter.deploy(
@@ -48,7 +54,6 @@ describe('Converter Unit', () => {
       shares
     )
     await converter.deployed()
-
   })
 
   describe('Default Values', async () => {
@@ -244,7 +249,6 @@ describe('Converter Unit', () => {
   })
 
   describe('Convert and transfer', async () => {
-
     it('user can convert and transfer any token along a preset Uniswap pool path', async () => {
       const aAddress = testAToken.address
       const bAddress = testBToken.address
@@ -254,26 +258,36 @@ describe('Converter Unit', () => {
 
       const testATokenStartingBalance = 25000
 
-      await testAToken.mock.balanceOf.withArgs(converter.address).returns(testATokenStartingBalance)
+      await testAToken.mock.balanceOf
+        .withArgs(converter.address)
+        .returns(testATokenStartingBalance)
 
-      await testAToken.mock.approve.withArgs(uniswapV2Router02Contract.address, testATokenStartingBalance).returns(true)
-      await uniswapV2Router02Contract.mock.swapExactTokensForTokensSupportingFeeOnTransferTokens
-        .returns()
+      await testAToken.mock.approve
+        .withArgs(uniswapV2Router02Contract.address, testATokenStartingBalance)
+        .returns(true)
+      await uniswapV2Router02Contract.mock.swapExactTokensForTokensSupportingFeeOnTransferTokens.returns()
 
       const swapToTokenReturnBalance = 25000
 
       await swapToToken.mock.transfer.returns(true)
 
-      await swapToToken.mock.balanceOf.withArgs(converter.address).returns(swapToTokenReturnBalance)
+      await swapToToken.mock.balanceOf
+        .withArgs(converter.address)
+        .returns(swapToTokenReturnBalance)
 
-      const triggerAmount = ((swapToTokenReturnBalance * triggerFee) / 100)
-      await swapToToken.mock.balanceOf.withArgs(deployer.address).returns(triggerAmount)
+      const triggerAmount = (swapToTokenReturnBalance * triggerFee) / 100
+      await swapToToken.mock.balanceOf
+        .withArgs(deployer.address)
+        .returns(triggerAmount)
 
-      await swapToToken.mock.balanceOf.withArgs(payees[0]).returns(swapToTokenReturnBalance - triggerAmount)
+      await swapToToken.mock.balanceOf
+        .withArgs(payees[0])
+        .returns(swapToTokenReturnBalance - triggerAmount)
 
-      await expect(converter
-        .connect(deployer)
-        .convertAndTransfer(testAToken.address, 0)).to.emit(converter, 'ConvertAndTransfer')
+      await expect(
+        converter.connect(deployer).convertAndTransfer(testAToken.address, 0)
+      )
+        .to.emit(converter, 'ConvertAndTransfer')
         .withArgs(
           deployer.address,
           testAToken.address,
@@ -285,7 +299,9 @@ describe('Converter Unit', () => {
 
       const testATokenEndingBalance = swapToTokenReturnBalance - 25000
 
-      await testAToken.mock.balanceOf.withArgs(converter.address).returns(testATokenEndingBalance)
+      await testAToken.mock.balanceOf
+        .withArgs(converter.address)
+        .returns(testATokenEndingBalance)
 
       const converterTokenABalance = await testAToken.balanceOf(
         converter.address
@@ -303,26 +319,36 @@ describe('Converter Unit', () => {
     it('user can convert and transfer any token without a preset Uniswap pool path', async () => {
       const testATokenStartingBalance = 25000
 
-      await testAToken.mock.balanceOf.withArgs(converter.address).returns(testATokenStartingBalance)
+      await testAToken.mock.balanceOf
+        .withArgs(converter.address)
+        .returns(testATokenStartingBalance)
 
-      await testAToken.mock.approve.withArgs(uniswapV2Router02Contract.address, testATokenStartingBalance).returns(true)
-      await uniswapV2Router02Contract.mock.swapExactTokensForTokensSupportingFeeOnTransferTokens
-        .returns()
+      await testAToken.mock.approve
+        .withArgs(uniswapV2Router02Contract.address, testATokenStartingBalance)
+        .returns(true)
+      await uniswapV2Router02Contract.mock.swapExactTokensForTokensSupportingFeeOnTransferTokens.returns()
 
       const swapToTokenReturnBalance = 25000
 
       await swapToToken.mock.transfer.returns(true)
 
-      await swapToToken.mock.balanceOf.withArgs(converter.address).returns(swapToTokenReturnBalance)
+      await swapToToken.mock.balanceOf
+        .withArgs(converter.address)
+        .returns(swapToTokenReturnBalance)
 
-      const triggerAmount = ((swapToTokenReturnBalance * triggerFee) / 100)
-      await swapToToken.mock.balanceOf.withArgs(deployer.address).returns(triggerAmount)
+      const triggerAmount = (swapToTokenReturnBalance * triggerFee) / 100
+      await swapToToken.mock.balanceOf
+        .withArgs(deployer.address)
+        .returns(triggerAmount)
 
-      await swapToToken.mock.balanceOf.withArgs(payees[0]).returns(swapToTokenReturnBalance - triggerAmount)
+      await swapToToken.mock.balanceOf
+        .withArgs(payees[0])
+        .returns(swapToTokenReturnBalance - triggerAmount)
 
-      await expect(converter
-        .connect(deployer)
-        .convertAndTransfer(testAToken.address, 0)).to.emit(converter, 'ConvertAndTransfer')
+      await expect(
+        converter.connect(deployer).convertAndTransfer(testAToken.address, 0)
+      )
+        .to.emit(converter, 'ConvertAndTransfer')
         .withArgs(
           deployer.address,
           testAToken.address,
@@ -334,7 +360,9 @@ describe('Converter Unit', () => {
 
       const testATokenEndingBalance = swapToTokenReturnBalance - 25000
 
-      await testAToken.mock.balanceOf.withArgs(converter.address).returns(testATokenEndingBalance)
+      await testAToken.mock.balanceOf
+        .withArgs(converter.address)
+        .returns(testATokenEndingBalance)
 
       const converterTokenABalance = await testAToken.balanceOf(
         converter.address
@@ -356,11 +384,14 @@ describe('Converter Unit', () => {
 
       await swapToToken.mock.transfer.returns(true)
 
-      await swapToToken.mock.balanceOf.withArgs(converter.address).returns(swapToTokenStartingBalance)
+      await swapToToken.mock.balanceOf
+        .withArgs(converter.address)
+        .returns(swapToTokenStartingBalance)
 
-      await expect(converter
-        .connect(deployer)
-        .convertAndTransfer(swapToToken.address, 0)).to.emit(converter, 'ConvertAndTransfer')
+      await expect(
+        converter.connect(deployer).convertAndTransfer(swapToToken.address, 0)
+      )
+        .to.emit(converter, 'ConvertAndTransfer')
         .withArgs(
           deployer.address,
           swapToToken.address,
@@ -372,10 +403,14 @@ describe('Converter Unit', () => {
 
       await swapToToken.mock.balanceOf.withArgs(converter.address).returns(0)
 
-      const triggerAmount = ((swapToTokenStartingBalance * triggerFee) / 100)
-      await swapToToken.mock.balanceOf.withArgs(deployer.address).returns(triggerAmount)
+      const triggerAmount = (swapToTokenStartingBalance * triggerFee) / 100
+      await swapToToken.mock.balanceOf
+        .withArgs(deployer.address)
+        .returns(triggerAmount)
 
-      await swapToToken.mock.balanceOf.withArgs(payees[0]).returns(swapToTokenStartingBalance - triggerAmount)
+      await swapToToken.mock.balanceOf
+        .withArgs(payees[0])
+        .returns(swapToTokenStartingBalance - triggerAmount)
 
       const converterSwapToTokenBalance = await swapToToken.balanceOf(
         converter.address
@@ -393,22 +428,22 @@ describe('Converter Unit', () => {
     it('user cannot convert and transfer a token with a balance of zero', async () => {
       const testATokenStartingBalance = 0
 
-      await testAToken.mock.balanceOf.withArgs(converter.address).returns(testATokenStartingBalance)
+      await testAToken.mock.balanceOf
+        .withArgs(converter.address)
+        .returns(testATokenStartingBalance)
 
-      await expect(converter
-        .connect(deployer)
-        .convertAndTransfer(testAToken.address, 0)).to.revertedWith('Token balance is zero')
+      await expect(
+        converter.connect(deployer).convertAndTransfer(testAToken.address, 0)
+      ).to.revertedWith('Token balance is zero')
     })
 
     it('user cannot convert and transfer a token if payees are zero', async () => {
       const payeeAddress = await converter.payee(0)
-      await converter
-        .connect(deployer)
-        .removePayee(payeeAddress, 0)
+      await converter.connect(deployer).removePayee(payeeAddress, 0)
 
-      await expect(converter
-        .connect(deployer)
-        .convertAndTransfer(testAToken.address, 0)).to.revertedWith('No payees are set')
+      await expect(
+        converter.connect(deployer).convertAndTransfer(testAToken.address, 0)
+      ).to.revertedWith('No payees are set')
     })
   })
 
@@ -420,16 +455,28 @@ describe('Converter Unit', () => {
       const tokenAddresses = [aAddress, bAddress, cAddress]
       const tokenStartingBalance = 25000
 
-      await testAToken.mock.balanceOf.withArgs(converter.address).returns(tokenStartingBalance)
-      await testBToken.mock.balanceOf.withArgs(converter.address).returns(tokenStartingBalance)
-      await swapToToken.mock.balanceOf.withArgs(converter.address).returns(tokenStartingBalance)
+      await testAToken.mock.balanceOf
+        .withArgs(converter.address)
+        .returns(tokenStartingBalance)
+      await testBToken.mock.balanceOf
+        .withArgs(converter.address)
+        .returns(tokenStartingBalance)
+      await swapToToken.mock.balanceOf
+        .withArgs(converter.address)
+        .returns(tokenStartingBalance)
 
-      await testAToken.mock.transfer.withArgs(account1.address, tokenStartingBalance).returns(true)
-      await testBToken.mock.transfer.withArgs(account1.address, tokenStartingBalance).returns(true)
-      await swapToToken.mock.transfer.withArgs(account1.address, tokenStartingBalance).returns(true)
+      await testAToken.mock.transfer
+        .withArgs(account1.address, tokenStartingBalance)
+        .returns(true)
+      await testBToken.mock.transfer
+        .withArgs(account1.address, tokenStartingBalance)
+        .returns(true)
+      await swapToToken.mock.transfer
+        .withArgs(account1.address, tokenStartingBalance)
+        .returns(true)
 
-      await expect(converter.drainTo(account1.address, tokenAddresses)).to.emit(
-        converter, 'DrainTo')
+      await expect(converter.drainTo(account1.address, tokenAddresses))
+        .to.emit(converter, 'DrainTo')
         .withArgs([aAddress, bAddress, cAddress], account1.address)
     })
   })

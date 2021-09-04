@@ -2,7 +2,7 @@ const { expect } = require('chai')
 const timeMachine = require('ganache-time-traveler')
 const { ethers } = require('hardhat')
 
-describe('Converter', () => {
+describe('Converter Integration Tests', () => {
   let snapshotId
   let deployer
   let payeeA
@@ -75,7 +75,7 @@ describe('Converter', () => {
       250000,
       250000,
       deployer.address,
-      1627647649
+      1700000000
     )
 
     await uniswapV2Router02Contract.addLiquidity(
@@ -86,7 +86,7 @@ describe('Converter', () => {
       250000,
       250000,
       deployer.address,
-      1627647649
+      1700000000
     )
 
     await uniswapV2Router02Contract.addLiquidity(
@@ -97,7 +97,7 @@ describe('Converter', () => {
       250000,
       250000,
       deployer.address,
-      1627647649
+      1700000000
     )
 
     await uniswapV2Router02Contract.addLiquidityETH(
@@ -106,7 +106,7 @@ describe('Converter', () => {
       250000,
       250000,
       deployer.address,
-      1628647649,
+      1700000000,
       { value: 250000 }
     )
 
@@ -116,7 +116,7 @@ describe('Converter', () => {
       250000,
       250000,
       deployer.address,
-      1628647649,
+      1700000000,
       { value: 250000 }
     )
 
@@ -126,7 +126,7 @@ describe('Converter', () => {
       250000,
       250000,
       deployer.address,
-      1628647649,
+      1700000000,
       { value: 250000 }
     )
 
@@ -242,9 +242,9 @@ describe('Converter', () => {
       expect(newPayeeDShares).to.equal(payeeDShares)
       expect(endingTotalShares).to.equal(
         parseFloat(beginningTotalShares) +
-        payeeBShares +
-        payeeCShares +
-        payeeDShares
+          payeeBShares +
+          payeeCShares +
+          payeeDShares
       )
     })
 
