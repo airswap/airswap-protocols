@@ -18,16 +18,6 @@ describe('Metadata: Mainnet', async () => {
   it('checks that ETH does not exist', async () => {
     expect(findTokenByAddress(ADDRESS_ZERO, result.tokens)).to.be.undefined
   })
-  it('checks that WETH exists', async () => {
-    expect(findTokenByAddress(wethAddresses[chainIds.MAINNET], result.tokens))
-      .to.not.be.undefined
-    expect(findTokensBySymbol('WETH', result.tokens)[0].address).to.equal(
-      wethAddresses[chainIds.MAINNET]
-    )
-    expect(firstTokenBySymbol('WETH', result.tokens).address).to.equal(
-      wethAddresses[chainIds.MAINNET]
-    )
-  })
 })
 
 describe('Metadata: Rinkeby', async () => {
