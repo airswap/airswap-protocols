@@ -14,9 +14,9 @@ const IWETH = artifacts.require('IWETH')
 describe('Light Unit Tests', () => {
   let snapshotId
   let light
-  let lightFactory
+  let wrapper
 
-  let wethToken
+  let weth
   let signerToken
   let senderToken
 
@@ -71,18 +71,22 @@ describe('Light Unit Tests', () => {
     await signerToken.mock.transferFrom.returns(true)
     await senderToken.mock.transferFrom.returns(true)
 
-    wethToken = await deployMockContract(deployer, IWETH.abi)
-    await wethToken.mock.deposit.returns()
-    await wethToken.mock.withdraw.returns()
-    await wethToken.mock.transferFrom.returns(true)
+    weth = await deployMockContract(deployer, IWETH.abi)
+    await weth.mock.deposit.returns()
+    await weth.mock.withdraw.returns()
+    await weth.mock.transferFrom.returns(true)
 
-    lightFactory = await ethers.getContractFactory('Light')
-    light = await lightFactory.deploy(
+    light = await (await ethers.getContractFactory('Light')).deploy(
       feeWallet.address,
-      SIGNER_FEE,
-      wethToken.address
+      SIGNER_FEE
     )
     await light.deployed()
+
+    wrapper = await (await ethers.getContractFactory('Wrapper')).deploy(
+      light.address,
+      weth.address
+    )
+    await wrapper.deployed()
   })
 
   describe('Default Values', async () => {
@@ -95,13 +99,19 @@ describe('Light Unit Tests', () => {
 
     it('test invalid feeWallet', async () => {
       await expect(
-        lightFactory.deploy(ADDRESS_ZERO, SIGNER_FEE, ADDRESS_ZERO)
+        (await ethers.getContractFactory('Light')).deploy(
+          ADDRESS_ZERO,
+          SIGNER_FEE
+        )
       ).to.be.revertedWith('INVALID_FEE_WALLET')
     })
 
     it('test invalid fee', async () => {
       await expect(
-        lightFactory.deploy(feeWallet.address, 100000000000, ADDRESS_ZERO)
+        (await ethers.getContractFactory('Light')).deploy(
+          feeWallet.address,
+          100000000000
+        )
       ).to.be.revertedWith('INVALID_FEE')
     })
   })
@@ -327,37 +337,46 @@ describe('Light Unit Tests', () => {
     it('test wrapped swap fails without value', async () => {
       const order = await createSignedOrder(
         {
-          senderToken: wethToken.address,
+          senderToken: weth.address,
         },
         signer
       )
-
-      await expect(
-        light.connect(sender).swapWithEther(...order)
-      ).to.be.revertedWith('VALUE_MUST_BE_SENT')
+      await expect(wrapper.connect(sender).swap(...order)).to.be.revertedWith(
+        'VALUE_MUST_BE_SENT'
+      )
     })
 
-    it('test wrap', async () => {
+    it('test wrap (deposit)', async () => {
       const order = await createSignedOrder(
         {
-          senderToken: wethToken.address,
+          senderToken: weth.address,
+          senderWallet: wrapper.address,
         },
         signer
       )
+      await weth.mock.transferFrom.returns(false)
+      await weth.mock.transferFrom
+        .withArgs(wrapper.address, signer.address, DEFAULT_AMOUNT)
+        .returns(true)
+
       await expect(
-        light.connect(sender).swapWithEther(...order, { value: DEFAULT_AMOUNT })
+        wrapper.connect(sender).swap(...order, { value: DEFAULT_AMOUNT })
       ).to.emit(light, 'Swap')
     })
 
-    it('test unwrap', async () => {
+    it('test unwrap (withdraw)', async () => {
       const order = await createSignedOrder(
         {
-          signerToken: wethToken.address,
+          signerToken: weth.address,
+          senderWallet: wrapper.address,
         },
         signer
       )
+      await weth.mock.transferFrom.returns(true)
+      await senderToken.mock.transferFrom.returns(true)
+
       await expect(
-        light.connect(sender).swapWithEther(...order, { value: DEFAULT_AMOUNT })
+        wrapper.connect(sender).swap(...order, { value: DEFAULT_AMOUNT })
       ).to.emit(light, 'Swap')
     })
   })

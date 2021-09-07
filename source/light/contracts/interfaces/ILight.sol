@@ -16,7 +16,7 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-pragma solidity ^0.8.7;
+pragma solidity ^0.8.0;
 
 interface ILight {
   event Swap(
@@ -54,19 +54,6 @@ interface ILight {
     bytes32 s
   ) external;
 
-  function swapWithEther(
-    uint256 nonce,
-    uint256 expiry,
-    address signerWallet,
-    address signerToken,
-    uint256 signerAmount,
-    address senderToken,
-    uint256 senderAmount,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
-  ) external payable;
-
   function swapWithRecipient(
     address recipient,
     uint256 nonce,
@@ -80,20 +67,6 @@ interface ILight {
     bytes32 r,
     bytes32 s
   ) external;
-
-  function swapWithEtherWithRecipient(
-    address recipient,
-    uint256 nonce,
-    uint256 expiry,
-    address signerWallet,
-    address signerToken,
-    uint256 signerAmount,
-    address senderToken,
-    uint256 senderAmount,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
-  ) external payable;
 
   function authorize(address sender) external;
 

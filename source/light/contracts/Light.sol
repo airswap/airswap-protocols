@@ -17,13 +17,12 @@
 */
 
 /* solhint-disable var-name-mixedcase */
-pragma solidity ^0.8.7;
+pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/ILight.sol";
-import "./interfaces/IWETH.sol";
 
 /**
  * @title Light: Simple atomic swap
@@ -81,13 +80,7 @@ contract Light is ILight, Ownable {
 
   address public feeWallet;
 
-  IWETH public wethContract;
-
-  constructor(
-    address _feeWallet,
-    uint256 _fee,
-    address _wethContract
-  ) {
+  constructor(address _feeWallet, uint256 _fee) {
     // Ensure the fee wallet is not null
     require(_feeWallet != address(0), "INVALID_FEE_WALLET");
     // Ensure the fee is less than divisor
@@ -106,7 +99,6 @@ contract Light is ILight, Ownable {
 
     feeWallet = _feeWallet;
     signerFee = _fee;
-    wethContract = IWETH(_wethContract);
   }
 
   /**
@@ -135,46 +127,6 @@ contract Light is ILight, Ownable {
     bytes32 s
   ) external override {
     swapWithRecipient(
-      msg.sender,
-      nonce,
-      expiry,
-      signerWallet,
-      signerToken,
-      signerAmount,
-      senderToken,
-      senderAmount,
-      v,
-      r,
-      s
-    );
-  }
-
-  /**
-   * @notice Atomic ERC20 Swap with Ether
-   * @param nonce uint256 Unique and should be sequential
-   * @param expiry uint256 Expiry in seconds since 1 January 1970
-   * @param signerWallet address Wallet of the signer
-   * @param signerToken address ERC20 token transferred from the signer
-   * @param signerAmount uint256 Amount transferred from the signer
-   * @param senderToken address ERC20 token transferred from the sender
-   * @param senderAmount uint256 Amount transferred from the sender
-   * @param v uint8 "v" value of the ECDSA signature
-   * @param r bytes32 "r" value of the ECDSA signature
-   * @param s bytes32 "s" value of the ECDSA signature
-   */
-  function swapWithEther(
-    uint256 nonce,
-    uint256 expiry,
-    address signerWallet,
-    address signerToken,
-    uint256 signerAmount,
-    address senderToken,
-    uint256 senderAmount,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
-  ) external payable override {
-    swapWithEtherWithRecipient(
       msg.sender,
       nonce,
       expiry,
@@ -244,63 +196,6 @@ contract Light is ILight, Ownable {
       if (_markNonceAsUsed(msg.sender, nonce)) {
         emit Cancel(nonce, msg.sender);
       }
-    }
-  }
-
-  /**
-   * @notice Atomic ERC20 Swap with Ether with Recipient
-   * @param recipient Wallet of the recipient
-   * @param nonce uint256 Unique and should be sequential
-   * @param expiry uint256 Expiry in seconds since 1 January 1970
-   * @param signerWallet address Wallet of the signer
-   * @param signerToken address ERC20 token transferred from the signer
-   * @param signerAmount uint256 Amount transferred from the signer
-   * @param senderToken address ERC20 token transferred from the sender
-   * @param senderAmount uint256 Amount transferred from the sender
-   * @param v uint8 "v" value of the ECDSA signature
-   * @param r bytes32 "r" value of the ECDSA signature
-   * @param s bytes32 "s" value of the ECDSA signature
-   */
-  function swapWithEtherWithRecipient(
-    address recipient,
-    uint256 nonce,
-    uint256 expiry,
-    address signerWallet,
-    address signerToken,
-    uint256 signerAmount,
-    address senderToken,
-    uint256 senderAmount,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
-  ) public payable override {
-    if (senderToken == address(wethContract)) {
-      // Ensure message value is param
-      require(senderAmount == msg.value, "VALUE_MUST_BE_SENT");
-      // Wrap (deposit) the ether
-      wethContract.deposit{value: msg.value}();
-    }
-
-    swapWithRecipient(
-      recipient,
-      nonce,
-      expiry,
-      signerWallet,
-      signerToken,
-      signerAmount,
-      senderToken,
-      senderAmount,
-      v,
-      r,
-      s
-    );
-
-    if (signerToken == address(wethContract)) {
-      // Unwrap (withdraw) the ether
-      wethContract.withdraw(signerAmount);
-      // Transfer ether to the recipient
-      (bool success, ) = msg.sender.call{value: signerAmount}("");
-      require(success, "ETH_RETURN_FAILED");
     }
   }
 
