@@ -99,9 +99,10 @@ contract LightValidator {
       }
     }
     //accounts & balances check
-    uint256 senderBalance = IERC20(senderToken).balanceOf(msg.sender);
+    uint256 senderBalance = IERC20(senderToken).balanceOf(senderWallet);
     uint256 signerBalance = IERC20(signerToken).balanceOf(signerWallet);
-    uint256 senderAllowance = IERC20(senderToken).allowance(msg.sender, light);
+    uint256 senderAllowance =
+      IERC20(senderToken).allowance(senderWallet, light);
     uint256 signerAllowance =
       IERC20(signerToken).allowance(signerWallet, light);
 
@@ -181,7 +182,9 @@ contract LightValidator {
     bytes32 s
   ) internal view returns (address) {
     bytes32 digest =
-      keccak256(abi.encodePacked("\x19\x01", light.DOMAIN_SEPARATOR(), hash));
+      keccak256(
+        abi.encodePacked("\x19\x01", Light(light).DOMAIN_SEPARATOR(), hash)
+      );
     address signatory = ecrecover(digest, v, r, s);
     return signatory;
   }
