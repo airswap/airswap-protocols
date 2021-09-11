@@ -64,7 +64,8 @@ contract LightValidator {
     uint256 senderAmount,
     uint8 v,
     bytes32 r,
-    bytes32 s
+    bytes32 s,
+    address senderWallet
   ) public returns (uint256, bytes32[] memory) {
     bytes32[] memory errors = new bytes32[](MAX_ERROR_COUNT);
     uint256 errCount;
@@ -75,7 +76,7 @@ contract LightValidator {
         signerWallet,
         signerToken,
         signerAmount,
-        msg.sender,
+        senderWallet,
         senderToken,
         senderAmount
       );
@@ -158,7 +159,7 @@ contract LightValidator {
           signerWallet,
           signerToken,
           signerAmount,
-          signerFee,
+          Light(light).signerFee(),
           senderWallet,
           senderToken,
           senderAmount
