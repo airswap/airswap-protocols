@@ -12,10 +12,7 @@ import "../../light/contracts/Light.sol";
  */
 
 contract LightValidator {
-  bytes internal constant DOM_VERSION = "3";
-  bytes internal constant DOM_NAME = "SWAP_LIGHT";
   address public immutable light;
-
   bytes32 public constant LIGHT_ORDER_TYPEHASH =
     keccak256(
       abi.encodePacked(
@@ -32,7 +29,6 @@ contract LightValidator {
         ")"
       )
     );
-
   // size of fixed array that holds max returning error messages
   uint256 internal constant MAX_ERROR_COUNT = 8;
 
