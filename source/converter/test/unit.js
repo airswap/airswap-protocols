@@ -3,7 +3,9 @@ const timeMachine = require('ganache-time-traveler')
 const { artifacts, ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
 const UniswapV2Router02 = artifacts.require('UniswapV2Router02')
-const ERC20PresetMinterPauser = artifacts.require('ERC20PresetMinterPauser')
+const IERC20 = artifacts.require(
+  '@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20'
+)
 
 describe('Converter Unit Tests', () => {
   let snapshotId
@@ -15,6 +17,7 @@ describe('Converter Unit Tests', () => {
   let swapToToken
   let uniswapV2Router02Contract
   let converter
+  const wETH = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
   const triggerFee = 1
   const payees = ['0x7296333e1615721f4Bd9Df1a3070537484A50CF8']
   const shares = [10]
@@ -31,14 +34,11 @@ describe('Converter Unit Tests', () => {
   before(async () => {
     ;[deployer, account1, account2] = await ethers.getSigners()
 
-    testAToken = await deployMockContract(deployer, ERC20PresetMinterPauser.abi)
+    testAToken = await deployMockContract(deployer, IERC20.abi)
 
-    testBToken = await deployMockContract(deployer, ERC20PresetMinterPauser.abi)
+    testBToken = await deployMockContract(deployer, IERC20.abi)
 
-    swapToToken = await deployMockContract(
-      deployer,
-      ERC20PresetMinterPauser.abi
-    )
+    swapToToken = await deployMockContract(deployer, IERC20.abi)
 
     uniswapV2Router02Contract = await deployMockContract(
       deployer,
@@ -47,6 +47,7 @@ describe('Converter Unit Tests', () => {
 
     const Converter = await ethers.getContractFactory('Converter')
     converter = await Converter.deploy(
+      wETH,
       swapToToken.address,
       uniswapV2Router02Contract.address,
       triggerFee,
@@ -88,7 +89,7 @@ describe('Converter Unit Tests', () => {
         converter
           .connect(deployer)
           .setSwapToToken('0x0000000000000000000000000000000000000000')
-      ).to.be.revertedWith('Cannot set to zero address')
+      ).to.be.revertedWith('MUST_BE_VALID_ADDRESS')
     })
 
     it('owner can set swapToToken', async () => {
@@ -113,7 +114,7 @@ describe('Converter Unit Tests', () => {
     it('owner cannot set triggerFee greater than 100', async () => {
       await expect(
         converter.connect(deployer).setTriggerFee(101)
-      ).to.be.revertedWith('Cannot set trigger fee above 100')
+      ).to.be.revertedWith('FEE_TOO_HIGH')
     })
 
     it('owner can set triggerFee', async () => {
@@ -145,16 +146,6 @@ describe('Converter Unit Tests', () => {
       expect(_tokenPath[0]).to.equal(testAToken.address)
       expect(_tokenPath[1]).to.equal(testBToken.address)
       expect(_tokenPath[2]).to.equal(swapToToken.address)
-    })
-
-    it('token is added to current tokens list', async () => {
-      const aAddress = testAToken.address
-      const bAddress = testBToken.address
-      const cAddress = swapToToken.address
-      const path = [aAddress, bAddress, cAddress]
-      await converter.connect(deployer).setTokenPath(aAddress, path)
-      const addedToken = await converter.currTokens(0)
-      expect(addedToken).to.equal(aAddress)
     })
   })
 
@@ -434,7 +425,7 @@ describe('Converter Unit Tests', () => {
 
       await expect(
         converter.connect(deployer).convertAndTransfer(testAToken.address, 0)
-      ).to.revertedWith('Token balance is zero')
+      ).to.revertedWith('NO_BALANCE_TO_CONVERT')
     })
 
     it('user cannot convert and transfer a token if payees are zero', async () => {
@@ -443,7 +434,7 @@ describe('Converter Unit Tests', () => {
 
       await expect(
         converter.connect(deployer).convertAndTransfer(testAToken.address, 0)
-      ).to.revertedWith('No payees are set')
+      ).to.revertedWith('PAYEES_MUST_BE_SET')
     })
   })
 

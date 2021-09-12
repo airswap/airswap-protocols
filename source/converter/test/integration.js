@@ -14,7 +14,7 @@ describe('Converter Integration Tests', () => {
   let swapToToken
   let uniswapV2Router02Contract
   let converter
-  let uniRouter
+  const wETH = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
   const triggerFee = 1
   const shares = [10]
 
@@ -130,12 +130,11 @@ describe('Converter Integration Tests', () => {
       { value: 250000 }
     )
 
-    uniRouter = uniswapV2Router02Contract.address
-
     const Converter = await ethers.getContractFactory('Converter')
     converter = await Converter.deploy(
+      wETH,
       swapToToken.address,
-      uniRouter,
+      uniswapV2Router02Contract.address,
       triggerFee,
       [payeeA.address],
       shares
@@ -172,7 +171,7 @@ describe('Converter Integration Tests', () => {
 
       expect(owner).to.equal(deployer.address)
       expect(swapToTokenAddress).to.equal(swapToToken.address)
-      expect(uniRouterAddress).to.equal(uniRouter)
+      expect(uniRouterAddress).to.equal(uniswapV2Router02Contract.address)
       expect(triggerFeeAmount).to.equal(triggerFee)
       expect(payeesAddress).to.equal(payeeA.address)
       expect(sharesAmount).to.equal(shares[0])
@@ -180,7 +179,7 @@ describe('Converter Integration Tests', () => {
   })
 
   describe('Add and remove payees and convert and transfer', async () => {
-    it('multiple payees with even number of shares are added to fee receiver contract', async () => {
+    it('multiple payees with even number of shares are added to converter contract', async () => {
       const payeeShares = 10
       const beginningTotalShares = await converter.totalShares()
 
@@ -211,7 +210,7 @@ describe('Converter Integration Tests', () => {
       )
     })
 
-    it('multiple payees with uneven number of shares are added to fee receiver contract', async () => {
+    it('multiple payees with uneven number of shares are added to converter contract', async () => {
       const payeeAShares = 10
       const payeeBShares = 5
       const payeeCShares = 11

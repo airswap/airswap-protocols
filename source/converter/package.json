@@ -1,7 +1,7 @@
 {
   "name": "@airswap/converter",
   "version": "0.0.0",
-  "description": "Converter of AirSwap fees",
+  "description": "Converts and distributes token balances to recipients",
   "contributors": [
     "Martin Sterlicchi",
     "Hassan Malik",
@@ -21,6 +21,7 @@
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "2.0.2",
+    "@nomiclabs/hardhat-etherscan": "^2.1.6",
     "@nomiclabs/hardhat-truffle5": "2.0.0",
     "@nomiclabs/hardhat-waffle": "2.0.1",
     "@nomiclabs/hardhat-web3": "2.0.0",

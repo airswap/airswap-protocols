@@ -2,7 +2,6 @@
 
 pragma solidity ^0.8.4;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -23,8 +22,7 @@ contract Converter is Ownable, ReentrancyGuard, TokenPaymentSplitter {
   using SafeMath for uint256;
   using SafeERC20 for IERC20;
 
-  address public constant WETH =
-    address(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
+  address public wETH;
 
   address public swapToToken;
 
@@ -34,12 +32,10 @@ contract Converter is Ownable, ReentrancyGuard, TokenPaymentSplitter {
 
   mapping(address => address[]) private tokenPathMapping;
 
-  address[] public currTokens;
-
   event ConvertAndTransfer(
     address triggerAccount,
-    IERC20 swapFromToken,
-    IERC20 swapToToken,
+    address swapFromToken,
+    address swapToToken,
     uint256 amountTokenFrom,
     uint256 amountTokenTo,
     address[] recievedAddresses
@@ -48,22 +44,32 @@ contract Converter is Ownable, ReentrancyGuard, TokenPaymentSplitter {
   event DrainTo(address[] tokens, address dest);
 
   constructor(
+    address _wETH,
     address _swapToToken,
     address _uniRouter,
     uint256 _triggerFee,
     address[] memory _payees,
     uint256[] memory _shares
   ) TokenPaymentSplitter(_payees, _shares) {
+    wETH = _wETH;
     swapToToken = _swapToToken;
     uniRouter = _uniRouter;
     setTriggerFee(_triggerFee);
   }
 
   /**
+   * @dev Set a new address for WETH.
+   **/
+  function setWETH(address _swapWETH) public onlyOwner {
+    require(_swapWETH != address(0), "MUST_BE_VALID_ADDRESS");
+    wETH = _swapWETH;
+  }
+
+  /**
    * @dev Set a new token to swap to (e.g., stabletoken).
    **/
   function setSwapToToken(address _swapToToken) public onlyOwner {
-    require(_swapToToken != address(0), "Cannot set to zero address");
+    require(_swapToToken != address(0), "MUST_BE_VALID_ADDRESS");
     swapToToken = _swapToToken;
   }
 
@@ -71,7 +77,7 @@ contract Converter is Ownable, ReentrancyGuard, TokenPaymentSplitter {
    * @dev Set a new fee (perentage 0 - 100) for calling the ConvertAndTransfer function.
    */
   function setTriggerFee(uint256 _triggerFee) public onlyOwner {
-    require(_triggerFee <= 100, "Cannot set trigger fee above 100");
+    require(_triggerFee <= 100, "FEE_TOO_HIGH");
     triggerFee = _triggerFee;
   }
 
@@ -85,7 +91,6 @@ contract Converter is Ownable, ReentrancyGuard, TokenPaymentSplitter {
     uint256 pathLength = _tokenPath.length;
     for (uint256 i = 0; i < pathLength; i++) {
       tokenPathMapping[_token].push(_tokenPath[i]);
-      currTokens.push(_token);
     }
   }
 
@@ -100,11 +105,11 @@ contract Converter is Ownable, ReentrancyGuard, TokenPaymentSplitter {
     nonReentrant
   {
     // Checks that at least 1 payee is set to recieve converted token.
-    require(_payees.length >= 1, "No payees are set");
+    require(_payees.length >= 1, "PAYEES_MUST_BE_SET");
     // Calls the balanceOf function from the to be converted token.
     uint256 tokenBalance = _balanceOfErc20(_swapFromToken);
     // Checks that the converted token is currently present in the contract.
-    require(tokenBalance > 0, "Token balance is zero");
+    require(tokenBalance > 0, "NO_BALANCE_TO_CONVERT");
     // Approve token for AMM usage.
     _approveErc20(_swapFromToken, tokenBalance);
     // Read or set the path for AMM.
@@ -113,10 +118,9 @@ contract Converter is Ownable, ReentrancyGuard, TokenPaymentSplitter {
       if (tokenPathMapping[_swapFromToken].length > 0) {
         path = getTokenPath(_swapFromToken);
       } else {
-        currTokens.push(_swapFromToken);
         tokenPathMapping[_swapFromToken].push(_swapFromToken);
-        tokenPathMapping[_swapFromToken].push(WETH);
-        if (swapToToken != WETH) {
+        tokenPathMapping[_swapFromToken].push(wETH);
+        if (swapToToken != wETH) {
           tokenPathMapping[_swapFromToken].push(swapToToken);
         }
         path = getTokenPath(_swapFromToken);
@@ -145,8 +149,8 @@ contract Converter is Ownable, ReentrancyGuard, TokenPaymentSplitter {
     }
     emit ConvertAndTransfer(
       msg.sender,
-      IERC20(_swapFromToken),
-      IERC20(swapToToken),
+      _swapFromToken,
+      swapToToken,
       tokenBalance,
       totalPayeeAmount,
       _payees
@@ -208,9 +212,7 @@ contract Converter is Ownable, ReentrancyGuard, TokenPaymentSplitter {
    *
    * */
   function _approveErc20(address _tokenToApprove, uint256 _amount) internal {
-    IERC20 erc;
-    erc = IERC20(_tokenToApprove);
-    require(erc.approve(address(uniRouter), _amount), "approve failed");
+    require(IERC20(_tokenToApprove).approve(address(uniRouter), _amount), "APPROVE_FAILED");
   }
 
   /**
@@ -225,13 +227,7 @@ contract Converter is Ownable, ReentrancyGuard, TokenPaymentSplitter {
     address _tokenContract,
     uint256 _transferAmount
   ) internal {
-    IERC20 erc;
-    erc = IERC20(_tokenContract);
-    require(
-      erc.balanceOf(address(this)) >= _transferAmount,
-      "Not enough funds to transfer"
-    );
-    erc.safeTransfer(_recipient, _transferAmount);
+    IERC20(_tokenContract).safeTransfer(_recipient, _transferAmount);
   }
 
   /**
