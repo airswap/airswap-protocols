@@ -48,6 +48,7 @@ contract LightValidator {
    * @param v uint8 "v" value of the ECDSA signature
    * @param r bytes32 "r" value of the ECDSA signature
    * @param s bytes32 "s" value of the ECDSA signature
+   * @param senderWallet address Wallet of the sender
    * @return tuple of error count and bytes32[] memory array of error messages
    */
   function checkSwap(
@@ -133,6 +134,7 @@ contract LightValidator {
    * @param signerWallet address
    * @param signerToken address
    * @param signerAmount uint256
+   * @param senderWallet address
    * @param senderToken address
    * @param senderAmount uint256
    * @return bytes32
