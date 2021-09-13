@@ -36,5 +36,8 @@
     "ganache-time-traveler": "1.0.15",
     "hardhat": "2.5.0",
     "solidity-coverage": "0.7.16"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
