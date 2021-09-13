@@ -15,71 +15,73 @@
 */
 
 import { ethers } from 'ethers'
-import * as url from 'url'
-import { Client, JSONRPCRequest } from 'jayson'
 import { REQUEST_TIMEOUT } from '@airswap/constants'
-import { parseUrl, flattenObject, isValidQuote } from '@airswap/utils'
+import { parseUrl, flattenObject } from '@airswap/utils'
 import { Quote, LightOrder } from '@airswap/types'
 import { Light } from './Light'
-import { isBrowser } from 'browser-or-node'
+import { HTTPServer } from './HTTPServer'
 
-export class Server {
-  private client: Client
-  private swapContract: string
+export interface SupportedProtocolInfo {
+  name: string
+  version: string
+  params?: any
+}
+
+interface LocatorOptions {
+  protocol: string
+  hostname: string
+  port: string
+  timeout?: number
+}
+
+export abstract class Server {
+  protected swapContract: string
+  protected locatorUrl: ReturnType<typeof parseUrl>
+  protected locatorOptions: LocatorOptions
+  protected supportedProtocols: SupportedProtocolInfo[]
 
   public constructor(locator: string, swapContract = Light.getAddress()) {
     this.swapContract = swapContract
-    const locatorUrl = parseUrl(locator)
-    const options = {
-      protocol: locatorUrl.protocol,
-      hostname: locatorUrl.hostname,
-      port: locatorUrl.port,
+    this.locatorUrl = parseUrl(locator)
+    this.locatorOptions = {
+      protocol: this.locatorUrl.protocol,
+      hostname: this.locatorUrl.hostname,
+      port: this.locatorUrl.port,
       timeout: REQUEST_TIMEOUT,
     }
-    if (isBrowser) {
-      const jaysonClient = require('jayson/lib/client/browser')
-      this.client = new jaysonClient((request, callback) => {
-        fetch(url.format(locatorUrl), {
-          method: 'POST',
-          body: request,
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        })
-          .then(res => {
-            return res.text()
-          })
-          .then(text => {
-            callback(null, text)
-          })
-          .catch(err => {
-            callback(err)
-          })
-      }, options)
-    } else {
-      const jaysonClient = require('jayson/lib/client')
-      if (options.protocol === 'https:') {
-        this.client = jaysonClient.https(options)
-      } else {
-        this.client = jaysonClient.http(options)
-      }
+    this._initClient(locator, swapContract)
+  }
+
+  public static async for(locator: string, swapContract?: string) {
+    if (!locator.match(/^wss?:\/\//)) {
+      return new HTTPServer(locator, swapContract)
     }
+  }
+
+  /**
+   * Method to check support for a given swap protocol.
+   * @param protocol String protocol name
+   * @param minVersion String minimum required version (semVer). If not supplied
+   *                          all versions match.
+   * @returns boolean true if protocol is supported at given version
+   */
+  public supportsProtocol(protocol: string, minVersion?: string) {
+    const supportedProtocolInfo = this.supportedProtocols.find(
+      p => p.name === protocol
+    )
+    if (!supportedProtocolInfo) return false
+    if (!minVersion) return true
+    // TODO: semVer matching.
   }
 
   public async getMaxQuote(
     signerToken: string,
     senderToken: string
   ): Promise<Quote> {
-    return new Promise((resolve, reject) => {
-      this.generateRequest(
-        'getMaxQuote',
-        {
-          signerToken,
-          senderToken,
-        },
-        resolve,
-        reject
-      )
+    this.requireRFQSupport()
+    return this.callRPCMethod<Quote>('getMaxQuote', {
+      signerToken,
+      senderToken,
     })
   }
 
@@ -88,17 +90,11 @@ export class Server {
     signerToken: string,
     senderToken: string
   ): Promise<Quote> {
-    return new Promise((resolve, reject) => {
-      this.generateRequest(
-        'getSignerSideQuote',
-        {
-          senderAmount: senderAmount.toString(),
-          signerToken,
-          senderToken,
-        },
-        resolve,
-        reject
-      )
+    this.requireRFQSupport()
+    return this.callRPCMethod<Quote>('getSignerSideQuote', {
+      senderAmount: senderAmount.toString(),
+      signerToken,
+      senderToken,
     })
   }
 
@@ -107,17 +103,11 @@ export class Server {
     signerToken: string,
     senderToken: string
   ): Promise<Quote> {
-    return new Promise((resolve, reject) => {
-      this.generateRequest(
-        'getSenderSideQuote',
-        {
-          signerAmount: signerAmount.toString(),
-          signerToken,
-          senderToken,
-        },
-        resolve,
-        reject
-      )
+    this.requireRFQSupport()
+    return this.callRPCMethod<Quote>('getSenderSideQuote', {
+      signerAmount: signerAmount.toString(),
+      signerToken,
+      senderToken,
     })
   }
 
@@ -127,18 +117,12 @@ export class Server {
     senderToken: string,
     senderWallet: string
   ): Promise<LightOrder> {
-    return new Promise((resolve, reject) => {
-      this.generateRequest(
-        'getSignerSideOrder',
-        {
-          senderAmount: senderAmount.toString(),
-          signerToken,
-          senderToken,
-          senderWallet,
-        },
-        resolve,
-        reject
-      )
+    this.requireRFQSupport()
+    return this.callRPCMethod<LightOrder>('getSignerSideOrder', {
+      senderAmount: senderAmount.toString(),
+      signerToken,
+      senderToken,
+      senderWallet,
     })
   }
 
@@ -148,22 +132,23 @@ export class Server {
     senderToken: string,
     senderWallet: string
   ): Promise<LightOrder> {
-    return new Promise((resolve, reject) => {
-      this.generateRequest(
-        'getSenderSideOrder',
-        {
-          signerAmount: signerAmount.toString(),
-          signerToken,
-          senderToken,
-          senderWallet,
-        },
-        resolve,
-        reject
-      )
+    this.requireRFQSupport()
+    return this.callRPCMethod('getSenderSideOrder', {
+      signerAmount: signerAmount.toString(),
+      signerToken,
+      senderToken,
+      senderWallet,
     })
   }
 
-  private compare(params: any, result: any): Array<string> {
+  protected requireRFQSupport(version?: string) {
+    if (!this.supportsProtocol('request-for-quote', version))
+      throw new Error(
+        `Server at ${this.locatorUrl} doesn't support this version of RFQ`
+      )
+  }
+
+  protected compare(params: any, result: any): Array<string> {
     const errors: Array<string> = []
     const flat: any = flattenObject(result)
     for (const param in params) {
@@ -177,42 +162,9 @@ export class Server {
     return errors
   }
 
-  private generateRequest(
+  protected abstract _initClient(locator: string, swapContract: string): void
+  protected abstract callRPCMethod<T>(
     method: string,
-    params: Record<string, string>,
-    resolve: Function,
-    reject: Function
-  ): JSONRPCRequest {
-    params.swapContract = this.swapContract
-    return this.client.request(
-      method,
-      params,
-      (connectionError: any, serverError: any, result: any) => {
-        if (connectionError) {
-          reject({ code: -1, message: connectionError.message })
-        } else if (serverError) {
-          reject(serverError)
-        } else {
-          const errors = this.compare(params, result)
-          if (errors.length) {
-            reject({
-              code: -1,
-              message: `Server response differs from request params: ${errors}`,
-            })
-          } else {
-            if (method.indexOf('Quote') !== -1 && !isValidQuote(result)) {
-              reject({
-                code: -1,
-                message: `Server response is not a valid quote: ${JSON.stringify(
-                  result
-                )}`,
-              })
-            } else {
-              resolve(result)
-            }
-          }
-        }
-      }
-    )
-  }
+    params: Record<string, string>
+  ): Promise<T>
 }
