@@ -1,8 +1,7 @@
 const { expect } = require('chai')
-const timeMachine = require('ganache-time-traveler')
-const { artifacts, ethers, waffle } = require('hardhat')
+const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
-const IERC20 = artifacts.require('IERC20')
+const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
 
 describe('Registry Unit', () => {
   let snapshotId
@@ -19,12 +18,11 @@ describe('Registry Unit', () => {
   const TOKEN_COST = 10
 
   beforeEach(async () => {
-    const snapshot = await timeMachine.takeSnapshot()
-    snapshotId = snapshot['result']
+    snapshotId = await ethers.provider.send('evm_snapshot')
   })
 
   afterEach(async () => {
-    await timeMachine.revertToSnapshot(snapshotId)
+    await ethers.provider.send('evm_revert', [snapshotId])
   })
 
   before(async () => {

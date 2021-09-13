@@ -1,22 +1,17 @@
 const { expect } = require('chai')
-const timeMachine = require('ganache-time-traveler')
 const { ADDRESS_ZERO } = require('@airswap/constants')
 const {
   createLightOrder,
   lightOrderToParams,
   createLightSignature,
 } = require('@airswap/utils')
-const { artifacts, ethers, waffle } = require('hardhat')
+const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
-const IERC20 = artifacts.require('IERC20')
-const IWETH = artifacts.require('IWETH')
+const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
 
 describe('Light Unit Tests', () => {
   let snapshotId
   let light
-  let wrapper
-
-  let weth
   let signerToken
   let senderToken
 
@@ -55,12 +50,11 @@ describe('Light Unit Tests', () => {
   }
 
   beforeEach(async () => {
-    const snapshot = await timeMachine.takeSnapshot()
-    snapshotId = snapshot['result']
+    snapshotId = await ethers.provider.send('evm_snapshot')
   })
 
   afterEach(async () => {
-    await timeMachine.revertToSnapshot(snapshotId)
+    await ethers.provider.send('evm_revert', [snapshotId])
   })
 
   before('get signers and deploy', async () => {
@@ -71,25 +65,14 @@ describe('Light Unit Tests', () => {
     await signerToken.mock.transferFrom.returns(true)
     await senderToken.mock.transferFrom.returns(true)
 
-    weth = await deployMockContract(deployer, IWETH.abi)
-    await weth.mock.deposit.returns()
-    await weth.mock.withdraw.returns()
-    await weth.mock.transferFrom.returns(true)
-
     light = await (await ethers.getContractFactory('Light')).deploy(
       feeWallet.address,
       SIGNER_FEE
     )
     await light.deployed()
-
-    wrapper = await (await ethers.getContractFactory('Wrapper')).deploy(
-      light.address,
-      weth.address
-    )
-    await wrapper.deployed()
   })
 
-  describe('Default Values', async () => {
+  describe('Constructor', async () => {
     it('constructor sets default values', async () => {
       const storedFee = await light.signerFee()
       const storedFeeWallet = await light.feeWallet()
@@ -330,54 +313,6 @@ describe('Light Unit Tests', () => {
       await expect(await light.nonceUsed(signer.address, 4)).to.equal(true)
       await expect(await light.nonceUsed(signer.address, 5)).to.equal(false)
       await expect(await light.nonceUsed(signer.address, 6)).to.equal(true)
-    })
-  })
-
-  describe('Test wraps', async () => {
-    it('test wrapped swap fails without value', async () => {
-      const order = await createSignedOrder(
-        {
-          senderToken: weth.address,
-        },
-        signer
-      )
-      await expect(wrapper.connect(sender).swap(...order)).to.be.revertedWith(
-        'VALUE_MUST_BE_SENT'
-      )
-    })
-
-    it('test wrap (deposit)', async () => {
-      const order = await createSignedOrder(
-        {
-          senderToken: weth.address,
-          senderWallet: wrapper.address,
-        },
-        signer
-      )
-      await weth.mock.transferFrom.returns(false)
-      await weth.mock.transferFrom
-        .withArgs(wrapper.address, signer.address, DEFAULT_AMOUNT)
-        .returns(true)
-
-      await expect(
-        wrapper.connect(sender).swap(...order, { value: DEFAULT_AMOUNT })
-      ).to.emit(light, 'Swap')
-    })
-
-    it('test unwrap (withdraw)', async () => {
-      const order = await createSignedOrder(
-        {
-          signerToken: weth.address,
-          senderWallet: wrapper.address,
-        },
-        signer
-      )
-      await weth.mock.transferFrom.returns(true)
-      await senderToken.mock.transferFrom.returns(true)
-
-      await expect(
-        wrapper.connect(sender).swap(...order, { value: DEFAULT_AMOUNT })
-      ).to.emit(light, 'Swap')
     })
   })
 })

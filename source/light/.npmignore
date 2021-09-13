@@ -6,3 +6,7 @@ lerna-debug.log
 *.orig
 coverage.json
 coverage
+test
+scripts
+cache
+.env

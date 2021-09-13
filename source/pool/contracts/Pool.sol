@@ -14,14 +14,14 @@
   limitations under the License.
 */
 
-pragma solidity ^0.6.12;
+pragma solidity ^0.8.0;
 pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
-import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
-import "@openzeppelin/contracts/cryptography/MerkleProof.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
 /**
  * @title Pool: Claim Tokens Based on a Pricing Function
@@ -29,6 +29,15 @@ import "@openzeppelin/contracts/cryptography/MerkleProof.sol";
 contract Pool is Ownable {
   using SafeERC20 for IERC20;
   using SafeMath for uint256;
+
+  /**
+   * @notice Structs
+   */
+  struct Claim {
+    bytes32 root;
+    uint256 score;
+    bytes32[] proof;
+  }
 
   uint256 internal constant MAX_PERCENTAGE = 100;
   uint256 internal constant MAX_SCALE = 77;
@@ -60,24 +69,35 @@ contract Pool is Ownable {
   event DrainTo(IERC20[] tokens, address dest);
 
   /**
-   * @notice Structs
-   */
-  struct Claim {
-    bytes32 root;
-    uint256 score;
-    bytes32[] proof;
-  }
-
-  /**
    * @notice Constructor
    * @param _scale uint256
    * @param _max uint256
    */
-  constructor(uint256 _scale, uint256 _max) public {
+  constructor(uint256 _scale, uint256 _max) {
     require(_max <= MAX_PERCENTAGE, "MAX_TOO_HIGH");
     require(_scale <= MAX_SCALE, "SCALE_TOO_HIGH");
     scale = _scale;
     max = _max;
+  }
+
+  /**
+   * @notice Set scale
+   * @dev Only owner
+   */
+  function setScale(uint256 _scale) external onlyOwner {
+    require(_scale <= MAX_SCALE, "SCALE_TOO_HIGH");
+    scale = _scale;
+    emit SetScale(scale);
+  }
+
+  /**
+   * @notice Set max
+   * @dev Only owner
+   */
+  function setMax(uint256 _max) external onlyOwner {
+    require(_max <= MAX_PERCENTAGE, "MAX_TOO_HIGH");
+    max = _max;
+    emit SetMax(max);
   }
 
   /**
@@ -147,7 +167,7 @@ contract Pool is Ownable {
    * @param tokens IERC20[]
    */
   function calculateMultiple(uint256 score, IERC20[] calldata tokens)
-    external
+    public
     view
     returns (uint256[] memory outputAmounts)
   {
@@ -170,29 +190,9 @@ contract Pool is Ownable {
     bytes32 root,
     uint256 score,
     bytes32[] memory proof
-  ) public view returns (bool valid) {
+  ) public pure returns (bool valid) {
     bytes32 leaf = keccak256(abi.encodePacked(participant, score));
     return MerkleProof.verify(proof, root, leaf);
-  }
-
-  /**
-   * @notice Set scale
-   * @dev Only owner
-   */
-  function setScale(uint256 _scale) external onlyOwner {
-    require(_scale <= MAX_SCALE, "SCALE_TOO_HIGH");
-    scale = _scale;
-    emit SetScale(scale);
-  }
-
-  /**
-   * @notice Set max
-   * @dev Only owner
-   */
-  function setMax(uint256 _max) external onlyOwner {
-    require(_max <= MAX_PERCENTAGE, "MAX_TOO_HIGH");
-    max = _max;
-    emit SetMax(max);
   }
 
   /**

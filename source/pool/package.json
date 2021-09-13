@@ -5,27 +5,30 @@
   "contributors": [
     "Don Mosites <don.mosites@consensys.net>"
   ],
-  "license": "Apache-2.0",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/airswap/airswap-protocols"
   },
   "scripts": {
-    "clean": "rm -rf ./build",
-    "compile": "yarn clean && truffle compile",
-    "coverage": "truffle run coverage",
-    "test": "yarn compile && truffle test",
-    "test:unit": "yarn compile && truffle test ./test/Pool-unit.js"
-  },
-  "dependencies": {
-    "@openzeppelin/contracts": "^3.3.0"
+    "clean": "hardhat clean",
+    "compile": "hardhat compile",
+    "coverage": "hardhat coverage",
+    "test": "hardhat test",
+    "test:unit": "hardhat test ./test/unit.js"
   },
   "devDependencies": {
-    "@gnosis.pm/mock-contract": "^4.0.0",
-    "@airswap/test-utils": "0.1.10",
-    "@airswap/merkle": "0.0.1",
+    "@airswap/constants": "0.4.0",
     "@airswap/utils": "0.4.5",
-    "solidity-coverage": "^0.7.13"
+    "@nomiclabs/hardhat-ethers": "^2.0.2",
+    "@nomiclabs/hardhat-etherscan": "^2.1.6",
+    "@nomiclabs/hardhat-waffle": "^2.0.1",
+    "ethereum-waffle": "^3.4.0",
+    "hardhat": "^2.6.4",
+    "solidity-coverage": "^0.7.4"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.3.1"
   },
   "publishConfig": {
     "access": "public"

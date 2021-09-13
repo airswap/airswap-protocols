@@ -1,11 +1,8 @@
 const { expect } = require('chai')
-const timeMachine = require('ganache-time-traveler')
-const { artifacts, ethers, waffle } = require('hardhat')
+const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
-const UniswapV2Router02 = artifacts.require('UniswapV2Router02')
-const IERC20 = artifacts.require(
-  '@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20'
-)
+const UniswapV2Router02 = require('@uniswap/v2-periphery/build/IUniswapV2Router02.json')
+const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
 
 describe('Converter Unit Tests', () => {
   let snapshotId
@@ -23,12 +20,11 @@ describe('Converter Unit Tests', () => {
   const shares = [10]
 
   beforeEach(async () => {
-    const snapshot = await timeMachine.takeSnapshot()
-    snapshotId = snapshot['result']
+    snapshotId = await ethers.provider.send('evm_snapshot')
   })
 
   afterEach(async () => {
-    await timeMachine.revertToSnapshot(snapshotId)
+    await ethers.provider.send('evm_revert', [snapshotId])
   })
 
   before(async () => {

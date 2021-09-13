@@ -1,9 +1,8 @@
 const { expect } = require('chai')
-const timeMachine = require('ganache-time-traveler')
-const { artifacts, ethers, waffle } = require('hardhat')
+const { ethers, waffle } = require('hardhat')
 const BN = ethers.BigNumber
 const { deployMockContract } = waffle
-const IERC20 = artifacts.require('IERC20')
+const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
 
 describe('Staking Unit', () => {
   let snapshotId
@@ -17,12 +16,11 @@ describe('Staking Unit', () => {
   const DURATION = 100 // time in seconds
 
   beforeEach(async () => {
-    const snapshot = await timeMachine.takeSnapshot()
-    snapshotId = snapshot['result']
+    snapshotId = await ethers.provider.send('evm_snapshot')
   })
 
   afterEach(async () => {
-    await timeMachine.revertToSnapshot(snapshotId)
+    await ethers.provider.send('evm_revert', [snapshotId])
   })
 
   before(async () => {
@@ -240,7 +238,7 @@ describe('Staking Unit', () => {
       const block0 = await ethers.provider.getBlock()
 
       // move 100000 seconds forward
-      await timeMachine.advanceBlockAndSetTime(block0.timestamp + CLIFF)
+      await ethers.provider.send('evm_mine', [block0.timestamp + CLIFF])
 
       const blockNewTime = await ethers.provider.getBlockNumber()
       const blockNewTimeInfo = await ethers.provider.getBlock(blockNewTime)
@@ -273,7 +271,7 @@ describe('Staking Unit', () => {
       const block0 = await ethers.provider.getBlock()
 
       // advance to fully vest
-      await timeMachine.advanceBlockAndSetTime(block0.timestamp + DURATION)
+      await ethers.provider.send('evm_mine', [block0.timestamp + DURATION])
       await staking.connect(account1).extend('0', '120')
 
       const userStakes = await staking
@@ -327,7 +325,7 @@ describe('Staking Unit', () => {
 
       // move 10 seconds forward - 100% vested
       for (let index = 0; index < 100; index++) {
-        await timeMachine.advanceBlock()
+        await ethers.provider.send('evm_mine')
       }
 
       await expect(
@@ -362,7 +360,9 @@ describe('Staking Unit', () => {
       await token.mock.transfer.returns(true)
       await staking.connect(account1).stake('100')
 
-      await timeMachine.advanceTimeAndBlock(CLIFF)
+      const block = await ethers.provider.getBlock()
+      await ethers.provider.send('evm_mine', [block['timestamp'] + CLIFF])
+
       await expect(
         staking.connect(account1).unstake(['100'])
       ).to.be.revertedWith('AMOUNT_EXCEEDS_AVAILABLE')
@@ -375,7 +375,7 @@ describe('Staking Unit', () => {
 
       // move 10 seconds forward - 10% vested
       for (let index = 0; index < 10; index++) {
-        await timeMachine.advanceBlock()
+        await ethers.provider.send('evm_mine')
       }
 
       await staking.connect(account1).unstake(['10'])
@@ -396,7 +396,7 @@ describe('Staking Unit', () => {
 
       // move 10 seconds forward - 20% vested for second stake
       for (let index = 0; index < 10; index++) {
-        await timeMachine.advanceBlock()
+        await ethers.provider.send('evm_mine')
       }
 
       await staking.connect(account1).unstake(['0', '5'])
@@ -419,7 +419,7 @@ describe('Staking Unit', () => {
 
       // move 100 seconds forward + 2 stakes = 102% vested
       for (let index = 0; index < 100; index++) {
-        await timeMachine.advanceBlock()
+        await ethers.provider.send('evm_mine')
       }
 
       await staking.connect(account1).unstake(['100'])
@@ -444,7 +444,9 @@ describe('Staking Unit', () => {
       await token.mock.transfer.returns(true)
       await staking.connect(account1).stake('100')
 
-      await timeMachine.advanceTimeAndBlock(5)
+      const block = await ethers.provider.getBlock()
+      await ethers.provider.send('evm_mine', [block['timestamp'] + 5])
+
       const vestedAmount = await staking.vested(account1.address, '0')
       expect(vestedAmount).to.equal('5')
     })
@@ -455,7 +457,9 @@ describe('Staking Unit', () => {
       await staking.connect(deployer).setVesting(DURATION * 2, CLIFF)
       await staking.connect(account1).stake('100')
 
-      await timeMachine.advanceTimeAndBlock(20)
+      const block = await ethers.provider.getBlock()
+      await ethers.provider.send('evm_mine', [block['timestamp'] + 20])
+
       const vestedAmount = await staking.vested(account1.address, '0')
       expect(vestedAmount).to.equal('10')
     })
@@ -466,17 +470,17 @@ describe('Staking Unit', () => {
       await staking.connect(account1).stake('100')
       // 10% of first stake is unlocked
       for (let index = 0; index < CLIFF; index++) {
-        await timeMachine.advanceBlock()
+        await ethers.provider.send('evm_mine')
       }
       await staking.connect(account1).stake('160')
       // 13% of second stake is unlocked
       for (let index = 0; index < 13; index++) {
-        await timeMachine.advanceBlock()
+        await ethers.provider.send('evm_mine')
       }
       await staking.connect(account1).stake('170')
       // 3% of third stake is unlocked
       for (let index = 0; index < 3; index++) {
-        await timeMachine.advanceBlock()
+        await ethers.provider.send('evm_mine')
       }
 
       // every 1 block 1% is vested, user can only claim starting after 10 blocks, or 10% vested
@@ -499,7 +503,9 @@ describe('Staking Unit', () => {
       await token.mock.transfer.returns(true)
       await staking.connect(account1).stake('100')
 
-      await timeMachine.advanceTimeAndBlock(CLIFF - 1)
+      const block = await ethers.provider.getBlock()
+      await ethers.provider.send('evm_mine', [block['timestamp'] + CLIFF - 1])
+
       const available = await staking.available(account1.address, '0')
       expect(available).to.equal('0')
     })
@@ -512,7 +518,7 @@ describe('Staking Unit', () => {
       await staking.connect(account1).stake('100')
       // move 1 block before cliff for second stake
       for (let index = 0; index < CLIFF - 1; index++) {
-        await timeMachine.advanceBlock()
+        await ethers.provider.send('evm_mine')
       }
       const available = await staking.available(account1.address, '1')
       expect(available).to.equal('0')
@@ -523,7 +529,9 @@ describe('Staking Unit', () => {
       await token.mock.transfer.returns(true)
       await staking.connect(account1).stake('100')
 
-      await timeMachine.advanceTimeAndBlock(CLIFF)
+      const block = await ethers.provider.getBlock()
+      await ethers.provider.send('evm_mine', [block['timestamp'] + CLIFF])
+
       const available = await staking.available(account1.address, '0')
       // every 1 block 1% is vested, user can only claim starting afater 10 blocks, or 10% vested
       expect(available).to.equal('10')
@@ -536,7 +544,9 @@ describe('Staking Unit', () => {
       await staking.connect(deployer).setVesting(DURATION, CLIFF)
       await staking.connect(account1).stake('100')
 
-      await timeMachine.advanceTimeAndBlock(CLIFF)
+      const block = await ethers.provider.getBlock()
+      await ethers.provider.send('evm_mine', [block['timestamp'] + CLIFF])
+
       const available = await staking.available(account1.address, '1')
       // every 1 block 2% is vested, user can only claim starting afater 10 blocks, or 20% vested
       expect(available).to.equal('10')
@@ -548,17 +558,17 @@ describe('Staking Unit', () => {
       await staking.connect(account1).stake('100')
       // 10% of first stake is unlocked
       for (let index = 0; index < CLIFF; index++) {
-        await timeMachine.advanceBlock()
+        await ethers.provider.send('evm_mine')
       }
       await staking.connect(account1).stake('160')
       // 13% of second stake is unlocked
       for (let index = 0; index < 13; index++) {
-        await timeMachine.advanceBlock()
+        await ethers.provider.send('evm_mine')
       }
       await staking.connect(account1).stake('170')
       // 3% of third stake is unlocked
       for (let index = 0; index < 3; index++) {
-        await timeMachine.advanceBlock()
+        await ethers.provider.send('evm_mine')
       }
 
       // every 1 block 1% is vested, user can only claim starting after 10 blocks, or 10% vested

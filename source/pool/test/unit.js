@@ -1,20 +1,21 @@
+const { expect } = require('chai')
 const { soliditySha3 } = require('web3-utils')
 const { toAtomicString } = require('@airswap/utils')
-const { emitted, equal, reverted } = require('@airswap/test-utils').assert
 const { generateTreeFromData, getRoot, getProof } = require('@airswap/merkle')
-const { takeSnapshot, revertToSnapshot } = require('@airswap/test-utils').time
-const { ADDRESS_ZERO } = require('@airswap/constants')
 
-const { artifacts, ethers, waffle } = require('hardhat')
+const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
-const IERC20 = artifacts.require('IERC20')
+const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
 
 function toWei(value, places) {
   return toAtomicString(value, places || 18)
 }
 
-contract('Pool Unit Tests', async accounts => {
-  const [ownerAddress, aliceAddress, bobAddress, carolAddress] = accounts
+describe('Pool Unit Tests', () => {
+  let deployer
+  let alice
+  let bob
+  let carol
 
   const CLAIM_SCALE = 10
   const CLAIM_MAX = 50
@@ -27,129 +28,115 @@ contract('Pool Unit Tests', async accounts => {
   let feeToken
   let feeToken2
   let pool
-  let mockFungibleTokenTemplate
   let snapshotId
 
   beforeEach(async () => {
-    const snapshot = await takeSnapshot()
-    snapshotId = snapshot['result']
+    snapshotId = await ethers.provider.send('evm_snapshot')
   })
 
   afterEach(async () => {
-    await revertToSnapshot(snapshotId)
+    await ethers.provider.send('evm_revert', [snapshotId])
   })
 
   before(async () => {
-    pool = await Pool.new(CLAIM_SCALE, CLAIM_MAX, { from: ownerAddress })
+    ;[deployer, alice, bob, carol] = await ethers.getSigners()
+
+    pool = await (await ethers.getContractFactory('Pool')).deploy(
+      CLAIM_SCALE,
+      CLAIM_MAX
+    )
+    await pool.deployed()
+
     tree = generateTreeFromData({
-      [aliceAddress]: ALICE_SCORE,
-      [bobAddress]: BOB_SCORE,
-      [carolAddress]: CAROL_SCORE,
+      [alice.address]: ALICE_SCORE,
+      [bob.address]: BOB_SCORE,
+      [carol.address]: CAROL_SCORE,
     })
-    feeToken = await MockContract.new()
-    feeToken2 = await MockContract.new()
-    mockFungibleTokenTemplate = await ERC20PresetMinterPauser.new('Fee', 'FEE')
+
+    feeToken = await deployMockContract(deployer, IERC20.abi)
+    feeToken2 = await deployMockContract(deployer, IERC20.abi)
   })
 
-  describe('Test Constructor', async () => {
-    it('Test Constructor successful', async () => {
-      const instance = await Pool.new(CLAIM_SCALE, CLAIM_MAX, {
-        from: ownerAddress,
-      })
-      equal((await instance.scale()).toString(), CLAIM_SCALE.toString())
-      equal((await instance.max()).toString(), CLAIM_MAX.toString())
+  describe('Test constructor', async () => {
+    it('constructor sets values', async () => {
+      const storedScale = await pool.scale()
+      const storedMax = await pool.max()
+      await expect(storedScale).to.equal(CLAIM_SCALE)
+      await expect(storedMax).to.equal(CLAIM_MAX)
     })
 
-    it('Test Constructor reverts when percentage is too high', async () => {
-      await reverted(
-        Pool.new(CLAIM_SCALE, 101, { from: ownerAddress }),
-        'MAX_TOO_HIGH'
-      )
+    it('constructor reverts when percentage is too high', async () => {
+      await expect(
+        (await ethers.getContractFactory('Pool')).deploy(CLAIM_SCALE, 101)
+      ).to.be.revertedWith('MAX_TOO_HIGH')
     })
 
-    it('Test Constructor reverts when scale is too high', async () => {
-      await reverted(
-        Pool.new(78, CLAIM_MAX, { from: ownerAddress }),
-        'SCALE_TOO_HIGH'
-      )
+    it('constructor reverts when scale is too high', async () => {
+      await expect(
+        (await ethers.getContractFactory('Pool')).deploy(78, CLAIM_MAX)
+      ).to.be.revertedWith('SCALE_TOO_HIGH')
     })
   })
 
   describe('Test enable', async () => {
-    it('Test enable successful', async () => {
+    it('enable successful', async () => {
       const root = getRoot(tree)
-      const trx = await pool.enable(root, { from: ownerAddress })
-      const isEnabled = await pool.roots(root)
-      equal(isEnabled, true)
-      emitted(trx, 'Enable', e => {
-        return e.root == root
-      })
+      await expect(await pool.connect(deployer).enable(root)).to.emit(
+        pool,
+        'Enable'
+      )
+      expect(await pool.roots(root)).to.equal(true)
     })
 
-    it('Test enable reverts', async () => {
+    it('enable reverts', async () => {
       const root = getRoot(tree)
-      await pool.enable(root, { from: ownerAddress })
-      // resumit the same root
-      await reverted(pool.enable(root, { from: ownerAddress }), 'ROOT_EXISTS')
+      await expect(await pool.connect(deployer).enable(root)).to.emit(
+        pool,
+        'Enable'
+      )
+      await expect(pool.connect(deployer).enable(root)).to.be.revertedWith(
+        'ROOT_EXISTS'
+      )
     })
   })
 
   describe('Test withdraw', async () => {
-    it('Test withdraw success', async () => {
-      const mockToken_balanceOf = await mockFungibleTokenTemplate.contract.methods
-        .balanceOf(ADDRESS_ZERO)
-        .encodeABI()
-      await feeToken.givenMethodReturnUint(mockToken_balanceOf, '100000')
-
-      const mockToken_transfer = await mockFungibleTokenTemplate.contract.methods
-        .transfer(ADDRESS_ZERO, 0)
-        .encodeABI()
-      await feeToken.givenMethodReturnBool(mockToken_transfer, true)
+    it('withdraw success', async () => {
+      await feeToken.mock.balanceOf.returns('100000')
+      await feeToken.mock.transfer.returns(true)
 
       const root = getRoot(tree)
-      await pool.enable(root, { from: ownerAddress })
+      await pool.connect(deployer).enable(root)
 
-      const proof = getProof(tree, soliditySha3(aliceAddress, ALICE_SCORE))
-      const trx = await pool.withdraw(
-        [
-          {
-            root: getRoot(tree),
-            score: ALICE_SCORE,
-            proof,
-          },
-        ],
-        feeToken.address,
-        {
-          from: aliceAddress,
-        }
-      )
-
-      emitted(trx, 'Withdraw', e => {
-        return (
-          e.roots[0] === root &&
-          e.account === aliceAddress &&
-          e.token === feeToken.address &&
-          e.amount.toString() === '495'
+      const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
+      await expect(
+        await pool.connect(alice).withdraw(
+          [
+            {
+              root: getRoot(tree),
+              score: ALICE_SCORE,
+              proof,
+            },
+          ],
+          feeToken.address
         )
-      })
+      ).to.emit(pool, 'Withdraw')
 
-      const isClaimed = await pool.claimed(root, aliceAddress)
-      equal(isClaimed, true)
+      const isClaimed = await pool.claimed(root, alice.address)
+      expect(isClaimed).to.equal(true)
     })
 
     it('Test withdraw reverts with no claims provided', async () => {
-      await reverted(
-        pool.withdraw([], feeToken.address, {
-          from: aliceAddress,
-        }),
-        'CLAIMS_MUST_BE_PROVIDED'
-      )
+      await expect(
+        pool.connect(deployer).withdraw([], feeToken.address)
+      ).to.be.revertedWith('CLAIMS_MUST_BE_PROVIDED')
     })
 
     it('Test withdraw reverts with root not enabled', async () => {
-      const proof = getProof(tree, soliditySha3(aliceAddress, ALICE_SCORE))
-      await reverted(
-        pool.withdraw(
+      const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
+
+      await expect(
+        pool.connect(alice).withdraw(
           [
             {
               root: getRoot(tree),
@@ -157,26 +144,20 @@ contract('Pool Unit Tests', async accounts => {
               proof,
             },
           ],
-          feeToken.address,
-          {
-            from: aliceAddress,
-          }
-        ),
-        'ROOT_NOT_ENABLED'
-      )
+          feeToken.address
+        )
+      ).to.be.revertedWith('ROOT_NOT_ENABLED')
     })
 
     it('Test withdraw reverts with claim already made', async () => {
-      const mockToken_transfer = await mockFungibleTokenTemplate.contract.methods
-        .transfer(ADDRESS_ZERO, 0)
-        .encodeABI()
-      await feeToken.givenMethodReturnBool(mockToken_transfer, true)
+      await feeToken.mock.balanceOf.returns('100000')
+      await feeToken.mock.transfer.returns(true)
 
       const root = getRoot(tree)
-      await pool.enable(root, { from: ownerAddress })
+      await pool.connect(deployer).enable(root)
 
-      const proof = getProof(tree, soliditySha3(aliceAddress, ALICE_SCORE))
-      await pool.withdraw(
+      const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
+      await pool.connect(alice).withdraw(
         [
           {
             root: getRoot(tree),
@@ -184,13 +165,10 @@ contract('Pool Unit Tests', async accounts => {
             proof,
           },
         ],
-        feeToken.address,
-        {
-          from: aliceAddress,
-        }
+        feeToken.address
       )
-      await reverted(
-        pool.withdraw(
+      await expect(
+        pool.connect(alice).withdraw(
           [
             {
               root: getRoot(tree),
@@ -198,28 +176,21 @@ contract('Pool Unit Tests', async accounts => {
               proof,
             },
           ],
-          feeToken.address,
-          {
-            from: aliceAddress,
-          }
-        ),
-        'CLAIM_ALREADY_MADE'
-      )
+          feeToken.address
+        )
+      ).to.be.revertedWith('CLAIM_ALREADY_MADE')
     })
 
     it('Test withdraw reverts with invalid proof', async () => {
-      const mockToken_transfer = await mockFungibleTokenTemplate.contract.methods
-        .transfer(ADDRESS_ZERO, 0)
-        .encodeABI()
-      await feeToken.givenMethodReturnBool(mockToken_transfer, true)
+      await feeToken.mock.transfer.returns(true)
 
       const root = getRoot(tree)
-      await pool.enable(root, { from: ownerAddress })
+      await pool.connect(deployer).enable(root)
 
-      const proof = getProof(tree, soliditySha3(aliceAddress, ALICE_SCORE))
+      const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
 
-      await reverted(
-        pool.withdraw(
+      await expect(
+        pool.connect(alice).withdraw(
           [
             {
               root: getRoot(tree),
@@ -227,125 +198,93 @@ contract('Pool Unit Tests', async accounts => {
               proof,
             },
           ],
-          feeToken.address,
-          {
-            from: aliceAddress,
-          }
-        ),
-        'PROOF_INVALID'
-      )
+          feeToken.address
+        )
+      ).to.be.revertedWith('PROOF_INVALID')
     })
   })
-
   describe('Test Calculate', async () => {
     it('Test calculation input and output', async () => {
-      const mockToken_balanceOf = await mockFungibleTokenTemplate.contract.methods
-        .balanceOf(ADDRESS_ZERO)
-        .encodeABI()
-      await feeToken.givenMethodReturnUint(mockToken_balanceOf, '100000')
+      await feeToken.mock.balanceOf.returns('100000')
 
       const amount = await pool.calculate(ALICE_SCORE, feeToken.address)
-      equal(amount.toString(), '495')
+      expect(amount).to.equal('495')
     })
   })
 
   describe('Test Calculate Multiple', async () => {
     it('Test calculation input and output', async () => {
-      const mockToken_balanceOf = await mockFungibleTokenTemplate.contract.methods
-        .balanceOf(ADDRESS_ZERO)
-        .encodeABI()
-      await feeToken.givenMethodReturnUint(mockToken_balanceOf, '100000')
-      await feeToken2.givenMethodReturnUint(mockToken_balanceOf, '10000')
+      await feeToken.mock.balanceOf.returns('100000')
+      await feeToken2.mock.balanceOf.returns('10000')
 
       const amounts = await pool.calculateMultiple(ALICE_SCORE, [
         feeToken.address,
         feeToken2.address,
       ])
-      equal(amounts[0].toString(), '495')
-      equal(amounts[1].toString(), '49')
+
+      expect(amounts[0]).to.equal('495')
+      expect(amounts[1]).to.equal('49')
     })
   })
 
   describe('Test Verify', async () => {
     it('Test verification is valid', async () => {
       const root = getRoot(tree)
-      const proof = getProof(tree, soliditySha3(aliceAddress, ALICE_SCORE))
-      const isValid = await pool.verify(aliceAddress, root, ALICE_SCORE, proof)
-      equal(isValid, true)
+      const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
+      const isValid = await pool.verify(alice.address, root, ALICE_SCORE, proof)
+      expect(isValid).to.be.equal(true)
     })
 
     it('Test verification is invalid', async () => {
       const root = getRoot(tree)
-      const proof = getProof(tree, soliditySha3(aliceAddress, ALICE_SCORE))
-      const isValid = await pool.verify(aliceAddress, root, BOB_SCORE, proof)
-      equal(isValid, false)
+      const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
+      const isValid = await pool.verify(alice.address, root, BOB_SCORE, proof)
+      expect(isValid).to.be.equal(false)
     })
   })
 
   describe('Test setting Scale', async () => {
     it('Test setScale is successful', async () => {
-      const trx = await pool.setScale(77)
-      const scale = await pool.scale()
-      equal(scale.toString(), '77')
-      emitted(trx, 'SetScale', e => {
-        return e.scale.toString() === '77'
-      })
+      await expect(await pool.setScale(77)).to.emit(pool, 'SetScale')
+      expect(await pool.scale()).to.be.equal('77')
     })
 
     it('Test setScale reverts', async () => {
-      await reverted(pool.setScale(1000), 'SCALE_TOO_HIGH')
+      await expect(pool.setScale(1000)).to.be.revertedWith('SCALE_TOO_HIGH')
     })
   })
 
   describe('Test setting Max', async () => {
     it('Test setMax is successful', async () => {
-      const trx = await pool.setMax(10)
-      const max = await pool.max()
-      equal(max.toString(), '10')
-      emitted(trx, 'SetMax', e => {
-        return e.max.toString() === '10'
-      })
+      await expect(await pool.setMax(10)).to.emit(pool, 'SetMax')
+      expect(await pool.scale()).to.be.equal('10')
     })
 
     it('Test setMax reverts', async () => {
-      await reverted(pool.setMax(101), 'MAX_TOO_HIGH')
+      await expect(pool.setMax(101)).to.be.revertedWith('MAX_TOO_HIGH')
     })
   })
 
   describe('Test drain to', async () => {
     it('Test drain to is successful', async () => {
-      const mockToken_transfer = await mockFungibleTokenTemplate.contract.methods
-        .transfer(ADDRESS_ZERO, 0)
-        .encodeABI()
-      const mockToken_balanceOf = await mockFungibleTokenTemplate.contract.methods
-        .balanceOf(ADDRESS_ZERO)
-        .encodeABI()
-      await feeToken.givenMethodReturnBool(mockToken_transfer, true)
-      await feeToken.givenMethodReturnUint(mockToken_balanceOf, 10)
-      await feeToken2.givenMethodReturnBool(mockToken_transfer, true)
-      await feeToken2.givenMethodReturnUint(mockToken_balanceOf, 10)
+      await feeToken.mock.balanceOf.returns('10')
+      await feeToken.mock.transfer.returns(true)
+      await feeToken2.mock.balanceOf.returns('10')
+      await feeToken2.mock.transfer.returns(true)
 
-      const trx = await pool.drainTo(
-        [feeToken.address, feeToken2.address],
-        carolAddress
-      )
-
-      emitted(trx, 'DrainTo', e => {
-        return (
-          e.tokens[0] === feeToken.address &&
-          e.tokens[1] === feeToken2.address &&
-          e.dest === carolAddress
-        )
-      })
+      await expect(
+        await pool
+          .connect(deployer)
+          .drainTo([feeToken.address, feeToken2.address], carol.address)
+      ).to.emit(pool, 'DrainTo')
     })
 
     it('Test dtain to is only callable by owner', async () => {
-      await reverted(
-        pool.drainTo([feeToken.address, feeToken2.address], carolAddress, {
-          from: aliceAddress,
-        }),
-        'Ownable: caller is not the owner'
-      )
+      await expect(
+        pool
+          .connect(alice)
+          .drainTo([feeToken.address, feeToken2.address], carol.address)
+      ).to.be.revertedWith('Ownable: caller is not the owner')
     })
   })
 })

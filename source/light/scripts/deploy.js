@@ -6,26 +6,42 @@ const { ethers } = hre
 async function main() {
   await hre.run('compile')
   const [deployer] = await ethers.getSigners()
-  console.log(deployer.address)
-  const stakingToken = '0xcc1cbd4f67cceb7c001bd4adf98451237a193ff8'
-  const name = 'Staked AST'
-  const symbol = 'sAST'
-  const duration = 300
-  const cliff = 30
-  const stakingFactory = await ethers.getContractFactory('Staking')
-  const stakingContract = await stakingFactory.deploy(
-    stakingToken,
-    name,
-    symbol,
-    duration,
-    cliff
-  )
-  await stakingContract.deployed()
-  console.log(`Staking Address: ${stakingContract.address}`)
+  console.log(`Deployer Address: ${deployer.address}`)
 
+  // Light Deploy
+  const feeWallet = '0x7296333e1615721f4Bd9Df1a3070537484A50CF8'
+  const fee = 30
+  const lightFactory = await ethers.getContractFactory('Light')
+  const lightContract = await lightFactory.deploy(feeWallet, fee)
+  await lightContract.deployed()
+  console.log(`Light Address: ${lightContract.address}`)
+
+  console.log('Waiting to verify...')
+  await new Promise(r => setTimeout(r, 60000))
+
+  console.log('Verifying...')
   await hre.run('verify:verify', {
-    address: stakingContract.address,
-    constructorArguments: [stakingToken, name, symbol, duration, cliff],
+    address: lightContract.address,
+    constructorArguments: [feeWallet, fee],
+  })
+
+  // Wrapper Deploy
+  const wethAddress = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+  const wrapperFactory = await ethers.getContractFactory('Wrapper')
+  const wrapperContract = await wrapperFactory.deploy(
+    lightContract.address,
+    wethAddress
+  )
+  await wrapperContract.deployed()
+  console.log(`Wrapper Address: ${wrapperContract.address}`)
+
+  console.log('Waiting to verify...')
+  await new Promise(r => setTimeout(r, 60000))
+
+  console.log('Verifying...')
+  await hre.run('verify:verify', {
+    address: wrapperContract.address,
+    constructorArguments: [lightContract.address, wethAddress],
   })
 }
 

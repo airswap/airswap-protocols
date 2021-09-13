@@ -1,6 +1,5 @@
 require('dotenv').config()
 require('@nomiclabs/hardhat-ethers')
-require('@nomiclabs/hardhat-truffle5')
 require('@nomiclabs/hardhat-waffle')
 require('ganache-time-traveler')
 require('solidity-coverage')
@@ -17,12 +16,6 @@ module.exports = {
           'https://eth-mainnet.alchemyapi.io/v2/' + process.env.ALCHEMY_API_KEY,
         blockNumber: 13158665,
       },
-    },
-    coverage: {
-      url: 'http://localhost:8555',
-    },
-    ganache: {
-      url: 'http://127.0.0.1:8545',
     },
     rinkeby: {
       url: 'https://rinkeby.infura.io/v3/' + process.env.INFURA_API_KEY,

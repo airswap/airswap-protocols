@@ -1,10 +1,10 @@
-pragma solidity ^0.7.6;
-pragma abicoder v2;
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/math/Math.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/utils/math/Math.sol";
 
 /**
  * @title Staking: Stake and Unstake Tokens
@@ -159,7 +159,8 @@ contract Staking is Ownable {
   function unstake(uint256[] calldata amounts) external {
     uint256 totalAmount = 0;
     uint256 length = amounts.length;
-    while (length-- > 0) {
+    while (length > 0) {
+      length = length - 1;
       if (amounts[length] > 0) {
         _unstake(length, amounts[length]);
         totalAmount += amounts[length];
@@ -219,7 +220,8 @@ contract Staking is Ownable {
   {
     uint256 length = allStakes[account].length;
     stakes = new Stake[](length);
-    while (length-- > 0) {
+    while (length > 0) {
+      length = length - 1;
       stakes[length] = allStakes[account][length];
     }
     return stakes;
@@ -238,7 +240,8 @@ contract Staking is Ownable {
   function balanceOf(address account) external view returns (uint256 total) {
     Stake[] memory stakes = allStakes[account];
     uint256 length = stakes.length;
-    while (length-- > 0) {
+    while (length > 0) {
+      length = length - 1;
       total = total.add(stakes[length].balance);
     }
     return total;

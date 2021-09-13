@@ -14,11 +14,6 @@
   limitations under the License.
 */
 
-export { Delegate } from './src/Delegate'
-export { ERC20 } from './src/ERC20'
-export { Indexer } from './src/Indexer'
 export { Light } from './src/Light'
 export { Registry } from './src/Registry'
 export { Server } from './src/Server'
-export { Swap } from './src/Swap'
-export { Validator } from './src/Validator'
