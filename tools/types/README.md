@@ -13,10 +13,6 @@
 - Twitter → https://twitter.com/airswap
 - Chat → https://chat.airswap.io/
 
-## Usage
-
-:warning: This package is under active development and contains unaudited code. The audited [Types](https://github.com/airswap/airswap-protocols/blob/953956f308c65ec53d1f1b20d35f47fe04b936af/source/types/contracts/Types.sol) contract is deployed; see [deploys.js](./deploys.js) for latest. For all AirSwap contract deployments see [Deployed Contracts](https://docs.airswap.io/system/contract-deployments).
-
 ## Commands
 
 | Command         | Description                                   |

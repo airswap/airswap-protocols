@@ -1,9 +1,9 @@
 {
-  "name": "@airswap/utils",
-  "version": "0.4.5",
-  "description": "Utilities for AirSwap Developers",
+  "name": "@airswap/types",
+  "version": "3.6.0",
+  "description": "TypeScript Types AirSwap Developers",
   "contributors": [
-    "Don Mosites <don.mosites@fluidity.io>"
+    "Don Mosites <mosites@gmail.com>"
   ],
   "repository": {
     "type": "git",
@@ -20,8 +20,7 @@
   ],
   "scripts": {
     "clean": "rm -rf ./build",
-    "compile": "yarn clean && tsc -b",
-    "test": "yarn compile && mocha -r ts-node/register test/**/*.ts"
+    "compile": "yarn clean; tsc -b"
   },
   "dependencies": {
     "@airswap/constants": "0.4.0",

@@ -15,8 +15,9 @@
   },
   "scripts": {
     "clean": "rm -rf ./build",
-    "compile": "yarn clean; truffle compile",
-    "test": "yarn compile; truffle test",
+    "compile": "yarn clean && truffle compile",
+    "test": "yarn compile && truffle test",
+    "test:unit": "truffle test ./test/Index-unit.js ./test/Indexer-unit.js",
     "coverage": "truffle run coverage",
     "cp_migration_flat": "mkdir -p flatten/; cp contracts/Migrations.sol flatten/",
     "flatten": "truffle run flatten",
@@ -27,7 +28,7 @@
     "@airswap/constants": "0.4.0",
     "@airswap/test-utils": "0.1.10",
     "@airswap/transfers": "1.1.4",
-    "@airswap/types": "3.5.17",
+    "@airswap/types": "3.6.0",
     "bignumber.js": "^9.0.0",
     "solidity-coverage": "^0.7.4"
   },
