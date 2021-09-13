@@ -23,10 +23,10 @@
   ],
   "scripts": {
     "clean": "rm -rf ./build",
-    "compile": "yarn clean; truffle compile",
+    "compile": "yarn clean && truffle compile",
     "coverage": "truffle run coverage",
     "cp_migration_flat": "mkdir -p flatten/; cp contracts/Migrations.sol flatten/",
-    "test": "yarn compile; truffle test",
+    "test": "yarn compile && truffle test",
     "flatten": "truffle run flatten",
     "migrate": "yarn cp_migration_flat; truffle migrate --skip-dry-run",
     "verify": "truffle run verify"
