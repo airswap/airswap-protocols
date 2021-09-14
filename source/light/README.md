@@ -15,19 +15,29 @@
 
 ## Usage
 
-:warning: This package is under active development and contains unaudited code. For all AirSwap contract deployments see [Deployed Contracts](https://docs.airswap.io/system/contract-deployments).
+:warning: This package is under active development and contains unaudited code. For all AirSwap contract deployments see [Deployed Contracts](https://about.airswap.io/technology/deployments).
+
+## Env Vars
+
+Hardhat expects the following environment variables to be set. They may be set in a `.env` file.
+
+| Variable            | Description                                |
+| :------------------ | :----------------------------------------- |
+| `MNEMONIC`          | 12-world account mnemonic used for testing |
+| `INFURA_API_KEY`    | Infura API key to use for deployments      |
+| `ETHERSCAN_API_KEY` | Etherscan API key to use for verification  |
 
 ## Commands
 
-| Command         | Description                                   |
-| :-------------- | :-------------------------------------------- |
-| `yarn`          | Install dependencies                          |
-| `yarn clean`    | Delete the contract `build` folder            |
-| `yarn compile`  | Compile all contracts to `build` folder       |
-| `yarn coverage` | Run solidity-coverage to report test coverage |
-| `yarn hint`     | Run a syntax linter for all Solidity code     |
-| `yarn lint`     | Run a syntax linter for all JavaScript code   |
-| `yarn test`     | Run all contract tests in `test` folder       |
+| Command               | Description                                   |
+| :-------------------- | :-------------------------------------------- |
+| `yarn`                | Install dependencies                          |
+| `yarn clean`          | Delete the contract `build` folder            |
+| `yarn compile`        | Compile all contracts to `build` folder       |
+| `yarn test`           | Run all contract tests in `test` folder       |
+| `yarn coverage`       | Run solidity-coverage to report test coverage |
+| `yarn deploy:rinkeby` | Deploy contracts to Rinkeby                   |
+| `yarn deploy:mainnet` | Deploy contracts to Mainnet                   |
 
 ## Running Tests
 

@@ -15,7 +15,17 @@
 
 ## Usage
 
-:warning: This package is under active development and contains unaudited code. For all AirSwap contract deployments see [Deployed Contracts](https://docs.airswap.io/system/contract-deployments).
+:warning: This package is under active development and contains unaudited code. For all AirSwap contract deployments see [Deployed Contracts](https://about.airswap.io/technology/deployments).
+
+## Env Vars
+
+Hardhat expects the following environment variables to be set. They may be set in a `.env` file.
+
+| Variable            | Description                                |
+| :------------------ | :----------------------------------------- |
+| `MNEMONIC`          | 12-world account mnemonic used for testing |
+| `INFURA_API_KEY`    | Infura API key to use for deployments      |
+| `ETHERSCAN_API_KEY` | Etherscan API key to use for verification  |
 
 ## Commands
 
