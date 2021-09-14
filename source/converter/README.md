@@ -4,7 +4,6 @@
 
 [![Discord](https://img.shields.io/discord/590643190281928738.svg)](https://discord.gg/ecQbV7H)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/MIT)
-[![CircleCI](https://circleci.com/gh/airswap/airswap-protocols.svg?style=svg&circle-token=73bd6668f836ce4306dbf6ca32109ddbb5b7e1fe)](https://circleci.com/gh/airswap/airswap-protocols)
 ![Twitter Follow](https://img.shields.io/twitter/follow/airswap?style=social)
 
 ## Resources
@@ -31,13 +30,16 @@ Hardhat expects the following environment variables to be set. They may be set i
 
 ## Commands
 
-| Command         | Description                                   |
-| :-------------- | :-------------------------------------------- |
-| `yarn`          | Install dependencies                          |
-| `yarn clean`    | Delete the contract `build` folder            |
-| `yarn compile`  | Compile all contracts to `build` folder       |
-| `yarn coverage` | Run solidity-coverage to report test coverage |
-| `yarn test`     | Run all contract tests in `test` folder       |
+| Command               | Description                             |
+| :-------------------- | :-------------------------------------- |
+| `yarn`                | Install dependencies                    |
+| `yarn clean`          | Delete the contract `build` folder      |
+| `yarn compile`        | Compile all contracts to `build` folder |
+| `yarn test`           | Run all tests in `test` folder          |
+| `yarn test:unit`      | Run unit tests in `test` folder         |
+| `yarn coverage`       | Report test coverage                    |
+| `yarn deploy:rinkeby` | Deploy contracts to Rinkeby             |
+| `yarn deploy:mainnet` | Deploy contracts to Mainnet             |
 
 ## Running Tests
 

@@ -29,13 +29,16 @@ Hardhat expects the following environment variables to be set. They may be set i
 
 ## Commands
 
-| Command         | Description                                   |
-| :-------------- | :-------------------------------------------- |
-| `yarn`          | Install dependencies                          |
-| `yarn clean`    | Delete the contract `build` folder            |
-| `yarn compile`  | Compile all contracts to `build` folder       |
-| `yarn test`     | Run all contract tests in `test` folder       |
-| `yarn coverage` | Run solidity-coverage to report test coverage |
+| Command               | Description                             |
+| :-------------------- | :-------------------------------------- |
+| `yarn`                | Install dependencies                    |
+| `yarn clean`          | Delete the contract `build` folder      |
+| `yarn compile`        | Compile all contracts to `build` folder |
+| `yarn test`           | Run all tests in `test` folder          |
+| `yarn test:unit`      | Run unit tests in `test` folder         |
+| `yarn coverage`       | Report test coverage                    |
+| `yarn deploy:rinkeby` | Deploy contracts to Rinkeby             |
+| `yarn deploy:mainnet` | Deploy contracts to Mainnet             |
 
 ## Running Tests
 

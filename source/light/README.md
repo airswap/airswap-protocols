@@ -1,6 +1,6 @@
 # Light
 
-[AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens. This package contains source code and tests for the `Light` atomic swap used to perform trustless token transfers between parties. Light functions as a simplified version of the [Swap](https://github.com/airswap/airswap-protocols/tree/main/source/swap) contract for specific use cases that do not require full features.
+[AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens.
 
 [![Discord](https://img.shields.io/discord/590643190281928738.svg)](https://discord.gg/ecQbV7H)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/MIT)
@@ -29,15 +29,16 @@ Hardhat expects the following environment variables to be set. They may be set i
 
 ## Commands
 
-| Command               | Description                                   |
-| :-------------------- | :-------------------------------------------- |
-| `yarn`                | Install dependencies                          |
-| `yarn clean`          | Delete the contract `build` folder            |
-| `yarn compile`        | Compile all contracts to `build` folder       |
-| `yarn test`           | Run all contract tests in `test` folder       |
-| `yarn coverage`       | Run solidity-coverage to report test coverage |
-| `yarn deploy:rinkeby` | Deploy contracts to Rinkeby                   |
-| `yarn deploy:mainnet` | Deploy contracts to Mainnet                   |
+| Command               | Description                             |
+| :-------------------- | :-------------------------------------- |
+| `yarn`                | Install dependencies                    |
+| `yarn clean`          | Delete the contract `build` folder      |
+| `yarn compile`        | Compile all contracts to `build` folder |
+| `yarn test`           | Run all tests in `test` folder          |
+| `yarn test:unit`      | Run unit tests in `test` folder         |
+| `yarn coverage`       | Report test coverage                    |
+| `yarn deploy:rinkeby` | Deploy contracts to Rinkeby             |
+| `yarn deploy:mainnet` | Deploy contracts to Mainnet             |
 
 ## Running Tests
 
