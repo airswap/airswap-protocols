@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/member-ordering */
 /*
   Copyright 2020 Swap Holdings Ltd.
 
@@ -20,27 +21,49 @@ import { parseUrl, flattenObject } from '@airswap/utils'
 import { Quote, LightOrder } from '@airswap/types'
 import { Light } from './Light'
 import { HTTPServer } from './HTTPServer'
+import { EventEmitter } from 'events'
+import { WebSocketServer } from './WebSocketServer'
 
-export interface SupportedProtocolInfo {
+export type SupportedProtocolInfo = {
   name: string
   version: string
   params?: any
 }
 
-interface LocatorOptions {
+type LocatorOptions = {
   protocol: string
   hostname: string
   port: string
   timeout?: number
 }
 
-export abstract class Server {
+type Levels = [string, string][]
+type Formula = string
+
+type PricingDetails =
+  | {
+      bid: Levels
+      ask: Levels
+    }
+  | {
+      bid: Formula
+      ask: Formula
+    }
+
+type Pricing = {
+  baseToken: string
+  quoteToken: string
+} & PricingDetails
+
+export abstract class Server extends EventEmitter {
   protected swapContract: string
   protected locatorUrl: ReturnType<typeof parseUrl>
   protected locatorOptions: LocatorOptions
   protected supportedProtocols: SupportedProtocolInfo[]
+  protected isInitialized: boolean
 
   public constructor(locator: string, swapContract = Light.getAddress()) {
+    super()
     this.swapContract = swapContract
     this.locatorUrl = parseUrl(locator)
     this.locatorOptions = {
@@ -55,6 +78,8 @@ export abstract class Server {
   public static async for(locator: string, swapContract?: string) {
     if (!locator.match(/^wss?:\/\//)) {
       return new HTTPServer(locator, swapContract)
+    } else {
+      return new WebSocketServer(locator, swapContract)
     }
   }
 
@@ -66,6 +91,9 @@ export abstract class Server {
    * @returns boolean true if protocol is supported at given version
    */
   public supportsProtocol(protocol: string, minVersion?: string) {
+    // Don't check supportedProtocols unless the server has initialized.
+    // Important for WebSocket servers that can support either RFQ or Last Look
+    this.requireInitialized()
     const supportedProtocolInfo = this.supportedProtocols.find(
       p => p.name === protocol
     )
@@ -74,6 +102,7 @@ export abstract class Server {
     // TODO: semVer matching.
   }
 
+  // ***   RFQ METHODS   *** //
   public async getMaxQuote(
     signerToken: string,
     senderToken: string
@@ -140,11 +169,67 @@ export abstract class Server {
       senderWallet,
     })
   }
+  // *** END RFQ METHODS *** //
 
+  // ***   LAST LOOK METHODS   *** //
+  protected initialize(supportedProtocols: SupportedProtocolInfo[]) {
+    this.requireLastLookSupport()
+    this.supportedProtocols = supportedProtocols
+  }
+
+  public async subscribe(pairs: { baseToken: string; quoteToken: string }[]) {
+    this.requireLastLookSupport()
+    return this.callRPCMethod<boolean>('subscribe', pairs)
+  }
+
+  public async unsubscribe(pairs: { baseToken: string; quoteToken: string }[]) {
+    this.requireLastLookSupport()
+    return this.callRPCMethod<boolean>('unsubscribe', pairs)
+  }
+
+  public async subscribeAll() {
+    this.requireLastLookSupport()
+    return this.callRPCMethod<boolean>('subscribeAll')
+  }
+
+  public async unsubscribeAll() {
+    this.requireLastLookSupport()
+    return this.callRPCMethod<boolean>('unsubscribeAll')
+  }
+
+  protected updatePricing(newPricing: Pricing[]) {
+    this.emit('pricing', newPricing)
+  }
+
+  public async consider(order: LightOrder) {
+    this.requireLastLookSupport()
+    return this.callRPCMethod<boolean>('consider', order)
+  }
+  // *** END LAST LOOK METHODS *** //
+
+  protected requireInitialized() {
+    if (!this.isInitialized) throw new Error('Server not yet initialized')
+  }
+
+  /**
+   * Throws if RFQ protocol is not supported, or if server is not yet
+   * initialized.
+   */
   protected requireRFQSupport(version?: string) {
     if (!this.supportsProtocol('request-for-quote', version))
       throw new Error(
         `Server at ${this.locatorUrl} doesn't support this version of RFQ`
+      )
+  }
+
+  /**
+   * Throws if Last Look protocol is not supported, or if server is not yet
+   * initialized.
+   */
+  protected requireLastLookSupport(version?: string) {
+    if (!this.supportsProtocol('last-look', version))
+      throw new Error(
+        `Server at ${this.locatorUrl} doesn't support this version of Last Look`
       )
   }
 
@@ -162,9 +247,13 @@ export abstract class Server {
     return errors
   }
 
+  /**
+   * This method should instantiate the relevenat transport client and also
+   * trigger initialization, setting `isInitialized` when complete.
+   */
   protected abstract _initClient(locator: string, swapContract: string): void
   protected abstract callRPCMethod<T>(
     method: string,
-    params: Record<string, string>
+    params?: Record<string, string> | Array<any>
   ): Promise<T>
 }

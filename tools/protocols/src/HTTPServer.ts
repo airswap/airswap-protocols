@@ -11,6 +11,7 @@ export class HTTPServer extends Server {
     // TODO: check this - version is probably wrong and I think swap contract
     // needs to go in the params.
     this.supportedProtocols = [{ name: 'request-for-quote', version: '2.0.0' }]
+    this.isInitialized = true
 
     if (isBrowser) {
       const jaysonClient = require('jayson/lib/client/browser')
