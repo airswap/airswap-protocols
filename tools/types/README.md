@@ -21,14 +21,13 @@
 | `yarn clean`    | Delete the contract `build` folder            |
 | `yarn compile`  | Compile all contracts to `build` folder       |
 | `yarn coverage` | Run solidity-coverage to report test coverage |
-| `yarn ganache`  | Run an instance of `ganache-cli` for tests    |
 | `yarn hint`     | Run a syntax linter for all Solidity code     |
 | `yarn lint`     | Run a syntax linter for all JavaScript code   |
 | `yarn test`     | Run all contract tests in `test` folder       |
 
 ## Running Tests
 
-:bulb: Prior to testing locally, run `yarn compile` in the `airswap-protocols` project root to build required artifacts. Then run an instance of `ganache-cli` before running `yarn test` in another shell.
+:bulb: Prior to testing locally, run `yarn compile` in the `airswap-protocols` project root to build required artifacts.
 
 ```
 yarn ganache
