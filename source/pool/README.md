@@ -28,4 +28,4 @@
 
 ## Running Tests
 
-:bulb: Prior to testing locally, run `yarn compile` in the `airswap-protocols` project root to build required artifacts. Also in root, run `yarn ganache` before running `yarn test` in another shell.
+:bulb: Prior to testing locally, run `yarn compile` in the `airswap-protocols` project root to build required artifacts.

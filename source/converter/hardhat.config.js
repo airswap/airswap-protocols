@@ -1,7 +1,6 @@
 require('dotenv').config()
 require('@nomiclabs/hardhat-ethers')
 require('@nomiclabs/hardhat-waffle')
-require('ganache-time-traveler')
 require('solidity-coverage')
 
 module.exports = {
