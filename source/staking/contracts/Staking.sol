@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+
 pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
@@ -7,7 +8,8 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 
 /**
- * @title Staking: Stake and Unstake Tokens
+ * @title AirSwap Staking: Stake and Unstake Tokens
+ * @notice https://www.airswap.io/
  */
 contract Staking is Ownable {
   using SafeERC20 for ERC20;
@@ -91,65 +93,11 @@ contract Staking is Ownable {
   }
 
   /**
-   * @notice Stake tokens for an account
-   * @param account address
-   * @param amount uint256
-   */
-  function stakeFor(address account, uint256 amount) public {
-    require(amount > 0, "AMOUNT_INVALID");
-    allStakes[account].push(
-      Stake(duration, cliff, amount, amount, block.timestamp)
-    );
-    token.safeTransferFrom(msg.sender, address(this), amount);
-    emit Transfer(address(0), account, amount);
-  }
-
-  /**
    * @notice Extend a stake
    * @param amount uint256
    */
   function extend(uint256 index, uint256 amount) external {
     extendFor(index, msg.sender, amount);
-  }
-
-  /**
-   * @notice Extend a stake for an account
-   * @param index uint256
-   * @param account address
-   * @param amount uint256
-   */
-  function extendFor(
-    uint256 index,
-    address account,
-    uint256 amount
-  ) public {
-    require(amount > 0, "AMOUNT_INVALID");
-
-    Stake storage selected = allStakes[account][index];
-
-    // If selected stake is fully vested create a new stake
-    if (vested(account, index) == selected.initial) {
-      stakeFor(account, amount);
-    } else {
-      uint256 newInitial = selected.initial.add(amount);
-      uint256 newBalance = selected.balance.add(amount);
-
-      // Calculate a new timestamp proportional to the new amount
-      // New timestamp limited to current timestamp (amount / newInitial approaches 1)
-      uint256 newTimestamp =
-        selected.timestamp +
-          amount.mul(block.timestamp.sub(selected.timestamp)).div(newInitial);
-
-      allStakes[account][index] = Stake(
-        duration,
-        cliff,
-        newInitial,
-        newBalance,
-        newTimestamp
-      );
-      token.safeTransferFrom(msg.sender, address(this), amount);
-      emit Transfer(address(0), account, amount);
-    }
   }
 
   /**
@@ -170,43 +118,6 @@ contract Staking is Ownable {
       token.transfer(msg.sender, totalAmount);
       emit Transfer(msg.sender, address(0), totalAmount);
     }
-  }
-
-  /**
-   * @notice Vested amount for an account
-   * @param account uint256
-   * @param index uint256
-   */
-  function vested(address account, uint256 index)
-    public
-    view
-    returns (uint256)
-  {
-    Stake storage stakeData = allStakes[account][index];
-    if (block.timestamp.sub(stakeData.timestamp) > duration) {
-      return stakeData.initial;
-    }
-    return
-      stakeData.initial.mul(block.timestamp.sub(stakeData.timestamp)).div(
-        stakeData.duration
-      );
-  }
-
-  /**
-   * @notice Available amount for an account
-   * @param account uint256
-   * @param index uint256
-   */
-  function available(address account, uint256 index)
-    public
-    view
-    returns (uint256)
-  {
-    Stake memory selected = allStakes[account][index];
-    if (block.timestamp.sub(selected.timestamp) < selected.cliff) {
-      return 0;
-    }
-    return vested(account, index) - (selected.initial - selected.balance);
   }
 
   /**
@@ -252,6 +163,98 @@ contract Staking is Ownable {
    */
   function decimals() external view returns (uint8) {
     return token.decimals();
+  }
+
+
+  /**
+   * @notice Stake tokens for an account
+   * @param account address
+   * @param amount uint256
+   */
+  function stakeFor(address account, uint256 amount) public {
+    require(amount > 0, "AMOUNT_INVALID");
+    allStakes[account].push(
+      Stake(duration, cliff, amount, amount, block.timestamp)
+    );
+    token.safeTransferFrom(msg.sender, address(this), amount);
+    emit Transfer(address(0), account, amount);
+  }
+
+  /**
+   * @notice Extend a stake for an account
+   * @param index uint256
+   * @param account address
+   * @param amount uint256
+   */
+  function extendFor(
+    uint256 index,
+    address account,
+    uint256 amount
+  ) public {
+    require(amount > 0, "AMOUNT_INVALID");
+
+    Stake storage selected = allStakes[account][index];
+
+    // If selected stake is fully vested create a new stake
+    if (vested(account, index) == selected.initial) {
+      stakeFor(account, amount);
+    } else {
+      uint256 newInitial = selected.initial.add(amount);
+      uint256 newBalance = selected.balance.add(amount);
+
+      // Calculate a new timestamp proportional to the new amount
+      // New timestamp limited to current timestamp (amount / newInitial approaches 1)
+      uint256 newTimestamp =
+        selected.timestamp +
+          amount.mul(block.timestamp.sub(selected.timestamp)).div(newInitial);
+
+      allStakes[account][index] = Stake(
+        duration,
+        cliff,
+        newInitial,
+        newBalance,
+        newTimestamp
+      );
+      token.safeTransferFrom(msg.sender, address(this), amount);
+      emit Transfer(address(0), account, amount);
+    }
+  }
+
+  /**
+   * @notice Vested amount for an account
+   * @param account uint256
+   * @param index uint256
+   */
+  function vested(address account, uint256 index)
+    public
+    view
+    returns (uint256)
+  {
+    Stake storage stakeData = allStakes[account][index];
+    if (block.timestamp.sub(stakeData.timestamp) > duration) {
+      return stakeData.initial;
+    }
+    return
+      stakeData.initial.mul(block.timestamp.sub(stakeData.timestamp)).div(
+        stakeData.duration
+      );
+  }
+
+  /**
+   * @notice Available amount for an account
+   * @param account uint256
+   * @param index uint256
+   */
+  function available(address account, uint256 index)
+    public
+    view
+    returns (uint256)
+  {
+    Stake memory selected = allStakes[account][index];
+    if (block.timestamp.sub(selected.timestamp) < selected.cliff) {
+      return 0;
+    }
+    return vested(account, index) - (selected.initial - selected.balance);
   }
 
   /**

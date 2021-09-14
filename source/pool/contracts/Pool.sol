@@ -1,21 +1,6 @@
-/*
-  Copyright 2020 Swap Holdings Ltd.
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-*/
+// SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.0;
-pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -24,7 +9,8 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
 /**
- * @title Pool: Claim Tokens Based on a Pricing Function
+ * @title AirSwap Pool: Claim Tokens Based on an Output Function
+ * @notice https://www.airswap.io/
  */
 contract Pool is Ownable {
   using SafeERC20 for IERC20;
@@ -111,6 +97,20 @@ contract Pool is Ownable {
   }
 
   /**
+   * @notice Admin function to migrate funds
+   * @dev Only owner
+   * @param tokens IERC20[]
+   * @param dest address
+   */
+  function drainTo(IERC20[] calldata tokens, address dest) external onlyOwner {
+    for (uint256 i = 0; i < tokens.length; i++) {
+      uint256 bal = tokens[i].balanceOf(address(this));
+      tokens[i].safeTransfer(dest, bal);
+    }
+    emit DrainTo(tokens, dest);
+  }
+
+  /**
    * @notice Withdraw tokens from the pool using claims
    * @param claims Claim[]
    * @param token IERC20
@@ -193,19 +193,5 @@ contract Pool is Ownable {
   ) public pure returns (bool valid) {
     bytes32 leaf = keccak256(abi.encodePacked(participant, score));
     return MerkleProof.verify(proof, root, leaf);
-  }
-
-  /**
-   * @notice Admin function to migrate funds
-   * @dev Only owner
-   * @param tokens IERC20[]
-   * @param dest address
-   */
-  function drainTo(IERC20[] calldata tokens, address dest) external onlyOwner {
-    for (uint256 i = 0; i < tokens.length; i++) {
-      uint256 bal = tokens[i].balanceOf(address(this));
-      tokens[i].safeTransfer(dest, bal);
-    }
-    emit DrainTo(tokens, dest);
   }
 }

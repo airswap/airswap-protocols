@@ -23,17 +23,9 @@
     "compile": "yarn clean; tsc -b"
   },
   "dependencies": {
-    "@airswap/constants": "0.4.0",
-    "@airswap/types": "3.6.0",
-    "@types/ethereumjs-util": "^6.1.0",
-    "eth-sig-util": "^3.0.0",
-    "ethereumjs-util": "^6.2.0",
-    "ethers": "^5.4.6"
+    "@airswap/constants": "0.4.0"
   },
   "devDependencies": {
-    "@types/mocha": "^7.0.1",
-    "chai": "^4.2.0",
-    "mocha": "^7.0.1",
     "ts-node": "^8.6.2",
     "typescript": "^3.8.2"
   },
