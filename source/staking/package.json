@@ -3,8 +3,8 @@
   "version": "2.3.2",
   "description": "Stake and unstake tokens on a schedule",
   "contributors": [
-    "Ethan Wessel <ethan.wessel@consensys.net>",
-    "Don Mosites <don.mosites@consensys.net>"
+    "Ethan Wessel",
+    "Don Mosites"
   ],
   "license": "MIT",
   "repository": {

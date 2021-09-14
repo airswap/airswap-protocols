@@ -3,9 +3,9 @@
   "version": "2.2.2",
   "description": "Light version of @airswap/swap",
   "contributors": [
-    "Vicente Dragicevic <vicente.dragicevic@consensys.net>",
-    "Don Mosites <don.mosites@fluidity.io>",
-    "Ethan Wessel <ethan.wessel@fluidity.io>"
+    "Vicente Dragicevic",
+    "Don Mosites",
+    "Ethan Wessel"
   ],
   "license": "MIT",
   "repository": {

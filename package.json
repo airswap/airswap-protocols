@@ -2,14 +2,6 @@
   "name": "airswap-protocols",
   "version": "0.0.1",
   "private": true,
-  "contributors": [
-    "Don Mosites <don.mosites@fluidity.io>",
-    "Deepa Sathaye <deepa.sathaye@fludity.io>",
-    "Ethan Wessel <ethan.wessel@fluidity.io>",
-    "Alice Henshaw <alice.henshaw@fluidity.io>",
-    "Hassan Malik <hbmalik88@gmail.com>",
-    "Martin Sterlicchi <msterlicchi@gmail.com>"
-  ],
   "license": "MIT",
   "workspaces": {
     "packages": [
