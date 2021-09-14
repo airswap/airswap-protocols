@@ -21,6 +21,7 @@
   "scripts": {
     "clean": "rm -rf ./build",
     "compile": "yarn clean && tsc -b",
+    "test": "yarn test:unit",
     "test:unit": "yarn compile && mocha -r ts-node/register test/**/*.ts"
   },
   "dependencies": {

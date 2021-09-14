@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { functions } from '@airswap/test-utils'
+import { ethers } from 'ethers'
 import { ADDRESS_ZERO, SECONDS_IN_DAY, tokenKinds } from '@airswap/constants'
 
 import {
@@ -16,7 +16,10 @@ import {
   getSignerFromLightSignature,
 } from '../src/orders'
 
-const wallet = functions.getTestWallet()
+const signerPrivateKey =
+  '0x4934d4ff925f39f91e3729fbce52ef12f25fdf93e014e291350f7d314c1a096b'
+const provider = ethers.getDefaultProvider('rinkeby')
+const wallet = new ethers.Wallet(signerPrivateKey, provider)
 
 describe('Orders', async () => {
   it('Signs and validates an order', async () => {
