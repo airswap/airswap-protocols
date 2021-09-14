@@ -1,7 +1,7 @@
 {
-  "name": "@airswap/constants",
-  "version": "0.4.0",
-  "description": "Helpful Constants for AirSwap Developers",
+  "name": "@airswap/types",
+  "version": "3.6.0",
+  "description": "TypeScript Types AirSwap Developers",
   "contributors": [
     "Don Mosites"
   ],
@@ -9,7 +9,7 @@
     "type": "git",
     "url": "https://github.com/airswap/airswap-protocols"
   },
-  "homepage": "https://github.com/airswap/airswap-protocols/tree/main/tools/constants",
+  "homepage": "https://github.com/airswap/airswap-protocols/tree/main/tools/utils",
   "keywords": [
     "airswap"
   ],
@@ -20,10 +20,13 @@
   ],
   "scripts": {
     "clean": "rm -rf ./build",
-    "compile": "yarn clean && tsc -b"
+    "compile": "yarn clean; tsc -b"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@airswap/constants": "0.4.0"
+  },
   "devDependencies": {
+    "ts-node": "^8.6.2",
     "typescript": "^3.8.2"
   },
   "publishConfig": {

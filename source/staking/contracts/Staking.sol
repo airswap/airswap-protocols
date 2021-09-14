@@ -1,13 +1,15 @@
-pragma solidity ^0.7.6;
-pragma abicoder v2;
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
+// SPDX-License-Identifier: MIT
+
+pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/math/Math.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/utils/math/Math.sol";
 
 /**
- * @title Staking: Stake and Unstake Tokens
+ * @title AirSwap Staking: Stake and Unstake Tokens
+ * @notice https://www.airswap.io/
  */
 contract Staking is Ownable {
   using SafeERC20 for ERC20;
@@ -91,6 +93,80 @@ contract Staking is Ownable {
   }
 
   /**
+   * @notice Extend a stake
+   * @param amount uint256
+   */
+  function extend(uint256 index, uint256 amount) external {
+    extendFor(index, msg.sender, amount);
+  }
+
+  /**
+   * @notice Unstake multiple
+   * @param amounts uint256[]
+   */
+  function unstake(uint256[] calldata amounts) external {
+    uint256 totalAmount = 0;
+    uint256 length = amounts.length;
+    while (length > 0) {
+      length = length - 1;
+      if (amounts[length] > 0) {
+        _unstake(length, amounts[length]);
+        totalAmount += amounts[length];
+      }
+    }
+    if (totalAmount > 0) {
+      token.transfer(msg.sender, totalAmount);
+      emit Transfer(msg.sender, address(0), totalAmount);
+    }
+  }
+
+  /**
+   * @notice All stakes for an account
+   * @param account uint256
+   */
+  function getStakes(address account)
+    external
+    view
+    returns (Stake[] memory stakes)
+  {
+    uint256 length = allStakes[account].length;
+    stakes = new Stake[](length);
+    while (length > 0) {
+      length = length - 1;
+      stakes[length] = allStakes[account][length];
+    }
+    return stakes;
+  }
+
+  /**
+   * @notice Total balance of all accounts (ERC-20)
+   */
+  function totalSupply() external view returns (uint256) {
+    return token.balanceOf(address(this));
+  }
+
+  /**
+   * @notice Balance of an account (ERC-20)
+   */
+  function balanceOf(address account) external view returns (uint256 total) {
+    Stake[] memory stakes = allStakes[account];
+    uint256 length = stakes.length;
+    while (length > 0) {
+      length = length - 1;
+      total = total.add(stakes[length].balance);
+    }
+    return total;
+  }
+
+  /**
+   * @notice Decimals of underlying token (ERC-20)
+   */
+  function decimals() external view returns (uint8) {
+    return token.decimals();
+  }
+
+
+  /**
    * @notice Stake tokens for an account
    * @param account address
    * @param amount uint256
@@ -102,14 +178,6 @@ contract Staking is Ownable {
     );
     token.safeTransferFrom(msg.sender, address(this), amount);
     emit Transfer(address(0), account, amount);
-  }
-
-  /**
-   * @notice Extend a stake
-   * @param amount uint256
-   */
-  function extend(uint256 index, uint256 amount) external {
-    extendFor(index, msg.sender, amount);
   }
 
   /**
@@ -153,25 +221,6 @@ contract Staking is Ownable {
   }
 
   /**
-   * @notice Unstake multiple
-   * @param amounts uint256[]
-   */
-  function unstake(uint256[] calldata amounts) external {
-    uint256 totalAmount = 0;
-    uint256 length = amounts.length;
-    while (length-- > 0) {
-      if (amounts[length] > 0) {
-        _unstake(length, amounts[length]);
-        totalAmount += amounts[length];
-      }
-    }
-    if (totalAmount > 0) {
-      token.transfer(msg.sender, totalAmount);
-      emit Transfer(msg.sender, address(0), totalAmount);
-    }
-  }
-
-  /**
    * @notice Vested amount for an account
    * @param account uint256
    * @param index uint256
@@ -206,49 +255,6 @@ contract Staking is Ownable {
       return 0;
     }
     return vested(account, index) - (selected.initial - selected.balance);
-  }
-
-  /**
-   * @notice All stakes for an account
-   * @param account uint256
-   */
-  function getStakes(address account)
-    external
-    view
-    returns (Stake[] memory stakes)
-  {
-    uint256 length = allStakes[account].length;
-    stakes = new Stake[](length);
-    while (length-- > 0) {
-      stakes[length] = allStakes[account][length];
-    }
-    return stakes;
-  }
-
-  /**
-   * @notice Total balance of all accounts (ERC-20)
-   */
-  function totalSupply() external view returns (uint256) {
-    return token.balanceOf(address(this));
-  }
-
-  /**
-   * @notice Balance of an account (ERC-20)
-   */
-  function balanceOf(address account) external view returns (uint256 total) {
-    Stake[] memory stakes = allStakes[account];
-    uint256 length = stakes.length;
-    while (length-- > 0) {
-      total = total.add(stakes[length].balance);
-    }
-    return total;
-  }
-
-  /**
-   * @notice Decimals of underlying token (ERC-20)
-   */
-  function decimals() external view returns (uint8) {
-    return token.decimals();
   }
 
   /**

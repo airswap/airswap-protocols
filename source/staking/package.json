@@ -3,10 +3,10 @@
   "version": "2.3.2",
   "description": "Stake and unstake tokens on a schedule",
   "contributors": [
-    "Ethan Wessel <ethan.wessel@consensys.net>",
-    "Don Mosites <don.mosites@consensys.net>"
+    "Ethan Wessel",
+    "Don Mosites"
   ],
-  "license": "Apache-2.0",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/airswap/airswap-protocols"
@@ -16,19 +16,20 @@
     "compile": "hardhat compile",
     "coverage": "hardhat coverage",
     "test": "hardhat test",
-    "test:unit": "hardhat test ./test/Staking-unit.js"
+    "test:unit": "hardhat test ./test/unit.js",
+    "deploy:rinkeby": "hardhat run --network rinkeby ./scripts/deploy.js",
+    "deploy:mainnet": "hardhat run --network mainnet ./scripts/deploy.js"
   },
   "devDependencies": {
-    "@nomiclabs/hardhat-ethers": "^2.0.1",
-    "@nomiclabs/hardhat-etherscan": "^2.1.1",
-    "@nomiclabs/hardhat-truffle5": "^2.0.0",
+    "@nomiclabs/hardhat-ethers": "^2.0.2",
+    "@nomiclabs/hardhat-etherscan": "^2.1.6",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
-    "@nomiclabs/hardhat-web3": "^2.0.0",
-    "hardhat": "^2.0.10",
-    "ethereum-waffle": "^3.0.0",
-    "@openzeppelin/contracts": "^3.4.0",
-    "ganache-time-traveler": "^1.0.15",
-    "ethers": "^5.0.0"
+    "ethereum-waffle": "^3.4.0",
+    "hardhat": "^2.6.4",
+    "solidity-coverage": "^0.7.4"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.3.1"
   },
   "publishConfig": {
     "access": "public"

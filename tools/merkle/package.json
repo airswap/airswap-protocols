@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "Merkle Tree Tools Adapted from OpenZeppelin",
   "contributors": [
-    "Don Mosites <don.mosites@fluidity.io>"
+    "Don Mosites"
   ],
   "repository": {
     "type": "git",
@@ -13,7 +13,7 @@
   "keywords": [
     "airswap"
   ],
-  "license": "Apache-2.0",
+  "license": "MIT",
   "main": "build/index.js",
   "files": [
     "/build"
@@ -21,7 +21,8 @@
   "scripts": {
     "clean": "rm -rf ./build",
     "compile": "yarn clean && tsc -b",
-    "test": "yarn compile && mocha -r ts-node/register test/**/*.ts"
+    "test": "yarn test:unit",
+    "test:unit": "yarn compile && mocha -r ts-node/register test/**/*.ts"
   },
   "dependencies": {
     "@types/ethereumjs-util": "^6.1.0",

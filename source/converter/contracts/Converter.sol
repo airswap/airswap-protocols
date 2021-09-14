@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.4;
+pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
@@ -18,6 +18,10 @@ interface IUniswapV2Router02 {
   ) external;
 }
 
+/**
+ * @title AirSwap Converter: Convert Fee Tokens
+ * @notice https://www.airswap.io/
+ */
 contract Converter is Ownable, ReentrancyGuard, TokenPaymentSplitter {
   using SafeMath for uint256;
   using SafeERC20 for IERC20;
@@ -212,7 +216,10 @@ contract Converter is Ownable, ReentrancyGuard, TokenPaymentSplitter {
    *
    * */
   function _approveErc20(address _tokenToApprove, uint256 _amount) internal {
-    require(IERC20(_tokenToApprove).approve(address(uniRouter), _amount), "APPROVE_FAILED");
+    require(
+      IERC20(_tokenToApprove).approve(address(uniRouter), _amount),
+      "APPROVE_FAILED"
+    );
   }
 
   /**

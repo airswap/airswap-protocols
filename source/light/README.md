@@ -1,9 +1,9 @@
 # Light
 
-[AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens. This package contains source code and tests for the `Light` atomic swap used to perform trustless token transfers between parties. Light functions as a simplified version of the [Swap](https://github.com/airswap/airswap-protocols/tree/main/source/swap) contract for specific use cases that do not require full features.
+[AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens.
 
 [![Discord](https://img.shields.io/discord/590643190281928738.svg)](https://discord.gg/ecQbV7H)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/MIT)
 ![Twitter Follow](https://img.shields.io/twitter/follow/airswap?style=social)
 
 ## Resources
@@ -15,25 +15,31 @@
 
 ## Usage
 
-:warning: This package is under active development and contains unaudited code. For all AirSwap contract deployments see [Deployed Contracts](https://docs.airswap.io/system/contract-deployments).
+:warning: This package is under active development and contains unaudited code. For all AirSwap contract deployments see [Deployed Contracts](https://about.airswap.io/technology/deployments).
+
+## Env Vars
+
+Hardhat expects the following environment variables to be set. They may be set in a `.env` file.
+
+| Variable            | Description                                |
+| :------------------ | :----------------------------------------- |
+| `MNEMONIC`          | 12-world account mnemonic used for testing |
+| `INFURA_API_KEY`    | Infura API key to use for deployments      |
+| `ETHERSCAN_API_KEY` | Etherscan API key to use for verification  |
 
 ## Commands
 
-| Command         | Description                                   |
-| :-------------- | :-------------------------------------------- |
-| `yarn`          | Install dependencies                          |
-| `yarn clean`    | Delete the contract `build` folder            |
-| `yarn compile`  | Compile all contracts to `build` folder       |
-| `yarn coverage` | Run solidity-coverage to report test coverage |
-| `yarn ganache`  | Run an instance of `ganache-cli` for tests    |
-| `yarn hint`     | Run a syntax linter for all Solidity code     |
-| `yarn lint`     | Run a syntax linter for all JavaScript code   |
-| `yarn test`     | Run all contract tests in `test` folder       |
+| Command               | Description                             |
+| :-------------------- | :-------------------------------------- |
+| `yarn`                | Install dependencies                    |
+| `yarn clean`          | Delete the contract `build` folder      |
+| `yarn compile`        | Compile all contracts to `build` folder |
+| `yarn test`           | Run all tests in `test` folder          |
+| `yarn test:unit`      | Run unit tests in `test` folder         |
+| `yarn coverage`       | Report test coverage                    |
+| `yarn deploy:rinkeby` | Deploy contracts to Rinkeby             |
+| `yarn deploy:mainnet` | Deploy contracts to Mainnet             |
 
 ## Running Tests
 
-:bulb: Prior to testing locally, run `yarn compile` in the `airswap-protocols` project root to build required artifacts. Then run an instance of `ganache-cli` before running `yarn test` in another shell.
-
-```
-yarn ganache
-```
+:bulb: Prior to testing locally, run `yarn compile` in the `airswap-protocols` project root to build required artifacts.

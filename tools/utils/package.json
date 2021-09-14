@@ -3,7 +3,7 @@
   "version": "0.4.5",
   "description": "Utilities for AirSwap Developers",
   "contributors": [
-    "Don Mosites <don.mosites@fluidity.io>"
+    "Don Mosites"
   ],
   "repository": {
     "type": "git",
@@ -13,7 +13,7 @@
   "keywords": [
     "airswap"
   ],
-  "license": "Apache-2.0",
+  "license": "MIT",
   "main": "build/index.js",
   "files": [
     "/build"
@@ -21,15 +21,16 @@
   "scripts": {
     "clean": "rm -rf ./build",
     "compile": "yarn clean && tsc -b",
-    "test": "yarn compile && mocha -r ts-node/register test/**/*.ts"
+    "test": "yarn test:unit",
+    "test:unit": "yarn compile && mocha -r ts-node/register test/**/*.ts"
   },
   "dependencies": {
     "@airswap/constants": "0.4.0",
-    "@airswap/types": "3.5.17",
+    "@airswap/types": "3.6.0",
     "@types/ethereumjs-util": "^6.1.0",
     "eth-sig-util": "^3.0.0",
     "ethereumjs-util": "^6.2.0",
-    "ethers": "^5.0.25"
+    "ethers": "^5.4.6"
   },
   "devDependencies": {
     "@types/mocha": "^7.0.1",

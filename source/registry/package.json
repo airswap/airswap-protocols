@@ -3,10 +3,10 @@
   "version": "4.8.1",
   "description": "Registry of AirSwap server URLs",
   "contributors": [
-    "Ethan Wessel <ethan.wessel@consensys.net>",
-    "Don Mosites <don.mosites@consensys.net>"
+    "Ethan Wessel",
+    "Don Mosites"
   ],
-  "license": "Apache-2.0",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/airswap/airswap-protocols"
@@ -16,21 +16,22 @@
     "compile": "hardhat compile",
     "coverage": "hardhat coverage",
     "test": "hardhat test",
-    "test:unit": "hardhat test ./test/Registry-unit.js"
+    "test:unit": "hardhat test ./test/unit.js",
+    "deploy:rinkeby": "hardhat run --network rinkeby ./scripts/deploy.js",
+    "deploy:mainnet": "hardhat run --network mainnet ./scripts/deploy.js"
   },
   "devDependencies": {
-    "@nomiclabs/hardhat-ethers": "^2.0.1",
-    "@nomiclabs/hardhat-etherscan": "^2.1.1",
-    "@nomiclabs/hardhat-truffle5": "^2.0.0",
+    "@airswap/constants": "0.4.0",
+    "@airswap/utils": "0.4.5",
+    "@nomiclabs/hardhat-ethers": "^2.0.2",
+    "@nomiclabs/hardhat-etherscan": "^2.1.6",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
-    "@nomiclabs/hardhat-web3": "^2.0.0",
-    "@openzeppelin/contracts": "^4.2.0",
-    "chai": "^4.3.0",
-    "ethereum-waffle": "^3.2.2",
-    "ethers": "^5.0.31",
-    "ganache-time-traveler": "^1.0.15",
-    "hardhat": "^2.0.11",
-    "solidity-coverage": "^0.7.16"
+    "ethereum-waffle": "^3.4.0",
+    "hardhat": "^2.6.4",
+    "solidity-coverage": "^0.7.4"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.3.1"
   },
   "publishConfig": {
     "access": "public"

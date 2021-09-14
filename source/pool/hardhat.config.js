@@ -12,12 +12,10 @@ require('solidity-coverage')
  */
 module.exports = {
   networks: {
-    localhost: {
-      url: 'http://127.0.0.1:8545',
-      timeout: 1000000,
-    },
-    coverage: {
-      url: 'http://localhost:8555',
+    hardhat: {
+      accounts: {
+        mnemonic: process.env.MNEMONIC || '',
+      },
     },
     rinkeby: {
       url: 'https://rinkeby.infura.io/v3/' + process.env.INFURA_API_KEY,
@@ -28,7 +26,7 @@ module.exports = {
     },
     mainnet: {
       url: 'https://mainnet.infura.io/v3/' + process.env.INFURA_API_KEY,
-      gasPrice: 72e9,
+      gasPrice: 90e9,
       accounts: {
         mnemonic: process.env.MNEMONIC || '',
       },
@@ -48,12 +46,7 @@ module.exports = {
       },
     ],
   },
-  mocha: {
-    timeout: 1000000,
-  },
   etherscan: {
-    // Your API key for Etherscan
-    // Obtain one at https://etherscan.io/
     apiKey: process.env.ETHERSCAN_API_KEY,
   },
   paths: {

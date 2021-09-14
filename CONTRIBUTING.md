@@ -1,6 +1,6 @@
 # Contributing
 
-Thank you for your interest in contributing! We welcome all contributions no matter their size. Please read this guide to learn how to get started. More information about the individual sub-repos can be found in the relevant README.md, as well as on the [airswap docs site](https://docs.airswap.io/).
+Thank you for your interest in contributing! We welcome all contributions no matter their size. Please read this guide to learn how to get started. More information about the individual sub-repos can be found in the relevant README.md, as well as on the [airswap docs site](https://about.airswap.io/).
 
 ## Set up:
 

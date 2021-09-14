@@ -1,5 +1,4 @@
 const { expect } = require('chai')
-const timeMachine = require('ganache-time-traveler')
 const { ethers } = require('hardhat')
 
 describe('Converter Integration Tests', () => {
@@ -19,12 +18,11 @@ describe('Converter Integration Tests', () => {
   const shares = [10]
 
   beforeEach(async () => {
-    const snapshot = await timeMachine.takeSnapshot()
-    snapshotId = snapshot['result']
+    snapshotId = await ethers.provider.send('evm_snapshot')
   })
 
   afterEach(async () => {
-    await timeMachine.revertToSnapshot(snapshotId)
+    await ethers.provider.send('evm_revert', [snapshotId])
   })
 
   before(async () => {

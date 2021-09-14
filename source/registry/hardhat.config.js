@@ -1,6 +1,5 @@
 require('dotenv').config()
 require('@nomiclabs/hardhat-ethers')
-require('@nomiclabs/hardhat-truffle5')
 require('@nomiclabs/hardhat-waffle')
 require('@nomiclabs/hardhat-etherscan')
 require('solidity-coverage')
@@ -40,7 +39,7 @@ module.exports = {
     apiKey: process.env.ETHERSCAN_API_KEY,
   },
   solidity: {
-    version: '0.8.4',
+    version: '0.8.7',
     settings: {
       optimizer: {
         enabled: true,
