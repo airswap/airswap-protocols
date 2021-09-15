@@ -1,31 +1,15 @@
-/*
-  Copyright 2021 Swap Holdings Ltd.
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-*/
+// SPDX-License-Identifier: MIT
 
 /* solhint-disable var-name-mixedcase */
-pragma solidity ^0.6.0;
+pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
-
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/ILight.sol";
 
 /**
- * @title Light: Simple atomic swap
+ * @title AirSwap Light: Atomic Swap between Tokens
  * @notice https://www.airswap.io/
  */
 contract Light is ILight, Ownable {
@@ -80,7 +64,7 @@ contract Light is ILight, Ownable {
 
   address public feeWallet;
 
-  constructor(address _feeWallet, uint256 _fee) public {
+  constructor(address _feeWallet, uint256 _fee) {
     // Ensure the fee wallet is not null
     require(_feeWallet != address(0), "INVALID_FEE_WALLET");
     // Ensure the fee is less than divisor
@@ -102,7 +86,7 @@ contract Light is ILight, Ownable {
   }
 
   /**
-   * @notice Atomic Token Swap
+   * @notice Atomic ERC20 Swap
    * @param nonce uint256 Unique and should be sequential
    * @param expiry uint256 Expiry in seconds since 1 January 1970
    * @param signerWallet address Wallet of the signer
@@ -118,9 +102,9 @@ contract Light is ILight, Ownable {
     uint256 nonce,
     uint256 expiry,
     address signerWallet,
-    IERC20 signerToken,
+    address signerToken,
     uint256 signerAmount,
-    IERC20 senderToken,
+    address senderToken,
     uint256 senderAmount,
     uint8 v,
     bytes32 r,
@@ -142,87 +126,6 @@ contract Light is ILight, Ownable {
   }
 
   /**
-   * @notice Atomic Token Swap with Recipient
-   * @param recipient Wallet of the recipient
-   * @param nonce uint256 Unique and should be sequential
-   * @param expiry uint256 Expiry in seconds since 1 January 1970
-   * @param signerWallet address Wallet of the signer
-   * @param signerToken address ERC20 token transferred from the signer
-   * @param signerAmount uint256 Amount transferred from the signer
-   * @param senderToken address ERC20 token transferred from the sender
-   * @param senderAmount uint256 Amount transferred from the sender
-   * @param v uint8 "v" value of the ECDSA signature
-   * @param r bytes32 "r" value of the ECDSA signature
-   * @param s bytes32 "s" value of the ECDSA signature
-   */
-  function swapWithRecipient(
-    address recipient,
-    uint256 nonce,
-    uint256 expiry,
-    address signerWallet,
-    IERC20 signerToken,
-    uint256 signerAmount,
-    IERC20 senderToken,
-    uint256 senderAmount,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
-  ) public override {
-    require(DOMAIN_CHAIN_ID == getChainId(), "CHAIN_ID_CHANGED");
-
-    // Ensure the expiry is not passed
-    require(expiry > block.timestamp, "EXPIRY_PASSED");
-
-    bytes32 hashed =
-      _getOrderHash(
-        nonce,
-        expiry,
-        signerWallet,
-        signerToken,
-        signerAmount,
-        msg.sender,
-        senderToken,
-        senderAmount
-      );
-
-    // Recover the signatory from the hash and signature
-    address signatory = _getSignatory(hashed, v, r, s);
-
-    // Ensure the nonce is not yet used and if not mark it used
-    require(_markNonceAsUsed(signatory, nonce), "NONCE_ALREADY_USED");
-
-    // Ensure the signatory is authorized by the signer wallet
-    if (signerWallet != signatory) {
-      require(authorized[signerWallet] == signatory, "UNAUTHORIZED");
-    }
-
-    // Transfer token from sender to signer
-    senderToken.safeTransferFrom(msg.sender, signerWallet, senderAmount);
-
-    // Transfer token from signer to recipient
-    signerToken.safeTransferFrom(signerWallet, recipient, signerAmount);
-
-    // Transfer fee from signer to feeWallet
-    uint256 feeAmount = signerAmount.mul(signerFee).div(FEE_DIVISOR);
-    if (feeAmount > 0) {
-      signerToken.safeTransferFrom(signerWallet, feeWallet, feeAmount);
-    }
-
-    // Emit a Swap event
-    emit Swap(
-      nonce,
-      block.timestamp,
-      signerWallet,
-      signerToken,
-      signerAmount,
-      signerFee,
-      msg.sender,
-      senderToken,
-      senderAmount
-    );
-  }
-
-  /**
    * @notice Set the fee wallet
    * @param newFeeWallet address Wallet to transfer signerFee to
    */
@@ -230,6 +133,7 @@ contract Light is ILight, Ownable {
     // Ensure the new fee wallet is not null
     require(newFeeWallet != address(0), "INVALID_FEE_WALLET");
     feeWallet = newFeeWallet;
+    emit SetFeeWallet(newFeeWallet);
   }
 
   /**
@@ -240,6 +144,7 @@ contract Light is ILight, Ownable {
     // Ensure the fee is less than divisor
     require(newSignerFee < FEE_DIVISOR, "INVALID_FEE");
     signerFee = newSignerFee;
+    emit SetFee(newSignerFee);
   }
 
   /**
@@ -279,6 +184,91 @@ contract Light is ILight, Ownable {
   }
 
   /**
+   * @notice Atomic ERC20 Swap with Recipient
+   * @param recipient Wallet of the recipient
+   * @param nonce uint256 Unique and should be sequential
+   * @param expiry uint256 Expiry in seconds since 1 January 1970
+   * @param signerWallet address Wallet of the signer
+   * @param signerToken address ERC20 token transferred from the signer
+   * @param signerAmount uint256 Amount transferred from the signer
+   * @param senderToken address ERC20 token transferred from the sender
+   * @param senderAmount uint256 Amount transferred from the sender
+   * @param v uint8 "v" value of the ECDSA signature
+   * @param r bytes32 "r" value of the ECDSA signature
+   * @param s bytes32 "s" value of the ECDSA signature
+   */
+  function swapWithRecipient(
+    address recipient,
+    uint256 nonce,
+    uint256 expiry,
+    address signerWallet,
+    address signerToken,
+    uint256 signerAmount,
+    address senderToken,
+    uint256 senderAmount,
+    uint8 v,
+    bytes32 r,
+    bytes32 s
+  ) public override {
+    require(DOMAIN_CHAIN_ID == getChainId(), "CHAIN_ID_CHANGED");
+
+    // Ensure the expiry is not passed
+    require(expiry > block.timestamp, "EXPIRY_PASSED");
+
+    bytes32 hashed =
+      _getOrderHash(
+        nonce,
+        expiry,
+        signerWallet,
+        signerToken,
+        signerAmount,
+        msg.sender,
+        senderToken,
+        senderAmount
+      );
+
+    // Recover the signatory from the hash and signature
+    address signatory = _getSignatory(hashed, v, r, s);
+
+    // Ensure the nonce is not yet used and if not mark it used
+    require(_markNonceAsUsed(signatory, nonce), "NONCE_ALREADY_USED");
+
+    // Ensure the signatory is authorized by the signer wallet
+    if (signerWallet != signatory) {
+      require(authorized[signerWallet] == signatory, "UNAUTHORIZED");
+    }
+
+    // Transfer token from sender to signer
+    IERC20(senderToken).safeTransferFrom(
+      msg.sender,
+      signerWallet,
+      senderAmount
+    );
+
+    // Transfer token from signer to recipient
+    IERC20(signerToken).safeTransferFrom(signerWallet, recipient, signerAmount);
+
+    // Transfer fee from signer to feeWallet
+    uint256 feeAmount = signerAmount.mul(signerFee).div(FEE_DIVISOR);
+    if (feeAmount > 0) {
+      IERC20(signerToken).safeTransferFrom(signerWallet, feeWallet, feeAmount);
+    }
+
+    // Emit a Swap event
+    emit Swap(
+      nonce,
+      block.timestamp,
+      signerWallet,
+      signerToken,
+      signerAmount,
+      signerFee,
+      msg.sender,
+      senderToken,
+      senderAmount
+    );
+  }
+
+  /**
    * @notice Returns true if the nonce has been used
    * @param signer address Address of the signer
    * @param nonce uint256 Nonce being checked
@@ -298,7 +288,7 @@ contract Light is ILight, Ownable {
    * @notice Returns the current chainId using the chainid opcode
    * @return id uint256 The chain id
    */
-  function getChainId() public pure returns (uint256 id) {
+  function getChainId() public view returns (uint256 id) {
     // no-inline-assembly
     assembly {
       id := chainid()
@@ -344,10 +334,10 @@ contract Light is ILight, Ownable {
     uint256 nonce,
     uint256 expiry,
     address signerWallet,
-    IERC20 signerToken,
+    address signerToken,
     uint256 signerAmount,
     address senderWallet,
-    IERC20 senderToken,
+    address senderToken,
     uint256 senderAmount
   ) internal view returns (bytes32) {
     return

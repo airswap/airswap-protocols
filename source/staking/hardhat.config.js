@@ -1,6 +1,5 @@
 require('dotenv').config()
 require('@nomiclabs/hardhat-ethers')
-require('@nomiclabs/hardhat-truffle5')
 require('@nomiclabs/hardhat-waffle')
 require('@nomiclabs/hardhat-etherscan')
 require('solidity-coverage')
@@ -37,13 +36,17 @@ module.exports = {
     },
   },
   solidity: {
-    version: '0.7.6',
-    settings: {
-      optimizer: {
-        enabled: true,
-        runs: 999999,
+    compilers: [
+      {
+        version: '0.8.7',
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 999999,
+          },
+        },
       },
-    },
+    ],
   },
   mocha: {
     timeout: 1000000,

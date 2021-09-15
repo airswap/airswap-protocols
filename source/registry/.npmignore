@@ -8,3 +8,5 @@ coverage.json
 coverage
 test
 scripts
+cache
+.env
