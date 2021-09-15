@@ -12,7 +12,6 @@ describe('LightValidator', () => {
      */
     ;[owner, addr1, addr2] = await ethers.getSigners()
     const LightValidator = await ethers.getContractFactory('LightValidator')
-    // console.log(ethers)
   })
   describe('checkSwap', () => {
     /* Create custom scenarios for each error
@@ -26,7 +25,9 @@ describe('LightValidator', () => {
      * 8. Create a scenario where multiple orders are sent in succession. This can
      * be done by just marking the nonce in the Light contract as used.
      */
-    // it('properly detects an invalid signature', () => {})
+    it('properly detects an invalid signature', () => {
+      console.log(ethers)
+    })
     // it('properly detects an expired order', () => {})
     // it('properly detects an unauthorized signature', () => {})
     // it('properly detects a low signer allowance', () => {})
