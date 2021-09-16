@@ -117,23 +117,30 @@ export class Server extends EventEmitter {
     // TODO: connection timeout:
     // this.ws.on('open', cleartimeout....)
 
-    const initPromise = new Promise<SupportedProtocolInfo[]>((resolve) => {
-      // Add initialise listener.
-      this.webSocketClient.on('initialize', (message) => {
-        // TODO: swapcontract is included in the initialize protocol payloads
-        // need to check it.
-        this.isInitialized = true
-        this.initialize(message)
-        resolve(this.supportedProtocols)
+    // TODO: connectivity lifecycle
+
+    await new Promise<SupportedProtocolInfo[]>((resolve) =>
+      this.webSocketClient.once('open', async () => {
+        console.log('open & subscribe')
+        this.webSocketClient.subscribe('initialize')
+        this.webSocketClient.on('initialize', (message) => {
+          console.log('ininitialize', message)
+          // TODO: swapcontract is included in the initialize protocol payloads
+          // need to check it.
+          this.isInitialized = true
+          this.initialize(message)
+          resolve(this.supportedProtocols)
+        })
       })
-    })
+    )
 
     this.webSocketClient.on('updatePricing', this.updatePricing)
-
-    return initPromise
   }
 
-  public static async for(locator: string, swapContract?: string) {
+  public static async for(
+    locator: string,
+    swapContract?: string
+  ): Promise<Server> {
     const server = new Server(locator, swapContract)
     await server._init()
     return server
@@ -227,12 +234,11 @@ export class Server extends EventEmitter {
   }
   // *** END RFQ METHODS *** //
 
-  // ***   LAST LOOK METHODS   *** //
   protected initialize(supportedProtocols: SupportedProtocolInfo[]) {
-    this.requireLastLookSupport()
     this.supportedProtocols = supportedProtocols
   }
 
+  // ***   LAST LOOK METHODS   *** //
   public async subscribe(pairs: { baseToken: string; quoteToken: string }[]) {
     this.requireLastLookSupport()
     return this.callRPCMethod<boolean>('subscribe', pairs)

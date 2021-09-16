@@ -1,5 +1,8 @@
 import { fancy } from 'fancy-test'
-import { expect } from 'chai'
+import chai, { expect } from 'chai'
+import sinonChai from 'sinon-chai'
+import { spy } from 'sinon'
+import { Server as WebSocketServer } from 'rpc-websockets'
 
 import { createQuote, createLightOrder } from '@airswap/utils'
 import { ADDRESS_ZERO } from '@airswap/constants'
@@ -9,6 +12,8 @@ import { Server } from '..'
 const badQuote = { bad: 'quote' }
 const emptyQuote = createQuote({})
 const URL = 'maker.example.com'
+
+chai.use(sinonChai)
 
 function mockServer(api) {
   api.post('/').reply(200, async (uri, body) => {
@@ -87,4 +92,47 @@ describe('HTTPServer', () => {
       )
       expect(order.signerToken).to.equal(ADDRESS_ZERO)
     })
+})
+
+describe.only('WebSocketServer', () => {
+  let server: WebSocketServer
+  const host = 'localhost'
+  const port = 8833
+  const url = `ws://${host}:${port}`
+  before(async () => {
+    server = new WebSocketServer({ host, port })
+
+    await new Promise((res) => server.once('listening', res))
+    console.log('listening')
+
+    server.event('initialize')
+
+    server.on('connection', () => {
+      setTimeout(() => {
+        console.log('emit')
+        server.emit('initialize', [
+          [
+            {
+              name: 'last-look',
+              version: '1.0.0',
+              params: {
+                swapContract: '0x1234',
+                senderWallet: '0x1234',
+                senderServer: '0x1234',
+              },
+            },
+          ],
+        ])
+      }, 100)
+    })
+  })
+
+  it('Should initialize', async () => {
+    const client = (await Server.for(url)) as Server
+    expect(client.supportsProtocol('last-look')).to.equal(true)
+  })
+
+  after(() => {
+    server.close()
+  })
 })

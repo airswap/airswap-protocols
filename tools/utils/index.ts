@@ -93,7 +93,7 @@ export function getTimestamp(): string {
 }
 
 export function parseUrl(locator: string): url.UrlWithStringQuery {
-  if (!/^http:\/\//.test(locator) && !/^https:\/\//.test(locator)) {
+  if (!/(http|ws)s?:\/\//.test(locator)) {
     locator = `https://${locator}`
   }
   return url.parse(locator)

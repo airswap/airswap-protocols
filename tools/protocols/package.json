@@ -37,12 +37,21 @@
     "rpc-websockets": "^7.4.14"
   },
   "devDependencies": {
+    "@relaycorp/ws-mock": "^4.2.0",
+    "@types/mock-require": "^2.0.0",
     "eslint": "^6.8.0",
     "fancy-test": "^1.4.7",
+    "mock-require": "^3.0.3",
+    "mock-socket": "^9.0.3",
     "nock": "^12.0.1",
+    "sinon": "^11.1.2",
+    "sinon-chai": "^3.7.0",
     "typescript": "^3.8.2"
   },
   "publishConfig": {
     "access": "public"
+  },
+  "volta": {
+    "node": "16.9.0"
   }
 }
