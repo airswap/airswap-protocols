@@ -13,8 +13,10 @@ jobs:
         with:
           node-version: '14.x'
       - run: yarn
-      - run: yarn ganache > /dev/null &
+      - run: yarn compile
       - run: yarn test
+        env:
+          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
       - name: Success ✅
         if: ${{ success() }}
         run: |

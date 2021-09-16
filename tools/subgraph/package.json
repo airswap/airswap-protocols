@@ -1,7 +1,7 @@
 {
   "name": "@airswap/subgraph",
   "version": "0.0.1",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "private": true,
   "scripts": {
     "codegen": "graph codegen",
