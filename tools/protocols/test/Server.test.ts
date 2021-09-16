@@ -2,7 +2,9 @@ import { fancy } from 'fancy-test'
 import chai, { expect } from 'chai'
 import sinonChai from 'sinon-chai'
 import { spy } from 'sinon'
-import { Server as WebSocketServer } from 'rpc-websockets'
+import mock from 'mock-require'
+import { WebSocket, Server as MockSocketServer } from 'mock-socket'
+import { JsonRpcRequest } from 'jsonrpc-client-websocket'
 
 import { createQuote, createLightOrder } from '@airswap/utils'
 import { ADDRESS_ZERO } from '@airswap/constants'
@@ -14,6 +16,21 @@ const emptyQuote = createQuote({})
 const URL = 'maker.example.com'
 
 chai.use(sinonChai)
+
+const jsonRpcVersion = '2.0'
+
+function createRequest(
+  method: string,
+  params?: any,
+  id?: number
+): JsonRpcRequest {
+  return {
+    jsonrpc: jsonRpcVersion,
+    id: id,
+    method: method,
+    params: params,
+  }
+}
 
 function mockServer(api) {
   api.post('/').reply(200, async (uri, body) => {
@@ -95,35 +112,30 @@ describe('HTTPServer', () => {
 })
 
 describe.only('WebSocketServer', () => {
-  let server: WebSocketServer
-  const host = 'localhost'
-  const port = 8833
-  const url = `ws://${host}:${port}`
+  const url = `ws://maker.com:1234`
   before(async () => {
-    server = new WebSocketServer({ host, port })
+    mock('websocket', { client: WebSocket })
+    const server = new MockSocketServer(url)
 
-    await new Promise((res) => server.once('listening', res))
-    console.log('listening')
-
-    server.event('initialize')
-
-    server.on('connection', () => {
-      setTimeout(() => {
-        console.log('emit')
-        server.emit('initialize', [
-          [
-            {
-              name: 'last-look',
-              version: '1.0.0',
-              params: {
-                swapContract: '0x1234',
-                senderWallet: '0x1234',
-                senderServer: '0x1234',
+    server.on('connection', (socket) => {
+      socket.send(
+        JSON.stringify(
+          createRequest('initialize', [
+            [
+              {
+                name: 'last-look',
+                version: '1.0.0',
+                params: {
+                  swapContract: '0x1234',
+                  senderWallet: '0x1234',
+                  senderServer: '0x1234',
+                },
+                id: 1,
               },
-            },
-          ],
-        ])
-      }, 100)
+            ],
+          ])
+        )
+      )
     })
   })
 
@@ -133,6 +145,6 @@ describe.only('WebSocketServer', () => {
   })
 
   after(() => {
-    server.close()
+    // server.close()
   })
 })

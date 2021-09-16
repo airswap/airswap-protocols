@@ -3,7 +3,7 @@ import * as url from 'url'
 import { ethers } from 'ethers'
 import { isBrowser } from 'browser-or-node'
 import { Client as HttpClient } from 'jayson'
-import { Client as WebSocketClient } from 'rpc-websockets'
+import { JsonRpcWebsocket, JsonRpcError } from 'jsonrpc-client-websocket'
 
 import { REQUEST_TIMEOUT } from '@airswap/constants'
 import { parseUrl, flattenObject, isValidQuote } from '@airswap/utils'
@@ -43,13 +43,20 @@ type Pricing = {
   quoteToken: string
 } & PricingDetails
 
+if (!isBrowser) {
+  JsonRpcWebsocket.setWebSocketFactory((url: string) => {
+    const ws = require('websocket').client
+    return new ws(url)
+  })
+}
+
 export class Server extends EventEmitter {
   protected locatorUrl: ReturnType<typeof parseUrl>
   protected locatorOptions: LocatorOptions
   protected supportedProtocols: SupportedProtocolInfo[]
   protected isInitialized: boolean
   private httpClient: HttpClient
-  private webSocketClient: WebSocketClient
+  private webSocketClient: JsonRpcWebsocket
   public transportProtocol: 'websockets' | 'http'
 
   public constructor(
@@ -112,29 +119,33 @@ export class Server extends EventEmitter {
   }
 
   private async _initWebSocketClient() {
-    this.webSocketClient = new WebSocketClient(url.format(this.locatorUrl))
+    this.webSocketClient = new JsonRpcWebsocket(
+      url.format(this.locatorUrl),
+      2000,
+      (error: JsonRpcError) => {
+        /* handle error */
+        console.error(error)
+      }
+    )
+    const initPromise = new Promise<SupportedProtocolInfo[]>((resolve) => {
+      this.webSocketClient.on('initialize', (message) => {
+        // TODO: swapcontract is included in the initialize protocol payloads
+        // need to check it.
+        this.isInitialized = true
+        this.initialize(message)
+        resolve(this.supportedProtocols)
+      })
+    })
+
+    this.webSocketClient.on('updatePricing', this.updatePricing)
+
+    await this.webSocketClient.open()
+    await initPromise
 
     // TODO: connection timeout:
     // this.ws.on('open', cleartimeout....)
 
     // TODO: connectivity lifecycle
-
-    await new Promise<SupportedProtocolInfo[]>((resolve) =>
-      this.webSocketClient.once('open', async () => {
-        console.log('open & subscribe')
-        this.webSocketClient.subscribe('initialize')
-        this.webSocketClient.on('initialize', (message) => {
-          console.log('ininitialize', message)
-          // TODO: swapcontract is included in the initialize protocol payloads
-          // need to check it.
-          this.isInitialized = true
-          this.initialize(message)
-          resolve(this.supportedProtocols)
-        })
-      })
-    )
-
-    this.webSocketClient.on('updatePricing', this.updatePricing)
   }
 
   public static async for(
@@ -354,7 +365,8 @@ export class Server extends EventEmitter {
     method: string,
     params?: Record<string, string> | Array<any>
   ): Promise<T> {
-    return this.webSocketClient.call(method, params) as Promise<T>
+    const response = await this.webSocketClient.call(method, params)
+    return response.result as T
   }
 
   /**
