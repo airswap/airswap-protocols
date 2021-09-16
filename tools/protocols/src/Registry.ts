@@ -41,8 +41,8 @@ export class Registry {
     const senderTokenURLs = await this.contract.getURLsForToken(senderToken)
     const servers: Server[] = await Promise.all(
       signerTokenURLs
-        .filter(value => senderTokenURLs.includes(value))
-        .map(url => {
+        .filter((value) => senderTokenURLs.includes(value))
+        .map((url) => {
           return Server.for(url, Light.getAddress(this.chainId))
         })
     )

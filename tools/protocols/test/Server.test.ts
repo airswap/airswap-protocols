@@ -4,7 +4,7 @@ import { expect } from 'chai'
 import { createQuote, createLightOrder } from '@airswap/utils'
 import { ADDRESS_ZERO } from '@airswap/constants'
 
-import { HTTPServer } from '..'
+import { Server } from '..'
 
 const badQuote = { bad: 'quote' }
 const emptyQuote = createQuote({})
@@ -53,14 +53,16 @@ describe('HTTPServer', () => {
   fancy
     .nock('https://' + URL, mockServer)
     .do(async () => {
-      await new HTTPServer(URL).getSignerSideQuote('', '', '')
+      const server = await Server.for(URL)
+      await server.getSignerSideQuote('', '', '')
     })
     .catch(/Server response is not a valid quote: {"bad":"quote"}/)
     .it('Server getSignerSideQuote() throws')
   fancy
     .nock('https://' + URL, mockServer)
     .do(async () => {
-      await new HTTPServer(URL).getMaxQuote('', '')
+      const server = await Server.for(URL)
+      await server.getMaxQuote('', '')
     })
     .catch(
       /Server response differs from request params: signerToken,senderToken/
@@ -69,17 +71,15 @@ describe('HTTPServer', () => {
   fancy
     .nock('https://' + URL, mockServer)
     .it('Server getSenderSideQuote()', async () => {
-      const quote = await new HTTPServer(URL).getSenderSideQuote(
-        '1',
-        'SIGNERTOKEN',
-        ''
-      )
+      const server = await Server.for(URL)
+      const quote = await server.getSenderSideQuote('1', 'SIGNERTOKEN', '')
       expect(quote.signer.token).to.equal('SIGNERTOKEN')
     })
   fancy
     .nock('https://' + URL, mockServer)
     .it('Server getSignerSideOrder()', async () => {
-      const order = await new HTTPServer(URL).getSignerSideOrder(
+      const server = await Server.for(URL)
+      const order = await server.getSignerSideOrder(
         '0',
         ADDRESS_ZERO,
         ADDRESS_ZERO,
