@@ -1,10 +1,10 @@
 import { fancy } from 'fancy-test'
-import chai, { expect } from 'chai'
+import chai, { expect, util, Assertion } from 'chai'
 import sinonChai from 'sinon-chai'
-import { spy } from 'sinon'
+// import { spy } from 'sinon'
 import mock from 'mock-require'
 import { WebSocket, Server as MockSocketServer } from 'mock-socket'
-import { JsonRpcRequest } from 'jsonrpc-client-websocket'
+import { JsonRpcRequest, JsonRpcResponse } from 'jsonrpc-client-websocket'
 
 import { createQuote, createLightOrder } from '@airswap/utils'
 import { ADDRESS_ZERO } from '@airswap/constants'
@@ -17,6 +17,18 @@ const URL = 'maker.example.com'
 
 chai.use(sinonChai)
 
+util.addProperty(Assertion.prototype, 'JSONRpcRequest', function () {
+  const obj = this._obj
+  const keys = Object.keys(obj)
+  const required = ['jsonrpc', 'method', 'params', 'id']
+  this.assert(
+    keys.every((k) => required.includes(k)) &&
+      required.every((k) => keys.includes(k)),
+    'expected #{this} to be a JSONRpcRequest',
+    'expected #{this} not to be a JSONRpcRequest'
+  )
+})
+
 const jsonRpcVersion = '2.0'
 
 function createRequest(
@@ -26,9 +38,17 @@ function createRequest(
 ): JsonRpcRequest {
   return {
     jsonrpc: jsonRpcVersion,
-    id: id,
-    method: method,
-    params: params,
+    id,
+    method,
+    params,
+  }
+}
+
+function createResponse(id: number, result: any): JsonRpcResponse {
+  return {
+    jsonrpc: jsonRpcVersion,
+    id,
+    result,
   }
 }
 
@@ -112,39 +132,110 @@ describe('HTTPServer', () => {
 })
 
 describe.only('WebSocketServer', () => {
-  const url = `ws://maker.com:1234`
-  before(async () => {
-    mock('websocket', { client: WebSocket })
-    const server = new MockSocketServer(url)
+  describe('Positive case', () => {
+    const url = `ws://maker.com:1234`
+    let mockServer: MockSocketServer
+    let messageCallback: (socket: WebSocket, data: any) => void
+    let client: Server
+    before(async () => {
+      mock('websocket', { client: WebSocket })
+      mockServer = new MockSocketServer(url)
 
-    server.on('connection', (socket) => {
-      socket.send(
-        JSON.stringify(
-          createRequest('initialize', [
-            [
-              {
-                name: 'last-look',
-                version: '1.0.0',
-                params: {
-                  swapContract: '0x1234',
-                  senderWallet: '0x1234',
-                  senderServer: '0x1234',
+      mockServer.on('connection', (socket) => {
+        socket.send(
+          JSON.stringify(
+            createRequest('initialize', [
+              [
+                {
+                  name: 'last-look',
+                  version: '1.0.0',
+                  params: {
+                    swapContract: '0x1234',
+                    senderWallet: '0x1234',
+                    senderServer: 'www.makersender.com',
+                  },
                 },
-                id: 1,
-              },
-            ],
-          ])
+              ],
+            ])
+          )
         )
-      )
+        socket.on('message', (data) => {
+          if (messageCallback) {
+            messageCallback(socket, data)
+          }
+        })
+      })
     })
-  })
 
-  it('Should initialize', async () => {
-    const client = (await Server.for(url)) as Server
-    expect(client.supportsProtocol('last-look')).to.equal(true)
-  })
+    it('Should be initialized after Server.for has resolved', async () => {
+      client = await Server.for(url)
+      expect(client.supportsProtocol('last-look')).to.equal(true)
+      expect(client.supportsProtocol('request-for-quote')).to.equal(false)
+    })
 
-  after(() => {
-    // server.close()
+    it('Should call subscribe with the correct params and emit pricing', (done) => {
+      const samplePricing = [
+        {
+          baseToken: '0xbase1',
+          quoteToken: '0xquote1',
+          bid: [
+            ['100', '0.00053'],
+            ['1000', '0.00061'],
+            ['10000', '0.0007'],
+          ],
+          ask: [
+            ['100', '0.00055'],
+            ['1000', '0.00067'],
+            ['10000', '0.0008'],
+          ],
+        },
+        {
+          baseToken: '0xbase2',
+          quoteToken: '0xquote2',
+          bid: [
+            ['100', '0.00053'],
+            ['1000', '0.00061'],
+            ['10000', '0.0007'],
+          ],
+          ask: [
+            ['100', '0.00055'],
+            ['1000', '0.00067'],
+            ['10000', '0.0008'],
+          ],
+        },
+      ]
+      const onPricing = (pricing) => {
+        try {
+          expect(pricing).to.eql(samplePricing)
+          done()
+        } catch (e) {
+          done(e)
+        }
+      }
+      const onSubscribe = (socket, data) => {
+        const parseData = JSON.parse(data) as JsonRpcRequest
+        socket.send(
+          JSON.stringify(createResponse(parseData.id, [samplePricing]))
+        )
+      }
+
+      messageCallback = onSubscribe
+
+      client.on('pricing', onPricing)
+      client.subscribe([
+        {
+          baseToken: '0xbase1',
+          quoteToken: '0xquote1',
+        },
+        {
+          baseToken: '0xbase2',
+          quoteToken: '0xquote2',
+        },
+      ])
+    })
+    after(() => {
+      mock.stop('websocket')
+      mockServer.close()
+    })
   })
 })

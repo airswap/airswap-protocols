@@ -252,7 +252,9 @@ export class Server extends EventEmitter {
   // ***   LAST LOOK METHODS   *** //
   public async subscribe(pairs: { baseToken: string; quoteToken: string }[]) {
     this.requireLastLookSupport()
-    return this.callRPCMethod<boolean>('subscribe', pairs)
+    const pricing = await this.callRPCMethod<[Pricing[]]>('subscribe', pairs)
+    this.emit('pricing', pricing[0])
+    return pricing
   }
 
   public async unsubscribe(pairs: { baseToken: string; quoteToken: string }[]) {
@@ -270,8 +272,32 @@ export class Server extends EventEmitter {
     return this.callRPCMethod<boolean>('unsubscribeAll')
   }
 
-  protected updatePricing(newPricing: Pricing[]) {
-    this.emit('pricing', newPricing)
+  protected updatePricing(newPricing: [Pricing[]]) {
+    this.emit('pricing', newPricing[0])
+  }
+
+  /**
+   * @param pair The baseToken and quoteToken to listen to pricing updates for.
+   * @param callback Function to call with updated pricing
+   * @returns A teardown function to remove the listener.
+   */
+  public addPairPriceListener(
+    pair: { baseToken: string; quoteToken: string },
+    callback: (newPricing: Pricing) => void
+  ): () => void {
+    const listener = (newPricing: Pricing[]) => {
+      const tokenPricing = newPricing.find((pricing) => {
+        pricing.baseToken.toLowerCase() === pair.baseToken.toLowerCase() &&
+          pricing.quoteToken === pair.baseToken
+      })
+      if (tokenPricing) {
+        callback(tokenPricing)
+      }
+    }
+    this.on('pricing', listener)
+
+    // Return a teardown function for the listener.
+    return this.off.bind(this, 'pricing', listener)
   }
 
   public async consider(order: LightOrder) {
