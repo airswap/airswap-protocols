@@ -35,9 +35,6 @@ module.exports = {
       timeout: 1000000,
     },
   },
-  etherscan: {
-    apiKey: process.env.ETHERSCAN_API_KEY,
-  },
   solidity: {
     version: '0.8.7',
     settings: {
@@ -47,8 +44,8 @@ module.exports = {
       },
     },
   },
-  mocha: {
-    timeout: 1000000,
+  etherscan: {
+    apiKey: process.env.ETHERSCAN_API_KEY,
   },
   paths: {
     artifacts: './build',
