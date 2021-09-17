@@ -5,6 +5,7 @@ pragma experimental ABIEncoderV2;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@airswap/light/contracts/Light.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "hardhat/console.sol";
 
 /**
  * @title LightValidator: Helper contract to Light protocol
@@ -16,15 +17,15 @@ contract LightValidator is Ownable {
   struct OrderDetails {
     uint256 nonce;
     uint256 expiry;
-    address signerWallet;
-    IERC20 signerToken;
     uint256 signerAmount;
-    IERC20 senderToken;
     uint256 senderAmount;
+    IERC20 signerToken;
+    IERC20 senderToken;
     uint8 v;
     bytes32 r;
     bytes32 s;
     address senderWallet;
+    address signerWallet;
   }
   address public light;
   bytes32 public constant LIGHT_ORDER_TYPEHASH =
@@ -104,6 +105,7 @@ contract LightValidator is Ownable {
     bytes32 hashed = _getOrderHash(details);
     address signatory = _getSignatory(hashed, v, r, s);
     // Ensure the signatory is not null
+    console.log("Signatory is", signatory);
     if (signatory == address(0)) {
       errors[errCount] = "SIGNATURE_INVALID";
       errCount++;
@@ -121,14 +123,20 @@ contract LightValidator is Ownable {
       }
     }
     //accounts & balances check
-    uint256 senderBalance =
-      IERC20(details.senderToken).balanceOf(details.senderWallet);
-    uint256 signerBalance =
-      IERC20(details.signerToken).balanceOf(details.signerWallet);
-    uint256 senderAllowance =
-      IERC20(details.senderToken).allowance(details.senderWallet, light);
-    uint256 signerAllowance =
-      IERC20(details.signerToken).allowance(details.signerWallet, light);
+    uint256 senderBalance = IERC20(details.senderToken).balanceOf(
+      details.senderWallet
+    );
+    uint256 signerBalance = IERC20(details.signerToken).balanceOf(
+      details.signerWallet
+    );
+    uint256 senderAllowance = IERC20(details.senderToken).allowance(
+      details.senderWallet,
+      light
+    );
+    uint256 signerAllowance = IERC20(details.signerToken).allowance(
+      details.signerWallet,
+      light
+    );
 
     if (senderAllowance < details.senderAmount) {
       errors[errCount] = "SENDER_ALLOWANCE_LOW";
@@ -194,10 +202,9 @@ contract LightValidator is Ownable {
     bytes32 r,
     bytes32 s
   ) internal view returns (address) {
-    bytes32 digest =
-      keccak256(
-        abi.encodePacked("\x19\x01", Light(light).DOMAIN_SEPARATOR(), hash)
-      );
+    bytes32 digest = keccak256(
+      abi.encodePacked("\x19\x01", Light(light).DOMAIN_SEPARATOR(), hash)
+    );
     address signatory = ecrecover(digest, v, r, s);
     return signatory;
   }

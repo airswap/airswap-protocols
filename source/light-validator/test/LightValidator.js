@@ -1,17 +1,68 @@
 const { expect } = require('chai')
 const { ethers } = require('hardhat')
+const lightContract = require('../../light/build/contracts/Light.json')
+const {
+  createLightOrder,
+  lightOrderToParams,
+  createLightSignature,
+} = require('@airswap/tools/utils')
 
 describe('LightValidator', () => {
-  let owner, addr1, addr2
+  let deployer, sender, signer, other, feeWallet
   let light, lightValidator
-  beforeEach(async () => {
+  let tokenA, tokenB
+  const CHAIN_ID = 31337
+  const SIGNER_FEE = '30'
+  const DEFAULT_AMOUNT = '1000'
+
+  async function createSignedOrder(params, signer) {
+    const unsignedOrder = createLightOrder({
+      signerFee: SIGNER_FEE,
+      signerWallet: signer.address,
+      signerToken: signerToken.address,
+      signerAmount: DEFAULT_AMOUNT,
+      senderWallet: sender.address,
+      senderToken: senderToken.address,
+      senderAmount: DEFAULT_AMOUNT,
+      ...params,
+    })
+    return lightOrderToParams({
+      ...unsignedOrder,
+      ...(await createLightSignature(
+        unsignedOrder,
+        signer,
+        light.address,
+        CHAIN_ID
+      )),
+    })
+  }
+
+  before(async () => {
     /* TODO: get accounts
      * deploy light
      * deploy light-validator
      * deploy mock tokens and transfer them to the correct accounts
      */
-    ;[owner, addr1, addr2] = await ethers.getSigners()
-    const LightValidator = await ethers.getContractFactory('LightValidator')
+    ;[deployer, sender, signer, feeWallet, other] = await ethers.getSigners()
+    const LightValidatorFactory = await ethers.getContractFactory(
+      'LightValidator'
+    )
+    const LightFactory = await ethers.getContractFactory(
+      lightContract.abi,
+      lightContract.bytecode,
+      owner
+    )
+    const TokenFactory = await ethers.getContractFactory('MockCoin')
+    light = await LightFactory.deploy(feeWallet.address, SIGNER_FEE)
+    await light.deployed()
+    lightValidator = await LightValidatorFactory.deploy(light.address)
+    await lightValidator.deployed()
+    tokenA = await TokenFactory.deploy()
+    tokenB = await TokenFactory.deploy()
+    await tokenA.deployed()
+    await tokenB.deployed()
+    await tokenA.mint(sender.address, 10000)
+    await tokenB.mint(signer.address, 10000)
   })
   describe('checkSwap', () => {
     /* Create custom scenarios for each error
@@ -25,8 +76,10 @@ describe('LightValidator', () => {
      * 8. Create a scenario where multiple orders are sent in succession. This can
      * be done by just marking the nonce in the Light contract as used.
      */
-    it('properly detects an invalid signature', () => {
-      console.log(ethers)
+    it('properly detects an invalid signature', async () => {
+      const order = await createSignedOrder({}, signer)
+      order[7] = '29'
+      await lightValidator.connect(sender).checkSwap(...order, sender)
     })
     // it('properly detects an expired order', () => {})
     // it('properly detects an unauthorized signature', () => {})
