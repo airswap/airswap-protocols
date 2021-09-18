@@ -5,12 +5,12 @@ const {
   createLightOrder,
   lightOrderToParams,
   createLightSignature,
-} = require('@airswap/tools/utils')
+} = require('@airswap/utils')
 
 describe('LightValidator', () => {
   let deployer, sender, signer, other, feeWallet
   let light, lightValidator
-  let tokenA, tokenB
+  let senderToken, signerToken
   const CHAIN_ID = 31337
   const SIGNER_FEE = '30'
   const DEFAULT_AMOUNT = '1000'
@@ -38,11 +38,6 @@ describe('LightValidator', () => {
   }
 
   before(async () => {
-    /* TODO: get accounts
-     * deploy light
-     * deploy light-validator
-     * deploy mock tokens and transfer them to the correct accounts
-     */
     ;[deployer, sender, signer, feeWallet, other] = await ethers.getSigners()
     const LightValidatorFactory = await ethers.getContractFactory(
       'LightValidator'
@@ -50,19 +45,19 @@ describe('LightValidator', () => {
     const LightFactory = await ethers.getContractFactory(
       lightContract.abi,
       lightContract.bytecode,
-      owner
+      deployer
     )
     const TokenFactory = await ethers.getContractFactory('MockCoin')
     light = await LightFactory.deploy(feeWallet.address, SIGNER_FEE)
     await light.deployed()
     lightValidator = await LightValidatorFactory.deploy(light.address)
     await lightValidator.deployed()
-    tokenA = await TokenFactory.deploy()
-    tokenB = await TokenFactory.deploy()
-    await tokenA.deployed()
-    await tokenB.deployed()
-    await tokenA.mint(sender.address, 10000)
-    await tokenB.mint(signer.address, 10000)
+    senderToken = await TokenFactory.deploy()
+    signerToken = await TokenFactory.deploy()
+    await senderToken.deployed()
+    await signerToken.deployed()
+    await senderToken.mint(sender.address, 10000)
+    await signerToken.mint(signer.address, 10000)
   })
   describe('checkSwap', () => {
     /* Create custom scenarios for each error
@@ -79,7 +74,7 @@ describe('LightValidator', () => {
     it('properly detects an invalid signature', async () => {
       const order = await createSignedOrder({}, signer)
       order[7] = '29'
-      await lightValidator.connect(sender).checkSwap(...order, sender)
+      await lightValidator.connect(sender).checkSwap(...order, sender.address)
     })
     // it('properly detects an expired order', () => {})
     // it('properly detects an unauthorized signature', () => {})
