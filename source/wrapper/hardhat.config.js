@@ -12,12 +12,10 @@ require('solidity-coverage')
  */
 module.exports = {
   networks: {
-    localhost: {
-      url: 'http://127.0.0.1:8545',
-      timeout: 1000000,
-    },
-    coverage: {
-      url: 'http://localhost:8555',
+    hardhat: {
+      accounts: {
+        mnemonic: process.env.MNEMONIC || '',
+      },
     },
     rinkeby: {
       url: 'https://rinkeby.infura.io/v3/' + process.env.INFURA_API_KEY,
@@ -35,20 +33,21 @@ module.exports = {
       timeout: 1000000,
     },
   },
+  solidity: {
+    compilers: [
+      {
+        version: '0.8.7',
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 999999,
+          },
+        },
+      },
+    ],
+  },
   etherscan: {
     apiKey: process.env.ETHERSCAN_API_KEY,
-  },
-  solidity: {
-    version: '0.8.4',
-    settings: {
-      optimizer: {
-        enabled: true,
-        runs: 999999,
-      },
-    },
-  },
-  mocha: {
-    timeout: 1000000,
   },
   paths: {
     artifacts: './build',
