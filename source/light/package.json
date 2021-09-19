@@ -1,7 +1,7 @@
 {
   "name": "@airswap/light",
-  "version": "2.2.2",
-  "description": "Light version of @airswap/swap",
+  "version": "2.2.3",
+  "description": "Swap ERC20 tokens efficiently",
   "contributors": [
     "Vicente Dragicevic",
     "Don Mosites",
@@ -22,8 +22,8 @@
     "deploy:mainnet": "hardhat run --network mainnet ./scripts/deploy.js"
   },
   "devDependencies": {
-    "@airswap/constants": "0.4.0",
-    "@airswap/utils": "0.4.5",
+    "@airswap/constants": "0.4.1",
+    "@airswap/utils": "0.4.6",
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-etherscan": "^2.1.6",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
