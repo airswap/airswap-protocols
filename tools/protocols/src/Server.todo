@@ -1,0 +1,7 @@
+Implementation:
+  ☐ Emit pricing on subscribe
+  ☐ Use `senderServer` http endpoint for `consider` if it is set.
+  ☐ Make sure all addresses get lowercased.
+  ☐ Check that we properly handle malformed payloads from the maker servers.
+  ☐ Potentially make `addTokenPairPriceUpdateListener` subscribe too
+  ☐ Throw errors for malformed server responses
