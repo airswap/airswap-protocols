@@ -5,6 +5,7 @@ pragma experimental ABIEncoderV2;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@airswap/light/contracts/Light.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "hardhat/console.sol";
 
 /**
@@ -14,6 +15,8 @@ import "hardhat/console.sol";
  */
 
 contract LightValidator is Ownable {
+  using SafeMath for uint256;
+
   struct OrderDetails {
     uint256 nonce;
     uint256 expiry;
@@ -104,8 +107,10 @@ contract LightValidator is Ownable {
     details.senderWallet = senderWallet;
     bytes32 hashed = _getOrderHash(details);
     address signatory = _getSignatory(hashed, v, r, s);
+    uint256 swapFee = details.signerAmount.mul(Light(light).signerFee()).div(
+      Light(light).FEE_DIVISOR()
+    );
     // Ensure the signatory is not null
-    console.log("Signatory is", signatory);
     if (signatory == address(0)) {
       errors[errCount] = "SIGNATURE_INVALID";
       errCount++;
@@ -142,7 +147,7 @@ contract LightValidator is Ownable {
       errors[errCount] = "SENDER_ALLOWANCE_LOW";
       errCount++;
     }
-    if (signerAllowance < details.signerAmount) {
+    if (signerAllowance < details.signerAmount + swapFee) {
       errors[errCount] = "SIGNER_ALLOWANCE_LOW";
       errCount++;
     }
@@ -150,7 +155,7 @@ contract LightValidator is Ownable {
       errors[errCount] = "SENDER_BALANCE_LOW";
       errCount++;
     }
-    if (signerBalance < details.signerAmount) {
+    if (signerBalance < details.signerAmount + swapFee) {
       errors[errCount] = "SIGNER_BALANCE_LOW";
       errCount++;
     }
