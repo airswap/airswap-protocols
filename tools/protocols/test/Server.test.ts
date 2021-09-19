@@ -7,13 +7,18 @@ import { createQuote, createLightOrder } from '@airswap/utils'
 import { ADDRESS_ZERO } from '@airswap/constants'
 
 import { Server } from '..'
-import { createResponse, MockSocketServer } from './test-utils'
+import {
+  addJSONRPCAssertions,
+  createResponse,
+  MockSocketServer,
+} from './test-utils'
 
 const badQuote = { bad: 'quote' }
 const emptyQuote = createQuote({})
 const URL = 'maker.example.com'
 
 chai.use(sinonChai)
+addJSONRPCAssertions()
 
 function mockServer(api) {
   api.post('/').reply(200, async (uri, body) => {
@@ -95,83 +100,92 @@ describe('HTTPServer', () => {
 })
 
 describe.only('WebSocketServer', () => {
-  describe('Positive case', () => {
-    const url = `ws://maker.com:1234`
-    let mockServer: MockSocketServer
-    let client: Server
-    before(() => {
-      MockSocketServer.startMockingWebSocket()
-    })
+  const url = `ws://maker.com:1234/`
+  let mockServer: MockSocketServer
+  before(() => {
+    MockSocketServer.startMockingWebSocket()
+  })
 
-    beforeEach(async () => {
-      mockServer = new MockSocketServer(url)
-    })
+  beforeEach(async () => {
+    mockServer = new MockSocketServer(url)
+  })
 
-    it('Should be initialized after Server.for has resolved', async () => {
-      client = await Server.for(url)
-      expect(client.supportsProtocol('last-look')).to.equal(true)
-      expect(client.supportsProtocol('request-for-quote')).to.equal(false)
-    })
+  it('Should be initialized after Server.for has resolved', async () => {
+    const client = await Server.for(url)
+    expect(client.supportsProtocol('last-look')).to.equal(true)
+    expect(client.supportsProtocol('request-for-quote')).to.equal(false)
+  })
 
-    it('Should call subscribe with the correct params and emit pricing', (done) => {
-      const samplePricing = [
-        {
-          baseToken: '0xbase1',
-          quoteToken: '0xquote1',
-          bid: [
-            ['100', '0.00053'],
-            ['1000', '0.00061'],
-            ['10000', '0.0007'],
-          ],
-          ask: [
-            ['100', '0.00055'],
-            ['1000', '0.00067'],
-            ['10000', '0.0008'],
-          ],
-        },
-        {
-          baseToken: '0xbase2',
-          quoteToken: '0xquote2',
-          bid: [
-            ['100', '0.00053'],
-            ['1000', '0.00061'],
-            ['10000', '0.0007'],
-          ],
-          ask: [
-            ['100', '0.00055'],
-            ['1000', '0.00067'],
-            ['10000', '0.0008'],
-          ],
-        },
-      ]
+  it('Should call subscribe with the correct params and emit pricing', async () => {
+    const client = await Server.for(url)
+    const samplePairs = [
+      {
+        baseToken: '0xbase1',
+        quoteToken: '0xquote1',
+      },
+      {
+        baseToken: '0xbase2',
+        quoteToken: '0xquote2',
+      },
+    ]
+    const samplePricing = [
+      {
+        baseToken: '0xbase1',
+        quoteToken: '0xquote1',
+        bid: [
+          ['100', '0.00053'],
+          ['1000', '0.00061'],
+          ['10000', '0.0007'],
+        ],
+        ask: [
+          ['100', '0.00055'],
+          ['1000', '0.00067'],
+          ['10000', '0.0008'],
+        ],
+      },
+      {
+        baseToken: '0xbase2',
+        quoteToken: '0xquote2',
+        bid: [
+          ['100', '0.00053'],
+          ['1000', '0.00061'],
+          ['10000', '0.0007'],
+        ],
+        ask: [
+          ['100', '0.00055'],
+          ['1000', '0.00067'],
+          ['10000', '0.0008'],
+        ],
+      },
+    ]
+
+    const receivedPringPromise = new Promise<void>((resolve, reject) => {
       const onPricing = (pricing) => {
         try {
           expect(pricing).to.eql(samplePricing)
-          done()
+          resolve()
         } catch (e) {
-          done(e)
+          reject(e)
         }
       }
-      const onSubscribe = (socket, data) => {
-        socket.send(JSON.stringify(createResponse(data.id, [samplePricing])))
-      }
-
-      mockServer.setNextMessageCallback(onSubscribe)
-
       client.on('pricing', onPricing)
-      client.subscribe([
-        {
-          baseToken: '0xbase1',
-          quoteToken: '0xquote1',
-        },
-        {
-          baseToken: '0xbase2',
-          quoteToken: '0xquote2',
-        },
-      ])
     })
-    before(() => {
-      MockSocketServer.stopMockingWebSocket()
-    })
+    const onSubscribe = (socket, data) => {
+      // @ts-ignore
+      expect(data).to.be.a.JSONRpcRequest('subscribe', samplePairs)
+      socket.send(JSON.stringify(createResponse(data.id, samplePricing)))
+    }
+
+    mockServer.setNextMessageCallback(onSubscribe)
+
+    client.subscribe(samplePairs)
+
+    await receivedPringPromise
+  })
+  afterEach(() => {
+    mockServer.close()
+  })
+  after(() => {
+    MockSocketServer.stopMockingWebSocket()
   })
 })

@@ -252,14 +252,14 @@ export class Server extends EventEmitter {
   // ***   LAST LOOK METHODS   *** //
   public async subscribe(pairs: { baseToken: string; quoteToken: string }[]) {
     this.requireLastLookSupport()
-    const pricing = await this.callRPCMethod<[Pricing[]]>('subscribe', pairs)
-    this.emit('pricing', pricing[0])
+    const pricing = await this.callRPCMethod<Pricing[]>('subscribe', pairs)
+    this.emit('pricing', pricing)
     return pricing
   }
 
   public async unsubscribe(pairs: { baseToken: string; quoteToken: string }[]) {
     this.requireLastLookSupport()
-    return this.callRPCMethod<boolean>('unsubscribe', pairs)
+    return this.callRPCMethod<boolean>('unsubscribe', [pairs])
   }
 
   public async subscribeAll() {

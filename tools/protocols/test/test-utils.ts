@@ -7,17 +7,31 @@ import {
 import mock from 'mock-require'
 import { WebSocket, Server } from 'mock-socket'
 
-chai.util.addProperty(chai.Assertion.prototype, 'JSONRpcRequest', function () {
-  const obj = this._obj
-  const keys = Object.keys(obj)
-  const required = ['jsonrpc', 'method', 'params', 'id']
-  this.assert(
-    keys.every((k) => required.includes(k)) &&
-      required.every((k) => keys.includes(k)),
-    'expected #{this} to be a JSONRpcRequest',
-    'expected #{this} not to be a JSONRpcRequest'
+export function addJSONRPCAssertions() {
+  chai.Assertion.addMethod(
+    'JSONRpcRequest',
+    function (method?: string, params?: any) {
+      const obj = this._obj
+      const keys = Object.keys(obj)
+      const required = ['jsonrpc', 'method', 'params', 'id']
+      if (method) {
+        new chai.Assertion(this._obj.method).to.equal(method)
+      }
+
+      if (params) {
+        new chai.Assertion(this._obj.params).to.eql(params)
+      }
+
+      this.assert(
+        keys.every((k) => required.includes(k)) &&
+          required.every((k) => keys.includes(k)),
+        'expected #{this} to be a JSONRpcRequest',
+        'expected #{this} not to be a JSONRpcRequest',
+        obj
+      )
+    }
   )
-})
+}
 
 const jsonRpcVersion = '2.0'
 
