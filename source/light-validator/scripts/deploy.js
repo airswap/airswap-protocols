@@ -9,7 +9,7 @@ async function main() {
   console.log(`Deployer Address: ${deployer.address}`)
 
   // Deploy
-  const lightAddress = '0x7296333e1615721f4Bd9Df1a3070537484A50CF8'
+  const lightAddress = '0xc549a5c701cb6e6cbc091007a80c089c49595468'
   const LightValidatorFactory = await ethers.getContractFactory(
     'LightValidator'
   )

@@ -1,6 +1,9 @@
 const { expect } = require('chai')
-const { ethers } = require('hardhat')
+const { ethers, waffle } = require('hardhat')
+const { deployMockContract } = waffle
 const lightContract = require('../../light/build/contracts/Light.sol/Light.json')
+const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
+
 const {
   createLightOrder,
   lightOrderToParams,
@@ -40,6 +43,20 @@ describe('LightValidator', () => {
     })
   }
 
+  async function setUpAllowances() {
+    await senderToken.mock.allowance
+      .withArgs(sender.address, light.address)
+      .returns(DEFAULT_AMOUNT)
+    await signerToken.mock.allowance
+      .withArgs(signer.address, light.address)
+      .returns(DEFAULT_AMOUNT + SWAP_FEE)
+  }
+
+  async function setUpBalances() {
+    await senderToken.mock.balanceOf.withArgs(sender.address).returns(10000)
+    await signerToken.mock.balanceOf.withArgs(signer.address).returns(10000)
+  }
+
   before(async () => {
     ;[deployer, sender, signer, feeWallet, other] = await ethers.getSigners()
     const LightValidatorFactory = await ethers.getContractFactory(
@@ -50,21 +67,12 @@ describe('LightValidator', () => {
       lightContract.bytecode,
       deployer
     )
-    const TokenFactory = await ethers.getContractFactory('MockCoin')
     light = await LightFactory.deploy(feeWallet.address, SIGNER_FEE)
     await light.deployed()
     lightValidator = await LightValidatorFactory.deploy(light.address)
     await lightValidator.deployed()
-    senderToken = await TokenFactory.deploy()
-    signerToken = await TokenFactory.deploy()
-    await senderToken.deployed()
-    await signerToken.deployed()
-    await senderToken.mint(sender.address, 10000)
-    await signerToken.mint(signer.address, 10000)
-    await senderToken.connect(sender).approve(light.address, DEFAULT_AMOUNT)
-    await signerToken
-      .connect(signer)
-      .approve(light.address, DEFAULT_AMOUNT + SWAP_FEE)
+    senderToken = await deployMockContract(deployer, IERC20.abi)
+    signerToken = await deployMockContract(deployer, IERC20.abi)
   })
 
   describe('constructor', () => {
@@ -75,6 +83,8 @@ describe('LightValidator', () => {
 
   describe('checkSwap', () => {
     it('properly detects an invalid signature', async () => {
+      await setUpAllowances()
+      await setUpBalances()
       const order = await createSignedOrder({}, signer)
       order[7] = '29'
       const res = await lightValidator
@@ -87,6 +97,8 @@ describe('LightValidator', () => {
       )
     })
     it('properly detects an expired order', async () => {
+      await setUpAllowances()
+      await setUpBalances()
       const order = await createSignedOrder(
         {
           expiry: '0',
@@ -103,6 +115,8 @@ describe('LightValidator', () => {
       )
     })
     it('properly detects an unauthorized signature', async () => {
+      await setUpAllowances()
+      await setUpBalances()
       const order = await createSignedOrder({}, other)
       const res = await lightValidator
         .connect(sender)
@@ -114,9 +128,13 @@ describe('LightValidator', () => {
       )
     })
     it('properly detects a low signer allowance', async () => {
-      await signerToken
-        .connect(signer)
-        .decreaseAllowance(light.address, DEFAULT_AMOUNT + SWAP_FEE)
+      await senderToken.mock.allowance
+        .withArgs(sender.address, light.address)
+        .returns(DEFAULT_AMOUNT)
+      await signerToken.mock.allowance
+        .withArgs(signer.address, light.address)
+        .returns(0)
+      await setUpBalances()
       const order = await createSignedOrder({}, signer)
       const res = await lightValidator
         .connect(sender)
@@ -128,12 +146,13 @@ describe('LightValidator', () => {
       )
     })
     it('properly detects a low sender allowance', async () => {
-      await signerToken
-        .connect(signer)
-        .increaseAllowance(light.address, DEFAULT_AMOUNT + SWAP_FEE)
-      await senderToken
-        .connect(sender)
-        .decreaseAllowance(light.address, DEFAULT_AMOUNT)
+      await senderToken.mock.allowance
+        .withArgs(sender.address, light.address)
+        .returns(0)
+      await signerToken.mock.allowance
+        .withArgs(signer.address, light.address)
+        .returns(DEFAULT_AMOUNT + SWAP_FEE)
+      await setUpBalances()
       const order = await createSignedOrder({}, signer)
       const res = await lightValidator
         .connect(sender)
@@ -145,10 +164,9 @@ describe('LightValidator', () => {
       )
     })
     it('properly detects a low signer balance', async () => {
-      await senderToken
-        .connect(sender)
-        .increaseAllowance(light.address, DEFAULT_AMOUNT)
-      await signerToken.connect(signer).transfer(other.address, 10000)
+      await setUpAllowances()
+      await senderToken.mock.balanceOf.withArgs(sender.address).returns(10000)
+      await signerToken.mock.balanceOf.withArgs(signer.address).returns(0)
       const order = await createSignedOrder({}, signer)
       const res = await lightValidator
         .connect(sender)
@@ -160,8 +178,9 @@ describe('LightValidator', () => {
       )
     })
     it('properly detects a low sender balance', async () => {
-      await signerToken.connect(other).transfer(signer.address, 10000)
-      await senderToken.connect(sender).transfer(other.address, 10000)
+      await setUpAllowances()
+      await senderToken.mock.balanceOf.withArgs(sender.address).returns(0)
+      await signerToken.mock.balanceOf.withArgs(signer.address).returns(10000)
       const order = await createSignedOrder({}, signer)
       const res = await lightValidator
         .connect(sender)
@@ -173,10 +192,15 @@ describe('LightValidator', () => {
       )
     })
     it('properly detects a nonce that has already been used', async () => {
-      await senderToken.connect(other).transfer(sender.address, 10000)
-      await signerToken
-        .connect(signer)
-        .approve(light.address, DEFAULT_AMOUNT + SWAP_FEE)
+      await senderToken.mock.transferFrom
+        .withArgs(sender.address, signer.address, DEFAULT_AMOUNT)
+        .returns(true)
+      await signerToken.mock.transferFrom
+        .withArgs(signer.address, sender.address, DEFAULT_AMOUNT)
+        .returns(true)
+      await signerToken.mock.transferFrom
+        .withArgs(signer.address, feeWallet.address, SWAP_FEE)
+        .returns(true)
       const order = await createSignedOrder(
         {
           nonce: '1',
@@ -184,10 +208,8 @@ describe('LightValidator', () => {
         signer
       )
       await light.connect(sender).swap(...order)
-      await signerToken
-        .connect(signer)
-        .approve(light.address, DEFAULT_AMOUNT + SWAP_FEE)
-      await senderToken.connect(sender).approve(light.address, DEFAULT_AMOUNT)
+      await setUpAllowances()
+      await setUpBalances()
       const res = await lightValidator
         .connect(sender)
         .checkSwap(...order, sender.address)
@@ -198,7 +220,9 @@ describe('LightValidator', () => {
       )
     })
     it('can detect multiple errors', async () => {
-      await senderToken.connect(sender).transfer(other.address, 9000)
+      await setUpAllowances()
+      await senderToken.mock.balanceOf.withArgs(sender.address).returns(0)
+      await signerToken.mock.balanceOf.withArgs(signer.address).returns(10000)
       const order = await createSignedOrder(
         {
           expiry: '0',

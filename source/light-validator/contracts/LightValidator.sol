@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
-pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@airswap/light/contracts/Light.sol";
@@ -8,7 +7,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 /**
- * @title LightValidator: Helper contract to Light protocol
+ * @title AirSwap Validator: Validate Prior to Submitting Transactions
  * @notice contains helper method that checks whether
  * a Light Order is well-formed and counterparty criteria is met
  */
