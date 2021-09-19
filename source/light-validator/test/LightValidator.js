@@ -17,6 +17,7 @@ describe('LightValidator', () => {
   const CHAIN_ID = 31337
   const SIGNER_FEE = '30'
   const DEFAULT_AMOUNT = '1000'
+  const DEFAULT_BALANCE = '10000'
   const FEE_DIVISOR = '10000'
   const SWAP_FEE =
     (parseInt(DEFAULT_AMOUNT) * parseInt(SIGNER_FEE)) / parseInt(FEE_DIVISOR)
@@ -43,18 +44,28 @@ describe('LightValidator', () => {
     })
   }
 
-  async function setUpAllowances() {
+  async function setUpAllowances(senderAmount, signerAmount) {
     await senderToken.mock.allowance
       .withArgs(sender.address, light.address)
-      .returns(DEFAULT_AMOUNT)
+      .returns(senderAmount)
     await signerToken.mock.allowance
       .withArgs(signer.address, light.address)
-      .returns(DEFAULT_AMOUNT + SWAP_FEE)
+      .returns(signerAmount)
   }
 
-  async function setUpBalances() {
-    await senderToken.mock.balanceOf.withArgs(sender.address).returns(10000)
-    await signerToken.mock.balanceOf.withArgs(signer.address).returns(10000)
+  async function setUpBalances(senderAmount, signerAmount) {
+    await senderToken.mock.balanceOf
+      .withArgs(sender.address)
+      .returns(senderAmount)
+    await signerToken.mock.balanceOf
+      .withArgs(signer.address)
+      .returns(signerAmount)
+  }
+
+  async function getErrorInfo(order) {
+    return await lightValidator
+      .connect(sender)
+      .checkSwap(...order, sender.address)
   }
 
   before(async () => {
@@ -83,109 +94,76 @@ describe('LightValidator', () => {
 
   describe('checkSwap', () => {
     it('properly detects an invalid signature', async () => {
-      await setUpAllowances()
-      await setUpBalances()
+      await setUpAllowances(DEFAULT_AMOUNT, DEFAULT_AMOUNT + SWAP_FEE)
+      await setUpBalances(DEFAULT_BALANCE, DEFAULT_BALANCE)
       const order = await createSignedOrder({}, signer)
       order[7] = '29'
-      const res = await lightValidator
-        .connect(sender)
-        .checkSwap(...order, sender.address)
-      const [errCount, messages] = res
+      const [errCount, messages] = await getErrorInfo(order)
       expect(errCount).to.equal(1)
       expect(ethers.utils.parseBytes32String(messages[0])).to.equal(
         'SIGNATURE_INVALID'
       )
     })
     it('properly detects an expired order', async () => {
-      await setUpAllowances()
-      await setUpBalances()
+      await setUpAllowances(DEFAULT_AMOUNT, DEFAULT_AMOUNT + SWAP_FEE)
+      await setUpBalances(DEFAULT_BALANCE, DEFAULT_BALANCE)
       const order = await createSignedOrder(
         {
           expiry: '0',
         },
         signer
       )
-      const res = await lightValidator
-        .connect(sender)
-        .checkSwap(...order, sender.address)
-      const [errCount, messages] = res
+      const [errCount, messages] = await getErrorInfo(order)
       expect(errCount).to.equal(1)
       expect(ethers.utils.parseBytes32String(messages[0])).to.equal(
         'ORDER_EXPIRED'
       )
     })
     it('properly detects an unauthorized signature', async () => {
-      await setUpAllowances()
-      await setUpBalances()
+      await setUpAllowances(DEFAULT_AMOUNT, DEFAULT_AMOUNT + SWAP_FEE)
+      await setUpBalances(DEFAULT_BALANCE, DEFAULT_BALANCE)
       const order = await createSignedOrder({}, other)
-      const res = await lightValidator
-        .connect(sender)
-        .checkSwap(...order, sender.address)
-      const [errCount, messages] = res
+      const [errCount, messages] = await getErrorInfo(order)
       expect(errCount).to.equal(1)
       expect(ethers.utils.parseBytes32String(messages[0])).to.equal(
         'SIGNATURE_UNAUTHORIZED'
       )
     })
     it('properly detects a low signer allowance', async () => {
-      await senderToken.mock.allowance
-        .withArgs(sender.address, light.address)
-        .returns(DEFAULT_AMOUNT)
-      await signerToken.mock.allowance
-        .withArgs(signer.address, light.address)
-        .returns(0)
-      await setUpBalances()
+      await setUpAllowances(DEFAULT_AMOUNT, 0)
+      await setUpBalances(DEFAULT_BALANCE, DEFAULT_BALANCE)
       const order = await createSignedOrder({}, signer)
-      const res = await lightValidator
-        .connect(sender)
-        .checkSwap(...order, sender.address)
-      const [errCount, messages] = res
+      const [errCount, messages] = await getErrorInfo(order)
       expect(errCount).to.equal(1)
       expect(ethers.utils.parseBytes32String(messages[0])).to.equal(
         'SIGNER_ALLOWANCE_LOW'
       )
     })
     it('properly detects a low sender allowance', async () => {
-      await senderToken.mock.allowance
-        .withArgs(sender.address, light.address)
-        .returns(0)
-      await signerToken.mock.allowance
-        .withArgs(signer.address, light.address)
-        .returns(DEFAULT_AMOUNT + SWAP_FEE)
-      await setUpBalances()
+      await setUpAllowances(0, DEFAULT_AMOUNT + SWAP_FEE)
+      await setUpBalances(DEFAULT_BALANCE, DEFAULT_BALANCE)
       const order = await createSignedOrder({}, signer)
-      const res = await lightValidator
-        .connect(sender)
-        .checkSwap(...order, sender.address)
-      const [errCount, messages] = res
+      const [errCount, messages] = await getErrorInfo(order)
       expect(errCount).to.equal(1)
       expect(ethers.utils.parseBytes32String(messages[0])).to.equal(
         'SENDER_ALLOWANCE_LOW'
       )
     })
     it('properly detects a low signer balance', async () => {
-      await setUpAllowances()
-      await senderToken.mock.balanceOf.withArgs(sender.address).returns(10000)
-      await signerToken.mock.balanceOf.withArgs(signer.address).returns(0)
+      await setUpAllowances(DEFAULT_AMOUNT, DEFAULT_AMOUNT + SWAP_FEE)
+      await setUpBalances(DEFAULT_BALANCE, 0)
       const order = await createSignedOrder({}, signer)
-      const res = await lightValidator
-        .connect(sender)
-        .checkSwap(...order, sender.address)
-      const [errCount, messages] = res
+      const [errCount, messages] = await getErrorInfo(order)
       expect(errCount).to.equal(1)
       expect(ethers.utils.parseBytes32String(messages[0])).to.equal(
         'SIGNER_BALANCE_LOW'
       )
     })
     it('properly detects a low sender balance', async () => {
-      await setUpAllowances()
-      await senderToken.mock.balanceOf.withArgs(sender.address).returns(0)
-      await signerToken.mock.balanceOf.withArgs(signer.address).returns(10000)
+      await setUpAllowances(DEFAULT_AMOUNT, DEFAULT_AMOUNT + SWAP_FEE)
+      await setUpBalances(0, DEFAULT_BALANCE)
       const order = await createSignedOrder({}, signer)
-      const res = await lightValidator
-        .connect(sender)
-        .checkSwap(...order, sender.address)
-      const [errCount, messages] = res
+      const [errCount, messages] = await getErrorInfo(order)
       expect(errCount).to.equal(1)
       expect(ethers.utils.parseBytes32String(messages[0])).to.equal(
         'SENDER_BALANCE_LOW'
@@ -208,31 +186,24 @@ describe('LightValidator', () => {
         signer
       )
       await light.connect(sender).swap(...order)
-      await setUpAllowances()
-      await setUpBalances()
-      const res = await lightValidator
-        .connect(sender)
-        .checkSwap(...order, sender.address)
-      const [errCount, messages] = res
+      await setUpAllowances(DEFAULT_AMOUNT, DEFAULT_AMOUNT + SWAP_FEE)
+      await setUpBalances(DEFAULT_BALANCE, DEFAULT_BALANCE)
+      const [errCount, messages] = await getErrorInfo(order)
       expect(errCount).to.equal(1)
       expect(ethers.utils.parseBytes32String(messages[0])).to.equal(
         'ORDER_TAKEN_OR_CANCELLED'
       )
     })
     it('can detect multiple errors', async () => {
-      await setUpAllowances()
-      await senderToken.mock.balanceOf.withArgs(sender.address).returns(0)
-      await signerToken.mock.balanceOf.withArgs(signer.address).returns(10000)
+      await setUpAllowances(DEFAULT_AMOUNT, DEFAULT_AMOUNT + SWAP_FEE)
+      await setUpBalances(0, DEFAULT_BALANCE)
       const order = await createSignedOrder(
         {
           expiry: '0',
         },
         signer
       )
-      const res = await lightValidator
-        .connect(sender)
-        .checkSwap(...order, sender.address)
-      const [errCount, messages] = res
+      const [errCount, messages] = await getErrorInfo(order)
       expect(errCount).to.equal(2)
       expect(ethers.utils.parseBytes32String(messages[0])).to.equal(
         'ORDER_EXPIRED'
