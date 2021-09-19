@@ -66,6 +66,13 @@ describe('LightValidator', () => {
       .connect(signer)
       .approve(light.address, DEFAULT_AMOUNT + SWAP_FEE)
   })
+
+  describe('constructor', () => {
+    it('properly sets the light address', async () => {
+      expect(await lightValidator.light()).to.equal(light.address)
+    })
+  })
+
   describe('checkSwap', () => {
     it('properly detects an invalid signature', async () => {
       const order = await createSignedOrder({}, signer)
@@ -218,6 +225,7 @@ describe('LightValidator', () => {
       await newLight.deployed()
       await expect(lightValidator.setLightAddress(newLight.address)).to.not.be
         .reverted
+      expect(await lightValidator.light()).to.equal(newLight.address)
     })
 
     it('will not allow a non-owner to set the light address', async () => {
