@@ -101,7 +101,7 @@ describe('LightValidator', () => {
       const [errCount, messages] = await getErrorInfo(order)
       expect(errCount).to.equal(1)
       expect(ethers.utils.parseBytes32String(messages[0])).to.equal(
-        'SIGNATURE_INVALID'
+        'INVALID_SIG'
       )
     })
     it('properly detects an expired order', async () => {
@@ -116,7 +116,7 @@ describe('LightValidator', () => {
       const [errCount, messages] = await getErrorInfo(order)
       expect(errCount).to.equal(1)
       expect(ethers.utils.parseBytes32String(messages[0])).to.equal(
-        'ORDER_EXPIRED'
+        'EXPIRY_PASSED'
       )
     })
     it('properly detects an unauthorized signature', async () => {
@@ -126,7 +126,7 @@ describe('LightValidator', () => {
       const [errCount, messages] = await getErrorInfo(order)
       expect(errCount).to.equal(1)
       expect(ethers.utils.parseBytes32String(messages[0])).to.equal(
-        'SIGNATURE_UNAUTHORIZED'
+        'UNAUTHORIZED'
       )
     })
     it('properly detects a low signer allowance', async () => {
@@ -191,7 +191,7 @@ describe('LightValidator', () => {
       const [errCount, messages] = await getErrorInfo(order)
       expect(errCount).to.equal(1)
       expect(ethers.utils.parseBytes32String(messages[0])).to.equal(
-        'ORDER_TAKEN_OR_CANCELLED'
+        'NONCE_ALREADY_USED'
       )
     })
     it('can detect multiple errors', async () => {
@@ -206,7 +206,7 @@ describe('LightValidator', () => {
       const [errCount, messages] = await getErrorInfo(order)
       expect(errCount).to.equal(2)
       expect(ethers.utils.parseBytes32String(messages[0])).to.equal(
-        'ORDER_EXPIRED'
+        'EXPIRY_PASSED'
       )
       expect(ethers.utils.parseBytes32String(messages[1])).to.equal(
         'SENDER_BALANCE_LOW'
