@@ -110,18 +110,18 @@ contract LightValidator is Ownable {
     );
     // Ensure the signatory is not null
     if (signatory == address(0)) {
-      errors[errCount] = "SIGNATURE_INVALID";
+      errors[errCount] = "INVALID_SIG";
       errCount++;
     }
     //expiry check
     if (details.expiry < block.timestamp) {
-      errors[errCount] = "ORDER_EXPIRED";
+      errors[errCount] = "EXPIRY_PASSED";
       errCount++;
     }
     //if signatory is not the signerWallet, then it must have been authorized
     if (details.signerWallet != signatory) {
       if (Light(light).authorized(details.signerWallet) != signatory) {
-        errors[errCount] = "SIGNATURE_UNAUTHORIZED";
+        errors[errCount] = "UNAUTHORIZED";
         errCount++;
       }
     }
@@ -159,7 +159,7 @@ contract LightValidator is Ownable {
     }
     //nonce check
     if (Light(light).nonceUsed(details.signerWallet, details.nonce)) {
-      errors[errCount] = "ORDER_TAKEN_OR_CANCELLED";
+      errors[errCount] = "NONCE_ALREADY_USED";
       errCount++;
     }
     return (errCount, errors);

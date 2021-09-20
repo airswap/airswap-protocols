@@ -2,8 +2,8 @@ import { ethers } from 'ethers'
 import { BigNumber } from 'ethers'
 import { chainIds, chainNames } from '@airswap/constants'
 import { LightOrder } from '@airswap/types'
-import * as LightValidatorContract from '@airswap/light-validator/build/contracts/LightValidator.sol/LightValidator.json'
-import * as LightValidatorDeploys from '@airswap/light/deploys.js'
+import * as LightValidatorContract from '@airswap/validator/build/contracts/LightValidator.sol/LightValidator.json'
+import * as LightValidatorDeploys from '@airswap/validator/deploys.js'
 
 const LightValidatorInterface = new ethers.utils.Interface(
   JSON.stringify(LightValidatorContract.abi)

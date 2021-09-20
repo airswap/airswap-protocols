@@ -28,7 +28,7 @@
   "dependencies": {
     "@airswap/constants": "0.4.0",
     "@airswap/light": "2.2.2",
-    "@airswap/light-validator": "0.0.0",
+    "@airswap/validator": "0.0.0",
     "@airswap/registry": "4.8.1",
     "@airswap/types": "3.6.0",
     "@airswap/utils": "0.4.5",
