@@ -137,7 +137,7 @@ export class Server extends EventEmitter {
       })
     })
 
-    this.webSocketClient.on('updatePricing', this.updatePricing)
+    this.webSocketClient.on('updatePricing', this.updatePricing.bind(this))
 
     await this.webSocketClient.open()
     await initPromise
@@ -272,8 +272,8 @@ export class Server extends EventEmitter {
     return this.callRPCMethod<boolean>('unsubscribeAll')
   }
 
-  protected updatePricing(newPricing: [Pricing[]]) {
-    this.emit('pricing', newPricing[0])
+  protected updatePricing(newPricing: Pricing[]) {
+    this.emit('pricing', newPricing)
   }
 
   /**
@@ -285,6 +285,7 @@ export class Server extends EventEmitter {
     pair: { baseToken: string; quoteToken: string },
     callback: (newPricing: Pricing) => void
   ): () => void {
+    this.requireLastLookSupport()
     const listener = (newPricing: Pricing[]) => {
       const tokenPricing = newPricing.find((pricing) => {
         pricing.baseToken.toLowerCase() === pair.baseToken.toLowerCase() &&

@@ -56,6 +56,16 @@ export function createResponse(id: number, result: any): JsonRpcResponse {
   }
 }
 
+export async function nextEvent(client, eventName: string) {
+  const promise = new Promise((resolve) => {
+    client.on(eventName, function resolvePromiseAndRemove(data) {
+      resolve(data)
+      client.off(eventName, resolvePromiseAndRemove)
+    })
+  })
+  return promise
+}
+
 export class MockSocketServer extends Server {
   private nextMessageCallback: (socket: WebSocket, data: any) => void
   private _initOptions: {
