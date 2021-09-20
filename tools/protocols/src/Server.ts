@@ -257,7 +257,7 @@ export class Server extends EventEmitter {
   // ***   LAST LOOK METHODS   *** //
   public async subscribe(pairs: { baseToken: string; quoteToken: string }[]) {
     this.requireLastLookSupport()
-    const pricing = await this.callRPCMethod<Pricing[]>('subscribe', pairs)
+    const pricing = await this.callRPCMethod<Pricing[]>('subscribe', [pairs])
     this.emit('pricing', pricing)
     return pricing
   }

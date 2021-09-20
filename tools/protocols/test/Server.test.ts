@@ -169,19 +169,19 @@ describe.only('WebSocketServer', () => {
     mockServer = new MockSocketServer(url)
   })
 
-  it('Should be initialized after Server.for has resolved', async () => {
+  it('should be initialized after Server.for has resolved', async () => {
     const client = await Server.for(url)
     expect(client.supportsProtocol('last-look')).to.equal(true)
     expect(client.supportsProtocol('request-for-quote')).to.equal(false)
   })
 
-  it('Should call subscribe with the correct params and emit pricing', async () => {
+  it('should call subscribe with the correct params and emit pricing', async () => {
     const client = await Server.for(url)
 
     // Ensure subscribe method is correct format.
     const onSubscribe = (socket, data) => {
       // @ts-ignore
-      expect(data).to.be.a.JSONRpcRequest('subscribe', samplePairs)
+      expect(data).to.be.a.JSONRpcRequest('subscribe', [samplePairs])
       socket.send(JSON.stringify(createResponse(data.id, samplePricing)))
     }
     mockServer.setNextMessageCallback(onSubscribe)
@@ -250,6 +250,38 @@ describe.only('WebSocketServer', () => {
         expect(result).to.equal(true)
       }
     )
+
+  it('should call unsubscribe with the correct parameters', async () => {
+    const client = await Server.for(url)
+    const onUnsubscribe = (socket, data) => {
+      // @ts-ignore
+      expect(data).to.be.a.JSONRpcRequest('unsubscribe', [samplePairs])
+      socket.send(JSON.stringify(createResponse(data.id, true)))
+    }
+    mockServer.setNextMessageCallback(onUnsubscribe)
+    const result = await client.unsubscribe(samplePairs)
+    expect(result).to.equal(true)
+  })
+
+  it('should call subscribeAll and unsubscribeAll correctly', async () => {
+    const client = await Server.for(url)
+    const onSubscribeAll = (socket, data) => {
+      // @ts-ignore
+      expect(data).to.be.a.JSONRpcRequest('subscribeAll')
+      socket.send(JSON.stringify(createResponse(data.id, true)))
+    }
+    const onUnsubscribeAll = (socket, data) => {
+      // @ts-ignore
+      expect(data).to.be.a.JSONRpcRequest('unsubscribeAll')
+      socket.send(JSON.stringify(createResponse(data.id, true)))
+    }
+    mockServer.setNextMessageCallback(onSubscribeAll)
+    const subscribeResult = await client.subscribeAll()
+    expect(subscribeResult).to.equal(true)
+    mockServer.setNextMessageCallback(onUnsubscribeAll)
+    const unsubscribeResult = await client.unsubscribeAll()
+    expect(unsubscribeResult).to.equal(true)
+  })
 
   afterEach(() => {
     mockServer.close()

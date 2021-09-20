@@ -13,7 +13,8 @@ export function addJSONRPCAssertions() {
     function (method?: string, params?: any) {
       const obj = this._obj
       const keys = Object.keys(obj)
-      const required = ['jsonrpc', 'method', 'params', 'id']
+      const required = ['jsonrpc', 'method', 'id']
+      const optional = ['params']
       if (method) {
         new chai.Assertion(this._obj.method).to.equal(method)
       }
@@ -23,7 +24,7 @@ export function addJSONRPCAssertions() {
       }
 
       this.assert(
-        keys.every((k) => required.includes(k)) &&
+        keys.every((k) => required.concat(optional).includes(k)) &&
           required.every((k) => keys.includes(k)),
         'expected #{this} to be a JSONRpcRequest',
         'expected #{this} not to be a JSONRpcRequest',
