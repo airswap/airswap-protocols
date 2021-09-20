@@ -73,14 +73,7 @@ export class MockSocketServer extends Server {
     lastLook?: string
     rfq?: string
     params?: any
-  } | null = {
-    lastLook: '1.0.0',
-    rfq: null,
-    params: {
-      swapContract: '0x1234',
-      senderWallet: '0x2345',
-    },
-  }
+  } | null
 
   public set initOptions(options: {
     lastLook?: string
@@ -92,6 +85,7 @@ export class MockSocketServer extends Server {
 
   public constructor(url: string) {
     super(url)
+    this.resetInitOptions()
     this.on('connection', (socket) => {
       const protocols = []
       if (this._initOptions) {
@@ -120,6 +114,17 @@ export class MockSocketServer extends Server {
 
   public static stopMockingWebSocket() {
     mock.stop('websocket')
+  }
+
+  public resetInitOptions() {
+    this.initOptions = {
+      lastLook: '1.0.0',
+      rfq: null,
+      params: {
+        swapContract: '0x1234',
+        senderWallet: '0x2345',
+      },
+    }
   }
 
   public setNextMessageCallback(cb: (socket: WebSocket, data: any) => void) {

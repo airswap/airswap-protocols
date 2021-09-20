@@ -44,8 +44,8 @@ if (!isBrowser) {
 }
 
 export class Server extends EventEmitter {
-  protected supportedProtocols: SupportedProtocolInfo[]
-  protected isInitialized: boolean
+  private supportedProtocols: SupportedProtocolInfo[]
+  private isInitialized: boolean
   private httpClient: HttpClient
   private webSocketClient: JsonRpcWebsocket
   private senderServer: string
@@ -124,23 +124,28 @@ export class Server extends EventEmitter {
         console.error(error)
       }
     )
-    const initPromise = new Promise<SupportedProtocolInfo[]>((resolve) => {
-      this.webSocketClient.on('initialize', (message) => {
-        // TODO: swapcontract is included in the initialize protocol payloads
-        // need to check it.
-        this.isInitialized = true
-        this.initialize(message)
-        resolve(this.supportedProtocols)
-      })
-    })
+    const initPromise = new Promise<SupportedProtocolInfo[]>(
+      (resolve, reject) => {
+        setTimeout(() => {
+          reject('Server did not call initialize in time')
+          this.disconnect()
+        }, REQUEST_TIMEOUT)
+
+        this.webSocketClient.on('initialize', (message) => {
+          // TODO: swapcontract is included in the initialize protocol payloads
+          // need to check it.
+          this.isInitialized = true
+          this.initialize(message)
+          resolve(this.supportedProtocols)
+        })
+      }
+    )
 
     this.webSocketClient.on('updatePricing', this.updatePricing.bind(this))
 
     await this.webSocketClient.open()
-    await initPromise
 
-    // TODO: connection timeout:
-    // this.ws.on('open', cleartimeout....)
+    await initPromise
 
     // TODO: connectivity lifecycle
   }
@@ -242,7 +247,7 @@ export class Server extends EventEmitter {
   }
   // *** END RFQ METHODS *** //
 
-  protected initialize(supportedProtocols: SupportedProtocolInfo[]) {
+  private initialize(supportedProtocols: SupportedProtocolInfo[]) {
     this.supportedProtocols = supportedProtocols
     const lastLookSupport = supportedProtocols.find(
       (protocol) => protocol.name === 'last-look'
@@ -277,7 +282,7 @@ export class Server extends EventEmitter {
     return this.callRPCMethod<boolean>('unsubscribeAll')
   }
 
-  protected updatePricing(newPricing: Pricing[]) {
+  private updatePricing(newPricing: Pricing[]) {
     this.emit('pricing', newPricing)
   }
 
@@ -285,9 +290,14 @@ export class Server extends EventEmitter {
     this.requireLastLookSupport()
     return this.callRPCMethod<boolean>('consider', order)
   }
+
+  public disconnect() {
+    this.webSocketClient.close()
+    this.removeAllListeners()
+  }
   // *** END LAST LOOK METHODS *** //
 
-  protected requireInitialized() {
+  private requireInitialized() {
     if (!this.isInitialized) throw new Error('Server not yet initialized')
   }
 
@@ -295,7 +305,7 @@ export class Server extends EventEmitter {
    * Throws if RFQ protocol is not supported, or if server is not yet
    * initialized.
    */
-  protected requireRFQSupport(version?: string) {
+  private requireRFQSupport(version?: string) {
     if (!this.supportsProtocol('request-for-quote', version))
       throw new Error(
         `Server at ${this.locator} doesn't support this version of RFQ`
@@ -306,14 +316,14 @@ export class Server extends EventEmitter {
    * Throws if Last Look protocol is not supported, or if server is not yet
    * initialized.
    */
-  protected requireLastLookSupport(version?: string) {
+  private requireLastLookSupport(version?: string) {
     if (!this.supportsProtocol('last-look', version))
       throw new Error(
         `Server at ${this.locator} doesn't support this version of Last Look`
       )
   }
 
-  protected compare(params: any, result: any): Array<string> {
+  private compare(params: any, result: any): Array<string> {
     const errors: Array<string> = []
     const flat: any = flattenObject(result)
     for (const param in params) {
@@ -327,7 +337,7 @@ export class Server extends EventEmitter {
     return errors
   }
 
-  protected httpCall<T>(
+  private httpCall<T>(
     method: string,
     params: Record<string, string> | Array<any>
   ): Promise<T> {
@@ -368,7 +378,7 @@ export class Server extends EventEmitter {
     })
   }
 
-  protected async webSocketCall<T>(
+  private async webSocketCall<T>(
     method: string,
     params?: Record<string, string> | Array<any>
   ): Promise<T> {
@@ -380,7 +390,7 @@ export class Server extends EventEmitter {
    * This method should instantiate the relevenat transport client and also
    * trigger initialization, setting `isInitialized` when complete.
    */
-  protected async callRPCMethod<T>(
+  private async callRPCMethod<T>(
     method: string,
     params?: Record<string, string> | Array<any>
   ): Promise<T> {

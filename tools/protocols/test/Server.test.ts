@@ -1,10 +1,10 @@
 import { fancy } from 'fancy-test'
 import chai, { expect } from 'chai'
 import sinonChai from 'sinon-chai'
-// import { spy } from 'sinon'
+import { useFakeTimers } from 'sinon'
 
 import { createQuote, createLightOrder } from '@airswap/utils'
-import { ADDRESS_ZERO } from '@airswap/constants'
+import { ADDRESS_ZERO, REQUEST_TIMEOUT } from '@airswap/constants'
 
 import { Server } from '..'
 import {
@@ -248,6 +248,7 @@ describe.only('WebSocketServer', () => {
         const client = await Server.for(url)
         const result = await client.consider(fakeOrder)
         expect(result).to.equal(true)
+        mockServer.resetInitOptions()
       }
     )
 
@@ -281,6 +282,22 @@ describe.only('WebSocketServer', () => {
     mockServer.setNextMessageCallback(onUnsubscribeAll)
     const unsubscribeResult = await client.unsubscribeAll()
     expect(unsubscribeResult).to.equal(true)
+  })
+
+  it("should throw if the server doesn't initialize within timeout", async () => {
+    const fakeTimers = useFakeTimers()
+    // prevent server from initializing
+    mockServer.initOptions = null
+    const initializePromise = Server.for(url)
+    fakeTimers.tick(REQUEST_TIMEOUT)
+    try {
+      await initializePromise
+      throw new Error('Server.for should not resolve before initialize')
+    } catch (e) {
+      expect(e).to.equal('Server did not call initialize in time')
+    }
+    fakeTimers.restore()
+    mockServer.resetInitOptions()
   })
 
   afterEach(() => {
