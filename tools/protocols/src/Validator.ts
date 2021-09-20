@@ -2,14 +2,14 @@ import { ethers } from 'ethers'
 import { BigNumber } from 'ethers'
 import { chainIds, chainNames } from '@airswap/constants'
 import { LightOrder } from '@airswap/types'
-import * as LightValidatorContract from '@airswap/validator/build/contracts/LightValidator.sol/LightValidator.json'
-import * as LightValidatorDeploys from '@airswap/validator/deploys.js'
+import * as ValidatorContract from '@airswap/validator/build/contracts/Validator.sol/Validator.json'
+import * as ValidatorDeploys from '@airswap/validator/deploys.js'
 
-const LightValidatorInterface = new ethers.utils.Interface(
-  JSON.stringify(LightValidatorContract.abi)
+const ValidatorInterface = new ethers.utils.Interface(
+  JSON.stringify(ValidatorContract.abi)
 )
 
-export class LightValidator {
+export class Validator {
   public chainId: number
   private contract: ethers.Contract
 
@@ -19,16 +19,16 @@ export class LightValidator {
   ) {
     this.chainId = chainId
     this.contract = new ethers.Contract(
-      LightValidatorDeploys[chainId],
-      LightValidatorInterface,
+      ValidatorDeploys[chainId],
+      ValidatorInterface,
       signerOrProvider ||
         ethers.getDefaultProvider(chainNames[chainId].toLowerCase())
     )
   }
 
   public static getAddress(chainId = chainIds.RINKEBY): string {
-    if (chainId in LightValidatorDeploys) {
-      return LightValidator[chainId]
+    if (chainId in ValidatorDeploys) {
+      return Validator[chainId]
     }
     throw new Error(`Light Validator deploy not found or chainId ${chainId}`)
   }
