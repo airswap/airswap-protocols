@@ -50,5 +50,8 @@
     "hooks": {
       "pre-commit": "yarn deps:check && yarn hint && yarn lint:check && yarn pretty:check"
     }
+  },
+  "volta": {
+    "node": "16.9.0"
   }
 }

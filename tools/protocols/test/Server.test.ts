@@ -171,8 +171,18 @@ describe.only('WebSocketServer', () => {
 
   it('should be initialized after Server.for has resolved', async () => {
     const client = await Server.for(url)
+    const correctInitializeResponse = new Promise<void>((resolve) => {
+      const onResponse = (socket, data) => {
+        // Note mock server implementation uses id '123' for initialize.
+        // @ts-ignore
+        expect(data).to.be.a.JSONRpcResponse('123', true)
+        resolve()
+      }
+      mockServer.setNextMessageCallback(onResponse)
+    })
     expect(client.supportsProtocol('last-look')).to.equal(true)
     expect(client.supportsProtocol('request-for-quote')).to.equal(false)
+    await correctInitializeResponse
   })
 
   it('should call subscribe with the correct params and emit pricing', async () => {
@@ -184,7 +194,7 @@ describe.only('WebSocketServer', () => {
       expect(data).to.be.a.JSONRpcRequest('subscribe', [samplePairs])
       socket.send(JSON.stringify(createResponse(data.id, samplePricing)))
     }
-    mockServer.setNextMessageCallback(onSubscribe)
+    mockServer.setNextMessageCallback(onSubscribe, true)
     const pricing = nextEvent(client, 'pricing')
     client.subscribe(samplePairs)
 
@@ -211,12 +221,26 @@ describe.only('WebSocketServer', () => {
       ],
     ]
 
+    const updatePricingRequestId = '456'
+    // Ensure client responds to server correctly when pricing is updated
+    const correctUpdatePricingResponse = new Promise<void>((resolve) => {
+      const onResponse = (socket, data) => {
+        // @ts-ignore
+        expect(data).to.be.a.JSONRpcResponse(updatePricingRequestId, true)
+        resolve()
+      }
+      mockServer.setNextMessageCallback(onResponse)
+    })
+
     // Ensure updatePricing is correctly called and causes pricing to be emitted
     mockServer.emit(
       'message',
-      JSON.stringify(createRequest('updatePricing', latestPricing))
+      JSON.stringify(
+        createRequest('updatePricing', latestPricing, updatePricingRequestId)
+      )
     )
     expect(await updatedPricing).to.eql(latestPricing[0])
+    await correctUpdatePricingResponse
   })
 
   it('should call consider with the correct parameters', async () => {
@@ -226,7 +250,7 @@ describe.only('WebSocketServer', () => {
       expect(data).to.be.a.JSONRpcRequest('consider', fakeOrder)
       socket.send(JSON.stringify(createResponse(data.id, true)))
     }
-    mockServer.setNextMessageCallback(onConsider)
+    mockServer.setNextMessageCallback(onConsider, true)
     const result = await client.consider(fakeOrder)
     expect(result).to.equal(true)
   })
@@ -259,7 +283,7 @@ describe.only('WebSocketServer', () => {
       expect(data).to.be.a.JSONRpcRequest('unsubscribe', [samplePairs])
       socket.send(JSON.stringify(createResponse(data.id, true)))
     }
-    mockServer.setNextMessageCallback(onUnsubscribe)
+    mockServer.setNextMessageCallback(onUnsubscribe, true)
     const result = await client.unsubscribe(samplePairs)
     expect(result).to.equal(true)
   })
@@ -276,10 +300,10 @@ describe.only('WebSocketServer', () => {
       expect(data).to.be.a.JSONRpcRequest('unsubscribeAll')
       socket.send(JSON.stringify(createResponse(data.id, true)))
     }
-    mockServer.setNextMessageCallback(onSubscribeAll)
+    mockServer.setNextMessageCallback(onSubscribeAll, true)
     const subscribeResult = await client.subscribeAll()
     expect(subscribeResult).to.equal(true)
-    mockServer.setNextMessageCallback(onUnsubscribeAll)
+    mockServer.setNextMessageCallback(onUnsubscribeAll, true)
     const unsubscribeResult = await client.unsubscribeAll()
     expect(unsubscribeResult).to.equal(true)
   })
@@ -298,6 +322,20 @@ describe.only('WebSocketServer', () => {
     }
     fakeTimers.restore()
     mockServer.resetInitOptions()
+  })
+
+  it('should correctly indicate support for protocol versions', async () => {
+    // Protocol is supported if the major version is the same,
+    // and minor and patch versions are the same or greater than requried
+    mockServer.initOptions = { lastLook: '1.2.3' }
+    const client = await Server.for(url)
+    expect(client.supportsProtocol('last-look', '0.9.1')).to.be.false
+    expect(client.supportsProtocol('last-look', '1.0.0')).to.be.true
+    expect(client.supportsProtocol('last-look', '1.1.1')).to.be.true
+    expect(client.supportsProtocol('last-look', '1.2.3')).to.be.true
+    expect(client.supportsProtocol('last-look', '1.2.4')).to.be.false
+    expect(client.supportsProtocol('last-look', '1.3.0')).to.be.false
+    expect(client.supportsProtocol('last-look', '2.2.3')).to.be.false
   })
 
   afterEach(() => {

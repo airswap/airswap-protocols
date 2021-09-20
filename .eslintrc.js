@@ -27,7 +27,7 @@ module.exports = {
     'prettier/@typescript-eslint',
   ],
   rules: {
-    'prettier/prettier': 'error',
+    'prettier/prettier': 0,
     'prefer-const': 'error',
     'no-undef': 'warn',
     'no-unused-vars': 'warn',

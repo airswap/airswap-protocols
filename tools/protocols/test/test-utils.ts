@@ -32,6 +32,30 @@ export function addJSONRPCAssertions() {
       )
     }
   )
+
+  chai.Assertion.addMethod(
+    'JSONRpcResponse',
+    function (id?: any, result?: any) {
+      const obj = this._obj
+      const keys = Object.keys(obj)
+      const required = ['jsonrpc', 'id', 'result']
+      if (id) {
+        new chai.Assertion(this._obj.id).to.equal(id)
+      }
+
+      if (result) {
+        new chai.Assertion(this._obj.result).to.eql(result)
+      }
+
+      this.assert(
+        keys.every((k) => required.includes(k)) &&
+          required.every((k) => keys.includes(k)),
+        'expected #{this} to be a JSONRpcResult',
+        'expected #{this} not to be a JSONRpcResult',
+        obj
+      )
+    }
+  )
 }
 
 const jsonRpcVersion = '2.0'
@@ -39,7 +63,7 @@ const jsonRpcVersion = '2.0'
 export function createRequest(
   method: string,
   params?: any,
-  id?: number
+  id?: string
 ): JsonRpcRequest {
   return {
     jsonrpc: jsonRpcVersion,
@@ -68,7 +92,10 @@ export async function nextEvent(client, eventName: string) {
 }
 
 export class MockSocketServer extends Server {
-  private nextMessageCallback: (socket: WebSocket, data: any) => void
+  private nextMessageCallback: {
+    callback: (socket: WebSocket, data: any) => void
+    ignoreResponses: boolean
+  } | null
   private _initOptions: {
     lastLook?: string
     rfq?: string
@@ -101,7 +128,9 @@ export class MockSocketServer extends Server {
             version: this._initOptions.rfq,
             params: this._initOptions.params,
           })
-        socket.send(JSON.stringify(createRequest('initialize', [protocols])))
+        socket.send(
+          JSON.stringify(createRequest('initialize', [protocols], '123'))
+        )
       }
 
       socket.on('message', this.onMessage.bind(this, socket))
@@ -127,17 +156,26 @@ export class MockSocketServer extends Server {
     }
   }
 
-  public setNextMessageCallback(cb: (socket: WebSocket, data: any) => void) {
-    this.nextMessageCallback = cb
+  public setNextMessageCallback(
+    cb: (socket: WebSocket, data: any) => void,
+    ignoreResponses?: boolean
+  ) {
+    this.nextMessageCallback = {
+      callback: cb,
+      ignoreResponses: !!ignoreResponses,
+    }
   }
 
   private onMessage(socket: WebSocket, data) {
-    const parsedData = JSON.parse(data.toString()) as
-      | JsonRpcRequest
-      | JsonRpcResponse
-      | JsonRpcError
+    const parsedData = JSON.parse(data.toString())
     if (this.nextMessageCallback) {
-      this.nextMessageCallback(socket, parsedData)
+      if (
+        this.nextMessageCallback.ignoreResponses &&
+        (parsedData.result || parsedData.error)
+      ) {
+        return // ignore this response.
+      }
+      this.nextMessageCallback.callback(socket, parsedData)
       this.nextMessageCallback = null
     }
   }

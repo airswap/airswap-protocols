@@ -118,10 +118,9 @@ export class Server extends EventEmitter {
   private async _initWebSocketClient(locator: string) {
     this.webSocketClient = new JsonRpcWebsocket(
       url.format(locator),
-      2000,
+      REQUEST_TIMEOUT,
       (error: JsonRpcError) => {
-        /* handle error */
-        console.error(error)
+        this.emit('error', error)
       }
     )
     const initPromise = new Promise<SupportedProtocolInfo[]>(
@@ -132,22 +131,17 @@ export class Server extends EventEmitter {
         }, REQUEST_TIMEOUT)
 
         this.webSocketClient.on('initialize', (message) => {
-          // TODO: swapcontract is included in the initialize protocol payloads
-          // need to check it.
           this.isInitialized = true
           this.initialize(message)
           resolve(this.supportedProtocols)
+          return true
         })
       }
     )
 
     this.webSocketClient.on('updatePricing', this.updatePricing.bind(this))
-
     await this.webSocketClient.open()
-
     await initPromise
-
-    // TODO: connectivity lifecycle
   }
 
   public static async for(
@@ -161,12 +155,12 @@ export class Server extends EventEmitter {
 
   /**
    * Method to check support for a given swap protocol.
-   * @param protocol String protocol name
-   * @param minVersion String minimum required version (semVer). If not supplied
-   *                          all versions match.
-   * @returns boolean true if protocol is supported at given version
+   * @param protocol protocol name
+   * @param version Optional version to match. Fails if major version is
+   *                different, or minor/patch are lower.
+   * @returns {boolean} true if protocol is supported at given version
    */
-  public supportsProtocol(protocol: string, minVersion?: string) {
+  public supportsProtocol(protocol: string, version?: string): boolean {
     // Don't check supportedProtocols unless the server has initialized.
     // Important for WebSocket servers that can support either RFQ or Last Look
     this.requireInitialized()
@@ -174,8 +168,17 @@ export class Server extends EventEmitter {
       (p) => p.name === protocol
     )
     if (!supportedProtocolInfo) return false
-    if (!minVersion) return true
-    // TODO: semVer matching.
+    if (!version) return true
+
+    const [, wantedMajor, wantedMinor, wantedPatch] =
+      /(\d+)\.(\d+)\.(\d+)/.exec(version)
+    const [, supportedMajor, supportedMinor, supportedPatch] =
+      /(\d+)\.(\d+)\.(\d+)/.exec(supportedProtocolInfo.version)
+
+    if (wantedMajor !== supportedMajor) return false
+    if (parseInt(wantedMinor) > parseInt(supportedMinor)) return false
+    if (parseInt(wantedPatch) > parseInt(supportedPatch)) return false
+    return true
   }
 
   // ***   RFQ METHODS   *** //
@@ -284,6 +287,7 @@ export class Server extends EventEmitter {
 
   private updatePricing(newPricing: Pricing[]) {
     this.emit('pricing', newPricing)
+    return true
   }
 
   public async consider(order: LightOrder) {

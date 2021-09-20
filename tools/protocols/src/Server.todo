@@ -4,3 +4,5 @@ Implementation:
   ☐ Throw errors for malformed server requests and responses
   ☐ Consider what happens if server calls initialize twice for some reason
   ☐ Update docs to remove change to notification
+  ☐ Dependency on client library
+  ☐ Decide if we need to worry about disconnects?
