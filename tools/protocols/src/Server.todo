@@ -1,7 +1,8 @@
 Implementation:
   ✔ Emit pricing on subscribe @done(21-09-19 14:45)
-  ☐ Use `senderServer` http endpoint for `consider` if it is set.
+  ✔ Use `senderServer` http endpoint for `consider` if it is set. @done(21-09-20 15:02)
   ☐ Make sure all addresses get lowercased.
   ☐ Check that we properly handle malformed payloads from the maker servers.
   ☐ Potentially make `addTokenPairPriceUpdateListener` subscribe too
   ☐ Throw errors for malformed server responses
+  ☐ Consider what happens if server calls initialize twice for some reason

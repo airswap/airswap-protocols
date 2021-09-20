@@ -18,13 +18,6 @@ export type SupportedProtocolInfo = {
   params?: any
 }
 
-type LocatorOptions = {
-  protocol: string
-  hostname: string
-  port: string
-  timeout?: number
-}
-
 type Levels = [string, string][]
 type Formula = string
 
@@ -51,12 +44,11 @@ if (!isBrowser) {
 }
 
 export class Server extends EventEmitter {
-  protected locatorUrl: ReturnType<typeof parseUrl>
-  protected locatorOptions: LocatorOptions
   protected supportedProtocols: SupportedProtocolInfo[]
   protected isInitialized: boolean
   private httpClient: HttpClient
   private webSocketClient: JsonRpcWebsocket
+  private senderServer: string
   public transportProtocol: 'websockets' | 'http'
 
   public constructor(
@@ -64,34 +56,39 @@ export class Server extends EventEmitter {
     private swapContract = Light.getAddress()
   ) {
     super()
-    this.locatorUrl = parseUrl(locator)
-    this.transportProtocol = this.locatorUrl.protocol.startsWith('http')
-      ? 'http'
-      : 'websockets'
-    this.locatorOptions = {
-      protocol: this.locatorUrl.protocol,
-      hostname: this.locatorUrl.hostname,
-      port: this.locatorUrl.port,
-      timeout: REQUEST_TIMEOUT,
-    }
+    const protocol = parseUrl(locator).protocol
+    this.transportProtocol = protocol.startsWith('http') ? 'http' : 'websockets'
   }
 
   private _init() {
     if (this.transportProtocol === 'http') {
-      return this._initHTTPClient()
+      return this._initHTTPClient(this.locator)
     } else {
-      return this._initWebSocketClient()
+      return this._initWebSocketClient(this.locator)
     }
   }
 
-  private _initHTTPClient() {
-    this.supportedProtocols = [{ name: 'request-for-quote', version: '2.0.0' }]
-    this.isInitialized = true
+  private _initHTTPClient(locator: string, clientOnly?: boolean) {
+    // clientOnly flag set when initializing client for last look `senderServer`
+    const parsedUrl = parseUrl(locator)
+    const options = {
+      protocol: parsedUrl.protocol,
+      hostname: parsedUrl.hostname,
+      port: parsedUrl.port,
+      timeout: REQUEST_TIMEOUT,
+    }
+
+    if (!clientOnly) {
+      this.supportedProtocols = [
+        { name: 'request-for-quote', version: '2.0.0' },
+      ]
+      this.isInitialized = true
+    }
 
     if (isBrowser) {
       const jaysonClient = require('jayson/lib/client/browser')
       this.httpClient = new jaysonClient((request, callback) => {
-        fetch(url.format(this.locatorUrl), {
+        fetch(url.format(parsedUrl), {
           method: 'POST',
           body: request,
           headers: {
@@ -107,20 +104,20 @@ export class Server extends EventEmitter {
           .catch((err) => {
             callback(err)
           })
-      }, this.locatorOptions)
+      }, options)
     } else {
       const jaysonClient = require('jayson/lib/client')
-      if (this.locatorOptions.protocol === 'https:') {
-        this.httpClient = jaysonClient.https(this.locatorOptions)
+      if (options.protocol === 'https:') {
+        this.httpClient = jaysonClient.https(options)
       } else {
-        this.httpClient = jaysonClient.http(this.locatorOptions)
+        this.httpClient = jaysonClient.http(options)
       }
     }
   }
 
-  private async _initWebSocketClient() {
+  private async _initWebSocketClient(locator: string) {
     this.webSocketClient = new JsonRpcWebsocket(
-      url.format(this.locatorUrl),
+      url.format(locator),
       2000,
       (error: JsonRpcError) => {
         /* handle error */
@@ -247,6 +244,14 @@ export class Server extends EventEmitter {
 
   protected initialize(supportedProtocols: SupportedProtocolInfo[]) {
     this.supportedProtocols = supportedProtocols
+    const lastLookSupport = supportedProtocols.find(
+      (protocol) => protocol.name === 'last-look'
+    )
+    if (lastLookSupport?.params?.senderServer) {
+      this.senderServer = lastLookSupport.params.senderServer
+      // Prepare an http client for consider calls.
+      this._initHTTPClient(this.senderServer, true)
+    }
   }
 
   // ***   LAST LOOK METHODS   *** //
@@ -318,7 +323,7 @@ export class Server extends EventEmitter {
   protected requireRFQSupport(version?: string) {
     if (!this.supportsProtocol('request-for-quote', version))
       throw new Error(
-        `Server at ${this.locatorUrl} doesn't support this version of RFQ`
+        `Server at ${this.locator} doesn't support this version of RFQ`
       )
   }
 
@@ -329,7 +334,7 @@ export class Server extends EventEmitter {
   protected requireLastLookSupport(version?: string) {
     if (!this.supportsProtocol('last-look', version))
       throw new Error(
-        `Server at ${this.locatorUrl} doesn't support this version of Last Look`
+        `Server at ${this.locator} doesn't support this version of Last Look`
       )
   }
 
@@ -404,7 +409,10 @@ export class Server extends EventEmitter {
     method: string,
     params?: Record<string, string> | Array<any>
   ): Promise<T> {
-    if (this.transportProtocol === 'http') {
+    if (
+      this.transportProtocol === 'http' ||
+      (method === 'consider' && this.senderServer)
+    ) {
       return this.httpCall<T>(method, params)
     } else {
       return this.webSocketCall<T>(method, params)

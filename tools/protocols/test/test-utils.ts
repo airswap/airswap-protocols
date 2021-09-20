@@ -74,7 +74,7 @@ export class MockSocketServer extends Server {
     params?: any
   } | null = {
     lastLook: '1.0.0',
-    rfq: '1.0.0',
+    rfq: null,
     params: {
       swapContract: '0x1234',
       senderWallet: '0x2345',
@@ -102,7 +102,7 @@ export class MockSocketServer extends Server {
           })
         if (this._initOptions.rfq)
           protocols.push({
-            name: 'last-look',
+            name: 'request-for-quote',
             version: this._initOptions.rfq,
             params: this._initOptions.params,
           })

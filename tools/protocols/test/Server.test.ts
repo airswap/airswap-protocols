@@ -23,7 +23,7 @@ const URL = 'maker.example.com'
 chai.use(sinonChai)
 addJSONRPCAssertions()
 
-function mockServer(api) {
+function mockHttpServer(api) {
   api.post('/').reply(200, async (uri, body) => {
     const params = body['params']
     let res
@@ -53,6 +53,9 @@ function mockServer(api) {
           senderWallet: params.senderWallet,
         })
         break
+      case 'consider':
+        res = true
+        break
     }
     return {
       jsonrpc: '2.0',
@@ -64,7 +67,7 @@ function mockServer(api) {
 
 describe('HTTPServer', () => {
   fancy
-    .nock('https://' + URL, mockServer)
+    .nock('https://' + URL, mockHttpServer)
     .do(async () => {
       const server = await Server.for(URL)
       await server.getSignerSideQuote('', '', '')
@@ -72,7 +75,7 @@ describe('HTTPServer', () => {
     .catch(/Server response is not a valid quote: {"bad":"quote"}/)
     .it('Server getSignerSideQuote() throws')
   fancy
-    .nock('https://' + URL, mockServer)
+    .nock('https://' + URL, mockHttpServer)
     .do(async () => {
       const server = await Server.for(URL)
       await server.getMaxQuote('', '')
@@ -82,14 +85,14 @@ describe('HTTPServer', () => {
     )
     .it('Server getMaxQuote() throws')
   fancy
-    .nock('https://' + URL, mockServer)
+    .nock('https://' + URL, mockHttpServer)
     .it('Server getSenderSideQuote()', async () => {
       const server = await Server.for(URL)
       const quote = await server.getSenderSideQuote('1', 'SIGNERTOKEN', '')
       expect(quote.signer.token).to.equal('SIGNERTOKEN')
     })
   fancy
-    .nock('https://' + URL, mockServer)
+    .nock('https://' + URL, mockHttpServer)
     .it('Server getSignerSideOrder()', async () => {
       const server = await Server.for(URL)
       const order = await server.getSignerSideOrder(
@@ -142,6 +145,18 @@ const samplePricing = [
     ],
   },
 ]
+const fakeOrder: LightOrder = {
+  nonce: '1',
+  expiry: '1234',
+  signerWallet: '0xsigner',
+  signerToken: '0xtokena',
+  signerAmount: '100',
+  senderToken: '0xtokenb',
+  senderAmount: '200',
+  v: 'v',
+  r: 'r',
+  s: 's',
+}
 
 describe.only('WebSocketServer', () => {
   const url = `ws://maker.com:1234/`
@@ -205,18 +220,6 @@ describe.only('WebSocketServer', () => {
   })
 
   it('should call consider with the correct parameters', async () => {
-    const fakeOrder: LightOrder = {
-      nonce: '1',
-      expiry: '1234',
-      signerWallet: '0xsigner',
-      signerToken: '0xtokena',
-      signerAmount: '100',
-      senderToken: '0xtokenb',
-      senderAmount: '200',
-      v: 'v',
-      r: 'r',
-      s: 's',
-    }
     const client = await Server.for(url)
     const onConsider = (socket, data) => {
       // @ts-ignore
@@ -227,6 +230,26 @@ describe.only('WebSocketServer', () => {
     const result = await client.consider(fakeOrder)
     expect(result).to.equal(true)
   })
+
+  fancy
+    .nock('https://' + URL, mockHttpServer)
+    .it(
+      'should use HTTP for consider when senderServer is provided',
+      async () => {
+        mockServer.initOptions = {
+          lastLook: '1.0.0',
+          params: {
+            swapContract: '0x1234',
+            senderWallet: '0x2345',
+            senderServer: URL,
+          },
+        }
+
+        const client = await Server.for(url)
+        const result = await client.consider(fakeOrder)
+        expect(result).to.equal(true)
+      }
+    )
 
   afterEach(() => {
     mockServer.close()
