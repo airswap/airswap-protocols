@@ -165,7 +165,6 @@ contract Staking is Ownable {
     return token.decimals();
   }
 
-
   /**
    * @notice Stake tokens for an account
    * @param account address

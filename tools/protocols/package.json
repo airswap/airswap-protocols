@@ -3,7 +3,8 @@
   "version": "0.5.11",
   "description": "Protocol Libraries for AirSwap Developers",
   "contributors": [
-    "Don Mosites"
+    "Don Mosites",
+    "Hassan Malik <hbmalik88@gmail.com>"
   ],
   "repository": {
     "type": "git",
@@ -27,6 +28,7 @@
   "dependencies": {
     "@airswap/constants": "0.4.1",
     "@airswap/light": "2.2.2",
+    "@airswap/validator": "1.2.8",
     "@airswap/registry": "4.8.1",
     "@airswap/types": "3.6.1",
     "@airswap/utils": "0.4.6",
