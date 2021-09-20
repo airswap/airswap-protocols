@@ -281,31 +281,6 @@ export class Server extends EventEmitter {
     this.emit('pricing', newPricing)
   }
 
-  /**
-   * @param pair The baseToken and quoteToken to listen to pricing updates for.
-   * @param callback Function to call with updated pricing
-   * @returns A teardown function to remove the listener.
-   */
-  public addPairPriceListener(
-    pair: { baseToken: string; quoteToken: string },
-    callback: (newPricing: Pricing) => void
-  ): () => void {
-    this.requireLastLookSupport()
-    const listener = (newPricing: Pricing[]) => {
-      const tokenPricing = newPricing.find((pricing) => {
-        pricing.baseToken.toLowerCase() === pair.baseToken.toLowerCase() &&
-          pricing.quoteToken === pair.baseToken
-      })
-      if (tokenPricing) {
-        callback(tokenPricing)
-      }
-    }
-    this.on('pricing', listener)
-
-    // Return a teardown function for the listener.
-    return this.off.bind(this, 'pricing', listener)
-  }
-
   public async consider(order: LightOrder) {
     this.requireLastLookSupport()
     return this.callRPCMethod<boolean>('consider', order)
