@@ -1,8 +1,0 @@
-Implementation:
-  ✔ Emit pricing on subscribe @done(21-09-19 14:45)
-  ✔ Use `senderServer` http endpoint for `consider` if it is set. @done(21-09-20 15:02)
-  ☐ Throw errors for malformed server requests and responses
-  ☐ Consider what happens if server calls initialize twice for some reason
-  ☐ Update docs to remove change to notification
-  ☐ Dependency on client library
-  ☐ Decide if we need to worry about disconnects?

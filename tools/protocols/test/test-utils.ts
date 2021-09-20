@@ -1,9 +1,5 @@
 import chai from 'chai'
-import {
-  JsonRpcRequest,
-  JsonRpcResponse,
-  JsonRpcError,
-} from 'jsonrpc-client-websocket'
+import { JsonRpcRequest, JsonRpcResponse } from 'jsonrpc-client-websocket'
 import mock from 'mock-require'
 import { WebSocket, Server } from 'mock-socket'
 
@@ -33,29 +29,35 @@ export function addJSONRPCAssertions() {
     }
   )
 
-  chai.Assertion.addMethod(
-    'JSONRpcResponse',
-    function (id?: any, result?: any) {
-      const obj = this._obj
-      const keys = Object.keys(obj)
-      const required = ['jsonrpc', 'id', 'result']
-      if (id) {
-        new chai.Assertion(this._obj.id).to.equal(id)
-      }
+  chai.Assertion.addMethod('JSONRpcResponse', function (id: any, result: any) {
+    const obj = this._obj
+    const keys = Object.keys(obj)
+    const required = ['jsonrpc', 'id', 'result']
+    new chai.Assertion(this._obj.id).to.equal(id)
+    new chai.Assertion(this._obj.result).to.eql(result)
+    this.assert(
+      keys.every((k) => required.includes(k)) &&
+        required.every((k) => keys.includes(k)),
+      'expected #{this} to be a JSONRpcResult',
+      'expected #{this} not to be a JSONRpcResult',
+      obj
+    )
+  })
 
-      if (result) {
-        new chai.Assertion(this._obj.result).to.eql(result)
-      }
-
-      this.assert(
-        keys.every((k) => required.includes(k)) &&
-          required.every((k) => keys.includes(k)),
-        'expected #{this} to be a JSONRpcResult',
-        'expected #{this} not to be a JSONRpcResult',
-        obj
-      )
-    }
-  )
+  chai.Assertion.addMethod('JSONRpcError', function (id: any, error: any) {
+    const obj = this._obj
+    const keys = Object.keys(obj)
+    const required = ['jsonrpc', 'id', 'error']
+    new chai.Assertion(this._obj.id).to.equal(id)
+    new chai.Assertion(this._obj.error).to.eql(error)
+    this.assert(
+      keys.every((k) => required.includes(k)) &&
+        required.every((k) => keys.includes(k)),
+      'expected #{this} to be a JSONRpcError',
+      'expected #{this} not to be a JSONRpcError',
+      obj
+    )
+  })
 }
 
 const jsonRpcVersion = '2.0'

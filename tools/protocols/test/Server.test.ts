@@ -15,6 +15,7 @@ import {
   nextEvent,
 } from './test-utils'
 import { LightOrder } from '@airswap/types'
+import { JsonRpcErrorCodes } from 'jsonrpc-client-websocket'
 
 const badQuote = { bad: 'quote' }
 const emptyQuote = createQuote({})
@@ -158,7 +159,7 @@ const fakeOrder: LightOrder = {
   s: 's',
 }
 
-describe.only('WebSocketServer', () => {
+describe('WebSocketServer', () => {
   const url = `ws://maker.com:1234/`
   let mockServer: MockSocketServer
   before(() => {
@@ -167,6 +168,7 @@ describe.only('WebSocketServer', () => {
 
   beforeEach(async () => {
     mockServer = new MockSocketServer(url)
+    mockServer.resetInitOptions()
   })
 
   it('should be initialized after Server.for has resolved', async () => {
@@ -272,7 +274,6 @@ describe.only('WebSocketServer', () => {
         const client = await Server.for(url)
         const result = await client.consider(fakeOrder)
         expect(result).to.equal(true)
-        mockServer.resetInitOptions()
       }
     )
 
@@ -321,7 +322,6 @@ describe.only('WebSocketServer', () => {
       expect(e).to.equal('Server did not call initialize in time')
     }
     fakeTimers.restore()
-    mockServer.resetInitOptions()
   })
 
   it('should correctly indicate support for protocol versions', async () => {
@@ -329,6 +329,8 @@ describe.only('WebSocketServer', () => {
     // and minor and patch versions are the same or greater than requried
     mockServer.initOptions = { lastLook: '1.2.3' }
     const client = await Server.for(url)
+    expect(client.supportsProtocol('last-look')).to.be.true
+    expect(client.supportsProtocol('request-for-quote')).to.be.false
     expect(client.supportsProtocol('last-look', '0.9.1')).to.be.false
     expect(client.supportsProtocol('last-look', '1.0.0')).to.be.true
     expect(client.supportsProtocol('last-look', '1.1.1')).to.be.true
@@ -336,6 +338,80 @@ describe.only('WebSocketServer', () => {
     expect(client.supportsProtocol('last-look', '1.2.4')).to.be.false
     expect(client.supportsProtocol('last-look', '1.3.0')).to.be.false
     expect(client.supportsProtocol('last-look', '2.2.3')).to.be.false
+  })
+
+  it('should reject when calling a method from an unsupported protocol', async () => {
+    const client = await Server.for(url)
+    try {
+      await client.getMaxQuote('', '')
+      throw new Error('expected unsupported getMaxQuote method to reject')
+    } catch (e) {
+      expect(e.message).to.match(/support/)
+    }
+  })
+
+  it('should respond with an error if initialize is called with bad params', async () => {
+    mockServer.initOptions = null
+    const responseReceived = new Promise<void>((resolve) => {
+      const onInitializeResponse = (socket, data) => {
+        // @ts-ignore
+        expect(data).to.be.a.JSONRpcError('abc', {
+          code: JsonRpcErrorCodes.INVALID_PARAMS,
+          message: 'Invalid params',
+        })
+        resolve()
+      }
+      mockServer.setNextMessageCallback(onInitializeResponse)
+    })
+    mockServer.on('connection', (socket) => {
+      socket.send(
+        JSON.stringify(createRequest('initialize', [{ bad: 'params' }], 'abc'))
+      )
+    })
+    Server.for(url).catch(() => {
+      /* this is expected, server won't init */
+    })
+
+    await responseReceived
+  })
+
+  it('should respond with an error if pricing is called with bad params', async () => {
+    await Server.for(url)
+    const initResponseReceived = new Promise<void>((resolve) => {
+      mockServer.setNextMessageCallback(() => resolve())
+    })
+    await initResponseReceived
+    const responseReceived = new Promise<void>((resolve) => {
+      const onPricingReponse = (socket, data) => {
+        // @ts-ignore
+        expect(data).to.be.a.JSONRpcError('abc', {
+          code: JsonRpcErrorCodes.INVALID_PARAMS,
+          message: 'Invalid params',
+        })
+        resolve()
+      }
+      mockServer.setNextMessageCallback(onPricingReponse)
+    })
+
+    mockServer.emit(
+      'message',
+      JSON.stringify(
+        createRequest('updatePricing', [{ bad: 'pricing' }], 'abc')
+      )
+    )
+
+    await responseReceived
+  })
+
+  it('should return the correct sender wallet', async () => {
+    mockServer.initOptions = {
+      lastLook: '1.2.3',
+      params: {
+        senderWallet: '0xmySender',
+      },
+    }
+    const client = await Server.for(url)
+    expect(client.getSenderWallet()).to.equal('0xmySender')
   })
 
   afterEach(() => {

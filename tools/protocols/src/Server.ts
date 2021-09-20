@@ -3,7 +3,11 @@ import * as url from 'url'
 import { ethers } from 'ethers'
 import { isBrowser } from 'browser-or-node'
 import { Client as HttpClient } from 'jayson'
-import { JsonRpcWebsocket, JsonRpcError } from 'jsonrpc-client-websocket'
+import {
+  JsonRpcWebsocket,
+  JsonRpcError,
+  JsonRpcErrorCodes,
+} from 'jsonrpc-client-websocket'
 
 import { REQUEST_TIMEOUT } from '@airswap/constants'
 import { parseUrl, flattenObject, isValidQuote } from '@airswap/utils'
@@ -49,6 +53,7 @@ export class Server extends EventEmitter {
   private httpClient: HttpClient
   private webSocketClient: JsonRpcWebsocket
   private senderServer: string
+  private senderWallet: string
   public transportProtocol: 'websockets' | 'http'
 
   public constructor(
@@ -131,8 +136,8 @@ export class Server extends EventEmitter {
         }, REQUEST_TIMEOUT)
 
         this.webSocketClient.on('initialize', (message) => {
-          this.isInitialized = true
           this.initialize(message)
+          this.isInitialized = true
           resolve(this.supportedProtocols)
           return true
         })
@@ -251,6 +256,7 @@ export class Server extends EventEmitter {
   // *** END RFQ METHODS *** //
 
   private initialize(supportedProtocols: SupportedProtocolInfo[]) {
+    this.validateInitializeParams(supportedProtocols)
     this.supportedProtocols = supportedProtocols
     const lastLookSupport = supportedProtocols.find(
       (protocol) => protocol.name === 'last-look'
@@ -259,6 +265,9 @@ export class Server extends EventEmitter {
       this.senderServer = lastLookSupport.params.senderServer
       // Prepare an http client for consider calls.
       this._initHTTPClient(this.senderServer, true)
+    }
+    if (lastLookSupport?.params?.senderWallet) {
+      this.senderWallet = lastLookSupport.params.senderWallet
     }
   }
 
@@ -286,8 +295,14 @@ export class Server extends EventEmitter {
   }
 
   private updatePricing(newPricing: Pricing[]) {
+    this.validateUpdatePricingParams(newPricing)
     this.emit('pricing', newPricing)
     return true
+  }
+
+  public getSenderWallet(): string {
+    this.requireLastLookSupport()
+    return this.senderWallet
   }
 
   public async consider(order: LightOrder) {
@@ -296,8 +311,10 @@ export class Server extends EventEmitter {
   }
 
   public disconnect() {
-    this.webSocketClient.close()
-    this.removeAllListeners()
+    if (this.webSocketClient) {
+      this.webSocketClient.close()
+      this.removeAllListeners()
+    }
   }
   // *** END LAST LOOK METHODS *** //
 
@@ -339,6 +356,41 @@ export class Server extends EventEmitter {
       }
     }
     return errors
+  }
+
+  private throwInvalidParams() {
+    throw {
+      code: JsonRpcErrorCodes.INVALID_PARAMS,
+      message: 'Invalid params',
+    }
+  }
+
+  private validateInitializeParams(params: any): void {
+    let valid = true
+    if (!Array.isArray(params)) valid = false
+    if (
+      valid &&
+      !params.every((protocolInfo) => protocolInfo.version && protocolInfo.name)
+    )
+      valid = false
+    if (!valid) this.throwInvalidParams()
+  }
+
+  private validateUpdatePricingParams(params: any): void {
+    let valid = true
+    if (!Array.isArray(params)) valid = false
+    if (
+      valid &&
+      !params.every(
+        (pricing) =>
+          pricing.baseToken &&
+          pricing.quoteToken &&
+          Array.isArray(pricing.bid) &&
+          Array.isArray(pricing.ask)
+      )
+    )
+      valid = false
+    if (!valid) this.throwInvalidParams()
   }
 
   private httpCall<T>(
