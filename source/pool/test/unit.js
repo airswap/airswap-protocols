@@ -41,10 +41,9 @@ describe('Pool Unit Tests', () => {
   before(async () => {
     ;[deployer, alice, bob, carol] = await ethers.getSigners()
 
-    pool = await (await ethers.getContractFactory('Pool')).deploy(
-      CLAIM_SCALE,
-      CLAIM_MAX
-    )
+    pool = await (
+      await ethers.getContractFactory('Pool')
+    ).deploy(CLAIM_SCALE, CLAIM_MAX)
     await pool.deployed()
 
     tree = generateTreeFromData({

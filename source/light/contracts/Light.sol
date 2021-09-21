@@ -215,17 +215,16 @@ contract Light is ILight, Ownable {
     // Ensure the expiry is not passed
     require(expiry > block.timestamp, "EXPIRY_PASSED");
 
-    bytes32 hashed =
-      _getOrderHash(
-        nonce,
-        expiry,
-        signerWallet,
-        signerToken,
-        signerAmount,
-        msg.sender,
-        senderToken,
-        senderAmount
-      );
+    bytes32 hashed = _getOrderHash(
+      nonce,
+      expiry,
+      signerWallet,
+      signerToken,
+      signerAmount,
+      msg.sender,
+      senderToken,
+      senderAmount
+    );
 
     // Recover the signatory from the hash and signature
     address signatory = _getSignatory(hashed, v, r, s);
@@ -370,8 +369,9 @@ contract Light is ILight, Ownable {
     bytes32 r,
     bytes32 s
   ) internal view returns (address) {
-    bytes32 digest =
-      keccak256(abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR, hash));
+    bytes32 digest = keccak256(
+      abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR, hash)
+    );
     address signatory = ecrecover(digest, v, r, s);
     // Ensure the signatory is not null
     require(signatory != address(0), "INVALID_SIG");

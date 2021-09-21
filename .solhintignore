@@ -1,5 +1,2 @@
-Migrations.sol
-**/node_modules/
-./source/tokens/
-flatten/
+node_modules/
 build/
