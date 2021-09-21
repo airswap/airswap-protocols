@@ -1,26 +1,29 @@
 /* eslint-disable no-console */
-require('dotenv').config()
-const hre = require('hardhat')
-const { ethers } = hre
+const { ethers, run } = require('hardhat')
+const lightDeploys = require('@airswap/light/deploys.js')
+const { chainNames } = require('@airswap/constants')
 
 async function main() {
-  await hre.run('compile')
+  await run('compile')
   const [deployer] = await ethers.getSigners()
-  console.log(`Deployer Address: ${deployer.address}`)
+  console.log(`Deployer: ${deployer.address}`)
 
-  // Deploy
-  const lightAddress = '0xc549a5c701cb6e6cbc091007a80c089c49595468'
-  const ValidatorFactory = await ethers.getContractFactory('Validator')
-  const Validator = await ValidatorFactory.deploy(lightAddress)
-  await Validator.deployed()
-  console.log(`Validator Address: ${Validator.address}`)
+  const chainId = await deployer.getChainId()
+  const lightAddress = lightDeploys[chainId]
+
+  // Deploy Validator
+  console.log(`Deploying on ${chainNames[chainId].toUpperCase()}`)
+  const validatorFactory = await ethers.getContractFactory('Validator')
+  const validator = await validatorFactory.deploy(lightAddress)
+  await validator.deployed()
+  console.log(`New Validator: ${validator.address}`)
 
   console.log('Waiting to verify...')
   await new Promise((r) => setTimeout(r, 60000))
 
   console.log('Verifying...')
-  await hre.run('verify:verify', {
-    address: Validator.address,
+  await run('verify:verify', {
+    address: validator.address,
     constructorArguments: [lightAddress],
   })
 }

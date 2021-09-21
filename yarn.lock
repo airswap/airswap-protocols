@@ -2,6 +2,11 @@
 # yarn lockfile v1
 
 
+"@airswap/constants@0.4.1":
+  version "0.4.1"
+  resolved "https://registry.yarnpkg.com/@airswap/constants/-/constants-0.4.1.tgz#1664b9bb752ac9278edc16de46b5e25d8f20f04c"
+  integrity sha512-llPEcAZRizBejMBP2ZVlnIuK0uhLRL0VgqQYaBquPx2O+CXjWRkQNQVOZ3i09PW0SDTTV+WkwnQy0FAE8OBHVw==
+
 "@airswap/light@2.2.2":
   version "2.2.2"
   resolved "https://registry.yarnpkg.com/@airswap/light/-/light-2.2.2.tgz#9b2c3cd5d612172e03728a019835573067e3848d"
@@ -29,6 +34,13 @@
   integrity sha512-mQSoNy0GCQbuPdaB8HFCn/5rCMduGVE82f5Ub/0CU/bbPJVznJj6KnZnOlfPS/NYmqQOGmyrVJRyqPginTBWfg==
   dependencies:
     openzeppelin-solidity "2.4"
+
+"@airswap/validator@1.2.8":
+  version "1.2.8"
+  resolved "https://registry.yarnpkg.com/@airswap/validator/-/validator-1.2.8.tgz#045395bd9fe1ddeb2e188d0796b32dc609e29d3c"
+  integrity sha512-aKWi1mW8sxpWxcxKjHzDlF4peujMGJiJw+UPn4y2g6AM06BtBXMfxI7AMbATH0AuP2gxI1jT5YuH5xoK1ouI9w==
+  dependencies:
+    "@openzeppelin/contracts" "^4.3.2"
 
 "@babel/code-frame@^7.0.0":
   version "7.14.5"
