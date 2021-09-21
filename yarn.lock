@@ -2,34 +2,6 @@
 # yarn lockfile v1
 
 
-"@airswap/light@2.2.2":
-  version "2.2.2"
-  resolved "https://registry.yarnpkg.com/@airswap/light/-/light-2.2.2.tgz#9b2c3cd5d612172e03728a019835573067e3848d"
-  integrity sha512-HldeXFfhnMFekhybxtrtPpQWdtJKTGZpdUXj13S92v7DtvspOHqHaAxbHynTPTGkqYY5MCEX/FzYwajmg6PJSQ==
-  dependencies:
-    "@airswap/transfers" "1.1.4"
-    "@airswap/types" "3.5.17"
-    "@openzeppelin/contracts" "^3.3.0"
-
-"@airswap/registry@4.8.1":
-  version "4.8.1"
-  resolved "https://registry.yarnpkg.com/@airswap/registry/-/registry-4.8.1.tgz#aa2aee29d50382dbf0b6473f96c47102c3640baa"
-  integrity sha512-+oQyca5seNtDbcOvBcKAcVbInf3b836E8xBrzUbuh7cCfkayfq0jqi+yBABSWmdYrgKRTL3ZG2mJFbDg1NpCgg==
-
-"@airswap/transfers@1.1.4":
-  version "1.1.4"
-  resolved "https://registry.yarnpkg.com/@airswap/transfers/-/transfers-1.1.4.tgz#ef98a8b265bafe8f3daf8431808233cd38579304"
-  integrity sha512-20q0u+V2Y8QDOzPXfF7Fuos0J1pyzcgS7csH3+mDkob76uQ7oGcLauesganN2BQ+at9JHwfer8yUIfEETYD8bg==
-  dependencies:
-    openzeppelin-solidity "2.4"
-
-"@airswap/types@3.5.17":
-  version "3.5.17"
-  resolved "https://registry.yarnpkg.com/@airswap/types/-/types-3.5.17.tgz#d2028efe88f83c32ec6346674a1078093caaf3ca"
-  integrity sha512-mQSoNy0GCQbuPdaB8HFCn/5rCMduGVE82f5Ub/0CU/bbPJVznJj6KnZnOlfPS/NYmqQOGmyrVJRyqPginTBWfg==
-  dependencies:
-    openzeppelin-solidity "2.4"
-
 "@babel/code-frame@^7.0.0":
   version "7.14.5"
   resolved "https://registry.yarnpkg.com/@babel/code-frame/-/code-frame-7.14.5.tgz#23b08d740e83f49c5e59945fbf1b43e80bbf4edb"
@@ -1499,11 +1471,6 @@
   integrity sha512-AgajmAJh7LhStgaEaNoY1N7znst2q07CKZVdnVB/V4tmitMbk+qijmD0IkkSKulXE5RVLbJjQikJF9+XLqhsVA==
   dependencies:
     "@octokit/openapi-types" "^10.1.5"
-
-"@openzeppelin/contracts@^3.3.0":
-  version "3.4.2"
-  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-3.4.2.tgz#d81f786fda2871d1eb8a8c5a73e455753ba53527"
-  integrity sha512-z0zMCjyhhp4y7XKAcDAi3Vgms4T2PstwBdahiO0+9NaGICQKjynK3wduSRplTgk4LXmoO1yfDGO5RbjKYxtuxA==
 
 "@openzeppelin/contracts@^4.3.1":
   version "4.3.1"
@@ -9766,11 +9733,6 @@ open@^7.4.2:
   dependencies:
     is-docker "^2.0.0"
     is-wsl "^2.1.1"
-
-openzeppelin-solidity@2.4:
-  version "2.4.0"
-  resolved "https://registry.yarnpkg.com/openzeppelin-solidity/-/openzeppelin-solidity-2.4.0.tgz#5f0a7b30571c45493449166e57b947203415349d"
-  integrity sha512-533gc5jkspxW5YT0qJo02Za5q1LHwXK9CJCc48jNj/22ncNM/3M/3JfWLqfpB90uqLwOKOovpl0JfaMQTR+gXQ==
 
 optimist@~0.3.5:
   version "0.3.7"

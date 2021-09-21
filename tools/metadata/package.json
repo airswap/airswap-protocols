@@ -26,7 +26,7 @@
     "test:unit": "yarn compile && mocha -r ts-node/register test/**/*.ts"
   },
   "dependencies": {
-    "@airswap/constants": "0.4.1",
+    "@airswap/constants": "0.4.2",
     "@airswap/types": "3.6.1",
     "@uniswap/token-lists": "^1.0.0-beta.24",
     "axios": "^0.21.3",

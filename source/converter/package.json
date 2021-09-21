@@ -1,6 +1,6 @@
 {
   "name": "@airswap/converter",
-  "version": "0.0.0",
+  "version": "1.1.0",
   "description": "Converts and distributes token balances to recipients",
   "contributors": [
     "Martin Sterlicchi",
@@ -12,6 +12,10 @@
     "type": "git",
     "url": "https://github.com/airswap/airswap-protocols"
   },
+  "files": [
+    "/build",
+    "deploys.js"
+  ],
   "scripts": {
     "clean": "hardhat clean",
     "compile": "hardhat compile",
