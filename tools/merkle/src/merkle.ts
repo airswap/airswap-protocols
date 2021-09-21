@@ -10,10 +10,10 @@ export class MerkleTree {
   public layers: any
   public id: any
 
-  public constructor(elements) {
+  public constructor(elements: Array<string>) {
     this.elements = elements
-      .filter(el => el)
-      .map(el => Buffer.from(hexToBytes(el)))
+      .filter((el) => el)
+      .map((el) => Buffer.from(hexToBytes(el)))
 
     // Sort elements
     this.elements.sort(Buffer.compare)
@@ -24,7 +24,7 @@ export class MerkleTree {
     this.layers = this.getLayers(this.elements)
   }
 
-  public getLayers(elements) {
+  public getLayers(elements: Array<string>): Array<Array<string>> {
     if (elements.length === 0) {
       return [['']]
     }
@@ -40,7 +40,7 @@ export class MerkleTree {
     return layers
   }
 
-  public getNextLayer(elements) {
+  public getNextLayer(elements: Array<Buffer>): Array<string> {
     return elements.reduce((layer, el, idx, arr) => {
       if (idx % 2 === 0) {
         // Hash the current element with its pair element
@@ -51,7 +51,7 @@ export class MerkleTree {
     }, [])
   }
 
-  public combinedHash(first, second) {
+  public combinedHash(first: Buffer, second: Buffer): Buffer {
     if (!first) {
       return second
     }
@@ -62,15 +62,15 @@ export class MerkleTree {
     return keccak256(this.sortAndConcat(first, second))
   }
 
-  public getRoot() {
+  public getRoot(): Buffer {
     return this.layers[this.layers.length - 1][0]
   }
 
-  public getHexRoot() {
+  public getHexRoot(): string {
     return bufferToHex(this.getRoot())
   }
 
-  public getProof(el) {
+  public getProof(el: Buffer): Array<Buffer> {
     let idx = this.bufIndexOf(el, this.elements)
 
     if (idx === -1) {
@@ -91,7 +91,7 @@ export class MerkleTree {
   }
 
   // external call - convert to buffer
-  public getHexProof(_el) {
+  public getHexProof(_el: string): Array<string> {
     const el = Buffer.from(hexToBytes(_el))
 
     const proof = this.getProof(el)
@@ -99,7 +99,7 @@ export class MerkleTree {
     return this.bufArrToHexArr(proof)
   }
 
-  public getPairElement(idx, layer) {
+  public getPairElement(idx: number, layer: string): string {
     const pairIdx = idx % 2 === 0 ? idx + 1 : idx - 1
 
     if (pairIdx < layer.length) {
@@ -109,12 +109,12 @@ export class MerkleTree {
     }
   }
 
-  public bufIndexOf(el, arr) {
+  public bufIndexOf(el: Buffer | string, arr: Array<string>): number {
     let hash
 
     // Convert element to 32 byte hash if it is not one already
     if (el.length !== 32 || !Buffer.isBuffer(el)) {
-      hash = keccakFromString(el)
+      hash = keccakFromString(String(el))
     } else {
       hash = el
     }
@@ -128,21 +128,21 @@ export class MerkleTree {
     return -1
   }
 
-  public bufDedup(elements) {
+  public bufDedup(elements: Array<Buffer>): Array<Buffer> {
     return elements.filter((el, idx) => {
       return idx === 0 || !elements[idx - 1].equals(el)
     })
   }
 
-  public bufArrToHexArr(arr) {
-    if (arr.some(el => !Buffer.isBuffer(el))) {
+  public bufArrToHexArr(arr: Array<Buffer>): Array<string> {
+    if (arr.some((el) => !Buffer.isBuffer(el))) {
       throw new Error('Array is not an array of buffers')
     }
 
-    return arr.map(el => '0x' + el.toString('hex'))
+    return arr.map((el) => '0x' + el.toString('hex'))
   }
 
-  public sortAndConcat(...args) {
+  public sortAndConcat(...args: Array<any>): Buffer {
     return Buffer.concat([...args].sort(Buffer.compare))
   }
 }

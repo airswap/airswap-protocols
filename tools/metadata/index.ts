@@ -10,7 +10,7 @@ export async function fetchTokens(
   const errors = []
   let tokens = []
   const promises = await Promise.allSettled(
-    known.map(async url => {
+    known.map(async (url) => {
       try {
         const res = await axios.get(url)
         return res.data.tokens
@@ -20,7 +20,7 @@ export async function fetchTokens(
     })
   )
   tokens.push(...defaults)
-  promises.forEach(promise => {
+  promises.forEach((promise) => {
     if (promise.status === 'fulfilled') {
       if (promise.value.message) {
         errors.push(promise.value)
@@ -31,7 +31,7 @@ export async function fetchTokens(
       errors.push(promise.reason.message)
     }
   })
-  tokens = tokens.filter(token => {
+  tokens = tokens.filter((token) => {
     token.address = token.address.toLowerCase()
     return token.chainId === chainId
   })
@@ -53,7 +53,7 @@ export async function scrapeToken(
     address: address.toLowerCase(),
     name: tokenName,
     symbol: tokenSymbol,
-    decimals: tokenDecimals,
+    decimals: Number(tokenDecimals),
   }
 }
 
@@ -61,7 +61,7 @@ export function findTokenByAddress(
   address: string,
   tokens: TokenInfo[]
 ): TokenInfo {
-  return tokens.find(token => {
+  return tokens.find((token) => {
     return token.address === address
   })
 }
@@ -70,7 +70,7 @@ export function findTokensBySymbol(
   symbol: string,
   tokens: TokenInfo[]
 ): TokenInfo[] {
-  return tokens.filter(token => {
+  return tokens.filter((token) => {
     return token.symbol === symbol
   })
 }
@@ -79,7 +79,7 @@ export function firstTokenBySymbol(
   symbol: string,
   tokens: TokenInfo[]
 ): TokenInfo {
-  return tokens.find(token => {
+  return tokens.find((token) => {
     return token.symbol === symbol
   })
 }

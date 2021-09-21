@@ -1,7 +1,7 @@
 {
   "name": "@airswap/merkle",
   "version": "0.0.3",
-  "description": "Merkle tree tools adapted from OpenZeppelin",
+  "description": "Merkle Tree Tools Adapted from OpenZeppelin",
   "contributors": [
     "Don Mosites"
   ],

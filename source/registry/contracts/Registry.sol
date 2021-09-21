@@ -106,8 +106,9 @@ contract Registry {
    * @notice Remove all tokens supported by the caller
    */
   function removeAllTokens() external {
-    EnumerableSet.AddressSet storage supportedTokenList =
-      supportedTokens[msg.sender];
+    EnumerableSet.AddressSet storage supportedTokenList = supportedTokens[
+      msg.sender
+    ];
     uint256 length = supportedTokenList.length();
     require(length > 0, "NO_TOKENS_TO_REMOVE");
     address[] memory tokenList = new address[](length);

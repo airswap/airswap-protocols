@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { ethers } from 'ethers'
 import * as url from 'url'
 
@@ -99,11 +100,15 @@ export function parseUrl(locator: string): url.UrlWithStringQuery {
   return url.parse(locator)
 }
 
-export function getEtherscanURL(chainId: number, hash: string) {
+export function getEtherscanURL(chainId: number, hash: string): string {
   return `https://${etherscanDomains[chainId]}/tx/${hash}`
 }
 
-export function flattenObject(obj: any, propName = '', result = {}) {
+export function flattenObject(
+  obj: any,
+  propName = '',
+  result = {}
+): { [id: string]: string } {
   if (Object(obj) !== obj) {
     result[propName] = obj
   } else {

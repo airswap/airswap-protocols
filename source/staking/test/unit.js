@@ -259,9 +259,7 @@ describe('Staking Unit', () => {
       const product = BN.from(120).mul(diff)
       const quotient = product.div(BN.from(220))
       // + 1 because number rounds up to nearest whole
-      const sum = BN.from(block0.timestamp)
-        .add(BN.from(quotient))
-        .add(1)
+      const sum = BN.from(block0.timestamp).add(BN.from(quotient)).add(1)
       expect(userStakes[0].timestamp).to.equal(sum)
     })
 
