@@ -23,6 +23,8 @@ export function calculateCostFromLevels(
       `Requested amount (${totalAmount.toFixed()}) exceeds maximum available (${totalAvailable.toFixed()}).`
     )
   }
+  // Steps through levels and multiplies each incremental amount by the level price
+  // Levels takes the form of [[ level, price ], ... ] as in [[ '100', '0.5' ], ... ]
   for (let i = 0; i < levels.length; i++) {
     let incrementalAmount
     if (totalAmount.gt(new BigNumber(levels[i][0]))) {
