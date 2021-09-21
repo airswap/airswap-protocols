@@ -1,15 +1,18 @@
 /* eslint-disable no-console */
-require('dotenv').config()
-const hre = require('hardhat')
-const { ethers } = hre
+const { ethers, run } = require('hardhat')
+const { chainNames, stakingTokenAddresses } = require('@airswap/constants')
 
 async function main() {
-  await hre.run('compile')
+  await run('compile')
   const [deployer] = await ethers.getSigners()
-  console.log(`Deployer Address: ${deployer.address}`)
-  const stakingToken = '0x27054b13b1b798b345b591a4d22e6562d47ea75a'
+  console.log(`Deployer: ${deployer.address}`)
+
+  const chainId = await deployer.getChainId()
+  const stakingToken = stakingTokenAddresses[chainId]
   const obligationCost = 1000000000
   const tokenCost = 1000000
+
+  console.log(`Deploying on ${chainNames[chainId].toUpperCase()}`)
   const registryFactory = await ethers.getContractFactory('Registry')
   const registryContract = await registryFactory.deploy(
     stakingToken,
@@ -17,13 +20,13 @@ async function main() {
     tokenCost
   )
   await registryContract.deployed()
-  console.log(`Registry Address: ${registryContract.address}`)
+  console.log(`New Registry: ${registryContract.address}`)
 
   console.log('Waiting to verify...')
-  await new Promise(r => setTimeout(r, 60000))
+  await new Promise((r) => setTimeout(r, 60000))
 
   console.log('Verifying...')
-  await hre.run('verify:verify', {
+  await run('verify:verify', {
     address: registryContract.address,
     constructorArguments: [stakingToken, obligationCost, tokenCost],
   })
@@ -31,7 +34,7 @@ async function main() {
 
 main()
   .then(() => process.exit(0))
-  .catch(error => {
+  .catch((error) => {
     console.error(error)
     process.exit(1)
   })

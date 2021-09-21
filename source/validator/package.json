@@ -1,6 +1,6 @@
 {
   "name": "@airswap/validator",
-  "version": "1.2.8",
+  "version": "2.3.1",
   "description": "Validate AirSwap orders prior to submitting transactions",
   "contributors": [
     "Hassan Malik <hbmalik88@gmail.com>"
@@ -10,12 +10,18 @@
     "type": "git",
     "url": "https://github.com/airswap/airswap-protocols"
   },
+  "files": [
+    "/build",
+    "deploys.js"
+  ],
   "scripts": {
     "clean": "hardhat clean",
     "compile": "hardhat compile",
     "coverage": "hardhat coverage",
     "test": "hardhat test",
-    "test:unit": "hardhat test ./test/unit.js"
+    "test:unit": "hardhat test ./test/unit.js",
+    "deploy:rinkeby": "hardhat run --network rinkeby ./scripts/deploy.js",
+    "deploy:mainnet": "hardhat run --network mainnet ./scripts/deploy.js"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",

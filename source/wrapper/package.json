@@ -1,6 +1,6 @@
 {
   "name": "@airswap/wrapper",
-  "version": "0.0.1",
+  "version": "1.1.1",
   "description": "Automatically wrap and unwrap ether",
   "contributors": [
     "Don Mosites"
@@ -10,15 +10,21 @@
     "type": "git",
     "url": "https://github.com/airswap/airswap-protocols"
   },
+  "files": [
+    "/build",
+    "deploys.js"
+  ],
   "scripts": {
     "clean": "hardhat clean",
     "compile": "hardhat compile",
     "coverage": "hardhat coverage",
     "test": "hardhat test",
-    "test:unit": "hardhat test ./test/*unit.js"
+    "test:unit": "hardhat test ./test/unit.js",
+    "deploy:rinkeby": "hardhat run --network rinkeby ./scripts/deploy.js",
+    "deploy:mainnet": "hardhat run --network mainnet ./scripts/deploy.js"
   },
   "devDependencies": {
-    "@airswap/constants": "0.4.1",
+    "@airswap/constants": "0.4.2",
     "@airswap/utils": "0.4.6",
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-etherscan": "^2.1.6",

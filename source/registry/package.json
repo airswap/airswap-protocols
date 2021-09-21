@@ -1,6 +1,6 @@
 {
   "name": "@airswap/registry",
-  "version": "4.8.2",
+  "version": "4.8.3",
   "description": "Registry of AirSwap server URLs",
   "contributors": [
     "Ethan Wessel",
@@ -11,6 +11,10 @@
     "type": "git",
     "url": "https://github.com/airswap/airswap-protocols"
   },
+  "files": [
+    "/build",
+    "deploys.js"
+  ],
   "scripts": {
     "clean": "hardhat clean",
     "compile": "hardhat compile",
@@ -21,7 +25,7 @@
     "deploy:mainnet": "hardhat run --network mainnet ./scripts/deploy.js"
   },
   "devDependencies": {
-    "@airswap/constants": "0.4.1",
+    "@airswap/constants": "0.4.2",
     "@airswap/utils": "0.4.6",
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-etherscan": "^2.1.6",
