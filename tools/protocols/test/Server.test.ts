@@ -344,7 +344,7 @@ describe('WebSocketServer', () => {
     const client = await Server.for(url)
     try {
       await client.getMaxQuote('', '')
-      throw new Error('expected unsupported getMaxQuote method to reject')
+      throw new Error('expected getMaxQuote method to reject')
     } catch (e) {
       expect(e.message).to.match(/support/)
     }
