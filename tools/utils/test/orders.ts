@@ -1,4 +1,4 @@
-import { expect } from 'chai'
+import { assert, expect } from 'chai'
 import { ethers } from 'ethers'
 import { ADDRESS_ZERO, SECONDS_IN_DAY, tokenKinds } from '@airswap/constants'
 
@@ -7,6 +7,7 @@ import {
   signOrder,
   isValidOrder,
   isValidLightOrder,
+  calculateCostFromLevels,
   getBestByLowestSenderAmount,
   getBestByHighestSignerAmount,
 } from '../index'
@@ -114,5 +115,27 @@ describe('Orders', async () => {
     }
     const best = getBestByHighestSignerAmount(orders)
     expect(best.signer.amount).to.equal(String(highestAmount))
+  })
+
+  const levels = [
+    ['250', '0.5'],
+    ['500', '0.6'],
+    ['750', '0.7'],
+  ]
+
+  it('Calculates cost from levels', async () => {
+    expect(calculateCostFromLevels('200', levels)).to.equal('100')
+    expect(calculateCostFromLevels('250', levels)).to.equal('125')
+    expect(calculateCostFromLevels('255', levels)).to.equal('128')
+    expect(calculateCostFromLevels('600', levels)).to.equal('345')
+  })
+
+  it('Throws for amount over max', async () => {
+    try {
+      calculateCostFromLevels('755', levels)
+      assert(false)
+    } catch (e) {
+      assert(true)
+    }
   })
 })

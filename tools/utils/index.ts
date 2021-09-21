@@ -1,5 +1,6 @@
 import { ethers } from 'ethers'
 import * as url from 'url'
+import BigNumber from 'bignumber.js'
 
 import { etherscanDomains } from '@airswap/constants'
 import { Quote, Order } from '@airswap/types'
@@ -7,6 +8,36 @@ import { Quote, Order } from '@airswap/types'
 export * from './src/hashes'
 export * from './src/orders'
 export * from './src/quotes'
+
+export function calculateCostFromLevels(
+  amount: string,
+  levels: Array<Array<string>>
+) {
+  const totalAmount = new BigNumber(amount)
+  const totalAvailable = new BigNumber(levels[levels.length - 1][0])
+  let totalCost = new BigNumber(0)
+  let previousLevel = new BigNumber(0)
+
+  if (totalAmount.gt(totalAvailable)) {
+    throw new Error(
+      `Requested amount (${totalAmount.toFixed()}) exceeds maximum available (${totalAvailable.toFixed()}).`
+    )
+  }
+  for (let i = 0; i < levels.length; i++) {
+    let incrementalAmount
+    if (totalAmount.gt(new BigNumber(levels[i][0]))) {
+      incrementalAmount = new BigNumber(levels[i][0]).minus(previousLevel)
+    } else {
+      incrementalAmount = new BigNumber(totalAmount).minus(previousLevel)
+    }
+    totalCost = totalCost.plus(
+      new BigNumber(incrementalAmount).multipliedBy(levels[i][1])
+    )
+    previousLevel = new BigNumber(levels[i][0])
+    if (totalAmount.lt(previousLevel)) break
+  }
+  return totalCost.decimalPlaces(6).toFixed()
+}
 
 function getLowest(objects: Array<Quote> | Array<Order>, key: string): any {
   let best: any
