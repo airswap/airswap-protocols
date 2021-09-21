@@ -3,7 +3,7 @@
 Merkle Tree Utilities
 
 [![Discord](https://img.shields.io/discord/590643190281928738.svg)](https://discord.gg/ecQbV7H)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/MIT)
+[![License](https://img.shields.io/badge/License-MIT-blue)](https://opensource.org/licenses/MIT)
 ![Twitter Follow](https://img.shields.io/twitter/follow/airswap?style=social)
 
 ## Resources

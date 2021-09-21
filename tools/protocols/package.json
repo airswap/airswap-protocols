@@ -1,6 +1,6 @@
 {
   "name": "@airswap/protocols",
-  "version": "0.5.11",
+  "version": "0.5.12",
   "description": "Protocol Libraries for AirSwap Developers",
   "contributors": [
     "Don Mosites",
