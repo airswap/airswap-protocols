@@ -1,6 +1,8 @@
 const { expect } = require('chai')
 const { ethers } = require('hardhat')
 
+const UniswapV2Router02Contract = require('@uniswap/v2-periphery/build/IUniswapV2Router02.json')
+
 describe('Converter Integration Tests', () => {
   let snapshotId
   let deployer
@@ -52,14 +54,7 @@ describe('Converter Integration Tests', () => {
 
     await swapToToken.mint(deployer.address, 1000000)
 
-    const UniswapV2Router02Contract = await ethers.getContractFactory(
-      'UniswapV2Router02'
-    )
-    uniswapV2Router02Contract = await UniswapV2Router02Contract.deploy(
-      '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f',
-      '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
-    )
-    await uniswapV2Router02Contract.deployed()
+    uniswapV2Router02Contract = new ethers.Contract('0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D', UniswapV2Router02Contract.abi, deployer)
 
     testAToken.approve(uniswapV2Router02Contract.address, 1000000)
     await testBToken.approve(uniswapV2Router02Contract.address, 1000000)
