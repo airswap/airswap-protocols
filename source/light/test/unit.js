@@ -65,10 +65,9 @@ describe('Light Unit Tests', () => {
     await signerToken.mock.transferFrom.returns(true)
     await senderToken.mock.transferFrom.returns(true)
 
-    light = await (await ethers.getContractFactory('Light')).deploy(
-      feeWallet.address,
-      SIGNER_FEE
-    )
+    light = await (
+      await ethers.getContractFactory('Light')
+    ).deploy(feeWallet.address, SIGNER_FEE)
     await light.deployed()
   })
 
@@ -82,19 +81,17 @@ describe('Light Unit Tests', () => {
 
     it('test invalid feeWallet', async () => {
       await expect(
-        (await ethers.getContractFactory('Light')).deploy(
-          ADDRESS_ZERO,
-          SIGNER_FEE
-        )
+        (
+          await ethers.getContractFactory('Light')
+        ).deploy(ADDRESS_ZERO, SIGNER_FEE)
       ).to.be.revertedWith('INVALID_FEE_WALLET')
     })
 
     it('test invalid fee', async () => {
       await expect(
-        (await ethers.getContractFactory('Light')).deploy(
-          feeWallet.address,
-          100000000000
-        )
+        (
+          await ethers.getContractFactory('Light')
+        ).deploy(feeWallet.address, 100000000000)
       ).to.be.revertedWith('INVALID_FEE')
     })
   })

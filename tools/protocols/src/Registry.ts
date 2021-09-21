@@ -40,8 +40,8 @@ export class Registry {
     const signerTokenURLs = await this.contract.getURLsForToken(signerToken)
     const senderTokenURLs = await this.contract.getURLsForToken(senderToken)
     return signerTokenURLs
-      .filter(value => senderTokenURLs.includes(value))
-      .map(url => {
+      .filter((value) => senderTokenURLs.includes(value))
+      .map((url) => {
         return new Server(url, Light.getAddress(this.chainId))
       })
   }

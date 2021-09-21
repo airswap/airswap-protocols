@@ -30,13 +30,13 @@ export class Server {
             'Content-Type': 'application/json',
           },
         })
-          .then(res => {
+          .then((res) => {
             return res.text()
           })
-          .then(text => {
+          .then((text) => {
             callback(null, text)
           })
-          .catch(err => {
+          .catch((err) => {
             callback(err)
           })
       }, options)
@@ -164,8 +164,8 @@ export class Server {
   private generateRequest(
     method: string,
     params: Record<string, string>,
-    resolve: Function,
-    reject: Function
+    resolve: (x: any) => any,
+    reject: (x: any) => any
   ): JSONRPCRequest {
     params.swapContract = this.swapContract
     return this.client.request(

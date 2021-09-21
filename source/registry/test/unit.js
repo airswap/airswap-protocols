@@ -26,14 +26,8 @@ describe('Registry Unit', () => {
   })
 
   before(async () => {
-    ;[
-      deployer,
-      account1,
-      account2,
-      token1,
-      token2,
-      token3,
-    ] = await ethers.getSigners()
+    ;[deployer, account1, account2, token1, token2, token3] =
+      await ethers.getSigners()
     stakingToken = await deployMockContract(deployer, IERC20.abi)
     registryFactory = await ethers.getContractFactory('Registry')
     registry = await registryFactory.deploy(

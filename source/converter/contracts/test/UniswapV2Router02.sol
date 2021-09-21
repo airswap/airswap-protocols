@@ -44,13 +44,19 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
     if (IUniswapV2Factory(factory).getPair(tokenA, tokenB) == address(0)) {
       IUniswapV2Factory(factory).createPair(tokenA, tokenB);
     }
-    (uint256 reserveA, uint256 reserveB) =
-      UniswapV2Library.getReserves(factory, tokenA, tokenB);
+    (uint256 reserveA, uint256 reserveB) = UniswapV2Library.getReserves(
+      factory,
+      tokenA,
+      tokenB
+    );
     if (reserveA == 0 && reserveB == 0) {
       (amountA, amountB) = (amountADesired, amountBDesired);
     } else {
-      uint256 amountBOptimal =
-        UniswapV2Library.quote(amountADesired, reserveA, reserveB);
+      uint256 amountBOptimal = UniswapV2Library.quote(
+        amountADesired,
+        reserveA,
+        reserveB
+      );
       if (amountBOptimal <= amountBDesired) {
         require(
           amountBOptimal >= amountBMin,
@@ -58,8 +64,11 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
         );
         (amountA, amountB) = (amountADesired, amountBOptimal);
       } else {
-        uint256 amountAOptimal =
-          UniswapV2Library.quote(amountBDesired, reserveB, reserveA);
+        uint256 amountAOptimal = UniswapV2Library.quote(
+          amountBDesired,
+          reserveB,
+          reserveA
+        );
         assert(amountAOptimal <= amountADesired);
         require(
           amountAOptimal >= amountAMin,
@@ -335,12 +344,12 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
       (address input, address output) = (path[i], path[i + 1]);
       (address token0, ) = UniswapV2Library.sortTokens(input, output);
       uint256 amountOut = amounts[i + 1];
-      (uint256 amount0Out, uint256 amount1Out) =
-        input == token0 ? (uint256(0), amountOut) : (amountOut, uint256(0));
-      address to =
-        i < path.length - 2
-          ? UniswapV2Library.pairFor(factory, output, path[i + 2])
-          : _to;
+      (uint256 amount0Out, uint256 amount1Out) = input == token0
+        ? (uint256(0), amountOut)
+        : (amountOut, uint256(0));
+      address to = i < path.length - 2
+        ? UniswapV2Library.pairFor(factory, output, path[i + 2])
+        : _to;
       IUniswapV2Pair(UniswapV2Library.pairFor(factory, input, output)).swap(
         amount0Out,
         amount1Out,
@@ -531,15 +540,17 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
     for (uint256 i; i < path.length - 1; i++) {
       (address input, address output) = (path[i], path[i + 1]);
       (address token0, ) = UniswapV2Library.sortTokens(input, output);
-      IUniswapV2Pair pair =
-        IUniswapV2Pair(UniswapV2Library.pairFor(factory, input, output));
+      IUniswapV2Pair pair = IUniswapV2Pair(
+        UniswapV2Library.pairFor(factory, input, output)
+      );
       uint256 amountInput;
       uint256 amountOutput;
       {
         // scope to avoid stack too deep errors
         (uint256 reserve0, uint256 reserve1, ) = pair.getReserves();
-        (uint256 reserveInput, uint256 reserveOutput) =
-          input == token0 ? (reserve0, reserve1) : (reserve1, reserve0);
+        (uint256 reserveInput, uint256 reserveOutput) = input == token0
+          ? (reserve0, reserve1)
+          : (reserve1, reserve0);
         amountInput = IERC20(input).balanceOf(address(pair)).sub(reserveInput);
         amountOutput = UniswapV2Library.getAmountOut(
           amountInput,
@@ -547,14 +558,12 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
           reserveOutput
         );
       }
-      (uint256 amount0Out, uint256 amount1Out) =
-        input == token0
-          ? (uint256(0), amountOutput)
-          : (amountOutput, uint256(0));
-      address to =
-        i < path.length - 2
-          ? UniswapV2Library.pairFor(factory, output, path[i + 2])
-          : _to;
+      (uint256 amount0Out, uint256 amount1Out) = input == token0
+        ? (uint256(0), amountOutput)
+        : (amountOutput, uint256(0));
+      address to = i < path.length - 2
+        ? UniswapV2Library.pairFor(factory, output, path[i + 2])
+        : _to;
       pair.swap(amount0Out, amount1Out, to, new bytes(0));
     }
   }

@@ -2,7 +2,8 @@ import { ethers } from 'ethers'
 import { Quote, emptyParty } from '@airswap/types'
 import { lowerCaseAddresses } from '..'
 
-export function createQuote({ signer = {}, sender = {} }): Quote {
+// eslint-disable-next-line  @typescript-eslint/explicit-module-boundary-types
+export function createQuote({ signer = {}, sender = {} }: any): Quote {
   return lowerCaseAddresses({
     signer: { ...emptyParty, ...signer },
     sender: { ...emptyParty, ...sender },

@@ -1,18 +1,12 @@
 import { expect } from 'chai'
 import { ethers } from 'ethers'
-import { ADDRESS_ZERO, SECONDS_IN_DAY, tokenKinds } from '@airswap/constants'
+import { ADDRESS_ZERO, SECONDS_IN_DAY } from '@airswap/constants'
 
 import {
-  createOrder,
-  signOrder,
-  isValidOrder,
   isValidLightOrder,
-  getBestByLowestSenderAmount,
-  getBestByHighestSignerAmount,
 } from '../index'
 import {
   createLightSignature,
-  signTypedDataOrder,
   getSignerFromLightSignature,
 } from '../src/orders'
 
@@ -22,29 +16,6 @@ const provider = ethers.getDefaultProvider('rinkeby')
 const wallet = new ethers.Wallet(signerPrivateKey, provider)
 
 describe('Orders', async () => {
-  it('Signs and validates an order', async () => {
-    const unsignedOrder = createOrder({
-      signer: {
-        wallet: wallet.address,
-      },
-    })
-    const order = await signOrder(unsignedOrder, wallet, ADDRESS_ZERO)
-    expect(isValidOrder(order)).to.equal(true)
-  })
-
-  it('Signs with typed data and validates an order', async () => {
-    const unsignedOrder = createOrder({
-      signer: {
-        wallet: wallet.address,
-      },
-    })
-    const order = await signTypedDataOrder(
-      unsignedOrder,
-      wallet.privateKey,
-      ADDRESS_ZERO
-    )
-    expect(isValidOrder(order)).to.equal(true)
-  })
 
   it('Signs and validates a light order', async () => {
     const unsignedOrder = {
@@ -76,43 +47,4 @@ describe('Orders', async () => {
     expect(signerWallet.toLowerCase()).to.equal(wallet.address.toLowerCase())
   })
 
-  it('Best by lowest sender', async () => {
-    const orders = []
-    let count = 5
-    const lowestAmount = 50
-    while (count--) {
-      orders.push(
-        createOrder({
-          sender: {
-            wallet: '',
-            kind: tokenKinds.ERC20,
-            token: '',
-            amount: count + lowestAmount,
-          },
-        })
-      )
-    }
-    const best = getBestByLowestSenderAmount(orders)
-    expect(best.sender.amount).to.equal(String(lowestAmount))
-  })
-
-  it('Best by highest signer', async () => {
-    const orders = []
-    const highestAmount = 5
-    let count = 0
-    while (count++ < highestAmount) {
-      orders.push(
-        createOrder({
-          signer: {
-            wallet: '',
-            kind: tokenKinds.ERC20,
-            token: '',
-            amount: count,
-          },
-        })
-      )
-    }
-    const best = getBestByHighestSignerAmount(orders)
-    expect(best.signer.amount).to.equal(String(highestAmount))
-  })
 })
