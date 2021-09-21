@@ -1,6 +1,7 @@
 const { expect } = require('chai')
 const { ethers } = require('hardhat')
 
+const { uniswapRouterAddress } = require('@airswap/constants')
 const UniswapV2Router02Contract = require('@uniswap/v2-periphery/build/IUniswapV2Router02.json')
 
 describe('Converter Integration Tests', () => {
@@ -54,7 +55,11 @@ describe('Converter Integration Tests', () => {
 
     await swapToToken.mint(deployer.address, 1000000)
 
-    uniswapV2Router02Contract = new ethers.Contract('0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D', UniswapV2Router02Contract.abi, deployer)
+    uniswapV2Router02Contract = new ethers.Contract(
+      uniswapRouterAddress,
+      UniswapV2Router02Contract.abi,
+      deployer
+    )
 
     testAToken.approve(uniswapV2Router02Contract.address, 1000000)
     await testBToken.approve(uniswapV2Router02Contract.address, 1000000)
