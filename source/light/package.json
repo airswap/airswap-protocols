@@ -1,6 +1,6 @@
 {
   "name": "@airswap/light",
-  "version": "2.2.4",
+  "version": "2.2.5",
   "description": "Swap ERC20 tokens efficiently",
   "contributors": [
     "Vicente Dragicevic",
