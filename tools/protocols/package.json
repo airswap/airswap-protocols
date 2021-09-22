@@ -31,7 +31,7 @@
     "@airswap/light": "2.2.4",
     "@airswap/registry": "4.8.2",
     "@airswap/types": "3.6.1",
-    "@airswap/utils": "0.4.6",
+    "@airswap/utils": "0.4.10",
     "@airswap/validator": "2.3.0",
     "bignumber.js": "^9.0.0",
     "browser-or-node": "^1.3.0",
