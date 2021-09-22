@@ -1,9 +1,13 @@
 import chai from 'chai'
-import { JsonRpcRequest, JsonRpcResponse } from 'jsonrpc-client-websocket'
+import { EventEmitter } from 'events'
+import {
+  JsonRpcRequest,
+  JsonRpcResponse,
+} from '@airswap/jsonrpc-client-websocket'
 import mock from 'mock-require'
-import { WebSocket, Server } from 'mock-socket'
+import { WebSocket, Server as BaseMockSocketServer } from 'mock-socket'
 
-export function addJSONRPCAssertions() {
+export function addJSONRPCAssertions(): void {
   chai.Assertion.addMethod(
     'JSONRpcRequest',
     function (method?: string, params?: any) {
@@ -64,7 +68,7 @@ const jsonRpcVersion = '2.0'
 
 export function createRequest(
   method: string,
-  params?: any,
+  params?: Record<string, string> | Array<any>,
   id?: string
 ): JsonRpcRequest {
   return {
@@ -75,7 +79,10 @@ export function createRequest(
   }
 }
 
-export function createResponse(id: number, result: any): JsonRpcResponse {
+export function createResponse(
+  id: number,
+  result: Record<string, unknown> | boolean | Array<any>
+): JsonRpcResponse {
   return {
     jsonrpc: jsonRpcVersion,
     id,
@@ -83,7 +90,10 @@ export function createResponse(id: number, result: any): JsonRpcResponse {
   }
 }
 
-export async function nextEvent(client, eventName: string) {
+export async function nextEvent(
+  client: EventEmitter,
+  eventName: string
+): Promise<unknown> {
   const promise = new Promise((resolve) => {
     client.on(eventName, function resolvePromiseAndRemove(data) {
       resolve(data)
@@ -93,7 +103,7 @@ export async function nextEvent(client, eventName: string) {
   return promise
 }
 
-export class MockSocketServer extends Server {
+export class MockSocketServer extends BaseMockSocketServer {
   private nextMessageCallback: {
     callback: (socket: WebSocket, data: any) => void
     ignoreResponses: boolean
@@ -139,15 +149,15 @@ export class MockSocketServer extends Server {
     })
   }
 
-  public static startMockingWebSocket() {
+  public static startMockingWebSocket(): void {
     mock('websocket', { client: WebSocket })
   }
 
-  public static stopMockingWebSocket() {
+  public static stopMockingWebSocket(): void {
     mock.stop('websocket')
   }
 
-  public resetInitOptions() {
+  public resetInitOptions(): void {
     this.initOptions = {
       lastLook: '1.0.0',
       rfq: null,
@@ -161,7 +171,7 @@ export class MockSocketServer extends Server {
   public setNextMessageCallback(
     cb: (socket: WebSocket, data: any) => void,
     ignoreResponses?: boolean
-  ) {
+  ): void {
     this.nextMessageCallback = {
       callback: cb,
       ignoreResponses: !!ignoreResponses,

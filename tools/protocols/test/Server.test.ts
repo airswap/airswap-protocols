@@ -15,10 +15,12 @@ import {
   nextEvent,
 } from './test-utils'
 import { LightOrder } from '@airswap/types'
-import { JsonRpcErrorCodes } from 'jsonrpc-client-websocket'
+import { JsonRpcErrorCodes } from '@airswap/jsonrpc-client-websocket'
 
 addJSONRPCAssertions()
 declare global {
+  // External library defines a namespace so ignore this rule.
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   export namespace Chai {
     interface Assertion {
       JSONRpcRequest(method: string, params?: any): void
