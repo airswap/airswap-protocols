@@ -30,14 +30,14 @@ Packages are versioned based on deploys. Major versions e.g. `1.x.x` are mainnet
 
 ## JavaScript Libraries
 
-| Package                                  | Version                                                                                                     | Description           |
-| :--------------------------------------- | :---------------------------------------------------------------------------------------------------------- | :-------------------- |
-| [`@airswap/protocols`](/tools/protocols) | [![npm](https://img.shields.io/npm/v/@airswap/protocols)](https://www.npmjs.com/package/@airswap/protocols) | Protocol Clients      |
-| [`@airswap/utils`](/tools/utils)         | [![npm](https://img.shields.io/npm/v/@airswap/utils)](https://www.npmjs.com/package/@airswap/utils)         | Orders and Signatures |
-| [`@airswap/metadata`](/tools/metadata)   | [![npm](https://img.shields.io/npm/v/@airswap/metadata)](https://www.npmjs.com/package/@airswap/metadata)   | Token Metadata        |
-| [`@airswap/constants`](/tools/constants) | [![npm](https://img.shields.io/npm/v/@airswap/constants)](https://www.npmjs.com/package/@airswap/constants) | Helpful Constants     |
-| [`@airswap/types`](/tools/types)         | [![npm](https://img.shields.io/npm/v/@airswap/types)](https://www.npmjs.com/package/@airswap/types)         | TypeScript Types      |
-| [`@airswap/merkle`](/tools/merkle)       | [![npm](https://img.shields.io/npm/v/@airswap/merkle)](https://www.npmjs.com/package/@airswap/merkle)       | Merkle Tree Helpers   |
+| Package                                  | Version                                                                                                     | Description               |
+| :--------------------------------------- | :---------------------------------------------------------------------------------------------------------- | :------------------------ |
+| [`@airswap/libraries`](/tools/libraries) | [![npm](https://img.shields.io/npm/v/@airswap/libraries)](https://www.npmjs.com/package/@airswap/libraries) | Protocol Client Libraries |
+| [`@airswap/utils`](/tools/utils)         | [![npm](https://img.shields.io/npm/v/@airswap/utils)](https://www.npmjs.com/package/@airswap/utils)         | Orders and Signatures     |
+| [`@airswap/metadata`](/tools/metadata)   | [![npm](https://img.shields.io/npm/v/@airswap/metadata)](https://www.npmjs.com/package/@airswap/metadata)   | Token Metadata            |
+| [`@airswap/constants`](/tools/constants) | [![npm](https://img.shields.io/npm/v/@airswap/constants)](https://www.npmjs.com/package/@airswap/constants) | Helpful Constants         |
+| [`@airswap/types`](/tools/types)         | [![npm](https://img.shields.io/npm/v/@airswap/types)](https://www.npmjs.com/package/@airswap/types)         | TypeScript Types          |
+| [`@airswap/merkle`](/tools/merkle)       | [![npm](https://img.shields.io/npm/v/@airswap/merkle)](https://www.npmjs.com/package/@airswap/merkle)       | Merkle Tree Helpers       |
 
 ## Commands
 

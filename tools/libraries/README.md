@@ -18,13 +18,13 @@ Protocol Libraries for AirSwap Developers
 Add the package to your project:
 
 ```console
-yarn add @airswap/protocols
+yarn add @airswap/libraries
 ```
 
 Import into your application:
 
 ```TypeScript
-import { Indexer, Server, Swap } from '@airswap/protocols';
+import { Indexer, Server, Swap } from '@airswap/libraries';
 ```
 
 ## Commands
