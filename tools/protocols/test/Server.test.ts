@@ -17,12 +17,22 @@ import {
 import { LightOrder } from '@airswap/types'
 import { JsonRpcErrorCodes } from 'jsonrpc-client-websocket'
 
+addJSONRPCAssertions()
+declare global {
+  export namespace Chai {
+    interface Assertion {
+      JSONRpcRequest(method: string, params?: any): void
+      JSONRpcResponse(id: string, result: any): void
+      JSONRpcError(id: string, error: any): void
+    }
+  }
+}
+
 const badQuote = { bad: 'quote' }
 const emptyQuote = createQuote({})
 const URL = 'maker.example.com'
 
 chai.use(sinonChai)
-addJSONRPCAssertions()
 
 function mockHttpServer(api) {
   api.post('/').reply(200, async (uri, body) => {
@@ -176,7 +186,6 @@ describe('WebSocketServer', () => {
     const correctInitializeResponse = new Promise<void>((resolve) => {
       const onResponse = (socket, data) => {
         // Note mock server implementation uses id '123' for initialize.
-        // @ts-ignore
         expect(data).to.be.a.JSONRpcResponse('123', true)
         resolve()
       }
@@ -192,7 +201,6 @@ describe('WebSocketServer', () => {
 
     // Ensure subscribe method is correct format.
     const onSubscribe = (socket, data) => {
-      // @ts-ignore
       expect(data).to.be.a.JSONRpcRequest('subscribe', [samplePairs])
       socket.send(JSON.stringify(createResponse(data.id, samplePricing)))
     }
@@ -227,7 +235,6 @@ describe('WebSocketServer', () => {
     // Ensure client responds to server correctly when pricing is updated
     const correctUpdatePricingResponse = new Promise<void>((resolve) => {
       const onResponse = (socket, data) => {
-        // @ts-ignore
         expect(data).to.be.a.JSONRpcResponse(updatePricingRequestId, true)
         resolve()
       }
@@ -248,7 +255,6 @@ describe('WebSocketServer', () => {
   it('should call consider with the correct parameters', async () => {
     const client = await Server.for(url)
     const onConsider = (socket, data) => {
-      // @ts-ignore
       expect(data).to.be.a.JSONRpcRequest('consider', fakeOrder)
       socket.send(JSON.stringify(createResponse(data.id, true)))
     }
@@ -280,7 +286,6 @@ describe('WebSocketServer', () => {
   it('should call unsubscribe with the correct parameters', async () => {
     const client = await Server.for(url)
     const onUnsubscribe = (socket, data) => {
-      // @ts-ignore
       expect(data).to.be.a.JSONRpcRequest('unsubscribe', [samplePairs])
       socket.send(JSON.stringify(createResponse(data.id, true)))
     }
@@ -292,12 +297,10 @@ describe('WebSocketServer', () => {
   it('should call subscribeAll and unsubscribeAll correctly', async () => {
     const client = await Server.for(url)
     const onSubscribeAll = (socket, data) => {
-      // @ts-ignore
       expect(data).to.be.a.JSONRpcRequest('subscribeAll')
       socket.send(JSON.stringify(createResponse(data.id, true)))
     }
     const onUnsubscribeAll = (socket, data) => {
-      // @ts-ignore
       expect(data).to.be.a.JSONRpcRequest('unsubscribeAll')
       socket.send(JSON.stringify(createResponse(data.id, true)))
     }
@@ -354,7 +357,6 @@ describe('WebSocketServer', () => {
     mockServer.initOptions = null
     const responseReceived = new Promise<void>((resolve) => {
       const onInitializeResponse = (socket, data) => {
-        // @ts-ignore
         expect(data).to.be.a.JSONRpcError('abc', {
           code: JsonRpcErrorCodes.INVALID_PARAMS,
           message: 'Invalid params',
@@ -383,7 +385,6 @@ describe('WebSocketServer', () => {
     await initResponseReceived
     const responseReceived = new Promise<void>((resolve) => {
       const onPricingReponse = (socket, data) => {
-        // @ts-ignore
         expect(data).to.be.a.JSONRpcError('abc', {
           code: JsonRpcErrorCodes.INVALID_PARAMS,
           message: 'Invalid params',

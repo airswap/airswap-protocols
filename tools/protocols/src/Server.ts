@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/member-ordering */
 import * as url from 'url'
 import { ethers } from 'ethers'
 import { isBrowser } from 'browser-or-node'
@@ -48,13 +47,13 @@ if (!isBrowser) {
 }
 
 export class Server extends EventEmitter {
+  public transportProtocol: 'websockets' | 'http'
   private supportedProtocols: SupportedProtocolInfo[]
   private isInitialized: boolean
   private httpClient: HttpClient
   private webSocketClient: JsonRpcWebsocket
   private senderServer: string
   private senderWallet: string
-  public transportProtocol: 'websockets' | 'http'
 
   public constructor(
     private locator: string,
@@ -63,90 +62,6 @@ export class Server extends EventEmitter {
     super()
     const protocol = parseUrl(locator).protocol
     this.transportProtocol = protocol.startsWith('http') ? 'http' : 'websockets'
-  }
-
-  private _init() {
-    if (this.transportProtocol === 'http') {
-      return this._initHTTPClient(this.locator)
-    } else {
-      return this._initWebSocketClient(this.locator)
-    }
-  }
-
-  private _initHTTPClient(locator: string, clientOnly?: boolean) {
-    // clientOnly flag set when initializing client for last look `senderServer`
-    const parsedUrl = parseUrl(locator)
-    const options = {
-      protocol: parsedUrl.protocol,
-      hostname: parsedUrl.hostname,
-      port: parsedUrl.port,
-      timeout: REQUEST_TIMEOUT,
-    }
-
-    if (!clientOnly) {
-      this.supportedProtocols = [
-        { name: 'request-for-quote', version: '2.0.0' },
-      ]
-      this.isInitialized = true
-    }
-
-    if (isBrowser) {
-      const jaysonClient = require('jayson/lib/client/browser')
-      this.httpClient = new jaysonClient((request, callback) => {
-        fetch(url.format(parsedUrl), {
-          method: 'POST',
-          body: request,
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        })
-          .then((res) => {
-            return res.text()
-          })
-          .then((text) => {
-            callback(null, text)
-          })
-          .catch((err) => {
-            callback(err)
-          })
-      }, options)
-    } else {
-      const jaysonClient = require('jayson/lib/client')
-      if (options.protocol === 'https:') {
-        this.httpClient = jaysonClient.https(options)
-      } else {
-        this.httpClient = jaysonClient.http(options)
-      }
-    }
-  }
-
-  private async _initWebSocketClient(locator: string) {
-    this.webSocketClient = new JsonRpcWebsocket(
-      url.format(locator),
-      REQUEST_TIMEOUT,
-      (error: JsonRpcError) => {
-        this.emit('error', error)
-      }
-    )
-    const initPromise = new Promise<SupportedProtocolInfo[]>(
-      (resolve, reject) => {
-        setTimeout(() => {
-          reject('Server did not call initialize in time')
-          this.disconnect()
-        }, REQUEST_TIMEOUT)
-
-        this.webSocketClient.on('initialize', (message) => {
-          this.initialize(message)
-          this.isInitialized = true
-          resolve(this.supportedProtocols)
-          return true
-        })
-      }
-    )
-
-    this.webSocketClient.on('updatePricing', this.updatePricing.bind(this))
-    await this.webSocketClient.open()
-    await initPromise
   }
 
   public static async for(
@@ -255,49 +170,31 @@ export class Server extends EventEmitter {
   }
   // *** END RFQ METHODS *** //
 
-  private initialize(supportedProtocols: SupportedProtocolInfo[]) {
-    this.validateInitializeParams(supportedProtocols)
-    this.supportedProtocols = supportedProtocols
-    const lastLookSupport = supportedProtocols.find(
-      (protocol) => protocol.name === 'last-look'
-    )
-    if (lastLookSupport?.params?.senderServer) {
-      this.senderServer = lastLookSupport.params.senderServer
-      // Prepare an http client for consider calls.
-      this._initHTTPClient(this.senderServer, true)
-    }
-    if (lastLookSupport?.params?.senderWallet) {
-      this.senderWallet = lastLookSupport.params.senderWallet
-    }
-  }
-
   // ***   LAST LOOK METHODS   *** //
-  public async subscribe(pairs: { baseToken: string; quoteToken: string }[]) {
+  public async subscribe(
+    pairs: { baseToken: string; quoteToken: string }[]
+  ): Promise<Pricing[]> {
     this.requireLastLookSupport()
     const pricing = await this.callRPCMethod<Pricing[]>('subscribe', [pairs])
     this.emit('pricing', pricing)
     return pricing
   }
 
-  public async unsubscribe(pairs: { baseToken: string; quoteToken: string }[]) {
+  public async unsubscribe(
+    pairs: { baseToken: string; quoteToken: string }[]
+  ): Promise<boolean> {
     this.requireLastLookSupport()
     return this.callRPCMethod<boolean>('unsubscribe', [pairs])
   }
 
-  public async subscribeAll() {
+  public async subscribeAll(): Promise<boolean> {
     this.requireLastLookSupport()
     return this.callRPCMethod<boolean>('subscribeAll')
   }
 
-  public async unsubscribeAll() {
+  public async unsubscribeAll(): Promise<boolean> {
     this.requireLastLookSupport()
     return this.callRPCMethod<boolean>('unsubscribeAll')
-  }
-
-  private updatePricing(newPricing: Pricing[]) {
-    this.validateUpdatePricingParams(newPricing)
-    this.emit('pricing', newPricing)
-    return true
   }
 
   public getSenderWallet(): string {
@@ -305,18 +202,102 @@ export class Server extends EventEmitter {
     return this.senderWallet
   }
 
-  public async consider(order: LightOrder) {
+  public async consider(order: LightOrder): Promise<boolean> {
     this.requireLastLookSupport()
     return this.callRPCMethod<boolean>('consider', order)
   }
 
-  public disconnect() {
+  public disconnect(): void {
     if (this.webSocketClient) {
       this.webSocketClient.close()
       this.removeAllListeners()
     }
   }
   // *** END LAST LOOK METHODS *** //
+
+  private _init() {
+    if (this.transportProtocol === 'http') {
+      return this._initHTTPClient(this.locator)
+    } else {
+      return this._initWebSocketClient(this.locator)
+    }
+  }
+
+  private _initHTTPClient(locator: string, clientOnly?: boolean) {
+    // clientOnly flag set when initializing client for last look `senderServer`
+    const parsedUrl = parseUrl(locator)
+    const options = {
+      protocol: parsedUrl.protocol,
+      hostname: parsedUrl.hostname,
+      port: parsedUrl.port,
+      timeout: REQUEST_TIMEOUT,
+    }
+
+    if (!clientOnly) {
+      this.supportedProtocols = [
+        { name: 'request-for-quote', version: '2.0.0' },
+      ]
+      this.isInitialized = true
+    }
+
+    if (isBrowser) {
+      const jaysonClient = require('jayson/lib/client/browser')
+      this.httpClient = new jaysonClient((request, callback) => {
+        fetch(url.format(parsedUrl), {
+          method: 'POST',
+          body: request,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+          .then((res) => {
+            return res.text()
+          })
+          .then((text) => {
+            callback(null, text)
+          })
+          .catch((err) => {
+            callback(err)
+          })
+      }, options)
+    } else {
+      const jaysonClient = require('jayson/lib/client')
+      if (options.protocol === 'https:') {
+        this.httpClient = jaysonClient.https(options)
+      } else {
+        this.httpClient = jaysonClient.http(options)
+      }
+    }
+  }
+
+  private async _initWebSocketClient(locator: string) {
+    this.webSocketClient = new JsonRpcWebsocket(
+      url.format(locator),
+      REQUEST_TIMEOUT,
+      (error: JsonRpcError) => {
+        this.emit('error', error)
+      }
+    )
+    const initPromise = new Promise<SupportedProtocolInfo[]>(
+      (resolve, reject) => {
+        setTimeout(() => {
+          reject('Server did not call initialize in time')
+          this.disconnect()
+        }, REQUEST_TIMEOUT)
+
+        this.webSocketClient.on('initialize', (message) => {
+          this.initialize(message)
+          this.isInitialized = true
+          resolve(this.supportedProtocols)
+          return true
+        })
+      }
+    )
+
+    this.webSocketClient.on('updatePricing', this.updatePricing.bind(this))
+    await this.webSocketClient.open()
+    await initPromise
+  }
 
   private requireInitialized() {
     if (!this.isInitialized) throw new Error('Server not yet initialized')
@@ -391,6 +372,28 @@ export class Server extends EventEmitter {
     )
       valid = false
     if (!valid) this.throwInvalidParams()
+  }
+
+  private updatePricing(newPricing: Pricing[]) {
+    this.validateUpdatePricingParams(newPricing)
+    this.emit('pricing', newPricing)
+    return true
+  }
+
+  private initialize(supportedProtocols: SupportedProtocolInfo[]) {
+    this.validateInitializeParams(supportedProtocols)
+    this.supportedProtocols = supportedProtocols
+    const lastLookSupport = supportedProtocols.find(
+      (protocol) => protocol.name === 'last-look'
+    )
+    if (lastLookSupport?.params?.senderServer) {
+      this.senderServer = lastLookSupport.params.senderServer
+      // Prepare an http client for consider calls.
+      this._initHTTPClient(this.senderServer, true)
+    }
+    if (lastLookSupport?.params?.senderWallet) {
+      this.senderWallet = lastLookSupport.params.senderWallet
+    }
   }
 
   private httpCall<T>(
