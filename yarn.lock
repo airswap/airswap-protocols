@@ -12,6 +12,13 @@
   resolved "https://registry.yarnpkg.com/@airswap/constants/-/constants-0.4.2.tgz#021e76a048495836dd3ecf64943078c16a699fab"
   integrity sha512-1G3kpLR2dJONU3qSrwdFXCXwf5OlNv1LOn+Zm259V9SnpBTRS5e3msPaKyBMvRm2AVY4QoQ9UnKRjVRMkO1g6Q==
 
+"@airswap/jsonrpc-client-websocket@^0.0.1":
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/@airswap/jsonrpc-client-websocket/-/jsonrpc-client-websocket-0.0.1.tgz#e75932a0f19cb6c23cf145834277211cce150400"
+  integrity sha512-4S5iBAVzQKy+p3DgUr9OOKvKfBq1FHmbcgCYoVWSv5YBTVuaC4N03UHwKRjNXLcSUXXV/efl/sRjEQKm+ayklg==
+  dependencies:
+    get-parameter-names "^0.3.0"
+
 "@airswap/light@2.2.4":
   version "2.2.4"
   resolved "https://registry.yarnpkg.com/@airswap/light/-/light-2.2.4.tgz#e52477d3aec03d7a84986f5f504a66b496a29322"
@@ -3975,17 +3982,7 @@ concat-stream@^1.5.1, concat-stream@~1.6.2:
     readable-stream "^2.2.2"
     typedarray "^0.0.6"
 
-concat-stream@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/concat-stream/-/concat-stream-2.0.0.tgz#414cf5af790a48c60ab9be4527d56d5e41133cb1"
-  integrity sha512-MWufYdFw53ccGjCA+Ol7XJYpAlW6/prSMzuPOTRnJGcGzuhLn4Scrz7qf6o8bROZ514ltazcIFJZevcfbo0x7A==
-  dependencies:
-    buffer-from "^1.0.0"
-    inherits "^2.0.3"
-    readable-stream "^3.0.2"
-    typedarray "^0.0.6"
-
-"concat-stream@github:hugomrdias/concat-stream#feat/smaller":
+concat-stream@^2.0.0, "concat-stream@github:hugomrdias/concat-stream#feat/smaller":
   version "2.0.0"
   resolved "https://codeload.github.com/hugomrdias/concat-stream/tar.gz/057bc7b5d6d8df26c8cf00a3f151b6721a0a8034"
   dependencies:
@@ -7806,12 +7803,6 @@ jsonparse@^1.2.0, jsonparse@^1.3.1:
   version "1.3.1"
   resolved "https://registry.yarnpkg.com/jsonparse/-/jsonparse-1.3.1.tgz#3f4dae4a91fac315f71062f8521cc239f1366280"
   integrity sha1-P02uSpH6wxX3EGL4UhzCOfE2YoA=
-
-jsonrpc-client-websocket@gpxl-dev/jsonrpc-client-websocket#master:
-  version "1.4.2"
-  resolved "https://codeload.github.com/gpxl-dev/jsonrpc-client-websocket/tar.gz/bf76e2a2f507fe339135c5467d727ea0922bce9f"
-  dependencies:
-    get-parameter-names "^0.3.0"
 
 jsonschema@^1.2.4:
   version "1.4.0"

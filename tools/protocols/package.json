@@ -27,16 +27,16 @@
   },
   "dependencies": {
     "@airswap/constants": "0.4.2",
+    "@airswap/jsonrpc-client-websocket": "^0.0.1",
     "@airswap/light": "2.2.4",
-    "@airswap/validator": "2.3.0",
     "@airswap/registry": "4.8.2",
     "@airswap/types": "3.6.1",
     "@airswap/utils": "0.4.6",
+    "@airswap/validator": "2.3.0",
     "bignumber.js": "^9.0.0",
     "browser-or-node": "^1.3.0",
     "ethers": "^5.0.25",
     "jayson": "^3.2.0",
-    "jsonrpc-client-websocket": "gpxl-dev/jsonrpc-client-websocket#master",
     "websocket": "^1.0.34"
   },
   "devDependencies": {

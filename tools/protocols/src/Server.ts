@@ -2,12 +2,12 @@ import * as url from 'url'
 import { ethers } from 'ethers'
 import { isBrowser } from 'browser-or-node'
 import { Client as HttpClient } from 'jayson'
+
 import {
   JsonRpcWebsocket,
   JsonRpcError,
   JsonRpcErrorCodes,
-} from 'jsonrpc-client-websocket'
-
+} from '@airswap/jsonrpc-client-websocket'
 import { REQUEST_TIMEOUT } from '@airswap/constants'
 import { parseUrl, flattenObject, isValidQuote } from '@airswap/utils'
 import { Quote, LightOrder } from '@airswap/types'
