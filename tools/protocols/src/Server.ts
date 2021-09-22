@@ -101,7 +101,6 @@ export class Server extends EventEmitter {
     return true
   }
 
-  // ***   RFQ METHODS   *** //
   public async getMaxQuote(
     signerToken: string,
     senderToken: string
@@ -168,9 +167,7 @@ export class Server extends EventEmitter {
       senderWallet,
     })
   }
-  // *** END RFQ METHODS *** //
 
-  // ***   LAST LOOK METHODS   *** //
   public async subscribe(
     pairs: { baseToken: string; quoteToken: string }[]
   ): Promise<Pricing[]> {
@@ -213,7 +210,6 @@ export class Server extends EventEmitter {
       this.removeAllListeners()
     }
   }
-  // *** END LAST LOOK METHODS *** //
 
   private _init() {
     if (this.transportProtocol === 'http') {
