@@ -46,8 +46,13 @@ if (!isBrowser) {
   })
 }
 
+const PROTOCOL_NAMES = {
+  'last-look': 'Last Look',
+  'request-for-quote': 'Request for Quote',
+}
+
 export class Server extends EventEmitter {
-  public transportProtocol: 'websockets' | 'http'
+  public transportProtocol: 'websocket' | 'http'
   private supportedProtocols: SupportedProtocolInfo[]
   private isInitialized: boolean
   private httpClient: HttpClient
@@ -61,7 +66,7 @@ export class Server extends EventEmitter {
   ) {
     super()
     const protocol = parseUrl(locator).protocol
-    this.transportProtocol = protocol.startsWith('http') ? 'http' : 'websockets'
+    this.transportProtocol = protocol.startsWith('http') ? 'http' : 'websocket'
   }
 
   public static async for(
@@ -73,27 +78,29 @@ export class Server extends EventEmitter {
     return server
   }
 
-  /**
-   * Method to check support for a given swap protocol.
-   * @param protocol protocol name
-   * @param version Optional version to match. Fails if major version is
-   *                different, or minor/patch are lower.
-   * @returns {boolean} true if protocol is supported at given version
-   */
-  public supportsProtocol(protocol: string, version?: string): boolean {
+  public getSupportedProtocolVersion(protocol: string): string | null {
     // Don't check supportedProtocols unless the server has initialized.
     // Important for WebSocket servers that can support either RFQ or Last Look
     this.requireInitialized()
     const supportedProtocolInfo = this.supportedProtocols.find(
       (p) => p.name === protocol
     )
-    if (!supportedProtocolInfo) return false
-    if (!version) return true
+    if (!supportedProtocolInfo) return null
+    return supportedProtocolInfo.version
+  }
+
+  public supportsProtocol(
+    protocol: string,
+    requestedVersion?: string
+  ): boolean {
+    const supportedVersion = this.getSupportedProtocolVersion(protocol)
+    if (!supportedVersion) return false
+    if (!requestedVersion) return true
 
     const [, wantedMajor, wantedMinor, wantedPatch] =
-      /(\d+)\.(\d+)\.(\d+)/.exec(version)
+      /(\d+)\.(\d+)\.(\d+)/.exec(requestedVersion)
     const [, supportedMajor, supportedMinor, supportedPatch] =
-      /(\d+)\.(\d+)\.(\d+)/.exec(supportedProtocolInfo.version)
+      /(\d+)\.(\d+)\.(\d+)/.exec(supportedVersion)
 
     if (wantedMajor !== supportedMajor) return false
     if (parseInt(wantedMinor) > parseInt(supportedMinor)) return false
@@ -299,26 +306,30 @@ export class Server extends EventEmitter {
     if (!this.isInitialized) throw new Error('Server not yet initialized')
   }
 
-  /**
-   * Throws if RFQ protocol is not supported, or if server is not yet
-   * initialized.
-   */
   private requireRFQSupport(version?: string) {
-    if (!this.supportsProtocol('request-for-quote', version))
-      throw new Error(
-        `Server at ${this.locator} doesn't support this version of RFQ`
-      )
+    this.requireProtocolSupport('request-for-quote', version)
   }
 
-  /**
-   * Throws if Last Look protocol is not supported, or if server is not yet
-   * initialized.
-   */
   private requireLastLookSupport(version?: string) {
-    if (!this.supportsProtocol('last-look', version))
-      throw new Error(
-        `Server at ${this.locator} doesn't support this version of Last Look`
-      )
+    this.requireProtocolSupport('last-look', version)
+  }
+
+  private requireProtocolSupport(protocol: string, version?: string) {
+    if (!this.supportsProtocol(protocol, version)) {
+      const supportedVersion = this.getSupportedProtocolVersion(protocol)
+      let message
+      if (supportedVersion) {
+        message =
+          `Server at ${this.locator} doesn't support ` +
+          `${PROTOCOL_NAMES[protocol]} v${version}` +
+          `supported version ${supportedVersion}`
+      } else {
+        message =
+          `Server at ${this.locator} doesn't ` +
+          `support ${PROTOCOL_NAMES[protocol]}`
+      }
+      throw new Error(message)
+    }
   }
 
   private compare(params: any, result: any): Array<string> {
