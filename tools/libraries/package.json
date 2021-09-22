@@ -1,16 +1,17 @@
 {
-  "name": "@airswap/protocols",
-  "version": "0.5.12",
+  "name": "@airswap/libraries",
+  "version": "0.0.1",
   "description": "Protocol Libraries for AirSwap Developers",
   "contributors": [
     "Don Mosites",
-    "Hassan Malik <hbmalik88@gmail.com>"
+    "Hassan Malik <hbmalik88@gmail.com>",
+    "Ed Hinchliffe"
   ],
   "repository": {
     "type": "git",
     "url": "https://github.com/airswap/airswap-protocols"
   },
-  "homepage": "https://github.com/airswap/airswap-protocols/tree/main/tools/protocols",
+  "homepage": "https://github.com/airswap/airswap-protocols/tree/main/tools/libraries",
   "keywords": [
     "airswap"
   ],
