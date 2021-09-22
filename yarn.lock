@@ -40,19 +40,6 @@
   dependencies:
     "@airswap/constants" "0.4.1"
 
-"@airswap/utils@0.4.10":
-  version "0.4.10"
-  resolved "https://registry.yarnpkg.com/@airswap/utils/-/utils-0.4.10.tgz#bac8c7d5e7a6ef288d47d2ae6f1aaf41fdaf9093"
-  integrity sha512-YzR0G1hoVYPx/KsSjObX2XuMo+ySURHGRijiz4eM4EMU7udiH4upIpE2M/HeQ0HISWLVJrMJa89BJ/8szKorVQ==
-  dependencies:
-    "@airswap/constants" "0.4.2"
-    "@airswap/types" "3.6.1"
-    "@types/ethereumjs-util" "^6.1.0"
-    bignumber.js "^9.0.1"
-    eth-sig-util "^3.0.0"
-    ethereumjs-util "^6.2.0"
-    ethers "^5.4.7"
-
 "@airswap/utils@0.4.6":
   version "0.4.6"
   resolved "https://registry.yarnpkg.com/@airswap/utils/-/utils-0.4.6.tgz#e042538e4c88cdb60c166e515ac91e3c549b2721"
