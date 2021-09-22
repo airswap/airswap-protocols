@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import * as ethers from 'ethers'
 import { ERC20_ABI, ERC20_BYTES32_ABI } from './constants'
 
@@ -5,7 +6,7 @@ export function getContract(
   address: string,
   ABI: any,
   provider: ethers.providers.BaseProvider
-) {
+): ethers.Contract {
   if (!address || !address.startsWith('0x')) {
     throw Error(`Invalid 'address' parameter '${address}'.`)
   }
@@ -15,7 +16,7 @@ export function getContract(
 export async function getTokenName(
   tokenAddress: string,
   provider: ethers.providers.BaseProvider
-) {
+): Promise<string> {
   if (!tokenAddress || !tokenAddress.startsWith('0x')) {
     throw Error(`Invalid 'tokenAddress' parameter`)
   }
@@ -34,7 +35,7 @@ export async function getTokenName(
 export async function getTokenSymbol(
   tokenAddress: string,
   provider: ethers.providers.BaseProvider
-) {
+): Promise<string> {
   if (!tokenAddress || !tokenAddress.startsWith('0x')) {
     throw Error(`Invalid 'tokenAddress' parameter`)
   }
@@ -54,7 +55,7 @@ export async function getTokenSymbol(
 export function getTokenDecimals(
   tokenAddress: string,
   provider: ethers.providers.BaseProvider
-) {
+): string {
   if (!tokenAddress || !tokenAddress.startsWith('0x')) {
     throw Error(`Invalid 'tokenAddress' parameter`)
   }

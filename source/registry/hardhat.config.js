@@ -28,15 +28,12 @@ module.exports = {
     },
     mainnet: {
       url: 'https://mainnet.infura.io/v3/' + process.env.INFURA_API_KEY,
-      gasPrice: 90e9,
+      gasPrice: 50e9,
       accounts: {
         mnemonic: process.env.MNEMONIC || '',
       },
       timeout: 1000000,
     },
-  },
-  etherscan: {
-    apiKey: process.env.ETHERSCAN_API_KEY,
   },
   solidity: {
     version: '0.8.7',
@@ -47,8 +44,8 @@ module.exports = {
       },
     },
   },
-  mocha: {
-    timeout: 1000000,
+  etherscan: {
+    apiKey: process.env.ETHERSCAN_API_KEY,
   },
   paths: {
     artifacts: './build',

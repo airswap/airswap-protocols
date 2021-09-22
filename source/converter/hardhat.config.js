@@ -1,6 +1,7 @@
 require('dotenv').config()
 require('@nomiclabs/hardhat-ethers')
 require('@nomiclabs/hardhat-waffle')
+require('@nomiclabs/hardhat-etherscan')
 require('solidity-coverage')
 
 module.exports = {
@@ -25,7 +26,7 @@ module.exports = {
     },
     mainnet: {
       url: 'https://mainnet.infura.io/v3/' + process.env.INFURA_API_KEY,
-      gasPrice: 72e9,
+      gasPrice: 60e9,
       accounts: {
         mnemonic: process.env.MNEMONIC || '',
       },
@@ -36,14 +37,25 @@ module.exports = {
     compilers: [
       {
         version: '0.8.7',
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 999999,
+          },
+        },
       },
       {
         version: '0.7.6',
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 999999,
+          },
+        },
       },
       {
         version: '0.6.6',
         settings: {
-          // See the solidity docs for advice about optimization and evmVersion
           optimizer: {
             enabled: true,
             runs: 999999,
@@ -66,8 +78,8 @@ module.exports = {
       },
     ],
   },
-  mocha: {
-    timeout: 1000000,
+  etherscan: {
+    apiKey: process.env.ETHERSCAN_API_KEY,
   },
   paths: {
     artifacts: './build',

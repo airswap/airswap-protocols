@@ -1,0 +1,40 @@
+{
+  "name": "@airswap/validator",
+  "version": "2.3.1",
+  "description": "Validate AirSwap orders prior to submitting transactions",
+  "contributors": [
+    "Hassan Malik <hbmalik88@gmail.com>"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/airswap/airswap-protocols"
+  },
+  "files": [
+    "/build",
+    "deploys.js"
+  ],
+  "scripts": {
+    "clean": "hardhat clean",
+    "compile": "hardhat compile",
+    "coverage": "hardhat coverage",
+    "test": "hardhat test",
+    "test:unit": "hardhat test ./test/unit.js",
+    "deploy:rinkeby": "hardhat run --network rinkeby ./scripts/deploy.js",
+    "deploy:mainnet": "hardhat run --network mainnet ./scripts/deploy.js"
+  },
+  "devDependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.0.2",
+    "@nomiclabs/hardhat-etherscan": "^2.1.6",
+    "@nomiclabs/hardhat-waffle": "^2.0.1",
+    "ethereum-waffle": "^3.4.0",
+    "hardhat": "^2.6.4",
+    "solidity-coverage": "^0.7.17"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.3.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

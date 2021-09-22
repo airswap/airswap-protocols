@@ -21,17 +21,10 @@ module.exports = {
   },
   plugins: ['prettier', '@typescript-eslint'],
   extends: [
-    'eslint:recommended',
-    'plugin:@typescript-eslint/eslint-recommended',
     'plugin:@typescript-eslint/recommended',
-    'prettier/@typescript-eslint',
+    'plugin:prettier/recommended',
   ],
   rules: {
-    'prettier/prettier': 0,
-    'prefer-const': 'error',
-    'no-undef': 'warn',
-    'no-unused-vars': 'warn',
-    'no-extra-semi': 0,
     '@typescript-eslint/explicit-member-accessibility': 1,
     '@typescript-eslint/member-ordering': 1,
     '@typescript-eslint/no-explicit-any': 0,

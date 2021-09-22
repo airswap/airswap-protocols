@@ -1,6 +1,6 @@
 {
   "name": "@airswap/staking",
-  "version": "2.3.2",
+  "version": "2.3.3",
   "description": "Stake and unstake tokens on a schedule",
   "contributors": [
     "Ethan Wessel",
@@ -11,6 +11,10 @@
     "type": "git",
     "url": "https://github.com/airswap/airswap-protocols"
   },
+  "files": [
+    "/build",
+    "deploys.js"
+  ],
   "scripts": {
     "clean": "hardhat clean",
     "compile": "hardhat compile",
@@ -26,7 +30,7 @@
     "@nomiclabs/hardhat-waffle": "^2.0.1",
     "ethereum-waffle": "^3.4.0",
     "hardhat": "^2.6.4",
-    "solidity-coverage": "^0.7.4"
+    "solidity-coverage": "^0.7.17"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.3.1"

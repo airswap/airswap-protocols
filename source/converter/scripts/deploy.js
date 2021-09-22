@@ -1,40 +1,49 @@
 /* eslint-disable no-console */
-const hre = require('hardhat')
+const { ethers, run } = require('hardhat')
+const {
+  chainNames,
+  wethAddresses,
+  uniswapRouterAddress,
+} = require('@airswap/constants')
+const poolDeploys = require('@airswap/pool/deploys.js')
 
 async function main() {
-  await hre.run('compile')
+  await run('compile')
+  const [deployer] = await ethers.getSigners()
+  console.log(`Deployer: ${deployer.address}`)
 
-  const wETH = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2' // placeholder token
-  const swapToToken = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2' // placeholder token
-  const uniRouter = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D' // placeholder address
-  const triggerFee = 1
-  const payees = ['0x7296333e1615721f4Bd9Df1a3070537484A50CF8'] // placeholder address
-  const shares = [10]
+  const chainId = await deployer.getChainId()
+  const wethAddress = wethAddresses[chainId]
+  const poolAddress = poolDeploys[chainId]
 
-  // Deploy the contract
-  const Converter = await hre.ethers.getContractFactory('Converter')
-  const converter = await Converter.deploy(
-    wETH,
-    swapToToken,
-    uniRouter,
+  const payees = [poolAddress]
+  const shares = [1]
+  const triggerFee = 0
+
+  console.log(`Deploying on ${chainNames[chainId].toUpperCase()}`)
+  const converterFactory = await ethers.getContractFactory('Converter')
+  const converter = await converterFactory.deploy(
+    wethAddress,
+    wethAddress,
+    uniswapRouterAddress,
     triggerFee,
     payees,
     shares
   )
 
   await converter.deployed()
-  console.log(`Converter Address: ${converter.address}`)
+  console.log(`New Converter: ${converter.address}`)
 
   console.log('Waiting to verify...')
-  await new Promise(r => setTimeout(r, 60000))
+  await new Promise((r) => setTimeout(r, 60000))
 
   console.log('Verifying...')
-  await hre.run('verify:verify', {
+  await run('verify:verify', {
     address: converter.address,
     constructorArguments: [
-      wETH,
-      swapToToken,
-      uniRouter,
+      wethAddress,
+      wethAddress,
+      uniswapRouterAddress,
       triggerFee,
       payees,
       shares,
@@ -44,7 +53,7 @@ async function main() {
 
 main()
   .then(() => process.exit(0))
-  .catch(error => {
+  .catch((error) => {
     console.log(error)
     process.exit(1)
   })

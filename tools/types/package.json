@@ -1,6 +1,6 @@
 {
   "name": "@airswap/types",
-  "version": "3.6.0",
+  "version": "3.6.2",
   "description": "TypeScript Types AirSwap Developers",
   "contributors": [
     "Don Mosites"
@@ -23,7 +23,7 @@
     "compile": "yarn clean; tsc -b"
   },
   "dependencies": {
-    "@airswap/constants": "0.4.0"
+    "@airswap/constants": "0.4.2"
   },
   "devDependencies": {
     "ts-node": "^8.6.2",

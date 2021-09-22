@@ -165,7 +165,6 @@ contract Staking is Ownable {
     return token.decimals();
   }
 
-
   /**
    * @notice Stake tokens for an account
    * @param account address
@@ -204,9 +203,8 @@ contract Staking is Ownable {
 
       // Calculate a new timestamp proportional to the new amount
       // New timestamp limited to current timestamp (amount / newInitial approaches 1)
-      uint256 newTimestamp =
-        selected.timestamp +
-          amount.mul(block.timestamp.sub(selected.timestamp)).div(newInitial);
+      uint256 newTimestamp = selected.timestamp +
+        amount.mul(block.timestamp.sub(selected.timestamp)).div(newInitial);
 
       allStakes[account][index] = Stake(
         duration,
