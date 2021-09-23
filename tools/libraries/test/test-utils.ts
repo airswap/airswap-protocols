@@ -150,7 +150,7 @@ export class MockSocketServer extends BaseMockSocketServer {
   }
 
   public static startMockingWebSocket(): void {
-    mock('websocket', { client: WebSocket })
+    mock('websocket', { w3cwebsocket: WebSocket })
   }
 
   public static stopMockingWebSocket(): void {

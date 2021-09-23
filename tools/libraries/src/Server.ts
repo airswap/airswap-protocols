@@ -41,7 +41,7 @@ type Pricing = {
 
 if (!isBrowser) {
   JsonRpcWebsocket.setWebSocketFactory((url: string) => {
-    const ws = require('websocket').client
+    const ws = require('websocket').w3cwebsocket
     return new ws(url)
   })
 }
