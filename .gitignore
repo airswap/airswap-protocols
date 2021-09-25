@@ -10,7 +10,6 @@ build
 flatten/
 .env
 venv
-.husky/
 .vscode/
 .idea/
 subgraph.yaml
