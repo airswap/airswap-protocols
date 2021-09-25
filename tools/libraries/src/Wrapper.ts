@@ -55,7 +55,8 @@ export class Wrapper {
       order.senderAmount,
       order.v,
       order.r,
-      order.s
+      order.s,
+      { value: order.senderAmount }
     )
   }
 }
