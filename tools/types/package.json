@@ -23,7 +23,7 @@
     "compile": "yarn clean; tsc -b"
   },
   "dependencies": {
-    "@airswap/constants": "0.4.2"
+    "@airswap/constants": "0.4.3"
   },
   "devDependencies": {
     "ts-node": "^8.6.2",

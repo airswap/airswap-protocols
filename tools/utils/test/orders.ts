@@ -2,10 +2,7 @@ import { assert, expect } from 'chai'
 import { ethers } from 'ethers'
 import { ADDRESS_ZERO, SECONDS_IN_DAY } from '@airswap/constants'
 
-import {
-  isValidLightOrder,
-  calculateCostFromLevels,
-} from '../index'
+import { isValidLightOrder, calculateCostFromLevels } from '../index'
 import {
   createLightSignature,
   getSignerFromLightSignature,
@@ -17,7 +14,6 @@ const provider = ethers.getDefaultProvider('rinkeby')
 const wallet = new ethers.Wallet(signerPrivateKey, provider)
 
 describe('Orders', async () => {
-
   it('Signs and validates a light order', async () => {
     const unsignedOrder = {
       nonce: Date.now().toString(),

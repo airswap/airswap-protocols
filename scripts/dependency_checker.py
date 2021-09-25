@@ -63,6 +63,9 @@ class DependencyChecker:
                     if DEPENDENCY_KEYWORD not in declared_name:
                         continue
 
+                    if (declared_name not in self.dependency_graph):
+                        break
+
                     # check version against declared version
                     expected_version = self.dependency_graph[declared_name]['version']
                     if declared_version != expected_version:
