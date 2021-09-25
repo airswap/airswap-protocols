@@ -7,11 +7,6 @@
   resolved "https://registry.yarnpkg.com/@airswap/constants/-/constants-0.4.1.tgz#1664b9bb752ac9278edc16de46b5e25d8f20f04c"
   integrity sha512-llPEcAZRizBejMBP2ZVlnIuK0uhLRL0VgqQYaBquPx2O+CXjWRkQNQVOZ3i09PW0SDTTV+WkwnQy0FAE8OBHVw==
 
-"@airswap/constants@0.4.2":
-  version "0.4.2"
-  resolved "https://registry.yarnpkg.com/@airswap/constants/-/constants-0.4.2.tgz#021e76a048495836dd3ecf64943078c16a699fab"
-  integrity sha512-1G3kpLR2dJONU3qSrwdFXCXwf5OlNv1LOn+Zm259V9SnpBTRS5e3msPaKyBMvRm2AVY4QoQ9UnKRjVRMkO1g6Q==
-
 "@airswap/jsonrpc-client-websocket@^0.0.1":
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/@airswap/jsonrpc-client-websocket/-/jsonrpc-client-websocket-0.0.1.tgz#e75932a0f19cb6c23cf145834277211cce150400"
@@ -39,18 +34,6 @@
   integrity sha512-ryN9SxxbkOOU+MqYHlnm+lENh53P/6HDbQK6hyuv49ehRAn7BhzVLgYdINJWwj09oDrVME9DseWz521L8HzoPw==
   dependencies:
     "@airswap/constants" "0.4.1"
-
-"@airswap/utils@0.4.6":
-  version "0.4.6"
-  resolved "https://registry.yarnpkg.com/@airswap/utils/-/utils-0.4.6.tgz#e042538e4c88cdb60c166e515ac91e3c549b2721"
-  integrity sha512-vnkV8QGd2iCXhdSlE6U4NdSDa6f4ryfJgjA28F0GH6lnZlTjvwNspVXjVFFoaYSvxaBTxsVWaFkS5gWtka5arg==
-  dependencies:
-    "@airswap/constants" "0.4.1"
-    "@airswap/types" "3.6.1"
-    "@types/ethereumjs-util" "^6.1.0"
-    eth-sig-util "^3.0.0"
-    ethereumjs-util "^6.2.0"
-    ethers "^5.4.6"
 
 "@airswap/validator@2.3.0":
   version "2.3.0"
