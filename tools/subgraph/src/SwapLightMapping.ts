@@ -5,6 +5,7 @@ import {
 import { SwapLightContract, SwapLight } from "../generated/schema"
 import { getUser, getToken, } from "./EntityHelper"
 import { updateCollectedFeesDay } from "./PricingHelper"
+import { updateVolumeDay } from "./VolumeHelper"
 
 export function handleCancel(event: Cancel): void {
   let user = getUser(event.params.signerWallet.toHex())
@@ -52,4 +53,5 @@ export function handleSwap(event: SwapEvent): void {
 
   completedSwap.save()
   updateCollectedFeesDay(event)
+  updateVolumeDay(event)
 }
