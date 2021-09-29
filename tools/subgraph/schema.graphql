@@ -161,6 +161,7 @@ type CollectedFeesDay @entity {
   id: ID!
   date: Int!
   amount: BigDecimal!
+}
 
 type VolumeDay @entity {
   id: ID!
