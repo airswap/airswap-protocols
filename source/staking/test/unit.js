@@ -161,8 +161,8 @@ describe('Staking Unit', () => {
       await staking.connect(account1).stake('100')
       const block0 = await ethers.provider.getBlock()
 
-      // move 100000 seconds forward
-      await ethers.provider.send('evm_mine', [block0.timestamp + 20])
+      // move 100 seconds forward
+      await ethers.provider.send('evm_mine', [block0.timestamp + 100])
 
       await staking.connect(account1).stake('120')
 
@@ -210,9 +210,8 @@ describe('Staking Unit', () => {
       await staking.connect(account2).stake('100')
 
       // move 10 seconds forward - 100% vested
-      for (let index = 0; index < 100; index++) {
-        await ethers.provider.send('evm_mine')
-      }
+      await ethers.provider.send('evm_increaseTime', [10])
+      await ethers.provider.send('evm_mine')
 
       await expect(staking.connect(account1).stakeFor(account2.address, '1')).to
         .not.be.reverted
@@ -246,9 +245,8 @@ describe('Staking Unit', () => {
       await staking.connect(account1).stake('100')
 
       // move 10 seconds forward - 10% vested
-      for (let index = 0; index < 10; index++) {
-        await ethers.provider.send('evm_mine')
-      }
+      await ethers.provider.send('evm_increaseTime', [10])
+      await ethers.provider.send('evm_mine')
 
       await staking.connect(account1).unstake('10')
       const userStakes = await staking
@@ -269,9 +267,8 @@ describe('Staking Unit', () => {
         .getStakes(account1.address)
 
       // move 10 seconds forward - 10% vested
-      for (let index = 0; index < 10; index++) {
-        await ethers.provider.send('evm_mine')
-      }
+      await ethers.provider.send('evm_increaseTime', [10])
+      await ethers.provider.send('evm_mine')
 
       await staking.connect(account1).unstake('10')
       const currentUserStakes = await staking
@@ -316,10 +313,8 @@ describe('Staking Unit', () => {
 
   describe('Delegate', async () => {
     it('delegate can be set', async () => {
-      await staking.connect(account1).addDelegate(account2.address)
-      expect(
-        await staking.connect(account1).isDelegate(account2.address)
-      ).to.equal(true)
+      await staking.connect(account1).proposeDelegate(account2.address)
+      await staking.connect(account2).setDelegate(account1.address)
       expect(
         await staking.connect(account1).delegateAccount(account2.address)
       ).to.equal(account1.address)
@@ -329,9 +324,27 @@ describe('Staking Unit', () => {
     })
 
     it('unsuccessful delegate set if already a delegate', async () => {
-      await staking.connect(account1).addDelegate(account2.address)
+      await staking.connect(account1).proposeDelegate(account2.address)
+      await staking.connect(account2).setDelegate(account1.address)
       await expect(
-        staking.connect(deployer).addDelegate(account2.address)
+        staking.connect(deployer).proposeDelegate(account2.address)
+      ).to.be.revertedWith('ALREADY_DELEGATE')
+    })
+
+    it('unsuccessful delegate proposed if already delegating', async () => {
+      await staking.connect(account1).proposeDelegate(account2.address)
+      await staking.connect(account2).setDelegate(account1.address)
+      await expect(
+        staking.connect(account1).proposeDelegate(deployer.address)
+      ).to.be.revertedWith('ALREADY_DELEGATING')
+    })
+
+    it('unsuccessful delegate set if already delegating', async () => {
+      await staking.connect(account1).proposeDelegate(account2.address)
+      await staking.connect(deployer).proposeDelegate(account2.address)
+      await staking.connect(account2).setDelegate(account1.address)
+      await expect(
+        staking.connect(account2).setDelegate(deployer.address)
       ).to.be.revertedWith('ALREADY_DELEGATE')
     })
 
@@ -339,17 +352,30 @@ describe('Staking Unit', () => {
       await token.mock.transferFrom.returns(true)
       await staking.connect(account2).stake('100')
       await expect(
-        staking.connect(account1).addDelegate(account2.address)
+        staking.connect(account1).proposeDelegate(account2.address)
       ).to.be.revertedWith('ALREADY_STAKING')
+    })
+
+    it('unsuccessful delegate set if delegate stakes after proposal', async () => {
+      await token.mock.transferFrom.returns(true)
+      staking.connect(account1).proposeDelegate(account2.address)
+      await staking.connect(account2).stake('100')
+      await expect(
+        staking.connect(account2).setDelegate(account1.address)
+      ).to.be.revertedWith('ALREADY_STAKING')
+    })
+
+    it('unsuccessful delegate set if not proposed', async () => {
+      await expect(
+        staking.connect(account2).setDelegate(account1.address)
+      ).to.be.revertedWith('NOT_PROPOSED')
     })
 
     it('delegate can be removed', async () => {
       const zeroAddress = '0x0000000000000000000000000000000000000000'
-      await staking.connect(account1).addDelegate(account2.address)
-      await staking.connect(account1).removeDelegate(account2.address)
-      expect(
-        await staking.connect(account1).isDelegate(account2.address)
-      ).to.equal(false)
+      await staking.connect(account1).proposeDelegate(account2.address)
+      await staking.connect(account2).setDelegate(account1.address)
+      await staking.connect(account1).unsetDelegate(account2.address)
       expect(
         await staking.connect(account1).delegateAccount(account2.address)
       ).to.equal(zeroAddress)
@@ -360,13 +386,14 @@ describe('Staking Unit', () => {
 
     it('unsuccessful delegate removed if not set as delegate', async () => {
       await expect(
-        staking.connect(account1).removeDelegate(account2.address)
+        staking.connect(account1).unsetDelegate(account2.address)
       ).to.be.revertedWith('NOT_DELEGATE')
     })
 
     it('successful staking with delegate', async () => {
       await token.mock.transferFrom.returns(true)
-      await staking.connect(account1).addDelegate(account2.address)
+      await staking.connect(account1).proposeDelegate(account2.address)
+      await staking.connect(account2).setDelegate(account1.address)
       await staking.connect(account2).stake('100')
       const block = await ethers.provider.getBlock()
       const userStakes = await staking
@@ -377,16 +404,17 @@ describe('Staking Unit', () => {
       expect(userStakes.timestamp).to.equal(block.timestamp)
     })
 
+
     it('successful unstaking with delegate', async () => {
       await token.mock.transferFrom.returns(true)
       await token.mock.transfer.returns(true)
-      await staking.connect(account1).addDelegate(account2.address)
+      await staking.connect(account1).proposeDelegate(account2.address)
+      await staking.connect(account2).setDelegate(account1.address)
       await staking.connect(account2).stake('100')
 
       // move 10 seconds forward - 10% vested
-      for (let index = 0; index < 10; index++) {
-        await ethers.provider.send('evm_mine')
-      }
+      await ethers.provider.send('evm_increaseTime', [10])
+      await ethers.provider.send('evm_mine')
 
       const initialUserStakes = await staking
         .connect(account2)
@@ -403,7 +431,8 @@ describe('Staking Unit', () => {
     it('successful extended stake and successful unstaking with delegate', async () => {
       await token.mock.transferFrom.returns(true)
       await token.mock.transfer.returns(true)
-      await staking.connect(account1).addDelegate(account2.address)
+      await staking.connect(account1).proposeDelegate(account2.address)
+      await staking.connect(account2).setDelegate(account1.address)
       await staking.connect(account2).stake('100')
       await staking.connect(account2).stake('100')
 
@@ -412,16 +441,14 @@ describe('Staking Unit', () => {
         .getStakes(account1.address)
 
       // move 10 seconds forward - 10% vested
-      for (let index = 0; index < 10; index++) {
-        await ethers.provider.send('evm_mine')
-      }
+      await ethers.provider.send('evm_increaseTime', [10])
+      await ethers.provider.send('evm_mine')
 
       await staking.connect(account1).unstake('10')
       const currentUserStakes = await staking
         .connect(account2)
         .getStakes(account1.address)
 
-      // expect(currentUserStakes.initial).to.equal(100)
       expect(initialUserStake.balance).to.equal(200)
       expect(currentUserStakes.balance).to.equal(190)
     })

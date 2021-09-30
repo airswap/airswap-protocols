@@ -31,8 +31,9 @@ contract Staking is Ownable {
 
   // Mapping of account to delegate
   mapping(address => address) public accountDelegate;
+
+  // Mapping of delegate to account
   mapping(address => address) public delegateAccount;
-  mapping(address => bool) public isDelegate;
 
   // ERC-20 token properties
   string public name;
@@ -74,25 +75,34 @@ contract Staking is Ownable {
   }
 
   /**
-   * @notice Add delegate for account
+   * @notice Propose delegate for account
    * @param delegate address
    */
-  function addDelegate(address delegate) external {
-    require(!isDelegate[delegate], "ALREADY_DELEGATE");
+  function proposeDelegate(address delegate) external {
+    require(accountDelegate[msg.sender] == address(0), "ALREADY_DELEGATING");
+    require(delegateAccount[delegate] == address(0), "ALREADY_DELEGATE");
     require(allStakes[delegate].balance == 0, "ALREADY_STAKING");
     accountDelegate[msg.sender] = delegate;
-    isDelegate[delegate] = true;
-    delegateAccount[delegate] = msg.sender;
   }
 
   /**
-   * @notice Remove delegate for account
+   * @notice Set delegate for account
+   * @param account address
+   */
+  function setDelegate(address account) external {
+    require(accountDelegate[account] == msg.sender, "NOT_PROPOSED");
+    require(delegateAccount[msg.sender] == address(0), "ALREADY_DELEGATE");
+    require(allStakes[msg.sender].balance == 0, "ALREADY_STAKING");
+    delegateAccount[msg.sender] = account;
+  }
+
+  /**
+   * @notice Unset delegate for account
    * @param delegate address
    */
-  function removeDelegate(address delegate) external {
+  function unsetDelegate(address delegate) external {
     require(accountDelegate[msg.sender] == delegate, "NOT_DELEGATE");
     accountDelegate[msg.sender] = address(0);
-    isDelegate[delegate] = false;
     delegateAccount[delegate] = address(0);
   }
 
@@ -101,7 +111,7 @@ contract Staking is Ownable {
    * @param amount uint256
    */
   function stake(uint256 amount) external {
-    if (isDelegate[msg.sender]) {
+    if (delegateAccount[msg.sender] != address(0)) {
       _stake(delegateAccount[msg.sender], amount);
     } else {
       _stake(msg.sender, amount);
@@ -109,22 +119,17 @@ contract Staking is Ownable {
   }
 
   /**
-   * @notice Unstake multiple
+   * @notice Unstake tokens
    * @param amount uint256
    */
   function unstake(uint256 amount) external {
-    uint256 totalAmount = 0;
     address account;
-    isDelegate[msg.sender]
+    delegateAccount[msg.sender] != address(0)
       ? account = delegateAccount[msg.sender]
       : account = msg.sender;
     _unstake(account, amount);
-    totalAmount += amount;
-
-    if (totalAmount > 0) {
-      token.transfer(account, totalAmount);
-      emit Transfer(account, address(0), totalAmount);
-    }
+      token.transfer(account, amount);
+      emit Transfer(account, address(0), amount);
   }
 
   /**
