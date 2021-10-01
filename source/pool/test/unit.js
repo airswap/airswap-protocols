@@ -41,7 +41,16 @@ describe('Pool Unit Tests', () => {
   })
 
   before(async () => {
-    ;[deployer, alice, bob, carol] = await ethers.getSigners()
+    ;[deployer, alice, bob, carol ] = await ethers.getSigners()
+
+    feeToken = await deployMockContract(deployer, IERC20.abi)
+    feeToken2 = await deployMockContract(deployer, IERC20.abi)
+
+
+    stakeContract = await (
+      await ethers.getContractFactory('Staking')
+    ).deploy(feeToken.address, 'StakedAST', 'sAST', 100)
+    await stakeContract.deployed()
 
     feeToken = await deployMockContract(deployer, IERC20.abi)
     feeToken2 = await deployMockContract(deployer, IERC20.abi)
@@ -163,11 +172,6 @@ describe('Pool Unit Tests', () => {
       await feeToken.mock.balanceOf.returns('100000')
       await feeToken.mock.transfer.returns(true)
       await feeToken.mock.transferFrom.returns(true)
-      // await stakeContract.mock.token.returns(feeToken.address)
-      // await feeToken.mock.safeTransferFrom.returns(true)
-      // await stakeContract.mock.stakeFor.returns()
-
-      // expect(stakeContract.address).to.equal(0xd2e8d9173584d4daa5c8354a79ef75cec2dfa228)
 
       const root = getRoot(tree)
       await pool.connect(deployer).enable(root)
