@@ -23,22 +23,17 @@ contract Staking is Ownable {
   // Token to be staked
   ERC20 public immutable token;
 
-  // Vesting duration min and max
-  uint256 public vestingLength;
+  // Unstaking duration
+  uint256 public duration;
 
   // Mapping of account to stakes
-  mapping(address => Stake) internal allStakes;
+  mapping(address => Stake) internal stakes;
 
   // Mapping of account to delegate
-  mapping(address => address) public accountDelegate;
-<<<<<<< HEAD
+  mapping(address => address) public accountDelegates;
 
   // Mapping of delegate to account
-  mapping(address => address) public delegateAccount;
-=======
-  mapping(address => address) public delegateAccount;
-  mapping(address => bool) public isDelegate;
->>>>>>> 0b37b7b60f4511f3d4dc2573be25c48298d3a8af
+  mapping(address => address) public delegateAccounts;
 
   // ERC-20 token properties
   string public name;
@@ -52,18 +47,18 @@ contract Staking is Ownable {
    * @param _token address
    * @param _name string
    * @param _symbol string
-   * @param _vestingLength uint256
+   * @param _duration uint256
    */
   constructor(
     ERC20 _token,
     string memory _name,
     string memory _symbol,
-    uint256 _vestingLength
+    uint256 _duration
   ) {
     token = _token;
     name = _name;
     symbol = _symbol;
-    setVesting(_vestingLength);
+    setDuration(_duration);
   }
 
   /**
@@ -80,15 +75,14 @@ contract Staking is Ownable {
   }
 
   /**
-<<<<<<< HEAD
    * @notice Propose delegate for account
    * @param delegate address
    */
   function proposeDelegate(address delegate) external {
-    require(accountDelegate[msg.sender] == address(0), "ALREADY_DELEGATING");
-    require(delegateAccount[delegate] == address(0), "ALREADY_DELEGATE");
-    require(allStakes[delegate].balance == 0, "ALREADY_STAKING");
-    accountDelegate[msg.sender] = delegate;
+    require(accountDelegates[msg.sender] == address(0), "SENDER_HAS_DELEGATE");
+    require(delegateAccounts[delegate] == address(0), "DELEGATE_IS_TAKEN");
+    require(stakes[delegate].balance == 0, "DELEGATE_MUST_NOT_BE_STAKED");
+    accountDelegates[msg.sender] = delegate;
   }
 
   /**
@@ -96,10 +90,10 @@ contract Staking is Ownable {
    * @param account address
    */
   function setDelegate(address account) external {
-    require(accountDelegate[account] == msg.sender, "NOT_PROPOSED");
-    require(delegateAccount[msg.sender] == address(0), "ALREADY_DELEGATE");
-    require(allStakes[msg.sender].balance == 0, "ALREADY_STAKING");
-    delegateAccount[msg.sender] = account;
+    require(accountDelegates[account] == msg.sender, "MUST_BE_PROPOSED");
+    require(delegateAccounts[msg.sender] == address(0), "DELEGATE_IS_TAKEN");
+    require(stakes[msg.sender].balance == 0, "DELEGATE_MUST_NOT_BE_STAKED");
+    delegateAccounts[msg.sender] = account;
   }
 
   /**
@@ -107,30 +101,9 @@ contract Staking is Ownable {
    * @param delegate address
    */
   function unsetDelegate(address delegate) external {
-    require(accountDelegate[msg.sender] == delegate, "NOT_DELEGATE");
-    accountDelegate[msg.sender] = address(0);
-=======
-   * @notice Add delegate for account
-   * @param delegate address
-   */
-  function addDelegate(address delegate) external {
-    require(!isDelegate[delegate], "ALREADY_DELEGATE");
-    require(allStakes[delegate].balance == 0, "ALREADY_STAKING");
-    accountDelegate[msg.sender] = delegate;
-    isDelegate[delegate] = true;
-    delegateAccount[delegate] = msg.sender;
-  }
-
-  /**
-   * @notice Remove delegate for account
-   * @param delegate address
-   */
-  function removeDelegate(address delegate) external {
-    require(accountDelegate[msg.sender] == delegate, "NOT_DELEGATE");
-    accountDelegate[msg.sender] = address(0);
-    isDelegate[delegate] = false;
->>>>>>> 0b37b7b60f4511f3d4dc2573be25c48298d3a8af
-    delegateAccount[delegate] = address(0);
+    require(accountDelegates[msg.sender] == delegate, "DELEGATE_NOT_SET");
+    accountDelegates[msg.sender] = address(0);
+    delegateAccounts[delegate] = address(0);
   }
 
   /**
@@ -138,48 +111,25 @@ contract Staking is Ownable {
    * @param amount uint256
    */
   function stake(uint256 amount) external {
-<<<<<<< HEAD
-    if (delegateAccount[msg.sender] != address(0)) {
-=======
-    if (isDelegate[msg.sender]) {
->>>>>>> 0b37b7b60f4511f3d4dc2573be25c48298d3a8af
-      _stake(delegateAccount[msg.sender], amount);
+    if (delegateAccounts[msg.sender] != address(0)) {
+      _stake(delegateAccounts[msg.sender], amount);
     } else {
       _stake(msg.sender, amount);
     }
   }
 
   /**
-<<<<<<< HEAD
    * @notice Unstake tokens
    * @param amount uint256
    */
   function unstake(uint256 amount) external {
     address account;
-    delegateAccount[msg.sender] != address(0)
-      ? account = delegateAccount[msg.sender]
+    delegateAccounts[msg.sender] != address(0)
+      ? account = delegateAccounts[msg.sender]
       : account = msg.sender;
     _unstake(account, amount);
-      token.transfer(account, amount);
-      emit Transfer(account, address(0), amount);
-=======
-   * @notice Unstake multiple
-   * @param amount uint256
-   */
-  function unstake(uint256 amount) external {
-    uint256 totalAmount = 0;
-    address account;
-    isDelegate[msg.sender]
-      ? account = delegateAccount[msg.sender]
-      : account = msg.sender;
-    _unstake(account, amount);
-    totalAmount += amount;
-
-    if (totalAmount > 0) {
-      token.transfer(account, totalAmount);
-      emit Transfer(account, address(0), totalAmount);
-    }
->>>>>>> 0b37b7b60f4511f3d4dc2573be25c48298d3a8af
+    token.transfer(account, amount);
+    emit Transfer(account, address(0), amount);
   }
 
   /**
@@ -191,7 +141,7 @@ contract Staking is Ownable {
     view
     returns (Stake memory accountStake)
   {
-    return allStakes[account];
+    return stakes[account];
   }
 
   /**
@@ -205,7 +155,7 @@ contract Staking is Ownable {
    * @notice Balance of an account (ERC-20)
    */
   function balanceOf(address account) external view returns (uint256 total) {
-    return allStakes[account].balance;
+    return stakes[account].balance;
   }
 
   /**
@@ -216,12 +166,12 @@ contract Staking is Ownable {
   }
 
   /**
-   * @notice Set vesting config
-   * @param _vestingLength uint256
+   * @notice Set unstaking duration
+   * @param _duration uint256
    */
-  function setVesting(uint256 _vestingLength) public onlyOwner {
-    require(_vestingLength != 0, "INVALID_VESTING");
-    vestingLength = _vestingLength;
+  function setDuration(uint256 _duration) public onlyOwner {
+    require(_duration != 0, "DURATION_INVALID");
+    duration = _duration;
   }
 
   /**
@@ -229,11 +179,7 @@ contract Staking is Ownable {
    * @param account address
    * @param amount uint256
    */
-<<<<<<< HEAD
   function stakeFor(address account, uint256 amount) public {
-=======
-  function stakeFor(address account, uint256 amount) external {
->>>>>>> 0b37b7b60f4511f3d4dc2573be25c48298d3a8af
     _stake(account, amount);
   }
 
@@ -242,12 +188,12 @@ contract Staking is Ownable {
    * @param account uint256
    */
   function available(address account) public view returns (uint256) {
-    Stake storage selected = allStakes[account];
+    Stake storage selected = stakes[account];
     uint256 _available = (block.timestamp.sub(selected.timestamp))
       .mul(selected.balance)
       .div(selected.duration);
-    if (_available >= allStakes[account].balance) {
-      return allStakes[account].balance;
+    if (_available >= stakes[account].balance) {
+      return stakes[account].balance;
     } else {
       return _available;
     }
@@ -260,17 +206,15 @@ contract Staking is Ownable {
    */
   function _stake(address account, uint256 amount) internal {
     require(amount > 0, "AMOUNT_INVALID");
-    allStakes[account].duration = vestingLength;
-    if (allStakes[account].balance == 0) {
-      allStakes[account].balance = amount;
-      allStakes[account].timestamp = block.timestamp;
+    stakes[account].duration = duration;
+    if (stakes[account].balance == 0) {
+      stakes[account].balance = amount;
+      stakes[account].timestamp = block.timestamp;
     } else {
       uint256 nowAvailable = available(account);
-      allStakes[account].balance = allStakes[account].balance.add(amount);
-      allStakes[account].timestamp = block.timestamp.sub(
-        nowAvailable.mul(allStakes[account].duration).div(
-          allStakes[account].balance
-        )
+      stakes[account].balance = stakes[account].balance.add(amount);
+      stakes[account].timestamp = block.timestamp.sub(
+        nowAvailable.mul(stakes[account].duration).div(stakes[account].balance)
       );
     }
     token.safeTransferFrom(msg.sender, address(this), amount);
@@ -283,12 +227,8 @@ contract Staking is Ownable {
    * @param amount uint256
    */
   function _unstake(address account, uint256 amount) internal {
-    Stake storage selected = allStakes[account];
+    Stake storage selected = stakes[account];
     require(amount <= available(account), "AMOUNT_EXCEEDS_AVAILABLE");
     selected.balance = selected.balance.sub(amount);
   }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 0b37b7b60f4511f3d4dc2573be25c48298d3a8af

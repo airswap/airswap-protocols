@@ -41,7 +41,7 @@ describe('Pool Unit Tests', () => {
   })
 
   before(async () => {
-    ;[deployer, alice, bob, carol ] = await ethers.getSigners()
+    ;[deployer, alice, bob, carol] = await ethers.getSigners()
 
     feeToken = await deployMockContract(deployer, IERC20.abi)
     feeToken2 = await deployMockContract(deployer, IERC20.abi)
@@ -74,13 +74,17 @@ describe('Pool Unit Tests', () => {
 
     it('constructor reverts when percentage is too high', async () => {
       await expect(
-        (await ethers.getContractFactory('Pool')).deploy(CLAIM_SCALE, 101, stakeContract.address, feeToken.address)
+        (
+          await ethers.getContractFactory('Pool')
+        ).deploy(CLAIM_SCALE, 101, stakeContract.address, feeToken.address)
       ).to.be.revertedWith('MAX_TOO_HIGH')
     })
 
     it('constructor reverts when scale is too high', async () => {
       await expect(
-        (await ethers.getContractFactory('Pool')).deploy(78, CLAIM_MAX, stakeContract.address, feeToken.address)
+        (
+          await ethers.getContractFactory('Pool')
+        ).deploy(78, CLAIM_MAX, stakeContract.address, feeToken.address)
       ).to.be.revertedWith('SCALE_TOO_HIGH')
     })
   })
@@ -114,9 +118,11 @@ describe('Pool Unit Tests', () => {
     })
 
     it('set stake contract reverts', async () => {
-      await expect(pool.connect(deployer).setStakingContract('0x0000000000000000000000000000000000000000')).to.be.revertedWith(
-        'INVALID_ADDRESS'
-      )
+      await expect(
+        pool
+          .connect(deployer)
+          .setStakingContract('0x0000000000000000000000000000000000000000')
+      ).to.be.revertedWith('INVALID_ADDRESS')
     })
 
     it('set stake token successful', async () => {
@@ -125,9 +131,11 @@ describe('Pool Unit Tests', () => {
     })
 
     it('set stake token reverts', async () => {
-      await expect(pool.connect(deployer).setStakingToken('0x0000000000000000000000000000000000000000')).to.be.revertedWith(
-        'INVALID_ADDRESS'
-      )
+      await expect(
+        pool
+          .connect(deployer)
+          .setStakingToken('0x0000000000000000000000000000000000000000')
+      ).to.be.revertedWith('INVALID_ADDRESS')
     })
   })
 
@@ -211,8 +219,6 @@ describe('Pool Unit Tests', () => {
         .connect(alice)
         .balanceOf(alice.address)
       expect(balance).to.equal('495')
-
-      
     })
 
     it('withdrawAndStake reverts with wrong token', async () => {
@@ -264,9 +270,7 @@ describe('Pool Unit Tests', () => {
       const isClaimed = await pool.claimed(root, alice.address)
       expect(isClaimed).to.equal(true)
 
-      const balance = await stakeContract
-        .connect(bob)
-        .balanceOf(bob.address)
+      const balance = await stakeContract.connect(bob).balanceOf(bob.address)
       expect(balance).to.equal('495')
     })
 
@@ -355,7 +359,9 @@ describe('Pool Unit Tests', () => {
 
       const root = getRoot(tree)
 
-      await pool.connect(deployer).setClaimed(root, [alice.address, bob.address])
+      await pool
+        .connect(deployer)
+        .setClaimed(root, [alice.address, bob.address])
 
       let proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
 

@@ -15,7 +15,12 @@ async function main() {
 
   console.log(`Deploying on ${chainNames[chainId].toUpperCase()}`)
   const poolFactory = await ethers.getContractFactory('Pool')
-  const poolContract = await poolFactory.deploy(scale, max, stakingContract, stakingToken)
+  const poolContract = await poolFactory.deploy(
+    scale,
+    max,
+    stakingContract,
+    stakingToken
+  )
   await poolContract.deployed()
   console.log(`New Registry: ${poolContract.address}`)
 
