@@ -11,8 +11,7 @@ async function main() {
   const stakingToken = stakingTokenAddresses[chainId]
   const name = 'Staked AST'
   const symbol = 'sAST'
-  const duration = 300
-  const cliff = 30
+  const vestingLength = 100
 
   console.log(`Deploying on ${chainNames[chainId].toUpperCase()}`)
   const stakingFactory = await ethers.getContractFactory('Staking')
@@ -20,15 +19,14 @@ async function main() {
     stakingToken,
     name,
     symbol,
-    duration,
-    cliff
+    vestingLength
   )
   await stakingContract.deployed()
   console.log(`New Staking: ${stakingContract.address}`)
 
   await run('verify:verify', {
     address: stakingContract.address,
-    constructorArguments: [stakingToken, name, symbol, duration, cliff],
+    constructorArguments: [stakingToken, name, symbol, vestingLength],
   })
 }
 
