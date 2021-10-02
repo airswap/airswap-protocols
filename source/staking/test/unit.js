@@ -41,7 +41,7 @@ describe('Staking Unit', () => {
       const name = await staking.name()
       const symbol = await staking.symbol()
       const tokenAddress = await staking.token()
-      const defaultduration = await staking.vestingLength()
+      const defaultduration = await staking.duration()
 
       expect(owner).to.equal(deployer.address)
       expect(name).to.equal('Staked AST')
@@ -74,23 +74,23 @@ describe('Staking Unit', () => {
     })
   })
 
-  describe('Set Vesting Schedule', async () => {
-    it('non owner cannot set vesting schedule', async () => {
-      await expect(staking.connect(account1).setVesting(0)).to.be.revertedWith(
+  describe('Set Unstaking Duration', async () => {
+    it('non owner cannot set unstaking duration', async () => {
+      await expect(staking.connect(account1).setDuration(0)).to.be.revertedWith(
         'Ownable: caller is not the owner'
       )
     })
 
-    it('owner can set vesting schedule', async () => {
-      await staking.connect(deployer).setVesting(2 * DEFAULTDURATION)
+    it('owner can set unstaking duration', async () => {
+      await staking.connect(deployer).setDuration(2 * DEFAULTDURATION)
 
-      const defaultduration = await staking.vestingLength()
+      const defaultduration = await staking.duration()
       expect(defaultduration).to.equal(2 * DEFAULTDURATION)
     })
 
-    it('Owner cannot set vesting to zero', async () => {
-      await expect(staking.connect(deployer).setVesting(0)).to.be.revertedWith(
-        'INVALID_VESTING'
+    it('Owner cannot set unstaking duration to zero', async () => {
+      await expect(staking.connect(deployer).setDuration(0)).to.be.revertedWith(
+        'DURATION_INVALID'
       )
     })
   })
@@ -191,7 +191,7 @@ describe('Staking Unit', () => {
       ).to.be.revertedWith('AMOUNT_INVALID')
     })
 
-    it('successful stakeFor when existing stake is not fully vested', async () => {
+    it('successful stakeFor when existing stake is not fully unstakeable', async () => {
       await token.mock.transferFrom.returns(true)
       await staking.connect(account2).stake('100')
       await expect(staking.connect(account1).stakeFor(account2.address, '1')).to
@@ -205,11 +205,11 @@ describe('Staking Unit', () => {
       expect(userStakes.duration).to.equal(DEFAULTDURATION)
     })
 
-    it('successful stakeFor when existing stake is fully vested', async () => {
+    it('successful stakeFor when existing stake is fully unstakeable', async () => {
       await token.mock.transferFrom.returns(true)
       await staking.connect(account2).stake('100')
 
-      // move 10 seconds forward - 100% vested
+      // move 10 seconds forward - 100% unstakeable
       await ethers.provider.send('evm_increaseTime', [10])
       await ethers.provider.send('evm_mine')
 
@@ -244,7 +244,7 @@ describe('Staking Unit', () => {
       await token.mock.transfer.returns(true)
       await staking.connect(account1).stake('100')
 
-      // move 10 seconds forward - 10% vested
+      // move 10 seconds forward - 10% unstakeable
       await ethers.provider.send('evm_increaseTime', [10])
       await ethers.provider.send('evm_mine')
 
@@ -266,7 +266,7 @@ describe('Staking Unit', () => {
         .connect(account1)
         .getStakes(account1.address)
 
-      // move 10 seconds forward - 10% vested
+      // move 10 seconds forward - 10% unstakeable
       await ethers.provider.send('evm_increaseTime', [10])
       await ethers.provider.send('evm_mine')
 
@@ -290,11 +290,11 @@ describe('Staking Unit', () => {
       await ethers.provider.send('evm_mine', [block['timestamp'] + 10])
 
       const available = await staking.available(account1.address)
-      // every 1 block 1% is vested, user can only claim starting afater 10 blocks, or 10% vested
+      // every 1 block 1% is unstakeable, user can only claim starting afater 10 blocks, or 10% unstakeable
       expect(available).to.equal('10')
     })
 
-    it('available to unstake is > 0, if time has passed with an updated vesting schedule', async () => {
+    it('available to unstake is > 0, if time has passed with an updated unstaking duration', async () => {
       await token.mock.transferFrom.returns(true)
       await token.mock.transfer.returns(true)
       await staking.connect(account1).stake('100')
@@ -306,7 +306,7 @@ describe('Staking Unit', () => {
 
       const available = await staking.available(account1.address)
 
-      // every 1 block 2% is vested
+      // every 1 block 2% is unstakeable
       expect(available).to.equal('10')
     })
   })
@@ -316,10 +316,10 @@ describe('Staking Unit', () => {
       await staking.connect(account1).proposeDelegate(account2.address)
       await staking.connect(account2).setDelegate(account1.address)
       expect(
-        await staking.connect(account1).delegateAccount(account2.address)
+        await staking.connect(account1).delegateAccounts(account2.address)
       ).to.equal(account1.address)
       expect(
-        await staking.connect(account1).accountDelegate(account1.address)
+        await staking.connect(account1).accountDelegates(account1.address)
       ).to.equal(account2.address)
     })
 
@@ -328,7 +328,7 @@ describe('Staking Unit', () => {
       await staking.connect(account2).setDelegate(account1.address)
       await expect(
         staking.connect(deployer).proposeDelegate(account2.address)
-      ).to.be.revertedWith('ALREADY_DELEGATE')
+      ).to.be.revertedWith('DELEGATE_IS_TAKEN')
     })
 
     it('unsuccessful delegate proposed if already delegating', async () => {
@@ -336,7 +336,7 @@ describe('Staking Unit', () => {
       await staking.connect(account2).setDelegate(account1.address)
       await expect(
         staking.connect(account1).proposeDelegate(deployer.address)
-      ).to.be.revertedWith('ALREADY_DELEGATING')
+      ).to.be.revertedWith('SENDER_HAS_DELEGATE')
     })
 
     it('unsuccessful delegate set if already delegating', async () => {
@@ -345,7 +345,7 @@ describe('Staking Unit', () => {
       await staking.connect(account2).setDelegate(account1.address)
       await expect(
         staking.connect(account2).setDelegate(deployer.address)
-      ).to.be.revertedWith('ALREADY_DELEGATE')
+      ).to.be.revertedWith('DELEGATE_IS_TAKEN')
     })
 
     it('unsuccessful delegate set if delegate already staking', async () => {
@@ -353,7 +353,7 @@ describe('Staking Unit', () => {
       await staking.connect(account2).stake('100')
       await expect(
         staking.connect(account1).proposeDelegate(account2.address)
-      ).to.be.revertedWith('ALREADY_STAKING')
+      ).to.be.revertedWith('DELEGATE_MUST_NOT_BE_STAKED')
     })
 
     it('unsuccessful delegate set if delegate stakes after proposal', async () => {
@@ -362,13 +362,13 @@ describe('Staking Unit', () => {
       await staking.connect(account2).stake('100')
       await expect(
         staking.connect(account2).setDelegate(account1.address)
-      ).to.be.revertedWith('ALREADY_STAKING')
+      ).to.be.revertedWith('DELEGATE_MUST_NOT_BE_STAKED')
     })
 
     it('unsuccessful delegate set if not proposed', async () => {
       await expect(
         staking.connect(account2).setDelegate(account1.address)
-      ).to.be.revertedWith('NOT_PROPOSED')
+      ).to.be.revertedWith('MUST_BE_PROPOSED')
     })
 
     it('delegate can be removed', async () => {
@@ -377,17 +377,17 @@ describe('Staking Unit', () => {
       await staking.connect(account2).setDelegate(account1.address)
       await staking.connect(account1).unsetDelegate(account2.address)
       expect(
-        await staking.connect(account1).delegateAccount(account2.address)
+        await staking.connect(account1).delegateAccounts(account2.address)
       ).to.equal(zeroAddress)
       expect(
-        await staking.connect(account1).accountDelegate(account1.address)
+        await staking.connect(account1).accountDelegates(account1.address)
       ).to.equal(zeroAddress)
     })
 
     it('unsuccessful delegate removed if not set as delegate', async () => {
       await expect(
         staking.connect(account1).unsetDelegate(account2.address)
-      ).to.be.revertedWith('NOT_DELEGATE')
+      ).to.be.revertedWith('DELEGATE_NOT_SET')
     })
 
     it('successful staking with delegate', async () => {
@@ -404,7 +404,6 @@ describe('Staking Unit', () => {
       expect(userStakes.timestamp).to.equal(block.timestamp)
     })
 
-
     it('successful unstaking with delegate', async () => {
       await token.mock.transferFrom.returns(true)
       await token.mock.transfer.returns(true)
@@ -412,7 +411,7 @@ describe('Staking Unit', () => {
       await staking.connect(account2).setDelegate(account1.address)
       await staking.connect(account2).stake('100')
 
-      // move 10 seconds forward - 10% vested
+      // move 10 seconds forward - 10% unstakeable
       await ethers.provider.send('evm_increaseTime', [10])
       await ethers.provider.send('evm_mine')
 
@@ -440,7 +439,7 @@ describe('Staking Unit', () => {
         .connect(account2)
         .getStakes(account1.address)
 
-      // move 10 seconds forward - 10% vested
+      // move 10 seconds forward - 10% unstakeable
       await ethers.provider.send('evm_increaseTime', [10])
       await ethers.provider.send('evm_mine')
 
