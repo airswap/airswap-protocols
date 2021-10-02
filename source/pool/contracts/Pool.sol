@@ -84,6 +84,7 @@ contract Pool is Ownable {
   /**
    * @notice Set scale
    * @dev Only owner
+   * @param _scale uint256
    */
   function setScale(uint256 _scale) external onlyOwner {
     require(_scale <= MAX_SCALE, "SCALE_TOO_HIGH");
@@ -94,11 +95,53 @@ contract Pool is Ownable {
   /**
    * @notice Set max
    * @dev Only owner
+   * @param _max uint256
    */
   function setMax(uint256 _max) external onlyOwner {
     require(_max <= MAX_PERCENTAGE, "MAX_TOO_HIGH");
     max = _max;
     emit SetMax(max);
+  }
+
+  /**
+   * @notice Set staking contract address
+   * @dev Only owner
+   * @param _stakingContract address
+   */
+  function setStakingContract(address _stakingContract) external onlyOwner {
+    require(_stakingContract != address(0), "INVALID_ADDRESS");
+    stakingContract = _stakingContract;
+  }
+
+  /**
+   * @notice Set staking token address
+   * @dev Only owner
+   * @param _stakingToken address
+   */
+  function setStakingToken(address _stakingToken) external onlyOwner {
+    require(_stakingToken != address(0), "INVALID_ADDRESS");
+    stakingToken = _stakingToken;
+  }
+
+  /**
+   * @notice Set claims from previous pool contract
+   * @dev Only owner
+   * @param root bytes32
+   * @param accounts address[]
+   */
+  function setClaimed(bytes32 root, address[] memory accounts)
+    external
+    onlyOwner
+  {
+    if (roots[root] == false) {
+      roots[root] = true;
+    }
+    for (uint256 i = 0; i < accounts.length; i++) {
+      address account = accounts[i];
+      require(!claimed[root][account], "CLAIM_ALREADY_MADE");
+      claimed[root][account] = true;
+    }
+    emit Enable(root);
   }
 
   /**
@@ -193,6 +236,14 @@ contract Pool is Ownable {
     require(success, "ERROR_STAKING");
   }
 
+  /**
+   * @notice Withdraw tokens from the pool using claims
+   
+   * @param token IERC20
+   * @param minimumAmount uint256
+   * @param account address
+   * @param recipient address
+   */
   function withdrawProtected(
     Claim[] memory claims,
     IERC20 token,

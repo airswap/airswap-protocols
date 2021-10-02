@@ -45,15 +45,6 @@ describe('Pool Unit Tests', () => {
 
     feeToken = await deployMockContract(deployer, IERC20.abi)
     feeToken2 = await deployMockContract(deployer, IERC20.abi)
-
-
-    stakeContract = await (
-      await ethers.getContractFactory('Staking')
-    ).deploy(feeToken.address, 'StakedAST', 'sAST', 100)
-    await stakeContract.deployed()
-
-    feeToken = await deployMockContract(deployer, IERC20.abi)
-    feeToken2 = await deployMockContract(deployer, IERC20.abi)
     // stakeContract = await deployMockContract(deployer, STAKE.abi)
 
     stakeContract = await (
@@ -112,6 +103,30 @@ describe('Pool Unit Tests', () => {
       )
       await expect(pool.connect(deployer).enable(root)).to.be.revertedWith(
         'ROOT_EXISTS'
+      )
+    })
+  })
+
+  describe('Test staking variables', async () => {
+    it('set stake contract successful', async () => {
+      await pool.connect(deployer).setStakingContract(stakeContract.address)
+      expect(await pool.stakingContract()).to.equal(stakeContract.address)
+    })
+
+    it('set stake contract reverts', async () => {
+      await expect(pool.connect(deployer).setStakingContract('0x0000000000000000000000000000000000000000')).to.be.revertedWith(
+        'INVALID_ADDRESS'
+      )
+    })
+
+    it('set stake token successful', async () => {
+      await pool.connect(deployer).setStakingToken(feeToken2.address)
+      expect(await pool.stakingToken()).to.equal(feeToken2.address)
+    })
+
+    it('set stake token reverts', async () => {
+      await expect(pool.connect(deployer).setStakingToken('0x0000000000000000000000000000000000000000')).to.be.revertedWith(
+        'INVALID_ADDRESS'
       )
     })
   })
@@ -197,7 +212,7 @@ describe('Pool Unit Tests', () => {
         .balanceOf(alice.address)
       expect(balance).to.equal('495')
 
-
+      
     })
 
     it('withdrawAndStake reverts with wrong token', async () => {
@@ -334,6 +349,45 @@ describe('Pool Unit Tests', () => {
       ).to.be.revertedWith('CLAIM_ALREADY_MADE')
     })
 
+    it('Test withdraw reverts with claim already made on previous pool contract', async () => {
+      await feeToken.mock.balanceOf.returns('100000')
+      await feeToken.mock.transfer.returns(true)
+
+      const root = getRoot(tree)
+
+      await pool.connect(deployer).setClaimed(root, [alice.address, bob.address])
+
+      let proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
+
+      await expect(
+        pool.connect(bob).withdraw(
+          [
+            {
+              root: getRoot(tree),
+              score: BOB_SCORE,
+              proof,
+            },
+          ],
+          feeToken.address
+        )
+      ).to.be.revertedWith('CLAIM_ALREADY_MADE')
+
+      proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
+
+      await expect(
+        pool.connect(alice).withdraw(
+          [
+            {
+              root: getRoot(tree),
+              score: ALICE_SCORE,
+              proof,
+            },
+          ],
+          feeToken.address
+        )
+      ).to.be.revertedWith('CLAIM_ALREADY_MADE')
+    })
+
     it('Test withdraw reverts with invalid proof', async () => {
       await feeToken.mock.transfer.returns(true)
 
@@ -356,6 +410,7 @@ describe('Pool Unit Tests', () => {
       ).to.be.revertedWith('PROOF_INVALID')
     })
   })
+
   describe('Test Calculate', async () => {
     it('Test calculation input and output', async () => {
       await feeToken.mock.balanceOf.returns('100000')
@@ -432,7 +487,7 @@ describe('Pool Unit Tests', () => {
       ).to.emit(pool, 'DrainTo')
     })
 
-    it('Test dtain to is only callable by owner', async () => {
+    it('Test drain to is only callable by owner', async () => {
       await expect(
         pool
           .connect(alice)
