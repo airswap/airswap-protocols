@@ -40,6 +40,12 @@ contract Pool is Ownable {
   // Mapping of tree root to account to mark as claimed
   mapping(bytes32 => mapping(address => bool)) public claimed;
 
+  // Staking contract address
+  address public stakingContract;
+
+  // Staking token address
+  address public stakingToken;
+
   /**
    * @notice Events
    */
@@ -58,17 +64,27 @@ contract Pool is Ownable {
    * @notice Constructor
    * @param _scale uint256
    * @param _max uint256
+   * @param _stakingContract address
+   * @param _stakingToken address
    */
-  constructor(uint256 _scale, uint256 _max) {
+  constructor(
+    uint256 _scale,
+    uint256 _max,
+    address _stakingContract,
+    address _stakingToken
+  ) {
     require(_max <= MAX_PERCENTAGE, "MAX_TOO_HIGH");
     require(_scale <= MAX_SCALE, "SCALE_TOO_HIGH");
     scale = _scale;
     max = _max;
+    stakingContract = _stakingContract;
+    stakingToken = _stakingToken;
   }
 
   /**
    * @notice Set scale
    * @dev Only owner
+   * @param _scale uint256
    */
   function setScale(uint256 _scale) external onlyOwner {
     require(_scale <= MAX_SCALE, "SCALE_TOO_HIGH");
@@ -79,11 +95,53 @@ contract Pool is Ownable {
   /**
    * @notice Set max
    * @dev Only owner
+   * @param _max uint256
    */
   function setMax(uint256 _max) external onlyOwner {
     require(_max <= MAX_PERCENTAGE, "MAX_TOO_HIGH");
     max = _max;
     emit SetMax(max);
+  }
+
+  /**
+   * @notice Set staking contract address
+   * @dev Only owner
+   * @param _stakingContract address
+   */
+  function setStakingContract(address _stakingContract) external onlyOwner {
+    require(_stakingContract != address(0), "INVALID_ADDRESS");
+    stakingContract = _stakingContract;
+  }
+
+  /**
+   * @notice Set staking token address
+   * @dev Only owner
+   * @param _stakingToken address
+   */
+  function setStakingToken(address _stakingToken) external onlyOwner {
+    require(_stakingToken != address(0), "INVALID_ADDRESS");
+    stakingToken = _stakingToken;
+  }
+
+  /**
+   * @notice Set claims from previous pool contract
+   * @dev Only owner
+   * @param root bytes32
+   * @param accounts address[]
+   */
+  function setClaimed(bytes32 root, address[] memory accounts)
+    external
+    onlyOwner
+  {
+    if (roots[root] == false) {
+      roots[root] = true;
+    }
+    for (uint256 i = 0; i < accounts.length; i++) {
+      address account = accounts[i];
+      require(!claimed[root][account], "CLAIM_ALREADY_MADE");
+      claimed[root][account] = true;
+    }
+    emit Enable(root);
   }
 
   /**
@@ -116,14 +174,84 @@ contract Pool is Ownable {
    * @param token IERC20
    */
   function withdraw(Claim[] memory claims, IERC20 token) external {
-    withdrawProtected(claims, token, 0);
+    withdrawProtected(claims, token, 0, msg.sender, msg.sender);
   }
 
+  /**
+   * @notice Withdraw tokens from the pool using claims and send to recipient
+   * @param claims Claim[]
+   * @param token IERC20
+   * @param recipient address
+   */
+  function withdrawWithRecipient(
+    Claim[] memory claims,
+    IERC20 token,
+    address recipient
+  ) external {
+    withdrawProtected(claims, token, 0, msg.sender, recipient);
+  }
+
+  /**
+   * @notice Withdraw tokens from the pool using claims and stake
+   * @param claims Claim[]
+   * @param token IERC20
+   */
+  function withdrawAndStake(Claim[] memory claims, IERC20 token) external {
+    require(token == IERC20(stakingToken), "INVALID_TOKEN");
+    uint256 amount = withdrawProtected(
+      claims,
+      token,
+      0,
+      msg.sender,
+      msg.sender
+    );
+    (bool success, ) = address(stakingContract).call(
+      abi.encodeWithSignature("stakeFor(address,uint256)", msg.sender, amount)
+    );
+    require(success, "ERROR_STAKING");
+  }
+
+  /**
+   * @notice Withdraw tokens from the pool using claims and stake for another account
+   * @param claims Claim[]
+   * @param token IERC20
+   * @param account address
+   */
+  function withdrawAndStakeFor(
+    Claim[] memory claims,
+    IERC20 token,
+    address account
+  ) external {
+    require(token == IERC20(stakingToken), "INVALID_TOKEN");
+    uint256 amount = withdrawProtected(
+      claims,
+      token,
+      0,
+      msg.sender,
+      msg.sender
+    );
+    (bool success, ) = address(stakingContract).call(
+      abi.encodeWithSignature("stakeFor(address,uint256)", account, amount)
+    );
+    require(success, "ERROR_STAKING");
+  }
+
+  /**
+   * @notice Withdraw tokens from the pool using claims
+   
+   * @param claims Claim[]
+   * @param token IERC20
+   * @param minimumAmount uint256
+   * @param account address
+   * @param recipient address
+   */
   function withdrawProtected(
     Claim[] memory claims,
     IERC20 token,
-    uint256 minimumAmount
-  ) public {
+    uint256 minimumAmount,
+    address account,
+    address recipient
+  ) public returns (uint256) {
     require(claims.length > 0, "CLAIMS_MUST_BE_PROVIDED");
     uint256 totalScore = 0;
     bytes32[] memory rootList = new bytes32[](claims.length);
@@ -131,19 +259,20 @@ contract Pool is Ownable {
     for (uint256 i = 0; i < claims.length; i++) {
       claim = claims[i];
       require(roots[claim.root], "ROOT_NOT_ENABLED");
-      require(!claimed[claim.root][msg.sender], "CLAIM_ALREADY_MADE");
+      require(!claimed[claim.root][account], "CLAIM_ALREADY_MADE");
       require(
-        verify(msg.sender, claim.root, claim.score, claim.proof),
+        verify(account, claim.root, claim.score, claim.proof),
         "PROOF_INVALID"
       );
       totalScore = totalScore.add(claim.score);
-      claimed[claim.root][msg.sender] = true;
+      claimed[claim.root][account] = true;
       rootList[i] = claim.root;
     }
     uint256 amount = calculate(totalScore, token);
     require(amount >= minimumAmount, "INSUFFICIENT_AMOUNT");
-    token.safeTransfer(msg.sender, amount);
-    emit Withdraw(rootList, msg.sender, token, amount);
+    token.safeTransfer(recipient, amount);
+    emit Withdraw(rootList, account, token, amount);
+    return amount;
   }
 
   /**
