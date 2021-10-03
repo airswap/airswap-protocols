@@ -175,6 +175,7 @@ contract Pool is Ownable {
    */
   function withdraw(Claim[] memory claims, IERC20 token) external {
     withdrawProtected(claims, token, 0, msg.sender, msg.sender);
+<<<<<<< HEAD
   }
 
   /**
@@ -240,6 +241,72 @@ contract Pool is Ownable {
    * @notice Withdraw tokens from the pool using claims
    
    * @param claims Claim[]
+=======
+  }
+
+  /**
+   * @notice Withdraw tokens from the pool using claims and send to recipient
+   * @param claims Claim[]
+   * @param token IERC20
+   * @param recipient address
+   */
+  function withdrawWithRecipient(
+    Claim[] memory claims,
+    IERC20 token,
+    address recipient
+  ) external {
+    withdrawProtected(claims, token, 0, msg.sender, recipient);
+  }
+
+  /**
+   * @notice Withdraw tokens from the pool using claims and stake
+   * @param claims Claim[]
+   * @param token IERC20
+   */
+  function withdrawAndStake(Claim[] memory claims, IERC20 token) external {
+    require(token == IERC20(stakingToken), "INVALID_TOKEN");
+    uint256 amount = withdrawProtected(
+      claims,
+      token,
+      0,
+      msg.sender,
+      msg.sender
+    );
+    (bool success, ) = address(stakingContract).call(
+      abi.encodeWithSignature("stakeFor(address,uint256)", msg.sender, amount)
+    );
+    require(success, "ERROR_STAKING");
+  }
+
+  /**
+   * @notice Withdraw tokens from the pool using claims and stake for another account
+   * @param claims Claim[]
+   * @param token IERC20
+   * @param account address
+   */
+  function withdrawAndStakeFor(
+    Claim[] memory claims,
+    IERC20 token,
+    address account
+  ) external {
+    require(token == IERC20(stakingToken), "INVALID_TOKEN");
+    uint256 amount = withdrawProtected(
+      claims,
+      token,
+      0,
+      msg.sender,
+      msg.sender
+    );
+    (bool success, ) = address(stakingContract).call(
+      abi.encodeWithSignature("stakeFor(address,uint256)", account, amount)
+    );
+    require(success, "ERROR_STAKING");
+  }
+
+  /**
+   * @notice Withdraw tokens from the pool using claims
+   
+>>>>>>> 6c4769e56793aff782169d14e2d1533b2cfde5fc
    * @param token IERC20
    * @param minimumAmount uint256
    * @param account address

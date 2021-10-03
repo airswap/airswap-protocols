@@ -6,7 +6,11 @@ const { generateTreeFromData, getRoot, getProof } = require('@airswap/merkle')
 const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
 const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
+<<<<<<< HEAD
 const STAKING = require('@airswap/staking/build/contracts/Staking.sol/Staking.json')
+=======
+// const STAKE = require('@airswap/staking/build/contracts/Staking.sol/Staking.json')
+>>>>>>> 6c4769e56793aff782169d14e2d1533b2cfde5fc
 
 function toWei(value, places) {
   return toAtomicString(value, places || 18)
@@ -45,9 +49,16 @@ describe('Pool Unit Tests', () => {
 
     feeToken = await deployMockContract(deployer, IERC20.abi)
     feeToken2 = await deployMockContract(deployer, IERC20.abi)
+<<<<<<< HEAD
 
     stakeContract = await (
       await ethers.getContractFactory(STAKING.abi, STAKING.bytecode)
+=======
+    // stakeContract = await deployMockContract(deployer, STAKE.abi)
+
+    stakeContract = await (
+      await ethers.getContractFactory('Staking')
+>>>>>>> 6c4769e56793aff782169d14e2d1533b2cfde5fc
     ).deploy(feeToken.address, 'StakedAST', 'sAST', 100)
     await stakeContract.deployed()
 
