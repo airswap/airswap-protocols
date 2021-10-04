@@ -147,7 +147,6 @@ describe('Pool Unit Tests', () => {
       await pool.connect(deployer).enable(root)
 
       const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
-      const withdrawMinimum = 0
       await expect(
         await pool.connect(alice).withdraw(
           [
@@ -157,8 +156,7 @@ describe('Pool Unit Tests', () => {
               proof,
             },
           ],
-          feeToken.address,
-          withdrawMinimum
+          feeToken.address
         )
       ).to.emit(pool, 'Withdraw')
 
@@ -168,13 +166,12 @@ describe('Pool Unit Tests', () => {
 
     it('withdraw reverts with no claims provided', async () => {
       await expect(
-        pool.connect(deployer).withdraw([], feeToken.address, 0)
+        pool.connect(deployer).withdraw([], feeToken.address)
       ).to.be.revertedWith('CLAIMS_MUST_BE_PROVIDED')
     })
 
     it('withdraw reverts with root not enabled', async () => {
       const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
-      const withdrawMinimum = 0
 
       await expect(
         pool.connect(alice).withdraw(
@@ -185,8 +182,7 @@ describe('Pool Unit Tests', () => {
               proof,
             },
           ],
-          feeToken.address,
-          withdrawMinimum
+          feeToken.address
         )
       ).to.be.revertedWith('ROOT_NOT_ENABLED')
     })
@@ -199,7 +195,6 @@ describe('Pool Unit Tests', () => {
       await pool.connect(deployer).enable(root)
 
       const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
-      const withdrawMinimum = 0
       await pool.connect(alice).withdraw(
         [
           {
@@ -208,8 +203,7 @@ describe('Pool Unit Tests', () => {
             proof,
           },
         ],
-        feeToken.address,
-        withdrawMinimum
+        feeToken.address
       )
       await expect(
         pool.connect(alice).withdraw(
@@ -220,36 +214,11 @@ describe('Pool Unit Tests', () => {
               proof,
             },
           ],
-          feeToken.address,
-          withdrawMinimum
+          feeToken.address
         )
       ).to.be.revertedWith('CLAIM_ALREADY_MADE')
     })
 
-    it('withdraw reverts with minimumAmount not met', async () => {
-      await feeToken.mock.balanceOf.returns('100000')
-      await feeToken.mock.transfer.returns(true)
-
-      const root = getRoot(tree)
-      await pool.connect(deployer).enable(root)
-
-      const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
-      const withdrawMinimum = 496
-
-      await expect(
-        pool.connect(alice).withdraw(
-          [
-            {
-              root: getRoot(tree),
-              score: ALICE_SCORE,
-              proof,
-            },
-          ],
-          feeToken.address,
-          withdrawMinimum
-        )
-      ).to.be.revertedWith('INSUFFICIENT_AMOUNT')
-    })
 
     it('withdraw reverts with claim already made on previous pool contract', async () => {
       await feeToken.mock.balanceOf.returns('100000')
@@ -261,7 +230,6 @@ describe('Pool Unit Tests', () => {
         .connect(deployer)
         .setClaimed(root, [alice.address, bob.address])
 
-      const withdrawMinimum = 0
       let proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
 
       await expect(
@@ -273,8 +241,7 @@ describe('Pool Unit Tests', () => {
               proof,
             },
           ],
-          feeToken.address,
-          withdrawMinimum
+          feeToken.address
         )
       ).to.be.revertedWith('CLAIM_ALREADY_MADE')
 
@@ -289,8 +256,7 @@ describe('Pool Unit Tests', () => {
               proof,
             },
           ],
-          feeToken.address,
-          withdrawMinimum
+          feeToken.address
         )
       ).to.be.revertedWith('CLAIM_ALREADY_MADE')
     })
@@ -302,7 +268,6 @@ describe('Pool Unit Tests', () => {
       await pool.connect(deployer).enable(root)
 
       const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
-      const withdrawMinimum = 0
 
       await expect(
         pool.connect(alice).withdraw(
@@ -313,8 +278,7 @@ describe('Pool Unit Tests', () => {
               proof,
             },
           ],
-          feeToken.address,
-          withdrawMinimum
+          feeToken.address
         )
       ).to.be.revertedWith('PROOF_INVALID')
     })
@@ -345,6 +309,32 @@ describe('Pool Unit Tests', () => {
 
       const isClaimed = await pool.claimed(root, alice.address)
       expect(isClaimed).to.equal(true)
+    })
+
+    it('withdrawWithRecipient reverts with minimumAmount not met', async () => {
+      await feeToken.mock.balanceOf.returns('100000')
+      await feeToken.mock.transfer.returns(true)
+
+      const root = getRoot(tree)
+      await pool.connect(deployer).enable(root)
+
+      const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
+      const withdrawMinimum = 496
+
+      await expect(
+        pool.connect(alice).withdrawWithRecipient(
+          [
+            {
+              root: getRoot(tree),
+              score: ALICE_SCORE,
+              proof,
+            },
+          ],
+          feeToken.address,
+          withdrawMinimum,
+          bob.address
+        )
+      ).to.be.revertedWith('INSUFFICIENT_AMOUNT')
     })
 
     it('withdrawAndStake success', async () => {
