@@ -173,8 +173,12 @@ contract Pool is Ownable {
    * @param claims Claim[]
    * @param token IERC20
    */
-  function withdraw(Claim[] memory claims, IERC20 token) external {
-    withdrawProtected(claims, token, 0, msg.sender, msg.sender);
+  function withdraw(
+    Claim[] memory claims,
+    IERC20 token,
+    uint256 minimumAmount
+  ) external {
+    withdrawProtected(claims, token, minimumAmount, msg.sender);
   }
 
   /**
@@ -186,9 +190,10 @@ contract Pool is Ownable {
   function withdrawWithRecipient(
     Claim[] memory claims,
     IERC20 token,
+    uint256 minimumAmount,
     address recipient
   ) external {
-    withdrawProtected(claims, token, 0, msg.sender, recipient);
+    withdrawProtected(claims, token, minimumAmount, recipient);
   }
 
   /**
@@ -196,13 +201,16 @@ contract Pool is Ownable {
    * @param claims Claim[]
    * @param token IERC20
    */
-  function withdrawAndStake(Claim[] memory claims, IERC20 token) external {
+  function withdrawAndStake(
+    Claim[] memory claims,
+    IERC20 token,
+    uint256 minimumAmount
+  ) external {
     require(token == IERC20(stakingToken), "INVALID_TOKEN");
     uint256 amount = withdrawProtected(
       claims,
       token,
-      0,
-      msg.sender,
+      minimumAmount,
       msg.sender
     );
     (bool success, ) = address(stakingContract).call(
@@ -220,14 +228,14 @@ contract Pool is Ownable {
   function withdrawAndStakeFor(
     Claim[] memory claims,
     IERC20 token,
+    uint256 minimumAmount,
     address account
   ) external {
     require(token == IERC20(stakingToken), "INVALID_TOKEN");
     uint256 amount = withdrawProtected(
       claims,
       token,
-      0,
-      msg.sender,
+      minimumAmount,
       msg.sender
     );
     (bool success, ) = address(stakingContract).call(
@@ -238,18 +246,15 @@ contract Pool is Ownable {
 
   /**
    * @notice Withdraw tokens from the pool using claims
-   
    * @param claims Claim[]
    * @param token IERC20
    * @param minimumAmount uint256
-   * @param account address
    * @param recipient address
    */
   function withdrawProtected(
     Claim[] memory claims,
     IERC20 token,
     uint256 minimumAmount,
-    address account,
     address recipient
   ) public returns (uint256) {
     require(claims.length > 0, "CLAIMS_MUST_BE_PROVIDED");
@@ -259,19 +264,19 @@ contract Pool is Ownable {
     for (uint256 i = 0; i < claims.length; i++) {
       claim = claims[i];
       require(roots[claim.root], "ROOT_NOT_ENABLED");
-      require(!claimed[claim.root][account], "CLAIM_ALREADY_MADE");
+      require(!claimed[claim.root][msg.sender], "CLAIM_ALREADY_MADE");
       require(
-        verify(account, claim.root, claim.score, claim.proof),
+        verify(msg.sender, claim.root, claim.score, claim.proof),
         "PROOF_INVALID"
       );
       totalScore = totalScore.add(claim.score);
-      claimed[claim.root][account] = true;
+      claimed[claim.root][msg.sender] = true;
       rootList[i] = claim.root;
     }
     uint256 amount = calculate(totalScore, token);
     require(amount >= minimumAmount, "INSUFFICIENT_AMOUNT");
     token.safeTransfer(recipient, amount);
-    emit Withdraw(rootList, account, token, amount);
+    emit Withdraw(rootList, msg.sender, token, amount);
     return amount;
   }
 
