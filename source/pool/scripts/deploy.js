@@ -10,10 +10,17 @@ async function main() {
   const chainId = await deployer.getChainId()
   const scale = 10
   const max = 100
+  const stakingContract = 0x579120871266ccd8de6c85ef59e2ff6743e7cd15
+  const stakingToken = 0x27054b13b1b798b345b591a4d22e6562d47ea75a
 
   console.log(`Deploying on ${chainNames[chainId].toUpperCase()}`)
   const poolFactory = await ethers.getContractFactory('Pool')
-  const poolContract = await poolFactory.deploy(scale, max)
+  const poolContract = await poolFactory.deploy(
+    scale,
+    max,
+    stakingContract,
+    stakingToken
+  )
   await poolContract.deployed()
   console.log(`New Registry: ${poolContract.address}`)
 
@@ -23,7 +30,7 @@ async function main() {
   console.log('Verifying...')
   await run('verify:verify', {
     address: poolContract.address,
-    constructorArguments: [scale, max],
+    constructorArguments: [scale, max, stakingContract, stakingToken],
   })
 }
 
