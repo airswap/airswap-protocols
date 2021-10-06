@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 const { ethers, run } = require('hardhat')
-const { chainNames } = require('@airswap/constants')
+const stakingDeploys = require('@airswap/staking/deploys.js')
+const { chainNames, stakingTokenAddresses } = require('@airswap/constants')
 
 async function main() {
   await run('compile')
@@ -10,8 +11,8 @@ async function main() {
   const chainId = await deployer.getChainId()
   const scale = 10
   const max = 100
-  const stakingContract = 0x579120871266ccd8de6c85ef59e2ff6743e7cd15
-  const stakingToken = 0x27054b13b1b798b345b591a4d22e6562d47ea75a
+  const stakingContract = stakingDeploys[chainId]
+  const stakingToken = stakingTokenAddresses[chainId]
 
   console.log(`Deploying on ${chainNames[chainId].toUpperCase()}`)
   const poolFactory = await ethers.getContractFactory('Pool')

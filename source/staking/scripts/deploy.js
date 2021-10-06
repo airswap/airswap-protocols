@@ -24,6 +24,9 @@ async function main() {
   await stakingContract.deployed()
   console.log(`New Staking: ${stakingContract.address}`)
 
+  console.log('Waiting to verify...')
+  await new Promise((r) => setTimeout(r, 60000))
+
   await run('verify:verify', {
     address: stakingContract.address,
     constructorArguments: [stakingToken, name, symbol, vestingLength],
