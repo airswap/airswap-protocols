@@ -7,11 +7,11 @@ const {
 const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
 
-const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
+const ERC20 = require('@openzeppelin/contracts/build/contracts/ERC20PresetMinterPauser.json')
 const IWETH = require('../build/contracts/interfaces/IWETH.sol/IWETH.json')
 const LIGHT = require('@airswap/light/build/contracts/Light.sol/Light.json')
 
-describe('Wrapper Unit Tests', () => {
+describe('Wrapper Integration Tests', () => {
   let snapshotId
   let light
   let wrapper
@@ -27,7 +27,7 @@ describe('Wrapper Unit Tests', () => {
 
   const CHAIN_ID = 31337
   const SIGNER_FEE = '30'
-  const DEFAULT_AMOUNT = '10000'
+  const DEFAULT_AMOUNT = '100'
 
   async function createSignedOrder(params, signer) {
     const unsignedOrder = createLightOrder({
@@ -62,10 +62,17 @@ describe('Wrapper Unit Tests', () => {
   before('get signers and deploy', async () => {
     ;[deployer, sender, signer, feeWallet] = await ethers.getSigners()
 
-    signerToken = await deployMockContract(deployer, IERC20.abi)
-    senderToken = await deployMockContract(deployer, IERC20.abi)
-    await signerToken.mock.transferFrom.returns(true)
-    await senderToken.mock.transferFrom.returns(true)
+    signerToken = await (
+      await ethers.getContractFactory(ERC20.abi, ERC20.bytecode)
+    ).deploy('A', 'A')
+    await signerToken.deployed()
+    signerToken.mint(signer.address, 10000)
+
+    senderToken = await (
+      await ethers.getContractFactory(ERC20.abi, ERC20.bytecode)
+    ).deploy('B', 'B')
+    await senderToken.deployed()
+    senderToken.mint(sender.address, 10000)
 
     weth = await deployMockContract(deployer, IWETH.abi)
     await weth.mock.deposit.returns()
@@ -77,6 +84,9 @@ describe('Wrapper Unit Tests', () => {
     ).deploy(feeWallet.address, SIGNER_FEE)
     await light.deployed()
 
+    signerToken.connect(signer).approve(light.address, 10000)
+    senderToken.connect(sender).approve(light.address, 10000)
+
     wrapper = await (
       await ethers.getContractFactory('Wrapper')
     ).deploy(light.address, weth.address)
@@ -84,19 +94,7 @@ describe('Wrapper Unit Tests', () => {
   })
 
   describe('Test wraps', async () => {
-    it('test wrapped swap fails without value', async () => {
-      const order = await createSignedOrder(
-        {
-          senderToken: weth.address,
-        },
-        signer
-      )
-      await expect(wrapper.connect(sender).swap(...order)).to.be.revertedWith(
-        'VALUE_MUST_BE_SENT'
-      )
-    })
-
-    it('test wrap (deposit)', async () => {
+    it('test wrapped swap succeeds', async () => {
       const order = await createSignedOrder(
         {
           senderToken: weth.address,
@@ -104,37 +102,9 @@ describe('Wrapper Unit Tests', () => {
         },
         signer
       )
-      await weth.mock.transferFrom.returns(false)
-      await weth.mock.transferFrom
-        .withArgs(wrapper.address, signer.address, DEFAULT_AMOUNT)
-        .returns(true)
-      await signerToken.mock.transfer.returns(true)
-      await wrapper.connect(sender).swap(...order, { value: DEFAULT_AMOUNT })
-    })
-
-    it('test unwrap (withdraw) with error for msg.value', async () => {
-      const order = await createSignedOrder(
-        {
-          signerToken: weth.address,
-          senderWallet: wrapper.address,
-        },
-        signer
-      )
-      await weth.mock.transferFrom.returns(true)
-      await senderToken.mock.transferFrom.returns(true)
-      await signerToken.mock.transfer.returns(true)
       await expect(
         wrapper.connect(sender).swap(...order, { value: DEFAULT_AMOUNT })
-      ).to.be.revertedWith('VALUE_MUST_BE_ZERO')
-    })
-
-    it('Test fallback function revert', async () => {
-      await expect(
-        deployer.sendTransaction({
-          to: wrapper.address,
-          value: 1,
-        })
-      ).to.be.revertedWith('DO_NOT_SEND_ETHER')
+      ).to.emit(light, 'Swap')
     })
   })
 })

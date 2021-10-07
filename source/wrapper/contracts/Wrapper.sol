@@ -3,6 +3,7 @@
 pragma solidity ^0.8.0;
 
 import "@airswap/light/contracts/interfaces/ILight.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/IWETH.sol";
 
 /**
@@ -10,6 +11,8 @@ import "./interfaces/IWETH.sol";
  * @notice https://www.airswap.io/
  */
 contract Wrapper {
+  using SafeERC20 for IERC20;
+
   ILight public lightContract;
   IWETH public wethContract;
 
@@ -64,10 +67,12 @@ contract Wrapper {
       require(senderAmount == msg.value, "VALUE_MUST_BE_SENT");
       // Wrap (deposit) the ether
       wethContract.deposit{value: msg.value}();
+    } else {
+      // Ensure no unexpected ether is sent.
+      require(msg.value == 0, "VALUE_MUST_BE_ZERO");
     }
 
-    lightContract.swapWithRecipient(
-      msg.sender,
+    lightContract.swap(
       nonce,
       expiry,
       signerWallet,
@@ -86,6 +91,8 @@ contract Wrapper {
       // Transfer ether to the recipient
       (bool success, ) = msg.sender.call{value: signerAmount}("");
       require(success, "ETH_RETURN_FAILED");
+    } else {
+      IERC20(signerToken).safeTransfer(msg.sender, signerAmount);
     }
   }
 }
