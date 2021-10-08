@@ -63,13 +63,15 @@ contract Light is ILight, Ownable {
   mapping(address => address) public override authorized;
 
   address public feeWallet;
-  uint256 public max = 100;
-  uint256 public scale = 10;
+  uint256 public rebateScale;
+  uint256 public rebateMax;
   address public stakingToken;
 
   constructor(
     address _feeWallet,
     uint256 _fee,
+    uint256 _rebateScale,
+    uint256 _rebateMax,
     address _stakingToken
   ) {
     // Ensure the fee wallet is not null
@@ -90,6 +92,8 @@ contract Light is ILight, Ownable {
 
     feeWallet = _feeWallet;
     signerFee = _fee;
+    rebateScale = _rebateScale;
+    rebateMax = _rebateMax;
     stakingToken = _stakingToken;
   }
 
@@ -313,25 +317,30 @@ contract Light is ILight, Ownable {
       signerAmount
     );
 
-    // Transfer fee from signer to feeWallet
+    // Transfer fee from signer
     uint256 feeAmount = signerAmount.mul(signerFee).div(FEE_DIVISOR);
     if (feeAmount > 0) {
+      // Check sender staking balance for rebate amount
       uint256 score = IERC20(stakingToken).balanceOf(msg.sender);
-      uint256 divisor = (uint256(10)**scale).add(score);
-      rebateAmount = max.mul(score).mul(feeAmount).div(divisor).div(100);
-
-      IERC20(signerToken).safeTransferFrom(
-        signerWallet,
-        msg.sender,
-        rebateAmount
-      );
+      if (score > 0) {
+        // Calculate rebate amount based on balance
+        uint256 divisor = (uint256(10)**rebateScale).add(score);
+        rebateAmount = rebateMax.mul(score).mul(feeAmount).div(divisor).div(
+          100
+        );
+        // Transfer rebate from signer to sender
+        IERC20(signerToken).safeTransferFrom(
+          signerWallet,
+          msg.sender,
+          rebateAmount
+        );
+      }
+      // Transfer remaining fee from signer to feeWallet
       IERC20(signerToken).safeTransferFrom(
         signerWallet,
         feeWallet,
         feeAmount - rebateAmount
       );
-    } else {
-      rebateAmount = 0;
     }
 
     // Emit a Swap event

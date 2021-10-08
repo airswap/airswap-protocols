@@ -24,6 +24,8 @@ describe('Light Unit Tests', () => {
   const CHAIN_ID = 31337
   const SIGNER_FEE = '30'
   const HIGHER_FEE = '50'
+  const REBATE_SCALE = '10'
+  const REBATE_MAX = '100'
   const FEE_DIVISOR = '10000'
   const DEFAULT_AMOUNT = '10000'
 
@@ -69,7 +71,13 @@ describe('Light Unit Tests', () => {
 
     light = await (
       await ethers.getContractFactory('Light')
-    ).deploy(feeWallet.address, SIGNER_FEE, stakingToken.address)
+    ).deploy(
+      feeWallet.address,
+      SIGNER_FEE,
+      REBATE_SCALE,
+      REBATE_MAX,
+      stakingToken.address
+    )
     await light.deployed()
   })
 
@@ -85,7 +93,13 @@ describe('Light Unit Tests', () => {
       await expect(
         (
           await ethers.getContractFactory('Light')
-        ).deploy(ADDRESS_ZERO, SIGNER_FEE, stakingToken.address)
+        ).deploy(
+          ADDRESS_ZERO,
+          SIGNER_FEE,
+          REBATE_SCALE,
+          REBATE_MAX,
+          stakingToken.address
+        )
       ).to.be.revertedWith('INVALID_FEE_WALLET')
     })
 
@@ -93,7 +107,13 @@ describe('Light Unit Tests', () => {
       await expect(
         (
           await ethers.getContractFactory('Light')
-        ).deploy(feeWallet.address, 100000000000, stakingToken.address)
+        ).deploy(
+          feeWallet.address,
+          100000000000,
+          REBATE_SCALE,
+          REBATE_MAX,
+          stakingToken.address
+        )
       ).to.be.revertedWith('INVALID_FEE')
     })
   })
