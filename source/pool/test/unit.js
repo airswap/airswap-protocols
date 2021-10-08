@@ -219,7 +219,6 @@ describe('Pool Unit Tests', () => {
       ).to.be.revertedWith('CLAIM_ALREADY_MADE')
     })
 
-
     it('withdraw reverts with claim already made on previous pool contract', async () => {
       await feeToken.mock.balanceOf.returns('100000')
       await feeToken.mock.transfer.returns(true)
