@@ -1,6 +1,7 @@
 const { expect } = require('chai')
 const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
+const { ADDRESS_ZERO } = require('@airswap/constants')
 const lightContract = require('../../light/build/contracts/Light.sol/Light.json')
 const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
 
@@ -74,7 +75,13 @@ describe('Validator', () => {
       lightContract.bytecode,
       deployer
     )
-    light = await LightFactory.deploy(feeWallet.address, SIGNER_FEE)
+    light = await LightFactory.deploy(
+      feeWallet.address,
+      SIGNER_FEE,
+      '0',
+      '0',
+      ADDRESS_ZERO
+    )
     await light.deployed()
     Validator = await ValidatorFactory.deploy(light.address)
     await Validator.deployed()
@@ -212,7 +219,13 @@ describe('Validator', () => {
 
   describe('setLightAddress', async () => {
     it('can properly set the address to a new light address', async () => {
-      const newLight = await LightFactory.deploy(feeWallet.address, SIGNER_FEE)
+      const newLight = await LightFactory.deploy(
+        feeWallet.address,
+        SIGNER_FEE,
+        '0',
+        '0',
+        ADDRESS_ZERO
+      )
       await newLight.deployed()
       await expect(Validator.setLightAddress(newLight.address)).to.not.be
         .reverted
@@ -220,7 +233,13 @@ describe('Validator', () => {
     })
 
     it('will not allow a non-owner to set the light address', async () => {
-      const newLight = await LightFactory.deploy(feeWallet.address, SIGNER_FEE)
+      const newLight = await LightFactory.deploy(
+        feeWallet.address,
+        SIGNER_FEE,
+        '0',
+        '0',
+        ADDRESS_ZERO
+      )
       await newLight.deployed()
       await expect(
         Validator.connect(other).setLightAddress(newLight.address)
