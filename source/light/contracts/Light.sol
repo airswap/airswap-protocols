@@ -63,8 +63,15 @@ contract Light is ILight, Ownable {
   mapping(address => address) public override authorized;
 
   address public feeWallet;
+  uint256 public max = 100;
+  uint256 public scale = 10;
+  address public stakingToken;
 
-  constructor(address _feeWallet, uint256 _fee) {
+  constructor(
+    address _feeWallet,
+    uint256 _fee,
+    address _stakingToken
+  ) {
     // Ensure the fee wallet is not null
     require(_feeWallet != address(0), "INVALID_FEE_WALLET");
     // Ensure the fee is less than divisor
@@ -83,6 +90,7 @@ contract Light is ILight, Ownable {
 
     feeWallet = _feeWallet;
     signerFee = _fee;
+    stakingToken = _stakingToken;
   }
 
   /**
@@ -210,32 +218,18 @@ contract Light is ILight, Ownable {
     bytes32 r,
     bytes32 s
   ) public override {
-    require(DOMAIN_CHAIN_ID == getChainId(), "CHAIN_ID_CHANGED");
-
-    // Ensure the expiry is not passed
-    require(expiry > block.timestamp, "EXPIRY_PASSED");
-
-    bytes32 hashed = _getOrderHash(
+    _checkValidOrder(
       nonce,
       expiry,
       signerWallet,
       signerToken,
       signerAmount,
-      msg.sender,
       senderToken,
-      senderAmount
+      senderAmount,
+      v,
+      r,
+      s
     );
-
-    // Recover the signatory from the hash and signature
-    address signatory = _getSignatory(hashed, v, r, s);
-
-    // Ensure the nonce is not yet used and if not mark it used
-    require(_markNonceAsUsed(signatory, nonce), "NONCE_ALREADY_USED");
-
-    // Ensure the signatory is authorized by the signer wallet
-    if (signerWallet != signatory) {
-      require(authorized[signerWallet] == signatory, "UNAUTHORIZED");
-    }
 
     // Transfer token from sender to signer
     IERC20(senderToken).safeTransferFrom(
@@ -265,6 +259,96 @@ contract Light is ILight, Ownable {
       senderToken,
       senderAmount
     );
+  }
+
+  /**
+   * @notice Atomic ERC20 Swap with Rebate for Stakers
+   * @param nonce uint256 Unique and should be sequential
+   * @param expiry uint256 Expiry in seconds since 1 January 1970
+   * @param signerWallet address Wallet of the signer
+   * @param signerToken address ERC20 token transferred from the signer
+   * @param signerAmount uint256 Amount transferred from the signer
+   * @param senderToken address ERC20 token transferred from the sender
+   * @param senderAmount uint256 Amount transferred from the sender
+   * @param v uint8 "v" value of the ECDSA signature
+   * @param r bytes32 "r" value of the ECDSA signature
+   * @param s bytes32 "s" value of the ECDSA signature
+   */
+  function swapWithRebate(
+    uint256 nonce,
+    uint256 expiry,
+    address signerWallet,
+    address signerToken,
+    uint256 signerAmount,
+    address senderToken,
+    uint256 senderAmount,
+    uint8 v,
+    bytes32 r,
+    bytes32 s
+  ) public override returns (uint256 rebateAmount) {
+    _checkValidOrder(
+      nonce,
+      expiry,
+      signerWallet,
+      signerToken,
+      signerAmount,
+      senderToken,
+      senderAmount,
+      v,
+      r,
+      s
+    );
+
+    // Transfer token from sender to signer
+    IERC20(senderToken).safeTransferFrom(
+      msg.sender,
+      signerWallet,
+      senderAmount
+    );
+
+    // Transfer token from signer to recipient
+    IERC20(signerToken).safeTransferFrom(
+      signerWallet,
+      msg.sender,
+      signerAmount
+    );
+
+    // Transfer fee from signer to feeWallet
+    uint256 feeAmount = signerAmount.mul(signerFee).div(FEE_DIVISOR);
+    if (feeAmount > 0) {
+      uint256 score = IERC20(stakingToken).balanceOf(msg.sender);
+      uint256 divisor = (uint256(10)**scale).add(score);
+      rebateAmount = max.mul(score).mul(feeAmount).div(divisor).div(100);
+
+      IERC20(signerToken).safeTransferFrom(
+        signerWallet,
+        msg.sender,
+        rebateAmount
+      );
+      IERC20(signerToken).safeTransferFrom(
+        signerWallet,
+        feeWallet,
+        feeAmount - rebateAmount
+      );
+    } else {
+      rebateAmount = 0;
+    }
+
+    // Emit a Swap event
+    emit Swap(
+      nonce,
+      block.timestamp,
+      signerWallet,
+      signerToken,
+      signerAmount,
+      signerFee,
+      msg.sender,
+      senderToken,
+      senderAmount
+    );
+
+    // Return rebate amount
+    return rebateAmount;
   }
 
   /**
@@ -316,6 +400,59 @@ contract Light is ILight, Ownable {
     _nonceGroups[signer][groupKey] = group | (uint256(1) << indexInGroup);
 
     return true;
+  }
+
+  /**
+   * @notice Checks Order Expiry, Nonce, Signature
+   * @param nonce uint256 Unique and should be sequential
+   * @param expiry uint256 Expiry in seconds since 1 January 1970
+   * @param signerWallet address Wallet of the signer
+   * @param signerToken address ERC20 token transferred from the signer
+   * @param signerAmount uint256 Amount transferred from the signer
+   * @param senderToken address ERC20 token transferred from the sender
+   * @param senderAmount uint256 Amount transferred from the sender
+   * @param v uint8 "v" value of the ECDSA signature
+   * @param r bytes32 "r" value of the ECDSA signature
+   * @param s bytes32 "s" value of the ECDSA signature
+   */
+  function _checkValidOrder(
+    uint256 nonce,
+    uint256 expiry,
+    address signerWallet,
+    address signerToken,
+    uint256 signerAmount,
+    address senderToken,
+    uint256 senderAmount,
+    uint8 v,
+    bytes32 r,
+    bytes32 s
+  ) internal {
+    require(DOMAIN_CHAIN_ID == getChainId(), "CHAIN_ID_CHANGED");
+
+    // Ensure the expiry is not passed
+    require(expiry > block.timestamp, "EXPIRY_PASSED");
+
+    bytes32 hashed = _getOrderHash(
+      nonce,
+      expiry,
+      signerWallet,
+      signerToken,
+      signerAmount,
+      msg.sender,
+      senderToken,
+      senderAmount
+    );
+
+    // Recover the signatory from the hash and signature
+    address signatory = _getSignatory(hashed, v, r, s);
+
+    // Ensure the nonce is not yet used and if not mark it used
+    require(_markNonceAsUsed(signatory, nonce), "NONCE_ALREADY_USED");
+
+    // Ensure the signatory is authorized by the signer wallet
+    if (signerWallet != signatory) {
+      require(authorized[signerWallet] == signatory, "UNAUTHORIZED");
+    }
   }
 
   /**

@@ -62,12 +62,14 @@ describe('Light Unit Tests', () => {
 
     signerToken = await deployMockContract(deployer, IERC20.abi)
     senderToken = await deployMockContract(deployer, IERC20.abi)
+    stakingToken = await deployMockContract(deployer, IERC20.abi)
     await signerToken.mock.transferFrom.returns(true)
     await senderToken.mock.transferFrom.returns(true)
+    await stakingToken.mock.balanceOf.returns(10000000)
 
     light = await (
       await ethers.getContractFactory('Light')
-    ).deploy(feeWallet.address, SIGNER_FEE)
+    ).deploy(feeWallet.address, SIGNER_FEE, stakingToken.address)
     await light.deployed()
   })
 
@@ -83,7 +85,7 @@ describe('Light Unit Tests', () => {
       await expect(
         (
           await ethers.getContractFactory('Light')
-        ).deploy(ADDRESS_ZERO, SIGNER_FEE)
+        ).deploy(ADDRESS_ZERO, SIGNER_FEE, stakingToken.address)
       ).to.be.revertedWith('INVALID_FEE_WALLET')
     })
 
@@ -91,7 +93,7 @@ describe('Light Unit Tests', () => {
       await expect(
         (
           await ethers.getContractFactory('Light')
-        ).deploy(feeWallet.address, 100000000000)
+        ).deploy(feeWallet.address, 100000000000, stakingToken.address)
       ).to.be.revertedWith('INVALID_FEE')
     })
   })
