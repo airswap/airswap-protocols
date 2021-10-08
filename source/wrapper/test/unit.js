@@ -68,6 +68,7 @@ describe('Wrapper Unit Tests', () => {
     await senderToken.mock.transferFrom.returns(true)
 
     weth = await deployMockContract(deployer, IWETH.abi)
+    await weth.mock.approve.returns(true)
     await weth.mock.deposit.returns()
     await weth.mock.withdraw.returns()
     await weth.mock.transferFrom.returns(true)

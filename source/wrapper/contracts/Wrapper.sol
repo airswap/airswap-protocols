@@ -15,6 +15,7 @@ contract Wrapper {
 
   ILight public lightContract;
   IWETH public wethContract;
+  uint256 constant MAX_UINT = 2**256 - 1;
 
   /**
    * @notice Constructor
@@ -24,6 +25,7 @@ contract Wrapper {
   constructor(address _lightContract, address _wethContract) {
     lightContract = ILight(_lightContract);
     wethContract = IWETH(_wethContract);
+    wethContract.approve(_lightContract, MAX_UINT);
   }
 
   /**
