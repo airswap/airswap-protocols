@@ -24,6 +24,8 @@ describe('Light Unit Tests', () => {
   const CHAIN_ID = 31337
   const SIGNER_FEE = '30'
   const HIGHER_FEE = '50'
+  const CONDITIONAL_SIGNER_FEE = '30'
+  const STAKING_REBATE_MINIMUM = '1000000'
   const FEE_DIVISOR = '10000'
   const DEFAULT_AMOUNT = '10000'
 
@@ -62,12 +64,20 @@ describe('Light Unit Tests', () => {
 
     signerToken = await deployMockContract(deployer, IERC20.abi)
     senderToken = await deployMockContract(deployer, IERC20.abi)
+    stakingToken = await deployMockContract(deployer, IERC20.abi)
     await signerToken.mock.transferFrom.returns(true)
     await senderToken.mock.transferFrom.returns(true)
+    await stakingToken.mock.balanceOf.returns(10000000)
 
     light = await (
       await ethers.getContractFactory('Light')
-    ).deploy(feeWallet.address, SIGNER_FEE)
+    ).deploy(
+      feeWallet.address,
+      SIGNER_FEE,
+      CONDITIONAL_SIGNER_FEE,
+      STAKING_REBATE_MINIMUM,
+      stakingToken.address
+    )
     await light.deployed()
   })
 
@@ -83,7 +93,13 @@ describe('Light Unit Tests', () => {
       await expect(
         (
           await ethers.getContractFactory('Light')
-        ).deploy(ADDRESS_ZERO, SIGNER_FEE)
+        ).deploy(
+          ADDRESS_ZERO,
+          SIGNER_FEE,
+          CONDITIONAL_SIGNER_FEE,
+          STAKING_REBATE_MINIMUM,
+          stakingToken.address
+        )
       ).to.be.revertedWith('INVALID_FEE_WALLET')
     })
 
@@ -91,7 +107,13 @@ describe('Light Unit Tests', () => {
       await expect(
         (
           await ethers.getContractFactory('Light')
-        ).deploy(feeWallet.address, 100000000000)
+        ).deploy(
+          feeWallet.address,
+          100000000000,
+          CONDITIONAL_SIGNER_FEE,
+          STAKING_REBATE_MINIMUM,
+          stakingToken.address
+        )
       ).to.be.revertedWith('INVALID_FEE')
     })
   })
@@ -216,6 +238,13 @@ describe('Light Unit Tests', () => {
       )
     })
 
+    it('test changing conditional fee', async () => {
+      await light.connect(deployer).setConditionalFee(HIGHER_FEE)
+
+      const storedSignerFee = await light.conditionalSignerFee()
+      await expect(await storedSignerFee).to.equal(HIGHER_FEE)
+    })
+
     it('test zero fee', async () => {
       const order = await createSignedOrder(
         {
@@ -246,6 +275,20 @@ describe('Light Unit Tests', () => {
       await expect(light.connect(sender).swap(...order)).to.be.revertedWith(
         'UNAUTHORIZED'
       )
+    })
+  })
+
+  describe('Test staking', async () => {
+    it('test set staking token by non-owner', async () => {
+      await expect(
+        light.connect(anyone).setStakingToken(stakingToken.address)
+      ).to.be.revertedWith('Ownable: caller is not the owner')
+    })
+
+    it('test set staking token', async () => {
+      await expect(
+        light.connect(deployer).setStakingToken(stakingToken.address)
+      ).to.emit(light, 'SetStakingToken')
     })
   })
 

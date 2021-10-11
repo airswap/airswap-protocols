@@ -13,7 +13,7 @@ const {
 describe('Validator', () => {
   let deployer, sender, signer, other, feeWallet
   let light, Validator, LightFactory
-  let senderToken, signerToken
+  let senderToken, signerToken, stakingToken
   const CHAIN_ID = 31337
   const SIGNER_FEE = '30'
   const DEFAULT_AMOUNT = '1000'
@@ -68,13 +68,21 @@ describe('Validator', () => {
 
   before(async () => {
     ;[deployer, sender, signer, feeWallet, other] = await ethers.getSigners()
+
+    stakingToken = await deployMockContract(deployer, IERC20.abi)
     const ValidatorFactory = await ethers.getContractFactory('Validator')
     LightFactory = await ethers.getContractFactory(
       lightContract.abi,
       lightContract.bytecode,
       deployer
     )
-    light = await LightFactory.deploy(feeWallet.address, SIGNER_FEE)
+    light = await LightFactory.deploy(
+      feeWallet.address,
+      SIGNER_FEE,
+      '0',
+      '0',
+      stakingToken.address
+    )
     await light.deployed()
     Validator = await ValidatorFactory.deploy(light.address)
     await Validator.deployed()
@@ -212,7 +220,13 @@ describe('Validator', () => {
 
   describe('setLightAddress', async () => {
     it('can properly set the address to a new light address', async () => {
-      const newLight = await LightFactory.deploy(feeWallet.address, SIGNER_FEE)
+      const newLight = await LightFactory.deploy(
+        feeWallet.address,
+        SIGNER_FEE,
+        '0',
+        '0',
+        stakingToken.address
+      )
       await newLight.deployed()
       await expect(Validator.setLightAddress(newLight.address)).to.not.be
         .reverted
@@ -220,7 +234,13 @@ describe('Validator', () => {
     })
 
     it('will not allow a non-owner to set the light address', async () => {
-      const newLight = await LightFactory.deploy(feeWallet.address, SIGNER_FEE)
+      const newLight = await LightFactory.deploy(
+        feeWallet.address,
+        SIGNER_FEE,
+        '0',
+        '0',
+        stakingToken.address
+      )
       await newLight.deployed()
       await expect(
         Validator.connect(other).setLightAddress(newLight.address)

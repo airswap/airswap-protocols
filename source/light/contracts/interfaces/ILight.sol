@@ -23,7 +23,11 @@ interface ILight {
 
   event SetFee(uint256 indexed signerFee);
 
+  event SetConditionalFee(uint256 indexed conditionalSignerFee);
+
   event SetFeeWallet(address indexed feeWallet);
+
+  event SetStakingToken(address indexed stakingToken);
 
   function swap(
     uint256 nonce,
@@ -40,6 +44,19 @@ interface ILight {
 
   function swapWithRecipient(
     address recipient,
+    uint256 nonce,
+    uint256 expiry,
+    address signerWallet,
+    address signerToken,
+    uint256 signerAmount,
+    address senderToken,
+    uint256 senderAmount,
+    uint8 v,
+    bytes32 r,
+    bytes32 s
+  ) external;
+
+  function swapWithConditionalFee(
     uint256 nonce,
     uint256 expiry,
     address signerWallet,
