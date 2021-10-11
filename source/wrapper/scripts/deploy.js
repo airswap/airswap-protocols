@@ -14,6 +14,9 @@ async function main() {
 
   // Wrapper Deploy
   console.log(`Deploying on ${chainNames[chainId].toUpperCase()}`)
+  console.log(`Light: ${lightAddress}`)
+  console.log(`WETH: ${wethAddress}`)
+
   const wrapperFactory = await ethers.getContractFactory('Wrapper')
   const wrapperContract = await wrapperFactory.deploy(lightAddress, wethAddress)
   await wrapperContract.deployed()
