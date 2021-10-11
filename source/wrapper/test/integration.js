@@ -106,7 +106,13 @@ describe('Wrapper Integration Tests', () => {
 
   describe('Test wraps', async () => {
     it('test that value is required', async () => {
-      const order = await createSignedOrder({}, signer)
+      const order = await createSignedOrder(
+        {
+          senderToken: weth.address,
+          senderWallet: wrapper.address,
+        },
+        signer
+      )
       await expect(wrapper.connect(sender).swap(...order)).to.be.revertedWith(
         'VALUE_MUST_BE_SENT'
       )
@@ -123,6 +129,40 @@ describe('Wrapper Integration Tests', () => {
       await expect(
         wrapper.connect(sender).swap(...order, { value: DEFAULT_AMOUNT })
       ).to.emit(light, 'Swap')
+    })
+
+    it('test that tokens require approval', async () => {
+      const order = await createSignedOrder({}, signer)
+      await expect(wrapper.connect(sender).swap(...order)).to.be.revertedWith(
+        'ERC20: transfer amount exceeds allowance'
+      )
+    })
+
+    it('test that token swaps have no value', async () => {
+      const order = await createSignedOrder({}, signer)
+      await senderToken.connect(sender).approve(wrapper.address, 10000)
+      await expect(
+        wrapper.connect(sender).swap(...order, { value: DEFAULT_AMOUNT })
+      ).to.be.revertedWith('VALUE_MUST_BE_ZERO')
+    })
+
+    it('test that unwrap works', async () => {
+      const order = await createSignedOrder(
+        {
+          signerToken: weth.address,
+          senderWallet: wrapper.address,
+          senderAmount: DEFAULT_AMOUNT,
+        },
+        signer
+      )
+      // Signer approves WETH
+      await weth.connect(signer).approve(light.address, DEFAULT_AMOUNT)
+      // Sender approves wrapper
+      await senderToken.connect(sender).approve(wrapper.address, DEFAULT_AMOUNT)
+      await expect(wrapper.connect(sender).swap(...order)).to.emit(
+        light,
+        'Swap'
+      )
     })
   })
 })

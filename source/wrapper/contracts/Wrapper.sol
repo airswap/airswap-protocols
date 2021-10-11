@@ -77,7 +77,7 @@ contract Wrapper is Ownable {
     bytes32 r,
     bytes32 s
   ) public payable {
-    _wrapEther(senderAmount);
+    _wrapEther(senderToken, senderAmount);
     lightContract.swap(
       nonce,
       expiry,
@@ -90,6 +90,7 @@ contract Wrapper is Ownable {
       r,
       s
     );
+    _unwrapEther(signerToken, signerAmount);
   }
 
   /**
@@ -117,7 +118,7 @@ contract Wrapper is Ownable {
     bytes32 r,
     bytes32 s
   ) public payable {
-    _wrapEther(senderAmount);
+    _wrapEther(senderToken, senderAmount);
     lightContract.swapWithConditionalFee(
       nonce,
       expiry,
@@ -130,16 +131,47 @@ contract Wrapper is Ownable {
       r,
       s
     );
+    _unwrapEther(signerToken, signerAmount);
   }
 
   /**
-   * @notice Wrap Ether as WETH
+   * @notice Wrap Ether into WETH
    * @param senderAmount uint256 Amount transferred from the sender
    */
-  function _wrapEther(uint256 senderAmount) internal {
-    // Ensure message value is param
-    require(senderAmount == msg.value, "VALUE_MUST_BE_SENT");
-    // Wrap (deposit) the ether
-    wethContract.deposit{value: msg.value}();
+  function _wrapEther(address senderToken, uint256 senderAmount) internal {
+    if (senderToken == address(wethContract)) {
+      // Ensure message value is param
+      require(senderAmount == msg.value, "VALUE_MUST_BE_SENT");
+      // Wrap (deposit) the ether
+      wethContract.deposit{value: msg.value}();
+    } else {
+      // Ensure message value is zero
+      require(msg.value == 0, "VALUE_MUST_BE_ZERO");
+      // Approve the light contract to swap the amount
+      IERC20(senderToken).safeApprove(address(lightContract), senderAmount);
+      // Transfer tokens from sender to wrapper for swap
+      IERC20(senderToken).safeTransferFrom(
+        msg.sender,
+        address(this),
+        senderAmount
+      );
+    }
+  }
+
+  /**
+   * @notice Unwrap WETH into Ether
+   * @param signerToken address Token of the signer
+   * @param signerAmount uint256 Amount transferred from the signer
+   */
+  function _unwrapEther(address signerToken, uint256 signerAmount) internal {
+    if (signerToken == address(wethContract)) {
+      // Unwrap (withdraw) the ether
+      wethContract.withdraw(signerAmount);
+      // Transfer ether to the recipient
+      (bool success, ) = msg.sender.call{value: signerAmount}("");
+      require(success, "ETH_RETURN_FAILED");
+    } else {
+      IERC20(signerToken).safeTransfer(msg.sender, signerAmount);
+    }
   }
 }
