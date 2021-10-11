@@ -14,13 +14,6 @@
   dependencies:
     get-parameter-names "^0.3.0"
 
-"@airswap/light@2.2.4":
-  version "2.2.4"
-  resolved "https://registry.yarnpkg.com/@airswap/light/-/light-2.2.4.tgz#e52477d3aec03d7a84986f5f504a66b496a29322"
-  integrity sha512-om5Ra8xwwApY/B3qonkAFQCnIOUYRiDMCh+lIbcIEKqf2rv91efrVtQzGc1KZ/Kl9f5m25beM6SMc0zlAs8u9Q==
-  dependencies:
-    "@openzeppelin/contracts" "^4.3.1"
-
 "@airswap/registry@4.8.2":
   version "4.8.2"
   resolved "https://registry.yarnpkg.com/@airswap/registry/-/registry-4.8.2.tgz#047da3fdfcc0d9064d4798b8d3ae19e816788ef3"
