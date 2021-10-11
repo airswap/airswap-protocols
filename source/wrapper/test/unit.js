@@ -19,6 +19,7 @@ describe('Wrapper Unit Tests', () => {
   let weth
   let signerToken
   let senderToken
+  let stakingToken
 
   let deployer
   let sender
@@ -28,6 +29,7 @@ describe('Wrapper Unit Tests', () => {
   const CHAIN_ID = 31337
   const SIGNER_FEE = '30'
   const DEFAULT_AMOUNT = '10000'
+  const STAKING_REBATE_MINIMUM = '10000'
 
   async function createSignedOrder(params, signer) {
     const unsignedOrder = createLightOrder({
@@ -64,8 +66,10 @@ describe('Wrapper Unit Tests', () => {
 
     signerToken = await deployMockContract(deployer, IERC20.abi)
     senderToken = await deployMockContract(deployer, IERC20.abi)
+    stakingToken = await deployMockContract(deployer, IERC20.abi)
     await signerToken.mock.transferFrom.returns(true)
     await senderToken.mock.transferFrom.returns(true)
+    await stakingToken.mock.transferFrom.returns(true)
 
     weth = await deployMockContract(deployer, IWETH.abi)
     await weth.mock.approve.returns(true)
@@ -75,13 +79,33 @@ describe('Wrapper Unit Tests', () => {
 
     light = await (
       await ethers.getContractFactory(LIGHT.abi, LIGHT.bytecode)
-    ).deploy(feeWallet.address, SIGNER_FEE)
+    ).deploy(
+      feeWallet.address,
+      SIGNER_FEE,
+      SIGNER_FEE,
+      STAKING_REBATE_MINIMUM,
+      stakingToken.address
+    )
     await light.deployed()
 
     wrapper = await (
       await ethers.getContractFactory('Wrapper')
     ).deploy(light.address, weth.address)
     await wrapper.deployed()
+  })
+
+  describe('Test light config', async () => {
+    it('test changing light contract by non-owner', async () => {
+      await expect(
+        wrapper.connect(sender).setLightContract(light.address)
+      ).to.be.revertedWith('owner')
+    })
+    it('test changing light contract', async () => {
+      await wrapper.connect(deployer).setLightContract(light.address)
+
+      const storedLightContract = await wrapper.lightContract()
+      await expect(await storedLightContract).to.equal(light.address)
+    })
   })
 
   describe('Test wraps', async () => {
@@ -97,7 +121,7 @@ describe('Wrapper Unit Tests', () => {
       )
     })
 
-    it('test wrap (deposit)', async () => {
+    it('test wrapped swap', async () => {
       const order = await createSignedOrder(
         {
           senderToken: weth.address,
@@ -113,20 +137,23 @@ describe('Wrapper Unit Tests', () => {
       await wrapper.connect(sender).swap(...order, { value: DEFAULT_AMOUNT })
     })
 
-    it('test unwrap (withdraw) with error for msg.value', async () => {
+    it('test wrapped swapWithConditionalFee', async () => {
       const order = await createSignedOrder(
         {
-          signerToken: weth.address,
+          senderToken: weth.address,
           senderWallet: wrapper.address,
         },
         signer
       )
-      await weth.mock.transferFrom.returns(true)
-      await senderToken.mock.transferFrom.returns(true)
+      await stakingToken.mock.balanceOf.returns('0')
+      await weth.mock.transferFrom.returns(false)
+      await weth.mock.transferFrom
+        .withArgs(wrapper.address, signer.address, DEFAULT_AMOUNT)
+        .returns(true)
       await signerToken.mock.transfer.returns(true)
-      await expect(
-        wrapper.connect(sender).swap(...order, { value: DEFAULT_AMOUNT })
-      ).to.be.revertedWith('VALUE_MUST_BE_ZERO')
+      await wrapper
+        .connect(sender)
+        .swapWithConditionalFee(...order, { value: DEFAULT_AMOUNT })
     })
 
     it('Test fallback function revert', async () => {

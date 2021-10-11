@@ -8,7 +8,7 @@ const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
 
 const ERC20 = require('@openzeppelin/contracts/build/contracts/ERC20PresetMinterPauser.json')
-const IWETH = require('../build/contracts/interfaces/IWETH.sol/IWETH.json')
+const WETH9 = require('@uniswap/v2-periphery/build/WETH9.json')
 const LIGHT = require('@airswap/light/build/contracts/Light.sol/Light.json')
 
 describe('Wrapper Integration Tests', () => {
@@ -19,6 +19,7 @@ describe('Wrapper Integration Tests', () => {
   let weth
   let signerToken
   let senderToken
+  let stakingToken
 
   let deployer
   let sender
@@ -28,6 +29,7 @@ describe('Wrapper Integration Tests', () => {
   const CHAIN_ID = 31337
   const SIGNER_FEE = '30'
   const DEFAULT_AMOUNT = '100'
+  const STAKING_REBATE_MINIMUM = '10000'
 
   async function createSignedOrder(params, signer) {
     const unsignedOrder = createLightOrder({
@@ -74,15 +76,23 @@ describe('Wrapper Integration Tests', () => {
     await senderToken.deployed()
     senderToken.mint(sender.address, 10000)
 
-    weth = await deployMockContract(deployer, IWETH.abi)
-    await weth.mock.approve.returns(true)
-    await weth.mock.deposit.returns()
-    await weth.mock.withdraw.returns()
-    await weth.mock.transferFrom.returns(true)
+    weth = await (
+      await ethers.getContractFactory(WETH9.abi, WETH9.bytecode)
+    ).deploy()
+    await weth.deployed()
+    await weth.connect(signer).deposit({ value: 1000 })
+
+    stakingToken = await deployMockContract(deployer, ERC20.abi)
 
     light = await (
       await ethers.getContractFactory(LIGHT.abi, LIGHT.bytecode)
-    ).deploy(feeWallet.address, SIGNER_FEE)
+    ).deploy(
+      feeWallet.address,
+      SIGNER_FEE,
+      SIGNER_FEE,
+      STAKING_REBATE_MINIMUM,
+      stakingToken.address
+    )
     await light.deployed()
 
     signerToken.connect(signer).approve(light.address, 10000)
@@ -95,6 +105,13 @@ describe('Wrapper Integration Tests', () => {
   })
 
   describe('Test wraps', async () => {
+    it('test that value is required', async () => {
+      const order = await createSignedOrder({}, signer)
+      await expect(wrapper.connect(sender).swap(...order)).to.be.revertedWith(
+        'VALUE_MUST_BE_SENT'
+      )
+    })
+
     it('test wrapped swap succeeds', async () => {
       const order = await createSignedOrder(
         {
