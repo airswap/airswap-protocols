@@ -1,7 +1,7 @@
 {
   "name": "@airswap/light",
-  "version": "2.2.5",
-  "description": "Swap ERC20 tokens efficiently",
+  "version": "2.3.0",
+  "description": "Atomic Token Swap",
   "contributors": [
     "Vicente Dragicevic",
     "Don Mosites",
