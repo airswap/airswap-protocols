@@ -35,6 +35,13 @@
   dependencies:
     "@openzeppelin/contracts" "^4.3.2"
 
+"@airswap/wrapper@1.4.0":
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/@airswap/wrapper/-/wrapper-1.4.0.tgz#447c94220e4a8f10b77654546edba392e85eca0b"
+  integrity sha512-nnz7xgGDBbyI1Arn22mCemYTBXZWvNQ2sgHV9+iC0GaCmtLiTaI/MyBhw77QECqcsX3vQcLnOJFB1pOgRfQQ3g==
+  dependencies:
+    "@openzeppelin/contracts" "^4.3.1"
+
 "@babel/code-frame@7.12.11":
   version "7.12.11"
   resolved "https://registry.yarnpkg.com/@babel/code-frame/-/code-frame-7.12.11.tgz#f4ad435aa263db935b8f10f2c552d23fb716a63f"
