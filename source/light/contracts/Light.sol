@@ -52,6 +52,7 @@ contract Light is ILight, Ownable {
 
   uint256 public constant FEE_DIVISOR = 10000;
   uint256 public signerFee;
+  uint256 public conditionalSignerFee;
 
   /**
    * @notice Double mapping of signers to nonce groups to nonce states
@@ -63,21 +64,25 @@ contract Light is ILight, Ownable {
   mapping(address => address) public override authorized;
 
   address public feeWallet;
-  uint256 public rebateScale;
-  uint256 public rebateMax;
+  uint256 public stakingRebateMinimum;
   address public stakingToken;
 
   constructor(
     address _feeWallet,
-    uint256 _fee,
-    uint256 _rebateScale,
-    uint256 _rebateMax,
+    uint256 _signerFee,
+    uint256 _conditionalSignerFee,
+    uint256 _stakingRebateMinimum,
     address _stakingToken
   ) {
     // Ensure the fee wallet is not null
     require(_feeWallet != address(0), "INVALID_FEE_WALLET");
     // Ensure the fee is less than divisor
-    require(_fee < FEE_DIVISOR, "INVALID_FEE");
+    require(_signerFee < FEE_DIVISOR, "INVALID_FEE");
+    // Ensure the conditional fee is less than divisor
+    require(_conditionalSignerFee < FEE_DIVISOR, "INVALID_CONDITIONAL_FEE");
+    // Ensure the staking token is not null
+    require(_stakingToken != address(0), "INVALID_STAKING_TOKEN");
+
     uint256 currentChainId = getChainId();
     DOMAIN_CHAIN_ID = currentChainId;
     DOMAIN_SEPARATOR = keccak256(
@@ -91,9 +96,9 @@ contract Light is ILight, Ownable {
     );
 
     feeWallet = _feeWallet;
-    signerFee = _fee;
-    rebateScale = _rebateScale;
-    rebateMax = _rebateMax;
+    signerFee = _signerFee;
+    conditionalSignerFee = _conditionalSignerFee;
+    stakingRebateMinimum = _stakingRebateMinimum;
     stakingToken = _stakingToken;
   }
 
@@ -157,6 +162,31 @@ contract Light is ILight, Ownable {
     require(newSignerFee < FEE_DIVISOR, "INVALID_FEE");
     signerFee = newSignerFee;
     emit SetFee(newSignerFee);
+  }
+
+  /**
+   * @notice Set the conditional fee
+   * @param newConditionalSignerFee uint256 Value of the fee in basis points
+   */
+  function setConditionalFee(uint256 newConditionalSignerFee)
+    external
+    onlyOwner
+  {
+    // Ensure the fee is less than divisor
+    require(newConditionalSignerFee < FEE_DIVISOR, "INVALID_FEE");
+    conditionalSignerFee = newConditionalSignerFee;
+    emit SetConditionalFee(conditionalSignerFee);
+  }
+
+  /**
+   * @notice Set the staking token
+   * @param newStakingToken address Token to check balances on
+   */
+  function setStakingToken(address newStakingToken) external onlyOwner {
+    // Ensure the new staking token is not null
+    require(newStakingToken != address(0), "INVALID_FEE_WALLET");
+    stakingToken = newStakingToken;
+    emit SetStakingToken(newStakingToken);
   }
 
   /**
@@ -278,7 +308,7 @@ contract Light is ILight, Ownable {
    * @param r bytes32 "r" value of the ECDSA signature
    * @param s bytes32 "s" value of the ECDSA signature
    */
-  function swapWithRebate(
+  function swapWithConditionalFee(
     uint256 nonce,
     uint256 expiry,
     address signerWallet,
@@ -289,7 +319,7 @@ contract Light is ILight, Ownable {
     uint8 v,
     bytes32 r,
     bytes32 s
-  ) public override returns (uint256 rebateAmount) {
+  ) public override {
     _checkValidOrder(
       nonce,
       expiry,
@@ -318,29 +348,24 @@ contract Light is ILight, Ownable {
     );
 
     // Transfer fee from signer
-    uint256 feeAmount = signerAmount.mul(signerFee).div(FEE_DIVISOR);
+    uint256 feeAmount = signerAmount.mul(conditionalSignerFee).div(FEE_DIVISOR);
     if (feeAmount > 0) {
-      // Check sender staking balance for rebate amount
-      uint256 score = IERC20(stakingToken).balanceOf(msg.sender);
-      if (score > 0) {
-        // Calculate rebate amount based on balance
-        uint256 divisor = (uint256(10)**rebateScale).add(score);
-        rebateAmount = rebateMax.mul(score).mul(feeAmount).div(divisor).div(
-          100
-        );
-        // Transfer rebate from signer to sender
+      // Check sender staking balance for rebate
+      if (IERC20(stakingToken).balanceOf(msg.sender) >= stakingRebateMinimum) {
+        // Transfer fee from signer to sender
         IERC20(signerToken).safeTransferFrom(
           signerWallet,
           msg.sender,
-          rebateAmount
+          feeAmount
+        );
+      } else {
+        // Transfer fee from signer to feeWallet
+        IERC20(signerToken).safeTransferFrom(
+          signerWallet,
+          feeWallet,
+          feeAmount
         );
       }
-      // Transfer remaining fee from signer to feeWallet
-      IERC20(signerToken).safeTransferFrom(
-        signerWallet,
-        feeWallet,
-        feeAmount - rebateAmount
-      );
     }
 
     // Emit a Swap event
@@ -355,9 +380,6 @@ contract Light is ILight, Ownable {
       senderToken,
       senderAmount
     );
-
-    // Return rebate amount
-    return rebateAmount;
   }
 
   /**

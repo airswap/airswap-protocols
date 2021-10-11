@@ -8,7 +8,7 @@ const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
 const ERC20 = require('@openzeppelin/contracts/build/contracts/ERC20PresetMinterPauser.json')
 
-describe('Light Unit Tests', () => {
+describe('Light Integration Tests', () => {
   let snapshotId
   let light
   let signerToken
@@ -20,9 +20,9 @@ describe('Light Unit Tests', () => {
   let feeWallet
 
   const CHAIN_ID = 31337
-  const SIGNER_FEE = '30'
-  const REBATE_SCALE = '10'
-  const REBATE_MAX = '100'
+  const SIGNER_FEE = '7'
+  const CONDITIONAL_SIGNER_FEE = '30'
+  const STAKING_REBATE_MINIMUM = '1000000'
   const DEFAULT_AMOUNT = '10000'
 
   async function createSignedOrder(params, signer) {
@@ -59,7 +59,6 @@ describe('Light Unit Tests', () => {
     ;[deployer, sender, signer, feeWallet] = await ethers.getSigners()
 
     stakingToken = await deployMockContract(deployer, ERC20.abi)
-    await stakingToken.mock.balanceOf.returns(10000000000)
 
     signerToken = await (
       await ethers.getContractFactory(ERC20.abi, ERC20.bytecode)
@@ -78,8 +77,8 @@ describe('Light Unit Tests', () => {
     ).deploy(
       feeWallet.address,
       SIGNER_FEE,
-      REBATE_SCALE,
-      REBATE_MAX,
+      CONDITIONAL_SIGNER_FEE,
+      STAKING_REBATE_MINIMUM,
       stakingToken.address
     )
     await light.deployed()
@@ -89,20 +88,42 @@ describe('Light Unit Tests', () => {
   })
 
   describe('Test rebates', async () => {
-    it('test swap', async () => {
+    it('test swap without rebate', async () => {
+      await stakingToken.mock.balanceOf.returns(0)
+
       const order = await createSignedOrder({}, signer)
       await expect(
-        await light.connect(sender).swapWithRebate(...order)
+        await light.connect(sender).swapWithConditionalFee(...order)
       ).to.emit(light, 'Swap')
 
       // Expect full 30 to be taken from signer
       expect(await signerToken.balanceOf(signer.address)).to.equal('989970')
 
-      // Expect half of 30 to be given to sender
-      expect(await signerToken.balanceOf(sender.address)).to.equal('10015')
+      // Expect full fee to have been sent to sender
+      expect(await signerToken.balanceOf(sender.address)).to.equal('10000')
 
-      // Expect other half of 30 to be given to fee wallet
-      expect(await signerToken.balanceOf(feeWallet.address)).to.equal('15')
+      // Expect no fee to have been sent to fee wallet
+      expect(await signerToken.balanceOf(feeWallet.address)).to.equal(
+        CONDITIONAL_SIGNER_FEE
+      )
+    })
+
+    it('test swap with rebate', async () => {
+      await stakingToken.mock.balanceOf.returns(10000000000)
+
+      const order = await createSignedOrder({}, signer)
+      await expect(
+        await light.connect(sender).swapWithConditionalFee(...order)
+      ).to.emit(light, 'Swap')
+
+      // Expect full 30 to be taken from signer
+      expect(await signerToken.balanceOf(signer.address)).to.equal('989970')
+
+      // Expect full fee to have been sent to sender
+      expect(await signerToken.balanceOf(sender.address)).to.equal('10030')
+
+      // Expect no fee to have been sent to fee wallet
+      expect(await signerToken.balanceOf(feeWallet.address)).to.equal('0')
     })
   })
 })
