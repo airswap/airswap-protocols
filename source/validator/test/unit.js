@@ -1,7 +1,6 @@
 const { expect } = require('chai')
 const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
-const { ADDRESS_ZERO } = require('@airswap/constants')
 const lightContract = require('../../light/build/contracts/Light.sol/Light.json')
 const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
 
