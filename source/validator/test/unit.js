@@ -14,7 +14,7 @@ const {
 describe('Validator', () => {
   let deployer, sender, signer, other, feeWallet
   let light, Validator, LightFactory
-  let senderToken, signerToken
+  let senderToken, signerToken, stakingToken
   const CHAIN_ID = 31337
   const SIGNER_FEE = '30'
   const DEFAULT_AMOUNT = '1000'
@@ -69,6 +69,8 @@ describe('Validator', () => {
 
   before(async () => {
     ;[deployer, sender, signer, feeWallet, other] = await ethers.getSigners()
+
+    stakingToken = await deployMockContract(deployer, IERC20.abi)
     const ValidatorFactory = await ethers.getContractFactory('Validator')
     LightFactory = await ethers.getContractFactory(
       lightContract.abi,
@@ -80,7 +82,7 @@ describe('Validator', () => {
       SIGNER_FEE,
       '0',
       '0',
-      ADDRESS_ZERO
+      stakingToken.address
     )
     await light.deployed()
     Validator = await ValidatorFactory.deploy(light.address)
@@ -224,7 +226,7 @@ describe('Validator', () => {
         SIGNER_FEE,
         '0',
         '0',
-        ADDRESS_ZERO
+        stakingToken.address
       )
       await newLight.deployed()
       await expect(Validator.setLightAddress(newLight.address)).to.not.be
@@ -238,7 +240,7 @@ describe('Validator', () => {
         SIGNER_FEE,
         '0',
         '0',
-        ADDRESS_ZERO
+        stakingToken.address
       )
       await newLight.deployed()
       await expect(
