@@ -43,7 +43,7 @@ export class Registry {
       signerTokenURLs
         .filter((value) => senderTokenURLs.includes(value))
         .map((url) => {
-          return Server.for(url, Light.getAddress(this.chainId))
+          return Server.at(url, Light.getAddress(this.chainId))
         })
     )
     return servers

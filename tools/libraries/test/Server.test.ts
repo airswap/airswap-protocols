@@ -82,7 +82,7 @@ describe('HTTPServer', () => {
   fancy
     .nock('https://' + URL, mockHttpServer)
     .do(async () => {
-      const server = await Server.for(URL)
+      const server = await Server.at(URL)
       await server.getSignerSideQuote('', '', '')
     })
     .catch(/Server response is not a valid quote: {"bad":"quote"}/)
@@ -90,7 +90,7 @@ describe('HTTPServer', () => {
   fancy
     .nock('https://' + URL, mockHttpServer)
     .do(async () => {
-      const server = await Server.for(URL)
+      const server = await Server.at(URL)
       await server.getMaxQuote('', '')
     })
     .catch(
@@ -100,14 +100,14 @@ describe('HTTPServer', () => {
   fancy
     .nock('https://' + URL, mockHttpServer)
     .it('Server getSenderSideQuote()', async () => {
-      const server = await Server.for(URL)
+      const server = await Server.at(URL)
       const quote = await server.getSenderSideQuote('1', 'SIGNERTOKEN', '')
       expect(quote.signer.token).to.equal('SIGNERTOKEN')
     })
   fancy
     .nock('https://' + URL, mockHttpServer)
     .it('Server getSignerSideOrder()', async () => {
-      const server = await Server.for(URL)
+      const server = await Server.at(URL)
       const order = await server.getSignerSideOrder(
         '0',
         ADDRESS_ZERO,
@@ -183,8 +183,8 @@ describe('WebSocketServer', () => {
     mockServer.resetInitOptions()
   })
 
-  it('should be initialized after Server.for has resolved', async () => {
-    const client = await Server.for(url)
+  it('should be initialized after Server.at has resolved', async () => {
+    const server = await Server.at(url)
     const correctInitializeResponse = new Promise<void>((resolve) => {
       const onResponse = (socket, data) => {
         // Note mock server implementation uses id '123' for initialize.
@@ -193,13 +193,13 @@ describe('WebSocketServer', () => {
       }
       mockServer.setNextMessageCallback(onResponse)
     })
-    expect(client.supportsProtocol('last-look')).to.equal(true)
-    expect(client.supportsProtocol('request-for-quote')).to.equal(false)
+    expect(server.supportsProtocol('last-look')).to.equal(true)
+    expect(server.supportsProtocol('request-for-quote')).to.equal(false)
     await correctInitializeResponse
   })
 
   it('should call subscribe with the correct params and emit pricing', async () => {
-    const client = await Server.for(url)
+    const server = await Server.at(url)
 
     // Ensure subscribe method is correct format.
     const onSubscribe = (socket, data) => {
@@ -207,13 +207,13 @@ describe('WebSocketServer', () => {
       socket.send(JSON.stringify(createResponse(data.id, samplePricing)))
     }
     mockServer.setNextMessageCallback(onSubscribe, true)
-    const pricing = nextEvent(client, 'pricing')
-    client.subscribe(samplePairs)
+    const pricing = nextEvent(server, 'pricing')
+    server.subscribe(samplePairs)
 
     // Ensure pricing is emitted and has the correct values.
     expect(await pricing).to.eql(samplePricing)
 
-    const updatedPricing = nextEvent(client, 'pricing')
+    const updatedPricing = nextEvent(server, 'pricing')
     const latestPricing = [
       [
         {
@@ -255,13 +255,13 @@ describe('WebSocketServer', () => {
   })
 
   it('should call consider with the correct parameters', async () => {
-    const client = await Server.for(url)
+    const server = await Server.at(url)
     const onConsider = (socket, data) => {
       expect(data).to.be.a.JSONRpcRequest('consider', fakeOrder)
       socket.send(JSON.stringify(createResponse(data.id, true)))
     }
     mockServer.setNextMessageCallback(onConsider, true)
-    const result = await client.consider(fakeOrder)
+    const result = await server.consider(fakeOrder)
     expect(result).to.equal(true)
   })
 
@@ -279,25 +279,25 @@ describe('WebSocketServer', () => {
           },
         }
 
-        const client = await Server.for(url)
-        const result = await client.consider(fakeOrder)
+        const server = await Server.at(url)
+        const result = await server.consider(fakeOrder)
         expect(result).to.equal(true)
       }
     )
 
   it('should call unsubscribe with the correct parameters', async () => {
-    const client = await Server.for(url)
+    const server = await Server.at(url)
     const onUnsubscribe = (socket, data) => {
       expect(data).to.be.a.JSONRpcRequest('unsubscribe', [samplePairs])
       socket.send(JSON.stringify(createResponse(data.id, true)))
     }
     mockServer.setNextMessageCallback(onUnsubscribe, true)
-    const result = await client.unsubscribe(samplePairs)
+    const result = await server.unsubscribe(samplePairs)
     expect(result).to.equal(true)
   })
 
   it('should call subscribeAll and unsubscribeAll correctly', async () => {
-    const client = await Server.for(url)
+    const server = await Server.at(url)
     const onSubscribeAll = (socket, data) => {
       expect(data).to.be.a.JSONRpcRequest('subscribeAll')
       socket.send(JSON.stringify(createResponse(data.id, true)))
@@ -307,10 +307,10 @@ describe('WebSocketServer', () => {
       socket.send(JSON.stringify(createResponse(data.id, true)))
     }
     mockServer.setNextMessageCallback(onSubscribeAll, true)
-    const subscribeResult = await client.subscribeAll()
+    const subscribeResult = await server.subscribeAll()
     expect(subscribeResult).to.equal(true)
     mockServer.setNextMessageCallback(onUnsubscribeAll, true)
-    const unsubscribeResult = await client.unsubscribeAll()
+    const unsubscribeResult = await server.unsubscribeAll()
     expect(unsubscribeResult).to.equal(true)
   })
 
@@ -318,11 +318,11 @@ describe('WebSocketServer', () => {
     const fakeTimers = useFakeTimers()
     // prevent server from initializing
     mockServer.initOptions = null
-    const initializePromise = Server.for(url)
+    const initializePromise = Server.at(url)
     fakeTimers.tick(REQUEST_TIMEOUT)
     try {
       await initializePromise
-      throw new Error('Server.for should not resolve before initialize')
+      throw new Error('Server.at should not resolve before initialize')
     } catch (e) {
       expect(e).to.equal('Server did not call initialize in time')
     }
@@ -333,22 +333,22 @@ describe('WebSocketServer', () => {
     // Protocol is supported if the major version is the same,
     // and minor and patch versions are the same or greater than requried
     mockServer.initOptions = { lastLook: '1.2.3' }
-    const client = await Server.for(url)
-    expect(client.supportsProtocol('last-look')).to.be.true
-    expect(client.supportsProtocol('request-for-quote')).to.be.false
-    expect(client.supportsProtocol('last-look', '0.9.1')).to.be.false
-    expect(client.supportsProtocol('last-look', '1.0.0')).to.be.true
-    expect(client.supportsProtocol('last-look', '1.1.1')).to.be.true
-    expect(client.supportsProtocol('last-look', '1.2.3')).to.be.true
-    expect(client.supportsProtocol('last-look', '1.2.4')).to.be.false
-    expect(client.supportsProtocol('last-look', '1.3.0')).to.be.false
-    expect(client.supportsProtocol('last-look', '2.2.3')).to.be.false
+    const server = await Server.at(url)
+    expect(server.supportsProtocol('last-look')).to.be.true
+    expect(server.supportsProtocol('request-for-quote')).to.be.false
+    expect(server.supportsProtocol('last-look', '0.9.1')).to.be.false
+    expect(server.supportsProtocol('last-look', '1.0.0')).to.be.true
+    expect(server.supportsProtocol('last-look', '1.1.1')).to.be.true
+    expect(server.supportsProtocol('last-look', '1.2.3')).to.be.true
+    expect(server.supportsProtocol('last-look', '1.2.4')).to.be.false
+    expect(server.supportsProtocol('last-look', '1.3.0')).to.be.false
+    expect(server.supportsProtocol('last-look', '2.2.3')).to.be.false
   })
 
   it('should reject when calling a method from an unsupported protocol', async () => {
-    const client = await Server.for(url)
+    const server = await Server.at(url)
     try {
-      await client.getMaxQuote('', '')
+      await server.getMaxQuote('', '')
       throw new Error('expected getMaxQuote method to reject')
     } catch (e) {
       expect(e.message).to.match(/support/)
@@ -372,7 +372,7 @@ describe('WebSocketServer', () => {
         JSON.stringify(createRequest('initialize', [{ bad: 'params' }], 'abc'))
       )
     })
-    Server.for(url).catch(() => {
+    Server.at(url).catch(() => {
       /* this is expected, server won't init */
     })
 
@@ -380,7 +380,7 @@ describe('WebSocketServer', () => {
   })
 
   it('should respond with an error if pricing is called with bad params', async () => {
-    await Server.for(url)
+    await Server.at(url)
     const initResponseReceived = new Promise<void>((resolve) => {
       mockServer.setNextMessageCallback(() => resolve())
     })
@@ -413,8 +413,8 @@ describe('WebSocketServer', () => {
         senderWallet: '0xmySender',
       },
     }
-    const client = await Server.for(url)
-    expect(client.getSenderWallet()).to.equal('0xmySender')
+    const server = await Server.at(url)
+    expect(server.getSenderWallet()).to.equal('0xmySender')
   })
 
   afterEach(() => {

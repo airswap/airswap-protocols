@@ -74,7 +74,7 @@ export class Server extends TypedEmitter<ServerEvents> {
     this.transportProtocol = protocol.startsWith('http') ? 'http' : 'websocket'
   }
 
-  public static async for(
+  public static async at(
     locator: string,
     swapContract?: string
   ): Promise<Server> {
