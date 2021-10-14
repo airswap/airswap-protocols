@@ -13,7 +13,7 @@ import { parseUrl, flattenObject, isValidQuote } from '@airswap/utils'
 import { Quote, LightOrder } from '@airswap/types'
 
 import { Light } from './Light'
-import { EventEmitter } from 'events'
+import { TypedEmitter } from 'tiny-typed-emitter'
 
 export type SupportedProtocolInfo = {
   name: string
@@ -21,8 +21,8 @@ export type SupportedProtocolInfo = {
   params?: any
 }
 
-type Levels = [string, string][]
-type Formula = string
+export type Levels = [string, string][]
+export type Formula = string
 
 type PricingDetails =
   | {
@@ -34,7 +34,7 @@ type PricingDetails =
       ask: Formula
     }
 
-type Pricing = {
+export type Pricing = {
   baseToken: string
   quoteToken: string
 } & PricingDetails
@@ -51,7 +51,12 @@ const PROTOCOL_NAMES = {
   'request-for-quote': 'Request for Quote',
 }
 
-export class Server extends EventEmitter {
+export interface ServerEvents {
+  pricing: (pricing: Pricing[]) => void
+  error: (error: JsonRpcError) => void
+}
+
+export class Server extends TypedEmitter<ServerEvents> {
   public transportProtocol: 'websocket' | 'http'
   private supportedProtocols: SupportedProtocolInfo[]
   private isInitialized: boolean
