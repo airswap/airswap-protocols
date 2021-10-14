@@ -283,12 +283,13 @@ export class Server extends EventEmitter {
     )
     const initPromise = new Promise<SupportedProtocolInfo[]>(
       (resolve, reject) => {
-        setTimeout(() => {
+        const initTimeout = setTimeout(() => {
           reject('Server did not call initialize in time')
           this.disconnect()
         }, REQUEST_TIMEOUT)
 
         this.webSocketClient.on('initialize', (message) => {
+          clearTimeout(initTimeout)
           this.initialize(message)
           this.isInitialized = true
           resolve(this.supportedProtocols)
