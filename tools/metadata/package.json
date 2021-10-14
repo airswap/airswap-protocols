@@ -1,6 +1,6 @@
 {
   "name": "@airswap/metadata",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "description": "Token metadata fetching tools",
   "contributors": [
     "Don Mosites",
