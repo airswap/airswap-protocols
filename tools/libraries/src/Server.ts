@@ -66,7 +66,7 @@ export class Server extends TypedEmitter<ServerEvents> {
   private senderWallet: string
 
   public constructor(
-    private locator: string,
+    public locator: string,
     private swapContract = Light.getAddress()
   ) {
     super()
