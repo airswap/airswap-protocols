@@ -150,3 +150,21 @@ export const emptySignature: Signature = {
   s: LOCATOR_ZERO,
   v: '0',
 }
+
+export type Levels = [string, string][]
+export type Formula = string
+
+type LevelsOrFomulae =
+  | {
+      bid: Levels
+      ask: Levels
+    }
+  | {
+      bid: Formula
+      ask: Formula
+    }
+
+export type Pricing = {
+  baseToken: string
+  quoteToken: string
+} & LevelsOrFomulae

@@ -10,7 +10,7 @@ import {
 } from '@airswap/jsonrpc-client-websocket'
 import { REQUEST_TIMEOUT } from '@airswap/constants'
 import { parseUrl, flattenObject, isValidQuote } from '@airswap/utils'
-import { Quote, LightOrder } from '@airswap/types'
+import { Quote, LightOrder, Pricing } from '@airswap/types'
 
 import { Light } from './Light'
 import { TypedEmitter } from 'tiny-typed-emitter'
@@ -20,24 +20,6 @@ export type SupportedProtocolInfo = {
   version: string
   params?: any
 }
-
-export type Levels = [string, string][]
-export type Formula = string
-
-type PricingDetails =
-  | {
-      bid: Levels
-      ask: Levels
-    }
-  | {
-      bid: Formula
-      ask: Formula
-    }
-
-export type Pricing = {
-  baseToken: string
-  quoteToken: string
-} & PricingDetails
 
 if (!isBrowser) {
   JsonRpcWebsocket.setWebSocketFactory((url: string) => {
