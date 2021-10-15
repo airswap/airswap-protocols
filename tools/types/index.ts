@@ -151,6 +151,8 @@ export const emptySignature: Signature = {
   v: '0',
 }
 
+export { TokenInfo } from '@uniswap/token-lists'
+
 export type Levels = [string, string][]
 export type Formula = string
 
