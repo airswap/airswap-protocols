@@ -10,34 +10,16 @@ import {
 } from '@airswap/jsonrpc-client-websocket'
 import { REQUEST_TIMEOUT } from '@airswap/constants'
 import { parseUrl, flattenObject, isValidQuote } from '@airswap/utils'
-import { Quote, LightOrder } from '@airswap/types'
+import { Quote, LightOrder, Pricing } from '@airswap/types'
 
 import { Light } from './Light'
-import { EventEmitter } from 'events'
+import { TypedEmitter } from 'tiny-typed-emitter'
 
 export type SupportedProtocolInfo = {
   name: string
   version: string
   params?: any
 }
-
-type Levels = [string, string][]
-type Formula = string
-
-type PricingDetails =
-  | {
-      bid: Levels
-      ask: Levels
-    }
-  | {
-      bid: Formula
-      ask: Formula
-    }
-
-type Pricing = {
-  baseToken: string
-  quoteToken: string
-} & PricingDetails
 
 if (!isBrowser) {
   JsonRpcWebsocket.setWebSocketFactory((url: string) => {
@@ -51,7 +33,12 @@ const PROTOCOL_NAMES = {
   'request-for-quote': 'Request for Quote',
 }
 
-export class Server extends EventEmitter {
+export interface ServerEvents {
+  pricing: (pricing: Pricing[]) => void
+  error: (error: JsonRpcError) => void
+}
+
+export class Server extends TypedEmitter<ServerEvents> {
   public transportProtocol: 'websocket' | 'http'
   private supportedProtocols: SupportedProtocolInfo[]
   private isInitialized: boolean
@@ -61,7 +48,7 @@ export class Server extends EventEmitter {
   private senderWallet: string
 
   public constructor(
-    private locator: string,
+    public locator: string,
     private swapContract = Light.getAddress()
   ) {
     super()
@@ -69,7 +56,7 @@ export class Server extends EventEmitter {
     this.transportProtocol = protocol.startsWith('http') ? 'http' : 'websocket'
   }
 
-  public static async for(
+  public static async at(
     locator: string,
     swapContract?: string
   ): Promise<Server> {
@@ -283,12 +270,13 @@ export class Server extends EventEmitter {
     )
     const initPromise = new Promise<SupportedProtocolInfo[]>(
       (resolve, reject) => {
-        setTimeout(() => {
+        const initTimeout = setTimeout(() => {
           reject('Server did not call initialize in time')
           this.disconnect()
         }, REQUEST_TIMEOUT)
 
         this.webSocketClient.on('initialize', (message) => {
+          clearTimeout(initTimeout)
           this.initialize(message)
           this.isInitialized = true
           resolve(this.supportedProtocols)

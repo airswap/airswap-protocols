@@ -1,6 +1,6 @@
 {
   "name": "@airswap/libraries",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Protocol Libraries for AirSwap Developers",
   "contributors": [
     "Don Mosites",
@@ -31,7 +31,7 @@
     "@airswap/jsonrpc-client-websocket": "0.0.1",
     "@airswap/light": "2.3.1",
     "@airswap/registry": "4.8.2",
-    "@airswap/types": "3.6.1",
+    "@airswap/types": "^3.7.0",
     "@airswap/utils": "0.4.10",
     "@airswap/validator": "2.3.0",
     "@airswap/wrapper": "1.4.0",
@@ -39,6 +39,7 @@
     "browser-or-node": "^1.3.0",
     "ethers": "^5.0.25",
     "jayson": "^3.2.0",
+    "tiny-typed-emitter": "^2.1.0",
     "websocket": "^1.0.34"
   },
   "devDependencies": {

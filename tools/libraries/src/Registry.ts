@@ -34,16 +34,16 @@ export class Registry {
   }
 
   public async getServers(
-    signerToken: string,
-    senderToken: string
+    quoteToken: string,
+    baseToken: string
   ): Promise<Array<Server>> {
-    const signerTokenURLs = await this.contract.getURLsForToken(signerToken)
-    const senderTokenURLs = await this.contract.getURLsForToken(senderToken)
+    const quoteTokenURLs = await this.contract.getURLsForToken(quoteToken)
+    const baseTokenURLs = await this.contract.getURLsForToken(baseToken)
     const servers: Server[] = await Promise.all(
-      signerTokenURLs
-        .filter((value) => senderTokenURLs.includes(value))
+      quoteTokenURLs
+        .filter((value) => baseTokenURLs.includes(value))
         .map((url) => {
-          return Server.for(url, Light.getAddress(this.chainId))
+          return Server.at(url, Light.getAddress(this.chainId))
         })
     )
     return servers
