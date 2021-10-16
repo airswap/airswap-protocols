@@ -4,16 +4,13 @@ import * as url from 'url'
 import BigNumber from 'bignumber.js'
 
 import { etherscanDomains } from '@airswap/constants'
-import { Quote, Order } from '@airswap/types'
+import { Quote, Order, Levels } from '@airswap/types'
 
 export * from './src/hashes'
 export * from './src/orders'
 export * from './src/quotes'
 
-export function calculateCostFromLevels(
-  amount: string,
-  levels: Array<Array<string>>
-) {
+export function calculateCostFromLevels(amount: string, levels: Levels) {
   const totalAmount = new BigNumber(amount)
   const totalAvailable = new BigNumber(levels[levels.length - 1][0])
   let totalCost = new BigNumber(0)
