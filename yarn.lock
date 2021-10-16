@@ -46,6 +46,19 @@
     ethereumjs-util "^6.2.0"
     ethers "^5.4.7"
 
+"@airswap/utils@0.4.11":
+  version "0.4.11"
+  resolved "https://registry.yarnpkg.com/@airswap/utils/-/utils-0.4.11.tgz#b70a6e91d1bbaaafc4503e1c0f24b19be8bb9ebd"
+  integrity sha512-+bjehGHREMS7T06D2MPo6cHY0WDnBT4V8G/mkcylgHqs7OHSE1HL1tmF7IIwfQbp6B5oEU4T/qzaybOWH/a0Gg==
+  dependencies:
+    "@airswap/constants" "0.4.3"
+    "@airswap/types" "3.7.0"
+    "@types/ethereumjs-util" "^6.1.0"
+    bignumber.js "^9.0.1"
+    eth-sig-util "^3.0.0"
+    ethereumjs-util "^6.2.0"
+    ethers "^5.4.7"
+
 "@airswap/validator@2.3.0":
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/@airswap/validator/-/validator-2.3.0.tgz#f7afd96950e33d2f3bb6653116aa2a97b9bdebf1"

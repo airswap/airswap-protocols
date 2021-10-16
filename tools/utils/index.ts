@@ -4,11 +4,19 @@ import * as url from 'url'
 import BigNumber from 'bignumber.js'
 
 import { etherscanDomains } from '@airswap/constants'
-import { Quote, Order, Levels } from '@airswap/types'
+import { Quote, Order, Formula, Levels } from '@airswap/types'
 
 export * from './src/hashes'
 export * from './src/orders'
 export * from './src/quotes'
+
+export function calculateCost(amount: string, pricing: Formula | Levels) {
+  // TODO: Formula support
+  if (typeof pricing !== 'string') {
+    return calculateCostFromLevels(amount, pricing)
+  }
+  return null
+}
 
 export function calculateCostFromLevels(amount: string, levels: Levels) {
   const totalAmount = new BigNumber(amount)
