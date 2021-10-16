@@ -4,7 +4,7 @@ import * as url from 'url'
 import BigNumber from 'bignumber.js'
 
 import { etherscanDomains } from '@airswap/constants'
-import { Quote, Order, Formula, Levels } from '@airswap/types'
+import { Quote, Order, Levels, Formula } from '@airswap/types'
 
 export * from './src/hashes'
 export * from './src/orders'
