@@ -1,6 +1,7 @@
 import { assert, expect } from 'chai'
 import { ethers } from 'ethers'
 import { ADDRESS_ZERO, SECONDS_IN_DAY } from '@airswap/constants'
+import { Levels } from '@airswap/types'
 
 import { isValidLightOrder, calculateCostFromLevels } from '../index'
 import {
@@ -44,7 +45,7 @@ describe('Orders', async () => {
     expect(signerWallet.toLowerCase()).to.equal(wallet.address.toLowerCase())
   })
 
-  const levels = [
+  const levels: Levels = [
     ['250', '0.5'],
     ['500', '0.6'],
     ['750', '0.7'],

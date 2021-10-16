@@ -2,6 +2,11 @@
 # yarn lockfile v1
 
 
+"@airswap/constants@0.4.1":
+  version "0.4.1"
+  resolved "https://registry.yarnpkg.com/@airswap/constants/-/constants-0.4.1.tgz#1664b9bb752ac9278edc16de46b5e25d8f20f04c"
+  integrity sha512-llPEcAZRizBejMBP2ZVlnIuK0uhLRL0VgqQYaBquPx2O+CXjWRkQNQVOZ3i09PW0SDTTV+WkwnQy0FAE8OBHVw==
+
 "@airswap/constants@0.4.2":
   version "0.4.2"
   resolved "https://registry.yarnpkg.com/@airswap/constants/-/constants-0.4.2.tgz#021e76a048495836dd3ecf64943078c16a699fab"
@@ -21,12 +26,25 @@
   dependencies:
     "@openzeppelin/contracts" "^4.3.1"
 
-"@airswap/types@3.6.2":
-  version "3.6.2"
-  resolved "https://registry.yarnpkg.com/@airswap/types/-/types-3.6.2.tgz#846478944648f23adec2def5bcfd6c6e5eef4b7d"
-  integrity sha512-tGdOlpRpKW+OVDnENhfUrtL06A/0GCe4hTAhV73yNYKrFdRdi3dEdcTHHMPDG2Pmh8TIMF297B8Piuae1jWa6Q==
+"@airswap/types@3.6.1":
+  version "3.6.1"
+  resolved "https://registry.yarnpkg.com/@airswap/types/-/types-3.6.1.tgz#23beafff44cf8bec84f89ca8d545f73291212c9a"
+  integrity sha512-ryN9SxxbkOOU+MqYHlnm+lENh53P/6HDbQK6hyuv49ehRAn7BhzVLgYdINJWwj09oDrVME9DseWz521L8HzoPw==
+  dependencies:
+    "@airswap/constants" "0.4.1"
+
+"@airswap/utils@0.4.10":
+  version "0.4.10"
+  resolved "https://registry.yarnpkg.com/@airswap/utils/-/utils-0.4.10.tgz#bac8c7d5e7a6ef288d47d2ae6f1aaf41fdaf9093"
+  integrity sha512-YzR0G1hoVYPx/KsSjObX2XuMo+ySURHGRijiz4eM4EMU7udiH4upIpE2M/HeQ0HISWLVJrMJa89BJ/8szKorVQ==
   dependencies:
     "@airswap/constants" "0.4.2"
+    "@airswap/types" "3.6.1"
+    "@types/ethereumjs-util" "^6.1.0"
+    bignumber.js "^9.0.1"
+    eth-sig-util "^3.0.0"
+    ethereumjs-util "^6.2.0"
+    ethers "^5.4.7"
 
 "@airswap/validator@2.3.0":
   version "2.3.0"
