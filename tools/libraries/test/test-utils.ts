@@ -114,14 +114,6 @@ export class MockSocketServer extends BaseMockSocketServer {
     params?: any
   } | null
 
-  public set initOptions(options: {
-    lastLook?: string
-    rfq?: string
-    params?: any
-  }) {
-    this._initOptions = options
-  }
-
   public constructor(url: string) {
     super(url)
     this.resetInitOptions()
@@ -147,6 +139,14 @@ export class MockSocketServer extends BaseMockSocketServer {
 
       socket.on('message', this.onMessage.bind(this, socket))
     })
+  }
+
+  public set initOptions(options: {
+    lastLook?: string
+    rfq?: string
+    params?: any
+  }) {
+    this._initOptions = options
   }
 
   public static startMockingWebSocket(): void {
