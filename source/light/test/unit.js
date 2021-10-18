@@ -27,9 +27,12 @@ describe('Light Unit Tests', () => {
   const CONDITIONAL_SIGNER_FEE = '30'
   const STAKING_REBATE_MINIMUM = '1000000'
   const FEE_DIVISOR = '10000'
-  const DEFAULT_AMOUNT = '10000'
+  const DEFAULT_AMOUNT = '1000'
+  const DEFAULT_BALANCE = '10000'
+  const SWAP_FEE =
+    (parseInt(DEFAULT_AMOUNT) * parseInt(SIGNER_FEE)) / parseInt(FEE_DIVISOR)
 
-  async function createSignedOrder(params, signer) {
+  async function createSignedOrder(params, signatory) {
     const unsignedOrder = createLightOrder({
       signerFee: SIGNER_FEE,
       signerWallet: signer.address,
@@ -44,11 +47,33 @@ describe('Light Unit Tests', () => {
       ...unsignedOrder,
       ...(await createLightSignature(
         unsignedOrder,
-        signer,
+        signatory,
         light.address,
         CHAIN_ID
       )),
     })
+  }
+
+  async function setUpAllowances(senderAmount, signerAmount) {
+    await senderToken.mock.allowance
+      .withArgs(sender.address, light.address)
+      .returns(senderAmount)
+    await signerToken.mock.allowance
+      .withArgs(signer.address, light.address)
+      .returns(signerAmount)
+  }
+
+  async function setUpBalances(senderAmount, signerAmount) {
+    await senderToken.mock.balanceOf
+      .withArgs(sender.address)
+      .returns(senderAmount)
+    await signerToken.mock.balanceOf
+      .withArgs(signer.address)
+      .returns(signerAmount)
+  }
+
+  async function getErrorInfo(order) {
+    return await light.connect(sender).validate(...order, sender.address)
   }
 
   beforeEach(async () => {
@@ -353,6 +378,130 @@ describe('Light Unit Tests', () => {
       await expect(await light.nonceUsed(signer.address, 4)).to.equal(true)
       await expect(await light.nonceUsed(signer.address, 5)).to.equal(false)
       await expect(await light.nonceUsed(signer.address, 6)).to.equal(true)
+    })
+  })
+
+  describe('validate', () => {
+    it('properly detects an invalid signature', async () => {
+      await setUpAllowances(DEFAULT_AMOUNT, DEFAULT_AMOUNT + SWAP_FEE)
+      await setUpBalances(DEFAULT_BALANCE, DEFAULT_BALANCE)
+      const order = await createSignedOrder({}, signer)
+      order[7] = '29'
+      const [errCount, messages] = await getErrorInfo(order)
+      console.log(ethers.utils.parseBytes32String(messages[1]))
+      expect(errCount).to.equal(1)
+
+      expect(ethers.utils.parseBytes32String(messages[0])).to.equal(
+        'INVALID_SIG'
+      )
+    })
+    it('properly detects an expired order', async () => {
+      await setUpAllowances(DEFAULT_AMOUNT, DEFAULT_AMOUNT + SWAP_FEE)
+      await setUpBalances(DEFAULT_BALANCE, DEFAULT_BALANCE)
+      const order = await createSignedOrder(
+        {
+          expiry: '0',
+        },
+        signer
+      )
+      const [errCount, messages] = await getErrorInfo(order)
+      expect(errCount).to.equal(1)
+      expect(ethers.utils.parseBytes32String(messages[0])).to.equal(
+        'EXPIRY_PASSED'
+      )
+    })
+    it('properly detects an unauthorized signature', async () => {
+      await setUpAllowances(DEFAULT_AMOUNT, DEFAULT_AMOUNT + SWAP_FEE)
+      await setUpBalances(DEFAULT_BALANCE, DEFAULT_BALANCE)
+      const order = await createSignedOrder({}, anyone)
+      const [errCount, messages] = await getErrorInfo(order)
+      expect(errCount).to.equal(1)
+      expect(ethers.utils.parseBytes32String(messages[0])).to.equal(
+        'UNAUTHORIZED'
+      )
+    })
+    it('properly detects a low signer allowance', async () => {
+      await setUpAllowances(DEFAULT_AMOUNT, 0)
+      await setUpBalances(DEFAULT_BALANCE, DEFAULT_BALANCE)
+      const order = await createSignedOrder({}, signer)
+      const [errCount, messages] = await getErrorInfo(order)
+      expect(errCount).to.equal(1)
+      expect(ethers.utils.parseBytes32String(messages[0])).to.equal(
+        'SIGNER_ALLOWANCE_LOW'
+      )
+    })
+    it('properly detects a low sender allowance', async () => {
+      await setUpAllowances(0, DEFAULT_AMOUNT + SWAP_FEE)
+      await setUpBalances(DEFAULT_BALANCE, DEFAULT_BALANCE)
+      const order = await createSignedOrder({}, signer)
+      const [errCount, messages] = await getErrorInfo(order)
+      expect(errCount).to.equal(1)
+      expect(ethers.utils.parseBytes32String(messages[0])).to.equal(
+        'SENDER_ALLOWANCE_LOW'
+      )
+    })
+    it('properly detects a low signer balance', async () => {
+      await setUpAllowances(DEFAULT_AMOUNT, DEFAULT_AMOUNT + SWAP_FEE)
+      await setUpBalances(DEFAULT_BALANCE, 0)
+      const order = await createSignedOrder({}, signer)
+      const [errCount, messages] = await getErrorInfo(order)
+      expect(errCount).to.equal(1)
+      expect(ethers.utils.parseBytes32String(messages[0])).to.equal(
+        'SIGNER_BALANCE_LOW'
+      )
+    })
+    it('properly detects a low sender balance', async () => {
+      await setUpAllowances(DEFAULT_AMOUNT, DEFAULT_AMOUNT + SWAP_FEE)
+      await setUpBalances(0, DEFAULT_BALANCE)
+      const order = await createSignedOrder({}, signer)
+      const [errCount, messages] = await getErrorInfo(order)
+      expect(errCount).to.equal(1)
+      expect(ethers.utils.parseBytes32String(messages[0])).to.equal(
+        'SENDER_BALANCE_LOW'
+      )
+    })
+    it('properly detects a nonce that has already been used', async () => {
+      await senderToken.mock.transferFrom
+        .withArgs(sender.address, signer.address, DEFAULT_AMOUNT)
+        .returns(true)
+      await signerToken.mock.transferFrom
+        .withArgs(signer.address, sender.address, DEFAULT_AMOUNT)
+        .returns(true)
+      await signerToken.mock.transferFrom
+        .withArgs(signer.address, feeWallet.address, SWAP_FEE)
+        .returns(true)
+      const order = await createSignedOrder(
+        {
+          nonce: '1',
+        },
+        signer
+      )
+      await light.connect(sender).swap(...order)
+      await setUpAllowances(DEFAULT_AMOUNT, DEFAULT_AMOUNT + SWAP_FEE)
+      await setUpBalances(DEFAULT_BALANCE, DEFAULT_BALANCE)
+      const [errCount, messages] = await getErrorInfo(order)
+      expect(errCount).to.equal(1)
+      expect(ethers.utils.parseBytes32String(messages[0])).to.equal(
+        'NONCE_ALREADY_USED'
+      )
+    })
+    it('can detect multiple errors', async () => {
+      await setUpAllowances(DEFAULT_AMOUNT, DEFAULT_AMOUNT + SWAP_FEE)
+      await setUpBalances(0, DEFAULT_BALANCE)
+      const order = await createSignedOrder(
+        {
+          expiry: '0',
+        },
+        signer
+      )
+      const [errCount, messages] = await getErrorInfo(order)
+      expect(errCount).to.equal(2)
+      expect(ethers.utils.parseBytes32String(messages[0])).to.equal(
+        'EXPIRY_PASSED'
+      )
+      expect(ethers.utils.parseBytes32String(messages[1])).to.equal(
+        'SENDER_BALANCE_LOW'
+      )
     })
   })
 })
