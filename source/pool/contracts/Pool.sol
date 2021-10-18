@@ -173,10 +173,7 @@ contract Pool is Ownable {
    * @param claims Claim[]
    * @param token IERC20
    */
-  function withdraw(
-    Claim[] memory claims,
-    IERC20 token
-  ) external {
+  function withdraw(Claim[] memory claims, IERC20 token) external {
     withdrawProtected(claims, token, 0, msg.sender);
   }
 
