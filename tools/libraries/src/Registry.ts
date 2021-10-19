@@ -1,6 +1,6 @@
 import { ethers } from 'ethers'
 import { chainIds, chainNames } from '@airswap/constants'
-import { Server } from './Server'
+import { Server, ServerOptions } from './Server'
 import { Light } from './Light'
 
 import * as RegistryContract from '@airswap/registry/build/contracts/Registry.sol/Registry.json'
@@ -35,7 +35,8 @@ export class Registry {
 
   public async getServers(
     quoteToken: string,
-    baseToken: string
+    baseToken: string,
+    options?: ServerOptions
   ): Promise<Array<Server>> {
     const quoteTokenURLs = await this.contract.getURLsForToken(quoteToken)
     const baseTokenURLs = await this.contract.getURLsForToken(baseToken)
@@ -43,7 +44,11 @@ export class Registry {
       quoteTokenURLs
         .filter((value) => baseTokenURLs.includes(value))
         .map((url) => {
-          return Server.at(url, Light.getAddress(this.chainId))
+          return Server.at(url, {
+            swapContract:
+              options.swapContract || Light.getAddress(this.chainId),
+            initializeTimeout: options?.initializeTimeout,
+          })
         })
     )
     return servers

@@ -21,6 +21,11 @@ export type SupportedProtocolInfo = {
   params?: any
 }
 
+export type ServerOptions = {
+  initializeTimeout?: number
+  swapContract?: string
+}
+
 if (!isBrowser) {
   JsonRpcWebsocket.setWebSocketFactory((url: string) => {
     const ws = require('websocket').w3cwebsocket
@@ -58,10 +63,10 @@ export class Server extends TypedEmitter<ServerEvents> {
 
   public static async at(
     locator: string,
-    swapContract?: string
+    options?: ServerOptions
   ): Promise<Server> {
-    const server = new Server(locator, swapContract)
-    await server._init()
+    const server = new Server(locator, options.swapContract)
+    await server._init(options.initializeTimeout)
     return server
   }
 
@@ -205,11 +210,11 @@ export class Server extends TypedEmitter<ServerEvents> {
     }
   }
 
-  private _init() {
+  private _init(initializeTimeout: number = REQUEST_TIMEOUT) {
     if (this.transportProtocol === 'http') {
       return this._initHTTPClient(this.locator)
     } else {
-      return this._initWebSocketClient(this.locator)
+      return this._initWebSocketClient(this.locator, initializeTimeout)
     }
   }
 
@@ -260,7 +265,10 @@ export class Server extends TypedEmitter<ServerEvents> {
     }
   }
 
-  private async _initWebSocketClient(locator: string) {
+  private async _initWebSocketClient(
+    locator: string,
+    initializeTimeout: number
+  ) {
     this.webSocketClient = new JsonRpcWebsocket(
       url.format(locator),
       REQUEST_TIMEOUT,
@@ -273,7 +281,7 @@ export class Server extends TypedEmitter<ServerEvents> {
         const initTimeout = setTimeout(() => {
           reject('Server did not call initialize in time')
           this.disconnect()
-        }, REQUEST_TIMEOUT)
+        }, initializeTimeout)
 
         this.webSocketClient.on('initialize', (message) => {
           clearTimeout(initTimeout)
