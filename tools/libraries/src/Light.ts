@@ -1,4 +1,4 @@
-import { ethers } from 'ethers'
+import { ethers, BigNumber } from 'ethers'
 import { chainIds, chainNames } from '@airswap/constants'
 import { LightOrder } from '@airswap/types'
 
@@ -32,6 +32,35 @@ export class Light {
     throw new Error(`Light deploy not found for chainId ${chainId}`)
   }
 
+  public async validate(
+    order: LightOrder,
+    senderWallet: string,
+    signer?: ethers.Signer
+  ): Promise<Array<string>> {
+    let contract = this.contract
+    if (!this.contract.signer) {
+      if (signer === undefined) {
+        throw new Error('Signer must be provided')
+      } else {
+        contract = contract.connect(signer)
+      }
+    }
+    const [count, errors] = await contract.validate(
+      order.nonce,
+      order.expiry,
+      order.signerWallet,
+      order.signerToken,
+      order.signerAmount,
+      order.senderToken,
+      order.senderAmount,
+      order.v,
+      order.r,
+      order.s,
+      senderWallet
+    )
+    return this.convertToArray(count, errors)
+  }
+
   public async swap(
     order: LightOrder,
     signer?: ethers.Signer
@@ -56,5 +85,13 @@ export class Light {
       order.r,
       order.s
     )
+  }
+
+  private convertToArray(count: BigNumber, errors: Array<string>) {
+    const res: Array<string> = []
+    for (let idx = 0; idx < count.toNumber(); idx++) {
+      res.push(ethers.utils.parseBytes32String(errors[idx]))
+    }
+    return res
   }
 }
