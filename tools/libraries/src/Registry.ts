@@ -36,7 +36,7 @@ export class Registry {
   public async getServers(
     quoteToken: string,
     baseToken: string,
-    options: ServerOptions
+    options?: ServerOptions
   ): Promise<Array<Server>> {
     const quoteTokenURLs = await this.contract.getURLsForToken(quoteToken)
     const baseTokenURLs = await this.contract.getURLsForToken(baseToken)
@@ -47,7 +47,7 @@ export class Registry {
           return Server.at(url, {
             swapContract:
               options.swapContract || Light.getAddress(this.chainId),
-            initializeTimeout: options.initializeTimeout,
+            initializeTimeout: options?.initializeTimeout,
           })
         })
     )
