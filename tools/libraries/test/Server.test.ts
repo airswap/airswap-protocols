@@ -319,6 +319,7 @@ describe('WebSocketServer', () => {
     // prevent server from initializing
     mockServer.initOptions = null
     const initializePromise = Server.at(url)
+    // This is the default timeout.
     fakeTimers.tick(REQUEST_TIMEOUT)
     try {
       await initializePromise
