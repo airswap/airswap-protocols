@@ -206,19 +206,21 @@ export class Server extends TypedEmitter<ServerEvents> {
 
   public disconnect(): void {
     if (this.webSocketClient) {
-      if (this.webSocketClient.state === WebsocketReadyStates.OPEN) {
+      if (this.webSocketClient.state !== WebsocketReadyStates.CLOSED) {
         this.webSocketClient.close()
-        this.removeAllListeners()
-        delete this.webSocketClient
-      } else if (
-        this.webSocketClient.state === WebsocketReadyStates.CONNECTING
-      ) {
-        this.webSocketClient.on('open', this.disconnect.bind(this))
+
+        // Note that we remove listeners only after close as closing before a
+        // successful connection will emit an error, and emitting an error
+        // without a listener will throw. Removing listeners before close means
+        // closing before connecting would cause an unpreventable throw (error
+        // listener would be removed first).
+        this.webSocketClient.on('close', () => {
+          this.removeAllListeners()
+        })
       } else {
-        // Closing or closed.
         this.removeAllListeners()
-        delete this.webSocketClient
       }
+      delete this.webSocketClient
     }
   }
 
