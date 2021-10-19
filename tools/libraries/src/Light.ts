@@ -1,4 +1,4 @@
-import { ethers } from 'ethers'
+import { ethers, BigNumber } from 'ethers'
 import { chainIds, chainNames } from '@airswap/constants'
 import { LightOrder } from '@airswap/types'
 
