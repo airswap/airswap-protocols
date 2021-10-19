@@ -428,16 +428,6 @@ describe('Light Unit Tests', () => {
         'SIGNER_ALLOWANCE_LOW'
       )
     })
-    it('properly detects a low sender allowance', async () => {
-      await setUpAllowances(0, DEFAULT_AMOUNT + SWAP_FEE)
-      await setUpBalances(DEFAULT_BALANCE, DEFAULT_BALANCE)
-      const order = await createSignedOrder({}, signer)
-      const [errCount, messages] = await getErrorInfo(order)
-      expect(errCount).to.equal(1)
-      expect(ethers.utils.parseBytes32String(messages[0])).to.equal(
-        'SENDER_ALLOWANCE_LOW'
-      )
-    })
     it('properly detects a low signer balance', async () => {
       await setUpAllowances(DEFAULT_AMOUNT, DEFAULT_AMOUNT + SWAP_FEE)
       await setUpBalances(DEFAULT_BALANCE, 0)
@@ -446,16 +436,6 @@ describe('Light Unit Tests', () => {
       expect(errCount).to.equal(1)
       expect(ethers.utils.parseBytes32String(messages[0])).to.equal(
         'SIGNER_BALANCE_LOW'
-      )
-    })
-    it('properly detects a low sender balance', async () => {
-      await setUpAllowances(DEFAULT_AMOUNT, DEFAULT_AMOUNT + SWAP_FEE)
-      await setUpBalances(0, DEFAULT_BALANCE)
-      const order = await createSignedOrder({}, signer)
-      const [errCount, messages] = await getErrorInfo(order)
-      expect(errCount).to.equal(1)
-      expect(ethers.utils.parseBytes32String(messages[0])).to.equal(
-        'SENDER_BALANCE_LOW'
       )
     })
     it('properly detects a nonce that has already been used', async () => {
@@ -485,7 +465,7 @@ describe('Light Unit Tests', () => {
     })
     it('can detect multiple errors', async () => {
       await setUpAllowances(DEFAULT_AMOUNT, DEFAULT_AMOUNT + SWAP_FEE)
-      await setUpBalances(0, DEFAULT_BALANCE)
+      await setUpBalances(DEFAULT_BALANCE, 0)
       const order = await createSignedOrder(
         {
           expiry: '0',
@@ -498,7 +478,7 @@ describe('Light Unit Tests', () => {
         'EXPIRY_PASSED'
       )
       expect(ethers.utils.parseBytes32String(messages[1])).to.equal(
-        'SENDER_BALANCE_LOW'
+        'SIGNER_BALANCE_LOW'
       )
     })
   })
