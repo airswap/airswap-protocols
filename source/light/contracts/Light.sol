@@ -68,7 +68,7 @@ contract Light is ILight, Ownable {
   uint256 public signerFee;
   uint256 public conditionalSignerFee;
   // size of fixed array that holds max returning error messages
-  uint256 internal constant MAX_ERROR_COUNT = 8;
+  uint256 internal constant MAX_ERROR_COUNT = 6;
 
   /**
    * @notice Double mapping of signers to nonce groups to nonce states
@@ -190,33 +190,20 @@ contract Light is ILight, Ownable {
       }
     }
     //accounts & balances check
-    uint256 senderBalance = IERC20(details.senderToken).balanceOf(
-      details.senderWallet
-    );
     uint256 signerBalance = IERC20(details.signerToken).balanceOf(
       details.signerWallet
     );
-    uint256 senderAllowance = IERC20(details.senderToken).allowance(
-      details.senderWallet,
-      address(this)
-    );
+
     uint256 signerAllowance = IERC20(details.signerToken).allowance(
       details.signerWallet,
       address(this)
     );
 
-    if (senderAllowance < details.senderAmount) {
-      errors[errCount] = "SENDER_ALLOWANCE_LOW";
-      errCount++;
-    }
     if (signerAllowance < details.signerAmount + swapFee) {
       errors[errCount] = "SIGNER_ALLOWANCE_LOW";
       errCount++;
     }
-    if (senderBalance < details.senderAmount) {
-      errors[errCount] = "SENDER_BALANCE_LOW";
-      errCount++;
-    }
+
     if (signerBalance < details.signerAmount + swapFee) {
       errors[errCount] = "SIGNER_BALANCE_LOW";
       errCount++;
