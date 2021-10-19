@@ -3,6 +3,19 @@
 pragma solidity ^0.8.0;
 
 interface ILight {
+  struct OrderDetails {
+    uint256 nonce;
+    uint256 expiry;
+    uint256 signerAmount;
+    uint256 senderAmount;
+    address signerToken;
+    address senderToken;
+    uint8 v;
+    bytes32 r;
+    bytes32 s;
+    address senderWallet;
+    address signerWallet;
+  }
   event Swap(
     uint256 indexed nonce,
     uint256 timestamp,

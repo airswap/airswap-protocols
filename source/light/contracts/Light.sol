@@ -16,20 +16,6 @@ contract Light is ILight, Ownable {
   using SafeERC20 for IERC20;
   using SafeMath for uint256;
 
-  struct OrderDetails {
-    uint256 nonce;
-    uint256 expiry;
-    uint256 signerAmount;
-    uint256 senderAmount;
-    address signerToken;
-    address senderToken;
-    uint8 v;
-    bytes32 r;
-    bytes32 s;
-    address senderWallet;
-    address signerWallet;
-  }
-
   bytes32 public constant DOMAIN_TYPEHASH =
     keccak256(
       abi.encodePacked(
