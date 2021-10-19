@@ -388,9 +388,7 @@ describe('Light Unit Tests', () => {
       const order = await createSignedOrder({}, signer)
       order[7] = '29'
       const [errCount, messages] = await getErrorInfo(order)
-      console.log(ethers.utils.parseBytes32String(messages[1]))
       expect(errCount).to.equal(1)
-
       expect(ethers.utils.parseBytes32String(messages[0])).to.equal(
         'INVALID_SIG'
       )
