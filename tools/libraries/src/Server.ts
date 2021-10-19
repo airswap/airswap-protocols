@@ -7,6 +7,7 @@ import {
   JsonRpcWebsocket,
   JsonRpcError,
   JsonRpcErrorCodes,
+  WebsocketReadyStates,
 } from '@airswap/jsonrpc-client-websocket'
 import { REQUEST_TIMEOUT } from '@airswap/constants'
 import { parseUrl, flattenObject, isValidQuote } from '@airswap/utils'
@@ -205,8 +206,19 @@ export class Server extends TypedEmitter<ServerEvents> {
 
   public disconnect(): void {
     if (this.webSocketClient) {
-      this.webSocketClient.close()
-      this.removeAllListeners()
+      if (this.webSocketClient.state === WebsocketReadyStates.OPEN) {
+        this.webSocketClient.close()
+        this.removeAllListeners()
+        delete this.webSocketClient
+      } else if (
+        this.webSocketClient.state === WebsocketReadyStates.CONNECTING
+      ) {
+        this.webSocketClient.on('open', this.disconnect.bind(this))
+      } else {
+        // Closing or closed.
+        this.removeAllListeners()
+        delete this.webSocketClient
+      }
     }
   }
 
