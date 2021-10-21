@@ -65,8 +65,8 @@ export class Server extends TypedEmitter<ServerEvents> {
     locator: string,
     options?: ServerOptions
   ): Promise<Server> {
-    const server = new Server(locator, options ? options.swapContract : null)
-    await server._init(options ? options.initializeTimeout : null)
+    const server = new Server(locator, options?.swapContract)
+    await server._init(options?.initializeTimeout)
     return server
   }
 
