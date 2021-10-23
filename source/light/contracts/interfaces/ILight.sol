@@ -16,13 +16,14 @@ interface ILight {
     address senderWallet;
     address signerWallet;
   }
+
   event Swap(
     uint256 indexed nonce,
     uint256 timestamp,
     address indexed signerWallet,
     address signerToken,
     uint256 signerAmount,
-    uint256 signerFee,
+    uint256 protocolFee,
     address indexed senderWallet,
     address senderToken,
     uint256 senderAmount
@@ -34,28 +35,19 @@ interface ILight {
 
   event Revoke(address indexed signer, address indexed signerWallet);
 
-  event SetFee(uint256 indexed signerFee);
+  event SetProtocolFee(uint256 protocolFee);
 
-  event SetConditionalFee(uint256 indexed conditionalSignerFee);
+  event SetProtocolFeeLight(uint256 protocolFeeLight);
 
-  event SetFeeWallet(address indexed feeWallet);
+  event SetProtocolFeeWallet(address indexed feeWallet);
+
+  event SetRebateScale(uint256 rebateScale);
+
+  event SetRebateMax(uint256 rebateMax);
 
   event SetStakingToken(address indexed stakingToken);
 
   function swap(
-    uint256 nonce,
-    uint256 expiry,
-    address signerWallet,
-    address signerToken,
-    uint256 signerAmount,
-    address senderToken,
-    uint256 senderAmount,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
-  ) external;
-
-  function swapWithRecipient(
     address recipient,
     uint256 nonce,
     uint256 expiry,
@@ -69,7 +61,46 @@ interface ILight {
     bytes32 s
   ) external;
 
-  function swapWithConditionalFee(
+  function light(
+    uint256 nonce,
+    uint256 expiry,
+    address signerWallet,
+    address signerToken,
+    uint256 signerAmount,
+    address senderToken,
+    uint256 senderAmount,
+    uint8 v,
+    bytes32 r,
+    bytes32 s
+  ) external;
+
+  function buyNFT(
+    uint256 nonce,
+    uint256 expiry,
+    address signerWallet,
+    address signerToken,
+    uint256 signerAmount,
+    address senderToken,
+    uint256 senderAmount,
+    uint8 v,
+    bytes32 r,
+    bytes32 s
+  ) external;
+
+  function sellNFT(
+    uint256 nonce,
+    uint256 expiry,
+    address signerWallet,
+    address signerToken,
+    uint256 signerAmount,
+    address senderToken,
+    uint256 senderAmount,
+    uint8 v,
+    bytes32 r,
+    bytes32 s
+  ) external;
+
+  function swapNFT(
     uint256 nonce,
     uint256 expiry,
     address signerWallet,

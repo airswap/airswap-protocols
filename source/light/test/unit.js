@@ -8,6 +8,7 @@ const {
 const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
 const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
+const IERC721 = require('@openzeppelin/contracts/build/contracts/IERC721.json')
 
 describe('Light Unit Tests', () => {
   let snapshotId
@@ -18,23 +19,24 @@ describe('Light Unit Tests', () => {
   let deployer
   let sender
   let signer
-  let feeWallet
+  let protocolFeeWallet
   let anyone
 
   const CHAIN_ID = 31337
-  const SIGNER_FEE = '30'
+  const PROTOCOL_FEE = '30'
+  const PROTOCOL_FEE_LIGHT = '7'
   const HIGHER_FEE = '50'
-  const CONDITIONAL_SIGNER_FEE = '30'
-  const STAKING_REBATE_MINIMUM = '1000000'
+  const REBATE_SCALE = '10'
+  const REBATE_MAX = '100'
   const FEE_DIVISOR = '10000'
   const DEFAULT_AMOUNT = '1000'
   const DEFAULT_BALANCE = '10000'
   const SWAP_FEE =
-    (parseInt(DEFAULT_AMOUNT) * parseInt(SIGNER_FEE)) / parseInt(FEE_DIVISOR)
+    (parseInt(DEFAULT_AMOUNT) * parseInt(PROTOCOL_FEE)) / parseInt(FEE_DIVISOR)
 
   async function createSignedOrder(params, signatory) {
     const unsignedOrder = createLightOrder({
-      signerFee: SIGNER_FEE,
+      protocolFee: PROTOCOL_FEE,
       signerWallet: signer.address,
       signerToken: signerToken.address,
       signerAmount: DEFAULT_AMOUNT,
@@ -85,7 +87,8 @@ describe('Light Unit Tests', () => {
   })
 
   before('get signers and deploy', async () => {
-    ;[deployer, sender, signer, feeWallet, anyone] = await ethers.getSigners()
+    ;[deployer, sender, signer, protocolFeeWallet, anyone] =
+      await ethers.getSigners()
 
     signerToken = await deployMockContract(deployer, IERC20.abi)
     senderToken = await deployMockContract(deployer, IERC20.abi)
@@ -97,10 +100,11 @@ describe('Light Unit Tests', () => {
     light = await (
       await ethers.getContractFactory('Light')
     ).deploy(
-      feeWallet.address,
-      SIGNER_FEE,
-      CONDITIONAL_SIGNER_FEE,
-      STAKING_REBATE_MINIMUM,
+      PROTOCOL_FEE,
+      PROTOCOL_FEE_LIGHT,
+      protocolFeeWallet.address,
+      REBATE_SCALE,
+      REBATE_MAX,
       stakingToken.address
     )
     await light.deployed()
@@ -108,21 +112,22 @@ describe('Light Unit Tests', () => {
 
   describe('Constructor', async () => {
     it('constructor sets default values', async () => {
-      const storedFee = await light.signerFee()
-      const storedFeeWallet = await light.feeWallet()
-      await expect(storedFee).to.equal(SIGNER_FEE)
-      await expect(storedFeeWallet).to.equal(feeWallet.address)
+      const storedFee = await light.protocolFee()
+      const storedFeeWallet = await light.protocolFeeWallet()
+      await expect(storedFee).to.equal(PROTOCOL_FEE)
+      await expect(storedFeeWallet).to.equal(protocolFeeWallet.address)
     })
 
-    it('test invalid feeWallet', async () => {
+    it('test invalid protocolFeeWallet', async () => {
       await expect(
         (
           await ethers.getContractFactory('Light')
         ).deploy(
+          PROTOCOL_FEE,
+          PROTOCOL_FEE_LIGHT,
           ADDRESS_ZERO,
-          SIGNER_FEE,
-          CONDITIONAL_SIGNER_FEE,
-          STAKING_REBATE_MINIMUM,
+          REBATE_SCALE,
+          REBATE_MAX,
           stakingToken.address
         )
       ).to.be.revertedWith('INVALID_FEE_WALLET')
@@ -133,23 +138,59 @@ describe('Light Unit Tests', () => {
         (
           await ethers.getContractFactory('Light')
         ).deploy(
-          feeWallet.address,
           100000000000,
-          CONDITIONAL_SIGNER_FEE,
-          STAKING_REBATE_MINIMUM,
+          PROTOCOL_FEE_LIGHT,
+          protocolFeeWallet.address,
+          REBATE_SCALE,
+          REBATE_MAX,
           stakingToken.address
         )
       ).to.be.revertedWith('INVALID_FEE')
     })
   })
 
+  describe('Test setters', async () => {
+    it('test setProtocolFee', async () => {
+      await expect(
+        await light.connect(deployer).setProtocolFee(PROTOCOL_FEE)
+      ).to.emit(light, 'SetProtocolFee')
+    })
+    it('test setProtocolFeeLight', async () => {
+      await expect(
+        await light.connect(deployer).setProtocolFeeLight(PROTOCOL_FEE_LIGHT)
+      ).to.emit(light, 'SetProtocolFeeLight')
+    })
+    it('test protocolFeeWallet', async () => {
+      await expect(
+        await light
+          .connect(deployer)
+          .setProtocolFeeWallet(protocolFeeWallet.address)
+      ).to.emit(light, 'SetProtocolFeeWallet')
+    })
+    it('test setRebateScale', async () => {
+      await expect(
+        await light.connect(deployer).setRebateScale(REBATE_SCALE)
+      ).to.emit(light, 'SetRebateScale')
+    })
+    it('test setRebateMax', async () => {
+      await expect(
+        await light.connect(deployer).setRebateMax(REBATE_MAX)
+      ).to.emit(light, 'SetRebateMax')
+    })
+    it('test setStakingToken', async () => {
+      await expect(
+        await light.connect(deployer).setStakingToken(stakingToken.address)
+      ).to.emit(light, 'SetStakingToken')
+    })
+  })
+
   describe('Test swap', async () => {
     it('test swaps', async () => {
       const order = await createSignedOrder({}, signer)
-      await expect(await light.connect(sender).swap(...order)).to.emit(
-        light,
-        'Swap'
-      )
+
+      await expect(
+        await light.connect(sender).swap(sender.address, ...order)
+      ).to.emit(light, 'Swap')
     })
 
     it('test authorized signer', async () => {
@@ -164,10 +205,9 @@ describe('Light Unit Tests', () => {
         .to.emit(light, 'Authorize')
         .withArgs(signer.address, anyone.address)
 
-      await expect(await light.connect(sender).swap(...order)).to.emit(
-        light,
-        'Swap'
-      )
+      await expect(
+        await light.connect(sender).swap(sender.address, ...order)
+      ).to.emit(light, 'Swap')
     })
 
     it('test when signer not authorized', async () => {
@@ -178,9 +218,9 @@ describe('Light Unit Tests', () => {
         signer
       )
 
-      await expect(light.connect(sender).swap(...order)).to.be.revertedWith(
-        'UNAUTHORIZED'
-      )
+      await expect(
+        light.connect(sender).swap(sender.address, ...order)
+      ).to.be.revertedWith('UNAUTHORIZED')
     })
 
     it('test when order is expired', async () => {
@@ -190,9 +230,9 @@ describe('Light Unit Tests', () => {
         },
         signer
       )
-      await expect(light.connect(sender).swap(...order)).to.be.revertedWith(
-        'EXPIRY_PASSED'
-      )
+      await expect(
+        light.connect(sender).swap(sender.address, ...order)
+      ).to.be.revertedWith('EXPIRY_PASSED')
     })
 
     it('test when nonce has already been used', async () => {
@@ -202,10 +242,10 @@ describe('Light Unit Tests', () => {
         },
         signer
       )
-      await light.connect(sender).swap(...order)
-      await expect(light.connect(sender).swap(...order)).to.be.revertedWith(
-        'NONCE_ALREADY_USED'
-      )
+      await light.connect(sender).swap(sender.address, ...order)
+      await expect(
+        light.connect(sender).swap(sender.address, ...order)
+      ).to.be.revertedWith('NONCE_ALREADY_USED')
     })
 
     it('test when nonce has been cancelled', async () => {
@@ -216,89 +256,157 @@ describe('Light Unit Tests', () => {
         signer
       )
       await light.connect(signer).cancel([1])
-      await expect(light.connect(sender).swap(...order)).to.be.revertedWith(
-        'NONCE_ALREADY_USED'
-      )
+      await expect(
+        light.connect(sender).swap(sender.address, ...order)
+      ).to.be.revertedWith('NONCE_ALREADY_USED')
     })
 
     it('test invalid signature', async () => {
       const order = await createSignedOrder({}, signer)
       order[7] = '29' // Change "v" of signature
-      await expect(light.connect(sender).swap(...order)).to.be.revertedWith(
-        'INVALID_SIG'
+      await expect(
+        light.connect(sender).swap(sender.address, ...order)
+      ).to.be.revertedWith('SIGNATURE_INVALID')
+    })
+  })
+
+  describe('Test light swap', async () => {
+    it('test light swaps', async () => {
+      const order = await createSignedOrder(
+        {
+          protocolFee: PROTOCOL_FEE_LIGHT,
+        },
+        signer
+      )
+
+      await expect(await light.connect(sender).light(...order)).to.emit(
+        light,
+        'Swap'
+      )
+    })
+    it('test when signer not authorized', async () => {
+      const order = await createSignedOrder(
+        {
+          signerWallet: anyone.address,
+        },
+        signer
+      )
+
+      await expect(light.connect(sender).light(...order)).to.be.revertedWith(
+        'UNAUTHORIZED'
       )
     })
   })
 
   describe('Test fees', async () => {
     it('test changing fee wallet', async () => {
-      await light.connect(deployer).setFeeWallet(anyone.address)
+      await light.connect(deployer).setProtocolFeeWallet(anyone.address)
 
-      const storedFeeWallet = await light.feeWallet()
+      const storedFeeWallet = await light.protocolFeeWallet()
       await expect(await storedFeeWallet).to.equal(anyone.address)
     })
 
     it('test only deployer can change fee wallet', async () => {
       await expect(
-        light.connect(anyone).setFeeWallet(anyone.address)
+        light.connect(anyone).setProtocolFeeWallet(anyone.address)
       ).to.be.revertedWith('Ownable: caller is not the owner')
     })
 
     it('test invalid fee wallet', async () => {
       await expect(
-        light.connect(deployer).setFeeWallet(ADDRESS_ZERO)
+        light.connect(deployer).setProtocolFeeWallet(ADDRESS_ZERO)
       ).to.be.revertedWith('INVALID_FEE_WALLET')
     })
 
     it('test changing fee', async () => {
-      await light.connect(deployer).setFee(HIGHER_FEE)
+      await light.connect(deployer).setProtocolFee(HIGHER_FEE)
 
-      const storedSignerFee = await light.signerFee()
+      const storedSignerFee = await light.protocolFee()
       await expect(await storedSignerFee).to.equal(HIGHER_FEE)
     })
 
     it('test only deployer can change fee', async () => {
-      await expect(light.connect(anyone).setFee('0')).to.be.revertedWith(
-        'Ownable: caller is not the owner'
-      )
-    })
-
-    it('test changing conditional fee', async () => {
-      await light.connect(deployer).setConditionalFee(HIGHER_FEE)
-
-      const storedSignerFee = await light.conditionalSignerFee()
-      await expect(await storedSignerFee).to.equal(HIGHER_FEE)
+      await expect(
+        light.connect(anyone).setProtocolFee('0')
+      ).to.be.revertedWith('Ownable: caller is not the owner')
     })
 
     it('test zero fee', async () => {
       const order = await createSignedOrder(
         {
-          signerFee: '0',
+          protocolFee: '0',
         },
         signer
       )
-      await light.connect(deployer).setFee('0')
-      await expect(await light.connect(sender).swap(...order)).to.emit(
-        light,
-        'Swap'
-      )
+      await light.connect(deployer).setProtocolFee('0')
+      await expect(
+        await light.connect(sender).swap(sender.address, ...order)
+      ).to.emit(light, 'Swap')
     })
 
     it('test invalid fee', async () => {
       await expect(
-        light.connect(deployer).setFee(FEE_DIVISOR + 1)
+        light.connect(deployer).setProtocolFee(FEE_DIVISOR + 1)
       ).to.be.revertedWith('INVALID_FEE')
     })
 
     it('test when signed with incorrect fee', async () => {
       const order = await createSignedOrder(
         {
-          signerFee: HIGHER_FEE / 2,
+          protocolFee: HIGHER_FEE / 2,
         },
         signer
       )
-      await expect(light.connect(sender).swap(...order)).to.be.revertedWith(
-        'UNAUTHORIZED'
+      await expect(
+        light.connect(sender).swap(sender.address, ...order)
+      ).to.be.revertedWith('UNAUTHORIZED')
+    })
+  })
+
+  describe('Test NFTs', async () => {
+    before(async () => {
+      signerNFT = await deployMockContract(deployer, IERC721.abi)
+      senderNFT = await deployMockContract(deployer, IERC721.abi)
+      await signerNFT.mock.transferFrom.returns()
+      await senderNFT.mock.transferFrom.returns()
+    })
+    it('test buy NFT', async () => {
+      const order = await createSignedOrder(
+        {
+          signerToken: signerNFT.address,
+          signerAmount: '123',
+        },
+        signer
+      )
+      await expect(await light.connect(sender).buyNFT(...order)).to.emit(
+        light,
+        'Swap'
+      )
+    })
+    it('test sell NFT', async () => {
+      const order = await createSignedOrder(
+        {
+          signerToken: signerNFT.address,
+          signerAmount: '123',
+        },
+        signer
+      )
+      await expect(await light.connect(sender).sellNFT(...order)).to.emit(
+        light,
+        'Swap'
+      )
+    })
+    it('test swap NFT', async () => {
+      const order = await createSignedOrder(
+        {
+          signerToken: signerNFT.address,
+          signerAmount: '123',
+        },
+        signer
+      )
+      await expect(await light.connect(sender).swapNFT(...order)).to.emit(
+        light,
+        'Swap'
       )
     })
   })
@@ -381,7 +489,7 @@ describe('Light Unit Tests', () => {
     })
   })
 
-  describe('validate', () => {
+  describe('Test validate', () => {
     it('properly detects an invalid signature', async () => {
       await setUpAllowances(DEFAULT_AMOUNT, DEFAULT_AMOUNT + SWAP_FEE)
       await setUpBalances(DEFAULT_BALANCE, DEFAULT_BALANCE)
@@ -390,7 +498,7 @@ describe('Light Unit Tests', () => {
       const [errCount, messages] = await getErrorInfo(order)
       expect(errCount).to.equal(1)
       expect(ethers.utils.parseBytes32String(messages[0])).to.equal(
-        'INVALID_SIG'
+        'SIGNATURE_INVALID'
       )
     })
     it('properly detects an expired order', async () => {
@@ -446,7 +554,7 @@ describe('Light Unit Tests', () => {
         .withArgs(signer.address, sender.address, DEFAULT_AMOUNT)
         .returns(true)
       await signerToken.mock.transferFrom
-        .withArgs(signer.address, feeWallet.address, SWAP_FEE)
+        .withArgs(signer.address, protocolFeeWallet.address, SWAP_FEE)
         .returns(true)
       const order = await createSignedOrder(
         {
@@ -454,7 +562,7 @@ describe('Light Unit Tests', () => {
         },
         signer
       )
-      await light.connect(sender).swap(...order)
+      await light.connect(sender).swap(sender.address, ...order)
       await setUpAllowances(DEFAULT_AMOUNT, DEFAULT_AMOUNT + SWAP_FEE)
       await setUpBalances(DEFAULT_BALANCE, DEFAULT_BALANCE)
       const [errCount, messages] = await getErrorInfo(order)

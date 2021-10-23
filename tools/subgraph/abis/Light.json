@@ -127,7 +127,7 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "signerFee",
+        "name": "protocolFee",
         "type": "uint256"
       },
       {
@@ -393,7 +393,7 @@
   },
   {
     "inputs": [],
-    "name": "signerFee",
+    "name": "protocolFee",
     "outputs": [
       {
         "internalType": "uint256",

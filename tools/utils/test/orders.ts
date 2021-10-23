@@ -22,7 +22,7 @@ describe('Orders', async () => {
       signerWallet: ADDRESS_ZERO,
       signerToken: ADDRESS_ZERO,
       signerAmount: '0',
-      signerFee: '300',
+      protocolFee: '300',
       senderWallet: ADDRESS_ZERO,
       senderToken: ADDRESS_ZERO,
       senderAmount: '0',

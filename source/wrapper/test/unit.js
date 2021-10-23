@@ -16,7 +16,7 @@ describe('Wrapper Unit Tests', () => {
   let light
   let wrapper
 
-  let weth
+  let wethToken
   let signerToken
   let senderToken
   let stakingToken
@@ -24,16 +24,18 @@ describe('Wrapper Unit Tests', () => {
   let deployer
   let sender
   let signer
-  let feeWallet
+  let protocolFeeWallet
 
   const CHAIN_ID = 31337
-  const SIGNER_FEE = '30'
+  const PROTOCOL_FEE = '30'
+  const PROTOCOL_FEE_LIGHT = '7'
   const DEFAULT_AMOUNT = '10000'
-  const STAKING_REBATE_MINIMUM = '10000'
+  const REBATE_SCALE = '10'
+  const REBATE_MAX = '100'
 
   async function createSignedOrder(params, signer) {
     const unsignedOrder = createLightOrder({
-      signerFee: SIGNER_FEE,
+      protocolFee: PROTOCOL_FEE,
       signerWallet: signer.address,
       signerToken: signerToken.address,
       signerAmount: DEFAULT_AMOUNT,
@@ -62,35 +64,42 @@ describe('Wrapper Unit Tests', () => {
   })
 
   before('get signers and deploy', async () => {
-    ;[deployer, sender, signer, feeWallet] = await ethers.getSigners()
+    ;[deployer, sender, signer, protocolFeeWallet] = await ethers.getSigners()
 
     signerToken = await deployMockContract(deployer, IERC20.abi)
     senderToken = await deployMockContract(deployer, IERC20.abi)
     stakingToken = await deployMockContract(deployer, IERC20.abi)
-    await signerToken.mock.transferFrom.returns(true)
-    await senderToken.mock.transferFrom.returns(true)
-    await stakingToken.mock.transferFrom.returns(true)
 
-    weth = await deployMockContract(deployer, IWETH.abi)
-    await weth.mock.approve.returns(true)
-    await weth.mock.deposit.returns()
-    await weth.mock.withdraw.returns()
-    await weth.mock.transferFrom.returns(true)
+    await senderToken.mock.approve.returns(true)
+    await senderToken.mock.allowance.returns('0')
+    await senderToken.mock.transferFrom.returns(true)
+
+    await signerToken.mock.transferFrom.returns(true)
+    await signerToken.mock.transfer.returns(true)
+
+    await stakingToken.mock.balanceOf.returns('0')
+
+    wethToken = await deployMockContract(deployer, IWETH.abi)
+    await wethToken.mock.approve.returns(true)
+    await wethToken.mock.deposit.returns()
+    await wethToken.mock.withdraw.returns()
+    await wethToken.mock.transferFrom.returns(true)
 
     light = await (
       await ethers.getContractFactory(LIGHT.abi, LIGHT.bytecode)
     ).deploy(
-      feeWallet.address,
-      SIGNER_FEE,
-      SIGNER_FEE,
-      STAKING_REBATE_MINIMUM,
+      PROTOCOL_FEE,
+      PROTOCOL_FEE_LIGHT,
+      protocolFeeWallet.address,
+      REBATE_SCALE,
+      REBATE_MAX,
       stakingToken.address
     )
     await light.deployed()
 
     wrapper = await (
       await ethers.getContractFactory('Wrapper')
-    ).deploy(light.address, weth.address)
+    ).deploy(light.address, wethToken.address)
     await wrapper.deployed()
   })
 
@@ -109,10 +118,21 @@ describe('Wrapper Unit Tests', () => {
   })
 
   describe('Test wraps', async () => {
+    it('test swap fails with value', async () => {
+      const order = await createSignedOrder(
+        {
+          senderWallet: wrapper.address,
+        },
+        signer
+      )
+      await expect(
+        wrapper.connect(sender).swap(...order, { value: DEFAULT_AMOUNT })
+      ).to.be.revertedWith('VALUE_MUST_BE_ZERO')
+    })
     it('test wrapped swap fails without value', async () => {
       const order = await createSignedOrder(
         {
-          senderToken: weth.address,
+          senderToken: wethToken.address,
         },
         signer
       )
@@ -120,42 +140,25 @@ describe('Wrapper Unit Tests', () => {
         'VALUE_MUST_BE_SENT'
       )
     })
-
+    it('test swap', async () => {
+      const order = await createSignedOrder(
+        {
+          senderWallet: wrapper.address,
+        },
+        signer
+      )
+      await wrapper.connect(sender).swap(...order)
+    })
     it('test wrapped swap', async () => {
       const order = await createSignedOrder(
         {
-          senderToken: weth.address,
+          senderToken: wethToken.address,
           senderWallet: wrapper.address,
         },
         signer
       )
-      await weth.mock.transferFrom.returns(false)
-      await weth.mock.transferFrom
-        .withArgs(wrapper.address, signer.address, DEFAULT_AMOUNT)
-        .returns(true)
-      await signerToken.mock.transfer.returns(true)
       await wrapper.connect(sender).swap(...order, { value: DEFAULT_AMOUNT })
     })
-
-    it('test wrapped swapWithConditionalFee', async () => {
-      const order = await createSignedOrder(
-        {
-          senderToken: weth.address,
-          senderWallet: wrapper.address,
-        },
-        signer
-      )
-      await stakingToken.mock.balanceOf.returns('0')
-      await weth.mock.transferFrom.returns(false)
-      await weth.mock.transferFrom
-        .withArgs(wrapper.address, signer.address, DEFAULT_AMOUNT)
-        .returns(true)
-      await signerToken.mock.transfer.returns(true)
-      await wrapper
-        .connect(sender)
-        .swapWithConditionalFee(...order, { value: DEFAULT_AMOUNT })
-    })
-
     it('Test fallback function revert', async () => {
       await expect(
         deployer.sendTransaction({
