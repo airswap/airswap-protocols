@@ -100,7 +100,7 @@ interface ILight {
     bytes32 s
   ) external;
 
-  function swapNFT(
+  function swapNFTs(
     uint256 nonce,
     uint256 expiry,
     address signerWallet,

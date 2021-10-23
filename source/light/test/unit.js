@@ -404,7 +404,7 @@ describe('Light Unit Tests', () => {
         },
         signer
       )
-      await expect(await light.connect(sender).swapNFT(...order)).to.emit(
+      await expect(await light.connect(sender).swapNFTs(...order)).to.emit(
         light,
         'Swap'
       )

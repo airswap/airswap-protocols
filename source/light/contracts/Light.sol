@@ -280,7 +280,7 @@ contract Light is ILight, Ownable {
    * @param nonce uint256 Unique and should be sequential
    * @param expiry uint256 Expiry in seconds since 1 January 1970
    * @param signerWallet address Wallet of the signer
-   * @param signerToken address ERC20 token transferred from the signer
+   * @param signerToken address ERC721 token transferred from the signer
    * @param signerID uint256 Token ID transferred from the signer
    * @param senderToken address ERC20 token transferred from the sender
    * @param senderAmount uint256 Amount transferred from the sender
@@ -340,13 +340,13 @@ contract Light is ILight, Ownable {
   }
 
   /**
-   * @notice Sender Buys an NFT (ERC721)
+   * @notice Sender Sells an NFT (ERC721)
    * @param nonce uint256 Unique and should be sequential
    * @param expiry uint256 Expiry in seconds since 1 January 1970
    * @param signerWallet address Wallet of the signer
    * @param signerToken address ERC20 token transferred from the signer
    * @param signerAmount uint256 Amount transferred from the signer
-   * @param senderToken address ERC20 token transferred from the sender
+   * @param senderToken address ERC721 token transferred from the sender
    * @param senderID uint256 Token ID transferred from the sender
    * @param v uint8 "v" value of the ECDSA signature
    * @param r bytes32 "r" value of the ECDSA signature
@@ -408,15 +408,15 @@ contract Light is ILight, Ownable {
    * @param nonce uint256 Unique and should be sequential
    * @param expiry uint256 Expiry in seconds since 1 January 1970
    * @param signerWallet address Wallet of the signer
-   * @param signerToken address ERC20 token transferred from the signer
+   * @param signerToken address ERC721 token transferred from the signer
    * @param signerID uint256 Token ID transferred from the signer
-   * @param senderToken address ERC20 token transferred from the sender
+   * @param senderToken address ERC721 token transferred from the sender
    * @param senderID uint256 Token ID transferred from the sender
    * @param v uint8 "v" value of the ECDSA signature
    * @param r bytes32 "r" value of the ECDSA signature
    * @param s bytes32 "s" value of the ECDSA signature
    */
-  function swapNFT(
+  function swapNFTs(
     uint256 nonce,
     uint256 expiry,
     address signerWallet,
