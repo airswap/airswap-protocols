@@ -63,17 +63,18 @@ export class Light {
 
   public async swap(
     order: LightOrder,
-    signer?: ethers.Signer
+    sender?: ethers.Signer
   ): Promise<string> {
     let contract = this.contract
     if (!this.contract.signer) {
-      if (signer === undefined) {
+      if (sender === undefined) {
         throw new Error('Signer must be provided')
       } else {
-        contract = contract.connect(signer)
+        contract = contract.connect(sender)
       }
     }
     return await contract.swap(
+      sender.getAddress(),
       order.nonce,
       order.expiry,
       order.signerWallet,
