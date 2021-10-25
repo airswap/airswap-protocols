@@ -208,7 +208,6 @@ export class Server extends TypedEmitter<ServerEvents> {
     if (this.webSocketClient) {
       if (this.webSocketClient.state !== WebsocketReadyStates.CLOSED) {
         this.webSocketClient.close()
-
         // Note that we remove listeners only after close as closing before a
         // successful connection will emit an error, and emitting an error
         // without a listener will throw. Removing listeners before close means
@@ -283,15 +282,19 @@ export class Server extends TypedEmitter<ServerEvents> {
     locator: string,
     initializeTimeout: number
   ) {
-    this.webSocketClient = new JsonRpcWebsocket(
-      url.format(locator),
-      REQUEST_TIMEOUT,
-      (error: JsonRpcError) => {
-        this.emit('error', error)
-      }
-    )
     const initPromise = new Promise<SupportedProtocolInfo[]>(
       (resolve, reject) => {
+        this.webSocketClient = new JsonRpcWebsocket(
+          url.format(locator),
+          REQUEST_TIMEOUT,
+          (error: JsonRpcError) => {
+            if (!this.isInitialized) {
+              reject(error)
+            } else {
+              this.emit('error', error)
+            }
+          }
+        )
         const initTimeout = setTimeout(() => {
           reject('Server did not call initialize in time')
           this.disconnect()
