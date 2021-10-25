@@ -38,9 +38,13 @@ export class Registry {
     baseToken: string,
     options?: ServerOptions
   ): Promise<Array<Server>> {
-    const quoteTokenURLs = await this.contract.getURLsForToken(quoteToken)
-    const baseTokenURLs = await this.contract.getURLsForToken(baseToken)
-    const servers: Server[] = await Promise.all(
+    const quoteTokenURLs: string[] = await this.contract.getURLsForToken(
+      quoteToken
+    )
+    const baseTokenURLs: string[] = await this.contract.getURLsForToken(
+      baseToken
+    )
+    const serverPromises = await Promise.allSettled(
       quoteTokenURLs
         .filter((value) => baseTokenURLs.includes(value))
         .map((url) => {
@@ -51,6 +55,8 @@ export class Registry {
           })
         })
     )
-    return servers
+    return serverPromises
+      .filter((value) => value.status === 'fulfilled')
+      .map((v: PromiseFulfilledResult<Server>) => v.value)
   }
 }
