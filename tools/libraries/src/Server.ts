@@ -66,8 +66,8 @@ export class Server extends TypedEmitter<ServerEvents> {
     locator: string,
     options?: ServerOptions
   ): Promise<Server> {
-    const server = new Server(locator, options.swapContract)
-    await server._init(options.initializeTimeout)
+    const server = new Server(locator, options?.swapContract)
+    await server._init(options?.initializeTimeout)
     return server
   }
 
@@ -302,10 +302,15 @@ export class Server extends TypedEmitter<ServerEvents> {
 
         this.webSocketClient.on('initialize', (message) => {
           clearTimeout(initTimeout)
-          this.initialize(message)
-          this.isInitialized = true
-          resolve(this.supportedProtocols)
-          return true
+          try {
+            this.initialize(message)
+            this.isInitialized = true
+            resolve(this.supportedProtocols)
+            return true
+          } catch (e) {
+            reject(e)
+            return false
+          }
         })
       }
     )
@@ -359,10 +364,10 @@ export class Server extends TypedEmitter<ServerEvents> {
     return errors
   }
 
-  private throwInvalidParams() {
+  private throwInvalidParams(method: string, params: string) {
     throw {
       code: JsonRpcErrorCodes.INVALID_PARAMS,
-      message: 'Invalid params',
+      message: `Received invalid param format or values for method "${method}": ${params}`,
     }
   }
 
@@ -374,7 +379,7 @@ export class Server extends TypedEmitter<ServerEvents> {
       !params.every((protocolInfo) => protocolInfo.version && protocolInfo.name)
     )
       valid = false
-    if (!valid) this.throwInvalidParams()
+    if (!valid) this.throwInvalidParams('initialize', JSON.stringify(params))
   }
 
   private validateUpdatePricingParams(params: any): void {
@@ -391,7 +396,7 @@ export class Server extends TypedEmitter<ServerEvents> {
       )
     )
       valid = false
-    if (!valid) this.throwInvalidParams()
+    if (!valid) this.throwInvalidParams('updatePricing', JSON.stringify(params))
   }
 
   private updatePricing(newPricing: Pricing[]) {
