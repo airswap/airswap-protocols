@@ -13,6 +13,7 @@ describe('Staking Unit', () => {
   let stakingFactory
   let staking
   const DEFAULTDURATION = 100 // time in seconds
+  const DEFAULTDELAY = 10
 
   beforeEach(async () => {
     snapshotId = await ethers.provider.send('evm_snapshot')
@@ -30,7 +31,8 @@ describe('Staking Unit', () => {
       token.address,
       'Staked AST',
       'sAST',
-      DEFAULTDURATION
+      DEFAULTDURATION,
+      DEFAULTDELAY
     )
     await staking.deployed()
   })
@@ -76,22 +78,84 @@ describe('Staking Unit', () => {
 
   describe('Set Unstaking Duration', async () => {
     it('non owner cannot set unstaking duration', async () => {
-      await expect(staking.connect(account1).setDuration(0)).to.be.revertedWith(
-        'Ownable: caller is not the owner'
+      await staking.connect(deployer).scheduleDurationChange(DEFAULTDELAY)
+      const block = await ethers.provider.getBlock()
+      let id = await staking.hashOperation(
+        DEFAULTDELAY,
+        block.timestamp,
+        DEFAULTDELAY + block.timestamp
       )
+
+      // move 10 seconds forward
+      await ethers.provider.send('evm_increaseTime', [10])
+      await ethers.provider.send('evm_mine')
+
+      await expect(
+        staking.connect(account1).setDuration(0, id)
+      ).to.be.revertedWith('Ownable: caller is not the owner')
     })
 
     it('owner can set unstaking duration', async () => {
-      await staking.connect(deployer).setDuration(2 * DEFAULTDURATION)
+      await expect(
+        await staking.connect(deployer).scheduleDurationChange(DEFAULTDELAY)
+      ).to.emit(staking, 'ScheduleDurationChange')
+      const block = await ethers.provider.getBlock()
+      let id = await staking.hashOperation(
+        DEFAULTDELAY,
+        block.timestamp,
+        DEFAULTDELAY + block.timestamp
+      )
+
+      // move 10 seconds forward
+      await ethers.provider.send('evm_increaseTime', [10])
+      await ethers.provider.send('evm_mine')
+
+      await expect(
+        await staking.connect(deployer).setDuration(2 * DEFAULTDURATION, id)
+      ).to.emit(staking, 'CompleteDurationChange')
 
       const defaultduration = await staking.duration()
       expect(defaultduration).to.equal(2 * DEFAULTDURATION)
     })
 
     it('Owner cannot set unstaking duration to zero', async () => {
-      await expect(staking.connect(deployer).setDuration(0)).to.be.revertedWith(
-        'DURATION_INVALID'
+      await staking.connect(deployer).scheduleDurationChange(DEFAULTDELAY)
+      const block = await ethers.provider.getBlock()
+      let id = await staking.hashOperation(
+        DEFAULTDELAY,
+        block.timestamp,
+        DEFAULTDELAY + block.timestamp
       )
+
+      // move 10 seconds forward
+      await ethers.provider.send('evm_increaseTime', [10])
+      await ethers.provider.send('evm_mine')
+
+      await expect(
+        staking.connect(deployer).setDuration(0, id)
+      ).to.be.revertedWith('DURATION_INVALID')
+    })
+
+    it('Owner cannot set unstaking duration with canceled timelock', async () => {
+      await staking.connect(deployer).scheduleDurationChange(DEFAULTDELAY)
+      const block = await ethers.provider.getBlock()
+      let id = await staking.hashOperation(
+        DEFAULTDELAY,
+        block.timestamp,
+        DEFAULTDELAY + block.timestamp
+      )
+
+      await expect(
+        await staking.connect(deployer).cancelDurationChange(id)
+      ).to.emit(staking, 'CancelDurationChange')
+
+      // move 10 seconds forward
+      await ethers.provider.send('evm_increaseTime', [10])
+      await ethers.provider.send('evm_mine')
+
+      await expect(
+        staking.connect(deployer).setDuration(DEFAULTDURATION * 2, id)
+      ).to.be.revertedWith('TIMELOCK_INACTIVE')
     })
   })
 
@@ -313,14 +377,24 @@ describe('Staking Unit', () => {
 
   describe('Delegate', async () => {
     it('delegate can be set', async () => {
-      await staking.connect(account1).proposeDelegate(account2.address)
-      await staking.connect(account2).setDelegate(account1.address)
+      await expect(
+        await staking.connect(account1).proposeDelegate(account2.address)
+      ).to.emit(staking, 'ProposeDelegate')
+      expect(
+        await staking.connect(account1).proposedDelegates(account1.address)
+      ).to.equal(account2.address)
+      await expect(
+        await staking.connect(account2).setDelegate(account1.address)
+      ).to.emit(staking, 'SetDelegate')
       expect(
         await staking.connect(account1).delegateAccounts(account2.address)
       ).to.equal(account1.address)
       expect(
         await staking.connect(account1).accountDelegates(account1.address)
       ).to.equal(account2.address)
+      expect(
+        await staking.connect(account1).proposedDelegates(account1.address)
+      ).to.equal('0x0000000000000000000000000000000000000000')
     })
 
     it('unsuccessful delegate set if already a delegate', async () => {

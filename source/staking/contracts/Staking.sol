@@ -26,8 +26,17 @@ contract Staking is Ownable {
   // Unstaking duration
   uint256 public duration;
 
+  // Timelock delay
+  uint256 private minDelay;
+
+  // Timelock toggle
+  bool private timelockState;
+
   // Mapping of account to stakes
   mapping(address => Stake) internal stakes;
+
+  // Mapping of account to proposed delegate
+  mapping(address => address) public proposedDelegates;
 
   // Mapping of account to delegate
   mapping(address => address) public accountDelegates;
@@ -35,12 +44,33 @@ contract Staking is Ownable {
   // Mapping of delegate to account
   mapping(address => address) public delegateAccounts;
 
+  // Mapping of timelock ids to used state
+  mapping(bytes32 => bool) private usedIds;
+
+  // Mapping of ids to timestamps
+  mapping(bytes32 => uint256) private unlockTimestamps;
+
   // ERC-20 token properties
   string public name;
   string public symbol;
 
   // ERC-20 Transfer event
   event Transfer(address indexed from, address indexed to, uint256 tokens);
+
+  // Schedule timelock event
+  event ScheduleDurationChange(bytes32 indexed id, uint256 indexed unlockTimestamp);
+
+  // Cancel timelock event
+  event CancelDurationChange(bytes32 indexed id);
+
+  // Complete timelock event
+  event CompleteDurationChange(bytes32 indexed id, uint256 indexed newDuration);
+
+  // Propose Delegate event
+  event ProposeDelegate(address indexed delegate, address indexed account);
+
+  // Set Delegate event
+  event SetDelegate(address indexed delegate, address indexed account);
 
   /**
    * @notice Constructor
@@ -53,12 +83,14 @@ contract Staking is Ownable {
     ERC20 _token,
     string memory _name,
     string memory _symbol,
-    uint256 _duration
+    uint256 _duration,
+    uint256 _minDelay
   ) {
     token = _token;
     name = _name;
     symbol = _symbol;
-    setDuration(_duration);
+    duration = _duration;
+    minDelay = _minDelay;
   }
 
   /**
@@ -82,7 +114,8 @@ contract Staking is Ownable {
     require(accountDelegates[msg.sender] == address(0), "SENDER_HAS_DELEGATE");
     require(delegateAccounts[delegate] == address(0), "DELEGATE_IS_TAKEN");
     require(stakes[delegate].balance == 0, "DELEGATE_MUST_NOT_BE_STAKED");
-    accountDelegates[msg.sender] = delegate;
+    proposedDelegates[msg.sender] = delegate;
+    emit ProposeDelegate(delegate, msg.sender);
   }
 
   /**
@@ -90,10 +123,13 @@ contract Staking is Ownable {
    * @param account address
    */
   function setDelegate(address account) external {
-    require(accountDelegates[account] == msg.sender, "MUST_BE_PROPOSED");
+    require(proposedDelegates[account] == msg.sender, "MUST_BE_PROPOSED");
     require(delegateAccounts[msg.sender] == address(0), "DELEGATE_IS_TAKEN");
     require(stakes[msg.sender].balance == 0, "DELEGATE_MUST_NOT_BE_STAKED");
+    accountDelegates[account] = msg.sender;
     delegateAccounts[msg.sender] = account;
+    delete proposedDelegates[account];
+    emit SetDelegate(msg.sender, account);
   }
 
   /**
@@ -166,12 +202,63 @@ contract Staking is Ownable {
   }
 
   /**
+   * @dev Schedules timelock to change duration
+   */
+  function scheduleDurationChange(uint256 delay)
+    external
+    onlyOwner
+  {
+    require(timelockState == false, "TIMELOCK_ACTIVE");
+    require(delay >= minDelay, "INVALID_DELAY");
+    uint256 timeUnlock = block.timestamp + minDelay;
+    bytes32 id = hashOperation(delay, block.timestamp, timeUnlock);
+    unlockTimestamps[id] = timeUnlock;
+    timelockState = true;
+    emit ScheduleDurationChange(id, timeUnlock);
+  }
+
+  /**
+   * @dev Cancels timelock to change duration
+   */
+  function cancelDurationChange(bytes32 timelockId) external onlyOwner {
+    require(timelockState == true, "TIMELOCK_INACTIVE");
+    timelockState = false;
+    emit CancelDurationChange(timelockId);
+  }
+
+  /**
+   * @dev Returns the identifier of an operation containing a single
+   * transaction.
+   */
+  function hashOperation(
+    uint256 delay,
+    uint256 timestamp,
+    uint256 timeUnlock
+  ) public pure virtual returns (bytes32 hash) {
+    return keccak256(abi.encode(delay, timestamp, timeUnlock));
+  }
+
+  /**
    * @notice Set unstaking duration
    * @param _duration uint256
    */
-  function setDuration(uint256 _duration) public onlyOwner {
+  function setDuration(uint256 _duration, bytes32 timelockId)
+    public
+    onlyOwner
+  {
     require(_duration != 0, "DURATION_INVALID");
+    require(timelockState == true, "TIMELOCK_INACTIVE");
+    require(
+      unlockTimestamps[timelockId] > 0,
+      "INVALID_ID"
+    );
+    require(
+      block.timestamp >= unlockTimestamps[timelockId],
+      "TIMELOCK_NOT_PASSED"
+    );
     duration = _duration;
+    timelockState = false;
+    emit CompleteDurationChange(timelockId, _duration);
   }
 
   /**
