@@ -7,6 +7,7 @@ import {
   JsonRpcWebsocket,
   JsonRpcError,
   JsonRpcErrorCodes,
+  WebsocketReadyStates,
 } from '@airswap/jsonrpc-client-websocket'
 import { REQUEST_TIMEOUT } from '@airswap/constants'
 import { parseUrl, flattenObject, isValidQuote } from '@airswap/utils'
@@ -205,8 +206,20 @@ export class Server extends TypedEmitter<ServerEvents> {
 
   public disconnect(): void {
     if (this.webSocketClient) {
-      this.webSocketClient.close()
-      this.removeAllListeners()
+      if (this.webSocketClient.state !== WebsocketReadyStates.CLOSED) {
+        this.webSocketClient.close()
+        // Note that we remove listeners only after close as closing before a
+        // successful connection will emit an error, and emitting an error
+        // without a listener will throw. Removing listeners before close means
+        // closing before connecting would cause an unpreventable throw (error
+        // listener would be removed first).
+        this.webSocketClient.on('close', () => {
+          this.removeAllListeners()
+        })
+      } else {
+        this.removeAllListeners()
+      }
+      delete this.webSocketClient
     }
   }
 
@@ -269,15 +282,19 @@ export class Server extends TypedEmitter<ServerEvents> {
     locator: string,
     initializeTimeout: number
   ) {
-    this.webSocketClient = new JsonRpcWebsocket(
-      url.format(locator),
-      REQUEST_TIMEOUT,
-      (error: JsonRpcError) => {
-        this.emit('error', error)
-      }
-    )
     const initPromise = new Promise<SupportedProtocolInfo[]>(
       (resolve, reject) => {
+        this.webSocketClient = new JsonRpcWebsocket(
+          url.format(locator),
+          REQUEST_TIMEOUT,
+          (error: JsonRpcError) => {
+            if (!this.isInitialized) {
+              reject(error)
+            } else {
+              this.emit('error', error)
+            }
+          }
+        )
         const initTimeout = setTimeout(() => {
           reject('Server did not call initialize in time')
           this.disconnect()
