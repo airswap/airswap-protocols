@@ -39,7 +39,7 @@ contract Pool is Ownable {
   mapping(bytes32 => bool) public roots;
 
   // Mapping of address to boolean to enable admin accounts
-  mapping(address => bool) public admin;
+  mapping(address => bool) public admins;
 
   // Mapping of tree root to account to mark as claimed
   mapping(bytes32 => mapping(address => bool)) public claimed;
@@ -83,14 +83,15 @@ contract Pool is Ownable {
     max = _max;
     stakingContract = _stakingContract;
     stakingToken = _stakingToken;
-    admin[msg.sender] = true;
+    admins[msg.sender] = true;
+    IERC20(stakingToken).approve(stakingContract, 2**256 - 1);
   }
 
   /**
    * @dev Throws if called by any account other than the admin.
    */
   modifier multiAdmin() {
-    require(admin[msg.sender] == true, "NOT_ADMIN");
+    require(admins[msg.sender] == true, "NOT_ADMIN");
     _;
   }
 
@@ -123,7 +124,7 @@ contract Pool is Ownable {
    */
   function addAdmin(address _admin) external onlyOwner {
     require(_admin != address(0), "INVALID_ADDRESS");
-    admin[_admin] = true;
+    admins[_admin] = true;
   }
 
   /**
@@ -132,8 +133,8 @@ contract Pool is Ownable {
    * @param _admin address
    */
   function removeAdmin(address _admin) external onlyOwner {
-    require(admin[_admin] == true, "ADMIN_NOT_SET");
-    admin[_admin] = false;
+    require(admins[_admin] == true, "ADMIN_NOT_SET");
+    admins[_admin] = false;
   }
 
   /**
@@ -144,6 +145,7 @@ contract Pool is Ownable {
   function setStakingContract(address _stakingContract) external onlyOwner {
     require(_stakingContract != address(0), "INVALID_ADDRESS");
     stakingContract = _stakingContract;
+    IERC20(stakingToken).approve(stakingContract, 2**256 - 1);
   }
 
   /**
@@ -154,6 +156,7 @@ contract Pool is Ownable {
   function setStakingToken(address _stakingToken) external onlyOwner {
     require(_stakingToken != address(0), "INVALID_ADDRESS");
     stakingToken = _stakingToken;
+    IERC20(stakingToken).approve(stakingContract, 2**256 - 1);
   }
 
   /**
@@ -241,7 +244,6 @@ contract Pool is Ownable {
       token,
       minimumAmount
     );
-    IERC20(stakingToken).approve(stakingContract, amount);
     IStaking(stakingContract).stakeFor(msg.sender, amount);
     emit Withdraw(rootList, msg.sender, token, amount);
   }

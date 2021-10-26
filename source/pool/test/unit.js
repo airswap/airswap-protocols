@@ -44,6 +44,7 @@ describe('Pool Unit Tests', () => {
     ;[deployer, alice, bob, carol] = await ethers.getSigners()
 
     feeToken = await deployMockContract(deployer, IERC20.abi)
+    await feeToken.mock.approve.returns(true)
     feeToken2 = await deployMockContract(deployer, IERC20.abi)
 
     stakeContract = await (
@@ -69,7 +70,7 @@ describe('Pool Unit Tests', () => {
       const storedMax = await pool.max()
       const stakingContract = await pool.stakingContract()
       const stakingToken = await pool.stakingToken()
-      const adminOwner = await pool.admin(deployer.address)
+      const adminOwner = await pool.admins(deployer.address)
       expect(storedScale).to.equal(CLAIM_SCALE)
       expect(storedMax).to.equal(CLAIM_MAX)
       expect(stakingContract).to.equal(stakeContract.address)
@@ -131,6 +132,7 @@ describe('Pool Unit Tests', () => {
     })
 
     it('set stake token successful', async () => {
+      await feeToken2.mock.approve.returns(true)
       await pool.connect(deployer).setStakingToken(feeToken2.address)
       expect(await pool.stakingToken()).to.equal(feeToken2.address)
     })
@@ -344,7 +346,6 @@ describe('Pool Unit Tests', () => {
 
     it('withdrawAndStake success', async () => {
       await feeToken.mock.balanceOf.returns('100000')
-      await feeToken.mock.approve.returns(true)
       await feeToken.mock.transferFrom.returns(true)
 
       const root = getRoot(tree)
@@ -522,7 +523,7 @@ describe('Pool Unit Tests', () => {
   describe('Test setting admin', async () => {
     it('Test addAdmin is successful', async () => {
       await pool.addAdmin(alice.address)
-      expect(await pool.admin(alice.address)).to.be.equal(true)
+      expect(await pool.admins(alice.address)).to.be.equal(true)
     })
 
     it('Test addAdmin reverts', async () => {
@@ -534,7 +535,7 @@ describe('Pool Unit Tests', () => {
     it('Test removeAdmin is successful', async () => {
       await pool.addAdmin(alice.address)
       await pool.removeAdmin(alice.address)
-      expect(await pool.admin(alice.address)).to.be.equal(false)
+      expect(await pool.admins(alice.address)).to.be.equal(false)
     })
 
     it('Test removeAdmin reverts', async () => {
