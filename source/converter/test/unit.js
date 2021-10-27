@@ -18,6 +18,7 @@ describe('Converter Unit Tests', () => {
   const triggerFee = 1
   const payees = ['0x7296333e1615721f4Bd9Df1a3070537484A50CF8']
   const shares = [10]
+  const MINAMOUNTOUT = 1
 
   beforeEach(async () => {
     snapshotId = await ethers.provider.send('evm_snapshot')
@@ -272,7 +273,7 @@ describe('Converter Unit Tests', () => {
         .returns(swapToTokenReturnBalance - triggerAmount)
 
       await expect(
-        converter.connect(deployer).convertAndTransfer(testAToken.address, 0)
+        converter.connect(deployer).convertAndTransfer(testAToken.address, MINAMOUNTOUT)
       )
         .to.emit(converter, 'ConvertAndTransfer')
         .withArgs(
@@ -333,7 +334,7 @@ describe('Converter Unit Tests', () => {
         .returns(swapToTokenReturnBalance - triggerAmount)
 
       await expect(
-        converter.connect(deployer).convertAndTransfer(testAToken.address, 0)
+        converter.connect(deployer).convertAndTransfer(testAToken.address, MINAMOUNTOUT)
       )
         .to.emit(converter, 'ConvertAndTransfer')
         .withArgs(
@@ -376,7 +377,7 @@ describe('Converter Unit Tests', () => {
         .returns(swapToTokenStartingBalance)
 
       await expect(
-        converter.connect(deployer).convertAndTransfer(swapToToken.address, 0)
+        converter.connect(deployer).convertAndTransfer(swapToToken.address, MINAMOUNTOUT)
       )
         .to.emit(converter, 'ConvertAndTransfer')
         .withArgs(
@@ -420,7 +421,7 @@ describe('Converter Unit Tests', () => {
         .returns(testATokenStartingBalance)
 
       await expect(
-        converter.connect(deployer).convertAndTransfer(testAToken.address, 0)
+        converter.connect(deployer).convertAndTransfer(testAToken.address, MINAMOUNTOUT)
       ).to.revertedWith('NO_BALANCE_TO_CONVERT')
     })
 
@@ -429,7 +430,7 @@ describe('Converter Unit Tests', () => {
       await converter.connect(deployer).removePayee(payeeAddress, 0)
 
       await expect(
-        converter.connect(deployer).convertAndTransfer(testAToken.address, 0)
+        converter.connect(deployer).convertAndTransfer(testAToken.address, MINAMOUNTOUT)
       ).to.revertedWith('PAYEES_MUST_BE_SET')
     })
   })
