@@ -29,6 +29,9 @@ contract Staking is Ownable {
   // Timelock delay
   uint256 private minDelay;
 
+  // Timeunlock timestamp 
+  uint256 private timeUnlock;
+
   // Timelock toggle
   bool private timelockState;
 
@@ -58,13 +61,10 @@ contract Staking is Ownable {
   event Transfer(address indexed from, address indexed to, uint256 tokens);
 
   // Schedule timelock event
-  event ScheduleDurationChange(bytes32 indexed id, uint256 indexed unlockTimestamp);
-
-  // Cancel timelock event
-  event CancelDurationChange(bytes32 indexed id);
+  event ScheduleDurationChange(uint256 indexed unlockTimestamp);
 
   // Complete timelock event
-  event CompleteDurationChange(bytes32 indexed id, uint256 indexed newDuration);
+  event CompleteDurationChange(uint256 indexed newDuration);
 
   // Propose Delegate event
   event ProposeDelegate(address indexed delegate, address indexed account);
@@ -104,6 +104,49 @@ contract Staking is Ownable {
   {
     name = _name;
     symbol = _symbol;
+  }
+
+    /**
+   * @dev Schedules timelock to change duration
+   * @param delay uint256
+   */
+  function scheduleDurationChange(uint256 delay)
+    external
+    onlyOwner
+  {
+    require(timelockState == false, "TIMELOCK_ACTIVE");
+    require(delay >= minDelay, "INVALID_DELAY");
+    timeUnlock = block.timestamp + delay;
+    timelockState = true;
+    emit ScheduleDurationChange(timeUnlock);
+  }
+
+  /**
+   * @dev Cancels timelock to change duration
+   */
+  function cancelDurationChange() external onlyOwner {
+    require(timelockState == true, "TIMELOCK_INACTIVE");
+    delete timeUnlock;
+    delete timelockState;
+  }
+
+  /**
+   * @notice Set unstaking duration
+   * @param _duration uint256
+   */
+  function setDuration(uint256 _duration)
+    external
+    onlyOwner
+  {
+    require(_duration != 0, "DURATION_INVALID");
+    require(timelockState == true, "TIMELOCK_INACTIVE");
+    require(
+      block.timestamp >= timeUnlock,
+      "TIMELOCKED");
+    duration = _duration;
+    delete timeUnlock;
+    delete timelockState;
+    emit CompleteDurationChange(_duration);
   }
 
   /**
@@ -199,66 +242,6 @@ contract Staking is Ownable {
    */
   function decimals() external view returns (uint8) {
     return token.decimals();
-  }
-
-  /**
-   * @dev Schedules timelock to change duration
-   */
-  function scheduleDurationChange(uint256 delay)
-    external
-    onlyOwner
-  {
-    require(timelockState == false, "TIMELOCK_ACTIVE");
-    require(delay >= minDelay, "INVALID_DELAY");
-    uint256 timeUnlock = block.timestamp + minDelay;
-    bytes32 id = hashOperation(delay, block.timestamp, timeUnlock);
-    unlockTimestamps[id] = timeUnlock;
-    timelockState = true;
-    emit ScheduleDurationChange(id, timeUnlock);
-  }
-
-  /**
-   * @dev Cancels timelock to change duration
-   */
-  function cancelDurationChange(bytes32 timelockId) external onlyOwner {
-    require(timelockState == true, "TIMELOCK_INACTIVE");
-    timelockState = false;
-    emit CancelDurationChange(timelockId);
-  }
-
-  /**
-   * @dev Returns the identifier of an operation containing a single
-   * transaction.
-   */
-  function hashOperation(
-    uint256 delay,
-    uint256 timestamp,
-    uint256 timeUnlock
-  ) public pure virtual returns (bytes32 hash) {
-    return keccak256(abi.encode(delay, timestamp, timeUnlock));
-  }
-
-  /**
-   * @notice Set unstaking duration
-   * @param _duration uint256
-   */
-  function setDuration(uint256 _duration, bytes32 timelockId)
-    public
-    onlyOwner
-  {
-    require(_duration != 0, "DURATION_INVALID");
-    require(timelockState == true, "TIMELOCK_INACTIVE");
-    require(
-      unlockTimestamps[timelockId] > 0,
-      "INVALID_ID"
-    );
-    require(
-      block.timestamp >= unlockTimestamps[timelockId],
-      "TIMELOCK_NOT_PASSED"
-    );
-    duration = _duration;
-    timelockState = false;
-    emit CompleteDurationChange(timelockId, _duration);
   }
 
   /**
