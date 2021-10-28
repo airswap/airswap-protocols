@@ -32,9 +32,6 @@ contract Staking is Ownable {
   // Timeunlock timestamp 
   uint256 private timeUnlock;
 
-  // Timelock toggle
-  bool private timelockState;
-
   // Mapping of account to stakes
   mapping(address => Stake) internal stakes;
 
@@ -62,6 +59,9 @@ contract Staking is Ownable {
 
   // Schedule timelock event
   event ScheduleDurationChange(uint256 indexed unlockTimestamp);
+
+  // Cancel timelock event
+  event CancelDurationChange();
 
   // Complete timelock event
   event CompleteDurationChange(uint256 indexed newDuration);
@@ -114,10 +114,9 @@ contract Staking is Ownable {
     external
     onlyOwner
   {
-    require(timelockState == false, "TIMELOCK_ACTIVE");
+    require(timeUnlock == 0, "TIMELOCK_ACTIVE");
     require(delay >= minDelay, "INVALID_DELAY");
     timeUnlock = block.timestamp + delay;
-    timelockState = true;
     emit ScheduleDurationChange(timeUnlock);
   }
 
@@ -125,9 +124,9 @@ contract Staking is Ownable {
    * @dev Cancels timelock to change duration
    */
   function cancelDurationChange() external onlyOwner {
-    require(timelockState == true, "TIMELOCK_INACTIVE");
+    require(timeUnlock > 0, "TIMELOCK_INACTIVE");
     delete timeUnlock;
-    delete timelockState;
+    emit CancelDurationChange();
   }
 
   /**
@@ -139,13 +138,12 @@ contract Staking is Ownable {
     onlyOwner
   {
     require(_duration != 0, "DURATION_INVALID");
-    require(timelockState == true, "TIMELOCK_INACTIVE");
+    require(timeUnlock > 0, "TIMELOCK_INACTIVE");
     require(
       block.timestamp >= timeUnlock,
       "TIMELOCKED");
     duration = _duration;
     delete timeUnlock;
-    delete timelockState;
     emit CompleteDurationChange(_duration);
   }
 

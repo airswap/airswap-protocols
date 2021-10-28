@@ -127,7 +127,7 @@ describe('Staking Unit', () => {
 
       expect(
         await staking.connect(deployer).cancelDurationChange()
-      )
+      ).to.emit(staking, 'CancelDurationChange')
 
       // move 10 seconds forward
       await ethers.provider.send('evm_increaseTime', [10])
