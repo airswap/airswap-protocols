@@ -19,6 +19,7 @@ describe('Converter Integration Tests', () => {
   const wETH = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
   const triggerFee = 1
   const shares = [10]
+  const MINAMOUNTOUT = 1
 
   beforeEach(async () => {
     snapshotId = await ethers.provider.send('evm_snapshot')
@@ -254,7 +255,7 @@ describe('Converter Integration Tests', () => {
 
       await converter
         .connect(deployer)
-        .convertAndTransfer(testAToken.address, 0)
+        .convertAndTransfer(testAToken.address, MINAMOUNTOUT)
 
       const converterTokenABalance = await testAToken.balanceOf(
         converter.address
@@ -286,7 +287,7 @@ describe('Converter Integration Tests', () => {
 
       await converter
         .connect(deployer)
-        .convertAndTransfer(testAToken.address, 0)
+        .convertAndTransfer(testAToken.address, MINAMOUNTOUT)
 
       const converterTokenABalance = await testAToken.balanceOf(
         converter.address
@@ -317,7 +318,7 @@ describe('Converter Integration Tests', () => {
 
       await converter
         .connect(deployer)
-        .convertAndTransfer(testAToken.address, 0)
+        .convertAndTransfer(testAToken.address, MINAMOUNTOUT)
 
       const converterTokenABalance = await testAToken.balanceOf(
         converter.address
@@ -350,7 +351,7 @@ describe('Converter Integration Tests', () => {
 
       await converter
         .connect(deployer)
-        .convertAndTransfer(testAToken.address, 0)
+        .convertAndTransfer(testAToken.address, MINAMOUNTOUT)
 
       const converterTokenABalance = await testAToken.balanceOf(
         converter.address
@@ -382,7 +383,7 @@ describe('Converter Integration Tests', () => {
 
       await converter
         .connect(deployer)
-        .convertAndTransfer(swapToToken.address, 0)
+        .convertAndTransfer(swapToToken.address, MINAMOUNTOUT)
 
       const converterTokenABalance = await swapToToken.balanceOf(
         converter.address
@@ -416,7 +417,7 @@ describe('Converter Integration Tests', () => {
 
       await converter
         .connect(deployer)
-        .convertAndTransfer(swapToToken.address, 0)
+        .convertAndTransfer(swapToToken.address, MINAMOUNTOUT)
 
       const converterTokenABalance = await swapToToken.balanceOf(
         converter.address
@@ -441,7 +442,7 @@ describe('Converter Integration Tests', () => {
       await converter.connect(deployer).setTriggerFee(0)
       await converter
         .connect(deployer)
-        .convertAndTransfer(testAToken.address, 0)
+        .convertAndTransfer(testAToken.address, MINAMOUNTOUT)
 
       const converterTokenABalance = await testAToken.balanceOf(
         converter.address
