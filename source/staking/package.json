@@ -4,7 +4,8 @@
   "description": "Stake and unstake tokens on a schedule",
   "contributors": [
     "Ethan Wessel",
-    "Don Mosites"
+    "Don Mosites",
+    "Martin Sterlicchi"
   ],
   "license": "MIT",
   "repository": {

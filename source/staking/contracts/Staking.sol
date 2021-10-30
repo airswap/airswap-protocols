@@ -26,8 +26,17 @@ contract Staking is Ownable {
   // Unstaking duration
   uint256 public duration;
 
+  // Timelock delay
+  uint256 private minDelay;
+
+  // Timeunlock timestamp 
+  uint256 private timeUnlock;
+
   // Mapping of account to stakes
   mapping(address => Stake) internal stakes;
+
+  // Mapping of account to proposed delegate
+  mapping(address => address) public proposedDelegates;
 
   // Mapping of account to delegate
   mapping(address => address) public accountDelegates;
@@ -35,12 +44,33 @@ contract Staking is Ownable {
   // Mapping of delegate to account
   mapping(address => address) public delegateAccounts;
 
+  // Mapping of timelock ids to used state
+  mapping(bytes32 => bool) private usedIds;
+
+  // Mapping of ids to timestamps
+  mapping(bytes32 => uint256) private unlockTimestamps;
+
   // ERC-20 token properties
   string public name;
   string public symbol;
 
   // ERC-20 Transfer event
   event Transfer(address indexed from, address indexed to, uint256 tokens);
+
+  // Schedule timelock event
+  event ScheduleDurationChange(uint256 indexed unlockTimestamp);
+
+  // Cancel timelock event
+  event CancelDurationChange();
+
+  // Complete timelock event
+  event CompleteDurationChange(uint256 indexed newDuration);
+
+  // Propose Delegate event
+  event ProposeDelegate(address indexed delegate, address indexed account);
+
+  // Set Delegate event
+  event SetDelegate(address indexed delegate, address indexed account);
 
   /**
    * @notice Constructor
@@ -53,12 +83,14 @@ contract Staking is Ownable {
     ERC20 _token,
     string memory _name,
     string memory _symbol,
-    uint256 _duration
+    uint256 _duration,
+    uint256 _minDelay
   ) {
     token = _token;
     name = _name;
     symbol = _symbol;
-    setDuration(_duration);
+    duration = _duration;
+    minDelay = _minDelay;
   }
 
   /**
@@ -74,6 +106,47 @@ contract Staking is Ownable {
     symbol = _symbol;
   }
 
+    /**
+   * @dev Schedules timelock to change duration
+   * @param delay uint256
+   */
+  function scheduleDurationChange(uint256 delay)
+    external
+    onlyOwner
+  {
+    require(timeUnlock == 0, "TIMELOCK_ACTIVE");
+    require(delay >= minDelay, "INVALID_DELAY");
+    timeUnlock = block.timestamp + delay;
+    emit ScheduleDurationChange(timeUnlock);
+  }
+
+  /**
+   * @dev Cancels timelock to change duration
+   */
+  function cancelDurationChange() external onlyOwner {
+    require(timeUnlock > 0, "TIMELOCK_INACTIVE");
+    delete timeUnlock;
+    emit CancelDurationChange();
+  }
+
+  /**
+   * @notice Set unstaking duration
+   * @param _duration uint256
+   */
+  function setDuration(uint256 _duration)
+    external
+    onlyOwner
+  {
+    require(_duration != 0, "DURATION_INVALID");
+    require(timeUnlock > 0, "TIMELOCK_INACTIVE");
+    require(
+      block.timestamp >= timeUnlock,
+      "TIMELOCKED");
+    duration = _duration;
+    delete timeUnlock;
+    emit CompleteDurationChange(_duration);
+  }
+
   /**
    * @notice Propose delegate for account
    * @param delegate address
@@ -82,7 +155,8 @@ contract Staking is Ownable {
     require(accountDelegates[msg.sender] == address(0), "SENDER_HAS_DELEGATE");
     require(delegateAccounts[delegate] == address(0), "DELEGATE_IS_TAKEN");
     require(stakes[delegate].balance == 0, "DELEGATE_MUST_NOT_BE_STAKED");
-    accountDelegates[msg.sender] = delegate;
+    proposedDelegates[msg.sender] = delegate;
+    emit ProposeDelegate(delegate, msg.sender);
   }
 
   /**
@@ -90,10 +164,13 @@ contract Staking is Ownable {
    * @param account address
    */
   function setDelegate(address account) external {
-    require(accountDelegates[account] == msg.sender, "MUST_BE_PROPOSED");
+    require(proposedDelegates[account] == msg.sender, "MUST_BE_PROPOSED");
     require(delegateAccounts[msg.sender] == address(0), "DELEGATE_IS_TAKEN");
     require(stakes[msg.sender].balance == 0, "DELEGATE_MUST_NOT_BE_STAKED");
+    accountDelegates[account] = msg.sender;
     delegateAccounts[msg.sender] = account;
+    delete proposedDelegates[account];
+    emit SetDelegate(msg.sender, account);
   }
 
   /**
@@ -163,15 +240,6 @@ contract Staking is Ownable {
    */
   function decimals() external view returns (uint8) {
     return token.decimals();
-  }
-
-  /**
-   * @notice Set unstaking duration
-   * @param _duration uint256
-   */
-  function setDuration(uint256 _duration) public onlyOwner {
-    require(_duration != 0, "DURATION_INVALID");
-    duration = _duration;
   }
 
   /**
