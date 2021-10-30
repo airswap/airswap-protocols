@@ -369,6 +369,8 @@ describe('Light Unit Tests', () => {
       senderNFT = await deployMockContract(deployer, IERC721.abi)
       await signerNFT.mock.transferFrom.returns()
       await senderNFT.mock.transferFrom.returns()
+      await signerNFT.mock.supportsInterface.returns(false)
+      await senderNFT.mock.supportsInterface.returns(false)
     })
     it('test buy NFT', async () => {
       const order = await createSignedOrder(

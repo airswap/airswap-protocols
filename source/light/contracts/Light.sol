@@ -7,6 +7,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+import "@openzeppelin/contracts/interfaces/IERC2981.sol";
 import "./interfaces/ILight.sol";
 
 /**
@@ -54,8 +56,9 @@ contract Light is ILight, Ownable {
   uint256 internal constant MAX_PERCENTAGE = 100;
   uint256 internal constant MAX_SCALE = 77;
   uint256 internal constant MAX_ERROR_COUNT = 6;
-
   uint256 public constant FEE_DIVISOR = 10000;
+
+  bytes4 private constant _INTERFACE_ID_ERC2981 = 0x2a55205a;
 
   /**
    * @notice Double mapping of signers to nonce groups to nonce states
@@ -313,6 +316,13 @@ contract Light is ILight, Ownable {
       s
     );
 
+    // Check for and transfer royalty payment
+    if (IERC165(signerToken).supportsInterface(_INTERFACE_ID_ERC2981)) {
+      (address receiver, uint256 royaltyAmount) = IERC2981(signerToken)
+        .royaltyInfo(signerID, senderAmount);
+      IERC20(senderToken).safeTransferFrom(msg.sender, receiver, royaltyAmount);
+    }
+
     // Transfer token from sender to signer
     IERC20(senderToken).safeTransferFrom(
       msg.sender,
@@ -376,6 +386,17 @@ contract Light is ILight, Ownable {
       r,
       s
     );
+
+    // Check for and transfer royalty payment
+    if (IERC165(senderToken).supportsInterface(_INTERFACE_ID_ERC2981)) {
+      (address receiver, uint256 royaltyAmount) = IERC2981(senderToken)
+        .royaltyInfo(senderID, signerAmount);
+      IERC20(signerToken).safeTransferFrom(
+        signerWallet,
+        receiver,
+        royaltyAmount
+      );
+    }
 
     // Transfer token from sender to signer
     IERC721(senderToken).transferFrom(msg.sender, signerWallet, senderID);
@@ -701,6 +722,11 @@ contract Light is ILight, Ownable {
     assembly {
       id := chainid()
     }
+  }
+
+  function checkRoyalties(address _contract) internal view returns (bool) {
+    bool success = IERC165(_contract).supportsInterface(_INTERFACE_ID_ERC2981);
+    return success;
   }
 
   /**
