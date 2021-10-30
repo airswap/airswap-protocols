@@ -1,6 +1,7 @@
 import { ethers, BigNumber } from 'ethers'
 import { chainIds, chainNames } from '@airswap/constants'
 import { LightOrder } from '@airswap/types'
+import { lightOrderToParams } from '@airswap/utils'
 
 import * as LightContract from '@airswap/light/build/contracts/Light.sol/Light.json'
 import * as lightDeploys from '@airswap/light/deploys.js'
@@ -46,17 +47,8 @@ export class Light {
       }
     }
     const [count, errors] = await contract.validate(
-      order.nonce,
-      order.expiry,
-      order.signerWallet,
-      order.signerToken,
-      order.signerAmount,
-      order.senderToken,
-      order.senderAmount,
-      order.v,
-      order.r,
-      order.s,
-      senderWallet
+      senderWallet,
+      ...lightOrderToParams(order)
     )
     return this.convertToArray(count, errors)
   }
@@ -75,16 +67,7 @@ export class Light {
     }
     return await contract.swap(
       sender.getAddress(),
-      order.nonce,
-      order.expiry,
-      order.signerWallet,
-      order.signerToken,
-      order.signerAmount,
-      order.senderToken,
-      order.senderAmount,
-      order.v,
-      order.r,
-      order.s
+      ...lightOrderToParams(order)
     )
   }
 

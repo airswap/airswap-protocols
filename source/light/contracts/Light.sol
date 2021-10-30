@@ -7,8 +7,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/utils/introspection/IERC165.sol";
-import "@openzeppelin/contracts/interfaces/IERC2981.sol";
 import "./interfaces/ILight.sol";
 
 /**
@@ -316,13 +314,6 @@ contract Light is ILight, Ownable {
       s
     );
 
-    // Check for and transfer royalty payment
-    if (IERC165(signerToken).supportsInterface(_INTERFACE_ID_ERC2981)) {
-      (address receiver, uint256 royaltyAmount) = IERC2981(signerToken)
-        .royaltyInfo(signerID, senderAmount);
-      IERC20(senderToken).safeTransferFrom(msg.sender, receiver, royaltyAmount);
-    }
-
     // Transfer token from sender to signer
     IERC20(senderToken).safeTransferFrom(
       msg.sender,
@@ -386,17 +377,6 @@ contract Light is ILight, Ownable {
       r,
       s
     );
-
-    // Check for and transfer royalty payment
-    if (IERC165(senderToken).supportsInterface(_INTERFACE_ID_ERC2981)) {
-      (address receiver, uint256 royaltyAmount) = IERC2981(senderToken)
-        .royaltyInfo(senderID, signerAmount);
-      IERC20(signerToken).safeTransferFrom(
-        signerWallet,
-        receiver,
-        royaltyAmount
-      );
-    }
 
     // Transfer token from sender to signer
     IERC721(senderToken).transferFrom(msg.sender, signerWallet, senderID);
@@ -586,6 +566,7 @@ contract Light is ILight, Ownable {
 
   /**
    * @notice Validates Light Order for any potential errors
+   * @param senderWallet address Wallet of the sender
    * @param nonce uint256 Unique and should be sequential
    * @param expiry uint256 Expiry in seconds since 1 January 1970
    * @param signerWallet address Wallet of the signer
@@ -596,10 +577,10 @@ contract Light is ILight, Ownable {
    * @param v uint8 "v" value of the ECDSA signature
    * @param r bytes32 "r" value of the ECDSA signature
    * @param s bytes32 "s" value of the ECDSA signature
-   * @param senderWallet address Wallet of the sender
    * @return tuple of error count and bytes32[] memory array of error messages
    */
   function validate(
+    address senderWallet,
     uint256 nonce,
     uint256 expiry,
     address signerWallet,
@@ -609,74 +590,73 @@ contract Light is ILight, Ownable {
     uint256 senderAmount,
     uint8 v,
     bytes32 r,
-    bytes32 s,
-    address senderWallet
+    bytes32 s
   ) public view returns (uint256, bytes32[] memory) {
     bytes32[] memory errors = new bytes32[](MAX_ERROR_COUNT);
-    OrderDetails memory details;
+    Order memory order;
     uint256 errCount;
-    details.nonce = nonce;
-    details.expiry = expiry;
-    details.signerWallet = signerWallet;
-    details.signerToken = signerToken;
-    details.signerAmount = signerAmount;
-    details.senderToken = senderToken;
-    details.senderAmount = senderAmount;
-    details.v = v;
-    details.r = r;
-    details.s = s;
-    details.senderWallet = senderWallet;
+    order.nonce = nonce;
+    order.expiry = expiry;
+    order.signerWallet = signerWallet;
+    order.signerToken = signerToken;
+    order.signerAmount = signerAmount;
+    order.senderToken = senderToken;
+    order.senderAmount = senderAmount;
+    order.v = v;
+    order.r = r;
+    order.s = s;
+    order.senderWallet = senderWallet;
     bytes32 hashed = _getOrderHash(
-      details.nonce,
-      details.expiry,
-      details.signerWallet,
-      details.signerToken,
-      details.signerAmount,
-      details.senderWallet,
-      details.senderToken,
-      details.senderAmount
+      order.nonce,
+      order.expiry,
+      order.signerWallet,
+      order.signerToken,
+      order.signerAmount,
+      order.senderWallet,
+      order.senderToken,
+      order.senderAmount
     );
-    address signatory = _getSignatory(hashed, v, r, s);
+    address signatory = _getSignatory(hashed, order.v, order.r, order.s);
     // Ensure the signatory is not null
     if (signatory == address(0)) {
       errors[errCount] = "SIGNATURE_INVALID";
       errCount++;
     }
     //expiry check
-    if (details.expiry < block.timestamp) {
+    if (order.expiry < block.timestamp) {
       errors[errCount] = "EXPIRY_PASSED";
       errCount++;
     }
     //if signatory is not the signerWallet, then it must have been authorized
-    if (details.signerWallet != signatory) {
-      if (authorized[details.signerWallet] != signatory) {
+    if (order.signerWallet != signatory) {
+      if (authorized[order.signerWallet] != signatory) {
         errors[errCount] = "UNAUTHORIZED";
         errCount++;
       }
     }
     //accounts & balances check
-    uint256 signerBalance = IERC20(details.signerToken).balanceOf(
-      details.signerWallet
+    uint256 signerBalance = IERC20(order.signerToken).balanceOf(
+      order.signerWallet
     );
 
-    uint256 signerAllowance = IERC20(details.signerToken).allowance(
-      details.signerWallet,
+    uint256 signerAllowance = IERC20(order.signerToken).allowance(
+      order.signerWallet,
       address(this)
     );
 
-    uint256 feeAmount = details.signerAmount.mul(protocolFee).div(FEE_DIVISOR);
+    uint256 feeAmount = order.signerAmount.mul(protocolFee).div(FEE_DIVISOR);
 
-    if (signerAllowance < details.signerAmount + feeAmount) {
+    if (signerAllowance < order.signerAmount + feeAmount) {
       errors[errCount] = "SIGNER_ALLOWANCE_LOW";
       errCount++;
     }
 
-    if (signerBalance < details.signerAmount + feeAmount) {
+    if (signerBalance < order.signerAmount + feeAmount) {
       errors[errCount] = "SIGNER_BALANCE_LOW";
       errCount++;
     }
     //nonce check
-    if (nonceUsed(details.signerWallet, details.nonce)) {
+    if (nonceUsed(order.signerWallet, order.nonce)) {
       errors[errCount] = "NONCE_ALREADY_USED";
       errCount++;
     }
@@ -722,11 +702,6 @@ contract Light is ILight, Ownable {
     assembly {
       id := chainid()
     }
-  }
-
-  function checkRoyalties(address _contract) internal view returns (bool) {
-    bool success = IERC165(_contract).supportsInterface(_INTERFACE_ID_ERC2981);
-    return success;
   }
 
   /**

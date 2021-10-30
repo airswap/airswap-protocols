@@ -75,7 +75,7 @@ describe('Light Unit Tests', () => {
   }
 
   async function getErrorInfo(order) {
-    return await light.connect(sender).validate(...order, sender.address)
+    return await light.connect(sender).validate(sender.address, ...order)
   }
 
   beforeEach(async () => {
@@ -369,8 +369,6 @@ describe('Light Unit Tests', () => {
       senderNFT = await deployMockContract(deployer, IERC721.abi)
       await signerNFT.mock.transferFrom.returns()
       await senderNFT.mock.transferFrom.returns()
-      await signerNFT.mock.supportsInterface.returns(false)
-      await senderNFT.mock.supportsInterface.returns(false)
     })
     it('test buy NFT', async () => {
       const order = await createSignedOrder(
