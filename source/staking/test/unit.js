@@ -79,22 +79,20 @@ describe('Staking Unit', () => {
   describe('Set Unstaking Duration', async () => {
     it('non owner cannot set unstaking duration', async () => {
       await staking.connect(deployer).scheduleDurationChange(DEFAULTDELAY)
-      const block = await ethers.provider.getBlock()
 
       // move 10 seconds forward
       await ethers.provider.send('evm_increaseTime', [10])
       await ethers.provider.send('evm_mine')
 
-      await expect(
-        staking.connect(account1).setDuration(0)
-      ).to.be.revertedWith('Ownable: caller is not the owner')
+      await expect(staking.connect(account1).setDuration(0)).to.be.revertedWith(
+        'Ownable: caller is not the owner'
+      )
     })
 
     it('owner can set unstaking duration', async () => {
       await expect(
         await staking.connect(deployer).scheduleDurationChange(DEFAULTDELAY)
       ).to.emit(staking, 'ScheduleDurationChange')
-      const block = await ethers.provider.getBlock()
 
       // move 10 seconds forward
       await ethers.provider.send('evm_increaseTime', [10])
@@ -110,24 +108,23 @@ describe('Staking Unit', () => {
 
     it('Owner cannot set unstaking duration to zero', async () => {
       await staking.connect(deployer).scheduleDurationChange(DEFAULTDELAY)
-      const block = await ethers.provider.getBlock()
 
       // move 10 seconds forward
       await ethers.provider.send('evm_increaseTime', [10])
       await ethers.provider.send('evm_mine')
 
-      await expect(
-        staking.connect(deployer).setDuration(0)
-      ).to.be.revertedWith('DURATION_INVALID')
+      await expect(staking.connect(deployer).setDuration(0)).to.be.revertedWith(
+        'DURATION_INVALID'
+      )
     })
 
     it('Owner cannot set unstaking duration with canceled timelock', async () => {
       await staking.connect(deployer).scheduleDurationChange(DEFAULTDELAY)
-      const block = await ethers.provider.getBlock()
 
-      expect(
-        await staking.connect(deployer).cancelDurationChange()
-      ).to.emit(staking, 'CancelDurationChange')
+      expect(await staking.connect(deployer).cancelDurationChange()).to.emit(
+        staking,
+        'CancelDurationChange'
+      )
 
       // move 10 seconds forward
       await ethers.provider.send('evm_increaseTime', [10])

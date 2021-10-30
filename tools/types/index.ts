@@ -57,7 +57,7 @@ export type UnsignedLightOrder = {
   signerWallet: string
   signerToken: string
   signerAmount: string
-  signerFee: string
+  protocolFee: string
   senderWallet: string
   senderToken: string
   senderAmount: string
@@ -120,7 +120,7 @@ export const EIP712Light = {
     { name: 'signerWallet', type: 'address' },
     { name: 'signerToken', type: 'address' },
     { name: 'signerAmount', type: 'uint256' },
-    { name: 'signerFee', type: 'uint256' },
+    { name: 'protocolFee', type: 'uint256' },
     { name: 'senderWallet', type: 'address' },
     { name: 'senderToken', type: 'address' },
     { name: 'senderAmount', type: 'uint256' },

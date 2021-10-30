@@ -79,47 +79,7 @@ contract Wrapper is Ownable {
   ) public payable {
     _wrapEther(senderToken, senderAmount);
     lightContract.swap(
-      nonce,
-      expiry,
-      signerWallet,
-      signerToken,
-      signerAmount,
-      senderToken,
-      senderAmount,
-      v,
-      r,
-      s
-    );
-    _unwrapEther(signerToken, signerAmount);
-  }
-
-  /**
-   * @notice Wrapped Swap with Conditional Fee
-   * @param nonce uint256 Unique and should be sequential
-   * @param expiry uint256 Expiry in seconds since 1 January 1970
-   * @param signerWallet address Wallet of the signer
-   * @param signerToken address ERC20 token transferred from the signer
-   * @param signerAmount uint256 Amount transferred from the signer
-   * @param senderToken address ERC20 token transferred from the sender
-   * @param senderAmount uint256 Amount transferred from the sender
-   * @param v uint8 "v" value of the ECDSA signature
-   * @param r bytes32 "r" value of the ECDSA signature
-   * @param s bytes32 "s" value of the ECDSA signature
-   */
-  function swapWithConditionalFee(
-    uint256 nonce,
-    uint256 expiry,
-    address signerWallet,
-    address signerToken,
-    uint256 signerAmount,
-    address senderToken,
-    uint256 senderAmount,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
-  ) public payable {
-    _wrapEther(senderToken, senderAmount);
-    lightContract.swapWithConditionalFee(
+      address(this),
       nonce,
       expiry,
       signerWallet,

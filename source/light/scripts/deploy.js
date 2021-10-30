@@ -10,22 +10,24 @@ async function main() {
   console.log(`Deployer: ${deployer.address}`)
 
   const chainId = await deployer.getChainId()
-  const feeWallet = converterDeploys[chainId]
+  const protocolFeeWallet = converterDeploys[chainId]
   const stakingContract = stakingDeploys[chainId]
-  const signerFee = 7
-  const conditionalSignerFee = 30
-  const minimumStakingAmount = 10000
+  const protocolFee = 30
+  const protocolFeeLight = 7
+  const rebateScale = 10
+  const rebateMax = 100
 
   console.log(`Deploying on ${chainNames[chainId].toUpperCase()}`)
-  console.log(`Converter: ${feeWallet}`)
+  console.log(`Converter: ${protocolFeeWallet}`)
   console.log(`Staking: ${stakingContract}`)
 
   const lightFactory = await ethers.getContractFactory('Light')
   const lightContract = await lightFactory.deploy(
-    feeWallet,
-    signerFee,
-    conditionalSignerFee,
-    minimumStakingAmount,
+    protocolFee,
+    protocolFeeLight,
+    protocolFeeWallet,
+    rebateScale,
+    rebateMax,
     stakingContract
   )
   await lightContract.deployed()
@@ -38,10 +40,11 @@ async function main() {
   await run('verify:verify', {
     address: lightContract.address,
     constructorArguments: [
-      feeWallet,
-      signerFee,
-      conditionalSignerFee,
-      minimumStakingAmount,
+      protocolFee,
+      protocolFeeLight,
+      protocolFeeWallet,
+      rebateScale,
+      rebateMax,
       stakingContract,
     ],
   })
