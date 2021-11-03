@@ -9,6 +9,24 @@ interface IStaking {
     uint256 timestamp;
   }
 
+  // ERC-20 Transfer event
+  event Transfer(address indexed from, address indexed to, uint256 tokens);
+
+  // Schedule timelock event
+  event ScheduleDurationChange(uint256 indexed unlockTimestamp);
+
+  // Cancel timelock event
+  event CancelDurationChange();
+
+  // Complete timelock event
+  event CompleteDurationChange(uint256 indexed newDuration);
+
+  // Propose Delegate event
+  event ProposeDelegate(address indexed delegate, address indexed account);
+
+  // Set Delegate event
+  event SetDelegate(address indexed delegate, address indexed account);
+
   /**
    * @notice Stake tokens
    * @param amount uint256
