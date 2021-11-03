@@ -14,6 +14,8 @@ import "./interfaces/IWETH.sol";
 contract Wrapper is Ownable {
   using SafeERC20 for IERC20;
 
+  event WrappedSwapFor(address senderWallet);
+
   ILight public lightContract;
   IWETH public wethContract;
   uint256 constant MAX_UINT = 2**256 - 1;
@@ -92,6 +94,7 @@ contract Wrapper is Ownable {
       s
     );
     _unwrapEther(signerToken, signerAmount);
+    emit WrappedSwapFor(msg.sender);
   }
 
   /**
