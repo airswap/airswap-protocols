@@ -24,7 +24,7 @@
     "clean": "rm -rf ./build",
     "compile": "yarn clean && tsc -b",
     "test": "yarn test:unit",
-    "test:unit": "yarn compile && mocha -r ts-node/register test/**/*test.ts"
+    "test:unit": "yarn compile && mocha -r ts-node/register test/Server.test.ts"
   },
   "dependencies": {
     "@airswap/constants": "1.0.0",
