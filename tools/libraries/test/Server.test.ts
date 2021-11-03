@@ -3,7 +3,7 @@ import chai, { expect } from 'chai'
 import sinonChai from 'sinon-chai'
 import { useFakeTimers } from 'sinon'
 
-import { createQuote, createLightOrder } from '@airswap/utils'
+import { createOrder } from '@airswap/utils'
 import { ADDRESS_ZERO, REQUEST_TIMEOUT } from '@airswap/constants'
 
 import { Server } from '..'
@@ -14,7 +14,7 @@ import {
   MockSocketServer,
   nextEvent,
 } from './test-utils'
-import { LightOrder } from '@airswap/types'
+import { Order } from '@airswap/types'
 import { JsonRpcErrorCodes } from '@airswap/jsonrpc-client-websocket'
 
 addJSONRPCAssertions()
@@ -30,8 +30,6 @@ declare global {
   }
 }
 
-const badQuote = { bad: 'quote' }
-const emptyQuote = createQuote({})
 const URL = 'maker.example.com'
 
 chai.use(sinonChai)
@@ -41,25 +39,8 @@ function mockHttpServer(api) {
     const params = body['params']
     let res
     switch (body['method']) {
-      case 'getMaxQuote':
-        res = emptyQuote
-        break
-      case 'getSignerSideQuote':
-        res = badQuote
-        break
-      case 'getSenderSideQuote':
-        res = createQuote({
-          signer: {
-            token: params.signerToken,
-            amount: params.signerAmount,
-          },
-          sender: {
-            token: params.senderToken,
-          },
-        })
-        break
       case 'getSignerSideOrder':
-        res = createLightOrder({
+        res = createOrder({
           signerToken: params.signerToken,
           senderToken: params.senderToken,
           senderAmount: params.senderAmount,
@@ -79,31 +60,6 @@ function mockHttpServer(api) {
 }
 
 describe('HTTPServer', () => {
-  fancy
-    .nock('https://' + URL, mockHttpServer)
-    .do(async () => {
-      const server = await Server.at(URL)
-      await server.getSignerSideQuote('', '', '')
-    })
-    .catch(/Server response is not a valid quote: {"bad":"quote"}/)
-    .it('Server getSignerSideQuote() throws')
-  fancy
-    .nock('https://' + URL, mockHttpServer)
-    .do(async () => {
-      const server = await Server.at(URL)
-      await server.getMaxQuote('', '')
-    })
-    .catch(
-      /Server response differs from request params: signerToken,senderToken/
-    )
-    .it('Server getMaxQuote() throws')
-  fancy
-    .nock('https://' + URL, mockHttpServer)
-    .it('Server getSenderSideQuote()', async () => {
-      const server = await Server.at(URL)
-      const quote = await server.getSenderSideQuote('1', 'SIGNERTOKEN', '')
-      expect(quote.signer.token).to.equal('SIGNERTOKEN')
-    })
   fancy
     .nock('https://' + URL, mockHttpServer)
     .it('Server getSignerSideOrder()', async () => {
@@ -158,7 +114,7 @@ const samplePricing = [
     ],
   },
 ]
-const fakeOrder: LightOrder = {
+const fakeOrder: Order = {
   nonce: '1',
   expiry: '1234',
   signerWallet: '0xsigner',
@@ -349,21 +305,22 @@ describe('WebSocketServer', () => {
   it('should reject when calling a method from an unsupported protocol', async () => {
     const server = await Server.at(url)
     try {
-      await server.getMaxQuote('', '')
-      throw new Error('expected getMaxQuote method to reject')
+      await server.getSignerSideOrder(
+        '0',
+        ADDRESS_ZERO,
+        ADDRESS_ZERO,
+        ADDRESS_ZERO
+      )
+      throw new Error('expected getSignerSideOrder method to reject')
     } catch (e) {
       expect(e.message).to.match(/support/)
     }
   })
 
-  it('should respond with an error if initialize is called with bad params', async () => {
+  it('should not initialize if initialize is called with bad params', async () => {
     mockServer.initOptions = null
     const responseReceived = new Promise<void>((resolve) => {
-      const onInitializeResponse = (socket, data) => {
-        expect(data).to.be.a.JSONRpcError('abc', {
-          code: JsonRpcErrorCodes.INVALID_PARAMS,
-          message: 'Invalid params',
-        })
+      const onInitializeResponse = () => {
         resolve()
       }
       mockServer.setNextMessageCallback(onInitializeResponse)
@@ -390,7 +347,8 @@ describe('WebSocketServer', () => {
       const onPricingReponse = (socket, data) => {
         expect(data).to.be.a.JSONRpcError('abc', {
           code: JsonRpcErrorCodes.INVALID_PARAMS,
-          message: 'Invalid params',
+          message:
+            'Received invalid param format or values for method "updatePricing": {"bad":"pricing"}',
         })
         resolve()
       }

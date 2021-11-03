@@ -1,19 +1,19 @@
 const { expect } = require('chai')
 const {
-  createLightOrder,
-  lightOrderToParams,
-  createLightSignature,
+  createOrder,
+  orderToParams,
+  createSignature,
 } = require('@airswap/utils')
 const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
 
 const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
 const IWETH = require('../build/contracts/interfaces/IWETH.sol/IWETH.json')
-const LIGHT = require('@airswap/light/build/contracts/Light.sol/Light.json')
+const LIGHT = require('@airswap/swap/build/contracts/Swap.sol/Swap.json')
 
 describe('Wrapper Unit Tests', () => {
   let snapshotId
-  let light
+  let swap
   let wrapper
 
   let wethToken
@@ -34,7 +34,7 @@ describe('Wrapper Unit Tests', () => {
   const REBATE_MAX = '100'
 
   async function createSignedOrder(params, signer) {
-    const unsignedOrder = createLightOrder({
+    const unsignedOrder = createOrder({
       protocolFee: PROTOCOL_FEE,
       signerWallet: signer.address,
       signerToken: signerToken.address,
@@ -44,14 +44,9 @@ describe('Wrapper Unit Tests', () => {
       senderAmount: DEFAULT_AMOUNT,
       ...params,
     })
-    return lightOrderToParams({
+    return orderToParams({
       ...unsignedOrder,
-      ...(await createLightSignature(
-        unsignedOrder,
-        signer,
-        light.address,
-        CHAIN_ID
-      )),
+      ...(await createSignature(unsignedOrder, signer, swap.address, CHAIN_ID)),
     })
   }
 
@@ -85,7 +80,7 @@ describe('Wrapper Unit Tests', () => {
     await wethToken.mock.withdraw.returns()
     await wethToken.mock.transferFrom.returns(true)
 
-    light = await (
+    swap = await (
       await ethers.getContractFactory(LIGHT.abi, LIGHT.bytecode)
     ).deploy(
       PROTOCOL_FEE,
@@ -95,25 +90,25 @@ describe('Wrapper Unit Tests', () => {
       REBATE_MAX,
       stakingToken.address
     )
-    await light.deployed()
+    await swap.deployed()
 
     wrapper = await (
       await ethers.getContractFactory('Wrapper')
-    ).deploy(light.address, wethToken.address)
+    ).deploy(swap.address, wethToken.address)
     await wrapper.deployed()
   })
 
-  describe('Test light config', async () => {
-    it('test changing light contract by non-owner', async () => {
+  describe('Test swap config', async () => {
+    it('test changing swap contract by non-owner', async () => {
       await expect(
-        wrapper.connect(sender).setLightContract(light.address)
+        wrapper.connect(sender).setSwapContract(swap.address)
       ).to.be.revertedWith('owner')
     })
-    it('test changing light contract', async () => {
-      await wrapper.connect(deployer).setLightContract(light.address)
+    it('test changing swap contract', async () => {
+      await wrapper.connect(deployer).setSwapContract(swap.address)
 
-      const storedLightContract = await wrapper.lightContract()
-      await expect(await storedLightContract).to.equal(light.address)
+      const storedSwapContract = await wrapper.swapContract()
+      await expect(await storedSwapContract).to.equal(swap.address)
     })
   })
 

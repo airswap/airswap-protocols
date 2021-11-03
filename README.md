@@ -20,13 +20,13 @@
 
 Packages are versioned based on deploys. Major versions e.g. `1.x.x` are mainnet deploys, while minor versions e.g. `x.1.x` are rinkeby deploys. Packages that are not deployed increment patch versions e.g. `x.x.1`. Each package that includes a deployment includes the ABI files for that deployed contract in `build/contracts` within the package.
 
-| Package                                   | Version                                                                                                     | Description                |
-| :---------------------------------------- | :---------------------------------------------------------------------------------------------------------- | :------------------------- |
-| [`@airswap/light`](/source/light)         | [![npm](https://img.shields.io/npm/v/@airswap/light)](https://www.npmjs.com/package/@airswap/light)         | Atomic Swap Between Tokens |
-| [`@airswap/registry`](/source/registry)   | [![npm](https://img.shields.io/npm/v/@airswap/registry)](https://www.npmjs.com/package/@airswap/registry)   | Counterparty Discovery     |
-| [`@airswap/staking`](/source/staking)     | [![npm](https://img.shields.io/npm/v/@airswap/staking)](https://www.npmjs.com/package/@airswap/staking)     | Staking for Members        |
-| [`@airswap/pool`](/source/pool)           | [![npm](https://img.shields.io/npm/v/@airswap/pool)](https://www.npmjs.com/package/@airswap/pool)           | Rewards Pool for Members   |
-| [`@airswap/converter`](/source/converter) | [![npm](https://img.shields.io/npm/v/@airswap/converter)](https://www.npmjs.com/package/@airswap/converter) | Converter for Fee Tokens   |
+| Package                                   | Version                                                                                                     | Description              |
+| :---------------------------------------- | :---------------------------------------------------------------------------------------------------------- | :----------------------- |
+| [`@airswap/swap`](/source/swap)           | [![npm](https://img.shields.io/npm/v/@airswap/swap)](https://www.npmjs.com/package/@airswap/swap)           | Atomic Token Swap        |
+| [`@airswap/registry`](/source/registry)   | [![npm](https://img.shields.io/npm/v/@airswap/registry)](https://www.npmjs.com/package/@airswap/registry)   | Counterparty Discovery   |
+| [`@airswap/staking`](/source/staking)     | [![npm](https://img.shields.io/npm/v/@airswap/staking)](https://www.npmjs.com/package/@airswap/staking)     | Staking for Members      |
+| [`@airswap/pool`](/source/pool)           | [![npm](https://img.shields.io/npm/v/@airswap/pool)](https://www.npmjs.com/package/@airswap/pool)           | Rewards Pool for Members |
+| [`@airswap/converter`](/source/converter) | [![npm](https://img.shields.io/npm/v/@airswap/converter)](https://www.npmjs.com/package/@airswap/converter) | Converter for Fee Tokens |
 
 ## JavaScript Libraries
 

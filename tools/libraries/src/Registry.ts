@@ -1,7 +1,7 @@
 import { ethers } from 'ethers'
 import { chainIds, chainNames } from '@airswap/constants'
 import { Server, ServerOptions } from './Server'
-import { Light } from './Light'
+import { Swap } from './Swap'
 
 import * as RegistryContract from '@airswap/registry/build/contracts/Registry.sol/Registry.json'
 import * as registryDeploys from '@airswap/registry/deploys.js'
@@ -49,8 +49,7 @@ export class Registry {
         .filter((value) => baseTokenURLs.includes(value))
         .map((url) => {
           return Server.at(url, {
-            swapContract:
-              options.swapContract || Light.getAddress(this.chainId),
+            swapContract: options.swapContract || Swap.getAddress(this.chainId),
             initializeTimeout: options?.initializeTimeout,
           })
         })

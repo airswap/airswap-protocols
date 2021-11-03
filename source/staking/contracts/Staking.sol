@@ -29,7 +29,7 @@ contract Staking is Ownable {
   // Timelock delay
   uint256 private minDelay;
 
-  // Timeunlock timestamp 
+  // Timeunlock timestamp
   uint256 private timeUnlock;
 
   // Mapping of account to stakes
@@ -106,14 +106,11 @@ contract Staking is Ownable {
     symbol = _symbol;
   }
 
-    /**
+  /**
    * @dev Schedules timelock to change duration
    * @param delay uint256
    */
-  function scheduleDurationChange(uint256 delay)
-    external
-    onlyOwner
-  {
+  function scheduleDurationChange(uint256 delay) external onlyOwner {
     require(timeUnlock == 0, "TIMELOCK_ACTIVE");
     require(delay >= minDelay, "INVALID_DELAY");
     timeUnlock = block.timestamp + delay;
@@ -133,15 +130,10 @@ contract Staking is Ownable {
    * @notice Set unstaking duration
    * @param _duration uint256
    */
-  function setDuration(uint256 _duration)
-    external
-    onlyOwner
-  {
+  function setDuration(uint256 _duration) external onlyOwner {
     require(_duration != 0, "DURATION_INVALID");
     require(timeUnlock > 0, "TIMELOCK_INACTIVE");
-    require(
-      block.timestamp >= timeUnlock,
-      "TIMELOCKED");
+    require(block.timestamp >= timeUnlock, "TIMELOCKED");
     duration = _duration;
     delete timeUnlock;
     emit CompleteDurationChange(_duration);
