@@ -22,7 +22,7 @@
     "clean": "rm -rf ./build",
     "compile": "yarn clean && tsc -b",
     "test": "yarn test:unit",
-    "test:unit": "yarn compile && mocha -r ts-node/register test/**/*.ts"
+    "test:unit": "yarn compile && mocha -r ts-node/register test/merkle.ts"
   },
   "dependencies": {
     "@types/ethereumjs-util": "^6.1.0",
