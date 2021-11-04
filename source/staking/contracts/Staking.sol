@@ -6,19 +6,15 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
+import "./interfaces/IStaking.sol";
 
 /**
  * @title AirSwap Staking: Stake and Unstake Tokens
  * @notice https://www.airswap.io/
  */
-contract Staking is Ownable {
+contract Staking is IStaking, Ownable {
   using SafeERC20 for ERC20;
   using SafeMath for uint256;
-  struct Stake {
-    uint256 duration;
-    uint256 balance;
-    uint256 timestamp;
-  }
 
   // Token to be staked
   ERC20 public immutable token;
@@ -53,24 +49,6 @@ contract Staking is Ownable {
   // ERC-20 token properties
   string public name;
   string public symbol;
-
-  // ERC-20 Transfer event
-  event Transfer(address indexed from, address indexed to, uint256 tokens);
-
-  // Schedule timelock event
-  event ScheduleDurationChange(uint256 indexed unlockTimestamp);
-
-  // Cancel timelock event
-  event CancelDurationChange();
-
-  // Complete timelock event
-  event CompleteDurationChange(uint256 indexed newDuration);
-
-  // Propose Delegate event
-  event ProposeDelegate(address indexed delegate, address indexed account);
-
-  // Set Delegate event
-  event SetDelegate(address indexed delegate, address indexed account);
 
   /**
    * @notice Constructor
@@ -179,7 +157,7 @@ contract Staking is Ownable {
    * @notice Stake tokens
    * @param amount uint256
    */
-  function stake(uint256 amount) external {
+  function stake(uint256 amount) external override {
     if (delegateAccounts[msg.sender] != address(0)) {
       _stake(delegateAccounts[msg.sender], amount);
     } else {
@@ -191,7 +169,7 @@ contract Staking is Ownable {
    * @notice Unstake tokens
    * @param amount uint256
    */
-  function unstake(uint256 amount) external {
+  function unstake(uint256 amount) external override {
     address account;
     delegateAccounts[msg.sender] != address(0)
       ? account = delegateAccounts[msg.sender]
@@ -208,6 +186,7 @@ contract Staking is Ownable {
   function getStakes(address account)
     external
     view
+    override
     returns (Stake memory accountStake)
   {
     return stakes[account];
@@ -216,21 +195,26 @@ contract Staking is Ownable {
   /**
    * @notice Total balance of all accounts (ERC-20)
    */
-  function totalSupply() external view returns (uint256) {
+  function totalSupply() external view override returns (uint256) {
     return token.balanceOf(address(this));
   }
 
   /**
    * @notice Balance of an account (ERC-20)
    */
-  function balanceOf(address account) external view returns (uint256 total) {
+  function balanceOf(address account)
+    external
+    view
+    override
+    returns (uint256 total)
+  {
     return stakes[account].balance;
   }
 
   /**
    * @notice Decimals of underlying token (ERC-20)
    */
-  function decimals() external view returns (uint8) {
+  function decimals() external view override returns (uint8) {
     return token.decimals();
   }
 
@@ -239,7 +223,7 @@ contract Staking is Ownable {
    * @param account address
    * @param amount uint256
    */
-  function stakeFor(address account, uint256 amount) public {
+  function stakeFor(address account, uint256 amount) public override {
     _stake(account, amount);
   }
 
@@ -247,7 +231,7 @@ contract Staking is Ownable {
    * @notice Available amount for an account
    * @param account uint256
    */
-  function available(address account) public view returns (uint256) {
+  function available(address account) public view override returns (uint256) {
     Stake storage selected = stakes[account];
     uint256 _available = (block.timestamp.sub(selected.timestamp))
       .mul(selected.balance)
