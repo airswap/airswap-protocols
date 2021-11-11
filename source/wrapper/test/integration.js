@@ -125,10 +125,9 @@ describe('Wrapper Integration Tests', () => {
         },
         signer
       )
-      await expect(wrapper.connect(sender).swap(...order)).to.emit(
-        light,
-        'Swap'
-      )
+      await expect(wrapper.connect(sender).swap(...order))
+        .to.emit(light, 'Swap')
+        .to.emit(wrapper, 'WrappedSwapFor')
     })
 
     it('test that value is required', async () => {
@@ -154,7 +153,9 @@ describe('Wrapper Integration Tests', () => {
       )
       await expect(
         wrapper.connect(sender).swap(...order, { value: DEFAULT_AMOUNT })
-      ).to.emit(light, 'Swap')
+      )
+        .to.emit(light, 'Swap')
+        .to.emit(wrapper, 'WrappedSwapFor')
     })
 
     it('test that token swaps have no value', async () => {
@@ -175,10 +176,9 @@ describe('Wrapper Integration Tests', () => {
         signer
       )
 
-      await expect(wrapper.connect(sender).swap(...order)).to.emit(
-        light,
-        'Swap'
-      )
+      await expect(wrapper.connect(sender).swap(...order))
+        .to.emit(light, 'Swap')
+        .to.emit(wrapper, 'WrappedSwapFor')
     })
   })
 })
