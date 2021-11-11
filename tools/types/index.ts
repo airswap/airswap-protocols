@@ -169,4 +169,5 @@ type LevelsOrFomulae =
 export type Pricing = {
   baseToken: string
   quoteToken: string
+  minimum?: string
 } & LevelsOrFomulae
