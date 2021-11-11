@@ -26,6 +26,7 @@
   },
   "devDependencies": {
     "@airswap/constants": "0.4.3",
+    "@airswap/staking": "2.4.3",
     "@airswap/utils": "0.4.12",
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-etherscan": "^2.1.6",
