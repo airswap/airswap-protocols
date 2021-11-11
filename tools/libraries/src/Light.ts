@@ -65,10 +65,7 @@ export class Light {
         contract = contract.connect(sender)
       }
     }
-    return await contract.swap(
-      sender.getAddress(),
-      ...lightOrderToParams(order)
-    )
+    return await contract.swap(...lightOrderToParams(order))
   }
 
   private convertToArray(count: BigNumber, errors: Array<string>) {
