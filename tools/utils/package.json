@@ -1,7 +1,7 @@
 {
   "name": "@airswap/utils",
   "version": "1.0.0",
-  "description": "Utils for AirSwap Developers",
+  "description": "Utilities for AirSwap Development",
   "contributors": [
     "Don Mosites"
   ],

@@ -140,6 +140,21 @@ export function orderToParams(order: Order): Array<string> {
   ]
 }
 
+export function orderPropsToStrings(obj: any): Order {
+  return {
+    nonce: String(obj.nonce),
+    expiry: String(obj.expiry),
+    signerWallet: String(obj.signerWallet),
+    signerToken: String(obj.signerToken),
+    signerAmount: String(obj.signerAmount),
+    senderToken: String(obj.senderToken),
+    senderAmount: String(obj.senderAmount),
+    v: String(obj.v),
+    r: String(obj.r),
+    s: String(obj.s),
+  }
+}
+
 export function calculateCost(amount: string, pricing: Formula | Levels) {
   // TODO: Formula support
   if (typeof pricing !== 'string') {
