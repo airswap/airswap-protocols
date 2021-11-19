@@ -2,6 +2,7 @@ import * as url from 'url'
 import { ethers } from 'ethers'
 import { isBrowser } from 'browser-or-node'
 import { Client as HttpClient } from 'jayson'
+import { TypedEmitter } from 'tiny-typed-emitter'
 
 import {
   JsonRpcWebsocket,
@@ -10,11 +11,9 @@ import {
   WebsocketReadyStates,
 } from '@airswap/jsonrpc-client-websocket'
 import { REQUEST_TIMEOUT } from '@airswap/constants'
-import { parseUrl } from '@airswap/utils'
+import { parseUrl, orderPropsToStrings } from '@airswap/utils'
 import { Order, Pricing } from '@airswap/types'
-
 import { Swap } from './Swap'
-import { TypedEmitter } from 'tiny-typed-emitter'
 
 export type SupportedProtocolInfo = {
   name: string
@@ -113,6 +112,8 @@ export class Server extends TypedEmitter<ServerEvents> {
       signerToken,
       senderToken,
       senderWallet,
+    }).then((order) => {
+      return orderPropsToStrings(order)
     })
   }
 
@@ -128,6 +129,8 @@ export class Server extends TypedEmitter<ServerEvents> {
       signerToken,
       senderToken,
       senderWallet,
+    }).then((order) => {
+      return orderPropsToStrings(order)
     })
   }
 
