@@ -16,14 +16,6 @@
   dependencies:
     "@openzeppelin/contracts" "^4.3.1"
 
-"@airswap/typescript@1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@airswap/typescript/-/typescript-1.0.0.tgz#52c7250a822aa3396897e64a5f2b79ef69d8d3c1"
-  integrity sha512-UPytDGOzNwNh/b0rvdIcuHhMY51Id5R1ioCRNFC0O0p492sDQUOQlg6E2MW5QHUwNlZc8PHXVAO3tLcYUSvjaA==
-  dependencies:
-    "@airswap/constants" "1.0.0"
-    "@uniswap/token-lists" "^1.0.0-beta.26"
-
 "@airswap/validator@2.3.0":
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/@airswap/validator/-/validator-2.3.0.tgz#f7afd96950e33d2f3bb6653116aa2a97b9bdebf1"

@@ -31,7 +31,7 @@
     "@airswap/jsonrpc-client-websocket": "0.0.1",
     "@airswap/swap": "2.3.1",
     "@airswap/registry": "4.8.2",
-    "@airswap/typescript": "1.0.0",
+    "@airswap/typescript": "1.0.1",
     "@airswap/utils": "1.0.0",
     "@airswap/validator": "2.3.0",
     "@airswap/wrapper": "2.5.2",
