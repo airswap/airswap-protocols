@@ -7,13 +7,13 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "./interfaces/ILight.sol";
+import "./interfaces/ISwap.sol";
 
 /**
  * @title AirSwap: Atomic Token Swap
  * @notice https://www.airswap.io/
  */
-contract Light is ILight, Ownable {
+contract Swap is ISwap, Ownable {
   using SafeERC20 for IERC20;
   using SafeMath for uint256;
 
@@ -29,10 +29,10 @@ contract Light is ILight, Ownable {
       )
     );
 
-  bytes32 public constant LIGHT_ORDER_TYPEHASH =
+  bytes32 public constant ORDER_TYPEHASH =
     keccak256(
       abi.encodePacked(
-        "LightOrder(",
+        "Order(",
         "uint256 nonce,",
         "uint256 expiry,",
         "address signerWallet,",
@@ -46,7 +46,7 @@ contract Light is ILight, Ownable {
       )
     );
 
-  bytes32 public constant DOMAIN_NAME = keccak256("SWAP_LIGHT");
+  bytes32 public constant DOMAIN_NAME = keccak256("SWAP");
   bytes32 public constant DOMAIN_VERSION = keccak256("3");
   uint256 public immutable DOMAIN_CHAIN_ID;
   bytes32 public immutable DOMAIN_SEPARATOR;
@@ -68,7 +68,7 @@ contract Light is ILight, Ownable {
   mapping(address => address) public override authorized;
 
   uint256 public protocolFee;
-  uint256 public protocolFeeLight;
+  uint256 public protocolFeeSwap;
   address public protocolFeeWallet;
   uint256 public rebateScale;
   uint256 public rebateMax;
@@ -76,14 +76,14 @@ contract Light is ILight, Ownable {
 
   constructor(
     uint256 _protocolFee,
-    uint256 _protocolFeeLight,
+    uint256 _protocolFeeSwap,
     address _protocolFeeWallet,
     uint256 _rebateScale,
     uint256 _rebateMax,
     address _stakingToken
   ) {
     require(_protocolFee < FEE_DIVISOR, "INVALID_FEE");
-    require(_protocolFeeLight < FEE_DIVISOR, "INVALID_LIGHT_FEE");
+    require(_protocolFeeSwap < FEE_DIVISOR, "INVALID_FEE");
     require(_protocolFeeWallet != address(0), "INVALID_FEE_WALLET");
     require(_rebateScale <= MAX_SCALE, "SCALE_TOO_HIGH");
     require(_rebateMax <= MAX_PERCENTAGE, "MAX_TOO_HIGH");
@@ -102,7 +102,7 @@ contract Light is ILight, Ownable {
     );
 
     protocolFee = _protocolFee;
-    protocolFeeLight = _protocolFeeLight;
+    protocolFeeSwap = _protocolFeeSwap;
     protocolFeeWallet = _protocolFeeWallet;
     rebateScale = _rebateScale;
     rebateMax = _rebateMax;
@@ -177,7 +177,7 @@ contract Light is ILight, Ownable {
   }
 
   /**
-   * @notice Light Atomic ERC20 Swap (Low Gas Usage)
+   * @notice Swap Atomic ERC20 Swap (Low Gas Usage)
    * @param nonce uint256 Unique and should be sequential
    * @param expiry uint256 Expiry in seconds since 1 January 1970
    * @param signerWallet address Wallet of the signer
@@ -214,13 +214,13 @@ contract Light is ILight, Ownable {
           DOMAIN_SEPARATOR,
           keccak256(
             abi.encode(
-              LIGHT_ORDER_TYPEHASH,
+              ORDER_TYPEHASH,
               nonce,
               expiry,
               signerWallet,
               signerToken,
               signerAmount,
-              protocolFeeLight,
+              protocolFeeSwap,
               msg.sender,
               senderToken,
               senderAmount
@@ -259,7 +259,7 @@ contract Light is ILight, Ownable {
     IERC20(signerToken).safeTransferFrom(
       signerWallet,
       protocolFeeWallet,
-      signerAmount.mul(protocolFeeLight).div(FEE_DIVISOR)
+      signerAmount.mul(protocolFeeSwap).div(FEE_DIVISOR)
     );
 
     // Emit a Swap event
@@ -269,7 +269,7 @@ contract Light is ILight, Ownable {
       signerWallet,
       signerToken,
       signerAmount,
-      protocolFeeLight,
+      protocolFeeSwap,
       msg.sender,
       senderToken,
       senderAmount
@@ -474,13 +474,13 @@ contract Light is ILight, Ownable {
 
   /**
    * @notice Set the light fee
-   * @param _protocolFeeLight uint256 Value of the fee in basis points
+   * @param _protocolFeeSwap uint256 Value of the fee in basis points
    */
-  function setProtocolFeeLight(uint256 _protocolFeeLight) external onlyOwner {
+  function setProtocolFeeSwap(uint256 _protocolFeeSwap) external onlyOwner {
     // Ensure the fee is less than divisor
-    require(_protocolFeeLight < FEE_DIVISOR, "INVALID_FEE_LIGHT");
-    protocolFee = _protocolFeeLight;
-    emit SetProtocolFeeLight(_protocolFeeLight);
+    require(_protocolFeeSwap < FEE_DIVISOR, "INVALID_FEE_LIGHT");
+    protocolFee = _protocolFeeSwap;
+    emit SetProtocolFeeSwap(_protocolFeeSwap);
   }
 
   /**
@@ -565,7 +565,7 @@ contract Light is ILight, Ownable {
   }
 
   /**
-   * @notice Validates Light Order for any potential errors
+   * @notice Validates Swap Order for any potential errors
    * @param senderWallet address Wallet of the sender
    * @param nonce uint256 Unique and should be sequential
    * @param expiry uint256 Expiry in seconds since 1 January 1970
@@ -808,7 +808,7 @@ contract Light is ILight, Ownable {
     return
       keccak256(
         abi.encode(
-          LIGHT_ORDER_TYPEHASH,
+          ORDER_TYPEHASH,
           nonce,
           expiry,
           signerWallet,

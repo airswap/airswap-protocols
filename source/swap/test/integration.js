@@ -1,16 +1,16 @@
 const { expect } = require('chai')
 const {
-  createLightOrder,
-  lightOrderToParams,
-  createLightSignature,
+  createOrder,
+  orderToParams,
+  createSignature,
 } = require('@airswap/utils')
 const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
 const ERC20 = require('@openzeppelin/contracts/build/contracts/ERC20PresetMinterPauser.json')
 
-describe('Light Integration Tests', () => {
+describe('Swap Integration Tests', () => {
   let snapshotId
-  let light
+  let swap
   let signerToken
   let senderToken
 
@@ -27,7 +27,7 @@ describe('Light Integration Tests', () => {
   const DEFAULT_AMOUNT = '10000'
 
   async function createSignedOrder(params, signer) {
-    const unsignedOrder = createLightOrder({
+    const unsignedOrder = createOrder({
       protocolFee: PROTOCOL_FEE,
       signerWallet: signer.address,
       signerToken: signerToken.address,
@@ -37,14 +37,9 @@ describe('Light Integration Tests', () => {
       senderAmount: DEFAULT_AMOUNT,
       ...params,
     })
-    return lightOrderToParams({
+    return orderToParams({
       ...unsignedOrder,
-      ...(await createLightSignature(
-        unsignedOrder,
-        signer,
-        light.address,
-        CHAIN_ID
-      )),
+      ...(await createSignature(unsignedOrder, signer, swap.address, CHAIN_ID)),
     })
   }
 
@@ -73,8 +68,8 @@ describe('Light Integration Tests', () => {
     await senderToken.deployed()
     senderToken.mint(sender.address, 1000000)
 
-    light = await (
-      await ethers.getContractFactory('Light')
+    swap = await (
+      await ethers.getContractFactory('Swap')
     ).deploy(
       PROTOCOL_FEE,
       PROTOCOL_FEE_LIGHT,
@@ -83,10 +78,10 @@ describe('Light Integration Tests', () => {
       REBATE_MAX,
       stakingToken.address
     )
-    await light.deployed()
+    await swap.deployed()
 
-    signerToken.connect(signer).approve(light.address, 1000000)
-    senderToken.connect(sender).approve(light.address, 1000000)
+    signerToken.connect(signer).approve(swap.address, 1000000)
+    senderToken.connect(sender).approve(swap.address, 1000000)
   })
 
   describe('Test rebates', async () => {
@@ -95,8 +90,8 @@ describe('Light Integration Tests', () => {
 
       const order = await createSignedOrder({}, signer)
       await expect(
-        await light.connect(sender).swap(sender.address, ...order)
-      ).to.emit(light, 'Swap')
+        await swap.connect(sender).swap(sender.address, ...order)
+      ).to.emit(swap, 'Swap')
 
       // Expect full 30 to be taken from signer
       expect(await signerToken.balanceOf(signer.address)).to.equal('989970')
@@ -115,8 +110,8 @@ describe('Light Integration Tests', () => {
 
       const order = await createSignedOrder({}, signer)
       await expect(
-        await light.connect(sender).swap(sender.address, ...order)
-      ).to.emit(light, 'Swap')
+        await swap.connect(sender).swap(sender.address, ...order)
+      ).to.emit(swap, 'Swap')
 
       // Expect full 30 to be taken from signer
       expect(await signerToken.balanceOf(signer.address)).to.equal('989970')
@@ -137,8 +132,8 @@ describe('Light Integration Tests', () => {
         },
         signer
       )
-      await expect(await light.connect(sender).light(...order)).to.emit(
-        light,
+      await expect(await swap.connect(sender).light(...order)).to.emit(
+        swap,
         'Swap'
       )
 

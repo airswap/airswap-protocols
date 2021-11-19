@@ -1,20 +1,20 @@
 const { expect } = require('chai')
 const {
-  createLightOrder,
-  lightOrderToParams,
-  createLightSignature,
+  createOrder,
+  orderToParams,
+  createSignature,
 } = require('@airswap/utils')
 const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
 
 const ERC20 = require('@openzeppelin/contracts/build/contracts/ERC20PresetMinterPauser.json')
 const WETH9 = require('@uniswap/v2-periphery/build/WETH9.json')
-const LIGHT = require('@airswap/light/build/contracts/Light.sol/Light.json')
+const LIGHT = require('@airswap/swap/build/contracts/Swap.sol/Swap.json')
 const { MAX_APPROVAL_AMOUNT } = require('../../../tools/constants')
 
 describe('Wrapper Integration Tests', () => {
   let snapshotId
-  let light
+  let swap
   let wrapper
 
   let wethToken
@@ -36,7 +36,7 @@ describe('Wrapper Integration Tests', () => {
   const REBATE_MAX = '100'
 
   async function createSignedOrder(params, signer) {
-    const unsignedOrder = createLightOrder({
+    const unsignedOrder = createOrder({
       protocolFee: PROTOCOL_FEE,
       signerWallet: signer.address,
       signerToken: signerToken.address,
@@ -46,14 +46,9 @@ describe('Wrapper Integration Tests', () => {
       senderAmount: DEFAULT_AMOUNT,
       ...params,
     })
-    return lightOrderToParams({
+    return orderToParams({
       ...unsignedOrder,
-      ...(await createLightSignature(
-        unsignedOrder,
-        signer,
-        light.address,
-        CHAIN_ID
-      )),
+      ...(await createSignature(unsignedOrder, signer, swap.address, CHAIN_ID)),
     })
   }
 
@@ -89,7 +84,7 @@ describe('Wrapper Integration Tests', () => {
     stakingToken = await deployMockContract(deployer, ERC20.abi)
     await stakingToken.mock.balanceOf.returns(0)
 
-    light = await (
+    swap = await (
       await ethers.getContractFactory(LIGHT.abi, LIGHT.bytecode)
     ).deploy(
       PROTOCOL_FEE,
@@ -99,17 +94,17 @@ describe('Wrapper Integration Tests', () => {
       REBATE_MAX,
       stakingToken.address
     )
-    await light.deployed()
+    await swap.deployed()
 
-    await wethToken.connect(signer).approve(light.address, DEFAULT_AMOUNT)
+    await wethToken.connect(signer).approve(swap.address, DEFAULT_AMOUNT)
 
-    wethToken.connect(signer).approve(light.address, DEFAULT_BALANCE)
-    signerToken.connect(signer).approve(light.address, DEFAULT_BALANCE)
-    senderToken.connect(sender).approve(light.address, DEFAULT_BALANCE)
+    wethToken.connect(signer).approve(swap.address, DEFAULT_BALANCE)
+    signerToken.connect(signer).approve(swap.address, DEFAULT_BALANCE)
+    senderToken.connect(sender).approve(swap.address, DEFAULT_BALANCE)
 
     wrapper = await (
       await ethers.getContractFactory('Wrapper')
-    ).deploy(light.address, wethToken.address)
+    ).deploy(swap.address, wethToken.address)
     await wrapper.deployed()
 
     await senderToken
@@ -125,8 +120,9 @@ describe('Wrapper Integration Tests', () => {
         },
         signer
       )
+
       await expect(wrapper.connect(sender).swap(...order))
-        .to.emit(light, 'Swap')
+        .to.emit(swap, 'Swap')
         .to.emit(wrapper, 'WrappedSwapFor')
     })
 
@@ -154,7 +150,7 @@ describe('Wrapper Integration Tests', () => {
       await expect(
         wrapper.connect(sender).swap(...order, { value: DEFAULT_AMOUNT })
       )
-        .to.emit(light, 'Swap')
+        .to.emit(swap, 'Swap')
         .to.emit(wrapper, 'WrappedSwapFor')
     })
 
@@ -177,7 +173,7 @@ describe('Wrapper Integration Tests', () => {
       )
 
       await expect(wrapper.connect(sender).swap(...order))
-        .to.emit(light, 'Swap')
+        .to.emit(swap, 'Swap')
         .to.emit(wrapper, 'WrappedSwapFor')
     })
   })

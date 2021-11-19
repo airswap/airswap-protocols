@@ -13,7 +13,7 @@ async function main() {
   const protocolFeeWallet = converterDeploys[chainId]
   const stakingContract = stakingDeploys[chainId]
   const protocolFee = 30
-  const protocolFeeLight = 7
+  const protocolFeeSwap = 7
   const rebateScale = 10
   const rebateMax = 100
 
@@ -21,27 +21,27 @@ async function main() {
   console.log(`Converter: ${protocolFeeWallet}`)
   console.log(`Staking: ${stakingContract}`)
 
-  const lightFactory = await ethers.getContractFactory('Light')
-  const lightContract = await lightFactory.deploy(
+  const swapFactory = await ethers.getContractFactory('Swap')
+  const swapContract = await swapFactory.deploy(
     protocolFee,
-    protocolFeeLight,
+    protocolFeeSwap,
     protocolFeeWallet,
     rebateScale,
     rebateMax,
     stakingContract
   )
-  await lightContract.deployed()
-  console.log(`New Light: ${lightContract.address}`)
+  await swapContract.deployed()
+  console.log(`New Swap: ${swapContract.address}`)
 
   console.log('Waiting to verify...')
   await new Promise((r) => setTimeout(r, 60000))
 
   console.log('Verifying...')
   await run('verify:verify', {
-    address: lightContract.address,
+    address: swapContract.address,
     constructorArguments: [
       protocolFee,
-      protocolFeeLight,
+      protocolFeeSwap,
       protocolFeeWallet,
       rebateScale,
       rebateMax,
