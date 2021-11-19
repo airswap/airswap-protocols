@@ -2,6 +2,7 @@ import * as url from 'url'
 import { ethers } from 'ethers'
 import { isBrowser } from 'browser-or-node'
 import { Client as HttpClient } from 'jayson'
+import { TypedEmitter } from 'tiny-typed-emitter'
 
 import {
   JsonRpcWebsocket,
@@ -10,11 +11,9 @@ import {
   WebsocketReadyStates,
 } from '@airswap/jsonrpc-client-websocket'
 import { REQUEST_TIMEOUT } from '@airswap/constants'
-import { parseUrl, flattenObject, isValidQuote } from '@airswap/utils'
-import { Quote, LightOrder, Pricing } from '@airswap/types'
-
-import { Light } from './Light'
-import { TypedEmitter } from 'tiny-typed-emitter'
+import { parseUrl, orderPropsToStrings } from '@airswap/utils'
+import { Order, Pricing } from '@airswap/typescript'
+import { Swap } from './Swap'
 
 export type SupportedProtocolInfo = {
   name: string
@@ -55,7 +54,7 @@ export class Server extends TypedEmitter<ServerEvents> {
 
   public constructor(
     public locator: string,
-    private swapContract = Light.getAddress()
+    private swapContract = Swap.getAddress()
   ) {
     super()
     const protocol = parseUrl(locator).protocol
@@ -101,55 +100,20 @@ export class Server extends TypedEmitter<ServerEvents> {
     return true
   }
 
-  public async getMaxQuote(
-    signerToken: string,
-    senderToken: string
-  ): Promise<Quote> {
-    this.requireRFQSupport()
-    return this.callRPCMethod<Quote>('getMaxQuote', {
-      signerToken,
-      senderToken,
-    })
-  }
-
-  public async getSignerSideQuote(
-    senderAmount: string,
-    signerToken: string,
-    senderToken: string
-  ): Promise<Quote> {
-    this.requireRFQSupport()
-    return this.callRPCMethod<Quote>('getSignerSideQuote', {
-      senderAmount: senderAmount.toString(),
-      signerToken,
-      senderToken,
-    })
-  }
-
-  public async getSenderSideQuote(
-    signerAmount: string,
-    signerToken: string,
-    senderToken: string
-  ): Promise<Quote> {
-    this.requireRFQSupport()
-    return this.callRPCMethod<Quote>('getSenderSideQuote', {
-      signerAmount: signerAmount.toString(),
-      signerToken,
-      senderToken,
-    })
-  }
-
   public async getSignerSideOrder(
     senderAmount: string,
     signerToken: string,
     senderToken: string,
     senderWallet: string
-  ): Promise<LightOrder> {
+  ): Promise<Order> {
     this.requireRFQSupport()
-    return this.callRPCMethod<LightOrder>('getSignerSideOrder', {
+    return this.callRPCMethod<Order>('getSignerSideOrder', {
       senderAmount: senderAmount.toString(),
       signerToken,
       senderToken,
       senderWallet,
+    }).then((order) => {
+      return orderPropsToStrings(order)
     })
   }
 
@@ -158,13 +122,15 @@ export class Server extends TypedEmitter<ServerEvents> {
     signerToken: string,
     senderToken: string,
     senderWallet: string
-  ): Promise<LightOrder> {
+  ): Promise<Order> {
     this.requireRFQSupport()
     return this.callRPCMethod('getSenderSideOrder', {
       signerAmount: signerAmount.toString(),
       signerToken,
       senderToken,
       senderWallet,
+    }).then((order) => {
+      return orderPropsToStrings(order)
     })
   }
 
@@ -199,7 +165,7 @@ export class Server extends TypedEmitter<ServerEvents> {
     return this.senderWallet
   }
 
-  public async consider(order: LightOrder): Promise<boolean> {
+  public async consider(order: Order): Promise<boolean> {
     this.requireLastLookSupport()
     return this.callRPCMethod<boolean>('consider', order)
   }
@@ -350,11 +316,11 @@ export class Server extends TypedEmitter<ServerEvents> {
     }
   }
 
-  private compare(params: any, result: any): Array<string> {
+  private compare(params: any, flat: any): Array<string> {
     const errors: Array<string> = []
-    const flat: any = flattenObject(result)
     for (const param in params) {
       if (
+        typeof flat === 'object' &&
         param in flat &&
         flat[param].toLowerCase() !== params[param].toLowerCase()
       ) {
@@ -445,16 +411,7 @@ export class Server extends TypedEmitter<ServerEvents> {
                 message: `Server response differs from request params: ${errors}`,
               })
             } else {
-              if (method.indexOf('Quote') !== -1 && !isValidQuote(result)) {
-                reject({
-                  code: -1,
-                  message: `Server response is not a valid quote: ${JSON.stringify(
-                    result
-                  )}`,
-                })
-              } else {
-                resolve(result)
-              }
+              resolve(result)
             }
           }
         }

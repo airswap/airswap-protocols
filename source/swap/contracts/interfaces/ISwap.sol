@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.0;
 
-interface ILight {
+interface ISwap {
   struct Order {
     uint256 nonce;
     uint256 expiry;
@@ -37,7 +37,7 @@ interface ILight {
 
   event SetProtocolFee(uint256 protocolFee);
 
-  event SetProtocolFeeLight(uint256 protocolFeeLight);
+  event SetProtocolFeeSwap(uint256 protocolFeeSwap);
 
   event SetProtocolFeeWallet(address indexed feeWallet);
 

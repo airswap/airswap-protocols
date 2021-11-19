@@ -1,15 +1,15 @@
 import { ethers, BigNumber } from 'ethers'
 import { chainIds, chainNames } from '@airswap/constants'
-import { LightOrder } from '@airswap/types'
-import { lightOrderToParams } from '@airswap/utils'
+import { Order } from '@airswap/typescript'
+import { orderToParams } from '@airswap/utils'
 
-import * as LightContract from '@airswap/light/build/contracts/Light.sol/Light.json'
-import * as lightDeploys from '@airswap/light/deploys.js'
-const LightInterface = new ethers.utils.Interface(
-  JSON.stringify(LightContract.abi)
+import * as SwapContract from '@airswap/swap/build/contracts/Swap.sol/Swap.json'
+import * as swapDeploys from '@airswap/swap/deploys.js'
+const SwapInterface = new ethers.utils.Interface(
+  JSON.stringify(SwapContract.abi)
 )
 
-export class Light {
+export class Swap {
   public chainId: number
   private contract: ethers.Contract
 
@@ -19,22 +19,22 @@ export class Light {
   ) {
     this.chainId = chainId
     this.contract = new ethers.Contract(
-      Light.getAddress(chainId),
-      LightInterface,
+      Swap.getAddress(chainId),
+      SwapInterface,
       signerOrProvider ||
         ethers.getDefaultProvider(chainNames[chainId].toLowerCase())
     )
   }
 
   public static getAddress(chainId = chainIds.RINKEBY): string {
-    if (chainId in lightDeploys) {
-      return lightDeploys[chainId]
+    if (chainId in swapDeploys) {
+      return swapDeploys[chainId]
     }
-    throw new Error(`Light deploy not found for chainId ${chainId}`)
+    throw new Error(`Swap deploy not found for chainId ${chainId}`)
   }
 
   public async validate(
-    order: LightOrder,
+    order: Order,
     senderWallet: string,
     signer?: ethers.Signer
   ): Promise<Array<string>> {
@@ -48,15 +48,12 @@ export class Light {
     }
     const [count, errors] = await contract.validate(
       senderWallet,
-      ...lightOrderToParams(order)
+      ...orderToParams(order)
     )
     return this.convertToArray(count, errors)
   }
 
-  public async swap(
-    order: LightOrder,
-    sender?: ethers.Signer
-  ): Promise<string> {
+  public async swap(order: Order, sender?: ethers.Signer): Promise<string> {
     let contract = this.contract
     if (!this.contract.signer) {
       if (sender === undefined) {
@@ -65,10 +62,7 @@ export class Light {
         contract = contract.connect(sender)
       }
     }
-    return await contract.swap(
-      sender.getAddress(),
-      ...lightOrderToParams(order)
-    )
+    return await contract.swap(sender.getAddress(), ...orderToParams(order))
   }
 
   private convertToArray(count: BigNumber, errors: Array<string>) {

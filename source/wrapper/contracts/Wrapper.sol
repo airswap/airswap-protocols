@@ -2,43 +2,45 @@
 
 pragma solidity ^0.8.0;
 
-import "@airswap/light/contracts/interfaces/ILight.sol";
+import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/IWETH.sol";
 
 /**
- * @title Light: Simple atomic swap
+ * @title Swap: Simple atomic swap
  * @notice https://www.airswap.io/
  */
 contract Wrapper is Ownable {
   using SafeERC20 for IERC20;
 
-  ILight public lightContract;
+  event WrappedSwapFor(address senderWallet);
+
+  ISwap public swapContract;
   IWETH public wethContract;
   uint256 constant MAX_UINT = 2**256 - 1;
 
   /**
    * @notice Constructor
-   * @param _lightContract address
+   * @param _swapContract address
    * @param _wethContract address
    */
-  constructor(address _lightContract, address _wethContract) {
-    require(_lightContract != address(0), "INVALID_LIGHT_CONTRACT");
+  constructor(address _swapContract, address _wethContract) {
+    require(_swapContract != address(0), "INVALID_CONTRACT");
     require(_wethContract != address(0), "INVALID_WETH_CONTRACT");
 
-    lightContract = ILight(_lightContract);
+    swapContract = ISwap(_swapContract);
     wethContract = IWETH(_wethContract);
-    wethContract.approve(_lightContract, MAX_UINT);
+    wethContract.approve(_swapContract, MAX_UINT);
   }
 
   /**
-   * @notice Set the light contract
-   * @param _lightContract address Address of the new light contract
+   * @notice Set the swap contract
+   * @param _swapContract address Address of the new swap contract
    */
-  function setLightContract(address _lightContract) external onlyOwner {
-    require(_lightContract != address(0), "INVALID_LIGHT_CONTRACT");
-    wethContract.approve(_lightContract, MAX_UINT);
+  function setSwapContract(address _swapContract) external onlyOwner {
+    require(_swapContract != address(0), "INVALID_CONTRACT");
+    wethContract.approve(_swapContract, MAX_UINT);
   }
 
   /**
@@ -78,7 +80,7 @@ contract Wrapper is Ownable {
     bytes32 s
   ) public payable {
     _wrapEther(senderToken, senderAmount);
-    lightContract.swap(
+    swapContract.swap(
       address(this),
       nonce,
       expiry,
@@ -92,6 +94,7 @@ contract Wrapper is Ownable {
       s
     );
     _unwrapEther(signerToken, signerAmount);
+    emit WrappedSwapFor(msg.sender);
   }
 
   /**
@@ -107,8 +110,8 @@ contract Wrapper is Ownable {
     } else {
       // Ensure message value is zero
       require(msg.value == 0, "VALUE_MUST_BE_ZERO");
-      // Approve the light contract to swap the amount
-      IERC20(senderToken).safeApprove(address(lightContract), senderAmount);
+      // Approve the swap contract to swap the amount
+      IERC20(senderToken).safeApprove(address(swapContract), senderAmount);
       // Transfer tokens from sender to wrapper for swap
       IERC20(senderToken).safeTransferFrom(
         msg.sender,

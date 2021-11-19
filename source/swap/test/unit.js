@@ -1,18 +1,18 @@
 const { expect } = require('chai')
 const { ADDRESS_ZERO } = require('@airswap/constants')
 const {
-  createLightOrder,
-  lightOrderToParams,
-  createLightSignature,
+  createOrder,
+  orderToParams,
+  createSignature,
 } = require('@airswap/utils')
 const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
 const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
 const IERC721 = require('@openzeppelin/contracts/build/contracts/IERC721.json')
 
-describe('Light Unit Tests', () => {
+describe('Swap Unit Tests', () => {
   let snapshotId
-  let light
+  let swap
   let signerToken
   let senderToken
 
@@ -35,7 +35,7 @@ describe('Light Unit Tests', () => {
     (parseInt(DEFAULT_AMOUNT) * parseInt(PROTOCOL_FEE)) / parseInt(FEE_DIVISOR)
 
   async function createSignedOrder(params, signatory) {
-    const unsignedOrder = createLightOrder({
+    const unsignedOrder = createOrder({
       protocolFee: PROTOCOL_FEE,
       signerWallet: signer.address,
       signerToken: signerToken.address,
@@ -45,12 +45,12 @@ describe('Light Unit Tests', () => {
       senderAmount: DEFAULT_AMOUNT,
       ...params,
     })
-    return lightOrderToParams({
+    return orderToParams({
       ...unsignedOrder,
-      ...(await createLightSignature(
+      ...(await createSignature(
         unsignedOrder,
         signatory,
-        light.address,
+        swap.address,
         CHAIN_ID
       )),
     })
@@ -58,10 +58,10 @@ describe('Light Unit Tests', () => {
 
   async function setUpAllowances(senderAmount, signerAmount) {
     await senderToken.mock.allowance
-      .withArgs(sender.address, light.address)
+      .withArgs(sender.address, swap.address)
       .returns(senderAmount)
     await signerToken.mock.allowance
-      .withArgs(signer.address, light.address)
+      .withArgs(signer.address, swap.address)
       .returns(signerAmount)
   }
 
@@ -75,7 +75,7 @@ describe('Light Unit Tests', () => {
   }
 
   async function getErrorInfo(order) {
-    return await light.connect(sender).validate(sender.address, ...order)
+    return await swap.connect(sender).validate(sender.address, ...order)
   }
 
   beforeEach(async () => {
@@ -97,8 +97,8 @@ describe('Light Unit Tests', () => {
     await senderToken.mock.transferFrom.returns(true)
     await stakingToken.mock.balanceOf.returns(10000000)
 
-    light = await (
-      await ethers.getContractFactory('Light')
+    swap = await (
+      await ethers.getContractFactory('Swap')
     ).deploy(
       PROTOCOL_FEE,
       PROTOCOL_FEE_LIGHT,
@@ -107,13 +107,13 @@ describe('Light Unit Tests', () => {
       REBATE_MAX,
       stakingToken.address
     )
-    await light.deployed()
+    await swap.deployed()
   })
 
   describe('Constructor', async () => {
     it('constructor sets default values', async () => {
-      const storedFee = await light.protocolFee()
-      const storedFeeWallet = await light.protocolFeeWallet()
+      const storedFee = await swap.protocolFee()
+      const storedFeeWallet = await swap.protocolFeeWallet()
       await expect(storedFee).to.equal(PROTOCOL_FEE)
       await expect(storedFeeWallet).to.equal(protocolFeeWallet.address)
     })
@@ -121,7 +121,7 @@ describe('Light Unit Tests', () => {
     it('test invalid protocolFeeWallet', async () => {
       await expect(
         (
-          await ethers.getContractFactory('Light')
+          await ethers.getContractFactory('Swap')
         ).deploy(
           PROTOCOL_FEE,
           PROTOCOL_FEE_LIGHT,
@@ -136,7 +136,7 @@ describe('Light Unit Tests', () => {
     it('test invalid fee', async () => {
       await expect(
         (
-          await ethers.getContractFactory('Light')
+          await ethers.getContractFactory('Swap')
         ).deploy(
           100000000000,
           PROTOCOL_FEE_LIGHT,
@@ -152,35 +152,35 @@ describe('Light Unit Tests', () => {
   describe('Test setters', async () => {
     it('test setProtocolFee', async () => {
       await expect(
-        await light.connect(deployer).setProtocolFee(PROTOCOL_FEE)
-      ).to.emit(light, 'SetProtocolFee')
+        await swap.connect(deployer).setProtocolFee(PROTOCOL_FEE)
+      ).to.emit(swap, 'SetProtocolFee')
     })
-    it('test setProtocolFeeLight', async () => {
+    it('test setProtocolFeeSwap', async () => {
       await expect(
-        await light.connect(deployer).setProtocolFeeLight(PROTOCOL_FEE_LIGHT)
-      ).to.emit(light, 'SetProtocolFeeLight')
+        await swap.connect(deployer).setProtocolFeeSwap(PROTOCOL_FEE_LIGHT)
+      ).to.emit(swap, 'SetProtocolFeeSwap')
     })
     it('test protocolFeeWallet', async () => {
       await expect(
-        await light
+        await swap
           .connect(deployer)
           .setProtocolFeeWallet(protocolFeeWallet.address)
-      ).to.emit(light, 'SetProtocolFeeWallet')
+      ).to.emit(swap, 'SetProtocolFeeWallet')
     })
     it('test setRebateScale', async () => {
       await expect(
-        await light.connect(deployer).setRebateScale(REBATE_SCALE)
-      ).to.emit(light, 'SetRebateScale')
+        await swap.connect(deployer).setRebateScale(REBATE_SCALE)
+      ).to.emit(swap, 'SetRebateScale')
     })
     it('test setRebateMax', async () => {
       await expect(
-        await light.connect(deployer).setRebateMax(REBATE_MAX)
-      ).to.emit(light, 'SetRebateMax')
+        await swap.connect(deployer).setRebateMax(REBATE_MAX)
+      ).to.emit(swap, 'SetRebateMax')
     })
     it('test setStakingToken', async () => {
       await expect(
-        await light.connect(deployer).setStakingToken(stakingToken.address)
-      ).to.emit(light, 'SetStakingToken')
+        await swap.connect(deployer).setStakingToken(stakingToken.address)
+      ).to.emit(swap, 'SetStakingToken')
     })
   })
 
@@ -189,8 +189,8 @@ describe('Light Unit Tests', () => {
       const order = await createSignedOrder({}, signer)
 
       await expect(
-        await light.connect(sender).swap(sender.address, ...order)
-      ).to.emit(light, 'Swap')
+        await swap.connect(sender).swap(sender.address, ...order)
+      ).to.emit(swap, 'Swap')
     })
 
     it('test authorized signer', async () => {
@@ -201,13 +201,13 @@ describe('Light Unit Tests', () => {
         signer
       )
 
-      await expect(await light.connect(anyone).authorize(signer.address))
-        .to.emit(light, 'Authorize')
+      await expect(await swap.connect(anyone).authorize(signer.address))
+        .to.emit(swap, 'Authorize')
         .withArgs(signer.address, anyone.address)
 
       await expect(
-        await light.connect(sender).swap(sender.address, ...order)
-      ).to.emit(light, 'Swap')
+        await swap.connect(sender).swap(sender.address, ...order)
+      ).to.emit(swap, 'Swap')
     })
 
     it('test when signer not authorized', async () => {
@@ -219,7 +219,7 @@ describe('Light Unit Tests', () => {
       )
 
       await expect(
-        light.connect(sender).swap(sender.address, ...order)
+        swap.connect(sender).swap(sender.address, ...order)
       ).to.be.revertedWith('UNAUTHORIZED')
     })
 
@@ -231,7 +231,7 @@ describe('Light Unit Tests', () => {
         signer
       )
       await expect(
-        light.connect(sender).swap(sender.address, ...order)
+        swap.connect(sender).swap(sender.address, ...order)
       ).to.be.revertedWith('EXPIRY_PASSED')
     })
 
@@ -242,9 +242,9 @@ describe('Light Unit Tests', () => {
         },
         signer
       )
-      await light.connect(sender).swap(sender.address, ...order)
+      await swap.connect(sender).swap(sender.address, ...order)
       await expect(
-        light.connect(sender).swap(sender.address, ...order)
+        swap.connect(sender).swap(sender.address, ...order)
       ).to.be.revertedWith('NONCE_ALREADY_USED')
     })
 
@@ -255,9 +255,9 @@ describe('Light Unit Tests', () => {
         },
         signer
       )
-      await light.connect(signer).cancel([1])
+      await swap.connect(signer).cancel([1])
       await expect(
-        light.connect(sender).swap(sender.address, ...order)
+        swap.connect(sender).swap(sender.address, ...order)
       ).to.be.revertedWith('NONCE_ALREADY_USED')
     })
 
@@ -265,7 +265,7 @@ describe('Light Unit Tests', () => {
       const order = await createSignedOrder({}, signer)
       order[7] = '29' // Change "v" of signature
       await expect(
-        light.connect(sender).swap(sender.address, ...order)
+        swap.connect(sender).swap(sender.address, ...order)
       ).to.be.revertedWith('SIGNATURE_INVALID')
     })
   })
@@ -279,8 +279,8 @@ describe('Light Unit Tests', () => {
         signer
       )
 
-      await expect(await light.connect(sender).light(...order)).to.emit(
-        light,
+      await expect(await swap.connect(sender).light(...order)).to.emit(
+        swap,
         'Swap'
       )
     })
@@ -292,7 +292,7 @@ describe('Light Unit Tests', () => {
         signer
       )
 
-      await expect(light.connect(sender).light(...order)).to.be.revertedWith(
+      await expect(swap.connect(sender).light(...order)).to.be.revertedWith(
         'UNAUTHORIZED'
       )
     })
@@ -300,35 +300,35 @@ describe('Light Unit Tests', () => {
 
   describe('Test fees', async () => {
     it('test changing fee wallet', async () => {
-      await light.connect(deployer).setProtocolFeeWallet(anyone.address)
+      await swap.connect(deployer).setProtocolFeeWallet(anyone.address)
 
-      const storedFeeWallet = await light.protocolFeeWallet()
+      const storedFeeWallet = await swap.protocolFeeWallet()
       await expect(await storedFeeWallet).to.equal(anyone.address)
     })
 
     it('test only deployer can change fee wallet', async () => {
       await expect(
-        light.connect(anyone).setProtocolFeeWallet(anyone.address)
+        swap.connect(anyone).setProtocolFeeWallet(anyone.address)
       ).to.be.revertedWith('Ownable: caller is not the owner')
     })
 
     it('test invalid fee wallet', async () => {
       await expect(
-        light.connect(deployer).setProtocolFeeWallet(ADDRESS_ZERO)
+        swap.connect(deployer).setProtocolFeeWallet(ADDRESS_ZERO)
       ).to.be.revertedWith('INVALID_FEE_WALLET')
     })
 
     it('test changing fee', async () => {
-      await light.connect(deployer).setProtocolFee(HIGHER_FEE)
+      await swap.connect(deployer).setProtocolFee(HIGHER_FEE)
 
-      const storedSignerFee = await light.protocolFee()
+      const storedSignerFee = await swap.protocolFee()
       await expect(await storedSignerFee).to.equal(HIGHER_FEE)
     })
 
     it('test only deployer can change fee', async () => {
-      await expect(
-        light.connect(anyone).setProtocolFee('0')
-      ).to.be.revertedWith('Ownable: caller is not the owner')
+      await expect(swap.connect(anyone).setProtocolFee('0')).to.be.revertedWith(
+        'Ownable: caller is not the owner'
+      )
     })
 
     it('test zero fee', async () => {
@@ -338,15 +338,15 @@ describe('Light Unit Tests', () => {
         },
         signer
       )
-      await light.connect(deployer).setProtocolFee('0')
+      await swap.connect(deployer).setProtocolFee('0')
       await expect(
-        await light.connect(sender).swap(sender.address, ...order)
-      ).to.emit(light, 'Swap')
+        await swap.connect(sender).swap(sender.address, ...order)
+      ).to.emit(swap, 'Swap')
     })
 
     it('test invalid fee', async () => {
       await expect(
-        light.connect(deployer).setProtocolFee(FEE_DIVISOR + 1)
+        swap.connect(deployer).setProtocolFee(FEE_DIVISOR + 1)
       ).to.be.revertedWith('INVALID_FEE')
     })
 
@@ -358,7 +358,7 @@ describe('Light Unit Tests', () => {
         signer
       )
       await expect(
-        light.connect(sender).swap(sender.address, ...order)
+        swap.connect(sender).swap(sender.address, ...order)
       ).to.be.revertedWith('UNAUTHORIZED')
     })
   })
@@ -378,8 +378,8 @@ describe('Light Unit Tests', () => {
         },
         signer
       )
-      await expect(await light.connect(sender).buyNFT(...order)).to.emit(
-        light,
+      await expect(await swap.connect(sender).buyNFT(...order)).to.emit(
+        swap,
         'Swap'
       )
     })
@@ -391,8 +391,8 @@ describe('Light Unit Tests', () => {
         },
         signer
       )
-      await expect(await light.connect(sender).sellNFT(...order)).to.emit(
-        light,
+      await expect(await swap.connect(sender).sellNFT(...order)).to.emit(
+        swap,
         'Swap'
       )
     })
@@ -404,8 +404,8 @@ describe('Light Unit Tests', () => {
         },
         signer
       )
-      await expect(await light.connect(sender).swapNFTs(...order)).to.emit(
-        light,
+      await expect(await swap.connect(sender).swapNFTs(...order)).to.emit(
+        swap,
         'Swap'
       )
     })
@@ -414,78 +414,76 @@ describe('Light Unit Tests', () => {
   describe('Test staking', async () => {
     it('test set staking token by non-owner', async () => {
       await expect(
-        light.connect(anyone).setStakingToken(stakingToken.address)
+        swap.connect(anyone).setStakingToken(stakingToken.address)
       ).to.be.revertedWith('Ownable: caller is not the owner')
     })
 
     it('test set staking token', async () => {
       await expect(
-        light.connect(deployer).setStakingToken(stakingToken.address)
-      ).to.emit(light, 'SetStakingToken')
+        swap.connect(deployer).setStakingToken(stakingToken.address)
+      ).to.emit(swap, 'SetStakingToken')
     })
   })
 
   describe('Test authorization', async () => {
     it('test authorized is set', async () => {
-      await light.connect(anyone).authorize(signer.address)
-      await expect(await light.authorized(anyone.address)).to.equal(
+      await swap.connect(anyone).authorize(signer.address)
+      await expect(await swap.authorized(anyone.address)).to.equal(
         signer.address
       )
     })
 
     it('test revoke', async () => {
-      await light.connect(anyone).revoke()
-      await expect(await light.authorized(anyone.address)).to.equal(
-        ADDRESS_ZERO
-      )
+      await swap.connect(anyone).revoke()
+      await expect(await swap.authorized(anyone.address)).to.equal(ADDRESS_ZERO)
     })
   })
 
   describe('Test cancel', async () => {
     it('test cancellation with no items', async () => {
-      await expect(await light.connect(signer).cancel([])).to.not.emit(
-        light,
+      await expect(await swap.connect(signer).cancel([])).to.not.emit(
+        swap,
         'Cancel'
       )
     })
 
     it('test cancellation with duplicated items', async () => {
-      await expect(await light.connect(signer).cancel([1, 1])).to.emit(
-        light,
+      await expect(await swap.connect(signer).cancel([1, 1])).to.emit(
+        swap,
         'Cancel'
       )
-      await expect(await light.nonceUsed(signer.address, 1)).to.equal(true)
+      await expect(await swap.nonceUsed(signer.address, 1)).to.equal(true)
     })
 
     it('test cancellation of same item twice', async () => {
-      await expect(await light.connect(signer).cancel([1])).to.emit(
-        light,
+      await expect(await swap.connect(signer).cancel([1])).to.emit(
+        swap,
         'Cancel'
       )
-      await expect(await light.connect(signer).cancel([1])).to.not.emit(
-        light,
+      await expect(await swap.connect(signer).cancel([1])).to.not.emit(
+        swap,
         'Cancel'
       )
 
-      await expect(await light.nonceUsed(signer.address, 1)).to.equal(true)
+      await expect(await swap.nonceUsed(signer.address, 1)).to.equal(true)
     })
 
     it('test cancellation with one item', async () => {
-      await expect(await light.connect(signer).cancel([1])).to.emit(
-        light,
+      await expect(await swap.connect(signer).cancel([1])).to.emit(
+        swap,
         'Cancel'
       )
-      await expect(await light.nonceUsed(signer.address, 1)).to.equal(true)
+      await expect(await swap.nonceUsed(signer.address, 1)).to.equal(true)
     })
 
     it('test an array of nonces, ensure the cancellation of only those orders', async () => {
-      await light.connect(signer).cancel([1, 2, 4, 6])
-      await expect(await light.nonceUsed(signer.address, 1)).to.equal(true)
-      await expect(await light.nonceUsed(signer.address, 2)).to.equal(true)
-      await expect(await light.nonceUsed(signer.address, 3)).to.equal(false)
-      await expect(await light.nonceUsed(signer.address, 4)).to.equal(true)
-      await expect(await light.nonceUsed(signer.address, 5)).to.equal(false)
-      await expect(await light.nonceUsed(signer.address, 6)).to.equal(true)
+      await swap.connect(signer).cancel([1, 2, 4, 6])
+      await expect(await swap.nonceUsed(signer.address, 1)).to.equal(true)
+      await expect(await swap.nonceUsed(signer.address, 2)).to.equal(true)
+      await expect(await swap.nonceUsed(signer.address, 3)).to.equal(false)
+      await expect(await swap.nonceUsed(signer.address, 4)).to.equal(true)
+      await expect(await swap.nonceUsed(signer.address, 5)).to.equal(false)
+      await expect(await swap.nonceUsed(signer.address, 6)).to.equal(true)
     })
   })
 
@@ -562,7 +560,7 @@ describe('Light Unit Tests', () => {
         },
         signer
       )
-      await light.connect(sender).swap(sender.address, ...order)
+      await swap.connect(sender).swap(sender.address, ...order)
       await setUpAllowances(DEFAULT_AMOUNT, DEFAULT_AMOUNT + SWAP_FEE)
       await setUpBalances(DEFAULT_BALANCE, DEFAULT_BALANCE)
       const [errCount, messages] = await getErrorInfo(order)
