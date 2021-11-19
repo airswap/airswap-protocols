@@ -12,7 +12,7 @@ import {
 } from '@airswap/jsonrpc-client-websocket'
 import { REQUEST_TIMEOUT } from '@airswap/constants'
 import { parseUrl, orderPropsToStrings } from '@airswap/utils'
-import { Order, Pricing } from '@airswap/types'
+import { Order, Pricing } from '@airswap/typescript'
 import { Swap } from './Swap'
 
 export type SupportedProtocolInfo = {

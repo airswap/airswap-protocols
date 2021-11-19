@@ -14,7 +14,7 @@ import {
   MockSocketServer,
   nextEvent,
 } from './test-utils'
-import { Order } from '@airswap/types'
+import { Order } from '@airswap/typescript'
 import { JsonRpcErrorCodes } from '@airswap/jsonrpc-client-websocket'
 
 addJSONRPCAssertions()

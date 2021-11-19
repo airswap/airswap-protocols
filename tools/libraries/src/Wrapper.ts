@@ -1,6 +1,6 @@
 import { ethers } from 'ethers'
 import { chainIds, chainNames, wethAddresses } from '@airswap/constants'
-import { Order } from '@airswap/types'
+import { Order } from '@airswap/typescript'
 
 import * as WrapperContract from '@airswap/wrapper/build/contracts/Wrapper.sol/Wrapper.json'
 import * as wrapperDeploys from '@airswap/wrapper/deploys.js'

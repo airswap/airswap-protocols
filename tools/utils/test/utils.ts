@@ -1,7 +1,7 @@
 import { assert, expect } from 'chai'
 import { ethers } from 'ethers'
 import { ADDRESS_ZERO, SECONDS_IN_DAY } from '@airswap/constants'
-import { Levels } from '@airswap/types'
+import { Levels } from '@airswap/typescript'
 
 import {
   isValidOrder,

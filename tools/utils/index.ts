@@ -18,7 +18,7 @@ import {
   Levels,
   Formula,
   EIP712,
-} from '@airswap/types'
+} from '@airswap/typescript'
 
 // eslint-disable-next-line  @typescript-eslint/explicit-module-boundary-types
 export function createOrder({

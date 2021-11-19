@@ -1,6 +1,6 @@
 import { ethers, BigNumber } from 'ethers'
 import { chainIds, chainNames } from '@airswap/constants'
-import { Order } from '@airswap/types'
+import { Order } from '@airswap/typescript'
 import { orderToParams } from '@airswap/utils'
 
 import * as SwapContract from '@airswap/swap/build/contracts/Swap.sol/Swap.json'
