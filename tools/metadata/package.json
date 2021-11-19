@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "@airswap/constants": "1.0.0",
-    "@airswap/typescript": "1.0.0",
+    "@airswap/typescript": "1.0.1",
     "@uniswap/token-lists": "^1.0.0-beta.24",
     "axios": "^0.21.3",
     "eth-contract-metadata": "^1.12.1",
