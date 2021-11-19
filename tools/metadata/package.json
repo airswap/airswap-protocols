@@ -1,10 +1,10 @@
 {
   "name": "@airswap/metadata",
-  "version": "0.3.8",
-  "description": "Token metadata fetching tools",
+  "version": "1.0.0",
+  "description": "Metadata Tools for AirSwap Developers",
   "contributors": [
     "Don Mosites",
-    "Hassan Malik <hbmalik88@gmail.com>"
+    "Hassan Malik"
   ],
   "repository": {
     "type": "git",
