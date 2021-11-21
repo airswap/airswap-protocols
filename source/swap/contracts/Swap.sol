@@ -577,7 +577,7 @@ contract Swap is ISwap, Ownable {
    * @param s bytes32 "s" value of the ECDSA signature
    * @return tuple of error count and bytes32[] memory array of error messages
    */
-  function getErrors(
+  function check(
     address senderWallet,
     uint256 nonce,
     uint256 expiry,

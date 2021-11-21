@@ -33,7 +33,7 @@ export class Swap {
     throw new Error(`Swap deploy not found for chainId ${chainId}`)
   }
 
-  public async getErrors(
+  public async check(
     order: Order,
     senderWallet: string,
     signer?: ethers.Signer
@@ -46,7 +46,7 @@ export class Swap {
         contract = contract.connect(signer)
       }
     }
-    const [count, errors] = await contract.getErrors(
+    const [count, errors] = await contract.check(
       senderWallet,
       ...orderToParams(order)
     )

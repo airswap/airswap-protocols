@@ -75,7 +75,7 @@ describe('Swap Unit Tests', () => {
   }
 
   async function getErrorInfo(order) {
-    return await swap.connect(sender).getErrors(sender.address, ...order)
+    return await swap.connect(sender).check(sender.address, ...order)
   }
 
   beforeEach(async () => {
