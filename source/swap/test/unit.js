@@ -75,7 +75,7 @@ describe('Swap Unit Tests', () => {
   }
 
   async function getErrorInfo(order) {
-    return await swap.connect(sender).validate(sender.address, ...order)
+    return await swap.connect(sender).getErrors(sender.address, ...order)
   }
 
   beforeEach(async () => {
@@ -155,10 +155,10 @@ describe('Swap Unit Tests', () => {
         await swap.connect(deployer).setProtocolFee(PROTOCOL_FEE)
       ).to.emit(swap, 'SetProtocolFee')
     })
-    it('test setProtocolFeeSwap', async () => {
+    it('test setProtocolFeeLight', async () => {
       await expect(
-        await swap.connect(deployer).setProtocolFeeSwap(PROTOCOL_FEE_LIGHT)
-      ).to.emit(swap, 'SetProtocolFeeSwap')
+        await swap.connect(deployer).setProtocolFeeLight(PROTOCOL_FEE_LIGHT)
+      ).to.emit(swap, 'SetProtocolFeeLight')
     })
     it('test protocolFeeWallet', async () => {
       await expect(

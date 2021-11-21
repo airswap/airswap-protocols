@@ -37,7 +37,7 @@ interface ISwap {
 
   event SetProtocolFee(uint256 protocolFee);
 
-  event SetProtocolFeeSwap(uint256 protocolFeeSwap);
+  event SetProtocolFeeLight(uint256 protocolFeeLight);
 
   event SetProtocolFeeWallet(address indexed feeWallet);
 
