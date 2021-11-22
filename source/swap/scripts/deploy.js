@@ -13,18 +13,18 @@ async function main() {
   const protocolFeeWallet = converterDeploys[chainId]
   const stakingContract = stakingDeploys[chainId]
   const protocolFee = 30
-  const protocolFeeSwap = 7
+  const protocolFeeLight = 7
   const rebateScale = 10
   const rebateMax = 100
 
   console.log(`Deploying on ${chainNames[chainId].toUpperCase()}`)
-  console.log(`Converter: ${protocolFeeWallet}`)
+  console.log(`Fee wallet (Converter): ${protocolFeeWallet}`)
   console.log(`Staking: ${stakingContract}`)
 
   const swapFactory = await ethers.getContractFactory('Swap')
   const swapContract = await swapFactory.deploy(
     protocolFee,
-    protocolFeeSwap,
+    protocolFeeLight,
     protocolFeeWallet,
     rebateScale,
     rebateMax,
@@ -41,7 +41,7 @@ async function main() {
     address: swapContract.address,
     constructorArguments: [
       protocolFee,
-      protocolFeeSwap,
+      protocolFeeLight,
       protocolFeeWallet,
       rebateScale,
       rebateMax,

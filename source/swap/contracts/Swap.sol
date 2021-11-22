@@ -56,8 +56,6 @@ contract Swap is ISwap, Ownable {
   uint256 internal constant MAX_ERROR_COUNT = 6;
   uint256 public constant FEE_DIVISOR = 10000;
 
-  bytes4 private constant _INTERFACE_ID_ERC2981 = 0x2a55205a;
-
   /**
    * @notice Double mapping of signers to nonce groups to nonce states
    * @dev The nonce group is computed as nonce / 256, so each group of 256 sequential nonces uses the same key
@@ -68,7 +66,7 @@ contract Swap is ISwap, Ownable {
   mapping(address => address) public override authorized;
 
   uint256 public protocolFee;
-  uint256 public protocolFeeSwap;
+  uint256 public protocolFeeLight;
   address public protocolFeeWallet;
   uint256 public rebateScale;
   uint256 public rebateMax;
@@ -76,14 +74,14 @@ contract Swap is ISwap, Ownable {
 
   constructor(
     uint256 _protocolFee,
-    uint256 _protocolFeeSwap,
+    uint256 _protocolFeeLight,
     address _protocolFeeWallet,
     uint256 _rebateScale,
     uint256 _rebateMax,
     address _stakingToken
   ) {
     require(_protocolFee < FEE_DIVISOR, "INVALID_FEE");
-    require(_protocolFeeSwap < FEE_DIVISOR, "INVALID_FEE");
+    require(_protocolFeeLight < FEE_DIVISOR, "INVALID_FEE");
     require(_protocolFeeWallet != address(0), "INVALID_FEE_WALLET");
     require(_rebateScale <= MAX_SCALE, "SCALE_TOO_HIGH");
     require(_rebateMax <= MAX_PERCENTAGE, "MAX_TOO_HIGH");
@@ -102,7 +100,7 @@ contract Swap is ISwap, Ownable {
     );
 
     protocolFee = _protocolFee;
-    protocolFeeSwap = _protocolFeeSwap;
+    protocolFeeLight = _protocolFeeLight;
     protocolFeeWallet = _protocolFeeWallet;
     rebateScale = _rebateScale;
     rebateMax = _rebateMax;
@@ -220,7 +218,7 @@ contract Swap is ISwap, Ownable {
               signerWallet,
               signerToken,
               signerAmount,
-              protocolFeeSwap,
+              protocolFeeLight,
               msg.sender,
               senderToken,
               senderAmount
@@ -259,7 +257,7 @@ contract Swap is ISwap, Ownable {
     IERC20(signerToken).safeTransferFrom(
       signerWallet,
       protocolFeeWallet,
-      signerAmount.mul(protocolFeeSwap).div(FEE_DIVISOR)
+      signerAmount.mul(protocolFeeLight).div(FEE_DIVISOR)
     );
 
     // Emit a Swap event
@@ -269,7 +267,7 @@ contract Swap is ISwap, Ownable {
       signerWallet,
       signerToken,
       signerAmount,
-      protocolFeeSwap,
+      protocolFeeLight,
       msg.sender,
       senderToken,
       senderAmount
@@ -474,13 +472,13 @@ contract Swap is ISwap, Ownable {
 
   /**
    * @notice Set the light fee
-   * @param _protocolFeeSwap uint256 Value of the fee in basis points
+   * @param _protocolFeeLight uint256 Value of the fee in basis points
    */
-  function setProtocolFeeSwap(uint256 _protocolFeeSwap) external onlyOwner {
+  function setProtocolFeeLight(uint256 _protocolFeeLight) external onlyOwner {
     // Ensure the fee is less than divisor
-    require(_protocolFeeSwap < FEE_DIVISOR, "INVALID_FEE_LIGHT");
-    protocolFee = _protocolFeeSwap;
-    emit SetProtocolFeeSwap(_protocolFeeSwap);
+    require(_protocolFeeLight < FEE_DIVISOR, "INVALID_FEE_LIGHT");
+    protocolFee = _protocolFeeLight;
+    emit SetProtocolFeeLight(_protocolFeeLight);
   }
 
   /**
@@ -566,7 +564,7 @@ contract Swap is ISwap, Ownable {
 
   /**
    * @notice Validates Swap Order for any potential errors
-   * @param senderWallet address Wallet of the sender
+   * @param senderWallet address Wallet that would send the order
    * @param nonce uint256 Unique and should be sequential
    * @param expiry uint256 Expiry in seconds since 1 January 1970
    * @param signerWallet address Wallet of the signer
@@ -579,7 +577,7 @@ contract Swap is ISwap, Ownable {
    * @param s bytes32 "s" value of the ECDSA signature
    * @return tuple of error count and bytes32[] memory array of error messages
    */
-  function validate(
+  function check(
     address senderWallet,
     uint256 nonce,
     uint256 expiry,
@@ -617,24 +615,30 @@ contract Swap is ISwap, Ownable {
       order.senderAmount
     );
     address signatory = _getSignatory(hashed, order.v, order.r, order.s);
-    // Ensure the signatory is not null
+
     if (signatory == address(0)) {
       errors[errCount] = "SIGNATURE_INVALID";
       errCount++;
     }
-    //expiry check
+
     if (order.expiry < block.timestamp) {
       errors[errCount] = "EXPIRY_PASSED";
       errCount++;
     }
-    //if signatory is not the signerWallet, then it must have been authorized
-    if (order.signerWallet != signatory) {
-      if (authorized[order.signerWallet] != signatory) {
-        errors[errCount] = "UNAUTHORIZED";
+
+    if (
+      order.signerWallet != signatory &&
+      authorized[order.signerWallet] != signatory
+    ) {
+      errors[errCount] = "UNAUTHORIZED";
+      errCount++;
+    } else {
+      if (nonceUsed(signatory, order.nonce)) {
+        errors[errCount] = "NONCE_ALREADY_USED";
         errCount++;
       }
     }
-    //accounts & balances check
+
     uint256 signerBalance = IERC20(order.signerToken).balanceOf(
       order.signerWallet
     );
@@ -653,11 +657,6 @@ contract Swap is ISwap, Ownable {
 
     if (signerBalance < order.signerAmount + feeAmount) {
       errors[errCount] = "SIGNER_BALANCE_LOW";
-      errCount++;
-    }
-    //nonce check
-    if (nonceUsed(order.signerWallet, order.nonce)) {
-      errors[errCount] = "NONCE_ALREADY_USED";
       errCount++;
     }
     return (errCount, errors);
