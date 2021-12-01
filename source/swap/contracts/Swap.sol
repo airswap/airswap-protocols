@@ -231,6 +231,9 @@ contract Swap is ISwap, Ownable {
       s
     );
 
+    // Ensure the signatory is not null
+    require(signatory != address(0), "SIGNATURE_INVALID");
+
     // Ensure the nonce is not yet used and if not mark it used
     require(_markNonceAsUsed(signatory, nonce), "NONCE_ALREADY_USED");
 
@@ -477,7 +480,7 @@ contract Swap is ISwap, Ownable {
   function setProtocolFeeLight(uint256 _protocolFeeLight) external onlyOwner {
     // Ensure the fee is less than divisor
     require(_protocolFeeLight < FEE_DIVISOR, "INVALID_FEE_LIGHT");
-    protocolFee = _protocolFeeLight;
+    protocolFeeLight = _protocolFeeLight;
     emit SetProtocolFeeLight(_protocolFeeLight);
   }
 
