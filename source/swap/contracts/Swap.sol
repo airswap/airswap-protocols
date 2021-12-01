@@ -677,6 +677,29 @@ contract Swap is ISwap, Ownable {
   }
 
   /**
+   * @notice Calculates and refers fee amount
+   * @param wallet address
+   * @param amount uint256
+   */
+  function calculateProtocolFee(address wallet, uint256 amount)
+    public
+    view
+    override
+    returns (uint256)
+  {
+    // Transfer fee from signer to feeWallet
+    uint256 feeAmount = amount.mul(protocolFee).div(FEE_DIVISOR);
+    if (feeAmount > 0) {
+      uint256 discountAmount = calculateDiscount(
+        IERC20(stakingToken).balanceOf(wallet),
+        feeAmount
+      );
+      return feeAmount - discountAmount;
+    }
+    return feeAmount;
+  }
+
+  /**
    * @notice Returns true if the nonce has been used
    * @param signer address Address of the signer
    * @param nonce uint256 Nonce being checked

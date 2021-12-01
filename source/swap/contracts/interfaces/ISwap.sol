@@ -122,4 +122,9 @@ interface ISwap {
   function nonceUsed(address, uint256) external view returns (bool);
 
   function authorized(address) external view returns (address);
+
+  function calculateProtocolFee(address, uint256)
+    external
+    view
+    returns (uint256);
 }
