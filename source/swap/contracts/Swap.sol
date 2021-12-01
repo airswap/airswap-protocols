@@ -677,11 +677,11 @@ contract Swap is ISwap, Ownable {
   }
 
   /**
-   * @notice Calculates and transfers protocol fee and rebate
-   * @param sourceWallet address
+   * @notice Calculates and refers fee amount
+   * @param wallet address
    * @param amount uint256
    */
-  function calculateProtocolFee(address sourceWallet, uint256 amount)
+  function calculateProtocolFee(address wallet, uint256 amount)
     public
     view
     override
