@@ -691,7 +691,7 @@ contract Swap is ISwap, Ownable {
     uint256 feeAmount = amount.mul(protocolFee).div(FEE_DIVISOR);
     if (feeAmount > 0) {
       uint256 discountAmount = calculateDiscount(
-        IERC20(stakingToken).balanceOf(sourceWallet),
+        IERC20(stakingToken).balanceOf(wallet),
         feeAmount
       );
       return feeAmount - discountAmount;
