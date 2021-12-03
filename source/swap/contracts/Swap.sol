@@ -231,6 +231,9 @@ contract Swap is ISwap, Ownable {
       s
     );
 
+    // Ensure the signatory is not null
+    require(signatory != address(0), "SIGNATURE_INVALID");
+
     // Ensure the nonce is not yet used and if not mark it used
     require(_markNonceAsUsed(signatory, nonce), "NONCE_ALREADY_USED");
 
@@ -477,7 +480,7 @@ contract Swap is ISwap, Ownable {
   function setProtocolFeeLight(uint256 _protocolFeeLight) external onlyOwner {
     // Ensure the fee is less than divisor
     require(_protocolFeeLight < FEE_DIVISOR, "INVALID_FEE_LIGHT");
-    protocolFee = _protocolFeeLight;
+    protocolFeeLight = _protocolFeeLight;
     emit SetProtocolFeeLight(_protocolFeeLight);
   }
 
@@ -674,6 +677,29 @@ contract Swap is ISwap, Ownable {
   {
     uint256 divisor = (uint256(10)**rebateScale).add(stakingBalance);
     return rebateMax.mul(stakingBalance).mul(feeAmount).div(divisor).div(100);
+  }
+
+  /**
+   * @notice Calculates and refers fee amount
+   * @param wallet address
+   * @param amount uint256
+   */
+  function calculateProtocolFee(address wallet, uint256 amount)
+    public
+    view
+    override
+    returns (uint256)
+  {
+    // Transfer fee from signer to feeWallet
+    uint256 feeAmount = amount.mul(protocolFee).div(FEE_DIVISOR);
+    if (feeAmount > 0) {
+      uint256 discountAmount = calculateDiscount(
+        IERC20(stakingToken).balanceOf(wallet),
+        feeAmount
+      );
+      return feeAmount - discountAmount;
+    }
+    return feeAmount;
   }
 
   /**

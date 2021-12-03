@@ -8,6 +8,7 @@ const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
 
 const ERC20 = require('@openzeppelin/contracts/build/contracts/ERC20PresetMinterPauser.json')
+const ERC721 = require('@openzeppelin/contracts/build/contracts/ERC721PresetMinterPauserAutoId.json')
 const WETH9 = require('@uniswap/v2-periphery/build/WETH9.json')
 const LIGHT = require('@airswap/swap/build/contracts/Swap.sol/Swap.json')
 const { MAX_APPROVAL_AMOUNT } = require('../../../tools/constants')
@@ -20,6 +21,8 @@ describe('Wrapper Integration Tests', () => {
   let wethToken
   let signerToken
   let senderToken
+  let signerNFT
+  let senderNFT
   let stakingToken
 
   let deployer
@@ -75,6 +78,18 @@ describe('Wrapper Integration Tests', () => {
     await senderToken.deployed()
     senderToken.mint(sender.address, DEFAULT_BALANCE)
 
+    signerNFT = await (
+      await ethers.getContractFactory(ERC721.abi, ERC721.bytecode)
+    ).deploy('C', 'C', 'C')
+    await signerNFT.deployed()
+    signerNFT.mint(signer.address)
+
+    senderNFT = await (
+      await ethers.getContractFactory(ERC721.abi, ERC721.bytecode)
+    ).deploy('D', 'D', 'D')
+    await senderNFT.deployed()
+    senderNFT.mint(sender.address)
+
     wethToken = await (
       await ethers.getContractFactory(WETH9.abi, WETH9.bytecode)
     ).deploy()
@@ -101,6 +116,7 @@ describe('Wrapper Integration Tests', () => {
     wethToken.connect(signer).approve(swap.address, DEFAULT_BALANCE)
     signerToken.connect(signer).approve(swap.address, DEFAULT_BALANCE)
     senderToken.connect(sender).approve(swap.address, DEFAULT_BALANCE)
+    signerNFT.connect(signer).setApprovalForAll(swap.address, true)
 
     wrapper = await (
       await ethers.getContractFactory('Wrapper')
@@ -110,6 +126,8 @@ describe('Wrapper Integration Tests', () => {
     await senderToken
       .connect(sender)
       .approve(wrapper.address, MAX_APPROVAL_AMOUNT)
+
+    await senderNFT.connect(sender).setApprovalForAll(wrapper.address, true)
   })
 
   describe('Test wraps', async () => {
@@ -175,6 +193,68 @@ describe('Wrapper Integration Tests', () => {
       await expect(wrapper.connect(sender).swap(...order))
         .to.emit(swap, 'Swap')
         .to.emit(wrapper, 'WrappedSwapFor')
+    })
+  })
+  describe('Test NFT wrapped swaps', async () => {
+    it('test wrapped buyNFT succeeds', async () => {
+      const feeNum = await swap.calculateProtocolFee(
+        sender.address,
+        DEFAULT_AMOUNT
+      )
+      const order = await createSignedOrder(
+        {
+          signerToken: signerNFT.address,
+          signerAmount: '0',
+          senderToken: wethToken.address,
+          senderWallet: wrapper.address,
+        },
+        signer
+      )
+      const totalValue = (
+        parseFloat(DEFAULT_AMOUNT) + parseFloat(PROTOCOL_FEE)
+      ).toString()
+      await wrapper.connect(sender).buyNFT(...order, { value: totalValue })
+    })
+
+    it('test wrapped buyNFT fails without value', async () => {
+      const order = await createSignedOrder(
+        {
+          signerToken: signerNFT.address,
+          signerAmount: '0',
+          senderToken: wethToken.address,
+          senderWallet: wrapper.address,
+        },
+        signer
+      )
+      await expect(wrapper.connect(sender).buyNFT(...order)).to.be.revertedWith(
+        'VALUE_MUST_BE_SENT'
+      )
+    })
+
+    it('test wrapped sellNFT succeeds', async () => {
+      const order = await createSignedOrder(
+        {
+          senderWallet: wrapper.address,
+          senderToken: senderNFT.address,
+          senderAmount: '0',
+        },
+        signer
+      )
+      await wrapper.connect(sender).sellNFT(...order)
+    })
+
+    it('test wrapped sellNFT fails with value', async () => {
+      const order = await createSignedOrder(
+        {
+          senderWallet: wrapper.address,
+          senderToken: senderNFT.address,
+          senderAmount: '0',
+        },
+        signer
+      )
+      await expect(
+        wrapper.connect(sender).sellNFT(...order, { value: DEFAULT_AMOUNT })
+      ).to.be.revertedWith('VALUE_MUST_BE_ZERO')
     })
   })
 })

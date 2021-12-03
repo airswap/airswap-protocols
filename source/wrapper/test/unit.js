@@ -8,6 +8,7 @@ const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
 
 const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
+const IERC721 = require('@openzeppelin/contracts/build/contracts/IERC721.json')
 const IWETH = require('../build/contracts/interfaces/IWETH.sol/IWETH.json')
 const LIGHT = require('@airswap/swap/build/contracts/Swap.sol/Swap.json')
 
@@ -59,7 +60,8 @@ describe('Wrapper Unit Tests', () => {
   })
 
   before('get signers and deploy', async () => {
-    ;[deployer, sender, signer, protocolFeeWallet] = await ethers.getSigners()
+    ;[deployer, sender, signer, protocolFeeWallet, newSwap] =
+      await ethers.getSigners()
 
     signerToken = await deployMockContract(deployer, IERC20.abi)
     senderToken = await deployMockContract(deployer, IERC20.abi)
@@ -105,10 +107,10 @@ describe('Wrapper Unit Tests', () => {
       ).to.be.revertedWith('owner')
     })
     it('test changing swap contract', async () => {
-      await wrapper.connect(deployer).setSwapContract(swap.address)
+      await wrapper.connect(deployer).setSwapContract(newSwap.address)
 
       const storedSwapContract = await wrapper.swapContract()
-      await expect(await storedSwapContract).to.equal(swap.address)
+      expect(await storedSwapContract).to.equal(newSwap.address)
     })
   })
 
@@ -161,6 +163,69 @@ describe('Wrapper Unit Tests', () => {
           value: 1,
         })
       ).to.be.revertedWith('DO_NOT_SEND_ETHER')
+    })
+  })
+  describe('Test NFT wrapped swaps', async () => {
+    before(async () => {
+      signerNFT = await deployMockContract(deployer, IERC721.abi)
+      senderNFT = await deployMockContract(deployer, IERC721.abi)
+      await signerNFT.mock.transferFrom.returns()
+      await signerNFT.mock.setApprovalForAll.returns()
+      await senderNFT.mock.transferFrom.returns()
+      await senderNFT.mock.setApprovalForAll.returns()
+    })
+    it('test wrapped buyNFT', async () => {
+      const order = await createSignedOrder(
+        {
+          signerToken: signerNFT.address,
+          signerAmount: '123',
+          senderToken: wethToken.address,
+          senderWallet: wrapper.address,
+        },
+        signer
+      )
+      const totalValue = (
+        parseFloat(DEFAULT_AMOUNT) + parseFloat(PROTOCOL_FEE)
+      ).toString()
+      await wrapper.connect(sender).buyNFT(...order, { value: totalValue })
+    })
+    it('test wrapped buyNFT fails without value', async () => {
+      const order = await createSignedOrder(
+        {
+          signerToken: signerNFT.address,
+          signerAmount: '123',
+          senderToken: wethToken.address,
+          senderWallet: wrapper.address,
+        },
+        signer
+      )
+      await expect(wrapper.connect(sender).buyNFT(...order)).to.be.revertedWith(
+        'VALUE_MUST_BE_SENT'
+      )
+    })
+    it('test wrapped sellNFT', async () => {
+      const order = await createSignedOrder(
+        {
+          senderWallet: wrapper.address,
+          senderToken: senderNFT.address,
+          senderAmount: '123',
+        },
+        signer
+      )
+      await wrapper.connect(sender).sellNFT(...order)
+    })
+    it('test wrapped sellNFT fails with value', async () => {
+      const order = await createSignedOrder(
+        {
+          senderWallet: wrapper.address,
+          senderToken: senderNFT.address,
+          senderAmount: '123',
+        },
+        signer
+      )
+      await expect(
+        wrapper.connect(sender).sellNFT(...order, { value: DEFAULT_AMOUNT })
+      ).to.be.revertedWith('VALUE_MUST_BE_ZERO')
     })
   })
 })
