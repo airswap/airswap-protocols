@@ -1,19 +1,169 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+import * as ethUtil from 'ethereumjs-util'
+import * as sigUtil from 'eth-sig-util'
 import { ethers } from 'ethers'
 import * as url from 'url'
 import BigNumber from 'bignumber.js'
+import {
+  SECONDS_IN_DAY,
+  ADDRESS_ZERO,
+  DOMAIN_VERSION,
+  DOMAIN_NAME,
+  etherscanDomains,
+} from '@airswap/constants'
+import {
+  UnsignedOrder,
+  Order,
+  Signature,
+  Levels,
+  Formula,
+  EIP712,
+} from '@airswap/typescript'
 
-import { etherscanDomains } from '@airswap/constants'
-import { Quote, Order } from '@airswap/types'
+// eslint-disable-next-line  @typescript-eslint/explicit-module-boundary-types
+export function createOrder({
+  expiry = Math.round(Date.now() / 1000 + SECONDS_IN_DAY).toString(),
+  nonce = Date.now().toString(),
+  signerWallet = ADDRESS_ZERO,
+  signerToken = ADDRESS_ZERO,
+  signerAmount = '0',
+  protocolFee = '0',
+  senderWallet = ADDRESS_ZERO,
+  senderToken = ADDRESS_ZERO,
+  senderAmount = '0',
+}: any): UnsignedOrder {
+  return {
+    expiry: String(expiry),
+    nonce: String(nonce),
+    signerWallet,
+    signerToken,
+    signerAmount: String(signerAmount),
+    protocolFee: String(protocolFee),
+    senderWallet,
+    senderToken,
+    senderAmount: String(senderAmount),
+  }
+}
 
-export * from './src/hashes'
-export * from './src/orders'
-export * from './src/quotes'
+export async function createSignature(
+  unsignedOrder: UnsignedOrder,
+  signer: ethers.VoidSigner | string,
+  swapContract: string,
+  chainId: number
+): Promise<Signature> {
+  let sig
+  if (typeof signer === 'string') {
+    sig = sigUtil.signTypedData_v4(ethUtil.toBuffer(signer), {
+      data: {
+        types: EIP712,
+        domain: {
+          name: DOMAIN_NAME,
+          version: DOMAIN_VERSION,
+          chainId,
+          verifyingContract: swapContract,
+        },
+        primaryType: 'Order',
+        message: unsignedOrder,
+      },
+    })
+  } else {
+    sig = await signer._signTypedData(
+      {
+        name: DOMAIN_NAME,
+        version: DOMAIN_VERSION,
+        chainId,
+        verifyingContract: swapContract,
+      },
+      { Order: EIP712.Order },
+      unsignedOrder
+    )
+  }
+  const { r, s, v } = ethers.utils.splitSignature(sig)
+  return { r, s, v: String(v) }
+}
 
-export function calculateCostFromLevels(
-  amount: string,
-  levels: Array<Array<string>>
-) {
+export function getSignerFromSignature(
+  order: UnsignedOrder,
+  swapContract: string,
+  chainId: number,
+  v: string,
+  r: string,
+  s: string
+): string {
+  const sig = `${r}${s.slice(2)}${ethers.BigNumber.from(v)
+    .toHexString()
+    .slice(2)}`
+  return sigUtil.recoverTypedSignature_v4({
+    data: {
+      types: EIP712,
+      domain: {
+        name: DOMAIN_NAME,
+        version: DOMAIN_VERSION,
+        chainId,
+        verifyingContract: swapContract,
+      },
+      primaryType: 'Order',
+      message: order,
+    },
+    sig,
+  })
+}
+
+export function isValidOrder(order: Order): boolean {
+  return (
+    order &&
+    'nonce' in order &&
+    'expiry' in order &&
+    'signerWallet' in order &&
+    'signerToken' in order &&
+    'signerAmount' in order &&
+    'senderToken' in order &&
+    'senderAmount' in order &&
+    'r' in order &&
+    's' in order &&
+    'v' in order
+  )
+}
+
+export function orderToParams(order: Order): Array<string> {
+  return [
+    order.nonce,
+    order.expiry,
+    order.signerWallet,
+    order.signerToken,
+    order.signerAmount,
+    order.senderToken,
+    order.senderAmount,
+    order.v,
+    order.r,
+    order.s,
+  ]
+}
+
+export function orderPropsToStrings(obj: any): Order {
+  return {
+    nonce: String(obj.nonce),
+    expiry: String(obj.expiry),
+    signerWallet: String(obj.signerWallet),
+    signerToken: String(obj.signerToken),
+    signerAmount: String(obj.signerAmount),
+    senderToken: String(obj.senderToken),
+    senderAmount: String(obj.senderAmount),
+    v: String(obj.v),
+    r: String(obj.r),
+    s: String(obj.s),
+  }
+}
+
+export function calculateCost(amount: string, pricing: Formula | Levels) {
+  // TODO: Formula support
+  if (typeof pricing !== 'string') {
+    return calculateCostFromLevels(amount, pricing)
+  }
+  return null
+}
+
+export function calculateCostFromLevels(amount: string, levels: Levels) {
   const totalAmount = new BigNumber(amount)
   const totalAvailable = new BigNumber(levels[levels.length - 1][0])
   let totalCost = new BigNumber(0)
@@ -42,7 +192,7 @@ export function calculateCostFromLevels(
   return totalCost.decimalPlaces(6).toFixed()
 }
 
-function getLowest(objects: Array<Quote> | Array<Order>, key: string): any {
+function getLowest(objects: Array<Order>, key: string): any {
   let best: any
   let bestAmount
   let amount
@@ -63,7 +213,7 @@ function getLowest(objects: Array<Quote> | Array<Order>, key: string): any {
   return best
 }
 
-function getHighest(objects: Array<Quote> | Array<Order>, key: string): any {
+function getHighest(objects: Array<Order>, key: string): any {
   let best: any
   let bestAmount
   let amount
@@ -84,27 +234,19 @@ function getHighest(objects: Array<Quote> | Array<Order>, key: string): any {
   return best
 }
 
-export function getBestByLowestSenderAmount(
-  objects: Array<Quote> | Array<Order>
-): any {
+export function getBestByLowestSenderAmount(objects: Array<Order>): any {
   return getLowest(objects, 'sender')
 }
 
-export function getBestByLowestSignerAmount(
-  objects: Array<Quote> | Array<Order>
-): any {
+export function getBestByLowestSignerAmount(objects: Array<Order>): any {
   return getLowest(objects, 'signer')
 }
 
-export function getBestByHighestSignerAmount(
-  objects: Array<Quote> | Array<Order>
-): any {
+export function getBestByHighestSignerAmount(objects: Array<Order>): any {
   return getHighest(objects, 'signer')
 }
 
-export function getBestByHighestSenderAmount(
-  objects: Array<Quote> | Array<Order>
-): any {
+export function getBestByHighestSenderAmount(objects: Array<Order>): any {
   return getHighest(objects, 'sender')
 }
 
@@ -126,6 +268,11 @@ export function getTimestamp(): string {
   return Math.round(Date.now() / 1000).toString()
 }
 
+export function numberToBytes32(number: number): string {
+  const hexString = number.toString(16)
+  return `0x${hexString.padStart(64, '0')}`
+}
+
 export function parseUrl(locator: string): url.UrlWithStringQuery {
   if (!/(http|ws)s?:\/\//.test(locator)) {
     locator = `https://${locator}`
@@ -135,27 +282,6 @@ export function parseUrl(locator: string): url.UrlWithStringQuery {
 
 export function getEtherscanURL(chainId: number, hash: string): string {
   return `https://${etherscanDomains[chainId]}/tx/${hash}`
-}
-
-export function flattenObject(
-  obj: any,
-  propName = '',
-  result = {}
-): { [id: string]: string } {
-  if (Object(obj) !== obj) {
-    result[propName] = obj
-  } else {
-    for (const prop in obj) {
-      flattenObject(
-        obj[prop],
-        propName
-          ? propName + prop.charAt(0).toUpperCase() + prop.slice(1)
-          : prop,
-        result
-      )
-    }
-  }
-  return result
 }
 
 export function lowerCaseAddresses(obj: any): any {

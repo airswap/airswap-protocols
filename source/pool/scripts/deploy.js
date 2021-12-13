@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 const { ethers, run } = require('hardhat')
-const { chainNames } = require('@airswap/constants')
+const stakingDeploys = require('@airswap/staking/deploys.js')
+const { chainNames, stakingTokenAddresses } = require('@airswap/constants')
 
 async function main() {
   await run('compile')
@@ -10,10 +11,17 @@ async function main() {
   const chainId = await deployer.getChainId()
   const scale = 10
   const max = 100
+  const stakingContract = stakingDeploys[chainId]
+  const stakingToken = stakingTokenAddresses[chainId]
 
   console.log(`Deploying on ${chainNames[chainId].toUpperCase()}`)
   const poolFactory = await ethers.getContractFactory('Pool')
-  const poolContract = await poolFactory.deploy(scale, max)
+  const poolContract = await poolFactory.deploy(
+    scale,
+    max,
+    stakingContract,
+    stakingToken
+  )
   await poolContract.deployed()
   console.log(`New Registry: ${poolContract.address}`)
 
@@ -23,7 +31,7 @@ async function main() {
   console.log('Verifying...')
   await run('verify:verify', {
     address: poolContract.address,
-    constructorArguments: [scale, max],
+    constructorArguments: [scale, max, stakingContract, stakingToken],
   })
 }
 

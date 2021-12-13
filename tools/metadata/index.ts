@@ -40,16 +40,30 @@ export async function fetchTokens(
 
 export async function scrapeToken(
   address: string,
-  provider: ethers.providers.BaseProvider
+  ethersProvider: ethers.providers.BaseProvider | string
 ): Promise<TokenInfo> {
-  const [tokenSymbol, tokenName, tokenDecimals] = await Promise.all([
-    getTokenSymbol(address, provider),
-    getTokenName(address, provider),
-    getTokenDecimals(address, provider),
-  ])
+  let chainId
+  let tokenSymbol
+  let tokenName
+  let tokenDecimals
+  if (typeof ethersProvider === 'string') {
+    const provider = new ethers.providers.JsonRpcProvider(ethersProvider)
+    ;[tokenSymbol, tokenName, tokenDecimals] = await Promise.all([
+      getTokenSymbol(address, provider),
+      getTokenName(address, provider),
+      getTokenDecimals(address, provider),
+    ])
+    chainId = provider.network.chainId
+  } else {
+    ;[tokenSymbol, tokenName, tokenDecimals] = await Promise.all([
+      getTokenSymbol(address, ethersProvider),
+      getTokenName(address, ethersProvider),
+      getTokenDecimals(address, ethersProvider),
+    ])
+  }
 
   return {
-    chainId: provider.network.chainId,
+    chainId,
     address: address.toLowerCase(),
     name: tokenName,
     symbol: tokenSymbol,

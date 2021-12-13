@@ -1,6 +1,6 @@
 import { ethers } from 'ethers'
 import { chainIds, chainNames, wethAddresses } from '@airswap/constants'
-import { LightOrder } from '@airswap/types'
+import { Order } from '@airswap/typescript'
 
 import * as WrapperContract from '@airswap/wrapper/build/contracts/Wrapper.sol/Wrapper.json'
 import * as wrapperDeploys from '@airswap/wrapper/deploys.js'
@@ -33,10 +33,7 @@ export class Wrapper {
     throw new Error(`Wrapper deploy not found for chainId ${chainId}`)
   }
 
-  public async swap(
-    order: LightOrder,
-    signer?: ethers.Signer
-  ): Promise<string> {
+  public async swap(order: Order, signer?: ethers.Signer): Promise<string> {
     let contract = this.contract
     if (!this.contract.signer) {
       if (signer === undefined) {

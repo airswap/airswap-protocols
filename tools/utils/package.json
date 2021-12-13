@@ -1,7 +1,7 @@
 {
   "name": "@airswap/utils",
-  "version": "0.4.10",
-  "description": "Utilities for AirSwap Development",
+  "version": "1.0.0",
+  "description": "Utilities for AirSwap Developers",
   "contributors": [
     "Don Mosites"
   ],
@@ -22,11 +22,11 @@
     "clean": "rm -rf ./build",
     "compile": "yarn clean && tsc -b",
     "test": "yarn test:unit",
-    "test:unit": "yarn compile && mocha -r ts-node/register test/**/*.ts"
+    "test:unit": "yarn compile && mocha -r ts-node/register test/utils.ts"
   },
   "dependencies": {
-    "@airswap/constants": "0.4.3",
-    "@airswap/types": "3.6.2",
+    "@airswap/constants": "1.0.0",
+    "@airswap/typescript": "1.0.1",
     "@types/ethereumjs-util": "^6.1.0",
     "bignumber.js": "^9.0.1",
     "eth-sig-util": "^3.0.0",
@@ -35,10 +35,10 @@
   },
   "devDependencies": {
     "@types/mocha": "^9.0.0",
-    "chai": "^4.2.0",
-    "mocha": "^7.0.1",
-    "ts-node": "^8.6.2",
-    "typescript": "^3.8.2"
+    "chai": "^4.3.4",
+    "mocha": "^9.1.3",
+    "ts-node": "^10.4.0",
+    "typescript": "^4.5.2"
   },
   "publishConfig": {
     "access": "public"

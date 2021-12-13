@@ -7,12 +7,13 @@ const {
 const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
 
-const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
-const IERC721 = require('@openzeppelin/contracts/build/contracts/IERC721.json')
-const IWETH = require('../build/contracts/interfaces/IWETH.sol/IWETH.json')
+const ERC20 = require('@openzeppelin/contracts/build/contracts/ERC20PresetMinterPauser.json')
+const ERC721 = require('@openzeppelin/contracts/build/contracts/ERC721PresetMinterPauserAutoId.json')
+const WETH9 = require('@uniswap/v2-periphery/build/WETH9.json')
 const LIGHT = require('@airswap/swap/build/contracts/Swap.sol/Swap.json')
+const { MAX_APPROVAL_AMOUNT } = require('../../../tools/constants')
 
-describe('Wrapper Unit Tests', () => {
+describe('Wrapper Integration Tests', () => {
   let snapshotId
   let swap
   let wrapper
@@ -20,6 +21,8 @@ describe('Wrapper Unit Tests', () => {
   let wethToken
   let signerToken
   let senderToken
+  let signerNFT
+  let senderNFT
   let stakingToken
 
   let deployer
@@ -31,6 +34,7 @@ describe('Wrapper Unit Tests', () => {
   const PROTOCOL_FEE = '30'
   const PROTOCOL_FEE_LIGHT = '7'
   const DEFAULT_AMOUNT = '10000'
+  const DEFAULT_BALANCE = '100000'
   const REBATE_SCALE = '10'
   const REBATE_MAX = '100'
 
@@ -60,27 +64,40 @@ describe('Wrapper Unit Tests', () => {
   })
 
   before('get signers and deploy', async () => {
-    ;[deployer, sender, signer, protocolFeeWallet, newSwap] =
-      await ethers.getSigners()
+    ;[deployer, sender, signer, protocolFeeWallet] = await ethers.getSigners()
 
-    signerToken = await deployMockContract(deployer, IERC20.abi)
-    senderToken = await deployMockContract(deployer, IERC20.abi)
-    stakingToken = await deployMockContract(deployer, IERC20.abi)
+    signerToken = await (
+      await ethers.getContractFactory(ERC20.abi, ERC20.bytecode)
+    ).deploy('A', 'A')
+    await signerToken.deployed()
+    signerToken.mint(signer.address, DEFAULT_BALANCE)
 
-    await senderToken.mock.approve.returns(true)
-    await senderToken.mock.allowance.returns('0')
-    await senderToken.mock.transferFrom.returns(true)
+    senderToken = await (
+      await ethers.getContractFactory(ERC20.abi, ERC20.bytecode)
+    ).deploy('B', 'B')
+    await senderToken.deployed()
+    senderToken.mint(sender.address, DEFAULT_BALANCE)
 
-    await signerToken.mock.transferFrom.returns(true)
-    await signerToken.mock.transfer.returns(true)
+    signerNFT = await (
+      await ethers.getContractFactory(ERC721.abi, ERC721.bytecode)
+    ).deploy('C', 'C', 'C')
+    await signerNFT.deployed()
+    signerNFT.mint(signer.address)
 
-    await stakingToken.mock.balanceOf.returns('0')
+    senderNFT = await (
+      await ethers.getContractFactory(ERC721.abi, ERC721.bytecode)
+    ).deploy('D', 'D', 'D')
+    await senderNFT.deployed()
+    senderNFT.mint(sender.address)
 
-    wethToken = await deployMockContract(deployer, IWETH.abi)
-    await wethToken.mock.approve.returns(true)
-    await wethToken.mock.deposit.returns()
-    await wethToken.mock.withdraw.returns()
-    await wethToken.mock.transferFrom.returns(true)
+    wethToken = await (
+      await ethers.getContractFactory(WETH9.abi, WETH9.bytecode)
+    ).deploy()
+    await wethToken.deployed()
+    await wethToken.connect(signer).deposit({ value: DEFAULT_BALANCE })
+
+    stakingToken = await deployMockContract(deployer, ERC20.abi)
+    await stakingToken.mock.balanceOf.returns(0)
 
     swap = await (
       await ethers.getContractFactory(LIGHT.abi, LIGHT.bytecode)
@@ -94,42 +111,44 @@ describe('Wrapper Unit Tests', () => {
     )
     await swap.deployed()
 
+    await wethToken.connect(signer).approve(swap.address, DEFAULT_AMOUNT)
+
+    wethToken.connect(signer).approve(swap.address, DEFAULT_BALANCE)
+    signerToken.connect(signer).approve(swap.address, DEFAULT_BALANCE)
+    senderToken.connect(sender).approve(swap.address, DEFAULT_BALANCE)
+    signerNFT.connect(signer).setApprovalForAll(swap.address, true)
+
     wrapper = await (
       await ethers.getContractFactory('Wrapper')
     ).deploy(swap.address, wethToken.address)
     await wrapper.deployed()
-  })
 
-  describe('Test swap config', async () => {
-    it('test changing swap contract by non-owner', async () => {
-      await expect(
-        wrapper.connect(sender).setSwapContract(swap.address)
-      ).to.be.revertedWith('owner')
-    })
-    it('test changing swap contract', async () => {
-      await wrapper.connect(deployer).setSwapContract(newSwap.address)
+    await senderToken
+      .connect(sender)
+      .approve(wrapper.address, MAX_APPROVAL_AMOUNT)
 
-      const storedSwapContract = await wrapper.swapContract()
-      expect(await storedSwapContract).to.equal(newSwap.address)
-    })
+    await senderNFT.connect(sender).setApprovalForAll(wrapper.address, true)
   })
 
   describe('Test wraps', async () => {
-    it('test swap fails with value', async () => {
+    it('test swap with approval succeeds', async () => {
       const order = await createSignedOrder(
         {
           senderWallet: wrapper.address,
         },
         signer
       )
-      await expect(
-        wrapper.connect(sender).swap(...order, { value: DEFAULT_AMOUNT })
-      ).to.be.revertedWith('VALUE_MUST_BE_ZERO')
+
+      await expect(wrapper.connect(sender).swap(...order))
+        .to.emit(swap, 'Swap')
+        .to.emit(wrapper, 'WrappedSwapFor')
     })
-    it('test wrapped swap fails without value', async () => {
+
+    it('test that value is required', async () => {
       const order = await createSignedOrder(
         {
           senderToken: wethToken.address,
+          senderWallet: wrapper.address,
         },
         signer
       )
@@ -137,16 +156,8 @@ describe('Wrapper Unit Tests', () => {
         'VALUE_MUST_BE_SENT'
       )
     })
-    it('test swap', async () => {
-      const order = await createSignedOrder(
-        {
-          senderWallet: wrapper.address,
-        },
-        signer
-      )
-      await wrapper.connect(sender).swap(...order)
-    })
-    it('test wrapped swap', async () => {
+
+    it('test wrapped swap succeeds', async () => {
       const order = await createSignedOrder(
         {
           senderToken: wethToken.address,
@@ -154,31 +165,46 @@ describe('Wrapper Unit Tests', () => {
         },
         signer
       )
-      await wrapper.connect(sender).swap(...order, { value: DEFAULT_AMOUNT })
-    })
-    it('Test fallback function revert', async () => {
       await expect(
-        deployer.sendTransaction({
-          to: wrapper.address,
-          value: 1,
-        })
-      ).to.be.revertedWith('DO_NOT_SEND_ETHER')
+        wrapper.connect(sender).swap(...order, { value: DEFAULT_AMOUNT })
+      )
+        .to.emit(swap, 'Swap')
+        .to.emit(wrapper, 'WrappedSwapFor')
+    })
+
+    it('test that token swaps have no value', async () => {
+      const order = await createSignedOrder({}, signer)
+      await senderToken.connect(sender).approve(wrapper.address, 10000)
+      await expect(
+        wrapper.connect(sender).swap(...order, { value: DEFAULT_AMOUNT })
+      ).to.be.revertedWith('VALUE_MUST_BE_ZERO')
+    })
+
+    it('test that unwrap works', async () => {
+      const order = await createSignedOrder(
+        {
+          signerToken: wethToken.address,
+          senderWallet: wrapper.address,
+          senderAmount: DEFAULT_AMOUNT,
+        },
+        signer
+      )
+
+      await expect(wrapper.connect(sender).swap(...order))
+        .to.emit(swap, 'Swap')
+        .to.emit(wrapper, 'WrappedSwapFor')
     })
   })
   describe('Test NFT wrapped swaps', async () => {
-    before(async () => {
-      signerNFT = await deployMockContract(deployer, IERC721.abi)
-      senderNFT = await deployMockContract(deployer, IERC721.abi)
-      await signerNFT.mock.transferFrom.returns()
-      await signerNFT.mock.setApprovalForAll.returns()
-      await senderNFT.mock.transferFrom.returns()
-      await senderNFT.mock.setApprovalForAll.returns()
-    })
-    it('test wrapped buyNFT', async () => {
+    it('test wrapped buyNFT succeeds', async () => {
+      const feeNum = await swap.calculateProtocolFee(
+        sender.address,
+        DEFAULT_AMOUNT
+      )
       const order = await createSignedOrder(
         {
           signerToken: signerNFT.address,
-          signerAmount: '123',
+          signerAmount: '0',
           senderToken: wethToken.address,
           senderWallet: wrapper.address,
         },
@@ -189,11 +215,12 @@ describe('Wrapper Unit Tests', () => {
       ).toString()
       await wrapper.connect(sender).buyNFT(...order, { value: totalValue })
     })
+
     it('test wrapped buyNFT fails without value', async () => {
       const order = await createSignedOrder(
         {
           signerToken: signerNFT.address,
-          signerAmount: '123',
+          signerAmount: '0',
           senderToken: wethToken.address,
           senderWallet: wrapper.address,
         },
@@ -203,23 +230,25 @@ describe('Wrapper Unit Tests', () => {
         'VALUE_MUST_BE_SENT'
       )
     })
-    it('test wrapped sellNFT', async () => {
+
+    it('test wrapped sellNFT succeeds', async () => {
       const order = await createSignedOrder(
         {
           senderWallet: wrapper.address,
           senderToken: senderNFT.address,
-          senderAmount: '123',
+          senderAmount: '0',
         },
         signer
       )
       await wrapper.connect(sender).sellNFT(...order)
     })
+
     it('test wrapped sellNFT fails with value', async () => {
       const order = await createSignedOrder(
         {
           senderWallet: wrapper.address,
           senderToken: senderNFT.address,
-          senderAmount: '123',
+          senderAmount: '0',
         },
         signer
       )

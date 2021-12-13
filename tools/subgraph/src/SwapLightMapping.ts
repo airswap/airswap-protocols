@@ -45,7 +45,7 @@ export function handleSwap(event: SwapEvent): void {
   completedSwap.signer = signer.id
   completedSwap.signerAmount = event.params.signerAmount
   completedSwap.signerToken = signerToken.id
-  completedSwap.signerFee = event.params.signerFee
+  completedSwap.protocolFee = event.params.protocolFee
 
   completedSwap.sender = sender.id
   completedSwap.senderAmount = event.params.senderAmount

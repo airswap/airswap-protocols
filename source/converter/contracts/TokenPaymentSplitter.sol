@@ -26,8 +26,6 @@ abstract contract TokenPaymentSplitter is Context {
 
   event PayeeAdded(address account, uint256 shares);
   event PayeeRemoved(address account);
-  event PaymentReleased(address to, uint256 amount);
-  event PaymentReceived(address from, uint256 amount);
 
   /**
    * @dev Creates an instance of `TokenPaymentSplitter` where each account in `payees` is assigned the number
@@ -39,9 +37,9 @@ abstract contract TokenPaymentSplitter is Context {
   constructor(address[] memory payees, uint256[] memory shares_) payable {
     require(
       payees.length == shares_.length,
-      "PaymentSplitter: payees and shares length mismatch"
+      "TokenPaymentSplitter: payees and shares length mismatch"
     );
-    require(payees.length > 0, "PaymentSplitter: no payees");
+    require(payees.length > 0, "TokenPaymentSplitter: no payees");
 
     for (uint256 i = 0; i < payees.length; i++) {
       _addPayee(payees[i], shares_[i]);
@@ -66,7 +64,7 @@ abstract contract TokenPaymentSplitter is Context {
    * @dev Getter for the address of the payee number `index`.
    */
   function payee(uint256 index) public view returns (address) {
-    require(_payees.length >= 1, "PaymentSplitter: There are no payees");
+    require(_payees.length >= 1, "TokenPaymentSplitter: There are no payees");
     return _payees[index];
   }
 
@@ -78,12 +76,12 @@ abstract contract TokenPaymentSplitter is Context {
   function _addPayee(address account, uint256 shares_) internal {
     require(
       account != address(0),
-      "PaymentSplitter: account is the zero address"
+      "TokenPaymentSplitter: account is the zero address"
     );
-    require(shares_ > 0, "PaymentSplitter: shares are 0");
+    require(shares_ > 0, "TokenPaymentSplitter: shares are 0");
     require(
       _shares[account] == 0,
-      "PaymentSplitter: account already has shares"
+      "TokenPaymentSplitter: account already has shares"
     );
 
     _payees.push(account);
@@ -100,11 +98,11 @@ abstract contract TokenPaymentSplitter is Context {
   function _removePayee(address account, uint256 index) internal {
     require(
       index < _payees.length,
-      "PaymentSplitter: index not in payee array"
+      "TokenPaymentSplitter: index not in payee array"
     );
     require(
       account == _payees[index],
-      "PaymentSplitter: account does not match payee array index"
+      "TokenPaymentSplitter: account does not match payee array index"
     );
 
     _totalShares = _totalShares - _shares[account];

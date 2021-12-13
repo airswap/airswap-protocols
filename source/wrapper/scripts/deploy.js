@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 const { ethers, run } = require('hardhat')
-const lightDeploys = require('@airswap/light/deploys.js')
+const swapDeploys = require('@airswap/swap/deploys.js')
 const { chainNames, wethAddresses } = require('@airswap/constants')
 
 async function main() {
@@ -9,13 +9,16 @@ async function main() {
   console.log(`Deployer: ${deployer.address}`)
 
   const chainId = await deployer.getChainId()
-  const lightAddress = lightDeploys[chainId]
+  const swapAddress = swapDeploys[chainId]
   const wethAddress = wethAddresses[chainId]
 
   // Wrapper Deploy
   console.log(`Deploying on ${chainNames[chainId].toUpperCase()}`)
+  console.log(`Swap: ${swapAddress}`)
+  console.log(`WETH: ${wethAddress}`)
+
   const wrapperFactory = await ethers.getContractFactory('Wrapper')
-  const wrapperContract = await wrapperFactory.deploy(lightAddress, wethAddress)
+  const wrapperContract = await wrapperFactory.deploy(swapAddress, wethAddress)
   await wrapperContract.deployed()
   console.log(`New Wrapper: ${wrapperContract.address}`)
 
@@ -25,7 +28,7 @@ async function main() {
   console.log('Verifying...')
   await run('verify:verify', {
     address: wrapperContract.address,
-    constructorArguments: [lightAddress, wethAddress],
+    constructorArguments: [swapAddress, wethAddress],
   })
 }
 

@@ -1,15 +1,15 @@
-import { ethers } from 'ethers'
-import { BigNumber } from 'ethers'
+import { ethers, BigNumber } from 'ethers'
 import { chainIds, chainNames } from '@airswap/constants'
-import { LightOrder } from '@airswap/types'
-import * as ValidatorContract from '@airswap/validator/build/contracts/Validator.sol/Validator.json'
-import * as ValidatorDeploys from '@airswap/validator/deploys.js'
+import { Order } from '@airswap/typescript'
+import { orderToParams } from '@airswap/utils'
 
-const ValidatorInterface = new ethers.utils.Interface(
-  JSON.stringify(ValidatorContract.abi)
+import * as SwapContract from '@airswap/swap/build/contracts/Swap.sol/Swap.json'
+import * as swapDeploys from '@airswap/swap/deploys.js'
+const SwapInterface = new ethers.utils.Interface(
+  JSON.stringify(SwapContract.abi)
 )
 
-export class Validator {
+export class Swap {
   public chainId: number
   private contract: ethers.Contract
 
@@ -19,22 +19,22 @@ export class Validator {
   ) {
     this.chainId = chainId
     this.contract = new ethers.Contract(
-      ValidatorDeploys[chainId],
-      ValidatorInterface,
+      Swap.getAddress(chainId),
+      SwapInterface,
       signerOrProvider ||
         ethers.getDefaultProvider(chainNames[chainId].toLowerCase())
     )
   }
 
   public static getAddress(chainId = chainIds.RINKEBY): string {
-    if (chainId in ValidatorDeploys) {
-      return Validator[chainId]
+    if (chainId in swapDeploys) {
+      return swapDeploys[chainId]
     }
-    throw new Error(`Light Validator deploy not found or chainId ${chainId}`)
+    throw new Error(`Swap deploy not found for chainId ${chainId}`)
   }
 
-  public async checkSwap(
-    order: LightOrder,
+  public async check(
+    order: Order,
     senderWallet: string,
     signer?: ethers.Signer
   ): Promise<Array<string>> {
@@ -46,20 +46,23 @@ export class Validator {
         contract = contract.connect(signer)
       }
     }
-    const [count, errors] = await contract.checkSwap(
-      order.nonce,
-      order.expiry,
-      order.signerWallet,
-      order.signerToken,
-      order.signerAmount,
-      order.senderToken,
-      order.senderAmount,
-      order.v,
-      order.r,
-      order.s,
-      senderWallet
+    const [count, errors] = await contract.check(
+      senderWallet,
+      ...orderToParams(order)
     )
     return this.convertToArray(count, errors)
+  }
+
+  public async swap(order: Order, sender?: ethers.Signer): Promise<string> {
+    let contract = this.contract
+    if (!this.contract.signer) {
+      if (sender === undefined) {
+        throw new Error('Signer must be provided')
+      } else {
+        contract = contract.connect(sender)
+      }
+    }
+    return await contract.swap(sender.getAddress(), ...orderToParams(order))
   }
 
   private convertToArray(count: BigNumber, errors: Array<string>) {

@@ -1,11 +1,11 @@
 {
   "name": "@airswap/libraries",
-  "version": "0.0.2",
-  "description": "Protocol Libraries for AirSwap Developers",
+  "version": "1.0.1",
+  "description": "Libraries for AirSwap Developers",
   "contributors": [
     "Don Mosites",
-    "Hassan Malik <hbmalik88@gmail.com>",
-    "Ed Hinchliffe"
+    "Ed Hinchliffe",
+    "Hassan Malik"
   ],
   "repository": {
     "type": "git",
@@ -24,34 +24,34 @@
     "clean": "rm -rf ./build",
     "compile": "yarn clean && tsc -b",
     "test": "yarn test:unit",
-    "test:unit": "yarn compile && mocha -r ts-node/register test/**/*test.ts"
+    "test:unit": "yarn compile && mocha -r ts-node/register test/Server.test.ts"
   },
   "dependencies": {
-    "@airswap/constants": "0.4.3",
-    "@airswap/jsonrpc-client-websocket": "^0.0.1",
-    "@airswap/light": "2.2.4",
+    "@airswap/constants": "1.0.0",
+    "@airswap/jsonrpc-client-websocket": "0.0.1",
+    "@airswap/swap": "2.5.0",
     "@airswap/registry": "4.8.2",
-    "@airswap/types": "3.6.1",
-    "@airswap/utils": "0.4.10",
+    "@airswap/typescript": "1.0.1",
+    "@airswap/utils": "1.0.0",
     "@airswap/validator": "2.3.0",
-    "@airswap/wrapper": "^1.1.1",
+    "@airswap/wrapper": "2.5.2",
     "bignumber.js": "^9.0.0",
     "browser-or-node": "^1.3.0",
     "ethers": "^5.0.25",
     "jayson": "^3.2.0",
+    "tiny-typed-emitter": "^2.1.0",
     "websocket": "^1.0.34"
   },
   "devDependencies": {
     "@relaycorp/ws-mock": "^4.2.0",
     "@types/mock-require": "^2.0.0",
-    "eslint": "^6.8.0",
     "fancy-test": "^1.4.7",
     "mock-require": "^3.0.3",
     "mock-socket": "^9.0.3",
     "nock": "^12.0.1",
     "sinon": "^11.1.2",
     "sinon-chai": "^3.7.0",
-    "typescript": "^3.8.2"
+    "typescript": "^4.5.2"
   },
   "publishConfig": {
     "access": "public"

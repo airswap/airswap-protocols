@@ -110,12 +110,12 @@ contract Converter is Ownable, ReentrancyGuard, TokenPaymentSplitter {
   {
     // Checks that at least 1 payee is set to recieve converted token.
     require(_payees.length >= 1, "PAYEES_MUST_BE_SET");
+    // Checks that _amountOutMin is at least 1
+    require(_amountOutMin > 0, "INVALID_AMOUNT_OUT");
     // Calls the balanceOf function from the to be converted token.
     uint256 tokenBalance = _balanceOfErc20(_swapFromToken);
     // Checks that the converted token is currently present in the contract.
     require(tokenBalance > 0, "NO_BALANCE_TO_CONVERT");
-    // Approve token for AMM usage.
-    _approveErc20(_swapFromToken, tokenBalance);
     // Read or set the path for AMM.
     if (_swapFromToken != swapToToken) {
       address[] memory path;
@@ -129,6 +129,8 @@ contract Converter is Ownable, ReentrancyGuard, TokenPaymentSplitter {
         }
         path = getTokenPath(_swapFromToken);
       }
+      // Approve token for AMM usage.
+      _approveErc20(_swapFromToken, tokenBalance);
       // Calls the swap function from the on-chain AMM to swap token from fee pool into reward token.
       IUniswapV2Router02(uniRouter)
         .swapExactTokensForTokensSupportingFeeOnTransferTokens(
@@ -140,12 +142,14 @@ contract Converter is Ownable, ReentrancyGuard, TokenPaymentSplitter {
         );
     }
     // Calls the balanceOf function from the reward token to get the new balance post-swap.
-    uint256 newTokenBalance = _balanceOfErc20(swapToToken);
+    uint256 totalPayeeAmount = _balanceOfErc20(swapToToken);
     // Calculates trigger reward amount and transfers to msg.sender.
-    uint256 triggerFeeAmount = newTokenBalance.mul(triggerFee).div(100);
-    _transferErc20(msg.sender, swapToToken, triggerFeeAmount);
+    if (triggerFee > 0) {
+      uint256 triggerFeeAmount = totalPayeeAmount.mul(triggerFee).div(100);
+      _transferErc20(msg.sender, swapToToken, triggerFeeAmount);
+      totalPayeeAmount = totalPayeeAmount.sub(triggerFeeAmount);
+    }
     // Transfers remaining amount to reward payee address(es).
-    uint256 totalPayeeAmount = newTokenBalance.sub(triggerFeeAmount);
     for (uint256 i = 0; i < _payees.length; i++) {
       uint256 payeeAmount = (totalPayeeAmount.mul(_shares[_payees[i]])).div(
         _totalShares

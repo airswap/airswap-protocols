@@ -2,18 +2,18 @@ import * as url from 'url'
 import { ethers } from 'ethers'
 import { isBrowser } from 'browser-or-node'
 import { Client as HttpClient } from 'jayson'
+import { TypedEmitter } from 'tiny-typed-emitter'
 
 import {
   JsonRpcWebsocket,
   JsonRpcError,
   JsonRpcErrorCodes,
+  WebsocketReadyStates,
 } from '@airswap/jsonrpc-client-websocket'
 import { REQUEST_TIMEOUT } from '@airswap/constants'
-import { parseUrl, flattenObject, isValidQuote } from '@airswap/utils'
-import { Quote, LightOrder } from '@airswap/types'
-
-import { Light } from './Light'
-import { EventEmitter } from 'events'
+import { parseUrl, orderPropsToStrings } from '@airswap/utils'
+import { Order, Pricing } from '@airswap/typescript'
+import { Swap } from './Swap'
 
 export type SupportedProtocolInfo = {
   name: string
@@ -21,23 +21,10 @@ export type SupportedProtocolInfo = {
   params?: any
 }
 
-type Levels = [string, string][]
-type Formula = string
-
-type PricingDetails =
-  | {
-      bid: Levels
-      ask: Levels
-    }
-  | {
-      bid: Formula
-      ask: Formula
-    }
-
-type Pricing = {
-  baseToken: string
-  quoteToken: string
-} & PricingDetails
+export type ServerOptions = {
+  initializeTimeout?: number
+  swapContract?: string
+}
 
 if (!isBrowser) {
   JsonRpcWebsocket.setWebSocketFactory((url: string) => {
@@ -51,7 +38,12 @@ const PROTOCOL_NAMES = {
   'request-for-quote': 'Request for Quote',
 }
 
-export class Server extends EventEmitter {
+export interface ServerEvents {
+  pricing: (pricing: Pricing[]) => void
+  error: (error: JsonRpcError) => void
+}
+
+export class Server extends TypedEmitter<ServerEvents> {
   public transportProtocol: 'websocket' | 'http'
   private supportedProtocols: SupportedProtocolInfo[]
   private isInitialized: boolean
@@ -61,20 +53,20 @@ export class Server extends EventEmitter {
   private senderWallet: string
 
   public constructor(
-    private locator: string,
-    private swapContract = Light.getAddress()
+    public locator: string,
+    private swapContract = Swap.getAddress()
   ) {
     super()
     const protocol = parseUrl(locator).protocol
     this.transportProtocol = protocol.startsWith('http') ? 'http' : 'websocket'
   }
 
-  public static async for(
+  public static async at(
     locator: string,
-    swapContract?: string
+    options?: ServerOptions
   ): Promise<Server> {
-    const server = new Server(locator, swapContract)
-    await server._init()
+    const server = new Server(locator, options?.swapContract)
+    await server._init(options?.initializeTimeout)
     return server
   }
 
@@ -108,55 +100,20 @@ export class Server extends EventEmitter {
     return true
   }
 
-  public async getMaxQuote(
-    signerToken: string,
-    senderToken: string
-  ): Promise<Quote> {
-    this.requireRFQSupport()
-    return this.callRPCMethod<Quote>('getMaxQuote', {
-      signerToken,
-      senderToken,
-    })
-  }
-
-  public async getSignerSideQuote(
-    senderAmount: string,
-    signerToken: string,
-    senderToken: string
-  ): Promise<Quote> {
-    this.requireRFQSupport()
-    return this.callRPCMethod<Quote>('getSignerSideQuote', {
-      senderAmount: senderAmount.toString(),
-      signerToken,
-      senderToken,
-    })
-  }
-
-  public async getSenderSideQuote(
-    signerAmount: string,
-    signerToken: string,
-    senderToken: string
-  ): Promise<Quote> {
-    this.requireRFQSupport()
-    return this.callRPCMethod<Quote>('getSenderSideQuote', {
-      signerAmount: signerAmount.toString(),
-      signerToken,
-      senderToken,
-    })
-  }
-
   public async getSignerSideOrder(
     senderAmount: string,
     signerToken: string,
     senderToken: string,
     senderWallet: string
-  ): Promise<LightOrder> {
+  ): Promise<Order> {
     this.requireRFQSupport()
-    return this.callRPCMethod<LightOrder>('getSignerSideOrder', {
+    return this.callRPCMethod<Order>('getSignerSideOrder', {
       senderAmount: senderAmount.toString(),
       signerToken,
       senderToken,
       senderWallet,
+    }).then((order) => {
+      return orderPropsToStrings(order)
     })
   }
 
@@ -165,13 +122,15 @@ export class Server extends EventEmitter {
     signerToken: string,
     senderToken: string,
     senderWallet: string
-  ): Promise<LightOrder> {
+  ): Promise<Order> {
     this.requireRFQSupport()
     return this.callRPCMethod('getSenderSideOrder', {
       signerAmount: signerAmount.toString(),
       signerToken,
       senderToken,
       senderWallet,
+    }).then((order) => {
+      return orderPropsToStrings(order)
     })
   }
 
@@ -206,23 +165,35 @@ export class Server extends EventEmitter {
     return this.senderWallet
   }
 
-  public async consider(order: LightOrder): Promise<boolean> {
+  public async consider(order: Order): Promise<boolean> {
     this.requireLastLookSupport()
     return this.callRPCMethod<boolean>('consider', order)
   }
 
   public disconnect(): void {
     if (this.webSocketClient) {
-      this.webSocketClient.close()
-      this.removeAllListeners()
+      if (this.webSocketClient.state !== WebsocketReadyStates.CLOSED) {
+        this.webSocketClient.close()
+        // Note that we remove listeners only after close as closing before a
+        // successful connection will emit an error, and emitting an error
+        // without a listener will throw. Removing listeners before close means
+        // closing before connecting would cause an unpreventable throw (error
+        // listener would be removed first).
+        this.webSocketClient.on('close', () => {
+          this.removeAllListeners()
+        })
+      } else {
+        this.removeAllListeners()
+      }
+      delete this.webSocketClient
     }
   }
 
-  private _init() {
+  private _init(initializeTimeout: number = REQUEST_TIMEOUT) {
     if (this.transportProtocol === 'http') {
       return this._initHTTPClient(this.locator)
     } else {
-      return this._initWebSocketClient(this.locator)
+      return this._initWebSocketClient(this.locator, initializeTimeout)
     }
   }
 
@@ -273,26 +244,39 @@ export class Server extends EventEmitter {
     }
   }
 
-  private async _initWebSocketClient(locator: string) {
-    this.webSocketClient = new JsonRpcWebsocket(
-      url.format(locator),
-      REQUEST_TIMEOUT,
-      (error: JsonRpcError) => {
-        this.emit('error', error)
-      }
-    )
+  private async _initWebSocketClient(
+    locator: string,
+    initializeTimeout: number
+  ) {
     const initPromise = new Promise<SupportedProtocolInfo[]>(
       (resolve, reject) => {
-        setTimeout(() => {
+        this.webSocketClient = new JsonRpcWebsocket(
+          url.format(locator),
+          REQUEST_TIMEOUT,
+          (error: JsonRpcError) => {
+            if (!this.isInitialized) {
+              reject(error)
+            } else {
+              this.emit('error', error)
+            }
+          }
+        )
+        const initTimeout = setTimeout(() => {
           reject('Server did not call initialize in time')
           this.disconnect()
-        }, REQUEST_TIMEOUT)
+        }, initializeTimeout)
 
         this.webSocketClient.on('initialize', (message) => {
-          this.initialize(message)
-          this.isInitialized = true
-          resolve(this.supportedProtocols)
-          return true
+          clearTimeout(initTimeout)
+          try {
+            this.initialize(message)
+            this.isInitialized = true
+            resolve(this.supportedProtocols)
+            return true
+          } catch (e) {
+            reject(e)
+            return false
+          }
         })
       }
     )
@@ -332,11 +316,11 @@ export class Server extends EventEmitter {
     }
   }
 
-  private compare(params: any, result: any): Array<string> {
+  private compare(params: any, flat: any): Array<string> {
     const errors: Array<string> = []
-    const flat: any = flattenObject(result)
     for (const param in params) {
       if (
+        typeof flat === 'object' &&
         param in flat &&
         flat[param].toLowerCase() !== params[param].toLowerCase()
       ) {
@@ -346,10 +330,10 @@ export class Server extends EventEmitter {
     return errors
   }
 
-  private throwInvalidParams() {
+  private throwInvalidParams(method: string, params: string) {
     throw {
       code: JsonRpcErrorCodes.INVALID_PARAMS,
-      message: 'Invalid params',
+      message: `Received invalid param format or values for method "${method}": ${params}`,
     }
   }
 
@@ -361,7 +345,7 @@ export class Server extends EventEmitter {
       !params.every((protocolInfo) => protocolInfo.version && protocolInfo.name)
     )
       valid = false
-    if (!valid) this.throwInvalidParams()
+    if (!valid) this.throwInvalidParams('initialize', JSON.stringify(params))
   }
 
   private validateUpdatePricingParams(params: any): void {
@@ -378,7 +362,7 @@ export class Server extends EventEmitter {
       )
     )
       valid = false
-    if (!valid) this.throwInvalidParams()
+    if (!valid) this.throwInvalidParams('updatePricing', JSON.stringify(params))
   }
 
   private updatePricing(newPricing: Pricing[]) {
@@ -427,16 +411,7 @@ export class Server extends EventEmitter {
                 message: `Server response differs from request params: ${errors}`,
               })
             } else {
-              if (method.indexOf('Quote') !== -1 && !isValidQuote(result)) {
-                reject({
-                  code: -1,
-                  message: `Server response is not a valid quote: ${JSON.stringify(
-                    result
-                  )}`,
-                })
-              } else {
-                resolve(result)
-              }
+              resolve(result)
             }
           }
         }

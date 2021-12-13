@@ -3,6 +3,7 @@ const { ethers } = require('hardhat')
 
 const { uniswapRouterAddress } = require('@airswap/constants')
 const UniswapV2Router02Contract = require('@uniswap/v2-periphery/build/IUniswapV2Router02.json')
+const ERC20 = require('@openzeppelin/contracts/build/contracts/ERC20PresetMinterPauser.json')
 
 describe('Converter Integration Tests', () => {
   let snapshotId
@@ -19,6 +20,7 @@ describe('Converter Integration Tests', () => {
   const wETH = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
   const triggerFee = 1
   const shares = [10]
+  const MINAMOUNTOUT = 1
 
   beforeEach(async () => {
     snapshotId = await ethers.provider.send('evm_snapshot')
@@ -32,7 +34,8 @@ describe('Converter Integration Tests', () => {
     ;[deployer, payeeA, payeeB, payeeC, payeeD] = await ethers.getSigners()
 
     const TestAToken = await ethers.getContractFactory(
-      'ERC20PresetMinterPauser'
+      ERC20.abi,
+      ERC20.bytecode
     )
     testAToken = await TestAToken.deploy('TestAToken', 'TESTA')
     await testAToken.deployed()
@@ -40,7 +43,8 @@ describe('Converter Integration Tests', () => {
     await testAToken.mint(deployer.address, 1000000)
 
     const TestBToken = await ethers.getContractFactory(
-      'ERC20PresetMinterPauser'
+      ERC20.abi,
+      ERC20.bytecode
     )
     testBToken = await TestBToken.deploy('TestBToken', 'TESTB')
     await testBToken.deployed()
@@ -48,7 +52,8 @@ describe('Converter Integration Tests', () => {
     await testBToken.mint(deployer.address, 1000000)
 
     const SwapToToken = await ethers.getContractFactory(
-      'ERC20PresetMinterPauser'
+      ERC20.abi,
+      ERC20.bytecode
     )
     swapToToken = await SwapToToken.deploy('SwapToToken', 'SWAPTO')
     await swapToToken.deployed()
@@ -254,7 +259,7 @@ describe('Converter Integration Tests', () => {
 
       await converter
         .connect(deployer)
-        .convertAndTransfer(testAToken.address, 0)
+        .convertAndTransfer(testAToken.address, MINAMOUNTOUT)
 
       const converterTokenABalance = await testAToken.balanceOf(
         converter.address
@@ -286,7 +291,7 @@ describe('Converter Integration Tests', () => {
 
       await converter
         .connect(deployer)
-        .convertAndTransfer(testAToken.address, 0)
+        .convertAndTransfer(testAToken.address, MINAMOUNTOUT)
 
       const converterTokenABalance = await testAToken.balanceOf(
         converter.address
@@ -317,7 +322,7 @@ describe('Converter Integration Tests', () => {
 
       await converter
         .connect(deployer)
-        .convertAndTransfer(testAToken.address, 0)
+        .convertAndTransfer(testAToken.address, MINAMOUNTOUT)
 
       const converterTokenABalance = await testAToken.balanceOf(
         converter.address
@@ -350,7 +355,7 @@ describe('Converter Integration Tests', () => {
 
       await converter
         .connect(deployer)
-        .convertAndTransfer(testAToken.address, 0)
+        .convertAndTransfer(testAToken.address, MINAMOUNTOUT)
 
       const converterTokenABalance = await testAToken.balanceOf(
         converter.address
@@ -382,7 +387,7 @@ describe('Converter Integration Tests', () => {
 
       await converter
         .connect(deployer)
-        .convertAndTransfer(swapToToken.address, 0)
+        .convertAndTransfer(swapToToken.address, MINAMOUNTOUT)
 
       const converterTokenABalance = await swapToToken.balanceOf(
         converter.address
@@ -416,7 +421,7 @@ describe('Converter Integration Tests', () => {
 
       await converter
         .connect(deployer)
-        .convertAndTransfer(swapToToken.address, 0)
+        .convertAndTransfer(swapToToken.address, MINAMOUNTOUT)
 
       const converterTokenABalance = await swapToToken.balanceOf(
         converter.address
@@ -441,7 +446,7 @@ describe('Converter Integration Tests', () => {
       await converter.connect(deployer).setTriggerFee(0)
       await converter
         .connect(deployer)
-        .convertAndTransfer(testAToken.address, 0)
+        .convertAndTransfer(testAToken.address, MINAMOUNTOUT)
 
       const converterTokenABalance = await testAToken.balanceOf(
         converter.address

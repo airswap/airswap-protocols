@@ -1,7 +1,5 @@
 export const DOMAIN_NAME = 'SWAP'
-export const DOMAIN_VERSION = '2'
-export const LIGHT_DOMAIN_NAME = 'SWAP_LIGHT'
-export const LIGHT_DOMAIN_VERSION = '3'
+export const DOMAIN_VERSION = '3'
 export const INDEX_HEAD = '0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF'
 export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
 export const LOCATOR_ZERO =
