@@ -35,26 +35,26 @@ function getTokenDecimals(tokenAddress: string): BigInt {
   return BigInt.fromI32(value.value)
 }
 
-function computeFeeAmountUsd(signerToken: string, signerAmount: BigInt, protocolFee: BigInt, divisor: BigInt): BigInt {
+export function computeValueUsd(signerToken: string, signerAmount: BigInt): BigInt {
   let base64 = BigInt.fromI32(2).pow(64) //used to keep precision
 
   let signerTokenPrice = getPrice(signerToken) // 8 decimals USD
   let signerTokenPriceNormalizedx64 = signerTokenPrice.times(base64).div(BigInt.fromI32(10).pow(8)) //should be a decimal whole, precision kept by base64
 
-  let feeAmount = signerAmount.times(protocolFee).div(divisor) // quantity of token
   let tokenDecimals: BigInt = getTokenDecimals(signerToken) // 6,8,18 decimals - depends on the token
-  let feeAmountNormalizedx64 = feeAmount.times(base64).div(BigInt.fromI32(10).pow(<u8>tokenDecimals.toI32())) // should be a decimal whole, precision kept by base64
+  let signerAmountNormalizedx64 = signerAmount.times(base64).div(BigInt.fromI32(10).pow(<u8>tokenDecimals.toI32())) // should be a decimal whole, precision kept by base64
 
-  let priceUsdx64 = feeAmountNormalizedx64.times(signerTokenPriceNormalizedx64)
-  let priceUsd = priceUsdx64.div(base64)
+  let valueUsdx64 = signerAmountNormalizedx64.times(signerTokenPriceNormalizedx64)
+  let valueUsd = valueUsdx64.div(base64.pow(2))
 
-  return priceUsd
+  return valueUsd
 }
 
-export function updateCollectedFeesDay(event: SwapEvent): void {
-  let divisor = SwapContract.bind(event.address).FEE_DIVISOR()
-  let feeAmountUsd = computeFeeAmountUsd(event.params.signerToken.toHex(), event.params.signerAmount, event.params.protocolFee, divisor)
+export function computeFeeAmountUsd(swapValueUsd: BigInt, protocolFee: BigInt, divisor: BigInt): BigInt {
+  return swapValueUsd.times(protocolFee).div(divisor)
+}
 
+export function updateCollectedFeesDay(event: SwapEvent, feeValueUsd: BigInt): void {
   //the following uses integer division based on the number of seconds in a day to generate the id and date
   let dayId = event.block.timestamp.toI32() / 86400
   let dayStartTimestamp = dayId * 86400
@@ -64,6 +64,6 @@ export function updateCollectedFeesDay(event: SwapEvent): void {
   if (feesDay.date == 0) {
     feesDay.date = dayStartTimestamp
   }
-  feesDay.amount = feesDay.amount.plus(feeAmountUsd.toBigDecimal())
+  feesDay.amount = feesDay.amount.plus(feeValueUsd.toBigDecimal())
   feesDay.save()
 }

@@ -63,6 +63,9 @@ type SwapLight @entity {
   sender: User
   senderAmount: BigInt
   senderToken: Token
+
+  swapValueUsd: BigInt
+  feeValueUsd: BigInt
 }
 
 type Token @entity {
