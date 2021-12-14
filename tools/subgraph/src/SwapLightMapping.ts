@@ -47,7 +47,7 @@ export function handleSwap(event: SwapEvent): void {
   completedSwap.signer = signer.id
   completedSwap.signerAmount = event.params.signerAmount
   completedSwap.signerToken = signerToken.id
-  completedSwap.protocolFee = event.params.protocolFee
+  completedSwap.protocolFee = event.params.signerFee
 
   completedSwap.sender = sender.id
   completedSwap.senderAmount = event.params.senderAmount
@@ -58,7 +58,7 @@ export function handleSwap(event: SwapEvent): void {
     event.params.signerAmount
   );
 
-  const feesUsd = computeFeeAmountUsd(valueUsd, event.params.protocolFee, feeDivisor)
+  const feesUsd = computeFeeAmountUsd(valueUsd, event.params.signerFee, feeDivisor)
 
   completedSwap.swapValueUsd = valueUsd;
   completedSwap.feeValueUsd = feesUsd;
