@@ -23,7 +23,8 @@ interface IPool {
     address signer,
     address token,
     uint256 amount,
-    address account
+    address account,
+    uint256 nonce
   );
 
   function setScale(uint256 _scale) external;
@@ -92,9 +93,11 @@ interface IPool {
 
 
   function withdrawWithSignature(
+    bytes memory signature,
     bytes32 ethSignedMessageHash,
     address token,
     uint256 amount,
-    address recipient
-  ) external returns (bool);
+    address recipient,
+    uint256 nonce
+  ) external returns (uint256);
 }

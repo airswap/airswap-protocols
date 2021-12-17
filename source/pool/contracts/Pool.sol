@@ -371,48 +371,36 @@ contract Pool is IPool, Ownable {
 
 
 /** @notice withdraw function that uses signature instead of claim
-  * @param ethSignedMessageHash is a hash of signer's signature, token address, minimumAmount and recipient
+  * @param signature signature from msg.sender
+  * @param ethSignedMessageHash hash of signer's signature, token address, minimumAmount and recipient
   * @param token address
   * @param amount uint256
   * @param recipient address
+  * @param nonce add salt to the hash
   */
   function withdrawWithSignature(
+    bytes memory signature,
     bytes32 ethSignedMessageHash,
     address token,
     uint256 amount,
-    address recipient
-  ) external virtual override returns (bool) {
-    // verify address
-    require(admins[msg.sender], "NOT_ADMIN");
+    address recipient,
+    uint256 nonce
+  ) external override multiAdmin returns (uint256) {
+    // add salt to the hash
+    bytes32 saltedHash = keccak256(abi.encodePacked(ethSignedMessageHash, nonce));
     // verify signed hash has not been claimed
-    require(!hashClaimed[ethSignedMessageHash], "CLAIM_ALREADY_MADE");
-    // to verify hash
-    require(
-      ethSignedMessageHash == getEthSignedMessageHash
-    (
-      token, 
-      amount, 
-      recipient
-    ), "SIGNED_HASH_NOT_VERIFIED");
+    require(!claimed[saltedHash][recipient], "CLAIM_ALREADY_MADE");
+    // to verify hash is signed by an admin
+    address signer = ECDSA.recover(ethSignedMessageHash, signature);
+    require(admins[signer]==true, "NOT_VERIFIED");
     
+    // mark signed hash and account as claimed
+    claimed[saltedHash][recipient] = true;
+
     IERC20(token).safeTransfer(recipient, amount);
-    // mark signed hash as claimed
-    hashClaimed[ethSignedMessageHash] = true;
-    emit WithdrawWithSignature(msg.sender, token, amount, recipient);
-    return true;
+  
+    emit WithdrawWithSignature(signer, token, amount, recipient, nonce);
+    return amount;
   }
 
-/** @notice return signed message hash using Openzeppelin's ECDSA library
-  * @param token address
-  * @param amount uint256
-  * @param recipient address
-  */
-  function getEthSignedMessageHash(
-    address token,
-    uint256 amount,
-    address recipient
-  ) internal pure returns (bytes32) {
-    bytes32 messageHash = keccak256(abi.encodePacked(token, amount, recipient));
-    return ECDSA.toEthSignedMessageHash(messageHash);
-  }
 }
