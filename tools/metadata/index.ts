@@ -51,30 +51,31 @@ export async function scrapeToken(
   }
 
   const chainId = (await provider.getNetwork()).chainId
-  let tokenSymbol
-  let tokenName
-  let tokenDecimals
-  let tokenImage
-  let tokenKind
 
-  try {
-    ;[tokenSymbol, tokenName, tokenDecimals] = await Promise.all([
-      getTokenSymbol(address, provider),
-      getTokenName(address, provider),
-      getTokenDecimals(address, provider),
-    ])
-  } catch (e) {
-    if (openSeaUrls[chainId]) {
-      const {
-        data: { name, symbol, image_url, schema_name },
-      } = await axios.get(`${openSeaUrls[chainId]}/asset_contract/${address}`)
-      tokenName = name
-      tokenSymbol = symbol
-      tokenDecimals = 0
-      tokenImage = image_url
-      tokenKind = tokenKinds[schema_name]
+  if (openSeaUrls[chainId]) {
+    const {
+      data: { name, symbol, image_url, schema_name },
+    } = await axios.get(`${openSeaUrls[chainId]}/asset_contract/${address}`)
+    if (schema_name === 'ERC721' || schema_name === 'ERC1155') {
+      return {
+        chainId,
+        address: address.toLowerCase(),
+        name,
+        symbol,
+        extensions: {
+          kind: tokenKinds[schema_name],
+        },
+        logoURI: image_url,
+        decimals: 0,
+      }
     }
   }
+
+  const [tokenSymbol, tokenName, tokenDecimals] = await Promise.all([
+    getTokenSymbol(address, provider),
+    getTokenName(address, provider),
+    getTokenDecimals(address, provider),
+  ])
 
   return {
     chainId,
@@ -82,9 +83,8 @@ export async function scrapeToken(
     name: tokenName,
     symbol: tokenSymbol || tokenName.toUpperCase(),
     extensions: {
-      kind: tokenKind || tokenKinds.ERC20,
+      kind: tokenKinds.ERC20,
     },
-    logoURI: tokenImage,
     decimals: Number(tokenDecimals),
   }
 }
