@@ -1,7 +1,8 @@
 import axios from 'axios'
 import * as ethers from 'ethers'
 import { TokenInfo } from '@uniswap/token-lists'
-import { defaults, known } from './src/constants'
+import { defaults, known, openSeaUrls } from './src/constants'
+import { tokenKinds } from '@airswap/constants'
 import { getTokenName, getTokenSymbol, getTokenDecimals } from './src/helpers'
 
 export async function fetchTokens(
@@ -42,31 +43,48 @@ export async function scrapeToken(
   address: string,
   ethersProvider: ethers.providers.BaseProvider | string
 ): Promise<TokenInfo> {
-  let chainId
+  let provider
+  if (typeof ethersProvider === 'string') {
+    provider = new ethers.providers.JsonRpcProvider(ethersProvider)
+  } else {
+    provider = ethersProvider
+  }
+
+  const chainId = (await provider.getNetwork()).chainId
   let tokenSymbol
   let tokenName
   let tokenDecimals
-  if (typeof ethersProvider === 'string') {
-    const provider = new ethers.providers.JsonRpcProvider(ethersProvider)
+  let tokenImage
+  let tokenKind
+
+  try {
     ;[tokenSymbol, tokenName, tokenDecimals] = await Promise.all([
       getTokenSymbol(address, provider),
       getTokenName(address, provider),
       getTokenDecimals(address, provider),
     ])
-    chainId = provider.network.chainId
-  } else {
-    ;[tokenSymbol, tokenName, tokenDecimals] = await Promise.all([
-      getTokenSymbol(address, ethersProvider),
-      getTokenName(address, ethersProvider),
-      getTokenDecimals(address, ethersProvider),
-    ])
+  } catch (e) {
+    if (openSeaUrls[chainId]) {
+      const {
+        data: { name, symbol, image_url, schema_name },
+      } = await axios.get(`${openSeaUrls[chainId]}/asset_contract/${address}`)
+      tokenName = name
+      tokenSymbol = symbol
+      tokenDecimals = 0
+      tokenImage = image_url
+      tokenKind = tokenKinds[schema_name]
+    }
   }
 
   return {
     chainId,
     address: address.toLowerCase(),
     name: tokenName,
-    symbol: tokenSymbol,
+    symbol: tokenSymbol || tokenName.toUpperCase(),
+    extensions: {
+      kind: tokenKind || tokenKinds.ERC20,
+    },
+    logoURI: tokenImage,
     decimals: Number(tokenDecimals),
   }
 }
