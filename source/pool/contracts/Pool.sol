@@ -371,7 +371,7 @@ contract Pool is IPool, Ownable {
 
 
 /** @notice withdraw function that uses signature instead of claim
-  * @param signature signature from msg.sender
+  * @param signature signature from the signer
   * @param ethSignedMessageHash hash of signer's signature, token address, minimumAmount and recipient
   * @param token address
   * @param amount uint256
