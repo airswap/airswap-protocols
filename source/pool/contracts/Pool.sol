@@ -368,20 +368,20 @@ contract Pool is IPool, Ownable {
     bytes32 leaf = keccak256(abi.encodePacked(participant, score));
     return MerkleProof.verify(proof, root, leaf);
   }
-}
+
 
 /** @notice withdraw function that uses signature instead of claim
   * @param ethSignedMessageHash is a hash of signer's signature, token address, minimumAmount and recipient
   * @param token address
-  * @param minimumAmount uint256
+  * @param amount uint256
   * @param recipient address
   */
   function withdrawWithSignature(
     bytes32 ethSignedMessageHash,
     address token,
-    uint256 minimumAmount,
+    uint256 amount,
     address recipient
-  ) external returns (bool) {
+  ) external virtual override returns (bool) {
     // verify address
     require(admins[msg.sender], "NOT_ADMIN");
     // verify signed hash has not been claimed
@@ -404,7 +404,7 @@ contract Pool is IPool, Ownable {
 
 /** @notice return signed message hash using Openzeppelin's ECDSA library
   * @param token address
-  * @param minimumAmount uint256
+  * @param amount uint256
   * @param recipient address
   */
   function getEthSignedMessageHash(
@@ -415,3 +415,4 @@ contract Pool is IPool, Ownable {
     bytes32 messageHash = keccak256(abi.encodePacked(token, amount, recipient));
     return ECDSA.toEthSignedMessageHash(messageHash);
   }
+}
