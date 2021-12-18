@@ -372,7 +372,7 @@ contract Pool is IPool, Ownable {
 
 /** @notice withdraw function that uses signature instead of claim
   * @param signature signature from the signer
-  * @param ethSignedMessageHash hash of signer's signature, token address, minimumAmount and recipient
+  * @param messageHash hash of token address, minimumAmount and recipient
   * @param token address
   * @param amount uint256
   * @param recipient address
@@ -380,21 +380,21 @@ contract Pool is IPool, Ownable {
   */
   function withdrawWithSignature(
     bytes memory signature,
-    bytes32 ethSignedMessageHash,
+    bytes32 messageHash,
     address token,
     uint256 amount,
     address recipient,
     uint256 nonce
   ) external override multiAdmin returns (uint256) {
     // add salt to the hash
-    bytes32 saltedHash = keccak256(abi.encodePacked(ethSignedMessageHash, nonce));
+    bytes32 saltedHash = keccak256(abi.encodePacked(signature, messageHash, nonce));
     // verify signed hash has not been claimed
     require(!claimed[saltedHash][recipient], "CLAIM_ALREADY_MADE");
-    // to verify hash is signed by an admin
+    // to verify hash is signed by an admin, ECDSA.recover will throw error if signer not recoverable
+    bytes32 ethSignedMessageHash = ECDSA.toEthSignedMessageHash(messageHash);
     address signer = ECDSA.recover(ethSignedMessageHash, signature);
-    require(admins[signer]==true, "NOT_VERIFIED");
-    
-    // mark signed hash and account as claimed
+    require(admins[signer], "NOT_VERIFIED");
+    // mark the hash of (signature, hash and nonce) and recipient as true
     claimed[saltedHash][recipient] = true;
 
     IERC20(token).safeTransfer(recipient, amount);

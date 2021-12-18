@@ -94,7 +94,7 @@ interface IPool {
 
   function withdrawWithSignature(
     bytes memory signature,
-    bytes32 ethSignedMessageHash,
+    bytes32 messageHash,
     address token,
     uint256 amount,
     address recipient,
