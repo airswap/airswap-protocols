@@ -381,8 +381,7 @@ contract Pool is IPool, Ownable {
     bytes32 messageHash,
     address token,
     uint256 amount,
-    address recipient,
-    uint256 nonce
+    address recipient
   ) external override multiAdmin returns (uint256) {
     // verify signed hash has not been claimed
     require(!claimed[messageHash][recipient], "CLAIM_ALREADY_MADE");
@@ -395,7 +394,7 @@ contract Pool is IPool, Ownable {
 
     IERC20(token).safeTransfer(recipient, amount);
   
-    emit WithdrawWithSignature(signer, token, amount, recipient, nonce);
+    emit WithdrawWithSignature(signer, token, amount, recipient);
     return amount;
   }
 
