@@ -40,7 +40,7 @@ describe('Pool Integration Tests', () => {
   })
 
   before(async () => {
-    ;[deployer, alice, bob, carol] = await ethers.getSigners()
+    [deployer, alice, bob, carol] = await ethers.getSigners()
 
     feeToken = await (
       await ethers.getContractFactory(ERC20.abi, ERC20.bytecode)
@@ -54,13 +54,14 @@ describe('Pool Integration Tests', () => {
 
     stakeContract = await (
       await ethers.getContractFactory(STAKING.abi, STAKING.bytecode)
-    ).deploy(feeToken.address, 'StakedAST', 'sAST', 100, 1)
+    ).deploy(feeToken.address, 'StakedAST', 'sAST', 100, 1) 
     await stakeContract.deployed()
 
     pool = await (
       await ethers.getContractFactory('Pool')
     ).deploy(CLAIM_SCALE, CLAIM_MAX, stakeContract.address, feeToken.address)
     await pool.deployed()
+    
 
     feeToken.mint(pool.address, 100000)
     feeToken2.mint(pool.address, 10000)
@@ -293,8 +294,52 @@ describe('Pool Integration Tests', () => {
         )
       ).to.be.revertedWith('INVALID_TOKEN')
     })
-  })
 
+    it('withdrawWithSignature does not revert with admin', async () => {
+      //messageHash is a hash of token, amount, recipient and nonce
+      let amount = 100;
+      let nonce = 1;
+      let messageHash = ethers.utils.solidityKeccak256(
+          ["address","uint256","address","uint256"],
+          [feeToken.address, amount, alice.address, nonce]
+        )
+      let messageHashBytes = ethers.utils.arrayify(messageHash)
+      let sig = await deployer.signMessage(messageHashBytes)
+      //for solidity, need expanded format of a signature
+      await expect(
+        pool.connect(deployer).withdrawWithSignature(
+          sig,
+          messageHash,
+          feeToken.address,
+          amount,
+          alice.address
+        )
+      ).to.emit(pool, 'WithdrawWithSignature')
+    })
+
+    it('withdrawWithSignature reverts with wrong signer', async () => {
+      //messageHash is a hash of token, amount, recipient and nonce
+      let amount = 100;
+      let nonce = 1;
+      let messageHash = ethers.utils.solidityKeccak256(
+          ["address","uint256","address","uint256"],
+          [feeToken.address, amount, alice.address, nonce]
+        )
+      let messageHashBytes = ethers.utils.arrayify(messageHash)
+      let sig = await alice.signMessage(messageHashBytes)
+      //for solidity, need expanded format of a signature
+      await expect(
+        pool.connect(deployer).withdrawWithSignature(
+          sig,
+          messageHash,
+          feeToken.address,
+          amount,
+          alice.address
+        )
+      ).to.be.revertedWith('NOT_VERIFIED')
+    })
+    
+  })  
   describe('Test Calculate', async () => {
     it('Test calculation input and output', async () => {
       const amount = await pool.calculate(ALICE_SCORE, feeToken.address)
