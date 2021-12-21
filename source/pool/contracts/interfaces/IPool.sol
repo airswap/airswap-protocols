@@ -92,10 +92,12 @@ interface IPool {
 
 
   function withdrawWithSignature(
-    bytes memory signature,
+    uint8 v,
+    bytes32 r,
+    bytes32 s,
     bytes32 messageHash,
     address token,
     uint256 amount,
-    address recipient
+    uint256 nonce
   ) external returns (uint256);
 }
