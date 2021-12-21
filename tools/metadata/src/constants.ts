@@ -9,7 +9,7 @@ export const known = [
 
 export const openSeaUrls = {
   1: 'https://api.opensea.io/api/v1',
-  4: 'https://rinkeby-api.opensea.io/api/v1',
+  4: 'https://testnets-api.opensea.io',
 }
 
 export const defaults = [
