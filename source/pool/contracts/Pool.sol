@@ -369,32 +369,39 @@ contract Pool is IPool, Ownable {
     return MerkleProof.verify(proof, root, leaf);
   }
 
-/** @notice withdraw function that uses signature instead of claim
-  * @param signature signature from activate or any admin
+/** @notice withdraw function that uses signature instead of claim calculated from merkle root
+  * @param v signature parameter v of one of the admins
+  * @param r signature parameter r of one of the admins
+  * @param s signature parameter s of one of the admins
   * @param messageHash hash of token address, minimumAmount, recipient and nonce
   * @param token address
   * @param amount uint256
-  * @param recipient address
+  * @param nonce add nonce to the hash, nonce must be non-reusable
   */
   function withdrawWithSignature(
-    bytes memory signature,
+    uint8 v,
+    bytes32 r,
+    bytes32 s,
     bytes32 messageHash,
     address token,
     uint256 amount,
-    address recipient
-  ) external override multiAdmin returns (uint256) {
-    // verify signed hash has not been claimed
-    require(!claimed[messageHash][recipient], "CLAIM_ALREADY_MADE");
+    uint256 nonce
+  ) external override returns (uint256) {
+    // verify hash has not been claimed
+    require(!hashClaimed[messageHash], "CLAIM_ALREADY_MADE");
+    // verify message hash
+    bytes32 calculatedHash = keccak256(abi.encodePacked(token, amount, msg.sender, nonce));
+    require(messageHash == calculatedHash, "HASH_NOT_VERIFIED");
     // to verify hash is signed by an admin, ECDSA.recover will throw error if signer is not recoverable
     bytes32 ethSignedMessageHash = ECDSA.toEthSignedMessageHash(messageHash);
-    address signer = ECDSA.recover(ethSignedMessageHash, signature);
-    require(signer == msg.sender, "NOT_VERIFIED");
+    address signer = ECDSA.recover(ethSignedMessageHash, v,r,s);
+    require(admins[signer], "NOT_VERIFIED");
     // mark the hash of (signature, hash and nonce) and recipient as true
-    claimed[messageHash][recipient] = true;
+    hashClaimed[messageHash] = true;
 
-    IERC20(token).safeTransfer(recipient, amount);
+    IERC20(token).safeTransfer(msg.sender, amount);
   
-    emit WithdrawWithSignature(signer, token, amount, recipient);
+    emit WithdrawWithSignature(signer, token, amount, msg.sender);
     return amount;
   }
 
