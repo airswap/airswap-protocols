@@ -23,7 +23,8 @@ interface IPool {
     address signer,
     address token,
     uint256 amount,
-    address account
+    address account,
+    uint256 nonce
   );
 
   function setScale(uint256 _scale) external;
@@ -95,7 +96,6 @@ interface IPool {
     uint8 v,
     bytes32 r,
     bytes32 s,
-    bytes32 messageHash,
     address token,
     uint256 amount,
     uint256 nonce
