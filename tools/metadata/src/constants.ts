@@ -7,6 +7,11 @@ export const known = [
   'https://tokens.coingecko.com/uniswap/all.json',
 ]
 
+export const openSeaUrls = {
+  1: 'https://api.opensea.io/api/v1',
+  4: 'https://rinkeby-api.opensea.io/api/v1',
+}
+
 export const defaults = [
   {
     name: 'Wrapped Ether',

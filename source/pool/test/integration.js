@@ -40,7 +40,7 @@ describe('Pool Integration Tests', () => {
   })
 
   before(async () => {
-    ;[deployer, alice, bob, carol] = await ethers.getSigners()
+    [deployer, alice, bob, carol] = await ethers.getSigners()
 
     feeToken = await (
       await ethers.getContractFactory(ERC20.abi, ERC20.bytecode)
@@ -54,13 +54,14 @@ describe('Pool Integration Tests', () => {
 
     stakeContract = await (
       await ethers.getContractFactory(STAKING.abi, STAKING.bytecode)
-    ).deploy(feeToken.address, 'StakedAST', 'sAST', 100, 1)
+    ).deploy(feeToken.address, 'StakedAST', 'sAST', 100, 1) 
     await stakeContract.deployed()
 
     pool = await (
       await ethers.getContractFactory('Pool')
     ).deploy(CLAIM_SCALE, CLAIM_MAX, stakeContract.address, feeToken.address)
     await pool.deployed()
+    
 
     feeToken.mint(pool.address, 100000)
     feeToken2.mint(pool.address, 10000)
@@ -293,8 +294,9 @@ describe('Pool Integration Tests', () => {
         )
       ).to.be.revertedWith('INVALID_TOKEN')
     })
-  })
 
+    
+  })  
   describe('Test Calculate', async () => {
     it('Test calculation input and output', async () => {
       const amount = await pool.calculate(ALICE_SCORE, feeToken.address)

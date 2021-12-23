@@ -197,10 +197,6 @@ describe('Wrapper Integration Tests', () => {
   })
   describe('Test NFT wrapped swaps', async () => {
     it('test wrapped buyNFT succeeds', async () => {
-      const feeNum = await swap.calculateProtocolFee(
-        sender.address,
-        DEFAULT_AMOUNT
-      )
       const order = await createSignedOrder(
         {
           signerToken: signerNFT.address,

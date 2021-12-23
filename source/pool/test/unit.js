@@ -41,7 +41,7 @@ describe('Pool Unit Tests', () => {
   })
 
   before(async () => {
-    ;[deployer, alice, bob, carol] = await ethers.getSigners()
+    [deployer, alice, bob, carol] = await ethers.getSigners()
 
     feeToken = await deployMockContract(deployer, IERC20.abi)
     await feeToken.mock.approve.returns(true)
@@ -507,6 +507,10 @@ describe('Pool Unit Tests', () => {
         )
       ).to.be.revertedWith('NOT_VERIFIED')
     })
+<<<<<<< HEAD
+=======
+    
+>>>>>>> b88d9952434cd7d447e69514fb72f594c5b66498
   })
 
   describe('Test Calculate', async () => {

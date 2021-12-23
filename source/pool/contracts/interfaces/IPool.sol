@@ -19,6 +19,13 @@ interface IPool {
   event SetScale(uint256 scale);
   event SetMax(uint256 max);
   event DrainTo(address[] tokens, address dest);
+  event WithdrawWithSignature(
+    address signer,
+    address token,
+    uint256 amount,
+    address account,
+    uint256 nonce
+  );
 
   function setScale(uint256 _scale) external;
 
@@ -83,4 +90,14 @@ interface IPool {
     uint256 score,
     bytes32[] memory proof
   ) external pure returns (bool valid);
+
+
+  function withdrawWithSignature(
+    uint8 v,
+    bytes32 r,
+    bytes32 s,
+    address token,
+    uint256 amount,
+    uint256 nonce
+  ) external returns (uint256);
 }
