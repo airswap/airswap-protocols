@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
-import "@airswap/staking/contracts/interfaces/IStaking.sol";
+import ".@airswap/staking/contracts/interfaces/IStaking.sol";
 import "./interfaces/IPool.sol";
 
 /**
@@ -263,6 +263,38 @@ contract Pool is IPool, Ownable {
     emit Withdraw(rootList, msg.sender, token, amount);
   }
 
+  /** @notice withdraw function that uses signature instead of claim calculated from merkle root
+    * @param v signature parameter v of one of the admins
+    * @param r signature parameter r of one of the admins
+    * @param s signature parameter s of one of the admins
+    * @param token address
+    * @param amount uint256 withdrawal amount
+    * @param nonce uint256 add nonce to the hash, nonce must be non-reusable
+    */
+    function withdrawWithSignature(
+      uint8 v,
+      bytes32 r,
+      bytes32 s,
+      address token,
+      uint256 amount,
+      uint256 nonce
+    ) external override returns (uint256) {
+      // calculate hash
+      bytes32 calculatedHash = keccak256(abi.encodePacked(token, amount, msg.sender, nonce));
+      // verify hash has not been claimed
+      require(!hashClaimed[calculatedHash], "CLAIM_ALREADY_MADE");
+      // verify hash is signed by an admin, ECDSA.recover will throw error if signer is not recoverable
+      bytes32 ethSignedMessageHash = ECDSA.toEthSignedMessageHash(calculatedHash);
+      address signer = ECDSA.recover(ethSignedMessageHash, v,r,s);
+      require(admins[signer], "NOT_VERIFIED");
+      // mark the hash of (signature, hash and nonce) and recipient as true
+      hashClaimed[calculatedHash] = true;
+      IERC20(token).safeTransfer(msg.sender, amount);
+      emit WithdrawWithSignature(signer, token, amount, msg.sender, nonce);
+      return amount;
+    }
+
+
   /**
    * @notice Withdraw tokens from the pool using claims
    * @param claims Claim[]
@@ -369,40 +401,6 @@ contract Pool is IPool, Ownable {
     return MerkleProof.verify(proof, root, leaf);
   }
 
-/** @notice withdraw function that uses signature instead of claim calculated from merkle root
-  * @param v signature parameter v of one of the admins
-  * @param r signature parameter r of one of the admins
-  * @param s signature parameter s of one of the admins
-  * @param messageHash hash of token address, minimumAmount, recipient and nonce
-  * @param token address
-  * @param amount uint256
-  * @param nonce add nonce to the hash, nonce must be non-reusable
-  */
-  function withdrawWithSignature(
-    uint8 v,
-    bytes32 r,
-    bytes32 s,
-    bytes32 messageHash,
-    address token,
-    uint256 amount,
-    uint256 nonce
-  ) external override returns (uint256) {
-    // verify hash has not been claimed
-    require(!hashClaimed[messageHash], "CLAIM_ALREADY_MADE");
-    // verify message hash
-    bytes32 calculatedHash = keccak256(abi.encodePacked(token, amount, msg.sender, nonce));
-    require(messageHash == calculatedHash, "HASH_NOT_VERIFIED");
-    // to verify hash is signed by an admin, ECDSA.recover will throw error if signer is not recoverable
-    bytes32 ethSignedMessageHash = ECDSA.toEthSignedMessageHash(messageHash);
-    address signer = ECDSA.recover(ethSignedMessageHash, v,r,s);
-    require(admins[signer], "NOT_VERIFIED");
-    // mark the hash of (signature, hash and nonce) and recipient as true
-    hashClaimed[messageHash] = true;
 
-    IERC20(token).safeTransfer(msg.sender, amount);
-  
-    emit WithdrawWithSignature(signer, token, amount, msg.sender);
-    return amount;
-  }
 
 }
