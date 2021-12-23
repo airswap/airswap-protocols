@@ -6,7 +6,7 @@ const { generateTreeFromData, getRoot, getProof } = require('@airswap/merkle')
 const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
 const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
-const STAKING = require('@airswap/staking/build/contracts/Staking.sol/Staking.json')
+const STAKING = require('../build/contracts/Staking.sol/Staking.json')
 
 function toWei(value, places) {
   return toAtomicString(value, places || 18)
@@ -41,7 +41,7 @@ describe('Pool Unit Tests', () => {
   })
 
   before(async () => {
-    ;[deployer, alice, bob, carol] = await ethers.getSigners()
+    [deployer, alice, bob, carol] = await ethers.getSigners()
 
     feeToken = await deployMockContract(deployer, IERC20.abi)
     await feeToken.mock.approve.returns(true)
@@ -456,6 +456,58 @@ describe('Pool Unit Tests', () => {
         )
       ).to.be.revertedWith('INVALID_TOKEN')
     })
+
+    it('withdrawWithSignature does not revert with signer who is admin', async () => {
+      await feeToken.mock.balanceOf.returns('100000')
+      await feeToken.mock.transfer.returns(true)
+      let amount = 100
+      let nonce = 1
+      let messageHash = ethers.utils.solidityKeccak256(
+          ["address","uint256","address","uint256"],
+          [feeToken.address, amount, deployer.address, nonce]
+        )
+      let messageHashBytes = ethers.utils.arrayify(messageHash)
+      let sig = await deployer.signMessage(messageHashBytes)
+      //for solidity, need expanded format of a signature
+      let splitSig = ethers.utils.splitSignature(sig);
+      await expect(
+        pool.connect(deployer).withdrawWithSignature(
+          splitSig.v,
+          splitSig.r,
+          splitSig.s,
+          feeToken.address,
+          amount,
+          nonce
+        )
+      ).to.emit(pool, 'WithdrawWithSignature')
+       .withArgs(deployer.address, feeToken.address, amount, deployer.address, nonce)
+    })
+
+    it('withdrawWithSignature reverts with signer who is not admin', async () => {
+      await feeToken.mock.balanceOf.returns('100000')
+      await feeToken.mock.transfer.returns(true)
+      let amount = 100
+      let nonce = 1
+      let messageHash = ethers.utils.solidityKeccak256(
+          ["address","uint256","address","uint256"],
+          [feeToken.address, amount, deployer.address, nonce]
+        )
+      let messageHashBytes = ethers.utils.arrayify(messageHash)
+      let sig = await alice.signMessage(messageHashBytes)
+      //for solidity, need expanded format of a signature
+      let splitSig = ethers.utils.splitSignature(sig)
+      await expect(
+        pool.connect(deployer).withdrawWithSignature(
+          splitSig.v,
+          splitSig.r,
+          splitSig.s,
+          feeToken.address,
+          amount,
+          nonce
+        )
+      ).to.be.revertedWith('NOT_VERIFIED')
+    })
+    
   })
 
   describe('Test Calculate', async () => {

@@ -312,7 +312,6 @@ describe('Pool Integration Tests', () => {
           splitSig.v,
           splitSig.r,
           splitSig.s,
-          messageHash,
           feeToken.address,
           amount,
           nonce
@@ -337,7 +336,6 @@ describe('Pool Integration Tests', () => {
           splitSig.v,
           splitSig.r,
           splitSig.s,
-          messageHash,
           feeToken.address,
           amount,
           nonce
