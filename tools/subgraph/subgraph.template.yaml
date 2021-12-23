@@ -228,4 +228,23 @@ templates:
           handler: handleUnsetRule
         - event: ProvideOrder(indexed address,address,indexed address,indexed address,uint256,uint256,uint256)
           handler: handleProvideOrder
+  - name: Wrapper
+    kind: ethereum/contract
+    network: mainnet
+    source:
+      address: "0x3775fECdd794E6136Ea0Df43c18631314ABC01b1"
+      abi: Wrapper
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      file: ./src/WrapperMapping.ts
+      entities:
+        - WrappedSwapFor
+      abis:
+        - name: Wrapper
+          file: ./abis/Wrapper.json
+      eventHandlers:
+        - event: WrappedSwapFor(address)
+          handler: handleWrappedSwapFor
 

@@ -162,3 +162,9 @@ type CollectedFeesDay @entity {
   date: Int!
   amount: BigDecimal!
 }
+
+
+type WrappedSwapFor @entity {
+  id: ID!
+  senderWallet: Bytes! # address
+}
