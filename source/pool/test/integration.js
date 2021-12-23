@@ -295,53 +295,6 @@ describe('Pool Integration Tests', () => {
       ).to.be.revertedWith('INVALID_TOKEN')
     })
 
-    it('withdrawWithSignature does not revert with signer who is admin', async () => {
-      //messageHash is a hash of token, amount, recipient and nonce
-      let amount = 100;
-      let nonce = 1;
-      let messageHash = ethers.utils.solidityKeccak256(
-          ["address","uint256","address","uint256"],
-          [feeToken.address, amount, deployer.address, nonce]
-        )
-      let messageHashBytes = ethers.utils.arrayify(messageHash)
-      let sig = await deployer.signMessage(messageHashBytes)
-      let splitSig = ethers.utils.splitSignature(sig);
-      //for solidity, need expanded format of a signature
-      await expect(
-        pool.connect(deployer).withdrawWithSignature(
-          splitSig.v,
-          splitSig.r,
-          splitSig.s,
-          feeToken.address,
-          amount,
-          nonce
-        )
-      ).to.emit(pool, 'WithdrawWithSignature')
-    })
-
-    it('withdrawWithSignature reverts with signer who is not admin', async () => {
-      //messageHash is a hash of token, amount, recipient and nonce
-      let amount = 100;
-      let nonce = 1;
-      let messageHash = ethers.utils.solidityKeccak256(
-          ["address","uint256","address","uint256"],
-          [feeToken.address, amount, deployer.address, nonce]
-        )
-      let messageHashBytes = ethers.utils.arrayify(messageHash)
-      let sig = await alice.signMessage(messageHashBytes)
-      let splitSig = ethers.utils.splitSignature(sig)
-      //for solidity, need expanded format of a signature
-      await expect(
-        pool.connect(deployer).withdrawWithSignature(
-          splitSig.v,
-          splitSig.r,
-          splitSig.s,
-          feeToken.address,
-          amount,
-          nonce
-        )
-      ).to.be.revertedWith('NOT_VERIFIED')
-    })
     
   })  
   describe('Test Calculate', async () => {

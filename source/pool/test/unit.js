@@ -6,7 +6,7 @@ const { generateTreeFromData, getRoot, getProof } = require('@airswap/merkle')
 const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
 const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
-const STAKING = require('../build/contracts/Staking.sol/Staking.json')
+const STAKING = require('@airswap/staking/build/contracts/Staking.sol/Staking.json')
 
 function toWei(value, places) {
   return toAtomicString(value, places || 18)
