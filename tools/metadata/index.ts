@@ -1,7 +1,8 @@
 import axios from 'axios'
 import * as ethers from 'ethers'
 import { TokenInfo } from '@uniswap/token-lists'
-import { defaults, known } from './src/constants'
+import { defaults, known, openSeaUrls } from './src/constants'
+import { tokenKinds } from '@airswap/constants'
 import { getTokenName, getTokenSymbol, getTokenDecimals } from './src/helpers'
 
 export async function fetchTokens(
@@ -42,31 +43,48 @@ export async function scrapeToken(
   address: string,
   ethersProvider: ethers.providers.BaseProvider | string
 ): Promise<TokenInfo> {
-  let chainId
-  let tokenSymbol
-  let tokenName
-  let tokenDecimals
+  let provider
   if (typeof ethersProvider === 'string') {
-    const provider = new ethers.providers.JsonRpcProvider(ethersProvider)
-    ;[tokenSymbol, tokenName, tokenDecimals] = await Promise.all([
-      getTokenSymbol(address, provider),
-      getTokenName(address, provider),
-      getTokenDecimals(address, provider),
-    ])
-    chainId = provider.network.chainId
+    provider = new ethers.providers.JsonRpcProvider(ethersProvider)
   } else {
-    ;[tokenSymbol, tokenName, tokenDecimals] = await Promise.all([
-      getTokenSymbol(address, ethersProvider),
-      getTokenName(address, ethersProvider),
-      getTokenDecimals(address, ethersProvider),
-    ])
+    provider = ethersProvider
   }
+
+  const chainId = (await provider.getNetwork()).chainId
+
+  if (openSeaUrls[chainId]) {
+    const {
+      data: { name, symbol, image_url, schema_name },
+    } = await axios.get(`${openSeaUrls[chainId]}/asset_contract/${address}`)
+    if (schema_name === 'ERC721' || schema_name === 'ERC1155') {
+      return {
+        chainId,
+        address: address.toLowerCase(),
+        name,
+        symbol,
+        extensions: {
+          kind: tokenKinds[schema_name],
+        },
+        logoURI: image_url,
+        decimals: 0,
+      }
+    }
+  }
+
+  const [tokenSymbol, tokenName, tokenDecimals] = await Promise.all([
+    getTokenSymbol(address, provider),
+    getTokenName(address, provider),
+    getTokenDecimals(address, provider),
+  ])
 
   return {
     chainId,
     address: address.toLowerCase(),
     name: tokenName,
-    symbol: tokenSymbol,
+    symbol: tokenSymbol || tokenName.toUpperCase(),
+    extensions: {
+      kind: tokenKinds.ERC20,
+    },
     decimals: Number(tokenDecimals),
   }
 }
