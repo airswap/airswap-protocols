@@ -526,6 +526,14 @@ describe('Pool Unit Tests', () => {
       expect(await pool.admins(alice.address)).to.be.equal(true)
     })
 
+    it('Test addAdmin with zero address reverts', async () => {
+      await expect(
+        pool
+          .connect(deployer)
+          .addAdmin('0x0000000000000000000000000000000000000000')
+      ).to.be.revertedWith('INVALID_ADDRESS')
+    })
+
     it('Test addAdmin reverts', async () => {
       await expect(
         pool.connect(alice).addAdmin(alice.address)
@@ -545,6 +553,12 @@ describe('Pool Unit Tests', () => {
       ).to.be.revertedWith('Ownable: caller is not the owner')
     })
 
+    it('Test removeAdmin who is non-admin reverts', async () => {
+      await expect(
+        pool.connect(deployer).removeAdmin(alice.address)
+      ).to.be.revertedWith('ADMIN_NOT_SET')
+    })
+
     it('enable successful with admin', async () => {
       await pool.addAdmin(alice.address)
       const root = getRoot(tree)
@@ -559,25 +573,36 @@ describe('Pool Unit Tests', () => {
       await feeToken.mock.balanceOf.returns('100000')
       await feeToken.mock.transfer.returns(true)
 
-      await pool.addAdmin(alice.address)
+      await pool.connect(deployer).addAdmin(alice.address)
 
       const root = getRoot(tree)
 
-      await pool.connect(alice).setClaimed(root, [bob.address])
+      await expect(await pool.connect(alice).setClaimed(root, [bob.address]))
+        .to.emit(pool, 'Enable')
+        .withArgs(root)
+    })
 
-      let proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
+    it('Test setclaimed with non-admin reverts', async () => {
+      await feeToken.mock.balanceOf.returns('100000')
+      await feeToken.mock.transfer.returns(true)
+
+      const root = getRoot(tree)
 
       await expect(
-        pool.connect(bob).withdraw(
-          [
-            {
-              root: getRoot(tree),
-              score: BOB_SCORE,
-              proof,
-            },
-          ],
-          feeToken.address
-        )
+        pool.connect(alice).setClaimed(root, [bob.address])
+      ).to.be.revertedWith('NOT_ADMIN')
+    })
+
+    it('setClaimed reverts with claim already made', async () => {
+      await feeToken.mock.balanceOf.returns('100000')
+      await feeToken.mock.transfer.returns(true)
+      const root = getRoot(tree)
+      await pool
+        .connect(deployer)
+        .setClaimed(root, [alice.address, bob.address])
+
+      await expect(
+        pool.connect(deployer).setClaimed(root, [alice.address, bob.address])
       ).to.be.revertedWith('CLAIM_ALREADY_MADE')
     })
   })
