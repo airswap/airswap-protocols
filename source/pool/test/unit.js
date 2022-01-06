@@ -528,7 +528,9 @@ describe('Pool Unit Tests', () => {
 
     it('Test addAdmin with zero address reverts', async () => {
       await expect(
-        pool.connect(deployer).addAdmin("0x0000000000000000000000000000000000000000")
+        pool
+          .connect(deployer)
+          .addAdmin('0x0000000000000000000000000000000000000000')
       ).to.be.revertedWith('INVALID_ADDRESS')
     })
 
@@ -575,11 +577,8 @@ describe('Pool Unit Tests', () => {
 
       const root = getRoot(tree)
 
-      await expect(
-        await pool
-          .connect(alice)
-          .setClaimed(root, [bob.address])
-      ).to.emit(pool,'Enable')
+      await expect(await pool.connect(alice).setClaimed(root, [bob.address]))
+        .to.emit(pool, 'Enable')
         .withArgs(root)
     })
 
@@ -590,9 +589,7 @@ describe('Pool Unit Tests', () => {
       const root = getRoot(tree)
 
       await expect(
-        pool
-          .connect(alice)
-          .setClaimed(root, [bob.address])
+        pool.connect(alice).setClaimed(root, [bob.address])
       ).to.be.revertedWith('NOT_ADMIN')
     })
 
@@ -605,10 +602,7 @@ describe('Pool Unit Tests', () => {
         .setClaimed(root, [alice.address, bob.address])
 
       await expect(
-        pool.connect(deployer).setClaimed(
-             root,
-            [alice.address, bob.address]
-            )
+        pool.connect(deployer).setClaimed(root, [alice.address, bob.address])
       ).to.be.revertedWith('CLAIM_ALREADY_MADE')
     })
   })
