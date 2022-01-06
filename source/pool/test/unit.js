@@ -532,6 +532,12 @@ describe('Pool Unit Tests', () => {
       ).to.be.revertedWith('Ownable: caller is not the owner')
     })
 
+    it('Test addAdmin reverts with zero address', async () => {
+      await expect(
+        pool.connect(deployer).addAdmin('0x0000000000000000000000000000000000000000')
+      ).to.be.revertedWith('INVALID_ADDRESS')
+    })
+
     it('Test removeAdmin is successful', async () => {
       await pool.addAdmin(alice.address)
       await pool.removeAdmin(alice.address)
@@ -543,6 +549,12 @@ describe('Pool Unit Tests', () => {
       await expect(
         pool.connect(alice).removeAdmin(alice.address)
       ).to.be.revertedWith('Ownable: caller is not the owner')
+    })
+
+    it('Test removeAdmin executed by non-admin reverts', async () => {
+      await expect(
+        pool.connect(deployer).removeAdmin(alice.address)
+      ).to.be.revertedWith('ADMIN_NOT_SET')
     })
 
     it('enable successful with admin', async () => {
@@ -577,6 +589,40 @@ describe('Pool Unit Tests', () => {
             },
           ],
           feeToken.address
+        )
+      ).to.be.revertedWith('CLAIM_ALREADY_MADE')
+    })
+
+    it('Test setclaimed with non-admin reverts', async () => {
+      await feeToken.mock.balanceOf.returns('100000')
+      await feeToken.mock.transfer.returns(true)
+
+      const root = getRoot(tree)
+
+      await expect(
+        pool
+        .connect(alice)
+        .setClaimed(
+          root,
+          [bob.address]
+        )
+      ).to.be.revertedWith('NOT_ADMIN')
+    })
+
+    it('Test setclaimed reverts with claim already made', async () => {
+      await feeToken.mock.balanceOf.returns('100000')
+      await feeToken.mock.transfer.returns(true)
+
+      const root = getRoot(tree)
+
+      await pool.connect(deployer).setClaimed(root, [bob.address])
+      
+      await expect(
+        pool
+        .connect(deployer)
+        .setClaimed(
+          root,
+          [bob.address]
         )
       ).to.be.revertedWith('CLAIM_ALREADY_MADE')
     })
