@@ -7,6 +7,7 @@ const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
 const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
 const STAKING = require('@airswap/staking/build/contracts/Staking.sol/Staking.json')
+const {ADDRESS_ZERO} = require('@airswap/constants')
 
 function toWei(value, places) {
   return toAtomicString(value, places || 18)
@@ -127,7 +128,7 @@ describe('Pool Unit Tests', () => {
       await expect(
         pool
           .connect(deployer)
-          .setStakingContract('0x0000000000000000000000000000000000000000')
+          .setStakingContract(ADDRESS_ZERO)
       ).to.be.revertedWith('INVALID_ADDRESS')
     })
 
@@ -141,7 +142,7 @@ describe('Pool Unit Tests', () => {
       await expect(
         pool
           .connect(deployer)
-          .setStakingToken('0x0000000000000000000000000000000000000000')
+          .setStakingToken(ADDRESS_ZERO)
       ).to.be.revertedWith('INVALID_ADDRESS')
     })
   })
@@ -320,7 +321,6 @@ describe('Pool Unit Tests', () => {
 
     it('withdrawWithRecipient reverts with minimumAmount not met', async () => {
       await feeToken.mock.balanceOf.returns('100000')
-      await feeToken.mock.transfer.returns(true)
 
       const root = getRoot(tree)
       await pool.connect(deployer).enable(root)
@@ -376,9 +376,6 @@ describe('Pool Unit Tests', () => {
     })
 
     it('withdrawAndStake reverts with wrong token', async () => {
-      await feeToken.mock.balanceOf.returns('100000')
-      await feeToken.mock.transferFrom.returns(true)
-
       const root = getRoot(tree)
       await pool.connect(deployer).enable(root)
 
@@ -433,8 +430,6 @@ describe('Pool Unit Tests', () => {
 
     it('withdrawAndStakeFor reverts with wrong token', async () => {
       await feeToken.mock.balanceOf.returns('100000')
-      await feeToken.mock.transfer.returns(true)
-      await feeToken.mock.transferFrom.returns(true)
 
       const root = getRoot(tree)
       await pool.connect(deployer).enable(root)
@@ -534,7 +529,7 @@ describe('Pool Unit Tests', () => {
 
     it('Test addAdmin reverts with zero address', async () => {
       await expect(
-        pool.connect(deployer).addAdmin('0x0000000000000000000000000000000000000000')
+        pool.connect(deployer).addAdmin(ADDRESS_ZERO)
       ).to.be.revertedWith('INVALID_ADDRESS')
     })
 
@@ -569,7 +564,6 @@ describe('Pool Unit Tests', () => {
 
     it('Test setclaimed with admin is successful', async () => {
       await feeToken.mock.balanceOf.returns('100000')
-      await feeToken.mock.transfer.returns(true)
 
       await pool.addAdmin(alice.address)
 
@@ -595,7 +589,6 @@ describe('Pool Unit Tests', () => {
 
     it('Test setclaimed with non-admin reverts', async () => {
       await feeToken.mock.balanceOf.returns('100000')
-      await feeToken.mock.transfer.returns(true)
 
       const root = getRoot(tree)
 
@@ -611,7 +604,6 @@ describe('Pool Unit Tests', () => {
 
     it('Test setclaimed reverts with claim already made', async () => {
       await feeToken.mock.balanceOf.returns('100000')
-      await feeToken.mock.transfer.returns(true)
 
       const root = getRoot(tree)
 
