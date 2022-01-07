@@ -555,24 +555,6 @@ describe('Converter Unit Tests', () => {
       await testAToken.mock.approve
         .withArgs(uniswapV2Router02Contract.address, testATokenStartingBalance)
         .returns(false)
-      await uniswapV2Router02Contract.mock.swapExactTokensForTokensSupportingFeeOnTransferTokens.returns()
-
-      const swapToTokenReturnBalance = 25000
-
-      await swapToToken.mock.transfer.returns(true)
-
-      await swapToToken.mock.balanceOf
-        .withArgs(converter.address)
-        .returns(swapToTokenReturnBalance)
-
-      const triggerAmount = (swapToTokenReturnBalance * triggerFee) / 100
-      await swapToToken.mock.balanceOf
-        .withArgs(deployer.address)
-        .returns(triggerAmount)
-
-      await swapToToken.mock.balanceOf
-        .withArgs(payees[0])
-        .returns(swapToTokenReturnBalance - triggerAmount)
 
       await expect(
         converter
@@ -597,15 +579,6 @@ describe('Converter Unit Tests', () => {
 
     it('user cannot convert and transfer a token with an _amountOutMin of zero', async () => {
       const _amountOutMin = 0
-      const testATokenStartingBalance = 25000
-
-      await testAToken.mock.approve.returns(true)
-
-      await testAToken.mock.transfer.returns(true)
-
-      await testAToken.mock.balanceOf
-        .withArgs(converter.address)
-        .returns(testATokenStartingBalance)
 
       await expect(
         converter
