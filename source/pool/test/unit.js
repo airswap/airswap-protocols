@@ -429,8 +429,6 @@ describe('Pool Unit Tests', () => {
     })
 
     it('withdrawAndStakeFor reverts with wrong token', async () => {
-      await feeToken.mock.balanceOf.returns('100000')
-
       const root = getRoot(tree)
       await pool.connect(deployer).enable(root)
 
