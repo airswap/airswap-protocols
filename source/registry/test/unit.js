@@ -250,6 +250,45 @@ describe('Registry Unit', () => {
       ).to.be.revertedWith('TOKEN_DOES_NOT_EXIST')
     })
   })
+  describe('Test Zero Amount Transfer', async () => {
+    it('zero transfer amount', async () => {
+      let zero_amount = '0'
+      deployRegistry = await registryFactory.deploy(
+        stakingToken.address,
+        zero_amount,
+        zero_amount
+      )
+      await deployRegistry.deployed()
+      await deployRegistry.connect(account1).addTokens([token1.address])
+      await stakingToken.mock.transferFrom.returns(true)
+    })
+    it('zero transfer amount when removing token', async () => {
+      let zero_amount = '0'
+      deployRegistry = await registryFactory.deploy(
+        stakingToken.address,
+        zero_amount,
+        zero_amount
+      )
+      await deployRegistry.deployed()
+      await deployRegistry.connect(account1).addTokens([token1.address])
+      await deployRegistry.connect(account1).removeTokens([token1.address])
+      await stakingToken.mock.transferFrom.returns(true)
+    })
+    it('zero transfer amount when removing all tokens', async () => {
+      let zero_amount = '0'
+      deployRegistry = await registryFactory.deploy(
+        stakingToken.address,
+        zero_amount,
+        zero_amount
+      )
+      await deployRegistry.deployed()
+      await deployRegistry
+        .connect(account1)
+        .addTokens([token1.address, token2.address, token3.address])
+      await deployRegistry.connect(account1).removeAllTokens()
+      await stakingToken.mock.transferFrom.returns(true)
+    })
+  })
 
   describe('Set URL', async () => {
     it('successful setting of url', async () => {
