@@ -6,6 +6,7 @@ const {
 } = require('@airswap/utils')
 const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
+const { ADDRESS_ZERO } = require('@airswap/constants')
 
 const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
 const IERC721 = require('@openzeppelin/contracts/build/contracts/IERC721.json')
@@ -100,6 +101,24 @@ describe('Wrapper Unit Tests', () => {
     await wrapper.deployed()
   })
 
+  describe('revert deploy', async () => {
+    it('test deploy fails when swap contract address is zero address', async () => {
+      await expect(
+        (
+          await ethers.getContractFactory('Wrapper')
+        ).deploy(ADDRESS_ZERO, wethToken.address)
+      ).to.be.revertedWith('INVALID_CONTRACT')
+    })
+
+    it('test deploy fails when weth contract address is zero address', async () => {
+      await expect(
+        (
+          await ethers.getContractFactory('Wrapper')
+        ).deploy(swap.address, ADDRESS_ZERO)
+      ).to.be.revertedWith('INVALID_WETH_CONTRACT')
+    })
+  })
+
   describe('Test swap config', async () => {
     it('test changing swap contract by non-owner', async () => {
       await expect(
@@ -111,6 +130,12 @@ describe('Wrapper Unit Tests', () => {
 
       const storedSwapContract = await wrapper.swapContract()
       expect(await storedSwapContract).to.equal(newSwap.address)
+    })
+
+    it('test changing swap contract fails when set to zero address', async () => {
+      await expect(
+        wrapper.connect(deployer).setSwapContract(ADDRESS_ZERO)
+      ).to.be.revertedWith('INVALID_CONTRACT')
     })
   })
 
@@ -155,6 +180,20 @@ describe('Wrapper Unit Tests', () => {
         signer
       )
       await wrapper.connect(sender).swap(...order, { value: DEFAULT_AMOUNT })
+    })
+    it('test that unwrap fails', async () => {
+      const order = await createSignedOrder(
+        {
+          signerToken: wethToken.address,
+          senderWallet: wrapper.address,
+          senderAmount: DEFAULT_AMOUNT,
+        },
+        signer
+      )
+
+      await expect(wrapper.connect(sender).swap(...order)).to.be.revertedWith(
+        'ETH_RETURN_FAILED'
+      )
     })
     it('Test fallback function revert', async () => {
       await expect(

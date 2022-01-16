@@ -1,16 +1,8 @@
 [
   {
     "inputs": [
-      {
-        "internalType": "address",
-        "name": "_feeWallet",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_fee",
-        "type": "uint256"
-      }
+      { "internalType": "address", "name": "_feeWallet", "type": "address" },
+      { "internalType": "uint256", "name": "_fee", "type": "uint256" }
     ],
     "stateMutability": "nonpayable",
     "type": "constructor"
@@ -127,7 +119,7 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "protocolFee",
+        "name": "signerFee",
         "type": "uint256"
       },
       {
@@ -155,101 +147,55 @@
   {
     "inputs": [],
     "name": "DOMAIN_CHAIN_ID",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [],
     "name": "DOMAIN_NAME",
-    "outputs": [
-      {
-        "internalType": "bytes32",
-        "name": "",
-        "type": "bytes32"
-      }
-    ],
+    "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [],
     "name": "DOMAIN_SEPARATOR",
-    "outputs": [
-      {
-        "internalType": "bytes32",
-        "name": "",
-        "type": "bytes32"
-      }
-    ],
+    "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [],
     "name": "DOMAIN_TYPEHASH",
-    "outputs": [
-      {
-        "internalType": "bytes32",
-        "name": "",
-        "type": "bytes32"
-      }
-    ],
+    "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [],
     "name": "DOMAIN_VERSION",
-    "outputs": [
-      {
-        "internalType": "bytes32",
-        "name": "",
-        "type": "bytes32"
-      }
-    ],
+    "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [],
     "name": "FEE_DIVISOR",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [],
     "name": "ORDER_TYPEHASH",
-    "outputs": [
-      {
-        "internalType": "bytes32",
-        "name": "",
-        "type": "bytes32"
-      }
-    ],
+    "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      {
-        "internalType": "address",
-        "name": "signer",
-        "type": "address"
-      }
+      { "internalType": "address", "name": "signer", "type": "address" }
     ],
     "name": "authorize",
     "outputs": [],
@@ -257,31 +203,15 @@
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
+    "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
     "name": "authorized",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      {
-        "internalType": "uint256[]",
-        "name": "nonces",
-        "type": "uint256[]"
-      }
+      { "internalType": "uint256[]", "name": "nonces", "type": "uint256[]" }
     ],
     "name": "cancel",
     "outputs": [],
@@ -291,63 +221,31 @@
   {
     "inputs": [],
     "name": "feeWallet",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [],
     "name": "getChainId",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "id",
-        "type": "uint256"
-      }
-    ],
+    "outputs": [{ "internalType": "uint256", "name": "id", "type": "uint256" }],
     "stateMutability": "pure",
     "type": "function"
   },
   {
     "inputs": [
-      {
-        "internalType": "address",
-        "name": "signer",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "nonce",
-        "type": "uint256"
-      }
+      { "internalType": "address", "name": "signer", "type": "address" },
+      { "internalType": "uint256", "name": "nonce", "type": "uint256" }
     ],
     "name": "nonceUsed",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [],
     "name": "owner",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
     "stateMutability": "view",
     "type": "function"
   },
@@ -367,11 +265,7 @@
   },
   {
     "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "newSignerFee",
-        "type": "uint256"
-      }
+      { "internalType": "uint256", "name": "newSignerFee", "type": "uint256" }
     ],
     "name": "setFee",
     "outputs": [],
@@ -380,11 +274,7 @@
   },
   {
     "inputs": [
-      {
-        "internalType": "address",
-        "name": "newFeeWallet",
-        "type": "address"
-      }
+      { "internalType": "address", "name": "newFeeWallet", "type": "address" }
     ],
     "name": "setFeeWallet",
     "outputs": [],
@@ -393,69 +283,31 @@
   },
   {
     "inputs": [],
-    "name": "protocolFee",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
+    "name": "signerFee",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "nonce",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "expiry",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "signerWallet",
-        "type": "address"
-      },
+      { "internalType": "uint256", "name": "nonce", "type": "uint256" },
+      { "internalType": "uint256", "name": "expiry", "type": "uint256" },
+      { "internalType": "address", "name": "signerWallet", "type": "address" },
       {
         "internalType": "contract IERC20",
         "name": "signerToken",
         "type": "address"
       },
-      {
-        "internalType": "uint256",
-        "name": "signerAmount",
-        "type": "uint256"
-      },
+      { "internalType": "uint256", "name": "signerAmount", "type": "uint256" },
       {
         "internalType": "contract IERC20",
         "name": "senderToken",
         "type": "address"
       },
-      {
-        "internalType": "uint256",
-        "name": "senderAmount",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint8",
-        "name": "v",
-        "type": "uint8"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "r",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "s",
-        "type": "bytes32"
-      }
+      { "internalType": "uint256", "name": "senderAmount", "type": "uint256" },
+      { "internalType": "uint8", "name": "v", "type": "uint8" },
+      { "internalType": "bytes32", "name": "r", "type": "bytes32" },
+      { "internalType": "bytes32", "name": "s", "type": "bytes32" }
     ],
     "name": "swap",
     "outputs": [],
@@ -464,61 +316,25 @@
   },
   {
     "inputs": [
-      {
-        "internalType": "address",
-        "name": "recipient",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "nonce",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "expiry",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "signerWallet",
-        "type": "address"
-      },
+      { "internalType": "address", "name": "recipient", "type": "address" },
+      { "internalType": "uint256", "name": "nonce", "type": "uint256" },
+      { "internalType": "uint256", "name": "expiry", "type": "uint256" },
+      { "internalType": "address", "name": "signerWallet", "type": "address" },
       {
         "internalType": "contract IERC20",
         "name": "signerToken",
         "type": "address"
       },
-      {
-        "internalType": "uint256",
-        "name": "signerAmount",
-        "type": "uint256"
-      },
+      { "internalType": "uint256", "name": "signerAmount", "type": "uint256" },
       {
         "internalType": "contract IERC20",
         "name": "senderToken",
         "type": "address"
       },
-      {
-        "internalType": "uint256",
-        "name": "senderAmount",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint8",
-        "name": "v",
-        "type": "uint8"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "r",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "s",
-        "type": "bytes32"
-      }
+      { "internalType": "uint256", "name": "senderAmount", "type": "uint256" },
+      { "internalType": "uint8", "name": "v", "type": "uint8" },
+      { "internalType": "bytes32", "name": "r", "type": "bytes32" },
+      { "internalType": "bytes32", "name": "s", "type": "bytes32" }
     ],
     "name": "swapWithRecipient",
     "outputs": [],
@@ -527,11 +343,7 @@
   },
   {
     "inputs": [
-      {
-        "internalType": "address",
-        "name": "newOwner",
-        "type": "address"
-      }
+      { "internalType": "address", "name": "newOwner", "type": "address" }
     ],
     "name": "transferOwnership",
     "outputs": [],

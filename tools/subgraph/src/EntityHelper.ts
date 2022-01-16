@@ -1,5 +1,5 @@
 import { BigDecimal, BigInt, Bytes } from "@graphprotocol/graph-ts"
-import { User, Token, Indexer, DelegateFactory, SwapContract, Locker, Pool, CollectedFeesDay } from "../generated/schema"
+import { User, Token, Indexer, DelegateFactory, SwapContract, Locker, Pool, CollectedFeesDay, VolumeDay } from "../generated/schema"
 
 export function getUser(userAddress: string): User {
   let user = User.load(userAddress)
@@ -90,4 +90,16 @@ export function getCollectedFeesDay(dayId: string): CollectedFeesDay {
     fees.save()
   }
   return fees as CollectedFeesDay
+}
+
+export function getVolumeDay(dayId: string): VolumeDay {
+  //the following uses integer division based on the number of seconds in a day to generate the id and date
+  let volume = VolumeDay.load(dayId)
+  if (!volume) {
+    volume = new VolumeDay(dayId)
+    volume.date = 0
+    volume.amount = BigDecimal.fromString('0')
+    volume.save()
+  }
+  return volume as VolumeDay
 }
