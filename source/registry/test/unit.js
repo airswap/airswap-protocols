@@ -14,6 +14,7 @@ describe('Registry Unit', () => {
   let stakingToken
   let registryFactory
   let registry
+  let registryZeroCost
   const OBLIGATION_COST = 1000
   const TOKEN_COST = 10
 
@@ -250,43 +251,40 @@ describe('Registry Unit', () => {
       ).to.be.revertedWith('TOKEN_DOES_NOT_EXIST')
     })
   })
+
   describe('Test Zero Amount Transfer', async () => {
-    it('zero transfer amount', async () => {
-      let zero_amount = '0'
-      deployRegistry = await registryFactory.deploy(
+    beforeEach(async () => {
+      let zero_cost = '0'
+      registryZeroCost = await registryFactory.deploy(
         stakingToken.address,
-        zero_amount,
-        zero_amount
+        zero_cost,
+        zero_cost
       )
-      await deployRegistry.deployed()
-      await deployRegistry.connect(account1).addTokens([token1.address])
-      await stakingToken.mock.transferFrom.returns(true)
+      await registryZeroCost.deployed()
+    })
+
+    it('zero transfer amount', async () => {
+      await expect(
+        registryZeroCost.connect(account1).addTokens([token1.address])
+      )
+        .to.emit(registryZeroCost, 'AddTokens')
+        .withArgs(account1.address, [token1.address])
     })
     it('zero transfer amount when removing token', async () => {
-      let zero_amount = '0'
-      deployRegistry = await registryFactory.deploy(
-        stakingToken.address,
-        zero_amount,
-        zero_amount
+      await registryZeroCost.connect(account1).addTokens([token1.address])
+      await expect(
+        registryZeroCost.connect(account1).removeTokens([token1.address])
       )
-      await deployRegistry.deployed()
-      await deployRegistry.connect(account1).addTokens([token1.address])
-      await deployRegistry.connect(account1).removeTokens([token1.address])
-      await stakingToken.mock.transferFrom.returns(true)
+        .to.emit(registryZeroCost, 'RemoveTokens')
+        .withArgs(account1.address, [token1.address])
     })
     it('zero transfer amount when removing all tokens', async () => {
-      let zero_amount = '0'
-      deployRegistry = await registryFactory.deploy(
-        stakingToken.address,
-        zero_amount,
-        zero_amount
-      )
-      await deployRegistry.deployed()
-      await deployRegistry
+      await registryZeroCost
         .connect(account1)
         .addTokens([token1.address, token2.address, token3.address])
-      await deployRegistry.connect(account1).removeAllTokens()
-      await stakingToken.mock.transferFrom.returns(true)
+      await expect(registryZeroCost.connect(account1).removeAllTokens())
+        .to.emit(registryZeroCost, 'FullUnstake')
+        .withArgs(account1.address)
     })
   })
 

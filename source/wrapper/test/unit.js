@@ -102,7 +102,7 @@ describe('Wrapper Unit Tests', () => {
   })
 
   describe('revert deploy', async () => {
-    it('zero swap contract address reverts', async () => {
+    it('test deploy fails when swap contract address is zero address', async () => {
       await expect(
         (
           await ethers.getContractFactory('Wrapper')
@@ -110,7 +110,7 @@ describe('Wrapper Unit Tests', () => {
       ).to.be.revertedWith('INVALID_CONTRACT')
     })
 
-    it('zero weth contract address reverts', async () => {
+    it('test deploy fails when weth contract address is zero address', async () => {
       await expect(
         (
           await ethers.getContractFactory('Wrapper')
@@ -132,7 +132,7 @@ describe('Wrapper Unit Tests', () => {
       expect(await storedSwapContract).to.equal(newSwap.address)
     })
 
-    it('reverts when set swap contract address is zero', async () => {
+    it('test changing swap contract fails when set to zero address', async () => {
       await expect(
         wrapper.connect(deployer).setSwapContract(ADDRESS_ZERO)
       ).to.be.revertedWith('INVALID_CONTRACT')
