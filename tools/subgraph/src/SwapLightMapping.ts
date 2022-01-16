@@ -4,7 +4,8 @@ import {
 } from "../generated/SwapLightContract/SwapLightContract"
 import { SwapLightContract, SwapLight } from "../generated/schema"
 import { getUser, getToken, } from "./EntityHelper"
-import { updateCollectedFeesDay } from "./PricingHelper"
+import { updateCollectedFeesDay, computeValueUsd, computeFeeAmountUsd } from "./PricingHelper"
+import { updateVolumeDay } from "./VolumeHelper"
 
 export function handleCancel(event: Cancel): void {
   let user = getUser(event.params.signerWallet.toHex())
@@ -25,6 +26,8 @@ export function handleSwap(event: SwapEvent): void {
     swapContract.save()
   }
 
+  const feeDivisor = SwapLightContract.bind(event.address).FEE_DIVISOR()
+
   let signer = getUser(event.params.signerWallet.toHex())
   let sender = getUser(event.params.senderWallet.toHex())
   let signerToken = getToken(event.params.signerToken.toHex())
@@ -44,12 +47,23 @@ export function handleSwap(event: SwapEvent): void {
   completedSwap.signer = signer.id
   completedSwap.signerAmount = event.params.signerAmount
   completedSwap.signerToken = signerToken.id
-  completedSwap.protocolFee = event.params.protocolFee
+  completedSwap.protocolFee = event.params.signerFee
 
   completedSwap.sender = sender.id
   completedSwap.senderAmount = event.params.senderAmount
   completedSwap.senderToken = senderToken.id
 
+  const valueUsd = computeValueUsd(
+    event.params.signerToken.toHex(),
+    event.params.signerAmount
+  );
+
+  const feesUsd = computeFeeAmountUsd(valueUsd, event.params.signerFee, feeDivisor)
+
+  completedSwap.swapValueUsd = valueUsd;
+  completedSwap.feeValueUsd = feesUsd;
+
   completedSwap.save()
-  updateCollectedFeesDay(event)
+  updateCollectedFeesDay(event, feesUsd)
+  updateVolumeDay(event, valueUsd)
 }

@@ -116,7 +116,7 @@ dataSources:
         - name: SwapLightContract
           file: ./abis/Light.json
         - name: Oracle
-          file: ./abis/AggregatorV3Interface.json
+          file: ./abis/FeedRegistry.json
       eventHandlers:
         - event: Cancel(indexed uint256,indexed address)
           handler: handleCancel
@@ -195,13 +195,13 @@ templates:
       kind: ethereum/events
       apiVersion: 0.0.5
       language: wasm/assemblyscript
-      file: ./src/IndexMapping.ts 
+      file: ./src/IndexMapping.ts
       entities:
         - Index
       abis:
         - name: Index
           file: ./abis/Index.json
-      eventHandlers: 
+      eventHandlers:
         - event: SetLocator(indexed address,uint256,indexed bytes32)
           handler: handleSetLocator
         - event: UnsetLocator(indexed address)
@@ -211,7 +211,7 @@ templates:
     network: '{{network}}'
     source:
       abi: Delegate
-    mapping: 
+    mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
       language: wasm/assemblyscript
@@ -221,11 +221,10 @@ templates:
       abis:
         - name: Delegate
           file: ./abis/Delegate.json
-      eventHandlers: 
+      eventHandlers:
         - event: SetRule(indexed address,indexed address,indexed address,uint256,uint256,uint256)
           handler: handleSetRule
         - event: UnsetRule(indexed address,indexed address,indexed address)
           handler: handleUnsetRule
         - event: ProvideOrder(indexed address,address,indexed address,indexed address,uint256,uint256,uint256)
           handler: handleProvideOrder
-

@@ -17,7 +17,6 @@ type SwapLightContract @entity {
 
 type Swap @entity {
   id: ID! # signer address + nonce
-
   swap: SwapContract! # address of swap contract that executed this order
   block: BigInt # The block this swap was executed at
   transactionHash: Bytes # The transaction hash the swap was executed at
@@ -25,7 +24,6 @@ type Swap @entity {
   from: Bytes # address of the originator of the transaction
   to: Bytes # who the originator sent the transaction to
   value: BigInt # value sent with the transaction
-
   nonce: BigInt # order nonce for a user
   expiry: BigInt
 
@@ -47,7 +45,6 @@ type Swap @entity {
 
 type SwapLight @entity {
   id: ID! # signer address + nonce
-
   swap: SwapLightContract! # address of swap contract that executed this order
   block: BigInt # The block this swap was executed at
   transactionHash: Bytes # The transaction hash the swap was executed at
@@ -55,18 +52,20 @@ type SwapLight @entity {
   from: Bytes # address of the originator of the transaction
   to: Bytes # who the originator sent the transaction to
   value: BigInt # value sent with the transaction
-
   nonce: BigInt # order nonce for a user
   expiry: BigInt
 
   signer: User
   signerAmount: BigInt
   signerToken: Token
-  protocolFee: BigInt
+  signerFee: BigInt
 
   sender: User
   senderAmount: BigInt
   senderToken: Token
+
+  swapValueUsd: BigInt
+  feeValueUsd: BigInt
 }
 
 type Token @entity {
@@ -158,6 +157,12 @@ type EnabledRoot @entity {
 }
 
 type CollectedFeesDay @entity {
+  id: ID!
+  date: Int!
+  amount: BigDecimal!
+}
+
+type VolumeDay @entity {
   id: ID!
   date: Int!
   amount: BigDecimal!
