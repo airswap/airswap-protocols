@@ -26,6 +26,18 @@ export type Order = {
   senderAmount: string
 } & Signature
 
+export type UnsignedClaim = {
+  nonce: string
+  participant: string
+  score: string
+}
+
+export type Claim = {
+  nonce: string
+  participant: string
+  score: string
+} & Signature
+
 export type Token = {
   address: string
   symbol: string
@@ -38,7 +50,7 @@ export type LocatorResult = {
   nextCursor: string
 }
 
-export const EIP712 = {
+export const EIP712Swap = {
   EIP712Domain: [
     { name: 'name', type: 'string' },
     { name: 'version', type: 'string' },
@@ -55,6 +67,20 @@ export const EIP712 = {
     { name: 'senderWallet', type: 'address' },
     { name: 'senderToken', type: 'address' },
     { name: 'senderAmount', type: 'uint256' },
+  ],
+}
+
+export const EIP712Claim = {
+  EIP712Domain: [
+    { name: 'name', type: 'string' },
+    { name: 'version', type: 'string' },
+    { name: 'chainId', type: 'uint256' },
+    { name: 'verifyingContract', type: 'address' },
+  ],
+  Claim: [
+    { name: 'nonce', type: 'uint256' },
+    { name: 'participant', type: 'address' },
+    { name: 'score', type: 'uint256' },
   ],
 }
 

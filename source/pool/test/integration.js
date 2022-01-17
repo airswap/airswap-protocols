@@ -1,7 +1,6 @@
 const { expect } = require('chai')
-const { soliditySha3 } = require('web3-utils')
 const { toAtomicString } = require('@airswap/utils')
-const { generateTreeFromData, getRoot, getProof } = require('@airswap/merkle')
+const { createClaim, createClaimSignature } = require('@airswap/utils')
 
 const { ethers } = require('hardhat')
 const ERC20 = require('@openzeppelin/contracts/build/contracts/ERC20PresetMinterPauser.json')
@@ -18,18 +17,26 @@ describe('Pool Integration Tests', () => {
   let carol
   let stakeContract
 
+  const CHAIN_ID = 31337
   const CLAIM_SCALE = 10
   const CLAIM_MAX = 50
 
   const ALICE_SCORE = toWei(10000, 4)
   const BOB_SCORE = toWei(100000, 4)
-  const CAROL_SCORE = toWei(1000000, 4)
 
-  let tree
   let feeToken
   let feeToken2
   let pool
   let snapshotId
+
+  async function createUnsignedClaim(params) {
+    const unsignedClaim = createClaim({
+      participant: alice.address,
+      score: ALICE_SCORE,
+      ...params,
+    })
+    return unsignedClaim
+  }
 
   beforeEach(async () => {
     snapshotId = await ethers.provider.send('evm_snapshot')
@@ -64,157 +71,315 @@ describe('Pool Integration Tests', () => {
 
     feeToken.mint(pool.address, 100000)
     feeToken2.mint(pool.address, 10000)
-
-    tree = generateTreeFromData({
-      [alice.address]: ALICE_SCORE,
-      [bob.address]: BOB_SCORE,
-      [carol.address]: CAROL_SCORE,
-    })
   })
 
   describe('Test withdraw', async () => {
     it('withdraw success', async () => {
-      const root = getRoot(tree)
-      await pool.connect(deployer).enable(root)
+      const claim = await createUnsignedClaim({})
 
-      const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
+      const claimSignature = await createClaimSignature(
+        claim,
+        deployer,
+        pool.address,
+        CHAIN_ID
+      )
       await expect(
-        await pool.connect(alice).withdraw(
-          [
-            {
-              root: getRoot(tree),
-              score: ALICE_SCORE,
-              proof,
-            },
-          ],
-          feeToken.address
-        )
+        await pool
+          .connect(alice)
+          .withdraw(
+            feeToken.address,
+            claim.nonce,
+            ALICE_SCORE,
+            claimSignature.v,
+            claimSignature.r,
+            claimSignature.s
+          )
       ).to.emit(pool, 'Withdraw')
 
-      const isClaimed = await pool.claimed(root, alice.address)
+      const isClaimed = await pool.noncesClaimed(alice.address, claim.nonce)
       expect(isClaimed).to.equal(true)
     })
 
-    it('withdraw reverts with no claims provided', async () => {
+    it('withdraw success with claims by different participants', async () => {
+      const nonce = 1
+
+      const claimAlice = await createUnsignedClaim({ nonce: nonce })
+      const claimAliceSignature = await createClaimSignature(
+        claimAlice,
+        deployer,
+        pool.address,
+        CHAIN_ID
+      )
+
+      const participant = bob.address
+      const claimBob = await createUnsignedClaim({
+        participant: participant,
+        score: BOB_SCORE,
+        nonce: nonce,
+      })
+      const claimBobSignature = await createClaimSignature(
+        claimBob,
+        deployer,
+        pool.address,
+        CHAIN_ID
+      )
+
       await expect(
-        pool.connect(deployer).withdraw([], feeToken.address)
-      ).to.be.revertedWith('CLAIMS_MUST_BE_PROVIDED')
+        pool
+          .connect(alice)
+          .withdraw(
+            feeToken.address,
+            nonce,
+            ALICE_SCORE,
+            claimAliceSignature.v,
+            claimAliceSignature.r,
+            claimAliceSignature.s
+          )
+      ).to.emit(pool, 'Withdraw')
+
+      await expect(
+        pool
+          .connect(bob)
+          .withdraw(
+            feeToken.address,
+            nonce,
+            BOB_SCORE,
+            claimBobSignature.v,
+            claimBobSignature.r,
+            claimBobSignature.s
+          )
+      ).to.emit(pool, 'Withdraw')
+
+      expect(await pool.noncesClaimed(alice.address, nonce)).to.equal(true)
+      expect(await pool.noncesClaimed(bob.address, nonce)).to.equal(true)
     })
 
-    it('withdraw reverts with root not enabled', async () => {
-      const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
+    it('withdraw success with new admin', async () => {
+      await pool.connect(deployer).addAdmin(carol.address)
+      const claim = await createUnsignedClaim({})
+
+      const claimSignature = await createClaimSignature(
+        claim,
+        carol,
+        pool.address,
+        CHAIN_ID
+      )
+      await expect(
+        pool
+          .connect(alice)
+          .withdraw(
+            feeToken.address,
+            claim.nonce,
+            ALICE_SCORE,
+            claimSignature.v,
+            claimSignature.r,
+            claimSignature.s
+          )
+      ).to.emit(pool, 'Withdraw')
+
+      const isClaimed = await pool.noncesClaimed(alice.address, claim.nonce)
+      expect(isClaimed).to.equal(true)
+    })
+
+    it('withdraw reverts when admin is removed', async () => {
+      await pool.connect(deployer).addAdmin(carol.address)
+      const claim = await createUnsignedClaim({})
+
+      const claimSignature = await createClaimSignature(
+        claim,
+        carol,
+        pool.address,
+        CHAIN_ID
+      )
+      await pool.connect(deployer).removeAdmin(carol.address)
+      await expect(
+        pool
+          .connect(alice)
+          .withdraw(
+            feeToken.address,
+            claim.nonce,
+            ALICE_SCORE,
+            claimSignature.v,
+            claimSignature.r,
+            claimSignature.s
+          )
+      ).to.be.revertedWith('UNAUTHORIZED')
+
+      const isClaimed = await pool.noncesClaimed(alice.address, claim.nonce)
+      expect(isClaimed).to.equal(false)
+    })
+
+    it('withdraw reverts with score of zero', async () => {
+      const score = 0
+
+      const claim = await createUnsignedClaim({ score: score })
+
+      const claimSignature = await createClaimSignature(
+        claim,
+        deployer,
+        pool.address,
+        CHAIN_ID
+      )
 
       await expect(
-        pool.connect(alice).withdraw(
-          [
-            {
-              root: getRoot(tree),
-              score: ALICE_SCORE,
-              proof,
-            },
-          ],
-          feeToken.address
-        )
-      ).to.be.revertedWith('ROOT_NOT_ENABLED')
+        pool
+          .connect(alice)
+          .withdraw(
+            feeToken.address,
+            claim.nonce,
+            claim.score,
+            claimSignature.v,
+            claimSignature.r,
+            claimSignature.s
+          )
+      ).to.be.revertedWith('SCORE_MUST_BE_PROVIDED')
     })
 
     it('withdraw reverts with claim already made', async () => {
-      const root = getRoot(tree)
-      await pool.connect(deployer).enable(root)
+      const claim = await createUnsignedClaim({})
 
-      const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
-      await pool.connect(alice).withdraw(
-        [
-          {
-            root: getRoot(tree),
-            score: ALICE_SCORE,
-            proof,
-          },
-        ],
-        feeToken.address
+      const claimSignature = await createClaimSignature(
+        claim,
+        deployer,
+        pool.address,
+        CHAIN_ID
       )
+
       await expect(
-        pool.connect(alice).withdraw(
-          [
-            {
-              root: getRoot(tree),
-              score: ALICE_SCORE,
-              proof,
-            },
-          ],
-          feeToken.address
-        )
-      ).to.be.revertedWith('CLAIM_ALREADY_MADE')
+        pool
+          .connect(alice)
+          .withdraw(
+            feeToken.address,
+            claim.nonce,
+            ALICE_SCORE,
+            claimSignature.v,
+            claimSignature.r,
+            claimSignature.s
+          )
+      ).to.emit(pool, 'Withdraw')
+
+      await expect(
+        pool
+          .connect(alice)
+          .withdraw(
+            feeToken.address,
+            claim.nonce,
+            ALICE_SCORE,
+            claimSignature.v,
+            claimSignature.r,
+            claimSignature.s
+          )
+      ).to.be.revertedWith('NONCE_ALREADY_USED')
+    })
+
+    it('withdraw reverts with invalid signatory signing', async () => {
+      const claim = await createUnsignedClaim({})
+
+      const claimSignature = await createClaimSignature(
+        claim,
+        bob,
+        pool.address,
+        CHAIN_ID
+      )
+
+      await expect(
+        pool
+          .connect(alice)
+          .withdraw(
+            feeToken.address,
+            claim.nonce,
+            ALICE_SCORE,
+            claimSignature.v,
+            claimSignature.r,
+            claimSignature.s
+          )
+      ).to.be.revertedWith('UNAUTHORIZED')
     })
 
     it('withdrawWithRecipient success', async () => {
-      const root = getRoot(tree)
-      await pool.connect(deployer).enable(root)
+      const claim = await createUnsignedClaim({})
 
-      const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
+      const claimSignature = await createClaimSignature(
+        claim,
+        deployer,
+        pool.address,
+        CHAIN_ID
+      )
+
       const withdrawMinimum = 0
       await expect(
-        await pool.connect(alice).withdrawWithRecipient(
-          [
-            {
-              root: getRoot(tree),
-              score: ALICE_SCORE,
-              proof,
-            },
-          ],
-          feeToken.address,
-          withdrawMinimum,
-          bob.address
-        )
+        pool
+          .connect(alice)
+          .withdrawWithRecipient(
+            withdrawMinimum,
+            feeToken.address,
+            bob.address,
+            claim.nonce,
+            claim.score,
+            claimSignature.v,
+            claimSignature.r,
+            claimSignature.s
+          )
       ).to.emit(pool, 'Withdraw')
 
-      const isClaimed = await pool.claimed(root, alice.address)
+      const isClaimed = await pool.noncesClaimed(alice.address, claim.nonce)
       expect(isClaimed).to.equal(true)
     })
 
     it('withdrawWithRecipient reverts with minimumAmount not met', async () => {
-      const root = getRoot(tree)
-      await pool.connect(deployer).enable(root)
-
-      const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
       const withdrawMinimum = 496
 
+      const claim = await createUnsignedClaim({})
+
+      const claimSignature = await createClaimSignature(
+        claim,
+        deployer,
+        pool.address,
+        CHAIN_ID
+      )
+
       await expect(
-        pool.connect(alice).withdrawWithRecipient(
-          [
-            {
-              root: getRoot(tree),
-              score: ALICE_SCORE,
-              proof,
-            },
-          ],
-          feeToken.address,
-          withdrawMinimum,
-          bob.address
-        )
+        pool
+          .connect(alice)
+          .withdrawWithRecipient(
+            withdrawMinimum,
+            feeToken.address,
+            bob.address,
+            claim.nonce,
+            claim.score,
+            claimSignature.v,
+            claimSignature.r,
+            claimSignature.s
+          )
       ).to.be.revertedWith('INSUFFICIENT_AMOUNT')
     })
 
     it('withdrawAndStake success', async () => {
-      const root = getRoot(tree)
-      await pool.connect(deployer).enable(root)
+      const claim = await createUnsignedClaim({})
 
-      const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
+      const claimSignature = await createClaimSignature(
+        claim,
+        deployer,
+        pool.address,
+        CHAIN_ID
+      )
+
       const withdrawMinimum = 0
       await expect(
-        pool.connect(alice).withdrawAndStake(
-          [
-            {
-              root: getRoot(tree),
-              score: ALICE_SCORE,
-              proof,
-            },
-          ],
-          feeToken.address,
-          withdrawMinimum
-        )
+        pool
+          .connect(alice)
+          .withdrawAndStake(
+            withdrawMinimum,
+            feeToken.address,
+            claim.nonce,
+            claim.score,
+            claimSignature.v,
+            claimSignature.r,
+            claimSignature.s
+          )
       ).to.emit(pool, 'Withdraw')
-      const isClaimed = await pool.claimed(root, alice.address)
+
+      const isClaimed = await pool.noncesClaimed(alice.address, claim.nonce)
       expect(isClaimed).to.equal(true)
 
       const balance = await stakeContract
@@ -224,48 +389,58 @@ describe('Pool Integration Tests', () => {
     })
 
     it('withdrawAndStake reverts with wrong token', async () => {
-      const root = getRoot(tree)
-      await pool.connect(deployer).enable(root)
+      const claim = await createUnsignedClaim({})
 
-      const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
+      const claimSignature = await createClaimSignature(
+        claim,
+        deployer,
+        pool.address,
+        CHAIN_ID
+      )
+
       const withdrawMinimum = 0
       await expect(
-        pool.connect(alice).withdrawAndStake(
-          [
-            {
-              root: getRoot(tree),
-              score: ALICE_SCORE,
-              proof,
-            },
-          ],
-          feeToken2.address,
-          withdrawMinimum
-        )
+        pool
+          .connect(alice)
+          .withdrawAndStake(
+            withdrawMinimum,
+            feeToken2.address,
+            claim.nonce,
+            claim.score,
+            claimSignature.v,
+            claimSignature.r,
+            claimSignature.s
+          )
       ).to.be.revertedWith('INVALID_TOKEN')
     })
 
     it('withdrawAndStakeFor success', async () => {
-      const root = getRoot(tree)
-      await pool.connect(deployer).enable(root)
+      const claim = await createUnsignedClaim({})
 
-      const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
+      const claimSignature = await createClaimSignature(
+        claim,
+        deployer,
+        pool.address,
+        CHAIN_ID
+      )
+
       const withdrawMinimum = 0
       await expect(
-        await pool.connect(alice).withdrawAndStakeFor(
-          [
-            {
-              root: getRoot(tree),
-              score: ALICE_SCORE,
-              proof,
-            },
-          ],
-          feeToken.address,
-          withdrawMinimum,
-          bob.address
-        )
+        pool
+          .connect(alice)
+          .withdrawAndStakeFor(
+            withdrawMinimum,
+            feeToken.address,
+            bob.address,
+            claim.nonce,
+            claim.score,
+            claimSignature.v,
+            claimSignature.r,
+            claimSignature.s
+          )
       ).to.emit(pool, 'Withdraw')
 
-      const isClaimed = await pool.claimed(root, alice.address)
+      const isClaimed = await pool.noncesClaimed(alice.address, claim.nonce)
       expect(isClaimed).to.equal(true)
 
       const balance = await stakeContract.connect(bob).balanceOf(bob.address)
@@ -273,24 +448,28 @@ describe('Pool Integration Tests', () => {
     })
 
     it('withdrawAndStakeFor reverts with wrong token', async () => {
-      const root = getRoot(tree)
-      await pool.connect(deployer).enable(root)
+      const claim = await createUnsignedClaim({})
 
-      const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
+      const claimSignature = await createClaimSignature(
+        claim,
+        deployer,
+        pool.address,
+        CHAIN_ID
+      )
       const withdrawMinimum = 0
       await expect(
-        pool.connect(alice).withdrawAndStakeFor(
-          [
-            {
-              root: getRoot(tree),
-              score: ALICE_SCORE,
-              proof,
-            },
-          ],
-          feeToken2.address,
-          withdrawMinimum,
-          bob.address
-        )
+        pool
+          .connect(alice)
+          .withdrawAndStakeFor(
+            withdrawMinimum,
+            feeToken2.address,
+            bob.address,
+            claim.nonce,
+            claim.score,
+            claimSignature.v,
+            claimSignature.r,
+            claimSignature.s
+          )
       ).to.be.revertedWith('INVALID_TOKEN')
     })
   })
@@ -302,22 +481,10 @@ describe('Pool Integration Tests', () => {
     })
   })
 
-  describe('Test Calculate Multiple', async () => {
-    it('Test calculation input and output', async () => {
-      const amounts = await pool.calculateMultiple(ALICE_SCORE, [
-        feeToken.address,
-        feeToken2.address,
-      ])
-
-      expect(amounts[0]).to.equal('495')
-      expect(amounts[1]).to.equal('49')
-    })
-  })
-
   describe('Test drain to', async () => {
     it('Test drain to is successful', async () => {
       await expect(
-        await pool
+        pool
           .connect(deployer)
           .drainTo([feeToken.address, feeToken2.address], carol.address)
       ).to.emit(pool, 'DrainTo')

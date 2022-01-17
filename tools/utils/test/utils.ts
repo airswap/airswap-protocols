@@ -5,9 +5,12 @@ import { Levels } from '@airswap/typescript'
 
 import {
   isValidOrder,
+  isValidClaim,
   calculateCostFromLevels,
-  createSignature,
-  getSignerFromSignature,
+  createSwapSignature,
+  createClaimSignature,
+  getSignerFromSwapSignature,
+  getSignerFromClaimSignature,
 } from '../index'
 
 const signerPrivateKey =
@@ -28,13 +31,13 @@ describe('Utils', async () => {
       senderToken: ADDRESS_ZERO,
       senderAmount: '0',
     }
-    const { v, r, s } = await createSignature(
+    const { v, r, s } = await createSwapSignature(
       unsignedOrder,
       wallet.privateKey,
       ADDRESS_ZERO,
       1
     )
-    const signerWallet = getSignerFromSignature(
+    const signerWallet = getSignerFromSwapSignature(
       unsignedOrder,
       ADDRESS_ZERO,
       1,
@@ -43,6 +46,30 @@ describe('Utils', async () => {
       s
     )
     expect(isValidOrder({ ...unsignedOrder, v, r, s })).to.equal(true)
+    expect(signerWallet.toLowerCase()).to.equal(wallet.address.toLowerCase())
+  })
+
+  it('Signs and validates a claim', async () => {
+    const unsignedClaim = {
+      nonce: Date.now().toString(),
+      participant: ADDRESS_ZERO,
+      score: '300',
+    }
+    const { v, r, s } = await createClaimSignature(
+      unsignedClaim,
+      wallet.privateKey,
+      ADDRESS_ZERO,
+      1
+    )
+    const signerWallet = getSignerFromClaimSignature(
+      unsignedClaim,
+      ADDRESS_ZERO,
+      1,
+      v,
+      r,
+      s
+    )
+    expect(isValidClaim({ ...unsignedClaim, v, r, s })).to.equal(true)
     expect(signerWallet.toLowerCase()).to.equal(wallet.address.toLowerCase())
   })
 

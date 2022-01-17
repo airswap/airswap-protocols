@@ -1,7 +1,7 @@
 {
   "name": "@airswap/pool",
   "version": "1.2.4",
-  "description": "Tokens pooled and claimable using merkle proofs",
+  "description": "Tokens pooled and claimable using signatures",
   "contributors": [
     "Don Mosites",
     "Martin Sterlicchi"
