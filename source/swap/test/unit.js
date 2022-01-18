@@ -1,5 +1,5 @@
 const { expect } = require('chai')
-const { ADDRESS_ZERO } = require('@airswap/constants')
+const { ADDRESS_ZERO, SECONDS_IN_DAY } = require('@airswap/constants')
 const {
   createOrder,
   orderToParams,
@@ -147,40 +147,145 @@ describe('Swap Unit Tests', () => {
         )
       ).to.be.revertedWith('INVALID_FEE')
     })
+
+    it('test invalid fee light', async () => {
+      await expect(
+        (
+          await ethers.getContractFactory('Swap')
+        ).deploy(
+          PROTOCOL_FEE,
+          100000000000,
+          protocolFeeWallet.address,
+          REBATE_SCALE,
+          REBATE_MAX,
+          stakingToken.address
+        )
+      ).to.be.revertedWith('INVALID_FEE')
+    })
+
+    it('test invalid rebate scale', async () => {
+      await expect(
+        (
+          await ethers.getContractFactory('Swap')
+        ).deploy(
+          PROTOCOL_FEE,
+          PROTOCOL_FEE_LIGHT,
+          protocolFeeWallet.address,
+          REBATE_SCALE + 1,
+          REBATE_MAX,
+          stakingToken.address
+        )
+      ).to.be.revertedWith('SCALE_TOO_HIGH')
+    })
+
+    it('test invalid rebate maximum', async () => {
+      await expect(
+        (
+          await ethers.getContractFactory('Swap')
+        ).deploy(
+          PROTOCOL_FEE,
+          PROTOCOL_FEE_LIGHT,
+          protocolFeeWallet.address,
+          REBATE_SCALE,
+          REBATE_MAX + 1,
+          stakingToken.address
+        )
+      ).to.be.revertedWith('MAX_TOO_HIGH')
+    })
+
+    it('test invalid rebate maximum', async () => {
+      await expect(
+        (
+          await ethers.getContractFactory('Swap')
+        ).deploy(
+          PROTOCOL_FEE,
+          PROTOCOL_FEE_LIGHT,
+          protocolFeeWallet.address,
+          REBATE_SCALE,
+          REBATE_MAX,
+          ADDRESS_ZERO
+        )
+      ).to.be.revertedWith('INVALID_STAKING_TOKEN')
+    })
   })
 
   describe('Test setters', async () => {
     it('test setProtocolFee', async () => {
-      await expect(
-        await swap.connect(deployer).setProtocolFee(PROTOCOL_FEE)
-      ).to.emit(swap, 'SetProtocolFee')
+      await expect(swap.connect(deployer).setProtocolFee(PROTOCOL_FEE)).to.emit(
+        swap,
+        'SetProtocolFee'
+      )
     })
     it('test setProtocolFeeLight', async () => {
       await expect(
-        await swap.connect(deployer).setProtocolFeeLight(PROTOCOL_FEE_LIGHT)
+        swap.connect(deployer).setProtocolFeeLight(PROTOCOL_FEE_LIGHT)
       ).to.emit(swap, 'SetProtocolFeeLight')
+    })
+    it('test setProtocolFeeLight with invalid input', async () => {
+      await expect(
+        swap.connect(deployer).setProtocolFeeLight(FEE_DIVISOR)
+      ).to.be.revertedWith('INVALID_FEE_LIGHT')
     })
     it('test protocolFeeWallet', async () => {
       await expect(
-        await swap
-          .connect(deployer)
-          .setProtocolFeeWallet(protocolFeeWallet.address)
+        swap.connect(deployer).setProtocolFeeWallet(protocolFeeWallet.address)
       ).to.emit(swap, 'SetProtocolFeeWallet')
     })
     it('test setRebateScale', async () => {
+      await expect(swap.connect(deployer).setRebateScale(REBATE_SCALE)).to.emit(
+        swap,
+        'SetRebateScale'
+      )
+    })
+    it('test setRebateScale with invalid input', async () => {
       await expect(
-        await swap.connect(deployer).setRebateScale(REBATE_SCALE)
-      ).to.emit(swap, 'SetRebateScale')
+        swap.connect(deployer).setRebateScale(REBATE_SCALE + 1)
+      ).to.be.revertedWith('SCALE_TOO_HIGH')
     })
     it('test setRebateMax', async () => {
       await expect(
         await swap.connect(deployer).setRebateMax(REBATE_MAX)
       ).to.emit(swap, 'SetRebateMax')
     })
+    it('test setRebateMax with invalid input', async () => {
+      await expect(
+        swap.connect(deployer).setRebateMax(REBATE_MAX + 1)
+      ).to.be.revertedWith('MAX_TOO_HIGH')
+    })
     it('test setStakingToken', async () => {
       await expect(
-        await swap.connect(deployer).setStakingToken(stakingToken.address)
+        swap.connect(deployer).setStakingToken(stakingToken.address)
       ).to.emit(swap, 'SetStakingToken')
+    })
+    it('test setStakingToken with zero address', async () => {
+      await expect(
+        swap.connect(deployer).setStakingToken(ADDRESS_ZERO)
+      ).to.be.revertedWith('INVALID_FEE_WALLET')
+    })
+  })
+
+  describe('Test calculateProtocolFee', async () => {
+    it('test calculateProtocolFee', async () => {
+      const initialFeeAmount = (DEFAULT_AMOUNT * PROTOCOL_FEE) / FEE_DIVISOR
+      const discount = await swap
+        .connect(deployer)
+        .calculateDiscount(10000000, initialFeeAmount)
+      const actualFeeAmount = await swap
+        .connect(deployer)
+        .calculateProtocolFee(sender.address, DEFAULT_AMOUNT)
+      expect(actualFeeAmount).to.equal(initialFeeAmount - discount)
+    })
+    it('test calculateProtocolFee with protocol fee as zero', async () => {
+      const zeroProtocolFee = 0
+      await swap.connect(deployer).setProtocolFee(zeroProtocolFee)
+      const initialFeeAmount = (DEFAULT_AMOUNT * zeroProtocolFee) / FEE_DIVISOR
+      const discount = await swap
+        .connect(deployer)
+        .calculateDiscount(10000000, initialFeeAmount)
+      const actualFeeAmount = await swap
+        .connect(deployer)
+        .calculateProtocolFee(sender.address, DEFAULT_AMOUNT)
+      expect(actualFeeAmount).to.equal(initialFeeAmount - discount)
     })
   })
 
@@ -188,9 +293,10 @@ describe('Swap Unit Tests', () => {
     it('test swaps', async () => {
       const order = await createSignedOrder({}, signer)
 
-      await expect(
-        await swap.connect(sender).swap(sender.address, ...order)
-      ).to.emit(swap, 'Swap')
+      await expect(swap.connect(sender).swap(sender.address, ...order)).to.emit(
+        swap,
+        'Swap'
+      )
     })
 
     it('test authorized signer', async () => {
@@ -201,13 +307,14 @@ describe('Swap Unit Tests', () => {
         signer
       )
 
-      await expect(await swap.connect(anyone).authorize(signer.address))
+      await expect(swap.connect(anyone).authorize(signer.address))
         .to.emit(swap, 'Authorize')
         .withArgs(signer.address, anyone.address)
 
-      await expect(
-        await swap.connect(sender).swap(sender.address, ...order)
-      ).to.emit(swap, 'Swap')
+      await expect(swap.connect(sender).swap(sender.address, ...order)).to.emit(
+        swap,
+        'Swap'
+      )
     })
 
     it('test when signer not authorized', async () => {
@@ -279,19 +386,64 @@ describe('Swap Unit Tests', () => {
         signer
       )
 
-      await expect(await swap.connect(sender).light(...order)).to.emit(
-        swap,
-        'Swap'
-      )
+      await expect(swap.connect(sender).light(...order)).to.emit(swap, 'Swap')
     })
-    it('test when signer not authorized', async () => {
+    it('test light swaps with authorized', async () => {
       const order = await createSignedOrder(
         {
+          protocolFee: PROTOCOL_FEE_LIGHT,
           signerWallet: anyone.address,
         },
         signer
       )
 
+      await expect(swap.connect(anyone).authorize(signer.address))
+        .to.emit(swap, 'Authorize')
+        .withArgs(signer.address, anyone.address)
+
+      await expect(swap.connect(sender).light(...order)).to.emit(swap, 'Swap')
+    })
+    it('test when expiration has passed', async () => {
+      const order = await createSignedOrder(
+        {
+          protocolFee: PROTOCOL_FEE_LIGHT,
+        },
+        signer
+      )
+      const block = await ethers.provider.getBlock()
+      await ethers.provider.send('evm_mine', [block.timestamp + SECONDS_IN_DAY])
+      await expect(swap.connect(sender).light(...order)).to.be.revertedWith(
+        'EXPIRY_PASSED'
+      )
+    })
+    it('test when signatory is invalid', async () => {
+      const order = await createSignedOrder({}, signer)
+      order[7] = '29' // Change "v" of signature
+      await expect(swap.connect(sender).light(...order)).to.be.revertedWith(
+        'SIGNATURE_INVALID'
+      )
+    })
+    it('test when nonce has already been used', async () => {
+      const order = await createSignedOrder(
+        {
+          protocolFee: PROTOCOL_FEE_LIGHT,
+          nonce: '0',
+        },
+        signer
+      )
+      await swap.connect(sender).light(...order)
+      await expect(swap.connect(sender).light(...order)).to.be.revertedWith(
+        'NONCE_ALREADY_USED'
+      )
+    })
+    it('test when signer not authorized', async () => {
+      const order = await createSignedOrder(
+        {
+          protocolFee: PROTOCOL_FEE_LIGHT,
+          signerWallet: signer.address,
+        },
+        anyone
+      )
       await expect(swap.connect(sender).light(...order)).to.be.revertedWith(
         'UNAUTHORIZED'
       )
@@ -303,7 +455,7 @@ describe('Swap Unit Tests', () => {
       await swap.connect(deployer).setProtocolFeeWallet(anyone.address)
 
       const storedFeeWallet = await swap.protocolFeeWallet()
-      await expect(await storedFeeWallet).to.equal(anyone.address)
+      expect(storedFeeWallet).to.equal(anyone.address)
     })
 
     it('test only deployer can change fee wallet', async () => {
@@ -322,7 +474,7 @@ describe('Swap Unit Tests', () => {
       await swap.connect(deployer).setProtocolFee(HIGHER_FEE)
 
       const storedSignerFee = await swap.protocolFee()
-      await expect(await storedSignerFee).to.equal(HIGHER_FEE)
+      expect(storedSignerFee).to.equal(HIGHER_FEE)
     })
 
     it('test only deployer can change fee', async () => {
@@ -339,9 +491,10 @@ describe('Swap Unit Tests', () => {
         signer
       )
       await swap.connect(deployer).setProtocolFee('0')
-      await expect(
-        await swap.connect(sender).swap(sender.address, ...order)
-      ).to.emit(swap, 'Swap')
+      await expect(swap.connect(sender).swap(sender.address, ...order)).to.emit(
+        swap,
+        'Swap'
+      )
     })
 
     it('test invalid fee', async () => {
@@ -378,10 +531,7 @@ describe('Swap Unit Tests', () => {
         },
         signer
       )
-      await expect(await swap.connect(sender).buyNFT(...order)).to.emit(
-        swap,
-        'Swap'
-      )
+      await expect(swap.connect(sender).buyNFT(...order)).to.emit(swap, 'Swap')
     })
     it('test sell NFT', async () => {
       const order = await createSignedOrder(
@@ -391,10 +541,7 @@ describe('Swap Unit Tests', () => {
         },
         signer
       )
-      await expect(await swap.connect(sender).sellNFT(...order)).to.emit(
-        swap,
-        'Swap'
-      )
+      await expect(swap.connect(sender).sellNFT(...order)).to.emit(swap, 'Swap')
     })
     it('test swap NFT', async () => {
       const order = await createSignedOrder(
@@ -404,7 +551,7 @@ describe('Swap Unit Tests', () => {
         },
         signer
       )
-      await expect(await swap.connect(sender).swapNFTs(...order)).to.emit(
+      await expect(swap.connect(sender).swapNFTs(...order)).to.emit(
         swap,
         'Swap'
       )
@@ -428,62 +575,51 @@ describe('Swap Unit Tests', () => {
   describe('Test authorization', async () => {
     it('test authorized is set', async () => {
       await swap.connect(anyone).authorize(signer.address)
-      await expect(await swap.authorized(anyone.address)).to.equal(
-        signer.address
-      )
+      expect(await swap.authorized(anyone.address)).to.equal(signer.address)
+    })
+
+    it('test authorize with zero address', async () => {
+      await expect(
+        swap.connect(deployer).authorize(ADDRESS_ZERO)
+      ).to.be.revertedWith('SIGNER_INVALID')
     })
 
     it('test revoke', async () => {
       await swap.connect(anyone).revoke()
-      await expect(await swap.authorized(anyone.address)).to.equal(ADDRESS_ZERO)
+      expect(await swap.authorized(anyone.address)).to.equal(ADDRESS_ZERO)
     })
   })
 
   describe('Test cancel', async () => {
     it('test cancellation with no items', async () => {
-      await expect(await swap.connect(signer).cancel([])).to.not.emit(
-        swap,
-        'Cancel'
-      )
+      await expect(swap.connect(signer).cancel([])).to.not.emit(swap, 'Cancel')
     })
 
     it('test cancellation with duplicated items', async () => {
-      await expect(await swap.connect(signer).cancel([1, 1])).to.emit(
-        swap,
-        'Cancel'
-      )
-      await expect(await swap.nonceUsed(signer.address, 1)).to.equal(true)
+      await expect(swap.connect(signer).cancel([1, 1])).to.emit(swap, 'Cancel')
+      expect(await swap.nonceUsed(signer.address, 1)).to.equal(true)
     })
 
     it('test cancellation of same item twice', async () => {
-      await expect(await swap.connect(signer).cancel([1])).to.emit(
-        swap,
-        'Cancel'
-      )
-      await expect(await swap.connect(signer).cancel([1])).to.not.emit(
-        swap,
-        'Cancel'
-      )
+      await expect(swap.connect(signer).cancel([1])).to.emit(swap, 'Cancel')
+      await expect(swap.connect(signer).cancel([1])).to.not.emit(swap, 'Cancel')
 
-      await expect(await swap.nonceUsed(signer.address, 1)).to.equal(true)
+      expect(await swap.nonceUsed(signer.address, 1)).to.equal(true)
     })
 
     it('test cancellation with one item', async () => {
-      await expect(await swap.connect(signer).cancel([1])).to.emit(
-        swap,
-        'Cancel'
-      )
-      await expect(await swap.nonceUsed(signer.address, 1)).to.equal(true)
+      await expect(swap.connect(signer).cancel([1])).to.emit(swap, 'Cancel')
+      expect(await swap.nonceUsed(signer.address, 1)).to.equal(true)
     })
 
     it('test an array of nonces, ensure the cancellation of only those orders', async () => {
       await swap.connect(signer).cancel([1, 2, 4, 6])
-      await expect(await swap.nonceUsed(signer.address, 1)).to.equal(true)
-      await expect(await swap.nonceUsed(signer.address, 2)).to.equal(true)
-      await expect(await swap.nonceUsed(signer.address, 3)).to.equal(false)
-      await expect(await swap.nonceUsed(signer.address, 4)).to.equal(true)
-      await expect(await swap.nonceUsed(signer.address, 5)).to.equal(false)
-      await expect(await swap.nonceUsed(signer.address, 6)).to.equal(true)
+      expect(await swap.nonceUsed(signer.address, 1)).to.equal(true)
+      expect(await swap.nonceUsed(signer.address, 2)).to.equal(true)
+      expect(await swap.nonceUsed(signer.address, 3)).to.equal(false)
+      expect(await swap.nonceUsed(signer.address, 4)).to.equal(true)
+      expect(await swap.nonceUsed(signer.address, 5)).to.equal(false)
+      expect(await swap.nonceUsed(signer.address, 6)).to.equal(true)
     })
   })
 

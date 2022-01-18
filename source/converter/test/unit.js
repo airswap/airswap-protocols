@@ -1,6 +1,7 @@
 const { expect } = require('chai')
 const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
+const { ADDRESS_ZERO } = require('@airswap/constants')
 const UniswapV2Router02 = require('@uniswap/v2-periphery/build/IUniswapV2Router02.json')
 const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
 
@@ -72,6 +73,37 @@ describe('Converter Unit Tests', () => {
     })
   })
 
+  describe('Deploy payment splitter contract', async () => {
+    it('contract cannot deploy if payees and shares_ do not match in length', async () => {
+      const Converter = await ethers.getContractFactory('Converter')
+      await expect(
+        Converter.deploy(
+          wETH,
+          swapToToken.address,
+          uniswapV2Router02Contract.address,
+          triggerFee,
+          payees,
+          [10, 1]
+        )
+      ).to.be.revertedWith(
+        'TokenPaymentSplitter: payees and shares length mismatch'
+      )
+    })
+    it('contract cannot deploy if payees length is zero', async () => {
+      const Converter = await ethers.getContractFactory('Converter')
+      await expect(
+        Converter.deploy(
+          wETH,
+          swapToToken.address,
+          uniswapV2Router02Contract.address,
+          triggerFee,
+          [],
+          []
+        )
+      ).to.be.revertedWith('TokenPaymentSplitter: no payees')
+    })
+  })
+
   describe('Set swapToToken', async () => {
     it('non owner cannot set swapToToken', async () => {
       await expect(
@@ -83,9 +115,7 @@ describe('Converter Unit Tests', () => {
 
     it('owner cannot set swapToToken to zero address', async () => {
       await expect(
-        converter
-          .connect(deployer)
-          .setSwapToToken('0x0000000000000000000000000000000000000000')
+        converter.connect(deployer).setSwapToToken(ADDRESS_ZERO)
       ).to.be.revertedWith('MUST_BE_VALID_ADDRESS')
     })
 
@@ -98,6 +128,31 @@ describe('Converter Unit Tests', () => {
       expect(swapToTokenAddress).to.equal(
         '0x6B175474E89094C44Da98b954EedeAC495271d0F'
       )
+    })
+  })
+
+  describe('Set WETH', async () => {
+    it('non owner cannot set WETH', async () => {
+      await expect(
+        converter
+          .connect(account1)
+          .setWETH('0x6B175474E89094C44Da98b954EedeAC495271d0F')
+      ).to.be.revertedWith('Ownable: caller is not the owner')
+    })
+
+    it('owner cannot set WETH to zero address', async () => {
+      await expect(
+        converter.connect(deployer).setWETH(ADDRESS_ZERO)
+      ).to.be.revertedWith('MUST_BE_VALID_ADDRESS')
+    })
+
+    it('owner can set WETH', async () => {
+      await converter
+        .connect(deployer)
+        .setWETH('0x6B175474E89094C44Da98b954EedeAC495271d0F')
+
+      const setWETH = await converter.wETH()
+      expect(setWETH).to.equal('0x6B175474E89094C44Da98b954EedeAC495271d0F')
     })
   })
 
@@ -166,6 +221,12 @@ describe('Converter Unit Tests', () => {
       await expect(
         converter.connect(deployer).addPayee(payeeAddress, 0)
       ).to.be.revertedWith('PaymentSplitter: shares are 0')
+    })
+
+    it('owner cannot add payee with zero address', async () => {
+      await expect(
+        converter.connect(deployer).addPayee(ADDRESS_ZERO, payeeShares)
+      ).to.be.revertedWith('TokenPaymentSplitter: account is the zero address')
     })
 
     it('owner can add payee', async () => {
@@ -369,6 +430,71 @@ describe('Converter Unit Tests', () => {
       expect(payeeSwapToTokenBalance).to.equal(24750)
     })
 
+    it('user can convert and transfer any token without a preset Uniswap pool path if swapToToken is WETH', async () => {
+      await converter.connect(deployer).setWETH(swapToToken.address)
+
+      const testATokenStartingBalance = 25000
+
+      await testAToken.mock.balanceOf
+        .withArgs(converter.address)
+        .returns(testATokenStartingBalance)
+
+      await testAToken.mock.approve
+        .withArgs(uniswapV2Router02Contract.address, testATokenStartingBalance)
+        .returns(true)
+      await uniswapV2Router02Contract.mock.swapExactTokensForTokensSupportingFeeOnTransferTokens.returns()
+
+      const swapToTokenReturnBalance = 25000
+
+      await swapToToken.mock.transfer.returns(true)
+
+      await swapToToken.mock.balanceOf
+        .withArgs(converter.address)
+        .returns(swapToTokenReturnBalance)
+
+      const triggerAmount = (swapToTokenReturnBalance * triggerFee) / 100
+      await swapToToken.mock.balanceOf
+        .withArgs(deployer.address)
+        .returns(triggerAmount)
+
+      await swapToToken.mock.balanceOf
+        .withArgs(payees[0])
+        .returns(swapToTokenReturnBalance - triggerAmount)
+
+      await expect(
+        converter
+          .connect(deployer)
+          .convertAndTransfer(testAToken.address, MINAMOUNTOUT)
+      )
+        .to.emit(converter, 'ConvertAndTransfer')
+        .withArgs(
+          deployer.address,
+          testAToken.address,
+          swapToToken.address,
+          25000,
+          24750,
+          payees
+        )
+
+      const testATokenEndingBalance = swapToTokenReturnBalance - 25000
+
+      await testAToken.mock.balanceOf
+        .withArgs(converter.address)
+        .returns(testATokenEndingBalance)
+
+      const converterTokenABalance = await testAToken.balanceOf(
+        converter.address
+      )
+      const msgSenderSwapToTokenBalance = await swapToToken.balanceOf(
+        deployer.address
+      )
+      const payeeSwapToTokenBalance = await swapToToken.balanceOf(payees[0])
+
+      expect(converterTokenABalance).to.equal(0)
+      expect(msgSenderSwapToTokenBalance).to.equal(250)
+      expect(payeeSwapToTokenBalance).to.equal(24750)
+    })
+
     it('user can transfer swapToToken', async () => {
       const swapToTokenStartingBalance = 25000
 
@@ -419,6 +545,24 @@ describe('Converter Unit Tests', () => {
       expect(payeeSwapToTokenBalance).to.equal(24750)
     })
 
+    it('user cannot convert and transfer a token if approval fails', async () => {
+      const testATokenStartingBalance = 25000
+
+      await testAToken.mock.balanceOf
+        .withArgs(converter.address)
+        .returns(testATokenStartingBalance)
+
+      await testAToken.mock.approve
+        .withArgs(uniswapV2Router02Contract.address, testATokenStartingBalance)
+        .returns(false)
+
+      await expect(
+        converter
+          .connect(deployer)
+          .convertAndTransfer(testAToken.address, MINAMOUNTOUT)
+      ).to.be.revertedWith('APPROVE_FAILED')
+    })
+
     it('user cannot convert and transfer a token with a balance of zero', async () => {
       const testATokenStartingBalance = 0
 
@@ -431,6 +575,16 @@ describe('Converter Unit Tests', () => {
           .connect(deployer)
           .convertAndTransfer(testAToken.address, MINAMOUNTOUT)
       ).to.revertedWith('NO_BALANCE_TO_CONVERT')
+    })
+
+    it('user cannot convert and transfer a token with an _amountOutMin of zero', async () => {
+      const _amountOutMin = 0
+
+      await expect(
+        converter
+          .connect(deployer)
+          .convertAndTransfer(testAToken.address, _amountOutMin)
+      ).to.revertedWith('INVALID_AMOUNT_OUT')
     })
 
     it('user cannot convert and transfer a token if payees are zero', async () => {
@@ -456,9 +610,7 @@ describe('Converter Unit Tests', () => {
       await testAToken.mock.balanceOf
         .withArgs(converter.address)
         .returns(tokenStartingBalance)
-      await testBToken.mock.balanceOf
-        .withArgs(converter.address)
-        .returns(tokenStartingBalance)
+      await testBToken.mock.balanceOf.withArgs(converter.address).returns(0)
       await swapToToken.mock.balanceOf
         .withArgs(converter.address)
         .returns(tokenStartingBalance)
@@ -466,9 +618,7 @@ describe('Converter Unit Tests', () => {
       await testAToken.mock.transfer
         .withArgs(account1.address, tokenStartingBalance)
         .returns(true)
-      await testBToken.mock.transfer
-        .withArgs(account1.address, tokenStartingBalance)
-        .returns(true)
+      await testBToken.mock.transfer.withArgs(account1.address, 0).returns(true)
       await swapToToken.mock.transfer
         .withArgs(account1.address, tokenStartingBalance)
         .returns(true)
