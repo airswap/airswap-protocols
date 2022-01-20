@@ -96,7 +96,7 @@ describe('Pool Integration Tests', () => {
           )
       ).to.emit(pool, 'Withdraw')
 
-      const isClaimed = await pool.noncesClaimed(alice.address, claim.nonce)
+      const isClaimed = await pool.nonceUsed(alice.address, claim.nonce)
       expect(isClaimed).to.equal(true)
     })
 
@@ -150,8 +150,8 @@ describe('Pool Integration Tests', () => {
           )
       ).to.emit(pool, 'Withdraw')
 
-      expect(await pool.noncesClaimed(alice.address, nonce)).to.equal(true)
-      expect(await pool.noncesClaimed(bob.address, nonce)).to.equal(true)
+      expect(await pool.nonceUsed(alice.address, nonce)).to.equal(true)
+      expect(await pool.nonceUsed(bob.address, nonce)).to.equal(true)
     })
 
     it('withdraw success with new admin', async () => {
@@ -177,7 +177,7 @@ describe('Pool Integration Tests', () => {
           )
       ).to.emit(pool, 'Withdraw')
 
-      const isClaimed = await pool.noncesClaimed(alice.address, claim.nonce)
+      const isClaimed = await pool.nonceUsed(alice.address, claim.nonce)
       expect(isClaimed).to.equal(true)
     })
 
@@ -205,7 +205,7 @@ describe('Pool Integration Tests', () => {
           )
       ).to.be.revertedWith('UNAUTHORIZED')
 
-      const isClaimed = await pool.noncesClaimed(alice.address, claim.nonce)
+      const isClaimed = await pool.nonceUsed(alice.address, claim.nonce)
       expect(isClaimed).to.equal(false)
     })
 
@@ -322,7 +322,7 @@ describe('Pool Integration Tests', () => {
           )
       ).to.emit(pool, 'Withdraw')
 
-      const isClaimed = await pool.noncesClaimed(alice.address, claim.nonce)
+      const isClaimed = await pool.nonceUsed(alice.address, claim.nonce)
       expect(isClaimed).to.equal(true)
     })
 
@@ -379,7 +379,7 @@ describe('Pool Integration Tests', () => {
           )
       ).to.emit(pool, 'Withdraw')
 
-      const isClaimed = await pool.noncesClaimed(alice.address, claim.nonce)
+      const isClaimed = await pool.nonceUsed(alice.address, claim.nonce)
       expect(isClaimed).to.equal(true)
 
       const balance = await stakeContract
@@ -440,7 +440,7 @@ describe('Pool Integration Tests', () => {
           )
       ).to.emit(pool, 'Withdraw')
 
-      const isClaimed = await pool.noncesClaimed(alice.address, claim.nonce)
+      const isClaimed = await pool.nonceUsed(alice.address, claim.nonce)
       expect(isClaimed).to.equal(true)
 
       const balance = await stakeContract.connect(bob).balanceOf(bob.address)

@@ -152,7 +152,7 @@ describe('Pool Unit Tests', () => {
           )
       ).to.emit(pool, 'Withdraw')
 
-      const isClaimed = await pool.noncesClaimed(alice.address, nonce)
+      const isClaimed = await pool.nonceUsed(alice.address, nonce)
       expect(isClaimed).to.equal(true)
     })
 
@@ -301,7 +301,7 @@ describe('Pool Unit Tests', () => {
           )
       ).to.emit(pool, 'Withdraw')
 
-      const isClaimed = await pool.noncesClaimed(alice.address, claim.nonce)
+      const isClaimed = await pool.nonceUsed(alice.address, claim.nonce)
       expect(isClaimed).to.equal(true)
     })
 
@@ -363,7 +363,7 @@ describe('Pool Unit Tests', () => {
           )
       ).to.emit(pool, 'Withdraw')
 
-      const isClaimed = await pool.noncesClaimed(alice.address, claim.nonce)
+      const isClaimed = await pool.nonceUsed(alice.address, claim.nonce)
       expect(isClaimed).to.equal(true)
 
       const balance = await stakeContract
@@ -428,7 +428,7 @@ describe('Pool Unit Tests', () => {
           )
       ).to.emit(pool, 'Withdraw')
 
-      const isClaimed = await pool.noncesClaimed(alice.address, claim.nonce)
+      const isClaimed = await pool.nonceUsed(alice.address, claim.nonce)
       expect(isClaimed).to.equal(true)
 
       const balance = await stakeContract.connect(bob).balanceOf(bob.address)
