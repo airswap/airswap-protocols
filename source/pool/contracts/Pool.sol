@@ -4,7 +4,6 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@airswap/staking/contracts/interfaces/IStaking.sol";
 import "./interfaces/IPool.sol";
@@ -15,7 +14,6 @@ import "./interfaces/IPool.sol";
  */
 contract Pool is IPool, Ownable {
   using SafeERC20 for IERC20;
-  using SafeMath for uint256;
 
   bytes32 public constant DOMAIN_TYPEHASH =
     keccak256(
@@ -57,8 +55,12 @@ contract Pool is IPool, Ownable {
   // Mapping of address to boolean to enable admin accounts
   mapping(address => bool) public admins;
 
-  // Mapping of participant addresses to nonces to boolean to mark as claimed
-  mapping(address => mapping(uint256 => bool)) public noncesClaimed;
+  /**
+   * @notice Double mapping of signers to nonce groups to nonce states
+   * @dev The nonce group is computed as nonce / 256, so each group of 256 sequential nonces uses the same key
+   * @dev The nonce states are encoded as 256 bits, for each nonce in the group 0 means available and 1 means used
+   */
+  mapping(address => mapping(uint256 => uint256)) internal noncesClaimed;
 
   // Staking contract address
   address public stakingContract;
@@ -189,7 +191,7 @@ contract Pool is IPool, Ownable {
   }
 
   /**
-   * @notice Withdraw tokens from the pool using claims
+   * @notice Withdraw tokens from the pool using a signed claim
    * @param token address
    * @param nonce uint256
    * @param score uint256
@@ -209,7 +211,7 @@ contract Pool is IPool, Ownable {
   }
 
   /**
-   * @notice Withdraw tokens from the pool using claims and send to recipient
+   * @notice Withdraw tokens from the pool using a signed claim and send to recipient
    * @param minimumAmount uint256
    * @param token address
    * @param recipient address
@@ -243,7 +245,7 @@ contract Pool is IPool, Ownable {
   }
 
   /**
-   * @notice Withdraw tokens from the pool using claims and stake
+   * @notice Withdraw tokens from the pool using a signed claim and stake
    * @param minimumAmount uint256
    * @param token address
    * @param nonce uint256
@@ -298,7 +300,7 @@ contract Pool is IPool, Ownable {
   }
 
   /**
-   * @notice Withdraw tokens from the pool using claims
+   * @notice Withdraw tokens from the pool using a signed claim
    * @param minimumAmount uint256
    * @param token address
    * @param participant address
@@ -339,8 +341,8 @@ contract Pool is IPool, Ownable {
     returns (uint256 amount)
   {
     uint256 balance = IERC20(token).balanceOf(address(this));
-    uint256 divisor = (uint256(10)**scale).add(score);
-    return max.mul(score).mul(balance).div(divisor).div(100);
+    uint256 divisor = (uint256(10)**scale) + score;
+    return (max * score * balance) / divisor / 100;
   }
 
   /**
@@ -370,9 +372,25 @@ contract Pool is IPool, Ownable {
       r,
       s
     );
-    admins[signatory] && !noncesClaimed[participant][nonce]
+    admins[signatory] && !nonceUsed(participant, nonce)
       ? valid = true
       : valid = false;
+  }
+
+  /**
+   * @notice Returns true if the nonce has been used
+   * @param participant address
+   * @param nonce uint256
+   */
+  function nonceUsed(address participant, uint256 nonce)
+    public
+    view
+    override
+    returns (bool)
+  {
+    uint256 groupKey = nonce / 256;
+    uint256 indexInGroup = nonce % 256;
+    return (noncesClaimed[participant][groupKey] >> indexInGroup) & 1 == 1;
   }
 
   /**
@@ -427,11 +445,18 @@ contract Pool is IPool, Ownable {
     internal
     returns (bool)
   {
+    uint256 groupKey = nonce / 256;
+    uint256 indexInGroup = nonce % 256;
+    uint256 group = noncesClaimed[participant][groupKey];
+
     // If it is already used, return false
-    if (noncesClaimed[participant][nonce]) {
+    if ((group >> indexInGroup) & 1 == 1) {
       return false;
     }
-    return noncesClaimed[participant][nonce] = true;
+
+    noncesClaimed[participant][groupKey] = group | (uint256(1) << indexInGroup);
+
+    return true;
   }
 
   /**

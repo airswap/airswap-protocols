@@ -88,4 +88,9 @@ interface IPool {
     bytes32 r,
     bytes32 s
   ) external view returns (bool valid);
+
+  function nonceUsed(address participant, uint256 nonce)
+    external
+    view
+    returns (bool);
 }
