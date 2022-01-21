@@ -3,7 +3,7 @@ const { ADDRESS_ZERO, SECONDS_IN_DAY } = require('@airswap/constants')
 const {
   createOrder,
   orderToParams,
-  createSignature,
+  createSwapSignature,
 } = require('@airswap/utils')
 const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
@@ -47,7 +47,7 @@ describe('Swap Unit Tests', () => {
     })
     return orderToParams({
       ...unsignedOrder,
-      ...(await createSignature(
+      ...(await createSwapSignature(
         unsignedOrder,
         signatory,
         swap.address,

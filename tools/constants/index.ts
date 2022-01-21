@@ -1,5 +1,7 @@
-export const DOMAIN_NAME = 'SWAP'
-export const DOMAIN_VERSION = '3'
+export const DOMAIN_NAME_SWAP = 'SWAP'
+export const DOMAIN_VERSION_SWAP = '3'
+export const DOMAIN_NAME_POOL = 'POOL'
+export const DOMAIN_VERSION_POOL = '1'
 export const INDEX_HEAD = '0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF'
 export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
 export const LOCATOR_ZERO =

@@ -3,7 +3,6 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./TokenPaymentSplitter.sol";
@@ -23,7 +22,6 @@ interface IUniswapV2Router02 {
  * @notice https://www.airswap.io/
  */
 contract Converter is Ownable, ReentrancyGuard, TokenPaymentSplitter {
-  using SafeMath for uint256;
   using SafeERC20 for IERC20;
 
   address public wETH;
@@ -145,15 +143,14 @@ contract Converter is Ownable, ReentrancyGuard, TokenPaymentSplitter {
     uint256 totalPayeeAmount = _balanceOfErc20(swapToToken);
     // Calculates trigger reward amount and transfers to msg.sender.
     if (triggerFee > 0) {
-      uint256 triggerFeeAmount = totalPayeeAmount.mul(triggerFee).div(100);
+      uint256 triggerFeeAmount = (totalPayeeAmount * triggerFee) / 100;
       _transferErc20(msg.sender, swapToToken, triggerFeeAmount);
-      totalPayeeAmount = totalPayeeAmount.sub(triggerFeeAmount);
+      totalPayeeAmount = totalPayeeAmount - triggerFeeAmount;
     }
     // Transfers remaining amount to reward payee address(es).
     for (uint256 i = 0; i < _payees.length; i++) {
-      uint256 payeeAmount = (totalPayeeAmount.mul(_shares[_payees[i]])).div(
-        _totalShares
-      );
+      uint256 payeeAmount = (totalPayeeAmount * _shares[_payees[i]]) /
+        _totalShares;
       _transferErc20(_payees[i], swapToToken, payeeAmount);
     }
     emit ConvertAndTransfer(

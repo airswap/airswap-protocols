@@ -4,7 +4,6 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "./interfaces/ISwap.sol";
@@ -15,7 +14,6 @@ import "./interfaces/ISwap.sol";
  */
 contract Swap is ISwap, Ownable {
   using SafeERC20 for IERC20;
-  using SafeMath for uint256;
 
   bytes32 public constant DOMAIN_TYPEHASH =
     keccak256(
@@ -260,7 +258,7 @@ contract Swap is ISwap, Ownable {
     IERC20(signerToken).safeTransferFrom(
       signerWallet,
       protocolFeeWallet,
-      signerAmount.mul(protocolFeeLight).div(FEE_DIVISOR)
+      (signerAmount * protocolFeeLight) / FEE_DIVISOR
     );
 
     // Emit a Swap event
@@ -651,7 +649,7 @@ contract Swap is ISwap, Ownable {
       address(this)
     );
 
-    uint256 feeAmount = order.signerAmount.mul(protocolFee).div(FEE_DIVISOR);
+    uint256 feeAmount = (order.signerAmount * protocolFee) / FEE_DIVISOR;
 
     if (signerAllowance < order.signerAmount + feeAmount) {
       errors[errCount] = "SIGNER_ALLOWANCE_LOW";
@@ -675,8 +673,8 @@ contract Swap is ISwap, Ownable {
     view
     returns (uint256)
   {
-    uint256 divisor = (uint256(10)**rebateScale).add(stakingBalance);
-    return rebateMax.mul(stakingBalance).mul(feeAmount).div(divisor).div(100);
+    uint256 divisor = (uint256(10)**rebateScale) + stakingBalance;
+    return (rebateMax * stakingBalance * feeAmount) / divisor / 100;
   }
 
   /**
@@ -691,7 +689,7 @@ contract Swap is ISwap, Ownable {
     returns (uint256)
   {
     // Transfer fee from signer to feeWallet
-    uint256 feeAmount = amount.mul(protocolFee).div(FEE_DIVISOR);
+    uint256 feeAmount = (amount * protocolFee) / FEE_DIVISOR;
     if (feeAmount > 0) {
       uint256 discountAmount = calculateDiscount(
         IERC20(stakingToken).balanceOf(wallet),
@@ -881,7 +879,7 @@ contract Swap is ISwap, Ownable {
     uint256 amount
   ) internal {
     // Transfer fee from signer to feeWallet
-    uint256 feeAmount = amount.mul(protocolFee).div(FEE_DIVISOR);
+    uint256 feeAmount = (amount * protocolFee) / FEE_DIVISOR;
     if (feeAmount > 0) {
       uint256 discountAmount = calculateDiscount(
         IERC20(stakingToken).balanceOf(msg.sender),

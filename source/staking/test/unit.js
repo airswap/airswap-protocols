@@ -94,7 +94,7 @@ describe('Staking Unit', () => {
 
       await expect(
         staking.connect(deployer).setDuration(DEFAULTDURATION)
-        ).to.be.revertedWith("TIMELOCKED")
+      ).to.be.revertedWith('TIMELOCKED')
     })
 
     it('owner can set unstaking duration', async () => {
@@ -116,7 +116,7 @@ describe('Staking Unit', () => {
 
     it('owner cannot set timelock to be less than minimum delay', async () => {
       await expect(
-          staking.connect(deployer).scheduleDurationChange(0)
+        staking.connect(deployer).scheduleDurationChange(0)
       ).to.be.revertedWith('INVALID_DELAY')
     })
 
@@ -126,7 +126,7 @@ describe('Staking Unit', () => {
       ).to.emit(staking, 'ScheduleDurationChange')
 
       await expect(
-          staking.connect(deployer).scheduleDurationChange(DEFAULTDELAY)
+        staking.connect(deployer).scheduleDurationChange(DEFAULTDELAY)
       ).to.be.revertedWith('TIMELOCK_ACTIVE')
     })
 
@@ -162,8 +162,8 @@ describe('Staking Unit', () => {
     it('Owner cannot cancel timelock before it is set', async () => {
       expect(
         staking.connect(deployer).cancelDurationChange()
-        ).to.be.revertedWith('TIMELOCK_INACTIVE')
-      })
+      ).to.be.revertedWith('TIMELOCK_INACTIVE')
+    })
   })
 
   describe('Stake', async () => {
