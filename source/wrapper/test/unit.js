@@ -48,7 +48,12 @@ describe('Wrapper Unit Tests', () => {
     })
     return orderToParams({
       ...unsignedOrder,
-      ...(await createSwapSignature(unsignedOrder, signer, swap.address, CHAIN_ID)),
+      ...(await createSwapSignature(
+        unsignedOrder,
+        signer,
+        swap.address,
+        CHAIN_ID
+      )),
     })
   }
 
