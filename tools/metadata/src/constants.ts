@@ -2,7 +2,6 @@ export const known = [
   'https://raw.githubusercontent.com/compound-finance/token-list/master/compound.tokenlist.json',
   'https://umaproject.org/uma.tokenlist.json',
   'https://raw.githubusercontent.com/SetProtocol/uniswap-tokenlist/main/set.tokenlist.json',
-  'https://raw.githubusercontent.com/opynfinance/opyn-tokenlist/master/opyn-v1.tokenlist.json',
   'https://app.tryroll.com/tokens.json',
   'https://tokens.coingecko.com/uniswap/all.json',
 ]
