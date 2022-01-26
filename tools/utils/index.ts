@@ -400,6 +400,13 @@ export function getEtherscanURL(chainId: number, hash: string): string {
   return `https://${etherscanDomains[chainId]}/tx/${hash}`
 }
 
+export function getEtherscanWalletURL(
+  chainId: number,
+  address: string
+): string {
+  return `https://${etherscanDomains[chainId]}/address/${address}`
+}
+
 export function lowerCaseAddresses(obj: any): any {
   for (const key in obj) {
     if (typeof obj[key] === 'object') {
