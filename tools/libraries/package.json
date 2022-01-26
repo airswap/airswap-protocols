@@ -32,7 +32,7 @@
     "@airswap/swap": "2.5.0",
     "@airswap/registry": "4.8.2",
     "@airswap/typescript": "1.0.1",
-    "@airswap/utils": "1.0.0",
+    "@airswap/utils": "1.0.1",
     "@airswap/validator": "2.3.0",
     "@airswap/wrapper": "2.5.2",
     "bignumber.js": "^9.0.0",
