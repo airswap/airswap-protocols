@@ -3,7 +3,12 @@
 pragma solidity ^0.8.0;
 
 interface IPool {
-  event Withdraw(uint256 nonce, address account, address token, uint256 amount);
+  event Withdraw(
+    uint256 indexed nonce,
+    address indexed account,
+    address token,
+    uint256 amount
+  );
   event SetScale(uint256 scale);
   event SetMax(uint256 max);
   event DrainTo(address[] tokens, address dest);
