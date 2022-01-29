@@ -40,12 +40,6 @@ contract Staking is IStaking, Ownable {
   // Mapping of delegate to account
   mapping(address => address) public delegateAccounts;
 
-  // Mapping of timelock ids to used state
-  mapping(bytes32 => bool) private usedIds;
-
-  // Mapping of ids to timestamps
-  mapping(bytes32 => uint256) private unlockTimestamps;
-
   // ERC-20 token properties
   string public name;
   string public symbol;
