@@ -175,7 +175,7 @@ contract Staking is IStaking, Ownable {
       ? account = delegateAccounts[msg.sender]
       : account = msg.sender;
     _unstake(account, amount);
-    token.transfer(account, amount);
+    token.safeTransfer(account, amount);
     emit Transfer(account, address(0), amount);
   }
 
