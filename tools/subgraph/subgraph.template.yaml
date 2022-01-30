@@ -11,7 +11,7 @@ dataSources:
       startBlock: {{start_block_swap}}
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       entities:
         - AuthorizeSender
@@ -49,7 +49,7 @@ dataSources:
       startBlock: {{start_block_indexer}}
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       entities:
         - AddTokenToBlacklist
@@ -84,7 +84,7 @@ dataSources:
       startBlock: {{start_block_delegateFactory}}
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       entities:
         - CreateDelegate
@@ -104,7 +104,7 @@ dataSources:
       startBlock: {{start_block_light}}
     mapping:
       kind: ethereum/Events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       entities:
         - Cancel
@@ -132,7 +132,7 @@ dataSources:
       startBlock: {{start_block_locker}}
     mapping:
       kind: ethereum/Events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       entities:
         - Lock
@@ -164,7 +164,7 @@ dataSources:
       startBlock: {{start_block_pool}}
     mapping:
       kind: ethereum/Events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       entities:
         - Enable
@@ -184,6 +184,25 @@ dataSources:
         - event: SetMax(uint256)
           handler: handleSetMax
       file: ./src/PoolMapping.ts
+  - kind: ethereum/contract
+    name: Wrapper
+    network: '{{network}}'
+    source:
+      address: '{{wrapper_address}}'
+      abi: Wrapper
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - WrappedSwapFor
+      abis:
+        - name: Wrapper
+          file: ./abis/Wrapper.json
+      eventHandlers:
+        - event: WrappedSwapFor(address)
+          handler: handleWrappedSwapFor
+      file: ./src/WrapperMapping.ts
 
 templates:
   - name: Index
@@ -193,7 +212,7 @@ templates:
       abi: Index
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       file: ./src/IndexMapping.ts
       entities:
@@ -213,7 +232,7 @@ templates:
       abi: Delegate
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       file: ./src/DelegateMapping.ts
       entities:
@@ -228,22 +247,3 @@ templates:
           handler: handleUnsetRule
         - event: ProvideOrder(indexed address,address,indexed address,indexed address,uint256,uint256,uint256)
           handler: handleProvideOrder
-  - name: Wrapper
-    kind: ethereum/contract
-    network: mainnet
-    source:
-      address: "0x3775fECdd794E6136Ea0Df43c18631314ABC01b1"
-      abi: Wrapper
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.5
-      language: wasm/assemblyscript
-      file: ./src/WrapperMapping.ts
-      entities:
-        - WrappedSwapFor
-      abis:
-        - name: Wrapper
-          file: ./abis/Wrapper.json
-      eventHandlers:
-        - event: WrappedSwapFor(address)
-          handler: handleWrappedSwapFor
