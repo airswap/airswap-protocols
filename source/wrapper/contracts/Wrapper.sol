@@ -170,8 +170,7 @@ contract Wrapper is Ownable {
     uint8 v,
     bytes32 r,
     bytes32 s
-  ) public payable {
-    require(msg.value == 0, "VALUE_MUST_BE_ZERO");
+  ) public {
     IERC721(senderToken).setApprovalForAll(address(swapContract), true);
     IERC721(senderToken).transferFrom(msg.sender, address(this), senderID);
     swapContract.sellNFT(

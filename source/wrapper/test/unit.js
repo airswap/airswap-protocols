@@ -269,7 +269,7 @@ describe('Wrapper Unit Tests', () => {
       )
       await expect(
         wrapper.connect(sender).sellNFT(...order, { value: DEFAULT_AMOUNT })
-      ).to.be.revertedWith('VALUE_MUST_BE_ZERO')
+      ).to.be.reverted
     })
   })
 })
