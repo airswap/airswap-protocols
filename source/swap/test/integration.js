@@ -4,15 +4,16 @@ const {
   orderToParams,
   createSwapSignature,
 } = require('@airswap/utils')
-const { ethers, waffle } = require('hardhat')
-const { deployMockContract } = waffle
+const { ethers } = require('hardhat')
 const ERC20 = require('@openzeppelin/contracts/build/contracts/ERC20PresetMinterPauser.json')
+const STAKING = require('@airswap/staking/build/contracts/Staking.sol/Staking.json')
 
 describe('Swap Integration Tests', () => {
   let snapshotId
   let swap
   let signerToken
   let senderToken
+  let staking
 
   let deployer
   let sender
@@ -59,7 +60,16 @@ describe('Swap Integration Tests', () => {
   before('get signers and deploy', async () => {
     ;[deployer, sender, signer, protocolFeeWallet] = await ethers.getSigners()
 
-    stakingToken = await deployMockContract(deployer, ERC20.abi)
+    stakingToken = await (
+      await ethers.getContractFactory(ERC20.abi, ERC20.bytecode)
+    ).deploy('Staking', 'STAKE')
+    await stakingToken.deployed()
+    stakingToken.mint(sender.address, 10000000000)
+
+    staking = await (
+      await ethers.getContractFactory(STAKING.abi, STAKING.bytecode)
+    ).deploy(stakingToken.address, 'Staking', 'STAKING', 100, 100)
+    await staking.deployed()
 
     signerToken = await (
       await ethers.getContractFactory(ERC20.abi, ERC20.bytecode)
@@ -81,7 +91,7 @@ describe('Swap Integration Tests', () => {
       protocolFeeWallet.address,
       REBATE_SCALE,
       REBATE_MAX,
-      stakingToken.address
+      staking.address
     )
     await swap.deployed()
 
@@ -91,7 +101,7 @@ describe('Swap Integration Tests', () => {
 
   describe('Test rebates', async () => {
     it('test swap without rebate', async () => {
-      await stakingToken.mock.balanceOf.returns(0)
+      // await stakingToken.mock.balanceOf.returns(0)
 
       const order = await createSignedOrder({}, signer)
       await expect(
@@ -111,9 +121,11 @@ describe('Swap Integration Tests', () => {
     })
 
     it('test swap with rebate', async () => {
-      await stakingToken.mock.balanceOf.returns(10000000000)
+      await stakingToken.connect(sender).approve(staking.address, 10000000000)
+      await staking.connect(sender).stake(10000000000)
 
       const order = await createSignedOrder({}, signer)
+
       await expect(
         await swap.connect(sender).swap(sender.address, ...order)
       ).to.emit(swap, 'Swap')

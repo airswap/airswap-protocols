@@ -9,12 +9,14 @@ const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
 const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
 const IERC721 = require('@openzeppelin/contracts/build/contracts/IERC721.json')
+const STAKING = require('@airswap/staking/build/contracts/Staking.sol/Staking.json')
 
 describe('Swap Unit Tests', () => {
   let snapshotId
   let swap
   let signerToken
   let senderToken
+  let staking
 
   let deployer
   let sender
@@ -92,10 +94,10 @@ describe('Swap Unit Tests', () => {
 
     signerToken = await deployMockContract(deployer, IERC20.abi)
     senderToken = await deployMockContract(deployer, IERC20.abi)
-    stakingToken = await deployMockContract(deployer, IERC20.abi)
+    staking = await deployMockContract(deployer, STAKING.abi)
     await signerToken.mock.transferFrom.returns(true)
     await senderToken.mock.transferFrom.returns(true)
-    await stakingToken.mock.balanceOf.returns(10000000)
+    await staking.mock.balanceOf.returns(10000000)
 
     swap = await (
       await ethers.getContractFactory('Swap')
@@ -105,7 +107,7 @@ describe('Swap Unit Tests', () => {
       protocolFeeWallet.address,
       REBATE_SCALE,
       REBATE_MAX,
-      stakingToken.address
+      staking.address
     )
     await swap.deployed()
   })
@@ -128,7 +130,7 @@ describe('Swap Unit Tests', () => {
           ADDRESS_ZERO,
           REBATE_SCALE,
           REBATE_MAX,
-          stakingToken.address
+          staking.address
         )
       ).to.be.revertedWith('INVALID_FEE_WALLET')
     })
@@ -143,7 +145,7 @@ describe('Swap Unit Tests', () => {
           protocolFeeWallet.address,
           REBATE_SCALE,
           REBATE_MAX,
-          stakingToken.address
+          staking.address
         )
       ).to.be.revertedWith('INVALID_FEE')
     })
@@ -158,7 +160,7 @@ describe('Swap Unit Tests', () => {
           protocolFeeWallet.address,
           REBATE_SCALE,
           REBATE_MAX,
-          stakingToken.address
+          staking.address
         )
       ).to.be.revertedWith('INVALID_FEE')
     })
@@ -173,7 +175,7 @@ describe('Swap Unit Tests', () => {
           protocolFeeWallet.address,
           REBATE_SCALE + 1,
           REBATE_MAX,
-          stakingToken.address
+          staking.address
         )
       ).to.be.revertedWith('SCALE_TOO_HIGH')
     })
@@ -188,7 +190,7 @@ describe('Swap Unit Tests', () => {
           protocolFeeWallet.address,
           REBATE_SCALE,
           REBATE_MAX + 1,
-          stakingToken.address
+          staking.address
         )
       ).to.be.revertedWith('MAX_TOO_HIGH')
     })
@@ -205,7 +207,7 @@ describe('Swap Unit Tests', () => {
           REBATE_MAX,
           ADDRESS_ZERO
         )
-      ).to.be.revertedWith('INVALID_STAKING_TOKEN')
+      ).to.be.revertedWith('INVALID_STAKING')
     })
   })
 
@@ -252,14 +254,15 @@ describe('Swap Unit Tests', () => {
         swap.connect(deployer).setRebateMax(REBATE_MAX + 1)
       ).to.be.revertedWith('MAX_TOO_HIGH')
     })
-    it('test setStakingToken', async () => {
-      await expect(
-        swap.connect(deployer).setStakingToken(stakingToken.address)
-      ).to.emit(swap, 'SetStakingToken')
+    it('test setStaking', async () => {
+      await expect(swap.connect(deployer).setStaking(staking.address)).to.emit(
+        swap,
+        'SetStaking'
+      )
     })
-    it('test setStakingToken with zero address', async () => {
+    it('test setStaking with zero address', async () => {
       await expect(
-        swap.connect(deployer).setStakingToken(ADDRESS_ZERO)
+        swap.connect(deployer).setStaking(ADDRESS_ZERO)
       ).to.be.revertedWith('INVALID_FEE_WALLET')
     })
   })
@@ -559,16 +562,17 @@ describe('Swap Unit Tests', () => {
   })
 
   describe('Test staking', async () => {
-    it('test set staking token by non-owner', async () => {
+    it('test set staking by non-owner', async () => {
       await expect(
-        swap.connect(anyone).setStakingToken(stakingToken.address)
+        swap.connect(anyone).setStaking(staking.address)
       ).to.be.revertedWith('Ownable: caller is not the owner')
     })
 
-    it('test set staking token', async () => {
-      await expect(
-        swap.connect(deployer).setStakingToken(stakingToken.address)
-      ).to.emit(swap, 'SetStakingToken')
+    it('test set staking', async () => {
+      await expect(swap.connect(deployer).setStaking(staking.address)).to.emit(
+        swap,
+        'SetStaking'
+      )
     })
   })
 

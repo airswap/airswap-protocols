@@ -45,7 +45,7 @@ interface ISwap {
 
   event SetRebateMax(uint256 rebateMax);
 
-  event SetStakingToken(address indexed stakingToken);
+  event SetStaking(address indexed staking);
 
   function swap(
     address recipient,

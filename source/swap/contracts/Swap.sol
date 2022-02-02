@@ -68,7 +68,7 @@ contract Swap is ISwap, Ownable {
   address public protocolFeeWallet;
   uint256 public rebateScale;
   uint256 public rebateMax;
-  address public stakingToken;
+  address public staking;
 
   constructor(
     uint256 _protocolFee,
@@ -76,14 +76,14 @@ contract Swap is ISwap, Ownable {
     address _protocolFeeWallet,
     uint256 _rebateScale,
     uint256 _rebateMax,
-    address _stakingToken
+    address _staking
   ) {
     require(_protocolFee < FEE_DIVISOR, "INVALID_FEE");
     require(_protocolFeeLight < FEE_DIVISOR, "INVALID_FEE");
     require(_protocolFeeWallet != address(0), "INVALID_FEE_WALLET");
     require(_rebateScale <= MAX_SCALE, "SCALE_TOO_HIGH");
     require(_rebateMax <= MAX_PERCENTAGE, "MAX_TOO_HIGH");
-    require(_stakingToken != address(0), "INVALID_STAKING_TOKEN");
+    require(_staking != address(0), "INVALID_STAKING");
 
     uint256 currentChainId = getChainId();
     DOMAIN_CHAIN_ID = currentChainId;
@@ -102,7 +102,7 @@ contract Swap is ISwap, Ownable {
     protocolFeeWallet = _protocolFeeWallet;
     rebateScale = _rebateScale;
     rebateMax = _rebateMax;
-    stakingToken = _stakingToken;
+    staking = _staking;
   }
 
   /**
@@ -517,13 +517,13 @@ contract Swap is ISwap, Ownable {
 
   /**
    * @notice Set the staking token
-   * @param newStakingToken address Token to check balances on
+   * @param newstaking address Token to check balances on
    */
-  function setStakingToken(address newStakingToken) external onlyOwner {
+  function setStaking(address newstaking) external onlyOwner {
     // Ensure the new staking token is not null
-    require(newStakingToken != address(0), "INVALID_FEE_WALLET");
-    stakingToken = newStakingToken;
-    emit SetStakingToken(newStakingToken);
+    require(newstaking != address(0), "INVALID_FEE_WALLET");
+    staking = newstaking;
+    emit SetStaking(newstaking);
   }
 
   /**
@@ -692,7 +692,7 @@ contract Swap is ISwap, Ownable {
     uint256 feeAmount = (amount * protocolFee) / FEE_DIVISOR;
     if (feeAmount > 0) {
       uint256 discountAmount = calculateDiscount(
-        IERC20(stakingToken).balanceOf(wallet),
+        IERC20(staking).balanceOf(wallet),
         feeAmount
       );
       return feeAmount - discountAmount;
@@ -882,7 +882,7 @@ contract Swap is ISwap, Ownable {
     uint256 feeAmount = (amount * protocolFee) / FEE_DIVISOR;
     if (feeAmount > 0) {
       uint256 discountAmount = calculateDiscount(
-        IERC20(stakingToken).balanceOf(msg.sender),
+        IERC20(staking).balanceOf(msg.sender),
         feeAmount
       );
       if (discountAmount > 0) {
