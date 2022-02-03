@@ -7,7 +7,8 @@ interface IPool {
     uint256 indexed nonce,
     address indexed account,
     address token,
-    uint256 amount
+    uint256 amount,
+    uint256 score
   );
   event SetScale(uint256 scale);
   event SetMax(uint256 max);

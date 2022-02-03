@@ -271,7 +271,7 @@ contract Pool is IPool, Ownable {
     _checkValidClaim(nonce, msg.sender, score, v, r, s);
     uint256 amount = _withdrawCheck(score, token, minimumAmount);
     IStaking(stakingContract).stakeFor(msg.sender, amount);
-    emit Withdraw(nonce, msg.sender, token, amount);
+    emit Withdraw(nonce, msg.sender, token, amount, score);
   }
 
   /**
@@ -300,7 +300,7 @@ contract Pool is IPool, Ownable {
     uint256 amount = _withdrawCheck(score, token, minimumAmount);
     IERC20(stakingToken).approve(stakingContract, amount);
     IStaking(stakingContract).stakeFor(account, amount);
-    emit Withdraw(nonce, msg.sender, token, amount);
+    emit Withdraw(nonce, msg.sender, token, amount, score);
   }
 
   /**
@@ -328,7 +328,7 @@ contract Pool is IPool, Ownable {
     _checkValidClaim(nonce, participant, score, v, r, s);
     uint256 amount = _withdrawCheck(score, token, minimumAmount);
     IERC20(token).safeTransfer(recipient, amount);
-    emit Withdraw(nonce, participant, token, amount);
+    emit Withdraw(nonce, participant, token, amount, score);
     return amount;
   }
 
