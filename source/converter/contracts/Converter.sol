@@ -128,7 +128,7 @@ contract Converter is Ownable, ReentrancyGuard, TokenPaymentSplitter {
         path = getTokenPath(_swapFromToken);
       }
       // Approve token for AMM usage.
-      IERC20(_swapFromToken).safeIncreaseAllowance(address(uniRouter), tokenBalance);
+      IERC20(_swapFromToken).safeIncreaseAllowance(uniRouter, tokenBalance);
       // Calls the swap function from the on-chain AMM to swap token from fee pool into reward token.
       IUniswapV2Router02(uniRouter)
         .swapExactTokensForTokensSupportingFeeOnTransferTokens(
