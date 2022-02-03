@@ -314,6 +314,9 @@ describe('Converter Unit Tests', () => {
       await testAToken.mock.approve
         .withArgs(uniswapV2Router02Contract.address, testATokenStartingBalance)
         .returns(true)
+      await testAToken.mock.allowance
+        .withArgs(converter.address, uniswapV2Router02Contract.address)
+        .returns(0)
       await uniswapV2Router02Contract.mock.swapExactTokensForTokensSupportingFeeOnTransferTokens.returns()
 
       const swapToTokenReturnBalance = 25000
@@ -377,6 +380,9 @@ describe('Converter Unit Tests', () => {
       await testAToken.mock.approve
         .withArgs(uniswapV2Router02Contract.address, testATokenStartingBalance)
         .returns(true)
+      await testAToken.mock.allowance
+        .withArgs(converter.address, uniswapV2Router02Contract.address)
+        .returns(0)
       await uniswapV2Router02Contract.mock.swapExactTokensForTokensSupportingFeeOnTransferTokens.returns()
 
       const swapToTokenReturnBalance = 25000
@@ -442,6 +448,9 @@ describe('Converter Unit Tests', () => {
       await testAToken.mock.approve
         .withArgs(uniswapV2Router02Contract.address, testATokenStartingBalance)
         .returns(true)
+      await testAToken.mock.allowance
+        .withArgs(converter.address, uniswapV2Router02Contract.address)
+        .returns(0)
       await uniswapV2Router02Contract.mock.swapExactTokensForTokensSupportingFeeOnTransferTokens.returns()
 
       const swapToTokenReturnBalance = 25000
@@ -555,12 +564,15 @@ describe('Converter Unit Tests', () => {
       await testAToken.mock.approve
         .withArgs(uniswapV2Router02Contract.address, testATokenStartingBalance)
         .returns(false)
+      await testAToken.mock.allowance
+        .withArgs(converter.address, uniswapV2Router02Contract.address)
+        .returns(0)
 
       await expect(
         converter
           .connect(deployer)
           .convertAndTransfer(testAToken.address, MINAMOUNTOUT)
-      ).to.be.revertedWith('APPROVE_FAILED')
+      ).to.be.revertedWith('SafeERC20: ERC20 operation did not succeed')
     })
 
     it('user cannot convert and transfer a token with a balance of zero', async () => {

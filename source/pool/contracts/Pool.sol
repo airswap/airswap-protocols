@@ -101,7 +101,7 @@ contract Pool is IPool, Ownable {
       )
     );
 
-    IERC20(stakingToken).approve(stakingContract, 2**256 - 1);
+    IERC20(stakingToken).safeApprove(stakingContract, 2**256 - 1);
   }
 
   /**
@@ -158,9 +158,9 @@ contract Pool is IPool, Ownable {
   {
     require(_stakingContract != address(0), "INVALID_ADDRESS");
     // set allowance on old staking contract to zero
-    IERC20(stakingToken).approve(stakingContract, 0);
+    IERC20(stakingToken).safeApprove(stakingContract, 0);
     stakingContract = _stakingContract;
-    IERC20(stakingToken).approve(stakingContract, 2**256 - 1);
+    IERC20(stakingToken).safeApprove(stakingContract, 2**256 - 1);
   }
 
   /**
@@ -171,9 +171,9 @@ contract Pool is IPool, Ownable {
   function setStakingToken(address _stakingToken) external override onlyOwner {
     require(_stakingToken != address(0), "INVALID_ADDRESS");
     // set allowance on old staking token to zero
-    IERC20(stakingToken).approve(stakingContract, 0);
+    IERC20(stakingToken).safeApprove(stakingContract, 0);
     stakingToken = _stakingToken;
-    IERC20(stakingToken).approve(stakingContract, 2**256 - 1);
+    IERC20(stakingToken).safeApprove(stakingContract, 2**256 - 1);
   }
 
   /**

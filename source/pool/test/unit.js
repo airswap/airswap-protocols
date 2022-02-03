@@ -54,6 +54,7 @@ describe('Pool Unit Tests', () => {
 
     feeToken = await deployMockContract(deployer, IERC20.abi)
     await feeToken.mock.approve.returns(true)
+    await feeToken.mock.allowance.returns(0)
     feeToken2 = await deployMockContract(deployer, IERC20.abi)
 
     stakeContract = await (
@@ -112,6 +113,7 @@ describe('Pool Unit Tests', () => {
 
     it('set stake token successful', async () => {
       await feeToken2.mock.approve.returns(true)
+      await feeToken2.mock.allowance.returns(0)
       await pool.connect(deployer).setStakingToken(feeToken2.address)
       expect(await pool.stakingToken()).to.equal(feeToken2.address)
     })
@@ -401,6 +403,7 @@ describe('Pool Unit Tests', () => {
     it('withdrawAndStakeFor success', async () => {
       await feeToken.mock.balanceOf.returns('100000')
       await feeToken.mock.approve.returns(true)
+      await feeToken.mock.allowance.returns(0)
       await feeToken.mock.transferFrom.returns(true)
 
       const claim = await createUnsignedClaim({})
