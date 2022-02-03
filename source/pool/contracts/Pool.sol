@@ -298,7 +298,6 @@ contract Pool is IPool, Ownable {
     require(token == address(stakingToken), "INVALID_TOKEN");
     _checkValidClaim(nonce, msg.sender, score, v, r, s);
     uint256 amount = _withdrawCheck(score, token, minimumAmount);
-    IERC20(stakingToken).approve(stakingContract, amount);
     IStaking(stakingContract).stakeFor(account, amount);
     emit Withdraw(nonce, msg.sender, token, amount, score);
   }
