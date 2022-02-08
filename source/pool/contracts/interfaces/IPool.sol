@@ -5,6 +5,7 @@ pragma solidity ^0.8.0;
 interface IPool {
   event Withdraw(
     uint256 indexed nonce,
+    uint256 indexed expiry,
     address indexed account,
     address token,
     uint256 amount,
@@ -31,6 +32,7 @@ interface IPool {
   function withdraw(
     address token,
     uint256 nonce,
+    uint256 expiry,
     uint256 score,
     uint8 v,
     bytes32 r,
@@ -42,6 +44,7 @@ interface IPool {
     address token,
     address recipient,
     uint256 nonce,
+    uint256 expiry,
     uint256 score,
     uint8 v,
     bytes32 r,
@@ -52,6 +55,7 @@ interface IPool {
     uint256 minimumAmount,
     address token,
     uint256 nonce,
+    uint256 expiry,
     uint256 score,
     uint8 v,
     bytes32 r,
@@ -63,6 +67,7 @@ interface IPool {
     address token,
     address account,
     uint256 nonce,
+    uint256 expiry,
     uint256 score,
     uint8 v,
     bytes32 r,
@@ -74,6 +79,7 @@ interface IPool {
     address recipient,
     address token,
     uint256 nonce,
+    uint256 expiry,
     address participant,
     uint256 score,
     uint8 v,
@@ -88,6 +94,7 @@ interface IPool {
 
   function verify(
     uint256 nonce,
+    uint256 expiry,
     address participant,
     uint256 score,
     uint8 v,

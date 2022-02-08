@@ -132,7 +132,10 @@ describe('Pool Unit Tests', () => {
 
       nonce = 1
 
-      const claim = await createUnsignedClaim({ nonce: nonce })
+      const block = await ethers.provider.getBlock()
+      const expiry = block.timestamp + 60
+
+      const claim = await createUnsignedClaim({ nonce: nonce, expiry: expiry })
 
       const claimSignature = await createClaimSignature(
         claim,
@@ -147,6 +150,7 @@ describe('Pool Unit Tests', () => {
           .withdraw(
             feeToken.address,
             claim.nonce,
+            claim.expiry,
             claim.score,
             claimSignature.v,
             claimSignature.r,
@@ -164,7 +168,10 @@ describe('Pool Unit Tests', () => {
 
       nonce = 1
 
-      const claim = await createUnsignedClaim({ nonce: nonce })
+      const block = await ethers.provider.getBlock()
+      const expiry = block.timestamp + 60
+
+      const claim = await createUnsignedClaim({ nonce: nonce, expiry: expiry })
 
       const claimSignature = await createClaimSignature(
         claim,
@@ -179,6 +186,7 @@ describe('Pool Unit Tests', () => {
           .withdraw(
             feeToken.address,
             claim.nonce,
+            claim.expiry,
             claim.score,
             claimSignature.v,
             claimSignature.r,
@@ -192,6 +200,7 @@ describe('Pool Unit Tests', () => {
           .withdraw(
             feeToken.address,
             claim.nonce,
+            claim.expiry,
             claim.score,
             claimSignature.v,
             claimSignature.r,
@@ -218,6 +227,7 @@ describe('Pool Unit Tests', () => {
           .withdraw(
             feeToken.address,
             claim.nonce,
+            claim.expiry,
             claim.score,
             claimSignature.v,
             claimSignature.r,
@@ -242,6 +252,7 @@ describe('Pool Unit Tests', () => {
           .withdraw(
             feeToken.address,
             claim.nonce,
+            claim.expiry,
             claim.score,
             claimSignature.v,
             claimSignature.r,
@@ -266,6 +277,7 @@ describe('Pool Unit Tests', () => {
           .withdraw(
             feeToken.address,
             claim.nonce,
+            claim.expiry,
             claim.score,
             claimSignature.v,
             claimSignature.r,
@@ -296,6 +308,7 @@ describe('Pool Unit Tests', () => {
             feeToken.address,
             bob.address,
             claim.nonce,
+            claim.expiry,
             claim.score,
             claimSignature.v,
             claimSignature.r,
@@ -329,6 +342,7 @@ describe('Pool Unit Tests', () => {
             feeToken.address,
             bob.address,
             claim.nonce,
+            claim.expiry,
             claim.score,
             claimSignature.v,
             claimSignature.r,
@@ -358,6 +372,7 @@ describe('Pool Unit Tests', () => {
             withdrawMinimum,
             feeToken.address,
             claim.nonce,
+            claim.expiry,
             claim.score,
             claimSignature.v,
             claimSignature.r,
@@ -392,6 +407,7 @@ describe('Pool Unit Tests', () => {
             withdrawMinimum,
             feeToken2.address,
             claim.nonce,
+            claim.expiry,
             claim.score,
             claimSignature.v,
             claimSignature.r,
@@ -424,6 +440,7 @@ describe('Pool Unit Tests', () => {
             feeToken.address,
             bob.address,
             claim.nonce,
+            claim.expiry,
             claim.score,
             claimSignature.v,
             claimSignature.r,
@@ -456,6 +473,7 @@ describe('Pool Unit Tests', () => {
             feeToken2.address,
             bob.address,
             claim.nonce,
+            claim.expiry,
             claim.score,
             claimSignature.v,
             claimSignature.r,
@@ -486,6 +504,7 @@ describe('Pool Unit Tests', () => {
       )
       const isValid = await pool.verify(
         claim.nonce,
+        claim.expiry,
         alice.address,
         ALICE_SCORE,
         claimSignature.v,
@@ -506,6 +525,7 @@ describe('Pool Unit Tests', () => {
       )
       const isValid = await pool.verify(
         claim.nonce,
+        claim.expiry,
         alice.address,
         BOB_SCORE,
         claimSignature.v,
@@ -513,6 +533,31 @@ describe('Pool Unit Tests', () => {
         claimSignature.s
       )
       expect(isValid).to.be.equal(false)
+    })
+
+    it('Test verification fails with expiry passed', async () => {
+      const claim = await createUnsignedClaim({})
+
+      const claimSignature = await createClaimSignature(
+        claim,
+        deployer,
+        pool.address,
+        CHAIN_ID
+      )
+
+      await ethers.provider.send('evm_mine', [parseFloat(claim.expiry)])
+
+      await expect(
+        pool.verify(
+          claim.nonce,
+          claim.expiry,
+          alice.address,
+          BOB_SCORE,
+          claimSignature.v,
+          claimSignature.r,
+          claimSignature.s
+        )
+      ).to.be.revertedWith('EXPIRY_PASSED')
     })
   })
 

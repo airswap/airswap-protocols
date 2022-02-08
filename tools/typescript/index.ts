@@ -28,12 +28,14 @@ export type Order = {
 
 export type UnsignedClaim = {
   nonce: string
+  expiry: string
   participant: string
   score: string
 }
 
 export type Claim = {
   nonce: string
+  expiry: string
   participant: string
   score: string
 } & Signature
@@ -79,6 +81,7 @@ export const EIP712Claim = {
   ],
   Claim: [
     { name: 'nonce', type: 'uint256' },
+    { name: 'expiry', type: 'uint256' },
     { name: 'participant', type: 'address' },
     { name: 'score', type: 'uint256' },
   ],
