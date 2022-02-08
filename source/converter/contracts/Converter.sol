@@ -128,7 +128,7 @@ contract Converter is Ownable, ReentrancyGuard, TokenPaymentSplitter {
         path = getTokenPath(_swapFromToken);
       }
       // Approve token for AMM usage.
-      _approveErc20(_swapFromToken, tokenBalance);
+      IERC20(_swapFromToken).safeIncreaseAllowance(uniRouter, tokenBalance);
       // Calls the swap function from the on-chain AMM to swap token from fee pool into reward token.
       IUniswapV2Router02(uniRouter)
         .swapExactTokensForTokensSupportingFeeOnTransferTokens(
@@ -209,19 +209,6 @@ contract Converter is Ownable, ReentrancyGuard, TokenPaymentSplitter {
     returns (address[] memory)
   {
     return tokenPathMapping[_token];
-  }
-
-  /**
-   * @dev Internal function to approve ERC20 for AMM calls.
-   * @param _tokenToApprove Address of ERC20 to approve.
-   * @param _amount Amount of ERC20  to be approved.
-   *
-   * */
-  function _approveErc20(address _tokenToApprove, uint256 _amount) internal {
-    require(
-      IERC20(_tokenToApprove).approve(address(uniRouter), _amount),
-      "APPROVE_FAILED"
-    );
   }
 
   /**
