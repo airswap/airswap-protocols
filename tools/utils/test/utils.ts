@@ -52,6 +52,7 @@ describe('Utils', async () => {
   it('Signs and validates a claim', async () => {
     const unsignedClaim = {
       nonce: Date.now().toString(),
+      expiry: Math.round(Date.now() / 1000 + SECONDS_IN_DAY).toString(),
       participant: ADDRESS_ZERO,
       score: '300',
     }

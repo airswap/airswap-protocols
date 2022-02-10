@@ -89,6 +89,7 @@ describe('Pool Integration Tests', () => {
           .withdraw(
             feeToken.address,
             claim.nonce,
+            claim.expiry,
             ALICE_SCORE,
             claimSignature.v,
             claimSignature.r,
@@ -103,7 +104,13 @@ describe('Pool Integration Tests', () => {
     it('withdraw success with claims by different participants', async () => {
       const nonce = 1
 
-      const claimAlice = await createUnsignedClaim({ nonce: nonce })
+      const block = await ethers.provider.getBlock()
+      const expiry = block.timestamp + 60
+
+      const claimAlice = await createUnsignedClaim({
+        nonce: nonce,
+        expiry: expiry,
+      })
       const claimAliceSignature = await createClaimSignature(
         claimAlice,
         deployer,
@@ -116,6 +123,7 @@ describe('Pool Integration Tests', () => {
         participant: participant,
         score: BOB_SCORE,
         nonce: nonce,
+        expiry: expiry,
       })
       const claimBobSignature = await createClaimSignature(
         claimBob,
@@ -130,6 +138,7 @@ describe('Pool Integration Tests', () => {
           .withdraw(
             feeToken.address,
             nonce,
+            claimAlice.expiry,
             ALICE_SCORE,
             claimAliceSignature.v,
             claimAliceSignature.r,
@@ -143,6 +152,7 @@ describe('Pool Integration Tests', () => {
           .withdraw(
             feeToken.address,
             nonce,
+            claimBob.expiry,
             BOB_SCORE,
             claimBobSignature.v,
             claimBobSignature.r,
@@ -170,6 +180,7 @@ describe('Pool Integration Tests', () => {
           .withdraw(
             feeToken.address,
             claim.nonce,
+            claim.expiry,
             ALICE_SCORE,
             claimSignature.v,
             claimSignature.r,
@@ -198,6 +209,7 @@ describe('Pool Integration Tests', () => {
           .withdraw(
             feeToken.address,
             claim.nonce,
+            claim.expiry,
             ALICE_SCORE,
             claimSignature.v,
             claimSignature.r,
@@ -227,6 +239,7 @@ describe('Pool Integration Tests', () => {
           .withdraw(
             feeToken.address,
             claim.nonce,
+            claim.expiry,
             claim.score,
             claimSignature.v,
             claimSignature.r,
@@ -251,6 +264,7 @@ describe('Pool Integration Tests', () => {
           .withdraw(
             feeToken.address,
             claim.nonce,
+            claim.expiry,
             ALICE_SCORE,
             claimSignature.v,
             claimSignature.r,
@@ -264,12 +278,43 @@ describe('Pool Integration Tests', () => {
           .withdraw(
             feeToken.address,
             claim.nonce,
+            claim.expiry,
             ALICE_SCORE,
             claimSignature.v,
             claimSignature.r,
             claimSignature.s
           )
       ).to.be.revertedWith('NONCE_ALREADY_USED')
+    })
+
+    it('withdraw reverts with expiry passed', async () => {
+      const block = await ethers.provider.getBlock()
+      const expiry = block.timestamp + 60
+
+      const claim = await createUnsignedClaim({ expiry: expiry })
+
+      const claimSignature = await createClaimSignature(
+        claim,
+        deployer,
+        pool.address,
+        CHAIN_ID
+      )
+
+      await ethers.provider.send('evm_mine', [expiry])
+
+      await expect(
+        pool
+          .connect(alice)
+          .withdraw(
+            feeToken.address,
+            claim.nonce,
+            claim.expiry,
+            ALICE_SCORE,
+            claimSignature.v,
+            claimSignature.r,
+            claimSignature.s
+          )
+      ).to.be.revertedWith('EXPIRY_PASSED')
     })
 
     it('withdraw reverts with invalid signatory signing', async () => {
@@ -288,6 +333,7 @@ describe('Pool Integration Tests', () => {
           .withdraw(
             feeToken.address,
             claim.nonce,
+            claim.expiry,
             ALICE_SCORE,
             claimSignature.v,
             claimSignature.r,
@@ -315,6 +361,7 @@ describe('Pool Integration Tests', () => {
             feeToken.address,
             bob.address,
             claim.nonce,
+            claim.expiry,
             claim.score,
             claimSignature.v,
             claimSignature.r,
@@ -346,6 +393,7 @@ describe('Pool Integration Tests', () => {
             feeToken.address,
             bob.address,
             claim.nonce,
+            claim.expiry,
             claim.score,
             claimSignature.v,
             claimSignature.r,
@@ -372,6 +420,7 @@ describe('Pool Integration Tests', () => {
             withdrawMinimum,
             feeToken.address,
             claim.nonce,
+            claim.expiry,
             claim.score,
             claimSignature.v,
             claimSignature.r,
@@ -406,6 +455,7 @@ describe('Pool Integration Tests', () => {
             withdrawMinimum,
             feeToken2.address,
             claim.nonce,
+            claim.expiry,
             claim.score,
             claimSignature.v,
             claimSignature.r,
@@ -433,6 +483,7 @@ describe('Pool Integration Tests', () => {
             feeToken.address,
             bob.address,
             claim.nonce,
+            claim.expiry,
             claim.score,
             claimSignature.v,
             claimSignature.r,
@@ -465,6 +516,7 @@ describe('Pool Integration Tests', () => {
             feeToken2.address,
             bob.address,
             claim.nonce,
+            claim.expiry,
             claim.score,
             claimSignature.v,
             claimSignature.r,

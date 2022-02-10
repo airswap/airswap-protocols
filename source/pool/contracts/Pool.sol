@@ -32,6 +32,7 @@ contract Pool is IPool, Ownable {
       abi.encodePacked(
         "Claim(",
         "uint256 nonce,",
+        "uint256 expiry,",
         "address participant,",
         "uint256 score",
         ")"
@@ -198,6 +199,7 @@ contract Pool is IPool, Ownable {
    * @notice Withdraw tokens from the pool using a signed claim
    * @param token address
    * @param nonce uint256
+   * @param expiry uint256
    * @param score uint256
    * @param v uint8 "v" value of the ECDSA signature
    * @param r bytes32 "r" value of the ECDSA signature
@@ -206,12 +208,13 @@ contract Pool is IPool, Ownable {
   function withdraw(
     address token,
     uint256 nonce,
+    uint256 expiry,
     uint256 score,
     uint8 v,
     bytes32 r,
     bytes32 s
   ) external override {
-    withdrawProtected(0, msg.sender, token, nonce, msg.sender, score, v, r, s);
+    withdrawProtected(0, msg.sender, token, nonce, expiry, msg.sender, score, v, r, s);
   }
 
   /**
@@ -220,6 +223,7 @@ contract Pool is IPool, Ownable {
    * @param token address
    * @param recipient address
    * @param nonce uint256
+   * @param expiry uint256
    * @param score uint256
    * @param v uint8 "v" value of the ECDSA signature
    * @param r bytes32 "r" value of the ECDSA signature
@@ -230,6 +234,7 @@ contract Pool is IPool, Ownable {
     address token,
     address recipient,
     uint256 nonce,
+    uint256 expiry,
     uint256 score,
     uint8 v,
     bytes32 r,
@@ -240,6 +245,7 @@ contract Pool is IPool, Ownable {
       recipient,
       token,
       nonce,
+      expiry,
       msg.sender,
       score,
       v,
@@ -253,6 +259,7 @@ contract Pool is IPool, Ownable {
    * @param minimumAmount uint256
    * @param token address
    * @param nonce uint256
+   * @param expiry uint256
    * @param score uint256
    * @param v uint8 "v" value of the ECDSA signature
    * @param r bytes32 "r" value of the ECDSA signature
@@ -262,16 +269,17 @@ contract Pool is IPool, Ownable {
     uint256 minimumAmount,
     address token,
     uint256 nonce,
+    uint256 expiry,
     uint256 score,
     uint8 v,
     bytes32 r,
     bytes32 s
   ) external override {
     require(token == address(stakingToken), "INVALID_TOKEN");
-    _checkValidClaim(nonce, msg.sender, score, v, r, s);
+    _checkValidClaim(nonce, expiry, msg.sender, score, v, r, s);
     uint256 amount = _withdrawCheck(score, token, minimumAmount);
     IStaking(stakingContract).stakeFor(msg.sender, amount);
-    emit Withdraw(nonce, msg.sender, token, amount, score);
+    emit Withdraw(nonce, expiry, msg.sender, token, amount, score);
   }
 
   /**
@@ -280,6 +288,7 @@ contract Pool is IPool, Ownable {
    * @param token address
    * @param account address
    * @param nonce uint256
+   * @param expiry uint256
    * @param score uint256
    * @param v uint8 "v" value of the ECDSA signature
    * @param r bytes32 "r" value of the ECDSA signature
@@ -290,16 +299,17 @@ contract Pool is IPool, Ownable {
     address token,
     address account,
     uint256 nonce,
+    uint256 expiry,
     uint256 score,
     uint8 v,
     bytes32 r,
     bytes32 s
   ) external override {
     require(token == address(stakingToken), "INVALID_TOKEN");
-    _checkValidClaim(nonce, msg.sender, score, v, r, s);
+    _checkValidClaim(nonce, expiry, msg.sender, score, v, r, s);
     uint256 amount = _withdrawCheck(score, token, minimumAmount);
     IStaking(stakingContract).stakeFor(account, amount);
-    emit Withdraw(nonce, msg.sender, token, amount, score);
+    emit Withdraw(nonce, expiry, msg.sender, token, amount, score);
   }
 
   /**
@@ -308,6 +318,7 @@ contract Pool is IPool, Ownable {
    * @param token address
    * @param participant address
    * @param nonce uint256
+   * @param expiry uint256
    * @param score uint256
    * @param v uint8 "v" value of the ECDSA signature
    * @param r bytes32 "r" value of the ECDSA signature
@@ -318,16 +329,17 @@ contract Pool is IPool, Ownable {
     address recipient,
     address token,
     uint256 nonce,
+    uint256 expiry,
     address participant,
     uint256 score,
     uint8 v,
     bytes32 r,
     bytes32 s
   ) public override returns (uint256) {
-    _checkValidClaim(nonce, participant, score, v, r, s);
+    _checkValidClaim(nonce, expiry, participant, score, v, r, s);
     uint256 amount = _withdrawCheck(score, token, minimumAmount);
     IERC20(token).safeTransfer(recipient, amount);
-    emit Withdraw(nonce, participant, token, amount, score);
+    emit Withdraw(nonce, expiry, participant, token, amount, score);
     return amount;
   }
 
@@ -351,6 +363,7 @@ contract Pool is IPool, Ownable {
   /**
    * @notice Verify a signature
    * @param nonce uint256
+   * @param expiry uint256
    * @param participant address
    * @param score uint256
    * @param v uint8 "v" value of the ECDSA signature
@@ -359,6 +372,7 @@ contract Pool is IPool, Ownable {
    */
   function verify(
     uint256 nonce,
+    uint256 expiry,
     address participant,
     uint256 score,
     uint8 v,
@@ -366,8 +380,9 @@ contract Pool is IPool, Ownable {
     bytes32 s
   ) public view override returns (bool valid) {
     require(DOMAIN_CHAIN_ID == getChainId(), "CHAIN_ID_CHANGED");
+    require(expiry > block.timestamp, "EXPIRY_PASSED");
     bytes32 claimHash = keccak256(
-      abi.encode(CLAIM_TYPEHASH, nonce, participant, score)
+      abi.encode(CLAIM_TYPEHASH, nonce, expiry, participant, score)
     );
     address signatory = ecrecover(
       keccak256(abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR, claimHash)),
@@ -408,8 +423,9 @@ contract Pool is IPool, Ownable {
   }
 
   /**
-   * @notice Checks Claim Nonce, Participant, Score, Signature
+   * @notice Checks Claim Nonce, Expiry, Participant, Score, Signature
    * @param nonce uint256
+   * @param expiry uint256
    * @param participant address
    * @param score uint256
    * @param v uint8 "v" value of the ECDSA signature
@@ -418,6 +434,7 @@ contract Pool is IPool, Ownable {
    */
   function _checkValidClaim(
     uint256 nonce,
+    uint256 expiry,
     address participant,
     uint256 score,
     uint8 v,
@@ -425,8 +442,9 @@ contract Pool is IPool, Ownable {
     bytes32 s
   ) internal {
     require(DOMAIN_CHAIN_ID == getChainId(), "CHAIN_ID_CHANGED");
+    require(expiry > block.timestamp, "EXPIRY_PASSED");
     bytes32 claimHash = keccak256(
-      abi.encode(CLAIM_TYPEHASH, nonce, participant, score)
+      abi.encode(CLAIM_TYPEHASH, nonce, expiry, participant, score)
     );
     address signatory = ecrecover(
       keccak256(abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR, claimHash)),

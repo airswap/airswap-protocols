@@ -163,11 +163,13 @@ export function orderPropsToStrings(obj: any): Order {
 // eslint-disable-next-line  @typescript-eslint/explicit-module-boundary-types
 export function createClaim({
   nonce = Date.now().toString(),
+  expiry = nonce + 60,
   participant = ADDRESS_ZERO,
   score = '0',
 }: any): UnsignedClaim {
   return {
     nonce: String(nonce),
+    expiry: String(expiry),
     participant,
     score: String(score),
   }
@@ -241,6 +243,7 @@ export function isValidClaim(claim: Claim): boolean {
   return (
     claim &&
     'nonce' in claim &&
+    'expiry' in claim &&
     'participant' in claim &&
     'score' in claim &&
     'r' in claim &&
@@ -252,6 +255,7 @@ export function isValidClaim(claim: Claim): boolean {
 export function claimToParams(claim: Claim): Array<string> {
   return [
     claim.nonce,
+    claim.expiry,
     claim.participant,
     claim.score,
     claim.v,
@@ -263,6 +267,7 @@ export function claimToParams(claim: Claim): Array<string> {
 export function claimPropsToStrings(obj: any): Claim {
   return {
     nonce: String(obj.nonce),
+    expiry: String(obj.expiry),
     participant: String(obj.participant),
     score: String(obj.score),
     v: String(obj.v),
