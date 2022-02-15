@@ -34,7 +34,7 @@ export async function fetchTokens(
   })
   tokens = tokens.filter((token) => {
     token.address = token.address.toLowerCase()
-    return token.chainId === chainId
+    return token.address && token.chainId === chainId
   })
   return { tokens, errors }
 }
