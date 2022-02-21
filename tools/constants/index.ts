@@ -83,7 +83,7 @@ export const wethAddresses: Record<string, string> = {
 
 export const stakingTokenAddresses: Record<string, string> = {
   1: '0x27054b13b1b798b345b591a4d22e6562d47ea75a',
-  4: '0xcc1cbd4f67cceb7c001bd4adf98451237a193ff8',
+  4: '0x8F8cA1BcfC53003D39C64192Bab6ACa7263f6A97',
   5: '0x1a1ec25dc08e98e5e93f1104b5e5cdd298707d31',
   42: '0x1a1ec25dc08e98e5e93f1104b5e5cdd298707d31',
   56: '0x1ac0d76f11875317f8a7d791db94cdd82bd02bd1',
