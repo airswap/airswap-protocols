@@ -1,6 +1,6 @@
 {
   "name": "@airswap/wrapper",
-  "version": "2.5.2",
+  "version": "2.6.2",
   "description": "Automatically wrap and unwrap ether for swaps",
   "contributors": [
     "Don Mosites",
