@@ -16,12 +16,33 @@
   dependencies:
     "@openzeppelin/contracts" "^4.3.1"
 
+"@airswap/staking@2.4.3":
+  version "2.4.3"
+  resolved "https://registry.yarnpkg.com/@airswap/staking/-/staking-2.4.3.tgz#6f855b0d4ececf33121cbc59914691f47ed559c6"
+  integrity sha512-VC4FK8qjg9O6fVyD2BUcczapSRHGNbqp77fY06N4ekqQbdIQcgs9lBS838GYZ6/bHuGVh6dszvyp+1wVUBRM1g==
+  dependencies:
+    "@openzeppelin/contracts" "^4.3.1"
+
+"@airswap/swap@2.5.0":
+  version "2.5.0"
+  resolved "https://registry.yarnpkg.com/@airswap/swap/-/swap-2.5.0.tgz#a76ac0866bf49c45b7daf8992cdf1262ea07b80d"
+  integrity sha512-xNsIpMP4gabT5AznSyGzh83pC2FQPWdqvdFyW/g+FxyMzecQYHlBfxMJsXU14Ist7RNeGroWHoPBOGInmr9liA==
+  dependencies:
+    "@openzeppelin/contracts" "^4.3.1"
+
 "@airswap/validator@2.3.0":
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/@airswap/validator/-/validator-2.3.0.tgz#f7afd96950e33d2f3bb6653116aa2a97b9bdebf1"
   integrity sha512-tRoOrbN76k5CCglIH8SwelpzY9etshs3wCxe7+Y8KvXFmEopwgMRSj8LCkFCIjLuVDw3rMDRcyMTgx9z1RMcvA==
   dependencies:
     "@openzeppelin/contracts" "^4.3.2"
+
+"@airswap/wrapper@2.5.2":
+  version "2.5.2"
+  resolved "https://registry.yarnpkg.com/@airswap/wrapper/-/wrapper-2.5.2.tgz#9932284fc75c38335bb79f62f3de13fcff4f7b66"
+  integrity sha512-bEcCgF27XRB2Uo25uW5XyxlUZE+6iVvvNX63Il7TJAEF0d9RbcdV2+s4ejBO/iypnPyrprT9diKLYoB4Gn5pSw==
+  dependencies:
+    "@openzeppelin/contracts" "^4.3.1"
 
 "@babel/code-frame@^7.0.0":
   version "7.14.5"
