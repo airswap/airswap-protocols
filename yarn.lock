@@ -16,13 +16,6 @@
   dependencies:
     "@openzeppelin/contracts" "^4.3.1"
 
-"@airswap/staking@2.4.3":
-  version "2.4.3"
-  resolved "https://registry.yarnpkg.com/@airswap/staking/-/staking-2.4.3.tgz#6f855b0d4ececf33121cbc59914691f47ed559c6"
-  integrity sha512-VC4FK8qjg9O6fVyD2BUcczapSRHGNbqp77fY06N4ekqQbdIQcgs9lBS838GYZ6/bHuGVh6dszvyp+1wVUBRM1g==
-  dependencies:
-    "@openzeppelin/contracts" "^4.3.1"
-
 "@airswap/swap@2.5.0":
   version "2.5.0"
   resolved "https://registry.yarnpkg.com/@airswap/swap/-/swap-2.5.0.tgz#a76ac0866bf49c45b7daf8992cdf1262ea07b80d"
