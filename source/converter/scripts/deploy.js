@@ -17,7 +17,7 @@ async function main() {
   const poolAddress = poolDeploys[chainId]
 
   const payees = [poolAddress]
-  const shares = [1]
+  const shares = [100]
   const triggerFee = 0
 
   console.log(`Deploying on ${chainNames[chainId].toUpperCase()}`)
