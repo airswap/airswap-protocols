@@ -1,6 +1,6 @@
 {
   "name": "@airswap/converter",
-  "version": "1.1.1-beta",
+  "version": "3.0.0-beta",
   "description": "Converts and distributes token balances to recipients",
   "contributors": [
     "Martin Sterlicchi",
