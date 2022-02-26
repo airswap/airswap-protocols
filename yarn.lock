@@ -9,34 +9,6 @@
   dependencies:
     get-parameter-names "^0.3.0"
 
-"@airswap/registry@4.8.2":
-  version "4.8.2"
-  resolved "https://registry.yarnpkg.com/@airswap/registry/-/registry-4.8.2.tgz#047da3fdfcc0d9064d4798b8d3ae19e816788ef3"
-  integrity sha512-0sUMHePUUv4cqCZcebHWhMHCMJI9rVmbrP/QqMe52g/holZ3zquEtySY3OzYqBppjlLvodPJX/XcfArjpGljVA==
-  dependencies:
-    "@openzeppelin/contracts" "^4.3.1"
-
-"@airswap/swap@2.5.0":
-  version "2.5.0"
-  resolved "https://registry.yarnpkg.com/@airswap/swap/-/swap-2.5.0.tgz#a76ac0866bf49c45b7daf8992cdf1262ea07b80d"
-  integrity sha512-xNsIpMP4gabT5AznSyGzh83pC2FQPWdqvdFyW/g+FxyMzecQYHlBfxMJsXU14Ist7RNeGroWHoPBOGInmr9liA==
-  dependencies:
-    "@openzeppelin/contracts" "^4.3.1"
-
-"@airswap/validator@2.3.0":
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/@airswap/validator/-/validator-2.3.0.tgz#f7afd96950e33d2f3bb6653116aa2a97b9bdebf1"
-  integrity sha512-tRoOrbN76k5CCglIH8SwelpzY9etshs3wCxe7+Y8KvXFmEopwgMRSj8LCkFCIjLuVDw3rMDRcyMTgx9z1RMcvA==
-  dependencies:
-    "@openzeppelin/contracts" "^4.3.2"
-
-"@airswap/wrapper@2.5.2":
-  version "2.5.2"
-  resolved "https://registry.yarnpkg.com/@airswap/wrapper/-/wrapper-2.5.2.tgz#9932284fc75c38335bb79f62f3de13fcff4f7b66"
-  integrity sha512-bEcCgF27XRB2Uo25uW5XyxlUZE+6iVvvNX63Il7TJAEF0d9RbcdV2+s4ejBO/iypnPyrprT9diKLYoB4Gn5pSw==
-  dependencies:
-    "@openzeppelin/contracts" "^4.3.1"
-
 "@babel/code-frame@^7.0.0":
   version "7.14.5"
   resolved "https://registry.yarnpkg.com/@babel/code-frame/-/code-frame-7.14.5.tgz#23b08d740e83f49c5e59945fbf1b43e80bbf4edb"
@@ -1542,7 +1514,7 @@
   dependencies:
     "@octokit/openapi-types" "^10.5.0"
 
-"@openzeppelin/contracts@^4.3.1", "@openzeppelin/contracts@^4.3.2":
+"@openzeppelin/contracts@^4.3.1":
   version "4.4.2"
   resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.4.2.tgz#4e889c9c66e736f7de189a53f8ba5b8d789425c2"
   integrity sha512-NyJV7sJgoGYqbtNUWgzzOGW4T6rR19FmX1IJgXGdapGPWsuMelGJn9h03nos0iqfforCbCB0iYIR0MtIuIFLLw==
