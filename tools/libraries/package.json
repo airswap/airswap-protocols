@@ -1,6 +1,6 @@
 {
   "name": "@airswap/libraries",
-  "version": "3.0.0-beta.1",
+  "version": "1.0.2",
   "description": "Libraries for AirSwap Developers",
   "contributors": [
     "Don Mosites",
@@ -27,7 +27,7 @@
     "test:unit": "yarn compile && mocha -r ts-node/register test/Server.test.ts"
   },
   "dependencies": {
-    "@airswap/constants": "1.0.0",
+    "@airswap/constants": "1.0.1",
     "@airswap/jsonrpc-client-websocket": "0.0.1",
     "@airswap/swap": "3.0.0-beta",
     "@airswap/registry": "3.0.0-beta",
