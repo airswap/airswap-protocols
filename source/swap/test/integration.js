@@ -58,7 +58,7 @@ describe('Swap Integration Tests', () => {
   })
 
   before('get signers and deploy', async () => {
-    ;[deployer, sender, signer, protocolFeeWallet] = await ethers.getSigners()
+    ;[sender, signer, protocolFeeWallet] = await ethers.getSigners()
 
     stakingToken = await (
       await ethers.getContractFactory(ERC20.abi, ERC20.bytecode)
