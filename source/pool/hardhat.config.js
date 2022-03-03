@@ -14,23 +14,36 @@ module.exports = {
   networks: {
     hardhat: {
       accounts: {
-        mnemonic: process.env.MNEMONIC || '',
+        mnemonic: process.env.MNEMONIC,
       },
     },
     rinkeby: {
       url: 'https://rinkeby.infura.io/v3/' + process.env.INFURA_API_KEY,
       accounts: {
-        mnemonic: process.env.MNEMONIC || '',
+        mnemonic: process.env.MNEMONIC,
       },
-      timeout: 1000000,
     },
     mainnet: {
       url: 'https://mainnet.infura.io/v3/' + process.env.INFURA_API_KEY,
       gasPrice: 50e9,
       accounts: {
-        mnemonic: process.env.MNEMONIC || '',
+        mnemonic: process.env.MNEMONIC,
       },
-      timeout: 1000000,
+    },
+    fuji: {
+      url: 'https://api.avax-test.network/ext/bc/C/rpc',
+      gas: 3000000,
+      gasPrice: 225e9,
+      accounts: {
+        mnemonic: process.env.MNEMONIC,
+      },
+    },
+    avalanche: {
+      url: 'https://api.avax.network/ext/bc/C/rpc',
+      gasPrice: 30e9,
+      accounts: {
+        mnemonic: process.env.MNEMONIC,
+      },
     },
   },
   solidity: {
@@ -47,7 +60,7 @@ module.exports = {
     ],
   },
   etherscan: {
-    apiKey: process.env.ETHERSCAN_API_KEY,
+    apiKey: process.env.VERIFICATION_API_KEY,
   },
   paths: {
     artifacts: './build',

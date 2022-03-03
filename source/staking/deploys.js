@@ -1,3 +1,4 @@
 module.exports = {
   4: '0x1f22124a0cfa8e54005CC3b1186ACE50a4cB0229',
+  43113: '0x50c13b3763075C9DA5Dfc4E88e77C3DaB4bf6af2',
 }

@@ -23,7 +23,7 @@ async function main() {
     stakingToken
   )
   await poolContract.deployed()
-  console.log(`New Registry: ${poolContract.address}`)
+  console.log(`New Pool: ${poolContract.address}`)
 
   console.log('Waiting to verify...')
   await new Promise((r) => setTimeout(r, 60000))

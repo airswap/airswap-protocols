@@ -19,6 +19,8 @@ export const chainIds: Record<string, number> = {
   GOERLI: 5,
   KOVAN: 42,
   BINANCE: 56,
+  FUJI: 43113,
+  AVALANCHE: 43114,
 }
 
 export const chainNames: Record<number, string> = {
@@ -27,6 +29,8 @@ export const chainNames: Record<number, string> = {
   5: 'GOERLI',
   42: 'KOVAN',
   56: 'BINANCE',
+  43113: 'FUJI',
+  43114: 'AVALANCHE',
 }
 
 export const chainCurrencies: Record<string, string> = {
@@ -35,6 +39,8 @@ export const chainCurrencies: Record<string, string> = {
   5: 'Goerli ETH',
   42: 'Kovan ETH',
   56: 'BNB',
+  43113: 'AVAX',
+  43114: 'AVAX',
 }
 
 export enum TokenKinds {
@@ -87,6 +93,7 @@ export const stakingTokenAddresses: Record<string, string> = {
   5: '0x1a1ec25dc08e98e5e93f1104b5e5cdd298707d31',
   42: '0x1a1ec25dc08e98e5e93f1104b5e5cdd298707d31',
   56: '0x1ac0d76f11875317f8a7d791db94cdd82bd02bd1',
+  43113: '0x48c427e7cEf42399e9e8300fC47875772309e995',
 }
 
 export const balanceCheckerAddresses: Record<string, string> = {
@@ -102,6 +109,8 @@ export const etherscanDomains: Record<string, string> = {
   5: 'goerli.etherscan.io',
   42: 'kovan.etherscan.io',
   56: 'bscscan.com',
+  43113: 'testnet.snowtrace.io',
+  43114: 'snowtrace.io',
 }
 
 export const uniswapRouterAddress = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
