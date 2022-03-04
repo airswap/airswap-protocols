@@ -15,7 +15,6 @@ describe('Swap Integration Tests', () => {
   let senderToken
   let staking
 
-  let deployer
   let sender
   let signer
   let protocolFeeWallet

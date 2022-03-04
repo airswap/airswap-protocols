@@ -1,6 +1,6 @@
 {
   "name": "@airswap/staking",
-  "version": "3.0.0-beta.1",
+  "version": "3.0.0-beta.3",
   "description": "Stake and unstake tokens on a schedule",
   "contributors": [
     "Ethan Wessel",
@@ -22,15 +22,17 @@
     "coverage": "hardhat coverage",
     "test": "hardhat test",
     "test:unit": "hardhat test ./test/unit.js",
-    "deploy": "hardhat run ./scripts/deploy.js"
+    "deploy": "hardhat run ./scripts/deploy.js",
+    "verify": "hardhat run ./scripts/verify.js"
   },
   "devDependencies": {
-    "@nomiclabs/hardhat-ethers": "^2.0.2",
+    "@nomiclabs/hardhat-ethers": "^2.0.5",
     "@nomiclabs/hardhat-etherscan": "^3.0.3",
-    "@nomiclabs/hardhat-waffle": "^2.0.1",
+    "@nomiclabs/hardhat-waffle": "^2.0.3",
     "ethereum-waffle": "^3.4.0",
-    "hardhat": "^2.6.4",
-    "solidity-coverage": "^0.7.17"
+    "ethers": "^5.5.4",
+    "hardhat": "^2.9.0",
+    "solidity-coverage": "^0.7.20"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.3.1"

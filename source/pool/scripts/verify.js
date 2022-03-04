@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 const { ethers, run } = require('hardhat')
 const stakingDeploys = require('@airswap/staking/deploys.js')
+const poolDeploys = require('../deploys.js')
 const { chainNames, stakingTokenAddresses } = require('@airswap/constants')
 
 async function main() {
@@ -14,22 +15,11 @@ async function main() {
   const stakingContract = stakingDeploys[chainId]
   const stakingToken = stakingTokenAddresses[chainId]
 
-  console.log(`Deploying on ${chainNames[chainId].toUpperCase()}`)
-
-  const poolFactory = await ethers.getContractFactory('Pool')
-  const poolContract = await poolFactory.deploy(
-    scale,
-    max,
-    stakingContract,
-    stakingToken
-  )
-  await poolContract.deployed()
-  console.log(`Deployed: ${poolContract.address}`)
-  console.log(
-    `\nVerify with "yarn verify --network ${chainNames[
-      chainId
-    ].toLowerCase()}"\n`
-  )
+  console.log(`Verifying on ${chainNames[chainId].toUpperCase()}`)
+  await run('verify:verify', {
+    address: poolDeploys[chainId],
+    constructorArguments: [scale, max, stakingContract, stakingToken],
+  })
 }
 
 main()

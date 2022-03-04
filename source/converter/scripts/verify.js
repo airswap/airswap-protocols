@@ -1,11 +1,12 @@
 /* eslint-disable no-console */
 const { ethers, run } = require('hardhat')
+const poolDeploys = require('@airswap/pool/deploys.js')
+const converterDeploys = require('../deploys.js')
 const {
   chainNames,
   wethAddresses,
   uniswapRouterAddress,
 } = require('@airswap/constants')
-const poolDeploys = require('@airswap/pool/deploys.js')
 
 async function main() {
   await run('compile')
@@ -20,28 +21,23 @@ async function main() {
   const shares = [100]
   const triggerFee = 0
 
-  console.log(`Deploying on ${chainNames[chainId].toUpperCase()}`)
-  const converterFactory = await ethers.getContractFactory('Converter')
-  const converter = await converterFactory.deploy(
-    wethAddress,
-    wethAddress,
-    uniswapRouterAddress,
-    triggerFee,
-    payees,
-    shares
-  )
-  await converter.deployed()
-  console.log(`Deployed: ${converter.address}`)
-  console.log(
-    `\nVerify with "yarn verify --network ${chainNames[
-      chainId
-    ].toLowerCase()}"\n`
-  )
+  console.log(`Verifying on ${chainNames[chainId].toUpperCase()}`)
+  await run('verify:verify', {
+    address: converterDeploys[chainId],
+    constructorArguments: [
+      wethAddress,
+      wethAddress,
+      uniswapRouterAddress,
+      triggerFee,
+      payees,
+      shares,
+    ],
+  })
 }
 
 main()
   .then(() => process.exit(0))
   .catch((error) => {
-    console.log(error)
+    console.error(error)
     process.exit(1)
   })

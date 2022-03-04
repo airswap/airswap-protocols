@@ -1,6 +1,6 @@
 {
   "name": "@airswap/converter",
-  "version": "3.0.0-beta",
+  "version": "3.0.0-beta.3",
   "description": "Converts and distributes token balances to recipients",
   "contributors": [
     "Martin Sterlicchi",
@@ -22,20 +22,20 @@
     "coverage": "hardhat coverage",
     "test": "hardhat test",
     "test:unit": "hardhat test ./test/unit.js",
-    "deploy:rinkeby": "hardhat run --network rinkeby ./scripts/deploy.js",
-    "deploy:mainnet": "hardhat run --network mainnet ./scripts/deploy.js"
+    "deploy": "hardhat run ./scripts/deploy.js",
+    "verify": "hardhat run ./scripts/verify.js"
   },
   "devDependencies": {
-    "@nomiclabs/hardhat-ethers": "^2.0.2",
-    "@nomiclabs/hardhat-etherscan": "^2.1.6",
-    "@nomiclabs/hardhat-waffle": "^2.0.1",
+    "@nomiclabs/hardhat-ethers": "^2.0.5",
+    "@nomiclabs/hardhat-etherscan": "^3.0.3",
+    "@nomiclabs/hardhat-waffle": "^2.0.3",
     "@uniswap/lib": "1.1.1",
     "@uniswap/v2-core": "1.0.1",
     "@uniswap/v2-periphery": "^1.1.0-beta.0",
     "ethereum-waffle": "^3.4.0",
-    "ethers": "^5.4.6",
-    "hardhat": "^2.6.4",
-    "solidity-coverage": "^0.7.17"
+    "ethers": "^5.5.4",
+    "hardhat": "^2.9.0",
+    "solidity-coverage": "^0.7.20"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.3.1"

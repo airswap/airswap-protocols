@@ -24,21 +24,12 @@ async function main() {
     minimumDelay
   )
   await stakingContract.deployed()
-  console.log(`New Staking: ${stakingContract.address}`)
-
-  console.log('Waiting to verify...')
-  await new Promise((r) => setTimeout(r, 60000))
-
-  await run('verify:verify', {
-    address: stakingContract.address,
-    constructorArguments: [
-      stakingToken,
-      name,
-      symbol,
-      vestingLength,
-      minimumDelay,
-    ],
-  })
+  console.log(`Deployed: ${stakingContract.address}`)
+  console.log(
+    `\nVerify with "yarn verify --network ${chainNames[
+      chainId
+    ].toLowerCase()}"\n`
+  )
 }
 
 main()

@@ -1,6 +1,6 @@
 {
   "name": "@airswap/pool",
-  "version": "3.0.0-beta.2",
+  "version": "3.0.0-beta.3",
   "description": "Tokens pooled and claimable using signatures",
   "contributors": [
     "Don Mosites",
@@ -21,11 +21,12 @@
     "coverage": "hardhat coverage",
     "test": "hardhat test",
     "test:unit": "hardhat test ./test/unit.js",
-    "deploy": "hardhat run ./scripts/deploy.js"
+    "deploy": "hardhat run ./scripts/deploy.js",
+    "verify": "hardhat run ./scripts/verify.js"
   },
   "devDependencies": {
     "@airswap/constants": "1.0.1",
-    "@airswap/staking": "3.0.0-beta.1",
+    "@airswap/staking": "3.0.0-beta.3",
     "@airswap/utils": "1.0.3",
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-etherscan": "^3.0.3",

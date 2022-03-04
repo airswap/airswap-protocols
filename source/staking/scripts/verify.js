@@ -9,27 +9,23 @@ async function main() {
   console.log(`Deployer: ${deployer.address}`)
 
   const chainId = await deployer.getChainId()
-  const scale = 10
-  const max = 100
-  const stakingContract = stakingDeploys[chainId]
   const stakingToken = stakingTokenAddresses[chainId]
+  const name = 'Staked AST'
+  const symbol = 'sAST'
+  const vestingLength = 100
+  const minimumDelay = 86400 // 3 days
 
-  console.log(`Deploying on ${chainNames[chainId].toUpperCase()}`)
-
-  const poolFactory = await ethers.getContractFactory('Pool')
-  const poolContract = await poolFactory.deploy(
-    scale,
-    max,
-    stakingContract,
-    stakingToken
-  )
-  await poolContract.deployed()
-  console.log(`Deployed: ${poolContract.address}`)
-  console.log(
-    `\nVerify with "yarn verify --network ${chainNames[
-      chainId
-    ].toLowerCase()}"\n`
-  )
+  console.log(`Verifying on ${chainNames[chainId].toUpperCase()}`)
+  await run('verify:verify', {
+    address: stakingDeploys[chainId],
+    constructorArguments: [
+      stakingToken,
+      name,
+      symbol,
+      vestingLength,
+      minimumDelay,
+    ],
+  })
 }
 
 main()
