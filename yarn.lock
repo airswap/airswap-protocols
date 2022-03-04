@@ -2,11 +2,6 @@
 # yarn lockfile v1
 
 
-"@airswap/constants@1.0.1":
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/@airswap/constants/-/constants-1.0.1.tgz#c39fa8b955e9da20392d080270cd32f8976a586f"
-  integrity sha512-EPbWfruo4nXGRYg9f2Dmr7tFrS2pIPq3iTpRBR2oLqJloioq5EwY9skOb/sCptyJLWH+K19Fys/EOZJvLauhCQ==
-
 "@airswap/jsonrpc-client-websocket@0.0.1":
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/@airswap/jsonrpc-client-websocket/-/jsonrpc-client-websocket-0.0.1.tgz#e75932a0f19cb6c23cf145834277211cce150400"

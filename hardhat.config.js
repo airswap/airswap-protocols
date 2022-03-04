@@ -1,4 +1,4 @@
-require('dotenv').config()
+require('dotenv').config({ path: '../../.env' })
 require('@nomiclabs/hardhat-ethers')
 require('@nomiclabs/hardhat-waffle')
 require('@nomiclabs/hardhat-etherscan')
