@@ -27,7 +27,7 @@
     "test:unit": "yarn compile && mocha -r ts-node/register test/Server.test.ts"
   },
   "dependencies": {
-    "@airswap/constants": "1.0.1",
+    "@airswap/constants": "3.0.0-beta.0",
     "@airswap/jsonrpc-client-websocket": "0.0.1",
     "@airswap/swap": "3.0.0-beta",
     "@airswap/registry": "3.0.0-beta",

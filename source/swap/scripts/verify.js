@@ -1,8 +1,9 @@
 /* eslint-disable no-console */
 const { ethers, run } = require('hardhat')
-const converterDeploys = require('@airswap/converter/deploys.js')
 const stakingDeploys = require('@airswap/staking/deploys.js')
+const converterDeploys = require('@airswap/converter/deploys.js')
 const { chainNames } = require('@airswap/constants')
+const swapDeploys = require('../deploys.js')
 
 async function main() {
   await run('compile')
@@ -17,26 +18,18 @@ async function main() {
   const rebateScale = 10
   const rebateMax = 100
 
-  console.log(`Deploying on ${chainNames[chainId].toUpperCase()}`)
-  console.log(`Fee wallet (Converter): ${protocolFeeWallet}`)
-  console.log(`Staking: ${stakingContract}`)
-
-  const swapFactory = await ethers.getContractFactory('Swap')
-  const swapContract = await swapFactory.deploy(
-    protocolFee,
-    protocolFeeLight,
-    protocolFeeWallet,
-    rebateScale,
-    rebateMax,
-    stakingContract
-  )
-  await swapContract.deployed()
-  console.log(`Deployed: ${swapContract.address}`)
-  console.log(
-    `\nVerify with "yarn verify --network ${chainNames[
-      chainId
-    ].toLowerCase()}"\n`
-  )
+  console.log(`Verifying on ${chainNames[chainId].toUpperCase()}`)
+  await run('verify:verify', {
+    address: swapDeploys[chainId],
+    constructorArguments: [
+      protocolFee,
+      protocolFeeLight,
+      protocolFeeWallet,
+      rebateScale,
+      rebateMax,
+      stakingContract,
+    ],
+  })
 }
 
 main()

@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 const { ethers, run } = require('hardhat')
 const swapDeploys = require('@airswap/swap/deploys.js')
+const wrapperDeploys = require('../deploys.js')
 const { chainNames, wethAddresses } = require('@airswap/constants')
 
 async function main() {
@@ -12,19 +13,11 @@ async function main() {
   const swapAddress = swapDeploys[chainId]
   const wethAddress = wethAddresses[chainId]
 
-  console.log(`Deploying on ${chainNames[chainId].toUpperCase()}`)
-  console.log(`Swap: ${swapAddress}`)
-  console.log(`WETH: ${wethAddress}`)
-
-  const wrapperFactory = await ethers.getContractFactory('Wrapper')
-  const wrapperContract = await wrapperFactory.deploy(swapAddress, wethAddress)
-  await wrapperContract.deployed()
-  console.log(`Deployed: ${wrapperContract.address}`)
-  console.log(
-    `\nVerify with "yarn verify --network ${chainNames[
-      chainId
-    ].toLowerCase()}"\n`
-  )
+  console.log(`Verifying on ${chainNames[chainId].toUpperCase()}`)
+  await run('verify:verify', {
+    address: wrapperDeploys[chainId],
+    constructorArguments: [swapAddress, wethAddress],
+  })
 }
 
 main()

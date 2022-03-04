@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 const { ethers, run } = require('hardhat')
+const registryDeploys = require('../deploys.js')
 const { chainNames, stakingTokenAddresses } = require('@airswap/constants')
 
 async function main() {
@@ -12,20 +13,11 @@ async function main() {
   const obligationCost = 0
   const tokenCost = 0
 
-  console.log(`Deploying on ${chainNames[chainId].toUpperCase()}`)
-  const registryFactory = await ethers.getContractFactory('Registry')
-  const registryContract = await registryFactory.deploy(
-    stakingToken,
-    obligationCost,
-    tokenCost
-  )
-  await registryContract.deployed()
-  console.log(`Deployed: ${registryContract.address}`)
-  console.log(
-    `\nVerify with "yarn verify --network ${chainNames[
-      chainId
-    ].toLowerCase()}"\n`
-  )
+  console.log(`Verifying on ${chainNames[chainId].toUpperCase()}`)
+  await run('verify:verify', {
+    address: registryDeploys[chainId],
+    constructorArguments: [stakingToken, obligationCost, tokenCost],
+  })
 }
 
 main()

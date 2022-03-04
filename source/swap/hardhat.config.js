@@ -1,1 +1,1 @@
-module.exports = require('../hardhat.config.js')
+module.exports = require('../../hardhat.config.js')
