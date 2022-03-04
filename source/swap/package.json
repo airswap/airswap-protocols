@@ -1,7 +1,7 @@
 {
   "name": "@airswap/swap",
-  "version": "3.0.0-beta",
-  "description": "Atomic Token Swap",
+  "version": "3.0.0-beta.3",
+  "description": "AirSwap: Atomic Token Swap",
   "contributors": [
     "Vicente Dragicevic",
     "Don Mosites",

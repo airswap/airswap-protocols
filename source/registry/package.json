@@ -1,7 +1,7 @@
 {
   "name": "@airswap/registry",
-  "version": "3.0.0-beta",
-  "description": "Registry of AirSwap server URLs",
+  "version": "3.0.0-beta.3",
+  "description": "AirSwap: Server URL Registry",
   "contributors": [
     "Ethan Wessel",
     "Don Mosites"

@@ -1,7 +1,7 @@
 {
   "name": "@airswap/staking",
   "version": "3.0.0-beta.3",
-  "description": "Stake and unstake tokens on a schedule",
+  "description": "AirSwap: Stake Tokens",
   "contributors": [
     "Ethan Wessel",
     "Don Mosites",

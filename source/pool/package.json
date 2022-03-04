@@ -1,7 +1,7 @@
 {
   "name": "@airswap/pool",
   "version": "3.0.0-beta.3",
-  "description": "Tokens pooled and claimable using signatures",
+  "description": "AirSwap: Rewards Pool",
   "contributors": [
     "Don Mosites",
     "Martin Sterlicchi"
