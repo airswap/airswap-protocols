@@ -1,8 +1,10 @@
 /* eslint-disable no-console */
+const fs = require('fs')
 const { ethers, run } = require('hardhat')
 const converterDeploys = require('@airswap/converter/deploys.js')
 const stakingDeploys = require('@airswap/staking/deploys.js')
 const { chainNames } = require('@airswap/constants')
+const swapDeploys = require('../deploys.js')
 
 async function main() {
   await run('compile')
@@ -32,6 +34,14 @@ async function main() {
   )
   await swapContract.deployed()
   console.log(`Deployed: ${swapContract.address}`)
+
+  swapDeploys[chainId] = swapContract.address
+  fs.writeFileSync(
+    './deploys.js',
+    `module.exports = ${JSON.stringify(swapDeploys, null, '\t')}`
+  )
+  console.log('Updated deploys.js')
+
   console.log(
     `\nVerify with "yarn verify --network ${chainNames[
       chainId

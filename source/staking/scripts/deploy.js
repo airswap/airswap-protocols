@@ -1,6 +1,8 @@
 /* eslint-disable no-console */
+const fs = require('fs')
 const { ethers, run } = require('hardhat')
 const { chainNames, stakingTokenAddresses } = require('@airswap/constants')
+const stakingDeploys = require('../deploys.js')
 
 async function main() {
   await run('compile')
@@ -25,6 +27,14 @@ async function main() {
   )
   await stakingContract.deployed()
   console.log(`Deployed: ${stakingContract.address}`)
+
+  stakingDeploys[chainId] = stakingContract.address
+  fs.writeFileSync(
+    './deploys.js',
+    `module.exports = ${JSON.stringify(stakingDeploys, null, '\t')}`
+  )
+  console.log('Updated deploys.js')
+
   console.log(
     `\nVerify with "yarn verify --network ${chainNames[
       chainId
