@@ -1,6 +1,6 @@
 {
   "name": "@airswap/typescript",
-  "version": "1.0.3",
+  "version": "3.0.0-beta.0",
   "description": "TypeScript Types for AirSwap Developers",
   "contributors": [
     "Don Mosites"
