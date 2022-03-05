@@ -1,6 +1,8 @@
 /* eslint-disable no-console */
+const fs = require('fs')
 const { ethers, run } = require('hardhat')
 const { chainNames, stakingTokenAddresses } = require('@airswap/constants')
+const stakingDeploys = require('../deploys.js')
 
 async function main() {
   await run('compile')
@@ -24,21 +26,20 @@ async function main() {
     minimumDelay
   )
   await stakingContract.deployed()
-  console.log(`New Staking: ${stakingContract.address}`)
+  console.log(`Deployed: ${stakingContract.address}`)
 
-  console.log('Waiting to verify...')
-  await new Promise((r) => setTimeout(r, 60000))
+  stakingDeploys[chainId] = stakingContract.address
+  fs.writeFileSync(
+    './deploys.js',
+    `module.exports = ${JSON.stringify(stakingDeploys, null, '\t')}`
+  )
+  console.log('Updated deploys.js')
 
-  await run('verify:verify', {
-    address: stakingContract.address,
-    constructorArguments: [
-      stakingToken,
-      name,
-      symbol,
-      vestingLength,
-      minimumDelay,
-    ],
-  })
+  console.log(
+    `\nVerify with "yarn verify --network ${chainNames[
+      chainId
+    ].toLowerCase()}"\n`
+  )
 }
 
 main()

@@ -191,9 +191,9 @@ describe('Staking Unit', () => {
     })
 
     it('unsuccessful staking', async () => {
-      await token.mock.transferFrom.revertsWithReason('Insufficient Funds')
+      await token.mock.transferFrom.returns(false)
       await expect(staking.connect(account1).stake('100')).to.be.revertedWith(
-        'Insufficient Funds'
+        'SafeERC20: ERC20 operation did not succeed'
       )
     })
 

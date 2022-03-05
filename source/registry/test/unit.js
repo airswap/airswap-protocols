@@ -105,14 +105,12 @@ describe('Registry Unit', () => {
     })
 
     it('add a list of tokens when there is insufficent stake token', async () => {
-      await stakingToken.mock.transferFrom.revertsWithReason(
-        'Insufficient Funds'
-      )
+      await stakingToken.mock.transferFrom.returns(false)
       await expect(
         registry
           .connect(account1)
           .addTokens([token1.address, token2.address, token3.address])
-      ).to.be.revertedWith('Insufficient Funds')
+      ).to.be.revertedWith('SafeERC20: ERC20 operation did not succeed')
     })
 
     it('add a list of duplicate tokens fails', async () => {

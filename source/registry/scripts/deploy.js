@@ -1,6 +1,8 @@
 /* eslint-disable no-console */
+const fs = require('fs')
 const { ethers, run } = require('hardhat')
 const { chainNames, stakingTokenAddresses } = require('@airswap/constants')
+const registryDeploys = require('../deploys.js')
 
 async function main() {
   await run('compile')
@@ -9,8 +11,8 @@ async function main() {
 
   const chainId = await deployer.getChainId()
   const stakingToken = stakingTokenAddresses[chainId]
-  const obligationCost = 1000000000
-  const tokenCost = 1000000
+  const obligationCost = 0
+  const tokenCost = 0
 
   console.log(`Deploying on ${chainNames[chainId].toUpperCase()}`)
   const registryFactory = await ethers.getContractFactory('Registry')
@@ -20,16 +22,20 @@ async function main() {
     tokenCost
   )
   await registryContract.deployed()
-  console.log(`New Registry: ${registryContract.address}`)
+  console.log(`Deployed: ${registryContract.address}`)
 
-  console.log('Waiting to verify...')
-  await new Promise((r) => setTimeout(r, 60000))
+  registryDeploys[chainId] = registryContract.address
+  fs.writeFileSync(
+    './deploys.js',
+    `module.exports = ${JSON.stringify(registryDeploys, null, '\t')}`
+  )
+  console.log('Updated deploys.js')
 
-  console.log('Verifying...')
-  await run('verify:verify', {
-    address: registryContract.address,
-    constructorArguments: [stakingToken, obligationCost, tokenCost],
-  })
+  console.log(
+    `\nVerify with "yarn verify --network ${chainNames[
+      chainId
+    ].toLowerCase()}"\n`
+  )
 }
 
 main()

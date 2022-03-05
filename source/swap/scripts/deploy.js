@@ -1,8 +1,10 @@
 /* eslint-disable no-console */
+const fs = require('fs')
 const { ethers, run } = require('hardhat')
 const converterDeploys = require('@airswap/converter/deploys.js')
 const stakingDeploys = require('@airswap/staking/deploys.js')
 const { chainNames } = require('@airswap/constants')
+const swapDeploys = require('../deploys.js')
 
 async function main() {
   await run('compile')
@@ -31,23 +33,20 @@ async function main() {
     stakingContract
   )
   await swapContract.deployed()
-  console.log(`New Swap: ${swapContract.address}`)
+  console.log(`Deployed: ${swapContract.address}`)
 
-  console.log('Waiting to verify...')
-  await new Promise((r) => setTimeout(r, 60000))
+  swapDeploys[chainId] = swapContract.address
+  fs.writeFileSync(
+    './deploys.js',
+    `module.exports = ${JSON.stringify(swapDeploys, null, '\t')}`
+  )
+  console.log('Updated deploys.js')
 
-  console.log('Verifying...')
-  await run('verify:verify', {
-    address: swapContract.address,
-    constructorArguments: [
-      protocolFee,
-      protocolFeeLight,
-      protocolFeeWallet,
-      rebateScale,
-      rebateMax,
-      stakingContract,
-    ],
-  })
+  console.log(
+    `\nVerify with "yarn verify --network ${chainNames[
+      chainId
+    ].toLowerCase()}"\n`
+  )
 }
 
 main()

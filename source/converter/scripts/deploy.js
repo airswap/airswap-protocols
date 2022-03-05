@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+const fs = require('fs')
 const { ethers, run } = require('hardhat')
 const {
   chainNames,
@@ -6,6 +7,7 @@ const {
   uniswapRouterAddress,
 } = require('@airswap/constants')
 const poolDeploys = require('@airswap/pool/deploys.js')
+const converterDeploys = require('../deploys.js')
 
 async function main() {
   await run('compile')
@@ -30,25 +32,21 @@ async function main() {
     payees,
     shares
   )
-
   await converter.deployed()
-  console.log(`New Converter: ${converter.address}`)
+  console.log(`Deployed: ${converter.address}`)
 
-  console.log('Waiting to verify...')
-  await new Promise((r) => setTimeout(r, 60000))
+  converterDeploys[chainId] = converter.address
+  fs.writeFileSync(
+    './deploys.js',
+    `module.exports = ${JSON.stringify(converterDeploys, null, '\t')}`
+  )
+  console.log('Updated deploys.js')
 
-  console.log('Verifying...')
-  await run('verify:verify', {
-    address: converter.address,
-    constructorArguments: [
-      wethAddress,
-      wethAddress,
-      uniswapRouterAddress,
-      triggerFee,
-      payees,
-      shares,
-    ],
-  })
+  console.log(
+    `\nVerify with "yarn verify --network ${chainNames[
+      chainId
+    ].toLowerCase()}"\n`
+  )
 }
 
 main()

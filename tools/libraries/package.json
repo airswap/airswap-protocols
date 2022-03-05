@@ -1,6 +1,6 @@
 {
   "name": "@airswap/libraries",
-  "version": "1.0.2",
+  "version": "3.0.0-beta.0",
   "description": "Libraries for AirSwap Developers",
   "contributors": [
     "Don Mosites",
@@ -27,13 +27,13 @@
     "test:unit": "yarn compile && mocha -r ts-node/register test/Server.test.ts"
   },
   "dependencies": {
-    "@airswap/constants": "1.0.1",
+    "@airswap/constants": "3.0.0-beta.0",
     "@airswap/jsonrpc-client-websocket": "0.0.1",
-    "@airswap/swap": "3.0.0-beta",
-    "@airswap/registry": "3.0.0-beta",
+    "@airswap/swap": "3.0.0-beta.3",
+    "@airswap/registry": "3.0.0-beta.3",
     "@airswap/typescript": "1.0.3",
     "@airswap/utils": "1.0.3",
-    "@airswap/wrapper": "3.0.0-beta",
+    "@airswap/wrapper": "3.0.0-beta.3",
     "bignumber.js": "^9.0.0",
     "browser-or-node": "^1.3.0",
     "ethers": "^5.0.25",
