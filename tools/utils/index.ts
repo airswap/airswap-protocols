@@ -23,7 +23,7 @@ import {
   Formula,
   EIP712Swap,
   EIP712Claim,
-} from '@airswap/typescript/build/index'
+} from '@airswap/typescript'
 
 // eslint-disable-next-line  @typescript-eslint/explicit-module-boundary-types
 export function createOrder({
