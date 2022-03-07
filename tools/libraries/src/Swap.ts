@@ -15,7 +15,9 @@ export class Swap {
 
   public constructor(
     chainId = chainIds.RINKEBY,
-    signerOrProvider?: ethers.Signer | ethers.providers.Provider
+    signerOrProvider?:
+      | ethers.providers.JsonRpcSigner
+      | ethers.providers.Provider
   ) {
     this.chainId = chainId
     this.contract = new ethers.Contract(
@@ -36,7 +38,7 @@ export class Swap {
   public async check(
     order: Order,
     senderWallet: string,
-    signer?: ethers.Signer
+    signer?: ethers.providers.JsonRpcSigner
   ): Promise<Array<string>> {
     let contract = this.contract
     if (!this.contract.signer) {
@@ -53,7 +55,10 @@ export class Swap {
     return this.convertToArray(count, errors)
   }
 
-  public async swap(order: Order, sender?: ethers.Signer): Promise<string> {
+  public async swap(
+    order: Order,
+    sender?: ethers.providers.JsonRpcSigner
+  ): Promise<string> {
     let contract = this.contract
     if (!this.contract.signer) {
       if (sender === undefined) {
@@ -63,6 +68,21 @@ export class Swap {
       }
     }
     return await contract.swap(sender.getAddress(), ...orderToParams(order))
+  }
+
+  public async light(
+    order: Order,
+    sender?: ethers.providers.JsonRpcSigner
+  ): Promise<string> {
+    let contract = this.contract
+    if (!this.contract.signer) {
+      if (sender === undefined) {
+        throw new Error('Signer must be provided')
+      } else {
+        contract = contract.connect(sender)
+      }
+    }
+    return await contract.light(...orderToParams(order))
   }
 
   private convertToArray(count: BigNumber, errors: Array<string>) {
