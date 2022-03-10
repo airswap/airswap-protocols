@@ -1,7 +1,7 @@
 import axios from 'axios'
 import * as ethers from 'ethers'
 import { TokenInfo } from '@uniswap/token-lists'
-import { defaults, known, openSeaUrls } from './src/constants'
+import { defaults, tokenListURLs, openSeaUrls } from './src/constants'
 import { tokenKinds } from '@airswap/constants'
 import { getTokenName, getTokenSymbol, getTokenDecimals } from './src/helpers'
 
@@ -11,7 +11,7 @@ export async function fetchTokens(
   const errors = []
   let tokens = []
   const promises = await Promise.allSettled(
-    known.map(async (url) => {
+    tokenListURLs[chainId].map(async (url) => {
       try {
         const res = await axios.get(url)
         return res.data.tokens
