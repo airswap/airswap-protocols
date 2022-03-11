@@ -12,19 +12,14 @@ async function main() {
   const stakingToken = stakingTokenAddresses[chainId]
   const name = 'Staked AST'
   const symbol = 'sAST'
-  const vestingLength = 100
-  const minimumDelay = 86400 // 3 days
+  const duration = 12096000
+  const minDelay = 2419200
 
+  console.log(`Contract: ${stakingDeploys[chainId]}`)
   console.log(`Verifying on ${chainNames[chainId].toUpperCase()}`)
   await run('verify:verify', {
     address: stakingDeploys[chainId],
-    constructorArguments: [
-      stakingToken,
-      name,
-      symbol,
-      vestingLength,
-      minimumDelay,
-    ],
+    constructorArguments: [stakingToken, name, symbol, duration, minDelay],
   })
 }
 

@@ -26,7 +26,7 @@ module.exports = {
     },
     mainnet: {
       url: 'https://mainnet.infura.io/v3/' + process.env.INFURA_API_KEY,
-      gasPrice: 50e9,
+      gasPrice: 15e9,
       accounts: {
         mnemonic: process.env.MNEMONIC || '',
       },
@@ -40,7 +40,7 @@ module.exports = {
     },
     bsc: {
       url: 'https://bsc-dataseed.binance.org/',
-      gasPrice: 10e9,
+      gasPrice: 5e9,
       accounts: {
         mnemonic: process.env.MNEMONIC || '',
       },

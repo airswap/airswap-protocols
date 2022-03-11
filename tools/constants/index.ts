@@ -108,6 +108,7 @@ export const stakingTokenAddresses: Record<string, string> = {
   56: '0x1ac0d76f11875317f8a7d791db94cdd82bd02bd1',
   97: '0xd161ddcfcc0c2d823021aa26200824efa75218d1',
   43113: '0x48c427e7cEf42399e9e8300fC47875772309e995',
+  43114: '0xc32a3c867abad28d977e1724f92d9684ff3d2976',
 }
 
 export const balanceCheckerAddresses: Record<string, string> = {
