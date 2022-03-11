@@ -14,7 +14,7 @@ async function main() {
   const chainId = await deployer.getChainId()
   const protocolFeeWallet = converterDeploys[chainId]
   const stakingContract = stakingDeploys[chainId]
-  const protocolFee = 30
+  const protocolFee = 7
   const protocolFeeLight = 7
   const rebateScale = 10
   const rebateMax = 100

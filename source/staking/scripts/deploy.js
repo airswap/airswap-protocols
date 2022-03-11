@@ -13,8 +13,8 @@ async function main() {
   const stakingToken = stakingTokenAddresses[chainId]
   const name = 'Staked AST'
   const symbol = 'sAST'
-  const vestingLength = 100
-  const minimumDelay = 86400 // 3 days
+  const duration = 12096000
+  const minDelay = 2419200
 
   console.log(`Deploying on ${chainNames[chainId].toUpperCase()}`)
   const stakingFactory = await ethers.getContractFactory('Staking')
@@ -22,8 +22,8 @@ async function main() {
     stakingToken,
     name,
     symbol,
-    vestingLength,
-    minimumDelay
+    duration,
+    minDelay
   )
   await stakingContract.deployed()
   console.log(`Deployed: ${stakingContract.address}`)
