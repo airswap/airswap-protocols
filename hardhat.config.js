@@ -24,6 +24,13 @@ module.exports = {
         mnemonic: process.env.MNEMONIC || '',
       },
     },
+    goerli: {
+      url: 'https://goerli.infura.io/v3/' + process.env.INFURA_API_KEY,
+      gasPrice: 10e9,
+      accounts: {
+        mnemonic: process.env.MNEMONIC || '',
+      },
+    },
     mainnet: {
       url: 'https://mainnet.infura.io/v3/' + process.env.INFURA_API_KEY,
       gasPrice: 15e9,
@@ -75,12 +82,13 @@ module.exports = {
   },
   etherscan: {
     apiKey: {
-      mainnet: process.env.MAINNET_API_KEY,
-      rinkeby: process.env.RINKEBY_API_KEY,
-      bsc: process.env.BSC_API_KEY,
-      bscTestnet: process.env.BSCTESTNET_API_KEY,
-      avalanche: process.env.AVALANCHE_API_KEY,
-      avalancheFujiTestnet: process.env.FUJI_API_KEY,
+      mainnet: process.env.ETHERSCAN_API_KEY,
+      rinkeby: process.env.ETHERSCAN_API_KEY,
+      goerli: process.env.ETHERSCAN_API_KEY,
+      bsc: process.env.BSCSCAN_API_KEY,
+      bscTestnet: process.env.BSCSCAN_API_KEY,
+      avalanche: process.env.SNOWTRACE_API_KEY,
+      avalancheFujiTestnet: process.env.SNOWTRACE_API_KEY,
     },
   },
   paths: {
