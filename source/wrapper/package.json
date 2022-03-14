@@ -1,6 +1,6 @@
 {
   "name": "@airswap/wrapper",
-  "version": "3.0.0-beta.4",
+  "version": "3.0.0-beta.5",
   "description": "AirSwap: Automatic Wrap and Unwrap",
   "contributors": [
     "Don Mosites",
