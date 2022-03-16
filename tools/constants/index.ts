@@ -2,10 +2,7 @@ export const DOMAIN_NAME_SWAP = 'SWAP'
 export const DOMAIN_VERSION_SWAP = '3'
 export const DOMAIN_NAME_POOL = 'POOL'
 export const DOMAIN_VERSION_POOL = '1'
-export const INDEX_HEAD = '0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF'
 export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
-export const LOCATOR_ZERO =
-  '0x0000000000000000000000000000000000000000000000000000000000000000'
 export const MAX_LOCATORS = 10
 export const MAX_APPROVAL_AMOUNT = '90071992547409910000000000'
 export const MIN_CONFIRMATIONS = 2
@@ -43,12 +40,12 @@ export const chainNames: Record<number, string> = {
 
 export const chainCurrencies: Record<string, string> = {
   1: 'ETH',
-  4: 'Rinkeby ETH',
-  5: 'Goerli ETH',
-  42: 'Kovan ETH',
+  4: 'ETH',
+  5: 'ETH',
+  42: 'ETH',
   56: 'BNB',
-  97: 'Testnet BNB',
-  43113: 'Fuji AVAX',
+  97: 'BNB',
+  43113: 'AVAX',
   43114: 'AVAX',
 }
 
@@ -71,16 +68,6 @@ export const tokenKindNames: Record<string, string> = {
   '0x80ac58cd': 'ERC721',
   '0xd9b67a26': 'ERC1155',
   '0x9a20483d': 'CKITTY',
-}
-
-export const protocols: Record<string, string> = {
-  SERVER: '0x0000',
-  DELEGATE: '0x0001',
-}
-
-export const protocolNames: Record<string, string> = {
-  '0x0000': 'SERVER',
-  '0x0001': 'DELEGATE',
 }
 
 export const signatureTypes: Record<string, string> = {
@@ -109,13 +96,6 @@ export const stakingTokenAddresses: Record<string, string> = {
   97: '0xd161ddcfcc0c2d823021aa26200824efa75218d1',
   43113: '0x48c427e7cEf42399e9e8300fC47875772309e995',
   43114: '0xc32a3c867abad28d977e1724f92d9684ff3d2976',
-}
-
-export const balanceCheckerAddresses: Record<string, string> = {
-  1: '0x5dfe850d4b029c25c7ef9531ec9986c97d90300f',
-  4: '0xa1e2c4132cbd33c3876e1254143a850466c97e32',
-  5: '0x755aa03f420a62560e90502d7da23a73c301dad4',
-  42: '0xe25b7504856bfb230b7c32bc87047479815cbc70',
 }
 
 export const etherscanDomains: Record<string, string> = {

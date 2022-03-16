@@ -24,7 +24,7 @@
     "compile": "yarn clean && tsc -b"
   },
   "dependencies": {
-    "@airswap/constants": "3.0.0-beta.1",
+    "@airswap/constants": "3.0.0-beta.2",
     "@uniswap/token-lists": "^1.0.0-beta.26"
   },
   "devDependencies": {
