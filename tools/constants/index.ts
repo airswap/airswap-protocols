@@ -22,6 +22,7 @@ export const chainIds: Record<string, number> = {
   ARBITRUM: 42161,
   FUJI: 43113,
   AVALANCHE: 43114,
+  MUMBAI: 80001,
 }
 
 export const chainNames: Record<number, string> = {
@@ -36,6 +37,7 @@ export const chainNames: Record<number, string> = {
   42161: 'ARBITRUM',
   43113: 'FUJI',
   43114: 'AVALANCHE',
+  80001: 'MUMBAI',
 }
 
 export const chainCurrencies: Record<string, string> = {
@@ -45,8 +47,10 @@ export const chainCurrencies: Record<string, string> = {
   42: 'ETH',
   56: 'BNB',
   97: 'BNB',
+  137: 'MATIC',
   43113: 'AVAX',
   43114: 'AVAX',
+  80001: 'MATIC',
 }
 
 export enum TokenKinds {
@@ -83,8 +87,10 @@ export const wethAddresses: Record<string, string> = {
   42: '0xd0a1e359811322d97991e03f863a0c30c2cf029c',
   56: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
   97: '0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd',
+  137: '0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619',
   43113: '0xd9d01a9f7c810ec035c0e42cb9e80ef44d7f8692',
   43114: '0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7',
+  80001: '0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa',
 }
 
 export const stakingTokenAddresses: Record<string, string> = {
@@ -94,8 +100,10 @@ export const stakingTokenAddresses: Record<string, string> = {
   42: '0x1a1ec25dc08e98e5e93f1104b5e5cdd298707d31',
   56: '0x1ac0d76f11875317f8a7d791db94cdd82bd02bd1',
   97: '0xd161ddcfcc0c2d823021aa26200824efa75218d1',
+  137: '0x04bEa9FCE76943E90520489cCAb84E84C0198E29',
   43113: '0x48c427e7cEf42399e9e8300fC47875772309e995',
   43114: '0xc32a3c867abad28d977e1724f92d9684ff3d2976',
+  80001: '0xd161ddcfcc0c2d823021aa26200824efa75218d1',
 }
 
 export const etherscanDomains: Record<string, string> = {
@@ -105,8 +113,10 @@ export const etherscanDomains: Record<string, string> = {
   42: 'kovan.etherscan.io',
   56: 'bscscan.com',
   97: 'testnet.bscscan.com',
+  137: 'polygonscan.com',
   43113: 'testnet.snowtrace.io',
   43114: 'snowtrace.io',
+  80001: 'mumbai.polygonscan.com',
 }
 
 export const uniswapRouterAddress = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
