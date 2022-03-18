@@ -521,7 +521,7 @@ contract Swap is ISwap, Ownable {
    */
   function setStaking(address newstaking) external onlyOwner {
     // Ensure the new staking token is not null
-    require(newstaking != address(0), "INVALID_FEE_WALLET");
+    require(newstaking != address(0), "INVALID_STAKING");
     staking = newstaking;
     emit SetStaking(newstaking);
   }
