@@ -263,7 +263,7 @@ describe('Swap Unit Tests', () => {
     it('test setStaking with zero address', async () => {
       await expect(
         swap.connect(deployer).setStaking(ADDRESS_ZERO)
-      ).to.be.revertedWith('INVALID_FEE_WALLET')
+      ).to.be.revertedWith('INVALID_STAKING')
     })
   })
 
