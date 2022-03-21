@@ -35,7 +35,7 @@
     "@uniswap/v2-periphery": "^1.1.0-beta.0",
     "ethereum-waffle": "^3.4.0",
     "ethers": "^5.5.4",
-    "hardhat": "^2.9.0",
+    "hardhat": "^2.9.1",
     "solidity-coverage": "^0.7.20"
   },
   "dependencies": {
