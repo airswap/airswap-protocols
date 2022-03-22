@@ -71,6 +71,20 @@ export const defaults = [
     chainId: 56,
   },
   {
+    name: 'Wrapped AVAX',
+    address: '0xd9d01a9f7c810ec035c0e42cb9e80ef44d7f8692',
+    decimals: 18,
+    symbol: 'WAVAX',
+    chainId: 43113,
+  },
+  {
+    name: 'Wrapped AVAX',
+    address: '0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7',
+    decimals: 18,
+    symbol: 'WAVAX',
+    chainId: 43114,
+  },
+  {
     name: 'AirSwap Token',
     address: '0xcc1cbd4f67cceb7c001bd4adf98451237a193ff8',
     decimals: 4,
@@ -97,6 +111,20 @@ export const defaults = [
     decimals: 4,
     symbol: 'AST',
     chainId: 56,
+  },
+  {
+    name: 'AirSwap Token',
+    address: '0x48c427e7cEf42399e9e8300fC47875772309e995',
+    decimals: 18,
+    symbol: 'AST',
+    chainId: 43113,
+  },
+  {
+    name: 'AirSwap Token',
+    address: '0xc32a3c867abad28d977e1724f92d9684ff3d2976',
+    decimals: 18,
+    symbol: 'AST',
+    chainId: 43114,
   },
 ]
 

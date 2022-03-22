@@ -21,6 +21,7 @@ import {
   Signature,
   Levels,
   Formula,
+  Pricing,
   EIP712Swap,
   EIP712Claim,
 } from '@airswap/typescript'
@@ -274,6 +275,26 @@ export function claimPropsToStrings(obj: any): Claim {
     r: String(obj.r),
     s: String(obj.s),
   }
+}
+
+export function getCostFromPricing(
+  side: 'buy' | 'sell',
+  amount: string,
+  baseToken: string,
+  quoteToken: string,
+  pricing: Pricing[]
+) {
+  for (const i in pricing) {
+    if (pricing[i].baseToken.toLowerCase() === baseToken.toLowerCase()) {
+      if (pricing[i].quoteToken.toLowerCase() === quoteToken.toLowerCase()) {
+        if (side === 'buy') {
+          return calculateCost(amount, pricing[i].ask)
+        }
+        return calculateCost(amount, pricing[i].bid)
+      }
+    }
+  }
+  return null
 }
 
 export function calculateCost(amount: string, pricing: Formula | Levels) {
