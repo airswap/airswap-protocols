@@ -1,6 +1,6 @@
 {
   "name": "@airswap/swap",
-  "version": "3.0.0-beta.6",
+  "version": "3.0.0-beta.7",
   "description": "AirSwap: Atomic Token Swap",
   "contributors": [
     "Vicente Dragicevic",
@@ -33,7 +33,6 @@
     "@nomiclabs/hardhat-waffle": "^2.0.3",
     "ethereum-waffle": "^3.4.0",
     "ethers": "^5.5.4",
-    "hardhat": "^2.9.0",
     "solidity-coverage": "^0.7.20"
   },
   "dependencies": {
