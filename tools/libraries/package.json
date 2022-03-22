@@ -33,7 +33,7 @@
     "@airswap/registry": "3.0.0-beta.6",
     "@airswap/swap": "3.0.0-beta.7",
     "@airswap/typescript": "3.0.0-beta.1",
-    "@airswap/utils": "3.0.0-beta.0",
+    "@airswap/utils": "3.0.0-beta.1",
     "@airswap/wrapper": "3.0.0-beta.7",
     "bignumber.js": "^9.0.0",
     "browser-or-node": "^1.3.0",
