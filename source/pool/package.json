@@ -1,6 +1,6 @@
 {
   "name": "@airswap/pool",
-  "version": "3.0.0-beta.6",
+  "version": "3.0.0",
   "description": "AirSwap: Rewards Pool",
   "contributors": [
     "Don Mosites",
@@ -25,9 +25,9 @@
     "verify": "hardhat run ./scripts/verify.js"
   },
   "devDependencies": {
-    "@airswap/constants": "3.0.0-beta.3",
-    "@airswap/staking": "3.0.0-beta.6",
-    "@airswap/utils": "3.0.0-beta.1",
+    "@airswap/constants": "3.0.0",
+    "@airswap/staking": "3.0.0",
+    "@airswap/utils": "3.0.0",
     "@nomiclabs/hardhat-ethers": "^2.0.5",
     "@nomiclabs/hardhat-etherscan": "^3.0.3",
     "@nomiclabs/hardhat-waffle": "^2.0.3",
