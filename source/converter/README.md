@@ -15,31 +15,22 @@
 
 ## Usage
 
-:warning: This package is under active development and contains unaudited code. For all AirSwap contract deployments see [Deployed Contracts](https://about.airswap.io/technology/deployments).
-
-## Env Vars
-
-Hardhat expects the following environment variables to be set. They may be set in a `.env` file.
-
-| Variable            | Description                                    |
-| :------------------ | :--------------------------------------------- |
-| `MNEMONIC`          | 12-world account mnemonic used for testing     |
-| `INFURA_API_KEY`    | Infura API key to use for deployments          |
-| `ETHERSCAN_API_KEY` | Etherscan API key to use for verification      |
-| `ALCHEMY_API_KEY`   | Alchemy API key for testing with mainnet forks |
+:warning: This package may contain unaudited code. For all AirSwap contract deployments see [Deployed Contracts](https://about.airswap.io/technology/deployments).
 
 ## Commands
 
-| Command               | Description                             |
-| :-------------------- | :-------------------------------------- |
-| `yarn`                | Install dependencies                    |
-| `yarn clean`          | Delete the contract `build` folder      |
-| `yarn compile`        | Compile all contracts to `build` folder |
-| `yarn test`           | Run all tests in `test` folder          |
-| `yarn test:unit`      | Run unit tests in `test` folder         |
-| `yarn coverage`       | Report test coverage                    |
-| `yarn deploy:rinkeby` | Deploy contracts to Rinkeby             |
-| `yarn deploy:mainnet` | Deploy contracts to Mainnet             |
+Environment variables are set in an `.env` file in the repository root.
+
+| Command          | Description                              |
+| :--------------- | :--------------------------------------- |
+| `yarn`           | Install dependencies                     |
+| `yarn clean`     | Delete the contract `build` folder       |
+| `yarn compile`   | Compile all contracts to `build` folder  |
+| `yarn coverage`  | Report test coverage                     |
+| `yarn test`      | Run all tests in `test` folder           |
+| `yarn test:unit` | Run unit tests in `test` folder          |
+| `yarn deploy`    | Deploy on a network using --network flag |
+| `yarn verify`    | Verify on a network using --network flag |
 
 ## Running Tests
 
