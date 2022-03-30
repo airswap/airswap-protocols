@@ -10,28 +10,30 @@ export async function fetchTokens(
 ): Promise<{ tokens: TokenInfo[]; errors: string[] }> {
   const errors = []
   let tokens = []
-  const promises = await Promise.allSettled(
-    tokenListURLs[chainId].map(async (url) => {
-      try {
-        const res = await axios.get(url)
-        return res.data.tokens
-      } catch (e) {
-        return { url, message: e.message }
+  tokens.push(...defaults)
+  if (tokenListURLs[chainId]) {
+    const promises = await Promise.allSettled(
+      tokenListURLs[chainId].map(async (url) => {
+        try {
+          const res = await axios.get(url)
+          return res.data.tokens
+        } catch (e) {
+          return { url, message: e.message }
+        }
+      })
+    )
+    promises.forEach((promise) => {
+      if (promise.status === 'fulfilled') {
+        if (promise.value.message) {
+          errors.push(promise.value)
+        } else {
+          tokens.push(...promise.value)
+        }
+      } else {
+        errors.push(promise.reason.message)
       }
     })
-  )
-  tokens.push(...defaults)
-  promises.forEach((promise) => {
-    if (promise.status === 'fulfilled') {
-      if (promise.value.message) {
-        errors.push(promise.value)
-      } else {
-        tokens.push(...promise.value)
-      }
-    } else {
-      errors.push(promise.reason.message)
-    }
-  })
+  }
   tokens = tokens.filter((token) => {
     token.address = token.address.toLowerCase()
     return token.address && token.chainId === chainId

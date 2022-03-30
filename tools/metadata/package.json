@@ -1,7 +1,7 @@
 {
   "name": "@airswap/metadata",
-  "version": "3.0.0-beta.0",
-  "description": "Metadata Tools for AirSwap Developers",
+  "version": "3.0.0",
+  "description": "AirSwap: Token Metadata for Developers",
   "contributors": [
     "Don Mosites",
     "Hassan Malik"
@@ -24,8 +24,8 @@
     "compile": "yarn clean && tsc -b"
   },
   "dependencies": {
-    "@airswap/constants": "3.0.0-beta.1",
-    "@airswap/typescript": "3.0.0-beta.1",
+    "@airswap/constants": "3.0.0",
+    "@airswap/typescript": "3.0.0",
     "@uniswap/token-lists": "^1.0.0-beta.24",
     "axios": "^0.21.3",
     "eth-contract-metadata": "^1.12.1",

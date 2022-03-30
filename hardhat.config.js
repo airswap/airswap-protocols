@@ -66,6 +66,18 @@ module.exports = {
         mnemonic: process.env.MNEMONIC || '',
       },
     },
+    mumbai: {
+      url: 'https://rpc-mumbai.maticvigil.com',
+      accounts: {
+        mnemonic: process.env.MNEMONIC || '',
+      },
+    },
+    polygon: {
+      url: 'https://polygon-rpc.com/',
+      accounts: {
+        mnemonic: process.env.MNEMONIC || '',
+      },
+    },
   },
   solidity: {
     compilers: [
@@ -87,8 +99,10 @@ module.exports = {
       goerli: process.env.ETHERSCAN_API_KEY,
       bsc: process.env.BSCSCAN_API_KEY,
       bscTestnet: process.env.BSCSCAN_API_KEY,
+      polygon: process.env.POLYGONSCAN_API_KEY,
       avalanche: process.env.SNOWTRACE_API_KEY,
       avalancheFujiTestnet: process.env.SNOWTRACE_API_KEY,
+      polygonMumbai: process.env.POLYGONSCAN_API_KEY,
     },
   },
   paths: {

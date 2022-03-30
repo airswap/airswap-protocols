@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/utils/math/Math.sol";
 import "./interfaces/IStaking.sol";
 
 /**
- * @title AirSwap Staking: Stake and Unstake Tokens
+ * @title AirSwap: Stake Tokens
  * @notice https://www.airswap.io/
  */
 contract Staking is IStaking, Ownable {
