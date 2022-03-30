@@ -1,7 +1,7 @@
 {
   "name": "@airswap/constants",
-  "version": "3.0.0-beta.3",
-  "description": "Constants for AirSwap Developers",
+  "version": "3.0.0",
+  "description": "AirSwap: Constants for Developers",
   "contributors": [
     "Don Mosites"
   ],

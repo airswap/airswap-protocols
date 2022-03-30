@@ -9,7 +9,7 @@ import "@airswap/staking/contracts/interfaces/IStaking.sol";
 import "./interfaces/IPool.sol";
 
 /**
- * @title AirSwap Pool: Claim Tokens
+ * @title AirSwap: Rewards Pool
  * @notice https://www.airswap.io/
  */
 contract Pool is IPool, Ownable {
@@ -214,7 +214,18 @@ contract Pool is IPool, Ownable {
     bytes32 r,
     bytes32 s
   ) external override {
-    withdrawProtected(0, msg.sender, token, nonce, expiry, msg.sender, score, v, r, s);
+    withdrawProtected(
+      0,
+      msg.sender,
+      token,
+      nonce,
+      expiry,
+      msg.sender,
+      score,
+      v,
+      r,
+      s
+    );
   }
 
   /**

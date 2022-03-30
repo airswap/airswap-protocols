@@ -18,7 +18,7 @@ interface IUniswapV2Router02 {
 }
 
 /**
- * @title AirSwap Converter: Convert Fee Tokens
+ * @title AirSwap: Protocol Fee Converter
  * @notice https://www.airswap.io/
  */
 contract Converter is Ownable, ReentrancyGuard, TokenPaymentSplitter {
