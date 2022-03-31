@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "./interfaces/IWETH.sol";
 
 /**
- * @title Swap: Simple atomic swap
+ * @title AirSwap: Automatic Wrap and Unwrap
  * @notice https://www.airswap.io/
  */
 contract Wrapper is Ownable {
