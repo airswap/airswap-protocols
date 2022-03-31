@@ -25,7 +25,7 @@
     "verify": "hardhat run ./scripts/verify.js"
   },
   "devDependencies": {
-    "@airswap/constants": "3.0.0",
+    "@airswap/constants": "3.0.1",
     "@airswap/swap": "3.0.1",
     "@airswap/utils": "3.0.0",
     "@nomiclabs/hardhat-ethers": "^2.0.5",
