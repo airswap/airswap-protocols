@@ -1,5 +1,5 @@
 import { ethers } from 'ethers'
-import { chainIds, chainNames, wethAddresses } from '@airswap/constants'
+import { chainIds, chainNames, wrappedTokenAddresses } from '@airswap/constants'
 import { Order } from '@airswap/typescript'
 
 import * as WrapperContract from '@airswap/wrapper/build/contracts/Wrapper.sol/Wrapper.json'
@@ -55,7 +55,7 @@ export class Wrapper {
       order.s,
       {
         value:
-          order.senderToken === wethAddresses[this.chainId]
+          order.senderToken === wrappedTokenAddresses[this.chainId]
             ? order.senderAmount
             : 0,
       }

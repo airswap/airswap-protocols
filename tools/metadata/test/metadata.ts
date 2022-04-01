@@ -6,7 +6,11 @@ import {
   findTokensBySymbol,
   firstTokenBySymbol,
 } from '../index'
-import { chainIds, wethAddresses, ADDRESS_ZERO } from '@airswap/constants'
+import {
+  chainIds,
+  wrappedTokenAddresses,
+  ADDRESS_ZERO,
+} from '@airswap/constants'
 
 describe('Metadata: Mainnet', async () => {
   let result
@@ -31,13 +35,14 @@ describe('Metadata: Rinkeby', async () => {
     expect(findTokenByAddress(ADDRESS_ZERO, result.tokens)).to.be.undefined
   })
   it('checks that WETH exists', async () => {
-    expect(findTokenByAddress(wethAddresses[chainIds.RINKEBY], result.tokens))
-      .to.not.be.undefined
+    expect(
+      findTokenByAddress(wrappedTokenAddresses[chainIds.RINKEBY], result.tokens)
+    ).to.not.be.undefined
     expect(findTokensBySymbol('WETH', result.tokens)[0].address).to.equal(
-      wethAddresses[chainIds.RINKEBY]
+      wrappedTokenAddresses[chainIds.RINKEBY]
     )
     expect(firstTokenBySymbol('WETH', result.tokens).address).to.equal(
-      wethAddresses[chainIds.RINKEBY]
+      wrappedTokenAddresses[chainIds.RINKEBY]
     )
   })
 })
