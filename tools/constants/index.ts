@@ -53,44 +53,17 @@ export const chainCurrencies: Record<string, string> = {
   80001: 'MATIC',
 }
 
-export enum TokenKinds {
-  ERC20 = '0x36372b07',
-  ERC721 = '0x80ac58cd',
-  ERC1155 = '0xd9b67a26',
-  CKITTY = '0x9a20483d',
-}
-
-export const tokenKinds = {
-  ERC20: TokenKinds.ERC20,
-  ERC721: TokenKinds.ERC721,
-  ERC1155: TokenKinds.ERC1155,
-  CKITTY: TokenKinds.CKITTY,
-}
-
-export const tokenKindNames: Record<string, string> = {
-  '0x36372b07': 'ERC20',
-  '0x80ac58cd': 'ERC721',
-  '0xd9b67a26': 'ERC1155',
-  '0x9a20483d': 'CKITTY',
-}
-
-export const signatureTypes: Record<string, string> = {
-  INTENDED_VALIDATOR: '0x00',
-  SIGN_TYPED_DATA: '0x01',
-  PERSONAL_SIGN: '0x45',
-}
-
-export const wethAddresses: Record<string, string> = {
+export const wrappedTokenAddresses: Record<string, string> = {
   1: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
   4: '0xc778417e063141139fce010982780140aa0cd5ab',
   5: '0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6',
   42: '0xd0a1e359811322d97991e03f863a0c30c2cf029c',
   56: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
   97: '0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd',
-  137: '0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619',
+  137: '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270',
   43113: '0xd9d01a9f7c810ec035c0e42cb9e80ef44d7f8692',
   43114: '0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7',
-  80001: '0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa',
+  80001: '0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889',
 }
 
 export const stakingTokenAddresses: Record<string, string> = {
@@ -117,6 +90,33 @@ export const etherscanDomains: Record<string, string> = {
   43113: 'testnet.snowtrace.io',
   43114: 'snowtrace.io',
   80001: 'mumbai.polygonscan.com',
+}
+
+export enum TokenKinds {
+  ERC20 = '0x36372b07',
+  ERC721 = '0x80ac58cd',
+  ERC1155 = '0xd9b67a26',
+  CKITTY = '0x9a20483d',
+}
+
+export const tokenKinds = {
+  ERC20: TokenKinds.ERC20,
+  ERC721: TokenKinds.ERC721,
+  ERC1155: TokenKinds.ERC1155,
+  CKITTY: TokenKinds.CKITTY,
+}
+
+export const tokenKindNames: Record<string, string> = {
+  '0x36372b07': 'ERC20',
+  '0x80ac58cd': 'ERC721',
+  '0xd9b67a26': 'ERC1155',
+  '0x9a20483d': 'CKITTY',
+}
+
+export const signatureTypes: Record<string, string> = {
+  INTENDED_VALIDATOR: '0x00',
+  SIGN_TYPED_DATA: '0x01',
+  PERSONAL_SIGN: '0x45',
 }
 
 export const uniswapRouterAddress = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'

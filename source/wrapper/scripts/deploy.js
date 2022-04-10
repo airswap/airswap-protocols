@@ -3,7 +3,7 @@ const fs = require('fs')
 const { ethers, run } = require('hardhat')
 const swapDeploys = require('@airswap/swap/deploys.js')
 const wrapperDeploys = require('../deploys.js')
-const { chainNames, wethAddresses } = require('@airswap/constants')
+const { chainNames, wrappedTokenAddresses } = require('@airswap/constants')
 
 async function main() {
   await run('compile')
@@ -12,14 +12,17 @@ async function main() {
 
   const chainId = await deployer.getChainId()
   const swapAddress = swapDeploys[chainId]
-  const wethAddress = wethAddresses[chainId]
+  const wrappedTokenAddress = wrappedTokenAddresses[chainId]
 
   console.log(`Deploying on ${chainNames[chainId].toUpperCase()}`)
   console.log(`Swap: ${swapAddress}`)
-  console.log(`WETH: ${wethAddress}`)
+  console.log(`Wrapped: ${wrappedTokenAddress}`)
 
   const wrapperFactory = await ethers.getContractFactory('Wrapper')
-  const wrapperContract = await wrapperFactory.deploy(swapAddress, wethAddress)
+  const wrapperContract = await wrapperFactory.deploy(
+    swapAddress,
+    wrappedTokenAddress
+  )
   await wrapperContract.deployed()
   console.log(`Deployed: ${wrapperContract.address}`)
 

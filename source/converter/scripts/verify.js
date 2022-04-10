@@ -4,7 +4,7 @@ const poolDeploys = require('@airswap/pool/deploys.js')
 const converterDeploys = require('../deploys.js')
 const {
   chainNames,
-  wethAddresses,
+  wrappedTokenAddresses,
   uniswapRouterAddress,
 } = require('@airswap/constants')
 
@@ -14,7 +14,7 @@ async function main() {
   console.log(`Deployer: ${deployer.address}`)
 
   const chainId = await deployer.getChainId()
-  const wethAddress = wethAddresses[chainId]
+  const wrappedTokenAddress = wrappedTokenAddresses[chainId]
   const poolAddress = poolDeploys[chainId]
 
   const payees = [poolAddress]
@@ -25,8 +25,8 @@ async function main() {
   await run('verify:verify', {
     address: converterDeploys[chainId],
     constructorArguments: [
-      wethAddress,
-      wethAddress,
+      wrappedTokenAddress,
+      wrappedTokenAddress,
       uniswapRouterAddress,
       triggerFee,
       payees,
