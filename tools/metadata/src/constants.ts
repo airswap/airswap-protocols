@@ -125,6 +125,13 @@ export const defaults = [
     symbol: 'AST',
     chainId: 43114,
   },
+  {
+    name: 'Dai',
+    address: '0x5592ec0cfb4dbc12d3ab100b257153436a1f0fea',
+    decimals: 18,
+    symbol: 'DAI',
+    chainId: 4,
+  },
 ]
 
 export const ERC20_BYTES32_ABI = [
