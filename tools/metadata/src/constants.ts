@@ -8,7 +8,6 @@ export const tokenListURLs = {
     'https://app.tryroll.com/tokens.json',
     'https://tokens.coingecko.com/uniswap/all.json',
     'https://zapper.fi/api/token-list',
-    'https://yearn.science/static/tokenlist.json',
     'https://tokenlist.aave.eth.link',
     'https://tokens.coingecko.com/ethereum/all.json',
   ],
@@ -125,6 +124,13 @@ export const defaults = [
     decimals: 18,
     symbol: 'AST',
     chainId: 43114,
+  },
+  {
+    name: 'Dai',
+    address: '0x5592ec0cfb4dbc12d3ab100b257153436a1f0fea',
+    decimals: 18,
+    symbol: 'DAI',
+    chainId: 4,
   },
 ]
 
