@@ -8,7 +8,6 @@ export const tokenListURLs = {
     'https://app.tryroll.com/tokens.json',
     'https://tokens.coingecko.com/uniswap/all.json',
     'https://zapper.fi/api/token-list',
-    'https://yearn.science/static/tokenlist.json',
     'https://tokenlist.aave.eth.link',
     'https://tokens.coingecko.com/ethereum/all.json',
   ],
