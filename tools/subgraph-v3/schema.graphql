@@ -1,0 +1,157 @@
+# Staking
+type CancelDurationChange @entity {
+  id: ID!
+}
+
+type CompleteDurationChange @entity {
+  id: ID!
+  newDuration: BigInt! # uint256
+}
+
+type OwnershipTransferred @entity {
+  id: ID!
+  previousOwner: Bytes! # address
+  newOwner: Bytes! # address
+}
+
+type ProposeDelegate @entity {
+  id: ID!
+  delegate: Bytes! # address
+  account: Bytes! # address
+}
+
+type ScheduleDurationChange @entity {
+  id: ID!
+  unlockTimestamp: BigInt! # uint256
+}
+
+type SetDelegate @entity {
+  id: ID!
+  delegate: Bytes! # address
+  account: Bytes! # address
+}
+
+type Transfer @entity {
+  id: ID!
+  from: Bytes! # address
+  to: Bytes! # address
+  tokens: BigInt! # uint256
+}
+
+# Swap
+type Authorize @entity {
+  id: ID!
+  signer: Bytes! # address
+  signerWallet: Bytes! # address
+}
+
+type Cancel @entity {
+  id: ID!
+  nonce: BigInt! # uint256
+  signerWallet: Bytes! # address
+}
+
+type Revoke @entity {
+  id: ID!
+  signer: Bytes! # address
+  signerWallet: Bytes! # address
+}
+
+type SetProtocolFee @entity {
+  id: ID!
+  protocolFee: BigInt! # uint256
+}
+
+type SetProtocolFeeLight @entity {
+  id: ID!
+  protocolFeeLight: BigInt! # uint256
+}
+
+type SetProtocolFeeWallet @entity {
+  id: ID!
+  feeWallet: Bytes! # address
+}
+
+type SetRebateMax @entity {
+  id: ID!
+  rebateMax: BigInt! # uint256
+}
+
+type SetRebateScale @entity {
+  id: ID!
+  rebateScale: BigInt! # uint256
+}
+
+type SetStaking @entity {
+  id: ID!
+  staking: Bytes! # address
+}
+
+type Swap @entity {
+  id: ID!
+  nonce: BigInt! # uint256
+  timestamp: BigInt! # uint256
+  signerWallet: Bytes! # address
+  signerToken: Bytes! # address
+  signerAmount: BigInt! # uint256
+  protocolFee: BigInt! # uint256
+  senderWallet: Bytes! # address
+  senderToken: Bytes! # address
+  senderAmount: BigInt! # uint256
+}
+
+# wrapper
+type WrappedSwapFor @entity {
+  id: ID!
+  senderWallet: Bytes! # address
+}
+
+
+# pool
+type DrainTo @entity {
+  id: ID!
+  tokens: [String!]! # address[]
+  dest: Bytes! # address
+}
+
+type SetMax @entity {
+  id: ID!
+  max: BigInt! # uint256
+}
+
+type SetScale @entity {
+  id: ID!
+  scale: BigInt! # uint256
+}
+
+type Withdraw @entity {
+  id: ID!
+  nonce: BigInt! # uint256
+  expiry: BigInt! # uint256
+  account: Bytes! # address
+  token: Bytes! # address
+  amount: BigInt! # uint256
+  score: BigInt! # uint256
+}
+
+# converter
+type ConvertAndTransfer @entity {
+  id: ID!
+  triggerAccount: Bytes! # address
+  swapFromToken: Bytes! # address
+  swapToToken: Bytes! # address
+  amountTokenFrom: BigInt! # uint256
+  amountTokenTo: BigInt! # uint256
+  recievedAddresses: [String!]! # address[]
+}
+
+type PayeeAdded @entity {
+  id: ID!
+  account: Bytes! # address
+  shares: BigInt! # uint256
+}
+
+type PayeeRemoved @entity {
+  id: ID!
+  account: Bytes! # address
+}

@@ -14,5 +14,6 @@ venv
 .idea/
 subgraph.yaml
 **/subgraph/generated
+**/subgraph-v3/generated
 artifacts/
 cache/
