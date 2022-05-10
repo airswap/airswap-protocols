@@ -96,7 +96,7 @@ export function findTokenByAddress(
   tokens: TokenInfo[]
 ): TokenInfo {
   return tokens.find((token) => {
-    return token.address === address
+    return token.address.toLowerCase() === address.toLowerCase()
   })
 }
 
