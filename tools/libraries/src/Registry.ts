@@ -49,7 +49,8 @@ export class Registry {
         .filter((value) => baseTokenURLs.includes(value))
         .map((url) => {
           return Server.at(url, {
-            swapContract: options.swapContract || Swap.getAddress(this.chainId),
+            swapContract:
+              options?.swapContract || Swap.getAddress(this.chainId),
             initializeTimeout: options?.initializeTimeout,
           })
         })
