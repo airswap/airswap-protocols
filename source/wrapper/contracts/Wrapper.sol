@@ -15,7 +15,7 @@ import "./interfaces/IWETH.sol";
 contract Wrapper is Ownable {
   using SafeERC20 for IERC20;
 
-  event WrappedSwapFor(address senderWallet);
+  event WrappedSwapFor(address indexed senderWallet);
 
   ISwap public swapContract;
   IWETH public wethContract;
