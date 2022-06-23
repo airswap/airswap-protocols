@@ -4,7 +4,7 @@ const { ethers, run } = require('hardhat')
 const {
   chainNames,
   wrappedTokenAddresses,
-  uniswapRouterAddress,
+  uniswapRouterAddresses,
 } = require('@airswap/constants')
 const poolDeploys = require('@airswap/pool/deploys.js')
 const converterDeploys = require('../deploys.js')
@@ -16,6 +16,7 @@ async function main() {
 
   const chainId = await deployer.getChainId()
   const wrappedTokenAddress = wrappedTokenAddresses[chainId]
+  const uniswapRouterAddress = uniswapRouterAddresses[chainId]
   const poolAddress = poolDeploys[chainId]
 
   const payees = [poolAddress]

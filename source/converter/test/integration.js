@@ -1,7 +1,7 @@
 const { expect } = require('chai')
 const { ethers } = require('hardhat')
 
-const { uniswapRouterAddress } = require('@airswap/constants')
+const { uniswapRouterAddresses } = require('@airswap/constants')
 const UniswapV2Router02Contract = require('@uniswap/v2-periphery/build/IUniswapV2Router02.json')
 const ERC20 = require('@openzeppelin/contracts/build/contracts/ERC20PresetMinterPauser.json')
 
@@ -33,6 +33,9 @@ describe('Converter Integration Tests', () => {
   before(async () => {
     ;[deployer, payeeA, payeeB, payeeC, payeeD] = await ethers.getSigners()
 
+    const [deployer] = await ethers.getSigners()
+    const chainId = await deployer.getChainId()
+
     const TestAToken = await ethers.getContractFactory(
       ERC20.abi,
       ERC20.bytecode
@@ -61,7 +64,7 @@ describe('Converter Integration Tests', () => {
     await swapToToken.mint(deployer.address, 1000000)
 
     uniswapV2Router02Contract = new ethers.Contract(
-      uniswapRouterAddress,
+      uniswapRouterAddresses[chainId],
       UniswapV2Router02Contract.abi,
       deployer
     )

@@ -5,7 +5,7 @@ const converterDeploys = require('../deploys.js')
 const {
   chainNames,
   wrappedTokenAddresses,
-  uniswapRouterAddress,
+  uniswapRouterAddresses,
 } = require('@airswap/constants')
 
 async function main() {
@@ -15,6 +15,7 @@ async function main() {
 
   const chainId = await deployer.getChainId()
   const wrappedTokenAddress = wrappedTokenAddresses[chainId]
+  const uniswapRouterAddress = uniswapRouterAddresses[chainId]
   const poolAddress = poolDeploys[chainId]
 
   const payees = [poolAddress]

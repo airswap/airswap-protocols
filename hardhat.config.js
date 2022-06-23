@@ -78,6 +78,12 @@ module.exports = {
         mnemonic: process.env.MNEMONIC || '',
       },
     },
+    rsktestnet: {
+      url: 'https://public-node.testnet.rsk.co/',
+      accounts: {
+        mnemonic: process.env.MNEMONIC || '',
+      },
+    },
   },
   solidity: {
     compilers: [
