@@ -1,7 +1,0 @@
-{
-  "network": "kovan",
-  "swap_address": "0x79fb4604f2D7bD558Cda0DFADb7d61D98b28CA9f",
-  "indexer_address" : "0x0f125A69e1590CEa67F776cd44B87F6059128887",
-  "delegateFactory_address" : "0x982A916882Fb26e9408993b9d03247d44Fb4E8D4",
-  "startBlock": 17298087
-}
