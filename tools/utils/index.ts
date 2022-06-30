@@ -26,16 +26,14 @@ import {
   EIP712Claim,
 } from '@airswap/typescript'
 
-function stringify(types: any, primaryType: string): string {
-  let str = `${primaryType}(`
-  const keys = Object.keys(types[primaryType])
-  for (let i = 0; i < keys.length; i++) {
-    str += `${types[primaryType][i].type} ${types[primaryType][i].name}`
-    if (i !== keys.length - 1) {
-      str += ','
-    }
-  }
-  return `${str})`
+function stringify(
+  types: { [key: string]: { type: string; name: string }[] },
+  primaryType: string
+): string {
+  return types[primaryType].reduce((str, value, index, values) => {
+    const isEnd = index !== values.length - 1
+    return str + `${value.type} ${value.name}${isEnd ? ',' : ')'}`
+  }, `${primaryType}(`)
 }
 
 export const EIP712_DOMAIN_TYPEHASH = ethUtil.keccak256(
