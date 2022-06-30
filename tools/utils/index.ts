@@ -4,6 +4,8 @@ import * as sigUtil from 'eth-sig-util'
 import { ethers } from 'ethers'
 import * as url from 'url'
 import BigNumber from 'bignumber.js'
+import lzString from 'lz-string'
+
 import {
   SECONDS_IN_DAY,
   ADDRESS_ZERO,
@@ -146,6 +148,22 @@ export function orderToParams(order: Order): Array<string> {
   ]
 }
 
+export function paramsToOrder(str: string): Order {
+  const split = str.split(',')
+  return {
+    nonce: split[0],
+    expiry: split[1],
+    signerWallet: split[2],
+    signerToken: split[3],
+    signerAmount: split[4],
+    senderToken: split[5],
+    senderAmount: split[6],
+    v: split[7],
+    r: split[8],
+    s: split[9],
+  }
+}
+
 export function orderPropsToStrings(obj: any): Order {
   return {
     nonce: String(obj.nonce),
@@ -159,6 +177,14 @@ export function orderPropsToStrings(obj: any): Order {
     r: String(obj.r),
     s: String(obj.s),
   }
+}
+
+export function compressOrder(order: Order): string {
+  return lzString.compressToEncodedURIComponent(orderToParams(order).join(','))
+}
+
+export function decompressOrder(str: string): Order {
+  return paramsToOrder(lzString.decompressFromEncodedURIComponent(str))
 }
 
 // eslint-disable-next-line  @typescript-eslint/explicit-module-boundary-types
