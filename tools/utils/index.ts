@@ -4,6 +4,8 @@ import * as sigUtil from 'eth-sig-util'
 import { ethers } from 'ethers'
 import * as url from 'url'
 import BigNumber from 'bignumber.js'
+import lzString from 'lz-string'
+
 import {
   SECONDS_IN_DAY,
   ADDRESS_ZERO,
@@ -25,6 +27,21 @@ import {
   EIP712Swap,
   EIP712Claim,
 } from '@airswap/typescript'
+
+function stringify(
+  types: { [key: string]: { type: string; name: string }[] },
+  primaryType: string
+): string {
+  return types[primaryType].reduce((str, value, index, values) => {
+    const isEnd = index !== values.length - 1
+    return str + `${value.type} ${value.name}${isEnd ? ',' : ')'}`
+  }, `${primaryType}(`)
+}
+
+export const EIP712_DOMAIN_TYPEHASH = ethUtil.keccak256(
+  stringify(EIP712Swap, 'EIP712Domain')
+)
+export const ORDER_TYPEHASH = ethUtil.keccak256(stringify(EIP712Swap, 'Order'))
 
 // eslint-disable-next-line  @typescript-eslint/explicit-module-boundary-types
 export function createOrder({
@@ -115,6 +132,64 @@ export function getSignerFromSwapSignature(
   })
 }
 
+export function hashOrder(order: UnsignedOrder): Buffer {
+  return ethUtil.keccak256(
+    ethers.utils.defaultAbiCoder.encode(
+      [
+        'bytes32',
+        'uint256',
+        'uint256',
+        'address',
+        'address',
+        'uint256',
+        'uint256',
+        'address',
+        'address',
+        'uint256',
+      ],
+      [
+        ORDER_TYPEHASH,
+        order.nonce,
+        order.expiry,
+        order.signerWallet,
+        order.signerToken,
+        order.signerAmount,
+        order.protocolFee,
+        order.senderWallet,
+        order.senderToken,
+        order.senderAmount,
+      ]
+    )
+  )
+}
+
+export function hashDomain(swapContract: string): Buffer {
+  return ethUtil.keccak256(
+    ethers.utils.defaultAbiCoder.encode(
+      ['bytes32', 'bytes32', 'bytes32', 'address'],
+      [
+        EIP712_DOMAIN_TYPEHASH,
+        ethUtil.keccak256(DOMAIN_NAME_SWAP),
+        ethUtil.keccak256(DOMAIN_VERSION_SWAP),
+        swapContract,
+      ]
+    )
+  )
+}
+
+export function getOrderHash(
+  order: UnsignedOrder,
+  swapContract: string
+): Buffer {
+  return ethUtil.keccak256(
+    Buffer.concat([
+      Buffer.from('1901', 'hex'),
+      hashDomain(swapContract),
+      hashOrder(order),
+    ])
+  )
+}
+
 export function isValidOrder(order: Order): boolean {
   return (
     order &&
@@ -146,6 +221,22 @@ export function orderToParams(order: Order): Array<string> {
   ]
 }
 
+export function paramsToOrder(str: string): Order {
+  const split = str.split(',')
+  return {
+    nonce: split[0],
+    expiry: split[1],
+    signerWallet: split[2],
+    signerToken: split[3],
+    signerAmount: split[4],
+    senderToken: split[5],
+    senderAmount: split[6],
+    v: split[7],
+    r: split[8],
+    s: split[9],
+  }
+}
+
 export function orderPropsToStrings(obj: any): Order {
   return {
     nonce: String(obj.nonce),
@@ -159,6 +250,14 @@ export function orderPropsToStrings(obj: any): Order {
     r: String(obj.r),
     s: String(obj.s),
   }
+}
+
+export function compressOrder(order: Order): string {
+  return lzString.compressToEncodedURIComponent(orderToParams(order).join(','))
+}
+
+export function decompressOrder(str: string): Order {
+  return paramsToOrder(lzString.decompressFromEncodedURIComponent(str))
 }
 
 // eslint-disable-next-line  @typescript-eslint/explicit-module-boundary-types
