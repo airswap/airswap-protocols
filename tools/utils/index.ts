@@ -28,6 +28,21 @@ import {
   EIP712Claim,
 } from '@airswap/typescript'
 
+function stringify(
+  types: { [key: string]: { type: string; name: string }[] },
+  primaryType: string
+): string {
+  return types[primaryType].reduce((str, value, index, values) => {
+    const isEnd = index !== values.length - 1
+    return str + `${value.type} ${value.name}${isEnd ? ',' : ')'}`
+  }, `${primaryType}(`)
+}
+
+export const EIP712_DOMAIN_TYPEHASH = ethUtil.keccak256(
+  stringify(EIP712Swap, 'EIP712Domain')
+)
+export const ORDER_TYPEHASH = ethUtil.keccak256(stringify(EIP712Swap, 'Order'))
+
 // eslint-disable-next-line  @typescript-eslint/explicit-module-boundary-types
 export function createOrder({
   expiry = Math.round(Date.now() / 1000 + SECONDS_IN_DAY).toString(),
@@ -115,6 +130,64 @@ export function getSignerFromSwapSignature(
     },
     sig,
   })
+}
+
+export function hashOrder(order: UnsignedOrder): Buffer {
+  return ethUtil.keccak256(
+    ethers.utils.defaultAbiCoder.encode(
+      [
+        'bytes32',
+        'uint256',
+        'uint256',
+        'address',
+        'address',
+        'uint256',
+        'uint256',
+        'address',
+        'address',
+        'uint256',
+      ],
+      [
+        ORDER_TYPEHASH,
+        order.nonce,
+        order.expiry,
+        order.signerWallet,
+        order.signerToken,
+        order.signerAmount,
+        order.protocolFee,
+        order.senderWallet,
+        order.senderToken,
+        order.senderAmount,
+      ]
+    )
+  )
+}
+
+export function hashDomain(swapContract: string): Buffer {
+  return ethUtil.keccak256(
+    ethers.utils.defaultAbiCoder.encode(
+      ['bytes32', 'bytes32', 'bytes32', 'address'],
+      [
+        EIP712_DOMAIN_TYPEHASH,
+        ethUtil.keccak256(DOMAIN_NAME_SWAP),
+        ethUtil.keccak256(DOMAIN_VERSION_SWAP),
+        swapContract,
+      ]
+    )
+  )
+}
+
+export function getOrderHash(
+  order: UnsignedOrder,
+  swapContract: string
+): Buffer {
+  return ethUtil.keccak256(
+    Buffer.concat([
+      Buffer.from('1901', 'hex'),
+      hashDomain(swapContract),
+      hashOrder(order),
+    ])
+  )
 }
 
 export function isValidOrder(order: Order): boolean {
