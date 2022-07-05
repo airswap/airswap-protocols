@@ -39,7 +39,6 @@ contract IndexerRegistry {
    */
   function setURL(string calldata _url) external {
     if (bytes(stakerURLs[msg.sender]).length == 0) {
-      stakingToken.safeTransferFrom(msg.sender, address(this), obligationCost);
       supportingStakers.add(msg.sender);
       emit Stake(msg.sender);
     }
