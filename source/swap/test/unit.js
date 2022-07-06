@@ -57,6 +57,27 @@ describe('Swap Unit Tests', () => {
       )),
     })
   }
+  async function createSignedPublicOrder(params, signatory) {
+    const unsignedOrder = createOrder({
+      protocolFee: PROTOCOL_FEE,
+      signerWallet: signer.address,
+      signerToken: signerToken.address,
+      signerAmount: DEFAULT_AMOUNT,
+      senderWallet: ADDRESS_ZERO,
+      senderToken: senderToken.address,
+      senderAmount: DEFAULT_AMOUNT,
+      ...params,
+    })
+    return orderToParams({
+      ...unsignedOrder,
+      ...(await createSwapSignature(
+        unsignedOrder,
+        signatory,
+        swap.address,
+        CHAIN_ID
+      )),
+    })
+  }
 
   async function setUpAllowances(senderAmount, signerAmount) {
     await senderToken.mock.allowance
@@ -382,17 +403,15 @@ describe('Swap Unit Tests', () => {
 
   describe('Test public swap', async () => {
     it('test public swaps', async () => {
-      const order = await createSignedOrder({}, signer)
+      const order = await createSignedPublicOrder({}, signer)
 
       await expect(
-        swap
-          .connect(sender)
-          .publicSwap('0x0000000000000000000000000000000000000000', ...order)
+        swap.connect(sender).publicSwap(sender.address, ...order)
       ).to.emit(swap, 'Swap')
     })
 
     it('test authorized signer', async () => {
-      const order = await createSignedOrder(
+      const order = await createSignedPublicOrder(
         {
           signerWallet: anyone.address,
         },
@@ -434,20 +453,20 @@ describe('Swap Unit Tests', () => {
     })
 
     it('test when nonce has already been used', async () => {
-      const order = await createSignedOrder(
+      const order = await createSignedPublicOrder(
         {
           nonce: '0',
         },
         signer
       )
-      await swap.connect(sender).swap(sender.address, ...order)
+      await swap.connect(sender).publicSwap(sender.address, ...order)
       await expect(
         swap.connect(sender).publicSwap(sender.address, ...order)
       ).to.be.revertedWith('NONCE_ALREADY_USED')
     })
 
     it('test when nonce has been cancelled', async () => {
-      const order = await createSignedOrder(
+      const order = await createSignedPublicOrder(
         {
           nonce: '1',
         },
