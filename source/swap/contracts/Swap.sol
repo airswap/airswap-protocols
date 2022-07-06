@@ -8,6 +8,8 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "./interfaces/ISwap.sol";
 
+import "hardhat/console.sol";
+
 /**
  * @title AirSwap: Atomic Token Swap
  * @notice https://www.airswap.io/
@@ -138,6 +140,7 @@ contract Swap is ISwap, Ownable {
       signerWallet,
       signerToken,
       signerAmount,
+      msg.sender,
       senderToken,
       senderAmount,
       v,
@@ -154,6 +157,78 @@ contract Swap is ISwap, Ownable {
 
     // Transfer token from signer to recipient
     IERC20(signerToken).safeTransferFrom(signerWallet, recipient, signerAmount);
+
+    // Calculate and transfer protocol fee and any rebate
+    _transferProtocolFee(signerToken, signerWallet, signerAmount);
+
+    // Emit a Swap event
+    emit Swap(
+      nonce,
+      block.timestamp,
+      signerWallet,
+      signerToken,
+      signerAmount,
+      protocolFee,
+      msg.sender,
+      senderToken,
+      senderAmount
+    );
+  }
+
+  /**
+   * @notice Atomic ERC20 Public Swap
+   * @param nonce uint256 Unique and should be sequential
+   * @param expiry uint256 Expiry in seconds since 1 January 1970
+   * @param signerWallet address Wallet of the signer
+   * @param signerToken address ERC20 token transferred from the signer
+   * @param signerAmount uint256 Amount transferred from the signer
+   * @param senderToken address ERC20 token transferred from the sender
+   * @param senderAmount uint256 Amount transferred from the sender
+   * @param v uint8 "v" value of the ECDSA signature
+   * @param r bytes32 "r" value of the ECDSA signature
+   * @param s bytes32 "s" value of the ECDSA signature
+   */
+  function publicSwap(
+    address recipient,
+    uint256 nonce,
+    uint256 expiry,
+    address signerWallet,
+    address signerToken,
+    uint256 signerAmount,
+    address senderToken,
+    uint256 senderAmount,
+    uint8 v,
+    bytes32 r,
+    bytes32 s
+  ) external {
+    // Ensure the order is valid
+    _checkValidOrder(
+      nonce,
+      expiry,
+      signerWallet,
+      signerToken,
+      signerAmount,
+      address(0),
+      senderToken,
+      senderAmount,
+      v,
+      r,
+      s
+    );
+
+    // Transfer token from sender to signer
+    IERC20(senderToken).safeTransferFrom(
+      msg.sender,
+      signerWallet,
+      senderAmount
+    );
+
+    // Transfer token from signer to recipient
+    IERC20(signerToken).safeTransferFrom(
+      signerWallet,
+      msg.sender,
+      signerAmount
+    );
 
     // Calculate and transfer protocol fee and any rebate
     _transferProtocolFee(signerToken, signerWallet, signerAmount);
@@ -306,6 +381,7 @@ contract Swap is ISwap, Ownable {
       signerWallet,
       signerToken,
       signerID,
+      msg.sender,
       senderToken,
       senderAmount,
       v,
@@ -370,6 +446,7 @@ contract Swap is ISwap, Ownable {
       signerWallet,
       signerToken,
       signerAmount,
+      msg.sender,
       senderToken,
       senderID,
       v,
@@ -434,6 +511,7 @@ contract Swap is ISwap, Ownable {
       signerWallet,
       signerToken,
       signerID,
+      msg.sender,
       senderToken,
       senderID,
       v,
@@ -649,15 +727,34 @@ contract Swap is ISwap, Ownable {
       address(this)
     );
 
-    uint256 feeAmount = (order.signerAmount * protocolFee) / FEE_DIVISOR;
+    uint256 senderBalance = IERC20(order.senderToken).balanceOf(
+      order.senderWallet
+    );
 
-    if (signerAllowance < order.signerAmount + feeAmount) {
+    uint256 senderAllowance = IERC20(order.senderToken).allowance(
+      order.senderWallet,
+      address(this)
+    );
+
+    uint256 signerFeeAmount = (order.signerAmount * protocolFee) / FEE_DIVISOR;
+
+    if (signerAllowance < order.signerAmount + signerFeeAmount) {
       errors[errCount] = "SIGNER_ALLOWANCE_LOW";
       errCount++;
     }
 
-    if (signerBalance < order.signerAmount + feeAmount) {
+    if (signerBalance < order.signerAmount + signerFeeAmount) {
       errors[errCount] = "SIGNER_BALANCE_LOW";
+      errCount++;
+    }
+
+    if (senderAllowance < order.senderAmount) {
+      errors[errCount] = "SENDER_ALLOWANCE_LOW";
+      errCount++;
+    }
+
+    if (senderBalance < order.senderAmount) {
+      errors[errCount] = "SENDER_BALANCE_LOW";
       errCount++;
     }
     return (errCount, errors);
@@ -770,6 +867,7 @@ contract Swap is ISwap, Ownable {
     address signerWallet,
     address signerToken,
     uint256 signerAmount,
+    address senderWallet,
     address senderToken,
     uint256 senderAmount,
     uint8 v,
@@ -787,13 +885,15 @@ contract Swap is ISwap, Ownable {
       signerWallet,
       signerToken,
       signerAmount,
-      msg.sender,
+      senderWallet,
       senderToken,
       senderAmount
     );
 
     // Recover the signatory from the hash and signature
     address signatory = _getSignatory(hashed, v, r, s);
+    // console.log(signatory);
+    // console.log(signerWallet);
 
     // Ensure the signatory is not null
     require(signatory != address(0), "SIGNATURE_INVALID");
