@@ -380,6 +380,94 @@ describe('Swap Unit Tests', () => {
     })
   })
 
+  describe('Test public swap', async () => {
+    it('test public swaps', async () => {
+      const order = await createSignedOrder({}, signer)
+
+      await expect(
+        swap
+          .connect(sender)
+          .publicSwap('0x0000000000000000000000000000000000000000', ...order)
+      ).to.emit(swap, 'Swap')
+    })
+
+    it('test authorized signer', async () => {
+      const order = await createSignedOrder(
+        {
+          signerWallet: anyone.address,
+        },
+        signer
+      )
+
+      await expect(swap.connect(anyone).authorize(signer.address))
+        .to.emit(swap, 'Authorize')
+        .withArgs(signer.address, anyone.address)
+
+      await expect(
+        swap.connect(sender).publicSwap(sender.address, ...order)
+      ).to.emit(swap, 'Swap')
+    })
+
+    it('test when signer not authorized', async () => {
+      const order = await createSignedOrder(
+        {
+          signerWallet: anyone.address,
+        },
+        signer
+      )
+
+      await expect(
+        swap.connect(sender).publicSwap(sender.address, ...order)
+      ).to.be.revertedWith('UNAUTHORIZED')
+    })
+
+    it('test when order is expired', async () => {
+      const order = await createSignedOrder(
+        {
+          expiry: '0',
+        },
+        signer
+      )
+      await expect(
+        swap.connect(sender).publicSwap(sender.address, ...order)
+      ).to.be.revertedWith('EXPIRY_PASSED')
+    })
+
+    it('test when nonce has already been used', async () => {
+      const order = await createSignedOrder(
+        {
+          nonce: '0',
+        },
+        signer
+      )
+      await swap.connect(sender).swap(sender.address, ...order)
+      await expect(
+        swap.connect(sender).publicSwap(sender.address, ...order)
+      ).to.be.revertedWith('NONCE_ALREADY_USED')
+    })
+
+    it('test when nonce has been cancelled', async () => {
+      const order = await createSignedOrder(
+        {
+          nonce: '1',
+        },
+        signer
+      )
+      await swap.connect(signer).cancel([1])
+      await expect(
+        swap.connect(sender).publicSwap(sender.address, ...order)
+      ).to.be.revertedWith('NONCE_ALREADY_USED')
+    })
+
+    it('test invalid signature', async () => {
+      const order = await createSignedOrder({}, signer)
+      order[7] = '29' // Change "v" of signature
+      await expect(
+        swap.connect(sender).publicSwap(sender.address, ...order)
+      ).to.be.revertedWith('SIGNATURE_INVALID')
+    })
+  })
+
   describe('Test light swap', async () => {
     it('test light swaps', async () => {
       const order = await createSignedOrder(
