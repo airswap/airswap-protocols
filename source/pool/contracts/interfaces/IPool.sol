@@ -80,7 +80,6 @@ interface IPool {
     address token,
     uint256 nonce,
     uint256 expiry,
-    address participant,
     uint256 score,
     uint8 v,
     bytes32 r,
