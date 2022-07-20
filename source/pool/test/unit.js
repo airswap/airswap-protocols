@@ -148,6 +148,8 @@ describe('Pool Unit Tests', () => {
         pool
           .connect(alice)
           .withdraw(
+            alice.address,
+            0,
             feeToken.address,
             claim.nonce,
             claim.expiry,
@@ -184,6 +186,8 @@ describe('Pool Unit Tests', () => {
         pool
           .connect(alice)
           .withdraw(
+            alice.address,
+            0,
             feeToken.address,
             claim.nonce,
             claim.expiry,
@@ -198,6 +202,8 @@ describe('Pool Unit Tests', () => {
         pool
           .connect(alice)
           .withdraw(
+            alice.address,
+            0,
             feeToken.address,
             claim.nonce,
             claim.expiry,
@@ -225,6 +231,8 @@ describe('Pool Unit Tests', () => {
         pool
           .connect(alice)
           .withdraw(
+            alice.address,
+            0,
             feeToken.address,
             claim.nonce,
             claim.expiry,
@@ -250,6 +258,8 @@ describe('Pool Unit Tests', () => {
         pool
           .connect(alice)
           .withdraw(
+            alice.address,
+            0,
             feeToken.address,
             claim.nonce,
             claim.expiry,
@@ -261,32 +271,7 @@ describe('Pool Unit Tests', () => {
       ).to.be.revertedWith('UNAUTHORIZED')
     })
 
-    it('withdraw reverts with invalid participant claiming', async () => {
-      const claim = await createUnsignedClaim({})
-
-      const claimSignature = await createClaimSignature(
-        claim,
-        deployer,
-        pool.address,
-        CHAIN_ID
-      )
-
-      await expect(
-        pool
-          .connect(bob)
-          .withdraw(
-            feeToken.address,
-            claim.nonce,
-            claim.expiry,
-            claim.score,
-            claimSignature.v,
-            claimSignature.r,
-            claimSignature.s
-          )
-      ).to.be.revertedWith('UNAUTHORIZED')
-    })
-
-    it('withdrawWithRecipient success', async () => {
+    it('withdraw with different recipient success', async () => {
       await feeToken.mock.balanceOf.returns('100000')
       await feeToken.mock.transfer.returns(true)
 
@@ -303,10 +288,10 @@ describe('Pool Unit Tests', () => {
       await expect(
         pool
           .connect(alice)
-          .withdrawWithRecipient(
+          .withdraw(
+            bob.address,
             withdrawMinimum,
             feeToken.address,
-            bob.address,
             claim.nonce,
             claim.expiry,
             claim.score,
@@ -320,7 +305,7 @@ describe('Pool Unit Tests', () => {
       expect(isClaimed).to.equal(true)
     })
 
-    it('withdrawWithRecipient reverts with minimumAmount not met', async () => {
+    it('withdraw with different recipient reverts with minimumAmount not met', async () => {
       await feeToken.mock.balanceOf.returns('100000')
 
       const withdrawMinimum = 496
@@ -337,10 +322,10 @@ describe('Pool Unit Tests', () => {
       await expect(
         pool
           .connect(alice)
-          .withdrawWithRecipient(
+          .withdraw(
+            bob.address,
             withdrawMinimum,
             feeToken.address,
-            bob.address,
             claim.nonce,
             claim.expiry,
             claim.score,
@@ -351,7 +336,7 @@ describe('Pool Unit Tests', () => {
       ).to.be.revertedWith('INSUFFICIENT_AMOUNT')
     })
 
-    it('withdrawWithRecipient reverts if caller not participant', async () => {
+    it('withdraw with different recipient reverts if caller not participant', async () => {
       await feeToken.mock.balanceOf.returns('100000')
 
       const withdrawMinimum = 496
@@ -368,40 +353,9 @@ describe('Pool Unit Tests', () => {
       await expect(
         pool
           .connect(bob)
-          .withdrawWithRecipient(
-            withdrawMinimum,
-            feeToken.address,
+          .withdraw(
             bob.address,
-            claim.nonce,
-            claim.expiry,
-            claim.score,
-            claimSignature.v,
-            claimSignature.r,
-            claimSignature.s
-          )
-      ).to.be.revertedWith('UNAUTHORIZED')
-    })
-
-    it('withdrawProtected reverts if caller not participant', async () => {
-      await feeToken.mock.balanceOf.returns('100000')
-
-      const withdrawMinimum = 496
-
-      const claim = await createUnsignedClaim({})
-
-      const claimSignature = await createClaimSignature(
-        claim,
-        deployer,
-        pool.address,
-        CHAIN_ID
-      )
-
-      await expect(
-        pool
-          .connect(bob)
-          .withdrawProtected(
             withdrawMinimum,
-            bob.address,
             feeToken.address,
             claim.nonce,
             claim.expiry,
@@ -431,6 +385,7 @@ describe('Pool Unit Tests', () => {
         pool
           .connect(alice)
           .withdrawAndStake(
+            alice.address,
             withdrawMinimum,
             feeToken.address,
             claim.nonce,
@@ -466,6 +421,7 @@ describe('Pool Unit Tests', () => {
         pool
           .connect(alice)
           .withdrawAndStake(
+            alice.address,
             withdrawMinimum,
             feeToken2.address,
             claim.nonce,
@@ -478,7 +434,7 @@ describe('Pool Unit Tests', () => {
       ).to.be.revertedWith('INVALID_TOKEN')
     })
 
-    it('withdrawAndStakeFor success', async () => {
+    it('withdrawAndStake for a recipient success', async () => {
       await feeToken.mock.balanceOf.returns('100000')
       await feeToken.mock.approve.returns(true)
       await feeToken.mock.allowance.returns(0)
@@ -497,10 +453,10 @@ describe('Pool Unit Tests', () => {
       await expect(
         pool
           .connect(alice)
-          .withdrawAndStakeFor(
+          .withdrawAndStake(
+            bob.address,
             withdrawMinimum,
             feeToken.address,
-            bob.address,
             claim.nonce,
             claim.expiry,
             claim.score,
@@ -517,7 +473,7 @@ describe('Pool Unit Tests', () => {
       expect(balance).to.equal('495')
     })
 
-    it('withdrawAndStakeFor reverts with wrong token', async () => {
+    it('withdrawAndStake for a recipient reverts with wrong token', async () => {
       const claim = await createUnsignedClaim({})
 
       const claimSignature = await createClaimSignature(
@@ -530,10 +486,10 @@ describe('Pool Unit Tests', () => {
       await expect(
         pool
           .connect(alice)
-          .withdrawAndStakeFor(
+          .withdrawAndStake(
+            bob.address,
             withdrawMinimum,
             feeToken2.address,
-            bob.address,
             claim.nonce,
             claim.expiry,
             claim.score,
