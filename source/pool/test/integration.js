@@ -87,6 +87,8 @@ describe('Pool Integration Tests', () => {
         await pool
           .connect(alice)
           .withdraw(
+            alice.address,
+            0,
             feeToken.address,
             claim.nonce,
             claim.expiry,
@@ -136,6 +138,8 @@ describe('Pool Integration Tests', () => {
         pool
           .connect(alice)
           .withdraw(
+            alice.address,
+            0,
             feeToken.address,
             nonce,
             claimAlice.expiry,
@@ -150,6 +154,8 @@ describe('Pool Integration Tests', () => {
         pool
           .connect(bob)
           .withdraw(
+            bob.address,
+            0,
             feeToken.address,
             nonce,
             claimBob.expiry,
@@ -178,6 +184,8 @@ describe('Pool Integration Tests', () => {
         pool
           .connect(alice)
           .withdraw(
+            alice.address,
+            0,
             feeToken.address,
             claim.nonce,
             claim.expiry,
@@ -207,6 +215,8 @@ describe('Pool Integration Tests', () => {
         pool
           .connect(alice)
           .withdraw(
+            alice.address,
+            0,
             feeToken.address,
             claim.nonce,
             claim.expiry,
@@ -237,6 +247,8 @@ describe('Pool Integration Tests', () => {
         pool
           .connect(alice)
           .withdraw(
+            alice.address,
+            0,
             feeToken.address,
             claim.nonce,
             claim.expiry,
@@ -262,6 +274,8 @@ describe('Pool Integration Tests', () => {
         pool
           .connect(alice)
           .withdraw(
+            alice.address,
+            0,
             feeToken.address,
             claim.nonce,
             claim.expiry,
@@ -276,6 +290,8 @@ describe('Pool Integration Tests', () => {
         pool
           .connect(alice)
           .withdraw(
+            alice.address,
+            0,
             feeToken.address,
             claim.nonce,
             claim.expiry,
@@ -306,6 +322,8 @@ describe('Pool Integration Tests', () => {
         pool
           .connect(alice)
           .withdraw(
+            alice.address,
+            0,
             feeToken.address,
             claim.nonce,
             claim.expiry,
@@ -331,6 +349,8 @@ describe('Pool Integration Tests', () => {
         pool
           .connect(alice)
           .withdraw(
+            alice.address,
+            0,
             feeToken.address,
             claim.nonce,
             claim.expiry,
@@ -342,7 +362,7 @@ describe('Pool Integration Tests', () => {
       ).to.be.revertedWith('UNAUTHORIZED')
     })
 
-    it('withdrawWithRecipient success', async () => {
+    it('withdraw with different recipient success', async () => {
       const claim = await createUnsignedClaim({})
 
       const claimSignature = await createClaimSignature(
@@ -356,10 +376,10 @@ describe('Pool Integration Tests', () => {
       await expect(
         pool
           .connect(alice)
-          .withdrawWithRecipient(
+          .withdraw(
+            bob.address,
             withdrawMinimum,
             feeToken.address,
-            bob.address,
             claim.nonce,
             claim.expiry,
             claim.score,
@@ -373,7 +393,7 @@ describe('Pool Integration Tests', () => {
       expect(isClaimed).to.equal(true)
     })
 
-    it('withdrawWithRecipient reverts with minimumAmount not met', async () => {
+    it('withdraw with different recipient reverts with minimumAmount not met', async () => {
       const withdrawMinimum = 496
 
       const claim = await createUnsignedClaim({})
@@ -388,10 +408,10 @@ describe('Pool Integration Tests', () => {
       await expect(
         pool
           .connect(alice)
-          .withdrawWithRecipient(
+          .withdraw(
+            bob.address,
             withdrawMinimum,
             feeToken.address,
-            bob.address,
             claim.nonce,
             claim.expiry,
             claim.score,
@@ -417,6 +437,7 @@ describe('Pool Integration Tests', () => {
         pool
           .connect(alice)
           .withdrawAndStake(
+            alice.address,
             withdrawMinimum,
             feeToken.address,
             claim.nonce,
@@ -452,6 +473,7 @@ describe('Pool Integration Tests', () => {
         pool
           .connect(alice)
           .withdrawAndStake(
+            alice.address,
             withdrawMinimum,
             feeToken2.address,
             claim.nonce,
@@ -464,7 +486,7 @@ describe('Pool Integration Tests', () => {
       ).to.be.revertedWith('INVALID_TOKEN')
     })
 
-    it('withdrawAndStakeFor success', async () => {
+    it('withdrawAndStake for a recipient success', async () => {
       const claim = await createUnsignedClaim({})
 
       const claimSignature = await createClaimSignature(
@@ -478,10 +500,10 @@ describe('Pool Integration Tests', () => {
       await expect(
         pool
           .connect(alice)
-          .withdrawAndStakeFor(
+          .withdrawAndStake(
+            bob.address,
             withdrawMinimum,
             feeToken.address,
-            bob.address,
             claim.nonce,
             claim.expiry,
             claim.score,
@@ -498,7 +520,7 @@ describe('Pool Integration Tests', () => {
       expect(balance).to.equal('495')
     })
 
-    it('withdrawAndStakeFor reverts with wrong token', async () => {
+    it('withdrawAndStake for a recipient reverts with wrong token', async () => {
       const claim = await createUnsignedClaim({})
 
       const claimSignature = await createClaimSignature(
@@ -511,10 +533,10 @@ describe('Pool Integration Tests', () => {
       await expect(
         pool
           .connect(alice)
-          .withdrawAndStakeFor(
+          .withdrawAndStake(
+            bob.address,
             withdrawMinimum,
             feeToken2.address,
-            bob.address,
             claim.nonce,
             claim.expiry,
             claim.score,
