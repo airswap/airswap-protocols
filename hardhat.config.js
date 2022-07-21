@@ -33,7 +33,7 @@ module.exports = {
     },
     mainnet: {
       url: 'https://mainnet.infura.io/v3/' + process.env.INFURA_API_KEY,
-      gasPrice: 25e9,
+      gasPrice: 10e9,
       accounts: {
         mnemonic: process.env.MNEMONIC || '',
       },
@@ -74,7 +74,7 @@ module.exports = {
     },
     polygon: {
       url: 'https://polygon-rpc.com/',
-      gasPrice: 55e9,
+      gasPrice: 100e9,
       accounts: {
         mnemonic: process.env.MNEMONIC || '',
       },
