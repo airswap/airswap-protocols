@@ -1,6 +1,6 @@
 {
   "name": "@airswap/wrapper",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "description": "AirSwap: Automatic Wrap and Unwrap",
   "contributors": [
     "Don Mosites",
@@ -27,7 +27,7 @@
   "devDependencies": {
     "@airswap/constants": "3.0.1",
     "@airswap/swap": "3.0.1",
-    "@airswap/utils": "3.0.0",
+    "@airswap/utils": "3.0.1",
     "@nomiclabs/hardhat-ethers": "^2.0.5",
     "@nomiclabs/hardhat-etherscan": "^3.0.3",
     "@nomiclabs/hardhat-waffle": "^2.0.3",

@@ -30,57 +30,23 @@ interface IPool {
   function drainTo(address[] calldata tokens, address dest) external;
 
   function withdraw(
-    address token,
-    uint256 nonce,
-    uint256 expiry,
-    uint256 score,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
-  ) external;
-
-  function withdrawWithRecipient(
-    uint256 minimumAmount,
-    address token,
     address recipient,
+    uint256 minimum,
+    address token,
     uint256 nonce,
     uint256 expiry,
     uint256 score,
     uint8 v,
     bytes32 r,
     bytes32 s
-  ) external;
+  ) external returns (uint256);
 
   function withdrawAndStake(
-    uint256 minimumAmount,
-    address token,
-    uint256 nonce,
-    uint256 expiry,
-    uint256 score,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
-  ) external;
-
-  function withdrawAndStakeFor(
-    uint256 minimumAmount,
-    address token,
-    address account,
-    uint256 nonce,
-    uint256 expiry,
-    uint256 score,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
-  ) external;
-
-  function withdrawProtected(
-    uint256 minimumAmount,
     address recipient,
+    uint256 minimum,
     address token,
     uint256 nonce,
     uint256 expiry,
-    address participant,
     uint256 score,
     uint8 v,
     bytes32 r,
