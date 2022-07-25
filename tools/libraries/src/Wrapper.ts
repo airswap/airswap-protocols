@@ -14,7 +14,7 @@ export class Wrapper {
   private contract: ethers.Contract
 
   public constructor(
-    chainId = chainIds.RINKEBY,
+    chainId = chainIds.GOERLI,
     signerOrProvider?: ethers.Signer | ethers.providers.Provider
   ) {
     this.chainId = chainId
@@ -26,7 +26,7 @@ export class Wrapper {
     )
   }
 
-  public static getAddress(chainId = chainIds.RINKEBY): string {
+  public static getAddress(chainId = chainIds.GOERLI): string {
     if (chainId in wrapperDeploys) {
       return wrapperDeploys[chainId]
     }

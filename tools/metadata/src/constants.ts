@@ -37,7 +37,7 @@ export const tokenListURLs = {
 
 export const openSeaUrls = {
   1: 'https://api.opensea.io/api/v1',
-  4: 'https://rinkeby-api.opensea.io/api/v1',
+  4: 'https://testnets-api.opensea.io/api/v1',
 }
 
 export const defaults = [
