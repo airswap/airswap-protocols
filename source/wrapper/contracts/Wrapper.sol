@@ -58,7 +58,7 @@ contract Wrapper is Ownable {
   }
 
   /**
-   * @notice Wrapped Swap
+   * @notice Wrapped Swap.swap
    * @param nonce uint256 Unique and should be sequential
    * @param expiry uint256 Expiry in seconds since 1 January 1970
    * @param signerWallet address Wallet of the signer
@@ -101,86 +101,40 @@ contract Wrapper is Ownable {
   }
 
   /**
-   * @notice Wrapped BuyNFT
+   * @notice Wrapped Swap.swapAnySender
    * @param nonce uint256 Unique and should be sequential
    * @param expiry uint256 Expiry in seconds since 1 January 1970
    * @param signerWallet address Wallet of the signer
-   * @param signerToken address ERC721 token transferred from the signer
-   * @param signerID uint256 Token ID transferred from the signer
+   * @param signerToken address ERC20 token transferred from the signer
+   * @param signerAmount uint256 Amount transferred from the signer
    * @param senderToken address ERC20 token transferred from the sender
    * @param senderAmount uint256 Amount transferred from the sender
    * @param v uint8 "v" value of the ECDSA signature
    * @param r bytes32 "r" value of the ECDSA signature
    * @param s bytes32 "s" value of the ECDSA signature
    */
-  function buyNFT(
-    uint256 nonce,
-    uint256 expiry,
-    address signerWallet,
-    address signerToken,
-    uint256 signerID,
-    address senderToken,
-    uint256 senderAmount,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
-  ) public payable {
-    uint256 protocolFee = swapContract.calculateProtocolFee(
-      msg.sender,
-      senderAmount
-    );
-    _wrapEther(senderToken, senderAmount + protocolFee);
-    swapContract.buyNFT(
-      nonce,
-      expiry,
-      signerWallet,
-      signerToken,
-      signerID,
-      senderToken,
-      senderAmount,
-      v,
-      r,
-      s
-    );
-    IERC721(signerToken).transferFrom(address(this), msg.sender, signerID);
-    emit WrappedSwapFor(msg.sender);
-  }
-
-  /**
-   * @notice Wrapped SellNFT
-   * @param nonce uint256 Unique and should be sequential
-   * @param expiry uint256 Expiry in seconds since 1 January 1970
-   * @param signerWallet address Wallet of the signer
-   * @param signerToken address ERC721 token transferred from the signer
-   * @param signerAmount uint256 Token ID transferred from the signer
-   * @param senderToken address ERC20 token transferred from the sender
-   * @param senderID uint256 Amount transferred from the sender
-   * @param v uint8 "v" value of the ECDSA signature
-   * @param r bytes32 "r" value of the ECDSA signature
-   * @param s bytes32 "s" value of the ECDSA signature
-   */
-  function sellNFT(
+  function swapAnySender(
     uint256 nonce,
     uint256 expiry,
     address signerWallet,
     address signerToken,
     uint256 signerAmount,
     address senderToken,
-    uint256 senderID,
+    uint256 senderAmount,
     uint8 v,
     bytes32 r,
     bytes32 s
-  ) public {
-    IERC721(senderToken).setApprovalForAll(address(swapContract), true);
-    IERC721(senderToken).transferFrom(msg.sender, address(this), senderID);
-    swapContract.sellNFT(
+  ) public payable {
+    _wrapEther(senderToken, senderAmount);
+    swapContract.swapAnySender(
+      address(this),
       nonce,
       expiry,
       signerWallet,
       signerToken,
       signerAmount,
       senderToken,
-      senderID,
+      senderAmount,
       v,
       r,
       s
