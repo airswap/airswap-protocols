@@ -15,10 +15,10 @@
   },
   "scripts": {
     "clean": "lerna run clean",
-    "compile": "yarn clean && lerna run compile --concurrency=1",
+    "compile": "lerna run compile",
     "lint:check": "yarn eslint . --ext .js,.ts",
     "lint:fix": "yarn eslint . --ext .js,.ts --fix",
-    "test": "lerna run test:unit --concurrency=1",
+    "test": "yarn compile && lerna run test:unit",
     "deps:check": "python3 -m venv ./venv && source venv/bin/activate && pip3 install -r requirements.txt | { grep -v \"satisfied\" || :; } && python3 scripts/dependency_checker.py",
     "deps:fix": "python3 -m venv ./venv && source venv/bin/activate && pip3 install -r requirements.txt | { grep -v \"satisfied\" || :; } && python3 scripts/dependency_checker.py --fix",
     "prepare": "husky install",
@@ -26,19 +26,20 @@
     "pretty:fix": "prettier --write \"./**/*.sol\" \"./**/*.ts\" \"./**/*.js\""
   },
   "devDependencies": {
-    "@nomiclabs/hardhat-ethers": "^2.0.5",
+    "@nomiclabs/hardhat-ethers": "^2.1.0",
     "@nomiclabs/hardhat-waffle": "^2.0.3",
-    "@typescript-eslint/eslint-plugin": "^5.13.0",
-    "@typescript-eslint/parser": "^5.13.0",
-    "dotenv": "^8.2.0",
-    "eslint": "^8.10.0",
-    "eslint-config-prettier": "^8.3.0",
-    "eslint-plugin-prettier": "^4.0.0",
-    "husky": "^7.0.2",
-    "lerna": "^4.0.0",
-    "prettier": "^2.5.1",
-    "prettier-plugin-solidity": "^1.0.0-beta.19",
-    "typescript": "^4.6.2"
+    "@typescript-eslint/eslint-plugin": "^5.31.0",
+    "@typescript-eslint/parser": "^5.31.0",
+    "dotenv": "^16.0.1",
+    "eslint": "^8.20.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "husky": "^8.0.1",
+    "lerna": "^5.2.0",
+    "nx": "^14.4.3",
+    "prettier": "^2.7.1",
+    "prettier-plugin-solidity": "^1.0.0-dev.23",
+    "typescript": "^4.7.4"
   },
   "engines": {
     "node": ">=14"

@@ -25,7 +25,7 @@
     "clean": "rm -rf ./build",
     "compile": "yarn clean && tsc -b",
     "test": "yarn test:unit",
-    "test:unit": "yarn compile && mocha -r ts-node/register test/Server.test.ts"
+    "test:unit": "yarn compile && yarn mocha -r ts-node/register test/Server.test.ts"
   },
   "dependencies": {
     "@airswap/constants": "3.0.1",
@@ -46,6 +46,7 @@
     "@relaycorp/ws-mock": "^4.2.0",
     "@types/mock-require": "^2.0.0",
     "fancy-test": "^1.4.7",
+    "mocha": "^10.0.0",
     "mock-require": "^3.0.3",
     "mock-socket": "^9.0.3",
     "nock": "^12.0.1",

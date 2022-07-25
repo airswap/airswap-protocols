@@ -22,7 +22,7 @@
     "clean": "rm -rf ./build",
     "compile": "yarn clean && tsc -b",
     "test": "yarn test:unit",
-    "test:unit": "yarn compile && mocha -r ts-node/register test/utils.ts"
+    "test:unit": "yarn compile && yarn mocha -r ts-node/register test/utils.ts"
   },
   "dependencies": {
     "@airswap/constants": "3.0.1",
@@ -37,7 +37,7 @@
   "devDependencies": {
     "@types/mocha": "^9.0.0",
     "chai": "^4.3.4",
-    "mocha": "^9.1.3",
+    "mocha": "^10.0.0",
     "ts-node": "^10.4.0",
     "typescript": "^4.6.2"
   },
