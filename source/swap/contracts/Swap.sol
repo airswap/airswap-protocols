@@ -224,11 +224,7 @@ contract Swap is ISwap, Ownable {
     );
 
     // Transfer token from signer to recipient
-    IERC20(signerToken).safeTransferFrom(
-      signerWallet,
-      msg.sender,
-      signerAmount
-    );
+    IERC20(signerToken).safeTransferFrom(signerWallet, recipient, signerAmount);
 
     // Calculate and transfer protocol fee and any rebate
     _transferProtocolFee(signerToken, signerWallet, signerAmount);
