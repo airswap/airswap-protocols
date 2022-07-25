@@ -632,48 +632,6 @@ describe('Swap Unit Tests', () => {
     })
   })
 
-  describe('Test NFTs', async () => {
-    before(async () => {
-      signerNFT = await deployMockContract(deployer, IERC721.abi)
-      senderNFT = await deployMockContract(deployer, IERC721.abi)
-      await signerNFT.mock.transferFrom.returns()
-      await senderNFT.mock.transferFrom.returns()
-    })
-    it('test buy NFT', async () => {
-      const order = await createSignedOrder(
-        {
-          signerToken: signerNFT.address,
-          signerAmount: '123',
-        },
-        signer
-      )
-      await expect(swap.connect(sender).buyNFT(...order)).to.emit(swap, 'Swap')
-    })
-    it('test sell NFT', async () => {
-      const order = await createSignedOrder(
-        {
-          signerToken: signerNFT.address,
-          signerAmount: '123',
-        },
-        signer
-      )
-      await expect(swap.connect(sender).sellNFT(...order)).to.emit(swap, 'Swap')
-    })
-    it('test swap NFT', async () => {
-      const order = await createSignedOrder(
-        {
-          signerToken: signerNFT.address,
-          signerAmount: '123',
-        },
-        signer
-      )
-      await expect(swap.connect(sender).swapNFTs(...order)).to.emit(
-        swap,
-        'Swap'
-      )
-    })
-  })
-
   describe('Test staking', async () => {
     it('test set staking by non-owner', async () => {
       await expect(

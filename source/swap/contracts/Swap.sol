@@ -109,6 +109,7 @@ contract Swap is ISwap, Ownable {
 
   /**
    * @notice Atomic ERC20 Swap
+   * @param recipient address Wallet to receive sender proceeds
    * @param nonce uint256 Unique and should be sequential
    * @param expiry uint256 Expiry in seconds since 1 January 1970
    * @param signerWallet address Wallet of the signer
@@ -176,7 +177,8 @@ contract Swap is ISwap, Ownable {
   }
 
   /**
-   * @notice Atomic ERC20 Public Swap
+   * @notice Atomic ERC20 Swap for Any Sender
+   * @param recipient address Wallet to receive sender proceeds
    * @param nonce uint256 Unique and should be sequential
    * @param expiry uint256 Expiry in seconds since 1 January 1970
    * @param signerWallet address Wallet of the signer
@@ -343,194 +345,6 @@ contract Swap is ISwap, Ownable {
       msg.sender,
       senderToken,
       senderAmount
-    );
-  }
-
-  /**
-   * @notice Sender Buys an NFT (ERC721)
-   * @param nonce uint256 Unique and should be sequential
-   * @param expiry uint256 Expiry in seconds since 1 January 1970
-   * @param signerWallet address Wallet of the signer
-   * @param signerToken address ERC721 token transferred from the signer
-   * @param signerID uint256 Token ID transferred from the signer
-   * @param senderToken address ERC20 token transferred from the sender
-   * @param senderAmount uint256 Amount transferred from the sender
-   * @param v uint8 "v" value of the ECDSA signature
-   * @param r bytes32 "r" value of the ECDSA signature
-   * @param s bytes32 "s" value of the ECDSA signature
-   */
-  function buyNFT(
-    uint256 nonce,
-    uint256 expiry,
-    address signerWallet,
-    address signerToken,
-    uint256 signerID,
-    address senderToken,
-    uint256 senderAmount,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
-  ) public override {
-    _checkValidOrder(
-      nonce,
-      expiry,
-      signerWallet,
-      signerToken,
-      signerID,
-      msg.sender,
-      senderToken,
-      senderAmount,
-      v,
-      r,
-      s
-    );
-
-    // Transfer token from sender to signer
-    IERC20(senderToken).safeTransferFrom(
-      msg.sender,
-      signerWallet,
-      senderAmount
-    );
-
-    // Transfer token from signer to recipient
-    IERC721(signerToken).transferFrom(signerWallet, msg.sender, signerID);
-
-    // Calculate and transfer protocol fee and rebate
-    _transferProtocolFee(senderToken, msg.sender, senderAmount);
-
-    emit Swap(
-      nonce,
-      block.timestamp,
-      signerWallet,
-      signerToken,
-      signerID,
-      protocolFee,
-      msg.sender,
-      senderToken,
-      senderAmount
-    );
-  }
-
-  /**
-   * @notice Sender Sells an NFT (ERC721)
-   * @param nonce uint256 Unique and should be sequential
-   * @param expiry uint256 Expiry in seconds since 1 January 1970
-   * @param signerWallet address Wallet of the signer
-   * @param signerToken address ERC20 token transferred from the signer
-   * @param signerAmount uint256 Amount transferred from the signer
-   * @param senderToken address ERC721 token transferred from the sender
-   * @param senderID uint256 Token ID transferred from the sender
-   * @param v uint8 "v" value of the ECDSA signature
-   * @param r bytes32 "r" value of the ECDSA signature
-   * @param s bytes32 "s" value of the ECDSA signature
-   */
-  function sellNFT(
-    uint256 nonce,
-    uint256 expiry,
-    address signerWallet,
-    address signerToken,
-    uint256 signerAmount,
-    address senderToken,
-    uint256 senderID,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
-  ) public override {
-    _checkValidOrder(
-      nonce,
-      expiry,
-      signerWallet,
-      signerToken,
-      signerAmount,
-      msg.sender,
-      senderToken,
-      senderID,
-      v,
-      r,
-      s
-    );
-
-    // Transfer token from sender to signer
-    IERC721(senderToken).transferFrom(msg.sender, signerWallet, senderID);
-
-    // Transfer token from signer to recipient
-    IERC20(signerToken).safeTransferFrom(
-      signerWallet,
-      msg.sender,
-      signerAmount
-    );
-
-    // Calculate and transfer protocol fee and rebate
-    _transferProtocolFee(signerToken, signerWallet, signerAmount);
-
-    emit Swap(
-      nonce,
-      block.timestamp,
-      signerWallet,
-      signerToken,
-      signerAmount,
-      protocolFee,
-      msg.sender,
-      senderToken,
-      senderID
-    );
-  }
-
-  /**
-   * @notice Signer and sender swap NFTs (ERC721)
-   * @param nonce uint256 Unique and should be sequential
-   * @param expiry uint256 Expiry in seconds since 1 January 1970
-   * @param signerWallet address Wallet of the signer
-   * @param signerToken address ERC721 token transferred from the signer
-   * @param signerID uint256 Token ID transferred from the signer
-   * @param senderToken address ERC721 token transferred from the sender
-   * @param senderID uint256 Token ID transferred from the sender
-   * @param v uint8 "v" value of the ECDSA signature
-   * @param r bytes32 "r" value of the ECDSA signature
-   * @param s bytes32 "s" value of the ECDSA signature
-   */
-  function swapNFTs(
-    uint256 nonce,
-    uint256 expiry,
-    address signerWallet,
-    address signerToken,
-    uint256 signerID,
-    address senderToken,
-    uint256 senderID,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
-  ) public override {
-    _checkValidOrder(
-      nonce,
-      expiry,
-      signerWallet,
-      signerToken,
-      signerID,
-      msg.sender,
-      senderToken,
-      senderID,
-      v,
-      r,
-      s
-    );
-
-    // Transfer token from sender to signer
-    IERC721(senderToken).transferFrom(msg.sender, signerWallet, senderID);
-
-    // Transfer token from signer to sender
-    IERC721(signerToken).transferFrom(signerWallet, msg.sender, signerID);
-
-    emit Swap(
-      nonce,
-      block.timestamp,
-      signerWallet,
-      signerToken,
-      signerID,
-      0,
-      msg.sender,
-      senderToken,
-      senderID
     );
   }
 
