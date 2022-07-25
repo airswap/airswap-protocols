@@ -791,6 +791,26 @@ describe('Swap Unit Tests', () => {
         'SIGNER_BALANCE_LOW'
       )
     })
+    it('properly detects a low sender allowance', async () => {
+      await setUpAllowances(0, DEFAULT_AMOUNT + SWAP_FEE)
+      await setUpBalances(DEFAULT_BALANCE, DEFAULT_BALANCE)
+      const order = await createSignedOrder({}, signer)
+      const [errCount, messages] = await getErrorInfo(order)
+      expect(errCount).to.equal(1)
+      expect(ethers.utils.parseBytes32String(messages[0])).to.equal(
+        'SENDER_ALLOWANCE_LOW'
+      )
+    })
+    it('properly detects a low sender balance', async () => {
+      await setUpAllowances(DEFAULT_AMOUNT, DEFAULT_AMOUNT + SWAP_FEE)
+      await setUpBalances(0, DEFAULT_BALANCE)
+      const order = await createSignedOrder({}, signer)
+      const [errCount, messages] = await getErrorInfo(order)
+      expect(errCount).to.equal(1)
+      expect(ethers.utils.parseBytes32String(messages[0])).to.equal(
+        'SENDER_BALANCE_LOW'
+      )
+    })
     it('properly detects a nonce that has already been used', async () => {
       await senderToken.mock.transferFrom
         .withArgs(sender.address, signer.address, DEFAULT_AMOUNT)
