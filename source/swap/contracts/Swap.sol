@@ -188,7 +188,7 @@ contract Swap is ISwap, Ownable {
    * @param r bytes32 "r" value of the ECDSA signature
    * @param s bytes32 "s" value of the ECDSA signature
    */
-  function publicSwap(
+  function swapAnySender(
     address recipient,
     uint256 nonce,
     uint256 expiry,
@@ -200,7 +200,7 @@ contract Swap is ISwap, Ownable {
     uint8 v,
     bytes32 r,
     bytes32 s
-  ) external {
+  ) external override {
     // Ensure the order is valid
     _checkValidOrder(
       nonce,
@@ -256,7 +256,7 @@ contract Swap is ISwap, Ownable {
    * @param r bytes32 "r" value of the ECDSA signature
    * @param s bytes32 "s" value of the ECDSA signature
    */
-  function light(
+  function swapLight(
     uint256 nonce,
     uint256 expiry,
     address signerWallet,

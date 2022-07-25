@@ -406,7 +406,7 @@ describe('Swap Unit Tests', () => {
       const order = await createSignedPublicOrder({}, signer)
 
       await expect(
-        swap.connect(sender).publicSwap(sender.address, ...order)
+        swap.connect(sender).swapAnySender(sender.address, ...order)
       ).to.emit(swap, 'Swap')
     })
 
@@ -423,7 +423,7 @@ describe('Swap Unit Tests', () => {
         .withArgs(signer.address, anyone.address)
 
       await expect(
-        swap.connect(sender).publicSwap(sender.address, ...order)
+        swap.connect(sender).swapAnySender(sender.address, ...order)
       ).to.emit(swap, 'Swap')
     })
 
@@ -436,7 +436,7 @@ describe('Swap Unit Tests', () => {
       )
 
       await expect(
-        swap.connect(sender).publicSwap(sender.address, ...order)
+        swap.connect(sender).swapAnySender(sender.address, ...order)
       ).to.be.revertedWith('UNAUTHORIZED')
     })
 
@@ -448,7 +448,7 @@ describe('Swap Unit Tests', () => {
         signer
       )
       await expect(
-        swap.connect(sender).publicSwap(sender.address, ...order)
+        swap.connect(sender).swapAnySender(sender.address, ...order)
       ).to.be.revertedWith('EXPIRY_PASSED')
     })
 
@@ -459,9 +459,9 @@ describe('Swap Unit Tests', () => {
         },
         signer
       )
-      await swap.connect(sender).publicSwap(sender.address, ...order)
+      await swap.connect(sender).swapAnySender(sender.address, ...order)
       await expect(
-        swap.connect(sender).publicSwap(sender.address, ...order)
+        swap.connect(sender).swapAnySender(sender.address, ...order)
       ).to.be.revertedWith('NONCE_ALREADY_USED')
     })
 
@@ -474,7 +474,7 @@ describe('Swap Unit Tests', () => {
       )
       await swap.connect(signer).cancel([1])
       await expect(
-        swap.connect(sender).publicSwap(sender.address, ...order)
+        swap.connect(sender).swapAnySender(sender.address, ...order)
       ).to.be.revertedWith('NONCE_ALREADY_USED')
     })
 
@@ -482,7 +482,7 @@ describe('Swap Unit Tests', () => {
       const order = await createSignedOrder({}, signer)
       order[7] = '29' // Change "v" of signature
       await expect(
-        swap.connect(sender).publicSwap(sender.address, ...order)
+        swap.connect(sender).swapAnySender(sender.address, ...order)
       ).to.be.revertedWith('SIGNATURE_INVALID')
     })
   })
@@ -496,7 +496,10 @@ describe('Swap Unit Tests', () => {
         signer
       )
 
-      await expect(swap.connect(sender).light(...order)).to.emit(swap, 'Swap')
+      await expect(swap.connect(sender).swapLight(...order)).to.emit(
+        swap,
+        'Swap'
+      )
     })
     it('test light swaps with authorized', async () => {
       const order = await createSignedOrder(
@@ -511,7 +514,10 @@ describe('Swap Unit Tests', () => {
         .to.emit(swap, 'Authorize')
         .withArgs(signer.address, anyone.address)
 
-      await expect(swap.connect(sender).light(...order)).to.emit(swap, 'Swap')
+      await expect(swap.connect(sender).swapLight(...order)).to.emit(
+        swap,
+        'Swap'
+      )
     })
     it('test when expiration has passed', async () => {
       const order = await createSignedOrder(
@@ -522,14 +528,14 @@ describe('Swap Unit Tests', () => {
       )
       const block = await ethers.provider.getBlock()
       await ethers.provider.send('evm_mine', [block.timestamp + SECONDS_IN_DAY])
-      await expect(swap.connect(sender).light(...order)).to.be.revertedWith(
+      await expect(swap.connect(sender).swapLight(...order)).to.be.revertedWith(
         'EXPIRY_PASSED'
       )
     })
     it('test when signatory is invalid', async () => {
       const order = await createSignedOrder({}, signer)
       order[7] = '29' // Change "v" of signature
-      await expect(swap.connect(sender).light(...order)).to.be.revertedWith(
+      await expect(swap.connect(sender).swapLight(...order)).to.be.revertedWith(
         'SIGNATURE_INVALID'
       )
     })
@@ -541,8 +547,8 @@ describe('Swap Unit Tests', () => {
         },
         signer
       )
-      await swap.connect(sender).light(...order)
-      await expect(swap.connect(sender).light(...order)).to.be.revertedWith(
+      await swap.connect(sender).swapLight(...order)
+      await expect(swap.connect(sender).swapLight(...order)).to.be.revertedWith(
         'NONCE_ALREADY_USED'
       )
     })
@@ -554,7 +560,7 @@ describe('Swap Unit Tests', () => {
         },
         anyone
       )
-      await expect(swap.connect(sender).light(...order)).to.be.revertedWith(
+      await expect(swap.connect(sender).swapLight(...order)).to.be.revertedWith(
         'UNAUTHORIZED'
       )
     })

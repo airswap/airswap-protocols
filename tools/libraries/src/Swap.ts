@@ -82,7 +82,7 @@ export class Swap {
         contract = contract.connect(sender)
       }
     }
-    return await contract.light(...orderToParams(order))
+    return await contract.swapLight(...orderToParams(order))
   }
 
   private convertToArray(count: BigNumber, errors: Array<string>) {
