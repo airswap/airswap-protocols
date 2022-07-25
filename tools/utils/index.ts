@@ -18,6 +18,7 @@ import {
 import {
   UnsignedOrder,
   Order,
+  FullOrder,
   UnsignedClaim,
   Claim,
   Signature,
@@ -237,6 +238,45 @@ export function paramsToOrder(str: string): Order {
   }
 }
 
+export function fullOrderToParams(order: FullOrder): Array<string> {
+  return [
+    order.chainId,
+    order.swapContract,
+    order.nonce,
+    order.expiry,
+    order.signerWallet,
+    order.signerToken,
+    order.signerAmount,
+    order.protocolFee,
+    order.senderWallet,
+    order.senderToken,
+    order.senderAmount,
+    order.v,
+    order.r,
+    order.s,
+  ]
+}
+
+export function paramsToFullOrder(str: string): FullOrder {
+  const split = str.split(',')
+  return {
+    chainId: split[0],
+    swapContract: split[1],
+    nonce: split[2],
+    expiry: split[3],
+    signerWallet: split[4],
+    signerToken: split[5],
+    signerAmount: split[6],
+    protocolFee: split[7],
+    senderWallet: split[8],
+    senderToken: split[9],
+    senderAmount: split[10],
+    v: split[11],
+    r: split[12],
+    s: split[13],
+  }
+}
+
 export function orderPropsToStrings(obj: any): Order {
   return {
     nonce: String(obj.nonce),
@@ -252,12 +292,14 @@ export function orderPropsToStrings(obj: any): Order {
   }
 }
 
-export function compressOrder(order: Order): string {
-  return lzString.compressToEncodedURIComponent(orderToParams(order).join(','))
+export function compressFullOrder(order: FullOrder): string {
+  return lzString.compressToEncodedURIComponent(
+    fullOrderToParams(order).join(',')
+  )
 }
 
-export function decompressOrder(str: string): Order {
-  return paramsToOrder(lzString.decompressFromEncodedURIComponent(str))
+export function decompressFullOrder(str: string): FullOrder {
+  return paramsToFullOrder(lzString.decompressFromEncodedURIComponent(str))
 }
 
 // eslint-disable-next-line  @typescript-eslint/explicit-module-boundary-types

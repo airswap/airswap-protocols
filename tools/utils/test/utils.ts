@@ -11,8 +11,8 @@ import {
   createClaimSignature,
   getSignerFromSwapSignature,
   getSignerFromClaimSignature,
-  compressOrder,
-  decompressOrder,
+  compressFullOrder,
+  decompressFullOrder,
 } from '../index'
 
 const signerPrivateKey =
@@ -117,8 +117,17 @@ describe('Utils', async () => {
       r,
       s
     )
-    const compressed = compressOrder({ ...unsignedOrder, v, r, s })
-    const signedOrder = decompressOrder(compressed)
+    const chainId = 1
+    const swapContract = ADDRESS_ZERO
+    const compressed = compressFullOrder({
+      chainId,
+      swapContract,
+      ...unsignedOrder,
+      v,
+      r,
+      s,
+    })
+    const signedOrder = decompressFullOrder(compressed)
     expect(isValidOrder(signedOrder)).to.equal(true)
     expect(signerWallet.toLowerCase()).to.equal(wallet.address.toLowerCase())
   })
