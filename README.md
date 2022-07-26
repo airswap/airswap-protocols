@@ -37,14 +37,13 @@ Packages are versioned based on deploys. Major versions e.g. `1.x.x` are mainnet
 
 ## Repository Commands
 
-| Command           | Description                                  |
-| :---------------- | :------------------------------------------- |
-| `yarn compile`    | Compile all contracts to `build` folders.    |
-| `yarn clean`      | Delete all contract `build` folders.         |
-| `yarn test`       | Run all contract tests in `test` folders.    |
-| `yarn hint`       | Run a syntax linter for all Solidity code.   |
-| `yarn lint`       | Run a syntax linter for all JavaScript code. |
-| `yarn deps:check` | Run a dependency consistency check.          |
+| Command        | Description                                  |
+| :------------- | :------------------------------------------- |
+| `yarn compile` | Compile all contracts to `build` folders.    |
+| `yarn clean`   | Delete all contract `build` folders.         |
+| `yarn test`    | Run all contract tests in `test` folders.    |
+| `yarn hint`    | Run a syntax linter for all Solidity code.   |
+| `yarn lint`    | Run a syntax linter for all JavaScript code. |
 
 ## Deploying Contracts
 

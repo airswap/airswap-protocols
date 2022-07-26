@@ -28,12 +28,7 @@
   "devDependencies": {
     "@airswap/constants": "3.0.1",
     "@airswap/utils": "3.0.1",
-    "@nomiclabs/hardhat-ethers": "^2.0.5",
-    "@nomiclabs/hardhat-etherscan": "^3.0.3",
-    "@nomiclabs/hardhat-waffle": "^2.0.3",
-    "ethereum-waffle": "^3.4.0",
-    "ethers": "^5.5.4",
-    "solidity-coverage": "^0.7.20"
+    "hardhat": "^2.10.1"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.3.1"
