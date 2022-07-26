@@ -8,8 +8,6 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "./interfaces/ISwap.sol";
 
-import "hardhat/console.sol";
-
 /**
  * @title AirSwap: Atomic Token Swap
  * @notice https://www.airswap.io/
