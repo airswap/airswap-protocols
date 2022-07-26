@@ -700,8 +700,6 @@ contract Swap is ISwap, Ownable {
 
     // Recover the signatory from the hash and signature
     address signatory = _getSignatory(hashed, v, r, s);
-    // console.log(signatory);
-    // console.log(signerWallet);
 
     // Ensure the signatory is not null
     require(signatory != address(0), "SIGNATURE_INVALID");
