@@ -1,6 +1,6 @@
 {
   "name": "@airswap/utils",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "AirSwap: Utilities for Developers",
   "contributors": [
     "Don Mosites"
@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "@airswap/constants": "3.0.1",
-    "@airswap/typescript": "3.0.0",
+    "@airswap/typescript": "3.0.1",
     "@types/ethereumjs-util": "^6.1.0",
     "bignumber.js": "^9.0.1",
     "eth-sig-util": "^3.0.0",

@@ -11,13 +11,13 @@ import {
   createClaimSignature,
   getSignerFromSwapSignature,
   getSignerFromClaimSignature,
-  compressOrder,
-  decompressOrder,
+  compressFullOrder,
+  decompressFullOrder,
 } from '../index'
 
 const signerPrivateKey =
   '0x4934d4ff925f39f91e3729fbce52ef12f25fdf93e014e291350f7d314c1a096b'
-const provider = ethers.getDefaultProvider('rinkeby')
+const provider = ethers.getDefaultProvider('goerli')
 const wallet = new ethers.Wallet(signerPrivateKey, provider)
 
 describe('Utils', async () => {
@@ -117,8 +117,17 @@ describe('Utils', async () => {
       r,
       s
     )
-    const compressed = compressOrder({ ...unsignedOrder, v, r, s })
-    const signedOrder = decompressOrder(compressed)
+    const chainId = 1
+    const swapContract = ADDRESS_ZERO
+    const compressed = compressFullOrder({
+      chainId,
+      swapContract,
+      ...unsignedOrder,
+      v,
+      r,
+      s,
+    })
+    const signedOrder = decompressFullOrder(compressed)
     expect(isValidOrder(signedOrder)).to.equal(true)
     expect(signerWallet.toLowerCase()).to.equal(wallet.address.toLowerCase())
   })

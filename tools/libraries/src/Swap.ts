@@ -14,7 +14,7 @@ export class Swap {
   private contract: ethers.Contract
 
   public constructor(
-    chainId = chainIds.RINKEBY,
+    chainId = chainIds.GOERLI,
     signerOrProvider?:
       | ethers.providers.JsonRpcSigner
       | ethers.providers.Provider
@@ -28,7 +28,7 @@ export class Swap {
     )
   }
 
-  public static getAddress(chainId = chainIds.RINKEBY): string {
+  public static getAddress(chainId = chainIds.GOERLI): string {
     if (chainId in swapDeploys) {
       return swapDeploys[chainId]
     }

@@ -12,7 +12,6 @@ export const SECONDS_IN_DAY = 86400
 
 export const chainIds: Record<string, number> = {
   MAINNET: 1,
-  RINKEBY: 4,
   GOERLI: 5,
   OPTIMISM: 10,
   KOVAN: 42,
@@ -27,7 +26,6 @@ export const chainIds: Record<string, number> = {
 
 export const chainNames: Record<number, string> = {
   1: 'MAINNET',
-  4: 'RINKEBY',
   5: 'GOERLI',
   10: 'OPTIMISM',
   42: 'KOVAN',
@@ -81,7 +79,6 @@ export const stakingTokenAddresses: Record<string, string> = {
 
 export const etherscanDomains: Record<string, string> = {
   1: 'etherscan.io',
-  4: 'rinkeby.etherscan.io',
   5: 'goerli.etherscan.io',
   42: 'kovan.etherscan.io',
   56: 'bscscan.com',

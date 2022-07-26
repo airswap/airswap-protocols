@@ -2,12 +2,39 @@
 # yarn lockfile v1
 
 
+"@airswap/constants@3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@airswap/constants/-/constants-3.0.0.tgz#c652461c85c0787ef8981fba2f026815cb545a47"
+  integrity sha512-7SW0U97X/6tAwZFOg/vK9b3/VfcW8Id4dydx6iPuTLwKFvd/0hJ5IuvIew4S5aWyTAc3u9xB5sEdwHfq1DtoCA==
+
 "@airswap/jsonrpc-client-websocket@0.0.1":
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/@airswap/jsonrpc-client-websocket/-/jsonrpc-client-websocket-0.0.1.tgz#e75932a0f19cb6c23cf145834277211cce150400"
   integrity sha512-4S5iBAVzQKy+p3DgUr9OOKvKfBq1FHmbcgCYoVWSv5YBTVuaC4N03UHwKRjNXLcSUXXV/efl/sRjEQKm+ayklg==
   dependencies:
     get-parameter-names "^0.3.0"
+
+"@airswap/typescript@3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@airswap/typescript/-/typescript-3.0.0.tgz#9ecc6ad543ad09de46ff772a5701f486630a3476"
+  integrity sha512-HGWBMXRaXRHzNeC99uImYNYbsYNjB8wiRlqOzyVFoYGCaDLLxL83lcv6pqJjbFmqd6dggRynljGVHyLhNbST1Q==
+  dependencies:
+    "@airswap/constants" "3.0.0"
+    "@uniswap/token-lists" "^1.0.0-beta.26"
+
+"@airswap/utils@3.0.1":
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/@airswap/utils/-/utils-3.0.1.tgz#326d117f98ffd78f2fcb14188a5e24f7967400cb"
+  integrity sha512-BeJ5xlxDdaq32h8x7ZRtTYPS7Pm86zcSOTTGarbpkGYsX4CFwbOCQ8XNtP13b7aHPoELqFhQdu7ZX1xN3NsGSA==
+  dependencies:
+    "@airswap/constants" "3.0.1"
+    "@airswap/typescript" "3.0.0"
+    "@types/ethereumjs-util" "^6.1.0"
+    bignumber.js "^9.0.1"
+    eth-sig-util "^3.0.0"
+    ethereumjs-util "^6.2.0"
+    ethers "^5.5.4"
+    lz-string "^1.4.4"
 
 "@babel/code-frame@^7.0.0":
   version "7.14.5"
@@ -6090,7 +6117,7 @@ ethers@^5.0.1, ethers@^5.0.2:
     "@ethersproject/web" "5.4.0"
     "@ethersproject/wordlists" "5.4.0"
 
-ethers@^5.5.2, ethers@^5.6.9:
+ethers@^5.5.2, ethers@^5.5.4, ethers@^5.6.9:
   version "5.6.9"
   resolved "https://registry.yarnpkg.com/ethers/-/ethers-5.6.9.tgz#4e12f8dfcb67b88ae7a78a9519b384c23c576a4d"
   integrity sha512-lMGC2zv9HC5EC+8r429WaWu3uWJUCgUCt8xxKCFqkrFuBDZXDYIdzDUECxzjf2BMF8IVBByY1EBoGSL3RTm8RA==
