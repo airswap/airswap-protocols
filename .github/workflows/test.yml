@@ -12,7 +12,6 @@ jobs:
         with:
           fetch-depth: 0
       - uses: nrwl/nx-set-shas@v2
-      - run: npm ci
       - run: npx nx affected --target=lint:check --parallel=3
       - run: npx nx affected --target=test --parallel=3 --ci
         env:
