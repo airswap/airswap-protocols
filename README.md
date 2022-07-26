@@ -14,8 +14,6 @@
 
 ## Smart Contracts
 
-Packages are versioned based on deploys. Major versions e.g. `1.x.x` are mainnet deploys, while minor versions e.g. `x.1.x` are rinkeby deploys. Packages that are not deployed increment patch versions e.g. `x.x.1`. Each package that includes a deployment includes the ABI files for that deployed contract in `build/contracts` within the package.
-
 | Package                                   | Version                                                                                                     | Description              |
 | :---------------------------------------- | :---------------------------------------------------------------------------------------------------------- | :----------------------- |
 | [`@airswap/swap`](/source/swap)           | [![npm](https://img.shields.io/npm/v/@airswap/swap)](https://www.npmjs.com/package/@airswap/swap)           | Atomic Token Swap        |
@@ -37,22 +35,21 @@ Packages are versioned based on deploys. Major versions e.g. `1.x.x` are mainnet
 
 ## Repository Commands
 
-| Command           | Description                                  |
-| :---------------- | :------------------------------------------- |
-| `yarn compile`    | Compile all contracts to `build` folders.    |
-| `yarn clean`      | Delete all contract `build` folders.         |
-| `yarn test`       | Run all contract tests in `test` folders.    |
-| `yarn hint`       | Run a syntax linter for all Solidity code.   |
-| `yarn lint`       | Run a syntax linter for all JavaScript code. |
-| `yarn deps:check` | Run a dependency consistency check.          |
+| Command        | Description                                  |
+| :------------- | :------------------------------------------- |
+| `yarn compile` | Compile all contracts to `build` folders.    |
+| `yarn clean`   | Delete all contract `build` folders.         |
+| `yarn test`    | Run all contract tests in `test` folders.    |
+| `yarn hint`    | Run a syntax linter for all Solidity code.   |
+| `yarn lint`    | Run a syntax linter for all JavaScript code. |
 
 ## Deploying Contracts
 
 Each package in `source` has commands `yarn deploy` and `yarn verify`. Each command takes a `--network` flag. For example:
 
 ```
-yarn deploy --network rinkeby
-yarn verify --network rinkeby
+yarn deploy --network goerli
+yarn verify --network goerli
 ```
 
 The account used to deploy and verify is derived from the `MNEMONIC` environment variable in `.env` in the repository root. The source of these scripts can be found in the `scripts` folder of each package.

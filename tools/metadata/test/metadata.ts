@@ -28,7 +28,7 @@ describe('Metadata: Rinkeby', async () => {
   let result
 
   it('fetches all known tokens', async () => {
-    result = await fetchTokens(chainIds.RINKEBY)
+    result = await fetchTokens(chainIds.GOERLI)
     expect(result.tokens.length).to.not.equal(0)
   })
   it('checks that ETH does not exist', async () => {
@@ -36,13 +36,13 @@ describe('Metadata: Rinkeby', async () => {
   })
   it('checks that WETH exists', async () => {
     expect(
-      findTokenByAddress(wrappedTokenAddresses[chainIds.RINKEBY], result.tokens)
+      findTokenByAddress(wrappedTokenAddresses[chainIds.GOERLI], result.tokens)
     ).to.not.be.undefined
     expect(findTokensBySymbol('WETH', result.tokens)[0].address).to.equal(
-      wrappedTokenAddresses[chainIds.RINKEBY]
+      wrappedTokenAddresses[chainIds.GOERLI]
     )
     expect(firstTokenBySymbol('WETH', result.tokens).address).to.equal(
-      wrappedTokenAddresses[chainIds.RINKEBY]
+      wrappedTokenAddresses[chainIds.GOERLI]
     )
   })
 })
