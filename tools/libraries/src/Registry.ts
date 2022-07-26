@@ -14,7 +14,7 @@ export class Registry {
   private contract: ethers.Contract
 
   public constructor(
-    chainId = chainIds.RINKEBY,
+    chainId = chainIds.GOERLI,
     walletOrProvider?: ethers.Wallet | ethers.providers.Provider
   ) {
     this.chainId = chainId
@@ -26,7 +26,7 @@ export class Registry {
     )
   }
 
-  public static getAddress(chainId = chainIds.RINKEBY): string {
+  public static getAddress(chainId = chainIds.GOERLI): string {
     if (chainId in registryDeploys) {
       return registryDeploys[chainId]
     }
