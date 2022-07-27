@@ -3,3 +3,5 @@ Imports.sol
 build/
 node_modules/
 coverage/
+typechain-types/
+tools/subgraph/generated

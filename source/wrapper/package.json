@@ -1,6 +1,6 @@
 {
   "name": "@airswap/wrapper",
-  "version": "3.0.3",
+  "version": "3.1.0",
   "description": "AirSwap: Automatic Wrap and Unwrap",
   "contributors": [
     "Don Mosites",
@@ -13,6 +13,7 @@
   },
   "files": [
     "/build",
+    "typechain-types",
     "deploys.js"
   ],
   "scripts": {

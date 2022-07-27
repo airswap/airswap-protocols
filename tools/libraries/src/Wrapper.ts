@@ -1,28 +1,25 @@
-import { ethers } from 'ethers'
-import { chainIds, chainNames, wrappedTokenAddresses } from '@airswap/constants'
+import { ContractTransaction, ethers } from 'ethers'
+import { chainIds, wrappedTokenAddresses } from '@airswap/constants'
+import {
+  Wrapper as WrapperContract,
+  Wrapper__factory,
+} from '@airswap/wrapper/typechain-types'
 import { Order } from '@airswap/typescript'
 
-import * as WrapperContract from '@airswap/wrapper/build/contracts/Wrapper.sol/Wrapper.json'
 import * as wrapperDeploys from '@airswap/wrapper/deploys.js'
-
-const WrapperInterface = new ethers.utils.Interface(
-  JSON.stringify(WrapperContract.abi)
-)
 
 export class Wrapper {
   public chainId: number
-  private contract: ethers.Contract
+  public contract: WrapperContract
 
   public constructor(
     chainId = chainIds.GOERLI,
     signerOrProvider?: ethers.Signer | ethers.providers.Provider
   ) {
     this.chainId = chainId
-    this.contract = new ethers.Contract(
+    this.contract = Wrapper__factory.connect(
       Wrapper.getAddress(chainId),
-      WrapperInterface,
-      signerOrProvider ||
-        ethers.getDefaultProvider(chainNames[chainId].toLowerCase())
+      signerOrProvider
     )
   }
 
@@ -33,7 +30,10 @@ export class Wrapper {
     throw new Error(`Wrapper deploy not found for chainId ${chainId}`)
   }
 
-  public async swap(order: Order, signer?: ethers.Signer): Promise<string> {
+  public async swap(
+    order: Order,
+    signer?: ethers.Signer
+  ): Promise<ContractTransaction> {
     let contract = this.contract
     if (!this.contract.signer) {
       if (signer === undefined) {
