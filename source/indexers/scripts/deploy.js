@@ -14,7 +14,7 @@ async function main() {
   const obligationCost = 0
 
   console.log(`Deploying on ${chainNames[chainId].toUpperCase()}`)
-  const registryFactory = await ethers.getContractFactory('IndexerRegistry')
+  const registryFactory = await ethers.getContractFactory('Indexers')
   const registryContract = await registryFactory.deploy(
     stakingToken,
     obligationCost
