@@ -1,17 +1,17 @@
 import { ethers, BigNumber } from 'ethers'
 import { chainIds, chainNames } from '@airswap/constants'
 import { Order } from '@airswap/typescript'
+import {
+  Swap as SwapContract,
+  Swap__factory,
+} from '@airswap/swap/typechain-types'
 import { orderToParams } from '@airswap/utils'
 
-import * as SwapContract from '@airswap/swap/build/contracts/Swap.sol/Swap.json'
 import * as swapDeploys from '@airswap/swap/deploys.js'
-const SwapInterface = new ethers.utils.Interface(
-  JSON.stringify(SwapContract.abi)
-)
 
 export class Swap {
   public chainId: number
-  private contract: ethers.Contract
+  public contract: SwapContract
 
   public constructor(
     chainId = chainIds.GOERLI,
@@ -20,9 +20,8 @@ export class Swap {
       | ethers.providers.Provider
   ) {
     this.chainId = chainId
-    this.contract = new ethers.Contract(
+    this.contract = Swap__factory.connect(
       Swap.getAddress(chainId),
-      SwapInterface,
       signerOrProvider ||
         ethers.getDefaultProvider(chainNames[chainId].toLowerCase())
     )

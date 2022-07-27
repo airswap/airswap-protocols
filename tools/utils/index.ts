@@ -207,7 +207,20 @@ export function isValidOrder(order: Order): boolean {
   )
 }
 
-export function orderToParams(order: Order): Array<string> {
+export function orderToParams(
+  order: Order
+): [
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string
+] {
   return [
     order.nonce,
     order.expiry,
@@ -238,7 +251,24 @@ export function paramsToOrder(str: string): Order {
   }
 }
 
-export function fullOrderToParams(order: FullOrder): Array<string> {
+export function fullOrderToParams(
+  order: FullOrder
+): [
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string
+] {
   return [
     order.chainId,
     order.swapContract,

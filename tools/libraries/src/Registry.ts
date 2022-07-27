@@ -1,28 +1,26 @@
 import { ethers } from 'ethers'
-import { chainIds, chainNames } from '@airswap/constants'
+import {
+  Registry__factory,
+  Registry as RegistryContract,
+} from '@airswap/registry/typechain-types'
+import { chainIds } from '@airswap/constants'
 import { Server, ServerOptions } from './Server'
 import { Swap } from './Swap'
 
-import * as RegistryContract from '@airswap/registry/build/contracts/Registry.sol/Registry.json'
 import * as registryDeploys from '@airswap/registry/deploys.js'
-const RegistryInterface = new ethers.utils.Interface(
-  JSON.stringify(RegistryContract.abi)
-)
 
 export class Registry {
   public chainId: number
-  private contract: ethers.Contract
+  private contract: RegistryContract
 
   public constructor(
     chainId = chainIds.GOERLI,
     walletOrProvider?: ethers.Wallet | ethers.providers.Provider
   ) {
     this.chainId = chainId
-    this.contract = new ethers.Contract(
-      registryDeploys[chainId],
-      RegistryInterface,
-      walletOrProvider ||
-        ethers.getDefaultProvider(chainNames[chainId].toLowerCase())
+    this.contract = Registry__factory.connect(
+      Registry.getAddress(chainId),
+      walletOrProvider
     )
   }
 
