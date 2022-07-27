@@ -8,13 +8,9 @@ describe('Registry Unit', () => {
   let deployer
   let account1
   let account2
-  let token1
-  let token2
-  let token3
   let stakingToken
   let registryFactory
   let registry
-  const OBLIGATION_COST = 1000
 
   beforeEach(async () => {
     snapshotId = await ethers.provider.send('evm_snapshot')
