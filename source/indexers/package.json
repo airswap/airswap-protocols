@@ -1,0 +1,36 @@
+{
+  "name": "@airswap/indexers",
+  "version": "3.0.0",
+  "description": "AirSwap: Indexer URL Registry",
+  "contributors": [
+    "Don Mosites"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/airswap/airswap-protocols"
+  },
+  "files": [
+    "/build",
+    "deploys.js"
+  ],
+  "scripts": {
+    "clean": "hardhat clean",
+    "compile": "hardhat compile",
+    "coverage": "hardhat coverage",
+    "test": "hardhat test",
+    "test:unit": "hardhat test ./test/unit.js",
+    "deploy": "hardhat run ./scripts/deploy.js",
+    "verify": "hardhat run ./scripts/verify.js"
+  },
+  "devDependencies": {
+    "@airswap/constants": "3.0.1",
+    "hardhat": "^2.10.1"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.3.1"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
