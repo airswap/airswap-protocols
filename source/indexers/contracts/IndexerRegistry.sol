@@ -10,28 +10,16 @@ import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
  * @title AirSwap: Indexer URL Registry
  * @notice https://www.airswap.io/
  */
-contract IndexerRegistry {
+contract Indexers {
   using SafeERC20 for IERC20;
   using EnumerableSet for EnumerableSet.AddressSet;
 
-  IERC20 public immutable stakingToken;
-  uint256 public immutable obligationCost;
   EnumerableSet.AddressSet internal supportingStakers;
   mapping(address => string) public stakerURLs;
 
   event Stake(address indexed account);
   event Unstake(address indexed account);
   event SetURL(address indexed account, string url);
-
-  /**
-   * @notice Constructor
-   * @param _stakingToken address of token used for staking
-   * @param _obligationCost base amount required to stake
-   */
-  constructor(IERC20 _stakingToken, uint256 _obligationCost) {
-    stakingToken = _stakingToken;
-    obligationCost = _obligationCost;
-  }
 
   /**
    * @notice Set the URL for a staker
@@ -56,17 +44,5 @@ contract IndexerRegistry {
     for (uint256 i = 0; i < length; i++) {
       urls[i] = stakerURLs[address(supportingStakers.at(i))];
     }
-  }
-
-  /**
-   * @notice Return the staking balance of a given staker
-   * @param staker address of the account used to stake
-   * @return balance of the staker account
-   */
-  function balanceOf(address staker) external view returns (uint256) {
-    if (bytes(stakerURLs[staker]).length == 0) {
-      return 0;
-    }
-    return obligationCost;
   }
 }

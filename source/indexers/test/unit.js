@@ -28,21 +28,9 @@ describe('Registry Unit', () => {
     ;[deployer, account1, account2, token1, token2, token3] =
       await ethers.getSigners()
     stakingToken = await deployMockContract(deployer, IERC20.abi)
-    registryFactory = await ethers.getContractFactory('IndexerRegistry')
-    registry = await registryFactory.deploy(
-      stakingToken.address,
-      OBLIGATION_COST
-    )
+    registryFactory = await ethers.getContractFactory('Indexers')
+    registry = await registryFactory.deploy()
     await registry.deployed()
-  })
-
-  describe('Default Values', async () => {
-    it('constructor set default values', async () => {
-      const tokenAddress = await registry.stakingToken()
-      const obligationCost = await registry.obligationCost()
-      expect(tokenAddress).to.equal(stakingToken.address)
-      expect(obligationCost).to.equal(OBLIGATION_COST)
-    })
   })
 
   describe('Set URL', async () => {
@@ -76,13 +64,6 @@ describe('Registry Unit', () => {
       expect(urls.length).to.equal(2)
       expect(urls[0]).to.equal('www.noneURL.com')
       expect(urls[1]).to.equal('www.TheCatsMeow.com')
-    })
-  })
-
-  describe('Balance Of', async () => {
-    it('verify expected balance when a user has no tokens', async () => {
-      const balance = await registry.balanceOf(account1.address)
-      expect(balance).to.equal(0)
     })
   })
 })
