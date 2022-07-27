@@ -26,6 +26,13 @@ export type Order = {
   senderAmount: string
 } & Signature
 
+export type Settlement = {
+  chainId: string
+  swapContract: string
+}
+
+export type FullOrder = UnsignedOrder & Signature & Settlement
+
 export type UnsignedClaim = {
   nonce: string
   expiry: string

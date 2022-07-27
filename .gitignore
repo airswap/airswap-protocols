@@ -12,7 +12,5 @@ flatten/
 venv
 .vscode/
 .idea/
-subgraph.yaml
-**/subgraph/generated
 artifacts/
 cache/

@@ -17,13 +17,6 @@ module.exports = {
         mnemonic: process.env.MNEMONIC || '',
       },
     },
-    rinkeby: {
-      url: 'https://rinkeby.infura.io/v3/' + process.env.INFURA_API_KEY,
-      gasPrice: 10e9,
-      accounts: {
-        mnemonic: process.env.MNEMONIC || '',
-      },
-    },
     goerli: {
       url: 'https://goerli.infura.io/v3/' + process.env.INFURA_API_KEY,
       gasPrice: 10e9,
@@ -33,7 +26,7 @@ module.exports = {
     },
     mainnet: {
       url: 'https://mainnet.infura.io/v3/' + process.env.INFURA_API_KEY,
-      gasPrice: 15e9,
+      gasPrice: 10e9,
       accounts: {
         mnemonic: process.env.MNEMONIC || '',
       },
@@ -74,6 +67,7 @@ module.exports = {
     },
     polygon: {
       url: 'https://polygon-rpc.com/',
+      gasPrice: 100e9,
       accounts: {
         mnemonic: process.env.MNEMONIC || '',
       },
@@ -95,7 +89,6 @@ module.exports = {
   etherscan: {
     apiKey: {
       mainnet: process.env.ETHERSCAN_API_KEY,
-      rinkeby: process.env.ETHERSCAN_API_KEY,
       goerli: process.env.ETHERSCAN_API_KEY,
       bsc: process.env.BSCSCAN_API_KEY,
       bscTestnet: process.env.BSCSCAN_API_KEY,

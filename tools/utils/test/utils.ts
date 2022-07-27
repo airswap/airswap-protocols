@@ -11,16 +11,19 @@ import {
   createClaimSignature,
   getSignerFromSwapSignature,
   getSignerFromClaimSignature,
+  compressFullOrder,
+  decompressFullOrder,
 } from '../index'
 
 const signerPrivateKey =
   '0x4934d4ff925f39f91e3729fbce52ef12f25fdf93e014e291350f7d314c1a096b'
-const provider = ethers.getDefaultProvider('rinkeby')
+const provider = ethers.getDefaultProvider('goerli')
 const wallet = new ethers.Wallet(signerPrivateKey, provider)
 
 describe('Utils', async () => {
-  it('Signs and validates an order', async () => {
-    const unsignedOrder = {
+  let unsignedOrder
+  before(async () => {
+    unsignedOrder = {
       nonce: Date.now().toString(),
       expiry: Math.round(Date.now() / 1000 + SECONDS_IN_DAY).toString(),
       signerWallet: ADDRESS_ZERO,
@@ -31,6 +34,9 @@ describe('Utils', async () => {
       senderToken: ADDRESS_ZERO,
       senderAmount: '0',
     }
+  })
+
+  it('Signs and validates an order', async () => {
     const { v, r, s } = await createSwapSignature(
       unsignedOrder,
       wallet.privateKey,
@@ -94,5 +100,35 @@ describe('Utils', async () => {
     } catch (e) {
       assert(true)
     }
+  })
+
+  it('Compresses and decompresses an order', async () => {
+    const { v, r, s } = await createSwapSignature(
+      unsignedOrder,
+      wallet.privateKey,
+      ADDRESS_ZERO,
+      1
+    )
+    const signerWallet = getSignerFromSwapSignature(
+      unsignedOrder,
+      ADDRESS_ZERO,
+      1,
+      v,
+      r,
+      s
+    )
+    const chainId = 1
+    const swapContract = ADDRESS_ZERO
+    const compressed = compressFullOrder({
+      chainId,
+      swapContract,
+      ...unsignedOrder,
+      v,
+      r,
+      s,
+    })
+    const signedOrder = decompressFullOrder(compressed)
+    expect(isValidOrder(signedOrder)).to.equal(true)
+    expect(signerWallet.toLowerCase()).to.equal(wallet.address.toLowerCase())
   })
 })

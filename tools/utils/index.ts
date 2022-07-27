@@ -4,6 +4,8 @@ import * as sigUtil from 'eth-sig-util'
 import { ethers } from 'ethers'
 import * as url from 'url'
 import BigNumber from 'bignumber.js'
+import lzString from 'lz-string'
+
 import {
   SECONDS_IN_DAY,
   ADDRESS_ZERO,
@@ -16,6 +18,7 @@ import {
 import {
   UnsignedOrder,
   Order,
+  FullOrder,
   UnsignedClaim,
   Claim,
   Signature,
@@ -25,6 +28,21 @@ import {
   EIP712Swap,
   EIP712Claim,
 } from '@airswap/typescript'
+
+function stringify(
+  types: { [key: string]: { type: string; name: string }[] },
+  primaryType: string
+): string {
+  return types[primaryType].reduce((str, value, index, values) => {
+    const isEnd = index !== values.length - 1
+    return str + `${value.type} ${value.name}${isEnd ? ',' : ')'}`
+  }, `${primaryType}(`)
+}
+
+export const EIP712_DOMAIN_TYPEHASH = ethUtil.keccak256(
+  stringify(EIP712Swap, 'EIP712Domain')
+)
+export const ORDER_TYPEHASH = ethUtil.keccak256(stringify(EIP712Swap, 'Order'))
 
 // eslint-disable-next-line  @typescript-eslint/explicit-module-boundary-types
 export function createOrder({
@@ -115,6 +133,64 @@ export function getSignerFromSwapSignature(
   })
 }
 
+export function hashOrder(order: UnsignedOrder): Buffer {
+  return ethUtil.keccak256(
+    ethers.utils.defaultAbiCoder.encode(
+      [
+        'bytes32',
+        'uint256',
+        'uint256',
+        'address',
+        'address',
+        'uint256',
+        'uint256',
+        'address',
+        'address',
+        'uint256',
+      ],
+      [
+        ORDER_TYPEHASH,
+        order.nonce,
+        order.expiry,
+        order.signerWallet,
+        order.signerToken,
+        order.signerAmount,
+        order.protocolFee,
+        order.senderWallet,
+        order.senderToken,
+        order.senderAmount,
+      ]
+    )
+  )
+}
+
+export function hashDomain(swapContract: string): Buffer {
+  return ethUtil.keccak256(
+    ethers.utils.defaultAbiCoder.encode(
+      ['bytes32', 'bytes32', 'bytes32', 'address'],
+      [
+        EIP712_DOMAIN_TYPEHASH,
+        ethUtil.keccak256(DOMAIN_NAME_SWAP),
+        ethUtil.keccak256(DOMAIN_VERSION_SWAP),
+        swapContract,
+      ]
+    )
+  )
+}
+
+export function getOrderHash(
+  order: UnsignedOrder,
+  swapContract: string
+): Buffer {
+  return ethUtil.keccak256(
+    Buffer.concat([
+      Buffer.from('1901', 'hex'),
+      hashDomain(swapContract),
+      hashOrder(order),
+    ])
+  )
+}
+
 export function isValidOrder(order: Order): boolean {
   return (
     order &&
@@ -146,6 +222,61 @@ export function orderToParams(order: Order): Array<string> {
   ]
 }
 
+export function paramsToOrder(str: string): Order {
+  const split = str.split(',')
+  return {
+    nonce: split[0],
+    expiry: split[1],
+    signerWallet: split[2],
+    signerToken: split[3],
+    signerAmount: split[4],
+    senderToken: split[5],
+    senderAmount: split[6],
+    v: split[7],
+    r: split[8],
+    s: split[9],
+  }
+}
+
+export function fullOrderToParams(order: FullOrder): Array<string> {
+  return [
+    order.chainId,
+    order.swapContract,
+    order.nonce,
+    order.expiry,
+    order.signerWallet,
+    order.signerToken,
+    order.signerAmount,
+    order.protocolFee,
+    order.senderWallet,
+    order.senderToken,
+    order.senderAmount,
+    order.v,
+    order.r,
+    order.s,
+  ]
+}
+
+export function paramsToFullOrder(str: string): FullOrder {
+  const split = str.split(',')
+  return {
+    chainId: split[0],
+    swapContract: split[1],
+    nonce: split[2],
+    expiry: split[3],
+    signerWallet: split[4],
+    signerToken: split[5],
+    signerAmount: split[6],
+    protocolFee: split[7],
+    senderWallet: split[8],
+    senderToken: split[9],
+    senderAmount: split[10],
+    v: split[11],
+    r: split[12],
+    s: split[13],
+  }
+}
+
 export function orderPropsToStrings(obj: any): Order {
   return {
     nonce: String(obj.nonce),
@@ -159,6 +290,16 @@ export function orderPropsToStrings(obj: any): Order {
     r: String(obj.r),
     s: String(obj.s),
   }
+}
+
+export function compressFullOrder(order: FullOrder): string {
+  return lzString.compressToEncodedURIComponent(
+    fullOrderToParams(order).join(',')
+  )
+}
+
+export function decompressFullOrder(str: string): FullOrder {
+  return paramsToFullOrder(lzString.decompressFromEncodedURIComponent(str))
 }
 
 // eslint-disable-next-line  @typescript-eslint/explicit-module-boundary-types
