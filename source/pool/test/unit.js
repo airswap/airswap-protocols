@@ -367,6 +367,38 @@ describe('Pool Unit Tests', () => {
       ).to.be.revertedWith('UNAUTHORIZED')
     })
 
+    it('withdrawProtected reverts if caller not participant', async () => {
+      await feeToken.mock.balanceOf.returns('100000')
+
+      const withdrawMinimum = 496
+
+      const claim = await createUnsignedClaim({})
+
+      const claimSignature = await createClaimSignature(
+        claim,
+        deployer,
+        pool.address,
+        CHAIN_ID
+      )
+
+      await expect(
+        pool
+          .connect(bob)
+          .withdrawProtected(
+            withdrawMinimum,
+            bob.address,
+            feeToken.address,
+            claim.nonce,
+            claim.expiry,
+            alice.address,
+            claim.score,
+            claimSignature.v,
+            claimSignature.r,
+            claimSignature.s
+          )
+      ).to.be.revertedWith('UNAUTHORIZED')
+    })
+
     it('withdrawAndStake success', async () => {
       await feeToken.mock.balanceOf.returns('100000')
       await feeToken.mock.transferFrom.returns(true)
