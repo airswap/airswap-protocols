@@ -27,12 +27,12 @@
   },
   "devDependencies": {
     "@airswap/constants": "3.0.1",
-    "@airswap/staking": "3.0.1",
     "@airswap/utils": "3.0.1",
     "hardhat": "^2.10.1"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.3.1"
+    "@openzeppelin/contracts": "^4.3.1",
+    "@airswap/staking": "3.1.0"
   },
   "publishConfig": {
     "access": "public"

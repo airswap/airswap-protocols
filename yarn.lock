@@ -14,20 +14,6 @@
   dependencies:
     get-parameter-names "^0.3.0"
 
-"@airswap/staking@3.0.1":
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/@airswap/staking/-/staking-3.0.1.tgz#cb25ba294561d46ea9c933a996897492c8e4d7fe"
-  integrity sha512-pmVqK0CVHLpz/3qKme2jDyEbpOzGi1458riTY42n4sUHTyzZ3g14sV+S2DVScanVlSvYi5crG1sp3l8BNlCqqw==
-  dependencies:
-    "@openzeppelin/contracts" "^4.3.1"
-
-"@airswap/swap@3.0.1":
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/@airswap/swap/-/swap-3.0.1.tgz#fb283983eb488b47d148a5e435ca57beb309c08a"
-  integrity sha512-xgl+Nk+9MIAOsoSt14i5pXvfiSn0o/mJlTDp21kWZ2sjYRtlq4Sdv82xmEVAb8bPjF6dzDrcuE9LASkkU3gyPQ==
-  dependencies:
-    "@openzeppelin/contracts" "^4.3.1"
-
 "@airswap/typescript@3.0.0":
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/@airswap/typescript/-/typescript-3.0.0.tgz#9ecc6ad543ad09de46ff772a5701f486630a3476"
