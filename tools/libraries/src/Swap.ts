@@ -1,4 +1,4 @@
-import { ethers, BigNumber } from 'ethers'
+import { ethers, BigNumber, ContractTransaction } from 'ethers'
 import { chainIds, chainNames } from '@airswap/constants'
 import { Order } from '@airswap/typescript'
 import {
@@ -57,7 +57,7 @@ export class Swap {
   public async swap(
     order: Order,
     sender?: ethers.providers.JsonRpcSigner
-  ): Promise<string> {
+  ): Promise<ContractTransaction> {
     let contract = this.contract
     if (!this.contract.signer) {
       if (sender === undefined) {
@@ -72,7 +72,7 @@ export class Swap {
   public async light(
     order: Order,
     sender?: ethers.providers.JsonRpcSigner
-  ): Promise<string> {
+  ): Promise<ContractTransaction> {
     let contract = this.contract
     if (!this.contract.signer) {
       if (sender === undefined) {
