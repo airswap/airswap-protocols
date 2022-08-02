@@ -1,12 +1,12 @@
-import * as indexerRegistryDeploys from '@airswap/indexer-registry/deploys.js'
+import * as indexersDeploys from '@airswap/indexers/deploys.js'
 import { providers, getDefaultProvider } from 'ethers'
 import {
-  IndexerRegistry__factory,
-  IndexerRegistry as IndexerRegistryContract,
-} from '@airswap/indexer-registry/typechain-types'
+  Indexers__factory,
+  Indexers as IndexerRegistryContract,
+} from '@airswap/indexers/typechain-types'
 import { chainIds } from '@airswap/constants'
 
-export class IndexerRegistry {
+export class Indexers {
   public chainId: number
   public contract: IndexerRegistryContract
 
@@ -15,14 +15,14 @@ export class IndexerRegistry {
     signerOrProvider?: providers.JsonRpcSigner | providers.Provider
   ) {
     this.chainId = chainId
-    this.contract = IndexerRegistry__factory.connect(
-      IndexerRegistry.getAddress(chainId),
+    this.contract = Indexers__factory.connect(
+      Indexers.getAddress(chainId),
       signerOrProvider || getDefaultProvider(chainId)
     )
   }
   public static getAddress(chainId = chainIds.RINKEBY) {
-    if (chainId in indexerRegistryDeploys) {
-      return indexerRegistryDeploys[chainId]
+    if (chainId in indexersDeploys) {
+      return indexersDeploys[chainId]
     }
     throw new Error(`Wrapper deploy not found for chainId ${chainId}`)
   }
