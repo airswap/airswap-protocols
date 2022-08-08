@@ -61,7 +61,8 @@ interface ISwap {
     bytes32 s
   ) external;
 
-  function light(
+  function swapAnySender(
+    address recipient,
     uint256 nonce,
     uint256 expiry,
     address signerWallet,
@@ -74,33 +75,7 @@ interface ISwap {
     bytes32 s
   ) external;
 
-  function buyNFT(
-    uint256 nonce,
-    uint256 expiry,
-    address signerWallet,
-    address signerToken,
-    uint256 signerAmount,
-    address senderToken,
-    uint256 senderAmount,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
-  ) external;
-
-  function sellNFT(
-    uint256 nonce,
-    uint256 expiry,
-    address signerWallet,
-    address signerToken,
-    uint256 signerAmount,
-    address senderToken,
-    uint256 senderAmount,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
-  ) external;
-
-  function swapNFTs(
+  function swapLight(
     uint256 nonce,
     uint256 expiry,
     address signerWallet,

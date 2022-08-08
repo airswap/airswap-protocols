@@ -57,6 +57,27 @@ describe('Swap Unit Tests', () => {
       )),
     })
   }
+  async function createSignedPublicOrder(params, signatory) {
+    const unsignedOrder = createOrder({
+      protocolFee: PROTOCOL_FEE,
+      signerWallet: signer.address,
+      signerToken: signerToken.address,
+      signerAmount: DEFAULT_AMOUNT,
+      senderWallet: ADDRESS_ZERO,
+      senderToken: senderToken.address,
+      senderAmount: DEFAULT_AMOUNT,
+      ...params,
+    })
+    return orderToParams({
+      ...unsignedOrder,
+      ...(await createSwapSignature(
+        unsignedOrder,
+        signatory,
+        swap.address,
+        CHAIN_ID
+      )),
+    })
+  }
 
   async function setUpAllowances(senderAmount, signerAmount) {
     await senderToken.mock.allowance
@@ -380,6 +401,92 @@ describe('Swap Unit Tests', () => {
     })
   })
 
+  describe('Test public swap', async () => {
+    it('test public swaps', async () => {
+      const order = await createSignedPublicOrder({}, signer)
+
+      await expect(
+        swap.connect(sender).swapAnySender(sender.address, ...order)
+      ).to.emit(swap, 'Swap')
+    })
+
+    it('test authorized signer', async () => {
+      const order = await createSignedPublicOrder(
+        {
+          signerWallet: anyone.address,
+        },
+        signer
+      )
+
+      await expect(swap.connect(anyone).authorize(signer.address))
+        .to.emit(swap, 'Authorize')
+        .withArgs(signer.address, anyone.address)
+
+      await expect(
+        swap.connect(sender).swapAnySender(sender.address, ...order)
+      ).to.emit(swap, 'Swap')
+    })
+
+    it('test when signer not authorized', async () => {
+      const order = await createSignedOrder(
+        {
+          signerWallet: anyone.address,
+        },
+        signer
+      )
+
+      await expect(
+        swap.connect(sender).swapAnySender(sender.address, ...order)
+      ).to.be.revertedWith('UNAUTHORIZED')
+    })
+
+    it('test when order is expired', async () => {
+      const order = await createSignedOrder(
+        {
+          expiry: '0',
+        },
+        signer
+      )
+      await expect(
+        swap.connect(sender).swapAnySender(sender.address, ...order)
+      ).to.be.revertedWith('EXPIRY_PASSED')
+    })
+
+    it('test when nonce has already been used', async () => {
+      const order = await createSignedPublicOrder(
+        {
+          nonce: '0',
+        },
+        signer
+      )
+      await swap.connect(sender).swapAnySender(sender.address, ...order)
+      await expect(
+        swap.connect(sender).swapAnySender(sender.address, ...order)
+      ).to.be.revertedWith('NONCE_ALREADY_USED')
+    })
+
+    it('test when nonce has been cancelled', async () => {
+      const order = await createSignedPublicOrder(
+        {
+          nonce: '1',
+        },
+        signer
+      )
+      await swap.connect(signer).cancel([1])
+      await expect(
+        swap.connect(sender).swapAnySender(sender.address, ...order)
+      ).to.be.revertedWith('NONCE_ALREADY_USED')
+    })
+
+    it('test invalid signature', async () => {
+      const order = await createSignedOrder({}, signer)
+      order[7] = '29' // Change "v" of signature
+      await expect(
+        swap.connect(sender).swapAnySender(sender.address, ...order)
+      ).to.be.revertedWith('SIGNATURE_INVALID')
+    })
+  })
+
   describe('Test light swap', async () => {
     it('test light swaps', async () => {
       const order = await createSignedOrder(
@@ -389,7 +496,10 @@ describe('Swap Unit Tests', () => {
         signer
       )
 
-      await expect(swap.connect(sender).light(...order)).to.emit(swap, 'Swap')
+      await expect(swap.connect(sender).swapLight(...order)).to.emit(
+        swap,
+        'Swap'
+      )
     })
     it('test light swaps with authorized', async () => {
       const order = await createSignedOrder(
@@ -404,7 +514,10 @@ describe('Swap Unit Tests', () => {
         .to.emit(swap, 'Authorize')
         .withArgs(signer.address, anyone.address)
 
-      await expect(swap.connect(sender).light(...order)).to.emit(swap, 'Swap')
+      await expect(swap.connect(sender).swapLight(...order)).to.emit(
+        swap,
+        'Swap'
+      )
     })
     it('test when expiration has passed', async () => {
       const order = await createSignedOrder(
@@ -415,14 +528,14 @@ describe('Swap Unit Tests', () => {
       )
       const block = await ethers.provider.getBlock()
       await ethers.provider.send('evm_mine', [block.timestamp + SECONDS_IN_DAY])
-      await expect(swap.connect(sender).light(...order)).to.be.revertedWith(
+      await expect(swap.connect(sender).swapLight(...order)).to.be.revertedWith(
         'EXPIRY_PASSED'
       )
     })
     it('test when signatory is invalid', async () => {
       const order = await createSignedOrder({}, signer)
       order[7] = '29' // Change "v" of signature
-      await expect(swap.connect(sender).light(...order)).to.be.revertedWith(
+      await expect(swap.connect(sender).swapLight(...order)).to.be.revertedWith(
         'SIGNATURE_INVALID'
       )
     })
@@ -434,8 +547,8 @@ describe('Swap Unit Tests', () => {
         },
         signer
       )
-      await swap.connect(sender).light(...order)
-      await expect(swap.connect(sender).light(...order)).to.be.revertedWith(
+      await swap.connect(sender).swapLight(...order)
+      await expect(swap.connect(sender).swapLight(...order)).to.be.revertedWith(
         'NONCE_ALREADY_USED'
       )
     })
@@ -447,7 +560,7 @@ describe('Swap Unit Tests', () => {
         },
         anyone
       )
-      await expect(swap.connect(sender).light(...order)).to.be.revertedWith(
+      await expect(swap.connect(sender).swapLight(...order)).to.be.revertedWith(
         'UNAUTHORIZED'
       )
     })
@@ -516,48 +629,6 @@ describe('Swap Unit Tests', () => {
       await expect(
         swap.connect(sender).swap(sender.address, ...order)
       ).to.be.revertedWith('UNAUTHORIZED')
-    })
-  })
-
-  describe('Test NFTs', async () => {
-    before(async () => {
-      signerNFT = await deployMockContract(deployer, IERC721.abi)
-      senderNFT = await deployMockContract(deployer, IERC721.abi)
-      await signerNFT.mock.transferFrom.returns()
-      await senderNFT.mock.transferFrom.returns()
-    })
-    it('test buy NFT', async () => {
-      const order = await createSignedOrder(
-        {
-          signerToken: signerNFT.address,
-          signerAmount: '123',
-        },
-        signer
-      )
-      await expect(swap.connect(sender).buyNFT(...order)).to.emit(swap, 'Swap')
-    })
-    it('test sell NFT', async () => {
-      const order = await createSignedOrder(
-        {
-          signerToken: signerNFT.address,
-          signerAmount: '123',
-        },
-        signer
-      )
-      await expect(swap.connect(sender).sellNFT(...order)).to.emit(swap, 'Swap')
-    })
-    it('test swap NFT', async () => {
-      const order = await createSignedOrder(
-        {
-          signerToken: signerNFT.address,
-          signerAmount: '123',
-        },
-        signer
-      )
-      await expect(swap.connect(sender).swapNFTs(...order)).to.emit(
-        swap,
-        'Swap'
-      )
     })
   })
 
@@ -682,6 +753,26 @@ describe('Swap Unit Tests', () => {
       expect(errCount).to.equal(1)
       expect(ethers.utils.parseBytes32String(messages[0])).to.equal(
         'SIGNER_BALANCE_LOW'
+      )
+    })
+    it('properly detects a low sender allowance', async () => {
+      await setUpAllowances(0, DEFAULT_AMOUNT + SWAP_FEE)
+      await setUpBalances(DEFAULT_BALANCE, DEFAULT_BALANCE)
+      const order = await createSignedOrder({}, signer)
+      const [errCount, messages] = await getErrorInfo(order)
+      expect(errCount).to.equal(1)
+      expect(ethers.utils.parseBytes32String(messages[0])).to.equal(
+        'SENDER_ALLOWANCE_LOW'
+      )
+    })
+    it('properly detects a low sender balance', async () => {
+      await setUpAllowances(DEFAULT_AMOUNT, DEFAULT_AMOUNT + SWAP_FEE)
+      await setUpBalances(0, DEFAULT_BALANCE)
+      const order = await createSignedOrder({}, signer)
+      const [errCount, messages] = await getErrorInfo(order)
+      expect(errCount).to.equal(1)
+      expect(ethers.utils.parseBytes32String(messages[0])).to.equal(
+        'SENDER_BALANCE_LOW'
       )
     })
     it('properly detects a nonce that has already been used', async () => {

@@ -148,7 +148,7 @@ describe('Swap Integration Tests', () => {
         },
         signer
       )
-      await expect(await swap.connect(sender).light(...order)).to.emit(
+      await expect(await swap.connect(sender).swapLight(...order)).to.emit(
         swap,
         'Swap'
       )
