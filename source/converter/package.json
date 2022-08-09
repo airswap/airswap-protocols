@@ -1,6 +1,6 @@
 {
   "name": "@airswap/converter",
-  "version": "3.0.1",
+  "version": "3.1.0",
   "description": "AirSwap: Protocol Fee Converter",
   "contributors": [
     "Martin Sterlicchi",
@@ -14,10 +14,11 @@
   },
   "files": [
     "/build",
+    "typechain-types",
     "deploys.js"
   ],
   "scripts": {
-    "clean": "hardhat clean",
+    "clean": "hardhat clean; rm -rf ./build ./typechain-types",
     "compile": "hardhat compile",
     "coverage": "hardhat coverage",
     "test": "hardhat test",

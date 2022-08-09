@@ -14,3 +14,4 @@ venv
 .idea/
 artifacts/
 cache/
+**/typechain-types

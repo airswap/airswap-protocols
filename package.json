@@ -28,6 +28,8 @@
     "@nomiclabs/hardhat-etherscan": "^3.1.0",
     "@nomiclabs/hardhat-waffle": "^2.0.3",
     "@types/mocha": "^9.1.1",
+    "@typechain/ethers-v5": "^10.1.0",
+    "@typechain/hardhat": "^6.1.2",
     "@typescript-eslint/eslint-plugin": "^5.31.0",
     "@typescript-eslint/parser": "^5.31.0",
     "chai": "^4.3.6",
@@ -45,9 +47,13 @@
     "prettier-plugin-solidity": "^1.0.0-dev.23",
     "solidity-coverage": "^0.7.21",
     "ts-node": "^10.4.0",
+    "typechain": "^8.1.0",
     "typescript": "^4.6.2"
   },
   "engines": {
     "node": ">=14"
+  },
+  "volta": {
+    "node": "16.15.1"
   }
 }
