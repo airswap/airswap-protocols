@@ -22,7 +22,7 @@
     "/build"
   ],
   "scripts": {
-    "clean": "rm -rf ./build ./cache",
+    "clean": "rm -rf ./build",
     "compile": "yarn clean && tsc -b",
     "test": "yarn test:unit",
     "test:unit": "yarn compile && yarn mocha -r ts-node/register test/Server.test.ts"
