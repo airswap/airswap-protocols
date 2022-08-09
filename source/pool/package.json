@@ -17,7 +17,7 @@
     "deploys.js"
   ],
   "scripts": {
-    "clean": "hardhat clean",
+    "clean": "hardhat clean; rm -rf ./build ./cache",
     "compile": "hardhat compile",
     "coverage": "hardhat coverage",
     "test": "hardhat test",
