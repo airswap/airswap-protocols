@@ -107,6 +107,7 @@ contract Swap is ISwap, Ownable {
 
   /**
    * @notice Atomic ERC20 Swap
+   * @param recipient address Wallet to receive sender proceeds
    * @param nonce uint256 Unique and should be sequential
    * @param expiry uint256 Expiry in seconds since 1 January 1970
    * @param signerWallet address Wallet of the signer
@@ -138,6 +139,76 @@ contract Swap is ISwap, Ownable {
       signerWallet,
       signerToken,
       signerAmount,
+      msg.sender,
+      senderToken,
+      senderAmount,
+      v,
+      r,
+      s
+    );
+
+    // Transfer token from sender to signer
+    IERC20(senderToken).safeTransferFrom(
+      msg.sender,
+      signerWallet,
+      senderAmount
+    );
+
+    // Transfer token from signer to recipient
+    IERC20(signerToken).safeTransferFrom(signerWallet, recipient, signerAmount);
+
+    // Calculate and transfer protocol fee and any rebate
+    _transferProtocolFee(signerToken, signerWallet, signerAmount);
+
+    // Emit a Swap event
+    emit Swap(
+      nonce,
+      block.timestamp,
+      signerWallet,
+      signerToken,
+      signerAmount,
+      protocolFee,
+      msg.sender,
+      senderToken,
+      senderAmount
+    );
+  }
+
+  /**
+   * @notice Atomic ERC20 Swap for Any Sender
+   * @param recipient address Wallet to receive sender proceeds
+   * @param nonce uint256 Unique and should be sequential
+   * @param expiry uint256 Expiry in seconds since 1 January 1970
+   * @param signerWallet address Wallet of the signer
+   * @param signerToken address ERC20 token transferred from the signer
+   * @param signerAmount uint256 Amount transferred from the signer
+   * @param senderToken address ERC20 token transferred from the sender
+   * @param senderAmount uint256 Amount transferred from the sender
+   * @param v uint8 "v" value of the ECDSA signature
+   * @param r bytes32 "r" value of the ECDSA signature
+   * @param s bytes32 "s" value of the ECDSA signature
+   */
+  function swapAnySender(
+    address recipient,
+    uint256 nonce,
+    uint256 expiry,
+    address signerWallet,
+    address signerToken,
+    uint256 signerAmount,
+    address senderToken,
+    uint256 senderAmount,
+    uint8 v,
+    bytes32 r,
+    bytes32 s
+  ) external override {
+    // Ensure the order is valid
+    _checkValidOrder(
+      nonce,
+      expiry,
+      signerWallet,
+      signerToken,
+      signerAmount,
+      address(0),
       senderToken,
       senderAmount,
       v,
@@ -185,7 +256,7 @@ contract Swap is ISwap, Ownable {
    * @param r bytes32 "r" value of the ECDSA signature
    * @param s bytes32 "s" value of the ECDSA signature
    */
-  function light(
+  function swapLight(
     uint256 nonce,
     uint256 expiry,
     address signerWallet,
@@ -272,191 +343,6 @@ contract Swap is ISwap, Ownable {
       msg.sender,
       senderToken,
       senderAmount
-    );
-  }
-
-  /**
-   * @notice Sender Buys an NFT (ERC721)
-   * @param nonce uint256 Unique and should be sequential
-   * @param expiry uint256 Expiry in seconds since 1 January 1970
-   * @param signerWallet address Wallet of the signer
-   * @param signerToken address ERC721 token transferred from the signer
-   * @param signerID uint256 Token ID transferred from the signer
-   * @param senderToken address ERC20 token transferred from the sender
-   * @param senderAmount uint256 Amount transferred from the sender
-   * @param v uint8 "v" value of the ECDSA signature
-   * @param r bytes32 "r" value of the ECDSA signature
-   * @param s bytes32 "s" value of the ECDSA signature
-   */
-  function buyNFT(
-    uint256 nonce,
-    uint256 expiry,
-    address signerWallet,
-    address signerToken,
-    uint256 signerID,
-    address senderToken,
-    uint256 senderAmount,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
-  ) public override {
-    _checkValidOrder(
-      nonce,
-      expiry,
-      signerWallet,
-      signerToken,
-      signerID,
-      senderToken,
-      senderAmount,
-      v,
-      r,
-      s
-    );
-
-    // Transfer token from sender to signer
-    IERC20(senderToken).safeTransferFrom(
-      msg.sender,
-      signerWallet,
-      senderAmount
-    );
-
-    // Transfer token from signer to recipient
-    IERC721(signerToken).transferFrom(signerWallet, msg.sender, signerID);
-
-    // Calculate and transfer protocol fee and rebate
-    _transferProtocolFee(senderToken, msg.sender, senderAmount);
-
-    emit Swap(
-      nonce,
-      block.timestamp,
-      signerWallet,
-      signerToken,
-      signerID,
-      protocolFee,
-      msg.sender,
-      senderToken,
-      senderAmount
-    );
-  }
-
-  /**
-   * @notice Sender Sells an NFT (ERC721)
-   * @param nonce uint256 Unique and should be sequential
-   * @param expiry uint256 Expiry in seconds since 1 January 1970
-   * @param signerWallet address Wallet of the signer
-   * @param signerToken address ERC20 token transferred from the signer
-   * @param signerAmount uint256 Amount transferred from the signer
-   * @param senderToken address ERC721 token transferred from the sender
-   * @param senderID uint256 Token ID transferred from the sender
-   * @param v uint8 "v" value of the ECDSA signature
-   * @param r bytes32 "r" value of the ECDSA signature
-   * @param s bytes32 "s" value of the ECDSA signature
-   */
-  function sellNFT(
-    uint256 nonce,
-    uint256 expiry,
-    address signerWallet,
-    address signerToken,
-    uint256 signerAmount,
-    address senderToken,
-    uint256 senderID,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
-  ) public override {
-    _checkValidOrder(
-      nonce,
-      expiry,
-      signerWallet,
-      signerToken,
-      signerAmount,
-      senderToken,
-      senderID,
-      v,
-      r,
-      s
-    );
-
-    // Transfer token from sender to signer
-    IERC721(senderToken).transferFrom(msg.sender, signerWallet, senderID);
-
-    // Transfer token from signer to recipient
-    IERC20(signerToken).safeTransferFrom(
-      signerWallet,
-      msg.sender,
-      signerAmount
-    );
-
-    // Calculate and transfer protocol fee and rebate
-    _transferProtocolFee(signerToken, signerWallet, signerAmount);
-
-    emit Swap(
-      nonce,
-      block.timestamp,
-      signerWallet,
-      signerToken,
-      signerAmount,
-      protocolFee,
-      msg.sender,
-      senderToken,
-      senderID
-    );
-  }
-
-  /**
-   * @notice Signer and sender swap NFTs (ERC721)
-   * @param nonce uint256 Unique and should be sequential
-   * @param expiry uint256 Expiry in seconds since 1 January 1970
-   * @param signerWallet address Wallet of the signer
-   * @param signerToken address ERC721 token transferred from the signer
-   * @param signerID uint256 Token ID transferred from the signer
-   * @param senderToken address ERC721 token transferred from the sender
-   * @param senderID uint256 Token ID transferred from the sender
-   * @param v uint8 "v" value of the ECDSA signature
-   * @param r bytes32 "r" value of the ECDSA signature
-   * @param s bytes32 "s" value of the ECDSA signature
-   */
-  function swapNFTs(
-    uint256 nonce,
-    uint256 expiry,
-    address signerWallet,
-    address signerToken,
-    uint256 signerID,
-    address senderToken,
-    uint256 senderID,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
-  ) public override {
-    _checkValidOrder(
-      nonce,
-      expiry,
-      signerWallet,
-      signerToken,
-      signerID,
-      senderToken,
-      senderID,
-      v,
-      r,
-      s
-    );
-
-    // Transfer token from sender to signer
-    IERC721(senderToken).transferFrom(msg.sender, signerWallet, senderID);
-
-    // Transfer token from signer to sender
-    IERC721(signerToken).transferFrom(signerWallet, msg.sender, signerID);
-
-    emit Swap(
-      nonce,
-      block.timestamp,
-      signerWallet,
-      signerToken,
-      signerID,
-      0,
-      msg.sender,
-      senderToken,
-      senderID
     );
   }
 
@@ -649,15 +535,34 @@ contract Swap is ISwap, Ownable {
       address(this)
     );
 
-    uint256 feeAmount = (order.signerAmount * protocolFee) / FEE_DIVISOR;
+    uint256 senderBalance = IERC20(order.senderToken).balanceOf(
+      order.senderWallet
+    );
 
-    if (signerAllowance < order.signerAmount + feeAmount) {
+    uint256 senderAllowance = IERC20(order.senderToken).allowance(
+      order.senderWallet,
+      address(this)
+    );
+
+    uint256 signerFeeAmount = (order.signerAmount * protocolFee) / FEE_DIVISOR;
+
+    if (signerAllowance < order.signerAmount + signerFeeAmount) {
       errors[errCount] = "SIGNER_ALLOWANCE_LOW";
       errCount++;
     }
 
-    if (signerBalance < order.signerAmount + feeAmount) {
+    if (signerBalance < order.signerAmount + signerFeeAmount) {
       errors[errCount] = "SIGNER_BALANCE_LOW";
+      errCount++;
+    }
+
+    if (senderAllowance < order.senderAmount) {
+      errors[errCount] = "SENDER_ALLOWANCE_LOW";
+      errCount++;
+    }
+
+    if (senderBalance < order.senderAmount) {
+      errors[errCount] = "SENDER_BALANCE_LOW";
       errCount++;
     }
     return (errCount, errors);
@@ -770,6 +675,7 @@ contract Swap is ISwap, Ownable {
     address signerWallet,
     address signerToken,
     uint256 signerAmount,
+    address senderWallet,
     address senderToken,
     uint256 senderAmount,
     uint8 v,
@@ -787,7 +693,7 @@ contract Swap is ISwap, Ownable {
       signerWallet,
       signerToken,
       signerAmount,
-      msg.sender,
+      senderWallet,
       senderToken,
       senderAmount
     );
