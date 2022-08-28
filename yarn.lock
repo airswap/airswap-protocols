@@ -9,6 +9,14 @@
   dependencies:
     get-parameter-names "^0.3.0"
 
+"@airswap/typescript@3.0.1":
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/@airswap/typescript/-/typescript-3.0.1.tgz#2b936fe95196de42c2c1f8d2ddd6a9357540112c"
+  integrity sha512-kN6ScCiMMFNGegVSs+n+6X3UDis2YqX1lXriIQyDE8DVqI3l7oJU6/RIPOLdg8iRFU6Z0IUgSInyoiVxhvY5ig==
+  dependencies:
+    "@airswap/constants" "3.0.1"
+    "@uniswap/token-lists" "^1.0.0-beta.26"
+
 "@babel/code-frame@^7.0.0":
   version "7.14.5"
   resolved "https://registry.yarnpkg.com/@babel/code-frame/-/code-frame-7.14.5.tgz#23b08d740e83f49c5e59945fbf1b43e80bbf4edb"
