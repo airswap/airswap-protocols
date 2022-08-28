@@ -4,6 +4,7 @@ import { ADDRESS_ZERO, SECONDS_IN_DAY } from '@airswap/constants'
 import { Levels } from '@airswap/typescript'
 
 import {
+  isValidFullOrder,
   isValidOrder,
   isValidClaim,
   calculateCostFromLevels,
@@ -53,6 +54,58 @@ describe('Utils', async () => {
     )
     expect(isValidOrder({ ...unsignedOrder, v, r, s })).to.equal(true)
     expect(signerWallet.toLowerCase()).to.equal(wallet.address.toLowerCase())
+  })
+
+  it('isValidFullOrder : returns true only if fields are present', async () => {
+    const unsignedOrder = {
+      nonce: Date.now().toString(),
+      expiry: Math.round(Date.now() / 1000 + SECONDS_IN_DAY).toString(),
+      signerWallet: ADDRESS_ZERO,
+      signerToken: ADDRESS_ZERO,
+      signerAmount: '0',
+      protocolFee: '300',
+      senderWallet: ADDRESS_ZERO,
+      senderToken: ADDRESS_ZERO,
+      senderAmount: '0',
+    }
+    const signature = await createSwapSignature(
+      unsignedOrder,
+      wallet.privateKey,
+      ADDRESS_ZERO,
+      1
+    )
+    const signerWallet = getSignerFromSwapSignature(
+      unsignedOrder,
+      ADDRESS_ZERO,
+      1,
+      signature.v,
+      signature.r,
+      signature.s
+    )
+    const settlement = {
+      chainId: '4',
+      swapContract: '0x3700A8C0447aEE3160F6aF3A34a0C062629335d9',
+    }
+
+    expect(isValidFullOrder(undefined)).to.equal(false)
+    expect(isValidFullOrder(null)).to.equal(false)
+    expect(isValidFullOrder({})).to.equal(false)
+    expect(isValidFullOrder(unsignedOrder)).to.equal(false)
+    expect(isValidFullOrder({ ...unsignedOrder, ...signature })).to.equal(false)
+    console.log({
+      ...unsignedOrder,
+      ...signature,
+      signerWallet,
+      ...settlement,
+    })
+    expect(
+      isValidFullOrder({
+        ...unsignedOrder,
+        ...signature,
+        signerWallet,
+        ...settlement,
+      })
+    ).to.equal(true)
   })
 
   it('Signs and validates a claim', async () => {
