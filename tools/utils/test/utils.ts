@@ -1,7 +1,7 @@
 import { assert, expect } from 'chai'
 import { ethers } from 'ethers'
 import { ADDRESS_ZERO, SECONDS_IN_DAY } from '@airswap/constants'
-import { Levels } from '@airswap/typescript'
+import { Levels, FullOrder } from '@airswap/typescript'
 
 import {
   isValidFullOrder,
@@ -81,17 +81,18 @@ describe('Utils', async () => {
       swapContract: '0x3700A8C0447aEE3160F6aF3A34a0C062629335d9',
     }
 
-    expect(isValidFullOrder(undefined)).to.equal(false)
-    expect(isValidFullOrder(null)).to.equal(false)
-    expect(isValidFullOrder({})).to.equal(false)
-    expect(isValidFullOrder(unsignedOrder)).to.equal(false)
-    expect(isValidFullOrder({ ...unsignedOrder, ...signature })).to.equal(false)
-    console.log({
-      ...unsignedOrder,
-      ...signature,
-      signerWallet,
-      ...settlement,
-    })
+    expect(isValidFullOrder(undefined as unknown as FullOrder)).to.equal(false)
+    expect(isValidFullOrder(null as unknown as FullOrder)).to.equal(false)
+    expect(isValidFullOrder({} as unknown as FullOrder)).to.equal(false)
+    expect(isValidFullOrder(unsignedOrder as unknown as FullOrder)).to.equal(
+      false
+    )
+    expect(
+      isValidFullOrder({
+        ...unsignedOrder,
+        ...signature,
+      } as unknown as FullOrder)
+    ).to.equal(false)
     expect(
       isValidFullOrder({
         ...unsignedOrder,
