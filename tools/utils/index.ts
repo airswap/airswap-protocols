@@ -207,6 +207,27 @@ export function isValidOrder(order: Order): boolean {
   )
 }
 
+export function isValidFullOrder(fullOrder: FullOrder): boolean {
+  return (
+    fullOrder !== null &&
+    fullOrder !== undefined &&
+    'nonce' in fullOrder &&
+    'expiry' in fullOrder &&
+    'signerWallet' in fullOrder &&
+    'signerToken' in fullOrder &&
+    'signerAmount' in fullOrder &&
+    'protocolFee' in fullOrder &&
+    'senderWallet' in fullOrder &&
+    'senderToken' in fullOrder &&
+    'senderAmount' in fullOrder &&
+    'v' in fullOrder &&
+    'r' in fullOrder &&
+    's' in fullOrder &&
+    'chainId' in fullOrder &&
+    'swapContract' in fullOrder
+  )
+}
+
 export function orderToParams(
   order: Order
 ): [
