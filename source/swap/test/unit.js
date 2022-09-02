@@ -8,7 +8,6 @@ const {
 const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
 const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
-const IERC721 = require('@openzeppelin/contracts/build/contracts/IERC721.json')
 const STAKING = require('@airswap/staking/build/contracts/Staking.sol/Staking.json')
 
 describe('Swap Unit Tests', () => {
