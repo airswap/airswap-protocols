@@ -193,21 +193,54 @@ export function getOrderHash(
 
 export function isValidOrder(order: Order): boolean {
   return (
-    order &&
-    'nonce' in order &&
-    'expiry' in order &&
-    'signerWallet' in order &&
-    'signerToken' in order &&
-    'signerAmount' in order &&
-    'senderToken' in order &&
-    'senderAmount' in order &&
-    'r' in order &&
-    's' in order &&
-    'v' in order
+    !!order &&
+    typeof order['nonce'] == 'string' &&
+    typeof order['expiry'] == 'string' &&
+    ethers.utils.isAddress(order['signerWallet']) &&
+    ethers.utils.isAddress(order['signerToken']) &&
+    typeof order['signerAmount'] == 'string' &&
+    ethers.utils.isAddress(order['senderToken']) &&
+    typeof order['senderAmount'] == 'string' &&
+    typeof order['v'] == 'string' &&
+    ethers.utils.isBytesLike(order['r']) &&
+    ethers.utils.isBytesLike(order['s'])
   )
 }
 
-export function orderToParams(order: Order): Array<string> {
+export function isValidFullOrder(fullOrder: FullOrder): boolean {
+  return (
+    !!fullOrder &&
+    ethers.utils.isAddress(fullOrder['swapContract']) &&
+    typeof fullOrder['chainId'] == 'string' &&
+    typeof fullOrder['nonce'] == 'string' &&
+    typeof fullOrder['expiry'] == 'string' &&
+    ethers.utils.isAddress(fullOrder['signerWallet']) &&
+    ethers.utils.isAddress(fullOrder['signerToken']) &&
+    typeof fullOrder['signerAmount'] == 'string' &&
+    typeof fullOrder['protocolFee'] == 'string' &&
+    ethers.utils.isAddress(fullOrder['senderWallet']) &&
+    ethers.utils.isAddress(fullOrder['senderToken']) &&
+    typeof fullOrder['senderAmount'] == 'string' &&
+    typeof fullOrder['v'] == 'string' &&
+    ethers.utils.isBytesLike(fullOrder['r']) &&
+    ethers.utils.isBytesLike(fullOrder['s'])
+  )
+}
+
+export function orderToParams(
+  order: Order
+): [
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string
+] {
   return [
     order.nonce,
     order.expiry,
@@ -238,7 +271,24 @@ export function paramsToOrder(str: string): Order {
   }
 }
 
-export function fullOrderToParams(order: FullOrder): Array<string> {
+export function fullOrderToParams(
+  order: FullOrder
+): [
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string
+] {
   return [
     order.chainId,
     order.swapContract,
