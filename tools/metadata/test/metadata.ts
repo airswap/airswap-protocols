@@ -24,7 +24,7 @@ describe('Metadata: Mainnet', async () => {
   })
 })
 
-describe('Metadata: Rinkeby', async () => {
+describe('Metadata: Goerli', async () => {
   let result
 
   it('fetches all known tokens', async () => {

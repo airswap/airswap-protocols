@@ -11,7 +11,7 @@ export class Indexers {
   public contract: IndexerRegistryContract
 
   public constructor(
-    chainId = chainIds.RINKEBY,
+    chainId = chainIds.GOERLI,
     signerOrProvider?: providers.JsonRpcSigner | providers.Provider
   ) {
     this.chainId = chainId
@@ -20,7 +20,7 @@ export class Indexers {
       signerOrProvider || getDefaultProvider(chainId)
     )
   }
-  public static getAddress(chainId = chainIds.RINKEBY) {
+  public static getAddress(chainId = chainIds.GOERLI) {
     if (chainId in indexersDeploys) {
       return indexersDeploys[chainId]
     }
