@@ -576,7 +576,7 @@ describe('Swap Unit Tests', () => {
     it('test only deployer can change fee wallet', async () => {
       await expect(
         swap.connect(anyone).setProtocolFeeWallet(anyone.address)
-      ).to.be.revertedWith('Ownable: caller is not the owner')
+      ).to.be.revertedWith('OnlyCallableByOwner()')
     })
 
     it('test invalid fee wallet', async () => {
@@ -594,7 +594,7 @@ describe('Swap Unit Tests', () => {
 
     it('test only deployer can change fee', async () => {
       await expect(swap.connect(anyone).setProtocolFee('0')).to.be.revertedWith(
-        'Ownable: caller is not the owner'
+        'OnlyCallableByOwner()'
       )
     })
 
@@ -635,7 +635,7 @@ describe('Swap Unit Tests', () => {
     it('test set staking by non-owner', async () => {
       await expect(
         swap.connect(anyone).setStaking(staking.address)
-      ).to.be.revertedWith('Ownable: caller is not the owner')
+      ).to.be.revertedWith('OnlyCallableByOwner()')
     })
 
     it('test set staking', async () => {
