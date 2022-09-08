@@ -3,7 +3,7 @@
 /* solhint-disable var-name-mixedcase */
 pragma solidity 0.8.17;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "./utils/TSOwnable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "./interfaces/ISwap.sol";
@@ -12,7 +12,7 @@ import "./interfaces/ISwap.sol";
  * @title AirSwap: Atomic Token Swap
  * @notice https://www.airswap.io/
  */
-contract Swap is ISwap, Ownable {
+contract Swap is ISwap, TSOwnable {
   using SafeERC20 for IERC20;
 
   bytes32 public constant DOMAIN_TYPEHASH =
