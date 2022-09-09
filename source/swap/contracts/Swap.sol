@@ -17,31 +17,12 @@ contract Swap is ISwap, Ownable {
 
   bytes32 public constant DOMAIN_TYPEHASH =
     keccak256(
-      abi.encodePacked(
-        "EIP712Domain(",
-        "string name,",
-        "string version,",
-        "uint256 chainId,",
-        "address verifyingContract",
-        ")"
-      )
+      "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
     );
 
   bytes32 public constant ORDER_TYPEHASH =
     keccak256(
-      abi.encodePacked(
-        "Order(",
-        "uint256 nonce,",
-        "uint256 expiry,",
-        "address signerWallet,",
-        "address signerToken,",
-        "uint256 signerAmount,",
-        "uint256 protocolFee,",
-        "address senderWallet,",
-        "address senderToken,",
-        "uint256 senderAmount",
-        ")"
-      )
+      "Order(uint256 nonce,uint256 expiry,address signerWallet,address signerToken,uint256 signerAmount,uint256 protocolFee,address senderWallet,address senderToken,uint256 senderAmount)"
     );
 
   bytes32 public constant DOMAIN_NAME = keccak256("SWAP");
