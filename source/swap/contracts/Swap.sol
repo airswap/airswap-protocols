@@ -690,7 +690,11 @@ contract Swap is ISwap, Ownable {
 
     // Ensure the signatory is authorized by the signer wallet
     if (signerWallet != signatory) {
-      require(authorized[signerWallet] == signatory, "UNAUTHORIZED");
+      require(
+        authorized[signerWallet] != address(0) &&
+          authorized[signerWallet] == signatory,
+        "UNAUTHORIZED"
+      );
     }
   }
 

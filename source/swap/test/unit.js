@@ -398,6 +398,19 @@ describe('Swap Unit Tests', () => {
         swap.connect(sender).swap(sender.address, ...order)
       ).to.be.revertedWith('SIGNATURE_INVALID')
     })
+
+    it('test when signer is zero address', async () => {
+      const order = await createSignedOrder(
+        {
+          signerWallet: anyone.ADDRESS_ZERO,
+        },
+        signer
+      )
+
+      await expect(
+        swap.connect(sender).swap(sender.address, ...order)
+      ).to.be.revertedWith('UNAUTHORIZED')
+    })
   })
 
   describe('Test public swap', async () => {
