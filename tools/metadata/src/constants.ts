@@ -132,6 +132,13 @@ export const defaults = [
     symbol: 'DAI',
     chainId: 4,
   },
+  {
+    name: 'Tether USD',
+    address: '0x79c950c7446b234a6ad53b908fbf342b01c4d446',
+    decimals: 6,
+    symbol: 'USDT',
+    chainId: 5,
+  },
 ]
 
 export const ERC20_BYTES32_ABI = [
