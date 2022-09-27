@@ -1,6 +1,6 @@
 {
   "name": "@airswap/swap",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "description": "AirSwap: Atomic Token Swap",
   "contributors": [
     "Vicente Dragicevic",
@@ -29,7 +29,7 @@
   "devDependencies": {
     "@airswap/constants": "3.0.1",
     "@airswap/utils": "3.0.1",
-    "hardhat": "^2.10.1"
+    "hardhat": "^2.11.2"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.3.1"
