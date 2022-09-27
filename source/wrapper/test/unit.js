@@ -9,7 +9,6 @@ const { deployMockContract } = waffle
 const { ADDRESS_ZERO } = require('@airswap/constants')
 
 const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
-const IERC721 = require('@openzeppelin/contracts/build/contracts/IERC721.json')
 const IWETH = require('../build/contracts/interfaces/IWETH.sol/IWETH.json')
 const LIGHT = require('@airswap/swap/build/contracts/Swap.sol/Swap.json')
 

@@ -8,7 +8,6 @@ const {
 const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
 const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
-const IERC721 = require('@openzeppelin/contracts/build/contracts/IERC721.json')
 const STAKING = require('@airswap/staking/build/contracts/Staking.sol/Staking.json')
 
 describe('Swap Unit Tests', () => {
@@ -398,6 +397,19 @@ describe('Swap Unit Tests', () => {
       await expect(
         swap.connect(sender).swap(sender.address, ...order)
       ).to.be.revertedWith('SIGNATURE_INVALID')
+    })
+
+    it('test when signer is zero address', async () => {
+      const order = await createSignedOrder(
+        {
+          signerWallet: anyone.ADDRESS_ZERO,
+        },
+        signer
+      )
+
+      await expect(
+        swap.connect(sender).swap(sender.address, ...order)
+      ).to.be.revertedWith('UNAUTHORIZED')
     })
   })
 

@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 const fs = require('fs')
 const { ethers, run } = require('hardhat')
-const converterDeploys = require('@airswap/converter/deploys.js')
+const poolDeploys = require('@airswap/pool/deploys.js')
 const stakingDeploys = require('@airswap/staking/deploys.js')
 const { chainNames } = require('@airswap/constants')
 const swapDeploys = require('../deploys.js')
@@ -12,7 +12,7 @@ async function main() {
   console.log(`Deployer: ${deployer.address}`)
 
   const chainId = await deployer.getChainId()
-  const protocolFeeWallet = converterDeploys[chainId]
+  const protocolFeeWallet = poolDeploys[chainId]
   const stakingContract = stakingDeploys[chainId]
   const protocolFee = 7
   const protocolFeeLight = 7
@@ -20,7 +20,7 @@ async function main() {
   const rebateMax = 100
 
   console.log(`Deploying on ${chainNames[chainId].toUpperCase()}`)
-  console.log(`Fee wallet (Converter): ${protocolFeeWallet}`)
+  console.log(`Fee wallet (Pool): ${protocolFeeWallet}`)
   console.log(`Staking: ${stakingContract}`)
 
   const swapFactory = await ethers.getContractFactory('Swap')

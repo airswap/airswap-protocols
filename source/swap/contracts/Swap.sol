@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 /* solhint-disable var-name-mixedcase */
-pragma solidity ^0.8.0;
+pragma solidity 0.8.17;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -17,31 +17,12 @@ contract Swap is ISwap, Ownable {
 
   bytes32 public constant DOMAIN_TYPEHASH =
     keccak256(
-      abi.encodePacked(
-        "EIP712Domain(",
-        "string name,",
-        "string version,",
-        "uint256 chainId,",
-        "address verifyingContract",
-        ")"
-      )
+      "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
     );
 
   bytes32 public constant ORDER_TYPEHASH =
     keccak256(
-      abi.encodePacked(
-        "Order(",
-        "uint256 nonce,",
-        "uint256 expiry,",
-        "address signerWallet,",
-        "address signerToken,",
-        "uint256 signerAmount,",
-        "uint256 protocolFee,",
-        "address senderWallet,",
-        "address senderToken,",
-        "uint256 senderAmount",
-        ")"
-      )
+      "Order(uint256 nonce,uint256 expiry,address signerWallet,address signerToken,uint256 signerAmount,uint256 protocolFee,address senderWallet,address senderToken,uint256 senderAmount)"
     );
 
   bytes32 public constant DOMAIN_NAME = keccak256("SWAP");
@@ -709,7 +690,11 @@ contract Swap is ISwap, Ownable {
 
     // Ensure the signatory is authorized by the signer wallet
     if (signerWallet != signatory) {
-      require(authorized[signerWallet] == signatory, "UNAUTHORIZED");
+      require(
+        authorized[signerWallet] != address(0) &&
+          authorized[signerWallet] == signatory,
+        "UNAUTHORIZED"
+      );
     }
   }
 
