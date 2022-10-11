@@ -13,13 +13,13 @@
     "url": "https://github.com/airswap/airswap-protocols"
   },
   "files": [
-    "/build",
-    "typechain-types",
-    "deploys.js"
+    "./build/contracts",
+    "./build/factories",
+    "./deploys.js"
   ],
   "scripts": {
-    "clean": "hardhat clean; rm -rf ./build ./typechain-types",
-    "compile": "hardhat compile",
+    "clean": "hardhat clean; rm -rf ./build",
+    "compile": "hardhat compile; tsc -b; rm -rf ./typechain-types",
     "coverage": "hardhat coverage",
     "test": "hardhat test",
     "test:unit": "hardhat test ./test/unit.js",
@@ -27,11 +27,9 @@
     "verify": "hardhat run ./scripts/verify.js"
   },
   "devDependencies": {
-    "@airswap/constants": "3.0.1",
     "@uniswap/lib": "1.1.1",
     "@uniswap/v2-core": "1.0.1",
-    "@uniswap/v2-periphery": "^1.1.0-beta.0",
-    "hardhat": "^2.11.2"
+    "@uniswap/v2-periphery": "^1.1.0-beta.0"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.3.1"

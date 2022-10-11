@@ -1,8 +1,6 @@
 import { ethers } from 'ethers'
-import {
-  Registry__factory,
-  Registry as RegistryContract,
-} from '@airswap/registry/typechain-types'
+import { Registry as RegistryContract } from '@airswap/registry/build/contracts'
+import { Registry__factory } from '@airswap/registry/build/factories/contracts'
 import { chainIds } from '@airswap/constants'
 import { Server, ServerOptions } from './Server'
 import { Swap } from './Swap'

@@ -1,9 +1,7 @@
 import { ContractTransaction, ethers } from 'ethers'
 import { chainIds, wrappedTokenAddresses } from '@airswap/constants'
-import {
-  Wrapper as WrapperContract,
-  Wrapper__factory,
-} from '@airswap/wrapper/typechain-types'
+import { Wrapper as WrapperContract } from '@airswap/wrapper/build/contracts'
+import { Wrapper__factory } from '@airswap/wrapper/build/factories/contracts'
 import { Order } from '@airswap/typescript'
 
 import * as wrapperDeploys from '@airswap/wrapper/deploys.js'

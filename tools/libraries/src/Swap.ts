@@ -1,10 +1,8 @@
 import { ethers, BigNumber, ContractTransaction } from 'ethers'
 import { chainIds, chainNames } from '@airswap/constants'
 import { Order } from '@airswap/typescript'
-import {
-  Swap as SwapContract,
-  Swap__factory,
-} from '@airswap/swap/typechain-types'
+import { Swap as SwapContract } from '@airswap/swap/build/contracts'
+import { Swap__factory } from '@airswap/swap/build/factories/contracts'
 import { orderToParams } from '@airswap/utils'
 
 import * as swapDeploys from '@airswap/swap/deploys.js'
@@ -15,9 +13,7 @@ export class Swap {
 
   public constructor(
     chainId = chainIds.GOERLI,
-    signerOrProvider?:
-      | ethers.providers.JsonRpcSigner
-      | ethers.providers.Provider
+    signerOrProvider?: ethers.Signer | ethers.providers.Provider
   ) {
     this.chainId = chainId
     this.contract = Swap__factory.connect(
@@ -37,7 +33,7 @@ export class Swap {
   public async check(
     order: Order,
     senderWallet: string,
-    signer?: ethers.providers.JsonRpcSigner
+    signer?: ethers.Signer
   ): Promise<Array<string>> {
     let contract = this.contract
     if (!this.contract.signer) {
