@@ -1,6 +1,6 @@
 {
   "name": "@airswap/wrapper",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "description": "AirSwap: Automatic Wrap and Unwrap",
   "contributors": [
     "Don Mosites",
@@ -12,27 +12,22 @@
     "url": "https://github.com/airswap/airswap-protocols"
   },
   "files": [
-    "/build",
-    "typechain-types",
-    "deploys.js"
+    "./build/contracts",
+    "./build/factories",
+    "./deploys.js"
   ],
   "scripts": {
-    "clean": "hardhat clean; rm -rf ./build ./typechain-types",
-    "compile": "hardhat compile",
+    "clean": "hardhat clean; rm -rf ./build",
+    "compile": "hardhat compile; tsc -b; rm -rf ./typechain-types",
     "coverage": "hardhat coverage",
     "test": "hardhat test",
     "test:unit": "hardhat test ./test/unit.js",
     "deploy": "hardhat run ./scripts/deploy.js",
     "verify": "hardhat run ./scripts/verify.js"
   },
-  "devDependencies": {
-    "@airswap/constants": "3.0.1",
-    "@airswap/utils": "3.0.1",
-    "hardhat": "^2.11.2"
-  },
   "dependencies": {
     "@openzeppelin/contracts": "^4.3.1",
-    "@airswap/swap": "3.2.0"
+    "@airswap/swap": "3.2.1"
   },
   "publishConfig": {
     "access": "public"

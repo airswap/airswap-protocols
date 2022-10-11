@@ -22,10 +22,6 @@
     "clean": "rm -rf ./build",
     "compile": "yarn clean && tsc -b"
   },
-  "dependencies": {},
-  "devDependencies": {
-    "typescript": "^4.6.2"
-  },
   "publishConfig": {
     "access": "public"
   }
