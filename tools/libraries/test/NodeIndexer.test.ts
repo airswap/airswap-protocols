@@ -1,4 +1,4 @@
-import{ expect } from 'chai'
+import { expect } from 'chai'
 import {
   SortField,
   SortOrder,
@@ -7,14 +7,14 @@ import {
 } from '../src/NodeIndexer'
 
 describe('toSortField', () => {
-  test('should match value', () => {
+  it('should match value', () => {
     expect(toSortField('SENDER_AMOUNT')).to.equal(SortField.SENDER_AMOUNT)
     expect(toSortField('sender_amount')).to.equal(SortField.SENDER_AMOUNT)
     expect(toSortField('SIGNER_AMOUNT')).to.equal(SortField.SIGNER_AMOUNT)
     expect(toSortField('signer_amount')).to.equal(SortField.SIGNER_AMOUNT)
   })
 
-  test('should return undefined', () => {
+  it('should return undefined', () => {
     //@ts-ignore
     expect(toSortField(null)).to.equal(undefined)
     //@ts-ignore
@@ -27,14 +27,14 @@ describe('toSortField', () => {
 })
 
 describe('toSortOrder', () => {
-  test('should match value', () => {
+  it('should match value', () => {
     expect(toSortOrder('ASC')).to.equal(SortOrder.ASC)
     expect(toSortOrder('asc')).to.equal(SortOrder.ASC)
     expect(toSortOrder('DESC')).to.equal(SortOrder.DESC)
     expect(toSortOrder('desc')).to.equal(SortOrder.DESC)
   })
 
-  test('should return undefined', () => {
+  it('should return undefined', () => {
     // @ts-ignore
     expect(toSortOrder(null)).to.equal(undefined)
     // @ts-ignore
