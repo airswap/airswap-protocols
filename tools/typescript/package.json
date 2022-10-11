@@ -27,10 +27,6 @@
     "@airswap/constants": "3.0.1",
     "@uniswap/token-lists": "^1.0.0-beta.26"
   },
-  "devDependencies": {
-    "ts-node": "^10.4.0",
-    "typescript": "^4.6.2"
-  },
   "publishConfig": {
     "access": "public"
   }

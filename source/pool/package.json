@@ -1,6 +1,6 @@
 {
   "name": "@airswap/pool",
-  "version": "3.2.1",
+  "version": "3.2.2",
   "description": "AirSwap: Rewards Pool",
   "contributors": [
     "Don Mosites",
@@ -12,27 +12,22 @@
     "url": "https://github.com/airswap/airswap-protocols"
   },
   "files": [
-    "/build",
-    "typechain-types",
-    "deploys.js"
+    "./build/contracts",
+    "./build/factories",
+    "./deploys.js"
   ],
   "scripts": {
-    "clean": "hardhat clean; rm -rf ./build ./typechain-types",
-    "compile": "hardhat compile",
+    "clean": "hardhat clean; rm -rf ./build",
+    "compile": "hardhat compile; tsc -b; rm -rf ./typechain-types",
     "coverage": "hardhat coverage",
     "test": "hardhat test",
     "test:unit": "hardhat test ./test/unit.js",
     "deploy": "hardhat run ./scripts/deploy.js",
     "verify": "hardhat run ./scripts/verify.js"
   },
-  "devDependencies": {
-    "@airswap/constants": "3.0.1",
-    "@airswap/utils": "3.0.1",
-    "hardhat": "^2.11.2"
-  },
   "dependencies": {
     "@openzeppelin/contracts": "^4.3.1",
-    "@airswap/staking": "3.1.0"
+    "@airswap/staking": "3.1.1"
   },
   "publishConfig": {
     "access": "public"
