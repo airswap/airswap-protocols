@@ -13,7 +13,9 @@ export class Swap {
 
   public constructor(
     chainId = chainIds.GOERLI,
-    signerOrProvider?: ethers.Signer | ethers.providers.Provider
+    signerOrProvider?:
+      | ethers.providers.JsonRpcSigner
+      | ethers.providers.Provider
   ) {
     this.chainId = chainId
     this.contract = Swap__factory.connect(
@@ -33,7 +35,7 @@ export class Swap {
   public async check(
     order: Order,
     senderWallet: string,
-    signer?: ethers.Signer
+    signer?: ethers.providers.JsonRpcSigner
   ): Promise<Array<string>> {
     let contract = this.contract
     if (!this.contract.signer) {
