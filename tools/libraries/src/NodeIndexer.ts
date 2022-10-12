@@ -1,5 +1,5 @@
 import { FullOrder } from '@airswap/typescript'
-import axios from 'axios'
+import axios, { AxiosError, AxiosResponse } from 'axios'
 
 export type IndexedOrderResponse = {
   hash?: string | undefined
@@ -87,6 +87,54 @@ export enum SortOrder {
   DESC = 'DESC',
 }
 
+export abstract class IndexedOrderError extends Error {
+  public code!: number
+  public constructor(message: string) {
+    super(message)
+  }
+}
+export class ErrorResponse {
+  private code: number
+  private message: string
+  public constructor(code: number, message: string) {
+    this.code = code
+    this.message = message
+  }
+}
+export class SuccessResponse {
+  public message: string
+  public constructor(message: string) {
+    this.message = message
+  }
+}
+export class JsonRpcResponse {
+  public id: string
+  public result:
+    | OrderResponse
+    | ErrorResponse
+    | SuccessResponse
+    | HealthCheckResponse
+    | undefined
+  private jsonrpc = '2.0'
+
+  public constructor(
+    id: string,
+    result:
+      | OrderResponse
+      | IndexedOrderError
+      | SuccessResponse
+      | HealthCheckResponse
+      | undefined
+  ) {
+    this.id = id
+    if (result instanceof IndexedOrderError) {
+      this.result = new ErrorResponse(result.code, result.message)
+    } else {
+      this.result = result
+    }
+  }
+}
+
 export class NodeIndexer {
   private host: string
 
@@ -94,34 +142,76 @@ export class NodeIndexer {
     this.host = hostname
   }
 
-  public async getOrdersBy(requestFilter: RequestFilter, filters = false) {
-    return await axios.post(this.host, {
-      jsonrpc: '2.0',
-      id: '1',
-      method: 'getOrders',
-      params: [{ ...requestFilter, filters }],
-    })
+  public async getOrdersBy(
+    requestFilter: RequestFilter,
+    filters = false
+  ): Promise<OrderResponse | IndexedOrderError> {
+    try {
+      const axiosResponse = (await axios.post(this.host, {
+        jsonrpc: '2.0',
+        id: '1',
+        method: 'getOrders',
+        params: [{ ...this.toBigIntJson(requestFilter), filters }],
+      })) as AxiosResponse<JsonRpcResponse>
+      const response = axiosResponse.data.result as OrderResponse
+      return Promise.resolve(response)
+    } catch (err) {
+      const error = err as AxiosError<JsonRpcResponse>
+      const response = error.response?.data?.result as IndexedOrderError
+      return Promise.reject(response)
+    }
   }
 
-  public async getOrders() {
-    return await axios.post(this.host, {
-      jsonrpc: '2.0',
-      id: '1',
-      method: 'getOrders',
-      params: [{}],
-    })
+  public async getOrders(): Promise<OrderResponse | Error> {
+    try {
+      const axiosResponse = (await axios.post(this.host, {
+        jsonrpc: '2.0',
+        id: '1',
+        method: 'getOrders',
+        params: [{}],
+      })) as AxiosResponse<JsonRpcResponse>
+      const response = axiosResponse.data.result as OrderResponse
+      return Promise.resolve(response)
+    } catch (err) {
+      return Promise.reject(err)
+    }
   }
 
-  public async addOrder(fullOrder: FullOrder) {
-    return await axios.post(this.host, {
-      jsonrpc: '2.0',
-      id: '1',
-      method: 'addOrder',
-      params: [fullOrder],
-    })
+  public async addOrder(
+    fullOrder: FullOrder
+  ): Promise<SuccessResponse | IndexedOrderError> {
+    try {
+      const axiosResponse = await axios.post(this.host, {
+        jsonrpc: '2.0',
+        id: '1',
+        method: 'addOrder',
+        params: [fullOrder],
+      })
+      const response = axiosResponse.data.result as SuccessResponse
+      return Promise.resolve(response)
+    } catch (err) {
+      const error = err as AxiosError<JsonRpcResponse>
+      const response = error.response?.data?.result as IndexedOrderError
+      return Promise.reject(response)
+    }
   }
 
-  public async getHealthCheck() {
-    return await axios.get(this.host)
+  public async getHealthCheck(): Promise<HealthCheckResponse | Error> {
+    try {
+      const response = (await axios.get(
+        this.host
+      )) as AxiosResponse<JsonRpcResponse>
+      return Promise.resolve(response.data.result as HealthCheckResponse)
+    } catch (err) {
+      return Promise.reject(err)
+    }
+  }
+
+  private toBigIntJson(requestFilter: RequestFilter) {
+    return JSON.parse(
+      JSON.stringify(requestFilter, (key, value) =>
+        typeof value === 'bigint' ? value.toString() : value
+      )
+    )
   }
 }
