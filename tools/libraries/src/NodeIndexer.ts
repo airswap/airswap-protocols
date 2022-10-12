@@ -87,37 +87,41 @@ export enum SortOrder {
   DESC = 'DESC',
 }
 
-export async function getOrdersBy(
-  host: string,
-  requestFilter: RequestFilter,
-  filters = false
-) {
-  return await axios.post(host, {
-    jsonrpc: '2.0',
-    id: '1',
-    method: 'getOrders',
-    params: [{ ...requestFilter, filters }],
-  })
-}
+export class NodeIndexer {
+  private host: string
 
-export async function getOrders(host: string) {
-  return await axios.post(host, {
-    jsonrpc: '2.0',
-    id: '1',
-    method: 'getOrders',
-    params: [{}],
-  })
-}
+  public constructor(hostname: string) {
+    this.host = hostname
+  }
 
-export async function addOrder(host: string, fullOrder: FullOrder) {
-  return await axios.post(host, {
-    jsonrpc: '2.0',
-    id: '1',
-    method: 'addOrder',
-    params: [fullOrder],
-  })
-}
+  public async getOrdersBy(requestFilter: RequestFilter, filters = false) {
+    return await axios.post(this.host, {
+      jsonrpc: '2.0',
+      id: '1',
+      method: 'getOrders',
+      params: [{ ...requestFilter, filters }],
+    })
+  }
 
-export async function getHealthCheck(host: string) {
-  return await axios.get(host)
+  public async getOrders() {
+    return await axios.post(this.host, {
+      jsonrpc: '2.0',
+      id: '1',
+      method: 'getOrders',
+      params: [{}],
+    })
+  }
+
+  public async addOrder(fullOrder: FullOrder) {
+    return await axios.post(this.host, {
+      jsonrpc: '2.0',
+      id: '1',
+      method: 'addOrder',
+      params: [fullOrder],
+    })
+  }
+
+  public async getHealthCheck() {
+    return await axios.get(this.host)
+  }
 }
