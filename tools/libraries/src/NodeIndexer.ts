@@ -145,7 +145,7 @@ export class NodeIndexer {
   public async getOrdersBy(
     requestFilter: RequestFilter,
     filters = false
-  ): Promise<OrderResponse | IndexedOrderError> {
+  ): Promise<OrderResponse> {
     try {
       const axiosResponse = (await axios.post(this.host, {
         jsonrpc: '2.0',
@@ -162,7 +162,7 @@ export class NodeIndexer {
     }
   }
 
-  public async getOrders(): Promise<OrderResponse | Error> {
+  public async getOrders(): Promise<OrderResponse> {
     try {
       const axiosResponse = (await axios.post(this.host, {
         jsonrpc: '2.0',
@@ -177,9 +177,7 @@ export class NodeIndexer {
     }
   }
 
-  public async addOrder(
-    fullOrder: FullOrder
-  ): Promise<SuccessResponse | IndexedOrderError> {
+  public async addOrder(fullOrder: FullOrder): Promise<SuccessResponse> {
     try {
       const axiosResponse = await axios.post(this.host, {
         jsonrpc: '2.0',
@@ -196,7 +194,7 @@ export class NodeIndexer {
     }
   }
 
-  public async getHealthCheck(): Promise<HealthCheckResponse | Error> {
+  public async getHealthCheck(): Promise<HealthCheckResponse> {
     try {
       const response = (await axios.get(
         this.host
