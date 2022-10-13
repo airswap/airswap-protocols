@@ -96,8 +96,8 @@ describe('Swap Unit Tests', () => {
       .returns(signerAmount)
   }
 
-  async function getErrorInfo(order) {
-    return await swap.connect(sender).check(sender.address, ...order)
+  async function getErrorInfo(order, senderAddress = sender.address) {
+    return await swap.connect(sender).check(senderAddress, ...order)
   }
 
   beforeEach(async () => {
@@ -786,6 +786,16 @@ describe('Swap Unit Tests', () => {
       expect(ethers.utils.parseBytes32String(messages[0])).to.equal(
         'SENDER_BALANCE_LOW'
       )
+    })
+    it('properly avoids checks on a null sender wallet', async () => {
+      await setUpAllowances(DEFAULT_AMOUNT, DEFAULT_AMOUNT + SWAP_FEE)
+      await setUpBalances(0, DEFAULT_BALANCE)
+      const order = await createSignedOrder(
+        { senderWallet: ADDRESS_ZERO },
+        signer
+      )
+      const [errCount] = await getErrorInfo(order, ADDRESS_ZERO)
+      expect(errCount).to.equal(0)
     })
     it('properly detects a nonce that has already been used', async () => {
       await senderToken.mock.transferFrom
