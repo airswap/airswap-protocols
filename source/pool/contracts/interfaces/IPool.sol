@@ -13,6 +13,8 @@ interface IPool {
   );
   event SetScale(uint256 scale);
   event SetMax(uint256 max);
+  event AddAdmin(address admin);
+  event RemoveAdmin(address admin);
   event DrainTo(address[] tokens, address dest);
 
   function setScale(uint256 _scale) external;
