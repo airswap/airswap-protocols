@@ -67,7 +67,25 @@ export class Swap {
     return await contract.swap(sender.getAddress(), ...orderToParams(order))
   }
 
-  public async light(
+  public async swapAnySender(
+    order: Order,
+    sender?: ethers.providers.JsonRpcSigner
+  ): Promise<ContractTransaction> {
+    let contract = this.contract
+    if (!this.contract.signer) {
+      if (sender === undefined) {
+        throw new Error('Signer must be provided')
+      } else {
+        contract = contract.connect(sender)
+      }
+    }
+    return await contract.swapAnySender(
+      sender.getAddress(),
+      ...orderToParams(order)
+    )
+  }
+
+  public async swapLight(
     order: Order,
     sender?: ethers.providers.JsonRpcSigner
   ): Promise<ContractTransaction> {
