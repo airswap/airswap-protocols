@@ -172,7 +172,7 @@ describe('Pool Integration Tests', () => {
 
     it('withdraw success with new admin', async () => {
       await expect(pool.connect(deployer).addAdmin(carol.address)).to.emit(
-        carol.address,
+        pool,
         'AddAdmin'
       )
       const claim = await createUnsignedClaim({})
@@ -205,7 +205,7 @@ describe('Pool Integration Tests', () => {
 
     it('withdraw reverts when admin is removed', async () => {
       await expect(pool.connect(deployer).addAdmin(carol.address)).to.emit(
-        carol.address,
+        pool,
         'AddAdmin'
       )
       const claim = await createUnsignedClaim({})
@@ -216,7 +216,10 @@ describe('Pool Integration Tests', () => {
         pool.address,
         CHAIN_ID
       )
-      await pool.connect(deployer).removeAdmin(carol.address)
+      await expect(pool.connect(deployer).removeAdmin(carol.address)).to.emit(
+        pool,
+        'RemoveAdmin'
+      )
       await expect(
         pool
           .connect(alice)
