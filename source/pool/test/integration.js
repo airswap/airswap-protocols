@@ -171,7 +171,10 @@ describe('Pool Integration Tests', () => {
     })
 
     it('withdraw success with new admin', async () => {
-      await pool.connect(deployer).addAdmin(carol.address)
+      await expect(pool.connect(deployer).addAdmin(carol.address)).to.emit(
+        carol.address,
+        'AddAdmin'
+      )
       const claim = await createUnsignedClaim({})
 
       const claimSignature = await createClaimSignature(
@@ -201,7 +204,10 @@ describe('Pool Integration Tests', () => {
     })
 
     it('withdraw reverts when admin is removed', async () => {
-      await pool.connect(deployer).addAdmin(carol.address)
+      await expect(pool.connect(deployer).addAdmin(carol.address)).to.emit(
+        carol.address,
+        'AddAdmin'
+      )
       const claim = await createUnsignedClaim({})
 
       const claimSignature = await createClaimSignature(
