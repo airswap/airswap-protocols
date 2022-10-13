@@ -507,21 +507,33 @@ contract Swap is ISwap, Ownable {
       }
     }
 
+    if (order.senderWallet != address(0)) {
+      uint256 senderBalance = IERC20(order.senderToken).balanceOf(
+        order.senderWallet
+      );
+
+      uint256 senderAllowance = IERC20(order.senderToken).allowance(
+        order.senderWallet,
+        address(this)
+      );
+
+      if (senderAllowance < order.senderAmount) {
+        errors[errCount] = "SENDER_ALLOWANCE_LOW";
+        errCount++;
+      }
+
+      if (senderBalance < order.senderAmount) {
+        errors[errCount] = "SENDER_BALANCE_LOW";
+        errCount++;
+      }
+    }
+
     uint256 signerBalance = IERC20(order.signerToken).balanceOf(
       order.signerWallet
     );
 
     uint256 signerAllowance = IERC20(order.signerToken).allowance(
       order.signerWallet,
-      address(this)
-    );
-
-    uint256 senderBalance = IERC20(order.senderToken).balanceOf(
-      order.senderWallet
-    );
-
-    uint256 senderAllowance = IERC20(order.senderToken).allowance(
-      order.senderWallet,
       address(this)
     );
 
@@ -537,15 +549,6 @@ contract Swap is ISwap, Ownable {
       errCount++;
     }
 
-    if (senderAllowance < order.senderAmount) {
-      errors[errCount] = "SENDER_ALLOWANCE_LOW";
-      errCount++;
-    }
-
-    if (senderBalance < order.senderAmount) {
-      errors[errCount] = "SENDER_BALANCE_LOW";
-      errCount++;
-    }
     return (errCount, errors);
   }
 
