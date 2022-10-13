@@ -1,6 +1,6 @@
 {
   "name": "@airswap/libraries",
-  "version": "3.1.2",
+  "version": "3.1.3",
   "description": "AirSwap: Libraries for Developers",
   "contributors": [
     "Don Mosites",
@@ -32,7 +32,7 @@
     "@airswap/jsonrpc-client-websocket": "0.0.1",
     "@airswap/registry": "3.1.1",
     "@airswap/indexers": "3.1.1",
-    "@airswap/swap": "3.2.1",
+    "@airswap/swap": "3.2.2",
     "@airswap/typescript": "3.0.1",
     "@airswap/utils": "3.0.4",
     "@airswap/wrapper": "3.1.1",

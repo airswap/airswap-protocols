@@ -1,6 +1,6 @@
 {
   "name": "@airswap/wrapper",
-  "version": "3.1.1",
+  "version": "3.1.2",
   "description": "AirSwap: Automatic Wrap and Unwrap",
   "contributors": [
     "Don Mosites",
@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.3.1",
-    "@airswap/swap": "3.2.1"
+    "@airswap/swap": "3.2.2"
   },
   "publishConfig": {
     "access": "public"
