@@ -1,7 +1,7 @@
 import * as indexersDeploys from '@airswap/indexers/deploys.js'
 import { providers, getDefaultProvider } from 'ethers'
-import { Indexers as IndexerRegistryContract } from '@airswap/indexers/build/contracts'
-import { Indexers__factory } from '@airswap/indexers/build/factories/contracts'
+import { Indexers as IndexerRegistryContract } from '@airswap/indexers/typechain/contracts'
+import { Indexers__factory } from '@airswap/indexers/typechain/factories/contracts'
 import { chainIds } from '@airswap/constants'
 
 export class Indexers {
