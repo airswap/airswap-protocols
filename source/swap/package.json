@@ -30,6 +30,9 @@
   "dependencies": {
     "@openzeppelin/contracts": "^4.3.1"
   },
+  "devDependencies": {
+    "@airswap/utils": "3.0.4"
+  },
   "publishConfig": {
     "access": "public"
   }
