@@ -7,11 +7,10 @@ lerna-debug.log
 coverage.json
 coverage
 build
-flatten/
 .env
 venv
 .vscode/
 .idea/
 artifacts/
 cache/
-**/typechain-types
+typechain

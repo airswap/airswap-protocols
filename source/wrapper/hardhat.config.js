@@ -1,1 +1,6 @@
-module.exports = require('../../hardhat.config.js')
+module.exports = {
+  typechain: {
+    outDir: 'typechain',
+  },
+  ...require('../../hardhat.config.js'),
+}

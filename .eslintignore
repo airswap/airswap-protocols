@@ -3,3 +3,4 @@ lcov-report/
 node_modules/
 venv/
 build/
+typechain/
