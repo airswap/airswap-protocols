@@ -12,8 +12,8 @@
     "url": "https://github.com/airswap/airswap-protocols"
   },
   "files": [
-    "./build/contracts",
-    "./typechain/factories",
+    "./build",
+    "./typechain",
     "./deploys.js"
   ],
   "scripts": {
@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.3.1",
-    "@airswap/staking": "3.1.1"
+    "@airswap/staking": "3.1.2"
   },
   "publishConfig": {
     "access": "public"

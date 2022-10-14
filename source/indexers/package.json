@@ -11,8 +11,8 @@
     "url": "https://github.com/airswap/airswap-protocols"
   },
   "files": [
-    "./build/contracts",
-    "./typechain/factories",
+    "./build",
+    "./typechain",
     "./deploys.js"
   ],
   "scripts": {
