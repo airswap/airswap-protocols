@@ -1,6 +1,6 @@
 {
   "name": "@airswap/wrapper",
-  "version": "3.1.2",
+  "version": "3.1.3",
   "description": "AirSwap: Automatic Wrap and Unwrap",
   "contributors": [
     "Don Mosites",
@@ -13,12 +13,13 @@
   },
   "files": [
     "./build/contracts",
-    "./build/factories",
+    "./typechain/factories",
     "./deploys.js"
   ],
   "scripts": {
-    "clean": "hardhat clean; rm -rf ./build",
-    "compile": "hardhat compile; tsc -b; rm -rf ./typechain-types",
+    "clean": "hardhat clean; rm -rf ./build; rm -rf ./typechain",
+    "compile": "hardhat compile; yarn typechain",
+    "typechain": "tsc -b",
     "coverage": "hardhat coverage",
     "test": "hardhat test",
     "test:unit": "hardhat test ./test/unit.js",
