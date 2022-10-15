@@ -1,8 +1,8 @@
 import { ethers, BigNumber, ContractTransaction } from 'ethers'
 import { chainIds, chainNames } from '@airswap/constants'
 import { Order } from '@airswap/typescript'
-import { Swap as SwapContract } from '@airswap/swap/build/contracts'
-import { Swap__factory } from '@airswap/swap/build/factories/contracts'
+import { Swap as SwapContract } from '@airswap/swap/typechain/contracts'
+import { Swap__factory } from '@airswap/swap/typechain/factories/contracts'
 import { orderToParams } from '@airswap/utils'
 
 import * as swapDeploys from '@airswap/swap/deploys.js'

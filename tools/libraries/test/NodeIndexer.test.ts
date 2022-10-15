@@ -15,12 +15,6 @@ describe('toSortField', () => {
   })
 
   it('should return undefined', () => {
-    //@ts-ignore
-    expect(toSortField(null)).to.equal(undefined)
-    //@ts-ignore
-    expect(toSortField({})).to.equal(undefined)
-    // @ts-ignore
-    expect(toSortField(undefined)).to.equal(undefined)
     expect(toSortField('')).to.equal(undefined)
     expect(toSortField('aze')).to.equal(undefined)
   })
@@ -35,13 +29,7 @@ describe('toSortOrder', () => {
   })
 
   it('should return undefined', () => {
-    // @ts-ignore
-    expect(toSortOrder(null)).to.equal(undefined)
-    // @ts-ignore
-    expect(toSortOrder(undefined)).to.equal(undefined)
     expect(toSortOrder('')).to.equal(undefined)
     expect(toSortOrder('aze')).to.equal(undefined)
-    // @ts-ignore
-    expect(toSortOrder({})).to.equal(undefined)
   })
 })
