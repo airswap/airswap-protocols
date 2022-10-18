@@ -603,7 +603,7 @@ describe('Pool Unit Tests', () => {
 
   describe('Test setting admin', async () => {
     it('Test addAdmin is successful', async () => {
-      await pool.addAdmin(alice.address)
+      await expect(pool.addAdmin(alice.address)).to.emit(pool, 'AddAdmin')
       expect(await pool.admins(alice.address)).to.be.equal(true)
     })
 
@@ -620,13 +620,13 @@ describe('Pool Unit Tests', () => {
     })
 
     it('Test removeAdmin is successful', async () => {
-      await pool.addAdmin(alice.address)
-      await pool.removeAdmin(alice.address)
+      await expect(pool.addAdmin(alice.address)).to.emit(pool, 'AddAdmin')
+      await expect(pool.removeAdmin(alice.address)).to.emit(pool, 'RemoveAdmin')
       expect(await pool.admins(alice.address)).to.be.equal(false)
     })
 
     it('Test removeAdmin reverts', async () => {
-      await pool.addAdmin(alice.address)
+      await expect(pool.addAdmin(alice.address)).to.emit(pool, 'AddAdmin')
       await expect(
         pool.connect(alice).removeAdmin(alice.address)
       ).to.be.revertedWith('Ownable: caller is not the owner')

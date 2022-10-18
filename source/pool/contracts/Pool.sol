@@ -135,6 +135,7 @@ contract Pool is IPool, Ownable {
   function addAdmin(address _admin) external override onlyOwner {
     require(_admin != address(0), "INVALID_ADDRESS");
     admins[_admin] = true;
+    emit AddAdmin(_admin);
   }
 
   /**
@@ -145,6 +146,7 @@ contract Pool is IPool, Ownable {
   function removeAdmin(address _admin) external override onlyOwner {
     require(admins[_admin] == true, "ADMIN_NOT_SET");
     admins[_admin] = false;
+    emit RemoveAdmin(_admin);
   }
 
   /**
