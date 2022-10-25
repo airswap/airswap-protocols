@@ -1,11 +1,11 @@
 import { ethers } from 'ethers'
-import { Registry as RegistryContract } from '@airswap/registry/typechain/contracts'
-import { Registry__factory } from '@airswap/registry/typechain/factories/contracts'
+import { Registry as RegistryContract } from '@airswap/maker-registry/typechain/contracts'
+import { Registry__factory } from '@airswap/maker-registry/typechain/factories/contracts'
 import { chainIds } from '@airswap/constants'
-import { Server, ServerOptions } from './Server'
+import { Server, ServerOptions } from './Maker'
 import { Swap } from './Swap'
 
-import * as registryDeploys from '@airswap/registry/deploys.js'
+import * as registryDeploys from '@airswap/maker-registry/deploys.js'
 
 export class Registry {
   public chainId: number
