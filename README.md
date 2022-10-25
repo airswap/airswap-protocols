@@ -14,12 +14,13 @@
 
 ## Smart Contracts
 
-| Package                                 | Version                                                                                                   | Description              |
-| :-------------------------------------- | :-------------------------------------------------------------------------------------------------------- | :----------------------- |
-| [`@airswap/swap`](/source/swap)         | [![npm](https://img.shields.io/npm/v/@airswap/swap)](https://www.npmjs.com/package/@airswap/swap)         | Atomic Token Swap        |
-| [`@airswap/registry`](/source/registry) | [![npm](https://img.shields.io/npm/v/@airswap/registry)](https://www.npmjs.com/package/@airswap/registry) | Counterparty Discovery   |
-| [`@airswap/staking`](/source/staking)   | [![npm](https://img.shields.io/npm/v/@airswap/staking)](https://www.npmjs.com/package/@airswap/staking)   | Staking for Members      |
-| [`@airswap/pool`](/source/pool)         | [![npm](https://img.shields.io/npm/v/@airswap/pool)](https://www.npmjs.com/package/@airswap/pool)         | Rewards Pool for Members |
+| Package                                                 | Version                                                                                                                   | Description                   |
+| :------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------ | :---------------------------- |
+| [`@airswap/swap`](/source/swap)                         | [![npm](https://img.shields.io/npm/v/@airswap/swap)](https://www.npmjs.com/package/@airswap/swap)                         | Atomic Token Swap             |
+| [`@airswap/maker-registry`](/source/maker-registry)     | [![npm](https://img.shields.io/npm/v/@airswap/maker-registry)](https://www.npmjs.com/package/@airswap/maker-registry)     | Maker Discovery               |
+| [`@airswap/indexer-registry`](/source/indexer-registry) | [![npm](https://img.shields.io/npm/v/@airswap/indexer-registry)](https://www.npmjs.com/package/@airswap/indexer-registry) | Indexer Discovery             |
+| [`@airswap/staking`](/source/staking)                   | [![npm](https://img.shields.io/npm/v/@airswap/staking)](https://www.npmjs.com/package/@airswap/staking)                   | Staking for Participants      |
+| [`@airswap/pool`](/source/pool)                         | [![npm](https://img.shields.io/npm/v/@airswap/pool)](https://www.npmjs.com/package/@airswap/pool)                         | Rewards Pool for Participants |
 
 ## JavaScript Libraries
 

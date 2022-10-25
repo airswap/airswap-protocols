@@ -1,10 +1,5 @@
 import { expect } from 'chai'
-import {
-  SortField,
-  SortOrder,
-  toSortField,
-  toSortOrder,
-} from '../src/NodeIndexer'
+import { SortField, SortOrder, toSortField, toSortOrder } from '../src/Indexer'
 
 describe('toSortField', () => {
   it('should match value', () => {

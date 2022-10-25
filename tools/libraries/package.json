@@ -1,6 +1,6 @@
 {
   "name": "@airswap/libraries",
-  "version": "3.2.0",
+  "version": "3.3.0",
   "description": "AirSwap: Libraries for Developers",
   "contributors": [
     "Don Mosites",
@@ -25,13 +25,13 @@
     "clean": "rm -rf ./build",
     "compile": "yarn clean && tsc -b",
     "test": "yarn test:unit",
-    "test:unit": "yarn compile && yarn mocha -r ts-node/register test/Server.test.ts test/NodeIndexer.test.ts"
+    "test:unit": "yarn compile && yarn mocha -r ts-node/register test/Maker.test.ts test/Indexer.test.ts"
   },
   "dependencies": {
     "@airswap/constants": "3.0.1",
     "@airswap/jsonrpc-client-websocket": "0.0.1",
-    "@airswap/registry": "3.1.2",
-    "@airswap/indexers": "3.1.2",
+    "@airswap/maker-registry": "3.1.2",
+    "@airswap/indexer-registry": "3.1.2",
     "@airswap/swap": "3.2.3",
     "@airswap/typescript": "3.0.1",
     "@airswap/utils": "3.0.4",

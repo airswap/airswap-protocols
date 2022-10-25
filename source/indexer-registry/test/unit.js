@@ -3,7 +3,7 @@ const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
 const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
 
-describe('Registry Unit', () => {
+describe('IndexerRegistry Unit', () => {
   let snapshotId
   let deployer
   let account1
@@ -24,7 +24,7 @@ describe('Registry Unit', () => {
     ;[deployer, account1, account2, token1, token2, token3] =
       await ethers.getSigners()
     stakingToken = await deployMockContract(deployer, IERC20.abi)
-    registryFactory = await ethers.getContractFactory('Indexers')
+    registryFactory = await ethers.getContractFactory('IndexerRegistry')
     registry = await registryFactory.deploy()
     await registry.deployed()
   })
