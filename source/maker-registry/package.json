@@ -1,7 +1,7 @@
 {
-  "name": "@airswap/registry",
+  "name": "@airswap/maker-registry",
   "version": "3.1.2",
-  "description": "AirSwap: Server URL Registry",
+  "description": "AirSwap: Maker Registry",
   "contributors": [
     "Ethan Wessel",
     "Don Mosites"

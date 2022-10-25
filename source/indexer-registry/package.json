@@ -1,7 +1,7 @@
 {
-  "name": "@airswap/indexers",
+  "name": "@airswap/indexer-registry",
   "version": "3.1.2",
-  "description": "AirSwap: Indexer URL Registry",
+  "description": "AirSwap: Indexer Registry",
   "contributors": [
     "Don Mosites"
   ],
