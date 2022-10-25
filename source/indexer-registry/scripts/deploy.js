@@ -12,7 +12,7 @@ async function main() {
   const chainId = await deployer.getChainId()
 
   console.log(`Deploying on ${chainNames[chainId].toUpperCase()}`)
-  const registryFactory = await ethers.getContractFactory('Indexers')
+  const registryFactory = await ethers.getContractFactory('IndexerRegistry')
   const registryContract = await registryFactory.deploy()
   await registryContract.deployed()
   console.log(`Deployed: ${registryContract.address}`)

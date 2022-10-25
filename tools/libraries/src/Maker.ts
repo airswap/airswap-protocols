@@ -21,7 +21,7 @@ export type SupportedProtocolInfo = {
   params?: any
 }
 
-export type ServerOptions = {
+export type MakerOptions = {
   initializeTimeout?: number
   swapContract?: string
 }
@@ -38,18 +38,18 @@ const PROTOCOL_NAMES = {
   'request-for-quote': 'Request for Quote',
 }
 
-export interface ServerEvents {
+export interface MakerEvents {
   pricing: (pricing: Pricing[]) => void
   error: (error: JsonRpcError) => void
 }
 
-export class Server extends TypedEmitter<ServerEvents> {
+export class Maker extends TypedEmitter<MakerEvents> {
   public transportProtocol: 'websocket' | 'http'
   private supportedProtocols: SupportedProtocolInfo[]
   private isInitialized: boolean
   private httpClient: HttpClient
   private webSocketClient: JsonRpcWebsocket
-  private senderServer: string
+  private senderMaker: string
   private senderWallet: string
 
   public constructor(
@@ -63,9 +63,9 @@ export class Server extends TypedEmitter<ServerEvents> {
 
   public static async at(
     locator: string,
-    options?: ServerOptions
-  ): Promise<Server> {
-    const server = new Server(locator, options?.swapContract)
+    options?: MakerOptions
+  ): Promise<Maker> {
+    const server = new Maker(locator, options?.swapContract)
     await server._init(options?.initializeTimeout)
     return server
   }
@@ -198,7 +198,7 @@ export class Server extends TypedEmitter<ServerEvents> {
   }
 
   private _initHTTPClient(locator: string, clientOnly?: boolean) {
-    // clientOnly flag set when initializing client for last look `senderServer`
+    // clientOnly flag set when initializing client for last look `senderMaker`
     const parsedUrl = parseUrl(locator)
     const options = {
       protocol: parsedUrl.protocol,
@@ -262,7 +262,7 @@ export class Server extends TypedEmitter<ServerEvents> {
           }
         )
         const initTimeout = setTimeout(() => {
-          reject('Server did not call initialize in time')
+          reject('Maker did not call initialize in time')
           this.disconnect()
         }, initializeTimeout)
 
@@ -287,7 +287,7 @@ export class Server extends TypedEmitter<ServerEvents> {
   }
 
   private requireInitialized() {
-    if (!this.isInitialized) throw new Error('Server not yet initialized')
+    if (!this.isInitialized) throw new Error('Maker not yet initialized')
   }
 
   private requireRFQSupport(version?: string) {
@@ -304,12 +304,12 @@ export class Server extends TypedEmitter<ServerEvents> {
       let message
       if (supportedVersion) {
         message =
-          `Server at ${this.locator} doesn't support ` +
+          `Maker at ${this.locator} doesn't support ` +
           `${PROTOCOL_NAMES[protocol]} v${version}` +
           `supported version ${supportedVersion}`
       } else {
         message =
-          `Server at ${this.locator} doesn't ` +
+          `Maker at ${this.locator} doesn't ` +
           `support ${PROTOCOL_NAMES[protocol]}`
       }
       throw new Error(message)
@@ -377,10 +377,10 @@ export class Server extends TypedEmitter<ServerEvents> {
     const lastLookSupport = supportedProtocols.find(
       (protocol) => protocol.name === 'last-look'
     )
-    if (lastLookSupport?.params?.senderServer) {
-      this.senderServer = lastLookSupport.params.senderServer
+    if (lastLookSupport?.params?.senderMaker) {
+      this.senderMaker = lastLookSupport.params.senderMaker
       // Prepare an http client for consider calls.
-      this._initHTTPClient(this.senderServer, true)
+      this._initHTTPClient(this.senderMaker, true)
     }
     if (lastLookSupport?.params?.senderWallet) {
       this.senderWallet = lastLookSupport.params.senderWallet
@@ -408,7 +408,7 @@ export class Server extends TypedEmitter<ServerEvents> {
             if (errors.length) {
               reject({
                 code: -1,
-                message: `Server response differs from request params: ${errors}`,
+                message: `Maker response differs from request params: ${errors}`,
               })
             } else {
               resolve(result)
@@ -437,7 +437,7 @@ export class Server extends TypedEmitter<ServerEvents> {
   ): Promise<T> {
     if (
       this.transportProtocol === 'http' ||
-      (method === 'consider' && this.senderServer)
+      (method === 'consider' && this.senderMaker)
     ) {
       return this.httpCall<T>(method, params)
     } else {

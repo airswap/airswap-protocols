@@ -1,10 +1,10 @@
 import * as indexersDeploys from '@airswap/indexer-registry/deploys.js'
 import { providers, getDefaultProvider } from 'ethers'
-import { Indexers as IndexerRegistryContract } from '@airswap/indexer-registry/typechain/contracts'
-import { Indexers__factory } from '@airswap/indexer-registry/typechain/factories/contracts'
+import { IndexerRegistry as IndexerRegistryContract } from '@airswap/indexer-registry/typechain/contracts'
+import { IndexerRegistry__factory } from '@airswap/indexer-registry/typechain/factories/contracts'
 import { chainIds } from '@airswap/constants'
 
-export class Indexers {
+export class IndexerRegistry {
   public chainId: number
   public contract: IndexerRegistryContract
 
@@ -13,8 +13,8 @@ export class Indexers {
     signerOrProvider?: providers.JsonRpcSigner | providers.Provider
   ) {
     this.chainId = chainId
-    this.contract = Indexers__factory.connect(
-      Indexers.getAddress(chainId),
+    this.contract = IndexerRegistry__factory.connect(
+      IndexerRegistry.getAddress(chainId),
       signerOrProvider || getDefaultProvider(chainId)
     )
   }

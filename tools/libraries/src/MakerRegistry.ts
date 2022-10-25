@@ -1,23 +1,23 @@
 import { ethers } from 'ethers'
-import { Registry as RegistryContract } from '@airswap/maker-registry/typechain/contracts'
-import { Registry__factory } from '@airswap/maker-registry/typechain/factories/contracts'
+import { MakerRegistry as MakerRegistryContract } from '@airswap/maker-registry/typechain/contracts'
+import { MakerRegistry__factory } from '@airswap/maker-registry/typechain/factories/contracts'
 import { chainIds } from '@airswap/constants'
-import { Server, ServerOptions } from './Maker'
+import { Maker, MakerOptions } from './Maker'
 import { Swap } from './Swap'
 
 import * as registryDeploys from '@airswap/maker-registry/deploys.js'
 
-export class Registry {
+export class MakerRegistry {
   public chainId: number
-  private contract: RegistryContract
+  private contract: MakerRegistryContract
 
   public constructor(
     chainId = chainIds.GOERLI,
     walletOrProvider?: ethers.Wallet | ethers.providers.Provider
   ) {
     this.chainId = chainId
-    this.contract = Registry__factory.connect(
-      Registry.getAddress(chainId),
+    this.contract = MakerRegistry__factory.connect(
+      MakerRegistry.getAddress(chainId),
       walletOrProvider
     )
   }
@@ -26,14 +26,14 @@ export class Registry {
     if (chainId in registryDeploys) {
       return registryDeploys[chainId]
     }
-    throw new Error(`Registry deploy not found for chainId ${chainId}`)
+    throw new Error(`MakerRegistry deploy not found for chainId ${chainId}`)
   }
 
-  public async getServers(
+  public async getMakers(
     quoteToken: string,
     baseToken: string,
-    options?: ServerOptions
-  ): Promise<Array<Server>> {
+    options?: MakerOptions
+  ): Promise<Array<Maker>> {
     const quoteTokenURLs: string[] = await this.contract.getURLsForToken(
       quoteToken
     )
@@ -44,7 +44,7 @@ export class Registry {
       quoteTokenURLs
         .filter((value) => baseTokenURLs.includes(value))
         .map((url) => {
-          return Server.at(url, {
+          return Maker.at(url, {
             swapContract:
               options?.swapContract || Swap.getAddress(this.chainId),
             initializeTimeout: options?.initializeTimeout,
@@ -53,6 +53,6 @@ export class Registry {
     )
     return serverPromises
       .filter((value) => value.status === 'fulfilled')
-      .map((v: PromiseFulfilledResult<Server>) => v.value)
+      .map((v: PromiseFulfilledResult<Maker>) => v.value)
   }
 }
