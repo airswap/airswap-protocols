@@ -25,9 +25,10 @@
     "clean": "rm -rf ./build",
     "compile": "yarn clean && tsc -b",
     "test": "yarn test:unit",
-    "test:unit": "yarn compile && yarn mocha -r ts-node/register test/Maker.test.ts test/Indexer.test.ts"
+    "test:unit": "yarn mocha -r ts-node/register test/Indexer.test.ts"
   },
   "dependencies": {
+    "axios": "^1.1.0",
     "@airswap/constants": "3.0.1",
     "@airswap/jsonrpc-client-websocket": "0.0.1",
     "@airswap/maker-registry": "3.1.2",
@@ -44,6 +45,8 @@
     "websocket": "^1.0.34"
   },
   "devDependencies": {
+    "express": "^4.18.2",
+    "body-parser": "^1.20.1",
     "@relaycorp/ws-mock": "^4.2.0",
     "@types/mock-require": "^2.0.0",
     "fancy-test": "^1.4.7",

@@ -94,8 +94,8 @@ export abstract class IndexedOrderError extends Error {
   }
 }
 export class ErrorResponse {
-  private code: number
-  private message: string
+  public code: number
+  public message: string
   public constructor(code: number, message: string) {
     this.code = code
     this.message = message
@@ -196,6 +196,8 @@ export class NodeIndexer {
 
   public async getHealthCheck(): Promise<HealthCheckResponse> {
     try {
+      console.log(axios)
+      console.log('getHealthCheck')
       const response = (await axios.get(
         this.host
       )) as AxiosResponse<JsonRpcResponse>
