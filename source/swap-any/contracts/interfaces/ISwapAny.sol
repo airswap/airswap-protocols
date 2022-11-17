@@ -17,7 +17,7 @@ pragma solidity 0.8.17;
 import "../TransferHandlerRegistry.sol";
 
 interface ISwapAny {
-  struct Order {
+  struct OrderAny {
     uint256 nonce;
     uint256 expiry;
     // Signer Data
@@ -49,7 +49,7 @@ interface ISwapAny {
 
   event Swap(
     uint256 indexed nonce,
-    uint256 timestamp, //block.timestamp
+    uint256 timestamp,
     address indexed signerWallet,
     uint256 signerAmount,
     uint256 signerId,
@@ -92,7 +92,7 @@ interface ISwapAny {
    * @notice Atomic Token Swap
    * @param order Order
    */
-  function swap(Order calldata order) external;
+  function swap(OrderAny calldata order) external;
 
   /**
    * @notice Cancel one or more open orders by nonce
@@ -143,9 +143,9 @@ interface ISwapAny {
 
   /**
    * @notice Provides hash for a given order
-   * @param order Order
+   * @param order OrderAny
    * @param domainSeparator bytes32
    *  */
 
-  //   function hashOrder(Order calldata order, bytes32 domainSeparator) external view returns(bytes32);
+  function hashOrder(OrderAny calldata order, bytes32 domainSeparator) external view returns(bytes32);
 }
