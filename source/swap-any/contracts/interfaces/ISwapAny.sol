@@ -16,7 +16,7 @@ pragma solidity 0.8.17;
 // import "@airswap/transfers/contracts/TransferHandlerRegistry.sol";
 import "../TransferHandlerRegistry.sol";
 
-interface INFTSwap {
+interface ISwapAny {
   struct Order {
     uint256 nonce;
     uint256 expiry;
