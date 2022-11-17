@@ -1,0 +1,151 @@
+/*
+  Copyright 2020 Swap Holdings Ltd.
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+    http://www.apache.org/licenses/LICENSE-2.0
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/
+
+pragma solidity 0.8.17;
+
+// import "@airswap/transfers/contracts/TransferHandlerRegistry.sol";
+import "../TransferHandlerRegistry.sol";
+
+interface INFTSwap {
+  struct Order {
+    uint256 nonce;
+    uint256 expiry;
+    // Signer Data
+    address signerWallet; // Signer Wallet Address
+    uint256 signerAmount; // Quantity of tokens
+    uint256 signerId; // ID for ERC-721 or ERC-1155
+    address signerToken; // Token's contract address
+    bytes4 signerKind; // Interface ID of the token
+    // Sender Data
+    address senderWallet; // Sender Wallet address
+    uint256 senderAmount; // Quantity of tokens
+    uint256 senderId; // ID for ERC-721 or ERC-1155
+    address senderToken; // Token's contract addresss
+    bytes4 senderKind; // Interface ID of the token
+    // Affiliate Data - supports community fees
+    address affiliateWallet; // Wallet address of the party
+    uint256 affiliateAmount; // Amount for ERC-20 or ERC-1155
+    uint256 affiliateId; // ID for ERC-721 or ERC-1155
+    address affiliateToken; // Contract address of the token
+    bytes4 affiliateKind; // Interface ID of the token
+    // Signature Data
+    address signatory; // Address of the wallet used to sign
+    address validator; // Address of the intended swap contract
+    bytes1 signatureVersion;
+    uint8 v;
+    bytes32 r;
+    bytes32 s;
+  }
+
+  event Swap(
+    uint256 indexed nonce,
+    uint256 timestamp, //block.timestamp
+    address indexed signerWallet,
+    uint256 signerAmount,
+    uint256 signerId,
+    address signerToken,
+    address indexed senderWallet,
+    uint256 senderAmount,
+    uint256 senderId,
+    address senderToken,
+    address affiliateWallet,
+    uint256 affiliateAmount,
+    uint256 affiliateId,
+    address affiliateToken
+  );
+
+  event Cancel(uint256 indexed nonce, address indexed signerWallet);
+
+  event CancelUpTo(uint256 indexed nonce, address indexed signerWallet);
+
+  event AuthorizeSender(
+    address indexed authorizerAddress,
+    address indexed authorizedSender
+  );
+
+  event AuthorizeSigner(
+    address indexed authorizerAddress,
+    address indexed authorizedSigner
+  );
+
+  event RevokeSender(
+    address indexed authorizerAddress,
+    address indexed revokedSender
+  );
+
+  event RevokeSigner(
+    address indexed authorizerAddress,
+    address indexed revokedSigner
+  );
+
+  /**
+   * @notice Atomic Token Swap
+   * @param order Order
+   */
+  function swap(Order calldata order) external;
+
+  /**
+   * @notice Cancel one or more open orders by nonce
+   * @param nonces uint256[]
+   */
+  function cancel(uint256[] calldata nonces) external;
+
+  /**
+   * @notice Cancels all orders below a nonce value
+   * @dev These orders can be made active by reducing the minimum nonce
+   * @param minimumNonce uint256
+   */
+  function cancelUpTo(uint256 minimumNonce) external;
+
+  /**
+   * @notice Authorize a delegated sender
+   * @param authorizedSender address
+   */
+  function authorizeSender(address authorizedSender) external;
+
+  /**
+   * @notice Authorize a delegated signer
+   * @param authorizedSigner address
+   */
+  function authorizeSigner(address authorizedSigner) external;
+
+  /**
+   * @notice Revoke an authorization
+   * @param authorizedSender address
+   */
+  function revokeSender(address authorizedSender) external;
+
+  /**
+   * @notice Revoke an authorization
+   * @param authorizedSigner address
+   */
+  function revokeSigner(address authorizedSigner) external;
+
+  function senderAuthorizations(address, address) external view returns (bool);
+
+  function signerAuthorizations(address, address) external view returns (bool);
+
+  function signerNonceStatus(address, uint256) external view returns (bytes1);
+
+  function signerMinimumNonce(address) external view returns (uint256);
+
+  function registry() external view returns (TransferHandlerRegistry);
+
+  /**
+   * @notice Provides hash for a given order
+   * @param order Order
+   * @param domainSeparator bytes32
+   *  */
+
+  //   function hashOrder(Order calldata order, bytes32 domainSeparator) external view returns(bytes32);
+}
