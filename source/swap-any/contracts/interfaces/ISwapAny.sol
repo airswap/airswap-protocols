@@ -147,5 +147,8 @@ interface ISwapAny {
    * @param domainSeparator bytes32
    *  */
 
-  function hashOrder(OrderAny calldata order, bytes32 domainSeparator) external view returns(bytes32);
+  function hashOrder(OrderAny calldata order, bytes32 domainSeparator)
+    external
+    view
+    returns (bytes32);
 }

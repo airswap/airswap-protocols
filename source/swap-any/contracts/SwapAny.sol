@@ -34,7 +34,7 @@ contract SwapAny is ISwapAny {
   bytes internal constant EIP191_HEADER = "\x19\x01";
 
   // Domain and version for use in signatures (EIP-712)
-  bytes32 public constant DOMAIN_NAME = keccak256("NFTSWAP");
+  bytes32 public constant DOMAIN_NAME = keccak256("SWAPANY");
   bytes32 public constant DOMAIN_VERSION = keccak256("3");
 
   // Domain chain id for use in signatures (EIP-712)
