@@ -1,12 +1,9 @@
 /*
   Copyright 2020 Swap Holdings Ltd.
-
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
-
     http://www.apache.org/licenses/LICENSE-2.0
-
   Unless required by applicable law or agreed to in writing, software
   distributed under the License is distributed on an "AS IS" BASIS,
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,22 +11,37 @@
   limitations under the License.
 */
 
-pragma solidity 0.5.16;
-pragma experimental ABIEncoderV2;
+pragma solidity 0.8.17;
 
-import "@airswap/transfers/contracts/interfaces/ITransferHandler.sol";
-import "@airswap/swap/contracts/interfaces/ISwap.sol";
+import "./interfaces/ITransferHandler.sol";
+import "./interfaces/ISwapAny.sol";
 
 /**
  * @title Swap: The Atomic Swap used on the AirSwap Network
  */
-contract Swap is ISwap {
+contract SwapAny is ISwapAny {
+  bytes32 public constant DOMAIN_TYPEHASH =
+    keccak256(
+      "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
+    );
+
+  bytes32 public constant ORDER_TYPEHASH =
+    keccak256(
+      "Order(uint256 nonce,uint256 expiry,address signerWallet,address signerToken,uint256 signerAmount,uint256 protocolFee,address senderWallet,address senderToken,uint256 senderAmount)"
+    );
+
+  // Data type used for hashing: Structured data (EIP-191)
+  bytes internal constant EIP191_HEADER = "\x19\x01";
+
   // Domain and version for use in signatures (EIP-712)
-  bytes internal constant DOMAIN_NAME = "SWAP";
-  bytes internal constant DOMAIN_VERSION = "2";
+  bytes32 public constant DOMAIN_NAME = keccak256("SWAPANY");
+  bytes32 public constant DOMAIN_VERSION = keccak256("3");
+
+  // Domain chain id for use in signatures (EIP-712)
+  uint256 public immutable DOMAIN_CHAIN_ID;
 
   // Unique domain identifier for use in signatures (EIP-712)
-  bytes32 private _domainSeparator;
+  bytes32 public immutable DOMAIN_SEPARATOR;
 
   // Possible nonce statuses
   bytes1 internal constant AVAILABLE = 0x00;
@@ -55,42 +67,48 @@ contract Swap is ISwap {
    * @dev Sets domain for signature validation (EIP-712)
    * @param swapRegistry TransferHandlerRegistry
    */
-  constructor(TransferHandlerRegistry swapRegistry) public {
-    _domainSeparator = Types.hashDomain(
-      DOMAIN_NAME,
-      DOMAIN_VERSION,
-      address(this)
+  constructor(TransferHandlerRegistry swapRegistry) {
+    uint256 currentChainId = getChainId();
+    DOMAIN_CHAIN_ID = currentChainId;
+    DOMAIN_SEPARATOR = keccak256(
+      abi.encode(
+        DOMAIN_TYPEHASH,
+        DOMAIN_NAME,
+        DOMAIN_VERSION,
+        currentChainId,
+        this
+      )
     );
     registry = swapRegistry;
   }
 
   /**
    * @notice Atomic Token Swap
-   * @param order Types.Order Order to settle
+   * @param order Order to settle
    */
-  function swap(Types.Order calldata order) external {
+  function swap(OrderAny calldata order) external {
     // Ensure the order is not expired.
     require(order.expiry > block.timestamp, "ORDER_EXPIRED");
 
     // Ensure the nonce is AVAILABLE (0x00).
     require(
-      signerNonceStatus[order.signer.wallet][order.nonce] == AVAILABLE,
+      signerNonceStatus[order.signerWallet][order.nonce] == AVAILABLE,
       "ORDER_TAKEN_OR_CANCELLED"
     );
 
     // Ensure the order nonce is above the minimum.
     require(
-      order.nonce >= signerMinimumNonce[order.signer.wallet],
+      order.nonce >= signerMinimumNonce[order.signerWallet],
       "NONCE_TOO_LOW"
     );
 
     // Mark the nonce UNAVAILABLE (0x01).
-    signerNonceStatus[order.signer.wallet][order.nonce] = UNAVAILABLE;
+    signerNonceStatus[order.signerWallet][order.nonce] = UNAVAILABLE;
 
     // Validate the sender side of the trade.
     address finalSenderWallet;
 
-    if (order.sender.wallet == address(0)) {
+    if (order.senderWallet == address(0)) {
       /**
        * Sender is not specified. The msg.sender of the transaction becomes
        * the sender of the order.
@@ -102,21 +120,21 @@ contract Swap is ISwap {
        * this determines whether the msg.sender is an authorized sender.
        */
       require(
-        isSenderAuthorized(order.sender.wallet, msg.sender),
+        isSenderAuthorized(order.senderWallet, msg.sender),
         "SENDER_UNAUTHORIZED"
       );
       // The msg.sender is authorized.
-      finalSenderWallet = order.sender.wallet;
+      finalSenderWallet = order.senderWallet;
     }
 
     // Validate the signer side of the trade.
-    if (order.signature.v == 0) {
+    if (order.v == 0) {
       /**
        * Signature is not provided. The signer may have authorized the
        * msg.sender to swap on its behalf, which does not require a signature.
        */
       require(
-        isSignerAuthorized(order.signer.wallet, msg.sender),
+        isSignerAuthorized(order.signerWallet, msg.sender),
         "SIGNER_UNAUTHORIZED"
       );
     } else {
@@ -125,61 +143,127 @@ contract Swap is ISwap {
        * authorized and if so validate the signature itself.
        */
       require(
-        isSignerAuthorized(order.signer.wallet, order.signature.signatory),
+        isSignerAuthorized(order.signerWallet, order.signatory),
         "SIGNER_UNAUTHORIZED"
       );
 
       // Ensure the signature is valid.
-      require(isValid(order, _domainSeparator), "SIGNATURE_INVALID");
+      require(isValid(order, DOMAIN_SEPARATOR), "SIGNATURE_INVALID");
     }
     // Transfer token from sender to signer.
     transferToken(
       finalSenderWallet,
-      order.signer.wallet,
-      order.sender.amount,
-      order.sender.id,
-      order.sender.token,
-      order.sender.kind
+      order.signerWallet,
+      order.senderAmount,
+      order.senderId,
+      order.senderToken,
+      order.senderKind
     );
 
     // Transfer token from signer to sender.
     transferToken(
-      order.signer.wallet,
+      order.signerWallet,
       finalSenderWallet,
-      order.signer.amount,
-      order.signer.id,
-      order.signer.token,
-      order.signer.kind
+      order.signerAmount,
+      order.signerId,
+      order.signerToken,
+      order.signerKind
     );
 
     // Transfer token from signer to affiliate if specified.
-    if (order.affiliate.token != address(0)) {
+    if (order.affiliateToken != address(0)) {
       transferToken(
-        order.signer.wallet,
-        order.affiliate.wallet,
-        order.affiliate.amount,
-        order.affiliate.id,
-        order.affiliate.token,
-        order.affiliate.kind
+        order.signerWallet,
+        order.affiliateWallet,
+        order.affiliateAmount,
+        order.affiliateId,
+        order.affiliateToken,
+        order.affiliateKind
       );
     }
 
     emit Swap(
       order.nonce,
       block.timestamp,
-      order.signer.wallet,
-      order.signer.amount,
-      order.signer.id,
-      order.signer.token,
+      order.signerWallet,
+      order.signerAmount,
+      order.signerId,
+      order.signerToken,
       finalSenderWallet,
-      order.sender.amount,
-      order.sender.id,
-      order.sender.token,
-      order.affiliate.wallet,
-      order.affiliate.amount,
-      order.affiliate.id,
-      order.affiliate.token
+      order.senderAmount,
+      order.senderId,
+      order.senderToken,
+      order.affiliateWallet,
+      order.affiliateAmount,
+      order.affiliateId,
+      order.affiliateToken
     );
+  }
+
+  /**
+   * @notice Returns the current chainId using the chainid opcode
+   * @return id uint256 The chain id
+   */
+  function getChainId() public view returns (uint256 id) {
+    // no-inline-assembly
+    assembly {
+      id := chainid()
+    }
+  }
+
+  /**
+   * @notice Hash an order into bytes32
+   * @dev EIP-191 header and domain separator included
+   * @param order Order The order to be hashed
+   * @param domainSeparator bytes32
+   * @return bytes32 A keccak256 abi.encodePacked value
+   */
+  function hashOrder(OrderAny calldata order, bytes32 domainSeparator)
+    internal
+    pure
+    returns (bytes32)
+  {
+    return
+      keccak256(
+        abi.encodePacked(
+          EIP191_HEADER,
+          domainSeparator,
+          keccak256(
+            abi.encode(
+              ORDER_TYPEHASH,
+              order.nonce,
+              order.expiry,
+              keccak256(
+                abi.encode(
+                  order.signerKind,
+                  order.signerWallet,
+                  order.signerToken,
+                  order.signerAmount,
+                  order.signerId
+                )
+              ),
+              keccak256(
+                abi.encode(
+                  order.senderKind,
+                  order.senderWallet,
+                  order.senderToken,
+                  order.senderAmount,
+                  order.senderId
+                )
+              ),
+              keccak256(
+                abi.encode(
+                  order.affiliateKind,
+                  order.affiliateWallet,
+                  order.affiliateToken,
+                  order.affiliateAmount,
+                  order.affiliateId
+                )
+              )
+            )
+          )
+        )
+      );
   }
 
   /**
@@ -290,38 +374,33 @@ contract Swap is ISwap {
 
   /**
    * @notice Validate signature using an EIP-712 typed data hash
-   * @param order Types.Order Order to validate
+   * @param order Order to validate
    * @param domainSeparator bytes32 Domain identifier used in signatures (EIP-712)
    * @return bool True if order has a valid signature
    */
-  function isValid(Types.Order memory order, bytes32 domainSeparator)
+  function isValid(OrderAny calldata order, bytes32 domainSeparator)
     internal
     pure
     returns (bool)
   {
-    if (order.signature.version == bytes1(0x01)) {
+    if (order.signatureVersion == bytes1(0x01)) {
       return
-        order.signature.signatory ==
-        ecrecover(
-          Types.hashOrder(order, domainSeparator),
-          order.signature.v,
-          order.signature.r,
-          order.signature.s
-        );
+        order.signatory ==
+        ecrecover(hashOrder(order, domainSeparator), order.v, order.r, order.s);
     }
-    if (order.signature.version == bytes1(0x45)) {
+    if (order.signatureVersion == bytes1(0x45)) {
       return
-        order.signature.signatory ==
+        order.signatory ==
         ecrecover(
           keccak256(
             abi.encodePacked(
               "\x19Ethereum Signed Message:\n32",
-              Types.hashOrder(order, domainSeparator)
+              hashOrder(order, domainSeparator)
             )
           ),
-          order.signature.v,
-          order.signature.r,
-          order.signature.s
+          order.v,
+          order.r,
+          order.s
         );
     }
     return false;
