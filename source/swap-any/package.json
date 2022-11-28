@@ -1,0 +1,35 @@
+{
+  "name": "@airswap/swap-any",
+  "version": "0.0.1",
+  "description": "AirSwap: Atomic Token Swap",
+  "contributors": [
+    "Vicente Dragicevic",
+    "Don Mosites",
+    "Ethan Wessel"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/airswap/airswap-protocols"
+  },
+  "files": [
+    "./build",
+    "./typechain",
+    "./deploys.js"
+  ],
+  "scripts": {
+    "clean": "hardhat clean; rm -rf ./build; rm -rf ./typechain",
+    "compile": "hardhat compile; yarn typechain",
+    "typechain": "tsc -b",
+    "coverage": "hardhat coverage",
+    "test": "hardhat test",
+    "deploy": "hardhat run ./scripts/deploy.js",
+    "verify": "hardhat run ./scripts/verify.js"
+  },
+  "dependencies": {
+    "openzeppelin-solidity": "^4.6.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
