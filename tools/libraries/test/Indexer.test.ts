@@ -39,11 +39,18 @@ describe('toSortOrder', () => {
 
 describe('client', () => {
   let app
+  let server
+
   before(() => {
     app = express()
     app.use(bodyParser.json())
-    app.listen(12435)
+    server = app.listen(12435)
   })
+
+  after(() => {
+    server.close()
+  })
+
   describe('getHealthCheck', () => {
     it('Should query on /', async () => {
       app.get('/', (req, res) => {
