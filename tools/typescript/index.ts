@@ -33,6 +33,25 @@ export type Settlement = {
 
 export type FullOrder = UnsignedOrder & Signature & Settlement
 
+export type UnsignedOrderAny = {
+  nonce: string
+  expiry: string
+  protocolFee: string
+  signer: OrderAnyParty
+  sender: OrderAnyParty
+  affiliate: OrderAnyParty
+}
+
+export type OrderAny = UnsignedOrderAny & Signature
+
+export type OrderAnyParty = {
+  wallet: string
+  token: string
+  kind: string
+  id: string
+  amount: string
+}
+
 export type UnsignedClaim = {
   nonce: string
   expiry: string
@@ -76,6 +95,30 @@ export const EIP712Swap = {
     { name: 'senderWallet', type: 'address' },
     { name: 'senderToken', type: 'address' },
     { name: 'senderAmount', type: 'uint256' },
+  ],
+}
+
+export const EIP712SwapAny = {
+  EIP712Domain: [
+    { name: 'name', type: 'string' },
+    { name: 'version', type: 'string' },
+    { name: 'chainId', type: 'uint256' },
+    { name: 'verifyingContract', type: 'address' },
+  ],
+  Order: [
+    { name: 'nonce', type: 'uint256' },
+    { name: 'expiry', type: 'uint256' },
+    { name: 'protocolFee', type: 'uint256' },
+    { name: 'signer', type: 'Party' },
+    { name: 'sender', type: 'Party' },
+    { name: 'affiliate', type: 'Party' },
+  ],
+  Party: [
+    { name: 'wallet', type: 'address' },
+    { name: 'token', type: 'address' },
+    { name: 'kind', type: 'bytes4' },
+    { name: 'id', type: 'uint256' },
+    { name: 'amount', type: 'uint256' },
   ],
 }
 
