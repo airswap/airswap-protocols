@@ -10,7 +10,7 @@ const { ADDRESS_ZERO } = require('@airswap/constants')
 
 const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
 const IWETH = require('../build/contracts/interfaces/IWETH.sol/IWETH.json')
-const LIGHT = require('@airswap/swap/build/contracts/Swap.sol/Swap.json')
+const LIGHT = require('@airswap/swap-erc20/build/contracts/SwapERC20.sol/SwapERC20.json')
 
 describe('Wrapper Unit Tests', () => {
   let snapshotId

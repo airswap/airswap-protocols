@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 const { ethers, run } = require('hardhat')
-const swapDeploys = require('@airswap/swap/deploys.js')
+const swapDeploys = require('@airswap/swap-erc20/deploys.js')
 const wrapperDeploys = require('../deploys.js')
 const { chainNames, wrappedTokenAddresses } = require('@airswap/constants')
 

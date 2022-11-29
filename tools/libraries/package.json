@@ -32,7 +32,7 @@
     "@airswap/jsonrpc-client-websocket": "0.0.1",
     "@airswap/maker-registry": "3.1.2",
     "@airswap/indexer-registry": "3.1.2",
-    "@airswap/swap": "3.2.3",
+    "@airswap/swap-erc20": "3.2.3",
     "@airswap/typescript": "3.0.1",
     "@airswap/utils": "3.0.4",
     "@airswap/wrapper": "3.1.3",

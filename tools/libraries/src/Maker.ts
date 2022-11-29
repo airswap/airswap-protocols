@@ -13,7 +13,7 @@ import {
 import { REQUEST_TIMEOUT } from '@airswap/constants'
 import { parseUrl, orderPropsToStrings } from '@airswap/utils'
 import { Order, Pricing } from '@airswap/typescript'
-import { Swap } from './Swap'
+import { SwapERC20 } from './SwapERC20'
 
 export type SupportedProtocolInfo = {
   name: string
@@ -54,7 +54,7 @@ export class Maker extends TypedEmitter<MakerEvents> {
 
   public constructor(
     public locator: string,
-    private swapContract = Swap.getAddress()
+    private swapContract = SwapERC20.getAddress()
   ) {
     super()
     const protocol = parseUrl(locator).protocol

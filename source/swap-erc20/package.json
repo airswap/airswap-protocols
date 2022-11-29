@@ -1,7 +1,7 @@
 {
-  "name": "@airswap/swap",
+  "name": "@airswap/swap-erc20",
   "version": "3.2.3",
-  "description": "AirSwap: Atomic Token Swap",
+  "description": "AirSwap: Atomic ERC20 Token Swap",
   "contributors": [
     "Vicente Dragicevic",
     "Don Mosites",

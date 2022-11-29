@@ -1,13 +1,13 @@
 import { ethers, BigNumber, ContractTransaction } from 'ethers'
 import { chainIds, chainNames } from '@airswap/constants'
 import { Order } from '@airswap/typescript'
-import { Swap as SwapContract } from '@airswap/swap/typechain/contracts'
-import { Swap__factory } from '@airswap/swap/typechain/factories/contracts'
+import { SwapERC20 as SwapContract } from '@airswap/swap-erc20/typechain/contracts'
+import { SwapERC20__factory } from '@airswap/swap-erc20/typechain/factories/contracts'
 import { orderToParams } from '@airswap/utils'
 
-import * as swapDeploys from '@airswap/swap/deploys.js'
+import * as swapDeploys from '@airswap/swap-erc20/deploys.js'
 
-export class Swap {
+export class SwapERC20 {
   public chainId: number
   public contract: SwapContract
 
@@ -18,8 +18,8 @@ export class Swap {
       | ethers.providers.Provider
   ) {
     this.chainId = chainId
-    this.contract = Swap__factory.connect(
-      Swap.getAddress(chainId),
+    this.contract = SwapERC20__factory.connect(
+      SwapERC20.getAddress(chainId),
       signerOrProvider ||
         ethers.getDefaultProvider(chainNames[chainId].toLowerCase())
     )
@@ -29,7 +29,7 @@ export class Swap {
     if (chainId in swapDeploys) {
       return swapDeploys[chainId]
     }
-    throw new Error(`Swap deploy not found for chainId ${chainId}`)
+    throw new Error(`SwapERC20 contract not found for chainId ${chainId}`)
   }
 
   public async check(
