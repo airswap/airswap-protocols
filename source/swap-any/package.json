@@ -23,11 +23,15 @@
     "typechain": "tsc -b",
     "coverage": "hardhat coverage",
     "test": "hardhat test",
+    "test:unit": "hardhat test ./test/unit.js",
     "deploy": "hardhat run ./scripts/deploy.js",
     "verify": "hardhat run ./scripts/verify.js"
   },
   "dependencies": {
     "openzeppelin-solidity": "^4.6.0"
+  },
+  "devDependencies": {
+    "@airswap/utils": "3.0.4"
   },
   "publishConfig": {
     "access": "public"

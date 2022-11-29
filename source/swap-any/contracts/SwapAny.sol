@@ -14,17 +14,46 @@ contract SwapAny is ISwapAny {
       "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
     );
 
-  bytes32 public constant ORDER_TYPEHASH =
+  bytes32 internal constant ORDER_TYPEHASH =
     keccak256(
-      "Order(uint256 nonce,uint256 expiry,address signerWallet,address signerToken,uint256 signerAmount,uint256 protocolFee,address senderWallet,address senderToken,uint256 senderAmount)"
+      abi.encodePacked(
+        "Order(",
+        "uint256 nonce,",
+        "uint256 expiry,",
+        "uint256 protocolFee,",
+        "Party signer,",
+        "Party sender,",
+        "Party affiliate",
+        ")",
+        "Party(",
+        "address wallet,",
+        "address token,",
+        "bytes4 kind,",
+        "uint256 id,",
+        "uint256 amount",
+        ")"
+      )
+    );
+
+  bytes32 internal constant PARTY_TYPEHASH =
+    keccak256(
+      abi.encodePacked(
+        "Party(",
+        "address wallet,",
+        "address token,",
+        "bytes4 kind,",
+        "uint256 id,",
+        "uint256 amount",
+        ")"
+      )
     );
 
   // Data type used for hashing: Structured data (EIP-191)
   bytes internal constant EIP191_HEADER = "\x19\x01";
 
   // Domain and version for use in signatures (EIP-712)
-  bytes32 public constant DOMAIN_NAME = keccak256("SWAPANY");
-  bytes32 public constant DOMAIN_VERSION = keccak256("3");
+  bytes32 public constant DOMAIN_NAME = keccak256("SWAP_ANY");
+  bytes32 public constant DOMAIN_VERSION = keccak256("1");
 
   // Domain chain id for use in signatures (EIP-712)
   uint256 public immutable DOMAIN_CHAIN_ID;
@@ -81,111 +110,83 @@ contract SwapAny is ISwapAny {
 
     // Ensure the nonce is AVAILABLE (0x00).
     require(
-      signerNonceStatus[order.signerWallet][order.nonce] == AVAILABLE,
+      signerNonceStatus[order.signer.wallet][order.nonce] == AVAILABLE,
       "ORDER_TAKEN_OR_CANCELLED"
     );
 
     // Ensure the order nonce is above the minimum.
     require(
-      order.nonce >= signerMinimumNonce[order.signerWallet],
+      order.nonce >= signerMinimumNonce[order.signer.wallet],
       "NONCE_TOO_LOW"
     );
 
     // Mark the nonce UNAVAILABLE (0x01).
-    signerNonceStatus[order.signerWallet][order.nonce] = UNAVAILABLE;
+    signerNonceStatus[order.signer.wallet][order.nonce] = UNAVAILABLE;
 
     // Validate the sender side of the trade.
     address finalSenderWallet;
 
-    if (order.senderWallet == address(0)) {
+    if (order.sender.wallet == address(0)) {
       /**
        * Sender is not specified. The msg.sender of the transaction becomes
        * the sender of the order.
        */
       finalSenderWallet = msg.sender;
     } else {
-      /**
-       * Sender is specified. If the msg.sender is not the specified sender,
-       * this determines whether the msg.sender is an authorized sender.
-       */
-      require(
-        isSenderAuthorized(order.senderWallet, msg.sender),
-        "SENDER_UNAUTHORIZED"
-      );
       // The msg.sender is authorized.
-      finalSenderWallet = order.senderWallet;
+      finalSenderWallet = order.sender.wallet;
     }
 
     // Validate the signer side of the trade.
-    if (order.v == 0) {
-      /**
-       * Signature is not provided. The signer may have authorized the
-       * msg.sender to swap on its behalf, which does not require a signature.
-       */
-      require(
-        isSignerAuthorized(order.signerWallet, msg.sender),
-        "SIGNER_UNAUTHORIZED"
-      );
-    } else {
-      /**
-       * The signature is provided. Determine whether the signer is
-       * authorized and if so validate the signature itself.
-       */
-      require(
-        isSignerAuthorized(order.signerWallet, order.signatory),
-        "SIGNER_UNAUTHORIZED"
-      );
+    require(isValid(order, DOMAIN_SEPARATOR), "SIGNATURE_INVALID");
 
-      // Ensure the signature is valid.
-      require(isValid(order, DOMAIN_SEPARATOR), "SIGNATURE_INVALID");
-    }
     // Transfer token from sender to signer.
     transferToken(
       finalSenderWallet,
-      order.signerWallet,
-      order.senderAmount,
-      order.senderId,
-      order.senderToken,
-      order.senderKind
+      order.signer.wallet,
+      order.sender.amount,
+      order.sender.id,
+      order.sender.token,
+      order.sender.kind
     );
 
     // Transfer token from signer to sender.
     transferToken(
-      order.signerWallet,
+      order.signer.wallet,
       finalSenderWallet,
-      order.signerAmount,
-      order.signerId,
-      order.signerToken,
-      order.signerKind
+      order.signer.amount,
+      order.signer.id,
+      order.signer.token,
+      order.signer.kind
     );
 
     // Transfer token from signer to affiliate if specified.
-    if (order.affiliateToken != address(0)) {
+    if (order.affiliate.token != address(0)) {
       transferToken(
-        order.signerWallet,
-        order.affiliateWallet,
-        order.affiliateAmount,
-        order.affiliateId,
-        order.affiliateToken,
-        order.affiliateKind
+        order.signer.wallet,
+        order.affiliate.wallet,
+        order.affiliate.amount,
+        order.affiliate.id,
+        order.affiliate.token,
+        order.affiliate.kind
       );
     }
 
     emit Swap(
       order.nonce,
       block.timestamp,
-      order.signerWallet,
-      order.signerAmount,
-      order.signerId,
-      order.signerToken,
+      order.signer.wallet,
+      order.sender.amount,
+      order.signer.id,
+      order.signer.token,
       finalSenderWallet,
-      order.senderAmount,
-      order.senderId,
-      order.senderToken,
-      order.affiliateWallet,
-      order.affiliateAmount,
-      order.affiliateId,
-      order.affiliateToken
+      order.sender.amount,
+      order.sender.id,
+      order.sender.token,
+      order.affiliate.wallet,
+      order.affiliate.amount,
+      order.affiliate.id,
+      order.affiliate.token
     );
   }
 
@@ -222,31 +223,35 @@ contract SwapAny is ISwapAny {
               ORDER_TYPEHASH,
               order.nonce,
               order.expiry,
+              order.protocolFee,
               keccak256(
                 abi.encode(
-                  order.signerKind,
-                  order.signerWallet,
-                  order.signerToken,
-                  order.signerAmount,
-                  order.signerId
+                  PARTY_TYPEHASH,
+                  order.signer.wallet,
+                  order.signer.token,
+                  order.signer.kind,
+                  order.signer.id,
+                  order.signer.amount
                 )
               ),
               keccak256(
                 abi.encode(
-                  order.senderKind,
-                  order.senderWallet,
-                  order.senderToken,
-                  order.senderAmount,
-                  order.senderId
+                  PARTY_TYPEHASH,
+                  order.sender.wallet,
+                  order.sender.token,
+                  order.sender.kind,
+                  order.sender.id,
+                  order.sender.amount
                 )
               ),
               keccak256(
                 abi.encode(
-                  order.affiliateKind,
-                  order.affiliateWallet,
-                  order.affiliateToken,
-                  order.affiliateAmount,
-                  order.affiliateId
+                  PARTY_TYPEHASH,
+                  order.affiliate.wallet,
+                  order.affiliate.token,
+                  order.affiliate.kind,
+                  order.affiliate.id,
+                  order.affiliate.amount
                 )
               )
             )
@@ -282,86 +287,6 @@ contract SwapAny is ISwapAny {
   }
 
   /**
-   * @notice Authorize a delegated sender
-   * @dev Emits an AuthorizeSender event
-   * @param authorizedSender address Address to authorize
-   */
-  function authorizeSender(address authorizedSender) external {
-    require(msg.sender != authorizedSender, "SELF_AUTH_INVALID");
-    if (!senderAuthorizations[msg.sender][authorizedSender]) {
-      senderAuthorizations[msg.sender][authorizedSender] = true;
-      emit AuthorizeSender(msg.sender, authorizedSender);
-    }
-  }
-
-  /**
-   * @notice Authorize a delegated signer
-   * @dev Emits an AuthorizeSigner event
-   * @param authorizedSigner address Address to authorize
-   */
-  function authorizeSigner(address authorizedSigner) external {
-    require(msg.sender != authorizedSigner, "SELF_AUTH_INVALID");
-    if (!signerAuthorizations[msg.sender][authorizedSigner]) {
-      signerAuthorizations[msg.sender][authorizedSigner] = true;
-      emit AuthorizeSigner(msg.sender, authorizedSigner);
-    }
-  }
-
-  /**
-   * @notice Revoke an authorized sender
-   * @dev Emits a RevokeSender event
-   * @param authorizedSender address Address to revoke
-   */
-  function revokeSender(address authorizedSender) external {
-    if (senderAuthorizations[msg.sender][authorizedSender]) {
-      delete senderAuthorizations[msg.sender][authorizedSender];
-      emit RevokeSender(msg.sender, authorizedSender);
-    }
-  }
-
-  /**
-   * @notice Revoke an authorized signer
-   * @dev Emits a RevokeSigner event
-   * @param authorizedSigner address Address to revoke
-   */
-  function revokeSigner(address authorizedSigner) external {
-    if (signerAuthorizations[msg.sender][authorizedSigner]) {
-      delete signerAuthorizations[msg.sender][authorizedSigner];
-      emit RevokeSigner(msg.sender, authorizedSigner);
-    }
-  }
-
-  /**
-   * @notice Determine whether a sender delegate is authorized
-   * @param authorizer address Address doing the authorization
-   * @param delegate address Address being authorized
-   * @return bool True if a delegate is authorized to send
-   */
-  function isSenderAuthorized(address authorizer, address delegate)
-    internal
-    view
-    returns (bool)
-  {
-    return ((authorizer == delegate) ||
-      senderAuthorizations[authorizer][delegate]);
-  }
-
-  /**
-   * @notice Determine whether a signer delegate is authorized
-   * @param authorizer address Address doing the authorization
-   * @param delegate address Address being authorized
-   * @return bool True if a delegate is authorized to sign
-   */
-  function isSignerAuthorized(address authorizer, address delegate)
-    internal
-    view
-    returns (bool)
-  {
-    return ((authorizer == delegate) ||
-      signerAuthorizations[authorizer][delegate]);
-  }
-
-  /**
    * @notice Validate signature using an EIP-712 typed data hash
    * @param order Order to validate
    * @param domainSeparator bytes32 Domain identifier used in signatures (EIP-712)
@@ -372,27 +297,9 @@ contract SwapAny is ISwapAny {
     pure
     returns (bool)
   {
-    if (order.signatureVersion == bytes1(0x01)) {
-      return
-        order.signatory ==
-        ecrecover(hashOrder(order, domainSeparator), order.v, order.r, order.s);
-    }
-    if (order.signatureVersion == bytes1(0x45)) {
-      return
-        order.signatory ==
-        ecrecover(
-          keccak256(
-            abi.encodePacked(
-              "\x19Ethereum Signed Message:\n32",
-              hashOrder(order, domainSeparator)
-            )
-          ),
-          order.v,
-          order.r,
-          order.s
-        );
-    }
-    return false;
+    return
+      order.signer.wallet ==
+      ecrecover(hashOrder(order, domainSeparator), order.v, order.r, order.s);
   }
 
   /**
