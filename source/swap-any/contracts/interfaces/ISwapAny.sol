@@ -7,33 +7,23 @@ import "../TransferHandlerRegistry.sol";
 
 interface ISwapAny {
   struct OrderAny {
-    uint256 nonce;
-    uint256 expiry;
-    // Signer Data
-    address signerWallet; // Signer Wallet Address
-    uint256 signerAmount; // Quantity of tokens
-    uint256 signerId; // ID for ERC-721 or ERC-1155
-    address signerToken; // Token's contract address
-    bytes4 signerKind; // Interface ID of the token
-    // Sender Data
-    address senderWallet; // Sender Wallet address
-    uint256 senderAmount; // Quantity of tokens
-    uint256 senderId; // ID for ERC-721 or ERC-1155
-    address senderToken; // Token's contract addresss
-    bytes4 senderKind; // Interface ID of the token
-    // Affiliate Data - supports community fees
-    address affiliateWallet; // Wallet address of the party
-    uint256 affiliateAmount; // Amount for ERC-20 or ERC-1155
-    uint256 affiliateId; // ID for ERC-721 or ERC-1155
-    address affiliateToken; // Contract address of the token
-    bytes4 affiliateKind; // Interface ID of the token
-    // Signature Data
-    address signatory; // Address of the wallet used to sign
-    address validator; // Address of the intended swap contract
-    bytes1 signatureVersion;
+    uint256 nonce; // Unique per order and should be sequential
+    uint256 expiry; // Expiry in seconds since 1 January 1970
+    uint256 protocolFee;
+    Party signer; // Party to the trade that sets terms
+    Party sender; // Party to the trade that accepts terms
+    Party affiliate; // Party compensated for facilitating (optional)
     uint8 v;
     bytes32 r;
     bytes32 s;
+  }
+
+  struct Party {
+    address wallet; // Wallet address of the party
+    address token; // Contract address of the token
+    bytes4 kind; // Interface ID of the token
+    uint256 id; // ID for ERC-721 or ERC-1155
+    uint256 amount; // Amount for ERC-20 or ERC-1155
   }
 
   event Swap(
@@ -57,26 +47,6 @@ interface ISwapAny {
 
   event CancelUpTo(uint256 indexed nonce, address indexed signerWallet);
 
-  event AuthorizeSender(
-    address indexed authorizerAddress,
-    address indexed authorizedSender
-  );
-
-  event AuthorizeSigner(
-    address indexed authorizerAddress,
-    address indexed authorizedSigner
-  );
-
-  event RevokeSender(
-    address indexed authorizerAddress,
-    address indexed revokedSender
-  );
-
-  event RevokeSigner(
-    address indexed authorizerAddress,
-    address indexed revokedSigner
-  );
-
   /**
    * @notice Atomic Token Swap
    * @param order Order
@@ -95,34 +65,6 @@ interface ISwapAny {
    * @param minimumNonce uint256
    */
   function cancelUpTo(uint256 minimumNonce) external;
-
-  /**
-   * @notice Authorize a delegated sender
-   * @param authorizedSender address
-   */
-  function authorizeSender(address authorizedSender) external;
-
-  /**
-   * @notice Authorize a delegated signer
-   * @param authorizedSigner address
-   */
-  function authorizeSigner(address authorizedSigner) external;
-
-  /**
-   * @notice Revoke an authorization
-   * @param authorizedSender address
-   */
-  function revokeSender(address authorizedSender) external;
-
-  /**
-   * @notice Revoke an authorization
-   * @param authorizedSigner address
-   */
-  function revokeSigner(address authorizedSigner) external;
-
-  function senderAuthorizations(address, address) external view returns (bool);
-
-  function signerAuthorizations(address, address) external view returns (bool);
 
   function signerNonceStatus(address, uint256) external view returns (bytes1);
 
