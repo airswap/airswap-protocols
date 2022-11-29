@@ -1,5 +1,6 @@
 import { FullOrder } from '@airswap/typescript'
-import axios, { AxiosError, AxiosResponse } from 'axios'
+import { AxiosError, AxiosResponse } from 'axios'
+const axios = require('axios')
 
 export type IndexedOrderResponse = {
   hash?: string | undefined
@@ -91,11 +92,12 @@ export abstract class IndexedOrderError extends Error {
   public code!: number
   public constructor(message: string) {
     super(message)
+    this.message = message
   }
 }
 export class ErrorResponse {
-  private code: number
-  private message: string
+  public code: number
+  public message: string
   public constructor(code: number, message: string) {
     this.code = code
     this.message = message
@@ -127,7 +129,7 @@ export class JsonRpcResponse {
       | undefined
   ) {
     this.id = id
-    if (result instanceof IndexedOrderError) {
+    if (result instanceof Error) {
       this.result = new ErrorResponse(result.code, result.message)
     } else {
       this.result = result

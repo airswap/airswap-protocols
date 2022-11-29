@@ -1,5 +1,13 @@
 import { expect } from 'chai'
-import { SortField, SortOrder, toSortField, toSortOrder } from '../src/Indexer'
+import {
+  NodeIndexer,
+  SortField,
+  SortOrder,
+  toSortField,
+  toSortOrder,
+} from '../src/Indexer'
+import express from 'express'
+import bodyParser from 'body-parser'
 
 describe('toSortField', () => {
   it('should match value', () => {
@@ -26,5 +34,44 @@ describe('toSortOrder', () => {
   it('should return undefined', () => {
     expect(toSortOrder('')).to.equal(undefined)
     expect(toSortOrder('aze')).to.equal(undefined)
+  })
+})
+
+describe('client', () => {
+  let app
+  let server
+
+  before(() => {
+    app = express()
+    app.use(bodyParser.json())
+    server = app.listen(12435)
+  })
+
+  after(() => {
+    server.close()
+  })
+
+  describe('getHealthCheck', () => {
+    it('Should query on /', async () => {
+      app.get('/', (req, res) => {
+        res.send({ result: { a: 'b' } })
+      })
+      const health = await new NodeIndexer(
+        'http://localhost:12435'
+      ).getHealthCheck()
+      expect(health).to.eql({ a: 'b' })
+    })
+
+    it('Should query on post /orders', async () => {
+      app.post('/', (req, res) => {
+        expect(req.body.jsonrpc).to.equal('2.0')
+        expect(req.body.id).to.equal('1')
+        expect(req.body.method).to.equal('getOrders')
+        expect(req.body.params).to.eql([{}])
+        res.send({ result: { a: 'b' } })
+      })
+      const health = await new NodeIndexer('http://localhost:12435').getOrders()
+      expect(health).to.eql({ a: 'b' })
+    })
   })
 })
