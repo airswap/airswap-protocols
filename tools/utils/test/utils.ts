@@ -8,9 +8,9 @@ import {
   isValidOrderERC20,
   isValidClaim,
   calculateCostFromLevels,
-  createSwapERC20Signature,
+  createOrderERC20Signature,
   createClaimSignature,
-  getSignerFromSwapERC20Signature,
+  getSignerFromOrderERC20Signature,
   getSignerFromClaimSignature,
   compressFullOrderERC20,
   decompressFullOrderERC20,
@@ -38,13 +38,13 @@ describe('Utils', async () => {
   })
 
   it('Signs and validates an order', async () => {
-    const { v, r, s } = await createSwapERC20Signature(
+    const { v, r, s } = await createOrderERC20Signature(
       unsignedOrder,
       wallet.privateKey,
       ADDRESS_ZERO,
       1
     )
-    const signerWallet = getSignerFromSwapERC20Signature(
+    const signerWallet = getSignerFromOrderERC20Signature(
       unsignedOrder,
       ADDRESS_ZERO,
       1,
@@ -68,13 +68,13 @@ describe('Utils', async () => {
       senderToken: ADDRESS_ZERO,
       senderAmount: '0',
     }
-    const signature = await createSwapERC20Signature(
+    const signature = await createOrderERC20Signature(
       unsignedOrder,
       wallet.privateKey,
       ADDRESS_ZERO,
       1
     )
-    const signerWallet = getSignerFromSwapERC20Signature(
+    const signerWallet = getSignerFromOrderERC20Signature(
       unsignedOrder,
       ADDRESS_ZERO,
       1,
@@ -163,13 +163,13 @@ describe('Utils', async () => {
   })
 
   it('Compresses and decompresses an order', async () => {
-    const { v, r, s } = await createSwapERC20Signature(
+    const { v, r, s } = await createOrderERC20Signature(
       unsignedOrder,
       wallet.privateKey,
       ADDRESS_ZERO,
       1
     )
-    const signerWallet = getSignerFromSwapERC20Signature(
+    const signerWallet = getSignerFromOrderERC20Signature(
       unsignedOrder,
       ADDRESS_ZERO,
       1,

@@ -50,7 +50,7 @@ export function createOrderERC20({
   }
 }
 
-export async function createSwapERC20Signature(
+export async function createOrderERC20Signature(
   unsignedOrder: UnsignedOrderERC20,
   signer: ethers.VoidSigner | string,
   swapContract: string,
@@ -87,7 +87,7 @@ export async function createSwapERC20Signature(
   return { r, s, v: String(v) }
 }
 
-export function getSignerFromSwapERC20Signature(
+export function getSignerFromOrderERC20Signature(
   order: UnsignedOrderERC20,
   swapContract: string,
   chainId: number,

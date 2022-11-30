@@ -2,7 +2,7 @@ const { expect } = require('chai')
 const {
   createOrderERC20,
   orderERC20ToParams,
-  createSwapSignature,
+  createOrderERC20Signature,
 } = require('@airswap/utils')
 const { ethers } = require('hardhat')
 const ERC20 = require('@openzeppelin/contracts/build/contracts/ERC20PresetMinterPauser.json')
@@ -39,7 +39,7 @@ describe('Swap Integration Tests', () => {
     })
     return orderERC20ToParams({
       ...unsignedOrder,
-      ...(await createSwapSignature(
+      ...(await createOrderERC20Signature(
         unsignedOrder,
         signer,
         swap.address,

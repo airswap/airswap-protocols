@@ -2,7 +2,7 @@ const { expect } = require('chai')
 const {
   createOrderERC20,
   orderERC20ToParams,
-  createSwapERC20Signature,
+  createOrderERC20Signature,
 } = require('@airswap/utils')
 const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
@@ -47,7 +47,7 @@ describe('Wrapper Unit Tests', () => {
     })
     return orderERC20ToParams({
       ...unsignedOrder,
-      ...(await createSwapERC20Signature(
+      ...(await createOrderERC20Signature(
         unsignedOrder,
         signer,
         swap.address,

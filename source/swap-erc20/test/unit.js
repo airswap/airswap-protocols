@@ -3,7 +3,7 @@ const { ADDRESS_ZERO, SECONDS_IN_DAY } = require('@airswap/constants')
 const {
   createOrderERC20,
   orderERC20ToParams,
-  createSwapERC20Signature,
+  createOrderERC20Signature,
 } = require('@airswap/utils')
 const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
@@ -48,7 +48,7 @@ describe('SwapERC20 Unit Tests', () => {
     })
     return orderERC20ToParams({
       ...unsignedOrder,
-      ...(await createSwapERC20Signature(
+      ...(await createOrderERC20Signature(
         unsignedOrder,
         signatory,
         swap.address,
@@ -69,7 +69,7 @@ describe('SwapERC20 Unit Tests', () => {
     })
     return orderERC20ToParams({
       ...unsignedOrder,
-      ...(await createSwapERC20Signature(
+      ...(await createOrderERC20Signature(
         unsignedOrder,
         signatory,
         swap.address,
