@@ -1,8 +1,8 @@
 const { expect } = require('chai')
 const {
-  createOrder,
-  orderToParams,
-  createSwapSignature,
+  createOrderERC20,
+  orderERC20ToParams,
+  createOrderERC20Signature,
 } = require('@airswap/utils')
 const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
@@ -34,8 +34,8 @@ describe('Wrapper Unit Tests', () => {
   const REBATE_SCALE = '10'
   const REBATE_MAX = '100'
 
-  async function createSignedOrder(params, signer) {
-    const unsignedOrder = createOrder({
+  async function createSignedOrderERC20(params, signer) {
+    const unsignedOrder = createOrderERC20({
       protocolFee: PROTOCOL_FEE,
       signerWallet: signer.address,
       signerToken: signerToken.address,
@@ -45,9 +45,9 @@ describe('Wrapper Unit Tests', () => {
       senderAmount: DEFAULT_AMOUNT,
       ...params,
     })
-    return orderToParams({
+    return orderERC20ToParams({
       ...unsignedOrder,
-      ...(await createSwapSignature(
+      ...(await createOrderERC20Signature(
         unsignedOrder,
         signer,
         swap.address,
@@ -145,7 +145,7 @@ describe('Wrapper Unit Tests', () => {
 
   describe('Test wraps', async () => {
     it('test swap fails with value', async () => {
-      const order = await createSignedOrder(
+      const order = await createSignedOrderERC20(
         {
           senderWallet: wrapper.address,
         },
@@ -156,7 +156,7 @@ describe('Wrapper Unit Tests', () => {
       ).to.be.revertedWith('VALUE_MUST_BE_ZERO')
     })
     it('test wrapped swap fails without value', async () => {
-      const order = await createSignedOrder(
+      const order = await createSignedOrderERC20(
         {
           senderToken: wethToken.address,
         },
@@ -167,7 +167,7 @@ describe('Wrapper Unit Tests', () => {
       )
     })
     it('test swap', async () => {
-      const order = await createSignedOrder(
+      const order = await createSignedOrderERC20(
         {
           senderWallet: wrapper.address,
         },
@@ -176,7 +176,7 @@ describe('Wrapper Unit Tests', () => {
       await wrapper.connect(sender).swap(...order)
     })
     it('test wrapped swap', async () => {
-      const order = await createSignedOrder(
+      const order = await createSignedOrderERC20(
         {
           senderToken: wethToken.address,
           senderWallet: wrapper.address,
@@ -186,7 +186,7 @@ describe('Wrapper Unit Tests', () => {
       await wrapper.connect(sender).swap(...order, { value: DEFAULT_AMOUNT })
     })
     it('test wrapped swapAnySender', async () => {
-      const order = await createSignedOrder(
+      const order = await createSignedOrderERC20(
         {
           senderToken: wethToken.address,
           senderWallet: ADDRESS_ZERO,
@@ -198,7 +198,7 @@ describe('Wrapper Unit Tests', () => {
         .swapAnySender(...order, { value: DEFAULT_AMOUNT })
     })
     it('test that unwrap fails', async () => {
-      const order = await createSignedOrder(
+      const order = await createSignedOrderERC20(
         {
           signerToken: wethToken.address,
           senderWallet: wrapper.address,

@@ -1,20 +1,20 @@
 import * as ethUtil from 'ethereumjs-util'
 import * as sigUtil from 'eth-sig-util'
 import { ethers } from 'ethers'
-import lzString from 'lz-string'
 
-import { stringify } from './strings'
+import { lowerCaseAddresses, stringify } from './strings'
 
 import {
   SECONDS_IN_DAY,
   ADDRESS_ZERO,
   DOMAIN_VERSION_SWAP,
   DOMAIN_NAME_SWAP,
+  chainIds,
 } from '@airswap/constants'
 import {
   UnsignedOrder,
   Order,
-  FullOrder,
+  OrderParty,
   Signature,
   EIP712Swap,
 } from '@airswap/typescript'
@@ -25,32 +25,37 @@ export const SWAP_DOMAIN_TYPEHASH = ethUtil.keccak256(
 export const SWAP_ORDER_TYPEHASH = ethUtil.keccak256(
   stringify(EIP712Swap, 'Order')
 )
+export const SWAP_PARTY_TYPEHASH = ethUtil.keccak256(
+  stringify(EIP712Swap, 'Party')
+)
 
-export function createOrder({
-  nonce = Date.now().toString(),
-  expiry = Math.round(Date.now() / 1000 + SECONDS_IN_DAY).toString(),
-  signerWallet = ADDRESS_ZERO,
-  signerToken = ADDRESS_ZERO,
-  signerAmount = '0',
-  protocolFee = '0',
-  senderWallet = ADDRESS_ZERO,
-  senderToken = ADDRESS_ZERO,
-  senderAmount = '0',
-}: any): UnsignedOrder {
-  return {
-    nonce: String(nonce),
-    expiry: String(expiry),
-    signerWallet,
-    signerToken,
-    signerAmount: String(signerAmount),
-    protocolFee: String(protocolFee),
-    senderWallet,
-    senderToken,
-    senderAmount: String(senderAmount),
-  }
+const defaultParty: OrderParty = {
+  wallet: ADDRESS_ZERO,
+  token: ADDRESS_ZERO,
+  kind: '0x36372b07',
+  id: '0',
+  amount: '0',
 }
 
-export async function createSwapSignature(
+export function createOrder({
+  nonce = Date.now(),
+  expiry = Math.round(Date.now() / 1000 + SECONDS_IN_DAY).toString(),
+  protocolFee = 0,
+  signer = {},
+  sender = {},
+  affiliate = {},
+}): UnsignedOrder {
+  return lowerCaseAddresses({
+    nonce: String(nonce),
+    expiry: String(expiry),
+    protocolFee: String(protocolFee),
+    signer: { ...defaultParty, ...signer },
+    sender: { ...defaultParty, ...sender },
+    affiliate: { ...defaultParty, ...affiliate },
+  })
+}
+
+export async function createOrderSignature(
   unsignedOrder: UnsignedOrder,
   signer: ethers.VoidSigner | string,
   swapContract: string,
@@ -79,7 +84,7 @@ export async function createSwapSignature(
         chainId,
         verifyingContract: swapContract,
       },
-      { Order: EIP712Swap.Order },
+      { Order: EIP712Swap.Order, Party: EIP712Swap.Party },
       unsignedOrder
     )
   }
@@ -87,7 +92,7 @@ export async function createSwapSignature(
   return { r, s, v: String(v) }
 }
 
-export function getSignerFromSwapSignature(
+export function getSignerFromOrderSignature(
   order: UnsignedOrder,
   swapContract: string,
   chainId: number,
@@ -112,223 +117,4 @@ export function getSignerFromSwapSignature(
     },
     sig,
   })
-}
-
-export function hashOrder(order: UnsignedOrder): Buffer {
-  return ethUtil.keccak256(
-    ethers.utils.defaultAbiCoder.encode(
-      [
-        'bytes32',
-        'uint256',
-        'uint256',
-        'address',
-        'address',
-        'uint256',
-        'uint256',
-        'address',
-        'address',
-        'uint256',
-      ],
-      [
-        SWAP_ORDER_TYPEHASH,
-        order.nonce,
-        order.expiry,
-        order.signerWallet,
-        order.signerToken,
-        order.signerAmount,
-        order.protocolFee,
-        order.senderWallet,
-        order.senderToken,
-        order.senderAmount,
-      ]
-    )
-  )
-}
-
-export function hashDomain(swapContract: string): Buffer {
-  return ethUtil.keccak256(
-    ethers.utils.defaultAbiCoder.encode(
-      ['bytes32', 'bytes32', 'bytes32', 'address'],
-      [
-        SWAP_DOMAIN_TYPEHASH,
-        ethUtil.keccak256(DOMAIN_NAME_SWAP),
-        ethUtil.keccak256(DOMAIN_VERSION_SWAP),
-        swapContract,
-      ]
-    )
-  )
-}
-
-export function getOrderHash(
-  order: UnsignedOrder,
-  swapContract: string
-): Buffer {
-  return ethUtil.keccak256(
-    Buffer.concat([
-      Buffer.from('1901', 'hex'),
-      hashDomain(swapContract),
-      hashOrder(order),
-    ])
-  )
-}
-
-export function isValidOrder(order: Order): boolean {
-  return (
-    !!order &&
-    typeof order['nonce'] == 'string' &&
-    typeof order['expiry'] == 'string' &&
-    ethers.utils.isAddress(order['signerWallet']) &&
-    ethers.utils.isAddress(order['signerToken']) &&
-    typeof order['signerAmount'] == 'string' &&
-    ethers.utils.isAddress(order['senderToken']) &&
-    typeof order['senderAmount'] == 'string' &&
-    typeof order['v'] == 'string' &&
-    ethers.utils.isBytesLike(order['r']) &&
-    ethers.utils.isBytesLike(order['s'])
-  )
-}
-
-export function isValidFullOrder(fullOrder: FullOrder): boolean {
-  return (
-    !!fullOrder &&
-    ethers.utils.isAddress(fullOrder['swapContract']) &&
-    typeof fullOrder['chainId'] == 'string' &&
-    typeof fullOrder['nonce'] == 'string' &&
-    typeof fullOrder['expiry'] == 'string' &&
-    ethers.utils.isAddress(fullOrder['signerWallet']) &&
-    ethers.utils.isAddress(fullOrder['signerToken']) &&
-    typeof fullOrder['signerAmount'] == 'string' &&
-    typeof fullOrder['protocolFee'] == 'string' &&
-    ethers.utils.isAddress(fullOrder['senderWallet']) &&
-    ethers.utils.isAddress(fullOrder['senderToken']) &&
-    typeof fullOrder['senderAmount'] == 'string' &&
-    typeof fullOrder['v'] == 'string' &&
-    ethers.utils.isBytesLike(fullOrder['r']) &&
-    ethers.utils.isBytesLike(fullOrder['s'])
-  )
-}
-
-export function orderToParams(
-  order: Order
-): [
-  string,
-  string,
-  string,
-  string,
-  string,
-  string,
-  string,
-  string,
-  string,
-  string
-] {
-  return [
-    order.nonce,
-    order.expiry,
-    order.signerWallet,
-    order.signerToken,
-    order.signerAmount,
-    order.senderToken,
-    order.senderAmount,
-    order.v,
-    order.r,
-    order.s,
-  ]
-}
-
-export function paramsToOrder(str: string): Order {
-  const split = str.split(',')
-  return {
-    nonce: split[0],
-    expiry: split[1],
-    signerWallet: split[2],
-    signerToken: split[3],
-    signerAmount: split[4],
-    senderToken: split[5],
-    senderAmount: split[6],
-    v: split[7],
-    r: split[8],
-    s: split[9],
-  }
-}
-
-export function fullOrderToParams(
-  order: FullOrder
-): [
-  string,
-  string,
-  string,
-  string,
-  string,
-  string,
-  string,
-  string,
-  string,
-  string,
-  string,
-  string,
-  string,
-  string
-] {
-  return [
-    order.chainId,
-    order.swapContract,
-    order.nonce,
-    order.expiry,
-    order.signerWallet,
-    order.signerToken,
-    order.signerAmount,
-    order.protocolFee,
-    order.senderWallet,
-    order.senderToken,
-    order.senderAmount,
-    order.v,
-    order.r,
-    order.s,
-  ]
-}
-
-export function paramsToFullOrder(str: string): FullOrder {
-  const split = str.split(',')
-  return {
-    chainId: split[0],
-    swapContract: split[1],
-    nonce: split[2],
-    expiry: split[3],
-    signerWallet: split[4],
-    signerToken: split[5],
-    signerAmount: split[6],
-    protocolFee: split[7],
-    senderWallet: split[8],
-    senderToken: split[9],
-    senderAmount: split[10],
-    v: split[11],
-    r: split[12],
-    s: split[13],
-  }
-}
-
-export function orderPropsToStrings(obj: any): Order {
-  return {
-    nonce: String(obj.nonce),
-    expiry: String(obj.expiry),
-    signerWallet: String(obj.signerWallet),
-    signerToken: String(obj.signerToken),
-    signerAmount: String(obj.signerAmount),
-    senderToken: String(obj.senderToken),
-    senderAmount: String(obj.senderAmount),
-    v: String(obj.v),
-    r: String(obj.r),
-    s: String(obj.s),
-  }
-}
-
-export function compressFullOrder(order: FullOrder): string {
-  return lzString.compressToEncodedURIComponent(
-    fullOrderToParams(order).join(',')
-  )
-}
-
-export function decompressFullOrder(str: string): FullOrder {
-  return paramsToFullOrder(lzString.decompressFromEncodedURIComponent(str))
 }

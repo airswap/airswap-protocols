@@ -25,7 +25,7 @@ contract SwapERC20 is ISwapERC20, Ownable {
       "Order(uint256 nonce,uint256 expiry,address signerWallet,address signerToken,uint256 signerAmount,uint256 protocolFee,address senderWallet,address senderToken,uint256 senderAmount)"
     );
 
-  bytes32 public constant DOMAIN_NAME = keccak256("SWAP");
+  bytes32 public constant DOMAIN_NAME = keccak256("SWAP_ERC20");
   bytes32 public constant DOMAIN_VERSION = keccak256("3");
   uint256 public immutable DOMAIN_CHAIN_ID;
   bytes32 public immutable DOMAIN_SEPARATOR;

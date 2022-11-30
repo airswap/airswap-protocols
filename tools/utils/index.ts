@@ -3,10 +3,10 @@ import * as url from 'url'
 import BigNumber from 'bignumber.js'
 
 import { etherscanDomains } from '@airswap/constants'
-import { Order, Levels, Formula, Pricing } from '@airswap/typescript'
+import { OrderERC20, Levels, Formula, Pricing } from '@airswap/typescript'
 
 export * from './src/swap'
-export * from './src/swap-any'
+export * from './src/swapERC20'
 export * from './src/pool'
 export * from './src/strings'
 
@@ -67,7 +67,7 @@ export function calculateCostFromLevels(amount: string, levels: Levels) {
   return totalCost.decimalPlaces(6).toFixed()
 }
 
-function getLowest(objects: Array<Order>, key: string): any {
+function getLowest(objects: Array<OrderERC20>, key: string): any {
   let best: any
   let bestAmount
   let amount
@@ -88,7 +88,7 @@ function getLowest(objects: Array<Order>, key: string): any {
   return best
 }
 
-function getHighest(objects: Array<Order>, key: string): any {
+function getHighest(objects: Array<OrderERC20>, key: string): any {
   let best: any
   let bestAmount
   let amount
@@ -109,19 +109,19 @@ function getHighest(objects: Array<Order>, key: string): any {
   return best
 }
 
-export function getBestByLowestSenderAmount(objects: Array<Order>): any {
+export function getBestByLowestSenderAmount(objects: Array<OrderERC20>): any {
   return getLowest(objects, 'sender')
 }
 
-export function getBestByLowestSignerAmount(objects: Array<Order>): any {
+export function getBestByLowestSignerAmount(objects: Array<OrderERC20>): any {
   return getLowest(objects, 'signer')
 }
 
-export function getBestByHighestSignerAmount(objects: Array<Order>): any {
+export function getBestByHighestSignerAmount(objects: Array<OrderERC20>): any {
   return getHighest(objects, 'signer')
 }
 
-export function getBestByHighestSenderAmount(objects: Array<Order>): any {
+export function getBestByHighestSenderAmount(objects: Array<OrderERC20>): any {
   return getHighest(objects, 'sender')
 }
 
