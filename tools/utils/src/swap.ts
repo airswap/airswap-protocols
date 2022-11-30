@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import * as ethUtil from 'ethereumjs-util'
 import * as sigUtil from 'eth-sig-util'
 import { ethers } from 'ethers'
@@ -100,7 +99,7 @@ export function getSignerFromOrderSignature(
   v: string,
   r: string,
   s: string
-) {
+): string {
   const sig = `${r}${s.slice(2)}${ethers.BigNumber.from(v)
     .toHexString()
     .slice(2)}`
