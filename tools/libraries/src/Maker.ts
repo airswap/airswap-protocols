@@ -11,8 +11,8 @@ import {
   WebsocketReadyStates,
 } from '@airswap/jsonrpc-client-websocket'
 import { REQUEST_TIMEOUT } from '@airswap/constants'
-import { parseUrl, orderPropsToStrings } from '@airswap/utils'
-import { Order, Pricing } from '@airswap/typescript'
+import { parseUrl, orderERC20PropsToStrings } from '@airswap/utils'
+import { OrderERC20, Pricing } from '@airswap/typescript'
 import { SwapERC20 } from './SwapERC20'
 
 export type SupportedProtocolInfo = {
@@ -105,15 +105,15 @@ export class Maker extends TypedEmitter<MakerEvents> {
     signerToken: string,
     senderToken: string,
     senderWallet: string
-  ): Promise<Order> {
+  ): Promise<OrderERC20> {
     this.requireRFQSupport()
-    return this.callRPCMethod<Order>('getSignerSideOrder', {
+    return this.callRPCMethod<OrderERC20>('getSignerSideOrder', {
       senderAmount: senderAmount.toString(),
       signerToken,
       senderToken,
       senderWallet,
     }).then((order) => {
-      return orderPropsToStrings(order)
+      return orderERC20PropsToStrings(order)
     })
   }
 
@@ -122,7 +122,7 @@ export class Maker extends TypedEmitter<MakerEvents> {
     signerToken: string,
     senderToken: string,
     senderWallet: string
-  ): Promise<Order> {
+  ): Promise<OrderERC20> {
     this.requireRFQSupport()
     return this.callRPCMethod('getSenderSideOrder', {
       signerAmount: signerAmount.toString(),
@@ -130,7 +130,7 @@ export class Maker extends TypedEmitter<MakerEvents> {
       senderToken,
       senderWallet,
     }).then((order) => {
-      return orderPropsToStrings(order)
+      return orderERC20PropsToStrings(order)
     })
   }
 
@@ -165,7 +165,7 @@ export class Maker extends TypedEmitter<MakerEvents> {
     return this.senderWallet
   }
 
-  public async consider(order: Order): Promise<boolean> {
+  public async consider(order: OrderERC20): Promise<boolean> {
     this.requireLastLookSupport()
     return this.callRPCMethod<boolean>('consider', order)
   }

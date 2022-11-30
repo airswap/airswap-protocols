@@ -1,10 +1,10 @@
-import { FullOrder } from '@airswap/typescript'
+import { FullOrderERC20 } from '@airswap/typescript'
 import { AxiosError, AxiosResponse } from 'axios'
 const axios = require('axios')
 
 export type IndexedOrderResponse = {
   hash?: string | undefined
-  order: FullOrder
+  order: FullOrderERC20
   addedOn: number
 }
 
@@ -179,7 +179,7 @@ export class NodeIndexer {
     }
   }
 
-  public async addOrder(fullOrder: FullOrder): Promise<SuccessResponse> {
+  public async addOrder(fullOrder: FullOrderERC20): Promise<SuccessResponse> {
     try {
       const axiosResponse = await axios.post(this.host, {
         jsonrpc: '2.0',

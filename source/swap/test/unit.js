@@ -2,7 +2,7 @@ const { expect } = require('chai')
 const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
 const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
-const { createOrderAny, createOrderAnySignature } = require('@airswap/utils')
+const { createOrder, createOrderSignature } = require('@airswap/utils')
 const { tokenKinds } = require('@airswap/constants')
 
 const CHAIN_ID = 31337
@@ -10,13 +10,13 @@ const CHAIN_ID = 31337
 const signOrder = async (order, wallet, swapContract) => {
   return {
     ...order,
-    ...(await createOrderAnySignature(order, wallet, swapContract, CHAIN_ID)),
+    ...(await createOrderSignature(order, wallet, swapContract, CHAIN_ID)),
   }
 }
 
 describe('Swap Unit Tests', () => {
   let snapshotId
-  let swapAny
+  let swap
   let signerToken
   let senderToken
 
@@ -60,23 +60,23 @@ describe('Swap Unit Tests', () => {
       erc20Handler.address
     )
 
-    swapAny = await (
-      await ethers.getContractFactory('SwapAny')
+    swap = await (
+      await ethers.getContractFactory('Swap')
     ).deploy(transferHandlerRegistry.address)
-    await swapAny.deployed()
+    await swap.deployed()
   })
 
   describe('Constructor', async () => {
     describe('Test signatures', async () => {
       it('test signatures', async () => {
-        let unsignedOrder = createOrderAny({
+        let unsignedOrder = createOrder({
           protocolFee: '30',
           signer: {
             wallet: signer.address,
           },
         })
-        let order = await signOrder(unsignedOrder, signer, swapAny.address)
-        await expect(swapAny.connect(sender).swap(order)).to.be.revertedWith(
+        let order = await signOrder(unsignedOrder, signer, swap.address)
+        await expect(swap.connect(sender).swap(order)).to.be.revertedWith(
           'TRANSFER_FAILED'
         )
       })

@@ -1,9 +1,9 @@
 const { expect } = require('chai')
 const { ADDRESS_ZERO, SECONDS_IN_DAY } = require('@airswap/constants')
 const {
-  createOrder,
-  orderToParams,
-  createSwapSignature,
+  createOrderERC20,
+  orderERC20ToParams,
+  createSwapERC20Signature,
 } = require('@airswap/utils')
 const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
@@ -35,8 +35,8 @@ describe('SwapERC20 Unit Tests', () => {
   const SWAP_FEE =
     (parseInt(DEFAULT_AMOUNT) * parseInt(PROTOCOL_FEE)) / parseInt(FEE_DIVISOR)
 
-  async function createSignedOrder(params, signatory) {
-    const unsignedOrder = createOrder({
+  async function createSignedOrderERC20(params, signatory) {
+    const unsignedOrder = createOrderERC20({
       protocolFee: PROTOCOL_FEE,
       signerWallet: signer.address,
       signerToken: signerToken.address,
@@ -46,9 +46,9 @@ describe('SwapERC20 Unit Tests', () => {
       senderAmount: DEFAULT_AMOUNT,
       ...params,
     })
-    return orderToParams({
+    return orderERC20ToParams({
       ...unsignedOrder,
-      ...(await createSwapSignature(
+      ...(await createSwapERC20Signature(
         unsignedOrder,
         signatory,
         swap.address,
@@ -56,8 +56,8 @@ describe('SwapERC20 Unit Tests', () => {
       )),
     })
   }
-  async function createSignedPublicOrder(params, signatory) {
-    const unsignedOrder = createOrder({
+  async function createSignedPublicOrderERC20(params, signatory) {
+    const unsignedOrder = createOrderERC20({
       protocolFee: PROTOCOL_FEE,
       signerWallet: signer.address,
       signerToken: signerToken.address,
@@ -67,9 +67,9 @@ describe('SwapERC20 Unit Tests', () => {
       senderAmount: DEFAULT_AMOUNT,
       ...params,
     })
-    return orderToParams({
+    return orderERC20ToParams({
       ...unsignedOrder,
-      ...(await createSwapSignature(
+      ...(await createSwapERC20Signature(
         unsignedOrder,
         signatory,
         swap.address,
@@ -314,7 +314,7 @@ describe('SwapERC20 Unit Tests', () => {
 
   describe('Test swap', async () => {
     it('test swaps', async () => {
-      const order = await createSignedOrder({}, signer)
+      const order = await createSignedOrderERC20({}, signer)
 
       await expect(swap.connect(sender).swap(sender.address, ...order)).to.emit(
         swap,
@@ -323,7 +323,7 @@ describe('SwapERC20 Unit Tests', () => {
     })
 
     it('test authorized signer', async () => {
-      const order = await createSignedOrder(
+      const order = await createSignedOrderERC20(
         {
           signerWallet: anyone.address,
         },
@@ -341,7 +341,7 @@ describe('SwapERC20 Unit Tests', () => {
     })
 
     it('test when signer not authorized', async () => {
-      const order = await createSignedOrder(
+      const order = await createSignedOrderERC20(
         {
           signerWallet: anyone.address,
         },
@@ -354,7 +354,7 @@ describe('SwapERC20 Unit Tests', () => {
     })
 
     it('test when order is expired', async () => {
-      const order = await createSignedOrder(
+      const order = await createSignedOrderERC20(
         {
           expiry: '0',
         },
@@ -366,7 +366,7 @@ describe('SwapERC20 Unit Tests', () => {
     })
 
     it('test when nonce has already been used', async () => {
-      const order = await createSignedOrder(
+      const order = await createSignedOrderERC20(
         {
           nonce: '0',
         },
@@ -379,7 +379,7 @@ describe('SwapERC20 Unit Tests', () => {
     })
 
     it('test when nonce has been cancelled', async () => {
-      const order = await createSignedOrder(
+      const order = await createSignedOrderERC20(
         {
           nonce: '1',
         },
@@ -392,7 +392,7 @@ describe('SwapERC20 Unit Tests', () => {
     })
 
     it('test invalid signature', async () => {
-      const order = await createSignedOrder({}, signer)
+      const order = await createSignedOrderERC20({}, signer)
       order[7] = '29' // Change "v" of signature
       await expect(
         swap.connect(sender).swap(sender.address, ...order)
@@ -400,7 +400,7 @@ describe('SwapERC20 Unit Tests', () => {
     })
 
     it('test when signer is zero address', async () => {
-      const order = await createSignedOrder(
+      const order = await createSignedOrderERC20(
         {
           signerWallet: anyone.ADDRESS_ZERO,
         },
@@ -415,7 +415,7 @@ describe('SwapERC20 Unit Tests', () => {
 
   describe('Test public swap', async () => {
     it('test public swaps', async () => {
-      const order = await createSignedPublicOrder({}, signer)
+      const order = await createSignedPublicOrderERC20({}, signer)
 
       await expect(
         swap.connect(sender).swapAnySender(sender.address, ...order)
@@ -423,7 +423,7 @@ describe('SwapERC20 Unit Tests', () => {
     })
 
     it('test authorized signer', async () => {
-      const order = await createSignedPublicOrder(
+      const order = await createSignedPublicOrderERC20(
         {
           signerWallet: anyone.address,
         },
@@ -440,7 +440,7 @@ describe('SwapERC20 Unit Tests', () => {
     })
 
     it('test when signer not authorized', async () => {
-      const order = await createSignedOrder(
+      const order = await createSignedOrderERC20(
         {
           signerWallet: anyone.address,
         },
@@ -453,7 +453,7 @@ describe('SwapERC20 Unit Tests', () => {
     })
 
     it('test when order is expired', async () => {
-      const order = await createSignedOrder(
+      const order = await createSignedOrderERC20(
         {
           expiry: '0',
         },
@@ -465,7 +465,7 @@ describe('SwapERC20 Unit Tests', () => {
     })
 
     it('test when nonce has already been used', async () => {
-      const order = await createSignedPublicOrder(
+      const order = await createSignedPublicOrderERC20(
         {
           nonce: '0',
         },
@@ -478,7 +478,7 @@ describe('SwapERC20 Unit Tests', () => {
     })
 
     it('test when nonce has been cancelled', async () => {
-      const order = await createSignedPublicOrder(
+      const order = await createSignedPublicOrderERC20(
         {
           nonce: '1',
         },
@@ -491,7 +491,7 @@ describe('SwapERC20 Unit Tests', () => {
     })
 
     it('test invalid signature', async () => {
-      const order = await createSignedOrder({}, signer)
+      const order = await createSignedOrderERC20({}, signer)
       order[7] = '29' // Change "v" of signature
       await expect(
         swap.connect(sender).swapAnySender(sender.address, ...order)
@@ -501,7 +501,7 @@ describe('SwapERC20 Unit Tests', () => {
 
   describe('Test light swap', async () => {
     it('test light swaps', async () => {
-      const order = await createSignedOrder(
+      const order = await createSignedOrderERC20(
         {
           protocolFee: PROTOCOL_FEE_LIGHT,
         },
@@ -514,7 +514,7 @@ describe('SwapERC20 Unit Tests', () => {
       )
     })
     it('test light swaps with authorized', async () => {
-      const order = await createSignedOrder(
+      const order = await createSignedOrderERC20(
         {
           protocolFee: PROTOCOL_FEE_LIGHT,
           signerWallet: anyone.address,
@@ -532,7 +532,7 @@ describe('SwapERC20 Unit Tests', () => {
       )
     })
     it('test when expiration has passed', async () => {
-      const order = await createSignedOrder(
+      const order = await createSignedOrderERC20(
         {
           protocolFee: PROTOCOL_FEE_LIGHT,
         },
@@ -545,14 +545,14 @@ describe('SwapERC20 Unit Tests', () => {
       )
     })
     it('test when signatory is invalid', async () => {
-      const order = await createSignedOrder({}, signer)
+      const order = await createSignedOrderERC20({}, signer)
       order[7] = '29' // Change "v" of signature
       await expect(swap.connect(sender).swapLight(...order)).to.be.revertedWith(
         'SIGNATURE_INVALID'
       )
     })
     it('test when nonce has already been used', async () => {
-      const order = await createSignedOrder(
+      const order = await createSignedOrderERC20(
         {
           protocolFee: PROTOCOL_FEE_LIGHT,
           nonce: '0',
@@ -565,7 +565,7 @@ describe('SwapERC20 Unit Tests', () => {
       )
     })
     it('test when signer not authorized', async () => {
-      const order = await createSignedOrder(
+      const order = await createSignedOrderERC20(
         {
           protocolFee: PROTOCOL_FEE_LIGHT,
           signerWallet: signer.address,
@@ -612,7 +612,7 @@ describe('SwapERC20 Unit Tests', () => {
     })
 
     it('test zero fee', async () => {
-      const order = await createSignedOrder(
+      const order = await createSignedOrderERC20(
         {
           protocolFee: '0',
         },
@@ -632,7 +632,7 @@ describe('SwapERC20 Unit Tests', () => {
     })
 
     it('test when signed with incorrect fee', async () => {
-      const order = await createSignedOrder(
+      const order = await createSignedOrderERC20(
         {
           protocolFee: HIGHER_FEE / 2,
         },
@@ -714,7 +714,7 @@ describe('SwapERC20 Unit Tests', () => {
     it('properly detects an invalid signature', async () => {
       await setUpAllowances(DEFAULT_AMOUNT, DEFAULT_AMOUNT + SWAP_FEE)
       await setUpBalances(DEFAULT_BALANCE, DEFAULT_BALANCE)
-      const order = await createSignedOrder({}, signer)
+      const order = await createSignedOrderERC20({}, signer)
       order[7] = '29'
       const [errCount, messages] = await getErrorInfo(order)
       expect(errCount).to.equal(1)
@@ -725,7 +725,7 @@ describe('SwapERC20 Unit Tests', () => {
     it('properly detects an expired order', async () => {
       await setUpAllowances(DEFAULT_AMOUNT, DEFAULT_AMOUNT + SWAP_FEE)
       await setUpBalances(DEFAULT_BALANCE, DEFAULT_BALANCE)
-      const order = await createSignedOrder(
+      const order = await createSignedOrderERC20(
         {
           expiry: '0',
         },
@@ -740,7 +740,7 @@ describe('SwapERC20 Unit Tests', () => {
     it('properly detects an unauthorized signature', async () => {
       await setUpAllowances(DEFAULT_AMOUNT, DEFAULT_AMOUNT + SWAP_FEE)
       await setUpBalances(DEFAULT_BALANCE, DEFAULT_BALANCE)
-      const order = await createSignedOrder({}, anyone)
+      const order = await createSignedOrderERC20({}, anyone)
       const [errCount, messages] = await getErrorInfo(order)
       expect(errCount).to.equal(1)
       expect(ethers.utils.parseBytes32String(messages[0])).to.equal(
@@ -750,7 +750,7 @@ describe('SwapERC20 Unit Tests', () => {
     it('properly detects a low signer allowance', async () => {
       await setUpAllowances(DEFAULT_AMOUNT, 0)
       await setUpBalances(DEFAULT_BALANCE, DEFAULT_BALANCE)
-      const order = await createSignedOrder({}, signer)
+      const order = await createSignedOrderERC20({}, signer)
       const [errCount, messages] = await getErrorInfo(order)
       expect(errCount).to.equal(1)
       expect(ethers.utils.parseBytes32String(messages[0])).to.equal(
@@ -760,7 +760,7 @@ describe('SwapERC20 Unit Tests', () => {
     it('properly detects a low signer balance', async () => {
       await setUpAllowances(DEFAULT_AMOUNT, DEFAULT_AMOUNT + SWAP_FEE)
       await setUpBalances(DEFAULT_BALANCE, 0)
-      const order = await createSignedOrder({}, signer)
+      const order = await createSignedOrderERC20({}, signer)
       const [errCount, messages] = await getErrorInfo(order)
       expect(errCount).to.equal(1)
       expect(ethers.utils.parseBytes32String(messages[0])).to.equal(
@@ -770,7 +770,7 @@ describe('SwapERC20 Unit Tests', () => {
     it('properly detects a low sender allowance', async () => {
       await setUpAllowances(0, DEFAULT_AMOUNT + SWAP_FEE)
       await setUpBalances(DEFAULT_BALANCE, DEFAULT_BALANCE)
-      const order = await createSignedOrder({}, signer)
+      const order = await createSignedOrderERC20({}, signer)
       const [errCount, messages] = await getErrorInfo(order)
       expect(errCount).to.equal(1)
       expect(ethers.utils.parseBytes32String(messages[0])).to.equal(
@@ -780,7 +780,7 @@ describe('SwapERC20 Unit Tests', () => {
     it('properly detects a low sender balance', async () => {
       await setUpAllowances(DEFAULT_AMOUNT, DEFAULT_AMOUNT + SWAP_FEE)
       await setUpBalances(0, DEFAULT_BALANCE)
-      const order = await createSignedOrder({}, signer)
+      const order = await createSignedOrderERC20({}, signer)
       const [errCount, messages] = await getErrorInfo(order)
       expect(errCount).to.equal(1)
       expect(ethers.utils.parseBytes32String(messages[0])).to.equal(
@@ -790,7 +790,7 @@ describe('SwapERC20 Unit Tests', () => {
     it('properly avoids checks on a null sender wallet', async () => {
       await setUpAllowances(DEFAULT_AMOUNT, DEFAULT_AMOUNT + SWAP_FEE)
       await setUpBalances(0, DEFAULT_BALANCE)
-      const order = await createSignedOrder(
+      const order = await createSignedOrderERC20(
         { senderWallet: ADDRESS_ZERO },
         signer
       )
@@ -807,7 +807,7 @@ describe('SwapERC20 Unit Tests', () => {
       await signerToken.mock.transferFrom
         .withArgs(signer.address, protocolFeeWallet.address, SWAP_FEE)
         .returns(true)
-      const order = await createSignedOrder(
+      const order = await createSignedOrderERC20(
         {
           nonce: '1',
         },
@@ -825,7 +825,7 @@ describe('SwapERC20 Unit Tests', () => {
     it('can detect multiple errors', async () => {
       await setUpAllowances(DEFAULT_AMOUNT, DEFAULT_AMOUNT + SWAP_FEE)
       await setUpBalances(DEFAULT_BALANCE, 0)
-      const order = await createSignedOrder(
+      const order = await createSignedOrderERC20(
         {
           expiry: '0',
         },

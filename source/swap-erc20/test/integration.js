@@ -1,7 +1,7 @@
 const { expect } = require('chai')
 const {
-  createOrder,
-  orderToParams,
+  createOrderERC20,
+  orderERC20ToParams,
   createSwapSignature,
 } = require('@airswap/utils')
 const { ethers } = require('hardhat')
@@ -27,7 +27,7 @@ describe('Swap Integration Tests', () => {
   const DEFAULT_AMOUNT = '10000'
 
   async function createSignedOrder(params, signer) {
-    const unsignedOrder = createOrder({
+    const unsignedOrder = createOrderERC20({
       protocolFee: PROTOCOL_FEE,
       signerWallet: signer.address,
       signerToken: signerToken.address,
@@ -37,7 +37,7 @@ describe('Swap Integration Tests', () => {
       senderAmount: DEFAULT_AMOUNT,
       ...params,
     })
-    return orderToParams({
+    return orderERC20ToParams({
       ...unsignedOrder,
       ...(await createSwapSignature(
         unsignedOrder,

@@ -3,7 +3,7 @@ import chai, { expect } from 'chai'
 import sinonChai from 'sinon-chai'
 import { useFakeTimers } from 'sinon'
 
-import { createOrder } from '@airswap/utils'
+import { createOrderERC20 } from '@airswap/utils'
 import { ADDRESS_ZERO, REQUEST_TIMEOUT } from '@airswap/constants'
 
 import { Maker } from '..'
@@ -14,7 +14,7 @@ import {
   MockSocketServer,
   nextEvent,
 } from './test-utils'
-import { Order } from '@airswap/typescript'
+import { OrderERC20 } from '@airswap/typescript'
 import { JsonRpcErrorCodes } from '@airswap/jsonrpc-client-websocket'
 
 addJSONRPCAssertions()
@@ -40,7 +40,7 @@ function mockHttpMaker(api) {
     let res
     switch (body['method']) {
       case 'getSignerSideOrder':
-        res = createOrder({
+        res = createOrderERC20({
           signerToken: params.signerToken,
           senderToken: params.senderToken,
           senderAmount: params.senderAmount,
@@ -114,7 +114,7 @@ const samplePricing = [
     ],
   },
 ]
-const fakeOrder: Order = {
+const fakeOrder: OrderERC20 = {
   nonce: '1',
   expiry: '1234',
   signerWallet: '0xsigner',

@@ -4,7 +4,7 @@ export type Signature = {
   s: string
 }
 
-export type UnsignedOrder = {
+export type UnsignedOrderERC20 = {
   nonce: string
   expiry: string
   signerWallet: string
@@ -16,7 +16,7 @@ export type UnsignedOrder = {
   senderAmount: string
 }
 
-export type Order = {
+export type OrderERC20 = {
   nonce: string
   expiry: string
   signerWallet: string
@@ -31,20 +31,20 @@ export type Settlement = {
   swapContract: string
 }
 
-export type FullOrder = UnsignedOrder & Signature & Settlement
+export type FullOrderERC20 = UnsignedOrderERC20 & Signature & Settlement
 
-export type UnsignedOrderAny = {
+export type UnsignedOrder = {
   nonce: string
   expiry: string
   protocolFee: string
-  signer: OrderAnyParty
-  sender: OrderAnyParty
-  affiliate: OrderAnyParty
+  signer: OrderParty
+  sender: OrderParty
+  affiliate: OrderParty
 }
 
-export type OrderAny = UnsignedOrderAny & Signature
+export type Order = UnsignedOrder & Signature
 
-export type OrderAnyParty = {
+export type OrderParty = {
   wallet: string
   token: string
   kind: string
@@ -78,7 +78,7 @@ export type LocatorResult = {
   nextCursor: string
 }
 
-export const EIP712Swap = {
+export const EIP712SwapERC20 = {
   EIP712Domain: [
     { name: 'name', type: 'string' },
     { name: 'version', type: 'string' },
@@ -98,7 +98,7 @@ export const EIP712Swap = {
   ],
 }
 
-export const EIP712SwapAny = {
+export const EIP712Swap = {
   EIP712Domain: [
     { name: 'name', type: 'string' },
     { name: 'version', type: 'string' },

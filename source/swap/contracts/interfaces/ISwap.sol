@@ -5,8 +5,8 @@ pragma solidity 0.8.17;
 // import "@airswap/transfers/contracts/TransferHandlerRegistry.sol";
 import "../TransferHandlerRegistry.sol";
 
-interface ISwapAny {
-  struct OrderAny {
+interface ISwap {
+  struct Order {
     uint256 nonce; // Unique per order and should be sequential
     uint256 expiry; // Expiry in seconds since 1 January 1970
     uint256 protocolFee;
@@ -51,7 +51,7 @@ interface ISwapAny {
    * @notice Atomic Token Swap
    * @param order Order
    */
-  function swap(OrderAny calldata order) external;
+  function swap(Order calldata order) external;
 
   /**
    * @notice Cancel one or more open orders by nonce

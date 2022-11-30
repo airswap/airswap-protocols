@@ -3,12 +3,12 @@
 pragma solidity 0.8.17;
 
 import "./interfaces/ITransferHandler.sol";
-import "./interfaces/ISwapAny.sol";
+import "./interfaces/ISwap.sol";
 
 /**
  * @title Swap: The Atomic Swap used on the AirSwap Network
  */
-contract SwapAny is ISwapAny {
+contract Swap is ISwap {
   bytes32 public constant DOMAIN_TYPEHASH =
     keccak256(
       "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
@@ -52,8 +52,8 @@ contract SwapAny is ISwapAny {
   bytes internal constant EIP191_HEADER = "\x19\x01";
 
   // Domain and version for use in signatures (EIP-712)
-  bytes32 public constant DOMAIN_NAME = keccak256("SWAP_ANY");
-  bytes32 public constant DOMAIN_VERSION = keccak256("1");
+  bytes32 public constant DOMAIN_NAME = keccak256("SWAP");
+  bytes32 public constant DOMAIN_VERSION = keccak256("3");
 
   // Domain chain id for use in signatures (EIP-712)
   uint256 public immutable DOMAIN_CHAIN_ID;
@@ -104,7 +104,7 @@ contract SwapAny is ISwapAny {
    * @notice Atomic Token Swap
    * @param order Order to settle
    */
-  function swap(OrderAny calldata order) external {
+  function swap(Order calldata order) external {
     // Ensure the order is not expired.
     require(order.expiry > block.timestamp, "ORDER_EXPIRED");
 
@@ -208,7 +208,7 @@ contract SwapAny is ISwapAny {
    * @param domainSeparator bytes32
    * @return bytes32 A keccak256 abi.encodePacked value
    */
-  function hashOrder(OrderAny calldata order, bytes32 domainSeparator)
+  function hashOrder(Order calldata order, bytes32 domainSeparator)
     internal
     pure
     returns (bytes32)
@@ -292,7 +292,7 @@ contract SwapAny is ISwapAny {
    * @param domainSeparator bytes32 Domain identifier used in signatures (EIP-712)
    * @return bool True if order has a valid signature
    */
-  function isValid(OrderAny calldata order, bytes32 domainSeparator)
+  function isValid(Order calldata order, bytes32 domainSeparator)
     internal
     pure
     returns (bool)

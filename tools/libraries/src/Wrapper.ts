@@ -2,7 +2,7 @@ import { ContractTransaction, ethers } from 'ethers'
 import { chainIds, wrappedTokenAddresses } from '@airswap/constants'
 import { Wrapper as WrapperContract } from '@airswap/wrapper/typechain/contracts'
 import { Wrapper__factory } from '@airswap/wrapper/typechain/factories/contracts'
-import { Order } from '@airswap/typescript'
+import { OrderERC20 } from '@airswap/typescript'
 
 import * as wrapperDeploys from '@airswap/wrapper/deploys.js'
 
@@ -29,7 +29,7 @@ export class Wrapper {
   }
 
   public async swap(
-    order: Order,
+    order: OrderERC20,
     signer?: ethers.Signer
   ): Promise<ContractTransaction> {
     let contract = this.contract
