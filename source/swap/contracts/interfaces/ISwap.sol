@@ -45,7 +45,7 @@ interface ISwap {
 
   event Cancel(uint256 indexed nonce, address indexed signerWallet);
 
-  event CancelUpTo(uint256 indexed nonce, address indexed signerWallet);
+  // event CancelUpTo(uint256 indexed nonce, address indexed signerWallet);
 
   /**
    * @notice Atomic Token Swap
@@ -59,16 +59,14 @@ interface ISwap {
    */
   function cancel(uint256[] calldata nonces) external;
 
-  /**
-   * @notice Cancels all orders below a nonce value
-   * @dev These orders can be made active by reducing the minimum nonce
-   * @param minimumNonce uint256
-   */
-  function cancelUpTo(uint256 minimumNonce) external;
+  // /**
+  //  * @notice Cancels all orders below a nonce value
+  //  * @dev These orders can be made active by reducing the minimum nonce
+  //  * @param minimumNonce uint256
+  //  */
+  // function cancelUpTo(uint256 minimumNonce) external;
 
-  function signerNonceStatus(address, uint256) external view returns (bytes1);
-
-  function signerMinimumNonce(address) external view returns (uint256);
+  function nonceUsed(address, uint256) external view returns (bool);
 
   function registry() external view returns (TransferHandlerRegistry);
 }
