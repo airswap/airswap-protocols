@@ -3,7 +3,7 @@ import { MakerRegistry as MakerRegistryContract } from '@airswap/maker-registry/
 import { MakerRegistry__factory } from '@airswap/maker-registry/typechain/factories/contracts'
 import { chainIds } from '@airswap/constants'
 import { Maker, MakerOptions } from './Maker'
-import { Swap } from './Swap'
+import { SwapERC20 } from './SwapERC20'
 
 import * as registryDeploys from '@airswap/maker-registry/deploys.js'
 
@@ -46,7 +46,7 @@ export class MakerRegistry {
         .map((url) => {
           return Maker.at(url, {
             swapContract:
-              options?.swapContract || Swap.getAddress(this.chainId),
+              options?.swapContract || SwapERC20.getAddress(this.chainId),
             initializeTimeout: options?.initializeTimeout,
           })
         })

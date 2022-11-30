@@ -10,7 +10,7 @@ const { deployMockContract } = waffle
 const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
 const STAKING = require('@airswap/staking/build/contracts/Staking.sol/Staking.json')
 
-describe('Swap Unit Tests', () => {
+describe('SwapERC20 Unit Tests', () => {
   let snapshotId
   let swap
   let signerToken
@@ -120,7 +120,7 @@ describe('Swap Unit Tests', () => {
     await staking.mock.balanceOf.returns(10000000)
 
     swap = await (
-      await ethers.getContractFactory('Swap')
+      await ethers.getContractFactory('SwapERC20')
     ).deploy(
       PROTOCOL_FEE,
       PROTOCOL_FEE_LIGHT,
@@ -143,7 +143,7 @@ describe('Swap Unit Tests', () => {
     it('test invalid protocolFeeWallet', async () => {
       await expect(
         (
-          await ethers.getContractFactory('Swap')
+          await ethers.getContractFactory('SwapERC20')
         ).deploy(
           PROTOCOL_FEE,
           PROTOCOL_FEE_LIGHT,
@@ -158,7 +158,7 @@ describe('Swap Unit Tests', () => {
     it('test invalid fee', async () => {
       await expect(
         (
-          await ethers.getContractFactory('Swap')
+          await ethers.getContractFactory('SwapERC20')
         ).deploy(
           100000000000,
           PROTOCOL_FEE_LIGHT,
@@ -173,7 +173,7 @@ describe('Swap Unit Tests', () => {
     it('test invalid fee light', async () => {
       await expect(
         (
-          await ethers.getContractFactory('Swap')
+          await ethers.getContractFactory('SwapERC20')
         ).deploy(
           PROTOCOL_FEE,
           100000000000,
@@ -188,7 +188,7 @@ describe('Swap Unit Tests', () => {
     it('test invalid rebate scale', async () => {
       await expect(
         (
-          await ethers.getContractFactory('Swap')
+          await ethers.getContractFactory('SwapERC20')
         ).deploy(
           PROTOCOL_FEE,
           PROTOCOL_FEE_LIGHT,
@@ -203,7 +203,7 @@ describe('Swap Unit Tests', () => {
     it('test invalid rebate maximum', async () => {
       await expect(
         (
-          await ethers.getContractFactory('Swap')
+          await ethers.getContractFactory('SwapERC20')
         ).deploy(
           PROTOCOL_FEE,
           PROTOCOL_FEE_LIGHT,
@@ -218,7 +218,7 @@ describe('Swap Unit Tests', () => {
     it('test invalid rebate maximum', async () => {
       await expect(
         (
-          await ethers.getContractFactory('Swap')
+          await ethers.getContractFactory('SwapERC20')
         ).deploy(
           PROTOCOL_FEE,
           PROTOCOL_FEE_LIGHT,

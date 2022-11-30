@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.17;
 
-interface ISwap {
+interface ISwapERC20 {
   struct Order {
     uint256 nonce;
     uint256 expiry;

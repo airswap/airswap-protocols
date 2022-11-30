@@ -83,7 +83,7 @@ describe('Swap Integration Tests', () => {
     senderToken.mint(sender.address, 1000000)
 
     swap = await (
-      await ethers.getContractFactory('Swap')
+      await ethers.getContractFactory('SwapERC20')
     ).deploy(
       PROTOCOL_FEE,
       PROTOCOL_FEE_LIGHT,

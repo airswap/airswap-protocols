@@ -10,7 +10,7 @@ const { deployMockContract } = waffle
 const ERC20 = require('@openzeppelin/contracts/build/contracts/ERC20PresetMinterPauser.json')
 const ERC721 = require('@openzeppelin/contracts/build/contracts/ERC721PresetMinterPauserAutoId.json')
 const WETH9 = require('@uniswap/v2-periphery/build/WETH9.json')
-const LIGHT = require('@airswap/swap/build/contracts/Swap.sol/Swap.json')
+const LIGHT = require('@airswap/swap-erc20/build/contracts/SwapERC20.sol/SwapERC20.json')
 const { MAX_APPROVAL_AMOUNT } = require('../../../tools/constants')
 
 describe('Wrapper Integration Tests', () => {

@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.0;
 
-import "@airswap/swap/contracts/interfaces/ISwap.sol";
+import "@airswap/swap-erc20/contracts/interfaces/ISwapERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
@@ -17,7 +17,7 @@ contract Wrapper is Ownable {
 
   event WrappedSwapFor(address indexed senderWallet);
 
-  ISwap public swapContract;
+  ISwapERC20 public swapContract;
   IWETH public wethContract;
   uint256 constant MAX_UINT = 2**256 - 1;
 
@@ -30,7 +30,7 @@ contract Wrapper is Ownable {
     require(_swapContract != address(0), "INVALID_CONTRACT");
     require(_wethContract != address(0), "INVALID_WETH_CONTRACT");
 
-    swapContract = ISwap(_swapContract);
+    swapContract = ISwapERC20(_swapContract);
     wethContract = IWETH(_wethContract);
     wethContract.approve(_swapContract, MAX_UINT);
   }
@@ -42,7 +42,7 @@ contract Wrapper is Ownable {
   function setSwapContract(address _swapContract) external onlyOwner {
     require(_swapContract != address(0), "INVALID_CONTRACT");
     wethContract.approve(address(swapContract), 0);
-    swapContract = ISwap(_swapContract);
+    swapContract = ISwapERC20(_swapContract);
     wethContract.approve(_swapContract, MAX_UINT);
   }
 
@@ -58,7 +58,7 @@ contract Wrapper is Ownable {
   }
 
   /**
-   * @notice Wrapped Swap.swap
+   * @notice Wrapped SwapERC20.swap
    * @param nonce uint256 Unique and should be sequential
    * @param expiry uint256 Expiry in seconds since 1 January 1970
    * @param signerWallet address Wallet of the signer
@@ -101,7 +101,7 @@ contract Wrapper is Ownable {
   }
 
   /**
-   * @notice Wrapped Swap.swapAnySender
+   * @notice Wrapped SwapERC20.swapAnySender
    * @param nonce uint256 Unique and should be sequential
    * @param expiry uint256 Expiry in seconds since 1 January 1970
    * @param signerWallet address Wallet of the signer
