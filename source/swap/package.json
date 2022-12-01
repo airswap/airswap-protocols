@@ -2,11 +2,6 @@
   "name": "@airswap/swap-any",
   "version": "0.0.1",
   "description": "AirSwap: Atomic Token Swap",
-  "contributors": [
-    "Vicente Dragicevic",
-    "Don Mosites",
-    "Ethan Wessel"
-  ],
   "license": "MIT",
   "repository": {
     "type": "git",

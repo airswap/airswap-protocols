@@ -2,10 +2,6 @@
   "name": "@airswap/metadata",
   "version": "3.0.5",
   "description": "AirSwap: Token Metadata for Developers",
-  "contributors": [
-    "Don Mosites",
-    "Hassan Malik"
-  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/airswap/airswap-protocols"
@@ -24,7 +20,7 @@
     "compile": "yarn clean && tsc -b"
   },
   "dependencies": {
-    "@airswap/constants": "3.0.1",
+    "@airswap/constants": "3.0.2",
     "@airswap/typescript": "3.0.1",
     "@uniswap/token-lists": "^1.0.0-beta.24",
     "axios": "^0.21.3",

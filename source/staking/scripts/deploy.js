@@ -17,6 +17,8 @@ async function main() {
   const minDelay = 2419200
 
   console.log(`Deploying on ${chainNames[chainId].toUpperCase()}`)
+  console.log(`Staking token: ${stakingToken}`)
+
   const stakingFactory = await ethers.getContractFactory('Staking')
   const stakingContract = await stakingFactory.deploy(
     stakingToken,

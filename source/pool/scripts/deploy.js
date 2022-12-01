@@ -17,6 +17,8 @@ async function main() {
   const stakingToken = stakingTokenAddresses[chainId]
 
   console.log(`Deploying on ${chainNames[chainId].toUpperCase()}`)
+  console.log(`Staking token: ${stakingToken}`)
+  console.log(`Staking contract: ${stakingContract}`)
 
   const poolFactory = await ethers.getContractFactory('Pool')
   const poolContract = await poolFactory.deploy(

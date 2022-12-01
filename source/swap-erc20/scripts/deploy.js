@@ -20,10 +20,10 @@ async function main() {
   const rebateMax = 100
 
   console.log(`Deploying on ${chainNames[chainId].toUpperCase()}`)
-  console.log(`Fee wallet (Pool): ${protocolFeeWallet}`)
-  console.log(`Staking: ${stakingContract}`)
+  console.log(`Fee recipient: ${protocolFeeWallet}`)
+  console.log(`Staking contract: ${stakingContract}`)
 
-  const swapFactory = await ethers.getContractFactory('Swap')
+  const swapFactory = await ethers.getContractFactory('SwapERC20')
   const swapContract = await swapFactory.deploy(
     protocolFee,
     protocolFeeLight,

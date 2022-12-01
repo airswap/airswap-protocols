@@ -2,11 +2,6 @@
   "name": "@airswap/libraries",
   "version": "3.3.1",
   "description": "AirSwap: Libraries for Developers",
-  "contributors": [
-    "Don Mosites",
-    "Ed Hinchliffe",
-    "Hassan Malik"
-  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/airswap/airswap-protocols"
@@ -28,11 +23,11 @@
     "test:unit": "yarn compile && yarn mocha -r ts-node/register test/Maker.test.ts test/Indexer.test.ts"
   },
   "dependencies": {
-    "@airswap/constants": "3.0.1",
+    "@airswap/constants": "3.0.2",
     "@airswap/jsonrpc-client-websocket": "0.0.1",
     "@airswap/maker-registry": "3.1.2",
     "@airswap/indexer-registry": "3.1.2",
-    "@airswap/swap-erc20": "3.2.3",
+    "@airswap/swap-erc20": "3.0.0",
     "@airswap/typescript": "3.0.1",
     "@airswap/utils": "3.0.4",
     "@airswap/wrapper": "3.1.3",

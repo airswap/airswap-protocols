@@ -32,7 +32,7 @@ contract SwapERC20 is ISwapERC20, Ownable {
 
   uint256 internal constant MAX_PERCENTAGE = 100;
   uint256 internal constant MAX_SCALE = 77;
-  uint256 internal constant MAX_ERROR_COUNT = 6;
+  uint256 internal constant MAX_ERROR_COUNT = 8;
   uint256 public constant FEE_DIVISOR = 10000;
 
   /**
