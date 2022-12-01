@@ -9,11 +9,9 @@ import {
   ADDRESS_ZERO,
   DOMAIN_VERSION_SWAP,
   DOMAIN_NAME_SWAP,
-  chainIds,
 } from '@airswap/constants'
 import {
   UnsignedOrder,
-  Order,
   OrderParty,
   Signature,
   EIP712Swap,
