@@ -66,9 +66,7 @@ interface ISwap {
    */
   function cancelUpTo(uint256 minimumNonce) external;
 
-  function signerNonceStatus(address, uint256) external view returns (bytes1);
-
-  function signerMinimumNonce(address) external view returns (uint256);
+  function nonceUsed(address, uint256) external view returns (bool);
 
   function registry() external view returns (TransferHandlerRegistry);
 }

@@ -61,21 +61,21 @@ contract Swap is ISwap {
   // Unique domain identifier for use in signatures (EIP-712)
   bytes32 public immutable DOMAIN_SEPARATOR;
 
-  // Possible nonce statuses
-  bytes1 internal constant AVAILABLE = 0x00;
-  bytes1 internal constant UNAVAILABLE = 0x01;
+  /**
+   * @notice Double mapping of signers to nonce groups to nonce states
+   * @dev The nonce group is computed as nonce / 256, so each group of 256 sequential nonces uses the same key
+   * @dev The nonce states are encoded as 256 bits, for each nonce in the group 0 means available and 1 means used
+   */
+  mapping(address => mapping(uint256 => uint256)) internal _nonceGroups;
+
+  // Mapping of signer addresses to an optionally set minimum valid nonce
+  mapping(address => uint256) public signerMinimumNonce;
 
   // Mapping of sender address to a delegated sender address and bool
   mapping(address => mapping(address => bool)) public senderAuthorizations;
 
   // Mapping of signer address to a delegated signer and bool
   mapping(address => mapping(address => bool)) public signerAuthorizations;
-
-  // Mapping of signers to nonces with value AVAILABLE (0x00) or UNAVAILABLE (0x01)
-  mapping(address => mapping(uint256 => bytes1)) public signerNonceStatus;
-
-  // Mapping of signer addresses to an optionally set minimum valid nonce
-  mapping(address => uint256) public signerMinimumNonce;
 
   // A registry storing a transfer handler for different token kinds
   TransferHandlerRegistry public registry;
@@ -108,20 +108,16 @@ contract Swap is ISwap {
     // Ensure the order is not expired.
     require(order.expiry > block.timestamp, "ORDER_EXPIRED");
 
-    // Ensure the nonce is AVAILABLE (0x00).
-    require(
-      signerNonceStatus[order.signer.wallet][order.nonce] == AVAILABLE,
-      "ORDER_TAKEN_OR_CANCELLED"
-    );
-
-    // Ensure the order nonce is above the minimum.
     require(
       order.nonce >= signerMinimumNonce[order.signer.wallet],
       "NONCE_TOO_LOW"
     );
 
-    // Mark the nonce UNAVAILABLE (0x01).
-    signerNonceStatus[order.signer.wallet][order.nonce] = UNAVAILABLE;
+    // Ensure the nonce is not yet used and if not mark it used
+    require(
+      _markNonceAsUsed(order.signer.wallet, order.nonce),
+      "NONCE_ALREADY_USED"
+    );
 
     // Validate the sender side of the trade.
     address finalSenderWallet;
@@ -261,17 +257,17 @@ contract Swap is ISwap {
   }
 
   /**
-   * @notice Cancel one or more open orders by nonce
-   * @dev Cancelled nonces are marked UNAVAILABLE (0x01)
+   * @notice Cancel one or more nonces
+   * @dev Cancelled nonces are marked as used
    * @dev Emits a Cancel event
    * @dev Out of gas may occur in arrays of length > 400
    * @param nonces uint256[] List of nonces to cancel
    */
-  function cancel(uint256[] calldata nonces) external {
+  function cancel(uint256[] calldata nonces) external override {
     for (uint256 i = 0; i < nonces.length; i++) {
-      if (signerNonceStatus[msg.sender][nonces[i]] == AVAILABLE) {
-        signerNonceStatus[msg.sender][nonces[i]] = UNAVAILABLE;
-        emit Cancel(nonces[i], msg.sender);
+      uint256 nonce = nonces[i];
+      if (_markNonceAsUsed(msg.sender, nonce)) {
+        emit Cancel(nonce, msg.sender);
       }
     }
   }
@@ -339,5 +335,45 @@ contract Swap is ISwap {
       )
     );
     require(success && abi.decode(data, (bool)), "TRANSFER_FAILED");
+  }
+
+  /**
+   * @notice Returns true if the nonce has been used
+   * @param signer address Address of the signer
+   * @param nonce uint256 Nonce being checked
+   */
+  function nonceUsed(address signer, uint256 nonce)
+    public
+    view
+    override
+    returns (bool)
+  {
+    uint256 groupKey = nonce / 256;
+    uint256 indexInGroup = nonce % 256;
+    return (_nonceGroups[signer][groupKey] >> indexInGroup) & 1 == 1;
+  }
+
+  /**
+   * @notice Marks a nonce as used for the given signer
+   * @param signer address Address of the signer for which to mark the nonce as used
+   * @param nonce uint256 Nonce to be marked as used
+   * @return bool True if the nonce was not marked as used already
+   */
+  function _markNonceAsUsed(address signer, uint256 nonce)
+    internal
+    returns (bool)
+  {
+    uint256 groupKey = nonce / 256;
+    uint256 indexInGroup = nonce % 256;
+    uint256 group = _nonceGroups[signer][groupKey];
+
+    // If it is already used, return false
+    if ((group >> indexInGroup) & 1 == 1) {
+      return false;
+    }
+
+    _nonceGroups[signer][groupKey] = group | (uint256(1) << indexInGroup);
+
+    return true;
   }
 }
