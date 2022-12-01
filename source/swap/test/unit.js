@@ -133,5 +133,18 @@ describe('Swap Unit Tests', () => {
         'NONCE_ALREADY_USED'
       )
     })
+
+    it('test when nonce has been cancelled up to', async () => {
+      const order = await createSignedOrder(
+        {
+          nonce: '2',
+        },
+        signer
+      )
+      await swap.connect(signer).cancelUpTo(3)
+      await expect(swap.connect(sender).swap(order)).to.be.revertedWith(
+        'NONCE_TOO_LOW'
+      )
+    })
   })
 })

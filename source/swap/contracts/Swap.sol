@@ -68,6 +68,9 @@ contract Swap is ISwap {
    */
   mapping(address => mapping(uint256 => uint256)) internal _nonceGroups;
 
+  // Mapping of signer addresses to an optionally set minimum valid nonce
+  mapping(address => uint256) public signerMinimumNonce;
+
   // Mapping of sender address to a delegated sender address and bool
   mapping(address => mapping(address => bool)) public senderAuthorizations;
 
@@ -104,6 +107,11 @@ contract Swap is ISwap {
   function swap(Order calldata order) external {
     // Ensure the order is not expired.
     require(order.expiry > block.timestamp, "ORDER_EXPIRED");
+
+    require(
+      order.nonce >= signerMinimumNonce[order.signer.wallet],
+      "NONCE_TOO_LOW"
+    );
 
     // Ensure the nonce is not yet used and if not mark it used
     require(
@@ -264,17 +272,15 @@ contract Swap is ISwap {
     }
   }
 
-  // Do we still need the cancelUpTo function?
-
-  // /**
-  //  * @notice Cancels all orders below a nonce value
-  //  * @dev Emits a CancelUpTo event
-  //  * @param minimumNonce uint256 Minimum valid nonce
-  //  */
-  // function cancelUpTo(uint256 minimumNonce) external {
-  //   signerMinimumNonce[msg.sender] = minimumNonce;
-  //   emit CancelUpTo(minimumNonce, msg.sender);
-  // }
+  /**
+   * @notice Cancels all orders below a nonce value
+   * @dev Emits a CancelUpTo event
+   * @param minimumNonce uint256 Minimum valid nonce
+   */
+  function cancelUpTo(uint256 minimumNonce) external {
+    signerMinimumNonce[msg.sender] = minimumNonce;
+    emit CancelUpTo(minimumNonce, msg.sender);
+  }
 
   /**
    * @notice Validate signature using an EIP-712 typed data hash
