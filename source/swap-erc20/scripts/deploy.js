@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 const fs = require('fs')
+const Confirm = require('prompt-confirm')
 const { ethers, run } = require('hardhat')
 const poolDeploys = require('@airswap/pool/deploys.js')
 const stakingDeploys = require('@airswap/staking/deploys.js')
@@ -23,30 +24,33 @@ async function main() {
   console.log(`Fee recipient: ${protocolFeeWallet}`)
   console.log(`Staking contract: ${stakingContract}`)
 
-  const swapFactory = await ethers.getContractFactory('SwapERC20')
-  const swapContract = await swapFactory.deploy(
-    protocolFee,
-    protocolFeeLight,
-    protocolFeeWallet,
-    rebateScale,
-    rebateMax,
-    stakingContract
-  )
-  await swapContract.deployed()
-  console.log(`Deployed: ${swapContract.address}`)
+  const prompt = new Confirm('Proceed to deploy?')
+  if (await prompt.run()) {
+    const swapFactory = await ethers.getContractFactory('SwapERC20')
+    const swapContract = await swapFactory.deploy(
+      protocolFee,
+      protocolFeeLight,
+      protocolFeeWallet,
+      rebateScale,
+      rebateMax,
+      stakingContract
+    )
+    await swapContract.deployed()
+    console.log(`Deployed: ${swapContract.address}`)
 
-  swapDeploys[chainId] = swapContract.address
-  fs.writeFileSync(
-    './deploys.js',
-    `module.exports = ${JSON.stringify(swapDeploys, null, '\t')}`
-  )
-  console.log('Updated deploys.js')
+    swapDeploys[chainId] = swapContract.address
+    fs.writeFileSync(
+      './deploys.js',
+      `module.exports = ${JSON.stringify(swapDeploys, null, '\t')}`
+    )
+    console.log('Updated deploys.js')
 
-  console.log(
-    `\nVerify with "yarn verify --network ${chainNames[
-      chainId
-    ].toLowerCase()}"\n`
-  )
+    console.log(
+      `\nVerify with "yarn verify --network ${chainNames[
+        chainId
+      ].toLowerCase()}"\n`
+    )
+  }
 }
 
 main()

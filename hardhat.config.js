@@ -56,7 +56,7 @@ module.exports = {
       url: 'https://arb1.arbitrum.io/rpc',
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
     },
-    'arbitrum-goerli': {
+    arbitrumgoerli: {
       url: 'https://goerli-rollup.arbitrum.io/rpc',
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
     },
@@ -82,10 +82,21 @@ module.exports = {
       bscTestnet: process.env.BSCSCAN_API_KEY,
       polygon: process.env.POLYGONSCAN_API_KEY,
       arbitrumOne: process.env.ARBISCAN_API_KEY,
+      arbitrumGoerli: process.env.ARBISCAN_API_KEY,
       avalanche: process.env.SNOWTRACE_API_KEY,
       avalancheFujiTestnet: process.env.SNOWTRACE_API_KEY,
       polygonMumbai: process.env.POLYGONSCAN_API_KEY,
     },
+    customChains: [
+      {
+        network: 'arbitrumGoerli',
+        chainId: 421613,
+        urls: {
+          apiURL: 'https://api-goerli.arbiscan.io/api',
+          browserURL: 'https://goerli.arbiscan.io',
+        },
+      },
+    ],
   },
   paths: {
     artifacts: './build',

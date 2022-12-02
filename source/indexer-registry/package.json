@@ -27,5 +27,8 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "devDependencies": {
+    "prompt-confirm": "^2.0.4"
   }
 }

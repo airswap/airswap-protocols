@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 const fs = require('fs')
+const Confirm = require('prompt-confirm')
 const { ethers, run } = require('hardhat')
 const stakingDeploys = require('@airswap/staking/deploys.js')
 const { chainNames, stakingTokenAddresses } = require('@airswap/constants')
@@ -20,28 +21,31 @@ async function main() {
   console.log(`Staking token: ${stakingToken}`)
   console.log(`Staking contract: ${stakingContract}`)
 
-  const poolFactory = await ethers.getContractFactory('Pool')
-  const poolContract = await poolFactory.deploy(
-    scale,
-    max,
-    stakingContract,
-    stakingToken
-  )
-  await poolContract.deployed()
-  console.log(`Deployed: ${poolContract.address}`)
+  const prompt = new Confirm('Proceed to deploy?')
+  if (await prompt.run()) {
+    const poolFactory = await ethers.getContractFactory('Pool')
+    const poolContract = await poolFactory.deploy(
+      scale,
+      max,
+      stakingContract,
+      stakingToken
+    )
+    await poolContract.deployed()
+    console.log(`Deployed: ${poolContract.address}`)
 
-  poolDeploys[chainId] = poolContract.address
-  fs.writeFileSync(
-    './deploys.js',
-    `module.exports = ${JSON.stringify(poolDeploys, null, '\t')}`
-  )
-  console.log('Updated deploys.js')
+    poolDeploys[chainId] = poolContract.address
+    fs.writeFileSync(
+      './deploys.js',
+      `module.exports = ${JSON.stringify(poolDeploys, null, '\t')}`
+    )
+    console.log('Updated deploys.js')
 
-  console.log(
-    `\nVerify with "yarn verify --network ${chainNames[
-      chainId
-    ].toLowerCase()}"\n`
-  )
+    console.log(
+      `\nVerify with "yarn verify --network ${chainNames[
+        chainId
+      ].toLowerCase()}"\n`
+    )
+  }
 }
 
 main()
