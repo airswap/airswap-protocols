@@ -17,6 +17,7 @@
 | Package                                                 | Version                                                                                                                   | Description                   |
 | :------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------ | :---------------------------- |
 | [`@airswap/swap`](/source/swap)                         | [![npm](https://img.shields.io/npm/v/@airswap/swap)](https://www.npmjs.com/package/@airswap/swap)                         | Atomic Token Swap             |
+| [`@airswap/swap`](/source/swap-erc20)                   | [![npm](https://img.shields.io/npm/v/@airswap/swap-erc20)](https://www.npmjs.com/package/@airswap/swap-erc20)             | Atomic Token Swap (ERC20)     |
 | [`@airswap/maker-registry`](/source/maker-registry)     | [![npm](https://img.shields.io/npm/v/@airswap/maker-registry)](https://www.npmjs.com/package/@airswap/maker-registry)     | Maker Discovery               |
 | [`@airswap/indexer-registry`](/source/indexer-registry) | [![npm](https://img.shields.io/npm/v/@airswap/indexer-registry)](https://www.npmjs.com/package/@airswap/indexer-registry) | Indexer Discovery             |
 | [`@airswap/staking`](/source/staking)                   | [![npm](https://img.shields.io/npm/v/@airswap/staking)](https://www.npmjs.com/package/@airswap/staking)                   | Staking for Participants      |
@@ -31,17 +32,16 @@
 | [`@airswap/metadata`](/tools/metadata)     | [![npm](https://img.shields.io/npm/v/@airswap/metadata)](https://www.npmjs.com/package/@airswap/metadata)     | Token Metadata            |
 | [`@airswap/constants`](/tools/constants)   | [![npm](https://img.shields.io/npm/v/@airswap/constants)](https://www.npmjs.com/package/@airswap/constants)   | Helpful Constants         |
 | [`@airswap/typescript`](/tools/typescript) | [![npm](https://img.shields.io/npm/v/@airswap/typescript)](https://www.npmjs.com/package/@airswap/typescript) | TypeScript Types          |
-| [`@airswap/merkle`](/tools/merkle)         | [![npm](https://img.shields.io/npm/v/@airswap/merkle)](https://www.npmjs.com/package/@airswap/merkle)         | Merkle Tree Helpers       |
 
 ## Repository Commands
 
-| Command        | Description                                  |
-| :------------- | :------------------------------------------- |
-| `yarn compile` | Compile all contracts to `build` folders.    |
-| `yarn clean`   | Delete all contract `build` folders.         |
-| `yarn test`    | Run all contract tests in `test` folders.    |
-| `yarn hint`    | Run a syntax linter for all Solidity code.   |
-| `yarn lint`    | Run a syntax linter for all JavaScript code. |
+| Command           | Description                               |
+| :---------------- | :---------------------------------------- |
+| `yarn compile`    | Compile all contracts to `build` folders. |
+| `yarn clean`      | Delete all contract `build` folders.      |
+| `yarn test`       | Run all contract tests in `test` folders. |
+| `yarn lint:fix`   | Run eslint for all JavaScript code.       |
+| `yarn pretty:fix` | Run prettier for all JavaScript code.     |
 
 ## Deploying Contracts
 
