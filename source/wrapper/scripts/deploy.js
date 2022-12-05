@@ -5,6 +5,7 @@ const { ethers, run } = require('hardhat')
 const swapDeploys = require('@airswap/swap-erc20/deploys.js')
 const wrapperDeploys = require('../deploys.js')
 const { chainNames, wrappedTokenAddresses } = require('@airswap/constants')
+const { getEtherscanURL } = require('@airswap/utils')
 
 async function main() {
   await run('compile')
@@ -12,12 +13,14 @@ async function main() {
   console.log(`Deployer: ${deployer.address}`)
 
   const chainId = await deployer.getChainId()
+  const gasPrice = await deployer.getGasPrice()
   const swapAddress = swapDeploys[chainId]
   const wrappedTokenAddress = wrappedTokenAddresses[chainId]
 
   console.log(`Deploying on ${chainNames[chainId].toUpperCase()}`)
   console.log(`Swap: ${swapAddress}`)
   console.log(`Wrapped: ${wrappedTokenAddress}`)
+  console.log(`Gas price: ${gasPrice / 10 ** 9} gwei`)
 
   const prompt = new Confirm('Proceed to deploy?')
   if (await prompt.run()) {
@@ -25,6 +28,10 @@ async function main() {
     const wrapperContract = await wrapperFactory.deploy(
       swapAddress,
       wrappedTokenAddress
+    )
+    console.log(
+      'Deploying...',
+      getEtherscanURL(chainId, wrapperContract.deployTransaction.hash)
     )
     await wrapperContract.deployed()
     console.log(`Deployed: ${wrapperContract.address}`)

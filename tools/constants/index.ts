@@ -44,7 +44,6 @@ export const chainNames: Record<number, string> = {
 
 export const chainCurrencies: Record<string, string> = {
   1: 'ETH',
-  4: 'ETH',
   5: 'ETH',
   42: 'ETH',
   56: 'BNB',
@@ -59,7 +58,6 @@ export const chainCurrencies: Record<string, string> = {
 
 export const wrappedTokenAddresses: Record<string, string> = {
   1: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
-  4: '0xc778417e063141139fce010982780140aa0cd5ab',
   5: '0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6',
   42: '0xd0a1e359811322d97991e03f863a0c30c2cf029c',
   56: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
@@ -74,7 +72,6 @@ export const wrappedTokenAddresses: Record<string, string> = {
 
 export const stakingTokenAddresses: Record<string, string> = {
   1: '0x27054b13b1b798b345b591a4d22e6562d47ea75a',
-  4: '0x8F8cA1BcfC53003D39C64192Bab6ACa7263f6A97',
   5: '0x1a1ec25dc08e98e5e93f1104b5e5cdd298707d31',
   42: '0x1a1ec25dc08e98e5e93f1104b5e5cdd298707d31',
   56: '0x1ac0d76f11875317f8a7d791db94cdd82bd02bd1',
@@ -83,7 +80,7 @@ export const stakingTokenAddresses: Record<string, string> = {
   42161: '0xa1135c2f2c7798d31459b5fdaef8613419be1008',
   421613: '0x71070c5607358fc25e3b4aaf4fb0a580c190252a',
   43113: '0x48c427e7cEf42399e9e8300fC47875772309e995',
-  43114: '0xc32a3c867abad28d977e1724f92d9684ff3d2976',
+  43114: '0x702d0f43edd46b77ea2d48570b02c328a20a94a1',
   80001: '0xd161ddcfcc0c2d823021aa26200824efa75218d1',
 }
 

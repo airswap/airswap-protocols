@@ -5,6 +5,7 @@ const { ethers, run } = require('hardhat')
 const poolDeploys = require('@airswap/pool/deploys.js')
 const stakingDeploys = require('@airswap/staking/deploys.js')
 const { chainNames } = require('@airswap/constants')
+const { getEtherscanURL } = require('@airswap/utils')
 const swapDeploys = require('../deploys.js')
 
 async function main() {
@@ -13,6 +14,7 @@ async function main() {
   console.log(`Deployer: ${deployer.address}`)
 
   const chainId = await deployer.getChainId()
+  const gasPrice = await deployer.getGasPrice()
   const protocolFeeWallet = poolDeploys[chainId]
   const stakingContract = stakingDeploys[chainId]
   const protocolFee = 7
@@ -23,6 +25,7 @@ async function main() {
   console.log(`Deploying on ${chainNames[chainId].toUpperCase()}`)
   console.log(`Fee recipient: ${protocolFeeWallet}`)
   console.log(`Staking contract: ${stakingContract}`)
+  console.log(`Gas price: ${gasPrice / 10 ** 9} gwei`)
 
   const prompt = new Confirm('Proceed to deploy?')
   if (await prompt.run()) {
@@ -34,6 +37,10 @@ async function main() {
       rebateScale,
       rebateMax,
       stakingContract
+    )
+    console.log(
+      'Deploying...',
+      getEtherscanURL(chainId, swapContract.deployTransaction.hash)
     )
     await swapContract.deployed()
     console.log(`Deployed: ${swapContract.address}`)

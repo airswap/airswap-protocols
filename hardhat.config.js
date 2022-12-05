@@ -15,32 +15,26 @@ module.exports = {
   networks: {
     goerli: {
       url: 'https://goerli.infura.io/v3/' + process.env.INFURA_API_KEY,
-      gasPrice: 10e9,
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
     },
     mainnet: {
       url: 'https://mainnet.infura.io/v3/' + process.env.INFURA_API_KEY,
-      gasPrice: 10e9,
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
     },
     bsctestnet: {
       url: 'https://data-seed-prebsc-1-s1.binance.org:8545/',
-      gasPrice: 10e9,
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
     },
     bsc: {
       url: 'https://bsc-dataseed.binance.org/',
-      gasPrice: 5e9,
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
     },
     fuji: {
       url: 'https://api.avax-test.network/ext/bc/C/rpc',
-      gasPrice: 225e9,
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
     },
     avalanche: {
       url: 'https://api.avax.network/ext/bc/C/rpc',
-      gasPrice: 30e9,
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
     },
     mumbai: {
@@ -49,7 +43,6 @@ module.exports = {
     },
     polygon: {
       url: 'https://polygon-rpc.com/',
-      gasPrice: 100e9,
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
     },
     arbitrum: {

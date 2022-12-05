@@ -17,7 +17,6 @@ jobs:
       - run: lerna run compile --concurrency=1
       - run: lerna run test:unit --concurrency=1
         env:
-          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
           MNEMONIC: ${{ secrets.MNEMONIC }}
       - name: Success ✅
         if: ${{ success() }}
