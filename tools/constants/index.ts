@@ -36,11 +36,15 @@ export const chainNames: Record<number, string> = {
   97: 'BSCTESTNET',
   137: 'POLYGON',
   42161: 'ARBITRUM',
-  421613: 'ARBITRUMGOERLI',
   43113: 'FUJI',
   43114: 'AVALANCHE',
   80001: 'MUMBAI',
+  421613: 'ARBITRUMGOERLI',
 }
+
+export const mainnets: number[] = [1, 56, 137, 42161, 43114]
+
+export const testnets: number[] = [5, 97, 80001, 421613, 43113]
 
 export const chainCurrencies: Record<string, string> = {
   1: 'ETH',
