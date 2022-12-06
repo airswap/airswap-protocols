@@ -64,10 +64,10 @@ export const wrappedTokenAddresses: Record<string, string> = {
   97: '0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd',
   137: '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270',
   42161: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1',
-  421613: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1',
   43113: '0xd9d01a9f7c810ec035c0e42cb9e80ef44d7f8692',
   43114: '0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7',
   80001: '0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889',
+  421613: '0xee01c0cd76354c383b8c7b4e65ea88d00b06f36f',
 }
 
 export const stakingTokenAddresses: Record<string, string> = {
@@ -78,10 +78,10 @@ export const stakingTokenAddresses: Record<string, string> = {
   97: '0xd161ddcfcc0c2d823021aa26200824efa75218d1',
   137: '0x04bEa9FCE76943E90520489cCAb84E84C0198E29',
   42161: '0xa1135c2f2c7798d31459b5fdaef8613419be1008',
-  421613: '0x71070c5607358fc25e3b4aaf4fb0a580c190252a',
   43113: '0x48c427e7cEf42399e9e8300fC47875772309e995',
   43114: '0x702d0f43edd46b77ea2d48570b02c328a20a94a1',
   80001: '0xd161ddcfcc0c2d823021aa26200824efa75218d1',
+  421613: '0x71070c5607358fc25e3b4aaf4fb0a580c190252a',
 }
 
 export const etherscanDomains: Record<string, string> = {
