@@ -1,11 +1,8 @@
 // SPDX-License-Identifier: MIT
-
-/* solhint-disable var-name-mixedcase */
 pragma solidity 0.8.17;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "./interfaces/ISwapERC20.sol";
 
 /**
@@ -22,7 +19,10 @@ contract SwapERC20 is ISwapERC20, Ownable {
 
   bytes32 public constant ORDER_TYPEHASH =
     keccak256(
-      "Order(uint256 nonce,uint256 expiry,address signerWallet,address signerToken,uint256 signerAmount,uint256 protocolFee,address senderWallet,address senderToken,uint256 senderAmount)"
+      abi.encodePacked(
+        "Order(uint256 nonce,uint256 expiry,address signerWallet,address signerToken,uint256 signerAmount,",
+        "uint256 protocolFee,address senderWallet,address senderToken,uint256 senderAmount)"
+      )
     );
 
   bytes32 public constant DOMAIN_NAME = keccak256("SWAP_ERC20");
@@ -32,7 +32,7 @@ contract SwapERC20 is ISwapERC20, Ownable {
 
   uint256 internal constant MAX_PERCENTAGE = 100;
   uint256 internal constant MAX_SCALE = 77;
-  uint256 internal constant MAX_ERROR_COUNT = 6;
+  uint256 internal constant MAX_ERROR_COUNT = 8;
   uint256 public constant FEE_DIVISOR = 10000;
 
   /**

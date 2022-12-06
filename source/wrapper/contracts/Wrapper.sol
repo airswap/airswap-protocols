@@ -1,15 +1,13 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.0;
 
 import "@airswap/swap-erc20/contracts/interfaces/ISwapERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "./interfaces/IWETH.sol";
 
 /**
- * @title AirSwap: Automatic Wrap and Unwrap
+ * @title AirSwap: Wrap and Unwrap Native Tokens
  * @notice https://www.airswap.io/
  */
 contract Wrapper is Ownable {

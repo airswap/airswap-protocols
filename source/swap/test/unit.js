@@ -28,9 +28,6 @@ describe('Swap Unit Tests', () => {
   let deployer
   let signer
   let sender
-  let affiliate
-  let protocolFeeWallet
-  let anyone
 
   async function createSignedOrder(params, signatory) {
     const unsignedOrder = createOrder({

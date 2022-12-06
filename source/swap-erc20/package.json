@@ -1,12 +1,7 @@
 {
   "name": "@airswap/swap-erc20",
-  "version": "3.2.3",
+  "version": "3.0.0",
   "description": "AirSwap: Atomic ERC20 Token Swap",
-  "contributors": [
-    "Vicente Dragicevic",
-    "Don Mosites",
-    "Ethan Wessel"
-  ],
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -31,7 +26,8 @@
     "@openzeppelin/contracts": "^4.3.1"
   },
   "devDependencies": {
-    "@airswap/utils": "3.0.4"
+    "@airswap/utils": "3.0.4",
+    "prompt-confirm": "^2.0.4"
   },
   "publishConfig": {
     "access": "public"
