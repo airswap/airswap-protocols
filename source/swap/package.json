@@ -1,6 +1,7 @@
 {
-  "name": "@airswap/swap-any",
+  "name": "@airswap/swap",
   "version": "0.0.1",
+  "private": true,
   "description": "AirSwap: Atomic Token Swap",
   "license": "MIT",
   "repository": {
@@ -27,8 +28,5 @@
   },
   "devDependencies": {
     "@airswap/utils": "3.0.4"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }
