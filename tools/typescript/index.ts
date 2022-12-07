@@ -4,7 +4,7 @@ export type Signature = {
   s: string
 }
 
-export type UnsignedOrder = {
+export type UnsignedOrderERC20 = {
   nonce: string
   expiry: string
   signerWallet: string
@@ -16,7 +16,7 @@ export type UnsignedOrder = {
   senderAmount: string
 }
 
-export type Order = {
+export type OrderERC20 = {
   nonce: string
   expiry: string
   signerWallet: string
@@ -31,7 +31,26 @@ export type Settlement = {
   swapContract: string
 }
 
-export type FullOrder = UnsignedOrder & Signature & Settlement
+export type FullOrderERC20 = UnsignedOrderERC20 & Signature & Settlement
+
+export type UnsignedOrder = {
+  nonce: string
+  expiry: string
+  protocolFee: string
+  signer: OrderParty
+  sender: OrderParty
+  affiliate: OrderParty
+}
+
+export type Order = UnsignedOrder & Signature
+
+export type OrderParty = {
+  wallet: string
+  token: string
+  kind: string
+  id: string
+  amount: string
+}
 
 export type UnsignedClaim = {
   nonce: string
@@ -59,7 +78,7 @@ export type LocatorResult = {
   nextCursor: string
 }
 
-export const EIP712Swap = {
+export const EIP712SwapERC20 = {
   EIP712Domain: [
     { name: 'name', type: 'string' },
     { name: 'version', type: 'string' },
@@ -76,6 +95,30 @@ export const EIP712Swap = {
     { name: 'senderWallet', type: 'address' },
     { name: 'senderToken', type: 'address' },
     { name: 'senderAmount', type: 'uint256' },
+  ],
+}
+
+export const EIP712Swap = {
+  EIP712Domain: [
+    { name: 'name', type: 'string' },
+    { name: 'version', type: 'string' },
+    { name: 'chainId', type: 'uint256' },
+    { name: 'verifyingContract', type: 'address' },
+  ],
+  Order: [
+    { name: 'nonce', type: 'uint256' },
+    { name: 'expiry', type: 'uint256' },
+    { name: 'protocolFee', type: 'uint256' },
+    { name: 'signer', type: 'Party' },
+    { name: 'sender', type: 'Party' },
+    { name: 'affiliate', type: 'Party' },
+  ],
+  Party: [
+    { name: 'wallet', type: 'address' },
+    { name: 'token', type: 'address' },
+    { name: 'kind', type: 'bytes4' },
+    { name: 'id', type: 'uint256' },
+    { name: 'amount', type: 'uint256' },
   ],
 }
 

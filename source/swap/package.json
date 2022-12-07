@@ -1,12 +1,8 @@
 {
   "name": "@airswap/swap",
-  "version": "3.2.3",
+  "version": "0.0.1",
+  "private": true,
   "description": "AirSwap: Atomic Token Swap",
-  "contributors": [
-    "Vicente Dragicevic",
-    "Don Mosites",
-    "Ethan Wessel"
-  ],
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -28,12 +24,9 @@
     "verify": "hardhat run ./scripts/verify.js"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.3.1"
+    "openzeppelin-solidity": "^4.6.0"
   },
   "devDependencies": {
     "@airswap/utils": "3.0.4"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

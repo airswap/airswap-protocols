@@ -1,16 +1,15 @@
 const { expect } = require('chai')
 const {
-  createOrder,
-  orderToParams,
-  createSwapSignature,
+  orderERC20ToParams,
+  createOrderERC20Signature,
+  createOrderERC20,
 } = require('@airswap/utils')
 const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
 
 const ERC20 = require('@openzeppelin/contracts/build/contracts/ERC20PresetMinterPauser.json')
-const ERC721 = require('@openzeppelin/contracts/build/contracts/ERC721PresetMinterPauserAutoId.json')
 const WETH9 = require('@uniswap/v2-periphery/build/WETH9.json')
-const LIGHT = require('@airswap/swap/build/contracts/Swap.sol/Swap.json')
+const LIGHT = require('@airswap/swap-erc20/build/contracts/SwapERC20.sol/SwapERC20.json')
 const { MAX_APPROVAL_AMOUNT } = require('../../../tools/constants')
 
 describe('Wrapper Integration Tests', () => {
@@ -21,8 +20,6 @@ describe('Wrapper Integration Tests', () => {
   let wethToken
   let signerToken
   let senderToken
-  let signerNFT
-  let senderNFT
   let stakingToken
 
   let deployer
@@ -39,7 +36,7 @@ describe('Wrapper Integration Tests', () => {
   const REBATE_MAX = '100'
 
   async function createSignedOrder(params, signer) {
-    const unsignedOrder = createOrder({
+    const unsignedOrder = createOrderERC20({
       protocolFee: PROTOCOL_FEE,
       signerWallet: signer.address,
       signerToken: signerToken.address,
@@ -49,9 +46,9 @@ describe('Wrapper Integration Tests', () => {
       senderAmount: DEFAULT_AMOUNT,
       ...params,
     })
-    return orderToParams({
+    return orderERC20ToParams({
       ...unsignedOrder,
-      ...(await createSwapSignature(
+      ...(await createOrderERC20Signature(
         unsignedOrder,
         signer,
         swap.address,
@@ -83,18 +80,6 @@ describe('Wrapper Integration Tests', () => {
     await senderToken.deployed()
     senderToken.mint(sender.address, DEFAULT_BALANCE)
 
-    signerNFT = await (
-      await ethers.getContractFactory(ERC721.abi, ERC721.bytecode)
-    ).deploy('C', 'C', 'C')
-    await signerNFT.deployed()
-    signerNFT.mint(signer.address)
-
-    senderNFT = await (
-      await ethers.getContractFactory(ERC721.abi, ERC721.bytecode)
-    ).deploy('D', 'D', 'D')
-    await senderNFT.deployed()
-    senderNFT.mint(sender.address)
-
     wethToken = await (
       await ethers.getContractFactory(WETH9.abi, WETH9.bytecode)
     ).deploy()
@@ -121,7 +106,6 @@ describe('Wrapper Integration Tests', () => {
     wethToken.connect(signer).approve(swap.address, DEFAULT_BALANCE)
     signerToken.connect(signer).approve(swap.address, DEFAULT_BALANCE)
     senderToken.connect(sender).approve(swap.address, DEFAULT_BALANCE)
-    signerNFT.connect(signer).setApprovalForAll(swap.address, true)
 
     wrapper = await (
       await ethers.getContractFactory('Wrapper')
@@ -131,8 +115,6 @@ describe('Wrapper Integration Tests', () => {
     await senderToken
       .connect(sender)
       .approve(wrapper.address, MAX_APPROVAL_AMOUNT)
-
-    await senderNFT.connect(sender).setApprovalForAll(wrapper.address, true)
   })
 
   describe('Test wraps', async () => {

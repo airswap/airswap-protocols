@@ -1,8 +1,8 @@
 const { expect } = require('chai')
 const {
-  createOrder,
-  orderToParams,
-  createSwapSignature,
+  createOrderERC20,
+  orderERC20ToParams,
+  createOrderERC20Signature,
 } = require('@airswap/utils')
 const { ethers } = require('hardhat')
 const ERC20 = require('@openzeppelin/contracts/build/contracts/ERC20PresetMinterPauser.json')
@@ -27,7 +27,7 @@ describe('Swap Integration Tests', () => {
   const DEFAULT_AMOUNT = '10000'
 
   async function createSignedOrder(params, signer) {
-    const unsignedOrder = createOrder({
+    const unsignedOrder = createOrderERC20({
       protocolFee: PROTOCOL_FEE,
       signerWallet: signer.address,
       signerToken: signerToken.address,
@@ -37,9 +37,9 @@ describe('Swap Integration Tests', () => {
       senderAmount: DEFAULT_AMOUNT,
       ...params,
     })
-    return orderToParams({
+    return orderERC20ToParams({
       ...unsignedOrder,
-      ...(await createSwapSignature(
+      ...(await createOrderERC20Signature(
         unsignedOrder,
         signer,
         swap.address,
@@ -83,7 +83,7 @@ describe('Swap Integration Tests', () => {
     senderToken.mint(sender.address, 1000000)
 
     swap = await (
-      await ethers.getContractFactory('Swap')
+      await ethers.getContractFactory('SwapERC20')
     ).deploy(
       PROTOCOL_FEE,
       PROTOCOL_FEE_LIGHT,

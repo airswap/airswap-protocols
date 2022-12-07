@@ -1,9 +1,10 @@
-import { FullOrder } from '@airswap/typescript'
-import axios, { AxiosError, AxiosResponse } from 'axios'
+import { FullOrderERC20 } from '@airswap/typescript'
+import { AxiosError, AxiosResponse } from 'axios'
+const axios = require('axios')
 
 export type IndexedOrderResponse = {
   hash?: string | undefined
-  order: FullOrder
+  order: FullOrderERC20
   addedOn: number
 }
 
@@ -91,11 +92,12 @@ export abstract class IndexedOrderError extends Error {
   public code!: number
   public constructor(message: string) {
     super(message)
+    this.message = message
   }
 }
 export class ErrorResponse {
-  private code: number
-  private message: string
+  public code: number
+  public message: string
   public constructor(code: number, message: string) {
     this.code = code
     this.message = message
@@ -127,7 +129,7 @@ export class JsonRpcResponse {
       | undefined
   ) {
     this.id = id
-    if (result instanceof IndexedOrderError) {
+    if (result instanceof Error) {
       this.result = new ErrorResponse(result.code, result.message)
     } else {
       this.result = result
@@ -177,7 +179,7 @@ export class NodeIndexer {
     }
   }
 
-  public async addOrder(fullOrder: FullOrder): Promise<SuccessResponse> {
+  public async addOrder(fullOrder: FullOrderERC20): Promise<SuccessResponse> {
     try {
       const axiosResponse = await axios.post(this.host, {
         jsonrpc: '2.0',

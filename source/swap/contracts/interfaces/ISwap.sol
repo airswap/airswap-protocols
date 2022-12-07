@@ -2,104 +2,71 @@
 
 pragma solidity 0.8.17;
 
+// import "@airswap/transfers/contracts/TransferHandlerRegistry.sol";
+import "../TransferHandlerRegistry.sol";
+
 interface ISwap {
   struct Order {
-    uint256 nonce;
-    uint256 expiry;
-    address signerWallet;
-    address signerToken;
-    uint256 signerAmount;
-    address senderWallet;
-    address senderToken;
-    uint256 senderAmount;
+    uint256 nonce; // Unique per order and should be sequential
+    uint256 expiry; // Expiry in seconds since 1 January 1970
+    uint256 protocolFee;
+    Party signer; // Party to the trade that sets terms
+    Party sender; // Party to the trade that accepts terms
+    Party affiliate; // Party compensated for facilitating (optional)
     uint8 v;
     bytes32 r;
     bytes32 s;
+  }
+
+  struct Party {
+    address wallet; // Wallet address of the party
+    address token; // Contract address of the token
+    bytes4 kind; // Interface ID of the token
+    uint256 id; // ID for ERC-721 or ERC-1155
+    uint256 amount; // Amount for ERC-20 or ERC-1155
   }
 
   event Swap(
     uint256 indexed nonce,
     uint256 timestamp,
     address indexed signerWallet,
-    address signerToken,
     uint256 signerAmount,
-    uint256 protocolFee,
+    uint256 signerId,
+    address signerToken,
     address indexed senderWallet,
+    uint256 senderAmount,
+    uint256 senderId,
     address senderToken,
-    uint256 senderAmount
+    address affiliateWallet,
+    uint256 affiliateAmount,
+    uint256 affiliateId,
+    address affiliateToken
   );
 
   event Cancel(uint256 indexed nonce, address indexed signerWallet);
 
-  event Authorize(address indexed signer, address indexed signerWallet);
+  event CancelUpTo(uint256 indexed nonce, address indexed signerWallet);
 
-  event Revoke(address indexed signer, address indexed signerWallet);
+  /**
+   * @notice Atomic Token Swap
+   * @param order Order
+   */
+  function swap(Order calldata order) external;
 
-  event SetProtocolFee(uint256 protocolFee);
-
-  event SetProtocolFeeLight(uint256 protocolFeeLight);
-
-  event SetProtocolFeeWallet(address indexed feeWallet);
-
-  event SetRebateScale(uint256 rebateScale);
-
-  event SetRebateMax(uint256 rebateMax);
-
-  event SetStaking(address indexed staking);
-
-  function swap(
-    address recipient,
-    uint256 nonce,
-    uint256 expiry,
-    address signerWallet,
-    address signerToken,
-    uint256 signerAmount,
-    address senderToken,
-    uint256 senderAmount,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
-  ) external;
-
-  function swapAnySender(
-    address recipient,
-    uint256 nonce,
-    uint256 expiry,
-    address signerWallet,
-    address signerToken,
-    uint256 signerAmount,
-    address senderToken,
-    uint256 senderAmount,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
-  ) external;
-
-  function swapLight(
-    uint256 nonce,
-    uint256 expiry,
-    address signerWallet,
-    address signerToken,
-    uint256 signerAmount,
-    address senderToken,
-    uint256 senderAmount,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
-  ) external;
-
-  function authorize(address sender) external;
-
-  function revoke() external;
-
+  /**
+   * @notice Cancel one or more open orders by nonce
+   * @param nonces uint256[]
+   */
   function cancel(uint256[] calldata nonces) external;
+
+  /**
+   * @notice Cancels all orders below a nonce value
+   * @dev These orders can be made active by reducing the minimum nonce
+   * @param minimumNonce uint256
+   */
+  function cancelUpTo(uint256 minimumNonce) external;
 
   function nonceUsed(address, uint256) external view returns (bool);
 
-  function authorized(address) external view returns (address);
-
-  function calculateProtocolFee(address, uint256)
-    external
-    view
-    returns (uint256);
+  function registry() external view returns (TransferHandlerRegistry);
 }

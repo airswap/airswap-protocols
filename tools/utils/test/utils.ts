@@ -1,19 +1,19 @@
 import { assert, expect } from 'chai'
 import { ethers } from 'ethers'
 import { ADDRESS_ZERO, SECONDS_IN_DAY } from '@airswap/constants'
-import { Levels, FullOrder } from '@airswap/typescript'
+import { Levels, FullOrderERC20 } from '@airswap/typescript'
 
 import {
-  isValidFullOrder,
-  isValidOrder,
+  isValidFullOrderERC20,
+  isValidOrderERC20,
   isValidClaim,
   calculateCostFromLevels,
-  createSwapSignature,
+  createOrderERC20Signature,
   createClaimSignature,
-  getSignerFromSwapSignature,
+  getSignerFromOrderERC20Signature,
   getSignerFromClaimSignature,
-  compressFullOrder,
-  decompressFullOrder,
+  compressFullOrderERC20,
+  decompressFullOrderERC20,
 } from '../index'
 
 const signerPrivateKey =
@@ -38,13 +38,13 @@ describe('Utils', async () => {
   })
 
   it('Signs and validates an order', async () => {
-    const { v, r, s } = await createSwapSignature(
+    const { v, r, s } = await createOrderERC20Signature(
       unsignedOrder,
       wallet.privateKey,
       ADDRESS_ZERO,
       1
     )
-    const signerWallet = getSignerFromSwapSignature(
+    const signerWallet = getSignerFromOrderERC20Signature(
       unsignedOrder,
       ADDRESS_ZERO,
       1,
@@ -52,7 +52,7 @@ describe('Utils', async () => {
       r,
       s
     )
-    expect(isValidOrder({ ...unsignedOrder, v, r, s })).to.equal(true)
+    expect(isValidOrderERC20({ ...unsignedOrder, v, r, s })).to.equal(true)
     expect(signerWallet.toLowerCase()).to.equal(wallet.address.toLowerCase())
   })
 
@@ -68,13 +68,13 @@ describe('Utils', async () => {
       senderToken: ADDRESS_ZERO,
       senderAmount: '0',
     }
-    const signature = await createSwapSignature(
+    const signature = await createOrderERC20Signature(
       unsignedOrder,
       wallet.privateKey,
       ADDRESS_ZERO,
       1
     )
-    const signerWallet = getSignerFromSwapSignature(
+    const signerWallet = getSignerFromOrderERC20Signature(
       unsignedOrder,
       ADDRESS_ZERO,
       1,
@@ -87,20 +87,26 @@ describe('Utils', async () => {
       swapContract: '0x3700A8C0447aEE3160F6aF3A34a0C062629335d9',
     }
 
-    expect(isValidFullOrder(undefined as unknown as FullOrder)).to.equal(false)
-    expect(isValidFullOrder(null as unknown as FullOrder)).to.equal(false)
-    expect(isValidFullOrder({} as unknown as FullOrder)).to.equal(false)
-    expect(isValidFullOrder(unsignedOrder as unknown as FullOrder)).to.equal(
+    expect(
+      isValidFullOrderERC20(undefined as unknown as FullOrderERC20)
+    ).to.equal(false)
+    expect(isValidFullOrderERC20(null as unknown as FullOrderERC20)).to.equal(
+      false
+    )
+    expect(isValidFullOrderERC20({} as unknown as FullOrderERC20)).to.equal(
       false
     )
     expect(
-      isValidFullOrder({
-        ...unsignedOrder,
-        ...signature,
-      } as unknown as FullOrder)
+      isValidFullOrderERC20(unsignedOrder as unknown as FullOrderERC20)
     ).to.equal(false)
     expect(
-      isValidFullOrder({
+      isValidFullOrderERC20({
+        ...unsignedOrder,
+        ...signature,
+      } as unknown as FullOrderERC20)
+    ).to.equal(false)
+    expect(
+      isValidFullOrderERC20({
         ...unsignedOrder,
         ...signature,
         signerWallet,
@@ -157,13 +163,13 @@ describe('Utils', async () => {
   })
 
   it('Compresses and decompresses an order', async () => {
-    const { v, r, s } = await createSwapSignature(
+    const { v, r, s } = await createOrderERC20Signature(
       unsignedOrder,
       wallet.privateKey,
       ADDRESS_ZERO,
       1
     )
-    const signerWallet = getSignerFromSwapSignature(
+    const signerWallet = getSignerFromOrderERC20Signature(
       unsignedOrder,
       ADDRESS_ZERO,
       1,
@@ -173,7 +179,7 @@ describe('Utils', async () => {
     )
     const chainId = 1
     const swapContract = ADDRESS_ZERO
-    const compressed = compressFullOrder({
+    const compressed = compressFullOrderERC20({
       chainId,
       swapContract,
       ...unsignedOrder,
@@ -181,8 +187,8 @@ describe('Utils', async () => {
       r,
       s,
     })
-    const signedOrder = decompressFullOrder(compressed)
-    expect(isValidOrder(signedOrder)).to.equal(true)
+    const signedOrder = decompressFullOrderERC20(compressed)
+    expect(isValidOrderERC20(signedOrder)).to.equal(true)
     expect(signerWallet.toLowerCase()).to.equal(wallet.address.toLowerCase())
   })
 })

@@ -37,17 +37,10 @@ export const tokenListURLs = {
 
 export const openSeaUrls = {
   1: 'https://api.opensea.io/api/v1',
-  4: 'https://testnets-api.opensea.io/api/v1',
+  5: 'https://testnets-api.opensea.io/api/v1',
 }
 
 export const defaults = [
-  {
-    name: 'Wrapped Ether',
-    address: '0xc778417e063141139fce010982780140aa0cd5ab',
-    decimals: 18,
-    symbol: 'WETH',
-    chainId: 4,
-  },
   {
     name: 'Wrapped Ether',
     address: '0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6',
@@ -85,13 +78,6 @@ export const defaults = [
   },
   {
     name: 'AirSwap Token',
-    address: '0xcc1cbd4f67cceb7c001bd4adf98451237a193ff8',
-    decimals: 4,
-    symbol: 'AST',
-    chainId: 4,
-  },
-  {
-    name: 'AirSwap Token',
     address: '0x1a1ec25dc08e98e5e93f1104b5e5cdd298707d31',
     decimals: 4,
     symbol: 'AST',
@@ -124,13 +110,6 @@ export const defaults = [
     decimals: 18,
     symbol: 'AST',
     chainId: 43114,
-  },
-  {
-    name: 'Dai',
-    address: '0x5592ec0cfb4dbc12d3ab100b257153436a1f0fea',
-    decimals: 18,
-    symbol: 'DAI',
-    chainId: 4,
   },
   {
     name: 'Tether USD',
