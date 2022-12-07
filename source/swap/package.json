@@ -27,6 +27,6 @@
     "openzeppelin-solidity": "^4.6.0"
   },
   "devDependencies": {
-    "@airswap/utils": "3.0.4"
+    "@airswap/utils": "3.0.5"
   }
 }
