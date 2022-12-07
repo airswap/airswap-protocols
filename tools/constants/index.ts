@@ -13,7 +13,7 @@ export const REQUEST_TIMEOUT = 4000
 export const SECONDS_IN_DAY = 86400
 
 export const chainIds: Record<string, number> = {
-  MAINNET: 1,
+  ETHEREUM: 1,
   GOERLI: 5,
   OPTIMISM: 10,
   KOVAN: 42,
@@ -28,7 +28,7 @@ export const chainIds: Record<string, number> = {
 }
 
 export const chainNames: Record<number, string> = {
-  1: 'MAINNET',
+  1: 'ETHEREUM',
   5: 'GOERLI',
   10: 'OPTIMISM',
   42: 'KOVAN',
@@ -96,10 +96,10 @@ export const etherscanDomains: Record<string, string> = {
   97: 'testnet.bscscan.com',
   137: 'polygonscan.com',
   42161: 'arbiscan.io',
-  421613: 'goerli.arbiscan.io',
   43113: 'testnet.snowtrace.io',
   43114: 'snowtrace.io',
   80001: 'mumbai.polygonscan.com',
+  421613: 'goerli.arbiscan.io',
 }
 
 export enum TokenKinds {
