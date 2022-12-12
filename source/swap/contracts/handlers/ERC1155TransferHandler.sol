@@ -7,6 +7,22 @@ import "openzeppelin-solidity/contracts/token/ERC1155/IERC1155.sol";
 
 contract ERC1155TransferHandler is ITransferHandler {
   /**
+   * @notice Function to wrap token transfer for different token types
+   * @param party Party from whom swap would be made
+   */
+  function hasAllowance(Party calldata party) external pure returns (bool) {
+    return party.wallet != address(0);
+  }
+
+  /**
+   * @notice Function to wrap token transfer for different token types
+   * @param party Party from whom swap would be made
+   */
+  function hasBalance(Party calldata party) external pure returns (bool) {
+    return party.wallet != address(0);
+  }
+
+  /**
    * @notice Function to wrap safeTransferFrom for ERC1155
    * @param from address Wallet address to transfer from
    * @param to address Wallet address to transfer to

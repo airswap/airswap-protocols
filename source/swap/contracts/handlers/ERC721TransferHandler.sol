@@ -7,6 +7,22 @@ import "openzeppelin-solidity/contracts/token/ERC721/IERC721.sol";
 
 contract ERC721TransferHandler is ITransferHandler {
   /**
+   * @notice Function to wrap token transfer for different token types
+   * @param party Party from whom swap would be made
+   */
+  function hasAllowance(Party calldata party) external pure returns (bool) {
+    return party.wallet != address(0);
+  }
+
+  /**
+   * @notice Function to wrap token transfer for different token types
+   * @param party Party from whom swap would be made
+   */
+  function hasBalance(Party calldata party) external pure returns (bool) {
+    return party.wallet != address(0);
+  }
+
+  /**
    * @notice Function to wrap safeTransferFrom for ERC721
    * @param from address Wallet address to transfer from
    * @param to address Wallet address to transfer to
