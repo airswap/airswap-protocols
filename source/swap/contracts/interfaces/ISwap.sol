@@ -51,12 +51,6 @@ interface ISwap {
 
   event SetProtocolFeeWallet(address indexed feeWallet);
 
-  event SetRebateScale(uint256 rebateScale);
-
-  event SetRebateMax(uint256 rebateMax);
-
-  event SetStaking(address indexed staking);
-
   /**
    * @notice Atomic Token Swap
    * @param order Order
@@ -79,9 +73,4 @@ interface ISwap {
   function nonceUsed(address, uint256) external view returns (bool);
 
   function registry() external view returns (TransferHandlerRegistry);
-
-  function calculateProtocolFee(address, uint256)
-    external
-    view
-    returns (uint256);
 }

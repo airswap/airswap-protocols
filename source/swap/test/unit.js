@@ -9,8 +9,6 @@ const { ADDRESS_ZERO, tokenKinds } = require('@airswap/constants')
 const CHAIN_ID = 31337
 const PROTOCOL_FEE = '30'
 const HIGHER_FEE = '50'
-const REBATE_SCALE = '10'
-const REBATE_MAX = '100'
 const FEE_DIVISOR = '10000'
 const DEFAULT_AMOUNT = '1000'
 
@@ -98,10 +96,7 @@ describe('Swap Unit Tests', () => {
     ).deploy(
       transferHandlerRegistry.address,
       PROTOCOL_FEE,
-      protocolFeeWallet.address,
-      REBATE_SCALE,
-      REBATE_MAX,
-      staking.address
+      protocolFeeWallet.address
     )
     await swap.deployed()
   })
@@ -119,14 +114,7 @@ describe('Swap Unit Tests', () => {
         await expect(
           (
             await ethers.getContractFactory('Swap')
-          ).deploy(
-            transferHandlerRegistry.address,
-            PROTOCOL_FEE,
-            ADDRESS_ZERO,
-            REBATE_SCALE,
-            REBATE_MAX,
-            staking.address
-          )
+          ).deploy(transferHandlerRegistry.address, PROTOCOL_FEE, ADDRESS_ZERO)
         ).to.be.revertedWith('INVALID_FEE_WALLET')
       })
 
@@ -137,57 +125,9 @@ describe('Swap Unit Tests', () => {
           ).deploy(
             transferHandlerRegistry.address,
             100000000000,
-            protocolFeeWallet.address,
-            REBATE_SCALE,
-            REBATE_MAX,
-            staking.address
+            protocolFeeWallet.address
           )
         ).to.be.revertedWith('INVALID_FEE')
-      })
-
-      it('test invalid rebate scale', async () => {
-        await expect(
-          (
-            await ethers.getContractFactory('Swap')
-          ).deploy(
-            transferHandlerRegistry.address,
-            PROTOCOL_FEE,
-            protocolFeeWallet.address,
-            REBATE_SCALE + 1,
-            REBATE_MAX,
-            staking.address
-          )
-        ).to.be.revertedWith('SCALE_TOO_HIGH')
-      })
-
-      it('test invalid rebate maximum', async () => {
-        await expect(
-          (
-            await ethers.getContractFactory('Swap')
-          ).deploy(
-            transferHandlerRegistry.address,
-            PROTOCOL_FEE,
-            protocolFeeWallet.address,
-            REBATE_SCALE,
-            REBATE_MAX + 1,
-            staking.address
-          )
-        ).to.be.revertedWith('MAX_TOO_HIGH')
-      })
-
-      it('test invalid rebate maximum', async () => {
-        await expect(
-          (
-            await ethers.getContractFactory('Swap')
-          ).deploy(
-            transferHandlerRegistry.address,
-            PROTOCOL_FEE,
-            protocolFeeWallet.address,
-            REBATE_SCALE,
-            REBATE_MAX,
-            ADDRESS_ZERO
-          )
-        ).to.be.revertedWith('INVALID_STAKING')
       })
     })
   })
@@ -203,63 +143,6 @@ describe('Swap Unit Tests', () => {
       await expect(
         swap.connect(deployer).setProtocolFeeWallet(protocolFeeWallet.address)
       ).to.emit(swap, 'SetProtocolFeeWallet')
-    })
-    it('test setRebateScale', async () => {
-      await expect(swap.connect(deployer).setRebateScale(REBATE_SCALE)).to.emit(
-        swap,
-        'SetRebateScale'
-      )
-    })
-    it('test setRebateScale with invalid input', async () => {
-      await expect(
-        swap.connect(deployer).setRebateScale(REBATE_SCALE + 1)
-      ).to.be.revertedWith('SCALE_TOO_HIGH')
-    })
-    it('test setRebateMax', async () => {
-      await expect(
-        await swap.connect(deployer).setRebateMax(REBATE_MAX)
-      ).to.emit(swap, 'SetRebateMax')
-    })
-    it('test setRebateMax with invalid input', async () => {
-      await expect(
-        swap.connect(deployer).setRebateMax(REBATE_MAX + 1)
-      ).to.be.revertedWith('MAX_TOO_HIGH')
-    })
-    it('test setStaking', async () => {
-      await expect(swap.connect(deployer).setStaking(staking.address)).to.emit(
-        swap,
-        'SetStaking'
-      )
-    })
-    it('test setStaking with zero address', async () => {
-      await expect(
-        swap.connect(deployer).setStaking(ADDRESS_ZERO)
-      ).to.be.revertedWith('INVALID_STAKING')
-    })
-  })
-
-  describe('Test calculateProtocolFee', async () => {
-    it('test calculateProtocolFee', async () => {
-      const initialFeeAmount = (DEFAULT_AMOUNT * PROTOCOL_FEE) / FEE_DIVISOR
-      const discount = await swap
-        .connect(deployer)
-        .calculateDiscount(10000000, initialFeeAmount)
-      const actualFeeAmount = await swap
-        .connect(deployer)
-        .calculateProtocolFee(sender.address, DEFAULT_AMOUNT)
-      expect(actualFeeAmount).to.equal(initialFeeAmount - discount)
-    })
-    it('test calculateProtocolFee with protocol fee as zero', async () => {
-      const zeroProtocolFee = 0
-      await swap.connect(deployer).setProtocolFee(zeroProtocolFee)
-      const initialFeeAmount = (DEFAULT_AMOUNT * zeroProtocolFee) / FEE_DIVISOR
-      const discount = await swap
-        .connect(deployer)
-        .calculateDiscount(10000000, initialFeeAmount)
-      const actualFeeAmount = await swap
-        .connect(deployer)
-        .calculateProtocolFee(sender.address, DEFAULT_AMOUNT)
-      expect(actualFeeAmount).to.equal(initialFeeAmount - discount)
     })
   })
 
@@ -368,21 +251,6 @@ describe('Swap Unit Tests', () => {
       )
       await expect(swap.connect(sender).swap(order)).to.be.revertedWith(
         'SIGNATURE_INVALID'
-      )
-    })
-  })
-
-  describe('Test staking', async () => {
-    it('test set staking by non-owner', async () => {
-      await expect(
-        swap.connect(anyone).setStaking(staking.address)
-      ).to.be.revertedWith('Ownable: caller is not the owner')
-    })
-
-    it('test set staking', async () => {
-      await expect(swap.connect(deployer).setStaking(staking.address)).to.emit(
-        swap,
-        'SetStaking'
       )
     })
   })
