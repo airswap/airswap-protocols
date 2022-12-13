@@ -8,6 +8,7 @@ const { ADDRESS_ZERO, tokenKinds } = require('@airswap/constants')
 
 const CHAIN_ID = 31337
 const PROTOCOL_FEE = '30'
+const HIGHER_FEE = '50'
 const REBATE_SCALE = '10'
 const REBATE_MAX = '100'
 const FEE_DIVISOR = '10000'
@@ -306,6 +307,84 @@ describe('Swap Unit Tests', () => {
       await swap.connect(signer).cancelUpTo(3)
       await expect(swap.connect(sender).swap(order)).to.be.revertedWith(
         'NONCE_TOO_LOW'
+      )
+    })
+  })
+
+  describe('Test fees', async () => {
+    it('test changing fee wallet', async () => {
+      await swap.connect(deployer).setProtocolFeeWallet(anyone.address)
+
+      const storedFeeWallet = await swap.protocolFeeWallet()
+      expect(storedFeeWallet).to.equal(anyone.address)
+    })
+
+    it('test only deployer can change fee wallet', async () => {
+      await expect(
+        swap.connect(anyone).setProtocolFeeWallet(anyone.address)
+      ).to.be.revertedWith('Ownable: caller is not the owner')
+    })
+
+    it('test invalid fee wallet', async () => {
+      await expect(
+        swap.connect(deployer).setProtocolFeeWallet(ADDRESS_ZERO)
+      ).to.be.revertedWith('INVALID_FEE_WALLET')
+    })
+
+    it('test changing fee', async () => {
+      await swap.connect(deployer).setProtocolFee(HIGHER_FEE)
+
+      const storedSignerFee = await swap.protocolFee()
+      expect(storedSignerFee).to.equal(HIGHER_FEE)
+    })
+
+    it('test only deployer can change fee', async () => {
+      await expect(swap.connect(anyone).setProtocolFee('0')).to.be.revertedWith(
+        'Ownable: caller is not the owner'
+      )
+    })
+
+    it('test zero fee', async () => {
+      const order = await createSignedOrder(
+        {
+          protocolFee: '0',
+        },
+        signer
+      )
+      await swap.connect(deployer).setProtocolFee('0')
+      await expect(swap.connect(sender).swap(order)).to.emit(swap, 'Swap')
+    })
+
+    it('test invalid fee', async () => {
+      await expect(
+        swap.connect(deployer).setProtocolFee(FEE_DIVISOR + 1)
+      ).to.be.revertedWith('INVALID_FEE')
+    })
+
+    it('test when signed with incorrect fee', async () => {
+      const order = await createSignedOrder(
+        {
+          protocolFee: HIGHER_FEE / 2,
+        },
+        signer
+      )
+      await expect(swap.connect(sender).swap(order)).to.be.revertedWith(
+        'SIGNATURE_INVALID'
+      )
+    })
+  })
+
+  describe('Test staking', async () => {
+    it('test set staking by non-owner', async () => {
+      await expect(
+        swap.connect(anyone).setStaking(staking.address)
+      ).to.be.revertedWith('Ownable: caller is not the owner')
+    })
+
+    it('test set staking', async () => {
+      await expect(swap.connect(deployer).setStaking(staking.address)).to.emit(
+        swap,
+        'SetStaking'
       )
     })
   })
