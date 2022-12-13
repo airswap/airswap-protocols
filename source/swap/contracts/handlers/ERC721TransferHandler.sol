@@ -30,7 +30,7 @@ contract ERC721TransferHandler is ITransferHandler {
   /**
    * @notice Function to return whether the token transfered is fungible or not
    */
-  function isFungible () external pure returns(bool){
+  function isFungible() external pure returns (bool) {
     return false;
   }
 }

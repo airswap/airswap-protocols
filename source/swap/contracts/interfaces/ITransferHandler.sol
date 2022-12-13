@@ -26,5 +26,5 @@ interface ITransferHandler {
   /**
    * @notice Function to return whether the token transfered is fungible or not
    */
-  function isFungible () external returns(bool);
+  function isFungible() external returns (bool);
 }

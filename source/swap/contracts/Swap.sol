@@ -186,8 +186,12 @@ contract Swap is ISwap, Ownable {
 
     // Check if protocol fee is applicable and transfer it accordingly
     // ITransferHandler transferHandler = registry.transferHandlers(order.signer.kind);
-    if(registry.transferHandlers(order.signer.kind).isFungible()){
-      _transferProtocolFee(order.signer.token, order.signer.wallet, order.signer.amount);
+    if (registry.transferHandlers(order.signer.kind).isFungible()) {
+      _transferProtocolFee(
+        order.signer.token,
+        order.signer.wallet,
+        order.signer.amount
+      );
     }
 
     emit Swap(
