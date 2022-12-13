@@ -250,7 +250,7 @@ contract Swap is ISwap, Ownable {
    */
   function hashOrder(Order calldata order, bytes32 domainSeparator)
     internal
-    pure
+    view
     returns (bytes32)
   {
     return
@@ -263,7 +263,7 @@ contract Swap is ISwap, Ownable {
               ORDER_TYPEHASH,
               order.nonce,
               order.expiry,
-              order.protocolFee,
+              protocolFee,
               keccak256(
                 abi.encode(
                   PARTY_TYPEHASH,
@@ -334,7 +334,7 @@ contract Swap is ISwap, Ownable {
    */
   function isValid(Order calldata order, bytes32 domainSeparator)
     internal
-    pure
+    view
     returns (bool)
   {
     return
