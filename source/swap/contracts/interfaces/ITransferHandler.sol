@@ -22,4 +22,9 @@ interface ITransferHandler {
     uint256 id,
     address token
   ) external returns (bool);
+
+  /**
+   * @notice Function to return whether the token transfered is fungible or not
+   */
+  function isFungible () external returns(bool);
 }

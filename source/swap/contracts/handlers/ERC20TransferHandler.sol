@@ -27,4 +27,11 @@ contract ERC20TransferHandler is ITransferHandler {
     IERC20(token).transferFrom(from, to, amount);
     return true;
   }
+
+  /**
+   * @notice Function to return whether the token transfered is fungible or not
+   */
+  function isFungible () external pure returns(bool){
+    return true;
+  }
 }
