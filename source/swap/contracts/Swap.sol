@@ -227,6 +227,10 @@ contract Swap is ISwap, Ownable {
     }
   }
 
+  /**
+   * @notice Set the fee
+   * @param _protocolFee uint256 Value of the fee in basis points
+   */
   function setProtocolFee(uint256 _protocolFee) external onlyOwner {
     // Ensure the fee is less than divisor
     require(_protocolFee < FEE_DIVISOR, "INVALID_FEE");
@@ -234,11 +238,48 @@ contract Swap is ISwap, Ownable {
     emit SetProtocolFee(_protocolFee);
   }
 
+  /**
+   * @notice Set the fee wallet
+   * @param _protocolFeeWallet address Wallet to transfer fee to
+   */
   function setProtocolFeeWallet(address _protocolFeeWallet) external onlyOwner {
     // Ensure the new fee wallet is not null
     require(_protocolFeeWallet != address(0), "INVALID_FEE_WALLET");
     protocolFeeWallet = _protocolFeeWallet;
     emit SetProtocolFeeWallet(_protocolFeeWallet);
+  }
+
+  /**
+   * @notice Set scale
+   * @dev Only owner
+   * @param _rebateScale uint256
+   */
+  function setRebateScale(uint256 _rebateScale) external onlyOwner {
+    require(_rebateScale <= MAX_SCALE, "SCALE_TOO_HIGH");
+    rebateScale = _rebateScale;
+    emit SetRebateScale(_rebateScale);
+  }
+
+  /**
+   * @notice Set max
+   * @dev Only owner
+   * @param _rebateMax uint256
+   */
+  function setRebateMax(uint256 _rebateMax) external onlyOwner {
+    require(_rebateMax <= MAX_PERCENTAGE, "MAX_TOO_HIGH");
+    rebateMax = _rebateMax;
+    emit SetRebateMax(_rebateMax);
+  }
+
+  /**
+   * @notice Set the staking token
+   * @param newstaking address Token to check balances on
+   */
+  function setStaking(address newstaking) external onlyOwner {
+    // Ensure the new staking token is not null
+    require(newstaking != address(0), "INVALID_STAKING");
+    staking = newstaking;
+    emit SetStaking(newstaking);
   }
 
   /**
