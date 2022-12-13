@@ -2,17 +2,16 @@ const { expect } = require('chai')
 const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
 const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
-const {
-  createOrder,
-  createOrderSignature,
-  checkResultToErrors,
-} = require('@airswap/utils')
+const { createOrder, createOrderSignature } = require('@airswap/utils')
 const { tokenKinds, ADDRESS_ZERO } = require('@airswap/constants')
 
 const CHAIN_ID = 31337
 const PROTOCOL_FEE = '30'
 const DEFAULT_AMOUNT = '1000'
-const DEFAULT_SIGNER_AMOUNT = '2030'
+const FEE_DIVISOR = '10000'
+const SWAP_FEE =
+  (parseInt(DEFAULT_AMOUNT) * parseInt(PROTOCOL_FEE)) / parseInt(FEE_DIVISOR)
+const DEFAULT_SIGNER_AMOUNT = parseInt(DEFAULT_AMOUNT) + SWAP_FEE
 
 const signOrder = async (order, wallet, swapContract) => {
   return {
