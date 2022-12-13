@@ -1,4 +1,4 @@
-import { ethers } from 'ethers'
+import { ethers, BigNumber as BigNumberEthers } from 'ethers'
 import * as url from 'url'
 import BigNumber from 'bignumber.js'
 
@@ -9,6 +9,17 @@ export * from './src/swap'
 export * from './src/swapERC20'
 export * from './src/pool'
 export * from './src/strings'
+
+export function checkResultToErrors(
+  count: BigNumberEthers,
+  errors: Array<string>
+) {
+  const res: Array<string> = []
+  for (let idx = 0; idx < count.toNumber(); idx++) {
+    res.push(ethers.utils.parseBytes32String(errors[idx]))
+  }
+  return res
+}
 
 export function getCostFromPricing(
   side: 'buy' | 'sell',
