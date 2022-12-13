@@ -10,16 +10,17 @@ contract ERC1155TransferHandler is ITransferHandler {
    * @notice Function to wrap token transfer for different token types
    * @param party Party from whom swap would be made
    */
-  function hasAllowance(Party calldata party) external pure returns (bool) {
-    return party.wallet != address(0);
+  function hasAllowance(Party calldata party) external view returns (bool) {
+    return IERC1155(party.token).isApprovedForAll(party.wallet, msg.sender);
   }
 
   /**
    * @notice Function to wrap token transfer for different token types
    * @param party Party from whom swap would be made
    */
-  function hasBalance(Party calldata party) external pure returns (bool) {
-    return party.wallet != address(0);
+  function hasBalance(Party calldata party) external view returns (bool) {
+    return
+      IERC1155(party.token).balanceOf(party.wallet, party.id) > party.amount;
   }
 
   /**

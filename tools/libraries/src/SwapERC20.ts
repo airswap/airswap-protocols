@@ -1,9 +1,9 @@
-import { ethers, BigNumber, ContractTransaction } from 'ethers'
+import { ethers, ContractTransaction } from 'ethers'
 import { chainIds, chainNames } from '@airswap/constants'
 import { OrderERC20 } from '@airswap/typescript'
 import { SwapERC20 as SwapContract } from '@airswap/swap-erc20/typechain/contracts'
 import { SwapERC20__factory } from '@airswap/swap-erc20/typechain/factories/contracts'
-import { orderERC20ToParams } from '@airswap/utils'
+import { orderERC20ToParams, checkResultToErrors } from '@airswap/utils'
 
 import * as swapDeploys from '@airswap/swap-erc20/deploys.js'
 
@@ -49,7 +49,7 @@ export class SwapERC20 {
       senderWallet,
       ...orderERC20ToParams(order)
     )
-    return this.convertToArray(count, errors)
+    return checkResultToErrors(count, errors)
   }
 
   public async swap(
@@ -101,13 +101,5 @@ export class SwapERC20 {
       }
     }
     return await contract.swapLight(...orderERC20ToParams(order))
-  }
-
-  private convertToArray(count: BigNumber, errors: Array<string>) {
-    const res: Array<string> = []
-    for (let idx = 0; idx < count.toNumber(); idx++) {
-      res.push(ethers.utils.parseBytes32String(errors[idx]))
-    }
-    return res
   }
 }

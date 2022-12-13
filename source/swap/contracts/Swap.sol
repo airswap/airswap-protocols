@@ -61,7 +61,7 @@ contract Swap is ISwap {
   // Unique domain identifier for use in signatures (EIP-712)
   bytes32 public immutable DOMAIN_SEPARATOR;
 
-  uint256 internal constant MAX_ERROR_COUNT = 8;
+  uint256 internal constant MAX_ERROR_COUNT = 10;
 
   /**
    * @notice Double mapping of signers to nonce groups to nonce states
@@ -328,61 +328,61 @@ contract Swap is ISwap {
     ITransferHandler signerTransferHandler = registry.transferHandlers(
       order.signer.kind
     );
-    require(
-      address(signerTransferHandler) != address(0),
-      "SIGNER_TOKEN_KIND_UNKNOWN"
-    );
 
-    (success, data) = address(signerTransferHandler).staticcall(
-      abi.encodeWithSelector(
-        signerTransferHandler.hasAllowance.selector,
-        order.signer
-      )
-    );
-    if (!success || abi.decode(data, (bool))) {
-      errors[errCount] = "SIGNER_ALLOWANCE_LOW";
+    if (address(signerTransferHandler) == address(0)) {
+      errors[errCount] = "SIGNER_TOKEN_KIND_UNKNOWN";
       errCount++;
-    }
-
-    (success, data) = address(signerTransferHandler).staticcall(
-      abi.encodeWithSelector(
-        signerTransferHandler.hasBalance.selector,
-        order.signer
-      )
-    );
-    if (!success || abi.decode(data, (bool))) {
-      errors[errCount] = "SIGNER_BALANCE_LOW";
-      errCount++;
+    } else {
+      (success, data) = address(signerTransferHandler).staticcall(
+        abi.encodeWithSelector(
+          signerTransferHandler.hasAllowance.selector,
+          order.signer
+        )
+      );
+      if (!success || !abi.decode(data, (bool))) {
+        errors[errCount] = "SIGNER_ALLOWANCE_LOW";
+        errCount++;
+      }
+      (success, data) = address(signerTransferHandler).staticcall(
+        abi.encodeWithSelector(
+          signerTransferHandler.hasBalance.selector,
+          order.signer
+        )
+      );
+      if (!success || !abi.decode(data, (bool))) {
+        errors[errCount] = "SIGNER_BALANCE_LOW";
+        errCount++;
+      }
     }
 
     ITransferHandler senderTransferHandler = registry.transferHandlers(
-      order.signer.kind
-    );
-    require(
-      address(senderTransferHandler) != address(0),
-      "SIGNER_TOKEN_KIND_UNKNOWN"
+      order.sender.kind
     );
 
-    (success, data) = address(senderTransferHandler).staticcall(
-      abi.encodeWithSelector(
-        senderTransferHandler.hasAllowance.selector,
-        order.signer
-      )
-    );
-    if (!success || abi.decode(data, (bool))) {
-      errors[errCount] = "SENDER_ALLOWANCE_LOW";
+    if (address(senderTransferHandler) == address(0)) {
+      errors[errCount] = "SENDER_TOKEN_KIND_UNKNOWN";
       errCount++;
-    }
-
-    (success, data) = address(senderTransferHandler).staticcall(
-      abi.encodeWithSelector(
-        senderTransferHandler.hasBalance.selector,
-        order.signer
-      )
-    );
-    if (!success || abi.decode(data, (bool))) {
-      errors[errCount] = "SENDER_BALANCE_LOW";
-      errCount++;
+    } else {
+      (success, data) = address(senderTransferHandler).staticcall(
+        abi.encodeWithSelector(
+          senderTransferHandler.hasAllowance.selector,
+          order.sender
+        )
+      );
+      if (!success || !abi.decode(data, (bool))) {
+        errors[errCount] = "SENDER_ALLOWANCE_LOW";
+        errCount++;
+      }
+      (success, data) = address(senderTransferHandler).staticcall(
+        abi.encodeWithSelector(
+          senderTransferHandler.hasBalance.selector,
+          order.sender
+        )
+      );
+      if (!success || !abi.decode(data, (bool))) {
+        errors[errCount] = "SENDER_BALANCE_LOW";
+        errCount++;
+      }
     }
 
     return (errCount, errors);

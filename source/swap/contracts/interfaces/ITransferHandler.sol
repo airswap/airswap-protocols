@@ -18,13 +18,13 @@ interface ITransferHandler {
    * @notice Function to wrap token transfer for different token types
    * @param party Party from whom swap would be made
    */
-  function hasAllowance(Party calldata party) external pure returns (bool);
+  function hasAllowance(Party calldata party) external view returns (bool);
 
   /**
    * @notice Function to wrap token transfer for different token types
    * @param party Party from whom swap would be made
    */
-  function hasBalance(Party calldata party) external pure returns (bool);
+  function hasBalance(Party calldata party) external view returns (bool);
 
   /**
    * @notice Function to wrap token transfer for different token types
