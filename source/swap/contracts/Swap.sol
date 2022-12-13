@@ -68,7 +68,7 @@ contract Swap is ISwap, Ownable {
 
   uint256 public protocolFee;
   address public protocolFeeWallet;
-  
+
   uint256 internal constant MAX_ERROR_COUNT = 10;
 
   /**
