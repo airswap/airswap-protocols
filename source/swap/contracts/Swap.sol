@@ -2,13 +2,16 @@
 
 pragma solidity 0.8.17;
 
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/ITransferHandler.sol";
 import "./interfaces/ISwap.sol";
 
 /**
  * @title Swap: The Atomic Swap used on the AirSwap Network
  */
-contract Swap is ISwap {
+contract Swap is ISwap, Ownable {
+  using SafeERC20 for IERC20;
+
   bytes32 public constant DOMAIN_TYPEHASH =
     keccak256(
       "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
@@ -61,6 +64,16 @@ contract Swap is ISwap {
   // Unique domain identifier for use in signatures (EIP-712)
   bytes32 public immutable DOMAIN_SEPARATOR;
 
+  uint256 internal constant MAX_PERCENTAGE = 100;
+  uint256 internal constant MAX_SCALE = 77;
+  uint256 public constant FEE_DIVISOR = 10000;
+
+  uint256 public protocolFee;
+  address public protocolFeeWallet;
+  uint256 public rebateScale;
+  uint256 public rebateMax;
+  address public staking;
+
   /**
    * @notice Double mapping of signers to nonce groups to nonce states
    * @dev The nonce group is computed as nonce / 256, so each group of 256 sequential nonces uses the same key
@@ -85,7 +98,19 @@ contract Swap is ISwap {
    * @dev Sets domain for signature validation (EIP-712)
    * @param swapRegistry TransferHandlerRegistry
    */
-  constructor(TransferHandlerRegistry swapRegistry) {
+  constructor(
+    TransferHandlerRegistry swapRegistry,
+    uint256 _protocolFee,
+    address _protocolFeeWallet,
+    uint256 _rebateScale,
+    uint256 _rebateMax,
+    address _staking
+  ) {
+    require(_protocolFee < FEE_DIVISOR, "INVALID_FEE");
+    require(_protocolFeeWallet != address(0), "INVALID_FEE_WALLET");
+    require(_rebateScale <= MAX_SCALE, "SCALE_TOO_HIGH");
+    require(_rebateMax <= MAX_PERCENTAGE, "MAX_TOO_HIGH");
+    require(_staking != address(0), "INVALID_STAKING");
     uint256 currentChainId = getChainId();
     DOMAIN_CHAIN_ID = currentChainId;
     DOMAIN_SEPARATOR = keccak256(
@@ -98,6 +123,11 @@ contract Swap is ISwap {
       )
     );
     registry = swapRegistry;
+    protocolFee = _protocolFee;
+    protocolFeeWallet = _protocolFeeWallet;
+    rebateScale = _rebateScale;
+    rebateMax = _rebateMax;
+    staking = _staking;
   }
 
   /**
@@ -195,6 +225,20 @@ contract Swap is ISwap {
     assembly {
       id := chainid()
     }
+  }
+
+  function setProtocolFee(uint256 _protocolFee) external onlyOwner {
+    // Ensure the fee is less than divisor
+    require(_protocolFee < FEE_DIVISOR, "INVALID_FEE");
+    protocolFee = _protocolFee;
+    emit SetProtocolFee(_protocolFee);
+  }
+
+  function setProtocolFeeWallet(address _protocolFeeWallet) external onlyOwner {
+    // Ensure the new fee wallet is not null
+    require(_protocolFeeWallet != address(0), "INVALID_FEE_WALLET");
+    protocolFeeWallet = _protocolFeeWallet;
+    emit SetProtocolFeeWallet(_protocolFeeWallet);
   }
 
   /**
@@ -375,5 +419,73 @@ contract Swap is ISwap {
     _nonceGroups[signer][groupKey] = group | (uint256(1) << indexInGroup);
 
     return true;
+  }
+
+  function calculateProtocolFee(address wallet, uint256 amount)
+    public
+    view
+    override
+    returns (uint256)
+  {
+    // Transfer fee from signer to feeWallet
+    uint256 feeAmount = (amount * protocolFee) / FEE_DIVISOR;
+    if (feeAmount > 0) {
+      uint256 discountAmount = calculateDiscount(
+        IERC20(staking).balanceOf(wallet),
+        feeAmount
+      );
+      return feeAmount - discountAmount;
+    }
+    return feeAmount;
+  }
+
+  function calculateDiscount(uint256 stakingBalance, uint256 feeAmount)
+    public
+    view
+    returns (uint256)
+  {
+    uint256 divisor = (uint256(10)**rebateScale) + stakingBalance;
+    return (rebateMax * stakingBalance * feeAmount) / divisor / 100;
+  }
+
+  /**
+   * @notice Calculates and transfers protocol fee and rebate
+   * @param sourceToken address
+   * @param sourceWallet address
+   * @param amount uint256
+   */
+  function _transferProtocolFee(
+    address sourceToken,
+    address sourceWallet,
+    uint256 amount
+  ) internal {
+    // Transfer fee from signer to feeWallet
+    uint256 feeAmount = (amount * protocolFee) / FEE_DIVISOR;
+    if (feeAmount > 0) {
+      uint256 discountAmount = calculateDiscount(
+        IERC20(staking).balanceOf(msg.sender),
+        feeAmount
+      );
+      if (discountAmount > 0) {
+        // Transfer fee from signer to sender
+        IERC20(sourceToken).safeTransferFrom(
+          sourceWallet,
+          msg.sender,
+          discountAmount
+        );
+        // Transfer fee from signer to feeWallet
+        IERC20(sourceToken).safeTransferFrom(
+          sourceWallet,
+          protocolFeeWallet,
+          feeAmount - discountAmount
+        );
+      } else {
+        IERC20(sourceToken).safeTransferFrom(
+          sourceWallet,
+          protocolFeeWallet,
+          feeAmount
+        );
+      }
+    }
   }
 }
