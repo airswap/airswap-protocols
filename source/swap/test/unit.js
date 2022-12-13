@@ -13,8 +13,6 @@ const REBATE_SCALE = '10'
 const REBATE_MAX = '100'
 const FEE_DIVISOR = '10000'
 const DEFAULT_AMOUNT = '1000'
-const SWAP_FEE =
-  (parseInt(DEFAULT_AMOUNT) * parseInt(PROTOCOL_FEE)) / parseInt(FEE_DIVISOR)
 
 const signOrder = async (order, wallet, swapContract) => {
   return {
