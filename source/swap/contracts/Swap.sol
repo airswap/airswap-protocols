@@ -366,9 +366,6 @@ contract Swap is ISwap, Ownable {
       }
     }
 
-    bool success;
-    bytes memory data;
-
     ITransferHandler signerTransferHandler = registry.transferHandlers(
       order.signer.kind
     );
@@ -377,23 +374,11 @@ contract Swap is ISwap, Ownable {
       errors[errCount] = "SIGNER_TOKEN_KIND_UNKNOWN";
       errCount++;
     } else {
-      (success, data) = address(signerTransferHandler).staticcall(
-        abi.encodeWithSelector(
-          signerTransferHandler.hasAllowance.selector,
-          order.signer
-        )
-      );
-      if (!success || !abi.decode(data, (bool))) {
+      if (!signerTransferHandler.hasAllowance(order.signer)) {
         errors[errCount] = "SIGNER_ALLOWANCE_LOW";
         errCount++;
       }
-      (success, data) = address(signerTransferHandler).staticcall(
-        abi.encodeWithSelector(
-          signerTransferHandler.hasBalance.selector,
-          order.signer
-        )
-      );
-      if (!success || !abi.decode(data, (bool))) {
+      if (!signerTransferHandler.hasBalance(order.signer)) {
         errors[errCount] = "SIGNER_BALANCE_LOW";
         errCount++;
       }
@@ -407,23 +392,11 @@ contract Swap is ISwap, Ownable {
       errors[errCount] = "SENDER_TOKEN_KIND_UNKNOWN";
       errCount++;
     } else {
-      (success, data) = address(senderTransferHandler).staticcall(
-        abi.encodeWithSelector(
-          senderTransferHandler.hasAllowance.selector,
-          order.sender
-        )
-      );
-      if (!success || !abi.decode(data, (bool))) {
+      if (!senderTransferHandler.hasAllowance(order.sender)) {
         errors[errCount] = "SENDER_ALLOWANCE_LOW";
         errCount++;
       }
-      (success, data) = address(senderTransferHandler).staticcall(
-        abi.encodeWithSelector(
-          senderTransferHandler.hasBalance.selector,
-          order.sender
-        )
-      );
-      if (!success || !abi.decode(data, (bool))) {
+      if (!senderTransferHandler.hasBalance(order.sender)) {
         errors[errCount] = "SENDER_BALANCE_LOW";
         errCount++;
       }

@@ -2,7 +2,13 @@ const { expect } = require('chai')
 const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
 const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
-const { createOrder, createOrderSignature } = require('@airswap/utils')
+const IERC721 = require('@openzeppelin/contracts/build/contracts/IERC721.json')
+const IERC1155 = require('@openzeppelin/contracts/build/contracts/IERC1155.json')
+const {
+  createOrder,
+  createOrderSignature,
+  checkResultToErrors,
+} = require('@airswap/utils')
 const { tokenKinds, ADDRESS_ZERO } = require('@airswap/constants')
 
 const CHAIN_ID = 31337
@@ -94,9 +100,29 @@ describe('Swap Unit Tests', () => {
     senderToken = await deployMockContract(deployer, IERC20.abi)
     affiliateToken = await deployMockContract(deployer, IERC20.abi)
 
+    await senderToken.mock.allowance.returns('0')
+    await signerToken.mock.allowance.returns('0')
+    await senderToken.mock.balanceOf.returns('0')
+    await signerToken.mock.balanceOf.returns('0')
     await signerToken.mock.transferFrom.returns(true)
     await senderToken.mock.transferFrom.returns(true)
     await affiliateToken.mock.transferFrom.returns(true)
+
+    signerTokenERC721 = await deployMockContract(deployer, IERC721.abi)
+    senderTokenERC721 = await deployMockContract(deployer, IERC721.abi)
+
+    await senderTokenERC721.mock.isApprovedForAll.returns(true)
+    await senderTokenERC721.mock.ownerOf.returns(sender.address)
+    await signerTokenERC721.mock.isApprovedForAll.returns(true)
+    await signerTokenERC721.mock.ownerOf.returns(signer.address)
+
+    signerTokenERC1155 = await deployMockContract(deployer, IERC1155.abi)
+    senderTokenERC1155 = await deployMockContract(deployer, IERC1155.abi)
+
+    await senderTokenERC1155.mock.isApprovedForAll.returns(true)
+    await senderTokenERC1155.mock.balanceOf.returns('0')
+    await signerTokenERC1155.mock.isApprovedForAll.returns(true)
+    await signerTokenERC1155.mock.balanceOf.returns('0')
 
     transferHandlerRegistry = await (
       await ethers.getContractFactory('TransferHandlerRegistry')
@@ -264,32 +290,37 @@ describe('Swap Unit Tests', () => {
       const order = await createSignedOrder(
         {
           signer: {
+            token: signerTokenERC721.address,
             kind: tokenKinds.ERC721,
           },
           sender: {
+            token: senderTokenERC721.address,
             kind: tokenKinds.ERC721,
           },
         },
         signer
       )
       const [errCount] = await swap.check(order)
-      expect(errCount).to.equal(4)
+      expect(errCount).to.equal(0)
     })
 
     it('test eip1155 check', async () => {
       const order = await createSignedOrder(
         {
           signer: {
+            token: signerTokenERC1155.address,
             kind: tokenKinds.ERC1155,
           },
           sender: {
+            token: senderTokenERC1155.address,
             kind: tokenKinds.ERC1155,
           },
         },
         signer
       )
-      const [errCount] = await swap.check(order)
-      expect(errCount).to.equal(4)
+      const [errCount, errors] = await swap.check(order)
+      console.log(checkResultToErrors(errCount, errors))
+      expect(errCount).to.equal(2)
     })
   })
 
