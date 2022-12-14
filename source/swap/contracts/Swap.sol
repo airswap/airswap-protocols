@@ -189,9 +189,7 @@ contract Swap is ISwap, Ownable {
     // Check if protocol fee is applicable and transfer it accordingly
     // ITransferHandler transferHandler = registry.transferHandlers(order.signer.kind);
     if (registry.transferHandlers(order.signer.kind).isFungible()) {
-      _transferProtocolFee(
-        order
-      );
+      _transferProtocolFee(order);
     }
 
     emit Swap(
@@ -533,9 +531,7 @@ contract Swap is ISwap, Ownable {
    * @notice Calculates and transfers protocol fee and rebate
    * @param order order
    */
-  function _transferProtocolFee(
-    Order calldata order
-  ) internal {
+  function _transferProtocolFee(Order calldata order) internal {
     // Transfer fee from signer to feeWallet
     uint256 feeAmount = (order.signer.amount * protocolFee) / FEE_DIVISOR;
     if (feeAmount > 0) {
