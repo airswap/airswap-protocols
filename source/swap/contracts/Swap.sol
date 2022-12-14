@@ -190,9 +190,7 @@ contract Swap is ISwap, Ownable {
     // ITransferHandler transferHandler = registry.transferHandlers(order.signer.kind);
     if (registry.transferHandlers(order.signer.kind).isFungible()) {
       _transferProtocolFee(
-        order.signer.token,
-        order.signer.wallet,
-        order.signer.amount
+        order
       );
     }
 
@@ -533,22 +531,21 @@ contract Swap is ISwap, Ownable {
 
   /**
    * @notice Calculates and transfers protocol fee and rebate
-   * @param sourceToken address
-   * @param sourceWallet address
-   * @param amount uint256
+   * @param order order
    */
   function _transferProtocolFee(
-    address sourceToken,
-    address sourceWallet,
-    uint256 amount
+    Order calldata order
   ) internal {
     // Transfer fee from signer to feeWallet
-    uint256 feeAmount = (amount * protocolFee) / FEE_DIVISOR;
+    uint256 feeAmount = (order.signer.amount * protocolFee) / FEE_DIVISOR;
     if (feeAmount > 0) {
-      IERC20(sourceToken).safeTransferFrom(
-        sourceWallet,
+      transferToken(
+        order.signer.wallet,
         protocolFeeWallet,
-        feeAmount
+        order.signer.amount,
+        order.signer.id,
+        order.signer.token,
+        order.signer.kind
       );
     }
   }
