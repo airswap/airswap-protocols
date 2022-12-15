@@ -4,11 +4,7 @@ const { deployMockContract } = waffle
 const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
 const IERC721 = require('@openzeppelin/contracts/build/contracts/IERC721.json')
 const IERC1155 = require('@openzeppelin/contracts/build/contracts/IERC1155.json')
-const {
-  createOrder,
-  createOrderSignature,
-  checkResultToErrors,
-} = require('@airswap/utils')
+const { createOrder, createOrderSignature } = require('@airswap/utils')
 const { tokenKinds, ADDRESS_ZERO } = require('@airswap/constants')
 
 const CHAIN_ID = 31337
@@ -318,8 +314,7 @@ describe('Swap Unit Tests', () => {
         },
         signer
       )
-      const [errCount, errors] = await swap.check(order)
-      console.log(checkResultToErrors(errCount, errors))
+      const [errCount] = await swap.check(order)
       expect(errCount).to.equal(2)
     })
   })
