@@ -42,4 +42,11 @@ contract ERC721TransferHandler is ITransferHandler {
     IERC721(token).safeTransferFrom(from, to, id);
     return true;
   }
+
+  /**
+   * @notice Function to return whether the token transfered is fungible or not
+   */
+  function isFungible() external pure returns (bool) {
+    return false;
+  }
 }

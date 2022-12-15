@@ -39,6 +39,10 @@ interface ISwap {
 
   event CancelUpTo(uint256 indexed nonce, address indexed signerWallet);
 
+  event SetProtocolFee(uint256 protocolFee);
+
+  event SetProtocolFeeWallet(address indexed feeWallet);
+
   /**
    * @notice Atomic Token Swap
    * @param order Order

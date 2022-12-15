@@ -2,13 +2,16 @@
 
 pragma solidity 0.8.17;
 
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/ITransferHandler.sol";
 import "./interfaces/ISwap.sol";
 
 /**
  * @title Swap: The Atomic Swap used on the AirSwap Network
  */
-contract Swap is ISwap {
+contract Swap is ISwap, Ownable {
+  using SafeERC20 for IERC20;
+
   bytes32 public constant DOMAIN_TYPEHASH =
     keccak256(
       "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
@@ -61,6 +64,11 @@ contract Swap is ISwap {
   // Unique domain identifier for use in signatures (EIP-712)
   bytes32 public immutable DOMAIN_SEPARATOR;
 
+  uint256 public constant FEE_DIVISOR = 10000;
+
+  uint256 public protocolFee;
+  address public protocolFeeWallet;
+
   uint256 internal constant MAX_ERROR_COUNT = 10;
 
   /**
@@ -87,7 +95,13 @@ contract Swap is ISwap {
    * @dev Sets domain for signature validation (EIP-712)
    * @param swapRegistry TransferHandlerRegistry
    */
-  constructor(TransferHandlerRegistry swapRegistry) {
+  constructor(
+    TransferHandlerRegistry swapRegistry,
+    uint256 _protocolFee,
+    address _protocolFeeWallet
+  ) {
+    require(_protocolFee < FEE_DIVISOR, "INVALID_FEE");
+    require(_protocolFeeWallet != address(0), "INVALID_FEE_WALLET");
     uint256 currentChainId = getChainId();
     DOMAIN_CHAIN_ID = currentChainId;
     DOMAIN_SEPARATOR = keccak256(
@@ -100,6 +114,8 @@ contract Swap is ISwap {
       )
     );
     registry = swapRegistry;
+    protocolFee = _protocolFee;
+    protocolFeeWallet = _protocolFeeWallet;
   }
 
   /**
@@ -170,6 +186,12 @@ contract Swap is ISwap {
       );
     }
 
+    // Check if protocol fee is applicable and transfer it accordingly
+    // ITransferHandler transferHandler = registry.transferHandlers(order.signer.kind);
+    if (registry.transferHandlers(order.signer.kind).isFungible()) {
+      _transferProtocolFee(order);
+    }
+
     emit Swap(
       order.nonce,
       block.timestamp,
@@ -200,6 +222,28 @@ contract Swap is ISwap {
   }
 
   /**
+   * @notice Set the fee
+   * @param _protocolFee uint256 Value of the fee in basis points
+   */
+  function setProtocolFee(uint256 _protocolFee) external onlyOwner {
+    // Ensure the fee is less than divisor
+    require(_protocolFee < FEE_DIVISOR, "INVALID_FEE");
+    protocolFee = _protocolFee;
+    emit SetProtocolFee(_protocolFee);
+  }
+
+  /**
+   * @notice Set the fee wallet
+   * @param _protocolFeeWallet address Wallet to transfer fee to
+   */
+  function setProtocolFeeWallet(address _protocolFeeWallet) external onlyOwner {
+    // Ensure the new fee wallet is not null
+    require(_protocolFeeWallet != address(0), "INVALID_FEE_WALLET");
+    protocolFeeWallet = _protocolFeeWallet;
+    emit SetProtocolFeeWallet(_protocolFeeWallet);
+  }
+
+  /**
    * @notice Hash an order into bytes32
    * @dev EIP-191 header and domain separator included
    * @param order Order The order to be hashed
@@ -208,7 +252,7 @@ contract Swap is ISwap {
    */
   function hashOrder(Order calldata order, bytes32 domainSeparator)
     internal
-    pure
+    view
     returns (bytes32)
   {
     return
@@ -221,7 +265,7 @@ contract Swap is ISwap {
               ORDER_TYPEHASH,
               order.nonce,
               order.expiry,
-              order.protocolFee,
+              protocolFee,
               keccak256(
                 abi.encode(
                   PARTY_TYPEHASH,
@@ -369,7 +413,7 @@ contract Swap is ISwap {
    */
   function isValid(Order calldata order, bytes32 domainSeparator)
     internal
-    pure
+    view
     returns (bool)
   {
     return
@@ -454,5 +498,24 @@ contract Swap is ISwap {
     _nonceGroups[signer][groupKey] = group | (uint256(1) << indexInGroup);
 
     return true;
+  }
+
+  /**
+   * @notice Calculates and transfers protocol fee and rebate
+   * @param order order
+   */
+  function _transferProtocolFee(Order calldata order) internal {
+    // Transfer fee from signer to feeWallet
+    uint256 feeAmount = (order.signer.amount * protocolFee) / FEE_DIVISOR;
+    if (feeAmount > 0) {
+      transferToken(
+        order.signer.wallet,
+        protocolFeeWallet,
+        order.signer.amount,
+        order.signer.id,
+        order.signer.token,
+        order.signer.kind
+      );
+    }
   }
 }
