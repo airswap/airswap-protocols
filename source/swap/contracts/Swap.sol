@@ -79,13 +79,7 @@ contract Swap is ISwap, Ownable {
   mapping(address => mapping(uint256 => uint256)) internal _nonceGroups;
 
   // Mapping of signer addresses to an optionally set minimum valid nonce
-  mapping(address => uint256) public signerMinimumNonce;
-
-  // Mapping of sender address to a delegated sender address and bool
-  mapping(address => mapping(address => bool)) public senderAuthorizations;
-
-  // Mapping of signer address to a delegated signer and bool
-  mapping(address => mapping(address => bool)) public signerAuthorizations;
+  mapping(address => uint256) public _signerMinimumNonce;
 
   // A registry storing a transfer handler for different token kinds
   TransferHandlerRegistry public registry;
@@ -127,7 +121,7 @@ contract Swap is ISwap, Ownable {
     require(order.expiry > block.timestamp, "ORDER_EXPIRED");
 
     require(
-      order.nonce >= signerMinimumNonce[order.signer.wallet],
+      order.nonce >= _signerMinimumNonce[order.signer.wallet],
       "NONCE_TOO_LOW"
     );
 
@@ -152,10 +146,10 @@ contract Swap is ISwap, Ownable {
     }
 
     // Validate the signer side of the trade.
-    require(isValid(order, DOMAIN_SEPARATOR), "SIGNATURE_INVALID");
+    require(_isValid(order, DOMAIN_SEPARATOR), "SIGNATURE_INVALID");
 
     // Transfer token from sender to signer.
-    transferToken(
+    _transferToken(
       finalSenderWallet,
       order.signer.wallet,
       order.sender.amount,
@@ -165,7 +159,7 @@ contract Swap is ISwap, Ownable {
     );
 
     // Transfer token from signer to sender.
-    transferToken(
+    _transferToken(
       order.signer.wallet,
       finalSenderWallet,
       order.signer.amount,
@@ -176,7 +170,7 @@ contract Swap is ISwap, Ownable {
 
     // Transfer token from signer to affiliate if specified.
     if (order.affiliate.token != address(0)) {
-      transferToken(
+      _transferToken(
         order.signer.wallet,
         order.affiliate.wallet,
         order.affiliate.amount,
@@ -250,7 +244,7 @@ contract Swap is ISwap, Ownable {
    * @param domainSeparator bytes32
    * @return bytes32 A keccak256 abi.encodePacked value
    */
-  function hashOrder(Order calldata order, bytes32 domainSeparator)
+  function _hashOrder(Order calldata order, bytes32 domainSeparator)
     internal
     view
     returns (bytes32)
@@ -324,7 +318,7 @@ contract Swap is ISwap, Ownable {
    * @param minimumNonce uint256 Minimum valid nonce
    */
   function cancelUpTo(uint256 minimumNonce) external {
-    signerMinimumNonce[msg.sender] = minimumNonce;
+    _signerMinimumNonce[msg.sender] = minimumNonce;
     emit CancelUpTo(minimumNonce, msg.sender);
   }
 
@@ -340,7 +334,7 @@ contract Swap is ISwap, Ownable {
     uint256 errCount;
     bytes32[] memory errors = new bytes32[](MAX_ERROR_COUNT);
     address signatory = ecrecover(
-      hashOrder(order, DOMAIN_SEPARATOR),
+      _hashOrder(order, DOMAIN_SEPARATOR),
       order.v,
       order.r,
       order.s
@@ -411,14 +405,14 @@ contract Swap is ISwap, Ownable {
    * @param domainSeparator bytes32 Domain identifier used in signatures (EIP-712)
    * @return bool True if order has a valid signature
    */
-  function isValid(Order calldata order, bytes32 domainSeparator)
+  function _isValid(Order calldata order, bytes32 domainSeparator)
     internal
     view
     returns (bool)
   {
     return
       order.signer.wallet ==
-      ecrecover(hashOrder(order, domainSeparator), order.v, order.r, order.s);
+      ecrecover(_hashOrder(order, domainSeparator), order.v, order.r, order.s);
   }
 
   /**
@@ -433,7 +427,7 @@ contract Swap is ISwap, Ownable {
    * @param token address Contract address of token
    * @param kind bytes4 EIP-165 interface ID of the token
    */
-  function transferToken(
+  function _transferToken(
     address from,
     address to,
     uint256 amount,
@@ -508,7 +502,7 @@ contract Swap is ISwap, Ownable {
     // Transfer fee from signer to feeWallet
     uint256 feeAmount = (order.signer.amount * protocolFee) / FEE_DIVISOR;
     if (feeAmount > 0) {
-      transferToken(
+      _transferToken(
         order.signer.wallet,
         protocolFeeWallet,
         order.signer.amount,
