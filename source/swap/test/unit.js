@@ -182,7 +182,7 @@ describe('Swap Unit Tests', () => {
           (
             await ethers.getContractFactory('Swap')
           ).deploy(transferHandlerRegistry.address, PROTOCOL_FEE, ADDRESS_ZERO)
-        ).to.be.revertedWith('INVALID_FEE_WALLET')
+        ).to.be.revertedWith('InvalidFeeWallet()')
       })
 
       it('test invalid fee', async () => {
@@ -194,7 +194,7 @@ describe('Swap Unit Tests', () => {
             100000000000,
             protocolFeeWallet.address
           )
-        ).to.be.revertedWith('INVALID_FEE')
+        ).to.be.revertedWith('InvalidFee()')
       })
     })
   })
@@ -362,7 +362,7 @@ describe('Swap Unit Tests', () => {
       )
       await swap.connect(sender).swap(order)
       await expect(swap.connect(sender).swap(order)).to.be.revertedWith(
-        'NONCE_ALREADY_USED'
+        'NonceAlreadyUsed()'
       )
     })
 
@@ -375,7 +375,7 @@ describe('Swap Unit Tests', () => {
       )
       await swap.connect(signer).cancel([1])
       await expect(swap.connect(sender).swap(order)).to.be.revertedWith(
-        'NONCE_ALREADY_USED'
+        'NonceAlreadyUsed()'
       )
     })
 
@@ -388,7 +388,7 @@ describe('Swap Unit Tests', () => {
       )
       await swap.connect(signer).cancelUpTo(3)
       await expect(swap.connect(sender).swap(order)).to.be.revertedWith(
-        'NONCE_TOO_LOW'
+        'NonceTooLow()'
       )
     })
   })
@@ -410,7 +410,7 @@ describe('Swap Unit Tests', () => {
     it('test invalid fee wallet', async () => {
       await expect(
         swap.connect(deployer).setProtocolFeeWallet(ADDRESS_ZERO)
-      ).to.be.revertedWith('INVALID_FEE_WALLET')
+      ).to.be.revertedWith('InvalidFeeWallet()')
     })
 
     it('test changing fee', async () => {
@@ -440,7 +440,7 @@ describe('Swap Unit Tests', () => {
     it('test invalid fee', async () => {
       await expect(
         swap.connect(deployer).setProtocolFee(FEE_DIVISOR + 1)
-      ).to.be.revertedWith('INVALID_FEE')
+      ).to.be.revertedWith('InvalidFee()')
     })
 
     it('test when signed with incorrect fee', async () => {
@@ -451,7 +451,7 @@ describe('Swap Unit Tests', () => {
         signer
       )
       await expect(swap.connect(sender).swap(order)).to.be.revertedWith(
-        'SIGNATURE_INVALID'
+        'SignatureInvalid()'
       )
     })
   })
