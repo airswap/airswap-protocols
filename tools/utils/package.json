@@ -22,7 +22,7 @@
     "test:unit": "yarn compile && yarn mocha -r ts-node/register test/utils.ts"
   },
   "dependencies": {
-    "@airswap/constants": "3.0.3",
+    "@airswap/constants": "3.0.4",
     "@airswap/typescript": "3.0.2",
     "@types/ethereumjs-util": "^6.1.0",
     "bignumber.js": "^9.0.1",

@@ -53,6 +53,14 @@ module.exports = {
       url: 'https://goerli-rollup.arbitrum.io/rpc',
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
     },
+    rsk: {
+      url: 'https://public-node.rsk.co',
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
+    },
+    rsktestnet: {
+      url: 'https://public-node.testnet.rsk.co/',
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
+    },
   },
   solidity: {
     compilers: [
