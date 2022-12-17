@@ -6,6 +6,13 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/ITransferHandler.sol";
 import "./interfaces/ISwap.sol";
 
+error InvalidFee();
+error InvalidFeeWallet();
+error OrderExpired();
+error NonceTooLow();
+error NonceAlreadyUsed();
+error SignatureInvalid();
+
 /**
  * @title Swap: The Atomic Swap used on the AirSwap Network
  */
@@ -94,8 +101,8 @@ contract Swap is ISwap, Ownable {
     uint256 _protocolFee,
     address _protocolFeeWallet
   ) {
-    require(_protocolFee < FEE_DIVISOR, "INVALID_FEE");
-    require(_protocolFeeWallet != address(0), "INVALID_FEE_WALLET");
+    if (_protocolFee >= FEE_DIVISOR) revert InvalidFee();
+    if (_protocolFeeWallet == address(0)) revert InvalidFeeWallet();
     uint256 currentChainId = getChainId();
     DOMAIN_CHAIN_ID = currentChainId;
     DOMAIN_SEPARATOR = keccak256(
@@ -118,18 +125,15 @@ contract Swap is ISwap, Ownable {
    */
   function swap(Order calldata order) external {
     // Ensure the order is not expired.
-    require(order.expiry > block.timestamp, "ORDER_EXPIRED");
-
-    require(
-      order.nonce >= _signerMinimumNonce[order.signer.wallet],
-      "NONCE_TOO_LOW"
-    );
+    if (order.expiry <= block.timestamp) revert OrderExpired();
 
     // Ensure the nonce is not yet used and if not mark it used
-    require(
-      _markNonceAsUsed(order.signer.wallet, order.nonce),
-      "NONCE_ALREADY_USED"
-    );
+    if (order.nonce < _signerMinimumNonce[order.signer.wallet])
+      revert NonceTooLow();
+
+    // Ensure the nonce is not yet used and if not mark it used
+    if (!_markNonceAsUsed(order.signer.wallet, order.nonce))
+      revert NonceAlreadyUsed();
 
     // Validate the sender side of the trade.
     address finalSenderWallet;
@@ -146,7 +150,7 @@ contract Swap is ISwap, Ownable {
     }
 
     // Validate the signer side of the trade.
-    require(_isValid(order, DOMAIN_SEPARATOR), "SIGNATURE_INVALID");
+    if (!_isValid(order, DOMAIN_SEPARATOR)) revert SignatureInvalid();
 
     // Transfer token from sender to signer.
     _transferToken(
@@ -221,7 +225,7 @@ contract Swap is ISwap, Ownable {
    */
   function setProtocolFee(uint256 _protocolFee) external onlyOwner {
     // Ensure the fee is less than divisor
-    require(_protocolFee < FEE_DIVISOR, "INVALID_FEE");
+    if (_protocolFee >= FEE_DIVISOR) revert InvalidFee();
     protocolFee = _protocolFee;
     emit SetProtocolFee(_protocolFee);
   }
@@ -232,7 +236,7 @@ contract Swap is ISwap, Ownable {
    */
   function setProtocolFeeWallet(address _protocolFeeWallet) external onlyOwner {
     // Ensure the new fee wallet is not null
-    require(_protocolFeeWallet != address(0), "INVALID_FEE_WALLET");
+    if (_protocolFeeWallet == address(0)) revert InvalidFeeWallet();
     protocolFeeWallet = _protocolFeeWallet;
     emit SetProtocolFeeWallet(_protocolFeeWallet);
   }
