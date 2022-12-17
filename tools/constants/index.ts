@@ -16,6 +16,8 @@ export const chainIds: Record<string, number> = {
   ETHEREUM: 1,
   GOERLI: 5,
   OPTIMISM: 10,
+  RSK: 30,
+  RSKTESTNET: 31,
   KOVAN: 42,
   BSC: 56,
   BSCTESTNET: 97,
@@ -31,6 +33,8 @@ export const chainNames: Record<number, string> = {
   1: 'ETHEREUM',
   5: 'GOERLI',
   10: 'OPTIMISM',
+  30: 'RSK',
+  31: 'RSKTESTNET',
   42: 'KOVAN',
   56: 'BSC',
   97: 'BSCTESTNET',
@@ -42,13 +46,15 @@ export const chainNames: Record<number, string> = {
   421613: 'ARBITRUMGOERLI',
 }
 
-export const mainnets: number[] = [1, 56, 137, 42161, 43114]
+export const mainnets: number[] = [1, 30, 56, 137, 42161, 43114]
 
-export const testnets: number[] = [5, 97, 80001, 421613, 43113]
+export const testnets: number[] = [5, 31, 97, 80001, 421613, 43113]
 
 export const chainCurrencies: Record<string, string> = {
   1: 'ETH',
   5: 'ETH',
+  30: 'RBTC',
+  31: 'tRBTC',
   42: 'ETH',
   56: 'BNB',
   97: 'BNB',
@@ -63,6 +69,8 @@ export const chainCurrencies: Record<string, string> = {
 export const wrappedTokenAddresses: Record<string, string> = {
   1: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
   5: '0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6',
+  30: '0x967f8799af07df1534d48a95a5c9febe92c53ae0',
+  31: '0x09b6ca5e4496238a1f176aea6bb607db96c2286e',
   42: '0xd0a1e359811322d97991e03f863a0c30c2cf029c',
   56: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
   97: '0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd',
@@ -77,6 +85,8 @@ export const wrappedTokenAddresses: Record<string, string> = {
 export const stakingTokenAddresses: Record<string, string> = {
   1: '0x27054b13b1b798b345b591a4d22e6562d47ea75a',
   5: '0x1a1ec25dc08e98e5e93f1104b5e5cdd298707d31',
+  30: '',
+  31: '0x9c7005fa2f8476e2331f45f69e0930a4c9eff0c3',
   42: '0x1a1ec25dc08e98e5e93f1104b5e5cdd298707d31',
   56: '0x1ac0d76f11875317f8a7d791db94cdd82bd02bd1',
   97: '0xd161ddcfcc0c2d823021aa26200824efa75218d1',
@@ -91,6 +101,8 @@ export const stakingTokenAddresses: Record<string, string> = {
 export const etherscanDomains: Record<string, string> = {
   1: 'etherscan.io',
   5: 'goerli.etherscan.io',
+  30: 'explorer.rsk.co',
+  31: 'explorer.testnet.rsk.co',
   42: 'kovan.etherscan.io',
   56: 'bscscan.com',
   97: 'testnet.bscscan.com',
@@ -122,11 +134,3 @@ export const tokenKindNames: Record<string, string> = {
   '0xd9b67a26': 'ERC1155',
   '0x9a20483d': 'CKITTY',
 }
-
-export const signatureTypes: Record<string, string> = {
-  INTENDED_VALIDATOR: '0x00',
-  SIGN_TYPED_DATA: '0x01',
-  PERSONAL_SIGN: '0x45',
-}
-
-export const uniswapRouterAddress = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
