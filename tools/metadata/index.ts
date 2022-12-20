@@ -43,10 +43,12 @@ export async function fetchTokens(
 
 export async function scrapeToken(
   address: string,
-  ethersProvider: ethers.providers.BaseProvider | string
+  ethersProvider: ethers.providers.BaseProvider | string | number
 ): Promise<TokenInfo> {
   let provider
-  if (typeof ethersProvider === 'string') {
+  if (typeof ethersProvider === 'number') {
+    provider = ethers.getDefaultProvider(ethersProvider)
+  } else if (typeof ethersProvider === 'string') {
     provider = new ethers.providers.JsonRpcProvider(ethersProvider)
   } else {
     provider = ethersProvider
