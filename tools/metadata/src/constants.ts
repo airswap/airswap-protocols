@@ -1,7 +1,7 @@
 import { chainIds } from '@airswap/constants'
 
 export const tokenListURLs = {
-  [chainIds.MAINNET]: [
+  [chainIds.ETHEREUM]: [
     'https://raw.githubusercontent.com/compound-finance/token-list/master/compound.tokenlist.json',
     'https://umaproject.org/uma.tokenlist.json',
     'https://raw.githubusercontent.com/SetProtocol/uniswap-tokenlist/main/set.tokenlist.json',
