@@ -18,14 +18,6 @@ interface ISwap {
     bytes32 s;
   }
 
-  struct Party {
-    address wallet; // Wallet address of the party
-    address token; // Contract address of the token
-    bytes4 kind; // Interface ID of the token
-    uint256 id; // ID for ERC-721 or ERC-1155
-    uint256 amount; // Amount for ERC-20 or ERC-1155
-  }
-
   event Swap(
     uint256 indexed nonce,
     uint256 timestamp,
@@ -46,6 +38,10 @@ interface ISwap {
   event Cancel(uint256 indexed nonce, address indexed signerWallet);
 
   event CancelUpTo(uint256 indexed nonce, address indexed signerWallet);
+
+  event SetProtocolFee(uint256 protocolFee);
+
+  event SetProtocolFeeWallet(address indexed feeWallet);
 
   /**
    * @notice Atomic Token Swap

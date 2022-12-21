@@ -26,7 +26,7 @@ Import into your application:
 ```TypeScript
 import { fetchTokens } from '@airswap/metadata'
 import { chainIds } from '@airswap/constants'
-const { errors, tokens } = await fetchTokens(chainIds.MAINNET)
+const { errors, tokens } = await fetchTokens(chainIds.ETHEREUM)
 ```
 
 ## Commands

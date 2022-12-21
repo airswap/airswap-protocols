@@ -2,13 +2,23 @@
 
 pragma solidity 0.8.17;
 
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/ITransferHandler.sol";
 import "./interfaces/ISwap.sol";
+
+error InvalidFee();
+error InvalidFeeWallet();
+error OrderExpired();
+error NonceTooLow();
+error NonceAlreadyUsed();
+error SignatureInvalid();
 
 /**
  * @title Swap: The Atomic Swap used on the AirSwap Network
  */
-contract Swap is ISwap {
+contract Swap is ISwap, Ownable {
+  using SafeERC20 for IERC20;
+
   bytes32 public constant DOMAIN_TYPEHASH =
     keccak256(
       "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
@@ -61,6 +71,13 @@ contract Swap is ISwap {
   // Unique domain identifier for use in signatures (EIP-712)
   bytes32 public immutable DOMAIN_SEPARATOR;
 
+  uint256 public constant FEE_DIVISOR = 10000;
+
+  uint256 public protocolFee;
+  address public protocolFeeWallet;
+
+  uint256 internal constant MAX_ERROR_COUNT = 10;
+
   /**
    * @notice Double mapping of signers to nonce groups to nonce states
    * @dev The nonce group is computed as nonce / 256, so each group of 256 sequential nonces uses the same key
@@ -69,13 +86,7 @@ contract Swap is ISwap {
   mapping(address => mapping(uint256 => uint256)) internal _nonceGroups;
 
   // Mapping of signer addresses to an optionally set minimum valid nonce
-  mapping(address => uint256) public signerMinimumNonce;
-
-  // Mapping of sender address to a delegated sender address and bool
-  mapping(address => mapping(address => bool)) public senderAuthorizations;
-
-  // Mapping of signer address to a delegated signer and bool
-  mapping(address => mapping(address => bool)) public signerAuthorizations;
+  mapping(address => uint256) public _signerMinimumNonce;
 
   // A registry storing a transfer handler for different token kinds
   TransferHandlerRegistry public registry;
@@ -85,7 +96,13 @@ contract Swap is ISwap {
    * @dev Sets domain for signature validation (EIP-712)
    * @param swapRegistry TransferHandlerRegistry
    */
-  constructor(TransferHandlerRegistry swapRegistry) {
+  constructor(
+    TransferHandlerRegistry swapRegistry,
+    uint256 _protocolFee,
+    address _protocolFeeWallet
+  ) {
+    if (_protocolFee >= FEE_DIVISOR) revert InvalidFee();
+    if (_protocolFeeWallet == address(0)) revert InvalidFeeWallet();
     uint256 currentChainId = getChainId();
     DOMAIN_CHAIN_ID = currentChainId;
     DOMAIN_SEPARATOR = keccak256(
@@ -98,6 +115,8 @@ contract Swap is ISwap {
       )
     );
     registry = swapRegistry;
+    protocolFee = _protocolFee;
+    protocolFeeWallet = _protocolFeeWallet;
   }
 
   /**
@@ -106,18 +125,15 @@ contract Swap is ISwap {
    */
   function swap(Order calldata order) external {
     // Ensure the order is not expired.
-    require(order.expiry > block.timestamp, "ORDER_EXPIRED");
-
-    require(
-      order.nonce >= signerMinimumNonce[order.signer.wallet],
-      "NONCE_TOO_LOW"
-    );
+    if (order.expiry <= block.timestamp) revert OrderExpired();
 
     // Ensure the nonce is not yet used and if not mark it used
-    require(
-      _markNonceAsUsed(order.signer.wallet, order.nonce),
-      "NONCE_ALREADY_USED"
-    );
+    if (order.nonce < _signerMinimumNonce[order.signer.wallet])
+      revert NonceTooLow();
+
+    // Ensure the nonce is not yet used and if not mark it used
+    if (!_markNonceAsUsed(order.signer.wallet, order.nonce))
+      revert NonceAlreadyUsed();
 
     // Validate the sender side of the trade.
     address finalSenderWallet;
@@ -134,10 +150,10 @@ contract Swap is ISwap {
     }
 
     // Validate the signer side of the trade.
-    require(isValid(order, DOMAIN_SEPARATOR), "SIGNATURE_INVALID");
+    if (!_isValid(order, DOMAIN_SEPARATOR)) revert SignatureInvalid();
 
     // Transfer token from sender to signer.
-    transferToken(
+    _transferToken(
       finalSenderWallet,
       order.signer.wallet,
       order.sender.amount,
@@ -147,7 +163,7 @@ contract Swap is ISwap {
     );
 
     // Transfer token from signer to sender.
-    transferToken(
+    _transferToken(
       order.signer.wallet,
       finalSenderWallet,
       order.signer.amount,
@@ -158,7 +174,7 @@ contract Swap is ISwap {
 
     // Transfer token from signer to affiliate if specified.
     if (order.affiliate.token != address(0)) {
-      transferToken(
+      _transferToken(
         order.signer.wallet,
         order.affiliate.wallet,
         order.affiliate.amount,
@@ -166,6 +182,12 @@ contract Swap is ISwap {
         order.affiliate.token,
         order.affiliate.kind
       );
+    }
+
+    // Check if protocol fee is applicable and transfer it accordingly
+    // ITransferHandler transferHandler = registry.transferHandlers(order.signer.kind);
+    if (registry.transferHandlers(order.signer.kind).isFungible()) {
+      _transferProtocolFee(order);
     }
 
     emit Swap(
@@ -198,15 +220,37 @@ contract Swap is ISwap {
   }
 
   /**
+   * @notice Set the fee
+   * @param _protocolFee uint256 Value of the fee in basis points
+   */
+  function setProtocolFee(uint256 _protocolFee) external onlyOwner {
+    // Ensure the fee is less than divisor
+    if (_protocolFee >= FEE_DIVISOR) revert InvalidFee();
+    protocolFee = _protocolFee;
+    emit SetProtocolFee(_protocolFee);
+  }
+
+  /**
+   * @notice Set the fee wallet
+   * @param _protocolFeeWallet address Wallet to transfer fee to
+   */
+  function setProtocolFeeWallet(address _protocolFeeWallet) external onlyOwner {
+    // Ensure the new fee wallet is not null
+    if (_protocolFeeWallet == address(0)) revert InvalidFeeWallet();
+    protocolFeeWallet = _protocolFeeWallet;
+    emit SetProtocolFeeWallet(_protocolFeeWallet);
+  }
+
+  /**
    * @notice Hash an order into bytes32
    * @dev EIP-191 header and domain separator included
    * @param order Order The order to be hashed
    * @param domainSeparator bytes32
    * @return bytes32 A keccak256 abi.encodePacked value
    */
-  function hashOrder(Order calldata order, bytes32 domainSeparator)
+  function _hashOrder(Order calldata order, bytes32 domainSeparator)
     internal
-    pure
+    view
     returns (bytes32)
   {
     return
@@ -219,7 +263,7 @@ contract Swap is ISwap {
               ORDER_TYPEHASH,
               order.nonce,
               order.expiry,
-              order.protocolFee,
+              protocolFee,
               keccak256(
                 abi.encode(
                   PARTY_TYPEHASH,
@@ -278,8 +322,85 @@ contract Swap is ISwap {
    * @param minimumNonce uint256 Minimum valid nonce
    */
   function cancelUpTo(uint256 minimumNonce) external {
-    signerMinimumNonce[msg.sender] = minimumNonce;
+    _signerMinimumNonce[msg.sender] = minimumNonce;
     emit CancelUpTo(minimumNonce, msg.sender);
+  }
+
+  /**
+   * @notice Validates Swap Order for any potential errors
+   * @param order Order to settle
+   */
+  function check(Order calldata order)
+    public
+    view
+    returns (uint256, bytes32[] memory)
+  {
+    uint256 errCount;
+    bytes32[] memory errors = new bytes32[](MAX_ERROR_COUNT);
+    address signatory = ecrecover(
+      _hashOrder(order, DOMAIN_SEPARATOR),
+      order.v,
+      order.r,
+      order.s
+    );
+
+    if (signatory == address(0)) {
+      errors[errCount] = "SIGNATURE_INVALID";
+      errCount++;
+    }
+
+    if (order.expiry < block.timestamp) {
+      errors[errCount] = "EXPIRY_PASSED";
+      errCount++;
+    }
+
+    if (order.signer.wallet != signatory) {
+      errors[errCount] = "UNAUTHORIZED";
+      errCount++;
+    } else {
+      if (nonceUsed(signatory, order.nonce)) {
+        errors[errCount] = "NONCE_ALREADY_USED";
+        errCount++;
+      }
+    }
+
+    ITransferHandler signerTransferHandler = registry.transferHandlers(
+      order.signer.kind
+    );
+
+    if (address(signerTransferHandler) == address(0)) {
+      errors[errCount] = "SIGNER_TOKEN_KIND_UNKNOWN";
+      errCount++;
+    } else {
+      if (!signerTransferHandler.hasAllowance(order.signer)) {
+        errors[errCount] = "SIGNER_ALLOWANCE_LOW";
+        errCount++;
+      }
+      if (!signerTransferHandler.hasBalance(order.signer)) {
+        errors[errCount] = "SIGNER_BALANCE_LOW";
+        errCount++;
+      }
+    }
+
+    ITransferHandler senderTransferHandler = registry.transferHandlers(
+      order.sender.kind
+    );
+
+    if (address(senderTransferHandler) == address(0)) {
+      errors[errCount] = "SENDER_TOKEN_KIND_UNKNOWN";
+      errCount++;
+    } else {
+      if (!senderTransferHandler.hasAllowance(order.sender)) {
+        errors[errCount] = "SENDER_ALLOWANCE_LOW";
+        errCount++;
+      }
+      if (!senderTransferHandler.hasBalance(order.sender)) {
+        errors[errCount] = "SENDER_BALANCE_LOW";
+        errCount++;
+      }
+    }
+
+    return (errCount, errors);
   }
 
   /**
@@ -288,14 +409,14 @@ contract Swap is ISwap {
    * @param domainSeparator bytes32 Domain identifier used in signatures (EIP-712)
    * @return bool True if order has a valid signature
    */
-  function isValid(Order calldata order, bytes32 domainSeparator)
+  function _isValid(Order calldata order, bytes32 domainSeparator)
     internal
-    pure
+    view
     returns (bool)
   {
     return
       order.signer.wallet ==
-      ecrecover(hashOrder(order, domainSeparator), order.v, order.r, order.s);
+      ecrecover(_hashOrder(order, domainSeparator), order.v, order.r, order.s);
   }
 
   /**
@@ -310,7 +431,7 @@ contract Swap is ISwap {
    * @param token address Contract address of token
    * @param kind bytes4 EIP-165 interface ID of the token
    */
-  function transferToken(
+  function _transferToken(
     address from,
     address to,
     uint256 amount,
@@ -375,5 +496,24 @@ contract Swap is ISwap {
     _nonceGroups[signer][groupKey] = group | (uint256(1) << indexInGroup);
 
     return true;
+  }
+
+  /**
+   * @notice Calculates and transfers protocol fee and rebate
+   * @param order order
+   */
+  function _transferProtocolFee(Order calldata order) internal {
+    // Transfer fee from signer to feeWallet
+    uint256 feeAmount = (order.signer.amount * protocolFee) / FEE_DIVISOR;
+    if (feeAmount > 0) {
+      _transferToken(
+        order.signer.wallet,
+        protocolFeeWallet,
+        order.signer.amount,
+        order.signer.id,
+        order.signer.token,
+        order.signer.kind
+      );
+    }
   }
 }

@@ -2,10 +2,30 @@
 
 pragma solidity 0.8.17;
 
+struct Party {
+  address wallet; // Wallet address of the party
+  address token; // Contract address of the token
+  bytes4 kind; // Interface ID of the token
+  uint256 id; // ID for ERC-721 or ERC-1155
+  uint256 amount; // Amount for ERC-20 or ERC-1155
+}
+
 /**
  * @title ITransferHandler: interface for token transfers
  */
 interface ITransferHandler {
+  /**
+   * @notice Function to wrap token transfer for different token types
+   * @param party Party from whom swap would be made
+   */
+  function hasAllowance(Party calldata party) external view returns (bool);
+
+  /**
+   * @notice Function to wrap token transfer for different token types
+   * @param party Party from whom swap would be made
+   */
+  function hasBalance(Party calldata party) external view returns (bool);
+
   /**
    * @notice Function to wrap token transfer for different token types
    * @param from address Wallet address to transfer from
@@ -22,4 +42,9 @@ interface ITransferHandler {
     uint256 id,
     address token
   ) external returns (bool);
+
+  /**
+   * @notice Function to return whether the token transfered is fungible or not
+   */
+  function isFungible() external returns (bool);
 }
