@@ -420,7 +420,7 @@ describe('Swap Unit Tests', () => {
       )
 
       await expect(swap.connect(sender).swap(order)).to.be.revertedWith(
-        'SignatureInvalid()'
+        'Unauthorized()'
       )
     })
   })
@@ -483,7 +483,7 @@ describe('Swap Unit Tests', () => {
         signer
       )
       await expect(swap.connect(sender).swap(order)).to.be.revertedWith(
-        'SignatureInvalid()'
+        'Unauthorized()'
       )
     })
   })

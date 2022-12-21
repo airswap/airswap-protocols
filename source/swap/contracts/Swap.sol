@@ -13,6 +13,7 @@ error NonceTooLow();
 error NonceAlreadyUsed();
 error SignatureInvalid();
 error SignerInvalid();
+error Unauthorized();
 
 /**
  * @title Swap: The Atomic Swap used on the AirSwap Network
@@ -153,7 +154,7 @@ contract Swap is ISwap, Ownable {
     }
 
     // // Validate the signer side of the trade.
-    if (!_isAuthorized(order, DOMAIN_SEPARATOR)) revert SignatureInvalid();
+    _isAuthorized(order, DOMAIN_SEPARATOR);
 
     // Ensure the signatory is authorized by the signer wallet
 
@@ -251,7 +252,7 @@ contract Swap is ISwap, Ownable {
    * @dev Emits an Authorize event
    */
   function authorize(address signer) external override {
-    if(signer == address(0)) revert SignerInvalid();
+    if (signer == address(0)) revert SignerInvalid();
     authorized[msg.sender] = signer;
     emit Authorize(signer, msg.sender);
   }
@@ -429,31 +430,39 @@ contract Swap is ISwap, Ownable {
   }
 
   /**
-   * @notice Validate signature using an EIP-712 typed data hash
+   * @notice Checks Order Expiry, Nonce, Signature
    * @param order Order to validate
-   * @param domainSeparator bytes32 Domain identifier used in signatures (EIP-712)
-   * @return bool True if order has a valid signature
+   * @param domainSeparator bytes32
    */
   function _isAuthorized(Order calldata order, bytes32 domainSeparator)
     internal
     view
-    returns (bool)
   {
-    return
-      (order.signer.wallet ==
-        ecrecover(
-          _hashOrder(order, domainSeparator),
-          order.v,
-          order.r,
-          order.s
-        )) ||
-      (authorized[order.signer.wallet] ==
-        ecrecover(
-          _hashOrder(order, domainSeparator),
-          order.v,
-          order.r,
-          order.s
-        ));
+    bytes32 hashed = _hashOrder(order, domainSeparator);
+
+    // Recover the signatory from the hash and signature
+    address signatory = _getSignatory(order, hashed);
+
+    // Ensure the signatory is not null
+    if (signatory == address(0)) revert SignatureInvalid();
+
+    // Ensure the signatory is authorized by the signer wallet
+    if (order.signer.wallet != signatory) {
+      if (authorized[order.signer.wallet] != signatory) revert Unauthorized();
+    }
+  }
+
+  /**
+   * @notice Recover the signatory from a signature
+   * @param order Order signeds
+   * @param orderHash hash of the Order signed
+   */
+  function _getSignatory(Order calldata order, bytes32 orderHash)
+    internal
+    pure
+    returns (address)
+  {
+    return ecrecover(orderHash, order.v, order.r, order.s);
   }
 
   /**
@@ -534,8 +543,6 @@ contract Swap is ISwap, Ownable {
 
     return true;
   }
-
-
 
   /**
    * @notice Calculates and transfers protocol fee and rebate
