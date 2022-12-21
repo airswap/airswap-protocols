@@ -12,11 +12,10 @@ import {
   ADDRESS_ZERO,
 } from '@airswap/constants'
 
-describe('Metadata: Mainnet', async () => {
+describe('Metadata: Ethereum', async () => {
   let result
-
   it('fetches all known tokens', async () => {
-    result = await fetchTokens(chainIds.MAINNET)
+    result = await fetchTokens(chainIds.ETHEREUM)
     expect(result.tokens.length).to.not.equal(0)
   })
   it('checks that ETH does not exist', async () => {
