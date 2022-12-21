@@ -391,6 +391,38 @@ describe('Swap Unit Tests', () => {
         'NonceTooLow()'
       )
     })
+
+    it('test authorized signer', async () => {
+      const order = await createSignedOrder(
+        {
+          signer: {
+            wallet: anyone.address,
+          },
+        },
+        signer
+      )
+
+      await expect(swap.connect(anyone).authorize(signer.address))
+        .to.emit(swap, 'Authorize')
+        .withArgs(signer.address, anyone.address)
+
+      await expect(swap.connect(sender).swap(order)).to.emit(swap, 'Swap')
+    })
+
+    it('test when signer not authorized', async () => {
+      const order = await createSignedOrder(
+        {
+          signer: {
+            wallet: anyone.address,
+          },
+        },
+        signer
+      )
+
+      await expect(swap.connect(sender).swap(order)).to.be.revertedWith(
+        'SignatureInvalid()'
+      )
+    })
   })
 
   describe('Test fees', async () => {
