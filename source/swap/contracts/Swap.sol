@@ -12,6 +12,7 @@ error OrderExpired();
 error NonceTooLow();
 error NonceAlreadyUsed();
 error SignatureInvalid();
+error SignerInvalid();
 
 /**
  * @title Swap: The Atomic Swap used on the AirSwap Network
@@ -244,14 +245,13 @@ contract Swap is ISwap, Ownable {
     emit SetProtocolFeeWallet(_protocolFeeWallet);
   }
 
-
   /**
    * @notice Authorize a signer
    * @param signer address Wallet of the signer to authorize
    * @dev Emits an Authorize event
    */
   function authorize(address signer) external override {
-    require(signer != address(0), "SIGNER_INVALID");
+    if(signer == address(0)) revert SignerInvalid();
     authorized[msg.sender] = signer;
     emit Authorize(signer, msg.sender);
   }
@@ -265,7 +265,6 @@ contract Swap is ISwap, Ownable {
     delete authorized[msg.sender];
     emit Revoke(tmp, msg.sender);
   }
-
 
   /**
    * @notice Hash an order into bytes32
@@ -440,19 +439,21 @@ contract Swap is ISwap, Ownable {
     view
     returns (bool)
   {
-    return (order.signer.wallet == ecrecover(
-      _hashOrder(order, domainSeparator),
-        order.v,
-        order.r,
-        order.s
-      ))
-      ||
-      (authorized[order.signer.wallet] == ecrecover(
-        _hashOrder(order, domainSeparator),
-        order.v,
-        order.r,
-        order.s
-      ));
+    return
+      (order.signer.wallet ==
+        ecrecover(
+          _hashOrder(order, domainSeparator),
+          order.v,
+          order.r,
+          order.s
+        )) ||
+      (authorized[order.signer.wallet] ==
+        ecrecover(
+          _hashOrder(order, domainSeparator),
+          order.v,
+          order.r,
+          order.s
+        ));
   }
 
   /**
@@ -533,6 +534,8 @@ contract Swap is ISwap, Ownable {
 
     return true;
   }
+
+
 
   /**
    * @notice Calculates and transfers protocol fee and rebate
