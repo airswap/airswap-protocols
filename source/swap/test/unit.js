@@ -156,7 +156,7 @@ describe('Swap Unit Tests', () => {
         tokenKinds.ERC1155,
         erc1155Handler.address
       )
-    ).to.be.revertedWith('HANDLER_EXISTS_FOR_KIND')
+    ).to.be.revertedWith('HandlerExistsForKind()')
 
     swap = await (
       await ethers.getContractFactory('Swap')
