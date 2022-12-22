@@ -12,6 +12,9 @@ error OrderExpired();
 error NonceTooLow();
 error NonceAlreadyUsed();
 error SignatureInvalid();
+error SelfTransferInvalid();
+error TokenKindUnknown();
+error TransferFailed();
 
 /**
  * @title Swap: The Atomic Swap used on the AirSwap Network
@@ -440,9 +443,9 @@ contract Swap is ISwap, Ownable {
     bytes4 kind
   ) internal {
     // Ensure the transfer is not to self.
-    require(from != to, "SELF_TRANSFER_INVALID");
+    if (from == to) revert SelfTransferInvalid();
     ITransferHandler transferHandler = registry.transferHandlers(kind);
-    require(address(transferHandler) != address(0), "TOKEN_KIND_UNKNOWN");
+    if (address(transferHandler) == address(0)) revert TokenKindUnknown();
     // delegatecall required to pass msg.sender as Swap contract to handle the
     // token transfer in the calling contract
     (bool success, bytes memory data) = address(transferHandler).delegatecall(
@@ -455,7 +458,7 @@ contract Swap is ISwap, Ownable {
         token
       )
     );
-    require(success && abi.decode(data, (bool)), "TRANSFER_FAILED");
+    if (!success || !abi.decode(data, (bool))) revert TransferFailed();
   }
 
   /**
