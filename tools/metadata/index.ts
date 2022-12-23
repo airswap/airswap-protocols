@@ -46,7 +46,7 @@ export async function scrapeToken(
   ethersProvider: ethers.providers.BaseProvider | string | null,
   chainId?: number
 ): Promise<TokenInfo> {
-  if (ethersProvider === undefined && chainId === undefined) {
+  if (ethersProvider === null && chainId === undefined) {
     throw new Error('Either ethersProvider or chainId required')
   }
   let provider
