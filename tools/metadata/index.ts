@@ -43,7 +43,7 @@ export async function fetchTokens(
 
 export async function scrapeToken(
   address: string,
-  ethersProvider?: ethers.providers.BaseProvider | string | null,
+  ethersProvider: ethers.providers.BaseProvider | string | null,
   chainId?: number
 ): Promise<TokenInfo> {
   if (ethersProvider === undefined && chainId === undefined) {
