@@ -43,21 +43,19 @@ export async function fetchTokens(
 
 export async function scrapeToken(
   address: string,
-  ethersProvider?: ethers.providers.BaseProvider | string,
+  ethersProvider: ethers.providers.BaseProvider | string | null,
   chainId?: number
 ): Promise<TokenInfo> {
-  if (ethersProvider === undefined && chainId === undefined) {
+  if (ethersProvider === null && chainId === undefined) {
     throw new Error('Either ethersProvider or chainId required')
   }
   let provider
   if (typeof ethersProvider === 'string') {
     provider = new ethers.providers.JsonRpcProvider(ethersProvider)
-  } else if (typeof ethersProvider !== undefined) {
+  } else if (ethersProvider !== null) {
     provider = ethersProvider
   } else {
-    if (typeof chainId === 'number') {
-      provider = ethers.getDefaultProvider(chainId)
-    }
+    provider = ethers.getDefaultProvider(chainId)
   }
   chainId = (await provider.getNetwork()).chainId
 
