@@ -6,16 +6,6 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/ITransferHandler.sol";
 import "./interfaces/ISwap.sol";
 
-error InvalidFee();
-error InvalidFeeWallet();
-error OrderExpired();
-error NonceTooLow();
-error NonceAlreadyUsed();
-error SignatureInvalid();
-error SelfTransferInvalid();
-error TokenKindUnknown();
-error TransferFailed();
-
 /**
  * @title Swap: The Atomic Swap used on the AirSwap Network
  */

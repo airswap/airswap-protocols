@@ -5,6 +5,16 @@ pragma solidity 0.8.17;
 // import "@airswap/transfers/contracts/TransferHandlerRegistry.sol";
 import "../TransferHandlerRegistry.sol";
 
+error InvalidFee();
+error InvalidFeeWallet();
+error OrderExpired();
+error NonceTooLow();
+error NonceAlreadyUsed();
+error SignatureInvalid();
+error SelfTransferInvalid();
+error TokenKindUnknown();
+error TransferFailed();
+
 interface ISwap {
   struct Order {
     uint256 nonce; // Unique per order and should be sequential
