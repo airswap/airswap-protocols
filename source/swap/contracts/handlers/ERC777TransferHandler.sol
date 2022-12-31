@@ -39,7 +39,7 @@ contract ERC777TransferHandler is ITransferHandler {
     address token
   ) external returns (bool) {
     require(amount == 0, "AMOUNT_INVALID");
-    IERC777(token).operatorSend(from, to, amount, '0x0', '0x0');
+    IERC777(token).operatorSend(from, to, amount, "0x0", "0x0");
     return true;
   }
 

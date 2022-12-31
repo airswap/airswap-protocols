@@ -4,6 +4,7 @@ const { deployMockContract } = waffle
 const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
 const IERC721 = require('@openzeppelin/contracts/build/contracts/IERC721.json')
 const IERC1155 = require('@openzeppelin/contracts/build/contracts/IERC1155.json')
+const IERC777 = require('@openzeppelin/contracts/build/contracts/IERC777.json')
 const { createOrder, createOrderSignature } = require('@airswap/utils')
 const { tokenKinds, ADDRESS_ZERO } = require('@airswap/constants')
 
@@ -104,6 +105,15 @@ describe('Swap Unit Tests', () => {
     await senderToken.mock.transferFrom.returns(true)
     await affiliateToken.mock.transferFrom.returns(true)
 
+    signerTokenERC777 = await deployMockContract(deployer, IERC777.abi)
+    senderTokenERC777 = await deployMockContract(deployer, IERC777.abi)
+    affiliateTokenERC777 = await deployMockContract(deployer, IERC777.abi)
+
+    await signerTokenERC777.mock.balanceOf.returns('0')
+    await senderTokenERC777.mock.balanceOf.returns('0')
+    await signerTokenERC777.mock.isOperatorFor.returns(true)
+    await senderTokenERC777.mock.isOperatorFor.returns(true)
+
     signerTokenERC721 = await deployMockContract(deployer, IERC721.abi)
     senderTokenERC721 = await deployMockContract(deployer, IERC721.abi)
 
@@ -128,6 +138,10 @@ describe('Swap Unit Tests', () => {
       await ethers.getContractFactory('ERC20TransferHandler')
     ).deploy()
     await erc20Handler.deployed()
+    erc777Handler = await (
+      await ethers.getContractFactory('ERC777TransferHandler')
+    ).deploy()
+    await erc777Handler.deployed()
     erc721Handler = await (
       await ethers.getContractFactory('ERC721TransferHandler')
     ).deploy()
@@ -141,6 +155,10 @@ describe('Swap Unit Tests', () => {
       tokenKinds.ERC20,
       erc20Handler.address
     )
+    // await transferHandlerRegistry.addTransferHandler(
+    //   tokenKinds.ERC777,
+    //   erc777Handler.address
+    // )
     await transferHandlerRegistry.addTransferHandler(
       tokenKinds.ERC721,
       erc721Handler.address
@@ -310,6 +328,24 @@ describe('Swap Unit Tests', () => {
           sender: {
             token: senderTokenERC1155.address,
             kind: tokenKinds.ERC1155,
+          },
+        },
+        signer
+      )
+      const [errCount] = await swap.check(order)
+      expect(errCount).to.equal(2)
+    })
+
+    it('test eip777 check', async () => {
+      const order = await createSignedOrder(
+        {
+          signer: {
+            token: signerTokenERC777.address,
+            kind: tokenKinds.ERC777,
+          },
+          sender: {
+            token: senderTokenERC777.address,
+            kind: tokenKinds.ERC777,
           },
         },
         signer
