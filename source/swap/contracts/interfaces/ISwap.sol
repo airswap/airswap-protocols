@@ -47,6 +47,18 @@ interface ISwap {
 
   event Revoke(address indexed signer, address indexed signerWallet);
 
+  error InvalidFee();
+  error InvalidFeeWallet();
+  error OrderExpired();
+  error NonceTooLow();
+  error NonceAlreadyUsed();
+  error SignatureInvalid();
+  error SignerInvalid();
+  error SelfTransferInvalid();
+  error TokenKindUnknown();
+  error TransferFailed(); 
+  error Unauthorized();
+
   /**
    * @notice Atomic Token Swap
    * @param order Order
