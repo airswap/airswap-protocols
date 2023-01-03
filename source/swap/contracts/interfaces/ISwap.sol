@@ -43,6 +43,16 @@ interface ISwap {
 
   event SetProtocolFeeWallet(address indexed feeWallet);
 
+  error InvalidFee();
+  error InvalidFeeWallet();
+  error OrderExpired();
+  error NonceTooLow();
+  error NonceAlreadyUsed();
+  error SignatureInvalid();
+  error SelfTransferInvalid();
+  error TokenKindUnknown();
+  error TransferFailed();
+
   /**
    * @notice Atomic Token Swap
    * @param order Order
