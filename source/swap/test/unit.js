@@ -155,10 +155,10 @@ describe('Swap Unit Tests', () => {
       tokenKinds.ERC20,
       erc20Handler.address
     )
-    // await transferHandlerRegistry.addTransferHandler(
-    //   tokenKinds.ERC777,
-    //   erc777Handler.address
-    // )
+    await transferHandlerRegistry.addTransferHandler(
+      tokenKinds.ERC777,
+      erc777Handler.address
+    )
     await transferHandlerRegistry.addTransferHandler(
       tokenKinds.ERC721,
       erc721Handler.address

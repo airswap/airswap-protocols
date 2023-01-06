@@ -19,7 +19,7 @@ contract ERC777TransferHandler is ITransferHandler {
    * @param party Party from whom swap would be made
    */
   function hasBalance(Party calldata party) external view returns (bool) {
-    return IERC777(party.token).balanceOf(party.wallet) == party.amount;
+    return IERC777(party.token).balanceOf(party.wallet) >= party.amount;
   }
 
   /**
