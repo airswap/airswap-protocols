@@ -350,7 +350,7 @@ contract Swap is ISwap, Ownable {
   function check(Order calldata order)
     public
     view
-    returns (uint256, bytes32[] memory)
+    returns (bytes32[] memory, uint256)
   {
     uint256 errCount;
     bytes32[] memory errors = new bytes32[](MAX_ERROR_COUNT);
@@ -417,7 +417,7 @@ contract Swap is ISwap, Ownable {
       }
     }
 
-    return (errCount, errors);
+    return (errors, errCount);
   }
 
   /**

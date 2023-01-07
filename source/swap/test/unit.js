@@ -17,69 +17,69 @@ const SWAP_FEE =
   (parseInt(DEFAULT_AMOUNT) * parseInt(PROTOCOL_FEE)) / parseInt(FEE_DIVISOR)
 const DEFAULT_SIGNER_AMOUNT = parseInt(DEFAULT_AMOUNT) + SWAP_FEE
 
-const signOrder = async (order, wallet, swapContract) => {
+let snapshotId
+let deployer
+let signer
+let sender
+let affiliate
+let transferHandlerRegistry
+let swap
+
+let signerToken
+let senderToken
+let affiliateToken
+
+async function signOrder(order, wallet, swapContract) {
   return {
     ...order,
     ...(await createOrderSignature(order, wallet, swapContract, CHAIN_ID)),
   }
 }
 
-describe('Swap Unit Tests', () => {
-  let snapshotId
-  let swap
-  let signerToken
-  let senderToken
-  let affiliateToken
+async function createSignedOrder(params, signatory) {
+  const unsignedOrder = createOrder({
+    protocolFee: PROTOCOL_FEE,
+    ...params,
+    signer: {
+      wallet: signer.address,
+      token: signerToken.address,
+      kind: tokenKinds.ERC20,
+      id: '0',
+      amount: DEFAULT_AMOUNT,
+      ...params.signer,
+    },
+    sender: {
+      wallet: sender.address,
+      token: senderToken.address,
+      kind: tokenKinds.ERC20,
+      id: '0',
+      amount: DEFAULT_AMOUNT,
+      ...params.sender,
+    },
+  })
+  return await signOrder(unsignedOrder, signatory, swap.address, CHAIN_ID)
+}
 
-  let transferHandlerRegistry
+async function setUpAllowances(senderAmount, signerAmount) {
+  await senderToken.mock.allowance
+    .withArgs(sender.address, swap.address)
+    .returns(senderAmount)
+  await signerToken.mock.allowance
+    .withArgs(signer.address, swap.address)
+    .returns(signerAmount)
+}
+
+async function setUpBalances(senderAmount, signerAmount) {
+  await senderToken.mock.balanceOf
+    .withArgs(sender.address)
+    .returns(senderAmount)
+  await signerToken.mock.balanceOf
+    .withArgs(signer.address)
+    .returns(signerAmount)
+}
+
+describe('Swap Unit', () => {
   let erc20Handler
-
-  let deployer
-  let signer
-  let sender
-  let affiliate
-
-  async function createSignedOrder(params, signatory) {
-    const unsignedOrder = createOrder({
-      protocolFee: PROTOCOL_FEE,
-      ...params,
-      signer: {
-        wallet: signer.address,
-        token: signerToken.address,
-        kind: tokenKinds.ERC20,
-        id: '0',
-        amount: DEFAULT_AMOUNT,
-        ...params.signer,
-      },
-      sender: {
-        wallet: sender.address,
-        token: senderToken.address,
-        kind: tokenKinds.ERC20,
-        id: '0',
-        amount: DEFAULT_AMOUNT,
-        ...params.sender,
-      },
-    })
-    return await signOrder(unsignedOrder, signatory, swap.address, CHAIN_ID)
-  }
-
-  async function setUpAllowances(senderAmount, signerAmount) {
-    await senderToken.mock.allowance
-      .withArgs(sender.address, swap.address)
-      .returns(senderAmount)
-    await signerToken.mock.allowance
-      .withArgs(signer.address, swap.address)
-      .returns(signerAmount)
-  }
-
-  async function setUpBalances(senderAmount, signerAmount) {
-    await senderToken.mock.balanceOf
-      .withArgs(sender.address)
-      .returns(senderAmount)
-    await signerToken.mock.balanceOf
-      .withArgs(signer.address)
-      .returns(signerAmount)
-  }
 
   beforeEach(async () => {
     snapshotId = await ethers.provider.send('evm_snapshot')
@@ -89,7 +89,7 @@ describe('Swap Unit Tests', () => {
     await ethers.provider.send('evm_revert', [snapshotId])
   })
 
-  before('get signers and deploy', async () => {
+  before('deploy registry, erc20handler, swap', async () => {
     ;[deployer, sender, signer, affiliate, protocolFeeWallet, anyone] =
       await ethers.getSigners()
 
@@ -105,31 +105,6 @@ describe('Swap Unit Tests', () => {
     await senderToken.mock.transferFrom.returns(true)
     await affiliateToken.mock.transferFrom.returns(true)
 
-    signerTokenERC777 = await deployMockContract(deployer, IERC777.abi)
-    senderTokenERC777 = await deployMockContract(deployer, IERC777.abi)
-    affiliateTokenERC777 = await deployMockContract(deployer, IERC777.abi)
-
-    await signerTokenERC777.mock.balanceOf.returns('0')
-    await senderTokenERC777.mock.balanceOf.returns('0')
-    await signerTokenERC777.mock.isOperatorFor.returns(true)
-    await senderTokenERC777.mock.isOperatorFor.returns(true)
-
-    signerTokenERC721 = await deployMockContract(deployer, IERC721.abi)
-    senderTokenERC721 = await deployMockContract(deployer, IERC721.abi)
-
-    await senderTokenERC721.mock.isApprovedForAll.returns(true)
-    await senderTokenERC721.mock.ownerOf.returns(sender.address)
-    await signerTokenERC721.mock.isApprovedForAll.returns(true)
-    await signerTokenERC721.mock.ownerOf.returns(signer.address)
-
-    signerTokenERC1155 = await deployMockContract(deployer, IERC1155.abi)
-    senderTokenERC1155 = await deployMockContract(deployer, IERC1155.abi)
-
-    await senderTokenERC1155.mock.isApprovedForAll.returns(true)
-    await senderTokenERC1155.mock.balanceOf.returns('0')
-    await signerTokenERC1155.mock.isApprovedForAll.returns(true)
-    await signerTokenERC1155.mock.balanceOf.returns('0')
-
     transferHandlerRegistry = await (
       await ethers.getContractFactory('TransferHandlerRegistry')
     ).deploy()
@@ -138,44 +113,16 @@ describe('Swap Unit Tests', () => {
       await ethers.getContractFactory('ERC20TransferHandler')
     ).deploy()
     await erc20Handler.deployed()
-    erc777Handler = await (
-      await ethers.getContractFactory('ERC777TransferHandler')
-    ).deploy()
-    await erc777Handler.deployed()
-    erc721Handler = await (
-      await ethers.getContractFactory('ERC721TransferHandler')
-    ).deploy()
-    await erc721Handler.deployed()
-    erc1155Handler = await (
-      await ethers.getContractFactory('ERC1155TransferHandler')
-    ).deploy()
-    await erc1155Handler.deployed()
-
     await transferHandlerRegistry.addTransferHandler(
       tokenKinds.ERC20,
       erc20Handler.address
     )
-    await transferHandlerRegistry.addTransferHandler(
-      tokenKinds.ERC777,
-      erc777Handler.address
-    )
-    await transferHandlerRegistry.addTransferHandler(
-      tokenKinds.ERC721,
-      erc721Handler.address
-    )
     await expect(
       transferHandlerRegistry.addTransferHandler(
-        tokenKinds.ERC1155,
-        erc1155Handler.address
-      )
-    ).to.emit(transferHandlerRegistry, 'AddTransferHandler')
-    await expect(
-      transferHandlerRegistry.addTransferHandler(
-        tokenKinds.ERC1155,
-        erc1155Handler.address
+        tokenKinds.ERC20,
+        erc20Handler.address
       )
     ).to.be.revertedWith('HandlerExistsForKind()')
-
     swap = await (
       await ethers.getContractFactory('Swap')
     ).deploy(
@@ -186,278 +133,70 @@ describe('Swap Unit Tests', () => {
     await swap.deployed()
   })
 
-  describe('Constructor', async () => {
-    describe('Test signatures', async () => {
-      it('test signatures', async () => {
-        let order = await createSignedOrder({}, signer)
-        await expect(swap.connect(sender).swap(order)).to.emit(swap, 'Swap')
-      })
+  describe('constructor, setters', async () => {
+    it('deploy with invalid protocolFeeWallet fails', async () => {
+      await expect(
+        (
+          await ethers.getContractFactory('Swap')
+        ).deploy(transferHandlerRegistry.address, PROTOCOL_FEE, ADDRESS_ZERO)
+      ).to.be.revertedWith('InvalidFeeWallet()')
     })
 
-    describe('Test fee', async () => {
-      it('test invalid protocolFeeWallet', async () => {
-        await expect(
-          (
-            await ethers.getContractFactory('Swap')
-          ).deploy(transferHandlerRegistry.address, PROTOCOL_FEE, ADDRESS_ZERO)
-        ).to.be.revertedWith('InvalidFeeWallet()')
-      })
-
-      it('test invalid fee', async () => {
-        await expect(
-          (
-            await ethers.getContractFactory('Swap')
-          ).deploy(
-            transferHandlerRegistry.address,
-            100000000000,
-            protocolFeeWallet.address
-          )
-        ).to.be.revertedWith('InvalidFee()')
-      })
+    it('deploy with invalid fee fails', async () => {
+      await expect(
+        (
+          await ethers.getContractFactory('Swap')
+        ).deploy(
+          transferHandlerRegistry.address,
+          100000000000,
+          protocolFeeWallet.address
+        )
+      ).to.be.revertedWith('InvalidFee()')
     })
-  })
 
-  describe('Test setters', async () => {
-    it('test setProtocolFee', async () => {
+    it('setProtocolFeeWallet', async () => {
+      await expect(
+        swap.connect(deployer).setProtocolFeeWallet(protocolFeeWallet.address)
+      ).to.emit(swap, 'SetProtocolFeeWallet')
+      const storedFeeWallet = await swap.protocolFeeWallet()
+      expect(storedFeeWallet).to.equal(protocolFeeWallet.address)
+    })
+
+    it('setProtocolFeeWallet by anyone fails', async () => {
+      await expect(
+        swap.connect(anyone).setProtocolFeeWallet(anyone.address)
+      ).to.be.revertedWith('Ownable: caller is not the owner')
+    })
+
+    it('setProtocolFeeWallet with invalid address fails', async () => {
+      await expect(
+        swap.connect(deployer).setProtocolFeeWallet(ADDRESS_ZERO)
+      ).to.be.revertedWith('InvalidFeeWallet()')
+    })
+
+    it('setProtocolFee', async () => {
       await expect(swap.connect(deployer).setProtocolFee(PROTOCOL_FEE)).to.emit(
         swap,
         'SetProtocolFee'
       )
+      const storedSignerFee = await swap.protocolFee()
+      expect(storedSignerFee).to.equal(PROTOCOL_FEE)
     })
-    it('test protocolFeeWallet', async () => {
+
+    it('setProtocolFee with invalid address fails', async () => {
+      await expect(swap.connect(anyone).setProtocolFee('0')).to.be.revertedWith(
+        'Ownable: caller is not the owner'
+      )
+    })
+
+    it('setProtocolFee with invalid fee', async () => {
       await expect(
-        swap.connect(deployer).setProtocolFeeWallet(protocolFeeWallet.address)
-      ).to.emit(swap, 'SetProtocolFeeWallet')
+        swap.connect(deployer).setProtocolFee(FEE_DIVISOR + 1)
+      ).to.be.revertedWith('InvalidFee()')
     })
   })
 
-  describe('Test check', async () => {
-    it('test check with bad kind', async () => {
-      const order = await createSignedOrder(
-        {
-          signer: {
-            kind: '0x00000000',
-          },
-          sender: {
-            kind: '0x00000000',
-          },
-        },
-        signer
-      )
-      const [errCount, errors] = await swap.check(order)
-      expect(errors[0]).to.be.equal(
-        ethers.utils.formatBytes32String('SIGNER_TOKEN_KIND_UNKNOWN')
-      )
-      expect(errors[1]).to.be.equal(
-        ethers.utils.formatBytes32String('SENDER_TOKEN_KIND_UNKNOWN')
-      )
-    })
-
-    it('test erc20 check', async () => {
-      const order = await createSignedOrder({}, signer)
-      const [errCount, errors] = await swap.check(order)
-      expect(errors[0]).to.be.equal(
-        ethers.utils.formatBytes32String('SIGNER_ALLOWANCE_LOW')
-      )
-      expect(errors[1]).to.be.equal(
-        ethers.utils.formatBytes32String('SIGNER_BALANCE_LOW')
-      )
-      expect(errors[2]).to.be.equal(
-        ethers.utils.formatBytes32String('SENDER_ALLOWANCE_LOW')
-      )
-      expect(errors[3]).to.be.equal(
-        ethers.utils.formatBytes32String('SENDER_BALANCE_LOW')
-      )
-    })
-
-    it('test erc20 check with allowances and balances setup', async () => {
-      const order = await createSignedOrder({}, signer)
-      await setUpAllowances(DEFAULT_AMOUNT, DEFAULT_SIGNER_AMOUNT)
-      await setUpBalances(DEFAULT_AMOUNT, DEFAULT_SIGNER_AMOUNT)
-      const [errCount] = await swap.check(order)
-      expect(errCount).to.equal(0)
-    })
-
-    it('test check with used nonce', async () => {
-      const order = await createSignedOrder(
-        {
-          nonce: '0',
-        },
-        signer
-      )
-      await setUpAllowances(DEFAULT_AMOUNT, DEFAULT_SIGNER_AMOUNT)
-      await setUpBalances(DEFAULT_AMOUNT, DEFAULT_SIGNER_AMOUNT)
-      await expect(swap.connect(sender).swap(order)).to.emit(swap, 'Swap')
-      const [errCount, errors] = await swap.check(order)
-      expect(errors[0]).to.be.equal(
-        ethers.utils.formatBytes32String('NONCE_ALREADY_USED')
-      )
-    })
-
-    it('test check with bad signer', async () => {
-      const order = await createSignedOrder(
-        {
-          signer: {
-            wallet: ADDRESS_ZERO,
-          },
-        },
-        signer
-      )
-      await expect(swap.connect(sender).swap(order)).to.be.revertedWith(
-        'Unauthorized()'
-      )
-    })
-
-    it('test check with bad expiry', async () => {
-      const order = await createSignedOrder(
-        {
-          expiry: '0',
-        },
-        signer
-      )
-      await expect(swap.connect(sender).swap(order)).to.be.revertedWith(
-        'OrderExpired()'
-      )
-    })
-
-    it('test erc721 check', async () => {
-      const order = await createSignedOrder(
-        {
-          signer: {
-            token: signerTokenERC721.address,
-            kind: tokenKinds.ERC721,
-          },
-          sender: {
-            token: senderTokenERC721.address,
-            kind: tokenKinds.ERC721,
-          },
-        },
-        signer
-      )
-      const [errCount] = await swap.check(order)
-      expect(errCount).to.equal(0)
-    })
-
-    it('test eip1155 check', async () => {
-      const order = await createSignedOrder(
-        {
-          signer: {
-            token: signerTokenERC1155.address,
-            kind: tokenKinds.ERC1155,
-          },
-          sender: {
-            token: senderTokenERC1155.address,
-            kind: tokenKinds.ERC1155,
-          },
-        },
-        signer
-      )
-      const [errCount, errors] = await swap.check(order)
-      expect(errors[0]).to.be.equal(
-        ethers.utils.formatBytes32String('SIGNER_BALANCE_LOW')
-      )
-      expect(errors[1]).to.be.equal(
-        ethers.utils.formatBytes32String('SENDER_BALANCE_LOW')
-      )
-    })
-
-    it('test eip777 check', async () => {
-      const order = await createSignedOrder(
-        {
-          signer: {
-            token: signerTokenERC777.address,
-            kind: tokenKinds.ERC777,
-          },
-          sender: {
-            token: senderTokenERC777.address,
-            kind: tokenKinds.ERC777,
-          },
-        },
-        signer
-      )
-      const [errCount, errors] = await swap.check(order)
-      expect(errors[0]).to.be.equal(
-        ethers.utils.formatBytes32String('SIGNER_BALANCE_LOW')
-      )
-      expect(errors[1]).to.be.equal(
-        ethers.utils.formatBytes32String('SENDER_BALANCE_LOW')
-      )
-    })
-  })
-
-  describe('Test swap', async () => {
-    it('test swap', async () => {
-      const order = await createSignedOrder({}, signer)
-      await expect(swap.connect(sender).swap(order)).to.emit(swap, 'Swap')
-    })
-
-    it('test public swap', async () => {
-      const order = await createSignedOrder(
-        {
-          sender: {
-            wallet: ADDRESS_ZERO,
-          },
-        },
-        signer
-      )
-      await expect(swap.connect(sender).swap(order)).to.emit(swap, 'Swap')
-    })
-
-    it('test swap with affiliate', async () => {
-      const order = await createSignedOrder(
-        {
-          affiliate: {
-            wallet: affiliate.address,
-            token: affiliateToken.address,
-            kind: tokenKinds.ERC20,
-            id: '0',
-            amount: DEFAULT_AMOUNT,
-          },
-        },
-        signer
-      )
-      await expect(swap.connect(sender).swap(order)).to.emit(swap, 'Swap')
-    })
-
-    it('test when nonce has already been used', async () => {
-      const order = await createSignedOrder(
-        {
-          nonce: '0',
-        },
-        signer
-      )
-      await swap.connect(sender).swap(order)
-      await expect(swap.connect(sender).swap(order)).to.be.revertedWith(
-        'NonceAlreadyUsed()'
-      )
-    })
-
-    it('test when nonce has been cancelled', async () => {
-      const order = await createSignedOrder(
-        {
-          nonce: '1',
-        },
-        signer
-      )
-      await swap.connect(signer).cancel([1])
-      await expect(swap.connect(sender).swap(order)).to.be.revertedWith(
-        'NonceAlreadyUsed()'
-      )
-    })
-
-    it('test when nonce has been cancelled up to', async () => {
-      const order = await createSignedOrder(
-        {
-          nonce: '2',
-        },
-        signer
-      )
-      await swap.connect(signer).cancelUpTo(3)
-      await expect(swap.connect(sender).swap(order)).to.be.revertedWith(
-        'NonceTooLow()'
-      )
-    })
-
+  describe('authorizations', async () => {
     it('test authorized signer', async () => {
       const order = await createSignedOrder(
         {
@@ -490,40 +229,80 @@ describe('Swap Unit Tests', () => {
     })
   })
 
-  describe('Test fees', async () => {
-    it('test changing fee wallet', async () => {
-      await swap.connect(deployer).setProtocolFeeWallet(anyone.address)
-
-      const storedFeeWallet = await swap.protocolFeeWallet()
-      expect(storedFeeWallet).to.equal(anyone.address)
+  describe('basic / erc20', async () => {
+    it('erc20 swap succeeds', async () => {
+      const order = await createSignedOrder({}, signer)
+      await expect(swap.connect(sender).swap(order)).to.emit(swap, 'Swap')
     })
 
-    it('test only deployer can change fee wallet', async () => {
-      await expect(
-        swap.connect(anyone).setProtocolFeeWallet(anyone.address)
-      ).to.be.revertedWith('Ownable: caller is not the owner')
+    it('erc20 public swap succeeds', async () => {
+      const order = await createSignedOrder(
+        {
+          sender: {
+            wallet: ADDRESS_ZERO,
+          },
+        },
+        signer
+      )
+      await expect(swap.connect(sender).swap(order)).to.emit(swap, 'Swap')
     })
 
-    it('test invalid fee wallet', async () => {
-      await expect(
-        swap.connect(deployer).setProtocolFeeWallet(ADDRESS_ZERO)
-      ).to.be.revertedWith('InvalidFeeWallet()')
+    it('erc20 swap with erc20 affiliate succeeds', async () => {
+      const order = await createSignedOrder(
+        {
+          affiliate: {
+            wallet: affiliate.address,
+            token: affiliateToken.address,
+            kind: tokenKinds.ERC20,
+            id: '0',
+            amount: DEFAULT_AMOUNT,
+          },
+        },
+        signer
+      )
+      await expect(swap.connect(sender).swap(order)).to.emit(swap, 'Swap')
     })
 
-    it('test changing fee', async () => {
-      await swap.connect(deployer).setProtocolFee(HIGHER_FEE)
-
-      const storedSignerFee = await swap.protocolFee()
-      expect(storedSignerFee).to.equal(HIGHER_FEE)
-    })
-
-    it('test only deployer can change fee', async () => {
-      await expect(swap.connect(anyone).setProtocolFee('0')).to.be.revertedWith(
-        'Ownable: caller is not the owner'
+    it('swap with previously used nonce fails', async () => {
+      const order = await createSignedOrder(
+        {
+          nonce: '0',
+        },
+        signer
+      )
+      await swap.connect(sender).swap(order)
+      await expect(swap.connect(sender).swap(order)).to.be.revertedWith(
+        'NonceAlreadyUsed()'
       )
     })
 
-    it('test zero fee', async () => {
+    it('swap with cancelled nonce fails', async () => {
+      const order = await createSignedOrder(
+        {
+          nonce: '1',
+        },
+        signer
+      )
+      await swap.connect(signer).cancel([1])
+      await expect(swap.connect(sender).swap(order)).to.be.revertedWith(
+        'NonceAlreadyUsed()'
+      )
+    })
+
+    it('swap with nonce below cancelUpTo fails', async () => {
+      const order = await createSignedOrder(
+        {
+          nonce: '2',
+        },
+        signer
+      )
+      await swap.connect(signer).cancelUpTo(3)
+      await expect(swap.connect(sender).swap(order)).to.be.revertedWith(
+        'NonceTooLow()'
+      )
+    })
+
+    it('swap with zero fee succeeds', async () => {
       const order = await createSignedOrder(
         {
           protocolFee: '0',
@@ -534,13 +313,7 @@ describe('Swap Unit Tests', () => {
       await expect(swap.connect(sender).swap(order)).to.emit(swap, 'Swap')
     })
 
-    it('test invalid fee', async () => {
-      await expect(
-        swap.connect(deployer).setProtocolFee(FEE_DIVISOR + 1)
-      ).to.be.revertedWith('InvalidFee()')
-    })
-
-    it('test when signed with incorrect fee', async () => {
+    it('swap with incorrect fee fails', async () => {
       const order = await createSignedOrder(
         {
           protocolFee: HIGHER_FEE / 2,
@@ -549,6 +322,227 @@ describe('Swap Unit Tests', () => {
       )
       await expect(swap.connect(sender).swap(order)).to.be.revertedWith(
         'Unauthorized()'
+      )
+    })
+
+    it('check succeeds with allowances and balances set', async () => {
+      const order = await createSignedOrder({}, signer)
+      await setUpAllowances(DEFAULT_AMOUNT, DEFAULT_SIGNER_AMOUNT)
+      await setUpBalances(DEFAULT_AMOUNT, DEFAULT_SIGNER_AMOUNT)
+      const [errors, errCount] = await swap.check(order)
+      expect(errCount).to.equal(0)
+    })
+
+    it('check without allowances and balances fails', async () => {
+      const order = await createSignedOrder({}, signer)
+      const [errors] = await swap.check(order)
+      expect(errors[0]).to.be.equal(
+        ethers.utils.formatBytes32String('SIGNER_ALLOWANCE_LOW')
+      )
+      expect(errors[1]).to.be.equal(
+        ethers.utils.formatBytes32String('SIGNER_BALANCE_LOW')
+      )
+      expect(errors[2]).to.be.equal(
+        ethers.utils.formatBytes32String('SENDER_ALLOWANCE_LOW')
+      )
+      expect(errors[3]).to.be.equal(
+        ethers.utils.formatBytes32String('SENDER_BALANCE_LOW')
+      )
+    })
+
+    it('check with bad kind fails', async () => {
+      const order = await createSignedOrder(
+        {
+          signer: {
+            kind: '0x00000000',
+          },
+          sender: {
+            kind: '0x00000000',
+          },
+        },
+        signer
+      )
+      const [errors] = await swap.check(order)
+      expect(errors[0]).to.be.equal(
+        ethers.utils.formatBytes32String('SIGNER_TOKEN_KIND_UNKNOWN')
+      )
+      expect(errors[1]).to.be.equal(
+        ethers.utils.formatBytes32String('SENDER_TOKEN_KIND_UNKNOWN')
+      )
+    })
+
+    it('check with previously used nonce fails', async () => {
+      const order = await createSignedOrder(
+        {
+          nonce: '0',
+        },
+        signer
+      )
+      await setUpAllowances(DEFAULT_AMOUNT, DEFAULT_SIGNER_AMOUNT)
+      await setUpBalances(DEFAULT_AMOUNT, DEFAULT_SIGNER_AMOUNT)
+      await expect(swap.connect(sender).swap(order)).to.emit(swap, 'Swap')
+      const [errors] = await swap.check(order)
+      expect(errors[0]).to.be.equal(
+        ethers.utils.formatBytes32String('NONCE_ALREADY_USED')
+      )
+    })
+
+    it('check with incorrect signer fails', async () => {
+      const order = await createSignedOrder(
+        {
+          signer: {
+            wallet: ADDRESS_ZERO,
+          },
+        },
+        signer
+      )
+      await expect(swap.connect(sender).swap(order)).to.be.revertedWith(
+        'Unauthorized()'
+      )
+    })
+
+    it('check with passed expiry fails', async () => {
+      const order = await createSignedOrder(
+        {
+          expiry: '0',
+        },
+        signer
+      )
+      await expect(swap.connect(sender).swap(order)).to.be.revertedWith(
+        'OrderExpired()'
+      )
+    })
+  })
+
+  describe('erc721', async () => {
+    before(async () => {
+      signerTokenERC721 = await deployMockContract(deployer, IERC721.abi)
+      senderTokenERC721 = await deployMockContract(deployer, IERC721.abi)
+
+      await senderTokenERC721.mock.isApprovedForAll.returns(true)
+      await senderTokenERC721.mock.ownerOf.returns(sender.address)
+      await signerTokenERC721.mock.isApprovedForAll.returns(true)
+      await signerTokenERC721.mock.ownerOf.returns(signer.address)
+
+      erc721Handler = await (
+        await ethers.getContractFactory('ERC721TransferHandler')
+      ).deploy()
+      await erc721Handler.deployed()
+
+      await transferHandlerRegistry.addTransferHandler(
+        tokenKinds.ERC721,
+        erc721Handler.address
+      )
+    })
+    it('test erc721 check', async () => {
+      const order = await createSignedOrder(
+        {
+          signer: {
+            token: signerTokenERC721.address,
+            kind: tokenKinds.ERC721,
+          },
+          sender: {
+            token: senderTokenERC721.address,
+            kind: tokenKinds.ERC721,
+          },
+        },
+        signer
+      )
+      const [errors, errCount] = await swap.check(order)
+      expect(errCount).to.equal(0)
+    })
+  })
+
+  describe('erc777', async () => {
+    before(async () => {
+      signerTokenERC777 = await deployMockContract(deployer, IERC777.abi)
+      senderTokenERC777 = await deployMockContract(deployer, IERC777.abi)
+      affiliateTokenERC777 = await deployMockContract(deployer, IERC777.abi)
+
+      await signerTokenERC777.mock.balanceOf.returns('0')
+      await senderTokenERC777.mock.balanceOf.returns('0')
+      await signerTokenERC777.mock.isOperatorFor.returns(true)
+      await senderTokenERC777.mock.isOperatorFor.returns(true)
+
+      erc777Handler = await (
+        await ethers.getContractFactory('ERC777TransferHandler')
+      ).deploy()
+      await erc777Handler.deployed()
+
+      await transferHandlerRegistry.addTransferHandler(
+        tokenKinds.ERC777,
+        erc777Handler.address
+      )
+    })
+
+    it('test erc777 check', async () => {
+      const order = await createSignedOrder(
+        {
+          signer: {
+            token: signerTokenERC777.address,
+            kind: tokenKinds.ERC777,
+          },
+          sender: {
+            token: senderTokenERC777.address,
+            kind: tokenKinds.ERC777,
+          },
+        },
+        signer
+      )
+      const [errors] = await swap.check(order)
+      expect(errors[0]).to.be.equal(
+        ethers.utils.formatBytes32String('SIGNER_BALANCE_LOW')
+      )
+      expect(errors[1]).to.be.equal(
+        ethers.utils.formatBytes32String('SENDER_BALANCE_LOW')
+      )
+    })
+  })
+
+  describe('erc1155', async () => {
+    let signerTokenERC1155
+    let senderTokenERC1155
+    before(async () => {
+      signerTokenERC1155 = await deployMockContract(deployer, IERC1155.abi)
+      senderTokenERC1155 = await deployMockContract(deployer, IERC1155.abi)
+
+      await senderTokenERC1155.mock.isApprovedForAll.returns(true)
+      await senderTokenERC1155.mock.balanceOf.returns('0')
+      await signerTokenERC1155.mock.isApprovedForAll.returns(true)
+      await signerTokenERC1155.mock.balanceOf.returns('0')
+
+      erc1155Handler = await (
+        await ethers.getContractFactory('ERC1155TransferHandler')
+      ).deploy()
+      await erc1155Handler.deployed()
+
+      await expect(
+        transferHandlerRegistry.addTransferHandler(
+          tokenKinds.ERC1155,
+          erc1155Handler.address
+        )
+      ).to.emit(transferHandlerRegistry, 'AddTransferHandler')
+    })
+    it('test erc1155 check', async () => {
+      const order = await createSignedOrder(
+        {
+          signer: {
+            token: signerTokenERC1155.address,
+            kind: tokenKinds.ERC1155,
+          },
+          sender: {
+            token: senderTokenERC1155.address,
+            kind: tokenKinds.ERC1155,
+          },
+        },
+        signer
+      )
+      const [errors] = await swap.check(order)
+      expect(errors[0]).to.be.equal(
+        ethers.utils.formatBytes32String('SIGNER_BALANCE_LOW')
+      )
+      expect(errors[1]).to.be.equal(
+        ethers.utils.formatBytes32String('SENDER_BALANCE_LOW')
       )
     })
   })
