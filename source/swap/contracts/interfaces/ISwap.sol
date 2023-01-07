@@ -56,7 +56,7 @@ interface ISwap {
   error SignerInvalid();
   error SelfTransferInvalid();
   error TokenKindUnknown();
-  error TransferFailed(); 
+  error TransferFailed();
   error Unauthorized();
 
   /**

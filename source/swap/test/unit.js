@@ -244,14 +244,30 @@ describe('Swap Unit Tests', () => {
         },
         signer
       )
-      const [errCount] = await swap.check(order)
-      expect(errCount).to.equal(2)
+      const [errCount, errors] = await swap.check(order)
+      expect(errors[0]).to.be.equal(
+        ethers.utils.formatBytes32String('SIGNER_TOKEN_KIND_UNKNOWN')
+      )
+      expect(errors[1]).to.be.equal(
+        ethers.utils.formatBytes32String('SENDER_TOKEN_KIND_UNKNOWN')
+      )
     })
 
     it('test erc20 check', async () => {
       const order = await createSignedOrder({}, signer)
-      const [errCount] = await swap.check(order)
-      expect(errCount).to.equal(4)
+      const [errCount, errors] = await swap.check(order)
+      expect(errors[0]).to.be.equal(
+        ethers.utils.formatBytes32String('SIGNER_ALLOWANCE_LOW')
+      )
+      expect(errors[1]).to.be.equal(
+        ethers.utils.formatBytes32String('SIGNER_BALANCE_LOW')
+      )
+      expect(errors[2]).to.be.equal(
+        ethers.utils.formatBytes32String('SENDER_ALLOWANCE_LOW')
+      )
+      expect(errors[3]).to.be.equal(
+        ethers.utils.formatBytes32String('SENDER_BALANCE_LOW')
+      )
     })
 
     it('test erc20 check with allowances and balances setup', async () => {
@@ -272,8 +288,10 @@ describe('Swap Unit Tests', () => {
       await setUpAllowances(DEFAULT_AMOUNT, DEFAULT_SIGNER_AMOUNT)
       await setUpBalances(DEFAULT_AMOUNT, DEFAULT_SIGNER_AMOUNT)
       await expect(swap.connect(sender).swap(order)).to.emit(swap, 'Swap')
-      const [errCount] = await swap.check(order)
-      expect(errCount).to.equal(1)
+      const [errCount, errors] = await swap.check(order)
+      expect(errors[0]).to.be.equal(
+        ethers.utils.formatBytes32String('NONCE_ALREADY_USED')
+      )
     })
 
     it('test check with bad signer', async () => {
@@ -285,8 +303,9 @@ describe('Swap Unit Tests', () => {
         },
         signer
       )
-      const [errCount] = await swap.check(order)
-      expect(errCount).to.equal(5)
+      await expect(swap.connect(sender).swap(order)).to.be.revertedWith(
+        'Unauthorized()'
+      )
     })
 
     it('test check with bad expiry', async () => {
@@ -296,8 +315,9 @@ describe('Swap Unit Tests', () => {
         },
         signer
       )
-      const [errCount] = await swap.check(order)
-      expect(errCount).to.equal(5)
+      await expect(swap.connect(sender).swap(order)).to.be.revertedWith(
+        'OrderExpired()'
+      )
     })
 
     it('test erc721 check', async () => {
@@ -332,8 +352,13 @@ describe('Swap Unit Tests', () => {
         },
         signer
       )
-      const [errCount] = await swap.check(order)
-      expect(errCount).to.equal(2)
+      const [errCount, errors] = await swap.check(order)
+      expect(errors[0]).to.be.equal(
+        ethers.utils.formatBytes32String('SIGNER_BALANCE_LOW')
+      )
+      expect(errors[1]).to.be.equal(
+        ethers.utils.formatBytes32String('SENDER_BALANCE_LOW')
+      )
     })
 
     it('test eip777 check', async () => {
@@ -350,8 +375,13 @@ describe('Swap Unit Tests', () => {
         },
         signer
       )
-      const [errCount] = await swap.check(order)
-      expect(errCount).to.equal(2)
+      const [errCount, errors] = await swap.check(order)
+      expect(errors[0]).to.be.equal(
+        ethers.utils.formatBytes32String('SIGNER_BALANCE_LOW')
+      )
+      expect(errors[1]).to.be.equal(
+        ethers.utils.formatBytes32String('SENDER_BALANCE_LOW')
+      )
     })
   })
 
@@ -454,7 +484,6 @@ describe('Swap Unit Tests', () => {
         },
         signer
       )
-
       await expect(swap.connect(sender).swap(order)).to.be.revertedWith(
         'Unauthorized()'
       )
