@@ -78,6 +78,8 @@ contract Swap is ISwap, Ownable {
    */
   mapping(address => mapping(uint256 => uint256)) internal _nonceGroups;
 
+  mapping(address => address) public override authorized;
+
   // Mapping of signer addresses to an optionally set minimum valid nonce
   mapping(address => uint256) public _signerMinimumNonce;
 
@@ -142,8 +144,10 @@ contract Swap is ISwap, Ownable {
       finalSenderWallet = order.sender.wallet;
     }
 
-    // Validate the signer side of the trade.
-    if (!_isValid(order, DOMAIN_SEPARATOR)) revert SignatureInvalid();
+    // // Validate the signer side of the trade.
+    _isAuthorized(order, DOMAIN_SEPARATOR);
+
+    // Ensure the signatory is authorized by the signer wallet
 
     // Transfer token from sender to signer.
     _transferToken(
@@ -178,7 +182,6 @@ contract Swap is ISwap, Ownable {
     }
 
     // Check if protocol fee is applicable and transfer it accordingly
-    // ITransferHandler transferHandler = registry.transferHandlers(order.signer.kind);
     if (registry.transferHandlers(order.signer.kind).isFungible()) {
       _transferProtocolFee(order);
     }
@@ -232,6 +235,27 @@ contract Swap is ISwap, Ownable {
     if (_protocolFeeWallet == address(0)) revert InvalidFeeWallet();
     protocolFeeWallet = _protocolFeeWallet;
     emit SetProtocolFeeWallet(_protocolFeeWallet);
+  }
+
+  /**
+   * @notice Authorize a signer
+   * @param signer address Wallet of the signer to authorize
+   * @dev Emits an Authorize event
+   */
+  function authorize(address signer) external override {
+    if (signer == address(0)) revert SignerInvalid();
+    authorized[msg.sender] = signer;
+    emit Authorize(signer, msg.sender);
+  }
+
+  /**
+   * @notice Revoke the signer
+   * @dev Emits a Revoke event
+   */
+  function revoke() external override {
+    address tmp = authorized[msg.sender];
+    delete authorized[msg.sender];
+    emit Revoke(tmp, msg.sender);
   }
 
   /**
@@ -397,19 +421,39 @@ contract Swap is ISwap, Ownable {
   }
 
   /**
-   * @notice Validate signature using an EIP-712 typed data hash
+   * @notice Checks Order Expiry, Nonce, Signature
    * @param order Order to validate
-   * @param domainSeparator bytes32 Domain identifier used in signatures (EIP-712)
-   * @return bool True if order has a valid signature
+   * @param domainSeparator bytes32
    */
-  function _isValid(Order calldata order, bytes32 domainSeparator)
+  function _isAuthorized(Order calldata order, bytes32 domainSeparator)
     internal
     view
-    returns (bool)
   {
-    return
-      order.signer.wallet ==
-      ecrecover(_hashOrder(order, domainSeparator), order.v, order.r, order.s);
+    bytes32 hashed = _hashOrder(order, domainSeparator);
+
+    // Recover the signatory from the hash and signature
+    address signatory = _getSignatory(order, hashed);
+
+    // Ensure the signatory is not null
+    if (signatory == address(0)) revert SignatureInvalid();
+
+    // Ensure the signatory is authorized by the signer wallet
+    if (order.signer.wallet != signatory) {
+      if (authorized[order.signer.wallet] != signatory) revert Unauthorized();
+    }
+  }
+
+  /**
+   * @notice Recover the signatory from a signature
+   * @param order Order signeds
+   * @param orderHash hash of the Order signed
+   */
+  function _getSignatory(Order calldata order, bytes32 orderHash)
+    internal
+    pure
+    returns (address)
+  {
+    return ecrecover(orderHash, order.v, order.r, order.s);
   }
 
   /**
