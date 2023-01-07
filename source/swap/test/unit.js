@@ -329,8 +329,8 @@ describe('Swap Unit', () => {
       const order = await createSignedOrder({}, signer)
       await setUpAllowances(DEFAULT_AMOUNT, DEFAULT_SIGNER_AMOUNT)
       await setUpBalances(DEFAULT_AMOUNT, DEFAULT_SIGNER_AMOUNT)
-      const [errors, errCount] = await swap.check(order)
-      expect(errCount).to.equal(0)
+      const errors = await swap.check(order)
+      expect(errors[1]).to.equal(0)
     })
 
     it('check without allowances and balances fails', async () => {
@@ -448,8 +448,8 @@ describe('Swap Unit', () => {
         },
         signer
       )
-      const [errors, errCount] = await swap.check(order)
-      expect(errCount).to.equal(0)
+      const errors = await swap.check(order)
+      expect(errors[1]).to.equal(0)
     })
   })
 
