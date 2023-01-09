@@ -364,12 +364,12 @@ contract Swap is ISwap, Ownable {
     );
 
     if (signatory == address(0)) {
-      errors[errCount] = "SIGNATURE_INVALID";
+      errors[errCount] = "SignatureInvalid";
       errCount++;
     }
 
     if (order.expiry < block.timestamp) {
-      errors[errCount] = "EXPIRY_PASSED";
+      errors[errCount] = "OrderExpired";
       errCount++;
     }
 
@@ -377,11 +377,11 @@ contract Swap is ISwap, Ownable {
       order.signer.wallet != signatory &&
       authorized[order.signer.wallet] != signatory
     ) {
-      errors[errCount] = "UNAUTHORIZED";
+      errors[errCount] = "Unauthorized";
       errCount++;
     } else {
       if (nonceUsed(signatory, order.nonce)) {
-        errors[errCount] = "NONCE_ALREADY_USED";
+        errors[errCount] = "NonceAlreadyUsed";
         errCount++;
       }
     }
@@ -391,15 +391,15 @@ contract Swap is ISwap, Ownable {
     );
 
     if (address(signerTransferHandler) == address(0)) {
-      errors[errCount] = "SIGNER_TOKEN_KIND_UNKNOWN";
+      errors[errCount] = "SignerTokenKindUnknown";
       errCount++;
     } else {
       if (!signerTransferHandler.hasAllowance(order.signer)) {
-        errors[errCount] = "SIGNER_ALLOWANCE_LOW";
+        errors[errCount] = "SignerAllowanceLow";
         errCount++;
       }
       if (!signerTransferHandler.hasBalance(order.signer)) {
-        errors[errCount] = "SIGNER_BALANCE_LOW";
+        errors[errCount] = "SignerBalanceLow";
         errCount++;
       }
     }
@@ -409,15 +409,15 @@ contract Swap is ISwap, Ownable {
     );
 
     if (address(senderTransferHandler) == address(0)) {
-      errors[errCount] = "SENDER_TOKEN_KIND_UNKNOWN";
+      errors[errCount] = "SenderTokenKindUnknown";
       errCount++;
     } else {
       if (!senderTransferHandler.hasAllowance(order.sender)) {
-        errors[errCount] = "SENDER_ALLOWANCE_LOW";
+        errors[errCount] = "SenderAllowanceLow";
         errCount++;
       }
       if (!senderTransferHandler.hasBalance(order.sender)) {
-        errors[errCount] = "SENDER_BALANCE_LOW";
+        errors[errCount] = "SenderBalanceLow";
         errCount++;
       }
     }
@@ -426,7 +426,7 @@ contract Swap is ISwap, Ownable {
   }
 
   /**
-   * @notice Checks Order Expiry, Nonce, Signature
+   * @notice Tests whether signature and signer are valid
    * @param order Order to validate
    * @param domainSeparator bytes32
    */
