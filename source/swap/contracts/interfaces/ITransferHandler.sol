@@ -15,7 +15,7 @@ struct Party {
  */
 interface ITransferHandler {
   /**
-   * Revert if provided an invalid parameter
+   * Revert if provided an invalid transfer argument
    */
   error InvalidArgument(string);
 
