@@ -15,6 +15,11 @@ struct Party {
  */
 interface ITransferHandler {
   /**
+   * Revert if provided an invalid parameter
+   */
+  error InvalidArgument(string);
+
+  /**
    * @notice Indicates whether to attempt a fee transfer on the token
    */
   function attemptFeeTransfer() external returns (bool);

@@ -78,6 +78,6 @@ describe('ERC721TransferHandler Unit', () => {
           '1',
           party.token
         )
-    ).to.be.revertedWith('ID_INVALID')
+    ).to.be.revertedWith('InvalidArgument("id")')
   })
 })

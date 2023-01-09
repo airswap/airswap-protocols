@@ -44,7 +44,7 @@ contract ERC20TransferHandler is ITransferHandler {
     uint256 id,
     address token
   ) external returns (bool) {
-    require(id == 0, "ID_INVALID");
+    if (id != 0) revert InvalidArgument("id");
     IERC20(token).transferFrom(from, to, amount);
     return true;
   }

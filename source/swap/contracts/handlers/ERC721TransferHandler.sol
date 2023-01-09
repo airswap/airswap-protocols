@@ -43,7 +43,7 @@ contract ERC721TransferHandler is ITransferHandler {
     uint256 id,
     address token
   ) external returns (bool) {
-    require(amount == 0, "AMOUNT_INVALID");
+    if (amount != 0) revert InvalidArgument("amount");
     IERC721(token).safeTransferFrom(from, to, id);
     return true;
   }

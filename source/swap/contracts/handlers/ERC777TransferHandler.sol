@@ -43,7 +43,7 @@ contract ERC777TransferHandler is ITransferHandler {
     uint256 id,
     address token
   ) external returns (bool) {
-    require(id == 0, "ID_INVALID");
+    if (id != 0) revert InvalidArgument("id");
     IERC777(token).operatorSend(from, to, amount, "0x0", "0x0");
     return true;
   }
