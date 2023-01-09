@@ -7,6 +7,11 @@ import "openzeppelin-solidity/contracts/token/ERC721/IERC721.sol";
 
 contract ERC721TransferHandler is ITransferHandler {
   /**
+   * @notice Indicates whether to attempt a fee transfer on the token
+   */
+  bool public constant attemptFeeTransfer = false;
+
+  /**
    * @notice Function to wrap token transfer for different token types
    * @param party Party from whom swap would be made
    */
@@ -38,15 +43,8 @@ contract ERC721TransferHandler is ITransferHandler {
     uint256 id,
     address token
   ) external returns (bool) {
-    require(amount == 0, "AMOUNT_INVALID");
+    if (amount != 0) revert InvalidArgument("amount");
     IERC721(token).safeTransferFrom(from, to, id);
     return true;
-  }
-
-  /**
-   * @notice Function to return whether the token transfered is fungible or not
-   */
-  function isFungible() external pure returns (bool) {
-    return false;
   }
 }
