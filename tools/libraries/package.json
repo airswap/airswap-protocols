@@ -23,7 +23,7 @@
     "test:unit": "yarn compile && yarn mocha -r ts-node/register test/Maker.test.ts test/Indexer.test.ts"
   },
   "dependencies": {
-    "@airswap/constants": "3.0.4",
+    "@airswap/constants": "3.0.5",
     "@airswap/jsonrpc-client-websocket": "0.0.1",
     "@airswap/maker-registry": "3.1.4",
     "@airswap/indexer-registry": "3.1.2",
