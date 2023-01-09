@@ -19,7 +19,7 @@
     "typechain": "tsc -b",
     "coverage": "hardhat coverage",
     "test": "hardhat test",
-    "test:unit": "hardhat test ./test/unit.js",
+    "test:unit": "hardhat test",
     "deploy": "hardhat run ./scripts/deploy.js",
     "verify": "hardhat run ./scripts/verify.js"
   },
