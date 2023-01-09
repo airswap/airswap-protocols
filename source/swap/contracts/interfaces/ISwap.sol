@@ -43,15 +43,21 @@ interface ISwap {
 
   event SetProtocolFeeWallet(address indexed feeWallet);
 
+  event Authorize(address indexed signer, address indexed signerWallet);
+
+  event Revoke(address indexed signer, address indexed signerWallet);
+
   error InvalidFee();
   error InvalidFeeWallet();
   error OrderExpired();
   error NonceTooLow();
-  error NonceAlreadyUsed();
+  error NonceAlreadyUsed(uint256);
   error SignatureInvalid();
+  error SignerInvalid();
   error SelfTransferInvalid();
   error TokenKindUnknown();
   error TransferFailed();
+  error Unauthorized();
 
   /**
    * @notice Atomic Token Swap
@@ -75,4 +81,10 @@ interface ISwap {
   function nonceUsed(address, uint256) external view returns (bool);
 
   function registry() external view returns (TransferHandlerRegistry);
+
+  function authorize(address sender) external;
+
+  function revoke() external;
+
+  function authorized(address) external view returns (address);
 }

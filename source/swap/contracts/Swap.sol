@@ -78,6 +78,8 @@ contract Swap is ISwap, Ownable {
    */
   mapping(address => mapping(uint256 => uint256)) internal _nonceGroups;
 
+  mapping(address => address) public override authorized;
+
   // Mapping of signer addresses to an optionally set minimum valid nonce
   mapping(address => uint256) public _signerMinimumNonce;
 
@@ -126,7 +128,7 @@ contract Swap is ISwap, Ownable {
 
     // Ensure the nonce is not yet used and if not mark it used
     if (!_markNonceAsUsed(order.signer.wallet, order.nonce))
-      revert NonceAlreadyUsed();
+      revert NonceAlreadyUsed(order.nonce);
 
     // Validate the sender side of the trade.
     address finalSenderWallet;
@@ -142,8 +144,10 @@ contract Swap is ISwap, Ownable {
       finalSenderWallet = order.sender.wallet;
     }
 
-    // Validate the signer side of the trade.
-    if (!_isValid(order, DOMAIN_SEPARATOR)) revert SignatureInvalid();
+    // // Validate the signer side of the trade.
+    _isAuthorized(order, DOMAIN_SEPARATOR);
+
+    // Ensure the signatory is authorized by the signer wallet
 
     // Transfer token from sender to signer.
     _transferToken(
@@ -178,8 +182,7 @@ contract Swap is ISwap, Ownable {
     }
 
     // Check if protocol fee is applicable and transfer it accordingly
-    // ITransferHandler transferHandler = registry.transferHandlers(order.signer.kind);
-    if (registry.transferHandlers(order.signer.kind).isFungible()) {
+    if (registry.transferHandlers(order.signer.kind).attemptFeeTransfer()) {
       _transferProtocolFee(order);
     }
 
@@ -232,6 +235,27 @@ contract Swap is ISwap, Ownable {
     if (_protocolFeeWallet == address(0)) revert InvalidFeeWallet();
     protocolFeeWallet = _protocolFeeWallet;
     emit SetProtocolFeeWallet(_protocolFeeWallet);
+  }
+
+  /**
+   * @notice Authorize a signer
+   * @param signer address Wallet of the signer to authorize
+   * @dev Emits an Authorize event
+   */
+  function authorize(address signer) external override {
+    if (signer == address(0)) revert SignerInvalid();
+    authorized[msg.sender] = signer;
+    emit Authorize(signer, msg.sender);
+  }
+
+  /**
+   * @notice Revoke the signer
+   * @dev Emits a Revoke event
+   */
+  function revoke() external override {
+    address tmp = authorized[msg.sender];
+    delete authorized[msg.sender];
+    emit Revoke(tmp, msg.sender);
   }
 
   /**
@@ -305,6 +329,8 @@ contract Swap is ISwap, Ownable {
       uint256 nonce = nonces[i];
       if (_markNonceAsUsed(msg.sender, nonce)) {
         emit Cancel(nonce, msg.sender);
+      } else {
+        revert NonceAlreadyUsed(nonce);
       }
     }
   }
@@ -326,7 +352,7 @@ contract Swap is ISwap, Ownable {
   function check(Order calldata order)
     public
     view
-    returns (uint256, bytes32[] memory)
+    returns (bytes32[] memory, uint256)
   {
     uint256 errCount;
     bytes32[] memory errors = new bytes32[](MAX_ERROR_COUNT);
@@ -338,21 +364,24 @@ contract Swap is ISwap, Ownable {
     );
 
     if (signatory == address(0)) {
-      errors[errCount] = "SIGNATURE_INVALID";
+      errors[errCount] = "SignatureInvalid";
       errCount++;
     }
 
     if (order.expiry < block.timestamp) {
-      errors[errCount] = "EXPIRY_PASSED";
+      errors[errCount] = "OrderExpired";
       errCount++;
     }
 
-    if (order.signer.wallet != signatory) {
-      errors[errCount] = "UNAUTHORIZED";
+    if (
+      order.signer.wallet != signatory &&
+      authorized[order.signer.wallet] != signatory
+    ) {
+      errors[errCount] = "Unauthorized";
       errCount++;
     } else {
       if (nonceUsed(signatory, order.nonce)) {
-        errors[errCount] = "NONCE_ALREADY_USED";
+        errors[errCount] = "NonceAlreadyUsed";
         errCount++;
       }
     }
@@ -362,15 +391,15 @@ contract Swap is ISwap, Ownable {
     );
 
     if (address(signerTransferHandler) == address(0)) {
-      errors[errCount] = "SIGNER_TOKEN_KIND_UNKNOWN";
+      errors[errCount] = "SignerTokenKindUnknown";
       errCount++;
     } else {
       if (!signerTransferHandler.hasAllowance(order.signer)) {
-        errors[errCount] = "SIGNER_ALLOWANCE_LOW";
+        errors[errCount] = "SignerAllowanceLow";
         errCount++;
       }
       if (!signerTransferHandler.hasBalance(order.signer)) {
-        errors[errCount] = "SIGNER_BALANCE_LOW";
+        errors[errCount] = "SignerBalanceLow";
         errCount++;
       }
     }
@@ -380,36 +409,56 @@ contract Swap is ISwap, Ownable {
     );
 
     if (address(senderTransferHandler) == address(0)) {
-      errors[errCount] = "SENDER_TOKEN_KIND_UNKNOWN";
+      errors[errCount] = "SenderTokenKindUnknown";
       errCount++;
     } else {
       if (!senderTransferHandler.hasAllowance(order.sender)) {
-        errors[errCount] = "SENDER_ALLOWANCE_LOW";
+        errors[errCount] = "SenderAllowanceLow";
         errCount++;
       }
       if (!senderTransferHandler.hasBalance(order.sender)) {
-        errors[errCount] = "SENDER_BALANCE_LOW";
+        errors[errCount] = "SenderBalanceLow";
         errCount++;
       }
     }
 
-    return (errCount, errors);
+    return (errors, errCount);
   }
 
   /**
-   * @notice Validate signature using an EIP-712 typed data hash
+   * @notice Tests whether signature and signer are valid
    * @param order Order to validate
-   * @param domainSeparator bytes32 Domain identifier used in signatures (EIP-712)
-   * @return bool True if order has a valid signature
+   * @param domainSeparator bytes32
    */
-  function _isValid(Order calldata order, bytes32 domainSeparator)
+  function _isAuthorized(Order calldata order, bytes32 domainSeparator)
     internal
     view
-    returns (bool)
   {
-    return
-      order.signer.wallet ==
-      ecrecover(_hashOrder(order, domainSeparator), order.v, order.r, order.s);
+    bytes32 hashed = _hashOrder(order, domainSeparator);
+
+    // Recover the signatory from the hash and signature
+    address signatory = _getSignatory(order, hashed);
+
+    // Ensure the signatory is not null
+    if (signatory == address(0)) revert SignatureInvalid();
+
+    // Ensure the signatory is authorized by the signer wallet
+    if (order.signer.wallet != signatory) {
+      if (authorized[order.signer.wallet] != signatory) revert Unauthorized();
+    }
+  }
+
+  /**
+   * @notice Recover the signatory from a signature
+   * @param order Order signeds
+   * @param orderHash hash of the Order signed
+   */
+  function _getSignatory(Order calldata order, bytes32 orderHash)
+    internal
+    pure
+    returns (address)
+  {
+    return ecrecover(orderHash, order.v, order.r, order.s);
   }
 
   /**
@@ -436,19 +485,8 @@ contract Swap is ISwap, Ownable {
     if (from == to) revert SelfTransferInvalid();
     ITransferHandler transferHandler = registry.transferHandlers(kind);
     if (address(transferHandler) == address(0)) revert TokenKindUnknown();
-    // delegatecall required to pass msg.sender as Swap contract to handle the
-    // token transfer in the calling contract
-    (bool success, bytes memory data) = address(transferHandler).delegatecall(
-      abi.encodeWithSelector(
-        transferHandler.transferTokens.selector,
-        from,
-        to,
-        amount,
-        id,
-        token
-      )
-    );
-    if (!success || !abi.decode(data, (bool))) revert TransferFailed();
+    if (!transferHandler.transferTokens(from, to, amount, id, token))
+      revert TransferFailed();
   }
 
   /**

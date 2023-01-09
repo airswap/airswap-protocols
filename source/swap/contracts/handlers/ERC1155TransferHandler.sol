@@ -7,6 +7,11 @@ import "openzeppelin-solidity/contracts/token/ERC1155/IERC1155.sol";
 
 contract ERC1155TransferHandler is ITransferHandler {
   /**
+   * @notice Indicates whether to attempt a fee transfer on the token
+   */
+  bool public constant attemptFeeTransfer = true;
+
+  /**
    * @notice Function to wrap token transfer for different token types
    * @param party Party from whom swap would be made
    */
@@ -20,7 +25,7 @@ contract ERC1155TransferHandler is ITransferHandler {
    */
   function hasBalance(Party calldata party) external view returns (bool) {
     return
-      IERC1155(party.token).balanceOf(party.wallet, party.id) > party.amount;
+      IERC1155(party.token).balanceOf(party.wallet, party.id) >= party.amount;
   }
 
   /**
@@ -46,13 +51,6 @@ contract ERC1155TransferHandler is ITransferHandler {
       amount,
       "" // bytes are empty
     );
-    return true;
-  }
-
-  /**
-   * @notice Function to return whether the token transfered is fungible or not
-   */
-  function isFungible() external pure returns (bool) {
     return true;
   }
 }
