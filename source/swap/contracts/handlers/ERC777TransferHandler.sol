@@ -23,11 +23,11 @@ contract ERC777TransferHandler is ITransferHandler {
   }
 
   /**
-   * @notice Function to wrap safeTransferFrom for ERC721
+   * @notice Function to wrap safeTransferFrom for ERC777
    * @param from address Wallet address to transfer from
    * @param to address Wallet address to transfer to
-   * @param amount uint256, must be 0 for this contract
-   * @param id uint256 ID for ERC721
+   * @param amount uint256 Amount for ERC777
+   * @param id uint256 ID, must be 0 for this contract
    * @param token address Contract address of token
    * @return bool on success of the token transfer
    */
@@ -38,7 +38,7 @@ contract ERC777TransferHandler is ITransferHandler {
     uint256 id,
     address token
   ) external returns (bool) {
-    require(amount == 0, "AMOUNT_INVALID");
+    require(id == 0, "ID_INVALID");
     IERC777(token).operatorSend(from, to, amount, "0x0", "0x0");
     return true;
   }
@@ -47,6 +47,6 @@ contract ERC777TransferHandler is ITransferHandler {
    * @notice Function to return whether the token transfered is fungible or not
    */
   function isFungible() external pure returns (bool) {
-    return false;
+    return true;
   }
 }

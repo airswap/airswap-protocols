@@ -51,7 +51,7 @@ interface ISwap {
   error InvalidFeeWallet();
   error OrderExpired();
   error NonceTooLow();
-  error NonceAlreadyUsed();
+  error NonceAlreadyUsed(uint256);
   error SignatureInvalid();
   error SignerInvalid();
   error SelfTransferInvalid();

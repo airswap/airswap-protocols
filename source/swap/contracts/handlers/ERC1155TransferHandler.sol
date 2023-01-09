@@ -20,7 +20,7 @@ contract ERC1155TransferHandler is ITransferHandler {
    */
   function hasBalance(Party calldata party) external view returns (bool) {
     return
-      IERC1155(party.token).balanceOf(party.wallet, party.id) > party.amount;
+      IERC1155(party.token).balanceOf(party.wallet, party.id) >= party.amount;
   }
 
   /**

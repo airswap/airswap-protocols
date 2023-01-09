@@ -128,7 +128,7 @@ contract Swap is ISwap, Ownable {
 
     // Ensure the nonce is not yet used and if not mark it used
     if (!_markNonceAsUsed(order.signer.wallet, order.nonce))
-      revert NonceAlreadyUsed();
+      revert NonceAlreadyUsed(order.nonce);
 
     // Validate the sender side of the trade.
     address finalSenderWallet;
@@ -329,6 +329,8 @@ contract Swap is ISwap, Ownable {
       uint256 nonce = nonces[i];
       if (_markNonceAsUsed(msg.sender, nonce)) {
         emit Cancel(nonce, msg.sender);
+      } else {
+        revert NonceAlreadyUsed(nonce);
       }
     }
   }
@@ -371,7 +373,10 @@ contract Swap is ISwap, Ownable {
       errCount++;
     }
 
-    if (order.signer.wallet != signatory) {
+    if (
+      order.signer.wallet != signatory &&
+      authorized[order.signer.wallet] != signatory
+    ) {
       errors[errCount] = "UNAUTHORIZED";
       errCount++;
     } else {
@@ -480,19 +485,8 @@ contract Swap is ISwap, Ownable {
     if (from == to) revert SelfTransferInvalid();
     ITransferHandler transferHandler = registry.transferHandlers(kind);
     if (address(transferHandler) == address(0)) revert TokenKindUnknown();
-    // delegatecall required to pass msg.sender as Swap contract to handle the
-    // token transfer in the calling contract
-    (bool success, bytes memory data) = address(transferHandler).delegatecall(
-      abi.encodeWithSelector(
-        transferHandler.transferTokens.selector,
-        from,
-        to,
-        amount,
-        id,
-        token
-      )
-    );
-    if (!success || !abi.decode(data, (bool))) revert TransferFailed();
+    if (!transferHandler.transferTokens(from, to, amount, id, token))
+      revert TransferFailed();
   }
 
   /**
