@@ -435,22 +435,22 @@ describe('Swap Unit', () => {
     expect(errors[1]).to.equal(0)
   })
 
-  it('check without allowances and balances fails', async () => {
+  it('check without allowances or balances fails', async () => {
     await transferHandler.mock.hasAllowance.returns(false)
     await transferHandler.mock.hasBalance.returns(false)
     const order = await createSignedOrder({}, signer)
     const [errors] = await swap.check(order)
     expect(errors[0]).to.be.equal(
-      ethers.utils.formatBytes32String('SIGNER_ALLOWANCE_LOW')
+      ethers.utils.formatBytes32String('SignerAllowanceLow')
     )
     expect(errors[1]).to.be.equal(
-      ethers.utils.formatBytes32String('SIGNER_BALANCE_LOW')
+      ethers.utils.formatBytes32String('SignerBalanceLow')
     )
     expect(errors[2]).to.be.equal(
-      ethers.utils.formatBytes32String('SENDER_ALLOWANCE_LOW')
+      ethers.utils.formatBytes32String('SenderAllowanceLow')
     )
     expect(errors[3]).to.be.equal(
-      ethers.utils.formatBytes32String('SENDER_BALANCE_LOW')
+      ethers.utils.formatBytes32String('SenderBalanceLow')
     )
   })
 
@@ -468,10 +468,10 @@ describe('Swap Unit', () => {
     )
     const [errors] = await swap.check(order)
     expect(errors[0]).to.be.equal(
-      ethers.utils.formatBytes32String('SIGNER_TOKEN_KIND_UNKNOWN')
+      ethers.utils.formatBytes32String('SignerTokenKindUnknown')
     )
     expect(errors[1]).to.be.equal(
-      ethers.utils.formatBytes32String('SENDER_TOKEN_KIND_UNKNOWN')
+      ethers.utils.formatBytes32String('SenderTokenKindUnknown')
     )
   })
 
@@ -485,7 +485,7 @@ describe('Swap Unit', () => {
     await expect(swap.connect(sender).swap(order)).to.emit(swap, 'Swap')
     const [errors] = await swap.check(order)
     expect(errors[0]).to.be.equal(
-      ethers.utils.formatBytes32String('NONCE_ALREADY_USED')
+      ethers.utils.formatBytes32String('NonceAlreadyUsed')
     )
   })
 
@@ -497,7 +497,7 @@ describe('Swap Unit', () => {
     }
     const [errors] = await swap.check(order)
     expect(errors[0]).to.be.equal(
-      ethers.utils.formatBytes32String('SIGNATURE_INVALID')
+      ethers.utils.formatBytes32String('SignatureInvalid')
     )
   })
 
@@ -510,7 +510,7 @@ describe('Swap Unit', () => {
     )
     const [errors] = await swap.check(order)
     expect(errors[0]).to.be.equal(
-      ethers.utils.formatBytes32String('EXPIRY_PASSED')
+      ethers.utils.formatBytes32String('OrderExpired')
     )
   })
 
@@ -525,7 +525,7 @@ describe('Swap Unit', () => {
     )
     const [errors] = await swap.check(order)
     expect(errors[0]).to.be.equal(
-      ethers.utils.formatBytes32String('UNAUTHORIZED')
+      ethers.utils.formatBytes32String('Unauthorized')
     )
   })
 })
