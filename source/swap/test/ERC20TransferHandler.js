@@ -33,8 +33,8 @@ describe('ERC20TransferHandler Unit', () => {
     }
   })
 
-  it('isFungible is true', async () => {
-    expect(await transferHandler.isFungible()).to.be.equal(true)
+  it('attemptFeeTransfer is true', async () => {
+    expect(await transferHandler.attemptFeeTransfer()).to.be.equal(true)
   })
 
   it('hasAllowance succeeds', async () => {

@@ -4,9 +4,13 @@ pragma solidity 0.8.17;
 
 import "../interfaces/ITransferHandler.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
-import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 
 contract ERC20TransferHandler is ITransferHandler {
+  /**
+   * @notice Indicates whether to attempt a fee transfer on the token
+   */
+  bool public constant attemptFeeTransfer = true;
+
   /**
    * @notice Function to wrap token transfer for different token types
    * @param party Party from whom swap would be made
@@ -42,13 +46,6 @@ contract ERC20TransferHandler is ITransferHandler {
   ) external returns (bool) {
     require(id == 0, "ID_INVALID");
     IERC20(token).transferFrom(from, to, amount);
-    return true;
-  }
-
-  /**
-   * @notice Function to return whether the token transfered is fungible or not
-   */
-  function isFungible() external pure returns (bool) {
     return true;
   }
 }

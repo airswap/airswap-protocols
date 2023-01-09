@@ -182,7 +182,7 @@ contract Swap is ISwap, Ownable {
     }
 
     // Check if protocol fee is applicable and transfer it accordingly
-    if (registry.transferHandlers(order.signer.kind).isFungible()) {
+    if (registry.transferHandlers(order.signer.kind).attemptFeeTransfer()) {
       _transferProtocolFee(order);
     }
 

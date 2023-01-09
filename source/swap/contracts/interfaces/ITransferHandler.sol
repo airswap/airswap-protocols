@@ -15,6 +15,11 @@ struct Party {
  */
 interface ITransferHandler {
   /**
+   * @notice Indicates whether to attempt a fee transfer on the token
+   */
+  function attemptFeeTransfer() external returns (bool);
+
+  /**
    * @notice Function to wrap token transfer for different token types
    * @param party Party from whom swap would be made
    */
@@ -42,9 +47,4 @@ interface ITransferHandler {
     uint256 id,
     address token
   ) external returns (bool);
-
-  /**
-   * @notice Function to return whether the token transfered is fungible or not
-   */
-  function isFungible() external returns (bool);
 }

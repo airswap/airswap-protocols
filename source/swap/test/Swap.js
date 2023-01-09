@@ -144,7 +144,7 @@ describe('Swap Unit', () => {
 
   before(async () => {
     transferHandler = await deployMockContract(deployer, TransferHandler.abi)
-    await transferHandler.mock.isFungible.returns(true)
+    await transferHandler.mock.attemptFeeTransfer.returns(true)
     await transferHandler.mock.hasAllowance.returns(true)
     await transferHandler.mock.hasBalance.returns(true)
     await transferHandler.mock.transferTokens.returns(true)
@@ -275,7 +275,7 @@ describe('Swap Unit', () => {
 
   it('swap with nonfungible signer token succeeds', async () => {
     const order = await createSignedOrder({}, signer)
-    await transferHandler.mock.isFungible.returns(false)
+    await transferHandler.mock.attemptFeeTransfer.returns(false)
     await expect(swap.connect(sender).swap(order)).to.emit(swap, 'Swap')
   })
 
@@ -336,7 +336,7 @@ describe('Swap Unit', () => {
       deployer,
       TransferHandler.abi
     )
-    await erc721TransferHandler.mock.isFungible.returns(true)
+    await erc721TransferHandler.mock.attemptFeeTransfer.returns(true)
     await erc721TransferHandler.mock.hasAllowance.returns(true)
     await erc721TransferHandler.mock.hasBalance.returns(true)
     await erc721TransferHandler.mock.transferTokens.returns(true)

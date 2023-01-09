@@ -33,8 +33,8 @@ describe('ERC721TransferHandler Unit', () => {
     }
   })
 
-  it('isFungible is false', async () => {
-    expect(await transferHandler.isFungible()).to.be.equal(false)
+  it('attemptFeeTransfer is false', async () => {
+    expect(await transferHandler.attemptFeeTransfer()).to.be.equal(false)
   })
 
   it('hasAllowance succeeds', async () => {

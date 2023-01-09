@@ -7,6 +7,11 @@ import "openzeppelin-solidity/contracts/token/ERC777/IERC777.sol";
 
 contract ERC777TransferHandler is ITransferHandler {
   /**
+   * @notice Indicates whether to attempt a fee transfer on the token
+   */
+  bool public constant attemptFeeTransfer = true;
+
+  /**
    * @notice Function to wrap token transfer for different token types
    * @param party Party from whom swap would be made
    */
@@ -40,13 +45,6 @@ contract ERC777TransferHandler is ITransferHandler {
   ) external returns (bool) {
     require(id == 0, "ID_INVALID");
     IERC777(token).operatorSend(from, to, amount, "0x0", "0x0");
-    return true;
-  }
-
-  /**
-   * @notice Function to return whether the token transfered is fungible or not
-   */
-  function isFungible() external pure returns (bool) {
     return true;
   }
 }
