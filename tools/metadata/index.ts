@@ -2,7 +2,7 @@ import axios from 'axios'
 import * as ethers from 'ethers'
 import { TokenInfo } from '@uniswap/token-lists'
 import { defaults, tokenListURLs, openSeaUrls } from './src/constants'
-import { tokenKinds } from '@airswap/constants'
+import { tokenKinds, stakingTokenAddresses } from '@airswap/constants'
 import { getTokenName, getTokenSymbol, getTokenDecimals } from './src/helpers'
 
 export async function fetchTokens(
@@ -38,6 +38,15 @@ export async function fetchTokens(
     token.address = token.address.toLowerCase()
     return token.address && token.chainId === chainId
   })
+  if (stakingTokenAddresses[chainId]) {
+    tokens.push({
+      name: 'Staked AST',
+      address: stakingTokenAddresses[chainId],
+      decimals: 4,
+      symbol: 'sAST',
+      chainId,
+    })
+  }
   return { tokens, errors }
 }
 
