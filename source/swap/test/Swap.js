@@ -542,4 +542,17 @@ describe('Swap Unit', () => {
       ethers.utils.formatBytes32String('Unauthorized')
     )
   })
+
+  it('check with invalid fee fails', async () => {
+    const order = await createSignedOrder(
+      {
+        protocolFee: '0',
+      },
+      signer
+    )
+    const [errors] = await swap.check(order)
+    expect(errors[0]).to.be.equal(
+      ethers.utils.formatBytes32String('Unauthorized')
+    )
+  })
 })

@@ -427,6 +427,11 @@ contract Swap is ISwap, Ownable {
       }
     }
 
+    if (order.protocolFee != protocolFee) {
+      errors[errCount] = "InvalidFee";
+      errCount++;
+    }
+
     return (errors, errCount);
   }
 
