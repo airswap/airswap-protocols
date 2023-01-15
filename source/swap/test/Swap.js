@@ -489,6 +489,20 @@ describe('Swap Unit', () => {
     )
   })
 
+  it('check with nonce too low fails', async () => {
+    const order = await createSignedOrder(
+      {
+        nonce: '2',
+      },
+      signer
+    )
+    await swap.connect(signer).cancelUpTo(3)
+    const [errors] = await swap.check(order)
+    expect(errors[0]).to.be.equal(
+      ethers.utils.formatBytes32String('NonceTooLow')
+    )
+  })
+
   it('check with bad signature fails', async () => {
     let order = await createSignedOrder({}, signer)
     order = {

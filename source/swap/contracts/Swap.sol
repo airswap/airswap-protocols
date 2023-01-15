@@ -386,6 +386,11 @@ contract Swap is ISwap, Ownable {
       }
     }
 
+    if (order.nonce < _signerMinimumNonce[order.signer.wallet]) {
+      errors[errCount] = "NonceTooLow";
+      errCount++;
+    }
+
     ITransferHandler signerTransferHandler = registry.transferHandlers(
       order.signer.kind
     );
