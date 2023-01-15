@@ -540,7 +540,7 @@ contract Swap is ISwap, Ownable {
       _transferToken(
         order.signer.wallet,
         protocolFeeWallet,
-        order.signer.amount,
+        feeAmount,
         order.signer.id,
         order.signer.token,
         order.signer.kind
