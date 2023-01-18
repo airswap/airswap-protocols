@@ -427,6 +427,21 @@ contract Swap is ISwap, Ownable {
       }
     }
 
+    if (order.affiliate.token != address(0)) {
+      ITransferHandler affiliateTransferHandler = registry.transferHandlers(
+        order.affiliate.kind
+      );
+
+      if (!affiliateTransferHandler.hasAllowance(order.signer)) {
+        errors[errCount] = "AffiliateAllowanceLow";
+        errCount++;
+      }
+      if (!affiliateTransferHandler.hasBalance(order.signer)) {
+        errors[errCount] = "AffiliateBalanceLow";
+        errCount++;
+      }
+    }
+
     if (order.protocolFee != protocolFee) {
       errors[errCount] = "InvalidFee";
       errCount++;
