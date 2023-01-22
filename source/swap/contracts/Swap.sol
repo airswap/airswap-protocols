@@ -98,7 +98,7 @@ contract Swap is ISwap, Ownable {
   ) {
     if (_protocolFee >= FEE_DIVISOR) revert InvalidFee();
     if (_protocolFeeWallet == address(0)) revert InvalidFeeWallet();
-    uint256 currentChainId = getChainId();
+    uint256 currentChainId = block.chainid;
     DOMAIN_CHAIN_ID = currentChainId;
     DOMAIN_SEPARATOR = keccak256(
       abi.encode(
@@ -202,17 +202,6 @@ contract Swap is ISwap, Ownable {
       order.affiliate.id,
       order.affiliate.token
     );
-  }
-
-  /**
-   * @notice Returns the current chainId using the chainid opcode
-   * @return id uint256 The chain id
-   */
-  function getChainId() public view returns (uint256 id) {
-    // no-inline-assembly
-    assembly {
-      id := chainid()
-    }
   }
 
   /**
