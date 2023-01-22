@@ -142,6 +142,7 @@ contract Swap is ISwap, Ownable {
     } else {
       // The msg.sender is authorized.
       finalSenderWallet = order.sender.wallet;
+      if (order.sender.wallet != msg.sender) revert SenderInvalid();
     }
 
     // // Validate the signer side of the trade.
@@ -495,8 +496,6 @@ contract Swap is ISwap, Ownable {
     address token,
     bytes4 kind
   ) internal {
-    // Ensure the transfer is not to self.
-    if (from == to) revert SelfTransferInvalid();
     ITransferHandler transferHandler = registry.transferHandlers(kind);
     if (address(transferHandler) == address(0)) revert TokenKindUnknown();
     if (!transferHandler.transferTokens(from, to, amount, id, token))

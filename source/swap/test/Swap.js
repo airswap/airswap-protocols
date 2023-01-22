@@ -305,7 +305,25 @@ describe('Swap Unit', () => {
     )
     await transferHandler.mock.transferTokens.returns(false)
     await expect(swap.connect(sender).swap(order)).to.be.revertedWith(
-      'SelfTransferInvalid()'
+      'SenderInvalid()'
+    )
+  })
+
+  it('swap with another sender fails', async () => {
+    const order = await createSignedOrder(
+      {
+        signer: {
+          wallet: signer.address,
+        },
+        sender: {
+          wallet: affiliate.address,
+        },
+      },
+      signer
+    )
+    await transferHandler.mock.transferTokens.returns(false)
+    await expect(swap.connect(sender).swap(order)).to.be.revertedWith(
+      'SenderInvalid()'
     )
   })
 
