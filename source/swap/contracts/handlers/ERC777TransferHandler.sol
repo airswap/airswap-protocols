@@ -16,7 +16,7 @@ contract ERC777TransferHandler is ITransferHandler {
    * @param party Party from whom swap would be made
    */
   function hasAllowance(Party calldata party) external view returns (bool) {
-    return IERC777(party.token).isOperatorFor(party.wallet, msg.sender);
+    return IERC777(party.token).isOperatorFor(msg.sender, party.wallet);
   }
 
   /**
