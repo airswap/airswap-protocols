@@ -298,6 +298,7 @@ contract Swap is ISwap, Ownable, EIP712 {
     for (uint256 i = 0; i < nonces.length; i++) {
       uint256 nonce = nonces[i];
       _markNonceAsUsed(msg.sender, nonce);
+      emit Cancel(nonce, msg.sender);
     }
   }
 
@@ -505,7 +506,6 @@ contract Swap is ISwap, Ownable, EIP712 {
 
     // If it is already used, return mit cancel and revert
     if ((group >> indexInGroup) & 1 == 1) {
-      emit Cancel(nonce, msg.sender);
       revert NonceAlreadyUsed(nonce);
     }
 

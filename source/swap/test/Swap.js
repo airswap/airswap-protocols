@@ -291,24 +291,6 @@ describe('Swap Unit', () => {
     )
   })
 
-  it('swap with self-transfer fails', async () => {
-    const order = await createSignedOrder(
-      {
-        signer: {
-          wallet: signer.address,
-        },
-        sender: {
-          wallet: signer.address,
-        },
-      },
-      signer
-    )
-    await transferHandler.mock.transferTokens.returns()
-    await expect(swap.connect(sender).swap(order)).to.be.revertedWith(
-      'SenderInvalid()'
-    )
-  })
-
   it('swap with another sender fails', async () => {
     const order = await createSignedOrder(
       {
