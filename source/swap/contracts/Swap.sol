@@ -3,13 +3,14 @@
 pragma solidity 0.8.17;
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
 import "./interfaces/ITransferHandler.sol";
 import "./interfaces/ISwap.sol";
 
 /**
  * @title Swap: The Atomic Swap used on the AirSwap Network
  */
-contract Swap is ISwap, Ownable {
+contract Swap is ISwap, Ownable, EIP712 {
   using SafeERC20 for IERC20;
 
   bytes32 public constant DOMAIN_TYPEHASH =
@@ -55,14 +56,8 @@ contract Swap is ISwap, Ownable {
   bytes internal constant EIP191_HEADER = "\x19\x01";
 
   // Domain and version for use in signatures (EIP-712)
-  bytes32 public constant DOMAIN_NAME = keccak256("SWAP");
-  bytes32 public constant DOMAIN_VERSION = keccak256("3");
-
-  // Domain chain id for use in signatures (EIP-712)
-  uint256 public immutable DOMAIN_CHAIN_ID;
-
-  // Unique domain identifier for use in signatures (EIP-712)
-  bytes32 public immutable DOMAIN_SEPARATOR;
+  string public constant DOMAIN_NAME = "SWAP";
+  string public constant DOMAIN_VERSION = "3";
 
   uint256 public constant FEE_DIVISOR = 10000;
 
@@ -95,20 +90,9 @@ contract Swap is ISwap, Ownable {
     TransferHandlerRegistry swapRegistry,
     uint256 _protocolFee,
     address _protocolFeeWallet
-  ) {
+  ) EIP712(DOMAIN_NAME, DOMAIN_VERSION) {
     if (_protocolFee >= FEE_DIVISOR) revert InvalidFee();
     if (_protocolFeeWallet == address(0)) revert InvalidFeeWallet();
-    uint256 currentChainId = block.chainid;
-    DOMAIN_CHAIN_ID = currentChainId;
-    DOMAIN_SEPARATOR = keccak256(
-      abi.encode(
-        DOMAIN_TYPEHASH,
-        DOMAIN_NAME,
-        DOMAIN_VERSION,
-        currentChainId,
-        this
-      )
-    );
     registry = swapRegistry;
     protocolFee = _protocolFee;
     protocolFeeWallet = _protocolFeeWallet;
@@ -145,7 +129,7 @@ contract Swap is ISwap, Ownable {
     }
 
     // Validate the signer side of the trade.
-    _isAuthorized(order, DOMAIN_SEPARATOR);
+    _isAuthorized(order, _domainSeparatorV4());
 
     // Ensure the signatory is authorized by the signer wallet
 
@@ -342,7 +326,7 @@ contract Swap is ISwap, Ownable {
     uint256 errCount;
     bytes32[] memory errors = new bytes32[](MAX_ERROR_COUNT);
     address signatory = ecrecover(
-      _hashOrder(order, DOMAIN_SEPARATOR),
+      _hashOrder(order, _domainSeparatorV4()),
       order.v,
       order.r,
       order.s
