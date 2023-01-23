@@ -127,8 +127,7 @@ contract Swap is ISwap, Ownable {
       revert NonceTooLow();
 
     // Ensure the nonce is not yet used and if not mark it used
-    if (!_markNonceAsUsed(order.signer.wallet, order.nonce))
-      revert NonceAlreadyUsed(order.nonce);
+    _markNonceAsUsed(order.signer.wallet, order.nonce);
 
     // Validate the sender side of the trade.
     address finalSenderWallet;
@@ -317,11 +316,7 @@ contract Swap is ISwap, Ownable {
   function cancel(uint256[] calldata nonces) external override {
     for (uint256 i = 0; i < nonces.length; i++) {
       uint256 nonce = nonces[i];
-      if (_markNonceAsUsed(msg.sender, nonce)) {
-        emit Cancel(nonce, msg.sender);
-      } else {
-        revert NonceAlreadyUsed(nonce);
-      }
+      _markNonceAsUsed(msg.sender, nonce);
     }
   }
 
@@ -522,24 +517,21 @@ contract Swap is ISwap, Ownable {
    * @notice Marks a nonce as used for the given signer
    * @param signer address Address of the signer for which to mark the nonce as used
    * @param nonce uint256 Nonce to be marked as used
-   * @return bool True if the nonce was not marked as used already
    */
   function _markNonceAsUsed(address signer, uint256 nonce)
     internal
-    returns (bool)
   {
     uint256 groupKey = nonce / 256;
     uint256 indexInGroup = nonce % 256;
     uint256 group = _nonceGroups[signer][groupKey];
 
-    // If it is already used, return false
+    // If it is already used, return mit cancel and revert
     if ((group >> indexInGroup) & 1 == 1) {
-      return false;
+      emit Cancel(nonce, msg.sender);
+      revert NonceAlreadyUsed(nonce);
     }
 
     _nonceGroups[signer][groupKey] = group | (uint256(1) << indexInGroup);
-
-    return true;
   }
 
   /**
