@@ -145,7 +145,7 @@ contract Swap is ISwap, Ownable {
       if (order.sender.wallet != msg.sender) revert SenderInvalid();
     }
 
-    // // Validate the signer side of the trade.
+    // Validate the signer side of the trade.
     _isAuthorized(order, DOMAIN_SEPARATOR);
 
     // Ensure the signatory is authorized by the signer wallet
