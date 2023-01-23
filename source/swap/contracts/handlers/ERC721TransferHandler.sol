@@ -34,7 +34,6 @@ contract ERC721TransferHandler is ITransferHandler {
    * @param amount uint256, must be 0 for this contract
    * @param id uint256 ID for ERC721
    * @param token address Contract address of token
-   * @return bool on success of the token transfer
    */
   function transferTokens(
     address from,
@@ -42,9 +41,8 @@ contract ERC721TransferHandler is ITransferHandler {
     uint256 amount,
     uint256 id,
     address token
-  ) external returns (bool) {
+  ) external {
     if (amount != 0) revert InvalidArgument("amount");
     IERC721(token).safeTransferFrom(from, to, id);
-    return true;
   }
 }

@@ -147,7 +147,7 @@ describe('Swap Unit', () => {
     await transferHandler.mock.attemptFeeTransfer.returns(true)
     await transferHandler.mock.hasAllowance.returns(true)
     await transferHandler.mock.hasBalance.returns(true)
-    await transferHandler.mock.transferTokens.returns(true)
+    await transferHandler.mock.transferTokens.returns()
     await transferHandlerRegistry.addTransferHandler(
       tokenKinds.ERC20,
       transferHandler.address
@@ -303,7 +303,7 @@ describe('Swap Unit', () => {
       },
       signer
     )
-    await transferHandler.mock.transferTokens.returns(false)
+    await transferHandler.mock.transferTokens.returns()
     await expect(swap.connect(sender).swap(order)).to.be.revertedWith(
       'SenderInvalid()'
     )
@@ -321,17 +321,9 @@ describe('Swap Unit', () => {
       },
       signer
     )
-    await transferHandler.mock.transferTokens.returns(false)
+    await transferHandler.mock.transferTokens.returns()
     await expect(swap.connect(sender).swap(order)).to.be.revertedWith(
       'SenderInvalid()'
-    )
-  })
-
-  it('swap with failed token transfer fails', async () => {
-    const order = await createSignedOrder({}, signer)
-    await transferHandler.mock.transferTokens.returns(false)
-    await expect(swap.connect(sender).swap(order)).to.be.revertedWith(
-      'TransferFailed()'
     )
   })
 
@@ -357,7 +349,7 @@ describe('Swap Unit', () => {
     await erc721TransferHandler.mock.attemptFeeTransfer.returns(true)
     await erc721TransferHandler.mock.hasAllowance.returns(true)
     await erc721TransferHandler.mock.hasBalance.returns(true)
-    await erc721TransferHandler.mock.transferTokens.returns(true)
+    await erc721TransferHandler.mock.transferTokens.returns()
     await transferHandlerRegistry.addTransferHandler(
       tokenKinds.ERC721,
       erc721TransferHandler.address

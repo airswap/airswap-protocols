@@ -2,7 +2,6 @@
 
 pragma solidity 0.8.17;
 
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
 import "./interfaces/ITransferHandler.sol";
 import "./interfaces/ISwap.sol";
@@ -11,8 +10,6 @@ import "./interfaces/ISwap.sol";
  * @title Swap: The Atomic Swap used on the AirSwap Network
  */
 contract Swap is ISwap, Ownable, EIP712 {
-  using SafeERC20 for IERC20;
-
   bytes32 public constant DOMAIN_TYPEHASH =
     keccak256(
       "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
@@ -477,8 +474,7 @@ contract Swap is ISwap, Ownable, EIP712 {
   ) internal {
     ITransferHandler transferHandler = registry.transferHandlers(kind);
     if (address(transferHandler) == address(0)) revert TokenKindUnknown();
-    if (!transferHandler.transferTokens(from, to, amount, id, token))
-      revert TransferFailed();
+    transferHandler.transferTokens(from, to, amount, id, token);
   }
 
   /**

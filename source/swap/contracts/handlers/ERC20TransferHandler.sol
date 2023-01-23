@@ -37,7 +37,6 @@ contract ERC20TransferHandler is ITransferHandler {
    * @param amount uint256 Amount for ERC20
    * @param id uint256 ID, must be 0 for this contract
    * @param token address Contract address of token
-   * @return bool on success of the token transfer
    */
   function transferTokens(
     address from,
@@ -45,9 +44,8 @@ contract ERC20TransferHandler is ITransferHandler {
     uint256 amount,
     uint256 id,
     address token
-  ) external returns (bool) {
+  ) external {
     if (id != 0) revert InvalidArgument("id");
     IERC20(token).safeTransferFrom(from, to, amount);
-    return true;
   }
 }
