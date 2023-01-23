@@ -518,9 +518,7 @@ contract Swap is ISwap, Ownable {
    * @param signer address Address of the signer for which to mark the nonce as used
    * @param nonce uint256 Nonce to be marked as used
    */
-  function _markNonceAsUsed(address signer, uint256 nonce)
-    internal
-  {
+  function _markNonceAsUsed(address signer, uint256 nonce) internal {
     uint256 groupKey = nonce / 256;
     uint256 indexInGroup = nonce % 256;
     uint256 group = _nonceGroups[signer][groupKey];
@@ -535,7 +533,7 @@ contract Swap is ISwap, Ownable {
   }
 
   /**
-   * @notice Calculates and transfers protocol fee and rebate
+   * @notice Calculates and transfers protocol fee
    * @param order order
    */
   function _transferProtocolFee(Order calldata order) internal {
