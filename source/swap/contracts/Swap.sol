@@ -190,7 +190,7 @@ contract Swap is ISwap, Ownable {
       order.nonce,
       block.timestamp,
       order.signer.wallet,
-      order.sender.amount,
+      order.signer.amount,
       order.signer.id,
       order.signer.token,
       finalSenderWallet,
