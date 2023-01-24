@@ -23,7 +23,7 @@
     "verify": "hardhat run ./scripts/verify.js"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.3.1"
+    "@openzeppelin/contracts": "^4.8.1"
   },
   "publishConfig": {
     "access": "public"
