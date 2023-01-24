@@ -52,11 +52,10 @@ interface ISwap {
   error OrderExpired();
   error NonceTooLow();
   error NonceAlreadyUsed(uint256);
+  error SenderInvalid();
   error SignatureInvalid();
   error SignerInvalid();
-  error SelfTransferInvalid();
   error TokenKindUnknown();
-  error TransferFailed();
   error Unauthorized();
 
   /**

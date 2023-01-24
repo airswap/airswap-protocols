@@ -35,7 +35,6 @@ contract ERC1155TransferHandler is ITransferHandler {
    * @param amount uint256 Amount for ERC-1155
    * @param id uint256 token ID for ERC-1155
    * @param token address Contract address of token
-   * @return bool on success of the token transfer
    */
   function transferTokens(
     address from,
@@ -43,7 +42,7 @@ contract ERC1155TransferHandler is ITransferHandler {
     uint256 amount,
     uint256 id,
     address token
-  ) external returns (bool) {
+  ) external {
     IERC1155(token).safeTransferFrom(
       from,
       to,
@@ -51,6 +50,5 @@ contract ERC1155TransferHandler is ITransferHandler {
       amount,
       "" // bytes are empty
     );
-    return true;
   }
 }

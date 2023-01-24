@@ -16,7 +16,7 @@ contract ERC777TransferHandler is ITransferHandler {
    * @param party Party from whom swap would be made
    */
   function hasAllowance(Party calldata party) external view returns (bool) {
-    return IERC777(party.token).isOperatorFor(party.wallet, msg.sender);
+    return IERC777(party.token).isOperatorFor(msg.sender, party.wallet);
   }
 
   /**
@@ -34,7 +34,6 @@ contract ERC777TransferHandler is ITransferHandler {
    * @param amount uint256 Amount for ERC777
    * @param id uint256 ID, must be 0 for this contract
    * @param token address Contract address of token
-   * @return bool on success of the token transfer
    */
   function transferTokens(
     address from,
@@ -42,9 +41,8 @@ contract ERC777TransferHandler is ITransferHandler {
     uint256 amount,
     uint256 id,
     address token
-  ) external returns (bool) {
+  ) external {
     if (id != 0) revert InvalidArgument("id");
     IERC777(token).operatorSend(from, to, amount, "0x0", "0x0");
-    return true;
   }
 }

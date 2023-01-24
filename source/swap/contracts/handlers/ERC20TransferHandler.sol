@@ -4,8 +4,10 @@ pragma solidity 0.8.17;
 
 import "../interfaces/ITransferHandler.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/utils/SafeERC20.sol";
 
 contract ERC20TransferHandler is ITransferHandler {
+  using SafeERC20 for IERC20;
   /**
    * @notice Indicates whether to attempt a fee transfer on the token
    */
@@ -35,7 +37,6 @@ contract ERC20TransferHandler is ITransferHandler {
    * @param amount uint256 Amount for ERC20
    * @param id uint256 ID, must be 0 for this contract
    * @param token address Contract address of token
-   * @return bool on success of the token transfer
    */
   function transferTokens(
     address from,
@@ -43,9 +44,8 @@ contract ERC20TransferHandler is ITransferHandler {
     uint256 amount,
     uint256 id,
     address token
-  ) external returns (bool) {
+  ) external {
     if (id != 0) revert InvalidArgument("id");
-    IERC20(token).transferFrom(from, to, amount);
-    return true;
+    IERC20(token).safeTransferFrom(from, to, amount);
   }
 }

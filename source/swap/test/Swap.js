@@ -147,7 +147,7 @@ describe('Swap Unit', () => {
     await transferHandler.mock.attemptFeeTransfer.returns(true)
     await transferHandler.mock.hasAllowance.returns(true)
     await transferHandler.mock.hasBalance.returns(true)
-    await transferHandler.mock.transferTokens.returns(true)
+    await transferHandler.mock.transferTokens.returns()
     await transferHandlerRegistry.addTransferHandler(
       tokenKinds.ERC20,
       transferHandler.address
@@ -291,29 +291,21 @@ describe('Swap Unit', () => {
     )
   })
 
-  it('swap with self-transfer fails', async () => {
+  it('swap with another sender fails', async () => {
     const order = await createSignedOrder(
       {
         signer: {
           wallet: signer.address,
         },
         sender: {
-          wallet: signer.address,
+          wallet: affiliate.address,
         },
       },
       signer
     )
-    await transferHandler.mock.transferTokens.returns(false)
+    await transferHandler.mock.transferTokens.returns()
     await expect(swap.connect(sender).swap(order)).to.be.revertedWith(
-      'SelfTransferInvalid()'
-    )
-  })
-
-  it('swap with failed token transfer fails', async () => {
-    const order = await createSignedOrder({}, signer)
-    await transferHandler.mock.transferTokens.returns(false)
-    await expect(swap.connect(sender).swap(order)).to.be.revertedWith(
-      'TransferFailed()'
+      'SenderInvalid()'
     )
   })
 
@@ -339,7 +331,7 @@ describe('Swap Unit', () => {
     await erc721TransferHandler.mock.attemptFeeTransfer.returns(true)
     await erc721TransferHandler.mock.hasAllowance.returns(true)
     await erc721TransferHandler.mock.hasBalance.returns(true)
-    await erc721TransferHandler.mock.transferTokens.returns(true)
+    await erc721TransferHandler.mock.transferTokens.returns()
     await transferHandlerRegistry.addTransferHandler(
       tokenKinds.ERC721,
       erc721TransferHandler.address
@@ -489,6 +481,20 @@ describe('Swap Unit', () => {
     )
   })
 
+  it('check with nonce too low fails', async () => {
+    const order = await createSignedOrder(
+      {
+        nonce: '2',
+      },
+      signer
+    )
+    await swap.connect(signer).cancelUpTo(3)
+    const [errors] = await swap.check(order)
+    expect(errors[0]).to.be.equal(
+      ethers.utils.formatBytes32String('NonceTooLow')
+    )
+  })
+
   it('check with bad signature fails', async () => {
     let order = await createSignedOrder({}, signer)
     order = {
@@ -526,6 +532,75 @@ describe('Swap Unit', () => {
     const [errors] = await swap.check(order)
     expect(errors[0]).to.be.equal(
       ethers.utils.formatBytes32String('Unauthorized')
+    )
+  })
+
+  it('check with invalid fee fails', async () => {
+    const order = await createSignedOrder(
+      {
+        protocolFee: '0',
+      },
+      signer
+    )
+    const [errors] = await swap.check(order)
+    expect(errors[0]).to.be.equal(
+      ethers.utils.formatBytes32String('Unauthorized')
+    )
+    expect(errors[1]).to.be.equal(
+      ethers.utils.formatBytes32String('InvalidFee')
+    )
+  })
+
+  it('check succeeds with affiliate', async () => {
+    const order = await createSignedOrder(
+      {
+        affiliate: {
+          wallet: affiliate.address,
+          token: token.address,
+          kind: tokenKinds.ERC20,
+          id: '0',
+          amount: DEFAULT_AMOUNT,
+        },
+      },
+      signer
+    )
+    const errors = await swap.check(order)
+    expect(errors[1]).to.equal(0)
+  })
+
+  it('check fails with affiliate balance insufficient', async () => {
+    await transferHandler.mock.hasAllowance.returns(false)
+    await transferHandler.mock.hasBalance.returns(false)
+    const order = await createSignedOrder(
+      {
+        affiliate: {
+          wallet: affiliate.address,
+          token: token.address,
+          kind: tokenKinds.ERC20,
+          id: '0',
+          amount: DEFAULT_AMOUNT,
+        },
+      },
+      signer
+    )
+    const [errors] = await swap.check(order)
+    expect(errors[0]).to.be.equal(
+      ethers.utils.formatBytes32String('SignerAllowanceLow')
+    )
+    expect(errors[1]).to.be.equal(
+      ethers.utils.formatBytes32String('SignerBalanceLow')
+    )
+    expect(errors[2]).to.be.equal(
+      ethers.utils.formatBytes32String('SenderAllowanceLow')
+    )
+    expect(errors[3]).to.be.equal(
+      ethers.utils.formatBytes32String('SenderBalanceLow')
+    )
+    expect(errors[4]).to.be.equal(
+      ethers.utils.formatBytes32String('AffiliateAllowanceLow')
+    )
+    expect(errors[5]).to.be.equal(
+      ethers.utils.formatBytes32String('AffiliateBalanceLow')
     )
   })
 })

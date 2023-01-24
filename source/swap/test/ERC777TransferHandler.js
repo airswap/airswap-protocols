@@ -8,7 +8,7 @@ let snapshotId
 let transferHandler
 let party
 
-describe('ERC721TransferHandler Unit', () => {
+describe('ERC777TransferHandler Unit', () => {
   beforeEach(async () => {
     snapshotId = await ethers.provider.send('evm_snapshot')
   })
@@ -39,7 +39,7 @@ describe('ERC721TransferHandler Unit', () => {
 
   it('hasAllowance succeeds', async () => {
     await token.mock.isOperatorFor
-      .withArgs(party.wallet, swap.address)
+      .withArgs(swap.address, party.wallet)
       .returns(true)
     expect(await transferHandler.connect(swap).hasAllowance(party)).to.be.equal(
       true
