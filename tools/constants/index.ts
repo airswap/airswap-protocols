@@ -85,7 +85,7 @@ export const wrappedTokenAddresses: Record<string, string> = {
 export const stakingTokenAddresses: Record<string, string> = {
   1: '0x27054b13b1b798b345b591a4d22e6562d47ea75a',
   5: '0x1a1ec25dc08e98e5e93f1104b5e5cdd298707d31',
-  30: '',
+  30: '0x71070c5607358fc25e3b4aaf4fb0a580c190252a',
   31: '0x9c7005fa2f8476e2331f45f69e0930a4c9eff0c3',
   42: '0x1a1ec25dc08e98e5e93f1104b5e5cdd298707d31',
   56: '0x1ac0d76f11875317f8a7d791db94cdd82bd02bd1',
