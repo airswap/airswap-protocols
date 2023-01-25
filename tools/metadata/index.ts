@@ -4,6 +4,7 @@ import { TokenInfo } from '@uniswap/token-lists'
 import { defaults, tokenListURLs } from './constants'
 import { tokenKinds } from '@airswap/constants'
 
+import { abi as ERC165_ABI } from '@openzeppelin/contracts/build/contracts/ERC165.json'
 import { abi as ERC20_ABI } from '@openzeppelin/contracts/build/contracts/ERC20.json'
 import { abi as ERC721_ABI } from '@openzeppelin/contracts/build/contracts/ERC721.json'
 import { abi as ERC777_ABI } from '@openzeppelin/contracts/build/contracts/ERC777.json'
@@ -72,13 +73,46 @@ export function firstTokenBySymbol(
   })
 }
 
+export async function getTokenFromContract(
+  provider: ethers.providers.BaseProvider,
+  address: string,
+  id?: string
+): Promise<TokenInfo> {
+  const contract = new ethers.Contract(address, ERC165_ABI, provider)
+  let supportsERC165 = true
+  let tokenKind = tokenKinds.ERC20
+  try {
+    if (await contract.supportsInterface(tokenKinds.ERC721)) {
+      tokenKind = tokenKinds.ERC721
+    }
+  } catch (e) {
+    supportsERC165 = false
+  }
+  if (supportsERC165) {
+    if (tokenKind === tokenKinds.ERC20) {
+      if (await contract.supportsInterface(tokenKinds.ERC1155)) {
+        tokenKind = tokenKinds.ERC1155
+      } else if (await contract.supportsInterface(tokenKinds.ERC777)) {
+        tokenKind = tokenKinds.ERC777
+      }
+    }
+  }
+  switch (tokenKind) {
+    case tokenKinds.ERC721:
+      return await getERC721FromContract(provider, address, id)
+    case tokenKinds.ERC777:
+      return await getERC777FromContract(provider, address)
+    case tokenKinds.ERC1155:
+      return await getERC1155FromContract(provider, address, id)
+    default:
+      return await getERC20FromContract(provider, address)
+  }
+}
+
 export async function getERC20FromContract(
   provider: ethers.providers.BaseProvider,
   address: string
 ): Promise<TokenInfo> {
-  if (!address || !address.startsWith('0x')) {
-    throw Error(`Invalid 'address' parameter '${address}'.`)
-  }
   const contract = new ethers.Contract(address, ERC20_ABI, provider)
   const [name, symbol] = await Promise.all([contract.name(), contract.symbol()])
   return {
