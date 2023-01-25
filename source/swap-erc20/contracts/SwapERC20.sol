@@ -20,7 +20,7 @@ contract SwapERC20 is ISwapERC20, Ownable {
   bytes32 public constant ORDER_TYPEHASH =
     keccak256(
       abi.encodePacked(
-        "Order(uint256 nonce,uint256 expiry,address signerWallet,address signerToken,uint256 signerAmount,",
+        "OrderERC20(uint256 nonce,uint256 expiry,address signerWallet,address signerToken,uint256 signerAmount,",
         "uint256 protocolFee,address senderWallet,address senderToken,uint256 senderAmount)"
       )
     );
@@ -431,7 +431,7 @@ contract SwapERC20 is ISwapERC20, Ownable {
   }
 
   /**
-   * @notice Validates Swap Order for any potential errors
+   * @notice Checks and returns any potential errors given an order
    * @param senderWallet address Wallet that would send the order
    * @param nonce uint256 Unique and should be sequential
    * @param expiry uint256 Expiry in seconds since 1 January 1970
@@ -459,7 +459,7 @@ contract SwapERC20 is ISwapERC20, Ownable {
     bytes32 s
   ) public view returns (uint256, bytes32[] memory) {
     bytes32[] memory errors = new bytes32[](MAX_ERROR_COUNT);
-    Order memory order;
+    OrderERC20 memory order;
     uint256 errCount;
     order.nonce = nonce;
     order.expiry = expiry;

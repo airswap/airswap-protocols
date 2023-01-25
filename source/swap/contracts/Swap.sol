@@ -99,7 +99,7 @@ contract Swap is ISwap, Ownable, EIP712 {
    * @notice Atomic Token Swap
    * @param order Order to settle
    */
-  function swap(Order calldata order) external {
+  function swap(address recipient, Order calldata order) external {
     // Ensure the order is not expired.
     if (order.expiry <= block.timestamp) revert OrderExpired();
 
@@ -143,7 +143,7 @@ contract Swap is ISwap, Ownable, EIP712 {
     // Transfer token from signer to sender.
     _transferToken(
       order.signer.wallet,
-      finalSenderWallet,
+      recipient,
       order.signer.amount,
       order.signer.id,
       order.signer.token,
