@@ -99,13 +99,13 @@ export async function getTokenFromContract(
   }
   switch (tokenKind) {
     case tokenKinds.ERC721:
-      return await getERC721FromContract(provider, address, id)
+      return getERC721FromContract(provider, address, id)
     case tokenKinds.ERC777:
-      return await getERC777FromContract(provider, address)
+      return getERC777FromContract(provider, address)
     case tokenKinds.ERC1155:
-      return await getERC1155FromContract(provider, address, id)
+      return getERC1155FromContract(provider, address, id)
     default:
-      return await getERC20FromContract(provider, address)
+      return getERC20FromContract(provider, address)
   }
 }
 
