@@ -347,7 +347,7 @@ contract Swap is ISwap, Ownable, EIP712 {
       errors[errCount] = "Unauthorized";
       errCount++;
     } else {
-      if (nonceUsed(signatory, order.nonce)) {
+      if (nonceUsed(order.signer.wallet, order.nonce)) {
         errors[errCount] = "NonceAlreadyUsed";
         errCount++;
       }
