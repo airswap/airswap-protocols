@@ -2,7 +2,7 @@ import { ContractTransaction, ethers } from 'ethers'
 import { chainIds, wrappedTokenAddresses } from '@airswap/constants'
 import { Wrapper as WrapperContract } from '@airswap/wrapper/typechain/contracts'
 import { Wrapper__factory } from '@airswap/wrapper/typechain/factories/contracts'
-import { OrderERC20 } from '@airswap/typescript'
+import { Order, OrderERC20 } from '@airswap/typescript'
 
 import * as wrapperDeploys from '@airswap/wrapper/deploys.js'
 
@@ -29,6 +29,26 @@ export class Wrapper {
   }
 
   public async swap(
+    order: Order,
+    signer?: ethers.Signer
+  ): Promise<ContractTransaction> {
+    let contract = this.contract
+    if (!this.contract.signer) {
+      if (signer === undefined) {
+        throw new Error('Signer must be provided')
+      } else {
+        contract = contract.connect(signer)
+      }
+    }
+    return await contract.swap(order, {
+      value:
+        order.sender.token === wrappedTokenAddresses[this.chainId]
+          ? order.sender.amount
+          : 0,
+    })
+  }
+
+  public async swapERC20(
     order: OrderERC20,
     signer?: ethers.Signer
   ): Promise<ContractTransaction> {
@@ -40,7 +60,7 @@ export class Wrapper {
         contract = contract.connect(signer)
       }
     }
-    return await contract.swap(
+    return await contract.swapERC20(
       order.nonce,
       order.expiry,
       order.signerWallet,

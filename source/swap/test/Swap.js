@@ -173,7 +173,10 @@ describe('Swap Unit', () => {
 
   it('swap succeeds', async () => {
     const order = await createSignedOrder({}, signer)
-    await expect(swap.connect(sender).swap(order)).to.emit(swap, 'Swap')
+    await expect(swap.connect(sender).swap(sender.address, order)).to.emit(
+      swap,
+      'Swap'
+    )
   })
 
   it('public swap succeeds', async () => {
@@ -185,7 +188,10 @@ describe('Swap Unit', () => {
       },
       signer
     )
-    await expect(swap.connect(sender).swap(order)).to.emit(swap, 'Swap')
+    await expect(swap.connect(sender).swap(sender.address, order)).to.emit(
+      swap,
+      'Swap'
+    )
   })
 
   it('swap with affiliate succeeds', async () => {
@@ -201,7 +207,10 @@ describe('Swap Unit', () => {
       },
       signer
     )
-    await expect(swap.connect(sender).swap(order)).to.emit(swap, 'Swap')
+    await expect(swap.connect(sender).swap(sender.address, order)).to.emit(
+      swap,
+      'Swap'
+    )
   })
 
   it('swap with previously used nonce fails', async () => {
@@ -211,10 +220,10 @@ describe('Swap Unit', () => {
       },
       signer
     )
-    await swap.connect(sender).swap(order)
-    await expect(swap.connect(sender).swap(order)).to.be.revertedWith(
-      'NonceAlreadyUsed(1)'
-    )
+    await swap.connect(sender).swap(sender.address, order)
+    await expect(
+      swap.connect(sender).swap(sender.address, order)
+    ).to.be.revertedWith('NonceAlreadyUsed(1)')
   })
 
   it('swap with cancelled nonce fails', async () => {
@@ -225,9 +234,9 @@ describe('Swap Unit', () => {
       signer
     )
     await swap.connect(signer).cancel([1])
-    await expect(swap.connect(sender).swap(order)).to.be.revertedWith(
-      'NonceAlreadyUsed(1)'
-    )
+    await expect(
+      swap.connect(sender).swap(sender.address, order)
+    ).to.be.revertedWith('NonceAlreadyUsed(1)')
   })
 
   it('cancel with cancelled nonce fails', async () => {
@@ -245,9 +254,9 @@ describe('Swap Unit', () => {
       signer
     )
     await swap.connect(signer).cancelUpTo(3)
-    await expect(swap.connect(sender).swap(order)).to.be.revertedWith(
-      'NonceTooLow()'
-    )
+    await expect(
+      swap.connect(sender).swap(sender.address, order)
+    ).to.be.revertedWith('NonceTooLow()')
   })
 
   it('swap with zero fee succeeds', async () => {
@@ -258,7 +267,10 @@ describe('Swap Unit', () => {
       signer
     )
     await swap.connect(deployer).setProtocolFee('0')
-    await expect(swap.connect(sender).swap(order)).to.emit(swap, 'Swap')
+    await expect(swap.connect(sender).swap(sender.address, order)).to.emit(
+      swap,
+      'Swap'
+    )
   })
 
   it('swap with incorrect fee fails', async () => {
@@ -268,15 +280,18 @@ describe('Swap Unit', () => {
       },
       signer
     )
-    await expect(swap.connect(sender).swap(order)).to.be.revertedWith(
-      'Unauthorized()'
-    )
+    await expect(
+      swap.connect(sender).swap(sender.address, order)
+    ).to.be.revertedWith('Unauthorized()')
   })
 
   it('swap with nonfungible signer token succeeds', async () => {
     const order = await createSignedOrder({}, signer)
     await transferHandler.mock.attemptFeeTransfer.returns(false)
-    await expect(swap.connect(sender).swap(order)).to.emit(swap, 'Swap')
+    await expect(swap.connect(sender).swap(sender.address, order)).to.emit(
+      swap,
+      'Swap'
+    )
   })
 
   it('swap with passed expiry fails', async () => {
@@ -286,9 +301,9 @@ describe('Swap Unit', () => {
       },
       signer
     )
-    await expect(swap.connect(sender).swap(order)).to.be.revertedWith(
-      'OrderExpired()'
-    )
+    await expect(
+      swap.connect(sender).swap(sender.address, order)
+    ).to.be.revertedWith('OrderExpired()')
   })
 
   it('swap with another sender fails', async () => {
@@ -304,9 +319,9 @@ describe('Swap Unit', () => {
       signer
     )
     await transferHandler.mock.transferTokens.returns()
-    await expect(swap.connect(sender).swap(order)).to.be.revertedWith(
-      'SenderInvalid()'
-    )
+    await expect(
+      swap.connect(sender).swap(sender.address, order)
+    ).to.be.revertedWith('SenderInvalid()')
   })
 
   it('swap with invalid kind fails', async () => {
@@ -318,9 +333,9 @@ describe('Swap Unit', () => {
       },
       signer
     )
-    await expect(swap.connect(sender).swap(order)).to.be.revertedWith(
-      'TokenKindUnknown()'
-    )
+    await expect(
+      swap.connect(sender).swap(sender.address, order)
+    ).to.be.revertedWith('TokenKindUnknown()')
   })
 
   it('swap with different kinds succeeds', async () => {
@@ -347,7 +362,10 @@ describe('Swap Unit', () => {
       },
       signer
     )
-    await expect(swap.connect(sender).swap(order)).to.emit(swap, 'Swap')
+    await expect(swap.connect(sender).swap(sender.address, order)).to.emit(
+      swap,
+      'Swap'
+    )
   })
 
   it('swap with bad signature fails', async () => {
@@ -356,9 +374,9 @@ describe('Swap Unit', () => {
       ...order,
       v: '0',
     }
-    await expect(swap.connect(sender).swap(order)).to.be.revertedWith(
-      'SignatureInvalid()'
-    )
+    await expect(
+      swap.connect(sender).swap(sender.address, order)
+    ).to.be.revertedWith('SignatureInvalid()')
   })
 
   it('swap signed by unauthorized signer fails', async () => {
@@ -370,9 +388,9 @@ describe('Swap Unit', () => {
       },
       signer
     )
-    await expect(swap.connect(sender).swap(order)).to.be.revertedWith(
-      'Unauthorized()'
-    )
+    await expect(
+      swap.connect(sender).swap(sender.address, order)
+    ).to.be.revertedWith('Unauthorized()')
   })
 
   it('authorizing null address fails', async () => {
@@ -395,7 +413,10 @@ describe('Swap Unit', () => {
       .to.emit(swap, 'Authorize')
       .withArgs(signer.address, anyone.address)
 
-    await expect(swap.connect(sender).swap(order)).to.emit(swap, 'Swap')
+    await expect(swap.connect(sender).swap(sender.address, order)).to.emit(
+      swap,
+      'Swap'
+    )
   })
 
   it('swap signed by revoked authorized signer fails', async () => {
@@ -416,9 +437,9 @@ describe('Swap Unit', () => {
       .to.emit(swap, 'Revoke')
       .withArgs(signer.address, anyone.address)
 
-    await expect(swap.connect(sender).swap(order)).to.be.revertedWith(
-      'Unauthorized()'
-    )
+    await expect(
+      swap.connect(sender).swap(sender.address, order)
+    ).to.be.revertedWith('Unauthorized()')
   })
 
   it('check succeeds', async () => {
@@ -474,7 +495,10 @@ describe('Swap Unit', () => {
       },
       signer
     )
-    await expect(swap.connect(sender).swap(order)).to.emit(swap, 'Swap')
+    await expect(swap.connect(sender).swap(sender.address, order)).to.emit(
+      swap,
+      'Swap'
+    )
     const [errors] = await swap.check(order)
     expect(errors[0]).to.be.equal(
       ethers.utils.formatBytes32String('NonceAlreadyUsed')
