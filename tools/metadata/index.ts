@@ -113,6 +113,9 @@ export async function getERC20FromContract(
   provider: ethers.providers.BaseProvider,
   address: string
 ): Promise<TokenInfo> {
+  if (!ethers.utils.isAddress(address)) {
+    throw new Error(`Invalid address: ${address}`)
+  }
   const contract = new ethers.Contract(address, ERC20_ABI, provider)
   const [name, symbol] = await Promise.all([contract.name(), contract.symbol()])
   return {
@@ -120,10 +123,10 @@ export async function getERC20FromContract(
     address: address.toLowerCase(),
     name,
     symbol,
+    decimals: Number(await contract.decimals()),
     extensions: {
       kind: tokenKinds.ERC20,
     },
-    decimals: Number(await contract.decimals()),
   }
 }
 
@@ -132,6 +135,12 @@ export async function getERC721FromContract(
   address: string,
   id: string
 ): Promise<TokenInfo> {
+  if (!ethers.utils.isAddress(address)) {
+    throw new Error(`Invalid address: ${address}`)
+  }
+  if (isNaN(Number(id))) {
+    throw new Error(`Invalid id: ${id}`)
+  }
   const contract = new ethers.Contract(address, ERC721_ABI, provider)
   const [name, symbol] = await Promise.all([contract.name(), contract.symbol()])
 
@@ -140,17 +149,17 @@ export async function getERC721FromContract(
     uri = `https://cloudflare-ipfs.com/${uri.replace('://', '/')}`
   }
   const res = await axios.get(uri)
-
   return {
     chainId: (await provider.getNetwork()).chainId,
     address: address.toLowerCase(),
     name,
     symbol: symbol || name.toUpperCase(),
+    decimals: Number(0),
     extensions: {
       kind: tokenKinds.ERC721,
-      ...res.data,
+      id,
+      metadata: res.data,
     },
-    decimals: Number(0),
   }
 }
 
@@ -158,6 +167,9 @@ export async function getERC777FromContract(
   provider: ethers.providers.BaseProvider,
   address: string
 ): Promise<TokenInfo> {
+  if (!ethers.utils.isAddress(address)) {
+    throw new Error(`Invalid address: ${address}`)
+  }
   const contract = new ethers.Contract(address, ERC777_ABI, provider)
   const [name, symbol] = await Promise.all([contract.name(), contract.symbol()])
   return {
@@ -165,10 +177,10 @@ export async function getERC777FromContract(
     address: address.toLowerCase(),
     name,
     symbol,
+    decimals: Number(await contract.decimals()),
     extensions: {
       kind: tokenKinds.ERC777,
     },
-    decimals: Number(await contract.decimals()),
   }
 }
 
@@ -177,6 +189,12 @@ export async function getERC1155FromContract(
   address: string,
   id: string
 ): Promise<TokenInfo> {
+  if (!ethers.utils.isAddress(address)) {
+    throw new Error(`Invalid address: ${address}`)
+  }
+  if (isNaN(Number(id))) {
+    throw new Error(`Invalid id: ${id}`)
+  }
   const contract = new ethers.Contract(address, ERC1155_ABI, provider)
   let uri = await contract.uri(id)
   if (uri.startsWith('ipfs')) {
@@ -188,10 +206,11 @@ export async function getERC1155FromContract(
     address: address.toLowerCase(),
     name: '',
     symbol: '',
+    decimals: Number(0),
     extensions: {
       kind: tokenKinds.ERC1155,
-      ...res.data,
+      id,
+      metadata: res.data,
     },
-    decimals: Number(0),
   }
 }
