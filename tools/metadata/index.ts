@@ -117,7 +117,13 @@ export async function getERC20FromContract(
     throw new Error(`Invalid address: ${address}`)
   }
   const contract = new ethers.Contract(address, ERC20_ABI, provider)
-  const [name, symbol] = await Promise.all([contract.name(), contract.symbol()])
+  let name
+  let symbol
+  try {
+    ;[name, symbol] = await Promise.all([contract.name(), contract.symbol()])
+  } catch (e) {
+    throw new Error(`Unable to get ERC20 from contract at ${address}`)
+  }
   return {
     chainId: (await provider.getNetwork()).chainId,
     address: address.toLowerCase(),
@@ -142,8 +148,13 @@ export async function getERC721FromContract(
     throw new Error(`Invalid id: ${id}`)
   }
   const contract = new ethers.Contract(address, ERC721_ABI, provider)
-  const [name, symbol] = await Promise.all([contract.name(), contract.symbol()])
-
+  let name
+  let symbol
+  try {
+    ;[name, symbol] = await Promise.all([contract.name(), contract.symbol()])
+  } catch (e) {
+    throw new Error(`Unable to get ERC721 from contract at ${address}`)
+  }
   let uri = await contract.tokenURI(id)
   if (uri.startsWith('ipfs')) {
     uri = `https://cloudflare-ipfs.com/${uri.replace('://', '/')}`
@@ -171,7 +182,13 @@ export async function getERC777FromContract(
     throw new Error(`Invalid address: ${address}`)
   }
   const contract = new ethers.Contract(address, ERC777_ABI, provider)
-  const [name, symbol] = await Promise.all([contract.name(), contract.symbol()])
+  let name
+  let symbol
+  try {
+    ;[name, symbol] = await Promise.all([contract.name(), contract.symbol()])
+  } catch (e) {
+    throw new Error(`Unable to get ERC777 from contract at ${address}`)
+  }
   return {
     chainId: (await provider.getNetwork()).chainId,
     address: address.toLowerCase(),
@@ -196,7 +213,12 @@ export async function getERC1155FromContract(
     throw new Error(`Invalid id: ${id}`)
   }
   const contract = new ethers.Contract(address, ERC1155_ABI, provider)
-  let uri = await contract.uri(id)
+  let uri
+  try {
+    uri = await contract.uri(id)
+  } catch (e) {
+    throw new Error(`Unable to get ERC1155 from contract at ${address}`)
+  }
   if (uri.startsWith('ipfs')) {
     uri = `https://cloudflare-ipfs.com/${uri.replace('://', '/')}`
   }
