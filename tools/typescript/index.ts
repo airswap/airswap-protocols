@@ -27,7 +27,7 @@ export type OrderERC20 = {
 } & Signature
 
 export type Settlement = {
-  chainId: string
+  chainId: number
   swapContract: string
 }
 
