@@ -18,6 +18,7 @@ let signer
 let sender
 let affiliate
 let token
+let adapter
 let swap
 
 async function signOrder(order, wallet, swapContract) {
