@@ -53,17 +53,14 @@ contract Swap is ISwap, Ownable, EIP712 {
   // Data type used for hashing: Structured data (EIP-191)
   bytes internal constant EIP191_HEADER = "\x19\x01";
 
-  // Domain and version for use in signatures (EIP-712)
+  // Domain name and version for use in signatures (EIP-712)
   string public constant DOMAIN_NAME = "SWAP";
   string public constant DOMAIN_VERSION = "3";
-
   uint256 public constant FEE_DIVISOR = 10000;
+  uint256 internal constant MAX_ERROR_COUNT = 10;
 
   uint256 public protocolFee;
   address public protocolFeeWallet;
-  bool public adaptersSet = false;
-
-  uint256 internal constant MAX_ERROR_COUNT = 10;
 
   /**
    * @notice Double mapping of signers to nonce groups to nonce states
