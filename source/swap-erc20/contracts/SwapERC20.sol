@@ -25,8 +25,13 @@ contract SwapERC20 is ISwapERC20, Ownable {
       )
     );
 
+  // EIP191 header for use in EIP712 signatures
+  bytes internal constant EIP191_HEADER = "\x19\x01";
+
+  // Domain name and version for use in EIP712 signatures
   bytes32 public constant DOMAIN_NAME = keccak256("SWAP_ERC20");
   bytes32 public constant DOMAIN_VERSION = keccak256("3");
+
   uint256 public immutable DOMAIN_CHAIN_ID;
   bytes32 public immutable DOMAIN_SEPARATOR;
 
@@ -51,6 +56,15 @@ contract SwapERC20 is ISwapERC20, Ownable {
   uint256 public rebateMax;
   address public staking;
 
+  /**
+   * @notice Constructor
+   * @dev Sets domain and version for EIP712 signatures
+   * @param _protocolFee uin256 fee to be assessed on swaps
+   * @param _protocolFeeWallet address destination for fees
+   * @param _rebateScale uin256 scale factor for rebate
+   * @param _rebateMax uint256 max rebate percentage
+   * @param _staking address staking contract address
+   */
   constructor(
     uint256 _protocolFee,
     uint256 _protocolFeeLight,
@@ -724,17 +738,23 @@ contract SwapERC20 is ISwapERC20, Ownable {
   ) internal view returns (bytes32) {
     return
       keccak256(
-        abi.encode(
-          ORDER_TYPEHASH,
-          nonce,
-          expiry,
-          signerWallet,
-          signerToken,
-          signerAmount,
-          protocolFee,
-          senderWallet,
-          senderToken,
-          senderAmount
+        abi.encodePacked(
+          "\x19\x01",
+          DOMAIN_SEPARATOR,
+          keccak256(
+            abi.encode(
+              ORDER_TYPEHASH,
+              nonce,
+              expiry,
+              signerWallet,
+              signerToken,
+              signerAmount,
+              protocolFee,
+              senderWallet,
+              senderToken,
+              senderAmount
+            )
+          )
         )
       );
   }
@@ -751,14 +771,8 @@ contract SwapERC20 is ISwapERC20, Ownable {
     uint8 v,
     bytes32 r,
     bytes32 s
-  ) internal view returns (address) {
-    return
-      ecrecover(
-        keccak256(abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR, hash)),
-        v,
-        r,
-        s
-      );
+  ) internal pure returns (address) {
+    return ecrecover(hash, v, r, s);
   }
 
   /**
