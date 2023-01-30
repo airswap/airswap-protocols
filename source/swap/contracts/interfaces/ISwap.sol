@@ -48,7 +48,6 @@ interface ISwap {
 
   event Revoke(address indexed signer, address indexed signerWallet);
 
-  error AdaptersAlreadySet();
   error InvalidAdapters();
   error InvalidFee();
   error InvalidFeeWallet();

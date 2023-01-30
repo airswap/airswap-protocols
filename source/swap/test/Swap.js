@@ -78,17 +78,15 @@ describe('Swap Unit', () => {
 
     swap = await (
       await ethers.getContractFactory('Swap')
-    ).deploy(PROTOCOL_FEE, protocolFeeWallet.address)
+    ).deploy([adapter.address], PROTOCOL_FEE, protocolFeeWallet.address)
     await swap.deployed()
-
-    await swap.connect(deployer).setAdapters([adapter.address])
   })
 
   it('deploy with invalid protocolFeeWallet fails', async () => {
     await expect(
       (
         await ethers.getContractFactory('Swap')
-      ).deploy(PROTOCOL_FEE, ADDRESS_ZERO)
+      ).deploy([], PROTOCOL_FEE, ADDRESS_ZERO)
     ).to.be.revertedWith('InvalidFeeWallet()')
   })
 
@@ -96,8 +94,16 @@ describe('Swap Unit', () => {
     await expect(
       (
         await ethers.getContractFactory('Swap')
-      ).deploy(100000000000, protocolFeeWallet.address)
+      ).deploy([], 100000000000, protocolFeeWallet.address)
     ).to.be.revertedWith('InvalidFee()')
+  })
+
+  it('deploy with invalid adapters fails', async () => {
+    await expect(
+      (
+        await ethers.getContractFactory('Swap')
+      ).deploy([], PROTOCOL_FEE, protocolFeeWallet.address)
+    ).to.be.revertedWith('InvalidAdapters()')
   })
 
   it('setProtocolFeeWallet', async () => {
@@ -139,24 +145,6 @@ describe('Swap Unit', () => {
     await expect(
       swap.connect(deployer).setProtocolFee(FEE_DIVISOR + 1)
     ).to.be.revertedWith('InvalidFee()')
-  })
-
-  it('setAdapters fails for non-owner', async () => {
-    await expect(swap.connect(anyone).setAdapters([])).to.be.revertedWith(
-      'Ownable: caller is not the owner'
-    )
-  })
-
-  it('setAdapters fails with empty args', async () => {
-    await expect(swap.connect(deployer).setAdapters([])).to.be.revertedWith(
-      'InvalidAdapters()'
-    )
-  })
-
-  it('setAdapters twice fails', async () => {
-    await expect(
-      swap.connect(deployer).setAdapters([adapter.address])
-    ).to.be.revertedWith('AdaptersAlreadySet()')
   })
 
   it('swap succeeds', async () => {

@@ -86,27 +86,19 @@ contract Swap is ISwap, Ownable, EIP712 {
    * @param _protocolFee uin256
    * @param _protocolFeeWallet address
    */
-  constructor(uint256 _protocolFee, address _protocolFeeWallet)
-    EIP712(DOMAIN_NAME, DOMAIN_VERSION)
-  {
+  constructor(
+    address[] memory _adapters,
+    uint256 _protocolFee,
+    address _protocolFeeWallet
+  ) EIP712(DOMAIN_NAME, DOMAIN_VERSION) {
     if (_protocolFee >= FEE_DIVISOR) revert InvalidFee();
     if (_protocolFeeWallet == address(0)) revert InvalidFeeWallet();
     protocolFee = _protocolFee;
     protocolFeeWallet = _protocolFeeWallet;
-  }
-
-  /**
-   * @notice Set Token Adapters
-   * @param _adapters Array of IAdapters to set
-   */
-  function setAdapters(address[] calldata _adapters) public onlyOwner {
     if (_adapters.length == 0) revert InvalidAdapters();
-    if (adaptersSet == true) revert AdaptersAlreadySet();
     for (uint256 i = 0; i < _adapters.length; i++) {
       adapters[IAdapter(_adapters[i]).interfaceID()] = IAdapter(_adapters[i]);
     }
-    adaptersSet = true;
-    emit SetAdapters(_adapters);
   }
 
   /**
