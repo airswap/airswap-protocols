@@ -245,31 +245,19 @@ contract Swap is ISwap, Ownable, EIP712 {
               keccak256(
                 abi.encode(
                   PARTY_TYPEHASH,
-                  order.signer.wallet,
-                  order.signer.token,
-                  order.signer.kind,
-                  order.signer.id,
-                  order.signer.amount
+                  order.signer
                 )
               ),
               keccak256(
                 abi.encode(
                   PARTY_TYPEHASH,
-                  order.sender.wallet,
-                  order.sender.token,
-                  order.sender.kind,
-                  order.sender.id,
-                  order.sender.amount
+                  order.sender
                 )
               ),
               keccak256(
                 abi.encode(
                   PARTY_TYPEHASH,
-                  order.affiliate.wallet,
-                  order.affiliate.token,
-                  order.affiliate.kind,
-                  order.affiliate.id,
-                  order.affiliate.amount
+                  order.affiliate
                 )
               )
             )
