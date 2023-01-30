@@ -2,16 +2,14 @@
 
 pragma solidity 0.8.17;
 
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import "./interfaces/ITransferHandler.sol";
 import "./interfaces/ISwap.sol";
 
 /**
  * @title Swap: The Atomic Swap used on the AirSwap Network
  */
-contract Swap is ISwap, Ownable {
-  using SafeERC20 for IERC20;
-
+contract Swap is ISwap, Ownable, EIP712 {
   bytes32 public constant DOMAIN_TYPEHASH =
     keccak256(
       "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
@@ -55,14 +53,8 @@ contract Swap is ISwap, Ownable {
   bytes internal constant EIP191_HEADER = "\x19\x01";
 
   // Domain and version for use in signatures (EIP-712)
-  bytes32 public constant DOMAIN_NAME = keccak256("SWAP");
-  bytes32 public constant DOMAIN_VERSION = keccak256("3");
-
-  // Domain chain id for use in signatures (EIP-712)
-  uint256 public immutable DOMAIN_CHAIN_ID;
-
-  // Unique domain identifier for use in signatures (EIP-712)
-  bytes32 public immutable DOMAIN_SEPARATOR;
+  string public constant DOMAIN_NAME = "SWAP";
+  string public constant DOMAIN_VERSION = "3";
 
   uint256 public constant FEE_DIVISOR = 10000;
 
@@ -95,20 +87,9 @@ contract Swap is ISwap, Ownable {
     TransferHandlerRegistry swapRegistry,
     uint256 _protocolFee,
     address _protocolFeeWallet
-  ) {
+  ) EIP712(DOMAIN_NAME, DOMAIN_VERSION) {
     if (_protocolFee >= FEE_DIVISOR) revert InvalidFee();
     if (_protocolFeeWallet == address(0)) revert InvalidFeeWallet();
-    uint256 currentChainId = getChainId();
-    DOMAIN_CHAIN_ID = currentChainId;
-    DOMAIN_SEPARATOR = keccak256(
-      abi.encode(
-        DOMAIN_TYPEHASH,
-        DOMAIN_NAME,
-        DOMAIN_VERSION,
-        currentChainId,
-        this
-      )
-    );
     registry = swapRegistry;
     protocolFee = _protocolFee;
     protocolFeeWallet = _protocolFeeWallet;
@@ -118,7 +99,7 @@ contract Swap is ISwap, Ownable {
    * @notice Atomic Token Swap
    * @param order Order to settle
    */
-  function swap(Order calldata order) external {
+  function swap(address recipient, Order calldata order) external {
     // Ensure the order is not expired.
     if (order.expiry <= block.timestamp) revert OrderExpired();
 
@@ -127,8 +108,7 @@ contract Swap is ISwap, Ownable {
       revert NonceTooLow();
 
     // Ensure the nonce is not yet used and if not mark it used
-    if (!_markNonceAsUsed(order.signer.wallet, order.nonce))
-      revert NonceAlreadyUsed(order.nonce);
+    _markNonceAsUsed(order.signer.wallet, order.nonce);
 
     // Validate the sender side of the trade.
     address finalSenderWallet;
@@ -142,10 +122,11 @@ contract Swap is ISwap, Ownable {
     } else {
       // The msg.sender is authorized.
       finalSenderWallet = order.sender.wallet;
+      if (order.sender.wallet != msg.sender) revert SenderInvalid();
     }
 
-    // // Validate the signer side of the trade.
-    _isAuthorized(order, DOMAIN_SEPARATOR);
+    // Validate the signer side of the trade.
+    _isAuthorized(order, _domainSeparatorV4());
 
     // Ensure the signatory is authorized by the signer wallet
 
@@ -162,7 +143,7 @@ contract Swap is ISwap, Ownable {
     // Transfer token from signer to sender.
     _transferToken(
       order.signer.wallet,
-      finalSenderWallet,
+      recipient,
       order.signer.amount,
       order.signer.id,
       order.signer.token,
@@ -190,7 +171,7 @@ contract Swap is ISwap, Ownable {
       order.nonce,
       block.timestamp,
       order.signer.wallet,
-      order.sender.amount,
+      order.signer.amount,
       order.signer.id,
       order.signer.token,
       finalSenderWallet,
@@ -202,17 +183,6 @@ contract Swap is ISwap, Ownable {
       order.affiliate.id,
       order.affiliate.token
     );
-  }
-
-  /**
-   * @notice Returns the current chainId using the chainid opcode
-   * @return id uint256 The chain id
-   */
-  function getChainId() public view returns (uint256 id) {
-    // no-inline-assembly
-    assembly {
-      id := chainid()
-    }
   }
 
   /**
@@ -281,36 +251,9 @@ contract Swap is ISwap, Ownable {
               order.nonce,
               order.expiry,
               protocolFee,
-              keccak256(
-                abi.encode(
-                  PARTY_TYPEHASH,
-                  order.signer.wallet,
-                  order.signer.token,
-                  order.signer.kind,
-                  order.signer.id,
-                  order.signer.amount
-                )
-              ),
-              keccak256(
-                abi.encode(
-                  PARTY_TYPEHASH,
-                  order.sender.wallet,
-                  order.sender.token,
-                  order.sender.kind,
-                  order.sender.id,
-                  order.sender.amount
-                )
-              ),
-              keccak256(
-                abi.encode(
-                  PARTY_TYPEHASH,
-                  order.affiliate.wallet,
-                  order.affiliate.token,
-                  order.affiliate.kind,
-                  order.affiliate.id,
-                  order.affiliate.amount
-                )
-              )
+              keccak256(abi.encode(PARTY_TYPEHASH, order.signer)),
+              keccak256(abi.encode(PARTY_TYPEHASH, order.sender)),
+              keccak256(abi.encode(PARTY_TYPEHASH, order.affiliate))
             )
           )
         )
@@ -327,11 +270,8 @@ contract Swap is ISwap, Ownable {
   function cancel(uint256[] calldata nonces) external override {
     for (uint256 i = 0; i < nonces.length; i++) {
       uint256 nonce = nonces[i];
-      if (_markNonceAsUsed(msg.sender, nonce)) {
-        emit Cancel(nonce, msg.sender);
-      } else {
-        revert NonceAlreadyUsed(nonce);
-      }
+      _markNonceAsUsed(msg.sender, nonce);
+      emit Cancel(nonce, msg.sender);
     }
   }
 
@@ -357,7 +297,7 @@ contract Swap is ISwap, Ownable {
     uint256 errCount;
     bytes32[] memory errors = new bytes32[](MAX_ERROR_COUNT);
     address signatory = ecrecover(
-      _hashOrder(order, DOMAIN_SEPARATOR),
+      _hashOrder(order, _domainSeparatorV4()),
       order.v,
       order.r,
       order.s
@@ -384,6 +324,11 @@ contract Swap is ISwap, Ownable {
         errors[errCount] = "NonceAlreadyUsed";
         errCount++;
       }
+    }
+
+    if (order.nonce < _signerMinimumNonce[order.signer.wallet]) {
+      errors[errCount] = "NonceTooLow";
+      errCount++;
     }
 
     ITransferHandler signerTransferHandler = registry.transferHandlers(
@@ -420,6 +365,26 @@ contract Swap is ISwap, Ownable {
         errors[errCount] = "SenderBalanceLow";
         errCount++;
       }
+    }
+
+    if (order.affiliate.token != address(0)) {
+      ITransferHandler affiliateTransferHandler = registry.transferHandlers(
+        order.affiliate.kind
+      );
+
+      if (!affiliateTransferHandler.hasAllowance(order.signer)) {
+        errors[errCount] = "AffiliateAllowanceLow";
+        errCount++;
+      }
+      if (!affiliateTransferHandler.hasBalance(order.signer)) {
+        errors[errCount] = "AffiliateBalanceLow";
+        errCount++;
+      }
+    }
+
+    if (order.protocolFee != protocolFee) {
+      errors[errCount] = "InvalidFee";
+      errCount++;
     }
 
     return (errors, errCount);
@@ -481,12 +446,9 @@ contract Swap is ISwap, Ownable {
     address token,
     bytes4 kind
   ) internal {
-    // Ensure the transfer is not to self.
-    if (from == to) revert SelfTransferInvalid();
     ITransferHandler transferHandler = registry.transferHandlers(kind);
     if (address(transferHandler) == address(0)) revert TokenKindUnknown();
-    if (!transferHandler.transferTokens(from, to, amount, id, token))
-      revert TransferFailed();
+    transferHandler.transferTokens(from, to, amount, id, token);
   }
 
   /**
@@ -509,28 +471,22 @@ contract Swap is ISwap, Ownable {
    * @notice Marks a nonce as used for the given signer
    * @param signer address Address of the signer for which to mark the nonce as used
    * @param nonce uint256 Nonce to be marked as used
-   * @return bool True if the nonce was not marked as used already
    */
-  function _markNonceAsUsed(address signer, uint256 nonce)
-    internal
-    returns (bool)
-  {
+  function _markNonceAsUsed(address signer, uint256 nonce) internal {
     uint256 groupKey = nonce / 256;
     uint256 indexInGroup = nonce % 256;
     uint256 group = _nonceGroups[signer][groupKey];
 
-    // If it is already used, return false
+    // If it is already used, return mit cancel and revert
     if ((group >> indexInGroup) & 1 == 1) {
-      return false;
+      revert NonceAlreadyUsed(nonce);
     }
 
     _nonceGroups[signer][groupKey] = group | (uint256(1) << indexInGroup);
-
-    return true;
   }
 
   /**
-   * @notice Calculates and transfers protocol fee and rebate
+   * @notice Calculates and transfers protocol fee
    * @param order order
    */
   function _transferProtocolFee(Order calldata order) internal {
@@ -540,7 +496,7 @@ contract Swap is ISwap, Ownable {
       _transferToken(
         order.signer.wallet,
         protocolFeeWallet,
-        order.signer.amount,
+        feeAmount,
         order.signer.id,
         order.signer.token,
         order.signer.kind

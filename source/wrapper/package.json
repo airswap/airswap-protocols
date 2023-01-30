@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "@airswap/swap-erc20": "3.0.1",
-    "@openzeppelin/contracts": "^4.3.1"
+    "@openzeppelin/contracts": "^4.8.1"
   },
   "devDependencies": {
     "@airswap/utils": "3.0.7",

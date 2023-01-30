@@ -85,7 +85,7 @@ export const EIP712SwapERC20 = {
     { name: 'chainId', type: 'uint256' },
     { name: 'verifyingContract', type: 'address' },
   ],
-  Order: [
+  OrderERC20: [
     { name: 'nonce', type: 'uint256' },
     { name: 'expiry', type: 'uint256' },
     { name: 'signerWallet', type: 'address' },

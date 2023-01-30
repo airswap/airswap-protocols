@@ -52,18 +52,17 @@ interface ISwap {
   error OrderExpired();
   error NonceTooLow();
   error NonceAlreadyUsed(uint256);
+  error SenderInvalid();
   error SignatureInvalid();
   error SignerInvalid();
-  error SelfTransferInvalid();
   error TokenKindUnknown();
-  error TransferFailed();
   error Unauthorized();
 
   /**
    * @notice Atomic Token Swap
    * @param order Order
    */
-  function swap(Order calldata order) external;
+  function swap(address recipient, Order calldata order) external;
 
   /**
    * @notice Cancel one or more open orders by nonce

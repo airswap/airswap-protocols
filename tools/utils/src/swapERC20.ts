@@ -23,7 +23,7 @@ export const SWAP_ERC20_DOMAIN_TYPEHASH = ethUtil.keccak256(
   stringify(EIP712SwapERC20, 'EIP712Domain')
 )
 export const SWAP_ERC20_ORDER_TYPEHASH = ethUtil.keccak256(
-  stringify(EIP712SwapERC20, 'Order')
+  stringify(EIP712SwapERC20, 'OrderERC20')
 )
 
 export function createOrderERC20({
@@ -67,7 +67,7 @@ export async function createOrderERC20Signature(
           chainId,
           verifyingContract: swapContract,
         },
-        primaryType: 'Order',
+        primaryType: 'OrderERC20',
         message: unsignedOrder,
       },
     })
@@ -79,7 +79,7 @@ export async function createOrderERC20Signature(
         chainId,
         verifyingContract: swapContract,
       },
-      { Order: EIP712SwapERC20.Order },
+      { OrderERC20: EIP712SwapERC20.OrderERC20 },
       unsignedOrder
     )
   }
@@ -107,7 +107,7 @@ export function getSignerFromOrderERC20Signature(
         chainId,
         verifyingContract: swapContract,
       },
-      primaryType: 'Order',
+      primaryType: 'OrderERC20',
       message: order,
     },
     sig,

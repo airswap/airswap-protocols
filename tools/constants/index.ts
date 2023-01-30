@@ -1,5 +1,3 @@
-import { TokenInfo } from '@uniswap/token-lists'
-
 export const DOMAIN_NAME_SWAP_ERC20 = 'SWAP_ERC20'
 export const DOMAIN_VERSION_SWAP_ERC20 = '3'
 export const DOMAIN_NAME_SWAP = 'SWAP'
@@ -99,22 +97,6 @@ export const stakingTokenAddresses: Record<number, string> = {
   80001: '0xd161ddcfcc0c2d823021aa26200824efa75218d1',
   421613: '0x71070c5607358fc25e3b4aaf4fb0a580c190252a',
 }
-
-const _stakingTokens: TokenInfo[] = []
-for (const chainId in stakingTokenAddresses) {
-  const _chainId = Number(chainId)
-  _stakingTokens.push({
-    name:
-      'AirSwap Token' +
-      (_chainId !== 1 ? ` (${chainNames[_chainId]} Placeholder)` : ''),
-    symbol:
-      'AST' + (_chainId !== 1 ? ` (${chainNames[_chainId]} Placeholder)` : ''),
-    address: stakingTokenAddresses[_chainId],
-    decimals: 4,
-    chainId: Number(_chainId),
-  })
-}
-export const stakingTokens = _stakingTokens
 
 export const etherscanDomains: Record<number, string> = {
   1: 'etherscan.io',
