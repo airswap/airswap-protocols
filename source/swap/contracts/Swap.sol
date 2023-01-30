@@ -501,7 +501,7 @@ contract Swap is ISwap, Ownable, EIP712 {
     uint256 indexInGroup = nonce % 256;
     uint256 group = _nonceGroups[signatory][groupKey];
 
-    // If it is already used, return cancel and revert
+    // Revert if nonce is already used
     if ((group >> indexInGroup) & 1 == 1) {
       revert NonceAlreadyUsed(nonce);
     }
