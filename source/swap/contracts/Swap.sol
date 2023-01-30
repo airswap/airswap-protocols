@@ -73,7 +73,7 @@ contract Swap is ISwap, Ownable, EIP712 {
   mapping(address => address) public override authorized;
 
   // Mapping of signer addresses to an optionally set minimum valid nonce
-  mapping(address => uint256) public _signerMinimumNonce;
+  mapping(address => uint256) public _signatoryMinimumNonce;
 
   // A registry storing a transfer handler for different token kinds
   TransferHandlerRegistry public registry;
@@ -100,16 +100,6 @@ contract Swap is ISwap, Ownable, EIP712 {
    * @param order Order to settle
    */
   function swap(address recipient, Order calldata order) external {
-    // Ensure the order is not expired.
-    if (order.expiry <= block.timestamp) revert OrderExpired();
-
-    // Ensure the nonce is not yet used and if not mark it used
-    if (order.nonce < _signerMinimumNonce[order.signer.wallet])
-      revert NonceTooLow();
-
-    // Ensure the nonce is not yet used and if not mark it used
-    _markNonceAsUsed(order.signer.wallet, order.nonce);
-
     // Validate the sender side of the trade.
     address finalSenderWallet;
 
@@ -126,9 +116,7 @@ contract Swap is ISwap, Ownable, EIP712 {
     }
 
     // Validate the signer side of the trade.
-    _isAuthorized(order, _domainSeparatorV4());
-
-    // Ensure the signatory is authorized by the signer wallet
+    _checkValidOrder(order, _domainSeparatorV4());
 
     // Transfer token from sender to signer.
     _transferToken(
@@ -281,7 +269,7 @@ contract Swap is ISwap, Ownable, EIP712 {
    * @param minimumNonce uint256 Minimum valid nonce
    */
   function cancelUpTo(uint256 minimumNonce) external {
-    _signerMinimumNonce[msg.sender] = minimumNonce;
+    _signatoryMinimumNonce[msg.sender] = minimumNonce;
     emit CancelUpTo(minimumNonce, msg.sender);
   }
 
@@ -320,13 +308,13 @@ contract Swap is ISwap, Ownable, EIP712 {
       errors[errCount] = "Unauthorized";
       errCount++;
     } else {
-      if (nonceUsed(signatory, order.nonce)) {
+      if (nonceUsed(order.signer.wallet, order.nonce)) {
         errors[errCount] = "NonceAlreadyUsed";
         errCount++;
       }
     }
 
-    if (order.nonce < _signerMinimumNonce[order.signer.wallet]) {
+    if (order.nonce < _signatoryMinimumNonce[signatory]) {
       errors[errCount] = "NonceTooLow";
       errCount++;
     }
@@ -395,10 +383,13 @@ contract Swap is ISwap, Ownable, EIP712 {
    * @param order Order to validate
    * @param domainSeparator bytes32
    */
-  function _isAuthorized(Order calldata order, bytes32 domainSeparator)
+
+  function _checkValidOrder(Order calldata order, bytes32 domainSeparator)
     internal
-    view
   {
+    // Ensure the order is not expired.
+    if (order.expiry <= block.timestamp) revert OrderExpired();
+
     bytes32 hashed = _hashOrder(order, domainSeparator);
 
     // Recover the signatory from the hash and signature
@@ -406,6 +397,12 @@ contract Swap is ISwap, Ownable, EIP712 {
 
     // Ensure the signatory is not null
     if (signatory == address(0)) revert SignatureInvalid();
+
+    // Ensure the nonce is not yet used and if not mark it used
+    _markNonceAsUsed(signatory, order.nonce);
+
+    // Ensure the nonce is not yet used and if not mark it used
+    if (order.nonce < _signatoryMinimumNonce[signatory]) revert NonceTooLow();
 
     // Ensure the signatory is authorized by the signer wallet
     if (order.signer.wallet != signatory) {
@@ -468,21 +465,21 @@ contract Swap is ISwap, Ownable, EIP712 {
   }
 
   /**
-   * @notice Marks a nonce as used for the given signer
-   * @param signer address Address of the signer for which to mark the nonce as used
+   * @notice Marks a nonce as used for the given signatory
+   * @param signatory  address Address of the signer for which to mark the nonce as used
    * @param nonce uint256 Nonce to be marked as used
    */
-  function _markNonceAsUsed(address signer, uint256 nonce) internal {
+  function _markNonceAsUsed(address signatory, uint256 nonce) internal {
     uint256 groupKey = nonce / 256;
     uint256 indexInGroup = nonce % 256;
-    uint256 group = _nonceGroups[signer][groupKey];
+    uint256 group = _nonceGroups[signatory][groupKey];
 
-    // If it is already used, return mit cancel and revert
+    // Revert if nonce is already used
     if ((group >> indexInGroup) & 1 == 1) {
       revert NonceAlreadyUsed(nonce);
     }
 
-    _nonceGroups[signer][groupKey] = group | (uint256(1) << indexInGroup);
+    _nonceGroups[signatory][groupKey] = group | (uint256(1) << indexInGroup);
   }
 
   /**
