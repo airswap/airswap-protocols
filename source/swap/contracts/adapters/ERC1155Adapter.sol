@@ -2,10 +2,15 @@
 
 pragma solidity 0.8.17;
 
-import "../interfaces/ITransferHandler.sol";
-import "openzeppelin-solidity/contracts/token/ERC777/IERC777.sol";
+import "../interfaces/IAdapter.sol";
+import "openzeppelin-solidity/contracts/token/ERC1155/IERC1155.sol";
 
-contract ERC777TransferHandler is ITransferHandler {
+contract ERC1155Adapter is IAdapter {
+  /**
+   * @notice Indicates the ERC165 interfaceID supported by this adapter
+   */
+  bytes4 public constant interfaceID = 0xd9b67a26;
+
   /**
    * @notice Indicates whether to attempt a fee transfer on the token
    */
@@ -16,7 +21,7 @@ contract ERC777TransferHandler is ITransferHandler {
    * @param party Party from whom swap would be made
    */
   function hasAllowance(Party calldata party) external view returns (bool) {
-    return IERC777(party.token).isOperatorFor(msg.sender, party.wallet);
+    return IERC1155(party.token).isApprovedForAll(party.wallet, msg.sender);
   }
 
   /**
@@ -24,15 +29,16 @@ contract ERC777TransferHandler is ITransferHandler {
    * @param party Party from whom swap would be made
    */
   function hasBalance(Party calldata party) external view returns (bool) {
-    return IERC777(party.token).balanceOf(party.wallet) >= party.amount;
+    return
+      IERC1155(party.token).balanceOf(party.wallet, party.id) >= party.amount;
   }
 
   /**
-   * @notice Function to wrap safeTransferFrom for ERC777
+   * @notice Function to wrap safeTransferFrom for ERC1155
    * @param from address Wallet address to transfer from
    * @param to address Wallet address to transfer to
-   * @param amount uint256 Amount for ERC777
-   * @param id uint256 ID, must be 0 for this contract
+   * @param amount uint256 Amount for ERC-1155
+   * @param id uint256 token ID for ERC-1155
    * @param token address Contract address of token
    */
   function transferTokens(
@@ -42,7 +48,12 @@ contract ERC777TransferHandler is ITransferHandler {
     uint256 id,
     address token
   ) external {
-    if (id != 0) revert InvalidArgument("id");
-    IERC777(token).operatorSend(from, to, amount, "0x0", "0x0");
+    IERC1155(token).safeTransferFrom(
+      from,
+      to,
+      id,
+      amount,
+      "" // bytes are empty
+    );
   }
 }

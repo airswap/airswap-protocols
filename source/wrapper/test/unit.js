@@ -15,6 +15,7 @@ const SWAP_ERC20 = require('@airswap/swap-erc20/build/contracts/SwapERC20.sol/Sw
 
 describe('Wrapper Unit Tests', () => {
   let snapshotId
+  let swap
   let swapErc20
   let wrapper
 
@@ -88,18 +89,9 @@ describe('Wrapper Unit Tests', () => {
     await wethToken.mock.withdraw.returns()
     await wethToken.mock.transferFrom.returns(true)
 
-    transferHandlerRegistry = await (
-      await ethers.getContractFactory('TransferHandlerRegistry')
-    ).deploy()
-    await transferHandlerRegistry.deployed()
-
     swap = await (
       await ethers.getContractFactory(SWAP.abi, SWAP.bytecode)
-    ).deploy(
-      transferHandlerRegistry.address,
-      PROTOCOL_FEE,
-      protocolFeeWallet.address
-    )
+    ).deploy(PROTOCOL_FEE, protocolFeeWallet.address)
     await swap.deployed()
 
     swapErc20 = await (
