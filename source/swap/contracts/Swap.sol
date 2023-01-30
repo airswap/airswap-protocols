@@ -506,7 +506,6 @@ contract Swap is ISwap, Ownable, EIP712 {
       revert NonceAlreadyUsed(nonce);
     }
 
-    _signatoryMinimumNonce[signatory];
     _nonceGroups[signatory][groupKey] = group | (uint256(1) << indexInGroup);
   }
 
