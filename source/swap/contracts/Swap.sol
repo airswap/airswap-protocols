@@ -100,9 +100,6 @@ contract Swap is ISwap, Ownable, EIP712 {
    * @param order Order to settle
    */
   function swap(address recipient, Order calldata order) external {
-    // Ensure the order is not expired.
-    if (order.expiry <= block.timestamp) revert OrderExpired();
-
     // Validate the sender side of the trade.
     address finalSenderWallet;
 
@@ -417,6 +414,9 @@ contract Swap is ISwap, Ownable, EIP712 {
   function _checkValidOrder(Order calldata order, bytes32 domainSeparator)
     internal
   {
+    // Ensure the order is not expired.
+    if (order.expiry <= block.timestamp) revert OrderExpired();
+
     bytes32 hashed = _hashOrder(order, domainSeparator);
 
     // Recover the signatory from the hash and signature
