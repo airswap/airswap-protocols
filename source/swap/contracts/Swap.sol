@@ -2,8 +2,9 @@
 
 pragma solidity 0.8.17;
 
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
-import "./interfaces/ITransferHandler.sol";
+import "./interfaces/IAdapter.sol";
 import "./interfaces/ISwap.sol";
 
 /**
@@ -52,16 +53,14 @@ contract Swap is ISwap, Ownable, EIP712 {
   // Data type used for hashing: Structured data (EIP-191)
   bytes internal constant EIP191_HEADER = "\x19\x01";
 
-  // Domain and version for use in signatures (EIP-712)
+  // Domain name and version for use in signatures (EIP-712)
   string public constant DOMAIN_NAME = "SWAP";
   string public constant DOMAIN_VERSION = "3";
-
   uint256 public constant FEE_DIVISOR = 10000;
+  uint256 internal constant MAX_ERROR_COUNT = 10;
 
   uint256 public protocolFee;
   address public protocolFeeWallet;
-
-  uint256 internal constant MAX_ERROR_COUNT = 10;
 
   /**
    * @notice Double mapping of signers to nonce groups to nonce states
@@ -75,24 +74,29 @@ contract Swap is ISwap, Ownable, EIP712 {
   // Mapping of signer addresses to an optionally set minimum valid nonce
   mapping(address => uint256) public _signatoryMinimumNonce;
 
-  // A registry storing a transfer handler for different token kinds
-  TransferHandlerRegistry public registry;
+  // Mapping of ERC165 interface ID to token Adapter
+  mapping(bytes4 => IAdapter) public adapters;
 
   /**
    * @notice Contract Constructor
    * @dev Sets domain for signature validation (EIP-712)
-   * @param swapRegistry TransferHandlerRegistry
+   * @param _adapters IAdapter[] array of token adapters
+   * @param _protocolFee uin256 fee to be assessed on swaps
+   * @param _protocolFeeWallet address destination for fees
    */
   constructor(
-    TransferHandlerRegistry swapRegistry,
+    IAdapter[] memory _adapters,
     uint256 _protocolFee,
     address _protocolFeeWallet
   ) EIP712(DOMAIN_NAME, DOMAIN_VERSION) {
     if (_protocolFee >= FEE_DIVISOR) revert InvalidFee();
     if (_protocolFeeWallet == address(0)) revert InvalidFeeWallet();
-    registry = swapRegistry;
     protocolFee = _protocolFee;
     protocolFeeWallet = _protocolFeeWallet;
+    if (_adapters.length == 0) revert InvalidAdapters();
+    for (uint256 i = 0; i < _adapters.length; i++) {
+      adapters[_adapters[i].interfaceID()] = _adapters[i];
+    }
   }
 
   /**
@@ -151,7 +155,7 @@ contract Swap is ISwap, Ownable, EIP712 {
     }
 
     // Check if protocol fee is applicable and transfer it accordingly
-    if (registry.transferHandlers(order.signer.kind).attemptFeeTransfer()) {
+    if (adapters[order.signer.kind].attemptFeeTransfer()) {
       _transferProtocolFee(order);
     }
 
@@ -319,52 +323,46 @@ contract Swap is ISwap, Ownable, EIP712 {
       errCount++;
     }
 
-    ITransferHandler signerTransferHandler = registry.transferHandlers(
-      order.signer.kind
-    );
+    IAdapter signerTokenAdapter = adapters[order.signer.kind];
 
-    if (address(signerTransferHandler) == address(0)) {
+    if (address(signerTokenAdapter) == address(0)) {
       errors[errCount] = "SignerTokenKindUnknown";
       errCount++;
     } else {
-      if (!signerTransferHandler.hasAllowance(order.signer)) {
+      if (!signerTokenAdapter.hasAllowance(order.signer)) {
         errors[errCount] = "SignerAllowanceLow";
         errCount++;
       }
-      if (!signerTransferHandler.hasBalance(order.signer)) {
+      if (!signerTokenAdapter.hasBalance(order.signer)) {
         errors[errCount] = "SignerBalanceLow";
         errCount++;
       }
     }
 
-    ITransferHandler senderTransferHandler = registry.transferHandlers(
-      order.sender.kind
-    );
+    IAdapter senderTokenAdapter = adapters[order.sender.kind];
 
-    if (address(senderTransferHandler) == address(0)) {
+    if (address(senderTokenAdapter) == address(0)) {
       errors[errCount] = "SenderTokenKindUnknown";
       errCount++;
     } else {
-      if (!senderTransferHandler.hasAllowance(order.sender)) {
+      if (!senderTokenAdapter.hasAllowance(order.sender)) {
         errors[errCount] = "SenderAllowanceLow";
         errCount++;
       }
-      if (!senderTransferHandler.hasBalance(order.sender)) {
+      if (!senderTokenAdapter.hasBalance(order.sender)) {
         errors[errCount] = "SenderBalanceLow";
         errCount++;
       }
     }
 
     if (order.affiliate.token != address(0)) {
-      ITransferHandler affiliateTransferHandler = registry.transferHandlers(
-        order.affiliate.kind
-      );
+      IAdapter affiliateTokenAdapter = adapters[order.affiliate.kind];
 
-      if (!affiliateTransferHandler.hasAllowance(order.signer)) {
+      if (!affiliateTokenAdapter.hasAllowance(order.signer)) {
         errors[errCount] = "AffiliateAllowanceLow";
         errCount++;
       }
-      if (!affiliateTransferHandler.hasBalance(order.signer)) {
+      if (!affiliateTokenAdapter.hasBalance(order.signer)) {
         errors[errCount] = "AffiliateBalanceLow";
         errCount++;
       }
@@ -443,9 +441,9 @@ contract Swap is ISwap, Ownable, EIP712 {
     address token,
     bytes4 kind
   ) internal {
-    ITransferHandler transferHandler = registry.transferHandlers(kind);
-    if (address(transferHandler) == address(0)) revert TokenKindUnknown();
-    transferHandler.transferTokens(from, to, amount, id, token);
+    IAdapter adapter = adapters[kind];
+    if (address(adapter) == address(0)) revert TokenKindUnknown();
+    adapter.transferTokens(from, to, amount, id, token);
   }
 
   /**

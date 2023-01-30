@@ -11,13 +11,18 @@ struct Party {
 }
 
 /**
- * @title ITransferHandler: interface for token transfers
+ * @title IAdapter: Adapter for various token kinds
  */
-interface ITransferHandler {
+interface IAdapter {
   /**
-   * Revert if provided an invalid transfer argument
+   * @notice Revert if provided an invalid transfer argument
    */
   error InvalidArgument(string);
+
+  /**
+   * @notice Return the ERC165 interfaceID this adapter supports
+   */
+  function interfaceID() external view returns (bytes4);
 
   /**
    * @notice Indicates whether to attempt a fee transfer on the token

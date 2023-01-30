@@ -10,7 +10,6 @@ const { ADDRESS_ZERO } = require('@airswap/constants')
 
 const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
 const IWETH = require('../build/contracts/interfaces/IWETH.sol/IWETH.json')
-const SWAP = require('@airswap/swap/build/contracts/Swap.sol/Swap.json')
 const SWAP_ERC20 = require('@airswap/swap-erc20/build/contracts/SwapERC20.sol/SwapERC20.json')
 
 describe('Wrapper Unit Tests', () => {
@@ -66,7 +65,7 @@ describe('Wrapper Unit Tests', () => {
   })
 
   before('get signers and deploy', async () => {
-    ;[deployer, sender, signer, protocolFeeWallet, newSwap] =
+    ;[deployer, sender, signer, protocolFeeWallet, newSwap, anyone] =
       await ethers.getSigners()
 
     signerToken = await deployMockContract(deployer, IERC20.abi)
@@ -88,20 +87,6 @@ describe('Wrapper Unit Tests', () => {
     await wethToken.mock.withdraw.returns()
     await wethToken.mock.transferFrom.returns(true)
 
-    transferHandlerRegistry = await (
-      await ethers.getContractFactory('TransferHandlerRegistry')
-    ).deploy()
-    await transferHandlerRegistry.deployed()
-
-    swap = await (
-      await ethers.getContractFactory(SWAP.abi, SWAP.bytecode)
-    ).deploy(
-      transferHandlerRegistry.address,
-      PROTOCOL_FEE,
-      protocolFeeWallet.address
-    )
-    await swap.deployed()
-
     swapErc20 = await (
       await ethers.getContractFactory(SWAP_ERC20.abi, SWAP_ERC20.bytecode)
     ).deploy(
@@ -116,7 +101,7 @@ describe('Wrapper Unit Tests', () => {
 
     wrapper = await (
       await ethers.getContractFactory('Wrapper')
-    ).deploy(swap.address, swapErc20.address, wethToken.address)
+    ).deploy(anyone.address, swapErc20.address, wethToken.address)
     await wrapper.deployed()
   })
 
@@ -133,7 +118,7 @@ describe('Wrapper Unit Tests', () => {
       await expect(
         (
           await ethers.getContractFactory('Wrapper')
-        ).deploy(swap.address, swapErc20.address, ADDRESS_ZERO)
+        ).deploy(anyone.address, swapErc20.address, ADDRESS_ZERO)
       ).to.be.revertedWith('INVALID_WETH_CONTRACT')
     })
   })
@@ -158,7 +143,7 @@ describe('Wrapper Unit Tests', () => {
     })
   })
 
-  describe('Test wraps', async () => {
+  describe('Test SwapERC20 wraps', async () => {
     it('test swap fails with value', async () => {
       const order = await createSignedOrderERC20(
         {
