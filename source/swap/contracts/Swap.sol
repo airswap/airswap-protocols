@@ -84,7 +84,7 @@ contract Swap is ISwap, Ownable, EIP712 {
    * @param _protocolFeeWallet address
    */
   constructor(
-    address[] memory _adapters,
+    IAdapter[] memory _adapters,
     uint256 _protocolFee,
     address _protocolFeeWallet
   ) EIP712(DOMAIN_NAME, DOMAIN_VERSION) {
@@ -94,7 +94,7 @@ contract Swap is ISwap, Ownable, EIP712 {
     protocolFeeWallet = _protocolFeeWallet;
     if (_adapters.length == 0) revert InvalidAdapters();
     for (uint256 i = 0; i < _adapters.length; i++) {
-      adapters[IAdapter(_adapters[i]).interfaceID()] = IAdapter(_adapters[i]);
+      adapters[_adapters[i].interfaceID()] = _adapters[i];
     }
   }
 
