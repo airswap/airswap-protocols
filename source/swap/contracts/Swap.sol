@@ -80,8 +80,9 @@ contract Swap is ISwap, Ownable, EIP712 {
   /**
    * @notice Contract Constructor
    * @dev Sets domain for signature validation (EIP-712)
-   * @param _protocolFee uin256
-   * @param _protocolFeeWallet address
+   * @param _adapters IAdapter[] array of token adapters
+   * @param _protocolFee uin256 fee to be assessed on swaps
+   * @param _protocolFeeWallet address destination for fees
    */
   constructor(
     IAdapter[] memory _adapters,
