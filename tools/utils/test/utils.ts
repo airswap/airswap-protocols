@@ -83,7 +83,7 @@ describe('Utils', async () => {
       signature.s
     )
     const settlement = {
-      chainId: '4',
+      chainId: 4,
       swapContract: '0x3700A8C0447aEE3160F6aF3A34a0C062629335d9',
     }
 

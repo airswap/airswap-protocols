@@ -2,10 +2,15 @@
 
 pragma solidity 0.8.17;
 
-import "../interfaces/ITransferHandler.sol";
+import "../interfaces/IAdapter.sol";
 import "openzeppelin-solidity/contracts/token/ERC721/IERC721.sol";
 
-contract ERC721TransferHandler is ITransferHandler {
+contract ERC721Adapter is IAdapter {
+  /**
+   * @notice Indicates the ERC165 interfaceID supported by this adapter
+   */
+  bytes4 public constant interfaceID = 0x80ac58cd;
+
   /**
    * @notice Indicates whether to attempt a fee transfer on the token
    */
@@ -34,7 +39,6 @@ contract ERC721TransferHandler is ITransferHandler {
    * @param amount uint256, must be 0 for this contract
    * @param id uint256 ID for ERC721
    * @param token address Contract address of token
-   * @return bool on success of the token transfer
    */
   function transferTokens(
     address from,
@@ -42,9 +46,8 @@ contract ERC721TransferHandler is ITransferHandler {
     uint256 amount,
     uint256 id,
     address token
-  ) external returns (bool) {
+  ) external {
     if (amount != 0) revert InvalidArgument("amount");
     IERC721(token).safeTransferFrom(from, to, id);
-    return true;
   }
 }

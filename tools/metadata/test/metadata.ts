@@ -1,7 +1,6 @@
 import { expect } from 'chai'
-
 import {
-  fetchTokens,
+  getKnownTokens,
   findTokenByAddress,
   findTokensBySymbol,
   firstTokenBySymbol,
@@ -15,7 +14,7 @@ import {
 describe('Metadata: Ethereum', async () => {
   let result
   it('fetches all known tokens', async () => {
-    result = await fetchTokens(chainIds.ETHEREUM)
+    result = await getKnownTokens(chainIds.ETHEREUM)
     expect(result.tokens.length).to.not.equal(0)
   })
   it('checks that ETH does not exist', async () => {
@@ -27,7 +26,7 @@ describe('Metadata: Goerli', async () => {
   let result
 
   it('fetches all known tokens', async () => {
-    result = await fetchTokens(chainIds.GOERLI)
+    result = await getKnownTokens(chainIds.GOERLI)
     expect(result.tokens.length).to.not.equal(0)
   })
   it('checks that ETH does not exist', async () => {

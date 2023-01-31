@@ -2,7 +2,7 @@
 pragma solidity 0.8.17;
 
 interface ISwapERC20 {
-  struct Order {
+  struct OrderERC20 {
     uint256 nonce;
     uint256 expiry;
     address signerWallet;

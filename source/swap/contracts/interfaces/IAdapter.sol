@@ -11,13 +11,18 @@ struct Party {
 }
 
 /**
- * @title ITransferHandler: interface for token transfers
+ * @title IAdapter: Adapter for various token kinds
  */
-interface ITransferHandler {
+interface IAdapter {
   /**
-   * Revert if provided an invalid transfer argument
+   * @notice Revert if provided an invalid transfer argument
    */
   error InvalidArgument(string);
+
+  /**
+   * @notice Return the ERC165 interfaceID this adapter supports
+   */
+  function interfaceID() external view returns (bytes4);
 
   /**
    * @notice Indicates whether to attempt a fee transfer on the token
@@ -43,7 +48,6 @@ interface ITransferHandler {
    * @param amount uint256 Amount for ERC-20
    * @param id token ID for ERC-721
    * @param token address Contract address of token
-   * @return bool on success of the token transfer
    */
   function transferTokens(
     address from,
@@ -51,5 +55,5 @@ interface ITransferHandler {
     uint256 amount,
     uint256 id,
     address token
-  ) external returns (bool);
+  ) external;
 }

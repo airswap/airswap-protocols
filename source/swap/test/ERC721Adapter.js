@@ -1,6 +1,6 @@
 const { expect } = require('chai')
 const { ethers, waffle } = require('hardhat')
-const IERC777 = require('@openzeppelin/contracts/build/contracts/IERC777.json')
+const IERC721 = require('@openzeppelin/contracts/build/contracts/IERC721.json')
 const { deployMockContract } = waffle
 const { ADDRESS_ZERO, tokenKinds } = require('@airswap/constants')
 
@@ -8,7 +8,7 @@ let snapshotId
 let transferHandler
 let party
 
-describe('ERC721TransferHandler Unit', () => {
+describe('ERC721Adapter Unit', () => {
   beforeEach(async () => {
     snapshotId = await ethers.provider.send('evm_snapshot')
   })
@@ -17,28 +17,28 @@ describe('ERC721TransferHandler Unit', () => {
     await ethers.provider.send('evm_revert', [snapshotId])
   })
 
-  before('deploy erc777 transfer handler', async () => {
+  before('deploy erc721 transfer handler', async () => {
     ;[deployer, swap, anyone] = await ethers.getSigners()
-    token = await deployMockContract(deployer, IERC777.abi)
+    token = await deployMockContract(deployer, IERC721.abi)
     transferHandler = await (
-      await ethers.getContractFactory('ERC777TransferHandler')
+      await ethers.getContractFactory('ERC721Adapter')
     ).deploy()
     await transferHandler.deployed()
     party = {
       wallet: ADDRESS_ZERO,
       token: token.address,
-      kind: tokenKinds.ERC777,
-      id: '0',
-      amount: '1',
+      kind: tokenKinds.ERC721,
+      id: '1',
+      amount: '0',
     }
   })
 
-  it('attemptFeeTransfer is true', async () => {
-    expect(await transferHandler.attemptFeeTransfer()).to.be.equal(true)
+  it('attemptFeeTransfer is false', async () => {
+    expect(await transferHandler.attemptFeeTransfer()).to.be.equal(false)
   })
 
   it('hasAllowance succeeds', async () => {
-    await token.mock.isOperatorFor
+    await token.mock.isApprovedForAll
       .withArgs(party.wallet, swap.address)
       .returns(true)
     expect(await transferHandler.connect(swap).hasAllowance(party)).to.be.equal(
@@ -47,12 +47,12 @@ describe('ERC721TransferHandler Unit', () => {
   })
 
   it('hasBalance succeeds', async () => {
-    await token.mock.balanceOf.returns(party.amount)
+    await token.mock.ownerOf.returns(party.wallet)
     expect(await transferHandler.hasBalance(party)).to.be.equal(true)
   })
 
   it('transferTokens succeeds', async () => {
-    await token.mock.operatorSend.returns()
+    await token.mock['safeTransferFrom(address,address,uint256)'].returns()
     await expect(
       transferHandler
         .connect(swap)
@@ -67,17 +67,17 @@ describe('ERC721TransferHandler Unit', () => {
   })
 
   it('transferTokens with nonzero amount fails', async () => {
-    await token.mock.operatorSend.returns()
+    await token.mock['safeTransferFrom(address,address,uint256)'].returns()
     await expect(
       transferHandler
         .connect(swap)
         .transferTokens(
           party.wallet,
           anyone.address,
-          party.amount,
           '1',
+          party.id,
           party.token
         )
-    ).to.be.revertedWith('InvalidArgument("id")')
+    ).to.be.revertedWith('InvalidArgument("amount")')
   })
 })

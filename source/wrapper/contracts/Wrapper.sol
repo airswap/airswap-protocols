@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "@airswap/swap-erc20/contracts/interfaces/ISwapERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/IWETH.sol";
 
 /**
@@ -15,33 +16,52 @@ contract Wrapper is Ownable {
 
   event WrappedSwapFor(address indexed senderWallet);
 
-  ISwapERC20 public swapContract;
+  ISwap public swapContract;
+  ISwapERC20 public swapERC20Contract;
   IWETH public wethContract;
   uint256 constant MAX_UINT = 2**256 - 1;
 
   /**
    * @notice Constructor
    * @param _swapContract address
+   * @param _swapERC20Contract address
    * @param _wethContract address
    */
-  constructor(address _swapContract, address _wethContract) {
-    require(_swapContract != address(0), "INVALID_CONTRACT");
+  constructor(
+    address _swapContract,
+    address _swapERC20Contract,
+    address _wethContract
+  ) {
+    require(_swapContract != address(0), "INVALID_SWAP_CONTRACT");
+    require(_swapERC20Contract != address(0), "INVALID_SWAP_ERC20_CONTRACT");
     require(_wethContract != address(0), "INVALID_WETH_CONTRACT");
 
-    swapContract = ISwapERC20(_swapContract);
+    swapContract = ISwap(_swapContract);
+    swapERC20Contract = ISwapERC20(_swapERC20Contract);
     wethContract = IWETH(_wethContract);
     wethContract.approve(_swapContract, MAX_UINT);
   }
 
   /**
-   * @notice Set the swap contract
+   * @notice Set the SwapERC20 contract
    * @param _swapContract address Address of the new swap contract
    */
   function setSwapContract(address _swapContract) external onlyOwner {
-    require(_swapContract != address(0), "INVALID_CONTRACT");
+    require(_swapContract != address(0), "INVALID_SWAP_CONTRACT");
     wethContract.approve(address(swapContract), 0);
-    swapContract = ISwapERC20(_swapContract);
+    swapContract = ISwap(_swapContract);
     wethContract.approve(_swapContract, MAX_UINT);
+  }
+
+  /**
+   * @notice Set the SwapERC20 contract
+   * @param _swapERC20Contract address Address of the new swap contract
+   */
+  function setSwapERC20Contract(address _swapERC20Contract) external onlyOwner {
+    require(_swapERC20Contract != address(0), "INVALID_SWAP_ERC20_CONTRACT");
+    wethContract.approve(address(swapERC20Contract), 0);
+    swapERC20Contract = ISwapERC20(_swapERC20Contract);
+    wethContract.approve(_swapERC20Contract, MAX_UINT);
   }
 
   /**
@@ -53,6 +73,17 @@ contract Wrapper is Ownable {
     if (msg.sender != address(wethContract)) {
       revert("DO_NOT_SEND_ETHER");
     }
+  }
+
+  /**
+   * @notice Wrapped Swap.swap
+   * @param order ISwap.Order uint256 Unique and should be sequential
+   */
+  function swap(ISwap.Order calldata order) public payable {
+    _wrapEther(order.sender.token, order.sender.amount);
+    swapContract.swap(address(this), order);
+    _unwrapEther(order.signer.token, order.signer.amount);
+    emit WrappedSwapFor(msg.sender);
   }
 
   /**
@@ -68,7 +99,7 @@ contract Wrapper is Ownable {
    * @param r bytes32 "r" value of the ECDSA signature
    * @param s bytes32 "s" value of the ECDSA signature
    */
-  function swap(
+  function swapERC20(
     uint256 nonce,
     uint256 expiry,
     address signerWallet,
@@ -81,7 +112,7 @@ contract Wrapper is Ownable {
     bytes32 s
   ) public payable {
     _wrapEther(senderToken, senderAmount);
-    swapContract.swap(
+    swapERC20Contract.swap(
       address(this),
       nonce,
       expiry,
@@ -124,7 +155,7 @@ contract Wrapper is Ownable {
     bytes32 s
   ) public payable {
     _wrapEther(senderToken, senderAmount);
-    swapContract.swapAnySender(
+    swapERC20Contract.swapAnySender(
       address(this),
       nonce,
       expiry,
