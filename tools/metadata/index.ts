@@ -2,7 +2,15 @@ import axios from 'axios'
 import * as ethers from 'ethers'
 import { TokenInfo } from '@uniswap/token-lists'
 import { defaults, tokenListURLs } from './constants'
-import { tokenKinds } from '@airswap/constants'
+import {
+  tokenKinds,
+  chainNames,
+  stakingTokenAddresses,
+} from '@airswap/constants'
+
+const AIRSWAP_LOGO_URI =
+  'https://storage.googleapis.com/subgraph-images/158680119781426823563.png'
+const AIRSWAP_SYMBOL = 'AST'
 
 import { abi as ERC165_ABI } from '@openzeppelin/contracts/build/contracts/ERC165.json'
 import { abi as ERC20_ABI } from '@openzeppelin/contracts/build/contracts/ERC20.json'
@@ -41,8 +49,20 @@ export async function getKnownTokens(
   }
   tokens = tokens.filter((token) => {
     token.address = token.address.toLowerCase()
-    return token.address && token.chainId === chainId
+    return (
+      token.address &&
+      token.chainId === chainId &&
+      token.symbol !== AIRSWAP_SYMBOL
+    )
   })
+  if (stakingTokenAddresses[chainId]) {
+    const stakingTokens = getStakingTokens()
+    for (let i = 0; i < stakingTokens.length; i++) {
+      if (stakingTokens[i].chainId == chainId) {
+        tokens.push(stakingTokens[i])
+      }
+    }
+  }
   return { tokens, errors }
 }
 
@@ -71,6 +91,26 @@ export function firstTokenBySymbol(
   return tokens.find((token) => {
     return token.symbol === symbol
   })
+}
+
+export function getStakingTokens(): TokenInfo[] {
+  const _stakingTokens: TokenInfo[] = []
+  for (const chainId in stakingTokenAddresses) {
+    const _chainId = Number(chainId)
+    _stakingTokens.push({
+      name:
+        'AirSwap Token' +
+        (_chainId !== 1 ? ` (${chainNames[_chainId]} Placeholder)` : ''),
+      symbol:
+        'AST' +
+        (_chainId !== 1 ? ` (${chainNames[_chainId]} Placeholder)` : ''),
+      address: stakingTokenAddresses[_chainId],
+      decimals: 4,
+      logoURI: AIRSWAP_LOGO_URI,
+      chainId: Number(_chainId),
+    })
+  }
+  return _stakingTokens
 }
 
 export async function getTokenFromContract(

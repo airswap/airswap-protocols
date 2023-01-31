@@ -50,7 +50,7 @@ export const mainnets: number[] = [1, 30, 56, 137, 42161, 43114]
 
 export const testnets: number[] = [5, 31, 97, 80001, 421613, 43113]
 
-export const chainCurrencies: Record<string, string> = {
+export const chainCurrencies: Record<number, string> = {
   1: 'ETH',
   5: 'ETH',
   30: 'RBTC',
@@ -66,7 +66,7 @@ export const chainCurrencies: Record<string, string> = {
   80001: 'MATIC',
 }
 
-export const wrappedTokenAddresses: Record<string, string> = {
+export const wrappedTokenAddresses: Record<number, string> = {
   1: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
   5: '0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6',
   30: '0x967f8799af07df1534d48a95a5c9febe92c53ae0',
@@ -82,7 +82,7 @@ export const wrappedTokenAddresses: Record<string, string> = {
   421613: '0xee01c0cd76354c383b8c7b4e65ea88d00b06f36f',
 }
 
-export const stakingTokenAddresses: Record<string, string> = {
+export const stakingTokenAddresses: Record<number, string> = {
   1: '0x27054b13b1b798b345b591a4d22e6562d47ea75a',
   5: '0x1a1ec25dc08e98e5e93f1104b5e5cdd298707d31',
   30: '',
@@ -98,7 +98,7 @@ export const stakingTokenAddresses: Record<string, string> = {
   421613: '0x71070c5607358fc25e3b4aaf4fb0a580c190252a',
 }
 
-export const etherscanDomains: Record<string, string> = {
+export const etherscanDomains: Record<number, string> = {
   1: 'etherscan.io',
   5: 'goerli.etherscan.io',
   30: 'explorer.rsk.co',
