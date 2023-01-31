@@ -17,14 +17,10 @@ async function main() {
   console.log(`Verifying on ${chainNames[chainId].toUpperCase()}`)
 
   for (let i = 0; i < adapterDeploys[chainId].length; i++) {
-    try {
-      await run('verify:verify', {
-        address: adapterDeploys[chainId][i],
-        constructorArguments: [],
-      })
-    } catch (e) {
-      console.log(e)
-    }
+    await run('verify:verify', {
+      address: adapterDeploys[chainId][i],
+      constructorArguments: [],
+    })
   }
 
   await run('verify:verify', {
