@@ -25,9 +25,6 @@ contract SwapERC20 is ISwapERC20, Ownable {
       )
     );
 
-  // EIP191 header for use in EIP712 signatures
-  bytes internal constant EIP191_HEADER = "\x19\x01";
-
   // Domain name and version for use in EIP712 signatures
   bytes32 public constant DOMAIN_NAME = keccak256("SWAP_ERC20");
   bytes32 public constant DOMAIN_VERSION = keccak256("3");
@@ -272,6 +269,7 @@ contract SwapERC20 is ISwapERC20, Ownable {
     address signatory = ecrecover(
       keccak256(
         abi.encodePacked(
+          // Indicates EIP712
           "\x19\x01",
           DOMAIN_SEPARATOR,
           keccak256(
@@ -739,6 +737,7 @@ contract SwapERC20 is ISwapERC20, Ownable {
     return
       keccak256(
         abi.encodePacked(
+          // Indicates EIP712
           "\x19\x01",
           DOMAIN_SEPARATOR,
           keccak256(
