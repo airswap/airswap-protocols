@@ -1,8 +1,8 @@
 const { expect } = require('chai')
 const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
-const TransferHandler = require('../build/contracts/interfaces/ITransferHandler.sol/ITransferHandler.json')
 const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
+const IAdapter = require('../build/contracts/interfaces/IAdapter.sol/IAdapter.json')
 const { createOrder, createOrderSignature } = require('@airswap/utils')
 const { tokenKinds, ADDRESS_ZERO } = require('@airswap/constants')
 
@@ -18,8 +18,7 @@ let signer
 let sender
 let affiliate
 let token
-let transferHandler
-let transferHandlerRegistry
+let adapter
 let swap
 
 async function signOrder(order, wallet, swapContract) {
@@ -35,7 +34,7 @@ async function createSignedOrder(params, signatory) {
     ...params,
     signer: {
       wallet: signer.address,
-      token: ADDRESS_ZERO,
+      token: token.address,
       kind: tokenKinds.ERC20,
       id: '0',
       amount: DEFAULT_AMOUNT,
@@ -43,7 +42,7 @@ async function createSignedOrder(params, signatory) {
     },
     sender: {
       wallet: sender.address,
-      token: ADDRESS_ZERO,
+      token: token.address,
       kind: tokenKinds.ERC20,
       id: '0',
       amount: DEFAULT_AMOUNT,
@@ -62,22 +61,25 @@ describe('Swap Unit', () => {
     await ethers.provider.send('evm_revert', [snapshotId])
   })
 
-  before('deploy registry and swap', async () => {
+  before('deploy adapter and swap', async () => {
     ;[deployer, sender, signer, affiliate, protocolFeeWallet, anyone] =
       await ethers.getSigners()
 
     token = await deployMockContract(deployer, IERC20.abi)
-    transferHandlerRegistry = await (
-      await ethers.getContractFactory('TransferHandlerRegistry')
-    ).deploy()
-    await transferHandlerRegistry.deployed()
+    await token.mock.allowance.returns('0')
+    await token.mock.balanceOf.returns('0')
+    await token.mock.transferFrom.returns(true)
+
+    adapter = await deployMockContract(deployer, IAdapter.abi)
+    await adapter.mock.interfaceID.returns(tokenKinds.ERC20)
+    await adapter.mock.hasAllowance.returns(true)
+    await adapter.mock.hasBalance.returns(true)
+    await adapter.mock.attemptFeeTransfer.returns(true)
+    await adapter.mock.transferTokens.returns()
+
     swap = await (
       await ethers.getContractFactory('Swap')
-    ).deploy(
-      transferHandlerRegistry.address,
-      PROTOCOL_FEE,
-      protocolFeeWallet.address
-    )
+    ).deploy([adapter.address], PROTOCOL_FEE, protocolFeeWallet.address)
     await swap.deployed()
   })
 
@@ -85,7 +87,7 @@ describe('Swap Unit', () => {
     await expect(
       (
         await ethers.getContractFactory('Swap')
-      ).deploy(transferHandlerRegistry.address, PROTOCOL_FEE, ADDRESS_ZERO)
+      ).deploy([], PROTOCOL_FEE, ADDRESS_ZERO)
     ).to.be.revertedWith('InvalidFeeWallet()')
   })
 
@@ -93,12 +95,16 @@ describe('Swap Unit', () => {
     await expect(
       (
         await ethers.getContractFactory('Swap')
-      ).deploy(
-        transferHandlerRegistry.address,
-        100000000000,
-        protocolFeeWallet.address
-      )
+      ).deploy([], 100000000000, protocolFeeWallet.address)
     ).to.be.revertedWith('InvalidFee()')
+  })
+
+  it('deploy with invalid adapters fails', async () => {
+    await expect(
+      (
+        await ethers.getContractFactory('Swap')
+      ).deploy([], PROTOCOL_FEE, protocolFeeWallet.address)
+    ).to.be.revertedWith('InvalidAdapters()')
   })
 
   it('setProtocolFeeWallet', async () => {
@@ -140,35 +146,6 @@ describe('Swap Unit', () => {
     await expect(
       swap.connect(deployer).setProtocolFee(FEE_DIVISOR + 1)
     ).to.be.revertedWith('InvalidFee()')
-  })
-
-  before(async () => {
-    transferHandler = await deployMockContract(deployer, TransferHandler.abi)
-    await transferHandler.mock.attemptFeeTransfer.returns(true)
-    await transferHandler.mock.hasAllowance.returns(true)
-    await transferHandler.mock.hasBalance.returns(true)
-    await transferHandler.mock.transferTokens.returns()
-    await transferHandlerRegistry.addTransferHandler(
-      tokenKinds.ERC20,
-      transferHandler.address
-    )
-  })
-
-  it('adding transfer handler as non-owner fails', async () => {
-    await expect(
-      transferHandlerRegistry
-        .connect(anyone)
-        .addTransferHandler(tokenKinds.ERC20, transferHandler.address)
-    ).to.be.revertedWith('Ownable: caller is not the owner')
-  })
-
-  it('adding duplicate transfer handler fails', async () => {
-    await expect(
-      transferHandlerRegistry.addTransferHandler(
-        tokenKinds.ERC20,
-        transferHandler.address
-      )
-    ).to.be.revertedWith('HandlerExistsForKind()')
   })
 
   it('swap succeeds', async () => {
@@ -285,15 +262,6 @@ describe('Swap Unit', () => {
     ).to.be.revertedWith('Unauthorized()')
   })
 
-  it('swap with nonfungible signer token succeeds', async () => {
-    const order = await createSignedOrder({}, signer)
-    await transferHandler.mock.attemptFeeTransfer.returns(false)
-    await expect(swap.connect(sender).swap(sender.address, order)).to.emit(
-      swap,
-      'Swap'
-    )
-  })
-
   it('swap with passed expiry fails', async () => {
     const order = await createSignedOrder(
       {
@@ -318,7 +286,6 @@ describe('Swap Unit', () => {
       },
       signer
     )
-    await transferHandler.mock.transferTokens.returns()
     await expect(
       swap.connect(sender).swap(sender.address, order)
     ).to.be.revertedWith('SenderInvalid()')
@@ -336,36 +303,6 @@ describe('Swap Unit', () => {
     await expect(
       swap.connect(sender).swap(sender.address, order)
     ).to.be.revertedWith('TokenKindUnknown()')
-  })
-
-  it('swap with different kinds succeeds', async () => {
-    const erc721TransferHandler = await deployMockContract(
-      deployer,
-      TransferHandler.abi
-    )
-    await erc721TransferHandler.mock.attemptFeeTransfer.returns(true)
-    await erc721TransferHandler.mock.hasAllowance.returns(true)
-    await erc721TransferHandler.mock.hasBalance.returns(true)
-    await erc721TransferHandler.mock.transferTokens.returns()
-    await transferHandlerRegistry.addTransferHandler(
-      tokenKinds.ERC721,
-      erc721TransferHandler.address
-    )
-    const order = await createSignedOrder(
-      {
-        signer: {
-          kind: tokenKinds.ERC20,
-        },
-        sender: {
-          kind: tokenKinds.ERC721,
-        },
-      },
-      signer
-    )
-    await expect(swap.connect(sender).swap(sender.address, order)).to.emit(
-      swap,
-      'Swap'
-    )
   })
 
   it('swap with bad signature fails', async () => {
@@ -443,14 +380,16 @@ describe('Swap Unit', () => {
   })
 
   it('check succeeds', async () => {
+    await token.mock.allowance.returns(DEFAULT_AMOUNT)
+    await token.mock.balanceOf.returns(DEFAULT_AMOUNT)
     const order = await createSignedOrder({}, signer)
     const errors = await swap.check(order)
     expect(errors[1]).to.equal(0)
   })
 
   it('check without allowances or balances fails', async () => {
-    await transferHandler.mock.hasAllowance.returns(false)
-    await transferHandler.mock.hasBalance.returns(false)
+    await adapter.mock.hasAllowance.returns(false)
+    await adapter.mock.hasBalance.returns(false)
     const order = await createSignedOrder({}, signer)
     const [errors] = await swap.check(order)
     expect(errors[0]).to.be.equal(
@@ -593,8 +532,8 @@ describe('Swap Unit', () => {
   })
 
   it('check fails with affiliate balance insufficient', async () => {
-    await transferHandler.mock.hasAllowance.returns(false)
-    await transferHandler.mock.hasBalance.returns(false)
+    await adapter.mock.hasAllowance.returns(false)
+    await adapter.mock.hasBalance.returns(false)
     const order = await createSignedOrder(
       {
         affiliate: {

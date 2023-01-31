@@ -1,6 +1,6 @@
 const { expect } = require('chai')
 const { ethers, waffle } = require('hardhat')
-const IERC1155 = require('@openzeppelin/contracts/build/contracts/IERC1155.json')
+const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
 const { deployMockContract } = waffle
 const { ADDRESS_ZERO, tokenKinds } = require('@airswap/constants')
 
@@ -8,7 +8,7 @@ let snapshotId
 let transferHandler
 let party
 
-describe('ERC721TransferHandler Unit', () => {
+describe('ERC20Adapter Unit', () => {
   beforeEach(async () => {
     snapshotId = await ethers.provider.send('evm_snapshot')
   })
@@ -17,17 +17,17 @@ describe('ERC721TransferHandler Unit', () => {
     await ethers.provider.send('evm_revert', [snapshotId])
   })
 
-  before('deploy erc1155 transfer handler', async () => {
+  before('deploy erc20 transfer handler', async () => {
     ;[deployer, swap, anyone] = await ethers.getSigners()
-    token = await deployMockContract(deployer, IERC1155.abi)
+    erc20token = await deployMockContract(deployer, IERC20.abi)
     transferHandler = await (
-      await ethers.getContractFactory('ERC1155TransferHandler')
+      await ethers.getContractFactory('ERC20Adapter')
     ).deploy()
     await transferHandler.deployed()
     party = {
       wallet: ADDRESS_ZERO,
-      token: token.address,
-      kind: tokenKinds.ERC1155,
+      token: erc20token.address,
+      kind: tokenKinds.ERC20,
       id: '0',
       amount: '1',
     }
@@ -38,21 +38,21 @@ describe('ERC721TransferHandler Unit', () => {
   })
 
   it('hasAllowance succeeds', async () => {
-    await token.mock.isApprovedForAll
+    await erc20token.mock.allowance
       .withArgs(party.wallet, swap.address)
-      .returns(true)
+      .returns('1')
     expect(await transferHandler.connect(swap).hasAllowance(party)).to.be.equal(
       true
     )
   })
 
   it('hasBalance succeeds', async () => {
-    await token.mock.balanceOf.returns(party.amount)
+    await erc20token.mock.balanceOf.returns('1')
     expect(await transferHandler.hasBalance(party)).to.be.equal(true)
   })
 
   it('transferTokens succeeds', async () => {
-    await token.mock.safeTransferFrom.returns()
+    await erc20token.mock.transferFrom.returns(true)
     await expect(
       transferHandler
         .connect(swap)
@@ -63,6 +63,21 @@ describe('ERC721TransferHandler Unit', () => {
           party.id,
           party.token
         )
-    ).to.not.be.reverted
+    ).not.to.be.reverted
+  })
+
+  it('transferTokens with nonzero id fails', async () => {
+    await erc20token.mock.transferFrom.returns(true)
+    await expect(
+      transferHandler
+        .connect(swap)
+        .transferTokens(
+          party.wallet,
+          anyone.address,
+          party.amount,
+          '1',
+          party.token
+        )
+    ).to.be.revertedWith('InvalidArgument("id")')
   })
 })

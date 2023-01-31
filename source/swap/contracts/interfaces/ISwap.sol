@@ -2,8 +2,7 @@
 
 pragma solidity 0.8.17;
 
-// import "@airswap/transfers/contracts/TransferHandlerRegistry.sol";
-import "../TransferHandlerRegistry.sol";
+import "./IAdapter.sol";
 
 interface ISwap {
   struct Order {
@@ -17,6 +16,8 @@ interface ISwap {
     bytes32 r;
     bytes32 s;
   }
+
+  event SetAdapters(address[] adapters);
 
   event Swap(
     uint256 indexed nonce,
@@ -47,6 +48,7 @@ interface ISwap {
 
   event Revoke(address indexed signer, address indexed signerWallet);
 
+  error InvalidAdapters();
   error InvalidFee();
   error InvalidFeeWallet();
   error OrderExpired();
@@ -78,8 +80,6 @@ interface ISwap {
   function cancelUpTo(uint256 minimumNonce) external;
 
   function nonceUsed(address, uint256) external view returns (bool);
-
-  function registry() external view returns (TransferHandlerRegistry);
 
   function authorize(address sender) external;
 
