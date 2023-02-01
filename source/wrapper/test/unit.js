@@ -10,11 +10,11 @@ const { ADDRESS_ZERO } = require('@airswap/constants')
 
 const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
 const IWETH = require('../build/contracts/interfaces/IWETH.sol/IWETH.json')
-const LIGHT = require('@airswap/swap-erc20/build/contracts/SwapERC20.sol/SwapERC20.json')
+const SWAP_ERC20 = require('@airswap/swap-erc20/build/contracts/SwapERC20.sol/SwapERC20.json')
 
 describe('Wrapper Unit Tests', () => {
   let snapshotId
-  let swap
+  let swapErc20
   let wrapper
 
   let wethToken
@@ -50,7 +50,7 @@ describe('Wrapper Unit Tests', () => {
       ...(await createOrderERC20Signature(
         unsignedOrder,
         signer,
-        swap.address,
+        swapErc20.address,
         CHAIN_ID
       )),
     })
@@ -65,7 +65,7 @@ describe('Wrapper Unit Tests', () => {
   })
 
   before('get signers and deploy', async () => {
-    ;[deployer, sender, signer, protocolFeeWallet, newSwap] =
+    ;[deployer, sender, signer, protocolFeeWallet, newSwap, anyone] =
       await ethers.getSigners()
 
     signerToken = await deployMockContract(deployer, IERC20.abi)
@@ -87,8 +87,8 @@ describe('Wrapper Unit Tests', () => {
     await wethToken.mock.withdraw.returns()
     await wethToken.mock.transferFrom.returns(true)
 
-    swap = await (
-      await ethers.getContractFactory(LIGHT.abi, LIGHT.bytecode)
+    swapErc20 = await (
+      await ethers.getContractFactory(SWAP_ERC20.abi, SWAP_ERC20.bytecode)
     ).deploy(
       PROTOCOL_FEE,
       PROTOCOL_FEE_LIGHT,
@@ -97,11 +97,11 @@ describe('Wrapper Unit Tests', () => {
       REBATE_MAX,
       stakingToken.address
     )
-    await swap.deployed()
+    await swapErc20.deployed()
 
     wrapper = await (
       await ethers.getContractFactory('Wrapper')
-    ).deploy(swap.address, wethToken.address)
+    ).deploy(anyone.address, swapErc20.address, wethToken.address)
     await wrapper.deployed()
   })
 
@@ -110,15 +110,15 @@ describe('Wrapper Unit Tests', () => {
       await expect(
         (
           await ethers.getContractFactory('Wrapper')
-        ).deploy(ADDRESS_ZERO, wethToken.address)
-      ).to.be.revertedWith('INVALID_CONTRACT')
+        ).deploy(ADDRESS_ZERO, ADDRESS_ZERO, wethToken.address)
+      ).to.be.revertedWith('INVALID_SWAP_CONTRACT')
     })
 
     it('test deploy fails when weth contract address is zero address', async () => {
       await expect(
         (
           await ethers.getContractFactory('Wrapper')
-        ).deploy(swap.address, ADDRESS_ZERO)
+        ).deploy(anyone.address, swapErc20.address, ADDRESS_ZERO)
       ).to.be.revertedWith('INVALID_WETH_CONTRACT')
     })
   })
@@ -126,7 +126,7 @@ describe('Wrapper Unit Tests', () => {
   describe('Test swap config', async () => {
     it('test changing swap contract by non-owner', async () => {
       await expect(
-        wrapper.connect(sender).setSwapContract(swap.address)
+        wrapper.connect(sender).setSwapContract(swapErc20.address)
       ).to.be.revertedWith('owner')
     })
     it('test changing swap contract', async () => {
@@ -139,11 +139,11 @@ describe('Wrapper Unit Tests', () => {
     it('test changing swap contract fails when set to zero address', async () => {
       await expect(
         wrapper.connect(deployer).setSwapContract(ADDRESS_ZERO)
-      ).to.be.revertedWith('INVALID_CONTRACT')
+      ).to.be.revertedWith('INVALID_SWAP_CONTRACT')
     })
   })
 
-  describe('Test wraps', async () => {
+  describe('Test SwapERC20 wraps', async () => {
     it('test swap fails with value', async () => {
       const order = await createSignedOrderERC20(
         {
@@ -152,7 +152,7 @@ describe('Wrapper Unit Tests', () => {
         signer
       )
       await expect(
-        wrapper.connect(sender).swap(...order, { value: DEFAULT_AMOUNT })
+        wrapper.connect(sender).swapERC20(...order, { value: DEFAULT_AMOUNT })
       ).to.be.revertedWith('VALUE_MUST_BE_ZERO')
     })
     it('test wrapped swap fails without value', async () => {
@@ -162,9 +162,9 @@ describe('Wrapper Unit Tests', () => {
         },
         signer
       )
-      await expect(wrapper.connect(sender).swap(...order)).to.be.revertedWith(
-        'VALUE_MUST_BE_SENT'
-      )
+      await expect(
+        wrapper.connect(sender).swapERC20(...order)
+      ).to.be.revertedWith('VALUE_MUST_BE_SENT')
     })
     it('test swap', async () => {
       const order = await createSignedOrderERC20(
@@ -173,7 +173,7 @@ describe('Wrapper Unit Tests', () => {
         },
         signer
       )
-      await wrapper.connect(sender).swap(...order)
+      await wrapper.connect(sender).swapERC20(...order)
     })
     it('test wrapped swap', async () => {
       const order = await createSignedOrderERC20(
@@ -183,7 +183,9 @@ describe('Wrapper Unit Tests', () => {
         },
         signer
       )
-      await wrapper.connect(sender).swap(...order, { value: DEFAULT_AMOUNT })
+      await wrapper
+        .connect(sender)
+        .swapERC20(...order, { value: DEFAULT_AMOUNT })
     })
     it('test wrapped swapAnySender', async () => {
       const order = await createSignedOrderERC20(
@@ -207,9 +209,9 @@ describe('Wrapper Unit Tests', () => {
         signer
       )
 
-      await expect(wrapper.connect(sender).swap(...order)).to.be.revertedWith(
-        'ETH_RETURN_FAILED'
-      )
+      await expect(
+        wrapper.connect(sender).swapERC20(...order)
+      ).to.be.revertedWith('ETH_RETURN_FAILED')
     })
     it('Test fallback function revert', async () => {
       await expect(

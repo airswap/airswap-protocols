@@ -20,13 +20,15 @@ contract SwapERC20 is ISwapERC20, Ownable {
   bytes32 public constant ORDER_TYPEHASH =
     keccak256(
       abi.encodePacked(
-        "Order(uint256 nonce,uint256 expiry,address signerWallet,address signerToken,uint256 signerAmount,",
+        "OrderERC20(uint256 nonce,uint256 expiry,address signerWallet,address signerToken,uint256 signerAmount,",
         "uint256 protocolFee,address senderWallet,address senderToken,uint256 senderAmount)"
       )
     );
 
+  // Domain name and version for use in EIP712 signatures
   bytes32 public constant DOMAIN_NAME = keccak256("SWAP_ERC20");
   bytes32 public constant DOMAIN_VERSION = keccak256("3");
+
   uint256 public immutable DOMAIN_CHAIN_ID;
   bytes32 public immutable DOMAIN_SEPARATOR;
 
@@ -51,6 +53,15 @@ contract SwapERC20 is ISwapERC20, Ownable {
   uint256 public rebateMax;
   address public staking;
 
+  /**
+   * @notice Constructor
+   * @dev Sets domain and version for EIP712 signatures
+   * @param _protocolFee uin256 fee to be assessed on swaps
+   * @param _protocolFeeWallet address destination for fees
+   * @param _rebateScale uin256 scale factor for rebate
+   * @param _rebateMax uint256 max rebate percentage
+   * @param _staking address staking contract address
+   */
   constructor(
     uint256 _protocolFee,
     uint256 _protocolFeeLight,
@@ -258,6 +269,7 @@ contract SwapERC20 is ISwapERC20, Ownable {
     address signatory = ecrecover(
       keccak256(
         abi.encodePacked(
+          // Indicates EIP712
           "\x19\x01",
           DOMAIN_SEPARATOR,
           keccak256(
@@ -431,7 +443,7 @@ contract SwapERC20 is ISwapERC20, Ownable {
   }
 
   /**
-   * @notice Validates Swap Order for any potential errors
+   * @notice Checks and returns any potential errors given an order
    * @param senderWallet address Wallet that would send the order
    * @param nonce uint256 Unique and should be sequential
    * @param expiry uint256 Expiry in seconds since 1 January 1970
@@ -459,7 +471,7 @@ contract SwapERC20 is ISwapERC20, Ownable {
     bytes32 s
   ) public view returns (uint256, bytes32[] memory) {
     bytes32[] memory errors = new bytes32[](MAX_ERROR_COUNT);
-    Order memory order;
+    OrderERC20 memory order;
     uint256 errCount;
     order.nonce = nonce;
     order.expiry = expiry;
@@ -671,7 +683,8 @@ contract SwapERC20 is ISwapERC20, Ownable {
     // Ensure the expiry is not passed
     require(expiry > block.timestamp, "EXPIRY_PASSED");
 
-    bytes32 hashed = _getOrderHash(
+    // Get the order hash
+    bytes32 hash = _getOrderHash(
       nonce,
       expiry,
       signerWallet,
@@ -683,22 +696,18 @@ contract SwapERC20 is ISwapERC20, Ownable {
     );
 
     // Recover the signatory from the hash and signature
-    address signatory = _getSignatory(hashed, v, r, s);
+    address signatory = _getSignatory(hash, v, r, s);
 
     // Ensure the signatory is not null
     require(signatory != address(0), "SIGNATURE_INVALID");
 
-    // Ensure the nonce is not yet used and if not mark it used
-    require(_markNonceAsUsed(signatory, nonce), "NONCE_ALREADY_USED");
-
     // Ensure the signatory is authorized by the signer wallet
     if (signerWallet != signatory) {
-      require(
-        authorized[signerWallet] != address(0) &&
-          authorized[signerWallet] == signatory,
-        "UNAUTHORIZED"
-      );
+      require(authorized[signerWallet] == signatory, "UNAUTHORIZED");
     }
+
+    // Ensure the nonce is not yet used and if not mark it used
+    require(_markNonceAsUsed(signatory, nonce), "NONCE_ALREADY_USED");
   }
 
   /**
@@ -724,17 +733,24 @@ contract SwapERC20 is ISwapERC20, Ownable {
   ) internal view returns (bytes32) {
     return
       keccak256(
-        abi.encode(
-          ORDER_TYPEHASH,
-          nonce,
-          expiry,
-          signerWallet,
-          signerToken,
-          signerAmount,
-          protocolFee,
-          senderWallet,
-          senderToken,
-          senderAmount
+        abi.encodePacked(
+          // Indicates EIP712
+          "\x19\x01",
+          DOMAIN_SEPARATOR,
+          keccak256(
+            abi.encode(
+              ORDER_TYPEHASH,
+              nonce,
+              expiry,
+              signerWallet,
+              signerToken,
+              signerAmount,
+              protocolFee,
+              senderWallet,
+              senderToken,
+              senderAmount
+            )
+          )
         )
       );
   }
@@ -751,14 +767,8 @@ contract SwapERC20 is ISwapERC20, Ownable {
     uint8 v,
     bytes32 r,
     bytes32 s
-  ) internal view returns (address) {
-    return
-      ecrecover(
-        keccak256(abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR, hash)),
-        v,
-        r,
-        s
-      );
+  ) internal pure returns (address) {
+    return ecrecover(hash, v, r, s);
   }
 
   /**
