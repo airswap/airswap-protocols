@@ -269,28 +269,26 @@ contract Swap is ISwap, Ownable, EIP712 {
     if (signatory == address(0)) {
       errors[errCount] = "SignatureInvalid";
       errCount++;
-    }
-
-    if (order.expiry < block.timestamp) {
-      errors[errCount] = "OrderExpired";
-      errCount++;
-    }
-
-    if (
-      order.signer.wallet != signatory &&
-      authorized[order.signer.wallet] != signatory
-    ) {
-      errors[errCount] = "Unauthorized";
-      errCount++;
     } else {
-      if (nonceUsed(order.signer.wallet, order.nonce)) {
+      if (
+        order.signer.wallet != signatory &&
+        authorized[order.signer.wallet] != signatory
+      ) {
+        errors[errCount] = "Unauthorized";
+        errCount++;
+      }
+      if (nonceUsed(signatory, order.nonce)) {
         errors[errCount] = "NonceAlreadyUsed";
+        errCount++;
+      }
+      if (order.nonce < _signatoryMinimumNonce[signatory]) {
+        errors[errCount] = "NonceTooLow";
         errCount++;
       }
     }
 
-    if (order.nonce < _signatoryMinimumNonce[signatory]) {
-      errors[errCount] = "NonceTooLow";
+    if (order.expiry < block.timestamp) {
+      errors[errCount] = "OrderExpired";
       errCount++;
     }
 
