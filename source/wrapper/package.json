@@ -23,7 +23,7 @@
     "verify": "hardhat run ./scripts/verify.js"
   },
   "dependencies": {
-    "@airswap/swap-erc20": "3.0.1",
+    "@airswap/swap-erc20": "3.0.2",
     "@openzeppelin/contracts": "^4.3.1"
   },
   "devDependencies": {
