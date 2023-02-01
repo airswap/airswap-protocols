@@ -27,7 +27,7 @@
     "@openzeppelin/contracts": "^4.8.1"
   },
   "devDependencies": {
-    "@airswap/utils": "3.0.7",
+    "@airswap/utils": "3.0.8",
     "prompt-confirm": "^2.0.4"
   },
   "publishConfig": {
