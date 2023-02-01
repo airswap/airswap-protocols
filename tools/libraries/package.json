@@ -25,9 +25,9 @@
   "dependencies": {
     "@airswap/constants": "3.0.6",
     "@airswap/jsonrpc-client-websocket": "0.0.1",
-    "@airswap/maker-registry": "3.1.4",
+    "@airswap/maker-registry": "3.1.5",
     "@airswap/indexer-registry": "3.1.2",
-    "@airswap/swap-erc20": "3.0.1",
+    "@airswap/swap-erc20": "3.0.2",
     "@airswap/typescript": "3.0.3",
     "@airswap/utils": "3.0.7",
     "@airswap/wrapper": "3.1.5",
