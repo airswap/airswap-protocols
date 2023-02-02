@@ -259,7 +259,7 @@ contract Swap is ISwap, Ownable, EIP712 {
   {
     uint256 errCount;
     bytes32[] memory errors = new bytes32[](MAX_ERROR_COUNT);
-  (address signatory,) = ECDSA.tryRecover(
+    (address signatory, ) = ECDSA.tryRecover(
       _getOrderHash(order, _domainSeparatorV4()),
       order.v,
       order.r,
@@ -395,7 +395,7 @@ contract Swap is ISwap, Ownable, EIP712 {
     bytes32 hash = _getOrderHash(order, domainSeparator);
 
     // Recover the signatory from the hash and signature
-    address signatory = _getSignatory(hash, order.v, order.r, order.s);
+    address signatory = ECDSA.tryRecover(hash, order.v, order.r, order.s);
 
     // Ensure the signatory is not null
     if (signatory == address(0)) revert SignatureInvalid();
@@ -442,23 +442,6 @@ contract Swap is ISwap, Ownable, EIP712 {
           )
         )
       );
-  }
-
-  /**
-   * @notice Recover the signatory from a signature
-   * @param hash bytes32
-   * @param v uint8
-   * @param r bytes32
-   * @param s bytes32
-   */
-  function _getSignatory(
-    bytes32 hash,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
-  ) internal pure returns (address) {
-    (address signatory,) = ECDSA.tryRecover(hash, v, r, s);
-    return signatory;
   }
 
   /**
