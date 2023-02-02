@@ -15,7 +15,6 @@ export const SECONDS_IN_DAY = 86400
 export const chainIds: Record<string, number> = {
   ETHEREUM: 1,
   GOERLI: 5,
-  OPTIMISM: 10,
   RSK: 30,
   RSKTESTNET: 31,
   KOVAN: 42,
@@ -33,7 +32,6 @@ export const chainIds: Record<string, number> = {
 export const chainNames: Record<number, string> = {
   1: 'ETHEREUM',
   5: 'GOERLI',
-  10: 'OPTIMISM',
   30: 'RSK',
   31: 'RSKTESTNET',
   42: 'KOVAN',
@@ -88,7 +86,7 @@ export const wrappedTokenAddresses: Record<number, string> = {
 export const stakingTokenAddresses: Record<number, string> = {
   1: '0x27054b13b1b798b345b591a4d22e6562d47ea75a',
   5: '0x1a1ec25dc08e98e5e93f1104b5e5cdd298707d31',
-  30: '',
+  30: '0x71070c5607358fc25e3b4aaf4fb0a580c190252a',
   31: '0x9c7005fa2f8476e2331f45f69e0930a4c9eff0c3',
   42: '0x1a1ec25dc08e98e5e93f1104b5e5cdd298707d31',
   56: '0x1ac0d76f11875317f8a7d791db94cdd82bd02bd1',
@@ -104,7 +102,7 @@ export const stakingTokenAddresses: Record<number, string> = {
 export const etherscanDomains: Record<number, string> = {
   1: 'etherscan.io',
   5: 'goerli.etherscan.io',
-  30: 'explorer.rsk.co',
+  30: 'blockscout.com/rsk/mainnet',
   31: 'explorer.testnet.rsk.co',
   42: 'kovan.etherscan.io',
   56: 'bscscan.com',

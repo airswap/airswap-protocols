@@ -269,28 +269,26 @@ contract Swap is ISwap, Ownable, EIP712 {
     if (signatory == address(0)) {
       errors[errCount] = "SignatureInvalid";
       errCount++;
-    }
-
-    if (order.expiry < block.timestamp) {
-      errors[errCount] = "OrderExpired";
-      errCount++;
-    }
-
-    if (
-      order.signer.wallet != signatory &&
-      authorized[order.signer.wallet] != signatory
-    ) {
-      errors[errCount] = "Unauthorized";
-      errCount++;
     } else {
-      if (nonceUsed(order.signer.wallet, order.nonce)) {
+      if (
+        order.signer.wallet != signatory &&
+        authorized[order.signer.wallet] != signatory
+      ) {
+        errors[errCount] = "Unauthorized";
+        errCount++;
+      }
+      if (nonceUsed(signatory, order.nonce)) {
         errors[errCount] = "NonceAlreadyUsed";
+        errCount++;
+      }
+      if (order.nonce < _signatoryMinimumNonce[signatory]) {
+        errors[errCount] = "NonceTooLow";
         errCount++;
       }
     }
 
-    if (order.nonce < _signatoryMinimumNonce[signatory]) {
-      errors[errCount] = "NonceTooLow";
+    if (order.expiry < block.timestamp) {
+      errors[errCount] = "OrderExpired";
       errCount++;
     }
 
@@ -390,27 +388,28 @@ contract Swap is ISwap, Ownable, EIP712 {
   function _checkValidOrder(Order calldata order, bytes32 domainSeparator)
     internal
   {
-    // Ensure the order is not expired.
+    // Ensure the expiry is not passed
     if (order.expiry <= block.timestamp) revert OrderExpired();
 
-    bytes32 hashed = _getOrderHash(order, domainSeparator);
+    // Get the order hash
+    bytes32 hash = _getOrderHash(order, domainSeparator);
 
     // Recover the signatory from the hash and signature
-    address signatory = _getSignatory(order, hashed);
+    address signatory = _getSignatory(hash, order.v, order.r, order.s);
 
     // Ensure the signatory is not null
     if (signatory == address(0)) revert SignatureInvalid();
-
-    // Ensure the nonce is not yet used and if not mark it used
-    _markNonceAsUsed(signatory, order.nonce);
-
-    // Ensure the nonce is not yet used and if not mark it used
-    if (order.nonce < _signatoryMinimumNonce[signatory]) revert NonceTooLow();
 
     // Ensure the signatory is authorized by the signer wallet
     if (order.signer.wallet != signatory) {
       if (authorized[order.signer.wallet] != signatory) revert Unauthorized();
     }
+
+    // Ensure the nonce is not yet used and if not mark it used
+    _markNonceAsUsed(signatory, order.nonce);
+
+    // Ensure the nonce is not below the minimum nonce set by cancelUpTo
+    if (order.nonce < _signatoryMinimumNonce[signatory]) revert NonceTooLow();
   }
 
   /**
@@ -447,15 +446,18 @@ contract Swap is ISwap, Ownable, EIP712 {
 
   /**
    * @notice Recover the signatory from a signature
-   * @param order Order signeds
-   * @param hash hash of the Order signed
+   * @param hash bytes32
+   * @param v uint8
+   * @param r bytes32
+   * @param s bytes32
    */
-  function _getSignatory(Order calldata order, bytes32 hash)
-    internal
-    pure
-    returns (address)
-  {
-    return ecrecover(hash, order.v, order.r, order.s);
+  function _getSignatory(
+    bytes32 hash,
+    uint8 v,
+    bytes32 r,
+    bytes32 s
+  ) internal pure returns (address) {
+    return ecrecover(hash, v, r, s);
   }
 
   /**

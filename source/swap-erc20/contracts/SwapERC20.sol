@@ -683,7 +683,8 @@ contract SwapERC20 is ISwapERC20, Ownable {
     // Ensure the expiry is not passed
     require(expiry > block.timestamp, "EXPIRY_PASSED");
 
-    bytes32 hashed = _getOrderHash(
+    // Get the order hash
+    bytes32 hash = _getOrderHash(
       nonce,
       expiry,
       signerWallet,
@@ -695,22 +696,18 @@ contract SwapERC20 is ISwapERC20, Ownable {
     );
 
     // Recover the signatory from the hash and signature
-    address signatory = _getSignatory(hashed, v, r, s);
+    address signatory = _getSignatory(hash, v, r, s);
 
     // Ensure the signatory is not null
     require(signatory != address(0), "SIGNATURE_INVALID");
 
-    // Ensure the nonce is not yet used and if not mark it used
-    require(_markNonceAsUsed(signatory, nonce), "NONCE_ALREADY_USED");
-
     // Ensure the signatory is authorized by the signer wallet
     if (signerWallet != signatory) {
-      require(
-        authorized[signerWallet] != address(0) &&
-          authorized[signerWallet] == signatory,
-        "UNAUTHORIZED"
-      );
+      require(authorized[signerWallet] == signatory, "UNAUTHORIZED");
     }
+
+    // Ensure the nonce is not yet used and if not mark it used
+    require(_markNonceAsUsed(signatory, nonce), "NONCE_ALREADY_USED");
   }
 
   /**

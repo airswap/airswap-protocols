@@ -1,6 +1,6 @@
 {
   "name": "@airswap/pool",
-  "version": "3.2.6",
+  "version": "3.2.7",
   "description": "AirSwap: Rewards Pool",
   "license": "MIT",
   "repository": {
@@ -23,11 +23,11 @@
     "verify": "hardhat run ./scripts/verify.js"
   },
   "dependencies": {
-    "@airswap/staking": "3.1.4",
+    "@airswap/staking": "3.1.5",
     "@openzeppelin/contracts": "^4.8.1"
   },
   "devDependencies": {
-    "@airswap/utils": "3.0.7",
+    "@airswap/utils": "3.0.8",
     "prompt-confirm": "^2.0.4"
   },
   "publishConfig": {
