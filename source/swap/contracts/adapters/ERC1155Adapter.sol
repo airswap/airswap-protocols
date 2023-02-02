@@ -21,7 +21,7 @@ contract ERC1155Adapter is IAdapter {
    * @param party Party from whom swap would be made
    */
   function hasAllowance(Party calldata party) external view returns (bool) {
-    return IERC1155(party.token).isApprovedForAll(party.wallet, msg.sender);
+    return IERC1155(party.token).isApprovedForAll(party.wallet, address(this));
   }
 
   /**

@@ -3,7 +3,11 @@ const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
 const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
 const IAdapter = require('../build/contracts/interfaces/IAdapter.sol/IAdapter.json')
-const { createOrder, createOrderSignature } = require('@airswap/utils')
+const {
+  createOrder,
+  createOrderSignature,
+  checkResultToErrors,
+} = require('@airswap/utils')
 const { tokenKinds, ADDRESS_ZERO } = require('@airswap/constants')
 
 const CHAIN_ID = 31337
@@ -64,19 +68,12 @@ describe('Swap Unit', () => {
   before('deploy adapter and swap', async () => {
     ;[deployer, sender, signer, affiliate, protocolFeeWallet, anyone] =
       await ethers.getSigners()
-
     token = await deployMockContract(deployer, IERC20.abi)
-    await token.mock.allowance.returns('0')
-    await token.mock.balanceOf.returns('0')
+    await token.mock.allowance.returns(DEFAULT_AMOUNT)
+    await token.mock.balanceOf.returns(DEFAULT_AMOUNT)
     await token.mock.transferFrom.returns(true)
-
-    adapter = await deployMockContract(deployer, IAdapter.abi)
-    await adapter.mock.interfaceID.returns(tokenKinds.ERC20)
-    await adapter.mock.hasAllowance.returns(true)
-    await adapter.mock.hasBalance.returns(true)
-    await adapter.mock.attemptFeeTransfer.returns(true)
-    await adapter.mock.transferTokens.returns()
-
+    adapter = await (await ethers.getContractFactory('ERC20Adapter')).deploy()
+    await adapter.deployed()
     swap = await (
       await ethers.getContractFactory('Swap')
     ).deploy([adapter.address], PROTOCOL_FEE, protocolFeeWallet.address)
@@ -388,8 +385,8 @@ describe('Swap Unit', () => {
   })
 
   it('check without allowances or balances fails', async () => {
-    await adapter.mock.hasAllowance.returns(false)
-    await adapter.mock.hasBalance.returns(false)
+    await token.mock.allowance.returns('0')
+    await token.mock.balanceOf.returns('0')
     const order = await createSignedOrder({}, signer)
     const [errors] = await swap.check(order)
     expect(errors[0]).to.be.equal(
@@ -532,8 +529,8 @@ describe('Swap Unit', () => {
   })
 
   it('check fails with affiliate balance insufficient', async () => {
-    await adapter.mock.hasAllowance.returns(false)
-    await adapter.mock.hasBalance.returns(false)
+    await token.mock.allowance.returns('0')
+    await token.mock.balanceOf.returns('0')
     const order = await createSignedOrder(
       {
         affiliate: {
