@@ -21,7 +21,7 @@ contract ERC777Adapter is IAdapter {
    * @param party Party from whom swap would be made
    */
   function hasAllowance(Party calldata party) external view returns (bool) {
-    return IERC777(party.token).isOperatorFor(msg.sender, party.wallet);
+    return IERC777(party.token).isOperatorFor(address(this), party.wallet);
   }
 
   /**

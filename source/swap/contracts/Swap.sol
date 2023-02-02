@@ -482,7 +482,18 @@ contract Swap is ISwap, Ownable, EIP712 {
   ) internal {
     IAdapter adapter = adapters[kind];
     if (address(adapter) == address(0)) revert TokenKindUnknown();
-    adapter.transferTokens(from, to, amount, id, token);
+    // Use delegatecall so transferToken calls underlying transfer as Swap
+    (bool success, ) = address(adapter).delegatecall(
+      abi.encodeWithSelector(
+        adapter.transferTokens.selector,
+        from,
+        to,
+        amount,
+        id,
+        token
+      )
+    );
+    if (!success) revert TransferFailed(from, to);
   }
 
   /**

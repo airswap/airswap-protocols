@@ -24,7 +24,8 @@ contract ERC20Adapter is IAdapter {
    */
   function hasAllowance(Party calldata party) external view returns (bool) {
     return
-      IERC20(party.token).allowance(party.wallet, msg.sender) >= party.amount;
+      IERC20(party.token).allowance(party.wallet, address(this)) >=
+      party.amount;
   }
 
   /**
