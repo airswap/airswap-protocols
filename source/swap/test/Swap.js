@@ -2,12 +2,7 @@ const { expect } = require('chai')
 const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
 const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
-const IAdapter = require('../build/contracts/interfaces/IAdapter.sol/IAdapter.json')
-const {
-  createOrder,
-  createOrderSignature,
-  checkResultToErrors,
-} = require('@airswap/utils')
+const { createOrder, createOrderSignature } = require('@airswap/utils')
 const { tokenKinds, ADDRESS_ZERO } = require('@airswap/constants')
 
 const CHAIN_ID = 31337
