@@ -259,7 +259,7 @@ contract Swap is ISwap, Ownable, EIP712 {
   {
     uint256 errCount;
     bytes32[] memory errors = new bytes32[](MAX_ERROR_COUNT);
-    address signatory = ecrecover(
+    (address signatory, ECDSA.RecoverError err) = ECDSA.tryRecover(
       _getOrderHash(order, _domainSeparatorV4()),
       order.v,
       order.r,
@@ -457,7 +457,13 @@ contract Swap is ISwap, Ownable, EIP712 {
     bytes32 r,
     bytes32 s
   ) internal pure returns (address) {
-    return ecrecover(hash, v, r, s);
+    (address signatory, ECDSA.RecoverError err) = ECDSA.tryRecover(
+      hash,
+      v,
+      r,
+      s
+    );
+    return signatory;
   }
 
   /**
