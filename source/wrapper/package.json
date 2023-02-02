@@ -1,6 +1,6 @@
 {
   "name": "@airswap/wrapper",
-  "version": "3.1.5",
+  "version": "3.1.6",
   "description": "AirSwap: Wrap and Unwrap Native Tokens",
   "license": "MIT",
   "repository": {
