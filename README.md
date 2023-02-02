@@ -12,7 +12,7 @@
 - Twitter → https://twitter.com/airswap
 - Chat → https://chat.airswap.io/
 
-## Smart Contracts
+## Packages
 
 | Package                                                 | Version                                                                                                                   | Description                   |
 | :------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------ | :---------------------------- |
@@ -23,17 +23,7 @@
 | [`@airswap/staking`](/source/staking)                   | [![npm](https://img.shields.io/npm/v/@airswap/staking)](https://www.npmjs.com/package/@airswap/staking)                   | Staking for Participants      |
 | [`@airswap/pool`](/source/pool)                         | [![npm](https://img.shields.io/npm/v/@airswap/pool)](https://www.npmjs.com/package/@airswap/pool)                         | Rewards Pool for Participants |
 
-## JavaScript Libraries
-
-| Package                                    | Version                                                                                                       | Description               |
-| :----------------------------------------- | :------------------------------------------------------------------------------------------------------------ | :------------------------ |
-| [`@airswap/libraries`](/tools/libraries)   | [![npm](https://img.shields.io/npm/v/@airswap/libraries)](https://www.npmjs.com/package/@airswap/libraries)   | Protocol Client Libraries |
-| [`@airswap/utils`](/tools/utils)           | [![npm](https://img.shields.io/npm/v/@airswap/utils)](https://www.npmjs.com/package/@airswap/utils)           | Orders and Signatures     |
-| [`@airswap/metadata`](/tools/metadata)     | [![npm](https://img.shields.io/npm/v/@airswap/metadata)](https://www.npmjs.com/package/@airswap/metadata)     | Token Metadata            |
-| [`@airswap/constants`](/tools/constants)   | [![npm](https://img.shields.io/npm/v/@airswap/constants)](https://www.npmjs.com/package/@airswap/constants)   | Helpful Constants         |
-| [`@airswap/typescript`](/tools/typescript) | [![npm](https://img.shields.io/npm/v/@airswap/typescript)](https://www.npmjs.com/package/@airswap/typescript) | TypeScript Types          |
-
-## Repository Commands
+## Commands
 
 | Command           | Description                               |
 | :---------------- | :---------------------------------------- |

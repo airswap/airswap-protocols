@@ -10,7 +10,7 @@ Example of clone command after forking with https:
 
 `git clone https://github.com/<YOUR-GITHUB-USER>/airswap-protocols`
 
-This project has multiple sub-repos found within `source` and `tools`. We use lerna to handle managing the mono-repo. [Lerna](https://lerna.js.org/) is a tool for managing JavaScript projects with multiple packages.
+This project has multiple packages of smart contracts found in `packages`. We use lerna to handle managing the mono-repo. [Lerna](https://lerna.js.org/) is a tool for managing JavaScript projects with multiple packages.
 
 Run the below command from the root directory to start downloading necessary packages:
 
