@@ -395,7 +395,7 @@ contract Swap is ISwap, Ownable, EIP712 {
     bytes32 hash = _getOrderHash(order, domainSeparator);
 
     // Recover the signatory from the hash and signature
-    address signatory = ECDSA.tryRecover(hash, order.v, order.r, order.s);
+    (address signatory, ) = ECDSA.tryRecover(hash, order.v, order.r, order.s);
 
     // Ensure the signatory is not null
     if (signatory == address(0)) revert SignatureInvalid();
