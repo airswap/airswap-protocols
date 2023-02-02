@@ -5,12 +5,7 @@
   "license": "MIT",
   "workspaces": {
     "packages": [
-      "source/*",
-      "tools/*"
-    ],
-    "nohoist": [
-      "**/@graphprotocol",
-      "**/@graphprotocol/**"
+      "packages/*"
     ]
   },
   "scripts": {
