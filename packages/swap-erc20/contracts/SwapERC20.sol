@@ -124,7 +124,7 @@ contract SwapERC20 is ISwapERC20, Ownable {
     bytes32 r,
     bytes32 s
   ) external override {
-    // Ensure the order is valid
+    // Ensure the order is valid for signer and sender
     _checkValidOrder(
       nonce,
       expiry,
@@ -269,8 +269,7 @@ contract SwapERC20 is ISwapERC20, Ownable {
     address signatory = ecrecover(
       keccak256(
         abi.encodePacked(
-          // Indicates EIP712
-          "\x19\x01",
+          "\x19\x01", // EIP191: Indicates EIP712
           DOMAIN_SEPARATOR,
           keccak256(
             abi.encode(
@@ -734,8 +733,7 @@ contract SwapERC20 is ISwapERC20, Ownable {
     return
       keccak256(
         abi.encodePacked(
-          // Indicates EIP712
-          "\x19\x01",
+          "\x19\x01", // EIP191: Indicates EIP712
           DOMAIN_SEPARATOR,
           keccak256(
             abi.encode(
