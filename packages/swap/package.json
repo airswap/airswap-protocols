@@ -24,7 +24,7 @@
     "verify": "hardhat run ./scripts/verify.js"
   },
   "dependencies": {
-    "openzeppelin-solidity": "^4.6.0"
+    "@openzeppelin/contracts": "^4.8.1"
   },
   "devDependencies": {
     "@airswap/utils": "3.0.8"

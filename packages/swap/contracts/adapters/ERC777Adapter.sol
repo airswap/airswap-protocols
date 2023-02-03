@@ -3,7 +3,7 @@
 pragma solidity 0.8.17;
 
 import "../interfaces/IAdapter.sol";
-import "openzeppelin-solidity/contracts/token/ERC777/IERC777.sol";
+import "@openzeppelin/contracts/token/ERC777/IERC777.sol";
 
 contract ERC777Adapter is IAdapter {
   /**
