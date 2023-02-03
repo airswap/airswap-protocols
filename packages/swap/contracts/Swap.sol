@@ -83,14 +83,14 @@ contract Swap is ISwap, Ownable, EIP712 {
    */
   function swap(address recipient, Order calldata order) external {
     // Ensure order is valid for signer
-    _checkValidOrder(order);
+    _check(order);
 
     // Ensure msg.sender matches order if specified
     if (order.sender.wallet != address(0) && order.sender.wallet != msg.sender)
       revert SenderInvalid();
 
     // Transfer from sender to signer
-    _transferTokens(
+    _transfer(
       msg.sender,
       order.signer.wallet,
       order.sender.amount,
@@ -100,7 +100,7 @@ contract Swap is ISwap, Ownable, EIP712 {
     );
 
     // Transfer from signer to recipient
-    _transferTokens(
+    _transfer(
       order.signer.wallet,
       recipient,
       order.signer.amount,
@@ -111,7 +111,7 @@ contract Swap is ISwap, Ownable, EIP712 {
 
     // Transfer from signer to affiliate if specified
     if (order.affiliate.token != address(0)) {
-      _transferTokens(
+      _transfer(
         order.signer.wallet,
         order.affiliate.wallet,
         order.affiliate.amount,
@@ -348,7 +348,7 @@ contract Swap is ISwap, Ownable, EIP712 {
    * @param order Order to validate
    */
 
-  function _checkValidOrder(Order calldata order) internal {
+  function _check(Order calldata order) internal {
     // Ensure the expiry is not passed
     if (order.expiry <= block.timestamp) revert OrderExpired();
 
@@ -419,7 +419,7 @@ contract Swap is ISwap, Ownable, EIP712 {
    * @param token address Contract address of token
    * @param kind bytes4 EIP-165 interface ID of the token
    */
-  function _transferTokens(
+  function _transfer(
     address from,
     address to,
     uint256 amount,
@@ -451,7 +451,7 @@ contract Swap is ISwap, Ownable, EIP712 {
     // Transfer fee from signer to feeWallet
     uint256 feeAmount = (order.signer.amount * protocolFee) / FEE_DIVISOR;
     if (feeAmount > 0) {
-      _transferTokens(
+      _transfer(
         order.signer.wallet,
         protocolFeeWallet,
         feeAmount,
