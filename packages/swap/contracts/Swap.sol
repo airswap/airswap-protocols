@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/access/Ownable2Step.sol";
 import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import "./interfaces/IAdapter.sol";
 import "./interfaces/ISwap.sol";
@@ -10,7 +10,7 @@ import "./interfaces/ISwap.sol";
  * @title AirSwap: Atomic Token Swap
  * @notice https://www.airswap.io/
  */
-contract Swap is ISwap, Ownable, EIP712 {
+contract Swap is ISwap, Ownable2Step, EIP712 {
   bytes32 public constant DOMAIN_TYPEHASH =
     keccak256(
       "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
