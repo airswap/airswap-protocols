@@ -4,14 +4,14 @@ pragma solidity ^0.8.0;
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "@airswap/swap-erc20/contracts/interfaces/ISwapERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/access/Ownable2Step.sol";
 import "./interfaces/IWETH.sol";
 
 /**
  * @title AirSwap: Wrap and Unwrap Native Tokens
  * @notice https://www.airswap.io/
  */
-contract Wrapper is Ownable {
+contract Wrapper is Ownable2Step {
   using SafeERC20 for IERC20;
 
   event WrappedSwapFor(address indexed senderWallet);
