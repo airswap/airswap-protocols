@@ -11,11 +11,6 @@ import "./interfaces/ISwap.sol";
  * @notice https://www.airswap.io/
  */
 contract Swap is ISwap, Ownable2Step, EIP712 {
-  bytes32 public constant DOMAIN_TYPEHASH =
-    keccak256(
-      "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
-    );
-
   bytes32 internal constant ORDER_TYPEHASH =
     keccak256(
       abi.encodePacked(

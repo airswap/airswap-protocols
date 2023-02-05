@@ -9886,11 +9886,6 @@ open@^8.4.0:
     is-docker "^2.1.1"
     is-wsl "^2.2.0"
 
-openzeppelin-solidity@^4.6.0:
-  version "4.6.0"
-  resolved "https://registry.yarnpkg.com/openzeppelin-solidity/-/openzeppelin-solidity-4.6.0.tgz#a65a4e11dc72f46a9e2eb691fc9aeff2d70fe189"
-  integrity sha512-Os4FUzc5V+4U2lpFyJA0kWh5fy3AZhYgS8CmB3Db4c4NGd3SsjFzuvWjBybn7NA4KZG7Gf6Lb7BdS8Cxb8Adtw==
-
 optionator@^0.8.1:
   version "0.8.3"
   resolved "https://registry.yarnpkg.com/optionator/-/optionator-0.8.3.tgz#84fa1d036fe9d3c7e21d99884b601167ec8fb495"
