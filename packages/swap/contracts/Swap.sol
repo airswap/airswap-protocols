@@ -19,39 +19,15 @@ contract Swap is ISwap, Ownable, EIP712 {
   bytes32 internal constant ORDER_TYPEHASH =
     keccak256(
       abi.encodePacked(
-        "Order(",
-        "uint256 nonce,",
-        "uint256 expiry,",
-        "uint256 protocolFee,",
-        "Party signer,",
-        "Party sender,",
-        "Party affiliate",
-        ")",
-        "Party(",
-        "address wallet,",
-        "address token,",
-        "bytes4 kind,",
-        "uint256 id,",
-        "uint256 amount",
-        ")"
+        "Order(uint256 nonce,uint256 expiry,uint256 protocolFee,Party signer,Party sender,Party affiliate)",
+        "Party(address wallet,address token,bytes4 kind,uint256 id,uint256 amount)"
       )
     );
 
   bytes32 internal constant PARTY_TYPEHASH =
     keccak256(
-      abi.encodePacked(
-        "Party(",
-        "address wallet,",
-        "address token,",
-        "bytes4 kind,",
-        "uint256 id,",
-        "uint256 amount",
-        ")"
-      )
+      "Party(address wallet,address token,bytes4 kind,uint256 id,uint256 amount)"
     );
-
-  // EIP191 header for use in EIP712 signatures
-  bytes internal constant EIP191_HEADER = "\x19\x01";
 
   // Domain name and version for use in EIP712 signatures
   string public constant DOMAIN_NAME = "SWAP";
@@ -92,14 +68,13 @@ contract Swap is ISwap, Ownable, EIP712 {
   ) EIP712(DOMAIN_NAME, DOMAIN_VERSION) {
     if (_protocolFee >= FEE_DIVISOR) revert InvalidFee();
     if (_protocolFeeWallet == address(0)) revert InvalidFeeWallet();
-
-    protocolFee = _protocolFee;
-    protocolFeeWallet = _protocolFeeWallet;
-
     if (_adapters.length == 0) revert InvalidAdapters();
+
     for (uint256 i = 0; i < _adapters.length; i++) {
       adapters[_adapters[i].interfaceID()] = _adapters[i];
     }
+    protocolFee = _protocolFee;
+    protocolFeeWallet = _protocolFeeWallet;
   }
 
   /**
@@ -107,27 +82,16 @@ contract Swap is ISwap, Ownable, EIP712 {
    * @param order Order to settle
    */
   function swap(address recipient, Order calldata order) external {
-    // Validate the signer side of the swap
-    _checkValidOrder(order, _domainSeparatorV4());
+    // Ensure order is valid for signer
+    _check(order);
 
-    // Validate the sender side of the swap
-    address finalSenderWallet;
+    // Ensure msg.sender matches order if specified
+    if (order.sender.wallet != address(0) && order.sender.wallet != msg.sender)
+      revert SenderInvalid();
 
-    if (order.sender.wallet == address(0)) {
-      /**
-       * Sender is not specified. The msg.sender of the transaction becomes
-       * the sender of the order
-       */
-      finalSenderWallet = msg.sender;
-    } else {
-      // Ensure that msg.sender is the sender specified on the order
-      finalSenderWallet = order.sender.wallet;
-      if (order.sender.wallet != msg.sender) revert SenderInvalid();
-    }
-
-    // Transfer token from sender to signer
-    _transferToken(
-      finalSenderWallet,
+    // Transfer from sender to signer
+    _transfer(
+      msg.sender,
       order.signer.wallet,
       order.sender.amount,
       order.sender.id,
@@ -135,8 +99,8 @@ contract Swap is ISwap, Ownable, EIP712 {
       order.sender.kind
     );
 
-    // Transfer token from signer to recipient
-    _transferToken(
+    // Transfer from signer to recipient
+    _transfer(
       order.signer.wallet,
       recipient,
       order.signer.amount,
@@ -145,9 +109,9 @@ contract Swap is ISwap, Ownable, EIP712 {
       order.signer.kind
     );
 
-    // Transfer token from signer to affiliate if specified
+    // Transfer from signer to affiliate if specified
     if (order.affiliate.token != address(0)) {
-      _transferToken(
+      _transfer(
         order.signer.wallet,
         order.affiliate.wallet,
         order.affiliate.amount,
@@ -169,7 +133,7 @@ contract Swap is ISwap, Ownable, EIP712 {
       order.signer.amount,
       order.signer.id,
       order.signer.token,
-      finalSenderWallet,
+      msg.sender,
       order.sender.amount,
       order.sender.id,
       order.sender.token,
@@ -382,20 +346,19 @@ contract Swap is ISwap, Ownable, EIP712 {
   /**
    * @notice Tests whether signature and signer are valid
    * @param order Order to validate
-   * @param domainSeparator bytes32
    */
 
-  function _checkValidOrder(Order calldata order, bytes32 domainSeparator)
-    internal
-  {
+  function _check(Order calldata order) internal {
     // Ensure the expiry is not passed
     if (order.expiry <= block.timestamp) revert OrderExpired();
 
-    // Get the order hash
-    bytes32 hash = _getOrderHash(order, domainSeparator);
-
     // Recover the signatory from the hash and signature
-    (address signatory, ) = ECDSA.tryRecover(hash, order.v, order.r, order.s);
+    (address signatory, ) = ECDSA.tryRecover(
+      _getOrderHash(order, _domainSeparatorV4()),
+      order.v,
+      order.r,
+      order.s
+    );
 
     // Ensure the signatory is not null
     if (signatory == address(0)) revert SignatureInvalid();
@@ -427,7 +390,7 @@ contract Swap is ISwap, Ownable, EIP712 {
     return
       keccak256(
         abi.encodePacked(
-          EIP191_HEADER,
+          "\x19\x01", // EIP191: Indicates EIP712
           domainSeparator,
           keccak256(
             abi.encode(
@@ -456,7 +419,7 @@ contract Swap is ISwap, Ownable, EIP712 {
    * @param token address Contract address of token
    * @param kind bytes4 EIP-165 interface ID of the token
    */
-  function _transferToken(
+  function _transfer(
     address from,
     address to,
     uint256 amount,
@@ -488,7 +451,7 @@ contract Swap is ISwap, Ownable, EIP712 {
     // Transfer fee from signer to feeWallet
     uint256 feeAmount = (order.signer.amount * protocolFee) / FEE_DIVISOR;
     if (feeAmount > 0) {
-      _transferToken(
+      _transfer(
         order.signer.wallet,
         protocolFeeWallet,
         feeAmount,

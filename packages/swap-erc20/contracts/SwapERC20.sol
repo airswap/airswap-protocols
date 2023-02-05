@@ -124,8 +124,8 @@ contract SwapERC20 is ISwapERC20, Ownable {
     bytes32 r,
     bytes32 s
   ) external override {
-    // Ensure the order is valid
-    _checkValidOrder(
+    // Ensure the order is valid for signer and sender
+    _check(
       nonce,
       expiry,
       signerWallet,
@@ -194,7 +194,7 @@ contract SwapERC20 is ISwapERC20, Ownable {
     bytes32 s
   ) external override {
     // Ensure the order is valid
-    _checkValidOrder(
+    _check(
       nonce,
       expiry,
       signerWallet,
@@ -269,8 +269,7 @@ contract SwapERC20 is ISwapERC20, Ownable {
     address signatory = ecrecover(
       keccak256(
         abi.encodePacked(
-          // Indicates EIP712
-          "\x19\x01",
+          "\x19\x01", // EIP191: Indicates EIP712
           DOMAIN_SEPARATOR,
           keccak256(
             abi.encode(
@@ -443,7 +442,7 @@ contract SwapERC20 is ISwapERC20, Ownable {
   }
 
   /**
-   * @notice Checks and returns any potential errors given an order
+   * @notice Checks order and returns list of errors
    * @param senderWallet address Wallet that would send the order
    * @param nonce uint256 Unique and should be sequential
    * @param expiry uint256 Expiry in seconds since 1 January 1970
@@ -484,17 +483,22 @@ contract SwapERC20 is ISwapERC20, Ownable {
     order.r = r;
     order.s = s;
     order.senderWallet = senderWallet;
-    bytes32 hashed = _getOrderHash(
-      order.nonce,
-      order.expiry,
-      order.signerWallet,
-      order.signerToken,
-      order.signerAmount,
-      order.senderWallet,
-      order.senderToken,
-      order.senderAmount
+
+    address signatory = ecrecover(
+      _getOrderHash(
+        order.nonce,
+        order.expiry,
+        order.signerWallet,
+        order.signerToken,
+        order.signerAmount,
+        order.senderWallet,
+        order.senderToken,
+        order.senderAmount
+      ),
+      order.v,
+      order.r,
+      order.s
     );
-    address signatory = _getSignatory(hashed, order.v, order.r, order.s);
 
     if (signatory == address(0)) {
       errors[errCount] = "SIGNATURE_INVALID";
@@ -653,7 +657,7 @@ contract SwapERC20 is ISwapERC20, Ownable {
   }
 
   /**
-   * @notice Checks Order Expiry, Nonce, Signature
+   * @notice Checks order and reverts on error
    * @param nonce uint256 Unique and should be sequential
    * @param expiry uint256 Expiry in seconds since 1 January 1970
    * @param signerWallet address Wallet of the signer
@@ -665,7 +669,7 @@ contract SwapERC20 is ISwapERC20, Ownable {
    * @param r bytes32 "r" value of the ECDSA signature
    * @param s bytes32 "s" value of the ECDSA signature
    */
-  function _checkValidOrder(
+  function _check(
     uint256 nonce,
     uint256 expiry,
     address signerWallet,
@@ -683,20 +687,22 @@ contract SwapERC20 is ISwapERC20, Ownable {
     // Ensure the expiry is not passed
     require(expiry > block.timestamp, "EXPIRY_PASSED");
 
-    // Get the order hash
-    bytes32 hash = _getOrderHash(
-      nonce,
-      expiry,
-      signerWallet,
-      signerToken,
-      signerAmount,
-      senderWallet,
-      senderToken,
-      senderAmount
-    );
-
     // Recover the signatory from the hash and signature
-    address signatory = _getSignatory(hash, v, r, s);
+    address signatory = ecrecover(
+      _getOrderHash(
+        nonce,
+        expiry,
+        signerWallet,
+        signerToken,
+        signerAmount,
+        senderWallet,
+        senderToken,
+        senderAmount
+      ),
+      v,
+      r,
+      s
+    );
 
     // Ensure the signatory is not null
     require(signatory != address(0), "SIGNATURE_INVALID");
@@ -734,8 +740,7 @@ contract SwapERC20 is ISwapERC20, Ownable {
     return
       keccak256(
         abi.encodePacked(
-          // Indicates EIP712
-          "\x19\x01",
+          "\x19\x01", // EIP191: Indicates EIP712
           DOMAIN_SEPARATOR,
           keccak256(
             abi.encode(
@@ -753,22 +758,6 @@ contract SwapERC20 is ISwapERC20, Ownable {
           )
         )
       );
-  }
-
-  /**
-   * @notice Recover the signatory from a signature
-   * @param hash bytes32
-   * @param v uint8
-   * @param r bytes32
-   * @param s bytes32
-   */
-  function _getSignatory(
-    bytes32 hash,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
-  ) internal pure returns (address) {
-    return ecrecover(hash, v, r, s);
   }
 
   /**
