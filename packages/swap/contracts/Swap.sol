@@ -81,7 +81,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
    * @param order Order to settle
    */
   function swap(address recipient, Order calldata order) external {
-    // Ensure order is done on the right chain  
+    // Ensure execution on the intended chain
     if (DOMAIN_CHAIN_ID != block.chainid) revert ChainIdChanged();
 
     // Ensure order is valid for signer
@@ -343,7 +343,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
     }
 
     _nonceGroups[signatory][groupKey] = group | (uint256(1) << indexInGroup);
-    }
+  }
 
   /**
    * @notice Tests whether signature and signer are valid
