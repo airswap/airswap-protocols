@@ -53,14 +53,10 @@ interface ISwapERC20 {
   error InvalidStaking();
   error OrderExpired();
   error MaxTooHigh();
-  // error NonceTooLow();
   error NonceAlreadyUsed(uint256);
   error ScaleTooHigh();
-  // error SenderInvalid();
   error SignatureInvalid();
   error SignerInvalid();
-  // error TokenKindUnknown();
-  // error TransferFailed(address, address);
   error Unauthorized();
 
   function swap(

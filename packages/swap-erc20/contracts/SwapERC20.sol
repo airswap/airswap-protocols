@@ -70,12 +70,12 @@ contract SwapERC20 is ISwapERC20, Ownable2Step {
     uint256 _rebateMax,
     address _staking
   ) {
-    if(_protocolFee >= FEE_DIVISOR) revert InvalidFee();
-    if(_protocolFeeLight >= FEE_DIVISOR) revert InvalidFeeLight();
-    if(_protocolFeeWallet == address(0)) revert InvalidFeeWallet();
-    if(_rebateScale > MAX_SCALE) revert ScaleTooHigh();
-    if(_rebateScale > MAX_PERCENTAGE) revert MaxTooHigh();
-    if(_staking == address(0)) revert InvalidStaking();
+    if (_protocolFee >= FEE_DIVISOR) revert InvalidFee();
+    if (_protocolFeeLight >= FEE_DIVISOR) revert InvalidFeeLight();
+    if (_protocolFeeWallet == address(0)) revert InvalidFeeWallet();
+    if (_rebateScale > MAX_SCALE) revert ScaleTooHigh();
+    if (_rebateMax > MAX_PERCENTAGE) revert MaxTooHigh();
+    if (_staking == address(0)) revert InvalidStaking();
 
     uint256 currentChainId = getChainId();
     DOMAIN_CHAIN_ID = currentChainId;
@@ -260,10 +260,10 @@ contract SwapERC20 is ISwapERC20, Ownable2Step {
     bytes32 r,
     bytes32 s
   ) external override {
-    if(DOMAIN_CHAIN_ID != getChainId()) revert ChainIdChanged();
+    if (DOMAIN_CHAIN_ID != getChainId()) revert ChainIdChanged();
 
     // Ensure the expiry is not passed
-    if(expiry <= block.timestamp) revert OrderExpired();
+    if (expiry <= block.timestamp) revert OrderExpired();
 
     // Recover the signatory from the hash and signature
     address signatory = ecrecover(
@@ -293,14 +293,14 @@ contract SwapERC20 is ISwapERC20, Ownable2Step {
     );
 
     // Ensure the signatory is not null
-    if(signatory == address(0)) revert SignatureInvalid();
+    if (signatory == address(0)) revert SignatureInvalid();
 
     // Ensure the nonce is not yet used and if not mark it used
-    if(!_markNonceAsUsed(signatory, nonce)) revert NonceAlreadyUsed(nonce);
+    if (!_markNonceAsUsed(signatory, nonce)) revert NonceAlreadyUsed(nonce);
 
     // Ensure the signatory is authorized by the signer wallet
     if (signerWallet != signatory) {
-      if(authorized[signerWallet] != signatory) revert Unauthorized();
+      if (authorized[signerWallet] != signatory) revert Unauthorized();
     }
 
     // Transfer token from sender to signer
@@ -344,7 +344,7 @@ contract SwapERC20 is ISwapERC20, Ownable2Step {
    */
   function setProtocolFee(uint256 _protocolFee) external onlyOwner {
     // Ensure the fee is less than divisor
-    if(_protocolFee >= FEE_DIVISOR) revert InvalidFee();
+    if (_protocolFee >= FEE_DIVISOR) revert InvalidFee();
     protocolFee = _protocolFee;
     emit SetProtocolFee(_protocolFee);
   }
@@ -355,7 +355,7 @@ contract SwapERC20 is ISwapERC20, Ownable2Step {
    */
   function setProtocolFeeLight(uint256 _protocolFeeLight) external onlyOwner {
     // Ensure the fee is less than divisor
-    if(_protocolFeeLight >= FEE_DIVISOR) revert InvalidFeeLight();
+    if (_protocolFeeLight >= FEE_DIVISOR) revert InvalidFeeLight();
     protocolFeeLight = _protocolFeeLight;
     emit SetProtocolFeeLight(_protocolFeeLight);
   }
@@ -366,7 +366,7 @@ contract SwapERC20 is ISwapERC20, Ownable2Step {
    */
   function setProtocolFeeWallet(address _protocolFeeWallet) external onlyOwner {
     // Ensure the new fee wallet is not null
-    if(_protocolFeeWallet == address(0)) revert InvalidFeeWallet();
+    if (_protocolFeeWallet == address(0)) revert InvalidFeeWallet();
     protocolFeeWallet = _protocolFeeWallet;
     emit SetProtocolFeeWallet(_protocolFeeWallet);
   }
@@ -377,7 +377,7 @@ contract SwapERC20 is ISwapERC20, Ownable2Step {
    * @param _rebateScale uint256
    */
   function setRebateScale(uint256 _rebateScale) external onlyOwner {
-    if(_rebateScale > MAX_SCALE) revert ScaleTooHigh();
+    if (_rebateScale > MAX_SCALE) revert ScaleTooHigh();
     rebateScale = _rebateScale;
     emit SetRebateScale(_rebateScale);
   }
@@ -388,7 +388,7 @@ contract SwapERC20 is ISwapERC20, Ownable2Step {
    * @param _rebateMax uint256
    */
   function setRebateMax(uint256 _rebateMax) external onlyOwner {
-    if(_rebateMax > MAX_PERCENTAGE) revert MaxTooHigh();
+    if (_rebateMax > MAX_PERCENTAGE) revert MaxTooHigh();
     rebateMax = _rebateMax;
     emit SetRebateMax(_rebateMax);
   }
@@ -399,7 +399,7 @@ contract SwapERC20 is ISwapERC20, Ownable2Step {
    */
   function setStaking(address newstaking) external onlyOwner {
     // Ensure the new staking token is not null
-    if(newstaking == address(0)) revert InvalidStaking();
+    if (newstaking == address(0)) revert InvalidStaking();
     staking = newstaking;
     emit SetStaking(newstaking);
   }
@@ -410,7 +410,7 @@ contract SwapERC20 is ISwapERC20, Ownable2Step {
    * @dev Emits an Authorize event
    */
   function authorize(address signer) external override {
-    if(signer == address(0)) revert SignerInvalid();
+    if (signer == address(0)) revert SignerInvalid();
     authorized[msg.sender] = signer;
     emit Authorize(signer, msg.sender);
   }
@@ -501,12 +501,12 @@ contract SwapERC20 is ISwapERC20, Ownable2Step {
     );
 
     if (signatory == address(0)) {
-      errors[errCount] = "SIGNATURE_INVALID";
+      errors[errCount] = "SignatureInvalid";
       errCount++;
     }
 
     if (order.expiry < block.timestamp) {
-      errors[errCount] = "EXPIRY_PASSED";
+      errors[errCount] = "OrderExpired";
       errCount++;
     }
 
@@ -514,11 +514,11 @@ contract SwapERC20 is ISwapERC20, Ownable2Step {
       order.signerWallet != signatory &&
       authorized[order.signerWallet] != signatory
     ) {
-      errors[errCount] = "UNAUTHORIZED";
+      errors[errCount] = "Unauthorized";
       errCount++;
     } else {
       if (nonceUsed(signatory, order.nonce)) {
-        errors[errCount] = "NONCE_ALREADY_USED";
+        errors[errCount] = "NonceAlreadyUsed";
         errCount++;
       }
     }
@@ -534,12 +534,12 @@ contract SwapERC20 is ISwapERC20, Ownable2Step {
       );
 
       if (senderAllowance < order.senderAmount) {
-        errors[errCount] = "SENDER_ALLOWANCE_LOW";
+        errors[errCount] = "SenderAllowanceLow";
         errCount++;
       }
 
       if (senderBalance < order.senderAmount) {
-        errors[errCount] = "SENDER_BALANCE_LOW";
+        errors[errCount] = "SenderBalanceLow";
         errCount++;
       }
     }
@@ -556,12 +556,12 @@ contract SwapERC20 is ISwapERC20, Ownable2Step {
     uint256 signerFeeAmount = (order.signerAmount * protocolFee) / FEE_DIVISOR;
 
     if (signerAllowance < order.signerAmount + signerFeeAmount) {
-      errors[errCount] = "SIGNER_ALLOWANCE_LOW";
+      errors[errCount] = "SignerAllowanceLow";
       errCount++;
     }
 
     if (signerBalance < order.signerAmount + signerFeeAmount) {
-      errors[errCount] = "SIGNER_BALANCE_LOW";
+      errors[errCount] = "SignerBalanceLow";
       errCount++;
     }
 
@@ -682,10 +682,10 @@ contract SwapERC20 is ISwapERC20, Ownable2Step {
     bytes32 r,
     bytes32 s
   ) internal {
-    if(DOMAIN_CHAIN_ID != getChainId()) revert ChainIdChanged();
+    if (DOMAIN_CHAIN_ID != getChainId()) revert ChainIdChanged();
 
     // Ensure the expiry is not passed
-    if(expiry <= block.timestamp) revert OrderExpired();
+    if (expiry <= block.timestamp) revert OrderExpired();
 
     // Recover the signatory from the hash and signature
     address signatory = ecrecover(
@@ -705,15 +705,15 @@ contract SwapERC20 is ISwapERC20, Ownable2Step {
     );
 
     // Ensure the signatory is not null
-    if(signatory == address(0)) revert SignerInvalid();
+    if (signatory == address(0)) revert SignatureInvalid();
 
     // Ensure the signatory is authorized by the signer wallet
     if (signerWallet != signatory) {
-      if(authorized[signerWallet] != signatory) revert Unauthorized();
+      if (authorized[signerWallet] != signatory) revert Unauthorized();
     }
 
     // Ensure the nonce is not yet used and if not mark it used
-    if(!_markNonceAsUsed(signatory, nonce)) revert NonceAlreadyUsed(nonce);
+    if (!_markNonceAsUsed(signatory, nonce)) revert NonceAlreadyUsed(nonce);
   }
 
   /**
