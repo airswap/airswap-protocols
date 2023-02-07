@@ -70,12 +70,12 @@ contract SwapERC20 is ISwapERC20, Ownable2Step {
     uint256 _rebateMax,
     address _staking
   ) {
-    require(_protocolFee < FEE_DIVISOR, "INVALID_FEE");
-    require(_protocolFeeLight < FEE_DIVISOR, "INVALID_FEE");
-    require(_protocolFeeWallet != address(0), "INVALID_FEE_WALLET");
-    require(_rebateScale <= MAX_SCALE, "SCALE_TOO_HIGH");
-    require(_rebateMax <= MAX_PERCENTAGE, "MAX_TOO_HIGH");
-    require(_staking != address(0), "INVALID_STAKING");
+    if(_protocolFee >= FEE_DIVISOR) revert InvalidFee();
+    if(_protocolFeeLight >= FEE_DIVISOR) revert InvalidFeeLight();
+    if(_protocolFeeWallet == address(0)) revert InvalidFeeWallet();
+    if(_rebateScale > MAX_SCALE) revert ScaleTooHigh();
+    if(_rebateScale > MAX_PERCENTAGE) revert MaxTooHigh();
+    if(_staking == address(0)) revert InvalidStaking();
 
     uint256 currentChainId = getChainId();
     DOMAIN_CHAIN_ID = currentChainId;
@@ -260,10 +260,10 @@ contract SwapERC20 is ISwapERC20, Ownable2Step {
     bytes32 r,
     bytes32 s
   ) external override {
-    require(DOMAIN_CHAIN_ID == getChainId(), "CHAIN_ID_CHANGED");
+    if(DOMAIN_CHAIN_ID != getChainId()) revert ChainIdChanged();
 
     // Ensure the expiry is not passed
-    require(expiry > block.timestamp, "EXPIRY_PASSED");
+    if(expiry <= block.timestamp) revert OrderExpired();
 
     // Recover the signatory from the hash and signature
     address signatory = ecrecover(
@@ -293,14 +293,14 @@ contract SwapERC20 is ISwapERC20, Ownable2Step {
     );
 
     // Ensure the signatory is not null
-    require(signatory != address(0), "SIGNATURE_INVALID");
+    if(signatory == address(0)) revert SignatureInvalid();
 
     // Ensure the nonce is not yet used and if not mark it used
-    require(_markNonceAsUsed(signatory, nonce), "NONCE_ALREADY_USED");
+    if(!_markNonceAsUsed(signatory, nonce)) revert NonceAlreadyUsed(nonce);
 
     // Ensure the signatory is authorized by the signer wallet
     if (signerWallet != signatory) {
-      require(authorized[signerWallet] == signatory, "UNAUTHORIZED");
+      if(authorized[signerWallet] != signatory) revert Unauthorized();
     }
 
     // Transfer token from sender to signer
@@ -344,7 +344,7 @@ contract SwapERC20 is ISwapERC20, Ownable2Step {
    */
   function setProtocolFee(uint256 _protocolFee) external onlyOwner {
     // Ensure the fee is less than divisor
-    require(_protocolFee < FEE_DIVISOR, "INVALID_FEE");
+    if(_protocolFee >= FEE_DIVISOR) revert InvalidFee();
     protocolFee = _protocolFee;
     emit SetProtocolFee(_protocolFee);
   }
@@ -355,7 +355,7 @@ contract SwapERC20 is ISwapERC20, Ownable2Step {
    */
   function setProtocolFeeLight(uint256 _protocolFeeLight) external onlyOwner {
     // Ensure the fee is less than divisor
-    require(_protocolFeeLight < FEE_DIVISOR, "INVALID_FEE_LIGHT");
+    if(_protocolFeeLight >= FEE_DIVISOR) revert InvalidFeeLight();
     protocolFeeLight = _protocolFeeLight;
     emit SetProtocolFeeLight(_protocolFeeLight);
   }
@@ -366,7 +366,7 @@ contract SwapERC20 is ISwapERC20, Ownable2Step {
    */
   function setProtocolFeeWallet(address _protocolFeeWallet) external onlyOwner {
     // Ensure the new fee wallet is not null
-    require(_protocolFeeWallet != address(0), "INVALID_FEE_WALLET");
+    if(_protocolFeeWallet == address(0)) revert InvalidFeeWallet();
     protocolFeeWallet = _protocolFeeWallet;
     emit SetProtocolFeeWallet(_protocolFeeWallet);
   }
@@ -377,7 +377,7 @@ contract SwapERC20 is ISwapERC20, Ownable2Step {
    * @param _rebateScale uint256
    */
   function setRebateScale(uint256 _rebateScale) external onlyOwner {
-    require(_rebateScale <= MAX_SCALE, "SCALE_TOO_HIGH");
+    if(_rebateScale > MAX_SCALE) revert ScaleTooHigh();
     rebateScale = _rebateScale;
     emit SetRebateScale(_rebateScale);
   }
@@ -388,7 +388,7 @@ contract SwapERC20 is ISwapERC20, Ownable2Step {
    * @param _rebateMax uint256
    */
   function setRebateMax(uint256 _rebateMax) external onlyOwner {
-    require(_rebateMax <= MAX_PERCENTAGE, "MAX_TOO_HIGH");
+    if(_rebateMax > MAX_PERCENTAGE) revert MaxTooHigh();
     rebateMax = _rebateMax;
     emit SetRebateMax(_rebateMax);
   }
@@ -399,7 +399,7 @@ contract SwapERC20 is ISwapERC20, Ownable2Step {
    */
   function setStaking(address newstaking) external onlyOwner {
     // Ensure the new staking token is not null
-    require(newstaking != address(0), "INVALID_STAKING");
+    if(newstaking == address(0)) revert InvalidStaking();
     staking = newstaking;
     emit SetStaking(newstaking);
   }
@@ -410,7 +410,7 @@ contract SwapERC20 is ISwapERC20, Ownable2Step {
    * @dev Emits an Authorize event
    */
   function authorize(address signer) external override {
-    require(signer != address(0), "SIGNER_INVALID");
+    if(signer == address(0)) revert SignerInvalid();
     authorized[msg.sender] = signer;
     emit Authorize(signer, msg.sender);
   }
@@ -682,10 +682,10 @@ contract SwapERC20 is ISwapERC20, Ownable2Step {
     bytes32 r,
     bytes32 s
   ) internal {
-    require(DOMAIN_CHAIN_ID == getChainId(), "CHAIN_ID_CHANGED");
+    if(DOMAIN_CHAIN_ID != getChainId()) revert ChainIdChanged();
 
     // Ensure the expiry is not passed
-    require(expiry > block.timestamp, "EXPIRY_PASSED");
+    if(expiry <= block.timestamp) revert OrderExpired();
 
     // Recover the signatory from the hash and signature
     address signatory = ecrecover(
@@ -705,15 +705,15 @@ contract SwapERC20 is ISwapERC20, Ownable2Step {
     );
 
     // Ensure the signatory is not null
-    require(signatory != address(0), "SIGNATURE_INVALID");
+    if(signatory == address(0)) revert SignerInvalid();
 
     // Ensure the signatory is authorized by the signer wallet
     if (signerWallet != signatory) {
-      require(authorized[signerWallet] == signatory, "UNAUTHORIZED");
+      if(authorized[signerWallet] != signatory) revert Unauthorized();
     }
 
     // Ensure the nonce is not yet used and if not mark it used
-    require(_markNonceAsUsed(signatory, nonce), "NONCE_ALREADY_USED");
+    if(!_markNonceAsUsed(signatory, nonce)) revert NonceAlreadyUsed(nonce);
   }
 
   /**

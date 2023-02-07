@@ -46,6 +46,23 @@ interface ISwapERC20 {
 
   event SetStaking(address indexed staking);
 
+  error ChainIdChanged();
+  error InvalidFee();
+  error InvalidFeeLight();
+  error InvalidFeeWallet();
+  error InvalidStaking();
+  error OrderExpired();
+  error MaxTooHigh();
+  // error NonceTooLow();
+  error NonceAlreadyUsed(uint256);
+  error ScaleTooHigh();
+  // error SenderInvalid();
+  error SignatureInvalid();
+  error SignerInvalid();
+  // error TokenKindUnknown();
+  // error TransferFailed(address, address);
+  error Unauthorized();
+
   function swap(
     address recipient,
     uint256 nonce,
