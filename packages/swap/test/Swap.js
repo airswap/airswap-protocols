@@ -311,7 +311,7 @@ describe('Swap Unit', () => {
     it('a signer may not authorize a signatory with null address', async () => {
       await expect(
         swap.connect(signer).authorize(ADDRESS_ZERO)
-      ).to.be.revertedWith('SignerInvalid()')
+      ).to.be.revertedWith('SignatoryInvalid()')
     })
 
     it('a signer may only authorize one (1) other signatory at a time', async () => {
