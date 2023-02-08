@@ -26,7 +26,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
 
   // Domain name and version for use in EIP712 signatures
   string public constant DOMAIN_NAME = "SWAP";
-  string public constant DOMAIN_VERSION = "3";
+  string public constant DOMAIN_VERSION = "4";
 
   uint256 public immutable DOMAIN_CHAIN_ID;
 

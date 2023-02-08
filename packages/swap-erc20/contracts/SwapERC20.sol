@@ -27,7 +27,7 @@ contract SwapERC20 is ISwapERC20, Ownable2Step {
 
   // Domain name and version for use in EIP712 signatures
   bytes32 public constant DOMAIN_NAME = keccak256("SWAP_ERC20");
-  bytes32 public constant DOMAIN_VERSION = keccak256("3");
+  bytes32 public constant DOMAIN_VERSION = keccak256("4");
 
   uint256 public immutable DOMAIN_CHAIN_ID;
   bytes32 public immutable DOMAIN_SEPARATOR;
