@@ -29,5 +29,8 @@
   "devDependencies": {
     "@airswap/utils": "4.0.0-beta.1",
     "@nomicfoundation/hardhat-network-helpers": "^1.0.7"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
