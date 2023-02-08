@@ -26,7 +26,9 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
 
   // Domain name and version for use in EIP712 signatures
   string public constant DOMAIN_NAME = "SWAP";
-  string public constant DOMAIN_VERSION = "3";
+  string public constant DOMAIN_VERSION = "4";
+
+  uint256 public immutable DOMAIN_CHAIN_ID;
 
   uint256 public constant FEE_DIVISOR = 10000;
   uint256 internal constant MAX_ERROR_COUNT = 10;
@@ -65,6 +67,8 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
     if (_protocolFeeWallet == address(0)) revert InvalidFeeWallet();
     if (_adapters.length == 0) revert InvalidAdapters();
 
+    DOMAIN_CHAIN_ID = block.chainid;
+
     for (uint256 i = 0; i < _adapters.length; i++) {
       adapters[_adapters[i].interfaceID()] = _adapters[i];
     }
@@ -77,6 +81,9 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
    * @param order Order to settle
    */
   function swap(address recipient, Order calldata order) external {
+    // Ensure execution on the intended chain
+    if (DOMAIN_CHAIN_ID != block.chainid) revert ChainIdChanged();
+
     // Ensure order is valid for signer
     _check(order);
 
@@ -163,17 +170,17 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
 
   /**
    * @notice Authorize a signer
-   * @param signer address Wallet of the signer to authorize
+   * @param signatory address Wallet of the signer to authorize
    * @dev Emits an Authorize event
    */
-  function authorize(address signer) external override {
-    if (signer == address(0)) revert SignerInvalid();
-    authorized[msg.sender] = signer;
-    emit Authorize(signer, msg.sender);
+  function authorize(address signatory) external override {
+    if (signatory == address(0)) revert SignatoryInvalid();
+    authorized[msg.sender] = signatory;
+    emit Authorize(signatory, msg.sender);
   }
 
   /**
-   * @notice Revoke the signer
+   * @notice Revoke the signatory
    * @dev Emits a Revoke event
    */
   function revoke() external override {

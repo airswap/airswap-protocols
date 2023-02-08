@@ -48,6 +48,7 @@ interface ISwap {
 
   event Revoke(address indexed signer, address indexed signerWallet);
 
+  error ChainIdChanged();
   error InvalidAdapters();
   error InvalidFee();
   error InvalidFeeWallet();
@@ -56,7 +57,7 @@ interface ISwap {
   error NonceAlreadyUsed(uint256);
   error SenderInvalid();
   error SignatureInvalid();
-  error SignerInvalid();
+  error SignatoryInvalid();
   error TokenKindUnknown();
   error TransferFailed(address, address);
   error Unauthorized();
