@@ -121,6 +121,11 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
       _transferProtocolFee(order);
     }
 
+    // Check if protocol fee is to be transferred
+    if (adapters[order.sender.kind].implementsEIP2981(order.sender.token)) {
+      _transferRoyalties(order);
+    }
+
     emit Swap(
       order.nonce,
       block.timestamp,
@@ -453,6 +458,32 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
         order.signer.id,
         order.signer.token,
         order.signer.kind
+      );
+    }
+  }
+
+  /**
+   * @notice Calculates and transfers protocol fee
+   * @param order order
+   */
+  function _transferRoyalties(Order calldata order) internal {
+    // Transfer royalties from sender to royaltiesRecipient
+    IAdapter _adapter = adapters[order.sender.kind];
+    address royaltyRecipient;
+    uint256 royaltyAmount;
+    (royaltyRecipient, royaltyAmount) = _adapter.getRoyaltyInfo(
+      order.sender.token,
+      order.signer.id,
+      order.sender.amount
+    );
+    if (royaltyAmount > 0) {
+      _transfer(
+        order.sender.wallet,
+        royaltyRecipient,
+        royaltyAmount,
+        order.sender.id,
+        order.sender.token,
+        order.sender.kind
       );
     }
   }

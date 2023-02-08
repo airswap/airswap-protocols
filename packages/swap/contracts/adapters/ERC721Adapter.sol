@@ -4,6 +4,8 @@ pragma solidity 0.8.17;
 
 import "../interfaces/IAdapter.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/interfaces/IERC2981.sol";
+import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 
 contract ERC721Adapter is IAdapter {
   /**
@@ -15,6 +17,26 @@ contract ERC721Adapter is IAdapter {
    * @notice Indicates whether to attempt a fee transfer on the token
    */
   bool public constant attemptFeeTransfer = false;
+
+  /**
+   * @notice Function to indicate whether the party token implements EIP-2981
+   * @param token Contract address from which royalties need to be considered
+   */
+  function implementsEIP2981(address token) external view returns (bool) {
+    return ERC165Checker.supportsInterface(token, type(IERC2981).interfaceId);
+  }
+
+  /**
+   * @notice Function to query EIP-2981 implementation and provide royalties information
+   * @param token Contract address from which royalties need to be considered
+   */
+  function getRoyaltyInfo(
+    address token,
+    uint256 tokenId,
+    uint256 salePrice
+  ) external view returns (address, uint256) {
+    return IERC2981(token).royaltyInfo(tokenId, salePrice);
+  }
 
   /**
    * @notice Function to wrap token transfer for different token types
