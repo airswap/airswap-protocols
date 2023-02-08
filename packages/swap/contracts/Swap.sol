@@ -170,17 +170,17 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
 
   /**
    * @notice Authorize a signer
-   * @param signer address Wallet of the signer to authorize
+   * @param signatory address Wallet of the signer to authorize
    * @dev Emits an Authorize event
    */
-  function authorize(address signer) external override {
-    if (signer == address(0)) revert SignerInvalid();
-    authorized[msg.sender] = signer;
-    emit Authorize(signer, msg.sender);
+  function authorize(address signatory) external override {
+    if (signatory == address(0)) revert SignatoryInvalid();
+    authorized[msg.sender] = signatory;
+    emit Authorize(signatory, msg.sender);
   }
 
   /**
-   * @notice Revoke the signer
+   * @notice Revoke the signatory
    * @dev Emits a Revoke event
    */
   function revoke() external override {

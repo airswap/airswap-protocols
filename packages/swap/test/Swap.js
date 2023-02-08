@@ -325,7 +325,7 @@ describe('Swap Unit', () => {
   it('authorizing null address fails', async () => {
     await expect(
       swap.connect(anyone).authorize(ADDRESS_ZERO)
-    ).to.be.revertedWith('SignerInvalid()')
+    ).to.be.revertedWith('SignatoryInvalid()')
   })
 
   it('swap signed by authorized signer succeeds', async () => {

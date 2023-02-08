@@ -668,7 +668,7 @@ describe('SwapERC20 Unit Tests', () => {
     it('test authorize with zero address', async () => {
       await expect(
         swap.connect(deployer).authorize(ADDRESS_ZERO)
-      ).to.be.revertedWith('SignerInvalid()')
+      ).to.be.revertedWith('SignatoryInvalid()')
     })
 
     it('test revoke', async () => {

@@ -405,18 +405,18 @@ contract SwapERC20 is ISwapERC20, Ownable2Step {
   }
 
   /**
-   * @notice Authorize a signer
-   * @param signer address Wallet of the signer to authorize
+   * @notice Authorize a signatory
+   * @param signatory address Wallet of the signatory to authorize
    * @dev Emits an Authorize event
    */
-  function authorize(address signer) external override {
-    if (signer == address(0)) revert SignerInvalid();
-    authorized[msg.sender] = signer;
-    emit Authorize(signer, msg.sender);
+  function authorize(address signatory) external override {
+    if (signatory == address(0)) revert SignatoryInvalid();
+    authorized[msg.sender] = signatory;
+    emit Authorize(signatory, msg.sender);
   }
 
   /**
-   * @notice Revoke the signer
+   * @notice Revoke the signatory
    * @dev Emits a Revoke event
    */
   function revoke() external override {
