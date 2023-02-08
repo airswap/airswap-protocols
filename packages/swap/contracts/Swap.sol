@@ -124,11 +124,11 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
     }
 
     // Check if protocol fee is to be transferred
-    if (adapters[order.signer.kind].attemptFeeTransfer()) {
+    if (adapters[order.sender.kind].attemptFeeTransfer()) {
       _transferProtocolFee(order);
     }
 
-    // Check if protocol fee is to be transferred
+    // Check if royalty fee is to be transferred
     if (adapters[order.sender.kind].implementsEIP2981(order.sender.token)) {
       _transferRoyalties(order);
     }
@@ -456,15 +456,15 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
    */
   function _transferProtocolFee(Order calldata order) internal {
     // Transfer fee from signer to feeWallet
-    uint256 feeAmount = (order.signer.amount * protocolFee) / FEE_DIVISOR;
+    uint256 feeAmount = (order.sender.amount * protocolFee) / FEE_DIVISOR;
     if (feeAmount > 0) {
       _transfer(
-        order.signer.wallet,
+        order.sender.wallet,
         protocolFeeWallet,
         feeAmount,
-        order.signer.id,
-        order.signer.token,
-        order.signer.kind
+        order.sender.id,
+        order.sender.token,
+        order.sender.kind
       );
     }
   }
