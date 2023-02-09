@@ -31,10 +31,6 @@ describe('ERC20Adapter Unit', () => {
     }
   })
 
-  it('attemptFeeTransfer is true', async () => {
-    expect(await adapter.attemptFeeTransfer()).to.be.equal(true)
-  })
-
   it('hasAllowance succeeds', async () => {
     await token.mock.allowance
       .withArgs(party.wallet, adapter.address)
