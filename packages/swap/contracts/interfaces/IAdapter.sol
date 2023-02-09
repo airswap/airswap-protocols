@@ -25,22 +25,6 @@ interface IAdapter {
   function interfaceID() external view returns (bytes4);
 
   /**
-   * @notice Function to indicate whether the party token implements EIP-2981
-   * @param token contract address from which royalties need to be considered
-   */
-  function implementsEIP2981(address token) external view returns (bool);
-
-  /**
-   * @notice Function to query EIP-2981 implementation and provide royalties information
-   * @param token contract address from which royalties need to be considered
-   */
-  function getRoyaltyInfo(
-    address token,
-    uint256 tokenId,
-    uint256 salePrice
-  ) external view returns (address, uint256);
-
-  /**
    * @notice Function to wrap token transfer for different token types
    * @param party Party from whom swap would be made
    */

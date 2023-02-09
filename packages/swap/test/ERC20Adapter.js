@@ -31,20 +31,6 @@ describe('ERC20Adapter Unit', () => {
     }
   })
 
-  it('implementsEIP2981 is false', async () => {
-    expect(await adapter.implementsEIP2981(party.token)).to.be.equal(false)
-  })
-
-  it('getRoyaltyInfo returns (address(0), 0)', async () => {
-    let royaltyInfo = await adapter.getRoyaltyInfo(
-      party.token,
-      party.id,
-      party.amount
-    )
-    expect(royaltyInfo[0]).to.be.equal(ADDRESS_ZERO)
-    expect(royaltyInfo[1].toString()).to.be.equal('0')
-  })
-
   it('hasAllowance succeeds', async () => {
     await token.mock.allowance
       .withArgs(party.wallet, adapter.address)

@@ -14,26 +14,6 @@ contract ERC20Adapter is IAdapter {
   bytes4 public constant interfaceID = 0x36372b07;
 
   /**
-   * @notice Function to indicate whether the party token implements EIP-2981
-   * @param token Contract address from which royalties need to be considered
-   */
-  function implementsEIP2981(address token) external view returns (bool) {
-    return false;
-  }
-
-  /**
-   * @notice Function to query EIP-2981 implementation and provide royalties information
-   * @param token Contract address from which royalties need to be considered
-   */
-  function getRoyaltyInfo(
-    address token,
-    uint256 tokenId,
-    uint256 salePrice
-  ) external view returns (address, uint256) {
-    return (address(0), 0);
-  }
-
-  /**
    * @notice Function to wrap token transfer for different token types
    * @param party Party from whom swap would be made
    */
