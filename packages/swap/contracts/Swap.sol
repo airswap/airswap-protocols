@@ -3,6 +3,9 @@ pragma solidity 0.8.17;
 
 import "@openzeppelin/contracts/access/Ownable2Step.sol";
 import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
+import "@openzeppelin/contracts/interfaces/IERC165.sol";
+import "@openzeppelin/contracts/interfaces/IERC1155.sol";
+import "@openzeppelin/contracts/interfaces/IERC721.sol";
 import "./interfaces/IAdapter.sol";
 import "./interfaces/ISwap.sol";
 
@@ -42,6 +45,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
 
   mapping(address => address) public override authorized;
 
+  bytes4 public requiredSenderKind;
   uint256 public protocolFee;
   address public protocolFeeWallet;
 
@@ -60,6 +64,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
    */
   constructor(
     IAdapter[] memory _adapters,
+    bytes4 _requiredSenderKind,
     uint256 _protocolFee,
     address _protocolFeeWallet
   ) EIP712(DOMAIN_NAME, DOMAIN_VERSION) {
@@ -73,6 +78,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
     for (uint256 i = 0; i < _adapters.length; i++) {
       adapters[_adapters[i].interfaceID()] = _adapters[i];
     }
+    requiredSenderKind = _requiredSenderKind;
     protocolFee = _protocolFee;
     protocolFeeWallet = _protocolFeeWallet;
   }
@@ -360,6 +366,9 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
    */
 
   function _check(Order calldata order) internal {
+    // Ensure the sender uses the right token kind
+    if (order.sender.kind != requiredSenderKind) revert InvalidSenderToken();
+
     // Ensure execution on the intended chain
     if (DOMAIN_CHAIN_ID != block.chainid) revert ChainIdChanged();
 

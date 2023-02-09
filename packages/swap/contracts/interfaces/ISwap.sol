@@ -52,6 +52,7 @@ interface ISwap {
   error InvalidAdapters();
   error InvalidFee();
   error InvalidFeeWallet();
+  error InvalidSenderToken();
   error OrderExpired();
   error NonceTooLow();
   error NonceAlreadyUsed(uint256);
