@@ -3,6 +3,7 @@ pragma solidity 0.8.17;
 
 import "@openzeppelin/contracts/access/Ownable2Step.sol";
 import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
+import "@openzeppelin/contracts/interfaces/IERC2981.sol";
 import "./interfaces/IAdapter.sol";
 import "./interfaces/ISwap.sol";
 
@@ -130,6 +131,27 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
           order.sender.wallet,
           protocolFeeWallet,
           protocolFeeAmount,
+          order.sender.id,
+          order.sender.token,
+          order.sender.kind
+        );
+      }
+    }
+
+    // Check if royalty fee is to be transferred
+    if (implementsEIP2981(order.sender.token)) {
+      address royaltyRecipient;
+      uint256 royaltyAmount;
+      (royaltyRecipient, royaltyAmount) = getRoyaltyInfo(
+        order.sender.token,
+        order.signer.id,
+        order.sender.amount
+      );
+      if (royaltyAmount > 0) {
+        _transfer(
+          order.sender.wallet,
+          royaltyRecipient,
+          royaltyAmount,
           order.sender.id,
           order.sender.token,
           order.sender.kind
@@ -352,6 +374,30 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
     }
 
     _nonceGroups[signatory][groupKey] = group | (uint256(1) << indexInGroup);
+  }
+
+  /**
+   * @notice Function to indicate whether the party token implements EIP-2981
+   * @param token Contract address from which royalties need to be considered
+   */
+  function implementsEIP2981(address token) internal view returns (bool) {
+    try IERC165(token).supportsInterface(type(IERC2981).interfaceId) returns (bool result) {
+      return result;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * @notice Function to query EIP-2981 implementation and provide royalties information
+   * @param token Contract address from which royalties need to be considered
+   */
+  function getRoyaltyInfo(
+    address token,
+    uint256 tokenId,
+    uint256 salePrice
+  ) internal view returns (address, uint256) {
+    return IERC2981(token).royaltyInfo(tokenId, salePrice);
   }
 
   /**

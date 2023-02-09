@@ -4,6 +4,7 @@ const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
 const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
 const IERC721 = require('@openzeppelin/contracts/build/contracts/IERC721.json')
+const IERC2981 = require('@openzeppelin/contracts/build/contracts/IERC2981.json')
 const { createOrder, createOrderSignature } = require('@airswap/utils')
 const { tokenKinds, ADDRESS_ZERO } = require('@airswap/constants')
 
@@ -186,6 +187,20 @@ describe('Swap Unit', () => {
       await expect(
         swap.connect(sender).swap(sender.address, order)
       ).to.be.revertedWith('Unauthorized()')
+    })
+
+    it('an order with an non-fungible token that implements EIP2981 succeeds', async () => {
+      erc2981token = await deployMockContract(deployer, IERC2981.abi)
+      const order = await createSignedOrder(
+        {
+          token: erc2981token,
+        },
+        signer
+      )
+      await expect(swap.connect(sender).swap(sender.address, order)).to.emit(
+        swap,
+        'Swap'
+      )
     })
   })
 
