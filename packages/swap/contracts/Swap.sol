@@ -138,7 +138,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
       }
     }
 
-    // Check if royalty fee is to be transferred
+    // Check if royalty is to be transferred
     if (implementsEIP2981(order.sender.token)) {
       address royaltyRecipient;
       uint256 royaltyAmount;
@@ -378,10 +378,12 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
 
   /**
    * @notice Function to indicate whether the party token implements EIP-2981
-   * @param token Contract address from which royalties need to be considered
+   * @param token Contract address from which royalty need to be considered
    */
   function implementsEIP2981(address token) internal view returns (bool) {
-    try IERC165(token).supportsInterface(type(IERC2981).interfaceId) returns (bool result) {
+    try IERC165(token).supportsInterface(type(IERC2981).interfaceId) returns (
+      bool result
+    ) {
       return result;
     } catch {
       return false;
@@ -389,8 +391,8 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
   }
 
   /**
-   * @notice Function to query EIP-2981 implementation and provide royalties information
-   * @param token Contract address from which royalties need to be considered
+   * @notice Function to query EIP-2981 implementation and provide royalty information
+   * @param token Contract address from which royalty need to be considered
    */
   function getRoyaltyInfo(
     address token,

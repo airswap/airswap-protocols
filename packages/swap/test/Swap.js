@@ -189,7 +189,7 @@ describe('Swap Unit', () => {
       ).to.be.revertedWith('Unauthorized()')
     })
 
-    it('an order with an non-fungible token that implements EIP2981 succeeds', async () => {
+    it('an order with a non-fungible token that implements EIP2981 succeeds', async () => {
       erc2981token = await deployMockContract(deployer, IERC2981.abi)
       const order = await createSignedOrder(
         {
