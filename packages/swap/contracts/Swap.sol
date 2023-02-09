@@ -82,7 +82,11 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
    * @notice Atomic Token Swap
    * @param order Order to settle
    */
-  function swap(address recipient, Order calldata order) external {
+  function swap(
+    address recipient,
+    uint256 maxRoyalty,
+    Order calldata order
+  ) external {
     // Ensure order is valid for signer
     _check(order);
 
@@ -147,6 +151,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
         order.signer.id,
         order.sender.amount
       );
+      if (royaltyAmount > maxRoyalty) revert InvalidRoyalty();
       if (royaltyAmount > 0) {
         _transfer(
           order.sender.wallet,
