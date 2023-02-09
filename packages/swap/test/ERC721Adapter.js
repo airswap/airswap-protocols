@@ -37,8 +37,8 @@ describe('ERC721Adapter Unit', () => {
 
   it('hasAllowance succeeds', async () => {
     await token.mock.isApprovedForAll
-      .withArgs(party.id, adapter.amount)
-      .returns([true])
+      .withArgs(party.wallet, adapter.address)
+      .returns(true)
     expect(await adapter.connect(anyone).hasAllowance(party)).to.be.equal(true)
   })
 
