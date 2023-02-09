@@ -12,11 +12,6 @@ contract ERC721Adapter is IAdapter {
   bytes4 public constant interfaceID = 0x80ac58cd;
 
   /**
-   * @notice Indicates whether to attempt a fee transfer on the token
-   */
-  bool public constant attemptFeeTransfer = false;
-
-  /**
    * @notice Function to wrap token transfer for different token types
    * @param party Party from whom swap would be made
    */
