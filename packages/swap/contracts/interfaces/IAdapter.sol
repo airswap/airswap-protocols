@@ -25,11 +25,6 @@ interface IAdapter {
   function interfaceID() external view returns (bytes4);
 
   /**
-   * @notice Indicates whether to attempt a fee transfer on the token
-   */
-  function attemptFeeTransfer() external returns (bool);
-
-  /**
    * @notice Function to wrap token transfer for different token types
    * @param party Party from whom swap would be made
    */

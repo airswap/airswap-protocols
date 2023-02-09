@@ -31,10 +31,6 @@ describe('ERC721Adapter Unit', () => {
     }
   })
 
-  it('attemptFeeTransfer is false', async () => {
-    expect(await adapter.attemptFeeTransfer()).to.be.equal(false)
-  })
-
   it('hasAllowance succeeds', async () => {
     await token.mock.isApprovedForAll
       .withArgs(party.wallet, adapter.address)

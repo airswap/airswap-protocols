@@ -12,11 +12,6 @@ contract ERC1155Adapter is IAdapter {
   bytes4 public constant interfaceID = 0xd9b67a26;
 
   /**
-   * @notice Indicates whether to attempt a fee transfer on the token
-   */
-  bool public constant attemptFeeTransfer = true;
-
-  /**
    * @notice Function to wrap token transfer for different token types
    * @param party Party from whom swap would be made
    */
