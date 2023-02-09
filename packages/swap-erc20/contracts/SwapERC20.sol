@@ -2,6 +2,7 @@
 pragma solidity 0.8.17;
 
 import "@openzeppelin/contracts/access/Ownable2Step.sol";
+import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/ISwapERC20.sol";
 
@@ -9,7 +10,7 @@ import "./interfaces/ISwapERC20.sol";
  * @title AirSwap: Atomic ERC20 Token Swap
  * @notice https://www.airswap.io/
  */
-contract SwapERC20 is ISwapERC20, Ownable2Step {
+contract SwapERC20 is ISwapERC20, Ownable2Step, EIP712 {
   using SafeERC20 for IERC20;
 
   bytes32 public constant DOMAIN_TYPEHASH =
@@ -26,9 +27,8 @@ contract SwapERC20 is ISwapERC20, Ownable2Step {
     );
 
   // Domain name and version for use in EIP712 signatures
-  bytes32 public constant DOMAIN_NAME = keccak256("SWAP_ERC20");
-  bytes32 public constant DOMAIN_VERSION = keccak256("4");
-
+  string public constant DOMAIN_NAME = "SWAP_ERC20";
+  string public constant DOMAIN_VERSION = "4";
   uint256 public immutable DOMAIN_CHAIN_ID;
   bytes32 public immutable DOMAIN_SEPARATOR;
 
@@ -69,7 +69,7 @@ contract SwapERC20 is ISwapERC20, Ownable2Step {
     uint256 _rebateScale,
     uint256 _rebateMax,
     address _staking
-  ) {
+  ) EIP712(DOMAIN_NAME, DOMAIN_VERSION) {
     if (_protocolFee >= FEE_DIVISOR) revert InvalidFee();
     if (_protocolFeeLight >= FEE_DIVISOR) revert InvalidFeeLight();
     if (_protocolFeeWallet == address(0)) revert InvalidFeeWallet();
@@ -77,17 +77,8 @@ contract SwapERC20 is ISwapERC20, Ownable2Step {
     if (_rebateMax > MAX_PERCENTAGE) revert MaxTooHigh();
     if (_staking == address(0)) revert InvalidStaking();
 
-    uint256 currentChainId = getChainId();
-    DOMAIN_CHAIN_ID = currentChainId;
-    DOMAIN_SEPARATOR = keccak256(
-      abi.encode(
-        DOMAIN_TYPEHASH,
-        DOMAIN_NAME,
-        DOMAIN_VERSION,
-        currentChainId,
-        this
-      )
-    );
+    DOMAIN_CHAIN_ID = block.chainid;
+    DOMAIN_SEPARATOR = _domainSeparatorV4();
 
     protocolFee = _protocolFee;
     protocolFeeLight = _protocolFeeLight;
@@ -266,7 +257,7 @@ contract SwapERC20 is ISwapERC20, Ownable2Step {
     if (expiry <= block.timestamp) revert OrderExpired();
 
     // Recover the signatory from the hash and signature
-    address signatory = ecrecover(
+    (address signatory, ) = ECDSA.tryRecover(
       keccak256(
         abi.encodePacked(
           "\x19\x01", // EIP191: Indicates EIP712
@@ -682,13 +673,14 @@ contract SwapERC20 is ISwapERC20, Ownable2Step {
     bytes32 r,
     bytes32 s
   ) internal {
-    if (DOMAIN_CHAIN_ID != getChainId()) revert ChainIdChanged();
+    // Ensure execution on the intended chain
+    if (DOMAIN_CHAIN_ID != block.chainid) revert ChainIdChanged();
 
     // Ensure the expiry is not passed
     if (expiry <= block.timestamp) revert OrderExpired();
 
     // Recover the signatory from the hash and signature
-    address signatory = ecrecover(
+    (address signatory, ) = ECDSA.tryRecover(
       _getOrderHash(
         nonce,
         expiry,
