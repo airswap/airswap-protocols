@@ -31,10 +31,6 @@ describe('ERC20Adapter Unit', () => {
     }
   })
 
-  it('attemptFeeTransfer is true', async () => {
-    expect(await adapter.attemptFeeTransfer()).to.be.equal(true)
-  })
-
   it('implementsEIP2981 is false', async () => {
     expect(await adapter.implementsEIP2981(party.token)).to.be.equal(false)
   })

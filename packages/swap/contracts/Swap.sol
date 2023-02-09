@@ -27,8 +27,8 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
   // Domain name and version for use in EIP712 signatures
   string public constant DOMAIN_NAME = "SWAP";
   string public constant DOMAIN_VERSION = "4";
-
   uint256 public immutable DOMAIN_CHAIN_ID;
+  bytes32 public immutable DOMAIN_SEPARATOR;
 
   uint256 public constant FEE_DIVISOR = 10000;
   uint256 internal constant MAX_ERROR_COUNT = 10;
@@ -68,6 +68,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
     if (_adapters.length == 0) revert InvalidAdapters();
 
     DOMAIN_CHAIN_ID = block.chainid;
+    DOMAIN_SEPARATOR = _domainSeparatorV4();
 
     for (uint256 i = 0; i < _adapters.length; i++) {
       adapters[_adapters[i].interfaceID()] = _adapters[i];
@@ -81,9 +82,6 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
    * @param order Order to settle
    */
   function swap(address recipient, Order calldata order) external {
-    // Ensure execution on the intended chain
-    if (DOMAIN_CHAIN_ID != block.chainid) revert ChainIdChanged();
-
     // Ensure order is valid for signer
     _check(order);
 
@@ -111,10 +109,10 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
       order.signer.kind
     );
 
-    // Transfer from signer to affiliate if specified
+    // Transfer from sender to affiliate if specified
     if (order.affiliate.token != address(0)) {
       _transfer(
-        order.signer.wallet,
+        order.sender.wallet,
         order.affiliate.wallet,
         order.affiliate.amount,
         order.affiliate.id,
@@ -231,7 +229,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
     uint256 errCount;
     bytes32[] memory errors = new bytes32[](MAX_ERROR_COUNT);
     (address signatory, ) = ECDSA.tryRecover(
-      _getOrderHash(order, _domainSeparatorV4()),
+      _getOrderHash(order),
       order.v,
       order.r,
       order.s
@@ -356,12 +354,15 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
    */
 
   function _check(Order calldata order) internal {
+    // Ensure execution on the intended chain
+    if (DOMAIN_CHAIN_ID != block.chainid) revert ChainIdChanged();
+
     // Ensure the expiry is not passed
     if (order.expiry <= block.timestamp) revert OrderExpired();
 
     // Recover the signatory from the hash and signature
     (address signatory, ) = ECDSA.tryRecover(
-      _getOrderHash(order, _domainSeparatorV4()),
+      _getOrderHash(order),
       order.v,
       order.r,
       order.s
@@ -386,19 +387,14 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
    * @notice Hash an order into bytes32
    * @dev EIP-191 header and domain separator included
    * @param order Order The order to be hashed
-   * @param domainSeparator bytes32
    * @return bytes32 A keccak256 abi.encodePacked value
    */
-  function _getOrderHash(Order calldata order, bytes32 domainSeparator)
-    internal
-    view
-    returns (bytes32)
-  {
+  function _getOrderHash(Order calldata order) internal view returns (bytes32) {
     return
       keccak256(
         abi.encodePacked(
           "\x19\x01", // EIP191: Indicates EIP712
-          domainSeparator,
+          DOMAIN_SEPARATOR,
           keccak256(
             abi.encode(
               ORDER_TYPEHASH,

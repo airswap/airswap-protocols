@@ -25,11 +25,6 @@ interface IAdapter {
   function interfaceID() external view returns (bytes4);
 
   /**
-   * @notice Indicates whether to attempt a fee transfer on the token
-   */
-  function attemptFeeTransfer() external returns (bool);
-
-  /**
    * @notice Function to indicate whether the party token implements EIP-2981
    * @param token contract address from which royalties need to be considered
    */

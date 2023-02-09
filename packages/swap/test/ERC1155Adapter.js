@@ -31,10 +31,6 @@ describe('ERC1155Adapter Unit', () => {
     }
   })
 
-  it('attemptFeeTransfer is true', async () => {
-    expect(await adapter.attemptFeeTransfer()).to.be.equal(true)
-  })
-
   it('hasAllowance succeeds', async () => {
     await token.mock.isApprovedForAll
       .withArgs(party.wallet, adapter.address)
