@@ -111,10 +111,10 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
       order.signer.kind
     );
 
-    // Transfer from signer to affiliate if specified
+    // Transfer from sender to affiliate if specified
     if (order.affiliate.token != address(0)) {
       _transfer(
-        order.signer.wallet,
+        order.sender.wallet,
         order.affiliate.wallet,
         order.affiliate.amount,
         order.affiliate.id,
@@ -123,9 +123,20 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
       );
     }
 
-    // Check if protocol fee is to be transferred
-    if (adapters[order.signer.kind].attemptFeeTransfer()) {
-      _transferProtocolFee(order);
+    // Transfer protocol fee from sender if possible
+    if (order.sender.amount > 0) {
+      uint256 protocolFeeAmount = (order.sender.amount * protocolFee) /
+        FEE_DIVISOR;
+      if (protocolFeeAmount > 0) {
+        _transfer(
+          order.sender.wallet,
+          protocolFeeWallet,
+          protocolFeeAmount,
+          order.sender.id,
+          order.sender.token,
+          order.sender.kind
+        );
+      }
     }
 
     emit Swap(
@@ -443,24 +454,5 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
       )
     );
     if (!success) revert TransferFailed(from, to);
-  }
-
-  /**
-   * @notice Calculates and transfers protocol fee
-   * @param order order
-   */
-  function _transferProtocolFee(Order calldata order) internal {
-    // Transfer fee from signer to feeWallet
-    uint256 feeAmount = (order.signer.amount * protocolFee) / FEE_DIVISOR;
-    if (feeAmount > 0) {
-      _transfer(
-        order.signer.wallet,
-        protocolFeeWallet,
-        feeAmount,
-        order.signer.id,
-        order.signer.token,
-        order.signer.kind
-      );
-    }
   }
 }
