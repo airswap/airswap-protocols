@@ -16,9 +16,8 @@ interface ISwapERC20 {
     bytes32 s;
   }
 
-  event Swap(
+  event SwapERC20(
     uint256 indexed nonce,
-    uint256 timestamp,
     address indexed signerWallet,
     address signerToken,
     uint256 signerAmount,

@@ -144,9 +144,8 @@ contract SwapERC20 is ISwapERC20, Ownable2Step, EIP712 {
     _transferProtocolFee(signerToken, signerWallet, signerAmount);
 
     // Emit a Swap event
-    emit Swap(
+    emit SwapERC20(
       nonce,
-      block.timestamp,
       signerWallet,
       signerToken,
       signerAmount,
@@ -213,9 +212,8 @@ contract SwapERC20 is ISwapERC20, Ownable2Step, EIP712 {
     _transferProtocolFee(signerToken, signerWallet, signerAmount);
 
     // Emit a Swap event
-    emit Swap(
+    emit SwapERC20(
       nonce,
-      block.timestamp,
       signerWallet,
       signerToken,
       signerAmount,
@@ -316,9 +314,8 @@ contract SwapERC20 is ISwapERC20, Ownable2Step, EIP712 {
     );
 
     // Emit a Swap event
-    emit Swap(
+    emit SwapERC20(
       nonce,
-      block.timestamp,
       signerWallet,
       signerToken,
       signerAmount,

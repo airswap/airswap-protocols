@@ -139,7 +139,6 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
 
     emit Swap(
       order.nonce,
-      block.timestamp,
       order.signer.wallet,
       order.signer.amount,
       order.signer.id,
