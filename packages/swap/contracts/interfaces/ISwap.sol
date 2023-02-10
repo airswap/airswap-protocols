@@ -21,7 +21,6 @@ interface ISwap {
 
   event Swap(
     uint256 indexed nonce,
-    uint256 timestamp,
     address indexed signerWallet,
     uint256 signerAmount,
     uint256 signerId,

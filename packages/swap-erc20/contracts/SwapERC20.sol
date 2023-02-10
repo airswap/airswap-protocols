@@ -146,7 +146,6 @@ contract SwapERC20 is ISwapERC20, Ownable2Step, EIP712 {
     // Emit a Swap event
     emit Swap(
       nonce,
-      block.timestamp,
       signerWallet,
       signerToken,
       signerAmount,
@@ -215,7 +214,6 @@ contract SwapERC20 is ISwapERC20, Ownable2Step, EIP712 {
     // Emit a Swap event
     emit Swap(
       nonce,
-      block.timestamp,
       signerWallet,
       signerToken,
       signerAmount,
@@ -318,7 +316,6 @@ contract SwapERC20 is ISwapERC20, Ownable2Step, EIP712 {
     // Emit a Swap event
     emit Swap(
       nonce,
-      block.timestamp,
       signerWallet,
       signerToken,
       signerAmount,
