@@ -143,14 +143,11 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
     }
 
     // Check if royalty is to be transferred
-    if (implementsEIP2981(order.sender.token)) {
+    if (supportsRoyalties(order.signer.token)) {
       address royaltyRecipient;
       uint256 royaltyAmount;
-      (royaltyRecipient, royaltyAmount) = getRoyaltyInfo(
-        order.sender.token,
-        order.signer.id,
-        order.sender.amount
-      );
+      (royaltyRecipient, royaltyAmount) = IERC2981(order.signer.token)
+        .royaltyInfo(order.signer.id, order.sender.amount);
       if (royaltyAmount > maxRoyalty) revert InvalidRoyalty();
       if (royaltyAmount > 0) {
         _transfer(
@@ -385,7 +382,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
    * @notice Function to indicate whether the party token implements EIP-2981
    * @param token Contract address from which royalty need to be considered
    */
-  function implementsEIP2981(address token) internal view returns (bool) {
+  function supportsRoyalties(address token) internal view returns (bool) {
     try IERC165(token).supportsInterface(type(IERC2981).interfaceId) returns (
       bool result
     ) {
@@ -393,18 +390,6 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
     } catch {
       return false;
     }
-  }
-
-  /**
-   * @notice Function to query EIP-2981 implementation and provide royalty information
-   * @param token Contract address from which royalty need to be considered
-   */
-  function getRoyaltyInfo(
-    address token,
-    uint256 tokenId,
-    uint256 salePrice
-  ) internal view returns (address, uint256) {
-    return IERC2981(token).royaltyInfo(tokenId, salePrice);
   }
 
   /**

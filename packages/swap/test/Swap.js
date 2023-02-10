@@ -3,8 +3,7 @@ const { time } = require('@nomicfoundation/hardhat-network-helpers')
 const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
 const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
-const IERC721 = require('@openzeppelin/contracts/build/contracts/IERC721.json')
-const IERC2981 = require('@openzeppelin/contracts/build/contracts/IERC2981.json')
+const IERC721 = require('@openzeppelin/contracts/build/contracts/ERC721Royalty.json')
 const { createOrder, createOrderSignature } = require('@airswap/utils')
 const { tokenKinds, ADDRESS_ZERO } = require('@airswap/constants')
 
@@ -24,7 +23,6 @@ let affiliate
 let erc20token
 let erc20adapter
 let erc721token
-let erc2981token
 let erc721adapter
 let swap
 
@@ -89,8 +87,6 @@ describe('Swap Unit', () => {
       await ethers.getContractFactory('ERC721Adapter')
     ).deploy()
     await erc721adapter.deployed()
-    erc2981token = await deployMockContract(deployer, IERC2981.abi)
-    await erc2981token.mock.royaltyInfo.returns(ADDRESS_ZERO, MAX_ROYALTY)
     swap = await (
       await ethers.getContractFactory('Swap')
     ).deploy(
@@ -192,28 +188,25 @@ describe('Swap Unit', () => {
       ).to.be.revertedWith('Unauthorized()')
     })
 
-    it('an order with a non-fungible token that implements EIP2981 succeeds', async () => {
+    it('an order with a higher-than-max royalty is rejected', async () => {
+      await erc721token.mock.supportsInterface.returns(true)
+      await erc721token.mock.royaltyInfo.returns(
+        ADDRESS_ZERO,
+        Number(MAX_ROYALTY) + 1
+      )
       const order = await createSignedOrder(
         {
-          token: erc2981token,
+          signer: {
+            token: erc721token.address,
+            kind: tokenKinds.ERC721,
+            id: '1',
+            amount: '0',
+          },
         },
         signer
       )
       await expect(
         swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
-      ).to.emit(swap, 'Swap')
-    })
-
-    it('an order with a wrong royalty is rejected', async () => {
-      const order = await createSignedOrder(
-        {
-          token: erc2981token,
-          kind: 0x2a55205a,
-        },
-        signer
-      )
-      await expect(
-        swap.connect(sender).swap(sender.address, MAX_ROYALTY - 1, order)
       ).to.be.revertedWith('InvalidRoyalty()')
     })
   })
