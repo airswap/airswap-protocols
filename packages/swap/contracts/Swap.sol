@@ -3,6 +3,7 @@ pragma solidity 0.8.17;
 
 import "@openzeppelin/contracts/access/Ownable2Step.sol";
 import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
+import "@openzeppelin/contracts/interfaces/IERC2981.sol";
 import "./interfaces/IAdapter.sol";
 import "./interfaces/ISwap.sol";
 
@@ -81,7 +82,11 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
    * @notice Atomic Token Swap
    * @param order Order to settle
    */
-  function swap(address recipient, Order calldata order) external {
+  function swap(
+    address recipient,
+    uint256 maxRoyalty,
+    Order calldata order
+  ) external {
     // Ensure order is valid for signer
     _check(order);
 
@@ -130,6 +135,25 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
           order.sender.wallet,
           protocolFeeWallet,
           protocolFeeAmount,
+          order.sender.id,
+          order.sender.token,
+          order.sender.kind
+        );
+      }
+    }
+
+    // Transfer royalty from sender if supported by signer token
+    if (supportsRoyalties(order.signer.token)) {
+      address royaltyRecipient;
+      uint256 royaltyAmount;
+      (royaltyRecipient, royaltyAmount) = IERC2981(order.signer.token)
+        .royaltyInfo(order.signer.id, order.sender.amount);
+      if (royaltyAmount > maxRoyalty) revert InvalidRoyalty();
+      if (royaltyAmount > 0) {
+        _transfer(
+          order.sender.wallet,
+          royaltyRecipient,
+          royaltyAmount,
           order.sender.id,
           order.sender.token,
           order.sender.kind
@@ -351,6 +375,20 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
     }
 
     _nonceGroups[signatory][groupKey] = group | (uint256(1) << indexInGroup);
+  }
+
+  /**
+   * @notice Function to indicate whether the party token implements EIP-2981
+   * @param token Contract address from which royalty need to be considered
+   */
+  function supportsRoyalties(address token) internal view returns (bool) {
+    try IERC165(token).supportsInterface(type(IERC2981).interfaceId) returns (
+      bool result
+    ) {
+      return result;
+    } catch {
+      return false;
+    }
   }
 
   /**

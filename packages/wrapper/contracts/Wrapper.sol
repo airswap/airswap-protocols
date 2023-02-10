@@ -79,9 +79,9 @@ contract Wrapper is Ownable2Step {
    * @notice Wrapped Swap.swap
    * @param order ISwap.Order uint256 Unique and should be sequential
    */
-  function swap(ISwap.Order calldata order) public payable {
+  function swap(uint256 maxRoyalty, ISwap.Order calldata order) public payable {
     _wrapEther(order.sender.token, order.sender.amount);
-    swapContract.swap(address(this), order);
+    swapContract.swap(address(this), maxRoyalty, order);
     _unwrapEther(order.signer.token, order.signer.amount);
     emit WrappedSwapFor(msg.sender);
   }

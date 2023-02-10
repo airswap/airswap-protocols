@@ -51,6 +51,7 @@ interface ISwap {
   error InvalidAdapters();
   error InvalidFee();
   error InvalidFeeWallet();
+  error InvalidRoyalty();
   error OrderExpired();
   error NonceTooLow();
   error NonceAlreadyUsed(uint256);
@@ -65,7 +66,11 @@ interface ISwap {
    * @notice Atomic Token Swap
    * @param order Order
    */
-  function swap(address recipient, Order calldata order) external;
+  function swap(
+    address recipient,
+    uint256 maxRoyalty,
+    Order calldata order
+  ) external;
 
   /**
    * @notice Cancel one or more open orders by nonce
