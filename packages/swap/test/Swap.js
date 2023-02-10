@@ -91,6 +91,7 @@ describe('Swap Unit', () => {
       await ethers.getContractFactory('Swap')
     ).deploy(
       [erc20adapter.address, erc721adapter.address],
+      tokenKinds.ERC20,
       PROTOCOL_FEE,
       protocolFeeWallet.address
     )
@@ -102,7 +103,7 @@ describe('Swap Unit', () => {
       await expect(
         (
           await ethers.getContractFactory('Swap')
-        ).deploy([], PROTOCOL_FEE, protocolFeeWallet.address)
+        ).deploy([], tokenKinds.ERC20, PROTOCOL_FEE, protocolFeeWallet.address)
       ).to.be.revertedWith('InvalidAdapters()')
     })
 
@@ -110,7 +111,7 @@ describe('Swap Unit', () => {
       await expect(
         (
           await ethers.getContractFactory('Swap')
-        ).deploy([], PROTOCOL_FEE, ADDRESS_ZERO)
+        ).deploy([], tokenKinds.ERC20, PROTOCOL_FEE, ADDRESS_ZERO)
       ).to.be.revertedWith('InvalidFeeWallet()')
     })
 
@@ -138,7 +139,7 @@ describe('Swap Unit', () => {
       await expect(
         (
           await ethers.getContractFactory('Swap')
-        ).deploy([], INVALID_FEE, protocolFeeWallet.address)
+        ).deploy([], tokenKinds.ERC20, INVALID_FEE, protocolFeeWallet.address)
       ).to.be.revertedWith('InvalidFee()')
     })
 
@@ -428,7 +429,7 @@ describe('Swap Unit', () => {
     it('an order with an invalid kind is rejected', async () => {
       const order = await createSignedOrder(
         {
-          sender: {
+          signer: {
             kind: INVALID_KIND,
           },
         },
@@ -437,6 +438,20 @@ describe('Swap Unit', () => {
       await expect(
         swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
       ).to.be.revertedWith('TokenKindUnknown')
+    })
+
+    it('an order with an invalid sender kind is rejected', async () => {
+      const order = await createSignedOrder(
+        {
+          sender: {
+            kind: INVALID_KIND,
+          },
+        },
+        signer
+      )
+      await expect(
+        swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
+      ).to.be.revertedWith('InvalidSenderToken()')
     })
   })
 

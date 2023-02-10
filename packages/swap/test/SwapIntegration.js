@@ -91,6 +91,7 @@ describe('Swap Integration', () => {
       await ethers.getContractFactory('Swap')
     ).deploy(
       [erc20adapter.address, erc721adapter.address],
+      tokenKinds.ERC20,
       PROTOCOL_FEE,
       protocolFeeWallet.address
     )
