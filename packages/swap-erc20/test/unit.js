@@ -318,7 +318,7 @@ describe('SwapERC20 Unit Tests', () => {
 
       await expect(swap.connect(sender).swap(sender.address, ...order)).to.emit(
         swap,
-        'Swap'
+        'SwapERC20'
       )
     })
 
@@ -336,7 +336,7 @@ describe('SwapERC20 Unit Tests', () => {
 
       await expect(swap.connect(sender).swap(sender.address, ...order)).to.emit(
         swap,
-        'Swap'
+        'SwapERC20'
       )
     })
 
@@ -419,7 +419,7 @@ describe('SwapERC20 Unit Tests', () => {
 
       await expect(
         swap.connect(sender).swapAnySender(sender.address, ...order)
-      ).to.emit(swap, 'Swap')
+      ).to.emit(swap, 'SwapERC20')
     })
 
     it('test authorized signer', async () => {
@@ -436,7 +436,7 @@ describe('SwapERC20 Unit Tests', () => {
 
       await expect(
         swap.connect(sender).swapAnySender(sender.address, ...order)
-      ).to.emit(swap, 'Swap')
+      ).to.emit(swap, 'SwapERC20')
     })
 
     it('test when signer not authorized', async () => {
@@ -510,7 +510,7 @@ describe('SwapERC20 Unit Tests', () => {
 
       await expect(swap.connect(sender).swapLight(...order)).to.emit(
         swap,
-        'Swap'
+        'SwapERC20'
       )
     })
     it('test light swaps with authorized', async () => {
@@ -528,7 +528,7 @@ describe('SwapERC20 Unit Tests', () => {
 
       await expect(swap.connect(sender).swapLight(...order)).to.emit(
         swap,
-        'Swap'
+        'SwapERC20'
       )
     })
     it('test when expiration has passed', async () => {
@@ -621,7 +621,7 @@ describe('SwapERC20 Unit Tests', () => {
       await swap.connect(deployer).setProtocolFee('0')
       await expect(swap.connect(sender).swap(sender.address, ...order)).to.emit(
         swap,
-        'Swap'
+        'SwapERC20'
       )
     })
 
