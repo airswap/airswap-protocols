@@ -21,7 +21,6 @@ interface ISwap {
 
   event Swap(
     uint256 indexed nonce,
-    uint256 timestamp,
     address indexed signerWallet,
     uint256 signerAmount,
     uint256 signerId,
@@ -53,6 +52,7 @@ interface ISwap {
   error InvalidFee();
   error InvalidFeeWallet();
   error InvalidSenderToken();
+  error InvalidRoyalty();
   error OrderExpired();
   error NonceTooLow();
   error NonceAlreadyUsed(uint256);
@@ -67,7 +67,11 @@ interface ISwap {
    * @notice Atomic Token Swap
    * @param order Order
    */
-  function swap(address recipient, Order calldata order) external;
+  function swap(
+    address recipient,
+    uint256 maxRoyalty,
+    Order calldata order
+  ) external;
 
   /**
    * @notice Cancel one or more open orders by nonce

@@ -8,6 +8,7 @@ const NonFungibleToken = require('@airswap/tokens/build/contracts/NonFungibleTok
 const CHAIN_ID = 31337
 const PROTOCOL_FEE = '30'
 const DEFAULT_AMOUNT = '1000'
+const MAX_ROYALTY = '0'
 
 let snapshotId
 let deployer
@@ -123,10 +124,9 @@ describe('Swap Integration', () => {
         signer
       )
       expect(await erc721token.ownerOf('1')).to.be.equal(signer.address)
-      await expect(swap.connect(sender).swap(sender.address, order)).to.emit(
-        swap,
-        'Swap'
-      )
+      await expect(
+        swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
+      ).to.emit(swap, 'Swap')
       expect(await erc721token.ownerOf('1')).to.be.equal(sender.address)
     })
   })
