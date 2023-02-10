@@ -142,7 +142,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
       }
     }
 
-    // Check if royalty is to be transferred
+    // Transfer royalty from sender if supported by signer token
     if (supportsRoyalties(order.signer.token)) {
       address royaltyRecipient;
       uint256 royaltyAmount;
