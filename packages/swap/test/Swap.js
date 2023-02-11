@@ -13,6 +13,7 @@ const HIGHER_FEE = '50'
 const INVALID_FEE = '100000000000'
 const INVALID_KIND = '0x00000000'
 const DEFAULT_AMOUNT = '1000'
+const ERC2981_INTERFACE_ID = '0x2a55205a'
 const MAX_ROYALTY = '10'
 
 let snapshotId
@@ -98,13 +99,13 @@ describe('Swap Unit', () => {
     await swap.deployed()
   })
 
-  describe('adapters, fees, fee wallets', () => {
+  describe('adapters, fees, fee wallets, royalties', () => {
     it('at least one adapter address must be passed to constructor', async () => {
       await expect(
         (
           await ethers.getContractFactory('Swap')
         ).deploy([], tokenKinds.ERC20, PROTOCOL_FEE, protocolFeeWallet.address)
-      ).to.be.revertedWith('InvalidAdapters()')
+      ).to.be.revertedWith('AdaptersInvalid()')
     })
 
     it('an invalid protocolFeeWallet (non-null) is rejected by constructor', async () => {
@@ -112,13 +113,13 @@ describe('Swap Unit', () => {
         (
           await ethers.getContractFactory('Swap')
         ).deploy([], tokenKinds.ERC20, PROTOCOL_FEE, ADDRESS_ZERO)
-      ).to.be.revertedWith('InvalidFeeWallet()')
+      ).to.be.revertedWith('FeeWalletInvalid()')
     })
 
     it('protocolFeeWallet can only be updated with a valid value (non-null)', async () => {
       await expect(
         swap.connect(deployer).setProtocolFeeWallet(ADDRESS_ZERO)
-      ).to.be.revertedWith('InvalidFeeWallet()')
+      ).to.be.revertedWith('FeeWalletInvalid()')
     })
 
     it('protocolFeeWallet can only be updated by owner', async () => {
@@ -140,13 +141,13 @@ describe('Swap Unit', () => {
         (
           await ethers.getContractFactory('Swap')
         ).deploy([], tokenKinds.ERC20, INVALID_FEE, protocolFeeWallet.address)
-      ).to.be.revertedWith('InvalidFee()')
+      ).to.be.revertedWith('FeeInvalid()')
     })
 
     it('protocolFee can only be updated with a valid value (less than divisor)', async () => {
       await expect(
         swap.connect(deployer).setProtocolFee(INVALID_FEE)
-      ).to.be.revertedWith('InvalidFee()')
+      ).to.be.revertedWith('FeeInvalid()')
     })
 
     it('protocolFee can only be updated by owner', async () => {
@@ -190,7 +191,9 @@ describe('Swap Unit', () => {
     })
 
     it('an order with a higher-than-max royalty is rejected', async () => {
-      await erc721token.mock.supportsInterface.returns(true)
+      await erc721token.mock.supportsInterface
+        .withArgs(ERC2981_INTERFACE_ID)
+        .returns(true)
       await erc721token.mock.royaltyInfo.returns(
         ADDRESS_ZERO,
         Number(MAX_ROYALTY) + 1
@@ -208,7 +211,76 @@ describe('Swap Unit', () => {
       )
       await expect(
         swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
-      ).to.be.revertedWith('InvalidRoyalty()')
+      ).to.be.revertedWith(`RoyaltyExceedsMax(${Number(MAX_ROYALTY) + 1}`)
+    })
+
+    it('an order with a royalty equal to max is accepted', async () => {
+      await erc721token.mock.supportsInterface
+        .withArgs('0x2a55205a')
+        .returns(true)
+      await erc721token.mock.royaltyInfo.returns(
+        ADDRESS_ZERO,
+        Number(MAX_ROYALTY)
+      )
+      const order = await createSignedOrder(
+        {
+          signer: {
+            token: erc721token.address,
+            kind: tokenKinds.ERC721,
+            id: '1',
+            amount: '0',
+          },
+        },
+        signer
+      )
+      await expect(
+        swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
+      ).to.emit(swap, 'Swap')
+    })
+
+    it('an order with a royalty below max is accepted', async () => {
+      await erc721token.mock.supportsInterface
+        .withArgs('0x2a55205a')
+        .returns(true)
+      await erc721token.mock.royaltyInfo.returns(
+        ADDRESS_ZERO,
+        Number(MAX_ROYALTY) - 1
+      )
+      const order = await createSignedOrder(
+        {
+          signer: {
+            token: erc721token.address,
+            kind: tokenKinds.ERC721,
+            id: '1',
+            amount: '0',
+          },
+        },
+        signer
+      )
+      await expect(
+        swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
+      ).to.emit(swap, 'Swap')
+    })
+
+    it('an order with zero royalty is accepted', async () => {
+      await erc721token.mock.supportsInterface
+        .withArgs('0x2a55205a')
+        .returns(true)
+      await erc721token.mock.royaltyInfo.returns(ADDRESS_ZERO, 0)
+      const order = await createSignedOrder(
+        {
+          signer: {
+            token: erc721token.address,
+            kind: tokenKinds.ERC721,
+            id: '1',
+            amount: '0',
+          },
+        },
+        signer
+      )
+      await expect(
+        swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
+      ).to.emit(swap, 'Swap')
     })
   })
 
@@ -451,7 +523,29 @@ describe('Swap Unit', () => {
       )
       await expect(
         swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
-      ).to.be.revertedWith('InvalidSenderToken()')
+      ).to.be.revertedWith('SenderTokenInvalid()')
+    })
+
+    it('an order with underlying signer token issue reverts', async () => {
+      await erc721token.mock[
+        'safeTransferFrom(address,address,uint256)'
+      ].reverts()
+      const order = await createSignedOrder(
+        {
+          signer: {
+            kind: tokenKinds.ERC721,
+            token: erc721token.address,
+            amount: '0',
+            id: '0',
+          },
+        },
+        signer
+      )
+      await expect(
+        swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
+      ).to.be.revertedWith(
+        `TransferFailed("${signer.address}", "${sender.address}")`
+      )
     })
   })
 
@@ -501,6 +595,21 @@ describe('Swap Unit', () => {
       )
       expect(errors[1]).to.be.equal(
         ethers.utils.formatBytes32String('SenderTokenKindUnknown')
+      )
+    })
+
+    it('check with an invalid sender kind fails', async () => {
+      const order = await createSignedOrder(
+        {
+          sender: {
+            kind: tokenKinds.ERC721,
+          },
+        },
+        signer
+      )
+      const [errors] = await swap.check(order)
+      expect(errors[0]).to.be.equal(
+        ethers.utils.formatBytes32String('SenderTokenInvalid')
       )
     })
 
@@ -586,7 +695,7 @@ describe('Swap Unit', () => {
         ethers.utils.formatBytes32String('Unauthorized')
       )
       expect(errors[1]).to.be.equal(
-        ethers.utils.formatBytes32String('InvalidFee')
+        ethers.utils.formatBytes32String('FeeInvalid')
       )
     })
 
