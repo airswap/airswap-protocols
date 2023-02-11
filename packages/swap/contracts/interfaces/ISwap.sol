@@ -48,17 +48,17 @@ interface ISwap {
   event Revoke(address indexed signer, address indexed signerWallet);
 
   error ChainIdChanged();
-  error InvalidAdapters();
-  error InvalidFee();
-  error InvalidFeeWallet();
-  error InvalidSenderToken();
-  error InvalidRoyalty();
-  error OrderExpired();
-  error NonceTooLow();
+  error AdaptersInvalid();
+  error FeeInvalid();
+  error FeeWalletInvalid();
   error NonceAlreadyUsed(uint256);
+  error NonceTooLow();
+  error OrderExpired();
   error SenderInvalid();
+  error SenderTokenInvalid();
   error SignatureInvalid();
   error SignatoryInvalid();
+  error RoyaltyExceedsMax(uint256);
   error TokenKindUnknown();
   error TransferFailed(address, address);
   error Unauthorized();
