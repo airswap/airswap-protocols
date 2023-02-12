@@ -15,7 +15,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
   bytes32 internal constant ORDER_TYPEHASH =
     keccak256(
       abi.encodePacked(
-        "Order(uint256 nonce,uint256 expiry,uint256 protocolFee,Party signer,Party sender,Party affiliate)",
+        "Order(uint256 nonce,uint256 expiry,uint256 protocolFee,Party signer,Party sender,address affiliateWallet,uint256 affiliateAmount)",
         "Party(address wallet,address token,bytes4 kind,uint256 id,uint256 amount)"
       )
     );
@@ -32,7 +32,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
   bytes32 public immutable DOMAIN_SEPARATOR;
 
   uint256 public constant FEE_DIVISOR = 10000;
-  uint256 internal constant MAX_ERROR_COUNT = 11;
+  uint256 internal constant MAX_ERROR_COUNT = 12;
 
   /**
    * @notice Double mapping of signers to nonce groups to nonce states
@@ -118,14 +118,14 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
     );
 
     // Transfer from sender to affiliate if specified
-    if (order.affiliate.token != address(0)) {
+    if (order.affiliateWallet != address(0)) {
       _transfer(
         order.sender.wallet,
-        order.affiliate.wallet,
-        order.affiliate.amount,
-        order.affiliate.id,
-        order.affiliate.token,
-        order.affiliate.kind
+        order.affiliateWallet,
+        order.affiliateAmount,
+        order.sender.id,
+        order.sender.token,
+        order.sender.kind
       );
     }
 
@@ -172,10 +172,8 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
       order.sender.amount,
       order.sender.id,
       order.sender.token,
-      order.affiliate.wallet,
-      order.affiliate.amount,
-      order.affiliate.id,
-      order.affiliate.token
+      order.affiliateWallet,
+      order.affiliateAmount
     );
   }
 
@@ -317,27 +315,30 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
         errors[errCount] = "SenderTokenInvalid";
         errCount++;
       } else {
-        if (!senderTokenAdapter.hasAllowance(order.sender)) {
+        uint256 protocolFeeAmount = (order.sender.amount * protocolFee) /
+          FEE_DIVISOR;
+        uint256 totalSenderAmount = order.sender.amount +
+          protocolFeeAmount +
+          order.affiliateAmount;
+        Party memory sender = Party(
+          order.sender.wallet,
+          order.sender.token,
+          order.sender.kind,
+          order.sender.id,
+          totalSenderAmount
+        );
+        if (!senderTokenAdapter.hasAllowance(sender)) {
           errors[errCount] = "SenderAllowanceLow";
           errCount++;
         }
-        if (!senderTokenAdapter.hasBalance(order.sender)) {
+        if (!senderTokenAdapter.hasBalance(sender)) {
           errors[errCount] = "SenderBalanceLow";
           errCount++;
         }
-      }
-    }
-
-    if (order.affiliate.token != address(0)) {
-      IAdapter affiliateTokenAdapter = adapters[order.affiliate.kind];
-
-      if (!affiliateTokenAdapter.hasAllowance(order.signer)) {
-        errors[errCount] = "AffiliateAllowanceLow";
-        errCount++;
-      }
-      if (!affiliateTokenAdapter.hasBalance(order.signer)) {
-        errors[errCount] = "AffiliateBalanceLow";
-        errCount++;
+        if (order.sender.amount < order.affiliateAmount) {
+          errors[errCount] = "AffiliateAmountInvalid";
+          errCount++;
+        }
       }
     }
 
@@ -409,6 +410,10 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
     // Ensure the sender token is the required kind
     if (order.sender.kind != requiredSenderKind) revert SenderTokenInvalid();
 
+    // Ensure the sender amount is greater than affiliate amount
+    if (order.sender.amount < order.affiliateAmount)
+      revert AffiliateAmountInvalid();
+
     // Recover the signatory from the hash and signature
     (address signatory, ) = ECDSA.tryRecover(
       _getOrderHash(order),
@@ -455,7 +460,8 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
               protocolFee,
               keccak256(abi.encode(PARTY_TYPEHASH, order.signer)),
               keccak256(abi.encode(PARTY_TYPEHASH, order.sender)),
-              keccak256(abi.encode(PARTY_TYPEHASH, order.affiliate))
+              order.affiliateWallet,
+              order.affiliateAmount
             )
           )
         )

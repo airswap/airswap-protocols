@@ -8,10 +8,11 @@ interface ISwap {
   struct Order {
     uint256 nonce; // Unique per order and should be sequential
     uint256 expiry; // Expiry in seconds since 1 January 1970
-    uint256 protocolFee;
-    Party signer; // Party to the trade that sets terms
-    Party sender; // Party to the trade that accepts terms
-    Party affiliate; // Party compensated for facilitating (optional)
+    uint256 protocolFee; // Protocol fee numerator
+    Party signer; // Party to the swap that sets terms
+    Party sender; // Party to the swap that accepts terms
+    address affiliateWallet; // Party tipped for facilitating (optional)
+    uint256 affiliateAmount;
     uint8 v;
     bytes32 r;
     bytes32 s;
@@ -30,9 +31,7 @@ interface ISwap {
     uint256 senderId,
     address senderToken,
     address affiliateWallet,
-    uint256 affiliateAmount,
-    uint256 affiliateId,
-    address affiliateToken
+    uint256 affiliateAmount
   );
 
   event Cancel(uint256 indexed nonce, address indexed signerWallet);
@@ -56,6 +55,7 @@ interface ISwap {
   error OrderExpired();
   error SenderInvalid();
   error SenderTokenInvalid();
+  error AffiliateAmountInvalid();
   error SignatureInvalid();
   error SignatoryInvalid();
   error RoyaltyExceedsMax(uint256);

@@ -483,19 +483,27 @@ describe('Swap Unit', () => {
     it('an order with an affiliate specified succeeds', async () => {
       const order = await createSignedOrder(
         {
-          affiliate: {
-            wallet: affiliate.address,
-            token: erc20token.address,
-            kind: tokenKinds.ERC20,
-            id: '0',
-            amount: DEFAULT_AMOUNT,
-          },
+          affiliateWallet: affiliate.address,
+          affiliateAmount: '1',
         },
         signer
       )
       await expect(
         swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
       ).to.emit(swap, 'Swap')
+    })
+
+    it('an order with an affiliate higher than sender fails', async () => {
+      const order = await createSignedOrder(
+        {
+          affiliateWallet: affiliate.address,
+          affiliateAmount: +DEFAULT_AMOUNT + 1,
+        },
+        signer
+      )
+      await expect(
+        swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
+      ).to.be.revertedWith('AffiliateAmountInvalid()')
     })
 
     it('an order with an invalid kind is rejected', async () => {
@@ -551,8 +559,8 @@ describe('Swap Unit', () => {
 
   describe('order check helper', () => {
     it('check succeeds', async () => {
-      await erc20token.mock.allowance.returns(DEFAULT_AMOUNT)
-      await erc20token.mock.balanceOf.returns(DEFAULT_AMOUNT)
+      await erc20token.mock.allowance.returns(DEFAULT_AMOUNT + PROTOCOL_FEE)
+      await erc20token.mock.balanceOf.returns(DEFAULT_AMOUNT + PROTOCOL_FEE)
       const order = await createSignedOrder({}, signer)
       const errors = await swap.check(order)
       expect(errors[1]).to.equal(0)
@@ -687,6 +695,9 @@ describe('Swap Unit', () => {
       const order = await createSignedOrder(
         {
           protocolFee: '0',
+          sender: {
+            amount: 0,
+          },
         },
         signer
       )
@@ -700,15 +711,12 @@ describe('Swap Unit', () => {
     })
 
     it('check succeeds with affiliate', async () => {
+      await erc20token.mock.allowance.returns(DEFAULT_AMOUNT + PROTOCOL_FEE)
+      await erc20token.mock.balanceOf.returns(DEFAULT_AMOUNT + PROTOCOL_FEE)
       const order = await createSignedOrder(
         {
-          affiliate: {
-            wallet: affiliate.address,
-            token: erc20token.address,
-            kind: tokenKinds.ERC20,
-            id: '0',
-            amount: DEFAULT_AMOUNT,
-          },
+          affiliateWallet: affiliate.address,
+          affiliateAmount: '1',
         },
         signer
       )
@@ -716,39 +724,19 @@ describe('Swap Unit', () => {
       expect(errors[1]).to.equal(0)
     })
 
-    it('check fails with affiliate balance insufficient', async () => {
-      await erc20token.mock.allowance.returns('0')
-      await erc20token.mock.balanceOf.returns('0')
+    it('check fails with affiliate higher than sender', async () => {
+      await erc20token.mock.allowance.returns(DEFAULT_AMOUNT + PROTOCOL_FEE)
+      await erc20token.mock.balanceOf.returns(DEFAULT_AMOUNT + PROTOCOL_FEE)
       const order = await createSignedOrder(
         {
-          affiliate: {
-            wallet: affiliate.address,
-            token: erc20token.address,
-            kind: tokenKinds.ERC20,
-            id: '0',
-            amount: DEFAULT_AMOUNT,
-          },
+          affiliateWallet: affiliate.address,
+          affiliateAmount: +DEFAULT_AMOUNT + 1,
         },
         signer
       )
       const [errors] = await swap.check(order)
       expect(errors[0]).to.be.equal(
-        ethers.utils.formatBytes32String('SignerAllowanceLow')
-      )
-      expect(errors[1]).to.be.equal(
-        ethers.utils.formatBytes32String('SignerBalanceLow')
-      )
-      expect(errors[2]).to.be.equal(
-        ethers.utils.formatBytes32String('SenderAllowanceLow')
-      )
-      expect(errors[3]).to.be.equal(
-        ethers.utils.formatBytes32String('SenderBalanceLow')
-      )
-      expect(errors[4]).to.be.equal(
-        ethers.utils.formatBytes32String('AffiliateAllowanceLow')
-      )
-      expect(errors[5]).to.be.equal(
-        ethers.utils.formatBytes32String('AffiliateBalanceLow')
+        ethers.utils.formatBytes32String('AffiliateAmountInvalid')
       )
     })
   })
