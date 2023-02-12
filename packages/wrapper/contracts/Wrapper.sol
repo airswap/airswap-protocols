@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "@airswap/swap-erc20/contracts/interfaces/ISwapERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable2Step.sol";
@@ -16,41 +15,22 @@ contract Wrapper is Ownable2Step {
 
   event WrappedSwapFor(address indexed senderWallet);
 
-  ISwap public swapContract;
   ISwapERC20 public swapERC20Contract;
   IWETH public wethContract;
   uint256 constant MAX_UINT = 2**256 - 1;
 
   /**
    * @notice Constructor
-   * @param _swapContract address
    * @param _swapERC20Contract address
    * @param _wethContract address
    */
-  constructor(
-    address _swapContract,
-    address _swapERC20Contract,
-    address _wethContract
-  ) {
-    require(_swapContract != address(0), "INVALID_SWAP_CONTRACT");
+  constructor(address _swapERC20Contract, address _wethContract) {
     require(_swapERC20Contract != address(0), "INVALID_SWAP_ERC20_CONTRACT");
     require(_wethContract != address(0), "INVALID_WETH_CONTRACT");
 
-    swapContract = ISwap(_swapContract);
     swapERC20Contract = ISwapERC20(_swapERC20Contract);
     wethContract = IWETH(_wethContract);
-    wethContract.approve(_swapContract, MAX_UINT);
-  }
-
-  /**
-   * @notice Set the SwapERC20 contract
-   * @param _swapContract address Address of the new swap contract
-   */
-  function setSwapContract(address _swapContract) external onlyOwner {
-    require(_swapContract != address(0), "INVALID_SWAP_CONTRACT");
-    wethContract.approve(address(swapContract), 0);
-    swapContract = ISwap(_swapContract);
-    wethContract.approve(_swapContract, MAX_UINT);
+    wethContract.approve(_swapERC20Contract, MAX_UINT);
   }
 
   /**
@@ -76,17 +56,6 @@ contract Wrapper is Ownable2Step {
   }
 
   /**
-   * @notice Wrapped Swap.swap
-   * @param order ISwap.Order uint256 Unique and should be sequential
-   */
-  function swap(uint256 maxRoyalty, ISwap.Order calldata order) public payable {
-    _wrapEther(order.sender.token, order.sender.amount);
-    swapContract.swap(address(this), maxRoyalty, order);
-    _unwrapEther(order.signer.token, order.signer.amount);
-    emit WrappedSwapFor(msg.sender);
-  }
-
-  /**
    * @notice Wrapped SwapERC20.swap
    * @param nonce uint256 Unique and should be sequential
    * @param expiry uint256 Expiry in seconds since 1 January 1970
@@ -99,7 +68,7 @@ contract Wrapper is Ownable2Step {
    * @param r bytes32 "r" value of the ECDSA signature
    * @param s bytes32 "s" value of the ECDSA signature
    */
-  function swapERC20(
+  function swap(
     uint256 nonce,
     uint256 expiry,
     address signerWallet,
@@ -186,7 +155,7 @@ contract Wrapper is Ownable2Step {
       // Ensure message value is zero
       require(msg.value == 0, "VALUE_MUST_BE_ZERO");
       // Approve the swap contract to swap the amount
-      IERC20(senderToken).safeApprove(address(swapContract), senderAmount);
+      IERC20(senderToken).safeApprove(address(swapERC20Contract), senderAmount);
       // Transfer tokens from sender to wrapper for swap
       IERC20(senderToken).safeTransferFrom(
         msg.sender,
