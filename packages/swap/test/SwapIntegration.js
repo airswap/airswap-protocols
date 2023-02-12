@@ -367,13 +367,8 @@ describe('Swap Integration', () => {
             amount: '10000',
             id: '0',
           },
-          affiliate: {
-            wallet: affiliate.address,
-            token: erc20token2.address,
-            kind: tokenKinds.ERC20,
-            amount: '100',
-            id: '0',
-          },
+          affiliateWallet: affiliate.address,
+          affiliateAmount: '100',
         },
         signer
       )
@@ -384,10 +379,10 @@ describe('Swap Integration', () => {
         DEFAULT_AMOUNT -
           order.sender.amount -
           PROTOCOL_FEE -
-          order.affiliate.amount
+          order.affiliateAmount
       )
       expect(await erc20token2.balanceOf(affiliate.address)).to.be.equal(
-        order.affiliate.amount
+        order.affiliateAmount
       )
     })
     it('royalty transfer succeeds', async () => {
