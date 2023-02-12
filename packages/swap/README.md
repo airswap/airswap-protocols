@@ -1,6 +1,6 @@
 # Swap
 
-[AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens.
+[AirSwap](https://www.airswap.io/) is an open-source peer-to-peer trading network.
 
 [![Discord](https://img.shields.io/discord/590643190281928738.svg)](https://discord.gg/ecQbV7H)
 [![License](https://img.shields.io/badge/License-MIT-blue)](https://opensource.org/licenses/MIT)
