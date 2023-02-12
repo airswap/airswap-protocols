@@ -121,7 +121,7 @@ describe('Swap Integration', () => {
   })
 
   describe('swaps', () => {
-    it('swap ERC20 for ERC20 fails', async () => {
+    it('swap ERC20 for ERC20 succeeds', async () => {
       await erc20token.connect(deployer).mint(signer.address, DEFAULT_AMOUNT)
       await erc20token.connect(signer).approve(swap.address, DEFAULT_AMOUNT)
       await erc20token2.connect(deployer).mint(sender.address, DEFAULT_AMOUNT)
@@ -157,6 +157,19 @@ describe('Swap Integration', () => {
       await expect(
         swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
       ).to.emit(swap, 'Swap')
+
+      expect(await erc20token.balanceOf(signer.address)).to.be.equal(
+        DEFAULT_AMOUNT - order.signer.amount
+      )
+      expect(await erc20token2.balanceOf(sender.address)).to.be.equal(
+        DEFAULT_AMOUNT - order.sender.amount
+      )
+      expect(await erc20token.balanceOf(sender.address)).to.be.equal(
+        order.signer.amount
+      )
+      expect(await erc20token2.balanceOf(signer.address)).to.be.equal(
+        order.sender.amount
+      )
     })
 
     it('swap ERC721 for ERC20 succeeds', async () => {
