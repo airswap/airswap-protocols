@@ -17,13 +17,6 @@
   resolved "https://registry.yarnpkg.com/@airswap/constants/-/constants-4.0.0-beta.1.tgz#95437d59793691a827155bb94612b0ffdd041b00"
   integrity sha512-8y4bYO/JNaaZ3UVl3pN5DBWnDxx+0hCLWUDy7ul5/SsIxOJ1g9W6bf1CzItagQvRoWYPXm6WmZUhGVBe0tWp2Q==
 
-"@airswap/tokens@0.1.4":
-  version "0.1.4"
-  resolved "https://registry.yarnpkg.com/@airswap/tokens/-/tokens-0.1.4.tgz#86f2ce399fa9ad2f108c8e21e4272d6a8b81fc05"
-  integrity sha512-ynOrf0StyNGVGQbfw2QoMD5MFmLbynRP2QF0GadOCY54fnIL/iFs3iaZ2jYIu35Pt9LX9FGg5m4ll9K5Uin0rg==
-  dependencies:
-    openzeppelin-solidity "2.4"
-
 "@airswap/typescript@3.0.3":
   version "3.0.3"
   resolved "https://registry.yarnpkg.com/@airswap/typescript/-/typescript-3.0.3.tgz#3a52d4e436a23a4324340581f2a6c544e4f92387"
@@ -9856,11 +9849,6 @@ open@^8.4.0:
     define-lazy-prop "^2.0.0"
     is-docker "^2.1.1"
     is-wsl "^2.2.0"
-
-openzeppelin-solidity@2.4:
-  version "2.4.0"
-  resolved "https://registry.yarnpkg.com/openzeppelin-solidity/-/openzeppelin-solidity-2.4.0.tgz#5f0a7b30571c45493449166e57b947203415349d"
-  integrity sha512-533gc5jkspxW5YT0qJo02Za5q1LHwXK9CJCc48jNj/22ncNM/3M/3JfWLqfpB90uqLwOKOovpl0JfaMQTR+gXQ==
 
 optionator@^0.8.1:
   version "0.8.3"

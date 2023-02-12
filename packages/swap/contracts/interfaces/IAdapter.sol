@@ -20,9 +20,9 @@ interface IAdapter {
   error InvalidArgument(string);
 
   /**
-   * @notice Return the ERC165 interfaceID this adapter supports
+   * @notice Return the ERC165 interfaceId this adapter supports
    */
-  function interfaceID() external view returns (bytes4);
+  function interfaceId() external view returns (bytes4);
 
   /**
    * @notice Function to wrap token transfer for different token types

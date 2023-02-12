@@ -2,13 +2,14 @@ const { expect } = require('chai')
 const { ethers } = require('hardhat')
 const { createOrder, createOrderSignature } = require('@airswap/utils')
 const { tokenKinds } = require('@airswap/constants')
-const FungibleToken = require('@airswap/tokens/build/contracts/FungibleToken.json')
-const NonFungibleToken = require('@airswap/tokens/build/contracts/NonFungibleToken.json')
+const ERC20PresetMinterPauser = require('@openzeppelin/contracts/build/contracts/ERC20PresetMinterPauser.json')
+const ERC1155PresetMinterPauser = require('@openzeppelin/contracts/build/contracts/ERC1155PresetMinterPauser.json')
 
 const CHAIN_ID = 31337
 const PROTOCOL_FEE = '30'
-const DEFAULT_AMOUNT = '1000'
-const MAX_ROYALTY = '0'
+const DEFAULT_AMOUNT = '100000'
+const MAX_ROYALTY = '10'
+const ROYALTY_DENOMINATOR = '10000'
 
 let snapshotId
 let deployer
@@ -65,15 +66,31 @@ describe('Swap Integration', () => {
       await ethers.getSigners()
 
     erc20token = await (
-      await ethers.getContractFactory(FungibleToken.abi, FungibleToken.bytecode)
-    ).deploy()
+      await ethers.getContractFactory(
+        ERC20PresetMinterPauser.abi,
+        ERC20PresetMinterPauser.bytecode
+      )
+    ).deploy('Test 1', 'T1')
     await erc20token.deployed()
 
-    erc721token = await (
+    erc20token2 = await (
       await ethers.getContractFactory(
-        NonFungibleToken.abi,
-        NonFungibleToken.bytecode
+        ERC20PresetMinterPauser.abi,
+        ERC20PresetMinterPauser.bytecode
       )
+    ).deploy('Test 2', 'T2')
+    await erc20token2.deployed()
+
+    erc1155token = await (
+      await ethers.getContractFactory(
+        ERC1155PresetMinterPauser.abi,
+        ERC1155PresetMinterPauser.bytecode
+      )
+    ).deploy('Test 4')
+    await erc1155token.deployed()
+
+    erc721token = await (
+      await ethers.getContractFactory('ERC721Royalty')
     ).deploy()
     await erc721token.deployed()
 
@@ -81,6 +98,11 @@ describe('Swap Integration', () => {
       await ethers.getContractFactory('ERC20Adapter')
     ).deploy()
     await erc20adapter.deployed()
+
+    erc1155adapter = await (
+      await ethers.getContractFactory('ERC1155Adapter')
+    ).deploy()
+    await erc1155adapter.deployed()
 
     erc721adapter = await (
       await ethers.getContractFactory('ERC721Adapter')
@@ -90,7 +112,7 @@ describe('Swap Integration', () => {
     swap = await (
       await ethers.getContractFactory('Swap')
     ).deploy(
-      [erc20adapter.address, erc721adapter.address],
+      [erc20adapter.address, erc721adapter.address, erc1155adapter.address],
       tokenKinds.ERC20,
       PROTOCOL_FEE,
       protocolFeeWallet.address
@@ -99,8 +121,46 @@ describe('Swap Integration', () => {
   })
 
   describe('swaps', () => {
-    it('swaps an ERC721 for an ERC20', async () => {
-      await erc721token.connect(deployer).mint(signer.address, '1')
+    it('swap ERC20 for ERC20 fails', async () => {
+      await erc20token.connect(deployer).mint(signer.address, DEFAULT_AMOUNT)
+      await erc20token.connect(signer).approve(swap.address, DEFAULT_AMOUNT)
+      await erc20token2.connect(deployer).mint(sender.address, DEFAULT_AMOUNT)
+      await erc20token2.connect(sender).approve(swap.address, DEFAULT_AMOUNT)
+      const order = await createSignedOrder(
+        {
+          signer: {
+            wallet: signer.address,
+            token: erc20token.address,
+            kind: tokenKinds.ERC20,
+            amount: '1',
+            id: '0',
+          },
+          sender: {
+            wallet: sender.address,
+            token: erc20token2.address,
+            kind: tokenKinds.ERC20,
+            amount: '1',
+            id: '0',
+          },
+        },
+        signer
+      )
+      expect(await erc20token.balanceOf(signer.address)).to.be.equal(
+        DEFAULT_AMOUNT
+      )
+      expect(await erc20token2.balanceOf(sender.address)).to.be.equal(
+        DEFAULT_AMOUNT
+      )
+      expect(await erc20token.balanceOf(sender.address)).to.be.equal('0')
+      expect(await erc20token2.balanceOf(signer.address)).to.be.equal('0')
+
+      await expect(
+        swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
+      ).to.emit(swap, 'Swap')
+    })
+
+    it('swap ERC721 for ERC20 succeeds', async () => {
+      await erc721token.connect(deployer).mint(signer.address)
       await erc721token.connect(signer).setApprovalForAll(swap.address, true)
       await erc20token.connect(deployer).mint(sender.address, DEFAULT_AMOUNT)
       await erc20token.connect(sender).approve(swap.address, DEFAULT_AMOUNT)
@@ -128,6 +188,230 @@ describe('Swap Integration', () => {
         swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
       ).to.emit(swap, 'Swap')
       expect(await erc721token.ownerOf('1')).to.be.equal(sender.address)
+    })
+
+    it('swap ERC1155 for ERC20 succeeds', async () => {
+      await erc1155token
+        .connect(deployer)
+        .mint(signer.address, '1', '1', '0x00')
+      await erc1155token.connect(signer).setApprovalForAll(swap.address, true)
+      await erc20token.connect(deployer).mint(sender.address, DEFAULT_AMOUNT)
+      await erc20token.connect(sender).approve(swap.address, DEFAULT_AMOUNT)
+      const order = await createSignedOrder(
+        {
+          signer: {
+            wallet: signer.address,
+            token: erc1155token.address,
+            kind: tokenKinds.ERC1155,
+            amount: '1',
+            id: '1',
+          },
+          sender: {
+            wallet: sender.address,
+            token: erc20token.address,
+            kind: tokenKinds.ERC20,
+            amount: '1',
+            id: '0',
+          },
+        },
+        signer
+      )
+      expect(
+        await erc1155token.balanceOf(signer.address, order.signer.id)
+      ).to.be.equal(order.signer.amount)
+      await expect(
+        swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
+      ).to.emit(swap, 'Swap')
+      expect(
+        await erc1155token.balanceOf(signer.address, order.signer.id)
+      ).to.be.equal('0')
+      return
+    })
+
+    it('swap ERC721 for ERC721 fails', async () => {
+      await erc721token.connect(deployer).mint(signer.address)
+      await erc721token.connect(signer).setApprovalForAll(swap.address, true)
+      await erc721token.connect(deployer).mint(sender.address)
+      await erc721token.connect(sender).setApprovalForAll(swap.address, true)
+      const order = await createSignedOrder(
+        {
+          signer: {
+            wallet: signer.address,
+            token: erc721token.address,
+            kind: tokenKinds.ERC721,
+            amount: '0',
+            id: '1',
+          },
+          sender: {
+            wallet: sender.address,
+            token: erc721token.address,
+            kind: tokenKinds.ERC721,
+            amount: '1',
+            id: '0',
+          },
+        },
+        signer
+      )
+      expect(await erc721token.ownerOf('1')).to.be.equal(signer.address)
+      await expect(
+        swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
+      ).to.be.revertedWith('SenderTokenInvalid()')
+      expect(await erc721token.ownerOf('1')).to.be.equal(signer.address)
+    })
+
+    it('swap ERC721 for ERC1155 fails', async () => {
+      await erc721token.connect(deployer).mint(signer.address)
+      await erc721token.connect(signer).setApprovalForAll(swap.address, true)
+      await erc1155token
+        .connect(deployer)
+        .mint(sender.address, '1', '1', '0x00')
+      await erc1155token.connect(sender).setApprovalForAll(swap.address, true)
+      const order = await createSignedOrder(
+        {
+          signer: {
+            wallet: signer.address,
+            token: erc721token.address,
+            kind: tokenKinds.ERC721,
+            amount: '0',
+            id: '1',
+          },
+          sender: {
+            wallet: sender.address,
+            token: erc1155token.address,
+            kind: tokenKinds.ERC1155,
+            amount: '1',
+            id: '1',
+          },
+        },
+        signer
+      )
+      await expect(
+        swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
+      ).to.be.revertedWith('SenderTokenInvalid()')
+    })
+  })
+
+  describe('fees, affiliates, royalties', () => {
+    it('protocol fee transfer succeeds', async () => {
+      await erc20token.connect(deployer).mint(signer.address, DEFAULT_AMOUNT)
+      await erc20token.connect(signer).approve(swap.address, DEFAULT_AMOUNT)
+      await erc20token2.connect(deployer).mint(sender.address, DEFAULT_AMOUNT)
+      await erc20token2.connect(sender).approve(swap.address, DEFAULT_AMOUNT)
+      const order = await createSignedOrder(
+        {
+          signer: {
+            wallet: signer.address,
+            token: erc20token.address,
+            kind: tokenKinds.ERC20,
+            amount: '1',
+            id: '0',
+          },
+          sender: {
+            wallet: sender.address,
+            token: erc20token2.address,
+            kind: tokenKinds.ERC20,
+            amount: '10000',
+            id: '0',
+          },
+        },
+        signer
+      )
+      await expect(
+        swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
+      ).to.emit(swap, 'Swap')
+      expect(await erc20token.balanceOf(sender.address)).to.be.equal(
+        order.signer.amount
+      )
+      expect(await erc20token2.balanceOf(signer.address)).to.be.equal(
+        order.sender.amount
+      )
+      expect(await erc20token2.balanceOf(sender.address)).to.be.equal(
+        DEFAULT_AMOUNT - order.sender.amount - PROTOCOL_FEE
+      )
+      expect(
+        await erc20token2.balanceOf(protocolFeeWallet.address)
+      ).to.be.equal(PROTOCOL_FEE)
+    })
+
+    it('affiliate fee transfer succeeds', async () => {
+      await erc20token.connect(deployer).mint(signer.address, DEFAULT_AMOUNT)
+      await erc20token.connect(signer).approve(swap.address, DEFAULT_AMOUNT)
+      await erc20token2.connect(deployer).mint(sender.address, DEFAULT_AMOUNT)
+      await erc20token2.connect(sender).approve(swap.address, DEFAULT_AMOUNT)
+      const order = await createSignedOrder(
+        {
+          signer: {
+            wallet: signer.address,
+            token: erc20token.address,
+            kind: tokenKinds.ERC20,
+            amount: '1',
+            id: '0',
+          },
+          sender: {
+            wallet: sender.address,
+            token: erc20token2.address,
+            kind: tokenKinds.ERC20,
+            amount: '10000',
+            id: '0',
+          },
+          affiliate: {
+            wallet: affiliate.address,
+            token: erc20token2.address,
+            kind: tokenKinds.ERC20,
+            amount: '100',
+            id: '0',
+          },
+        },
+        signer
+      )
+      await expect(
+        swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
+      ).to.emit(swap, 'Swap')
+      expect(await erc20token2.balanceOf(sender.address)).to.be.equal(
+        DEFAULT_AMOUNT -
+          order.sender.amount -
+          PROTOCOL_FEE -
+          order.affiliate.amount
+      )
+      expect(await erc20token2.balanceOf(affiliate.address)).to.be.equal(
+        order.affiliate.amount
+      )
+    })
+    it('royalty transfer succeeds', async () => {
+      const royaltyNumerator = '50'
+      await erc20token.connect(deployer).mint(sender.address, DEFAULT_AMOUNT)
+      await erc20token.connect(sender).approve(swap.address, DEFAULT_AMOUNT)
+      await erc721token
+        .connect(deployer)
+        .mintWithRoyalty(signer.address, deployer.address, royaltyNumerator)
+      await erc721token.connect(signer).setApprovalForAll(swap.address, true)
+      const order = await createSignedOrder(
+        {
+          signer: {
+            wallet: signer.address,
+            token: erc721token.address,
+            kind: tokenKinds.ERC721,
+            amount: '0',
+            id: '1',
+          },
+          sender: {
+            wallet: sender.address,
+            token: erc20token.address,
+            kind: tokenKinds.ERC20,
+            amount: '1000',
+            id: '0',
+          },
+        },
+        signer
+      )
+      const royaltyAmount =
+        Number(order.sender.amount) * (royaltyNumerator / ROYALTY_DENOMINATOR)
+      await expect(
+        swap.connect(sender).swap(sender.address, royaltyAmount, order)
+      ).to.emit(swap, 'Swap')
+      expect(await erc20token.balanceOf(deployer.address)).to.be.equal(
+        Math.floor(royaltyAmount)
+      )
     })
   })
 })

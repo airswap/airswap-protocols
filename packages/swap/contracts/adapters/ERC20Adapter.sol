@@ -9,9 +9,9 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 contract ERC20Adapter is IAdapter {
   using SafeERC20 for IERC20;
   /**
-   * @notice Indicates the ERC165 interfaceID supported by this adapter
+   * @notice Indicates the ERC165 interfaceId supported by this adapter
    */
-  bytes4 public constant interfaceID = 0x36372b07;
+  bytes4 public constant interfaceId = 0x36372b07;
 
   /**
    * @notice Function to wrap token transfer for different token types

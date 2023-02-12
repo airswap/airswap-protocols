@@ -74,7 +74,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
     DOMAIN_SEPARATOR = _domainSeparatorV4();
 
     for (uint256 i = 0; i < _adapters.length; i++) {
-      adapters[_adapters[i].interfaceID()] = _adapters[i];
+      adapters[_adapters[i].interfaceId()] = _adapters[i];
     }
     requiredSenderKind = _requiredSenderKind;
     protocolFee = _protocolFee;
