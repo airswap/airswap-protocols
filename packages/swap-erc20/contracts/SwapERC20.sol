@@ -30,7 +30,7 @@ contract SwapERC20 is ISwapERC20, Ownable2Step, EIP712 {
   uint256 public constant FEE_DIVISOR = 10000;
   uint256 internal constant MAX_PERCENTAGE = 100;
   uint256 internal constant MAX_SCALE = 77;
-  uint256 internal constant MAX_ERROR_COUNT = 8;
+  uint256 internal constant MAX_ERROR_COUNT = 9;
 
   /**
    * @notice Double mapping of signers to nonce groups to nonce states
@@ -491,24 +491,28 @@ contract SwapERC20 is ISwapERC20, Ownable2Step, EIP712 {
     if (signatory == address(0)) {
       errors[errCount] = "SignatureInvalid";
       errCount++;
+    } else {
+      if (
+        authorized[order.signerWallet] != address(0) &&
+        signatory != authorized[order.signerWallet]
+      ) {
+        errors[errCount] = "SignatoryUnauthorized";
+        errCount++;
+      } else if (
+        authorized[order.signerWallet] == address(0) &&
+        signatory != order.signerWallet
+      ) {
+        errors[errCount] = "Unauthorized";
+        errCount++;
+      } else if (nonceUsed(signatory, order.nonce)) {
+        errors[errCount] = "NonceAlreadyUsed";
+        errCount++;
+      }
     }
 
     if (order.expiry < block.timestamp) {
       errors[errCount] = "OrderExpired";
       errCount++;
-    }
-
-    if (
-      order.signerWallet != signatory &&
-      authorized[order.signerWallet] != signatory
-    ) {
-      errors[errCount] = "Unauthorized";
-      errCount++;
-    } else {
-      if (nonceUsed(signatory, order.nonce)) {
-        errors[errCount] = "NonceAlreadyUsed";
-        errCount++;
-      }
     }
 
     if (order.senderWallet != address(0)) {

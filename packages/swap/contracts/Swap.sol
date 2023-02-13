@@ -32,7 +32,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
   bytes32 public immutable DOMAIN_SEPARATOR;
 
   uint256 public constant FEE_DIVISOR = 10000;
-  uint256 internal constant MAX_ERROR_COUNT = 12;
+  uint256 internal constant MAX_ERROR_COUNT = 15;
 
   // Mapping of ERC165 interface ID to token adapter
   mapping(bytes4 => IAdapter) public adapters;
@@ -267,13 +267,18 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
       errCount++;
     } else {
       if (
-        order.signer.wallet != signatory &&
-        authorized[order.signer.wallet] != signatory
+        authorized[order.signer.wallet] != address(0) &&
+        signatory != authorized[order.signer.wallet]
+      ) {
+        errors[errCount] = "SignatoryUnauthorized";
+        errCount++;
+      } else if (
+        authorized[order.signer.wallet] == address(0) &&
+        signatory != order.signer.wallet
       ) {
         errors[errCount] = "Unauthorized";
         errCount++;
-      }
-      if (nonceUsed(signatory, order.nonce)) {
+      } else if (nonceUsed(signatory, order.nonce)) {
         errors[errCount] = "NonceAlreadyUsed";
         errCount++;
       }
@@ -492,7 +497,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
   ) internal {
     IAdapter adapter = adapters[kind];
     if (address(adapter) == address(0)) revert TokenKindUnknown();
-    // Use delegatecall so transferToken calls underlying transfer as Swap
+    // Use delegatecall so underlying transfer is called as Swap
     (bool success, ) = address(adapter).delegatecall(
       abi.encodeWithSelector(
         adapter.transfer.selector,
