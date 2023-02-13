@@ -326,7 +326,7 @@ describe('Swap Unit', () => {
         'CancelUpTo'
       )
       expect(
-        await swap.connect(sender)._signatoryMinimumNonce(signer.address)
+        await swap.connect(sender).signatoryMinimumNonce(signer.address)
       ).to.equal(order.nonce + 1)
       await expect(
         swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)

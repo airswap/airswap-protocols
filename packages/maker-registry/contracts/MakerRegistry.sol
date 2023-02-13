@@ -133,11 +133,9 @@ contract MakerRegistry {
    * @param token address of the token
    * @return urls array of server URLs supporting the token
    */
-  function getURLsForToken(address token)
-    external
-    view
-    returns (string[] memory urls)
-  {
+  function getURLsForToken(
+    address token
+  ) external view returns (string[] memory urls) {
     EnumerableSet.AddressSet storage stakers = supportingStakers[token];
     uint256 length = stakers.length();
     urls = new string[](length);
@@ -151,11 +149,9 @@ contract MakerRegistry {
    * @param stakers array of staker addresses
    * @return urls array of server URLs in the same order
    */
-  function getURLsForStakers(address[] calldata stakers)
-    external
-    view
-    returns (string[] memory urls)
-  {
+  function getURLsForStakers(
+    address[] calldata stakers
+  ) external view returns (string[] memory urls) {
     uint256 stakersLength = stakers.length;
     urls = new string[](stakersLength);
     for (uint256 i = 0; i < stakersLength; i++) {
@@ -169,11 +165,10 @@ contract MakerRegistry {
    * @param token address of the token
    * @return true if the staker supports the token
    */
-  function supportsToken(address staker, address token)
-    external
-    view
-    returns (bool)
-  {
+  function supportsToken(
+    address staker,
+    address token
+  ) external view returns (bool) {
     return supportedTokens[staker].contains(token);
   }
 
@@ -182,11 +177,9 @@ contract MakerRegistry {
    * @param staker account address of the staker
    * @return tokenList array of all the supported tokens
    */
-  function getSupportedTokens(address staker)
-    external
-    view
-    returns (address[] memory tokenList)
-  {
+  function getSupportedTokens(
+    address staker
+  ) external view returns (address[] memory tokenList) {
     EnumerableSet.AddressSet storage tokens = supportedTokens[staker];
     uint256 length = tokens.length();
     tokenList = new address[](length);
@@ -200,11 +193,9 @@ contract MakerRegistry {
    * @param token address of the token
    * @return stakers array of all stakers that support a given token
    */
-  function getStakersForToken(address token)
-    external
-    view
-    returns (address[] memory stakers)
-  {
+  function getStakersForToken(
+    address token
+  ) external view returns (address[] memory stakers) {
     EnumerableSet.AddressSet storage stakerList = supportingStakers[token];
     uint256 length = stakerList.length();
     stakers = new address[](length);
