@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
+pragma solidity 0.8.17;
 
 import "./IAdapter.sol";
 
 interface ISwap {
   struct Order {
-    uint256 nonce; // Unique per order and should be sequential
-    uint256 expiry; // Expiry in seconds since 1 January 1970
+    uint256 nonce; // Unique number per signatory per order
+    uint256 expiry; // Expiry time (seconds since unix epoch)
     uint256 protocolFee; // Protocol fee numerator
     Party signer; // Party to the swap that sets terms
     Party sender; // Party to the swap that accepts terms
     address affiliateWallet; // Party tipped for facilitating (optional)
     uint256 affiliateAmount;
-    uint8 v;
+    uint8 v; // ECDSA
     bytes32 r;
     bytes32 s;
   }

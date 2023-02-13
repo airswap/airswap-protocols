@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
+pragma solidity 0.8.17;
 
 import "@openzeppelin/contracts/access/Ownable2Step.sol";
 import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
@@ -35,22 +35,20 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
   uint256 internal constant MAX_ERROR_COUNT = 12;
 
   // Mapping of ERC165 interface ID to token adapter
-  mapping(bytes4 interfaceId => IAdapter adapter) public adapters;
+  mapping(bytes4 => IAdapter) public adapters;
 
   // Mapping of signer to authorized signatory
-  mapping(address signer => address signatory) public override authorized;
+  mapping(address => address) public override authorized;
 
   // Mapping of signatory address to a minimum valid nonce
-  mapping(address signatory => uint256 minimumNonce)
-    public signatoryMinimumNonce;
+  mapping(address => uint256) public signatoryMinimumNonce;
 
   /**
    * @notice Double mapping of signers to nonce groups to nonce states
    * @dev The nonce group is computed as nonce / 256, so each group of 256 sequential nonces uses the same key
    * @dev The nonce states are encoded as 256 bits, for each nonce in the group 0 means available and 1 means used
    */
-  mapping(address signatory => mapping(uint256 group => uint256 nonce))
-    internal _nonceGroups;
+  mapping(address => mapping(uint256 => uint256)) internal _nonceGroups;
 
   bytes4 public requiredSenderKind;
   uint256 public protocolFee;

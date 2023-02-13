@@ -8,7 +8,7 @@ const { ethers } = require('hardhat')
 const ERC20 = require('@openzeppelin/contracts/build/contracts/ERC20PresetMinterPauser.json')
 const STAKING = require('@airswap/staking/build/contracts/Staking.sol/Staking.json')
 
-describe('Swap Integration Tests', () => {
+describe('SwapERC20 Integration', () => {
   let snapshotId
   let swap
   let signerToken
@@ -20,8 +20,8 @@ describe('Swap Integration Tests', () => {
   let protocolFeeWallet
 
   const CHAIN_ID = 31337
-  const REBATE_SCALE = '10'
-  const REBATE_MAX = '100'
+  const DISCOUNT_SCALE = '10'
+  const DISCOUNT_MAX = '100'
   const PROTOCOL_FEE = '30'
   const PROTOCOL_FEE_LIGHT = '7'
   const DEFAULT_AMOUNT = '10000'
@@ -88,8 +88,8 @@ describe('Swap Integration Tests', () => {
       PROTOCOL_FEE,
       PROTOCOL_FEE_LIGHT,
       protocolFeeWallet.address,
-      REBATE_SCALE,
-      REBATE_MAX,
+      DISCOUNT_SCALE,
+      DISCOUNT_MAX,
       staking.address
     )
     await swap.deployed()
@@ -98,8 +98,8 @@ describe('Swap Integration Tests', () => {
     senderToken.connect(sender).approve(swap.address, 1000000)
   })
 
-  describe('Test rebates', async () => {
-    it('test swap without rebate', async () => {
+  describe('Test token holder discounts', async () => {
+    it('test swap without discount', async () => {
       const order = await createSignedOrder({}, signer)
       await expect(
         await swap.connect(sender).swap(sender.address, ...order)
@@ -117,7 +117,7 @@ describe('Swap Integration Tests', () => {
       )
     })
 
-    it('test swap with rebate', async () => {
+    it('test swap with discount', async () => {
       await stakingToken.connect(sender).approve(staking.address, 10000000000)
       await staking.connect(sender).stake(10000000000)
 
@@ -130,7 +130,7 @@ describe('Swap Integration Tests', () => {
       // Expect full 30 to be taken from signer
       expect(await signerToken.balanceOf(signer.address)).to.equal('989970')
 
-      // Expect half of the fee to have gone to the sender as rebate
+      // Expect half of the fee to have gone to the sender as discount
       expect(await signerToken.balanceOf(sender.address)).to.equal('10015')
 
       // Expect half of the fee to have gone to the fee wallet

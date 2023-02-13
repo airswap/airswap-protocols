@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
+pragma solidity 0.8.17;
 
 import "@openzeppelin/contracts/access/Ownable2Step.sol";
 import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
@@ -12,11 +12,6 @@ import "./interfaces/ISwapERC20.sol";
  */
 contract SwapERC20 is ISwapERC20, Ownable2Step, EIP712 {
   using SafeERC20 for IERC20;
-
-  bytes32 public constant DOMAIN_TYPEHASH =
-    keccak256(
-      "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
-    );
 
   bytes32 public constant ORDER_TYPEHASH =
     keccak256(
@@ -32,10 +27,10 @@ contract SwapERC20 is ISwapERC20, Ownable2Step, EIP712 {
   uint256 public immutable DOMAIN_CHAIN_ID;
   bytes32 public immutable DOMAIN_SEPARATOR;
 
+  uint256 public constant FEE_DIVISOR = 10000;
   uint256 internal constant MAX_PERCENTAGE = 100;
   uint256 internal constant MAX_SCALE = 77;
   uint256 internal constant MAX_ERROR_COUNT = 8;
-  uint256 public constant FEE_DIVISOR = 10000;
 
   /**
    * @notice Double mapping of signers to nonce groups to nonce states
@@ -44,6 +39,7 @@ contract SwapERC20 is ISwapERC20, Ownable2Step, EIP712 {
    */
   mapping(address => mapping(uint256 => uint256)) internal _nonceGroups;
 
+  // Mapping of signer to authorized signatory
   mapping(address => address) public override authorized;
 
   uint256 public protocolFee;
@@ -249,7 +245,7 @@ contract SwapERC20 is ISwapERC20, Ownable2Step, EIP712 {
     bytes32 r,
     bytes32 s
   ) external override {
-    if (DOMAIN_CHAIN_ID != getChainId()) revert ChainIdChanged();
+    if (DOMAIN_CHAIN_ID != block.chainid) revert ChainIdChanged();
 
     // Ensure the expiry is not passed
     if (expiry <= block.timestamp) revert OrderExpired();
@@ -602,17 +598,6 @@ contract SwapERC20 is ISwapERC20, Ownable2Step, EIP712 {
     uint256 groupKey = nonce / 256;
     uint256 indexInGroup = nonce % 256;
     return (_nonceGroups[signer][groupKey] >> indexInGroup) & 1 == 1;
-  }
-
-  /**
-   * @notice Returns the current chainId using the chainid opcode
-   * @return id uint256 The chain id
-   */
-  function getChainId() public view returns (uint256 id) {
-    // no-inline-assembly
-    assembly {
-      id := chainid()
-    }
   }
 
   /**
