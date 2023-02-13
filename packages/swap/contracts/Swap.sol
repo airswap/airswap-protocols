@@ -422,9 +422,14 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
     // Ensure the signatory is not null
     if (signatory == address(0)) revert SignatureInvalid();
 
-    // Ensure the signatory is authorized by the signer wallet
-    if (order.signer.wallet != signatory) {
-      if (authorized[order.signer.wallet] != signatory) revert Unauthorized();
+    // Ensure signatory is authorized to sign
+    if (authorized[order.signer.wallet] != address(0)) {
+      // If one is set by signer wallet, signatory must be authorized
+      if (signatory != authorized[order.signer.wallet])
+        revert SignatoryUnauthorized();
+    } else {
+      // Otherwise, signatory must be signer wallet
+      if (signatory != order.signer.wallet) revert Unauthorized();
     }
 
     // Ensure the nonce is not yet used and if not mark it used

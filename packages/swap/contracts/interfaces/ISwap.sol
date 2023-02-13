@@ -52,6 +52,7 @@ interface ISwap {
   error RoyaltyExceedsMax(uint256);
   error TokenKindUnknown();
   error TransferFailed(address, address);
+  error SignatoryUnauthorized();
   error Unauthorized();
 
   function swap(

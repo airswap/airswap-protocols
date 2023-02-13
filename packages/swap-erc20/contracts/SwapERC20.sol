@@ -283,9 +283,13 @@ contract SwapERC20 is ISwapERC20, Ownable2Step, EIP712 {
     // Ensure the nonce is not yet used and if not mark it used
     if (!_markNonceAsUsed(signatory, nonce)) revert NonceAlreadyUsed(nonce);
 
-    // Ensure the signatory is authorized by the signer wallet
-    if (signerWallet != signatory) {
-      if (authorized[signerWallet] != signatory) revert Unauthorized();
+    // Ensure signatory is authorized to sign
+    if (authorized[signerWallet] != address(0)) {
+      // If one is set by signer wallet, signatory must be authorized
+      if (signatory != authorized[signerWallet]) revert SignatoryUnauthorized();
+    } else {
+      // Otherwise, signatory must be signer wallet
+      if (signatory != signerWallet) revert Unauthorized();
     }
 
     // Transfer token from sender to signer
@@ -676,9 +680,13 @@ contract SwapERC20 is ISwapERC20, Ownable2Step, EIP712 {
     // Ensure the signatory is not null
     if (signatory == address(0)) revert SignatureInvalid();
 
-    // Ensure the signatory is authorized by the signer wallet
-    if (signerWallet != signatory) {
-      if (authorized[signerWallet] != signatory) revert Unauthorized();
+    // Ensure signatory is authorized to sign
+    if (authorized[signerWallet] != address(0)) {
+      // If one is set by signer wallet, signatory must be authorized
+      if (signatory != authorized[signerWallet]) revert SignatoryUnauthorized();
+    } else {
+      // Otherwise, signatory must be signer wallet
+      if (signatory != signerWallet) revert Unauthorized();
     }
 
     // Ensure the nonce is not yet used and if not mark it used
