@@ -413,7 +413,7 @@ describe('Swap Unit', () => {
         swap,
         'Authorize'
       )
-      await expect(swap.connect(signer).authorize(sender.address)).to.emit(
+      await expect(swap.connect(signer).authorize(deployer.address)).to.emit(
         swap,
         'Authorize'
       )
@@ -427,7 +427,25 @@ describe('Swap Unit', () => {
       )
       await expect(
         swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
-      ).to.be.revertedWith('Unauthorized()')
+      ).to.be.revertedWith('SignatoryUnauthorized()')
+    })
+
+    it('if set, order signatory must be authorized signatory', async () => {
+      await expect(swap.connect(signer).authorize(anyone.address)).to.emit(
+        swap,
+        'Authorize'
+      )
+      const order = await createSignedOrder(
+        {
+          signer: {
+            wallet: signer.address,
+          },
+        },
+        signer
+      )
+      await expect(
+        swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
+      ).to.be.revertedWith('SignatoryUnauthorized()')
     })
 
     it('a signer may revoke an authorized signatory', async () => {
