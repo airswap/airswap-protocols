@@ -12,11 +12,6 @@
   resolved "https://registry.yarnpkg.com/@airswap/constants/-/constants-3.0.7.tgz#045ad0484c27b56eec50984eae06d71dc1d829ee"
   integrity sha512-4/Dz+lxtPzvW5auivLMnucNOta2K4p5MG53q52pTCUurZmjk/7KTVT71JOOhCA4HqaNReYHnUC8FhwZ+rTNhvA==
 
-"@airswap/constants@4.0.0-beta.1":
-  version "4.0.0-beta.1"
-  resolved "https://registry.yarnpkg.com/@airswap/constants/-/constants-4.0.0-beta.1.tgz#95437d59793691a827155bb94612b0ffdd041b00"
-  integrity sha512-8y4bYO/JNaaZ3UVl3pN5DBWnDxx+0hCLWUDy7ul5/SsIxOJ1g9W6bf1CzItagQvRoWYPXm6WmZUhGVBe0tWp2Q==
-
 "@airswap/constants@4.0.0-beta.2":
   version "4.0.0-beta.2"
   resolved "https://registry.yarnpkg.com/@airswap/constants/-/constants-4.0.0-beta.2.tgz#8b6763a4841d479228d3fc431d0e2bbb78694652"
@@ -29,14 +24,6 @@
   dependencies:
     "@airswap/constants" "3.0.6"
     "@uniswap/token-lists" "^1.0.0-beta.26"
-
-"@airswap/typescript@4.0.0-beta.1":
-  version "4.0.0-beta.1"
-  resolved "https://registry.yarnpkg.com/@airswap/typescript/-/typescript-4.0.0-beta.1.tgz#90fbe5e9eb35cc3bb367408d065aa5900f99e20d"
-  integrity sha512-owwUofpR2CUStzzYwrzr2/g5q3nmCdMF/jnzNLGXj4EktIZEthQsH420l8IuAuFgqn8kIxpYxvHGYJiLTEmC8g==
-  dependencies:
-    "@airswap/constants" "4.0.0-beta.1"
-    "@uniswap/token-lists" "^1.0.0-beta.31"
 
 "@airswap/typescript@4.0.0-beta.2":
   version "4.0.0-beta.2"
@@ -53,20 +40,6 @@
   dependencies:
     "@airswap/constants" "3.0.7"
     "@airswap/typescript" "3.0.3"
-    "@types/ethereumjs-util" "^6.1.0"
-    bignumber.js "^9.0.1"
-    eth-sig-util "^3.0.0"
-    ethereumjs-util "^6.2.0"
-    ethers "^5.6.9"
-    lz-string "^1.4.4"
-
-"@airswap/utils@4.0.0-beta.1":
-  version "4.0.0-beta.1"
-  resolved "https://registry.yarnpkg.com/@airswap/utils/-/utils-4.0.0-beta.1.tgz#8b04665cc457356727b8252f76eab7d76f7aaeb0"
-  integrity sha512-VAHChD7DkSsQn8c+tvFN+7E5t1ayEYRd/hmS3dtYa+4UQ8dMnHmQ9ILAeYfQRzLKibl7SuzkF8habaOToRrVBg==
-  dependencies:
-    "@airswap/constants" "4.0.0-beta.1"
-    "@airswap/typescript" "4.0.0-beta.1"
     "@types/ethereumjs-util" "^6.1.0"
     bignumber.js "^9.0.1"
     eth-sig-util "^3.0.0"
