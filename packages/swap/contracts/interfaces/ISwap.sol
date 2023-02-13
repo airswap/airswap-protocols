@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
-
-pragma solidity 0.8.17;
+pragma solidity 0.8.18;
 
 import "./IAdapter.sol";
 
@@ -18,8 +17,6 @@ interface ISwap {
     bytes32 s;
   }
 
-  event SetAdapters(address[] adapters);
-
   event Swap(
     uint256 indexed nonce,
     address indexed signerWallet,
@@ -33,17 +30,11 @@ interface ISwap {
     address affiliateWallet,
     uint256 affiliateAmount
   );
-
   event Cancel(uint256 indexed nonce, address indexed signerWallet);
-
   event CancelUpTo(uint256 indexed nonce, address indexed signerWallet);
-
   event SetProtocolFee(uint256 protocolFee);
-
   event SetProtocolFeeWallet(address indexed feeWallet);
-
   event Authorize(address indexed signer, address indexed signerWallet);
-
   event Revoke(address indexed signer, address indexed signerWallet);
 
   error ChainIdChanged();
@@ -63,27 +54,14 @@ interface ISwap {
   error TransferFailed(address, address);
   error Unauthorized();
 
-  /**
-   * @notice Atomic Token Swap
-   * @param order Order
-   */
   function swap(
     address recipient,
     uint256 maxRoyalty,
     Order calldata order
   ) external;
 
-  /**
-   * @notice Cancel one or more open orders by nonce
-   * @param nonces uint256[]
-   */
   function cancel(uint256[] calldata nonces) external;
 
-  /**
-   * @notice Cancels all orders below a nonce value
-   * @dev These orders can be made active by reducing the minimum nonce
-   * @param minimumNonce uint256
-   */
   function cancelUpTo(uint256 minimumNonce) external;
 
   function nonceUsed(address, uint256) external view returns (bool);
@@ -92,5 +70,9 @@ interface ISwap {
 
   function revoke() external;
 
+  function adapters(bytes4) external view returns (IAdapter);
+
   function authorized(address) external view returns (address);
+
+  function signatoryMinimumNonce(address) external view returns (uint256);
 }

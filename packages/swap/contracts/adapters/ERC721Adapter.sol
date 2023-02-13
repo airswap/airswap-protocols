@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.17;
+pragma solidity 0.8.18;
 
 import "../interfaces/IAdapter.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
@@ -35,7 +35,7 @@ contract ERC721Adapter is IAdapter {
    * @param id uint256 ID for ERC721
    * @param token address Contract address of token
    */
-  function transferTokens(
+  function transfer(
     address from,
     address to,
     uint256 amount,

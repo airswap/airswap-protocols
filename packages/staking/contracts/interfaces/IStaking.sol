@@ -43,10 +43,9 @@ interface IStaking {
    * @notice Receive stakes for an account
    * @param account address
    */
-  function getStakes(address account)
-    external
-    view
-    returns (Stake memory accountStake);
+  function getStakes(
+    address account
+  ) external view returns (Stake memory accountStake);
 
   /**
    * @notice Total balance of all accounts (ERC-20)

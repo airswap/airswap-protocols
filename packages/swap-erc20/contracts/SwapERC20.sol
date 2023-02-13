@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.17;
+pragma solidity 0.8.18;
 
 import "@openzeppelin/contracts/access/Ownable2Step.sol";
 import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
@@ -561,12 +561,11 @@ contract SwapERC20 is ISwapERC20, Ownable2Step, EIP712 {
    * @param stakingBalance uint256
    * @param feeAmount uint256
    */
-  function calculateDiscount(uint256 stakingBalance, uint256 feeAmount)
-    public
-    view
-    returns (uint256)
-  {
-    uint256 divisor = (uint256(10)**rebateScale) + stakingBalance;
+  function calculateDiscount(
+    uint256 stakingBalance,
+    uint256 feeAmount
+  ) public view returns (uint256) {
+    uint256 divisor = (uint256(10) ** rebateScale) + stakingBalance;
     return (rebateMax * stakingBalance * feeAmount) / divisor / 100;
   }
 
@@ -575,12 +574,10 @@ contract SwapERC20 is ISwapERC20, Ownable2Step, EIP712 {
    * @param wallet address
    * @param amount uint256
    */
-  function calculateProtocolFee(address wallet, uint256 amount)
-    public
-    view
-    override
-    returns (uint256)
-  {
+  function calculateProtocolFee(
+    address wallet,
+    uint256 amount
+  ) public view override returns (uint256) {
     // Transfer fee from signer to feeWallet
     uint256 feeAmount = (amount * protocolFee) / FEE_DIVISOR;
     if (feeAmount > 0) {
@@ -598,12 +595,10 @@ contract SwapERC20 is ISwapERC20, Ownable2Step, EIP712 {
    * @param signer address Address of the signer
    * @param nonce uint256 Nonce being checked
    */
-  function nonceUsed(address signer, uint256 nonce)
-    public
-    view
-    override
-    returns (bool)
-  {
+  function nonceUsed(
+    address signer,
+    uint256 nonce
+  ) public view override returns (bool) {
     uint256 groupKey = nonce / 256;
     uint256 indexInGroup = nonce % 256;
     return (_nonceGroups[signer][groupKey] >> indexInGroup) & 1 == 1;
@@ -626,10 +621,10 @@ contract SwapERC20 is ISwapERC20, Ownable2Step, EIP712 {
    * @param nonce uint256 Nonce to be marked as used
    * @return bool True if the nonce was not marked as used already
    */
-  function _markNonceAsUsed(address signer, uint256 nonce)
-    internal
-    returns (bool)
-  {
+  function _markNonceAsUsed(
+    address signer,
+    uint256 nonce
+  ) internal returns (bool) {
     uint256 groupKey = nonce / 256;
     uint256 indexInGroup = nonce % 256;
     uint256 group = _nonceGroups[signer][groupKey];

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.17;
+pragma solidity 0.8.18;
 
 struct Party {
   address wallet; // Wallet address of the party
@@ -44,7 +44,7 @@ interface IAdapter {
    * @param id token ID for ERC-721
    * @param token address Contract address of token
    */
-  function transferTokens(
+  function transfer(
     address from,
     address to,
     uint256 amount,

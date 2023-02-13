@@ -17,7 +17,7 @@ contract Wrapper is Ownable2Step {
 
   ISwapERC20 public swapERC20Contract;
   IWETH public wethContract;
-  uint256 constant MAX_UINT = 2**256 - 1;
+  uint256 constant MAX_UINT = 2 ** 256 - 1;
 
   /**
    * @notice Constructor

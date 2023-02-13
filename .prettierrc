@@ -11,8 +11,7 @@
       "options": {
         "tabWidth": 2,
         "singleQuote": false,
-        "bracketSpacing": false,
-        "explicitTypes": "always"
+        "bracketSpacing": false
       }
     }
   ]

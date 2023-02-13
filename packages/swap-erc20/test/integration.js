@@ -100,12 +100,10 @@ describe('Swap Integration Tests', () => {
 
   describe('Test rebates', async () => {
     it('test swap without rebate', async () => {
-      // await stakingToken.mock.balanceOf.returns(0)
-
       const order = await createSignedOrder({}, signer)
       await expect(
         await swap.connect(sender).swap(sender.address, ...order)
-      ).to.emit(swap, 'Swap')
+      ).to.emit(swap, 'SwapERC20')
 
       // Expect full 30 to be taken from signer
       expect(await signerToken.balanceOf(signer.address)).to.equal('989970')
@@ -127,7 +125,7 @@ describe('Swap Integration Tests', () => {
 
       await expect(
         await swap.connect(sender).swap(sender.address, ...order)
-      ).to.emit(swap, 'Swap')
+      ).to.emit(swap, 'SwapERC20')
 
       // Expect full 30 to be taken from signer
       expect(await signerToken.balanceOf(signer.address)).to.equal('989970')
@@ -150,7 +148,7 @@ describe('Swap Integration Tests', () => {
       )
       await expect(await swap.connect(sender).swapLight(...order)).to.emit(
         swap,
-        'Swap'
+        'SwapERC20'
       )
 
       // Expect full 7 to be taken from signer

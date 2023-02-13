@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.17;
+pragma solidity 0.8.18;
 
 interface ISwapERC20 {
   struct OrderERC20 {
@@ -109,8 +109,8 @@ interface ISwapERC20 {
 
   function authorized(address) external view returns (address);
 
-  function calculateProtocolFee(address, uint256)
-    external
-    view
-    returns (uint256);
+  function calculateProtocolFee(
+    address,
+    uint256
+  ) external view returns (uint256);
 }

@@ -43,12 +43,12 @@ describe('ERC1155Adapter Unit', () => {
     expect(await adapter.hasBalance(party)).to.be.equal(true)
   })
 
-  it('transferTokens succeeds', async () => {
+  it('transfer succeeds', async () => {
     await token.mock.safeTransferFrom.returns()
     await expect(
       adapter
         .connect(anyone)
-        .transferTokens(
+        .transfer(
           party.wallet,
           anyone.address,
           party.amount,

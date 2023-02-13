@@ -43,12 +43,12 @@ describe('ERC20Adapter Unit', () => {
     expect(await adapter.hasBalance(party)).to.be.equal(true)
   })
 
-  it('transferTokens succeeds', async () => {
+  it('transfer succeeds', async () => {
     await token.mock.transferFrom.returns(true)
     await expect(
       adapter
         .connect(anyone)
-        .transferTokens(
+        .transfer(
           party.wallet,
           anyone.address,
           party.amount,
@@ -58,18 +58,12 @@ describe('ERC20Adapter Unit', () => {
     ).not.to.be.reverted
   })
 
-  it('transferTokens with nonzero id fails', async () => {
+  it('transfer with nonzero id fails', async () => {
     await token.mock.transferFrom.returns(true)
     await expect(
       adapter
         .connect(anyone)
-        .transferTokens(
-          party.wallet,
-          anyone.address,
-          party.amount,
-          '1',
-          party.token
-        )
+        .transfer(party.wallet, anyone.address, party.amount, '1', party.token)
     ).to.be.revertedWith('InvalidArgument("id")')
   })
 })

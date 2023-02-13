@@ -43,12 +43,12 @@ describe('ERC721Adapter Unit', () => {
     expect(await adapter.hasBalance(party)).to.be.equal(true)
   })
 
-  it('transferTokens succeeds', async () => {
+  it('transfer succeeds', async () => {
     await token.mock['safeTransferFrom(address,address,uint256)'].returns()
     await expect(
       adapter
         .connect(anyone)
-        .transferTokens(
+        .transfer(
           party.wallet,
           anyone.address,
           party.amount,
@@ -58,18 +58,12 @@ describe('ERC721Adapter Unit', () => {
     ).to.not.be.reverted
   })
 
-  it('transferTokens with nonzero amount fails', async () => {
+  it('transfer with nonzero amount fails', async () => {
     await token.mock['safeTransferFrom(address,address,uint256)'].returns()
     await expect(
       adapter
         .connect(anyone)
-        .transferTokens(
-          party.wallet,
-          anyone.address,
-          '1',
-          party.id,
-          party.token
-        )
+        .transfer(party.wallet, anyone.address, '1', party.id, party.token)
     ).to.be.revertedWith('InvalidArgument("amount")')
   })
 })
