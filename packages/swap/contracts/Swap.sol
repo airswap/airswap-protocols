@@ -32,7 +32,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
   bytes32 public immutable DOMAIN_SEPARATOR;
 
   uint256 public constant FEE_DIVISOR = 10000;
-  uint256 internal constant MAX_ERROR_COUNT = 12;
+  uint256 internal constant MAX_ERROR_COUNT = 15;
 
   // Mapping of ERC165 interface ID to token adapter
   mapping(bytes4 => IAdapter) public adapters;
