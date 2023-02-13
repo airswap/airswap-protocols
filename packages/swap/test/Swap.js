@@ -681,16 +681,22 @@ describe('Swap Unit', () => {
       )
     })
 
-    it('check with passed expiry fails', async () => {
+    it('check with incorrect authorized signatory fails', async () => {
+      await expect(swap.connect(signer).authorize(anyone.address)).to.emit(
+        swap,
+        'Authorize'
+      )
       const order = await createSignedOrder(
         {
-          expiry: '0',
+          signer: {
+            wallet: signer.address,
+          },
         },
         signer
       )
       const [errors] = await swap.check(order)
       expect(errors[0]).to.be.equal(
-        ethers.utils.formatBytes32String('OrderExpired')
+        ethers.utils.formatBytes32String('SignatoryUnauthorized')
       )
     })
 
@@ -706,6 +712,19 @@ describe('Swap Unit', () => {
       const [errors] = await swap.check(order)
       expect(errors[0]).to.be.equal(
         ethers.utils.formatBytes32String('Unauthorized')
+      )
+    })
+
+    it('check with passed expiry fails', async () => {
+      const order = await createSignedOrder(
+        {
+          expiry: '0',
+        },
+        signer
+      )
+      const [errors] = await swap.check(order)
+      expect(errors[0]).to.be.equal(
+        ethers.utils.formatBytes32String('OrderExpired')
       )
     })
 

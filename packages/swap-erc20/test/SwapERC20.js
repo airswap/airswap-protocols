@@ -796,7 +796,7 @@ describe('SwapERC20 Unit', () => {
         'OrderExpired'
       )
     })
-    it('properly detects a SenderUnauthorized() signature', async () => {
+    it('properly detects a SignatoryUnauthorized() signature', async () => {
       await setUpAllowances(DEFAULT_AMOUNT, DEFAULT_AMOUNT + SWAP_FEE)
       await setUpBalances(DEFAULT_BALANCE, DEFAULT_BALANCE)
       await swap.connect(signer).authorize(anyone.address)
