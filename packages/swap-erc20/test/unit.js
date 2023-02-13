@@ -365,6 +365,23 @@ describe('SwapERC20 Unit', () => {
       )
     })
 
+    it('test swaps by signer instead of authorized signatory fail', async () => {
+      const order = await createSignedOrderERC20(
+        {
+          signerWallet: signer.address,
+        },
+        signer
+      )
+
+      await expect(swap.connect(signer).authorize(deployer.address))
+        .to.emit(swap, 'Authorize')
+        .withArgs(deployer.address, signer.address)
+
+      await expect(
+        swap.connect(sender).swap(sender.address, ...order)
+      ).to.be.revertedWith('SignatoryUnauthorized()')
+    })
+
     it('test when signer not authorized', async () => {
       const order = await createSignedOrderERC20(
         {
@@ -554,6 +571,23 @@ describe('SwapERC20 Unit', () => {
       await expect(swap.connect(sender).swapLight(...order)).to.emit(
         swap,
         'SwapERC20'
+      )
+    })
+    it('test light swaps by signer instead of authorized signatory fail', async () => {
+      const order = await createSignedOrderERC20(
+        {
+          protocolFee: PROTOCOL_FEE_LIGHT,
+          signerWallet: anyone.address,
+        },
+        anyone
+      )
+
+      await expect(swap.connect(anyone).authorize(signer.address))
+        .to.emit(swap, 'Authorize')
+        .withArgs(signer.address, anyone.address)
+
+      await expect(swap.connect(sender).swapLight(...order)).to.be.revertedWith(
+        'SignatoryUnauthorized()'
       )
     })
     it('test when expiration has passed', async () => {

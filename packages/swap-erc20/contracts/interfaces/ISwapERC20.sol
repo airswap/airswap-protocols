@@ -47,6 +47,7 @@ interface ISwapERC20 {
   error ScaleTooHigh();
   error SignatureInvalid();
   error SignatoryInvalid();
+  error SignatoryUnauthorized();
   error Unauthorized();
 
   function swap(
