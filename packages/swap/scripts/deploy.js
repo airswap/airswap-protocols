@@ -23,12 +23,7 @@ async function main() {
 
   const protocolFeeWallet = poolDeploys[chainId]
   const protocolFee = 7
-  const adapters = [
-    'ERC20Adapter',
-    'ERC721Adapter',
-    'ERC777Adapter',
-    'ERC1155Adapter',
-  ]
+  const adapters = ['ERC20Adapter', 'ERC721Adapter', 'ERC1155Adapter']
 
   console.log(`adapters: ${JSON.stringify(adapters)}`)
   console.log(`protocolFee: ${protocolFee}`)

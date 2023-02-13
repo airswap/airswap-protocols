@@ -3,6 +3,7 @@ pragma solidity 0.8.17;
 
 import "@openzeppelin/contracts/access/Ownable2Step.sol";
 import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
+import "@openzeppelin/contracts/interfaces/IERC2981.sol";
 import "./interfaces/IAdapter.sol";
 import "./interfaces/ISwap.sol";
 
@@ -14,7 +15,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
   bytes32 internal constant ORDER_TYPEHASH =
     keccak256(
       abi.encodePacked(
-        "Order(uint256 nonce,uint256 expiry,uint256 protocolFee,Party signer,Party sender,Party affiliate)",
+        "Order(uint256 nonce,uint256 expiry,uint256 protocolFee,Party signer,Party sender,address affiliateWallet,uint256 affiliateAmount)",
         "Party(address wallet,address token,bytes4 kind,uint256 id,uint256 amount)"
       )
     );
@@ -31,7 +32,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
   bytes32 public immutable DOMAIN_SEPARATOR;
 
   uint256 public constant FEE_DIVISOR = 10000;
-  uint256 internal constant MAX_ERROR_COUNT = 10;
+  uint256 internal constant MAX_ERROR_COUNT = 12;
 
   /**
    * @notice Double mapping of signers to nonce groups to nonce states
@@ -42,6 +43,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
 
   mapping(address => address) public override authorized;
 
+  bytes4 public requiredSenderKind;
   uint256 public protocolFee;
   address public protocolFeeWallet;
 
@@ -60,19 +62,21 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
    */
   constructor(
     IAdapter[] memory _adapters,
+    bytes4 _requiredSenderKind,
     uint256 _protocolFee,
     address _protocolFeeWallet
   ) EIP712(DOMAIN_NAME, DOMAIN_VERSION) {
-    if (_protocolFee >= FEE_DIVISOR) revert InvalidFee();
-    if (_protocolFeeWallet == address(0)) revert InvalidFeeWallet();
-    if (_adapters.length == 0) revert InvalidAdapters();
+    if (_protocolFee >= FEE_DIVISOR) revert FeeInvalid();
+    if (_protocolFeeWallet == address(0)) revert FeeWalletInvalid();
+    if (_adapters.length == 0) revert AdaptersInvalid();
 
     DOMAIN_CHAIN_ID = block.chainid;
     DOMAIN_SEPARATOR = _domainSeparatorV4();
 
     for (uint256 i = 0; i < _adapters.length; i++) {
-      adapters[_adapters[i].interfaceID()] = _adapters[i];
+      adapters[_adapters[i].interfaceId()] = _adapters[i];
     }
+    requiredSenderKind = _requiredSenderKind;
     protocolFee = _protocolFee;
     protocolFeeWallet = _protocolFeeWallet;
   }
@@ -81,7 +85,11 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
    * @notice Atomic Token Swap
    * @param order Order to settle
    */
-  function swap(address recipient, Order calldata order) external {
+  function swap(
+    address recipient,
+    uint256 maxRoyalty,
+    Order calldata order
+  ) external {
     // Ensure order is valid for signer
     _check(order);
 
@@ -110,26 +118,43 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
     );
 
     // Transfer from sender to affiliate if specified
-    if (order.affiliate.token != address(0)) {
+    if (order.affiliateWallet != address(0)) {
       _transfer(
         order.sender.wallet,
-        order.affiliate.wallet,
-        order.affiliate.amount,
-        order.affiliate.id,
-        order.affiliate.token,
-        order.affiliate.kind
+        order.affiliateWallet,
+        order.affiliateAmount,
+        order.sender.id,
+        order.sender.token,
+        order.sender.kind
       );
     }
 
     // Transfer protocol fee from sender if possible
-    if (order.sender.amount > 0) {
-      uint256 protocolFeeAmount = (order.sender.amount * protocolFee) /
-        FEE_DIVISOR;
-      if (protocolFeeAmount > 0) {
+    uint256 protocolFeeAmount = (order.sender.amount * protocolFee) /
+      FEE_DIVISOR;
+    if (protocolFeeAmount > 0) {
+      _transfer(
+        order.sender.wallet,
+        protocolFeeWallet,
+        protocolFeeAmount,
+        order.sender.id,
+        order.sender.token,
+        order.sender.kind
+      );
+    }
+
+    // Transfer royalty from sender if supported by signer token
+    if (supportsRoyalties(order.signer.token)) {
+      address royaltyRecipient;
+      uint256 royaltyAmount;
+      (royaltyRecipient, royaltyAmount) = IERC2981(order.signer.token)
+        .royaltyInfo(order.signer.id, order.sender.amount);
+      if (royaltyAmount > 0) {
+        if (royaltyAmount > maxRoyalty) revert RoyaltyExceedsMax(royaltyAmount);
         _transfer(
           order.sender.wallet,
-          protocolFeeWallet,
-          protocolFeeAmount,
+          royaltyRecipient,
+          royaltyAmount,
           order.sender.id,
           order.sender.token,
           order.sender.kind
@@ -147,10 +172,8 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
       order.sender.amount,
       order.sender.id,
       order.sender.token,
-      order.affiliate.wallet,
-      order.affiliate.amount,
-      order.affiliate.id,
-      order.affiliate.token
+      order.affiliateWallet,
+      order.affiliateAmount
     );
   }
 
@@ -160,7 +183,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
    */
   function setProtocolFee(uint256 _protocolFee) external onlyOwner {
     // Ensure the fee is less than divisor
-    if (_protocolFee >= FEE_DIVISOR) revert InvalidFee();
+    if (_protocolFee >= FEE_DIVISOR) revert FeeInvalid();
     protocolFee = _protocolFee;
     emit SetProtocolFee(_protocolFee);
   }
@@ -171,7 +194,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
    */
   function setProtocolFeeWallet(address _protocolFeeWallet) external onlyOwner {
     // Ensure the new fee wallet is not null
-    if (_protocolFeeWallet == address(0)) revert InvalidFeeWallet();
+    if (_protocolFeeWallet == address(0)) revert FeeWalletInvalid();
     protocolFeeWallet = _protocolFeeWallet;
     emit SetProtocolFeeWallet(_protocolFeeWallet);
   }
@@ -288,31 +311,39 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
       errors[errCount] = "SenderTokenKindUnknown";
       errCount++;
     } else {
-      if (!senderTokenAdapter.hasAllowance(order.sender)) {
-        errors[errCount] = "SenderAllowanceLow";
+      if (order.sender.kind != requiredSenderKind) {
+        errors[errCount] = "SenderTokenInvalid";
         errCount++;
-      }
-      if (!senderTokenAdapter.hasBalance(order.sender)) {
-        errors[errCount] = "SenderBalanceLow";
-        errCount++;
-      }
-    }
-
-    if (order.affiliate.token != address(0)) {
-      IAdapter affiliateTokenAdapter = adapters[order.affiliate.kind];
-
-      if (!affiliateTokenAdapter.hasAllowance(order.signer)) {
-        errors[errCount] = "AffiliateAllowanceLow";
-        errCount++;
-      }
-      if (!affiliateTokenAdapter.hasBalance(order.signer)) {
-        errors[errCount] = "AffiliateBalanceLow";
-        errCount++;
+      } else {
+        uint256 protocolFeeAmount = (order.sender.amount * protocolFee) /
+          FEE_DIVISOR;
+        uint256 totalSenderAmount = order.sender.amount +
+          protocolFeeAmount +
+          order.affiliateAmount;
+        Party memory sender = Party(
+          order.sender.wallet,
+          order.sender.token,
+          order.sender.kind,
+          order.sender.id,
+          totalSenderAmount
+        );
+        if (!senderTokenAdapter.hasAllowance(sender)) {
+          errors[errCount] = "SenderAllowanceLow";
+          errCount++;
+        }
+        if (!senderTokenAdapter.hasBalance(sender)) {
+          errors[errCount] = "SenderBalanceLow";
+          errCount++;
+        }
+        if (order.sender.amount < order.affiliateAmount) {
+          errors[errCount] = "AffiliateAmountInvalid";
+          errCount++;
+        }
       }
     }
 
     if (order.protocolFee != protocolFee) {
-      errors[errCount] = "InvalidFee";
+      errors[errCount] = "FeeInvalid";
       errCount++;
     }
 
@@ -354,6 +385,20 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
   }
 
   /**
+   * @notice Function to indicate whether the party token implements EIP-2981
+   * @param token Contract address from which royalty need to be considered
+   */
+  function supportsRoyalties(address token) internal view returns (bool) {
+    try IERC165(token).supportsInterface(type(IERC2981).interfaceId) returns (
+      bool result
+    ) {
+      return result;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
    * @notice Tests whether signature and signer are valid
    * @param order Order to validate
    */
@@ -362,8 +407,12 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
     // Ensure execution on the intended chain
     if (DOMAIN_CHAIN_ID != block.chainid) revert ChainIdChanged();
 
-    // Ensure the expiry is not passed
-    if (order.expiry <= block.timestamp) revert OrderExpired();
+    // Ensure the sender token is the required kind
+    if (order.sender.kind != requiredSenderKind) revert SenderTokenInvalid();
+
+    // Ensure the sender amount is greater than affiliate amount
+    if (order.sender.amount < order.affiliateAmount)
+      revert AffiliateAmountInvalid();
 
     // Recover the signatory from the hash and signature
     (address signatory, ) = ECDSA.tryRecover(
@@ -386,6 +435,9 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
 
     // Ensure the nonce is not below the minimum nonce set by cancelUpTo
     if (order.nonce < _signatoryMinimumNonce[signatory]) revert NonceTooLow();
+
+    // Ensure the expiry is not passed
+    if (order.expiry <= block.timestamp) revert OrderExpired();
   }
 
   /**
@@ -408,7 +460,8 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
               protocolFee,
               keccak256(abi.encode(PARTY_TYPEHASH, order.signer)),
               keccak256(abi.encode(PARTY_TYPEHASH, order.sender)),
-              keccak256(abi.encode(PARTY_TYPEHASH, order.affiliate))
+              order.affiliateWallet,
+              order.affiliateAmount
             )
           )
         )

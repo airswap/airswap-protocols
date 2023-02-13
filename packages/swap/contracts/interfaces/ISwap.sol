@@ -8,10 +8,11 @@ interface ISwap {
   struct Order {
     uint256 nonce; // Unique per order and should be sequential
     uint256 expiry; // Expiry in seconds since 1 January 1970
-    uint256 protocolFee;
-    Party signer; // Party to the trade that sets terms
-    Party sender; // Party to the trade that accepts terms
-    Party affiliate; // Party compensated for facilitating (optional)
+    uint256 protocolFee; // Protocol fee numerator
+    Party signer; // Party to the swap that sets terms
+    Party sender; // Party to the swap that accepts terms
+    address affiliateWallet; // Party tipped for facilitating (optional)
+    uint256 affiliateAmount;
     uint8 v;
     bytes32 r;
     bytes32 s;
@@ -30,9 +31,7 @@ interface ISwap {
     uint256 senderId,
     address senderToken,
     address affiliateWallet,
-    uint256 affiliateAmount,
-    uint256 affiliateId,
-    address affiliateToken
+    uint256 affiliateAmount
   );
 
   event Cancel(uint256 indexed nonce, address indexed signerWallet);
@@ -48,15 +47,18 @@ interface ISwap {
   event Revoke(address indexed signer, address indexed signerWallet);
 
   error ChainIdChanged();
-  error InvalidAdapters();
-  error InvalidFee();
-  error InvalidFeeWallet();
-  error OrderExpired();
-  error NonceTooLow();
+  error AdaptersInvalid();
+  error FeeInvalid();
+  error FeeWalletInvalid();
   error NonceAlreadyUsed(uint256);
+  error NonceTooLow();
+  error OrderExpired();
   error SenderInvalid();
+  error SenderTokenInvalid();
+  error AffiliateAmountInvalid();
   error SignatureInvalid();
   error SignatoryInvalid();
+  error RoyaltyExceedsMax(uint256);
   error TokenKindUnknown();
   error TransferFailed(address, address);
   error Unauthorized();
@@ -65,7 +67,11 @@ interface ISwap {
    * @notice Atomic Token Swap
    * @param order Order
    */
-  function swap(address recipient, Order calldata order) external;
+  function swap(
+    address recipient,
+    uint256 maxRoyalty,
+    Order calldata order
+  ) external;
 
   /**
    * @notice Cancel one or more open orders by nonce

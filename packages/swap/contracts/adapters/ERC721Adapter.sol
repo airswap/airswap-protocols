@@ -7,9 +7,9 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 contract ERC721Adapter is IAdapter {
   /**
-   * @notice Indicates the ERC165 interfaceID supported by this adapter
+   * @notice Indicates the ERC165 interfaceId supported by this adapter
    */
-  bytes4 public constant interfaceID = 0x80ac58cd;
+  bytes4 public constant interfaceId = 0x80ac58cd;
 
   /**
    * @notice Function to wrap token transfer for different token types
