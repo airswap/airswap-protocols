@@ -55,10 +55,10 @@ interface IPool {
     bytes32 s
   ) external returns (uint256);
 
-  function calculate(uint256 score, address token)
-    external
-    view
-    returns (uint256 amount);
+  function calculate(
+    uint256 score,
+    address token
+  ) external view returns (uint256 amount);
 
   function verify(
     uint256 nonce,
@@ -70,8 +70,8 @@ interface IPool {
     bytes32 s
   ) external view returns (bool valid);
 
-  function nonceUsed(address participant, uint256 nonce)
-    external
-    view
-    returns (bool);
+  function nonceUsed(
+    address participant,
+    uint256 nonce
+  ) external view returns (bool);
 }

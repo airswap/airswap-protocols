@@ -17,7 +17,7 @@ contract Wrapper is Ownable2Step {
 
   ISwapERC20 public swapERC20Contract;
   IWETH public wethContract;
-  uint256 constant MAX_UINT = 2**256 - 1;
+  uint256 constant MAX_UINT = 2 ** 256 - 1;
 
   /**
    * @notice Constructor
@@ -150,7 +150,7 @@ contract Wrapper is Ownable2Step {
       // Ensure message value is param
       require(senderAmount == msg.value, "VALUE_MUST_BE_SENT");
       // Wrap (deposit) the ether
-      wethContract.deposit{value: msg.value}();
+      wethContract.deposit{ value: msg.value }();
     } else {
       // Ensure message value is zero
       require(msg.value == 0, "VALUE_MUST_BE_ZERO");
@@ -175,7 +175,7 @@ contract Wrapper is Ownable2Step {
       // Unwrap (withdraw) the ether
       wethContract.withdraw(signerAmount);
       // Transfer ether to the recipient
-      (bool success, ) = msg.sender.call{value: signerAmount}("");
+      (bool success, ) = msg.sender.call{ value: signerAmount }("");
       require(success, "ETH_RETURN_FAILED");
     } else {
       IERC20(signerToken).safeTransfer(msg.sender, signerAmount);

@@ -35,7 +35,7 @@ contract ERC721Adapter is IAdapter {
    * @param id uint256 ID for ERC721
    * @param token address Contract address of token
    */
-  function transferTokens(
+  function transfer(
     address from,
     address to,
     uint256 amount,

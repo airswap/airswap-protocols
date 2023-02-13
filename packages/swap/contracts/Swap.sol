@@ -34,6 +34,15 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
   uint256 public constant FEE_DIVISOR = 10000;
   uint256 internal constant MAX_ERROR_COUNT = 12;
 
+  // Mapping of ERC165 interface ID to token adapter
+  mapping(bytes4 => IAdapter) public adapters;
+
+  // Mapping of signer to authorized signatory
+  mapping(address => address) public override authorized;
+
+  // Mapping of signatory address to a minimum valid nonce
+  mapping(address => uint256) public signatoryMinimumNonce;
+
   /**
    * @notice Double mapping of signers to nonce groups to nonce states
    * @dev The nonce group is computed as nonce / 256, so each group of 256 sequential nonces uses the same key
@@ -41,17 +50,9 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
    */
   mapping(address => mapping(uint256 => uint256)) internal _nonceGroups;
 
-  mapping(address => address) public override authorized;
-
   bytes4 public requiredSenderKind;
   uint256 public protocolFee;
   address public protocolFeeWallet;
-
-  // Mapping of signer addresses to an optionally set minimum valid nonce
-  mapping(address => uint256) public _signatoryMinimumNonce;
-
-  // Mapping of ERC165 interface ID to token Adapter
-  mapping(bytes4 => IAdapter) public adapters;
 
   /**
    * @notice Constructor
@@ -241,7 +242,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
    * @param minimumNonce uint256 Minimum valid nonce
    */
   function cancelUpTo(uint256 minimumNonce) external {
-    _signatoryMinimumNonce[msg.sender] = minimumNonce;
+    signatoryMinimumNonce[msg.sender] = minimumNonce;
     emit CancelUpTo(minimumNonce, msg.sender);
   }
 
@@ -249,11 +250,9 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
    * @notice Validates Swap Order for any potential errors
    * @param order Order to settle
    */
-  function check(Order calldata order)
-    public
-    view
-    returns (bytes32[] memory, uint256)
-  {
+  function check(
+    Order calldata order
+  ) public view returns (bytes32[] memory, uint256) {
     uint256 errCount;
     bytes32[] memory errors = new bytes32[](MAX_ERROR_COUNT);
     (address signatory, ) = ECDSA.tryRecover(
@@ -278,7 +277,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
         errors[errCount] = "NonceAlreadyUsed";
         errCount++;
       }
-      if (order.nonce < _signatoryMinimumNonce[signatory]) {
+      if (order.nonce < signatoryMinimumNonce[signatory]) {
         errors[errCount] = "NonceTooLow";
         errCount++;
       }
@@ -355,12 +354,10 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
    * @param signer address Address of the signer
    * @param nonce uint256 Nonce being checked
    */
-  function nonceUsed(address signer, uint256 nonce)
-    public
-    view
-    override
-    returns (bool)
-  {
+  function nonceUsed(
+    address signer,
+    uint256 nonce
+  ) public view override returns (bool) {
     uint256 groupKey = nonce / 256;
     uint256 indexInGroup = nonce % 256;
     return (_nonceGroups[signer][groupKey] >> indexInGroup) & 1 == 1;
@@ -434,7 +431,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
     _markNonceAsUsed(signatory, order.nonce);
 
     // Ensure the nonce is not below the minimum nonce set by cancelUpTo
-    if (order.nonce < _signatoryMinimumNonce[signatory]) revert NonceTooLow();
+    if (order.nonce < signatoryMinimumNonce[signatory]) revert NonceTooLow();
 
     // Ensure the expiry is not passed
     if (order.expiry <= block.timestamp) revert OrderExpired();
@@ -493,7 +490,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
     // Use delegatecall so transferToken calls underlying transfer as Swap
     (bool success, ) = address(adapter).delegatecall(
       abi.encodeWithSelector(
-        adapter.transferTokens.selector,
+        adapter.transfer.selector,
         from,
         to,
         amount,

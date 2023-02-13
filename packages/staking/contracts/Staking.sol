@@ -70,10 +70,10 @@ contract Staking is IStaking, Ownable {
    * @param _name string
    * @param _symbol string
    */
-  function setMetaData(string memory _name, string memory _symbol)
-    external
-    onlyOwner
-  {
+  function setMetaData(
+    string memory _name,
+    string memory _symbol
+  ) external onlyOwner {
     name = _name;
     symbol = _symbol;
   }
@@ -177,12 +177,9 @@ contract Staking is IStaking, Ownable {
    * @notice Receive stakes for an account
    * @param account address
    */
-  function getStakes(address account)
-    external
-    view
-    override
-    returns (Stake memory accountStake)
-  {
+  function getStakes(
+    address account
+  ) external view override returns (Stake memory accountStake) {
     return stakes[account];
   }
 
@@ -196,12 +193,9 @@ contract Staking is IStaking, Ownable {
   /**
    * @notice Balance of an account (ERC-20)
    */
-  function balanceOf(address account)
-    external
-    view
-    override
-    returns (uint256 total)
-  {
+  function balanceOf(
+    address account
+  ) external view override returns (uint256 total) {
     return stakes[account].balance;
   }
 

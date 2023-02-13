@@ -10,7 +10,7 @@ const { deployMockContract } = waffle
 const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
 const STAKING = require('@airswap/staking/build/contracts/Staking.sol/Staking.json')
 
-describe('SwapERC20 Unit Tests', () => {
+describe('SwapERC20 Unit', () => {
   let snapshotId
   let swap
   let signerToken
@@ -238,6 +238,16 @@ describe('SwapERC20 Unit Tests', () => {
         'SetProtocolFee'
       )
     })
+    it('test setProtocolFee with invalid input', async () => {
+      await expect(
+        swap.connect(deployer).setProtocolFee(FEE_DIVISOR)
+      ).to.be.revertedWith('InvalidFee()')
+    })
+    it('test setProtocolFee as non-owner', async () => {
+      await expect(
+        swap.connect(anyone).setProtocolFee(FEE_DIVISOR)
+      ).to.be.revertedWith('Ownable: caller is not the owner')
+    })
     it('test setProtocolFeeLight', async () => {
       await expect(
         swap.connect(deployer).setProtocolFeeLight(PROTOCOL_FEE_LIGHT)
@@ -247,6 +257,11 @@ describe('SwapERC20 Unit Tests', () => {
       await expect(
         swap.connect(deployer).setProtocolFeeLight(FEE_DIVISOR)
       ).to.be.revertedWith('InvalidFeeLight()')
+    })
+    it('test setProtocolFeeLight as non-owner', async () => {
+      await expect(
+        swap.connect(anyone).setProtocolFeeLight(FEE_DIVISOR)
+      ).to.be.revertedWith('Ownable: caller is not the owner')
     })
     it('test protocolFeeWallet', async () => {
       await expect(
@@ -264,6 +279,11 @@ describe('SwapERC20 Unit Tests', () => {
         swap.connect(deployer).setRebateScale(REBATE_SCALE + 1)
       ).to.be.revertedWith('ScaleTooHigh()')
     })
+    it('test setRebateScale as non-owner', async () => {
+      await expect(
+        swap.connect(anyone).setRebateScale(REBATE_SCALE)
+      ).to.be.revertedWith('Ownable: caller is not the owner')
+    })
     it('test setRebateMax', async () => {
       await expect(
         await swap.connect(deployer).setRebateMax(REBATE_MAX)
@@ -273,6 +293,11 @@ describe('SwapERC20 Unit Tests', () => {
       await expect(
         swap.connect(deployer).setRebateMax(REBATE_MAX + 1)
       ).to.be.revertedWith('MaxTooHigh()')
+    })
+    it('test setRebateMax as non-owner', async () => {
+      await expect(
+        swap.connect(anyone).setRebateMax(REBATE_MAX)
+      ).to.be.revertedWith('Ownable: caller is not the owner')
     })
     it('test setStaking', async () => {
       await expect(swap.connect(deployer).setStaking(staking.address)).to.emit(
