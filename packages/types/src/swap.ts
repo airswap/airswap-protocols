@@ -2,8 +2,7 @@ import * as ethUtil from 'ethereumjs-util'
 import * as sigUtil from 'eth-sig-util'
 import { ethers } from 'ethers'
 
-import { lowerCaseAddresses, stringify } from '@airswap/utils'
-
+import { lowerCaseAddresses } from '@airswap/utils'
 import {
   chainIds,
   SECONDS_IN_DAY,
@@ -11,12 +10,10 @@ import {
   DOMAIN_VERSION_SWAP,
   DOMAIN_NAME_SWAP,
 } from '@airswap/constants'
-import {
-  UnsignedOrder,
-  OrderParty,
-  Signature,
-  EIP712Swap,
-} from '@airswap/types'
+
+import { EIP712Swap } from './eip712'
+import { stringify } from './stringify'
+import { UnsignedOrder, OrderParty, Signature } from './typescript'
 
 export const SWAP_DOMAIN_TYPEHASH = ethUtil.keccak256(
   stringify(EIP712Swap, 'EIP712Domain')

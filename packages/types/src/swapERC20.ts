@@ -3,8 +3,6 @@ import * as sigUtil from 'eth-sig-util'
 import { ethers } from 'ethers'
 import lzString from 'lz-string'
 
-import { stringify } from '@airswap/utils'
-
 import {
   chainIds,
   SECONDS_IN_DAY,
@@ -12,13 +10,15 @@ import {
   DOMAIN_VERSION_SWAP_ERC20,
   DOMAIN_NAME_SWAP_ERC20,
 } from '@airswap/constants'
+
+import { EIP712SwapERC20 } from './eip712'
+import { stringify } from './stringify'
 import {
   UnsignedOrderERC20,
   OrderERC20,
   FullOrderERC20,
   Signature,
-  EIP712SwapERC20,
-} from '@airswap/types'
+} from './typescript'
 
 export const SWAP_ERC20_DOMAIN_TYPEHASH = ethUtil.keccak256(
   stringify(EIP712SwapERC20, 'EIP712Domain')
