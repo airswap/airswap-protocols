@@ -5,7 +5,7 @@ const { ethers, run } = require('hardhat')
 const swapDeploys = require('@airswap/swap-erc20/deploys.js')
 const wrapperDeploys = require('../deploys.js')
 const { chainNames, wrappedTokenAddresses } = require('@airswap/constants')
-const { getEtherscanURL } = require('@airswap/utils')
+const { getEtherscanURL } = require('@airswap/constants')
 
 async function main() {
   await run('compile')

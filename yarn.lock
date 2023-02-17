@@ -12,11 +12,6 @@
   resolved "https://registry.yarnpkg.com/@airswap/constants/-/constants-3.0.7.tgz#045ad0484c27b56eec50984eae06d71dc1d829ee"
   integrity sha512-4/Dz+lxtPzvW5auivLMnucNOta2K4p5MG53q52pTCUurZmjk/7KTVT71JOOhCA4HqaNReYHnUC8FhwZ+rTNhvA==
 
-"@airswap/constants@4.0.0-beta.2":
-  version "4.0.0-beta.2"
-  resolved "https://registry.yarnpkg.com/@airswap/constants/-/constants-4.0.0-beta.2.tgz#8b6763a4841d479228d3fc431d0e2bbb78694652"
-  integrity sha512-XKRe/POyjdfvgwCHy2h7vjOzchtj7RiaSVL6oYcW9jf9NUybWlAKiVl0GGnFaoeWwwBCOXj+4eFAbmbIzyYd3g==
-
 "@airswap/typescript@3.0.3":
   version "3.0.3"
   resolved "https://registry.yarnpkg.com/@airswap/typescript/-/typescript-3.0.3.tgz#3a52d4e436a23a4324340581f2a6c544e4f92387"
@@ -25,14 +20,6 @@
     "@airswap/constants" "3.0.6"
     "@uniswap/token-lists" "^1.0.0-beta.26"
 
-"@airswap/typescript@4.0.0-beta.2":
-  version "4.0.0-beta.2"
-  resolved "https://registry.yarnpkg.com/@airswap/typescript/-/typescript-4.0.0-beta.2.tgz#b4f902757dbd7f30c0ba000ca9179abcfa8693f0"
-  integrity sha512-sG4tIHsOdCQMvs7i3smDS4v8kR86YV7sjRlRsBKUwO8PRfYNNrG2ZVSsPITKbHdq1oxms5A9DcCOrYgyI6v7Hg==
-  dependencies:
-    "@airswap/constants" "4.0.0-beta.2"
-    "@uniswap/token-lists" "^1.0.0-beta.31"
-
 "@airswap/utils@3.0.8":
   version "3.0.8"
   resolved "https://registry.yarnpkg.com/@airswap/utils/-/utils-3.0.8.tgz#0548d7b2c2ea47f5a11abbaaca0dc6f66e77c617"
@@ -40,20 +27,6 @@
   dependencies:
     "@airswap/constants" "3.0.7"
     "@airswap/typescript" "3.0.3"
-    "@types/ethereumjs-util" "^6.1.0"
-    bignumber.js "^9.0.1"
-    eth-sig-util "^3.0.0"
-    ethereumjs-util "^6.2.0"
-    ethers "^5.6.9"
-    lz-string "^1.4.4"
-
-"@airswap/utils@4.0.0-beta.2":
-  version "4.0.0-beta.2"
-  resolved "https://registry.yarnpkg.com/@airswap/utils/-/utils-4.0.0-beta.2.tgz#074d5db70927d61f8820d6937aac7142e39e77cd"
-  integrity sha512-r4qY4Iv2GKAyGIpvgPeVKaB8Ws/Cd629K1A7EKzdo+99nPtnuumy1BNGyGBP9rAM82TO0LNzZawFVsmKK4FhmA==
-  dependencies:
-    "@airswap/constants" "4.0.0-beta.2"
-    "@airswap/typescript" "4.0.0-beta.2"
     "@types/ethereumjs-util" "^6.1.0"
     bignumber.js "^9.0.1"
     eth-sig-util "^3.0.0"

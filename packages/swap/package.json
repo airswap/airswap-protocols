@@ -26,8 +26,8 @@
     "@openzeppelin/contracts": "^4.8.1"
   },
   "devDependencies": {
-    "@airswap/constants": "4.0.0-beta.2",
-    "@airswap/utils": "4.0.0-beta.2",
+    "@airswap/constants": "4.0.0-beta.3",
+    "@airswap/types": "4.0.0-beta.0",
     "@nomicfoundation/hardhat-network-helpers": "^1.0.7"
   },
   "publishConfig": {

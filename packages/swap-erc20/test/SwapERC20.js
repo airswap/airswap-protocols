@@ -4,7 +4,7 @@ const {
   createOrderERC20,
   orderERC20ToParams,
   createOrderERC20Signature,
-} = require('@airswap/utils')
+} = require('@airswap/types')
 const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
 const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')

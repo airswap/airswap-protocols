@@ -1,6 +1,6 @@
 const { expect } = require('chai')
 const { toAtomicString } = require('@airswap/utils')
-const { createClaim, createClaimSignature } = require('@airswap/utils')
+const { createClaim, createClaimSignature } = require('@airswap/types')
 
 const { ethers } = require('hardhat')
 const ERC20 = require('@openzeppelin/contracts/build/contracts/ERC20PresetMinterPauser.json')
