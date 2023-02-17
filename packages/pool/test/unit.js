@@ -1,6 +1,6 @@
 const { expect } = require('chai')
 const { toAtomicString } = require('@airswap/utils')
-const { createClaim, createClaimSignature } = require('@airswap/utils')
+const { createClaim, createClaimSignature } = require('@airswap/types')
 
 const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle

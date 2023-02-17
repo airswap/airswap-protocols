@@ -4,7 +4,7 @@ const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
 const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
 const IERC721 = require('@openzeppelin/contracts/build/contracts/ERC721Royalty.json')
-const { createOrder, createOrderSignature } = require('@airswap/utils')
+const { createOrder, createOrderSignature } = require('@airswap/types')
 const { tokenKinds, ADDRESS_ZERO } = require('@airswap/constants')
 
 const CHAIN_ID = 31337

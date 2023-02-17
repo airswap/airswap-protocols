@@ -3,7 +3,7 @@ const {
   createOrderERC20,
   orderERC20ToParams,
   createOrderERC20Signature,
-} = require('@airswap/utils')
+} = require('@airswap/types')
 const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
 const { ADDRESS_ZERO } = require('@airswap/constants')

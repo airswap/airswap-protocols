@@ -3,7 +3,7 @@ const {
   createOrderERC20,
   orderERC20ToParams,
   createOrderERC20Signature,
-} = require('@airswap/utils')
+} = require('@airswap/types')
 const { ethers } = require('hardhat')
 const ERC20 = require('@openzeppelin/contracts/build/contracts/ERC20PresetMinterPauser.json')
 const STAKING = require('@airswap/staking/build/contracts/Staking.sol/Staking.json')

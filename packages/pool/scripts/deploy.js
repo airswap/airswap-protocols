@@ -4,7 +4,7 @@ const Confirm = require('prompt-confirm')
 const { ethers, run } = require('hardhat')
 const stakingDeploys = require('@airswap/staking/deploys.js')
 const { chainNames, stakingTokenAddresses } = require('@airswap/constants')
-const { getEtherscanURL } = require('@airswap/utils')
+const { getEtherscanURL } = require('@airswap/constants')
 const poolDeploys = require('../deploys.js')
 
 async function main() {
