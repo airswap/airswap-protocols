@@ -27,13 +27,13 @@
     "test:unit": "yarn compile && yarn mocha -r ts-node/register test/Maker.test.ts test/Indexer.test.ts"
   },
   "dependencies": {
-    "@airswap/constants": "4.0.0-beta.3",
+    "@airswap/constants": "4.0.0-beta.4",
     "@airswap/indexer-registry": "4.0.0-beta.0",
     "@airswap/jsonrpc-client-websocket": "0.0.1",
     "@airswap/maker-registry": "4.0.0-beta.0",
     "@airswap/swap-erc20": "4.0.0-beta.1",
-    "@airswap/types": "4.0.0-beta.0",
-    "@airswap/utils": "4.0.0-beta.2",
+    "@airswap/types": "4.0.0-beta.1",
+    "@airswap/utils": "4.0.0-beta.3",
     "@airswap/wrapper": "4.0.0-beta.1",
     "axios": "^1.3.3",
     "bignumber.js": "^9.0.0",

@@ -29,7 +29,7 @@
     "access": "public"
   },
   "devDependencies": {
-    "@airswap/constants": "4.0.0-beta.3",
+    "@airswap/constants": "4.0.0-beta.4",
     "prompt-confirm": "^2.0.4"
   }
 }

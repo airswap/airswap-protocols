@@ -21,8 +21,8 @@
     "test": "yarn compile && yarn mocha -r ts-node/register test/metadata.ts"
   },
   "dependencies": {
-    "@airswap/constants": "4.0.0-beta.3",
-    "@airswap/types": "4.0.0-beta.0",
+    "@airswap/constants": "4.0.0-beta.4",
+    "@airswap/types": "4.0.0-beta.1",
     "@openzeppelin/contracts": "^4.8.1",
     "@uniswap/token-lists": "^1.0.0-beta.24",
     "axios": "^0.21.3",
