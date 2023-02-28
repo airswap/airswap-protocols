@@ -1,1 +1,7 @@
-module.exports = {}
+module.exports = {
+  5: [
+    '0x7C46b3656897ca71927dC696701072606c6A7D36',
+    '0x9165d1Fd7A4Ae1030ef7f78A66485F1581ae9DC5',
+    '0x7139071282E6b746E9A35c5814bDf051c387dbFf',
+  ],
+}

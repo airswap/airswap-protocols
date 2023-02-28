@@ -1,6 +1,7 @@
 import { ethers, ContractTransaction } from 'ethers'
-import { chainIds, chainNames } from '@airswap/constants'
-import { OrderERC20 } from '@airswap/typescript'
+import type { Provider } from '@ethersproject/providers'
+import { chainIds } from '@airswap/constants'
+import { OrderERC20 } from '@airswap/types'
 import { SwapERC20 as SwapContract } from '@airswap/swap-erc20/typechain/contracts'
 import { SwapERC20__factory } from '@airswap/swap-erc20/typechain/factories/contracts'
 import { orderERC20ToParams, checkResultToErrors } from '@airswap/utils'
@@ -13,15 +14,12 @@ export class SwapERC20 {
 
   public constructor(
     chainId = chainIds.GOERLI,
-    signerOrProvider?:
-      | ethers.providers.JsonRpcSigner
-      | ethers.providers.Provider
+    signerOrProvider?: ethers.Signer | Provider
   ) {
     this.chainId = chainId
     this.contract = SwapERC20__factory.connect(
       SwapERC20.getAddress(chainId),
-      signerOrProvider ||
-        ethers.getDefaultProvider(chainNames[chainId].toLowerCase())
+      signerOrProvider
     )
   }
 

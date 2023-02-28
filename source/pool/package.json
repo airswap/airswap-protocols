@@ -23,7 +23,7 @@
     "verify": "hardhat run ./scripts/verify.js"
   },
   "dependencies": {
-    "@airswap/staking": "3.1.5",
+    "@airswap/staking": "4.0.0-beta.0",
     "@openzeppelin/contracts": "^4.8.1"
   },
   "devDependencies": {

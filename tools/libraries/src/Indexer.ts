@@ -1,4 +1,4 @@
-import { FullOrderERC20 } from '@airswap/typescript'
+import { FullOrderERC20 } from '@airswap/types'
 import { AxiosError, AxiosResponse } from 'axios'
 const axios = require('axios')
 

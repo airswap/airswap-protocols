@@ -3,10 +3,10 @@ const fs = require('fs')
 const Confirm = require('prompt-confirm')
 const { ethers, run } = require('hardhat')
 const poolDeploys = require('@airswap/pool/deploys.js')
-const { chainNames, chainIds } = require('@airswap/constants')
+const { chainNames, chainIds, tokenKinds } = require('@airswap/constants')
 const { getEtherscanURL } = require('@airswap/constants')
 const swapDeploys = require('../deploys.js')
-const adapterDeploys = require('../adapters.js')
+const adapterDeploys = require('../deploys-adapters.js')
 
 async function main() {
   await run('compile')
@@ -47,6 +47,7 @@ async function main() {
     const swapFactory = await ethers.getContractFactory('Swap')
     const swapContract = await swapFactory.deploy(
       adapters,
+      tokenKinds.ERC20,
       protocolFee,
       protocolFeeWallet
     )
