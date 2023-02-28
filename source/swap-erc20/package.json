@@ -1,6 +1,6 @@
 {
   "name": "@airswap/swap-erc20",
-  "version": "4.0.0-beta.0",
+  "version": "4.0.0-beta.1",
   "description": "AirSwap: Atomic ERC20 Token Swap",
   "license": "MIT",
   "repository": {
