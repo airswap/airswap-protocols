@@ -1,0 +1,38 @@
+{
+  "name": "@airswap/pool",
+  "version": "3.2.7",
+  "description": "AirSwap: Rewards Pool",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/airswap/airswap-protocols"
+  },
+  "files": [
+    "./build",
+    "./typechain",
+    "./deploys.js"
+  ],
+  "scripts": {
+    "clean": "hardhat clean; rm -rf ./build; rm -rf ./typechain",
+    "compile": "hardhat compile; yarn typechain",
+    "typechain": "tsc -b",
+    "coverage": "hardhat coverage",
+    "test": "hardhat test",
+    "test:unit": "hardhat test ./test/Pool.js",
+    "deploy": "hardhat run ./scripts/deploy.js",
+    "verify": "hardhat run ./scripts/verify.js"
+  },
+  "dependencies": {
+    "@airswap/staking": "3.1.5",
+    "@openzeppelin/contracts": "^4.8.1"
+  },
+  "devDependencies": {
+    "@airswap/constants": "4.0.0-beta.3",
+    "@airswap/types": "4.0.0-beta.0",
+    "@airswap/utils": "4.0.0-beta.2",
+    "prompt-confirm": "^2.0.4"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
