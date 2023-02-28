@@ -1,6 +1,6 @@
 {
   "name": "@airswap/staking",
-  "version": "3.1.5",
+  "version": "4.0.0-beta.0",
   "description": "AirSwap: Stake Tokens",
   "license": "MIT",
   "repository": {
@@ -18,7 +18,7 @@
     "typechain": "tsc -b",
     "coverage": "hardhat coverage",
     "test": "hardhat test",
-    "test:unit": "hardhat test ./test/unit.js",
+    "test:unit": "hardhat test ./test/Staking.js",
     "deploy": "hardhat run ./scripts/deploy.js",
     "verify": "hardhat run ./scripts/verify.js"
   },

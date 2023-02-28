@@ -4,7 +4,7 @@ import sinonChai from 'sinon-chai'
 import { useFakeTimers } from 'sinon'
 
 import { createOrderERC20 } from '@airswap/utils'
-import { ADDRESS_ZERO, REQUEST_TIMEOUT } from '@airswap/constants'
+import { ADDRESS_ZERO } from '@airswap/constants'
 
 import { Maker } from '..'
 import {
@@ -14,7 +14,7 @@ import {
   MockSocketServer,
   nextEvent,
 } from './test-utils'
-import { OrderERC20 } from '@airswap/typescript'
+import { OrderERC20 } from '@airswap/types'
 import { JsonRpcErrorCodes } from '@airswap/jsonrpc-client-websocket'
 
 addJSONRPCAssertions()
@@ -30,6 +30,7 @@ declare global {
   }
 }
 
+const REQUEST_TIMEOUT = 4000
 const URL = 'maker.example.com'
 
 chai.use(sinonChai)
