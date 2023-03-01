@@ -1,8 +1,35 @@
+export type Settlement = {
+  chainId: number
+  swapContract: string
+}
+
 export type Signature = {
   v: string
   r: string
   s: string
 }
+
+export type OrderParty = {
+  wallet: string
+  token: string
+  kind: string
+  id: string
+  amount: string
+}
+
+export type UnsignedOrder = {
+  nonce: string
+  expiry: string
+  protocolFee: string
+  signer: OrderParty
+  sender: OrderParty
+  affiliateWallet: string
+  affiliateAmount: string
+}
+
+export type Order = UnsignedOrder & Signature
+
+export type FullOrder = UnsignedOrder & Signature & Settlement
 
 export type UnsignedOrderERC20 = {
   nonce: string
@@ -26,48 +53,10 @@ export type OrderERC20 = {
   senderAmount: string
 } & Signature
 
-export type Settlement = {
-  chainId: number
-  swapContract: string
-}
-
 export type FullOrderERC20 = UnsignedOrderERC20 & Signature & Settlement
 
-export type UnsignedOrder = {
-  nonce: string
-  expiry: string
-  protocolFee: string
-  signer: OrderParty
-  sender: OrderParty
-  affiliateWallet: string
-  affiliateAmount: string
-}
-
-export type Order = UnsignedOrder & Signature
-
-export type OrderParty = {
-  wallet: string
-  token: string
-  kind: string
-  id: string
-  amount: string
-}
-
-export type UnsignedClaim = {
-  nonce: string
-  expiry: string
-  participant: string
-  score: string
-}
-
-export type Claim = {
-  nonce: string
-  expiry: string
-  participant: string
-  score: string
-} & Signature
-
 export type Levels = [string, string][]
+
 export type Formula = string
 
 type LevelsOrFomulae =
@@ -93,3 +82,12 @@ export type Token = {
 }
 
 export { TokenInfo } from '@uniswap/token-lists'
+
+export type UnsignedClaim = {
+  nonce: string
+  expiry: string
+  participant: string
+  score: string
+}
+
+export type Claim = UnsignedClaim & Signature
