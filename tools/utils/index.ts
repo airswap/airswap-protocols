@@ -1,10 +1,22 @@
 import { ethers, BigNumber as BigNumberEthers } from 'ethers'
 import * as url from 'url'
+import { etherscanDomains } from '@airswap/constants'
 
 export * from './src/pool'
 export * from './src/pricing'
 export * from './src/swap'
 export * from './src/swapERC20'
+
+export function getEtherscanURL(chainId: number, hash: string): string {
+  return `https://${etherscanDomains[chainId]}/tx/${hash}`
+}
+
+export function getEtherscanWalletURL(
+  chainId: number,
+  address: string
+): string {
+  return `https://${etherscanDomains[chainId]}/address/${address}`
+}
 
 export function checkResultToErrors(
   count: BigNumberEthers,

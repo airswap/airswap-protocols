@@ -29,6 +29,7 @@
     "access": "public"
   },
   "devDependencies": {
+    "@airswap/utils": "4.0.0-beta.4",
     "prompt-confirm": "^2.0.4"
   }
 }

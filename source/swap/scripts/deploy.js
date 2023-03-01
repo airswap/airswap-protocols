@@ -4,7 +4,7 @@ const Confirm = require('prompt-confirm')
 const { ethers, run } = require('hardhat')
 const poolDeploys = require('@airswap/pool/deploys.js')
 const { chainNames, chainIds, tokenKinds } = require('@airswap/constants')
-const { getEtherscanURL } = require('@airswap/constants')
+const { getEtherscanURL } = require('@airswap/utils')
 const swapDeploys = require('../deploys.js')
 const adapterDeploys = require('../deploys-adapters.js')
 

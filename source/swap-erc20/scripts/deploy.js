@@ -5,7 +5,7 @@ const { ethers, run } = require('hardhat')
 const poolDeploys = require('@airswap/pool/deploys.js')
 const stakingDeploys = require('@airswap/staking/deploys.js')
 const { chainNames } = require('@airswap/constants')
-const { getEtherscanURL } = require('@airswap/constants')
+const { getEtherscanURL } = require('@airswap/utils')
 const swapDeploys = require('../deploys.js')
 
 async function main() {

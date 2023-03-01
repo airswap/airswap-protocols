@@ -136,14 +136,3 @@ export const tokenKindNames: Record<string, string> = {
   '0xe58e113c': 'ERC777',
   '0x9a20483d': 'CKITTY',
 }
-
-export function getEtherscanURL(chainId: number, hash: string): string {
-  return `https://${etherscanDomains[chainId]}/tx/${hash}`
-}
-
-export function getEtherscanWalletURL(
-  chainId: number,
-  address: string
-): string {
-  return `https://${etherscanDomains[chainId]}/address/${address}`
-}
