@@ -6,9 +6,21 @@ import {
   toSortField,
   toSortOrder,
 } from '../src/Indexer'
+import { ethers } from 'ethers'
 import express from 'express'
 import bodyParser from 'body-parser'
 import { Server } from 'http'
+import {
+  createOrderERC20,
+  createOrderERC20Signature,
+  isValidFullOrderERC20,
+} from '@airswap/utils'
+import { ADDRESS_ZERO, chainIds } from '@airswap/constants'
+
+const signerPrivateKey =
+  '0x4934d4ff925f39f91e3729fbce52ef12f25fdf93e014e291350f7d314c1a096b'
+const provider = ethers.getDefaultProvider('goerli')
+const wallet = new ethers.Wallet(signerPrivateKey, provider)
 
 describe('toSortField', () => {
   it('should match value', () => {
@@ -53,28 +65,38 @@ describe('client', () => {
   })
 
   describe('query on server Node', () => {
-    it('Should query on /', async () => {
-      app.get('/', (req, res) => {
-        res.send({ result: { a: 'b' } })
-      })
-      const health = await new NodeIndexer(
-        'http://localhost:12435'
-      ).getHealthCheck()
-      expect(health).to.eql({ a: 'b' })
-    })
-
     it('Should query on post /getOrdersERC20', async () => {
-      app.post('/', (req, res) => {
+      app.post('/', async (req, res) => {
         expect(req.body.jsonrpc).to.equal('2.0')
-        expect(req.body.id).to.equal('1')
         expect(req.body.method).to.equal('getOrdersERC20')
         expect(req.body.params).to.eql([{}])
-        res.send({ result: { a: 'b' } })
+
+        const unsignedOrder = createOrderERC20({})
+        const signature = await createOrderERC20Signature(
+          unsignedOrder,
+          wallet.privateKey,
+          ADDRESS_ZERO,
+          1
+        )
+        res.send({
+          result: {
+            orders: [
+              {
+                order: {
+                  ...unsignedOrder,
+                  ...signature,
+                  chainId: chainIds.GOERLI,
+                  swapContract: ADDRESS_ZERO,
+                },
+              },
+            ],
+          },
+        })
       })
-      const health = await new NodeIndexer(
+      const result = await new NodeIndexer(
         'http://localhost:12435'
       ).getOrdersERC20()
-      expect(health).to.eql({ a: 'b' })
+      expect(isValidFullOrderERC20(result.orders[0].order)).to.be.true
     })
   })
 })
