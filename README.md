@@ -14,7 +14,7 @@
 - Website → https://www.airswap.io/
 - About → https://about.airswap.io/
 
-## Packages
+## Contracts
 
 | Package                                                 | Version                                                                                                                   | Description                   |
 | :------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------ | :---------------------------- |
@@ -24,6 +24,16 @@
 | [`@airswap/indexer-registry`](/source/indexer-registry) | [![npm](https://img.shields.io/npm/v/@airswap/indexer-registry)](https://www.npmjs.com/package/@airswap/indexer-registry) | Indexer Discovery             |
 | [`@airswap/staking`](/source/staking)                   | [![npm](https://img.shields.io/npm/v/@airswap/staking)](https://www.npmjs.com/package/@airswap/staking)                   | Staking for Participants      |
 | [`@airswap/pool`](/source/pool)                         | [![npm](https://img.shields.io/npm/v/@airswap/pool)](https://www.npmjs.com/package/@airswap/pool)                         | Rewards Pool for Participants |
+
+## Tools
+
+| Package                                 | Version                                                                                                     | Description                   |
+| :-------------------------------------- | :---------------------------------------------------------------------------------------------------------- | :---------------------------- |
+| [`@airswap/libraries`](tools/libraries) | [![npm](https://img.shields.io/npm/v/@airswap/libraries)](https://www.npmjs.com/package/@airswap/libraries) | Libraries for Developers      |
+| [`@airswap/metadata`](tools/metadata)   | [![npm](https://img.shields.io/npm/v/@airswap/metadata)](https://www.npmjs.com/package/@airswap/metadata)   | Token Metadata for Developers |
+| [`@airswap/utils`](/tools/utils)        | [![npm](https://img.shields.io/npm/v/@airswap/utils)](https://www.npmjs.com/package/@airswap/utils)         | Utilities for Developers      |
+| [`@airswap/types`](/tools/types)        | [![npm](https://img.shields.io/npm/v/@airswap/types)](https://www.npmjs.com/package/@airswap/types)         | Types for Developers          |
+| [`@airswap/constants`](tools/constants) | [![npm](https://img.shields.io/npm/v/@airswap/constants)](https://www.npmjs.com/package/@airswap/constants) | Constants for Developers      |
 
 ## Commands
 

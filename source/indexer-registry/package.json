@@ -1,0 +1,36 @@
+{
+  "name": "@airswap/indexer-registry",
+  "version": "4.0.0-beta.1",
+  "description": "AirSwap: Indexer Registry",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/airswap/airswap-protocols"
+  },
+  "files": [
+    "./build",
+    "./typechain",
+    "./deploys.js"
+  ],
+  "scripts": {
+    "clean": "hardhat clean; rm -rf ./build; rm -rf ./typechain",
+    "compile": "hardhat compile; yarn typechain",
+    "typechain": "tsc -b",
+    "coverage": "hardhat coverage",
+    "test": "hardhat test",
+    "test:unit": "hardhat test ./test/unit.js",
+    "deploy": "hardhat run ./scripts/deploy.js",
+    "verify": "hardhat run ./scripts/verify.js"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.8.1"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@airswap/constants": "^4.0.0-beta",
+    "@airswap/utils": "^4.0.0-beta",
+    "prompt-confirm": "^2.0.4"
+  }
+}
