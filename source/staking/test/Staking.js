@@ -1,5 +1,6 @@
 const { expect } = require('chai')
 const { ethers, waffle } = require('hardhat')
+const { time } = require('@nomicfoundation/hardhat-network-helpers')
 const BN = ethers.BigNumber
 const { deployMockContract } = waffle
 const IERC20 = require('@openzeppelin/contracts/build/contracts/ERC20.json')
@@ -379,6 +380,41 @@ describe('Staking Unit', () => {
 
       // every 1 block 2% is unstakeable
       expect(available).to.equal('10')
+    })
+
+    it('the available balance should update', async () => {
+      await token.mock.transferFrom.returns(true)
+      await token.mock.transfer.returns(true)
+      await staking.connect(account1).stake('100')
+
+      let block = await ethers.provider.getBlock()
+      await ethers.provider.send('evm_mine', [block['timestamp'] + 10])
+
+      let available = await staking.available(account1.address)
+      await staking.connect(account1).unstake(available)
+
+      block = await ethers.provider.getBlock()
+      await ethers.provider.send('evm_mine', [block['timestamp'] + 1])
+      available = await staking.available(account1.address)
+      expect(available).to.equal('0')
+    })
+
+    it('the previous available balance should be maintained when not entierly unstaked', async () => {
+      await token.mock.transferFrom.returns(true)
+      await token.mock.transfer.returns(true)
+      await staking.connect(account1).stake('100')
+
+      let block = await ethers.provider.getBlock()
+      await ethers.provider.send('evm_mine', [block['timestamp'] + 10])
+      let available = await staking.available(account1.address)
+
+      available = available.sub((8).toString())
+      await staking.connect(account1).unstake(available)
+
+      block = await ethers.provider.getBlock()
+      await ethers.provider.send('evm_mine', [block['timestamp'] + 1])
+      available = await staking.available(account1.address)
+      expect(available).to.equal('9')
     })
   })
 
