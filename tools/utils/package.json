@@ -1,6 +1,6 @@
 {
   "name": "@airswap/utils",
-  "version": "4.0.0-beta.4",
+  "version": "4.0.0-beta.5",
   "description": "AirSwap: Utilities for Developers",
   "repository": {
     "type": "git",
@@ -22,8 +22,8 @@
     "test:unit": "yarn compile && yarn mocha -r ts-node/register test/utils.ts"
   },
   "dependencies": {
-    "@airswap/constants": "4.0.0-beta.4",
-    "@airswap/types": "4.0.0-beta.2",
+    "@airswap/constants": "^4.0.0-beta",
+    "@airswap/types": "^4.0.0-beta",
     "@types/ethereumjs-util": "^6.1.0",
     "bignumber.js": "^9.0.1",
     "eth-sig-util": "^3.0.0",

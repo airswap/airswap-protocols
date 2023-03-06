@@ -1,6 +1,6 @@
 {
   "name": "@airswap/maker-registry",
-  "version": "4.0.0-beta.0",
+  "version": "4.0.0-beta.1",
   "description": "AirSwap: Maker Registry",
   "license": "MIT",
   "repository": {
@@ -29,8 +29,8 @@
     "access": "public"
   },
   "devDependencies": {
-    "@airswap/constants": "4.0.0-beta.4",
-    "@airswap/utils": "4.0.0-beta.4",
+    "@airswap/constants": "^4.0.0-beta",
+    "@airswap/utils": "^4.0.0-beta",
     "prompt-confirm": "^2.0.4"
   }
 }
