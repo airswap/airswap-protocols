@@ -263,6 +263,8 @@ contract Staking is IStaking, Ownable {
     uint256 nowAvailable = available(account);
     require(amount <= nowAvailable, "AMOUNT_EXCEEDS_AVAILABLE");
     selected.balance = selected.balance.sub(amount);
-    selected.timestamp += amount.mul(selected.duration).div(selected.balance);
+    selected.timestamp = selected.timestamp.add(
+      amount.mul(selected.duration).div(selected.balance)
+    );
   }
 }
