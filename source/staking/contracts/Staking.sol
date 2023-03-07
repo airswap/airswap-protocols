@@ -260,8 +260,7 @@ contract Staking is IStaking, Ownable {
    */
   function _unstake(address account, uint256 amount) internal {
     Stake storage selected = stakes[account];
-    uint256 nowAvailable = available(account);
-    require(amount <= nowAvailable, "AMOUNT_EXCEEDS_AVAILABLE");
+    require(amount <= available(account), "AMOUNT_EXCEEDS_AVAILABLE");
     selected.balance = selected.balance.sub(amount);
     selected.timestamp = selected.timestamp.add(
       amount.mul(selected.duration).div(selected.balance)
