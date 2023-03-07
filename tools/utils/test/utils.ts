@@ -1,20 +1,20 @@
 import { assert, expect } from 'chai'
 import { ethers } from 'ethers'
 import { ADDRESS_ZERO, SECONDS_IN_DAY } from '@airswap/constants'
-import { Levels, FullOrderERC20 } from '@airswap/typescript'
+import { Levels, FullOrderERC20 } from '@airswap/types'
 
 import {
   isValidFullOrderERC20,
   isValidOrderERC20,
   isValidClaim,
-  calculateCostFromLevels,
   createOrderERC20Signature,
   createClaimSignature,
   getSignerFromOrderERC20Signature,
   getSignerFromClaimSignature,
   compressFullOrderERC20,
   decompressFullOrderERC20,
-} from '../index'
+  calculateCostFromLevels,
+} from '@airswap/utils'
 
 const signerPrivateKey =
   '0x4934d4ff925f39f91e3729fbce52ef12f25fdf93e014e291350f7d314c1a096b'

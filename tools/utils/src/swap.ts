@@ -2,30 +2,21 @@ import * as ethUtil from 'ethereumjs-util'
 import * as sigUtil from 'eth-sig-util'
 import { ethers } from 'ethers'
 
-import { lowerCaseAddresses, stringify } from './strings'
-
+import { lowerCaseAddresses } from '../index'
 import {
+  chainIds,
   SECONDS_IN_DAY,
   ADDRESS_ZERO,
   DOMAIN_VERSION_SWAP,
   DOMAIN_NAME_SWAP,
 } from '@airswap/constants'
+
 import {
   UnsignedOrder,
   OrderParty,
   Signature,
   EIP712Swap,
-} from '@airswap/typescript'
-
-export const SWAP_DOMAIN_TYPEHASH = ethUtil.keccak256(
-  stringify(EIP712Swap, 'EIP712Domain')
-)
-export const SWAP_ORDER_TYPEHASH = ethUtil.keccak256(
-  stringify(EIP712Swap, 'Order')
-)
-export const SWAP_PARTY_TYPEHASH = ethUtil.keccak256(
-  stringify(EIP712Swap, 'Party')
-)
+} from '@airswap/types'
 
 const defaultParty: OrderParty = {
   wallet: ADDRESS_ZERO,
@@ -41,7 +32,8 @@ export function createOrder({
   protocolFee = 0,
   signer = {},
   sender = {},
-  affiliate = {},
+  affiliateWallet = ADDRESS_ZERO,
+  affiliateAmount = 0,
 }): UnsignedOrder {
   return lowerCaseAddresses({
     nonce: String(nonce),
@@ -49,7 +41,8 @@ export function createOrder({
     protocolFee: String(protocolFee),
     signer: { ...defaultParty, ...signer },
     sender: { ...defaultParty, ...sender },
-    affiliate: { ...defaultParty, ...affiliate },
+    affiliateWallet: String(affiliateWallet),
+    affiliateAmount: String(affiliateAmount),
   })
 }
 
@@ -57,7 +50,9 @@ export async function createOrderSignature(
   unsignedOrder: UnsignedOrder,
   signer: ethers.VoidSigner | string,
   swapContract: string,
-  chainId: number
+  chainId = chainIds.ETHEREUM,
+  version = DOMAIN_VERSION_SWAP,
+  name = DOMAIN_NAME_SWAP
 ): Promise<Signature> {
   let sig
   if (typeof signer === 'string') {
@@ -65,10 +60,10 @@ export async function createOrderSignature(
       data: {
         types: EIP712Swap,
         domain: {
-          name: DOMAIN_NAME_SWAP,
-          version: DOMAIN_VERSION_SWAP,
-          chainId,
           verifyingContract: swapContract,
+          chainId,
+          version,
+          name,
         },
         primaryType: 'Order',
         message: unsignedOrder,
@@ -77,10 +72,10 @@ export async function createOrderSignature(
   } else {
     sig = await signer._signTypedData(
       {
-        name: DOMAIN_NAME_SWAP,
-        version: DOMAIN_VERSION_SWAP,
-        chainId,
         verifyingContract: swapContract,
+        chainId,
+        version,
+        name,
       },
       { Order: EIP712Swap.Order, Party: EIP712Swap.Party },
       unsignedOrder

@@ -10,7 +10,7 @@ function toWei(value, places) {
   return toAtomicString(value, places || 18)
 }
 
-describe('Pool Integration Tests', () => {
+describe('Pool Integration', () => {
   let deployer
   let alice
   let bob

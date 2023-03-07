@@ -3,25 +3,20 @@
 pragma solidity 0.8.17;
 
 import "../interfaces/IAdapter.sol";
-import "openzeppelin-solidity/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 contract ERC721Adapter is IAdapter {
   /**
-   * @notice Indicates the ERC165 interfaceID supported by this adapter
+   * @notice Indicates the ERC165 interfaceId supported by this adapter
    */
-  bytes4 public constant interfaceID = 0x80ac58cd;
-
-  /**
-   * @notice Indicates whether to attempt a fee transfer on the token
-   */
-  bool public constant attemptFeeTransfer = false;
+  bytes4 public constant interfaceId = 0x80ac58cd;
 
   /**
    * @notice Function to wrap token transfer for different token types
    * @param party Party from whom swap would be made
    */
   function hasAllowance(Party calldata party) external view returns (bool) {
-    return IERC721(party.token).isApprovedForAll(party.wallet, msg.sender);
+    return IERC721(party.token).isApprovedForAll(party.wallet, address(this));
   }
 
   /**
@@ -40,7 +35,7 @@ contract ERC721Adapter is IAdapter {
    * @param id uint256 ID for ERC721
    * @param token address Contract address of token
    */
-  function transferTokens(
+  function transfer(
     address from,
     address to,
     uint256 amount,

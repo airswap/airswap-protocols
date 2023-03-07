@@ -5,7 +5,7 @@ const { deployMockContract } = waffle
 const { ADDRESS_ZERO, tokenKinds } = require('@airswap/constants')
 
 let snapshotId
-let transferHandler
+let adapter
 let party
 
 describe('ERC721Adapter Unit', () => {
@@ -18,12 +18,10 @@ describe('ERC721Adapter Unit', () => {
   })
 
   before('deploy erc721 transfer handler', async () => {
-    ;[deployer, swap, anyone] = await ethers.getSigners()
+    ;[deployer, anyone] = await ethers.getSigners()
     token = await deployMockContract(deployer, IERC721.abi)
-    transferHandler = await (
-      await ethers.getContractFactory('ERC721Adapter')
-    ).deploy()
-    await transferHandler.deployed()
+    adapter = await (await ethers.getContractFactory('ERC721Adapter')).deploy()
+    await adapter.deployed()
     party = {
       wallet: ADDRESS_ZERO,
       token: token.address,
@@ -33,30 +31,24 @@ describe('ERC721Adapter Unit', () => {
     }
   })
 
-  it('attemptFeeTransfer is false', async () => {
-    expect(await transferHandler.attemptFeeTransfer()).to.be.equal(false)
-  })
-
   it('hasAllowance succeeds', async () => {
     await token.mock.isApprovedForAll
-      .withArgs(party.wallet, swap.address)
+      .withArgs(party.wallet, adapter.address)
       .returns(true)
-    expect(await transferHandler.connect(swap).hasAllowance(party)).to.be.equal(
-      true
-    )
+    expect(await adapter.connect(anyone).hasAllowance(party)).to.be.equal(true)
   })
 
   it('hasBalance succeeds', async () => {
     await token.mock.ownerOf.returns(party.wallet)
-    expect(await transferHandler.hasBalance(party)).to.be.equal(true)
+    expect(await adapter.hasBalance(party)).to.be.equal(true)
   })
 
-  it('transferTokens succeeds', async () => {
+  it('transfer succeeds', async () => {
     await token.mock['safeTransferFrom(address,address,uint256)'].returns()
     await expect(
-      transferHandler
-        .connect(swap)
-        .transferTokens(
+      adapter
+        .connect(anyone)
+        .transfer(
           party.wallet,
           anyone.address,
           party.amount,
@@ -66,18 +58,12 @@ describe('ERC721Adapter Unit', () => {
     ).to.not.be.reverted
   })
 
-  it('transferTokens with nonzero amount fails', async () => {
+  it('transfer with nonzero amount fails', async () => {
     await token.mock['safeTransferFrom(address,address,uint256)'].returns()
     await expect(
-      transferHandler
-        .connect(swap)
-        .transferTokens(
-          party.wallet,
-          anyone.address,
-          '1',
-          party.id,
-          party.token
-        )
+      adapter
+        .connect(anyone)
+        .transfer(party.wallet, anyone.address, '1', party.id, party.token)
     ).to.be.revertedWith('InvalidArgument("amount")')
   })
 })

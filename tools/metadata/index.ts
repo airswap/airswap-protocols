@@ -28,8 +28,11 @@ export async function getKnownTokens(
     const promises = await Promise.allSettled(
       tokenListURLs[chainId].map(async (url) => {
         try {
-          const res = await axios.get(url)
-          return res.data.tokens
+          const { data } = await axios.get(url)
+          if (data.tokens) {
+            return data.tokens
+          }
+          return { url, message: 'Invalid token list' }
         } catch (e) {
           return { url, message: e.message }
         }

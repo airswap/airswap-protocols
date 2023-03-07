@@ -1,6 +1,6 @@
 {
   "name": "@airswap/swap-erc20",
-  "version": "3.0.2",
+  "version": "4.0.0",
   "description": "AirSwap: Atomic ERC20 Token Swap",
   "license": "MIT",
   "repository": {
@@ -18,7 +18,7 @@
     "typechain": "tsc -b",
     "coverage": "hardhat coverage",
     "test": "hardhat test",
-    "test:unit": "hardhat test ./test/unit.js",
+    "test:unit": "hardhat test ./test/SwapERC20.js",
     "deploy": "hardhat run ./scripts/deploy.js",
     "verify": "hardhat run ./scripts/verify.js"
   },
@@ -26,7 +26,9 @@
     "@openzeppelin/contracts": "^4.8.1"
   },
   "devDependencies": {
-    "@airswap/utils": "3.0.8",
+    "@airswap/constants": "^4.0.0",
+    "@airswap/types": "^4.0.0",
+    "@airswap/utils": "^4.0.0",
     "prompt-confirm": "^2.0.4"
   },
   "publishConfig": {

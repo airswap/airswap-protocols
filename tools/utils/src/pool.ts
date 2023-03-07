@@ -7,12 +7,8 @@ import {
   DOMAIN_VERSION_POOL,
   DOMAIN_NAME_POOL,
 } from '@airswap/constants'
-import {
-  UnsignedClaim,
-  Claim,
-  Signature,
-  EIP712Claim,
-} from '@airswap/typescript'
+
+import { UnsignedClaim, Claim, Signature, EIP712Claim } from '@airswap/types'
 
 export function createClaim({
   nonce = Date.now().toString(),

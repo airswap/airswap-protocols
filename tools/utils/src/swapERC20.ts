@@ -3,28 +3,23 @@ import * as sigUtil from 'eth-sig-util'
 import { ethers } from 'ethers'
 import lzString from 'lz-string'
 
-import { stringify } from './strings'
-
 import {
+  chainIds,
   SECONDS_IN_DAY,
   ADDRESS_ZERO,
   DOMAIN_VERSION_SWAP_ERC20,
   DOMAIN_NAME_SWAP_ERC20,
 } from '@airswap/constants'
+
 import {
   UnsignedOrderERC20,
   OrderERC20,
   FullOrderERC20,
   Signature,
   EIP712SwapERC20,
-} from '@airswap/typescript'
-
-export const SWAP_ERC20_DOMAIN_TYPEHASH = ethUtil.keccak256(
-  stringify(EIP712SwapERC20, 'EIP712Domain')
-)
-export const SWAP_ERC20_ORDER_TYPEHASH = ethUtil.keccak256(
-  stringify(EIP712SwapERC20, 'OrderERC20')
-)
+  SWAP_ERC20_ORDER_TYPEHASH,
+  SWAP_ERC20_DOMAIN_TYPEHASH,
+} from '@airswap/types'
 
 export function createOrderERC20({
   nonce = Date.now().toString(),
@@ -54,7 +49,9 @@ export async function createOrderERC20Signature(
   unsignedOrder: UnsignedOrderERC20,
   signer: ethers.VoidSigner | string,
   swapContract: string,
-  chainId: number
+  chainId = chainIds.ETHEREUM,
+  version = DOMAIN_VERSION_SWAP_ERC20,
+  name = DOMAIN_NAME_SWAP_ERC20
 ): Promise<Signature> {
   let sig
   if (typeof signer === 'string') {
@@ -62,10 +59,10 @@ export async function createOrderERC20Signature(
       data: {
         types: EIP712SwapERC20,
         domain: {
-          name: DOMAIN_NAME_SWAP_ERC20,
-          version: DOMAIN_VERSION_SWAP_ERC20,
-          chainId,
           verifyingContract: swapContract,
+          chainId,
+          version,
+          name,
         },
         primaryType: 'OrderERC20',
         message: unsignedOrder,
@@ -74,10 +71,10 @@ export async function createOrderERC20Signature(
   } else {
     sig = await signer._signTypedData(
       {
-        name: DOMAIN_NAME_SWAP_ERC20,
-        version: DOMAIN_VERSION_SWAP_ERC20,
-        chainId,
         verifyingContract: swapContract,
+        chainId,
+        version,
+        name,
       },
       { OrderERC20: EIP712SwapERC20.OrderERC20 },
       unsignedOrder

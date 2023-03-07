@@ -1,4 +1,6 @@
-[AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens, initially built on the [Swap Protocol](https://www.airswap.io/whitepaper.htm). This repository contains smart contracts and JavaScript packages for use by developers and traders on the AirSwap network.
+# AirSwap Protocols
+
+[AirSwap](https://www.airswap.io/) is a peer-to-peer trading network. This repository contains smart contracts for use by developers and traders on the AirSwap network.
 
 [![Discord](https://img.shields.io/discord/590643190281928738.svg)](https://chat.airswap.io)
 [![License](https://img.shields.io/badge/License-MIT-blue)](https://opensource.org/licenses/MIT)
@@ -7,12 +9,12 @@
 
 ## Resources
 
-- About → https://about.airswap.io/
-- Website → https://www.airswap.io/
+- Discord → https://chat.airswap.io/
 - Twitter → https://twitter.com/airswap
-- Chat → https://chat.airswap.io/
+- Website → https://www.airswap.io/
+- About → https://about.airswap.io/
 
-## Smart Contracts
+## Contracts
 
 | Package                                                 | Version                                                                                                                   | Description                   |
 | :------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------ | :---------------------------- |
@@ -23,33 +25,33 @@
 | [`@airswap/staking`](/source/staking)                   | [![npm](https://img.shields.io/npm/v/@airswap/staking)](https://www.npmjs.com/package/@airswap/staking)                   | Staking for Participants      |
 | [`@airswap/pool`](/source/pool)                         | [![npm](https://img.shields.io/npm/v/@airswap/pool)](https://www.npmjs.com/package/@airswap/pool)                         | Rewards Pool for Participants |
 
-## JavaScript Libraries
+## Tools
 
-| Package                                    | Version                                                                                                       | Description               |
-| :----------------------------------------- | :------------------------------------------------------------------------------------------------------------ | :------------------------ |
-| [`@airswap/libraries`](/tools/libraries)   | [![npm](https://img.shields.io/npm/v/@airswap/libraries)](https://www.npmjs.com/package/@airswap/libraries)   | Protocol Client Libraries |
-| [`@airswap/utils`](/tools/utils)           | [![npm](https://img.shields.io/npm/v/@airswap/utils)](https://www.npmjs.com/package/@airswap/utils)           | Orders and Signatures     |
-| [`@airswap/metadata`](/tools/metadata)     | [![npm](https://img.shields.io/npm/v/@airswap/metadata)](https://www.npmjs.com/package/@airswap/metadata)     | Token Metadata            |
-| [`@airswap/constants`](/tools/constants)   | [![npm](https://img.shields.io/npm/v/@airswap/constants)](https://www.npmjs.com/package/@airswap/constants)   | Helpful Constants         |
-| [`@airswap/typescript`](/tools/typescript) | [![npm](https://img.shields.io/npm/v/@airswap/typescript)](https://www.npmjs.com/package/@airswap/typescript) | TypeScript Types          |
+| Package                                 | Version                                                                                                     | Description                   |
+| :-------------------------------------- | :---------------------------------------------------------------------------------------------------------- | :---------------------------- |
+| [`@airswap/libraries`](tools/libraries) | [![npm](https://img.shields.io/npm/v/@airswap/libraries)](https://www.npmjs.com/package/@airswap/libraries) | Libraries for Developers      |
+| [`@airswap/metadata`](tools/metadata)   | [![npm](https://img.shields.io/npm/v/@airswap/metadata)](https://www.npmjs.com/package/@airswap/metadata)   | Token Metadata for Developers |
+| [`@airswap/utils`](/tools/utils)        | [![npm](https://img.shields.io/npm/v/@airswap/utils)](https://www.npmjs.com/package/@airswap/utils)         | Utilities for Developers      |
+| [`@airswap/types`](/tools/types)        | [![npm](https://img.shields.io/npm/v/@airswap/types)](https://www.npmjs.com/package/@airswap/types)         | Types for Developers          |
+| [`@airswap/constants`](tools/constants) | [![npm](https://img.shields.io/npm/v/@airswap/constants)](https://www.npmjs.com/package/@airswap/constants) | Constants for Developers      |
 
-## Repository Commands
+## Commands
 
 | Command           | Description                               |
 | :---------------- | :---------------------------------------- |
 | `yarn compile`    | Compile all contracts to `build` folders. |
-| `yarn clean`      | Delete all contract `build` folders.      |
+| `yarn clean`      | Clean all contract `build` folders.       |
 | `yarn test`       | Run all contract tests in `test` folders. |
 | `yarn lint:fix`   | Run eslint for all JavaScript code.       |
 | `yarn pretty:fix` | Run prettier for all JavaScript code.     |
 
-## Deploying Contracts
+## Deploying and Verifying
 
-Each package in `source` has commands `yarn deploy` and `yarn verify`. Each command takes a `--network` flag. For example:
+Each package has commands `yarn deploy` and `yarn verify`. Each command takes a `--network` flag. For example:
 
 ```
 yarn deploy --network goerli
 yarn verify --network goerli
 ```
 
-The account used to deploy and verify is derived from the `MNEMONIC` environment variable in `.env` in the repository root. The source of these scripts can be found in the `scripts` folder of each package.
+The source of these scripts can be found in the `scripts` folder of each package. The account used to deploy and verify is derived from the `PRIVATE_KEY` environment variable in `.env` in the repository root.

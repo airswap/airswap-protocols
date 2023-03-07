@@ -5,9 +5,6 @@ require('@nomiclabs/hardhat-waffle')
 require('@nomiclabs/hardhat-etherscan')
 require('solidity-coverage')
 
-// You need to export an object to set up your config
-// Go to https://hardhat.org/config/ to learn more
-
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */

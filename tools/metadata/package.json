@@ -1,6 +1,6 @@
 {
   "name": "@airswap/metadata",
-  "version": "3.0.9",
+  "version": "4.0.0",
   "description": "AirSwap: Token Metadata for Developers",
   "repository": {
     "type": "git",
@@ -17,13 +17,15 @@
   ],
   "scripts": {
     "clean": "rm -rf ./build",
-    "compile": "yarn clean && tsc -b"
+    "compile": "yarn clean && tsc -b",
+    "test": "yarn compile && yarn mocha -r ts-node/register test/metadata.ts"
   },
   "dependencies": {
-    "@airswap/constants": "3.0.7",
-    "@airswap/typescript": "3.0.3",
+    "@airswap/constants": "^4.0.0",
+    "@airswap/types": "^4.0.0",
+    "@openzeppelin/contracts": "^4.8.1",
     "@uniswap/token-lists": "^1.0.0-beta.24",
-    "axios": "^0.21.3",
+    "axios": "^0.21.4",
     "eth-contract-metadata": "^1.12.1",
     "ethereumjs-abi": "^0.6.8",
     "ethers": "^5.6.9"

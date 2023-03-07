@@ -1,15 +1,13 @@
 export const DOMAIN_NAME_SWAP_ERC20 = 'SWAP_ERC20'
-export const DOMAIN_VERSION_SWAP_ERC20 = '3'
+export const DOMAIN_VERSION_SWAP_ERC20 = '4'
 export const DOMAIN_NAME_SWAP = 'SWAP'
-export const DOMAIN_VERSION_SWAP = '3'
+export const DOMAIN_VERSION_SWAP = '4'
 export const DOMAIN_NAME_POOL = 'POOL'
 export const DOMAIN_VERSION_POOL = '1'
 export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
 export const MAX_LOCATORS = 10
 export const MAX_APPROVAL_AMOUNT = '90071992547409910000000000'
 export const MIN_CONFIRMATIONS = 2
-export const DEFAULT_PORT = 3000
-export const REQUEST_TIMEOUT = 4000
 export const SECONDS_IN_DAY = 86400
 
 export const chainIds: Record<string, number> = {

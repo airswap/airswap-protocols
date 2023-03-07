@@ -1,6 +1,10 @@
-import { FullOrderERC20 } from '@airswap/typescript'
-import { AxiosError, AxiosResponse } from 'axios'
-const axios = require('axios')
+import * as url from 'url'
+import { isBrowser } from 'browser-or-node'
+import { Client as HttpClient } from 'jayson'
+import { FullOrderERC20 } from '@airswap/types'
+import { parseUrl } from '@airswap/utils'
+
+const REQUEST_TIMEOUT = 4000
 
 export type IndexedOrderResponse = {
   hash?: string | undefined
@@ -138,73 +142,103 @@ export class JsonRpcResponse {
 }
 
 export class NodeIndexer {
-  private host: string
+  private httpClient: HttpClient
 
-  public constructor(hostname: string) {
-    this.host = hostname
+  public constructor(locator: string) {
+    const parsedUrl = parseUrl(locator)
+    const options = {
+      protocol: parsedUrl.protocol,
+      hostname: parsedUrl.hostname,
+      port: parsedUrl.port,
+      timeout: REQUEST_TIMEOUT,
+    }
+
+    if (isBrowser) {
+      const jaysonClient = require('jayson/lib/client/browser')
+      this.httpClient = new jaysonClient((request, callback) => {
+        fetch(url.format(locator), {
+          method: 'POST',
+          body: request,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+          .then((res) => {
+            return res.text()
+          })
+          .then((text) => {
+            callback(null, text)
+          })
+          .catch((err) => {
+            callback(err)
+          })
+      })
+    } else {
+      const jaysonClient = require('jayson/lib/client')
+      if (options.protocol === 'https:') {
+        this.httpClient = jaysonClient.https(options)
+      } else {
+        this.httpClient = jaysonClient.http(options)
+      }
+    }
   }
 
-  public async getOrdersBy(
+  public async getOrdersERC20By(
     requestFilter: RequestFilter,
     filters = false
   ): Promise<OrderResponse> {
     try {
-      const axiosResponse = (await axios.post(this.host, {
-        jsonrpc: '2.0',
-        id: '1',
-        method: 'getOrders',
-        params: [{ ...this.toBigIntJson(requestFilter), filters }],
-      })) as AxiosResponse<JsonRpcResponse>
-      const response = axiosResponse.data.result as OrderResponse
-      return Promise.resolve(response)
-    } catch (err) {
-      const error = err as AxiosError<JsonRpcResponse>
-      const response = error.response?.data?.result as IndexedOrderError
-      return Promise.reject(response)
-    }
-  }
-
-  public async getOrders(): Promise<OrderResponse> {
-    try {
-      const axiosResponse = (await axios.post(this.host, {
-        jsonrpc: '2.0',
-        id: '1',
-        method: 'getOrders',
-        params: [{}],
-      })) as AxiosResponse<JsonRpcResponse>
-      const response = axiosResponse.data.result as OrderResponse
-      return Promise.resolve(response)
+      return Promise.resolve(
+        (await this.httpCall('getOrdersERC20', [
+          { ...this.toBigIntJson(requestFilter), filters },
+        ])) as OrderResponse
+      )
     } catch (err) {
       return Promise.reject(err)
     }
   }
 
-  public async addOrder(fullOrder: FullOrderERC20): Promise<SuccessResponse> {
+  public async getOrdersERC20(): Promise<OrderResponse> {
     try {
-      const axiosResponse = await axios.post(this.host, {
-        jsonrpc: '2.0',
-        id: '1',
-        method: 'addOrder',
-        params: [fullOrder],
-      })
-      const response = axiosResponse.data.result as SuccessResponse
-      return Promise.resolve(response)
-    } catch (err) {
-      const error = err as AxiosError<JsonRpcResponse>
-      const response = error.response?.data?.result as IndexedOrderError
-      return Promise.reject(response)
-    }
-  }
-
-  public async getHealthCheck(): Promise<HealthCheckResponse> {
-    try {
-      const response = (await axios.get(
-        this.host
-      )) as AxiosResponse<JsonRpcResponse>
-      return Promise.resolve(response.data.result as HealthCheckResponse)
+      return Promise.resolve(
+        (await this.httpCall('getOrdersERC20', [{}])) as OrderResponse
+      )
     } catch (err) {
       return Promise.reject(err)
     }
+  }
+
+  public async addOrderERC20(
+    fullOrder: FullOrderERC20
+  ): Promise<SuccessResponse> {
+    try {
+      return Promise.resolve(
+        (await this.httpCall('addOrderERC20', [fullOrder])) as SuccessResponse
+      )
+    } catch (err) {
+      return Promise.reject(err)
+    }
+  }
+
+  private httpCall<T>(
+    method: string,
+    params: Record<string, string> | Array<any>
+  ): Promise<T> {
+    return new Promise((resolve, reject) => {
+      this.httpClient.request(
+        method,
+        params,
+        (connectionError: any, serverError: any, result: any) => {
+          if (connectionError) {
+            reject({ code: -1, message: connectionError.message })
+          } else if (serverError) {
+            reject(serverError)
+          } else {
+            resolve(result)
+          }
+        }
+      )
+    })
   }
 
   private toBigIntJson(requestFilter: RequestFilter) {

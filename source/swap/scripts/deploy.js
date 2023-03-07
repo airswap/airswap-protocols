@@ -3,10 +3,10 @@ const fs = require('fs')
 const Confirm = require('prompt-confirm')
 const { ethers, run } = require('hardhat')
 const poolDeploys = require('@airswap/pool/deploys.js')
-const { chainNames, chainIds } = require('@airswap/constants')
+const { chainNames, chainIds, tokenKinds } = require('@airswap/constants')
 const { getEtherscanURL } = require('@airswap/utils')
 const swapDeploys = require('../deploys.js')
-const adapterDeploys = require('../adapters.js')
+const adapterDeploys = require('../deploys-adapters.js')
 
 async function main() {
   await run('compile')
@@ -23,12 +23,7 @@ async function main() {
 
   const protocolFeeWallet = poolDeploys[chainId]
   const protocolFee = 7
-  const adapters = [
-    'ERC20Adapter',
-    'ERC721Adapter',
-    'ERC777Adapter',
-    'ERC1155Adapter',
-  ]
+  const adapters = ['ERC20Adapter', 'ERC721Adapter', 'ERC1155Adapter']
 
   console.log(`adapters: ${JSON.stringify(adapters)}`)
   console.log(`protocolFee: ${protocolFee}`)
@@ -52,6 +47,7 @@ async function main() {
     const swapFactory = await ethers.getContractFactory('Swap')
     const swapContract = await swapFactory.deploy(
       adapters,
+      tokenKinds.ERC20,
       protocolFee,
       protocolFeeWallet
     )

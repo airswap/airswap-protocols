@@ -1,7 +1,9 @@
 import { ethers } from 'ethers'
+import type { Provider } from '@ethersproject/providers'
 import { MakerRegistry as MakerRegistryContract } from '@airswap/maker-registry/typechain/contracts'
 import { MakerRegistry__factory } from '@airswap/maker-registry/typechain/factories/contracts'
 import { chainIds } from '@airswap/constants'
+
 import { Maker, MakerOptions } from './Maker'
 import { SwapERC20 } from './SwapERC20'
 
@@ -13,12 +15,12 @@ export class MakerRegistry {
 
   public constructor(
     chainId = chainIds.GOERLI,
-    walletOrProvider?: ethers.Wallet | ethers.providers.Provider
+    signerOrProvider?: ethers.Signer | Provider
   ) {
     this.chainId = chainId
     this.contract = MakerRegistry__factory.connect(
       MakerRegistry.getAddress(chainId),
-      walletOrProvider
+      signerOrProvider
     )
   }
 

@@ -11,6 +11,9 @@ export const tokenListURLs = {
     'https://tokenlist.aave.eth.link',
     'https://tokens.coingecko.com/ethereum/all.json',
   ],
+  [chainIds.RSK]: [
+    'https://raw.githubusercontent.com/enkryptcom/dynamic-data/main/tokenlists/rsk.json',
+  ],
   [chainIds.BSC]: [
     'https://raw.githubusercontent.com/ApeSwapFinance/apeswap-token-lists/main/lists/apeswap.json',
     'https://tokens.pancakeswap.finance/pancakeswap-top-100.json',

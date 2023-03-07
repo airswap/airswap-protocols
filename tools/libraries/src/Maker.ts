@@ -10,9 +10,8 @@ import {
   JsonRpcErrorCodes,
   WebsocketReadyStates,
 } from '@airswap/jsonrpc-client-websocket'
-import { REQUEST_TIMEOUT } from '@airswap/constants'
 import { parseUrl, orderERC20PropsToStrings } from '@airswap/utils'
-import { OrderERC20, Pricing } from '@airswap/typescript'
+import { OrderERC20, Pricing } from '@airswap/types'
 import { SwapERC20 } from './SwapERC20'
 
 export type SupportedProtocolInfo = {
@@ -33,6 +32,7 @@ if (!isBrowser) {
   })
 }
 
+const REQUEST_TIMEOUT = 4000
 const PROTOCOL_NAMES = {
   'last-look': 'Last Look',
   'request-for-quote': 'Request for Quote',

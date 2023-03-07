@@ -1,81 +1,13 @@
-export type Signature = {
-  v: string
-  r: string
-  s: string
-}
+import * as ethUtil from 'ethereumjs-util'
 
-export type UnsignedOrderERC20 = {
-  nonce: string
-  expiry: string
-  signerWallet: string
-  signerToken: string
-  signerAmount: string
-  protocolFee: string
-  senderWallet: string
-  senderToken: string
-  senderAmount: string
-}
-
-export type OrderERC20 = {
-  nonce: string
-  expiry: string
-  signerWallet: string
-  signerToken: string
-  signerAmount: string
-  senderToken: string
-  senderAmount: string
-} & Signature
-
-export type Settlement = {
-  chainId: number
-  swapContract: string
-}
-
-export type FullOrderERC20 = UnsignedOrderERC20 & Signature & Settlement
-
-export type UnsignedOrder = {
-  nonce: string
-  expiry: string
-  protocolFee: string
-  signer: OrderParty
-  sender: OrderParty
-  affiliate: OrderParty
-}
-
-export type Order = UnsignedOrder & Signature
-
-export type OrderParty = {
-  wallet: string
-  token: string
-  kind: string
-  id: string
-  amount: string
-}
-
-export type UnsignedClaim = {
-  nonce: string
-  expiry: string
-  participant: string
-  score: string
-}
-
-export type Claim = {
-  nonce: string
-  expiry: string
-  participant: string
-  score: string
-} & Signature
-
-export type Token = {
-  address: string
-  symbol: string
-  decimals: number
-}
-
-export type LocatorResult = {
-  locators: Array<string>
-  scores: Array<string>
-  nextCursor: string
+export function stringifyEIP712Type(
+  types: { [key: string]: { type: string; name: string }[] },
+  primaryType: string
+): string {
+  return types[primaryType].reduce((str, value, index, values) => {
+    const isEnd = index !== values.length - 1
+    return str + `${value.type} ${value.name}${isEnd ? ',' : ')'}`
+  }, `${primaryType}(`)
 }
 
 export const EIP712SwapERC20 = {
@@ -111,7 +43,8 @@ export const EIP712Swap = {
     { name: 'protocolFee', type: 'uint256' },
     { name: 'signer', type: 'Party' },
     { name: 'sender', type: 'Party' },
-    { name: 'affiliate', type: 'Party' },
+    { name: 'affiliateWallet', type: 'address' },
+    { name: 'affiliateAmount', type: 'uint256' },
   ],
   Party: [
     { name: 'wallet', type: 'address' },
@@ -137,23 +70,19 @@ export const EIP712Claim = {
   ],
 }
 
-export { TokenInfo } from '@uniswap/token-lists'
+export const SWAP_DOMAIN_TYPEHASH = ethUtil.keccak256(
+  stringifyEIP712Type(EIP712Swap, 'EIP712Domain')
+)
+export const SWAP_ORDER_TYPEHASH = ethUtil.keccak256(
+  stringifyEIP712Type(EIP712Swap, 'Order')
+)
+export const SWAP_PARTY_TYPEHASH = ethUtil.keccak256(
+  stringifyEIP712Type(EIP712Swap, 'Party')
+)
 
-export type Levels = [string, string][]
-export type Formula = string
-
-type LevelsOrFomulae =
-  | {
-      bid: Levels
-      ask: Levels
-    }
-  | {
-      bid: Formula
-      ask: Formula
-    }
-
-export type Pricing = {
-  baseToken: string
-  quoteToken: string
-  minimum?: string
-} & LevelsOrFomulae
+export const SWAP_ERC20_DOMAIN_TYPEHASH = ethUtil.keccak256(
+  stringifyEIP712Type(EIP712SwapERC20, 'EIP712Domain')
+)
+export const SWAP_ERC20_ORDER_TYPEHASH = ethUtil.keccak256(
+  stringifyEIP712Type(EIP712SwapERC20, 'OrderERC20')
+)

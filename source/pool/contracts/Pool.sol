@@ -102,7 +102,7 @@ contract Pool is IPool, Ownable {
       )
     );
 
-    IERC20(stakingToken).safeApprove(stakingContract, 2**256 - 1);
+    IERC20(stakingToken).safeApprove(stakingContract, 2 ** 256 - 1);
   }
 
   /**
@@ -154,16 +154,14 @@ contract Pool is IPool, Ownable {
    * @dev Only owner
    * @param _stakingContract address
    */
-  function setStakingContract(address _stakingContract)
-    external
-    override
-    onlyOwner
-  {
+  function setStakingContract(
+    address _stakingContract
+  ) external override onlyOwner {
     require(_stakingContract != address(0), "INVALID_ADDRESS");
     // set allowance on old staking contract to zero
     IERC20(stakingToken).safeApprove(stakingContract, 0);
     stakingContract = _stakingContract;
-    IERC20(stakingToken).safeApprove(stakingContract, 2**256 - 1);
+    IERC20(stakingToken).safeApprove(stakingContract, 2 ** 256 - 1);
   }
 
   /**
@@ -176,7 +174,7 @@ contract Pool is IPool, Ownable {
     // set allowance on old staking token to zero
     IERC20(stakingToken).safeApprove(stakingContract, 0);
     stakingToken = _stakingToken;
-    IERC20(stakingToken).safeApprove(stakingContract, 2**256 - 1);
+    IERC20(stakingToken).safeApprove(stakingContract, 2 ** 256 - 1);
   }
 
   /**
@@ -185,11 +183,10 @@ contract Pool is IPool, Ownable {
    * @param tokens address[]
    * @param dest address
    */
-  function drainTo(address[] calldata tokens, address dest)
-    external
-    override
-    onlyOwner
-  {
+  function drainTo(
+    address[] calldata tokens,
+    address dest
+  ) external override onlyOwner {
     for (uint256 i = 0; i < tokens.length; i++) {
       uint256 bal = IERC20(tokens[i]).balanceOf(address(this));
       IERC20(tokens[i]).safeTransfer(dest, bal);
@@ -264,14 +261,12 @@ contract Pool is IPool, Ownable {
    * @param token address
    * @return amount uint256 amount to claim based on balance, scale, and max
    */
-  function calculate(uint256 score, address token)
-    public
-    view
-    override
-    returns (uint256 amount)
-  {
+  function calculate(
+    uint256 score,
+    address token
+  ) public view override returns (uint256 amount) {
     uint256 balance = IERC20(token).balanceOf(address(this));
-    uint256 divisor = (uint256(10)**scale) + score;
+    uint256 divisor = (uint256(10) ** scale) + score;
     return (max * score * balance) / divisor / 100;
   }
 
@@ -315,12 +310,10 @@ contract Pool is IPool, Ownable {
    * @param participant address
    * @param nonce uint256
    */
-  function nonceUsed(address participant, uint256 nonce)
-    public
-    view
-    override
-    returns (bool)
-  {
+  function nonceUsed(
+    address participant,
+    uint256 nonce
+  ) public view override returns (bool) {
     uint256 groupKey = nonce / 256;
     uint256 indexInGroup = nonce % 256;
     return (noncesClaimed[participant][groupKey] >> indexInGroup) & 1 == 1;
@@ -375,10 +368,10 @@ contract Pool is IPool, Ownable {
    * @param nonce uint256
    * @return bool True if nonce was not marked as used already
    */
-  function _markNonceAsUsed(address participant, uint256 nonce)
-    internal
-    returns (bool)
-  {
+  function _markNonceAsUsed(
+    address participant,
+    uint256 nonce
+  ) internal returns (bool) {
     uint256 groupKey = nonce / 256;
     uint256 indexInGroup = nonce % 256;
     uint256 group = noncesClaimed[participant][groupKey];

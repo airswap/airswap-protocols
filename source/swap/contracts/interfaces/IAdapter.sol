@@ -20,14 +20,9 @@ interface IAdapter {
   error InvalidArgument(string);
 
   /**
-   * @notice Return the ERC165 interfaceID this adapter supports
+   * @notice Return the ERC165 interfaceId this adapter supports
    */
-  function interfaceID() external view returns (bytes4);
-
-  /**
-   * @notice Indicates whether to attempt a fee transfer on the token
-   */
-  function attemptFeeTransfer() external returns (bool);
+  function interfaceId() external view returns (bytes4);
 
   /**
    * @notice Function to wrap token transfer for different token types
@@ -49,7 +44,7 @@ interface IAdapter {
    * @param id token ID for ERC-721
    * @param token address Contract address of token
    */
-  function transferTokens(
+  function transfer(
     address from,
     address to,
     uint256 amount,

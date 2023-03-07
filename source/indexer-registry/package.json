@@ -1,6 +1,6 @@
 {
   "name": "@airswap/indexer-registry",
-  "version": "3.1.2",
+  "version": "4.0.0",
   "description": "AirSwap: Indexer Registry",
   "license": "MIT",
   "repository": {
@@ -29,6 +29,8 @@
     "access": "public"
   },
   "devDependencies": {
+    "@airswap/constants": "^4.0.0",
+    "@airswap/utils": "^4.0.0",
     "prompt-confirm": "^2.0.4"
   }
 }

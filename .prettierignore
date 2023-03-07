@@ -4,4 +4,3 @@ build/
 node_modules/
 coverage/
 typechain/
-tools/subgraph/generated
