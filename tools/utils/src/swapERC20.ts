@@ -1,6 +1,6 @@
 import lzString from 'lz-string'
 import { ethers } from 'ethers'
-import { keccak256, toBuffer } from 'ethereumjs-util'
+import { toBuffer } from 'ethereumjs-util'
 import {
   signTypedData,
   recoverTypedSignature,
@@ -21,8 +21,6 @@ import {
   FullOrderERC20,
   Signature,
   EIP712SwapERC20,
-  SWAP_ERC20_ORDER_TYPEHASH,
-  SWAP_ERC20_DOMAIN_TYPEHASH,
 } from '@airswap/types'
 
 export function createOrderERC20({
@@ -116,64 +114,6 @@ export function getSignerFromOrderERC20Signature(
       message: order,
     },
   })
-}
-
-export function hashOrderERC20(order: UnsignedOrderERC20): Buffer {
-  return keccak256(
-    ethers.utils.defaultAbiCoder.encode(
-      [
-        'bytes32',
-        'uint256',
-        'uint256',
-        'address',
-        'address',
-        'uint256',
-        'uint256',
-        'address',
-        'address',
-        'uint256',
-      ],
-      [
-        SWAP_ERC20_ORDER_TYPEHASH,
-        order.nonce,
-        order.expiry,
-        order.signerWallet,
-        order.signerToken,
-        order.signerAmount,
-        order.protocolFee,
-        order.senderWallet,
-        order.senderToken,
-        order.senderAmount,
-      ]
-    )
-  )
-}
-
-export function hashDomain(swapContract: string): Buffer {
-  return keccak256(
-    ethers.utils.defaultAbiCoder.encode(
-      ['bytes32', 'bytes32', 'bytes32', 'address'],
-      [
-        SWAP_ERC20_DOMAIN_TYPEHASH,
-        keccak256(DOMAIN_NAME_SWAP_ERC20),
-        keccak256(DOMAIN_VERSION_SWAP_ERC20),
-        swapContract,
-      ]
-    )
-  )
-}
-
-export function getOrderERC20Hash(
-  order: UnsignedOrderERC20,
-  swapContract: string
-): Buffer {
-  return keccak256(
-    Buffer.concat([
-      Buffer.from('1901', 'hex'),
-      hashDomain(swapContract),
-      hashOrderERC20(order),
-    ])
-  )
 }
 
 export function isValidOrderERC20(order: OrderERC20): boolean {
