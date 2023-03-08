@@ -10,6 +10,7 @@ import {
   JsonRpcErrorCodes,
   WebsocketReadyStates,
 } from '@airswap/jsonrpc-client-websocket'
+import { chainIds } from '@airswap/constants'
 import { parseUrl, orderERC20PropsToStrings } from '@airswap/utils'
 import { OrderERC20, Pricing } from '@airswap/types'
 import { SwapERC20 } from './SwapERC20'
@@ -56,7 +57,7 @@ export class Maker extends TypedEmitter<MakerEvents> {
   public constructor(
     public locator: string,
     private swapContract = SwapERC20.getAddress(),
-    private chainId = 1
+    private chainId = chainIds.ETHEREUM
   ) {
     super()
     const protocol = parseUrl(locator).protocol
