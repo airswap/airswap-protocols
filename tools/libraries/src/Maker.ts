@@ -10,6 +10,7 @@ import {
   JsonRpcErrorCodes,
   WebsocketReadyStates,
 } from '@airswap/jsonrpc-client-websocket'
+import { chainIds } from '@airswap/constants'
 import { parseUrl, orderERC20PropsToStrings } from '@airswap/utils'
 import { OrderERC20, Pricing } from '@airswap/types'
 import { SwapERC20 } from './SwapERC20'
@@ -21,8 +22,9 @@ export type SupportedProtocolInfo = {
 }
 
 export type MakerOptions = {
-  initializeTimeout?: number
+  chainId?: number
   swapContract?: string
+  initializeTimeout?: number
 }
 
 if (!isBrowser) {
@@ -54,7 +56,8 @@ export class Maker extends TypedEmitter<MakerEvents> {
 
   public constructor(
     public locator: string,
-    private swapContract = SwapERC20.getAddress()
+    private swapContract = SwapERC20.getAddress(),
+    private chainId = chainIds.ETHEREUM
   ) {
     super()
     const protocol = parseUrl(locator).protocol
@@ -65,7 +68,7 @@ export class Maker extends TypedEmitter<MakerEvents> {
     locator: string,
     options?: MakerOptions
   ): Promise<Maker> {
-    const server = new Maker(locator, options?.swapContract)
+    const server = new Maker(locator, options?.swapContract, options?.chainId)
     await server._init(options?.initializeTimeout)
     return server
   }
@@ -100,14 +103,16 @@ export class Maker extends TypedEmitter<MakerEvents> {
     return true
   }
 
-  public async getSignerSideOrder(
+  public async getSignerSideOrderERC20(
     senderAmount: string,
     signerToken: string,
     senderToken: string,
     senderWallet: string
   ): Promise<OrderERC20> {
     this.requireRFQSupport()
-    return this.callRPCMethod<OrderERC20>('getSignerSideOrder', {
+    return this.callRPCMethod<OrderERC20>('getSignerSideOrderERC20', {
+      chainId: String(this.chainId),
+      swapContract: this.swapContract,
       senderAmount: senderAmount.toString(),
       signerToken,
       senderToken,
@@ -117,14 +122,16 @@ export class Maker extends TypedEmitter<MakerEvents> {
     })
   }
 
-  public async getSenderSideOrder(
+  public async getSenderSideOrderERC20(
     signerAmount: string | ethers.BigNumber,
     signerToken: string,
     senderToken: string,
     senderWallet: string
   ): Promise<OrderERC20> {
     this.requireRFQSupport()
-    return this.callRPCMethod('getSenderSideOrder', {
+    return this.callRPCMethod<OrderERC20>('getSenderSideOrderERC20', {
+      chainId: String(this.chainId),
+      swapContract: this.swapContract,
       signerAmount: signerAmount.toString(),
       signerToken,
       senderToken,
@@ -391,9 +398,6 @@ export class Maker extends TypedEmitter<MakerEvents> {
     method: string,
     params: Record<string, string> | Array<any>
   ): Promise<T> {
-    if (!Array.isArray(params)) {
-      params.swapContract = this.swapContract
-    }
     return new Promise((resolve, reject) => {
       this.httpClient.request(
         method,
