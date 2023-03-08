@@ -1,7 +1,11 @@
-import * as ethUtil from 'ethereumjs-util'
-import * as sigUtil from 'eth-sig-util'
-import { ethers } from 'ethers'
 import lzString from 'lz-string'
+import { ethers } from 'ethers'
+import { keccak256, toBuffer } from 'ethereumjs-util'
+import {
+  signTypedData,
+  recoverTypedSignature,
+  SignTypedDataVersion,
+} from '@metamask/eth-sig-util'
 
 import {
   chainIds,
@@ -55,7 +59,9 @@ export async function createOrderERC20Signature(
 ): Promise<Signature> {
   let sig
   if (typeof signer === 'string') {
-    sig = sigUtil.signTypedData_v4(ethUtil.toBuffer(signer), {
+    sig = signTypedData({
+      version: SignTypedDataVersion.V4,
+      privateKey: toBuffer(signer),
       data: {
         types: EIP712SwapERC20,
         domain: {
@@ -95,7 +101,9 @@ export function getSignerFromOrderERC20Signature(
   const sig = `${r}${s.slice(2)}${ethers.BigNumber.from(v)
     .toHexString()
     .slice(2)}`
-  return sigUtil.recoverTypedSignature_v4({
+  return recoverTypedSignature({
+    version: SignTypedDataVersion.V4,
+    signature: sig,
     data: {
       types: EIP712SwapERC20,
       domain: {
@@ -107,12 +115,11 @@ export function getSignerFromOrderERC20Signature(
       primaryType: 'OrderERC20',
       message: order,
     },
-    sig,
   })
 }
 
 export function hashOrderERC20(order: UnsignedOrderERC20): Buffer {
-  return ethUtil.keccak256(
+  return keccak256(
     ethers.utils.defaultAbiCoder.encode(
       [
         'bytes32',
@@ -143,13 +150,13 @@ export function hashOrderERC20(order: UnsignedOrderERC20): Buffer {
 }
 
 export function hashDomain(swapContract: string): Buffer {
-  return ethUtil.keccak256(
+  return keccak256(
     ethers.utils.defaultAbiCoder.encode(
       ['bytes32', 'bytes32', 'bytes32', 'address'],
       [
         SWAP_ERC20_DOMAIN_TYPEHASH,
-        ethUtil.keccak256(DOMAIN_NAME_SWAP_ERC20),
-        ethUtil.keccak256(DOMAIN_VERSION_SWAP_ERC20),
+        keccak256(DOMAIN_NAME_SWAP_ERC20),
+        keccak256(DOMAIN_VERSION_SWAP_ERC20),
         swapContract,
       ]
     )
@@ -160,7 +167,7 @@ export function getOrderERC20Hash(
   order: UnsignedOrderERC20,
   swapContract: string
 ): Buffer {
-  return ethUtil.keccak256(
+  return keccak256(
     Buffer.concat([
       Buffer.from('1901', 'hex'),
       hashDomain(swapContract),
