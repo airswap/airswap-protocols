@@ -14,7 +14,7 @@ export class MakerRegistry {
   private contract: MakerRegistryContract
 
   public constructor(
-    chainId = chainIds.GOERLI,
+    chainId = chainIds.MAINNET,
     signerOrProvider?: ethers.Signer | Provider
   ) {
     this.chainId = chainId
@@ -24,7 +24,7 @@ export class MakerRegistry {
     )
   }
 
-  public static getAddress(chainId = chainIds.GOERLI): string {
+  public static getAddress(chainId = chainIds.MAINNET): string {
     if (chainId in registryDeploys) {
       return registryDeploys[chainId]
     }
@@ -49,6 +49,7 @@ export class MakerRegistry {
           return Maker.at(url, {
             swapContract:
               options?.swapContract || SwapERC20.getAddress(this.chainId),
+            chainId: this.chainId,
             initializeTimeout: options?.initializeTimeout,
           })
         })

@@ -51,7 +51,7 @@ export async function createOrderERC20Signature(
   unsignedOrder: UnsignedOrderERC20,
   signer: ethers.VoidSigner | string,
   swapContract: string,
-  chainId = chainIds.ETHEREUM,
+  chainId = chainIds.MAINNET,
   version = DOMAIN_VERSION_SWAP_ERC20,
   name = DOMAIN_NAME_SWAP_ERC20
 ): Promise<Signature> {
