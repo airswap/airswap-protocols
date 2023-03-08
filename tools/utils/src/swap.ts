@@ -1,6 +1,10 @@
-import * as ethUtil from 'ethereumjs-util'
-import * as sigUtil from 'eth-sig-util'
 import { ethers } from 'ethers'
+import { toBuffer } from 'ethereumjs-util'
+import {
+  signTypedData,
+  recoverTypedSignature,
+  SignTypedDataVersion,
+} from '@metamask/eth-sig-util'
 
 import { lowerCaseAddresses } from '../index'
 import {
@@ -56,7 +60,9 @@ export async function createOrderSignature(
 ): Promise<Signature> {
   let sig
   if (typeof signer === 'string') {
-    sig = sigUtil.signTypedData_v4(ethUtil.toBuffer(signer), {
+    sig = signTypedData({
+      version: SignTypedDataVersion.V4,
+      privateKey: toBuffer(signer),
       data: {
         types: EIP712Swap,
         domain: {
@@ -96,7 +102,9 @@ export function getSignerFromOrderSignature(
   const sig = `${r}${s.slice(2)}${ethers.BigNumber.from(v)
     .toHexString()
     .slice(2)}`
-  return sigUtil.recoverTypedSignature_v4({
+  return recoverTypedSignature({
+    version: SignTypedDataVersion.V4,
+    signature: sig,
     data: {
       types: EIP712Swap,
       domain: {
@@ -108,6 +116,5 @@ export function getSignerFromOrderSignature(
       primaryType: 'Order',
       message: order,
     },
-    sig,
   })
 }
