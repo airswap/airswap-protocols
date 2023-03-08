@@ -85,7 +85,7 @@ describe('client', () => {
                 order: {
                   ...unsignedOrder,
                   ...signature,
-                  chainId: chainIds.GOERLI,
+                  chainId: chainIds.MAINNET,
                   swapContract: ADDRESS_ZERO,
                 },
               },

@@ -57,7 +57,7 @@ export class Maker extends TypedEmitter<MakerEvents> {
   public constructor(
     public locator: string,
     private swapContract = SwapERC20.getAddress(),
-    private chainId = chainIds.ETHEREUM
+    private chainId = chainIds.MAINNET
   ) {
     super()
     const protocol = parseUrl(locator).protocol

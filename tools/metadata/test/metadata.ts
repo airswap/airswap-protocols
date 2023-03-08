@@ -14,7 +14,7 @@ import {
 describe('Metadata: Ethereum', async () => {
   let result
   it('fetches all known tokens', async () => {
-    result = await getKnownTokens(chainIds.ETHEREUM)
+    result = await getKnownTokens(chainIds.MAINNET)
     expect(result.tokens.length).to.not.equal(0)
   })
   it('checks that ETH does not exist', async () => {
@@ -26,7 +26,7 @@ describe('Metadata: Goerli', async () => {
   let result
 
   it('fetches all known tokens', async () => {
-    result = await getKnownTokens(chainIds.GOERLI)
+    result = await getKnownTokens(chainIds.MAINNET)
     expect(result.tokens.length).to.not.equal(0)
   })
   it('checks that ETH does not exist', async () => {
@@ -34,13 +34,13 @@ describe('Metadata: Goerli', async () => {
   })
   it('checks that WETH exists', async () => {
     expect(
-      findTokenByAddress(wrappedTokenAddresses[chainIds.GOERLI], result.tokens)
+      findTokenByAddress(wrappedTokenAddresses[chainIds.MAINNET], result.tokens)
     ).to.not.be.undefined
     expect(findTokensBySymbol('WETH', result.tokens)[0].address).to.equal(
-      wrappedTokenAddresses[chainIds.GOERLI]
+      wrappedTokenAddresses[chainIds.MAINNET]
     )
     expect(firstTokenBySymbol('WETH', result.tokens).address).to.equal(
-      wrappedTokenAddresses[chainIds.GOERLI]
+      wrappedTokenAddresses[chainIds.MAINNET]
     )
   })
 })
