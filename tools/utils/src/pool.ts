@@ -1,5 +1,5 @@
 import { ethers } from 'ethers'
-import { keccak256, toBuffer } from 'ethereumjs-util'
+import { toBuffer } from 'ethereumjs-util'
 import {
   signTypedData,
   recoverTypedSignature,
