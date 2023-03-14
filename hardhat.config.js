@@ -84,8 +84,17 @@ module.exports = {
       avalanche: process.env.SNOWTRACE_API_KEY,
       avalancheFujiTestnet: process.env.SNOWTRACE_API_KEY,
       polygonMumbai: process.env.POLYGONSCAN_API_KEY,
+      rsk: process.env.BLOCKSCOUT_API_KEY,
     },
     customChains: [
+      {
+        network: 'rsk',
+        chainId: 30,
+        urls: {
+          apiURL: 'https://blockscout.com/rsk/mainnet/api',
+          browserURL: 'https://blockscout.com/rsk/mainnet',
+        },
+      },
       {
         network: 'arbitrumGoerli',
         chainId: 421613,

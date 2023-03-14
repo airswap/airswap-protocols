@@ -40,7 +40,7 @@ function mockHttpMaker(api) {
     const params = body['params']
     let res
     switch (body['method']) {
-      case 'getSignerSideOrder':
+      case 'getSignerSideOrderERC20':
         res = createOrderERC20({
           signerToken: params.signerToken,
           senderToken: params.senderToken,
@@ -63,9 +63,9 @@ function mockHttpMaker(api) {
 describe('HTTPMaker', () => {
   fancy
     .nock('https://' + URL, mockHttpMaker)
-    .it('Maker getSignerSideOrder()', async () => {
-      const server = await Maker.at(URL)
-      const order = await server.getSignerSideOrder(
+    .it('Maker getSignerSideOrderERC20()', async () => {
+      const maker = await Maker.at(URL)
+      const order = await maker.getSignerSideOrderERC20(
         '0',
         ADDRESS_ZERO,
         ADDRESS_ZERO,
@@ -141,22 +141,22 @@ describe('WebSocketMaker', () => {
   })
 
   it('should be initialized after Maker.at has resolved', async () => {
-    const server = await Maker.at(url)
+    const maker = await Maker.at(url)
     const correctInitializeResponse = new Promise<void>((resolve) => {
       const onResponse = (socket, data) => {
-        // Note mock server implementation uses id '123' for initialize.
+        // Note mock maker implementation uses id '123' for initialize.
         expect(data).to.be.a.JSONRpcResponse('123', true)
         resolve()
       }
       mockMaker.setNextMessageCallback(onResponse)
     })
-    expect(server.supportsProtocol('last-look')).to.equal(true)
-    expect(server.supportsProtocol('request-for-quote')).to.equal(false)
+    expect(maker.supportsProtocol('last-look')).to.equal(true)
+    expect(maker.supportsProtocol('request-for-quote')).to.equal(false)
     await correctInitializeResponse
   })
 
   it('should call subscribe with the correct params and emit pricing', async () => {
-    const server = await Maker.at(url)
+    const maker = await Maker.at(url)
 
     // Ensure subscribe method is correct format.
     const onSubscribe = (socket, data) => {
@@ -164,13 +164,13 @@ describe('WebSocketMaker', () => {
       socket.send(JSON.stringify(createResponse(data.id, samplePricing)))
     }
     mockMaker.setNextMessageCallback(onSubscribe, true)
-    const pricing = nextEvent(server, 'pricing')
-    server.subscribe(samplePairs)
+    const pricing = nextEvent(maker, 'pricing')
+    maker.subscribe(samplePairs)
 
     // Ensure pricing is emitted and has the correct values.
     expect(await pricing).to.eql(samplePricing)
 
-    const updatedPricing = nextEvent(server, 'pricing')
+    const updatedPricing = nextEvent(maker, 'pricing')
     const latestPricing = [
       [
         {
@@ -191,7 +191,7 @@ describe('WebSocketMaker', () => {
     ]
 
     const updatePricingRequestId = '456'
-    // Ensure client responds to server correctly when pricing is updated
+    // Ensure client responds to maker correctly when pricing is updated
     const correctUpdatePricingResponse = new Promise<void>((resolve) => {
       const onResponse = (socket, data) => {
         expect(data).to.be.a.JSONRpcResponse(updatePricingRequestId, true)
@@ -212,13 +212,13 @@ describe('WebSocketMaker', () => {
   })
 
   it('should call consider with the correct parameters', async () => {
-    const server = await Maker.at(url)
+    const maker = await Maker.at(url)
     const onConsider = (socket, data) => {
       expect(data).to.be.a.JSONRpcRequest('consider', fakeOrder)
       socket.send(JSON.stringify(createResponse(data.id, true)))
     }
     mockMaker.setNextMessageCallback(onConsider, true)
-    const result = await server.consider(fakeOrder)
+    const result = await maker.consider(fakeOrder)
     expect(result).to.equal(true)
   })
 
@@ -236,25 +236,25 @@ describe('WebSocketMaker', () => {
           },
         }
 
-        const server = await Maker.at(url)
-        const result = await server.consider(fakeOrder)
+        const maker = await Maker.at(url)
+        const result = await maker.consider(fakeOrder)
         expect(result).to.equal(true)
       }
     )
 
   it('should call unsubscribe with the correct parameters', async () => {
-    const server = await Maker.at(url)
+    const maker = await Maker.at(url)
     const onUnsubscribe = (socket, data) => {
       expect(data).to.be.a.JSONRpcRequest('unsubscribe', [samplePairs])
       socket.send(JSON.stringify(createResponse(data.id, true)))
     }
     mockMaker.setNextMessageCallback(onUnsubscribe, true)
-    const result = await server.unsubscribe(samplePairs)
+    const result = await maker.unsubscribe(samplePairs)
     expect(result).to.equal(true)
   })
 
   it('should call subscribeAll and unsubscribeAll correctly', async () => {
-    const server = await Maker.at(url)
+    const maker = await Maker.at(url)
     const onSubscribeAll = (socket, data) => {
       expect(data).to.be.a.JSONRpcRequest('subscribeAll')
       socket.send(JSON.stringify(createResponse(data.id, true)))
@@ -264,16 +264,16 @@ describe('WebSocketMaker', () => {
       socket.send(JSON.stringify(createResponse(data.id, true)))
     }
     mockMaker.setNextMessageCallback(onSubscribeAll, true)
-    const subscribeResult = await server.subscribeAll()
+    const subscribeResult = await maker.subscribeAll()
     expect(subscribeResult).to.equal(true)
     mockMaker.setNextMessageCallback(onUnsubscribeAll, true)
-    const unsubscribeResult = await server.unsubscribeAll()
+    const unsubscribeResult = await maker.unsubscribeAll()
     expect(unsubscribeResult).to.equal(true)
   })
 
-  it("should throw if the server doesn't initialize within timeout", async () => {
+  it("should throw if the maker doesn't initialize within timeout", async () => {
     const fakeTimers = useFakeTimers()
-    // prevent server from initializing
+    // prevent maker from initializing
     mockMaker.initOptions = null
     const initializePromise = Maker.at(url)
     // This is the default timeout.
@@ -291,22 +291,22 @@ describe('WebSocketMaker', () => {
     // Protocol is supported if the major version is the same,
     // and minor and patch versions are the same or greater than requried
     mockMaker.initOptions = { lastLook: '1.2.3' }
-    const server = await Maker.at(url)
-    expect(server.supportsProtocol('last-look')).to.be.true
-    expect(server.supportsProtocol('request-for-quote')).to.be.false
-    expect(server.supportsProtocol('last-look', '0.9.1')).to.be.false
-    expect(server.supportsProtocol('last-look', '1.0.0')).to.be.true
-    expect(server.supportsProtocol('last-look', '1.1.1')).to.be.true
-    expect(server.supportsProtocol('last-look', '1.2.3')).to.be.true
-    expect(server.supportsProtocol('last-look', '1.2.4')).to.be.false
-    expect(server.supportsProtocol('last-look', '1.3.0')).to.be.false
-    expect(server.supportsProtocol('last-look', '2.2.3')).to.be.false
+    const maker = await Maker.at(url)
+    expect(maker.supportsProtocol('last-look')).to.be.true
+    expect(maker.supportsProtocol('request-for-quote')).to.be.false
+    expect(maker.supportsProtocol('last-look', '0.9.1')).to.be.false
+    expect(maker.supportsProtocol('last-look', '1.0.0')).to.be.true
+    expect(maker.supportsProtocol('last-look', '1.1.1')).to.be.true
+    expect(maker.supportsProtocol('last-look', '1.2.3')).to.be.true
+    expect(maker.supportsProtocol('last-look', '1.2.4')).to.be.false
+    expect(maker.supportsProtocol('last-look', '1.3.0')).to.be.false
+    expect(maker.supportsProtocol('last-look', '2.2.3')).to.be.false
   })
 
   it('should reject when calling a method from an unsupported protocol', async () => {
-    const server = await Maker.at(url)
+    const maker = await Maker.at(url)
     try {
-      await server.getSignerSideOrder(
+      await maker.getSignerSideOrderERC20(
         '0',
         ADDRESS_ZERO,
         ADDRESS_ZERO,
@@ -332,7 +332,7 @@ describe('WebSocketMaker', () => {
       )
     })
     Maker.at(url).catch(() => {
-      /* this is expected, server won't init */
+      /* this is expected, maker won't init */
     })
 
     await responseReceived
@@ -373,8 +373,8 @@ describe('WebSocketMaker', () => {
         senderWallet: '0xmySender',
       },
     }
-    const server = await Maker.at(url)
-    expect(server.getSenderWallet()).to.equal('0xmySender')
+    const maker = await Maker.at(url)
+    expect(maker.getSenderWallet()).to.equal('0xmySender')
   })
 
   afterEach(() => {
