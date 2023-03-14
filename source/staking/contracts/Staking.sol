@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.17;
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
@@ -14,7 +13,6 @@ import "./interfaces/IStaking.sol";
  */
 contract Staking is IStaking, Ownable {
   using SafeERC20 for ERC20;
-  using SafeMath for uint256;
 
   // Token to be staked
   ERC20 public immutable token;
@@ -221,9 +219,8 @@ contract Staking is IStaking, Ownable {
    */
   function available(address account) public view override returns (uint256) {
     Stake storage selected = stakes[account];
-    uint256 _available = (block.timestamp.sub(selected.timestamp))
-      .mul(selected.balance)
-      .div(selected.duration);
+    uint256 _available = ((block.timestamp - selected.timestamp) *
+      selected.balance) / selected.duration;
     if (_available >= stakes[account].balance) {
       return stakes[account].balance;
     } else {
@@ -244,10 +241,10 @@ contract Staking is IStaking, Ownable {
       stakes[account].timestamp = block.timestamp;
     } else {
       uint256 nowAvailable = available(account);
-      stakes[account].balance = stakes[account].balance.add(amount);
-      stakes[account].timestamp = block.timestamp.sub(
-        nowAvailable.mul(stakes[account].duration).div(stakes[account].balance)
-      );
+      stakes[account].balance = stakes[account].balance + amount;
+      stakes[account].timestamp =
+        block.timestamp -
+        ((nowAvailable * stakes[account].duration) / stakes[account].balance);
     }
     token.safeTransferFrom(msg.sender, address(this), amount);
     emit Transfer(address(0), account, amount);
@@ -261,9 +258,6 @@ contract Staking is IStaking, Ownable {
   function _unstake(address account, uint256 amount) internal {
     Stake storage selected = stakes[account];
     require(amount <= available(account), "AMOUNT_EXCEEDS_AVAILABLE");
-    selected.balance = selected.balance.sub(amount);
-    selected.timestamp = selected.timestamp.add(
-      amount.mul(selected.duration).div(selected.balance)
-    );
+    selected.balance = selected.balance - amount;
   }
 }
