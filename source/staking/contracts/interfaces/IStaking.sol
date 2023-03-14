@@ -27,9 +27,6 @@ interface IStaking {
   // Set Delegate event
   event SetDelegate(address indexed delegate, address indexed account);
 
-  error DelayInvalid(uint256);
-  error TimelockActive();
-
   /**
    * @notice Stake tokens
    * @param amount uint256
