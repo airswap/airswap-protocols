@@ -24,9 +24,9 @@ yarn add @airswap/metadata
 Import into your application:
 
 ```TypeScript
-import { fetchTokens } from '@airswap/metadata'
+import { getKnownTokens } from '@airswap/metadata'
 import { chainIds } from '@airswap/constants'
-const { errors, tokens } = await fetchTokens(chainIds.ETHEREUM)
+const { errors, tokens } = await getKnownTokens(chainIds.MAINNET)
 ```
 
 ## Commands

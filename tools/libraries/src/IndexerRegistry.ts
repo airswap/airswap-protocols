@@ -11,7 +11,7 @@ export class IndexerRegistry {
   public contract: IndexerRegistryContract
 
   public constructor(
-    chainId = chainIds.GOERLI,
+    chainId = chainIds.MAINNET,
     signerOrProvider?: ethers.Signer | Provider
   ) {
     this.chainId = chainId
@@ -20,7 +20,7 @@ export class IndexerRegistry {
       signerOrProvider
     )
   }
-  public static getAddress(chainId = chainIds.GOERLI) {
+  public static getAddress(chainId = chainIds.MAINNET) {
     if (chainId in indexersDeploys) {
       return indexersDeploys[chainId]
     }

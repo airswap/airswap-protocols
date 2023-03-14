@@ -12,7 +12,7 @@ export class Wrapper {
   public contract: WrapperContract
 
   public constructor(
-    chainId = chainIds.GOERLI,
+    chainId = chainIds.MAINNET,
     signerOrProvider?: ethers.Signer | Provider
   ) {
     this.chainId = chainId
@@ -22,7 +22,7 @@ export class Wrapper {
     )
   }
 
-  public static getAddress(chainId = chainIds.GOERLI): string {
+  public static getAddress(chainId = chainIds.MAINNET): string {
     if (chainId in wrapperDeploys) {
       return wrapperDeploys[chainId]
     }

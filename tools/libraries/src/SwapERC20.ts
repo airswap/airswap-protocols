@@ -13,7 +13,7 @@ export class SwapERC20 {
   public contract: SwapContract
 
   public constructor(
-    chainId = chainIds.GOERLI,
+    chainId = chainIds.MAINNET,
     signerOrProvider?: ethers.Signer | Provider
   ) {
     this.chainId = chainId
@@ -23,7 +23,7 @@ export class SwapERC20 {
     )
   }
 
-  public static getAddress(chainId = chainIds.GOERLI): string {
+  public static getAddress(chainId = chainIds.MAINNET): string {
     if (chainId in swapDeploys) {
       return swapDeploys[chainId]
     }
