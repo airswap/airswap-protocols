@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.17;
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
@@ -14,7 +13,6 @@ import "./interfaces/IStaking.sol";
  */
 contract Staking is IStaking, Ownable {
   using SafeERC20 for ERC20;
-  using SafeMath for uint256;
 
   // Token to be staked
   ERC20 public immutable token;
@@ -83,8 +81,8 @@ contract Staking is IStaking, Ownable {
    * @param delay uint256
    */
   function scheduleDurationChange(uint256 delay) external onlyOwner {
-    require(timeUnlock == 0, "TIMELOCK_ACTIVE");
-    require(delay >= minDelay, "INVALID_DELAY");
+    if (timeUnlock != 0) revert TimelockActive();
+    if (delay < minDelay) revert DelayInvalid(delay);
     timeUnlock = block.timestamp + delay;
     emit ScheduleDurationChange(timeUnlock);
   }
@@ -93,7 +91,7 @@ contract Staking is IStaking, Ownable {
    * @dev Cancels timelock to change duration
    */
   function cancelDurationChange() external onlyOwner {
-    require(timeUnlock > 0, "TIMELOCK_INACTIVE");
+    if (timeUnlock <= 0) revert TimelockInactive();
     delete timeUnlock;
     emit CancelDurationChange();
   }
@@ -103,9 +101,9 @@ contract Staking is IStaking, Ownable {
    * @param _duration uint256
    */
   function setDuration(uint256 _duration) external onlyOwner {
-    require(_duration != 0, "DURATION_INVALID");
-    require(timeUnlock > 0, "TIMELOCK_INACTIVE");
-    require(block.timestamp >= timeUnlock, "TIMELOCKED");
+    if (_duration == 0) revert DurationInvalid(_duration);
+    if (timeUnlock <= 0) revert TimelockInactive();
+    if (block.timestamp < timeUnlock) revert Timelocked();
     duration = _duration;
     delete timeUnlock;
     emit CompleteDurationChange(_duration);
@@ -116,9 +114,11 @@ contract Staking is IStaking, Ownable {
    * @param delegate address
    */
   function proposeDelegate(address delegate) external {
-    require(accountDelegates[msg.sender] == address(0), "SENDER_HAS_DELEGATE");
-    require(delegateAccounts[delegate] == address(0), "DELEGATE_IS_TAKEN");
-    require(stakes[delegate].balance == 0, "DELEGATE_MUST_NOT_BE_STAKED");
+    if (accountDelegates[msg.sender] != address(0))
+      revert SenderHasDelegate(msg.sender, delegate);
+    if (delegateAccounts[delegate] != address(0))
+      revert DelegateTaken(delegate);
+    if (stakes[delegate].balance != 0) revert DelegateStaked(delegate);
     proposedDelegates[msg.sender] = delegate;
     emit ProposeDelegate(delegate, msg.sender);
   }
@@ -128,9 +128,11 @@ contract Staking is IStaking, Ownable {
    * @param account address
    */
   function setDelegate(address account) external {
-    require(proposedDelegates[account] == msg.sender, "MUST_BE_PROPOSED");
-    require(delegateAccounts[msg.sender] == address(0), "DELEGATE_IS_TAKEN");
-    require(stakes[msg.sender].balance == 0, "DELEGATE_MUST_NOT_BE_STAKED");
+    if (proposedDelegates[account] != msg.sender)
+      revert DelegateNotProposed(account);
+    if (delegateAccounts[msg.sender] != address(0))
+      revert DelegateTaken(account);
+    if (stakes[msg.sender].balance != 0) revert DelegateStaked(account);
     accountDelegates[account] = msg.sender;
     delegateAccounts[msg.sender] = account;
     delete proposedDelegates[account];
@@ -142,7 +144,8 @@ contract Staking is IStaking, Ownable {
    * @param delegate address
    */
   function unsetDelegate(address delegate) external {
-    require(accountDelegates[msg.sender] == delegate, "DELEGATE_NOT_SET");
+    if (accountDelegates[msg.sender] != delegate)
+      revert DelegateNotSet(delegate);
     accountDelegates[msg.sender] = address(0);
     delegateAccounts[delegate] = address(0);
   }
@@ -221,9 +224,8 @@ contract Staking is IStaking, Ownable {
    */
   function available(address account) public view override returns (uint256) {
     Stake storage selected = stakes[account];
-    uint256 _available = (block.timestamp.sub(selected.timestamp))
-      .mul(selected.balance)
-      .div(selected.duration);
+    uint256 _available = ((block.timestamp - selected.timestamp) *
+      selected.balance) / selected.duration;
     if (_available >= stakes[account].balance) {
       return stakes[account].balance;
     } else {
@@ -237,17 +239,17 @@ contract Staking is IStaking, Ownable {
    * @param amount uint256
    */
   function _stake(address account, uint256 amount) internal {
-    require(amount > 0, "AMOUNT_INVALID");
+    if (amount <= 0) revert AmountInvalid(amount);
     stakes[account].duration = duration;
     if (stakes[account].balance == 0) {
       stakes[account].balance = amount;
       stakes[account].timestamp = block.timestamp;
     } else {
       uint256 nowAvailable = available(account);
-      stakes[account].balance = stakes[account].balance.add(amount);
-      stakes[account].timestamp = block.timestamp.sub(
-        nowAvailable.mul(stakes[account].duration).div(stakes[account].balance)
-      );
+      stakes[account].balance = stakes[account].balance + amount;
+      stakes[account].timestamp =
+        block.timestamp -
+        ((nowAvailable * stakes[account].duration) / stakes[account].balance);
     }
     token.safeTransferFrom(msg.sender, address(this), amount);
     emit Transfer(address(0), account, amount);
@@ -260,7 +262,7 @@ contract Staking is IStaking, Ownable {
    */
   function _unstake(address account, uint256 amount) internal {
     Stake storage selected = stakes[account];
-    require(amount <= available(account), "AMOUNT_EXCEEDS_AVAILABLE");
-    selected.balance = selected.balance.sub(amount);
+    if (amount > available(account)) revert AmountInvalid(amount);
+    selected.balance = selected.balance - amount;
   }
 }
