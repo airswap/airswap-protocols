@@ -224,10 +224,11 @@ contract Staking is IStaking, Ownable {
    */
   function available(address account) public view override returns (uint256) {
     Stake storage selected = stakes[account];
-    uint256 _available = ((block.timestamp - selected.timestamp) *
-      selected.balance) / selected.duration;
-    if (_available >= stakes[account].balance) {
-      return stakes[account].balance;
+    uint256 _available = (selected.balance *
+      (block.timestamp - selected.timestamp)) /
+      (selected.maturity - selected.timestamp);
+    if (_available >= selected.balance) {
+      return selected.balance;
     } else {
       return _available;
     }
@@ -244,12 +245,18 @@ contract Staking is IStaking, Ownable {
     if (stakes[account].balance == 0) {
       stakes[account].balance = amount;
       stakes[account].timestamp = block.timestamp;
+      stakes[account].maturity =
+        stakes[account].timestamp +
+        stakes[account].duration;
     } else {
       uint256 nowAvailable = available(account);
       stakes[account].balance = stakes[account].balance + amount;
       stakes[account].timestamp =
         block.timestamp -
         ((nowAvailable * stakes[account].duration) / stakes[account].balance);
+      stakes[account].maturity =
+        stakes[account].timestamp +
+        stakes[account].duration;
     }
     token.safeTransferFrom(msg.sender, address(this), amount);
     emit Transfer(address(0), account, amount);
@@ -264,5 +271,9 @@ contract Staking is IStaking, Ownable {
     Stake storage selected = stakes[account];
     if (amount > available(account)) revert AmountInvalid(amount);
     selected.balance = selected.balance - amount;
+    selected.timestamp =
+      block.timestamp -
+      (((1000 - ((1000 * amount) / available(account))) *
+        (block.timestamp - selected.timestamp)) / 1000);
   }
 }
