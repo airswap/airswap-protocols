@@ -388,11 +388,10 @@ describe('Staking Unit', () => {
 
       let block = await ethers.provider.getBlock()
       await ethers.provider.send('evm_mine', [block['timestamp'] + 10])
-      let available = await staking.available(account1.address)
 
-      await staking.connect(account1).unstake(available.toString())
-      available = await staking.available(account1.address)
-      expect(available).to.equal('0')
+      await staking.connect(account1).unstake('10')
+      const available = await staking.available(account1.address)
+      expect(available).to.equal('1')
     })
 
     it('the previous available balance should be maintained when not entierly unstaked', async () => {
@@ -403,12 +402,9 @@ describe('Staking Unit', () => {
       let block = await ethers.provider.getBlock()
       await ethers.provider.send('evm_mine', [block['timestamp'] + 10])
 
-      let unstakeAmount = 2
-      let available = await staking.available(account1.address)
-      await staking.connect(account1).unstake(unstakeAmount.toString())
-
-      let updatedAvailable = await staking.available(account1.address)
-      expect(updatedAvailable).to.equal((available - unstakeAmount).toString())
+      await staking.connect(account1).unstake('2')
+      const available = await staking.available(account1.address)
+      expect(available).to.equal('9')
     })
   })
 
