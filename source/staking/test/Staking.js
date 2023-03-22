@@ -405,7 +405,7 @@ describe('Staking Unit', () => {
 
       // We withdraw 2
       await staking.connect(account1).unstake('2')
-      
+
       // The unstaking operation mine a new block with a timestamp increased by 1 hence a new balance of 9 and not 8
       const available = await staking.available(account1.address)
       expect(available).to.equal('9')
