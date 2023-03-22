@@ -45,6 +45,47 @@
 | `yarn lint:fix`   | Run eslint for all JavaScript code.       |
 | `yarn pretty:fix` | Run prettier for all JavaScript code.     |
 
+## Branching
+
+Flow for contracts and associated tools:
+Branch from Develop; Merge Feature → Develop → Beta → Main
+
+Flow for tool updates (not contracts):
+Branch from Main; Merge Feature → Main → Develop
+
+## Versioning
+
+- Major versions include breaking changes.
+- Minor versions do not include breaking changes and may include additional functionality.
+- Dependencies on fellow @airswap packages should use caret semver.
+
+## Process
+
+**Regular development process for a complete release**
+
+1. New work and features are cut from and merged to "develop"
+
+   1. Cut feature branches from develop
+   2. Merge feature branches into develop (Squash and Merge)
+
+2. Merge "develop" into "beta" to publish beta packages. (Semver: x.x.x-beta.x)
+
+   1. Merge develop into beta (Merge Commit): this will publish NPM with "beta" tag.
+   2. Tag beta release from beta branch. (x.x.x-beta.x)
+   3. Share tagged release with auditors if auditing.
+
+3. Merge "develop" into "main" to publish latest packages. (Semver: x.x.x)
+
+   1. Merge develop into main (Merge Commit): this will publish NPM with "latest" tag.
+   2. Merge main into beta: this will update the beta with latest.
+   3. Tag release from main branch. (x.x.x)
+
+**Individual package features or patches**
+
+1. Cut a feature or fix branch from main.
+2. Merge fix into main (Squash and Merge): this will publish to NPM with "latest" tag.
+3. Merge main into develop.
+
 ## Deploying and Verifying
 
 Each package has commands `yarn deploy` and `yarn verify`. Each command takes a `--network` flag. For example:
