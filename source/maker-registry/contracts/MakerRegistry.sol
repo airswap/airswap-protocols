@@ -23,8 +23,8 @@ contract MakerRegistry {
 
   event InitialStake(address indexed account);
   event FullUnstake(address indexed account);
-  event AddProtocols(address indexed account, address[] tokens);
-  event RemoveProtocols(address indexed account, address[] tokens);
+  event AddProtocols(address indexed account, address[] protocols);
+  event RemoveProtocols(address indexed account, address[] protocols);
   event SetURL(address indexed account, string url);
 
   error NoProtocolsToAdd();
@@ -36,7 +36,7 @@ contract MakerRegistry {
    * @notice Constructor
    * @param _stakingToken address of token used for staking
    * @param _obligationCost base amount required to stake
-   * @param _protocolCost amount required to stake per token
+   * @param _protocolCost amount required to stake per protocol
    */
   constructor(
     IERC20 _stakingToken,
@@ -63,7 +63,7 @@ contract MakerRegistry {
    */
   function addProtocols(address[] calldata protocols) external {
     uint256 length = protocols.length;
-    if(length <= 0) revert NoProtocolsToAdd();
+    if (length <= 0) revert NoProtocolsToAdd();
     EnumerableSet.AddressSet storage protocolList = supportedProtocols[
       msg.sender
     ];
@@ -75,7 +75,7 @@ contract MakerRegistry {
     }
     for (uint256 i = 0; i < length; i++) {
       address protocol = protocols[i];
-      if(!protocolList.add(protocol)) revert ProtocolExists(protocol);
+      if (!protocolList.add(protocol)) revert ProtocolExists(protocol);
       supportingStakers[protocol].add(msg.sender);
     }
     transferAmount += protocolCost * length;
@@ -91,11 +91,14 @@ contract MakerRegistry {
    */
   function removeProtocols(address[] calldata protocols) external {
     uint256 length = protocols.length;
-    if(length <= 0) revert NoProtocolsToRemove();
-    EnumerableSet.AddressSet storage protocolList = supportedProtocols[msg.sender];
+    if (length <= 0) revert NoProtocolsToRemove();
+    EnumerableSet.AddressSet storage protocolList = supportedProtocols[
+      msg.sender
+    ];
     for (uint256 i = 0; i < length; i++) {
       address protocol = protocols[i];
-      if(!protocolList.remove(protocol)) revert ProtocolDoesNotExists(protocol);
+      if (!protocolList.remove(protocol))
+        revert ProtocolDoesNotExists(protocol);
       supportingStakers[protocol].remove(msg.sender);
     }
     uint256 transferAmount = protocolCost * length;
@@ -117,7 +120,7 @@ contract MakerRegistry {
       msg.sender
     ];
     uint256 length = supportedProtocolList.length();
-    if(length <= 0) revert NoProtocolsToRemove();
+    if (length <= 0) revert NoProtocolsToRemove();
     address[] memory protocolList = new address[](length);
 
     for (uint256 i = length; i > 0; ) {
@@ -180,7 +183,7 @@ contract MakerRegistry {
   }
 
   /**
-   * @notice Return a list of all supported tokens for a given staker
+   * @notice Return a list of all supported protocols for a given staker
    * @param staker account address of the staker
    * @return protocolList array of all the supported protocols
    */
