@@ -21,7 +21,9 @@ contract MakerRegistry {
   uint256 public immutable protocolCost;
   mapping(address => EnumerableSet.AddressSet) internal supportedTokens;
   mapping(address => EnumerableSet.Bytes32Set) internal supportedProtocols;
-  mapping(address => EnumerableSet.AddressSet) internal supportingStakers;
+  mapping(address => EnumerableSet.AddressSet) internal supportingStakersTokens;
+  mapping(bytes4 => EnumerableSet.AddressSet)
+    internal supportingStakersProtocols;
   mapping(address => string) public stakerURLs;
 
   event InitialStake(address indexed account);
@@ -85,7 +87,7 @@ contract MakerRegistry {
     for (uint256 i = 0; i < length; i++) {
       address token = tokens[i];
       if (!tokenList.add(token)) revert TokenExists(token);
-      supportingStakers[token].add(msg.sender);
+      supportingStakersTokens[token].add(msg.sender);
     }
     transferAmount += tokenCost * length;
     emit AddTokens(msg.sender, tokens);
@@ -105,7 +107,7 @@ contract MakerRegistry {
     for (uint256 i = 0; i < length; i++) {
       address token = tokens[i];
       if (!tokenList.remove(token)) revert TokenDoesNotExist(token);
-      supportingStakers[token].remove(msg.sender);
+      supportingStakersTokens[token].remove(msg.sender);
     }
     uint256 transferAmount = tokenCost * length;
     if (tokenList.length() == 0) {
@@ -134,7 +136,7 @@ contract MakerRegistry {
       address token = supportedTokenList.at(i);
       tokenList[i] = token;
       supportedTokenList.remove(token);
-      supportingStakers[token].remove(msg.sender);
+      supportingStakersTokens[token].remove(msg.sender);
     }
     uint256 transferAmount = obligationCost + tokenCost * length;
     emit FullUnstake(msg.sender);
@@ -152,7 +154,7 @@ contract MakerRegistry {
   function getURLsForToken(
     address token
   ) external view returns (string[] memory urls) {
-    EnumerableSet.AddressSet storage stakers = supportingStakers[token];
+    EnumerableSet.AddressSet storage stakers = supportingStakersTokens[token];
     uint256 length = stakers.length();
     urls = new string[](length);
     for (uint256 i = 0; i < length; i++) {
@@ -197,7 +199,9 @@ contract MakerRegistry {
   function getStakersForToken(
     address token
   ) external view returns (address[] memory stakers) {
-    EnumerableSet.AddressSet storage stakerList = supportingStakers[token];
+    EnumerableSet.AddressSet storage stakerList = supportingStakersTokens[
+      token
+    ];
     uint256 length = stakerList.length();
     stakers = new address[](length);
     for (uint256 i = 0; i < length; i++) {
@@ -224,6 +228,7 @@ contract MakerRegistry {
     for (uint256 i = 0; i < length; i++) {
       bytes4 protocol = protocols[i];
       if (!protocolList.add(protocol)) revert ProtocolExists(protocol);
+      supportingStakersProtocols[protocol].add(msg.sender);
     }
     transferAmount += protocolCost * length;
     emit AddProtocols(msg.sender, protocols);
@@ -245,6 +250,7 @@ contract MakerRegistry {
     for (uint256 i = 0; i < length; i++) {
       bytes4 protocol = protocols[i];
       if (!protocolList.remove(protocol)) revert ProtocolDoesNotExist(protocol);
+      supportingStakersProtocols[protocol].remove(msg.sender);
     }
     uint256 transferAmount = protocolCost * length;
     if (protocolList.length() == 0) {
@@ -273,6 +279,7 @@ contract MakerRegistry {
       bytes4 protocol = supportedProtocolList.at(i)[4];
       protocolList[i] = protocol;
       supportedProtocolList.remove(protocol);
+      supportingStakersProtocols[protocol].remove(msg.sender);
     }
     uint256 transferAmount = obligationCost + protocolCost * length;
     emit FullUnstake(msg.sender);
@@ -288,9 +295,11 @@ contract MakerRegistry {
    * @return urls array of server URLs supporting the protocol
    */
   function getURLsForProtocol(
-    address protocol
+    bytes4 protocol
   ) external view returns (string[] memory urls) {
-    EnumerableSet.AddressSet storage stakers = supportingStakers[protocol];
+    EnumerableSet.AddressSet storage stakers = supportingStakersProtocols[
+      protocol
+    ];
     uint256 length = stakers.length();
     urls = new string[](length);
     for (uint256 i = 0; i < length; i++) {
@@ -348,9 +357,11 @@ contract MakerRegistry {
    * @return stakers array of all stakers that support a given protocol
    */
   function getStakersForProtocol(
-    address protocol
+    bytes4 protocol
   ) external view returns (address[] memory stakers) {
-    EnumerableSet.AddressSet storage stakerList = supportingStakers[protocol];
+    EnumerableSet.AddressSet storage stakerList = supportingStakersProtocols[
+      protocol
+    ];
     uint256 length = stakerList.length();
     stakers = new address[](length);
     for (uint256 i = 0; i < length; i++) {
