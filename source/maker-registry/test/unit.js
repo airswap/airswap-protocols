@@ -16,6 +16,7 @@ describe('MakerRegistry Unit', () => {
   let registry
   let registryZeroCost
   const OBLIGATION_COST = 1000
+  const TOKEN_COST = 10
   const PROTOCOL_COST = 10
 
   beforeEach(async () => {
@@ -34,6 +35,7 @@ describe('MakerRegistry Unit', () => {
     registry = await registryFactory.deploy(
       stakingToken.address,
       OBLIGATION_COST,
+      TOKEN_COST,
       PROTOCOL_COST
     )
     await registry.deployed()
@@ -297,6 +299,7 @@ describe('MakerRegistry Unit', () => {
       let zero_cost = '0'
       registryZeroCost = await registryFactory.deploy(
         stakingToken.address,
+        zero_cost,
         zero_cost,
         zero_cost
       )

@@ -17,7 +17,9 @@ contract MakerRegistry {
   IERC20 public immutable stakingToken;
   uint256 public immutable obligationCost;
   uint256 public immutable protocolCost;
+  uint256 public immutable tokenCost;
   mapping(address => EnumerableSet.AddressSet) internal supportedProtocols;
+  mapping(address => EnumerableSet.AddressSet) internal supportedTokens;
   mapping(address => EnumerableSet.AddressSet) internal supportingStakers;
   mapping(address => string) public stakerURLs;
 
@@ -25,12 +27,18 @@ contract MakerRegistry {
   event FullUnstake(address indexed account);
   event AddProtocols(address indexed account, address[] protocols);
   event RemoveProtocols(address indexed account, address[] protocols);
+  event AddTokens(address indexed account, address[] protocols);
+  event RemoveTokens(address indexed account, address[] protocols);
   event SetURL(address indexed account, string url);
 
   error NoProtocolsToAdd();
   error NoProtocolsToRemove();
   error ProtocolDoesNotExists(address);
   error ProtocolExists(address);
+  error NoTokenToAdd();
+  error NoTokensToRemove();
+  error TokenDoesNotExists(address);
+  error TokenExists(address);
 
   /**
    * @notice Constructor
@@ -41,10 +49,12 @@ contract MakerRegistry {
   constructor(
     IERC20 _stakingToken,
     uint256 _obligationCost,
+    uint256 _tokenCost,
     uint256 _protocolCost
   ) {
     stakingToken = _stakingToken;
     obligationCost = _obligationCost;
+    tokenCost = _tokenCost;
     protocolCost = _protocolCost;
   }
 
@@ -55,6 +65,143 @@ contract MakerRegistry {
   function setURL(string calldata _url) external {
     stakerURLs[msg.sender] = _url;
     emit SetURL(msg.sender, _url);
+  }
+
+    /**
+   * @notice Add tokens supported by the caller
+   * @param tokens array of token addresses
+   */
+  function addTokens(address[] calldata tokens) external {
+    uint256 length = tokens.length;
+    require(length > 0, "NO_TOKENS_TO_ADD");
+    EnumerableSet.AddressSet storage tokenList = supportedTokens[msg.sender];
+
+    uint256 transferAmount = 0;
+    if (tokenList.length() == 0) {
+      transferAmount = obligationCost;
+      emit InitialStake(msg.sender);
+    }
+    for (uint256 i = 0; i < length; i++) {
+      address token = tokens[i];
+      require(tokenList.add(token), "TOKEN_EXISTS");
+      supportingStakers[token].add(msg.sender);
+    }
+    transferAmount += tokenCost * length;
+    emit AddTokens(msg.sender, tokens);
+    if (transferAmount > 0) {
+      stakingToken.safeTransferFrom(msg.sender, address(this), transferAmount);
+    }
+  }
+
+  /**
+   * @notice Remove tokens supported by the caller
+   * @param tokens array of token addresses
+   */
+  function removeTokens(address[] calldata tokens) external {
+    uint256 length = tokens.length;
+    require(length > 0, "NO_TOKENS_TO_REMOVE");
+    EnumerableSet.AddressSet storage tokenList = supportedTokens[msg.sender];
+    for (uint256 i = 0; i < length; i++) {
+      address token = tokens[i];
+      require(tokenList.remove(token), "TOKEN_DOES_NOT_EXIST");
+      supportingStakers[token].remove(msg.sender);
+    }
+    uint256 transferAmount = tokenCost * length;
+    if (tokenList.length() == 0) {
+      transferAmount += obligationCost;
+      emit FullUnstake(msg.sender);
+    }
+    emit RemoveTokens(msg.sender, tokens);
+    if (transferAmount > 0) {
+      stakingToken.safeTransfer(msg.sender, transferAmount);
+    }
+  }
+
+  /**
+   * @notice Remove all tokens supported by the caller
+   */
+  function removeAllTokens() external {
+    EnumerableSet.AddressSet storage supportedTokenList = supportedTokens[
+      msg.sender
+    ];
+    uint256 length = supportedTokenList.length();
+    require(length > 0, "NO_TOKENS_TO_REMOVE");
+    address[] memory tokenList = new address[](length);
+
+    for (uint256 i = length; i > 0; ) {
+      i--;
+      address token = supportedTokenList.at(i);
+      tokenList[i] = token;
+      supportedTokenList.remove(token);
+      supportingStakers[token].remove(msg.sender);
+    }
+    uint256 transferAmount = obligationCost + tokenCost * length;
+    emit FullUnstake(msg.sender);
+    emit RemoveTokens(msg.sender, tokenList);
+    if (transferAmount > 0) {
+      stakingToken.safeTransfer(msg.sender, transferAmount);
+    }
+  }
+
+  /**
+   * @notice Return a list of all server URLs supporting a given token
+   * @param token address of the token
+   * @return urls array of server URLs supporting the token
+   */
+  function getURLsForToken(
+    address token
+  ) external view returns (string[] memory urls) {
+    EnumerableSet.AddressSet storage stakers = supportingStakers[token];
+    uint256 length = stakers.length();
+    urls = new string[](length);
+    for (uint256 i = 0; i < length; i++) {
+      urls[i] = stakerURLs[address(stakers.at(i))];
+    }
+  }
+
+  /**
+   * @notice Return whether a staker supports a given token
+   * @param staker account address used to stake
+   * @param token address of the token
+   * @return true if the staker supports the token
+   */
+  function supportsToken(
+    address staker,
+    address token
+  ) external view returns (bool) {
+    return supportedTokens[staker].contains(token);
+  }
+
+  /**
+   * @notice Return a list of all supported tokens for a given staker
+   * @param staker account address of the staker
+   * @return tokenList array of all the supported tokens
+   */
+  function getSupportedTokens(
+    address staker
+  ) external view returns (address[] memory tokenList) {
+    EnumerableSet.AddressSet storage tokens = supportedTokens[staker];
+    uint256 length = tokens.length();
+    tokenList = new address[](length);
+    for (uint256 i = 0; i < length; i++) {
+      tokenList[i] = tokens.at(i);
+    }
+  }
+
+  /**
+   * @notice Return a list of all stakers supporting a given token
+   * @param token address of the token
+   * @return stakers array of all stakers that support a given token
+   */
+  function getStakersForToken(
+    address token
+  ) external view returns (address[] memory stakers) {
+    EnumerableSet.AddressSet storage stakerList = supportingStakers[token];
+    uint256 length = stakerList.length();
+    stakers = new address[](length);
+    for (uint256 i = 0; i < length; i++) {
+      stakers[i] = stakerList.at(i);
+    }
   }
 
   /**
