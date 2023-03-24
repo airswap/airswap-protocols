@@ -43,18 +43,18 @@ describe('MakerRegistry Unit', () => {
     it('constructor set default values', async () => {
       const tokenAddress = await registry.stakingToken()
       const obligationCost = await registry.obligationCost()
-      const tokenCost = await registry.tokenCost()
+      const protocolCost = await registry.protocolCost()
       expect(tokenAddress).to.equal(stakingToken.address)
       expect(obligationCost).to.equal(OBLIGATION_COST)
-      expect(tokenCost).to.equal(TOKEN_COST)
+      expect(protocolCost).to.equal(TOKEN_COST)
     })
   })
 
   describe('Add Tokens', async () => {
     it('add an empty list of tokens fails', async () => {
-      await expect(registry.connect(account1).addTokens([])).to.be.revertedWith(
-        'NO_TOKENS_TO_ADD'
-      )
+      await expect(
+        registry.connect(account1).addProtocols([])
+      ).to.be.revertedWith('NO_PROTOCOLS_TO_ADD')
     })
 
     it('add a list of tokens when there is sufficient stake token', async () => {
@@ -62,24 +62,24 @@ describe('MakerRegistry Unit', () => {
       await expect(
         registry
           .connect(account1)
-          .addTokens([token1.address, token2.address, token3.address])
+          .addProtocols([token1.address, token2.address, token3.address])
       )
-        .to.emit(registry, 'AddTokens')
+        .to.emit(registry, 'AddProtocols')
         .withArgs(account1.address, [
           token1.address,
           token2.address,
           token3.address,
         ])
 
-      const tokens = await registry.getSupportedTokens(account1.address)
+      const tokens = await registry.getSupportedProtocols(account1.address)
       expect(tokens.length).to.equal(3)
       expect(tokens[0]).to.equal(token1.address)
       expect(tokens[1]).to.equal(token2.address)
       expect(tokens[2]).to.equal(token3.address)
 
-      const token1Stakers = await registry.getStakersForToken(token1.address)
-      const token2Stakers = await registry.getStakersForToken(token2.address)
-      const token3Stakers = await registry.getStakersForToken(token3.address)
+      const token1Stakers = await registry.getStakersForProtocol(token1.address)
+      const token2Stakers = await registry.getStakersForProtocol(token2.address)
+      const token3Stakers = await registry.getStakersForProtocol(token3.address)
       expect(token1Stakers.length).to.equal(1)
       expect(token2Stakers.length).to.equal(1)
       expect(token3Stakers.length).to.equal(1)
@@ -87,15 +87,15 @@ describe('MakerRegistry Unit', () => {
       expect(token2Stakers[0]).to.equal(account1.address)
       expect(token3Stakers[0]).to.equal(account1.address)
 
-      const token1Supported = await registry.supportsToken(
+      const token1Supported = await registry.supportsProtocol(
         account1.address,
         token1.address
       )
-      const token2Supported = await registry.supportsToken(
+      const token2Supported = await registry.supportsProtocol(
         account1.address,
         token2.address
       )
-      const token3Supported = await registry.supportsToken(
+      const token3Supported = await registry.supportsProtocol(
         account1.address,
         token3.address
       )
@@ -109,7 +109,7 @@ describe('MakerRegistry Unit', () => {
       await expect(
         registry
           .connect(account1)
-          .addTokens([token1.address, token2.address, token3.address])
+          .addProtocols([token1.address, token2.address, token3.address])
       ).to.be.revertedWith('SafeERC20: ERC20 operation did not succeed')
     })
 
@@ -118,26 +118,26 @@ describe('MakerRegistry Unit', () => {
       await expect(
         registry
           .connect(account1)
-          .addTokens([token1.address, token2.address, token1.address])
-      ).to.be.revertedWith('TOKEN_EXISTS')
+          .addProtocols([token1.address, token2.address, token1.address])
+      ).to.be.revertedWith('PROTOCOL_EXISTS')
     })
 
     it('add a duplicate token', async () => {
       await stakingToken.mock.transferFrom.returns(true)
       await registry
         .connect(account1)
-        .addTokens([token1.address, token2.address])
+        .addProtocols([token1.address, token2.address])
       await expect(
-        registry.connect(account1).addTokens([token1.address])
-      ).to.be.revertedWith('TOKEN_EXISTS')
+        registry.connect(account1).addProtocols([token1.address])
+      ).to.be.revertedWith('PROTOCOL_EXISTS')
     })
   })
 
   describe('Remove Tokens', async () => {
     it('remove an empty list of tokens fails', async () => {
       await expect(
-        registry.connect(account1).removeTokens([])
-      ).to.be.revertedWith('NO_TOKENS_TO_REMOVE')
+        registry.connect(account1).removeProtocols([])
+      ).to.be.revertedWith('NO_PROTOCOLS_TO_REMOVE')
     })
 
     it('remove a list of tokens', async () => {
@@ -145,39 +145,39 @@ describe('MakerRegistry Unit', () => {
       await stakingToken.mock.transferFrom.returns(true)
       await registry
         .connect(account1)
-        .addTokens([token1.address, token2.address, token3.address])
+        .addProtocols([token1.address, token2.address, token3.address])
 
       await expect(
         registry
           .connect(account1)
-          .removeTokens([token1.address, token2.address, token3.address])
+          .removeProtocols([token1.address, token2.address, token3.address])
       )
-        .to.emit(registry, 'RemoveTokens')
+        .to.emit(registry, 'RemoveProtocols')
         .withArgs(account1.address, [
           token1.address,
           token2.address,
           token3.address,
         ])
 
-      const tokens = await registry.getSupportedTokens(account1.address)
+      const tokens = await registry.getSupportedProtocols(account1.address)
       expect(tokens.length).to.equal(0)
 
-      const token1Stakers = await registry.getStakersForToken(token1.address)
-      const token2Stakers = await registry.getStakersForToken(token2.address)
-      const token3Stakers = await registry.getStakersForToken(token3.address)
+      const token1Stakers = await registry.getStakersForProtocol(token1.address)
+      const token2Stakers = await registry.getStakersForProtocol(token2.address)
+      const token3Stakers = await registry.getStakersForProtocol(token3.address)
       expect(token1Stakers.length).to.equal(0)
       expect(token2Stakers.length).to.equal(0)
       expect(token3Stakers.length).to.equal(0)
 
-      const token1Supported = await registry.supportsToken(
+      const token1Supported = await registry.supportsProtocol(
         account1.address,
         token1.address
       )
-      const token2Supported = await registry.supportsToken(
+      const token2Supported = await registry.supportsProtocol(
         account1.address,
         token2.address
       )
-      const token3Supported = await registry.supportsToken(
+      const token3Supported = await registry.supportsProtocol(
         account1.address,
         token3.address
       )
@@ -188,8 +188,8 @@ describe('MakerRegistry Unit', () => {
 
     it('remove all tokens for a staker fails when there are no tokens to remove', async () => {
       await expect(
-        registry.connect(account1).removeAllTokens()
-      ).to.be.revertedWith('NO_TOKENS_TO_REMOVE')
+        registry.connect(account1).removeAllProtocols()
+      ).to.be.revertedWith('NO_PROTOCOLS_TO_REMOVE')
     })
 
     it('remove all tokens for an staker', async () => {
@@ -197,9 +197,9 @@ describe('MakerRegistry Unit', () => {
       await stakingToken.mock.transferFrom.returns(true)
       await registry
         .connect(account1)
-        .addTokens([token1.address, token2.address, token3.address])
-      await expect(registry.connect(account1).removeAllTokens())
-        .to.emit(registry, 'RemoveTokens')
+        .addProtocols([token1.address, token2.address, token3.address])
+      await expect(registry.connect(account1).removeAllProtocols())
+        .to.emit(registry, 'RemoveProtocols')
         .withArgs(account1.address, [
           token1.address,
           token2.address,
@@ -208,12 +208,12 @@ describe('MakerRegistry Unit', () => {
 
       //NOTE: Note that there are no guarantees on the ordering of values inside the array, and it may change when more values are added or removed.
       // this is why token1, token3, token2 are in the above order
-      const tokens = await registry.getSupportedTokens(account1.address)
+      const tokens = await registry.getSupportedProtocols(account1.address)
       expect(tokens.length).to.equal(0)
 
-      const token1Stakers = await registry.getStakersForToken(token1.address)
-      const token2Stakers = await registry.getStakersForToken(token2.address)
-      const token3Stakers = await registry.getStakersForToken(token3.address)
+      const token1Stakers = await registry.getStakersForProtocol(token1.address)
+      const token2Stakers = await registry.getStakersForProtocol(token2.address)
+      const token3Stakers = await registry.getStakersForProtocol(token3.address)
       expect(token1Stakers.length).to.equal(0)
       expect(token2Stakers.length).to.equal(0)
       expect(token3Stakers.length).to.equal(0)
@@ -224,13 +224,13 @@ describe('MakerRegistry Unit', () => {
       await stakingToken.mock.transferFrom.returns(true)
       await registry
         .connect(account1)
-        .addTokens([token1.address, token2.address, token3.address])
+        .addProtocols([token1.address, token2.address, token3.address])
 
       await expect(
         registry
           .connect(account1)
-          .removeTokens([token1.address, token2.address, token1.address])
-      ).to.be.revertedWith('TOKEN_DOES_NOT_EXIST')
+          .removeProtocols([token1.address, token2.address, token1.address])
+      ).to.be.revertedWith('PROTOCOL_DOES_NOT_EXIST')
     })
 
     it('remove a token already removed fails', async () => {
@@ -238,15 +238,15 @@ describe('MakerRegistry Unit', () => {
       await stakingToken.mock.transferFrom.returns(true)
       await registry
         .connect(account1)
-        .addTokens([token1.address, token2.address, token3.address])
+        .addProtocols([token1.address, token2.address, token3.address])
 
       await registry
         .connect(account1)
-        .removeTokens([token1.address, token2.address, token3.address])
+        .removeProtocols([token1.address, token2.address, token3.address])
 
       await expect(
-        registry.connect(account1).removeTokens([token1.address])
-      ).to.be.revertedWith('TOKEN_DOES_NOT_EXIST')
+        registry.connect(account1).removeProtocols([token1.address])
+      ).to.be.revertedWith('PROTOCOL_DOES_NOT_EXIST')
     })
   })
 
@@ -263,24 +263,24 @@ describe('MakerRegistry Unit', () => {
 
     it('zero transfer amount', async () => {
       await expect(
-        registryZeroCost.connect(account1).addTokens([token1.address])
+        registryZeroCost.connect(account1).addProtocols([token1.address])
       )
-        .to.emit(registryZeroCost, 'AddTokens')
+        .to.emit(registryZeroCost, 'AddProtocols')
         .withArgs(account1.address, [token1.address])
     })
     it('zero transfer amount when removing token', async () => {
-      await registryZeroCost.connect(account1).addTokens([token1.address])
+      await registryZeroCost.connect(account1).addProtocols([token1.address])
       await expect(
-        registryZeroCost.connect(account1).removeTokens([token1.address])
+        registryZeroCost.connect(account1).removeProtocols([token1.address])
       )
-        .to.emit(registryZeroCost, 'RemoveTokens')
+        .to.emit(registryZeroCost, 'RemoveProtocols')
         .withArgs(account1.address, [token1.address])
     })
     it('zero transfer amount when removing all tokens', async () => {
       await registryZeroCost
         .connect(account1)
-        .addTokens([token1.address, token2.address, token3.address])
-      await expect(registryZeroCost.connect(account1).removeAllTokens())
+        .addProtocols([token1.address, token2.address, token3.address])
+      await expect(registryZeroCost.connect(account1).removeAllProtocols())
         .to.emit(registryZeroCost, 'FullUnstake')
         .withArgs(account1.address)
     })
@@ -314,16 +314,16 @@ describe('MakerRegistry Unit', () => {
       await expect(
         registry
           .connect(account1)
-          .addTokens([token1.address, token2.address, token3.address])
+          .addProtocols([token1.address, token2.address, token3.address])
       )
-        .to.emit(registry, 'AddTokens')
+        .to.emit(registry, 'AddProtocols')
         .withArgs(account1.address, [
           token1.address,
           token2.address,
           token3.address,
         ])
 
-      const urls = await registry.getURLsForToken(token3.address)
+      const urls = await registry.getURLsForProtocol(token3.address)
       expect(urls.length).to.equal(1)
       expect(urls[0]).to.equal('www.TheCatsMeow.com')
     })
@@ -364,7 +364,7 @@ describe('MakerRegistry Unit', () => {
       await stakingToken.mock.transferFrom.returns(true)
       await registry
         .connect(account1)
-        .addTokens([token1.address, token2.address, token3.address])
+        .addProtocols([token1.address, token2.address, token3.address])
 
       const balance = await registry.balanceOf(account1.address)
       expect(balance).to.equal(OBLIGATION_COST + TOKEN_COST * 3)
@@ -375,9 +375,9 @@ describe('MakerRegistry Unit', () => {
       await stakingToken.mock.transferFrom.returns(true)
       await registry
         .connect(account1)
-        .addTokens([token1.address, token2.address, token3.address])
+        .addProtocols([token1.address, token2.address, token3.address])
 
-      await registry.connect(account1).removeTokens([token2.address])
+      await registry.connect(account1).removeProtocols([token2.address])
 
       const balance = await registry.balanceOf(account1.address)
       expect(balance).to.equal(OBLIGATION_COST + TOKEN_COST * 2)

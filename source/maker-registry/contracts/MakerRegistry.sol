@@ -16,31 +16,31 @@ contract MakerRegistry {
 
   IERC20 public immutable stakingToken;
   uint256 public immutable obligationCost;
-  uint256 public immutable tokenCost;
-  mapping(address => EnumerableSet.AddressSet) internal supportedTokens;
+  uint256 public immutable protocolCost;
+  mapping(address => EnumerableSet.AddressSet) internal supportedProtocols;
   mapping(address => EnumerableSet.AddressSet) internal supportingStakers;
   mapping(address => string) public stakerURLs;
 
   event InitialStake(address indexed account);
   event FullUnstake(address indexed account);
-  event AddTokens(address indexed account, address[] tokens);
-  event RemoveTokens(address indexed account, address[] tokens);
+  event AddProtocols(address indexed account, address[] tokens);
+  event RemoveProtocols(address indexed account, address[] tokens);
   event SetURL(address indexed account, string url);
 
   /**
    * @notice Constructor
    * @param _stakingToken address of token used for staking
    * @param _obligationCost base amount required to stake
-   * @param _tokenCost amount required to stake per token
+   * @param _protocolCost amount required to stake per token
    */
   constructor(
     IERC20 _stakingToken,
     uint256 _obligationCost,
-    uint256 _tokenCost
+    uint256 _protocolCost
   ) {
     stakingToken = _stakingToken;
     obligationCost = _obligationCost;
-    tokenCost = _tokenCost;
+    protocolCost = _protocolCost;
   }
 
   /**
@@ -53,90 +53,90 @@ contract MakerRegistry {
   }
 
   /**
-   * @notice Add tokens supported by the caller
-   * @param tokens array of token addresses
+   * @notice Add protocols supported by the caller
+   * @param protocols array of protocol addresses
    */
-  function addTokens(address[] calldata tokens) external {
-    uint256 length = tokens.length;
-    require(length > 0, "NO_TOKENS_TO_ADD");
-    EnumerableSet.AddressSet storage tokenList = supportedTokens[msg.sender];
+  function addProtocols(address[] calldata protocols) external {
+    uint256 length = protocols.length;
+    require(length > 0, "NO_PROTOCOLS_TO_ADD");
+    EnumerableSet.AddressSet storage protocolList = supportedProtocols[msg.sender];
 
     uint256 transferAmount = 0;
-    if (tokenList.length() == 0) {
+    if (protocolList.length() == 0) {
       transferAmount = obligationCost;
       emit InitialStake(msg.sender);
     }
     for (uint256 i = 0; i < length; i++) {
-      address token = tokens[i];
-      require(tokenList.add(token), "TOKEN_EXISTS");
-      supportingStakers[token].add(msg.sender);
+      address protocol = protocols[i];
+      require(protocolList.add(protocol), "PROTOCOL_EXISTS");
+      supportingStakers[protocol].add(msg.sender);
     }
-    transferAmount += tokenCost * length;
-    emit AddTokens(msg.sender, tokens);
+    transferAmount += protocolCost * length;
+    emit AddProtocols(msg.sender, protocols);
     if (transferAmount > 0) {
       stakingToken.safeTransferFrom(msg.sender, address(this), transferAmount);
     }
   }
 
   /**
-   * @notice Remove tokens supported by the caller
-   * @param tokens array of token addresses
+   * @notice Remove protocols supported by the caller
+   * @param protocols array of protocol addresses
    */
-  function removeTokens(address[] calldata tokens) external {
-    uint256 length = tokens.length;
-    require(length > 0, "NO_TOKENS_TO_REMOVE");
-    EnumerableSet.AddressSet storage tokenList = supportedTokens[msg.sender];
+  function removeProtocols(address[] calldata protocols) external {
+    uint256 length = protocols.length;
+    require(length > 0, "NO_PROTOCOLS_TO_REMOVE");
+    EnumerableSet.AddressSet storage tokenList = supportedProtocols[msg.sender];
     for (uint256 i = 0; i < length; i++) {
-      address token = tokens[i];
-      require(tokenList.remove(token), "TOKEN_DOES_NOT_EXIST");
+      address token = protocols[i];
+      require(tokenList.remove(token), "PROTOCOL_DOES_NOT_EXIST");
       supportingStakers[token].remove(msg.sender);
     }
-    uint256 transferAmount = tokenCost * length;
+    uint256 transferAmount = protocolCost * length;
     if (tokenList.length() == 0) {
       transferAmount += obligationCost;
       emit FullUnstake(msg.sender);
     }
-    emit RemoveTokens(msg.sender, tokens);
+    emit RemoveProtocols(msg.sender, protocols);
     if (transferAmount > 0) {
       stakingToken.safeTransfer(msg.sender, transferAmount);
     }
   }
 
   /**
-   * @notice Remove all tokens supported by the caller
+   * @notice Remove all protocols supported by the caller
    */
-  function removeAllTokens() external {
-    EnumerableSet.AddressSet storage supportedTokenList = supportedTokens[
+  function removeAllProtocols() external {
+    EnumerableSet.AddressSet storage supportedProtocolList = supportedProtocols[
       msg.sender
     ];
-    uint256 length = supportedTokenList.length();
-    require(length > 0, "NO_TOKENS_TO_REMOVE");
-    address[] memory tokenList = new address[](length);
+    uint256 length = supportedProtocolList.length();
+    require(length > 0, "NO_PROTOCOLS_TO_REMOVE");
+    address[] memory protocolList = new address[](length);
 
     for (uint256 i = length; i > 0; ) {
       i--;
-      address token = supportedTokenList.at(i);
-      tokenList[i] = token;
-      supportedTokenList.remove(token);
-      supportingStakers[token].remove(msg.sender);
+      address protocol = supportedProtocolList.at(i);
+      protocolList[i] = protocol;
+      supportedProtocolList.remove(protocol);
+      supportingStakers[protocol].remove(msg.sender);
     }
-    uint256 transferAmount = obligationCost + tokenCost * length;
+    uint256 transferAmount = obligationCost + protocolCost * length;
     emit FullUnstake(msg.sender);
-    emit RemoveTokens(msg.sender, tokenList);
+    emit RemoveProtocols(msg.sender, protocolList);
     if (transferAmount > 0) {
       stakingToken.safeTransfer(msg.sender, transferAmount);
     }
   }
 
   /**
-   * @notice Return a list of all server URLs supporting a given token
-   * @param token address of the token
-   * @return urls array of server URLs supporting the token
+   * @notice Return a list of all server URLs supporting a given protocol
+   * @param protocol address of the protocol
+   * @return urls array of server URLs supporting the protocol
    */
-  function getURLsForToken(
-    address token
+  function getURLsForProtocol(
+    address protocol
   ) external view returns (string[] memory urls) {
-    EnumerableSet.AddressSet storage stakers = supportingStakers[token];
+    EnumerableSet.AddressSet storage stakers = supportingStakers[protocol];
     uint256 length = stakers.length();
     urls = new string[](length);
     for (uint256 i = 0; i < length; i++) {
@@ -160,43 +160,43 @@ contract MakerRegistry {
   }
 
   /**
-   * @notice Return whether a staker supports a given token
+   * @notice Return whether a staker supports a given protocol
    * @param staker account address used to stake
-   * @param token address of the token
-   * @return true if the staker supports the token
+   * @param protocol address of the protocol
+   * @return true if the staker supports the protocol
    */
-  function supportsToken(
+  function supportsProtocol(
     address staker,
-    address token
+    address protocol
   ) external view returns (bool) {
-    return supportedTokens[staker].contains(token);
+    return supportedProtocols[staker].contains(protocol);
   }
 
   /**
    * @notice Return a list of all supported tokens for a given staker
    * @param staker account address of the staker
-   * @return tokenList array of all the supported tokens
+   * @return protocolList array of all the supported protocols
    */
-  function getSupportedTokens(
+  function getSupportedProtocols(
     address staker
-  ) external view returns (address[] memory tokenList) {
-    EnumerableSet.AddressSet storage tokens = supportedTokens[staker];
-    uint256 length = tokens.length();
-    tokenList = new address[](length);
+  ) external view returns (address[] memory protocolList) {
+    EnumerableSet.AddressSet storage protocols = supportedProtocols[staker];
+    uint256 length = protocols.length();
+    protocolList = new address[](length);
     for (uint256 i = 0; i < length; i++) {
-      tokenList[i] = tokens.at(i);
+      protocolList[i] = protocols.at(i);
     }
   }
 
   /**
-   * @notice Return a list of all stakers supporting a given token
-   * @param token address of the token
-   * @return stakers array of all stakers that support a given token
+   * @notice Return a list of all stakers supporting a given protocol
+   * @param protocol address of the protocol
+   * @return stakers array of all stakers that support a given protocol
    */
-  function getStakersForToken(
-    address token
+  function getStakersForProtocol(
+    address protocol
   ) external view returns (address[] memory stakers) {
-    EnumerableSet.AddressSet storage stakerList = supportingStakers[token];
+    EnumerableSet.AddressSet storage stakerList = supportingStakers[protocol];
     uint256 length = stakerList.length();
     stakers = new address[](length);
     for (uint256 i = 0; i < length; i++) {
@@ -210,10 +210,10 @@ contract MakerRegistry {
    * @return balance of the staker account
    */
   function balanceOf(address staker) external view returns (uint256) {
-    uint256 tokenCount = supportedTokens[staker].length();
+    uint256 tokenCount = supportedProtocols[staker].length();
     if (tokenCount == 0) {
       return 0;
     }
-    return obligationCost + tokenCost * tokenCount;
+    return obligationCost + protocolCost * tokenCount;
   }
 }
