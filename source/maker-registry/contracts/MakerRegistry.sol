@@ -16,28 +16,28 @@ contract MakerRegistry {
 
   IERC20 public immutable stakingToken;
   uint256 public immutable obligationCost;
-  uint256 public immutable protocolCost;
   uint256 public immutable tokenCost;
-  mapping(address => EnumerableSet.AddressSet) internal supportedProtocols;
+  uint256 public immutable protocolCost;
   mapping(address => EnumerableSet.AddressSet) internal supportedTokens;
+  mapping(address => EnumerableSet.AddressSet) internal supportedProtocols;
   mapping(address => EnumerableSet.AddressSet) internal supportingStakers;
   mapping(address => string) public stakerURLs;
 
   event InitialStake(address indexed account);
   event FullUnstake(address indexed account);
+  event AddTokens(address indexed account, address[] tokens);
+  event RemoveTokens(address indexed account, address[] tokens);
   event AddProtocols(address indexed account, address[] protocols);
   event RemoveProtocols(address indexed account, address[] protocols);
-  event AddTokens(address indexed account, address[] protocols);
-  event RemoveTokens(address indexed account, address[] protocols);
   event SetURL(address indexed account, string url);
 
   error NoProtocolsToAdd();
   error NoProtocolsToRemove();
-  error ProtocolDoesNotExists(address);
+  error protocol3ProtocolDoesNotExist(address);
   error ProtocolExists(address);
-  error NoTokenToAdd();
+  error NoTokensToAdd();
   error NoTokensToRemove();
-  error TokenDoesNotExists(address);
+  error TokenDoesNotExist(address);
   error TokenExists(address);
 
   /**
@@ -67,13 +67,13 @@ contract MakerRegistry {
     emit SetURL(msg.sender, _url);
   }
 
-    /**
+  /**
    * @notice Add tokens supported by the caller
    * @param tokens array of token addresses
    */
   function addTokens(address[] calldata tokens) external {
     uint256 length = tokens.length;
-    require(length > 0, "NO_TOKENS_TO_ADD");
+    if(length <= 0) revert NoTokensToAdd();
     EnumerableSet.AddressSet storage tokenList = supportedTokens[msg.sender];
 
     uint256 transferAmount = 0;
@@ -83,7 +83,7 @@ contract MakerRegistry {
     }
     for (uint256 i = 0; i < length; i++) {
       address token = tokens[i];
-      require(tokenList.add(token), "TOKEN_EXISTS");
+      if(!tokenList.add(token)) revert TokenExists(token);
       supportingStakers[token].add(msg.sender);
     }
     transferAmount += tokenCost * length;
@@ -99,11 +99,11 @@ contract MakerRegistry {
    */
   function removeTokens(address[] calldata tokens) external {
     uint256 length = tokens.length;
-    require(length > 0, "NO_TOKENS_TO_REMOVE");
+    if(length <= 0) revert NoTokensToRemove();
     EnumerableSet.AddressSet storage tokenList = supportedTokens[msg.sender];
     for (uint256 i = 0; i < length; i++) {
       address token = tokens[i];
-      require(tokenList.remove(token), "TOKEN_DOES_NOT_EXIST");
+      if(!tokenList.remove(token)) revert TokenDoesNotExist(token);
       supportingStakers[token].remove(msg.sender);
     }
     uint256 transferAmount = tokenCost * length;
@@ -125,7 +125,7 @@ contract MakerRegistry {
       msg.sender
     ];
     uint256 length = supportedTokenList.length();
-    require(length > 0, "NO_TOKENS_TO_REMOVE");
+    if(length <= 0) revert NoTokensToRemove();
     address[] memory tokenList = new address[](length);
 
     for (uint256 i = length; i > 0; ) {
@@ -245,7 +245,7 @@ contract MakerRegistry {
     for (uint256 i = 0; i < length; i++) {
       address protocol = protocols[i];
       if (!protocolList.remove(protocol))
-        revert ProtocolDoesNotExists(protocol);
+        revert protocol3ProtocolDoesNotExist(protocol);
       supportingStakers[protocol].remove(msg.sender);
     }
     uint256 transferAmount = protocolCost * length;
@@ -367,10 +367,10 @@ contract MakerRegistry {
    * @return balance of the staker account
    */
   function balanceOf(address staker) external view returns (uint256) {
-    uint256 tokenCount = supportedProtocols[staker].length();
+    uint256 tokenCount = supportedTokens[staker].length();
     if (tokenCount == 0) {
       return 0;
     }
-    return obligationCost + protocolCost * tokenCount;
+    return obligationCost + tokenCost * tokenCount;
   }
 }
