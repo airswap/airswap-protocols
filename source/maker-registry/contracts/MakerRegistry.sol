@@ -13,13 +13,14 @@ import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 contract MakerRegistry {
   using SafeERC20 for IERC20;
   using EnumerableSet for EnumerableSet.AddressSet;
+  using EnumerableSet for EnumerableSet.Bytes32Set;
 
   IERC20 public immutable stakingToken;
   uint256 public immutable obligationCost;
   uint256 public immutable tokenCost;
   uint256 public immutable protocolCost;
   mapping(address => EnumerableSet.AddressSet) internal supportedTokens;
-  mapping(address => EnumerableSet.AddressSet) internal supportedProtocols;
+  mapping(address => EnumerableSet.Bytes32Set) internal supportedProtocols;
   mapping(address => EnumerableSet.AddressSet) internal supportingStakers;
   mapping(address => string) public stakerURLs;
 
@@ -27,14 +28,14 @@ contract MakerRegistry {
   event FullUnstake(address indexed account);
   event AddTokens(address indexed account, address[] tokens);
   event RemoveTokens(address indexed account, address[] tokens);
-  event AddProtocols(address indexed account, address[] protocols);
-  event RemoveProtocols(address indexed account, address[] protocols);
+  event AddProtocols(address indexed account, bytes4[] protocols);
+  event RemoveProtocols(address indexed account, bytes4[] protocols);
   event SetURL(address indexed account, string url);
 
   error NoProtocolsToAdd();
   error NoProtocolsToRemove();
-  error protocol3ProtocolDoesNotExist(address);
-  error ProtocolExists(address);
+  error ProtocolDoesNotExist(bytes4);
+  error ProtocolExists(bytes4);
   error NoTokensToAdd();
   error NoTokensToRemove();
   error TokenDoesNotExist(address);
@@ -73,7 +74,7 @@ contract MakerRegistry {
    */
   function addTokens(address[] calldata tokens) external {
     uint256 length = tokens.length;
-    if(length <= 0) revert NoTokensToAdd();
+    if (length <= 0) revert NoTokensToAdd();
     EnumerableSet.AddressSet storage tokenList = supportedTokens[msg.sender];
 
     uint256 transferAmount = 0;
@@ -83,7 +84,7 @@ contract MakerRegistry {
     }
     for (uint256 i = 0; i < length; i++) {
       address token = tokens[i];
-      if(!tokenList.add(token)) revert TokenExists(token);
+      if (!tokenList.add(token)) revert TokenExists(token);
       supportingStakers[token].add(msg.sender);
     }
     transferAmount += tokenCost * length;
@@ -99,11 +100,11 @@ contract MakerRegistry {
    */
   function removeTokens(address[] calldata tokens) external {
     uint256 length = tokens.length;
-    if(length <= 0) revert NoTokensToRemove();
+    if (length <= 0) revert NoTokensToRemove();
     EnumerableSet.AddressSet storage tokenList = supportedTokens[msg.sender];
     for (uint256 i = 0; i < length; i++) {
       address token = tokens[i];
-      if(!tokenList.remove(token)) revert TokenDoesNotExist(token);
+      if (!tokenList.remove(token)) revert TokenDoesNotExist(token);
       supportingStakers[token].remove(msg.sender);
     }
     uint256 transferAmount = tokenCost * length;
@@ -125,7 +126,7 @@ contract MakerRegistry {
       msg.sender
     ];
     uint256 length = supportedTokenList.length();
-    if(length <= 0) revert NoTokensToRemove();
+    if (length <= 0) revert NoTokensToRemove();
     address[] memory tokenList = new address[](length);
 
     for (uint256 i = length; i > 0; ) {
@@ -208,10 +209,10 @@ contract MakerRegistry {
    * @notice Add protocols supported by the caller
    * @param protocols array of protocol addresses
    */
-  function addProtocols(address[] calldata protocols) external {
+  function addProtocols(bytes4[] calldata protocols) external {
     uint256 length = protocols.length;
     if (length <= 0) revert NoProtocolsToAdd();
-    EnumerableSet.AddressSet storage protocolList = supportedProtocols[
+    EnumerableSet.Bytes32Set storage protocolList = supportedProtocols[
       msg.sender
     ];
 
@@ -221,9 +222,8 @@ contract MakerRegistry {
       emit InitialStake(msg.sender);
     }
     for (uint256 i = 0; i < length; i++) {
-      address protocol = protocols[i];
+      bytes4 protocol = protocols[i];
       if (!protocolList.add(protocol)) revert ProtocolExists(protocol);
-      supportingStakers[protocol].add(msg.sender);
     }
     transferAmount += protocolCost * length;
     emit AddProtocols(msg.sender, protocols);
@@ -236,17 +236,15 @@ contract MakerRegistry {
    * @notice Remove protocols supported by the caller
    * @param protocols array of protocol addresses
    */
-  function removeProtocols(address[] calldata protocols) external {
+  function removeProtocols(bytes4[] calldata protocols) external {
     uint256 length = protocols.length;
     if (length <= 0) revert NoProtocolsToRemove();
-    EnumerableSet.AddressSet storage protocolList = supportedProtocols[
+    EnumerableSet.Bytes32Set storage protocolList = supportedProtocols[
       msg.sender
     ];
     for (uint256 i = 0; i < length; i++) {
-      address protocol = protocols[i];
-      if (!protocolList.remove(protocol))
-        revert protocol3ProtocolDoesNotExist(protocol);
-      supportingStakers[protocol].remove(msg.sender);
+      bytes4 protocol = protocols[i];
+      if (!protocolList.remove(protocol)) revert ProtocolDoesNotExist(protocol);
     }
     uint256 transferAmount = protocolCost * length;
     if (protocolList.length() == 0) {
@@ -263,19 +261,18 @@ contract MakerRegistry {
    * @notice Remove all protocols supported by the caller
    */
   function removeAllProtocols() external {
-    EnumerableSet.AddressSet storage supportedProtocolList = supportedProtocols[
+    EnumerableSet.Bytes32Set storage supportedProtocolList = supportedProtocols[
       msg.sender
     ];
     uint256 length = supportedProtocolList.length();
     if (length <= 0) revert NoProtocolsToRemove();
-    address[] memory protocolList = new address[](length);
+    bytes4[] memory protocolList = new bytes4[](length);
 
     for (uint256 i = length; i > 0; ) {
       i--;
-      address protocol = supportedProtocolList.at(i);
+      bytes4 protocol = supportedProtocolList.at(i)[4];
       protocolList[i] = protocol;
       supportedProtocolList.remove(protocol);
-      supportingStakers[protocol].remove(msg.sender);
     }
     uint256 transferAmount = obligationCost + protocolCost * length;
     emit FullUnstake(msg.sender);
@@ -324,7 +321,7 @@ contract MakerRegistry {
    */
   function supportsProtocol(
     address staker,
-    address protocol
+    bytes4 protocol
   ) external view returns (bool) {
     return supportedProtocols[staker].contains(protocol);
   }
@@ -336,12 +333,12 @@ contract MakerRegistry {
    */
   function getSupportedProtocols(
     address staker
-  ) external view returns (address[] memory protocolList) {
-    EnumerableSet.AddressSet storage protocols = supportedProtocols[staker];
+  ) external view returns (bytes4[] memory protocolList) {
+    EnumerableSet.Bytes32Set storage protocols = supportedProtocols[staker];
     uint256 length = protocols.length();
-    protocolList = new address[](length);
+    protocolList = new bytes4[](length);
     for (uint256 i = 0; i < length; i++) {
-      protocolList[i] = protocols.at(i);
+      protocolList[i] = protocols.at(i)[4];
     }
   }
 
