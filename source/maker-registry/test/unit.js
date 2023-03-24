@@ -54,7 +54,7 @@ describe('MakerRegistry Unit', () => {
     it('add an empty list of tokens fails', async () => {
       await expect(
         registry.connect(account1).addProtocols([])
-      ).to.be.revertedWith('NO_PROTOCOLS_TO_ADD')
+      ).to.be.revertedWith('NoProtocolsToAdd()')
     })
 
     it('add a list of tokens when there is sufficient stake token', async () => {
@@ -119,7 +119,7 @@ describe('MakerRegistry Unit', () => {
         registry
           .connect(account1)
           .addProtocols([token1.address, token2.address, token1.address])
-      ).to.be.revertedWith('PROTOCOL_EXISTS')
+      ).to.be.revertedWith(`ProtocolExists("${token1.address}")`)
     })
 
     it('add a duplicate token', async () => {
@@ -129,7 +129,7 @@ describe('MakerRegistry Unit', () => {
         .addProtocols([token1.address, token2.address])
       await expect(
         registry.connect(account1).addProtocols([token1.address])
-      ).to.be.revertedWith('PROTOCOL_EXISTS')
+      ).to.be.revertedWith(`ProtocolExists("${token1.address}")`)
     })
   })
 
@@ -137,7 +137,7 @@ describe('MakerRegistry Unit', () => {
     it('remove an empty list of tokens fails', async () => {
       await expect(
         registry.connect(account1).removeProtocols([])
-      ).to.be.revertedWith('NO_PROTOCOLS_TO_REMOVE')
+      ).to.be.revertedWith('NoProtocolsToRemove()')
     })
 
     it('remove a list of tokens', async () => {
@@ -189,7 +189,7 @@ describe('MakerRegistry Unit', () => {
     it('remove all tokens for a staker fails when there are no tokens to remove', async () => {
       await expect(
         registry.connect(account1).removeAllProtocols()
-      ).to.be.revertedWith('NO_PROTOCOLS_TO_REMOVE')
+      ).to.be.revertedWith('NoProtocolsToRemove()')
     })
 
     it('remove all tokens for an staker', async () => {
@@ -230,7 +230,7 @@ describe('MakerRegistry Unit', () => {
         registry
           .connect(account1)
           .removeProtocols([token1.address, token2.address, token1.address])
-      ).to.be.revertedWith('PROTOCOL_DOES_NOT_EXIST')
+      ).to.be.revertedWith(`ProtocolDoesNotExists("${token1.address}")`)
     })
 
     it('remove a token already removed fails', async () => {
@@ -246,7 +246,7 @@ describe('MakerRegistry Unit', () => {
 
       await expect(
         registry.connect(account1).removeProtocols([token1.address])
-      ).to.be.revertedWith('PROTOCOL_DOES_NOT_EXIST')
+      ).to.be.revertedWith(`ProtocolDoesNotExists("${token1.address}")`)
     })
   })
 

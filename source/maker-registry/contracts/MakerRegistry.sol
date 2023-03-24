@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -26,6 +26,11 @@ contract MakerRegistry {
   event AddProtocols(address indexed account, address[] tokens);
   event RemoveProtocols(address indexed account, address[] tokens);
   event SetURL(address indexed account, string url);
+
+  error NoProtocolsToAdd();
+  error NoProtocolsToRemove();
+  error ProtocolDoesNotExists(address);
+  error ProtocolExists(address);
 
   /**
    * @notice Constructor
@@ -58,8 +63,10 @@ contract MakerRegistry {
    */
   function addProtocols(address[] calldata protocols) external {
     uint256 length = protocols.length;
-    require(length > 0, "NO_PROTOCOLS_TO_ADD");
-    EnumerableSet.AddressSet storage protocolList = supportedProtocols[msg.sender];
+    if(length <= 0) revert NoProtocolsToAdd();
+    EnumerableSet.AddressSet storage protocolList = supportedProtocols[
+      msg.sender
+    ];
 
     uint256 transferAmount = 0;
     if (protocolList.length() == 0) {
@@ -68,7 +75,7 @@ contract MakerRegistry {
     }
     for (uint256 i = 0; i < length; i++) {
       address protocol = protocols[i];
-      require(protocolList.add(protocol), "PROTOCOL_EXISTS");
+      if(!protocolList.add(protocol)) revert ProtocolExists(protocol);
       supportingStakers[protocol].add(msg.sender);
     }
     transferAmount += protocolCost * length;
@@ -84,15 +91,15 @@ contract MakerRegistry {
    */
   function removeProtocols(address[] calldata protocols) external {
     uint256 length = protocols.length;
-    require(length > 0, "NO_PROTOCOLS_TO_REMOVE");
-    EnumerableSet.AddressSet storage tokenList = supportedProtocols[msg.sender];
+    if(length <= 0) revert NoProtocolsToRemove();
+    EnumerableSet.AddressSet storage protocolList = supportedProtocols[msg.sender];
     for (uint256 i = 0; i < length; i++) {
-      address token = protocols[i];
-      require(tokenList.remove(token), "PROTOCOL_DOES_NOT_EXIST");
-      supportingStakers[token].remove(msg.sender);
+      address protocol = protocols[i];
+      if(!protocolList.remove(protocol)) revert ProtocolDoesNotExists(protocol);
+      supportingStakers[protocol].remove(msg.sender);
     }
     uint256 transferAmount = protocolCost * length;
-    if (tokenList.length() == 0) {
+    if (protocolList.length() == 0) {
       transferAmount += obligationCost;
       emit FullUnstake(msg.sender);
     }
@@ -110,7 +117,7 @@ contract MakerRegistry {
       msg.sender
     ];
     uint256 length = supportedProtocolList.length();
-    require(length > 0, "NO_PROTOCOLS_TO_REMOVE");
+    if(length <= 0) revert NoProtocolsToRemove();
     address[] memory protocolList = new address[](length);
 
     for (uint256 i = length; i > 0; ) {
