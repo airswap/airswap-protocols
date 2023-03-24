@@ -17,7 +17,6 @@ describe('MakerRegistry Unit', () => {
   let registryZeroCost
   const OBLIGATION_COST = 1000
   const TOKEN_COST = 10
-  const PROTOCOL_COST = 10
 
   beforeEach(async () => {
     snapshotId = await ethers.provider.send('evm_snapshot')
@@ -35,8 +34,7 @@ describe('MakerRegistry Unit', () => {
     registry = await registryFactory.deploy(
       stakingToken.address,
       OBLIGATION_COST,
-      TOKEN_COST,
-      PROTOCOL_COST
+      TOKEN_COST
     )
     await registry.deployed()
   })
@@ -46,11 +44,9 @@ describe('MakerRegistry Unit', () => {
       const tokenAddress = await registry.stakingToken()
       const obligationCost = await registry.obligationCost()
       const tokenCost = await registry.tokenCost()
-      const protocolCost = await registry.protocolCost()
       expect(tokenAddress).to.equal(stakingToken.address)
       expect(obligationCost).to.equal(OBLIGATION_COST)
       expect(tokenCost).to.equal(TOKEN_COST)
-      expect(protocolCost).to.equal(PROTOCOL_COST)
     })
   })
 
@@ -259,7 +255,6 @@ describe('MakerRegistry Unit', () => {
       let zero_cost = '0'
       registryZeroCost = await registryFactory.deploy(
         stakingToken.address,
-        zero_cost,
         zero_cost,
         zero_cost
       )

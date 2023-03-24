@@ -18,7 +18,6 @@ contract MakerRegistry {
   IERC20 public immutable stakingToken;
   uint256 public immutable obligationCost;
   uint256 public immutable tokenCost;
-  uint256 public immutable protocolCost;
   mapping(address => EnumerableSet.AddressSet) internal supportedTokens;
   mapping(address => EnumerableSet.Bytes32Set) internal supportedProtocols;
   mapping(address => EnumerableSet.AddressSet) internal supportingStakersTokens;
@@ -47,18 +46,16 @@ contract MakerRegistry {
    * @notice Constructor
    * @param _stakingToken address of token used for staking
    * @param _obligationCost base amount required to stake
-   * @param _protocolCost amount required to stake per protocol
+   * @param _tokenCost amount required to stake per protocol
    */
   constructor(
     IERC20 _stakingToken,
     uint256 _obligationCost,
-    uint256 _tokenCost,
-    uint256 _protocolCost
+    uint256 _tokenCost
   ) {
     stakingToken = _stakingToken;
     obligationCost = _obligationCost;
     tokenCost = _tokenCost;
-    protocolCost = _protocolCost;
   }
 
   /**
@@ -210,6 +207,19 @@ contract MakerRegistry {
   }
 
   /**
+   * @notice Return the staking balance of a given staker
+   * @param staker address of the account used to stake
+   * @return balance of the staker account
+   */
+  function balanceOf(address staker) external view returns (uint256) {
+    uint256 tokenCount = supportedTokens[staker].length();
+    if (tokenCount == 0) {
+      return 0;
+    }
+    return obligationCost + tokenCost * tokenCount;
+  }
+
+  /**
    * @notice Add protocols supported by the caller
    * @param protocols array of protocol addresses
    */
@@ -220,21 +230,12 @@ contract MakerRegistry {
       msg.sender
     ];
 
-    uint256 transferAmount = 0;
-    if (protocolList.length() == 0) {
-      transferAmount = obligationCost;
-      emit InitialStake(msg.sender);
-    }
     for (uint256 i = 0; i < length; i++) {
       bytes4 protocol = protocols[i];
       if (!protocolList.add(protocol)) revert ProtocolExists(protocol);
       supportingStakersProtocols[protocol].add(msg.sender);
     }
-    transferAmount += protocolCost * length;
     emit AddProtocols(msg.sender, protocols);
-    if (transferAmount > 0) {
-      stakingToken.safeTransferFrom(msg.sender, address(this), transferAmount);
-    }
   }
 
   /**
@@ -252,15 +253,7 @@ contract MakerRegistry {
       if (!protocolList.remove(protocol)) revert ProtocolDoesNotExist(protocol);
       supportingStakersProtocols[protocol].remove(msg.sender);
     }
-    uint256 transferAmount = protocolCost * length;
-    if (protocolList.length() == 0) {
-      transferAmount += obligationCost;
-      emit FullUnstake(msg.sender);
-    }
     emit RemoveProtocols(msg.sender, protocols);
-    if (transferAmount > 0) {
-      stakingToken.safeTransfer(msg.sender, transferAmount);
-    }
   }
 
   /**
@@ -281,12 +274,7 @@ contract MakerRegistry {
       supportedProtocolList.remove(protocol);
       supportingStakersProtocols[protocol].remove(msg.sender);
     }
-    uint256 transferAmount = obligationCost + protocolCost * length;
-    emit FullUnstake(msg.sender);
     emit RemoveProtocols(msg.sender, protocolList);
-    if (transferAmount > 0) {
-      stakingToken.safeTransfer(msg.sender, transferAmount);
-    }
   }
 
   /**
@@ -367,18 +355,5 @@ contract MakerRegistry {
     for (uint256 i = 0; i < length; i++) {
       stakers[i] = stakerList.at(i);
     }
-  }
-
-  /**
-   * @notice Return the staking balance of a given staker
-   * @param staker address of the account used to stake
-   * @return balance of the staker account
-   */
-  function balanceOf(address staker) external view returns (uint256) {
-    uint256 tokenCount = supportedTokens[staker].length();
-    if (tokenCount == 0) {
-      return 0;
-    }
-    return obligationCost + tokenCost * tokenCount;
   }
 }
