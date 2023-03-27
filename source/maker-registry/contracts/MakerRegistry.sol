@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 /**
- * @title AirSwap: Maker Registry
+ * @title AirSwap: Server Registry
  * @notice https://www.airswap.io/
  */
 contract MakerRegistry {
@@ -18,12 +18,11 @@ contract MakerRegistry {
   IERC20 public immutable stakingToken;
   uint256 public immutable obligationCost;
   uint256 public immutable tokenCost;
-  mapping(address => EnumerableSet.AddressSet) internal supportedTokens;
-  mapping(address => EnumerableSet.Bytes32Set) internal supportedProtocols;
-  mapping(address => EnumerableSet.AddressSet) internal supportingStakersTokens;
-  mapping(bytes4 => EnumerableSet.AddressSet)
-    internal supportingStakersProtocols;
-  mapping(address => string) public stakerURLs;
+  mapping(address => EnumerableSet.AddressSet) internal tokensByServer;
+  mapping(address => EnumerableSet.Bytes32Set) internal protocolsByServer;
+  mapping(address => EnumerableSet.AddressSet) internal serversByToken;
+  mapping(bytes4 => EnumerableSet.AddressSet) internal serversByProtocol;
+  mapping(address => string) public serverURLs;
 
   event InitialStake(address indexed account);
   event FullUnstake(address indexed account);
@@ -59,11 +58,11 @@ contract MakerRegistry {
   }
 
   /**
-   * @notice Set the URL for a staker
+   * @notice Set the URL for a server
    * @param _url string value of the URL
    */
   function setURL(string calldata _url) external {
-    stakerURLs[msg.sender] = _url;
+    serverURLs[msg.sender] = _url;
     emit SetURL(msg.sender, _url);
   }
 
@@ -74,7 +73,7 @@ contract MakerRegistry {
   function addTokens(address[] calldata tokens) external {
     uint256 length = tokens.length;
     if (length <= 0) revert NoTokensToAdd();
-    EnumerableSet.AddressSet storage tokenList = supportedTokens[msg.sender];
+    EnumerableSet.AddressSet storage tokenList = tokensByServer[msg.sender];
 
     uint256 transferAmount = 0;
     if (tokenList.length() == 0) {
@@ -84,7 +83,7 @@ contract MakerRegistry {
     for (uint256 i = 0; i < length; i++) {
       address token = tokens[i];
       if (!tokenList.add(token)) revert TokenExists(token);
-      supportingStakersTokens[token].add(msg.sender);
+      serversByToken[token].add(msg.sender);
     }
     transferAmount += tokenCost * length;
     emit AddTokens(msg.sender, tokens);
@@ -100,11 +99,11 @@ contract MakerRegistry {
   function removeTokens(address[] calldata tokens) external {
     uint256 length = tokens.length;
     if (length <= 0) revert NoTokensToRemove();
-    EnumerableSet.AddressSet storage tokenList = supportedTokens[msg.sender];
+    EnumerableSet.AddressSet storage tokenList = tokensByServer[msg.sender];
     for (uint256 i = 0; i < length; i++) {
       address token = tokens[i];
       if (!tokenList.remove(token)) revert TokenDoesNotExist(token);
-      supportingStakersTokens[token].remove(msg.sender);
+      serversByToken[token].remove(msg.sender);
     }
     uint256 transferAmount = tokenCost * length;
     if (tokenList.length() == 0) {
@@ -121,7 +120,7 @@ contract MakerRegistry {
    * @notice Remove all tokens supported by the caller
    */
   function removeAllTokens() external {
-    EnumerableSet.AddressSet storage supportedTokenList = supportedTokens[
+    EnumerableSet.AddressSet storage supportedTokenList = tokensByServer[
       msg.sender
     ];
     uint256 length = supportedTokenList.length();
@@ -133,7 +132,7 @@ contract MakerRegistry {
       address token = supportedTokenList.at(i);
       tokenList[i] = token;
       supportedTokenList.remove(token);
-      supportingStakersTokens[token].remove(msg.sender);
+      serversByToken[token].remove(msg.sender);
     }
     uint256 transferAmount = obligationCost + tokenCost * length;
     emit FullUnstake(msg.sender);
@@ -151,36 +150,36 @@ contract MakerRegistry {
   function getURLsForToken(
     address token
   ) external view returns (string[] memory urls) {
-    EnumerableSet.AddressSet storage stakers = supportingStakersTokens[token];
-    uint256 length = stakers.length();
+    EnumerableSet.AddressSet storage servers = serversByToken[token];
+    uint256 length = servers.length();
     urls = new string[](length);
     for (uint256 i = 0; i < length; i++) {
-      urls[i] = stakerURLs[address(stakers.at(i))];
+      urls[i] = serverURLs[address(servers.at(i))];
     }
   }
 
   /**
-   * @notice Return whether a staker supports a given token
-   * @param staker account address used to stake
+   * @notice Return whether a server supports a given token
+   * @param server account address used to stake
    * @param token address of the token
-   * @return true if the staker supports the token
+   * @return true if the server supports the token
    */
   function supportsToken(
-    address staker,
+    address server,
     address token
   ) external view returns (bool) {
-    return supportedTokens[staker].contains(token);
+    return tokensByServer[server].contains(token);
   }
 
   /**
-   * @notice Return a list of all supported tokens for a given staker
-   * @param staker account address of the staker
+   * @notice Return a list of all supported tokens for a given server
+   * @param server account address of the server
    * @return tokenList array of all the supported tokens
    */
-  function getSupportedTokens(
-    address staker
+  function getTokensForServer(
+    address server
   ) external view returns (address[] memory tokenList) {
-    EnumerableSet.AddressSet storage tokens = supportedTokens[staker];
+    EnumerableSet.AddressSet storage tokens = tokensByServer[server];
     uint256 length = tokens.length();
     tokenList = new address[](length);
     for (uint256 i = 0; i < length; i++) {
@@ -189,34 +188,19 @@ contract MakerRegistry {
   }
 
   /**
-   * @notice Return a list of all stakers supporting a given token
+   * @notice Return a list of all servers supporting a given token
    * @param token address of the token
-   * @return stakers array of all stakers that support a given token
+   * @return servers array of all servers that support a given token
    */
-  function getStakersForToken(
+  function getServersForToken(
     address token
-  ) external view returns (address[] memory stakers) {
-    EnumerableSet.AddressSet storage stakerList = supportingStakersTokens[
-      token
-    ];
-    uint256 length = stakerList.length();
-    stakers = new address[](length);
+  ) external view returns (address[] memory servers) {
+    EnumerableSet.AddressSet storage serverList = serversByToken[token];
+    uint256 length = serverList.length();
+    servers = new address[](length);
     for (uint256 i = 0; i < length; i++) {
-      stakers[i] = stakerList.at(i);
+      servers[i] = serverList.at(i);
     }
-  }
-
-  /**
-   * @notice Return the staking balance of a given staker
-   * @param staker address of the account used to stake
-   * @return balance of the staker account
-   */
-  function balanceOf(address staker) external view returns (uint256) {
-    uint256 tokenCount = supportedTokens[staker].length();
-    if (tokenCount == 0) {
-      return 0;
-    }
-    return obligationCost + tokenCost * tokenCount;
   }
 
   /**
@@ -226,14 +210,14 @@ contract MakerRegistry {
   function addProtocols(bytes4[] calldata protocols) external {
     uint256 length = protocols.length;
     if (length <= 0) revert NoProtocolsToAdd();
-    EnumerableSet.Bytes32Set storage protocolList = supportedProtocols[
+    EnumerableSet.Bytes32Set storage protocolList = protocolsByServer[
       msg.sender
     ];
 
     for (uint256 i = 0; i < length; i++) {
       bytes4 protocol = protocols[i];
       if (!protocolList.add(protocol)) revert ProtocolExists(protocol);
-      supportingStakersProtocols[protocol].add(msg.sender);
+      serversByProtocol[protocol].add(msg.sender);
     }
     emit AddProtocols(msg.sender, protocols);
   }
@@ -245,13 +229,13 @@ contract MakerRegistry {
   function removeProtocols(bytes4[] calldata protocols) external {
     uint256 length = protocols.length;
     if (length <= 0) revert NoProtocolsToRemove();
-    EnumerableSet.Bytes32Set storage protocolList = supportedProtocols[
+    EnumerableSet.Bytes32Set storage protocolList = protocolsByServer[
       msg.sender
     ];
     for (uint256 i = 0; i < length; i++) {
       bytes4 protocol = protocols[i];
       if (!protocolList.remove(protocol)) revert ProtocolDoesNotExist(protocol);
-      supportingStakersProtocols[protocol].remove(msg.sender);
+      serversByProtocol[protocol].remove(msg.sender);
     }
     emit RemoveProtocols(msg.sender, protocols);
   }
@@ -260,7 +244,7 @@ contract MakerRegistry {
    * @notice Remove all protocols supported by the caller
    */
   function removeAllProtocols() external {
-    EnumerableSet.Bytes32Set storage supportedProtocolList = supportedProtocols[
+    EnumerableSet.Bytes32Set storage supportedProtocolList = protocolsByServer[
       msg.sender
     ];
     uint256 length = supportedProtocolList.length();
@@ -269,10 +253,10 @@ contract MakerRegistry {
 
     for (uint256 i = length; i > 0; ) {
       i--;
-      bytes4 protocol = supportedProtocolList.at(i)[4];
+      bytes4 protocol = bytes4(supportedProtocolList.at(i));
       protocolList[i] = protocol;
       supportedProtocolList.remove(protocol);
-      supportingStakersProtocols[protocol].remove(msg.sender);
+      serversByProtocol[protocol].remove(msg.sender);
     }
     emit RemoveProtocols(msg.sender, protocolList);
   }
@@ -285,75 +269,84 @@ contract MakerRegistry {
   function getURLsForProtocol(
     bytes4 protocol
   ) external view returns (string[] memory urls) {
-    EnumerableSet.AddressSet storage stakers = supportingStakersProtocols[
-      protocol
-    ];
-    uint256 length = stakers.length();
+    EnumerableSet.AddressSet storage servers = serversByProtocol[protocol];
+    uint256 length = servers.length();
     urls = new string[](length);
     for (uint256 i = 0; i < length; i++) {
-      urls[i] = stakerURLs[address(stakers.at(i))];
+      urls[i] = serverURLs[address(servers.at(i))];
     }
   }
 
   /**
-   * @notice Get the URLs for an array of stakers
-   * @param stakers array of staker addresses
+   * @notice Get the URLs for an array of servers
+   * @param servers array of server addresses
    * @return urls array of server URLs in the same order
    */
-  function getURLsForStakers(
-    address[] calldata stakers
+  function getURLsForServers(
+    address[] calldata servers
   ) external view returns (string[] memory urls) {
-    uint256 stakersLength = stakers.length;
-    urls = new string[](stakersLength);
-    for (uint256 i = 0; i < stakersLength; i++) {
-      urls[i] = stakerURLs[stakers[i]];
+    uint256 serversLength = servers.length;
+    urls = new string[](serversLength);
+    for (uint256 i = 0; i < serversLength; i++) {
+      urls[i] = serverURLs[servers[i]];
     }
   }
 
   /**
-   * @notice Return whether a staker supports a given protocol
-   * @param staker account address used to stake
+   * @notice Return whether a server supports a given protocol
+   * @param server account address used to stake
    * @param protocol address of the protocol
-   * @return true if the staker supports the protocol
+   * @return true if the server supports the protocol
    */
   function supportsProtocol(
-    address staker,
+    address server,
     bytes4 protocol
   ) external view returns (bool) {
-    return supportedProtocols[staker].contains(protocol);
+    return protocolsByServer[server].contains(protocol);
   }
 
   /**
-   * @notice Return a list of all supported protocols for a given staker
-   * @param staker account address of the staker
+   * @notice Return a list of all supported protocols for a given server
+   * @param server account address of the server
    * @return protocolList array of all the supported protocols
    */
-  function getSupportedProtocols(
-    address staker
+  function getProtocolsForServer(
+    address server
   ) external view returns (bytes4[] memory protocolList) {
-    EnumerableSet.Bytes32Set storage protocols = supportedProtocols[staker];
+    EnumerableSet.Bytes32Set storage protocols = protocolsByServer[server];
     uint256 length = protocols.length();
     protocolList = new bytes4[](length);
     for (uint256 i = 0; i < length; i++) {
-      protocolList[i] = protocols.at(i)[4];
+      protocolList[i] = bytes4(protocols.at(i));
     }
   }
 
   /**
-   * @notice Return a list of all stakers supporting a given protocol
+   * @notice Return a list of all servers supporting a given protocol
    * @param protocol address of the protocol
-   * @return stakers array of all stakers that support a given protocol
+   * @return servers array of all servers that support a given protocol
    */
-  function getStakersForProtocol(
+  function getServersForProtocol(
     bytes4 protocol
-  ) external view returns (address[] memory stakers) {
-    EnumerableSet.AddressSet storage stakerList = supportingStakersProtocols[
-      protocol
-    ];
-    uint256 length = stakerList.length();
-    stakers = new address[](length);
+  ) external view returns (address[] memory servers) {
+    EnumerableSet.AddressSet storage serverList = serversByProtocol[protocol];
+    uint256 length = serverList.length();
+    servers = new address[](length);
     for (uint256 i = 0; i < length; i++) {
-      stakers[i] = stakerList.at(i);
+      servers[i] = serverList.at(i);
     }
+  }
+
+  /**
+   * @notice Return the staking balance of a given server
+   * @param server address of the account used to stake
+   * @return balance of the server account
+   */
+  function balanceOf(address server) external view returns (uint256) {
+    uint256 tokenCount = tokensByServer[server].length();
+    if (tokenCount == 0) {
+      return 0;
+    }
+    return obligationCost + tokenCost * tokenCount;
   }
 }
