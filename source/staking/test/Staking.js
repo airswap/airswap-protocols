@@ -380,6 +380,36 @@ describe('Staking Unit', () => {
       // every 1 block 2% is unstakeable
       expect(available).to.equal('10')
     })
+
+    it('the available balance should update', async () => {
+      await token.mock.transferFrom.returns(true)
+      await token.mock.transfer.returns(true)
+      await staking.connect(account1).stake('100')
+
+      let block = await ethers.provider.getBlock()
+      await ethers.provider.send('evm_mine', [block['timestamp'] + 10])
+
+      await staking.connect(account1).unstake('10')
+      const available = await staking.available(account1.address)
+      expect(available).to.equal('1')
+    })
+
+    it('the previous available balance should be maintained when not entirely unstaked', async () => {
+      await token.mock.transferFrom.returns(true)
+      await token.mock.transfer.returns(true)
+      await staking.connect(account1).stake('100')
+
+      let block = await ethers.provider.getBlock()
+      // With a duration of 100, increasing the timestamp by 10 will unlock 10% of the staked balance
+      await ethers.provider.send('evm_mine', [block['timestamp'] + 10])
+
+      // We withdraw 2
+      await staking.connect(account1).unstake('2')
+
+      // The unstaking operation mine a new block with a timestamp increased by 1 hence a new balance of 9 and not 8
+      const available = await staking.available(account1.address)
+      expect(available).to.equal('9')
+    })
   })
 
   describe('Delegate', async () => {
