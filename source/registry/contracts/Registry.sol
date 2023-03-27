@@ -10,7 +10,7 @@ import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
  * @title AirSwap: Server Registry
  * @notice https://www.airswap.io/
  */
-contract MakerRegistry {
+contract Registry {
   using SafeERC20 for IERC20;
   using EnumerableSet for EnumerableSet.AddressSet;
   using EnumerableSet for EnumerableSet.Bytes32Set;
