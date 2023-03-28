@@ -24,7 +24,7 @@ yarn add @airswap/libraries
 Import into your application:
 
 ```TypeScript
-import { Indexer, Maker, Swap } from '@airswap/libraries';
+import { Indexer, Server, Swap } from '@airswap/libraries';
 ```
 
 ## Commands

@@ -4,7 +4,7 @@ import { Registry as RegistryContract } from '@airswap/registry/typechain/contra
 import { Registry__factory } from '@airswap/registry/typechain/factories/contracts'
 import { chainIds } from '@airswap/constants'
 
-import { Maker, MakerOptions } from './Maker'
+import { Server, ServerOptions } from './Server'
 import { SwapERC20 } from './SwapERC20'
 
 import * as registryDeploys from '@airswap/registry/deploys.js'
@@ -31,11 +31,11 @@ export class Registry {
     throw new Error(`Registry deploy not found for chainId ${chainId}`)
   }
 
-  public async getMakers(
+  public async getServers(
     quoteToken: string,
     baseToken: string,
-    options?: MakerOptions
-  ): Promise<Array<Maker>> {
+    options?: ServerOptions
+  ): Promise<Array<Server>> {
     const quoteTokenURLs: string[] = await this.contract.getURLsForToken(
       quoteToken
     )
@@ -46,7 +46,7 @@ export class Registry {
       quoteTokenURLs
         .filter((value) => baseTokenURLs.includes(value))
         .map((url) => {
-          return Maker.at(url, {
+          return Server.at(url, {
             swapContract:
               options?.swapContract || SwapERC20.getAddress(this.chainId),
             chainId: this.chainId,
@@ -56,6 +56,6 @@ export class Registry {
     )
     return serverPromises
       .filter((value) => value.status === 'fulfilled')
-      .map((v: PromiseFulfilledResult<Maker>) => v.value)
+      .map((v: PromiseFulfilledResult<Server>) => v.value)
   }
 }

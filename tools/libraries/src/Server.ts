@@ -1,4 +1,5 @@
 import * as url from 'url'
+import { FullOrderERC20 } from '@airswap/types'
 import { ethers } from 'ethers'
 import { isBrowser } from 'browser-or-node'
 import { Client as HttpClient } from 'jayson'
@@ -21,7 +22,7 @@ export type SupportedProtocolInfo = {
   params?: any
 }
 
-export type MakerOptions = {
+export type ServerOptions = {
   chainId?: number
   swapContract?: string
   initializeTimeout?: number
@@ -40,18 +41,153 @@ const PROTOCOL_NAMES = {
   'request-for-quote': 'Request for Quote',
 }
 
-export interface MakerEvents {
+export type IndexedOrderResponse = {
+  hash?: string | undefined
+  order: FullOrderERC20
+  addedOn: number
+}
+
+export type HealthCheckResponse = {
+  peers: string[]
+  registry: string
+  databaseOrders: number
+}
+
+export type OrderResponse = {
+  orders: Record<string, IndexedOrderResponse>
+  pagination: Pagination
+  filters?: FiltersResponse | undefined
+  ordersForQuery: number
+}
+
+export type Pagination = {
+  first: string
+  last: string
+  prev?: string | undefined
+  next?: string | undefined
+}
+
+export function toSortOrder(key: string): SortOrder | undefined {
+  if (typeof key !== 'string') {
+    return undefined
+  }
+  if (key.toUpperCase() === SortOrder.ASC) {
+    return SortOrder.ASC
+  }
+  if (key.toUpperCase() === SortOrder.DESC) {
+    return SortOrder.DESC
+  }
+
+  return undefined
+}
+
+export type RequestFilter = {
+  signerTokens?: string[]
+  senderTokens?: string[]
+  minSignerAmount?: bigint
+  maxSignerAmount?: bigint
+  minSenderAmount?: bigint
+  maxSenderAmount?: bigint
+  page: number
+  sortField?: SortField
+  sortOrder?: SortOrder
+  maxAddedDate?: number
+}
+
+export type FiltersResponse = {
+  signerToken: Record<string, AmountLimitFilterResponse>
+  senderToken: Record<string, AmountLimitFilterResponse>
+}
+
+export type AmountLimitFilterResponse = {
+  min: string
+  max: string
+}
+
+export enum SortField {
+  SIGNER_AMOUNT = 'SIGNER_AMOUNT',
+  SENDER_AMOUNT = 'SENDER_AMOUNT',
+}
+
+export function toSortField(key: string): SortField | undefined {
+  if (typeof key !== 'string') {
+    return undefined
+  }
+  if (key.toUpperCase() === SortField.SIGNER_AMOUNT) {
+    return SortField.SIGNER_AMOUNT
+  }
+  if (key.toUpperCase() === SortField.SENDER_AMOUNT) {
+    return SortField.SENDER_AMOUNT
+  }
+  return undefined
+}
+
+export enum SortOrder {
+  ASC = 'ASC',
+  DESC = 'DESC',
+}
+
+export abstract class IndexedOrderError extends Error {
+  public code!: number
+  public constructor(message: string) {
+    super(message)
+    this.message = message
+  }
+}
+export class ErrorResponse {
+  public code: number
+  public message: string
+  public constructor(code: number, message: string) {
+    this.code = code
+    this.message = message
+  }
+}
+export class SuccessResponse {
+  public message: string
+  public constructor(message: string) {
+    this.message = message
+  }
+}
+export class JsonRpcResponse {
+  public id: string
+  public result:
+    | OrderResponse
+    | ErrorResponse
+    | SuccessResponse
+    | HealthCheckResponse
+    | undefined
+  private jsonrpc = '2.0'
+
+  public constructor(
+    id: string,
+    result:
+      | OrderResponse
+      | IndexedOrderError
+      | SuccessResponse
+      | HealthCheckResponse
+      | undefined
+  ) {
+    this.id = id
+    if (result instanceof Error) {
+      this.result = new ErrorResponse(result.code, result.message)
+    } else {
+      this.result = result
+    }
+  }
+}
+
+export interface ServerEvents {
   pricing: (pricing: Pricing[]) => void
   error: (error: JsonRpcError) => void
 }
 
-export class Maker extends TypedEmitter<MakerEvents> {
+export class Server extends TypedEmitter<ServerEvents> {
   public transportProtocol: 'websocket' | 'http'
   private supportedProtocols: SupportedProtocolInfo[]
   private isInitialized: boolean
   private httpClient: HttpClient
   private webSocketClient: JsonRpcWebsocket
-  private senderMaker: string
+  private senderServer: string
   private senderWallet: string
 
   public constructor(
@@ -66,9 +202,9 @@ export class Maker extends TypedEmitter<MakerEvents> {
 
   public static async at(
     locator: string,
-    options?: MakerOptions
-  ): Promise<Maker> {
-    const server = new Maker(locator, options?.swapContract, options?.chainId)
+    options?: ServerOptions
+  ): Promise<Server> {
+    const server = new Server(locator, options?.swapContract, options?.chainId)
     await server._init(options?.initializeTimeout)
     return server
   }
@@ -177,6 +313,43 @@ export class Maker extends TypedEmitter<MakerEvents> {
     return this.callRPCMethod<boolean>('consider', order)
   }
 
+  public async getOrdersERC20By(
+    requestFilter: RequestFilter,
+    filters = false
+  ): Promise<OrderResponse> {
+    try {
+      return Promise.resolve(
+        (await this.httpCall('getOrdersERC20', [
+          { ...this.toBigIntJson(requestFilter), filters },
+        ])) as OrderResponse
+      )
+    } catch (err) {
+      return Promise.reject(err)
+    }
+  }
+
+  public async getOrdersERC20(): Promise<OrderResponse> {
+    try {
+      return Promise.resolve(
+        (await this.httpCall('getOrdersERC20', [{}])) as OrderResponse
+      )
+    } catch (err) {
+      return Promise.reject(err)
+    }
+  }
+
+  public async addOrderERC20(
+    fullOrder: FullOrderERC20
+  ): Promise<SuccessResponse> {
+    try {
+      return Promise.resolve(
+        (await this.httpCall('addOrderERC20', [fullOrder])) as SuccessResponse
+      )
+    } catch (err) {
+      return Promise.reject(err)
+    }
+  }
+
   public disconnect(): void {
     if (this.webSocketClient) {
       if (this.webSocketClient.state !== WebsocketReadyStates.CLOSED) {
@@ -205,7 +378,7 @@ export class Maker extends TypedEmitter<MakerEvents> {
   }
 
   private _initHTTPClient(locator: string, clientOnly?: boolean) {
-    // clientOnly flag set when initializing client for last look `senderMaker`
+    // clientOnly flag set when initializing client for last look `senderServer`
     const parsedUrl = parseUrl(locator)
     const options = {
       protocol: parsedUrl.protocol,
@@ -269,7 +442,7 @@ export class Maker extends TypedEmitter<MakerEvents> {
           }
         )
         const initTimeout = setTimeout(() => {
-          reject('Maker did not call initialize in time')
+          reject('Server did not call initialize in time')
           this.disconnect()
         }, initializeTimeout)
 
@@ -294,7 +467,7 @@ export class Maker extends TypedEmitter<MakerEvents> {
   }
 
   private requireInitialized() {
-    if (!this.isInitialized) throw new Error('Maker not yet initialized')
+    if (!this.isInitialized) throw new Error('Server not yet initialized')
   }
 
   private requireRFQSupport(version?: string) {
@@ -311,12 +484,12 @@ export class Maker extends TypedEmitter<MakerEvents> {
       let message
       if (supportedVersion) {
         message =
-          `Maker at ${this.locator} doesn't support ` +
+          `Server at ${this.locator} doesn't support ` +
           `${PROTOCOL_NAMES[protocol]} v${version}` +
           `supported version ${supportedVersion}`
       } else {
         message =
-          `Maker at ${this.locator} doesn't ` +
+          `Server at ${this.locator} doesn't ` +
           `support ${PROTOCOL_NAMES[protocol]}`
       }
       throw new Error(message)
@@ -384,14 +557,22 @@ export class Maker extends TypedEmitter<MakerEvents> {
     const lastLookSupport = supportedProtocols.find(
       (protocol) => protocol.name === 'last-look'
     )
-    if (lastLookSupport?.params?.senderMaker) {
-      this.senderMaker = lastLookSupport.params.senderMaker
+    if (lastLookSupport?.params?.senderServer) {
+      this.senderServer = lastLookSupport.params.senderServer
       // Prepare an http client for consider calls.
-      this._initHTTPClient(this.senderMaker, true)
+      this._initHTTPClient(this.senderServer, true)
     }
     if (lastLookSupport?.params?.senderWallet) {
       this.senderWallet = lastLookSupport.params.senderWallet
     }
+  }
+
+  private toBigIntJson(requestFilter: RequestFilter) {
+    return JSON.parse(
+      JSON.stringify(requestFilter, (key, value) =>
+        typeof value === 'bigint' ? value.toString() : value
+      )
+    )
   }
 
   private httpCall<T>(
@@ -412,7 +593,7 @@ export class Maker extends TypedEmitter<MakerEvents> {
             if (errors.length) {
               reject({
                 code: -1,
-                message: `Maker response differs from request params: ${errors}`,
+                message: `Server response differs from request params: ${errors}`,
               })
             } else {
               resolve(result)
@@ -441,7 +622,7 @@ export class Maker extends TypedEmitter<MakerEvents> {
   ): Promise<T> {
     if (
       this.transportProtocol === 'http' ||
-      (method === 'consider' && this.senderMaker)
+      (method === 'consider' && this.senderServer)
     ) {
       return this.httpCall<T>(method, params)
     } else {

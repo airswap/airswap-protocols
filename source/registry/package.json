@@ -1,7 +1,7 @@
 {
   "name": "@airswap/registry",
   "version": "4.0.1",
-  "description": "AirSwap: Maker Registry",
+  "description": "AirSwap: Server Registry",
   "license": "MIT",
   "repository": {
     "type": "git",
