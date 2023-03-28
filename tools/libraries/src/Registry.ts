@@ -1,25 +1,25 @@
 import { ethers } from 'ethers'
 import type { Provider } from '@ethersproject/providers'
-import { MakerRegistry as MakerRegistryContract } from '@airswap/maker-registry/typechain/contracts'
-import { MakerRegistry__factory } from '@airswap/maker-registry/typechain/factories/contracts'
+import { Registry as RegistryContract } from '@airswap/registry/typechain/contracts'
+import { Registry__factory } from '@airswap/registry/typechain/factories/contracts'
 import { chainIds } from '@airswap/constants'
 
-import { Maker, MakerOptions } from './Maker'
+import { Server, ServerOptions } from './Server'
 import { SwapERC20 } from './SwapERC20'
 
-import * as registryDeploys from '@airswap/maker-registry/deploys.js'
+import * as registryDeploys from '@airswap/registry/deploys.js'
 
-export class MakerRegistry {
+export class Registry {
   public chainId: number
-  private contract: MakerRegistryContract
+  private contract: RegistryContract
 
   public constructor(
     chainId = chainIds.MAINNET,
     signerOrProvider?: ethers.Signer | Provider
   ) {
     this.chainId = chainId
-    this.contract = MakerRegistry__factory.connect(
-      MakerRegistry.getAddress(chainId),
+    this.contract = Registry__factory.connect(
+      Registry.getAddress(chainId),
       signerOrProvider
     )
   }
@@ -28,14 +28,14 @@ export class MakerRegistry {
     if (chainId in registryDeploys) {
       return registryDeploys[chainId]
     }
-    throw new Error(`MakerRegistry deploy not found for chainId ${chainId}`)
+    throw new Error(`Registry deploy not found for chainId ${chainId}`)
   }
 
-  public async getMakers(
+  public async getServers(
     quoteToken: string,
     baseToken: string,
-    options?: MakerOptions
-  ): Promise<Array<Maker>> {
+    options?: ServerOptions
+  ): Promise<Array<Server>> {
     const quoteTokenURLs: string[] = await this.contract.getURLsForToken(
       quoteToken
     )
@@ -46,7 +46,7 @@ export class MakerRegistry {
       quoteTokenURLs
         .filter((value) => baseTokenURLs.includes(value))
         .map((url) => {
-          return Maker.at(url, {
+          return Server.at(url, {
             swapContract:
               options?.swapContract || SwapERC20.getAddress(this.chainId),
             chainId: this.chainId,
@@ -56,6 +56,6 @@ export class MakerRegistry {
     )
     return serverPromises
       .filter((value) => value.status === 'fulfilled')
-      .map((v: PromiseFulfilledResult<Maker>) => v.value)
+      .map((v: PromiseFulfilledResult<Server>) => v.value)
   }
 }

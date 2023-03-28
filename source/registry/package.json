@@ -1,7 +1,7 @@
 {
-  "name": "@airswap/indexer-registry",
-  "version": "4.0.0",
-  "description": "AirSwap: Indexer Registry",
+  "name": "@airswap/registry",
+  "version": "4.0.1",
+  "description": "AirSwap: Server Registry",
   "license": "MIT",
   "repository": {
     "type": "git",
