@@ -47,12 +47,6 @@ export type IndexedOrderResponse = {
   addedOn: number
 }
 
-export type HealthCheckResponse = {
-  peers: string[]
-  registry: string
-  databaseOrders: number
-}
-
 export type OrderResponse = {
   orders: Record<string, IndexedOrderResponse>
   pagination: Pagination
@@ -150,22 +144,12 @@ export class SuccessResponse {
 }
 export class JsonRpcResponse {
   public id: string
-  public result:
-    | OrderResponse
-    | ErrorResponse
-    | SuccessResponse
-    | HealthCheckResponse
-    | undefined
+  public result: OrderResponse | ErrorResponse | SuccessResponse | undefined
   private jsonrpc = '2.0'
 
   public constructor(
     id: string,
-    result:
-      | OrderResponse
-      | IndexedOrderError
-      | SuccessResponse
-      | HealthCheckResponse
-      | undefined
+    result: OrderResponse | IndexedOrderError | SuccessResponse | undefined
   ) {
     this.id = id
     if (result instanceof Error) {
