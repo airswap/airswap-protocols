@@ -1,3 +1,4 @@
+export { Swap } from './src/Swap'
 export { SwapERC20 } from './src/SwapERC20'
 export { Wrapper } from './src/Wrapper'
 export { MakerRegistry } from './src/MakerRegistry'
