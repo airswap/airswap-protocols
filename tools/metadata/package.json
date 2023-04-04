@@ -28,7 +28,8 @@
     "axios": "^0.21.4",
     "eth-contract-metadata": "^1.12.1",
     "ethereumjs-abi": "^0.6.8",
-    "ethers": "^5.6.9"
+    "ethers": "^5.6.9",
+    "valid-url": "^1.0.9"
   },
   "publishConfig": {
     "access": "public"
