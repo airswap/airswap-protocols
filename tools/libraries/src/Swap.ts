@@ -9,7 +9,6 @@ import * as swapDeploys from '@airswap/swap/deploys.js'
 
 export class Swap {
   public contract: SwapContract
-  public chainId: number
   public address: string
 
   public constructor(signer: ethers.Signer, address?: string) {
