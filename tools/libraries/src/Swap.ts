@@ -1,26 +1,20 @@
 import { ethers, ContractTransaction } from 'ethers'
-import type { Provider } from '@ethersproject/providers'
 import { chainIds } from '@airswap/constants'
-import { Order } from '@airswap/types'
 import { Swap as SwapContract } from '@airswap/swap/typechain/contracts'
+import { ISwap } from '@airswap/swap/typechain/contracts/interfaces'
 import { Swap__factory } from '@airswap/swap/typechain/factories/contracts'
 import { checkResultToErrors } from '@airswap/utils'
 
 import * as swapDeploys from '@airswap/swap/deploys.js'
 
 export class Swap {
-  public chainId: number
   public contract: SwapContract
+  public chainId: number
+  public address: string
 
-  public constructor(
-    chainId = chainIds.MAINNET,
-    signerOrProvider?: ethers.Signer | Provider
-  ) {
-    this.chainId = chainId
-    this.contract = Swap__factory.connect(
-      Swap.getAddress(chainId),
-      signerOrProvider
-    )
+  public constructor(signer: ethers.Signer, address?: string) {
+    this.address = address
+    this.contract = Swap__factory.connect(this.address, signer)
   }
 
   public static getAddress(chainId = chainIds.MAINNET): string {
@@ -30,51 +24,21 @@ export class Swap {
     throw new Error(`Swap contract not found for chainId ${chainId}`)
   }
 
-  public async check(
-    order: Order,
-    senderWallet: string,
-    signer?: ethers.providers.JsonRpcSigner
-  ): Promise<Array<string>> {
-    let contract = this.contract
-    if (!this.contract.signer) {
-      if (signer === undefined) {
-        throw new Error('Signer must be provided')
-      } else {
-        contract = contract.connect(signer)
-      }
-    }
+  public async check(order: ISwap.OrderStruct): Promise<Array<string>> {
+    const contract = this.contract
     const [errors, count] = await contract.check(order)
     return checkResultToErrors(count, errors)
   }
 
   public async swap(
-    order: Order,
-    maxRoyalty: string,
-    sender?: ethers.providers.JsonRpcSigner
+    order: ISwap.OrderStruct,
+    maxRoyalty: string
   ): Promise<ContractTransaction> {
-    let contract = this.contract
-    if (!this.contract.signer) {
-      if (sender === undefined) {
-        throw new Error('Signer must be provided')
-      } else {
-        contract = contract.connect(sender)
-      }
-    }
-    return await contract.swap(sender.getAddress(), maxRoyalty, order)
+    const senderAddress = await this.contract.signer.getAddress()
+    return await this.contract.swap(senderAddress, maxRoyalty, order)
   }
 
-  public async cancel(
-    nonces: Array<string>,
-    sender?: ethers.providers.JsonRpcSigner
-  ): Promise<ContractTransaction> {
-    let contract = this.contract
-    if (!this.contract.signer) {
-      if (sender === undefined) {
-        throw new Error('Signer must be provided')
-      } else {
-        contract = contract.connect(sender)
-      }
-    }
-    return await contract.cancel(nonces)
+  public async cancel(nonces: Array<string>): Promise<ContractTransaction> {
+    return await this.contract.cancel(nonces)
   }
 }
