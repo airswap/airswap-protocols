@@ -234,10 +234,10 @@ async function fetchMetaData(uri) {
   return {}
 }
 
-const transformMetadataAttributeToCollectionTokenAttribute = (
+const transformErc721TokenAttributeToCollectionTokenAttribute = (
   attribute: any
 ): CollectionTokenAttribute => ({
-  label: attribute.trait_type,
+  label: attribute.item || attribute.trait_type || '',
   value: `${attribute.value}`,
 })
 
@@ -248,8 +248,15 @@ const transformERC721ToCollectionToken = (
   description: metadata.description,
   image: metadata.image?.replace('ipfs://', 'https://ipfs.io/ipfs/'),
   attributes: (metadata.attributes || []).map(
-    transformMetadataAttributeToCollectionTokenAttribute
+    transformErc721TokenAttributeToCollectionTokenAttribute
   ),
+})
+
+const transformErc1155TokenAttributeToCollectionTokenAttribute = (
+  attribute: any
+): CollectionTokenAttribute => ({
+  label: attribute.trait_type,
+  value: `${attribute.value}`,
 })
 
 const transformERC1155ToCollectionToken = (
@@ -263,7 +270,7 @@ const transformERC1155ToCollectionToken = (
       'https://ipfs.io/ipfs/'
     ) || undefined,
   attributes: (metadata.attributes || []).map(
-    transformMetadataAttributeToCollectionTokenAttribute
+    transformErc1155TokenAttributeToCollectionTokenAttribute
   ),
   createdBy: metadata.created_by,
 })
