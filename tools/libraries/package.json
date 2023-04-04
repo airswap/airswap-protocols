@@ -32,6 +32,7 @@
     "@airswap/jsonrpc-client-websocket": "0.0.1",
     "@airswap/maker-registry": "^4.0.0",
     "@airswap/swap-erc20": "^4.0.0",
+    "@airswap/swap": "^4.0.0",
     "@airswap/types": "^4.0.0",
     "@airswap/utils": "^4.0.0",
     "@airswap/wrapper": "^4.0.0",

@@ -11,7 +11,7 @@ export class Swap {
   public contract: SwapContract
   public address: string
 
-  public constructor(signer: ethers.Signer, address?: string) {
+  public constructor(signer: ethers.Signer, address: string) {
     this.address = address
     this.contract = Swap__factory.connect(this.address, signer)
   }
