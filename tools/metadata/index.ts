@@ -197,11 +197,11 @@ export async function getCollectionTokenInfo(
         uri = await new ethers.Contract(address, ERC721_ABI, provider).tokenURI(
           id
         )
-        metadata = transformERC721ToCollectionToken(fetchMetaData(uri))
+        metadata = transformERC721ToCollectionToken(await fetchMetaData(uri))
         break
       case tokenKinds.ERC1155:
         uri = await new ethers.Contract(address, ERC1155_ABI, provider).uri(id)
-        metadata = transformERC1155ToCollectionToken(fetchMetaData(uri))
+        metadata = transformERC1155ToCollectionToken(await fetchMetaData(uri))
         break
     }
   } catch (e) {
