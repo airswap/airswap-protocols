@@ -109,7 +109,7 @@ export class Maker extends TypedEmitter<MakerEvents> {
     senderToken: string,
     senderWallet: string
   ): Promise<OrderERC20> {
-    this.requireRFQSupport()
+    this.requireRFQERC20Support()
     return this.callRPCMethod<OrderERC20>('getSignerSideOrderERC20', {
       chainId: String(this.chainId),
       swapContract: this.swapContract,
@@ -128,7 +128,7 @@ export class Maker extends TypedEmitter<MakerEvents> {
     senderToken: string,
     senderWallet: string
   ): Promise<OrderERC20> {
-    this.requireRFQSupport()
+    this.requireRFQERC20Support()
     return this.callRPCMethod<OrderERC20>('getSenderSideOrderERC20', {
       chainId: String(this.chainId),
       swapContract: this.swapContract,
@@ -144,7 +144,7 @@ export class Maker extends TypedEmitter<MakerEvents> {
   public async subscribePricingERC20(
     pairs: { baseToken: string; quoteToken: string }[]
   ): Promise<Pricing[]> {
-    this.requireLastLookSupport()
+    this.requireLastLookERC20Support()
     const pricing = await this.callRPCMethod<Pricing[]>(
       'subscribePricingERC20',
       [pairs]
@@ -156,27 +156,27 @@ export class Maker extends TypedEmitter<MakerEvents> {
   public async unsubscribePricingERC20(
     pairs: { baseToken: string; quoteToken: string }[]
   ): Promise<boolean> {
-    this.requireLastLookSupport()
+    this.requireLastLookERC20Support()
     return this.callRPCMethod<boolean>('unsubscribePricingERC20', [pairs])
   }
 
   public async subscribeAllPricingERC20(): Promise<boolean> {
-    this.requireLastLookSupport()
+    this.requireLastLookERC20Support()
     return this.callRPCMethod<boolean>('subscribeAllPricingERC20')
   }
 
   public async unsubscribeAllPricingERC20(): Promise<boolean> {
-    this.requireLastLookSupport()
+    this.requireLastLookERC20Support()
     return this.callRPCMethod<boolean>('unsubscribeAllPricingERC20')
   }
 
   public getSenderWallet(): string {
-    this.requireLastLookSupport()
+    this.requireLastLookERC20Support()
     return this.senderWallet
   }
 
   public async considerOrderERC20(order: OrderERC20): Promise<boolean> {
-    this.requireLastLookSupport()
+    this.requireLastLookERC20Support()
     return this.callRPCMethod<boolean>('considerOrderERC20', order)
   }
 
@@ -300,11 +300,11 @@ export class Maker extends TypedEmitter<MakerEvents> {
     if (!this.isInitialized) throw new Error('Maker not yet initialized')
   }
 
-  private requireRFQSupport(version?: string) {
+  private requireRFQERC20Support(version?: string) {
     this.requireProtocolSupport('request-for-quote-erc20', version)
   }
 
-  private requireLastLookSupport(version?: string) {
+  private requireLastLookERC20Support(version?: string) {
     this.requireProtocolSupport('last-look-erc20', version)
   }
 
@@ -385,16 +385,16 @@ export class Maker extends TypedEmitter<MakerEvents> {
   private setProtocols(supportedProtocols: SupportedProtocolInfo[]) {
     this.validateInitializeParams(supportedProtocols)
     this.supportedProtocols = supportedProtocols
-    const lastLookSupport = supportedProtocols.find(
+    const lastLookERC20Support = supportedProtocols.find(
       (protocol) => protocol.name === 'last-look-erc20'
     )
-    if (lastLookSupport?.params?.senderMaker) {
-      this.senderMaker = lastLookSupport.params.senderMaker
+    if (lastLookERC20Support?.params?.senderMaker) {
+      this.senderMaker = lastLookERC20Support.params.senderMaker
       // Prepare an http client for consider calls.
       this._initHTTPClient(this.senderMaker, true)
     }
-    if (lastLookSupport?.params?.senderWallet) {
-      this.senderWallet = lastLookSupport.params.senderWallet
+    if (lastLookERC20Support?.params?.senderWallet) {
+      this.senderWallet = lastLookERC20Support.params.senderWallet
     }
   }
 
