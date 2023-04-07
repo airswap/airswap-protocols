@@ -48,7 +48,7 @@ function mockHttpMaker(api) {
           senderWallet: params.senderWallet,
         })
         break
-      case 'consider':
+      case 'considerOrderERC20':
         res = true
         break
     }
@@ -150,8 +150,8 @@ describe('WebSocketMaker', () => {
       }
       mockMaker.setNextMessageCallback(onResponse)
     })
-    expect(maker.supportsProtocol('last-look')).to.equal(true)
-    expect(maker.supportsProtocol('request-for-quote')).to.equal(false)
+    expect(maker.supportsProtocol('last-look-erc20')).to.equal(true)
+    expect(maker.supportsProtocol('request-for-quote-erc20')).to.equal(false)
     await correctInitializeResponse
   })
 
@@ -160,17 +160,19 @@ describe('WebSocketMaker', () => {
 
     // Ensure subscribe method is correct format.
     const onSubscribe = (socket, data) => {
-      expect(data).to.be.a.JSONRpcRequest('subscribe', [samplePairs])
+      expect(data).to.be.a.JSONRpcRequest('subscribePricingERC20', [
+        samplePairs,
+      ])
       socket.send(JSON.stringify(createResponse(data.id, samplePricing)))
     }
     mockMaker.setNextMessageCallback(onSubscribe, true)
-    const pricing = nextEvent(maker, 'pricing')
-    maker.subscribe(samplePairs)
+    const pricing = nextEvent(maker, 'pricing-erc20')
+    maker.subscribePricingERC20(samplePairs)
 
     // Ensure pricing is emitted and has the correct values.
     expect(await pricing).to.eql(samplePricing)
 
-    const updatedPricing = nextEvent(maker, 'pricing')
+    const updatedPricing = nextEvent(maker, 'pricing-erc20')
     const latestPricing = [
       [
         {
@@ -200,25 +202,25 @@ describe('WebSocketMaker', () => {
       mockMaker.setNextMessageCallback(onResponse)
     })
 
-    // Ensure updatePricing is correctly called and causes pricing to be emitted
+    // Ensure setPricingERC20 is correctly called and causes pricing to be emitted
     mockMaker.emit(
       'message',
       JSON.stringify(
-        createRequest('updatePricing', latestPricing, updatePricingRequestId)
+        createRequest('setPricingERC20', latestPricing, updatePricingRequestId)
       )
     )
     expect(await updatedPricing).to.eql(latestPricing[0])
     await correctUpdatePricingResponse
   })
 
-  it('should call consider with the correct parameters', async () => {
+  it('should call considerOrderERC20 with the correct parameters', async () => {
     const maker = await Maker.at(url)
     const onConsider = (socket, data) => {
-      expect(data).to.be.a.JSONRpcRequest('consider', fakeOrder)
+      expect(data).to.be.a.JSONRpcRequest('considerOrderERC20', fakeOrder)
       socket.send(JSON.stringify(createResponse(data.id, true)))
     }
     mockMaker.setNextMessageCallback(onConsider, true)
-    const result = await maker.consider(fakeOrder)
+    const result = await maker.considerOrderERC20(fakeOrder)
     expect(result).to.equal(true)
   })
 
@@ -237,7 +239,7 @@ describe('WebSocketMaker', () => {
         }
 
         const maker = await Maker.at(url)
-        const result = await maker.consider(fakeOrder)
+        const result = await maker.considerOrderERC20(fakeOrder)
         expect(result).to.equal(true)
       }
     )
@@ -245,29 +247,31 @@ describe('WebSocketMaker', () => {
   it('should call unsubscribe with the correct parameters', async () => {
     const maker = await Maker.at(url)
     const onUnsubscribe = (socket, data) => {
-      expect(data).to.be.a.JSONRpcRequest('unsubscribe', [samplePairs])
+      expect(data).to.be.a.JSONRpcRequest('unsubscribePricingERC20', [
+        samplePairs,
+      ])
       socket.send(JSON.stringify(createResponse(data.id, true)))
     }
     mockMaker.setNextMessageCallback(onUnsubscribe, true)
-    const result = await maker.unsubscribe(samplePairs)
+    const result = await maker.unsubscribePricingERC20(samplePairs)
     expect(result).to.equal(true)
   })
 
   it('should call subscribeAll and unsubscribeAll correctly', async () => {
     const maker = await Maker.at(url)
     const onSubscribeAll = (socket, data) => {
-      expect(data).to.be.a.JSONRpcRequest('subscribeAll')
+      expect(data).to.be.a.JSONRpcRequest('subscribeAllPricingERC20')
       socket.send(JSON.stringify(createResponse(data.id, true)))
     }
     const onUnsubscribeAll = (socket, data) => {
-      expect(data).to.be.a.JSONRpcRequest('unsubscribeAll')
+      expect(data).to.be.a.JSONRpcRequest('unsubscribeAllPricingERC20')
       socket.send(JSON.stringify(createResponse(data.id, true)))
     }
     mockMaker.setNextMessageCallback(onSubscribeAll, true)
-    const subscribeResult = await maker.subscribeAll()
+    const subscribeResult = await maker.subscribeAllPricingERC20()
     expect(subscribeResult).to.equal(true)
     mockMaker.setNextMessageCallback(onUnsubscribeAll, true)
-    const unsubscribeResult = await maker.unsubscribeAll()
+    const unsubscribeResult = await maker.unsubscribeAllPricingERC20()
     expect(unsubscribeResult).to.equal(true)
   })
 
@@ -282,7 +286,7 @@ describe('WebSocketMaker', () => {
       await initializePromise
       throw new Error('Maker.at should not resolve before initialize')
     } catch (e) {
-      expect(e).to.equal('Maker did not call initialize in time')
+      expect(e).to.equal('Maker did not call setProtocols in time')
     }
     fakeTimers.restore()
   })
@@ -292,15 +296,15 @@ describe('WebSocketMaker', () => {
     // and minor and patch versions are the same or greater than requried
     mockMaker.initOptions = { lastLook: '1.2.3' }
     const maker = await Maker.at(url)
-    expect(maker.supportsProtocol('last-look')).to.be.true
-    expect(maker.supportsProtocol('request-for-quote')).to.be.false
-    expect(maker.supportsProtocol('last-look', '0.9.1')).to.be.false
-    expect(maker.supportsProtocol('last-look', '1.0.0')).to.be.true
-    expect(maker.supportsProtocol('last-look', '1.1.1')).to.be.true
-    expect(maker.supportsProtocol('last-look', '1.2.3')).to.be.true
-    expect(maker.supportsProtocol('last-look', '1.2.4')).to.be.false
-    expect(maker.supportsProtocol('last-look', '1.3.0')).to.be.false
-    expect(maker.supportsProtocol('last-look', '2.2.3')).to.be.false
+    expect(maker.supportsProtocol('last-look-erc20')).to.be.true
+    expect(maker.supportsProtocol('request-for-quote-erc20')).to.be.false
+    expect(maker.supportsProtocol('last-look-erc20', '0.9.1')).to.be.false
+    expect(maker.supportsProtocol('last-look-erc20', '1.0.0')).to.be.true
+    expect(maker.supportsProtocol('last-look-erc20', '1.1.1')).to.be.true
+    expect(maker.supportsProtocol('last-look-erc20', '1.2.3')).to.be.true
+    expect(maker.supportsProtocol('last-look-erc20', '1.2.4')).to.be.false
+    expect(maker.supportsProtocol('last-look-erc20', '1.3.0')).to.be.false
+    expect(maker.supportsProtocol('last-look-erc20', '2.2.3')).to.be.false
   })
 
   it('should reject when calling a method from an unsupported protocol', async () => {
@@ -318,7 +322,7 @@ describe('WebSocketMaker', () => {
     }
   })
 
-  it('should not initialize if initialize is called with bad params', async () => {
+  it('should not initialize if setProtocols is called with bad params', async () => {
     mockMaker.initOptions = null
     const responseReceived = new Promise<void>((resolve) => {
       const onInitializeResponse = () => {
@@ -328,7 +332,9 @@ describe('WebSocketMaker', () => {
     })
     mockMaker.on('connection', (socket) => {
       socket.send(
-        JSON.stringify(createRequest('initialize', [{ bad: 'params' }], 'abc'))
+        JSON.stringify(
+          createRequest('setProtocols', [{ bad: 'params' }], 'abc')
+        )
       )
     })
     Maker.at(url).catch(() => {
@@ -349,7 +355,7 @@ describe('WebSocketMaker', () => {
         expect(data).to.be.a.JSONRpcError('abc', {
           code: JsonRpcErrorCodes.INVALID_PARAMS,
           message:
-            'Received invalid param format or values for method "updatePricing": {"bad":"pricing"}',
+            'Received invalid param format or values for method "setPricingERC20": {"bad":"pricing"}',
         })
         resolve()
       }
@@ -359,7 +365,7 @@ describe('WebSocketMaker', () => {
     mockMaker.emit(
       'message',
       JSON.stringify(
-        createRequest('updatePricing', [{ bad: 'pricing' }], 'abc')
+        createRequest('setPricingERC20', [{ bad: 'pricing' }], 'abc')
       )
     )
 

@@ -118,22 +118,22 @@ export class MockSocketServer extends BaseMockSocketServer {
     super(url)
     this.resetInitOptions()
     this.on('connection', (socket) => {
-      const protocols = []
+      const protocols: any = []
       if (this._initOptions) {
         if (this._initOptions.lastLook)
           protocols.push({
-            name: 'last-look',
+            name: 'last-look-erc20',
             version: this._initOptions.lastLook,
             params: this._initOptions.params,
           })
         if (this._initOptions.rfq)
           protocols.push({
-            name: 'request-for-quote',
+            name: 'request-for-quote-erc20',
             version: this._initOptions.rfq,
             params: this._initOptions.params,
           })
         socket.send(
-          JSON.stringify(createRequest('initialize', [protocols], '123'))
+          JSON.stringify(createRequest('setProtocols', [protocols], '123'))
         )
       }
 
@@ -160,7 +160,7 @@ export class MockSocketServer extends BaseMockSocketServer {
   public resetInitOptions(): void {
     this.initOptions = {
       lastLook: '1.0.0',
-      rfq: null,
+      rfq: undefined,
       params: {
         swapContract: '0x1234',
         senderWallet: '0x2345',
