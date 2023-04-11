@@ -79,7 +79,7 @@ function mockHttpServer(api) {
           ],
         }
         break
-      case 'consider':
+      case 'considerOrderERC20':
         res = true
         break
     }
@@ -188,8 +188,8 @@ describe('WebSocketServer', () => {
       }
       mockServer.setNextMessageCallback(onResponse)
     })
-    expect(server.supportsProtocol('last-look')).to.equal(true)
-    expect(server.supportsProtocol('request-for-quote')).to.equal(false)
+    expect(server.supportsProtocol('last-look-erc20')).to.equal(true)
+    expect(server.supportsProtocol('request-for-quote-erc20')).to.equal(false)
     await correctInitializeResponse
   })
 
@@ -198,17 +198,19 @@ describe('WebSocketServer', () => {
 
     // Ensure subscribe method is correct format.
     const onSubscribe = (socket, data) => {
-      expect(data).to.be.a.JSONRpcRequest('subscribe', [samplePairs])
+      expect(data).to.be.a.JSONRpcRequest('subscribePricingERC20', [
+        samplePairs,
+      ])
       socket.send(JSON.stringify(createResponse(data.id, samplePricing)))
     }
     mockServer.setNextMessageCallback(onSubscribe, true)
-    const pricing = nextEvent(server, 'pricing')
-    server.subscribe(samplePairs)
+    const pricing = nextEvent(server, 'pricing-erc20')
+    server.subscribePricingERC20(samplePairs)
 
     // Ensure pricing is emitted and has the correct values.
     expect(await pricing).to.eql(samplePricing)
 
-    const updatedPricing = nextEvent(server, 'pricing')
+    const updatedPricing = nextEvent(server, 'pricing-erc20')
     const latestPricing = [
       [
         {
@@ -242,21 +244,21 @@ describe('WebSocketServer', () => {
     mockServer.emit(
       'message',
       JSON.stringify(
-        createRequest('updatePricing', latestPricing, updatePricingRequestId)
+        createRequest('setPricingERC20', latestPricing, updatePricingRequestId)
       )
     )
     expect(await updatedPricing).to.eql(latestPricing[0])
     await correctUpdatePricingResponse
   })
 
-  it('should call consider with the correct parameters', async () => {
+  it('should call considerOrderERC20 with the correct parameters', async () => {
     const server = await Server.at(url)
     const onConsider = (socket, data) => {
-      expect(data).to.be.a.JSONRpcRequest('consider', fakeOrder)
+      expect(data).to.be.a.JSONRpcRequest('considerOrderERC20', fakeOrder)
       socket.send(JSON.stringify(createResponse(data.id, true)))
     }
     mockServer.setNextMessageCallback(onConsider, true)
-    const result = await server.consider(fakeOrder)
+    const result = await server.considerOrderERC20(fakeOrder)
     expect(result).to.equal(true)
   })
 
@@ -275,7 +277,7 @@ describe('WebSocketServer', () => {
         }
 
         const server = await Server.at(url)
-        const result = await server.consider(fakeOrder)
+        const result = await server.considerOrderERC20(fakeOrder)
         expect(result).to.equal(true)
       }
     )
@@ -283,29 +285,31 @@ describe('WebSocketServer', () => {
   it('should call unsubscribe with the correct parameters', async () => {
     const server = await Server.at(url)
     const onUnsubscribe = (socket, data) => {
-      expect(data).to.be.a.JSONRpcRequest('unsubscribe', [samplePairs])
+      expect(data).to.be.a.JSONRpcRequest('unsubscribePricingERC20', [
+        samplePairs,
+      ])
       socket.send(JSON.stringify(createResponse(data.id, true)))
     }
     mockServer.setNextMessageCallback(onUnsubscribe, true)
-    const result = await server.unsubscribe(samplePairs)
+    const result = await server.unsubscribePricingERC20(samplePairs)
     expect(result).to.equal(true)
   })
 
   it('should call subscribeAll and unsubscribeAll correctly', async () => {
     const server = await Server.at(url)
     const onSubscribeAll = (socket, data) => {
-      expect(data).to.be.a.JSONRpcRequest('subscribeAll')
+      expect(data).to.be.a.JSONRpcRequest('subscribeAllPricingERC20')
       socket.send(JSON.stringify(createResponse(data.id, true)))
     }
     const onUnsubscribeAll = (socket, data) => {
-      expect(data).to.be.a.JSONRpcRequest('unsubscribeAll')
+      expect(data).to.be.a.JSONRpcRequest('unsubscribeAllPricingERC20')
       socket.send(JSON.stringify(createResponse(data.id, true)))
     }
     mockServer.setNextMessageCallback(onSubscribeAll, true)
-    const subscribeResult = await server.subscribeAll()
+    const subscribeResult = await server.subscribeAllPricingERC20()
     expect(subscribeResult).to.equal(true)
     mockServer.setNextMessageCallback(onUnsubscribeAll, true)
-    const unsubscribeResult = await server.unsubscribeAll()
+    const unsubscribeResult = await server.unsubscribeAllPricingERC20()
     expect(unsubscribeResult).to.equal(true)
   })
 
@@ -320,7 +324,7 @@ describe('WebSocketServer', () => {
       await initializePromise
       throw new Error('Server.at should not resolve before initialize')
     } catch (e) {
-      expect(e).to.equal('Server did not call initialize in time')
+      expect(e).to.equal('Server did not call setProtocols in time')
     }
     fakeTimers.restore()
   })
@@ -330,15 +334,15 @@ describe('WebSocketServer', () => {
     // and minor and patch versions are the same or greater than requried
     mockServer.initOptions = { lastLook: '1.2.3' }
     const server = await Server.at(url)
-    expect(server.supportsProtocol('last-look')).to.be.true
-    expect(server.supportsProtocol('request-for-quote')).to.be.false
-    expect(server.supportsProtocol('last-look', '0.9.1')).to.be.false
-    expect(server.supportsProtocol('last-look', '1.0.0')).to.be.true
-    expect(server.supportsProtocol('last-look', '1.1.1')).to.be.true
-    expect(server.supportsProtocol('last-look', '1.2.3')).to.be.true
-    expect(server.supportsProtocol('last-look', '1.2.4')).to.be.false
-    expect(server.supportsProtocol('last-look', '1.3.0')).to.be.false
-    expect(server.supportsProtocol('last-look', '2.2.3')).to.be.false
+    expect(server.supportsProtocol('last-look-erc20')).to.be.true
+    expect(server.supportsProtocol('request-for-quote-erc20')).to.be.false
+    expect(server.supportsProtocol('last-look-erc20', '0.9.1')).to.be.false
+    expect(server.supportsProtocol('last-look-erc20', '1.0.0')).to.be.true
+    expect(server.supportsProtocol('last-look-erc20', '1.1.1')).to.be.true
+    expect(server.supportsProtocol('last-look-erc20', '1.2.3')).to.be.true
+    expect(server.supportsProtocol('last-look-erc20', '1.2.4')).to.be.false
+    expect(server.supportsProtocol('last-look-erc20', '1.3.0')).to.be.false
+    expect(server.supportsProtocol('last-look-erc20', '2.2.3')).to.be.false
   })
 
   it('should reject when calling a method from an unsupported protocol', async () => {
@@ -366,7 +370,9 @@ describe('WebSocketServer', () => {
     })
     mockServer.on('connection', (socket) => {
       socket.send(
-        JSON.stringify(createRequest('initialize', [{ bad: 'params' }], 'abc'))
+        JSON.stringify(
+          createRequest('setProtocols', [{ bad: 'params' }], 'abc')
+        )
       )
     })
     Server.at(url).catch(() => {
@@ -387,7 +393,7 @@ describe('WebSocketServer', () => {
         expect(data).to.be.a.JSONRpcError('abc', {
           code: JsonRpcErrorCodes.INVALID_PARAMS,
           message:
-            'Received invalid param format or values for method "updatePricing": {"bad":"pricing"}',
+            'Received invalid param format or values for method "setPricingERC20": {"bad":"pricing"}',
         })
         resolve()
       }
@@ -397,7 +403,7 @@ describe('WebSocketServer', () => {
     mockServer.emit(
       'message',
       JSON.stringify(
-        createRequest('updatePricing', [{ bad: 'pricing' }], 'abc')
+        createRequest('setPricingERC20', [{ bad: 'pricing' }], 'abc')
       )
     )
 
