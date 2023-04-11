@@ -32,10 +32,13 @@ describe('ERC721Adapter Unit', () => {
   })
 
   it('hasAllowance succeeds', async () => {
-    await token.mock.isApprovedForAll
-      .withArgs(party.wallet, adapter.address)
-      .returns(true)
+    await token.mock.getApproved.withArgs(party.id).returns(adapter.address)
     expect(await adapter.connect(anyone).hasAllowance(party)).to.be.equal(true)
+  })
+
+  it('hasAllowance fails for wrong address', async () => {
+    await token.mock.getApproved.withArgs(party.id).returns(anyone.address)
+    expect(await adapter.connect(anyone).hasAllowance(party)).to.be.equal(false)
   })
 
   it('hasBalance succeeds', async () => {
