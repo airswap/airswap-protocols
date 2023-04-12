@@ -11,7 +11,7 @@ export const MIN_CONFIRMATIONS = 2
 export const SECONDS_IN_DAY = 86400
 
 export const chainIds: Record<string, number> = {
-  ETHEREUM: 1,
+  MAINNET: 1,
   GOERLI: 5,
   RSK: 30,
   RSKTESTNET: 31,
@@ -28,7 +28,7 @@ export const chainIds: Record<string, number> = {
 }
 
 export const chainNames: Record<number, string> = {
-  1: 'ETHEREUM',
+  1: 'MAINNET',
   5: 'GOERLI',
   30: 'RSK',
   31: 'RSKTESTNET',

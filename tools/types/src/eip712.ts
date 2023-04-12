@@ -1,5 +1,3 @@
-import * as ethUtil from 'ethereumjs-util'
-
 export function stringifyEIP712Type(
   types: { [key: string]: { type: string; name: string }[] },
   primaryType: string
@@ -69,20 +67,3 @@ export const EIP712Claim = {
     { name: 'score', type: 'uint256' },
   ],
 }
-
-export const SWAP_DOMAIN_TYPEHASH = ethUtil.keccak256(
-  stringifyEIP712Type(EIP712Swap, 'EIP712Domain')
-)
-export const SWAP_ORDER_TYPEHASH = ethUtil.keccak256(
-  stringifyEIP712Type(EIP712Swap, 'Order')
-)
-export const SWAP_PARTY_TYPEHASH = ethUtil.keccak256(
-  stringifyEIP712Type(EIP712Swap, 'Party')
-)
-
-export const SWAP_ERC20_DOMAIN_TYPEHASH = ethUtil.keccak256(
-  stringifyEIP712Type(EIP712SwapERC20, 'EIP712Domain')
-)
-export const SWAP_ERC20_ORDER_TYPEHASH = ethUtil.keccak256(
-  stringifyEIP712Type(EIP712SwapERC20, 'OrderERC20')
-)

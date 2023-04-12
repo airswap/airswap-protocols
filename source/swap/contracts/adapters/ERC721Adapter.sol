@@ -16,7 +16,7 @@ contract ERC721Adapter is IAdapter {
    * @param party Party from whom swap would be made
    */
   function hasAllowance(Party calldata party) external view returns (bool) {
-    return IERC721(party.token).isApprovedForAll(party.wallet, address(this));
+    return IERC721(party.token).getApproved(party.id) == address(this);
   }
 
   /**
