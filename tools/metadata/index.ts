@@ -205,7 +205,7 @@ export async function getCollectionTokenInfo(
         break
     }
   } catch (e) {
-    throw e.message
+    throw `Unable to fetch token metadata: ${e.message}`
   }
   return {
     chainId: (await provider.getNetwork()).chainId,
