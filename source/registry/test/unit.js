@@ -72,21 +72,21 @@ describe('Registry Unit', () => {
         .to.emit(registry, 'AddProtocols')
         .withArgs(account1.address, [protocol1, protocol2, protocol3])
 
-      const protocols = await registry.getProtocolsForServer(account1.address)
+      const protocols = await registry.getProtocolsForStaker(account1.address)
       expect(protocols.length).to.equal(3)
       expect(protocols[0]).to.equal(protocol1)
       expect(protocols[1]).to.equal(protocol2)
       expect(protocols[2]).to.equal(protocol3)
 
-      const protocol1Servers = await registry.getServersForProtocol(protocol1)
-      const protocol2Servers = await registry.getServersForProtocol(protocol2)
-      const protocol3Servers = await registry.getServersForProtocol(protocol3)
-      expect(protocol1Servers.length).to.equal(1)
-      expect(protocol2Servers.length).to.equal(1)
-      expect(protocol3Servers.length).to.equal(1)
-      expect(protocol1Servers[0]).to.equal(account1.address)
-      expect(protocol2Servers[0]).to.equal(account1.address)
-      expect(protocol3Servers[0]).to.equal(account1.address)
+      const protocol1Stakers = await registry.getStakersForProtocol(protocol1)
+      const protocol2Stakers = await registry.getStakersForProtocol(protocol2)
+      const protocol3Stakers = await registry.getStakersForProtocol(protocol3)
+      expect(protocol1Stakers.length).to.equal(1)
+      expect(protocol2Stakers.length).to.equal(1)
+      expect(protocol3Stakers.length).to.equal(1)
+      expect(protocol1Stakers[0]).to.equal(account1.address)
+      expect(protocol2Stakers[0]).to.equal(account1.address)
+      expect(protocol3Stakers[0]).to.equal(account1.address)
 
       const protocol1Supported = await registry.supportsProtocol(
         account1.address,
@@ -141,15 +141,15 @@ describe('Registry Unit', () => {
         .to.emit(registry, 'RemoveProtocols')
         .withArgs(account1.address, [protocol1, protocol2, protocol3])
 
-      const protocols = await registry.getProtocolsForServer(account1.address)
+      const protocols = await registry.getProtocolsForStaker(account1.address)
       expect(protocols.length).to.equal(0)
 
-      const protocol1Servers = await registry.getServersForProtocol(protocol1)
-      const protocol2Servers = await registry.getServersForProtocol(protocol2)
-      const protocol3Servers = await registry.getServersForProtocol(protocol3)
-      expect(protocol1Servers.length).to.equal(0)
-      expect(protocol2Servers.length).to.equal(0)
-      expect(protocol3Servers.length).to.equal(0)
+      const protocol1Stakers = await registry.getStakersForProtocol(protocol1)
+      const protocol2Stakers = await registry.getStakersForProtocol(protocol2)
+      const protocol3Stakers = await registry.getStakersForProtocol(protocol3)
+      expect(protocol1Stakers.length).to.equal(0)
+      expect(protocol2Stakers.length).to.equal(0)
+      expect(protocol3Stakers.length).to.equal(0)
 
       const protocol1Supported = await registry.supportsProtocol(
         account1.address,
@@ -184,15 +184,15 @@ describe('Registry Unit', () => {
 
       //NOTE: Note that there are no guarantees on the ordering of values inside the array, and it may change when more values are added or removed.
       // this is why protocol1, protocol2, protocol3 are in the above order
-      const protocols = await registry.getProtocolsForServer(account1.address)
+      const protocols = await registry.getProtocolsForStaker(account1.address)
       expect(protocols.length).to.equal(0)
 
-      const protocol1Servers = await registry.getServersForProtocol(protocol1)
-      const protocol2Servers = await registry.getServersForProtocol(protocol2)
-      const protocol3Servers = await registry.getServersForProtocol(protocol3)
-      expect(protocol1Servers.length).to.equal(0)
-      expect(protocol2Servers.length).to.equal(0)
-      expect(protocol3Servers.length).to.equal(0)
+      const protocol1Stakers = await registry.getStakersForProtocol(protocol1)
+      const protocol2Stakers = await registry.getStakersForProtocol(protocol2)
+      const protocol3Stakers = await registry.getStakersForProtocol(protocol3)
+      expect(protocol1Stakers.length).to.equal(0)
+      expect(protocol2Stakers.length).to.equal(0)
+      expect(protocol3Stakers.length).to.equal(0)
     })
 
     it('remove a list of duplicate protocols fails', async () => {
@@ -243,21 +243,21 @@ describe('Registry Unit', () => {
           token3.address,
         ])
 
-      const tokens = await registry.getTokensForServer(account1.address)
+      const tokens = await registry.getTokensForStaker(account1.address)
       expect(tokens.length).to.equal(3)
       expect(tokens[0]).to.equal(token1.address)
       expect(tokens[1]).to.equal(token2.address)
       expect(tokens[2]).to.equal(token3.address)
 
-      const token1Servers = await registry.getServersForToken(token1.address)
-      const token2Servers = await registry.getServersForToken(token2.address)
-      const token3Servers = await registry.getServersForToken(token3.address)
-      expect(token1Servers.length).to.equal(1)
-      expect(token2Servers.length).to.equal(1)
-      expect(token3Servers.length).to.equal(1)
-      expect(token1Servers[0]).to.equal(account1.address)
-      expect(token2Servers[0]).to.equal(account1.address)
-      expect(token3Servers[0]).to.equal(account1.address)
+      const token1Stakers = await registry.getStakersForToken(token1.address)
+      const token2Stakers = await registry.getStakersForToken(token2.address)
+      const token3Stakers = await registry.getStakersForToken(token3.address)
+      expect(token1Stakers.length).to.equal(1)
+      expect(token2Stakers.length).to.equal(1)
+      expect(token3Stakers.length).to.equal(1)
+      expect(token1Stakers[0]).to.equal(account1.address)
+      expect(token2Stakers[0]).to.equal(account1.address)
+      expect(token3Stakers[0]).to.equal(account1.address)
 
       const token1Supported = await registry.supportsToken(
         account1.address,
@@ -331,15 +331,15 @@ describe('Registry Unit', () => {
           token3.address,
         ])
 
-      const tokens = await registry.getTokensForServer(account1.address)
+      const tokens = await registry.getTokensForStaker(account1.address)
       expect(tokens.length).to.equal(0)
 
-      const token1Servers = await registry.getServersForToken(token1.address)
-      const token2Servers = await registry.getServersForToken(token2.address)
-      const token3Servers = await registry.getServersForToken(token3.address)
-      expect(token1Servers.length).to.equal(0)
-      expect(token2Servers.length).to.equal(0)
-      expect(token3Servers.length).to.equal(0)
+      const token1Stakers = await registry.getStakersForToken(token1.address)
+      const token2Stakers = await registry.getStakersForToken(token2.address)
+      const token3Stakers = await registry.getStakersForToken(token3.address)
+      expect(token1Stakers.length).to.equal(0)
+      expect(token2Stakers.length).to.equal(0)
+      expect(token3Stakers.length).to.equal(0)
 
       const token1Supported = await registry.supportsToken(
         account1.address,
@@ -380,15 +380,15 @@ describe('Registry Unit', () => {
 
       //NOTE: Note that there are no guarantees on the ordering of values inside the array, and it may change when more values are added or removed.
       // this is why token1, token3, token2 are in the above order
-      const tokens = await registry.getTokensForServer(account1.address)
+      const tokens = await registry.getTokensForStaker(account1.address)
       expect(tokens.length).to.equal(0)
 
-      const token1Servers = await registry.getServersForToken(token1.address)
-      const token2Servers = await registry.getServersForToken(token2.address)
-      const token3Servers = await registry.getServersForToken(token3.address)
-      expect(token1Servers.length).to.equal(0)
-      expect(token2Servers.length).to.equal(0)
-      expect(token3Servers.length).to.equal(0)
+      const token1Stakers = await registry.getStakersForToken(token1.address)
+      const token2Stakers = await registry.getStakersForToken(token2.address)
+      const token3Stakers = await registry.getStakersForToken(token3.address)
+      expect(token1Stakers.length).to.equal(0)
+      expect(token2Stakers.length).to.equal(0)
+      expect(token3Stakers.length).to.equal(0)
     })
 
     it('remove a list of duplicate tokens fails', async () => {
@@ -460,27 +460,27 @@ describe('Registry Unit', () => {
 
   describe('Set URL', async () => {
     it('successful setting of url', async () => {
-      await expect(registry.connect(account1).setURL('www.noneURL.com'))
-        .to.emit(registry, 'SetURL')
+      await expect(registry.connect(account1).setServerURL('www.noneURL.com'))
+        .to.emit(registry, 'SetServerURL')
         .withArgs(account1.address, 'www.noneURL.com')
 
-      const urls = await registry.getURLsForServers([account1.address])
+      const urls = await registry.getServerURLsForStakers([account1.address])
       expect(urls.length).to.equal(1)
       expect(urls[0]).to.equal('www.noneURL.com')
     })
 
     it('successful changing of url, check by staker', async () => {
-      await registry.connect(account1).setURL('www.noneURL.com')
-      await registry.connect(account1).setURL('www.TheCatsMeow.com')
+      await registry.connect(account1).setServerURL('www.noneURL.com')
+      await registry.connect(account1).setServerURL('www.TheCatsMeow.com')
 
-      const urls = await registry.getURLsForServers([account1.address])
+      const urls = await registry.getServerURLsForStakers([account1.address])
       expect(urls.length).to.equal(1)
       expect(urls[0]).to.equal('www.TheCatsMeow.com')
     })
 
     it('successful changing of url, check by token', async () => {
-      await registry.connect(account1).setURL('www.noneURL.com')
-      await registry.connect(account1).setURL('www.TheCatsMeow.com')
+      await registry.connect(account1).setServerURL('www.noneURL.com')
+      await registry.connect(account1).setServerURL('www.TheCatsMeow.com')
 
       await stakingToken.mock.transferFrom.returns(true)
       await expect(
@@ -495,14 +495,14 @@ describe('Registry Unit', () => {
           token3.address,
         ])
 
-      const urls = await registry.getURLsForToken(token3.address)
+      const urls = await registry.getServerURLsForToken(token3.address)
       expect(urls.length).to.equal(1)
       expect(urls[0]).to.equal('www.TheCatsMeow.com')
     })
 
     it('successful changing of url, check by protocol', async () => {
-      await registry.connect(account1).setURL('www.noneURL.com')
-      await registry.connect(account1).setURL('www.TheCatsMeow.com')
+      await registry.connect(account1).setServerURL('www.noneURL.com')
+      await registry.connect(account1).setServerURL('www.TheCatsMeow.com')
 
       await stakingToken.mock.transferFrom.returns(true)
       await expect(
@@ -513,16 +513,16 @@ describe('Registry Unit', () => {
         .to.emit(registry, 'AddProtocols')
         .withArgs(account1.address, [protocol1, protocol2, protocol3])
 
-      const urls = await registry.getURLsForProtocol(protocol3)
+      const urls = await registry.getServerURLsForProtocol(protocol3)
       expect(urls.length).to.equal(1)
       expect(urls[0]).to.equal('www.TheCatsMeow.com')
     })
 
     it('successful fetching of multiple urls', async () => {
-      await registry.connect(account1).setURL('www.noneURL.com')
-      await registry.connect(account2).setURL('www.TheCatsMeow.com')
+      await registry.connect(account1).setServerURL('www.noneURL.com')
+      await registry.connect(account2).setServerURL('www.TheCatsMeow.com')
 
-      const urls = await registry.getURLsForServers([
+      const urls = await registry.getServerURLsForStakers([
         account1.address,
         account2.address,
       ])
@@ -532,9 +532,9 @@ describe('Registry Unit', () => {
     })
 
     it('successful fetching of multiple urls where one address has an empty url', async () => {
-      await registry.connect(account1).setURL('www.noneURL.com')
+      await registry.connect(account1).setServerURL('www.noneURL.com')
 
-      const urls = await registry.getURLsForServers([
+      const urls = await registry.getServerURLsForStakers([
         account1.address,
         account2.address,
       ])

@@ -2,13 +2,6 @@
 # yarn lockfile v1
 
 
-"@airswap/indexer-registry@^4.0.0":
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/@airswap/indexer-registry/-/indexer-registry-4.0.0.tgz#43c52e291935e62edef65bbc6256cee10c8fdc6b"
-  integrity sha512-dic4DJShBwx+iyzleE/rkL7g4FrWQDLgOU9a6UoYdr1+LlLAtucInkt6CyjNijB/ZRpDgprPWc/XmZwjRjAbdA==
-  dependencies:
-    "@openzeppelin/contracts" "^4.8.1"
-
 "@airswap/jsonrpc-client-websocket@0.0.1":
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/@airswap/jsonrpc-client-websocket/-/jsonrpc-client-websocket-0.0.1.tgz#e75932a0f19cb6c23cf145834277211cce150400"
