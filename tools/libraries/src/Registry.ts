@@ -36,10 +36,10 @@ export class Registry {
     baseToken: string,
     options?: ServerOptions
   ): Promise<Array<Server>> {
-    const quoteTokenURLs: string[] = await this.contract.getURLsForToken(
+    const quoteTokenURLs: string[] = await this.contract.getServerURLsForToken(
       quoteToken
     )
-    const baseTokenURLs: string[] = await this.contract.getURLsForToken(
+    const baseTokenURLs: string[] = await this.contract.getServerURLsForToken(
       baseToken
     )
     const serverPromises = await Promise.allSettled(
