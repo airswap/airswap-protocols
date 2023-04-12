@@ -80,6 +80,8 @@ Branch from Main; Merge Feature → Main → Develop
    2. Merge main into beta: this will update the beta with latest.
    3. Tag release from main branch. (x.x.x)
 
+Each `deploys.js` must be limited to contracts deployed from that package version.
+
 **Individual package features or patches**
 
 1. Cut a feature or fix branch from main.
