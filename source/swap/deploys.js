@@ -1,1 +1,3 @@
-module.exports = {}
+module.exports = {
+  59140: '0x99568Ce6c9901097150403B7629CF426B859BC22',
+}
