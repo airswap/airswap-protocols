@@ -1,3 +1,4 @@
+// @ts-ignore
 import lzString from 'lz-string'
 import { ethers } from 'ethers'
 import { toBuffer } from 'ethereumjs-util'

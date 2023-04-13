@@ -1,5 +1,4 @@
 import { ContractTransaction, ethers } from 'ethers'
-import type { Provider } from '@ethersproject/providers'
 import { chainIds, wrappedTokenAddresses } from '@airswap/constants'
 import { Wrapper as WrapperContract } from '@airswap/wrapper/typechain/contracts'
 import { Wrapper__factory } from '@airswap/wrapper/typechain/factories/contracts'
@@ -11,14 +10,11 @@ export class Wrapper {
   public chainId: number
   public contract: WrapperContract
 
-  public constructor(
-    chainId = chainIds.MAINNET,
-    signerOrProvider?: ethers.Signer | Provider
-  ) {
+  public constructor(chainId = chainIds.MAINNET, signer: ethers.VoidSigner) {
     this.chainId = chainId
     this.contract = Wrapper__factory.connect(
       Wrapper.getAddress(chainId),
-      signerOrProvider
+      signer
     )
   }
 
@@ -26,22 +22,11 @@ export class Wrapper {
     if (chainId in wrapperDeploys) {
       return wrapperDeploys[chainId]
     }
-    throw new Error(`Wrapper deploy not found for chainId ${chainId}`)
+    throw new Error(`Wrapper not available for chainId ${chainId}`)
   }
 
-  public async swap(
-    order: OrderERC20,
-    signer?: ethers.Signer
-  ): Promise<ContractTransaction> {
-    let contract = this.contract
-    if (!this.contract.signer) {
-      if (signer === undefined) {
-        throw new Error('Signer must be provided')
-      } else {
-        contract = contract.connect(signer)
-      }
-    }
-    return await contract.swap(
+  public async swap(order: OrderERC20): Promise<ContractTransaction> {
+    return await this.contract.swap(
       order.nonce,
       order.expiry,
       order.signerWallet,

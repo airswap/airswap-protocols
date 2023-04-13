@@ -3,14 +3,14 @@
     "target": "es5",
     "module": "commonjs",
     "moduleResolution": "node",
-    "lib": ["es2019", "dom"],
+    "lib": ["es2021"],
     "esModuleInterop": true,
     "skipLibCheck": false,
+    "strict": true,
     "resolveJsonModule": true,
-    "suppressImplicitAnyIndexErrors": true,
     "sourceMap": true,
     "declaration": true,
     "outDir": "./build"
   },
-  "exclude": ["**/test/", "**/build/"]
+  "exclude": ["**/test/", "**/node_modules/", "**/build/"]
 }

@@ -19,7 +19,7 @@
     "clean": "rm -rf ./build",
     "compile": "yarn clean && tsc -b",
     "test": "yarn test:unit",
-    "test:unit": "yarn compile && yarn mocha -r ts-node/register test/utils.ts"
+    "test:unit": "TS_NODE_COMPILER_OPTIONS='{\"strict\":false}' yarn mocha -r ts-node/esm test/*.ts"
   },
   "dependencies": {
     "@airswap/constants": "^4.0.0",
@@ -32,11 +32,5 @@
   },
   "publishConfig": {
     "access": "public"
-  },
-  "devDependencies": {
-    "@types/mocha": "^10.0.1",
-    "@types/node": "^18.14.6",
-    "ts-node": "^10.9.1",
-    "typescript": "^4.8.4"
   }
 }

@@ -12,25 +12,26 @@ import {
 } from '@airswap/constants'
 
 describe('Metadata: Ethereum', async () => {
-  let result
+  let result: any
+
   it('fetches all known tokens', async () => {
     result = await getKnownTokens(chainIds.MAINNET)
     expect(result.tokens.length).to.not.equal(0)
   })
   it('checks that ETH does not exist', async () => {
-    expect(findTokenByAddress(ADDRESS_ZERO, result.tokens)).to.be.undefined
+    expect(findTokenByAddress(ADDRESS_ZERO, result.tokens)).to.be.equal(null)
   })
 })
 
 describe('Metadata: Goerli', async () => {
-  let result
+  let result: any
 
   it('fetches all known tokens', async () => {
     result = await getKnownTokens(chainIds.MAINNET)
     expect(result.tokens.length).to.not.equal(0)
   })
   it('checks that ETH does not exist', async () => {
-    expect(findTokenByAddress(ADDRESS_ZERO, result.tokens)).to.be.undefined
+    expect(findTokenByAddress(ADDRESS_ZERO, result.tokens)).to.be.equal(null)
   })
   it('checks that WETH exists', async () => {
     expect(
@@ -39,7 +40,7 @@ describe('Metadata: Goerli', async () => {
     expect(findTokensBySymbol('WETH', result.tokens)[0].address).to.equal(
       wrappedTokenAddresses[chainIds.MAINNET]
     )
-    expect(firstTokenBySymbol('WETH', result.tokens).address).to.equal(
+    expect(firstTokenBySymbol('WETH', result.tokens)?.address).to.equal(
       wrappedTokenAddresses[chainIds.MAINNET]
     )
   })
