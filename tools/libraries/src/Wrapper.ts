@@ -1,5 +1,4 @@
 import { ContractTransaction, ethers } from 'ethers'
-import type { Provider } from '@ethersproject/providers'
 import { chainIds, wrappedTokenAddresses } from '@airswap/constants'
 import { Wrapper as WrapperContract } from '@airswap/wrapper/typechain/contracts'
 import { Wrapper__factory } from '@airswap/wrapper/typechain/factories/contracts'
@@ -11,14 +10,11 @@ export class Wrapper {
   public chainId: number
   public contract: WrapperContract
 
-  public constructor(
-    chainId = chainIds.MAINNET,
-    signerOrProvider: ethers.Signer | Provider
-  ) {
+  public constructor(chainId = chainIds.MAINNET, signer: ethers.VoidSigner) {
     this.chainId = chainId
     this.contract = Wrapper__factory.connect(
       Wrapper.getAddress(chainId),
-      signerOrProvider
+      signer
     )
   }
 

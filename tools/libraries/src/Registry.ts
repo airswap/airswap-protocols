@@ -1,5 +1,4 @@
 import { ethers } from 'ethers'
-import type { Provider } from '@ethersproject/providers'
 import { Registry as RegistryContract } from '@airswap/registry/typechain/contracts'
 import { Registry__factory } from '@airswap/registry/typechain/factories/contracts'
 import { chainIds } from '@airswap/constants'
@@ -13,14 +12,11 @@ export class Registry {
   public chainId: number
   private contract: RegistryContract
 
-  public constructor(
-    chainId = chainIds.MAINNET,
-    signerOrProvider: ethers.Signer | Provider
-  ) {
+  public constructor(chainId = chainIds.MAINNET, signer: ethers.Signer) {
     this.chainId = chainId
     this.contract = Registry__factory.connect(
       Registry.getAddress(chainId),
-      signerOrProvider
+      signer
     )
   }
 

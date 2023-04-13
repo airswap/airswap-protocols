@@ -1,5 +1,4 @@
 import { ethers, ContractTransaction } from 'ethers'
-import type { Provider } from '@ethersproject/providers'
 import { chainIds } from '@airswap/constants'
 import { OrderERC20 } from '@airswap/types'
 import { SwapERC20 as SwapContract } from '@airswap/swap-erc20/typechain/contracts'
@@ -12,14 +11,11 @@ export class SwapERC20 {
   public chainId: number
   public contract: SwapContract
 
-  public constructor(
-    chainId = chainIds.MAINNET,
-    signerOrProvider: ethers.Signer | Provider
-  ) {
+  public constructor(chainId = chainIds.MAINNET, signer: ethers.Signer) {
     this.chainId = chainId
     this.contract = SwapERC20__factory.connect(
       SwapERC20.getAddress(chainId),
-      signerOrProvider
+      signer
     )
   }
 
