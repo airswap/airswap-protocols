@@ -1,7 +1,7 @@
 import { assert, expect } from 'chai'
 import { ethers } from 'ethers'
 import { ADDRESS_ZERO, SECONDS_IN_DAY } from '@airswap/constants'
-import { Levels, FullOrderERC20 } from '@airswap/types'
+import { Levels, FullOrderERC20, UnsignedOrderERC20 } from '@airswap/types'
 
 import {
   isValidFullOrderERC20,
@@ -22,7 +22,7 @@ const provider = ethers.getDefaultProvider('goerli')
 const wallet = new ethers.Wallet(signerPrivateKey, provider)
 
 describe('Utils', async () => {
-  let unsignedOrder
+  let unsignedOrder: UnsignedOrderERC20
   before(async () => {
     unsignedOrder = {
       nonce: Date.now().toString(),
@@ -57,7 +57,7 @@ describe('Utils', async () => {
   })
 
   it('isValidFullOrder : returns true only if fields are present', async () => {
-    const unsignedOrder = {
+    const unsignedOrder: UnsignedOrderERC20 = {
       nonce: Date.now().toString(),
       expiry: Math.round(Date.now() / 1000 + SECONDS_IN_DAY).toString(),
       signerWallet: ADDRESS_ZERO,

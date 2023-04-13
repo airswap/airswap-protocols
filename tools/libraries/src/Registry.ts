@@ -15,7 +15,7 @@ export class Registry {
 
   public constructor(
     chainId = chainIds.MAINNET,
-    signerOrProvider?: ethers.Signer | Provider
+    signerOrProvider: ethers.Signer | Provider
   ) {
     this.chainId = chainId
     this.contract = Registry__factory.connect(
@@ -54,8 +54,10 @@ export class Registry {
           })
         })
     )
-    return serverPromises
-      .filter((value) => value.status === 'fulfilled')
-      .map((v: PromiseFulfilledResult<Server>) => v.value)
+    const servers: PromiseFulfilledResult<Server>[] = serverPromises.filter(
+      (value): value is PromiseFulfilledResult<Server> =>
+        value.status === 'fulfilled'
+    )
+    return servers.map((value) => value.value)
   }
 }

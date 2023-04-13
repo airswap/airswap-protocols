@@ -13,7 +13,7 @@ export class Wrapper {
 
   public constructor(
     chainId = chainIds.MAINNET,
-    signerOrProvider?: ethers.Signer | Provider
+    signerOrProvider: ethers.Signer | Provider
   ) {
     this.chainId = chainId
     this.contract = Wrapper__factory.connect(
@@ -26,22 +26,11 @@ export class Wrapper {
     if (chainId in wrapperDeploys) {
       return wrapperDeploys[chainId]
     }
-    throw new Error(`Wrapper deploy not found for chainId ${chainId}`)
+    throw new Error(`Wrapper not available for chainId ${chainId}`)
   }
 
-  public async swap(
-    order: OrderERC20,
-    signer?: ethers.Signer
-  ): Promise<ContractTransaction> {
-    let contract = this.contract
-    if (!this.contract.signer) {
-      if (signer === undefined) {
-        throw new Error('Signer must be provided')
-      } else {
-        contract = contract.connect(signer)
-      }
-    }
-    return await contract.swap(
+  public async swap(order: OrderERC20): Promise<ContractTransaction> {
+    return await this.contract.swap(
       order.nonce,
       order.expiry,
       order.signerWallet,

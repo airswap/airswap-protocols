@@ -14,7 +14,7 @@ export class SwapERC20 {
 
   public constructor(
     chainId = chainIds.MAINNET,
-    signerOrProvider?: ethers.Signer | Provider
+    signerOrProvider: ethers.Signer | Provider
   ) {
     this.chainId = chainId
     this.contract = SwapERC20__factory.connect(
@@ -27,77 +27,35 @@ export class SwapERC20 {
     if (chainId in swapDeploys) {
       return swapDeploys[chainId]
     }
-    throw new Error(`SwapERC20 contract not found for chainId ${chainId}`)
+    throw new Error(`SwapERC20 not available for chainId ${chainId}`)
   }
 
   public async check(
     order: OrderERC20,
-    senderWallet: string,
-    signer?: ethers.providers.JsonRpcSigner
+    senderWallet?: string
   ): Promise<Array<string>> {
-    let contract = this.contract
-    if (!this.contract.signer) {
-      if (signer === undefined) {
-        throw new Error('Signer must be provided')
-      } else {
-        contract = contract.connect(signer)
-      }
-    }
-    const [count, errors] = await contract.check(
-      senderWallet,
+    const [count, errors] = await this.contract.check(
+      senderWallet || (await this.contract.signer.getAddress()),
       ...orderERC20ToParams(order)
     )
     return checkResultToErrors(count, errors)
   }
 
-  public async swap(
-    order: OrderERC20,
-    sender?: ethers.providers.JsonRpcSigner
-  ): Promise<ContractTransaction> {
-    let contract = this.contract
-    if (!this.contract.signer) {
-      if (sender === undefined) {
-        throw new Error('Signer must be provided')
-      } else {
-        contract = contract.connect(sender)
-      }
-    }
-    return await contract.swap(
-      sender.getAddress(),
+  public async swap(order: OrderERC20): Promise<ContractTransaction> {
+    return await this.contract.swap(
+      await this.contract.signer.getAddress(),
       ...orderERC20ToParams(order)
     )
   }
 
-  public async swapAnySender(
-    order: OrderERC20,
-    sender?: ethers.providers.JsonRpcSigner
-  ): Promise<ContractTransaction> {
-    let contract = this.contract
-    if (!this.contract.signer) {
-      if (sender === undefined) {
-        throw new Error('Signer must be provided')
-      } else {
-        contract = contract.connect(sender)
-      }
-    }
-    return await contract.swapAnySender(
-      sender.getAddress(),
+  public async swapAnySender(order: OrderERC20): Promise<ContractTransaction> {
+    return await this.contract.swapAnySender(
+      await this.contract.signer.getAddress(),
       ...orderERC20ToParams(order)
     )
   }
 
-  public async swapLight(
-    order: OrderERC20,
-    sender?: ethers.providers.JsonRpcSigner
-  ): Promise<ContractTransaction> {
-    let contract = this.contract
-    if (!this.contract.signer) {
-      if (sender === undefined) {
-        throw new Error('Signer must be provided')
-      } else {
-        contract = contract.connect(sender)
-      }
-    }
-    return await contract.swapLight(...orderERC20ToParams(order))
+  public async swapLight(order: OrderERC20): Promise<ContractTransaction> {
+    return await this.contract.swapLight(...orderERC20ToParams(order))
   }
 }
