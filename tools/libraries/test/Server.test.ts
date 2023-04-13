@@ -11,7 +11,6 @@ import {
   createOrderSignature,
   isValidFullOrder,
   isValidFullOrderERC20,
-  isValidOrder,
 } from '@airswap/utils'
 import { ADDRESS_ZERO, chainIds } from '@airswap/constants'
 
@@ -142,7 +141,6 @@ describe('HTTPServer', () => {
     .it('Server getOrders()', async () => {
       const server = await Server.at(URL)
       const result = await server.getOrders()
-      console.log(result)
       expect(isValidFullOrder(result.orders[0].order)).to.be.true
     })
 })
