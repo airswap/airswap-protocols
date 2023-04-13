@@ -67,6 +67,7 @@ export function isValidOrder(order: Order): boolean {
 
 export function isValidFullOrder(fullOrder: FullOrder) {
   return (
+    isValidOrder(fullOrder as Order) &&
     ethers.utils.isAddress(fullOrder['swapContract']) &&
     typeof fullOrder['chainId'] == 'number'
   )
