@@ -83,6 +83,27 @@ export type Token = {
 
 export { TokenInfo } from '@uniswap/token-lists'
 
+export interface CollectionTokenAttribute {
+  label: string
+  value: string | number
+}
+
+export type CollectionTokenMetadata = {
+  name: string
+  image: string
+  description: string
+  attributes: CollectionTokenAttribute[]
+  createdBy?: string
+}
+
+export type CollectionTokenInfo = {
+  chainId: number
+  kind: string
+  address: string
+  id: number
+  uri: string
+} & CollectionTokenMetadata
+
 export type UnsignedClaim = {
   nonce: string
   expiry: string
