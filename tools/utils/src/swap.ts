@@ -20,6 +20,7 @@ import {
   OrderParty,
   Signature,
   EIP712Swap,
+  Order,
 } from '@airswap/types'
 
 const defaultParty: OrderParty = {
@@ -28,6 +29,35 @@ const defaultParty: OrderParty = {
   kind: '0x36372b07',
   id: '0',
   amount: '0',
+}
+
+function isValidString(value) {
+  return value == 'string' && value != ''
+}
+function isBytesLike(value) {
+  return value == 'string' && ethers.utils.isBytesLike(value)
+}
+function isValidOrderParty(orderParty: OrderParty) {
+  return !!orderParty &&
+    isValidString(orderParty["wallet"]) &&
+    isValidString(orderParty["token"]) &&
+    isValidString(orderParty["kind"]) &&
+    isValidString(orderParty["id"]) &&
+    isValidString(orderParty["amount"])
+}
+
+export function isValidOrder(order: Order): boolean {
+  return !!order &&
+    isValidString(order['nonce']) &&
+    isValidString(order['expiry']) &&
+    isValidString(order['protocolFee']) &&
+    isValidString(order['affiliateWallet']) &&
+    isValidString(order['affiliateAmount']) &&
+    isBytesLike(order['r']) &&
+    isBytesLike(order['s']) &&
+    isBytesLike(order['v']) &&
+    isValidOrderParty(order['signer']) &&
+    isValidOrderParty(order['sender'])
 }
 
 export function createOrder({
