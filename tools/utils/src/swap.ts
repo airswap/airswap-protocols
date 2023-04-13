@@ -33,10 +33,10 @@ const defaultParty: OrderParty = {
 }
 
 function isValidString(value: string): boolean {
-  return value === 'string' && value.length > 0
+  return typeof value === 'string' && value.length > 0
 }
 function isBytesLike(value: string): boolean {
-  return value === 'string' && ethers.utils.isBytesLike(value)
+  return typeof value === 'string' && ethers.utils.isBytesLike(value)
 }
 function isValidOrderParty(orderParty: OrderParty): boolean {
   return (
