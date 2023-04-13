@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js'
-import { BigNumberish, ethers } from 'ethers'
+import { ethers } from 'ethers'
 
-import { OrderERC20, Levels, Formula, Pricing } from '@airswap/types'
+import { Levels, Formula, Pricing } from '@airswap/types'
 
 export function getCostFromPricing(
   side: 'buy' | 'sell',
