@@ -21,9 +21,10 @@ export const chainIds: Record<string, number> = {
   POLYGON: 137,
   HARDHAT: 31337,
   ARBITRUM: 42161,
-  ARBITRUMGOERLI: 421613,
+  LINEA: 59140,
   FUJI: 43113,
   AVALANCHE: 43114,
+  ARBITRUMGOERLI: 421613,
   MUMBAI: 80001,
 }
 
@@ -40,13 +41,16 @@ export const chainNames: Record<number, string> = {
   42161: 'ARBITRUM',
   43113: 'FUJI',
   43114: 'AVALANCHE',
+  59140: 'LINEA',
   80001: 'MUMBAI',
   421613: 'ARBITRUMGOERLI',
 }
 
 export const mainnets: number[] = [1, 30, 56, 137, 42161, 43114]
 
-export const testnets: number[] = [5, 31, 97, 31337, 80001, 421613, 43113]
+export const testnets: number[] = [
+  5, 31, 97, 31337, 43113, 59140, 80001, 421613,
+]
 
 export const chainCurrencies: Record<number, string> = {
   1: 'ETH',
@@ -59,10 +63,11 @@ export const chainCurrencies: Record<number, string> = {
   137: 'MATIC',
   31337: 'ETH',
   42161: 'AETH',
-  421613: 'AETH',
   43113: 'AVAX',
   43114: 'AVAX',
+  59140: 'ETH',
   80001: 'MATIC',
+  421613: 'AETH',
 }
 
 export const wrappedTokenAddresses: Record<number, string> = {
@@ -77,6 +82,7 @@ export const wrappedTokenAddresses: Record<number, string> = {
   42161: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1',
   43113: '0xd9d01a9f7c810ec035c0e42cb9e80ef44d7f8692',
   43114: '0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7',
+  59140: '0x2C1b868d6596a18e32E61B901E4060C872647b6C',
   80001: '0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889',
   421613: '0xee01c0cd76354c383b8c7b4e65ea88d00b06f36f',
 }
@@ -93,6 +99,7 @@ export const stakingTokenAddresses: Record<number, string> = {
   42161: '0xa1135c2f2c7798d31459b5fdaef8613419be1008',
   43113: '0x48c427e7cEf42399e9e8300fC47875772309e995',
   43114: '0x702d0f43edd46b77ea2d48570b02c328a20a94a1',
+  59140: '0x2C1b868d6596a18e32E61B901E4060C872647b6C',
   80001: '0xd161ddcfcc0c2d823021aa26200824efa75218d1',
   421613: '0x71070c5607358fc25e3b4aaf4fb0a580c190252a',
 }
@@ -109,6 +116,7 @@ export const etherscanDomains: Record<number, string> = {
   42161: 'arbiscan.io',
   43113: 'testnet.snowtrace.io',
   43114: 'snowtrace.io',
+  59140: 'explorer.goerli.linea.build',
   80001: 'mumbai.polygonscan.com',
   421613: 'goerli.arbiscan.io',
 }
