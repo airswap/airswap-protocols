@@ -12,7 +12,7 @@ import {
 } from '@airswap/jsonrpc-client-websocket'
 import { chainIds } from '@airswap/constants'
 import { parseUrl, orderERC20PropsToStrings } from '@airswap/utils'
-import { FullOrderERC20, Order, OrderERC20, Pricing } from '@airswap/types'
+import { FullOrder, FullOrderERC20, OrderERC20, Pricing } from '@airswap/types'
 import { SwapERC20 } from './SwapERC20'
 
 export type SupportedProtocolInfo = {
@@ -337,10 +337,10 @@ export class Server extends TypedEmitter<ServerEvents> {
   }
 
    public async getOrders(
-  ): Promise<OrderResponse<Order>> {
+  ): Promise<OrderResponse<FullOrder>> {
     try {
       return Promise.resolve(
-        (await this.httpCall('getOrders', [{}])) as OrderResponse<Order>
+        (await this.httpCall('getOrders', [{}])) as OrderResponse<FullOrder>
       )
     } catch (err) {
       return Promise.reject(err)
@@ -348,7 +348,7 @@ export class Server extends TypedEmitter<ServerEvents> {
   }
 
   public async addOrder(
-    order: Order
+    order: FullOrder
     ): Promise<SuccessResponse> {
       try {
         return Promise.resolve(

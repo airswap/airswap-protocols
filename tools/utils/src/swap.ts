@@ -21,6 +21,7 @@ import {
   Signature,
   EIP712Swap,
   Order,
+  FullOrder,
 } from '@airswap/types'
 
 const defaultParty: OrderParty = {
@@ -58,6 +59,11 @@ export function isValidOrder(order: Order): boolean {
     isBytesLike(order['v']) &&
     isValidOrderParty(order['signer']) &&
     isValidOrderParty(order['sender'])
+}
+
+export function isValidFullOrder(fullOrder: FullOrder){
+  return ethers.utils.isAddress(fullOrder['swapContract']) &&
+  typeof fullOrder['chainId'] == 'number' 
 }
 
 export function createOrder({
