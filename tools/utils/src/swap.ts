@@ -39,16 +39,19 @@ function isBytesLike(value) {
   return value == 'string' && ethers.utils.isBytesLike(value)
 }
 function isValidOrderParty(orderParty: OrderParty) {
-  return !!orderParty &&
-    isValidString(orderParty["wallet"]) &&
-    isValidString(orderParty["token"]) &&
-    isValidString(orderParty["kind"]) &&
-    isValidString(orderParty["id"]) &&
-    isValidString(orderParty["amount"])
+  return (
+    !!orderParty &&
+    isValidString(orderParty['wallet']) &&
+    isValidString(orderParty['token']) &&
+    isValidString(orderParty['kind']) &&
+    isValidString(orderParty['id']) &&
+    isValidString(orderParty['amount'])
+  )
 }
 
 export function isValidOrder(order: Order): boolean {
-  return !!order &&
+  return (
+    !!order &&
     isValidString(order['nonce']) &&
     isValidString(order['expiry']) &&
     isValidString(order['protocolFee']) &&
@@ -59,11 +62,14 @@ export function isValidOrder(order: Order): boolean {
     isBytesLike(order['v']) &&
     isValidOrderParty(order['signer']) &&
     isValidOrderParty(order['sender'])
+  )
 }
 
-export function isValidFullOrder(fullOrder: FullOrder){
-  return ethers.utils.isAddress(fullOrder['swapContract']) &&
-  typeof fullOrder['chainId'] == 'number' 
+export function isValidFullOrder(fullOrder: FullOrder) {
+  return (
+    ethers.utils.isAddress(fullOrder['swapContract']) &&
+    typeof fullOrder['chainId'] == 'number'
+  )
 }
 
 export function createOrder({

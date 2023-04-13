@@ -9,6 +9,7 @@ import {
   createOrderERC20,
   createOrderERC20Signature,
   createOrderSignature,
+  isValidFullOrder,
   isValidFullOrderERC20,
   isValidOrder,
 } from '@airswap/utils'
@@ -102,7 +103,7 @@ function mockHttpServer(api) {
             },
           ],
         }
-      break
+        break
       case 'considerOrderERC20':
         res = true
         break
@@ -136,13 +137,13 @@ describe('HTTPServer', () => {
       server.getOrders
       expect(isValidFullOrderERC20(result.orders[0].order)).to.be.true
     })
-    fancy
+  fancy
     .nock('https://' + URL, mockHttpServer)
     .it('Server getOrders()', async () => {
       const server = await Server.at(URL)
       const result = await server.getOrders()
-      server.getOrders
-      expect(isValidOrder(result.orders[0].order)).to.be.true
+      console.log(result)
+      expect(isValidFullOrder(result.orders[0].order)).to.be.true
     })
 })
 

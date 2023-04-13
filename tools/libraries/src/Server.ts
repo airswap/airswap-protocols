@@ -143,12 +143,20 @@ export class SuccessResponse {
 }
 export class JsonRpcResponse<Type> {
   public id: string
-  public result: OrderResponse<Type> | ErrorResponse | SuccessResponse | undefined
+  public result:
+    | OrderResponse<Type>
+    | ErrorResponse
+    | SuccessResponse
+    | undefined
   private jsonrpc = '2.0'
 
   public constructor(
     id: string,
-    result: OrderResponse<Type> | IndexedOrderError | SuccessResponse | undefined
+    result:
+      | OrderResponse<Type>
+      | IndexedOrderError
+      | SuccessResponse
+      | undefined
   ) {
     this.id = id
     if (result instanceof Error) {
@@ -317,7 +325,9 @@ export class Server extends TypedEmitter<ServerEvents> {
   public async getOrdersERC20(): Promise<OrderResponse<FullOrderERC20>> {
     try {
       return Promise.resolve(
-        (await this.httpCall('getOrdersERC20', [{}])) as OrderResponse<FullOrderERC20>
+        (await this.httpCall('getOrdersERC20', [
+          {},
+        ])) as OrderResponse<FullOrderERC20>
       )
     } catch (err) {
       return Promise.reject(err)
@@ -336,8 +346,7 @@ export class Server extends TypedEmitter<ServerEvents> {
     }
   }
 
-   public async getOrders(
-  ): Promise<OrderResponse<FullOrder>> {
+  public async getOrders(): Promise<OrderResponse<FullOrder>> {
     try {
       return Promise.resolve(
         (await this.httpCall('getOrders', [{}])) as OrderResponse<FullOrder>
@@ -347,17 +356,15 @@ export class Server extends TypedEmitter<ServerEvents> {
     }
   }
 
-  public async addOrder(
-    order: FullOrder
-    ): Promise<SuccessResponse> {
-      try {
-        return Promise.resolve(
-          (await this.httpCall('addOrder', [order])) as SuccessResponse
-        )
-      } catch (err) {
-        return Promise.reject(err)
-      }
+  public async addOrder(order: FullOrder): Promise<SuccessResponse> {
+    try {
+      return Promise.resolve(
+        (await this.httpCall('addOrder', [order])) as SuccessResponse
+      )
+    } catch (err) {
+      return Promise.reject(err)
     }
+  }
 
   public disconnect(): void {
     if (this.webSocketClient) {
