@@ -1,16 +1,7 @@
 {
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "target": "es5",
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "lib": ["es2019", "dom"],
-    "esModuleInterop": true,
-    "skipLibCheck": false,
-    "resolveJsonModule": true,
-    "suppressImplicitAnyIndexErrors": true,
-    "sourceMap": true,
-    "declaration": true,
+    "lib": ["dom"],
     "outDir": "./build"
-  },
-  "exclude": ["**/test/", "**/build/"]
+  }
 }

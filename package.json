@@ -14,7 +14,7 @@
     "compile": "lerna run compile",
     "lint:check": "yarn eslint . --ext .js,.ts",
     "lint:fix": "yarn eslint . --ext .js,.ts --fix",
-    "test": "yarn compile && lerna run test:unit",
+    "test": "lerna run test:unit",
     "prepare": "husky install",
     "pretty:check": "prettier --check \"./**/*.sol\" \"./**/*.ts\" \"./**/*.js\"",
     "pretty:fix": "prettier --write \"./**/*.sol\" \"./**/*.ts\" \"./**/*.js\""
@@ -28,8 +28,10 @@
     "@nomiclabs/hardhat-waffle": "^2.0.3",
     "@typechain/ethers-v5": "^10.2.0",
     "@typechain/hardhat": "^6.1.5",
-    "@typescript-eslint/eslint-plugin": "^5.31.0",
-    "@typescript-eslint/parser": "^5.45.1",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "^18.15.11",
+    "@typescript-eslint/eslint-plugin": "^5.58.0",
+    "@typescript-eslint/parser": "^5.58.0",
     "chai": "^4.3.6",
     "dotenv": "^16.0.1",
     "eslint": "^8.20.0",
@@ -40,17 +42,16 @@
     "hardhat": "^2.12.7",
     "husky": "^8.0.1",
     "lerna": "^5.2.0",
+    "mocha": "^10.2.0",
     "nx": "^14.4.3",
     "prettier": "^2.8.4",
     "prettier-plugin-solidity": "^1.1.2",
     "solidity-coverage": "^0.8.2",
+    "ts-node": "^10.9.1",
     "typechain": "^8.1.1",
-    "typescript": "^4.8.4"
+    "typescript": "^5.0.4"
   },
   "engines": {
-    "node": ">=14"
-  },
-  "volta": {
-    "node": "16.15.1"
+    "node": "14"
   }
 }

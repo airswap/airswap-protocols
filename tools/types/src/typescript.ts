@@ -81,7 +81,7 @@ export type Token = {
   decimals: number
 }
 
-export { TokenInfo } from '@uniswap/token-lists'
+export type { TokenInfo } from '@uniswap/token-lists'
 
 export interface CollectionTokenAttribute {
   label: string
@@ -89,10 +89,10 @@ export interface CollectionTokenAttribute {
 }
 
 export type CollectionTokenMetadata = {
-  name: string
-  image: string
-  description: string
-  attributes: CollectionTokenAttribute[]
+  name?: string
+  image?: string
+  description?: string
+  attributes?: CollectionTokenAttribute[]
   createdBy?: string
 }
 

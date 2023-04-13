@@ -12,6 +12,7 @@ import {
   chainNames,
   stakingTokenAddresses,
 } from '@airswap/constants'
+// @ts-ignore
 import validUrl from 'valid-url'
 
 const AIRSWAP_LOGO_URI =
@@ -27,7 +28,7 @@ import { abi as ERC1155_ABI } from '@openzeppelin/contracts/build/contracts/ERC1
 export async function getKnownTokens(
   chainId: number
 ): Promise<{ tokens: TokenInfo[]; errors: string[] }> {
-  const errors = []
+  const errors: Array<string> = []
   let tokens = []
   tokens.push(...defaults)
   if (tokenListURLs[chainId]) {
@@ -39,7 +40,7 @@ export async function getKnownTokens(
             return data.tokens
           }
           return { url, message: 'Invalid token list' }
-        } catch (e) {
+        } catch (e: any) {
           return { url, message: e.message }
         }
       })
@@ -78,10 +79,12 @@ export async function getKnownTokens(
 export function findTokenByAddress(
   address: string,
   tokens: TokenInfo[]
-): TokenInfo {
-  return tokens.find((token) => {
-    return token.address.toLowerCase() === address.toLowerCase()
-  })
+): TokenInfo | null {
+  return (
+    tokens.find((token) => {
+      return token.address.toLowerCase() === address.toLowerCase()
+    }) || null
+  )
 }
 
 export function findTokensBySymbol(
@@ -96,10 +99,12 @@ export function findTokensBySymbol(
 export function firstTokenBySymbol(
   symbol: string,
   tokens: TokenInfo[]
-): TokenInfo {
-  return tokens.find((token) => {
-    return token.symbol === symbol
-  })
+): TokenInfo | null {
+  return (
+    tokens.find((token) => {
+      return token.symbol === symbol
+    }) || null
+  )
 }
 
 export function getStakingTokens(): TokenInfo[] {
@@ -204,20 +209,20 @@ export async function getCollectionTokenInfo(
         metadata = transformERC1155ToCollectionToken(await fetchMetaData(uri))
         break
     }
-  } catch (e) {
+  } catch (e: any) {
     throw `Unable to fetch token metadata: ${e.message}`
   }
   return {
     chainId: (await provider.getNetwork()).chainId,
     kind: tokenKind,
     address: address.toLowerCase(),
-    id,
+    id: Number(id),
     uri,
     ...metadata,
   }
 }
 
-async function fetchMetaData(uri) {
+async function fetchMetaData(uri: string) {
   if (validUrl.isUri(uri)) {
     if (uri.startsWith('ipfs')) {
       uri = `https://cloudflare-ipfs.com/${uri.replace('://', '/')}`

@@ -1,6 +1,7 @@
 import * as url from 'url'
 import { FullOrderERC20 } from '@airswap/types'
 import { ethers } from 'ethers'
+// @ts-ignore
 import { isBrowser } from 'browser-or-node'
 import { Client as HttpClient } from 'jayson'
 import { TypedEmitter } from 'tiny-typed-emitter'
@@ -36,7 +37,7 @@ if (!isBrowser) {
 }
 
 const REQUEST_TIMEOUT = 4000
-const PROTOCOL_NAMES = {
+const PROTOCOL_NAMES: { [index: string]: string } = {
   'last-look-erc20': 'Last Look (ERC20)',
   'request-for-quote-erc20': 'Request for Quote (ERC20)',
 }
@@ -167,12 +168,12 @@ export interface ServerEvents {
 
 export class Server extends TypedEmitter<ServerEvents> {
   public transportProtocol: 'websocket' | 'http'
-  private supportedProtocols: SupportedProtocolInfo[]
-  private isInitialized: boolean
-  private httpClient: HttpClient
-  private webSocketClient: JsonRpcWebsocket
-  private senderServer: string
-  private senderWallet: string
+  private supportedProtocols: SupportedProtocolInfo[] = []
+  private isInitialized = false
+  private httpClient: HttpClient | null = null
+  private webSocketClient: JsonRpcWebsocket | null = null
+  private senderServer: string | null = null
+  private senderWallet: string | null = null
 
   public constructor(
     public locator: string,
@@ -181,7 +182,7 @@ export class Server extends TypedEmitter<ServerEvents> {
   ) {
     super()
     const protocol = parseUrl(locator).protocol
-    this.transportProtocol = protocol.startsWith('http') ? 'http' : 'websocket'
+    this.transportProtocol = protocol?.startsWith('http') ? 'http' : 'websocket'
   }
 
   public static async at(
@@ -212,10 +213,11 @@ export class Server extends TypedEmitter<ServerEvents> {
     if (!supportedVersion) return false
     if (!requestedVersion) return true
 
-    const [, wantedMajor, wantedMinor, wantedPatch] =
-      /(\d+)\.(\d+)\.(\d+)/.exec(requestedVersion)
-    const [, supportedMajor, supportedMinor, supportedPatch] =
-      /(\d+)\.(\d+)\.(\d+)/.exec(supportedVersion)
+    const [, wantedMajor, wantedMinor, wantedPatch]: RegExpExecArray | [] =
+      /(\d+)\.(\d+)\.(\d+)/.exec(requestedVersion) || []
+    const [, supportedMajor, supportedMinor, supportedPatch]:
+      | RegExpExecArray
+      | [] = /(\d+)\.(\d+)\.(\d+)/.exec(supportedVersion) || []
 
     if (wantedMajor !== supportedMajor) return false
     if (parseInt(wantedMinor) > parseInt(supportedMinor)) return false
@@ -282,15 +284,15 @@ export class Server extends TypedEmitter<ServerEvents> {
 
   public async subscribeAllPricingERC20(): Promise<boolean> {
     this.requireLastLookERC20Support()
-    return this.callRPCMethod<boolean>('subscribeAllPricingERC20')
+    return this.callRPCMethod<boolean>('subscribeAllPricingERC20', [])
   }
 
   public async unsubscribeAllPricingERC20(): Promise<boolean> {
     this.requireLastLookERC20Support()
-    return this.callRPCMethod<boolean>('unsubscribeAllPricingERC20')
+    return this.callRPCMethod<boolean>('unsubscribeAllPricingERC20', [])
   }
 
-  public getSenderWallet(): string {
+  public getSenderWallet(): string | null {
     this.requireLastLookERC20Support()
     return this.senderWallet
   }
@@ -352,7 +354,7 @@ export class Server extends TypedEmitter<ServerEvents> {
       } else {
         this.removeAllListeners()
       }
-      delete this.webSocketClient
+      this.webSocketClient = null
     }
   }
 
@@ -383,7 +385,7 @@ export class Server extends TypedEmitter<ServerEvents> {
 
     if (isBrowser) {
       const jaysonClient = require('jayson/lib/client/browser')
-      this.httpClient = new jaysonClient((request, callback) => {
+      this.httpClient = new jaysonClient((request: any, callback: any) => {
         fetch(url.format(parsedUrl), {
           method: 'POST',
           body: request,
@@ -391,13 +393,13 @@ export class Server extends TypedEmitter<ServerEvents> {
             'Content-Type': 'application/json',
           },
         })
-          .then((res) => {
+          .then((res: any) => {
             return res.text()
           })
-          .then((text) => {
+          .then((text: any) => {
             callback(null, text)
           })
-          .catch((err) => {
+          .catch((err: any) => {
             callback(err)
           })
       }, options)
@@ -448,8 +450,8 @@ export class Server extends TypedEmitter<ServerEvents> {
       }
     )
 
-    this.webSocketClient.on('setPricingERC20', this.setPricingERC20.bind(this))
-    await this.webSocketClient.open()
+    this.webSocketClient?.on('setPricingERC20', this.setPricingERC20.bind(this))
+    await this.webSocketClient?.open()
     await initPromise
   }
 
@@ -509,7 +511,9 @@ export class Server extends TypedEmitter<ServerEvents> {
     if (!Array.isArray(params)) valid = false
     if (
       valid &&
-      !params.every((protocolInfo) => protocolInfo.version && protocolInfo.name)
+      !params.every(
+        (protocolInfo: any) => protocolInfo.version && protocolInfo.name
+      )
     )
       valid = false
     if (!valid) this.throwInvalidParams('setProtocols', JSON.stringify(params))
@@ -521,7 +525,7 @@ export class Server extends TypedEmitter<ServerEvents> {
     if (
       valid &&
       !params.every(
-        (pricing) =>
+        (pricing: Pricing) =>
           pricing.baseToken &&
           pricing.quoteToken &&
           Array.isArray(pricing.bid) &&
@@ -548,7 +552,7 @@ export class Server extends TypedEmitter<ServerEvents> {
     if (lastLookERC20Support?.params?.senderServer) {
       this.senderServer = lastLookERC20Support.params.senderServer
       // Prepare an http client for consider calls.
-      this._initHTTPClient(this.senderServer, true)
+      this._initHTTPClient(lastLookERC20Support.params.senderServer, true)
     }
     if (lastLookERC20Support?.params?.senderWallet) {
       this.senderWallet = lastLookERC20Support.params.senderWallet
@@ -568,7 +572,7 @@ export class Server extends TypedEmitter<ServerEvents> {
     params: Record<string, string> | Array<any>
   ): Promise<T> {
     return new Promise((resolve, reject) => {
-      this.httpClient.request(
+      this.httpClient?.request(
         method,
         params,
         (connectionError: any, serverError: any, result: any) => {
@@ -596,8 +600,8 @@ export class Server extends TypedEmitter<ServerEvents> {
     method: string,
     params?: Record<string, string> | Array<any>
   ): Promise<T> {
-    const response = await this.webSocketClient.call(method, params)
-    return response.result as T
+    const response = await this.webSocketClient?.call(method, params)
+    return response?.result as T
   }
 
   /**
@@ -606,7 +610,7 @@ export class Server extends TypedEmitter<ServerEvents> {
    */
   private async callRPCMethod<T>(
     method: string,
-    params?: Record<string, string> | Array<any>
+    params: Record<string, string> | Array<any>
   ): Promise<T> {
     if (
       this.transportProtocol === 'http' ||
