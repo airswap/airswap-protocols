@@ -32,11 +32,11 @@ const defaultParty: OrderParty = {
   amount: '0',
 }
 
-function isValidString(value): boolean {
-  return value == 'string' && value != ''
+function isValidString(value: string): boolean {
+  return value === 'string' && value.length > 0
 }
-function isBytesLike(value): boolean {
-  return value == 'string' && ethers.utils.isBytesLike(value)
+function isBytesLike(value: string): boolean {
+  return value === 'string' && ethers.utils.isBytesLike(value)
 }
 function isValidOrderParty(orderParty: OrderParty): boolean {
   return (
