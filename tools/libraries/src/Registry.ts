@@ -3,7 +3,8 @@ import { Registry as RegistryContract } from '@airswap/registry/typechain/contra
 import { Registry__factory } from '@airswap/registry/typechain/factories/contracts'
 import { chainIds } from '@airswap/constants'
 
-import { Server, ServerOptions } from './Server'
+import { Server } from './Server'
+import { ServerOptions } from '@airswap/types'
 import { SwapERC20 } from './SwapERC20'
 
 import * as registryDeploys from '@airswap/registry/deploys.js'

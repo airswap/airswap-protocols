@@ -15,19 +15,17 @@ import {
 import { chainIds } from '@airswap/constants'
 import { parseUrl, orderERC20PropsToStrings } from '@airswap/utils'
 import { OrderERC20, Pricing } from '@airswap/types'
+
+import {
+  SupportedProtocolInfo,
+  ServerOptions,
+  RequestFilter,
+  FiltersResponse,
+  SortOrder,
+  SortField,
+} from '@airswap/types'
+
 import { SwapERC20 } from './SwapERC20'
-
-export type SupportedProtocolInfo = {
-  name: string
-  version: string
-  params?: any
-}
-
-export type ServerOptions = {
-  chainId?: number
-  swapContract?: string
-  initializeTimeout?: number
-}
 
 if (!isBrowser) {
   JsonRpcWebsocket.setWebSocketFactory((url: string) => {
@@ -76,34 +74,6 @@ export function toSortOrder(key: string): SortOrder | undefined {
   return undefined
 }
 
-export type RequestFilter = {
-  signerTokens?: string[]
-  senderTokens?: string[]
-  minSignerAmount?: bigint
-  maxSignerAmount?: bigint
-  minSenderAmount?: bigint
-  maxSenderAmount?: bigint
-  page: number
-  sortField?: SortField
-  sortOrder?: SortOrder
-  maxAddedDate?: number
-}
-
-export type FiltersResponse = {
-  signerToken: Record<string, AmountLimitFilterResponse>
-  senderToken: Record<string, AmountLimitFilterResponse>
-}
-
-export type AmountLimitFilterResponse = {
-  min: string
-  max: string
-}
-
-export enum SortField {
-  SIGNER_AMOUNT = 'SIGNER_AMOUNT',
-  SENDER_AMOUNT = 'SENDER_AMOUNT',
-}
-
 export function toSortField(key: string): SortField | undefined {
   if (typeof key !== 'string') {
     return undefined
@@ -115,11 +85,6 @@ export function toSortField(key: string): SortField | undefined {
     return SortField.SENDER_AMOUNT
   }
   return undefined
-}
-
-export enum SortOrder {
-  ASC = 'ASC',
-  DESC = 'DESC',
 }
 
 export abstract class IndexedOrderError extends Error {
