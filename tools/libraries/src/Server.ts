@@ -1,6 +1,5 @@
 import * as url from 'url'
 import { ethers } from 'ethers'
-// @ts-ignore
 import { isBrowser } from 'browser-or-node'
 import { Client as HttpClient } from 'jayson'
 import { TypedEmitter } from 'tiny-typed-emitter'
