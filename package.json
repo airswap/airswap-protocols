@@ -20,6 +20,7 @@
     "pretty:fix": "prettier --write \"./**/*.sol\" \"./**/*.ts\" \"./**/*.js\""
   },
   "devDependencies": {
+    "@eslint-community/eslint-utils": "^4.4.0",
     "@ethersproject/abi": "^5.7.0",
     "@ethersproject/bytes": "^5.7.0",
     "@ethersproject/providers": "^5.7.2",

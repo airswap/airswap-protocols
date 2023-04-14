@@ -59,7 +59,7 @@ export function isValidOrder(order: Order): boolean {
     isValidString(order['affiliateAmount']) &&
     isBytesLike(order['r']) &&
     isBytesLike(order['s']) &&
-    isBytesLike(order['v']) &&
+    isValidString(order['v']) &&
     isValidOrderParty(order['signer']) &&
     isValidOrderParty(order['sender'])
   )
