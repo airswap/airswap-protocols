@@ -1,5 +1,4 @@
 import * as url from 'url'
-import { FullOrderERC20 } from '@airswap/types'
 import { ethers } from 'ethers'
 // @ts-ignore
 import { isBrowser } from 'browser-or-node'
@@ -14,7 +13,7 @@ import {
 } from '@airswap/jsonrpc-client-websocket'
 import { chainIds } from '@airswap/constants'
 import { parseUrl, orderERC20PropsToStrings } from '@airswap/utils'
-import { OrderERC20, Pricing } from '@airswap/types'
+import { FullOrder, FullOrderERC20, OrderERC20, Pricing } from '@airswap/types'
 import { SwapERC20 } from './SwapERC20'
 
 export type SupportedProtocolInfo = {
@@ -42,14 +41,14 @@ const PROTOCOL_NAMES: { [index: string]: string } = {
   'request-for-quote-erc20': 'Request for Quote (ERC20)',
 }
 
-export type IndexedOrderResponse = {
+export type IndexedOrder<Type> = {
   hash?: string | undefined
-  order: FullOrderERC20
+  order: Type
   addedOn: number
 }
 
-export type OrderResponse = {
-  orders: Record<string, IndexedOrderResponse>
+export type OrderResponse<Type> = {
+  orders: Record<string, IndexedOrder<Type>>
   pagination: Pagination
   filters?: FiltersResponse | undefined
   ordersForQuery: number
@@ -143,14 +142,22 @@ export class SuccessResponse {
     this.message = message
   }
 }
-export class JsonRpcResponse {
+export class JsonRpcResponse<Type> {
   public id: string
-  public result: OrderResponse | ErrorResponse | SuccessResponse | undefined
+  public result:
+    | OrderResponse<Type>
+    | ErrorResponse
+    | SuccessResponse
+    | undefined
   private jsonrpc = '2.0'
 
   public constructor(
     id: string,
-    result: OrderResponse | IndexedOrderError | SuccessResponse | undefined
+    result:
+      | OrderResponse<Type>
+      | IndexedOrderError
+      | SuccessResponse
+      | undefined
   ) {
     this.id = id
     if (result instanceof Error) {
@@ -305,22 +312,24 @@ export class Server extends TypedEmitter<ServerEvents> {
   public async getOrdersERC20By(
     requestFilter: RequestFilter,
     filters = false
-  ): Promise<OrderResponse> {
+  ): Promise<OrderResponse<FullOrderERC20>> {
     try {
       return Promise.resolve(
         (await this.httpCall('getOrdersERC20', [
           { ...this.toBigIntJson(requestFilter), filters },
-        ])) as OrderResponse
+        ])) as OrderResponse<FullOrderERC20>
       )
     } catch (err) {
       return Promise.reject(err)
     }
   }
 
-  public async getOrdersERC20(): Promise<OrderResponse> {
+  public async getOrdersERC20(): Promise<OrderResponse<FullOrderERC20>> {
     try {
       return Promise.resolve(
-        (await this.httpCall('getOrdersERC20', [{}])) as OrderResponse
+        (await this.httpCall('getOrdersERC20', [
+          {},
+        ])) as OrderResponse<FullOrderERC20>
       )
     } catch (err) {
       return Promise.reject(err)
@@ -333,6 +342,26 @@ export class Server extends TypedEmitter<ServerEvents> {
     try {
       return Promise.resolve(
         (await this.httpCall('addOrderERC20', [fullOrder])) as SuccessResponse
+      )
+    } catch (err) {
+      return Promise.reject(err)
+    }
+  }
+
+  public async getOrders(): Promise<OrderResponse<FullOrder>> {
+    try {
+      return Promise.resolve(
+        (await this.httpCall('getOrders', [{}])) as OrderResponse<FullOrder>
+      )
+    } catch (err) {
+      return Promise.reject(err)
+    }
+  }
+
+  public async addOrder(order: FullOrder): Promise<SuccessResponse> {
+    try {
+      return Promise.resolve(
+        (await this.httpCall('addOrder', [order])) as SuccessResponse
       )
     } catch (err) {
       return Promise.reject(err)

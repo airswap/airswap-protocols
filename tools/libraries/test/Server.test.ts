@@ -5,13 +5,16 @@ import { useFakeTimers } from 'sinon'
 import { ethers } from 'ethers'
 
 import {
+  createOrder,
   createOrderERC20,
   createOrderERC20Signature,
+  createOrderSignature,
+  isValidFullOrder,
   isValidFullOrderERC20,
 } from '@airswap/utils'
 import { ADDRESS_ZERO, chainIds } from '@airswap/constants'
 
-import { Server } from '../build'
+import { Server } from '../'
 import { SortField, SortOrder, toSortField, toSortOrder } from '../src/Server'
 import {
   addJSONRPCAssertions,
@@ -59,8 +62,29 @@ function mockHttpServer(api) {
         })
         break
       case 'getOrdersERC20':
-        const unsignedOrder = createOrderERC20({})
-        const signature = await createOrderERC20Signature(
+        const unsignedOrderERC20 = createOrderERC20({})
+        const signatureERC20 = await createOrderERC20Signature(
+          unsignedOrderERC20,
+          wallet.privateKey,
+          ADDRESS_ZERO,
+          1
+        )
+        res = {
+          orders: [
+            {
+              order: {
+                ...unsignedOrderERC20,
+                ...signatureERC20,
+                chainId: chainIds.MAINNET,
+                swapContract: ADDRESS_ZERO,
+              },
+            },
+          ],
+        }
+        break
+      case 'getOrders':
+        const unsignedOrder = createOrder({})
+        const signature = await createOrderSignature(
           unsignedOrder,
           wallet.privateKey,
           ADDRESS_ZERO,
@@ -109,7 +133,15 @@ describe('HTTPServer', () => {
     .it('Server getOrdersERC20()', async () => {
       const server = await Server.at(URL)
       const result = await server.getOrdersERC20()
+      server.getOrders
       expect(isValidFullOrderERC20(result.orders[0].order)).to.be.true
+    })
+  fancy
+    .nock('https://' + URL, mockHttpServer)
+    .it('Server getOrders()', async () => {
+      const server = await Server.at(URL)
+      const result = await server.getOrders()
+      expect(isValidFullOrder(result.orders[0].order)).to.be.true
     })
 })
 
