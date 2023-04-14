@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js'
 import { ethers } from 'ethers'
 
-import { OrderERC20, Levels, Formula, Pricing } from '@airswap/types'
+import { Levels, Formula, Pricing } from '@airswap/types'
 
 export function getCostFromPricing(
   side: 'buy' | 'sell',
@@ -58,64 +58,6 @@ export function calculateCostFromLevels(amount: string, levels: Levels) {
     if (totalAmount.lt(previousLevel)) break
   }
   return totalCost.decimalPlaces(6).toFixed()
-}
-
-function getLowest(objects: Array<OrderERC20>, key: string): any {
-  let best: any
-  let bestAmount
-  let amount
-  for (const obj of objects) {
-    if (!obj[key]) continue
-    if (obj[key].amount != undefined) {
-      // if its a quote, it has .amount
-      amount = ethers.BigNumber.from(obj[key].amount)
-    } else {
-      // if its an order, it has .data
-      amount = ethers.BigNumber.from(obj[key].data.slice(0, 66))
-    }
-    if (!best || amount.lt(bestAmount)) {
-      bestAmount = amount
-      best = obj
-    }
-  }
-  return best
-}
-
-function getHighest(objects: Array<OrderERC20>, key: string): any {
-  let best: any
-  let bestAmount
-  let amount
-  for (const obj of objects) {
-    if (!obj[key]) continue
-    if (obj[key].amount != undefined) {
-      // if its a quote, it has .amount
-      amount = ethers.BigNumber.from(obj[key].amount)
-    } else {
-      // if its an order, it has .data
-      amount = ethers.BigNumber.from(obj[key].data.slice(0, 66))
-    }
-    if (!best || amount.gt(bestAmount)) {
-      bestAmount = amount
-      best = obj
-    }
-  }
-  return best
-}
-
-export function getBestByLowestSenderAmount(objects: Array<OrderERC20>): any {
-  return getLowest(objects, 'sender')
-}
-
-export function getBestByLowestSignerAmount(objects: Array<OrderERC20>): any {
-  return getLowest(objects, 'signer')
-}
-
-export function getBestByHighestSignerAmount(objects: Array<OrderERC20>): any {
-  return getHighest(objects, 'signer')
-}
-
-export function getBestByHighestSenderAmount(objects: Array<OrderERC20>): any {
-  return getHighest(objects, 'sender')
 }
 
 export function toDecimalString(

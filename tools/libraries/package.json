@@ -24,13 +24,12 @@
     "pretty:check": "prettier --check \"./**/*.ts\" \"./**/*.js\"",
     "pretty:fix": "prettier --write \"./**/*.ts\" \"./**/*.js\"",
     "test": "yarn test:unit",
-    "test:unit": "yarn compile && yarn mocha -r ts-node/register test/Server.test.ts"
+    "test:unit": "TS_NODE_COMPILER_OPTIONS='{\"strict\":false}' yarn mocha -r ts-node/esm test/*.ts"
   },
   "dependencies": {
     "@airswap/constants": "^4.0.0",
-    "@airswap/indexer-registry": "^4.0.0",
     "@airswap/jsonrpc-client-websocket": "0.0.1",
-    "@airswap/registry": "^4.0.0",
+    "@airswap/registry": "4.0.2-beta.0",
     "@airswap/swap-erc20": "^4.0.0",
     "@airswap/types": "^4.0.0",
     "@airswap/utils": "^4.0.0",
@@ -45,7 +44,6 @@
   },
   "devDependencies": {
     "@relaycorp/ws-mock": "^5.2.5",
-    "@types/mocha": "^10.0.1",
     "@types/mock-require": "^2.0.0",
     "@types/node": "^18.14.2",
     "@typescript-eslint/eslint-plugin": "^5.52.0",
@@ -57,14 +55,12 @@
     "eslint-plugin-prettier": "^4.2.1",
     "express": "^4.18.2",
     "fancy-test": "^1.4.7",
-    "mocha": "^10.2.0",
     "mock-require": "^3.0.3",
     "mock-socket": "^9.0.3",
     "nock": "^12.0.1",
     "prettier": "^2.8.4",
     "sinon": "^14.0.0",
-    "sinon-chai": "^3.7.0",
-    "ts-node": "^10.9.1"
+    "sinon-chai": "^3.7.0"
   },
   "publishConfig": {
     "access": "public"

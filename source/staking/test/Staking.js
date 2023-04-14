@@ -89,6 +89,12 @@ describe('Staking Unit', () => {
       )
     })
 
+    it('non-owner cannot schedule a duration change', async () => {
+      await expect(
+        staking.connect(account1).scheduleDurationChange(DEFAULTDELAY)
+      ).to.be.revertedWith('Ownable: caller is not the owner')
+    })
+
     it('owner cannot reset unstaking duration during timelock', async () => {
       await staking.connect(deployer).scheduleDurationChange(DEFAULTDELAY)
 
@@ -157,6 +163,12 @@ describe('Staking Unit', () => {
       await expect(
         staking.connect(deployer).setDuration(DEFAULTDURATION * 2)
       ).to.be.revertedWith('TimelockInactive()')
+    })
+
+    it('Non-owner cannot cancel a duration change', async () => {
+      await expect(
+        staking.connect(account1).cancelDurationChange()
+      ).to.be.revertedWith('Ownable: caller is not the owner')
     })
 
     it('Owner cannot cancel timelock before it is set', async () => {

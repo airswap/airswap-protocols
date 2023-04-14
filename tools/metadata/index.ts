@@ -1,27 +1,34 @@
 import axios from 'axios'
 import * as ethers from 'ethers'
-import { TokenInfo } from '@uniswap/token-lists'
+import {
+  TokenInfo,
+  CollectionTokenInfo,
+  CollectionTokenMetadata,
+  CollectionTokenAttribute,
+} from '@airswap/types'
 import { defaults, tokenListURLs } from './constants'
 import {
   tokenKinds,
   chainNames,
   stakingTokenAddresses,
 } from '@airswap/constants'
+// @ts-ignore
+import validUrl from 'valid-url'
 
 const AIRSWAP_LOGO_URI =
   'https://storage.googleapis.com/subgraph-images/158680119781426823563.png'
 const AIRSWAP_SYMBOL = 'AST'
+const DEFAULT_NAME = 'Unknown NFT'
 
 import { abi as ERC165_ABI } from '@openzeppelin/contracts/build/contracts/ERC165.json'
 import { abi as ERC20_ABI } from '@openzeppelin/contracts/build/contracts/ERC20.json'
 import { abi as ERC721_ABI } from '@openzeppelin/contracts/build/contracts/ERC721.json'
-import { abi as ERC777_ABI } from '@openzeppelin/contracts/build/contracts/ERC777.json'
 import { abi as ERC1155_ABI } from '@openzeppelin/contracts/build/contracts/ERC1155.json'
 
 export async function getKnownTokens(
   chainId: number
 ): Promise<{ tokens: TokenInfo[]; errors: string[] }> {
-  const errors = []
+  const errors: Array<string> = []
   let tokens = []
   tokens.push(...defaults)
   if (tokenListURLs[chainId]) {
@@ -33,7 +40,7 @@ export async function getKnownTokens(
             return data.tokens
           }
           return { url, message: 'Invalid token list' }
-        } catch (e) {
+        } catch (e: any) {
           return { url, message: e.message }
         }
       })
@@ -72,10 +79,12 @@ export async function getKnownTokens(
 export function findTokenByAddress(
   address: string,
   tokens: TokenInfo[]
-): TokenInfo {
-  return tokens.find((token) => {
-    return token.address.toLowerCase() === address.toLowerCase()
-  })
+): TokenInfo | null {
+  return (
+    tokens.find((token) => {
+      return token.address.toLowerCase() === address.toLowerCase()
+    }) || null
+  )
 }
 
 export function findTokensBySymbol(
@@ -90,10 +99,12 @@ export function findTokensBySymbol(
 export function firstTokenBySymbol(
   symbol: string,
   tokens: TokenInfo[]
-): TokenInfo {
-  return tokens.find((token) => {
-    return token.symbol === symbol
-  })
+): TokenInfo | null {
+  return (
+    tokens.find((token) => {
+      return token.symbol === symbol
+    }) || null
+  )
 }
 
 export function getStakingTokens(): TokenInfo[] {
@@ -116,11 +127,10 @@ export function getStakingTokens(): TokenInfo[] {
   return _stakingTokens
 }
 
-export async function getTokenFromContract(
+export async function getTokenKind(
   provider: ethers.providers.BaseProvider,
-  address: string,
-  id?: string
-): Promise<TokenInfo> {
+  address: string
+): Promise<string> {
   const contract = new ethers.Contract(address, ERC165_ABI, provider)
   let supportsERC165 = true
   let tokenKind = tokenKinds.ERC20
@@ -135,24 +145,13 @@ export async function getTokenFromContract(
     if (tokenKind === tokenKinds.ERC20) {
       if (await contract.supportsInterface(tokenKinds.ERC1155)) {
         tokenKind = tokenKinds.ERC1155
-      } else if (await contract.supportsInterface(tokenKinds.ERC777)) {
-        tokenKind = tokenKinds.ERC777
       }
     }
   }
-  switch (tokenKind) {
-    case tokenKinds.ERC721:
-      return getERC721FromContract(provider, address, id)
-    case tokenKinds.ERC777:
-      return getERC777FromContract(provider, address)
-    case tokenKinds.ERC1155:
-      return getERC1155FromContract(provider, address, id)
-    default:
-      return getERC20FromContract(provider, address)
-  }
+  return tokenKind
 }
 
-export async function getERC20FromContract(
+export async function getTokenInfo(
   provider: ethers.providers.BaseProvider,
   address: string
 ): Promise<TokenInfo> {
@@ -162,8 +161,13 @@ export async function getERC20FromContract(
   const contract = new ethers.Contract(address, ERC20_ABI, provider)
   let name
   let symbol
+  let decimals
   try {
-    ;[name, symbol] = await Promise.all([contract.name(), contract.symbol()])
+    ;[name, symbol, decimals] = await Promise.all([
+      contract.name(),
+      contract.symbol(),
+      contract.decimals(),
+    ])
   } catch (e) {
     throw new Error(`Unable to get ERC20 from contract at ${address}`)
   }
@@ -172,110 +176,106 @@ export async function getERC20FromContract(
     address: address.toLowerCase(),
     name,
     symbol,
-    decimals: Number(await contract.decimals()),
-    extensions: {
-      kind: tokenKinds.ERC20,
-    },
+    decimals,
   }
 }
 
-export async function getERC721FromContract(
+export async function getCollectionTokenInfo(
   provider: ethers.providers.BaseProvider,
   address: string,
   id: string
-): Promise<TokenInfo> {
+): Promise<CollectionTokenInfo> {
+  const tokenKind = await getTokenKind(provider, address)
+
+  let uri = null
+  let metadata = null
+
   if (!ethers.utils.isAddress(address)) {
     throw new Error(`Invalid address: ${address}`)
   }
   if (isNaN(Number(id))) {
     throw new Error(`Invalid id: ${id}`)
   }
-  const contract = new ethers.Contract(address, ERC721_ABI, provider)
-  let name
-  let symbol
   try {
-    ;[name, symbol] = await Promise.all([contract.name(), contract.symbol()])
-  } catch (e) {
-    throw new Error(`Unable to get ERC721 from contract at ${address}`)
+    switch (tokenKind) {
+      case tokenKinds.ERC721:
+        uri = await new ethers.Contract(address, ERC721_ABI, provider).tokenURI(
+          id
+        )
+        metadata = transformERC721ToCollectionToken(await fetchMetaData(uri))
+        break
+      case tokenKinds.ERC1155:
+        uri = await new ethers.Contract(address, ERC1155_ABI, provider).uri(id)
+        metadata = transformERC1155ToCollectionToken(await fetchMetaData(uri))
+        break
+    }
+  } catch (e: any) {
+    throw `Unable to fetch token metadata: ${e.message}`
   }
-  let uri = await contract.tokenURI(id)
-  if (uri.startsWith('ipfs')) {
-    uri = `https://cloudflare-ipfs.com/${uri.replace('://', '/')}`
-  }
-  const res = await axios.get(uri)
   return {
     chainId: (await provider.getNetwork()).chainId,
+    kind: tokenKind,
     address: address.toLowerCase(),
-    name,
-    symbol: symbol || name.toUpperCase(),
-    decimals: Number(0),
-    extensions: {
-      kind: tokenKinds.ERC721,
-      id,
-      metadata: res.data,
-    },
+    id: Number(id),
+    uri,
+    ...metadata,
   }
 }
 
-export async function getERC777FromContract(
-  provider: ethers.providers.BaseProvider,
-  address: string
-): Promise<TokenInfo> {
-  if (!ethers.utils.isAddress(address)) {
-    throw new Error(`Invalid address: ${address}`)
+async function fetchMetaData(uri: string) {
+  if (validUrl.isUri(uri)) {
+    if (uri.startsWith('ipfs')) {
+      uri = `https://cloudflare-ipfs.com/${uri.replace('://', '/')}`
+    }
+    const { data } = await axios.get(uri)
+    if (typeof data === 'string')
+      try {
+        return JSON.parse(data)
+      } catch (e) {
+        return {}
+      }
+    return data
   }
-  const contract = new ethers.Contract(address, ERC777_ABI, provider)
-  let name
-  let symbol
-  try {
-    ;[name, symbol] = await Promise.all([contract.name(), contract.symbol()])
-  } catch (e) {
-    throw new Error(`Unable to get ERC777 from contract at ${address}`)
-  }
-  return {
-    chainId: (await provider.getNetwork()).chainId,
-    address: address.toLowerCase(),
-    name,
-    symbol,
-    decimals: Number(await contract.decimals()),
-    extensions: {
-      kind: tokenKinds.ERC777,
-    },
-  }
+  return {}
 }
 
-export async function getERC1155FromContract(
-  provider: ethers.providers.BaseProvider,
-  address: string,
-  id: string
-): Promise<TokenInfo> {
-  if (!ethers.utils.isAddress(address)) {
-    throw new Error(`Invalid address: ${address}`)
-  }
-  if (isNaN(Number(id))) {
-    throw new Error(`Invalid id: ${id}`)
-  }
-  const contract = new ethers.Contract(address, ERC1155_ABI, provider)
-  let uri
-  try {
-    uri = await contract.uri(id)
-  } catch (e) {
-    throw new Error(`Unable to get ERC1155 from contract at ${address}`)
-  }
-  if (uri.startsWith('ipfs')) {
-    uri = `https://cloudflare-ipfs.com/${uri.replace('://', '/')}`
-  }
-  const res = await axios.get(uri)
-  return {
-    chainId: (await provider.getNetwork()).chainId,
-    address: address.toLowerCase(),
-    name: '',
-    symbol: '',
-    decimals: Number(0),
-    extensions: {
-      kind: tokenKinds.ERC1155,
-      id,
-      metadata: res.data,
-    },
-  }
-}
+const transformErc721TokenAttributeToCollectionTokenAttribute = (
+  attribute: any
+): CollectionTokenAttribute => ({
+  label: attribute.item || attribute.trait_type || '',
+  value: `${attribute.value}`,
+})
+
+const transformERC721ToCollectionToken = (
+  metadata: any
+): CollectionTokenMetadata => ({
+  name: metadata.name || DEFAULT_NAME,
+  description: metadata.description,
+  image: metadata.image?.replace('ipfs://', 'https://ipfs.io/ipfs/'),
+  attributes: (metadata.attributes || []).map(
+    transformErc721TokenAttributeToCollectionTokenAttribute
+  ),
+})
+
+const transformErc1155TokenAttributeToCollectionTokenAttribute = (
+  attribute: any
+): CollectionTokenAttribute => ({
+  label: attribute.trait_type,
+  value: `${attribute.value}`,
+})
+
+const transformERC1155ToCollectionToken = (
+  metadata: any
+): CollectionTokenMetadata => ({
+  name: metadata.name || DEFAULT_NAME,
+  description: metadata.description,
+  image:
+    (metadata.image_url || metadata.image || '').replace(
+      'ipfs://',
+      'https://ipfs.io/ipfs/'
+    ) || undefined,
+  attributes: (metadata.attributes || []).map(
+    transformErc1155TokenAttributeToCollectionTokenAttribute
+  ),
+  createdBy: metadata.created_by,
+})

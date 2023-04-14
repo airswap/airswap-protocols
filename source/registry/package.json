@@ -1,7 +1,7 @@
 {
   "name": "@airswap/registry",
-  "version": "4.0.1",
-  "description": "AirSwap: Server Registry",
+  "version": "4.0.2-beta.0",
+  "description": "AirSwap: Server URL Registry",
   "license": "MIT",
   "repository": {
     "type": "git",

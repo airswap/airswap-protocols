@@ -1,5 +1,4 @@
 import { ethers } from 'ethers'
-import type { Provider } from '@ethersproject/providers'
 import { Registry as RegistryContract } from '@airswap/registry/typechain/contracts'
 import { Registry__factory } from '@airswap/registry/typechain/factories/contracts'
 import { chainIds } from '@airswap/constants'
@@ -13,14 +12,11 @@ export class Registry {
   public chainId: number
   private contract: RegistryContract
 
-  public constructor(
-    chainId = chainIds.MAINNET,
-    signerOrProvider?: ethers.Signer | Provider
-  ) {
+  public constructor(chainId = chainIds.MAINNET, signer: ethers.Signer) {
     this.chainId = chainId
     this.contract = Registry__factory.connect(
       Registry.getAddress(chainId),
-      signerOrProvider
+      signer
     )
   }
 
@@ -36,10 +32,10 @@ export class Registry {
     baseToken: string,
     options?: ServerOptions
   ): Promise<Array<Server>> {
-    const quoteTokenURLs: string[] = await this.contract.getURLsForToken(
+    const quoteTokenURLs: string[] = await this.contract.getServerURLsForToken(
       quoteToken
     )
-    const baseTokenURLs: string[] = await this.contract.getURLsForToken(
+    const baseTokenURLs: string[] = await this.contract.getServerURLsForToken(
       baseToken
     )
     const serverPromises = await Promise.allSettled(
@@ -54,8 +50,10 @@ export class Registry {
           })
         })
     )
-    return serverPromises
-      .filter((value) => value.status === 'fulfilled')
-      .map((v: PromiseFulfilledResult<Server>) => v.value)
+    const servers: PromiseFulfilledResult<Server>[] = serverPromises.filter(
+      (value): value is PromiseFulfilledResult<Server> =>
+        value.status === 'fulfilled'
+    )
+    return servers.map((value) => value.value)
   }
 }
