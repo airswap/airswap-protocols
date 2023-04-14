@@ -15,7 +15,7 @@ import {
 import { ADDRESS_ZERO, chainIds } from '@airswap/constants'
 
 import { Server } from '../'
-import { SortField, SortOrder, toSortField, toSortOrder } from '../src/Server'
+import { toSortField, toSortOrder } from '../src/Server'
 import {
   addJSONRPCAssertions,
   createRequest,
@@ -23,7 +23,7 @@ import {
   MockSocketServer,
   nextEvent,
 } from './test-utils'
-import { OrderERC20 } from '@airswap/types'
+import { OrderERC20, SortField, SortOrder } from '@airswap/types'
 import { JsonRpcErrorCodes } from '@airswap/jsonrpc-client-websocket'
 
 addJSONRPCAssertions()
