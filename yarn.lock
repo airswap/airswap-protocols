@@ -16,6 +16,13 @@
   dependencies:
     get-parameter-names "^0.3.0"
 
+"@airswap/swap@^4.0.2":
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/@airswap/swap/-/swap-4.0.2.tgz#8a6e1ef8e5306c9d28da40dc67beff6d1a5c82fc"
+  integrity sha512-deZc+R8v2UZIdx33l6EUfubGZXz/GoWlz3g1PhCLEkjLxXE4BLSfJZv+Z1PwDMhhTwFdSLNxsed/+9Lk85fhzQ==
+  dependencies:
+    "@openzeppelin/contracts" "^4.8.1"
+
 "@babel/code-frame@^7.0.0":
   version "7.21.4"
   resolved "https://registry.yarnpkg.com/@babel/code-frame/-/code-frame-7.21.4.tgz#d0fa9e4413aca81f2b23b9442797bda1826edb39"
@@ -13456,7 +13463,7 @@ websocket@1.0.32:
     utf-8-validate "^5.0.2"
     yaeti "^0.0.6"
 
-websocket@^1.0.31:
+websocket@^1.0.31, websocket@^1.0.34:
   version "1.0.34"
   resolved "https://registry.yarnpkg.com/websocket/-/websocket-1.0.34.tgz#2bdc2602c08bf2c82253b730655c0ef7dcab3111"
   integrity sha512-PRDso2sGwF6kM75QykIesBijKSVceR6jL2G8NGYyq2XrItNC2P5/qL5XeR056GhA+Ly7JMFvJb9I312mJfmqnQ==
