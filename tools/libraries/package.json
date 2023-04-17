@@ -1,6 +1,6 @@
 {
   "name": "@airswap/libraries",
-  "version": "4.0.5-beta.1",
+  "version": "4.0.5-beta.2",
   "description": "AirSwap: Libraries for Developers",
   "repository": {
     "type": "git",
@@ -31,6 +31,7 @@
     "@airswap/constants": "^4.0.0",
     "@airswap/jsonrpc-client-websocket": "0.0.1",
     "@airswap/registry": "4.0.2-beta.0",
+    "@airswap/swap": "4.0.3-beta.0",
     "@airswap/swap-erc20": "^4.0.0",
     "@airswap/types": "4.0.3-beta.0",
     "@airswap/utils": "4.0.5-beta.0",
@@ -38,7 +39,8 @@
     "browser-or-node": "^2.1.1",
     "ethers": "^5.6.9",
     "jayson": "^4.0.0",
-    "tiny-typed-emitter": "^2.1.0"
+    "tiny-typed-emitter": "^2.1.0",
+    "websocket": "^1.0.34"
   },
   "devDependencies": {
     "@relaycorp/ws-mock": "^5.2.6",
