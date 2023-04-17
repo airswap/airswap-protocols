@@ -12,5 +12,5 @@
     "declaration": true,
     "outDir": "./build"
   },
-  "exclude": ["**/test/", "**/node_modules/", "**/build/"]
+  "exclude": ["**/test/", "**/node_modules/", "**/build/", "**/src/"]
 }

@@ -2,6 +2,13 @@
 # yarn lockfile v1
 
 
+"@airswap/balances@^2.0.2":
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/@airswap/balances/-/balances-2.0.2.tgz#7b7ea05a2a6998fa1d1c475aa5278592a4853fa2"
+  integrity sha512-V5XOaDZajIES9Q4CZToAoebj5PpMYrtEdZ6Tj3MfE3Q27uxCkOarFAY5tPucHdzILizNJlTMwHi8N2N6oDH+5w==
+  dependencies:
+    openzeppelin-solidity "2.4"
+
 "@airswap/jsonrpc-client-websocket@0.0.1":
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/@airswap/jsonrpc-client-websocket/-/jsonrpc-client-websocket-0.0.1.tgz#e75932a0f19cb6c23cf145834277211cce150400"
@@ -9938,6 +9945,11 @@ open@^8.4.0:
     define-lazy-prop "^2.0.0"
     is-docker "^2.1.1"
     is-wsl "^2.2.0"
+
+openzeppelin-solidity@2.4:
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/openzeppelin-solidity/-/openzeppelin-solidity-2.4.0.tgz#5f0a7b30571c45493449166e57b947203415349d"
+  integrity sha512-533gc5jkspxW5YT0qJo02Za5q1LHwXK9CJCc48jNj/22ncNM/3M/3JfWLqfpB90uqLwOKOovpl0JfaMQTR+gXQ==
 
 optionator@^0.8.1:
   version "0.8.3"

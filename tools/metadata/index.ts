@@ -128,7 +128,7 @@ export function getStakingTokens(): TokenInfo[] {
 }
 
 export async function getTokenKind(
-  provider: ethers.providers.BaseProvider,
+  provider: ethers.providers.Provider,
   address: string
 ): Promise<string> {
   const contract = new ethers.Contract(address, ERC165_ABI, provider)
@@ -152,7 +152,7 @@ export async function getTokenKind(
 }
 
 export async function getTokenInfo(
-  provider: ethers.providers.BaseProvider,
+  provider: ethers.providers.Provider,
   address: string
 ): Promise<TokenInfo> {
   if (!ethers.utils.isAddress(address)) {
@@ -181,7 +181,7 @@ export async function getTokenInfo(
 }
 
 export async function getCollectionTokenInfo(
-  provider: ethers.providers.BaseProvider,
+  provider: ethers.providers.Provider,
   address: string,
   id: string
 ): Promise<CollectionTokenInfo> {

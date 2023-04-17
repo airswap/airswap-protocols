@@ -14,8 +14,8 @@ import {
 } from '@airswap/utils'
 import { ADDRESS_ZERO, chainIds } from '@airswap/constants'
 
-import { Server } from '../'
-import { toSortField, toSortOrder } from '../src/Server'
+import { Server } from '../index'
+import { toSortField, toSortOrder } from '../index'
 import {
   addJSONRPCAssertions,
   createRequest,
