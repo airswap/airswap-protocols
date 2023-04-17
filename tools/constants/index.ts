@@ -128,7 +128,7 @@ export const protocolNames: Record<string, string> = {
   [Protocols.Pricing]: 'Pricing',
   [Protocols.LastLook]: 'Last Look',
   [Protocols.Indexing]: 'Indexing',
-  [Protocols.RequestForQuoteERC20]: 'Request for Quote',
+  [Protocols.RequestForQuoteERC20]: 'Request for Quote (ERC20)',
   [Protocols.PricingERC20]: 'Pricing (ERC20)',
   [Protocols.LastLookERC20]: 'Last Look (ERC20)',
   [Protocols.IndexingERC20]: 'Indexing (ERC20)',
