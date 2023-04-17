@@ -43,7 +43,6 @@ class Contract {
     providerOrSigner: ethers.providers.Provider | ethers.Signer,
     chainId: number
   ): ethers.Contract {
-    console.log(this.name, chainId, this.addresses[chainId], this.addresses)
     return this.factory.connect(this.addresses[chainId], providerOrSigner)
   }
 }
