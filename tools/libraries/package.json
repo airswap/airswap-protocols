@@ -1,6 +1,6 @@
 {
   "name": "@airswap/libraries",
-  "version": "4.0.5-beta.0",
+  "version": "4.0.5-beta.1",
   "description": "AirSwap: Libraries for Developers",
   "repository": {
     "type": "git",
@@ -27,11 +27,12 @@
     "test:unit": "TS_NODE_COMPILER_OPTIONS='{\"strict\":false}' yarn mocha -r ts-node/esm test/*.ts"
   },
   "dependencies": {
+    "@airswap/balances": "^2.0.2",
     "@airswap/constants": "^4.0.0",
     "@airswap/jsonrpc-client-websocket": "0.0.1",
     "@airswap/registry": "4.0.2-beta.0",
     "@airswap/swap-erc20": "^4.0.0",
-    "@airswap/types": "^4.0.0",
+    "@airswap/types": "4.0.3-beta.0",
     "@airswap/utils": "4.0.5-beta.0",
     "@airswap/wrapper": "^4.0.0",
     "browser-or-node": "^2.1.1",

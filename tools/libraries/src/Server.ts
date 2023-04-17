@@ -10,22 +10,23 @@ import {
   JsonRpcErrorCodes,
   WebsocketReadyStates,
 } from '@airswap/jsonrpc-client-websocket'
-import { chainIds } from '@airswap/constants'
+
 import { parseUrl, orderERC20PropsToStrings } from '@airswap/utils'
 import {
   FullOrder,
   FullOrderERC20,
   OrderERC20,
   Pricing,
-  SupportedProtocolInfo,
   ServerOptions,
+  OrderResponse,
+  SupportedProtocolInfo,
   RequestFilter,
-  FiltersResponse,
   SortOrder,
   SortField,
 } from '@airswap/types'
+import { chainIds } from '@airswap/constants'
 
-import { SwapERC20 } from './SwapERC20'
+import { SwapERC20 } from './Contracts'
 
 if (!isBrowser) {
   JsonRpcWebsocket.setWebSocketFactory((url: string) => {
@@ -38,26 +39,6 @@ const REQUEST_TIMEOUT = 4000
 const PROTOCOL_NAMES: { [index: string]: string } = {
   'last-look-erc20': 'Last Look (ERC20)',
   'request-for-quote-erc20': 'Request for Quote (ERC20)',
-}
-
-export type IndexedOrder<Type> = {
-  hash?: string | undefined
-  order: Type
-  addedOn: number
-}
-
-export type OrderResponse<Type> = {
-  orders: Record<string, IndexedOrder<Type>>
-  pagination: Pagination
-  filters?: FiltersResponse | undefined
-  ordersForQuery: number
-}
-
-export type Pagination = {
-  first: string
-  last: string
-  prev?: string | undefined
-  next?: string | undefined
 }
 
 export function toSortOrder(key: string): SortOrder | undefined {
@@ -150,7 +131,7 @@ export class Server extends TypedEmitter<ServerEvents> {
 
   public constructor(
     public locator: string,
-    private swapContract = SwapERC20.getAddress(),
+    private swapContract = SwapERC20.getAddress(chainIds.MAINNET),
     private chainId = chainIds.MAINNET
   ) {
     super()
