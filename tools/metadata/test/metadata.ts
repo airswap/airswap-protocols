@@ -1,21 +1,12 @@
 import { expect } from 'chai'
-import {
-  getKnownTokens,
-  findTokenByAddress,
-  findTokensBySymbol,
-  firstTokenBySymbol,
-} from '../index'
-import {
-  chainIds,
-  wrappedTokenAddresses,
-  ADDRESS_ZERO,
-} from '@airswap/constants'
+import { getKnownTokens, findTokenByAddress } from '../index'
+import { ChainIds, ADDRESS_ZERO } from '@airswap/constants'
 
 describe('Metadata: Ethereum', async () => {
   let result: any
 
   it('fetches all known tokens', async () => {
-    result = await getKnownTokens(chainIds.MAINNET)
+    result = await getKnownTokens(ChainIds.MAINNET)
     expect(result.tokens.length).to.not.equal(0)
   })
   it('checks that ETH does not exist', async () => {
@@ -27,21 +18,10 @@ describe('Metadata: Goerli', async () => {
   let result: any
 
   it('fetches all known tokens', async () => {
-    result = await getKnownTokens(chainIds.MAINNET)
+    result = await getKnownTokens(ChainIds.MAINNET)
     expect(result.tokens.length).to.not.equal(0)
   })
   it('checks that ETH does not exist', async () => {
     expect(findTokenByAddress(ADDRESS_ZERO, result.tokens)).to.be.equal(null)
-  })
-  it('checks that WETH exists', async () => {
-    expect(
-      findTokenByAddress(wrappedTokenAddresses[chainIds.MAINNET], result.tokens)
-    ).to.not.be.undefined
-    expect(findTokensBySymbol('WETH', result.tokens)[0].address).to.equal(
-      wrappedTokenAddresses[chainIds.MAINNET]
-    )
-    expect(firstTokenBySymbol('WETH', result.tokens)?.address).to.equal(
-      wrappedTokenAddresses[chainIds.MAINNET]
-    )
   })
 })

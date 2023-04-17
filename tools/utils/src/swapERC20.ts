@@ -8,7 +8,7 @@ import {
 } from '@metamask/eth-sig-util'
 
 import {
-  chainIds,
+  ChainIds,
   SECONDS_IN_DAY,
   ADDRESS_ZERO,
   DOMAIN_VERSION_SWAP_ERC20,
@@ -51,7 +51,7 @@ export async function createOrderERC20Signature(
   unsignedOrder: UnsignedOrderERC20,
   signer: ethers.VoidSigner | string,
   swapContract: string,
-  chainId = chainIds.MAINNET,
+  chainId = ChainIds.MAINNET,
   version = DOMAIN_VERSION_SWAP_ERC20,
   name = DOMAIN_NAME_SWAP_ERC20
 ): Promise<Signature> {

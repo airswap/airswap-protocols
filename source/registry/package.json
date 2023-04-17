@@ -23,14 +23,14 @@
     "verify": "hardhat run ./scripts/verify.js"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.8.1"
+    "@openzeppelin/contracts": "^4.8.3"
   },
   "publishConfig": {
     "access": "public"
   },
   "devDependencies": {
-    "@airswap/constants": "^4.0.0",
-    "@airswap/utils": "^4.0.5-beta.0",
+    "@airswap/constants": "4.0.2-beta.0",
+    "@airswap/utils": "4.0.5-beta.1",
     "prompt-confirm": "^2.0.4"
   }
 }

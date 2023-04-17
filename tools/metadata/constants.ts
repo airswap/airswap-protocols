@@ -1,35 +1,32 @@
-import { chainIds } from '@airswap/constants'
+import { ChainIds } from '@airswap/constants'
 
-export const tokenListURLs = {
-  [chainIds.MAINNET]: [
+export const tokenListURLs: Record<number, string[]> = {
+  [ChainIds.MAINNET]: [
     'https://raw.githubusercontent.com/compound-finance/token-list/master/compound.tokenlist.json',
-    'https://umaproject.org/uma.tokenlist.json',
     'https://raw.githubusercontent.com/SetProtocol/uniswap-tokenlist/main/set.tokenlist.json',
     'https://app.tryroll.com/tokens.json',
     'https://tokens.coingecko.com/uniswap/all.json',
-    'https://zapper.fi/api/token-list',
     'https://tokenlist.aave.eth.link',
     'https://tokens.coingecko.com/ethereum/all.json',
   ],
-  [chainIds.RSK]: [
+  [ChainIds.RSK]: [
     'https://raw.githubusercontent.com/enkryptcom/dynamic-data/main/tokenlists/rsk.json',
   ],
-  [chainIds.BSC]: [
+  [ChainIds.BSC]: [
     'https://raw.githubusercontent.com/ApeSwapFinance/apeswap-token-lists/main/lists/apeswap.json',
     'https://tokens.pancakeswap.finance/pancakeswap-top-100.json',
     'https://tokens.pancakeswap.finance/pancakeswap-extended.json',
   ],
-  [chainIds.POLYGON]: [
+  [ChainIds.POLYGON]: [
     'https://unpkg.com/quickswap-default-token-list@1.2.9/build/quickswap-default.tokenlist.json',
     'https://storageapi.fleek.co/tomafrench-team-bucket/polygon.vetted.tokenlist.json',
   ],
-  [chainIds.OPTIMISM]: ['https://static.optimism.io/optimism.tokenlist.json'],
-  [chainIds.ARBITRUM]: [
+  [ChainIds.ARBITRUM]: [
     'https://bridge.arbitrum.io/token-list-42161.json',
     'https://tracer.finance/tokens',
     'https://storageapi.fleek.co/tomafrench-team-bucket/arbitrum.vetted.tokenlist.json',
   ],
-  [chainIds.AVALANCHE]: [
+  [ChainIds.AVALANCHE]: [
     'https://matcha.xyz/tokenlists/43114.json',
     'https://raw.githubusercontent.com/pangolindex/tokenlists/main/defi.tokenlist.json',
     'https://raw.githubusercontent.com/pangolindex/tokenlists/main/stablecoin.tokenlist.json',

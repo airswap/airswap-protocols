@@ -24,7 +24,7 @@ import {
   SortOrder,
   SortField,
 } from '@airswap/types'
-import { chainIds } from '@airswap/constants'
+import { ChainIds, Protocols, protocolNames } from '@airswap/constants'
 
 import { SwapERC20 } from './Contracts'
 
@@ -36,10 +36,6 @@ if (!isBrowser) {
 }
 
 const REQUEST_TIMEOUT = 4000
-const PROTOCOL_NAMES: { [index: string]: string } = {
-  'last-look-erc20': 'Last Look (ERC20)',
-  'request-for-quote-erc20': 'Request for Quote (ERC20)',
-}
 
 export function toSortOrder(key: string): SortOrder | undefined {
   if (typeof key !== 'string') {
@@ -131,8 +127,8 @@ export class Server extends TypedEmitter<ServerEvents> {
 
   public constructor(
     public locator: string,
-    private swapContract = SwapERC20.getAddress(chainIds.MAINNET),
-    private chainId = chainIds.MAINNET
+    private swapContract = SwapERC20.getAddress(ChainIds.MAINNET),
+    private chainId = ChainIds.MAINNET
   ) {
     super()
     const protocol = parseUrl(locator).protocol
@@ -354,7 +350,7 @@ export class Server extends TypedEmitter<ServerEvents> {
 
     if (!clientOnly) {
       this.supportedProtocols = [
-        { name: 'request-for-quote-erc20', version: '2.0.0' },
+        { name: Protocols.RequestForQuoteERC20, version: '2.0.0' },
       ]
       this.isInitialized = true
     }
@@ -436,11 +432,11 @@ export class Server extends TypedEmitter<ServerEvents> {
   }
 
   private requireRFQERC20Support(version?: string) {
-    this.requireProtocolSupport('request-for-quote-erc20', version)
+    this.requireProtocolSupport(Protocols.RequestForQuoteERC20, version)
   }
 
   private requireLastLookERC20Support(version?: string) {
-    this.requireProtocolSupport('last-look-erc20', version)
+    this.requireProtocolSupport(Protocols.LastLookERC20, version)
   }
 
   private requireProtocolSupport(protocol: string, version?: string) {
@@ -450,12 +446,12 @@ export class Server extends TypedEmitter<ServerEvents> {
       if (supportedVersion) {
         message =
           `Server at ${this.locator} doesn't support ` +
-          `${PROTOCOL_NAMES[protocol]} v${version}` +
+          `${protocolNames[protocol]} v${version}` +
           `supported version ${supportedVersion}`
       } else {
         message =
           `Server at ${this.locator} doesn't ` +
-          `support ${PROTOCOL_NAMES[protocol]}`
+          `support ${protocolNames[protocol]}`
       }
       throw new Error(message)
     }
@@ -523,7 +519,7 @@ export class Server extends TypedEmitter<ServerEvents> {
     this.validateInitializeParams(supportedProtocols)
     this.supportedProtocols = supportedProtocols
     const lastLookERC20Support = supportedProtocols.find(
-      (protocol) => protocol.name === 'last-look-erc20'
+      (protocol) => protocol.name === Protocols.LastLookERC20
     )
     if (lastLookERC20Support?.params?.senderServer) {
       this.senderServer = lastLookERC20Support.params.senderServer

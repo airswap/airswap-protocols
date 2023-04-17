@@ -6,6 +6,7 @@ import {
 } from '@airswap/jsonrpc-client-websocket'
 import mock from 'mock-require'
 import { WebSocket, Server as BaseMockSocketServer } from 'mock-socket'
+import { Protocols } from '@airswap/constants'
 
 export function addJSONRPCAssertions(): void {
   chai.Assertion.addMethod(
@@ -122,13 +123,13 @@ export class MockSocketServer extends BaseMockSocketServer {
       if (this._initOptions) {
         if (this._initOptions.lastLook)
           protocols.push({
-            name: 'last-look-erc20',
+            name: Protocols.LastLookERC20,
             version: this._initOptions.lastLook,
             params: this._initOptions.params,
           })
         if (this._initOptions.rfq)
           protocols.push({
-            name: 'request-for-quote-erc20',
+            name: Protocols.RequestForQuoteERC20,
             version: this._initOptions.rfq,
             params: this._initOptions.params,
           })

@@ -5,7 +5,7 @@ const { deployMockContract } = waffle
 const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
 const IERC721 = require('@openzeppelin/contracts/build/contracts/ERC721Royalty.json')
 const { createOrder, createOrderSignature } = require('@airswap/utils')
-const { tokenKinds, ADDRESS_ZERO } = require('@airswap/constants')
+const { TokenKinds, ADDRESS_ZERO } = require('@airswap/constants')
 
 const CHAIN_ID = 31337
 const PROTOCOL_FEE = '30'
@@ -41,7 +41,7 @@ async function createSignedOrder(params, signatory) {
     signer: {
       wallet: signer.address,
       token: erc20token.address,
-      kind: tokenKinds.ERC20,
+      kind: TokenKinds.ERC20,
       id: '0',
       amount: DEFAULT_AMOUNT,
       ...params.signer,
@@ -49,7 +49,7 @@ async function createSignedOrder(params, signatory) {
     sender: {
       wallet: sender.address,
       token: erc20token.address,
-      kind: tokenKinds.ERC20,
+      kind: TokenKinds.ERC20,
       id: '0',
       amount: DEFAULT_AMOUNT,
       ...params.sender,
@@ -92,7 +92,7 @@ describe('Swap Unit', () => {
       await ethers.getContractFactory('Swap')
     ).deploy(
       [erc20adapter.address, erc721adapter.address],
-      tokenKinds.ERC20,
+      TokenKinds.ERC20,
       PROTOCOL_FEE,
       protocolFeeWallet.address
     )
@@ -104,7 +104,7 @@ describe('Swap Unit', () => {
       await expect(
         (
           await ethers.getContractFactory('Swap')
-        ).deploy([], tokenKinds.ERC20, PROTOCOL_FEE, protocolFeeWallet.address)
+        ).deploy([], TokenKinds.ERC20, PROTOCOL_FEE, protocolFeeWallet.address)
       ).to.be.revertedWith('AdaptersInvalid()')
     })
 
@@ -112,7 +112,7 @@ describe('Swap Unit', () => {
       await expect(
         (
           await ethers.getContractFactory('Swap')
-        ).deploy([], tokenKinds.ERC20, PROTOCOL_FEE, ADDRESS_ZERO)
+        ).deploy([], TokenKinds.ERC20, PROTOCOL_FEE, ADDRESS_ZERO)
       ).to.be.revertedWith('FeeWalletInvalid()')
     })
 
@@ -140,7 +140,7 @@ describe('Swap Unit', () => {
       await expect(
         (
           await ethers.getContractFactory('Swap')
-        ).deploy([], tokenKinds.ERC20, INVALID_FEE, protocolFeeWallet.address)
+        ).deploy([], TokenKinds.ERC20, INVALID_FEE, protocolFeeWallet.address)
       ).to.be.revertedWith('FeeInvalid()')
     })
 
@@ -202,7 +202,7 @@ describe('Swap Unit', () => {
         {
           signer: {
             token: erc721token.address,
-            kind: tokenKinds.ERC721,
+            kind: TokenKinds.ERC721,
             id: '1',
             amount: '0',
           },
@@ -226,7 +226,7 @@ describe('Swap Unit', () => {
         {
           signer: {
             token: erc721token.address,
-            kind: tokenKinds.ERC721,
+            kind: TokenKinds.ERC721,
             id: '1',
             amount: '0',
           },
@@ -250,7 +250,7 @@ describe('Swap Unit', () => {
         {
           signer: {
             token: erc721token.address,
-            kind: tokenKinds.ERC721,
+            kind: TokenKinds.ERC721,
             id: '1',
             amount: '0',
           },
@@ -271,7 +271,7 @@ describe('Swap Unit', () => {
         {
           signer: {
             token: erc721token.address,
-            kind: tokenKinds.ERC721,
+            kind: TokenKinds.ERC721,
             id: '1',
             amount: '0',
           },
@@ -559,7 +559,7 @@ describe('Swap Unit', () => {
       const order = await createSignedOrder(
         {
           signer: {
-            kind: tokenKinds.ERC721,
+            kind: TokenKinds.ERC721,
             token: erc721token.address,
             amount: '0',
             id: '0',
@@ -628,7 +628,7 @@ describe('Swap Unit', () => {
       const order = await createSignedOrder(
         {
           sender: {
-            kind: tokenKinds.ERC721,
+            kind: TokenKinds.ERC721,
           },
         },
         signer

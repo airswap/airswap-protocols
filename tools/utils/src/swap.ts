@@ -8,7 +8,7 @@ import {
 
 import { lowerCaseAddresses } from '../index'
 import {
-  chainIds,
+  ChainIds,
   SECONDS_IN_DAY,
   ADDRESS_ZERO,
   DOMAIN_VERSION_SWAP,
@@ -97,7 +97,7 @@ export async function createOrderSignature(
   unsignedOrder: UnsignedOrder,
   signer: ethers.VoidSigner | string,
   swapContract: string,
-  chainId = chainIds.MAINNET,
+  chainId = ChainIds.MAINNET,
   version = DOMAIN_VERSION_SWAP,
   name = DOMAIN_NAME_SWAP
 ): Promise<Signature> {
