@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "@airswap/constants": "^4.0.0",
-    "@airswap/types": "^4.0.0",
+    "@airswap/types": "4.0.3-beta.0",
     "@metamask/eth-sig-util": "^5.0.2",
     "bignumber.js": "^9.0.1",
     "ethereumjs-util": "^7.1.5",

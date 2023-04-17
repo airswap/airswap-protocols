@@ -29,7 +29,7 @@
   "devDependencies": {
     "@airswap/constants": "^4.0.0",
     "@airswap/utils": "^4.0.5-beta.0",
-    "@airswap/types": "^4.0.0",
+    "@airswap/types": "4.0.3-beta.0",
     "@uniswap/v2-periphery": "^1.1.0-beta.0",
     "prompt-confirm": "^2.0.4"
   },
