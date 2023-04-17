@@ -18,8 +18,7 @@ import {
 
 const signerPrivateKey =
   '0x4934d4ff925f39f91e3729fbce52ef12f25fdf93e014e291350f7d314c1a096b'
-const provider = ethers.getDefaultProvider('goerli')
-const wallet = new ethers.Wallet(signerPrivateKey, provider)
+const wallet = new ethers.Wallet(signerPrivateKey)
 
 describe('Utils', async () => {
   let unsignedOrder: UnsignedOrderERC20

@@ -24,7 +24,7 @@ yarn add @airswap/constants
 Import into your application:
 
 ```TypeScript
-import { chainIds, tokenKinds, protocols } from '@airswap/constants';
+import { ChainIds, TokenKinds, protocols } from '@airswap/constants';
 ```
 
 ## Commands

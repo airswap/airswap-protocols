@@ -1,7 +1,6 @@
-import * as ethers from 'ethers'
+import { ethers } from 'ethers'
 
 import { ServerOptions } from '@airswap/types'
-import { wrappedTokenAddresses } from '@airswap/constants'
 
 import { Swap__factory } from '@airswap/swap/typechain/factories/contracts'
 import { SwapERC20__factory } from '@airswap/swap-erc20/typechain/factories/contracts'
@@ -9,10 +8,11 @@ import { Wrapper__factory } from '@airswap/wrapper/typechain/factories/contracts
 import { Registry__factory } from '@airswap/registry/typechain/factories/contracts'
 import { WETH9__factory } from '@airswap/wrapper/typechain/factories/contracts'
 
-import * as registryDeploys from '@airswap/registry/deploys.js'
-import * as swapERC20Deploys from '@airswap/swap-erc20/deploys.js'
-import * as swapDeploys from '@airswap/swap/deploys.js'
-import * as wrapperDeploys from '@airswap/wrapper/deploys.js'
+import registryDeploys from '@airswap/registry/deploys.js'
+import swapERC20Deploys from '@airswap/swap-erc20/deploys.js'
+import swapDeploys from '@airswap/swap/deploys.js'
+import wrapperDeploys from '@airswap/wrapper/deploys.js'
+import wethDeploys from '@airswap/wrapper/deploys-weth.js'
 
 import BalanceChecker from '@airswap/balances/build/contracts/BalanceChecker.json'
 // @ts-ignore
@@ -123,7 +123,7 @@ export const Registry = new ServerRegistry(
   registryDeploys,
   Registry__factory
 )
-export const WETH = new Contract('WETH', wrappedTokenAddresses, WETH9__factory)
+export const WETH = new Contract('WETH', wethDeploys, WETH9__factory)
 export const Balances = new Contract(
   'Balances',
   wrapperDeploys,

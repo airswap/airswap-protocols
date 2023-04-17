@@ -1,7 +1,7 @@
 const { expect } = require('chai')
 const { ethers } = require('hardhat')
 const { createOrder, createOrderSignature } = require('@airswap/utils')
-const { tokenKinds } = require('@airswap/constants')
+const { TokenKinds } = require('@airswap/constants')
 const ERC20PresetMinterPauser = require('@openzeppelin/contracts/build/contracts/ERC20PresetMinterPauser.json')
 const ERC1155PresetMinterPauser = require('@openzeppelin/contracts/build/contracts/ERC1155PresetMinterPauser.json')
 
@@ -35,7 +35,7 @@ async function createSignedOrder(params, signatory) {
     signer: {
       wallet: signer.address,
       token: erc20token.address,
-      kind: tokenKinds.ERC20,
+      kind: TokenKinds.ERC20,
       id: '0',
       amount: DEFAULT_AMOUNT,
       ...params.signer,
@@ -43,7 +43,7 @@ async function createSignedOrder(params, signatory) {
     sender: {
       wallet: sender.address,
       token: erc20token.address,
-      kind: tokenKinds.ERC20,
+      kind: TokenKinds.ERC20,
       id: '0',
       amount: DEFAULT_AMOUNT,
       ...params.sender,
@@ -113,7 +113,7 @@ describe('Swap Integration', () => {
       await ethers.getContractFactory('Swap')
     ).deploy(
       [erc20adapter.address, erc721adapter.address, erc1155adapter.address],
-      tokenKinds.ERC20,
+      TokenKinds.ERC20,
       PROTOCOL_FEE,
       protocolFeeWallet.address
     )
@@ -131,14 +131,14 @@ describe('Swap Integration', () => {
           signer: {
             wallet: signer.address,
             token: erc20token.address,
-            kind: tokenKinds.ERC20,
+            kind: TokenKinds.ERC20,
             amount: '1',
             id: '0',
           },
           sender: {
             wallet: sender.address,
             token: erc20token2.address,
-            kind: tokenKinds.ERC20,
+            kind: TokenKinds.ERC20,
             amount: '1',
             id: '0',
           },
@@ -182,14 +182,14 @@ describe('Swap Integration', () => {
           signer: {
             wallet: signer.address,
             token: erc721token.address,
-            kind: tokenKinds.ERC721,
+            kind: TokenKinds.ERC721,
             amount: '0',
             id: '1',
           },
           sender: {
             wallet: sender.address,
             token: erc20token.address,
-            kind: tokenKinds.ERC20,
+            kind: TokenKinds.ERC20,
             amount: '1',
             id: '0',
           },
@@ -215,14 +215,14 @@ describe('Swap Integration', () => {
           signer: {
             wallet: signer.address,
             token: erc1155token.address,
-            kind: tokenKinds.ERC1155,
+            kind: TokenKinds.ERC1155,
             amount: '1',
             id: '1',
           },
           sender: {
             wallet: sender.address,
             token: erc20token.address,
-            kind: tokenKinds.ERC20,
+            kind: TokenKinds.ERC20,
             amount: '1',
             id: '0',
           },
@@ -251,14 +251,14 @@ describe('Swap Integration', () => {
           signer: {
             wallet: signer.address,
             token: erc721token.address,
-            kind: tokenKinds.ERC721,
+            kind: TokenKinds.ERC721,
             amount: '0',
             id: '1',
           },
           sender: {
             wallet: sender.address,
             token: erc721token.address,
-            kind: tokenKinds.ERC721,
+            kind: TokenKinds.ERC721,
             amount: '1',
             id: '0',
           },
@@ -284,14 +284,14 @@ describe('Swap Integration', () => {
           signer: {
             wallet: signer.address,
             token: erc721token.address,
-            kind: tokenKinds.ERC721,
+            kind: TokenKinds.ERC721,
             amount: '0',
             id: '1',
           },
           sender: {
             wallet: sender.address,
             token: erc1155token.address,
-            kind: tokenKinds.ERC1155,
+            kind: TokenKinds.ERC1155,
             amount: '1',
             id: '1',
           },
@@ -315,14 +315,14 @@ describe('Swap Integration', () => {
           signer: {
             wallet: signer.address,
             token: erc20token.address,
-            kind: tokenKinds.ERC20,
+            kind: TokenKinds.ERC20,
             amount: '1',
             id: '0',
           },
           sender: {
             wallet: sender.address,
             token: erc20token2.address,
-            kind: tokenKinds.ERC20,
+            kind: TokenKinds.ERC20,
             amount: '10000',
             id: '0',
           },
@@ -356,14 +356,14 @@ describe('Swap Integration', () => {
           signer: {
             wallet: signer.address,
             token: erc20token.address,
-            kind: tokenKinds.ERC20,
+            kind: TokenKinds.ERC20,
             amount: '1',
             id: '0',
           },
           sender: {
             wallet: sender.address,
             token: erc20token2.address,
-            kind: tokenKinds.ERC20,
+            kind: TokenKinds.ERC20,
             amount: '10000',
             id: '0',
           },
@@ -398,14 +398,14 @@ describe('Swap Integration', () => {
           signer: {
             wallet: signer.address,
             token: erc721token.address,
-            kind: tokenKinds.ERC721,
+            kind: TokenKinds.ERC721,
             amount: '0',
             id: '1',
           },
           sender: {
             wallet: sender.address,
             token: erc20token.address,
-            kind: tokenKinds.ERC20,
+            kind: TokenKinds.ERC20,
             amount: '1000',
             id: '0',
           },
