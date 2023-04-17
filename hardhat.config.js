@@ -58,6 +58,10 @@ module.exports = {
       url: 'https://public-node.testnet.rsk.co/',
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
     },
+    linea: {
+      url: 'https://rpc.goerli.linea.build/',
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
+    },
   },
   solidity: {
     compilers: [
@@ -94,6 +98,7 @@ module.exports = {
       avalancheFujiTestnet: process.env.SNOWTRACE_API_KEY,
       polygonMumbai: process.env.POLYGONSCAN_API_KEY,
       rsk: process.env.BLOCKSCOUT_API_KEY,
+      linea: process.env.BLOCKSCOUT_API_KEY,
     },
     customChains: [
       {
@@ -102,6 +107,14 @@ module.exports = {
         urls: {
           apiURL: 'https://blockscout.com/rsk/mainnet/api',
           browserURL: 'https://blockscout.com/rsk/mainnet',
+        },
+      },
+      {
+        network: 'linea',
+        chainId: 59140,
+        urls: {
+          apiURL: 'https://explorer.goerli.linea.build/api',
+          browserURL: 'https://explorer.goerli.linea.build/',
         },
       },
       {
