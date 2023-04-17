@@ -12,7 +12,7 @@ import {
   isValidFullOrder,
   isValidFullOrderERC20,
 } from '@airswap/utils'
-import { ADDRESS_ZERO, chainIds } from '@airswap/constants'
+import { ADDRESS_ZERO, ChainIds, Protocols } from '@airswap/constants'
 
 import { Server } from '../index'
 import { toSortField, toSortOrder } from '../index'
@@ -43,8 +43,7 @@ const REQUEST_TIMEOUT = 4000
 const URL = 'server.example.com'
 const signerPrivateKey =
   '0x4934d4ff925f39f91e3729fbce52ef12f25fdf93e014e291350f7d314c1a096b'
-const provider = ethers.getDefaultProvider('goerli')
-const wallet = new ethers.Wallet(signerPrivateKey, provider)
+const wallet = new ethers.Wallet(signerPrivateKey)
 
 chai.use(sinonChai)
 
@@ -75,7 +74,7 @@ function mockHttpServer(api) {
               order: {
                 ...unsignedOrderERC20,
                 ...signatureERC20,
-                chainId: chainIds.MAINNET,
+                chainId: ChainIds.MAINNET,
                 swapContract: ADDRESS_ZERO,
               },
             },
@@ -96,7 +95,7 @@ function mockHttpServer(api) {
               order: {
                 ...unsignedOrder,
                 ...signature,
-                chainId: chainIds.MAINNET,
+                chainId: ChainIds.MAINNET,
                 swapContract: ADDRESS_ZERO,
               },
             },
@@ -220,8 +219,10 @@ describe('WebSocketServer', () => {
       }
       mockServer.setNextMessageCallback(onResponse)
     })
-    expect(server.supportsProtocol('last-look-erc20')).to.equal(true)
-    expect(server.supportsProtocol('request-for-quote-erc20')).to.equal(false)
+    expect(server.supportsProtocol(Protocols.LastLookERC20)).to.equal(true)
+    expect(server.supportsProtocol(Protocols.RequestForQuoteERC20)).to.equal(
+      false
+    )
     await correctInitializeResponse
   })
 
@@ -366,15 +367,19 @@ describe('WebSocketServer', () => {
     // and minor and patch versions are the same or greater than requried
     mockServer.initOptions = { lastLook: '1.2.3' }
     const server = await Server.at(url)
-    expect(server.supportsProtocol('last-look-erc20')).to.be.true
-    expect(server.supportsProtocol('request-for-quote-erc20')).to.be.false
-    expect(server.supportsProtocol('last-look-erc20', '0.9.1')).to.be.false
-    expect(server.supportsProtocol('last-look-erc20', '1.0.0')).to.be.true
-    expect(server.supportsProtocol('last-look-erc20', '1.1.1')).to.be.true
-    expect(server.supportsProtocol('last-look-erc20', '1.2.3')).to.be.true
-    expect(server.supportsProtocol('last-look-erc20', '1.2.4')).to.be.false
-    expect(server.supportsProtocol('last-look-erc20', '1.3.0')).to.be.false
-    expect(server.supportsProtocol('last-look-erc20', '2.2.3')).to.be.false
+    expect(server.supportsProtocol(Protocols.LastLookERC20)).to.be.true
+    expect(server.supportsProtocol(Protocols.RequestForQuoteERC20)).to.be.false
+    expect(server.supportsProtocol(Protocols.LastLookERC20, '0.9.1')).to.be
+      .false
+    expect(server.supportsProtocol(Protocols.LastLookERC20, '1.0.0')).to.be.true
+    expect(server.supportsProtocol(Protocols.LastLookERC20, '1.1.1')).to.be.true
+    expect(server.supportsProtocol(Protocols.LastLookERC20, '1.2.3')).to.be.true
+    expect(server.supportsProtocol(Protocols.LastLookERC20, '1.2.4')).to.be
+      .false
+    expect(server.supportsProtocol(Protocols.LastLookERC20, '1.3.0')).to.be
+      .false
+    expect(server.supportsProtocol(Protocols.LastLookERC20, '2.2.3')).to.be
+      .false
   })
 
   it('should reject when calling a method from an unsupported protocol', async () => {

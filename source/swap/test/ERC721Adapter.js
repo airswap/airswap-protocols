@@ -2,7 +2,7 @@ const { expect } = require('chai')
 const { ethers, waffle } = require('hardhat')
 const IERC721 = require('@openzeppelin/contracts/build/contracts/IERC721.json')
 const { deployMockContract } = waffle
-const { ADDRESS_ZERO, tokenKinds } = require('@airswap/constants')
+const { ADDRESS_ZERO, TokenKinds } = require('@airswap/constants')
 
 let snapshotId
 let adapter
@@ -25,7 +25,7 @@ describe('ERC721Adapter Unit', () => {
     party = {
       wallet: ADDRESS_ZERO,
       token: token.address,
-      kind: tokenKinds.ERC721,
+      kind: TokenKinds.ERC721,
       id: '1',
       amount: '0',
     }

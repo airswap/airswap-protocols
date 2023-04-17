@@ -24,12 +24,12 @@
   },
   "dependencies": {
     "@airswap/staking": "4.0.0-beta.2",
-    "@openzeppelin/contracts": "^4.8.1"
+    "@openzeppelin/contracts": "^4.8.3"
   },
   "devDependencies": {
-    "@airswap/constants": "^4.0.0",
+    "@airswap/constants": "4.0.2-beta.0",
     "@airswap/types": "4.0.3-beta.0",
-    "@airswap/utils": "^4.0.5-beta.0",
+    "@airswap/utils": "4.0.5-beta.1",
     "prompt-confirm": "^2.0.4"
   },
   "publishConfig": {

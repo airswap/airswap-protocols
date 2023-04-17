@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 const { ethers, run } = require('hardhat')
 const poolDeploys = require('@airswap/pool/deploys.js')
-const { chainNames, tokenKinds } = require('@airswap/constants')
+const { chainNames, TokenKinds } = require('@airswap/constants')
 const swapDeploys = require('../deploys.js')
 const adapterDeploys = require('../deploys-adapters.js')
 
@@ -31,7 +31,7 @@ async function main() {
     address: swapDeploys[chainId],
     constructorArguments: [
       adapterDeploys[chainId],
-      tokenKinds.ERC20,
+      TokenKinds.ERC20,
       protocolFee,
       protocolFeeWallet,
     ],

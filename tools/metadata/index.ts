@@ -1,5 +1,5 @@
 import axios from 'axios'
-import * as ethers from 'ethers'
+import { ethers } from 'ethers'
 import {
   TokenInfo,
   CollectionTokenInfo,
@@ -8,7 +8,7 @@ import {
 } from '@airswap/types'
 import { defaults, tokenListURLs } from './constants'
 import {
-  tokenKinds,
+  TokenKinds,
   chainNames,
   stakingTokenAddresses,
 } from '@airswap/constants'
@@ -133,18 +133,18 @@ export async function getTokenKind(
 ): Promise<string> {
   const contract = new ethers.Contract(address, ERC165_ABI, provider)
   let supportsERC165 = true
-  let tokenKind = tokenKinds.ERC20
+  let tokenKind = TokenKinds.ERC20
   try {
-    if (await contract.supportsInterface(tokenKinds.ERC721)) {
-      tokenKind = tokenKinds.ERC721
+    if (await contract.supportsInterface(TokenKinds.ERC721)) {
+      tokenKind = TokenKinds.ERC721
     }
   } catch (e) {
     supportsERC165 = false
   }
   if (supportsERC165) {
-    if (tokenKind === tokenKinds.ERC20) {
-      if (await contract.supportsInterface(tokenKinds.ERC1155)) {
-        tokenKind = tokenKinds.ERC1155
+    if (tokenKind === TokenKinds.ERC20) {
+      if (await contract.supportsInterface(TokenKinds.ERC1155)) {
+        tokenKind = TokenKinds.ERC1155
       }
     }
   }
@@ -198,13 +198,13 @@ export async function getCollectionTokenInfo(
   }
   try {
     switch (tokenKind) {
-      case tokenKinds.ERC721:
+      case TokenKinds.ERC721:
         uri = await new ethers.Contract(address, ERC721_ABI, provider).tokenURI(
           id
         )
         metadata = transformERC721ToCollectionToken(await fetchMetaData(uri))
         break
-      case tokenKinds.ERC1155:
+      case TokenKinds.ERC1155:
         uri = await new ethers.Contract(address, ERC1155_ABI, provider).uri(id)
         metadata = transformERC1155ToCollectionToken(await fetchMetaData(uri))
         break
