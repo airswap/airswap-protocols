@@ -1,6 +1,6 @@
 {
   "name": "@airswap/libraries",
-  "version": "4.0.5-beta.2",
+  "version": "4.0.5-beta.3",
   "description": "AirSwap: Libraries for Developers",
   "repository": {
     "type": "git",
@@ -30,8 +30,8 @@
     "@airswap/balances": "^2.0.2",
     "@airswap/constants": "^4.0.0",
     "@airswap/jsonrpc-client-websocket": "0.0.1",
-    "@airswap/registry": "4.0.2-beta.0",
-    "@airswap/swap": "4.0.3-beta.0",
+    "@airswap/registry": "4.0.2-beta.1",
+    "@airswap/swap": "4.0.3-beta.1",
     "@airswap/swap-erc20": "^4.0.0",
     "@airswap/types": "4.0.3-beta.0",
     "@airswap/utils": "4.0.5-beta.0",
