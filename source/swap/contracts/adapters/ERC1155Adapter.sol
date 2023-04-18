@@ -14,9 +14,11 @@ contract ERC1155Adapter is IAdapter {
   /**
    * @notice Function to wrap token transfer for different token types
    * @param party Party from whom swap would be made
+   * @dev Use call: "msg.sender" is Swap contract
    */
   function hasAllowance(Party calldata party) external view returns (bool) {
-    return IERC1155(party.token).isApprovedForAll(party.wallet, address(this));
+    return
+      IERC1155(party.token).isApprovedForAll(party.wallet, address(msg.sender));
   }
 
   /**
@@ -35,6 +37,7 @@ contract ERC1155Adapter is IAdapter {
    * @param amount uint256 Amount for ERC-1155
    * @param id uint256 token ID for ERC-1155
    * @param token address Contract address of token
+   * @dev Use delegatecall: "this" is Swap contract
    */
   function transfer(
     address from,
