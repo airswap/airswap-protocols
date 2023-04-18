@@ -80,20 +80,36 @@ export const chainCurrencies: Record<number, string> = {
   [ChainIds.ARBITRUMGOERLI]: 'AETH',
 }
 
-export const etherscanDomains: Record<number, string> = {
-  [ChainIds.MAINNET]: 'etherscan.io',
-  [ChainIds.GOERLI]: 'goerli.etherscan.io',
-  [ChainIds.RSK]: 'blockscout.com/rsk/mainnet',
-  [ChainIds.RSKTESTNET]: 'explorer.testnet.rsk.co',
-  [ChainIds.BSC]: 'bscscan.com',
-  [ChainIds.BSCTESTNET]: 'testnet.bscscan.com',
-  [ChainIds.POLYGON]: 'polygonscan.com',
-  [ChainIds.ARBITRUM]: 'arbiscan.io',
-  [ChainIds.FUJI]: 'testnet.snowtrace.io',
-  [ChainIds.AVALANCHE]: 'snowtrace.io',
-  [ChainIds.LINEA]: 'explorer.goerli.linea.build',
-  [ChainIds.MUMBAI]: 'mumbai.polygonscan.com',
-  [ChainIds.ARBITRUMGOERLI]: 'goerli.arbiscan.io',
+export const apiUrls: Record<number, string> = {
+  [ChainIds.MAINNET]: 'https://mainnet.infura.io/v3/',
+  [ChainIds.GOERLI]: 'https://goerli.infura.io/v3/',
+  [ChainIds.RSK]: 'https://public-node.rsk.co',
+  [ChainIds.RSKTESTNET]: 'https://public-node.testnet.rsk.co/',
+  [ChainIds.BSC]: 'https://bsc-dataseed.binance.org/',
+  [ChainIds.BSCTESTNET]: 'https://data-seed-prebsc-1-s1.binance.org:8545/',
+  [ChainIds.POLYGON]: 'https://polygon-rpc.com/',
+  [ChainIds.ARBITRUM]: 'https://arb1.arbitrum.io/rpc',
+  [ChainIds.FUJI]: 'https://api.avax-test.network/ext/bc/C/rpc',
+  [ChainIds.AVALANCHE]: 'https://api.avax.network/ext/bc/C/rpc',
+  [ChainIds.LINEA]: 'https://rpc.goerli.linea.build/',
+  [ChainIds.MUMBAI]: 'https://rpc-mumbai.maticvigil.com',
+  [ChainIds.ARBITRUMGOERLI]: 'https://goerli-rollup.arbitrum.io/rpc',
+}
+
+export const explorerUrls: Record<number, string> = {
+  [ChainIds.MAINNET]: 'https://etherscan.io/',
+  [ChainIds.GOERLI]: 'https://goerli.etherscan.io/',
+  [ChainIds.RSK]: 'https://blockscout.com/rsk/mainnet/',
+  [ChainIds.RSKTESTNET]: 'https://explorer.testnet.rsk.co/',
+  [ChainIds.BSC]: 'https://bscscan.com/',
+  [ChainIds.BSCTESTNET]: 'https://testnet.bscscan.com/',
+  [ChainIds.POLYGON]: 'https://polygonscan.com/',
+  [ChainIds.ARBITRUM]: 'https://arbiscan.io/',
+  [ChainIds.FUJI]: 'https://testnet.snowtrace.io/',
+  [ChainIds.AVALANCHE]: 'https://snowtrace.io/',
+  [ChainIds.LINEA]: 'https://explorer.goerli.linea.build/',
+  [ChainIds.MUMBAI]: 'https://mumbai.polygonscan.com/',
+  [ChainIds.ARBITRUMGOERLI]: 'https://goerli.arbiscan.io/',
 }
 
 export const stakingTokenAddresses: Record<number, string> = {

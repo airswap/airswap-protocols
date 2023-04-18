@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "@airswap/balances": "^2.0.2",
-    "@airswap/constants": "4.0.2-beta.0",
+    "@airswap/constants": "4.0.2-beta.1",
     "@airswap/jsonrpc-client-websocket": "0.0.1",
     "@airswap/registry": "4.0.2-beta.1",
     "@airswap/swap": "4.0.3-beta.1",
