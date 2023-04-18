@@ -6,7 +6,7 @@ const swapDeploys = require('@airswap/swap-erc20/deploys.js')
 const wrapperDeploys = require('../deploys.js')
 const wethDeploys = require('../deploys-weth.js')
 const { chainNames } = require('@airswap/constants')
-const { getExplorerUrl } = require('@airswap/utils')
+const { getReceiptUrl } = require('@airswap/utils')
 
 async function main() {
   await run('compile')
@@ -32,7 +32,7 @@ async function main() {
     )
     console.log(
       'Deploying...',
-      getExplorerUrl(chainId, wrapperContract.deployTransaction.hash)
+      getReceiptUrl(chainId, wrapperContract.deployTransaction.hash)
     )
     await wrapperContract.deployed()
     console.log(`Deployed: ${wrapperContract.address}`)

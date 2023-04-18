@@ -4,7 +4,7 @@ const Confirm = require('prompt-confirm')
 const { ethers, run } = require('hardhat')
 const stakingDeploys = require('@airswap/staking/deploys.js')
 const { chainNames, stakingTokenAddresses } = require('@airswap/constants')
-const { getExplorerUrl } = require('@airswap/utils')
+const { getReceiptUrl } = require('@airswap/utils')
 const poolDeploys = require('../deploys.js')
 
 async function main() {
@@ -35,7 +35,7 @@ async function main() {
     )
     console.log(
       'Deploying...',
-      getExplorerUrl(chainId, poolContract.deployTransaction.hash)
+      getReceiptUrl(chainId, poolContract.deployTransaction.hash)
     )
     await poolContract.deployed()
     console.log(`Deployed: ${poolContract.address}`)
