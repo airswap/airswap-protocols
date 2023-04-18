@@ -14,9 +14,10 @@ contract ERC721Adapter is IAdapter {
   /**
    * @notice Function to wrap token transfer for different token types
    * @param party Party from whom swap would be made
+   * @dev Use call: "msg.sender" is Swap contract
    */
   function hasAllowance(Party calldata party) external view returns (bool) {
-    return IERC721(party.token).getApproved(party.id) == address(this);
+    return IERC721(party.token).getApproved(party.id) == address(msg.sender);
   }
 
   /**
@@ -34,6 +35,7 @@ contract ERC721Adapter is IAdapter {
    * @param amount uint256, must be 0 for this contract
    * @param id uint256 ID for ERC721
    * @param token address Contract address of token
+   * @dev Use delegatecall: "this" is Swap contract
    */
   function transfer(
     address from,
