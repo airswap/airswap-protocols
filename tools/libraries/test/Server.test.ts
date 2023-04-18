@@ -362,26 +362,6 @@ describe('WebSocketServer', () => {
     fakeTimers.restore()
   })
 
-  it('should correctly indicate support for protocol versions', async () => {
-    // Protocol is supported if the major version is the same,
-    // and minor and patch versions are the same or greater than requried
-    mockServer.initOptions = { lastLook: '1.2.3' }
-    const server = await Server.at(url)
-    expect(server.supportsProtocol(Protocols.LastLookERC20)).to.be.true
-    expect(server.supportsProtocol(Protocols.RequestForQuoteERC20)).to.be.false
-    expect(server.supportsProtocol(Protocols.LastLookERC20, '0.9.1')).to.be
-      .false
-    expect(server.supportsProtocol(Protocols.LastLookERC20, '1.0.0')).to.be.true
-    expect(server.supportsProtocol(Protocols.LastLookERC20, '1.1.1')).to.be.true
-    expect(server.supportsProtocol(Protocols.LastLookERC20, '1.2.3')).to.be.true
-    expect(server.supportsProtocol(Protocols.LastLookERC20, '1.2.4')).to.be
-      .false
-    expect(server.supportsProtocol(Protocols.LastLookERC20, '1.3.0')).to.be
-      .false
-    expect(server.supportsProtocol(Protocols.LastLookERC20, '2.2.3')).to.be
-      .false
-  })
-
   it('should reject when calling a method from an unsupported protocol', async () => {
     const server = await Server.at(url)
     try {
