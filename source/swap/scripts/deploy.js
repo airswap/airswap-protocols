@@ -4,7 +4,7 @@ const Confirm = require('prompt-confirm')
 const { ethers, run } = require('hardhat')
 const poolDeploys = require('@airswap/pool/deploys.js')
 const { chainNames, ChainIds, TokenKinds } = require('@airswap/constants')
-const { getEtherscanURL } = require('@airswap/utils')
+const { getExplorerUrl } = require('@airswap/utils')
 const swapDeploys = require('../deploys.js')
 const adapterDeploys = require('../deploys-adapters.js')
 
@@ -39,7 +39,7 @@ async function main() {
       ).deploy()
       console.log(
         `Deploying ${adapters[i]}...`,
-        getEtherscanURL(chainId, adapterContract.deployTransaction.hash)
+        getExplorerUrl(chainId, adapterContract.deployTransaction.hash)
       )
       await adapterContract.deployed()
       adapters[i] = adapterContract.address
@@ -53,7 +53,7 @@ async function main() {
     )
     console.log(
       'Deploying...',
-      getEtherscanURL(chainId, swapContract.deployTransaction.hash)
+      getExplorerUrl(chainId, swapContract.deployTransaction.hash)
     )
     await swapContract.deployed()
     console.log(`Deployed: ${swapContract.address}`)

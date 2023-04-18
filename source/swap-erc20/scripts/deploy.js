@@ -5,7 +5,7 @@ const { ethers, run } = require('hardhat')
 const poolDeploys = require('@airswap/pool/deploys.js')
 const stakingDeploys = require('@airswap/staking/deploys.js')
 const { chainNames } = require('@airswap/constants')
-const { getEtherscanURL } = require('@airswap/utils')
+const { getExplorerUrl } = require('@airswap/utils')
 const swapDeploys = require('../deploys.js')
 
 async function main() {
@@ -40,7 +40,7 @@ async function main() {
     )
     console.log(
       'Deploying...',
-      getEtherscanURL(chainId, swapContract.deployTransaction.hash)
+      getExplorerUrl(chainId, swapContract.deployTransaction.hash)
     )
     await swapContract.deployed()
     console.log(`Deployed: ${swapContract.address}`)

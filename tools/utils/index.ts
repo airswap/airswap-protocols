@@ -7,14 +7,11 @@ export * from './src/pricing'
 export * from './src/swap'
 export * from './src/swapERC20'
 
-export function getEtherscanURL(chainId: number, hash: string): string {
+export function getReceiptUrl(chainId: number, hash: string): string {
   return `${explorerUrls[chainId]}/tx/${hash}`
 }
 
-export function getEtherscanWalletURL(
-  chainId: number,
-  address: string
-): string {
+export function getAccountUrl(chainId: number, address: string): string {
   return `${explorerUrls[chainId]}/address/${address}`
 }
 
