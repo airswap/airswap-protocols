@@ -33,9 +33,19 @@ describe('ERC1155Adapter Unit', () => {
 
   it('hasAllowance succeeds', async () => {
     await token.mock.isApprovedForAll
-      .withArgs(party.wallet, adapter.address)
+      .withArgs(party.wallet, anyone.address)
       .returns(true)
     expect(await adapter.connect(anyone).hasAllowance(party)).to.be.equal(true)
+  })
+
+  it('hasAllowance fails for wrong address', async () => {
+    await token.mock.isApprovedForAll
+      .withArgs(party.wallet, anyone.address)
+      .returns(false)
+    await token.mock.isApprovedForAll
+      .withArgs(party.wallet, deployer.address)
+      .returns(true)
+    expect(await adapter.connect(anyone).hasAllowance(party)).to.be.equal(false)
   })
 
   it('hasBalance succeeds', async () => {
