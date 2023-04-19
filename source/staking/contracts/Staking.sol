@@ -44,10 +44,11 @@ contract Staking is IStaking, Ownable {
 
   /**
    * @notice Constructor
-   * @param _token address
-   * @param _name string
-   * @param _symbol string
-   * @param _duration uint256
+   * @param _token address Token used for staking
+   * @param _name string Token name for this contract
+   * @param _symbol string Token symbol for this contract
+   * @param _duration uint256 Amount of time tokens are staked
+   * @param _minDelay uint256 Amount of time between duration changes
    */
   constructor(
     ERC20 _token,
@@ -64,9 +65,9 @@ contract Staking is IStaking, Ownable {
   }
 
   /**
-   * @notice Set metadata config
-   * @param _name string
-   * @param _symbol string
+   * @notice Set token metadata for this contract
+   * @param _name string Token name for this contract
+   * @param _symbol string Token symbol for this contract
    */
   function setMetaData(
     string memory _name,
@@ -187,14 +188,14 @@ contract Staking is IStaking, Ownable {
   }
 
   /**
-   * @notice Total balance of all accounts (ERC-20)
+   * @notice Get total balance of all staked accounts
    */
   function totalSupply() external view override returns (uint256) {
     return token.balanceOf(address(this));
   }
 
   /**
-   * @notice Balance of an account (ERC-20)
+   * @notice Get balance of an account
    */
   function balanceOf(
     address account
@@ -203,7 +204,7 @@ contract Staking is IStaking, Ownable {
   }
 
   /**
-   * @notice Decimals of underlying token (ERC-20)
+   * @notice Get decimals of underlying token
    */
   function decimals() external view override returns (uint8) {
     return token.decimals();
@@ -215,7 +216,11 @@ contract Staking is IStaking, Ownable {
    * @param amount uint256
    */
   function stakeFor(address account, uint256 amount) public override {
-    _stake(account, amount);
+    if (delegateAccounts[account] != address(0)) {
+      _stake(delegateAccounts[account], amount);
+    } else {
+      _stake(account, amount);
+    }
   }
 
   /**
