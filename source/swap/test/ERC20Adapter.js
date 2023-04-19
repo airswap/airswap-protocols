@@ -33,9 +33,19 @@ describe('ERC20Adapter Unit', () => {
 
   it('hasAllowance succeeds', async () => {
     await token.mock.allowance
-      .withArgs(party.wallet, adapter.address)
+      .withArgs(party.wallet, anyone.address)
       .returns('1')
     expect(await adapter.connect(anyone).hasAllowance(party)).to.be.equal(true)
+  })
+
+  it('hasAllowance fails for wrong address', async () => {
+    await token.mock.allowance
+      .withArgs(party.wallet, anyone.address)
+      .returns('0')
+    await token.mock.allowance
+      .withArgs(party.wallet, deployer.address)
+      .returns('1')
+    expect(await adapter.connect(anyone).hasAllowance(party)).to.be.equal(false)
   })
 
   it('hasBalance succeeds', async () => {

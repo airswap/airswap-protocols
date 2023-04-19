@@ -16,10 +16,11 @@ contract ERC20Adapter is IAdapter {
   /**
    * @notice Function to wrap token transfer for different token types
    * @param party Party from whom swap would be made
+   * @dev Use call: "msg.sender" is Swap contract
    */
   function hasAllowance(Party calldata party) external view returns (bool) {
     return
-      IERC20(party.token).allowance(party.wallet, address(this)) >=
+      IERC20(party.token).allowance(party.wallet, address(msg.sender)) >=
       party.amount;
   }
 
@@ -38,6 +39,7 @@ contract ERC20Adapter is IAdapter {
    * @param amount uint256 Amount for ERC20
    * @param id uint256 ID, must be 0 for this contract
    * @param token address Contract address of token
+   * @dev Use delegatecall: "this" is Swap contract
    */
   function transfer(
     address from,

@@ -29,8 +29,8 @@
     "access": "public"
   },
   "devDependencies": {
-    "@airswap/constants": "4.0.2-beta.0",
-    "@airswap/utils": "4.0.5-beta.1",
+    "@airswap/constants": "4.0.2-beta.1",
+    "@airswap/utils": "4.0.5-beta.2",
     "prompt-confirm": "^2.0.4"
   }
 }

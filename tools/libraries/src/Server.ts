@@ -144,7 +144,7 @@ export class Server extends TypedEmitter<ServerEvents> {
     return server
   }
 
-  public getSupportedProtocolVersion(protocol: string): string | null {
+  public getSupportedProtocol(protocol: string): SupportedProtocolInfo | null {
     // Don't check supportedProtocols unless the server has initialized.
     // Important for WebSocket servers that can support either RFQ or Last Look
     this.requireInitialized()
@@ -152,27 +152,11 @@ export class Server extends TypedEmitter<ServerEvents> {
       (p) => p.name === protocol
     )
     if (!supportedProtocolInfo) return null
-    return supportedProtocolInfo.version
+    return supportedProtocolInfo
   }
 
-  public supportsProtocol(
-    protocol: string,
-    requestedVersion?: string
-  ): boolean {
-    const supportedVersion = this.getSupportedProtocolVersion(protocol)
-    if (!supportedVersion) return false
-    if (!requestedVersion) return true
-
-    const [, wantedMajor, wantedMinor, wantedPatch]: RegExpExecArray | [] =
-      /(\d+)\.(\d+)\.(\d+)/.exec(requestedVersion) || []
-    const [, supportedMajor, supportedMinor, supportedPatch]:
-      | RegExpExecArray
-      | [] = /(\d+)\.(\d+)\.(\d+)/.exec(supportedVersion) || []
-
-    if (wantedMajor !== supportedMajor) return false
-    if (parseInt(wantedMinor) > parseInt(supportedMinor)) return false
-    if (parseInt(wantedPatch) > parseInt(supportedPatch)) return false
-    return true
+  public supportsProtocol(protocol: string): boolean {
+    return !!this.getSupportedProtocol(protocol)
   }
 
   public async getSignerSideOrderERC20(
@@ -431,29 +415,20 @@ export class Server extends TypedEmitter<ServerEvents> {
     if (!this.isInitialized) throw new Error('Server not yet initialized')
   }
 
-  private requireRFQERC20Support(version?: string) {
-    this.requireProtocolSupport(Protocols.RequestForQuoteERC20, version)
+  private requireRFQERC20Support() {
+    this.requireProtocolSupport(Protocols.RequestForQuoteERC20)
   }
 
-  private requireLastLookERC20Support(version?: string) {
-    this.requireProtocolSupport(Protocols.LastLookERC20, version)
+  private requireLastLookERC20Support() {
+    this.requireProtocolSupport(Protocols.LastLookERC20)
   }
 
-  private requireProtocolSupport(protocol: string, version?: string) {
-    if (!this.supportsProtocol(protocol, version)) {
-      const supportedVersion = this.getSupportedProtocolVersion(protocol)
-      let message
-      if (supportedVersion) {
-        message =
-          `Server at ${this.locator} doesn't support ` +
-          `${protocolNames[protocol]} v${version}` +
-          `supported version ${supportedVersion}`
-      } else {
-        message =
-          `Server at ${this.locator} doesn't ` +
+  private requireProtocolSupport(protocol: string) {
+    if (!this.supportsProtocol(protocol)) {
+      throw new Error(
+        `Server at ${this.locator} doesn't ` +
           `support ${protocolNames[protocol]}`
-      }
-      throw new Error(message)
+      )
     }
   }
 
