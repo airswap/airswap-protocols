@@ -195,6 +195,7 @@ contract Staking is IStaking, Ownable {
 
   /**
    * @notice Get balance of an account
+   * @param account address
    */
   function balanceOf(
     address account
@@ -223,7 +224,7 @@ contract Staking is IStaking, Ownable {
   }
 
   /**
-   * @notice Available amount for an account
+   * @notice Amountt available for withdrawal for a given account
    * @param account uint256
    */
   function available(address account) public view override returns (uint256) {
