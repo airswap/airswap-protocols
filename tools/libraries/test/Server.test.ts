@@ -25,7 +25,6 @@ import {
 } from './test-utils'
 import { OrderERC20, SortField, SortOrder } from '@airswap/types'
 import { JsonRpcErrorCodes } from '@airswap/jsonrpc-client-websocket'
-import { assert } from 'console'
 
 addJSONRPCAssertions()
 declare global {
