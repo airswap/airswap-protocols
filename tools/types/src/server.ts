@@ -13,6 +13,7 @@ export type SupportedProtocolInfo = {
 export enum SortField {
   SIGNER_AMOUNT = 'SIGNER_AMOUNT',
   SENDER_AMOUNT = 'SENDER_AMOUNT',
+  EXPIRY = 'EXPIRY',
 }
 
 export enum SortOrder {
@@ -20,7 +21,7 @@ export enum SortOrder {
   DESC = 'DESC',
 }
 
-export type RequestFilter = {
+export type RequestFilterERC20 = {
   signerTokens?: string[]
   senderTokens?: string[]
   minSignerAmount?: bigint
@@ -31,6 +32,14 @@ export type RequestFilter = {
   sortField?: SortField
   sortOrder?: SortOrder
   maxAddedDate?: number
+}
+
+export type RequestFilterMarketPlace = {
+  sortField?: SortField
+  sortOrder?: SortOrder
+  signerAddress?: string
+  senderAddress?: string
+  page: number
 }
 
 export type FiltersResponse = {
