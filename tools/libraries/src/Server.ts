@@ -23,7 +23,7 @@ import {
   RequestFilterERC20,
   SortOrder,
   SortField,
-  RequestFilterMarketPlace,
+  RequestFilter,
 } from '@airswap/types'
 import { ChainIds, Protocols, protocolNames } from '@airswap/constants'
 
@@ -290,7 +290,7 @@ export class Server extends TypedEmitter<ServerEvents> {
   }
 
   public async getOrdersBy(
-    requestFilter: RequestFilterMarketPlace
+    requestFilter: RequestFilter
   ): Promise<OrderResponse<FullOrder>> {
     try {
       return Promise.resolve(

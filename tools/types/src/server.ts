@@ -34,7 +34,7 @@ export type RequestFilterERC20 = {
   maxAddedDate?: number
 }
 
-export type RequestFilterMarketPlace = {
+export type RequestFilter = {
   sortField?: SortField
   sortOrder?: SortOrder
   signerAddress?: string
