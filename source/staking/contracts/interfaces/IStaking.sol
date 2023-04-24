@@ -68,6 +68,7 @@ interface IStaking {
 
   /**
    * @notice Balance of an account (ERC-20)
+   * @param account address
    */
   function balanceOf(address account) external view returns (uint256);
 
