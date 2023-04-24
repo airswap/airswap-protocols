@@ -224,7 +224,7 @@ contract Staking is IStaking, Ownable {
   }
 
   /**
-   * @notice Amountt available for withdrawal for a given account
+   * @notice Amount available to withdraw for a given account
    * @param _account uint256
    */
   function available(address _account) public view override returns (uint256) {
