@@ -82,25 +82,11 @@ function mockHttpServer(api) {
         }
         break
       case 'getOrders':
-        const unsignedOrder = createOrder({})
-        const signature = await createOrderSignature(
-          unsignedOrder,
-          wallet.privateKey,
-          ADDRESS_ZERO,
-          1
-        )
-        res = {
-          orders: [
-            {
-              order: {
-                ...unsignedOrder,
-                ...signature,
-                chainId: ChainIds.MAINNET,
-                swapContract: ADDRESS_ZERO,
-              },
-            },
-          ],
+        if (params[0]['page']) {
+          expect(params[0]['page']).to.equal(1)
+          expect(params[0]['signerAddress']).to.equal(ADDRESS_ZERO)
         }
+        res = await forgeFullOrder()
         break
       case 'considerOrderERC20':
         res = true
@@ -132,7 +118,6 @@ describe('HTTPServer', () => {
     .it('Server getOrdersERC20()', async () => {
       const server = await Server.at(URL)
       const result = await server.getOrdersERC20()
-      server.getOrders
       expect(isValidFullOrderERC20(result.orders[0].order)).to.be.true
     })
   fancy
@@ -140,6 +125,16 @@ describe('HTTPServer', () => {
     .it('Server getOrders()', async () => {
       const server = await Server.at(URL)
       const result = await server.getOrders()
+      expect(isValidFullOrder(result.orders[0].order)).to.be.true
+    })
+  fancy
+    .nock('https://' + URL, mockHttpServer)
+    .it('Server getOrdersBy()', async () => {
+      const server = await Server.at(URL)
+      const result = await server.getOrdersBy({
+        page: 1,
+        signerAddress: ADDRESS_ZERO,
+      })
       expect(isValidFullOrder(result.orders[0].order)).to.be.true
     })
 })
@@ -452,6 +447,8 @@ describe('Indexing', () => {
     expect(toSortField('sender_amount')).to.equal(SortField.SENDER_AMOUNT)
     expect(toSortField('SIGNER_AMOUNT')).to.equal(SortField.SIGNER_AMOUNT)
     expect(toSortField('signer_amount')).to.equal(SortField.SIGNER_AMOUNT)
+    expect(toSortField('EXPIRY')).to.equal(SortField.EXPIRY)
+    expect(toSortField('expiry')).to.equal(SortField.EXPIRY)
   })
 
   it('sort field: should return undefined', () => {
@@ -471,3 +468,25 @@ describe('Indexing', () => {
     expect(toSortOrder('aze')).to.equal(undefined)
   })
 })
+
+async function forgeFullOrder() {
+  const unsignedOrder = createOrder({})
+  const signature = await createOrderSignature(
+    unsignedOrder,
+    wallet.privateKey,
+    ADDRESS_ZERO,
+    1
+  )
+  return {
+    orders: [
+      {
+        order: {
+          ...unsignedOrder,
+          ...signature,
+          chainId: ChainIds.MAINNET,
+          swapContract: ADDRESS_ZERO,
+        },
+      },
+    ],
+  }
+}
