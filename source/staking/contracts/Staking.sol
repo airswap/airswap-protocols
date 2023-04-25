@@ -4,7 +4,6 @@ pragma solidity ^0.8.17;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/utils/math/Math.sol";
 import "./interfaces/IStaking.sol";
 
 /**
@@ -44,10 +43,11 @@ contract Staking is IStaking, Ownable {
 
   /**
    * @notice Constructor
-   * @param _token address
-   * @param _name string
-   * @param _symbol string
-   * @param _duration uint256
+   * @param _token address Token used for staking
+   * @param _name string Token name for this contract
+   * @param _symbol string Token symbol for this contract
+   * @param _duration uint256 Amount of time tokens are staked
+   * @param _minDelay uint256 Amount of time between duration changes
    */
   constructor(
     ERC20 _token,
@@ -64,9 +64,9 @@ contract Staking is IStaking, Ownable {
   }
 
   /**
-   * @notice Set metadata config
-   * @param _name string
-   * @param _symbol string
+   * @notice Set token metadata for this contract
+   * @param _name string Token name for this contract
+   * @param _symbol string Token symbol for this contract
    */
   function setMetaData(
     string memory _name,
@@ -78,12 +78,12 @@ contract Staking is IStaking, Ownable {
 
   /**
    * @dev Schedules timelock to change duration
-   * @param delay uint256
+   * @param _delay uint256
    */
-  function scheduleDurationChange(uint256 delay) external onlyOwner {
+  function scheduleDurationChange(uint256 _delay) external onlyOwner {
     if (timeUnlock != 0) revert TimelockActive();
-    if (delay < minDelay) revert DelayInvalid(delay);
-    timeUnlock = block.timestamp + delay;
+    if (_delay < minDelay) revert DelayInvalid(_delay);
+    timeUnlock = block.timestamp + _delay;
     emit ScheduleDurationChange(timeUnlock);
   }
 
@@ -111,99 +111,100 @@ contract Staking is IStaking, Ownable {
 
   /**
    * @notice Propose delegate for account
-   * @param delegate address
+   * @param _delegate address
    */
-  function proposeDelegate(address delegate) external {
+  function proposeDelegate(address _delegate) external {
     if (accountDelegates[msg.sender] != address(0))
-      revert SenderHasDelegate(msg.sender, delegate);
-    if (delegateAccounts[delegate] != address(0))
-      revert DelegateTaken(delegate);
-    if (stakes[delegate].balance != 0) revert DelegateStaked(delegate);
-    proposedDelegates[msg.sender] = delegate;
-    emit ProposeDelegate(delegate, msg.sender);
+      revert SenderHasDelegate(msg.sender, _delegate);
+    if (delegateAccounts[_delegate] != address(0))
+      revert DelegateTaken(_delegate);
+    if (stakes[_delegate].balance != 0) revert DelegateStaked(_delegate);
+    proposedDelegates[msg.sender] = _delegate;
+    emit ProposeDelegate(_delegate, msg.sender);
   }
 
   /**
    * @notice Set delegate for account
-   * @param account address
+   * @param _account address
    */
-  function setDelegate(address account) external {
-    if (proposedDelegates[account] != msg.sender)
-      revert DelegateNotProposed(account);
+  function setDelegate(address _account) external {
+    if (proposedDelegates[_account] != msg.sender)
+      revert DelegateNotProposed(_account);
     if (delegateAccounts[msg.sender] != address(0))
-      revert DelegateTaken(account);
-    if (stakes[msg.sender].balance != 0) revert DelegateStaked(account);
-    accountDelegates[account] = msg.sender;
-    delegateAccounts[msg.sender] = account;
-    delete proposedDelegates[account];
-    emit SetDelegate(msg.sender, account);
+      revert DelegateTaken(_account);
+    if (stakes[msg.sender].balance != 0) revert DelegateStaked(_account);
+    accountDelegates[_account] = msg.sender;
+    delegateAccounts[msg.sender] = _account;
+    delete proposedDelegates[_account];
+    emit SetDelegate(msg.sender, _account);
   }
 
   /**
    * @notice Unset delegate for account
-   * @param delegate address
+   * @param _delegate address
    */
-  function unsetDelegate(address delegate) external {
-    if (accountDelegates[msg.sender] != delegate)
-      revert DelegateNotSet(delegate);
+  function unsetDelegate(address _delegate) external {
+    if (accountDelegates[msg.sender] != _delegate)
+      revert DelegateNotSet(_delegate);
     accountDelegates[msg.sender] = address(0);
-    delegateAccounts[delegate] = address(0);
+    delegateAccounts[_delegate] = address(0);
   }
 
   /**
    * @notice Stake tokens
-   * @param amount uint256
+   * @param _amount uint256
    */
-  function stake(uint256 amount) external override {
+  function stake(uint256 _amount) external override {
     if (delegateAccounts[msg.sender] != address(0)) {
-      _stake(delegateAccounts[msg.sender], amount);
+      _stake(delegateAccounts[msg.sender], _amount);
     } else {
-      _stake(msg.sender, amount);
+      _stake(msg.sender, _amount);
     }
   }
 
   /**
    * @notice Unstake tokens
-   * @param amount uint256
+   * @param _amount uint256
    */
-  function unstake(uint256 amount) external override {
-    address account;
+  function unstake(uint256 _amount) external override {
+    address _account;
     delegateAccounts[msg.sender] != address(0)
-      ? account = delegateAccounts[msg.sender]
-      : account = msg.sender;
-    _unstake(account, amount);
-    token.safeTransfer(account, amount);
-    emit Transfer(account, address(0), amount);
+      ? _account = delegateAccounts[msg.sender]
+      : _account = msg.sender;
+    _unstake(_account, _amount);
+    token.safeTransfer(_account, _amount);
+    emit Transfer(_account, address(0), _amount);
   }
 
   /**
    * @notice Receive stakes for an account
-   * @param account address
+   * @param _account address
    */
   function getStakes(
-    address account
-  ) external view override returns (Stake memory accountStake) {
-    return stakes[account];
+    address _account
+  ) external view override returns (Stake memory _accountStake) {
+    return stakes[_account];
   }
 
   /**
-   * @notice Total balance of all accounts (ERC-20)
+   * @notice Get total balance of all staked accounts
    */
   function totalSupply() external view override returns (uint256) {
     return token.balanceOf(address(this));
   }
 
   /**
-   * @notice Balance of an account (ERC-20)
+   * @notice Get balance of an account
+   * @param _account address
    */
   function balanceOf(
-    address account
+    address _account
   ) external view override returns (uint256 total) {
-    return stakes[account].balance;
+    return stakes[_account].balance;
   }
 
   /**
-   * @notice Decimals of underlying token (ERC-20)
+   * @notice Get decimals of underlying token
    */
   function decimals() external view override returns (uint8) {
     return token.decimals();
@@ -211,24 +212,28 @@ contract Staking is IStaking, Ownable {
 
   /**
    * @notice Stake tokens for an account
-   * @param account address
-   * @param amount uint256
+   * @param _account address
+   * @param _amount uint256
    */
-  function stakeFor(address account, uint256 amount) public override {
-    _stake(account, amount);
+  function stakeFor(address _account, uint256 _amount) public override {
+    if (delegateAccounts[_account] != address(0)) {
+      _stake(delegateAccounts[_account], _amount);
+    } else {
+      _stake(_account, _amount);
+    }
   }
 
   /**
-   * @notice Available amount for an account
-   * @param account uint256
+   * @notice Amount available to withdraw for a given account
+   * @param _account uint256
    */
-  function available(address account) public view override returns (uint256) {
-    Stake storage selected = stakes[account];
-    uint256 _available = (selected.balance *
-      (block.timestamp - selected.timestamp)) /
-      (selected.maturity - selected.timestamp);
-    if (_available >= selected.balance) {
-      return selected.balance;
+  function available(address _account) public view override returns (uint256) {
+    Stake storage _selected = stakes[_account];
+    uint256 _available = (_selected.balance *
+      (block.timestamp - _selected.timestamp)) /
+      (_selected.maturity - _selected.timestamp);
+    if (_available >= _selected.balance) {
+      return _selected.balance;
     } else {
       return _available;
     }
@@ -236,45 +241,46 @@ contract Staking is IStaking, Ownable {
 
   /**
    * @notice Stake tokens for an account
-   * @param account address
-   * @param amount uint256
+   * @param _account address
+   * @param _amount uint256
    */
-  function _stake(address account, uint256 amount) internal {
-    if (amount <= 0) revert AmountInvalid(amount);
-    stakes[account].duration = duration;
-    if (stakes[account].balance == 0) {
-      stakes[account].balance = amount;
-      stakes[account].timestamp = block.timestamp;
-      stakes[account].maturity =
-        stakes[account].timestamp +
-        stakes[account].duration;
+  function _stake(address _account, uint256 _amount) internal {
+    if (_amount <= 0) revert AmountInvalid(_amount);
+    stakes[_account].duration = duration;
+    if (stakes[_account].balance == 0) {
+      stakes[_account].balance = _amount;
+      stakes[_account].timestamp = block.timestamp;
+      stakes[_account].maturity =
+        stakes[_account].timestamp +
+        stakes[_account].duration;
     } else {
-      uint256 nowAvailable = available(account);
-      stakes[account].balance = stakes[account].balance + amount;
-      stakes[account].timestamp =
+      uint256 _nowAvailable = available(_account);
+      stakes[_account].balance = stakes[_account].balance + _amount;
+      stakes[_account].timestamp =
         block.timestamp -
-        ((nowAvailable * stakes[account].duration) / stakes[account].balance);
-      stakes[account].maturity =
-        stakes[account].timestamp +
-        stakes[account].duration;
+        ((_nowAvailable * stakes[_account].duration) /
+          stakes[_account].balance);
+      stakes[_account].maturity =
+        stakes[_account].timestamp +
+        stakes[_account].duration;
     }
-    token.safeTransferFrom(msg.sender, address(this), amount);
-    emit Transfer(address(0), account, amount);
+    token.safeTransferFrom(msg.sender, address(this), _amount);
+    emit Transfer(address(0), _account, _amount);
   }
 
   /**
    * @notice Unstake tokens
-   * @param account address
-   * @param amount uint256
+   * @param _account address
+   * @param _amount uint256
    */
-  function _unstake(address account, uint256 amount) internal {
-    Stake storage selected = stakes[account];
-    if (amount > available(account)) revert AmountInvalid(amount);
-    uint256 nowAvailable = available(account);
-    selected.balance = selected.balance - amount;
-    selected.timestamp =
+  function _unstake(address _account, uint256 _amount) internal {
+    Stake storage _selected = stakes[_account];
+    if (_amount > available(_account)) revert AmountInvalid(_amount);
+    uint256 nowAvailable = available(_account);
+    _selected.balance = _selected.balance - _amount;
+    _selected.timestamp =
       block.timestamp -
-      (((10000 - ((10000 * amount) / nowAvailable)) *
-        (block.timestamp - selected.timestamp)) / 10000);
+      (((10000 - ((10000 * _amount) / nowAvailable)) *
+        (block.timestamp - _selected.timestamp)) / 10000);
   }
 }

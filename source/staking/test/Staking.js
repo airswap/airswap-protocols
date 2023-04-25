@@ -529,6 +529,19 @@ describe('Staking Unit', () => {
       expect(userStakes.timestamp).to.equal(block.timestamp)
     })
 
+    it('successful staking for with delegate', async () => {
+      await token.mock.transferFrom.returns(true)
+      await staking.connect(account1).proposeDelegate(account2.address)
+      await staking.connect(account2).setDelegate(account1.address)
+      await staking.connect(account1).stakeFor(account2.address, '100')
+      const block = await ethers.provider.getBlock()
+      const userStakes = await staking
+        .connect(account2)
+        .getStakes(account1.address)
+      expect(userStakes.balance).to.equal(100)
+      expect(userStakes.timestamp).to.equal(block.timestamp)
+    })
+
     it('successful unstaking with delegate', async () => {
       await token.mock.transferFrom.returns(true)
       await token.mock.transfer.returns(true)
