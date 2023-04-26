@@ -133,10 +133,27 @@ export enum Protocols {
   Pricing = '0x00000002',
   LastLook = '0x00000003',
   Indexing = '0x00000004',
-  RequestForQuoteERC20 = '0x00000005',
-  PricingERC20 = '0x00000006',
-  LastLookERC20 = '0x00000007',
+  RequestForQuoteERC20 = '0x57bb3622',
+  PricingERC20 = '0x8beb22c2',
+  LastLookERC20 = '0x2ca4c820',
   IndexingERC20 = '0x00000008',
+}
+
+export const protocolInterfaces: Record<string, string[]> = {
+  [Protocols.RequestForQuoteERC20]: [
+    'function getSignerSideOrderERC20(string chainId,string swapContract,string senderAmount,string signerToken,string senderToken,string senderWallet,string proxyingFor)',
+    'function getSenderSideOrderERC20(string chainId,string swapContract,string signerAmount,string signerToken,string senderToken,string senderWallet,string proxyingFor)',
+    'function getPricingERC20(array((string baseToken,string quoteToken)))',
+    'function getAllPricingERC20()',
+  ],
+  [Protocols.LastLookERC20]: [
+    'function subscribePricingERC20(array((string baseToken,string quoteToken)))',
+    'function subscribeAllPricingERC20()',
+    'function unsubscribePricingERC20(array((string baseToken,string quoteToken)))',
+    'function unsubscribeAllPricingERC20()',
+    'function setPricingERC20(array(string baseToken,string quoteToken,string minimum,array(array((string level,string price))),array(array((string level,string price)))))',
+    'function considerOrderERC20(string nonce,string expiry,string signerWallet,string signerToken,string signerAmount,string senderToken,string senderAmount,string v,string r,string s)',
+  ],
 }
 
 export const protocolNames: Record<string, string> = {
