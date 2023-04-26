@@ -1,7 +1,7 @@
 const { expect } = require('chai')
 const { ethers } = require('hardhat')
 const { createOrder, createOrderSignature } = require('@airswap/utils')
-const { TokenKinds } = require('@airswap/constants')
+const { TokenKinds, ADDRESS_ZERO } = require('@airswap/constants')
 const ERC20PresetMinterPauser = require('@openzeppelin/contracts/build/contracts/ERC20PresetMinterPauser.json')
 const ERC1155PresetMinterPauser = require('@openzeppelin/contracts/build/contracts/ERC1155PresetMinterPauser.json')
 
@@ -132,14 +132,14 @@ describe('Swap Integration', () => {
             wallet: signer.address,
             token: erc20token.address,
             kind: TokenKinds.ERC20,
-            amount: '1',
+            amount: '10000',
             id: '0',
           },
           sender: {
             wallet: sender.address,
             token: erc20token2.address,
             kind: TokenKinds.ERC20,
-            amount: '1',
+            amount: '10000',
             id: '0',
           },
         },
@@ -162,7 +162,58 @@ describe('Swap Integration', () => {
         DEFAULT_AMOUNT - order.signer.amount
       )
       expect(await erc20token2.balanceOf(sender.address)).to.be.equal(
-        DEFAULT_AMOUNT - order.sender.amount
+        DEFAULT_AMOUNT - order.sender.amount - PROTOCOL_FEE
+      )
+      expect(await erc20token.balanceOf(sender.address)).to.be.equal(
+        order.signer.amount
+      )
+      expect(await erc20token2.balanceOf(signer.address)).to.be.equal(
+        order.sender.amount
+      )
+    })
+
+    it('public swap ERC20 for ERC20 succeeds', async () => {
+      await erc20token.connect(deployer).mint(signer.address, DEFAULT_AMOUNT)
+      await erc20token.connect(signer).approve(swap.address, DEFAULT_AMOUNT)
+      await erc20token2.connect(deployer).mint(sender.address, DEFAULT_AMOUNT)
+      await erc20token2.connect(sender).approve(swap.address, DEFAULT_AMOUNT)
+      const order = await createSignedOrder(
+        {
+          signer: {
+            wallet: signer.address,
+            token: erc20token.address,
+            kind: TokenKinds.ERC20,
+            amount: '10000',
+            id: '0',
+          },
+          sender: {
+            wallet: ADDRESS_ZERO,
+            token: erc20token2.address,
+            kind: TokenKinds.ERC20,
+            amount: '10000',
+            id: '0',
+          },
+        },
+        signer
+      )
+      expect(await erc20token.balanceOf(signer.address)).to.be.equal(
+        DEFAULT_AMOUNT
+      )
+      expect(await erc20token2.balanceOf(sender.address)).to.be.equal(
+        DEFAULT_AMOUNT
+      )
+      expect(await erc20token.balanceOf(sender.address)).to.be.equal('0')
+      expect(await erc20token2.balanceOf(signer.address)).to.be.equal('0')
+
+      await expect(
+        swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
+      ).to.emit(swap, 'Swap')
+
+      expect(await erc20token.balanceOf(signer.address)).to.be.equal(
+        DEFAULT_AMOUNT - order.signer.amount
+      )
+      expect(await erc20token2.balanceOf(sender.address)).to.be.equal(
+        DEFAULT_AMOUNT - order.sender.amount - PROTOCOL_FEE
       )
       expect(await erc20token.balanceOf(sender.address)).to.be.equal(
         order.signer.amount
