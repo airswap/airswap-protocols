@@ -121,7 +121,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
     // Transfer from sender to affiliate if specified
     if (order.affiliateWallet != address(0)) {
       _transfer(
-        order.sender.wallet,
+        msg.sender,
         order.affiliateWallet,
         order.affiliateAmount,
         order.sender.id,
@@ -135,7 +135,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
       FEE_DIVISOR;
     if (protocolFeeAmount > 0) {
       _transfer(
-        order.sender.wallet,
+        msg.sender,
         protocolFeeWallet,
         protocolFeeAmount,
         order.sender.id,
@@ -153,7 +153,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
       if (royaltyAmount > 0) {
         if (royaltyAmount > maxRoyalty) revert RoyaltyExceedsMax(royaltyAmount);
         _transfer(
-          order.sender.wallet,
+          msg.sender,
           royaltyRecipient,
           royaltyAmount,
           order.sender.id,
