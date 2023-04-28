@@ -129,20 +129,23 @@ export const stakingTokenAddresses: Record<number, string> = {
 }
 
 export enum Protocols {
-  RequestForQuote = '0x00000001',
-  Pricing = '0x00000002',
-  LastLook = '0x00000003',
-  Indexing = '0x00000004',
+  Discovery = '0x283a6c28',
   RequestForQuoteERC20 = '0x57bb3622',
   PricingERC20 = '0x8beb22c2',
   LastLookERC20 = '0x2ca4c820',
-  IndexingERC20 = '0x00000008',
+  StorageERC20 = '0x218893b8',
 }
 
 export const protocolInterfaces: Record<string, string[]> = {
+  [Protocols.Discovery]: [
+    'function getProtocols()',
+    'function setProtocols(array(string interfaceId))',
+    'function getSupportedTokens()',
+    'function setSupportedTokens(array(string tokenContractAddress))',
+  ],
   [Protocols.RequestForQuoteERC20]: [
-    'function getSignerSideOrderERC20(string chainId,string swapContract,string senderAmount,string signerToken,string senderToken,string senderWallet,string proxyingFor)',
-    'function getSenderSideOrderERC20(string chainId,string swapContract,string signerAmount,string signerToken,string senderToken,string senderWallet,string proxyingFor)',
+    'function getSignerSideOrderERC20(string chainId,string swapContractAddress,string senderAmount,string signerToken,string senderToken,string senderWallet,string proxyingFor)',
+    'function getSenderSideOrderERC20(string chainId,string swapContractAddress,string signerAmount,string signerToken,string senderToken,string senderWallet,string proxyingFor)',
     'function getPricingERC20(array((string baseToken,string quoteToken)))',
     'function getAllPricingERC20()',
   ],
@@ -154,17 +157,19 @@ export const protocolInterfaces: Record<string, string[]> = {
     'function setPricingERC20(array(string baseToken,string quoteToken,string minimum,array(array((string level,string price))),array(array((string level,string price)))))',
     'function considerOrderERC20(string nonce,string expiry,string signerWallet,string signerToken,string signerAmount,string senderToken,string senderAmount,string v,string r,string s)',
   ],
+  [Protocols.StorageERC20]: [
+    'function addOrderERC20(string nonce,string expiry,string signerWallet,string signerToken,string signerAmount,string senderToken,string senderAmount,string v,string r,string s)',
+    'function getOrdersERC20()',
+    'function getOrdersERC20By(string sortField,array(string senderToken),string page,string filters,string sortOrder)',
+  ],
 }
 
 export const protocolNames: Record<string, string> = {
-  [Protocols.RequestForQuote]: 'Request for Quote',
-  [Protocols.Pricing]: 'Pricing',
-  [Protocols.LastLook]: 'Last Look',
-  [Protocols.Indexing]: 'Indexing',
+  [Protocols.Discovery]: 'Discovery',
   [Protocols.RequestForQuoteERC20]: 'Request for Quote (ERC20)',
   [Protocols.PricingERC20]: 'Pricing (ERC20)',
   [Protocols.LastLookERC20]: 'Last Look (ERC20)',
-  [Protocols.IndexingERC20]: 'Indexing (ERC20)',
+  [Protocols.StorageERC20]: 'Storage (ERC20)',
 }
 
 export enum TokenKinds {
