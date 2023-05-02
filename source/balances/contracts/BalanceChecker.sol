@@ -7,8 +7,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 
 /**
- * @title BalanceChecker: Contract for checking balances and allowances for ERC20 tokens
- * @notice Supports checks for fungible tokens (ERC-20)
+ * @title BalanceChecker: Batch ERC-20 allowance and balance calls
  */
 contract BalanceChecker is Ownable {
   using SafeERC20 for IERC20;
