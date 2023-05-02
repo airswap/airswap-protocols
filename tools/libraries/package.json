@@ -27,7 +27,7 @@
     "test:unit": "TS_NODE_COMPILER_OPTIONS='{\"strict\":false}' yarn mocha -r ts-node/esm test/*.ts"
   },
   "dependencies": {
-    "@airswap/balances": "^4.0.0",
+    "@airswap/balances": "4.0.0-beta.0",
     "@airswap/constants": "4.0.2-beta.1",
     "@airswap/jsonrpc-client-websocket": "0.0.1",
     "@airswap/registry": "4.0.2-beta.1",
