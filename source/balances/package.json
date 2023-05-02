@@ -1,17 +1,12 @@
 {
-  "name": "@airswap/pool",
-  "version": "4.0.1-beta.0",
-  "description": "AirSwap: Rewards Pool",
+  "name": "@airswap/balances",
+  "version": "4.0.0",
+  "description": "Batch balance and allowance calls",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/airswap/airswap-protocols"
   },
-  "files": [
-    "./build",
-    "./typechain",
-    "./deploys.js"
-  ],
   "scripts": {
     "clean": "hardhat clean; rm -rf ./build; rm -rf ./typechain",
     "compile": "hardhat compile; yarn typechain",
@@ -23,14 +18,7 @@
     "verify": "hardhat run ./scripts/verify.js"
   },
   "dependencies": {
-    "@airswap/staking": "4.0.0-beta.3",
     "@openzeppelin/contracts": "^4.8.3"
-  },
-  "devDependencies": {
-    "@airswap/constants": "4.0.2-beta.1",
-    "@airswap/types": "4.0.3-beta.1",
-    "@airswap/utils": "4.0.5-beta.2",
-    "prompt-confirm": "^2.0.4"
   },
   "publishConfig": {
     "access": "public"
