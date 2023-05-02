@@ -14,7 +14,7 @@ import swapDeploys from '@airswap/swap/deploys.js'
 import wrapperDeploys from '@airswap/wrapper/deploys.js'
 import wethDeploys from '@airswap/wrapper/deploys-weth.js'
 
-import BalanceChecker from '@airswap/balances/build/contracts/BalanceChecker.json'
+import BalanceChecker from '@airswap/balances/build/contracts/BalanceChecker.sol/BalanceChecker.json'
 // @ts-ignore
 import balancesDeploys from '@airswap/balances/deploys.js'
 const balancesInterface = new ethers.utils.Interface(
