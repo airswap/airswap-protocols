@@ -91,7 +91,7 @@ contract Staking is IStaking, Ownable {
    * @dev Cancels timelock to change duration
    */
   function cancelDurationChange() external onlyOwner {
-    if (timeUnlock <= 0) revert TimelockInactive();
+    if (timeUnlock == 0) revert TimelockInactive();
     delete timeUnlock;
     emit CancelDurationChange();
   }
@@ -102,7 +102,7 @@ contract Staking is IStaking, Ownable {
    */
   function setDuration(uint256 _duration) external onlyOwner {
     if (_duration == 0) revert DurationInvalid(_duration);
-    if (timeUnlock <= 0) revert TimelockInactive();
+    if (timeUnlock == 0) revert TimelockInactive();
     if (block.timestamp < timeUnlock) revert Timelocked();
     duration = _duration;
     delete timeUnlock;
@@ -172,8 +172,6 @@ contract Staking is IStaking, Ownable {
       ? _account = delegateAccounts[msg.sender]
       : _account = msg.sender;
     _unstake(_account, _amount);
-    token.safeTransfer(_account, _amount);
-    emit Transfer(_account, address(0), _amount);
   }
 
   /**
@@ -282,5 +280,7 @@ contract Staking is IStaking, Ownable {
       block.timestamp -
       (((10000 - ((10000 * _amount) / nowAvailable)) *
         (block.timestamp - _selected.timestamp)) / 10000);
+    token.safeTransfer(_account, _amount);
+    emit Transfer(_account, address(0), _amount);
   }
 }
