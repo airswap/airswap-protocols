@@ -441,7 +441,7 @@ describe('WebSocketServer', () => {
   })
 })
 
-describe('Indexing', () => {
+describe('Storage', () => {
   it('sort field: should match value', () => {
     expect(toSortField('SENDER_AMOUNT')).to.equal(SortField.SENDER_AMOUNT)
     expect(toSortField('sender_amount')).to.equal(SortField.SENDER_AMOUNT)

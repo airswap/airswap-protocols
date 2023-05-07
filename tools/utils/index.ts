@@ -35,6 +35,22 @@ export function numberToBytes32(number: number): string {
   return `0x${hexString.padStart(64, '0')}`
 }
 
+export function getInterfaceId(functions: string[]): string {
+  const _interface = new ethers.utils.Interface(functions)
+  const interfaceId = ethers.utils.arrayify(
+    _interface.getSighash(_interface.fragments[0])
+  )
+  for (let i = 1; i < _interface.fragments.length; i++) {
+    const hash = ethers.utils.arrayify(
+      _interface.getSighash(_interface.fragments[i])
+    )
+    for (let j = 0; j < hash.length; j++) {
+      interfaceId[j] = interfaceId[j] ^ hash[j]
+    }
+  }
+  return ethers.utils.hexlify(interfaceId)
+}
+
 export function parseUrl(locator: string): url.UrlWithStringQuery {
   if (!/(http|ws)s?:\/\//.test(locator)) {
     locator = `https://${locator}`
