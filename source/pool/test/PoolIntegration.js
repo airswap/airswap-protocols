@@ -61,7 +61,7 @@ describe('Pool Integration', () => {
 
     stakeContract = await (
       await ethers.getContractFactory(STAKING.abi, STAKING.bytecode)
-    ).deploy(feeToken.address, 'StakedAST', 'sAST', 100, 1)
+    ).deploy('StakedAST', 'sAST', feeToken.address, 100, 1)
     await stakeContract.deployed()
 
     pool = await (

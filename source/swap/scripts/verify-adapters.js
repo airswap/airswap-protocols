@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 const { ethers, run } = require('hardhat')
-const registryDeploys = require('../deploys.js')
-const { chainNames, stakingTokenAddresses } = require('@airswap/constants')
+const { chainNames } = require('@airswap/constants')
+const adapterDeploys = require('../deploys-adapters.js')
 
 async function main() {
   await run('compile')
@@ -9,15 +9,19 @@ async function main() {
   console.log(`Deployer: ${deployer.address}`)
 
   const chainId = await deployer.getChainId()
-  const stakingToken = stakingTokenAddresses[chainId]
-  const obligationCost = 1000000000
-  const tokenCost = 1000000
 
   console.log(`Verifying on ${chainNames[chainId].toUpperCase()}`)
-  await run('verify:verify', {
-    address: registryDeploys[chainId],
-    constructorArguments: [stakingToken, obligationCost, tokenCost],
-  })
+
+  for (let i = 0; i < adapterDeploys[chainId].length; i++) {
+    try {
+      await run('verify:verify', {
+        address: adapterDeploys[chainId][i],
+        constructorArguments: [],
+      })
+    } catch (e) {
+      console.log(e)
+    }
+  }
 }
 
 main()

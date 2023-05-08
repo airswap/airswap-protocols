@@ -129,7 +129,7 @@ export const stakingTokenAddresses: Record<number, string> = {
 }
 
 export enum Protocols {
-  Discovery = '0x283a6c28',
+  Discovery = '0x8cd261ef',
   RequestForQuoteERC20 = '0x57bb3622',
   PricingERC20 = '0x8beb22c2',
   LastLookERC20 = '0x2ca4c820',
@@ -140,8 +140,8 @@ export const protocolInterfaces: Record<string, string[]> = {
   [Protocols.Discovery]: [
     'function getProtocols()',
     'function setProtocols(array(string interfaceId))',
-    'function getSupportedTokens()',
-    'function setSupportedTokens(array(string tokenContractAddress))',
+    'function getTokens()',
+    'function setTokens(array(string tokenContractAddress))',
   ],
   [Protocols.RequestForQuoteERC20]: [
     'function getSignerSideOrderERC20(string chainId,string swapContractAddress,string senderAmount,string signerToken,string senderToken,string senderWallet,string proxyingFor)',

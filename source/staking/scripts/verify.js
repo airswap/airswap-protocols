@@ -9,17 +9,23 @@ async function main() {
   console.log(`Deployer: ${deployer.address}`)
 
   const chainId = await deployer.getChainId()
-  const stakingToken = stakingTokenAddresses[chainId]
   const name = 'Staked AST'
   const symbol = 'sAST'
-  const duration = 12096000
-  const minDelay = 2419200
+  const stakingToken = stakingTokenAddresses[chainId]
+  const stakingDuration = 60 * 60 * 24 * 7 * 20 // Twenty Weeks
+  const minDurationChangeDelay = 60 * 60 * 24 * 7 // One Week
 
   console.log(`Contract: ${stakingDeploys[chainId]}`)
   console.log(`Verifying on ${chainNames[chainId].toUpperCase()}`)
   await run('verify:verify', {
     address: stakingDeploys[chainId],
-    constructorArguments: [stakingToken, name, symbol, duration, minDelay],
+    constructorArguments: [
+      name,
+      symbol,
+      stakingToken,
+      stakingDuration,
+      minDurationChangeDelay,
+    ],
   })
 }
 
