@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.17;
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/IStaking.sol";
 
 /**
@@ -14,16 +14,16 @@ contract Staking is IStaking, Ownable {
   using SafeERC20 for ERC20;
 
   // Token to be staked
-  ERC20 public immutable token;
+  ERC20 public immutable stakingToken;
 
   // Unstaking duration
-  uint256 public duration;
+  uint256 public stakingDuration;
 
-  // Timelock delay
-  uint256 private minDelay;
+  // Minimum delay to staking duration change
+  uint256 private minDurationChangeDelay;
 
-  // Timeunlock timestamp
-  uint256 private timeUnlock;
+  // Timestamp after which staking duration change is possible
+  uint256 private activeDurationChangeTimestamp;
 
   // Mapping of account to stakes
   mapping(address => Stake) internal stakes;
@@ -43,24 +43,24 @@ contract Staking is IStaking, Ownable {
 
   /**
    * @notice Constructor
-   * @param _token address Token used for staking
    * @param _name string Token name for this contract
    * @param _symbol string Token symbol for this contract
-   * @param _duration uint256 Amount of time tokens are staked
-   * @param _minDelay uint256 Amount of time between duration changes
+   * @param _stakingToken address Token used for staking
+   * @param _stakingDuration uint256 Amount of time tokens are staked
+   * @param _minDurationChangeDelay uint256 Time delay for a duration change
    */
   constructor(
-    ERC20 _token,
     string memory _name,
     string memory _symbol,
-    uint256 _duration,
-    uint256 _minDelay
+    ERC20 _stakingToken,
+    uint256 _stakingDuration,
+    uint256 _minDurationChangeDelay
   ) {
-    token = _token;
+    stakingToken = _stakingToken;
+    stakingDuration = _stakingDuration;
+    minDurationChangeDelay = _minDurationChangeDelay;
     name = _name;
     symbol = _symbol;
-    duration = _duration;
-    minDelay = _minDelay;
   }
 
   /**
@@ -81,32 +81,32 @@ contract Staking is IStaking, Ownable {
    * @param _delay uint256
    */
   function scheduleDurationChange(uint256 _delay) external onlyOwner {
-    if (timeUnlock != 0) revert TimelockActive();
-    if (_delay < minDelay) revert DelayInvalid(_delay);
-    timeUnlock = block.timestamp + _delay;
-    emit ScheduleDurationChange(timeUnlock);
+    if (activeDurationChangeTimestamp != 0) revert TimelockActive();
+    if (_delay < minDurationChangeDelay) revert DelayInvalid(_delay);
+    activeDurationChangeTimestamp = block.timestamp + _delay;
+    emit ScheduleDurationChange(activeDurationChangeTimestamp);
   }
 
   /**
    * @dev Cancels timelock to change duration
    */
   function cancelDurationChange() external onlyOwner {
-    if (timeUnlock == 0) revert TimelockInactive();
-    delete timeUnlock;
+    if (activeDurationChangeTimestamp == 0) revert TimelockInactive();
+    delete activeDurationChangeTimestamp;
     emit CancelDurationChange();
   }
 
   /**
    * @notice Set unstaking duration
-   * @param _duration uint256
+   * @param _stakingDuration uint256
    */
-  function setDuration(uint256 _duration) external onlyOwner {
-    if (_duration == 0) revert DurationInvalid(_duration);
-    if (timeUnlock == 0) revert TimelockInactive();
-    if (block.timestamp < timeUnlock) revert Timelocked();
-    duration = _duration;
-    delete timeUnlock;
-    emit CompleteDurationChange(_duration);
+  function setDuration(uint256 _stakingDuration) external onlyOwner {
+    if (_stakingDuration == 0) revert DurationInvalid(_stakingDuration);
+    if (activeDurationChangeTimestamp == 0) revert TimelockInactive();
+    if (block.timestamp < activeDurationChangeTimestamp) revert Timelocked();
+    stakingDuration = _stakingDuration;
+    delete activeDurationChangeTimestamp;
+    emit CompleteDurationChange(_stakingDuration);
   }
 
   /**
@@ -188,7 +188,7 @@ contract Staking is IStaking, Ownable {
    * @notice Get total balance of all staked accounts
    */
   function totalSupply() external view override returns (uint256) {
-    return token.balanceOf(address(this));
+    return stakingToken.balanceOf(address(this));
   }
 
   /**
@@ -205,7 +205,7 @@ contract Staking is IStaking, Ownable {
    * @notice Get decimals of underlying token
    */
   function decimals() external view override returns (uint8) {
-    return token.decimals();
+    return stakingToken.decimals();
   }
 
   /**
@@ -244,7 +244,7 @@ contract Staking is IStaking, Ownable {
    */
   function _stake(address _account, uint256 _amount) internal {
     if (_amount <= 0) revert AmountInvalid(_amount);
-    stakes[_account].duration = duration;
+    stakes[_account].duration = stakingDuration;
     if (stakes[_account].balance == 0) {
       stakes[_account].balance = _amount;
       stakes[_account].timestamp = block.timestamp;
@@ -262,7 +262,7 @@ contract Staking is IStaking, Ownable {
         stakes[_account].timestamp +
         stakes[_account].duration;
     }
-    token.safeTransferFrom(msg.sender, address(this), _amount);
+    stakingToken.safeTransferFrom(msg.sender, address(this), _amount);
     emit Transfer(address(0), _account, _amount);
   }
 
@@ -280,7 +280,7 @@ contract Staking is IStaking, Ownable {
       block.timestamp -
       (((10000 - ((10000 * _amount) / nowAvailable)) *
         (block.timestamp - _selected.timestamp)) / 10000);
-    token.safeTransfer(_account, _amount);
+    stakingToken.safeTransfer(_account, _amount);
     emit Transfer(_account, address(0), _amount);
   }
 }
