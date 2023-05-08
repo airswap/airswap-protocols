@@ -28,9 +28,9 @@ describe('Staking Unit', () => {
     token = await deployMockContract(deployer, IERC20.abi)
     stakingFactory = await ethers.getContractFactory('Staking')
     staking = await stakingFactory.deploy(
-      token.address,
       'Staked AST',
       'sAST',
+      token.address,
       DEFAULTDURATION,
       DEFAULTDELAY
     )
@@ -42,8 +42,8 @@ describe('Staking Unit', () => {
       const owner = await staking.owner()
       const name = await staking.name()
       const symbol = await staking.symbol()
-      const tokenAddress = await staking.token()
-      const defaultduration = await staking.duration()
+      const tokenAddress = await staking.stakingToken()
+      const defaultduration = await staking.stakingDuration()
 
       expect(owner).to.equal(deployer.address)
       expect(name).to.equal('Staked AST')
@@ -116,7 +116,7 @@ describe('Staking Unit', () => {
         await staking.connect(deployer).setDuration(2 * DEFAULTDURATION)
       ).to.emit(staking, 'CompleteDurationChange')
 
-      const defaultduration = await staking.duration()
+      const defaultduration = await staking.stakingDuration()
       expect(defaultduration).to.equal(2 * DEFAULTDURATION)
     })
 
