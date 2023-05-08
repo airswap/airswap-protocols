@@ -39,6 +39,9 @@ declare global {
   }
 }
 
+const USDC = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
+const USDT = '0xdac17f958d2ee523a2206206994597c13d831ec7'
+
 const REQUEST_TIMEOUT = 4000
 const URL = 'server.example.com'
 const signerPrivateKey =
@@ -52,6 +55,12 @@ function mockHttpServer(api) {
     const params = body['params']
     let res
     switch (body['method']) {
+      case 'getProtocols':
+        res = [Protocols.Discovery, Protocols.RequestForQuoteERC20]
+        break
+      case 'getTokens':
+        res = [USDC, USDT]
+        break
       case 'getSignerSideOrderERC20':
         res = createOrderERC20({
           signerToken: params.signerToken,
@@ -59,6 +68,7 @@ function mockHttpServer(api) {
           senderAmount: params.senderAmount,
           senderWallet: params.senderWallet,
         })
+        console.log(params.proxyingFor)
         break
       case 'getOrdersERC20':
         const unsignedOrderERC20 = createOrderERC20({})
@@ -101,6 +111,22 @@ function mockHttpServer(api) {
 }
 
 describe('HTTPServer', () => {
+  fancy
+    .nock('https://' + URL, mockHttpServer)
+    .it('Server getProtocols()', async () => {
+      const server = await Server.at(URL)
+      const result = await server.getProtocols()
+      expect(result[0]).to.be.equal(Protocols.Discovery)
+      expect(result[1]).to.be.equal(Protocols.RequestForQuoteERC20)
+    })
+  fancy
+    .nock('https://' + URL, mockHttpServer)
+    .it('Server getTokens()', async () => {
+      const server = await Server.at(URL)
+      const result = await server.getTokens()
+      expect(result[0]).to.be.equal(USDC)
+      expect(result[1]).to.be.equal(USDT)
+    })
   fancy
     .nock('https://' + URL, mockHttpServer)
     .it('Server getSignerSideOrderERC20()', async () => {

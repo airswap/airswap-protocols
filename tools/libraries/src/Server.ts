@@ -163,21 +163,48 @@ export class Server extends TypedEmitter<ServerEvents> {
     return !!this.getSupportedProtocol(protocol)
   }
 
+  public getSenderWallet(): string | null {
+    this.requireLastLookERC20Support()
+    return this.senderWallet
+  }
+
+  /**
+   * Protocols.Discovery
+   */
+  public async getProtocols(): Promise<string[]> {
+    return this.callRPCMethod<string[]>('getProtocols', [])
+  }
+
+  public async getTokens(): Promise<string[]> {
+    return this.callRPCMethod<string[]>('getTokens', [])
+  }
+
+  /**
+   * Protocols.RequestForQuoteERC20
+   */
   public async getSignerSideOrderERC20(
     senderAmount: string,
     signerToken: string,
     senderToken: string,
-    senderWallet: string
+    senderWallet: string,
+    proxyingFor?: string
   ): Promise<OrderERC20> {
     this.requireRFQERC20Support()
-    return this.callRPCMethod<OrderERC20>('getSignerSideOrderERC20', {
+    const params: any = {
       chainId: String(this.chainId),
       swapContract: this.swapContract,
       senderAmount: senderAmount.toString(),
       signerToken,
       senderToken,
       senderWallet,
-    }).then((order) => {
+    }
+    if (proxyingFor) {
+      params.proxyingFor = proxyingFor
+    }
+    return this.callRPCMethod<OrderERC20>(
+      'getSignerSideOrderERC20',
+      params
+    ).then((order) => {
       return orderERC20PropsToStrings(order)
     })
   }
@@ -186,21 +213,42 @@ export class Server extends TypedEmitter<ServerEvents> {
     signerAmount: string | ethers.BigNumber,
     signerToken: string,
     senderToken: string,
-    senderWallet: string
+    senderWallet: string,
+    proxyingFor?: string
   ): Promise<OrderERC20> {
     this.requireRFQERC20Support()
-    return this.callRPCMethod<OrderERC20>('getSenderSideOrderERC20', {
+    const params: any = {
       chainId: String(this.chainId),
       swapContract: this.swapContract,
       signerAmount: signerAmount.toString(),
       signerToken,
       senderToken,
       senderWallet,
-    }).then((order) => {
+    }
+    if (proxyingFor) {
+      params.proxyingFor = proxyingFor
+    }
+    return this.callRPCMethod<OrderERC20>(
+      'getSenderSideOrderERC20',
+      params
+    ).then((order) => {
       return orderERC20PropsToStrings(order)
     })
   }
 
+  public async getPricingERC20(
+    pairs: { baseToken: string; quoteToken: string }[]
+  ): Promise<Pricing[]> {
+    return this.callRPCMethod<Pricing[]>('getPricingERC20', [pairs])
+  }
+
+  public async getAllPricingERC20(): Promise<Pricing[]> {
+    return this.callRPCMethod<Pricing[]>('getAllPricingERC20', [])
+  }
+
+  /**
+   * Protocols.LastLookERC20
+   */
   public async subscribePricingERC20(
     pairs: { baseToken: string; quoteToken: string }[]
   ): Promise<Pricing[]> {
@@ -213,6 +261,11 @@ export class Server extends TypedEmitter<ServerEvents> {
     return pricing
   }
 
+  public async subscribeAllPricingERC20(): Promise<boolean> {
+    this.requireLastLookERC20Support()
+    return this.callRPCMethod<boolean>('subscribeAllPricingERC20', [])
+  }
+
   public async unsubscribePricingERC20(
     pairs: { baseToken: string; quoteToken: string }[]
   ): Promise<boolean> {
@@ -220,19 +273,9 @@ export class Server extends TypedEmitter<ServerEvents> {
     return this.callRPCMethod<boolean>('unsubscribePricingERC20', [pairs])
   }
 
-  public async subscribeAllPricingERC20(): Promise<boolean> {
-    this.requireLastLookERC20Support()
-    return this.callRPCMethod<boolean>('subscribeAllPricingERC20', [])
-  }
-
   public async unsubscribeAllPricingERC20(): Promise<boolean> {
     this.requireLastLookERC20Support()
     return this.callRPCMethod<boolean>('unsubscribeAllPricingERC20', [])
-  }
-
-  public getSenderWallet(): string | null {
-    this.requireLastLookERC20Support()
-    return this.senderWallet
   }
 
   public async considerOrderERC20(order: OrderERC20): Promise<boolean> {
@@ -240,15 +283,15 @@ export class Server extends TypedEmitter<ServerEvents> {
     return this.callRPCMethod<boolean>('considerOrderERC20', order)
   }
 
-  public async getOrdersERC20By(
-    requestFilter: RequestFilterERC20,
-    filters = false
-  ): Promise<OrderResponse<FullOrderERC20>> {
+  /**
+   * Protocols.StorageERC20
+   */
+  public async addOrderERC20(
+    fullOrder: FullOrderERC20
+  ): Promise<SuccessResponse> {
     try {
       return Promise.resolve(
-        (await this.httpCall('getOrdersERC20', [
-          { ...this.toBigIntJson(requestFilter), filters },
-        ])) as OrderResponse<FullOrderERC20>
+        (await this.httpCall('addOrderERC20', [fullOrder])) as SuccessResponse
       )
     } catch (err) {
       return Promise.reject(err)
@@ -267,12 +310,28 @@ export class Server extends TypedEmitter<ServerEvents> {
     }
   }
 
-  public async addOrderERC20(
-    fullOrder: FullOrderERC20
-  ): Promise<SuccessResponse> {
+  public async getOrdersERC20By(
+    requestFilter: RequestFilterERC20,
+    filters = false
+  ): Promise<OrderResponse<FullOrderERC20>> {
     try {
       return Promise.resolve(
-        (await this.httpCall('addOrderERC20', [fullOrder])) as SuccessResponse
+        (await this.httpCall('getOrdersERC20', [
+          { ...this.toBigIntJson(requestFilter), filters },
+        ])) as OrderResponse<FullOrderERC20>
+      )
+    } catch (err) {
+      return Promise.reject(err)
+    }
+  }
+
+  /**
+   * Protocols.Storage
+   */
+  public async addOrder(order: FullOrder): Promise<SuccessResponse> {
+    try {
+      return Promise.resolve(
+        (await this.httpCall('addOrder', [order])) as SuccessResponse
       )
     } catch (err) {
       return Promise.reject(err)
@@ -297,16 +356,6 @@ export class Server extends TypedEmitter<ServerEvents> {
         (await this.httpCall('getOrders', [
           { ...requestFilter },
         ])) as OrderResponse<FullOrder>
-      )
-    } catch (err) {
-      return Promise.reject(err)
-    }
-  }
-
-  public async addOrder(order: FullOrder): Promise<SuccessResponse> {
-    try {
-      return Promise.resolve(
-        (await this.httpCall('addOrder', [order])) as SuccessResponse
       )
     } catch (err) {
       return Promise.reject(err)

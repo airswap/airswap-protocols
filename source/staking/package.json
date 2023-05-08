@@ -13,7 +13,7 @@
     "./deploys.js"
   ],
   "scripts": {
-    "clean": "hardhat clean; rm -rf ./build; rm -rf ./typechain",
+    "clean": "rm -rf cache && rm -rf ./build && rm -rf ./typechain",
     "compile": "hardhat compile; yarn typechain",
     "typechain": "tsc -b",
     "coverage": "hardhat coverage",
