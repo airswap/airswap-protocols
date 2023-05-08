@@ -1,6 +1,10 @@
 import { assert, expect } from 'chai'
 import { ethers } from 'ethers'
-import { ADDRESS_ZERO, SECONDS_IN_DAY } from '@airswap/constants'
+import {
+  ADDRESS_ZERO,
+  SECONDS_IN_DAY,
+  protocolInterfaces,
+} from '@airswap/constants'
 import { Levels, FullOrderERC20, UnsignedOrderERC20 } from '@airswap/types'
 
 import {
@@ -14,7 +18,8 @@ import {
   compressFullOrderERC20,
   decompressFullOrderERC20,
   calculateCostFromLevels,
-} from '@airswap/utils'
+  getInterfaceId,
+} from '../index'
 
 const signerPrivateKey =
   '0x4934d4ff925f39f91e3729fbce52ef12f25fdf93e014e291350f7d314c1a096b'
@@ -33,6 +38,14 @@ describe('Utils', async () => {
       senderWallet: ADDRESS_ZERO,
       senderToken: ADDRESS_ZERO,
       senderAmount: '0',
+    }
+  })
+
+  it('Generates correct interfaceIds', async () => {
+    for (const interfaceId in protocolInterfaces) {
+      expect(getInterfaceId(protocolInterfaces[interfaceId])).to.be.equal(
+        interfaceId
+      )
     }
   })
 
