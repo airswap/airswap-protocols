@@ -13,7 +13,7 @@
     "./deploys.js"
   ],
   "scripts": {
-    "clean": "hardhat clean; rm -rf ./build; rm -rf ./typechain",
+    "clean": "rm -rf ./cache && rm -rf ./build && rm -rf ./typechain",
     "compile": "hardhat compile; yarn typechain",
     "typechain": "tsc -b",
     "coverage": "hardhat coverage",
@@ -29,7 +29,7 @@
     "access": "public"
   },
   "devDependencies": {
-    "@airswap/constants": "4.0.2-beta.2",
+    "@airswap/constants": "4.0.2-beta.3",
     "@airswap/utils": "4.0.5-beta.3",
     "prompt-confirm": "^2.0.4"
   }
