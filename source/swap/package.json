@@ -21,7 +21,9 @@
     "test": "hardhat test",
     "test:unit": "hardhat test",
     "deploy": "hardhat run ./scripts/deploy.js",
-    "verify": "hardhat run ./scripts/verify.js"
+    "verify": "hardhat run ./scripts/verify.js",
+    "deploy-adapters": "hardhat run ./scripts/deploy-adapters.js",
+    "verify-adapters": "hardhat run ./scripts/verify-adapters.js"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.8.3"

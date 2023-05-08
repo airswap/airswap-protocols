@@ -1,4 +1,9 @@
 module.exports = {
+  1: [
+    '0xa71c528c89f3acf049e1ce00199dac9b48a70e18',
+    '0xee6f8e232d27aacc65e92dbf7c034d1061b8938d',
+    '0xe790b7919deaf5bc84809d8bec98e07e698e9e76',
+  ],
   5: [
     '0x210b7145737388430434e966DB651E763362a35f',
     '0xD2540236fD98DAeBa63Dd34C0216e78fDbF19B9c',

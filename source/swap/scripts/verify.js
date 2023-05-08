@@ -11,27 +11,17 @@ async function main() {
   console.log(`Deployer: ${deployer.address}`)
 
   const chainId = await deployer.getChainId()
-  const protocolFeeWallet = poolDeploys[chainId]
+  const requiredSenderKind = TokenKinds.ERC20
   const protocolFee = 7
+  const protocolFeeWallet = poolDeploys[chainId]
 
   console.log(`Verifying on ${chainNames[chainId].toUpperCase()}`)
-
-  for (let i = 0; i < adapterDeploys[chainId].length; i++) {
-    try {
-      await run('verify:verify', {
-        address: adapterDeploys[chainId][i],
-        constructorArguments: [],
-      })
-    } catch (e) {
-      console.log(e)
-    }
-  }
 
   await run('verify:verify', {
     address: swapDeploys[chainId],
     constructorArguments: [
       adapterDeploys[chainId],
-      TokenKinds.ERC20,
+      requiredSenderKind,
       protocolFee,
       protocolFeeWallet,
     ],

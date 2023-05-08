@@ -9,17 +9,19 @@ const registryDeploys = require('../deploys.js')
 async function main() {
   await run('compile')
   const [deployer] = await ethers.getSigners()
-  console.log(`Deployer: ${deployer.address}`)
-
   const chainId = await deployer.getChainId()
   const gasPrice = await deployer.getGasPrice()
   const stakingToken = stakingTokenAddresses[chainId]
-  const obligationCost = 0
-  const tokenCost = 0
+  const obligationCost = 1000000000
+  const tokenCost = 1000000
 
+  console.log(`\nstakingToken: ${stakingToken}`)
+  console.log(`obligationCost: ${obligationCost}`)
+  console.log(`tokenCost: ${tokenCost}\n`)
+
+  console.log(`Deployer: ${deployer.address}`)
   console.log(`Deploying on ${chainNames[chainId].toUpperCase()}`)
-  console.log(`Staking token: ${stakingToken}`)
-  console.log(`Gas price: ${gasPrice / 10 ** 9} gwei`)
+  console.log(`Gas price: ${gasPrice / 10 ** 9} gwei\n`)
 
   const prompt = new Confirm('Proceed to deploy?')
   if (await prompt.run()) {
