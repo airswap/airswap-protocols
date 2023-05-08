@@ -13,7 +13,7 @@
     "./deploys.js"
   ],
   "scripts": {
-    "clean": "hardhat clean; rm -rf ./build; rm -rf ./typechain",
+    "clean": "rm -rf ./cache && rm -rf ./build && rm -rf ./typechain",
     "compile": "hardhat compile; yarn typechain",
     "typechain": "tsc -b",
     "coverage": "hardhat coverage",
@@ -23,7 +23,7 @@
     "verify": "hardhat run ./scripts/verify.js"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.8.1"
+    "@openzeppelin/contracts": "^4.8.3"
   },
   "devDependencies": {
     "@airswap/constants": "^4.0.0",

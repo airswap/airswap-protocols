@@ -3,39 +3,43 @@ const fs = require('fs')
 const Confirm = require('prompt-confirm')
 const { ethers, run } = require('hardhat')
 const { chainNames, stakingTokenAddresses } = require('@airswap/constants')
-const { getEtherscanURL } = require('@airswap/utils')
+const { getReceiptUrl } = require('@airswap/utils')
 const stakingDeploys = require('../deploys.js')
 
 async function main() {
   await run('compile')
   const [deployer] = await ethers.getSigners()
-  console.log(`Deployer: ${deployer.address}`)
-
   const chainId = await deployer.getChainId()
   const gasPrice = await deployer.getGasPrice()
-  const stakingToken = stakingTokenAddresses[chainId]
   const name = 'Staked AST'
   const symbol = 'sAST'
-  const duration = 12096000
-  const minDelay = 2419200
+  const stakingToken = stakingTokenAddresses[chainId]
+  const stakingDuration = 60 * 60 * 24 * 7 * 20 // Twenty Weeks
+  const minDurationChangeDelay = 60 * 60 * 24 * 7 // One Week
 
+  console.log(`\nname: ${name}`)
+  console.log(`symbol: ${symbol}`)
+  console.log(`stakingToken: ${stakingToken}`)
+  console.log(`stakingDuration: ${stakingDuration}`)
+  console.log(`minDurationChangeDelay: ${minDurationChangeDelay}\n`)
+
+  console.log(`Deployer: ${deployer.address}`)
   console.log(`Deploying on ${chainNames[chainId].toUpperCase()}`)
-  console.log(`Staking token: ${stakingToken}`)
-  console.log(`Gas price: ${gasPrice / 10 ** 9} gwei`)
+  console.log(`Gas price: ${gasPrice / 10 ** 9} gwei\n`)
 
   const prompt = new Confirm('Proceed to deploy?')
   if (await prompt.run()) {
     const stakingFactory = await ethers.getContractFactory('Staking')
     const stakingContract = await stakingFactory.deploy(
-      stakingToken,
       name,
       symbol,
-      duration,
-      minDelay
+      stakingToken,
+      stakingDuration,
+      minDurationChangeDelay
     )
     console.log(
       'Deploying...',
-      getEtherscanURL(chainId, stakingContract.deployTransaction.hash)
+      getReceiptUrl(chainId, stakingContract.deployTransaction.hash)
     )
     await stakingContract.deployed()
     console.log(`Deployed: ${stakingContract.address}`)

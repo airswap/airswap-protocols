@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.17;
 
 interface IStaking {
   struct Stake {
     uint256 duration;
     uint256 balance;
     uint256 timestamp;
+    uint256 maturity;
   }
 
   // ERC-20 Transfer event
@@ -26,6 +27,19 @@ interface IStaking {
 
   // Set Delegate event
   event SetDelegate(address indexed delegate, address indexed account);
+
+  error AmountInvalid(uint256);
+  error DelayInvalid(uint256);
+  error DelegateInvalid(address);
+  error DelegateNotProposed(address);
+  error DelegateNotSet(address);
+  error DelegateStaked(address);
+  error DelegateTaken(address);
+  error DurationInvalid(uint256);
+  error SenderHasDelegate(address sender, address delegate);
+  error TimelockActive();
+  error Timelocked();
+  error TimelockInactive();
 
   /**
    * @notice Stake tokens
@@ -54,6 +68,7 @@ interface IStaking {
 
   /**
    * @notice Balance of an account (ERC-20)
+   * @param account address
    */
   function balanceOf(address account) external view returns (uint256);
 

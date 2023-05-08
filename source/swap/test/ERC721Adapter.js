@@ -2,7 +2,7 @@ const { expect } = require('chai')
 const { ethers, waffle } = require('hardhat')
 const IERC721 = require('@openzeppelin/contracts/build/contracts/IERC721.json')
 const { deployMockContract } = waffle
-const { ADDRESS_ZERO, tokenKinds } = require('@airswap/constants')
+const { ADDRESS_ZERO, TokenKinds } = require('@airswap/constants')
 
 let snapshotId
 let adapter
@@ -25,17 +25,20 @@ describe('ERC721Adapter Unit', () => {
     party = {
       wallet: ADDRESS_ZERO,
       token: token.address,
-      kind: tokenKinds.ERC721,
+      kind: TokenKinds.ERC721,
       id: '1',
       amount: '0',
     }
   })
 
   it('hasAllowance succeeds', async () => {
-    await token.mock.isApprovedForAll
-      .withArgs(party.wallet, adapter.address)
-      .returns(true)
+    await token.mock.getApproved.withArgs(party.id).returns(anyone.address)
     expect(await adapter.connect(anyone).hasAllowance(party)).to.be.equal(true)
+  })
+
+  it('hasAllowance fails for wrong address', async () => {
+    await token.mock.getApproved.withArgs(party.id).returns(deployer.address)
+    expect(await adapter.connect(anyone).hasAllowance(party)).to.be.equal(false)
   })
 
   it('hasBalance succeeds', async () => {

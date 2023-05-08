@@ -1,0 +1,31 @@
+{
+  "name": "@airswap/balances",
+  "version": "4.0.0",
+  "description": "Batch balance and allowance calls",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/airswap/airswap-protocols"
+  },
+  "scripts": {
+    "clean": "rm -rf ./cache && rm -rf ./build && rm -rf ./typechain",
+    "compile": "hardhat compile; yarn typechain",
+    "typechain": "tsc -b",
+    "coverage": "hardhat coverage",
+    "test": "hardhat test",
+    "test:unit": "hardhat test",
+    "deploy": "hardhat run ./scripts/deploy.js",
+    "verify": "hardhat run ./scripts/verify.js"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.8.3"
+  },
+  "devDependencies": {
+    "@airswap/constants": "^4.0.0",
+    "@airswap/utils": "^4.0.0",
+    "prompt-confirm": "^2.0.4"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

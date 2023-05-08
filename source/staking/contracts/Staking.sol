@@ -1,11 +1,9 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.0;
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+pragma solidity ^0.8.17;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/utils/math/Math.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/IStaking.sol";
 
 /**
@@ -14,19 +12,18 @@ import "./interfaces/IStaking.sol";
  */
 contract Staking is IStaking, Ownable {
   using SafeERC20 for ERC20;
-  using SafeMath for uint256;
 
   // Token to be staked
-  ERC20 public immutable token;
+  ERC20 public immutable stakingToken;
 
   // Unstaking duration
-  uint256 public duration;
+  uint256 public stakingDuration;
 
-  // Timelock delay
-  uint256 private minDelay;
+  // Minimum delay to staking duration change
+  uint256 private minDurationChangeDelay;
 
-  // Timeunlock timestamp
-  uint256 private timeUnlock;
+  // Timestamp after which staking duration change is possible
+  uint256 private activeDurationChangeTimestamp;
 
   // Mapping of account to stakes
   mapping(address => Stake) internal stakes;
@@ -46,29 +43,30 @@ contract Staking is IStaking, Ownable {
 
   /**
    * @notice Constructor
-   * @param _token address
-   * @param _name string
-   * @param _symbol string
-   * @param _duration uint256
+   * @param _name string Token name for this contract
+   * @param _symbol string Token symbol for this contract
+   * @param _stakingToken address Token used for staking
+   * @param _stakingDuration uint256 Amount of time tokens are staked
+   * @param _minDurationChangeDelay uint256 Time delay for a duration change
    */
   constructor(
-    ERC20 _token,
     string memory _name,
     string memory _symbol,
-    uint256 _duration,
-    uint256 _minDelay
+    ERC20 _stakingToken,
+    uint256 _stakingDuration,
+    uint256 _minDurationChangeDelay
   ) {
-    token = _token;
+    stakingToken = _stakingToken;
+    stakingDuration = _stakingDuration;
+    minDurationChangeDelay = _minDurationChangeDelay;
     name = _name;
     symbol = _symbol;
-    duration = _duration;
-    minDelay = _minDelay;
   }
 
   /**
-   * @notice Set metadata config
-   * @param _name string
-   * @param _symbol string
+   * @notice Set token metadata for this contract
+   * @param _name string Token name for this contract
+   * @param _symbol string Token symbol for this contract
    */
   function setMetaData(
     string memory _name,
@@ -80,152 +78,160 @@ contract Staking is IStaking, Ownable {
 
   /**
    * @dev Schedules timelock to change duration
-   * @param delay uint256
+   * @param _delay uint256
    */
-  function scheduleDurationChange(uint256 delay) external onlyOwner {
-    require(timeUnlock == 0, "TIMELOCK_ACTIVE");
-    require(delay >= minDelay, "INVALID_DELAY");
-    timeUnlock = block.timestamp + delay;
-    emit ScheduleDurationChange(timeUnlock);
+  function scheduleDurationChange(uint256 _delay) external onlyOwner {
+    if (activeDurationChangeTimestamp != 0) revert TimelockActive();
+    if (_delay < minDurationChangeDelay) revert DelayInvalid(_delay);
+    activeDurationChangeTimestamp = block.timestamp + _delay;
+    emit ScheduleDurationChange(activeDurationChangeTimestamp);
   }
 
   /**
    * @dev Cancels timelock to change duration
    */
   function cancelDurationChange() external onlyOwner {
-    require(timeUnlock > 0, "TIMELOCK_INACTIVE");
-    delete timeUnlock;
+    if (activeDurationChangeTimestamp == 0) revert TimelockInactive();
+    delete activeDurationChangeTimestamp;
     emit CancelDurationChange();
   }
 
   /**
    * @notice Set unstaking duration
-   * @param _duration uint256
+   * @param _stakingDuration uint256
    */
-  function setDuration(uint256 _duration) external onlyOwner {
-    require(_duration != 0, "DURATION_INVALID");
-    require(timeUnlock > 0, "TIMELOCK_INACTIVE");
-    require(block.timestamp >= timeUnlock, "TIMELOCKED");
-    duration = _duration;
-    delete timeUnlock;
-    emit CompleteDurationChange(_duration);
+  function setDuration(uint256 _stakingDuration) external onlyOwner {
+    if (_stakingDuration == 0) revert DurationInvalid(_stakingDuration);
+    if (activeDurationChangeTimestamp == 0) revert TimelockInactive();
+    if (block.timestamp < activeDurationChangeTimestamp) revert Timelocked();
+    stakingDuration = _stakingDuration;
+    delete activeDurationChangeTimestamp;
+    emit CompleteDurationChange(_stakingDuration);
   }
 
   /**
    * @notice Propose delegate for account
-   * @param delegate address
+   * @param _delegate address
    */
-  function proposeDelegate(address delegate) external {
-    require(accountDelegates[msg.sender] == address(0), "SENDER_HAS_DELEGATE");
-    require(delegateAccounts[delegate] == address(0), "DELEGATE_IS_TAKEN");
-    require(stakes[delegate].balance == 0, "DELEGATE_MUST_NOT_BE_STAKED");
-    proposedDelegates[msg.sender] = delegate;
-    emit ProposeDelegate(delegate, msg.sender);
+  function proposeDelegate(address _delegate) external {
+    if (accountDelegates[msg.sender] != address(0))
+      revert SenderHasDelegate(msg.sender, _delegate);
+    if (delegateAccounts[_delegate] != address(0))
+      revert DelegateTaken(_delegate);
+    if (stakes[_delegate].balance != 0) revert DelegateStaked(_delegate);
+    proposedDelegates[msg.sender] = _delegate;
+    emit ProposeDelegate(_delegate, msg.sender);
   }
 
   /**
    * @notice Set delegate for account
-   * @param account address
+   * @param _account address
    */
-  function setDelegate(address account) external {
-    require(proposedDelegates[account] == msg.sender, "MUST_BE_PROPOSED");
-    require(delegateAccounts[msg.sender] == address(0), "DELEGATE_IS_TAKEN");
-    require(stakes[msg.sender].balance == 0, "DELEGATE_MUST_NOT_BE_STAKED");
-    accountDelegates[account] = msg.sender;
-    delegateAccounts[msg.sender] = account;
-    delete proposedDelegates[account];
-    emit SetDelegate(msg.sender, account);
+  function setDelegate(address _account) external {
+    if (proposedDelegates[_account] != msg.sender)
+      revert DelegateNotProposed(_account);
+    if (delegateAccounts[msg.sender] != address(0))
+      revert DelegateTaken(_account);
+    if (stakes[msg.sender].balance != 0) revert DelegateStaked(_account);
+    accountDelegates[_account] = msg.sender;
+    delegateAccounts[msg.sender] = _account;
+    delete proposedDelegates[_account];
+    emit SetDelegate(msg.sender, _account);
   }
 
   /**
    * @notice Unset delegate for account
-   * @param delegate address
+   * @param _delegate address
    */
-  function unsetDelegate(address delegate) external {
-    require(accountDelegates[msg.sender] == delegate, "DELEGATE_NOT_SET");
+  function unsetDelegate(address _delegate) external {
+    if (accountDelegates[msg.sender] != _delegate)
+      revert DelegateNotSet(_delegate);
     accountDelegates[msg.sender] = address(0);
-    delegateAccounts[delegate] = address(0);
+    delegateAccounts[_delegate] = address(0);
   }
 
   /**
    * @notice Stake tokens
-   * @param amount uint256
+   * @param _amount uint256
    */
-  function stake(uint256 amount) external override {
+  function stake(uint256 _amount) external override {
     if (delegateAccounts[msg.sender] != address(0)) {
-      _stake(delegateAccounts[msg.sender], amount);
+      _stake(delegateAccounts[msg.sender], _amount);
     } else {
-      _stake(msg.sender, amount);
+      _stake(msg.sender, _amount);
     }
   }
 
   /**
    * @notice Unstake tokens
-   * @param amount uint256
+   * @param _amount uint256
    */
-  function unstake(uint256 amount) external override {
-    address account;
+  function unstake(uint256 _amount) external override {
+    address _account;
     delegateAccounts[msg.sender] != address(0)
-      ? account = delegateAccounts[msg.sender]
-      : account = msg.sender;
-    _unstake(account, amount);
-    token.safeTransfer(account, amount);
-    emit Transfer(account, address(0), amount);
+      ? _account = delegateAccounts[msg.sender]
+      : _account = msg.sender;
+    _unstake(_account, _amount);
   }
 
   /**
    * @notice Receive stakes for an account
-   * @param account address
+   * @param _account address
    */
   function getStakes(
-    address account
-  ) external view override returns (Stake memory accountStake) {
-    return stakes[account];
+    address _account
+  ) external view override returns (Stake memory _accountStake) {
+    return stakes[_account];
   }
 
   /**
-   * @notice Total balance of all accounts (ERC-20)
+   * @notice Get total balance of all staked accounts
    */
   function totalSupply() external view override returns (uint256) {
-    return token.balanceOf(address(this));
+    return stakingToken.balanceOf(address(this));
   }
 
   /**
-   * @notice Balance of an account (ERC-20)
+   * @notice Get balance of an account
+   * @param _account address
    */
   function balanceOf(
-    address account
+    address _account
   ) external view override returns (uint256 total) {
-    return stakes[account].balance;
+    return stakes[_account].balance;
   }
 
   /**
-   * @notice Decimals of underlying token (ERC-20)
+   * @notice Get decimals of underlying token
    */
   function decimals() external view override returns (uint8) {
-    return token.decimals();
+    return stakingToken.decimals();
   }
 
   /**
    * @notice Stake tokens for an account
-   * @param account address
-   * @param amount uint256
+   * @param _account address
+   * @param _amount uint256
    */
-  function stakeFor(address account, uint256 amount) public override {
-    _stake(account, amount);
+  function stakeFor(address _account, uint256 _amount) public override {
+    if (delegateAccounts[_account] != address(0)) {
+      _stake(delegateAccounts[_account], _amount);
+    } else {
+      _stake(_account, _amount);
+    }
   }
 
   /**
-   * @notice Available amount for an account
-   * @param account uint256
+   * @notice Amount available to withdraw for a given account
+   * @param _account uint256
    */
-  function available(address account) public view override returns (uint256) {
-    Stake storage selected = stakes[account];
-    uint256 _available = (block.timestamp.sub(selected.timestamp))
-      .mul(selected.balance)
-      .div(selected.duration);
-    if (_available >= stakes[account].balance) {
-      return stakes[account].balance;
+  function available(address _account) public view override returns (uint256) {
+    Stake storage _selected = stakes[_account];
+    uint256 _available = (_selected.balance *
+      (block.timestamp - _selected.timestamp)) /
+      (_selected.maturity - _selected.timestamp);
+    if (_available >= _selected.balance) {
+      return _selected.balance;
     } else {
       return _available;
     }
@@ -233,34 +239,48 @@ contract Staking is IStaking, Ownable {
 
   /**
    * @notice Stake tokens for an account
-   * @param account address
-   * @param amount uint256
+   * @param _account address
+   * @param _amount uint256
    */
-  function _stake(address account, uint256 amount) internal {
-    require(amount > 0, "AMOUNT_INVALID");
-    stakes[account].duration = duration;
-    if (stakes[account].balance == 0) {
-      stakes[account].balance = amount;
-      stakes[account].timestamp = block.timestamp;
+  function _stake(address _account, uint256 _amount) internal {
+    if (_amount <= 0) revert AmountInvalid(_amount);
+    stakes[_account].duration = stakingDuration;
+    if (stakes[_account].balance == 0) {
+      stakes[_account].balance = _amount;
+      stakes[_account].timestamp = block.timestamp;
+      stakes[_account].maturity =
+        stakes[_account].timestamp +
+        stakes[_account].duration;
     } else {
-      uint256 nowAvailable = available(account);
-      stakes[account].balance = stakes[account].balance.add(amount);
-      stakes[account].timestamp = block.timestamp.sub(
-        nowAvailable.mul(stakes[account].duration).div(stakes[account].balance)
-      );
+      uint256 _nowAvailable = available(_account);
+      stakes[_account].balance = stakes[_account].balance + _amount;
+      stakes[_account].timestamp =
+        block.timestamp -
+        ((_nowAvailable * stakes[_account].duration) /
+          stakes[_account].balance);
+      stakes[_account].maturity =
+        stakes[_account].timestamp +
+        stakes[_account].duration;
     }
-    token.safeTransferFrom(msg.sender, address(this), amount);
-    emit Transfer(address(0), account, amount);
+    stakingToken.safeTransferFrom(msg.sender, address(this), _amount);
+    emit Transfer(address(0), _account, _amount);
   }
 
   /**
    * @notice Unstake tokens
-   * @param account address
-   * @param amount uint256
+   * @param _account address
+   * @param _amount uint256
    */
-  function _unstake(address account, uint256 amount) internal {
-    Stake storage selected = stakes[account];
-    require(amount <= available(account), "AMOUNT_EXCEEDS_AVAILABLE");
-    selected.balance = selected.balance.sub(amount);
+  function _unstake(address _account, uint256 _amount) internal {
+    Stake storage _selected = stakes[_account];
+    if (_amount > available(_account)) revert AmountInvalid(_amount);
+    uint256 nowAvailable = available(_account);
+    _selected.balance = _selected.balance - _amount;
+    _selected.timestamp =
+      block.timestamp -
+      (((10000 - ((10000 * _amount) / nowAvailable)) *
+        (block.timestamp - _selected.timestamp)) / 10000);
+    stakingToken.safeTransfer(_account, _amount);
+    emit Transfer(_account, address(0), _amount);
   }
 }

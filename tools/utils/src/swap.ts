@@ -8,7 +8,7 @@ import {
 
 import { lowerCaseAddresses } from '../index'
 import {
-  chainIds,
+  ChainIds,
   SECONDS_IN_DAY,
   ADDRESS_ZERO,
   DOMAIN_VERSION_SWAP,
@@ -20,6 +20,8 @@ import {
   OrderParty,
   Signature,
   EIP712Swap,
+  Order,
+  FullOrder,
 } from '@airswap/types'
 
 const defaultParty: OrderParty = {
@@ -28,6 +30,47 @@ const defaultParty: OrderParty = {
   kind: '0x36372b07',
   id: '0',
   amount: '0',
+}
+
+function isValidString(value: string): boolean {
+  return typeof value === 'string' && value.length > 0
+}
+function isBytesLike(value: string): boolean {
+  return typeof value === 'string' && ethers.utils.isBytesLike(value)
+}
+function isValidOrderParty(orderParty: OrderParty): boolean {
+  return (
+    !!orderParty &&
+    isValidString(orderParty['wallet']) &&
+    isValidString(orderParty['token']) &&
+    isValidString(orderParty['kind']) &&
+    isValidString(orderParty['id']) &&
+    isValidString(orderParty['amount'])
+  )
+}
+
+export function isValidOrder(order: Order): boolean {
+  return (
+    !!order &&
+    isValidString(order['nonce']) &&
+    isValidString(order['expiry']) &&
+    isValidString(order['protocolFee']) &&
+    isValidString(order['affiliateWallet']) &&
+    isValidString(order['affiliateAmount']) &&
+    isBytesLike(order['r']) &&
+    isBytesLike(order['s']) &&
+    isValidString(order['v']) &&
+    isValidOrderParty(order['signer']) &&
+    isValidOrderParty(order['sender'])
+  )
+}
+
+export function isValidFullOrder(fullOrder: FullOrder) {
+  return (
+    isValidOrder(fullOrder as Order) &&
+    ethers.utils.isAddress(fullOrder['swapContract']) &&
+    typeof fullOrder['chainId'] == 'number'
+  )
 }
 
 export function createOrder({
@@ -54,7 +97,7 @@ export async function createOrderSignature(
   unsignedOrder: UnsignedOrder,
   signer: ethers.VoidSigner | string,
   swapContract: string,
-  chainId = chainIds.MAINNET,
+  chainId = ChainIds.MAINNET,
   version = DOMAIN_VERSION_SWAP,
   name = DOMAIN_NAME_SWAP
 ): Promise<Signature> {

@@ -3,8 +3,8 @@ const fs = require('fs')
 const Confirm = require('prompt-confirm')
 const { ethers, run } = require('hardhat')
 const poolDeploys = require('@airswap/pool/deploys.js')
-const { chainNames, chainIds, tokenKinds } = require('@airswap/constants')
-const { getEtherscanURL } = require('@airswap/utils')
+const { chainNames, ChainIds, TokenKinds } = require('@airswap/constants')
+const { getReceiptUrl } = require('@airswap/utils')
 const swapDeploys = require('../deploys.js')
 const adapterDeploys = require('../deploys-adapters.js')
 
@@ -13,47 +13,36 @@ async function main() {
   const [deployer] = await ethers.getSigners()
   const gasPrice = await deployer.getGasPrice()
   const chainId = await deployer.getChainId()
-  if (chainId === chainIds.HARDHAT) {
+  if (chainId === ChainIds.HARDHAT) {
     console.log('Value for --network flag is required')
     return
   }
 
-  console.log(`\nNetwork: ${chainNames[chainId].toUpperCase()}`)
-  console.log(`Deployer: ${deployer.address}\n`)
-
-  const protocolFeeWallet = poolDeploys[chainId]
+  const requiredSenderKind = TokenKinds.ERC20
   const protocolFee = 7
-  const adapters = ['ERC20Adapter', 'ERC721Adapter', 'ERC1155Adapter']
+  const protocolFeeWallet = poolDeploys[chainId]
 
-  console.log(`adapters: ${JSON.stringify(adapters)}`)
+  console.log(`\nadapters: ${JSON.stringify(adapterDeploys[chainId])}`)
+  console.log(`requiredSenderKind: ${requiredSenderKind}`)
   console.log(`protocolFee: ${protocolFee}`)
-  console.log(`protocolFeeWallet: ${protocolFeeWallet}`)
+  console.log(`protocolFeeWallet: ${protocolFeeWallet}\n`)
 
-  console.log(`\nGas price: ${gasPrice / 10 ** 9} gwei`)
+  console.log(`Deployer: ${deployer.address}`)
+  console.log(`Deploying on ${chainNames[chainId].toUpperCase()}`)
+  console.log(`Gas price: ${gasPrice / 10 ** 9} gwei\n`)
 
   const prompt = new Confirm('Proceed to deploy?')
   if (await prompt.run()) {
-    for (let i = 0; i < adapters.length; i++) {
-      const adapterContract = await (
-        await ethers.getContractFactory(adapters[i])
-      ).deploy()
-      console.log(
-        `Deploying ${adapters[i]}...`,
-        getEtherscanURL(chainId, adapterContract.deployTransaction.hash)
-      )
-      await adapterContract.deployed()
-      adapters[i] = adapterContract.address
-    }
     const swapFactory = await ethers.getContractFactory('Swap')
     const swapContract = await swapFactory.deploy(
-      adapters,
-      tokenKinds.ERC20,
+      adapterDeploys[chainId],
+      requiredSenderKind,
       protocolFee,
       protocolFeeWallet
     )
     console.log(
       'Deploying...',
-      getEtherscanURL(chainId, swapContract.deployTransaction.hash)
+      getReceiptUrl(chainId, swapContract.deployTransaction.hash)
     )
     await swapContract.deployed()
     console.log(`Deployed: ${swapContract.address}`)
@@ -65,12 +54,6 @@ async function main() {
     )
     console.log('Updated deploys.js')
 
-    adapterDeploys[chainId] = adapters
-    fs.writeFileSync(
-      './deploys-adapters.js',
-      `module.exports = ${JSON.stringify(adapterDeploys, null, '\t')}`
-    )
-    console.log('Updated deploys-adapters.js')
     console.log(
       `\nVerify with "yarn verify --network ${chainNames[
         chainId

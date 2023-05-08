@@ -32,7 +32,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
   bytes32 public immutable DOMAIN_SEPARATOR;
 
   uint256 public constant FEE_DIVISOR = 10000;
-  uint256 internal constant MAX_ERROR_COUNT = 15;
+  uint256 internal constant MAX_ERROR_COUNT = 16;
 
   // Mapping of ERC165 interface ID to token adapter
   mapping(bytes4 => IAdapter) public adapters;
@@ -121,7 +121,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
     // Transfer from sender to affiliate if specified
     if (order.affiliateWallet != address(0)) {
       _transfer(
-        order.sender.wallet,
+        msg.sender,
         order.affiliateWallet,
         order.affiliateAmount,
         order.sender.id,
@@ -135,7 +135,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
       FEE_DIVISOR;
     if (protocolFeeAmount > 0) {
       _transfer(
-        order.sender.wallet,
+        msg.sender,
         protocolFeeWallet,
         protocolFeeAmount,
         order.sender.id,
@@ -153,7 +153,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
       if (royaltyAmount > 0) {
         if (royaltyAmount > maxRoyalty) revert RoyaltyExceedsMax(royaltyAmount);
         _transfer(
-          order.sender.wallet,
+          msg.sender,
           royaltyRecipient,
           royaltyAmount,
           order.sender.id,
@@ -251,6 +251,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
    * @param order Order to settle
    */
   function check(
+    address senderWallet,
     Order calldata order
   ) public view returns (bytes32[] memory, uint256) {
     uint256 errCount;
@@ -261,6 +262,13 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
       order.r,
       order.s
     );
+
+    if (
+      order.sender.wallet != address(0) && order.sender.wallet != senderWallet
+    ) {
+      errors[errCount] = "SenderInvalid";
+      errCount++;
+    }
 
     if (signatory == address(0)) {
       errors[errCount] = "SignatureInvalid";
@@ -325,7 +333,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
           protocolFeeAmount +
           order.affiliateAmount;
         Party memory sender = Party(
-          order.sender.wallet,
+          senderWallet,
           order.sender.token,
           order.sender.kind,
           order.sender.id,
