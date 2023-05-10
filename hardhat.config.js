@@ -13,11 +13,11 @@ const { ChainIds, apiUrls, explorerUrls } = require('@airswap/constants')
 module.exports = {
   networks: {
     goerli: {
-      url: apiUrls[ChainIds.GOERLI] + process.env.INFURA_API_KEY,
+      url: apiUrls[ChainIds.GOERLI] + '/' + process.env.INFURA_API_KEY,
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
     },
     mainnet: {
-      url: apiUrls[ChainIds.MAINNET] + process.env.INFURA_API_KEY,
+      url: apiUrls[ChainIds.MAINNET] + '/' + process.env.INFURA_API_KEY,
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
     },
     bsctestnet: {
