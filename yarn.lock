@@ -9,6 +9,13 @@
   dependencies:
     get-parameter-names "^0.3.0"
 
+"@airswap/maker-registry@4.0.1":
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/@airswap/maker-registry/-/maker-registry-4.0.1.tgz#008790185a32f6b385aa1c22a58f572c776a6384"
+  integrity sha512-ArBQZHAYMINUUyxI0zOVPmP7YIbsn0SLMuSBs90TxwtIrg/xUGMmAMR25wuK53/+FHlNWy9siOcDq978OTQE7A==
+  dependencies:
+    "@openzeppelin/contracts" "^4.8.1"
+
 "@babel/code-frame@^7.0.0":
   version "7.21.4"
   resolved "https://registry.yarnpkg.com/@babel/code-frame/-/code-frame-7.21.4.tgz#d0fa9e4413aca81f2b23b9442797bda1826edb39"
@@ -1398,7 +1405,7 @@
   dependencies:
     "@octokit/openapi-types" "^16.0.0"
 
-"@openzeppelin/contracts@^4.8.3":
+"@openzeppelin/contracts@^4.8.1", "@openzeppelin/contracts@^4.8.3":
   version "4.8.3"
   resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.8.3.tgz#cbef3146bfc570849405f59cba18235da95a252a"
   integrity sha512-bQHV8R9Me8IaJoJ2vPG4rXcL7seB7YVuskr4f+f5RyOStSZetwzkWtoqDMl5erkBJy0lDRUnIR2WIkPiC0GJlg==
@@ -5291,11 +5298,6 @@ eth-block-tracker@^3.0.0:
     json-rpc-engine "^3.6.0"
     pify "^2.3.0"
     tape "^4.6.3"
-
-eth-contract-metadata@^1.12.1:
-  version "1.17.0"
-  resolved "https://registry.yarnpkg.com/eth-contract-metadata/-/eth-contract-metadata-1.17.0.tgz#96d4b056ac9a7175eeba091dbabd0713cfd4c703"
-  integrity sha512-vlw4OiW3+9J3kJfEtPCyiSW9fhdWTqrAhXcvdMY2CevGxbhvOd5Lz59DeWerSTV3IoSXttghDurPA76dAeTV+A==
 
 eth-ens-namehash@2.0.8, eth-ens-namehash@^2.0.8:
   version "2.0.8"

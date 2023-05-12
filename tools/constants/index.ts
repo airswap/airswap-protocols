@@ -134,6 +134,7 @@ export enum Protocols {
   PricingERC20 = '0x8beb22c2',
   LastLookERC20 = '0x2ca4c820',
   StorageERC20 = '0xb2256e3d',
+  Storage = '0x3e4e86a3',
 }
 
 export const protocolInterfaces: Record<string, string[]> = {
@@ -161,6 +162,10 @@ export const protocolInterfaces: Record<string, string[]> = {
     'function addOrderERC20(string nonce,string expiry,string signerWallet,string signerToken,string signerAmount,string senderToken,string senderAmount,string v,string r,string s)',
     'function getOrdersERC20(string sortField,array(string senderToken),string page,string filters,string sortOrder)',
   ],
+  [Protocols.Storage]: [
+    'function addOrder(uint256 nonce,uint256 expiry,uint256 protocolFee,(address wallet,address token,bytes4 kind,uint256 id,uint256 amount),(address wallet,address token,bytes4 kind,uint256 id,uint256 amount),address affiliateWallet,uint256 affiliateAmount)',
+    'function getOrders(string sortField,array(string senderToken),string page,string filters,string sortOrder)',
+  ],
 }
 
 export const protocolNames: Record<string, string> = {
@@ -169,6 +174,7 @@ export const protocolNames: Record<string, string> = {
   [Protocols.PricingERC20]: 'Pricing (ERC20)',
   [Protocols.LastLookERC20]: 'Last Look (ERC20)',
   [Protocols.StorageERC20]: 'Storage (ERC20)',
+  [Protocols.Storage]: 'Storage',
 }
 
 export enum TokenKinds {
