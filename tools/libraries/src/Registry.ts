@@ -3,31 +3,7 @@ import { ServerOptions } from '@airswap/types'
 import { MakerRegistry__factory } from '@airswap/maker-registry/typechain/factories/contracts'
 import registryDeploys from '@airswap/registry/deploys.js'
 import { Server } from './Server'
-import { SwapERC20 } from './Contracts'
-
-class Contract {
-  public name: string
-  public addresses: Record<number, string>
-  public factory: any
-  public constructor(
-    name: string,
-    addresses: Record<number, string>,
-    factory: any
-  ) {
-    this.name = name
-    this.addresses = addresses
-    this.factory = factory
-  }
-  public getAddress(chainId: number) {
-    return this.addresses[chainId]
-  }
-  public getContract(
-    providerOrSigner: ethers.providers.Provider | ethers.Signer,
-    chainId: number
-  ): ethers.Contract {
-    return this.factory.connect(this.addresses[chainId], providerOrSigner)
-  }
-}
+import { Contract, SwapERC20 } from './Contracts'
 
 class ServerRegistry extends Contract {
   public constructor(

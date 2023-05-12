@@ -17,7 +17,7 @@ const balancesInterface = new ethers.utils.Interface(
   JSON.stringify(BalanceChecker.abi)
 )
 
-class Contract {
+export class Contract {
   public name: string
   public addresses: Record<number, string>
   public factory: any
