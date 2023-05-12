@@ -1,7 +1,8 @@
 import { ethers } from 'ethers'
 import { ServerOptions } from '@airswap/types'
 import { MakerRegistry__factory } from '@airswap/maker-registry/typechain/factories/contracts'
-import registryDeploys from '@airswap/registry/deploys.js'
+// @ts-ignore
+import registryDeploys from '@airswap/maker-registry/deploys.js'
 import { Server } from './Server'
 import { Contract, SwapERC20 } from './Contracts'
 
