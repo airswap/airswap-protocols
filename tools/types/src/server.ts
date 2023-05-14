@@ -21,6 +21,9 @@ export enum SortOrder {
   DESC = 'DESC',
 }
 
+/*
+ *  @deprecated
+ */
 export type RequestFilterERC20 = {
   signerTokens?: string[]
   senderTokens?: string[]
@@ -34,12 +37,36 @@ export type RequestFilterERC20 = {
   maxAddedDate?: number
 }
 
+/*
+ *  @deprecated
+ */
 export type RequestFilter = {
   sortField?: SortField
   sortOrder?: SortOrder
   signerAddress?: string
   senderAddress?: string
   page: number
+}
+
+export type SideFilter = {
+  minAmount?: bigint
+  maxAmount?: bigint
+  wallet?: string
+  tokens?: string[]
+}
+
+export type PaginationFilter = {
+  offset: number
+  limit: number
+  page: number
+}
+
+export type OrderFilter = {
+  signer?: SideFilter
+  sender?: SideFilter
+  sortField?: SortField
+  sortOrder?: SortOrder
+  maxAddedDate?: number
 }
 
 export type FiltersResponse = {
