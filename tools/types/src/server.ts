@@ -67,6 +67,7 @@ export type OrderFilter = {
   sortField?: SortField
   sortOrder?: SortOrder
   maxAddedDate?: number
+  pagination?: PaginationFilter
 }
 
 export type FiltersResponse = {
