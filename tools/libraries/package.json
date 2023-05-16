@@ -1,6 +1,6 @@
 {
   "name": "@airswap/libraries",
-  "version": "4.0.7",
+  "version": "4.0.8",
   "description": "AirSwap: Libraries for Developers",
   "repository": {
     "type": "git",
@@ -36,7 +36,7 @@
     "@airswap/swap-erc20": "4.0.2",
     "@airswap/types": "^4.0.0",
     "@airswap/utils": "^4.0.0",
-    "@airswap/wrapper": "4.0.3",
+    "@airswap/wrapper": "4.0.4",
     "browser-or-node": "^2.1.1",
     "ethers": "^5.6.9",
     "jayson": "^4.0.0",
