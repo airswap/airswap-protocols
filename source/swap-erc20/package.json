@@ -1,6 +1,6 @@
 {
   "name": "@airswap/swap-erc20",
-  "version": "4.0.2",
+  "version": "4.0.3",
   "description": "AirSwap: Atomic ERC20 Token Swap",
   "license": "MIT",
   "repository": {
@@ -10,7 +10,8 @@
   "files": [
     "./build",
     "./typechain",
-    "./deploys.js"
+    "./deploys.js",
+    "./deploys.js.d.ts"
   ],
   "scripts": {
     "clean": "rm -rf ./cache && rm -rf ./build && rm -rf ./typechain",

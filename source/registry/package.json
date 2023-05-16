@@ -1,6 +1,6 @@
 {
   "name": "@airswap/registry",
-  "version": "4.0.2",
+  "version": "4.0.3",
   "description": "AirSwap: Server URL Registry",
   "license": "MIT",
   "repository": {
@@ -10,7 +10,8 @@
   "files": [
     "./build",
     "./typechain",
-    "./deploys.js"
+    "./deploys.js",
+    "./deploys.js.d.ts"
   ],
   "scripts": {
     "clean": "rm -rf ./cache && rm -rf ./build && rm -rf ./typechain",
