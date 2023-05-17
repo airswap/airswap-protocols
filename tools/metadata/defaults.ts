@@ -1,41 +1,6 @@
-import { ChainIds } from '@airswap/constants'
+import { TokenInfo } from '@airswap/types'
 
-export const tokenListURLs: Record<number, string[]> = {
-  [ChainIds.MAINNET]: [
-    'https://raw.githubusercontent.com/compound-finance/token-list/master/compound.tokenlist.json',
-    'https://raw.githubusercontent.com/SetProtocol/uniswap-tokenlist/main/set.tokenlist.json',
-    'https://app.tryroll.com/tokens.json',
-    'https://tokens.coingecko.com/uniswap/all.json',
-    'https://tokenlist.aave.eth.link',
-    'https://tokens.coingecko.com/ethereum/all.json',
-  ],
-  [ChainIds.RSK]: [
-    'https://raw.githubusercontent.com/enkryptcom/dynamic-data/main/tokenlists/rsk.json',
-  ],
-  [ChainIds.BSC]: [
-    'https://raw.githubusercontent.com/ApeSwapFinance/apeswap-token-lists/main/lists/apeswap.json',
-    'https://tokens.pancakeswap.finance/pancakeswap-top-100.json',
-    'https://tokens.pancakeswap.finance/pancakeswap-extended.json',
-  ],
-  [ChainIds.POLYGON]: [
-    'https://unpkg.com/quickswap-default-token-list@1.2.9/build/quickswap-default.tokenlist.json',
-    'https://storageapi.fleek.co/tomafrench-team-bucket/polygon.vetted.tokenlist.json',
-  ],
-  [ChainIds.ARBITRUM]: [
-    'https://bridge.arbitrum.io/token-list-42161.json',
-    'https://tracer.finance/tokens',
-    'https://storageapi.fleek.co/tomafrench-team-bucket/arbitrum.vetted.tokenlist.json',
-  ],
-  [ChainIds.AVALANCHE]: [
-    'https://matcha.xyz/tokenlists/43114.json',
-    'https://raw.githubusercontent.com/pangolindex/tokenlists/main/defi.tokenlist.json',
-    'https://raw.githubusercontent.com/pangolindex/tokenlists/main/stablecoin.tokenlist.json',
-    'https://raw.githubusercontent.com/pangolindex/tokenlists/main/ab.tokenlist.json',
-    'https://raw.githubusercontent.com/traderjoe-xyz/joe-tokenlists/main/joe.tokenlist.json',
-  ],
-}
-
-export const defaults = [
+export default [
   {
     name: 'Wrapped Ether',
     address: '0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6',
@@ -127,4 +92,18 @@ export const defaults = [
     symbol: 'DAI',
     chainId: 5,
   },
-]
+  {
+    name: 'Tether USD',
+    address: '0x1990BC6dfe2ef605Bfc08f5A23564dB75642Ad73',
+    decimals: 6,
+    symbol: 'USDT',
+    chainId: 59140,
+  },
+  {
+    name: 'USDC',
+    address: '0xf56dc6695cF1f5c364eDEbC7Dc7077ac9B586068',
+    decimals: 6,
+    symbol: 'USDC',
+    chainId: 59140,
+  },
+] as TokenInfo[]

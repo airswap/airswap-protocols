@@ -4,9 +4,8 @@
   "description": "AirSwap: Libraries for Developers",
   "repository": {
     "type": "git",
-    "url": "https://github.com/airswap/airswap-libraries"
+    "url": "https://github.com/airswap/airswap-protocols"
   },
-  "homepage": "https://github.com/airswap/airswap-libraries",
   "keywords": [
     "airswap"
   ],
