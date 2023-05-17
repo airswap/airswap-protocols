@@ -16,8 +16,8 @@
     "lint:fix": "yarn eslint . --ext .js,.ts --fix",
     "test": "lerna run test:unit",
     "prepare": "husky install",
-    "pretty:check": "prettier --check \"./**/*.sol\" \"./**/*.ts\" \"./**/*.js\"",
-    "pretty:fix": "prettier --write \"./**/*.sol\" \"./**/*.ts\" \"./**/*.js\""
+    "pretty:check": "prettier --check \"./**/*.sol\" \"./**/*.ts\" \"./**/*.js\" \"./**/*.json\"",
+    "pretty:fix": "prettier --write \"./**/*.sol\" \"./**/*.ts\" \"./**/*.js\" \"./**/*.json\""
   },
   "devDependencies": {
     "@ethersproject/abi": "^5.7.0",
