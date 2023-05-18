@@ -82,8 +82,8 @@ contract Pool is IPool, Ownable {
     address _stakingContract,
     address _stakingToken
   ) {
-    if(_max > MAX_PERCENTAGE) revert MaxTooHigh(_max);
-    if(_scale > MAX_SCALE) revert ScaleTooHigh(_scale);
+    if (_max > MAX_PERCENTAGE) revert MaxTooHigh(_max);
+    if (_scale > MAX_SCALE) revert ScaleTooHigh(_scale);
     scale = _scale;
     max = _max;
     stakingContract = _stakingContract;
@@ -111,7 +111,7 @@ contract Pool is IPool, Ownable {
    * @param _scale uint256
    */
   function setScale(uint256 _scale) external override onlyOwner {
-    if(_scale > MAX_SCALE) revert ScaleTooHigh(_scale);
+    if (_scale > MAX_SCALE) revert ScaleTooHigh(_scale);
     scale = _scale;
     emit SetScale(scale);
   }
@@ -122,7 +122,7 @@ contract Pool is IPool, Ownable {
    * @param _max uint256
    */
   function setMax(uint256 _max) external override onlyOwner {
-    if(_max > MAX_PERCENTAGE) revert MaxTooHigh(_max);
+    if (_max > MAX_PERCENTAGE) revert MaxTooHigh(_max);
     max = _max;
     emit SetMax(max);
   }
@@ -133,7 +133,7 @@ contract Pool is IPool, Ownable {
    * @param _admin address
    */
   function addAdmin(address _admin) external override onlyOwner {
-    if(_admin == address(0)) revert AddressInvalid(_admin);
+    if (_admin == address(0)) revert AddressInvalid(_admin);
     admins[_admin] = true;
     emit AddAdmin(_admin);
   }
@@ -144,7 +144,7 @@ contract Pool is IPool, Ownable {
    * @param _admin address
    */
   function removeAdmin(address _admin) external override onlyOwner {
-    if(admins[_admin] != true) revert AdminNotSet(_admin);
+    if (admins[_admin] != true) revert AdminNotSet(_admin);
     admins[_admin] = false;
     emit RemoveAdmin(_admin);
   }
@@ -157,7 +157,7 @@ contract Pool is IPool, Ownable {
   function setStakingContract(
     address _stakingContract
   ) external override onlyOwner {
-    if(_stakingContract == address(0)) revert AddressInvalid(_stakingContract);
+    if (_stakingContract == address(0)) revert AddressInvalid(_stakingContract);
     // set allowance on old staking contract to zero
     IERC20(stakingToken).safeApprove(stakingContract, 0);
     stakingContract = _stakingContract;
@@ -170,7 +170,7 @@ contract Pool is IPool, Ownable {
    * @param _stakingToken address
    */
   function setStakingToken(address _stakingToken) external override onlyOwner {
-    if(_stakingToken == address(0)) revert AddressInvalid(_stakingToken);
+    if (_stakingToken == address(0)) revert AddressInvalid(_stakingToken);
     // set allowance on old staking token to zero
     IERC20(stakingToken).safeApprove(stakingContract, 0);
     stakingToken = _stakingToken;
@@ -247,7 +247,7 @@ contract Pool is IPool, Ownable {
     bytes32 r,
     bytes32 s
   ) external override returns (uint256) {
-    if(token != address(stakingToken)) revert TokenInvalid(token);
+    if (token != address(stakingToken)) revert TokenInvalid(token);
     _checkValidClaim(nonce, expiry, score, v, r, s);
     uint256 amount = _withdrawCheck(score, token, minimum);
     IStaking(stakingContract).stakeFor(recipient, amount);
@@ -289,8 +289,8 @@ contract Pool is IPool, Ownable {
     bytes32 r,
     bytes32 s
   ) public view override returns (bool valid) {
-    if(DOMAIN_CHAIN_ID != getChainId()) revert ChainChanged(getChainId());
-    if(expiry <= block.timestamp) revert ExpiryPassed();
+    if (DOMAIN_CHAIN_ID != getChainId()) revert ChainChanged(getChainId());
+    if (expiry <= block.timestamp) revert ExpiryPassed();
     bytes32 claimHash = keccak256(
       abi.encode(CLAIM_TYPEHASH, nonce, expiry, participant, score)
     );
@@ -347,8 +347,8 @@ contract Pool is IPool, Ownable {
     bytes32 r,
     bytes32 s
   ) internal {
-    if(DOMAIN_CHAIN_ID != getChainId()) revert ChainChanged(getChainId());
-    if(expiry <= block.timestamp) revert ExpiryPassed();
+    if (DOMAIN_CHAIN_ID != getChainId()) revert ChainChanged(getChainId());
+    if (expiry <= block.timestamp) revert ExpiryPassed();
     bytes32 claimHash = keccak256(
       abi.encode(CLAIM_TYPEHASH, nonce, expiry, msg.sender, score)
     );
@@ -358,8 +358,8 @@ contract Pool is IPool, Ownable {
       r,
       s
     );
-    if(!admins[signatory]) revert Unauthorized();
-    if(!_markNonceAsUsed(msg.sender, nonce)) revert NonceAlreadyUsed(nonce);
+    if (!admins[signatory]) revert Unauthorized();
+    if (!_markNonceAsUsed(msg.sender, nonce)) revert NonceAlreadyUsed(nonce);
   }
 
   /**
@@ -397,9 +397,9 @@ contract Pool is IPool, Ownable {
     address token,
     uint256 minimumAmount
   ) internal view returns (uint256) {
-    if(score <= 0) revert ScoreNotProvided(score);
+    if (score <= 0) revert ScoreNotProvided(score);
     uint256 amount = calculate(score, token);
-    if(amount < minimumAmount) revert AmountInsufficient(minimumAmount);
+    if (amount < minimumAmount) revert AmountInsufficient(minimumAmount);
     return amount;
   }
 }
