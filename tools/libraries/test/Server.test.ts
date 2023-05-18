@@ -158,8 +158,9 @@ describe('HTTPServer', () => {
     .it('Server getOrdersBy()', async () => {
       const server = await Server.at(URL)
       const result = await server.getOrdersBy({
-        page: 1,
-        signerAddress: ADDRESS_ZERO,
+        signerWallet: ADDRESS_ZERO,
+        offset: 0,
+        limit: 100,
       })
       expect(isValidFullOrder(result.orders[0].order)).to.be.true
     })
