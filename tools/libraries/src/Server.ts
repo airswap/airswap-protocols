@@ -20,10 +20,9 @@ import {
   ServerOptions,
   OrderResponse,
   SupportedProtocolInfo,
-  RequestFilterERC20,
+  OrderFilter,
   SortOrder,
   SortField,
-  RequestFilter,
 } from '@airswap/types'
 import { ChainIds, Protocols, protocolNames } from '@airswap/constants'
 
@@ -311,13 +310,13 @@ export class Server extends TypedEmitter<ServerEvents> {
   }
 
   public async getOrdersERC20By(
-    requestFilter: RequestFilterERC20,
+    OrderFilter: OrderFilter,
     filters = false
   ): Promise<OrderResponse<FullOrderERC20>> {
     try {
       return Promise.resolve(
         (await this.httpCall('getOrdersERC20', [
-          { ...this.toBigIntJson(requestFilter), filters },
+          { ...this.toBigIntJson(OrderFilter), filters },
         ])) as OrderResponse<FullOrderERC20>
       )
     } catch (err) {
@@ -349,12 +348,12 @@ export class Server extends TypedEmitter<ServerEvents> {
   }
 
   public async getOrdersBy(
-    requestFilter: RequestFilter
+    OrderFilter: OrderFilter
   ): Promise<OrderResponse<FullOrder>> {
     try {
       return Promise.resolve(
         (await this.httpCall('getOrders', [
-          { ...requestFilter },
+          { ...OrderFilter },
         ])) as OrderResponse<FullOrder>
       )
     } catch (err) {
@@ -573,9 +572,9 @@ export class Server extends TypedEmitter<ServerEvents> {
     }
   }
 
-  private toBigIntJson(requestFilter: RequestFilterERC20) {
+  private toBigIntJson(OrderFilter: OrderFilter) {
     return JSON.parse(
-      JSON.stringify(requestFilter, (key, value) =>
+      JSON.stringify(OrderFilter, (key, value) =>
         typeof value === 'bigint' ? value.toString() : value
       )
     )

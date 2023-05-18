@@ -21,25 +21,19 @@ export enum SortOrder {
   DESC = 'DESC',
 }
 
-export type RequestFilterERC20 = {
+export type OrderFilter = {
+  signerWallet?: string
+  signerMinAmount?: string
+  signerMaxAmount?: string
   signerTokens?: string[]
+  senderWallet?: string
+  senderMinAmount?: string
+  senderMaxAmount?: string
   senderTokens?: string[]
-  minSignerAmount?: bigint
-  maxSignerAmount?: bigint
-  minSenderAmount?: bigint
-  maxSenderAmount?: bigint
-  page: number
   sortField?: SortField
   sortOrder?: SortOrder
-  maxAddedDate?: number
-}
-
-export type RequestFilter = {
-  sortField?: SortField
-  sortOrder?: SortOrder
-  signerAddress?: string
-  senderAddress?: string
-  page: number
+  offset: number
+  limit: number
 }
 
 export type FiltersResponse = {
