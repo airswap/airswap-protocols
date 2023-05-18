@@ -133,8 +133,8 @@ export enum Protocols {
   RequestForQuoteERC20 = '0x57bb3622',
   PricingERC20 = '0x8beb22c2',
   LastLookERC20 = '0x2ca4c820',
-  StorageERC20 = '0xcfa2e43e',
-  Storage = '0x29fe7ea0',
+  StorageERC20 = '0x3fb72f4e',
+  Storage = '0x9c6974be',
 }
 
 export const protocolInterfaces: Record<string, string[]> = {
@@ -160,11 +160,11 @@ export const protocolInterfaces: Record<string, string[]> = {
   ],
   [Protocols.StorageERC20]: [
     'function addOrderERC20(string nonce,string expiry,string signerWallet,string signerToken,string signerAmount,string senderToken,string senderAmount,string v,string r,string s)',
-    'function getOrdersERC20((string signerWallet,string signerMinAmount,string signerMaxAmount,array(string senderToken),string senderWallet,string senderMinAmount,string senderMaxAmount,array(string senderToken),string sortField,string sortOrder,string offset,stringn limit))',
+    'function getOrdersERC20((string signerWallet,array(string signerToken),string signerMinAmount,string signerMaxAmount,string senderWallet,array(string senderToken),string senderMinAmount,string senderMaxAmount,string sortField,string sortOrder,string offset,string limit))',
   ],
   [Protocols.Storage]: [
     'function addOrder(uint256 nonce,uint256 expiry,uint256 protocolFee,(address wallet,address token,bytes4 kind,uint256 id,uint256 amount),(address wallet,address token,bytes4 kind,uint256 id,uint256 amount),address affiliateWallet,uint256 affiliateAmount)',
-    'function getOrders((string signerWallet,string signerMinAmount,string signerMaxAmount,array(string senderToken),string senderWallet,string senderMinAmount,string senderMaxAmount,array(string senderToken),string sortField,string sortOrder,string offset,stringn limit))',
+    'function getOrders((string signerWallet,array(string signerToken),string signerMinAmount,string signerMaxAmount,string senderWallet,array(string senderToken),string senderMinAmount,string senderMaxAmount,string sortField,string sortOrder,string offset,string limit))',
   ],
 }
 
