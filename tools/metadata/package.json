@@ -1,12 +1,11 @@
 {
   "name": "@airswap/metadata",
-  "version": "4.0.4",
+  "version": "4.0.5",
   "description": "AirSwap: Token Metadata for Developers",
   "repository": {
     "type": "git",
     "url": "https://github.com/airswap/airswap-protocols"
   },
-  "homepage": "https://github.com/airswap/airswap-protocols/tree/main/tools/metadata",
   "keywords": [
     "airswap"
   ],

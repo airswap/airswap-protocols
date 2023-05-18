@@ -1,6 +1,6 @@
 {
   "name": "@airswap/pool",
-  "version": "4.0.1",
+  "version": "4.0.2",
   "description": "AirSwap: Rewards Pool",
   "license": "MIT",
   "repository": {
@@ -10,7 +10,8 @@
   "files": [
     "./build",
     "./typechain",
-    "./deploys.js"
+    "./deploys.js",
+    "./deploys.js.d.ts"
   ],
   "scripts": {
     "clean": "rm -rf ./cache && rm -rf ./build && rm -rf ./typechain",
@@ -23,7 +24,7 @@
     "verify": "hardhat run ./scripts/verify.js"
   },
   "dependencies": {
-    "@airswap/staking": "4.0.1",
+    "@airswap/staking": "4.0.2",
     "@openzeppelin/contracts": "^4.8.3"
   },
   "devDependencies": {

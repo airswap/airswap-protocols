@@ -1,12 +1,18 @@
 {
   "name": "@airswap/balances",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "Batch balance and allowance calls",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/airswap/airswap-protocols"
   },
+  "files": [
+    "./build",
+    "./typechain",
+    "./deploys.js",
+    "./deploys.js.d.ts"
+  ],
   "scripts": {
     "clean": "rm -rf ./cache && rm -rf ./build && rm -rf ./typechain",
     "compile": "hardhat compile; yarn typechain",

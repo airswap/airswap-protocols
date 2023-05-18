@@ -6,7 +6,8 @@ import {
   CollectionTokenMetadata,
   CollectionTokenAttribute,
 } from '@airswap/types'
-import { defaults, tokenListURLs } from './constants'
+import tokenlists from './tokenlists'
+import defaults from './defaults'
 import {
   TokenKinds,
   chainNames,
@@ -30,10 +31,15 @@ export async function getKnownTokens(
 ): Promise<{ tokens: TokenInfo[]; errors: string[] }> {
   const errors: Array<string> = []
   let tokens = []
-  tokens.push(...defaults)
-  if (tokenListURLs[chainId]) {
+  tokens.push(
+    ...defaults.map((token) => ({
+      ...token,
+      address: token.address.toLowerCase(),
+    }))
+  )
+  if (tokenlists[chainId]) {
     const promises = await Promise.allSettled(
-      tokenListURLs[chainId].map(async (url) => {
+      tokenlists[chainId].map(async (url) => {
         try {
           const { data } = await axios.get(url)
           if (data.tokens) {
@@ -58,7 +64,6 @@ export async function getKnownTokens(
     })
   }
   tokens = tokens.filter((token) => {
-    token.address = token.address.toLowerCase()
     return (
       token.address &&
       token.chainId === chainId &&
