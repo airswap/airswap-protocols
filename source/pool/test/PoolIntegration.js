@@ -234,7 +234,7 @@ describe('Pool Integration', () => {
             claimSignature.r,
             claimSignature.s
           )
-      ).to.be.revertedWith('UNAUTHORIZED')
+      ).to.be.revertedWith(`Unauthorized()`)
 
       const isClaimed = await pool.nonceUsed(alice.address, claim.nonce)
       expect(isClaimed).to.equal(false)
@@ -266,7 +266,7 @@ describe('Pool Integration', () => {
             claimSignature.r,
             claimSignature.s
           )
-      ).to.be.revertedWith('SCORE_MUST_BE_PROVIDED')
+      ).to.be.revertedWith(`ScoreNotProvided(${score})`)
     })
 
     it('withdraw reverts with claim already made', async () => {
@@ -309,7 +309,7 @@ describe('Pool Integration', () => {
             claimSignature.r,
             claimSignature.s
           )
-      ).to.be.revertedWith('NONCE_ALREADY_USED')
+      ).to.be.revertedWith(`NonceAlreadyUsed(${claim.nonce})`)
     })
 
     it('withdraw reverts with expiry passed', async () => {
@@ -341,7 +341,7 @@ describe('Pool Integration', () => {
             claimSignature.r,
             claimSignature.s
           )
-      ).to.be.revertedWith('EXPIRY_PASSED')
+      ).to.be.revertedWith(`ExpiryPassed()`)
     })
 
     it('withdraw reverts with invalid signatory signing', async () => {
@@ -368,7 +368,7 @@ describe('Pool Integration', () => {
             claimSignature.r,
             claimSignature.s
           )
-      ).to.be.revertedWith('UNAUTHORIZED')
+      ).to.be.revertedWith(`Unauthorized()`)
     })
 
     it('withdraw with different recipient success', async () => {
@@ -428,7 +428,7 @@ describe('Pool Integration', () => {
             claimSignature.r,
             claimSignature.s
           )
-      ).to.be.revertedWith('INSUFFICIENT_AMOUNT')
+      ).to.be.revertedWith(`AmountInsufficient(${withdrawMinimum})`)
     })
 
     it('withdrawAndStake success', async () => {
@@ -492,7 +492,7 @@ describe('Pool Integration', () => {
             claimSignature.r,
             claimSignature.s
           )
-      ).to.be.revertedWith('INVALID_TOKEN')
+      ).to.be.revertedWith(`TokenInvalid("${feeToken2.address}")`)
     })
 
     it('withdrawAndStake for a recipient success', async () => {
@@ -553,7 +553,7 @@ describe('Pool Integration', () => {
             claimSignature.r,
             claimSignature.s
           )
-      ).to.be.revertedWith('INVALID_TOKEN')
+      ).to.be.revertedWith(`TokenInvalid("${feeToken2.address}")`)
     })
   })
 

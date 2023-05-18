@@ -83,19 +83,21 @@ describe('Pool Unit', () => {
     })
 
     it('constructor reverts when percentage is too high', async () => {
+      const max = 101
       await expect(
         (
           await ethers.getContractFactory('Pool')
-        ).deploy(CLAIM_SCALE, 101, stakeContract.address, feeToken.address)
-      ).to.be.revertedWith('MAX_TOO_HIGH')
+        ).deploy(CLAIM_SCALE, max, stakeContract.address, feeToken.address)
+      ).to.be.revertedWith(`MaxTooHigh(${max})`)
     })
 
     it('constructor reverts when scale is too high', async () => {
+      const scale = 78
       await expect(
         (
           await ethers.getContractFactory('Pool')
-        ).deploy(78, CLAIM_MAX, stakeContract.address, feeToken.address)
-      ).to.be.revertedWith('SCALE_TOO_HIGH')
+        ).deploy(scale, CLAIM_MAX, stakeContract.address, feeToken.address)
+      ).to.be.revertedWith(`ScaleTooHigh(${scale})`)
     })
   })
 
@@ -108,7 +110,7 @@ describe('Pool Unit', () => {
     it('set stake contract reverts', async () => {
       await expect(
         pool.connect(deployer).setStakingContract(ADDRESS_ZERO)
-      ).to.be.revertedWith('INVALID_ADDRESS')
+      ).to.be.revertedWith(`AddressInvalid("${ADDRESS_ZERO}")`)
     })
 
     it('set stake token successful', async () => {
@@ -121,7 +123,7 @@ describe('Pool Unit', () => {
     it('set stake token reverts', async () => {
       await expect(
         pool.connect(deployer).setStakingToken(ADDRESS_ZERO)
-      ).to.be.revertedWith('INVALID_ADDRESS')
+      ).to.be.revertedWith(`AddressInvalid("${ADDRESS_ZERO}")`)
     })
   })
 
@@ -212,7 +214,7 @@ describe('Pool Unit', () => {
             claimSignature.r,
             claimSignature.s
           )
-      ).to.be.revertedWith('NONCE_ALREADY_USED')
+      ).to.be.revertedWith(`NonceAlreadyUsed(${nonce})`)
     })
 
     it('withdraw reverts with score of zero', async () => {
@@ -241,7 +243,7 @@ describe('Pool Unit', () => {
             claimSignature.r,
             claimSignature.s
           )
-      ).to.be.revertedWith('SCORE_MUST_BE_PROVIDED')
+      ).to.be.revertedWith(`ScoreNotProvided(${score})`)
     })
 
     it('withdraw reverts with invalid signatory signing', async () => {
@@ -268,7 +270,7 @@ describe('Pool Unit', () => {
             claimSignature.r,
             claimSignature.s
           )
-      ).to.be.revertedWith('UNAUTHORIZED')
+      ).to.be.revertedWith(`Unauthorized()`)
     })
 
     it('withdraw with different recipient success', async () => {
@@ -333,7 +335,7 @@ describe('Pool Unit', () => {
             claimSignature.r,
             claimSignature.s
           )
-      ).to.be.revertedWith('INSUFFICIENT_AMOUNT')
+      ).to.be.revertedWith(`AmountInsufficient(${withdrawMinimum})`)
     })
 
     it('withdraw with different recipient reverts if caller not participant', async () => {
@@ -364,7 +366,7 @@ describe('Pool Unit', () => {
             claimSignature.r,
             claimSignature.s
           )
-      ).to.be.revertedWith('UNAUTHORIZED')
+      ).to.be.revertedWith(`Unauthorized()`)
     })
 
     it('withdrawAndStake success', async () => {
@@ -431,7 +433,7 @@ describe('Pool Unit', () => {
             claimSignature.r,
             claimSignature.s
           )
-      ).to.be.revertedWith('INVALID_TOKEN')
+      ).to.be.revertedWith(`TokenInvalid("${feeToken2.address}")`)
     })
 
     it('withdrawAndStake for a recipient success', async () => {
@@ -497,7 +499,7 @@ describe('Pool Unit', () => {
             claimSignature.r,
             claimSignature.s
           )
-      ).to.be.revertedWith('INVALID_TOKEN')
+      ).to.be.revertedWith(`TokenInvalid("${feeToken2.address}")`)
     })
   })
 
@@ -575,29 +577,35 @@ describe('Pool Unit', () => {
           claimSignature.r,
           claimSignature.s
         )
-      ).to.be.revertedWith('EXPIRY_PASSED')
+      ).to.be.revertedWith(`ExpiryPassed()`)
     })
   })
 
   describe('Test setting Scale', async () => {
     it('Test setScale is successful', async () => {
-      await expect(pool.setScale(77)).to.emit(pool, 'SetScale')
-      expect(await pool.scale()).to.be.equal('77')
+      const scale = 77
+      await expect(pool.setScale(scale)).to.emit(pool, 'SetScale')
+      expect(await pool.scale()).to.be.equal(`${scale}`)
     })
 
     it('Test setScale reverts', async () => {
-      await expect(pool.setScale(1000)).to.be.revertedWith('SCALE_TOO_HIGH')
+      const scale = 1000
+      await expect(pool.setScale(scale)).to.be.revertedWith(
+        `ScaleTooHigh(${scale})`
+      )
     })
   })
 
   describe('Test setting Max', async () => {
     it('Test setMax is successful', async () => {
-      await expect(pool.setMax(10)).to.emit(pool, 'SetMax')
-      expect(await pool.scale()).to.be.equal('10')
+      const max = 10
+      await expect(pool.setMax(max)).to.emit(pool, 'SetMax')
+      expect(await pool.scale()).to.be.equal(`${max}`)
     })
 
     it('Test setMax reverts', async () => {
-      await expect(pool.setMax(101)).to.be.revertedWith('MAX_TOO_HIGH')
+      const max = 101
+      await expect(pool.setMax(max)).to.be.revertedWith(`MaxTooHigh(${max})`)
     })
   })
 
@@ -616,7 +624,7 @@ describe('Pool Unit', () => {
     it('Test addAdmin reverts with zero address', async () => {
       await expect(
         pool.connect(deployer).addAdmin(ADDRESS_ZERO)
-      ).to.be.revertedWith('INVALID_ADDRESS')
+      ).to.be.revertedWith(`AddressInvalid("${ADDRESS_ZERO}")`)
     })
 
     it('Test removeAdmin is successful', async () => {
@@ -635,7 +643,7 @@ describe('Pool Unit', () => {
     it('Test removeAdmin executed by non-admin reverts', async () => {
       await expect(
         pool.connect(deployer).removeAdmin(alice.address)
-      ).to.be.revertedWith('ADMIN_NOT_SET')
+      ).to.be.revertedWith(`AdminNotSet("${alice.address}")`)
     })
   })
 

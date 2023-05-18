@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.17;
 
 interface IPool {
   event Withdraw(
@@ -16,6 +16,18 @@ interface IPool {
   event AddAdmin(address admin);
   event RemoveAdmin(address admin);
   event DrainTo(address[] tokens, address dest);
+
+  error AddressInvalid(address);
+  error AdminNotSet(address);
+  error AmountInsufficient(uint256);
+  error ChainChanged(uint256);
+  error ExpiryPassed();
+  error MaxTooHigh(uint256);
+  error NonceAlreadyUsed(uint256);
+  error ScaleTooHigh(uint256);
+  error ScoreNotProvided(uint256);
+  error TokenInvalid(address);
+  error Unauthorized();
 
   function setScale(uint256 _scale) external;
 
