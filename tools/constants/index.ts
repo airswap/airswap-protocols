@@ -129,17 +129,18 @@ export const stakingTokenAddresses: Record<number, string> = {
 }
 
 export enum Protocols {
-  Discovery = '0x8cd261ef',
+  Discovery = '0xf3713ede',
   RequestForQuoteERC20 = '0x57bb3622',
   PricingERC20 = '0x8beb22c2',
   LastLookERC20 = '0x2ca4c820',
-  StorageERC20 = '0x218893b8',
+  StorageERC20 = '0x3fb72f4e',
+  Storage = '0x9c6974be',
 }
 
 export const protocolInterfaces: Record<string, string[]> = {
   [Protocols.Discovery]: [
     'function getProtocols()',
-    'function setProtocols(array(string interfaceId))',
+    'function setProtocols(array((string interfaceId,(string chainId,string swapContractAddress,string walletAddress))))',
     'function getTokens()',
     'function setTokens(array(string tokenContractAddress))',
   ],
@@ -159,8 +160,11 @@ export const protocolInterfaces: Record<string, string[]> = {
   ],
   [Protocols.StorageERC20]: [
     'function addOrderERC20(string nonce,string expiry,string signerWallet,string signerToken,string signerAmount,string senderToken,string senderAmount,string v,string r,string s)',
-    'function getOrdersERC20()',
-    'function getOrdersERC20By(string sortField,array(string senderToken),string page,string filters,string sortOrder)',
+    'function getOrdersERC20((string signerWallet,array(string signerToken),string signerMinAmount,string signerMaxAmount,string senderWallet,array(string senderToken),string senderMinAmount,string senderMaxAmount,string sortField,string sortOrder,string offset,string limit))',
+  ],
+  [Protocols.Storage]: [
+    'function addOrder(uint256 nonce,uint256 expiry,uint256 protocolFee,(address wallet,address token,bytes4 kind,uint256 id,uint256 amount),(address wallet,address token,bytes4 kind,uint256 id,uint256 amount),address affiliateWallet,uint256 affiliateAmount)',
+    'function getOrders((string signerWallet,array(string signerToken),string signerMinAmount,string signerMaxAmount,string senderWallet,array(string senderToken),string senderMinAmount,string senderMaxAmount,string sortField,string sortOrder,string offset,string limit))',
   ],
 }
 
@@ -170,6 +174,7 @@ export const protocolNames: Record<string, string> = {
   [Protocols.PricingERC20]: 'Pricing (ERC20)',
   [Protocols.LastLookERC20]: 'Last Look (ERC20)',
   [Protocols.StorageERC20]: 'Storage (ERC20)',
+  [Protocols.Storage]: 'Storage',
 }
 
 export enum TokenKinds {

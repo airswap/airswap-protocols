@@ -297,26 +297,13 @@ export class Server extends TypedEmitter<ServerEvents> {
     }
   }
 
-  public async getOrdersERC20(): Promise<OrderResponse<FullOrderERC20>> {
-    try {
-      return Promise.resolve(
-        (await this.httpCall('getOrdersERC20', [
-          {},
-        ])) as OrderResponse<FullOrderERC20>
-      )
-    } catch (err) {
-      return Promise.reject(err)
-    }
-  }
-
-  public async getOrdersERC20By(
-    OrderFilter: OrderFilter,
-    filters = false
+  public async getOrdersERC20(
+    orderFilter: OrderFilter
   ): Promise<OrderResponse<FullOrderERC20>> {
     try {
       return Promise.resolve(
         (await this.httpCall('getOrdersERC20', [
-          { ...this.toBigIntJson(OrderFilter), filters },
+          { ...this.toBigIntJson(orderFilter) },
         ])) as OrderResponse<FullOrderERC20>
       )
     } catch (err) {
@@ -337,23 +324,13 @@ export class Server extends TypedEmitter<ServerEvents> {
     }
   }
 
-  public async getOrders(): Promise<OrderResponse<FullOrder>> {
-    try {
-      return Promise.resolve(
-        (await this.httpCall('getOrders', [{}])) as OrderResponse<FullOrder>
-      )
-    } catch (err) {
-      return Promise.reject(err)
-    }
-  }
-
-  public async getOrdersBy(
-    OrderFilter: OrderFilter
+  public async getOrders(
+    orderFilter: OrderFilter
   ): Promise<OrderResponse<FullOrder>> {
     try {
       return Promise.resolve(
         (await this.httpCall('getOrders', [
-          { ...OrderFilter },
+          { ...this.toBigIntJson(orderFilter) },
         ])) as OrderResponse<FullOrder>
       )
     } catch (err) {
