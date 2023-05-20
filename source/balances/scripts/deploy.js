@@ -4,18 +4,20 @@ const Confirm = require('prompt-confirm')
 const { ethers, run } = require('hardhat')
 const { chainNames } = require('@airswap/constants')
 const { getReceiptUrl } = require('@airswap/utils')
-const swapDeploys = require('../deploys.js')
+const balancesDeploys = require('../deploys.js')
 
 async function main() {
   await run('compile')
   const [deployer] = await ethers.getSigners()
-  console.log(`Deployer: ${deployer.address}`)
-
-  const chainId = await deployer.getChainId()
   const gasPrice = await deployer.getGasPrice()
-
-  console.log(`Deploying on ${chainNames[chainId].toUpperCase()}`)
-  console.log(`Gas price: ${gasPrice / 10 ** 9} gwei`)
+  const chainId = await deployer.getChainId()
+  if (chainId === ChainIds.HARDHAT) {
+    console.log('Value for --network flag is required')
+    return
+  }
+  console.log(`Deployer: ${deployer.address}`)
+  console.log(`Network: ${chainNames[chainId].toUpperCase()}`)
+  console.log(`Gas price: ${gasPrice / 10 ** 9} gwei\n`)
 
   const prompt = new Confirm('Proceed to deploy?')
   if (await prompt.run()) {
@@ -30,10 +32,10 @@ async function main() {
     await balanceCheckerContract.deployed()
     console.log(`Deployed: ${balanceCheckerContract.address}`)
 
-    swapDeploys[chainId] = balanceCheckerContract.address
+    balancesDeploys[chainId] = balanceCheckerContract.address
     fs.writeFileSync(
       './deploys.js',
-      `module.exports = ${JSON.stringify(swapDeploys, null, '\t')}`
+      `module.exports = ${JSON.stringify(balancesDeploys, null, '\t')}`
     )
     console.log('Updated deploys.js')
 
