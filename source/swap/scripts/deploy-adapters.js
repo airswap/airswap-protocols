@@ -15,14 +15,13 @@ async function main() {
     console.log('Value for --network flag is required')
     return
   }
+  console.log(`Deployer: ${deployer.address}`)
+  console.log(`Network: ${chainNames[chainId].toUpperCase()}`)
+  console.log(`Gas price: ${gasPrice / 10 ** 9} gwei\n`)
 
   const adapters = ['ERC20Adapter', 'ERC721Adapter', 'ERC1155Adapter']
 
   console.log(`\nadapters: ${JSON.stringify(adapters)}`)
-
-  console.log(`Deployer: ${deployer.address}`)
-  console.log(`Deploying on ${chainNames[chainId].toUpperCase()}`)
-  console.log(`Gas price: ${gasPrice / 10 ** 9} gwei\n`)
 
   const prompt = new Confirm('Proceed to deploy?')
   if (await prompt.run()) {

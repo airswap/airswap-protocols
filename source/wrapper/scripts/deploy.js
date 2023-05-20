@@ -11,14 +11,19 @@ const { getReceiptUrl } = require('@airswap/utils')
 async function main() {
   await run('compile')
   const [deployer] = await ethers.getSigners()
-  console.log(`Deployer: ${deployer.address}`)
-
-  const chainId = await deployer.getChainId()
   const gasPrice = await deployer.getGasPrice()
+  const chainId = await deployer.getChainId()
+  if (chainId === ChainIds.HARDHAT) {
+    console.log('Value for --network flag is required')
+    return
+  }
+  console.log(`Deployer: ${deployer.address}`)
+  console.log(`Network: ${chainNames[chainId].toUpperCase()}`)
+  console.log(`Gas price: ${gasPrice / 10 ** 9} gwei\n`)
+
   const swapAddress = swapDeploys[chainId]
   const wrappedTokenAddress = wethDeploys[chainId]
 
-  console.log(`Deploying on ${chainNames[chainId].toUpperCase()}`)
   console.log(`Swap: ${swapAddress}`)
   console.log(`Wrapped: ${wrappedTokenAddress}`)
   console.log(`Gas price: ${gasPrice / 10 ** 9} gwei`)

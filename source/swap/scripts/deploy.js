@@ -17,6 +17,9 @@ async function main() {
     console.log('Value for --network flag is required')
     return
   }
+  console.log(`Deployer: ${deployer.address}`)
+  console.log(`Network: ${chainNames[chainId].toUpperCase()}`)
+  console.log(`Gas price: ${gasPrice / 10 ** 9} gwei\n`)
 
   const requiredSenderKind = TokenKinds.ERC20
   const protocolFee = 7
@@ -26,10 +29,6 @@ async function main() {
   console.log(`requiredSenderKind: ${requiredSenderKind}`)
   console.log(`protocolFee: ${protocolFee}`)
   console.log(`protocolFeeWallet: ${protocolFeeWallet}\n`)
-
-  console.log(`Deployer: ${deployer.address}`)
-  console.log(`Deploying on ${chainNames[chainId].toUpperCase()}`)
-  console.log(`Gas price: ${gasPrice / 10 ** 9} gwei\n`)
 
   const prompt = new Confirm('Proceed to deploy?')
   if (await prompt.run()) {

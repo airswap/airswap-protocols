@@ -1,6 +1,6 @@
 {
   "name": "@airswap/utils",
-  "version": "4.0.5",
+  "version": "4.0.6",
   "description": "AirSwap: Utilities for Developers",
   "repository": {
     "type": "git",
@@ -21,8 +21,8 @@
     "test:unit": "TS_NODE_COMPILER_OPTIONS='{\"strict\":false}' yarn mocha -r ts-node/esm test/*.ts"
   },
   "dependencies": {
-    "@airswap/constants": "^4.0.0",
-    "@airswap/types": "^4.0.0",
+    "@airswap/constants": "^4.0.4",
+    "@airswap/types": "^4.0.4",
     "@metamask/eth-sig-util": "^5.0.2",
     "bignumber.js": "^9.0.1",
     "ethereumjs-util": "^7.1.5",
