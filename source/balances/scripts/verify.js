@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 const { ethers, run } = require('hardhat')
 const { chainNames } = require('@airswap/constants')
-const swapDeploys = require('../deploys.js')
+const balancesDeploys = require('../deploys.js')
 
 async function main() {
   await run('compile')
@@ -12,7 +12,7 @@ async function main() {
 
   console.log(`Verifying on ${chainNames[chainId].toUpperCase()}`)
   await run('verify:verify', {
-    address: swapDeploys[chainId],
+    address: balancesDeploys[chainId],
     constructorArguments: [],
   })
 }

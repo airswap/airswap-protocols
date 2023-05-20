@@ -6,7 +6,7 @@ const poolDeploys = require('@airswap/pool/deploys.js')
 const stakingDeploys = require('@airswap/staking/deploys.js')
 const { chainNames } = require('@airswap/constants')
 const { getReceiptUrl } = require('@airswap/utils')
-const balancesDeploys = require('../deploys.js')
+const swapERC20Deploys = require('../deploys.js')
 
 async function main() {
   await run('compile')
@@ -50,10 +50,10 @@ async function main() {
     await swapContract.deployed()
     console.log(`Deployed: ${swapContract.address}`)
 
-    balancesDeploys[chainId] = swapContract.address
+    swapERC20Deploys[chainId] = swapContract.address
     fs.writeFileSync(
       './deploys.js',
-      `module.exports = ${JSON.stringify(balancesDeploys, null, '\t')}`
+      `module.exports = ${JSON.stringify(swapERC20Deploys, null, '\t')}`
     )
     console.log('Updated deploys.js')
 
