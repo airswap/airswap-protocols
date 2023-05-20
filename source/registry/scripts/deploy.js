@@ -9,8 +9,16 @@ const registryDeploys = require('../deploys.js')
 async function main() {
   await run('compile')
   const [deployer] = await ethers.getSigners()
-  const chainId = await deployer.getChainId()
   const gasPrice = await deployer.getGasPrice()
+  const chainId = await deployer.getChainId()
+  if (chainId === ChainIds.HARDHAT) {
+    console.log('Value for --network flag is required')
+    return
+  }
+  console.log(`Deployer: ${deployer.address}`)
+  console.log(`Network: ${chainNames[chainId].toUpperCase()}`)
+  console.log(`Gas price: ${gasPrice / 10 ** 9} gwei\n`)
+
   const stakingToken = stakingTokenAddresses[chainId]
   const obligationCost = 1000000000
   const tokenCost = 1000000
@@ -18,10 +26,6 @@ async function main() {
   console.log(`\nstakingToken: ${stakingToken}`)
   console.log(`obligationCost: ${obligationCost}`)
   console.log(`tokenCost: ${tokenCost}\n`)
-
-  console.log(`Deployer: ${deployer.address}`)
-  console.log(`Deploying on ${chainNames[chainId].toUpperCase()}`)
-  console.log(`Gas price: ${gasPrice / 10 ** 9} gwei\n`)
 
   const prompt = new Confirm('Proceed to deploy?')
   if (await prompt.run()) {

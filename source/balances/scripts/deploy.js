@@ -9,13 +9,15 @@ const swapDeploys = require('../deploys.js')
 async function main() {
   await run('compile')
   const [deployer] = await ethers.getSigners()
-  console.log(`Deployer: ${deployer.address}`)
-
-  const chainId = await deployer.getChainId()
   const gasPrice = await deployer.getGasPrice()
-
-  console.log(`Deploying on ${chainNames[chainId].toUpperCase()}`)
-  console.log(`Gas price: ${gasPrice / 10 ** 9} gwei`)
+  const chainId = await deployer.getChainId()
+  if (chainId === ChainIds.HARDHAT) {
+    console.log('Value for --network flag is required')
+    return
+  }
+  console.log(`Deployer: ${deployer.address}`)
+  console.log(`Network: ${chainNames[chainId].toUpperCase()}`)
+  console.log(`Gas price: ${gasPrice / 10 ** 9} gwei\n`)
 
   const prompt = new Confirm('Proceed to deploy?')
   if (await prompt.run()) {

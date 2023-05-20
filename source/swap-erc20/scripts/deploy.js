@@ -6,15 +6,21 @@ const poolDeploys = require('@airswap/pool/deploys.js')
 const stakingDeploys = require('@airswap/staking/deploys.js')
 const { chainNames } = require('@airswap/constants')
 const { getReceiptUrl } = require('@airswap/utils')
-const swapDeploys = require('../deploys.js')
+const balancesDeploys = require('../deploys.js')
 
 async function main() {
   await run('compile')
   const [deployer] = await ethers.getSigners()
-  console.log(`Deployer: ${deployer.address}`)
-
-  const chainId = await deployer.getChainId()
   const gasPrice = await deployer.getGasPrice()
+  const chainId = await deployer.getChainId()
+  if (chainId === ChainIds.HARDHAT) {
+    console.log('Value for --network flag is required')
+    return
+  }
+  console.log(`Deployer: ${deployer.address}`)
+  console.log(`Network: ${chainNames[chainId].toUpperCase()}`)
+  console.log(`Gas price: ${gasPrice / 10 ** 9} gwei\n`)
+
   const protocolFeeWallet = poolDeploys[chainId]
   const stakingContract = stakingDeploys[chainId]
   const protocolFee = 7
@@ -22,7 +28,6 @@ async function main() {
   const rebateScale = 10
   const rebateMax = 100
 
-  console.log(`Deploying on ${chainNames[chainId].toUpperCase()}`)
   console.log(`Fee recipient: ${protocolFeeWallet}`)
   console.log(`Staking contract: ${stakingContract}`)
   console.log(`Gas price: ${gasPrice / 10 ** 9} gwei`)
@@ -45,10 +50,10 @@ async function main() {
     await swapContract.deployed()
     console.log(`Deployed: ${swapContract.address}`)
 
-    swapDeploys[chainId] = swapContract.address
+    balancesDeploys[chainId] = swapContract.address
     fs.writeFileSync(
       './deploys.js',
-      `module.exports = ${JSON.stringify(swapDeploys, null, '\t')}`
+      `module.exports = ${JSON.stringify(balancesDeploys, null, '\t')}`
     )
     console.log('Updated deploys.js')
 

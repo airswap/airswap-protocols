@@ -128,6 +128,15 @@ export const stakingTokenAddresses: Record<number, string> = {
   [ChainIds.ARBITRUMGOERLI]: '0x71070c5607358fc25e3b4aaf4fb0a580c190252a',
 }
 
+export const ownerAddresses: Record<number, string> = {
+  [ChainIds.MAINNET]: '0xf8bB149F9525875Fa47B8CC632d368EB600FAba3',
+  [ChainIds.RSK]: '0xed669F5fe2A37Ef204DB178c7a982717B9f03Ec2',
+  [ChainIds.BSC]: '0x86C99b6dDC7A884db8b424B40b96Dc4043F19E37',
+  [ChainIds.POLYGON]: '0x4fef02E54160e6D7af83961d355B3B2E283506c5',
+  [ChainIds.ARBITRUM]: '0xed669F5fe2A37Ef204DB178c7a982717B9f03Ec2',
+  [ChainIds.AVALANCHE]: '0xed669F5fe2A37Ef204DB178c7a982717B9f03Ec2',
+}
+
 export enum Protocols {
   Discovery = '0x8cd261ef',
   RequestForQuoteERC20 = '0x57bb3622',
