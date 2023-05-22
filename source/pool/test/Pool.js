@@ -112,9 +112,24 @@ describe('Pool Unit', () => {
   })
 
   describe('Test admin functions', async () => {
-    it('can enable a claim for a merkle root', async () => {
+    it('enable a claim for a merkle root suceeds', async () => {
       const root = getRoot(tree)
       expect(await pool.connect(deployer).enable(root)).to.emit(pool, 'Enable')
+    })
+
+    it('enable a claim for a merkle root fails when not admin', async () => {
+      const root = getRoot(tree)
+      await expect(pool.connect(bob).enable(root)).to.be.revertedWith(
+        'Unauthorized()'
+      )
+    })
+
+    it('enable a root twice fails', async () => {
+      const root = getRoot(tree)
+      await pool.connect(deployer).enable(root)
+      await expect(pool.connect(deployer).enable(root)).to.be.revertedWith(
+        `RootExists("${root}")`
+      )
     })
 
     it('Test setclaimed with admin is successful', async () => {
@@ -167,6 +182,12 @@ describe('Pool Unit', () => {
       expect(await pool.stakingContract()).to.equal(stakeContract.address)
     })
 
+    it('set stake contract fails when not owner', async () => {
+      await expect(
+        pool.connect(alice).setStakingContract(stakeContract.address)
+      ).to.be.revertedWith('Ownable: caller is not the owner')
+    })
+
     it('set stake contract reverts', async () => {
       await expect(
         pool.connect(deployer).setStakingContract(ADDRESS_ZERO)
@@ -178,6 +199,14 @@ describe('Pool Unit', () => {
       await feeToken2.mock.allowance.returns(0)
       await pool.connect(deployer).setStakingToken(feeToken2.address)
       expect(await pool.stakingToken()).to.equal(feeToken2.address)
+    })
+
+    it('set stake contract fails when not owner', async () => {
+      await feeToken2.mock.approve.returns(true)
+      await feeToken2.mock.allowance.returns(0)
+      await expect(
+        pool.connect(alice).setStakingToken(feeToken2.address)
+      ).to.be.revertedWith('Ownable: caller is not the owner')
     })
 
     it('set stake token reverts', async () => {
@@ -212,6 +241,47 @@ describe('Pool Unit', () => {
 
       const isClaimed = await pool.claimed(root, bob.address)
       expect(isClaimed).to.equal(true)
+    })
+
+    it('withdraw reverts with no claim provided', async () => {
+      await feeToken.mock.balanceOf.returns('100000')
+      await feeToken.mock.transfer.returns(true)
+
+      await pool.addAdmin(alice.address)
+      const root = getRoot(tree)
+      await pool.connect(alice).enable(root)
+
+      await expect(
+        pool.connect(bob).withdraw([], feeToken.address)
+      ).to.be.revertedWith(`ClaimsNotProvided()`)
+
+      const isClaimed = await pool.claimed(root, bob.address)
+      expect(isClaimed).to.equal(false)
+    })
+
+    it('withdraw reverts with no root enabled', async () => {
+      await feeToken.mock.balanceOf.returns('100000')
+      await feeToken.mock.transfer.returns(true)
+
+      await pool.addAdmin(alice.address)
+      const root = getRoot(tree)
+      let proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
+
+      await expect(
+        pool.connect(bob).withdraw(
+          [
+            {
+              root: getRoot(tree),
+              score: BOB_SCORE,
+              proof,
+            },
+          ],
+          feeToken.address
+        )
+      ).to.be.revertedWith(`RootDisabled("${root}")`)
+
+      const isClaimed = await pool.claimed(root, bob.address)
+      expect(isClaimed).to.equal(false)
     })
 
     it('withdraw reverts with claim already made', async () => {
@@ -535,6 +605,13 @@ describe('Pool Unit', () => {
       expect(await pool.scale()).to.be.equal(`${scale}`)
     })
 
+    it('Test setScale reverts when not owner', async () => {
+      const scale = 77
+      await expect(pool.connect(alice).setScale(scale)).to.be.revertedWith(
+        'Ownable: caller is not the owner'
+      )
+    })
+
     it('Test setScale reverts', async () => {
       const scale = 1000
       await expect(pool.setScale(scale)).to.be.revertedWith(
@@ -548,6 +625,13 @@ describe('Pool Unit', () => {
       const max = 10
       await expect(pool.setMax(max)).to.emit(pool, 'SetMax')
       expect(await pool.scale()).to.be.equal(`${max}`)
+    })
+
+    it('Test setMax reverts when not owner', async () => {
+      const max = 10
+      await expect(pool.connect(alice).setMax(max)).to.be.revertedWith(
+        'Ownable: caller is not the owner'
+      )
     })
 
     it('Test setMax reverts', async () => {
