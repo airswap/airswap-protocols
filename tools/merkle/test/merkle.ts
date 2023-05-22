@@ -1,9 +1,10 @@
+/* eslint-disable  @typescript-eslint/no-non-null-assertion */
 import { expect } from 'chai'
 import { soliditySha3 } from 'web3-utils'
 import { generateTreeFromData, getRoot, getProof } from '../index'
 
 describe('Merkle', async () => {
-  let tree
+  let tree: any
   const treeRoot =
     '0xad519504d6845f9f2529e80a2247d751af56af868ed9f23398705a1ec1bd9fc4'
   const proof = [
@@ -21,7 +22,7 @@ describe('Merkle', async () => {
   })
 
   it('Validates proof', async () => {
-    const element = soliditySha3('a', '1')
+    const element: string = soliditySha3('a', '1')!
     expect(getProof(tree, element).join()).to.equal(proof.join())
   })
 })

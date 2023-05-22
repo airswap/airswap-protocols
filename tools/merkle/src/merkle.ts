@@ -40,15 +40,18 @@ export class MerkleTree {
     return layers
   }
 
-  public getNextLayer(elements: Array<Buffer>): Array<string> {
-    return elements.reduce((layer, el, idx, arr) => {
-      if (idx % 2 === 0) {
-        // Hash the current element with its pair element
-        layer.push(this.combinedHash(el, arr[idx + 1]))
-      }
+  public getNextLayer(elements: Array<Buffer>): Array<Buffer> {
+    return elements.reduce(
+      (layer: Buffer[], el: Buffer, idx: number, arr: Buffer[]) => {
+        if (idx % 2 === 0) {
+          // Hash the current element with its pair element
+          layer.push(this.combinedHash(el, arr[idx + 1]))
+        }
 
-      return layer
-    }, [])
+        return layer
+      },
+      []
+    )
   }
 
   public combinedHash(first: Buffer, second: Buffer): Buffer {
@@ -77,7 +80,7 @@ export class MerkleTree {
       throw new Error('Element does not exist in Merkle tree')
     }
 
-    return this.layers.reduce((proof, layer) => {
+    return this.layers.reduce((proof: string[], layer: any) => {
       const pairElement = this.getPairElement(idx, layer)
 
       if (pairElement) {
@@ -99,7 +102,7 @@ export class MerkleTree {
     return this.bufArrToHexArr(proof)
   }
 
-  public getPairElement(idx: number, layer: string): string {
+  public getPairElement(idx: number, layer: string): string | null {
     const pairIdx = idx % 2 === 0 ? idx + 1 : idx - 1
 
     if (pairIdx < layer.length) {
@@ -120,7 +123,7 @@ export class MerkleTree {
     }
 
     for (let i = 0; i < arr.length; i++) {
-      if (hash.equals(arr[i])) {
+      if (hash.equals(Buffer.from(arr[i]))) {
         return i
       }
     }
