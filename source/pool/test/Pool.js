@@ -1,6 +1,5 @@
 const { expect } = require('chai')
 const { toAtomicString } = require('@airswap/utils')
-const { createClaim, createClaimSignature } = require('@airswap/utils')
 const { generateTreeFromData, getRoot, getProof } = require('@airswap/merkle')
 const { soliditySha3 } = require('web3-utils')
 
