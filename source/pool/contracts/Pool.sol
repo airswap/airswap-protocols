@@ -193,7 +193,7 @@ contract Pool is IPool, Ownable {
    * @param root bytes32
    */
   function enable(bytes32 root) external override multiAdmin {
-    require(roots[root] == false, "ROOT_EXISTS");
+    if (roots[root]) revert RootExists(root);
     roots[root] = true;
     emit Enable(root);
   }

@@ -1,6 +1,7 @@
 const { expect } = require('chai')
 const { toAtomicString } = require('@airswap/utils')
 const { createClaim, createClaimSignature } = require('@airswap/utils')
+const { generateTreeFromData, getRoot, getProof } = require('@airswap/merkle')
 
 const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
@@ -24,7 +25,9 @@ describe('Pool Unit', () => {
 
   const ALICE_SCORE = toWei(10000, 4)
   const BOB_SCORE = toWei(100000, 4)
+  const CAROL_SCORE = toWei(1000000, 4)
 
+  let tree
   let nonce
   let score
   let feeToken
@@ -66,6 +69,12 @@ describe('Pool Unit', () => {
       await ethers.getContractFactory('Pool')
     ).deploy(CLAIM_SCALE, CLAIM_MAX, stakeContract.address, feeToken.address)
     await pool.deployed()
+
+    tree = generateTreeFromData({
+      [alice.address]: ALICE_SCORE,
+      [bob.address]: BOB_SCORE,
+      [carol.address]: CAROL_SCORE,
+    })
   })
 
   describe('Test constructor', async () => {
@@ -102,13 +111,10 @@ describe('Pool Unit', () => {
   })
 
   describe('Test admin functions', async () => {
-    // it('can enable a claim for a merkle root', async () => {
-    //   expect(
-    //     await pool
-    //       .connect(deployer)
-    //       .enable(ethers.utils.formatBytes32String('test root'))
-    //   ).to.emit(pool, 'Enable')
-    // })
+    it('can enable a claim for a merkle root', async () => {
+      const root = getRoot(tree)
+      expect(await pool.connect(deployer).enable(root)).to.emit(pool, 'Enable')
+    })
   })
 
   describe('Test staking variables', async () => {
