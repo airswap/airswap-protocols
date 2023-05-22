@@ -5,6 +5,8 @@ pragma solidity ^0.8.17;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "@airswap/staking/contracts/interfaces/IStaking.sol";
 import "./interfaces/IPool.sol";
 
@@ -14,6 +16,7 @@ import "./interfaces/IPool.sol";
  */
 contract Pool is IPool, Ownable {
   using SafeERC20 for IERC20;
+  using SafeMath for uint256;
 
   bytes32 public constant DOMAIN_TYPEHASH =
     keccak256(
@@ -64,13 +67,6 @@ contract Pool is IPool, Ownable {
 
   // Mapping of signed hash to boolean to mark as claimed
   mapping(bytes32 => bool) public hashClaimed;
-
-  /**
-   * @notice Double mapping of signers to nonce groups to nonce states
-   * @dev The nonce group is computed as nonce / 256, so each group of 256 sequential nonces uses the same key
-   * @dev The nonce states are encoded as 256 bits, for each nonce in the group 0 means available and 1 means used
-   */
-  mapping(address => mapping(uint256 => uint256)) internal noncesClaimed;
 
   // Staking contract address
   address public stakingContract;
@@ -243,64 +239,100 @@ contract Pool is IPool, Ownable {
   }
 
   /**
-   * @notice Withdraw tokens from the pool using a signed claim
-   * @param recipient address
-   * @param minimum uint256
+   * @notice Withdraw tokens from the pool using claims
+   * @param claims Claim[]
    * @param token address
-   * @param nonce uint256
-   * @param expiry uint256
-   * @param score uint256
-   * @param v uint8 "v" value of the ECDSA signature
-   * @param r bytes32 "r" value of the ECDSA signature
-   * @param s bytes32 "s" value of the ECDSA signature
    */
-  function withdraw(
-    address recipient,
-    uint256 minimum,
-    address token,
-    uint256 nonce,
-    uint256 expiry,
-    uint256 score,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
-  ) external override returns (uint256) {
-    _checkValidClaim(nonce, expiry, score, v, r, s);
-    uint256 amount = _withdrawCheck(score, token, minimum);
-    IERC20(token).safeTransfer(recipient, amount);
-    emit Withdraw(nonce, expiry, msg.sender, token, amount, score);
-    return amount;
+  function withdraw(Claim[] memory claims, address token) external override {
+    withdrawProtected(claims, token, 0, msg.sender);
   }
 
   /**
-   * @notice Withdraw tokens from the pool using signature and stake for a recipient
-   * @param recipient address
-   * @param minimum uint256
+   * @notice Withdraw tokens from the pool using claims and stake
+   * @param claims Claim[]
    * @param token address
-   * @param nonce uint256
-   * @param expiry uint256
-   * @param score uint256
-   * @param v uint8 "v" value of the ECDSA signature
-   * @param r bytes32 "r" value of the ECDSA signature
-   * @param s bytes32 "s" value of the ECDSA signature
    */
   function withdrawAndStake(
-    address recipient,
-    uint256 minimum,
+    Claim[] memory claims,
     address token,
-    uint256 nonce,
-    uint256 expiry,
-    uint256 score,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
-  ) external override returns (uint256) {
+    uint256 minimumAmount
+  ) external override {
     if (token != address(stakingToken)) revert TokenInvalid(token);
-    _checkValidClaim(nonce, expiry, score, v, r, s);
-    uint256 amount = _withdrawCheck(score, token, minimum);
-    IStaking(stakingContract).stakeFor(recipient, amount);
-    emit Withdraw(nonce, expiry, msg.sender, token, amount, score);
-    return amount;
+    (uint256 amount, bytes32[] memory rootList) = _withdrawCheck(
+      claims,
+      token,
+      minimumAmount
+    );
+    IStaking(stakingContract).stakeFor(msg.sender, amount);
+    emit Withdraw(rootList, msg.sender, token, amount);
+  }
+
+  /**
+   * @notice Withdraw tokens from the pool using claims and stake for another account
+   * @param claims Claim[]
+   * @param token address
+   * @param account address
+   */
+  function withdrawAndStakeFor(
+    Claim[] memory claims,
+    address token,
+    uint256 minimumAmount,
+    address account
+  ) external override {
+    if (token != address(stakingToken)) revert TokenInvalid(token);
+    (uint256 amount, bytes32[] memory rootList) = _withdrawCheck(
+      claims,
+      token,
+      minimumAmount
+    );
+    IERC20(stakingToken).approve(stakingContract, amount);
+    IStaking(stakingContract).stakeFor(account, amount);
+    emit Withdraw(rootList, msg.sender, token, amount);
+  }
+
+  /**
+   * @notice Withdraw tokens from the pool using claims and send to recipient
+   * @param claims Claim[]
+   * @param token address
+   * @param recipient address
+   */
+  function withdrawWithRecipient(
+    Claim[] memory claims,
+    address token,
+    uint256 minimumAmount,
+    address recipient
+  ) external override {
+    withdrawProtected(claims, token, minimumAmount, recipient);
+  }
+
+  /**
+   * @notice Withdraw tokens from the pool using claims
+   * @param claims Claim[]
+   * @param token address
+   * @param minimumAmount uint256
+   */
+  function _withdrawCheck(
+    Claim[] memory claims,
+    address token,
+    uint256 minimumAmount
+  ) internal returns (uint256, bytes32[] memory) {
+    if (claims.length <= 0) revert ClaimsNotProvided();
+    uint256 totalScore = 0;
+    bytes32[] memory rootList = new bytes32[](claims.length);
+    Claim memory claim;
+    for (uint256 i = 0; i < claims.length; i++) {
+      claim = claims[i];
+      if (!roots[claim.root]) revert RootDisabled(claim.root);
+      if (claimed[claim.root][msg.sender]) revert AlreadyClaimed();
+      if (!verify(msg.sender, claim.root, claim.score, claim.proof))
+        revert ProofInvalid(claim.proof);
+      totalScore = totalScore.add(claim.score);
+      claimed[claim.root][msg.sender] = true;
+      rootList[i] = claim.root;
+    }
+    uint256 amount = calculate(totalScore, token);
+    if (amount < minimumAmount) revert AmountInsufficient(amount);
+    return (amount, rootList);
   }
 
   /**
@@ -319,55 +351,6 @@ contract Pool is IPool, Ownable {
   }
 
   /**
-   * @notice Verify a signature
-   * @param nonce uint256
-   * @param expiry uint256
-   * @param participant address
-   * @param score uint256
-   * @param v uint8 "v" value of the ECDSA signature
-   * @param r bytes32 "r" value of the ECDSA signature
-   * @param s bytes32 "s" value of the ECDSA signature
-   */
-  function verify(
-    uint256 nonce,
-    uint256 expiry,
-    address participant,
-    uint256 score,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
-  ) public view override returns (bool valid) {
-    if (DOMAIN_CHAIN_ID != getChainId()) revert ChainChanged(getChainId());
-    if (expiry <= block.timestamp) revert ExpiryPassed();
-    bytes32 claimHash = keccak256(
-      abi.encode(CLAIM_TYPEHASH, nonce, expiry, participant, score)
-    );
-    address signatory = ecrecover(
-      keccak256(abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR, claimHash)),
-      v,
-      r,
-      s
-    );
-    admins[signatory] && !nonceUsed(participant, nonce)
-      ? valid = true
-      : valid = false;
-  }
-
-  /**
-   * @notice Returns true if the nonce has been used
-   * @param participant address
-   * @param nonce uint256
-   */
-  function nonceUsed(
-    address participant,
-    uint256 nonce
-  ) public view override returns (bool) {
-    uint256 groupKey = nonce / 256;
-    uint256 indexInGroup = nonce % 256;
-    return (noncesClaimed[participant][groupKey] >> indexInGroup) & 1 == 1;
-  }
-
-  /**
    * @notice Returns the current chainId using the chainid opcode
    * @return id uint256 The chain id
    */
@@ -379,75 +362,42 @@ contract Pool is IPool, Ownable {
   }
 
   /**
-   * @notice Checks Claim Nonce, Expiry, Participant, Score, Signature
-   * @param nonce uint256
-   * @param expiry uint256
-   * @param score uint256
-   * @param v uint8 "v" value of the ECDSA signature
-   * @param r bytes32 "r" value of the ECDSA signature
-   * @param s bytes32 "s" value of the ECDSA signature
-   */
-  function _checkValidClaim(
-    uint256 nonce,
-    uint256 expiry,
-    uint256 score,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
-  ) internal {
-    if (DOMAIN_CHAIN_ID != getChainId()) revert ChainChanged(getChainId());
-    if (expiry <= block.timestamp) revert ExpiryPassed();
-    bytes32 claimHash = keccak256(
-      abi.encode(CLAIM_TYPEHASH, nonce, expiry, msg.sender, score)
-    );
-    address signatory = ecrecover(
-      keccak256(abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR, claimHash)),
-      v,
-      r,
-      s
-    );
-    if (!admins[signatory]) revert Unauthorized();
-    if (!_markNonceAsUsed(msg.sender, nonce)) revert NonceAlreadyUsed(nonce);
-  }
-
-  /**
-   * @notice Marks a nonce as used for the given participant
-   * @param participant address
-   * @param nonce uint256
-   * @return bool True if nonce was not marked as used already
-   */
-  function _markNonceAsUsed(
-    address participant,
-    uint256 nonce
-  ) internal returns (bool) {
-    uint256 groupKey = nonce / 256;
-    uint256 indexInGroup = nonce % 256;
-    uint256 group = noncesClaimed[participant][groupKey];
-
-    // If it is already used, return false
-    if ((group >> indexInGroup) & 1 == 1) {
-      return false;
-    }
-
-    noncesClaimed[participant][groupKey] = group | (uint256(1) << indexInGroup);
-
-    return true;
-  }
-
-  /**
-   * @notice Withdraw tokens from the pool using a score
-   * @param score uint256
+   * @notice Withdraw tokens from the pool using claims
+   * @param claims Claim[]
    * @param token address
    * @param minimumAmount uint256
+   * @param recipient address
    */
-  function _withdrawCheck(
-    uint256 score,
+  function withdrawProtected(
+    Claim[] memory claims,
     address token,
-    uint256 minimumAmount
-  ) internal view returns (uint256) {
-    if (score <= 0) revert ScoreNotProvided(score);
-    uint256 amount = calculate(score, token);
-    if (amount < minimumAmount) revert AmountInsufficient(minimumAmount);
+    uint256 minimumAmount,
+    address recipient
+  ) public override returns (uint256) {
+    (uint256 amount, bytes32[] memory rootList) = _withdrawCheck(
+      claims,
+      token,
+      minimumAmount
+    );
+    IERC20(token).safeTransfer(recipient, amount);
+    emit Withdraw(rootList, msg.sender, token, amount);
     return amount;
+  }
+
+  /**
+   * @notice Verify a claim proof
+   * @param participant address
+   * @param root bytes32
+   * @param score uint256
+   * @param proof bytes32[]
+   */
+  function verify(
+    address participant,
+    bytes32 root,
+    uint256 score,
+    bytes32[] memory proof
+  ) public pure override returns (bool valid) {
+    bytes32 leaf = keccak256(abi.encodePacked(participant, score));
+    return MerkleProof.verify(proof, root, leaf);
   }
 }

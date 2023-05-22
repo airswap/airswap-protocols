@@ -3,6 +3,12 @@
 pragma solidity ^0.8.17;
 
 interface IPool {
+  struct Claim {
+    bytes32 root;
+    uint256 score;
+    bytes32[] proof;
+  }
+
   event AddAdmin(address admin);
   event DrainTo(address[] tokens, address dest);
   event Enable(bytes32);
@@ -10,12 +16,10 @@ interface IPool {
   event SetScale(uint256 scale);
   event RemoveAdmin(address admin);
   event Withdraw(
-    uint256 indexed nonce,
-    uint256 indexed expiry,
-    address indexed account,
+    bytes32[] roots,
+    address account,
     address token,
-    uint256 amount,
-    uint256 score
+    uint256 amount
   );
 
   error AddressInvalid(address);
@@ -23,11 +27,14 @@ interface IPool {
   error AlreadyClaimed();
   error AmountInsufficient(uint256);
   error ChainChanged(uint256);
+  error ClaimsNotProvided();
   error ExpiryPassed();
   error MaxTooHigh(uint256);
   error NonceAlreadyUsed(uint256);
+  error ProofInvalid(bytes32[]);
   error ScaleTooHigh(uint256);
   error ScoreNotProvided(uint256);
+  error RootDisabled(bytes32);
   error RootExists(bytes32);
   error TokenInvalid(address);
   error Unauthorized();
@@ -50,28 +57,33 @@ interface IPool {
 
   function drainTo(address[] calldata tokens, address dest) external;
 
-  function withdraw(
-    address recipient,
-    uint256 minimum,
+  function withdraw(Claim[] memory claims, address token) external;
+
+  function withdrawWithRecipient(
+    Claim[] memory claims,
     address token,
-    uint256 nonce,
-    uint256 expiry,
-    uint256 score,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
-  ) external returns (uint256);
+    uint256 minimumAmount,
+    address recipient
+  ) external;
 
   function withdrawAndStake(
-    address recipient,
-    uint256 minimum,
+    Claim[] memory claims,
     address token,
-    uint256 nonce,
-    uint256 expiry,
-    uint256 score,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
+    uint256 minimumAmount
+  ) external;
+
+  function withdrawAndStakeFor(
+    Claim[] memory claims,
+    address token,
+    uint256 minimumAmount,
+    address account
+  ) external;
+
+  function withdrawProtected(
+    Claim[] memory claims,
+    address token,
+    uint256 minimumAmount,
+    address recipient
   ) external returns (uint256);
 
   function calculate(
@@ -80,17 +92,9 @@ interface IPool {
   ) external view returns (uint256 amount);
 
   function verify(
-    uint256 nonce,
-    uint256 expiry,
     address participant,
+    bytes32 root,
     uint256 score,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
-  ) external view returns (bool valid);
-
-  function nonceUsed(
-    address participant,
-    uint256 nonce
-  ) external view returns (bool);
+    bytes32[] memory proof
+  ) external pure returns (bool valid);
 }
