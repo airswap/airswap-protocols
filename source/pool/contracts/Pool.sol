@@ -59,6 +59,12 @@ contract Pool is IPool, Ownable {
   // Mapping of address to boolean to enable admin accounts
   mapping(address => bool) public admins;
 
+  // Mapping of tree root to account to mark as claimed
+  mapping(bytes32 => mapping(address => bool)) public claimed;
+
+  // Mapping of signed hash to boolean to mark as claimed
+  mapping(bytes32 => bool) public hashClaimed;
+
   /**
    * @notice Double mapping of signers to nonce groups to nonce states
    * @dev The nonce group is computed as nonce / 256, so each group of 256 sequential nonces uses the same key
@@ -186,6 +192,27 @@ contract Pool is IPool, Ownable {
     IERC20(stakingToken).safeApprove(stakingContract, 0);
     stakingToken = _stakingToken;
     IERC20(stakingToken).safeApprove(stakingContract, 2 ** 256 - 1);
+  }
+
+  /**
+   * @notice Set claims from previous pool contract
+   * @dev Only owner
+   * @param root bytes32
+   * @param accounts address[]
+   */
+  function setClaimed(
+    bytes32 root,
+    address[] memory accounts
+  ) external override multiAdmin {
+    if (roots[root] == false) {
+      roots[root] = true;
+    }
+    for (uint256 i = 0; i < accounts.length; i++) {
+      address account = accounts[i];
+      if (claimed[root][account]) revert AlreadyClaimed();
+      claimed[root][account] = true;
+    }
+    emit Enable(root);
   }
 
   /**

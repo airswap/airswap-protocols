@@ -2,6 +2,7 @@ const { expect } = require('chai')
 const { toAtomicString } = require('@airswap/utils')
 const { createClaim, createClaimSignature } = require('@airswap/utils')
 const { generateTreeFromData, getRoot, getProof } = require('@airswap/merkle')
+const { soliditySha3 } = require('web3-utils')
 
 const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
@@ -114,6 +115,28 @@ describe('Pool Unit', () => {
     it('can enable a claim for a merkle root', async () => {
       const root = getRoot(tree)
       expect(await pool.connect(deployer).enable(root)).to.emit(pool, 'Enable')
+    })
+
+    it('Test setclaimed with non-admin reverts', async () => {
+      await feeToken.mock.balanceOf.returns('100000')
+
+      const root = getRoot(tree)
+
+      await expect(
+        pool.connect(alice).setClaimed(root, [bob.address])
+      ).to.be.revertedWith('Unauthorized()')
+    })
+
+    it('Test setclaimed reverts with claim already made', async () => {
+      await feeToken.mock.balanceOf.returns('100000')
+
+      const root = getRoot(tree)
+
+      await pool.connect(deployer).setClaimed(root, [bob.address])
+
+      await expect(
+        pool.connect(deployer).setClaimed(root, [bob.address])
+      ).to.be.revertedWith('AlreadyClaimed()')
     })
   })
 

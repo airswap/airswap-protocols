@@ -20,6 +20,7 @@ interface IPool {
 
   error AddressInvalid(address);
   error AdminNotSet(address);
+  error AlreadyClaimed();
   error AmountInsufficient(uint256);
   error ChainChanged(uint256);
   error ExpiryPassed();
@@ -42,6 +43,8 @@ interface IPool {
   function setStakingContract(address _stakingContract) external;
 
   function setStakingToken(address _stakingToken) external;
+
+  function setClaimed(bytes32 root, address[] memory accounts) external;
 
   function enable(bytes32 root) external;
 
