@@ -5,7 +5,6 @@ pragma solidity ^0.8.17;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "@airswap/staking/contracts/interfaces/IStaking.sol";
 import "./interfaces/IPool.sol";
@@ -16,7 +15,6 @@ import "./interfaces/IPool.sol";
  */
 contract Pool is IPool, Ownable {
   using SafeERC20 for IERC20;
-  using SafeMath for uint256;
 
   bytes32 public constant DOMAIN_TYPEHASH =
     keccak256(
@@ -326,7 +324,7 @@ contract Pool is IPool, Ownable {
       if (claimed[claim.root][msg.sender]) revert AlreadyClaimed();
       if (!verify(msg.sender, claim.root, claim.score, claim.proof))
         revert ProofInvalid(claim.proof);
-      totalScore = totalScore.add(claim.score);
+      totalScore = totalScore + claim.score;
       claimed[claim.root][msg.sender] = true;
       rootList[i] = claim.root;
     }
