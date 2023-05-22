@@ -53,6 +53,9 @@ contract Pool is IPool, Ownable {
   // Max percentage for a claim with infinite score
   uint256 public max;
 
+  // Mapping of tree root to boolean to enable claims
+  mapping(bytes32 => bool) public roots;
+
   // Mapping of address to boolean to enable admin accounts
   mapping(address => bool) public admins;
 
@@ -103,6 +106,14 @@ contract Pool is IPool, Ownable {
     );
 
     IERC20(stakingToken).safeApprove(stakingContract, 2 ** 256 - 1);
+  }
+
+  /**
+   * @dev Throws if called by any account other than the admin.
+   */
+  modifier multiAdmin() {
+    if (!admins[msg.sender]) revert Unauthorized();
+    _;
   }
 
   /**
@@ -175,6 +186,16 @@ contract Pool is IPool, Ownable {
     IERC20(stakingToken).safeApprove(stakingContract, 0);
     stakingToken = _stakingToken;
     IERC20(stakingToken).safeApprove(stakingContract, 2 ** 256 - 1);
+  }
+
+  /**
+   * @notice Enables claims for a merkle tree of a set of scores
+   * @param root bytes32
+   */
+  function enable(bytes32 root) external override multiAdmin {
+    require(roots[root] == false, "ROOT_EXISTS");
+    roots[root] = true;
+    emit Enable(root);
   }
 
   /**

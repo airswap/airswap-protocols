@@ -3,6 +3,12 @@
 pragma solidity ^0.8.17;
 
 interface IPool {
+  event AddAdmin(address admin);
+  event DrainTo(address[] tokens, address dest);
+  event Enable(bytes32);
+  event SetMax(uint256 max);
+  event SetScale(uint256 scale);
+  event RemoveAdmin(address admin);
   event Withdraw(
     uint256 indexed nonce,
     uint256 indexed expiry,
@@ -11,11 +17,6 @@ interface IPool {
     uint256 amount,
     uint256 score
   );
-  event SetScale(uint256 scale);
-  event SetMax(uint256 max);
-  event AddAdmin(address admin);
-  event RemoveAdmin(address admin);
-  event DrainTo(address[] tokens, address dest);
 
   error AddressInvalid(address);
   error AdminNotSet(address);
@@ -26,6 +27,7 @@ interface IPool {
   error NonceAlreadyUsed(uint256);
   error ScaleTooHigh(uint256);
   error ScoreNotProvided(uint256);
+  error RootExists(bytes32);
   error TokenInvalid(address);
   error Unauthorized();
 
@@ -40,6 +42,8 @@ interface IPool {
   function setStakingContract(address _stakingContract) external;
 
   function setStakingToken(address _stakingToken) external;
+
+  function enable(bytes32 root) external;
 
   function drainTo(address[] calldata tokens, address dest) external;
 

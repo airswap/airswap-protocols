@@ -101,6 +101,16 @@ describe('Pool Unit', () => {
     })
   })
 
+  describe('Test admin functions', async () => {
+    // it('can enable a claim for a merkle root', async () => {
+    //   expect(
+    //     await pool
+    //       .connect(deployer)
+    //       .enable(ethers.utils.formatBytes32String('test root'))
+    //   ).to.emit(pool, 'Enable')
+    // })
+  })
+
   describe('Test staking variables', async () => {
     it('set stake contract successful', async () => {
       await pool.connect(deployer).setStakingContract(stakeContract.address)
