@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
+import "@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
 import "@airswap/staking/contracts/interfaces/IStaking.sol";
 import "./interfaces/IPool.sol";
 
@@ -13,7 +14,7 @@ import "./interfaces/IPool.sol";
  * @title AirSwap: Rewards Pool
  * @notice https://www.airswap.io/
  */
-contract Pool is IPool, Ownable {
+contract Pool is IPool, Ownable, EIP712 {
   using SafeERC20 for IERC20;
 
   bytes32 public constant DOMAIN_TYPEHASH =
@@ -40,10 +41,8 @@ contract Pool is IPool, Ownable {
       )
     );
 
-  bytes32 public constant DOMAIN_NAME = keccak256("POOL");
-  bytes32 public constant DOMAIN_VERSION = keccak256("1");
-  uint256 public immutable DOMAIN_CHAIN_ID;
-  bytes32 public immutable DOMAIN_SEPARATOR;
+  string public constant DOMAIN_NAME = "POOL";
+  string public constant DOMAIN_VERSION = "4";
 
   uint256 internal constant MAX_PERCENTAGE = 100;
   uint256 internal constant MAX_SCALE = 77;
@@ -84,7 +83,7 @@ contract Pool is IPool, Ownable {
     uint256 _max,
     address _stakingContract,
     address _stakingToken
-  ) {
+  ) EIP712(DOMAIN_NAME, DOMAIN_VERSION) {
     if (_max > MAX_PERCENTAGE) revert MaxTooHigh(_max);
     if (_scale > MAX_SCALE) revert ScaleTooHigh(_scale);
     scale = _scale;
@@ -92,18 +91,6 @@ contract Pool is IPool, Ownable {
     stakingContract = _stakingContract;
     stakingToken = _stakingToken;
     admins[msg.sender] = true;
-
-    uint256 currentChainId = block.chainid;
-    DOMAIN_CHAIN_ID = currentChainId;
-    DOMAIN_SEPARATOR = keccak256(
-      abi.encode(
-        DOMAIN_TYPEHASH,
-        DOMAIN_NAME,
-        DOMAIN_VERSION,
-        currentChainId,
-        this
-      )
-    );
 
     IERC20(stakingToken).safeApprove(stakingContract, 2 ** 256 - 1);
   }
@@ -303,6 +290,62 @@ contract Pool is IPool, Ownable {
     withdrawProtected(claims, token, minimumAmount, recipient);
   }
 
+  /** @notice withdraw function that uses signature instead of claim calculated from merkle root
+   * @param v signature parameter v of one of the admins
+   * @param r signature parameter r of one of the admins
+   * @param s signature parameter s of one of the admins
+   * @param token address
+   * @param amount uint256 withdrawal amount
+   * @param nonce uint256 add nonce to the hash, nonce must be non-reusable
+   */
+  function withdrawWithSignature(
+    uint8 v,
+    bytes32 r,
+    bytes32 s,
+    address token,
+    uint256 amount,
+    uint256 nonce
+  ) external override returns (uint256) {
+    // calculate hash
+    bytes32 calculatedHash = keccak256(
+      abi.encodePacked(token, amount, msg.sender, nonce)
+    );
+    // verify hash has not been claimed
+    if (hashClaimed[calculatedHash]) revert AlreadyClaimed();
+    // verify hash is signed by an admin, ECDSA.recover will throw if signer is not recoverable
+    bytes32 ethSignedMessageHash = ECDSA.toEthSignedMessageHash(calculatedHash);
+    address signer = ECDSA.recover(ethSignedMessageHash, v, r, s);
+    if (!admins[signer]) revert Unauthorized();
+    // mark the hash of (signature, hash and nonce) and recipient as true
+    hashClaimed[calculatedHash] = true;
+    IERC20(token).safeTransfer(msg.sender, amount);
+    emit WithdrawWithSignature(signer, token, amount, msg.sender, nonce);
+    return amount;
+  }
+
+  /**
+   * @notice Withdraw tokens from the pool using claims
+   * @param claims Claim[]
+   * @param token address
+   * @param minimumAmount uint256
+   * @param recipient address
+   */
+  function withdrawProtected(
+    Claim[] memory claims,
+    address token,
+    uint256 minimumAmount,
+    address recipient
+  ) public override returns (uint256) {
+    (uint256 amount, bytes32[] memory rootList) = _withdrawCheck(
+      claims,
+      token,
+      minimumAmount
+    );
+    IERC20(token).safeTransfer(recipient, amount);
+    emit Withdraw(rootList, msg.sender, token, amount);
+    return amount;
+  }
+
   /**
    * @notice Withdraw tokens from the pool using claims
    * @param claims Claim[]
@@ -346,29 +389,6 @@ contract Pool is IPool, Ownable {
     uint256 balance = IERC20(token).balanceOf(address(this));
     uint256 divisor = (uint256(10) ** scale) + score;
     return (max * score * balance) / divisor / 100;
-  }
-
-  /**
-   * @notice Withdraw tokens from the pool using claims
-   * @param claims Claim[]
-   * @param token address
-   * @param minimumAmount uint256
-   * @param recipient address
-   */
-  function withdrawProtected(
-    Claim[] memory claims,
-    address token,
-    uint256 minimumAmount,
-    address recipient
-  ) public override returns (uint256) {
-    (uint256 amount, bytes32[] memory rootList) = _withdrawCheck(
-      claims,
-      token,
-      minimumAmount
-    );
-    IERC20(token).safeTransfer(recipient, amount);
-    emit Withdraw(rootList, msg.sender, token, amount);
-    return amount;
   }
 
   /**

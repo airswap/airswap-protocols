@@ -21,6 +21,13 @@ interface IPool {
     address token,
     uint256 amount
   );
+  event WithdrawWithSignature(
+    address signer,
+    address token,
+    uint256 amount,
+    address account,
+    uint256 nonce
+  );
 
   error AddressInvalid(address);
   error AdminNotSet(address);
@@ -78,6 +85,15 @@ interface IPool {
     uint256 minimumAmount,
     address account
   ) external;
+
+  function withdrawWithSignature(
+    uint8 v,
+    bytes32 r,
+    bytes32 s,
+    address token,
+    uint256 amount,
+    uint256 nonce
+  ) external returns (uint256);
 
   function withdrawProtected(
     Claim[] memory claims,
