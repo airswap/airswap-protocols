@@ -93,7 +93,7 @@ contract Pool is IPool, Ownable {
     stakingToken = _stakingToken;
     admins[msg.sender] = true;
 
-    uint256 currentChainId = getChainId();
+    uint256 currentChainId = block.chainid;
     DOMAIN_CHAIN_ID = currentChainId;
     DOMAIN_SEPARATOR = keccak256(
       abi.encode(
@@ -346,17 +346,6 @@ contract Pool is IPool, Ownable {
     uint256 balance = IERC20(token).balanceOf(address(this));
     uint256 divisor = (uint256(10) ** scale) + score;
     return (max * score * balance) / divisor / 100;
-  }
-
-  /**
-   * @notice Returns the current chainId using the chainid opcode
-   * @return id uint256 The chain id
-   */
-  function getChainId() public view returns (uint256 id) {
-    // no-inline-assembly
-    assembly {
-      id := chainid()
-    }
   }
 
   /**
