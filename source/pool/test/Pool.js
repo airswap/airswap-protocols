@@ -19,7 +19,6 @@ describe('Pool Unit', () => {
   let bob
   let stakeContract
 
-  const CHAIN_ID = 31337
   const CLAIM_SCALE = 10
   const CLAIM_MAX = 50
 

@@ -16,33 +16,6 @@ import "./interfaces/IPool.sol";
 contract Pool is IPool, Ownable {
   using SafeERC20 for IERC20;
 
-  bytes32 public constant DOMAIN_TYPEHASH =
-    keccak256(
-      abi.encodePacked(
-        "EIP712Domain(",
-        "string name,",
-        "string version,",
-        "uint256 chainId,",
-        "address verifyingContract",
-        ")"
-      )
-    );
-
-  bytes32 public constant CLAIM_TYPEHASH =
-    keccak256(
-      abi.encodePacked(
-        "Claim(",
-        "uint256 nonce,",
-        "uint256 expiry,",
-        "address participant,",
-        "uint256 score",
-        ")"
-      )
-    );
-
-  string public constant DOMAIN_NAME = "POOL";
-  string public constant DOMAIN_VERSION = "4";
-
   uint256 internal constant MAX_PERCENTAGE = 100;
   uint256 internal constant MAX_SCALE = 77;
 
