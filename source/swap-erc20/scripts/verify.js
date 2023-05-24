@@ -3,7 +3,7 @@ const { ethers, run } = require('hardhat')
 const stakingDeploys = require('@airswap/staking/deploys.js')
 const poolDeploys = require('@airswap/pool/deploys.js')
 const { chainNames } = require('@airswap/constants')
-const swapDeploys = require('../deploys.js')
+const swapERC20Deploys = require('../deploys.js')
 
 async function main() {
   await run('compile')
@@ -20,7 +20,7 @@ async function main() {
 
   console.log(`Verifying on ${chainNames[chainId].toUpperCase()}`)
   await run('verify:verify', {
-    address: swapDeploys[chainId],
+    address: swapERC20Deploys[chainId],
     constructorArguments: [
       protocolFee,
       protocolFeeLight,

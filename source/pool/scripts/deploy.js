@@ -10,16 +10,21 @@ const poolDeploys = require('../deploys.js')
 async function main() {
   await run('compile')
   const [deployer] = await ethers.getSigners()
-  console.log(`Deployer: ${deployer.address}`)
-
-  const chainId = await deployer.getChainId()
   const gasPrice = await deployer.getGasPrice()
+  const chainId = await deployer.getChainId()
+  if (chainId === ChainIds.HARDHAT) {
+    console.log('Value for --network flag is required')
+    return
+  }
+  console.log(`Deployer: ${deployer.address}`)
+  console.log(`Network: ${chainNames[chainId].toUpperCase()}`)
+  console.log(`Gas price: ${gasPrice / 10 ** 9} gwei\n`)
+
   const scale = 10
   const max = 100
   const stakingContract = stakingDeploys[chainId]
   const stakingToken = stakingTokenAddresses[chainId]
 
-  console.log(`Deploying on ${chainNames[chainId].toUpperCase()}`)
   console.log(`Staking token: ${stakingToken}`)
   console.log(`Staking contract: ${stakingContract}`)
   console.log(`Gas price: ${gasPrice / 10 ** 9} gwei`)

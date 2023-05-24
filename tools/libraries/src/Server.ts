@@ -20,10 +20,9 @@ import {
   ServerOptions,
   OrderResponse,
   SupportedProtocolInfo,
-  RequestFilterERC20,
+  OrderFilter,
   SortOrder,
   SortField,
-  RequestFilter,
 } from '@airswap/types'
 import { ChainIds, Protocols, protocolNames } from '@airswap/constants'
 
@@ -298,26 +297,13 @@ export class Server extends TypedEmitter<ServerEvents> {
     }
   }
 
-  public async getOrdersERC20(): Promise<OrderResponse<FullOrderERC20>> {
-    try {
-      return Promise.resolve(
-        (await this.httpCall('getOrdersERC20', [
-          {},
-        ])) as OrderResponse<FullOrderERC20>
-      )
-    } catch (err) {
-      return Promise.reject(err)
-    }
-  }
-
-  public async getOrdersERC20By(
-    requestFilter: RequestFilterERC20,
-    filters = false
+  public async getOrdersERC20(
+    orderFilter: OrderFilter
   ): Promise<OrderResponse<FullOrderERC20>> {
     try {
       return Promise.resolve(
         (await this.httpCall('getOrdersERC20', [
-          { ...this.toBigIntJson(requestFilter), filters },
+          { ...this.toBigIntJson(orderFilter) },
         ])) as OrderResponse<FullOrderERC20>
       )
     } catch (err) {
@@ -338,23 +324,13 @@ export class Server extends TypedEmitter<ServerEvents> {
     }
   }
 
-  public async getOrders(): Promise<OrderResponse<FullOrder>> {
-    try {
-      return Promise.resolve(
-        (await this.httpCall('getOrders', [{}])) as OrderResponse<FullOrder>
-      )
-    } catch (err) {
-      return Promise.reject(err)
-    }
-  }
-
-  public async getOrdersBy(
-    requestFilter: RequestFilter
+  public async getOrders(
+    orderFilter: OrderFilter
   ): Promise<OrderResponse<FullOrder>> {
     try {
       return Promise.resolve(
         (await this.httpCall('getOrders', [
-          { ...requestFilter },
+          { ...this.toBigIntJson(orderFilter) },
         ])) as OrderResponse<FullOrder>
       )
     } catch (err) {
@@ -573,9 +549,9 @@ export class Server extends TypedEmitter<ServerEvents> {
     }
   }
 
-  private toBigIntJson(requestFilter: RequestFilterERC20) {
+  private toBigIntJson(OrderFilter: OrderFilter) {
     return JSON.parse(
-      JSON.stringify(requestFilter, (key, value) =>
+      JSON.stringify(OrderFilter, (key, value) =>
         typeof value === 'bigint' ? value.toString() : value
       )
     )

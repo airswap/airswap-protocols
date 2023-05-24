@@ -68,7 +68,6 @@ function mockHttpServer(api) {
           senderAmount: params.senderAmount,
           senderWallet: params.senderWallet,
         })
-        console.log(params.proxyingFor)
         break
       case 'getOrdersERC20':
         const unsignedOrderERC20 = createOrderERC20({})
@@ -92,8 +91,8 @@ function mockHttpServer(api) {
         }
         break
       case 'getOrders':
-        if (params[0]['page']) {
-          expect(params[0]['page']).to.equal(1)
+        if (params[0]['offset']) {
+          expect(params[0]['page']).to.equal(0)
           expect(params[0]['signerAddress']).to.equal(ADDRESS_ZERO)
         }
         res = await forgeFullOrder()
@@ -143,23 +142,21 @@ describe('HTTPServer', () => {
     .nock('https://' + URL, mockHttpServer)
     .it('Server getOrdersERC20()', async () => {
       const server = await Server.at(URL)
-      const result = await server.getOrdersERC20()
+      const result = await server.getOrdersERC20({
+        signerWallet: ADDRESS_ZERO,
+        offset: 0,
+        limit: 100,
+      })
       expect(isValidFullOrderERC20(result.orders[0].order)).to.be.true
     })
   fancy
     .nock('https://' + URL, mockHttpServer)
     .it('Server getOrders()', async () => {
       const server = await Server.at(URL)
-      const result = await server.getOrders()
-      expect(isValidFullOrder(result.orders[0].order)).to.be.true
-    })
-  fancy
-    .nock('https://' + URL, mockHttpServer)
-    .it('Server getOrdersBy()', async () => {
-      const server = await Server.at(URL)
-      const result = await server.getOrdersBy({
-        page: 1,
-        signerAddress: ADDRESS_ZERO,
+      const result = await server.getOrders({
+        signerWallet: ADDRESS_ZERO,
+        offset: 0,
+        limit: 100,
       })
       expect(isValidFullOrder(result.orders[0].order)).to.be.true
     })
