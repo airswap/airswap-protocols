@@ -6,7 +6,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
-import "@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
 import "@airswap/staking/contracts/interfaces/IStaking.sol";
 import "./interfaces/IPool.sol";
 
@@ -14,7 +13,7 @@ import "./interfaces/IPool.sol";
  * @title AirSwap: Rewards Pool
  * @notice https://www.airswap.io/
  */
-contract Pool is IPool, Ownable, EIP712 {
+contract Pool is IPool, Ownable {
   using SafeERC20 for IERC20;
 
   bytes32 public constant DOMAIN_TYPEHASH =
@@ -83,7 +82,7 @@ contract Pool is IPool, Ownable, EIP712 {
     uint256 _max,
     address _stakingContract,
     address _stakingToken
-  ) EIP712(DOMAIN_NAME, DOMAIN_VERSION) {
+  ) {
     if (_max > MAX_PERCENTAGE) revert MaxTooHigh(_max);
     if (_scale > MAX_SCALE) revert ScaleTooHigh(_scale);
     scale = _scale;
