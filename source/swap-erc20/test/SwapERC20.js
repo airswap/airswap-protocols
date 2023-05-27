@@ -9,7 +9,6 @@ const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
 const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
 const STAKING = require('@airswap/staking/build/contracts/Staking.sol/Staking.json')
-const { BigNumber } = require('ethers')
 
 describe('SwapERC20 Unit', () => {
   let snapshotId
