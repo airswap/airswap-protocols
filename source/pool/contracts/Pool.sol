@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.17;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/access/Ownable2Step.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
@@ -13,7 +13,7 @@ import "./interfaces/IPool.sol";
  * @title AirSwap: Rewards Pool
  * @notice https://www.airswap.io/
  */
-contract Pool is IPool, Ownable {
+contract Pool is IPool, Ownable2Step {
   using SafeERC20 for IERC20;
 
   uint256 internal constant MAX_PERCENTAGE = 100;
