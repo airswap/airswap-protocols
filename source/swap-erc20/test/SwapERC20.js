@@ -9,6 +9,7 @@ const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
 const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
 const STAKING = require('@airswap/staking/build/contracts/Staking.sol/Staking.json')
+const { BigNumber } = require('ethers')
 
 describe('SwapERC20 Unit', () => {
   let snapshotId
@@ -365,6 +366,17 @@ describe('SwapERC20 Unit', () => {
       )
     })
 
+    it('test swaps gas consumption', async () => {
+      const order = await createSignedOrderERC20({}, signer)
+
+      let transaction = await swap
+        .connect(sender)
+        .swap(sender.address, ...order)
+      const swapReceipt = await transaction.wait()
+      const swapCost = swapReceipt.gasUsed
+      expect(Number(swapCost)).to.be.lessThanOrEqual(115799)
+    })
+
     it('test swaps by signer instead of authorized signatory fail', async () => {
       const order = await createSignedOrderERC20(
         {
@@ -555,6 +567,21 @@ describe('SwapERC20 Unit', () => {
         'SwapERC20'
       )
     })
+
+    it('test swapLigt gas consumption', async () => {
+      const order = await createSignedOrderERC20(
+        {
+          protocolFee: PROTOCOL_FEE_LIGHT,
+        },
+        signer
+      )
+
+      let transaction = await swap.connect(sender).swapLight(...order)
+      const swapLightReceipt = await transaction.wait()
+      const swapLightCost = swapLightReceipt.gasUsed
+      expect(Number(swapLightCost)).to.be.lessThanOrEqual(95223)
+    })
+
     it('test light swaps with authorized', async () => {
       const order = await createSignedOrderERC20(
         {
