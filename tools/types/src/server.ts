@@ -55,13 +55,10 @@ export type IndexedOrder<Type> = {
 export type OrderResponse<Type> = {
   orders: Record<string, IndexedOrder<Type>>
   pagination: Pagination
-  filters?: FiltersResponse | undefined
-  ordersForQuery: number
 }
 
 export type Pagination = {
-  first: string
-  last: string
-  prev?: string | undefined
-  next?: string | undefined
+  limit: number
+  offset: number
+  resultsForQuery: number
 }
