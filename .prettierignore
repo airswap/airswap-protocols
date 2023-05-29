@@ -3,4 +3,4 @@ node_modules/
 coverage/
 typechain/
 cache/
-**/*/coverage.json
+**/coverage.json
