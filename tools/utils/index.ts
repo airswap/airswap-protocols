@@ -2,7 +2,6 @@ import { ethers, BigNumber as BigNumberEthers } from 'ethers'
 import * as url from 'url'
 import { explorerUrls } from '@airswap/constants'
 
-export * from './src/pool'
 export * from './src/pricing'
 export * from './src/swap'
 export * from './src/swapERC20'
