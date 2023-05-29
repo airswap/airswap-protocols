@@ -567,7 +567,7 @@ describe('SwapERC20 Unit', () => {
       )
     })
 
-    it('test swapLigt gas consumption', async () => {
+    it('test swapLight gas consumption', async () => {
       const order = await createSignedOrderERC20(
         {
           protocolFee: PROTOCOL_FEE_LIGHT,
@@ -575,7 +575,7 @@ describe('SwapERC20 Unit', () => {
         signer
       )
 
-      let transaction = await swap.connect(sender).swapLight(...order)
+      const transaction = await swap.connect(sender).swapLight(...order)
       const swapLightReceipt = await transaction.wait()
       const swapLightCost = swapLightReceipt.gasUsed
       expect(Number(swapLightCost)).to.be.lessThanOrEqual(95223)
