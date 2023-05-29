@@ -424,7 +424,7 @@ describe('Registry Unit', () => {
 
   describe('Test Zero Amount Transfer', async () => {
     beforeEach(async () => {
-      let zero_cost = '0'
+      const zero_cost = '0'
       registryZeroCost = await registryFactory.deploy(
         stakingToken.address,
         zero_cost,
