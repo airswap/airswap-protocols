@@ -26,11 +26,8 @@ interface IPool {
   error AdminNotSet(address);
   error AlreadyClaimed();
   error AmountInsufficient(uint256);
-  error ChainChanged(uint256);
   error ClaimsNotProvided();
-  error ExpiryPassed();
   error MaxTooHigh(uint256);
-  error NonceAlreadyUsed(uint256);
   error ProofInvalid(bytes32[]);
   error ScaleTooHigh(uint256);
   error ScoreNotProvided(uint256);
