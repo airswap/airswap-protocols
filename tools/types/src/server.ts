@@ -14,6 +14,7 @@ export enum SortField {
   SIGNER_AMOUNT = 'SIGNER_AMOUNT',
   SENDER_AMOUNT = 'SENDER_AMOUNT',
   EXPIRY = 'EXPIRY',
+  NONCE = 'NONCE',
 }
 
 export enum SortOrder {
@@ -22,18 +23,20 @@ export enum SortOrder {
 }
 
 export type OrderFilter = {
-  signerWallet?: string
-  signerMinAmount?: string
-  signerMaxAmount?: string
-  signerTokens?: string[]
-  senderWallet?: string
-  senderMinAmount?: string
+  orderNonce?: string
   senderMaxAmount?: string
+  senderMinAmount?: string
   senderTokens?: string[]
+  senderWallet?: string
+  signerMaxAmount?: string
+  signerMinAmount?: string
+  signerTokens?: string[]
+  signerWallet?: string
   sortField?: SortField
   sortOrder?: SortOrder
-  offset: number
+  tokenIds?: string[]
   limit: number
+  offset: number
 }
 
 export type FiltersResponse = {
