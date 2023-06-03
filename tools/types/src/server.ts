@@ -39,16 +39,6 @@ export type OrderFilter = {
   offset: number
 }
 
-export type FiltersResponse = {
-  signerToken: Record<string, AmountLimitFilterResponse>
-  senderToken: Record<string, AmountLimitFilterResponse>
-}
-
-export type AmountLimitFilterResponse = {
-  min: string
-  max: string
-}
-
 export type IndexedOrder<Type> = {
   hash?: string | undefined
   order: Type
