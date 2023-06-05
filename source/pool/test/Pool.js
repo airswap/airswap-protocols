@@ -168,11 +168,14 @@ describe('Pool Unit', () => {
   })
 
   describe('Test staking variables', async () => {
-    it('set stake contract successful', async () => {
-      await pool
-        .connect(deployer)
-        .setStaking(feeToken.address, stakingContract.address)
+    it('set stake token and contract successful', async () => {
+      await expect(
+        pool
+          .connect(deployer)
+          .setStaking(feeToken.address, stakingContract.address)
+      ).to.emit(pool, 'SetStaking')
       expect(await pool.stakingContract()).to.equal(stakingContract.address)
+      expect(await pool.stakingToken()).to.equal(feeToken.address)
     })
 
     it('set stake contract fails when not owner', async () => {
@@ -194,29 +197,6 @@ describe('Pool Unit', () => {
         pool.connect(deployer).setStaking(feeToken.address, ADDRESS_ZERO)
       ).to.be.revertedWith(`AddressInvalid("${ADDRESS_ZERO}")`)
     })
-
-    /*
-    it('set stake token successful', async () => {
-      await feeToken2.mock.approve.returns(true)
-      await feeToken2.mock.allowance.returns(0)
-      await pool.connect(deployer).setStakingToken(feeToken2.address)
-      expect(await pool.stakingToken()).to.equal(feeToken2.address)
-    })
-
-    it('set stake contract fails when not owner', async () => {
-      await feeToken2.mock.approve.returns(true)
-      await feeToken2.mock.allowance.returns(0)
-      await expect(
-        pool.connect(alice).setStakingToken(feeToken2.address)
-      ).to.be.revertedWith('Ownable: caller is not the owner')
-    })
-
-    it('set stake token reverts', async () => {
-      await expect(
-        pool.connect(deployer).setStakingToken(ADDRESS_ZERO)
-      ).to.be.revertedWith(`AddressInvalid("${ADDRESS_ZERO}")`)
-    })
-    */
   })
 
   describe('Test withdraw', async () => {

@@ -122,6 +122,7 @@ contract Pool is IPool, Ownable2Step {
     stakingContract = _stakingContract;
     stakingToken = _stakingToken;
     IERC20(stakingToken).safeApprove(stakingContract, 2 ** 256 - 1);
+    emit SetStaking(_stakingToken, _stakingContract);
   }
 
   /**
