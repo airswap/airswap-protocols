@@ -151,13 +151,14 @@ describe('Registry Unit', () => {
   })
 
   describe('supported protocols', async () => {
-    it('add an empty list of protocols fails', async () => {
+    it('fails to add an empty list of protocols', async () => {
       await expect(
         registry.connect(account1).addProtocols([])
       ).to.be.revertedWith('NoProtocolsToAdd()')
     })
 
     it('add a list of protocols', async () => {
+      await stakingToken.mock.transferFrom.returns(true)
       await expect(
         registry
           .connect(account1)
@@ -199,7 +200,7 @@ describe('Registry Unit', () => {
       expect(protocol3Supported).to.equal(true)
     })
 
-    it('add a list of duplicate protocols fails', async () => {
+    it('fails to add a list of duplicate protocols', async () => {
       await expect(
         registry
           .connect(account1)
@@ -207,20 +208,22 @@ describe('Registry Unit', () => {
       ).to.be.revertedWith(`ProtocolExists("${protocol1}")`)
     })
 
-    it('add a duplicate token', async () => {
+    it('fails to add a duplicate protocol', async () => {
+      await stakingToken.mock.transferFrom.returns(true)
       await registry.connect(account1).addProtocols([protocol1, protocol2])
       await expect(
         registry.connect(account1).addProtocols([protocol1])
       ).to.be.revertedWith(`ProtocolExists("${protocol1}")`)
     })
 
-    it('remove an empty list of protocols fails', async () => {
+    it('fails to remove an empty list of protocols', async () => {
       await expect(
         registry.connect(account1).removeProtocols([])
       ).to.be.revertedWith('NoProtocolsToRemove()')
     })
 
     it('remove a list of protocols', async () => {
+      await stakingToken.mock.transferFrom.returns(true)
       await registry
         .connect(account1)
         .addProtocols([protocol1, protocol2, protocol3])
@@ -260,7 +263,8 @@ describe('Registry Unit', () => {
       expect(protocol3Supported).to.equal(false)
     })
 
-    it('remove a list of duplicate protocols fails', async () => {
+    it('fails to remove a list of duplicate protocols', async () => {
+      await stakingToken.mock.transferFrom.returns(true)
       await registry
         .connect(account1)
         .addProtocols([protocol1, protocol2, protocol3])
@@ -272,7 +276,8 @@ describe('Registry Unit', () => {
       ).to.be.revertedWith(`ProtocolDoesNotExist("${protocol1}")`)
     })
 
-    it('remove a token already removed fails', async () => {
+    it('fails to remove a protocol already removed', async () => {
+      await stakingToken.mock.transferFrom.returns(true)
       await registry
         .connect(account1)
         .addProtocols([protocol1, protocol2, protocol3])
@@ -288,7 +293,7 @@ describe('Registry Unit', () => {
   })
 
   describe('supported tokens', async () => {
-    it('add an empty list of tokens fails', async () => {
+    it('fails to add an empty list of tokens', async () => {
       await expect(registry.connect(account1).addTokens([])).to.be.revertedWith(
         'NoTokensToAdd()'
       )
@@ -350,7 +355,7 @@ describe('Registry Unit', () => {
       ).to.be.revertedWith('SafeERC20: ERC20 operation did not succeed')
     })
 
-    it('add a list of duplicate tokens fails', async () => {
+    it('fails to add a list of duplicate tokens', async () => {
       await stakingToken.mock.transferFrom.returns(true)
       await expect(
         registry
@@ -359,7 +364,7 @@ describe('Registry Unit', () => {
       ).to.be.revertedWith(`TokenExists("${token1.address}")`)
     })
 
-    it('add a duplicate token', async () => {
+    it('fails to add a duplicate token', async () => {
       await stakingToken.mock.transferFrom.returns(true)
       await registry
         .connect(account1)
@@ -369,7 +374,7 @@ describe('Registry Unit', () => {
       ).to.be.revertedWith(`TokenExists("${token1.address}")`)
     })
 
-    it('remove an empty list of tokens fails', async () => {
+    it('fails to remove an empty list of tokens', async () => {
       await expect(
         registry.connect(account1).removeTokens([])
       ).to.be.revertedWith('NoTokensToRemove()')
@@ -467,7 +472,7 @@ describe('Registry Unit', () => {
       expect(token3Stakers.length).to.equal(0)
     })
 
-    it('remove a list of duplicate tokens fails', async () => {
+    it('fails to remove a list of duplicate tokens', async () => {
       await stakingToken.mock.transfer.returns(true)
       await stakingToken.mock.transferFrom.returns(true)
       await registry
@@ -481,7 +486,7 @@ describe('Registry Unit', () => {
       ).to.be.revertedWith(`TokenDoesNotExist("${token1.address}")`)
     })
 
-    it('remove a token already removed fails', async () => {
+    it('fails to remove a token already removed', async () => {
       await stakingToken.mock.transfer.returns(true)
       await stakingToken.mock.transferFrom.returns(true)
       await registry
@@ -534,12 +539,33 @@ describe('Registry Unit', () => {
   })
 
   describe('Balance Of', async () => {
-    it('verify expected balance when a user has no tokens', async () => {
+    it('verify balance without a staked server', async () => {
       const balance = await registry.balanceOf(account1.address)
       expect(balance).to.equal(0)
     })
 
-    it('verify expected staking balance after a user has added tokens', async () => {
+    it('verify balance after adding protocols', async () => {
+      await stakingToken.mock.transferFrom.returns(true)
+      await registry.connect(account1).stakeForServer('maker1.com')
+      await registry.connect(account1).addProtocols([protocol1, protocol2])
+
+      const balance = await registry.balanceOf(account1.address)
+      expect(balance).to.equal(STAKING_COST + SUPPORT_COST * 2)
+    })
+
+    it('verify balance after removing protocols', async () => {
+      await stakingToken.mock.transfer.returns(true)
+      await stakingToken.mock.transferFrom.returns(true)
+      await registry.connect(account1).stakeForServer('maker1.com')
+      await registry.connect(account1).addProtocols([protocol1, protocol2])
+
+      await registry.connect(account1).removeProtocols([protocol1])
+
+      const balance = await registry.balanceOf(account1.address)
+      expect(balance).to.equal(STAKING_COST + SUPPORT_COST)
+    })
+
+    it('verify balance after adding tokens', async () => {
       await stakingToken.mock.transferFrom.returns(true)
       await registry.connect(account1).stakeForServer('maker1.com')
       await registry
@@ -550,7 +576,7 @@ describe('Registry Unit', () => {
       expect(balance).to.equal(STAKING_COST + SUPPORT_COST * 3)
     })
 
-    it('verify expected staking balance after a user has removed tokens', async () => {
+    it('verify balance after removing tokens', async () => {
       await stakingToken.mock.transfer.returns(true)
       await stakingToken.mock.transferFrom.returns(true)
       await registry.connect(account1).stakeForServer('maker1.com')

@@ -143,7 +143,11 @@ contract Registry {
       if (!_protocolList.add(protocol)) revert ProtocolExists(protocol);
       stakersByProtocol[protocol].add(msg.sender);
     }
+    uint256 _transferAmount = supportCost * _length;
     emit AddProtocols(msg.sender, _protocols);
+    if (_transferAmount > 0) {
+      stakingToken.safeTransferFrom(msg.sender, address(this), _transferAmount);
+    }
   }
 
   /**
