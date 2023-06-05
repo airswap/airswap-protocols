@@ -44,9 +44,7 @@ interface IPool {
 
   function removeAdmin(address _admin) external;
 
-  function setStakingContract(address _stakingContract) external;
-
-  function setStakingToken(address _stakingToken) external;
+  function setStaking(address _stakingToken, address _stakingContract) external;
 
   function setClaimed(bytes32 root, address[] memory accounts) external;
 
