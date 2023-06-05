@@ -129,7 +129,7 @@ describe('Pool Unit', () => {
       await pool.addAdmin(alice.address)
       const root = getRoot(tree)
       await pool.connect(alice).setClaimed(root, [bob.address])
-      let proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
+      const proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
 
       await expect(
         pool.connect(bob).withdraw(
@@ -227,7 +227,7 @@ describe('Pool Unit', () => {
       await pool.addAdmin(alice.address)
       const root = getRoot(tree)
       await pool.connect(alice).enable(root)
-      let proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
+      const proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
 
       await expect(
         pool.connect(bob).withdraw(
@@ -268,7 +268,7 @@ describe('Pool Unit', () => {
 
       await pool.addAdmin(alice.address)
       const root = getRoot(tree)
-      let proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
+      const proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
 
       await expect(
         pool.connect(bob).withdraw(
@@ -294,7 +294,7 @@ describe('Pool Unit', () => {
       await pool.addAdmin(alice.address)
       const root = getRoot(tree)
       await pool.connect(alice).enable(root)
-      let proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
+      const proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
 
       await expect(
         pool.connect(bob).withdraw(
@@ -332,7 +332,7 @@ describe('Pool Unit', () => {
       await pool.addAdmin(alice.address)
       const root = getRoot(tree)
       await pool.connect(alice).enable(root)
-      let proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
+      const proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
 
       await expect(
         pool.connect(bob).withdraw(
@@ -358,7 +358,7 @@ describe('Pool Unit', () => {
       await pool.addAdmin(alice.address)
       const root = getRoot(tree)
       await pool.connect(alice).enable(root)
-      let proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
+      const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
 
       const withdrawMinimum = 0
 
@@ -388,7 +388,7 @@ describe('Pool Unit', () => {
       await pool.addAdmin(alice.address)
       const root = getRoot(tree)
       await pool.connect(alice).enable(root)
-      let proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
+      const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
       const withdrawMinimum = 496
 
       const amount = await pool
@@ -420,7 +420,7 @@ describe('Pool Unit', () => {
       await pool.addAdmin(alice.address)
       const root = getRoot(tree)
       await pool.connect(alice).enable(root)
-      let proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
+      const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
 
       const withdrawMinimum = 496
 
@@ -447,7 +447,7 @@ describe('Pool Unit', () => {
       await pool.addAdmin(alice.address)
       const root = getRoot(tree)
       await pool.connect(alice).enable(root)
-      let proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
+      const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
 
       const withdrawMinimum = 0
 
@@ -481,7 +481,7 @@ describe('Pool Unit', () => {
       await pool.addAdmin(alice.address)
       const root = getRoot(tree)
       await pool.connect(alice).enable(root)
-      let proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
+      const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
 
       const withdrawMinimum = 0
 
@@ -509,7 +509,7 @@ describe('Pool Unit', () => {
       await pool.addAdmin(alice.address)
       const root = getRoot(tree)
       await pool.connect(alice).enable(root)
-      let proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
+      const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
 
       const withdrawMinimum = 0
 
@@ -539,7 +539,7 @@ describe('Pool Unit', () => {
       await pool.addAdmin(alice.address)
       const root = getRoot(tree)
       await pool.connect(alice).enable(root)
-      let proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
+      const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
 
       const withdrawMinimum = 0
 
@@ -574,7 +574,7 @@ describe('Pool Unit', () => {
       await pool.addAdmin(alice.address)
       const root = getRoot(tree)
       await pool.connect(alice).enable(root)
-      let proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
+      const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
 
       const isValid = await pool.verify(alice.address, root, ALICE_SCORE, proof)
       expect(isValid).to.be.equal(true)
@@ -584,7 +584,7 @@ describe('Pool Unit', () => {
       await pool.addAdmin(alice.address)
       const root = getRoot(tree)
       await pool.connect(alice).enable(root)
-      let proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
+      const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
 
       const isValid = await pool.verify(bob.address, root, ALICE_SCORE, proof)
       expect(isValid).to.be.equal(false)
@@ -594,7 +594,7 @@ describe('Pool Unit', () => {
       await pool.addAdmin(alice.address)
       const root = getRoot(tree)
       await pool.connect(alice).enable(root)
-      let proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
+      const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
 
       const isValid = await pool.verify(alice.address, root, BOB_SCORE, proof)
       expect(isValid).to.be.equal(false)
