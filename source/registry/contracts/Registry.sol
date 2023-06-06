@@ -45,7 +45,7 @@ contract Registry {
   error ProtocolExists(bytes4);
   error TokenDoesNotExist(address);
   error TokenExists(address);
-  error URLInvalid();
+  error ServerURLInvalid();
 
   /**
    * @notice Constructor
@@ -68,7 +68,7 @@ contract Registry {
    * @param _url string value of the URL
    */
   function stakeForServer(string calldata _url) external {
-    if (bytes(_url).length == 0) revert URLInvalid();
+    if (bytes(_url).length == 0) revert ServerURLInvalid();
 
     if (bytes(stakerServerURLs[msg.sender]).length == 0 && stakingCost > 0) {
       stakingToken.safeTransferFrom(msg.sender, address(this), stakingCost);

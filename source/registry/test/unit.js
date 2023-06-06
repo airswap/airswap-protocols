@@ -57,7 +57,7 @@ describe('Registry Unit', () => {
     it('fails for bad url', async () => {
       await expect(
         registry.connect(account1).stakeForServer('')
-      ).to.be.revertedWith('URLInvalid')
+      ).to.be.revertedWith('ServerURLInvalid')
     })
 
     it('successful setting of url', async () => {
