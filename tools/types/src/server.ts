@@ -34,7 +34,8 @@ export type OrderFilter = {
   signerWallet?: string
   sortField?: SortField
   sortOrder?: SortOrder
-  tokenIds?: string[]
+  senderIds?: string[]
+  signerIds?: string[]
   limit: number
   offset: number
 }
