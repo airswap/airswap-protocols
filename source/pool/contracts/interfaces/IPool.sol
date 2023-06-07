@@ -31,7 +31,6 @@ interface IPool {
   error MaxTooHigh(uint256);
   error ProofInvalid(bytes32[]);
   error ScaleTooHigh(uint256);
-  error ScoreNotProvided(uint256);
   error RootDisabled(bytes32);
   error RootExists(bytes32);
   error TokenInvalid(address);
