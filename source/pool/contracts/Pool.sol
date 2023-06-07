@@ -34,9 +34,6 @@ contract Pool is IPool, Ownable2Step {
   // Mapping of tree root to account to mark as claimed
   mapping(bytes32 => mapping(address => bool)) public claimed;
 
-  // Mapping of signed hash to boolean to mark as claimed
-  mapping(bytes32 => bool) public hashClaimed;
-
   // Staking contract address
   address public stakingContract;
 
@@ -47,24 +44,12 @@ contract Pool is IPool, Ownable2Step {
    * @notice Constructor
    * @param _scale uint256
    * @param _max uint256
-   * @param _stakingContract address
-   * @param _stakingToken address
    */
-  constructor(
-    uint256 _scale,
-    uint256 _max,
-    address _stakingContract,
-    address _stakingToken
-  ) {
+  constructor(uint256 _scale, uint256 _max) {
     if (_max > MAX_PERCENTAGE) revert MaxTooHigh(_max);
     if (_scale > MAX_SCALE) revert ScaleTooHigh(_scale);
     scale = _scale;
     max = _max;
-    stakingContract = _stakingContract;
-    stakingToken = _stakingToken;
-    admins[msg.sender] = true;
-
-    IERC20(stakingToken).safeApprove(stakingContract, 2 ** 256 - 1);
   }
 
   /**
@@ -124,27 +109,20 @@ contract Pool is IPool, Ownable2Step {
    * @dev Only owner
    * @param _stakingContract address
    */
-  function setStakingContract(
+  function setStaking(
+    address _stakingToken,
     address _stakingContract
   ) external override onlyOwner {
     if (_stakingContract == address(0)) revert AddressInvalid(_stakingContract);
-    // set allowance on old staking contract to zero
-    IERC20(stakingToken).safeApprove(stakingContract, 0);
-    stakingContract = _stakingContract;
-    IERC20(stakingToken).safeApprove(stakingContract, 2 ** 256 - 1);
-  }
-
-  /**
-   * @notice Set staking token address
-   * @dev Only owner
-   * @param _stakingToken address
-   */
-  function setStakingToken(address _stakingToken) external override onlyOwner {
     if (_stakingToken == address(0)) revert AddressInvalid(_stakingToken);
-    // set allowance on old staking token to zero
-    IERC20(stakingToken).safeApprove(stakingContract, 0);
+    if (stakingToken != address(0) && stakingContract != address(0)) {
+      // set allowance on old staking token to zero
+      IERC20(stakingToken).safeApprove(stakingContract, 0);
+    }
+    stakingContract = _stakingContract;
     stakingToken = _stakingToken;
     IERC20(stakingToken).safeApprove(stakingContract, 2 ** 256 - 1);
+    emit SetStaking(_stakingToken, _stakingContract);
   }
 
   /**

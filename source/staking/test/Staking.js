@@ -398,7 +398,7 @@ describe('Staking Unit', () => {
       await token.mock.transfer.returns(true)
       await staking.connect(account1).stake('100')
 
-      let block = await ethers.provider.getBlock()
+      const block = await ethers.provider.getBlock()
       await ethers.provider.send('evm_mine', [block['timestamp'] + 10])
 
       await staking.connect(account1).unstake('10')
@@ -411,7 +411,7 @@ describe('Staking Unit', () => {
       await token.mock.transfer.returns(true)
       await staking.connect(account1).stake('100')
 
-      let block = await ethers.provider.getBlock()
+      const block = await ethers.provider.getBlock()
       // With a duration of 100, increasing the timestamp by 10 will unlock 10% of the staked balance
       await ethers.provider.send('evm_mine', [block['timestamp'] + 10])
 

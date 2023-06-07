@@ -14,6 +14,7 @@ interface IPool {
   event Enable(bytes32);
   event SetMax(uint256 max);
   event SetScale(uint256 scale);
+  event SetStaking(address stakingToken, address stakigContract);
   event RemoveAdmin(address admin);
   event Withdraw(
     bytes32[] roots,
@@ -44,9 +45,7 @@ interface IPool {
 
   function removeAdmin(address _admin) external;
 
-  function setStakingContract(address _stakingContract) external;
-
-  function setStakingToken(address _stakingToken) external;
+  function setStaking(address _stakingToken, address _stakingContract) external;
 
   function setClaimed(bytes32 root, address[] memory accounts) external;
 

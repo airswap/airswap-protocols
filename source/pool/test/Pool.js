@@ -17,7 +17,7 @@ describe('Pool Unit', () => {
   let deployer
   let alice
   let bob
-  let stakeContract
+  let stakingContract
 
   const CLAIM_SCALE = 10
   const CLAIM_MAX = 50
@@ -59,15 +59,18 @@ describe('Pool Unit', () => {
     await feeToken.mock.allowance.returns(0)
     feeToken2 = await deployMockContract(deployer, IERC20.abi)
 
-    stakeContract = await (
+    stakingContract = await (
       await ethers.getContractFactory(STAKING.abi, STAKING.bytecode)
     ).deploy('StakedAST', 'sAST', feeToken.address, 100, 10)
-    await stakeContract.deployed()
+    await stakingContract.deployed()
 
     pool = await (
       await ethers.getContractFactory('Pool')
-    ).deploy(CLAIM_SCALE, CLAIM_MAX, stakeContract.address, feeToken.address)
+    ).deploy(CLAIM_SCALE, CLAIM_MAX)
     await pool.deployed()
+
+    await pool.setStaking(feeToken.address, stakingContract.address)
+    await pool.addAdmin(deployer.address)
 
     tree = generateTreeFromData({
       [alice.address]: ALICE_SCORE,
@@ -80,31 +83,21 @@ describe('Pool Unit', () => {
     it('constructor sets values', async () => {
       const storedScale = await pool.scale()
       const storedMax = await pool.max()
-      const stakingContract = await pool.stakingContract()
-      const stakingToken = await pool.stakingToken()
-      const adminOwner = await pool.admins(deployer.address)
       expect(storedScale).to.equal(CLAIM_SCALE)
       expect(storedMax).to.equal(CLAIM_MAX)
-      expect(stakingContract).to.equal(stakeContract.address)
-      expect(stakingToken).to.equal(feeToken.address)
-      expect(adminOwner).to.equal(true)
     })
 
     it('constructor reverts when percentage is too high', async () => {
       const max = 101
       await expect(
-        (
-          await ethers.getContractFactory('Pool')
-        ).deploy(CLAIM_SCALE, max, stakeContract.address, feeToken.address)
+        (await ethers.getContractFactory('Pool')).deploy(CLAIM_SCALE, max)
       ).to.be.revertedWith(`MaxTooHigh(${max})`)
     })
 
     it('constructor reverts when scale is too high', async () => {
       const scale = 78
       await expect(
-        (
-          await ethers.getContractFactory('Pool')
-        ).deploy(scale, CLAIM_MAX, stakeContract.address, feeToken.address)
+        (await ethers.getContractFactory('Pool')).deploy(scale, CLAIM_MAX)
       ).to.be.revertedWith(`ScaleTooHigh(${scale})`)
     })
   })
@@ -136,7 +129,7 @@ describe('Pool Unit', () => {
       await pool.addAdmin(alice.address)
       const root = getRoot(tree)
       await pool.connect(alice).setClaimed(root, [bob.address])
-      let proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
+      const proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
 
       await expect(
         pool.connect(bob).withdraw(
@@ -175,41 +168,33 @@ describe('Pool Unit', () => {
   })
 
   describe('Test staking variables', async () => {
-    it('set stake contract successful', async () => {
-      await pool.connect(deployer).setStakingContract(stakeContract.address)
-      expect(await pool.stakingContract()).to.equal(stakeContract.address)
+    it('set stake token and contract successful', async () => {
+      await expect(
+        pool
+          .connect(deployer)
+          .setStaking(feeToken.address, stakingContract.address)
+      ).to.emit(pool, 'SetStaking')
+      expect(await pool.stakingContract()).to.equal(stakingContract.address)
+      expect(await pool.stakingToken()).to.equal(feeToken.address)
     })
 
     it('set stake contract fails when not owner', async () => {
       await expect(
-        pool.connect(alice).setStakingContract(stakeContract.address)
+        pool
+          .connect(alice)
+          .setStaking(feeToken.address, stakingContract.address)
       ).to.be.revertedWith('Ownable: caller is not the owner')
     })
 
-    it('set stake contract reverts', async () => {
+    it('set stake contract with bad token address reverts', async () => {
       await expect(
-        pool.connect(deployer).setStakingContract(ADDRESS_ZERO)
+        pool.connect(deployer).setStaking(ADDRESS_ZERO, stakingContract.address)
       ).to.be.revertedWith(`AddressInvalid("${ADDRESS_ZERO}")`)
     })
 
-    it('set stake token successful', async () => {
-      await feeToken2.mock.approve.returns(true)
-      await feeToken2.mock.allowance.returns(0)
-      await pool.connect(deployer).setStakingToken(feeToken2.address)
-      expect(await pool.stakingToken()).to.equal(feeToken2.address)
-    })
-
-    it('set stake contract fails when not owner', async () => {
-      await feeToken2.mock.approve.returns(true)
-      await feeToken2.mock.allowance.returns(0)
+    it('set stake contract with bad contract address reverts', async () => {
       await expect(
-        pool.connect(alice).setStakingToken(feeToken2.address)
-      ).to.be.revertedWith('Ownable: caller is not the owner')
-    })
-
-    it('set stake token reverts', async () => {
-      await expect(
-        pool.connect(deployer).setStakingToken(ADDRESS_ZERO)
+        pool.connect(deployer).setStaking(feeToken.address, ADDRESS_ZERO)
       ).to.be.revertedWith(`AddressInvalid("${ADDRESS_ZERO}")`)
     })
   })
@@ -222,7 +207,7 @@ describe('Pool Unit', () => {
       await pool.addAdmin(alice.address)
       const root = getRoot(tree)
       await pool.connect(alice).enable(root)
-      let proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
+      const proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
 
       await expect(
         pool.connect(bob).withdraw(
@@ -263,7 +248,7 @@ describe('Pool Unit', () => {
 
       await pool.addAdmin(alice.address)
       const root = getRoot(tree)
-      let proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
+      const proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
 
       await expect(
         pool.connect(bob).withdraw(
@@ -289,7 +274,7 @@ describe('Pool Unit', () => {
       await pool.addAdmin(alice.address)
       const root = getRoot(tree)
       await pool.connect(alice).enable(root)
-      let proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
+      const proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
 
       await expect(
         pool.connect(bob).withdraw(
@@ -327,7 +312,7 @@ describe('Pool Unit', () => {
       await pool.addAdmin(alice.address)
       const root = getRoot(tree)
       await pool.connect(alice).enable(root)
-      let proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
+      const proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
 
       await expect(
         pool.connect(bob).withdraw(
@@ -353,7 +338,7 @@ describe('Pool Unit', () => {
       await pool.addAdmin(alice.address)
       const root = getRoot(tree)
       await pool.connect(alice).enable(root)
-      let proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
+      const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
 
       const withdrawMinimum = 0
 
@@ -383,7 +368,7 @@ describe('Pool Unit', () => {
       await pool.addAdmin(alice.address)
       const root = getRoot(tree)
       await pool.connect(alice).enable(root)
-      let proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
+      const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
       const withdrawMinimum = 496
 
       const amount = await pool
@@ -415,7 +400,7 @@ describe('Pool Unit', () => {
       await pool.addAdmin(alice.address)
       const root = getRoot(tree)
       await pool.connect(alice).enable(root)
-      let proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
+      const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
 
       const withdrawMinimum = 496
 
@@ -442,7 +427,7 @@ describe('Pool Unit', () => {
       await pool.addAdmin(alice.address)
       const root = getRoot(tree)
       await pool.connect(alice).enable(root)
-      let proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
+      const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
 
       const withdrawMinimum = 0
 
@@ -463,7 +448,7 @@ describe('Pool Unit', () => {
       const isClaimed = await pool.claimed(root, alice.address)
       expect(isClaimed).to.equal(true)
 
-      const balance = await stakeContract
+      const balance = await stakingContract
         .connect(alice)
         .balanceOf(alice.address)
       expect(balance).to.equal('495')
@@ -476,7 +461,7 @@ describe('Pool Unit', () => {
       await pool.addAdmin(alice.address)
       const root = getRoot(tree)
       await pool.connect(alice).enable(root)
-      let proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
+      const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
 
       const withdrawMinimum = 0
 
@@ -504,7 +489,7 @@ describe('Pool Unit', () => {
       await pool.addAdmin(alice.address)
       const root = getRoot(tree)
       await pool.connect(alice).enable(root)
-      let proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
+      const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
 
       const withdrawMinimum = 0
 
@@ -526,7 +511,7 @@ describe('Pool Unit', () => {
       const isClaimed = await pool.claimed(root, alice.address)
       expect(isClaimed).to.equal(true)
 
-      const balance = await stakeContract.connect(bob).balanceOf(bob.address)
+      const balance = await stakingContract.connect(bob).balanceOf(bob.address)
       expect(balance).to.equal('495')
     })
 
@@ -534,7 +519,7 @@ describe('Pool Unit', () => {
       await pool.addAdmin(alice.address)
       const root = getRoot(tree)
       await pool.connect(alice).enable(root)
-      let proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
+      const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
 
       const withdrawMinimum = 0
 
@@ -569,7 +554,7 @@ describe('Pool Unit', () => {
       await pool.addAdmin(alice.address)
       const root = getRoot(tree)
       await pool.connect(alice).enable(root)
-      let proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
+      const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
 
       const isValid = await pool.verify(alice.address, root, ALICE_SCORE, proof)
       expect(isValid).to.be.equal(true)
@@ -579,7 +564,7 @@ describe('Pool Unit', () => {
       await pool.addAdmin(alice.address)
       const root = getRoot(tree)
       await pool.connect(alice).enable(root)
-      let proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
+      const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
 
       const isValid = await pool.verify(bob.address, root, ALICE_SCORE, proof)
       expect(isValid).to.be.equal(false)
@@ -589,7 +574,7 @@ describe('Pool Unit', () => {
       await pool.addAdmin(alice.address)
       const root = getRoot(tree)
       await pool.connect(alice).enable(root)
-      let proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
+      const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
 
       const isValid = await pool.verify(alice.address, root, BOB_SCORE, proof)
       expect(isValid).to.be.equal(false)
