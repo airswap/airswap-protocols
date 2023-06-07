@@ -368,7 +368,7 @@ describe('SwapERC20 Unit', () => {
     it('test swaps gas consumption', async () => {
       const order = await createSignedOrderERC20({}, signer)
 
-      let transaction = await swap
+      const transaction = await swap
         .connect(sender)
         .swap(sender.address, ...order)
       const swapReceipt = await transaction.wait()

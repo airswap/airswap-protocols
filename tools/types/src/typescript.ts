@@ -103,12 +103,3 @@ export type CollectionTokenInfo = {
   id: number
   uri: string
 } & CollectionTokenMetadata
-
-export type UnsignedClaim = {
-  nonce: string
-  expiry: string
-  participant: string
-  score: string
-}
-
-export type Claim = UnsignedClaim & Signature
