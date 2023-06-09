@@ -54,5 +54,5 @@ export type OrderResponse<Type> = {
 export type Pagination = {
   limit: number
   offset: number
-  totalForQuery: number
+  total: number
 }
