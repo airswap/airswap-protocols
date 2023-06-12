@@ -24,12 +24,12 @@ contract Registry {
   mapping(bytes4 => EnumerableSet.AddressSet) internal stakersByProtocol;
   mapping(address => string) public stakerServerURLs;
 
-  event StakeForServer(address indexed account, string url);
+  event SetServer(address indexed account, string url);
   event AddProtocols(address indexed account, bytes4[] protocols);
   event AddTokens(address indexed account, address[] tokens);
   event RemoveTokens(address indexed account, address[] tokens);
   event RemoveProtocols(address indexed account, bytes4[] protocols);
-  event RemoveStakedServer(
+  event UnsetServer(
     address indexed account,
     string url,
     bytes4[] protocols,
@@ -67,14 +67,14 @@ contract Registry {
    * @notice Stake tokens and set the server URL
    * @param _url string value of the URL
    */
-  function stakeForServer(string calldata _url) external {
+  function setServer(string calldata _url) external {
     if (bytes(_url).length == 0) revert ServerURLInvalid();
 
     if (bytes(stakerServerURLs[msg.sender]).length == 0 && stakingCost > 0) {
       stakingToken.safeTransferFrom(msg.sender, address(this), stakingCost);
     }
     stakerServerURLs[msg.sender] = _url;
-    emit StakeForServer(msg.sender, _url);
+    emit SetServer(msg.sender, _url);
   }
 
   /**
@@ -111,7 +111,7 @@ contract Registry {
       stakersByToken[_token].remove(msg.sender);
     }
 
-    emit RemoveStakedServer(
+    emit UnsetServer(
       msg.sender,
       stakerServerURLs[msg.sender],
       _protocolList,
@@ -353,11 +353,13 @@ contract Registry {
    * @return balance of the staker account
    */
   function balanceOf(address _staker) external view returns (uint256) {
-    if (bytes(stakerServerURLs[_staker]).length == 0) return 0;
+    uint256 _stakingBalance = 0;
+    if (bytes(stakerServerURLs[_staker]).length > 0)
+      _stakingBalance = stakingCost;
     uint256 _protocolCount = protocolsByStaker[_staker].length();
     uint256 _tokenCount = tokensByStaker[_staker].length();
     return
-      stakingCost +
+      _stakingBalance +
       (supportCost * _protocolCount) +
       (supportCost * _tokenCount);
   }
