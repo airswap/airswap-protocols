@@ -128,200 +128,200 @@ contract Pool is IPool, Ownable2Step {
   /**
    * @notice Set claims from previous pool contract
    * @dev Only owner
-   * @param root bytes32
-   * @param accounts address[]
+   * @param _root bytes32
+   * @param _accounts address[]
    */
   function setClaimed(
-    bytes32 root,
-    address[] memory accounts
+    bytes32 _root,
+    address[] memory _accounts
   ) external override multiAdmin {
-    if (roots[root] == false) {
-      roots[root] = true;
+    if (roots[_root] == false) {
+      roots[_root] = true;
     }
-    for (uint256 i = 0; i < accounts.length; i++) {
-      address account = accounts[i];
-      if (claimed[root][account]) revert AlreadyClaimed();
-      claimed[root][account] = true;
+    for (uint256 i = 0; i < _accounts.length; i++) {
+      address account = _accounts[i];
+      if (claimed[_root][account]) revert AlreadyClaimed();
+      claimed[_root][account] = true;
     }
-    emit Enable(root);
+    emit Enable(_root);
   }
 
   /**
    * @notice Enables claims for a merkle tree of a set of scores
-   * @param root bytes32
+   * @param _root bytes32
    */
-  function enable(bytes32 root) external override multiAdmin {
-    if (roots[root]) revert RootExists(root);
-    roots[root] = true;
-    emit Enable(root);
+  function enable(bytes32 _root) external override multiAdmin {
+    if (roots[_root]) revert RootExists(_root);
+    roots[_root] = true;
+    emit Enable(_root);
   }
 
   /**
    * @notice Admin function to migrate funds
    * @dev Only owner
-   * @param tokens address[]
-   * @param dest address
+   * @param _tokens address[]
+   * @param _dest address
    */
   function drainTo(
-    address[] calldata tokens,
-    address dest
+    address[] calldata _tokens,
+    address _dest
   ) external override onlyOwner {
-    for (uint256 i = 0; i < tokens.length; i++) {
-      uint256 bal = IERC20(tokens[i]).balanceOf(address(this));
-      IERC20(tokens[i]).safeTransfer(dest, bal);
+    for (uint256 i = 0; i < _tokens.length; i++) {
+      uint256 _bal = IERC20(_tokens[i]).balanceOf(address(this));
+      IERC20(_tokens[i]).safeTransfer(_dest, _bal);
     }
-    emit DrainTo(tokens, dest);
+    emit DrainTo(_tokens, _dest);
   }
 
   /**
    * @notice Withdraw tokens from the pool using claims
-   * @param claims Claim[]
-   * @param token address
+   * @param _claims Claim[]
+   * @param _token address
    */
-  function withdraw(Claim[] memory claims, address token) external override {
-    withdrawProtected(claims, token, 0, msg.sender);
+  function withdraw(Claim[] memory _claims, address _token) external override {
+    withdrawProtected(_claims, _token, 0, msg.sender);
   }
 
   /**
    * @notice Withdraw tokens from the pool using claims and stake
-   * @param claims Claim[]
-   * @param token address
+   * @param _claims Claim[]
+   * @param _token address
    */
   function withdrawAndStake(
-    Claim[] memory claims,
-    address token,
-    uint256 minimumAmount
+    Claim[] memory _claims,
+    address _token,
+    uint256 _minimumAmount
   ) external override {
-    if (token != address(stakingToken)) revert TokenInvalid(token);
+    if (_token != address(stakingToken)) revert TokenInvalid(_token);
     (uint256 amount, bytes32[] memory rootList) = _withdrawCheck(
-      claims,
-      token,
-      minimumAmount
+      _claims,
+      _token,
+      _minimumAmount
     );
     IStaking(stakingContract).stakeFor(msg.sender, amount);
-    emit Withdraw(rootList, msg.sender, token, amount);
+    emit Withdraw(rootList, msg.sender, _token, amount);
   }
 
   /**
    * @notice Withdraw tokens from the pool using claims and stake for another account
-   * @param claims Claim[]
-   * @param token address
-   * @param account address
+   * @param _claims Claim[]
+   * @param _token address
+   * @param _account address
    */
   function withdrawAndStakeFor(
-    Claim[] memory claims,
-    address token,
-    uint256 minimumAmount,
-    address account
+    Claim[] memory _claims,
+    address _token,
+    uint256 _minimumAmount,
+    address _account
   ) external override {
-    if (token != address(stakingToken)) revert TokenInvalid(token);
+    if (_token != address(stakingToken)) revert TokenInvalid(_token);
     (uint256 amount, bytes32[] memory rootList) = _withdrawCheck(
-      claims,
-      token,
-      minimumAmount
+      _claims,
+      _token,
+      _minimumAmount
     );
     IERC20(stakingToken).approve(stakingContract, amount);
-    IStaking(stakingContract).stakeFor(account, amount);
-    emit Withdraw(rootList, msg.sender, token, amount);
+    IStaking(stakingContract).stakeFor(_account, amount);
+    emit Withdraw(rootList, msg.sender, _token, amount);
   }
 
   /**
    * @notice Withdraw tokens from the pool using claims and send to recipient
-   * @param claims Claim[]
-   * @param token address
-   * @param recipient address
+   * @param _claims Claim[]
+   * @param _token address
+   * @param _recipient address
    */
   function withdrawWithRecipient(
-    Claim[] memory claims,
-    address token,
-    uint256 minimumAmount,
-    address recipient
+    Claim[] memory _claims,
+    address _token,
+    uint256 _minimumAmount,
+    address _recipient
   ) external override {
-    withdrawProtected(claims, token, minimumAmount, recipient);
+    withdrawProtected(_claims, _token, _minimumAmount, _recipient);
   }
 
   /**
    * @notice Withdraw tokens from the pool using claims
-   * @param claims Claim[]
-   * @param token address
-   * @param minimumAmount uint256
+   * @param _claims Claim[]
+   * @param _token address
+   * @param _minimumAmount uint256
    */
   function _withdrawCheck(
-    Claim[] memory claims,
-    address token,
-    uint256 minimumAmount
+    Claim[] memory _claims,
+    address _token,
+    uint256 _minimumAmount
   ) internal returns (uint256, bytes32[] memory) {
-    if (claims.length <= 0) revert ClaimsNotProvided();
-    uint256 totalScore = 0;
-    bytes32[] memory rootList = new bytes32[](claims.length);
-    Claim memory claim;
-    for (uint256 i = 0; i < claims.length; i++) {
-      claim = claims[i];
-      if (!roots[claim.root]) revert RootDisabled(claim.root);
-      if (claimed[claim.root][msg.sender]) revert AlreadyClaimed();
-      if (!verify(msg.sender, claim.root, claim.score, claim.proof))
-        revert ProofInvalid(claim.proof);
-      totalScore = totalScore + claim.score;
-      claimed[claim.root][msg.sender] = true;
-      rootList[i] = claim.root;
+    if (_claims.length <= 0) revert ClaimsNotProvided();
+    uint256 _totalScore = 0;
+    bytes32[] memory _rootList = new bytes32[](_claims.length);
+    Claim memory _claim;
+    for (uint256 i = 0; i < _claims.length; i++) {
+      _claim = _claims[i];
+      if (!roots[_claim.root]) revert RootDisabled(_claim.root);
+      if (claimed[_claim.root][msg.sender]) revert AlreadyClaimed();
+      if (!verify(msg.sender, _claim.root, _claim.score, _claim.proof))
+        revert ProofInvalid(_claim.proof);
+      _totalScore = _totalScore + _claim.score;
+      claimed[_claim.root][msg.sender] = true;
+      _rootList[i] = _claim.root;
     }
-    uint256 amount = calculate(totalScore, token);
-    if (amount < minimumAmount) revert AmountInsufficient(amount);
-    return (amount, rootList);
+    uint256 _amount = calculate(_totalScore, _token);
+    if (_amount < _minimumAmount) revert AmountInsufficient(_amount);
+    return (_amount, _rootList);
   }
 
   /**
    * @notice Calculate output amount for an input score
-   * @param score uint256
-   * @param token address
+   * @param _score uint256
+   * @param _token address
    * @return amount uint256 amount to claim based on balance, scale, and max
    */
   function calculate(
-    uint256 score,
-    address token
+    uint256 _score,
+    address _token
   ) public view override returns (uint256 amount) {
-    uint256 balance = IERC20(token).balanceOf(address(this));
-    uint256 divisor = (uint256(10) ** scale) + score;
-    return (max * score * balance) / divisor / 100;
+    uint256 _balance = IERC20(_token).balanceOf(address(this));
+    uint256 _divisor = (uint256(10) ** scale) + _score;
+    return (max * _score * _balance) / _divisor / 100;
   }
 
   /**
    * @notice Withdraw tokens from the pool using claims
-   * @param claims Claim[]
-   * @param token address
-   * @param minimumAmount uint256
-   * @param recipient address
+   * @param _claims Claim[]
+   * @param _token address
+   * @param _minimumAmount uint256
+   * @param _recipient address
    */
   function withdrawProtected(
-    Claim[] memory claims,
-    address token,
-    uint256 minimumAmount,
-    address recipient
+    Claim[] memory _claims,
+    address _token,
+    uint256 _minimumAmount,
+    address _recipient
   ) public override returns (uint256) {
-    (uint256 amount, bytes32[] memory rootList) = _withdrawCheck(
-      claims,
-      token,
-      minimumAmount
+    (uint256 _amount, bytes32[] memory _rootList) = _withdrawCheck(
+      _claims,
+      _token,
+      _minimumAmount
     );
-    IERC20(token).safeTransfer(recipient, amount);
-    emit Withdraw(rootList, msg.sender, token, amount);
-    return amount;
+    IERC20(_token).safeTransfer(_recipient, _amount);
+    emit Withdraw(_rootList, msg.sender, _token, _amount);
+    return _amount;
   }
 
   /**
    * @notice Verify a claim proof
-   * @param participant address
-   * @param root bytes32
-   * @param score uint256
-   * @param proof bytes32[]
+   * @param _participant address
+   * @param _root bytes32
+   * @param _score uint256
+   * @param _proof bytes32[]
    */
   function verify(
-    address participant,
-    bytes32 root,
-    uint256 score,
-    bytes32[] memory proof
+    address _participant,
+    bytes32 _root,
+    uint256 _score,
+    bytes32[] memory _proof
   ) public pure override returns (bool valid) {
-    bytes32 leaf = keccak256(abi.encodePacked(participant, score));
-    return MerkleProof.verify(proof, root, leaf);
+    bytes32 _leaf = keccak256(abi.encodePacked(_participant, _score));
+    return MerkleProof.verify(_proof, _root, _leaf);
   }
 }
