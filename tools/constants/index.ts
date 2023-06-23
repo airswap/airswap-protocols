@@ -107,7 +107,7 @@ export const explorerUrls: Record<number, string> = {
   [ChainIds.ARBITRUM]: 'https://arbiscan.io',
   [ChainIds.FUJI]: 'https://testnet.snowtrace.io',
   [ChainIds.AVALANCHE]: 'https://snowtrace.io',
-  [ChainIds.LINEAGOERLI]: 'https://goerli.lineascan.build/',
+  [ChainIds.LINEAGOERLI]: 'https://goerli.lineascan.build',
   [ChainIds.MUMBAI]: 'https://mumbai.polygonscan.com',
   [ChainIds.ARBITRUMGOERLI]: 'https://goerli.arbiscan.io',
 }
