@@ -61,7 +61,7 @@ module.exports = {
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
     },
     linea: {
-      url: apiUrls[ChainIds.LINEA],
+      url: apiUrls[ChainIds.LINEAGOERLI],
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
     },
   },
@@ -100,7 +100,7 @@ module.exports = {
       avalancheFujiTestnet: process.env.SNOWTRACE_API_KEY,
       polygonMumbai: process.env.POLYGONSCAN_API_KEY,
       rsk: process.env.BLOCKSCOUT_API_KEY,
-      linea: process.env.BLOCKSCOUT_API_KEY,
+      linea: process.env.LINEASCAN_API_KEY,
     },
     customChains: [
       {
@@ -115,8 +115,8 @@ module.exports = {
         network: 'linea',
         chainId: 59140,
         urls: {
-          apiURL: apiUrls[ChainIds.LINEA],
-          browserURL: explorerUrls[ChainIds.LINEA],
+          apiURL: apiUrls[ChainIds.LINEAGOERLI],
+          browserURL: explorerUrls[ChainIds.LINEAGOERLI],
         },
       },
       {
