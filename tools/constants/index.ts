@@ -91,7 +91,7 @@ export const apiUrls: Record<number, string> = {
   [ChainIds.ARBITRUM]: 'https://arb1.arbitrum.io/rpc',
   [ChainIds.FUJI]: 'https://api.avax-test.network/ext/bc/C/rpc',
   [ChainIds.AVALANCHE]: 'https://api.avax.network/ext/bc/C/rpc',
-  [ChainIds.LINEAGOERLI]: 'https://linea-goerli.infura.io/v3',
+  [ChainIds.LINEAGOERLI]: 'https://rpc.goerli.linea.build',
   [ChainIds.MUMBAI]: 'https://rpc-mumbai.maticvigil.com',
   [ChainIds.ARBITRUMGOERLI]: 'https://goerli-rollup.arbitrum.io/rpc',
 }
