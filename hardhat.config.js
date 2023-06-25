@@ -5,7 +5,12 @@ require('@nomiclabs/hardhat-waffle')
 require('@nomiclabs/hardhat-etherscan')
 require('solidity-coverage')
 
-const { ChainIds, apiUrls, explorerUrls } = require('@airswap/constants')
+const {
+  ChainIds,
+  apiUrls,
+  explorerUrls,
+  explorerApiUrls,
+} = require('@airswap/constants')
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
@@ -60,7 +65,7 @@ module.exports = {
       url: apiUrls[ChainIds.RSKTESTNET],
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
     },
-    linea: {
+    lineagoerli: {
       url: apiUrls[ChainIds.LINEAGOERLI],
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
     },
@@ -99,23 +104,23 @@ module.exports = {
       avalanche: process.env.SNOWTRACE_API_KEY,
       avalancheFujiTestnet: process.env.SNOWTRACE_API_KEY,
       polygonMumbai: process.env.POLYGONSCAN_API_KEY,
+      lineagoerli: process.env.LINEASCAN_API_KEY,
       rsk: process.env.BLOCKSCOUT_API_KEY,
-      linea: process.env.LINEASCAN_API_KEY,
     },
     customChains: [
       {
         network: 'rsk',
         chainId: 30,
         urls: {
-          apiURL: apiUrls[ChainIds.RSK],
+          apiURL: explorerApiUrls[ChainIds.RSK],
           browserURL: explorerUrls[ChainIds.RSK],
         },
       },
       {
-        network: 'linea',
+        network: 'lineagoerli',
         chainId: 59140,
         urls: {
-          apiURL: apiUrls[ChainIds.LINEAGOERLI],
+          apiURL: explorerApiUrls[ChainIds.LINEAGOERLI],
           browserURL: explorerUrls[ChainIds.LINEAGOERLI],
         },
       },
@@ -123,7 +128,7 @@ module.exports = {
         network: 'arbitrumGoerli',
         chainId: 421613,
         urls: {
-          apiURL: apiUrls[ChainIds.ARBITRUMGOERLI],
+          apiURL: explorerApiUrls[ChainIds.ARBITRUMGOERLI],
           browserURL: explorerUrls[ChainIds.ARBITRUMGOERLI],
         },
       },
