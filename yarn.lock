@@ -9,10 +9,10 @@
   dependencies:
     get-parameter-names "^0.3.0"
 
-"@airswap/maker-registry@4.0.1":
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/@airswap/maker-registry/-/maker-registry-4.0.1.tgz#008790185a32f6b385aa1c22a58f572c776a6384"
-  integrity sha512-ArBQZHAYMINUUyxI0zOVPmP7YIbsn0SLMuSBs90TxwtIrg/xUGMmAMR25wuK53/+FHlNWy9siOcDq978OTQE7A==
+"@airswap/maker-registry@4.0.4":
+  version "4.0.4"
+  resolved "https://registry.yarnpkg.com/@airswap/maker-registry/-/maker-registry-4.0.4.tgz#57296740a3c08ee40982c4cbf02e84513df738cc"
+  integrity sha512-EuYXfnsLnRHbxDOONcmV6Qk4Q5CikcyyRki068+w6CwGC3s6FXdgUkSfQ6aYea/GGfjxqVdpHm2xsnyhEx0Z9w==
   dependencies:
     "@openzeppelin/contracts" "^4.8.1"
 
