@@ -93,6 +93,13 @@ export default [
     chainId: 5,
   },
   {
+    name: 'Dai',
+    address: '0x8741ba6225a6bf91f9d73531a98a89807857a2b3',
+    decimals: 18,
+    symbol: 'DAI',
+    chainId: 59140,
+  },
+  {
     name: 'Tether USD',
     address: '0x1990BC6dfe2ef605Bfc08f5A23564dB75642Ad73',
     decimals: 6,
