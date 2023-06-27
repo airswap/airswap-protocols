@@ -30,7 +30,7 @@
     "access": "public"
   },
   "devDependencies": {
-    "@airswap/constants": "^4.0.6",
+    "@airswap/constants": "^4.0.8",
     "@airswap/utils": "^4.0.0",
     "prompt-confirm": "^2.0.4"
   }
