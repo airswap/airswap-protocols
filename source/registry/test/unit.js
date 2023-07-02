@@ -428,7 +428,7 @@ describe('Registry Unit', () => {
 
     it('fails to remove a server not set', async () => {
       await expect(
-        registry.connect(account1).removeStakedServer()
+        registry.connect(account1).removeServer()
       ).to.be.revertedWith('NoServerToRemove')
     })
 
@@ -442,7 +442,7 @@ describe('Registry Unit', () => {
       await registry
         .connect(account1)
         .addTokens([token1.address, token2.address, token3.address])
-      await expect(registry.connect(account1).removeStakedServer())
+      await expect(registry.connect(account1).removeServer())
         .to.emit(registry, 'UnsetServer')
         .withArgs(
           account1.address,
@@ -532,7 +532,7 @@ describe('Registry Unit', () => {
     it('zero transfer amount when removing all tokens', async () => {
       await registryZeroCost.connect(account1).setServer('maker1.com')
       await registryZeroCost.connect(account1).addProtocols([protocol1])
-      await expect(registryZeroCost.connect(account1).removeStakedServer())
+      await expect(registryZeroCost.connect(account1).removeServer())
         .to.emit(registryZeroCost, 'UnsetServer')
         .withArgs(account1.address, 'maker1.com', [protocol1], [])
     })

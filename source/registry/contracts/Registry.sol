@@ -80,7 +80,7 @@ contract Registry {
   /**
    * @notice Fully remove server URL, protocols, and tokens
    */
-  function removeStakedServer() external {
+  function removeServer() external {
     if (bytes(stakerServerURLs[msg.sender]).length == 0)
       revert NoServerToRemove();
 
