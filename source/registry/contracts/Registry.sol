@@ -67,7 +67,7 @@ contract Registry {
    * @notice Stake tokens and set the server URL
    * @param _url string value of the URL
    */
-  function setServer(string calldata _url) external {
+  function setServerURL(string calldata _url) external {
     if (bytes(_url).length == 0) revert ServerURLInvalid();
 
     if (bytes(stakerServerURLs[msg.sender]).length == 0 && stakingCost > 0) {
