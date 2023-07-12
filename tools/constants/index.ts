@@ -19,9 +19,10 @@ export enum ChainIds {
   POLYGON = 137,
   HARDHAT = 31337,
   ARBITRUM = 42161,
-  LINEAGOERLI = 59140,
   FUJI = 43113,
   AVALANCHE = 43114,
+  LINEAGOERLI = 59140,
+  LINEA = 59144,
   ARBITRUMGOERLI = 421613,
   MUMBAI = 80001,
 }
@@ -33,6 +34,7 @@ export const mainnets: number[] = [
   ChainIds.POLYGON,
   ChainIds.ARBITRUM,
   ChainIds.AVALANCHE,
+  ChainIds.LINEA,
 ]
 
 export const testnets: number[] = [
@@ -59,6 +61,7 @@ export const chainNames: Record<number, string> = {
   [ChainIds.FUJI]: 'Fuji Testnet',
   [ChainIds.AVALANCHE]: 'Avalanche',
   [ChainIds.LINEAGOERLI]: 'Linea-Goerli',
+  [ChainIds.LINEA]: 'Linea',
   [ChainIds.MUMBAI]: 'Mumbai Testnet',
   [ChainIds.ARBITRUMGOERLI]: 'Arbitrum Goerli',
 }
@@ -76,6 +79,7 @@ export const chainCurrencies: Record<number, string> = {
   [ChainIds.FUJI]: 'AVAX',
   [ChainIds.AVALANCHE]: 'AVAX',
   [ChainIds.LINEAGOERLI]: 'ETH',
+  [ChainIds.LINEA]: 'ETH',
   [ChainIds.MUMBAI]: 'MATIC',
   [ChainIds.ARBITRUMGOERLI]: 'AETH',
 }
@@ -92,6 +96,7 @@ export const apiUrls: Record<number, string> = {
   [ChainIds.FUJI]: 'https://api.avax-test.network/ext/bc/C/rpc',
   [ChainIds.AVALANCHE]: 'https://api.avax.network/ext/bc/C/rpc',
   [ChainIds.LINEAGOERLI]: 'https://rpc.goerli.linea.build',
+  [ChainIds.LINEA]: 'https://linea-mainnet.infura.io/v3',
   [ChainIds.MUMBAI]: 'https://rpc-mumbai.maticvigil.com',
   [ChainIds.ARBITRUMGOERLI]: 'https://goerli-rollup.arbitrum.io/rpc',
 }
@@ -108,6 +113,7 @@ export const explorerUrls: Record<number, string> = {
   [ChainIds.FUJI]: 'https://testnet.snowtrace.io',
   [ChainIds.AVALANCHE]: 'https://snowtrace.io',
   [ChainIds.LINEAGOERLI]: 'https://goerli.lineascan.build',
+  [ChainIds.LINEA]: 'https://explorer.linea.build/',
   [ChainIds.MUMBAI]: 'https://mumbai.polygonscan.com',
   [ChainIds.ARBITRUMGOERLI]: 'https://goerli.arbiscan.io',
 }
@@ -115,6 +121,7 @@ export const explorerUrls: Record<number, string> = {
 export const explorerApiUrls: Record<number, string> = {
   [ChainIds.RSK]: 'https://blockscout.com/rsk/mainnet/api',
   [ChainIds.LINEAGOERLI]: 'https://api-goerli.lineascan.build/api',
+  [ChainIds.LINEA]: 'https://explorer.linea.build/api',
   [ChainIds.ARBITRUMGOERLI]: 'https://api-goerli.arbiscan.io/',
 }
 
