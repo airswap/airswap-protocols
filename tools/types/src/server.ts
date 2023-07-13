@@ -23,7 +23,7 @@ export enum SortOrder {
 }
 
 export type OrderFilter = {
-  orderNonce?: string
+  nonce?: string
   senderMaxAmount?: string
   senderMinAmount?: string
   senderTokens?: string[]

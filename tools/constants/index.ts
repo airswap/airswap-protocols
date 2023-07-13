@@ -17,7 +17,7 @@ export enum ChainIds {
   POLYGON = 137,
   HARDHAT = 31337,
   ARBITRUM = 42161,
-  LINEA = 59140,
+  LINEAGOERLI = 59140,
   FUJI = 43113,
   AVALANCHE = 43114,
   ARBITRUMGOERLI = 421613,
@@ -41,7 +41,7 @@ export const testnets: number[] = [
   ChainIds.ARBITRUMGOERLI,
   ChainIds.FUJI,
   ChainIds.HARDHAT,
-  ChainIds.LINEA,
+  ChainIds.LINEAGOERLI,
 ]
 
 export const chainNames: Record<number, string> = {
@@ -56,7 +56,7 @@ export const chainNames: Record<number, string> = {
   [ChainIds.ARBITRUM]: 'Arbitrum',
   [ChainIds.FUJI]: 'Fuji Testnet',
   [ChainIds.AVALANCHE]: 'Avalanche',
-  [ChainIds.LINEA]: 'Linea',
+  [ChainIds.LINEAGOERLI]: 'Linea-Goerli',
   [ChainIds.MUMBAI]: 'Mumbai Testnet',
   [ChainIds.ARBITRUMGOERLI]: 'Arbitrum Goerli',
 }
@@ -73,7 +73,7 @@ export const chainCurrencies: Record<number, string> = {
   [ChainIds.ARBITRUM]: 'AETH',
   [ChainIds.FUJI]: 'AVAX',
   [ChainIds.AVALANCHE]: 'AVAX',
-  [ChainIds.LINEA]: 'ETH',
+  [ChainIds.LINEAGOERLI]: 'ETH',
   [ChainIds.MUMBAI]: 'MATIC',
   [ChainIds.ARBITRUMGOERLI]: 'AETH',
 }
@@ -89,7 +89,7 @@ export const apiUrls: Record<number, string> = {
   [ChainIds.ARBITRUM]: 'https://arb1.arbitrum.io/rpc',
   [ChainIds.FUJI]: 'https://api.avax-test.network/ext/bc/C/rpc',
   [ChainIds.AVALANCHE]: 'https://api.avax.network/ext/bc/C/rpc',
-  [ChainIds.LINEA]: 'https://rpc.goerli.linea.build',
+  [ChainIds.LINEAGOERLI]: 'https://linea-goerli.infura.io/v3',
   [ChainIds.MUMBAI]: 'https://rpc-mumbai.maticvigil.com',
   [ChainIds.ARBITRUMGOERLI]: 'https://goerli-rollup.arbitrum.io/rpc',
 }
@@ -105,9 +105,15 @@ export const explorerUrls: Record<number, string> = {
   [ChainIds.ARBITRUM]: 'https://arbiscan.io',
   [ChainIds.FUJI]: 'https://testnet.snowtrace.io',
   [ChainIds.AVALANCHE]: 'https://snowtrace.io',
-  [ChainIds.LINEA]: 'https://explorer.goerli.linea.build',
+  [ChainIds.LINEAGOERLI]: 'https://goerli.lineascan.build',
   [ChainIds.MUMBAI]: 'https://mumbai.polygonscan.com',
   [ChainIds.ARBITRUMGOERLI]: 'https://goerli.arbiscan.io',
+}
+
+export const explorerApiUrls: Record<number, string> = {
+  [ChainIds.RSK]: 'https://blockscout.com/rsk/mainnet/api',
+  [ChainIds.LINEAGOERLI]: 'https://api-goerli.lineascan.build/api',
+  [ChainIds.ARBITRUMGOERLI]: 'https://api-goerli.arbiscan.io/',
 }
 
 export const stakingTokenAddresses: Record<number, string> = {
@@ -121,7 +127,7 @@ export const stakingTokenAddresses: Record<number, string> = {
   [ChainIds.ARBITRUM]: '0xa1135c2f2c7798d31459b5fdaef8613419be1008',
   [ChainIds.FUJI]: '0x48c427e7cEf42399e9e8300fC47875772309e995',
   [ChainIds.AVALANCHE]: '0x702d0f43edd46b77ea2d48570b02c328a20a94a1',
-  [ChainIds.LINEA]: '0x2C1b868d6596a18e32E61B901E4060C872647b6C',
+  [ChainIds.LINEAGOERLI]: '0x2C1b868d6596a18e32E61B901E4060C872647b6C',
   [ChainIds.MUMBAI]: '0xd161ddcfcc0c2d823021aa26200824efa75218d1',
   [ChainIds.ARBITRUMGOERLI]: '0x71070c5607358fc25e3b4aaf4fb0a580c190252a',
 }
