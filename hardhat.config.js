@@ -69,6 +69,10 @@ module.exports = {
       url: apiUrls[ChainIds.LINEAGOERLI],
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
     },
+    linea: {
+      url: apiUrls[ChainIds.LINEA] + '/' + process.env.INFURA_API_KEY,
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
+    },
   },
   solidity: {
     compilers: [
@@ -104,6 +108,7 @@ module.exports = {
       avalanche: process.env.SNOWTRACE_API_KEY,
       avalancheFujiTestnet: process.env.SNOWTRACE_API_KEY,
       polygonMumbai: process.env.POLYGONSCAN_API_KEY,
+      linea: process.env.LINEASCAN_API_KEY,
       lineagoerli: process.env.LINEASCAN_API_KEY,
       rsk: process.env.BLOCKSCOUT_API_KEY,
     },
@@ -114,6 +119,14 @@ module.exports = {
         urls: {
           apiURL: explorerApiUrls[ChainIds.RSK],
           browserURL: explorerUrls[ChainIds.RSK],
+        },
+      },
+      {
+        network: 'linea',
+        chainId: 59144,
+        urls: {
+          apiURL: explorerApiUrls[ChainIds.LINEA],
+          browserURL: explorerUrls[ChainIds.LINEA],
         },
       },
       {
