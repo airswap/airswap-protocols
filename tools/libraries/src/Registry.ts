@@ -3,16 +3,19 @@ import { ServerOptions } from '@airswap/types'
 import { MakerRegistry__factory } from '@airswap/maker-registry/typechain/factories/contracts'
 // @ts-ignore
 import registryDeploys from '@airswap/maker-registry/deploys.js'
+import { RegistryBlockNumbers } from './block-numbers'
+
 import { Server } from './Server'
 import { Contract, SwapERC20 } from './Contracts'
 
 class ServerRegistry extends Contract {
-  public constructor(
-    name: string,
-    addresses: Record<number, string>,
-    factory: any
-  ) {
-    super(name, addresses, factory)
+  public constructor() {
+    super(
+      'Registry',
+      registryDeploys,
+      RegistryBlockNumbers,
+      MakerRegistry__factory
+    )
   }
   public async getServerURLs(
     providerOrSigner: ethers.providers.Provider | ethers.Signer,
@@ -57,8 +60,4 @@ class ServerRegistry extends Contract {
     return servers.map((value) => value.value)
   }
 }
-export const Registry = new ServerRegistry(
-  'Registry',
-  registryDeploys,
-  MakerRegistry__factory
-)
+export const Registry = new ServerRegistry()
