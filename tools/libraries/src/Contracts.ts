@@ -43,7 +43,7 @@ export class Contract {
     return this.addresses[chainId]
   }
   public getBlockNumber(chainId: number) {
-    return this.blockNumbers[chainId]
+    return this.blockNumbers[chainId] || 0
   }
   public getContract(
     providerOrSigner: ethers.providers.Provider | ethers.Signer,
