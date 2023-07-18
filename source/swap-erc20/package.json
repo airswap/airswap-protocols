@@ -1,6 +1,6 @@
 {
   "name": "@airswap/swap-erc20",
-  "version": "4.0.3",
+  "version": "4.0.4",
   "description": "AirSwap: Atomic ERC20 Token Swap",
   "license": "MIT",
   "repository": {
@@ -27,7 +27,7 @@
     "@openzeppelin/contracts": "^4.8.3"
   },
   "devDependencies": {
-    "@airswap/constants": "^4.0.9",
+    "@airswap/constants": "^4.0.10",
     "@airswap/types": "^4.0.0",
     "@airswap/utils": "^4.0.0",
     "prompt-confirm": "^2.0.4"
