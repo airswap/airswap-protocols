@@ -1,6 +1,6 @@
 {
   "name": "@airswap/balances",
-  "version": "4.0.1",
+  "version": "4.0.2",
   "description": "Batch balance and allowance calls",
   "license": "MIT",
   "repository": {
