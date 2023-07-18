@@ -137,6 +137,7 @@ export const stakingTokenAddresses: Record<number, string> = {
   [ChainIds.FUJI]: '0x48c427e7cEf42399e9e8300fC47875772309e995',
   [ChainIds.AVALANCHE]: '0x702d0f43edd46b77ea2d48570b02c328a20a94a1',
   [ChainIds.LINEAGOERLI]: '0x7823e8dcc8bfc23ea3ac899eb86921f90e80f499',
+  [ChainIds.LINEA]: '0x71070c5607358fc25E3B4aaf4FB0a580c190252a',
   [ChainIds.MUMBAI]: '0xd161ddcfcc0c2d823021aa26200824efa75218d1',
   [ChainIds.ARBITRUMGOERLI]: '0x71070c5607358fc25e3b4aaf4fb0a580c190252a',
 }
@@ -148,6 +149,7 @@ export const ownerAddresses: Record<number, string> = {
   [ChainIds.POLYGON]: '0x4fef02E54160e6D7af83961d355B3B2E283506c5',
   [ChainIds.ARBITRUM]: '0xed669F5fe2A37Ef204DB178c7a982717B9f03Ec2',
   [ChainIds.AVALANCHE]: '0xed669F5fe2A37Ef204DB178c7a982717B9f03Ec2',
+  [ChainIds.LINEA]: '0xed669F5fe2A37Ef204DB178c7a982717B9f03Ec2',
 }
 
 export enum Protocols {

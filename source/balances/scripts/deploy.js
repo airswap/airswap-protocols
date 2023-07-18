@@ -2,7 +2,7 @@
 const fs = require('fs')
 const Confirm = require('prompt-confirm')
 const { ethers, run } = require('hardhat')
-const { chainNames } = require('@airswap/constants')
+const { ChainIds, chainNames } = require('@airswap/constants')
 const { getReceiptUrl } = require('@airswap/utils')
 const balancesDeploys = require('../deploys.js')
 
