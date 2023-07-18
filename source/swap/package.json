@@ -33,7 +33,7 @@
   "devDependencies": {
     "@airswap/constants": "^4.0.10",
     "@airswap/types": "^4.0.0",
-    "@airswap/utils": "^4.0.0",
+    "@airswap/utils": "^4.0.8",
     "@nomicfoundation/hardhat-network-helpers": "^1.0.7"
   },
   "publishConfig": {
