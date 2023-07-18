@@ -37,7 +37,7 @@ export const WrapperBlockNumbers: Record<ChainIds, number> = {
 }
 
 export const WETH9BlockNumbers: Record<ChainIds, number> = {
-  [ChainIds.MAINNET]: 0,
+  [ChainIds.MAINNET]: 4719568,
   [ChainIds.GOERLI]: 0,
   [ChainIds.RSK]: 0,
   [ChainIds.RSKTESTNET]: 0,
