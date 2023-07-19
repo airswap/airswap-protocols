@@ -373,7 +373,7 @@ describe('SwapERC20 Unit', () => {
         .swap(sender.address, ...order)
       const swapReceipt = await transaction.wait()
       const swapCost = swapReceipt.gasUsed
-      expect(Number(swapCost)).to.be.lessThanOrEqual(115799)
+      expect(Number(swapCost)).to.be.lessThanOrEqual(115661)
     })
 
     it('test swaps by signer instead of authorized signatory fail', async () => {
