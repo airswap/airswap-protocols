@@ -130,7 +130,7 @@ export class Server extends TypedEmitter<ServerEvents> {
 
   public constructor(
     public locator: string,
-    private swapContract = SwapERC20.getAddress(ChainIds.MAINNET),
+    private swapContract = SwapERC20.addresses[ChainIds.MAINNET],
     private chainId = ChainIds.MAINNET
   ) {
     super()
