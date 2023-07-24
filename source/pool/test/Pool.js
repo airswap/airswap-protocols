@@ -58,6 +58,8 @@ describe('Pool Unit', () => {
     await feeToken.mock.approve.returns(true)
     await feeToken.mock.allowance.returns(0)
     feeToken2 = await deployMockContract(deployer, IERC20.abi)
+    await feeToken2.mock.approve.returns(true)
+    await feeToken2.mock.allowance.returns(0)
 
     stakingContract = await (
       await ethers.getContractFactory(STAKING.abi, STAKING.bytecode)
@@ -99,6 +101,11 @@ describe('Pool Unit', () => {
       await expect(
         (await ethers.getContractFactory('Pool')).deploy(scale, CLAIM_MAX)
       ).to.be.revertedWith(`ScaleTooHigh(${scale})`)
+    })
+
+    it('constructor reverts when missing an argument', async () => {
+      await expect((await ethers.getContractFactory('Pool')).deploy(CLAIM_MAX))
+        .to.be.reverted
     })
   })
 
@@ -513,6 +520,41 @@ describe('Pool Unit', () => {
 
       const balance = await stakingContract.connect(bob).balanceOf(bob.address)
       expect(balance).to.equal('495')
+    })
+
+    it('withdraw and stake reverts with minimumAmount not met', async () => {
+      await feeToken.mock.balanceOf.returns('100000')
+      await feeToken.mock.transfer.returns(true)
+      await feeToken.mock.allowance.returns(0)
+      await feeToken.mock.transferFrom.returns(true)
+
+      await pool.addAdmin(alice.address)
+      const root = getRoot(tree)
+      await pool.connect(alice).enable(root)
+      const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
+      const withdrawMinimum = 496
+
+      const amount = await pool
+        .connect(alice)
+        .calculate(ALICE_SCORE, feeToken.address)
+
+      await expect(
+        pool.connect(alice).withdrawAndStakeFor(
+          [
+            {
+              root: getRoot(tree),
+              score: ALICE_SCORE,
+              proof,
+            },
+          ],
+          feeToken.address,
+          withdrawMinimum,
+          bob.address
+        )
+      ).to.be.revertedWith(`AmountInsufficient(${amount})`)
+
+      const isClaimed = await pool.claimed(root, alice.address)
+      expect(isClaimed).to.equal(false)
     })
 
     it('withdrawAndStake for a recipient reverts with wrong token', async () => {
