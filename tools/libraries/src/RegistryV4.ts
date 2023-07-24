@@ -2,16 +2,13 @@ import { ethers } from 'ethers'
 import { ServerOptions } from '@airswap/types'
 import { Registry__factory } from '@airswap/registry/typechain/factories/contracts'
 import registryDeploys from '@airswap/registry/deploys.js'
+
 import { Server } from './Server'
 import { Contract, SwapERC20 } from './Contracts'
 
 class ServerRegistry extends Contract {
-  public constructor(
-    name: string,
-    addresses: Record<number, string>,
-    factory: any
-  ) {
-    super(name, addresses, factory)
+  public constructor() {
+    super('Registry', registryDeploys, {}, Registry__factory)
   }
   public async getServerURLs(
     providerOrSigner: ethers.providers.Provider | ethers.Signer,
@@ -55,7 +52,7 @@ class ServerRegistry extends Contract {
     const serverPromises = await Promise.allSettled(
       urls.map((url) => {
         return Server.at(url, {
-          swapContract: options?.swapContract || SwapERC20.getAddress(chainId),
+          swapContract: options?.swapContract || SwapERC20.addresses[chainId],
           chainId: chainId,
           initializeTimeout: options?.initializeTimeout,
         })
@@ -68,8 +65,4 @@ class ServerRegistry extends Contract {
     return servers.map((value) => value.value)
   }
 }
-export const RegistryV4 = new ServerRegistry(
-  'Registry',
-  registryDeploys,
-  Registry__factory
-)
+export const RegistryV4 = new ServerRegistry()
