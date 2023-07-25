@@ -1,4 +1,5 @@
 import { ethers } from 'ethers'
+import { ChainIds } from '@airswap/constants'
 
 import { Swap__factory } from '@airswap/swap/typechain/factories/contracts'
 import { SwapERC20__factory } from '@airswap/swap-erc20/typechain/factories/contracts'
@@ -15,7 +16,6 @@ import wrapperBlocks from '@airswap/wrapper/deploys-blocks.js'
 import wethBlocks from '@airswap/wrapper/deploys-blocks-weth.js'
 
 import BalanceChecker from '@airswap/balances/build/contracts/BalanceChecker.sol/BalanceChecker.json'
-// @ts-ignore
 import balancesDeploys from '@airswap/balances/deploys.js'
 const balancesInterface = new ethers.utils.Interface(
   JSON.stringify(BalanceChecker.abi)
@@ -36,6 +36,12 @@ export class Contract {
     this.addresses = addresses
     this.deployedBlocks = deployedBlocks
     this.factory = factory
+  }
+  public getAddress(chainId: ChainIds): string | null {
+    return this.addresses[chainId] || null
+  }
+  public getBlock(chainId: ChainIds): number {
+    return this.deployedBlocks[chainId] || 0
   }
   public getContract(
     providerOrSigner: ethers.providers.Provider | ethers.Signer,

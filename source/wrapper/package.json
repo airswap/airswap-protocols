@@ -1,6 +1,6 @@
 {
   "name": "@airswap/wrapper",
-  "version": "4.0.7",
+  "version": "4.0.8",
   "description": "AirSwap: Wrap and Unwrap Native Tokens",
   "license": "MIT",
   "repository": {
@@ -11,8 +11,10 @@
     "./build",
     "./typechain",
     "./deploys.js",
-    "./deploys.js.d.ts",
-    "./deploys-weth.js"
+    "./deploys-blocks.js",
+    "./deploys-weth.js",
+    "./deploys-blocks-weth.js",
+    "./deploys.js.d.ts"
   ],
   "scripts": {
     "clean": "rm -rf ./cache && rm -rf ./build && rm -rf ./typechain",
@@ -25,7 +27,7 @@
     "verify": "hardhat run ./scripts/verify.js"
   },
   "dependencies": {
-    "@airswap/swap-erc20": "4.0.5",
+    "@airswap/swap-erc20": "4.0.6",
     "@openzeppelin/contracts": "^4.8.3"
   },
   "devDependencies": {
