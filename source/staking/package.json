@@ -1,6 +1,6 @@
 {
   "name": "@airswap/staking",
-  "version": "4.0.2",
+  "version": "4.0.3",
   "description": "AirSwap: Stake Tokens",
   "license": "MIT",
   "repository": {
@@ -11,6 +11,7 @@
     "./build",
     "./typechain",
     "./deploys.js",
+    "./deploys-blocks.js",
     "./deploys.js.d.ts"
   ],
   "scripts": {

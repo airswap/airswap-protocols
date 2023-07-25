@@ -11,6 +11,7 @@
     "./build",
     "./typechain",
     "./deploys.js",
+    "./deploys-blocks.js",
     "./deploys.js.d.ts",
     "./deploys-adapters.js"
   ],

@@ -11,6 +11,7 @@
     "./build",
     "./typechain",
     "./deploys.js",
+    "./deploys-blocks.js",
     "./deploys.js.d.ts"
   ],
   "scripts": {
@@ -24,7 +25,7 @@
     "verify": "hardhat run ./scripts/verify.js"
   },
   "dependencies": {
-    "@airswap/staking": "4.0.2",
+    "@airswap/staking": "4.0.3",
     "@openzeppelin/contracts": "^4.8.3"
   },
   "devDependencies": {
