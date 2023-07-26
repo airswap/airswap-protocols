@@ -93,14 +93,18 @@ describe('Pool Unit', () => {
       const max = 101
       await expect(
         (await ethers.getContractFactory('Pool')).deploy(CLAIM_SCALE, max)
-      ).to.be.revertedWith(`MaxTooHigh(${max})`)
+      )
+        .to.be.revertedWith(`MaxTooHigh`)
+        .withArgs(max)
     })
 
     it('constructor reverts when scale is too high', async () => {
       const scale = 78
       await expect(
         (await ethers.getContractFactory('Pool')).deploy(scale, CLAIM_MAX)
-      ).to.be.revertedWith(`ScaleTooHigh(${scale})`)
+      )
+        .to.be.revertedWith(`ScaleTooHigh`)
+        .withArgs(scale)
     })
 
     it('constructor reverts when missing an argument', async () => {
@@ -118,16 +122,16 @@ describe('Pool Unit', () => {
     it('enable a claim for a merkle root fails when not admin', async () => {
       const root = getRoot(tree)
       await expect(pool.connect(bob).enable(root)).to.be.revertedWith(
-        'Unauthorized()'
+        'Unauthorized'
       )
     })
 
     it('enable a root twice fails', async () => {
       const root = getRoot(tree)
       await pool.connect(deployer).enable(root)
-      await expect(pool.connect(deployer).enable(root)).to.be.revertedWith(
-        `RootExists("${root}")`
-      )
+      await expect(pool.connect(deployer).enable(root))
+        .to.be.revertedWith(`RootExists`)
+        .withArgs(root)
     })
 
     it('Test setclaimed with admin is successful', async () => {
@@ -149,7 +153,7 @@ describe('Pool Unit', () => {
           ],
           feeToken.address
         )
-      ).to.be.revertedWith('AlreadyClaimed()')
+      ).to.be.revertedWith('AlreadyClaimed')
     })
 
     it('Test setclaimed with non-admin reverts', async () => {
@@ -159,7 +163,7 @@ describe('Pool Unit', () => {
 
       await expect(
         pool.connect(alice).setClaimed(root, [bob.address])
-      ).to.be.revertedWith('Unauthorized()')
+      ).to.be.revertedWith('Unauthorized')
     })
 
     it('Test setclaimed reverts with claim already made', async () => {
@@ -170,7 +174,7 @@ describe('Pool Unit', () => {
 
       await expect(
         pool.connect(deployer).setClaimed(root, [bob.address])
-      ).to.be.revertedWith('AlreadyClaimed()')
+      ).to.be.revertedWith('AlreadyClaimed')
     })
   })
 
@@ -196,13 +200,17 @@ describe('Pool Unit', () => {
     it('set stake contract with bad token address reverts', async () => {
       await expect(
         pool.connect(deployer).setStaking(ADDRESS_ZERO, stakingContract.address)
-      ).to.be.revertedWith(`AddressInvalid("${ADDRESS_ZERO}")`)
+      )
+        .to.be.revertedWith(`AddressInvalid`)
+        .withArgs(ADDRESS_ZERO)
     })
 
     it('set stake contract with bad contract address reverts', async () => {
       await expect(
         pool.connect(deployer).setStaking(feeToken.address, ADDRESS_ZERO)
-      ).to.be.revertedWith(`AddressInvalid("${ADDRESS_ZERO}")`)
+      )
+        .to.be.revertedWith(`AddressInvalid`)
+        .withArgs(ADDRESS_ZERO)
     })
   })
 
@@ -243,7 +251,7 @@ describe('Pool Unit', () => {
 
       await expect(
         pool.connect(bob).withdraw([], feeToken.address)
-      ).to.be.revertedWith(`ClaimsNotProvided()`)
+      ).to.be.revertedWith(`ClaimsNotProvided`)
 
       const isClaimed = await pool.claimed(root, bob.address)
       expect(isClaimed).to.equal(false)
@@ -268,7 +276,9 @@ describe('Pool Unit', () => {
           ],
           feeToken.address
         )
-      ).to.be.revertedWith(`RootDisabled("${root}")`)
+      )
+        .to.be.revertedWith(`RootDisabled`)
+        .withArgs(root)
 
       const isClaimed = await pool.claimed(root, bob.address)
       expect(isClaimed).to.equal(false)
@@ -307,7 +317,7 @@ describe('Pool Unit', () => {
           ],
           feeToken.address
         )
-      ).to.be.revertedWith(`AlreadyClaimed()`)
+      ).to.be.revertedWith(`AlreadyClaimed`)
 
       const isClaimed = await pool.claimed(root, bob.address)
       expect(isClaimed).to.equal(true)
@@ -325,14 +335,16 @@ describe('Pool Unit', () => {
         pool.connect(bob).withdraw(
           [
             {
-              root: getRoot(tree),
+              root,
               score: score,
               proof,
             },
           ],
           feeToken.address
         )
-      ).to.be.revertedWith(`ProofInvalid([${stringifiedProof(proof)}])`)
+      )
+        .to.be.revertedWith(`ProofInvalid`)
+        .withArgs(root)
 
       const isClaimed = await pool.claimed(root, bob.address)
       expect(isClaimed).to.equal(false)
@@ -395,7 +407,9 @@ describe('Pool Unit', () => {
           withdrawMinimum,
           bob.address
         )
-      ).to.be.revertedWith(`AmountInsufficient(${amount})`)
+      )
+        .to.be.revertedWith(`AmountInsufficient`)
+        .withArgs(amount)
 
       const isClaimed = await pool.claimed(root, alice.address)
       expect(isClaimed).to.equal(false)
@@ -424,7 +438,9 @@ describe('Pool Unit', () => {
           withdrawMinimum,
           bob.address
         )
-      ).to.be.revertedWith(`ProofInvalid([${stringifiedProof(proof)}]`)
+      )
+        .to.be.revertedWith(`ProofInvalid`)
+        .withArgs(root)
     })
 
     it('withdrawAndStake success', async () => {
@@ -484,7 +500,9 @@ describe('Pool Unit', () => {
           feeToken2.address,
           withdrawMinimum
         )
-      ).to.be.revertedWith(`TokenInvalid("${feeToken2.address}")`)
+      )
+        .to.be.revertedWith(`TokenInvalid`)
+        .withArgs(feeToken2.address)
     })
 
     it('withdrawAndStake for a recipient success', async () => {
@@ -551,7 +569,9 @@ describe('Pool Unit', () => {
           withdrawMinimum,
           bob.address
         )
-      ).to.be.revertedWith(`AmountInsufficient(${amount})`)
+      )
+        .to.be.revertedWith(`AmountInsufficient`)
+        .withArgs(amount)
 
       const isClaimed = await pool.claimed(root, alice.address)
       expect(isClaimed).to.equal(false)
@@ -578,7 +598,9 @@ describe('Pool Unit', () => {
           withdrawMinimum,
           bob.address
         )
-      ).to.be.revertedWith(`TokenInvalid("${feeToken2.address}")`)
+      )
+        .to.be.revertedWith(`TokenInvalid`)
+        .withArgs(feeToken2.address)
     })
   })
 
@@ -639,9 +661,9 @@ describe('Pool Unit', () => {
 
     it('Test setScale reverts', async () => {
       const scale = 1000
-      await expect(pool.setScale(scale)).to.be.revertedWith(
-        `ScaleTooHigh(${scale})`
-      )
+      await expect(pool.setScale(scale))
+        .to.be.revertedWith(`ScaleTooHigh`)
+        .withArgs(scale)
     })
   })
 
@@ -661,7 +683,9 @@ describe('Pool Unit', () => {
 
     it('Test setMax reverts', async () => {
       const max = 101
-      await expect(pool.setMax(max)).to.be.revertedWith(`MaxTooHigh(${max})`)
+      await expect(pool.setMax(max))
+        .to.be.revertedWith(`MaxTooHigh`)
+        .withArgs(max)
     })
   })
 
@@ -678,9 +702,9 @@ describe('Pool Unit', () => {
     })
 
     it('Test addAdmin reverts with zero address', async () => {
-      await expect(
-        pool.connect(deployer).addAdmin(ADDRESS_ZERO)
-      ).to.be.revertedWith(`AddressInvalid("${ADDRESS_ZERO}")`)
+      await expect(pool.connect(deployer).addAdmin(ADDRESS_ZERO))
+        .to.be.revertedWith(`AddressInvalid`)
+        .withArgs(ADDRESS_ZERO)
     })
 
     it('Test removeAdmin is successful', async () => {
@@ -697,9 +721,9 @@ describe('Pool Unit', () => {
     })
 
     it('Test removeAdmin executed by non-admin reverts', async () => {
-      await expect(
-        pool.connect(deployer).removeAdmin(alice.address)
-      ).to.be.revertedWith(`AdminNotSet("${alice.address}")`)
+      await expect(pool.connect(deployer).removeAdmin(alice.address))
+        .to.be.revertedWith(`AdminNotSet`)
+        .withArgs(alice.address)
     })
   })
 

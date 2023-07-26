@@ -260,7 +260,7 @@ contract Pool is IPool, Ownable2Step {
       if (!roots[_claim.root]) revert RootDisabled(_claim.root);
       if (claimed[_claim.root][msg.sender]) revert AlreadyClaimed();
       if (!verify(msg.sender, _claim.root, _claim.score, _claim.proof))
-        revert ProofInvalid(_claim.proof);
+        revert ProofInvalid(_claim.root);
       _totalScore = _totalScore + _claim.score;
       claimed[_claim.root][msg.sender] = true;
       _rootList[i] = _claim.root;
