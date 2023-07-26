@@ -16,13 +16,6 @@
   dependencies:
     "@openzeppelin/contracts" "^4.8.1"
 
-"@airswap/registry@4.0.3":
-  version "4.0.3"
-  resolved "https://registry.yarnpkg.com/@airswap/registry/-/registry-4.0.3.tgz#c2ffa76864271b64275965c7badb85d118ee3cca"
-  integrity sha512-E+50VB5jFu56bjEPjDFVLbyFwJs5WphP+dNcDgxwbyHVgmWfgI2HD2wEXrY0OUjDHvtpqxfT2HkrDx2dypMBTQ==
-  dependencies:
-    "@openzeppelin/contracts" "^4.8.3"
-
 "@babel/code-frame@^7.0.0":
   version "7.21.4"
   resolved "https://registry.yarnpkg.com/@babel/code-frame/-/code-frame-7.21.4.tgz#d0fa9e4413aca81f2b23b9442797bda1826edb39"
