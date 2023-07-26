@@ -33,16 +33,6 @@ describe('Pool Unit', () => {
   let pool
   let snapshotId
 
-  function stringifiedProof(proof) {
-    return proof.map((x, idx) => {
-      if (idx === 0) {
-        return `"${x}"`
-      } else {
-        return ` "${x}"`
-      }
-    })
-  }
-
   beforeEach(async () => {
     snapshotId = await ethers.provider.send('evm_snapshot')
   })
