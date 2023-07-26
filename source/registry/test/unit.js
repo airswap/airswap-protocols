@@ -154,7 +154,7 @@ describe('Registry Unit', () => {
     it('fails to add an empty list of protocols', async () => {
       await expect(
         registry.connect(account1).addProtocols([])
-      ).to.be.revertedWith('NoProtocolsToAdd()')
+      ).to.be.revertedWith('NoProtocolsToAdd')
     })
 
     it('add a list of protocols', async () => {
@@ -205,21 +205,23 @@ describe('Registry Unit', () => {
         registry
           .connect(account1)
           .addProtocols([protocol1, protocol2, protocol1])
-      ).to.be.revertedWith(`ProtocolExists("${protocol1}")`)
+      )
+        .to.be.revertedWith(`ProtocolExists`)
+        .withArgs(protocol1)
     })
 
     it('fails to add a duplicate protocol', async () => {
       await stakingToken.mock.transferFrom.returns(true)
       await registry.connect(account1).addProtocols([protocol1, protocol2])
-      await expect(
-        registry.connect(account1).addProtocols([protocol1])
-      ).to.be.revertedWith(`ProtocolExists("${protocol1}")`)
+      await expect(registry.connect(account1).addProtocols([protocol1]))
+        .to.be.revertedWith(`ProtocolExists`)
+        .withArgs(protocol1)
     })
 
     it('fails to remove an empty list of protocols', async () => {
       await expect(
         registry.connect(account1).removeProtocols([])
-      ).to.be.revertedWith('NoProtocolsToRemove()')
+      ).to.be.revertedWith('NoProtocolsToRemove')
     })
 
     it('remove a list of protocols', async () => {
@@ -273,7 +275,9 @@ describe('Registry Unit', () => {
         registry
           .connect(account1)
           .removeProtocols([protocol1, protocol2, protocol1])
-      ).to.be.revertedWith(`ProtocolDoesNotExist("${protocol1}")`)
+      )
+        .to.be.revertedWith(`ProtocolDoesNotExist`)
+        .withArgs(protocol1)
     })
 
     it('fails to remove a protocol already removed', async () => {
@@ -286,16 +290,16 @@ describe('Registry Unit', () => {
         .connect(account1)
         .removeProtocols([protocol1, protocol2, protocol3])
 
-      await expect(
-        registry.connect(account1).removeProtocols([protocol1])
-      ).to.be.revertedWith(`ProtocolDoesNotExist("${protocol1}")`)
+      await expect(registry.connect(account1).removeProtocols([protocol1]))
+        .to.be.revertedWith(`ProtocolDoesNotExist`)
+        .withArgs(protocol1)
     })
   })
 
   describe('supported tokens', async () => {
     it('fails to add an empty list of tokens', async () => {
       await expect(registry.connect(account1).addTokens([])).to.be.revertedWith(
-        'NoTokensToAdd()'
+        'NoTokensToAdd'
       )
     })
 
@@ -361,7 +365,9 @@ describe('Registry Unit', () => {
         registry
           .connect(account1)
           .addTokens([token1.address, token2.address, token1.address])
-      ).to.be.revertedWith(`TokenExists("${token1.address}")`)
+      )
+        .to.be.revertedWith(`TokenExists`)
+        .withArgs(token1.address)
     })
 
     it('fails to add a duplicate token', async () => {
@@ -369,15 +375,15 @@ describe('Registry Unit', () => {
       await registry
         .connect(account1)
         .addTokens([token1.address, token2.address])
-      await expect(
-        registry.connect(account1).addTokens([token1.address])
-      ).to.be.revertedWith(`TokenExists("${token1.address}")`)
+      await expect(registry.connect(account1).addTokens([token1.address]))
+        .to.be.revertedWith(`TokenExists`)
+        .withArgs(token1.address)
     })
 
     it('fails to remove an empty list of tokens', async () => {
       await expect(
         registry.connect(account1).removeTokens([])
-      ).to.be.revertedWith('NoTokensToRemove()')
+      ).to.be.revertedWith('NoTokensToRemove')
     })
 
     it('remove a list of tokens', async () => {
@@ -483,7 +489,9 @@ describe('Registry Unit', () => {
         registry
           .connect(account1)
           .removeTokens([token1.address, token2.address, token1.address])
-      ).to.be.revertedWith(`TokenDoesNotExist("${token1.address}")`)
+      )
+        .to.be.revertedWith(`TokenDoesNotExist`)
+        .withArgs(token1.address)
     })
 
     it('fails to remove a token already removed', async () => {
@@ -497,9 +505,9 @@ describe('Registry Unit', () => {
         .connect(account1)
         .removeTokens([token1.address, token2.address, token3.address])
 
-      await expect(
-        registry.connect(account1).removeTokens([token1.address])
-      ).to.be.revertedWith(`TokenDoesNotExist("${token1.address}")`)
+      await expect(registry.connect(account1).removeTokens([token1.address]))
+        .to.be.revertedWith(`TokenDoesNotExist`)
+        .withArgs(token1.address)
     })
   })
 

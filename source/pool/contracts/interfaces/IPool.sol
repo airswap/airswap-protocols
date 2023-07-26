@@ -29,7 +29,7 @@ interface IPool {
   error AmountInsufficient(uint256);
   error ClaimsNotProvided();
   error MaxTooHigh(uint256);
-  error ProofInvalid(bytes32[]);
+  error ProofInvalid(bytes32);
   error ScaleTooHigh(uint256);
   error RootDisabled(bytes32);
   error RootExists(bytes32);
