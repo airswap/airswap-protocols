@@ -319,7 +319,7 @@ describe('Swap Integration', () => {
       expect(await erc721token.ownerOf('1')).to.be.equal(signer.address)
       await expect(
         swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
-      ).to.be.revertedWith('SenderTokenInvalid()')
+      ).to.be.revertedWith('SenderTokenInvalid')
       expect(await erc721token.ownerOf('1')).to.be.equal(signer.address)
     })
 
@@ -351,7 +351,7 @@ describe('Swap Integration', () => {
       )
       await expect(
         swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
-      ).to.be.revertedWith('SenderTokenInvalid()')
+      ).to.be.revertedWith('SenderTokenInvalid')
     })
   })
 

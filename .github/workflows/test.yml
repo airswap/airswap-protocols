@@ -14,7 +14,7 @@ jobs:
         with:
           node-version: '16.x'
       - run: yarn install
-      - run: lerna run compile --concurrency=1
+      - run: lerna run compile
       - run: lerna run test:unit --concurrency=1
         env:
           MNEMONIC: ${{ secrets.MNEMONIC }}
