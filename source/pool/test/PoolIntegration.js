@@ -3,12 +3,9 @@ const { toAtomicString } = require('@airswap/utils')
 const { generateTreeFromData, getRoot, getProof } = require('@airswap/merkle')
 const { soliditySha3 } = require('web3-utils')
 
-const { ethers, waffle } = require('hardhat')
-const { deployMockContract } = waffle
-const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
+const { ethers } = require('hardhat')
 const ERC20PresetFixedSupply = require('@openzeppelin/contracts/build/contracts/ERC20PresetFixedSupply.json')
 const STAKING = require('@airswap/staking/build/contracts/Staking.sol/Staking.json')
-const { ADDRESS_ZERO } = require('@airswap/constants')
 
 function toWei(value, places) {
   return toAtomicString(value, places || 18)
@@ -28,21 +25,10 @@ describe('Pool Integration', () => {
   const CAROL_SCORE = toWei(1000000, 4)
 
   let tree
-  let score
   let feeToken
   let feeToken2
   let pool
   let snapshotId
-
-  function stringifiedProof(proof) {
-    return proof.map((x, idx) => {
-      if (idx === 0) {
-        return `"${x}"`
-      } else {
-        return ` "${x}"`
-      }
-    })
-  }
 
   beforeEach(async () => {
     snapshotId = await ethers.provider.send('evm_snapshot')
