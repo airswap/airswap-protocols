@@ -13,7 +13,7 @@ jobs:
           node-version: '16.x'
           registry-url: 'https://registry.npmjs.org'
       - run: yarn install
-      - run: lerna run compile
+      - run: lerna run compile --concurrency=1
       - run: lerna publish from-package --yes --dist-tag beta
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
