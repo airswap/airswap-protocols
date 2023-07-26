@@ -63,24 +63,24 @@ describe('SwapERC20 Integration', () => {
       await ethers.getContractFactory(ERC20.abi, ERC20.bytecode)
     ).deploy('Staking', 'STAKE')
     await stakingToken.deployed()
-    stakingToken.mint(sender.address, 10000000000)
+    await stakingToken.mint(sender.address, 10000000000)
 
     staking = await (
       await ethers.getContractFactory(STAKING.abi, STAKING.bytecode)
-    ).deploy(stakingToken.address, 'Staking', 'STAKING', 100, 100)
+    ).deploy('Staking', 'STAKING', stakingToken.address, 100, 100)
     await staking.deployed()
 
     signerToken = await (
       await ethers.getContractFactory(ERC20.abi, ERC20.bytecode)
     ).deploy('A', 'A')
     await signerToken.deployed()
-    signerToken.mint(signer.address, 1000000)
+    await signerToken.mint(signer.address, 1000000)
 
     senderToken = await (
       await ethers.getContractFactory(ERC20.abi, ERC20.bytecode)
     ).deploy('B', 'B')
     await senderToken.deployed()
-    senderToken.mint(sender.address, 1000000)
+    await senderToken.mint(sender.address, 1000000)
 
     swap = await (
       await ethers.getContractFactory('SwapERC20')
