@@ -17,6 +17,9 @@ describe('Pool Integration', () => {
   let bob
   let stakingContract
 
+  const PROPOSAL_ID =
+    '0x0000000000000000000000000000000000000000000000000000000000000000'
+
   const CLAIM_SCALE = 10
   const CLAIM_MAX = 50
 
@@ -114,7 +117,10 @@ describe('Pool Integration', () => {
   describe('withdraw increase the staker balance', async () => {
     it('transfers the claimed funds to the staker', async () => {
       const root = getRoot(tree)
-      expect(await pool.connect(deployer).enable(root)).to.emit(pool, 'Enable')
+      expect(await pool.connect(deployer).enable(root, PROPOSAL_ID)).to.emit(
+        pool,
+        'Enable'
+      )
       const proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
       await pool.connect(bob).withdraw(
         [
@@ -135,7 +141,10 @@ describe('Pool Integration', () => {
   describe('withdraw for increase the balance of the recipient', async () => {
     it('transfers the claimed funds to the staker', async () => {
       const root = getRoot(tree)
-      expect(await pool.connect(deployer).enable(root)).to.emit(pool, 'Enable')
+      expect(await pool.connect(deployer).enable(root, PROPOSAL_ID)).to.emit(
+        pool,
+        'Enable'
+      )
       const proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
       await pool.connect(bob).withdrawWithRecipient(
         [
@@ -158,7 +167,10 @@ describe('Pool Integration', () => {
   describe('withdraw and stake for', async () => {
     it('transfers the claimed funds to the staker', async () => {
       const root = getRoot(tree)
-      expect(await pool.connect(deployer).enable(root)).to.emit(pool, 'Enable')
+      expect(await pool.connect(deployer).enable(root, PROPOSAL_ID)).to.emit(
+        pool,
+        'Enable'
+      )
       const proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
       await pool.connect(bob).withdrawAndStakeFor(
         [

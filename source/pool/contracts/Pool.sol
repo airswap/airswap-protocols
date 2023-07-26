@@ -34,6 +34,9 @@ contract Pool is IPool, Ownable2Step {
   // Mapping of tree root to account to mark as claimed
   mapping(bytes32 => mapping(address => bool)) public claimed;
 
+  // Mapping of proposalId to root
+  mapping(bytes32 => bytes32) public rootIds;
+
   // Staking contract address
   address public stakingContract;
 
@@ -150,10 +153,31 @@ contract Pool is IPool, Ownable2Step {
    * @notice Enables claims for a merkle tree of a set of scores
    * @param _root bytes32
    */
-  function enable(bytes32 _root) external override multiAdmin {
+  function enable(
+    bytes32 _root,
+    bytes32 _proposalId
+  ) external override multiAdmin {
     if (roots[_root]) revert RootExists(_root);
+    if (rootIds[_proposalId] != 0) revert ProposalIdExists(_proposalId);
+    rootIds[_proposalId] = _root;
     roots[_root] = true;
     emit Enable(_root);
+  }
+
+  /**
+   * @notice Returns the claim status of a root for a given address
+   * @param _address address
+   * @param _proposalIds bytes32[]
+   */
+  function hasClaimedProposals(
+    address _address,
+    bytes32[] calldata _proposalIds
+  ) external view returns (bool[] memory) {
+    bool[] memory claimList = new bool[](_proposalIds.length);
+    for (uint256 i = 0; i < _proposalIds.length; i++) {
+      claimList[i] = claimed[rootIds[_proposalIds[i]]][_address];
+    }
+    return claimList;
   }
 
   /**

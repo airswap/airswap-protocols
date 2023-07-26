@@ -30,6 +30,7 @@ interface IPool {
   error ClaimsNotProvided();
   error MaxTooHigh(uint256);
   error ProofInvalid(bytes32);
+  error ProposalIdExists(bytes32);
   error ScaleTooHigh(uint256);
   error RootDisabled(bytes32);
   error RootExists(bytes32);
@@ -46,9 +47,17 @@ interface IPool {
 
   function setStaking(address _stakingToken, address _stakingContract) external;
 
-  function setClaimed(bytes32 root, address[] memory accounts) external;
+  function setClaimed(
+    bytes32 root,
+    address[] memory accounts
+  ) external;
 
-  function enable(bytes32 root) external;
+  function enable(bytes32 _root, bytes32 _proposalId) external;
+
+  function hasClaimedProposals(
+    address _address,
+    bytes32[] calldata _proposalIds
+  ) external returns (bool[] memory);
 
   function drainTo(address[] calldata tokens, address dest) external;
 
