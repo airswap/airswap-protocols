@@ -3,7 +3,11 @@ const fs = require('fs')
 const Confirm = require('prompt-confirm')
 const { ethers, run } = require('hardhat')
 const stakingDeploys = require('@airswap/staking/deploys.js')
-const { chainNames, stakingTokenAddresses } = require('@airswap/constants')
+const {
+  chainNames,
+  ChainIds,
+  stakingTokenAddresses,
+} = require('@airswap/constants')
 const { getReceiptUrl } = require('@airswap/utils')
 const poolDeploys = require('../deploys.js')
 
@@ -32,12 +36,7 @@ async function main() {
   const prompt = new Confirm('Proceed to deploy?')
   if (await prompt.run()) {
     const poolFactory = await ethers.getContractFactory('Pool')
-    const poolContract = await poolFactory.deploy(
-      scale,
-      max,
-      stakingContract,
-      stakingToken
-    )
+    const poolContract = await poolFactory.deploy(scale, max)
     console.log(
       'Deploying...',
       getReceiptUrl(chainId, poolContract.deployTransaction.hash)

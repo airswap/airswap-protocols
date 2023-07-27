@@ -47,10 +47,7 @@ interface IPool {
 
   function setStaking(address _stakingToken, address _stakingContract) external;
 
-  function setClaimed(
-    bytes32 root,
-    address[] memory accounts
-  ) external;
+  function setClaimed(bytes32 root, address[] memory accounts) external;
 
   function enable(bytes32 _root, bytes32 _proposalId) external;
 

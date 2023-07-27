@@ -18,7 +18,7 @@ async function main() {
   console.log(`Verifying on ${chainNames[chainId].toUpperCase()}`)
   await run('verify:verify', {
     address: poolDeploys[chainId],
-    constructorArguments: [scale, max, stakingContract, stakingToken],
+    constructorArguments: [scale, max],
   })
 }
 
