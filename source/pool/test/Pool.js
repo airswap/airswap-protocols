@@ -162,7 +162,7 @@ describe('Pool Unit', () => {
         pool.connect(bob).withdraw(
           [
             {
-              root: getRoot(tree),
+              proposalId: PROPOSAL_ID,
               score: BOB_SCORE,
               proof,
             },
@@ -244,7 +244,7 @@ describe('Pool Unit', () => {
         pool.connect(bob).withdraw(
           [
             {
-              root: getRoot(tree),
+              proposalId: PROPOSAL_ID,
               score: BOB_SCORE,
               proof,
             },
@@ -285,7 +285,7 @@ describe('Pool Unit', () => {
         pool.connect(bob).withdraw(
           [
             {
-              root: getRoot(tree),
+              proposalId: PROPOSAL_ID,
               score: BOB_SCORE,
               proof,
             },
@@ -293,8 +293,8 @@ describe('Pool Unit', () => {
           feeToken.address
         )
       )
-        .to.be.revertedWith(`RootDisabled`)
-        .withArgs(root)
+        .to.be.revertedWith(`ProposalDisabled`)
+        .withArgs(PROPOSAL_ID)
 
       const isClaimed = await pool.claimed(root, bob.address)
       expect(isClaimed).to.equal(false)
@@ -313,7 +313,7 @@ describe('Pool Unit', () => {
         pool.connect(bob).withdraw(
           [
             {
-              root: getRoot(tree),
+              proposalId: PROPOSAL_ID,
               score: BOB_SCORE,
               proof,
             },
@@ -326,7 +326,7 @@ describe('Pool Unit', () => {
         pool.connect(bob).withdraw(
           [
             {
-              root: getRoot(tree),
+              proposalId: PROPOSAL_ID,
               score: BOB_SCORE,
               proof,
             },
@@ -351,7 +351,7 @@ describe('Pool Unit', () => {
         pool.connect(bob).withdraw(
           [
             {
-              root,
+              proposalId: PROPOSAL_ID,
               score: score,
               proof,
             },
@@ -381,7 +381,7 @@ describe('Pool Unit', () => {
         pool.connect(alice).withdrawWithRecipient(
           [
             {
-              root: getRoot(tree),
+              proposalId: PROPOSAL_ID,
               score: ALICE_SCORE,
               proof,
             },
@@ -414,7 +414,7 @@ describe('Pool Unit', () => {
         pool.connect(alice).withdrawWithRecipient(
           [
             {
-              root: getRoot(tree),
+              proposalId: PROPOSAL_ID,
               score: ALICE_SCORE,
               proof,
             },
@@ -445,7 +445,7 @@ describe('Pool Unit', () => {
         pool.connect(bob).withdrawWithRecipient(
           [
             {
-              root: getRoot(tree),
+              proposalId: PROPOSAL_ID,
               score: ALICE_SCORE,
               proof,
             },
@@ -474,7 +474,7 @@ describe('Pool Unit', () => {
         pool.connect(alice).withdrawAndStake(
           [
             {
-              root: getRoot(tree),
+              proposalId: PROPOSAL_ID,
               score: ALICE_SCORE,
               proof,
             },
@@ -508,7 +508,7 @@ describe('Pool Unit', () => {
         pool.connect(alice).withdrawAndStake(
           [
             {
-              root: getRoot(tree),
+              proposalId: PROPOSAL_ID,
               score: ALICE_SCORE,
               proof,
             },
@@ -538,7 +538,7 @@ describe('Pool Unit', () => {
         pool.connect(alice).withdrawAndStakeFor(
           [
             {
-              root: getRoot(tree),
+              proposalId: PROPOSAL_ID,
               score: ALICE_SCORE,
               proof,
             },
@@ -576,7 +576,7 @@ describe('Pool Unit', () => {
         pool.connect(alice).withdrawAndStakeFor(
           [
             {
-              root: getRoot(tree),
+              proposalId: PROPOSAL_ID,
               score: ALICE_SCORE,
               proof,
             },
@@ -605,7 +605,7 @@ describe('Pool Unit', () => {
         pool.connect(alice).withdrawAndStakeFor(
           [
             {
-              root: getRoot(tree),
+              proposalId: PROPOSAL_ID,
               score: ALICE_SCORE,
               proof,
             },
@@ -633,7 +633,7 @@ describe('Pool Unit', () => {
       await pool.connect(bob).withdraw(
         [
           {
-            root: getRoot(tree),
+            proposalId: PROPOSAL_ID,
             score: BOB_SCORE,
             proof,
           },

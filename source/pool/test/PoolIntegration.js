@@ -125,7 +125,7 @@ describe('Pool Integration', () => {
       await pool.connect(bob).withdraw(
         [
           {
-            root: getRoot(tree),
+            proposalId: PROPOSAL_ID,
             score: BOB_SCORE,
             proof,
           },
@@ -149,7 +149,7 @@ describe('Pool Integration', () => {
       await pool.connect(bob).withdrawWithRecipient(
         [
           {
-            root: getRoot(tree),
+            proposalId: PROPOSAL_ID,
             score: BOB_SCORE,
             proof,
           },
@@ -175,7 +175,7 @@ describe('Pool Integration', () => {
       await pool.connect(bob).withdrawAndStakeFor(
         [
           {
-            root: getRoot(tree),
+            proposalId: PROPOSAL_ID,
             score: BOB_SCORE,
             proof,
           },

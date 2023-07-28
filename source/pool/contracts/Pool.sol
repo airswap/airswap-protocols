@@ -131,22 +131,22 @@ contract Pool is IPool, Ownable2Step {
   /**
    * @notice Set claims from previous pool contract
    * @dev Only owner
-   * @param _root bytes32
+   * @param _proposalId bytes32
    * @param _accounts address[]
    */
   function setClaimed(
-    bytes32 _root,
+    bytes32 _proposalId,
     address[] memory _accounts
   ) external override multiAdmin {
-    if (roots[_root] == false) {
-      roots[_root] = true;
+    if (roots[rootIds[_proposalId]] == false) {
+      roots[rootIds[_proposalId]] = true;
     }
     for (uint256 i = 0; i < _accounts.length; i++) {
       address account = _accounts[i];
-      if (claimed[_root][account]) revert AlreadyClaimed();
-      claimed[_root][account] = true;
+      if (claimed[rootIds[_proposalId]][account]) revert AlreadyClaimed();
+      claimed[rootIds[_proposalId]][account] = true;
     }
-    emit Enable(_root);
+    emit Enable(rootIds[_proposalId]);
   }
 
   /**
@@ -281,13 +281,21 @@ contract Pool is IPool, Ownable2Step {
     Claim memory _claim;
     for (uint256 i = 0; i < _claims.length; i++) {
       _claim = _claims[i];
-      if (!roots[_claim.root]) revert RootDisabled(_claim.root);
-      if (claimed[_claim.root][msg.sender]) revert AlreadyClaimed();
-      if (!verify(msg.sender, _claim.root, _claim.score, _claim.proof))
-        revert ProofInvalid(_claim.root);
+      if (!roots[rootIds[_claim.proposalId]])
+        revert ProposalDisabled(_claim.proposalId);
+      if (claimed[rootIds[_claim.proposalId]][msg.sender])
+        revert AlreadyClaimed();
+      if (
+        !verify(
+          msg.sender,
+          rootIds[_claim.proposalId],
+          _claim.score,
+          _claim.proof
+        )
+      ) revert ProofInvalid(rootIds[_claim.proposalId]);
       _totalScore = _totalScore + _claim.score;
-      claimed[_claim.root][msg.sender] = true;
-      _rootList[i] = _claim.root;
+      claimed[rootIds[_claim.proposalId]][msg.sender] = true;
+      _rootList[i] = rootIds[_claim.proposalId];
     }
     uint256 _amount = calculate(_totalScore, _token);
     if (_amount < _minimumAmount) revert AmountInsufficient(_amount);

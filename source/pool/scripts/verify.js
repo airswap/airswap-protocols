@@ -12,8 +12,6 @@ async function main() {
   const chainId = await deployer.getChainId()
   const scale = 10
   const max = 100
-  const stakingContract = stakingDeploys[chainId]
-  const stakingToken = stakingTokenAddresses[chainId]
 
   console.log(`Verifying on ${chainNames[chainId].toUpperCase()}`)
   await run('verify:verify', {

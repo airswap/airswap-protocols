@@ -4,7 +4,7 @@ pragma solidity ^0.8.17;
 
 interface IPool {
   struct Claim {
-    bytes32 root;
+    bytes32 proposalId;
     uint256 score;
     bytes32[] proof;
   }
@@ -30,9 +30,9 @@ interface IPool {
   error ClaimsNotProvided();
   error MaxTooHigh(uint256);
   error ProofInvalid(bytes32);
+  error ProposalDisabled(bytes32);
   error ProposalIdExists(bytes32);
   error ScaleTooHigh(uint256);
-  error RootDisabled(bytes32);
   error RootExists(bytes32);
   error TokenInvalid(address);
   error Unauthorized();
