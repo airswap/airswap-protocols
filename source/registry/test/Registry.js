@@ -225,6 +225,7 @@ describe('Registry Unit', () => {
     })
 
     it('remove a list of protocols', async () => {
+      await stakingToken.mock.transfer.returns(true)
       await stakingToken.mock.transferFrom.returns(true)
       await registry
         .connect(account1)
@@ -281,6 +282,7 @@ describe('Registry Unit', () => {
     })
 
     it('fails to remove a protocol already removed', async () => {
+      await stakingToken.mock.transfer.returns(true)
       await stakingToken.mock.transferFrom.returns(true)
       await registry
         .connect(account1)
