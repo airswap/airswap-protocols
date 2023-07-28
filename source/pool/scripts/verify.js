@@ -1,8 +1,7 @@
 /* eslint-disable no-console */
 const { ethers, run } = require('hardhat')
-const stakingDeploys = require('@airswap/staking/deploys.js')
 const poolDeploys = require('../deploys.js')
-const { chainNames, stakingTokenAddresses } = require('@airswap/constants')
+const { chainNames } = require('@airswap/constants')
 
 async function main() {
   await run('compile')
