@@ -25,9 +25,6 @@ contract Pool is IPool, Ownable2Step {
   // Max percentage for a claim with infinite score
   uint256 public max;
 
-  // Mapping of tree root to boolean to enable claims
-  mapping(bytes32 => bool) public roots;
-
   // Mapping of address to boolean to enable admin accounts
   mapping(address => bool) public admins;
 
@@ -138,9 +135,9 @@ contract Pool is IPool, Ownable2Step {
     bytes32 _groupId,
     address[] memory _accounts
   ) external override multiAdmin {
-    if (roots[rootsByGroupId[_groupId]] == false) {
-      roots[rootsByGroupId[_groupId]] = true;
-    }
+    // if (roots[rootsByGroupId[_groupId]] == false) {
+    //   roots[rootsByGroupId[_groupId]] = true;
+    // }
     for (uint256 i = 0; i < _accounts.length; i++) {
       address account = _accounts[i];
       if (claimed[rootsByGroupId[_groupId]][account]) revert AlreadyClaimed();
@@ -157,10 +154,8 @@ contract Pool is IPool, Ownable2Step {
     bytes32 _groupId,
     bytes32 _root
   ) external override multiAdmin {
-    if (roots[_root]) revert RootExists(_root);
     if (rootsByGroupId[_groupId] != 0) revert GroupIdExists(_groupId);
     rootsByGroupId[_groupId] = _root;
-    roots[_root] = true;
     emit Enable(_root);
   }
 
@@ -281,7 +276,7 @@ contract Pool is IPool, Ownable2Step {
     Claim memory _claim;
     for (uint256 i = 0; i < _claims.length; i++) {
       _claim = _claims[i];
-      if (!roots[rootsByGroupId[_claim.groupId]])
+      if (rootsByGroupId[_claim.groupId]==0)
         revert GroupDisabled(_claim.groupId);
       if (claimed[rootsByGroupId[_claim.groupId]][msg.sender])
         revert AlreadyClaimed();

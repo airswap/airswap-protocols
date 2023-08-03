@@ -137,8 +137,8 @@ describe('Pool Unit', () => {
       const root = getRoot(tree)
       await pool.connect(deployer).enable(GROUP_ID, root)
       await expect(pool.connect(deployer).enable(GROUP_ID, root))
-        .to.be.revertedWith(`RootExists`)
-        .withArgs(root)
+        .to.be.revertedWith(`GroupIdExists`)
+        .withArgs(GROUP_ID)
     })
 
     it('enable a with the same group id twice fails', async () => {
@@ -154,8 +154,7 @@ describe('Pool Unit', () => {
       await feeToken.mock.balanceOf.returns('100000')
 
       await pool.addAdmin(alice.address)
-      const root = getRoot(tree)
-      await pool.connect(alice).setClaimed(root, [bob.address])
+      await pool.connect(alice).setClaimed(GROUP_ID, [bob.address])
       const proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
 
       await expect(
@@ -169,27 +168,24 @@ describe('Pool Unit', () => {
           ],
           feeToken.address
         )
-      ).to.be.revertedWith('AlreadyClaimed')
+      ).to.be.revertedWith('GroupDisabled')
     })
 
     it('Test setclaimed with non-admin reverts', async () => {
       await feeToken.mock.balanceOf.returns('100000')
 
-      const root = getRoot(tree)
-
       await expect(
-        pool.connect(alice).setClaimed(root, [bob.address])
+        pool.connect(alice).setClaimed(GROUP_ID, [bob.address])
       ).to.be.revertedWith('Unauthorized')
     })
 
     it('Test setclaimed reverts with claim already made', async () => {
       await feeToken.mock.balanceOf.returns('100000')
 
-      const root = getRoot(tree)
-      await pool.connect(deployer).setClaimed(root, [bob.address])
+      await pool.connect(deployer).setClaimed(GROUP_ID, [bob.address])
 
       await expect(
-        pool.connect(deployer).setClaimed(root, [bob.address])
+        pool.connect(deployer).setClaimed(GROUP_ID, [bob.address])
       ).to.be.revertedWith('AlreadyClaimed')
     })
   })
