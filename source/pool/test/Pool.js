@@ -249,7 +249,7 @@ describe('Pool Unit', () => {
         )
       ).to.emit(pool, 'Withdraw')
 
-      const isClaimed = await pool.claimed(root, bob.address)
+      const isClaimed = await pool.claimed(GROUP_ID, bob.address)
       expect(isClaimed).to.equal(true)
     })
 
@@ -265,7 +265,7 @@ describe('Pool Unit', () => {
         pool.connect(bob).withdraw([], feeToken.address)
       ).to.be.revertedWith(`ClaimsNotProvided`)
 
-      const isClaimed = await pool.claimed(root, bob.address)
+      const isClaimed = await pool.claimed(GROUP_ID, bob.address)
       expect(isClaimed).to.equal(false)
     })
 
@@ -292,7 +292,7 @@ describe('Pool Unit', () => {
         .to.be.revertedWith(`GroupDisabled`)
         .withArgs(GROUP_ID)
 
-      const isClaimed = await pool.claimed(root, bob.address)
+      const isClaimed = await pool.claimed(GROUP_ID, bob.address)
       expect(isClaimed).to.equal(false)
     })
 
@@ -331,7 +331,7 @@ describe('Pool Unit', () => {
         )
       ).to.be.revertedWith(`AlreadyClaimed`)
 
-      const isClaimed = await pool.claimed(root, bob.address)
+      const isClaimed = await pool.claimed(GROUP_ID, bob.address)
       expect(isClaimed).to.equal(true)
     })
 
@@ -358,7 +358,7 @@ describe('Pool Unit', () => {
         .to.be.revertedWith(`ProofInvalid`)
         .withArgs(root)
 
-      const isClaimed = await pool.claimed(root, bob.address)
+      const isClaimed = await pool.claimed(GROUP_ID, bob.address)
       expect(isClaimed).to.equal(false)
     })
 
@@ -388,7 +388,7 @@ describe('Pool Unit', () => {
         )
       ).to.emit(pool, 'Withdraw')
 
-      const isClaimed = await pool.claimed(root, alice.address)
+      const isClaimed = await pool.claimed(GROUP_ID, alice.address)
       expect(isClaimed).to.equal(true)
     })
 
@@ -423,7 +423,7 @@ describe('Pool Unit', () => {
         .to.be.revertedWith(`AmountInsufficient`)
         .withArgs(amount)
 
-      const isClaimed = await pool.claimed(root, alice.address)
+      const isClaimed = await pool.claimed(GROUP_ID, alice.address)
       expect(isClaimed).to.equal(false)
     })
 
@@ -480,7 +480,7 @@ describe('Pool Unit', () => {
         )
       ).to.emit(pool, 'Withdraw')
 
-      const isClaimed = await pool.claimed(root, alice.address)
+      const isClaimed = await pool.claimed(GROUP_ID, alice.address)
       expect(isClaimed).to.equal(true)
 
       const balance = await stakingContract
@@ -545,7 +545,7 @@ describe('Pool Unit', () => {
         )
       ).to.emit(pool, 'Withdraw')
 
-      const isClaimed = await pool.claimed(root, alice.address)
+      const isClaimed = await pool.claimed(GROUP_ID, alice.address)
       expect(isClaimed).to.equal(true)
 
       const balance = await stakingContract.connect(bob).balanceOf(bob.address)
@@ -585,7 +585,7 @@ describe('Pool Unit', () => {
         .to.be.revertedWith(`AmountInsufficient`)
         .withArgs(amount)
 
-      const isClaimed = await pool.claimed(root, alice.address)
+      const isClaimed = await pool.claimed(GROUP_ID, alice.address)
       expect(isClaimed).to.equal(false)
     })
 

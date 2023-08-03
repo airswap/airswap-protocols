@@ -28,7 +28,7 @@ contract Pool is IPool, Ownable2Step {
   // Mapping of address to boolean to enable admin accounts
   mapping(address => bool) public admins;
 
-  // Mapping of tree root to account to mark as claimed
+  // Mapping of groupId to account to mark as claimed
   mapping(bytes32 => mapping(address => bool)) public claimed;
 
   // Mapping of groupId to root
@@ -135,15 +135,12 @@ contract Pool is IPool, Ownable2Step {
     bytes32 _groupId,
     address[] memory _accounts
   ) external override multiAdmin {
-    // if (roots[rootsByGroupId[_groupId]] == false) {
-    //   roots[rootsByGroupId[_groupId]] = true;
-    // }
     for (uint256 i = 0; i < _accounts.length; i++) {
       address account = _accounts[i];
-      if (claimed[rootsByGroupId[_groupId]][account]) revert AlreadyClaimed();
-      claimed[rootsByGroupId[_groupId]][account] = true;
+      if (claimed[_groupId][account]) revert AlreadyClaimed();
+      claimed[_groupId][account] = true;
     }
-    emit Enable(rootsByGroupId[_groupId]);
+    emit Enable(_groupId, rootsByGroupId[_groupId]);
   }
 
   /**
@@ -156,7 +153,7 @@ contract Pool is IPool, Ownable2Step {
   ) external override multiAdmin {
     if (rootsByGroupId[_groupId] != 0) revert GroupIdExists(_groupId);
     rootsByGroupId[_groupId] = _root;
-    emit Enable(_root);
+    emit Enable(_groupId, _root);
   }
 
   /**
@@ -170,7 +167,7 @@ contract Pool is IPool, Ownable2Step {
   ) external view returns (bool[] memory) {
     bool[] memory claimList = new bool[](_groupIds.length);
     for (uint256 i = 0; i < _groupIds.length; i++) {
-      claimList[i] = claimed[rootsByGroupId[_groupIds[i]]][_address];
+      claimList[i] = claimed[_groupIds[i]][_address];
     }
     return claimList;
   }
@@ -276,9 +273,9 @@ contract Pool is IPool, Ownable2Step {
     Claim memory _claim;
     for (uint256 i = 0; i < _claims.length; i++) {
       _claim = _claims[i];
-      if (rootsByGroupId[_claim.groupId]==0)
+      if (rootsByGroupId[_claim.groupId] == 0)
         revert GroupDisabled(_claim.groupId);
-      if (claimed[rootsByGroupId[_claim.groupId]][msg.sender])
+      if (claimed[_claim.groupId][msg.sender])
         revert AlreadyClaimed();
       if (
         !verify(
@@ -289,7 +286,7 @@ contract Pool is IPool, Ownable2Step {
         )
       ) revert ProofInvalid(rootsByGroupId[_claim.groupId]);
       _totalScore = _totalScore + _claim.score;
-      claimed[rootsByGroupId[_claim.groupId]][msg.sender] = true;
+      claimed[_claim.groupId][msg.sender] = true;
       _rootList[i] = rootsByGroupId[_claim.groupId];
     }
     uint256 _amount = calculate(_totalScore, _token);

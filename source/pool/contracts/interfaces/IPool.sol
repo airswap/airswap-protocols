@@ -11,7 +11,7 @@ interface IPool {
 
   event AddAdmin(address admin);
   event DrainTo(address[] tokens, address dest);
-  event Enable(bytes32);
+  event Enable(bytes32, bytes32);
   event SetMax(uint256 max);
   event SetScale(uint256 scale);
   event SetStaking(address stakingToken, address stakigContract);

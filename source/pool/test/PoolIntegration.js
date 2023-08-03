@@ -133,7 +133,7 @@ describe('Pool Integration', () => {
         feeToken.address
       )
       await expect(await feeToken.balanceOf(bob.address)).to.be.equal('454')
-      const isClaimed = await pool.claimed(root, bob.address)
+      const isClaimed = await pool.claimed(GROUP_ID, bob.address)
       expect(isClaimed).to.equal(true)
     })
   })
@@ -159,7 +159,7 @@ describe('Pool Integration', () => {
         alice.address
       )
       await expect(await feeToken.balanceOf(alice.address)).to.be.equal('454')
-      const isClaimed = await pool.claimed(root, bob.address)
+      const isClaimed = await pool.claimed(GROUP_ID, bob.address)
       expect(isClaimed).to.equal(true)
     })
   })
@@ -187,7 +187,7 @@ describe('Pool Integration', () => {
       await expect(await stakingContract.balanceOf(bob.address)).to.be.equal(
         '454'
       )
-      const isClaimed = await pool.claimed(root, bob.address)
+      const isClaimed = await pool.claimed(GROUP_ID, bob.address)
       expect(isClaimed).to.equal(true)
     })
   })
