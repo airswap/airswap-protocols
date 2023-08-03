@@ -274,7 +274,6 @@ describe('Pool Unit', () => {
       await feeToken.mock.transfer.returns(true)
 
       await pool.addAdmin(alice.address)
-      const root = getRoot(tree)
       const proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
 
       await expect(
