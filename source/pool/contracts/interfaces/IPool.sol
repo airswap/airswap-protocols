@@ -4,7 +4,7 @@ pragma solidity ^0.8.17;
 
 interface IPool {
   struct Claim {
-    bytes32 proposalId;
+    bytes32 groupId;
     uint256 score;
     bytes32[] proof;
   }
@@ -30,8 +30,8 @@ interface IPool {
   error ClaimsNotProvided();
   error MaxTooHigh(uint256);
   error ProofInvalid(bytes32);
-  error ProposalDisabled(bytes32);
-  error ProposalIdExists(bytes32);
+  error GroupDisabled(bytes32);
+  error GroupIdExists(bytes32);
   error ScaleTooHigh(uint256);
   error RootExists(bytes32);
   error TokenInvalid(address);
@@ -49,11 +49,11 @@ interface IPool {
 
   function setClaimed(bytes32 root, address[] memory accounts) external;
 
-  function enable(bytes32 _root, bytes32 _proposalId) external;
+  function enable(bytes32 _root, bytes32 _groupId) external;
 
-  function hasClaimedProposals(
+  function hasClaimedGroups(
     address _address,
-    bytes32[] calldata _proposalIds
+    bytes32[] calldata _groupIds
   ) external returns (bool[] memory);
 
   function drainTo(address[] calldata tokens, address dest) external;

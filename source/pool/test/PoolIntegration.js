@@ -17,7 +17,7 @@ describe('Pool Integration', () => {
   let bob
   let stakingContract
 
-  const PROPOSAL_ID =
+  const GROUP_ID =
     '0x0000000000000000000000000000000000000000000000000000000000000000'
 
   const CLAIM_SCALE = 10
@@ -117,7 +117,7 @@ describe('Pool Integration', () => {
   describe('withdraw increase the staker balance', async () => {
     it('transfers the claimed funds to the staker', async () => {
       const root = getRoot(tree)
-      expect(await pool.connect(deployer).enable(root, PROPOSAL_ID)).to.emit(
+      expect(await pool.connect(deployer).enable(GROUP_ID, root)).to.emit(
         pool,
         'Enable'
       )
@@ -125,7 +125,7 @@ describe('Pool Integration', () => {
       await pool.connect(bob).withdraw(
         [
           {
-            proposalId: PROPOSAL_ID,
+            groupId: GROUP_ID,
             score: BOB_SCORE,
             proof,
           },
@@ -141,7 +141,7 @@ describe('Pool Integration', () => {
   describe('withdraw for increase the balance of the recipient', async () => {
     it('transfers the claimed funds to the staker', async () => {
       const root = getRoot(tree)
-      expect(await pool.connect(deployer).enable(root, PROPOSAL_ID)).to.emit(
+      expect(await pool.connect(deployer).enable(GROUP_ID, root)).to.emit(
         pool,
         'Enable'
       )
@@ -149,7 +149,7 @@ describe('Pool Integration', () => {
       await pool.connect(bob).withdrawWithRecipient(
         [
           {
-            proposalId: PROPOSAL_ID,
+            groupId: GROUP_ID,
             score: BOB_SCORE,
             proof,
           },
@@ -167,7 +167,7 @@ describe('Pool Integration', () => {
   describe('withdraw and stake for', async () => {
     it('transfers the claimed funds to the staker', async () => {
       const root = getRoot(tree)
-      expect(await pool.connect(deployer).enable(root, PROPOSAL_ID)).to.emit(
+      expect(await pool.connect(deployer).enable(GROUP_ID, root)).to.emit(
         pool,
         'Enable'
       )
@@ -175,7 +175,7 @@ describe('Pool Integration', () => {
       await pool.connect(bob).withdrawAndStakeFor(
         [
           {
-            proposalId: PROPOSAL_ID,
+            groupId: GROUP_ID,
             score: BOB_SCORE,
             proof,
           },

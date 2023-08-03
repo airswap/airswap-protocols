@@ -34,8 +34,8 @@ contract Pool is IPool, Ownable2Step {
   // Mapping of tree root to account to mark as claimed
   mapping(bytes32 => mapping(address => bool)) public claimed;
 
-  // Mapping of proposalId to root
-  mapping(bytes32 => bytes32) public rootIds;
+  // Mapping of groupId to root
+  mapping(bytes32 => bytes32) public rootsByGroupId;
 
   // Staking contract address
   address public stakingContract;
@@ -131,22 +131,22 @@ contract Pool is IPool, Ownable2Step {
   /**
    * @notice Set claims from previous pool contract
    * @dev Only owner
-   * @param _proposalId bytes32
+   * @param _groupId bytes32
    * @param _accounts address[]
    */
   function setClaimed(
-    bytes32 _proposalId,
+    bytes32 _groupId,
     address[] memory _accounts
   ) external override multiAdmin {
-    if (roots[rootIds[_proposalId]] == false) {
-      roots[rootIds[_proposalId]] = true;
+    if (roots[rootsByGroupId[_groupId]] == false) {
+      roots[rootsByGroupId[_groupId]] = true;
     }
     for (uint256 i = 0; i < _accounts.length; i++) {
       address account = _accounts[i];
-      if (claimed[rootIds[_proposalId]][account]) revert AlreadyClaimed();
-      claimed[rootIds[_proposalId]][account] = true;
+      if (claimed[rootsByGroupId[_groupId]][account]) revert AlreadyClaimed();
+      claimed[rootsByGroupId[_groupId]][account] = true;
     }
-    emit Enable(rootIds[_proposalId]);
+    emit Enable(rootsByGroupId[_groupId]);
   }
 
   /**
@@ -154,12 +154,12 @@ contract Pool is IPool, Ownable2Step {
    * @param _root bytes32
    */
   function enable(
-    bytes32 _root,
-    bytes32 _proposalId
+    bytes32 _groupId,
+    bytes32 _root
   ) external override multiAdmin {
     if (roots[_root]) revert RootExists(_root);
-    if (rootIds[_proposalId] != 0) revert ProposalIdExists(_proposalId);
-    rootIds[_proposalId] = _root;
+    if (rootsByGroupId[_groupId] != 0) revert GroupIdExists(_groupId);
+    rootsByGroupId[_groupId] = _root;
     roots[_root] = true;
     emit Enable(_root);
   }
@@ -167,15 +167,15 @@ contract Pool is IPool, Ownable2Step {
   /**
    * @notice Returns the claim status of a root for a given address
    * @param _address address
-   * @param _proposalIds bytes32[]
+   * @param _groupIds bytes32[]
    */
-  function hasClaimedProposals(
+  function hasClaimedGroups(
     address _address,
-    bytes32[] calldata _proposalIds
+    bytes32[] calldata _groupIds
   ) external view returns (bool[] memory) {
-    bool[] memory claimList = new bool[](_proposalIds.length);
-    for (uint256 i = 0; i < _proposalIds.length; i++) {
-      claimList[i] = claimed[rootIds[_proposalIds[i]]][_address];
+    bool[] memory claimList = new bool[](_groupIds.length);
+    for (uint256 i = 0; i < _groupIds.length; i++) {
+      claimList[i] = claimed[rootsByGroupId[_groupIds[i]]][_address];
     }
     return claimList;
   }
@@ -281,21 +281,21 @@ contract Pool is IPool, Ownable2Step {
     Claim memory _claim;
     for (uint256 i = 0; i < _claims.length; i++) {
       _claim = _claims[i];
-      if (!roots[rootIds[_claim.proposalId]])
-        revert ProposalDisabled(_claim.proposalId);
-      if (claimed[rootIds[_claim.proposalId]][msg.sender])
+      if (!roots[rootsByGroupId[_claim.groupId]])
+        revert GroupDisabled(_claim.groupId);
+      if (claimed[rootsByGroupId[_claim.groupId]][msg.sender])
         revert AlreadyClaimed();
       if (
         !verify(
           msg.sender,
-          rootIds[_claim.proposalId],
+          rootsByGroupId[_claim.groupId],
           _claim.score,
           _claim.proof
         )
-      ) revert ProofInvalid(rootIds[_claim.proposalId]);
+      ) revert ProofInvalid(rootsByGroupId[_claim.groupId]);
       _totalScore = _totalScore + _claim.score;
-      claimed[rootIds[_claim.proposalId]][msg.sender] = true;
-      _rootList[i] = rootIds[_claim.proposalId];
+      claimed[rootsByGroupId[_claim.groupId]][msg.sender] = true;
+      _rootList[i] = rootsByGroupId[_claim.groupId];
     }
     uint256 _amount = calculate(_totalScore, _token);
     if (_amount < _minimumAmount) revert AmountInsufficient(_amount);
