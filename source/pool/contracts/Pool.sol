@@ -275,8 +275,7 @@ contract Pool is IPool, Ownable2Step {
       _claim = _claims[i];
       if (rootsByGroupId[_claim.groupId] == 0)
         revert GroupDisabled(_claim.groupId);
-      if (claimed[_claim.groupId][msg.sender])
-        revert AlreadyClaimed();
+      if (claimed[_claim.groupId][msg.sender]) revert AlreadyClaimed();
       if (
         !verify(
           msg.sender,
