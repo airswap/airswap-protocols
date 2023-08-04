@@ -142,45 +142,6 @@ describe('Pool Unit', () => {
         `Enable`
       )
     })
-
-    it('Test setclaimed with admin is successful', async () => {
-      await feeToken.mock.balanceOf.returns('100000')
-
-      await pool.addAdmin(alice.address)
-      await pool.connect(alice).setClaimed(TREE, [bob.address])
-      const proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
-
-      await expect(
-        pool.connect(bob).withdraw(
-          [
-            {
-              tree: TREE,
-              score: BOB_SCORE,
-              proof,
-            },
-          ],
-          feeToken.address
-        )
-      ).to.be.revertedWith('TreeDisabled')
-    })
-
-    it('Test setclaimed with non-admin reverts', async () => {
-      await feeToken.mock.balanceOf.returns('100000')
-
-      await expect(
-        pool.connect(alice).setClaimed(TREE, [bob.address])
-      ).to.be.revertedWith('Unauthorized')
-    })
-
-    it('Test setclaimed reverts with claim already made', async () => {
-      await feeToken.mock.balanceOf.returns('100000')
-
-      await pool.connect(deployer).setClaimed(TREE, [bob.address])
-
-      await expect(
-        pool.connect(deployer).setClaimed(TREE, [bob.address])
-      ).to.be.revertedWith('AlreadyClaimed')
-    })
   })
 
   describe('Test staking variables', async () => {

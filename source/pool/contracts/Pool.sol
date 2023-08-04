@@ -126,24 +126,6 @@ contract Pool is IPool, Ownable2Step {
   }
 
   /**
-   * @notice Set claims from previous pool contract
-   * @dev Only owner
-   * @param _tree bytes32
-   * @param _accounts address[]
-   */
-  function setClaimed(
-    bytes32 _tree,
-    address[] memory _accounts
-  ) external override multiAdmin {
-    for (uint256 i = 0; i < _accounts.length; i++) {
-      address account = _accounts[i];
-      if (claimed[_tree][account]) revert AlreadyClaimed();
-      claimed[_tree][account] = true;
-    }
-    emit Enable(_tree, rootsByTree[_tree]);
-  }
-
-  /**
    * @notice Enables claims for a merkle tree of a set of scores
    * @param _root bytes32
    */
