@@ -28,11 +28,11 @@ contract Pool is IPool, Ownable2Step {
   // Mapping of address to boolean to enable admin accounts
   mapping(address => bool) public admins;
 
-  // Mapping of groupId to account to mark as claimed
+  // Mapping of tree to account to mark as claimed
   mapping(bytes32 => mapping(address => bool)) public claimed;
 
-  // Mapping of groupId to root
-  mapping(bytes32 => bytes32) public rootsByGroupId;
+  // Mapping of tree to root
+  mapping(bytes32 => bytes32) public rootsByTree;
 
   // Staking contract address
   address public stakingContract;
@@ -128,46 +128,42 @@ contract Pool is IPool, Ownable2Step {
   /**
    * @notice Set claims from previous pool contract
    * @dev Only owner
-   * @param _groupId bytes32
+   * @param _tree bytes32
    * @param _accounts address[]
    */
   function setClaimed(
-    bytes32 _groupId,
+    bytes32 _tree,
     address[] memory _accounts
   ) external override multiAdmin {
     for (uint256 i = 0; i < _accounts.length; i++) {
       address account = _accounts[i];
-      if (claimed[_groupId][account]) revert AlreadyClaimed();
-      claimed[_groupId][account] = true;
+      if (claimed[_tree][account]) revert AlreadyClaimed();
+      claimed[_tree][account] = true;
     }
-    emit Enable(_groupId, rootsByGroupId[_groupId]);
+    emit Enable(_tree, rootsByTree[_tree]);
   }
 
   /**
    * @notice Enables claims for a merkle tree of a set of scores
    * @param _root bytes32
    */
-  function enable(
-    bytes32 _groupId,
-    bytes32 _root
-  ) external override multiAdmin {
-    if (rootsByGroupId[_groupId] != 0) revert GroupIdExists(_groupId);
-    rootsByGroupId[_groupId] = _root;
-    emit Enable(_groupId, _root);
+  function enable(bytes32 _tree, bytes32 _root) external override multiAdmin {
+    rootsByTree[_tree] = _root;
+    emit Enable(_tree, _root);
   }
 
   /**
    * @notice Returns the claim status of a root for a given address
    * @param _address address
-   * @param _groupIds bytes32[]
+   * @param _trees bytes32[]
    */
-  function hasClaimedGroups(
+  function hasClaimedTrees(
     address _address,
-    bytes32[] calldata _groupIds
+    bytes32[] calldata _trees
   ) external view returns (bool[] memory) {
-    bool[] memory claimList = new bool[](_groupIds.length);
-    for (uint256 i = 0; i < _groupIds.length; i++) {
-      claimList[i] = claimed[_groupIds[i]][_address];
+    bool[] memory claimList = new bool[](_trees.length);
+    for (uint256 i = 0; i < _trees.length; i++) {
+      claimList[i] = claimed[_trees[i]][_address];
     }
     return claimList;
   }
@@ -273,20 +269,19 @@ contract Pool is IPool, Ownable2Step {
     Claim memory _claim;
     for (uint256 i = 0; i < _claims.length; i++) {
       _claim = _claims[i];
-      if (rootsByGroupId[_claim.groupId] == 0)
-        revert GroupDisabled(_claim.groupId);
-      if (claimed[_claim.groupId][msg.sender]) revert AlreadyClaimed();
+      if (rootsByTree[_claim.tree] == 0) revert TreeDisabled(_claim.tree);
+      if (claimed[_claim.tree][msg.sender]) revert AlreadyClaimed();
       if (
         !verify(
           msg.sender,
-          rootsByGroupId[_claim.groupId],
+          rootsByTree[_claim.tree],
           _claim.score,
           _claim.proof
         )
-      ) revert ProofInvalid(rootsByGroupId[_claim.groupId]);
+      ) revert ProofInvalid(rootsByTree[_claim.tree]);
       _totalScore = _totalScore + _claim.score;
-      claimed[_claim.groupId][msg.sender] = true;
-      _rootList[i] = rootsByGroupId[_claim.groupId];
+      claimed[_claim.tree][msg.sender] = true;
+      _rootList[i] = rootsByTree[_claim.tree];
     }
     uint256 _amount = calculate(_totalScore, _token);
     if (_amount < _minimumAmount) revert AmountInsufficient(_amount);
