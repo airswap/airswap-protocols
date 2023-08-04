@@ -22,7 +22,7 @@ contract Pool is IPool, Ownable2Step {
   // Larger the scale, lower the output for a claim
   uint256 public scale;
 
-  // Max percentage for a claim with infinite score
+  // Max percentage for a claim with infinite value
   uint256 public max;
 
   // Mapping of address to boolean to enable admin accounts
@@ -126,7 +126,7 @@ contract Pool is IPool, Ownable2Step {
   }
 
   /**
-   * @notice Enables claims for a merkle tree of a set of scores
+   * @notice Enables claims for a merkle tree of a set of values
    * @param _root bytes32
    */
   function enable(bytes32 _tree, bytes32 _root) external override multiAdmin {
@@ -136,16 +136,16 @@ contract Pool is IPool, Ownable2Step {
 
   /**
    * @notice Returns the claim status of a root for a given address
-   * @param _address address
+   * @param _account address
    * @param _trees bytes32[]
    */
-  function hasClaimedTrees(
-    address _address,
+  function getClaimStatusForTrees(
+    address _account,
     bytes32[] calldata _trees
   ) external view returns (bool[] memory) {
     bool[] memory claimList = new bool[](_trees.length);
     for (uint256 i = 0; i < _trees.length; i++) {
-      claimList[i] = claimed[_trees[i]][_address];
+      claimList[i] = claimed[_trees[i]][_account];
     }
     return claimList;
   }
@@ -246,7 +246,7 @@ contract Pool is IPool, Ownable2Step {
     uint256 _minimumAmount
   ) internal returns (uint256, bytes32[] memory) {
     if (_claims.length <= 0) revert ClaimsNotProvided();
-    uint256 _totalScore = 0;
+    uint256 _totalValue = 0;
     bytes32[] memory _rootList = new bytes32[](_claims.length);
     Claim memory _claim;
     for (uint256 i = 0; i < _claims.length; i++) {
@@ -257,32 +257,32 @@ contract Pool is IPool, Ownable2Step {
         !verify(
           msg.sender,
           rootsByTree[_claim.tree],
-          _claim.score,
+          _claim.value,
           _claim.proof
         )
       ) revert ProofInvalid(rootsByTree[_claim.tree]);
-      _totalScore = _totalScore + _claim.score;
+      _totalValue = _totalValue + _claim.value;
       claimed[_claim.tree][msg.sender] = true;
       _rootList[i] = rootsByTree[_claim.tree];
     }
-    uint256 _amount = calculate(_totalScore, _token);
+    uint256 _amount = calculate(_totalValue, _token);
     if (_amount < _minimumAmount) revert AmountInsufficient(_amount);
     return (_amount, _rootList);
   }
 
   /**
-   * @notice Calculate output amount for an input score
-   * @param _score uint256
+   * @notice Calculate output amount for an input value
+   * @param _value uint256
    * @param _token address
    * @return amount uint256 amount to claim based on balance, scale, and max
    */
   function calculate(
-    uint256 _score,
+    uint256 _value,
     address _token
   ) public view override returns (uint256 amount) {
     uint256 _balance = IERC20(_token).balanceOf(address(this));
-    uint256 _divisor = (uint256(10) ** scale) + _score;
-    return (max * _score * _balance) / _divisor / 100;
+    uint256 _divisor = (uint256(10) ** scale) + _value;
+    return (max * _value * _balance) / _divisor / 100;
   }
 
   /**
@@ -312,16 +312,16 @@ contract Pool is IPool, Ownable2Step {
    * @notice Verify a claim proof
    * @param _participant address
    * @param _root bytes32
-   * @param _score uint256
+   * @param _value uint256
    * @param _proof bytes32[]
    */
   function verify(
     address _participant,
     bytes32 _root,
-    uint256 _score,
+    uint256 _value,
     bytes32[] memory _proof
   ) public pure override returns (bool valid) {
-    bytes32 _leaf = keccak256(abi.encodePacked(_participant, _score));
+    bytes32 _leaf = keccak256(abi.encodePacked(_participant, _value));
     return MerkleProof.verify(_proof, _root, _leaf);
   }
 }

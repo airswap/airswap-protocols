@@ -5,7 +5,7 @@ pragma solidity ^0.8.17;
 interface IPool {
   struct Claim {
     bytes32 tree;
-    uint256 score;
+    uint256 value;
     bytes32[] proof;
   }
 
@@ -48,8 +48,8 @@ interface IPool {
 
   function enable(bytes32 _root, bytes32 _tree) external;
 
-  function hasClaimedTrees(
-    address _address,
+  function getClaimStatusForTrees(
+    address _account,
     bytes32[] calldata _trees
   ) external returns (bool[] memory);
 

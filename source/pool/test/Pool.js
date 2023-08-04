@@ -195,7 +195,7 @@ describe('Pool Unit', () => {
           [
             {
               tree: TREE,
-              score: BOB_SCORE,
+              value: BOB_SCORE,
               proof,
             },
           ],
@@ -235,7 +235,7 @@ describe('Pool Unit', () => {
           [
             {
               tree: TREE,
-              score: BOB_SCORE,
+              value: BOB_SCORE,
               proof,
             },
           ],
@@ -263,7 +263,7 @@ describe('Pool Unit', () => {
           [
             {
               tree: TREE,
-              score: BOB_SCORE,
+              value: BOB_SCORE,
               proof,
             },
           ],
@@ -276,7 +276,7 @@ describe('Pool Unit', () => {
           [
             {
               tree: TREE,
-              score: BOB_SCORE,
+              value: BOB_SCORE,
               proof,
             },
           ],
@@ -301,7 +301,7 @@ describe('Pool Unit', () => {
           [
             {
               tree: TREE,
-              score: score,
+              value: score,
               proof,
             },
           ],
@@ -331,7 +331,7 @@ describe('Pool Unit', () => {
           [
             {
               tree: TREE,
-              score: ALICE_SCORE,
+              value: ALICE_SCORE,
               proof,
             },
           ],
@@ -364,7 +364,7 @@ describe('Pool Unit', () => {
           [
             {
               tree: TREE,
-              score: ALICE_SCORE,
+              value: ALICE_SCORE,
               proof,
             },
           ],
@@ -395,7 +395,7 @@ describe('Pool Unit', () => {
           [
             {
               tree: TREE,
-              score: ALICE_SCORE,
+              value: ALICE_SCORE,
               proof,
             },
           ],
@@ -424,7 +424,7 @@ describe('Pool Unit', () => {
           [
             {
               tree: TREE,
-              score: ALICE_SCORE,
+              value: ALICE_SCORE,
               proof,
             },
           ],
@@ -458,7 +458,7 @@ describe('Pool Unit', () => {
           [
             {
               tree: TREE,
-              score: ALICE_SCORE,
+              value: ALICE_SCORE,
               proof,
             },
           ],
@@ -488,7 +488,7 @@ describe('Pool Unit', () => {
           [
             {
               tree: TREE,
-              score: ALICE_SCORE,
+              value: ALICE_SCORE,
               proof,
             },
           ],
@@ -526,7 +526,7 @@ describe('Pool Unit', () => {
           [
             {
               tree: TREE,
-              score: ALICE_SCORE,
+              value: ALICE_SCORE,
               proof,
             },
           ],
@@ -555,7 +555,7 @@ describe('Pool Unit', () => {
           [
             {
               tree: TREE,
-              score: ALICE_SCORE,
+              value: ALICE_SCORE,
               proof,
             },
           ],
@@ -583,14 +583,14 @@ describe('Pool Unit', () => {
         [
           {
             tree: TREE,
-            score: BOB_SCORE,
+            value: BOB_SCORE,
             proof,
           },
         ],
         feeToken.address
       )
 
-      const isClaimed = await pool.hasClaimedTrees(bob.address, [
+      const isClaimed = await pool.getClaimStatusForTrees(bob.address, [
         TREE,
         NEW_TREE,
       ])

@@ -126,7 +126,7 @@ describe('Pool Integration', () => {
         [
           {
             tree: TREE_ID,
-            score: BOB_SCORE,
+            value: BOB_SCORE,
             proof,
           },
         ],
@@ -150,7 +150,7 @@ describe('Pool Integration', () => {
         [
           {
             tree: TREE_ID,
-            score: BOB_SCORE,
+            value: BOB_SCORE,
             proof,
           },
         ],
@@ -176,7 +176,7 @@ describe('Pool Integration', () => {
         [
           {
             tree: TREE_ID,
-            score: BOB_SCORE,
+            value: BOB_SCORE,
             proof,
           },
         ],
