@@ -1,6 +1,4 @@
 {
-  "lerna": "4.0.0",
-  "packages": ["source/*", "tools/*"],
   "version": "independent",
   "npmClient": "yarn",
   "useNx": true
