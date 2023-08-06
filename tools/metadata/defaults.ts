@@ -25,28 +25,4 @@ export default [
     symbol: 'DAI',
     chainId: 5,
   },
-  /*
-   * Linea-Goerli Defaults
-   */
-  {
-    name: 'Dai',
-    address: '0x8741ba6225a6bf91f9d73531a98a89807857a2b3',
-    decimals: 18,
-    symbol: 'DAI',
-    chainId: 59140,
-  },
-  {
-    name: 'Tether USD',
-    address: '0x1990BC6dfe2ef605Bfc08f5A23564dB75642Ad73',
-    decimals: 6,
-    symbol: 'USDT',
-    chainId: 59140,
-  },
-  {
-    name: 'USDC',
-    address: '0xf56dc6695cF1f5c364eDEbC7Dc7077ac9B586068',
-    decimals: 6,
-    symbol: 'USDC',
-    chainId: 59140,
-  },
 ] as TokenInfo[]
