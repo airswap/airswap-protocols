@@ -1,21 +1,40 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.17;
 
 interface IPool {
-  event Withdraw(
-    uint256 indexed nonce,
-    uint256 indexed expiry,
-    address indexed account,
-    address token,
-    uint256 amount,
-    uint256 score
-  );
-  event SetScale(uint256 scale);
-  event SetMax(uint256 max);
+  struct Claim {
+    bytes32 root;
+    uint256 score;
+    bytes32[] proof;
+  }
+
   event AddAdmin(address admin);
-  event RemoveAdmin(address admin);
   event DrainTo(address[] tokens, address dest);
+  event Enable(bytes32);
+  event SetMax(uint256 max);
+  event SetScale(uint256 scale);
+  event SetStaking(address stakingToken, address stakigContract);
+  event RemoveAdmin(address admin);
+  event Withdraw(
+    bytes32[] roots,
+    address account,
+    address token,
+    uint256 amount
+  );
+
+  error AddressInvalid(address);
+  error AdminNotSet(address);
+  error AlreadyClaimed();
+  error AmountInsufficient(uint256);
+  error ClaimsNotProvided();
+  error MaxTooHigh(uint256);
+  error ProofInvalid(bytes32);
+  error ScaleTooHigh(uint256);
+  error RootDisabled(bytes32);
+  error RootExists(bytes32);
+  error TokenInvalid(address);
+  error Unauthorized();
 
   function setScale(uint256 _scale) external;
 
@@ -25,34 +44,41 @@ interface IPool {
 
   function removeAdmin(address _admin) external;
 
-  function setStakingContract(address _stakingContract) external;
+  function setStaking(address _stakingToken, address _stakingContract) external;
 
-  function setStakingToken(address _stakingToken) external;
+  function setClaimed(bytes32 root, address[] memory accounts) external;
+
+  function enable(bytes32 root) external;
 
   function drainTo(address[] calldata tokens, address dest) external;
 
-  function withdraw(
-    address recipient,
-    uint256 minimum,
+  function withdraw(Claim[] memory claims, address token) external;
+
+  function withdrawWithRecipient(
+    Claim[] memory claims,
     address token,
-    uint256 nonce,
-    uint256 expiry,
-    uint256 score,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
-  ) external returns (uint256);
+    uint256 minimumAmount,
+    address recipient
+  ) external;
 
   function withdrawAndStake(
-    address recipient,
-    uint256 minimum,
+    Claim[] memory claims,
     address token,
-    uint256 nonce,
-    uint256 expiry,
-    uint256 score,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
+    uint256 minimumAmount
+  ) external;
+
+  function withdrawAndStakeFor(
+    Claim[] memory claims,
+    address token,
+    uint256 minimumAmount,
+    address account
+  ) external;
+
+  function withdrawProtected(
+    Claim[] memory claims,
+    address token,
+    uint256 minimumAmount,
+    address recipient
   ) external returns (uint256);
 
   function calculate(
@@ -61,17 +87,9 @@ interface IPool {
   ) external view returns (uint256 amount);
 
   function verify(
-    uint256 nonce,
-    uint256 expiry,
     address participant,
+    bytes32 root,
     uint256 score,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
-  ) external view returns (bool valid);
-
-  function nonceUsed(
-    address participant,
-    uint256 nonce
-  ) external view returns (bool);
+    bytes32[] memory proof
+  ) external pure returns (bool valid);
 }

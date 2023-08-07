@@ -127,7 +127,7 @@ describe('Wrapper Unit Tests', () => {
     it('test changing swap-erc20 contract by non-owner', async () => {
       await expect(
         wrapper.connect(sender).setSwapERC20Contract(swapERC20.address)
-      ).to.be.revertedWith('owner')
+      ).to.be.revertedWith('Ownable: caller is not the owner')
     })
     it('test changing swap-erc20 contract', async () => {
       await wrapper.connect(deployer).setSwapERC20Contract(anyone.address)

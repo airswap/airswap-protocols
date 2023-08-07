@@ -1,0 +1,42 @@
+{
+  "name": "@airswap/merkle",
+  "version": "0.0.3",
+  "description": "Merkle Tree Tools Adapted from OpenZeppelin",
+  "contributors": [
+    "Don Mosites"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/airswap/airswap-protocols"
+  },
+  "homepage": "https://github.com/airswap/airswap-protocols/tree/main/tools/merkle",
+  "keywords": [
+    "airswap"
+  ],
+  "license": "MIT",
+  "main": "build/index.js",
+  "files": [
+    "/build"
+  ],
+  "scripts": {
+    "clean": "rm -rf ./build",
+    "compile": "yarn clean && tsc -b",
+    "test": "yarn test:unit",
+    "test:unit": "yarn compile && mocha -r ts-node/register test/merkle.ts"
+  },
+  "dependencies": {
+    "@types/ethereumjs-util": "^6.1.0",
+    "ethereumjs-util": "^7.0.7",
+    "web3-utils": "^1.3.1"
+  },
+  "devDependencies": {
+    "@types/mocha": "^9.0.0",
+    "chai": "^4.3.4",
+    "mocha": "^9.1.3",
+    "ts-node": "^10.4.0",
+    "typescript": "^4.5.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

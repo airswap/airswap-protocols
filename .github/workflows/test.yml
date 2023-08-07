@@ -12,7 +12,7 @@ jobs:
       - name: Test using Node.js
         uses: actions/setup-node@v1
         with:
-          node-version: '14.x'
+          node-version: '16.x'
       - run: yarn install
       - run: lerna run compile --concurrency=1
       - run: lerna run test:unit --concurrency=1

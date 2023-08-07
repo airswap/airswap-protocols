@@ -2,7 +2,7 @@
 const fs = require('fs')
 const Confirm = require('prompt-confirm')
 const { ethers, run } = require('hardhat')
-const { chainNames, stakingTokenAddresses } = require('@airswap/constants')
+const { ChainIds, chainNames, ADDRESS_ZERO } = require('@airswap/constants')
 const { getReceiptUrl } = require('@airswap/utils')
 const registryDeploys = require('../deploys.js')
 
@@ -19,21 +19,21 @@ async function main() {
   console.log(`Network: ${chainNames[chainId].toUpperCase()}`)
   console.log(`Gas price: ${gasPrice / 10 ** 9} gwei\n`)
 
-  const stakingToken = stakingTokenAddresses[chainId]
-  const obligationCost = 1000000000
-  const tokenCost = 1000000
+  const stakingToken = ADDRESS_ZERO // stakingTokenAddresses[chainId]
+  const stakingCost = 0 // 1000000000
+  const supportCost = 0 // 1000000
 
   console.log(`\nstakingToken: ${stakingToken}`)
-  console.log(`obligationCost: ${obligationCost}`)
-  console.log(`tokenCost: ${tokenCost}\n`)
+  console.log(`stakingCost: ${stakingCost}`)
+  console.log(`supportCost: ${supportCost}\n`)
 
   const prompt = new Confirm('Proceed to deploy?')
   if (await prompt.run()) {
     const registryFactory = await ethers.getContractFactory('Registry')
     const registryContract = await registryFactory.deploy(
       stakingToken,
-      obligationCost,
-      tokenCost
+      stakingCost,
+      supportCost
     )
     console.log(
       'Deploying...',

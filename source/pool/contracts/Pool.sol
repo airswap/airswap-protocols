@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.17;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/access/Ownable2Step.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "@airswap/staking/contracts/interfaces/IStaking.sol";
 import "./interfaces/IPool.sol";
 
@@ -12,37 +13,8 @@ import "./interfaces/IPool.sol";
  * @title AirSwap: Rewards Pool
  * @notice https://www.airswap.io/
  */
-contract Pool is IPool, Ownable {
+contract Pool is IPool, Ownable2Step {
   using SafeERC20 for IERC20;
-
-  bytes32 public constant DOMAIN_TYPEHASH =
-    keccak256(
-      abi.encodePacked(
-        "EIP712Domain(",
-        "string name,",
-        "string version,",
-        "uint256 chainId,",
-        "address verifyingContract",
-        ")"
-      )
-    );
-
-  bytes32 public constant CLAIM_TYPEHASH =
-    keccak256(
-      abi.encodePacked(
-        "Claim(",
-        "uint256 nonce,",
-        "uint256 expiry,",
-        "address participant,",
-        "uint256 score",
-        ")"
-      )
-    );
-
-  bytes32 public constant DOMAIN_NAME = keccak256("POOL");
-  bytes32 public constant DOMAIN_VERSION = keccak256("1");
-  uint256 public immutable DOMAIN_CHAIN_ID;
-  bytes32 public immutable DOMAIN_SEPARATOR;
 
   uint256 internal constant MAX_PERCENTAGE = 100;
   uint256 internal constant MAX_SCALE = 77;
@@ -53,15 +25,14 @@ contract Pool is IPool, Ownable {
   // Max percentage for a claim with infinite score
   uint256 public max;
 
+  // Mapping of tree root to boolean to enable claims
+  mapping(bytes32 => bool) public roots;
+
   // Mapping of address to boolean to enable admin accounts
   mapping(address => bool) public admins;
 
-  /**
-   * @notice Double mapping of signers to nonce groups to nonce states
-   * @dev The nonce group is computed as nonce / 256, so each group of 256 sequential nonces uses the same key
-   * @dev The nonce states are encoded as 256 bits, for each nonce in the group 0 means available and 1 means used
-   */
-  mapping(address => mapping(uint256 => uint256)) internal noncesClaimed;
+  // Mapping of tree root to account to mark as claimed
+  mapping(bytes32 => mapping(address => bool)) public claimed;
 
   // Staking contract address
   address public stakingContract;
@@ -73,36 +44,20 @@ contract Pool is IPool, Ownable {
    * @notice Constructor
    * @param _scale uint256
    * @param _max uint256
-   * @param _stakingContract address
-   * @param _stakingToken address
    */
-  constructor(
-    uint256 _scale,
-    uint256 _max,
-    address _stakingContract,
-    address _stakingToken
-  ) {
-    require(_max <= MAX_PERCENTAGE, "MAX_TOO_HIGH");
-    require(_scale <= MAX_SCALE, "SCALE_TOO_HIGH");
+  constructor(uint256 _scale, uint256 _max) {
+    if (_max > MAX_PERCENTAGE) revert MaxTooHigh(_max);
+    if (_scale > MAX_SCALE) revert ScaleTooHigh(_scale);
     scale = _scale;
     max = _max;
-    stakingContract = _stakingContract;
-    stakingToken = _stakingToken;
-    admins[msg.sender] = true;
+  }
 
-    uint256 currentChainId = getChainId();
-    DOMAIN_CHAIN_ID = currentChainId;
-    DOMAIN_SEPARATOR = keccak256(
-      abi.encode(
-        DOMAIN_TYPEHASH,
-        DOMAIN_NAME,
-        DOMAIN_VERSION,
-        currentChainId,
-        this
-      )
-    );
-
-    IERC20(stakingToken).safeApprove(stakingContract, 2 ** 256 - 1);
+  /**
+   * @dev Throws if called by any account other than the admin.
+   */
+  modifier multiAdmin() {
+    if (!admins[msg.sender]) revert Unauthorized();
+    _;
   }
 
   /**
@@ -111,7 +66,7 @@ contract Pool is IPool, Ownable {
    * @param _scale uint256
    */
   function setScale(uint256 _scale) external override onlyOwner {
-    require(_scale <= MAX_SCALE, "SCALE_TOO_HIGH");
+    if (_scale > MAX_SCALE) revert ScaleTooHigh(_scale);
     scale = _scale;
     emit SetScale(scale);
   }
@@ -122,7 +77,7 @@ contract Pool is IPool, Ownable {
    * @param _max uint256
    */
   function setMax(uint256 _max) external override onlyOwner {
-    require(_max <= MAX_PERCENTAGE, "MAX_TOO_HIGH");
+    if (_max > MAX_PERCENTAGE) revert MaxTooHigh(_max);
     max = _max;
     emit SetMax(max);
   }
@@ -133,7 +88,7 @@ contract Pool is IPool, Ownable {
    * @param _admin address
    */
   function addAdmin(address _admin) external override onlyOwner {
-    require(_admin != address(0), "INVALID_ADDRESS");
+    if (_admin == address(0)) revert AddressInvalid(_admin);
     admins[_admin] = true;
     emit AddAdmin(_admin);
   }
@@ -144,7 +99,7 @@ contract Pool is IPool, Ownable {
    * @param _admin address
    */
   function removeAdmin(address _admin) external override onlyOwner {
-    require(admins[_admin] == true, "ADMIN_NOT_SET");
+    if (admins[_admin] != true) revert AdminNotSet(_admin);
     admins[_admin] = false;
     emit RemoveAdmin(_admin);
   }
@@ -154,252 +109,219 @@ contract Pool is IPool, Ownable {
    * @dev Only owner
    * @param _stakingContract address
    */
-  function setStakingContract(
+  function setStaking(
+    address _stakingToken,
     address _stakingContract
   ) external override onlyOwner {
-    require(_stakingContract != address(0), "INVALID_ADDRESS");
-    // set allowance on old staking contract to zero
-    IERC20(stakingToken).safeApprove(stakingContract, 0);
+    if (_stakingContract == address(0)) revert AddressInvalid(_stakingContract);
+    if (_stakingToken == address(0)) revert AddressInvalid(_stakingToken);
+    if (stakingToken != address(0) && stakingContract != address(0)) {
+      // set allowance on old staking token to zero
+      IERC20(stakingToken).safeApprove(stakingContract, 0);
+    }
     stakingContract = _stakingContract;
+    stakingToken = _stakingToken;
     IERC20(stakingToken).safeApprove(stakingContract, 2 ** 256 - 1);
+    emit SetStaking(_stakingToken, _stakingContract);
   }
 
   /**
-   * @notice Set staking token address
+   * @notice Set claims from previous pool contract
    * @dev Only owner
-   * @param _stakingToken address
+   * @param _root bytes32
+   * @param _accounts address[]
    */
-  function setStakingToken(address _stakingToken) external override onlyOwner {
-    require(_stakingToken != address(0), "INVALID_ADDRESS");
-    // set allowance on old staking token to zero
-    IERC20(stakingToken).safeApprove(stakingContract, 0);
-    stakingToken = _stakingToken;
-    IERC20(stakingToken).safeApprove(stakingContract, 2 ** 256 - 1);
+  function setClaimed(
+    bytes32 _root,
+    address[] memory _accounts
+  ) external override multiAdmin {
+    if (roots[_root] == false) {
+      roots[_root] = true;
+    }
+    for (uint256 i = 0; i < _accounts.length; i++) {
+      address account = _accounts[i];
+      if (claimed[_root][account]) revert AlreadyClaimed();
+      claimed[_root][account] = true;
+    }
+    emit Enable(_root);
+  }
+
+  /**
+   * @notice Enables claims for a merkle tree of a set of scores
+   * @param _root bytes32
+   */
+  function enable(bytes32 _root) external override multiAdmin {
+    if (roots[_root]) revert RootExists(_root);
+    roots[_root] = true;
+    emit Enable(_root);
   }
 
   /**
    * @notice Admin function to migrate funds
    * @dev Only owner
-   * @param tokens address[]
-   * @param dest address
+   * @param _tokens address[]
+   * @param _dest address
    */
   function drainTo(
-    address[] calldata tokens,
-    address dest
+    address[] calldata _tokens,
+    address _dest
   ) external override onlyOwner {
-    for (uint256 i = 0; i < tokens.length; i++) {
-      uint256 bal = IERC20(tokens[i]).balanceOf(address(this));
-      IERC20(tokens[i]).safeTransfer(dest, bal);
+    for (uint256 i = 0; i < _tokens.length; i++) {
+      uint256 _bal = IERC20(_tokens[i]).balanceOf(address(this));
+      IERC20(_tokens[i]).safeTransfer(_dest, _bal);
     }
-    emit DrainTo(tokens, dest);
+    emit DrainTo(_tokens, _dest);
   }
 
   /**
-   * @notice Withdraw tokens from the pool using a signed claim
-   * @param recipient address
-   * @param minimum uint256
-   * @param token address
-   * @param nonce uint256
-   * @param expiry uint256
-   * @param score uint256
-   * @param v uint8 "v" value of the ECDSA signature
-   * @param r bytes32 "r" value of the ECDSA signature
-   * @param s bytes32 "s" value of the ECDSA signature
+   * @notice Withdraw tokens from the pool using claims
+   * @param _claims Claim[]
+   * @param _token address
    */
-  function withdraw(
-    address recipient,
-    uint256 minimum,
-    address token,
-    uint256 nonce,
-    uint256 expiry,
-    uint256 score,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
-  ) external override returns (uint256) {
-    _checkValidClaim(nonce, expiry, score, v, r, s);
-    uint256 amount = _withdrawCheck(score, token, minimum);
-    IERC20(token).safeTransfer(recipient, amount);
-    emit Withdraw(nonce, expiry, msg.sender, token, amount, score);
-    return amount;
+  function withdraw(Claim[] memory _claims, address _token) external override {
+    withdrawProtected(_claims, _token, 0, msg.sender);
   }
 
   /**
-   * @notice Withdraw tokens from the pool using signature and stake for a recipient
-   * @param recipient address
-   * @param minimum uint256
-   * @param token address
-   * @param nonce uint256
-   * @param expiry uint256
-   * @param score uint256
-   * @param v uint8 "v" value of the ECDSA signature
-   * @param r bytes32 "r" value of the ECDSA signature
-   * @param s bytes32 "s" value of the ECDSA signature
+   * @notice Withdraw tokens from the pool using claims and stake
+   * @param _claims Claim[]
+   * @param _token address
    */
   function withdrawAndStake(
-    address recipient,
-    uint256 minimum,
-    address token,
-    uint256 nonce,
-    uint256 expiry,
-    uint256 score,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
-  ) external override returns (uint256) {
-    require(token == address(stakingToken), "INVALID_TOKEN");
-    _checkValidClaim(nonce, expiry, score, v, r, s);
-    uint256 amount = _withdrawCheck(score, token, minimum);
-    IStaking(stakingContract).stakeFor(recipient, amount);
-    emit Withdraw(nonce, expiry, msg.sender, token, amount, score);
-    return amount;
+    Claim[] memory _claims,
+    address _token,
+    uint256 _minimumAmount
+  ) external override {
+    if (_token != address(stakingToken)) revert TokenInvalid(_token);
+    (uint256 amount, bytes32[] memory rootList) = _withdrawCheck(
+      _claims,
+      _token,
+      _minimumAmount
+    );
+    IStaking(stakingContract).stakeFor(msg.sender, amount);
+    emit Withdraw(rootList, msg.sender, _token, amount);
+  }
+
+  /**
+   * @notice Withdraw tokens from the pool using claims and stake for another account
+   * @param _claims Claim[]
+   * @param _token address
+   * @param _account address
+   */
+  function withdrawAndStakeFor(
+    Claim[] memory _claims,
+    address _token,
+    uint256 _minimumAmount,
+    address _account
+  ) external override {
+    if (_token != address(stakingToken)) revert TokenInvalid(_token);
+    (uint256 amount, bytes32[] memory rootList) = _withdrawCheck(
+      _claims,
+      _token,
+      _minimumAmount
+    );
+    IERC20(stakingToken).approve(stakingContract, amount);
+    IStaking(stakingContract).stakeFor(_account, amount);
+    emit Withdraw(rootList, msg.sender, _token, amount);
+  }
+
+  /**
+   * @notice Withdraw tokens from the pool using claims and send to recipient
+   * @param _claims Claim[]
+   * @param _token address
+   * @param _recipient address
+   */
+  function withdrawWithRecipient(
+    Claim[] memory _claims,
+    address _token,
+    uint256 _minimumAmount,
+    address _recipient
+  ) external override {
+    withdrawProtected(_claims, _token, _minimumAmount, _recipient);
+  }
+
+  /**
+   * @notice Withdraw tokens from the pool using claims
+   * @param _claims Claim[]
+   * @param _token address
+   * @param _minimumAmount uint256
+   */
+  function _withdrawCheck(
+    Claim[] memory _claims,
+    address _token,
+    uint256 _minimumAmount
+  ) internal returns (uint256, bytes32[] memory) {
+    if (_claims.length <= 0) revert ClaimsNotProvided();
+    uint256 _totalScore = 0;
+    bytes32[] memory _rootList = new bytes32[](_claims.length);
+    Claim memory _claim;
+    for (uint256 i = 0; i < _claims.length; i++) {
+      _claim = _claims[i];
+      if (!roots[_claim.root]) revert RootDisabled(_claim.root);
+      if (claimed[_claim.root][msg.sender]) revert AlreadyClaimed();
+      if (!verify(msg.sender, _claim.root, _claim.score, _claim.proof))
+        revert ProofInvalid(_claim.root);
+      _totalScore = _totalScore + _claim.score;
+      claimed[_claim.root][msg.sender] = true;
+      _rootList[i] = _claim.root;
+    }
+    uint256 _amount = calculate(_totalScore, _token);
+    if (_amount < _minimumAmount) revert AmountInsufficient(_amount);
+    return (_amount, _rootList);
   }
 
   /**
    * @notice Calculate output amount for an input score
-   * @param score uint256
-   * @param token address
+   * @param _score uint256
+   * @param _token address
    * @return amount uint256 amount to claim based on balance, scale, and max
    */
   function calculate(
-    uint256 score,
-    address token
+    uint256 _score,
+    address _token
   ) public view override returns (uint256 amount) {
-    uint256 balance = IERC20(token).balanceOf(address(this));
-    uint256 divisor = (uint256(10) ** scale) + score;
-    return (max * score * balance) / divisor / 100;
+    uint256 _balance = IERC20(_token).balanceOf(address(this));
+    uint256 _divisor = (uint256(10) ** scale) + _score;
+    return (max * _score * _balance) / _divisor / 100;
   }
 
   /**
-   * @notice Verify a signature
-   * @param nonce uint256
-   * @param expiry uint256
-   * @param participant address
-   * @param score uint256
-   * @param v uint8 "v" value of the ECDSA signature
-   * @param r bytes32 "r" value of the ECDSA signature
-   * @param s bytes32 "s" value of the ECDSA signature
+   * @notice Withdraw tokens from the pool using claims
+   * @param _claims Claim[]
+   * @param _token address
+   * @param _minimumAmount uint256
+   * @param _recipient address
+   */
+  function withdrawProtected(
+    Claim[] memory _claims,
+    address _token,
+    uint256 _minimumAmount,
+    address _recipient
+  ) public override returns (uint256) {
+    (uint256 _amount, bytes32[] memory _rootList) = _withdrawCheck(
+      _claims,
+      _token,
+      _minimumAmount
+    );
+    IERC20(_token).safeTransfer(_recipient, _amount);
+    emit Withdraw(_rootList, msg.sender, _token, _amount);
+    return _amount;
+  }
+
+  /**
+   * @notice Verify a claim proof
+   * @param _participant address
+   * @param _root bytes32
+   * @param _score uint256
+   * @param _proof bytes32[]
    */
   function verify(
-    uint256 nonce,
-    uint256 expiry,
-    address participant,
-    uint256 score,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
-  ) public view override returns (bool valid) {
-    require(DOMAIN_CHAIN_ID == getChainId(), "CHAIN_ID_CHANGED");
-    require(expiry > block.timestamp, "EXPIRY_PASSED");
-    bytes32 claimHash = keccak256(
-      abi.encode(CLAIM_TYPEHASH, nonce, expiry, participant, score)
-    );
-    address signatory = ecrecover(
-      keccak256(abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR, claimHash)),
-      v,
-      r,
-      s
-    );
-    admins[signatory] && !nonceUsed(participant, nonce)
-      ? valid = true
-      : valid = false;
-  }
-
-  /**
-   * @notice Returns true if the nonce has been used
-   * @param participant address
-   * @param nonce uint256
-   */
-  function nonceUsed(
-    address participant,
-    uint256 nonce
-  ) public view override returns (bool) {
-    uint256 groupKey = nonce / 256;
-    uint256 indexInGroup = nonce % 256;
-    return (noncesClaimed[participant][groupKey] >> indexInGroup) & 1 == 1;
-  }
-
-  /**
-   * @notice Returns the current chainId using the chainid opcode
-   * @return id uint256 The chain id
-   */
-  function getChainId() public view returns (uint256 id) {
-    // no-inline-assembly
-    assembly {
-      id := chainid()
-    }
-  }
-
-  /**
-   * @notice Checks Claim Nonce, Expiry, Participant, Score, Signature
-   * @param nonce uint256
-   * @param expiry uint256
-   * @param score uint256
-   * @param v uint8 "v" value of the ECDSA signature
-   * @param r bytes32 "r" value of the ECDSA signature
-   * @param s bytes32 "s" value of the ECDSA signature
-   */
-  function _checkValidClaim(
-    uint256 nonce,
-    uint256 expiry,
-    uint256 score,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
-  ) internal {
-    require(DOMAIN_CHAIN_ID == getChainId(), "CHAIN_ID_CHANGED");
-    require(expiry > block.timestamp, "EXPIRY_PASSED");
-    bytes32 claimHash = keccak256(
-      abi.encode(CLAIM_TYPEHASH, nonce, expiry, msg.sender, score)
-    );
-    address signatory = ecrecover(
-      keccak256(abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR, claimHash)),
-      v,
-      r,
-      s
-    );
-    require(admins[signatory], "UNAUTHORIZED");
-    require(_markNonceAsUsed(msg.sender, nonce), "NONCE_ALREADY_USED");
-  }
-
-  /**
-   * @notice Marks a nonce as used for the given participant
-   * @param participant address
-   * @param nonce uint256
-   * @return bool True if nonce was not marked as used already
-   */
-  function _markNonceAsUsed(
-    address participant,
-    uint256 nonce
-  ) internal returns (bool) {
-    uint256 groupKey = nonce / 256;
-    uint256 indexInGroup = nonce % 256;
-    uint256 group = noncesClaimed[participant][groupKey];
-
-    // If it is already used, return false
-    if ((group >> indexInGroup) & 1 == 1) {
-      return false;
-    }
-
-    noncesClaimed[participant][groupKey] = group | (uint256(1) << indexInGroup);
-
-    return true;
-  }
-
-  /**
-   * @notice Withdraw tokens from the pool using a score
-   * @param score uint256
-   * @param token address
-   * @param minimumAmount uint256
-   */
-  function _withdrawCheck(
-    uint256 score,
-    address token,
-    uint256 minimumAmount
-  ) internal view returns (uint256) {
-    require(score > 0, "SCORE_MUST_BE_PROVIDED");
-    uint256 amount = calculate(score, token);
-    require(amount >= minimumAmount, "INSUFFICIENT_AMOUNT");
-    return amount;
+    address _participant,
+    bytes32 _root,
+    uint256 _score,
+    bytes32[] memory _proof
+  ) public pure override returns (bool valid) {
+    bytes32 _leaf = keccak256(abi.encodePacked(_participant, _score));
+    return MerkleProof.verify(_proof, _root, _leaf);
   }
 }
