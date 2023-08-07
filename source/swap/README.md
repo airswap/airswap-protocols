@@ -28,7 +28,7 @@ Environment variables are set in an `.env` file in the repository root.
 | `yarn compile`   | Compile all contracts to `build` folder  |
 | `yarn coverage`  | Report test coverage                     |
 | `yarn test`      | Run all tests in `test` folder           |
-| `yarn test:unit` | Run unit tests in `test` folder          |
+| `yarn test:ci`   | Run ci tests in `test` folder            |
 | `yarn deploy`    | Deploy on a network using --network flag |
 | `yarn verify`    | Verify on a network using --network flag |
 
