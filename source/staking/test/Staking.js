@@ -100,7 +100,7 @@ describe('Staking Unit', () => {
 
       await expect(
         staking.connect(deployer).setDuration(DEFAULTDURATION)
-      ).to.be.revertedWith('Timelocked()')
+      ).to.be.revertedWith('Timelocked')
     })
 
     it('owner can set unstaking duration', async () => {
@@ -121,9 +121,9 @@ describe('Staking Unit', () => {
     })
 
     it('owner cannot set timelock to be less than minimum delay', async () => {
-      await expect(
-        staking.connect(deployer).scheduleDurationChange(0)
-      ).to.be.revertedWith('DelayInvalid(0)')
+      await expect(staking.connect(deployer).scheduleDurationChange(0))
+        .to.be.revertedWith('DelayInvalid')
+        .withArgs(0)
     })
 
     it('owner cannot reschedule timelock duration change', async () => {
@@ -133,7 +133,7 @@ describe('Staking Unit', () => {
 
       await expect(
         staking.connect(deployer).scheduleDurationChange(DEFAULTDELAY)
-      ).to.be.revertedWith('TimelockActive()')
+      ).to.be.revertedWith('TimelockActive')
     })
 
     it('Owner cannot set unstaking duration to zero', async () => {
@@ -143,9 +143,9 @@ describe('Staking Unit', () => {
       await ethers.provider.send('evm_increaseTime', [10])
       await ethers.provider.send('evm_mine')
 
-      await expect(staking.connect(deployer).setDuration(0)).to.be.revertedWith(
-        'DurationInvalid(0)'
-      )
+      await expect(staking.connect(deployer).setDuration(0))
+        .to.be.revertedWith('DurationInvalid')
+        .withArgs(0)
     })
 
     it('Owner cannot set unstaking duration with canceled timelock', async () => {
@@ -162,7 +162,7 @@ describe('Staking Unit', () => {
 
       await expect(
         staking.connect(deployer).setDuration(DEFAULTDURATION * 2)
-      ).to.be.revertedWith('TimelockInactive()')
+      ).to.be.revertedWith('TimelockInactive')
     })
 
     it('Non-owner cannot cancel a duration change', async () => {
@@ -174,7 +174,7 @@ describe('Staking Unit', () => {
     it('Owner cannot cancel timelock before it is set', async () => {
       expect(
         staking.connect(deployer).cancelDurationChange()
-      ).to.be.revertedWith('TimelockInactive()')
+      ).to.be.revertedWith('TimelockInactive')
     })
   })
 
@@ -210,17 +210,17 @@ describe('Staking Unit', () => {
     })
 
     it('unsuccessful staking when amount is 0', async () => {
-      await expect(staking.connect(account1).stake('0')).to.be.revertedWith(
-        'AmountInvalid(0)'
-      )
+      await expect(staking.connect(account1).stake('0'))
+        .to.be.revertedWith('AmountInvalid')
+        .withArgs(0)
     })
 
     it('unsuccessful extend stake when amount is 0', async () => {
       await token.mock.transferFrom.returns(true)
       await staking.connect(account1).stake('100')
-      await expect(staking.connect(account1).stake('0')).to.be.revertedWith(
-        'AmountInvalid(0)'
-      )
+      await expect(staking.connect(account1).stake('0'))
+        .to.be.revertedWith('AmountInvalid')
+        .withArgs(0)
     })
 
     it('successful extend stake when stake has been made', async () => {
@@ -269,9 +269,9 @@ describe('Staking Unit', () => {
     })
 
     it('unsuccessful stakeFor when user staking for with an amount of 0', async () => {
-      await expect(
-        staking.connect(account1).stakeFor(account2.address, '0')
-      ).to.be.revertedWith('AmountInvalid(0)')
+      await expect(staking.connect(account1).stakeFor(account2.address, '0'))
+        .to.be.revertedWith('AmountInvalid')
+        .withArgs(0)
     })
 
     it('successful stakeFor when existing stake is not fully unstakeable', async () => {
@@ -317,9 +317,9 @@ describe('Staking Unit', () => {
       const block = await ethers.provider.getBlock()
       await ethers.provider.send('evm_mine', [block['timestamp'] + 10])
 
-      await expect(staking.connect(account1).unstake('12')).to.be.revertedWith(
-        'AmountInvalid(12)'
-      )
+      await expect(staking.connect(account1).unstake('12'))
+        .to.be.revertedWith('AmountInvalid')
+        .withArgs(12)
     })
 
     it('successful unstaking', async () => {
@@ -398,7 +398,7 @@ describe('Staking Unit', () => {
       await token.mock.transfer.returns(true)
       await staking.connect(account1).stake('100')
 
-      let block = await ethers.provider.getBlock()
+      const block = await ethers.provider.getBlock()
       await ethers.provider.send('evm_mine', [block['timestamp'] + 10])
 
       await staking.connect(account1).unstake('10')
@@ -411,7 +411,7 @@ describe('Staking Unit', () => {
       await token.mock.transfer.returns(true)
       await staking.connect(account1).stake('100')
 
-      let block = await ethers.provider.getBlock()
+      const block = await ethers.provider.getBlock()
       // With a duration of 100, increasing the timestamp by 10 will unlock 10% of the staked balance
       await ethers.provider.send('evm_mine', [block['timestamp'] + 10])
 
@@ -449,51 +449,49 @@ describe('Staking Unit', () => {
     it('unsuccessful delegate set if already a delegate', async () => {
       await staking.connect(account1).proposeDelegate(account2.address)
       await staking.connect(account2).setDelegate(account1.address)
-      await expect(
-        staking.connect(deployer).proposeDelegate(account2.address)
-      ).to.be.revertedWith(`DelegateTaken("${account2.address}")`)
+      await expect(staking.connect(deployer).proposeDelegate(account2.address))
+        .to.be.revertedWith(`DelegateTaken`)
+        .withArgs(account2.address)
     })
 
     it('unsuccessful delegate proposed if already delegating', async () => {
       await staking.connect(account1).proposeDelegate(account2.address)
       await staking.connect(account2).setDelegate(account1.address)
-      await expect(
-        staking.connect(account1).proposeDelegate(deployer.address)
-      ).to.be.revertedWith(
-        `SenderHasDelegate("${account1.address}", "${deployer.address}")`
-      )
+      await expect(staking.connect(account1).proposeDelegate(deployer.address))
+        .to.be.revertedWith(`SenderHasDelegate`)
+        .withArgs(account1.address, deployer.address)
     })
 
     it('unsuccessful delegate set if already delegating', async () => {
       await staking.connect(account1).proposeDelegate(account2.address)
       await staking.connect(deployer).proposeDelegate(account2.address)
       await staking.connect(account2).setDelegate(account1.address)
-      await expect(
-        staking.connect(account2).setDelegate(deployer.address)
-      ).to.be.revertedWith(`DelegateTaken("${deployer.address}")`)
+      await expect(staking.connect(account2).setDelegate(deployer.address))
+        .to.be.revertedWith(`DelegateTaken`)
+        .withArgs(deployer.address)
     })
 
     it('unsuccessful delegate set if delegate already staking', async () => {
       await token.mock.transferFrom.returns(true)
       await staking.connect(account2).stake('100')
-      await expect(
-        staking.connect(account1).proposeDelegate(account2.address)
-      ).to.be.revertedWith(`DelegateStaked("${account2.address}")`)
+      await expect(staking.connect(account1).proposeDelegate(account2.address))
+        .to.be.revertedWith(`DelegateStaked`)
+        .withArgs(account2.address)
     })
 
     it('unsuccessful delegate set if delegate stakes after proposal', async () => {
       await token.mock.transferFrom.returns(true)
       staking.connect(account1).proposeDelegate(account2.address)
       await staking.connect(account2).stake('100')
-      await expect(
-        staking.connect(account2).setDelegate(account1.address)
-      ).to.be.revertedWith(`DelegateStaked("${account1.address}")`)
+      await expect(staking.connect(account2).setDelegate(account1.address))
+        .to.be.revertedWith(`DelegateStaked`)
+        .withArgs(account1.address)
     })
 
     it('unsuccessful delegate set if not proposed', async () => {
-      await expect(
-        staking.connect(account2).setDelegate(account1.address)
-      ).to.be.revertedWith(`DelegateNotProposed("${account1.address}")`)
+      await expect(staking.connect(account2).setDelegate(account1.address))
+        .to.be.revertedWith(`DelegateNotProposed`)
+        .withArgs(account1.address)
     })
 
     it('delegate can be removed', async () => {
@@ -510,9 +508,9 @@ describe('Staking Unit', () => {
     })
 
     it('unsuccessful delegate removed if not set as delegate', async () => {
-      await expect(
-        staking.connect(account1).unsetDelegate(account2.address)
-      ).to.be.revertedWith(`DelegateNotSet("${account2.address}")`)
+      await expect(staking.connect(account1).unsetDelegate(account2.address))
+        .to.be.revertedWith(`DelegateNotSet`)
+        .withArgs(account2.address)
     })
 
     it('successful staking with delegate', async () => {
