@@ -33,4 +33,10 @@ export default {
     'https://raw.githubusercontent.com/pangolindex/tokenlists/main/ab.tokenlist.json',
     'https://raw.githubusercontent.com/traderjoe-xyz/joe-tokenlists/main/joe.tokenlist.json',
   ],
+  [ChainIds.LINEAGOERLI]: [
+    'https://raw.githubusercontent.com/Consensys/linea-token-list/main/json/linea-goerli-token-shortlist.json',
+  ],
+  [ChainIds.LINEA]: [
+    'https://raw.githubusercontent.com/Consensys/linea-token-list/main/json/linea-mainnet-token-shortlist.json',
+  ],
 } as Record<number, string[]>
