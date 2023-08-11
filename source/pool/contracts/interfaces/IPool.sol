@@ -54,14 +54,18 @@ interface IPool {
 
   function drainTo(address[] calldata tokens, address dest) external;
 
-  function withdraw(Claim[] memory claims, address token) external;
+  function withdraw(
+    Claim[] memory claims,
+    address token,
+    uint256 minimumAmount
+  ) external returns (uint256 amountWithdrawn);
 
-  function withdrawWithRecipient(
+  function withdrawFor(
     Claim[] memory claims,
     address token,
     uint256 minimumAmount,
     address recipient
-  ) external;
+  ) external returns (uint256 amountWithdrawn);
 
   function withdrawAndStake(
     Claim[] memory claims,
@@ -75,13 +79,6 @@ interface IPool {
     uint256 minimumAmount,
     address account
   ) external;
-
-  function withdrawProtected(
-    Claim[] memory claims,
-    address token,
-    uint256 minimumAmount,
-    address recipient
-  ) external returns (uint256 amountWithdrawn);
 
   function calculate(
     uint256 score,
