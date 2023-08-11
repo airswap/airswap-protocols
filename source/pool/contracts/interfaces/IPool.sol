@@ -11,13 +11,13 @@ interface IPool {
 
   event AddAdmin(address admin);
   event DrainTo(address[] tokens, address dest);
-  event Enable(bytes32, bytes32);
+  event Enable(bytes32 tree, bytes32 root);
   event SetMax(uint256 max);
   event SetScale(uint256 scale);
-  event SetStaking(address stakingToken, address stakigContract);
+  event SetStaking(address stakingToken, address stakingContract);
   event RemoveAdmin(address admin);
   event Withdraw(
-    bytes32[] roots,
+    bytes32[] trees,
     address account,
     address token,
     uint256 amount
@@ -32,7 +32,6 @@ interface IPool {
   error ProofInvalid(bytes32);
   error TreeDisabled(bytes32);
   error ScaleTooHigh(uint256);
-  error RootExists(bytes32);
   error TokenInvalid(address);
   error Unauthorized();
 
@@ -46,12 +45,12 @@ interface IPool {
 
   function setStaking(address _stakingToken, address _stakingContract) external;
 
-  function enable(bytes32 _root, bytes32 _tree) external;
+  function enable(bytes32 _tree, bytes32 _root) external;
 
   function getClaimStatusForTrees(
     address _account,
     bytes32[] calldata _trees
-  ) external returns (bool[] memory);
+  ) external returns (bool[] memory claimStatusList);
 
   function drainTo(address[] calldata tokens, address dest) external;
 
@@ -82,7 +81,7 @@ interface IPool {
     address token,
     uint256 minimumAmount,
     address recipient
-  ) external returns (uint256);
+  ) external returns (uint256 amountWithdrawn);
 
   function calculate(
     uint256 score,
