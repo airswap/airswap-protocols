@@ -33,6 +33,8 @@ describe('Pool Unit', () => {
 
   const BOB_NEW_SCORE = toWei(200000, 4)
 
+  const WITHDRAW_MINIMUM = 0
+
   let tree
   let newTree
   let score
@@ -199,7 +201,8 @@ describe('Pool Unit', () => {
               proof,
             },
           ],
-          feeToken.address
+          feeToken.address,
+          WITHDRAW_MINIMUM
         )
       ).to.emit(pool, 'Withdraw')
 
@@ -216,7 +219,7 @@ describe('Pool Unit', () => {
       await pool.connect(alice).enable(TREE, root)
 
       await expect(
-        pool.connect(bob).withdraw([], feeToken.address)
+        pool.connect(bob).withdraw([], feeToken.address, WITHDRAW_MINIMUM)
       ).to.be.revertedWith(`ClaimsNotProvided`)
 
       const isClaimed = await pool.claimed(TREE, bob.address)
@@ -239,7 +242,8 @@ describe('Pool Unit', () => {
               proof,
             },
           ],
-          feeToken.address
+          feeToken.address,
+          WITHDRAW_MINIMUM
         )
       )
         .to.be.revertedWith(`TreeDisabled`)
@@ -267,7 +271,8 @@ describe('Pool Unit', () => {
               proof,
             },
           ],
-          feeToken.address
+          feeToken.address,
+          WITHDRAW_MINIMUM
         )
       ).to.emit(pool, 'Withdraw')
 
@@ -280,7 +285,8 @@ describe('Pool Unit', () => {
               proof,
             },
           ],
-          feeToken.address
+          feeToken.address,
+          WITHDRAW_MINIMUM
         )
       ).to.be.revertedWith(`AlreadyClaimed`)
 
@@ -305,7 +311,8 @@ describe('Pool Unit', () => {
               proof,
             },
           ],
-          feeToken.address
+          feeToken.address,
+          WITHDRAW_MINIMUM
         )
       )
         .to.be.revertedWith(`ProofInvalid`)
@@ -324,10 +331,8 @@ describe('Pool Unit', () => {
       await pool.connect(alice).enable(TREE, root)
       const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
 
-      const withdrawMinimum = 0
-
       await expect(
-        pool.connect(alice).withdrawWithRecipient(
+        pool.connect(alice).withdrawFor(
           [
             {
               tree: TREE,
@@ -336,7 +341,7 @@ describe('Pool Unit', () => {
             },
           ],
           feeToken.address,
-          withdrawMinimum,
+          WITHDRAW_MINIMUM,
           bob.address
         )
       ).to.emit(pool, 'Withdraw')
@@ -360,7 +365,7 @@ describe('Pool Unit', () => {
         .calculate(ALICE_SCORE, feeToken.address)
 
       await expect(
-        pool.connect(alice).withdrawWithRecipient(
+        pool.connect(alice).withdrawFor(
           [
             {
               tree: TREE,
@@ -391,7 +396,7 @@ describe('Pool Unit', () => {
       const withdrawMinimum = 496
 
       await expect(
-        pool.connect(bob).withdrawWithRecipient(
+        pool.connect(bob).withdrawFor(
           [
             {
               tree: TREE,
@@ -417,8 +422,6 @@ describe('Pool Unit', () => {
       await pool.connect(alice).enable(TREE, root)
       const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
 
-      const withdrawMinimum = 0
-
       await expect(
         pool.connect(alice).withdrawAndStake(
           [
@@ -429,7 +432,7 @@ describe('Pool Unit', () => {
             },
           ],
           feeToken.address,
-          withdrawMinimum
+          WITHDRAW_MINIMUM
         )
       ).to.emit(pool, 'Withdraw')
 
@@ -451,8 +454,6 @@ describe('Pool Unit', () => {
       await pool.connect(alice).enable(TREE, root)
       const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
 
-      const withdrawMinimum = 0
-
       await expect(
         pool.connect(alice).withdrawAndStake(
           [
@@ -463,7 +464,7 @@ describe('Pool Unit', () => {
             },
           ],
           feeToken2.address,
-          withdrawMinimum
+          WITHDRAW_MINIMUM
         )
       )
         .to.be.revertedWith(`TokenInvalid`)
@@ -481,8 +482,6 @@ describe('Pool Unit', () => {
       await pool.connect(alice).enable(TREE, root)
       const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
 
-      const withdrawMinimum = 0
-
       await expect(
         pool.connect(alice).withdrawAndStakeFor(
           [
@@ -493,7 +492,7 @@ describe('Pool Unit', () => {
             },
           ],
           feeToken.address,
-          withdrawMinimum,
+          WITHDRAW_MINIMUM,
           bob.address
         )
       ).to.emit(pool, 'Withdraw')
@@ -548,8 +547,6 @@ describe('Pool Unit', () => {
       await pool.connect(alice).enable(TREE, root)
       const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
 
-      const withdrawMinimum = 0
-
       await expect(
         pool.connect(alice).withdrawAndStakeFor(
           [
@@ -560,7 +557,7 @@ describe('Pool Unit', () => {
             },
           ],
           feeToken2.address,
-          withdrawMinimum,
+          WITHDRAW_MINIMUM,
           bob.address
         )
       )
@@ -587,7 +584,8 @@ describe('Pool Unit', () => {
             proof,
           },
         ],
-        feeToken.address
+        feeToken.address,
+        WITHDRAW_MINIMUM
       )
 
       const isClaimed = await pool.getClaimStatusForTrees(bob.address, [
