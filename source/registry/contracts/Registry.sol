@@ -166,7 +166,13 @@ contract Registry {
         revert ProtocolDoesNotExist(_protocol);
       stakersByProtocol[_protocol].remove(msg.sender);
     }
+
+    uint256 _transferAmount = supportCost * _length;
     emit RemoveProtocols(msg.sender, _protocols);
+
+    if (_transferAmount > 0) {
+      stakingToken.safeTransfer(msg.sender, _transferAmount);
+    }
   }
 
   /**
