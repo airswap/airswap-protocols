@@ -142,39 +142,22 @@ contract Pool is IPool, Ownable2Step {
   }
 
   /**
-   * @notice Withdraw tokens using one or more claims
-   * @param _claims Claim[] set of claims to use
-   * @param _token address of token to withdraw
-   * @param _minimumAmount uint256 minimum amount to avoid slippage
+   * @notice Withdraw from the pool using one or more claims
+   * @param _claims Claim[] a set of claims
+   * @param _token address of a token to withdraw
+   * @param _minimum uint256 minimum expected amount
+   * @param _recipient address to receive withdrawal
    */
   function withdraw(
     Claim[] memory _claims,
     address _token,
-    uint256 _minimumAmount
-  ) public override returns (uint256 amountWithdrawn) {
-    return withdrawFor(_claims, _token, _minimumAmount, msg.sender);
-  }
-
-  /**
-   * @notice Withdraw tokens from the pool using one or more claims, sending
-   *         the tokens to the passed recipient address.
-   * @param _claims Claim[] A set of claims each consisting of a tree id, a
-   *        points earned, and a merkle proof.
-   * @param _token address The address of the token to withdraw.
-   * @param _minimumAmount uint256 The minimum amount to withdraw - this acts
-   *        as slippage / frontrunning protection.
-   * @param _recipient address The address to send the tokens to.
-   */
-  function withdrawFor(
-    Claim[] memory _claims,
-    address _token,
-    uint256 _minimumAmount,
+    uint256 _minimum,
     address _recipient
-  ) public override returns (uint256 amountWithdrawn) {
+  ) public override returns (uint256 amount) {
     (uint256 _amount, bytes32[] memory _treeList) = _withdrawCheck(
       _claims,
       _token,
-      _minimumAmount
+      _minimum
     );
     IERC20(_token).safeTransfer(_recipient, _amount);
     emit Withdraw(_treeList, msg.sender, _token, _amount);
@@ -182,16 +165,16 @@ contract Pool is IPool, Ownable2Step {
   }
 
   /**
-   * @notice Internal function to verify a set of claims and calculate the
+   * @notice Verify a set of claims and calculate the
    *         total amount of that can be withdrawn with them.
-   * @param _claims Claim[] A set of claims.
-   * @param _token address The address of the token to withdraw.
-   * @param _minimumAmount uint256 The minimum amount to withdraw
+   * @param _claims Claim[] a set of claims
+   * @param _token address of the token to withdraw
+   * @param _minimum uint256 minimum expected amount
    */
   function _withdrawCheck(
     Claim[] memory _claims,
     address _token,
-    uint256 _minimumAmount
+    uint256 _minimum
   ) internal returns (uint256, bytes32[] memory) {
     if (_claims.length <= 0) revert ClaimsNotProvided();
 
@@ -216,7 +199,7 @@ contract Pool is IPool, Ownable2Step {
     }
 
     uint256 _amount = calculate(_totalValue, _token);
-    if (_amount < _minimumAmount) revert AmountInsufficient(_amount);
+    if (_amount < _minimum) revert AmountInsufficient(_amount);
 
     return (_amount, _treeList);
   }

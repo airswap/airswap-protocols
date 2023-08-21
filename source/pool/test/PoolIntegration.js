@@ -97,35 +97,10 @@ describe('Pool Integration', () => {
           },
         ],
         feeToken.address,
-        WITHDRAW_MINIMUM
+        WITHDRAW_MINIMUM,
+        bob.address
       )
       await expect(await feeToken.balanceOf(bob.address)).to.be.equal('454')
-      const isClaimed = await pool.claimed(TREE_ID, bob.address)
-      expect(isClaimed).to.equal(true)
-    })
-  })
-
-  describe('withdraw for increase the balance of the recipient', async () => {
-    it('transfers the claimed funds to the staker', async () => {
-      const root = getRoot(tree)
-      expect(await pool.connect(deployer).enable(TREE_ID, root)).to.emit(
-        pool,
-        'Enable'
-      )
-      const proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
-      await pool.connect(bob).withdrawFor(
-        [
-          {
-            tree: TREE_ID,
-            value: BOB_SCORE,
-            proof,
-          },
-        ],
-        feeToken.address,
-        0,
-        alice.address
-      )
-      await expect(await feeToken.balanceOf(alice.address)).to.be.equal('454')
       const isClaimed = await pool.claimed(TREE_ID, bob.address)
       expect(isClaimed).to.equal(true)
     })

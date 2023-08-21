@@ -54,15 +54,9 @@ interface IPool {
   function withdraw(
     Claim[] memory claims,
     address token,
-    uint256 minimumAmount
-  ) external returns (uint256 amountWithdrawn);
-
-  function withdrawFor(
-    Claim[] memory claims,
-    address token,
-    uint256 minimumAmount,
+    uint256 minimum,
     address recipient
-  ) external returns (uint256 amountWithdrawn);
+  ) external returns (uint256 amount);
 
   function calculate(
     uint256 score,
