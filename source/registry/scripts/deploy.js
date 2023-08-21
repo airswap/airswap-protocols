@@ -44,7 +44,6 @@ async function main() {
       getReceiptUrl(chainId, registryContract.deployTransaction.hash)
     )
     await registryContract.deployed()
-    console.log(`Deployed: ${registryContract.address}`)
 
     registryDeploys[chainId] = registryContract.address
     fs.writeFileSync(
@@ -54,7 +53,9 @@ async function main() {
         { ...config, parser: 'babel' }
       )
     )
-    registryBlocks[chainId] = registryContract.deployTransaction.blockNumber
+    registryBlocks[chainId] = (
+      await registryContract.deployTransaction.wait()
+    ).blockNumber
     fs.writeFileSync(
       './deploys-blocks.js',
       prettier.format(
@@ -62,7 +63,9 @@ async function main() {
         { ...config, parser: 'babel' }
       )
     )
-    console.log('Updated: deploys.js, deploys-blocks.js')
+    console.log(
+      `Deployed: ${registryDeploys[chainId]} @ ${registryBlocks[chainId]}`
+    )
 
     console.log(
       `\nVerify with "yarn verify --network ${chainNames[

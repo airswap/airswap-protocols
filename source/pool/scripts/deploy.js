@@ -35,7 +35,6 @@ async function main() {
       getReceiptUrl(chainId, poolContract.deployTransaction.hash)
     )
     await poolContract.deployed()
-    console.log(`Deployed: ${poolContract.address}`)
 
     poolDeploys[chainId] = poolContract.address
     fs.writeFileSync(
@@ -45,7 +44,9 @@ async function main() {
         { ...config, parser: 'babel' }
       )
     )
-    poolBlocks[chainId] = poolContract.deployTransaction.blockNumber
+    poolBlocks[chainId] = (
+      await poolContract.deployTransaction.wait()
+    ).blockNumber
     fs.writeFileSync(
       './deploys-blocks.js',
       prettier.format(
@@ -53,7 +54,7 @@ async function main() {
         { ...config, parser: 'babel' }
       )
     )
-    console.log('Updated: deploys.js, deploys-blocks.js')
+    console.log(`Deployed: ${poolDeploys[chainId]} @ ${poolBlocks[chainId]}`)
 
     console.log(
       `\nVerify with "yarn verify --network ${chainNames[
