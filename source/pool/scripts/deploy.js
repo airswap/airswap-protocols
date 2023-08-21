@@ -1,18 +1,17 @@
 /* eslint-disable no-console */
 const fs = require('fs')
+const prettier = require('prettier')
 const Confirm = require('prompt-confirm')
 const { ethers, run } = require('hardhat')
-const stakingDeploys = require('@airswap/staking/deploys.js')
-const {
-  chainNames,
-  ChainIds,
-  stakingTokenAddresses,
-} = require('@airswap/constants')
+const { chainNames, ChainIds } = require('@airswap/constants')
 const { getReceiptUrl } = require('@airswap/utils')
 const poolDeploys = require('../deploys.js')
+const poolBlocks = require('../deploys-blocks.js')
 
 async function main() {
   await run('compile')
+  const config = await prettier.resolveConfig('../deploys.js')
+
   const [deployer] = await ethers.getSigners()
   const gasPrice = await deployer.getGasPrice()
   const chainId = await deployer.getChainId()
@@ -26,12 +25,6 @@ async function main() {
 
   const scale = 10
   const max = 100
-  const stakingContract = stakingDeploys[chainId]
-  const stakingToken = stakingTokenAddresses[chainId]
-
-  console.log(`Staking token: ${stakingToken}`)
-  console.log(`Staking contract: ${stakingContract}`)
-  console.log(`Gas price: ${gasPrice / 10 ** 9} gwei`)
 
   const prompt = new Confirm('Proceed to deploy?')
   if (await prompt.run()) {
@@ -42,14 +35,26 @@ async function main() {
       getReceiptUrl(chainId, poolContract.deployTransaction.hash)
     )
     await poolContract.deployed()
-    console.log(`Deployed: ${poolContract.address}`)
 
     poolDeploys[chainId] = poolContract.address
     fs.writeFileSync(
       './deploys.js',
-      `module.exports = ${JSON.stringify(poolDeploys, null, '\t')}`
+      prettier.format(
+        `module.exports = ${JSON.stringify(poolDeploys, null, '\t')}`,
+        { ...config, parser: 'babel' }
+      )
     )
-    console.log('Updated deploys.js')
+    poolBlocks[chainId] = (
+      await poolContract.deployTransaction.wait()
+    ).blockNumber
+    fs.writeFileSync(
+      './deploys-blocks.js',
+      prettier.format(
+        `module.exports = ${JSON.stringify(poolBlocks, null, '\t')}`,
+        { ...config, parser: 'babel' }
+      )
+    )
+    console.log(`Deployed: ${poolDeploys[chainId]} @ ${poolBlocks[chainId]}`)
 
     console.log(
       `\nVerify with "yarn verify --network ${chainNames[
