@@ -18,7 +18,7 @@ describe('Metadata: Goerli', async () => {
   let result: any
 
   it('fetches all known tokens', async () => {
-    result = await getKnownTokens(ChainIds.MAINNET)
+    result = await getKnownTokens(ChainIds.GOERLI)
     expect(result.tokens.length).to.not.equal(0)
   })
   it('checks that ETH does not exist', async () => {
