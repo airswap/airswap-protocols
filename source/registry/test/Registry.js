@@ -513,7 +513,7 @@ describe('Registry Unit', () => {
     })
   })
 
-  describe('Test Zero Amount Transfer', async () => {
+  describe('zero amount transfers', async () => {
     beforeEach(async () => {
       const zero_cost = '0'
       registryZeroCost = await registryFactory.deploy(
@@ -531,7 +531,22 @@ describe('Registry Unit', () => {
         .to.emit(registryZeroCost, 'AddTokens')
         .withArgs(account1.address, [token1.address])
     })
-    it('zero transfer amount when removing token', async () => {
+    it('when removing protocol', async () => {
+      await registryZeroCost.connect(account1).addProtocols([protocol1])
+      await expect(
+        registryZeroCost.connect(account1).removeProtocols([protocol1])
+      )
+        .to.emit(registryZeroCost, 'RemoveProtocols')
+        .withArgs(account1.address, [protocol1])
+    })
+    it('when removing all protocols', async () => {
+      await registryZeroCost.connect(account1).setServerURL('maker1.com')
+      await registryZeroCost.connect(account1).addProtocols([protocol1])
+      await expect(registryZeroCost.connect(account1).removeServer())
+        .to.emit(registryZeroCost, 'UnsetServer')
+        .withArgs(account1.address, 'maker1.com', [protocol1], [])
+    })
+    it('when removing token', async () => {
       await registryZeroCost.connect(account1).addTokens([token1.address])
       await expect(
         registryZeroCost.connect(account1).removeTokens([token1.address])
@@ -539,16 +554,16 @@ describe('Registry Unit', () => {
         .to.emit(registryZeroCost, 'RemoveTokens')
         .withArgs(account1.address, [token1.address])
     })
-    it('zero transfer amount when removing all tokens', async () => {
+    it('when removing all tokens', async () => {
       await registryZeroCost.connect(account1).setServerURL('maker1.com')
-      await registryZeroCost.connect(account1).addProtocols([protocol1])
+      await registryZeroCost.connect(account1).addTokens([token1.address])
       await expect(registryZeroCost.connect(account1).removeServer())
         .to.emit(registryZeroCost, 'UnsetServer')
-        .withArgs(account1.address, 'maker1.com', [protocol1], [])
+        .withArgs(account1.address, 'maker1.com', [], [token1.address])
     })
   })
 
-  describe('Balance Of', async () => {
+  describe('balance of', async () => {
     it('verify balance without a staked server', async () => {
       const balance = await registry.balanceOf(account1.address)
       expect(balance).to.equal(0)
