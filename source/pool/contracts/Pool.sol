@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "./interfaces/IPool.sol";
 
 /**
- * @title AirSwap: Rewards Pool
+ * @title AirSwap: Withdrawable Token Pool
  * @notice https://www.airswap.io/
  */
 contract Pool is IPool, Ownable2Step {
@@ -24,19 +24,19 @@ contract Pool is IPool, Ownable2Step {
   // Max percentage for a claim with infinite value
   uint256 public max;
 
-  // Mapping of address to boolean to enable admin accounts
+  // Mapping of address to boolean for admin accounts
   mapping(address => bool) public admins;
 
-  // Mapping of tree -> account -> has claimed
+  // Mapping of tree to account to claim status
   mapping(bytes32 => mapping(address => bool)) public claimed;
 
-  // Mapping of tree -> root
+  // Mapping of tree to root
   mapping(bytes32 => bytes32) public rootsByTree;
 
   /**
    * @notice Constructor
-   * @param _scale uint256 scale param for calculating claim amount
-   * @param _max uint256 max param for calculating claim amount
+   * @param _scale uint256 scale to calculate withdrawal amount
+   * @param _max uint256 max to calculate withdrawal amount
    */
   constructor(uint256 _scale, uint256 _max) {
     if (_max > MAX_PERCENTAGE) revert MaxTooHigh(_max);
@@ -46,7 +46,7 @@ contract Pool is IPool, Ownable2Step {
   }
 
   /**
-   * @dev Reverts if called by any account other than an admin.
+   * @dev Revert if called by non admin account
    */
   modifier multiAdmin() {
     if (!admins[msg.sender]) revert Unauthorized();
@@ -54,82 +54,10 @@ contract Pool is IPool, Ownable2Step {
   }
 
   /**
-   * @notice Set scale
+   * @notice Transfer out token balances for migrations
+   * @param _tokens address[] token balances to transfer
+   * @param _dest address destination
    * @dev Only owner
-   * @param _scale uint256 scale param for calculating claim amount
-   */
-  function setScale(uint256 _scale) external override onlyOwner {
-    if (_scale > MAX_SCALE) revert ScaleTooHigh(_scale);
-    scale = _scale;
-    emit SetScale(scale);
-  }
-
-  /**
-   * @notice Set max
-   * @dev Only owner
-   * @param _max uint256 max param for calculating claim amount
-   */
-  function setMax(uint256 _max) external override onlyOwner {
-    if (_max > MAX_PERCENTAGE) revert MaxTooHigh(_max);
-    max = _max;
-    emit SetMax(max);
-  }
-
-  /**
-   * @notice Add admin address
-   * @dev Only owner
-   * @param _admin address to add
-   */
-  function addAdmin(address _admin) external override onlyOwner {
-    if (_admin == address(0)) revert AddressInvalid(_admin);
-    admins[_admin] = true;
-    emit AddAdmin(_admin);
-  }
-
-  /**
-   * @notice Remove admin address
-   * @dev Only owner
-   * @param _admin address to remove
-   */
-  function removeAdmin(address _admin) external override onlyOwner {
-    if (admins[_admin] != true) revert AdminNotSet(_admin);
-    admins[_admin] = false;
-    emit RemoveAdmin(_admin);
-  }
-
-  /**
-   * @notice Enables claims for a merkle tree of a set of values by setting the
-   *         merkle root
-   * @param _tree bytes32 The merkle tree unique identifier.
-   * @param _root bytes32 The merkle root.
-   */
-  function enable(bytes32 _tree, bytes32 _root) external override multiAdmin {
-    rootsByTree[_tree] = _root;
-    emit Enable(_tree, _root);
-  }
-
-  /**
-   * @notice Returns the claim status of a set of roots for a given address
-   * @param _account address The address to check.
-   * @param _trees bytes32[] An array of tree identifiers.
-   * @return claimList bool[] An array of claim statuses.
-   */
-  function getClaimStatusForTrees(
-    address _account,
-    bytes32[] calldata _trees
-  ) external view returns (bool[] memory) {
-    bool[] memory claimList = new bool[](_trees.length);
-    for (uint256 i = 0; i < _trees.length; i++) {
-      claimList[i] = claimed[_trees[i]][_account];
-    }
-    return claimList;
-  }
-
-  /**
-   * @notice Admin function to migrate funds
-   * @dev Only owner
-   * @param _tokens address[] addresses of tokens to migrate
-   * @param _dest address destination address
    */
   function drainTo(
     address[] calldata _tokens,
@@ -143,19 +71,70 @@ contract Pool is IPool, Ownable2Step {
   }
 
   /**
-   * @notice Withdraw tokens from the pool using one or more claims, sending
-   *         the tokens to the passed recipient address.
-   * @param _claims Claim[] A set of claims each consisting of a tree id, a
-   *        points earned, and a merkle proof.
-   * @param _token address The address of the token to withdraw.
-   * @param _minimumAmount uint256 The minimum amount to withdraw - this acts
-   *        as slippage / frontrunning protection.
-   * @param _recipient address The address to send the tokens to.
+   * @notice Set withdrawal scale
+   * @param _scale uint256 scale to calculate withdrawal amount
+   * @dev Only owner
+   */
+  function setScale(uint256 _scale) external override onlyOwner {
+    if (_scale > MAX_SCALE) revert ScaleTooHigh(_scale);
+    scale = _scale;
+    emit SetScale(scale);
+  }
+
+  /**
+   * @notice Set withdrawal max
+   * @param _max uint256 max to calculate withdrawal amount
+   * @dev Only owner
+   */
+  function setMax(uint256 _max) external override onlyOwner {
+    if (_max > MAX_PERCENTAGE) revert MaxTooHigh(_max);
+    max = _max;
+    emit SetMax(max);
+  }
+
+  /**
+   * @notice Set an admin
+   * @param _admin address to set as admin
+   * @dev Only owner
+   */
+  function setAdmin(address _admin) external override onlyOwner {
+    if (_admin == address(0)) revert AddressInvalid(_admin);
+    admins[_admin] = true;
+    emit SetAdmin(_admin);
+  }
+
+  /**
+   * @notice Unset an admin
+   * @param _admin address to unset as admin
+   * @dev Only owner
+   */
+  function unsetAdmin(address _admin) external override onlyOwner {
+    if (admins[_admin] != true) revert AdminNotSet(_admin);
+    admins[_admin] = false;
+    emit UnsetAdmin(_admin);
+  }
+
+  /**
+   * @notice Enable claims for a merkle tree
+   * @param _tree bytes32 a tree identifier
+   * @param _root bytes32 a tree root
+   */
+  function enable(bytes32 _tree, bytes32 _root) external override multiAdmin {
+    rootsByTree[_tree] = _root;
+    emit Enable(_tree, _root);
+  }
+
+  /**
+   * @notice Withdraw tokens using claims
+   * @param _claims Claim[] a set of claims
+   * @param _token address of a token to withdraw
+   * @param _minimum uint256 minimum expected amount
+   * @param _recipient address to receive withdrawal
    */
   function withdraw(
     Claim[] memory _claims,
     address _token,
-    uint256 _minimumAmount,
+    uint256 _minimum,
     address _recipient
   ) public override returns (uint256 _amount) {
     if (_claims.length <= 0) revert ClaimsNotProvided();
@@ -165,6 +144,7 @@ contract Pool is IPool, Ownable2Step {
     bytes32[] memory _treeList = new bytes32[](_claims.length);
     uint256 _totalValue = 0;
 
+    // Iterate through claims to determine total value
     for (uint256 i = 0; i < _claims.length; i++) {
       _claim = _claims[i];
       _root = rootsByTree[_claim.tree];
@@ -179,42 +159,62 @@ contract Pool is IPool, Ownable2Step {
       _treeList[i] = _claim.tree;
     }
 
+    // Determine withdrawable amount given total value
     _amount = calculate(_totalValue, _token);
-    if (_amount < _minimumAmount) revert AmountInsufficient(_amount);
+    if (_amount < _minimum) revert AmountInsufficient(_amount);
 
+    // Transfer withdrawable amount to recipient
     IERC20(_token).safeTransfer(_recipient, _amount);
     emit Withdraw(_treeList, msg.sender, _token, _amount);
   }
 
   /**
-   * @notice Calculate output amount for a given input amount and token
-   * @param _value uint256 input amount
-   * @param _token address token address to withdraw from the pool
-   * @return amount uint256 amount withdrawable based on balance, scale, and max
+   * @notice Calculate amount for a value and token
+   * @param _value uint256 claim value
+   * @param _token address claim token
+   * @return uint256 amount withdrawable
    */
   function calculate(
     uint256 _value,
     address _token
-  ) public view override returns (uint256 amount) {
+  ) public view override returns (uint256) {
     uint256 _balance = IERC20(_token).balanceOf(address(this));
     uint256 _divisor = (uint256(10) ** scale) + _value;
     return (max * _value * _balance) / _divisor / 100;
   }
 
   /**
-   * @notice Verify a claim's merkle proof
-   * @param _participant address The address of the claimant
-   * @param _root bytes32 The merkle root
-   * @param _value uint256 The value of the claim
-   * @param _proof bytes32[] The provided merkle proof
+   * @notice Verify a merkle proof
+   * @param _claimant address of the claimant
+   * @param _root bytes32 merkle root
+   * @param _value uint256 merkle value
+   * @param _proof bytes32[] merkle proof
+   * @return bool whether verified
    */
   function verify(
-    address _participant,
+    address _claimant,
     bytes32 _root,
     uint256 _value,
     bytes32[] memory _proof
-  ) public pure override returns (bool valid) {
-    bytes32 _leaf = keccak256(abi.encodePacked(_participant, _value));
+  ) public pure override returns (bool) {
+    bytes32 _leaf = keccak256(abi.encodePacked(_claimant, _value));
     return MerkleProof.verify(_proof, _root, _leaf);
+  }
+
+  /**
+   * @notice Get claim status for an account and set of trees
+   * @param _account address to check
+   * @param _trees bytes32[] an array of tree identifiers
+   * @return statuses bool[] an array of claim statuses
+   */
+  function getStatus(
+    address _account,
+    bytes32[] calldata _trees
+  ) external view returns (bool[] memory) {
+    bool[] memory statuses = new bool[](_trees.length);
+    for (uint256 i = 0; i < _trees.length; i++) {
+      statuses[i] = claimed[_trees[i]][_account];
+    }
+    return statuses;
   }
 }

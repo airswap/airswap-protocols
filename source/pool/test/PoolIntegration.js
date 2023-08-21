@@ -71,7 +71,7 @@ describe('Pool Integration', () => {
     ).deploy('StakedAST', 'sAST', feeToken.address, 100, 10)
     await stakingContract.deployed()
 
-    await pool.addAdmin(deployer.address)
+    await pool.setAdmin(deployer.address)
 
     tree = generateTreeFromData({
       [alice.address]: ALICE_SCORE,

@@ -59,7 +59,7 @@ describe('Registry Integration', () => {
   describe('staking cost transfers', async () => {
     it('staking cost is always transferred when a URL is set', async () => {
       await expect(registry.connect(account1).setServerURL('maker1.com'))
-        .to.emit(registry, 'SetServer')
+        .to.emit(registry, 'SetServerURL')
         .withArgs(account1.address, 'maker1.com')
 
       const urls = await registry.getServerURLsForStakers([account1.address])
@@ -72,7 +72,7 @@ describe('Registry Integration', () => {
 
     it('staking cost is always retruned when a URL is unset', async () => {
       await registry.connect(account1).setServerURL('maker1.com')
-      await expect(registry.connect(account1).removeServer())
+      await expect(registry.connect(account1).unsetServer())
         .to.emit(registry, 'UnsetServer')
         .withArgs(account1.address, 'maker1.com', [], [])
 

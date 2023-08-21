@@ -9,12 +9,12 @@ interface IPool {
     bytes32[] proof;
   }
 
-  event AddAdmin(address admin);
   event DrainTo(address[] tokens, address dest);
   event Enable(bytes32 tree, bytes32 root);
+  event SetAdmin(address admin);
   event SetMax(uint256 max);
   event SetScale(uint256 scale);
-  event RemoveAdmin(address admin);
+  event UnsetAdmin(address admin);
   event Withdraw(
     bytes32[] trees,
     address account,
@@ -38,23 +38,23 @@ interface IPool {
 
   function setMax(uint256 _max) external;
 
-  function addAdmin(address _admin) external;
+  function setAdmin(address _admin) external;
 
-  function removeAdmin(address _admin) external;
-
-  function enable(bytes32 _tree, bytes32 _root) external;
-
-  function getClaimStatusForTrees(
-    address _account,
-    bytes32[] calldata _trees
-  ) external returns (bool[] memory claimStatusList);
+  function unsetAdmin(address _admin) external;
 
   function drainTo(address[] calldata tokens, address dest) external;
+
+  function getStatus(
+    address _account,
+    bytes32[] calldata _trees
+  ) external returns (bool[] memory statuses);
+
+  function enable(bytes32 _tree, bytes32 _root) external;
 
   function withdraw(
     Claim[] memory claims,
     address token,
-    uint256 minimumAmount,
+    uint256 minimum,
     address recipient
   ) external returns (uint256 amount);
 

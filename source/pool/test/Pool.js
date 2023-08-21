@@ -71,7 +71,7 @@ describe('Pool Unit', () => {
     ).deploy(CLAIM_SCALE, CLAIM_MAX)
     await pool.deployed()
 
-    await pool.addAdmin(deployer.address)
+    await pool.setAdmin(deployer.address)
 
     tree = generateTreeFromData({
       [alice.address]: ALICE_SCORE,
@@ -150,7 +150,7 @@ describe('Pool Unit', () => {
       await feeToken.mock.balanceOf.returns('100000')
       await feeToken.mock.transfer.returns(true)
 
-      await pool.addAdmin(alice.address)
+      await pool.setAdmin(alice.address)
       const root = getRoot(tree)
       await pool.connect(alice).enable(TREE, root)
       const proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
@@ -178,7 +178,7 @@ describe('Pool Unit', () => {
       await feeToken.mock.balanceOf.returns('100000')
       await feeToken.mock.transfer.returns(true)
 
-      await pool.addAdmin(alice.address)
+      await pool.setAdmin(alice.address)
       const root = getRoot(tree)
       await pool.connect(alice).enable(TREE, root)
 
@@ -196,7 +196,7 @@ describe('Pool Unit', () => {
       await feeToken.mock.balanceOf.returns('100000')
       await feeToken.mock.transfer.returns(true)
 
-      await pool.addAdmin(alice.address)
+      await pool.setAdmin(alice.address)
       const proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
 
       await expect(
@@ -224,7 +224,7 @@ describe('Pool Unit', () => {
       await feeToken.mock.balanceOf.returns('100000')
       await feeToken.mock.transfer.returns(true)
 
-      await pool.addAdmin(alice.address)
+      await pool.setAdmin(alice.address)
       const root = getRoot(tree)
       await pool.connect(alice).enable(TREE, root)
       const proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
@@ -266,7 +266,7 @@ describe('Pool Unit', () => {
     it('withdraw reverts with score of zero', async () => {
       score = 0
 
-      await pool.addAdmin(alice.address)
+      await pool.setAdmin(alice.address)
       const root = getRoot(tree)
       await pool.connect(alice).enable(TREE, root)
       const proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
@@ -292,10 +292,10 @@ describe('Pool Unit', () => {
       expect(isClaimed).to.equal(false)
     })
 
-    it('withdraw reverts with minimumAmount not met', async () => {
+    it('withdraw reverts with minimum not met', async () => {
       await feeToken.mock.balanceOf.returns('100000')
       ;(await feeToken.mock.transfer.returns(true)) -
-        (await pool.addAdmin(alice.address))
+        (await pool.setAdmin(alice.address))
       const root = getRoot(tree)
       await pool.connect(alice).enable(TREE, root)
       const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
@@ -330,7 +330,7 @@ describe('Pool Unit', () => {
       await feeToken.mock.balanceOf.returns('100000')
       await feeToken.mock.transfer.returns(true)
 
-      await pool.addAdmin(alice.address)
+      await pool.setAdmin(alice.address)
       const root = getRoot(tree)
       const newRoot = getRoot(newTree)
       await pool.connect(alice).enable(TREE, root)
@@ -350,10 +350,7 @@ describe('Pool Unit', () => {
         bob.address
       )
 
-      const isClaimed = await pool.getClaimStatusForTrees(bob.address, [
-        TREE,
-        NEW_TREE,
-      ])
+      const isClaimed = await pool.getStatus(bob.address, [TREE, NEW_TREE])
       expect(await isClaimed[0]).to.equal(true)
       expect(await isClaimed[1]).to.equal(false)
     })
@@ -370,7 +367,7 @@ describe('Pool Unit', () => {
 
   describe('Test Verify', async () => {
     it('Test verification is valid', async () => {
-      await pool.addAdmin(alice.address)
+      await pool.setAdmin(alice.address)
       const root = getRoot(tree)
       await pool.connect(alice).enable(TREE, root)
       const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
@@ -380,7 +377,7 @@ describe('Pool Unit', () => {
     })
 
     it('Test verification is invalid with wrong participant', async () => {
-      await pool.addAdmin(alice.address)
+      await pool.setAdmin(alice.address)
       const root = getRoot(tree)
       await pool.connect(alice).enable(TREE, root)
       const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
@@ -390,7 +387,7 @@ describe('Pool Unit', () => {
     })
 
     it('Test verification is invalid with wrong scroe', async () => {
-      await pool.addAdmin(alice.address)
+      await pool.setAdmin(alice.address)
       const root = getRoot(tree)
       await pool.connect(alice).enable(TREE, root)
       const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
@@ -445,38 +442,38 @@ describe('Pool Unit', () => {
   })
 
   describe('Test setting admin', async () => {
-    it('Test addAdmin is successful', async () => {
-      await expect(pool.addAdmin(alice.address)).to.emit(pool, 'AddAdmin')
+    it('Test setAdmin is successful', async () => {
+      await expect(pool.setAdmin(alice.address)).to.emit(pool, 'SetAdmin')
       expect(await pool.admins(alice.address)).to.be.equal(true)
     })
 
-    it('Test addAdmin reverts', async () => {
+    it('Test setAdmin reverts', async () => {
       await expect(
-        pool.connect(alice).addAdmin(alice.address)
+        pool.connect(alice).setAdmin(alice.address)
       ).to.be.revertedWith('Ownable: caller is not the owner')
     })
 
-    it('Test addAdmin reverts with zero address', async () => {
-      await expect(pool.connect(deployer).addAdmin(ADDRESS_ZERO))
+    it('Test setAdmin reverts with zero address', async () => {
+      await expect(pool.connect(deployer).setAdmin(ADDRESS_ZERO))
         .to.be.revertedWith(`AddressInvalid`)
         .withArgs(ADDRESS_ZERO)
     })
 
-    it('Test removeAdmin is successful', async () => {
-      await expect(pool.addAdmin(alice.address)).to.emit(pool, 'AddAdmin')
-      await expect(pool.removeAdmin(alice.address)).to.emit(pool, 'RemoveAdmin')
+    it('Test unsetAdmin is successful', async () => {
+      await expect(pool.setAdmin(alice.address)).to.emit(pool, 'SetAdmin')
+      await expect(pool.unsetAdmin(alice.address)).to.emit(pool, 'UnsetAdmin')
       expect(await pool.admins(alice.address)).to.be.equal(false)
     })
 
-    it('Test removeAdmin reverts', async () => {
-      await expect(pool.addAdmin(alice.address)).to.emit(pool, 'AddAdmin')
+    it('Test unsetAdmin reverts', async () => {
+      await expect(pool.setAdmin(alice.address)).to.emit(pool, 'SetAdmin')
       await expect(
-        pool.connect(alice).removeAdmin(alice.address)
+        pool.connect(alice).unsetAdmin(alice.address)
       ).to.be.revertedWith('Ownable: caller is not the owner')
     })
 
-    it('Test removeAdmin executed by non-admin reverts', async () => {
-      await expect(pool.connect(deployer).removeAdmin(alice.address))
+    it('Test unsetAdmin executed by non-admin reverts', async () => {
+      await expect(pool.connect(deployer).unsetAdmin(alice.address))
         .to.be.revertedWith(`AdminNotSet`)
         .withArgs(alice.address)
     })
