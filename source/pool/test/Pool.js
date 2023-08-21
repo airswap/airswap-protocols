@@ -165,7 +165,8 @@ describe('Pool Unit', () => {
             },
           ],
           feeToken.address,
-          WITHDRAW_MINIMUM
+          WITHDRAW_MINIMUM,
+          bob.address
         )
       ).to.emit(pool, 'Withdraw')
 
@@ -182,7 +183,9 @@ describe('Pool Unit', () => {
       await pool.connect(alice).enable(TREE, root)
 
       await expect(
-        pool.connect(bob).withdraw([], feeToken.address, WITHDRAW_MINIMUM)
+        pool
+          .connect(bob)
+          .withdraw([], feeToken.address, WITHDRAW_MINIMUM, bob.address)
       ).to.be.revertedWith(`ClaimsNotProvided`)
 
       const isClaimed = await pool.claimed(TREE, bob.address)
@@ -206,7 +209,8 @@ describe('Pool Unit', () => {
             },
           ],
           feeToken.address,
-          WITHDRAW_MINIMUM
+          WITHDRAW_MINIMUM,
+          bob.address
         )
       )
         .to.be.revertedWith(`TreeDisabled`)
@@ -235,7 +239,8 @@ describe('Pool Unit', () => {
             },
           ],
           feeToken.address,
-          WITHDRAW_MINIMUM
+          WITHDRAW_MINIMUM,
+          bob.address
         )
       ).to.emit(pool, 'Withdraw')
 
@@ -249,7 +254,8 @@ describe('Pool Unit', () => {
             },
           ],
           feeToken.address,
-          WITHDRAW_MINIMUM
+          WITHDRAW_MINIMUM,
+          bob.address
         )
       ).to.be.revertedWith(`AlreadyClaimed`)
 
@@ -275,7 +281,8 @@ describe('Pool Unit', () => {
             },
           ],
           feeToken.address,
-          WITHDRAW_MINIMUM
+          WITHDRAW_MINIMUM,
+          bob.address
         )
       )
         .to.be.revertedWith(`ProofInvalid`)
@@ -285,39 +292,10 @@ describe('Pool Unit', () => {
       expect(isClaimed).to.equal(false)
     })
 
-    it('withdraw with different recipient success', async () => {
+    it('withdraw reverts with minimumAmount not met', async () => {
       await feeToken.mock.balanceOf.returns('100000')
-      await feeToken.mock.transfer.returns(true)
-
-      await pool.addAdmin(alice.address)
-      const root = getRoot(tree)
-      await pool.connect(alice).enable(TREE, root)
-      const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
-
-      await expect(
-        pool.connect(alice).withdrawFor(
-          [
-            {
-              tree: TREE,
-              value: ALICE_SCORE,
-              proof,
-            },
-          ],
-          feeToken.address,
-          WITHDRAW_MINIMUM,
-          bob.address
-        )
-      ).to.emit(pool, 'Withdraw')
-
-      const isClaimed = await pool.claimed(TREE, alice.address)
-      expect(isClaimed).to.equal(true)
-    })
-
-    it('withdraw with different recipient reverts with minimumAmount not met', async () => {
-      await feeToken.mock.balanceOf.returns('100000')
-      await feeToken.mock.transfer.returns(true)
-
-      await pool.addAdmin(alice.address)
+      ;(await feeToken.mock.transfer.returns(true)) -
+        (await pool.addAdmin(alice.address))
       const root = getRoot(tree)
       await pool.connect(alice).enable(TREE, root)
       const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
@@ -328,7 +306,7 @@ describe('Pool Unit', () => {
         .calculate(ALICE_SCORE, feeToken.address)
 
       await expect(
-        pool.connect(alice).withdrawFor(
+        pool.connect(alice).withdraw(
           [
             {
               tree: TREE,
@@ -346,34 +324,6 @@ describe('Pool Unit', () => {
 
       const isClaimed = await pool.claimed(TREE, alice.address)
       expect(isClaimed).to.equal(false)
-    })
-
-    it('withdraw with different recipient reverts if caller not participant', async () => {
-      await feeToken.mock.balanceOf.returns('100000')
-
-      await pool.addAdmin(alice.address)
-      const root = getRoot(tree)
-      await pool.connect(alice).enable(TREE, root)
-      const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
-
-      const withdrawMinimum = 496
-
-      await expect(
-        pool.connect(bob).withdrawFor(
-          [
-            {
-              tree: TREE,
-              value: ALICE_SCORE,
-              proof,
-            },
-          ],
-          feeToken.address,
-          withdrawMinimum,
-          bob.address
-        )
-      )
-        .to.be.revertedWith(`ProofInvalid`)
-        .withArgs(root)
     })
 
     it('withdraw marks tree for address as claimed', async () => {
@@ -396,7 +346,8 @@ describe('Pool Unit', () => {
           },
         ],
         feeToken.address,
-        WITHDRAW_MINIMUM
+        WITHDRAW_MINIMUM,
+        bob.address
       )
 
       const isClaimed = await pool.getClaimStatusForTrees(bob.address, [

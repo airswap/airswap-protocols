@@ -143,23 +143,6 @@ contract Pool is IPool, Ownable2Step {
   }
 
   /**
-   * @notice Withdraw tokens from the pool using one or more claims. The
-   *        claimant must be the message sender.
-   * @param _claims Claim[] A set of claims each consisting of a tree id, a
-   *        points earned, and a merkle proof.
-   * @param _token address The address of the token to withdraw.
-   * @param _minimumAmount uint256 The minimum amount to withdraw - this acts
-   *        as slippage / frontrunning protection.
-   */
-  function withdraw(
-    Claim[] memory _claims,
-    address _token,
-    uint256 _minimumAmount
-  ) public override returns (uint256 amountWithdrawn) {
-    return withdrawFor(_claims, _token, _minimumAmount, msg.sender);
-  }
-
-  /**
    * @notice Withdraw tokens from the pool using one or more claims, sending
    *         the tokens to the passed recipient address.
    * @param _claims Claim[] A set of claims each consisting of a tree id, a
@@ -169,7 +152,7 @@ contract Pool is IPool, Ownable2Step {
    *        as slippage / frontrunning protection.
    * @param _recipient address The address to send the tokens to.
    */
-  function withdrawFor(
+  function withdraw(
     Claim[] memory _claims,
     address _token,
     uint256 _minimumAmount,
