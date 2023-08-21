@@ -34,3 +34,4 @@ import { Indexer, Server, Swap } from '@airswap/libraries';
 | `yarn`         | Install dependencies                    |
 | `yarn clean`   | Delete the contract `build` folder      |
 | `yarn compile` | Compile all contracts to `build` folder |
+| `yarn test`    | Run all tests in the `test` folder      |
