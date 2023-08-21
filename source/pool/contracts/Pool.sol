@@ -6,11 +6,10 @@ import "@openzeppelin/contracts/access/Ownable2Step.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
-import "@airswap/staking/contracts/interfaces/IStaking.sol";
 import "./interfaces/IPool.sol";
 
 /**
- * @title AirSwap: Rewards Pool
+ * @title AirSwap: Withdrawable Token Pool
  * @notice https://www.airswap.io/
  */
 contract Pool is IPool, Ownable2Step {
@@ -22,28 +21,22 @@ contract Pool is IPool, Ownable2Step {
   // Larger the scale, lower the output for a claim
   uint256 public scale;
 
-  // Max percentage for a claim with infinite score
+  // Max percentage for a claim with infinite value
   uint256 public max;
 
-  // Mapping of tree root to boolean to enable claims
-  mapping(bytes32 => bool) public roots;
-
-  // Mapping of address to boolean to enable admin accounts
+  // Mapping of address to boolean for admin accounts
   mapping(address => bool) public admins;
 
-  // Mapping of tree root to account to mark as claimed
+  // Mapping of tree to account to claim status
   mapping(bytes32 => mapping(address => bool)) public claimed;
 
-  // Staking contract address
-  address public stakingContract;
-
-  // Staking token address
-  address public stakingToken;
+  // Mapping of tree to root
+  mapping(bytes32 => bytes32) public rootsByTree;
 
   /**
    * @notice Constructor
-   * @param _scale uint256
-   * @param _max uint256
+   * @param _scale uint256 scale to calculate withdrawal amount
+   * @param _max uint256 max to calculate withdrawal amount
    */
   constructor(uint256 _scale, uint256 _max) {
     if (_max > MAX_PERCENTAGE) revert MaxTooHigh(_max);
@@ -53,7 +46,7 @@ contract Pool is IPool, Ownable2Step {
   }
 
   /**
-   * @dev Throws if called by any account other than the admin.
+   * @dev Revert if called by non admin account
    */
   modifier multiAdmin() {
     if (!admins[msg.sender]) revert Unauthorized();
@@ -61,106 +54,10 @@ contract Pool is IPool, Ownable2Step {
   }
 
   /**
-   * @notice Set scale
+   * @notice Transfer out token balances for migrations
+   * @param _tokens address[] token balances to transfer
+   * @param _dest address destination
    * @dev Only owner
-   * @param _scale uint256
-   */
-  function setScale(uint256 _scale) external override onlyOwner {
-    if (_scale > MAX_SCALE) revert ScaleTooHigh(_scale);
-    scale = _scale;
-    emit SetScale(scale);
-  }
-
-  /**
-   * @notice Set max
-   * @dev Only owner
-   * @param _max uint256
-   */
-  function setMax(uint256 _max) external override onlyOwner {
-    if (_max > MAX_PERCENTAGE) revert MaxTooHigh(_max);
-    max = _max;
-    emit SetMax(max);
-  }
-
-  /**
-   * @notice Add admin address
-   * @dev Only owner
-   * @param _admin address
-   */
-  function addAdmin(address _admin) external override onlyOwner {
-    if (_admin == address(0)) revert AddressInvalid(_admin);
-    admins[_admin] = true;
-    emit AddAdmin(_admin);
-  }
-
-  /**
-   * @notice Remove admin address
-   * @dev Only owner
-   * @param _admin address
-   */
-  function removeAdmin(address _admin) external override onlyOwner {
-    if (admins[_admin] != true) revert AdminNotSet(_admin);
-    admins[_admin] = false;
-    emit RemoveAdmin(_admin);
-  }
-
-  /**
-   * @notice Set staking contract address
-   * @dev Only owner
-   * @param _stakingContract address
-   */
-  function setStaking(
-    address _stakingToken,
-    address _stakingContract
-  ) external override onlyOwner {
-    if (_stakingContract == address(0)) revert AddressInvalid(_stakingContract);
-    if (_stakingToken == address(0)) revert AddressInvalid(_stakingToken);
-    if (stakingToken != address(0) && stakingContract != address(0)) {
-      // set allowance on old staking token to zero
-      IERC20(stakingToken).safeApprove(stakingContract, 0);
-    }
-    stakingContract = _stakingContract;
-    stakingToken = _stakingToken;
-    IERC20(stakingToken).safeApprove(stakingContract, 2 ** 256 - 1);
-    emit SetStaking(_stakingToken, _stakingContract);
-  }
-
-  /**
-   * @notice Set claims from previous pool contract
-   * @dev Only owner
-   * @param _root bytes32
-   * @param _accounts address[]
-   */
-  function setClaimed(
-    bytes32 _root,
-    address[] memory _accounts
-  ) external override multiAdmin {
-    if (roots[_root] == false) {
-      roots[_root] = true;
-    }
-    for (uint256 i = 0; i < _accounts.length; i++) {
-      address account = _accounts[i];
-      if (claimed[_root][account]) revert AlreadyClaimed();
-      claimed[_root][account] = true;
-    }
-    emit Enable(_root);
-  }
-
-  /**
-   * @notice Enables claims for a merkle tree of a set of scores
-   * @param _root bytes32
-   */
-  function enable(bytes32 _root) external override multiAdmin {
-    if (roots[_root]) revert RootExists(_root);
-    roots[_root] = true;
-    emit Enable(_root);
-  }
-
-  /**
-   * @notice Admin function to migrate funds
-   * @dev Only owner
-   * @param _tokens address[]
-   * @param _dest address
    */
   function drainTo(
     address[] calldata _tokens,
@@ -174,154 +71,150 @@ contract Pool is IPool, Ownable2Step {
   }
 
   /**
-   * @notice Withdraw tokens from the pool using claims
-   * @param _claims Claim[]
-   * @param _token address
+   * @notice Set withdrawal scale
+   * @param _scale uint256 scale to calculate withdrawal amount
+   * @dev Only owner
    */
-  function withdraw(Claim[] memory _claims, address _token) external override {
-    withdrawProtected(_claims, _token, 0, msg.sender);
+  function setScale(uint256 _scale) external override onlyOwner {
+    if (_scale > MAX_SCALE) revert ScaleTooHigh(_scale);
+    scale = _scale;
+    emit SetScale(scale);
   }
 
   /**
-   * @notice Withdraw tokens from the pool using claims and stake
-   * @param _claims Claim[]
-   * @param _token address
+   * @notice Set withdrawal max
+   * @param _max uint256 max to calculate withdrawal amount
+   * @dev Only owner
    */
-  function withdrawAndStake(
-    Claim[] memory _claims,
-    address _token,
-    uint256 _minimumAmount
-  ) external override {
-    if (_token != address(stakingToken)) revert TokenInvalid(_token);
-    (uint256 amount, bytes32[] memory rootList) = _withdrawCheck(
-      _claims,
-      _token,
-      _minimumAmount
-    );
-    IStaking(stakingContract).stakeFor(msg.sender, amount);
-    emit Withdraw(rootList, msg.sender, _token, amount);
+  function setMax(uint256 _max) external override onlyOwner {
+    if (_max > MAX_PERCENTAGE) revert MaxTooHigh(_max);
+    max = _max;
+    emit SetMax(max);
   }
 
   /**
-   * @notice Withdraw tokens from the pool using claims and stake for another account
-   * @param _claims Claim[]
-   * @param _token address
-   * @param _account address
+   * @notice Set an admin
+   * @param _admin address to set as admin
+   * @dev Only owner
    */
-  function withdrawAndStakeFor(
-    Claim[] memory _claims,
-    address _token,
-    uint256 _minimumAmount,
-    address _account
-  ) external override {
-    if (_token != address(stakingToken)) revert TokenInvalid(_token);
-    (uint256 amount, bytes32[] memory rootList) = _withdrawCheck(
-      _claims,
-      _token,
-      _minimumAmount
-    );
-    IERC20(stakingToken).approve(stakingContract, amount);
-    IStaking(stakingContract).stakeFor(_account, amount);
-    emit Withdraw(rootList, msg.sender, _token, amount);
+  function setAdmin(address _admin) external override onlyOwner {
+    if (_admin == address(0)) revert AddressInvalid(_admin);
+    admins[_admin] = true;
+    emit SetAdmin(_admin);
   }
 
   /**
-   * @notice Withdraw tokens from the pool using claims and send to recipient
-   * @param _claims Claim[]
-   * @param _token address
-   * @param _recipient address
+   * @notice Unset an admin
+   * @param _admin address to unset as admin
+   * @dev Only owner
    */
-  function withdrawWithRecipient(
+  function unsetAdmin(address _admin) external override onlyOwner {
+    if (admins[_admin] != true) revert AdminNotSet(_admin);
+    admins[_admin] = false;
+    emit UnsetAdmin(_admin);
+  }
+
+  /**
+   * @notice Enable claims for a merkle tree
+   * @param _tree bytes32 a tree identifier
+   * @param _root bytes32 a tree root
+   */
+  function enable(bytes32 _tree, bytes32 _root) external override multiAdmin {
+    rootsByTree[_tree] = _root;
+    emit Enable(_tree, _root);
+  }
+
+  /**
+   * @notice Withdraw tokens using claims
+   * @param _claims Claim[] a set of claims
+   * @param _token address of a token to withdraw
+   * @param _minimum uint256 minimum expected amount
+   * @param _recipient address to receive withdrawal
+   */
+  function withdraw(
     Claim[] memory _claims,
     address _token,
-    uint256 _minimumAmount,
+    uint256 _minimum,
     address _recipient
-  ) external override {
-    withdrawProtected(_claims, _token, _minimumAmount, _recipient);
-  }
-
-  /**
-   * @notice Withdraw tokens from the pool using claims
-   * @param _claims Claim[]
-   * @param _token address
-   * @param _minimumAmount uint256
-   */
-  function _withdrawCheck(
-    Claim[] memory _claims,
-    address _token,
-    uint256 _minimumAmount
-  ) internal returns (uint256, bytes32[] memory) {
+  ) public override returns (uint256 _amount) {
     if (_claims.length <= 0) revert ClaimsNotProvided();
-    uint256 _totalScore = 0;
-    bytes32[] memory _rootList = new bytes32[](_claims.length);
+
     Claim memory _claim;
+    bytes32 _root;
+    bytes32[] memory _treeList = new bytes32[](_claims.length);
+    uint256 _totalValue = 0;
+
+    // Iterate through claims to determine total value
     for (uint256 i = 0; i < _claims.length; i++) {
       _claim = _claims[i];
-      if (!roots[_claim.root]) revert RootDisabled(_claim.root);
-      if (claimed[_claim.root][msg.sender]) revert AlreadyClaimed();
-      if (!verify(msg.sender, _claim.root, _claim.score, _claim.proof))
-        revert ProofInvalid(_claim.root);
-      _totalScore = _totalScore + _claim.score;
-      claimed[_claim.root][msg.sender] = true;
-      _rootList[i] = _claim.root;
+      _root = rootsByTree[_claim.tree];
+
+      if (_root == 0) revert TreeDisabled(_claim.tree);
+      if (claimed[_claim.tree][msg.sender]) revert AlreadyClaimed();
+      if (!verify(msg.sender, _root, _claim.value, _claim.proof))
+        revert ProofInvalid(_claim.tree, _root);
+
+      _totalValue = _totalValue + _claim.value;
+      claimed[_claim.tree][msg.sender] = true;
+      _treeList[i] = _claim.tree;
     }
-    uint256 _amount = calculate(_totalScore, _token);
-    if (_amount < _minimumAmount) revert AmountInsufficient(_amount);
-    return (_amount, _rootList);
+
+    // Determine withdrawable amount given total value
+    _amount = calculate(_totalValue, _token);
+    if (_amount < _minimum) revert AmountInsufficient(_amount);
+
+    // Transfer withdrawable amount to recipient
+    IERC20(_token).safeTransfer(_recipient, _amount);
+    emit Withdraw(_treeList, msg.sender, _token, _amount);
   }
 
   /**
-   * @notice Calculate output amount for an input score
-   * @param _score uint256
-   * @param _token address
-   * @return amount uint256 amount to claim based on balance, scale, and max
+   * @notice Calculate amount for a value and token
+   * @param _value uint256 claim value
+   * @param _token address claim token
+   * @return uint256 amount withdrawable
    */
   function calculate(
-    uint256 _score,
+    uint256 _value,
     address _token
-  ) public view override returns (uint256 amount) {
+  ) public view override returns (uint256) {
     uint256 _balance = IERC20(_token).balanceOf(address(this));
-    uint256 _divisor = (uint256(10) ** scale) + _score;
-    return (max * _score * _balance) / _divisor / 100;
+    uint256 _divisor = (uint256(10) ** scale) + _value;
+    return (max * _value * _balance) / _divisor / 100;
   }
 
   /**
-   * @notice Withdraw tokens from the pool using claims
-   * @param _claims Claim[]
-   * @param _token address
-   * @param _minimumAmount uint256
-   * @param _recipient address
-   */
-  function withdrawProtected(
-    Claim[] memory _claims,
-    address _token,
-    uint256 _minimumAmount,
-    address _recipient
-  ) public override returns (uint256) {
-    (uint256 _amount, bytes32[] memory _rootList) = _withdrawCheck(
-      _claims,
-      _token,
-      _minimumAmount
-    );
-    IERC20(_token).safeTransfer(_recipient, _amount);
-    emit Withdraw(_rootList, msg.sender, _token, _amount);
-    return _amount;
-  }
-
-  /**
-   * @notice Verify a claim proof
-   * @param _participant address
-   * @param _root bytes32
-   * @param _score uint256
-   * @param _proof bytes32[]
+   * @notice Verify a merkle proof
+   * @param _claimant address of the claimant
+   * @param _root bytes32 merkle root
+   * @param _value uint256 merkle value
+   * @param _proof bytes32[] merkle proof
+   * @return bool whether verified
    */
   function verify(
-    address _participant,
+    address _claimant,
     bytes32 _root,
-    uint256 _score,
+    uint256 _value,
     bytes32[] memory _proof
-  ) public pure override returns (bool valid) {
-    bytes32 _leaf = keccak256(abi.encodePacked(_participant, _score));
+  ) public pure override returns (bool) {
+    bytes32 _leaf = keccak256(abi.encodePacked(_claimant, _value));
     return MerkleProof.verify(_proof, _root, _leaf);
+  }
+
+  /**
+   * @notice Get claim status for an account and set of trees
+   * @param _account address to check
+   * @param _trees bytes32[] an array of tree identifiers
+   * @return statuses bool[] an array of claim statuses
+   */
+  function getStatus(
+    address _account,
+    bytes32[] calldata _trees
+  ) external view returns (bool[] memory) {
+    bool[] memory statuses = new bool[](_trees.length);
+    for (uint256 i = 0; i < _trees.length; i++) {
+      statuses[i] = claimed[_trees[i]][_account];
+    }
+    return statuses;
   }
 }

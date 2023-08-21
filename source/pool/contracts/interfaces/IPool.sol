@@ -4,20 +4,19 @@ pragma solidity ^0.8.17;
 
 interface IPool {
   struct Claim {
-    bytes32 root;
-    uint256 score;
+    bytes32 tree;
+    uint256 value;
     bytes32[] proof;
   }
 
-  event AddAdmin(address admin);
   event DrainTo(address[] tokens, address dest);
-  event Enable(bytes32);
+  event Enable(bytes32 tree, bytes32 root);
+  event SetAdmin(address admin);
   event SetMax(uint256 max);
   event SetScale(uint256 scale);
-  event SetStaking(address stakingToken, address stakigContract);
-  event RemoveAdmin(address admin);
+  event UnsetAdmin(address admin);
   event Withdraw(
-    bytes32[] roots,
+    bytes32[] trees,
     address account,
     address token,
     uint256 amount
@@ -29,10 +28,9 @@ interface IPool {
   error AmountInsufficient(uint256);
   error ClaimsNotProvided();
   error MaxTooHigh(uint256);
-  error ProofInvalid(bytes32);
+  error ProofInvalid(bytes32, bytes32);
+  error TreeDisabled(bytes32);
   error ScaleTooHigh(uint256);
-  error RootDisabled(bytes32);
-  error RootExists(bytes32);
   error TokenInvalid(address);
   error Unauthorized();
 
@@ -40,46 +38,25 @@ interface IPool {
 
   function setMax(uint256 _max) external;
 
-  function addAdmin(address _admin) external;
+  function setAdmin(address _admin) external;
 
-  function removeAdmin(address _admin) external;
-
-  function setStaking(address _stakingToken, address _stakingContract) external;
-
-  function setClaimed(bytes32 root, address[] memory accounts) external;
-
-  function enable(bytes32 root) external;
+  function unsetAdmin(address _admin) external;
 
   function drainTo(address[] calldata tokens, address dest) external;
 
-  function withdraw(Claim[] memory claims, address token) external;
+  function getStatus(
+    address _account,
+    bytes32[] calldata _trees
+  ) external returns (bool[] memory statuses);
 
-  function withdrawWithRecipient(
+  function enable(bytes32 _tree, bytes32 _root) external;
+
+  function withdraw(
     Claim[] memory claims,
     address token,
-    uint256 minimumAmount,
+    uint256 minimum,
     address recipient
-  ) external;
-
-  function withdrawAndStake(
-    Claim[] memory claims,
-    address token,
-    uint256 minimumAmount
-  ) external;
-
-  function withdrawAndStakeFor(
-    Claim[] memory claims,
-    address token,
-    uint256 minimumAmount,
-    address account
-  ) external;
-
-  function withdrawProtected(
-    Claim[] memory claims,
-    address token,
-    uint256 minimumAmount,
-    address recipient
-  ) external returns (uint256);
+  ) external returns (uint256 amount);
 
   function calculate(
     uint256 score,

@@ -1,6 +1,6 @@
 {
   "name": "@airswap/libraries",
-  "version": "4.0.19",
+  "version": "4.0.20-beta.0",
   "description": "AirSwap: Libraries for Developers",
   "repository": {
     "type": "git",
@@ -22,15 +22,16 @@
     "lint:fix": "yarn eslint . --ext .js,.ts --fix",
     "pretty:check": "prettier --check \"./**/*.ts\" \"./**/*.js\"",
     "pretty:fix": "prettier --write \"./**/*.ts\" \"./**/*.js\"",
-    "test": "yarn test:unit",
-    "test:unit": "TS_NODE_COMPILER_OPTIONS='{\"strict\":false}' yarn mocha -r ts-node/esm test/*.ts"
+    "test": "TS_NODE_COMPILER_OPTIONS='{\"strict\":false}' yarn mocha -r ts-node/esm test/*.ts",
+    "test:ci": "yarn test"
   },
   "dependencies": {
     "@airswap/balances": "4.0.2",
     "@airswap/constants": "4.0.10",
     "@airswap/jsonrpc-client-websocket": "0.0.1",
-    "@airswap/registry": "4.0.3",
+    "@airswap/registry": "4.0.4-beta.0",
     "@airswap/maker-registry": "4.0.4",
+    "@airswap/pool": "4.0.3-beta.1",
     "@airswap/staking": "4.0.3",
     "@airswap/swap": "4.0.4",
     "@airswap/swap-erc20": "4.0.6",

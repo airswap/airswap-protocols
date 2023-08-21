@@ -18,29 +18,27 @@ contract Registry {
   IERC20 public immutable stakingToken;
   uint256 public immutable stakingCost;
   uint256 public immutable supportCost;
-  mapping(address => EnumerableSet.AddressSet) internal tokensByStaker;
-  mapping(address => EnumerableSet.Bytes32Set) internal protocolsByStaker;
-  mapping(address => EnumerableSet.AddressSet) internal stakersByToken;
-  mapping(bytes4 => EnumerableSet.AddressSet) internal stakersByProtocol;
-  mapping(address => string) public stakerServerURLs;
 
-  event SetServer(address indexed account, string url);
-  event AddProtocols(address indexed account, bytes4[] protocols);
-  event AddTokens(address indexed account, address[] tokens);
-  event RemoveTokens(address indexed account, address[] tokens);
-  event RemoveProtocols(address indexed account, bytes4[] protocols);
+  mapping(address => string) public stakerServerURLs;
+  mapping(address => EnumerableSet.Bytes32Set) internal protocolsByStaker;
+  mapping(bytes4 => EnumerableSet.AddressSet) internal stakersByProtocol;
+  mapping(address => EnumerableSet.AddressSet) internal tokensByStaker;
+  mapping(address => EnumerableSet.AddressSet) internal stakersByToken;
+
+  event SetServerURL(address indexed staker, string url);
+  event AddProtocols(address indexed staker, bytes4[] protocols);
+  event AddTokens(address indexed staker, address[] tokens);
+  event RemoveTokens(address indexed staker, address[] tokens);
+  event RemoveProtocols(address indexed staker, bytes4[] protocols);
   event UnsetServer(
-    address indexed account,
+    address indexed staker,
     string url,
     bytes4[] protocols,
     address[] tokens
   );
 
-  error NoProtocolsToAdd();
-  error NoProtocolsToRemove();
-  error NoServerToRemove();
-  error NoTokensToAdd();
-  error NoTokensToRemove();
+  error ArgumentInvalid();
+  error NoServerURLSet();
   error ProtocolDoesNotExist(bytes4);
   error ProtocolExists(bytes4);
   error TokenDoesNotExist(address);
@@ -64,25 +62,24 @@ contract Registry {
   }
 
   /**
-   * @notice Stake tokens and set the server URL
-   * @param _url string value of the URL
+   * @notice Set a server URL
+   * @param _url string URL
    */
   function setServerURL(string calldata _url) external {
     if (bytes(_url).length == 0) revert ServerURLInvalid();
-
     if (bytes(stakerServerURLs[msg.sender]).length == 0 && stakingCost > 0) {
       stakingToken.safeTransferFrom(msg.sender, address(this), stakingCost);
     }
     stakerServerURLs[msg.sender] = _url;
-    emit SetServer(msg.sender, _url);
+    emit SetServerURL(msg.sender, _url);
   }
 
   /**
-   * @notice Fully remove server URL, protocols, and tokens
+   * @notice Unset server URL, all protocols, and all tokens
    */
-  function removeServer() external {
+  function unsetServer() external {
     if (bytes(stakerServerURLs[msg.sender]).length == 0)
-      revert NoServerToRemove();
+      revert NoServerURLSet();
 
     EnumerableSet.Bytes32Set storage supportedProtocolList = protocolsByStaker[
       msg.sender
@@ -111,29 +108,28 @@ contract Registry {
       stakersByToken[_token].remove(msg.sender);
     }
 
-    emit UnsetServer(
-      msg.sender,
-      stakerServerURLs[msg.sender],
-      _protocolList,
-      _tokenList
-    );
-
-    stakerServerURLs[msg.sender] = "";
     uint256 _transferAmount = stakingCost +
       (supportCost * _protocolListLength) +
       (supportCost * _tokenListLength);
     if (_transferAmount > 0) {
       stakingToken.safeTransfer(msg.sender, _transferAmount);
     }
+
+    emit UnsetServer(
+      msg.sender,
+      stakerServerURLs[msg.sender],
+      _protocolList,
+      _tokenList
+    );
   }
 
   /**
-   * @notice Add protocols supported by the caller
-   * @param _protocols array of protocol addresses
+   * @notice Add protocols supported by the sender
+   * @param _protocols array of protocol identifiers
    */
   function addProtocols(bytes4[] calldata _protocols) external {
     uint256 _length = _protocols.length;
-    if (_length <= 0) revert NoProtocolsToAdd();
+    if (_length <= 0) revert ArgumentInvalid();
     EnumerableSet.Bytes32Set storage _protocolList = protocolsByStaker[
       msg.sender
     ];
@@ -143,20 +139,22 @@ contract Registry {
       if (!_protocolList.add(protocol)) revert ProtocolExists(protocol);
       stakersByProtocol[protocol].add(msg.sender);
     }
+
     uint256 _transferAmount = supportCost * _length;
-    emit AddProtocols(msg.sender, _protocols);
     if (_transferAmount > 0) {
       stakingToken.safeTransferFrom(msg.sender, address(this), _transferAmount);
     }
+
+    emit AddProtocols(msg.sender, _protocols);
   }
 
   /**
-   * @notice Remove protocols supported by the caller
-   * @param _protocols array of protocol addresses
+   * @notice Remove protocols supported by the sender
+   * @param _protocols array of protocol identifiers
    */
   function removeProtocols(bytes4[] calldata _protocols) external {
     uint256 _length = _protocols.length;
-    if (_length <= 0) revert NoProtocolsToRemove();
+    if (_length <= 0) revert ArgumentInvalid();
     EnumerableSet.Bytes32Set storage protocolList = protocolsByStaker[
       msg.sender
     ];
@@ -166,13 +164,19 @@ contract Registry {
         revert ProtocolDoesNotExist(_protocol);
       stakersByProtocol[_protocol].remove(msg.sender);
     }
+
+    uint256 _transferAmount = supportCost * _length;
     emit RemoveProtocols(msg.sender, _protocols);
+
+    if (_transferAmount > 0) {
+      stakingToken.safeTransfer(msg.sender, _transferAmount);
+    }
   }
 
   /**
-   * @notice Return a list of all server URLs supporting a given protocol
-   * @param _protocol address of the protocol
-   * @return _urls array of staker server URLs supporting the protocol
+   * @notice Get all server URLs supporting a protocol
+   * @param _protocol bytes4 of a protocol identifier
+   * @return _urls array of URLs supporting the protocol
    */
   function getServerURLsForProtocol(
     bytes4 _protocol
@@ -186,9 +190,9 @@ contract Registry {
   }
 
   /**
-   * @notice Return whether a staker supports a given protocol
-   * @param _staker account address used to stake
-   * @param _protocol address of the protocol
+   * @notice Return whether a staker supports a protocol
+   * @param _staker account address of a staker
+   * @param _protocol bytes4 of a protocol identifier
    * @return true if the staker supports the protocol
    */
   function supportsProtocol(
@@ -199,9 +203,9 @@ contract Registry {
   }
 
   /**
-   * @notice Return a list of all supported protocols for a given staker
+   * @notice Get all supported protocols for a staker
    * @param _staker account address of the staker
-   * @return _protocolList array of all the supported protocols
+   * @return _protocolList array of supported protocol identifiers
    */
   function getProtocolsForStaker(
     address _staker
@@ -215,9 +219,9 @@ contract Registry {
   }
 
   /**
-   * @notice Return a list of all stakers supporting a given protocol
-   * @param _protocol address of the protocol
-   * @return _stakers array of all stakers that support a given protocol
+   * @notice Get all stakers supporting a protocol
+   * @param _protocol bytes4 of the protocol identifier
+   * @return _stakers array of all stakers that support the protocol
    */
   function getStakersForProtocol(
     bytes4 _protocol
@@ -231,12 +235,12 @@ contract Registry {
   }
 
   /**
-   * @notice Add tokens supported by the caller
+   * @notice Add tokens supported by the sender
    * @param _tokens array of token addresses
    */
   function addTokens(address[] calldata _tokens) external {
     uint256 _length = _tokens.length;
-    if (_length <= 0) revert NoTokensToAdd();
+    if (_length <= 0) revert ArgumentInvalid();
     EnumerableSet.AddressSet storage tokenList = tokensByStaker[msg.sender];
 
     for (uint256 i = 0; i < _length; i++) {
@@ -252,12 +256,12 @@ contract Registry {
   }
 
   /**
-   * @notice Remove tokens supported by the caller
+   * @notice Remove tokens supported by the sender
    * @param _tokens array of token addresses
    */
   function removeTokens(address[] calldata _tokens) external {
     uint256 _length = _tokens.length;
-    if (_length <= 0) revert NoTokensToRemove();
+    if (_length <= 0) revert ArgumentInvalid();
     EnumerableSet.AddressSet storage tokenList = tokensByStaker[msg.sender];
     for (uint256 i = 0; i < _length; i++) {
       address token = _tokens[i];
@@ -272,9 +276,9 @@ contract Registry {
   }
 
   /**
-   * @notice Return a list of all server URLs supporting a given token
-   * @param _token address of the token
-   * @return urls array of staker server URLs supporting the token
+   * @notice Get all server URLs supporting a protocol
+   * @param _token address of a token
+   * @return urls array of URLs supporting the token
    */
   function getServerURLsForToken(
     address _token
@@ -288,9 +292,9 @@ contract Registry {
   }
 
   /**
-   * @notice Return whether a staker supports a given token
-   * @param _staker account address used to stake
-   * @param _token address of the token
+   * @notice Return whether a staker supports a token
+   * @param _staker account address of a staker
+   * @param _token address of a token identifier
    * @return true if the staker supports the token
    */
   function supportsToken(
@@ -303,7 +307,7 @@ contract Registry {
   /**
    * @notice Return a list of all supported tokens for a given staker
    * @param _staker account address of the staker
-   * @return tokenList array of all the supported tokens
+   * @return tokenList array of all supported tokens
    */
   function getTokensForStaker(
     address _staker
@@ -317,9 +321,9 @@ contract Registry {
   }
 
   /**
-   * @notice Return a list of all stakers supporting a given token
+   * @notice Get all stakers supporting a token
    * @param _token address of the token
-   * @return _stakers array of all stakers that support a given token
+   * @return _stakers array of all stakers that support the token
    */
   function getStakersForToken(
     address _token
@@ -333,9 +337,9 @@ contract Registry {
   }
 
   /**
-   * @notice Get the ServerURLs for an array of stakers
+   * @notice Get the URLs for an array of stakers
    * @param _stakers array of staker addresses
-   * @return _urls array of staker ServerURLs in the same order
+   * @return _urls array of staker URLs in the same order
    */
   function getServerURLsForStakers(
     address[] calldata _stakers
@@ -348,8 +352,8 @@ contract Registry {
   }
 
   /**
-   * @notice Return the staking balance of a given staker
-   * @param _staker address of the account used to stake
+   * @notice Get the staking balance of a staker
+   * @param _staker address of a staker account
    * @return balance of the staker account
    */
   function balanceOf(address _staker) external view returns (uint256) {

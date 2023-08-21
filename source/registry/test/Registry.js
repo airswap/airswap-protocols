@@ -63,7 +63,7 @@ describe('Registry Unit', () => {
     it('successful setting of url', async () => {
       await stakingToken.mock.transferFrom.returns(true)
       await expect(registry.connect(account1).setServerURL('maker1.com'))
-        .to.emit(registry, 'SetServer')
+        .to.emit(registry, 'SetServerURL')
         .withArgs(account1.address, 'maker1.com')
 
       const urls = await registry.getServerURLsForStakers([account1.address])
@@ -154,7 +154,7 @@ describe('Registry Unit', () => {
     it('fails to add an empty list of protocols', async () => {
       await expect(
         registry.connect(account1).addProtocols([])
-      ).to.be.revertedWith('NoProtocolsToAdd')
+      ).to.be.revertedWith('ArgumentInvalid')
     })
 
     it('add a list of protocols', async () => {
@@ -221,10 +221,11 @@ describe('Registry Unit', () => {
     it('fails to remove an empty list of protocols', async () => {
       await expect(
         registry.connect(account1).removeProtocols([])
-      ).to.be.revertedWith('NoProtocolsToRemove')
+      ).to.be.revertedWith('ArgumentInvalid')
     })
 
     it('remove a list of protocols', async () => {
+      await stakingToken.mock.transfer.returns(true)
       await stakingToken.mock.transferFrom.returns(true)
       await registry
         .connect(account1)
@@ -281,6 +282,7 @@ describe('Registry Unit', () => {
     })
 
     it('fails to remove a protocol already removed', async () => {
+      await stakingToken.mock.transfer.returns(true)
       await stakingToken.mock.transferFrom.returns(true)
       await registry
         .connect(account1)
@@ -299,7 +301,7 @@ describe('Registry Unit', () => {
   describe('supported tokens', async () => {
     it('fails to add an empty list of tokens', async () => {
       await expect(registry.connect(account1).addTokens([])).to.be.revertedWith(
-        'NoTokensToAdd'
+        'ArgumentInvalid'
       )
     })
 
@@ -383,7 +385,7 @@ describe('Registry Unit', () => {
     it('fails to remove an empty list of tokens', async () => {
       await expect(
         registry.connect(account1).removeTokens([])
-      ).to.be.revertedWith('NoTokensToRemove')
+      ).to.be.revertedWith('ArgumentInvalid')
     })
 
     it('remove a list of tokens', async () => {
@@ -432,10 +434,10 @@ describe('Registry Unit', () => {
       expect(token3Supported).to.equal(false)
     })
 
-    it('fails to remove a server not set', async () => {
-      await expect(
-        registry.connect(account1).removeServer()
-      ).to.be.revertedWith('NoServerToRemove')
+    it('fails to remove a server without a url set', async () => {
+      await expect(registry.connect(account1).unsetServer()).to.be.revertedWith(
+        'NoServerURLSet'
+      )
     })
 
     it('successfully remove a server', async () => {
@@ -448,7 +450,7 @@ describe('Registry Unit', () => {
       await registry
         .connect(account1)
         .addTokens([token1.address, token2.address, token3.address])
-      await expect(registry.connect(account1).removeServer())
+      await expect(registry.connect(account1).unsetServer())
         .to.emit(registry, 'UnsetServer')
         .withArgs(
           account1.address,
@@ -511,7 +513,7 @@ describe('Registry Unit', () => {
     })
   })
 
-  describe('Test Zero Amount Transfer', async () => {
+  describe('zero amount transfers', async () => {
     beforeEach(async () => {
       const zero_cost = '0'
       registryZeroCost = await registryFactory.deploy(
@@ -529,7 +531,22 @@ describe('Registry Unit', () => {
         .to.emit(registryZeroCost, 'AddTokens')
         .withArgs(account1.address, [token1.address])
     })
-    it('zero transfer amount when removing token', async () => {
+    it('when removing protocol', async () => {
+      await registryZeroCost.connect(account1).addProtocols([protocol1])
+      await expect(
+        registryZeroCost.connect(account1).removeProtocols([protocol1])
+      )
+        .to.emit(registryZeroCost, 'RemoveProtocols')
+        .withArgs(account1.address, [protocol1])
+    })
+    it('when removing all protocols', async () => {
+      await registryZeroCost.connect(account1).setServerURL('maker1.com')
+      await registryZeroCost.connect(account1).addProtocols([protocol1])
+      await expect(registryZeroCost.connect(account1).unsetServer())
+        .to.emit(registryZeroCost, 'UnsetServer')
+        .withArgs(account1.address, 'maker1.com', [protocol1], [])
+    })
+    it('when removing token', async () => {
       await registryZeroCost.connect(account1).addTokens([token1.address])
       await expect(
         registryZeroCost.connect(account1).removeTokens([token1.address])
@@ -537,16 +554,16 @@ describe('Registry Unit', () => {
         .to.emit(registryZeroCost, 'RemoveTokens')
         .withArgs(account1.address, [token1.address])
     })
-    it('zero transfer amount when removing all tokens', async () => {
+    it('when removing all tokens', async () => {
       await registryZeroCost.connect(account1).setServerURL('maker1.com')
-      await registryZeroCost.connect(account1).addProtocols([protocol1])
-      await expect(registryZeroCost.connect(account1).removeServer())
+      await registryZeroCost.connect(account1).addTokens([token1.address])
+      await expect(registryZeroCost.connect(account1).unsetServer())
         .to.emit(registryZeroCost, 'UnsetServer')
-        .withArgs(account1.address, 'maker1.com', [protocol1], [])
+        .withArgs(account1.address, 'maker1.com', [], [token1.address])
     })
   })
 
-  describe('Balance Of', async () => {
+  describe('balance of', async () => {
     it('verify balance without a staked server', async () => {
       const balance = await registry.balanceOf(account1.address)
       expect(balance).to.equal(0)
