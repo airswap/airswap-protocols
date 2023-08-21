@@ -14,7 +14,6 @@ interface IPool {
   event Enable(bytes32 tree, bytes32 root);
   event SetMax(uint256 max);
   event SetScale(uint256 scale);
-  event SetStaking(address stakingToken, address stakingContract);
   event RemoveAdmin(address admin);
   event Withdraw(
     bytes32[] trees,
@@ -43,8 +42,6 @@ interface IPool {
 
   function removeAdmin(address _admin) external;
 
-  function setStaking(address _stakingToken, address _stakingContract) external;
-
   function enable(bytes32 _tree, bytes32 _root) external;
 
   function getClaimStatusForTrees(
@@ -66,19 +63,6 @@ interface IPool {
     uint256 minimumAmount,
     address recipient
   ) external returns (uint256 amountWithdrawn);
-
-  function withdrawAndStake(
-    Claim[] memory claims,
-    address token,
-    uint256 minimumAmount
-  ) external;
-
-  function withdrawAndStakeFor(
-    Claim[] memory claims,
-    address token,
-    uint256 minimumAmount,
-    address account
-  ) external;
 
   function calculate(
     uint256 score,

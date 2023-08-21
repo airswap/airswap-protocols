@@ -71,34 +71,12 @@ describe('Pool Integration', () => {
     ).deploy('StakedAST', 'sAST', feeToken.address, 100, 10)
     await stakingContract.deployed()
 
-    await pool.setStaking(feeToken.address, stakingContract.address)
     await pool.addAdmin(deployer.address)
 
     tree = generateTreeFromData({
       [alice.address]: ALICE_SCORE,
       [bob.address]: BOB_SCORE,
       [carol.address]: CAROL_SCORE,
-    })
-  })
-
-  describe('update allowances when update staking contract', async () => {
-    it('set a new staking contract and update allowances', async () => {
-      newStakingContract = await (
-        await ethers.getContractFactory(STAKING.abi, STAKING.bytecode)
-      ).deploy('StakedAST', 'sAST', feeToken.address, 100, 10)
-      await stakingContract.deployed()
-
-      await pool
-        .connect(deployer)
-        .setStaking(feeToken2.address, newStakingContract.address)
-      expect(await pool.stakingContract()).to.equal(newStakingContract.address)
-      expect(await pool.stakingToken()).to.equal(feeToken2.address)
-
-      expect(
-        await feeToken
-          .connect(deployer)
-          .allowance(pool.address, stakingContract.address)
-      ).to.equal(0)
     })
   })
 
@@ -148,34 +126,6 @@ describe('Pool Integration', () => {
         alice.address
       )
       await expect(await feeToken.balanceOf(alice.address)).to.be.equal('454')
-      const isClaimed = await pool.claimed(TREE_ID, bob.address)
-      expect(isClaimed).to.equal(true)
-    })
-  })
-
-  describe('withdraw and stake for', async () => {
-    it('transfers the claimed funds to the staker', async () => {
-      const root = getRoot(tree)
-      expect(await pool.connect(deployer).enable(TREE_ID, root)).to.emit(
-        pool,
-        'Enable'
-      )
-      const proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
-      await pool.connect(bob).withdrawAndStakeFor(
-        [
-          {
-            tree: TREE_ID,
-            value: BOB_SCORE,
-            proof,
-          },
-        ],
-        feeToken.address,
-        0,
-        bob.address
-      )
-      await expect(await stakingContract.balanceOf(bob.address)).to.be.equal(
-        '454'
-      )
       const isClaimed = await pool.claimed(TREE_ID, bob.address)
       expect(isClaimed).to.equal(true)
     })
