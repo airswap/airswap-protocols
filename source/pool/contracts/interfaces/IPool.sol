@@ -42,14 +42,14 @@ interface IPool {
 
   function removeAdmin(address _admin) external;
 
-  function enable(bytes32 _tree, bytes32 _root) external;
+  function drainTo(address[] calldata tokens, address dest) external;
 
-  function getClaimStatusForTrees(
+  function getStatus(
     address _account,
     bytes32[] calldata _trees
-  ) external returns (bool[] memory claimStatusList);
+  ) external returns (bool[] memory statuses);
 
-  function drainTo(address[] calldata tokens, address dest) external;
+  function enable(bytes32 _tree, bytes32 _root) external;
 
   function withdraw(
     Claim[] memory claims,

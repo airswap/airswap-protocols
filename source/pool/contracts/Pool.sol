@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "./interfaces/IPool.sol";
 
 /**
- * @title AirSwap: Rewards Pool
+ * @title AirSwap: Withdrawable Token Pool
  * @notice https://www.airswap.io/
  */
 contract Pool is IPool, Ownable2Step {
@@ -24,13 +24,13 @@ contract Pool is IPool, Ownable2Step {
   // Max percentage for a claim with infinite value
   uint256 public max;
 
-  // Mapping of address to boolean to enable admin accounts
+  // Mapping of address to boolean for admin accounts
   mapping(address => bool) public admins;
 
-  // Mapping of tree -> account -> has claimed
+  // Mapping of tree to account to claim status
   mapping(bytes32 => mapping(address => bool)) public claimed;
 
-  // Mapping of tree -> root
+  // Mapping of tree to root
   mapping(bytes32 => bytes32) public rootsByTree;
 
   /**
@@ -46,7 +46,7 @@ contract Pool is IPool, Ownable2Step {
   }
 
   /**
-   * @dev Reverts if called by any account other than an admin.
+   * @dev Revert if called by account other than admin.
    */
   modifier multiAdmin() {
     if (!admins[msg.sender]) revert Unauthorized();
@@ -98,10 +98,9 @@ contract Pool is IPool, Ownable2Step {
   }
 
   /**
-   * @notice Enables claims for a merkle tree of a set of values by setting the
-   *         merkle root
-   * @param _tree bytes32 The merkle tree unique identifier.
-   * @param _root bytes32 The merkle root.
+   * @notice Enables claims for a merkle tree by setting the root
+   * @param _tree bytes32 a tree identifier
+   * @param _root bytes32 a tree root
    */
   function enable(bytes32 _tree, bytes32 _root) external override multiAdmin {
     rootsByTree[_tree] = _root;
@@ -109,27 +108,27 @@ contract Pool is IPool, Ownable2Step {
   }
 
   /**
-   * @notice Returns the claim status of a set of roots for a given address
+   * @notice Get claim status for a set of trees for an account
    * @param _account address The address to check.
    * @param _trees bytes32[] An array of tree identifiers.
-   * @return claimList bool[] An array of claim statuses.
+   * @return statuses bool[] An array of claim statuses.
    */
-  function getClaimStatusForTrees(
+  function getStatus(
     address _account,
     bytes32[] calldata _trees
   ) external view returns (bool[] memory) {
-    bool[] memory claimList = new bool[](_trees.length);
+    bool[] memory statuses = new bool[](_trees.length);
     for (uint256 i = 0; i < _trees.length; i++) {
-      claimList[i] = claimed[_trees[i]][_account];
+      statuses[i] = claimed[_trees[i]][_account];
     }
-    return claimList;
+    return statuses;
   }
 
   /**
-   * @notice Admin function to migrate funds
+   * @notice Transfer out token balances for migrations
    * @dev Only owner
-   * @param _tokens address[] addresses of tokens to migrate
-   * @param _dest address destination address
+   * @param _tokens address[] token balances to transfer
+   * @param _dest address destination
    */
   function drainTo(
     address[] calldata _tokens,
@@ -143,13 +142,10 @@ contract Pool is IPool, Ownable2Step {
   }
 
   /**
-   * @notice Withdraw tokens from the pool using one or more claims. The
-   *        claimant must be the message sender.
-   * @param _claims Claim[] A set of claims each consisting of a tree id, a
-   *        points earned, and a merkle proof.
-   * @param _token address The address of the token to withdraw.
-   * @param _minimumAmount uint256 The minimum amount to withdraw - this acts
-   *        as slippage / frontrunning protection.
+   * @notice Withdraw tokens using one or more claims
+   * @param _claims Claim[] set of claims to use
+   * @param _token address of token to withdraw
+   * @param _minimumAmount uint256 minimum amount to avoid slippage
    */
   function withdraw(
     Claim[] memory _claims,
