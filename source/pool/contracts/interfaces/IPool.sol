@@ -28,7 +28,7 @@ interface IPool {
   error AmountInsufficient(uint256);
   error ClaimsNotProvided();
   error MaxTooHigh(uint256);
-  error ProofInvalid(bytes32);
+  error ProofInvalid(bytes32, bytes32);
   error TreeDisabled(bytes32);
   error ScaleTooHigh(uint256);
   error TokenInvalid(address);
@@ -56,7 +56,7 @@ interface IPool {
     address token,
     uint256 minimumAmount,
     address recipient
-  ) external;
+  ) external returns (uint256 amount);
 
   function calculate(
     uint256 score,

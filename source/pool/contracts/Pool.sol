@@ -157,7 +157,7 @@ contract Pool is IPool, Ownable2Step {
     address _token,
     uint256 _minimumAmount,
     address _recipient
-  ) public override {
+  ) public override returns (uint256 _amount) {
     if (_claims.length <= 0) revert ClaimsNotProvided();
 
     Claim memory _claim;
@@ -172,14 +172,14 @@ contract Pool is IPool, Ownable2Step {
       if (_root == 0) revert TreeDisabled(_claim.tree);
       if (claimed[_claim.tree][msg.sender]) revert AlreadyClaimed();
       if (!verify(msg.sender, _root, _claim.value, _claim.proof))
-        revert ProofInvalid(_root);
+        revert ProofInvalid(_claim.tree, _root);
 
       _totalValue = _totalValue + _claim.value;
       claimed[_claim.tree][msg.sender] = true;
       _treeList[i] = _claim.tree;
     }
 
-    uint256 _amount = calculate(_totalValue, _token);
+    _amount = calculate(_totalValue, _token);
     if (_amount < _minimumAmount) revert AmountInsufficient(_amount);
 
     IERC20(_token).safeTransfer(_recipient, _amount);
