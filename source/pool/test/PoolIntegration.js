@@ -17,12 +17,17 @@ describe('Pool Integration', () => {
   let bob
   let stakingContract
 
+  const TREE_ID =
+    '0x0000000000000000000000000000000000000000000000000000000000000000'
+
   const CLAIM_SCALE = 10
   const CLAIM_MAX = 50
 
   const ALICE_SCORE = toWei(10000, 4)
   const BOB_SCORE = toWei(100000, 4)
   const CAROL_SCORE = toWei(1000000, 4)
+
+  const WITHDRAW_MINIMUM = 0
 
   let tree
   let feeToken
@@ -77,14 +82,6 @@ describe('Pool Integration', () => {
   })
 
   describe('update allowances when update staking contract', async () => {
-    it('set has an allowance for the current feeToken contract', async () => {
-      expect(
-        await feeToken.allowance(pool.address, stakingContract.address)
-      ).to.equal(
-        '115792089237316195423570985008687907853269984665640564039457584007913129639935'
-      )
-    })
-
     it('set a new staking contract and update allowances', async () => {
       newStakingContract = await (
         await ethers.getContractFactory(STAKING.abi, STAKING.bytecode)
@@ -102,32 +99,30 @@ describe('Pool Integration', () => {
           .connect(deployer)
           .allowance(pool.address, stakingContract.address)
       ).to.equal(0)
-
-      expect(
-        await feeToken2.allowance(pool.address, newStakingContract.address)
-      ).to.equal(
-        '115792089237316195423570985008687907853269984665640564039457584007913129639935'
-      )
     })
   })
 
   describe('withdraw increase the staker balance', async () => {
     it('transfers the claimed funds to the staker', async () => {
       const root = getRoot(tree)
-      expect(await pool.connect(deployer).enable(root)).to.emit(pool, 'Enable')
+      expect(await pool.connect(deployer).enable(TREE_ID, root)).to.emit(
+        pool,
+        'Enable'
+      )
       const proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
       await pool.connect(bob).withdraw(
         [
           {
-            root: getRoot(tree),
-            score: BOB_SCORE,
+            tree: TREE_ID,
+            value: BOB_SCORE,
             proof,
           },
         ],
-        feeToken.address
+        feeToken.address,
+        WITHDRAW_MINIMUM
       )
       await expect(await feeToken.balanceOf(bob.address)).to.be.equal('454')
-      const isClaimed = await pool.claimed(root, bob.address)
+      const isClaimed = await pool.claimed(TREE_ID, bob.address)
       expect(isClaimed).to.equal(true)
     })
   })
@@ -135,13 +130,16 @@ describe('Pool Integration', () => {
   describe('withdraw for increase the balance of the recipient', async () => {
     it('transfers the claimed funds to the staker', async () => {
       const root = getRoot(tree)
-      expect(await pool.connect(deployer).enable(root)).to.emit(pool, 'Enable')
+      expect(await pool.connect(deployer).enable(TREE_ID, root)).to.emit(
+        pool,
+        'Enable'
+      )
       const proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
-      await pool.connect(bob).withdrawWithRecipient(
+      await pool.connect(bob).withdrawFor(
         [
           {
-            root: getRoot(tree),
-            score: BOB_SCORE,
+            tree: TREE_ID,
+            value: BOB_SCORE,
             proof,
           },
         ],
@@ -150,7 +148,7 @@ describe('Pool Integration', () => {
         alice.address
       )
       await expect(await feeToken.balanceOf(alice.address)).to.be.equal('454')
-      const isClaimed = await pool.claimed(root, bob.address)
+      const isClaimed = await pool.claimed(TREE_ID, bob.address)
       expect(isClaimed).to.equal(true)
     })
   })
@@ -158,13 +156,16 @@ describe('Pool Integration', () => {
   describe('withdraw and stake for', async () => {
     it('transfers the claimed funds to the staker', async () => {
       const root = getRoot(tree)
-      expect(await pool.connect(deployer).enable(root)).to.emit(pool, 'Enable')
+      expect(await pool.connect(deployer).enable(TREE_ID, root)).to.emit(
+        pool,
+        'Enable'
+      )
       const proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
       await pool.connect(bob).withdrawAndStakeFor(
         [
           {
-            root: getRoot(tree),
-            score: BOB_SCORE,
+            tree: TREE_ID,
+            value: BOB_SCORE,
             proof,
           },
         ],
@@ -175,7 +176,7 @@ describe('Pool Integration', () => {
       await expect(await stakingContract.balanceOf(bob.address)).to.be.equal(
         '454'
       )
-      const isClaimed = await pool.claimed(root, bob.address)
+      const isClaimed = await pool.claimed(TREE_ID, bob.address)
       expect(isClaimed).to.equal(true)
     })
   })
