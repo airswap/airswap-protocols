@@ -6,7 +6,6 @@ import "@openzeppelin/contracts/access/Ownable2Step.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
-import "@airswap/staking/contracts/interfaces/IStaking.sol";
 import "./interfaces/IPool.sol";
 
 /**
@@ -33,12 +32,6 @@ contract Pool is IPool, Ownable2Step {
 
   // Mapping of tree -> root
   mapping(bytes32 => bytes32) public rootsByTree;
-
-  // Staking contract address
-  address public stakingContract;
-
-  // Staking token address
-  address public stakingToken;
 
   /**
    * @notice Constructor
@@ -102,26 +95,6 @@ contract Pool is IPool, Ownable2Step {
     if (admins[_admin] != true) revert AdminNotSet(_admin);
     admins[_admin] = false;
     emit RemoveAdmin(_admin);
-  }
-
-  /**
-   * @notice Set staking contract address
-   * @dev Only owner
-   * @param _stakingContract address of staking contract
-   */
-  function setStaking(
-    address _stakingToken,
-    address _stakingContract
-  ) external override onlyOwner {
-    if (_stakingContract == address(0)) revert AddressInvalid(_stakingContract);
-    if (_stakingToken == address(0)) revert AddressInvalid(_stakingToken);
-    if (stakingToken != address(0) && stakingContract != address(0)) {
-      // set allowance on old staking token to zero
-      IERC20(stakingToken).safeApprove(stakingContract, 0);
-    }
-    stakingContract = _stakingContract;
-    stakingToken = _stakingToken;
-    emit SetStaking(_stakingToken, _stakingContract);
   }
 
   /**
@@ -210,47 +183,6 @@ contract Pool is IPool, Ownable2Step {
     IERC20(_token).safeTransfer(_recipient, _amount);
     emit Withdraw(_treeList, msg.sender, _token, _amount);
     return _amount;
-  }
-
-  /**
-   * @notice Withdraw an amount of staking tokens from the pool using claims,
-   *         and stake in the staking contract in the same transaction.
-   * @param _claims Claim[] A set of claims.
-   * @param _token address The address of the token to withdraw. Must be the
-   *               staking token.
-   */
-  function withdrawAndStake(
-    Claim[] memory _claims,
-    address _token,
-    uint256 _minimumAmount
-  ) external override {
-    withdrawAndStakeFor(_claims, _token, _minimumAmount, msg.sender);
-  }
-
-  /**
-   * @notice Withdraw an amount of staking tokens from the pool using claims,
-   *         and stake in the staking contract for the passed account  in the
-   *         same transaction.
-   * @param _claims Claim[] A set of claims.
-   * @param _token address The address of the token to withdraw. Must be the
-   *               staking token.
-   * @param _account address The address to stake for.
-   */
-  function withdrawAndStakeFor(
-    Claim[] memory _claims,
-    address _token,
-    uint256 _minimumAmount,
-    address _account
-  ) public override {
-    if (_token != address(stakingToken)) revert TokenInvalid(_token);
-    (uint256 _amount, bytes32[] memory _treeList) = _withdrawCheck(
-      _claims,
-      _token,
-      _minimumAmount
-    );
-    IERC20(stakingToken).approve(stakingContract, _amount);
-    IStaking(stakingContract).stakeFor(_account, _amount);
-    emit Withdraw(_treeList, msg.sender, _token, _amount);
   }
 
   /**
