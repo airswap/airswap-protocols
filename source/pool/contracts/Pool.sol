@@ -157,36 +157,13 @@ contract Pool is IPool, Ownable2Step {
     address _token,
     uint256 _minimumAmount,
     address _recipient
-  ) public override returns (uint256 amountWithdrawn) {
-    (uint256 _amount, bytes32[] memory _treeList) = _withdrawCheck(
-      _claims,
-      _token,
-      _minimumAmount
-    );
-    IERC20(_token).safeTransfer(_recipient, _amount);
-    emit Withdraw(_treeList, msg.sender, _token, _amount);
-    return _amount;
-  }
-
-  /**
-   * @notice Internal function to verify a set of claims and calculate the
-   *         total amount of that can be withdrawn with them.
-   * @param _claims Claim[] A set of claims.
-   * @param _token address The address of the token to withdraw.
-   * @param _minimumAmount uint256 The minimum amount to withdraw
-   */
-  function _withdrawCheck(
-    Claim[] memory _claims,
-    address _token,
-    uint256 _minimumAmount
-  ) internal returns (uint256, bytes32[] memory) {
+  ) public override {
     if (_claims.length <= 0) revert ClaimsNotProvided();
-
-    uint256 _totalValue = 0;
-    bytes32[] memory _treeList = new bytes32[](_claims.length);
 
     Claim memory _claim;
     bytes32 _root;
+    bytes32[] memory _treeList = new bytes32[](_claims.length);
+    uint256 _totalValue = 0;
 
     for (uint256 i = 0; i < _claims.length; i++) {
       _claim = _claims[i];
@@ -205,7 +182,8 @@ contract Pool is IPool, Ownable2Step {
     uint256 _amount = calculate(_totalValue, _token);
     if (_amount < _minimumAmount) revert AmountInsufficient(_amount);
 
-    return (_amount, _treeList);
+    IERC20(_token).safeTransfer(_recipient, _amount);
+    emit Withdraw(_treeList, msg.sender, _token, _amount);
   }
 
   /**

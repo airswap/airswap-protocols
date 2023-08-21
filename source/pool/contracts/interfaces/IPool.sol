@@ -56,7 +56,7 @@ interface IPool {
     address token,
     uint256 minimumAmount,
     address recipient
-  ) external returns (uint256 amountWithdrawn);
+  ) external;
 
   function calculate(
     uint256 score,
