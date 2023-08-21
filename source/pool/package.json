@@ -1,7 +1,7 @@
 {
   "name": "@airswap/pool",
-  "version": "4.0.3-beta.0",
-  "description": "AirSwap: Rewards Pool",
+  "version": "4.0.3-beta.1",
+  "description": "AirSwap: Withdrawable Token Pool",
   "license": "MIT",
   "repository": {
     "type": "git",

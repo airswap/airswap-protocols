@@ -1,13 +1,17 @@
 /* eslint-disable no-console */
 const fs = require('fs')
+const prettier = require('prettier')
 const Confirm = require('prompt-confirm')
 const { ethers, run } = require('hardhat')
 const { ChainIds, chainNames, ADDRESS_ZERO } = require('@airswap/constants')
 const { getReceiptUrl } = require('@airswap/utils')
 const registryDeploys = require('../deploys.js')
+const registryBlocks = require('../deploys-blocks.js')
 
 async function main() {
   await run('compile')
+  const config = await prettier.resolveConfig('../deploys.js')
+
   const [deployer] = await ethers.getSigners()
   const gasPrice = await deployer.getGasPrice()
   const chainId = await deployer.getChainId()
@@ -45,9 +49,20 @@ async function main() {
     registryDeploys[chainId] = registryContract.address
     fs.writeFileSync(
       './deploys.js',
-      `module.exports = ${JSON.stringify(registryDeploys, null, '\t')}`
+      prettier.format(
+        `module.exports = ${JSON.stringify(registryDeploys, null, '\t')}`,
+        { ...config, parser: 'babel' }
+      )
     )
-    console.log('Updated deploys.js')
+    registryBlocks[chainId] = registryContract.deployTransaction.blockNumber
+    fs.writeFileSync(
+      './deploys-blocks.js',
+      prettier.format(
+        `module.exports = ${JSON.stringify(registryBlocks, null, '\t')}`,
+        { ...config, parser: 'babel' }
+      )
+    )
+    console.log('Updated: deploys.js, deploys-blocks.js')
 
     console.log(
       `\nVerify with "yarn verify --network ${chainNames[
