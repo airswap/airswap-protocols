@@ -350,10 +350,7 @@ describe('Pool Unit', () => {
         bob.address
       )
 
-      const isClaimed = await pool.getClaimStatusForTrees(bob.address, [
-        TREE,
-        NEW_TREE,
-      ])
+      const isClaimed = await pool.getStatus(bob.address, [TREE, NEW_TREE])
       expect(await isClaimed[0]).to.equal(true)
       expect(await isClaimed[1]).to.equal(false)
     })

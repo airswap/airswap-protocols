@@ -9,12 +9,12 @@ interface IPool {
     bytes32[] proof;
   }
 
-  event AddAdmin(address admin);
   event DrainTo(address[] tokens, address dest);
   event Enable(bytes32 tree, bytes32 root);
+  event SetAdmin(address admin);
   event SetMax(uint256 max);
   event SetScale(uint256 scale);
-  event RemoveAdmin(address admin);
+  event UnsetAdmin(address admin);
   event Withdraw(
     bytes32[] trees,
     address account,
@@ -38,9 +38,9 @@ interface IPool {
 
   function setMax(uint256 _max) external;
 
-  function addAdmin(address _admin) external;
+  function setAdmin(address _admin) external;
 
-  function removeAdmin(address _admin) external;
+  function unsetAdmin(address _admin) external;
 
   function drainTo(address[] calldata tokens, address dest) external;
 
