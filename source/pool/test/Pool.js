@@ -286,7 +286,7 @@ describe('Pool Unit', () => {
         )
       )
         .to.be.revertedWith(`ProofInvalid`)
-        .withArgs(root)
+        .withArgs(TREE, root)
 
       const isClaimed = await pool.claimed(TREE, bob.address)
       expect(isClaimed).to.equal(false)

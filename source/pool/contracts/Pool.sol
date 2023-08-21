@@ -153,36 +153,13 @@ contract Pool is IPool, Ownable2Step {
     address _token,
     uint256 _minimum,
     address _recipient
-  ) public override returns (uint256 amount) {
-    (uint256 _amount, bytes32[] memory _treeList) = _withdrawCheck(
-      _claims,
-      _token,
-      _minimum
-    );
-    IERC20(_token).safeTransfer(_recipient, _amount);
-    emit Withdraw(_treeList, msg.sender, _token, _amount);
-    return _amount;
-  }
-
-  /**
-   * @notice Verify a set of claims and calculate the
-   *         total amount of that can be withdrawn with them.
-   * @param _claims Claim[] a set of claims
-   * @param _token address of the token to withdraw
-   * @param _minimum uint256 minimum expected amount
-   */
-  function _withdrawCheck(
-    Claim[] memory _claims,
-    address _token,
-    uint256 _minimum
-  ) internal returns (uint256, bytes32[] memory) {
+  ) public override returns (uint256 _amount) {
     if (_claims.length <= 0) revert ClaimsNotProvided();
-
-    uint256 _totalValue = 0;
-    bytes32[] memory _treeList = new bytes32[](_claims.length);
 
     Claim memory _claim;
     bytes32 _root;
+    bytes32[] memory _treeList = new bytes32[](_claims.length);
+    uint256 _totalValue = 0;
 
     for (uint256 i = 0; i < _claims.length; i++) {
       _claim = _claims[i];
@@ -191,17 +168,18 @@ contract Pool is IPool, Ownable2Step {
       if (_root == 0) revert TreeDisabled(_claim.tree);
       if (claimed[_claim.tree][msg.sender]) revert AlreadyClaimed();
       if (!verify(msg.sender, _root, _claim.value, _claim.proof))
-        revert ProofInvalid(_root);
+        revert ProofInvalid(_claim.tree, _root);
 
       _totalValue = _totalValue + _claim.value;
       claimed[_claim.tree][msg.sender] = true;
       _treeList[i] = _claim.tree;
     }
 
-    uint256 _amount = calculate(_totalValue, _token);
+    _amount = calculate(_totalValue, _token);
     if (_amount < _minimum) revert AmountInsufficient(_amount);
 
-    return (_amount, _treeList);
+    IERC20(_token).safeTransfer(_recipient, _amount);
+    emit Withdraw(_treeList, msg.sender, _token, _amount);
   }
 
   /**
