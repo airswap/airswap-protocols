@@ -180,7 +180,7 @@ contract Pool is IPool, Ownable2Step {
   ) public view override returns (uint256) {
     uint256 _balance = IERC20(_token).balanceOf(address(this));
     uint256 _divisor = (uint256(10) ** scale) + _value;
-    return (max * _value * _balance) / _divisor / 100;
+    return (max * _value * _balance) / _divisor / MAX_PERCENTAGE;
   }
 
   /**
