@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { protocolInterfaces, protocolNames } from '../index'
+import { protocolInterfaces } from '../index'
 
 import { getInterfaceId } from '@airswap/utils'
 
@@ -9,7 +9,6 @@ describe('Constants', async () => {
       expect(getInterfaceId(protocolInterfaces[interfaceId])).to.be.equal(
         interfaceId
       )
-      console.log(protocolNames[interfaceId])
     }
   })
 })
