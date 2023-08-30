@@ -31,7 +31,6 @@ interface IPool {
   error ProofInvalid(bytes32, bytes32);
   error TreeDisabled(bytes32);
   error ScaleTooHigh(uint256);
-  error TokenInvalid(address);
   error Unauthorized();
 
   function setScale(uint256 _scale) external;
