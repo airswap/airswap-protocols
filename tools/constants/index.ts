@@ -152,11 +152,11 @@ export const ownerAddresses: Record<number, string> = {
 
 export enum Protocols {
   Discovery = '0xf3713ede',
-  RequestForQuoteERC20 = '0x57bb3622',
+  RequestForQuoteERC20 = '0x02ad05d3',
   PricingERC20 = '0x8beb22c2',
-  LastLookERC20 = '0x2ca4c820',
-  StorageERC20 = '0x3fb72f4e',
-  Storage = '0x9c6974be',
+  LastLookERC20 = '0xb2b78b33',
+  StorageERC20 = '0xfdd616a7',
+  Storage = '0xd8b0f31f',
 }
 
 export const protocolInterfaces: Record<string, string[]> = {
@@ -167,25 +167,27 @@ export const protocolInterfaces: Record<string, string[]> = {
     'function setTokens(array(string tokenContractAddress))',
   ],
   [Protocols.RequestForQuoteERC20]: [
-    'function getSignerSideOrderERC20(string chainId,string swapContractAddress,string senderAmount,string signerToken,string senderToken,string senderWallet,string proxyingFor)',
-    'function getSenderSideOrderERC20(string chainId,string swapContractAddress,string signerAmount,string signerToken,string senderToken,string senderWallet,string proxyingFor)',
-    'function getPricingERC20(array((string baseToken,string quoteToken)))',
-    'function getAllPricingERC20()',
+    'function getSignerSideOrderERC20(string chainId,string swapContractAddress,string senderAmount,string signerToken,string senderToken,string senderWallet,string minExpiry,string proxyingFor)',
+    'function getSenderSideOrderERC20(string chainId,string swapContractAddress,string signerAmount,string signerToken,string senderToken,string senderWallet,string minExpiry,string proxyingFor)',
+    'function getPricingERC20(array((string baseToken,string quoteToken)),string minExpiry)',
+    'function getAllPricingERC20(string minExpiry)',
   ],
-  [Protocols.LastLookERC20]: [
+  [Protocols.PricingERC20]: [
     'function subscribePricingERC20(array((string baseToken,string quoteToken)))',
     'function subscribeAllPricingERC20()',
     'function unsubscribePricingERC20(array((string baseToken,string quoteToken)))',
     'function unsubscribeAllPricingERC20()',
     'function setPricingERC20(array(string baseToken,string quoteToken,string minimum,array(array((string level,string price))),array(array((string level,string price)))))',
-    'function considerOrderERC20(string nonce,string expiry,string signerWallet,string signerToken,string signerAmount,string senderToken,string senderAmount,string v,string r,string s)',
+  ],
+  [Protocols.LastLookERC20]: [
+    'function considerOrderERC20(string chainId,string swapContractAddress,string nonce,string expiry,string signerWallet,string signerToken,string signerAmount,string senderToken,string senderAmount,string v,string r,string s)',
   ],
   [Protocols.StorageERC20]: [
-    'function addOrderERC20(string nonce,string expiry,string signerWallet,string signerToken,string signerAmount,string senderToken,string senderAmount,string v,string r,string s)',
+    'function addOrderERC20(string chainId,string swapContractAddress,string nonce,string expiry,string signerWallet,string signerToken,string signerAmount,string senderToken,string senderAmount,string v,string r,string s)',
     'function getOrdersERC20((string signerWallet,array(string signerToken),string signerMinAmount,string signerMaxAmount,string senderWallet,array(string senderToken),string senderMinAmount,string senderMaxAmount,string sortField,string sortOrder,string offset,string limit))',
   ],
   [Protocols.Storage]: [
-    'function addOrder(uint256 nonce,uint256 expiry,uint256 protocolFee,(address wallet,address token,bytes4 kind,uint256 id,uint256 amount),(address wallet,address token,bytes4 kind,uint256 id,uint256 amount),address affiliateWallet,uint256 affiliateAmount)',
+    'function addOrder(string chainId,string swapContractAddress,uint256 nonce,uint256 expiry,uint256 protocolFee,(address wallet,address token,bytes4 kind,uint256 id,uint256 amount),(address wallet,address token,bytes4 kind,uint256 id,uint256 amount),address affiliateWallet,uint256 affiliateAmount)',
     'function getOrders((string signerWallet,array(string signerToken),string signerMinAmount,string signerMaxAmount,string senderWallet,array(string senderToken),string senderMinAmount,string senderMaxAmount,string sortField,string sortOrder,string offset,string limit))',
   ],
 }
