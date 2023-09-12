@@ -148,7 +148,7 @@ describe('SwapERC20 Integration', () => {
       )
       await expect(await swap.connect(sender).swapLight(...order)).to.emit(
         swap,
-        'SwapERC20'
+        'SwapLightERC20'
       )
 
       // Expect full 7 to be taken from signer

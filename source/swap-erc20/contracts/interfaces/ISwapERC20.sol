@@ -26,6 +26,9 @@ interface ISwapERC20 {
     address senderToken,
     uint256 senderAmount
   );
+
+  event SwapLightERC20(uint256 indexed nonce, address indexed signerWallet);
+
   event Cancel(uint256 indexed nonce, address indexed signerWallet);
   event Authorize(address indexed signer, address indexed signerWallet);
   event Revoke(address indexed signer, address indexed signerWallet);

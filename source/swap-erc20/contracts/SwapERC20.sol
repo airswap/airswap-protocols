@@ -314,16 +314,7 @@ contract SwapERC20 is ISwapERC20, Ownable2Step, EIP712 {
     );
 
     // Emit a Swap event
-    emit SwapERC20(
-      nonce,
-      signerWallet,
-      signerToken,
-      signerAmount,
-      protocolFeeLight,
-      msg.sender,
-      senderToken,
-      senderAmount
-    );
+    emit SwapLightERC20(nonce, signerWallet);
   }
 
   /**
