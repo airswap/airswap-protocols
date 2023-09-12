@@ -293,21 +293,13 @@ contract SwapERC20 is ISwapERC20, Ownable2Step, EIP712 {
     }
 
     // Transfer token from sender to signer
-    IERC20(senderToken).safeTransferFrom(
-      msg.sender,
-      signerWallet,
-      senderAmount
-    );
+    IERC20(senderToken).transferFrom(msg.sender, signerWallet, senderAmount);
 
     // Transfer token from signer to recipient
-    IERC20(signerToken).safeTransferFrom(
-      signerWallet,
-      msg.sender,
-      signerAmount
-    );
+    IERC20(signerToken).transferFrom(signerWallet, msg.sender, signerAmount);
 
     // Transfer fee from signer to feeWallet
-    IERC20(signerToken).safeTransferFrom(
+    IERC20(signerToken).transferFrom(
       signerWallet,
       protocolFeeWallet,
       (signerAmount * protocolFeeLight) / FEE_DIVISOR
