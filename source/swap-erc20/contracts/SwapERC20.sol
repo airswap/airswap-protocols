@@ -245,13 +245,11 @@ contract SwapERC20 is ISwapERC20, Ownable2Step, EIP712 {
     bytes32 r,
     bytes32 s
   ) external override {
-    if (DOMAIN_CHAIN_ID != block.chainid) revert ChainIdChanged();
-
     // Ensure the expiry is not passed
     if (expiry <= block.timestamp) revert OrderExpired();
 
     // Recover the signatory from the hash and signature
-    (address signatory, ) = ECDSA.tryRecover(
+    address signatory = ecrecover(
       keccak256(
         abi.encodePacked(
           "\x19\x01", // EIP191: Indicates EIP712
