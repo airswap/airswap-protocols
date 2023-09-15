@@ -125,6 +125,25 @@ contract Pool is IPool, Ownable2Step {
   }
 
   /**
+   * @notice Set previous claims for migrations
+   * @param _tree bytes32
+   * @param _root bytes32
+   * @param _accounts address[]
+   * @dev Only owner
+   */
+  function enableAndSetClaimed(
+    bytes32 _tree,
+    bytes32 _root,
+    address[] memory _accounts
+  ) external override multiAdmin {
+    for (uint256 i = 0; i < _accounts.length; i++) {
+      claimed[_tree][_accounts[i]] = true;
+    }
+    rootsByTree[_tree] = _root;
+    emit Enable(_tree, _root);
+  }
+
+  /**
    * @notice Withdraw tokens using claims
    * @param _claims Claim[] a set of claims
    * @param _token address of a token to withdraw
@@ -149,7 +168,7 @@ contract Pool is IPool, Ownable2Step {
       _claim = _claims[i];
       _root = rootsByTree[_claim.tree];
 
-      if (_root == 0) revert TreeDisabled(_claim.tree);
+      if (_root == 0) revert TreeNotEnabled(_claim.tree);
       if (claimed[_claim.tree][msg.sender]) revert AlreadyClaimed();
       if (!verify(msg.sender, _root, _claim.value, _claim.proof))
         revert ProofInvalid(_claim.tree, _root);

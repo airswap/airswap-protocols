@@ -71,8 +71,6 @@ describe('Pool Unit', () => {
     ).deploy(CLAIM_SCALE, CLAIM_MAX)
     await pool.deployed()
 
-    await pool.setAdmin(deployer.address)
-
     tree = generateTreeFromData({
       [alice.address]: ALICE_SCORE,
       [bob.address]: BOB_SCORE,
@@ -86,7 +84,7 @@ describe('Pool Unit', () => {
     })
   })
 
-  describe('Test constructor', async () => {
+  describe('constructor', async () => {
     it('constructor sets values', async () => {
       const storedScale = await pool.scale()
       const storedMax = await pool.max()
@@ -118,10 +116,11 @@ describe('Pool Unit', () => {
     })
   })
 
-  describe('Test admin functions', async () => {
+  describe('admin functions', async () => {
     it('enable a claim for a merkle root suceeds', async () => {
       const root = getRoot(tree)
-      expect(await pool.connect(deployer).enable(TREE, root)).to.emit(
+      await pool.setAdmin(alice.address)
+      expect(await pool.connect(alice).enable(TREE, root)).to.emit(
         pool,
         'Enable'
       )
@@ -136,16 +135,17 @@ describe('Pool Unit', () => {
 
     it('enable a with the same tree overrwrites the previous root', async () => {
       const root = getRoot(tree)
-      await pool.connect(deployer).enable(TREE, root)
+      await pool.setAdmin(alice.address)
+      await pool.connect(alice).enable(TREE, root)
       const newRoot = getRoot(newTree)
-      await expect(pool.connect(deployer).enable(TREE, newRoot)).to.be.emit(
+      await expect(pool.connect(alice).enable(TREE, newRoot)).to.be.emit(
         pool,
         `Enable`
       )
     })
   })
 
-  describe('Test withdraw', async () => {
+  describe('withdraw', async () => {
     it('withdraw success', async () => {
       await feeToken.mock.balanceOf.returns('100000')
       await feeToken.mock.transfer.returns(true)
@@ -213,7 +213,7 @@ describe('Pool Unit', () => {
           bob.address
         )
       )
-        .to.be.revertedWith(`TreeDisabled`)
+        .to.be.revertedWith(`TreeNotEnabled`)
         .withArgs(TREE)
 
       const isClaimed = await pool.claimed(TREE, bob.address)
@@ -356,8 +356,8 @@ describe('Pool Unit', () => {
     })
   })
 
-  describe('Test Calculate', async () => {
-    it('Test calculation input and output', async () => {
+  describe('Calculate', async () => {
+    it('calculation input and output', async () => {
       await feeToken.mock.balanceOf.returns('100000')
 
       const amount = await pool.calculate(ALICE_SCORE, feeToken.address)
@@ -365,8 +365,8 @@ describe('Pool Unit', () => {
     })
   })
 
-  describe('Test Verify', async () => {
-    it('Test verification is valid', async () => {
+  describe('Verify', async () => {
+    it('verification is valid', async () => {
       await pool.setAdmin(alice.address)
       const root = getRoot(tree)
       await pool.connect(alice).enable(TREE, root)
@@ -376,7 +376,7 @@ describe('Pool Unit', () => {
       expect(isValid).to.be.equal(true)
     })
 
-    it('Test verification is invalid with wrong participant', async () => {
+    it('verification is invalid with wrong participant', async () => {
       await pool.setAdmin(alice.address)
       const root = getRoot(tree)
       await pool.connect(alice).enable(TREE, root)
@@ -386,7 +386,7 @@ describe('Pool Unit', () => {
       expect(isValid).to.be.equal(false)
     })
 
-    it('Test verification is invalid with wrong scroe', async () => {
+    it('verification is invalid with wrong scroe', async () => {
       await pool.setAdmin(alice.address)
       const root = getRoot(tree)
       await pool.connect(alice).enable(TREE, root)
@@ -397,21 +397,21 @@ describe('Pool Unit', () => {
     })
   })
 
-  describe('Test setting Scale', async () => {
-    it('Test setScale is successful', async () => {
+  describe('setting Scale', async () => {
+    it('setScale is successful', async () => {
       const scale = 77
       await expect(pool.setScale(scale)).to.emit(pool, 'SetScale')
       expect(await pool.scale()).to.be.equal(`${scale}`)
     })
 
-    it('Test setScale reverts when not owner', async () => {
+    it('setScale reverts when not owner', async () => {
       const scale = 77
       await expect(pool.connect(alice).setScale(scale)).to.be.revertedWith(
         'Ownable: caller is not the owner'
       )
     })
 
-    it('Test setScale reverts', async () => {
+    it('setScale reverts', async () => {
       const scale = 1000
       await expect(pool.setScale(scale))
         .to.be.revertedWith(`ScaleTooHigh`)
@@ -419,21 +419,21 @@ describe('Pool Unit', () => {
     })
   })
 
-  describe('Test setting Max', async () => {
-    it('Test setMax is successful', async () => {
+  describe('setting Max', async () => {
+    it('setMax is successful', async () => {
       const max = 10
       await expect(pool.setMax(max)).to.emit(pool, 'SetMax')
       expect(await pool.scale()).to.be.equal(`${max}`)
     })
 
-    it('Test setMax reverts when not owner', async () => {
+    it('setMax reverts when not owner', async () => {
       const max = 10
       await expect(pool.connect(alice).setMax(max)).to.be.revertedWith(
         'Ownable: caller is not the owner'
       )
     })
 
-    it('Test setMax reverts', async () => {
+    it('setMax reverts', async () => {
       const max = 101
       await expect(pool.setMax(max))
         .to.be.revertedWith(`MaxTooHigh`)
@@ -441,46 +441,79 @@ describe('Pool Unit', () => {
     })
   })
 
-  describe('Test setting admin', async () => {
-    it('Test setAdmin is successful', async () => {
+  describe('setting admin', async () => {
+    it('setAdmin is successful', async () => {
       await expect(pool.setAdmin(alice.address)).to.emit(pool, 'SetAdmin')
       expect(await pool.admins(alice.address)).to.be.equal(true)
     })
 
-    it('Test setAdmin reverts', async () => {
+    it('setAdmin reverts', async () => {
       await expect(
         pool.connect(alice).setAdmin(alice.address)
       ).to.be.revertedWith('Ownable: caller is not the owner')
     })
 
-    it('Test setAdmin reverts with zero address', async () => {
+    it('setAdmin reverts with zero address', async () => {
       await expect(pool.connect(deployer).setAdmin(ADDRESS_ZERO))
         .to.be.revertedWith(`AddressInvalid`)
         .withArgs(ADDRESS_ZERO)
     })
 
-    it('Test unsetAdmin is successful', async () => {
+    it('unsetAdmin is successful', async () => {
       await expect(pool.setAdmin(alice.address)).to.emit(pool, 'SetAdmin')
       await expect(pool.unsetAdmin(alice.address)).to.emit(pool, 'UnsetAdmin')
       expect(await pool.admins(alice.address)).to.be.equal(false)
     })
 
-    it('Test unsetAdmin reverts', async () => {
+    it('unsetAdmin reverts', async () => {
       await expect(pool.setAdmin(alice.address)).to.emit(pool, 'SetAdmin')
       await expect(
         pool.connect(alice).unsetAdmin(alice.address)
       ).to.be.revertedWith('Ownable: caller is not the owner')
     })
 
-    it('Test unsetAdmin executed by non-admin reverts', async () => {
+    it('unsetAdmin executed by non-admin reverts', async () => {
       await expect(pool.connect(deployer).unsetAdmin(alice.address))
         .to.be.revertedWith(`AdminNotSet`)
         .withArgs(alice.address)
     })
   })
 
-  describe('Test drain to', async () => {
-    it('Test drain to is successful', async () => {
+  describe('migration functions', async () => {
+    it('set claimed as owner is successful', async () => {
+      await feeToken.mock.balanceOf.returns('100000')
+      await await pool.connect(deployer).setAdmin(alice.address)
+
+      const root = getRoot(tree)
+      await pool.connect(alice).enableAndSetClaimed(TREE, root, [bob.address])
+      const proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
+
+      await expect(
+        pool.connect(bob).withdraw(
+          [
+            {
+              tree: TREE,
+              value: BOB_SCORE,
+              proof,
+            },
+          ],
+          feeToken.address,
+          WITHDRAW_MINIMUM,
+          bob.address
+        )
+      ).to.be.revertedWith(`AlreadyClaimed`)
+    })
+
+    it('set claimed with non-owner reverts', async () => {
+      await feeToken.mock.balanceOf.returns('100000')
+
+      const root = getRoot(tree)
+      await expect(
+        pool.connect(bob).enableAndSetClaimed(TREE, root, [bob.address])
+      ).to.be.revertedWith('Unauthorized')
+    })
+
+    it('drain to is successful', async () => {
       await feeToken.mock.balanceOf.returns('10')
       await feeToken.mock.transfer.returns(true)
       await feeToken2.mock.balanceOf.returns('10')
@@ -493,7 +526,7 @@ describe('Pool Unit', () => {
       ).to.emit(pool, 'DrainTo')
     })
 
-    it('Test drain to is only callable by owner', async () => {
+    it('drain to is only callable by owner', async () => {
       await expect(
         pool
           .connect(alice)
