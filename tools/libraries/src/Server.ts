@@ -55,15 +55,11 @@ export function toSortField(key: string): SortField | undefined {
   if (typeof key !== 'string') {
     return undefined
   }
-  if (key.toUpperCase() === SortField.SIGNER_AMOUNT) {
-    return SortField.SIGNER_AMOUNT
+  key = key.toUpperCase()
+  if (Object.keys(SortField).includes(key)) {
+    return key as SortField
   }
-  if (key.toUpperCase() === SortField.SENDER_AMOUNT) {
-    return SortField.SENDER_AMOUNT
-  }
-  if (key.toUpperCase() === SortField.EXPIRY) {
-    return SortField.EXPIRY
-  }
+
   return undefined
 }
 
