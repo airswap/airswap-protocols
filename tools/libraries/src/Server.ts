@@ -367,6 +367,7 @@ export class Server extends TypedEmitter<ServerEvents> {
     const options = {
       protocol: parsedUrl.protocol,
       hostname: parsedUrl.hostname,
+      path: parsedUrl.path,
       port: parsedUrl.port,
       timeout: REQUEST_TIMEOUT,
     }
