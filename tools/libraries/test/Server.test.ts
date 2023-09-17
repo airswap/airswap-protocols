@@ -472,6 +472,8 @@ describe('Storage', () => {
     expect(toSortField('signer_amount')).to.equal(SortField.SIGNER_AMOUNT)
     expect(toSortField('EXPIRY')).to.equal(SortField.EXPIRY)
     expect(toSortField('expiry')).to.equal(SortField.EXPIRY)
+    expect(toSortField('nonce')).to.equal(SortField.NONCE)
+    expect(toSortField('NONCE')).to.equal(SortField.NONCE)
   })
 
   it('sort field: should return undefined', () => {
