@@ -257,7 +257,7 @@ describe('Pool Unit', () => {
           WITHDRAW_MINIMUM,
           bob.address
         )
-      ).to.be.revertedWith(`AlreadyClaimed`)
+      ).to.be.revertedWith(`ClaimAlreadyUsed`)
 
       const isClaimed = await pool.claimed(TREE, bob.address)
       expect(isClaimed).to.equal(true)
@@ -486,8 +486,8 @@ describe('Pool Unit', () => {
 
       const root = getRoot(tree)
       await pool.connect(alice).enableAndSetClaimed(TREE, root, [bob.address])
-      const proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
 
+      const proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
       await expect(
         pool.connect(bob).withdraw(
           [
@@ -501,7 +501,7 @@ describe('Pool Unit', () => {
           WITHDRAW_MINIMUM,
           bob.address
         )
-      ).to.be.revertedWith(`AlreadyClaimed`)
+      ).to.be.revertedWith(`ClaimAlreadyUsed`)
     })
 
     it('set claimed with non-owner reverts', async () => {
