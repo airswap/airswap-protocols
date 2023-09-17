@@ -125,6 +125,32 @@ contract Pool is IPool, Ownable2Step {
   }
 
   /**
+   * @notice Set previous claims for migrations
+   * @param _tree bytes32
+   * @param _root bytes32
+   * @param _accounts address[]
+   * @dev Only owner
+   */
+  function enableAndSetClaimed(
+    bytes32 _tree,
+    bytes32 _root,
+    address[] memory _accounts
+  ) external override multiAdmin {
+    // Enable the tree if not yet enabled
+    if (rootsByTree[_tree] == 0) {
+      rootsByTree[_tree] = _root;
+      emit Enable(_tree, _root);
+    }
+    // Iterate and set as claimed if not yet claimed
+    for (uint256 i = 0; i < _accounts.length; i++) {
+      if (claimed[_tree][_accounts[i]] == false) {
+        claimed[_tree][_accounts[i]] = true;
+        emit UseClaim(_accounts[i], _tree);
+      }
+    }
+  }
+
+  /**
    * @notice Withdraw tokens using claims
    * @param _claims Claim[] a set of claims
    * @param _token address of a token to withdraw
@@ -141,7 +167,6 @@ contract Pool is IPool, Ownable2Step {
 
     Claim memory _claim;
     bytes32 _root;
-    bytes32[] memory _treeList = new bytes32[](_claims.length);
     uint256 _totalValue = 0;
 
     // Iterate through claims to determine total value
@@ -149,14 +174,14 @@ contract Pool is IPool, Ownable2Step {
       _claim = _claims[i];
       _root = rootsByTree[_claim.tree];
 
-      if (_root == 0) revert TreeDisabled(_claim.tree);
-      if (claimed[_claim.tree][msg.sender]) revert AlreadyClaimed();
+      if (_root == 0) revert TreeNotEnabled(_claim.tree);
+      if (claimed[_claim.tree][msg.sender]) revert ClaimAlreadyUsed();
       if (!verify(msg.sender, _root, _claim.value, _claim.proof))
         revert ProofInvalid(_claim.tree, _root);
 
       _totalValue = _totalValue + _claim.value;
       claimed[_claim.tree][msg.sender] = true;
-      _treeList[i] = _claim.tree;
+      emit UseClaim(msg.sender, _claim.tree);
     }
 
     // Determine withdrawable amount given total value
@@ -165,7 +190,7 @@ contract Pool is IPool, Ownable2Step {
 
     // Transfer withdrawable amount to recipient
     IERC20(_token).safeTransfer(_recipient, _amount);
-    emit Withdraw(_treeList, msg.sender, _token, _amount);
+    emit Withdraw(msg.sender, _recipient, _token, _amount);
   }
 
   /**
