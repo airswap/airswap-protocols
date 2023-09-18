@@ -552,7 +552,7 @@ describe('SwapERC20 Unit', () => {
 
       await expect(swap.connect(sender).swapLight(...order)).to.emit(
         swap,
-        'SwapERC20'
+        'SwapLightERC20'
       )
     })
 
@@ -571,7 +571,7 @@ describe('SwapERC20 Unit', () => {
 
       await expect(swap.connect(sender).swapLight(...order)).to.emit(
         swap,
-        'SwapERC20'
+        'SwapLightERC20'
       )
     })
     it('test light swaps by signer instead of authorized signatory fail', async () => {
@@ -635,6 +635,21 @@ describe('SwapERC20 Unit', () => {
       await expect(swap.connect(sender).swapLight(...order)).to.be.revertedWith(
         'Unauthorized'
       )
+    })
+
+    it('test swaps gas consumption', async () => {
+      const order = await createSignedOrderERC20(
+        {
+          protocolFee: PROTOCOL_FEE_LIGHT,
+        },
+        signer
+      )
+
+      const transaction = await swap.connect(sender).swapLight(...order)
+      const swapReceipt = await transaction.wait()
+      const swapCost = swapReceipt.gasUsed
+      console.log(swapCost)
+      expect(Number(swapCost)).to.be.lessThanOrEqual(129246)
     })
   })
 
