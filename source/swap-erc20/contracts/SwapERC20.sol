@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
-import "@openzeppelin/contracts/access/Ownable2Step.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/ISwapERC20.sol";
@@ -10,7 +10,7 @@ import "./interfaces/ISwapERC20.sol";
  * @title AirSwap: Atomic ERC20 Token Swap
  * @notice https://www.airswap.io/
  */
-contract SwapERC20 is ISwapERC20, Ownable2Step, EIP712 {
+contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
   using SafeERC20 for IERC20;
 
   bytes32 public constant ORDER_TYPEHASH =
@@ -245,13 +245,11 @@ contract SwapERC20 is ISwapERC20, Ownable2Step, EIP712 {
     bytes32 r,
     bytes32 s
   ) external override {
-    if (DOMAIN_CHAIN_ID != block.chainid) revert ChainIdChanged();
-
     // Ensure the expiry is not passed
     if (expiry <= block.timestamp) revert OrderExpired();
 
     // Recover the signatory from the hash and signature
-    (address signatory, ) = ECDSA.tryRecover(
+    address signatory = ecrecover(
       keccak256(
         abi.encodePacked(
           "\x19\x01", // EIP191: Indicates EIP712
@@ -293,37 +291,20 @@ contract SwapERC20 is ISwapERC20, Ownable2Step, EIP712 {
     }
 
     // Transfer token from sender to signer
-    IERC20(senderToken).safeTransferFrom(
-      msg.sender,
-      signerWallet,
-      senderAmount
-    );
+    IERC20(senderToken).transferFrom(msg.sender, signerWallet, senderAmount);
 
     // Transfer token from signer to recipient
-    IERC20(signerToken).safeTransferFrom(
-      signerWallet,
-      msg.sender,
-      signerAmount
-    );
+    IERC20(signerToken).transferFrom(signerWallet, msg.sender, signerAmount);
 
     // Transfer fee from signer to feeWallet
-    IERC20(signerToken).safeTransferFrom(
+    IERC20(signerToken).transferFrom(
       signerWallet,
       protocolFeeWallet,
       (signerAmount * protocolFeeLight) / FEE_DIVISOR
     );
 
     // Emit a Swap event
-    emit SwapERC20(
-      nonce,
-      signerWallet,
-      signerToken,
-      signerAmount,
-      protocolFeeLight,
-      msg.sender,
-      senderToken,
-      senderAmount
-    );
+    emit SwapLightERC20(nonce, signerWallet);
   }
 
   /**
