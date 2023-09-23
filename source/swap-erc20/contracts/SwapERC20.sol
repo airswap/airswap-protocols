@@ -30,7 +30,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
   uint256 public constant FEE_DIVISOR = 10000;
   uint256 internal constant MAX_PERCENTAGE = 100;
   uint256 internal constant MAX_SCALE = 77;
-  uint256 internal constant MAX_ERROR_COUNT = 9;
+  uint256 internal constant MAX_ERROR_COUNT = 10;
 
   /**
    * @notice Double mapping of signers to nonce groups to nonce states
@@ -489,6 +489,11 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
         errors[errCount] = "NonceAlreadyUsed";
         errCount++;
       }
+    }
+
+    if (DOMAIN_CHAIN_ID != block.chainid) {
+      errors[errCount] = "ChainIdChanged";
+      errCount++;
     }
 
     if (order.expiry < block.timestamp) {
