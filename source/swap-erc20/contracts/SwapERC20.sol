@@ -551,7 +551,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     uint256 feeAmount
   ) public view returns (uint256) {
     uint256 divisor = (uint256(10) ** rebateScale) + stakingBalance;
-    return (rebateMax * stakingBalance * feeAmount) / divisor / 100;
+    return (rebateMax * stakingBalance * feeAmount) / divisor / MAX_PERCENTAGE;
   }
 
   /**
