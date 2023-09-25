@@ -1,4 +1,5 @@
 {
+  "packages": ["source/*", "tools/*"],
   "version": "independent",
   "npmClient": "yarn",
   "useNx": true
