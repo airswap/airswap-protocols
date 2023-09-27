@@ -25,8 +25,8 @@ async function main() {
   const stakingContract = stakingDeploys[chainId]
   const protocolFee = 7
   const protocolFeeLight = 7
-  const rebateScale = 10
-  const rebateMax = 100
+  const discountScale = 10
+  const discountMax = 100
 
   console.log(`Fee recipient: ${protocolFeeWallet}`)
   console.log(`Staking contract: ${stakingContract}`)
@@ -39,8 +39,8 @@ async function main() {
       protocolFee,
       protocolFeeLight,
       protocolFeeWallet,
-      rebateScale,
-      rebateMax,
+      discountScale,
+      discountMax,
       stakingContract
     )
     console.log(

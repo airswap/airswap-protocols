@@ -16,18 +16,7 @@ interface ISwapERC20 {
     bytes32 s;
   }
 
-  event SwapERC20(
-    uint256 indexed nonce,
-    address indexed signerWallet,
-    address signerToken,
-    uint256 signerAmount,
-    uint256 protocolFee,
-    address indexed senderWallet,
-    address senderToken,
-    uint256 senderAmount
-  );
-
-  event SwapLightERC20(uint256 indexed nonce, address indexed signerWallet);
+  event SwapERC20(uint256 indexed nonce, address indexed signerWallet);
 
   event Cancel(uint256 indexed nonce, address indexed signerWallet);
   event Authorize(address indexed signer, address indexed signerWallet);
@@ -35,8 +24,8 @@ interface ISwapERC20 {
   event SetProtocolFee(uint256 protocolFee);
   event SetProtocolFeeLight(uint256 protocolFeeLight);
   event SetProtocolFeeWallet(address indexed feeWallet);
-  event SetRebateScale(uint256 rebateScale);
-  event SetRebateMax(uint256 rebateMax);
+  event SetDiscountScale(uint256 discountScale);
+  event SetDiscountMax(uint256 discountMax);
   event SetStaking(address indexed staking);
 
   error ChainIdChanged();

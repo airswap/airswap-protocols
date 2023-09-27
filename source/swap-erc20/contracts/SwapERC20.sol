@@ -23,12 +23,12 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
 
   // Domain name and version for use in EIP712 signatures
   string public constant DOMAIN_NAME = "SWAP_ERC20";
-  string public constant DOMAIN_VERSION = "4";
+  string public constant DOMAIN_VERSION = "4.2";
   uint256 public immutable DOMAIN_CHAIN_ID;
   bytes32 public immutable DOMAIN_SEPARATOR;
 
   uint256 public constant FEE_DIVISOR = 10000;
-  uint256 internal constant MAX_PERCENTAGE = 100;
+  uint256 internal constant MAX_MAX = 100;
   uint256 internal constant MAX_SCALE = 77;
   uint256 internal constant MAX_ERROR_COUNT = 10;
 
@@ -45,8 +45,8 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
   uint256 public protocolFee;
   uint256 public protocolFeeLight;
   address public protocolFeeWallet;
-  uint256 public rebateScale;
-  uint256 public rebateMax;
+  uint256 public discountScale;
+  uint256 public discountMax;
   address public staking;
 
   /**
@@ -54,23 +54,23 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
    * @dev Sets domain and version for EIP712 signatures
    * @param _protocolFee uin256 fee to be assessed on swaps
    * @param _protocolFeeWallet address destination for fees
-   * @param _rebateScale uin256 scale factor for rebate
-   * @param _rebateMax uint256 max rebate percentage
+   * @param _discountScale uin256 scale factor for discount
+   * @param _discountMax uint256 max discount percentage
    * @param _staking address staking contract address
    */
   constructor(
     uint256 _protocolFee,
     uint256 _protocolFeeLight,
     address _protocolFeeWallet,
-    uint256 _rebateScale,
-    uint256 _rebateMax,
+    uint256 _discountScale,
+    uint256 _discountMax,
     address _staking
   ) EIP712(DOMAIN_NAME, DOMAIN_VERSION) {
     if (_protocolFee >= FEE_DIVISOR) revert InvalidFee();
     if (_protocolFeeLight >= FEE_DIVISOR) revert InvalidFeeLight();
     if (_protocolFeeWallet == address(0)) revert InvalidFeeWallet();
-    if (_rebateScale > MAX_SCALE) revert ScaleTooHigh();
-    if (_rebateMax > MAX_PERCENTAGE) revert MaxTooHigh();
+    if (_discountMax > MAX_MAX) revert MaxTooHigh();
+    if (_discountScale > MAX_SCALE) revert ScaleTooHigh();
     if (_staking == address(0)) revert InvalidStaking();
 
     DOMAIN_CHAIN_ID = block.chainid;
@@ -79,8 +79,8 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     protocolFee = _protocolFee;
     protocolFeeLight = _protocolFeeLight;
     protocolFeeWallet = _protocolFeeWallet;
-    rebateScale = _rebateScale;
-    rebateMax = _rebateMax;
+    discountMax = _discountMax;
+    discountScale = _discountScale;
     staking = _staking;
   }
 
@@ -111,7 +111,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     bytes32 r,
     bytes32 s
   ) external override {
-    // Ensure the order is valid for signer and sender
+    // Ensure the order is valid
     _check(
       nonce,
       expiry,
@@ -136,20 +136,11 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     // Transfer token from signer to recipient
     IERC20(signerToken).safeTransferFrom(signerWallet, recipient, signerAmount);
 
-    // Calculate and transfer protocol fee and any rebate
+    // Calculate and transfer protocol fee and any discount
     _transferProtocolFee(signerToken, signerWallet, signerAmount);
 
-    // Emit a Swap event
-    emit SwapERC20(
-      nonce,
-      signerWallet,
-      signerToken,
-      signerAmount,
-      protocolFee,
-      msg.sender,
-      senderToken,
-      senderAmount
-    );
+    // Emit event
+    emit SwapERC20(nonce, signerWallet);
   }
 
   /**
@@ -204,20 +195,11 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     // Transfer token from signer to recipient
     IERC20(signerToken).safeTransferFrom(signerWallet, recipient, signerAmount);
 
-    // Calculate and transfer protocol fee and any rebate
+    // Calculate and transfer protocol fee and any discount
     _transferProtocolFee(signerToken, signerWallet, signerAmount);
 
-    // Emit a Swap event
-    emit SwapERC20(
-      nonce,
-      signerWallet,
-      signerToken,
-      signerAmount,
-      protocolFee,
-      msg.sender,
-      senderToken,
-      senderAmount
-    );
+    // Emit event
+    emit SwapERC20(nonce, signerWallet);
   }
 
   /**
@@ -293,18 +275,18 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     // Transfer token from sender to signer
     IERC20(senderToken).transferFrom(msg.sender, signerWallet, senderAmount);
 
-    // Transfer token from signer to recipient
+    // Transfer token from signer to sender
     IERC20(signerToken).transferFrom(signerWallet, msg.sender, signerAmount);
 
-    // Transfer fee from signer to feeWallet
+    // Transfer protocol fee from signer to fee wallet
     IERC20(signerToken).transferFrom(
       signerWallet,
       protocolFeeWallet,
       (signerAmount * protocolFeeLight) / FEE_DIVISOR
     );
 
-    // Emit a Swap event
-    emit SwapLightERC20(nonce, signerWallet);
+    // Emit event
+    emit SwapERC20(nonce, signerWallet);
   }
 
   /**
@@ -341,25 +323,25 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
   }
 
   /**
-   * @notice Set scale
+   * @notice Set max
    * @dev Only owner
-   * @param _rebateScale uint256
+   * @param _discountMax uint256
    */
-  function setRebateScale(uint256 _rebateScale) external onlyOwner {
-    if (_rebateScale > MAX_SCALE) revert ScaleTooHigh();
-    rebateScale = _rebateScale;
-    emit SetRebateScale(_rebateScale);
+  function setDiscountMax(uint256 _discountMax) external onlyOwner {
+    if (_discountMax > MAX_MAX) revert MaxTooHigh();
+    discountMax = _discountMax;
+    emit SetDiscountMax(_discountMax);
   }
 
   /**
-   * @notice Set max
+   * @notice Set scale
    * @dev Only owner
-   * @param _rebateMax uint256
+   * @param _discountScale uint256
    */
-  function setRebateMax(uint256 _rebateMax) external onlyOwner {
-    if (_rebateMax > MAX_PERCENTAGE) revert MaxTooHigh();
-    rebateMax = _rebateMax;
-    emit SetRebateMax(_rebateMax);
+  function setDiscountScale(uint256 _discountScale) external onlyOwner {
+    if (_discountScale > MAX_SCALE) revert ScaleTooHigh();
+    discountScale = _discountScale;
+    emit SetDiscountScale(_discountScale);
   }
 
   /**
@@ -439,8 +421,14 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     bytes32 s
   ) public view returns (uint256, bytes32[] memory) {
     bytes32[] memory errors = new bytes32[](MAX_ERROR_COUNT);
-    OrderERC20 memory order;
     uint256 errCount;
+
+    if (DOMAIN_CHAIN_ID != block.chainid) {
+      errors[errCount] = "ChainIdChanged";
+      errCount++;
+    }
+
+    OrderERC20 memory order;
     order.nonce = nonce;
     order.expiry = expiry;
     order.signerWallet = signerWallet;
@@ -489,11 +477,6 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
         errors[errCount] = "NonceAlreadyUsed";
         errCount++;
       }
-    }
-
-    if (DOMAIN_CHAIN_ID != block.chainid) {
-      errors[errCount] = "ChainIdChanged";
-      errCount++;
     }
 
     if (order.expiry < block.timestamp) {
@@ -547,7 +530,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
   }
 
   /**
-   * @notice Calculate output amount for an input score
+   * @notice Calculate discount from staking balance
    * @param stakingBalance uint256
    * @param feeAmount uint256
    */
@@ -555,8 +538,8 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     uint256 stakingBalance,
     uint256 feeAmount
   ) public view returns (uint256) {
-    uint256 divisor = (uint256(10) ** rebateScale) + stakingBalance;
-    return (rebateMax * stakingBalance * feeAmount) / divisor / MAX_PERCENTAGE;
+    uint256 divisor = (uint256(10) ** discountScale) + stakingBalance;
+    return (discountMax * stakingBalance * feeAmount) / divisor / MAX_MAX;
   }
 
   /**
@@ -728,7 +711,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
   }
 
   /**
-   * @notice Calculates and transfers protocol fee and rebate
+   * @notice Calculates and transfers protocol fee and discount
    * @param sourceToken address
    * @param sourceWallet address
    * @param amount uint256
