@@ -15,8 +15,8 @@ async function main() {
   const stakingContract = stakingDeploys[chainId]
   const protocolFee = 7
   const protocolFeeLight = 7
-  const rebateScale = 10
-  const rebateMax = 100
+  const discountScale = 10
+  const discountMax = 100
 
   console.log(`Verifying on ${chainNames[chainId].toUpperCase()}`)
   await run('verify:verify', {
@@ -25,8 +25,8 @@ async function main() {
       protocolFee,
       protocolFeeLight,
       protocolFeeWallet,
-      rebateScale,
-      rebateMax,
+      discountScale,
+      discountMax,
       stakingContract,
     ],
   })

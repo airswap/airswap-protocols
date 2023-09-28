@@ -185,7 +185,7 @@ describe('SwapERC20 Unit', () => {
       ).to.be.revertedWith('InvalidFeeLight')
     })
 
-    it('test invalid rebate scale', async () => {
+    it('test invalid discount scale', async () => {
       await expect(
         (
           await ethers.getContractFactory('SwapERC20')
@@ -200,7 +200,7 @@ describe('SwapERC20 Unit', () => {
       ).to.be.revertedWith('ScaleTooHigh')
     })
 
-    it('test invalid rebate maximum', async () => {
+    it('test invalid discount maximum', async () => {
       await expect(
         (
           await ethers.getContractFactory('SwapERC20')
@@ -215,7 +215,7 @@ describe('SwapERC20 Unit', () => {
       ).to.be.revertedWith('MaxTooHigh')
     })
 
-    it('test invalid rebate maximum', async () => {
+    it('test invalid discount maximum', async () => {
       await expect(
         (
           await ethers.getContractFactory('SwapERC20')
@@ -268,35 +268,34 @@ describe('SwapERC20 Unit', () => {
         swap.connect(deployer).setProtocolFeeWallet(protocolFeeWallet.address)
       ).to.emit(swap, 'SetProtocolFeeWallet')
     })
-    it('test setRebateScale', async () => {
-      await expect(swap.connect(deployer).setRebateScale(REBATE_SCALE)).to.emit(
-        swap,
-        'SetRebateScale'
-      )
-    })
-    it('test setRebateScale with invalid input', async () => {
+    it('test setDiscountScale', async () => {
       await expect(
-        swap.connect(deployer).setRebateScale(REBATE_SCALE + 1)
+        swap.connect(deployer).setDiscountScale(REBATE_SCALE)
+      ).to.emit(swap, 'SetDiscountScale')
+    })
+    it('test setDiscountScale with invalid input', async () => {
+      await expect(
+        swap.connect(deployer).setDiscountScale(REBATE_SCALE + 1)
       ).to.be.revertedWith('ScaleTooHigh')
     })
-    it('test setRebateScale as non-owner', async () => {
+    it('test setDiscountScale as non-owner', async () => {
       await expect(
-        swap.connect(anyone).setRebateScale(REBATE_SCALE)
+        swap.connect(anyone).setDiscountScale(REBATE_SCALE)
       ).to.be.revertedWith('Ownable: caller is not the owner')
     })
-    it('test setRebateMax', async () => {
+    it('test setDiscountMax', async () => {
       await expect(
-        await swap.connect(deployer).setRebateMax(REBATE_MAX)
-      ).to.emit(swap, 'SetRebateMax')
+        await swap.connect(deployer).setDiscountMax(REBATE_MAX)
+      ).to.emit(swap, 'SetDiscountMax')
     })
-    it('test setRebateMax with invalid input', async () => {
+    it('test setDiscountMax with invalid input', async () => {
       await expect(
-        swap.connect(deployer).setRebateMax(REBATE_MAX + 1)
+        swap.connect(deployer).setDiscountMax(REBATE_MAX + 1)
       ).to.be.revertedWith('MaxTooHigh')
     })
-    it('test setRebateMax as non-owner', async () => {
+    it('test setDiscountMax as non-owner', async () => {
       await expect(
-        swap.connect(anyone).setRebateMax(REBATE_MAX)
+        swap.connect(anyone).setDiscountMax(REBATE_MAX)
       ).to.be.revertedWith('Ownable: caller is not the owner')
     })
     it('test setStaking', async () => {
@@ -552,7 +551,7 @@ describe('SwapERC20 Unit', () => {
 
       await expect(swap.connect(sender).swapLight(...order)).to.emit(
         swap,
-        'SwapLightERC20'
+        'SwapERC20'
       )
     })
 
@@ -571,7 +570,7 @@ describe('SwapERC20 Unit', () => {
 
       await expect(swap.connect(sender).swapLight(...order)).to.emit(
         swap,
-        'SwapLightERC20'
+        'SwapERC20'
       )
     })
     it('test light swaps by signer instead of authorized signatory fail', async () => {

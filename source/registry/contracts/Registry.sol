@@ -28,8 +28,8 @@ contract Registry {
   event SetServerURL(address indexed staker, string url);
   event AddProtocols(address indexed staker, bytes4[] protocols);
   event AddTokens(address indexed staker, address[] tokens);
-  event RemoveTokens(address indexed staker, address[] tokens);
   event RemoveProtocols(address indexed staker, bytes4[] protocols);
+  event RemoveTokens(address indexed staker, address[] tokens);
   event UnsetServer(
     address indexed staker,
     string url,
@@ -49,7 +49,7 @@ contract Registry {
    * @notice Constructor
    * @param _stakingToken address of token used for staking
    * @param _stakingCost base amount required to stake
-   * @param _supportCost amount required per token and protocol
+   * @param _supportCost amount required per token or protocol
    */
   constructor(
     IERC20 _stakingToken,
@@ -276,7 +276,7 @@ contract Registry {
   }
 
   /**
-   * @notice Get all server URLs supporting a protocol
+   * @notice Get all server URLs supporting a token
    * @param _token address of a token
    * @return urls array of URLs supporting the token
    */

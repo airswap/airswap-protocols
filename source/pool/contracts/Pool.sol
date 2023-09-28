@@ -15,7 +15,7 @@ import "./interfaces/IPool.sol";
 contract Pool is IPool, Ownable2Step {
   using SafeERC20 for IERC20;
 
-  uint256 internal constant MAX_PERCENTAGE = 100;
+  uint256 internal constant MAX_MAX = 100;
   uint256 internal constant MAX_SCALE = 77;
 
   // Larger the scale, lower the output for a claim
@@ -39,10 +39,10 @@ contract Pool is IPool, Ownable2Step {
    * @param _max uint256 max to calculate withdrawal amount
    */
   constructor(uint256 _scale, uint256 _max) {
-    if (_max > MAX_PERCENTAGE) revert MaxTooHigh(_max);
+    if (_max > MAX_MAX) revert MaxTooHigh(_max);
     if (_scale > MAX_SCALE) revert ScaleTooHigh(_scale);
-    scale = _scale;
     max = _max;
+    scale = _scale;
   }
 
   /**
@@ -87,7 +87,7 @@ contract Pool is IPool, Ownable2Step {
    * @dev Only owner
    */
   function setMax(uint256 _max) external override onlyOwner {
-    if (_max > MAX_PERCENTAGE) revert MaxTooHigh(_max);
+    if (_max > MAX_MAX) revert MaxTooHigh(_max);
     max = _max;
     emit SetMax(max);
   }
@@ -205,7 +205,7 @@ contract Pool is IPool, Ownable2Step {
   ) public view override returns (uint256) {
     uint256 _balance = IERC20(_token).balanceOf(address(this));
     uint256 _divisor = (uint256(10) ** scale) + _value;
-    return (max * _value * _balance) / _divisor / MAX_PERCENTAGE;
+    return (max * _value * _balance) / _divisor / MAX_MAX;
   }
 
   /**
