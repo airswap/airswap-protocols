@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 const fs = require('fs')
+const prettier = require('prettier')
 const Confirm = require('prompt-confirm')
 const { ethers, run } = require('hardhat')
 const poolDeploys = require('@airswap/pool/deploys.js')
@@ -7,6 +8,7 @@ const stakingDeploys = require('@airswap/staking/deploys.js')
 const { ChainIds, chainNames } = require('@airswap/constants')
 const { getReceiptUrl } = require('@airswap/utils')
 const swapERC20Deploys = require('../deploys.js')
+const swapERC20Blocks = require('../deploys-blocks.js')
 
 async function main() {
   await run('compile')
@@ -48,14 +50,28 @@ async function main() {
       getReceiptUrl(chainId, swapContract.deployTransaction.hash)
     )
     await swapContract.deployed()
-    console.log(`Deployed: ${swapContract.address}`)
 
     swapERC20Deploys[chainId] = swapContract.address
     fs.writeFileSync(
       './deploys.js',
-      `module.exports = ${JSON.stringify(swapERC20Deploys, null, '\t')}`
+      prettier.format(
+        `module.exports = ${JSON.stringify(swapERC20Deploys, null, '\t')}`,
+        { ...config, parser: 'babel' }
+      )
     )
-    console.log('Updated deploys.js')
+    swapERC20Blocks[chainId] = (
+      await swapContract.deployTransaction.wait()
+    ).blockNumber
+    fs.writeFileSync(
+      './deploys-blocks.js',
+      prettier.format(
+        `module.exports = ${JSON.stringify(swapERC20Blocks, null, '\t')}`,
+        { ...config, parser: 'babel' }
+      )
+    )
+    console.log(
+      `Deployed: ${swapERC20Deploys[chainId]} @ ${swapERC20Blocks[chainId]}`
+    )
 
     console.log(
       `\nVerify with "yarn verify --network ${chainNames[
