@@ -23,7 +23,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
 
   // Domain name and version for use in EIP712 signatures
   string public constant DOMAIN_NAME = "SWAP_ERC20";
-  string public constant DOMAIN_VERSION = "4.2";
+  string public constant DOMAIN_VERSION = "4.1";
   uint256 public immutable DOMAIN_CHAIN_ID;
   bytes32 public immutable DOMAIN_SEPARATOR;
 
