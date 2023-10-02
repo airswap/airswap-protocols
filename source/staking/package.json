@@ -31,7 +31,7 @@
     "access": "public"
   },
   "devDependencies": {
-    "@airswap/utils": "^4.1.0",
+    "@airswap/utils": "^4.1.1",
     "prompt-confirm": "^2.0.4"
   }
 }
