@@ -105,7 +105,7 @@ describe('Swap Unit', () => {
         (
           await ethers.getContractFactory('Swap')
         ).deploy([], TokenKinds.ERC20, PROTOCOL_FEE, protocolFeeWallet.address)
-      ).to.be.revertedWith('AdaptersInvalid()')
+      ).to.be.revertedWith('AdaptersInvalid')
     })
 
     it('an invalid protocolFeeWallet (non-null) is rejected by constructor', async () => {
@@ -113,13 +113,13 @@ describe('Swap Unit', () => {
         (
           await ethers.getContractFactory('Swap')
         ).deploy([], TokenKinds.ERC20, PROTOCOL_FEE, ADDRESS_ZERO)
-      ).to.be.revertedWith('FeeWalletInvalid()')
+      ).to.be.revertedWith('FeeWalletInvalid')
     })
 
     it('protocolFeeWallet can only be updated with a valid value (non-null)', async () => {
       await expect(
         swap.connect(deployer).setProtocolFeeWallet(ADDRESS_ZERO)
-      ).to.be.revertedWith('FeeWalletInvalid()')
+      ).to.be.revertedWith('FeeWalletInvalid')
     })
 
     it('protocolFeeWallet can only be updated by owner', async () => {
@@ -141,13 +141,13 @@ describe('Swap Unit', () => {
         (
           await ethers.getContractFactory('Swap')
         ).deploy([], TokenKinds.ERC20, INVALID_FEE, protocolFeeWallet.address)
-      ).to.be.revertedWith('FeeInvalid()')
+      ).to.be.revertedWith('FeeInvalid')
     })
 
     it('protocolFee can only be updated with a valid value (less than divisor)', async () => {
       await expect(
         swap.connect(deployer).setProtocolFee(INVALID_FEE)
-      ).to.be.revertedWith('FeeInvalid()')
+      ).to.be.revertedWith('FeeInvalid')
     })
 
     it('protocolFee can only be updated by owner', async () => {
@@ -187,7 +187,7 @@ describe('Swap Unit', () => {
       )
       await expect(
         swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
-      ).to.be.revertedWith('Unauthorized()')
+      ).to.be.revertedWith('Unauthorized')
     })
 
     it('an order with a higher-than-max royalty is rejected', async () => {
@@ -211,7 +211,9 @@ describe('Swap Unit', () => {
       )
       await expect(
         swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
-      ).to.be.revertedWith(`RoyaltyExceedsMax(${Number(MAX_ROYALTY) + 1}`)
+      )
+        .to.be.revertedWith(`RoyaltyExceedsMax`)
+        .withArgs(Number(MAX_ROYALTY) + 1)
     })
 
     it('an order with a royalty equal to max is accepted', async () => {
@@ -305,7 +307,9 @@ describe('Swap Unit', () => {
       ).to.equal(true)
       await expect(
         swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
-      ).to.be.revertedWith(`NonceAlreadyUsed(${order.nonce})`)
+      )
+        .to.be.revertedWith(`NonceAlreadyUsed`)
+        .withArgs(Number(order.nonce))
     })
 
     it('an order with an already canceled nonce is rejected', async () => {
@@ -316,7 +320,9 @@ describe('Swap Unit', () => {
       )
       await expect(
         swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
-      ).to.be.revertedWith(`NonceAlreadyUsed(${order.nonce})`)
+      )
+        .to.be.revertedWith(`NonceAlreadyUsed`)
+        .withArgs(Number(order.nonce))
     })
 
     it('an order signatory can cancel up to a minimum nonce', async () => {
@@ -347,7 +353,7 @@ describe('Swap Unit', () => {
             signer
           )
         )
-      ).to.be.revertedWith('OrderExpired()')
+      ).to.be.revertedWith('OrderExpired')
     })
 
     it('an order with an invalid expiry (before current block timestamp) is rejected', async () => {
@@ -364,7 +370,7 @@ describe('Swap Unit', () => {
             signer
           )
         )
-      ).to.be.revertedWith('OrderExpired()')
+      ).to.be.revertedWith('OrderExpired')
     })
   })
 
@@ -381,7 +387,7 @@ describe('Swap Unit', () => {
       order.v = 1
       await expect(
         swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
-      ).to.be.revertedWith('SignatureInvalid()')
+      ).to.be.revertedWith('SignatureInvalid')
     })
 
     it('a signer may authorize another signatory to sign orders on its behalf', async () => {
@@ -405,7 +411,7 @@ describe('Swap Unit', () => {
     it('a signer may not authorize a signatory with null address', async () => {
       await expect(
         swap.connect(signer).authorize(ADDRESS_ZERO)
-      ).to.be.revertedWith('SignatoryInvalid()')
+      ).to.be.revertedWith('SignatoryInvalid')
     })
 
     it('a signer may only authorize one (1) other signatory at a time', async () => {
@@ -427,7 +433,7 @@ describe('Swap Unit', () => {
       )
       await expect(
         swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
-      ).to.be.revertedWith('SignatoryUnauthorized()')
+      ).to.be.revertedWith('SignatoryUnauthorized')
     })
 
     it('if set, order signatory must be authorized signatory', async () => {
@@ -445,7 +451,7 @@ describe('Swap Unit', () => {
       )
       await expect(
         swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
-      ).to.be.revertedWith('SignatoryUnauthorized()')
+      ).to.be.revertedWith('SignatoryUnauthorized')
     })
 
     it('a signer may revoke an authorized signatory', async () => {
@@ -464,7 +470,7 @@ describe('Swap Unit', () => {
       )
       await expect(
         swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
-      ).to.be.revertedWith('Unauthorized()')
+      ).to.be.revertedWith('Unauthorized')
     })
 
     it('a sender may not take an order specified for another sender', async () => {
@@ -481,7 +487,7 @@ describe('Swap Unit', () => {
       )
       await expect(
         swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
-      ).to.be.revertedWith('SenderInvalid()')
+      ).to.be.revertedWith('SenderInvalid')
     })
 
     it('a sender may take an order not specified for another sender (public order)', async () => {
@@ -521,7 +527,7 @@ describe('Swap Unit', () => {
       )
       await expect(
         swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
-      ).to.be.revertedWith('AffiliateAmountInvalid()')
+      ).to.be.revertedWith('AffiliateAmountInvalid')
     })
 
     it('an order with an invalid kind is rejected', async () => {
@@ -549,7 +555,7 @@ describe('Swap Unit', () => {
       )
       await expect(
         swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
-      ).to.be.revertedWith('SenderTokenInvalid()')
+      ).to.be.revertedWith('SenderTokenInvalid')
     })
 
     it('an order with underlying signer token issue reverts', async () => {
@@ -569,9 +575,9 @@ describe('Swap Unit', () => {
       )
       await expect(
         swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
-      ).to.be.revertedWith(
-        `TransferFailed("${signer.address}", "${sender.address}")`
       )
+        .to.be.revertedWith(`TransferFailed`)
+        .withArgs(signer.address, sender.address)
     })
   })
 

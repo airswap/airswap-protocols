@@ -52,18 +52,3 @@ export const EIP712Swap = {
     { name: 'amount', type: 'uint256' },
   ],
 }
-
-export const EIP712Claim = {
-  EIP712Domain: [
-    { name: 'name', type: 'string' },
-    { name: 'version', type: 'string' },
-    { name: 'chainId', type: 'uint256' },
-    { name: 'verifyingContract', type: 'address' },
-  ],
-  Claim: [
-    { name: 'nonce', type: 'uint256' },
-    { name: 'expiry', type: 'uint256' },
-    { name: 'participant', type: 'address' },
-    { name: 'score', type: 'uint256' },
-  ],
-}

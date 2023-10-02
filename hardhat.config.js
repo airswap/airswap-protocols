@@ -3,6 +3,7 @@ require('@typechain/hardhat')
 require('@nomiclabs/hardhat-ethers')
 require('@nomiclabs/hardhat-waffle')
 require('@nomiclabs/hardhat-etherscan')
+require('hardhat-gas-reporter')
 require('solidity-coverage')
 
 const {
@@ -146,6 +147,9 @@ module.exports = {
         },
       },
     ],
+  },
+  gasReporter: {
+    enabled: process.env.REPORT_GAS === 'true' ? true : false,
   },
   paths: {
     artifacts: './build',

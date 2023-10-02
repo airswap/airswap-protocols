@@ -20,7 +20,7 @@
     "typechain": "tsc -b",
     "coverage": "hardhat coverage",
     "test": "hardhat test",
-    "test:unit": "hardhat test",
+    "test:ci": "hardhat test",
     "deploy": "hardhat run ./scripts/deploy.js",
     "verify": "hardhat run ./scripts/verify.js"
   },
@@ -28,7 +28,7 @@
     "@openzeppelin/contracts": "^4.8.3"
   },
   "devDependencies": {
-    "@airswap/constants": "^4.0.10",
+    "@airswap/constants": "^4.1.0",
     "@airswap/utils": "^4.0.8",
     "prompt-confirm": "^2.0.4"
   },

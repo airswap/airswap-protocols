@@ -4,12 +4,15 @@ const Confirm = require('prompt-confirm')
 const { ethers, run } = require('hardhat')
 const swapDeploys = require('@airswap/swap-erc20/deploys.js')
 const wrapperDeploys = require('../deploys.js')
+const wrapperBlocks = require('../deploys-blocks.js')
 const wethDeploys = require('../deploys-weth.js')
-const { ChainIds, chainNames } = require('@airswap/constants')
+const { ChainIds, chainNames, chainLabels } = require('@airswap/constants')
 const { getReceiptUrl } = require('@airswap/utils')
 
 async function main() {
   await run('compile')
+  const config = await prettier.resolveConfig('../deploys.js')
+
   const [deployer] = await ethers.getSigners()
   const gasPrice = await deployer.getGasPrice()
   const chainId = await deployer.getChainId()
@@ -21,18 +24,17 @@ async function main() {
   console.log(`Network: ${chainNames[chainId].toUpperCase()}`)
   console.log(`Gas price: ${gasPrice / 10 ** 9} gwei\n`)
 
-  const swapAddress = swapDeploys[chainId]
+  const swapERC20Address = swapDeploys[chainId]
   const wrappedTokenAddress = wethDeploys[chainId]
 
-  console.log(`Swap: ${swapAddress}`)
+  console.log(`SwapERC20: ${swapERC20Address}`)
   console.log(`Wrapped: ${wrappedTokenAddress}`)
-  console.log(`Gas price: ${gasPrice / 10 ** 9} gwei`)
 
   const prompt = new Confirm('Proceed to deploy?')
   if (await prompt.run()) {
     const wrapperFactory = await ethers.getContractFactory('Wrapper')
     const wrapperContract = await wrapperFactory.deploy(
-      swapAddress,
+      swapERC20Address,
       wrappedTokenAddress
     )
     console.log(
@@ -40,17 +42,31 @@ async function main() {
       getReceiptUrl(chainId, wrapperContract.deployTransaction.hash)
     )
     await wrapperContract.deployed()
-    console.log(`Deployed: ${wrapperContract.address}`)
 
     wrapperDeploys[chainId] = wrapperContract.address
     fs.writeFileSync(
       './deploys.js',
-      `module.exports = ${JSON.stringify(wrapperDeploys, null, '\t')}`
+      prettier.format(
+        `module.exports = ${JSON.stringify(wrapperDeploys, null, '\t')}`,
+        { ...config, parser: 'babel' }
+      )
     )
-    console.log('Updated deploys.js')
+    wrapperBlocks[chainId] = (
+      await wrapperContract.deployTransaction.wait()
+    ).blockNumber
+    fs.writeFileSync(
+      './deploys-blocks.js',
+      prettier.format(
+        `module.exports = ${JSON.stringify(wrapperBlocks, null, '\t')}`,
+        { ...config, parser: 'babel' }
+      )
+    )
+    console.log(
+      `Deployed: ${wrapperDeploys[chainId]} @ ${wrapperBlocks[chainId]}`
+    )
 
     console.log(
-      `\nVerify with "yarn verify --network ${chainNames[
+      `\nVerify with "yarn verify --network ${chainLabels[
         chainId
       ].toLowerCase()}"\n`
     )

@@ -10,11 +10,8 @@ import { Levels, FullOrderERC20, UnsignedOrderERC20 } from '@airswap/types'
 import {
   isValidFullOrderERC20,
   isValidOrderERC20,
-  isValidClaim,
   createOrderERC20Signature,
-  createClaimSignature,
   getSignerFromOrderERC20Signature,
-  getSignerFromClaimSignature,
   compressFullOrderERC20,
   decompressFullOrderERC20,
   calculateCostFromLevels,
@@ -125,31 +122,6 @@ describe('Utils', async () => {
         ...settlement,
       })
     ).to.equal(true)
-  })
-
-  it('Signs and validates a claim', async () => {
-    const unsignedClaim = {
-      nonce: Date.now().toString(),
-      expiry: Math.round(Date.now() / 1000 + SECONDS_IN_DAY).toString(),
-      participant: ADDRESS_ZERO,
-      score: '300',
-    }
-    const { v, r, s } = await createClaimSignature(
-      unsignedClaim,
-      wallet.privateKey,
-      ADDRESS_ZERO,
-      1
-    )
-    const signerWallet = getSignerFromClaimSignature(
-      unsignedClaim,
-      ADDRESS_ZERO,
-      1,
-      v,
-      r,
-      s
-    )
-    expect(isValidClaim({ ...unsignedClaim, v, r, s })).to.equal(true)
-    expect(signerWallet.toLowerCase()).to.equal(wallet.address.toLowerCase())
   })
 
   const levels: Levels = [

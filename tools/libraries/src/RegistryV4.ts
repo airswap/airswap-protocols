@@ -2,13 +2,14 @@ import { ethers } from 'ethers'
 import { ServerOptions } from '@airswap/types'
 import { Registry__factory } from '@airswap/registry/typechain/factories/contracts'
 import registryDeploys from '@airswap/registry/deploys.js'
+import registryBlocks from '@airswap/registry/deploys-blocks.js'
 
 import { Server } from './Server'
 import { Contract, SwapERC20 } from './Contracts'
 
 class ServerRegistry extends Contract {
   public constructor() {
-    super('Registry', registryDeploys, {}, Registry__factory)
+    super('Registry', registryDeploys, registryBlocks, Registry__factory)
   }
   public async getServerURLs(
     providerOrSigner: ethers.providers.Provider | ethers.Signer,

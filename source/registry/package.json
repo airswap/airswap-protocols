@@ -1,6 +1,6 @@
 {
   "name": "@airswap/registry",
-  "version": "4.0.3",
+  "version": "4.1.0",
   "description": "AirSwap: Server URL Registry",
   "license": "MIT",
   "repository": {
@@ -20,7 +20,7 @@
     "typechain": "tsc -b",
     "coverage": "hardhat coverage",
     "test": "hardhat test",
-    "test:unit": "hardhat test ./test/unit.js",
+    "test:ci": "hardhat test",
     "deploy": "hardhat run ./scripts/deploy.js",
     "verify": "hardhat run ./scripts/verify.js"
   },
@@ -31,7 +31,7 @@
     "access": "public"
   },
   "devDependencies": {
-    "@airswap/constants": "^4.0.10",
+    "@airswap/constants": "^4.1.0",
     "@airswap/utils": "^4.0.8",
     "prompt-confirm": "^2.0.4"
   }

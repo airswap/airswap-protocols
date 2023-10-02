@@ -1,9 +1,7 @@
 export const DOMAIN_NAME_SWAP_ERC20 = 'SWAP_ERC20'
-export const DOMAIN_VERSION_SWAP_ERC20 = '4'
+export const DOMAIN_VERSION_SWAP_ERC20 = '4.1'
 export const DOMAIN_NAME_SWAP = 'SWAP'
 export const DOMAIN_VERSION_SWAP = '4'
-export const DOMAIN_NAME_POOL = 'POOL'
-export const DOMAIN_VERSION_POOL = '1'
 export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
 export const MAX_APPROVAL_AMOUNT = '90071992547409910000000000'
 export const MIN_CONFIRMATIONS = 2
@@ -47,6 +45,24 @@ export const testnets: number[] = [
   ChainIds.HARDHAT,
   ChainIds.LINEAGOERLI,
 ]
+
+export const chainLabels: Record<number, string> = {
+  [ChainIds.MAINNET]: 'MAINNET',
+  [ChainIds.GOERLI]: 'GOERLI',
+  [ChainIds.RSK]: 'RSK',
+  [ChainIds.RSKTESTNET]: 'RSKTESTNET',
+  [ChainIds.BSC]: 'BSC',
+  [ChainIds.BSCTESTNET]: 'BSCTESTNET',
+  [ChainIds.POLYGON]: 'POLYGON',
+  [ChainIds.HARDHAT]: 'HARDHAT',
+  [ChainIds.ARBITRUM]: 'ARBITRUM',
+  [ChainIds.FUJI]: 'FUJI',
+  [ChainIds.AVALANCHE]: 'AVALANCHE',
+  [ChainIds.LINEAGOERLI]: 'LINEAGOERLI',
+  [ChainIds.LINEA]: 'LINEA',
+  [ChainIds.MUMBAI]: 'MUMBAI',
+  [ChainIds.ARBITRUMGOERLI]: 'ARBITRUMGOERLI',
+}
 
 export const chainNames: Record<number, string> = {
   [ChainIds.MAINNET]: 'Ethereum',
@@ -152,13 +168,17 @@ export const ownerAddresses: Record<number, string> = {
   [ChainIds.LINEA]: '0xed669F5fe2A37Ef204DB178c7a982717B9f03Ec2',
 }
 
+export const protocolFeeReceiverAddresses: Record<number, string> = {
+  [ChainIds.MAINNET]: '0xaD30f7EEBD9Bd5150a256F47DA41d4403033CdF0',
+}
+
 export enum Protocols {
   Discovery = '0xf3713ede',
-  RequestForQuoteERC20 = '0x57bb3622',
+  RequestForQuoteERC20 = '0x02ad05d3',
   PricingERC20 = '0x8beb22c2',
-  LastLookERC20 = '0x2ca4c820',
-  StorageERC20 = '0x3fb72f4e',
-  Storage = '0x9c6974be',
+  LastLookERC20 = '0xb2b78b33',
+  StorageERC20 = '0xfdd616a7',
+  Storage = '0xd8b0f31f',
 }
 
 export const protocolInterfaces: Record<string, string[]> = {
@@ -169,25 +189,27 @@ export const protocolInterfaces: Record<string, string[]> = {
     'function setTokens(array(string tokenContractAddress))',
   ],
   [Protocols.RequestForQuoteERC20]: [
-    'function getSignerSideOrderERC20(string chainId,string swapContractAddress,string senderAmount,string signerToken,string senderToken,string senderWallet,string proxyingFor)',
-    'function getSenderSideOrderERC20(string chainId,string swapContractAddress,string signerAmount,string signerToken,string senderToken,string senderWallet,string proxyingFor)',
-    'function getPricingERC20(array((string baseToken,string quoteToken)))',
-    'function getAllPricingERC20()',
+    'function getSignerSideOrderERC20(string chainId,string swapContractAddress,string senderAmount,string signerToken,string senderToken,string senderWallet,string minExpiry,string proxyingFor)',
+    'function getSenderSideOrderERC20(string chainId,string swapContractAddress,string signerAmount,string signerToken,string senderToken,string senderWallet,string minExpiry,string proxyingFor)',
+    'function getPricingERC20(array((string baseToken,string quoteToken)),string minExpiry)',
+    'function getAllPricingERC20(string minExpiry)',
   ],
-  [Protocols.LastLookERC20]: [
+  [Protocols.PricingERC20]: [
     'function subscribePricingERC20(array((string baseToken,string quoteToken)))',
     'function subscribeAllPricingERC20()',
     'function unsubscribePricingERC20(array((string baseToken,string quoteToken)))',
     'function unsubscribeAllPricingERC20()',
     'function setPricingERC20(array(string baseToken,string quoteToken,string minimum,array(array((string level,string price))),array(array((string level,string price)))))',
-    'function considerOrderERC20(string nonce,string expiry,string signerWallet,string signerToken,string signerAmount,string senderToken,string senderAmount,string v,string r,string s)',
+  ],
+  [Protocols.LastLookERC20]: [
+    'function considerOrderERC20(string chainId,string swapContractAddress,string nonce,string expiry,string signerWallet,string signerToken,string signerAmount,string senderToken,string senderAmount,string v,string r,string s)',
   ],
   [Protocols.StorageERC20]: [
-    'function addOrderERC20(string nonce,string expiry,string signerWallet,string signerToken,string signerAmount,string senderToken,string senderAmount,string v,string r,string s)',
+    'function addOrderERC20(string chainId,string swapContractAddress,string nonce,string expiry,string signerWallet,string signerToken,string signerAmount,string senderToken,string senderAmount,string v,string r,string s)',
     'function getOrdersERC20((string signerWallet,array(string signerToken),string signerMinAmount,string signerMaxAmount,string senderWallet,array(string senderToken),string senderMinAmount,string senderMaxAmount,string sortField,string sortOrder,string offset,string limit))',
   ],
   [Protocols.Storage]: [
-    'function addOrder(uint256 nonce,uint256 expiry,uint256 protocolFee,(address wallet,address token,bytes4 kind,uint256 id,uint256 amount),(address wallet,address token,bytes4 kind,uint256 id,uint256 amount),address affiliateWallet,uint256 affiliateAmount)',
+    'function addOrder(string chainId,string swapContractAddress,uint256 nonce,uint256 expiry,uint256 protocolFee,(address wallet,address token,bytes4 kind,uint256 id,uint256 amount),(address wallet,address token,bytes4 kind,uint256 id,uint256 amount),address affiliateWallet,uint256 affiliateAmount)',
     'function getOrders((string signerWallet,array(string signerToken),string signerMinAmount,string signerMaxAmount,string senderWallet,array(string senderToken),string senderMinAmount,string senderMaxAmount,string sortField,string sortOrder,string offset,string limit))',
   ],
 }

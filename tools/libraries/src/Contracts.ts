@@ -1,18 +1,21 @@
 import { ethers } from 'ethers'
 import { ChainIds } from '@airswap/constants'
 
+import { Pool__factory } from '@airswap/pool/typechain/factories/contracts'
 import { Staking__factory } from '@airswap/staking/typechain/factories/contracts'
 import { Swap__factory } from '@airswap/swap/typechain/factories/contracts'
 import { SwapERC20__factory } from '@airswap/swap-erc20/typechain/factories/contracts'
 import { Wrapper__factory } from '@airswap/wrapper/typechain/factories/contracts'
 import { WETH9__factory } from '@airswap/wrapper/typechain/factories/contracts'
 
+import poolDeploys from '@airswap/pool/deploys.js'
 import stakingDeploys from '@airswap/staking/deploys.js'
 import swapERC20Deploys from '@airswap/swap-erc20/deploys.js'
 import swapDeploys from '@airswap/swap/deploys.js'
 import wrapperDeploys from '@airswap/wrapper/deploys.js'
 import wethDeploys from '@airswap/wrapper/deploys-weth.js'
 
+import poolBlocks from '@airswap/pool/deploys-blocks.js'
 import stakingBlocks from '@airswap/staking/deploys-blocks.js'
 import swapERC20Blocks from '@airswap/swap-erc20/deploys-blocks.js'
 import wrapperBlocks from '@airswap/wrapper/deploys-blocks.js'
@@ -54,6 +57,7 @@ export class Contract {
   }
 }
 
+export const Pool = new Contract('Pool', poolDeploys, poolBlocks, Pool__factory)
 export const Staking = new Contract(
   'Staking',
   stakingDeploys,

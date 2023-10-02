@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 const { ethers, run } = require('hardhat')
-const swapDeploys = require('@airswap/swap-erc20/deploys.js')
+const swapERC20Deploys = require('@airswap/swap-erc20/deploys.js')
 const wrapperDeploys = require('../deploys.js')
 const wethDeploys = require('../deploys-weth.js')
 const { chainNames } = require('@airswap/constants')
@@ -11,13 +11,13 @@ async function main() {
   console.log(`Deployer: ${deployer.address}`)
 
   const chainId = await deployer.getChainId()
-  const swapAddress = swapDeploys[chainId]
+  const swapERC20Address = swapERC20Deploys[chainId]
   const wrappedTokenAddress = wethDeploys[chainId]
 
   console.log(`Verifying on ${chainNames[chainId].toUpperCase()}`)
   await run('verify:verify', {
     address: wrapperDeploys[chainId],
-    constructorArguments: [swapAddress, wrappedTokenAddress],
+    constructorArguments: [swapERC20Address, wrappedTokenAddress],
   })
 }
 

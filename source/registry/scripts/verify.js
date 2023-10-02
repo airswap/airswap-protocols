@@ -10,13 +10,13 @@ async function main() {
 
   const chainId = await deployer.getChainId()
   const stakingToken = stakingTokenAddresses[chainId]
-  const obligationCost = 1000000000
-  const tokenCost = 1000000
+  const stakingCost = 1000000000
+  const supportCost = 1000000
 
   console.log(`Verifying on ${chainNames[chainId].toUpperCase()}`)
   await run('verify:verify', {
     address: registryDeploys[chainId],
-    constructorArguments: [stakingToken, obligationCost, tokenCost],
+    constructorArguments: [stakingToken, stakingCost, supportCost],
   })
 }
 
