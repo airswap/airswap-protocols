@@ -55,6 +55,20 @@ export type OrderERC20 = {
 
 export type FullOrderERC20 = UnsignedOrderERC20 & Signature & Settlement
 
+export type SwapERC20 = {
+  nonce: string
+  signerWallet: string
+}
+
+export type FullSwapERC20 = {
+  signerToken: string
+  signerAmount: string
+  senderWallet: string
+  senderToken: string
+  senderAmount: string
+  feeAmount: string
+} & SwapERC20
+
 export type Levels = [string, string][]
 
 export type Formula = string
