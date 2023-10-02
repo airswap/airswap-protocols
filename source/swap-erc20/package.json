@@ -31,7 +31,7 @@
     "@airswap/constants": "^4.1.0",
     "@airswap/staking": "4.0.3",
     "@airswap/types": "^4.1.0",
-    "@airswap/utils": "^4.0.8",
+    "@airswap/utils": "^4.1.0",
     "prompt-confirm": "^2.0.4"
   },
   "publishConfig": {
