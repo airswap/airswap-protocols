@@ -1,6 +1,6 @@
 {
   "name": "@airswap/pool",
-  "version": "4.1.0-beta.0",
+  "version": "4.1.0",
   "description": "AirSwap: Withdrawable Token Pool",
   "license": "MIT",
   "repository": {
@@ -28,8 +28,8 @@
     "@openzeppelin/contracts": "^4.8.3"
   },
   "devDependencies": {
-    "@airswap/constants": "^4.0.10",
-    "@airswap/types": "^4.0.0",
+    "@airswap/constants": "^4.1.0",
+    "@airswap/types": "^4.1.0",
     "@airswap/utils": "^4.0.8",
     "prompt-confirm": "^2.0.4"
   },

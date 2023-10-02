@@ -3,7 +3,7 @@ const fs = require('fs')
 const prettier = require('prettier')
 const Confirm = require('prompt-confirm')
 const { ethers, run } = require('hardhat')
-const { chainNames, ChainIds } = require('@airswap/constants')
+const { chainLabels, chainNames, ChainIds } = require('@airswap/constants')
 const { getReceiptUrl } = require('@airswap/utils')
 const poolDeploys = require('../deploys.js')
 const poolBlocks = require('../deploys-blocks.js')
@@ -57,7 +57,7 @@ async function main() {
     console.log(`Deployed: ${poolDeploys[chainId]} @ ${poolBlocks[chainId]}`)
 
     console.log(
-      `\nVerify with "yarn verify --network ${chainNames[
+      `\nVerify with "yarn verify --network ${chainLabels[
         chainId
       ].toLowerCase()}"\n`
     )

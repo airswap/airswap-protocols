@@ -3,7 +3,12 @@ const fs = require('fs')
 const prettier = require('prettier')
 const Confirm = require('prompt-confirm')
 const { ethers, run } = require('hardhat')
-const { ChainIds, chainNames, ADDRESS_ZERO } = require('@airswap/constants')
+const {
+  ChainIds,
+  chainLabels,
+  chainNames,
+  stakingTokenAddresses,
+} = require('@airswap/constants')
 const { getReceiptUrl } = require('@airswap/utils')
 const registryDeploys = require('../deploys.js')
 const registryBlocks = require('../deploys-blocks.js')
@@ -23,9 +28,9 @@ async function main() {
   console.log(`Network: ${chainNames[chainId].toUpperCase()}`)
   console.log(`Gas price: ${gasPrice / 10 ** 9} gwei\n`)
 
-  const stakingToken = ADDRESS_ZERO // stakingTokenAddresses[chainId]
-  const stakingCost = 0 // 1000000000
-  const supportCost = 0 // 1000000
+  const stakingToken = stakingTokenAddresses[chainId]
+  const stakingCost = 1000000000
+  const supportCost = 1000000
 
   console.log(`\nstakingToken: ${stakingToken}`)
   console.log(`stakingCost: ${stakingCost}`)
@@ -68,7 +73,7 @@ async function main() {
     )
 
     console.log(
-      `\nVerify with "yarn verify --network ${chainNames[
+      `\nVerify with "yarn verify --network ${chainLabels[
         chainId
       ].toLowerCase()}"\n`
     )

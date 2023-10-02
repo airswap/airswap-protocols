@@ -46,6 +46,24 @@ export const testnets: number[] = [
   ChainIds.LINEAGOERLI,
 ]
 
+export const chainLabels: Record<number, string> = {
+  [ChainIds.MAINNET]: 'MAINNET',
+  [ChainIds.GOERLI]: 'GOERLI',
+  [ChainIds.RSK]: 'RSK',
+  [ChainIds.RSKTESTNET]: 'RSKTESTNET',
+  [ChainIds.BSC]: 'BSC',
+  [ChainIds.BSCTESTNET]: 'BSCTESTNET',
+  [ChainIds.POLYGON]: 'POLYGON',
+  [ChainIds.HARDHAT]: 'HARDHAT',
+  [ChainIds.ARBITRUM]: 'ARBITRUM',
+  [ChainIds.FUJI]: 'FUJI',
+  [ChainIds.AVALANCHE]: 'AVALANCHE',
+  [ChainIds.LINEAGOERLI]: 'LINEAGOERLI',
+  [ChainIds.LINEA]: 'LINEA',
+  [ChainIds.MUMBAI]: 'MUMBAI',
+  [ChainIds.ARBITRUMGOERLI]: 'ARBITRUMGOERLI',
+}
+
 export const chainNames: Record<number, string> = {
   [ChainIds.MAINNET]: 'Ethereum',
   [ChainIds.GOERLI]: 'Goerli',
@@ -148,6 +166,10 @@ export const ownerAddresses: Record<number, string> = {
   [ChainIds.ARBITRUM]: '0xed669F5fe2A37Ef204DB178c7a982717B9f03Ec2',
   [ChainIds.AVALANCHE]: '0xed669F5fe2A37Ef204DB178c7a982717B9f03Ec2',
   [ChainIds.LINEA]: '0xed669F5fe2A37Ef204DB178c7a982717B9f03Ec2',
+}
+
+export const protocolFeeReceiverAddresses: Record<number, string> = {
+  [ChainIds.MAINNET]: '0xaD30f7EEBD9Bd5150a256F47DA41d4403033CdF0',
 }
 
 export enum Protocols {

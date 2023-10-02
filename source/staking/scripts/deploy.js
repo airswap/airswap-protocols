@@ -2,7 +2,11 @@
 const fs = require('fs')
 const Confirm = require('prompt-confirm')
 const { ethers, run } = require('hardhat')
-const { chainNames, stakingTokenAddresses } = require('@airswap/constants')
+const {
+  chainNames,
+  chainLabels,
+  stakingTokenAddresses,
+} = require('@airswap/constants')
 const { getReceiptUrl } = require('@airswap/utils')
 const stakingDeploys = require('../deploys.js')
 
@@ -56,7 +60,7 @@ async function main() {
     console.log('Updated deploys.js')
 
     console.log(
-      `\nVerify with "yarn verify --network ${chainNames[
+      `\nVerify with "yarn verify --network ${chainLabels[
         chainId
       ].toLowerCase()}"\n`
     )
