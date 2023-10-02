@@ -2,7 +2,10 @@
 const { ethers, run } = require('hardhat')
 const stakingDeploys = require('@airswap/staking/deploys.js')
 const poolDeploys = require('@airswap/pool/deploys.js')
-const { chainNames } = require('@airswap/constants')
+const {
+  chainNames,
+  protocolFeeReceiverAddresses,
+} = require('@airswap/constants')
 const swapERC20Deploys = require('../deploys.js')
 
 async function main() {
@@ -11,7 +14,11 @@ async function main() {
   console.log(`Deployer: ${deployer.address}`)
 
   const chainId = await deployer.getChainId()
-  const protocolFeeWallet = poolDeploys[chainId]
+
+  let protocolFeeReceiver = poolDeploys[chainId]
+  if (protocolFeeReceiverAddresses[chainId]) {
+    protocolFeeReceiver = protocolFeeReceiverAddresses[chainId]
+  }
   const stakingContract = stakingDeploys[chainId]
   const protocolFee = 7
   const protocolFeeLight = 7
@@ -24,7 +31,7 @@ async function main() {
     constructorArguments: [
       protocolFee,
       protocolFeeLight,
-      protocolFeeWallet,
+      protocolFeeReceiver,
       discountScale,
       discountMax,
       stakingContract,

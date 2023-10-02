@@ -5,13 +5,20 @@ const Confirm = require('prompt-confirm')
 const { ethers, run } = require('hardhat')
 const poolDeploys = require('@airswap/pool/deploys.js')
 const stakingDeploys = require('@airswap/staking/deploys.js')
-const { ChainIds, chainNames } = require('@airswap/constants')
+const {
+  ChainIds,
+  chainLabels,
+  chainNames,
+  protocolFeeReceiverAddresses,
+} = require('@airswap/constants')
 const { getReceiptUrl } = require('@airswap/utils')
 const swapERC20Deploys = require('../deploys.js')
 const swapERC20Blocks = require('../deploys-blocks.js')
 
 async function main() {
   await run('compile')
+  const config = await prettier.resolveConfig('../deploys.js')
+
   const [deployer] = await ethers.getSigners()
   const gasPrice = await deployer.getGasPrice()
   const chainId = await deployer.getChainId()
@@ -23,16 +30,18 @@ async function main() {
   console.log(`Network: ${chainNames[chainId].toUpperCase()}`)
   console.log(`Gas price: ${gasPrice / 10 ** 9} gwei\n`)
 
-  const protocolFeeWallet = poolDeploys[chainId]
+  let protocolFeeReceiver = poolDeploys[chainId]
+  if (protocolFeeReceiverAddresses[chainId]) {
+    protocolFeeReceiver = protocolFeeReceiverAddresses[chainId]
+  }
   const stakingContract = stakingDeploys[chainId]
   const protocolFee = 7
   const protocolFeeLight = 7
   const discountScale = 10
   const discountMax = 100
 
-  console.log(`Fee recipient: ${protocolFeeWallet}`)
+  console.log(`Fee receiver: ${protocolFeeReceiver}`)
   console.log(`Staking contract: ${stakingContract}`)
-  console.log(`Gas price: ${gasPrice / 10 ** 9} gwei`)
 
   const prompt = new Confirm('Proceed to deploy?')
   if (await prompt.run()) {
@@ -40,7 +49,7 @@ async function main() {
     const swapContract = await swapFactory.deploy(
       protocolFee,
       protocolFeeLight,
-      protocolFeeWallet,
+      protocolFeeReceiver,
       discountScale,
       discountMax,
       stakingContract
@@ -74,7 +83,7 @@ async function main() {
     )
 
     console.log(
-      `\nVerify with "yarn verify --network ${chainNames[
+      `\nVerify with "yarn verify --network ${chainLabels[
         chainId
       ].toLowerCase()}"\n`
     )
