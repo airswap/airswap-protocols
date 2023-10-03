@@ -3,5 +3,5 @@
   "compilerOptions": {
     "outDir": "./typechain"
   },
-  "files": ["./typechain/index.ts"]
+  "files": ["./typechain/index.ts", "./events.ts"]
 }
