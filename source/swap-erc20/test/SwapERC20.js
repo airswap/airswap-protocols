@@ -30,8 +30,9 @@ describe('SwapERC20 Unit', () => {
   const REBATE_SCALE = '10'
   const REBATE_MAX = '100'
   const FEE_DIVISOR = '10000'
-  const DEFAULT_AMOUNT = '1000'
-  const DEFAULT_BALANCE = '10000'
+  const DEFAULT_AMOUNT = '10000'
+  const DEFAULT_BALANCE = '100000'
+  const STAKING_BALANCE = '10000000000'
   const SWAP_FEE =
     (parseInt(DEFAULT_AMOUNT) * parseInt(PROTOCOL_FEE)) / parseInt(FEE_DIVISOR)
 
@@ -117,7 +118,7 @@ describe('SwapERC20 Unit', () => {
     staking = await deployMockContract(deployer, STAKING.abi)
     await signerToken.mock.transferFrom.returns(true)
     await senderToken.mock.transferFrom.returns(true)
-    await staking.mock.balanceOf.returns(10000000)
+    await staking.mock.balanceOf.returns(STAKING_BALANCE)
 
     swap = await (
       await ethers.getContractFactory('SwapERC20')
@@ -305,7 +306,7 @@ describe('SwapERC20 Unit', () => {
       )
       const discount = await swap
         .connect(deployer)
-        .calculateDiscount(10000000, initialFeeAmount)
+        .calculateDiscount(STAKING_BALANCE, initialFeeAmount)
       const actualFeeAmount = await swap
         .connect(deployer)
         .calculateProtocolFee(sender.address, DEFAULT_AMOUNT)
@@ -321,7 +322,7 @@ describe('SwapERC20 Unit', () => {
       const initialFeeAmount = (DEFAULT_AMOUNT * zeroProtocolFee) / FEE_DIVISOR
       const discount = await swap
         .connect(deployer)
-        .calculateDiscount(10000000, initialFeeAmount)
+        .calculateDiscount(STAKING_BALANCE, initialFeeAmount)
       const actualFeeAmount = await swap
         .connect(deployer)
         .calculateProtocolFee(sender.address, DEFAULT_AMOUNT)
