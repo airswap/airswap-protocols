@@ -15,6 +15,7 @@ describe('SwapERC20 Integration', () => {
   let senderToken
   let staking
 
+  let deployer
   let sender
   let signer
   let protocolFeeWallet
@@ -57,7 +58,7 @@ describe('SwapERC20 Integration', () => {
   })
 
   before('get signers and deploy', async () => {
-    ;[sender, signer, protocolFeeWallet] = await ethers.getSigners()
+    ;[deployer, sender, signer, protocolFeeWallet] = await ethers.getSigners()
 
     stakingToken = await (
       await ethers.getContractFactory(ERC20.abi, ERC20.bytecode)
@@ -89,8 +90,7 @@ describe('SwapERC20 Integration', () => {
       PROTOCOL_FEE_LIGHT,
       protocolFeeWallet.address,
       DISCOUNT_SCALE,
-      DISCOUNT_MAX,
-      staking.address
+      DISCOUNT_MAX
     )
     await swap.deployed()
 
@@ -101,9 +101,16 @@ describe('SwapERC20 Integration', () => {
   describe('Test token holder discounts', async () => {
     it('test swap without discount', async () => {
       const order = await createSignedOrder({}, signer)
-      await expect(
-        await swap.connect(sender).swap(sender.address, ...order)
-      ).to.emit(swap, 'SwapERC20')
+
+      await expect(swap.connect(deployer).setStaking(staking.address)).to.emit(
+        swap,
+        'SetStaking'
+      )
+
+      await expect(swap.connect(sender).swap(sender.address, ...order)).to.emit(
+        swap,
+        'SwapERC20'
+      )
 
       // Expect full 30 to be taken from signer
       expect(await signerToken.balanceOf(signer.address)).to.equal('989970')
@@ -120,6 +127,11 @@ describe('SwapERC20 Integration', () => {
     it('test swap with discount', async () => {
       await stakingToken.connect(sender).approve(staking.address, 10000000000)
       await staking.connect(sender).stake(10000000000)
+
+      await expect(swap.connect(deployer).setStaking(staking.address)).to.emit(
+        swap,
+        'SetStaking'
+      )
 
       const order = await createSignedOrder({}, signer)
 
