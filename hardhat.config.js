@@ -74,6 +74,14 @@ module.exports = {
       url: apiUrls[ChainIds.LINEA] + '/' + process.env.INFURA_API_KEY,
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
     },
+    basegoerli: {
+      url: apiUrls[ChainIds.BASEGOERLI],
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
+    },
+    base: {
+      url: apiUrls[ChainIds.BASE],
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
+    },
   },
   solidity: {
     compilers: [
@@ -111,6 +119,8 @@ module.exports = {
       polygonMumbai: process.env.POLYGONSCAN_API_KEY,
       linea: process.env.LINEASCAN_API_KEY,
       lineagoerli: process.env.LINEASCAN_API_KEY,
+      base: process.env.BASESCAN_API_KEY,
+      basegoerli: process.env.BASESCAN_API_KEY,
       rsk: process.env.BLOCKSCOUT_API_KEY,
     },
     customChains: [
@@ -136,6 +146,22 @@ module.exports = {
         urls: {
           apiURL: explorerApiUrls[ChainIds.LINEAGOERLI],
           browserURL: explorerUrls[ChainIds.LINEAGOERLI],
+        },
+      },
+      {
+        network: 'base',
+        chainId: 8453,
+        urls: {
+          apiURL: explorerApiUrls[ChainIds.BASE],
+          browserURL: explorerUrls[ChainIds.BASE],
+        },
+      },
+      {
+        network: 'basegoerli',
+        chainId: 84531,
+        urls: {
+          apiURL: explorerApiUrls[ChainIds.BASEGOERLI],
+          browserURL: explorerUrls[ChainIds.BASEGOERLI],
         },
       },
       {
