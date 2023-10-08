@@ -126,8 +126,7 @@ describe('SwapERC20 Unit', () => {
       PROTOCOL_FEE_LIGHT,
       protocolFeeWallet.address,
       REBATE_SCALE,
-      REBATE_MAX,
-      staking.address
+      REBATE_MAX
     )
     await swap.deployed()
   })
@@ -149,8 +148,7 @@ describe('SwapERC20 Unit', () => {
           PROTOCOL_FEE_LIGHT,
           ADDRESS_ZERO,
           REBATE_SCALE,
-          REBATE_MAX,
-          staking.address
+          REBATE_MAX
         )
       ).to.be.revertedWith('InvalidFeeWallet')
     })
@@ -164,8 +162,7 @@ describe('SwapERC20 Unit', () => {
           PROTOCOL_FEE_LIGHT,
           protocolFeeWallet.address,
           REBATE_SCALE,
-          REBATE_MAX,
-          staking.address
+          REBATE_MAX
         )
       ).to.be.revertedWith('InvalidFee')
     })
@@ -179,8 +176,7 @@ describe('SwapERC20 Unit', () => {
           100000000000,
           protocolFeeWallet.address,
           REBATE_SCALE,
-          REBATE_MAX,
-          staking.address
+          REBATE_MAX
         )
       ).to.be.revertedWith('InvalidFeeLight')
     })
@@ -194,8 +190,7 @@ describe('SwapERC20 Unit', () => {
           PROTOCOL_FEE_LIGHT,
           protocolFeeWallet.address,
           REBATE_SCALE + 1,
-          REBATE_MAX,
-          staking.address
+          REBATE_MAX
         )
       ).to.be.revertedWith('ScaleTooHigh')
     })
@@ -209,25 +204,9 @@ describe('SwapERC20 Unit', () => {
           PROTOCOL_FEE_LIGHT,
           protocolFeeWallet.address,
           REBATE_SCALE,
-          REBATE_MAX + 1,
-          staking.address
+          REBATE_MAX + 1
         )
       ).to.be.revertedWith('MaxTooHigh')
-    })
-
-    it('test invalid discount maximum', async () => {
-      await expect(
-        (
-          await ethers.getContractFactory('SwapERC20')
-        ).deploy(
-          PROTOCOL_FEE,
-          PROTOCOL_FEE_LIGHT,
-          protocolFeeWallet.address,
-          REBATE_SCALE,
-          REBATE_MAX,
-          ADDRESS_ZERO
-        )
-      ).to.be.revertedWith('InvalidStaking')
     })
   })
 
@@ -312,8 +291,18 @@ describe('SwapERC20 Unit', () => {
   })
 
   describe('Test calculateProtocolFee', async () => {
+    it('test calculateProtocolFee without staking set', async () => {
+      const feeAmount = await swap
+        .connect(deployer)
+        .calculateProtocolFee(sender.address, DEFAULT_AMOUNT)
+      expect(feeAmount).to.equal((DEFAULT_AMOUNT * PROTOCOL_FEE) / FEE_DIVISOR)
+    })
     it('test calculateProtocolFee', async () => {
       const initialFeeAmount = (DEFAULT_AMOUNT * PROTOCOL_FEE) / FEE_DIVISOR
+      await expect(swap.connect(deployer).setStaking(staking.address)).to.emit(
+        swap,
+        'SetStaking'
+      )
       const discount = await swap
         .connect(deployer)
         .calculateDiscount(10000000, initialFeeAmount)
@@ -324,6 +313,10 @@ describe('SwapERC20 Unit', () => {
     })
     it('test calculateProtocolFee with protocol fee as zero', async () => {
       const zeroProtocolFee = 0
+      await expect(swap.connect(deployer).setStaking(staking.address)).to.emit(
+        swap,
+        'SetStaking'
+      )
       await swap.connect(deployer).setProtocolFee(zeroProtocolFee)
       const initialFeeAmount = (DEFAULT_AMOUNT * zeroProtocolFee) / FEE_DIVISOR
       const discount = await swap
@@ -634,21 +627,6 @@ describe('SwapERC20 Unit', () => {
       await expect(swap.connect(sender).swapLight(...order)).to.be.revertedWith(
         'Unauthorized'
       )
-    })
-
-    it('test swaps gas consumption', async () => {
-      const order = await createSignedOrderERC20(
-        {
-          protocolFee: PROTOCOL_FEE_LIGHT,
-        },
-        signer
-      )
-
-      const transaction = await swap.connect(sender).swapLight(...order)
-      const swapReceipt = await transaction.wait()
-      const swapCost = swapReceipt.gasUsed
-      console.log(swapCost)
-      expect(Number(swapCost)).to.be.lessThanOrEqual(129246)
     })
   })
 

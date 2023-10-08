@@ -47,7 +47,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
   address public protocolFeeWallet;
   uint256 public discountScale;
   uint256 public discountMax;
-  address public staking;
+  address public stakingToken;
 
   /**
    * @notice Constructor
@@ -56,22 +56,19 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
    * @param _protocolFeeWallet address destination for fees
    * @param _discountScale uin256 scale factor for discount
    * @param _discountMax uint256 max discount percentage
-   * @param _staking address staking contract address
    */
   constructor(
     uint256 _protocolFee,
     uint256 _protocolFeeLight,
     address _protocolFeeWallet,
     uint256 _discountScale,
-    uint256 _discountMax,
-    address _staking
+    uint256 _discountMax
   ) EIP712(DOMAIN_NAME, DOMAIN_VERSION) {
     if (_protocolFee >= FEE_DIVISOR) revert InvalidFee();
     if (_protocolFeeLight >= FEE_DIVISOR) revert InvalidFeeLight();
     if (_protocolFeeWallet == address(0)) revert InvalidFeeWallet();
     if (_discountMax > MAX_MAX) revert MaxTooHigh();
     if (_discountScale > MAX_SCALE) revert ScaleTooHigh();
-    if (_staking == address(0)) revert InvalidStaking();
 
     DOMAIN_CHAIN_ID = block.chainid;
     DOMAIN_SEPARATOR = _domainSeparatorV4();
@@ -81,7 +78,6 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     protocolFeeWallet = _protocolFeeWallet;
     discountMax = _discountMax;
     discountScale = _discountScale;
-    staking = _staking;
   }
 
   /**
@@ -346,13 +342,13 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
 
   /**
    * @notice Set the staking token
-   * @param newstaking address Token to check balances on
+   * @param _stakingToken address Token to check balances on
    */
-  function setStaking(address newstaking) external onlyOwner {
+  function setStaking(address _stakingToken) external onlyOwner {
     // Ensure the new staking token is not null
-    if (newstaking == address(0)) revert InvalidStaking();
-    staking = newstaking;
-    emit SetStaking(newstaking);
+    if (_stakingToken == address(0)) revert InvalidStaking();
+    stakingToken = _stakingToken;
+    emit SetStaking(_stakingToken);
   }
 
   /**
@@ -543,7 +539,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
   }
 
   /**
-   * @notice Calculates and refers fee amount
+   * @notice Calculates protocol fee for an account
    * @param wallet address
    * @param amount uint256
    */
@@ -553,9 +549,9 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
   ) public view override returns (uint256) {
     // Transfer fee from signer to feeWallet
     uint256 feeAmount = (amount * protocolFee) / FEE_DIVISOR;
-    if (feeAmount > 0) {
+    if (stakingToken != address(0) && feeAmount > 0) {
       uint256 discountAmount = calculateDiscount(
-        IERC20(staking).balanceOf(wallet),
+        IERC20(stakingToken).balanceOf(wallet),
         feeAmount
       );
       return feeAmount - discountAmount;
@@ -723,9 +719,9 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
   ) internal {
     // Transfer fee from signer to feeWallet
     uint256 feeAmount = (amount * protocolFee) / FEE_DIVISOR;
-    if (feeAmount > 0) {
+    if (stakingToken != address(0) && feeAmount > 0) {
       uint256 discountAmount = calculateDiscount(
-        IERC20(staking).balanceOf(msg.sender),
+        IERC20(stakingToken).balanceOf(msg.sender),
         feeAmount
       );
       if (discountAmount > 0) {
