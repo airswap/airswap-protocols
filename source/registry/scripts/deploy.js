@@ -43,7 +43,10 @@ async function main() {
     const registryContract = await registryFactory.deploy(
       stakingToken,
       stakingCost,
-      supportCost
+      supportCost,
+      {
+        gasPrice,
+      }
     )
     console.log(
       'Deploying...',

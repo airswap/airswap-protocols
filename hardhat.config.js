@@ -122,6 +122,7 @@ module.exports = {
       base: process.env.BASESCAN_API_KEY,
       basegoerli: process.env.BASESCAN_API_KEY,
       rsk: process.env.BLOCKSCOUT_API_KEY,
+      rsktestnet: process.env.BLOCKSCOUT_API_KEY,
     },
     customChains: [
       {
@@ -130,6 +131,14 @@ module.exports = {
         urls: {
           apiURL: explorerApiUrls[ChainIds.RSK],
           browserURL: explorerUrls[ChainIds.RSK],
+        },
+      },
+      {
+        network: 'rsktestnet',
+        chainId: 31,
+        urls: {
+          apiURL: explorerApiUrls[ChainIds.RSKTESTNET],
+          browserURL: explorerUrls[ChainIds.RSKTESTNET],
         },
       },
       {

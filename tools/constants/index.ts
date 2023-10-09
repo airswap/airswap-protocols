@@ -132,8 +132,8 @@ export const apiUrls: Record<number, string> = {
 export const explorerUrls: Record<number, string> = {
   [ChainIds.MAINNET]: 'https://etherscan.io',
   [ChainIds.GOERLI]: 'https://goerli.etherscan.io',
-  [ChainIds.RSK]: 'https://blockscout.com/rsk/mainnet',
-  [ChainIds.RSKTESTNET]: 'https://explorer.testnet.rsk.co',
+  [ChainIds.RSK]: 'https://rootstock.blockscout.com/',
+  [ChainIds.RSKTESTNET]: 'https://rootstock-testnet.blockscout.com/',
   [ChainIds.BSC]: 'https://bscscan.com',
   [ChainIds.BSCTESTNET]: 'https://testnet.bscscan.com',
   [ChainIds.POLYGON]: 'https://polygonscan.com',
@@ -149,7 +149,8 @@ export const explorerUrls: Record<number, string> = {
 }
 
 export const explorerApiUrls: Record<number, string> = {
-  [ChainIds.RSK]: 'https://blockscout.com/rsk/mainnet/api',
+  [ChainIds.RSK]: 'https://rootstock.blockscout.com/api',
+  [ChainIds.RSKTESTNET]: 'https://rootstock-testnet.blockscout.com/api',
   [ChainIds.LINEAGOERLI]: 'https://api-testnet.lineascan.build/api',
   [ChainIds.LINEA]: 'https://api.lineascan.build/api',
   [ChainIds.BASEGOERLI]: 'https://api-goerli.basescan.org/api',

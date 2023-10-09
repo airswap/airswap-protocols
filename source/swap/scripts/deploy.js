@@ -1,20 +1,26 @@
 /* eslint-disable no-console */
 const fs = require('fs')
+const prettier = require('prettier')
 const Confirm = require('prompt-confirm')
 const { ethers, run } = require('hardhat')
-const poolDeploys = require('@airswap/pool/deploys.js')
 const {
   chainNames,
   chainLabels,
   ChainIds,
   TokenKinds,
+  protocolFeeReceiverAddresses,
+  ADDRESS_ZERO,
 } = require('@airswap/constants')
 const { getReceiptUrl } = require('@airswap/utils')
+const poolDeploys = require('@airswap/pool/deploys.js')
 const swapDeploys = require('../deploys.js')
+const swapBlocks = require('../deploys-blocks.js')
 const adapterDeploys = require('../deploys-adapters.js')
 
 async function main() {
   await run('compile')
+  const config = await prettier.resolveConfig('../deploys.js')
+
   const [deployer] = await ethers.getSigners()
   const gasPrice = await deployer.getGasPrice()
   const chainId = await deployer.getChainId()
@@ -28,12 +34,20 @@ async function main() {
 
   const requiredSenderKind = TokenKinds.ERC20
   const protocolFee = 7
-  const protocolFeeWallet = poolDeploys[chainId]
+  let protocolFeeReceiver = poolDeploys[chainId] || ADDRESS_ZERO
+  if (protocolFeeReceiverAddresses[chainId]) {
+    protocolFeeReceiver = protocolFeeReceiverAddresses[chainId]
+  }
+
+  if (!adapterDeploys[chainId]) {
+    console.log('Adapters must be deployed first.')
+    return
+  }
 
   console.log(`\nadapters: ${JSON.stringify(adapterDeploys[chainId])}`)
   console.log(`requiredSenderKind: ${requiredSenderKind}`)
   console.log(`protocolFee: ${protocolFee}`)
-  console.log(`protocolFeeWallet: ${protocolFeeWallet}\n`)
+  console.log(`protocolFeeReceiver: ${protocolFeeReceiver}`)
 
   const prompt = new Confirm('Proceed to deploy?')
   if (await prompt.run()) {
@@ -42,21 +56,36 @@ async function main() {
       adapterDeploys[chainId],
       requiredSenderKind,
       protocolFee,
-      protocolFeeWallet
+      protocolFeeReceiver,
+      {
+        gasPrice,
+      }
     )
     console.log(
       'Deploying...',
       getReceiptUrl(chainId, swapContract.deployTransaction.hash)
     )
     await swapContract.deployed()
-    console.log(`Deployed: ${swapContract.address}`)
 
     swapDeploys[chainId] = swapContract.address
     fs.writeFileSync(
       './deploys.js',
-      `module.exports = ${JSON.stringify(swapDeploys, null, '\t')}`
+      prettier.format(
+        `module.exports = ${JSON.stringify(swapDeploys, null, '\t')}`,
+        { ...config, parser: 'babel' }
+      )
     )
-    console.log('Updated deploys.js')
+    swapBlocks[chainId] = (
+      await swapContract.deployTransaction.wait()
+    ).blockNumber
+    fs.writeFileSync(
+      './deploys-blocks.js',
+      prettier.format(
+        `module.exports = ${JSON.stringify(swapBlocks, null, '\t')}`,
+        { ...config, parser: 'babel' }
+      )
+    )
+    console.log(`Deployed: ${swapDeploys[chainId]} @ ${swapBlocks[chainId]}`)
 
     console.log(
       `\nVerify with "yarn verify --network ${chainLabels[
