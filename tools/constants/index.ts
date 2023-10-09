@@ -132,8 +132,8 @@ export const apiUrls: Record<number, string> = {
 export const explorerUrls: Record<number, string> = {
   [ChainIds.MAINNET]: 'https://etherscan.io',
   [ChainIds.GOERLI]: 'https://goerli.etherscan.io',
-  [ChainIds.RSK]: 'https://rootstock.blockscout.com/',
-  [ChainIds.RSKTESTNET]: 'https://rootstock-testnet.blockscout.com/',
+  [ChainIds.RSK]: 'https://rootstock.blockscout.com',
+  [ChainIds.RSKTESTNET]: 'https://rootstock-testnet.blockscout.com',
   [ChainIds.BSC]: 'https://bscscan.com',
   [ChainIds.BSCTESTNET]: 'https://testnet.bscscan.com',
   [ChainIds.POLYGON]: 'https://polygonscan.com',
