@@ -29,7 +29,9 @@ async function main() {
   const prompt = new Confirm('Proceed to deploy?')
   if (await prompt.run()) {
     const poolFactory = await ethers.getContractFactory('Pool')
-    const poolContract = await poolFactory.deploy(scale, max)
+    const poolContract = await poolFactory.deploy(scale, max, {
+      gasPrice,
+    })
     console.log(
       'Deploying...',
       getReceiptUrl(chainId, poolContract.deployTransaction.hash)

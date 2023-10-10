@@ -8,6 +8,7 @@ const {
   chainLabels,
   chainNames,
   stakingTokenAddresses,
+  ADDRESS_ZERO,
 } = require('@airswap/constants')
 const { getReceiptUrl } = require('@airswap/utils')
 const registryDeploys = require('../deploys.js')
@@ -28,9 +29,9 @@ async function main() {
   console.log(`Network: ${chainNames[chainId].toUpperCase()}`)
   console.log(`Gas price: ${gasPrice / 10 ** 9} gwei\n`)
 
-  const stakingToken = stakingTokenAddresses[chainId]
-  const stakingCost = 1000000000
-  const supportCost = 1000000
+  const stakingToken = stakingTokenAddresses[chainId] || ADDRESS_ZERO
+  const stakingCost = 0
+  const supportCost = 0
 
   console.log(`\nstakingToken: ${stakingToken}`)
   console.log(`stakingCost: ${stakingCost}`)
@@ -42,7 +43,10 @@ async function main() {
     const registryContract = await registryFactory.deploy(
       stakingToken,
       stakingCost,
-      supportCost
+      supportCost,
+      {
+        gasPrice,
+      }
     )
     console.log(
       'Deploying...',

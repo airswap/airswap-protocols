@@ -4,12 +4,12 @@ const prettier = require('prettier')
 const Confirm = require('prompt-confirm')
 const { ethers, run } = require('hardhat')
 const poolDeploys = require('@airswap/pool/deploys.js')
-const stakingDeploys = require('@airswap/staking/deploys.js')
 const {
   ChainIds,
   chainLabels,
   chainNames,
   protocolFeeReceiverAddresses,
+  ADDRESS_ZERO,
 } = require('@airswap/constants')
 const { getReceiptUrl } = require('@airswap/utils')
 const swapERC20Deploys = require('../deploys.js')
@@ -30,18 +30,18 @@ async function main() {
   console.log(`Network: ${chainNames[chainId].toUpperCase()}`)
   console.log(`Gas price: ${gasPrice / 10 ** 9} gwei\n`)
 
-  let protocolFeeReceiver = poolDeploys[chainId]
+  let protocolFeeReceiver = poolDeploys[chainId] || ADDRESS_ZERO
   if (protocolFeeReceiverAddresses[chainId]) {
     protocolFeeReceiver = protocolFeeReceiverAddresses[chainId]
   }
-  const stakingContract = stakingDeploys[chainId]
   const protocolFee = 7
   const protocolFeeLight = 7
   const discountScale = 10
   const discountMax = 100
 
-  console.log(`Fee receiver: ${protocolFeeReceiver}`)
-  console.log(`Staking contract: ${stakingContract}`)
+  console.log(`protocolFee: ${protocolFee}`)
+  console.log(`protocolFeeLight: ${protocolFeeLight}`)
+  console.log(`protocolFeeReceiver: ${protocolFeeReceiver}`)
 
   const prompt = new Confirm('Proceed to deploy?')
   if (await prompt.run()) {
@@ -52,7 +52,9 @@ async function main() {
       protocolFeeReceiver,
       discountScale,
       discountMax,
-      stakingContract
+      {
+        gasPrice,
+      }
     )
     console.log(
       'Deploying...',

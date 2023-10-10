@@ -1,7 +1,11 @@
 /* eslint-disable no-console */
 const { ethers, run } = require('hardhat')
 const poolDeploys = require('@airswap/pool/deploys.js')
-const { chainNames, TokenKinds } = require('@airswap/constants')
+const {
+  chainNames,
+  TokenKinds,
+  protocolFeeReceiverAddresses,
+} = require('@airswap/constants')
 const swapDeploys = require('../deploys.js')
 const adapterDeploys = require('../deploys-adapters.js')
 
@@ -11,9 +15,13 @@ async function main() {
   console.log(`Deployer: ${deployer.address}`)
 
   const chainId = await deployer.getChainId()
+
   const requiredSenderKind = TokenKinds.ERC20
   const protocolFee = 7
-  const protocolFeeWallet = poolDeploys[chainId]
+  let protocolFeeReceiver = poolDeploys[chainId]
+  if (protocolFeeReceiverAddresses[chainId]) {
+    protocolFeeReceiver = protocolFeeReceiverAddresses[chainId]
+  }
 
   console.log(`Verifying on ${chainNames[chainId].toUpperCase()}`)
 
@@ -23,7 +31,7 @@ async function main() {
       adapterDeploys[chainId],
       requiredSenderKind,
       protocolFee,
-      protocolFeeWallet,
+      protocolFeeReceiver,
     ],
   })
 }

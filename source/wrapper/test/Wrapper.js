@@ -94,8 +94,7 @@ describe('Wrapper Unit Tests', () => {
       PROTOCOL_FEE_LIGHT,
       protocolFeeWallet.address,
       REBATE_SCALE,
-      REBATE_MAX,
-      stakingToken.address
+      REBATE_MAX
     )
     await swapERC20.deployed()
 
