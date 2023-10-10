@@ -1,6 +1,5 @@
 /* eslint-disable no-console */
 const { ethers, run } = require('hardhat')
-const stakingDeploys = require('@airswap/staking/deploys.js')
 const poolDeploys = require('@airswap/pool/deploys.js')
 const {
   chainNames,
@@ -19,7 +18,6 @@ async function main() {
   if (protocolFeeReceiverAddresses[chainId]) {
     protocolFeeReceiver = protocolFeeReceiverAddresses[chainId]
   }
-  const stakingContract = stakingDeploys[chainId]
   const protocolFee = 7
   const protocolFeeLight = 7
   const discountScale = 10
@@ -34,7 +32,6 @@ async function main() {
       protocolFeeReceiver,
       discountScale,
       discountMax,
-      stakingContract,
     ],
   })
 }

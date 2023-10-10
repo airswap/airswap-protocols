@@ -15,14 +15,16 @@ export enum ChainIds {
   BSC = 56,
   BSCTESTNET = 97,
   POLYGON = 137,
+  BASE = 8453,
   HARDHAT = 31337,
   ARBITRUM = 42161,
   FUJI = 43113,
   AVALANCHE = 43114,
   LINEAGOERLI = 59140,
   LINEA = 59144,
-  ARBITRUMGOERLI = 421613,
   MUMBAI = 80001,
+  BASEGOERLI = 84531,
+  ARBITRUMGOERLI = 421613,
 }
 
 export const mainnets: number[] = [
@@ -30,6 +32,7 @@ export const mainnets: number[] = [
   ChainIds.RSK,
   ChainIds.BSC,
   ChainIds.POLYGON,
+  ChainIds.BASE,
   ChainIds.ARBITRUM,
   ChainIds.AVALANCHE,
   ChainIds.LINEA,
@@ -39,11 +42,12 @@ export const testnets: number[] = [
   ChainIds.GOERLI,
   ChainIds.RSKTESTNET,
   ChainIds.BSCTESTNET,
-  ChainIds.MUMBAI,
-  ChainIds.ARBITRUMGOERLI,
-  ChainIds.FUJI,
   ChainIds.HARDHAT,
+  ChainIds.FUJI,
   ChainIds.LINEAGOERLI,
+  ChainIds.MUMBAI,
+  ChainIds.BASEGOERLI,
+  ChainIds.ARBITRUMGOERLI,
 ]
 
 export const chainLabels: Record<number, string> = {
@@ -54,6 +58,7 @@ export const chainLabels: Record<number, string> = {
   [ChainIds.BSC]: 'BSC',
   [ChainIds.BSCTESTNET]: 'BSCTESTNET',
   [ChainIds.POLYGON]: 'POLYGON',
+  [ChainIds.BASE]: 'BASE',
   [ChainIds.HARDHAT]: 'HARDHAT',
   [ChainIds.ARBITRUM]: 'ARBITRUM',
   [ChainIds.FUJI]: 'FUJI',
@@ -61,6 +66,7 @@ export const chainLabels: Record<number, string> = {
   [ChainIds.LINEAGOERLI]: 'LINEAGOERLI',
   [ChainIds.LINEA]: 'LINEA',
   [ChainIds.MUMBAI]: 'MUMBAI',
+  [ChainIds.BASEGOERLI]: 'BASEGOERLI',
   [ChainIds.ARBITRUMGOERLI]: 'ARBITRUMGOERLI',
 }
 
@@ -72,6 +78,7 @@ export const chainNames: Record<number, string> = {
   [ChainIds.BSC]: 'BSC',
   [ChainIds.BSCTESTNET]: 'BSC Testnet',
   [ChainIds.POLYGON]: 'Polygon',
+  [ChainIds.BASE]: 'Base',
   [ChainIds.HARDHAT]: 'Hardhat',
   [ChainIds.ARBITRUM]: 'Arbitrum',
   [ChainIds.FUJI]: 'Fuji Testnet',
@@ -79,6 +86,7 @@ export const chainNames: Record<number, string> = {
   [ChainIds.LINEAGOERLI]: 'Linea-Goerli',
   [ChainIds.LINEA]: 'Linea',
   [ChainIds.MUMBAI]: 'Mumbai Testnet',
+  [ChainIds.BASEGOERLI]: 'Base Görli',
   [ChainIds.ARBITRUMGOERLI]: 'Arbitrum Goerli',
 }
 
@@ -90,6 +98,7 @@ export const chainCurrencies: Record<number, string> = {
   [ChainIds.BSC]: 'BNB',
   [ChainIds.BSCTESTNET]: 'BNB',
   [ChainIds.POLYGON]: 'MATIC',
+  [ChainIds.BASE]: 'ETH',
   [ChainIds.HARDHAT]: 'ETH',
   [ChainIds.ARBITRUM]: 'AETH',
   [ChainIds.FUJI]: 'AVAX',
@@ -97,6 +106,7 @@ export const chainCurrencies: Record<number, string> = {
   [ChainIds.LINEAGOERLI]: 'ETH',
   [ChainIds.LINEA]: 'ETH',
   [ChainIds.MUMBAI]: 'MATIC',
+  [ChainIds.BASEGOERLI]: 'ETH',
   [ChainIds.ARBITRUMGOERLI]: 'AETH',
 }
 
@@ -108,54 +118,49 @@ export const apiUrls: Record<number, string> = {
   [ChainIds.BSC]: 'https://bsc-dataseed.binance.org',
   [ChainIds.BSCTESTNET]: 'https://data-seed-prebsc-1-s1.binance.org:8545',
   [ChainIds.POLYGON]: 'https://polygon-rpc.com',
+  [ChainIds.BASE]: 'https://mainnet.base.org',
   [ChainIds.ARBITRUM]: 'https://arb1.arbitrum.io/rpc',
   [ChainIds.FUJI]: 'https://api.avax-test.network/ext/bc/C/rpc',
   [ChainIds.AVALANCHE]: 'https://api.avax.network/ext/bc/C/rpc',
   [ChainIds.LINEAGOERLI]: 'https://rpc.goerli.linea.build',
   [ChainIds.LINEA]: 'https://linea-mainnet.infura.io/v3',
   [ChainIds.MUMBAI]: 'https://rpc-mumbai.maticvigil.com',
+  [ChainIds.BASEGOERLI]: 'https://goerli.base.org',
   [ChainIds.ARBITRUMGOERLI]: 'https://goerli-rollup.arbitrum.io/rpc',
 }
 
 export const explorerUrls: Record<number, string> = {
   [ChainIds.MAINNET]: 'https://etherscan.io',
   [ChainIds.GOERLI]: 'https://goerli.etherscan.io',
-  [ChainIds.RSK]: 'https://blockscout.com/rsk/mainnet',
-  [ChainIds.RSKTESTNET]: 'https://explorer.testnet.rsk.co',
+  [ChainIds.RSK]: 'https://rootstock.blockscout.com',
+  [ChainIds.RSKTESTNET]: 'https://rootstock-testnet.blockscout.com',
   [ChainIds.BSC]: 'https://bscscan.com',
   [ChainIds.BSCTESTNET]: 'https://testnet.bscscan.com',
   [ChainIds.POLYGON]: 'https://polygonscan.com',
+  [ChainIds.BASE]: 'https://basescan.org',
   [ChainIds.ARBITRUM]: 'https://arbiscan.io',
   [ChainIds.FUJI]: 'https://testnet.snowtrace.io',
   [ChainIds.AVALANCHE]: 'https://snowtrace.io',
   [ChainIds.LINEAGOERLI]: 'https://goerli.lineascan.build',
-  [ChainIds.LINEA]: 'https://explorer.linea.build/',
+  [ChainIds.LINEA]: 'https://lineascan.build/',
   [ChainIds.MUMBAI]: 'https://mumbai.polygonscan.com',
+  [ChainIds.BASEGOERLI]: 'https://goerli.basescan.org',
   [ChainIds.ARBITRUMGOERLI]: 'https://goerli.arbiscan.io',
 }
 
 export const explorerApiUrls: Record<number, string> = {
-  [ChainIds.RSK]: 'https://blockscout.com/rsk/mainnet/api',
-  [ChainIds.LINEAGOERLI]: 'https://api-goerli.lineascan.build/api',
-  [ChainIds.LINEA]: 'https://explorer.linea.build/api',
-  [ChainIds.ARBITRUMGOERLI]: 'https://api-goerli.arbiscan.io/',
+  [ChainIds.RSK]: 'https://rootstock.blockscout.com/api',
+  [ChainIds.RSKTESTNET]: 'https://rootstock-testnet.blockscout.com/api',
+  [ChainIds.LINEAGOERLI]: 'https://api-testnet.lineascan.build/api',
+  [ChainIds.LINEA]: 'https://api.lineascan.build/api',
+  [ChainIds.BASEGOERLI]: 'https://api-goerli.basescan.org/api',
+  [ChainIds.BASE]: 'https://api.basescan.org/api',
+  [ChainIds.ARBITRUMGOERLI]: 'https://api-goerli.arbiscan.io/api',
 }
 
 export const stakingTokenAddresses: Record<number, string> = {
   [ChainIds.MAINNET]: '0x27054b13b1b798b345b591a4d22e6562d47ea75a',
   [ChainIds.GOERLI]: '0x1a1ec25dc08e98e5e93f1104b5e5cdd298707d31',
-  [ChainIds.RSK]: '0x71070c5607358fc25e3b4aaf4fb0a580c190252a',
-  [ChainIds.RSKTESTNET]: '0x9c7005fa2f8476e2331f45f69e0930a4c9eff0c3',
-  [ChainIds.BSC]: '0x1ac0d76f11875317f8a7d791db94cdd82bd02bd1',
-  [ChainIds.BSCTESTNET]: '0xd161ddcfcc0c2d823021aa26200824efa75218d1',
-  [ChainIds.POLYGON]: '0x04bEa9FCE76943E90520489cCAb84E84C0198E29',
-  [ChainIds.ARBITRUM]: '0xa1135c2f2c7798d31459b5fdaef8613419be1008',
-  [ChainIds.FUJI]: '0x48c427e7cEf42399e9e8300fC47875772309e995',
-  [ChainIds.AVALANCHE]: '0x702d0f43edd46b77ea2d48570b02c328a20a94a1',
-  [ChainIds.LINEAGOERLI]: '0x7823e8dcc8bfc23ea3ac899eb86921f90e80f499',
-  [ChainIds.LINEA]: '0x71070c5607358fc25E3B4aaf4FB0a580c190252a',
-  [ChainIds.MUMBAI]: '0xd161ddcfcc0c2d823021aa26200824efa75218d1',
-  [ChainIds.ARBITRUMGOERLI]: '0x71070c5607358fc25e3b4aaf4fb0a580c190252a',
 }
 
 export const ownerAddresses: Record<number, string> = {

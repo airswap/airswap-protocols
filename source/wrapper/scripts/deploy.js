@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 const fs = require('fs')
+const prettier = require('prettier')
 const Confirm = require('prompt-confirm')
 const { ethers, run } = require('hardhat')
 const swapDeploys = require('@airswap/swap-erc20/deploys.js')
@@ -27,6 +28,11 @@ async function main() {
   const swapERC20Address = swapDeploys[chainId]
   const wrappedTokenAddress = wethDeploys[chainId]
 
+  if (!wrappedTokenAddress) {
+    console.log('Wrapped token not found for selected network.')
+    return
+  }
+
   console.log(`SwapERC20: ${swapERC20Address}`)
   console.log(`Wrapped: ${wrappedTokenAddress}`)
 
@@ -35,7 +41,10 @@ async function main() {
     const wrapperFactory = await ethers.getContractFactory('Wrapper')
     const wrapperContract = await wrapperFactory.deploy(
       swapERC20Address,
-      wrappedTokenAddress
+      wrappedTokenAddress,
+      {
+        gasPrice,
+      }
     )
     console.log(
       'Deploying...',
