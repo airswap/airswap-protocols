@@ -99,13 +99,8 @@ describe('SwapERC20 Integration', () => {
   })
 
   describe('Test token holder discounts', async () => {
-    it('test swap without discount', async () => {
+    it('test swap without staking', async () => {
       const order = await createSignedOrder({}, signer)
-
-      await expect(swap.connect(deployer).setStaking(staking.address)).to.emit(
-        swap,
-        'SetStaking'
-      )
 
       await expect(swap.connect(sender).swap(sender.address, ...order)).to.emit(
         swap,
@@ -115,10 +110,30 @@ describe('SwapERC20 Integration', () => {
       // Expect full 30 to be taken from signer
       expect(await signerToken.balanceOf(signer.address)).to.equal('989970')
 
-      // Expect full fee to have been sent to sender
+      // Expect full amount to have been sent to sender
       expect(await signerToken.balanceOf(sender.address)).to.equal('10000')
 
-      // Expect no fee to have been sent to fee wallet
+      // Expect full fee to have been sent to fee wallet
+      expect(await signerToken.balanceOf(protocolFeeWallet.address)).to.equal(
+        '30'
+      )
+    })
+
+    it('test swap without discount', async () => {
+      const order = await createSignedOrder({}, signer)
+
+      await expect(swap.connect(sender).swap(sender.address, ...order)).to.emit(
+        swap,
+        'SwapERC20'
+      )
+
+      // Expect full fee to be taken from signer
+      expect(await signerToken.balanceOf(signer.address)).to.equal('989970')
+
+      // Expect full amount to have been sent to sender
+      expect(await signerToken.balanceOf(sender.address)).to.equal('10000')
+
+      // Expect full fee to have been sent to fee wallet
       expect(await signerToken.balanceOf(protocolFeeWallet.address)).to.equal(
         '30'
       )
