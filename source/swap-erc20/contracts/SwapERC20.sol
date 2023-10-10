@@ -719,11 +719,15 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
   ) internal {
     // Transfer fee from signer to feeWallet
     uint256 feeAmount = (amount * protocolFee) / FEE_DIVISOR;
-    if (stakingToken != address(0) && feeAmount > 0) {
-      uint256 discountAmount = calculateDiscount(
-        IERC20(stakingToken).balanceOf(msg.sender),
-        feeAmount
-      );
+    if (feeAmount > 0) {
+      uint256 discountAmount = 0;
+      if (stakingToken != address(0)) {
+        // Only check discount if staking is set
+        discountAmount = calculateDiscount(
+          IERC20(stakingToken).balanceOf(msg.sender),
+          feeAmount
+        );
+      }
       if (discountAmount > 0) {
         // Transfer fee from signer to sender
         IERC20(sourceToken).safeTransferFrom(
