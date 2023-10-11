@@ -24,14 +24,15 @@
     "test": "hardhat test",
     "test:ci": "hardhat",
     "deploy": "hardhat run ./scripts/deploy.js",
-    "verify": "hardhat run ./scripts/verify.js"
+    "verify": "hardhat run ./scripts/verify.js",
+    "ownership": "hardhat run ./scripts/ownership.js"
   },
   "dependencies": {
     "@airswap/swap-erc20": "4.1.4",
     "@openzeppelin/contracts": "^4.8.3"
   },
   "devDependencies": {
-    "@airswap/constants": "^4.1.1",
+    "@airswap/constants": "^4.1.2",
     "@airswap/utils": "^4.1.4",
     "@airswap/types": "^4.1.1",
     "@uniswap/v2-periphery": "^1.1.0-beta.0",

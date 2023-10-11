@@ -16,7 +16,7 @@
     "lint:fix": "yarn eslint . --ext .js,.ts --fix",
     "test": "lerna run test",
     "test:ci": "lerna run test:ci",
-    "ownership:check": "node ./scripts/ownership.js check",
+    "ownership": "node ./scripts/ownership-report.js",
     "prepare": "husky install",
     "pretty:check": "prettier --check \"./**/*.sol\" \"./**/*.ts\" \"./**/*.js\" \"./**/*.json\"",
     "pretty:fix": "prettier --write \"./**/*.sol\" \"./**/*.ts\" \"./**/*.js\" \"./**/*.json\""

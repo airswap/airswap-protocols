@@ -1,9 +1,9 @@
 const { check } = require('../../../scripts/ownership-update')
-const { Pool__factory } = require('@airswap/pool/typechain/factories/contracts')
-const poolDeploys = require('../deploys.js')
+const { Swap__factory } = require('@airswap/swap/typechain/factories/contracts')
+const deploys = require('../deploys.js')
 
 async function main() {
-  await check('Pool', Pool__factory, poolDeploys)
+  await check('Swap', Swap__factory, deploys)
 }
 
 main()
