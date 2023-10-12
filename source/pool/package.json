@@ -23,7 +23,8 @@
     "test:ci": "hardhat test",
     "deploy": "hardhat run ./scripts/deploy.js",
     "verify": "hardhat run ./scripts/verify.js",
-    "ownership": "hardhat run ./scripts/ownership.js"
+    "ownership": "hardhat run ./scripts/ownership.js",
+    "migrate": "hardhat run ./scripts/migrate.js"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.8.3"
