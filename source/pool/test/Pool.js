@@ -485,9 +485,7 @@ describe('Pool Unit', () => {
       await await pool.connect(deployer).setAdmin(alice.address)
 
       const root = getRoot(tree)
-      await pool
-        .connect(alice)
-        .enableAndSetClaimed(TREE, root, [bob.address], [BOB_SCORE])
+      await pool.connect(alice).enableAndSetClaimed(TREE, root, [bob.address])
 
       const proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
       await expect(
@@ -511,9 +509,7 @@ describe('Pool Unit', () => {
 
       const root = getRoot(tree)
       await expect(
-        pool
-          .connect(bob)
-          .enableAndSetClaimed(TREE, root, [bob.address], [BOB_SCORE])
+        pool.connect(bob).enableAndSetClaimed(TREE, root, [bob.address])
       ).to.be.revertedWith('Unauthorized')
     })
 

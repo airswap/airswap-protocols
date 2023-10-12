@@ -134,8 +134,7 @@ contract Pool is IPool, Ownable2Step {
   function enableAndSetClaimed(
     bytes32 _tree,
     bytes32 _root,
-    address[] memory _accounts,
-    uint256[] memory _values
+    address[] memory _accounts
   ) external override multiAdmin {
     // Enable the tree if not yet enabled
     if (rootsByTree[_tree] == 0) {
@@ -146,7 +145,7 @@ contract Pool is IPool, Ownable2Step {
     for (uint256 i = 0; i < _accounts.length; i++) {
       if (claimed[_tree][_accounts[i]] == false) {
         claimed[_tree][_accounts[i]] = true;
-        emit UseClaim(_accounts[i], _tree, _values[i]);
+        emit UseClaim(_accounts[i], _tree);
       }
     }
   }
@@ -182,7 +181,7 @@ contract Pool is IPool, Ownable2Step {
 
       _totalValue = _totalValue + _claim.value;
       claimed[_claim.tree][msg.sender] = true;
-      emit UseClaim(msg.sender, _claim.tree, _claim.value);
+      emit UseClaim(msg.sender, _claim.tree);
     }
 
     // Determine withdrawable amount given total value
@@ -191,7 +190,7 @@ contract Pool is IPool, Ownable2Step {
 
     // Transfer withdrawable amount to recipient
     IERC20(_token).safeTransfer(_recipient, _amount);
-    emit Withdraw(msg.sender, _recipient, _token, _amount);
+    emit Withdraw(msg.sender, _recipient, _token, _totalValue, _amount);
   }
 
   /**

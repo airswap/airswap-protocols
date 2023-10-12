@@ -16,11 +16,12 @@ interface IPool {
   event SetScale(uint256 scale);
   event UnsetAdmin(address indexed admin);
 
-  event UseClaim(address account, bytes32 tree, uint256 points);
+  event UseClaim(address indexed account, bytes32 indexed tree);
   event Withdraw(
     address indexed account,
     address indexed recipient,
     address indexed token,
+    uint256 points,
     uint256 amount
   );
 
@@ -50,8 +51,7 @@ interface IPool {
   function enableAndSetClaimed(
     bytes32 _tree,
     bytes32 _root,
-    address[] memory _accounts,
-    uint256[] memory _values
+    address[] memory _accounts
   ) external;
 
   function withdraw(
