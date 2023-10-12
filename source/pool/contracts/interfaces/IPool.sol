@@ -21,7 +21,7 @@ interface IPool {
     address indexed account,
     address indexed recipient,
     address indexed token,
-    uint256 points,
+    uint256 value,
     uint256 amount
   );
 
