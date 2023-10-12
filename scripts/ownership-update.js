@@ -47,15 +47,14 @@ module.exports = {
       if (await prompt.run()) {
         const tx = await contract.transferOwnership(ownerAddresses[chainId])
         console.log('Updating...', getReceiptUrl(chainId, tx.hash), '\n')
-        await tx.wait(CONFIRMATIONS).then((receipt) => {
-          if (receipt.logs[0].topics[0] === TRANSFER_STARTED) {
-            console.log(
-              `✔ Ownership transfer started but must be accepted by new owner.\n`
-            )
-          } else {
-            console.log(`✔ Ownership transfer complete.\n`)
-          }
-        })
+        const receipt = await tx.wait(CONFIRMATIONS)
+        if (receipt.logs[0].topics[0] === TRANSFER_STARTED) {
+          console.log(
+            `✔ Ownership transfer started but must be accepted by new owner.\n`
+          )
+        } else {
+          console.log(`✔ Ownership transfer complete.\n`)
+        }
       }
     }
   },
