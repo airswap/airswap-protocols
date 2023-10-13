@@ -33,7 +33,7 @@
   },
   "devDependencies": {
     "@airswap/constants": "^4.1.2",
-    "@airswap/utils": "^4.1.4",
+    "@airswap/utils": "^4.1.5",
     "@airswap/types": "^4.1.1",
     "@uniswap/v2-periphery": "^1.1.0-beta.0",
     "prompt-confirm": "^2.0.4"
