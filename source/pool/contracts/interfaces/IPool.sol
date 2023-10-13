@@ -11,16 +11,17 @@ interface IPool {
 
   event DrainTo(address[] tokens, address dest);
   event Enable(bytes32 tree, bytes32 root);
-  event SetAdmin(address admin);
+  event SetAdmin(address indexed admin);
   event SetMax(uint256 max);
   event SetScale(uint256 scale);
-  event UnsetAdmin(address admin);
+  event UnsetAdmin(address indexed admin);
 
-  event UseClaim(address account, bytes32 tree);
+  event UseClaim(address indexed account, bytes32 indexed tree);
   event Withdraw(
-    address account,
-    address recipient,
-    address token,
+    address indexed account,
+    address indexed recipient,
+    address indexed token,
+    uint256 value,
     uint256 amount
   );
 

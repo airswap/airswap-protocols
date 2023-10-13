@@ -6,6 +6,7 @@ const {
   ownerAddresses,
   apiUrls,
 } = require('@airswap/constants')
+const { ADDRESS_ZERO } = require('@airswap/constants')
 
 const contracts = [
   ['pool', 'Pool'],
@@ -35,7 +36,16 @@ async function main() {
         if (deploys[chainId]) {
           const contract = factory.connect(deploys[chainId], deployer)
           const currentOwner = await contract.owner()
-          return [name[0], name[1], currentOwner]
+          let pendingOwner = null
+          if (typeof contract.pendingOwner === 'function') {
+            pendingOwner = await contract.pendingOwner()
+          }
+          return [
+            name[0],
+            name[1],
+            currentOwner,
+            pendingOwner !== ADDRESS_ZERO ? pendingOwner : null,
+          ]
         }
         return [name[0], name[1]]
       })
@@ -55,6 +65,9 @@ async function main() {
         let label = '· Correct owner'
         if (owner.value[2] !== intendedOwner) {
           label = `· Incorrect owner: ${owner.value[2]}`
+        }
+        if (owner.value[3]) {
+          label += ` · Pending acceptance by: ${owner.value[3]}`
         }
         console.log(
           owner.value[2] === intendedOwner ? '✔' : '✘',

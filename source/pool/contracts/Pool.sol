@@ -190,7 +190,7 @@ contract Pool is IPool, Ownable2Step {
 
     // Transfer withdrawable amount to recipient
     IERC20(_token).safeTransfer(_recipient, _amount);
-    emit Withdraw(msg.sender, _recipient, _token, _amount);
+    emit Withdraw(msg.sender, _recipient, _token, _totalValue, _amount);
   }
 
   /**
