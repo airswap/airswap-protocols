@@ -24,13 +24,15 @@
     "deploy": "hardhat run ./scripts/deploy.js",
     "verify": "hardhat run ./scripts/verify.js",
     "ownership": "hardhat run ./scripts/ownership.js",
-    "migrate": "hardhat run ./scripts/migrate.js"
+    "migrate": "hardhat run ./scripts/migrate.js",
+    "balances": "hardhat run ./scripts/balances.js"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.8.3"
   },
   "devDependencies": {
     "@airswap/constants": "^4.1.2",
+    "@airswap/metadata": "^4.1.6",
     "@airswap/types": "^4.1.1",
     "@airswap/utils": "^4.1.5",
     "prompt-confirm": "^2.0.4"
