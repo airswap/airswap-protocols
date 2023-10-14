@@ -89,6 +89,15 @@ export async function getKnownTokens(
       }
     }
   }
+  const hasToken: any = {}
+  let length = tokens.length
+  while (length--) {
+    if (hasToken[tokens[length].address.toLowerCase()]) {
+      tokens.splice(length, 1)
+    } else {
+      hasToken[tokens[length].address.toLowerCase()] = 1
+    }
+  }
   return { tokens, errors }
 }
 

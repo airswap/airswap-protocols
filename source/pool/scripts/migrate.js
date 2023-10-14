@@ -8,8 +8,8 @@ const { abi } = require('./migrate-abis/4-1-1.js')
 const deploys = require('../deploys.js')
 
 const CONFIRMATIONS = 2
-const PREVIOUS_POOL = '0xa55CDCe4F6300D57831b2792c45E55a899D8e2a4'
-const NEW_POOL = '0xEEcD248D977Fd4D392915b4AdeF8154BA3aE9c02'
+const PREVIOUS_POOL = '0xEEcD248D977Fd4D392915b4AdeF8154BA3aE9c02'
+const NEW_POOL = '0xbbcec987E4C189FCbAB0a2534c77b3ba89229F11'
 
 async function main() {
   const [account] = await ethers.getSigners()
