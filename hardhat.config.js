@@ -82,6 +82,18 @@ module.exports = {
       url: apiUrls[ChainIds.BASE],
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
     },
+    telos_testnet: {
+      url: apiUrls[ChainIds.TELOSTESTNET],
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
+    },
+    telos: {
+      url: apiUrls[ChainIds.TELOS],
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
+    },
+    sepolia: {
+      url: apiUrls[ChainIds.SEPOLIA] + '/' + process.env.INFURA_API_KEY,
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
+    },
   },
   solidity: {
     compilers: [
@@ -123,6 +135,7 @@ module.exports = {
       basegoerli: process.env.BASESCAN_API_KEY,
       rsk: process.env.BLOCKSCOUT_API_KEY,
       rsktestnet: process.env.BLOCKSCOUT_API_KEY,
+      sepolia: process.env.ETHERSCAN_API_KEY,
     },
     customChains: [
       {
