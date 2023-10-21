@@ -1,4 +1,4 @@
-const { check } = require('../../../scripts/ownership-update')
+const { check } = require('../../../scripts/owners-update')
 const { Swap__factory } = require('@airswap/swap/typechain/factories/contracts')
 const deploys = require('../deploys.js')
 

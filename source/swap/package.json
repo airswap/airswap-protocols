@@ -26,7 +26,7 @@
     "verify": "hardhat run ./scripts/verify.js",
     "deploy-adapters": "hardhat run ./scripts/deploy-adapters.js",
     "verify-adapters": "hardhat run ./scripts/verify-adapters.js",
-    "ownership": "hardhat run ./scripts/ownership.js"
+    "owners": "hardhat run ./scripts/owner.js"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.8.3"

@@ -43,7 +43,7 @@ module.exports = {
     } else {
       console.log(`\n✘ Current owner does not match intended owner.\n`)
       console.log(`Gas price: ${gasPrice / 10 ** 9} gwei\n`)
-      const prompt = new Confirm(`Transfer ownership to intended owner?`)
+      const prompt = new Confirm(`Transfer owners to intended owner?`)
       if (await prompt.run()) {
         const tx = await contract.transferOwnership(ownerAddresses[chainId])
         console.log('Updating...', getReceiptUrl(chainId, tx.hash), '\n')
