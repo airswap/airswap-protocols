@@ -153,7 +153,7 @@ export const explorerUrls: Record<number, string> = {
   [ChainIds.RSK]: 'https://rootstock.blockscout.com',
   [ChainIds.RSKTESTNET]: 'https://rootstock-testnet.blockscout.com',
   [ChainIds.TELOS]: 'https://teloscan.io',
-  [ChainIds.TELOSTESTNET]: 'https://testnet.telos.net/v2/explore/',
+  [ChainIds.TELOSTESTNET]: 'https://testnet.teloscan.io',
   [ChainIds.BSC]: 'https://bscscan.com',
   [ChainIds.BSCTESTNET]: 'https://testnet.bscscan.com',
   [ChainIds.POLYGON]: 'https://polygonscan.com',

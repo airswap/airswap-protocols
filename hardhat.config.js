@@ -82,7 +82,7 @@ module.exports = {
       url: apiUrls[ChainIds.BASE],
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
     },
-    telos_testnet: {
+    telostestnet: {
       url: apiUrls[ChainIds.TELOSTESTNET],
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
     },
