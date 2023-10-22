@@ -234,7 +234,7 @@ export class Server extends TypedEmitter<ServerEvents> {
   public async getPricingERC20(
     pairs: { baseToken: string; quoteToken: string }[]
   ): Promise<Pricing[]> {
-    return this.callRPCMethod<Pricing[]>('getPricingERC20', [pairs])
+    return this.callRPCMethod<Pricing[]>('getPricingERC20', pairs)
   }
 
   public async getAllPricingERC20(): Promise<Pricing[]> {
