@@ -249,9 +249,9 @@ describe('WebSocketServer', () => {
 
     // Ensure subscribe method is correct format.
     const onSubscribe = (socket, data) => {
-      expect(data).to.be.a.JSONRpcRequest('subscribePricingERC20', [
-        samplePairs,
-      ])
+      expect(data).to.be.a.JSONRpcRequest('subscribePricingERC20', {
+        pairs: samplePairs,
+      })
       socket.send(JSON.stringify(createResponse(data.id, samplePricing)))
     }
     mockServer.setNextMessageCallback(onSubscribe, true)
@@ -336,9 +336,9 @@ describe('WebSocketServer', () => {
   it('should call unsubscribe with the correct parameters', async () => {
     const server = await Server.at(url)
     const onUnsubscribe = (socket, data) => {
-      expect(data).to.be.a.JSONRpcRequest('unsubscribePricingERC20', [
-        samplePairs,
-      ])
+      expect(data).to.be.a.JSONRpcRequest('unsubscribePricingERC20', {
+        pairs: samplePairs,
+      })
       socket.send(JSON.stringify(createResponse(data.id, true)))
     }
     mockServer.setNextMessageCallback(onUnsubscribe, true)
