@@ -53,6 +53,7 @@ chai.use(sinonChai)
 function mockHttpServer(api) {
   api.post('/').reply(200, async (uri, body) => {
     const params = body['params']
+    let order
     let res
     switch (body['method']) {
       case 'getProtocols':
@@ -62,27 +63,37 @@ function mockHttpServer(api) {
         res = [USDC, USDT]
         break
       case 'getSignerSideOrderERC20':
-        res = createOrderERC20({
+        order = createOrderERC20({
           signerToken: params.signerToken,
           senderToken: params.senderToken,
           senderAmount: params.senderAmount,
           senderWallet: params.senderWallet,
         })
+        res = {
+          ...order,
+          ...(await createOrderERC20Signature(
+            order,
+            wallet.privateKey,
+            params.swapContract,
+            ChainIds.MAINNET
+          )),
+          chainId: ChainIds.MAINNET,
+          swapContract: params.swapContract,
+        }
         break
       case 'getOrdersERC20':
-        const unsignedOrderERC20 = createOrderERC20({})
-        const signatureERC20 = await createOrderERC20Signature(
-          unsignedOrderERC20,
-          wallet.privateKey,
-          ADDRESS_ZERO,
-          1
-        )
+        order = createOrderERC20({})
         res = {
           orders: [
             {
               order: {
-                ...unsignedOrderERC20,
-                ...signatureERC20,
+                ...order,
+                ...(await createOrderERC20Signature(
+                  order,
+                  wallet.privateKey,
+                  ADDRESS_ZERO,
+                  ChainIds.MAINNET
+                )),
                 chainId: ChainIds.MAINNET,
                 swapContract: ADDRESS_ZERO,
               },

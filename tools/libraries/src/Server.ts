@@ -197,8 +197,12 @@ export class Server extends TypedEmitter<ServerEvents> {
       signerToken,
       senderToken,
       senderWallet,
-      minExpiry,
-      proxyingFor,
+    }
+    if (minExpiry) {
+      params.minExpiry = minExpiry
+    }
+    if (proxyingFor) {
+      params.proxyingFor = proxyingFor
     }
     return this.callRPCMethod<OrderERC20>(
       'getSignerSideOrderERC20',
@@ -210,7 +214,9 @@ export class Server extends TypedEmitter<ServerEvents> {
           `Server response differs from request params: ${errors}`
         )
       } else if (!isValidOrderERC20(order)) {
-        throw new Error(`Server responded with invalid order: ${order}`)
+        throw new Error(
+          `Server responded with invalid order: ${JSON.stringify(order)}`
+        )
       }
       return orderERC20PropsToStrings(order)
     })
@@ -232,8 +238,12 @@ export class Server extends TypedEmitter<ServerEvents> {
       signerToken,
       senderToken,
       senderWallet,
-      minExpiry,
-      proxyingFor,
+    }
+    if (minExpiry) {
+      params.minExpiry = minExpiry
+    }
+    if (proxyingFor) {
+      params.proxyingFor = proxyingFor
     }
     return this.callRPCMethod<OrderERC20>(
       'getSenderSideOrderERC20',
@@ -245,7 +255,9 @@ export class Server extends TypedEmitter<ServerEvents> {
           `Server response differs from request params: ${errors}`
         )
       } else if (!isValidOrderERC20(order)) {
-        throw new Error(`Server responded with invalid order: ${order}`)
+        throw new Error(
+          `Server responded with invalid order: ${JSON.stringify(order)}`
+        )
       }
       return orderERC20PropsToStrings(order)
     })
@@ -508,7 +520,8 @@ export class Server extends TypedEmitter<ServerEvents> {
       if (
         typeof flat === 'object' &&
         param in flat &&
-        flat[param].toLowerCase() !== params[param].toLowerCase()
+        String(flat[param]).toLowerCase() !==
+          String(params[param]).toLowerCase()
       ) {
         errors.push(param)
       }
