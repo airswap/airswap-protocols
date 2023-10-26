@@ -12,6 +12,12 @@ export default {
   [ChainIds.RSK]: [
     'https://raw.githubusercontent.com/enkryptcom/dynamic-data/main/tokenlists/rsk.json',
   ],
+  [ChainIds.TELOS]: [
+    'https://raw.githubusercontent.com/telosnetwork/token-list/main/telosevm.tokenlist.json',
+  ],
+  [ChainIds.TELOSTESTNET]: [
+    'https://raw.githubusercontent.com/telosnetwork/token-list/main/telosevm.tokenlist.json',
+  ],
   [ChainIds.BSC]: [
     'https://raw.githubusercontent.com/ApeSwapFinance/apeswap-token-lists/main/lists/apeswap.json',
     'https://tokens.pancakeswap.finance/pancakeswap-top-100.json',
