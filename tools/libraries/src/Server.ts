@@ -267,10 +267,13 @@ export class Server extends TypedEmitter<ServerEvents> {
     pairs: { baseToken: string; quoteToken: string }[],
     minExpiry?: string
   ): Promise<Pricing[]> {
-    return this.callRPCMethod<Pricing[]>('getPricingERC20', {
+    const params: any = {
       pairs,
-      minExpiry,
-    })
+    }
+    if (minExpiry) {
+      params.minExpiry = minExpiry
+    }
+    return this.callRPCMethod<Pricing[]>('getPricingERC20', params)
   }
 
   public async getAllPricingERC20(): Promise<Pricing[]> {
