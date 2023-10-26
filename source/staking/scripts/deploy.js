@@ -1,17 +1,22 @@
 /* eslint-disable no-console */
 const fs = require('fs')
+const prettier = require('prettier')
 const Confirm = require('prompt-confirm')
 const { ethers, run } = require('hardhat')
 const {
   chainNames,
   chainLabels,
   stakingTokenAddresses,
+  ChainIds,
 } = require('@airswap/constants')
 const { getReceiptUrl } = require('@airswap/utils')
 const stakingDeploys = require('../deploys.js')
+const stakingBlocks = require('../deploys-blocks.js')
 
 async function main() {
   await run('compile')
+  const config = await prettier.resolveConfig('../deploys.js')
+
   const [deployer] = await ethers.getSigners()
   const gasPrice = await deployer.getGasPrice()
   const chainId = await deployer.getChainId()
@@ -50,14 +55,28 @@ async function main() {
       getReceiptUrl(chainId, stakingContract.deployTransaction.hash)
     )
     await stakingContract.deployed()
-    console.log(`Deployed: ${stakingContract.address}`)
 
     stakingDeploys[chainId] = stakingContract.address
     fs.writeFileSync(
       './deploys.js',
-      `module.exports = ${JSON.stringify(stakingDeploys, null, '\t')}`
+      prettier.format(
+        `module.exports = ${JSON.stringify(stakingDeploys, null, '\t')}`,
+        { ...config, parser: 'babel' }
+      )
     )
-    console.log('Updated deploys.js')
+    stakingBlocks[chainId] = (
+      await stakingContract.deployTransaction.wait()
+    ).blockNumber
+    fs.writeFileSync(
+      './deploys-blocks.js',
+      prettier.format(
+        `module.exports = ${JSON.stringify(stakingBlocks, null, '\t')}`,
+        { ...config, parser: 'babel' }
+      )
+    )
+    console.log(
+      `Deployed: ${stakingDeploys[chainId]} @ ${stakingBlocks[chainId]}`
+    )
 
     console.log(
       `\nVerify with "yarn verify --network ${chainLabels[

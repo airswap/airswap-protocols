@@ -1,5 +1,4 @@
 import { ethers } from 'ethers'
-import { ChainIds } from '@airswap/constants'
 
 import { Pool__factory } from '@airswap/pool/typechain/factories/contracts'
 import { Staking__factory } from '@airswap/staking/typechain/factories/contracts'
@@ -43,10 +42,10 @@ export class Contract {
     this.deployedBlocks = deployedBlocks
     this.factory = factory
   }
-  public getAddress(chainId: ChainIds): string | null {
+  public getAddress(chainId: number): string | null {
     return this.addresses[chainId] || null
   }
-  public getBlock(chainId: ChainIds): number {
+  public getBlock(chainId: number): number {
     return this.deployedBlocks[chainId] || 0
   }
   public getContract(

@@ -11,6 +11,7 @@ import {
   createOrderSignature,
   isValidFullOrder,
   isValidFullOrderERC20,
+  isValidPricingERC20,
 } from '@airswap/utils'
 import { ADDRESS_ZERO, ChainIds, Protocols } from '@airswap/constants'
 
@@ -23,7 +24,7 @@ import {
   MockSocketServer,
   nextEvent,
 } from './test-utils'
-import { OrderERC20, SortField, SortOrder } from '@airswap/types'
+import { OrderERC20, SortField, SortOrder, Levels } from '@airswap/types'
 import { JsonRpcErrorCodes } from '@airswap/jsonrpc-client-websocket'
 
 addJSONRPCAssertions()
@@ -53,6 +54,7 @@ chai.use(sinonChai)
 function mockHttpServer(api) {
   api.post('/').reply(200, async (uri, body) => {
     const params = body['params']
+    let order
     let res
     switch (body['method']) {
       case 'getProtocols':
@@ -61,28 +63,53 @@ function mockHttpServer(api) {
       case 'getTokens':
         res = [USDC, USDT]
         break
+      case 'getPricingERC20':
+        const levels: Levels = [
+          ['250', '0.5'],
+          ['500', '0.6'],
+          ['750', '0.7'],
+        ]
+        res = [
+          {
+            baseToken: ADDRESS_ZERO,
+            quoteToken: ADDRESS_ZERO,
+            bid: levels,
+            ask: levels,
+          },
+        ]
+        break
       case 'getSignerSideOrderERC20':
-        res = createOrderERC20({
+        order = createOrderERC20({
           signerToken: params.signerToken,
           senderToken: params.senderToken,
           senderAmount: params.senderAmount,
           senderWallet: params.senderWallet,
         })
+        res = {
+          ...order,
+          ...(await createOrderERC20Signature(
+            order,
+            wallet.privateKey,
+            params.swapContract,
+            ChainIds.MAINNET
+          )),
+          chainId: ChainIds.MAINNET,
+          swapContract: params.swapContract,
+        }
         break
       case 'getOrdersERC20':
-        const unsignedOrderERC20 = createOrderERC20({})
-        const signatureERC20 = await createOrderERC20Signature(
-          unsignedOrderERC20,
-          wallet.privateKey,
-          ADDRESS_ZERO,
-          1
-        )
+        order = createOrderERC20({})
         res = {
           orders: [
             {
               order: {
-                ...unsignedOrderERC20,
-                ...signatureERC20,
+                ...order,
+                ...(await createOrderERC20Signature(
+                  order,
+                  wallet.privateKey,
+                  ADDRESS_ZERO,
+                  ChainIds.MAINNET
+                )),
                 chainId: ChainIds.MAINNET,
                 swapContract: ADDRESS_ZERO,
               },
@@ -125,6 +152,15 @@ describe('HTTPServer', () => {
       const result = await server.getTokens()
       expect(result[0]).to.be.equal(USDC)
       expect(result[1]).to.be.equal(USDT)
+    })
+  fancy
+    .nock('https://' + URL, mockHttpServer)
+    .it('Server getPricingERC20()', async () => {
+      const server = await Server.at(URL)
+      const result = await server.getPricingERC20([
+        { baseToken: ADDRESS_ZERO, quoteToken: ADDRESS_ZERO },
+      ])
+      expect(isValidPricingERC20(result)).to.be.true
     })
   fancy
     .nock('https://' + URL, mockHttpServer)
@@ -249,9 +285,9 @@ describe('WebSocketServer', () => {
 
     // Ensure subscribe method is correct format.
     const onSubscribe = (socket, data) => {
-      expect(data).to.be.a.JSONRpcRequest('subscribePricingERC20', [
-        samplePairs,
-      ])
+      expect(data).to.be.a.JSONRpcRequest('subscribePricingERC20', {
+        pairs: samplePairs,
+      })
       socket.send(JSON.stringify(createResponse(data.id, samplePricing)))
     }
     mockServer.setNextMessageCallback(onSubscribe, true)
@@ -336,9 +372,9 @@ describe('WebSocketServer', () => {
   it('should call unsubscribe with the correct parameters', async () => {
     const server = await Server.at(url)
     const onUnsubscribe = (socket, data) => {
-      expect(data).to.be.a.JSONRpcRequest('unsubscribePricingERC20', [
-        samplePairs,
-      ])
+      expect(data).to.be.a.JSONRpcRequest('unsubscribePricingERC20', {
+        pairs: samplePairs,
+      })
       socket.send(JSON.stringify(createResponse(data.id, true)))
     }
     mockServer.setNextMessageCallback(onUnsubscribe, true)

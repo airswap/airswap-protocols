@@ -8,6 +8,7 @@ import {
 import { Levels, FullOrderERC20, UnsignedOrderERC20 } from '@airswap/types'
 
 import {
+  isValidPricingERC20,
   isValidFullOrderERC20,
   isValidOrderERC20,
   createOrderERC20Signature,
@@ -65,7 +66,7 @@ describe('Utils', async () => {
     expect(signerWallet.toLowerCase()).to.equal(wallet.address.toLowerCase())
   })
 
-  it('isValidFullOrder : returns true only if fields are present', async () => {
+  it('checks isValidFullOrder', async () => {
     const unsignedOrder: UnsignedOrderERC20 = {
       nonce: Date.now().toString(),
       expiry: Math.round(Date.now() / 1000 + SECONDS_IN_DAY).toString(),
@@ -129,6 +130,19 @@ describe('Utils', async () => {
     ['500', '0.6'],
     ['750', '0.7'],
   ]
+
+  it('checks isValidPricingERC20', async () => {
+    expect(
+      isValidPricingERC20([
+        {
+          baseToken: ADDRESS_ZERO,
+          quoteToken: ADDRESS_ZERO,
+          bid: levels,
+          ask: levels,
+        },
+      ])
+    ).to.be.true
+  })
 
   it('Calculates cost from levels', async () => {
     expect(calculateCostFromLevels('200', levels)).to.equal('100')

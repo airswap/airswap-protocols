@@ -11,7 +11,12 @@ import {
   WebsocketReadyStates,
 } from '@airswap/jsonrpc-client-websocket'
 
-import { parseUrl, orderERC20PropsToStrings } from '@airswap/utils'
+import {
+  parseUrl,
+  orderERC20PropsToStrings,
+  isValidOrderERC20,
+  isValidPricingERC20,
+} from '@airswap/utils'
 import {
   FullOrder,
   FullOrderERC20,
@@ -182,6 +187,7 @@ export class Server extends TypedEmitter<ServerEvents> {
     signerToken: string,
     senderToken: string,
     senderWallet: string,
+    minExpiry?: string,
     proxyingFor?: string
   ): Promise<OrderERC20> {
     this.requireRFQERC20Support()
@@ -193,15 +199,23 @@ export class Server extends TypedEmitter<ServerEvents> {
       senderToken,
       senderWallet,
     }
+    if (minExpiry) {
+      params.minExpiry = minExpiry
+    }
     if (proxyingFor) {
       params.proxyingFor = proxyingFor
     }
-    return this.callRPCMethod<OrderERC20>(
+    const order = await this.callRPCMethod<OrderERC20>(
       'getSignerSideOrderERC20',
       params
-    ).then((order) => {
-      return orderERC20PropsToStrings(order)
-    })
+    )
+    const errors = this.compare(params, order)
+    if (errors.length) {
+      throw new Error(`Server response differs from request params: ${errors}`)
+    } else if (!isValidOrderERC20(order)) {
+      throw new Error(`Invalid order response: ${JSON.stringify(order)}`)
+    }
+    return orderERC20PropsToStrings(order)
   }
 
   public async getSenderSideOrderERC20(
@@ -209,6 +223,7 @@ export class Server extends TypedEmitter<ServerEvents> {
     signerToken: string,
     senderToken: string,
     senderWallet: string,
+    minExpiry?: string,
     proxyingFor?: string
   ): Promise<OrderERC20> {
     this.requireRFQERC20Support()
@@ -220,37 +235,70 @@ export class Server extends TypedEmitter<ServerEvents> {
       senderToken,
       senderWallet,
     }
+    if (minExpiry) {
+      params.minExpiry = minExpiry
+    }
     if (proxyingFor) {
       params.proxyingFor = proxyingFor
     }
-    return this.callRPCMethod<OrderERC20>(
+    const order = await this.callRPCMethod<OrderERC20>(
       'getSenderSideOrderERC20',
       params
-    ).then((order) => {
-      return orderERC20PropsToStrings(order)
-    })
+    )
+    const errors = this.compare(params, order)
+    if (errors.length) {
+      throw new Error(`Server response differs from request params: ${errors}`)
+    } else if (!isValidOrderERC20(order)) {
+      throw new Error(`Invalid order response: ${JSON.stringify(order)}`)
+    }
+    return orderERC20PropsToStrings(order)
   }
 
   public async getPricingERC20(
-    pairs: { baseToken: string; quoteToken: string }[]
+    pairs: { baseToken: string; quoteToken: string }[],
+    minExpiry?: string
   ): Promise<Pricing[]> {
-    return this.callRPCMethod<Pricing[]>('getPricingERC20', [pairs])
+    const params: any = {
+      pairs,
+    }
+    if (minExpiry) {
+      params.minExpiry = minExpiry
+    }
+    const pricing = await this.callRPCMethod<Pricing[]>(
+      'getPricingERC20',
+      params
+    )
+    if (!isValidPricingERC20(pricing)) {
+      throw new Error(`Invalid pricing response: ${JSON.stringify(pricing)}`)
+    }
+    return pricing
   }
 
   public async getAllPricingERC20(): Promise<Pricing[]> {
-    return this.callRPCMethod<Pricing[]>('getAllPricingERC20', [])
+    const pricing = await this.callRPCMethod<Pricing[]>(
+      'getAllPricingERC20',
+      []
+    )
+    if (!isValidPricingERC20(pricing)) {
+      throw new Error(`Invalid pricing response: ${JSON.stringify(pricing)}`)
+    }
+    return pricing
   }
 
   /**
    * Protocols.LastLookERC20
    */
   public async subscribePricingERC20(
-    pairs: { baseToken: string; quoteToken: string }[]
+    pairs: { baseToken: string; quoteToken: string }[],
+    minExpiry?: string
   ): Promise<Pricing[]> {
     this.requireLastLookERC20Support()
     const pricing = await this.callRPCMethod<Pricing[]>(
       'subscribePricingERC20',
-      [pairs]
+      {
+        pairs,
+        minExpiry,
+      }
     )
     this.emit('pricing-erc20', pricing)
     return pricing
@@ -265,7 +313,9 @@ export class Server extends TypedEmitter<ServerEvents> {
     pairs: { baseToken: string; quoteToken: string }[]
   ): Promise<boolean> {
     this.requireLastLookERC20Support()
-    return this.callRPCMethod<boolean>('unsubscribePricingERC20', [pairs])
+    return this.callRPCMethod<boolean>('unsubscribePricingERC20', {
+      pairs,
+    })
   }
 
   public async unsubscribeAllPricingERC20(): Promise<boolean> {
@@ -478,7 +528,8 @@ export class Server extends TypedEmitter<ServerEvents> {
       if (
         typeof flat === 'object' &&
         param in flat &&
-        flat[param].toLowerCase() !== params[param].toLowerCase()
+        String(flat[param]).toLowerCase() !==
+          String(params[param]).toLowerCase()
       ) {
         errors.push(param)
       }
@@ -568,15 +619,7 @@ export class Server extends TypedEmitter<ServerEvents> {
           } else if (serverError) {
             reject(serverError)
           } else {
-            const errors = this.compare(params, result)
-            if (errors.length) {
-              reject({
-                code: -1,
-                message: `Server response differs from request params: ${errors}`,
-              })
-            } else {
-              resolve(result)
-            }
+            resolve(result)
           }
         }
       )
@@ -597,7 +640,7 @@ export class Server extends TypedEmitter<ServerEvents> {
    */
   private async callRPCMethod<T>(
     method: string,
-    params: Record<string, string> | Array<any>
+    params: Record<string, any> | Array<any>
   ): Promise<T> {
     if (
       this.transportProtocol === 'http' ||
