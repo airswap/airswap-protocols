@@ -280,9 +280,7 @@ export class Server extends TypedEmitter<ServerEvents> {
       []
     )
     if (!isValidPricingERC20(pricing)) {
-      throw new Error(
-        `Server responded with invalid pricing: ${JSON.stringify(pricing)}`
-      )
+      throw new Error(`Invalid pricing response: ${JSON.stringify(pricing)}`)
     }
     return pricing
   }
