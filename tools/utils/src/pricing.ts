@@ -4,6 +4,7 @@ import { ethers } from 'ethers'
 import { Levels, Formula, Pricing } from '@airswap/types'
 
 export function isValidPricingERC20(pricing: Pricing[]): boolean {
+  if (!pricing || !pricing.length) return false
   let length = pricing.length
   while (length--) {
     if (!isValidPricingERC20Pair(pricing[length])) return false

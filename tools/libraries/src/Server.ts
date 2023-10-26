@@ -15,6 +15,7 @@ import {
   parseUrl,
   orderERC20PropsToStrings,
   isValidOrderERC20,
+  isValidPricingERC20,
 } from '@airswap/utils'
 import {
   FullOrder,
@@ -204,22 +205,17 @@ export class Server extends TypedEmitter<ServerEvents> {
     if (proxyingFor) {
       params.proxyingFor = proxyingFor
     }
-    return this.callRPCMethod<OrderERC20>(
+    const order = await this.callRPCMethod<OrderERC20>(
       'getSignerSideOrderERC20',
       params
-    ).then((order) => {
-      const errors = this.compare(params, order)
-      if (errors.length) {
-        throw new Error(
-          `Server response differs from request params: ${errors}`
-        )
-      } else if (!isValidOrderERC20(order)) {
-        throw new Error(
-          `Server responded with invalid order: ${JSON.stringify(order)}`
-        )
-      }
-      return orderERC20PropsToStrings(order)
-    })
+    )
+    const errors = this.compare(params, order)
+    if (errors.length) {
+      throw new Error(`Server response differs from request params: ${errors}`)
+    } else if (!isValidOrderERC20(order)) {
+      throw new Error(`Invalid order response: ${JSON.stringify(order)}`)
+    }
+    return orderERC20PropsToStrings(order)
   }
 
   public async getSenderSideOrderERC20(
@@ -245,22 +241,17 @@ export class Server extends TypedEmitter<ServerEvents> {
     if (proxyingFor) {
       params.proxyingFor = proxyingFor
     }
-    return this.callRPCMethod<OrderERC20>(
+    const order = await this.callRPCMethod<OrderERC20>(
       'getSenderSideOrderERC20',
       params
-    ).then((order) => {
-      const errors = this.compare(params, order)
-      if (errors.length) {
-        throw new Error(
-          `Server response differs from request params: ${errors}`
-        )
-      } else if (!isValidOrderERC20(order)) {
-        throw new Error(
-          `Server responded with invalid order: ${JSON.stringify(order)}`
-        )
-      }
-      return orderERC20PropsToStrings(order)
-    })
+    )
+    const errors = this.compare(params, order)
+    if (errors.length) {
+      throw new Error(`Server response differs from request params: ${errors}`)
+    } else if (!isValidOrderERC20(order)) {
+      throw new Error(`Invalid order response: ${JSON.stringify(order)}`)
+    }
+    return orderERC20PropsToStrings(order)
   }
 
   public async getPricingERC20(
@@ -273,11 +264,27 @@ export class Server extends TypedEmitter<ServerEvents> {
     if (minExpiry) {
       params.minExpiry = minExpiry
     }
-    return this.callRPCMethod<Pricing[]>('getPricingERC20', params)
+    const pricing = await this.callRPCMethod<Pricing[]>(
+      'getPricingERC20',
+      params
+    )
+    if (!isValidPricingERC20(pricing)) {
+      throw new Error(`Invalid pricing response: ${JSON.stringify(pricing)}`)
+    }
+    return pricing
   }
 
   public async getAllPricingERC20(): Promise<Pricing[]> {
-    return this.callRPCMethod<Pricing[]>('getAllPricingERC20', [])
+    const pricing = await this.callRPCMethod<Pricing[]>(
+      'getAllPricingERC20',
+      []
+    )
+    if (!isValidPricingERC20(pricing)) {
+      throw new Error(
+        `Server responded with invalid pricing: ${JSON.stringify(pricing)}`
+      )
+    }
+    return pricing
   }
 
   /**
