@@ -11,6 +11,7 @@ import {
   createOrderSignature,
   isValidFullOrder,
   isValidFullOrderERC20,
+  isValidPricingERC20,
 } from '@airswap/utils'
 import { ADDRESS_ZERO, ChainIds, Protocols } from '@airswap/constants'
 
@@ -23,7 +24,7 @@ import {
   MockSocketServer,
   nextEvent,
 } from './test-utils'
-import { OrderERC20, SortField, SortOrder } from '@airswap/types'
+import { OrderERC20, SortField, SortOrder, Levels } from '@airswap/types'
 import { JsonRpcErrorCodes } from '@airswap/jsonrpc-client-websocket'
 
 addJSONRPCAssertions()
@@ -61,6 +62,21 @@ function mockHttpServer(api) {
         break
       case 'getTokens':
         res = [USDC, USDT]
+        break
+      case 'getPricingERC20':
+        const levels: Levels = [
+          ['250', '0.5'],
+          ['500', '0.6'],
+          ['750', '0.7'],
+        ]
+        res = [
+          {
+            baseToken: ADDRESS_ZERO,
+            quoteToken: ADDRESS_ZERO,
+            bid: levels,
+            ask: levels,
+          },
+        ]
         break
       case 'getSignerSideOrderERC20':
         order = createOrderERC20({
@@ -136,6 +152,15 @@ describe('HTTPServer', () => {
       const result = await server.getTokens()
       expect(result[0]).to.be.equal(USDC)
       expect(result[1]).to.be.equal(USDT)
+    })
+  fancy
+    .nock('https://' + URL, mockHttpServer)
+    .it('Server getPricingERC20()', async () => {
+      const server = await Server.at(URL)
+      const result = await server.getPricingERC20([
+        { baseToken: ADDRESS_ZERO, quoteToken: ADDRESS_ZERO },
+      ])
+      expect(isValidPricingERC20(result)).to.be.true
     })
   fancy
     .nock('https://' + URL, mockHttpServer)
