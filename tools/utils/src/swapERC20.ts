@@ -119,14 +119,14 @@ export function getSignerFromOrderERC20Signature(
 export function isValidOrderERC20(order: OrderERC20): boolean {
   return (
     !!order &&
-    typeof order['nonce'] == 'string' &&
-    typeof order['expiry'] == 'string' &&
+    typeof order['nonce'] === 'string' &&
+    typeof order['expiry'] === 'string' &&
     ethers.utils.isAddress(order['signerWallet']) &&
     ethers.utils.isAddress(order['signerToken']) &&
-    typeof order['signerAmount'] == 'string' &&
+    typeof order['signerAmount'] === 'string' &&
     ethers.utils.isAddress(order['senderToken']) &&
-    typeof order['senderAmount'] == 'string' &&
-    typeof order['v'] == 'string' &&
+    typeof order['senderAmount'] === 'string' &&
+    typeof order['v'] === 'string' &&
     ethers.utils.isBytesLike(order['r']) &&
     ethers.utils.isBytesLike(order['s'])
   )
@@ -136,17 +136,17 @@ export function isValidFullOrderERC20(fullOrder: FullOrderERC20): boolean {
   return (
     !!fullOrder &&
     ethers.utils.isAddress(fullOrder['swapContract']) &&
-    typeof fullOrder['chainId'] == 'number' &&
-    typeof fullOrder['nonce'] == 'string' &&
-    typeof fullOrder['expiry'] == 'string' &&
+    typeof fullOrder['chainId'] === 'number' &&
+    typeof fullOrder['nonce'] === 'string' &&
+    typeof fullOrder['expiry'] === 'string' &&
     ethers.utils.isAddress(fullOrder['signerWallet']) &&
     ethers.utils.isAddress(fullOrder['signerToken']) &&
-    typeof fullOrder['signerAmount'] == 'string' &&
-    typeof fullOrder['protocolFee'] == 'string' &&
+    typeof fullOrder['signerAmount'] === 'string' &&
+    typeof fullOrder['protocolFee'] === 'string' &&
     ethers.utils.isAddress(fullOrder['senderWallet']) &&
     ethers.utils.isAddress(fullOrder['senderToken']) &&
-    typeof fullOrder['senderAmount'] == 'string' &&
-    typeof fullOrder['v'] == 'string' &&
+    typeof fullOrder['senderAmount'] === 'string' &&
+    typeof fullOrder['v'] === 'string' &&
     ethers.utils.isBytesLike(fullOrder['r']) &&
     ethers.utils.isBytesLike(fullOrder['s'])
   )

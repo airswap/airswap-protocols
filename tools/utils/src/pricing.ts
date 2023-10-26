@@ -3,6 +3,30 @@ import { ethers } from 'ethers'
 
 import { Levels, Formula, Pricing } from '@airswap/types'
 
+export function isValidPricingERC20(pricing: Pricing[]): boolean {
+  let length = pricing.length
+  while (length--) {
+    if (!isValidPricingERC20Pair(pricing[length])) return false
+  }
+  return true
+}
+
+export function isValidPricingERC20Pair(pricing: Pricing): boolean {
+  return (
+    !!pricing &&
+    ethers.utils.isAddress(pricing.baseToken) &&
+    ethers.utils.isAddress(pricing.quoteToken) &&
+    !!pricing.bid &&
+    !!pricing.ask &&
+    !!pricing.bid.length &&
+    !!pricing.ask.length &&
+    pricing.bid[0].length === 2 &&
+    pricing.ask[0].length === 2 &&
+    typeof pricing.ask[0][0] === 'string' &&
+    typeof pricing.ask[0][1] === 'string'
+  )
+}
+
 export function getCostFromPricing(
   side: 'buy' | 'sell',
   amount: string,
