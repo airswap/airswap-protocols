@@ -1,57 +1,52 @@
 import { ethers } from 'ethers'
 import { ServerOptions } from '@airswap/types'
-import { MakerRegistry__factory } from '@airswap/maker-registry/typechain/factories/contracts'
-// @ts-ignore
-import registryDeploys from '@airswap/maker-registry/deploys.js'
+import { Registry__factory } from '@airswap/registry/typechain/factories/contracts'
+import registryDeploys from '@airswap/registry/deploys.js'
+import registryBlocks from '@airswap/registry/deploys-blocks.js'
 
 import { Server } from './Server'
 import { Contract, SwapERC20 } from './Contracts'
 
-const registryBlocks = {
-  1: 12782029,
-  5: 6537104,
-  30: 5018400,
-  31: 3424107,
-  56: 15963896,
-  97: 17263882,
-  137: 26036024,
-  42161: 43864138,
-  43113: 6864382,
-  43114: 11969746,
-  59140: 992371,
-  59144: 0,
-  80001: 25550814,
-  421613: 2333984,
-}
-
 class ServerRegistry extends Contract {
   public constructor() {
-    super('Registry', registryDeploys, registryBlocks, MakerRegistry__factory)
+    super('Registry', registryDeploys, registryBlocks, Registry__factory)
   }
   public async getServerURLs(
     providerOrSigner: ethers.providers.Provider | ethers.Signer,
     chainId: number,
-    baseToken: string,
-    quoteToken: string
+    protocol: string,
+    baseToken?: string,
+    quoteToken?: string
   ): Promise<string[]> {
-    const contract = MakerRegistry__factory.connect(
+    const contract = Registry__factory.connect(
       registryDeploys[chainId],
       providerOrSigner
     )
-    const signerTokenURLs = await contract.getURLsForToken(baseToken)
-    const senderTokenURLs = await contract.getURLsForToken(quoteToken)
-    return signerTokenURLs.filter((value) => senderTokenURLs.includes(value))
+    const protocolStakers: string[] = await contract.getStakersForProtocol(
+      protocol
+    )
+    const stakers = protocolStakers.filter(async (staker) => {
+      const tokens = await contract.getTokensForStaker(staker)
+      let include = false
+      if (!tokens.length) include = true
+      else if (baseToken) include = tokens.includes(baseToken)
+      else if (quoteToken) include = tokens.includes(quoteToken)
+      return include
+    })
+    return await contract.getServerURLsForStakers(stakers)
   }
   public async getServers(
     providerOrSigner: ethers.providers.Provider | ethers.Signer,
     chainId: number,
-    baseToken: string,
-    quoteToken: string,
+    protocol: string,
+    baseToken?: string,
+    quoteToken?: string,
     options?: ServerOptions
   ): Promise<Array<Server>> {
     const urls = await this.getServerURLs(
       providerOrSigner,
       chainId,
+      protocol,
       baseToken,
       quoteToken
     )
