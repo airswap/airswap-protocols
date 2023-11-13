@@ -9,13 +9,6 @@
   dependencies:
     get-parameter-names "^0.3.0"
 
-"@airswap/maker-registry@4.0.4":
-  version "4.0.4"
-  resolved "https://registry.yarnpkg.com/@airswap/maker-registry/-/maker-registry-4.0.4.tgz#57296740a3c08ee40982c4cbf02e84513df738cc"
-  integrity sha512-EuYXfnsLnRHbxDOONcmV6Qk4Q5CikcyyRki068+w6CwGC3s6FXdgUkSfQ6aYea/GGfjxqVdpHm2xsnyhEx0Z9w==
-  dependencies:
-    "@openzeppelin/contracts" "^4.8.1"
-
 "@babel/code-frame@^7.0.0":
   version "7.21.4"
   resolved "https://registry.yarnpkg.com/@babel/code-frame/-/code-frame-7.21.4.tgz#d0fa9e4413aca81f2b23b9442797bda1826edb39"
@@ -1447,7 +1440,7 @@
   dependencies:
     "@octokit/openapi-types" "^18.0.0"
 
-"@openzeppelin/contracts@^4.8.1", "@openzeppelin/contracts@^4.8.3":
+"@openzeppelin/contracts@^4.8.3":
   version "4.9.3"
   resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.9.3.tgz#00d7a8cf35a475b160b3f0293a6403c511099364"
   integrity sha512-He3LieZ1pP2TNt5JbkPA4PNT9WC3gOTOlDcFGJW4Le4QKqwmiNJCRt44APfxMxvq7OugU/cqYuPcSBzOw38DAg==
