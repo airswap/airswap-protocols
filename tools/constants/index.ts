@@ -204,8 +204,7 @@ export const protocolFeeReceiverAddresses: Record<number, string> = {
 export enum Protocols {
   Discovery = '0xf3713ede',
   RequestForQuoteERC20 = '0x02ad05d3',
-  PricingERC20 = '0x8beb22c2',
-  LastLookERC20 = '0xb2b78b33',
+  LastLookERC20 = '0x395ca9f1',
   StorageERC20 = '0xfdd616a7',
   Storage = '0xd8b0f31f',
 }
@@ -223,14 +222,12 @@ export const protocolInterfaces: Record<string, string[]> = {
     'function getPricingERC20(array((string baseToken,string quoteToken)),string minExpiry)',
     'function getAllPricingERC20(string minExpiry)',
   ],
-  [Protocols.PricingERC20]: [
+  [Protocols.LastLookERC20]: [
     'function subscribePricingERC20(array((string baseToken,string quoteToken)))',
     'function subscribeAllPricingERC20()',
     'function unsubscribePricingERC20(array((string baseToken,string quoteToken)))',
     'function unsubscribeAllPricingERC20()',
     'function setPricingERC20(array(string baseToken,string quoteToken,string minimum,array(array((string level,string price))),array(array((string level,string price)))))',
-  ],
-  [Protocols.LastLookERC20]: [
     'function considerOrderERC20(string chainId,string swapContractAddress,string nonce,string expiry,string signerWallet,string signerToken,string signerAmount,string senderToken,string senderAmount,string v,string r,string s)',
   ],
   [Protocols.StorageERC20]: [
@@ -246,7 +243,6 @@ export const protocolInterfaces: Record<string, string[]> = {
 export const protocolNames: Record<string, string> = {
   [Protocols.Discovery]: 'Discovery',
   [Protocols.RequestForQuoteERC20]: 'Request for Quote (ERC20)',
-  [Protocols.PricingERC20]: 'Pricing (ERC20)',
   [Protocols.LastLookERC20]: 'Last Look (ERC20)',
   [Protocols.StorageERC20]: 'Storage (ERC20)',
   [Protocols.Storage]: 'Storage',

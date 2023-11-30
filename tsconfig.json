@@ -1,12 +1,9 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "ESNext",
     "module": "commonjs",
-    "moduleResolution": "node",
-    "lib": ["es2021"],
+    "moduleResolution": "nodenext",
     "esModuleInterop": true,
-    "skipLibCheck": false,
-    "strict": true,
     "resolveJsonModule": true,
     "sourceMap": true,
     "declaration": true,
