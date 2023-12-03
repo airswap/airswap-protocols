@@ -1,6 +1,6 @@
 {
   "name": "@airswap/libraries",
-  "version": "4.1.10",
+  "version": "4.1.11",
   "description": "AirSwap: Libraries for Developers",
   "repository": {
     "type": "git",
@@ -26,7 +26,7 @@
     "test:ci": "yarn test"
   },
   "dependencies": {
-    "@airswap/balances": "4.0.2",
+    "@airswap/balances": "4.0.3",
     "@airswap/constants": "^4.1.4",
     "@airswap/jsonrpc-client-websocket": "0.0.1",
     "@airswap/registry": "4.1.2",
