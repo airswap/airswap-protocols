@@ -21,8 +21,8 @@
     "test:ci": "yarn test"
   },
   "dependencies": {
-    "@airswap/constants": "^4.1.5",
-    "@airswap/types": "^4.1.1",
+    "@airswap/constants": "4.1.5",
+    "@airswap/types": "4.1.1",
     "@metamask/eth-sig-util": "^5.0.2",
     "bignumber.js": "^9.0.1",
     "ethereumjs-util": "^7.1.5",
