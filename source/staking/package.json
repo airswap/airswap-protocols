@@ -1,6 +1,6 @@
 {
   "name": "@airswap/staking",
-  "version": "4.0.4",
+  "version": "4.0.5",
   "description": "AirSwap: Stake Tokens",
   "license": "MIT",
   "repository": {
@@ -32,7 +32,7 @@
     "access": "public"
   },
   "devDependencies": {
-    "@airswap/utils": "^4.1.6",
+    "@airswap/utils": "4.1.8",
     "prompt-confirm": "^2.0.4"
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@airswap/balances",
-  "version": "4.0.2",
+  "version": "4.0.4",
   "description": "Batch balance and allowance calls",
   "license": "MIT",
   "repository": {
@@ -29,8 +29,8 @@
     "@openzeppelin/contracts": "^4.8.3"
   },
   "devDependencies": {
-    "@airswap/constants": "^4.1.4",
-    "@airswap/utils": "^4.1.6",
+    "@airswap/constants": "4.1.6",
+    "@airswap/utils": "4.1.8",
     "prompt-confirm": "^2.0.4"
   },
   "publishConfig": {

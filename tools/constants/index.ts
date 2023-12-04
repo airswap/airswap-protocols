@@ -84,8 +84,8 @@ export const chainNames: Record<number, string> = {
   [ChainIds.GOERLI]: 'Goerli',
   [ChainIds.RSK]: 'RSK',
   [ChainIds.RSKTESTNET]: 'RSK Testnet',
-  [ChainIds.TELOS]: 'Telos EVM Mainnet',
-  [ChainIds.TELOSTESTNET]: 'Telos EVM Testnet',
+  [ChainIds.TELOS]: 'Telos',
+  [ChainIds.TELOSTESTNET]: 'Telos Testnet',
   [ChainIds.BSC]: 'BSC',
   [ChainIds.BSCTESTNET]: 'BSC Testnet',
   [ChainIds.POLYGON]: 'Polygon',
@@ -94,10 +94,10 @@ export const chainNames: Record<number, string> = {
   [ChainIds.ARBITRUM]: 'Arbitrum',
   [ChainIds.FUJI]: 'Fuji Testnet',
   [ChainIds.AVALANCHE]: 'Avalanche',
-  [ChainIds.LINEAGOERLI]: 'Linea-Goerli',
+  [ChainIds.LINEAGOERLI]: 'Linea Goerli',
   [ChainIds.LINEA]: 'Linea',
   [ChainIds.MUMBAI]: 'Mumbai Testnet',
-  [ChainIds.BASEGOERLI]: 'Base Görli',
+  [ChainIds.BASEGOERLI]: 'Base Goerli',
   [ChainIds.ARBITRUMGOERLI]: 'Arbitrum Goerli',
   [ChainIds.SEPOLIA]: 'Sepolia',
 }
@@ -123,6 +123,28 @@ export const chainCurrencies: Record<number, string> = {
   [ChainIds.BASEGOERLI]: 'ETH',
   [ChainIds.ARBITRUMGOERLI]: 'AETH',
   [ChainIds.SEPOLIA]: 'SepoliaETH',
+}
+
+export const currencyIcons: Record<number, number> = {
+  [ChainIds.MAINNET]: ChainIds.MAINNET,
+  [ChainIds.GOERLI]: ChainIds.MAINNET,
+  [ChainIds.RSK]: ChainIds.RSK,
+  [ChainIds.RSKTESTNET]: ChainIds.RSK,
+  [ChainIds.TELOS]: ChainIds.TELOS,
+  [ChainIds.TELOSTESTNET]: ChainIds.TELOS,
+  [ChainIds.BSC]: ChainIds.BSC,
+  [ChainIds.BSCTESTNET]: ChainIds.BSC,
+  [ChainIds.POLYGON]: ChainIds.POLYGON,
+  [ChainIds.BASE]: ChainIds.MAINNET,
+  [ChainIds.ARBITRUM]: ChainIds.MAINNET,
+  [ChainIds.FUJI]: ChainIds.AVALANCHE,
+  [ChainIds.AVALANCHE]: ChainIds.AVALANCHE,
+  [ChainIds.LINEAGOERLI]: ChainIds.MAINNET,
+  [ChainIds.LINEA]: ChainIds.MAINNET,
+  [ChainIds.MUMBAI]: ChainIds.POLYGON,
+  [ChainIds.BASEGOERLI]: ChainIds.MAINNET,
+  [ChainIds.ARBITRUMGOERLI]: ChainIds.MAINNET,
+  [ChainIds.SEPOLIA]: ChainIds.MAINNET,
 }
 
 export const apiUrls: Record<number, string> = {
