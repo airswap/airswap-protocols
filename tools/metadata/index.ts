@@ -1,4 +1,3 @@
-import axios from 'axios'
 import { ethers } from 'ethers'
 import {
   TokenInfo,
@@ -44,7 +43,7 @@ export async function getKnownTokens(
     const promises = await Promise.allSettled(
       tokenlists[chainId].map(async (url) => {
         try {
-          const { data } = await axios.get(url)
+          const data = await (await fetch(url)).json()
           if (data.tokens) {
             return data.tokens
           }
@@ -262,12 +261,12 @@ export async function getCollectionTokenInfo(
   }
 }
 
-async function fetchMetaData(uri: string) {
-  if (validUrl.isUri(uri)) {
-    if (uri.startsWith('ipfs')) {
-      uri = `https://cloudflare-ipfs.com/${uri.replace('://', '/')}`
+async function fetchMetaData(url: string) {
+  if (validUrl.isUri(url)) {
+    if (url.startsWith('ipfs')) {
+      url = `https://cloudflare-ipfs.com/${url.replace('://', '/')}`
     }
-    const { data } = await axios.get(uri)
+    const data = await (await fetch(url)).json()
     if (typeof data === 'string')
       try {
         return JSON.parse(data)
