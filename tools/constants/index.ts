@@ -125,6 +125,28 @@ export const chainCurrencies: Record<number, string> = {
   [ChainIds.SEPOLIA]: 'SepoliaETH',
 }
 
+export const currencyIcons: Record<number, number> = {
+  [ChainIds.MAINNET]: ChainIds.MAINNET,
+  [ChainIds.GOERLI]: ChainIds.MAINNET,
+  [ChainIds.RSK]: ChainIds.RSK,
+  [ChainIds.RSKTESTNET]: ChainIds.RSK,
+  [ChainIds.TELOS]: ChainIds.TELOS,
+  [ChainIds.TELOSTESTNET]: ChainIds.TELOS,
+  [ChainIds.BSC]: ChainIds.BSC,
+  [ChainIds.BSCTESTNET]: ChainIds.BSC,
+  [ChainIds.POLYGON]: ChainIds.POLYGON,
+  [ChainIds.BASE]: ChainIds.MAINNET,
+  [ChainIds.ARBITRUM]: ChainIds.MAINNET,
+  [ChainIds.FUJI]: ChainIds.AVALANCHE,
+  [ChainIds.AVALANCHE]: ChainIds.AVALANCHE,
+  [ChainIds.LINEAGOERLI]: ChainIds.MAINNET,
+  [ChainIds.LINEA]: ChainIds.MAINNET,
+  [ChainIds.MUMBAI]: ChainIds.POLYGON,
+  [ChainIds.BASEGOERLI]: ChainIds.MAINNET,
+  [ChainIds.ARBITRUMGOERLI]: ChainIds.MAINNET,
+  [ChainIds.SEPOLIA]: ChainIds.MAINNET,
+}
+
 export const apiUrls: Record<number, string> = {
   [ChainIds.MAINNET]: 'https://mainnet.infura.io/v3',
   [ChainIds.GOERLI]: 'https://goerli.infura.io/v3',
