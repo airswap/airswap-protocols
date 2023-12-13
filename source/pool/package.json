@@ -34,7 +34,7 @@
     "@airswap/constants": "4.1.6",
     "@airswap/metadata": "4.1.12",
     "@airswap/types": "4.1.1",
-    "@airswap/utils": "4.1.8",
+    "@airswap/utils": "4.1.9",
     "prompt-confirm": "^2.0.4"
   },
   "publishConfig": {

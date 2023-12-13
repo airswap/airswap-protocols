@@ -7,6 +7,9 @@ import {
   SignTypedDataVersion,
 } from '@metamask/eth-sig-util'
 
+import { abi as ERC20_ABI } from '@openzeppelin/contracts/build/contracts/ERC20.json'
+const erc20Interface = new ethers.utils.Interface(ERC20_ABI)
+
 import {
   ChainIds,
   SECONDS_IN_DAY,
@@ -21,6 +24,7 @@ import {
   FullOrderERC20,
   Signature,
   EIP712SwapERC20,
+  FullSwapERC20,
 } from '@airswap/types'
 
 export function createOrderERC20({
@@ -275,4 +279,74 @@ export function compressFullOrderERC20(order: FullOrderERC20): string {
 
 export function decompressFullOrderERC20(str: string): FullOrderERC20 {
   return paramsToFullOrderERC20(lzString.decompressFromEncodedURIComponent(str))
+}
+
+const parseTransfer = (log: any) => {
+  let parsed
+  let transfer
+  try {
+    parsed = erc20Interface.parseLog(log)
+    if (parsed.name === 'Transfer') {
+      transfer = {
+        token: log.address,
+        from: parsed.args[0],
+        to: parsed.args[1],
+        amount: ethers.BigNumber.from(parsed.args[2]),
+      }
+    }
+  } catch (e) {
+    return null
+  }
+  return transfer
+}
+
+export const getFullSwapERC20 = async (
+  nonce: string,
+  signerWallet: string,
+  feeReceiver: string,
+  logs: ethers.providers.Log[]
+): Promise<FullSwapERC20> => {
+  const transfers = []
+  let transfer: any
+  let length = logs.length
+  while (length--) {
+    if ((transfer = parseTransfer(logs[length]))) {
+      transfers.push(transfer)
+    }
+  }
+
+  let fee: any
+  let signer: any
+  let sender: any
+
+  let i = transfers.length
+  while (i--) {
+    if (transfers[i].to === feeReceiver) {
+      fee = transfers[i]
+    } else {
+      let j = transfers.length
+      while (j--) {
+        if (
+          transfers[i].from === signerWallet &&
+          transfers[i].from === transfers[j].to &&
+          transfers[i].to == transfers[j].from
+        ) {
+          signer = transfers[i]
+          sender = transfers[j]
+          break
+        }
+      }
+    }
+  }
+
+  return {
+    nonce: nonce.toString(),
+    signerWallet: signer.from,
+    signerToken: signer.token,
+    signerAmount: signer.amount.toString(),
+    senderWallet: sender.from,
+    senderToken: sender.token,
+    senderAmount: sender.amount.toString(),
+    feeAmount: fee.amount.toString(),
+  }
 }
