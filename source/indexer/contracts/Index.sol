@@ -144,9 +144,9 @@ contract Index is Ownable {
    * @dev start value of 0x0 starts at the head
    * @param cursor address Cursor to start with
    * @param limit uint256 Maximum number of locators to return
-   * @return bytes32[] List of locators
-   * @return uint256[] List of scores corresponding to locators
-   * @return address The next cursor to provide for pagination
+   * @return locators bytes32[] List of locators
+   * @return scores uint256[] List of scores corresponding to locators
+   * @return nextCursor address The next cursor to provide for pagination
    */
   function getLocators(
     address cursor,

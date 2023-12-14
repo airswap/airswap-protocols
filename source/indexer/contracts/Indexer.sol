@@ -30,7 +30,8 @@ contract Indexer is IIndexer, Ownable {
   IERC20 public stakingToken;
 
   // Mapping of signer token to sender token to protocol type to index
-  mapping(address => mapping(address => mapping(bytes2 => Index)))
+  // Index is referenced by address
+  mapping(address => mapping(address => mapping(bytes2 => address)))
     public indexes;
 
   // The whitelist contract for checking whether a peer is whitelisted per peer type
@@ -56,7 +57,7 @@ contract Indexer is IIndexer, Ownable {
     bytes2 protocol
   ) {
     require(
-      indexes[signerToken][senderToken][protocol] != Index(0),
+      indexes[signerToken][senderToken][protocol] != address(0),
       "INDEX_DOES_NOT_EXIST"
     );
     _;
@@ -89,9 +90,10 @@ contract Indexer is IIndexer, Ownable {
     bytes2 protocol
   ) external returns (address) {
     // If the Index does not exist, create it.
-    if (indexes[signerToken][senderToken][protocol] == Index(0)) {
+    if (indexes[signerToken][senderToken][protocol] == address(0)) {
       // Create a new Index contract for the token pair.
-      indexes[signerToken][senderToken][protocol] = new Index();
+      Index index = new Index();
+      indexes[signerToken][senderToken][protocol] = address(index);
 
       emit CreateIndex(
         signerToken,
@@ -158,7 +160,7 @@ contract Indexer is IIndexer, Ownable {
       "PAIR_IS_BLACKLISTED"
     );
 
-    bool notPreviouslySet = (indexes[signerToken][senderToken][protocol]
+    bool notPreviouslySet = (Index(indexes[signerToken][senderToken][protocol])
       .getLocator(msg.sender) == bytes32(0));
 
     if (notPreviouslySet) {
@@ -171,7 +173,7 @@ contract Indexer is IIndexer, Ownable {
         );
       }
       // Set the locator on the index.
-      indexes[signerToken][senderToken][protocol].setLocator(
+      Index(indexes[signerToken][senderToken][protocol]).setLocator(
         msg.sender,
         stakingAmount,
         locator
@@ -179,9 +181,8 @@ contract Indexer is IIndexer, Ownable {
 
       emit Stake(msg.sender, signerToken, senderToken, protocol, stakingAmount);
     } else {
-      uint256 oldStake = indexes[signerToken][senderToken][protocol].getScore(
-        msg.sender
-      );
+      uint256 oldStake = Index(indexes[signerToken][senderToken][protocol])
+        .getScore(msg.sender);
 
       _updateIntent(
         msg.sender,
@@ -220,9 +221,9 @@ contract Indexer is IIndexer, Ownable {
    * @param protocol bytes2 Protocol type for locators in Intent
    * @param cursor address Address to start from
    * @param limit uint256 Total number of locators to return
-   * @return bytes32[] List of locators
-   * @return uint256[] List of scores corresponding to locators
-   * @return address The next cursor to provide for pagination
+   * @return locators bytes32[] List of locators
+   * @return scores uint256[] List of scores corresponding to locators
+   * @return nextCursor address The next cursor to provide for pagination
    */
   function getLocators(
     address signerToken,
@@ -245,12 +246,15 @@ contract Indexer is IIndexer, Ownable {
     }
 
     // Ensure the index exists.
-    if (indexes[signerToken][senderToken][protocol] == Index(0)) {
+    if (indexes[signerToken][senderToken][protocol] == address(0)) {
       return (new bytes32[](0), new uint256[](0), address(0));
     }
 
     return
-      indexes[signerToken][senderToken][protocol].getLocators(cursor, limit);
+      Index(indexes[signerToken][senderToken][protocol]).getLocators(
+        cursor,
+        limit
+      );
   }
 
   /**
@@ -259,7 +263,7 @@ contract Indexer is IIndexer, Ownable {
    * @param signerToken address Signer token the user staked on
    * @param senderToken address Sender token the user staked on
    * @param protocol bytes2 Protocol type for locators in Intent
-   * @return uint256 Amount the user staked
+   * @return stakedAmount uint256 Amount the user staked
    */
   function getStakedAmount(
     address user,
@@ -267,11 +271,11 @@ contract Indexer is IIndexer, Ownable {
     address senderToken,
     bytes2 protocol
   ) public view returns (uint256 stakedAmount) {
-    if (indexes[signerToken][senderToken][protocol] == Index(0)) {
+    if (indexes[signerToken][senderToken][protocol] == address(0)) {
       return 0;
     }
     // Return the score, equivalent to the stake amount.
-    return indexes[signerToken][senderToken][protocol].getScore(user);
+    return Index(indexes[signerToken][senderToken][protocol]).getScore(user);
   }
 
   function _updateIntent(
@@ -299,7 +303,7 @@ contract Indexer is IIndexer, Ownable {
     }
 
     // Update their intent.
-    indexes[signerToken][senderToken][protocol].updateLocator(
+    Index(indexes[signerToken][senderToken][protocol]).updateLocator(
       user,
       newAmount,
       newLocator
@@ -322,10 +326,12 @@ contract Indexer is IIndexer, Ownable {
     bytes2 protocol
   ) internal indexExists(signerToken, senderToken, protocol) {
     // Get the score for the user.
-    uint256 score = indexes[signerToken][senderToken][protocol].getScore(user);
+    uint256 score = Index(indexes[signerToken][senderToken][protocol]).getScore(
+      user
+    );
 
     // Unset the locator on the index.
-    indexes[signerToken][senderToken][protocol].unsetLocator(user);
+    Index(indexes[signerToken][senderToken][protocol]).unsetLocator(user);
 
     if (score > 0) {
       // Return the staked tokens. Reverts on failure.
