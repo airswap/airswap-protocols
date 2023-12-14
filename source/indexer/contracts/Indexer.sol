@@ -30,7 +30,7 @@ contract Indexer is IIndexer, Ownable {
    * @notice Contract Constructor
    * @param indexerStakingToken address
    */
-  constructor(address indexerStakingToken) public {
+  constructor(address indexerStakingToken) {
     stakingToken = IERC20(indexerStakingToken);
   }
 
@@ -325,5 +325,9 @@ contract Indexer is IIndexer, Ownable {
     }
 
     emit Unstake(user, signerToken, senderToken, protocol, score);
+  }
+
+  function getStakingToken() public view returns (address) {
+    return address(stakingToken);
   }
 }

@@ -53,7 +53,7 @@ contract Delegate is IDelegate, Ownable {
     address delegateContractOwner,
     address delegateTradeWallet,
     bytes2 delegateProtocol
-  ) public {
+  ) {
     swapContract = delegateSwap;
     indexer = delegateIndexer;
     protocol = delegateProtocol;
@@ -72,7 +72,10 @@ contract Delegate is IDelegate, Ownable {
 
     // Ensure that the indexer can pull funds from delegate account.
     require(
-      IERC20(indexer.stakingToken()).approve(address(indexer), MAX_INT),
+      IERC20(address(indexer.getStakingToken())).approve(
+        address(indexer),
+        MAX_INT
+      ),
       "STAKING_APPROVAL_FAILED"
     );
   }
@@ -146,7 +149,7 @@ contract Delegate is IDelegate, Ownable {
     } else if (oldStakeAmount < newStakeAmount) {
       // transfer only the difference from the sender to the Delegate.
       require(
-        IERC20(indexer.stakingToken()).transferFrom(
+        IERC20(address(indexer.getStakingToken())).transferFrom(
           msg.sender,
           address(this),
           newStakeAmount - oldStakeAmount
@@ -166,7 +169,7 @@ contract Delegate is IDelegate, Ownable {
     if (oldStakeAmount > newStakeAmount) {
       // return excess stake back
       require(
-        IERC20(indexer.stakingToken()).transfer(
+        IERC20(address(indexer.getStakingToken())).transfer(
           msg.sender,
           oldStakeAmount - newStakeAmount
         ),
@@ -200,7 +203,10 @@ contract Delegate is IDelegate, Ownable {
     // This is returned to the msg.sender.
     if (stakedAmount > 0) {
       require(
-        IERC20(indexer.stakingToken()).transfer(msg.sender, stakedAmount),
+        IERC20(address(indexer.getStakingToken())).transfer(
+          msg.sender,
+          stakedAmount
+        ),
         "STAKING_RETURN_FAILED"
       );
     }

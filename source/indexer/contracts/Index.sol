@@ -51,7 +51,7 @@ contract Index is Ownable {
   /**
    * @notice Contract Constructor
    */
-  constructor() public {
+  constructor() {
     // Create initial entry.
     entries[HEAD] = Entry(bytes32(0), 0, HEAD, HEAD);
   }

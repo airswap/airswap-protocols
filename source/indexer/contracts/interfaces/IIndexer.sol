@@ -59,6 +59,8 @@ interface IIndexer {
     bytes2 protocol
   ) external;
 
+  function getStakingToken() external view returns (address);
+
   function tokenBlacklist(address) external view returns (bool);
 
   function getStakedAmount(

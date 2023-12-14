@@ -28,7 +28,7 @@ contract DelegateFactory is IDelegateFactory, ILocatorWhitelist {
     ISwapERC20 factorySwapContract,
     IIndexer factoryIndexerContract,
     bytes2 factoryProtocol
-  ) public {
+  ) {
     swapContract = factorySwapContract;
     indexerContract = factoryIndexerContract;
     protocol = factoryProtocol;
