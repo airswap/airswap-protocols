@@ -114,6 +114,6 @@ export type CollectionTokenInfo = {
   chainId: number
   kind: string
   address: string
-  id: number
+  id: string
   uri: string
 } & CollectionTokenMetadata
