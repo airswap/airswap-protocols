@@ -329,7 +329,7 @@ export class Server extends TypedEmitter<ServerEvents> {
   }
 
   /**
-   * Protocols.StorageERC20
+   * Protocols.IndexingERC20
    */
   public async addOrderERC20(
     fullOrder: FullOrderERC20
@@ -358,7 +358,7 @@ export class Server extends TypedEmitter<ServerEvents> {
   }
 
   /**
-   * Protocols.Storage
+   * Protocols.Indexing
    */
   public async addOrder(order: FullOrder): Promise<SuccessResponse> {
     try {
