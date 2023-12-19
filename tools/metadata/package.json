@@ -1,6 +1,6 @@
 {
   "name": "@airswap/metadata",
-  "version": "4.1.12",
+  "version": "4.1.13",
   "description": "AirSwap: Token Metadata for Developers",
   "repository": {
     "type": "git",
@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@airswap/constants": "4.1.6",
-    "@airswap/types": "4.1.1",
+    "@airswap/types": "4.1.2",
     "@airswap/wrapper": "4.1.5",
     "@openzeppelin/contracts": "^4.8.3",
     "@uniswap/token-lists": "^1.0.0-beta.24",

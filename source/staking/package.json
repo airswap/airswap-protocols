@@ -32,7 +32,7 @@
     "access": "public"
   },
   "devDependencies": {
-    "@airswap/utils": "4.1.9",
+    "@airswap/utils": "4.1.10",
     "prompt-confirm": "^2.0.4"
   }
 }

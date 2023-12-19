@@ -31,8 +31,8 @@
   "devDependencies": {
     "@airswap/constants": "4.1.6",
     "@airswap/staking": "4.0.5",
-    "@airswap/types": "4.1.1",
-    "@airswap/utils": "4.1.9",
+    "@airswap/types": "4.1.2",
+    "@airswap/utils": "4.1.10",
     "prompt-confirm": "^2.0.4"
   },
   "publishConfig": {
