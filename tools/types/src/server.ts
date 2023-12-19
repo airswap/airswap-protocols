@@ -24,22 +24,19 @@ export enum SortOrder {
 
 export type OrderFilter = {
   chainId?: number
-  nonce?: string
-  excludeNonces?: string[]
-  senderMaxAmount?: string
-  senderMinAmount?: string
-  senderTokens?: string[]
-  senderWallet?: string
-  signerMaxAmount?: string
-  signerMinAmount?: string
-  signerTokens?: string[]
   signerWallet?: string
-  sortField?: SortField
-  sortOrder?: SortOrder
-  senderIds?: string[]
-  signerIds?: string[]
-  limit: number
-  offset: number
+  signerToken?: string
+  signerId?: string
+  senderWallet?: string
+  senderToken?: string
+}
+
+export type OrderERC20Filter = {
+  chainId?: number
+  signerWallet?: string
+  signerToken?: string
+  senderWallet?: string
+  senderToken?: string
 }
 
 export type IndexedOrder<Type> = {
