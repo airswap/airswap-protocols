@@ -109,7 +109,7 @@ async function setUpBalances(senderAmount, signerAmount) {
   await erc20token.mock.balanceOf.withArgs(signer.address).returns(signerAmount)
 }
 
-describe('Batching Integration', () => {
+describe('BatchChecks Integration', () => {
   beforeEach(async () => {
     snapshotId = await ethers.provider.send('evm_snapshot')
   })
@@ -165,7 +165,7 @@ describe('Batching Integration', () => {
     await swapERC20.deployed()
 
     batching = await (
-      await ethers.getContractFactory('Batching')
+      await ethers.getContractFactory('BatchChecks')
     ).deploy(swap.address, swapERC20.address)
     await batching.deployed()
   })

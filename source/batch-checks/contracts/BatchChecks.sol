@@ -11,7 +11,7 @@ import "@airswap/swap-erc20/contracts/interfaces/ISwapERC20.sol";
 /**
  * @title Batching: Batch balance, allowance, order validity check calls
  */
-contract Batching is Ownable {
+contract BatchChecks is Ownable {
   using SafeERC20 for IERC20;
   using Address for address;
 

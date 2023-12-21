@@ -1,4 +1,4 @@
-# Batching
+# Batch-Checks
 
 [AirSwap](https://www.airswap.io/) is a peer-to-peer trading network for Ethereum tokens. This package contains source code and tests for a basic ERC20 balance and allowance aggregator.
 
@@ -15,7 +15,7 @@
 
 ## Usage
 
-:warning: This package is under active development. The [Batching](./contracts/Batching.sol) contract is deployed; see [deploys.js](./deploys.js) for latest. For all AirSwap contract deployments see [Deployed Contracts](https://docs.airswap.io/system/contract-deployments).
+:warning: This package is under active development. The [BatchChecks](./contracts/BatchChecks.sol) contract is deployed; see [deploys.js](./deploys.js) for latest. For all AirSwap contract deployments see [Deployed Contracts](https://docs.airswap.io/system/contract-deployments).
 
 ## Commands
 
