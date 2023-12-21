@@ -65,6 +65,11 @@ interface ISwap {
 
   function cancelUpTo(uint256 minimumNonce) external;
 
+  function check(
+    address,
+    Order calldata
+  ) external view returns (bytes32[] memory, uint256);
+
   function nonceUsed(address, uint256) external view returns (bool);
 
   function authorize(address sender) external;
