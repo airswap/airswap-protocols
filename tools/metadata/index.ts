@@ -22,6 +22,7 @@ const AIRSWAP_LOGO_URI =
   'https://storage.googleapis.com/subgraph-images/158680119781426823563.png'
 const AIRSWAP_SYMBOL = 'AST'
 const DEFAULT_NAME = 'Unknown NFT'
+const DEFAULT_IPFS_URI = 'https://ipfs.io/ipfs/'
 
 import { abi as ERC165_ABI } from '@openzeppelin/contracts/build/contracts/ERC165.json'
 import { abi as ERC20_ABI } from '@openzeppelin/contracts/build/contracts/ERC20.json'
@@ -224,7 +225,7 @@ export async function getCollectionTokenInfo(
   address: string,
   id: string
 ): Promise<CollectionTokenInfo> {
-  const tokenKind = await getTokenKind(provider, address)
+  const kind = await getTokenKind(provider, address)
 
   let uri = null
   let metadata = null
@@ -232,11 +233,8 @@ export async function getCollectionTokenInfo(
   if (!ethers.utils.isAddress(address)) {
     throw new Error(`Invalid address: ${address}`)
   }
-  if (isNaN(Number(id))) {
-    throw new Error(`Invalid id: ${id}`)
-  }
   try {
-    switch (tokenKind) {
+    switch (kind) {
       case TokenKinds.ERC721:
         uri = await new ethers.Contract(address, ERC721_ABI, provider).tokenURI(
           id
@@ -253,18 +251,18 @@ export async function getCollectionTokenInfo(
   }
   return {
     chainId: (await provider.getNetwork()).chainId,
-    kind: tokenKind,
     address: address.toLowerCase(),
-    id: Number(id),
+    kind,
+    id,
     uri,
     ...metadata,
   }
 }
 
-async function fetchMetaData(url: string) {
+async function fetchMetaData(url: string, ipfsUri = DEFAULT_IPFS_URI) {
   if (validUrl.isUri(url)) {
     if (url.startsWith('ipfs')) {
-      url = `https://cloudflare-ipfs.com/${url.replace('://', '/')}`
+      url = url.replace('ipfs://', ipfsUri)
     }
     const data = await (await fetch(url)).json()
     if (typeof data === 'string')
@@ -286,11 +284,12 @@ const transformErc721TokenAttributeToCollectionTokenAttribute = (
 })
 
 const transformERC721ToCollectionToken = (
-  metadata: any
+  metadata: any,
+  ipfsUri = DEFAULT_IPFS_URI
 ): CollectionTokenMetadata => ({
   name: metadata.name || DEFAULT_NAME,
   description: metadata.description,
-  image: metadata.image?.replace('ipfs://', 'https://ipfs.io/ipfs/'),
+  image: metadata.image?.replace('ipfs://', ipfsUri),
   attributes: (metadata.attributes || []).map(
     transformErc721TokenAttributeToCollectionTokenAttribute
   ),
@@ -304,15 +303,14 @@ const transformErc1155TokenAttributeToCollectionTokenAttribute = (
 })
 
 const transformERC1155ToCollectionToken = (
-  metadata: any
+  metadata: any,
+  ipfsUri = DEFAULT_IPFS_URI
 ): CollectionTokenMetadata => ({
   name: metadata.name || DEFAULT_NAME,
   description: metadata.description,
   image:
-    (metadata.image_url || metadata.image || '').replace(
-      'ipfs://',
-      'https://ipfs.io/ipfs/'
-    ) || undefined,
+    (metadata.image_url || metadata.image || '').replace('ipfs://', ipfsUri) ||
+    undefined,
   attributes: (metadata.attributes || []).map(
     transformErc1155TokenAttributeToCollectionTokenAttribute
   ),
