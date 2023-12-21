@@ -1,5 +1,4 @@
 const { expect } = require('chai')
-const { time } = require('@nomicfoundation/hardhat-network-helpers')
 const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
 const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
@@ -8,33 +7,21 @@ const SWAP = require('@airswap/swap/build/contracts/Swap.sol/Swap.json')
 const SWAP_ERC20 = require('@airswap/swap-erc20/build/contracts/SwapERC20.sol/SwapERC20.json')
 const ERC20_ADAPTER = require('@airswap/swap/build/contracts/adapters/ERC20Adapter.sol/ERC20Adapter.json')
 const ERC721_ADAPTER = require('@airswap/swap/build/contracts/adapters/ERC721Adapter.sol/ERC721Adapter.json')
-const ERC1155_ADAPTER = require('@airswap/swap/build/contracts/adapters/ERC1155Adapter.sol/ERC1155Adapter.json')
 const { createOrder, createOrderSignature } = require('@airswap/utils')
-const { TokenKinds, ADDRESS_ZERO } = require('@airswap/constants')
+const { TokenKinds } = require('@airswap/constants')
 
 const CHAIN_ID = 31337
 const PROTOCOL_FEE = '30'
 const PROTOCOL_FEE_LIGHT = '7'
-const HIGHER_FEE = '50'
-const INVALID_FEE = '100000000000'
-const INVALID_KIND = '0x00000000'
 const DEFAULT_AMOUNT = '1000'
-const ERC2981_INTERFACE_ID = '0x2a55205a'
-const MAX_ROYALTY = '10'
 
 const REBATE_SCALE = '10'
 const REBATE_MAX = '100'
-const FEE_DIVISOR = '10000'
-const DEFAULT_BALANCE = '100000'
-const STAKING_BALANCE = '10000000000'
-const SWAP_FEE =
-  (parseInt(DEFAULT_AMOUNT) * parseInt(PROTOCOL_FEE)) / parseInt(FEE_DIVISOR)
 
 let snapshotId
 let deployer
 let signer
 let sender
-let affiliate
 let erc20token
 let erc20adapter
 let erc721token
