@@ -33,11 +33,7 @@ export default {
     'https://storageapi.fleek.co/tomafrench-team-bucket/arbitrum.vetted.tokenlist.json',
   ],
   [ChainIds.AVALANCHE]: [
-    'https://matcha.xyz/tokenlists/43114.json',
-    'https://raw.githubusercontent.com/pangolindex/tokenlists/main/defi.tokenlist.json',
-    'https://raw.githubusercontent.com/pangolindex/tokenlists/main/stablecoin.tokenlist.json',
-    'https://raw.githubusercontent.com/pangolindex/tokenlists/main/ab.tokenlist.json',
-    'https://raw.githubusercontent.com/traderjoe-xyz/joe-tokenlists/main/joe.tokenlist.json',
+    'https://raw.githubusercontent.com/pangolindex/tokenlists/main/pangolin.tokenlist.json',
   ],
   [ChainIds.LINEAGOERLI]: [
     'https://raw.githubusercontent.com/Consensys/linea-token-list/main/json/linea-goerli-token-shortlist.json',
