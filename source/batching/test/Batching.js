@@ -7,14 +7,19 @@ const SWAP = require('@airswap/swap/build/contracts/Swap.sol/Swap.json')
 const SWAP_ERC20 = require('@airswap/swap-erc20/build/contracts/SwapERC20.sol/SwapERC20.json')
 const ERC20_ADAPTER = require('@airswap/swap/build/contracts/adapters/ERC20Adapter.sol/ERC20Adapter.json')
 const ERC721_ADAPTER = require('@airswap/swap/build/contracts/adapters/ERC721Adapter.sol/ERC721Adapter.json')
-const { createOrder, createOrderSignature } = require('@airswap/utils')
-const { TokenKinds } = require('@airswap/constants')
+const {
+  createOrder,
+  createOrderSignature,
+  createOrderERC20,
+  orderERC20ToParams,
+  createOrderERC20Signature,
+} = require('@airswap/utils')
+const { ADDRESS_ZERO, TokenKinds } = require('@airswap/constants')
 
 const CHAIN_ID = 31337
 const PROTOCOL_FEE = '30'
 const PROTOCOL_FEE_LIGHT = '7'
 const DEFAULT_AMOUNT = '1000'
-
 const REBATE_SCALE = '10'
 const REBATE_MAX = '100'
 
@@ -27,6 +32,8 @@ let erc20adapter
 let erc721token
 let erc721adapter
 let swap
+let swapERC20
+let batching
 
 async function signOrder(order, wallet, swapContract) {
   return {
@@ -59,7 +66,50 @@ async function createSignedOrder(params, signatory) {
   return await signOrder(unsignedOrder, signatory, swap.address, CHAIN_ID)
 }
 
-describe('Swap Unit', () => {
+async function createSignedOrderERC20(params, signatory) {
+  const unsignedOrder = createOrderERC20({
+    protocolFee: PROTOCOL_FEE,
+    signerWallet: signer.address,
+    signerToken: erc20token.address,
+    signerAmount: DEFAULT_AMOUNT,
+    senderWallet: sender.address,
+    senderToken: erc20token.address,
+    senderAmount: DEFAULT_AMOUNT,
+    ...params,
+  })
+  return {
+    ...unsignedOrder,
+    ...(await createOrderERC20Signature(
+      unsignedOrder,
+      signatory,
+      swap.address,
+      CHAIN_ID
+    )),
+  }
+}
+async function createSignedPublicOrderERC20(params, signatory) {
+  const unsignedOrder = createOrderERC20({
+    protocolFee: PROTOCOL_FEE,
+    signerWallet: signer.address,
+    signerToken: erc20token.address,
+    signerAmount: DEFAULT_AMOUNT,
+    senderWallet: ADDRESS_ZERO,
+    senderToken: erc20token.address,
+    senderAmount: DEFAULT_AMOUNT,
+    ...params,
+  })
+  return {
+    ...unsignedOrder,
+    ...(await createOrderERC20Signature(
+      unsignedOrder,
+      signatory,
+      swap.address,
+      CHAIN_ID
+    )),
+  }
+}
+
+describe('Batching Integration', () => {
   beforeEach(async () => {
     snapshotId = await ethers.provider.send('evm_snapshot')
   })
@@ -67,11 +117,6 @@ describe('Swap Unit', () => {
   afterEach(async () => {
     await ethers.provider.send('evm_revert', [snapshotId])
   })
-
-  //   stakingContract = await (
-  //   await ethers.getContractFactory(STAKING.abi, STAKING.bytecode)
-  // ).deploy('StakedAST', 'sAST', feeToken.address, 100, 10)
-  // await stakingContract.deployed()
 
   before('deploy adapter and swap', async () => {
     ;[deployer, sender, signer, affiliate, protocolFeeWallet, anyone] =
@@ -125,14 +170,33 @@ describe('Swap Unit', () => {
     await batching.deployed()
   })
 
-  describe('nonces, expiry, signatures', () => {
-    it('a successful swap marks an order nonce used', async () => {
-      const order = await createSignedOrder({}, signer)
+  describe('checks order validity', () => {
+    it('invalid orders are marked invalid', async () => {
+      const orders = [
+        await createSignedOrder({}, signer),
+        await createSignedOrder({}, signer),
+        await createSignedOrder({}, signer),
+      ]
       const orderValidities = await batching
         .connect(sender)
-        .checkOrders(sender.address, [order])
-      console.log(orderValidities.toString())
-      expect(orderValidities.toString()).to.equal([false].toString())
+        .checkOrders(sender.address, orders)
+      expect(orderValidities.toString()).to.equal(
+        [false, false, false].toString()
+      )
+    })
+
+    it('invalid orders ERC20 are marked invalid', async () => {
+      const ERC20orders = [
+        await createSignedOrderERC20({}, signer),
+        await createSignedPublicOrderERC20({}, signer),
+        await createSignedOrderERC20({}, signer),
+      ]
+      const orderValidities = await batching
+        .connect(sender)
+        .checkOrdersERC20(sender.address, ERC20orders)
+      expect(orderValidities.toString()).to.equal(
+        [false, false, false].toString()
+      )
     })
   })
 })

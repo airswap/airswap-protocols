@@ -245,14 +245,6 @@ contract Batching is Ownable {
     return orderValidity;
   }
 
-  /**
-   * @notice Check if the validity of an array of ERC20 Orders
-   * @dev return array and will fail if large token arrays are inputted
-   * @dev Returns an array of bool
-   * @param ordersERC20[] list of orders to be checked
-   * @return bool[] order validity
-   */
-
   function checkOrdersERC20(
     address senderWallet,
     ISwapERC20.OrderERC20[] calldata ordersERC20
