@@ -89,6 +89,20 @@ interface ISwapERC20 {
 
   function cancel(uint256[] calldata nonces) external;
 
+  function check(
+    address senderWallet,
+    uint256 nonce,
+    uint256 expiry,
+    address signerWallet,
+    address signerToken,
+    uint256 signerAmount,
+    address senderToken,
+    uint256 senderAmount,
+    uint8 v,
+    bytes32 r,
+    bytes32 s
+  ) external view returns (uint256, bytes32[] memory);
+
   function nonceUsed(address, uint256) external view returns (bool);
 
   function authorized(address) external view returns (address);

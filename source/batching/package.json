@@ -1,7 +1,7 @@
 {
-  "name": "@airswap/balances",
+  "name": "@airswap/batching",
   "version": "4.0.4",
-  "description": "Batch balance and allowance calls",
+  "description": "Batch balance, allowance, order validity check calls",
   "license": "MIT",
   "repository": {
     "type": "git",

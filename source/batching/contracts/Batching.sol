@@ -6,18 +6,21 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
+import "@airswap/swap-erc20/contracts/interfaces/ISwapERC20.sol";
 
 /**
- * @title BalanceChecker: Batch ERC-20 allowance and balance calls
+ * @title Batching: Batch balance, allowance, order validity check calls
  */
 contract Batching is Ownable {
   using SafeERC20 for IERC20;
   using Address for address;
 
   ISwap public Swap;
+  ISwapERC20 public SwapERC20;
 
-  constructor(address _swapContractAddress) {
+  constructor(address _swapContractAddress, address _swapERC20ContractAddress) {
     Swap = ISwap(_swapContractAddress);
+    SwapERC20 = ISwapERC20(_swapERC20ContractAddress);
   }
 
   /**
@@ -228,7 +231,7 @@ contract Batching is Ownable {
    * @return bool[] order validity
    */
 
-  function getOrderValidity(
+  function checkOrders(
     address senderWallet,
     ISwap.Order[] calldata orders
   ) external view returns (bool[] memory) {
@@ -236,33 +239,44 @@ contract Batching is Ownable {
     bool[] memory orderValidity = new bool[](orders.length);
 
     for (uint256 i = 0; i < orders.length; i++) {
-      ISwap.Order memory order = orders[i];
-      (, uint256 errorCount) = Swap.check(senderWallet, order);
+      (, uint256 errorCount) = Swap.check(senderWallet, orders[i]);
       orderValidity[i] = errorCount == 0 ? true : false;
     }
     return orderValidity;
   }
 
   /**
-   * @notice Check if the nonce for an array of order has been already used or not
+   * @notice Check if the validity of an array of ERC20 Orders
    * @dev return array and will fail if large token arrays are inputted
    * @dev Returns an array of bool
-   * @param signerWallets[] list of wallets associated with the nonces to be checked
-   * * @param nonces[] list of nonces to be checked
-   * @return bool[] nonce validity
+   * @param ordersERC20[] list of orders to be checked
+   * @return bool[] order validity
    */
 
-  function getNonceUsed(
-    address[] calldata signerWallets,
-    uint256[] calldata nonces
+  function checkOrdersERC20(
+    address senderWallet,
+    ISwapERC20.OrderERC20[] calldata ordersERC20
   ) external view returns (bool[] memory) {
-    require(signerWallets.length > 0);
-    require(signerWallets.length == nonces.length);
-    bool[] memory nonceUsed = new bool[](signerWallets.length);
+    require(ordersERC20.length > 0);
+    bool[] memory orderValidity = new bool[](ordersERC20.length);
 
-    for (uint256 i = 0; i < signerWallets.length; i++) {
-      nonceUsed[i] = Swap.nonceUsed(signerWallets[i], nonces[i]);
+    for (uint256 i = 0; i < ordersERC20.length; i++) {
+      ISwapERC20.OrderERC20 memory order = ordersERC20[i];
+      (uint256 errorCount, ) = SwapERC20.check(
+        senderWallet,
+        order.nonce,
+        order.expiry,
+        order.signerWallet,
+        order.signerToken,
+        order.signerAmount,
+        order.senderToken,
+        order.senderAmount,
+        order.v,
+        order.r,
+        order.s
+      );
+      orderValidity[i] = errorCount == 0 ? true : false;
     }
-    return nonceUsed;
+    return orderValidity;
   }
 }

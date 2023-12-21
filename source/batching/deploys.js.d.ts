@@ -1,1 +1,1 @@
-declare module '@airswap/balances/deploys.js'
+declare module '@airswap/batching/deploys.js'
