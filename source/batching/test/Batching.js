@@ -11,7 +11,6 @@ const {
   createOrder,
   createOrderSignature,
   createOrderERC20,
-  orderERC20ToParams,
   createOrderERC20Signature,
 } = require('@airswap/utils')
 const { ADDRESS_ZERO, TokenKinds } = require('@airswap/constants')
@@ -20,6 +19,7 @@ const CHAIN_ID = 31337
 const PROTOCOL_FEE = '30'
 const PROTOCOL_FEE_LIGHT = '7'
 const DEFAULT_AMOUNT = '1000'
+const DEFAULT_BALANCE = '100000'
 const REBATE_SCALE = '10'
 const REBATE_MAX = '100'
 
@@ -82,31 +82,31 @@ async function createSignedOrderERC20(params, signatory) {
     ...(await createOrderERC20Signature(
       unsignedOrder,
       signatory,
-      swap.address,
+      swapERC20.address,
       CHAIN_ID
     )),
   }
 }
-async function createSignedPublicOrderERC20(params, signatory) {
-  const unsignedOrder = createOrderERC20({
-    protocolFee: PROTOCOL_FEE,
-    signerWallet: signer.address,
-    signerToken: erc20token.address,
-    signerAmount: DEFAULT_AMOUNT,
-    senderWallet: ADDRESS_ZERO,
-    senderToken: erc20token.address,
-    senderAmount: DEFAULT_AMOUNT,
-    ...params,
-  })
-  return {
-    ...unsignedOrder,
-    ...(await createOrderERC20Signature(
-      unsignedOrder,
-      signatory,
-      swap.address,
-      CHAIN_ID
-    )),
-  }
+
+async function setUpAllowances(senderAmount, signerAmount) {
+  await erc20token.mock.allowance
+    .withArgs(sender.address, swap.address)
+    .returns(senderAmount)
+  await erc20token.mock.allowance
+    .withArgs(signer.address, swap.address)
+    .returns(signerAmount)
+
+  await erc20token.mock.allowance
+    .withArgs(sender.address, swapERC20.address)
+    .returns(senderAmount)
+  await erc20token.mock.allowance
+    .withArgs(signer.address, swapERC20.address)
+    .returns(signerAmount)
+}
+
+async function setUpBalances(senderAmount, signerAmount) {
+  await erc20token.mock.balanceOf.withArgs(sender.address).returns(senderAmount)
+  await erc20token.mock.balanceOf.withArgs(signer.address).returns(signerAmount)
 }
 
 describe('Batching Integration', () => {
@@ -171,7 +171,37 @@ describe('Batching Integration', () => {
   })
 
   describe('checks order validity', () => {
+    it('valid orders are marked valid', async () => {
+      await setUpAllowances(DEFAULT_BALANCE, DEFAULT_BALANCE)
+      await setUpBalances(DEFAULT_BALANCE, DEFAULT_BALANCE)
+      const orders = [
+        await createSignedOrder({}, signer),
+        await createSignedOrder({}, signer),
+        await createSignedOrder({}, signer),
+      ]
+      const orderValidities = await batching
+        .connect(sender)
+        .checkOrders(sender.address, orders)
+      expect(orderValidities.toString()).to.equal([true, true, true].toString())
+    })
+
+    it('valid orders ERC20 are marked valid', async () => {
+      await setUpAllowances(DEFAULT_BALANCE, DEFAULT_BALANCE)
+      await setUpBalances(DEFAULT_BALANCE, DEFAULT_BALANCE)
+      const ERC20orders = [
+        await createSignedOrderERC20({}, signer),
+        await createSignedOrderERC20({}, signer),
+        await createSignedOrderERC20({}, signer),
+      ]
+      const orderValidities = await batching
+        .connect(sender)
+        .checkOrdersERC20(sender.address, ERC20orders)
+      expect(orderValidities.toString()).to.equal([true, true, true].toString())
+    })
+
     it('invalid orders are marked invalid', async () => {
+      await setUpAllowances(0, 0)
+      await setUpBalances(0, 0)
       const orders = [
         await createSignedOrder({}, signer),
         await createSignedOrder({}, signer),
@@ -186,9 +216,11 @@ describe('Batching Integration', () => {
     })
 
     it('invalid orders ERC20 are marked invalid', async () => {
+      await setUpAllowances(0, 0)
+      await setUpBalances(0, 0)
       const ERC20orders = [
         await createSignedOrderERC20({}, signer),
-        await createSignedPublicOrderERC20({}, signer),
+        await createSignedOrderERC20({}, signer),
         await createSignedOrderERC20({}, signer),
       ]
       const orderValidities = await batching
