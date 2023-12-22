@@ -1,5 +1,5 @@
 {
-  "name": "@airswap/batch-check",
+  "name": "@airswap/batch",
   "version": "4.0.4",
   "description": "Batch balance, allowance, order validity check calls",
   "license": "MIT",

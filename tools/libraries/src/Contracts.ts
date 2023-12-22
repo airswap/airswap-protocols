@@ -20,10 +20,10 @@ import swapERC20Blocks from '@airswap/swap-erc20/deploys-blocks.js'
 import wrapperBlocks from '@airswap/wrapper/deploys-blocks.js'
 import wethBlocks from '@airswap/wrapper/deploys-blocks-weth.js'
 
-import BalanceChecker from '@airswap/balances/build/contracts/BalanceChecker.sol/BalanceChecker.json'
-import balancesDeploys from '@airswap/balances/deploys.js'
-const balancesInterface = new ethers.utils.Interface(
-  JSON.stringify(BalanceChecker.abi)
+import BatchChecker from '@airswap/batch/build/contracts/Batch.sol/Batch.json'
+import batchDeploys from '@airswap/batch/deploys.js'
+const batchInterface = new ethers.utils.Interface(
+  JSON.stringify(BatchChecker.abi)
 )
 
 export class Contract {
@@ -82,14 +82,14 @@ export const WETH = new Contract(
   wethBlocks,
   WETH9__factory
 )
-export const Balances = new Contract('Balances', balancesDeploys)
-Balances.getContract = (
-  providerOrSigner: ethers.providers.Provider | ethers.Signer,
-  chainId: number
-): ethers.Contract => {
-  return new ethers.Contract(
-    balancesDeploys[chainId],
-    balancesInterface,
-    providerOrSigner
-  )
-}
+// export const Batch = new Contract('Batch', batchDeploys)
+// Batch.getContract = (
+//   providerOrSigner: ethers.providers.Provider | ethers.Signer,
+//   chainId: number
+// ): ethers.Contract => {
+//   return new ethers.Contract(
+//     batchDeploys[chainId],
+//     balancesInterface,
+//     providerOrSigner
+//   )
+// }

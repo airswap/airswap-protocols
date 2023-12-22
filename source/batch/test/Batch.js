@@ -33,7 +33,7 @@ let erc721token
 let erc721adapter
 let swap
 let swapERC20
-let batching
+let batch
 
 async function signOrder(order, wallet, swapContract) {
   return {
@@ -164,10 +164,10 @@ describe('BatchChecks Integration', () => {
     )
     await swapERC20.deployed()
 
-    batching = await (
-      await ethers.getContractFactory('BatchChecks')
+    batch = await (
+      await ethers.getContractFactory('Batch')
     ).deploy(swap.address, swapERC20.address)
-    await batching.deployed()
+    await batch.deployed()
   })
 
   describe('checks order validity', () => {
@@ -179,7 +179,7 @@ describe('BatchChecks Integration', () => {
         await createSignedOrder({}, signer),
         await createSignedOrder({}, signer),
       ]
-      const orderValidities = await batching
+      const orderValidities = await batch
         .connect(sender)
         .checkOrders(sender.address, orders)
       expect(orderValidities.toString()).to.equal([true, true, true].toString())
@@ -193,7 +193,7 @@ describe('BatchChecks Integration', () => {
         await createSignedOrderERC20({}, signer),
         await createSignedOrderERC20({}, signer),
       ]
-      const orderValidities = await batching
+      const orderValidities = await batch
         .connect(sender)
         .checkOrdersERC20(sender.address, ERC20orders)
       expect(orderValidities.toString()).to.equal([true, true, true].toString())
@@ -207,7 +207,7 @@ describe('BatchChecks Integration', () => {
         await createSignedOrder({}, signer),
         await createSignedOrder({}, signer),
       ]
-      const orderValidities = await batching
+      const orderValidities = await batch
         .connect(sender)
         .checkOrders(sender.address, orders)
       expect(orderValidities.toString()).to.equal(
@@ -223,7 +223,7 @@ describe('BatchChecks Integration', () => {
         await createSignedOrderERC20({}, signer),
         await createSignedOrderERC20({}, signer),
       ]
-      const orderValidities = await batching
+      const orderValidities = await batch
         .connect(sender)
         .checkOrdersERC20(sender.address, ERC20orders)
       expect(orderValidities.toString()).to.equal(
