@@ -51,7 +51,9 @@ export function getCostFromPricing(
       }
     }
   }
-  return null
+  throw new Error(
+    `Requested pair ${quoteToken}/${baseToken} not found in provided pricing`
+  )
 }
 
 export const getPriceForAmount = getCostFromPricing
