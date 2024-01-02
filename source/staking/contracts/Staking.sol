@@ -227,13 +227,17 @@ contract Staking is IStaking, Ownable {
    */
   function available(address _account) public view override returns (uint256) {
     Stake storage _selected = stakes[_account];
-    uint256 _available = (_selected.balance *
-      (block.timestamp - _selected.timestamp)) /
-      (_selected.maturity - _selected.timestamp);
-    if (_available >= _selected.balance) {
+    if (_selected.maturity < _selected.timestamp) {
       return _selected.balance;
     } else {
-      return _available;
+      uint256 _available = (_selected.balance *
+        (block.timestamp - _selected.timestamp)) /
+        (_selected.maturity - _selected.timestamp);
+      if (_available >= _selected.balance) {
+        return _selected.balance;
+      } else {
+        return _available;
+      }
     }
   }
 

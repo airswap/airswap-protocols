@@ -339,6 +339,54 @@ describe('Staking Unit', () => {
       expect(userStakes.balance).to.equal(90)
     })
 
+    it('successful partial unstaking', async () => {
+      await token.mock.transferFrom.returns(true)
+      await token.mock.transfer.returns(true)
+      await staking.connect(account1).stake('100')
+
+      // move 10 seconds forward - 10% unstakeable
+      await ethers.provider.send('evm_increaseTime', [200])
+      await ethers.provider.send('evm_mine')
+
+      await staking.connect(account1).unstake('10')
+      const userStakes = await staking
+        .connect(account1)
+        .getStakes(account1.address)
+
+      expect(userStakes.balance).to.equal(90)
+
+      await staking.connect(account1).unstake('10')
+      const userStakes2 = await staking
+        .connect(account1)
+        .getStakes(account1.address)
+
+      expect(userStakes2.balance).to.equal(80)
+    })
+
+    it('successful partial unstaking after stake maturity', async () => {
+      await token.mock.transferFrom.returns(true)
+      await token.mock.transfer.returns(true)
+      await staking.connect(account1).stake('100')
+
+      // move 10 seconds forward - 10% unstakeable
+      await ethers.provider.send('evm_increaseTime', [1000])
+      await ethers.provider.send('evm_mine')
+
+      await staking.connect(account1).unstake('10')
+      const userStakes = await staking
+        .connect(account1)
+        .getStakes(account1.address)
+
+      expect(userStakes.balance).to.equal(90)
+
+      await staking.connect(account1).unstake('10')
+      const userStakes2 = await staking
+        .connect(account1)
+        .getStakes(account1.address)
+
+      expect(userStakes2.balance).to.equal(80)
+    })
+
     it('successful extended stake and successful unstaking', async () => {
       await token.mock.transferFrom.returns(true)
       await token.mock.transfer.returns(true)
