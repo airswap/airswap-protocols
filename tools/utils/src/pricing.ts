@@ -38,15 +38,25 @@ export function getCostFromPricing(
   for (const i in pricing) {
     if (pricing[i].baseToken.toLowerCase() === baseToken.toLowerCase()) {
       if (pricing[i].quoteToken.toLowerCase() === quoteToken.toLowerCase()) {
-        if (side === 'buy') {
-          return calculateCost(amount, pricing[i].ask)
+        if (pricing[i].minimum && BigNumber(amount).lt(pricing[i].minimum)) {
+          throw new Error(
+            `Requested amount ${amount} does not meet minimum ${pricing[i].minimum}`
+          )
+        } else {
+          if (side === 'buy') {
+            return calculateCost(amount, pricing[i].ask)
+          }
+          return calculateCost(amount, pricing[i].bid)
         }
-        return calculateCost(amount, pricing[i].bid)
       }
     }
   }
-  return null
+  throw new Error(
+    `Requested pair ${quoteToken}/${baseToken} not found in provided pricing`
+  )
 }
+
+export const getPriceForAmount = getCostFromPricing
 
 export function calculateCost(amount: string, pricing: Formula | Levels) {
   // TODO: Formula support
