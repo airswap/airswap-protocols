@@ -17,6 +17,7 @@ import {
   decompressFullOrderERC20,
   calculateCostFromLevels,
   getInterfaceId,
+  getFullSwapERC20,
 } from '../index'
 
 const signerPrivateKey =
@@ -188,5 +189,27 @@ describe('Utils', async () => {
     const signedOrder = decompressFullOrderERC20(compressed)
     expect(isValidOrderERC20(signedOrder)).to.equal(true)
     expect(signerWallet.toLowerCase()).to.equal(wallet.address.toLowerCase())
+  })
+
+  it('Gets full SwapERC20 from signerWallet and logs', async () => {
+    const nonce = '1'
+    const signerWallet = '0x51C72848c68a965f66FA7a88855F9f7784502a7F'
+    const feeReceiver = '0xaD30f7EEBD9Bd5150a256F47DA41d4403033CdF0'
+    const fullSwap = await getFullSwapERC20(
+      nonce,
+      signerWallet,
+      feeReceiver,
+      require('./test-logs.json')
+    )
+    expect(fullSwap).to.deep.equal({
+      nonce,
+      signerWallet,
+      signerToken: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+      signerAmount: '1008438461',
+      senderWallet: '0x74de5d4FCbf63E00296fd95d33236B9794016631',
+      senderToken: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+      senderAmount: '461545050000000000',
+      feeAmount: '705906',
+    })
   })
 })
