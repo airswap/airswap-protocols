@@ -4,6 +4,7 @@ pragma solidity ^0.8.17;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/math/Math.sol";
 import "./interfaces/IStaking.sol";
 
 /**
@@ -227,17 +228,13 @@ contract Staking is IStaking, Ownable {
    */
   function available(address _account) public view override returns (uint256) {
     Stake storage _selected = stakes[_account];
-    if (_selected.maturity <= _selected.timestamp) {
+    uint256 _available = (_selected.balance *
+      (block.timestamp - _selected.timestamp)) /
+      (_selected.maturity - _selected.timestamp);
+    if (_available >= _selected.balance) {
       return _selected.balance;
     } else {
-      uint256 _available = (_selected.balance *
-        (block.timestamp - _selected.timestamp)) /
-        (_selected.maturity - _selected.timestamp);
-      if (_available >= _selected.balance) {
-        return _selected.balance;
-      } else {
-        return _available;
-      }
+      return _available;
     }
   }
 
@@ -280,10 +277,12 @@ contract Staking is IStaking, Ownable {
     if (_amount > available(_account)) revert AmountInvalid(_amount);
     uint256 nowAvailable = available(_account);
     _selected.balance = _selected.balance - _amount;
-    _selected.timestamp =
+    _selected.timestamp = Math.min(
       block.timestamp -
-      (((10000 - ((10000 * _amount) / nowAvailable)) *
-        (block.timestamp - _selected.timestamp)) / 10000);
+        (((10000 - ((10000 * _amount) / nowAvailable)) *
+          (block.timestamp - _selected.timestamp)) / 10000),
+      _selected.maturity - 1
+    );
     stakingToken.safeTransfer(_account, _amount);
     emit Transfer(_account, address(0), _amount);
   }
