@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.17;
+pragma solidity 0.8.23;
 
 import "../interfaces/IAdapter.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
@@ -46,6 +46,7 @@ contract ERC1155Adapter is IAdapter {
     uint256 id,
     address token
   ) external {
+    if (amount == 0) revert InvalidArgument("amount");
     IERC1155(token).safeTransferFrom(from, to, id, amount, "0x00");
   }
 }
