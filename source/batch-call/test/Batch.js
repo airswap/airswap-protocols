@@ -109,7 +109,7 @@ async function setUpBalances(senderAmount, signerAmount) {
   await erc20token.mock.balanceOf.withArgs(signer.address).returns(signerAmount)
 }
 
-describe('BatchChecks Integration', () => {
+describe('BatchCallChecks Integration', () => {
   beforeEach(async () => {
     snapshotId = await ethers.provider.send('evm_snapshot')
   })
@@ -164,9 +164,7 @@ describe('BatchChecks Integration', () => {
     )
     await swapERC20.deployed()
 
-    batch = await (
-      await ethers.getContractFactory('Batch')
-    ).deploy(swap.address, swapERC20.address)
+    batch = await (await ethers.getContractFactory('BatchCall')).deploy()
     await batch.deployed()
   })
 
@@ -181,7 +179,7 @@ describe('BatchChecks Integration', () => {
       ]
       const orderValidities = await batch
         .connect(sender)
-        .checkOrders(sender.address, orders)
+        .checkOrders(sender.address, orders, swap.address)
       expect(orderValidities.toString()).to.equal([true, true, true].toString())
     })
 
@@ -195,7 +193,7 @@ describe('BatchChecks Integration', () => {
       ]
       const orderValidities = await batch
         .connect(sender)
-        .checkOrdersERC20(sender.address, ERC20orders)
+        .checkOrdersERC20(sender.address, ERC20orders, swapERC20.address)
       expect(orderValidities.toString()).to.equal([true, true, true].toString())
     })
 
@@ -209,7 +207,7 @@ describe('BatchChecks Integration', () => {
       ]
       const orderValidities = await batch
         .connect(sender)
-        .checkOrders(sender.address, orders)
+        .checkOrders(sender.address, orders, swap.address)
       expect(orderValidities.toString()).to.equal(
         [false, false, false].toString()
       )
@@ -225,7 +223,7 @@ describe('BatchChecks Integration', () => {
       ]
       const orderValidities = await batch
         .connect(sender)
-        .checkOrdersERC20(sender.address, ERC20orders)
+        .checkOrdersERC20(sender.address, ERC20orders, swapERC20.address)
       expect(orderValidities.toString()).to.equal(
         [false, false, false].toString()
       )
