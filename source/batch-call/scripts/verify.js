@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 const { ethers, run } = require('hardhat')
 const { chainNames } = require('@airswap/constants')
-const batchDeploys = require('../deploys.js')
+const batchCallDeploys = require('../deploys.js')
 
 async function main() {
   await run('compile')
@@ -12,7 +12,7 @@ async function main() {
 
   console.log(`Verifying on ${chainNames[chainId].toUpperCase()}`)
   await run('verify:verify', {
-    address: batchDeploys[chainId],
+    address: batchCallDeploys[chainId],
     constructorArguments: [],
   })
 }

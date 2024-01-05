@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.17;
+pragma solidity 0.8.23;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -9,19 +9,11 @@ import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "@airswap/swap-erc20/contracts/interfaces/ISwapERC20.sol";
 
 /**
- * @title Batching: Batch balance, allowance, order validity check calls
+ * @title BatchCalling: BatchCall balance, allowance, order validity check calls
  */
-contract Batch is Ownable {
+contract BatchCall is Ownable {
   using SafeERC20 for IERC20;
   using Address for address;
-
-  ISwap public Swap;
-  ISwapERC20 public SwapERC20;
-
-  constructor(address _swapContractAddress, address _swapERC20ContractAddress) {
-    Swap = ISwap(_swapContractAddress);
-    SwapERC20 = ISwapERC20(_swapERC20ContractAddress);
-  }
 
   /**
    * @notice Check the token balances of a wallet for multiple tokens
@@ -138,36 +130,6 @@ contract Batch is Ownable {
   }
 
   /**
-   * @notice Self-destruct contract for clean-up
-   */
-  function destruct(address payable recipientAddress) public onlyOwner {
-    selfdestruct(recipientAddress);
-  }
-
-  /**
-   * @notice Allow owner to withdraw ether from contract
-   */
-  function withdraw() public onlyOwner {
-    (bool success, ) = address(owner()).call{ value: address(this).balance }(
-      ""
-    );
-    require(success, "ETH_WITHDRAW_FAILED");
-  }
-
-  /**
-   * @notice Allow owner to withdraw stuck tokens from contract
-   * @param tokenAddress address
-   * @param amount uint256
-   */
-  function withdrawToken(
-    address tokenAddress,
-    uint256 amount
-  ) public onlyOwner {
-    require(tokenAddress != address(0x0)); //use withdraw for ETH
-    IERC20(tokenAddress).safeTransfer(msg.sender, amount);
-  }
-
-  /**
    * @notice Check the token allowance of a wallet in a token contract
    * @dev return 0 on returns 0 on invalid spender contract or non-contract address
    * @param userAddress address
@@ -233,13 +195,14 @@ contract Batch is Ownable {
 
   function checkOrders(
     address senderWallet,
-    ISwap.Order[] calldata orders
+    ISwap.Order[] calldata orders,
+    ISwap swapContract
   ) external view returns (bool[] memory) {
     require(orders.length > 0);
     bool[] memory orderValidity = new bool[](orders.length);
 
     for (uint256 i = 0; i < orders.length; i++) {
-      (, uint256 errorCount) = Swap.check(senderWallet, orders[i]);
+      (, uint256 errorCount) = swapContract.check(senderWallet, orders[i]);
       orderValidity[i] = errorCount == 0 ? true : false;
     }
     return orderValidity;
@@ -247,14 +210,15 @@ contract Batch is Ownable {
 
   function checkOrdersERC20(
     address senderWallet,
-    ISwapERC20.OrderERC20[] calldata ordersERC20
+    ISwapERC20.OrderERC20[] calldata ordersERC20,
+    ISwapERC20 swapERC20Contract
   ) external view returns (bool[] memory) {
     require(ordersERC20.length > 0);
     bool[] memory orderValidity = new bool[](ordersERC20.length);
 
     for (uint256 i = 0; i < ordersERC20.length; i++) {
       ISwapERC20.OrderERC20 memory order = ordersERC20[i];
-      (uint256 errorCount, ) = SwapERC20.check(
+      (uint256 errorCount, ) = swapERC20Contract.check(
         senderWallet,
         order.nonce,
         order.expiry,
@@ -270,5 +234,28 @@ contract Batch is Ownable {
       orderValidity[i] = errorCount == 0 ? true : false;
     }
     return orderValidity;
+  }
+
+  /**
+   * @notice Allow owner to withdraw ether from contract
+   */
+  function withdraw() public onlyOwner {
+    (bool success, ) = address(owner()).call{ value: address(this).balance }(
+      ""
+    );
+    require(success, "ETH_WITHDRAW_FAILED");
+  }
+
+  /**
+   * @notice Allow owner to withdraw stuck tokens from contract
+   * @param tokenAddress address
+   * @param amount uint256
+   */
+  function withdrawToken(
+    address tokenAddress,
+    uint256 amount
+  ) public onlyOwner {
+    require(tokenAddress != address(0x0)); //use withdraw for ETH
+    IERC20(tokenAddress).safeTransfer(msg.sender, amount);
   }
 }
