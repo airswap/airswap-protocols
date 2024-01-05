@@ -329,7 +329,7 @@ export class Server extends TypedEmitter<ServerEvents> {
   }
 
   /**
-   * Protocols.StorageERC20
+   * Protocols.IndexingERC20
    */
   public async addOrderERC20(
     fullOrder: FullOrderERC20
@@ -344,12 +344,20 @@ export class Server extends TypedEmitter<ServerEvents> {
   }
 
   public async getOrdersERC20(
-    orderFilter: OrderFilter
+    orderFilter: OrderFilter,
+    offset: number,
+    limit: number,
+    sortField?: SortField,
+    sortOrder?: SortOrder
   ): Promise<OrderResponse<FullOrderERC20>> {
     try {
       return Promise.resolve(
         (await this.httpCall('getOrdersERC20', [
           { ...this.toBigIntJson(orderFilter) },
+          offset,
+          limit,
+          sortField,
+          sortOrder,
         ])) as OrderResponse<FullOrderERC20>
       )
     } catch (err) {
@@ -358,7 +366,7 @@ export class Server extends TypedEmitter<ServerEvents> {
   }
 
   /**
-   * Protocols.Storage
+   * Protocols.Indexing
    */
   public async addOrder(order: FullOrder): Promise<SuccessResponse> {
     try {
@@ -371,12 +379,20 @@ export class Server extends TypedEmitter<ServerEvents> {
   }
 
   public async getOrders(
-    orderFilter: OrderFilter
+    orderFilter: OrderFilter,
+    offset: number,
+    limit: number,
+    sortField?: SortField,
+    sortOrder?: SortOrder
   ): Promise<OrderResponse<FullOrder>> {
     try {
       return Promise.resolve(
         (await this.httpCall('getOrders', [
           { ...this.toBigIntJson(orderFilter) },
+          offset,
+          limit,
+          sortField,
+          sortOrder,
         ])) as OrderResponse<FullOrder>
       )
     } catch (err) {

@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.17;
+pragma solidity 0.8.23;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "./interfaces/INoReturnERC20.sol";
 import "./interfaces/ISwapERC20.sol";
 
 /**
@@ -199,7 +200,8 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
   }
 
   /**
-   * @notice Swap Atomic ERC20 Swap (Low Gas Usage)
+   * @notice Swap Atomic ERC20 Swap (Minimal Gas)
+   * @dev No transfer checks. Only use with known tokens.
    * @param nonce uint256 Unique and should be sequential
    * @param expiry uint256 Expiry in seconds since 1 January 1970
    * @param signerWallet address Wallet of the signer
@@ -269,13 +271,21 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     }
 
     // Transfer token from sender to signer
-    IERC20(senderToken).transferFrom(msg.sender, signerWallet, senderAmount);
+    INoReturnERC20(senderToken).transferFrom(
+      msg.sender,
+      signerWallet,
+      senderAmount
+    );
 
     // Transfer token from signer to sender
-    IERC20(signerToken).transferFrom(signerWallet, msg.sender, signerAmount);
+    INoReturnERC20(signerToken).transferFrom(
+      signerWallet,
+      msg.sender,
+      signerAmount
+    );
 
     // Transfer protocol fee from signer to fee wallet
-    IERC20(signerToken).transferFrom(
+    INoReturnERC20(signerToken).transferFrom(
       signerWallet,
       protocolFeeWallet,
       (signerAmount * protocolFeeLight) / FEE_DIVISOR
