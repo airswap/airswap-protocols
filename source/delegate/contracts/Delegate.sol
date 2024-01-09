@@ -4,7 +4,6 @@ pragma solidity 0.8.17;
 
 import "./interfaces/IDelegate.sol";
 import "@airswap/swap-erc20/contracts/interfaces/ISwapERC20.sol";
-import "@airswap/indexer/contracts/interfaces/IIndexer.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -19,9 +18,6 @@ contract Delegate is IDelegate, Ownable {
 
   // The Swap contract to be used to settle trades
   ISwapERC20 public swapContract;
-
-  // The Indexer to stake intent to trade on
-  IIndexer public indexer;
 
   // Maximum integer for token transfer approval
   uint256 internal constant MAX_INT = 2 ** 256 - 1;
@@ -42,20 +38,17 @@ contract Delegate is IDelegate, Ownable {
    * @notice Contract Constructor
    * @dev owner defaults to msg.sender if delegateContractOwner is provided as address(0)
    * @param delegateSwap address Swap contract the delegate will deploy with
-   * @param delegateIndexer address Indexer contract the delegate will deploy with
    * @param delegateContractOwner address Owner of the delegate
    * @param delegateTradeWallet address Wallet the delegate will trade from
    * @param delegateProtocol bytes2 The protocol identifier for Delegate contracts
    */
   constructor(
     ISwapERC20 delegateSwap,
-    IIndexer delegateIndexer,
     address delegateContractOwner,
     address delegateTradeWallet,
     bytes2 delegateProtocol
   ) {
     swapContract = delegateSwap;
-    indexer = delegateIndexer;
     protocol = delegateProtocol;
 
     // If no delegate owner is provided, the deploying address is the owner.
@@ -69,15 +62,6 @@ contract Delegate is IDelegate, Ownable {
     } else {
       tradeWallet = owner();
     }
-
-    // Ensure that the indexer can pull funds from delegate account.
-    require(
-      IERC20(address(indexer.getStakingToken())).approve(
-        address(indexer),
-        MAX_INT
-      ),
-      "STAKING_APPROVAL_FAILED"
-    );
   }
 
   /**
@@ -111,105 +95,6 @@ contract Delegate is IDelegate, Ownable {
     address signerToken
   ) external onlyOwner {
     _unsetRule(senderToken, signerToken);
-  }
-
-  /**
-   * @notice sets a rule on the delegate and an intent on the indexer
-   * @dev only callable by owner
-   * @dev delegate needs to be given allowance from msg.sender for the newStakeAmount
-   * @dev swap needs to be given permission to move funds from the delegate
-   * @param senderToken address Token the delgeate will send
-   * @param signerToken address Token the delegate will receive
-   * @param rule Rule Rule to set on a delegate
-   * @param newStakeAmount uint256 Amount to stake for an intent
-   */
-  function setRuleAndIntent(
-    address senderToken,
-    address signerToken,
-    Rule calldata rule,
-    uint256 newStakeAmount
-  ) external onlyOwner {
-    _setRule(
-      senderToken,
-      signerToken,
-      rule.maxSenderAmount,
-      rule.priceCoef,
-      rule.priceExp
-    );
-
-    // get currentAmount staked or 0 if never staked
-    uint256 oldStakeAmount = indexer.getStakedAmount(
-      address(this),
-      signerToken,
-      senderToken,
-      protocol
-    );
-    if (oldStakeAmount == newStakeAmount && oldStakeAmount > 0) {
-      return; // forgo trying to reset intent with non-zero same stake amount
-    } else if (oldStakeAmount < newStakeAmount) {
-      // transfer only the difference from the sender to the Delegate.
-      require(
-        IERC20(address(indexer.getStakingToken())).transferFrom(
-          msg.sender,
-          address(this),
-          newStakeAmount - oldStakeAmount
-        ),
-        "STAKING_TRANSFER_FAILED"
-      );
-    }
-
-    indexer.setIntent(
-      signerToken,
-      senderToken,
-      protocol,
-      newStakeAmount,
-      bytes32(uint256(uint160(address(this))) << 96) //NOTE: this will pad 0's to the right
-    );
-
-    if (oldStakeAmount > newStakeAmount) {
-      // return excess stake back
-      require(
-        IERC20(address(indexer.getStakingToken())).transfer(
-          msg.sender,
-          oldStakeAmount - newStakeAmount
-        ),
-        "STAKING_RETURN_FAILED"
-      );
-    }
-  }
-
-  /**
-   * @notice unsets a rule on the delegate and removes an intent on the indexer
-   * @dev only callable by owner
-   * @param senderToken address Maker token in the token pair for rules and intents
-   * @param signerToken address Taker token  in the token pair for rules and intents
-   */
-  function unsetRuleAndIntent(
-    address senderToken,
-    address signerToken
-  ) external onlyOwner {
-    _unsetRule(senderToken, signerToken);
-
-    // Query the indexer for the amount staked.
-    uint256 stakedAmount = indexer.getStakedAmount(
-      address(this),
-      signerToken,
-      senderToken,
-      protocol
-    );
-    indexer.unsetIntent(signerToken, senderToken, protocol);
-
-    // Upon unstaking, the Delegate will be given the staking amount.
-    // This is returned to the msg.sender.
-    if (stakedAmount > 0) {
-      require(
-        IERC20(address(indexer.getStakingToken())).transfer(
-          msg.sender,
-          stakedAmount
-        ),
-        "STAKING_RETURN_FAILED"
-      );
-    }
   }
 
   /**

@@ -13,7 +13,7 @@ function toWei(value, places) {
   return toAtomicString(value, places || 18)
 }
 
-describe('Pool Unit', () => {
+describe('Delefate Unit', () => {
   let deployer
   let alice
   let bob
@@ -35,10 +35,5 @@ describe('Pool Unit', () => {
 
     delegate = await (await ethers.getContractFactory('Delegate')).deploy()
     await delegate.deployed()
-
-    delegateFactory = await (
-      await ethers.getContractFactory('DelegateFactory')
-    ).deploy()
-    await delegateFactory.deployed()
   })
 })
