@@ -33,7 +33,7 @@ let erc721token
 let erc721adapter
 let swap
 let swapERC20
-let batch
+let batchCall
 
 async function signOrder(order, wallet, swapContract) {
   return {
