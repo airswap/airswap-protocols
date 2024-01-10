@@ -8,7 +8,7 @@ import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "@airswap/swap-erc20/contracts/interfaces/ISwapERC20.sol";
 
 /**
- * @title BatchCalling: BatchCall balance, allowance, order validity check calls
+ * @title BatchCalling: Batch balance, allowance, order validity checks
  */
 contract BatchCall {
   using SafeERC20 for IERC20;
