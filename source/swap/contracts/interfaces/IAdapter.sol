@@ -17,7 +17,7 @@ interface IAdapter {
   /**
    * @notice Revert if provided an invalid transfer argument
    */
-  error InvalidArgument(string);
+  error AmountOrIDInvalid(string);
 
   /**
    * @notice Return the ERC165 interfaceId this adapter supports
@@ -25,16 +25,22 @@ interface IAdapter {
   function interfaceId() external view returns (bytes4);
 
   /**
-   * @notice Function to wrap token transfer for different token types
-   * @param party Party from whom swap would be made
+   * @notice Checks allowance on a token
+   * @param party Party params to check
    */
   function hasAllowance(Party calldata party) external view returns (bool);
 
   /**
-   * @notice Function to wrap token transfer for different token types
-   * @param party Party from whom swap would be made
+   * @notice Checks balance on a token
+   * @param party Party params to check
    */
   function hasBalance(Party calldata party) external view returns (bool);
+
+  /**
+   * @notice Checks params for transfer
+   * @param party Party params to check
+   */
+  function hasValidParams(Party calldata party) external view returns (bool);
 
   /**
    * @notice Function to wrap token transfer for different token types

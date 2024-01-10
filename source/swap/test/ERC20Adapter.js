@@ -75,7 +75,7 @@ describe('ERC20Adapter Unit', () => {
         .connect(anyone)
         .transfer(party.wallet, anyone.address, party.amount, '1', party.token)
     )
-      .to.be.revertedWith('InvalidArgument')
+      .to.be.revertedWith('AmountOrIDInvalid')
       .withArgs('id')
   })
 })

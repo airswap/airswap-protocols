@@ -4,6 +4,7 @@ const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
 const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
 const IERC721 = require('@openzeppelin/contracts/build/contracts/ERC721Royalty.json')
+const IERC1155 = require('@openzeppelin/contracts/build/contracts/IERC1155.json')
 const { createOrder, createOrderSignature } = require('@airswap/utils')
 const { TokenKinds, ADDRESS_ZERO } = require('@airswap/constants')
 
@@ -25,6 +26,8 @@ let erc20token
 let erc20adapter
 let erc721token
 let erc721adapter
+let erc1155token
+let erc1155adapter
 let swap
 
 async function signOrder(order, wallet, swapContract) {
@@ -78,8 +81,9 @@ describe('Swap Unit', () => {
       await ethers.getContractFactory('ERC20Adapter')
     ).deploy()
     await erc20adapter.deployed()
+
     erc721token = await deployMockContract(deployer, IERC721.abi)
-    await erc721token.mock.isApprovedForAll.returns(true)
+    await erc721token.mock.getApproved.returns(sender.address)
     await erc721token.mock.ownerOf.returns(sender.address)
     await erc721token.mock[
       'safeTransferFrom(address,address,uint256)'
@@ -88,10 +92,22 @@ describe('Swap Unit', () => {
       await ethers.getContractFactory('ERC721Adapter')
     ).deploy()
     await erc721adapter.deployed()
+
+    erc1155token = await deployMockContract(deployer, IERC1155.abi)
+    await erc1155token.mock.isApprovedForAll.returns(true)
+    await erc1155token.mock.balanceOf.returns(DEFAULT_AMOUNT)
+    await erc1155token.mock[
+      'safeTransferFrom(address,address,uint256,uint256,bytes)'
+    ].returns()
+    erc1155adapter = await (
+      await ethers.getContractFactory('ERC1155Adapter')
+    ).deploy()
+    await erc1155adapter.deployed()
+
     swap = await (
       await ethers.getContractFactory('Swap')
     ).deploy(
-      [erc20adapter.address, erc721adapter.address],
+      [erc20adapter.address, erc721adapter.address, erc1155adapter.address],
       TokenKinds.ERC20,
       PROTOCOL_FEE,
       protocolFeeWallet.address
@@ -588,6 +604,56 @@ describe('Swap Unit', () => {
       const order = await createSignedOrder({}, signer)
       const errors = await swap.check(sender.address, order)
       expect(errors[1]).to.equal(0)
+    })
+
+    it('check with invalid erc20 params fails', async () => {
+      const order = await createSignedOrder(
+        {
+          signer: {
+            kind: TokenKinds.ERC20,
+            id: '1',
+          },
+        },
+        signer
+      )
+      const [errors] = await swap.check(sender.address, order)
+      expect(errors[0]).to.be.equal(
+        ethers.utils.formatBytes32String('AmountOrIDInvalid')
+      )
+    })
+
+    it('check with invalid erc721 params fails', async () => {
+      const order = await createSignedOrder(
+        {
+          signer: {
+            kind: TokenKinds.ERC721,
+            token: erc721token.address,
+            amount: '1',
+          },
+        },
+        signer
+      )
+      const [errors] = await swap.check(sender.address, order)
+      expect(errors[2]).to.be.equal(
+        ethers.utils.formatBytes32String('AmountOrIDInvalid')
+      )
+    })
+
+    it('check with invalid erc1155 params fails', async () => {
+      const order = await createSignedOrder(
+        {
+          signer: {
+            kind: TokenKinds.ERC1155,
+            token: erc1155token.address,
+            amount: '0',
+          },
+        },
+        signer
+      )
+      const [errors] = await swap.check(sender.address, order)
+      expect(errors[0]).to.be.equal(
+        ethers.utils.formatBytes32String('AmountOrIDInvalid')
+      )
     })
 
     it('check without allowances or balances fails', async () => {

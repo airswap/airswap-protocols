@@ -68,7 +68,7 @@ describe('ERC721Adapter Unit', () => {
         .connect(anyone)
         .transfer(party.wallet, anyone.address, '1', party.id, party.token)
     )
-      .to.be.revertedWith('InvalidArgument')
+      .to.be.revertedWith('AmountOrIDInvalid')
       .withArgs('amount')
   })
 })

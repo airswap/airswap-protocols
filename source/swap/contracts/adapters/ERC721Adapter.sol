@@ -12,8 +12,8 @@ contract ERC721Adapter is IAdapter {
   bytes4 public constant interfaceId = 0x80ac58cd;
 
   /**
-   * @notice Function to wrap token transfer for different token types
-   * @param party Party from whom swap would be made
+   * @notice Checks allowance on an ERC721
+   * @param party Party params to check
    * @dev Use call: "msg.sender" is Swap contract
    */
   function hasAllowance(Party calldata party) external view returns (bool) {
@@ -21,11 +21,19 @@ contract ERC721Adapter is IAdapter {
   }
 
   /**
-   * @notice Function to wrap token transfer for different token types
-   * @param party Party from whom swap would be made
+   * @notice Checks balance on an ERC721
+   * @param party Party params to check
    */
   function hasBalance(Party calldata party) external view returns (bool) {
     return IERC721(party.token).ownerOf(party.id) == party.wallet;
+  }
+
+  /**
+   * @notice Checks params for transfer
+   * @param party Party params to check
+   */
+  function hasValidParams(Party calldata party) external pure returns (bool) {
+    return (party.amount == 0);
   }
 
   /**
@@ -44,7 +52,7 @@ contract ERC721Adapter is IAdapter {
     uint256 id,
     address token
   ) external {
-    if (amount != 0) revert InvalidArgument("amount");
+    if (amount != 0) revert AmountOrIDInvalid("amount");
     IERC721(token).safeTransferFrom(from, to, id);
   }
 }
