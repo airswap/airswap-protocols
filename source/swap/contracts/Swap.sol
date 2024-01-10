@@ -315,6 +315,10 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
         errors[errCount] = "SignerBalanceLow";
         errCount++;
       }
+      if (!signerTokenAdapter.hasValidParams(order.signer)) {
+        errors[errCount] = "AmountOrIDInvalid";
+        errCount++;
+      }
     }
 
     IAdapter senderTokenAdapter = adapters[order.sender.kind];
@@ -345,6 +349,10 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
         }
         if (!senderTokenAdapter.hasBalance(sender)) {
           errors[errCount] = "SenderBalanceLow";
+          errCount++;
+        }
+        if (!senderTokenAdapter.hasValidParams(order.signer)) {
+          errors[errCount] = "AmountOrIDInvalid";
           errCount++;
         }
         if (order.sender.amount < order.affiliateAmount) {
