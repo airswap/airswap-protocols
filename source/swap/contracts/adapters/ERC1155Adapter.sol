@@ -12,8 +12,8 @@ contract ERC1155Adapter is IAdapter {
   bytes4 public constant interfaceId = 0xd9b67a26;
 
   /**
-   * @notice Function to wrap token transfer for different token types
-   * @param party Party from whom swap would be made
+   * @notice Checks balance on an ERC1155
+   * @param party Party params to check
    * @dev Use call: "msg.sender" is Swap contract
    */
   function hasAllowance(Party calldata party) external view returns (bool) {
@@ -22,12 +22,20 @@ contract ERC1155Adapter is IAdapter {
   }
 
   /**
-   * @notice Function to wrap token transfer for different token types
-   * @param party Party from whom swap would be made
+   * @notice Checks balance on an ERC721
+   * @param party Party params to check
    */
   function hasBalance(Party calldata party) external view returns (bool) {
     return
       IERC1155(party.token).balanceOf(party.wallet, party.id) >= party.amount;
+  }
+
+  /**
+   * @notice Checks params for transfer
+   * @param party Party params to check
+   */
+  function hasValidParams(Party calldata party) external pure returns (bool) {
+    return (party.amount != 0);
   }
 
   /**
@@ -46,7 +54,7 @@ contract ERC1155Adapter is IAdapter {
     uint256 id,
     address token
   ) external {
-    if (amount == 0) revert InvalidArgument("amount");
+    if (amount == 0) revert AmountOrIDInvalid("amount");
     IERC1155(token).safeTransferFrom(from, to, id, amount, "0x00");
   }
 }
