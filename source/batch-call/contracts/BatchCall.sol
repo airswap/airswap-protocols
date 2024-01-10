@@ -2,7 +2,6 @@
 pragma solidity 0.8.23;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
@@ -11,7 +10,7 @@ import "@airswap/swap-erc20/contracts/interfaces/ISwapERC20.sol";
 /**
  * @title BatchCalling: BatchCall balance, allowance, order validity check calls
  */
-contract BatchCall is Ownable {
+contract BatchCall {
   using SafeERC20 for IERC20;
   using Address for address;
 
@@ -234,28 +233,5 @@ contract BatchCall is Ownable {
       orderValidity[i] = errorCount == 0 ? true : false;
     }
     return orderValidity;
-  }
-
-  /**
-   * @notice Allow owner to withdraw ether from contract
-   */
-  function withdraw() public onlyOwner {
-    (bool success, ) = address(owner()).call{ value: address(this).balance }(
-      ""
-    );
-    require(success, "ETH_WITHDRAW_FAILED");
-  }
-
-  /**
-   * @notice Allow owner to withdraw stuck tokens from contract
-   * @param tokenAddress address
-   * @param amount uint256
-   */
-  function withdrawToken(
-    address tokenAddress,
-    uint256 amount
-  ) public onlyOwner {
-    require(tokenAddress != address(0x0)); //use withdraw for ETH
-    IERC20(tokenAddress).safeTransfer(msg.sender, amount);
   }
 }

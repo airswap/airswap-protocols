@@ -109,7 +109,7 @@ async function setUpBalances(senderAmount, signerAmount) {
   await erc20token.mock.balanceOf.withArgs(signer.address).returns(signerAmount)
 }
 
-describe('BatchCallChecks Integration', () => {
+describe('BatchCall Integration', () => {
   beforeEach(async () => {
     snapshotId = await ethers.provider.send('evm_snapshot')
   })
@@ -164,8 +164,8 @@ describe('BatchCallChecks Integration', () => {
     )
     await swapERC20.deployed()
 
-    batch = await (await ethers.getContractFactory('BatchCall')).deploy()
-    await batch.deployed()
+    batchCall = await (await ethers.getContractFactory('BatchCall')).deploy()
+    await batchCall.deployed()
   })
 
   describe('checks order validity', () => {
@@ -177,7 +177,7 @@ describe('BatchCallChecks Integration', () => {
         await createSignedOrder({}, signer),
         await createSignedOrder({}, signer),
       ]
-      const orderValidities = await batch
+      const orderValidities = await batchCall
         .connect(sender)
         .checkOrders(sender.address, orders, swap.address)
       expect(orderValidities.toString()).to.equal([true, true, true].toString())
@@ -191,7 +191,7 @@ describe('BatchCallChecks Integration', () => {
         await createSignedOrderERC20({}, signer),
         await createSignedOrderERC20({}, signer),
       ]
-      const orderValidities = await batch
+      const orderValidities = await batchCall
         .connect(sender)
         .checkOrdersERC20(sender.address, ERC20orders, swapERC20.address)
       expect(orderValidities.toString()).to.equal([true, true, true].toString())
@@ -205,7 +205,7 @@ describe('BatchCallChecks Integration', () => {
         await createSignedOrder({}, signer),
         await createSignedOrder({}, signer),
       ]
-      const orderValidities = await batch
+      const orderValidities = await batchCall
         .connect(sender)
         .checkOrders(sender.address, orders, swap.address)
       expect(orderValidities.toString()).to.equal(
@@ -221,7 +221,7 @@ describe('BatchCallChecks Integration', () => {
         await createSignedOrderERC20({}, signer),
         await createSignedOrderERC20({}, signer),
       ]
-      const orderValidities = await batch
+      const orderValidities = await batchCall
         .connect(sender)
         .checkOrdersERC20(sender.address, ERC20orders, swapERC20.address)
       expect(orderValidities.toString()).to.equal(
