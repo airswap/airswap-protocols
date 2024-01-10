@@ -4,7 +4,7 @@ const Confirm = require('prompt-confirm')
 const { ethers, run } = require('hardhat')
 const { ChainIds, chainNames, chainLabels } = require('@airswap/constants')
 const { getReceiptUrl } = require('@airswap/utils')
-const balancesDeploys = require('../deploys.js')
+const batchCallDeploys = require('../deploys.js')
 
 async function main() {
   await run('compile')
@@ -21,21 +21,19 @@ async function main() {
 
   const prompt = new Confirm('Proceed to deploy?')
   if (await prompt.run()) {
-    const balanceCheckerFactory = await ethers.getContractFactory(
-      'BalanceChecker'
-    )
-    const balanceCheckerContract = await balanceCheckerFactory.deploy()
+    const batchFactory = await ethers.getContractFactory('BatchCall')
+    const batchCallContract = await batchFactory.deploy()
     console.log(
       'Deploying...',
-      getReceiptUrl(chainId, balanceCheckerContract.deployTransaction.hash)
+      getReceiptUrl(chainId, batchCallContract.deployTransaction.hash)
     )
-    await balanceCheckerContract.deployed()
-    console.log(`Deployed: ${balanceCheckerContract.address}`)
+    await batchCallContract.deployed()
+    console.log(`Deployed: ${batchCallContract.address}`)
 
-    balancesDeploys[chainId] = balanceCheckerContract.address
+    batchCallDeploys[chainId] = batchCallContract.address
     fs.writeFileSync(
       './deploys.js',
-      `module.exports = ${JSON.stringify(balancesDeploys, null, '\t')}`
+      `module.exports = ${JSON.stringify(batchCallDeploys, null, '\t')}`
     )
     console.log('Updated deploys.js')
 
