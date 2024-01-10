@@ -7,7 +7,6 @@ const {
   chainNames,
   chainLabels,
   ChainIds,
-  TokenKinds,
   protocolFeeReceiverAddresses,
   ADDRESS_ZERO,
 } = require('@airswap/constants')
@@ -16,6 +15,7 @@ const poolDeploys = require('@airswap/pool/deploys.js')
 const swapDeploys = require('../deploys.js')
 const swapBlocks = require('../deploys-blocks.js')
 const adapterDeploys = require('../deploys-adapters.js')
+const config = require('./config.js')
 
 async function main() {
   await run('compile')
@@ -28,20 +28,26 @@ async function main() {
     console.log('Value for --network flag is required')
     return
   }
+  if (!adapterDeploys[chainId]) {
+    console.log('Adapters must be deployed first.')
+    return
+  }
+
   console.log(`Deployer: ${deployer.address}`)
   console.log(`Network: ${chainNames[chainId].toUpperCase()}`)
   console.log(`Gas price: ${gasPrice / 10 ** 9} gwei\n`)
 
-  const requiredSenderKind = TokenKinds.ERC20
-  const protocolFee = 7
+  let requiredSenderKind
+  let protocolFee
+  if (config[chainId]) {
+    ;({ requiredSenderKind, protocolFee } = config[chainId])
+  } else {
+    ;({ requiredSenderKind, protocolFee } = config[ChainIds.MAINNET])
+  }
+
   let protocolFeeReceiver = poolDeploys[chainId] || ADDRESS_ZERO
   if (protocolFeeReceiverAddresses[chainId]) {
     protocolFeeReceiver = protocolFeeReceiverAddresses[chainId]
-  }
-
-  if (!adapterDeploys[chainId]) {
-    console.log('Adapters must be deployed first.')
-    return
   }
 
   console.log(`\nadapters: ${JSON.stringify(adapterDeploys[chainId])}`)

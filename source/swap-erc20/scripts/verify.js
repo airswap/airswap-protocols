@@ -6,6 +6,7 @@ const {
   protocolFeeReceiverAddresses,
 } = require('@airswap/constants')
 const swapERC20Deploys = require('../deploys.js')
+const config = require('./config.js')
 
 async function main() {
   await run('compile')
@@ -18,10 +19,19 @@ async function main() {
   if (protocolFeeReceiverAddresses[chainId]) {
     protocolFeeReceiver = protocolFeeReceiverAddresses[chainId]
   }
-  const protocolFee = 7
-  const protocolFeeLight = 7
-  const discountScale = 10
-  const discountMax = 100
+
+  let protocolFee
+  let protocolFeeLight
+  let rebateScale
+  let rebateMax
+
+  if (config[chainId]) {
+    ;({ protocolFee, protocolFeeLight, rebateScale, rebateMax } =
+      config[chainId])
+  } else {
+    ;({ protocolFee, protocolFeeLight, rebateScale, rebateMax } =
+      config[ChainIds.MAINNET])
+  }
 
   console.log(`Verifying on ${chainNames[chainId].toUpperCase()}`)
   await run('verify:verify', {
@@ -30,8 +40,8 @@ async function main() {
       protocolFee,
       protocolFeeLight,
       protocolFeeReceiver,
-      discountScale,
-      discountMax,
+      rebateScale,
+      rebateMax,
     ],
   })
 }
