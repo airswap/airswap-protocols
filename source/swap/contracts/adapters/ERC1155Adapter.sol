@@ -12,7 +12,7 @@ contract ERC1155Adapter is IAdapter {
   bytes4 public constant interfaceId = 0xd9b67a26;
 
   /**
-   * @notice Checks balance on an ERC1155
+   * @notice Checks allowance on an ERC1155
    * @param party Party params to check
    * @dev Use call: "msg.sender" is Swap contract
    */
@@ -22,7 +22,7 @@ contract ERC1155Adapter is IAdapter {
   }
 
   /**
-   * @notice Checks balance on an ERC721
+   * @notice Checks balance on an ERC1155
    * @param party Party params to check
    */
   function hasBalance(Party calldata party) external view returns (bool) {

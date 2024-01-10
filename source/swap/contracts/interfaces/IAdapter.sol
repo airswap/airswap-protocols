@@ -25,7 +25,7 @@ interface IAdapter {
   function interfaceId() external view returns (bytes4);
 
   /**
-   * @notice Checks balance on a token
+   * @notice Checks allowance on a token
    * @param party Party params to check
    */
   function hasAllowance(Party calldata party) external view returns (bool);
