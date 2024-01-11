@@ -203,8 +203,8 @@ export const explorerApiUrls: Record<number, string> = {
 
 export const stakingTokenAddresses: Record<number, string> = {
   [ChainIds.MAINNET]: '0x27054b13b1b798b345b591a4d22e6562d47ea75a',
-  [ChainIds.GOERLI]: '0x7eef7238fd4f65312a53c5d195e675068afbb1d0',
-  [ChainIds.SEPOLIA]: '0x5e5a433cdfb14ab228c45e23251ad83f7b1e3302',
+  [ChainIds.GOERLI]: '0x23474e94e27ac59eec4411ce96c322add8833680',
+  [ChainIds.SEPOLIA]: '0x517d482f686f11b922eed764692f2b42663ce2fa',
 }
 
 export const ownerAddresses: Record<number, string> = {

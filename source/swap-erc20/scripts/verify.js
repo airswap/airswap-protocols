@@ -2,10 +2,12 @@
 const { ethers, run } = require('hardhat')
 const poolDeploys = require('@airswap/pool/deploys.js')
 const {
+  ChainIds,
   chainNames,
   protocolFeeReceiverAddresses,
 } = require('@airswap/constants')
 const swapERC20Deploys = require('../deploys.js')
+const config = require('./config.js')
 
 async function main() {
   await run('compile')
@@ -18,10 +20,18 @@ async function main() {
   if (protocolFeeReceiverAddresses[chainId]) {
     protocolFeeReceiver = protocolFeeReceiverAddresses[chainId]
   }
-  const protocolFee = 7
-  const protocolFeeLight = 7
-  const discountScale = 10
-  const discountMax = 100
+
+  let protocolFee
+  let protocolFeeLight
+  let bonusScale
+  let bonusMax
+
+  if (config[chainId]) {
+    ;({ protocolFee, protocolFeeLight, bonusScale, bonusMax } = config[chainId])
+  } else {
+    ;({ protocolFee, protocolFeeLight, bonusScale, bonusMax } =
+      config[ChainIds.MAINNET])
+  }
 
   console.log(`Verifying on ${chainNames[chainId].toUpperCase()}`)
   await run('verify:verify', {
@@ -30,8 +40,8 @@ async function main() {
       protocolFee,
       protocolFeeLight,
       protocolFeeReceiver,
-      discountScale,
-      discountMax,
+      bonusScale,
+      bonusMax,
     ],
   })
 }

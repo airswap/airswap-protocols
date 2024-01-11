@@ -54,7 +54,9 @@ describe('ERC1155Adapter Unit', () => {
   })
 
   it('transfer succeeds', async () => {
-    await token.mock.safeTransferFrom.returns()
+    await token.mock[
+      'safeTransferFrom(address,address,uint256,uint256,bytes)'
+    ].returns()
     await expect(
       adapter
         .connect(anyone)
@@ -66,5 +68,18 @@ describe('ERC1155Adapter Unit', () => {
           party.token
         )
     ).to.not.be.reverted
+  })
+
+  it('transfer with zero amount fails', async () => {
+    await token.mock[
+      'safeTransferFrom(address,address,uint256,uint256,bytes)'
+    ].returns()
+    await expect(
+      adapter
+        .connect(anyone)
+        .transfer(party.wallet, anyone.address, '0', party.id, party.token)
+    )
+      .to.be.revertedWith('AmountOrIDInvalid')
+      .withArgs('amount')
   })
 })

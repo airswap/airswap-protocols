@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.17;
+pragma solidity 0.8.23;
 
 interface ISwapERC20 {
   struct OrderERC20 {
@@ -24,8 +24,8 @@ interface ISwapERC20 {
   event SetProtocolFee(uint256 protocolFee);
   event SetProtocolFeeLight(uint256 protocolFeeLight);
   event SetProtocolFeeWallet(address indexed feeWallet);
-  event SetDiscountScale(uint256 discountScale);
-  event SetDiscountMax(uint256 discountMax);
+  event SetBonusScale(uint256 bonusScale);
+  event SetBonusMax(uint256 bonusMax);
   event SetStaking(address indexed staking);
 
   error ChainIdChanged();
@@ -88,6 +88,20 @@ interface ISwapERC20 {
   function revoke() external;
 
   function cancel(uint256[] calldata nonces) external;
+
+  function check(
+    address senderWallet,
+    uint256 nonce,
+    uint256 expiry,
+    address signerWallet,
+    address signerToken,
+    uint256 signerAmount,
+    address senderToken,
+    uint256 senderAmount,
+    uint8 v,
+    bytes32 r,
+    bytes32 s
+  ) external view returns (uint256, bytes32[] memory);
 
   function nonceUsed(address, uint256) external view returns (bool);
 
