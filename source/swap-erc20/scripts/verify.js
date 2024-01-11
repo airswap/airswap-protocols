@@ -22,14 +22,13 @@ async function main() {
 
   let protocolFee
   let protocolFeeLight
-  let rebateScale
-  let rebateMax
+  let bonusScale
+  let bonusMax
 
   if (config[chainId]) {
-    ;({ protocolFee, protocolFeeLight, rebateScale, rebateMax } =
-      config[chainId])
+    ;({ protocolFee, protocolFeeLight, bonusScale, bonusMax } = config[chainId])
   } else {
-    ;({ protocolFee, protocolFeeLight, rebateScale, rebateMax } =
+    ;({ protocolFee, protocolFeeLight, bonusScale, bonusMax } =
       config[ChainIds.MAINNET])
   }
 
@@ -40,8 +39,8 @@ async function main() {
       protocolFee,
       protocolFeeLight,
       protocolFeeReceiver,
-      rebateScale,
-      rebateMax,
+      bonusScale,
+      bonusMax,
     ],
   })
 }

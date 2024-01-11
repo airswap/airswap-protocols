@@ -21,8 +21,8 @@ describe('SwapERC20 Integration', () => {
   let protocolFeeWallet
 
   const CHAIN_ID = 31337
-  const DISCOUNT_SCALE = '10'
-  const DISCOUNT_MAX = '100'
+  const BONUS_SCALE = '10'
+  const BONUS_MAX = '100'
   const PROTOCOL_FEE = '30'
   const PROTOCOL_FEE_LIGHT = '7'
   const DEFAULT_AMOUNT = '10000'
@@ -89,8 +89,8 @@ describe('SwapERC20 Integration', () => {
       PROTOCOL_FEE,
       PROTOCOL_FEE_LIGHT,
       protocolFeeWallet.address,
-      DISCOUNT_SCALE,
-      DISCOUNT_MAX
+      BONUS_SCALE,
+      BONUS_MAX
     )
     await swap.deployed()
 
@@ -98,7 +98,7 @@ describe('SwapERC20 Integration', () => {
     senderToken.connect(sender).approve(swap.address, 1000000)
   })
 
-  describe('Test token holder discounts', async () => {
+  describe('Test token holder bonuss', async () => {
     it('test swap without staking', async () => {
       const order = await createSignedOrder({}, signer)
 
@@ -119,7 +119,7 @@ describe('SwapERC20 Integration', () => {
       )
     })
 
-    it('test swap without discount', async () => {
+    it('test swap without bonus', async () => {
       const order = await createSignedOrder({}, signer)
 
       await expect(swap.connect(sender).swap(sender.address, ...order)).to.emit(
@@ -139,7 +139,7 @@ describe('SwapERC20 Integration', () => {
       )
     })
 
-    it('test swap with discount', async () => {
+    it('test swap with bonus', async () => {
       await stakingToken.connect(sender).approve(staking.address, 10000000000)
       await staking.connect(sender).stake(10000000000)
 
@@ -157,7 +157,7 @@ describe('SwapERC20 Integration', () => {
       // Expect full 30 to be taken from signer
       expect(await signerToken.balanceOf(signer.address)).to.equal('989970')
 
-      // Expect half of the fee to have gone to the sender as discount
+      // Expect half of the fee to have gone to the sender as bonus
       expect(await signerToken.balanceOf(sender.address)).to.equal('10015')
 
       // Expect half of the fee to have gone to the fee wallet

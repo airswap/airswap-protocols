@@ -20,8 +20,8 @@ const PROTOCOL_FEE = '30'
 const PROTOCOL_FEE_LIGHT = '7'
 const DEFAULT_AMOUNT = '1000'
 const DEFAULT_BALANCE = '100000'
-const REBATE_SCALE = '10'
-const REBATE_MAX = '100'
+const BONUS_SCALE = '10'
+const BONUS_MAX = '100'
 
 let snapshotId
 let deployer
@@ -159,8 +159,8 @@ describe('BatchCall Integration', () => {
       PROTOCOL_FEE,
       PROTOCOL_FEE_LIGHT,
       protocolFeeWallet.address,
-      REBATE_SCALE,
-      REBATE_MAX
+      BONUS_SCALE,
+      BONUS_MAX
     )
     await swapERC20.deployed()
 
