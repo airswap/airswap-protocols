@@ -2,6 +2,7 @@
 const { ethers, run } = require('hardhat')
 const poolDeploys = require('@airswap/pool/deploys.js')
 const {
+  ChainIds,
   chainNames,
   protocolFeeReceiverAddresses,
 } = require('@airswap/constants')
