@@ -91,9 +91,9 @@ function mockHttpServer(api) {
             order,
             wallet.privateKey,
             params.swapContract,
-            ChainIds.MAINNET
+            ChainIds.SEPOLIA
           )),
-          chainId: ChainIds.MAINNET,
+          chainId: ChainIds.SEPOLIA,
           swapContract: params.swapContract,
         }
         break
@@ -108,9 +108,9 @@ function mockHttpServer(api) {
                   order,
                   wallet.privateKey,
                   ADDRESS_ZERO,
-                  ChainIds.MAINNET
+                  ChainIds.SEPOLIA
                 )),
-                chainId: ChainIds.MAINNET,
+                chainId: ChainIds.SEPOLIA,
                 swapContract: ADDRESS_ZERO,
               },
             },
@@ -165,7 +165,10 @@ describe('HTTPServer', () => {
   fancy
     .nock('https://' + URL, mockHttpServer)
     .it('Server getSignerSideOrderERC20()', async () => {
-      const server = await Server.at(URL)
+      const server = await Server.at(URL, {
+        swapContract: ADDRESS_ZERO,
+        chainId: ChainIds.SEPOLIA,
+      })
       const order = await server.getSignerSideOrderERC20(
         '0',
         ADDRESS_ZERO,
@@ -548,7 +551,7 @@ async function forgeFullOrder() {
         order: {
           ...unsignedOrder,
           ...signature,
-          chainId: ChainIds.MAINNET,
+          chainId: ChainIds.SEPOLIA,
           swapContract: ADDRESS_ZERO,
         },
       },
