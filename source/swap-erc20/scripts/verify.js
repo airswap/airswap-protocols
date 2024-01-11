@@ -20,8 +20,8 @@ async function main() {
   }
   const protocolFee = 7
   const protocolFeeLight = 7
-  const discountScale = 10
-  const discountMax = 100
+  const bonusScale = 10
+  const bonusMax = 100
 
   console.log(`Verifying on ${chainNames[chainId].toUpperCase()}`)
   await run('verify:verify', {
@@ -30,8 +30,8 @@ async function main() {
       protocolFee,
       protocolFeeLight,
       protocolFeeReceiver,
-      discountScale,
-      discountMax,
+      bonusScale,
+      bonusMax,
     ],
   })
 }
