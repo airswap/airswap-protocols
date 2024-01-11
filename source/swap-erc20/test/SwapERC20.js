@@ -27,8 +27,8 @@ describe('SwapERC20 Unit', () => {
   const PROTOCOL_FEE = '30'
   const PROTOCOL_FEE_LIGHT = '7'
   const HIGHER_FEE = '50'
-  const REBATE_SCALE = '10'
-  const REBATE_MAX = '100'
+  const BONUS_SCALE = '10'
+  const BONUS_MAX = '100'
   const FEE_DIVISOR = '10000'
   const DEFAULT_AMOUNT = '10000'
   const DEFAULT_BALANCE = '100000'
@@ -126,8 +126,8 @@ describe('SwapERC20 Unit', () => {
       PROTOCOL_FEE,
       PROTOCOL_FEE_LIGHT,
       protocolFeeWallet.address,
-      REBATE_SCALE,
-      REBATE_MAX
+      BONUS_SCALE,
+      BONUS_MAX
     )
     await swap.deployed()
   })
@@ -148,8 +148,8 @@ describe('SwapERC20 Unit', () => {
           PROTOCOL_FEE,
           PROTOCOL_FEE_LIGHT,
           ADDRESS_ZERO,
-          REBATE_SCALE,
-          REBATE_MAX
+          BONUS_SCALE,
+          BONUS_MAX
         )
       ).to.be.revertedWith('InvalidFeeWallet')
     })
@@ -162,8 +162,8 @@ describe('SwapERC20 Unit', () => {
           100000000000,
           PROTOCOL_FEE_LIGHT,
           protocolFeeWallet.address,
-          REBATE_SCALE,
-          REBATE_MAX
+          BONUS_SCALE,
+          BONUS_MAX
         )
       ).to.be.revertedWith('InvalidFee')
     })
@@ -176,13 +176,13 @@ describe('SwapERC20 Unit', () => {
           PROTOCOL_FEE,
           100000000000,
           protocolFeeWallet.address,
-          REBATE_SCALE,
-          REBATE_MAX
+          BONUS_SCALE,
+          BONUS_MAX
         )
       ).to.be.revertedWith('InvalidFeeLight')
     })
 
-    it('test invalid discount scale', async () => {
+    it('test invalid bonus scale', async () => {
       await expect(
         (
           await ethers.getContractFactory('SwapERC20')
@@ -190,13 +190,13 @@ describe('SwapERC20 Unit', () => {
           PROTOCOL_FEE,
           PROTOCOL_FEE_LIGHT,
           protocolFeeWallet.address,
-          REBATE_SCALE + 1,
-          REBATE_MAX
+          BONUS_SCALE + 1,
+          BONUS_MAX
         )
       ).to.be.revertedWith('ScaleTooHigh')
     })
 
-    it('test invalid discount maximum', async () => {
+    it('test invalid bonus maximum', async () => {
       await expect(
         (
           await ethers.getContractFactory('SwapERC20')
@@ -204,8 +204,8 @@ describe('SwapERC20 Unit', () => {
           PROTOCOL_FEE,
           PROTOCOL_FEE_LIGHT,
           protocolFeeWallet.address,
-          REBATE_SCALE,
-          REBATE_MAX + 1
+          BONUS_SCALE,
+          BONUS_MAX + 1
         )
       ).to.be.revertedWith('MaxTooHigh')
     })
@@ -248,34 +248,36 @@ describe('SwapERC20 Unit', () => {
         swap.connect(deployer).setProtocolFeeWallet(protocolFeeWallet.address)
       ).to.emit(swap, 'SetProtocolFeeWallet')
     })
-    it('test setDiscountScale', async () => {
-      await expect(
-        swap.connect(deployer).setDiscountScale(REBATE_SCALE)
-      ).to.emit(swap, 'SetDiscountScale')
+    it('test setBonusScale', async () => {
+      await expect(swap.connect(deployer).setBonusScale(BONUS_SCALE)).to.emit(
+        swap,
+        'SetBonusScale'
+      )
     })
-    it('test setDiscountScale with invalid input', async () => {
+    it('test setBonusScale with invalid input', async () => {
       await expect(
-        swap.connect(deployer).setDiscountScale(REBATE_SCALE + 1)
+        swap.connect(deployer).setBonusScale(BONUS_SCALE + 1)
       ).to.be.revertedWith('ScaleTooHigh')
     })
-    it('test setDiscountScale as non-owner', async () => {
+    it('test setBonusScale as non-owner', async () => {
       await expect(
-        swap.connect(anyone).setDiscountScale(REBATE_SCALE)
+        swap.connect(anyone).setBonusScale(BONUS_SCALE)
       ).to.be.revertedWith('Ownable: caller is not the owner')
     })
-    it('test setDiscountMax', async () => {
-      await expect(
-        await swap.connect(deployer).setDiscountMax(REBATE_MAX)
-      ).to.emit(swap, 'SetDiscountMax')
+    it('test setBonusMax', async () => {
+      await expect(await swap.connect(deployer).setBonusMax(BONUS_MAX)).to.emit(
+        swap,
+        'SetBonusMax'
+      )
     })
-    it('test setDiscountMax with invalid input', async () => {
+    it('test setBonusMax with invalid input', async () => {
       await expect(
-        swap.connect(deployer).setDiscountMax(REBATE_MAX + 1)
+        swap.connect(deployer).setBonusMax(BONUS_MAX + 1)
       ).to.be.revertedWith('MaxTooHigh')
     })
-    it('test setDiscountMax as non-owner', async () => {
+    it('test setBonusMax as non-owner', async () => {
       await expect(
-        swap.connect(anyone).setDiscountMax(REBATE_MAX)
+        swap.connect(anyone).setBonusMax(BONUS_MAX)
       ).to.be.revertedWith('Ownable: caller is not the owner')
     })
     it('test setStaking', async () => {
@@ -304,13 +306,13 @@ describe('SwapERC20 Unit', () => {
         swap,
         'SetStaking'
       )
-      const discount = await swap
+      const bonus = await swap
         .connect(deployer)
-        .calculateDiscount(STAKING_BALANCE, initialFeeAmount)
+        .calculateBonus(STAKING_BALANCE, initialFeeAmount)
       const actualFeeAmount = await swap
         .connect(deployer)
         .calculateProtocolFee(sender.address, DEFAULT_AMOUNT)
-      expect(actualFeeAmount).to.equal(initialFeeAmount - discount)
+      expect(actualFeeAmount).to.equal(initialFeeAmount - bonus)
     })
     it('test calculateProtocolFee with protocol fee as zero', async () => {
       const zeroProtocolFee = 0
@@ -320,13 +322,13 @@ describe('SwapERC20 Unit', () => {
       )
       await swap.connect(deployer).setProtocolFee(zeroProtocolFee)
       const initialFeeAmount = (DEFAULT_AMOUNT * zeroProtocolFee) / FEE_DIVISOR
-      const discount = await swap
+      const bonus = await swap
         .connect(deployer)
-        .calculateDiscount(STAKING_BALANCE, initialFeeAmount)
+        .calculateBonus(STAKING_BALANCE, initialFeeAmount)
       const actualFeeAmount = await swap
         .connect(deployer)
         .calculateProtocolFee(sender.address, DEFAULT_AMOUNT)
-      expect(actualFeeAmount).to.equal(initialFeeAmount - discount)
+      expect(actualFeeAmount).to.equal(initialFeeAmount - bonus)
     })
   })
 

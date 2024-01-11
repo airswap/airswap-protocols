@@ -24,8 +24,8 @@ interface ISwapERC20 {
   event SetProtocolFee(uint256 protocolFee);
   event SetProtocolFeeLight(uint256 protocolFeeLight);
   event SetProtocolFeeWallet(address indexed feeWallet);
-  event SetDiscountScale(uint256 discountScale);
-  event SetDiscountMax(uint256 discountMax);
+  event SetBonusScale(uint256 bonusScale);
+  event SetBonusMax(uint256 bonusMax);
   event SetStaking(address indexed staking);
 
   error ChainIdChanged();

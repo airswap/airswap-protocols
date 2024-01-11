@@ -36,8 +36,8 @@ async function main() {
   }
   const protocolFee = 7
   const protocolFeeLight = 7
-  const discountScale = 10
-  const discountMax = 100
+  const bonusScale = 10
+  const bonusMax = 100
 
   console.log(`protocolFee: ${protocolFee}`)
   console.log(`protocolFeeLight: ${protocolFeeLight}`)
@@ -50,8 +50,8 @@ async function main() {
       protocolFee,
       protocolFeeLight,
       protocolFeeReceiver,
-      discountScale,
-      discountMax,
+      bonusScale,
+      bonusMax,
       {
         gasPrice,
       }
