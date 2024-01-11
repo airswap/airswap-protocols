@@ -1,10 +1,12 @@
 /* eslint-disable no-console */
 const fs = require('fs')
+const prettier = require('prettier')
 const Confirm = require('prompt-confirm')
 const { ethers, run } = require('hardhat')
 const { ChainIds, chainNames, chainLabels } = require('@airswap/constants')
 const { getReceiptUrl } = require('@airswap/utils')
 const batchCallDeploys = require('../deploys.js')
+const batchCallBlocks = require('../deploys-blocks.js')
 
 async function main() {
   await run('compile')
@@ -21,6 +23,7 @@ async function main() {
 
   const prompt = new Confirm('Proceed to deploy?')
   if (await prompt.run()) {
+    const prettierConfig = await prettier.resolveConfig('../deploys.js')
     const batchFactory = await ethers.getContractFactory('BatchCall')
     const batchCallContract = await batchFactory.deploy()
     console.log(
@@ -28,14 +31,28 @@ async function main() {
       getReceiptUrl(chainId, batchCallContract.deployTransaction.hash)
     )
     await batchCallContract.deployed()
-    console.log(`Deployed: ${batchCallContract.address}`)
 
     batchCallDeploys[chainId] = batchCallContract.address
     fs.writeFileSync(
       './deploys.js',
-      `module.exports = ${JSON.stringify(batchCallDeploys, null, '\t')}`
+      prettier.format(
+        `module.exports = ${JSON.stringify(batchCallDeploys, null, '\t')}`,
+        { ...prettierConfig, parser: 'babel' }
+      )
     )
-    console.log('Updated deploys.js')
+    batchCallBlocks[chainId] = (
+      await batchCallContract.deployTransaction.wait()
+    ).blockNumber
+    fs.writeFileSync(
+      './deploys-blocks.js',
+      prettier.format(
+        `module.exports = ${JSON.stringify(batchCallBlocks, null, '\t')}`,
+        { ...prettierConfig, parser: 'babel' }
+      )
+    )
+    console.log(
+      `Deployed: ${batchCallDeploys[chainId]} @ ${batchCallBlocks[chainId]}`
+    )
 
     console.log(
       `\nVerify with "yarn verify --network ${chainLabels[

@@ -10,7 +10,7 @@ const adapterBlocks = require('../deploys-adapters-blocks.js')
 
 async function main() {
   await run('compile')
-  const config = await prettier.resolveConfig('../deploys.js')
+  const prettierConfig = await prettier.resolveConfig('../deploys.js')
 
   const [deployer] = await ethers.getSigners()
   const gasPrice = await deployer.getGasPrice()
@@ -50,7 +50,7 @@ async function main() {
       './deploys-adapters.js',
       prettier.format(
         `module.exports = ${JSON.stringify(adapterDeploys, null, '\t')}`,
-        { ...config, parser: 'babel' }
+        { ...prettierConfig, parser: 'babel' }
       )
     )
     adapterBlocks[chainId] = blocks
@@ -58,7 +58,7 @@ async function main() {
       './deploys-adapters-blocks.js',
       prettier.format(
         `module.exports = ${JSON.stringify(adapterBlocks, null, '\t')}`,
-        { ...config, parser: 'babel' }
+        { ...prettierConfig, parser: 'babel' }
       )
     )
 
