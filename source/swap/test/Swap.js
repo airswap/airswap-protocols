@@ -601,7 +601,19 @@ describe('Swap Unit', () => {
     it('check succeeds', async () => {
       await erc20token.mock.allowance.returns(DEFAULT_AMOUNT + PROTOCOL_FEE)
       await erc20token.mock.balanceOf.returns(DEFAULT_AMOUNT + PROTOCOL_FEE)
-      const order = await createSignedOrder({}, signer)
+      await erc721token.mock.getApproved.returns(swap.address)
+      await erc721token.mock.ownerOf.returns(signer.address)
+      const order = await createSignedOrder(
+        {
+          signer: {
+            kind: TokenKinds.ERC721,
+            token: erc721token.address,
+            id: '1',
+            amount: '0',
+          },
+        },
+        signer
+      )
       const errors = await swap.check(sender.address, order)
       expect(errors[1]).to.equal(0)
     })
