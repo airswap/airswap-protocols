@@ -229,4 +229,104 @@ describe('BatchCall Integration', () => {
       )
     })
   })
+
+  describe('checks nonce validity', () => {
+    it('unused nonce are marked unused', async () => {
+      await setUpAllowances(DEFAULT_BALANCE, DEFAULT_BALANCE)
+      await setUpBalances(DEFAULT_BALANCE, DEFAULT_BALANCE)
+      const orders = [
+        await createSignedOrder({}, signer),
+        await createSignedOrder({}, signer),
+        await createSignedOrder({}, signer),
+      ]
+      const orderValidities = await batchCall
+        .connect(sender)
+        .getNonceUsed(
+          [signer.address, signer.address, signer.address],
+          [orders[0].nonce, orders[1].nonce, orders[2].nonce],
+          swap.address
+        )
+      expect(orderValidities.toString()).to.equal(
+        [false, false, false].toString()
+      )
+    })
+
+    it('unused nonce ERC20 are marked unused', async () => {
+      await setUpAllowances(DEFAULT_BALANCE, DEFAULT_BALANCE)
+      await setUpBalances(DEFAULT_BALANCE, DEFAULT_BALANCE)
+      const ERC20orders = [
+        await createSignedOrderERC20({}, signer),
+        await createSignedOrderERC20({}, signer),
+        await createSignedOrderERC20({}, signer),
+      ]
+      const orderValidities = await batchCall
+        .connect(sender)
+        .getNonceUsedERC20(
+          [signer.address, signer.address, signer.address],
+          [ERC20orders[0].nonce, ERC20orders[1].nonce, ERC20orders[2].nonce],
+          swapERC20.address
+        )
+      expect(orderValidities.toString()).to.equal(
+        [false, false, false].toString()
+      )
+    })
+
+    it('used nonces are marked as used', async () => {
+      const usedNonce = 0
+      const unusedNonce = 1
+      const order = await createSignedOrder(
+        {
+          nonce: usedNonce,
+        },
+        signer
+      )
+      await swap.connect(sender).swap(sender.address, 0, order)
+      const orderValidities = await batchCall
+        .connect(sender)
+        .getNonceUsed(
+          [signer.address, signer.address, signer.address],
+          [usedNonce, usedNonce, unusedNonce],
+          swap.address
+        )
+      expect(orderValidities.toString()).to.equal(
+        [true, true, false].toString()
+      )
+    })
+
+    it('used nonces ERC20 are marked used', async () => {
+      const usedNonce = 0
+      const unusedNonce = 1
+      const ERC20order = await createSignedOrderERC20(
+        {
+          nonce: usedNonce,
+        },
+        signer
+      )
+      await swapERC20
+        .connect(sender)
+        .swap(
+          sender.address,
+          ERC20order.nonce,
+          ERC20order.expiry,
+          ERC20order.signerWallet,
+          ERC20order.signerToken,
+          ERC20order.signerAmount,
+          ERC20order.senderToken,
+          ERC20order.senderAmount,
+          ERC20order.v,
+          ERC20order.r,
+          ERC20order.s
+        )
+      const orderValidities = await batchCall
+        .connect(sender)
+        .getNonceUsedERC20(
+          [signer.address, signer.address, signer.address],
+          [usedNonce, usedNonce, unusedNonce],
+          swapERC20.address
+        )
+      expect(orderValidities.toString()).to.equal(
+        [true, true, false].toString()
+      )
+    })
+  })
 })
