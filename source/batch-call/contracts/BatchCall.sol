@@ -192,7 +192,7 @@ contract BatchCall {
    * @return bool[] order validity
    */
 
-  function checkOrders(
+  function getOrdersValid(
     address senderWallet,
     ISwap.Order[] calldata orders,
     ISwap swapContract
@@ -207,7 +207,7 @@ contract BatchCall {
     return orderValidity;
   }
 
-  function checkOrdersERC20(
+  function getOrdersValidERC20(
     address senderWallet,
     ISwapERC20.OrderERC20[] calldata ordersERC20,
     ISwapERC20 swapERC20Contract

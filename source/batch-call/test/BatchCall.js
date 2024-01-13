@@ -179,7 +179,7 @@ describe('BatchCall Integration', () => {
       ]
       const orderValidities = await batchCall
         .connect(sender)
-        .checkOrders(sender.address, orders, swap.address)
+        .getOrdersValid(sender.address, orders, swap.address)
       expect(orderValidities.toString()).to.equal([true, true, true].toString())
     })
 
@@ -193,7 +193,7 @@ describe('BatchCall Integration', () => {
       ]
       const orderValidities = await batchCall
         .connect(sender)
-        .checkOrdersERC20(sender.address, ERC20orders, swapERC20.address)
+        .getOrdersValidERC20(sender.address, ERC20orders, swapERC20.address)
       expect(orderValidities.toString()).to.equal([true, true, true].toString())
     })
 
@@ -207,7 +207,7 @@ describe('BatchCall Integration', () => {
       ]
       const orderValidities = await batchCall
         .connect(sender)
-        .checkOrders(sender.address, orders, swap.address)
+        .getOrdersValid(sender.address, orders, swap.address)
       expect(orderValidities.toString()).to.equal(
         [false, false, false].toString()
       )
@@ -223,7 +223,7 @@ describe('BatchCall Integration', () => {
       ]
       const orderValidities = await batchCall
         .connect(sender)
-        .checkOrdersERC20(sender.address, ERC20orders, swapERC20.address)
+        .getOrdersValidERC20(sender.address, ERC20orders, swapERC20.address)
       expect(orderValidities.toString()).to.equal(
         [false, false, false].toString()
       )
