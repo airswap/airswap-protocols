@@ -192,7 +192,7 @@ contract BatchCall {
    * @return bool[] order validity
    */
 
-  function checkOrders(
+  function getOrdersValid(
     address senderWallet,
     ISwap.Order[] calldata orders,
     ISwap swapContract
@@ -207,7 +207,7 @@ contract BatchCall {
     return orderValidity;
   }
 
-  function checkOrdersERC20(
+  function getOrdersValidERC20(
     address senderWallet,
     ISwapERC20.OrderERC20[] calldata ordersERC20,
     ISwapERC20 swapERC20Contract
@@ -233,5 +233,32 @@ contract BatchCall {
       orderValidity[i] = errorCount == 0 ? true : false;
     }
     return orderValidity;
+  }
+
+  /**
+   * @notice Check if the nonce for an array of order has been already used or not
+   * @dev Swap and SwapERC20 nonceUsed function have a similar signature
+   * @dev The same function can be used for both contract calls
+   * @dev Returns an array of bool
+   * @dev return array and will fail if large nonce arrays are inputted
+   * @param signerWallets[] list of wallets associated with the nonces to be checked
+   * @param nonces[] list of nonces to be checked
+   * @param swapContract[] swap or swapERC contract to check nonces forom
+   * @return bool[] nonce validity
+   */
+
+  function getNoncesUsed(
+    address[] calldata signerWallets,
+    uint256[] calldata nonces,
+    ISwap swapContract
+  ) external view returns (bool[] memory) {
+    require(signerWallets.length > 0);
+    require(signerWallets.length == nonces.length);
+    bool[] memory nonceUsed = new bool[](signerWallets.length);
+
+    for (uint256 i = 0; i < signerWallets.length; i++) {
+      nonceUsed[i] = swapContract.nonceUsed(signerWallets[i], nonces[i]);
+    }
+    return nonceUsed;
   }
 }
