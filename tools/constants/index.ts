@@ -18,6 +18,7 @@ export enum ChainIds {
   BSCTESTNET = 97,
   POLYGON = 137,
   BASE = 8453,
+  HOLESKY = 17000,
   HARDHAT = 31337,
   ARBITRUM = 42161,
   FUJI = 43113,
@@ -47,6 +48,7 @@ export const testnets: number[] = [
   ChainIds.RSKTESTNET,
   ChainIds.TELOSTESTNET,
   ChainIds.BSCTESTNET,
+  ChainIds.HOLESKY,
   ChainIds.HARDHAT,
   ChainIds.FUJI,
   ChainIds.LINEAGOERLI,
@@ -67,6 +69,7 @@ export const chainLabels: Record<number, string> = {
   [ChainIds.BSCTESTNET]: 'BSCTESTNET',
   [ChainIds.POLYGON]: 'POLYGON',
   [ChainIds.BASE]: 'BASE',
+  [ChainIds.HOLESKY]: 'HOLESKY',
   [ChainIds.HARDHAT]: 'HARDHAT',
   [ChainIds.ARBITRUM]: 'ARBITRUM',
   [ChainIds.FUJI]: 'FUJI',
@@ -90,6 +93,7 @@ export const chainNames: Record<number, string> = {
   [ChainIds.BSCTESTNET]: 'BSC Testnet',
   [ChainIds.POLYGON]: 'Polygon',
   [ChainIds.BASE]: 'Base',
+  [ChainIds.HOLESKY]: 'Holesky',
   [ChainIds.HARDHAT]: 'Hardhat',
   [ChainIds.ARBITRUM]: 'Arbitrum',
   [ChainIds.FUJI]: 'Fuji Testnet',
@@ -113,6 +117,7 @@ export const chainCurrencies: Record<number, string> = {
   [ChainIds.BSCTESTNET]: 'BNB',
   [ChainIds.POLYGON]: 'MATIC',
   [ChainIds.BASE]: 'ETH',
+  [ChainIds.HOLESKY]: 'HoleskyETH',
   [ChainIds.HARDHAT]: 'ETH',
   [ChainIds.ARBITRUM]: 'AETH',
   [ChainIds.FUJI]: 'AVAX',
@@ -136,6 +141,7 @@ export const currencyIcons: Record<number, number> = {
   [ChainIds.BSCTESTNET]: ChainIds.BSC,
   [ChainIds.POLYGON]: ChainIds.POLYGON,
   [ChainIds.BASE]: ChainIds.MAINNET,
+  [ChainIds.HOLESKY]: ChainIds.MAINNET,
   [ChainIds.ARBITRUM]: ChainIds.MAINNET,
   [ChainIds.FUJI]: ChainIds.AVALANCHE,
   [ChainIds.AVALANCHE]: ChainIds.AVALANCHE,
@@ -148,8 +154,8 @@ export const currencyIcons: Record<number, number> = {
 }
 
 export const apiUrls: Record<number, string> = {
-  [ChainIds.MAINNET]: 'https://mainnet.infura.io/v3',
-  [ChainIds.GOERLI]: 'https://goerli.infura.io/v3',
+  [ChainIds.MAINNET]: 'https://ethereum.publicnode.com',
+  [ChainIds.GOERLI]: 'https://ethereum-goerli.publicnode.com',
   [ChainIds.RSK]: 'https://public-node.rsk.co',
   [ChainIds.RSKTESTNET]: 'https://public-node.testnet.rsk.co',
   [ChainIds.TELOS]: 'https://mainnet.telos.net/evm',
@@ -158,15 +164,16 @@ export const apiUrls: Record<number, string> = {
   [ChainIds.BSCTESTNET]: 'https://data-seed-prebsc-1-s1.binance.org:8545',
   [ChainIds.POLYGON]: 'https://polygon-rpc.com',
   [ChainIds.BASE]: 'https://mainnet.base.org',
+  [ChainIds.HOLESKY]: 'https://ethereum-holesky.publicnode.com',
   [ChainIds.ARBITRUM]: 'https://arb1.arbitrum.io/rpc',
   [ChainIds.FUJI]: 'https://api.avax-test.network/ext/bc/C/rpc',
   [ChainIds.AVALANCHE]: 'https://api.avax.network/ext/bc/C/rpc',
   [ChainIds.LINEAGOERLI]: 'https://rpc.goerli.linea.build',
-  [ChainIds.LINEA]: 'https://linea-mainnet.infura.io/v3',
+  [ChainIds.LINEA]: 'https://rpc.linea.build',
   [ChainIds.MUMBAI]: 'https://rpc-mumbai.maticvigil.com',
   [ChainIds.BASEGOERLI]: 'https://goerli.base.org',
   [ChainIds.ARBITRUMGOERLI]: 'https://goerli-rollup.arbitrum.io/rpc',
-  [ChainIds.SEPOLIA]: 'https://sepolia.infura.io/v3',
+  [ChainIds.SEPOLIA]: 'https://ethereum-sepolia.publicnode.com',
 }
 
 export const explorerUrls: Record<number, string> = {
@@ -180,6 +187,7 @@ export const explorerUrls: Record<number, string> = {
   [ChainIds.BSCTESTNET]: 'https://testnet.bscscan.com',
   [ChainIds.POLYGON]: 'https://polygonscan.com',
   [ChainIds.BASE]: 'https://basescan.org',
+  [ChainIds.HOLESKY]: 'https://holesky.etherscan.io/',
   [ChainIds.ARBITRUM]: 'https://arbiscan.io',
   [ChainIds.FUJI]: 'https://testnet.snowtrace.io',
   [ChainIds.AVALANCHE]: 'https://snowtrace.io',
@@ -205,6 +213,7 @@ export const stakingTokenAddresses: Record<number, string> = {
   [ChainIds.MAINNET]: '0x27054b13b1b798b345b591a4d22e6562d47ea75a',
   [ChainIds.GOERLI]: '0x23474e94e27ac59eec4411ce96c322add8833680',
   [ChainIds.SEPOLIA]: '0x517d482f686f11b922eed764692f2b42663ce2fa',
+  [ChainIds.HOLESKY]: '0x71070c5607358fc25E3B4aaf4FB0a580c190252a',
 }
 
 export const ownerAddresses: Record<number, string> = {
