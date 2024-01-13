@@ -237,10 +237,13 @@ contract BatchCall {
 
   /**
    * @notice Check if the nonce for an array of order has been already used or not
-   * @dev return array and will fail if large token arrays are inputted
+   * @dev Swap and SwapERC20 nonceUsed function have a similar signature
+   * @dev The same function can be used for both contract calls
    * @dev Returns an array of bool
+   * @dev return array and will fail if large nonce arrays are inputted
    * @param signerWallets[] list of wallets associated with the nonces to be checked
-   * * @param nonces[] list of nonces to be checked
+   * @param nonces[] list of nonces to be checked
+   * @param swapContract[] swap or swapERC contract to check nonces forom
    * @return bool[] nonce validity
    */
 
