@@ -14,6 +14,13 @@ module.exports = {
     stakingDuration: 60 * 60, // 1 HOUR
     minDurationChangeDelay: 60, // 1 MINUTE
   },
+  [ChainIds.HOLESKY]: {
+    name: 'Staked AST (Holesky)',
+    symbol: 'sAST (Holesky)',
+    stakingToken: stakingTokenAddresses[ChainIds.HOLESKY],
+    stakingDuration: 60 * 60, // 1 HOUR
+    minDurationChangeDelay: 60, // 1 MINUTE
+  },
   [ChainIds.SEPOLIA]: {
     name: 'Staked AST (Sepolia)',
     symbol: 'sAST (Sepolia)',

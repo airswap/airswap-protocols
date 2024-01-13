@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "@airswap/batch-call": "4.1.0-beta.0",
-    "@airswap/constants": "4.1.9-beta.0",
+    "@airswap/constants": "4.1.9-beta.1",
     "@airswap/jsonrpc-client-websocket": "0.0.1",
     "@airswap/registry": "4.1.3",
     "@airswap/pool": "4.1.4",
