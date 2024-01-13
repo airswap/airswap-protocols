@@ -261,7 +261,7 @@ describe('BatchCall Integration', () => {
       ]
       const orderValidities = await batchCall
         .connect(sender)
-        .getNonceUsedERC20(
+        .getNonceUsed(
           [signer.address, signer.address, signer.address],
           [ERC20orders[0].nonce, ERC20orders[1].nonce, ERC20orders[2].nonce],
           swapERC20.address
@@ -319,7 +319,7 @@ describe('BatchCall Integration', () => {
         )
       const orderValidities = await batchCall
         .connect(sender)
-        .getNonceUsedERC20(
+        .getNonceUsed(
           [signer.address, signer.address, signer.address],
           [usedNonce, usedNonce, unusedNonce],
           swapERC20.address

@@ -258,28 +258,4 @@ contract BatchCall {
     }
     return nonceUsed;
   }
-
-  /**
-   * @notice Check if the nonce for an array of order has been already used or not
-   * @dev return array and will fail if large token arrays are inputted
-   * @dev Returns an array of bool
-   * @param signerWallets[] list of wallets associated with the nonces to be checked
-   * * @param nonces[] list of nonces to be checked
-   * @return bool[] nonce validity
-   */
-
-  function getNonceUsedERC20(
-    address[] calldata signerWallets,
-    uint256[] calldata nonces,
-    ISwapERC20 swapERC20Contract
-  ) external view returns (bool[] memory) {
-    require(signerWallets.length > 0);
-    require(signerWallets.length == nonces.length);
-    bool[] memory nonceUsed = new bool[](signerWallets.length);
-
-    for (uint256 i = 0; i < signerWallets.length; i++) {
-      nonceUsed[i] = swapERC20Contract.nonceUsed(signerWallets[i], nonces[i]);
-    }
-    return nonceUsed;
-  }
 }
