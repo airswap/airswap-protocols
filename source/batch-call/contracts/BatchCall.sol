@@ -247,7 +247,7 @@ contract BatchCall {
    * @return bool[] nonce validity
    */
 
-  function getNonceUsed(
+  function getNoncesUsed(
     address[] calldata signerWallets,
     uint256[] calldata nonces,
     ISwap swapContract
