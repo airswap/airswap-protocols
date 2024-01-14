@@ -459,6 +459,9 @@ describe('Registry Unit', () => {
           [token1.address, token2.address, token3.address]
         )
 
+      const serverUrl = await registry.stakerServerURLs(account1.address)
+      expect(serverUrl).to.equal('')
+
       const protocols = await registry.getProtocolsForStaker(account1.address)
       expect(protocols.length).to.equal(0)
 
