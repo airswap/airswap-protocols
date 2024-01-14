@@ -23,11 +23,11 @@ import {
   OrderERC20,
   Pricing,
   ServerOptions,
-  OrderResponse,
   SupportedProtocolInfo,
   OrderFilter,
-  SortOrder,
-  SortField,
+  OrderResponse,
+  Indexes,
+  Direction,
 } from '@airswap/types'
 import { ChainIds, Protocols, protocolNames } from '@airswap/constants'
 
@@ -40,80 +40,8 @@ if (!isBrowser) {
   })
 }
 
-const REQUEST_TIMEOUT = 4000
-
-export function toSortOrder(key: string): SortOrder | undefined {
-  if (typeof key !== 'string') {
-    return undefined
-  }
-  if (key.toUpperCase() === SortOrder.ASC) {
-    return SortOrder.ASC
-  }
-  if (key.toUpperCase() === SortOrder.DESC) {
-    return SortOrder.DESC
-  }
-
-  return undefined
-}
-
-export function toSortField(key: string): SortField | undefined {
-  if (typeof key !== 'string') {
-    return undefined
-  }
-  key = key.toUpperCase()
-  if (Object.keys(SortField).includes(key)) {
-    return key as SortField
-  }
-
-  return undefined
-}
-
-export abstract class IndexedOrderError extends Error {
-  public code!: number
-  public constructor(message: string) {
-    super(message)
-    this.message = message
-  }
-}
-export class ErrorResponse {
-  public code: number
-  public message: string
-  public constructor(code: number, message: string) {
-    this.code = code
-    this.message = message
-  }
-}
-export class SuccessResponse {
-  public message: string
-  public constructor(message: string) {
-    this.message = message
-  }
-}
-export class JsonRpcResponse<Type> {
-  public id: string
-  public result:
-    | OrderResponse<Type>
-    | ErrorResponse
-    | SuccessResponse
-    | undefined
-  private jsonrpc = '2.0'
-
-  public constructor(
-    id: string,
-    result:
-      | OrderResponse<Type>
-      | IndexedOrderError
-      | SuccessResponse
-      | undefined
-  ) {
-    this.id = id
-    if (result instanceof Error) {
-      this.result = new ErrorResponse(result.code, result.message)
-    } else {
-      this.result = result
-    }
-  }
-}
+const DEFAULT_LIMIT = 10
+const DEFAULT_TIMEOUT = 4000
 
 export interface ServerEvents {
   'pricing-erc20': (pricing: Pricing[]) => void
@@ -331,12 +259,10 @@ export class Server extends TypedEmitter<ServerEvents> {
   /**
    * Protocols.IndexingERC20
    */
-  public async addOrderERC20(
-    fullOrder: FullOrderERC20
-  ): Promise<SuccessResponse> {
+  public async addOrderERC20(fullOrder: FullOrderERC20): Promise<boolean> {
     try {
       return Promise.resolve(
-        (await this.httpCall('addOrderERC20', [fullOrder])) as SuccessResponse
+        (await this.httpCall('addOrderERC20', [fullOrder])) as boolean
       )
     } catch (err) {
       return Promise.reject(err)
@@ -345,10 +271,10 @@ export class Server extends TypedEmitter<ServerEvents> {
 
   public async getOrdersERC20(
     orderFilter: OrderFilter,
-    offset: number,
-    limit: number,
-    sortField?: SortField,
-    sortOrder?: SortOrder
+    offset = 0,
+    limit = DEFAULT_LIMIT,
+    by = Indexes.EXPIRY,
+    direction = Direction.ASC
   ): Promise<OrderResponse<FullOrderERC20>> {
     try {
       return Promise.resolve(
@@ -356,8 +282,8 @@ export class Server extends TypedEmitter<ServerEvents> {
           { ...this.toBigIntJson(orderFilter) },
           offset,
           limit,
-          sortField,
-          sortOrder,
+          by,
+          direction,
         ])) as OrderResponse<FullOrderERC20>
       )
     } catch (err) {
@@ -368,10 +294,10 @@ export class Server extends TypedEmitter<ServerEvents> {
   /**
    * Protocols.Indexing
    */
-  public async addOrder(order: FullOrder): Promise<SuccessResponse> {
+  public async addOrder(order: FullOrder): Promise<boolean> {
     try {
       return Promise.resolve(
-        (await this.httpCall('addOrder', [order])) as SuccessResponse
+        (await this.httpCall('addOrder', [order])) as boolean
       )
     } catch (err) {
       return Promise.reject(err)
@@ -380,10 +306,10 @@ export class Server extends TypedEmitter<ServerEvents> {
 
   public async getOrders(
     orderFilter: OrderFilter,
-    offset: number,
-    limit: number,
-    sortField?: SortField,
-    sortOrder?: SortOrder
+    offset = 0,
+    limit = DEFAULT_LIMIT,
+    by = Indexes.NONCE,
+    direction = Direction.ASC
   ): Promise<OrderResponse<FullOrder>> {
     try {
       return Promise.resolve(
@@ -391,8 +317,8 @@ export class Server extends TypedEmitter<ServerEvents> {
           { ...this.toBigIntJson(orderFilter) },
           offset,
           limit,
-          sortField,
-          sortOrder,
+          by,
+          direction,
         ])) as OrderResponse<FullOrder>
       )
     } catch (err) {
@@ -419,7 +345,7 @@ export class Server extends TypedEmitter<ServerEvents> {
     }
   }
 
-  private _init(initializeTimeout: number = REQUEST_TIMEOUT) {
+  private _init(initializeTimeout: number = DEFAULT_TIMEOUT) {
     if (this.transportProtocol === 'http') {
       return this._initHTTPClient(this.locator)
     } else {
@@ -435,7 +361,7 @@ export class Server extends TypedEmitter<ServerEvents> {
       hostname: parsedUrl.hostname,
       path: parsedUrl.path,
       port: parsedUrl.port,
-      timeout: REQUEST_TIMEOUT,
+      timeout: DEFAULT_TIMEOUT,
     }
 
     if (!clientOnly) {
@@ -483,7 +409,7 @@ export class Server extends TypedEmitter<ServerEvents> {
       (resolve, reject) => {
         this.webSocketClient = new JsonRpcWebsocket(
           url.format(locator),
-          REQUEST_TIMEOUT,
+          DEFAULT_TIMEOUT,
           (error: JsonRpcError) => {
             if (!this.isInitialized) {
               reject(error)
