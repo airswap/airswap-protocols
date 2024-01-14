@@ -243,7 +243,7 @@ contract BatchCall {
    * @dev return array and will fail if large nonce arrays are inputted
    * @param signerWallets[] list of wallets associated with the nonces to be checked
    * @param nonces[] list of nonces to be checked
-   * @param swapContract[] swap or swapERC contract to check nonces forom
+   * @param swapContract[] swap or swapERC contract to check nonces from
    * @return bool[] nonce validity
    */
 
