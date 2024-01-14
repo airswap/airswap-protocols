@@ -81,8 +81,6 @@ contract Registry {
     if (bytes(stakerServerURLs[msg.sender]).length == 0)
       revert NoServerURLSet();
 
-    string memory _url = stakerServerURLs[msg.sender];
-
     EnumerableSet.Bytes32Set storage supportedProtocolList = protocolsByStaker[
       msg.sender
     ];
@@ -111,6 +109,8 @@ contract Registry {
       supportedTokenList.remove(_token);
       stakersByToken[_token].remove(msg.sender);
     }
+
+    string memory _url = stakerServerURLs[msg.sender];
 
     delete stakerServerURLs[msg.sender];
 
