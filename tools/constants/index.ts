@@ -187,7 +187,7 @@ export const explorerUrls: Record<number, string> = {
   [ChainIds.BSCTESTNET]: 'https://testnet.bscscan.com',
   [ChainIds.POLYGON]: 'https://polygonscan.com',
   [ChainIds.BASE]: 'https://basescan.org',
-  [ChainIds.HOLESKY]: 'https://holesky.etherscan.io/',
+  [ChainIds.HOLESKY]: 'https://holesky.etherscan.io',
   [ChainIds.ARBITRUM]: 'https://arbiscan.io',
   [ChainIds.FUJI]: 'https://testnet.snowtrace.io',
   [ChainIds.AVALANCHE]: 'https://snowtrace.io',
@@ -202,6 +202,7 @@ export const explorerUrls: Record<number, string> = {
 export const explorerApiUrls: Record<number, string> = {
   [ChainIds.RSK]: 'https://rootstock.blockscout.com/api',
   [ChainIds.RSKTESTNET]: 'https://rootstock-testnet.blockscout.com/api',
+  [ChainIds.HOLESKY]: 'https://api-holesky.etherscan.io/api',
   [ChainIds.LINEAGOERLI]: 'https://api-testnet.lineascan.build/api',
   [ChainIds.LINEA]: 'https://api.lineascan.build/api',
   [ChainIds.BASEGOERLI]: 'https://api-goerli.basescan.org/api',
