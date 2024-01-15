@@ -351,7 +351,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
           errors[errCount] = "SenderBalanceLow";
           errCount++;
         }
-        if (!senderTokenAdapter.hasValidParams(order.signer)) {
+        if (!senderTokenAdapter.hasValidParams(sender)) {
           errors[errCount] = "AmountOrIDInvalid";
           errCount++;
         }

@@ -1,6 +1,6 @@
 {
   "name": "@airswap/swap",
-  "version": "4.1.3-beta.0",
+  "version": "4.1.3-beta.1",
   "description": "AirSwap: Atomic Token Swap",
   "license": "MIT",
   "repository": {
@@ -32,8 +32,8 @@
     "@openzeppelin/contracts": "^4.8.3"
   },
   "devDependencies": {
-    "@airswap/constants": "4.1.9-beta.0",
-    "@airswap/types": "4.1.3",
+    "@airswap/constants": "4.1.9-beta.2",
+    "@airswap/types": "4.1.4",
     "@airswap/utils": "4.1.12",
     "@nomicfoundation/hardhat-network-helpers": "^1.0.7"
   },

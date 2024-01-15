@@ -85,6 +85,7 @@ contract Registry {
       msg.sender
     ];
     uint256 _protocolListLength = supportedProtocolList.length();
+
     bytes4[] memory _protocolList = new bytes4[](_protocolListLength);
 
     for (uint256 i = _protocolListLength; i > 0; ) {
@@ -98,6 +99,7 @@ contract Registry {
       msg.sender
     ];
     uint256 _tokenListLength = supportedTokenList.length();
+
     address[] memory _tokenList = new address[](_tokenListLength);
 
     for (uint256 i = _tokenListLength; i > 0; ) {
@@ -108,6 +110,10 @@ contract Registry {
       stakersByToken[_token].remove(msg.sender);
     }
 
+    string memory _url = stakerServerURLs[msg.sender];
+
+    delete stakerServerURLs[msg.sender];
+
     uint256 _transferAmount = stakingCost +
       (supportCost * _protocolListLength) +
       (supportCost * _tokenListLength);
@@ -115,12 +121,7 @@ contract Registry {
       stakingToken.safeTransfer(msg.sender, _transferAmount);
     }
 
-    emit UnsetServer(
-      msg.sender,
-      stakerServerURLs[msg.sender],
-      _protocolList,
-      _tokenList
-    );
+    emit UnsetServer(msg.sender, _url, _protocolList, _tokenList);
   }
 
   /**

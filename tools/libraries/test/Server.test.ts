@@ -16,7 +16,6 @@ import {
 import { ADDRESS_ZERO, ChainIds, Protocols } from '@airswap/constants'
 
 import { Server } from '../index'
-import { toSortField, toSortOrder } from '../index'
 import {
   addJSONRPCAssertions,
   createRequest,
@@ -24,7 +23,7 @@ import {
   MockSocketServer,
   nextEvent,
 } from './test-utils'
-import { OrderERC20, SortField, SortOrder, Levels } from '@airswap/types'
+import { OrderERC20, Levels } from '@airswap/types'
 import { JsonRpcErrorCodes } from '@airswap/jsonrpc-client-websocket'
 
 addJSONRPCAssertions()
@@ -93,8 +92,6 @@ function mockHttpServer(api) {
             params.swapContract,
             ChainIds.SEPOLIA
           )),
-          chainId: ChainIds.SEPOLIA,
-          swapContract: params.swapContract,
         }
         break
       case 'getOrdersERC20':
@@ -102,27 +99,36 @@ function mockHttpServer(api) {
         res = {
           orders: [
             {
-              order: {
-                ...order,
-                ...(await createOrderERC20Signature(
-                  order,
-                  wallet.privateKey,
-                  ADDRESS_ZERO,
-                  ChainIds.SEPOLIA
-                )),
-                chainId: ChainIds.SEPOLIA,
-                swapContract: ADDRESS_ZERO,
-              },
+              ...order,
+              ...(await createOrderERC20Signature(
+                order,
+                wallet.privateKey,
+                ADDRESS_ZERO,
+                ChainIds.SEPOLIA
+              )),
+              chainId: ChainIds.SEPOLIA,
+              swapContract: ADDRESS_ZERO,
             },
           ],
         }
         break
       case 'getOrders':
-        if (params[0]['offset']) {
-          expect(params[0]['page']).to.equal(0)
-          expect(params[0]['signerAddress']).to.equal(ADDRESS_ZERO)
+        order = createOrder({})
+        res = {
+          orders: [
+            {
+              ...order,
+              ...(await createOrderSignature(
+                order,
+                wallet.privateKey,
+                ADDRESS_ZERO,
+                ChainIds.SEPOLIA
+              )),
+              chainId: ChainIds.SEPOLIA,
+              swapContract: ADDRESS_ZERO,
+            },
+          ],
         }
-        res = await forgeFullOrder()
         break
       case 'considerOrderERC20':
         res = true
@@ -188,7 +194,7 @@ describe('HTTPServer', () => {
         0,
         100
       )
-      expect(isValidFullOrderERC20(result.orders[0].order)).to.be.true
+      expect(isValidFullOrderERC20(result.orders[0])).to.be.true
     })
   fancy
     .nock('https://' + URL, mockHttpServer)
@@ -201,7 +207,7 @@ describe('HTTPServer', () => {
         0,
         100
       )
-      expect(isValidFullOrder(result.orders[0].order)).to.be.true
+      expect(isValidFullOrder(result.orders[0])).to.be.true
     })
 })
 
@@ -506,55 +512,3 @@ describe('WebSocketServer', () => {
     MockSocketServer.stopMockingWebSocket()
   })
 })
-
-describe('Indexing', () => {
-  it('sort field: should match value', () => {
-    expect(toSortField('SENDER_AMOUNT')).to.equal(SortField.SENDER_AMOUNT)
-    expect(toSortField('sender_amount')).to.equal(SortField.SENDER_AMOUNT)
-    expect(toSortField('SIGNER_AMOUNT')).to.equal(SortField.SIGNER_AMOUNT)
-    expect(toSortField('signer_amount')).to.equal(SortField.SIGNER_AMOUNT)
-    expect(toSortField('EXPIRY')).to.equal(SortField.EXPIRY)
-    expect(toSortField('expiry')).to.equal(SortField.EXPIRY)
-    expect(toSortField('nonce')).to.equal(SortField.NONCE)
-    expect(toSortField('NONCE')).to.equal(SortField.NONCE)
-  })
-
-  it('sort field: should return undefined', () => {
-    expect(toSortField('')).to.equal(undefined)
-    expect(toSortField('aze')).to.equal(undefined)
-  })
-
-  it('sort order: should match value', () => {
-    expect(toSortOrder('ASC')).to.equal(SortOrder.ASC)
-    expect(toSortOrder('asc')).to.equal(SortOrder.ASC)
-    expect(toSortOrder('DESC')).to.equal(SortOrder.DESC)
-    expect(toSortOrder('desc')).to.equal(SortOrder.DESC)
-  })
-
-  it('sort order: should return undefined', () => {
-    expect(toSortOrder('')).to.equal(undefined)
-    expect(toSortOrder('aze')).to.equal(undefined)
-  })
-})
-
-async function forgeFullOrder() {
-  const unsignedOrder = createOrder({})
-  const signature = await createOrderSignature(
-    unsignedOrder,
-    wallet.privateKey,
-    ADDRESS_ZERO,
-    1
-  )
-  return {
-    orders: [
-      {
-        order: {
-          ...unsignedOrder,
-          ...signature,
-          chainId: ChainIds.SEPOLIA,
-          swapContract: ADDRESS_ZERO,
-        },
-      },
-    ],
-  }
-}
