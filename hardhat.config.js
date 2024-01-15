@@ -169,6 +169,14 @@ module.exports = {
         },
       },
       {
+        network: 'holesky',
+        chainId: 17000,
+        urls: {
+          apiURL: explorerApiUrls[ChainIds.HOLESKY],
+          browserURL: explorerUrls[ChainIds.HOLESKY],
+        },
+      },
+      {
         network: 'linea',
         chainId: 59144,
         urls: {
