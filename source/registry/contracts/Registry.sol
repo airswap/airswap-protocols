@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.17;
+pragma solidity 0.8.23;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 /**
- * @title AirSwap: Server URL Registry
+ * @title AirSwap: Server Registry
  * @notice https://www.airswap.io/
  */
 contract Registry {
@@ -46,10 +46,10 @@ contract Registry {
   error ServerURLInvalid();
 
   /**
-   * @notice Constructor
-   * @param _stakingToken address of token used for staking
-   * @param _stakingCost base amount required to stake
-   * @param _supportCost amount required per token or protocol
+   * @notice Registry constructor
+   * @param _stakingToken IERC20 address of token used for staking
+   * @param _stakingCost uint256 base amount required to stake
+   * @param _supportCost uint256 amount required per token or protocol
    */
   constructor(
     IERC20 _stakingToken,
@@ -125,8 +125,8 @@ contract Registry {
   }
 
   /**
-   * @notice Add protocols supported by the sender
-   * @param _protocols array of protocol identifiers
+   * @notice Add protocols supported by the staker
+   * @param _protocols bytes4[] protocol identifiers
    */
   function addProtocols(bytes4[] calldata _protocols) external {
     uint256 _length = _protocols.length;
@@ -150,8 +150,8 @@ contract Registry {
   }
 
   /**
-   * @notice Remove protocols supported by the sender
-   * @param _protocols array of protocol identifiers
+   * @notice Remove protocols supported by the staker
+   * @param _protocols bytes4[] protocol identifiers
    */
   function removeProtocols(bytes4[] calldata _protocols) external {
     uint256 _length = _protocols.length;
@@ -175,9 +175,9 @@ contract Registry {
   }
 
   /**
-   * @notice Get all server URLs supporting a protocol
-   * @param _protocol bytes4 of a protocol identifier
-   * @return _urls array of URLs supporting the protocol
+   * @notice Get all server URLs that support a protocol
+   * @param _protocol bytes4 protocol identifier
+   * @return _urls string[] URLs that support the protocol
    */
   function getServerURLsForProtocol(
     bytes4 _protocol
@@ -192,9 +192,9 @@ contract Registry {
 
   /**
    * @notice Return whether a staker supports a protocol
-   * @param _staker account address of a staker
-   * @param _protocol bytes4 of a protocol identifier
-   * @return true if the staker supports the protocol
+   * @param _staker address staker address
+   * @param _protocol bytes4 protocol identifier
+   * @return bool true if the staker supports the protocol
    */
   function supportsProtocol(
     address _staker,
@@ -205,8 +205,8 @@ contract Registry {
 
   /**
    * @notice Get all supported protocols for a staker
-   * @param _staker account address of the staker
-   * @return _protocolList array of supported protocol identifiers
+   * @param _staker address staker address
+   * @return _protocolList bytes4[] supported protocol identifiers
    */
   function getProtocolsForStaker(
     address _staker
@@ -220,9 +220,9 @@ contract Registry {
   }
 
   /**
-   * @notice Get all stakers supporting a protocol
-   * @param _protocol bytes4 of the protocol identifier
-   * @return _stakers array of all stakers that support the protocol
+   * @notice Get all stakers that support a protocol
+   * @param _protocol bytes4 protocol identifier
+   * @return _stakers address[] stakers that support the protocol
    */
   function getStakersForProtocol(
     bytes4 _protocol
@@ -236,8 +236,8 @@ contract Registry {
   }
 
   /**
-   * @notice Add tokens supported by the sender
-   * @param _tokens array of token addresses
+   * @notice Add tokens supported by the staker
+   * @param _tokens address[] token addresses
    */
   function addTokens(address[] calldata _tokens) external {
     uint256 _length = _tokens.length;
@@ -257,8 +257,8 @@ contract Registry {
   }
 
   /**
-   * @notice Remove tokens supported by the sender
-   * @param _tokens array of token addresses
+   * @notice Remove tokens supported by the staker
+   * @param _tokens address[] token addresses
    */
   function removeTokens(address[] calldata _tokens) external {
     uint256 _length = _tokens.length;
@@ -277,9 +277,9 @@ contract Registry {
   }
 
   /**
-   * @notice Get all server URLs supporting a token
+   * @notice Get all server URLs that support a token
    * @param _token address of a token
-   * @return urls array of URLs supporting the token
+   * @return urls array of URLs that support the token
    */
   function getServerURLsForToken(
     address _token
@@ -294,8 +294,8 @@ contract Registry {
 
   /**
    * @notice Return whether a staker supports a token
-   * @param _staker account address of a staker
-   * @param _token address of a token identifier
+   * @param _staker address staker address
+   * @param _token address token address
    * @return true if the staker supports the token
    */
   function supportsToken(
@@ -307,8 +307,8 @@ contract Registry {
 
   /**
    * @notice Return a list of all supported tokens for a given staker
-   * @param _staker account address of the staker
-   * @return tokenList array of all supported tokens
+   * @param _staker address staker address
+   * @return tokenList address[] supported tokens
    */
   function getTokensForStaker(
     address _staker
@@ -322,9 +322,9 @@ contract Registry {
   }
 
   /**
-   * @notice Get all stakers supporting a token
-   * @param _token address of the token
-   * @return _stakers array of all stakers that support the token
+   * @notice Get all stakers that support a token
+   * @param _token address token address
+   * @return _stakers address[] stakers that support the token
    */
   function getStakersForToken(
     address _token
@@ -339,8 +339,8 @@ contract Registry {
 
   /**
    * @notice Get the URLs for an array of stakers
-   * @param _stakers array of staker addresses
-   * @return _urls array of staker URLs in the same order
+   * @param _stakers address[] staker addresses
+   * @return _urls string[] staker URLs mapped to _stakers
    */
   function getServerURLsForStakers(
     address[] calldata _stakers
@@ -354,8 +354,8 @@ contract Registry {
 
   /**
    * @notice Get the staking balance of a staker
-   * @param _staker address of a staker account
-   * @return balance of the staker account
+   * @param _staker address staker address
+   * @return balance uint256 balance of the staker address
    */
   function balanceOf(address _staker) external view returns (uint256) {
     uint256 _stakingBalance = 0;

@@ -27,21 +27,12 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
 
   // Domain name and version for use in EIP712 signatures
   string public constant DOMAIN_NAME = "SWAP";
-  string public constant DOMAIN_VERSION = "4";
+  string public constant DOMAIN_VERSION = "4.2";
   uint256 public immutable DOMAIN_CHAIN_ID;
   bytes32 public immutable DOMAIN_SEPARATOR;
 
   uint256 public constant FEE_DIVISOR = 10000;
-  uint256 internal constant MAX_ERROR_COUNT = 16;
-
-  // Mapping of ERC165 interface ID to token adapter
-  mapping(bytes4 => IAdapter) public adapters;
-
-  // Mapping of signer to authorized signatory
-  mapping(address => address) public override authorized;
-
-  // Mapping of signatory address to a minimum valid nonce
-  mapping(address => uint256) public signatoryMinimumNonce;
+  uint256 internal constant MAX_ERROR_COUNT = 18;
 
   /**
    * @notice Double mapping of signers to nonce groups to nonce states
@@ -50,16 +41,25 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
    */
   mapping(address => mapping(uint256 => uint256)) internal _nonceGroups;
 
-  bytes4 public requiredSenderKind;
+  // Mapping of signer to authorized signatory
+  mapping(address => address) public override authorized;
+
+  // Mapping of signatory address to a minimum valid nonce
+  mapping(address => uint256) public signatoryMinimumNonce;
+
   uint256 public protocolFee;
   address public protocolFeeWallet;
+  bytes4 public requiredSenderKind;
+
+  // Mapping of ERC165 interface ID to token adapter
+  mapping(bytes4 => IAdapter) public adapters;
 
   /**
-   * @notice Constructor
+   * @notice Swap constructor
    * @dev Sets domain and version for EIP712 signatures
    * @param _adapters IAdapter[] array of token adapters
-   * @param _protocolFee uin256 fee to be assessed on swaps
-   * @param _protocolFeeWallet address destination for fees
+   * @param _protocolFee uin256 protocol fee to be assessed on swaps
+   * @param _protocolFeeWallet address destination for protocol fees
    */
   constructor(
     IAdapter[] memory _adapters,
@@ -84,6 +84,8 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
 
   /**
    * @notice Atomic Token Swap
+   * @param recipient address Wallet to receive sender proceeds
+   * @param maxRoyalty uint256 Max to avoid unexpected royalties
    * @param order Order to settle
    */
   function swap(
@@ -130,7 +132,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
       );
     }
 
-    // Transfer protocol fee from sender if possible
+    // Transfer protocol fee from sender
     uint256 protocolFeeAmount = (order.sender.amount * protocolFee) /
       FEE_DIVISOR;
     if (protocolFeeAmount > 0) {
@@ -144,7 +146,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
       );
     }
 
-    // Transfer royalty from sender if supported by signer token
+    // Transfer royalty from sender if required by signer token
     if (supportsRoyalties(order.signer.token)) {
       address royaltyRecipient;
       uint256 royaltyAmount;
@@ -179,7 +181,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
   }
 
   /**
-   * @notice Set the fee
+   * @notice Set the protocol fee
    * @param _protocolFee uint256 Value of the fee in basis points
    */
   function setProtocolFee(uint256 _protocolFee) external onlyOwner {
@@ -190,7 +192,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
   }
 
   /**
-   * @notice Set the fee wallet
+   * @notice Set the protocol fee wallet
    * @param _protocolFeeWallet address Wallet to transfer fee to
    */
   function setProtocolFeeWallet(address _protocolFeeWallet) external onlyOwner {
@@ -247,8 +249,10 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
   }
 
   /**
-   * @notice Validates Swap Order for any potential errors
-   * @param order Order to settle
+   * @notice Checks order and returns list of errors
+   * @param senderWallet address wallet that would send the order
+   * @param order Order that would be settled
+   * @return (bytes32[], uint256) error messages and count
    */
   function check(
     address senderWallet,
@@ -403,8 +407,8 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
   }
 
   /**
-   * @notice Function to indicate whether the party token implements EIP-2981
-   * @param token Contract address from which royalty need to be considered
+   * @notice Checks whether a token implements EIP-2981
+   * @param token address token to check
    */
   function supportsRoyalties(address token) internal view returns (bool) {
     try IERC165(token).supportsInterface(type(IERC2981).interfaceId) returns (
@@ -420,7 +424,6 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
    * @notice Tests whether signature and signer are valid
    * @param order Order to validate
    */
-
   function _check(Order calldata order) internal {
     // Ensure execution on the intended chain
     if (DOMAIN_CHAIN_ID != block.chainid) revert ChainIdChanged();
@@ -464,7 +467,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
   }
 
   /**
-   * @notice Hash an order into bytes32
+   * @notice Hashes an order into bytes32
    * @dev EIP-191 header and domain separator included
    * @param order Order The order to be hashed
    * @return bytes32 A keccak256 abi.encodePacked value
@@ -492,14 +495,11 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
   }
 
   /**
-   * @notice Perform token transfer for tokens in registry
-   * @dev Transfer type specified by the bytes4 kind param
-   * @dev ERC721: uses transferFrom for transfer
-   * @dev ERC20: Takes into account non-standard ERC-20 tokens.
+   * @notice Performs token transfer
    * @param from address Wallet address to transfer from
    * @param to address Wallet address to transfer to
    * @param amount uint256 Amount for ERC-20
-   * @param id token ID for ERC-721
+   * @param id uint256 token ID for ERC-721, ERC-1155
    * @param token address Contract address of token
    * @param kind bytes4 EIP-165 interface ID of the token
    */

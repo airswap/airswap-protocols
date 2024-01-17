@@ -24,14 +24,14 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
 
   // Domain name and version for use in EIP712 signatures
   string public constant DOMAIN_NAME = "SWAP_ERC20";
-  string public constant DOMAIN_VERSION = "4.1";
+  string public constant DOMAIN_VERSION = "4.2";
   uint256 public immutable DOMAIN_CHAIN_ID;
   bytes32 public immutable DOMAIN_SEPARATOR;
 
   uint256 public constant FEE_DIVISOR = 10000;
+  uint256 internal constant MAX_ERROR_COUNT = 10;
   uint256 internal constant MAX_MAX = 100;
   uint256 internal constant MAX_SCALE = 77;
-  uint256 internal constant MAX_ERROR_COUNT = 10;
 
   /**
    * @notice Double mapping of signers to nonce groups to nonce states
@@ -51,10 +51,10 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
   address public stakingToken;
 
   /**
-   * @notice Constructor
+   * @notice SwapERC20 constructor
    * @dev Sets domain and version for EIP712 signatures
-   * @param _protocolFee uin256 fee to be assessed on swaps
-   * @param _protocolFeeWallet address destination for fees
+   * @param _protocolFee uin256 protocol fee to be assessed on swaps
+   * @param _protocolFeeWallet address destination for protocol fees
    * @param _bonusScale uin256 scale factor for bonus
    * @param _bonusMax uint256 max bonus percentage
    */
@@ -536,7 +536,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
   }
 
   /**
-   * @notice Calculate bonus from staking balance
+   * @notice Calculates bonus from staking balance
    * @param stakingBalance uint256
    * @param feeAmount uint256
    */
@@ -673,7 +673,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
   }
 
   /**
-   * @notice Hash order parameters
+   * @notice Hashes order parameters
    * @param nonce uint256
    * @param expiry uint256
    * @param signerWallet address

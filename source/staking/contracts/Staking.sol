@@ -43,7 +43,7 @@ contract Staking is IStaking, Ownable {
   string public symbol;
 
   /**
-   * @notice Constructor
+   * @notice Staking constructor
    * @param _name string Token name for this contract
    * @param _symbol string Token symbol for this contract
    * @param _stakingToken address Token used for staking
