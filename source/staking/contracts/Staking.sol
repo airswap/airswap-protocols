@@ -21,7 +21,7 @@ contract Staking is IStaking, Ownable {
   uint256 public stakingDuration;
 
   // Minimum delay to staking duration change
-  uint256 private minDurationChangeDelay;
+  uint256 private immutable minDurationChangeDelay;
 
   // Timestamp after which staking duration change is possible
   uint256 private activeDurationChangeTimestamp;
@@ -181,7 +181,7 @@ contract Staking is IStaking, Ownable {
    */
   function getStakes(
     address _account
-  ) external view override returns (Stake memory _accountStake) {
+  ) external view override returns (Stake memory) {
     return stakes[_account];
   }
 

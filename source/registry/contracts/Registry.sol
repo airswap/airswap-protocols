@@ -89,7 +89,9 @@ contract Registry {
     bytes4[] memory _protocolList = new bytes4[](_protocolListLength);
 
     for (uint256 i = _protocolListLength; i > 0; ) {
-      i--;
+      unchecked {
+        --i;
+      }
       bytes4 _protocol = bytes4(supportedProtocolList.at(i));
       _protocolList[i] = _protocol;
       supportedProtocolList.remove(_protocol);
@@ -103,7 +105,9 @@ contract Registry {
     address[] memory _tokenList = new address[](_tokenListLength);
 
     for (uint256 i = _tokenListLength; i > 0; ) {
-      i--;
+      unchecked {
+        --i;
+      }
       address _token = supportedTokenList.at(i);
       _tokenList[i] = _token;
       supportedTokenList.remove(_token);
@@ -135,10 +139,13 @@ contract Registry {
       msg.sender
     ];
 
-    for (uint256 i; i < _length; ++i) {
+    for (uint256 i; i < _length; ) {
       bytes4 protocol = _protocols[i];
       if (!_protocolList.add(protocol)) revert ProtocolExists(protocol);
       stakersByProtocol[protocol].add(msg.sender);
+      unchecked {
+        ++i;
+      }
     }
 
     uint256 _transferAmount = supportCost * _length;
@@ -159,11 +166,14 @@ contract Registry {
     EnumerableSet.Bytes32Set storage protocolList = protocolsByStaker[
       msg.sender
     ];
-    for (uint256 i; i < _length; ++i) {
+    for (uint256 i; i < _length; ) {
       bytes4 _protocol = _protocols[i];
       if (!protocolList.remove(_protocol))
         revert ProtocolDoesNotExist(_protocol);
       stakersByProtocol[_protocol].remove(msg.sender);
+      unchecked {
+        ++i;
+      }
     }
 
     uint256 _transferAmount = supportCost * _length;
@@ -185,8 +195,11 @@ contract Registry {
     EnumerableSet.AddressSet storage stakers = stakersByProtocol[_protocol];
     uint256 _length = stakers.length();
     _urls = new string[](_length);
-    for (uint256 i; i < _length; ++i) {
+    for (uint256 i; i < _length; ) {
       _urls[i] = stakerServerURLs[address(stakers.at(i))];
+      unchecked {
+        ++i;
+      }
     }
   }
 
@@ -214,8 +227,11 @@ contract Registry {
     EnumerableSet.Bytes32Set storage _protocols = protocolsByStaker[_staker];
     uint256 _length = _protocols.length();
     _protocolList = new bytes4[](_length);
-    for (uint256 i; i < _length; ++i) {
+    for (uint256 i; i < _length; ) {
       _protocolList[i] = bytes4(_protocols.at(i));
+      unchecked {
+        ++i;
+      }
     }
   }
 
@@ -230,8 +246,11 @@ contract Registry {
     EnumerableSet.AddressSet storage _stakerList = stakersByProtocol[_protocol];
     uint256 _length = _stakerList.length();
     _stakers = new address[](_length);
-    for (uint256 i; i < _length; ++i) {
+    for (uint256 i; i < _length; ) {
       _stakers[i] = _stakerList.at(i);
+      unchecked {
+        ++i;
+      }
     }
   }
 
@@ -244,10 +263,13 @@ contract Registry {
     if (_length <= 0) revert ArgumentInvalid();
     EnumerableSet.AddressSet storage tokenList = tokensByStaker[msg.sender];
 
-    for (uint256 i; i < _length; ++i) {
+    for (uint256 i; i < _length; ) {
       address _token = _tokens[i];
       if (!tokenList.add(_token)) revert TokenExists(_token);
       stakersByToken[_token].add(msg.sender);
+      unchecked {
+        ++i;
+      }
     }
     uint256 _transferAmount = supportCost * _length;
     emit AddTokens(msg.sender, _tokens);
@@ -264,10 +286,13 @@ contract Registry {
     uint256 _length = _tokens.length;
     if (_length <= 0) revert ArgumentInvalid();
     EnumerableSet.AddressSet storage tokenList = tokensByStaker[msg.sender];
-    for (uint256 i; i < _length; ++i) {
+    for (uint256 i; i < _length; ) {
       address token = _tokens[i];
       if (!tokenList.remove(token)) revert TokenDoesNotExist(token);
       stakersByToken[token].remove(msg.sender);
+      unchecked {
+        ++i;
+      }
     }
     uint256 _transferAmount = supportCost * _length;
     emit RemoveTokens(msg.sender, _tokens);
@@ -287,8 +312,11 @@ contract Registry {
     EnumerableSet.AddressSet storage stakers = stakersByToken[_token];
     uint256 _length = stakers.length();
     urls = new string[](_length);
-    for (uint256 i; i < _length; ++i) {
+    for (uint256 i; i < _length; ) {
       urls[i] = stakerServerURLs[address(stakers.at(i))];
+      unchecked {
+        ++i;
+      }
     }
   }
 
@@ -316,8 +344,11 @@ contract Registry {
     EnumerableSet.AddressSet storage tokens = tokensByStaker[_staker];
     uint256 _length = tokens.length();
     tokenList = new address[](_length);
-    for (uint256 i; i < _length; ++i) {
+    for (uint256 i; i < _length; ) {
       tokenList[i] = tokens.at(i);
+      unchecked {
+        ++i;
+      }
     }
   }
 
@@ -332,8 +363,11 @@ contract Registry {
     EnumerableSet.AddressSet storage stakerList = stakersByToken[_token];
     uint256 _length = stakerList.length();
     _stakers = new address[](_length);
-    for (uint256 i; i < _length; ++i) {
+    for (uint256 i; i < _length; ) {
       _stakers[i] = stakerList.at(i);
+      unchecked {
+        ++i;
+      }
     }
   }
 
@@ -347,8 +381,11 @@ contract Registry {
   ) external view returns (string[] memory _urls) {
     uint256 stakersLength = _stakers.length;
     _urls = new string[](stakersLength);
-    for (uint256 i; i < stakersLength; ++i) {
+    for (uint256 i; i < stakersLength; ) {
       _urls[i] = stakerServerURLs[_stakers[i]];
+      unchecked {
+        ++i;
+      }
     }
   }
 

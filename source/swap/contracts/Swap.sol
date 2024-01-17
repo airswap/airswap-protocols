@@ -48,7 +48,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
 
   uint256 public protocolFee;
   address public protocolFeeWallet;
-  bytes4 public requiredSenderKind;
+  bytes4 public immutable requiredSenderKind;
 
   // Mapping of ERC165 interface ID to token adapter
   mapping(bytes4 => IAdapter) public adapters;
@@ -73,8 +73,12 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
     DOMAIN_CHAIN_ID = block.chainid;
     DOMAIN_SEPARATOR = _domainSeparatorV4();
 
-    for (uint256 i; i < _adapters.length; ++i) {
+    uint256 adaptersLength = _adapters.length;
+    for (uint256 i; i < adaptersLength; ) {
       adapters[_adapters[i].interfaceId()] = _adapters[i];
+      unchecked {
+        ++i;
+      }
     }
     requiredSenderKind = _requiredSenderKind;
     protocolFee = _protocolFee;
@@ -230,10 +234,13 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
    * @param nonces uint256[] List of nonces to cancel
    */
   function cancel(uint256[] calldata nonces) external override {
-    for (uint256 i; i < nonces.length; ++i) {
+    for (uint256 i; i < nonces.length; ) {
       uint256 nonce = nonces[i];
       _markNonceAsUsed(msg.sender, nonce);
       emit Cancel(nonce, msg.sender);
+      unchecked {
+        ++i;
+      }
     }
   }
 

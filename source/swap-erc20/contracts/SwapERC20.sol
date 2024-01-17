@@ -390,10 +390,13 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
    * @param nonces uint256[] List of nonces to cancel
    */
   function cancel(uint256[] calldata nonces) external override {
-    for (uint256 i; i < nonces.length; ++i) {
+    for (uint256 i; i < nonces.length; ) {
       uint256 nonce = nonces[i];
       if (_markNonceAsUsed(msg.sender, nonce)) {
         emit Cancel(nonce, msg.sender);
+      }
+      unchecked {
+        ++i;
       }
     }
   }
