@@ -3,6 +3,7 @@ pragma solidity 0.8.23;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
+import "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/INoReturnERC20.sol";
 import "./interfaces/ISwapERC20.sol";
@@ -256,7 +257,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     );
 
     // Ensure the signatory is not null
-    if (signatory == address(0)) revert SignatureInvalid();
+    if (signatory == address(0)) revert Unauthorized();
 
     // Ensure the nonce is not yet used and if not mark it used
     if (!_markNonceAsUsed(signatory, nonce)) revert NonceAlreadyUsed(nonce);
@@ -264,7 +265,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     // Ensure signatory is authorized to sign
     if (authorized[signerWallet] != address(0)) {
       // If one is set by signer wallet, signatory must be authorized
-      if (signatory != authorized[signerWallet]) revert SignatoryUnauthorized();
+      if (signatory != authorized[signerWallet]) revert Unauthorized();
     } else {
       // Otherwise, signatory must be signer wallet
       if (signatory != signerWallet) revert Unauthorized();
@@ -447,42 +448,32 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     order.s = s;
     order.senderWallet = senderWallet;
 
-    address signatory = ecrecover(
-      _getOrderHash(
-        order.nonce,
-        order.expiry,
-        order.signerWallet,
-        order.signerToken,
-        order.signerAmount,
-        order.senderWallet,
-        order.senderToken,
-        order.senderAmount
-      ),
-      order.v,
-      order.r,
-      order.s
-    );
+    address signatory = order.signerWallet;
+    if (authorized[signatory] != address(0)) {
+      signatory = authorized[signatory];
+    }
 
-    if (signatory == address(0)) {
-      errors[errCount] = "SignatureInvalid";
+    if (
+      !SignatureChecker.isValidSignatureNow(
+        signatory,
+        _getOrderHash(
+          order.nonce,
+          order.expiry,
+          order.signerWallet,
+          order.signerToken,
+          order.signerAmount,
+          order.senderWallet,
+          order.senderToken,
+          order.senderAmount
+        ),
+        abi.encodePacked(r, s, v)
+      )
+    ) {
+      errors[errCount] = "Unauthorized";
       errCount++;
-    } else {
-      if (
-        authorized[order.signerWallet] != address(0) &&
-        signatory != authorized[order.signerWallet]
-      ) {
-        errors[errCount] = "SignatoryUnauthorized";
-        errCount++;
-      } else if (
-        authorized[order.signerWallet] == address(0) &&
-        signatory != order.signerWallet
-      ) {
-        errors[errCount] = "Unauthorized";
-        errCount++;
-      } else if (nonceUsed(signatory, order.nonce)) {
-        errors[errCount] = "NonceAlreadyUsed";
-        errCount++;
-      }
+    } else if (nonceUsed(signatory, order.nonce)) {
+      errors[errCount] = "NonceAlreadyUsed";
+      errCount++;
     }
 
     if (order.expiry < block.timestamp) {
@@ -639,34 +630,27 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     // Ensure the expiry is not passed
     if (expiry <= block.timestamp) revert OrderExpired();
 
-    // Recover the signatory from the hash and signature
-    (address signatory, ) = ECDSA.tryRecover(
-      _getOrderHash(
-        nonce,
-        expiry,
-        signerWallet,
-        signerToken,
-        signerAmount,
-        senderWallet,
-        senderToken,
-        senderAmount
-      ),
-      v,
-      r,
-      s
-    );
-
-    // Ensure the signatory is not null
-    if (signatory == address(0)) revert SignatureInvalid();
-
-    // Ensure signatory is authorized to sign
-    if (authorized[signerWallet] != address(0)) {
-      // If one is set by signer wallet, signatory must be authorized
-      if (signatory != authorized[signerWallet]) revert SignatoryUnauthorized();
-    } else {
-      // Otherwise, signatory must be signer wallet
-      if (signatory != signerWallet) revert Unauthorized();
+    address signatory = signerWallet;
+    if (authorized[signatory] != address(0)) {
+      signatory = authorized[signatory];
     }
+
+    if (
+      !SignatureChecker.isValidSignatureNow(
+        signatory,
+        _getOrderHash(
+          nonce,
+          expiry,
+          signerWallet,
+          signerToken,
+          signerAmount,
+          senderWallet,
+          senderToken,
+          senderAmount
+        ),
+        abi.encodePacked(r, s, v)
+      )
+    ) revert Unauthorized();
 
     // Ensure the nonce is not yet used and if not mark it used
     if (!_markNonceAsUsed(signatory, nonce)) revert NonceAlreadyUsed(nonce);

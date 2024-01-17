@@ -374,7 +374,7 @@ describe('SwapERC20 Unit', () => {
 
       await expect(
         swap.connect(sender).swap(sender.address, ...order)
-      ).to.be.revertedWith('SignatoryUnauthorized')
+      ).to.be.revertedWith('Unauthorized')
     })
 
     it('test when signer not authorized', async () => {
@@ -427,15 +427,6 @@ describe('SwapERC20 Unit', () => {
         .to.be.revertedWith('NonceAlreadyUsed')
         .withArgs(1)
     })
-
-    it('test invalid signature', async () => {
-      const order = await createSignedOrderERC20({}, signer)
-      order[7] = '29' // Change "v" of signature
-      await expect(
-        swap.connect(sender).swap(sender.address, ...order)
-      ).to.be.revertedWith('SignatureInvalid')
-    })
-
     it('test when signer is zero address', async () => {
       const order = await createSignedOrderERC20(
         {
@@ -532,7 +523,7 @@ describe('SwapERC20 Unit', () => {
       order[7] = '29' // Change "v" of signature
       await expect(
         swap.connect(sender).swapAnySender(sender.address, ...order)
-      ).to.be.revertedWith('SignatureInvalid')
+      ).to.be.revertedWith('Unauthorized')
     })
   })
 
@@ -583,7 +574,7 @@ describe('SwapERC20 Unit', () => {
         .withArgs(signer.address, anyone.address)
 
       await expect(swap.connect(sender).swapLight(...order)).to.be.revertedWith(
-        'SignatoryUnauthorized'
+        'Unauthorized'
       )
     })
     it('test when expiration has passed', async () => {
@@ -603,7 +594,7 @@ describe('SwapERC20 Unit', () => {
       const order = await createSignedOrderERC20({}, signer)
       order[7] = '29' // Change "v" of signature
       await expect(swap.connect(sender).swapLight(...order)).to.be.revertedWith(
-        'SignatureInvalid'
+        'Unauthorized'
       )
     })
     it('test when nonce has already been used', async () => {
@@ -766,17 +757,6 @@ describe('SwapERC20 Unit', () => {
   })
 
   describe('Test check helper', () => {
-    it('properly detects an invalid signature', async () => {
-      await setUpAllowances(DEFAULT_AMOUNT, DEFAULT_AMOUNT + SWAP_FEE)
-      await setUpBalances(DEFAULT_BALANCE, DEFAULT_BALANCE)
-      const order = await createSignedOrderERC20({}, signer)
-      order[7] = '29'
-      const [errCount, messages] = await getErrorInfo(order)
-      expect(errCount).to.equal(1)
-      expect(ethers.utils.parseBytes32String(messages[0])).to.equal(
-        'SignatureInvalid'
-      )
-    })
     it('properly detects an expired order', async () => {
       await setUpAllowances(DEFAULT_AMOUNT, DEFAULT_AMOUNT + SWAP_FEE)
       await setUpBalances(DEFAULT_BALANCE, DEFAULT_BALANCE)
@@ -790,22 +770,6 @@ describe('SwapERC20 Unit', () => {
       expect(errCount).to.equal(1)
       expect(ethers.utils.parseBytes32String(messages[0])).to.equal(
         'OrderExpired'
-      )
-    })
-    it('properly detects a SignatoryUnauthorized() signature', async () => {
-      await setUpAllowances(DEFAULT_AMOUNT, DEFAULT_AMOUNT + SWAP_FEE)
-      await setUpBalances(DEFAULT_BALANCE, DEFAULT_BALANCE)
-      await swap.connect(signer).authorize(anyone.address)
-      const order = await createSignedOrderERC20(
-        {
-          signer,
-        },
-        signer
-      )
-      const [errCount, messages] = await getErrorInfo(order)
-      expect(errCount).to.equal(1)
-      expect(ethers.utils.parseBytes32String(messages[0])).to.equal(
-        'SignatoryUnauthorized'
       )
     })
     it('properly detects an Unauthorized() signature', async () => {
