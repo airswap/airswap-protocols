@@ -27,7 +27,7 @@ contract Staking is IStaking, Ownable {
   uint256 private activeDurationChangeTimestamp;
 
   // Mapping of account to stakes
-  mapping(address => Stake) internal stakes;
+  mapping(address => Stake) private stakes;
 
   // Mapping of account to proposed delegate
   mapping(address => address) public proposedDelegates;
@@ -198,7 +198,7 @@ contract Staking is IStaking, Ownable {
    */
   function balanceOf(
     address _account
-  ) external view override returns (uint256 total) {
+  ) external view override returns (uint256) {
     return stakes[_account].balance;
   }
 
@@ -214,7 +214,7 @@ contract Staking is IStaking, Ownable {
    * @param _account address
    * @param _amount uint256
    */
-  function stakeFor(address _account, uint256 _amount) public override {
+  function stakeFor(address _account, uint256 _amount) external override {
     if (delegateAccounts[_account] != address(0)) {
       _stake(delegateAccounts[_account], _amount);
     } else {
@@ -247,7 +247,7 @@ contract Staking is IStaking, Ownable {
    * @param _account address
    * @param _amount uint256
    */
-  function _stake(address _account, uint256 _amount) internal {
+  function _stake(address _account, uint256 _amount) private {
     if (_amount <= 0) revert AmountInvalid(_amount);
     stakes[_account].duration = stakingDuration;
     if (stakes[_account].balance == 0) {
@@ -276,7 +276,7 @@ contract Staking is IStaking, Ownable {
    * @param _account address
    * @param _amount uint256
    */
-  function _unstake(address _account, uint256 _amount) internal {
+  function _unstake(address _account, uint256 _amount) private {
     Stake storage _selected = stakes[_account];
     if (_amount > available(_account)) revert AmountInvalid(_amount);
     uint256 nowAvailable = available(_account);

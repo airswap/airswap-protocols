@@ -54,7 +54,7 @@ contract BatchCall {
     require(tokenAddresses.length > 0);
     uint256[] memory balances = new uint256[](tokenAddresses.length);
 
-    for (uint256 i = 0; i < tokenAddresses.length; i++) {
+    for (uint256 i; i < tokenAddresses.length; ++i) {
       if (tokenAddresses[i] != address(0x0)) {
         balances[i] = tokenBalance(userAddress, tokenAddresses[i]);
       } else {
@@ -79,17 +79,16 @@ contract BatchCall {
     uint256[] memory balances = new uint256[](
       tokenAddresses.length * userAddresses.length
     );
-    for (uint256 user = 0; user < userAddresses.length; user++) {
-      for (uint256 token = 0; token < tokenAddresses.length; token++) {
-        if (tokenAddresses[token] != address(0x0)) {
+    for (uint256 i; i < userAddresses.length; ++i) {
+      for (uint256 j; j < tokenAddresses.length; ++j) {
+        if (tokenAddresses[j] != address(0x0)) {
           // ETH address in Etherdelta config
-          balances[(user * tokenAddresses.length) + token] = tokenBalance(
-            userAddresses[user],
-            tokenAddresses[token]
+          balances[(i * tokenAddresses.length) + j] = tokenBalance(
+            userAddresses[i],
+            tokenAddresses[j]
           );
         } else {
-          balances[(user * tokenAddresses.length) + token] = userAddresses[user]
-            .balance;
+          balances[(i * tokenAddresses.length) + j] = userAddresses[i].balance;
         }
       }
     }
@@ -144,7 +143,7 @@ contract BatchCall {
     require(tokenAddresses.length > 0);
     uint256[] memory allowances = new uint256[](tokenAddresses.length);
 
-    for (uint256 i = 0; i < tokenAddresses.length; i++) {
+    for (uint256 i; i < tokenAddresses.length; ++i) {
       allowances[i] = tokenAllowance(
         userAddress,
         spenderAddress,
@@ -172,12 +171,12 @@ contract BatchCall {
       tokenAddresses.length * userAddresses.length
     );
 
-    for (uint256 user = 0; user < userAddresses.length; user++) {
-      for (uint256 token = 0; token < tokenAddresses.length; token++) {
-        allowances[(user * tokenAddresses.length) + token] = tokenAllowance(
-          userAddresses[user],
+    for (uint256 i; i < userAddresses.length; ++i) {
+      for (uint256 j; j < tokenAddresses.length; ++j) {
+        allowances[(i * tokenAddresses.length) + j] = tokenAllowance(
+          userAddresses[i],
           spenderAddress,
-          tokenAddresses[token]
+          tokenAddresses[j]
         );
       }
     }
@@ -199,7 +198,7 @@ contract BatchCall {
     require(orders.length > 0);
     bool[] memory orderValidity = new bool[](orders.length);
 
-    for (uint256 i = 0; i < orders.length; i++) {
+    for (uint256 i; i < orders.length; ++i) {
       (, uint256 errorCount) = swapContract.check(senderWallet, orders[i]);
       orderValidity[i] = errorCount == 0 ? true : false;
     }
@@ -221,7 +220,7 @@ contract BatchCall {
     require(orders.length > 0);
     bool[] memory orderValidity = new bool[](orders.length);
 
-    for (uint256 i = 0; i < orders.length; i++) {
+    for (uint256 i; i < orders.length; ++i) {
       ISwapERC20.OrderERC20 memory order = orders[i];
       (uint256 errorCount, ) = swapERC20Contract.check(
         senderWallet,
@@ -258,7 +257,7 @@ contract BatchCall {
     require(signerWallets.length == nonces.length);
     bool[] memory nonceUsed = new bool[](signerWallets.length);
 
-    for (uint256 i = 0; i < signerWallets.length; i++) {
+    for (uint256 i; i < signerWallets.length; ++i) {
       nonceUsed[i] = swapContract.nonceUsed(signerWallets[i], nonces[i]);
     }
     return nonceUsed;

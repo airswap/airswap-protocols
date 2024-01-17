@@ -4,7 +4,6 @@ pragma solidity 0.8.23;
 import "@openzeppelin/contracts/access/Ownable2Step.sol";
 import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import "@openzeppelin/contracts/interfaces/IERC2981.sol";
-import "./interfaces/IAdapter.sol";
 import "./interfaces/ISwap.sol";
 
 /**
@@ -12,7 +11,7 @@ import "./interfaces/ISwap.sol";
  * @notice https://www.airswap.io/
  */
 contract Swap is ISwap, Ownable2Step, EIP712 {
-  bytes32 internal constant ORDER_TYPEHASH =
+  bytes32 private constant ORDER_TYPEHASH =
     keccak256(
       abi.encodePacked(
         "Order(uint256 nonce,uint256 expiry,uint256 protocolFee,Party signer,Party sender,address affiliateWallet,uint256 affiliateAmount)",
@@ -20,7 +19,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
       )
     );
 
-  bytes32 internal constant PARTY_TYPEHASH =
+  bytes32 private constant PARTY_TYPEHASH =
     keccak256(
       "Party(address wallet,address token,bytes4 kind,uint256 id,uint256 amount)"
     );
@@ -32,14 +31,14 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
   bytes32 public immutable DOMAIN_SEPARATOR;
 
   uint256 public constant FEE_DIVISOR = 10000;
-  uint256 internal constant MAX_ERROR_COUNT = 18;
+  uint256 private constant MAX_ERROR_COUNT = 18;
 
   /**
    * @notice Double mapping of signers to nonce groups to nonce states
    * @dev The nonce group is computed as nonce / 256, so each group of 256 sequential nonces uses the same key
    * @dev The nonce states are encoded as 256 bits, for each nonce in the group 0 means available and 1 means used
    */
-  mapping(address => mapping(uint256 => uint256)) internal _nonceGroups;
+  mapping(address => mapping(uint256 => uint256)) private _nonceGroups;
 
   // Mapping of signer to authorized signatory
   mapping(address => address) public override authorized;
@@ -74,7 +73,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
     DOMAIN_CHAIN_ID = block.chainid;
     DOMAIN_SEPARATOR = _domainSeparatorV4();
 
-    for (uint256 i = 0; i < _adapters.length; i++) {
+    for (uint256 i; i < _adapters.length; ++i) {
       adapters[_adapters[i].interfaceId()] = _adapters[i];
     }
     requiredSenderKind = _requiredSenderKind;
@@ -231,7 +230,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
    * @param nonces uint256[] List of nonces to cancel
    */
   function cancel(uint256[] calldata nonces) external override {
-    for (uint256 i = 0; i < nonces.length; i++) {
+    for (uint256 i; i < nonces.length; ++i) {
       uint256 nonce = nonces[i];
       _markNonceAsUsed(msg.sender, nonce);
       emit Cancel(nonce, msg.sender);
@@ -257,7 +256,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
   function check(
     address senderWallet,
     Order calldata order
-  ) public view returns (bytes32[] memory, uint256) {
+  ) external view returns (bytes32[] memory, uint256) {
     uint256 errCount;
     bytes32[] memory errors = new bytes32[](MAX_ERROR_COUNT);
     (address signatory, ) = ECDSA.tryRecover(
@@ -393,7 +392,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
    * @param signatory  address Address of the signer for which to mark the nonce as used
    * @param nonce uint256 Nonce to be marked as used
    */
-  function _markNonceAsUsed(address signatory, uint256 nonce) internal {
+  function _markNonceAsUsed(address signatory, uint256 nonce) private {
     uint256 groupKey = nonce / 256;
     uint256 indexInGroup = nonce % 256;
     uint256 group = _nonceGroups[signatory][groupKey];
@@ -410,7 +409,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
    * @notice Checks whether a token implements EIP-2981
    * @param token address token to check
    */
-  function supportsRoyalties(address token) internal view returns (bool) {
+  function supportsRoyalties(address token) private view returns (bool) {
     try IERC165(token).supportsInterface(type(IERC2981).interfaceId) returns (
       bool result
     ) {
@@ -424,7 +423,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
    * @notice Tests whether signature and signer are valid
    * @param order Order to validate
    */
-  function _check(Order calldata order) internal {
+  function _check(Order calldata order) private {
     // Ensure execution on the intended chain
     if (DOMAIN_CHAIN_ID != block.chainid) revert ChainIdChanged();
 
@@ -472,7 +471,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
    * @param order Order The order to be hashed
    * @return bytes32 A keccak256 abi.encodePacked value
    */
-  function _getOrderHash(Order calldata order) internal view returns (bytes32) {
+  function _getOrderHash(Order calldata order) private view returns (bytes32) {
     return
       keccak256(
         abi.encodePacked(
@@ -510,7 +509,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
     uint256 id,
     address token,
     bytes4 kind
-  ) internal {
+  ) private {
     IAdapter adapter = adapters[kind];
     if (address(adapter) == address(0)) revert TokenKindUnknown();
     // Use delegatecall so underlying transfer is called as Swap

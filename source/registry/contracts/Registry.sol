@@ -135,7 +135,7 @@ contract Registry {
       msg.sender
     ];
 
-    for (uint256 i = 0; i < _length; i++) {
+    for (uint256 i; i < _length; ++i) {
       bytes4 protocol = _protocols[i];
       if (!_protocolList.add(protocol)) revert ProtocolExists(protocol);
       stakersByProtocol[protocol].add(msg.sender);
@@ -159,7 +159,7 @@ contract Registry {
     EnumerableSet.Bytes32Set storage protocolList = protocolsByStaker[
       msg.sender
     ];
-    for (uint256 i = 0; i < _length; i++) {
+    for (uint256 i; i < _length; ++i) {
       bytes4 _protocol = _protocols[i];
       if (!protocolList.remove(_protocol))
         revert ProtocolDoesNotExist(_protocol);
@@ -185,7 +185,7 @@ contract Registry {
     EnumerableSet.AddressSet storage stakers = stakersByProtocol[_protocol];
     uint256 _length = stakers.length();
     _urls = new string[](_length);
-    for (uint256 i = 0; i < _length; i++) {
+    for (uint256 i; i < _length; ++i) {
       _urls[i] = stakerServerURLs[address(stakers.at(i))];
     }
   }
@@ -214,7 +214,7 @@ contract Registry {
     EnumerableSet.Bytes32Set storage _protocols = protocolsByStaker[_staker];
     uint256 _length = _protocols.length();
     _protocolList = new bytes4[](_length);
-    for (uint256 i = 0; i < _length; i++) {
+    for (uint256 i; i < _length; ++i) {
       _protocolList[i] = bytes4(_protocols.at(i));
     }
   }
@@ -230,7 +230,7 @@ contract Registry {
     EnumerableSet.AddressSet storage _stakerList = stakersByProtocol[_protocol];
     uint256 _length = _stakerList.length();
     _stakers = new address[](_length);
-    for (uint256 i = 0; i < _length; i++) {
+    for (uint256 i; i < _length; ++i) {
       _stakers[i] = _stakerList.at(i);
     }
   }
@@ -244,7 +244,7 @@ contract Registry {
     if (_length <= 0) revert ArgumentInvalid();
     EnumerableSet.AddressSet storage tokenList = tokensByStaker[msg.sender];
 
-    for (uint256 i = 0; i < _length; i++) {
+    for (uint256 i; i < _length; ++i) {
       address _token = _tokens[i];
       if (!tokenList.add(_token)) revert TokenExists(_token);
       stakersByToken[_token].add(msg.sender);
@@ -264,7 +264,7 @@ contract Registry {
     uint256 _length = _tokens.length;
     if (_length <= 0) revert ArgumentInvalid();
     EnumerableSet.AddressSet storage tokenList = tokensByStaker[msg.sender];
-    for (uint256 i = 0; i < _length; i++) {
+    for (uint256 i; i < _length; ++i) {
       address token = _tokens[i];
       if (!tokenList.remove(token)) revert TokenDoesNotExist(token);
       stakersByToken[token].remove(msg.sender);
@@ -287,7 +287,7 @@ contract Registry {
     EnumerableSet.AddressSet storage stakers = stakersByToken[_token];
     uint256 _length = stakers.length();
     urls = new string[](_length);
-    for (uint256 i = 0; i < _length; i++) {
+    for (uint256 i; i < _length; ++i) {
       urls[i] = stakerServerURLs[address(stakers.at(i))];
     }
   }
@@ -316,7 +316,7 @@ contract Registry {
     EnumerableSet.AddressSet storage tokens = tokensByStaker[_staker];
     uint256 _length = tokens.length();
     tokenList = new address[](_length);
-    for (uint256 i = 0; i < _length; i++) {
+    for (uint256 i; i < _length; ++i) {
       tokenList[i] = tokens.at(i);
     }
   }
@@ -332,7 +332,7 @@ contract Registry {
     EnumerableSet.AddressSet storage stakerList = stakersByToken[_token];
     uint256 _length = stakerList.length();
     _stakers = new address[](_length);
-    for (uint256 i = 0; i < _length; i++) {
+    for (uint256 i; i < _length; ++i) {
       _stakers[i] = stakerList.at(i);
     }
   }
@@ -347,7 +347,7 @@ contract Registry {
   ) external view returns (string[] memory _urls) {
     uint256 stakersLength = _stakers.length;
     _urls = new string[](stakersLength);
-    for (uint256 i = 0; i < stakersLength; i++) {
+    for (uint256 i; i < stakersLength; ++i) {
       _urls[i] = stakerServerURLs[_stakers[i]];
     }
   }
@@ -358,7 +358,7 @@ contract Registry {
    * @return balance uint256 balance of the staker address
    */
   function balanceOf(address _staker) external view returns (uint256) {
-    uint256 _stakingBalance = 0;
+    uint256 _stakingBalance;
     if (bytes(stakerServerURLs[_staker]).length > 0)
       _stakingBalance = stakingCost;
     uint256 _protocolCount = protocolsByStaker[_staker].length();

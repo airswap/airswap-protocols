@@ -29,16 +29,16 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
   bytes32 public immutable DOMAIN_SEPARATOR;
 
   uint256 public constant FEE_DIVISOR = 10000;
-  uint256 internal constant MAX_ERROR_COUNT = 10;
-  uint256 internal constant MAX_MAX = 100;
-  uint256 internal constant MAX_SCALE = 77;
+  uint256 private constant MAX_ERROR_COUNT = 10;
+  uint256 private constant MAX_MAX = 100;
+  uint256 private constant MAX_SCALE = 77;
 
   /**
    * @notice Double mapping of signers to nonce groups to nonce states
    * @dev The nonce group is computed as nonce / 256, so each group of 256 sequential nonces uses the same key
    * @dev The nonce states are encoded as 256 bits, for each nonce in the group 0 means available and 1 means used
    */
-  mapping(address => mapping(uint256 => uint256)) internal _nonceGroups;
+  mapping(address => mapping(uint256 => uint256)) private _nonceGroups;
 
   // Mapping of signer to authorized signatory
   mapping(address => address) public override authorized;
@@ -390,7 +390,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
    * @param nonces uint256[] List of nonces to cancel
    */
   function cancel(uint256[] calldata nonces) external override {
-    for (uint256 i = 0; i < nonces.length; i++) {
+    for (uint256 i; i < nonces.length; ++i) {
       uint256 nonce = nonces[i];
       if (_markNonceAsUsed(msg.sender, nonce)) {
         emit Cancel(nonce, msg.sender);
@@ -425,7 +425,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     uint8 v,
     bytes32 r,
     bytes32 s
-  ) public view returns (uint256, bytes32[] memory) {
+  ) external view returns (uint256, bytes32[] memory) {
     bytes32[] memory errors = new bytes32[](MAX_ERROR_COUNT);
     uint256 errCount;
 
@@ -556,7 +556,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
   function calculateProtocolFee(
     address wallet,
     uint256 amount
-  ) public view override returns (uint256) {
+  ) external view override returns (uint256) {
     // Transfer fee from signer to feeWallet
     uint256 feeAmount = (amount * protocolFee) / FEE_DIVISOR;
     if (stakingToken != address(0) && feeAmount > 0) {
@@ -592,7 +592,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
   function _markNonceAsUsed(
     address signer,
     uint256 nonce
-  ) internal returns (bool) {
+  ) private returns (bool) {
     uint256 groupKey = nonce / 256;
     uint256 indexInGroup = nonce % 256;
     uint256 group = _nonceGroups[signer][groupKey];
@@ -632,7 +632,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     uint8 v,
     bytes32 r,
     bytes32 s
-  ) internal {
+  ) private {
     // Ensure execution on the intended chain
     if (DOMAIN_CHAIN_ID != block.chainid) revert ChainIdChanged();
 
@@ -692,7 +692,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     address senderWallet,
     address senderToken,
     uint256 senderAmount
-  ) internal view returns (bytes32) {
+  ) private view returns (bytes32) {
     return
       keccak256(
         abi.encodePacked(
@@ -726,11 +726,11 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     address sourceToken,
     address sourceWallet,
     uint256 amount
-  ) internal {
+  ) private {
     // Transfer fee from signer to feeWallet
     uint256 feeAmount = (amount * protocolFee) / FEE_DIVISOR;
     if (feeAmount > 0) {
-      uint256 bonusAmount = 0;
+      uint256 bonusAmount;
       if (stakingToken != address(0)) {
         // Only check bonus if staking is set
         bonusAmount = calculateBonus(
