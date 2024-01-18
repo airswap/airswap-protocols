@@ -57,7 +57,7 @@ contract BatchCall {
     uint256[] memory balances = new uint256[](tokenAddresses.length);
 
     for (uint256 i; i < tokenAddresses.length; ) {
-      if (tokenAddresses[i] != address(0x0)) {
+      if (tokenAddresses[i] != address(0)) {
         balances[i] = tokenBalance(userAddress, tokenAddresses[i]);
       } else {
         balances[i] = userAddress.balance;
@@ -86,8 +86,7 @@ contract BatchCall {
     );
     for (uint256 i; i < userAddresses.length; ) {
       for (uint256 j; j < tokenAddresses.length; ) {
-        if (tokenAddresses[j] != address(0x0)) {
-          // ETH address in Etherdelta config
+        if (tokenAddresses[j] != address(0)) {
           balances[(i * tokenAddresses.length) + j] = tokenBalance(
             userAddresses[i],
             tokenAddresses[j]
