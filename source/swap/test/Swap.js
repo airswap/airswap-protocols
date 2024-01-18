@@ -687,6 +687,25 @@ describe('Swap Unit', () => {
       )
     })
 
+    it('check public order without allowances or balances fails', async () => {
+      await erc20token.mock.allowance.returns('0')
+      await erc20token.mock.balanceOf.returns('0')
+      const order = await createSignedOrder(
+        {
+          sender: { wallet: ADDRESS_ZERO },
+        },
+        signer
+      )
+      const [errors, count] = await swap.check(ADDRESS_ZERO, order)
+      expect(errors[0]).to.be.equal(
+        ethers.utils.formatBytes32String('SignerAllowanceLow')
+      )
+      expect(errors[1]).to.be.equal(
+        ethers.utils.formatBytes32String('SignerBalanceLow')
+      )
+      expect(count).to.be.equal(2)
+    })
+
     it('check with bad kind fails', async () => {
       const order = await createSignedOrder(
         {
