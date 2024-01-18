@@ -8,11 +8,16 @@ import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "@airswap/swap-erc20/contracts/interfaces/ISwapERC20.sol";
 
 /**
- * @title BatchCall: Batch balance, allowance, order validity checks
+ * @title BatchCall: Batch balance, allowance, order validity checks, nonce usage check
  */
 contract BatchCall {
   using SafeERC20 for IERC20;
   using Address for address;
+
+  error InvalidOrdersArray();
+  error InvalidTokenAddressesArray();
+  error InvalidNoncesArray();
+  error InvalidSignerWalletsArray();
 
   /**
    * @notice Check the token balance of a wallet in a token contract
@@ -51,7 +56,7 @@ contract BatchCall {
     address userAddress,
     address[] calldata tokenAddresses
   ) external view returns (uint256[] memory) {
-    require(tokenAddresses.length > 0);
+    if (tokenAddresses.length <= 0) revert InvalidTokenAddressesArray();
     uint256[] memory balances = new uint256[](tokenAddresses.length);
 
     for (uint256 i; i < tokenAddresses.length; ) {
@@ -149,7 +154,7 @@ contract BatchCall {
     address spenderAddress,
     address[] calldata tokenAddresses
   ) external view returns (uint256[] memory) {
-    require(tokenAddresses.length > 0);
+    if (tokenAddresses.length <= 0) revert InvalidTokenAddressesArray();
     uint256[] memory allowances = new uint256[](tokenAddresses.length);
 
     for (uint256 i; i < tokenAddresses.length; ) {
@@ -213,7 +218,7 @@ contract BatchCall {
     ISwap.Order[] calldata orders,
     ISwap swapContract
   ) external view returns (bool[] memory) {
-    require(orders.length > 0);
+    if (orders.length <= 0) revert InvalidOrdersArray();
     bool[] memory orderValidity = new bool[](orders.length);
 
     for (uint256 i; i < orders.length; ) {
@@ -238,7 +243,7 @@ contract BatchCall {
     ISwapERC20.OrderERC20[] calldata orders,
     ISwapERC20 swapERC20Contract
   ) external view returns (bool[] memory) {
-    require(orders.length > 0);
+    if (orders.length <= 0) revert InvalidOrdersArray();
     bool[] memory orderValidity = new bool[](orders.length);
 
     for (uint256 i; i < orders.length; ) {
@@ -265,19 +270,20 @@ contract BatchCall {
   }
 
   /**
-   * @notice Check whether nonces in an array have been used
+   * @notice Checks usage for an array of nonces
    * @dev Swap and SwapERC20 nonceUsed function have same signature
    * @param signerWallets address[] list of signers for each nonce
    * @param nonces uint256[] list of nonces to be checked
    * @param swapContract ISwap[] Swap or SwapERC20 contract to call
-   * @return bool[] nonce validity
+   * @return bool[] nonce usage
    */
   function getNoncesUsed(
     address[] calldata signerWallets,
     uint256[] calldata nonces,
     ISwap swapContract
   ) external view returns (bool[] memory) {
-    require(signerWallets.length > 0);
+    if (signerWallets.length <= 0) revert InvalidSignerWalletsArray();
+    if (signerWallets.length != nonces.length) revert InvalidNoncesArray();
     require(signerWallets.length == nonces.length);
     bool[] memory nonceUsed = new bool[](signerWallets.length);
 
