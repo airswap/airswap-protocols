@@ -353,13 +353,15 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
           order.sender.id,
           totalSenderAmount
         );
-        if (!senderTokenAdapter.hasAllowance(sender)) {
-          errors[errCount] = "SenderAllowanceLow";
-          errCount++;
-        }
-        if (!senderTokenAdapter.hasBalance(sender)) {
-          errors[errCount] = "SenderBalanceLow";
-          errCount++;
+        if (senderWallet != address(0)) {
+          if (!senderTokenAdapter.hasAllowance(sender)) {
+            errors[errCount] = "SenderAllowanceLow";
+            errCount++;
+          }
+          if (!senderTokenAdapter.hasBalance(sender)) {
+            errors[errCount] = "SenderBalanceLow";
+            errCount++;
+          }
         }
         if (!senderTokenAdapter.hasValidParams(sender)) {
           errors[errCount] = "AmountOrIDInvalid";
