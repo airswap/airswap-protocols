@@ -1,5 +1,1 @@
-module.exports = {
-  5: '0x147644781C1ccb078738ecced7B247AF0bD5Aa8b',
-  17000: '0xb0B0Aae54B4336B359201EDfB45C4dB4879e55a5',
-  11155111: '0x147644781C1ccb078738ecced7B247AF0bD5Aa8b',
-}
+module.exports = {}
