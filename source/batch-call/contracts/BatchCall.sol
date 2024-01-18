@@ -14,10 +14,10 @@ contract BatchCall {
   using SafeERC20 for IERC20;
   using Address for address;
 
-  error InvalidOrdersArray();
-  error InvalidTokenAddressesArray();
   error InvalidNoncesArray();
+  error InvalidOrdersArray();
   error InvalidSignerWalletsArray();
+  error InvalidTokenAddressesArray();
 
   /**
    * @notice Check the token balance of a wallet in a token contract
