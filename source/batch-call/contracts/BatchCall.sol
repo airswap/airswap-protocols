@@ -14,10 +14,7 @@ contract BatchCall {
   using SafeERC20 for IERC20;
   using Address for address;
 
-  error InvalidNoncesArray();
-  error InvalidOrdersArray();
-  error InvalidSignerWalletsArray();
-  error InvalidTokenAddressesArray();
+  error ArgumentInvalid();
 
   /**
    * @notice Check the token balance of a wallet in a token contract
@@ -56,7 +53,7 @@ contract BatchCall {
     address userAddress,
     address[] calldata tokenAddresses
   ) external view returns (uint256[] memory) {
-    if (tokenAddresses.length <= 0) revert InvalidTokenAddressesArray();
+    if (tokenAddresses.length <= 0) revert ArgumentInvalid();
     uint256[] memory balances = new uint256[](tokenAddresses.length);
 
     for (uint256 i; i < tokenAddresses.length; ) {
@@ -154,7 +151,7 @@ contract BatchCall {
     address spenderAddress,
     address[] calldata tokenAddresses
   ) external view returns (uint256[] memory) {
-    if (tokenAddresses.length <= 0) revert InvalidTokenAddressesArray();
+    if (tokenAddresses.length <= 0) revert ArgumentInvalid();
     uint256[] memory allowances = new uint256[](tokenAddresses.length);
 
     for (uint256 i; i < tokenAddresses.length; ) {
@@ -211,14 +208,14 @@ contract BatchCall {
    * @param senderWallet address wallet that would send the order
    * @param orders ISwap.Order[] list of orders to be checked
    * @param swapContract ISwap swap contract to call
-   * @return bool[] validity of each order
+   * @return bool[] true indicates the order is valid
    */
   function getOrdersValid(
     address senderWallet,
     ISwap.Order[] calldata orders,
     ISwap swapContract
   ) external view returns (bool[] memory) {
-    if (orders.length <= 0) revert InvalidOrdersArray();
+    if (orders.length <= 0) revert ArgumentInvalid();
     bool[] memory orderValidity = new bool[](orders.length);
 
     for (uint256 i; i < orders.length; ) {
@@ -243,7 +240,7 @@ contract BatchCall {
     ISwapERC20.OrderERC20[] calldata orders,
     ISwapERC20 swapERC20Contract
   ) external view returns (bool[] memory) {
-    if (orders.length <= 0) revert InvalidOrdersArray();
+    if (orders.length <= 0) revert ArgumentInvalid();
     bool[] memory orderValidity = new bool[](orders.length);
 
     for (uint256 i; i < orders.length; ) {
@@ -270,20 +267,20 @@ contract BatchCall {
   }
 
   /**
-   * @notice Checks usage for an array of nonces
-   * @dev Swap and SwapERC20 nonceUsed function have same signature
+   * @notice Checks usage of an array of nonces
+   * @dev Swap and SwapERC20 nonceUsed function have the same signature
    * @param signerWallets address[] list of signers for each nonce
    * @param nonces uint256[] list of nonces to be checked
    * @param swapContract ISwap[] Swap or SwapERC20 contract to call
-   * @return bool[] nonce usage
+   * @return bool[] true indicates the nonce is used
    */
   function getNoncesUsed(
     address[] calldata signerWallets,
     uint256[] calldata nonces,
     ISwap swapContract
   ) external view returns (bool[] memory) {
-    if (signerWallets.length <= 0) revert InvalidSignerWalletsArray();
-    if (signerWallets.length != nonces.length) revert InvalidNoncesArray();
+    if (signerWallets.length <= 0) revert ArgumentInvalid();
+    if (signerWallets.length != nonces.length) revert ArgumentInvalid();
     require(signerWallets.length == nonces.length);
     bool[] memory nonceUsed = new bool[](signerWallets.length);
 
