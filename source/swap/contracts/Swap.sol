@@ -3,6 +3,7 @@ pragma solidity 0.8.23;
 
 import "@openzeppelin/contracts/access/Ownable2Step.sol";
 import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
+import "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
 import "@openzeppelin/contracts/interfaces/IERC2981.sol";
 import "./interfaces/ISwap.sol";
 
@@ -266,37 +267,23 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
   ) external view returns (bytes32[] memory, uint256) {
     uint256 errCount;
     bytes32[] memory errors = new bytes32[](MAX_ERROR_COUNT);
-    (address signatory, ) = ECDSA.tryRecover(
-      _getOrderHash(order),
-      order.v,
-      order.r,
-      order.s
-    );
 
-    if (
-      order.sender.wallet != address(0) && order.sender.wallet != senderWallet
-    ) {
-      errors[errCount] = "SenderInvalid";
-      errCount++;
+    address signatory = order.signer.wallet;
+    if (authorized[signatory] != address(0)) {
+      signatory = authorized[signatory];
     }
 
-    if (signatory == address(0)) {
-      errors[errCount] = "SignatureInvalid";
+    if (
+      !SignatureChecker.isValidSignatureNow(
+        signatory,
+        _getOrderHash(order),
+        abi.encodePacked(order.r, order.s, order.v)
+      )
+    ) {
+      errors[errCount] = "Unauthorized";
       errCount++;
     } else {
-      if (
-        authorized[order.signer.wallet] != address(0) &&
-        signatory != authorized[order.signer.wallet]
-      ) {
-        errors[errCount] = "SignatoryUnauthorized";
-        errCount++;
-      } else if (
-        authorized[order.signer.wallet] == address(0) &&
-        signatory != order.signer.wallet
-      ) {
-        errors[errCount] = "Unauthorized";
-        errCount++;
-      } else if (nonceUsed(signatory, order.nonce)) {
+      if (nonceUsed(signatory, order.nonce)) {
         errors[errCount] = "NonceAlreadyUsed";
         errCount++;
       }
@@ -304,6 +291,13 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
         errors[errCount] = "NonceTooLow";
         errCount++;
       }
+    }
+
+    if (
+      order.sender.wallet != address(0) && order.sender.wallet != senderWallet
+    ) {
+      errors[errCount] = "SenderInvalid";
+      errCount++;
     }
 
     if (order.expiry < block.timestamp) {

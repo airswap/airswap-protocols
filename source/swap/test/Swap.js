@@ -780,7 +780,7 @@ describe('Swap Unit', () => {
       }
       const [errors] = await swap.check(sender.address, order)
       expect(errors[0]).to.be.equal(
-        ethers.utils.formatBytes32String('SignatureInvalid')
+        ethers.utils.formatBytes32String('Unauthorized')
       )
     })
 
@@ -829,7 +829,7 @@ describe('Swap Unit', () => {
       )
       const [errors] = await swap.check(sender.address, order)
       expect(errors[0]).to.be.equal(
-        ethers.utils.formatBytes32String('SignatoryUnauthorized')
+        ethers.utils.formatBytes32String('Unauthorized')
       )
     })
 
