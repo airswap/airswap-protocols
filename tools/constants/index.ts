@@ -194,7 +194,7 @@ export const explorerUrls: Record<number, string> = {
   [ChainIds.MUMBAI]: 'https://mumbai.polygonscan.com',
   [ChainIds.BASEGOERLI]: 'https://goerli.basescan.org',
   [ChainIds.ARBITRUMGOERLI]: 'https://goerli.arbiscan.io',
-  [ChainIds.SEPOLIA]: 'https://sepolia.etherscan.io/',
+  [ChainIds.SEPOLIA]: 'https://sepolia.etherscan.io',
 }
 
 export const explorerApiUrls: Record<number, string> = {
@@ -210,9 +210,9 @@ export const explorerApiUrls: Record<number, string> = {
 
 export const stakingTokenAddresses: Record<number, string> = {
   [ChainIds.MAINNET]: '0x27054b13b1b798b345b591a4d22e6562d47ea75a',
-  [ChainIds.GOERLI]: '0x23474e94e27ac59eec4411ce96c322add8833680',
-  [ChainIds.SEPOLIA]: '0x517d482f686f11b922eed764692f2b42663ce2fa',
-  [ChainIds.HOLESKY]: '0x71070c5607358fc25E3B4aaf4FB0a580c190252a',
+  [ChainIds.GOERLI]: '0x4092d6dba9abb7450b9d91aa7ed2712935d63b39',
+  [ChainIds.SEPOLIA]: '0x4092d6dba9abb7450b9d91aa7ed2712935d63b39',
+  [ChainIds.HOLESKY]: '0x4092d6dba9abb7450b9d91aa7ed2712935d63b39',
 }
 
 export const ownerAddresses: Record<number, string> = {
