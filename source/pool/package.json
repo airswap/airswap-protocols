@@ -31,7 +31,7 @@
     "@openzeppelin/contracts": "^4.8.3"
   },
   "devDependencies": {
-    "@airswap/constants": "4.2.0-beta.0",
+    "@airswap/constants": "4.2.0-beta.1",
     "@airswap/metadata": "4.1.16",
     "@airswap/types": "4.2.0-beta.0",
     "@airswap/utils": "4.2.0-beta.0",

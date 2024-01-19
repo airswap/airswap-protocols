@@ -21,7 +21,7 @@
     "test:ci": "yarn test"
   },
   "dependencies": {
-    "@airswap/constants": "4.2.0-beta.0",
+    "@airswap/constants": "4.2.0-beta.1",
     "@airswap/types": "4.2.0-beta.0",
     "@metamask/eth-sig-util": "^5.0.2",
     "bignumber.js": "^9.0.1",
