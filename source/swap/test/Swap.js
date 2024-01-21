@@ -104,6 +104,10 @@ describe('Swap Unit', () => {
     ).deploy()
     await erc1155adapter.deployed()
 
+    erc1271contract = await (
+      await ethers.getContractFactory('ERC1271')
+    ).deploy()
+
     swap = await (
       await ethers.getContractFactory('Swap')
     ).deploy(
@@ -424,6 +428,23 @@ describe('Swap Unit', () => {
       ).to.emit(swap, 'Swap')
     })
 
+    it('a signer may authorize a signatory contract to sign orders on its behalf', async () => {
+      await expect(
+        swap.connect(signer).authorize(erc1271contract.address)
+      ).to.emit(swap, 'Authorize')
+      const order = await createSignedOrder(
+        {
+          signer: {
+            wallet: anyone.address,
+          },
+        },
+        anyone
+      )
+      await expect(
+        swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
+      ).to.emit(swap, 'Swap')
+    })
+
     it('a signer may not authorize a signatory with null address', async () => {
       await expect(
         swap.connect(signer).authorize(ADDRESS_ZERO)
@@ -614,6 +635,24 @@ describe('Swap Unit', () => {
         },
         signer
       )
+      const errors = await swap.check(sender.address, order)
+      expect(errors[1]).to.equal(0)
+    })
+
+    it('checks with a contract as signatory suceeds', async () => {
+      await erc20token.mock.allowance.returns(DEFAULT_AMOUNT + PROTOCOL_FEE)
+      await erc20token.mock.balanceOf.returns(DEFAULT_AMOUNT + PROTOCOL_FEE)
+      await erc721token.mock.getApproved.returns(swap.address)
+      await erc721token.mock.ownerOf.returns(signer.address)
+      const order = await createSignedOrder(
+        {
+          signer: {
+            wallet: signer.address,
+          },
+        },
+        signer
+      )
+      await expect(swap.connect(signer).authorize(erc1271contract.address))
       const errors = await swap.check(sender.address, order)
       expect(errors[1]).to.equal(0)
     })
