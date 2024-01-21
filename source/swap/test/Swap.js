@@ -6,10 +6,11 @@ const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
 const IERC721 = require('@openzeppelin/contracts/build/contracts/ERC721Royalty.json')
 const IERC1155 = require('@openzeppelin/contracts/build/contracts/IERC1155.json')
 const { createOrder, createOrderSignature } = require('@airswap/utils')
-const { TokenKinds, ADDRESS_ZERO } = require('@airswap/constants')
 const {
-  Contract,
-} = require('hardhat/internal/hardhat-network/stack-traces/model')
+  TokenKinds,
+  ADDRESS_ZERO,
+  IS_VALID_SIGNATURE_ABI,
+} = require('@airswap/constants')
 
 const CHAIN_ID = 31337
 const PROTOCOL_FEE = '30'
@@ -19,32 +20,6 @@ const INVALID_KIND = '0x00000000'
 const DEFAULT_AMOUNT = '1000'
 const ERC2981_INTERFACE_ID = '0x2a55205a'
 const MAX_ROYALTY = '10'
-const IS_VALID_SIGNATURE_ABI = [
-  {
-    inputs: [
-      {
-        internalType: 'bytes32',
-        name: '_hash',
-        type: 'bytes32',
-      },
-      {
-        internalType: 'bytes',
-        name: '_signature',
-        type: 'bytes',
-      },
-    ],
-    name: 'isValidSignature',
-    outputs: [
-      {
-        internalType: 'bytes4',
-        name: '',
-        type: 'bytes4',
-      },
-    ],
-    stateMutability: 'pure',
-    type: 'function',
-  },
-]
 
 let snapshotId
 let deployer
