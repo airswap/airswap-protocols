@@ -435,7 +435,7 @@ describe('Swap Unit', () => {
       const order = await createSignedOrder(
         {
           signer: {
-            wallet: anyone.address,
+            wallet: signer.address,
           },
         },
         anyone
