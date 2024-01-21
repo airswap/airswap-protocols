@@ -1,5 +1,9 @@
 const { expect } = require('chai')
-const { ADDRESS_ZERO, SECONDS_IN_DAY } = require('@airswap/constants')
+const {
+  ADDRESS_ZERO,
+  SECONDS_IN_DAY,
+  IS_VALID_SIGNATURE_ABI,
+} = require('@airswap/constants')
 const {
   createOrderERC20,
   orderERC20ToParams,
@@ -16,6 +20,7 @@ describe('SwapERC20 Unit', () => {
   let signerToken
   let senderToken
   let staking
+  let erc1271
 
   let deployer
   let sender
@@ -116,9 +121,11 @@ describe('SwapERC20 Unit', () => {
     signerToken = await deployMockContract(deployer, IERC20.abi)
     senderToken = await deployMockContract(deployer, IERC20.abi)
     staking = await deployMockContract(deployer, STAKING.abi)
+    erc1271 = await deployMockContract(deployer, IS_VALID_SIGNATURE_ABI)
     await signerToken.mock.transferFrom.returns(true)
     await senderToken.mock.transferFrom.returns(true)
     await staking.mock.balanceOf.returns(STAKING_BALANCE)
+    await erc1271.mock.isValidSignature.returns(0x1626ba7e)
 
     swap = await (
       await ethers.getContractFactory('SwapERC20')
@@ -353,6 +360,24 @@ describe('SwapERC20 Unit', () => {
       await expect(swap.connect(anyone).authorize(signer.address))
         .to.emit(swap, 'Authorize')
         .withArgs(signer.address, anyone.address)
+
+      await expect(swap.connect(sender).swap(sender.address, ...order)).to.emit(
+        swap,
+        'SwapERC20'
+      )
+    })
+
+    it('test authorized signer as contract', async () => {
+      const order = await createSignedOrderERC20(
+        {
+          signerWallet: erc1271.address,
+        },
+        signer
+      )
+
+      await expect(swap.connect(signer).authorize(erc1271.address))
+        .to.emit(swap, 'Authorize')
+        .withArgs(erc1271.address, signer.address)
 
       await expect(swap.connect(sender).swap(sender.address, ...order)).to.emit(
         swap,
@@ -757,6 +782,24 @@ describe('SwapERC20 Unit', () => {
   })
 
   describe('Test check helper', () => {
+    it('checks with a contract as signatory suceeds', async () => {
+      await signerToken.mock.allowance.returns(DEFAULT_AMOUNT + PROTOCOL_FEE)
+      await signerToken.mock.balanceOf.returns(DEFAULT_AMOUNT + PROTOCOL_FEE)
+      await senderToken.mock.allowance.returns(DEFAULT_AMOUNT + PROTOCOL_FEE)
+      await senderToken.mock.balanceOf.returns(DEFAULT_AMOUNT + PROTOCOL_FEE)
+      const order = await createSignedOrderERC20(
+        {
+          signer: {
+            wallet: signer.address,
+          },
+        },
+        signer
+      )
+      await expect(swap.connect(signer).authorize(erc1271.address))
+      const [errCount] = await getErrorInfo(order)
+      expect(errCount).to.equal(0)
+    })
+
     it('properly detects an expired order', async () => {
       await setUpAllowances(DEFAULT_AMOUNT, DEFAULT_AMOUNT + SWAP_FEE)
       await setUpBalances(DEFAULT_BALANCE, DEFAULT_BALANCE)
