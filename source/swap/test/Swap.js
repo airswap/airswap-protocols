@@ -32,7 +32,7 @@ let erc721token
 let erc721adapter
 let erc1155token
 let erc1155adapter
-let erc1271contract
+let erc1271
 let swap
 
 async function signOrder(order, wallet, swapContract) {
@@ -109,8 +109,8 @@ describe('Swap Unit', () => {
     ).deploy()
     await erc1155adapter.deployed()
 
-    erc1271contract = await deployMockContract(deployer, IS_VALID_SIGNATURE_ABI)
-    await erc1271contract.mock.isValidSignature.returns(0x1626ba7e)
+    erc1271 = await deployMockContract(deployer, IS_VALID_SIGNATURE_ABI)
+    await erc1271.mock.isValidSignature.returns(0x1626ba7e)
 
     swap = await (
       await ethers.getContractFactory('Swap')
@@ -433,9 +433,10 @@ describe('Swap Unit', () => {
     })
 
     it('a signer may authorize a signatory contract to sign orders on its behalf', async () => {
-      await expect(
-        swap.connect(signer).authorize(erc1271contract.address)
-      ).to.emit(swap, 'Authorize')
+      await expect(swap.connect(signer).authorize(erc1271.address)).to.emit(
+        swap,
+        'Authorize'
+      )
       const order = await createSignedOrder(
         {
           signer: {
@@ -656,7 +657,7 @@ describe('Swap Unit', () => {
         },
         signer
       )
-      await expect(swap.connect(signer).authorize(erc1271contract.address))
+      await expect(swap.connect(signer).authorize(erc1271.address))
       const errors = await swap.check(sender.address, order)
       expect(errors[1]).to.equal(0)
     })
