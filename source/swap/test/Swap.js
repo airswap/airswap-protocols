@@ -7,6 +7,9 @@ const IERC721 = require('@openzeppelin/contracts/build/contracts/ERC721Royalty.j
 const IERC1155 = require('@openzeppelin/contracts/build/contracts/IERC1155.json')
 const { createOrder, createOrderSignature } = require('@airswap/utils')
 const { TokenKinds, ADDRESS_ZERO } = require('@airswap/constants')
+const {
+  Contract,
+} = require('hardhat/internal/hardhat-network/stack-traces/model')
 
 const CHAIN_ID = 31337
 const PROTOCOL_FEE = '30'
@@ -16,6 +19,32 @@ const INVALID_KIND = '0x00000000'
 const DEFAULT_AMOUNT = '1000'
 const ERC2981_INTERFACE_ID = '0x2a55205a'
 const MAX_ROYALTY = '10'
+const IS_VALID_SIGNATURE_ABI = [
+  {
+    inputs: [
+      {
+        internalType: 'bytes32',
+        name: '_hash',
+        type: 'bytes32',
+      },
+      {
+        internalType: 'bytes',
+        name: '_signature',
+        type: 'bytes',
+      },
+    ],
+    name: 'isValidSignature',
+    outputs: [
+      {
+        internalType: 'bytes4',
+        name: '',
+        type: 'bytes4',
+      },
+    ],
+    stateMutability: 'pure',
+    type: 'function',
+  },
+]
 
 let snapshotId
 let deployer
@@ -28,6 +57,7 @@ let erc721token
 let erc721adapter
 let erc1155token
 let erc1155adapter
+let erc1271contract
 let swap
 
 async function signOrder(order, wallet, swapContract) {
@@ -104,9 +134,8 @@ describe('Swap Unit', () => {
     ).deploy()
     await erc1155adapter.deployed()
 
-    erc1271contract = await (
-      await ethers.getContractFactory('ERC1271')
-    ).deploy()
+    erc1271contract = await deployMockContract(deployer, IS_VALID_SIGNATURE_ABI)
+    await erc1271contract.mock.isValidSignature.returns(0x1626ba7e)
 
     swap = await (
       await ethers.getContractFactory('Swap')
@@ -438,7 +467,7 @@ describe('Swap Unit', () => {
             wallet: signer.address,
           },
         },
-        anyone
+        signer
       )
       await expect(
         swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
