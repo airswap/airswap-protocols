@@ -403,7 +403,7 @@ describe('Swap Unit', () => {
       order.v = 1
       await expect(
         swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
-      ).to.be.revertedWith('SignatureInvalid')
+      ).to.be.revertedWith('Unauthorized')
     })
 
     it('a signer may authorize another signatory to sign orders on its behalf', async () => {
@@ -449,7 +449,7 @@ describe('Swap Unit', () => {
       )
       await expect(
         swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
-      ).to.be.revertedWith('SignatoryUnauthorized')
+      ).to.be.revertedWith('Unauthorized')
     })
 
     it('if set, order signatory must be authorized signatory', async () => {
@@ -467,7 +467,7 @@ describe('Swap Unit', () => {
       )
       await expect(
         swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
-      ).to.be.revertedWith('SignatoryUnauthorized')
+      ).to.be.revertedWith('Unauthorized')
     })
 
     it('a signer may revoke an authorized signatory', async () => {

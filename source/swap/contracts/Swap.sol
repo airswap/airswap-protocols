@@ -437,13 +437,18 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
     if (order.sender.amount < order.affiliateAmount)
       revert AffiliateAmountInvalid();
 
-    // Recover the signatory from the hash and signature
-    (address signatory, ) = ECDSA.tryRecover(
-      _getOrderHash(order),
-      order.v,
-      order.r,
-      order.s
-    );
+    address signatory = order.signer.wallet;
+    if (authorized[signatory] != address(0)) {
+      signatory = authorized[signatory];
+    }
+
+    if (
+      !SignatureChecker.isValidSignatureNow(
+        signatory,
+        _getOrderHash(order),
+        abi.encodePacked(order.r, order.s, order.v)
+      )
+    ) revert Unauthorized();
 
     // Ensure the signatory is not null
     if (signatory == address(0)) revert SignatureInvalid();
