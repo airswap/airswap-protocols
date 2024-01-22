@@ -32,7 +32,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
   bytes32 public immutable DOMAIN_SEPARATOR;
 
   uint256 public constant FEE_DIVISOR = 10000;
-  uint256 private constant MAX_ERROR_COUNT = 18;
+  uint256 private constant MAX_ERROR_COUNT = 16;
 
   /**
    * @notice Double mapping of signers to nonce groups to nonce states
@@ -449,19 +449,6 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
         abi.encodePacked(order.r, order.s, order.v)
       )
     ) revert Unauthorized();
-
-    // Ensure the signatory is not null
-    if (signatory == address(0)) revert SignatureInvalid();
-
-    // Ensure signatory is authorized to sign
-    if (authorized[order.signer.wallet] != address(0)) {
-      // If one is set by signer wallet, signatory must be authorized
-      if (signatory != authorized[order.signer.wallet])
-        revert SignatoryUnauthorized();
-    } else {
-      // Otherwise, signatory must be signer wallet
-      if (signatory != order.signer.wallet) revert Unauthorized();
-    }
 
     // Ensure the nonce is not yet used and if not mark it used
     _markNonceAsUsed(signatory, order.nonce);
