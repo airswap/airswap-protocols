@@ -16,6 +16,32 @@ const INVALID_KIND = '0x00000000'
 const DEFAULT_AMOUNT = '1000'
 const ERC2981_INTERFACE_ID = '0x2a55205a'
 const MAX_ROYALTY = '10'
+const IS_VALID_SIGNATURE_ABI = [
+  {
+    inputs: [
+      {
+        internalType: 'bytes32',
+        name: '_hash',
+        type: 'bytes32',
+      },
+      {
+        internalType: 'bytes',
+        name: '_signature',
+        type: 'bytes',
+      },
+    ],
+    name: 'isValidSignature',
+    outputs: [
+      {
+        internalType: 'bytes4',
+        name: '',
+        type: 'bytes4',
+      },
+    ],
+    stateMutability: 'pure',
+    type: 'function',
+  },
+]
 
 let snapshotId
 let deployer
@@ -28,6 +54,7 @@ let erc721token
 let erc721adapter
 let erc1155token
 let erc1155adapter
+let erc1271
 let swap
 
 async function signOrder(order, wallet, swapContract) {
@@ -103,6 +130,9 @@ describe('Swap Unit', () => {
       await ethers.getContractFactory('ERC1155Adapter')
     ).deploy()
     await erc1155adapter.deployed()
+
+    erc1271 = await deployMockContract(deployer, IS_VALID_SIGNATURE_ABI)
+    await erc1271.mock.isValidSignature.returns(0x1626ba7e)
 
     swap = await (
       await ethers.getContractFactory('Swap')
@@ -403,7 +433,7 @@ describe('Swap Unit', () => {
       order.v = 1
       await expect(
         swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
-      ).to.be.revertedWith('SignatureInvalid')
+      ).to.be.revertedWith('Unauthorized')
     })
 
     it('a signer may authorize another signatory to sign orders on its behalf', async () => {
@@ -418,6 +448,24 @@ describe('Swap Unit', () => {
           },
         },
         anyone
+      )
+      await expect(
+        swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
+      ).to.emit(swap, 'Swap')
+    })
+
+    it('a signer may authorize a signatory contract to sign orders on its behalf', async () => {
+      await expect(swap.connect(signer).authorize(erc1271.address)).to.emit(
+        swap,
+        'Authorize'
+      )
+      const order = await createSignedOrder(
+        {
+          signer: {
+            wallet: signer.address,
+          },
+        },
+        signer
       )
       await expect(
         swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
@@ -449,7 +497,7 @@ describe('Swap Unit', () => {
       )
       await expect(
         swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
-      ).to.be.revertedWith('SignatoryUnauthorized')
+      ).to.be.revertedWith('Unauthorized')
     })
 
     it('if set, order signatory must be authorized signatory', async () => {
@@ -467,7 +515,7 @@ describe('Swap Unit', () => {
       )
       await expect(
         swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
-      ).to.be.revertedWith('SignatoryUnauthorized')
+      ).to.be.revertedWith('Unauthorized')
     })
 
     it('a signer may revoke an authorized signatory', async () => {
@@ -614,6 +662,24 @@ describe('Swap Unit', () => {
         },
         signer
       )
+      const errors = await swap.check(sender.address, order)
+      expect(errors[1]).to.equal(0)
+    })
+
+    it('checks with a contract as signatory suceeds', async () => {
+      await erc20token.mock.allowance.returns(DEFAULT_AMOUNT + PROTOCOL_FEE)
+      await erc20token.mock.balanceOf.returns(DEFAULT_AMOUNT + PROTOCOL_FEE)
+      await erc721token.mock.getApproved.returns(swap.address)
+      await erc721token.mock.ownerOf.returns(signer.address)
+      const order = await createSignedOrder(
+        {
+          signer: {
+            wallet: signer.address,
+          },
+        },
+        signer
+      )
+      await expect(swap.connect(signer).authorize(erc1271.address))
       const errors = await swap.check(sender.address, order)
       expect(errors[1]).to.equal(0)
     })
@@ -780,7 +846,7 @@ describe('Swap Unit', () => {
       }
       const [errors] = await swap.check(sender.address, order)
       expect(errors[0]).to.be.equal(
-        ethers.utils.formatBytes32String('SignatureInvalid')
+        ethers.utils.formatBytes32String('Unauthorized')
       )
     })
 
@@ -829,7 +895,7 @@ describe('Swap Unit', () => {
       )
       const [errors] = await swap.check(sender.address, order)
       expect(errors[0]).to.be.equal(
-        ethers.utils.formatBytes32String('SignatoryUnauthorized')
+        ethers.utils.formatBytes32String('Unauthorized')
       )
     })
 

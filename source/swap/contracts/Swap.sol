@@ -3,6 +3,7 @@ pragma solidity 0.8.23;
 
 import "@openzeppelin/contracts/access/Ownable2Step.sol";
 import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
+import "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
 import "@openzeppelin/contracts/interfaces/IERC2981.sol";
 import "./interfaces/ISwap.sol";
 
@@ -31,7 +32,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
   bytes32 public immutable DOMAIN_SEPARATOR;
 
   uint256 public constant FEE_DIVISOR = 10000;
-  uint256 private constant MAX_ERROR_COUNT = 18;
+  uint256 private constant MAX_ERROR_COUNT = 16;
 
   /**
    * @notice Double mapping of signers to nonce groups to nonce states
@@ -266,37 +267,23 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
   ) external view returns (bytes32[] memory, uint256) {
     uint256 errCount;
     bytes32[] memory errors = new bytes32[](MAX_ERROR_COUNT);
-    (address signatory, ) = ECDSA.tryRecover(
-      _getOrderHash(order),
-      order.v,
-      order.r,
-      order.s
-    );
 
-    if (
-      order.sender.wallet != address(0) && order.sender.wallet != senderWallet
-    ) {
-      errors[errCount] = "SenderInvalid";
-      errCount++;
+    address signatory = order.signer.wallet;
+    if (authorized[signatory] != address(0)) {
+      signatory = authorized[signatory];
     }
 
-    if (signatory == address(0)) {
-      errors[errCount] = "SignatureInvalid";
+    if (
+      !SignatureChecker.isValidSignatureNow(
+        signatory,
+        _getOrderHash(order),
+        abi.encodePacked(order.r, order.s, order.v)
+      )
+    ) {
+      errors[errCount] = "Unauthorized";
       errCount++;
     } else {
-      if (
-        authorized[order.signer.wallet] != address(0) &&
-        signatory != authorized[order.signer.wallet]
-      ) {
-        errors[errCount] = "SignatoryUnauthorized";
-        errCount++;
-      } else if (
-        authorized[order.signer.wallet] == address(0) &&
-        signatory != order.signer.wallet
-      ) {
-        errors[errCount] = "Unauthorized";
-        errCount++;
-      } else if (nonceUsed(signatory, order.nonce)) {
+      if (nonceUsed(signatory, order.nonce)) {
         errors[errCount] = "NonceAlreadyUsed";
         errCount++;
       }
@@ -304,6 +291,13 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
         errors[errCount] = "NonceTooLow";
         errCount++;
       }
+    }
+
+    if (
+      order.sender.wallet != address(0) && order.sender.wallet != senderWallet
+    ) {
+      errors[errCount] = "SenderInvalid";
+      errCount++;
     }
 
     if (order.expiry < block.timestamp) {
@@ -443,26 +437,18 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
     if (order.sender.amount < order.affiliateAmount)
       revert AffiliateAmountInvalid();
 
-    // Recover the signatory from the hash and signature
-    (address signatory, ) = ECDSA.tryRecover(
-      _getOrderHash(order),
-      order.v,
-      order.r,
-      order.s
-    );
-
-    // Ensure the signatory is not null
-    if (signatory == address(0)) revert SignatureInvalid();
-
-    // Ensure signatory is authorized to sign
-    if (authorized[order.signer.wallet] != address(0)) {
-      // If one is set by signer wallet, signatory must be authorized
-      if (signatory != authorized[order.signer.wallet])
-        revert SignatoryUnauthorized();
-    } else {
-      // Otherwise, signatory must be signer wallet
-      if (signatory != order.signer.wallet) revert Unauthorized();
+    address signatory = order.signer.wallet;
+    if (authorized[signatory] != address(0)) {
+      signatory = authorized[signatory];
     }
+
+    if (
+      !SignatureChecker.isValidSignatureNow(
+        signatory,
+        _getOrderHash(order),
+        abi.encodePacked(order.r, order.s, order.v)
+      )
+    ) revert Unauthorized();
 
     // Ensure the nonce is not yet used and if not mark it used
     _markNonceAsUsed(signatory, order.nonce);
