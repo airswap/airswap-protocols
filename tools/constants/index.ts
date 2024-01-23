@@ -289,30 +289,3 @@ export const tokenKindNames: Record<string, string> = {
   [TokenKinds.ERC721]: 'ERC721',
   [TokenKinds.ERC1155]: 'ERC1155',
 }
-
-export const IS_VALID_SIGNATURE_ABI: object = [
-  {
-    inputs: [
-      {
-        internalType: 'bytes32',
-        name: '_hash',
-        type: 'bytes32',
-      },
-      {
-        internalType: 'bytes',
-        name: '_signature',
-        type: 'bytes',
-      },
-    ],
-    name: 'isValidSignature',
-    outputs: [
-      {
-        internalType: 'bytes4',
-        name: '',
-        type: 'bytes4',
-      },
-    ],
-    stateMutability: 'pure',
-    type: 'function',
-  },
-]

@@ -1,9 +1,5 @@
 const { expect } = require('chai')
-const {
-  ADDRESS_ZERO,
-  SECONDS_IN_DAY,
-  IS_VALID_SIGNATURE_ABI,
-} = require('@airswap/constants')
+const { ADDRESS_ZERO, SECONDS_IN_DAY } = require('@airswap/constants')
 const {
   createOrderERC20,
   orderERC20ToParams,
@@ -40,6 +36,32 @@ describe('SwapERC20 Unit', () => {
   const STAKING_BALANCE = '10000000000'
   const SWAP_FEE =
     (parseInt(DEFAULT_AMOUNT) * parseInt(PROTOCOL_FEE)) / parseInt(FEE_DIVISOR)
+  const IS_VALID_SIGNATURE_ABI = [
+    {
+      inputs: [
+        {
+          internalType: 'bytes32',
+          name: '_hash',
+          type: 'bytes32',
+        },
+        {
+          internalType: 'bytes',
+          name: '_signature',
+          type: 'bytes',
+        },
+      ],
+      name: 'isValidSignature',
+      outputs: [
+        {
+          internalType: 'bytes4',
+          name: '',
+          type: 'bytes4',
+        },
+      ],
+      stateMutability: 'pure',
+      type: 'function',
+    },
+  ]
 
   async function createSignedOrderERC20(params, signatory) {
     const unsignedOrder = createOrderERC20({
