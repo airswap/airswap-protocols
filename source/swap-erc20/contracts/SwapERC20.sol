@@ -404,7 +404,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
 
   /**
    * @notice Checks an order for errors
-   * @param senderWallet address wallet that would send the order
+   * @param senderWallet address Wallet that would send the order
    * @param nonce uint256 Unique and should be sequential
    * @param expiry uint256 Expiry in seconds since 1 January 1970
    * @param signerWallet address Wallet of the signer

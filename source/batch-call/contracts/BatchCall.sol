@@ -204,10 +204,10 @@ contract BatchCall {
 
   /**
    * @notice Check validity of an array of Orders
-   * @param senderWallet address wallet that would send the order
-   * @param orders ISwap.Order[] list of orders to be checked
-   * @param swapContract ISwap swap contract to call
-   * @return bool[] true indicates the order is valid
+   * @param senderWallet address Wallet that would send the order
+   * @param orders ISwap.Order[] Array of orders to be checked
+   * @param swapContract ISwap Swap contract to call
+   * @return bool[] True indicates the order is valid
    */
   function getOrdersValid(
     address senderWallet,
@@ -229,10 +229,10 @@ contract BatchCall {
 
   /**
    * @notice Check validity of an array of OrderERC20s
-   * @param senderWallet address wallet that would send the order
-   * @param orders ISwapERC20.OrderERC20[] list of orders to be checked
-   * @param swapERC20Contract ISwapERC20 swap contract to call
-   * @return bool[] validity of each order
+   * @param senderWallet address Wallet that would send the order
+   * @param orders ISwapERC20.OrderERC20[] Array of orders to be checked
+   * @param swapERC20Contract ISwapERC20 Swap contract to call
+   * @return bool[] True indicates the order is valid
    */
   function getOrdersValidERC20(
     address senderWallet,
