@@ -415,7 +415,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
    * @param v uint8 "v" value of the ECDSA signature
    * @param r bytes32 "r" value of the ECDSA signature
    * @param s bytes32 "s" value of the ECDSA signature
-   * @return (bytes32[], uint256) errors and count
+   * @return bytes32[] errors
    */
   function check(
     address senderWallet,
@@ -450,7 +450,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
       errors[count++] = "ChainIdChanged";
     }
 
-    // Validate as the authorized signer if set
+    // Validate as the authorized signatory if set
     address signatory = order.signerWallet;
     if (authorized[signatory] != address(0)) {
       signatory = authorized[signatory];
@@ -626,11 +626,13 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     // Ensure the expiry is not passed
     if (expiry <= block.timestamp) revert OrderExpired();
 
+    // Validate as the authorized signatory if set
     address signatory = signerWallet;
     if (authorized[signatory] != address(0)) {
       signatory = authorized[signatory];
     }
 
+    // Ensure the signature is correct for the order
     if (
       !SignatureChecker.isValidSignatureNow(
         signatory,
@@ -648,7 +650,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
       )
     ) revert Unauthorized();
 
-    // Ensure the nonce is not yet used and if not mark it used
+    // Ensure the nonce is not yet used and if not mark as used
     if (!_markNonceAsUsed(signatory, nonce)) revert NonceAlreadyUsed(nonce);
   }
 

@@ -272,7 +272,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
       errors[count++] = "ChainIdChanged";
     }
 
-    // Validate as the authorized signer if set
+    // Validate as the authorized signatory if set
     address signatory = order.signer.wallet;
     if (authorized[signatory] != address(0)) {
       signatory = authorized[signatory];
@@ -422,11 +422,13 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
     if (order.sender.amount < order.affiliateAmount)
       revert AffiliateAmountInvalid();
 
+    // Validate as the authorized signatory if set
     address signatory = order.signer.wallet;
     if (authorized[signatory] != address(0)) {
       signatory = authorized[signatory];
     }
 
+    // Ensure the signature is correct for the order
     if (
       !SignatureChecker.isValidSignatureNow(
         signatory,
