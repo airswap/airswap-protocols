@@ -278,9 +278,8 @@ contract BatchCall {
     uint256[] calldata nonces,
     ISwap swapContract
   ) external view returns (bool[] memory) {
-    if (signerWallets.length <= 0) revert ArgumentInvalid();
+    if (signerWallets.length == 0) revert ArgumentInvalid();
     if (signerWallets.length != nonces.length) revert ArgumentInvalid();
-    require(signerWallets.length == nonces.length);
     bool[] memory nonceUsed = new bool[](signerWallets.length);
 
     for (uint256 i; i < signerWallets.length; ) {
