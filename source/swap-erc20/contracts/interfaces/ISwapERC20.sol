@@ -99,7 +99,7 @@ interface ISwapERC20 {
     uint8 v,
     bytes32 r,
     bytes32 s
-  ) external view returns (uint256, bytes32[] memory);
+  ) external view returns (bytes32[] memory);
 
   function nonceUsed(address, uint256) external view returns (bool);
 

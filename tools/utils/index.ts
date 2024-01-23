@@ -1,5 +1,5 @@
 import * as url from 'url'
-import { ethers, BigNumber as BigNumberEthers } from 'ethers'
+import { ethers } from 'ethers'
 import { explorerUrls } from '@airswap/constants'
 
 export * from './src/pricing'
@@ -14,13 +14,13 @@ export function getAccountUrl(chainId: number, address: string): string {
   return `${explorerUrls[chainId]}/address/${address}`
 }
 
-export function checkResultToErrors(
-  count: BigNumberEthers,
-  errors: Array<string>
-) {
+export function parseCheckResult(errors: Array<string>) {
   const res: Array<string> = []
-  for (let idx = 0; idx < count.toNumber(); idx++) {
-    res.push(ethers.utils.parseBytes32String(errors[idx]))
+  for (let idx = 0; idx < errors.length; idx++) {
+    const error = ethers.utils.parseBytes32String(errors[idx])
+    if (error) {
+      res.push(error)
+    }
   }
   return res
 }
