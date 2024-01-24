@@ -6,7 +6,7 @@ const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
 const IERC721 = require('@openzeppelin/contracts/build/contracts/ERC721Royalty.json')
 const IERC1155 = require('@openzeppelin/contracts/build/contracts/IERC1155.json')
 const { createOrder, createOrderSignature } = require('@airswap/utils')
-const { TokenKinds, ADDRESS_ZERO, BYTES32_ZERO } = require('@airswap/constants')
+const { TokenKinds, ADDRESS_ZERO } = require('@airswap/constants')
 
 const CHAIN_ID = 31337
 const PROTOCOL_FEE = '30'
@@ -663,7 +663,7 @@ describe('Swap Unit', () => {
         signer
       )
       const errors = await swap.check(sender.address, order)
-      expect(errors[0]).to.equal(BYTES32_ZERO)
+      expect(errors).to.have.lengthOf(0)
     })
 
     it('checks with a contract as signatory succeeds', async () => {
@@ -681,7 +681,7 @@ describe('Swap Unit', () => {
       )
       await expect(swap.connect(signer).authorize(erc1271.address))
       const errors = await swap.check(sender.address, order)
-      expect(errors[0]).to.equal(BYTES32_ZERO)
+      expect(errors).to.have.lengthOf(0)
     })
 
     it('check with invalid erc20 signer param fails', async () => {
@@ -900,7 +900,7 @@ describe('Swap Unit', () => {
         signer
       )
       const errors = await swap.check(sender.address, order)
-      expect(errors[0]).to.equal(BYTES32_ZERO)
+      expect(errors).to.have.lengthOf(0)
     })
 
     it('check with incorrect authorized signatory fails', async () => {
@@ -961,7 +961,7 @@ describe('Swap Unit', () => {
         signer
       )
       const errors = await swap.check(sender.address, order)
-      expect(errors[0]).to.equal(BYTES32_ZERO)
+      expect(errors).to.have.lengthOf(0)
     })
 
     it('check fails with affiliate higher than sender', async () => {

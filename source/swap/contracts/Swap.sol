@@ -358,6 +358,13 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
       }
     }
 
+    // Truncate errors array to actual count
+    if (count != errors.length) {
+      assembly {
+        mstore(errors, count)
+      }
+    }
+
     return errors;
   }
 
