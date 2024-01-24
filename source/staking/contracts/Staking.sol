@@ -20,10 +20,10 @@ contract Staking is IStaking, Ownable {
   // Stake duration
   uint256 public stakeDuration;
 
-  // Minimum delay to stake duration change
+  // Minimum delay for a change to stake duration
   uint256 private immutable minDurationChangeDelay;
 
-  // Timestamp after which stake duration change is possible
+  // Time after which change to stake duration is possible
   uint256 private activeDurationChangeTimestamp;
 
   // Mapping of account to stakes
@@ -98,7 +98,7 @@ contract Staking is IStaking, Ownable {
   }
 
   /**
-   * @notice Set unstake duration
+   * @notice Set stake duration
    * @param _stakeDuration uint256
    */
   function setDuration(uint256 _stakeDuration) external onlyOwner {
