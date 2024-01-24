@@ -168,11 +168,11 @@ contract Staking is IStaking, Ownable {
    * @param _amount uint256
    */
   function unstake(uint256 _amount) external override {
-    address _account;
-    delegateAccounts[msg.sender] != address(0)
-      ? _account = delegateAccounts[msg.sender]
-      : _account = msg.sender;
-    _unstake(_account, _amount);
+    if (delegateAccounts[msg.sender] != address(0)) {
+      _unstake(delegateAccounts[msg.sender], _amount);
+    } else {
+      _unstake(msg.sender, _amount);
+    }
   }
 
   /**
