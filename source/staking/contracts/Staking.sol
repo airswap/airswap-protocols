@@ -278,8 +278,8 @@ contract Staking is IStaking, Ownable {
    */
   function _unstake(address _account, uint256 _amount) private {
     Stake storage _selected = stakes[_account];
-    if (_amount > available(_account)) revert AmountInvalid(_amount);
     uint256 nowAvailable = available(_account);
+    if (_amount > nowAvailable) revert AmountInvalid(_amount);
     _selected.balance = _selected.balance - _amount;
     _selected.timestamp = Math.min(
       block.timestamp -
