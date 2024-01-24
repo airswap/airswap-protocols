@@ -4,10 +4,9 @@ pragma solidity 0.8.23;
 
 interface IStaking {
   struct Stake {
-    uint256 duration;
+    uint256 start;
+    uint256 finish;
     uint256 balance;
-    uint256 timestamp;
-    uint256 maturity;
   }
 
   // ERC-20 Transfer event

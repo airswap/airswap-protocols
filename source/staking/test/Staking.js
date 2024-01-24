@@ -43,7 +43,7 @@ describe('Staking Unit', () => {
       const name = await staking.name()
       const symbol = await staking.symbol()
       const tokenAddress = await staking.stakingToken()
-      const defaultduration = await staking.stakingDuration()
+      const defaultduration = await staking.stakeDuration()
 
       expect(owner).to.equal(deployer.address)
       expect(name).to.equal('Staked AST')
@@ -116,7 +116,7 @@ describe('Staking Unit', () => {
         await staking.connect(deployer).setDuration(2 * DEFAULTDURATION)
       ).to.emit(staking, 'CompleteDurationChange')
 
-      const defaultduration = await staking.stakingDuration()
+      const defaultduration = await staking.stakeDuration()
       expect(defaultduration).to.equal(2 * DEFAULTDURATION)
     })
 
@@ -187,7 +187,7 @@ describe('Staking Unit', () => {
         .connect(account1)
         .getStakes(account1.address)
       expect(userStakes.balance).to.equal(100)
-      expect(userStakes.timestamp).to.equal(block.timestamp)
+      expect(userStakes.start).to.equal(block.timestamp)
     })
 
     it('successful staking for', async () => {
@@ -198,8 +198,7 @@ describe('Staking Unit', () => {
         .getStakes(account2.address)
       const block = await ethers.provider.getBlock()
       expect(userStakes.balance).to.equal(170)
-      expect(userStakes.duration).to.equal(DEFAULTDURATION)
-      expect(userStakes.timestamp).to.equal(block.timestamp)
+      expect(userStakes.start).to.equal(block.timestamp)
     })
 
     it('unsuccessful staking', async () => {
@@ -235,8 +234,7 @@ describe('Staking Unit', () => {
       const block = await ethers.provider.getBlock()
 
       expect(userStakes.balance).to.equal(220)
-      expect(userStakes.duration).to.equal(DEFAULTDURATION)
-      expect(userStakes.timestamp).to.equal(block.timestamp)
+      expect(userStakes.start).to.equal(block.timestamp)
     })
 
     it('successful extend stake and timestamp updates to appropriate value', async () => {
@@ -257,7 +255,6 @@ describe('Staking Unit', () => {
       const blockNewTimeInfo = await ethers.provider.getBlock(blockNewTime)
 
       expect(userStakes.balance).to.equal(220)
-      expect(userStakes.duration).to.equal(DEFAULTDURATION)
 
       // check if timestamp was updated appropriately
       const diff = BN.from(blockNewTimeInfo.timestamp).sub(block0.timestamp)
@@ -265,7 +262,7 @@ describe('Staking Unit', () => {
       const quotient = product.div(BN.from(220))
       // + 1 because number rounds up to nearest whole
       const sum = BN.from(block0.timestamp).add(BN.from(quotient)).add(1)
-      expect(userStakes.timestamp).to.equal(sum)
+      expect(userStakes.start).to.equal(sum)
     })
 
     it('unsuccessful stakeFor when user staking for with an amount of 0', async () => {
@@ -285,7 +282,6 @@ describe('Staking Unit', () => {
         .getStakes(account2.address)
 
       expect(userStakes.balance).to.equal(101)
-      expect(userStakes.duration).to.equal(DEFAULTDURATION)
     })
 
     it('successful stakeFor when existing stake is fully unstakeable', async () => {
@@ -304,7 +300,6 @@ describe('Staking Unit', () => {
         .getStakes(account2.address)
 
       expect(userStakes.balance).to.equal(101)
-      expect(userStakes.duration).to.equal(DEFAULTDURATION)
     })
   })
 
@@ -627,7 +622,7 @@ describe('Staking Unit', () => {
         .getStakes(account1.address)
 
       expect(userStakes.balance).to.equal(100)
-      expect(userStakes.timestamp).to.equal(block.timestamp)
+      expect(userStakes.start).to.equal(block.timestamp)
     })
 
     it('successful staking for with delegate', async () => {
@@ -640,7 +635,7 @@ describe('Staking Unit', () => {
         .connect(account2)
         .getStakes(account1.address)
       expect(userStakes.balance).to.equal(100)
-      expect(userStakes.timestamp).to.equal(block.timestamp)
+      expect(userStakes.start).to.equal(block.timestamp)
     })
 
     it('successful unstaking with delegate', async () => {

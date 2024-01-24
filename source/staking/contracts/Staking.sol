@@ -17,13 +17,13 @@ contract Staking is IStaking, Ownable {
   // Token to be staked
   ERC20 public immutable stakingToken;
 
-  // Unstaking duration
-  uint256 public stakingDuration;
+  // Stake duration
+  uint256 public stakeDuration;
 
-  // Minimum delay to staking duration change
+  // Minimum delay to stake duration change
   uint256 private immutable minDurationChangeDelay;
 
-  // Timestamp after which staking duration change is possible
+  // Timestamp after which stake duration change is possible
   uint256 private activeDurationChangeTimestamp;
 
   // Mapping of account to stakes
@@ -46,19 +46,19 @@ contract Staking is IStaking, Ownable {
    * @notice Staking constructor
    * @param _name string Token name for this contract
    * @param _symbol string Token symbol for this contract
-   * @param _stakingToken address Token used for staking
-   * @param _stakingDuration uint256 Amount of time tokens are staked
+   * @param _stakingToken address Token used for stake
+   * @param _stakeDuration uint256 Amount of time tokens are staked
    * @param _minDurationChangeDelay uint256 Time delay for a duration change
    */
   constructor(
     string memory _name,
     string memory _symbol,
     ERC20 _stakingToken,
-    uint256 _stakingDuration,
+    uint256 _stakeDuration,
     uint256 _minDurationChangeDelay
   ) {
     stakingToken = _stakingToken;
-    stakingDuration = _stakingDuration;
+    stakeDuration = _stakeDuration;
     minDurationChangeDelay = _minDurationChangeDelay;
     name = _name;
     symbol = _symbol;
@@ -98,16 +98,16 @@ contract Staking is IStaking, Ownable {
   }
 
   /**
-   * @notice Set unstaking duration
-   * @param _stakingDuration uint256
+   * @notice Set unstake duration
+   * @param _stakeDuration uint256
    */
-  function setDuration(uint256 _stakingDuration) external onlyOwner {
-    if (_stakingDuration == 0) revert DurationInvalid(_stakingDuration);
+  function setDuration(uint256 _stakeDuration) external onlyOwner {
+    if (_stakeDuration == 0) revert DurationInvalid(_stakeDuration);
     if (activeDurationChangeTimestamp == 0) revert TimelockInactive();
     if (block.timestamp < activeDurationChangeTimestamp) revert Timelocked();
-    stakingDuration = _stakingDuration;
+    stakeDuration = _stakeDuration;
     delete activeDurationChangeTimestamp;
-    emit CompleteDurationChange(_stakingDuration);
+    emit CompleteDurationChange(_stakeDuration);
   }
 
   /**
@@ -126,18 +126,18 @@ contract Staking is IStaking, Ownable {
 
   /**
    * @notice Set delegate for account
-   * @param _account address
+   * @param _staker address
    */
-  function setDelegate(address _account) external {
-    if (proposedDelegates[_account] != msg.sender)
-      revert DelegateNotProposed(_account);
+  function setDelegate(address _staker) external {
+    if (proposedDelegates[_staker] != msg.sender)
+      revert DelegateNotProposed(_staker);
     if (delegateAccounts[msg.sender] != address(0))
-      revert DelegateTaken(_account);
-    if (stakes[msg.sender].balance != 0) revert DelegateStaked(_account);
-    accountDelegates[_account] = msg.sender;
-    delegateAccounts[msg.sender] = _account;
-    delete proposedDelegates[_account];
-    emit SetDelegate(msg.sender, _account);
+      revert DelegateTaken(_staker);
+    if (stakes[msg.sender].balance != 0) revert DelegateStaked(_staker);
+    accountDelegates[_staker] = msg.sender;
+    delegateAccounts[msg.sender] = _staker;
+    delete proposedDelegates[_staker];
+    emit SetDelegate(msg.sender, _staker);
   }
 
   /**
@@ -177,12 +177,12 @@ contract Staking is IStaking, Ownable {
 
   /**
    * @notice Receive stakes for an account
-   * @param _account address
+   * @param _staker address
    */
   function getStakes(
-    address _account
+    address _staker
   ) external view override returns (Stake memory) {
-    return stakes[_account];
+    return stakes[_staker];
   }
 
   /**
@@ -194,12 +194,10 @@ contract Staking is IStaking, Ownable {
 
   /**
    * @notice Get balance of an account
-   * @param _account address
+   * @param _staker address
    */
-  function balanceOf(
-    address _account
-  ) external view override returns (uint256) {
-    return stakes[_account].balance;
+  function balanceOf(address _staker) external view override returns (uint256) {
+    return stakes[_staker].balance;
   }
 
   /**
@@ -211,83 +209,97 @@ contract Staking is IStaking, Ownable {
 
   /**
    * @notice Stake tokens for an account
-   * @param _account address
+   * @param _staker address
    * @param _amount uint256
    */
-  function stakeFor(address _account, uint256 _amount) external override {
-    if (delegateAccounts[_account] != address(0)) {
-      _stake(delegateAccounts[_account], _amount);
+  function stakeFor(address _staker, uint256 _amount) external override {
+    if (delegateAccounts[_staker] != address(0)) {
+      _stake(delegateAccounts[_staker], _amount);
     } else {
-      _stake(_account, _amount);
+      _stake(_staker, _amount);
     }
   }
 
   /**
-   * @notice Amount available to withdraw for a given account
-   * @param _account uint256
+   * @notice Amount available to unstake for a given account
+   * @dev Progresses linearly from start to finish (0 to 100%)
+   * @param _staker uint256
    */
-  function available(address _account) public view override returns (uint256) {
-    Stake storage _selected = stakes[_account];
-    if (_selected.maturity == _selected.timestamp) {
+  function available(address _staker) public view override returns (uint256) {
+    Stake storage _selected = stakes[_staker];
+    if (block.timestamp >= _selected.finish) {
       return _selected.balance;
-    } else {
-      uint256 _available = (_selected.balance *
-        (block.timestamp - _selected.timestamp)) /
-        (_selected.maturity - _selected.timestamp);
-      if (_available >= _selected.balance) {
-        return _selected.balance;
-      } else {
-        return _available;
-      }
     }
+    // Calc: (Balance * (Now - Start)) / (Finish - Start)
+    return
+      (_selected.balance * (block.timestamp - _selected.start)) /
+      (_selected.finish - _selected.start);
   }
 
   /**
    * @notice Stake tokens for an account
-   * @param _account address
+   * @param _staker address
    * @param _amount uint256
    */
-  function _stake(address _account, uint256 _amount) private {
-    if (_amount <= 0) revert AmountInvalid(_amount);
-    stakes[_account].duration = stakingDuration;
-    if (stakes[_account].balance == 0) {
-      stakes[_account].balance = _amount;
-      stakes[_account].timestamp = block.timestamp;
-      stakes[_account].maturity =
-        stakes[_account].timestamp +
-        stakes[_account].duration;
+  function _stake(address _staker, uint256 _amount) private {
+    // Ensure _amount to stake is non-zero
+    if (_amount == 0) revert AmountInvalid(_amount);
+
+    // Either create or update the stake
+    if (stakes[_staker].balance == 0) {
+      stakes[_staker].start = block.timestamp;
+      stakes[_staker].balance = _amount;
     } else {
-      uint256 _nowAvailable = available(_account);
-      stakes[_account].balance = stakes[_account].balance + _amount;
-      stakes[_account].timestamp =
+      // Update start accounting for progress and stake _amount
+      // Calc: Now - (Available / Stake Amount) * Duration
+      stakes[_staker].start =
         block.timestamp -
-        ((_nowAvailable * stakes[_account].duration) /
-          stakes[_account].balance);
-      stakes[_account].maturity =
-        stakes[_account].timestamp +
-        stakes[_account].duration;
+        (available(_staker) * stakeDuration) /
+        (stakes[_staker].balance + _amount);
+
+      // Add _amount to stake balance
+      stakes[_staker].balance = stakes[_staker].balance + _amount;
     }
+
+    // Update finish with new start plus duration
+    stakes[_staker].finish = stakes[_staker].start + stakeDuration;
+
+    // Transfer from msg.sender to this contract
     stakingToken.safeTransferFrom(msg.sender, address(this), _amount);
-    emit Transfer(address(0), _account, _amount);
+
+    // Mint staked tokens for the _staker
+    emit Transfer(address(0), _staker, _amount);
   }
 
   /**
-   * @notice Unstake tokens
-   * @param _account address
+   * @notice Unstake tokens for an account
+   * @param _staker address
    * @param _amount uint256
    */
-  function _unstake(address _account, uint256 _amount) private {
-    Stake storage _selected = stakes[_account];
-    if (_amount > available(_account)) revert AmountInvalid(_amount);
-    uint256 nowAvailable = available(_account);
-    _selected.balance = _selected.balance - _amount;
-    _selected.timestamp = Math.min(
+  function _unstake(address _staker, uint256 _amount) private {
+    Stake storage _selected = stakes[_staker];
+    uint256 currentlyAvailable = available(_staker);
+
+    // Ensure _amount does not exceed available
+    if (_amount > currentlyAvailable) revert AmountInvalid(_amount);
+
+    // Update start accounting for progress and unstake _amount
+    // Calc: Now - (Unstake Amount / Available) * (Now - Start)
+    _selected.start =
       block.timestamp -
-        (((10000 - ((10000 * _amount) / nowAvailable)) *
-          (block.timestamp - _selected.timestamp)) / 10000),
-      _selected.maturity
-    );
-    stakingToken.safeTransfer(_account, _amount);
-    emit Transfer(_account, address(0), _amount);
+      (((10000 - ((10000 * _amount) / currentlyAvailable)) *
+        (block.timestamp - _selected.start)) / 10000);
+
+    // Subtract _amount from stake balance
+    _selected.balance = _selected.balance - _amount;
+
+    // Delete the stake if it is now zero
+    if (_selected.balance == 0) delete stakes[_staker];
+
+    // Transfer from this contract to the _staker
+    stakingToken.safeTransfer(_staker, _amount);
+
+    // Burn staked tokens for the _staker
+    emit Transfer(_staker, address(0), _amount);
   }
 }
