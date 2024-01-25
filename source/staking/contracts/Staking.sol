@@ -17,33 +17,33 @@ contract Staking is IStaking, Ownable {
   // Token to be staked
   ERC20 public immutable stakingToken;
 
-  // Stake duration
-  uint256 public stakeDuration;
-
-  // Minimum timelock for stake duration change
-  uint256 private immutable minimumTimelock;
-
-  // Time after which duration change can be completed
-  uint256 private activeTimelock;
-
-  // Proposed stake duration during timelock
-  uint256 private proposedStakeDuration;
-
-  // Mapping of account to stakes
-  mapping(address => Stake) private stakes;
-
-  // Mapping of account to proposed delegate
-  mapping(address => address) public proposedDelegates;
-
-  // Mapping of account to delegate
-  mapping(address => address) public accountDelegates;
-
-  // Mapping of delegate to account
-  mapping(address => address) public delegateAccounts;
-
   // ERC-20 token properties
   string public name;
   string public symbol;
+
+  // Current stake duration
+  uint256 public stakeDuration;
+
+  // Proposed stake duration (subject to timelock)
+  uint256 private proposedStakeDuration;
+
+  // Minimum timelock for change to stake duration
+  uint256 private immutable minimumTimelock;
+
+  // Time after which change to stake duration can be completed
+  uint256 private activeTimelock;
+
+  // Mapping of staker to proposed delegate
+  mapping(address staker => address delegate) public proposedDelegates;
+
+  // Mapping of staker to delegate
+  mapping(address stsaker => address delegate) public stakerDelegates;
+
+  // Mapping of delegate to staker
+  mapping(address delegate => address staker) public delegateStakers;
+
+  // Mapping of staker to stake
+  mapping(address staker => Stake stake) public stakes;
 
   /**
    * @notice Staking constructor
@@ -96,7 +96,7 @@ contract Staking is IStaking, Ownable {
       revert DurationInvalid(_proposedStakeDuration);
     activeTimelock = block.timestamp + _durationChangeDelay;
     proposedStakeDuration = _proposedStakeDuration;
-    emit ScheduleDurationChange(activeTimelock);
+    emit ScheduleDurationChange(proposedStakeDuration, activeTimelock);
   }
 
   /**
@@ -118,93 +118,58 @@ contract Staking is IStaking, Ownable {
     stakeDuration = proposedStakeDuration;
     delete activeTimelock;
     delete proposedStakeDuration;
-    emit CompleteDurationChange(proposedStakeDuration);
+    emit CompleteDurationChange(stakeDuration);
   }
 
   /**
-   * @notice Propose delegate for account
-   * @param _delegate address
+   * @notice Propose delegate
+   * @param _to address
    */
-  function proposeDelegate(address _delegate) external {
-    if (accountDelegates[msg.sender] != address(0))
-      revert SenderHasDelegate(msg.sender, _delegate);
-    if (delegateAccounts[_delegate] != address(0))
-      revert DelegateTaken(_delegate);
-    if (stakes[_delegate].balance != 0) revert DelegateStaked(_delegate);
-    proposedDelegates[msg.sender] = _delegate;
-    emit ProposeDelegate(_delegate, msg.sender);
+  function proposeDelegate(address _to) external {
+    if (stakerDelegates[msg.sender] != address(0))
+      revert SenderHasDelegate(msg.sender, _to);
+    if (delegateStakers[_to] != address(0)) revert DelegateTaken(_to);
+    if (stakes[_to].balance != 0) revert DelegateStaked(_to);
+    proposedDelegates[msg.sender] = _to;
+    emit ProposeDelegate(msg.sender, _to);
   }
 
   /**
-   * @notice Set delegate for account
-   * @param _staker address
+   * @notice Accept delegate proposal
+   * @param _from address
    */
-  function setDelegate(address _staker) external {
-    if (proposedDelegates[_staker] != msg.sender)
-      revert DelegateNotProposed(_staker);
-    if (delegateAccounts[msg.sender] != address(0))
-      revert DelegateTaken(_staker);
-    if (stakes[msg.sender].balance != 0) revert DelegateStaked(_staker);
-    accountDelegates[_staker] = msg.sender;
-    delegateAccounts[msg.sender] = _staker;
-    delete proposedDelegates[_staker];
-    emit SetDelegate(msg.sender, _staker);
+  function acceptDelegateProposal(address _from) external {
+    if (proposedDelegates[_from] != msg.sender)
+      revert DelegateNotProposed(_from);
+    if (delegateStakers[msg.sender] != address(0)) revert DelegateTaken(_from);
+    if (stakes[msg.sender].balance != 0) revert DelegateStaked(_from);
+    stakerDelegates[_from] = msg.sender;
+    delegateStakers[msg.sender] = _from;
+    delete proposedDelegates[_from];
+    emit SetDelegate(_from, msg.sender);
   }
 
   /**
-   * @notice Unset delegate for account
+   * @notice Unset delegate
    * @param _delegate address
    */
   function unsetDelegate(address _delegate) external {
-    if (accountDelegates[msg.sender] != _delegate)
+    if (stakerDelegates[msg.sender] != _delegate)
       revert DelegateNotSet(_delegate);
-    accountDelegates[msg.sender] = address(0);
-    delegateAccounts[_delegate] = address(0);
+    stakerDelegates[msg.sender] = address(0);
+    delegateStakers[_delegate] = address(0);
+    emit UnsetDelegate(msg.sender, _delegate);
   }
 
   /**
-   * @notice Stake tokens
-   * @param _amount uint256
-   */
-  function stake(uint256 _amount) external override {
-    if (delegateAccounts[msg.sender] != address(0)) {
-      _stake(delegateAccounts[msg.sender], _amount);
-    } else {
-      _stake(msg.sender, _amount);
-    }
-  }
-
-  /**
-   * @notice Unstake tokens
-   * @param _amount uint256
-   */
-  function unstake(uint256 _amount) external override {
-    if (delegateAccounts[msg.sender] != address(0)) {
-      _unstake(delegateAccounts[msg.sender], _amount);
-    } else {
-      _unstake(msg.sender, _amount);
-    }
-  }
-
-  /**
-   * @notice Receive stakes for an account
-   * @param _staker address
-   */
-  function getStakes(
-    address _staker
-  ) external view override returns (Stake memory) {
-    return stakes[_staker];
-  }
-
-  /**
-   * @notice Get total balance of all staked accounts
+   * @notice Get total of all staked balances
    */
   function totalSupply() external view override returns (uint256) {
     return stakingToken.balanceOf(address(this));
   }
 
   /**
-   * @notice Get balance of an account
+   * @notice Get balance of a staker
    * @param _staker address
    */
   function balanceOf(address _staker) external view override returns (uint256) {
@@ -219,20 +184,40 @@ contract Staking is IStaking, Ownable {
   }
 
   /**
-   * @notice Stake tokens for an account
-   * @param _staker address
+   * @notice Stake tokens for msg.sender
    * @param _amount uint256
    */
-  function stakeFor(address _staker, uint256 _amount) external override {
-    if (delegateAccounts[_staker] != address(0)) {
-      _stake(delegateAccounts[_staker], _amount);
+  function stake(uint256 _amount) external override {
+    stakeFor(msg.sender, _amount);
+  }
+
+  /**
+   * @notice Stake tokens for an account
+   * @param _account address
+   * @param _amount uint256
+   */
+  function stakeFor(address _account, uint256 _amount) public override {
+    if (delegateStakers[_account] != address(0)) {
+      _stake(delegateStakers[_account], _amount);
     } else {
-      _stake(_staker, _amount);
+      _stake(_account, _amount);
     }
   }
 
   /**
-   * @notice Amount available to unstake for a given account
+   * @notice Unstake tokens
+   * @param _amount uint256
+   */
+  function unstake(uint256 _amount) external override {
+    if (delegateStakers[msg.sender] != address(0)) {
+      _unstake(delegateStakers[msg.sender], _amount);
+    } else {
+      _unstake(msg.sender, _amount);
+    }
+  }
+
+  /**
+   * @notice Amount available to unstake for a given staker
    * @dev Progresses linearly from start to finish (0 to 100%)
    * @param _staker uint256
    */
@@ -248,7 +233,7 @@ contract Staking is IStaking, Ownable {
   }
 
   /**
-   * @notice Stake tokens for an account
+   * @notice Stake tokens for a staker
    * @param _staker address
    * @param _amount uint256
    */
@@ -283,7 +268,7 @@ contract Staking is IStaking, Ownable {
   }
 
   /**
-   * @notice Unstake tokens for an account
+   * @notice Unstake tokens
    * @param _staker address
    * @param _amount uint256
    */

@@ -9,23 +9,29 @@ interface IStaking {
     uint256 balance;
   }
 
-  // ERC-20 Transfer event
+  // ERC-20 Transfer
   event Transfer(address indexed from, address indexed to, uint256 tokens);
 
-  // Schedule timelock event
-  event ScheduleDurationChange(uint256 indexed unlockTimestamp);
+  // Schedule stake duration change
+  event ScheduleDurationChange(
+    uint256 proposedStakeDuration,
+    uint256 indexed unlockTimestamp
+  );
 
-  // Cancel timelock event
+  // Cancel stake duration change
   event CancelDurationChange();
 
-  // Complete timelock event
+  // Complete stake duration change
   event CompleteDurationChange(uint256 indexed newDuration);
 
-  // Propose Delegate event
-  event ProposeDelegate(address indexed delegate, address indexed account);
+  // Propose delegate
+  event ProposeDelegate(address indexed from, address indexed to);
 
-  // Set Delegate event
-  event SetDelegate(address indexed delegate, address indexed account);
+  // Set delegate (proposal accepted)
+  event SetDelegate(address indexed staker, address indexed delegate);
+
+  // Unset delegate
+  event UnsetDelegate(address indexed staker, address indexed delegate);
 
   error AmountInvalid(uint256);
   error DelayInvalid(uint256);
@@ -71,14 +77,6 @@ interface IStaking {
    * @param amount uint256
    */
   function unstake(uint256 amount) external;
-
-  /**
-   * @notice Receive stakes for an account
-   * @param account address
-   */
-  function getStakes(
-    address account
-  ) external view returns (Stake memory accountStake);
 
   /**
    * @notice Total balance of all accounts (ERC-20)
