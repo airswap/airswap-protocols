@@ -332,6 +332,15 @@ describe('Staking Unit', () => {
       expect(userStake.balance).to.equal(0)
     })
 
+    it('fails attempting to unstake zero', async () => {
+      await token.mock.transferFrom.returns(true)
+      await token.mock.transfer.returns(true)
+      await staking.connect(account1).stake('100')
+      await expect(staking.connect(account1).unstake('0'))
+        .to.be.revertedWith('AmountInvalid')
+        .withArgs(0)
+    })
+
     it('successful partial unstaking', async () => {
       await token.mock.transferFrom.returns(true)
       await token.mock.transfer.returns(true)
