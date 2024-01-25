@@ -14,12 +14,12 @@ import "./interfaces/IStaking.sol";
 contract Staking is IStaking, Ownable {
   using SafeERC20 for ERC20;
 
-  // Token to be staked
-  ERC20 public immutable stakingToken;
-
-  // ERC-20 token properties
+  // ERC20 token properties
   string public name;
   string public symbol;
+
+  // Token to be staked
+  ERC20 public immutable stakingToken;
 
   // Current stake duration
   uint256 public stakeDuration;
@@ -37,7 +37,7 @@ contract Staking is IStaking, Ownable {
   mapping(address staker => address delegate) public proposedDelegates;
 
   // Mapping of staker to delegate
-  mapping(address stsaker => address delegate) public stakerDelegates;
+  mapping(address staker => address delegate) public stakerDelegates;
 
   // Mapping of delegate to staker
   mapping(address delegate => address staker) public delegateStakers;
@@ -81,13 +81,13 @@ contract Staking is IStaking, Ownable {
    * @param _amount uint256
    */
   function stakeFor(address _staker, uint256 _amount) public override {
+    // Ensure _amount to stake is non-zero
+    if (_amount == 0) revert AmountInvalid(0);
+
     // Stake as delegate if set
     if (delegateStakers[_staker] != address(0)) {
       _staker = delegateStakers[_staker];
     }
-
-    // Ensure _amount to stake is non-zero
-    if (_amount == 0) revert AmountInvalid(_amount);
 
     // Either create or update the stake
     if (stakes[_staker].balance == 0) {
@@ -120,6 +120,9 @@ contract Staking is IStaking, Ownable {
    * @param _amount uint256
    */
   function unstake(uint256 _amount) external override {
+    // Ensure _amount to unstake is non-zero
+    if (_amount == 0) revert AmountInvalid(0);
+
     // Unstake as delegate if set
     address _staker = msg.sender;
     if (delegateStakers[msg.sender] != address(0)) {
