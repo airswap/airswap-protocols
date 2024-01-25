@@ -20,11 +20,14 @@ contract Staking is IStaking, Ownable {
   // Unstaking duration
   uint256 public stakingDuration;
 
-  // Minimum delay to staking duration change
-  uint256 private immutable minDurationChangeDelay;
+  // Minimum timelock for staking duration change
+  uint256 private immutable minimumTimelock;
 
-  // Timestamp after which staking duration change is possible
-  uint256 private activeDurationChangeTimestamp;
+  // Time after which duration change can be completed
+  uint256 private activeTimelock;
+
+  // Proposed staking duration during timelock
+  uint256 private proposedStakeDuration;
 
   // Mapping of account to stakes
   mapping(address => Stake) private stakes;
@@ -48,18 +51,18 @@ contract Staking is IStaking, Ownable {
    * @param _symbol string Token symbol for this contract
    * @param _stakingToken address Token used for staking
    * @param _stakingDuration uint256 Amount of time tokens are staked
-   * @param _minDurationChangeDelay uint256 Time delay for a duration change
+   * @param _minimumTimelock uint256 Time delay for a duration change
    */
   constructor(
     string memory _name,
     string memory _symbol,
     ERC20 _stakingToken,
     uint256 _stakingDuration,
-    uint256 _minDurationChangeDelay
+    uint256 _minimumTimelock
   ) {
     stakingToken = _stakingToken;
     stakingDuration = _stakingDuration;
-    minDurationChangeDelay = _minDurationChangeDelay;
+    minimumTimelock = _minimumTimelock;
     name = _name;
     symbol = _symbol;
   }
@@ -78,36 +81,44 @@ contract Staking is IStaking, Ownable {
   }
 
   /**
-   * @dev Schedules timelock to change duration
-   * @param _delay uint256
+   * @notice Set timelock for duration change
+   * @param _proposedStakingDuration uint256
+   * @param _durationChangeDelay uint256
    */
-  function scheduleDurationChange(uint256 _delay) external onlyOwner {
-    if (activeDurationChangeTimestamp != 0) revert TimelockActive();
-    if (_delay < minDurationChangeDelay) revert DelayInvalid(_delay);
-    activeDurationChangeTimestamp = block.timestamp + _delay;
-    emit ScheduleDurationChange(activeDurationChangeTimestamp);
+  function scheduleDurationChange(
+    uint256 _proposedStakingDuration,
+    uint256 _durationChangeDelay
+  ) external onlyOwner {
+    if (activeTimelock != 0) revert TimelockActive();
+    if (_durationChangeDelay < minimumTimelock)
+      revert DelayInvalid(_durationChangeDelay);
+    if (_proposedStakingDuration == 0)
+      revert DurationInvalid(_proposedStakingDuration);
+    activeTimelock = block.timestamp + _durationChangeDelay;
+    proposedStakeDuration = _proposedStakingDuration;
+    emit ScheduleDurationChange(activeTimelock);
   }
 
   /**
-   * @dev Cancels timelock to change duration
+   * @notice Cancel timelock for duration change
    */
   function cancelDurationChange() external onlyOwner {
-    if (activeDurationChangeTimestamp == 0) revert TimelockInactive();
-    delete activeDurationChangeTimestamp;
+    if (activeTimelock == 0) revert TimelockInactive();
+    delete activeTimelock;
+    delete proposedStakeDuration;
     emit CancelDurationChange();
   }
 
   /**
-   * @notice Set unstaking duration
-   * @param _stakingDuration uint256
+   * @notice Complete timelocked duration change
    */
-  function setDuration(uint256 _stakingDuration) external onlyOwner {
-    if (_stakingDuration == 0) revert DurationInvalid(_stakingDuration);
-    if (activeDurationChangeTimestamp == 0) revert TimelockInactive();
-    if (block.timestamp < activeDurationChangeTimestamp) revert Timelocked();
-    stakingDuration = _stakingDuration;
-    delete activeDurationChangeTimestamp;
-    emit CompleteDurationChange(_stakingDuration);
+  function completeDurationChange() external onlyOwner {
+    if (activeTimelock == 0) revert TimelockInactive();
+    if (block.timestamp < activeTimelock) revert Timelocked();
+    stakingDuration = proposedStakeDuration;
+    delete activeTimelock;
+    delete proposedStakeDuration;
+    emit CompleteDurationChange(proposedStakeDuration);
   }
 
   /**
