@@ -17,6 +17,7 @@ describe('Registry Integration', () => {
   let registry
   const STAKING_COST = 1000
   const SUPPORT_COST = 10
+  const TOKEN_BALANCE = 10000
 
   beforeEach(async () => {
     snapshotId = await ethers.provider.send('evm_snapshot')
@@ -33,7 +34,7 @@ describe('Registry Integration', () => {
         ERC20PresetFixedSupply.abi,
         ERC20PresetFixedSupply.bytecode
       )
-    ).deploy('TestERC20', 'TERC20', '10000', account1.address)
+    ).deploy('TestERC20', 'TERC20', TOKEN_BALANCE, account1.address)
 
     await stakingToken.deployed()
 
@@ -42,7 +43,7 @@ describe('Registry Integration', () => {
       .connect(deployer)
       .deploy(stakingToken.address, STAKING_COST, SUPPORT_COST)
     await registry.deployed()
-    stakingToken.connect(account1).approve(registry.address, '10000')
+    stakingToken.connect(account1).approve(registry.address, TOKEN_BALANCE)
   })
 
   describe('constructor values', async () => {
@@ -70,12 +71,37 @@ describe('Registry Integration', () => {
       )
     })
 
-    it('staking cost is always retruned when a URL is unset', async () => {
+    it('staking and support costs return when a server is unset', async () => {
+      expect(await stakingToken.balanceOf(account1.address)).to.equal(
+        TOKEN_BALANCE
+      )
+      expect(await stakingToken.balanceOf(registry.address)).to.equal(0)
+
       await registry.connect(account1).setServerURL('maker1.com')
+      await registry.connect(account1).addProtocols([protocol1, protocol2])
+      await registry
+        .connect(account1)
+        .addTokens([token1.address, token2.address])
+
+      expect(await stakingToken.balanceOf(account1.address)).to.equal(
+        TOKEN_BALANCE - (STAKING_COST + SUPPORT_COST * 4)
+      )
+      expect(await stakingToken.balanceOf(registry.address)).to.equal(
+        STAKING_COST + SUPPORT_COST * 4
+      )
+
       await expect(registry.connect(account1).unsetServer())
         .to.emit(registry, 'UnsetServer')
-        .withArgs(account1.address, 'maker1.com', [], [])
+        .withArgs(
+          account1.address,
+          'maker1.com',
+          [protocol1, protocol2],
+          [token1.address, token2.address]
+        )
 
+      expect(await stakingToken.balanceOf(account1.address)).to.equal(
+        TOKEN_BALANCE
+      )
       expect(await stakingToken.balanceOf(registry.address)).to.equal(0)
     })
   })
