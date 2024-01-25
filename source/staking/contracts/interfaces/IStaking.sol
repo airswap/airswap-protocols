@@ -3,31 +3,6 @@
 pragma solidity 0.8.23;
 
 interface IStaking {
-  struct Stake {
-    uint256 duration;
-    uint256 balance;
-    uint256 timestamp;
-    uint256 maturity;
-  }
-
-  // ERC-20 Transfer event
-  event Transfer(address indexed from, address indexed to, uint256 tokens);
-
-  // Schedule timelock event
-  event ScheduleDurationChange(uint256 indexed unlockTimestamp);
-
-  // Cancel timelock event
-  event CancelDurationChange();
-
-  // Complete timelock event
-  event CompleteDurationChange(uint256 indexed newDuration);
-
-  // Propose Delegate event
-  event ProposeDelegate(address indexed delegate, address indexed account);
-
-  // Set Delegate event
-  event SetDelegate(address indexed delegate, address indexed account);
-
   error AmountInvalid(uint256);
   error DelayInvalid(uint256);
   error DelegateInvalid(address);
@@ -41,72 +16,51 @@ interface IStaking {
   error Timelocked();
   error TimelockInactive();
 
-  /**
-   * @notice Set timelock for duration change
-   * @param _proposedStakingDuration uint256
-   * @param _durationChangeDelay uint256
-   */
-  function scheduleDurationChange(
-    uint256 _proposedStakingDuration,
-    uint256 _durationChangeDelay
-  ) external;
+  struct Stake {
+    uint256 start;
+    uint256 finish;
+    uint256 balance;
+  }
 
-  /**
-   * @notice Cancel timelock for duration change
-   */
-  function cancelDurationChange() external;
+  event Transfer(address indexed from, address indexed to, uint256 tokens);
+  event ProposeDelegate(address indexed from, address indexed to);
+  event SetDelegate(address indexed staker, address indexed delegate);
+  event UnsetDelegate(address indexed staker, address indexed delegate);
+  event ScheduleDurationChange(
+    uint256 proposedStakeDuration,
+    uint256 indexed unlockTimestamp
+  );
+  event CancelDurationChange();
+  event CompleteDurationChange(uint256 indexed newDuration);
 
-  /**
-   * @notice Complete timelocked duration change
-   */
-  function completeDurationChange() external;
-
-  /**
-   * @notice Stake tokens
-   * @param amount uint256
-   */
   function stake(uint256 amount) external;
 
-  /**
-   * @notice Unstake tokens
-   * @param amount uint256
-   */
-  function unstake(uint256 amount) external;
-
-  /**
-   * @notice Receive stakes for an account
-   * @param account address
-   */
-  function getStakes(
-    address account
-  ) external view returns (Stake memory accountStake);
-
-  /**
-   * @notice Total balance of all accounts (ERC-20)
-   */
-  function totalSupply() external view returns (uint256);
-
-  /**
-   * @notice Balance of an account (ERC-20)
-   * @param account address
-   */
-  function balanceOf(address account) external view returns (uint256);
-
-  /**
-   * @notice Decimals of underlying token (ERC-20)
-   */
-  function decimals() external view returns (uint8);
-
-  /**
-   * @notice Stake tokens for an account
-   * @param account address
-   * @param amount uint256
-   */
   function stakeFor(address account, uint256 amount) external;
 
-  /**
-   * @notice Available amount for an account
-   * @param account uint256
-   */
-  function available(address account) external view returns (uint256);
+  function unstake(uint256 amount) external;
+
+  function available(address staker) external view returns (uint256);
+
+  function balanceOf(address account) external view returns (uint256);
+
+  function totalSupply() external view returns (uint256);
+
+  function decimals() external view returns (uint8);
+
+  function proposeDelegate(address to) external;
+
+  function acceptDelegateProposal(address from) external;
+
+  function unsetDelegate(address delegate) external;
+
+  function scheduleDurationChange(
+    uint256 proposedStakingDuration,
+    uint256 durationChangeDelay
+  ) external;
+
+  function cancelDurationChange() external;
+
+  function completeDurationChange() external;
+
+  function setMetaData(string memory name, string memory symbol) external;
 }
