@@ -76,7 +76,7 @@ describe('Staking Unit', () => {
     })
   })
 
-  describe('Set staking duration', async () => {
+  describe('Set stake duration', async () => {
     it('non-owner cannot set stake duration', async () => {
       await staking
         .connect(deployer)

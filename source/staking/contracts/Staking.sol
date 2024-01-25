@@ -68,16 +68,167 @@ contract Staking is IStaking, Ownable {
   }
 
   /**
-   * @notice Set token metadata for this contract
-   * @param _name string Token name for this contract
-   * @param _symbol string Token symbol for this contract
+   * @notice Stake tokens for msg.sender
+   * @param _amount uint256
    */
-  function setMetaData(
-    string memory _name,
-    string memory _symbol
-  ) external onlyOwner {
-    name = _name;
-    symbol = _symbol;
+  function stake(uint256 _amount) external override {
+    stakeFor(msg.sender, _amount);
+  }
+
+  /**
+   * @notice Stake tokens
+   * @param _staker address
+   * @param _amount uint256
+   */
+  function stakeFor(address _staker, uint256 _amount) public override {
+    // Stake as delegate if set
+    if (delegateStakers[_staker] != address(0)) {
+      _staker = delegateStakers[_staker];
+    }
+
+    // Ensure _amount to stake is non-zero
+    if (_amount == 0) revert AmountInvalid(_amount);
+
+    // Either create or update the stake
+    if (stakes[_staker].balance == 0) {
+      stakes[_staker].start = block.timestamp;
+      stakes[_staker].balance = _amount;
+    } else {
+      // Update start according to progress and stake _amount
+      // Calc: Now - (Duration * (Available / New Stake Balance))
+      stakes[_staker].start =
+        block.timestamp -
+        (stakeDuration * available(_staker)) /
+        (stakes[_staker].balance + _amount);
+
+      // Add _amount to stake balance
+      stakes[_staker].balance = stakes[_staker].balance + _amount;
+    }
+
+    // Update finish with new start plus duration
+    stakes[_staker].finish = stakes[_staker].start + stakeDuration;
+
+    // Transfer from msg.sender to this contract
+    stakingToken.safeTransferFrom(msg.sender, address(this), _amount);
+
+    // Mint staked tokens for the _staker
+    emit Transfer(address(0), _staker, _amount);
+  }
+
+  /**
+   * @notice Unstake tokens
+   * @param _amount uint256
+   */
+  function unstake(uint256 _amount) external override {
+    // Unstake as delegate if set
+    address _staker = msg.sender;
+    if (delegateStakers[msg.sender] != address(0)) {
+      _staker = delegateStakers[msg.sender];
+    }
+
+    // Select stake and currently available
+    Stake storage _selected = stakes[_staker];
+    uint256 currentlyAvailable = available(_staker);
+
+    // Ensure _amount does not exceed available
+    if (_amount > currentlyAvailable) revert AmountInvalid(_amount);
+
+    // Update start according to progress and unstake _amount
+    // Calc: Now - ((Now - Start) * ((Available - Unstake Amount) / Available))
+    _selected.start =
+      block.timestamp -
+      (((block.timestamp - _selected.start) * (currentlyAvailable - _amount)) /
+        currentlyAvailable);
+
+    // Subtract _amount from stake balance
+    _selected.balance = _selected.balance - _amount;
+
+    // Delete the stake if it is now zero
+    if (_selected.balance == 0) delete stakes[_staker];
+
+    // Transfer from this contract to the _staker
+    stakingToken.safeTransfer(_staker, _amount);
+
+    // Burn staked tokens for the _staker
+    emit Transfer(_staker, address(0), _amount);
+  }
+
+  /**
+   * @notice Amount available to unstake
+   * @dev Linear from start to finish (0 to 100%)
+   * @param _staker uint256
+   */
+  function available(address _staker) public view override returns (uint256) {
+    Stake storage _selected = stakes[_staker];
+    if (block.timestamp >= _selected.finish) {
+      return _selected.balance;
+    }
+    // Calc: (Balance * (Now - Start)) / (Finish - Start)
+    return
+      (_selected.balance * (block.timestamp - _selected.start)) /
+      (_selected.finish - _selected.start);
+  }
+
+  /**
+   * @notice Get balance of a staker
+   * @param _staker address
+   */
+  function balanceOf(address _staker) external view override returns (uint256) {
+    return stakes[_staker].balance;
+  }
+
+  /**
+   * @notice Get total of all staked balances
+   */
+  function totalSupply() external view override returns (uint256) {
+    return stakingToken.balanceOf(address(this));
+  }
+
+  /**
+   * @notice Get decimals of underlying token
+   */
+  function decimals() external view override returns (uint8) {
+    return stakingToken.decimals();
+  }
+
+  /**
+   * @notice Propose delegate
+   * @param _to address
+   */
+  function proposeDelegate(address _to) external {
+    if (stakerDelegates[msg.sender] != address(0))
+      revert SenderHasDelegate(msg.sender, _to);
+    if (delegateStakers[_to] != address(0)) revert DelegateTaken(_to);
+    if (stakes[_to].balance != 0) revert DelegateStaked(_to);
+    proposedDelegates[msg.sender] = _to;
+    emit ProposeDelegate(msg.sender, _to);
+  }
+
+  /**
+   * @notice Accept delegate proposal
+   * @param _from address
+   */
+  function acceptDelegateProposal(address _from) external {
+    if (proposedDelegates[_from] != msg.sender)
+      revert DelegateNotProposed(_from);
+    if (delegateStakers[msg.sender] != address(0)) revert DelegateTaken(_from);
+    if (stakes[msg.sender].balance != 0) revert DelegateStaked(_from);
+    stakerDelegates[_from] = msg.sender;
+    delegateStakers[msg.sender] = _from;
+    delete proposedDelegates[_from];
+    emit SetDelegate(_from, msg.sender);
+  }
+
+  /**
+   * @notice Unset delegate
+   * @param _delegate address
+   */
+  function unsetDelegate(address _delegate) external {
+    if (stakerDelegates[msg.sender] != _delegate)
+      revert DelegateNotSet(_delegate);
+    stakerDelegates[msg.sender] = address(0);
+    delegateStakers[_delegate] = address(0);
+    emit UnsetDelegate(msg.sender, _delegate);
   }
 
   /**
@@ -122,180 +273,15 @@ contract Staking is IStaking, Ownable {
   }
 
   /**
-   * @notice Propose delegate
-   * @param _to address
+   * @notice Set token metadata for this contract
+   * @param _name string Token name for this contract
+   * @param _symbol string Token symbol for this contract
    */
-  function proposeDelegate(address _to) external {
-    if (stakerDelegates[msg.sender] != address(0))
-      revert SenderHasDelegate(msg.sender, _to);
-    if (delegateStakers[_to] != address(0)) revert DelegateTaken(_to);
-    if (stakes[_to].balance != 0) revert DelegateStaked(_to);
-    proposedDelegates[msg.sender] = _to;
-    emit ProposeDelegate(msg.sender, _to);
-  }
-
-  /**
-   * @notice Accept delegate proposal
-   * @param _from address
-   */
-  function acceptDelegateProposal(address _from) external {
-    if (proposedDelegates[_from] != msg.sender)
-      revert DelegateNotProposed(_from);
-    if (delegateStakers[msg.sender] != address(0)) revert DelegateTaken(_from);
-    if (stakes[msg.sender].balance != 0) revert DelegateStaked(_from);
-    stakerDelegates[_from] = msg.sender;
-    delegateStakers[msg.sender] = _from;
-    delete proposedDelegates[_from];
-    emit SetDelegate(_from, msg.sender);
-  }
-
-  /**
-   * @notice Unset delegate
-   * @param _delegate address
-   */
-  function unsetDelegate(address _delegate) external {
-    if (stakerDelegates[msg.sender] != _delegate)
-      revert DelegateNotSet(_delegate);
-    stakerDelegates[msg.sender] = address(0);
-    delegateStakers[_delegate] = address(0);
-    emit UnsetDelegate(msg.sender, _delegate);
-  }
-
-  /**
-   * @notice Get total of all staked balances
-   */
-  function totalSupply() external view override returns (uint256) {
-    return stakingToken.balanceOf(address(this));
-  }
-
-  /**
-   * @notice Get balance of a staker
-   * @param _staker address
-   */
-  function balanceOf(address _staker) external view override returns (uint256) {
-    return stakes[_staker].balance;
-  }
-
-  /**
-   * @notice Get decimals of underlying token
-   */
-  function decimals() external view override returns (uint8) {
-    return stakingToken.decimals();
-  }
-
-  /**
-   * @notice Stake tokens for msg.sender
-   * @param _amount uint256
-   */
-  function stake(uint256 _amount) external override {
-    stakeFor(msg.sender, _amount);
-  }
-
-  /**
-   * @notice Stake tokens for an account
-   * @param _account address
-   * @param _amount uint256
-   */
-  function stakeFor(address _account, uint256 _amount) public override {
-    if (delegateStakers[_account] != address(0)) {
-      _stake(delegateStakers[_account], _amount);
-    } else {
-      _stake(_account, _amount);
-    }
-  }
-
-  /**
-   * @notice Unstake tokens
-   * @param _amount uint256
-   */
-  function unstake(uint256 _amount) external override {
-    if (delegateStakers[msg.sender] != address(0)) {
-      _unstake(delegateStakers[msg.sender], _amount);
-    } else {
-      _unstake(msg.sender, _amount);
-    }
-  }
-
-  /**
-   * @notice Amount available to unstake for a given staker
-   * @dev Progresses linearly from start to finish (0 to 100%)
-   * @param _staker uint256
-   */
-  function available(address _staker) public view override returns (uint256) {
-    Stake storage _selected = stakes[_staker];
-    if (block.timestamp >= _selected.finish) {
-      return _selected.balance;
-    }
-    // Calc: (Balance * (Now - Start)) / (Finish - Start)
-    return
-      (_selected.balance * (block.timestamp - _selected.start)) /
-      (_selected.finish - _selected.start);
-  }
-
-  /**
-   * @notice Stake tokens for a staker
-   * @param _staker address
-   * @param _amount uint256
-   */
-  function _stake(address _staker, uint256 _amount) private {
-    // Ensure _amount to stake is non-zero
-    if (_amount == 0) revert AmountInvalid(_amount);
-
-    // Either create or update the stake
-    if (stakes[_staker].balance == 0) {
-      stakes[_staker].start = block.timestamp;
-      stakes[_staker].balance = _amount;
-    } else {
-      // Update start accounting for progress and stake _amount
-      // Calc: Now - (Duration * (Available / New Stake Balance))
-      stakes[_staker].start =
-        block.timestamp -
-        (stakeDuration * available(_staker)) /
-        (stakes[_staker].balance + _amount);
-
-      // Add _amount to stake balance
-      stakes[_staker].balance = stakes[_staker].balance + _amount;
-    }
-
-    // Update finish with new start plus duration
-    stakes[_staker].finish = stakes[_staker].start + stakeDuration;
-
-    // Transfer from msg.sender to this contract
-    stakingToken.safeTransferFrom(msg.sender, address(this), _amount);
-
-    // Mint staked tokens for the _staker
-    emit Transfer(address(0), _staker, _amount);
-  }
-
-  /**
-   * @notice Unstake tokens
-   * @param _staker address
-   * @param _amount uint256
-   */
-  function _unstake(address _staker, uint256 _amount) private {
-    Stake storage _selected = stakes[_staker];
-    uint256 currentlyAvailable = available(_staker);
-
-    // Ensure _amount does not exceed available
-    if (_amount > currentlyAvailable) revert AmountInvalid(_amount);
-
-    // Update start accounting for progress and unstake _amount
-    // Calc: Now - ((Now - Start) * ((Available - Unstake Amount) / Available))
-    _selected.start =
-      block.timestamp -
-      (((block.timestamp - _selected.start) * (currentlyAvailable - _amount)) /
-        currentlyAvailable);
-
-    // Subtract _amount from stake balance
-    _selected.balance = _selected.balance - _amount;
-
-    // Delete the stake if it is now zero
-    if (_selected.balance == 0) delete stakes[_staker];
-
-    // Transfer from this contract to the _staker
-    stakingToken.safeTransfer(_staker, _amount);
-
-    // Burn staked tokens for the _staker
-    emit Transfer(_staker, address(0), _amount);
+  function setMetaData(
+    string memory _name,
+    string memory _symbol
+  ) external onlyOwner {
+    name = _name;
+    symbol = _symbol;
   }
 }
