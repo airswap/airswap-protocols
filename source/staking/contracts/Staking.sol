@@ -251,10 +251,10 @@ contract Staking is IStaking, Ownable {
       stakes[_staker].balance = _amount;
     } else {
       // Update start accounting for progress and stake _amount
-      // Calc: Now - (Available / Stake Amount) * Duration
+      // Calc: Now - (Duration * (Available / New Stake Balance))
       stakes[_staker].start =
         block.timestamp -
-        (available(_staker) * stakeDuration) /
+        (stakeDuration * available(_staker)) /
         (stakes[_staker].balance + _amount);
 
       // Add _amount to stake balance
@@ -284,7 +284,7 @@ contract Staking is IStaking, Ownable {
     if (_amount > currentlyAvailable) revert AmountInvalid(_amount);
 
     // Update start accounting for progress and unstake _amount
-    // Calc: Now - ((Now - Start) * (Available - Unstake Amount)) / Available
+    // Calc: Now - ((Now - Start) * ((Available - Unstake Amount) / Available))
     _selected.start =
       block.timestamp -
       (((block.timestamp - _selected.start) * (currentlyAvailable - _amount)) /
