@@ -1,7 +1,1 @@
-module.exports = {
-  5: [
-    '0xfa67955fd05Cba4c14C3736f58b43401674b19d5',
-    '0x57750B7c6F460bDe66438edc54191D07aB16e2e5',
-    '0x0082FA1Bb6A2Fb6cbc707F6909aE2928a8a5Ab58',
-  ],
-}
+module.exports = {}

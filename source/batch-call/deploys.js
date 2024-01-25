@@ -1,3 +1,1 @@
-module.exports = {
-  5: '0x4B79d8603E0C3244D20356D867759232551B9330',
-}
+module.exports = {}

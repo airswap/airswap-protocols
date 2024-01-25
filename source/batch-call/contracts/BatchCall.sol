@@ -204,10 +204,10 @@ contract BatchCall {
 
   /**
    * @notice Check validity of an array of Orders
-   * @param senderWallet address wallet that would send the order
-   * @param orders ISwap.Order[] list of orders to be checked
-   * @param swapContract ISwap swap contract to call
-   * @return bool[] true indicates the order is valid
+   * @param senderWallet address Wallet that would send the order
+   * @param orders ISwap.Order[] Array of orders to be checked
+   * @param swapContract ISwap Swap contract to call
+   * @return bool[] True indicates the order is valid
    */
   function getOrdersValid(
     address senderWallet,
@@ -218,8 +218,8 @@ contract BatchCall {
     bool[] memory orderValidity = new bool[](orders.length);
 
     for (uint256 i; i < orders.length; ) {
-      (, uint256 errorCount) = swapContract.check(senderWallet, orders[i]);
-      orderValidity[i] = errorCount == 0 ? true : false;
+      bytes32[] memory errors = swapContract.check(senderWallet, orders[i]);
+      orderValidity[i] = errors.length == 0 ? true : false;
       unchecked {
         ++i;
       }
@@ -229,10 +229,10 @@ contract BatchCall {
 
   /**
    * @notice Check validity of an array of OrderERC20s
-   * @param senderWallet address wallet that would send the order
-   * @param orders ISwapERC20.OrderERC20[] list of orders to be checked
-   * @param swapERC20Contract ISwapERC20 swap contract to call
-   * @return bool[] validity of each order
+   * @param senderWallet address Wallet that would send the order
+   * @param orders ISwapERC20.OrderERC20[] Array of orders to be checked
+   * @param swapERC20Contract ISwapERC20 Swap contract to call
+   * @return bool[] True indicates the order is valid
    */
   function getOrdersValidERC20(
     address senderWallet,
@@ -244,7 +244,7 @@ contract BatchCall {
 
     for (uint256 i; i < orders.length; ) {
       ISwapERC20.OrderERC20 memory order = orders[i];
-      (uint256 errorCount, ) = swapERC20Contract.check(
+      bytes32[] memory errors = swapERC20Contract.check(
         senderWallet,
         order.nonce,
         order.expiry,
@@ -257,7 +257,7 @@ contract BatchCall {
         order.r,
         order.s
       );
-      orderValidity[i] = errorCount == 0 ? true : false;
+      orderValidity[i] = errors.length == 0 ? true : false;
       unchecked {
         ++i;
       }
@@ -278,9 +278,8 @@ contract BatchCall {
     uint256[] calldata nonces,
     ISwap swapContract
   ) external view returns (bool[] memory) {
-    if (signerWallets.length <= 0) revert ArgumentInvalid();
+    if (signerWallets.length == 0) revert ArgumentInvalid();
     if (signerWallets.length != nonces.length) revert ArgumentInvalid();
-    require(signerWallets.length == nonces.length);
     bool[] memory nonceUsed = new bool[](signerWallets.length);
 
     for (uint256 i; i < signerWallets.length; ) {

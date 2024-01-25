@@ -30,7 +30,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
   bytes32 public immutable DOMAIN_SEPARATOR;
 
   uint256 public constant FEE_DIVISOR = 10000;
-  uint256 private constant MAX_ERROR_COUNT = 10;
+  uint256 private constant MAX_ERROR_COUNT = 8;
   uint256 private constant MAX_MAX = 100;
   uint256 private constant MAX_SCALE = 77;
 
@@ -403,7 +403,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
   }
 
   /**
-   * @notice Checks order and returns list of errors
+   * @notice Checks an order for errors
    * @param senderWallet address Wallet that would send the order
    * @param nonce uint256 Unique and should be sequential
    * @param expiry uint256 Expiry in seconds since 1 January 1970
@@ -415,7 +415,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
    * @param v uint8 "v" value of the ECDSA signature
    * @param r bytes32 "r" value of the ECDSA signature
    * @param s bytes32 "s" value of the ECDSA signature
-   * @return tuple of error count and bytes32[] memory array of error messages
+   * @return bytes32[] errors
    */
   function check(
     address senderWallet,
@@ -429,14 +429,9 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     uint8 v,
     bytes32 r,
     bytes32 s
-  ) external view returns (uint256, bytes32[] memory) {
+  ) external view returns (bytes32[] memory) {
     bytes32[] memory errors = new bytes32[](MAX_ERROR_COUNT);
-    uint256 errCount;
-
-    if (DOMAIN_CHAIN_ID != block.chainid) {
-      errors[errCount] = "ChainIdChanged";
-      errCount++;
-    }
+    uint256 count;
 
     OrderERC20 memory order;
     order.nonce = nonce;
@@ -451,6 +446,11 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     order.s = s;
     order.senderWallet = senderWallet;
 
+    if (DOMAIN_CHAIN_ID != block.chainid) {
+      errors[count++] = "ChainIdChanged";
+    }
+
+    // Validate as the authorized signatory if set
     address signatory = order.signerWallet;
     if (authorized[signatory] != address(0)) {
       signatory = authorized[signatory];
@@ -472,16 +472,13 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
         abi.encodePacked(r, s, v)
       )
     ) {
-      errors[errCount] = "Unauthorized";
-      errCount++;
+      errors[count++] = "Unauthorized";
     } else if (nonceUsed(signatory, order.nonce)) {
-      errors[errCount] = "NonceAlreadyUsed";
-      errCount++;
+      errors[count++] = "NonceAlreadyUsed";
     }
 
     if (order.expiry < block.timestamp) {
-      errors[errCount] = "OrderExpired";
-      errCount++;
+      errors[count++] = "OrderExpired";
     }
 
     if (order.senderWallet != address(0)) {
@@ -495,13 +492,11 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
       );
 
       if (senderAllowance < order.senderAmount) {
-        errors[errCount] = "SenderAllowanceLow";
-        errCount++;
+        errors[count++] = "SenderAllowanceLow";
       }
 
       if (senderBalance < order.senderAmount) {
-        errors[errCount] = "SenderBalanceLow";
-        errCount++;
+        errors[count++] = "SenderBalanceLow";
       }
     }
 
@@ -517,16 +512,21 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     uint256 signerFeeAmount = (order.signerAmount * protocolFee) / FEE_DIVISOR;
 
     if (signerAllowance < order.signerAmount + signerFeeAmount) {
-      errors[errCount] = "SignerAllowanceLow";
-      errCount++;
+      errors[count++] = "SignerAllowanceLow";
     }
 
     if (signerBalance < order.signerAmount + signerFeeAmount) {
-      errors[errCount] = "SignerBalanceLow";
-      errCount++;
+      errors[count++] = "SignerBalanceLow";
     }
 
-    return (errCount, errors);
+    // Truncate errors array to actual count
+    if (count != errors.length) {
+      assembly {
+        mstore(errors, count)
+      }
+    }
+
+    return errors;
   }
 
   /**
@@ -633,11 +633,13 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     // Ensure the expiry is not passed
     if (expiry <= block.timestamp) revert OrderExpired();
 
+    // Validate as the authorized signatory if set
     address signatory = signerWallet;
     if (authorized[signatory] != address(0)) {
       signatory = authorized[signatory];
     }
 
+    // Ensure the signature is correct for the order
     if (
       !SignatureChecker.isValidSignatureNow(
         signatory,
@@ -655,7 +657,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
       )
     ) revert Unauthorized();
 
-    // Ensure the nonce is not yet used and if not mark it used
+    // Ensure the nonce is not yet used and if not mark as used
     if (!_markNonceAsUsed(signatory, nonce)) revert NonceAlreadyUsed(nonce);
   }
 

@@ -50,7 +50,7 @@
     "nx": "^16.5.5",
     "prettier": "^2.8.4",
     "prettier-plugin-solidity": "^1.1.2",
-    "solidity-coverage": "^0.8.2",
+    "solidity-coverage": "^0.8.5",
     "ts-node": "^10.9.1",
     "typechain": "^8.1.1",
     "typescript": "^5.0.4"

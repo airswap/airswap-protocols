@@ -7,7 +7,6 @@ export const SECONDS_IN_DAY = 86400
 
 export enum ChainIds {
   MAINNET = 1,
-  GOERLI = 5,
   RSK = 30,
   RSKTESTNET = 31,
   TELOS = 40,
@@ -42,7 +41,6 @@ export const mainnets: number[] = [
 ]
 
 export const testnets: number[] = [
-  ChainIds.GOERLI,
   ChainIds.RSKTESTNET,
   ChainIds.TELOSTESTNET,
   ChainIds.BSCTESTNET,
@@ -58,7 +56,6 @@ export const testnets: number[] = [
 
 export const chainLabels: Record<number, string> = {
   [ChainIds.MAINNET]: 'MAINNET',
-  [ChainIds.GOERLI]: 'GOERLI',
   [ChainIds.RSK]: 'RSK',
   [ChainIds.RSKTESTNET]: 'RSKTESTNET',
   [ChainIds.TELOS]: 'TELOS',
@@ -82,7 +79,6 @@ export const chainLabels: Record<number, string> = {
 
 export const chainNames: Record<number, string> = {
   [ChainIds.MAINNET]: 'Ethereum',
-  [ChainIds.GOERLI]: 'Goerli',
   [ChainIds.RSK]: 'RSK',
   [ChainIds.RSKTESTNET]: 'RSK Testnet',
   [ChainIds.TELOS]: 'Telos',
@@ -106,7 +102,6 @@ export const chainNames: Record<number, string> = {
 
 export const chainCurrencies: Record<number, string> = {
   [ChainIds.MAINNET]: 'ETH',
-  [ChainIds.GOERLI]: 'GoerliETH',
   [ChainIds.RSK]: 'RBTC',
   [ChainIds.RSKTESTNET]: 'tRBTC',
   [ChainIds.TELOS]: 'TLOS',
@@ -130,7 +125,6 @@ export const chainCurrencies: Record<number, string> = {
 
 export const currencyIcons: Record<number, number> = {
   [ChainIds.MAINNET]: ChainIds.MAINNET,
-  [ChainIds.GOERLI]: ChainIds.MAINNET,
   [ChainIds.RSK]: ChainIds.RSK,
   [ChainIds.RSKTESTNET]: ChainIds.RSK,
   [ChainIds.TELOS]: ChainIds.TELOS,
@@ -153,7 +147,6 @@ export const currencyIcons: Record<number, number> = {
 
 export const apiUrls: Record<number, string> = {
   [ChainIds.MAINNET]: 'https://ethereum.publicnode.com',
-  [ChainIds.GOERLI]: 'https://ethereum-goerli.publicnode.com',
   [ChainIds.RSK]: 'https://public-node.rsk.co',
   [ChainIds.RSKTESTNET]: 'https://public-node.testnet.rsk.co',
   [ChainIds.TELOS]: 'https://mainnet.telos.net/evm',
@@ -176,7 +169,6 @@ export const apiUrls: Record<number, string> = {
 
 export const explorerUrls: Record<number, string> = {
   [ChainIds.MAINNET]: 'https://etherscan.io',
-  [ChainIds.GOERLI]: 'https://goerli.etherscan.io',
   [ChainIds.RSK]: 'https://rootstock.blockscout.com',
   [ChainIds.RSKTESTNET]: 'https://rootstock-testnet.blockscout.com',
   [ChainIds.TELOS]: 'https://teloscan.io',
@@ -210,7 +202,6 @@ export const explorerApiUrls: Record<number, string> = {
 
 export const stakingTokenAddresses: Record<number, string> = {
   [ChainIds.MAINNET]: '0x27054b13b1b798b345b591a4d22e6562d47ea75a',
-  [ChainIds.GOERLI]: '0x4092d6dba9abb7450b9d91aa7ed2712935d63b39',
   [ChainIds.SEPOLIA]: '0x4092d6dba9abb7450b9d91aa7ed2712935d63b39',
   [ChainIds.HOLESKY]: '0x4092d6dba9abb7450b9d91aa7ed2712935d63b39',
 }

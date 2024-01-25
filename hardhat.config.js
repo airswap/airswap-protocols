@@ -22,10 +22,6 @@ module.exports = {
       url: apiUrls[ChainIds.MAINNET],
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
     },
-    goerli: {
-      url: apiUrls[ChainIds.GOERLI],
-      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
-    },
     bsctestnet: {
       url: apiUrls[ChainIds.BSCTESTNET],
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
@@ -133,7 +129,6 @@ module.exports = {
   etherscan: {
     apiKey: {
       mainnet: process.env.ETHERSCAN_API_KEY,
-      goerli: process.env.ETHERSCAN_API_KEY,
       bsc: process.env.BSCSCAN_API_KEY,
       bscTestnet: process.env.BSCSCAN_API_KEY,
       polygon: process.env.POLYGONSCAN_API_KEY,

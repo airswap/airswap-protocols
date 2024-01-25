@@ -3,6 +3,7 @@ pragma solidity 0.8.23;
 
 import "@openzeppelin/contracts/access/Ownable2Step.sol";
 import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
+import "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
 import "@openzeppelin/contracts/interfaces/IERC2981.sol";
 import "./interfaces/ISwap.sol";
 
@@ -31,7 +32,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
   bytes32 public immutable DOMAIN_SEPARATOR;
 
   uint256 public constant FEE_DIVISOR = 10000;
-  uint256 private constant MAX_ERROR_COUNT = 18;
+  uint256 private constant MAX_ERROR_COUNT = 16;
 
   /**
    * @notice Double mapping of signers to nonce groups to nonce states
@@ -255,97 +256,72 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
   }
 
   /**
-   * @notice Checks order and returns list of errors
-   * @param senderWallet address wallet that would send the order
+   * @notice Checks an order for errors
+   * @param senderWallet address Wallet that would send the order
    * @param order Order that would be settled
-   * @return (bytes32[], uint256) error messages and count
+   * @return bytes32[] errors
    */
   function check(
     address senderWallet,
     Order calldata order
-  ) external view returns (bytes32[] memory, uint256) {
-    uint256 errCount;
+  ) external view returns (bytes32[] memory) {
     bytes32[] memory errors = new bytes32[](MAX_ERROR_COUNT);
-    (address signatory, ) = ECDSA.tryRecover(
-      _getOrderHash(order),
-      order.v,
-      order.r,
-      order.s
-    );
+    uint256 count;
+
+    if (DOMAIN_CHAIN_ID != block.chainid) {
+      errors[count++] = "ChainIdChanged";
+    }
+
+    // Validate as the authorized signatory if set
+    address signatory = order.signer.wallet;
+    if (authorized[signatory] != address(0)) {
+      signatory = authorized[signatory];
+    }
+
+    if (
+      !SignatureChecker.isValidSignatureNow(
+        signatory,
+        _getOrderHash(order),
+        abi.encodePacked(order.r, order.s, order.v)
+      )
+    ) {
+      errors[count++] = "Unauthorized";
+    } else if (nonceUsed(signatory, order.nonce)) {
+      errors[count++] = "NonceAlreadyUsed";
+    } else if (order.nonce < signatoryMinimumNonce[signatory]) {
+      errors[count++] = "NonceTooLow";
+    }
+
+    if (order.expiry < block.timestamp) {
+      errors[count++] = "OrderExpired";
+    }
 
     if (
       order.sender.wallet != address(0) && order.sender.wallet != senderWallet
     ) {
-      errors[errCount] = "SenderInvalid";
-      errCount++;
-    }
-
-    if (signatory == address(0)) {
-      errors[errCount] = "SignatureInvalid";
-      errCount++;
-    } else {
-      if (
-        authorized[order.signer.wallet] != address(0) &&
-        signatory != authorized[order.signer.wallet]
-      ) {
-        errors[errCount] = "SignatoryUnauthorized";
-        errCount++;
-      } else if (
-        authorized[order.signer.wallet] == address(0) &&
-        signatory != order.signer.wallet
-      ) {
-        errors[errCount] = "Unauthorized";
-        errCount++;
-      } else if (nonceUsed(signatory, order.nonce)) {
-        errors[errCount] = "NonceAlreadyUsed";
-        errCount++;
-      }
-      if (order.nonce < signatoryMinimumNonce[signatory]) {
-        errors[errCount] = "NonceTooLow";
-        errCount++;
-      }
-    }
-
-    if (order.expiry < block.timestamp) {
-      errors[errCount] = "OrderExpired";
-      errCount++;
-    }
-
-    IAdapter signerTokenAdapter = adapters[order.signer.kind];
-
-    if (address(signerTokenAdapter) == address(0)) {
-      errors[errCount] = "SignerTokenKindUnknown";
-      errCount++;
-    } else {
-      if (!signerTokenAdapter.hasAllowance(order.signer)) {
-        errors[errCount] = "SignerAllowanceLow";
-        errCount++;
-      }
-      if (!signerTokenAdapter.hasBalance(order.signer)) {
-        errors[errCount] = "SignerBalanceLow";
-        errCount++;
-      }
-      if (!signerTokenAdapter.hasValidParams(order.signer)) {
-        errors[errCount] = "AmountOrIDInvalid";
-        errCount++;
-      }
+      errors[count++] = "SenderInvalid";
     }
 
     IAdapter senderTokenAdapter = adapters[order.sender.kind];
 
     if (address(senderTokenAdapter) == address(0)) {
-      errors[errCount] = "SenderTokenKindUnknown";
-      errCount++;
+      errors[count++] = "SenderTokenKindUnknown";
     } else {
       if (order.sender.kind != requiredSenderKind) {
-        errors[errCount] = "SenderTokenInvalid";
-        errCount++;
+        errors[count++] = "SenderTokenInvalid";
       } else {
         uint256 protocolFeeAmount = (order.sender.amount * protocolFee) /
           FEE_DIVISOR;
         uint256 totalSenderAmount = order.sender.amount +
           protocolFeeAmount +
           order.affiliateAmount;
+        if (supportsRoyalties(order.signer.token)) {
+          (, uint256 royaltyAmount) = IERC2981(order.signer.token).royaltyInfo(
+            order.signer.id,
+            order.sender.amount
+          );
+          totalSenderAmount += royaltyAmount;
+        }
         Party memory sender = Party(
           senderWallet,
           order.sender.token,
@@ -355,31 +331,45 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
         );
         if (senderWallet != address(0)) {
           if (!senderTokenAdapter.hasAllowance(sender)) {
-            errors[errCount] = "SenderAllowanceLow";
-            errCount++;
+            errors[count++] = "SenderAllowanceLow";
           }
           if (!senderTokenAdapter.hasBalance(sender)) {
-            errors[errCount] = "SenderBalanceLow";
-            errCount++;
+            errors[count++] = "SenderBalanceLow";
           }
         }
         if (!senderTokenAdapter.hasValidParams(sender)) {
-          errors[errCount] = "AmountOrIDInvalid";
-          errCount++;
+          errors[count++] = "AmountOrIDInvalid";
         }
         if (order.sender.amount < order.affiliateAmount) {
-          errors[errCount] = "AffiliateAmountInvalid";
-          errCount++;
+          errors[count++] = "AffiliateAmountInvalid";
         }
       }
     }
 
-    if (order.protocolFee != protocolFee) {
-      errors[errCount] = "FeeInvalid";
-      errCount++;
+    IAdapter signerTokenAdapter = adapters[order.signer.kind];
+
+    if (address(signerTokenAdapter) == address(0)) {
+      errors[count++] = "SignerTokenKindUnknown";
+    } else {
+      if (!signerTokenAdapter.hasAllowance(order.signer)) {
+        errors[count++] = "SignerAllowanceLow";
+      }
+      if (!signerTokenAdapter.hasBalance(order.signer)) {
+        errors[count++] = "SignerBalanceLow";
+      }
+      if (!signerTokenAdapter.hasValidParams(order.signer)) {
+        errors[count++] = "AmountOrIDInvalid";
+      }
     }
 
-    return (errors, errCount);
+    // Truncate errors array to actual count
+    if (count != errors.length) {
+      assembly {
+        mstore(errors, count)
+      }
+    }
+
+    return errors;
   }
 
   /**
@@ -443,26 +433,20 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
     if (order.sender.amount < order.affiliateAmount)
       revert AffiliateAmountInvalid();
 
-    // Recover the signatory from the hash and signature
-    (address signatory, ) = ECDSA.tryRecover(
-      _getOrderHash(order),
-      order.v,
-      order.r,
-      order.s
-    );
-
-    // Ensure the signatory is not null
-    if (signatory == address(0)) revert SignatureInvalid();
-
-    // Ensure signatory is authorized to sign
-    if (authorized[order.signer.wallet] != address(0)) {
-      // If one is set by signer wallet, signatory must be authorized
-      if (signatory != authorized[order.signer.wallet])
-        revert SignatoryUnauthorized();
-    } else {
-      // Otherwise, signatory must be signer wallet
-      if (signatory != order.signer.wallet) revert Unauthorized();
+    // Validate as the authorized signatory if set
+    address signatory = order.signer.wallet;
+    if (authorized[signatory] != address(0)) {
+      signatory = authorized[signatory];
     }
+
+    // Ensure the signature is correct for the order
+    if (
+      !SignatureChecker.isValidSignatureNow(
+        signatory,
+        _getOrderHash(order),
+        abi.encodePacked(order.r, order.s, order.v)
+      )
+    ) revert Unauthorized();
 
     // Ensure the nonce is not yet used and if not mark it used
     _markNonceAsUsed(signatory, order.nonce);

@@ -7,7 +7,6 @@ interface ISwap {
   struct Order {
     uint256 nonce; // Unique number per signatory per order
     uint256 expiry; // Expiry time (seconds since unix epoch)
-    uint256 protocolFee; // Protocol fee numerator
     Party signer; // Party to the swap that sets terms
     Party sender; // Party to the swap that accepts terms
     address affiliateWallet; // Party tipped for facilitating (optional)
@@ -68,7 +67,7 @@ interface ISwap {
   function check(
     address,
     Order calldata
-  ) external view returns (bytes32[] memory, uint256);
+  ) external view returns (bytes32[] memory);
 
   function nonceUsed(address, uint256) external view returns (bool);
 

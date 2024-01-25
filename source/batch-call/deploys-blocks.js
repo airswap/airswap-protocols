@@ -1,3 +1,1 @@
-module.exports = {
-  5: 10395372,
-}
+module.exports = {}

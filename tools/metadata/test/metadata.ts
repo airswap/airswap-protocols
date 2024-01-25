@@ -14,11 +14,11 @@ describe('Metadata: Ethereum', async () => {
   })
 })
 
-describe('Metadata: Goerli', async () => {
+describe('Metadata: Sepolia', async () => {
   let result: any
 
   it('fetches all known tokens', async () => {
-    result = await getKnownTokens(ChainIds.GOERLI)
+    result = await getKnownTokens(ChainIds.SEPOLIA)
     expect(result.tokens.length).to.not.equal(0)
   })
   it('checks that ETH does not exist', async () => {

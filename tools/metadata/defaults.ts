@@ -1,28 +1,23 @@
 import { TokenInfo } from '@airswap/types'
+import { ChainIds } from '@airswap/constants'
+
+const TEST_TOKEN_DECIMALS = 6
+
+// Test tokens for Sepolia, Holesky
 
 export default [
-  /*
-   * Goerli Defaults
-   */
   {
-    name: 'Tether USD',
-    address: '0x79c950c7446b234a6ad53b908fbf342b01c4d446',
-    decimals: 6,
+    address: '0x20aaebad8c7c6ffb6fdaa5a622c399561562beea',
+    chainId: ChainIds.SEPOLIA,
+    decimals: TEST_TOKEN_DECIMALS,
+    name: 'Mintable USDT',
     symbol: 'USDT',
-    chainId: 5,
   },
   {
-    name: 'USD//C',
-    address: '0x07865c6e87b9f70255377e024ace6630c1eaa37f',
-    decimals: 6,
+    address: '0xf450ef4f268eaf2d3d8f9ed0354852e255a5eaef',
+    chainId: ChainIds.SEPOLIA,
+    decimals: TEST_TOKEN_DECIMALS,
+    name: 'Mintable USDC',
     symbol: 'USDC',
-    chainId: 5,
-  },
-  {
-    name: 'Dai',
-    address: '0x2899a03ffdab5c90badc5920b4f53b0884eb13cc',
-    decimals: 18,
-    symbol: 'DAI',
-    chainId: 5,
   },
 ] as TokenInfo[]
