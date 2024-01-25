@@ -1,9 +1,5 @@
 const { expect } = require('chai')
-const {
-  ADDRESS_ZERO,
-  BYTES32_ZERO,
-  SECONDS_IN_DAY,
-} = require('@airswap/constants')
+const { ADDRESS_ZERO, SECONDS_IN_DAY } = require('@airswap/constants')
 const {
   createOrderERC20,
   orderERC20ToParams,
@@ -823,7 +819,7 @@ describe('SwapERC20 Unit', () => {
       )
       await expect(swap.connect(signer).authorize(erc1271.address))
       const errors = await checkForErrors(order)
-      expect(errors[0]).to.equal(BYTES32_ZERO)
+      expect(errors).to.have.lengthOf(0)
     })
 
     it('test with expired order', async () => {
@@ -893,7 +889,7 @@ describe('SwapERC20 Unit', () => {
         signer
       )
       const errors = await checkForErrors(order, ADDRESS_ZERO)
-      expect(errors[0]).to.equal(BYTES32_ZERO)
+      expect(errors).to.have.lengthOf(0)
     })
     it('test with nonce that has already been used', async () => {
       await senderToken.mock.transferFrom

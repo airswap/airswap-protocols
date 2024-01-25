@@ -77,35 +77,43 @@ describe('Staking Unit', () => {
   })
 
   describe('Set Unstaking Duration', async () => {
-    it('non owner cannot set unstaking duration', async () => {
-      await staking.connect(deployer).scheduleDurationChange(DEFAULTDELAY)
+    it('non-owner cannot set stake duration', async () => {
+      await staking
+        .connect(deployer)
+        .scheduleDurationChange(2 * DEFAULTDURATION, DEFAULTDELAY)
 
       // move 10 seconds forward
       await ethers.provider.send('evm_increaseTime', [10])
       await ethers.provider.send('evm_mine')
 
-      await expect(staking.connect(account1).setDuration(0)).to.be.revertedWith(
-        'Ownable: caller is not the owner'
-      )
+      await expect(
+        staking.connect(account1).completeDurationChange()
+      ).to.be.revertedWith('Ownable: caller is not the owner')
     })
 
     it('non-owner cannot schedule a duration change', async () => {
       await expect(
-        staking.connect(account1).scheduleDurationChange(DEFAULTDELAY)
+        staking
+          .connect(account1)
+          .scheduleDurationChange(2 * DEFAULTDURATION, DEFAULTDELAY)
       ).to.be.revertedWith('Ownable: caller is not the owner')
     })
 
-    it('owner cannot reset unstaking duration during timelock', async () => {
-      await staking.connect(deployer).scheduleDurationChange(DEFAULTDELAY)
+    it('owner cannot reset stake duration during timelock', async () => {
+      await staking
+        .connect(deployer)
+        .scheduleDurationChange(2 * DEFAULTDURATION, DEFAULTDELAY)
 
       await expect(
-        staking.connect(deployer).setDuration(DEFAULTDURATION)
+        staking.connect(deployer).completeDurationChange()
       ).to.be.revertedWith('Timelocked')
     })
 
-    it('owner can set unstaking duration', async () => {
+    it('owner can set stake duration', async () => {
       await expect(
-        await staking.connect(deployer).scheduleDurationChange(DEFAULTDELAY)
+        await staking
+          .connect(deployer)
+          .scheduleDurationChange(2 * DEFAULTDURATION, DEFAULTDELAY)
       ).to.emit(staking, 'ScheduleDurationChange')
 
       // move 10 seconds forward
@@ -113,7 +121,7 @@ describe('Staking Unit', () => {
       await ethers.provider.send('evm_mine')
 
       await expect(
-        await staking.connect(deployer).setDuration(2 * DEFAULTDURATION)
+        await staking.connect(deployer).completeDurationChange()
       ).to.emit(staking, 'CompleteDurationChange')
 
       const defaultduration = await staking.stakeDuration()
@@ -121,35 +129,39 @@ describe('Staking Unit', () => {
     })
 
     it('owner cannot set timelock to be less than minimum delay', async () => {
-      await expect(staking.connect(deployer).scheduleDurationChange(0))
+      await expect(
+        staking.connect(deployer).scheduleDurationChange(2 * DEFAULTDURATION, 0)
+      )
         .to.be.revertedWith('DelayInvalid')
         .withArgs(0)
     })
 
     it('owner cannot reschedule timelock duration change', async () => {
       await expect(
-        await staking.connect(deployer).scheduleDurationChange(DEFAULTDELAY)
+        await staking
+          .connect(deployer)
+          .scheduleDurationChange(2 * DEFAULTDURATION, DEFAULTDELAY)
       ).to.emit(staking, 'ScheduleDurationChange')
 
       await expect(
-        staking.connect(deployer).scheduleDurationChange(DEFAULTDELAY)
+        staking
+          .connect(deployer)
+          .scheduleDurationChange(2 * DEFAULTDURATION, DEFAULTDELAY)
       ).to.be.revertedWith('TimelockActive')
     })
 
-    it('Owner cannot set unstaking duration to zero', async () => {
-      await staking.connect(deployer).scheduleDurationChange(DEFAULTDELAY)
-
-      // move 10 seconds forward
-      await ethers.provider.send('evm_increaseTime', [10])
-      await ethers.provider.send('evm_mine')
-
-      await expect(staking.connect(deployer).setDuration(0))
+    it('Owner cannot set stake duration to zero', async () => {
+      await expect(
+        staking.connect(deployer).scheduleDurationChange(0, DEFAULTDELAY)
+      )
         .to.be.revertedWith('DurationInvalid')
         .withArgs(0)
     })
 
-    it('Owner cannot set unstaking duration with canceled timelock', async () => {
-      await staking.connect(deployer).scheduleDurationChange(DEFAULTDELAY)
+    it('Owner cannot set stake duration with canceled timelock', async () => {
+      await staking
+        .connect(deployer)
+        .scheduleDurationChange(2 * DEFAULTDURATION, DEFAULTDELAY)
 
       expect(await staking.connect(deployer).cancelDurationChange()).to.emit(
         staking,
@@ -161,7 +173,7 @@ describe('Staking Unit', () => {
       await ethers.provider.send('evm_mine')
 
       await expect(
-        staking.connect(deployer).setDuration(DEFAULTDURATION * 2)
+        staking.connect(deployer).completeDurationChange()
       ).to.be.revertedWith('TimelockInactive')
     })
 
@@ -475,7 +487,7 @@ describe('Staking Unit', () => {
       expect(available).to.equal('10')
     })
 
-    it('available to unstake is > 0, if time has passed with an updated unstaking duration', async () => {
+    it('available to unstake is > 0, if time has passed with an updated stake duration', async () => {
       await token.mock.transferFrom.returns(true)
       await token.mock.transfer.returns(true)
       await staking.connect(account1).stake('100')

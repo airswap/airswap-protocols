@@ -41,6 +41,26 @@ interface IStaking {
   error TimelockInactive();
 
   /**
+   * @notice Set timelock for duration change
+   * @param _proposedStakingDuration uint256
+   * @param _durationChangeDelay uint256
+   */
+  function scheduleDurationChange(
+    uint256 _proposedStakingDuration,
+    uint256 _durationChangeDelay
+  ) external;
+
+  /**
+   * @notice Cancel timelock for duration change
+   */
+  function cancelDurationChange() external;
+
+  /**
+   * @notice Complete timelocked duration change
+   */
+  function completeDurationChange() external;
+
+  /**
    * @notice Stake tokens
    * @param amount uint256
    */
