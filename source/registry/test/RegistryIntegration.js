@@ -77,27 +77,25 @@ describe('Registry Integration', () => {
       )
       expect(await stakingToken.balanceOf(registry.address)).to.equal(0)
 
-      await registry.connect(account1).setServerURL('maker1.com')
-      await registry.connect(account1).addProtocols([protocol1, protocol2])
-      await registry
-        .connect(account1)
-        .addTokens([token1.address, token2.address])
+      const url = 'maker1.com'
+      const protocols = [protocol1, protocol2]
+      const tokens = [token1.address, token2.address]
+
+      await registry.connect(account1).setServerURL(url)
+      await registry.connect(account1).addProtocols(protocols)
+      await registry.connect(account1).addTokens(tokens)
 
       expect(await stakingToken.balanceOf(account1.address)).to.equal(
-        TOKEN_BALANCE - (STAKING_COST + SUPPORT_COST * 4)
+        TOKEN_BALANCE -
+          (STAKING_COST + SUPPORT_COST * (protocols.length + tokens.length))
       )
       expect(await stakingToken.balanceOf(registry.address)).to.equal(
-        STAKING_COST + SUPPORT_COST * 4
+        STAKING_COST + SUPPORT_COST * (protocols.length + tokens.length)
       )
 
       await expect(registry.connect(account1).unsetServer())
         .to.emit(registry, 'UnsetServer')
-        .withArgs(
-          account1.address,
-          'maker1.com',
-          [protocol1, protocol2],
-          [token1.address, token2.address]
-        )
+        .withArgs(account1.address, url, protocols, tokens)
 
       expect(await stakingToken.balanceOf(account1.address)).to.equal(
         TOKEN_BALANCE
