@@ -219,7 +219,7 @@ contract BatchCall {
 
     for (uint256 i; i < orders.length; ) {
       bytes32[] memory errors = swapContract.check(senderWallet, orders[i]);
-      orderValidity[i] = errors[0] == bytes32(0) ? true : false;
+      orderValidity[i] = errors.length == 0 ? true : false;
       unchecked {
         ++i;
       }
@@ -257,7 +257,7 @@ contract BatchCall {
         order.r,
         order.s
       );
-      orderValidity[i] = errors[0] == bytes32(0) ? true : false;
+      orderValidity[i] = errors.length == 0 ? true : false;
       unchecked {
         ++i;
       }

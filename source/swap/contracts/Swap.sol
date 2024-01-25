@@ -286,13 +286,10 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
       )
     ) {
       errors[count++] = "Unauthorized";
-    } else {
-      if (nonceUsed(signatory, order.nonce)) {
-        errors[count++] = "NonceAlreadyUsed";
-      }
-      if (order.nonce < signatoryMinimumNonce[signatory]) {
-        errors[count++] = "NonceTooLow";
-      }
+    } else if (nonceUsed(signatory, order.nonce)) {
+      errors[count++] = "NonceAlreadyUsed";
+    } else if (order.nonce < signatoryMinimumNonce[signatory]) {
+      errors[count++] = "NonceTooLow";
     }
 
     if (order.expiry < block.timestamp) {
@@ -318,6 +315,13 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
         uint256 totalSenderAmount = order.sender.amount +
           protocolFeeAmount +
           order.affiliateAmount;
+        if (supportsRoyalties(order.signer.token)) {
+          (, uint256 royaltyAmount) = IERC2981(order.signer.token).royaltyInfo(
+            order.signer.id,
+            order.sender.amount
+          );
+          totalSenderAmount += royaltyAmount;
+        }
         Party memory sender = Party(
           senderWallet,
           order.sender.token,
@@ -355,6 +359,13 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
       }
       if (!signerTokenAdapter.hasValidParams(order.signer)) {
         errors[count++] = "AmountOrIDInvalid";
+      }
+    }
+
+    // Truncate errors array to actual count
+    if (count != errors.length) {
+      assembly {
+        mstore(errors, count)
       }
     }
 
