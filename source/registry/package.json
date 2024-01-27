@@ -1,6 +1,6 @@
 {
   "name": "@airswap/registry",
-  "version": "4.2.0-beta.1",
+  "version": "4.2.0",
   "description": "AirSwap: Server Registry",
   "license": "MIT",
   "repository": {
@@ -32,8 +32,8 @@
     "access": "public"
   },
   "devDependencies": {
-    "@airswap/constants": "4.2.0-beta.3",
-    "@airswap/utils": "4.2.0-beta.2",
+    "@airswap/constants": "4.2.0",
+    "@airswap/utils": "4.2.0",
     "prompt-confirm": "^2.0.4"
   }
 }

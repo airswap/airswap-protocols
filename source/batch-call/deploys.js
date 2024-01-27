@@ -1,1 +1,4 @@
-module.exports = {}
+module.exports = {
+  80001: '0x2f9848b5644833b9A55F14375D5dAFCFa4d0E107',
+  11155111: '0x2f9848b5644833b9A55F14375D5dAFCFa4d0E107',
+}
