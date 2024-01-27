@@ -1,1 +1,4 @@
-module.exports = {}
+module.exports = {
+  80001: 45223424,
+  11155111: 5163542,
+}

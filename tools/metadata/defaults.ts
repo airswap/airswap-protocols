@@ -3,7 +3,7 @@ import { ChainIds } from '@airswap/constants'
 
 const TEST_TOKEN_DECIMALS = 6
 
-// Test tokens for Sepolia, Holesky
+// Test tokens for Sepolia
 
 export default [
   {
