@@ -18,12 +18,8 @@ const {
  */
 module.exports = {
   networks: {
-    goerli: {
-      url: apiUrls[ChainIds.GOERLI] + '/' + process.env.INFURA_API_KEY,
-      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
-    },
     mainnet: {
-      url: apiUrls[ChainIds.MAINNET] + '/' + process.env.INFURA_API_KEY,
+      url: apiUrls[ChainIds.MAINNET],
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
     },
     bsctestnet: {
@@ -71,7 +67,7 @@ module.exports = {
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
     },
     linea: {
-      url: apiUrls[ChainIds.LINEA] + '/' + process.env.INFURA_API_KEY,
+      url: apiUrls[ChainIds.LINEA],
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
     },
     basegoerli: {
@@ -91,7 +87,11 @@ module.exports = {
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
     },
     sepolia: {
-      url: apiUrls[ChainIds.SEPOLIA] + '/' + process.env.INFURA_API_KEY,
+      url: apiUrls[ChainIds.SEPOLIA],
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
+    },
+    holesky: {
+      url: apiUrls[ChainIds.HOLESKY],
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
     },
   },
@@ -115,12 +115,20 @@ module.exports = {
           },
         },
       },
+      {
+        version: '0.8.23',
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 999999,
+          },
+        },
+      },
     ],
   },
   etherscan: {
     apiKey: {
       mainnet: process.env.ETHERSCAN_API_KEY,
-      goerli: process.env.ETHERSCAN_API_KEY,
       bsc: process.env.BSCSCAN_API_KEY,
       bscTestnet: process.env.BSCSCAN_API_KEY,
       polygon: process.env.POLYGONSCAN_API_KEY,
@@ -128,6 +136,7 @@ module.exports = {
       arbitrumGoerli: process.env.ARBISCAN_API_KEY,
       avalanche: process.env.SNOWTRACE_API_KEY,
       avalancheFujiTestnet: process.env.SNOWTRACE_API_KEY,
+      holesky: process.env.ETHERSCAN_API_KEY,
       polygonMumbai: process.env.POLYGONSCAN_API_KEY,
       linea: process.env.LINEASCAN_API_KEY,
       lineagoerli: process.env.LINEASCAN_API_KEY,
@@ -152,6 +161,14 @@ module.exports = {
         urls: {
           apiURL: explorerApiUrls[ChainIds.RSKTESTNET],
           browserURL: explorerUrls[ChainIds.RSKTESTNET],
+        },
+      },
+      {
+        network: 'holesky',
+        chainId: 17000,
+        urls: {
+          apiURL: explorerApiUrls[ChainIds.HOLESKY],
+          browserURL: explorerUrls[ChainIds.HOLESKY],
         },
       },
       {

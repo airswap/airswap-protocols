@@ -1,7 +1,8 @@
 /* eslint-disable no-console */
 const { ethers, run } = require('hardhat')
 const stakingDeploys = require('../deploys.js')
-const { chainNames, stakingTokenAddresses } = require('@airswap/constants')
+const { chainNames } = require('@airswap/constants')
+const config = require('./config.js')
 
 async function main() {
   await run('compile')
@@ -9,11 +10,13 @@ async function main() {
   console.log(`Deployer: ${deployer.address}`)
 
   const chainId = await deployer.getChainId()
-  const name = 'Staked AST'
-  const symbol = 'sAST'
-  const stakingToken = stakingTokenAddresses[chainId]
-  const stakingDuration = 60 * 60 * 24 * 7 * 20 // Twenty Weeks
-  const minDurationChangeDelay = 60 * 60 * 24 * 7 // One Week
+  const {
+    name,
+    symbol,
+    stakingToken,
+    stakingDuration,
+    minDurationChangeDelay,
+  } = config[chainId]
 
   console.log(`Contract: ${stakingDeploys[chainId]}`)
   console.log(`Verifying on ${chainNames[chainId].toUpperCase()}`)

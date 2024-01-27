@@ -171,7 +171,10 @@ describe('HTTPServer', () => {
   fancy
     .nock('https://' + URL, mockHttpServer)
     .it('Server getSignerSideOrderERC20()', async () => {
-      const server = await Server.at(URL)
+      const server = await Server.at(URL, {
+        swapContract: ADDRESS_ZERO,
+        chainId: ChainIds.SEPOLIA,
+      })
       const order = await server.getSignerSideOrderERC20(
         '0',
         ADDRESS_ZERO,
