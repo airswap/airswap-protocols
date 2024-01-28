@@ -65,15 +65,15 @@ export class MerkleTree {
     return keccak256(this.sortAndConcat(first, second))
   }
 
-  public getRoot(): Buffer {
+  public getMerkleRoot(): Buffer {
     return this.layers[this.layers.length - 1][0]
   }
 
   public getHexRoot(): string {
-    return bufferToHex(this.getRoot())
+    return bufferToHex(this.getMerkleRoot())
   }
 
-  public getProof(el: Buffer): Array<Buffer> {
+  public getMerkleProof(el: Buffer): Array<Buffer> {
     let idx = this.bufIndexOf(el, this.elements)
 
     if (idx === -1) {
@@ -97,7 +97,7 @@ export class MerkleTree {
   public getHexProof(_el: string): Array<string> {
     const el = Buffer.from(hexToBytes(_el))
 
-    const proof = this.getProof(el)
+    const proof = this.getMerkleProof(el)
 
     return this.bufArrToHexArr(proof)
   }

@@ -3,7 +3,11 @@ import { ethers } from 'ethers'
 import { Levels, FullOrderERC20, UnsignedOrderERC20 } from '@airswap/utils'
 
 import { soliditySha3 } from 'web3-utils'
-import { generateTreeFromData, getRoot, getProof } from '../index'
+import {
+  generateMerkleTreeFromData,
+  getMerkleRoot,
+  getMerkleProof,
+} from '../index'
 
 import {
   ADDRESS_ZERO,
@@ -235,16 +239,16 @@ describe('Merkle', async () => {
   ]
 
   it('Creates and validates tree', async () => {
-    tree = generateTreeFromData({
+    tree = generateMerkleTreeFromData({
       a: '1',
       b: '2',
       c: '3',
     })
-    expect(getRoot(tree)).to.equal(treeRoot)
+    expect(getMerkleRoot(tree)).to.equal(treeRoot)
   })
 
   it('Validates proof', async () => {
     const element: any = soliditySha3('a', '1')
-    expect(getProof(tree, element).join()).to.equal(proof.join())
+    expect(getMerkleProof(tree, element).join()).to.equal(proof.join())
   })
 })

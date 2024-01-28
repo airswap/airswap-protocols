@@ -1,6 +1,8 @@
 import * as url from 'url'
 import { ethers } from 'ethers'
 import { explorerUrls } from './src/constants'
+import { soliditySha3 } from 'web3-utils'
+import { MerkleTree } from './src/MerkleTree'
 
 export * from './src/constants'
 export * from './src/MerkleTree'
@@ -29,15 +31,6 @@ export function parseCheckResult(errors: Array<string>) {
   return res
 }
 
-export function getTimestamp(): string {
-  return Math.round(Date.now() / 1000).toString()
-}
-
-export function numberToBytes32(number: number): string {
-  const hexString = number.toString(16)
-  return `0x${hexString.padStart(64, '0')}`
-}
-
 export function getInterfaceId(functions: string[]): string {
   const _interface = new ethers.utils.Interface(functions)
   const interfaceId = ethers.utils.arrayify(
@@ -52,6 +45,43 @@ export function getInterfaceId(functions: string[]): string {
     }
   }
   return ethers.utils.hexlify(interfaceId)
+}
+
+export function stringifyEIP712Type(
+  types: { [key: string]: { type: string; name: string }[] },
+  primaryType: string
+): string {
+  return types[primaryType].reduce((str, value, index, values) => {
+    const isEnd = index !== values.length - 1
+    return str + `${value.type} ${value.name}${isEnd ? ',' : ')'}`
+  }, `${primaryType}(`)
+}
+
+export function generateMerkleTreeFromElements(
+  elements: Array<any>
+): MerkleTree {
+  return new MerkleTree(elements)
+}
+
+export function generateMerkleTreeFromData(data: {
+  [id: string]: string
+}): MerkleTree {
+  const elements: any[] = []
+  for (const idx in data) {
+    elements.push(soliditySha3(idx, data[idx]))
+  }
+  return new MerkleTree(elements)
+}
+
+export function getMerkleRoot(tree: MerkleTree): string {
+  return tree.getHexRoot()
+}
+
+export function getMerkleProof(
+  tree: MerkleTree,
+  element: string
+): Array<string> {
+  return tree.getHexProof(element)
 }
 
 export function parseUrl(locator: string): url.UrlWithStringQuery {
@@ -74,39 +104,11 @@ export function lowerCaseAddresses(obj: any): any {
   return obj
 }
 
-export function stringifyEIP712Type(
-  types: { [key: string]: { type: string; name: string }[] },
-  primaryType: string
-): string {
-  return types[primaryType].reduce((str, value, index, values) => {
-    const isEnd = index !== values.length - 1
-    return str + `${value.type} ${value.name}${isEnd ? ',' : ')'}`
-  }, `${primaryType}(`)
+export function getTimestamp(): string {
+  return Math.round(Date.now() / 1000).toString()
 }
 
-/* eslint-disable  @typescript-eslint/no-non-null-assertion */
-
-import { soliditySha3 } from 'web3-utils'
-import { MerkleTree } from './src/MerkleTree'
-
-export function generateTreeFromElements(elements: Array<any>): MerkleTree {
-  return new MerkleTree(elements)
-}
-
-export function generateTreeFromData(data: {
-  [id: string]: string
-}): MerkleTree {
-  const elements: string[] = []
-  for (const idx in data) {
-    elements.push(soliditySha3(idx, data[idx])!)
-  }
-  return new MerkleTree(elements)
-}
-
-export function getRoot(tree: MerkleTree): string {
-  return tree.getHexRoot()
-}
-
-export function getProof(tree: MerkleTree, element: string): Array<string> {
-  return tree.getHexProof(element)
+export function numberToBytes32(number: number): string {
+  const hexString = number.toString(16)
+  return `0x${hexString.padStart(64, '0')}`
 }
