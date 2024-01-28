@@ -1,6 +1,6 @@
 const Confirm = require('prompt-confirm')
 const { ethers } = require('hardhat')
-const { chainNames, ChainIds } = require('@airswap/constants')
+const { chainNames, ChainIds } = require('@airswap/utils')
 const { getReceiptUrl } = require('@airswap/utils')
 
 const { Pool__factory } = require('../typechain/factories/contracts')

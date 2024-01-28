@@ -5,7 +5,7 @@ const {
   ChainIds,
   chainNames,
   protocolFeeReceiverAddresses,
-} = require('@airswap/constants')
+} = require('@airswap/utils')
 const swapDeploys = require('../deploys.js')
 const adapterDeploys = require('../deploys-adapters.js')
 const config = require('./config.js')

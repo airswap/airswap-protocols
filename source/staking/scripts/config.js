@@ -1,4 +1,4 @@
-const { ChainIds, stakingTokenAddresses } = require('@airswap/constants')
+const { ChainIds, stakingTokenAddresses } = require('@airswap/utils')
 module.exports = {
   [ChainIds.MAINNET]: {
     name: 'Staked AST',

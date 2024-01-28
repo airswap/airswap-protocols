@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 const { ethers, run } = require('hardhat')
-const { chainNames } = require('@airswap/constants')
+const { chainNames } = require('@airswap/utils')
 const batchCallDeploys = require('../deploys.js')
 
 async function main() {

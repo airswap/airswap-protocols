@@ -7,7 +7,7 @@ const swapDeploys = require('@airswap/swap-erc20/deploys.js')
 const wrapperDeploys = require('../deploys.js')
 const wrapperBlocks = require('../deploys-blocks.js')
 const wethDeploys = require('../deploys-weth.js')
-const { ChainIds, chainNames, chainLabels } = require('@airswap/constants')
+const { ChainIds, chainNames, chainLabels } = require('@airswap/utils')
 const { getReceiptUrl } = require('@airswap/utils')
 
 async function main() {

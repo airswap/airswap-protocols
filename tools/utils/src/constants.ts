@@ -222,28 +222,36 @@ export const protocolFeeReceiverAddresses: Record<number, string> = {
   [ChainIds.MAINNET]: '0xaD30f7EEBD9Bd5150a256F47DA41d4403033CdF0',
 }
 
-export enum Protocols {
+export enum ProtocolIds {
   Discovery = '0xf3713ede',
   RequestForQuoteERC20 = '0x02ad05d3',
   LastLookERC20 = '0x395ca9f1',
-  IndexingERC20 = '0xaf0c1ff7',
-  Indexing = '0x6d401808',
+  IndexingERC20 = '0x85ccc7d5',
+  Indexing = '0x9498325a',
+}
+
+export const protocolNames: Record<string, string> = {
+  [ProtocolIds.Discovery]: 'Discovery',
+  [ProtocolIds.RequestForQuoteERC20]: 'Request for Quote (ERC20)',
+  [ProtocolIds.LastLookERC20]: 'Last Look (ERC20)',
+  [ProtocolIds.IndexingERC20]: 'Indexing (ERC20)',
+  [ProtocolIds.Indexing]: 'Indexing',
 }
 
 export const protocolInterfaces: Record<string, string[]> = {
-  [Protocols.Discovery]: [
+  [ProtocolIds.Discovery]: [
     'function getProtocols()',
     'function setProtocols(array((string interfaceId,(string chainId,string swapContractAddress,string walletAddress))))',
     'function getTokens()',
     'function setTokens(array(string tokenContractAddress))',
   ],
-  [Protocols.RequestForQuoteERC20]: [
+  [ProtocolIds.RequestForQuoteERC20]: [
     'function getSignerSideOrderERC20(string chainId,string swapContractAddress,string senderAmount,string signerToken,string senderToken,string senderWallet,string minExpiry,string proxyingFor)',
     'function getSenderSideOrderERC20(string chainId,string swapContractAddress,string signerAmount,string signerToken,string senderToken,string senderWallet,string minExpiry,string proxyingFor)',
     'function getPricingERC20(array((string baseToken,string quoteToken)),string minExpiry)',
     'function getAllPricingERC20(string minExpiry)',
   ],
-  [Protocols.LastLookERC20]: [
+  [ProtocolIds.LastLookERC20]: [
     'function subscribePricingERC20(array((string baseToken,string quoteToken)))',
     'function subscribeAllPricingERC20()',
     'function unsubscribePricingERC20(array((string baseToken,string quoteToken)))',
@@ -251,22 +259,14 @@ export const protocolInterfaces: Record<string, string[]> = {
     'function setPricingERC20(array(string baseToken,string quoteToken,string minimum,array(array((string level,string price))),array(array((string level,string price)))))',
     'function considerOrderERC20(string chainId,string swapContractAddress,string nonce,string expiry,string signerWallet,string signerToken,string signerAmount,string senderToken,string senderAmount,string v,string r,string s)',
   ],
-  [Protocols.IndexingERC20]: [
-    'function addOrderERC20(string chainId,string swapContractAddress,string nonce,string expiry,string signerWallet,string signerToken,string signerAmount,string senderToken,string senderAmount,string v,string r,string s)',
-    'function getOrdersERC20((string chainId,string signerWallet,string signerToken,string senderWallet,string senderToken),string sortField,string sortOrder,string offset,string limit)',
+  [ProtocolIds.IndexingERC20]: [
+    'function addOrderERC20((string chainId,string swapContractAddress,string nonce,string expiry,string signerWallet,string signerToken,string signerAmount,string senderToken,string senderAmount,string v,string r,string s),bytes[] tags)',
+    'function getOrdersERC20((string chainId,string signerWallet,string signerToken,string senderWallet,string senderToken,bytes[] tags),string offset,string limit,string by,string direction)',
   ],
-  [Protocols.Indexing]: [
-    'function addOrder(string chainId,string swapContractAddress,uint256 nonce,uint256 expiry,uint256 protocolFee,(address wallet,address token,bytes4 kind,uint256 id,uint256 amount),(address wallet,address token,bytes4 kind,uint256 id,uint256 amount),address affiliateWallet,uint256 affiliateAmount)',
-    'function getOrders((string chainId,string signerWallet,string signerToken,string signerId,string senderWallet,string senderToken),string sortField,string sortOrder,string offset,string limit)',
+  [ProtocolIds.Indexing]: [
+    'function addOrder((string chainId,string swapContractAddress,uint256 nonce,uint256 expiry,uint256 protocolFee,(address wallet,address token,bytes4 kind,uint256 id,uint256 amount),(address wallet,address token,bytes4 kind,uint256 id,uint256 amount),address affiliateWallet,uint256 affiliateAmount),bytes[] tags)',
+    'function getOrders((string chainId,string signerWallet,string signerToken,string signerId,string senderWallet,string senderToken,bytes[] tags),string offset,string limit,string by,string direction)',
   ],
-}
-
-export const protocolNames: Record<string, string> = {
-  [Protocols.Discovery]: 'Discovery',
-  [Protocols.RequestForQuoteERC20]: 'Request for Quote (ERC20)',
-  [Protocols.LastLookERC20]: 'Last Look (ERC20)',
-  [Protocols.IndexingERC20]: 'Indexing (ERC20)',
-  [Protocols.Indexing]: 'Indexing',
 }
 
 export enum TokenKinds {

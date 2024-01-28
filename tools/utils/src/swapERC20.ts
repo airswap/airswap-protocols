@@ -16,16 +16,67 @@ import {
   ADDRESS_ZERO,
   DOMAIN_VERSION_SWAP_ERC20,
   DOMAIN_NAME_SWAP_ERC20,
-} from '@airswap/constants'
+} from './constants'
 
-import {
-  UnsignedOrderERC20,
-  OrderERC20,
-  FullOrderERC20,
-  Signature,
-  EIP712SwapERC20,
-  FullSwapERC20,
-} from '@airswap/types'
+import { Signature, Settlement } from './types'
+
+export const EIP712SwapERC20 = {
+  EIP712Domain: [
+    { name: 'name', type: 'string' },
+    { name: 'version', type: 'string' },
+    { name: 'chainId', type: 'uint256' },
+    { name: 'verifyingContract', type: 'address' },
+  ],
+  OrderERC20: [
+    { name: 'nonce', type: 'uint256' },
+    { name: 'expiry', type: 'uint256' },
+    { name: 'signerWallet', type: 'address' },
+    { name: 'signerToken', type: 'address' },
+    { name: 'signerAmount', type: 'uint256' },
+    { name: 'protocolFee', type: 'uint256' },
+    { name: 'senderWallet', type: 'address' },
+    { name: 'senderToken', type: 'address' },
+    { name: 'senderAmount', type: 'uint256' },
+  ],
+}
+
+export type UnsignedOrderERC20 = {
+  nonce: string
+  expiry: string
+  signerWallet: string
+  signerToken: string
+  signerAmount: string
+  protocolFee: string
+  senderWallet: string
+  senderToken: string
+  senderAmount: string
+}
+
+export type OrderERC20 = {
+  nonce: string
+  expiry: string
+  signerWallet: string
+  signerToken: string
+  signerAmount: string
+  senderToken: string
+  senderAmount: string
+} & Signature
+
+export type FullOrderERC20 = UnsignedOrderERC20 & Signature & Settlement
+
+export type SwapERC20 = {
+  nonce: string
+  signerWallet: string
+}
+
+export type FullSwapERC20 = {
+  signerToken: string
+  signerAmount: string
+  senderWallet: string
+  senderToken: string
+  senderAmount: string
+  feeAmount: string
+} & SwapERC20
 
 export function createOrderERC20({
   nonce = Date.now().toString(),

@@ -4,18 +4,14 @@ import {
   CollectionTokenInfo,
   CollectionTokenMetadata,
   CollectionTokenAttribute,
-} from '@airswap/types'
-import tokenlists from './tokenlists'
-import defaults from './defaults'
-import {
   TokenKinds,
   chainCurrencies,
   chainNames,
   stakingTokenAddresses,
-} from '@airswap/constants'
-// @ts-ignore
+} from '@airswap/utils'
+import tokenlists from './tokenlists'
+import defaults from './defaults'
 import wethDeploys from '@airswap/wrapper/deploys-weth.js'
-// @ts-ignore
 import validUrl from 'valid-url'
 
 const AIRSWAP_LOGO_URI =

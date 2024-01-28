@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import { WETH } from '../index'
-import { ChainIds } from '@airswap/constants'
+import { ChainIds } from '@airswap/utils'
 
 describe('Contract', () => {
   it('get address (WETH)', () => {

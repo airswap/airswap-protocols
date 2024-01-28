@@ -25,7 +25,7 @@ Import into your application:
 
 ```TypeScript
 import { getKnownTokens } from '@airswap/metadata'
-import { ChainIds } from '@airswap/constants'
+import { ChainIds } from '@airswap/utils'
 const { errors, tokens } = await getKnownTokens(ChainIds.MAINNET)
 ```
 

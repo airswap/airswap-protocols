@@ -2,7 +2,7 @@ const {
   ChainIds,
   stakingTokenAddresses,
   ADDRESS_ZERO,
-} = require('@airswap/constants')
+} = require('@airswap/utils')
 const wrappedTokenAddresses = require('@airswap/wrapper/deploys-weth')
 
 module.exports = {

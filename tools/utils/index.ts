@@ -1,10 +1,14 @@
 import * as url from 'url'
 import { ethers } from 'ethers'
-import { explorerUrls } from '@airswap/constants'
+import { explorerUrls } from './src/constants'
 
-export * from './src/pricing'
-export * from './src/swap'
-export * from './src/swapERC20'
+export * from './src/constants'
+export * from './src/MerkleTree'
+export * from './src/Pricing'
+export * from './src/Server'
+export * from './src/Swap'
+export * from './src/SwapERC20'
+export * from './src/types'
 
 export function getReceiptUrl(chainId: number, hash: string): string {
   return `${explorerUrls[chainId]}/tx/${hash}`
@@ -68,4 +72,41 @@ export function lowerCaseAddresses(obj: any): any {
     }
   }
   return obj
+}
+
+export function stringifyEIP712Type(
+  types: { [key: string]: { type: string; name: string }[] },
+  primaryType: string
+): string {
+  return types[primaryType].reduce((str, value, index, values) => {
+    const isEnd = index !== values.length - 1
+    return str + `${value.type} ${value.name}${isEnd ? ',' : ')'}`
+  }, `${primaryType}(`)
+}
+
+/* eslint-disable  @typescript-eslint/no-non-null-assertion */
+
+import { soliditySha3 } from 'web3-utils'
+import { MerkleTree } from './src/MerkleTree'
+
+export function generateTreeFromElements(elements: Array<any>): MerkleTree {
+  return new MerkleTree(elements)
+}
+
+export function generateTreeFromData(data: {
+  [id: string]: string
+}): MerkleTree {
+  const elements: string[] = []
+  for (const idx in data) {
+    elements.push(soliditySha3(idx, data[idx])!)
+  }
+  return new MerkleTree(elements)
+}
+
+export function getRoot(tree: MerkleTree): string {
+  return tree.getHexRoot()
+}
+
+export function getProof(tree: MerkleTree, element: string): Array<string> {
+  return tree.getHexProof(element)
 }

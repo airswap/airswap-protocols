@@ -6,7 +6,7 @@ const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
 const IERC721 = require('@openzeppelin/contracts/build/contracts/ERC721Royalty.json')
 const IERC1155 = require('@openzeppelin/contracts/build/contracts/IERC1155.json')
 const { createOrder, createOrderSignature } = require('@airswap/utils')
-const { TokenKinds, ADDRESS_ZERO } = require('@airswap/constants')
+const { TokenKinds, ADDRESS_ZERO } = require('@airswap/utils')
 
 const CHAIN_ID = 31337
 const PROTOCOL_FEE = '30'
