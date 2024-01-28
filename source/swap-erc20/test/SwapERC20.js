@@ -1,5 +1,5 @@
 const { expect } = require('chai')
-const { ADDRESS_ZERO, SECONDS_IN_DAY } = require('@airswap/constants')
+const { ADDRESS_ZERO, SECONDS_IN_DAY } = require('@airswap/utils')
 const {
   createOrderERC20,
   orderERC20ToParams,

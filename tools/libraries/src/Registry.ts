@@ -1,5 +1,5 @@
 import { ethers } from 'ethers'
-import { ServerOptions } from '@airswap/types'
+import { ServerOptions } from '@airswap/utils'
 import { Registry__factory } from '@airswap/registry/typechain/factories/contracts'
 import registryDeploys from '@airswap/registry/deploys.js'
 import registryBlocks from '@airswap/registry/deploys-blocks.js'

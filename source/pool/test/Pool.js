@@ -1,13 +1,17 @@
 const { expect } = require('chai')
-const { toAtomicString } = require('@airswap/utils')
-const { generateTreeFromData, getRoot, getProof } = require('@airswap/merkle')
+const {
+  toAtomicString,
+  generateMerkleTreeFromData,
+  getMerkleRoot,
+  getMerkleProof,
+} = require('@airswap/utils')
 const { soliditySha3 } = require('web3-utils')
 
 const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
 const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
 const STAKING = require('@airswap/staking/build/contracts/Staking.sol/Staking.json')
-const { ADDRESS_ZERO } = require('@airswap/constants')
+const { ADDRESS_ZERO } = require('@airswap/utils')
 
 function toWei(value, places) {
   return toAtomicString(value, places || 18)
@@ -71,13 +75,13 @@ describe('Pool Unit', () => {
     ).deploy(CLAIM_SCALE, CLAIM_MAX)
     await pool.deployed()
 
-    tree = generateTreeFromData({
+    tree = generateMerkleTreeFromData({
       [alice.address]: ALICE_SCORE,
       [bob.address]: BOB_SCORE,
       [carol.address]: CAROL_SCORE,
     })
 
-    newTree = generateTreeFromData({
+    newTree = generateMerkleTreeFromData({
       [alice.address]: ALICE_SCORE,
       [bob.address]: BOB_NEW_SCORE,
       [carol.address]: CAROL_SCORE,
@@ -118,7 +122,7 @@ describe('Pool Unit', () => {
 
   describe('admin functions', async () => {
     it('enable a claim for a merkle root suceeds', async () => {
-      const root = getRoot(tree)
+      const root = getMerkleRoot(tree)
       await pool.setAdmin(alice.address)
       expect(await pool.connect(alice).enable(TREE, root)).to.emit(
         pool,
@@ -127,17 +131,17 @@ describe('Pool Unit', () => {
     })
 
     it('enable a claim for a merkle root fails when not admin', async () => {
-      const root = getRoot(tree)
+      const root = getMerkleRoot(tree)
       await expect(pool.connect(bob).enable(TREE, root)).to.be.revertedWith(
         'Unauthorized'
       )
     })
 
     it('enable a with the same tree overrwrites the previous root', async () => {
-      const root = getRoot(tree)
+      const root = getMerkleRoot(tree)
       await pool.setAdmin(alice.address)
       await pool.connect(alice).enable(TREE, root)
-      const newRoot = getRoot(newTree)
+      const newRoot = getMerkleRoot(newTree)
       await expect(pool.connect(alice).enable(TREE, newRoot)).to.be.emit(
         pool,
         `Enable`
@@ -151,9 +155,9 @@ describe('Pool Unit', () => {
       await feeToken.mock.transfer.returns(true)
 
       await pool.setAdmin(alice.address)
-      const root = getRoot(tree)
+      const root = getMerkleRoot(tree)
       await pool.connect(alice).enable(TREE, root)
-      const proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
+      const proof = getMerkleProof(tree, soliditySha3(bob.address, BOB_SCORE))
 
       await expect(
         pool.connect(bob).withdraw(
@@ -179,7 +183,7 @@ describe('Pool Unit', () => {
       await feeToken.mock.transfer.returns(true)
 
       await pool.setAdmin(alice.address)
-      const root = getRoot(tree)
+      const root = getMerkleRoot(tree)
       await pool.connect(alice).enable(TREE, root)
 
       await expect(
@@ -197,7 +201,7 @@ describe('Pool Unit', () => {
       await feeToken.mock.transfer.returns(true)
 
       await pool.setAdmin(alice.address)
-      const proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
+      const proof = getMerkleProof(tree, soliditySha3(bob.address, BOB_SCORE))
 
       await expect(
         pool.connect(bob).withdraw(
@@ -225,9 +229,9 @@ describe('Pool Unit', () => {
       await feeToken.mock.transfer.returns(true)
 
       await pool.setAdmin(alice.address)
-      const root = getRoot(tree)
+      const root = getMerkleRoot(tree)
       await pool.connect(alice).enable(TREE, root)
-      const proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
+      const proof = getMerkleProof(tree, soliditySha3(bob.address, BOB_SCORE))
 
       await expect(
         pool.connect(bob).withdraw(
@@ -267,9 +271,9 @@ describe('Pool Unit', () => {
       score = 0
 
       await pool.setAdmin(alice.address)
-      const root = getRoot(tree)
+      const root = getMerkleRoot(tree)
       await pool.connect(alice).enable(TREE, root)
-      const proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
+      const proof = getMerkleProof(tree, soliditySha3(bob.address, BOB_SCORE))
 
       await expect(
         pool.connect(bob).withdraw(
@@ -296,9 +300,12 @@ describe('Pool Unit', () => {
       await feeToken.mock.balanceOf.returns('100000')
       ;(await feeToken.mock.transfer.returns(true)) -
         (await pool.setAdmin(alice.address))
-      const root = getRoot(tree)
+      const root = getMerkleRoot(tree)
       await pool.connect(alice).enable(TREE, root)
-      const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
+      const proof = getMerkleProof(
+        tree,
+        soliditySha3(alice.address, ALICE_SCORE)
+      )
       const withdrawMinimum = 496
 
       const amount = await pool
@@ -331,11 +338,11 @@ describe('Pool Unit', () => {
       await feeToken.mock.transfer.returns(true)
 
       await pool.setAdmin(alice.address)
-      const root = getRoot(tree)
-      const newRoot = getRoot(newTree)
+      const root = getMerkleRoot(tree)
+      const newRoot = getMerkleRoot(newTree)
       await pool.connect(alice).enable(TREE, root)
       await pool.connect(alice).enable(NEW_TREE, newRoot)
-      const proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
+      const proof = getMerkleProof(tree, soliditySha3(bob.address, BOB_SCORE))
 
       await pool.connect(bob).withdraw(
         [
@@ -368,9 +375,12 @@ describe('Pool Unit', () => {
   describe('Verify', async () => {
     it('verification is valid', async () => {
       await pool.setAdmin(alice.address)
-      const root = getRoot(tree)
+      const root = getMerkleRoot(tree)
       await pool.connect(alice).enable(TREE, root)
-      const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
+      const proof = getMerkleProof(
+        tree,
+        soliditySha3(alice.address, ALICE_SCORE)
+      )
 
       const isValid = await pool.verify(alice.address, root, ALICE_SCORE, proof)
       expect(isValid).to.be.equal(true)
@@ -378,9 +388,12 @@ describe('Pool Unit', () => {
 
     it('verification is invalid with wrong participant', async () => {
       await pool.setAdmin(alice.address)
-      const root = getRoot(tree)
+      const root = getMerkleRoot(tree)
       await pool.connect(alice).enable(TREE, root)
-      const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
+      const proof = getMerkleProof(
+        tree,
+        soliditySha3(alice.address, ALICE_SCORE)
+      )
 
       const isValid = await pool.verify(bob.address, root, ALICE_SCORE, proof)
       expect(isValid).to.be.equal(false)
@@ -388,9 +401,12 @@ describe('Pool Unit', () => {
 
     it('verification is invalid with wrong scroe', async () => {
       await pool.setAdmin(alice.address)
-      const root = getRoot(tree)
+      const root = getMerkleRoot(tree)
       await pool.connect(alice).enable(TREE, root)
-      const proof = getProof(tree, soliditySha3(alice.address, ALICE_SCORE))
+      const proof = getMerkleProof(
+        tree,
+        soliditySha3(alice.address, ALICE_SCORE)
+      )
 
       const isValid = await pool.verify(alice.address, root, BOB_SCORE, proof)
       expect(isValid).to.be.equal(false)
@@ -484,10 +500,10 @@ describe('Pool Unit', () => {
       await feeToken.mock.balanceOf.returns('100000')
       await await pool.connect(deployer).setAdmin(alice.address)
 
-      const root = getRoot(tree)
+      const root = getMerkleRoot(tree)
       await pool.connect(alice).enableAndSetClaimed(TREE, root, [bob.address])
 
-      const proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
+      const proof = getMerkleProof(tree, soliditySha3(bob.address, BOB_SCORE))
       await expect(
         pool.connect(bob).withdraw(
           [
@@ -507,7 +523,7 @@ describe('Pool Unit', () => {
     it('set claimed with non-owner reverts', async () => {
       await feeToken.mock.balanceOf.returns('100000')
 
-      const root = getRoot(tree)
+      const root = getMerkleRoot(tree)
       await expect(
         pool.connect(bob).enableAndSetClaimed(TREE, root, [bob.address])
       ).to.be.revertedWith('Unauthorized')

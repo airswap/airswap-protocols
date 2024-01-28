@@ -1,13 +1,17 @@
 import { assert, expect } from 'chai'
 import { ethers } from 'ethers'
+import { Levels, FullOrderERC20, UnsignedOrderERC20 } from '@airswap/utils'
+
+import { soliditySha3 } from 'web3-utils'
+import {
+  generateMerkleTreeFromData,
+  getMerkleRoot,
+  getMerkleProof,
+} from '../index'
+
 import {
   ADDRESS_ZERO,
   SECONDS_IN_DAY,
-  protocolInterfaces,
-} from '@airswap/constants'
-import { Levels, FullOrderERC20, UnsignedOrderERC20 } from '@airswap/types'
-
-import {
   isValidPricingERC20,
   isValidFullOrderERC20,
   isValidOrderERC20,
@@ -18,11 +22,22 @@ import {
   calculateCostFromLevels,
   getInterfaceId,
   getFullSwapERC20,
+  protocolInterfaces,
 } from '../index'
 
 const signerPrivateKey =
   '0x4934d4ff925f39f91e3729fbce52ef12f25fdf93e014e291350f7d314c1a096b'
 const wallet = new ethers.Wallet(signerPrivateKey)
+
+describe('Protocols', async () => {
+  it('InterfaceIds are correct', async () => {
+    for (const interfaceId in protocolInterfaces) {
+      expect(getInterfaceId(protocolInterfaces[interfaceId])).to.be.equal(
+        interfaceId
+      )
+    }
+  })
+})
 
 describe('Utils', async () => {
   let unsignedOrder: UnsignedOrderERC20
@@ -211,5 +226,29 @@ describe('Utils', async () => {
       senderAmount: '461545050000000000',
       feeAmount: '705906',
     })
+  })
+})
+
+describe('Merkle', async () => {
+  let tree: any
+  const treeRoot =
+    '0xad519504d6845f9f2529e80a2247d751af56af868ed9f23398705a1ec1bd9fc4'
+  const proof = [
+    '0xc361555652533965d9a3cda90060cb77c14bbaec689e062a4ca8ce8976836719',
+    '0xe2ad42ca8c17510e58dca1ba6f472caafa90b9fee56f679b0e000881096562f6',
+  ]
+
+  it('Creates and validates tree', async () => {
+    tree = generateMerkleTreeFromData({
+      a: '1',
+      b: '2',
+      c: '3',
+    })
+    expect(getMerkleRoot(tree)).to.equal(treeRoot)
+  })
+
+  it('Validates proof', async () => {
+    const element: any = soliditySha3('a', '1')
+    expect(getMerkleProof(tree, element).join()).to.equal(proof.join())
   })
 })

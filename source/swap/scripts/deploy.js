@@ -9,7 +9,7 @@ const {
   ChainIds,
   protocolFeeReceiverAddresses,
   ADDRESS_ZERO,
-} = require('@airswap/constants')
+} = require('@airswap/utils')
 const { getReceiptUrl } = require('@airswap/utils')
 const poolDeploys = require('@airswap/pool/deploys.js')
 const swapDeploys = require('../deploys.js')

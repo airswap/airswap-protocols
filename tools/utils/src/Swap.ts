@@ -13,16 +13,56 @@ import {
   ADDRESS_ZERO,
   DOMAIN_VERSION_SWAP,
   DOMAIN_NAME_SWAP,
-} from '@airswap/constants'
+} from './constants'
 
-import {
-  UnsignedOrder,
-  OrderParty,
-  Signature,
-  EIP712Swap,
-  Order,
-  FullOrder,
-} from '@airswap/types'
+import { Signature, Settlement } from './types'
+
+export const EIP712Swap = {
+  EIP712Domain: [
+    { name: 'name', type: 'string' },
+    { name: 'version', type: 'string' },
+    { name: 'chainId', type: 'uint256' },
+    { name: 'verifyingContract', type: 'address' },
+  ],
+  Order: [
+    { name: 'nonce', type: 'uint256' },
+    { name: 'expiry', type: 'uint256' },
+    { name: 'protocolFee', type: 'uint256' },
+    { name: 'signer', type: 'Party' },
+    { name: 'sender', type: 'Party' },
+    { name: 'affiliateWallet', type: 'address' },
+    { name: 'affiliateAmount', type: 'uint256' },
+  ],
+  Party: [
+    { name: 'wallet', type: 'address' },
+    { name: 'token', type: 'address' },
+    { name: 'kind', type: 'bytes4' },
+    { name: 'id', type: 'uint256' },
+    { name: 'amount', type: 'uint256' },
+  ],
+}
+
+export type OrderParty = {
+  wallet: string
+  token: string
+  kind: string
+  id: string
+  amount: string
+}
+
+export type UnsignedOrder = {
+  nonce: string
+  expiry: string
+  protocolFee: string
+  signer: OrderParty
+  sender: OrderParty
+  affiliateWallet: string
+  affiliateAmount: string
+}
+
+export type Order = UnsignedOrder & Signature
+
+export type FullOrder = UnsignedOrder & Signature & Settlement
 
 const defaultParty: OrderParty = {
   wallet: ADDRESS_ZERO,

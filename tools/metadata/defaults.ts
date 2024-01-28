@@ -1,5 +1,4 @@
-import { TokenInfo } from '@airswap/types'
-import { ChainIds } from '@airswap/constants'
+import { ChainIds, TokenInfo } from '@airswap/utils'
 
 const TEST_TOKEN_DECIMALS = 6
 

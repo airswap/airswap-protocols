@@ -11,7 +11,7 @@ const {
   apiUrls,
   explorerUrls,
   explorerApiUrls,
-} = require('@airswap/constants')
+} = require('@airswap/utils')
 
 /**
  * @type import('hardhat/config').HardhatUserConfig

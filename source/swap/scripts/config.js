@@ -1,4 +1,4 @@
-const { ChainIds, TokenKinds } = require('@airswap/constants')
+const { ChainIds, TokenKinds } = require('@airswap/utils')
 
 module.exports = {
   [ChainIds.MAINNET]: {
