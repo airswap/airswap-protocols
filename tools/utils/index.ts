@@ -1,7 +1,6 @@
 import * as url from 'url'
 import { ethers } from 'ethers'
 import { explorerUrls } from './src/constants'
-import { soliditySha3 } from 'web3-utils'
 
 export * from './src/constants'
 export * from './src/metadata'
