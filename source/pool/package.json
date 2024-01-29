@@ -31,7 +31,7 @@
     "@openzeppelin/contracts": "^4.8.3"
   },
   "devDependencies": {
-    "@airswap/utils": "4.2.2",
+    "@airswap/utils": "4.2.3",
     "@airswap/merkle": "0.0.2",
     "prompt-confirm": "^2.0.4"
   },
