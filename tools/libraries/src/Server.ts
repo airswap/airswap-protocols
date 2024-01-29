@@ -259,10 +259,13 @@ export class Server extends TypedEmitter<ServerEvents> {
   /**
    * Protocols.IndexingERC20
    */
-  public async addOrderERC20(fullOrder: FullOrderERC20): Promise<boolean> {
+  public async addOrderERC20(
+    order: FullOrderERC20,
+    tags = []
+  ): Promise<boolean> {
     try {
       return Promise.resolve(
-        (await this.httpCall('addOrderERC20', [fullOrder])) as boolean
+        (await this.httpCall('addOrderERC20', [order, tags])) as boolean
       )
     } catch (err) {
       return Promise.reject(err)
