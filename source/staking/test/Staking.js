@@ -76,7 +76,7 @@ describe('Staking Unit', () => {
     })
   })
 
-  describe('Set stake duration', async () => {
+  describe('Set stake duration and stakes unlock', async () => {
     it('non-owner cannot set stake duration', async () => {
       await staking
         .connect(deployer)
@@ -187,6 +187,12 @@ describe('Staking Unit', () => {
       expect(
         staking.connect(deployer).cancelDurationChange()
       ).to.be.revertedWith('TimelockInactive')
+    })
+
+    it('Only the admin can unlock stakes', async () => {
+      expect(staking.connect(account1).toggleStakesLock()).to.be.revertedWith(
+        'Unauthorized'
+      )
     })
   })
 
@@ -474,6 +480,19 @@ describe('Staking Unit', () => {
 
       expect(initialUserStake.balance).to.equal(200)
       expect(currentuserStake.balance).to.equal(190)
+    })
+
+    it('successful unstake when unlocked', async () => {
+      await token.mock.transferFrom.returns(true)
+      await token.mock.transfer.returns(true)
+      await staking.connect(account1).stake('100')
+
+      await staking.connect(deployer).toggleStakesLock()
+
+      await staking.connect(account1).unstake('100')
+      const userStake = await staking.connect(account1).stakes(account1.address)
+
+      expect(userStake.balance).to.equal(0)
     })
   })
 

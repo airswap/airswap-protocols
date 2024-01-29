@@ -45,6 +45,9 @@ contract Staking is IStaking, Ownable {
   // Mapping of staker to stake
   mapping(address staker => Stake stake) public stakes;
 
+  // Token unlock
+  bool private stakesUnlocked;
+
   /**
    * @notice Staking constructor
    * @param _name string Token name for this contract
@@ -163,7 +166,7 @@ contract Staking is IStaking, Ownable {
    */
   function available(address _staker) public view override returns (uint256) {
     Stake storage _selected = stakes[_staker];
-    if (block.timestamp >= _selected.finish) {
+    if (block.timestamp >= _selected.finish || stakesUnlocked) {
       return _selected.balance;
     }
     // Calc: (Balance * (Now - Start)) / (Finish - Start)
@@ -261,6 +264,14 @@ contract Staking is IStaking, Ownable {
     delete activeTimelock;
     delete proposedStakeDuration;
     emit CancelDurationChange();
+  }
+
+  /**
+   * @notice Lock/Unlock all stakes
+   */
+  function toggleStakesLock() external onlyOwner {
+    stakesUnlocked = !stakesUnlocked;
+    emit StakesLockToggled();
   }
 
   /**
