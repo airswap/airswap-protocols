@@ -1,15 +1,14 @@
 import * as url from 'url'
 import { ethers } from 'ethers'
 import { explorerUrls } from './src/constants'
-import { soliditySha3 } from 'web3-utils'
-import { MerkleTree } from './src/MerkleTree'
 
 export * from './src/constants'
-export * from './src/MerkleTree'
-export * from './src/Pricing'
-export * from './src/Server'
-export * from './src/Swap'
-export * from './src/SwapERC20'
+export * from './src/metadata'
+export * from './src/pricing'
+export * from './src/server'
+export * from './src/swap'
+export * from './src/swap-erc20'
+export * from './src/tokenlists'
 export * from './src/types'
 
 export function getReceiptUrl(chainId: number, hash: string): string {
@@ -55,33 +54,6 @@ export function stringifyEIP712Type(
     const isEnd = index !== values.length - 1
     return str + `${value.type} ${value.name}${isEnd ? ',' : ')'}`
   }, `${primaryType}(`)
-}
-
-export function generateMerkleTreeFromElements(
-  elements: Array<any>
-): MerkleTree {
-  return new MerkleTree(elements)
-}
-
-export function generateMerkleTreeFromData(data: {
-  [id: string]: string
-}): MerkleTree {
-  const elements: any[] = []
-  for (const idx in data) {
-    elements.push(soliditySha3(idx, data[idx]))
-  }
-  return new MerkleTree(elements)
-}
-
-export function getMerkleRoot(tree: MerkleTree): string {
-  return tree.getHexRoot()
-}
-
-export function getMerkleProof(
-  tree: MerkleTree,
-  element: string
-): Array<string> {
-  return tree.getHexProof(element)
 }
 
 export function parseUrl(locator: string): url.UrlWithStringQuery {

@@ -1,6 +1,10 @@
 import { expect } from 'chai'
-import { getKnownTokens, findTokenByAddress } from '../index'
-import { ChainIds, ADDRESS_ZERO } from '@airswap/utils'
+import {
+  ADDRESS_ZERO,
+  ChainIds,
+  getKnownTokens,
+  findTokenByAddress,
+} from '../index'
 
 describe('Metadata: Ethereum', async () => {
   let result: any
