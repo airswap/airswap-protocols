@@ -31,7 +31,7 @@ interface IStaking {
     uint256 indexed unlockTimestamp
   );
   event SetDelegate(address indexed staker, address indexed delegate);
-  event StakesLockToggled();
+  event SetUnlocked(bool unlock);
   event UnsetDelegate(address indexed staker, address indexed delegate);
 
   function stake(uint256 amount) external;

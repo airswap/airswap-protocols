@@ -268,10 +268,11 @@ contract Staking is IStaking, Ownable {
 
   /**
    * @notice Lock/Unlock all stakes
+   * @param _unlock bool Unlocked status for contract stakes
    */
-  function toggleStakesLock() external onlyOwner {
-    stakesUnlocked = !stakesUnlocked;
-    emit StakesLockToggled();
+  function setUnlocked(bool _unlock) external onlyOwner {
+    stakesUnlocked = _unlock;
+    emit SetUnlocked(_unlock);
   }
 
   /**

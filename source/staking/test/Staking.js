@@ -190,7 +190,7 @@ describe('Staking Unit', () => {
     })
 
     it('Only the admin can unlock stakes', async () => {
-      expect(staking.connect(account1).toggleStakesLock()).to.be.revertedWith(
+      expect(staking.connect(account1).setUnlocked(true)).to.be.revertedWith(
         'Unauthorized'
       )
     })
@@ -487,7 +487,10 @@ describe('Staking Unit', () => {
       await token.mock.transfer.returns(true)
       await staking.connect(account1).stake('100')
 
-      await staking.connect(deployer).toggleStakesLock()
+      await expect(staking.connect(account1).unstake('100')).to.be.revertedWith(
+        'AmountInvalid'
+      )
+      await staking.connect(deployer).setUnlocked(true)
 
       await staking.connect(account1).unstake('100')
       const userStake = await staking.connect(account1).stakes(account1.address)
