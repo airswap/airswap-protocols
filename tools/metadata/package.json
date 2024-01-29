@@ -20,7 +20,7 @@
     "test": "TS_NODE_COMPILER_OPTIONS='{\"strict\":false}' yarn mocha -r ts-node/esm test/*.ts"
   },
   "dependencies": {
-    "@airswap/utils": "4.2.1",
+    "@airswap/utils": "4.2.2",
     "@airswap/wrapper": "4.1.5",
     "@openzeppelin/contracts": "^4.8.3",
     "@uniswap/token-lists": "^1.0.0-beta.24",

@@ -32,7 +32,7 @@
   },
   "devDependencies": {
     "@airswap/metadata": "4.1.17",
-    "@airswap/utils": "4.2.1",
+    "@airswap/utils": "4.2.2",
     "prompt-confirm": "^2.0.4"
   },
   "publishConfig": {
