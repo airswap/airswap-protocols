@@ -10,7 +10,7 @@
 ## Resources
 
 - Discord → https://chat.airswap.io/
-- Twitter → https://twitter.com/airswap
+- X → https://x.com/airswap
 - Website → https://www.airswap.io/
 - About → https://about.airswap.io/
 
@@ -18,22 +18,20 @@
 
 | Package                                                 | Version                                                                                                                   | Description                   |
 | :------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------ | :---------------------------- |
+| [`@airswap/registry`](/source/registry)                 | [![npm](https://img.shields.io/npm/v/@airswap/registry)](https://www.npmjs.com/package/@airswap/registry)                 | Server Registry               |
 | [`@airswap/swap`](/source/swap)                         | [![npm](https://img.shields.io/npm/v/@airswap/swap)](https://www.npmjs.com/package/@airswap/swap)                         | Atomic Token Swap             |
 | [`@airswap/swap-erc20`](/source/swap-erc20)             | [![npm](https://img.shields.io/npm/v/@airswap/swap-erc20)](https://www.npmjs.com/package/@airswap/swap-erc20)             | Atomic Token Swap (ERC20)     |
-| [`@airswap/registry`](/source/registry)                 | [![npm](https://img.shields.io/npm/v/@airswap/registry)](https://www.npmjs.com/package/@airswap/registry)                 | Server Discovery              |
-| [`@airswap/indexer-registry`](/source/indexer-registry) | [![npm](https://img.shields.io/npm/v/@airswap/indexer-registry)](https://www.npmjs.com/package/@airswap/indexer-registry) | Indexer Discovery             |
-| [`@airswap/staking`](/source/staking)                   | [![npm](https://img.shields.io/npm/v/@airswap/staking)](https://www.npmjs.com/package/@airswap/staking)                   | Staking for Participants      |
-| [`@airswap/pool`](/source/pool)                         | [![npm](https://img.shields.io/npm/v/@airswap/pool)](https://www.npmjs.com/package/@airswap/pool)                         | Rewards Pool for Participants |
+| [`@airswap/wrapper`](/source/wrapper)                   | [![npm](https://img.shields.io/npm/v/@airswap/wrapper)](https://www.npmjs.com/package/@airswap/wrapper)                   | Wrapper for Native Tokens     |
+| [`@airswap/staking`](/source/staking)                   | [![npm](https://img.shields.io/npm/v/@airswap/staking)](https://www.npmjs.com/package/@airswap/staking)                   | Staking for Members           |
+| [`@airswap/pool`](/source/pool)                         | [![npm](https://img.shields.io/npm/v/@airswap/pool)](https://www.npmjs.com/package/@airswap/pool)                         | Rewards Pool for Members      |
+| [`@airswap/batch-call`](/source/batch-call)             | [![npm](https://img.shields.io/npm/v/@airswap/batch-call)](https://www.npmjs.com/package/@airswap/batch-call)             | Batch Token and Order Calls   |
 
 ## Tools
 
 | Package                                 | Version                                                                                                     | Description                   |
 | :-------------------------------------- | :---------------------------------------------------------------------------------------------------------- | :---------------------------- |
 | [`@airswap/libraries`](tools/libraries) | [![npm](https://img.shields.io/npm/v/@airswap/libraries)](https://www.npmjs.com/package/@airswap/libraries) | Libraries for Developers      |
-| [`@airswap/metadata`](tools/metadata)   | [![npm](https://img.shields.io/npm/v/@airswap/metadata)](https://www.npmjs.com/package/@airswap/metadata)   | Token Metadata for Developers |
-| [`@airswap/utils`](/tools/utils)        | [![npm](https://img.shields.io/npm/v/@airswap/utils)](https://www.npmjs.com/package/@airswap/utils)         | Utilities for Developers      |
-| [`@airswap/types`](/tools/types)        | [![npm](https://img.shields.io/npm/v/@airswap/types)](https://www.npmjs.com/package/@airswap/types)         | Types for Developers          |
-| [`@airswap/constants`](tools/constants) | [![npm](https://img.shields.io/npm/v/@airswap/constants)](https://www.npmjs.com/package/@airswap/constants) | Constants for Developers      |
+| [`@airswap/utils`](/tools/utils)        | [![npm](https://img.shields.io/npm/v/@airswap/utils)](https://www.npmjs.com/package/@airswap/utils)         | Utils for Developers      |
 
 ## Commands
 
@@ -52,12 +50,6 @@ Branch from Develop; Merge Feature → Develop → Beta → Main
 
 Flow for tool updates (not contracts):
 Branch from Main; Merge Feature → Main → Develop
-
-## Versioning
-
-- Major versions include breaking changes.
-- Minor versions do not include breaking changes and may include additional functionality.
-- Dependencies on fellow @airswap packages should use caret semver.
 
 ## Process
 
