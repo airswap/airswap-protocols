@@ -189,7 +189,7 @@ describe('Staking Unit', () => {
       ).to.be.revertedWith('TimelockInactive')
     })
 
-    it('Only the admin can unlock stakes', async () => {
+    it('Only the admin can set unlock', async () => {
       expect(staking.connect(account1).setUnlocked(true)).to.be.revertedWith(
         'Unauthorized'
       )
@@ -482,7 +482,7 @@ describe('Staking Unit', () => {
       expect(currentuserStake.balance).to.equal(190)
     })
 
-    it('successful unstake when unlocked', async () => {
+    it('successful full unstake when unlocked', async () => {
       await token.mock.transferFrom.returns(true)
       await token.mock.transfer.returns(true)
       await staking.connect(account1).stake('100')
